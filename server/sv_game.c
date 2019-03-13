@@ -405,6 +405,14 @@ void SV_InitGameProgs (void)
 	import.LoadFile = FS_LoadFile;
 	import.FreeFile = FS_FreeFile;
 	import.FreeFileList = FS_FreeFileList;
+	import.OpenFile = FS_FOpenFile;
+	import.OpenCompressedFile = FS_FOpenCompressedFile;
+	import.CloseFile = FS_FCloseFile;
+	import.FRead = FS_Read;
+	import.FWrite = FS_Write;
+	import.GameDir = FS_GameDir;
+	import.SaveGameDir = FS_GameDir;
+	import.CreatePath = FS_CreatePath;
 
 	import.SetAreaPortalState = CM_SetAreaPortalState;
 	import.AreasConnected = CM_AreasConnected;
@@ -419,4 +427,3 @@ void SV_InitGameProgs (void)
 
 	ge->Init ();
 }
-

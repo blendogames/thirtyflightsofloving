@@ -1,0 +1,20 @@
+# ignore all make dependency files and linux object binaries
+*.d
+*.o
+bin/
+
+# ignore all the windows binaries - they shouldn't be committed! 
+Debug/
+Release/
+x64/
+.vs/
+*.log
+*.ncb
+*.opt
+*.plg
+*.suo
+*.user
+*.aps
+*.clw
+*.pdb
+*.ilk

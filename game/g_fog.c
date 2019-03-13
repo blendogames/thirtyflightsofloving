@@ -41,11 +41,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #ifdef DISABLE_FOG
 
-void Fog_Init()	{}
+void Fog_Init (void)	{}
 void Fog (edict_t *ent)	{}
-void Fog_Off ()	{}
-void Fog_ConsoleFog ()	{}
-void GLFog ()	{}
+void Fog_Off (qboolean gameShutdown)	{}
+void Fog_ConsoleFog (void)	{}
+void GLFog (void)	{}
 void trig_fog_fade (edict_t *self)	{}
 void init_trigger_fog_delay (edict_t *self)	{}
 void fog_fade (edict_t *self)	{}
@@ -74,7 +74,7 @@ NEW FOG SYSTEM
 =================================================
 */
 
-void Fog_Off (edict_t *player_ent)
+void Client_Fog_Off (edict_t *player_ent)
 {
 	if (!player_ent->client || player_ent->is_bot)
 		return;
@@ -611,7 +611,7 @@ void Fog (edict_t *ent) //vec3_t viewpoint)
 	if (!level.active_fog)
 	{
 		if (level.last_active_fog)
-			Fog_Off();
+			Fog_Off (false);
 		level.last_active_fog = 0;
 		return;
 	}
@@ -635,7 +635,7 @@ void Fog (edict_t *ent) //vec3_t viewpoint)
 	level.last_active_fog = level.active_fog;
 }
 
-void Fog_Off (void)
+void Fog_Off (qboolean gameShutdown)
 {
 	if (deathmatch->value || coop->value)
 		return;
@@ -643,6 +643,11 @@ void Fog_Off (void)
 #ifdef KMQUAKE2_ENGINE_MOD // engine fog
 	{
 		edict_t	*player_ent = &g_edicts[1];
+
+		// If game is shutting down, g_edicts will likely be invalid
+		// and the client will clear the fog automatically
+		if (gameShutdown)
+			return;
 
 		if (!player_ent->client || player_ent->is_bot)
 			return;

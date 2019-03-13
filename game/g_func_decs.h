@@ -1113,7 +1113,7 @@ extern void model_die ( edict_t * self , edict_t * inflictor , edict_t * attacke
 extern void model_spawn_use ( edict_t * self , edict_t * other , edict_t * activator ) ;
 extern void modelspawn_think ( edict_t * self ) ;
 extern void PrecacheDebris ( int type ) ;
-extern int PatchDeadSoldier ( ) ;
+extern int PatchDeadSoldier ( void ) ;
 extern void SP_target_fountain ( edict_t * ent ) ;
 extern void target_fountain_delayed_use ( edict_t * self ) ;
 extern void target_fountain_use ( edict_t * ent , edict_t * other , edict_t * activator ) ;
@@ -1462,7 +1462,7 @@ extern void SP_target_fog ( edict_t * self ) ;
 extern void target_fog_use ( edict_t * self , edict_t * other , edict_t * activator ) ;
 extern void fog_fade ( edict_t * self ) ;
 extern void Fog_Init ( void ) ;
-extern void Fog_Off ( void ) ;
+extern void Fog_Off ( qboolean gameShutdown ) ;
 extern void Fog ( edict_t * ent ) ;
 extern void init_trigger_fog_delay ( edict_t * self ) ;
 extern void trig_fog_fade ( edict_t * self ) ;

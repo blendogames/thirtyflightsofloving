@@ -2088,7 +2088,7 @@ void ClientBegin (edict_t *ent)
 		return;
 	}
 
-	Fog_Off();
+	Fog_Off (false);
 
 	stuffcmd(ent,"alias +zoomin zoomin;alias -zoomin zoominstop\n");
 	stuffcmd(ent,"alias +zoomout zoomout;alias -zoomout zoomoutstop\n");

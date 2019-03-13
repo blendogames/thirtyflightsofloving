@@ -959,11 +959,11 @@ void Moving_Speaker_Think(edict_t *ent);
 //
 #define MAX_FOGS 16
 extern fog_t gfogs[MAX_FOGS];
-void Cmd_Fog_f(edict_t *ent);
-void Fog_Init();
-void Fog(edict_t *ent); //vec3_t viewpoint);
-void Fog_Off();
-void Fog_SetFogParms();
+void Cmd_Fog_f (edict_t *ent);
+void Fog_Init (void);
+void Fog (edict_t *ent); //vec3_t viewpoint);
+void Fog_Off (qboolean gameShutdown);
+void Fog_SetFogParms (void);
 //
 // g_func.c
 //
