@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual C++ Express 2005
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lazarus", "lazarus_2005.vcproj", "{B068C1EF-C1E2-4319-B4FE-C0F8D9B7536D}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "kmquake2", "kmquake2_2005.vcproj", "{10E97B41-1A5F-4BFC-B922-3321F99FAEB5}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "extractfuncs", "extractfuncs_2005.vcproj", "{79FE92EC-5BDA-493F-8D9C-AA8884E16E05}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B068C1EF-C1E2-4319-B4FE-C0F8D9B7536D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B068C1EF-C1E2-4319-B4FE-C0F8D9B7536D}.Debug|Win32.Build.0 = Debug|Win32
+		{B068C1EF-C1E2-4319-B4FE-C0F8D9B7536D}.Release|Win32.ActiveCfg = Release|Win32
+		{B068C1EF-C1E2-4319-B4FE-C0F8D9B7536D}.Release|Win32.Build.0 = Release|Win32
+		{10E97B41-1A5F-4BFC-B922-3321F99FAEB5}.Debug|Win32.ActiveCfg = Debug|Win32
+		{10E97B41-1A5F-4BFC-B922-3321F99FAEB5}.Debug|Win32.Build.0 = Debug|Win32
+		{10E97B41-1A5F-4BFC-B922-3321F99FAEB5}.Release|Win32.ActiveCfg = Release|Win32
+		{10E97B41-1A5F-4BFC-B922-3321F99FAEB5}.Release|Win32.Build.0 = Release|Win32
+		{79FE92EC-5BDA-493F-8D9C-AA8884E16E05}.Debug|Win32.ActiveCfg = Debug|Win32
+		{79FE92EC-5BDA-493F-8D9C-AA8884E16E05}.Debug|Win32.Build.0 = Debug|Win32
+		{79FE92EC-5BDA-493F-8D9C-AA8884E16E05}.Release|Win32.ActiveCfg = Release|Win32
+		{79FE92EC-5BDA-493F-8D9C-AA8884E16E05}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

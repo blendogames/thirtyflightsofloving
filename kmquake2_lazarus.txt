@@ -1,0 +1,153 @@
+KMQuake2_Lazarus
+
+Version 2.219
+
+
+NOTE: This game DLL requires KMQuake2 to run!
+
+This customized version of Lazarus (www.planetquake.com/lazarus) has several new features
+	in addition to the original, including:
+	
+Support for setting the sound attenuation of moving objects.  This allows the overriding of the default
+	attenuation	of most func_* entities, as well as model_spawn, model_train, and target_speaker.  Acceptable ranges for
+	the attenuation key are from 0.02 to 3.98.
+	
+Support for camera effect and letterbox screen modes added to func_monitor and target_monitor via new
+	spawnflags.  Letterbox mode is also available for info_player_intermission.
+	
+Support for func_train_origin, a func_train variant that follow path corners by its origin instead of its
+	lower southwest corner.  It must have an origin brush, unless built at the map's origin.
+	Similar variants of model_train, misc_viper, and misc_strogg_ship have also been added.
+
+Support for custom sounds for doors, plats, func_trackchanges, and buttons.  To use this, give the door
+	(regular, rotating, swinging, or secret), plat, func_trackchange, or button a sounds value from 5 to 99. 
+	The custom sounds for doors are named the following:
+
+		doors/drxx_strt.wav, doors/drxx_mid.wav, doors/drxx_end.wav
+
+	The custom sounds for plats and func_trackchanges are named the following:
+
+		plats/ptxx_strt.wav, plats/ptxx_mid.wav, plats/ptxx_end.wav
+
+	The custom sounds for buttons are named the following:
+
+		switches/butnxx.wav
+
+	where xx is the style value in 2 digits, e.g. 01 for a style value of 1.
+
+Support for mapper-specified Ogg Vorbis music.  Use the key "musictrack" in the worldspawn to specify
+	the name of the track, e.g. a musictrack key "foo" will play "gamedir/music/foo.ogg".  This key
+	also works with target_cd.  Tracks are not yet supported inside pak or pk3 files.
+
+Support for double-barreled turrets.  Code by Musashi.
+	Set the turret_breach's combattarget to the targetname of the second info_notnull.
+	To have the barrels alternate in firing, give the turret_breach a style value of 1.
+
+Integrated ACE bots.  The ACE Bot is a product of Steve Yeager, and is available from the
+	ACE Bot homepage, at http://www.axionfx.com/ace.  This program is a modification of
+	the ACE Bot, and is therefore in NO WAY supported by Steve Yeager.
+
+	To add bots in deathmatch or CTF mode, type in the console:
+		sv addbot <CTFteam> <name> <skin>
+	Example for DM mode:
+		sv addbot Grunt male/grunt
+	Example for CTF mode:
+		sv addbot red Grunt male/grunt
+	If you omit the name and skin, random ones will be chosen from those listed in the included bots.cfg.
+	Make sure bots.cfg is in the game dir you are running under if you wish to use random bots.
+	If you omit just the skin, and the name matches one in bots.cfg, then the skin for that name will be used.
+	To remove a bot, type in the console: sv removebot <name>
+	Example: sv removebot Grunt
+	To save route nodes before quitting, type in the console: sv savenodes
+	To pause and unpause the game, type sv dmpause (HINT: bind a key to this).
+
+CTF and 3Team CTF support, with cvars to control techs and flag dropping.  Set the cvar "ctf" to 1 to enable
+	CTF support, or "ttctf" to 1 to enable 3Team CTF support.  CTF and 3Team CTF game types are also now
+	selectable in the start server menu.  Special Thanks to Scarface for the double capture support and tech
+	scaling code.
+	See the file lazarus/default.cfg for more info on CTF and tech cvars.
+	To find the 3Team CTF files, search the web for 3tctffinal.exe (10.7 MB) and 3t_pack1.exe (4.75 MB).
+
+Lithium weapon and item balancing cvars, including how much ammo you can pick up, and how much each box is worth
+	(see the included  default.cfg).
+
+	CTF cvars:
+		ctf_blastercolors 0/1-	whether to have teams use matching colored blasters
+		allow_flagdrop 0/1- 	whether to allow players to drop flags in CTF
+		allow_flagpickup 0/1- 	whether to allow players to take flags of empty teams
+
+	Tech cvars:
+		use_techs 0/1-		whether to use techs in deathmatch
+		use_coloredtechs 0/1-	whether to use colored shells on techs
+		use_lithiumtechs 0/1-	whether to use Lithium-style colored pyramid key techs
+
+		tech_flags -	determines which tech will show in the game, a sum of these:
+				1 = resist, 2 = strength, 4 = haste, 8 = regen, 16 = vampire, 32 = ammogen
+				So, to have the resist, haste, regen, and vampire techs, set it to 29.
+				To have all 6 techs, set it to 63.
+		tech_perplayer- how many techs to spawn per player (decimal between 0 and 1)
+		tech_min-	minumum number of techs to spawn in level		
+		tech_max- 	maximum number of techs allowed to spawn
+		tech_life-	how many seconds each tech stays put before respawning
+
+		tech_resist-			what ratio the resistance tech divides damage taken by (2 = 1/2 damage)
+		tech_strength-			what ratio the strength tech multiplies damage by (2 = 2x damage)
+		tech_regen_armor 0/1-		whether the regen tech regenerates armor
+		tech_regen_armor_always 0/1-	whether regen tech regenerates armor even if player hasn't any
+		tech_regen_health_max-		maximum health regen tech rengenerates to
+		tech_regen_armor_max-		maximum armor regen tech rengenerates to
+		tech_vampire- 			what ratio vampire tech adds to health from damage
+						inflicted (decimal between 0 and 1, 0.5 = 50% of damage)
+		tech_vampiremax-		maximum health vampire tech will add up to
+
+	Other cvars:
+		dm_start_shells-	Number of shells to spawn with
+		dm_start_bullets-	Number of bullets to spawn with
+		dm_start_rockets-	Number of rockets to spawn with
+		dm_start_homing-	Number of homing rockets to spawn with (requires Lazarus data files)
+		dm_start_grenades-	Number of grenades to spawn with
+		dm_start_cells-		Number of cells to spawn with
+		dm_start_slugs-		Number of slugs to spawn with
+
+		dm_start_shotgun-		Whether to start with with shotgun in DM
+		dm_start_sshotgun-		Whether to start with with super shotgun in DM
+		dm_start_machinegun-		Whether to start with with machinegun in DM
+		dm_start_chaingun-		Whether to start with with shotgun in DM
+		dm_start_grenadelauncher-	Whether to start with with grenade launcher in DM
+		dm_start_rocketlauncher-	Whether to start with with rocket launcher in DM
+		dm_start_hyperblaster-		Whether to start with with hyperblaster in DM
+		dm_start_railgun-		Whether to start with with railgun in DM
+		dm_start_bfg-			Whether to start with with bfg in DM
+
+Entity alias script support- this enables mappers to create predefined entity aliases, allowing easy placement of
+	pre-configured entities in maps, based on highly configurable generic entities like model_spawn and model_train.
+	These aliases are defined in a text file called ext_data/entalias.def.  Alternately, aliases can be defined on
+	a per-map basis in a map-specific file called ext_data/entalias/<mapname>.alias.  A sample alias file is included. 
+	NOTE: This file can be loaded from inside a pak file.
+
+Func_breakaway, a new bmodel entity that will break away from its surroundings.  See the included QERadiant entity
+	defintion file for more information.
+
+Target_command, a new entity that sends a command to the console to be executed. See the included QERadiant entity
+	defintion file for more information.
+
+Item_armor_shard_flat, a version of the armor shard that sits on the ground.
+
+An salpha entity key, to set the transparency of entities.  Give it a decimal value between 0 and 1 (exclusive) to use it.
+	It supports 254 levels of transparency.
+	NOTE: don't combine this with trans33 or trans66 surfaces on the same brush model.
+
+A commander skin spawnflag for misc_eastertank.
+
+A Big spawnflag for target_explosion, which makes it spawn a larger explosion.
+
+Single-player obituaries- tells you which monster killed you and how.
+
+Blaster_color and hyperblaster_color cvars- these change the color of the bolts fired by the blaster and hyperblaster-
+	1 for standard orange, 2 for green, 3 for blue, and 4 for red.
+
+Cybernetic monsters now give off sparks in addition to blood when shot.
+
+Includes CDawg's fix for player frames.
+
+NOTE: to fix a conflict with the CTF "id" command, the Lazarus "id" command has been renamed to "entid".
