@@ -641,13 +641,13 @@ void Fog_Off (qboolean gameShutdown)
 		return;
 
 #ifdef KMQUAKE2_ENGINE_MOD // engine fog
+	// If game is shutting down, g_edicts will likely be invalid
+	// and the client will clear the fog automatically
+	if (gameShutdown)
+		return;
+
 	{
 		edict_t	*player_ent = &g_edicts[1];
-
-		// If game is shutting down, g_edicts will likely be invalid
-		// and the client will clear the fog automatically
-		if (gameShutdown)
-			return;
 
 		if (!player_ent->client || player_ent->is_bot)
 			return;
