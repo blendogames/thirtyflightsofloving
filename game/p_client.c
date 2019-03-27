@@ -1474,8 +1474,10 @@ void	SelectSpawnPoint (edict_t *ent, vec3_t origin, vec3_t angles, int *style, i
 		}
 	}
 
-	*style = spot->style;
-	*health = spot->health;
+	if (style)
+		*style = spot->style;
+	if (health)
+		*health = spot->health;
 	VectorCopy (spot->s.origin, origin);
 	origin[2] += 9;
 	VectorCopy (spot->s.angles, angles);
