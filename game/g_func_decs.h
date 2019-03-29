@@ -36,7 +36,7 @@ extern int LittleLong ( int l ) ;
 extern int BigLong ( int l ) ;
 extern short LittleShort ( short l ) ;
 extern short BigShort ( short l ) ;
-extern void COM_DefaultExtension ( char * path , char * extension ) ;
+extern void COM_DefaultExtension ( char * path , size_t pathSize , char * extension ) ;
 extern void COM_FilePath ( char * in , char * out ) ;
 extern void COM_FileBase ( char * in , char * out ) ;
 extern char * COM_FileExtension ( char * in ) ;

@@ -1079,7 +1079,7 @@ void COM_FilePath (char *in, char *out)
 COM_DefaultExtension
 ==================
 */
-void COM_DefaultExtension (char *path, char *extension)
+void COM_DefaultExtension (char *path, size_t pathSize, char *extension)
 {
 	char    *src;
 //
@@ -1095,7 +1095,8 @@ void COM_DefaultExtension (char *path, char *extension)
 		src--;
 	}
 
-	strcat (path, extension);
+//	strncat (path, extension);
+	Q_strncatz(path, extension, pathSize);
 }
 
 /*
