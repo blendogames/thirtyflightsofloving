@@ -226,7 +226,7 @@ void R_DrawGetPicSize (int *w, int *h, char *pic)
 	}
 	// Factor in replace scale, so tga/jpg replacements are scaled down...
 	*w = (int)((float)gl->width * gl->replace_scale_w);
-	*h = (int)((float)gl->height * gl->replace_scale_w);
+	*h = (int)((float)gl->height * gl->replace_scale_h);
 }
 
 
