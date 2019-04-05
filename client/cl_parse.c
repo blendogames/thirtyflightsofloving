@@ -384,7 +384,7 @@ as track02-track11, and the Rogue CD as track12-track21.
 */
 int CL_MissionPackCDTrack (int tracknum)
 {
-	if (modType("rogue") || cl_rogue_music->value)
+	if (FS_ModType("rogue") || cl_rogue_music->value)
 	{
 		if (tracknum >= 2 && tracknum <= 11)
 			return tracknum + 10;
@@ -392,7 +392,7 @@ int CL_MissionPackCDTrack (int tracknum)
 			return tracknum;
 	}
 	// an out-of-order mix from Q2 and Rogue CDs
-	else if (modType("xatrix") || cl_xatrix_music->value)
+	else if (FS_ModType("xatrix") || cl_xatrix_music->value)
 	{
 		switch(tracknum)
 		{

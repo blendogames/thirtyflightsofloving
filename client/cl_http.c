@@ -609,7 +609,7 @@ static void CL_CheckAndQueueDownload (char *path)
 
 	if ( !strcmp (ext, "pak") || !strcmp (ext, "pk3") )
 	{
-		Com_Printf ("HTTP NOTICE: Filelist is requesting a .pak file (%s)\n", path);
+		Com_Printf ("HTTP NOTICE: Filelist is requesting a pak file (%s)\n", path);
 		pak = true;
 	}
 	else
@@ -662,7 +662,7 @@ static void CL_CheckAndQueueDownload (char *path)
 			}
 			else
 			{
-				Com_Printf ("HTTP NOTICE: .pak file (%s) specified in filelist already exists\n", gamePath);
+				Com_Printf ("HTTP NOTICE: pak file (%s) specified in filelist already exists\n", gamePath);
 				exists = true;
 				fclose (f);
 			}
@@ -940,10 +940,13 @@ static void CL_FinishHTTPDownload (void)
 						|| !strcmp (dl->queueEntry->quakePath + i - 4, ".pk3") )
 						downloading_pak = false;
 
-					if (isFile)
+					if (isFile) {
 						remove (dl->filePath);
+					}
 					Com_Printf ("HTTP(%s): 404 File Not Found [%d remaining files]\n", dl->queueEntry->quakePath, pendingCount);
-					curl_easy_getinfo (curl, CURLINFO_SIZE_DOWNLOAD, &fileSize);
+				/*	curl_easy_getinfo (curl, CURLINFO_SIZE_DOWNLOAD, &fileSize);
+
+					// Knightmare- ignore this, doesn't need to be fatal
 					if (fileSize > 512)
 					{
 						// ick
@@ -951,7 +954,7 @@ static void CL_FinishHTTPDownload (void)
 						result = CURLE_FILESIZE_EXCEEDED;
 						Com_Printf ("Oversized 404 body received (%d bytes), aborting HTTP downloading.\n", (int)fileSize);
 					}
-					else
+					else */
 					{
 						curl_multi_remove_handle (multi, dl->curl);
 						// Knightmare- fall back to UDP download for this map if failure on .bsp
@@ -973,15 +976,16 @@ static void CL_FinishHTTPDownload (void)
 					break;
 				}
 
-				//every other code is treated as fatal, fallthrough here
+				// every other code is treated as fatal, fallthrough here
 				Com_Printf ("Bad HTTP response code %d for %s, aborting HTTP downloading.\n", responseCode, dl->queueEntry->quakePath);
 
 			//fatal error, disable http
 			case CURLE_COULDNT_RESOLVE_HOST:
 			case CURLE_COULDNT_CONNECT:
 			case CURLE_COULDNT_RESOLVE_PROXY:
-				if (isFile)
+				if (isFile) {
 					remove (dl->filePath);
+				}
 			//	Com_Printf ("Fatal HTTP error: %s\n", curl_easy_strerror (result));
 				Com_Printf ("Fatal HTTP error: %s\n", CURL_ERROR(result));
 				curl_multi_remove_handle (multi, dl->curl);
@@ -993,8 +997,9 @@ static void CL_FinishHTTPDownload (void)
 				i = strlen (dl->queueEntry->quakePath);
 				if ( !strcmp (dl->queueEntry->quakePath + i - 4, ".pak") || !strcmp (dl->queueEntry->quakePath + i - 4, ".pk3") )
 					downloading_pak = false;
-				if (isFile)
+				if (isFile) {
 					remove (dl->filePath);
+				}
 			//	Com_Printf ("HTTP download failed: %s\n", curl_easy_strerror (result));
 				Com_Printf ("HTTP download failed: %s\n", CURL_ERROR(result));
 				curl_multi_remove_handle (multi, dl->curl);

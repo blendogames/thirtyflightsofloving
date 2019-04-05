@@ -844,6 +844,10 @@ void		FS_SetGamedir (char *dir);
 char		*FS_Gamedir (void);
 void		FS_FreeFile (void *buffer);
 
+// Psychospaz's mod detector
+qboolean	FS_ModType (char *name);
+qboolean	FS_RoguePath (void);
+
 
 /*
 ==============================================================

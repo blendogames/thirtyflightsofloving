@@ -207,7 +207,7 @@ If path doesn't have a .EXT, append newExtension (newExtension should
 include the .)
 =================
 */
-void Com_DefaultExtension (char *path, int maxSize, const char *newExtension)
+void Com_DefaultExtension (char *path, size_t maxSize, const char *newExtension)
 {
 	char	*s;
 

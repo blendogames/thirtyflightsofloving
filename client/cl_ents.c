@@ -1468,7 +1468,7 @@ void CL_AddPacketEntities (frame_t *frame)
 			// if we're in the rogue pack, set up the custom mixing, otherwise just
 			// keep going
 			// Knightmare 6/06/2002
-			if (roguepath())
+			if (FS_RoguePath())
 			{
 				// all of the solo colors are fine.  we need to catch any of the combinations that look bad
 				// (double & half) and turn them into the appropriate color, and make double/quad something special

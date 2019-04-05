@@ -1256,7 +1256,7 @@ void SCR_DrawCrosshair (void)
 		crosshair->modified = false;
 		SCR_TouchPics ();
 
-		if ( modType("dday") ) //dday has no crosshair (FORCED)
+		if ( FS_ModType("dday") ) //dday has no crosshair (FORCED)
 			Cvar_SetValue("crosshair", 0);
 	}
 
