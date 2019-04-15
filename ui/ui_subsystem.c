@@ -29,6 +29,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 cvar_t	*ui_cursor_scale;
 
+qboolean	m_entersound;		// play after drawing a frame, so caching
+								// won't disrupt the sound
+
 void	(*m_drawfunc) (void);
 const char *(*m_keyfunc) (int key);
 

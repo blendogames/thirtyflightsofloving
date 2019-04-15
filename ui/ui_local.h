@@ -225,8 +225,8 @@ static char *menu_in_sound		= "misc/menu1.wav";
 static char *menu_move_sound	= "misc/menu2.wav";
 static char *menu_out_sound		= "misc/menu3.wav";
 
-qboolean	m_entersound;		// play after drawing a frame, so caching
-								// won't disrupt the sound
+extern qboolean	m_entersound;		// play after drawing a frame, so caching
+									// won't disrupt the sound
 
 int MainMenuMouseHover;
 

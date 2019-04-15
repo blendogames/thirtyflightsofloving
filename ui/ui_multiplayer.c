@@ -38,7 +38,7 @@ MULTIPLAYER MENU
 =======================================================================
 */
 
-menuframework_s	s_multiplayer_menu;
+menuframework_s			s_multiplayer_menu;
 static menuaction_s		s_join_network_server_action;
 static menuaction_s		s_start_network_server_action;
 static menuaction_s		s_player_setup_action;

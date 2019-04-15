@@ -49,7 +49,7 @@ SAVESHOT HANDLING
 */
 
 char		m_savestrings[MAX_SAVEGAMES][32];
-qboolean	m_savevalid[MAX_SAVEGAMES];
+qboolean	m_savevalid[MAX_SAVEGAMES+1];
 time_t		m_savetimestamps[MAX_SAVEGAMES];
 qboolean	m_savechanged[MAX_SAVEGAMES];
 qboolean	m_saveshotvalid[MAX_SAVEGAMES+1];
@@ -68,7 +68,7 @@ void Load_Savestrings (qboolean update)
 	time_t	old_timestamp;
 	struct	stat	st;
 
-	for (i=0 ; i<MAX_SAVEGAMES ; i++)
+	for (i=0; i<MAX_SAVEGAMES; i++)
 	{
 		Com_sprintf (name, sizeof(name), "%s/save/kmq2save%i/server.ssv", FS_Gamedir(), i);
 
@@ -196,22 +196,33 @@ void UI_InitSavegameData (void)
 		m_saveshotvalid[MAX_SAVEGAMES] = true;
 	else
 		m_saveshotvalid[MAX_SAVEGAMES] = false;
+
+	m_savevalid[MAX_SAVEGAMES] = false;	// this element is always false to handle the back action
 }
 
 
 void DrawSaveshot (qboolean loadmenu)
 {
-	char shotname [MAX_QPATH];
-	char mapshotname [MAX_QPATH];
-	int i;
-	if (loadmenu)
-		i = s_loadgame_actions[s_loadgame_menu.cursor].generic.localdata[0];
-	else
-		i = s_savegame_actions[s_savegame_menu.cursor].generic.localdata[0];
+	char	shotname [MAX_QPATH];
+	char	mapshotname [MAX_QPATH];
+	int		i;
+	
+	if (loadmenu) {
+		if ( (s_loadgame_menu.cursor < 0) || (s_loadgame_menu.cursor >= MAX_SAVEGAMES))	// catch back action
+			i = MAX_SAVEGAMES;
+		else
+			i = s_loadgame_actions[s_loadgame_menu.cursor].generic.localdata[0];
+	}
+	else {	// save menu
+		if ( (s_savegame_menu.cursor < 0) || (s_savegame_menu.cursor >= MAX_SAVEGAMES-1))	// catch back action
+			i = MAX_SAVEGAMES;
+		else
+			i = s_savegame_actions[s_savegame_menu.cursor].generic.localdata[0];
+	}
 
 	SCR_DrawFill (SCREEN_WIDTH/2+44, SCREEN_HEIGHT/2-60, 244, 184, ALIGN_CENTER, 60,60,60,255);
 
-	if ( loadmenu && i==0 && m_savevalid[i] && m_saveshotvalid[i])	// m_mapshotvalid ) // autosave shows mapshot
+	if ( loadmenu && (i == 0) && m_savevalid[i] && m_saveshotvalid[i])	// m_mapshotvalid ) // autosave shows mapshot
 	{
 		Com_sprintf(mapshotname, sizeof(mapshotname), "/levelshots/%s.pcx", m_mapname);
 
@@ -286,8 +297,8 @@ void LoadGame_MenuInit ( void )
 		Menu_AddItem( &s_loadgame_menu, &s_loadgame_actions[i] );
 	}
 
-	s_loadgame_back_action.generic.type	= MTYPE_ACTION;
-	s_loadgame_back_action.generic.flags  = QMF_LEFT_JUSTIFY;
+	s_loadgame_back_action.generic.type		= MTYPE_ACTION;
+	s_loadgame_back_action.generic.flags	= QMF_LEFT_JUSTIFY;
 	s_loadgame_back_action.generic.x		= 0;
 	s_loadgame_back_action.generic.y		= (MAX_SAVEGAMES+3)*MENU_LINE_SIZE;
 	s_loadgame_back_action.generic.name		= " back";

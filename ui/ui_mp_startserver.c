@@ -518,7 +518,7 @@ void RulesChangeFunc (void *self)
 		UI_RefreshMapList (MAP_3TCTF);
 	}
 	// ROGUE GAMES
-	else if (roguepath() && s_rules_box.curvalue == 4) // tag	
+	else if (FS_RoguePath() && s_rules_box.curvalue == 4) // tag	
 	{
 		s_maxclients_field.generic.statusbar = NULL;
 		if (atoi(s_maxclients_field.buffer) <= 8) // set default of 8
@@ -553,7 +553,7 @@ void StartServerActionFunc (void *self)
 	Cvar_SetValue ("coop", s_rules_box.curvalue == 1);
 	Cvar_SetValue ("ctf", s_rules_box.curvalue == 2);
 	Cvar_SetValue ("ttctf", s_rules_box.curvalue == 3);
-	Cvar_SetValue ("gamerules", roguepath() ? ((s_rules_box.curvalue == 4) ? 2 : 0) : 0);
+	Cvar_SetValue ("gamerules", FS_RoguePath() ? ((s_rules_box.curvalue == 4) ? 2 : 0) : 0);
 
 	spot = NULL;
 	if (s_rules_box.curvalue == 1)		// PGM
@@ -646,7 +646,7 @@ void StartServer_MenuInit (void)
 	s_rules_box.generic.y		= y += 2*MENU_LINE_SIZE;
 	s_rules_box.generic.name	= "rules";
 //PGM - rogue games only available with rogue DLL.
-	if (roguepath())
+	if (FS_RoguePath())
 		s_rules_box.itemnames	= dm_coop_names_rogue;
 	else
 		s_rules_box.itemnames	= dm_coop_names;
@@ -655,7 +655,7 @@ void StartServer_MenuInit (void)
 		s_rules_box.curvalue = 3;
 	else if (Cvar_VariableValue("ctf"))
 		s_rules_box.curvalue = 2;
-	else if (roguepath() && Cvar_VariableValue("gamerules") == 2)
+	else if (FS_RoguePath() && Cvar_VariableValue("gamerules") == 2)
 		s_rules_box.curvalue = 4;
 	else if (Cvar_VariableValue("coop"))
 		s_rules_box.curvalue = 1;

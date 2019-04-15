@@ -78,8 +78,8 @@ extern	menulist_s	s_rules_box;
 
 qboolean CTF_menumode (void)
 {
-	if ( (roguepath() && s_rules_box.curvalue >= 3)
-		|| (!roguepath() && s_rules_box.curvalue >= 2) )
+	if ( (FS_RoguePath() && s_rules_box.curvalue >= 3)
+		|| (!FS_RoguePath() && s_rules_box.curvalue >= 2) )
 		return true;
 	return false;
 }
@@ -188,7 +188,7 @@ static void DMFlagCallback ( void *self )
 		bit = DF_QUAD_DROP;
 	}
 	// Knightmare added
-	else if (modType("xatrix"))
+	else if (FS_ModType("xatrix"))
 	{
 		if ( f == &s_quadfire_drop_box)
 		{
@@ -197,7 +197,7 @@ static void DMFlagCallback ( void *self )
 	}
 //=======
 //ROGUE
-	else if (roguepath())
+	else if (FS_RoguePath())
 	{
 		if ( f == &s_no_mines_box)
 		{
@@ -387,7 +387,7 @@ void DMOptions_MenuInit( void )
 	s_friendlyfire_box.curvalue = ( dmflags & DF_NO_FRIENDLY_FIRE ) == 0;
 
 	// Knightmare added
-	if (modType("xatrix"))
+	if (FS_ModType("xatrix"))
 	{
 		s_quadfire_drop_box.generic.type = MTYPE_SPINCONTROL;
 		s_quadfire_drop_box.generic.x	= 0;
@@ -400,7 +400,7 @@ void DMOptions_MenuInit( void )
 //============
 //ROGUE
 	//Knightmare 12/23/2001
-	else if (roguepath())
+	else if (FS_RoguePath())
 	{
 		s_no_mines_box.generic.type = MTYPE_SPINCONTROL;
 		s_no_mines_box.generic.x	= 0;
@@ -489,11 +489,11 @@ void DMOptions_MenuInit( void )
 	Menu_AddItem( &s_dmoptions_menu, &s_friendlyfire_box );
 
 	// Xatrix
-	if (modType("xatrix"))
+	if (FS_ModType("xatrix"))
 		Menu_AddItem( &s_dmoptions_menu, &s_quadfire_drop_box );
 
 	// Rogue
-	else if (roguepath())
+	else if (FS_RoguePath())
 	{
 		Menu_AddItem( &s_dmoptions_menu, &s_no_mines_box );
 		Menu_AddItem( &s_dmoptions_menu, &s_no_nukes_box );
