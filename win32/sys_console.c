@@ -113,8 +113,13 @@ void Sys_ConsoleOutput (char *text)
 			buffer[len++] = '\r';
 			buffer[len++] = '\n';
 		}
-		else if (Q_IsColorString(text))
+		else if (Q_IsColorString(text)) {
 			text++;
+		}
+		else if (*text == '\02') {	// skip STX char before map name
+			text++;
+			continue;
+		}
 		else
 			buffer[len++] = *text;
 
@@ -186,7 +191,7 @@ void Sys_Error (char *error, ...)
 		while (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE))
 		{
 			if (!GetMessage(&msg, NULL, 0, 0))
-				Sys_Quit();
+				Sys_Quit ();
 
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
@@ -242,7 +247,7 @@ static LONG WINAPI Sys_ConsoleProc (HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 
 		break;
 	case WM_CLOSE:
-		Sys_Quit();
+		Sys_Quit ();
 
 		break;
 	case WM_COMMAND:
@@ -259,7 +264,7 @@ static LONG WINAPI Sys_ConsoleProc (HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 				SendMessage(sys_console.hWndOutput, WM_CLEAR, 0, 0);
 			}
 			else if ((HWND)lParam == sys_console.hWndQuit)
-				Sys_Quit();
+				Sys_Quit ();
 		}
 		else if (HIWORD(wParam) == EN_VSCROLL)
 			InvalidateRect(sys_console.hWndOutput, NULL, TRUE);

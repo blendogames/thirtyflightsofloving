@@ -252,23 +252,26 @@ LOADGAME MENU
 extern	char *load_saveshot;
 char loadshotname[MAX_QPATH];
 
-void LoadGameCallback( void *self )
+void LoadGameCallback (void *self)
 {
 	menuaction_s *a = ( menuaction_s * ) self;
 
 	// set saveshot name here
-	if ( m_saveshotvalid[ a->generic.localdata[0] ] ) {
+	if ( m_saveshotvalid[ a->generic.localdata[0] ] && (a->generic.localdata[0] != 0) )	// autosave has no saveshot, but uses levelshot instead
+	{
 		Com_sprintf(loadshotname, sizeof(loadshotname), "/save/kmq2save%i/shot.jpg", a->generic.localdata[0]);
 		load_saveshot = loadshotname; }
-	else
+	else {
 		load_saveshot = NULL;
+	}
 
-	if ( m_savevalid[ a->generic.localdata[0] ] )
+	if ( m_savevalid[ a->generic.localdata[0] ] ) {
 		Cbuf_AddText (va("load kmq2save%i\n",  a->generic.localdata[0] ) );
-	UI_ForceMenuOff ();
+		UI_ForceMenuOff ();
+	}
 }
 
-void LoadGame_MenuInit ( void )
+void LoadGame_MenuInit (void)
 {
 	int i;
 
@@ -309,7 +312,7 @@ void LoadGame_MenuInit ( void )
 //	ValidateSaveshots (true); // register saveshots
 }
 
-void LoadGame_MenuDraw( void )
+void LoadGame_MenuDraw (void)
 {
 	Menu_DrawBanner( "m_banner_load_game" );
 //	Menu_AdjustCursor( &s_loadgame_menu, 1 );
@@ -317,7 +320,7 @@ void LoadGame_MenuDraw( void )
 	DrawSaveshot (true);
 }
 
-const char *LoadGame_MenuKey( int key )
+const char *LoadGame_MenuKey (int key)
 {
 	if ( key == K_ESCAPE || key == K_ENTER )
 	{
@@ -343,7 +346,7 @@ SAVEGAME MENU
 =============================================================================
 */
 
-void SaveGameCallback( void *self )
+void SaveGameCallback (void *self)
 {
 	menuaction_s *a = ( menuaction_s * ) self;
 
@@ -351,7 +354,7 @@ void SaveGameCallback( void *self )
 	UI_ForceMenuOff ();
 }
 
-void SaveGame_MenuDraw( void )
+void SaveGame_MenuDraw (void)
 {
 	Menu_DrawBanner( "m_banner_save_game" );
 	Menu_AdjustCursor( &s_savegame_menu, 1 );
@@ -359,7 +362,7 @@ void SaveGame_MenuDraw( void )
 	DrawSaveshot (false);
 }
 
-void SaveGame_MenuInit( void )
+void SaveGame_MenuInit (void)
 {
 	int i;
 
@@ -398,7 +401,7 @@ void SaveGame_MenuInit( void )
 //	ValidateSaveshots (false);
 }
 
-const char *SaveGame_MenuKey( int key )
+const char *SaveGame_MenuKey (int key)
 {
 	if ( key == K_ENTER || key == K_ESCAPE )
 	{

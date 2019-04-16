@@ -1849,7 +1849,7 @@ Qcommon_Shutdown
 */
 void Qcommon_Shutdown (void)
 {	
-	FS_Shutdown();
+	FS_Shutdown ();
 }
 
 

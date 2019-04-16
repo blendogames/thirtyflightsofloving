@@ -195,7 +195,6 @@ static qboolean VerifyDriver( void )
 	return true;
 }
 
-qboolean modType (char *name);
 
 /*
 ** VID_CreateWindow
@@ -220,11 +219,11 @@ qboolean VID_CreateWindow( int width, int height, qboolean fullscreen )
     wc.cbWndExtra    = 0;
     wc.hInstance     = glw_state.hInstance;
 
-	if (modType("xatrix")) { // q2mp1
+	if (FS_ModType("xatrix")) { // q2mp1
 		wc.hIcon         = LoadIcon(glw_state.hInstance, MAKEINTRESOURCE(IDI_ICON2));
 		//wc.lpszClassName = WINDOW_CLASS_NAME2;
 	}
-	else if (modType("rogue"))  { // q2mp2
+	else if (FS_ModType("rogue"))  { // q2mp2
 		wc.hIcon         = LoadIcon(glw_state.hInstance, MAKEINTRESOURCE(IDI_ICON3));
 		//wc.lpszClassName = WINDOW_CLASS_NAME3;
 	}
