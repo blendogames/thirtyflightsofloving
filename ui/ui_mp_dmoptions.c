@@ -246,7 +246,6 @@ static void DMFlagCallback ( void *self )
 setvalue:
 	Cvar_SetValue ("dmflags", flags);
 	Com_sprintf( dmoptions_statusbar, sizeof( dmoptions_statusbar ), "dmflags = %d", flags );
-
 }
 
 void DMOptions_MenuInit( void )
@@ -345,6 +344,7 @@ void DMOptions_MenuInit( void )
 	s_teamplay_box.generic.name	= "teamplay";
 	s_teamplay_box.generic.callback = DMFlagCallback;
 	s_teamplay_box.itemnames = teamplay_names;
+	s_teamplay_box.curvalue = (dmflags & DF_SKINTEAMS) ? 1 : ((dmflags & DF_MODELTEAMS) ? 2 : 0);
 
 	s_allow_exit_box.generic.type = MTYPE_SPINCONTROL;
 	s_allow_exit_box.generic.x	= 0;

@@ -109,7 +109,7 @@ void Sys_ConsoleOutput (char *text)
 	// remove color escapes
 	while (*text)
 	{
-		if (*text == '\n'){
+		if (*text == '\n') {
 			buffer[len++] = '\r';
 			buffer[len++] = '\n';
 		}
