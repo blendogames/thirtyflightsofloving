@@ -514,6 +514,7 @@ void CL_RequestNextDownload (void)
 			}
 		}
 		precache_check = texture_cnt+3;
+		precache_tex = 0;
 	}
 
 #ifdef PNG_SUPPORT
@@ -561,7 +562,6 @@ void CL_RequestNextDownload (void)
 			}
 		}
 		precache_check = texture_cnt+999;
-		precache_tex = 0;
 	}
 //ZOID
 
