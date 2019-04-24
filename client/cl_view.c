@@ -558,7 +558,12 @@ void CL_PrepRefresh (void)
 
 	// Knightmare - Vics fix to get rid of male/grunt flicker
 	// CL_LoadClientinfo (&cl.baseclientinfo, "unnamed\\male/grunt");
-	CL_LoadClientinfo (&cl.baseclientinfo, va("unnamed\\%s", skin->string));
+	// Knightmare- make this single-player only
+	if ( !cl.configstrings[CS_MAXCLIENTS][0]
+		|| !strcmp(cl.configstrings[CS_MAXCLIENTS], "1") )
+		CL_LoadClientinfo (&cl.baseclientinfo, va("unnamed\\%s", skin->string));
+	else
+		CL_LoadClientinfo (&cl.baseclientinfo, "unnamed\\male/grunt");
 
 	// Knightmare- refresh the player model/skin info
 	userinfo_modified = true;

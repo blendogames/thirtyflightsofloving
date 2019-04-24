@@ -735,10 +735,10 @@ void CL_ParsePlayerstate (frame_t *oldframe, frame_t *newframe)
 
 		// parse stats
 		statbits = MSG_ReadLong (&net_message);
-		for (i = 0; i < OLD_MAX_STATS; i++) //Knightmare- use old max_stats
+		for (i = 0; i < OLD_MAX_STATS; i++) // Knightmare- use old max_stats
 			if (statbits & (1<<i) )
 				state->stats[i] = MSG_ReadShort(&net_message);
-	}	//end old CL_ParsePlayerstate code
+	}	// end old CL_ParsePlayerstate code
 	else //new CL_ParsePlayerstate code
 	{
 		// Knightmare 4/5/2002- read as long
@@ -813,7 +813,7 @@ void CL_ParsePlayerstate (frame_t *oldframe, frame_t *newframe)
 			state->kick_angles[2] = MSG_ReadChar (&net_message) * 0.25;
 		}
 
-		//Knightmare 4/5/2002- read as short
+		// Knightmare 4/5/2002- read as short
 		if (flags & PS_WEAPONINDEX)
 			state->gunindex = MSG_ReadShort (&net_message);
 
@@ -893,7 +893,7 @@ void CL_ParsePlayerstate (frame_t *oldframe, frame_t *newframe)
 		for (i = 0; i < MAX_STATS; i++)
 			if (statbits & (1<<i) )
 				state->stats[i] = MSG_ReadShort(&net_message);
-	} //end new CL_ParsePlayerstate code
+	} // end new CL_ParsePlayerstate code
 }
 
 
