@@ -292,34 +292,18 @@ fix ambient sounds w/ set atten not being sent to client- done!!
 
 fix dark corners on warp surfaces						- done!!
 
+decouple net FPS and vid FPS							- done!!
+
 --------------------------------------------------------------------------
 
 add lightmap bluring
 
 add explosion heat distortions
 
-add mods menu
-
-add R1Q2 protocol support
-
 add doppler shift for looped sounds
 
 replace ACE bot with JA bot
 
-remove two-pass rendering mode
-
-decouple net FPS and vid FPS?
-
 filter specific objects for light blooms?
 
 add caustics for moving water?
-
---------------------------------------------------------------------------
-
-add reflective shader water
-
-add 44KHz sound support
-
-add shader support
-
-add Q3 BSP support
