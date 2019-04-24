@@ -34,7 +34,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 vec3_t	tempVertexArray[MD3_MAX_MESHES][MD3_MAX_VERTS];
 
-vec3_t	aliasLightDir;
+vec3_t	aliasLightDir = {0, 0, 0};
 float	aliasShadowAlpha;
 
 /*
