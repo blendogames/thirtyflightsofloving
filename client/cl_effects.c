@@ -286,8 +286,8 @@ void CL_Explosion_Particle (vec3_t org, float size, qboolean rocket)
 		0,		0,		0,
 		1,		(rocket)? -2 : -1.5,
 		GL_SRC_ALPHA, GL_ONE,
-		//GL_ONE, GL_ONE,
-		(size!=0)?size:(150-((!rocket)?75:0)),	0,			
+	//	GL_ONE, GL_ONE,
+		(size != 0) ? size : (150 - ( (!rocket) ? 75 : 0)),	0,			
 		particle_rexplosion1,
 		PART_DEPTHHACK_SHORT,
 		CL_ExplosionThink, true);

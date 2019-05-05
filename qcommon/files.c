@@ -1471,8 +1471,10 @@ char *pakfile_ignore_names[] =
 {
 	"save/",
 	"scrnshot/",
+	"screenshots/",
 	"autoexec.cfg",
 	"kmq2config.cfg",
+	"maps.lst",
 	0
 };
 
