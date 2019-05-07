@@ -1474,7 +1474,6 @@ char *pakfile_ignore_names[] =
 	"screenshots/",
 	"autoexec.cfg",
 	"kmq2config.cfg",
-	"maps.lst",
 	0
 };
 
