@@ -2411,24 +2411,26 @@ trace_t SV_DebrisEntity (edict_t *ent, vec3_t push)
 
 	VectorCopy (ent->s.origin, start);
 	VectorAdd (start, push, end);
-	if(ent->clipmask)
+	if (ent->clipmask)
 		mask = ent->clipmask;
 	else
 		mask = MASK_SHOT;
 	trace = gi.trace (start, ent->mins, ent->maxs, end, ent, mask);
 	VectorCopy (trace.endpos, ent->s.origin);
 	gi.linkentity (ent);
-	if (trace.fraction != 1.0) {
-		if( (trace.surface) && (trace.surface->flags & SURF_SKY) ) {
+	if (trace.fraction != 1.0)
+	{
+		if ( (trace.surface) && (trace.surface->flags & SURF_SKY) ) {
 			G_FreeEdict(ent);
 			return trace;
 		}
-		if(trace.ent->client || (trace.ent->svflags & SVF_MONSTER) ) {
+		if (trace.ent->client || (trace.ent->svflags & SVF_MONSTER) )
+		{
 			// touching a player or monster
 			// if rock has no mass we really don't care who it hits
 			if(!ent->mass) return trace;
 			speed1 = VectorLength(ent->velocity);
-			if(!speed1) return trace;
+			if (!speed1) return trace;
 			speed2 = VectorLength(trace.ent->velocity);
 			VectorCopy(ent->velocity,v1);
 			VectorNormalize(v1);
@@ -2441,13 +2443,13 @@ trace_t SV_DebrisEntity (edict_t *ent, vec3_t push)
 			VectorMA(trace.ent->velocity,scale,v1,trace.ent->velocity);
 			// Take a swag at it... 
 
-			if(speed1 > 100) {
+			if (speed1 > 100) {
 				damage = (int)(ent->mass * speed1 / 5000.);
-				if(damage)
+				if (damage)
 					T_Damage(trace.ent, world, world, v1, trace.ent->s.origin, vec3_origin,
 						damage, 0, DAMAGE_NO_KNOCKBACK, MOD_CRUSH);
 			}
-			if(ent->touch)
+			if (ent->touch)
 				ent->touch (ent, trace.ent, &trace.plane, trace.surface);
 
 			gi.linkentity(trace.ent);
