@@ -35,6 +35,10 @@ Changes as of v0.20 update 8:
 
 - Fixed alignment issue with colored text on help computer and centerprints.
 
+- Fixed oversized 404 message from aborting all HTTP downloads.
+
+- Fixed HTTP download of the first pak in a filelist from aborting other paks.
+
 - Fixed plats with high accel/decel getting stuck near their top or bottom.
 
 - Fixed plats with PLAT_LOW_TRIGGER flag breaking when a high lip value is set.

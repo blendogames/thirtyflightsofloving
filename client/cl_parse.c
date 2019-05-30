@@ -674,6 +674,7 @@ void SHOWNET(char *s)
 		Com_Printf ("%3i:%s\n", net_message.readcount-1, s);
 }
 
+
 /*
 =====================
 CL_ParseStuffText
@@ -702,6 +703,95 @@ This simply disconnects, same effect as kicking player.
 	}
 	return true;
 }*/
+
+
+/*
+=====================
+CL_FilterStuffText
+Catches malicious stuffed commands from the server.
+Simply disconnects when the stuffed command is quit
+or error, same effect as kicking the player.
+Uses list of malicious commands from xian.
+=====================
+*/
+qboolean CL_FilterStuffText (char *stufftext)
+{
+	int		i = 0, len;
+	char	*parsetext = stufftext;
+	char	*s, *execname;
+	char	*bad_stuffcmds[] =
+	{
+/*		"+use",
+		"+mlook",
+		"+klook",
+		"+attack",
+		"+speed",
+		"+strafe",
+		"+back",
+		"+forward",
+		"+right",
+		"+left",
+		"+look",
+		"+move",	*/
+		"sensitivity",
+		"unbindall",
+		"unbind",
+		"bind",
+		"exec",
+		"kill",
+		"rate",
+		"cl_maxfps",
+		"r_maxfps",
+		"net_maxfps",
+		"quit",
+		"error",
+		0
+	};
+
+	// skip leading spaces
+	while (*parsetext == ' ') parsetext++;
+
+	// handle quit and error stuffs specially
+	if (!strncmp(parsetext, "quit", 4) || !strncmp(parsetext, "error", 5))
+	{
+		Com_Printf(S_COLOR_YELLOW"CL_FilterStuffText: Server stuffed 'quit' or 'error' command, disconnecting...\n");
+		CL_Disconnect ();
+		return false;
+	}
+
+	// don't allow stuffing of renderer cvars
+	if ( !strncmp(parsetext, "gl_", 3) || !strncmp(parsetext, "r_", 2) )    	
+		return false;
+
+	// the Generations mod stuffs exec g*.cfg  for classes, so limit exec stuffs to .cfg files
+	if ( !strncmp(parsetext, "exec", 4) )
+	{
+		s = parsetext;
+		execname = COM_Parse (&s);
+		if (!s)	return false;	// catch case of no text after 'exec'
+
+		execname = COM_Parse (&s);
+		len = (int)strlen(execname);
+
+		if ( (len > 1) && (execname[len-1] == ';') )	// catch token ending with ;
+			len--;
+
+		if ( (len < 5) || strncmp(execname+len-4, ".cfg", 4) ) {
+			Com_Printf(S_COLOR_YELLOW"CL_FilterStuffText: Server stuffed 'exec' command for non-cfg file\n");
+			return false;
+		}
+		return true;
+	}
+
+	// code by xian- cycle through list of malicious commands
+	while (bad_stuffcmds[i] != NULL)
+	{
+		if ( strstr(parsetext, bad_stuffcmds[i]) )
+			return false;
+		i++;
+	}
+	return true;
+}
 
 
 // Knightmare- server-controlled fog
@@ -741,6 +831,7 @@ void CL_ParseFog (void)
 //	R_SetFogVars (fogenable, model, density, start, end, red, green, blue);
 	V_SetFogInfo (fogenable, model, density, start, end, red, green, blue);
 }
+
 
 /*
 =====================
@@ -834,6 +925,11 @@ void CL_ParseServerMessage (void)
 			
 		case svc_stufftext:
 			s = MSG_ReadString (&net_message);
+			// Knightmare- filter malicious stufftext
+			if ( !CL_FilterStuffText(s) ) {
+				Com_Printf(S_COLOR_YELLOW"CL_ParseServerMessage: Malicious stufftext from server:  %s\n", s);
+				break;
+			}
 			Com_DPrintf ("stufftext: %s\n", s);
 			Cbuf_AddText (s);
 			break;
@@ -906,5 +1002,3 @@ void CL_ParseServerMessage (void)
 		CL_WriteDemoMessage ();
 
 }
-
-

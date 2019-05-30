@@ -266,7 +266,7 @@ int /*EXPORT*/ CL_CURL_Debug (CURL *c, curl_infotype type, char *data, size_t si
 		if (size > sizeof(buff)-1)
 			size = sizeof(buff)-1;
 		Q_strncpyz (buff, data, size);
-		Com_Printf ("HTTP DEBUG: %s\n", buff);
+		Com_Printf ("[HTTP] DEBUG: %s\n", buff);
 	}
 
 	return 0;
@@ -473,8 +473,8 @@ false will cause standard UDP downloading to be used instead.
 qboolean CL_QueueHTTPDownload (const char *quakePath)
 {
 	size_t		len;
-	dlqueue_t	*q;
-	qboolean	needList;
+	dlqueue_t	*q, *check, *last;
+	qboolean	needList, isPak = false, isFilelist = false;
 
 	// no http server (or we got booted)
 	if (!cls.downloadServer[0] || abortDownloads || thisMapAbort || !cl_http_downloads->value)
@@ -486,34 +486,69 @@ qboolean CL_QueueHTTPDownload (const char *quakePath)
 	if (!cls.downloadQueue.next && cl_http_filelists->value)
 		needList = true;
 
-	q = &cls.downloadQueue;
+	len = strlen (quakePath);
+	if (len > 4 && (!Q_stricmp((char *)quakePath + len - 4, ".pak") || !Q_stricmp((char *)quakePath + len - 4, ".pk3")) )
+		isPak = true;
+	if (len > 9 && !Q_stricmp((char *)quakePath + len - 9, ".filelist") )
+		isFilelist = true;
 
-	while (q->next)
+	if (isFilelist)	// Knightmare- always insert filelist at head of queue
 	{
-		q = q->next;
+		q = Z_TagMalloc (sizeof(dlqueue_t), 0);
+		q->next = cls.downloadQueue.next;
+		cls.downloadQueue.next = q;
+	}
+	else if (isPak)	// Knightmare- insert paks near head of queue, before first non-pak
+	{
+		last = &cls.downloadQueue;
+		check = cls.downloadQueue.next;
+		while (check)
+		{
+			// avoid sending duplicate requests
+			if (!strcmp (quakePath, check->quakePath))
+				return true;
 
-		//avoid sending duplicate requests
-		if (!strcmp (quakePath, q->quakePath))
-			return true;
+			if (!check->isPak)	// insert before this entry
+				break;
+
+			last = check;
+			check = check->next;
+		}
+		q = Z_TagMalloc (sizeof(dlqueue_t), 0);
+		q->next = check;
+		last->next = q;
+	}
+	else
+	{
+		q = &cls.downloadQueue;
+		while (q->next)
+		{
+			q = q->next;
+
+			// avoid sending duplicate requests
+			if (!strcmp (quakePath, q->quakePath))
+				return true;
+		}
+	//	q->next = Z_TagMalloc (sizeof(*q), TAGMALLOC_CLIENT_DOWNLOAD);
+		q->next = Z_TagMalloc (sizeof(dlqueue_t), 0);
+		q = q->next;
+		q->next = NULL;
 	}
 
-//	q->next = Z_TagMalloc (sizeof(*q), TAGMALLOC_CLIENT_DOWNLOAD);
-	q->next = Z_TagMalloc (sizeof(*q), 0);
-	q = q->next;
-
-	q->next = NULL;
 	q->state = DLQ_STATE_NOT_STARTED;
-	Q_strncpyz (q->quakePath, quakePath, sizeof(q->quakePath)-1);
+//	Q_strncpyz (q->quakePath, quakePath, sizeof(q->quakePath)-1);
+	Q_strncpyz (q->quakePath, quakePath, sizeof(q->quakePath));
+	q->isPak = isPak;	// Knightmare added
 
 	if (needList)
 	{
 		//grab the filelist
 		CL_QueueHTTPDownload (va("%s.filelist", cl.gamedir));
 
-		//this is a nasty hack to let the server know what we're doing so admins don't
-		//get confused by a ton of people stuck in CNCT state. it's assumed the server
-		//is running r1q2 if we're even able to do http downloading so hopefully this
-		//won't spew an error msg.
+		// this is a nasty hack to let the server know what we're doing so admins don't
+		// get confused by a ton of people stuck in CNCT state. it's assumed the server
+		// is running r1q2 if we're even able to do http downloading so hopefully this
+		// won't spew an error msg.
 	//	MSG_BeginWriting (clc_stringcmd);
 	//	MSG_WriteString ("download http\n");
 	//	MSG_EndWriting (&cls.netchan.message);
@@ -521,7 +556,7 @@ qboolean CL_QueueHTTPDownload (const char *quakePath)
 		MSG_WriteString (&cls.netchan.message, "download http\n");
 	}
 
-	//special case for map file lists, i really wanted a server-push mechanism for this, but oh well
+	// special case for map file lists, i really wanted a server-push mechanism for this, but oh well
 	len = strlen (quakePath);
 	if (cl_http_filelists->value && len > 4 && !Q_stricmp ((char *)(quakePath + len - 4), ".bsp"))
 	{
@@ -537,7 +572,7 @@ qboolean CL_QueueHTTPDownload (const char *quakePath)
 		CL_QueueHTTPDownload (listPath);
 	}
 
-	//if a download entry has made it this far, CL_FinishHTTPDownload is guaranteed to be called.
+	// if a download entry has made it this far, CL_FinishHTTPDownload is guaranteed to be called.
 	pendingCount++;
 
 	return true;
@@ -609,7 +644,7 @@ static void CL_CheckAndQueueDownload (char *path)
 
 	if ( !strcmp (ext, "pak") || !strcmp (ext, "pk3") )
 	{
-		Com_Printf ("HTTP NOTICE: Filelist is requesting a pak file (%s)\n", path);
+		Com_Printf ("[HTTP] NOTICE: Filelist is requesting a pak file (%s)\n", path);
 		pak = true;
 	}
 	else
@@ -620,7 +655,7 @@ static void CL_CheckAndQueueDownload (char *path)
 		strcmp (ext, "bsp") && strcmp (ext, "ent") && strcmp (ext, "txt") && strcmp (ext, "dm2") &&
 		strcmp (ext, "loc") && strcmp (ext, "md3") && strcmp (ext, "script") && strcmp (ext, "shader"))
 	{
-		Com_Printf ("HTTP WARNING: Illegal file type '%s' in filelist.\n", MakePrintable(path, length));
+		Com_Printf ("[HTTP] WARNING: Illegal file type '%s' in filelist.\n", MakePrintable(path, length));
 		return;
 	}
 
@@ -628,7 +663,7 @@ static void CL_CheckAndQueueDownload (char *path)
 	{
 		if (pak)
 		{
-			Com_Printf ("HTTP WARNING: @ prefix used on a pak file (%s) in filelist.\n", MakePrintable(path, length));
+			Com_Printf ("[HTTP] WARNING: @ prefix used on a pak file (%s) in filelist.\n", MakePrintable(path, length));
 			return;
 		}
 		gameLocal = true;
@@ -641,7 +676,7 @@ static void CL_CheckAndQueueDownload (char *path)
 	if (strstr (path, "..") || !IsValidChar (path[0]) || !IsValidChar (path[length-1]) || strstr(path, "//") ||
 		strchr (path, '\\') || (!pak && !strchr (path, '/')) || (pak && strchr(path, '/')))
 	{
-		Com_Printf ("HTTP WARNING: Illegal path '%s' in filelist.\n", MakePrintable(path, length));
+		Com_Printf ("[HTTP] WARNING: Illegal path '%s' in filelist.\n", MakePrintable(path, length));
 		return;
 	}
 
@@ -662,7 +697,7 @@ static void CL_CheckAndQueueDownload (char *path)
 			}
 			else
 			{
-				Com_Printf ("HTTP NOTICE: pak file (%s) specified in filelist already exists\n", gamePath);
+				Com_Printf ("[HTTP] NOTICE: pak file (%s) specified in filelist already exists\n", gamePath);
 				exists = true;
 				fclose (f);
 			}
@@ -677,10 +712,11 @@ static void CL_CheckAndQueueDownload (char *path)
 		{
 			if (CL_QueueHTTPDownload (path))
 			{
-				//paks get bumped to the top and HTTP switches to single downloading.
-				//this prevents someone on 28k dialup trying to do both the main .pak
-				//and referenced configstrings data at once.
-				if (pak)
+				// Paks get bumped to the top and HTTP switches to single downloading.
+				// This prevents someone on 28k dialup trying to do both the main .pak
+				// and referenced configstrings data at once.
+				// Knightmare- moved this functionality inside CL_QueueHTTPDownload()
+			/*	if (pak)
 				{
 					dlqueue_t	*q, *last;
 
@@ -695,12 +731,12 @@ static void CL_CheckAndQueueDownload (char *path)
 					last->next = NULL;
 					q->next = cls.downloadQueue.next;
 					cls.downloadQueue.next = q;
-				}
+				}*/
 			}
 		}
 		else
 		{
-			Com_Printf ("HTTP NOTICE: requested file (%s) already exists\n", path);
+			Com_Printf ("[HTTP] NOTICE: requested file (%s) already exists\n", path);
 		}
 	}
 	else
@@ -769,7 +805,8 @@ static void CL_ReVerifyHTTPQueue (void)
 		q = q->next;
 		if (q->state == DLQ_STATE_NOT_STARTED)
 		{
-			if (FS_LoadFile (q->quakePath, NULL) != -1)
+			// Knightmare- don't check for paks inside other paks!
+			if (!q->isPak && FS_LoadFile (q->quakePath, NULL) != -1)
 				q->state = DLQ_STATE_DONE;
 			else
 				pendingCount++;
@@ -943,7 +980,7 @@ static void CL_FinishHTTPDownload (void)
 					if (isFile) {
 						remove (dl->filePath);
 					}
-					Com_Printf ("HTTP(%s): 404 File Not Found [%d remaining files]\n", dl->queueEntry->quakePath, pendingCount);
+					Com_Printf ("[HTTP] (%s): 404 File Not Found [%d remaining files]\n", dl->queueEntry->quakePath, pendingCount);
 				/*	curl_easy_getinfo (curl, CURLINFO_SIZE_DOWNLOAD, &fileSize);
 
 					// Knightmare- ignore this, doesn't need to be fatal
@@ -960,7 +997,7 @@ static void CL_FinishHTTPDownload (void)
 						// Knightmare- fall back to UDP download for this map if failure on .bsp
 						if ( !strncmp(dl->queueEntry->quakePath, "maps/", 5) && !strcmp(dl->queueEntry->quakePath + i - 4, ".bsp") )
 						{
-							Com_Printf ("HTTP: failed to download %s, falling back to UDP until next map.\n", dl->queueEntry->quakePath);
+							Com_Printf ("[HTTP] Failed to download %s, falling back to UDP until next map.\n", dl->queueEntry->quakePath);
 							thisMapAbort = true;
 							CL_CancelHTTPDownloads (false);
 							CL_ResetPrecacheCheck ();
@@ -977,7 +1014,7 @@ static void CL_FinishHTTPDownload (void)
 				}
 
 				// every other code is treated as fatal, fallthrough here
-				Com_Printf ("Bad HTTP response code %d for %s, aborting HTTP downloading.\n", responseCode, dl->queueEntry->quakePath);
+				Com_Printf ("[HTTP] Bad response code %d for %s, aborting HTTP downloading.\n", responseCode, dl->queueEntry->quakePath);
 
 			//fatal error, disable http
 			case CURLE_COULDNT_RESOLVE_HOST:
@@ -986,8 +1023,8 @@ static void CL_FinishHTTPDownload (void)
 				if (isFile) {
 					remove (dl->filePath);
 				}
-			//	Com_Printf ("Fatal HTTP error: %s\n", curl_easy_strerror (result));
-				Com_Printf ("Fatal HTTP error: %s\n", CURL_ERROR(result));
+			//	Com_Printf ("[HTTP] Fatal error: %s\n", curl_easy_strerror (result));
+				Com_Printf ("[HTTP] Fatal error: %s\n", CURL_ERROR(result));
 				curl_multi_remove_handle (multi, dl->curl);
 				if (abortDownloads)
 					continue;
@@ -1000,8 +1037,8 @@ static void CL_FinishHTTPDownload (void)
 				if (isFile) {
 					remove (dl->filePath);
 				}
-			//	Com_Printf ("HTTP download failed: %s\n", curl_easy_strerror (result));
-				Com_Printf ("HTTP download failed: %s\n", CURL_ERROR(result));
+			//	Com_Printf ("[HTTP] download failed: %s\n", curl_easy_strerror (result));
+				Com_Printf ("[HTTP] download failed: %s\n", CURL_ERROR(result));
 				curl_multi_remove_handle (multi, dl->curl);
 				continue;
 		}
@@ -1012,7 +1049,7 @@ static void CL_FinishHTTPDownload (void)
 			Com_sprintf (tempName, sizeof(tempName), "%s/%s", FS_Gamedir(), dl->queueEntry->quakePath);
 
 			if (rename (dl->filePath, tempName))
-				Com_Printf ("Failed to rename %s for some odd reason...", dl->filePath);
+				Com_Printf ("[HTTP] Failed to rename %s for some odd reason...", dl->filePath);
 
 			// a pak file is very special...
 			i = strlen (tempName);
@@ -1042,7 +1079,7 @@ static void CL_FinishHTTPDownload (void)
 		//out why, please let me know.
 		curl_multi_remove_handle (multi, dl->curl);
 
-		Com_Printf ("HTTP(%s): %.f bytes, %.2fkB/sec [%d remaining files]\n", dl->queueEntry->quakePath, fileSize, (fileSize / 1024.0) / timeTaken, pendingCount);
+		Com_Printf ("[HTTP] (%s): %.f bytes, %.2fkB/sec [%d remaining files]\n", dl->queueEntry->quakePath, fileSize, (fileSize / 1024.0) / timeTaken, pendingCount);
 	} while (msgs_in_queue > 0);
 
 //	FS_FlushCache ();

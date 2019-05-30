@@ -143,6 +143,7 @@ typedef struct dlqueue_s
 {
 	struct dlqueue_s	*next;
 	char				quakePath[MAX_QPATH];
+	qboolean			isPak;	// Knightmare added
 	dlq_state			state;
 } dlqueue_t;
 
