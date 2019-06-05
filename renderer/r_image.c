@@ -2088,7 +2088,7 @@ nonscrap:
 
 
 // store the names of last images that failed to load
-#define NUM_FAIL_IMAGES 512
+#define NUM_FAIL_IMAGES 1024
 char lastFailedImage[NUM_FAIL_IMAGES][MAX_OSPATH];
 long lastFailedImageHash[NUM_FAIL_IMAGES];
 static unsigned failedImgListIndex;

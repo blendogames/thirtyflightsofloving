@@ -277,6 +277,9 @@ void ThrowGib (edict_t *self, char *gibname, int damage, int type)
 	gib->s.origin[2] = origin[2] + crandom() * size[2];
 
 	gi.setmodel (gib, modelname);
+	gib->clipmask = MASK_SHOT;
+	VectorSet (gib->mins, -4, -4, -4);
+	VectorSet (gib->maxs, 4, 4, 4);
 	gib->solid = SOLID_TRIGGER;	// Knightmare- was SOLID_NOT
 	if (self->blood_type == 1)
 	{
@@ -396,6 +399,17 @@ void ThrowHead (edict_t *self, char *gibname, int damage, int type)
 	self->s.modelindex2 = 0;
 	gi.setmodel (self, modelname);
 
+	self->clipmask = MASK_SHOT;
+	if (self->blood_type == 1)
+	{
+		VectorSet (self->mins, -4, -4, -4);
+		VectorSet (self->maxs, 4, 4, 4);
+	}
+	else
+	{
+		VectorSet (self->mins, -4, -4, 0);
+		VectorSet (self->maxs, 4, 4, 8);
+	}
 	self->solid = SOLID_TRIGGER;	// Knightmare- was SOLID_NOT
 	if(self->blood_type == 1)
 	{
@@ -496,15 +510,17 @@ void ThrowClientHead (edict_t *self, int damage)
 	self->s.frame = 0;
 	gi.setmodel (self, gibname);
 
-	VectorSet (self->mins, -16, -16, 0);
-	VectorSet (self->maxs, 16, 16, 16);
+//	VectorSet (self->mins, -16, -16, 0);
+//	VectorSet (self->maxs, 16, 16, 16);
+	VectorSet (self->mins, -4, -4, -4);
+	VectorSet (self->maxs, 4, 4, 4);
 
 	self->takedamage = DAMAGE_NO;
 	self->solid = SOLID_TRIGGER;	// Knightmare- was SOLID_NOT
 	self->s.effects = EF_GIB;
 	self->s.sound = 0;
 	self->flags |= FL_NO_KNOCKBACK;
-	self->svflags |= SVF_GIB; //Knightmare- gib flag
+	self->svflags |= SVF_GIB; // Knightmare- gib flag
 	self->movetype = MOVETYPE_BOUNCE;
 	VelocityForDamage (damage, vd);
 	VectorAdd (self->velocity, vd, self->velocity);

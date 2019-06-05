@@ -480,7 +480,7 @@ void Mod_LoadEdges (lump_t *l)
 //=======================================================
 
 // store the names of last textures that failed to load
-#define NUM_FAIL_TEXTURES 512
+#define NUM_FAIL_TEXTURES 256
 char lastFailedTexture[NUM_FAIL_TEXTURES][MAX_OSPATH];
 long lastFailedTextureHash[NUM_FAIL_TEXTURES];
 static unsigned failedTexListIndex;
@@ -576,7 +576,7 @@ typedef struct walsize_s
 	int		height;
 } walsize_t;
 
-#define NUM_WALSIZES 512
+#define NUM_WALSIZES 1024
 walsize_t walSizeList[NUM_WALSIZES];
 static unsigned walSizeListIndex;
 
