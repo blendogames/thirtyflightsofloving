@@ -590,6 +590,7 @@ void ThrowDebris (edict_t *self, char *modelname, float speed, vec3_t origin, in
 	chunk->s.frame = 0;
 	chunk->flags = 0;
 	chunk->classname = "debris";
+	chunk->svflags |= SVF_GIB; // Knightmare- gib flag
 	chunk->takedamage = DAMAGE_NO; // was DAMAGE_YES
 	chunk->die = debris_die;
 
