@@ -296,8 +296,8 @@ void ThrowGib (edict_t *self, char *gibname, int damage, int type)
 		gib->s.alpha = self->s.alpha;
 #endif
 	gib->flags |= FL_NO_KNOCKBACK;
-	gib->svflags |= SVF_GIB; //Knightmare- gib flag
-	gib->takedamage = DAMAGE_YES;
+	gib->svflags |= SVF_GIB; // Knightmare- gib flag
+	gib->takedamage = DAMAGE_NO;	//	 was DAMAGE_YES;
 	gib->die = gib_die;
 
 	if (type == GIB_ORGANIC)
@@ -424,8 +424,8 @@ void ThrowHead (edict_t *self, char *gibname, int damage, int type)
 	self->s.sound = 0;
 	self->flags |= FL_NO_KNOCKBACK;
 	self->svflags &= ~SVF_MONSTER;
-	self->svflags |= SVF_GIB; //Knightmare- gib flag
-	self->takedamage = DAMAGE_YES;
+	self->svflags |= SVF_GIB; // Knightmare- gib flag
+	self->takedamage = DAMAGE_NO;	// was DAMAGE_YES;
 	// Lazarus: Disassociate this head with its monster
 	self->targetname = NULL;
 	self->die = gib_die;
@@ -581,7 +581,7 @@ void ThrowDebris (edict_t *self, char *modelname, float speed, vec3_t origin, in
 	chunk->movetype = MOVETYPE_BOUNCE;
 	VectorSet (chunk->mins, -1, -1, -1);
 	VectorSet (chunk->maxs, 1, 1, 1);
-	chunk->solid = SOLID_TRIGGER;	// Knightmare- was SOLID_NOT
+	chunk->solid = SOLID_NOT;
 	chunk->avelocity[0] = random()*600;
 	chunk->avelocity[1] = random()*600;
 	chunk->avelocity[2] = random()*600;
@@ -590,7 +590,7 @@ void ThrowDebris (edict_t *self, char *modelname, float speed, vec3_t origin, in
 	chunk->s.frame = 0;
 	chunk->flags = 0;
 	chunk->classname = "debris";
-	chunk->takedamage = DAMAGE_YES;
+	chunk->takedamage = DAMAGE_NO; // was DAMAGE_YES
 	chunk->die = debris_die;
 
 	// Lazarus: Preserve model name for level changes:
