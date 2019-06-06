@@ -579,7 +579,9 @@ void ThrowDebris (edict_t *self, char *modelname, float speed, vec3_t origin, in
 	v[2] = 100 + 100 * crandom();
 	VectorMA (self->velocity, speed, v, chunk->velocity);
 	chunk->movetype = MOVETYPE_BOUNCE;
-	chunk->solid = SOLID_NOT;
+	VectorSet (chunk->mins, -1, -1, -1);
+	VectorSet (chunk->maxs, 1, 1, 1);
+	chunk->solid = SOLID_TRIGGER;	// Knightmare- was SOLID_NOT
 	chunk->avelocity[0] = random()*600;
 	chunk->avelocity[1] = random()*600;
 	chunk->avelocity[2] = random()*600;
