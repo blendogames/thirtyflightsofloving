@@ -134,23 +134,25 @@ void gib_fade2 (edict_t *self);
 
 void gib_fade (edict_t *self)
 {
-	if (self->s.effects & EF_BLASTER) //Remove glow from gekk gibs
+	if (self->s.effects & EF_BLASTER) // Remove glow from gekk gibs
 	{
 		self->s.effects &= ~EF_BLASTER;
 		self->s.renderfx &= ~RF_NOSHADOW;
 	}
 	if (self->s.renderfx & RF_TRANSLUCENT)
-		self->s.alpha = 0.70F;
+		self->s.alpha = 0.70f;
 	else if (self->s.effects & EF_SPHERETRANS)
-		self->s.alpha = 0.30F;
-	else if (!(self->s.alpha) || self->s.alpha <= 0.0F || self->s.alpha > 1.0F)
-		self->s.alpha = 1.00F;
-	gib_fade2 (self);
+		self->s.alpha = 0.30f;
+	else if ( !(self->s.alpha) || (self->s.alpha <= 0.0f) || (self->s.alpha > 1.0f) )
+		self->s.alpha = 1.00f;
+//	gib_fade2 (self);
+	self->nextthink = level.time + 0.2;
+	self->think = gib_fade2;
 }
 
 void gib_fade2 (edict_t *self)
 {
-	self->s.alpha -= 0.05F;
+	self->s.alpha -= 0.05f;
 	self->s.alpha = max(self->s.alpha, 1/255);
 	if (self->s.alpha <= 1/255)
 	{
@@ -290,9 +292,15 @@ void ThrowGib (edict_t *self, char *gibname, int damage, int type)
 		gib->s.effects |= EF_GRENADE;
 	else
 		gib->s.effects |= EF_GIB;
+
+	if (self->s.renderfx & RF_TRANSLUCENT)
+		gib->s.renderfx |= RF_TRANSLUCENT;
+	if (self->s.effects & EF_SPHERETRANS)
+		gib->s.effects |= EF_SPHERETRANS;
+
 #ifdef KMQUAKE2_ENGINE_MOD
-	//Knightmare- transparent monsters throw transparent gibs
-	if ((self->s.alpha) && self->s.alpha > 0.0F)
+	// Knightmare- transparent monsters throw transparent gibs
+	if ( (self->s.alpha) && (self->s.alpha > 0.0f) && (self->s.alpha < 1.0f) )
 		gib->s.alpha = self->s.alpha;
 #endif
 	gib->flags |= FL_NO_KNOCKBACK;
@@ -569,9 +577,15 @@ void ThrowDebris (edict_t *self, char *modelname, float speed, vec3_t origin, in
 	chunk = G_Spawn();
 	VectorCopy (origin, chunk->s.origin);
 	gi.setmodel (chunk, modelname);
+
+	if (self->s.renderfx & RF_TRANSLUCENT)
+		chunk->s.renderfx |= RF_TRANSLUCENT;
+	if (self->s.effects & EF_SPHERETRANS)
+		chunk->s.effects |= EF_SPHERETRANS;
+
 #ifdef KMQUAKE2_ENGINE_MOD
-	//Knightmare- transparent entities throw transparent debris
-	if ((self->s.alpha) && self->s.alpha > 0.0F && self->s.alpha < 1.0F)
+	// Knightmare- transparent entities throw transparent debris
+	if ( (self->s.alpha) && (self->s.alpha > 0.0f) && (self->s.alpha < 1.0f) )
 		chunk->s.alpha = self->s.alpha;
 #endif
 	v[0] = 100 * crandom();
