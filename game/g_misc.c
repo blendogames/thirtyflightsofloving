@@ -293,13 +293,14 @@ void ThrowGib (edict_t *self, char *gibname, int damage, int type)
 	else
 		gib->s.effects |= EF_GIB;
 
+	// inherit translucency flags from parent entity
 	if (self->s.renderfx & RF_TRANSLUCENT)
 		gib->s.renderfx |= RF_TRANSLUCENT;
 	if (self->s.effects & EF_SPHERETRANS)
 		gib->s.effects |= EF_SPHERETRANS;
 
 #ifdef KMQUAKE2_ENGINE_MOD
-	// Knightmare- transparent monsters throw transparent gibs
+	// Knightmare- translucent monsters throw translucent gibs
 	if ( (self->s.alpha) && (self->s.alpha > 0.0f) && (self->s.alpha < 1.0f) )
 		gib->s.alpha = self->s.alpha;
 #endif
@@ -578,13 +579,14 @@ void ThrowDebris (edict_t *self, char *modelname, float speed, vec3_t origin, in
 	VectorCopy (origin, chunk->s.origin);
 	gi.setmodel (chunk, modelname);
 
+	// inherit translucency flags from parent entity
 	if (self->s.renderfx & RF_TRANSLUCENT)
 		chunk->s.renderfx |= RF_TRANSLUCENT;
 	if (self->s.effects & EF_SPHERETRANS)
 		chunk->s.effects |= EF_SPHERETRANS;
 
 #ifdef KMQUAKE2_ENGINE_MOD
-	// Knightmare- transparent entities throw transparent debris
+	// Knightmare- translucent entities throw translucent debris
 	if ( (self->s.alpha) && (self->s.alpha > 0.0f) && (self->s.alpha < 1.0f) )
 		chunk->s.alpha = self->s.alpha;
 #endif
