@@ -534,7 +534,7 @@ void CL_ParseConfigString (void)
 		cl.configstrings[CS_PAKFILE-1][MAX_QPATH-1] = 0;	// null terminate end of section
 	}
 	else {
-		if (length >= MAX_PATH)
+		if (length >= MAX_QPATH)
 			Com_Printf(S_COLOR_YELLOW"CL_ParseConfigString: string %d of length %d exceeds MAX_QPATH.\n", i, (int)length);
 		Q_strncpyz (cl.configstrings[i], s, sizeof(cl.configstrings[i]));
 	}

@@ -697,7 +697,7 @@ static void CL_CheckAndQueueDownload (char *path)
 			}
 			else
 			{
-				Com_Printf ("[HTTP] NOTICE: pak file (%s) specified in filelist already exists\n", gamePath);
+			//	Com_Printf ("[HTTP] NOTICE: pak file (%s) specified in filelist already exists\n", gamePath);
 				exists = true;
 				fclose (f);
 			}
@@ -736,7 +736,7 @@ static void CL_CheckAndQueueDownload (char *path)
 		}
 		else
 		{
-			Com_Printf ("[HTTP] NOTICE: requested file (%s) already exists\n", path);
+		//	Com_Printf ("[HTTP] NOTICE: requested file (%s) already exists\n", path);
 		}
 	}
 	else

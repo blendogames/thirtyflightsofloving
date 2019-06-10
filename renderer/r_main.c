@@ -661,22 +661,12 @@ void R_RenderView (refdef_t *fd)
 
 	if (r_newrefdef.rdflags & RDF_NOWORLDMODEL) // options menu
 	{
-	/*	qboolean fog_on = false;
-		// Knightmare- no fogging on menu/hud models
-		if (qglIsEnabled(GL_FOG)) //check if fog is enabled
-		{
-			fog_on = true;
-			qglDisable(GL_FOG); //if so, disable it
-		}*/
 		R_SuspendFog ();
 
 	//	R_DrawAllDecals();
 		R_DrawAllEntities(false);
 		R_DrawAllParticles();
 
-		// re-enable fog if it was on
-	//	if (fog_on)
-	//		qglEnable(GL_FOG);
 		R_ResumeFog ();
 	}
 	else
