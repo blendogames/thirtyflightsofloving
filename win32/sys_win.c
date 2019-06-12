@@ -321,11 +321,11 @@ void Sys_Quit (void)
 	if (dedicated && dedicated->value)
 		FreeConsole ();
 
-// shut down QHOST hooks if necessary
-	DeinitConProc ();
-
 #ifdef NEW_DED_CONSOLE
 	Sys_ShutdownConsole();
+#else
+// shut down QHOST hooks if necessary
+	DeinitConProc ();
 #endif
 
 	exit (0);
