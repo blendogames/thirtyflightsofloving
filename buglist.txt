@@ -19,15 +19,40 @@ drops to console (SV_DemoCompleted, SV_Nextserver called twice) when changing fr
 models with bad skinnums rendered as invisible (0 alpha?)
 	- FIXED by checking skinnum before assgning renderparms
 
-invalid player models causing crashes?
-	- likely caused by corrupt data
+alpha test textures not displaying properly on ATI cards (lightmap blended into alpha channel?)
+	- FIXED by setting alpha in lightmap to 255
+
+memory leak on vid_restart / map change
+	- FIXED by freeing JPG file buffer
+	
+no audio in Q2 intermission cinematics
+	- FIXED by better order-of-operations handling in snd_dma.c->S_RawSamples
 	
 plats with spawnflag PLAT_LOW_TRIGGER breaking with high lip value set
 	- FIXED by setting tmin[2] differently for this spawnflag
+	
+door and plat looped sounds can get stuck on when blocked by a monster
+	- FIXED by clearing looped sound for all cases in door_hit_top()/door_hit_bottom() and plat_hit_top()/plat_hit_bottom()
+	
+fatal error when loading too many md2 models (VirtualAlloc reserve failure)
+	- FIXED by implementing new ModChunk_ memory allocation system for models
+	
+game menu text doesn't show when connected to RA2 server
+	- FIXED by allowing CS_STATUSBAR to overflow thru CS_AIRACCEL-1
 
-no audio in Q2 intermission cinematics
-	- FIXED by better order-of-operations handling in snd_dma.c->S_RawSamples
-
-alpha test textures not displaying properly on ATI cards (lightmap blended into alpha channel?)
+Thirdperson player shadow not drawn correctly at times (start of hangar1)
 
 depthhacked model appearing at player origin in Lazarus model test map
+
+Acebot dead bodies have interpolation glitch on respawn
+
+invalid player models causing crashes?
+	- likely caused by corrupt or missing player models
+
+Filelists not downloading all pak files (brazen)
+	- FIXED by preventing HTTP download of the first pak in a filelist from aborting other paks
+
+Maps.lst on disk override same filename inside pak?	
+	- FIXED by adding check against tryExtFirst files in FS_FileInPakBlacklist(), then testing for local file on disk
+
+Text color codes not handled properly by Con_Print()?
