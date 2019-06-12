@@ -49,6 +49,8 @@ Changes as of v0.20 update 8:
 
 - Fixed crash when patching dead soldier model.
 
+- Now ignores maps.lst file inside pak/pk3 files when the same file can be loaded from outside paks in the same game folder.
+
 - Removed target_animation from Lazarus DLL, as it breaks when loading/saving game and there's no good way
 	to implement it properly.
 

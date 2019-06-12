@@ -1477,6 +1477,13 @@ char *pakfile_ignore_names[] =
 	0
 };
 
+// These files are sometimes inside paks, but should be loaded externally first
+char *pakfile_tryExtFirst_names[] =
+{
+	"players/",
+	"maps.lst",
+	0
+};
 
 /*
 =================
@@ -1491,6 +1498,7 @@ qboolean FS_FileInPakBlacklist (char *filename, qboolean isPk3)
 	int			i;
 	char		*compare;
 	qboolean	ignore = false;
+	qboolean	loadExtFirst = false;
 
 	compare = filename;
 	if (compare[0] == '/')	// remove leading slash
@@ -1502,6 +1510,20 @@ qboolean FS_FileInPakBlacklist (char *filename, qboolean isPk3)
 		// Ogg files can't load from .paks
 	//	if ( !isPk3 && !strcmp(COM_FileExtension(compare), "ogg") )
 	//		ignore = true;
+	}
+	if (!ignore)	// see if a file should be loaded from outside paks first
+	{
+		for (i=0; pakfile_tryExtFirst_names[i]; i++) {
+			if ( !Q_strncasecmp(compare, pakfile_tryExtFirst_names[i], strlen(pakfile_tryExtFirst_names[i])) )
+				loadExtFirst = true;
+		}
+		if (loadExtFirst)
+		{
+			if (FS_LocalFileExists(compare)) {
+			//	Com_Printf ("FS_LoadPAK: file %s in pack is ignored in favor of external file first.\n", filename);
+				ignore = true;
+			}
+		}
 	}
 
 //	if (ignore)
