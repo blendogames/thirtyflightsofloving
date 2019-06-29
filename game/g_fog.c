@@ -325,21 +325,22 @@ void Cmd_Fog_f (edict_t *ent)
 			Fog_ConsoleFog();
 		}
 	}
-	else if(Q_stricmp (cmd, "Fog_List") == 0 )
+	else if (Q_stricmp (cmd, "Fog_List") == 0 )
 	{
-		int	i;
+		int		i;
+		fog_t	*cFog;
 
 		gi.dprintf("level.fogs=%d\n",level.fogs);
 		gi.dprintf("level.trigger_fogs=%d\n",level.trigger_fogs);
-		for(i=0; i<level.fogs; i++)
+		for (i=0; i<level.fogs; i++)
 		{
-			pfog = &gfogs[i];
+			cFog = &gfogs[i];
 			gi.dprintf("Fog #%d\n",i+1);
-			gi.dprintf("Trigger=%s\n",(pfog->Trigger ? "true" : "false"));
+			gi.dprintf("Trigger=%s\n",(cFog->Trigger ? "true" : "false"));
 			gi.dprintf("Model=%d, Near=%g, Far=%g, Density=%g\n",
-				pfog->Model, pfog->Near, pfog->Far, pfog->Density);
-			gi.dprintf("Color=%g,%g,%g\n",pfog->Color[0],pfog->Color[1],pfog->Color[2]);
-			gi.dprintf("Targetname=%s\n",(pfog->ent ? pfog->ent->targetname : "no ent"));
+				cFog->Model, cFog->Near, cFog->Far, cFog->Density);
+			gi.dprintf("Color=%g,%g,%g\n",cFog->Color[0],cFog->Color[1],cFog->Color[2]);
+			gi.dprintf("Targetname=%s\n",(cFog->ent ? cFog->ent->targetname : "no ent"));
 		}
 	}
 	else

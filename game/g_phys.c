@@ -1228,7 +1228,7 @@ qboolean SV_Push (edict_t *pusher, vec3_t move, vec3_t amove)
 				pushed_p--;
 				continue;
 			}
-			if (check->svflags & SVF_GIB) //Knightmare- gibs don't block
+			if (check->svflags & SVF_GIB) // Knightmare- gibs don't block
 			{
 				G_FreeEdict(check);
 				pushed_p--;

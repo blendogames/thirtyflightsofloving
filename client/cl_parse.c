@@ -911,7 +911,7 @@ void CL_ParseServerMessage (void)
 			if (i == PRINT_CHAT)
 			{
 				S_StartLocalSound ("misc/talk.wav");
-				con.ormask = 128;
+			//	con.ormask = 128;	// Knightmare- made redundant by color code
 				Com_Printf (S_COLOR_ALT"%s", MSG_ReadString (&net_message)); // Knightmare- add green flag
 			}
 			else

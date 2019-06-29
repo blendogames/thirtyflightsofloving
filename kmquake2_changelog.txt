@@ -35,6 +35,8 @@ Changes as of v0.20 update 8:
 
 - Fixed alignment issue with colored text on help computer and centerprints.
 
+- Fixed  text color and formatting disappearing after word wrap in console.
+
 - Fixed oversized 404 message from aborting all HTTP downloads.
 
 - Fixed HTTP download of the first pak in a filelist from aborting other paks.

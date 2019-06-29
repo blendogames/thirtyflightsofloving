@@ -357,17 +357,118 @@ void Con_Init (void)
 
 /*
 ===============
+Con_StringSetParams
+===============
+*/
+qboolean Con_StringSetParams (char modifier, char *colorCode, qboolean *bold, qboolean *shadow, qboolean *italic, qboolean *alt)
+{
+	// sanity check
+	if (!colorCode || !bold || !shadow || !italic || !alt)
+		return false;
+
+	switch (modifier)
+	{
+		case 'R':
+		case 'r':
+			*colorCode = 0;
+			*bold = *shadow = *italic = *alt = false;
+			return true;
+		case 'B':
+		case 'b':
+			if (*bold) 
+				*bold = false;
+			else 
+				*bold = true;
+			return true;
+		case 'S':
+		case 's':
+			if (*shadow) 
+				*shadow = false; 
+			else 
+				*shadow = true;
+			return true;
+		case 'I':
+		case 'i':
+			if (*italic) 
+				*italic = false; 
+			else 
+				*italic = true;
+			return true;
+		case COLOR_RED:
+		case COLOR_GREEN:
+		case COLOR_YELLOW:
+		case COLOR_BLUE:
+		case COLOR_CYAN:
+		case COLOR_MAGENTA:
+		case COLOR_WHITE:
+		case COLOR_BLACK:
+		case COLOR_ORANGE:
+		case COLOR_GRAY:
+			*colorCode = modifier;
+			return true;
+		case 'A':	// alt text color
+		case 'a':
+			*alt = true;
+			return true;
+	}
+	
+	return false;
+}
+
+
+/*
+===============
 Con_Linefeed
 ===============
 */
-void Con_Linefeed (void)
+void Con_Linefeed (char colorCode, qboolean bold, qboolean shadow, qboolean italic, qboolean alt)
 {
+	int		y;
+
 	con.x = 0;
 	if (con.display == con.current)
 		con.display++;
 	con.current++;
 	memset (&con.text[(con.current%con.totallines)*con.linewidth]
 	, ' ', con.linewidth);
+
+	// add any wrapped formatting
+	y = con.current % con.totallines;
+	if (colorCode != 0)
+	{
+		con.text[y*con.linewidth+con.x] = '^';
+		con.x++;
+		con.text[y*con.linewidth+con.x] = colorCode;
+		con.x++;
+	}
+	if (bold)
+	{
+		con.text[y*con.linewidth+con.x] = '^';
+		con.x++;
+		con.text[y*con.linewidth+con.x] = 'b';
+		con.x++;
+	}
+	if (shadow)
+	{
+		con.text[y*con.linewidth+con.x] = '^';
+		con.x++;
+		con.text[y*con.linewidth+con.x] = 's';
+		con.x++;
+	}
+	if (italic)
+	{
+		con.text[y*con.linewidth+con.x] = '^';
+		con.x++;
+		con.text[y*con.linewidth+con.x] = 'i';
+		con.x++;
+	}
+	if (alt)
+	{
+		con.text[y*con.linewidth+con.x] = '^';
+		con.x++;
+		con.text[y*con.linewidth+con.x] = 'a';
+		con.x++;
+	}
 }
 
 /*
@@ -381,10 +482,12 @@ If no console is visible, the text will appear at the top of the game window
 */
 void Con_Print (char *txt)
 {
-	int		y;
-	int		c, l;
+	int			y, c, l;	//, i;
 	static int	cr;
-	int		mask;
+	int			mask;
+	// vars for format wrapping
+	char		modifier, colorCode = 0;
+	qboolean	nextCharModifierCheck = false,  bold = false, shadow = false, italic = false, alt = false;
 
 	if (!con.initialized)
 		return;
@@ -406,8 +509,9 @@ void Con_Print (char *txt)
 				break;
 
 	// word wrap
-		if (l != con.linewidth && (con.x + l > con.linewidth) )
+		if (l != con.linewidth && (con.x + l > con.linewidth) ) {
 			con.x = 0;
+		}
 
 		txt++;
 
@@ -416,25 +520,40 @@ void Con_Print (char *txt)
 			con.current--;
 			cr = false;
 		}
-
 		
 		if (!con.x)
 		{
-			Con_Linefeed ();
+			Con_Linefeed (colorCode, bold, shadow, italic, alt);
 		// mark time for transparent overlay
 			if (con.current >= 0)
 				con.times[con.current % NUM_CON_TIMES] = cls.realtime;
+		}
+
+		// track formatting codes for word wrap
+		modifier = (c & ~128);
+		if (nextCharModifierCheck)	// last char was a ^
+		{
+			Con_StringSetParams (modifier, &colorCode, &bold, &shadow, &italic, &alt);
+			nextCharModifierCheck = false;
+		}
+		else {
+			// set var to check modifier if char is ^
+			nextCharModifierCheck = (modifier == '^') ? true : false;
 		}
 
 		switch (c)
 		{
 		case '\n':
 			con.x = 0;
+			colorCode = 0;
+			bold = shadow = italic = alt = false;
 			break;
 
 		case '\r':
 			con.x = 0;
 			cr = 1;
+			colorCode = 0;
+			bold = shadow = italic = alt = false;
 			break;
 
 		default:	// display character and advance
