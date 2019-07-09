@@ -288,6 +288,7 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn, int team)
 	bot->s.frame = 0;
 	VectorCopy (spawn_origin, bot->s.origin);
 	bot->s.origin[2] += 1;	// make sure off ground
+	VectorCopy (bot->s.origin, bot->s.old_origin);	// Knightmare- was missing oldorigin!
 
 	// set the delta angle
 	for (i=0 ; i<3 ; i++)

@@ -45,6 +45,7 @@ Thirdperson player shadow not drawn correctly at times (start of hangar1)
 depthhacked model appearing at player origin in Lazarus model test map
 
 Acebot dead bodies have interpolation glitch on respawn
+	- FIXED by setting oldorigin in ACESP_PutClientInServer()
 
 invalid player models causing crashes?
 	- likely caused by corrupt or missing player models
@@ -56,3 +57,4 @@ Maps.lst on disk override same filename inside pak?
 	- FIXED by adding check against tryExtFirst files in FS_FileInPakBlacklist(), then testing for local file on disk
 
 Text color codes not handled properly by Con_Print()?
+	- FIXED by adding formatting tracking for console line feed
