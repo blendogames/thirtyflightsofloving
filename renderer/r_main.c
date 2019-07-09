@@ -709,7 +709,7 @@ void R_RenderView (refdef_t *fd)
 
 		R_Flash();
 	}
-//	R_SetFog();
+
 	R_SetFog2D ();		// don't allow radial fogging of 2D elements
 }
 

@@ -168,7 +168,7 @@ void R_Bloom_InitBackUpTexture (int width, int height)
 	r_screenbackuptexture_width = width;
 	r_screenbackuptexture_height = height; 
 
-	r_bloombackuptexture = R_LoadPic( "***r_bloombackuptexture***", (byte *)data, width, height, it_pic, 3 );
+	r_bloombackuptexture = R_LoadPic ("***r_bloombackuptexture***", (byte *)data, width, height, it_pic, 3);
 	
 	free ( data );
 }
@@ -208,7 +208,7 @@ void R_Bloom_InitEffectTexture (void)
 	data = malloc( BLOOM_SIZE * BLOOM_SIZE * 4 );
 	memset( data, 0, BLOOM_SIZE * BLOOM_SIZE * 4 );
 
-	r_bloomeffecttexture = R_LoadPic( "***r_bloomeffecttexture***", (byte *)data, BLOOM_SIZE, BLOOM_SIZE, it_pic, 3 );
+	r_bloomeffecttexture = R_LoadPic ("***r_bloomeffecttexture***", (byte *)data, BLOOM_SIZE, BLOOM_SIZE, it_pic, 3);
 	
 	free ( data );
 }
@@ -240,7 +240,7 @@ void R_Bloom_InitTextures (void)
 	size = screen_texture_width * screen_texture_height * 4;
 	data = malloc( size );
 	memset( data, 255, size );
-	r_bloomscreentexture = R_LoadPic( "***r_bloomscreentexture***", (byte *)data, screen_texture_width, screen_texture_height, it_pic, 3 );
+	r_bloomscreentexture = R_LoadPic ("***r_bloomscreentexture***", (byte *)data, screen_texture_width, screen_texture_height, it_pic, 3);
 	free ( data );
 
 	//validate bloom size and init the bloom effect texture
@@ -254,7 +254,7 @@ void R_Bloom_InitTextures (void)
 		r_screendownsamplingtexture_size = (int)(BLOOM_SIZE * 2);
 		data = malloc( r_screendownsamplingtexture_size * r_screendownsamplingtexture_size * 4 );
 		memset( data, 0, r_screendownsamplingtexture_size * r_screendownsamplingtexture_size * 4 );
-		r_bloomdownsamplingtexture = R_LoadPic( "***r_bloomdownsamplingtexture***", (byte *)data, r_screendownsamplingtexture_size, r_screendownsamplingtexture_size, it_pic, 3 );
+		r_bloomdownsamplingtexture = R_LoadPic ("***r_bloomdownsamplingtexture***", (byte *)data, r_screendownsamplingtexture_size, r_screendownsamplingtexture_size, it_pic, 3);
 		free ( data );
 	}
 

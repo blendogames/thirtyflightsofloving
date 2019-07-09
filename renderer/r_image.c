@@ -43,8 +43,8 @@ cvar_t		*r_intensity;
 unsigned	d_8to24table[256];
 float		d_8to24tablef[256][3]; //Knightmare- MrG's Vertex array stuff
 
-qboolean GL_Upload8 (byte *data, int width, int height,  qboolean mipmap, qboolean is_sky );
-qboolean GL_Upload32 (unsigned *data, int width, int height,  qboolean mipmap);
+qboolean GL_Upload8 (byte *data, int width, int height, imagetype_t type);
+qboolean GL_Upload32 (unsigned *data, int width, int height, imagetype_t type);
 
 int		gl_solid_format = 3;
 int		gl_alpha_format = 4;
@@ -348,7 +348,7 @@ void Scrap_Upload (void)
 {
 	scrap_uploads++;
 	GL_Bind(TEXNUM_SCRAPS);
-	GL_Upload8 (scrap_texels[0], BLOCK_WIDTH, BLOCK_HEIGHT, false, false );
+	GL_Upload8 (scrap_texels[0], BLOCK_WIDTH, BLOCK_HEIGHT, it_pic);
 	scrap_dirty = false;
 }
 
@@ -1760,15 +1760,16 @@ Returns has_alpha
 ===============
 */
 //#define USE_GLMIPMAP
-qboolean GL_Upload32 (unsigned *data, int width, int height, qboolean mipmap)
+qboolean GL_Upload32 (unsigned *data, int width, int height, imagetype_t type)
 {
 	int			samples;
 	unsigned 	*scaled;
 	int			scaled_width, scaled_height;
-	int			i, c;
+	int			i, c, comp;
+	qboolean	mipmap;
 	byte		*scan;
-	int			comp;
 
+	mipmap = ((type != it_pic) && (type != it_sky));
 	uploaded_paletted = false;
 
 	//
@@ -1789,9 +1790,9 @@ qboolean GL_Upload32 (unsigned *data, int width, int height, qboolean mipmap)
 	// Heffo - ARB Texture Compression
 	qglHint(GL_TEXTURE_COMPRESSION_HINT_ARB, GL_NICEST);
 	if (samples == gl_solid_format)
-		comp = (glState.texture_compression) ? GL_COMPRESSED_RGB_ARB : gl_tex_solid_format;
+		comp = (glState.texture_compression && (type != it_pic)) ? GL_COMPRESSED_RGB_ARB : gl_tex_solid_format;
 	else if (samples == gl_alpha_format)
-		comp = (glState.texture_compression) ? GL_COMPRESSED_RGBA_ARB : gl_tex_alpha_format;
+		comp = (glState.texture_compression && (type != it_pic)) ? GL_COMPRESSED_RGBA_ARB : gl_tex_alpha_format;
 
 	//
 	// find sizes to scale to
@@ -1907,7 +1908,7 @@ GL_Upload8
 Returns has_alpha
 ===============
 */
-qboolean GL_Upload8 (byte *data, int width, int height,  qboolean mipmap, qboolean is_sky )
+qboolean GL_Upload8 (byte *data, int width, int height, imagetype_t type)
 {
 	unsigned	trans[512*256];
 	int			i, s;
@@ -1920,7 +1921,7 @@ qboolean GL_Upload8 (byte *data, int width, int height,  qboolean mipmap, qboole
 
 	/*if ( qglColorTableEXT && 
 		 gl_ext_palettedtexture->value && 
-		 is_sky )
+		 (type == it_sky) )
 	{
 		qglTexImage2D( GL_TEXTURE_2D,
 					  0,
@@ -1963,7 +1964,7 @@ qboolean GL_Upload8 (byte *data, int width, int height,  qboolean mipmap, qboole
 			}
 		}
 
-		return GL_Upload32 (trans, width, height, mipmap);
+		return GL_Upload32 (trans, width, height, type);
 	}
 }
 
@@ -2071,9 +2072,11 @@ nonscrap:
 		image->texnum = TEXNUM_IMAGES + (image - gltextures);
 		GL_Bind(image->texnum);
 		if (bits == 8)
-			image->has_alpha = GL_Upload8 (pic, width, height, (image->type != it_pic && image->type != it_sky), image->type == it_sky );
+		//	image->has_alpha = GL_Upload8 (pic, width, height, (image->type != it_pic && image->type != it_sky), image->type == it_sky );
+			image->has_alpha = GL_Upload8 (pic, width, height, type);
 		else
-			image->has_alpha = GL_Upload32 ((unsigned *)pic, width, height, (image->type != it_pic && image->type != it_sky) );
+		//	image->has_alpha = GL_Upload32 ((unsigned *)pic, width, height, (image->type != it_pic && image->type != it_sky) );
+			image->has_alpha = GL_Upload32 ((unsigned *)pic, width, height, type);
 		image->upload_width = upload_width;		// after power of 2 and scales
 		image->upload_height = upload_height;
 		image->paletted = uploaded_paletted;

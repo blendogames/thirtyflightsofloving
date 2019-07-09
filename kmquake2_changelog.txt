@@ -26,6 +26,8 @@ Changes as of v0.20 update 8:
 
 - Fixed fatal error when too many alias models are loaded (such as many unique player models in a multiplayer game).
 
+- Fixed light blooms killing performance if texture compression is enabled.
+
 - Fixed players in multiplayer games with models/skins not installed on the local client showing as the player's
 	model/skin.  The original default of male/grunt has been restored for multiplayer games.
 
