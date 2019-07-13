@@ -365,8 +365,8 @@ typedef struct miptex_s
 #define	MAX_MAP_PORTALS		65536
 #define	MAX_MAP_EDGES		128000
 #define	MAX_MAP_SURFEDGES	256000
-#define	MAX_MAP_LIGHTING	0x200000
-#define	MAX_MAP_VISIBILITY	0x100000
+#define	MAX_MAP_LIGHTING	0x2000000	// Knightmare increased, was 0x200000
+#define	MAX_MAP_VISIBILITY	0x1000000	// Knightmare increased, was 0x100000
 
 
 // key / value pair sizes
@@ -606,7 +606,7 @@ typedef struct
 } darea_t;
 
 
-//Knightmare- below is upper bounds for Q3 maps
+// Knightmare- below is upper bounds for Q3 maps
 /*
 //#define BSP_VERSION			46
 #define Q3_BSP_VERSION 46
