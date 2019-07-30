@@ -1051,14 +1051,15 @@ qboolean SV_Push (edict_t *pusher, vec3_t move, vec3_t amove)
 			VectorAdd (check->s.origin, move, check->s.origin);
 			// Lazarus: if turn_rider is set, do it. We don't do this by default
 			//          'cause it can be a fairly drastic change in gameplay
-			if (turn && (check->groundentity == pusher)) {
+			if (turn && (check->groundentity == pusher))
+			{
 				if(!check->client)
 				{
 					check->s.angles[YAW] += amove[YAW];
 				}
 				else
 				{
-					if(amove[YAW] != 0.)
+					if (amove[YAW] != 0.0f)
 					{
 						check->client->ps.pmove.delta_angles[YAW] += ANGLE2SHORT(amove[YAW]);
 						check->client->ps.viewangles[YAW] += amove[YAW];
@@ -1073,7 +1074,7 @@ qboolean SV_Push (edict_t *pusher, vec3_t move, vec3_t amove)
 						// player is riding a MOVETYPE_PUSH
 						check->client->ps.pmove.pm_flags |= PMF_NO_PREDICTION;
 					}
-					if(amove[PITCH] != 0.)
+					if(amove[PITCH] != 0.0f)
 					{
 						float	delta_yaw;
 						float	pitch = amove[PITCH];
@@ -1790,7 +1791,8 @@ void SV_Physics_Step (edict_t *ent)
 
 
 	// Lazarus: Floating stuff
-	if ((ent->movetype == MOVETYPE_PUSHABLE) && (ent->flags & FL_SWIM) && (ent->waterlevel)) {
+	if ((ent->movetype == MOVETYPE_PUSHABLE) && (ent->flags & FL_SWIM) && (ent->waterlevel))
+	{
 		float	waterlevel;
 		float	rider_mass, total_mass;
 		trace_t tr;
@@ -1810,7 +1812,8 @@ void SV_Physics_Step (edict_t *ent)
 		rider_mass = RiderMass(ent);
 		total_mass = rider_mass + ent->mass;
 		Area  = ent->size[0] * ent->size[1];
-		if(waterlevel < ent->absmax[2]) {
+		if (waterlevel < ent->absmax[2])
+		{
 			// A portion of crate is above water
 			int		time;
 			float	t0, t1, z0, z1;
@@ -1841,10 +1844,13 @@ void SV_Physics_Step (edict_t *ent)
 			z1 = sin(2*M_PI*t1/time);
 			ent->velocity[2] += ent->bob * (z1-z0) * 10;
 			ent->bobframe = (ent->bobframe+1)%time;
-		} else {
+		}
+		else
+		{
 			// Crate is fully submerged
 			Force = -total_mass + ent->volume * WATER_DENSITY;
-			if(sv_gravity->value) {
+			if (sv_gravity->value)
+			{
 				Drag  = 0.00190735 * 1.05 * Area * (ent->velocity[2]*ent->velocity[2])/sv_gravity->value;
 				if(Drag > fabs(Force)) {
 					// Drag actually CAN be > total weight, but if we do this we tend to
@@ -1852,7 +1858,7 @@ void SV_Physics_Step (edict_t *ent)
 					// height
 					Drag = fabs(Force);
 				}
-				if(ent->velocity[2] > 0)
+				if (ent->velocity[2] > 0)
 					Drag = -Drag;
 				Force += Drag;
 			}
@@ -1860,13 +1866,14 @@ void SV_Physics_Step (edict_t *ent)
 			ent->velocity[2] += Accel*FRAMETIME;
 		}
 
-		if(ent->watertype & MASK_CURRENT) {
+		if (ent->watertype & MASK_CURRENT)
+		{
 			// Move with current, relative to mass. Mass=400 or less
 			// will move at 50 units/sec.
 			float v;
 			int   current;
 
-			if(ent->mass > 400)
+			if (ent->mass > 400)
 				v = 0.125 * ent->mass;
 			else
 				v = 50.;
@@ -1877,8 +1884,8 @@ void SV_Physics_Step (edict_t *ent)
 			case CONTENTS_CURRENT_90:   ent->velocity[1] = v;  break;
 			case CONTENTS_CURRENT_180:  ent->velocity[0] = -v; break;
 			case CONTENTS_CURRENT_270:  ent->velocity[1] = -v; break;
-			case CONTENTS_CURRENT_UP :  ent->velocity[2] = max(v, ent->velocity[2]);
-			case CONTENTS_CURRENT_DOWN: ent->velocity[2] = min(-v, ent->velocity[2]);
+			case CONTENTS_CURRENT_UP :  ent->velocity[2] = max(v, ent->velocity[2]); break;
+			case CONTENTS_CURRENT_DOWN: ent->velocity[2] = min(-v, ent->velocity[2]); break;
 			}
 		}
 	}
@@ -1894,16 +1901,16 @@ void SV_Physics_Step (edict_t *ent)
 		end[2] -= 256;
 		tr = gi.trace (point, ent->mins, ent->maxs, end, ent, MASK_SOLID);
 		// tr.ent HAS to be ground, but just in case we screwed something up:
-		if(tr.ent == ground)
+		if (tr.ent == ground)
 		{
 			onconveyor = true;
 			ent->velocity[0] = ground->movedir[0] * ground->speed;
 			ent->velocity[1] = ground->movedir[1] * ground->speed;
-			if(tr.plane.normal[2] > 0) {
+			if (tr.plane.normal[2] > 0) {
 				ent->velocity[2] = ground->speed *
 					sqrt(1.0 - tr.plane.normal[2]*tr.plane.normal[2]) /
 					tr.plane.normal[2];
-				if(DotProduct(ground->movedir,tr.plane.normal) > 0) {
+				if (DotProduct(ground->movedir,tr.plane.normal) > 0) {
 					// Then we're moving down.
 					ent->velocity[2] = -ent->velocity[2] + 2;
 				}
@@ -1911,16 +1918,17 @@ void SV_Physics_Step (edict_t *ent)
 		}
 	}
 
-	if (ent->velocity[2] || ent->velocity[1] || ent->velocity[0]) {
+	if (ent->velocity[2] || ent->velocity[1] || ent->velocity[0])
+	{
 		int	block;
 		// apply friction
 		// let dead monsters who aren't completely onground slide
 
 		if ((wasonground) || (ent->flags & (FL_SWIM|FL_FLY)))
-
 			if (!onconveyor)
 			{
-				if (!(ent->health <= 0.0 && !M_CheckBottom(ent))) {
+				if (!(ent->health <= 0.0 && !M_CheckBottom(ent)))
+				{
 					vel = ent->velocity;
 					speed = sqrt(vel[0]*vel[0] +vel[1]*vel[1]);
 					if (speed) {
@@ -1941,9 +1949,9 @@ void SV_Physics_Step (edict_t *ent)
 
 		if (ent->svflags & SVF_MONSTER)
 			mask = MASK_MONSTERSOLID;
-		else if(ent->movetype == MOVETYPE_PUSHABLE)
+		else if (ent->movetype == MOVETYPE_PUSHABLE)
 			mask = MASK_MONSTERSOLID | MASK_PLAYERSOLID;
-		else if(ent->clipmask)
+		else if (ent->clipmask)
 			mask = ent->clipmask;		// Lazarus edition
 		else
 			mask = MASK_SOLID;
@@ -1990,9 +1998,10 @@ void SV_Physics_Step (edict_t *ent)
 			if(ent->bounce_me == 2)
 				VectorMA(old_origin,FRAMETIME,ent->velocity,ent->s.origin);
 			VectorSubtract(ent->s.origin,old_origin,move);
-			for(i=1, e=g_edicts+i; i<globals.num_edicts; i++, e++) {
-				if(e==ent) continue;
-				if(e->groundentity == ent) {
+			for (i=1, e=g_edicts+i; i<globals.num_edicts; i++, e++)
+			{
+				if (e==ent) continue;
+				if (e->groundentity == ent) {
 					VectorAdd(e->s.origin,move,end);
 					tr = gi.trace(e->s.origin,e->mins,e->maxs,end,ent,MASK_SOLID);
 					VectorCopy(tr.endpos,e->s.origin);
@@ -2002,23 +2011,14 @@ void SV_Physics_Step (edict_t *ent)
 		}
 	}
 
-	//Knightmare- also do func_breakaways
-	else if((ent->movetype == MOVETYPE_PUSHABLE) || !strcmp(ent->classname, "func_breakaway"))
+	// Knightmare- also do func_breakaways
+	else if ( (ent->movetype == MOVETYPE_PUSHABLE) || !strcmp(ent->classname, "func_breakaway") )
 	{
 		// We run touch function for non-moving func_pushables every frame
 		// to see if they are touching, for example, a trigger_mass
 		G_TouchTriggers(ent);
-		if(!ent->inuse) return;
+		if (!ent->inuse) return;
 	}
-
-	else if(ent->movetype == MOVETYPE_PUSHABLE)
-	{
-		// We run touch function for non-moving func_pushables every frame
-		// to see if they are touching, for example, a trigger_mass
-		G_TouchTriggers(ent);
-		if(!ent->inuse) return;
-	}
-
 
 	// Lazarus: Add falling damage for entities that can be damaged
 	if (ent->takedamage == DAMAGE_YES)
