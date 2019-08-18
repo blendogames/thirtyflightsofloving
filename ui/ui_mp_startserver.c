@@ -217,6 +217,12 @@ void UI_LoadArenas (void)
 	char		*p, *s, *s2, *tok, *tok2;
 	char		**arenafiles;
 	char		**tmplist = 0;
+	char		*path = NULL;
+	char		findName[1024];
+	char		shortname[MAX_TOKEN_CHARS];
+	char		longname[MAX_TOKEN_CHARS];
+	char		gametypes[MAX_TOKEN_CHARS];
+	char		scratch[200];
 	int			i, j, narenas = 0, narenanames = 0;
 	qboolean	type_supported[NUM_MAPTYPES];
 
@@ -236,6 +242,72 @@ void UI_LoadArenas (void)
 	memset( tmplist, 0, sizeof( char * ) * MAX_ARENAS );
 
 	//
+	// search in searchpaths for .arena files
+	//
+	path = FS_NextPath (path);
+	while (path) 
+	{
+		Com_sprintf (findName, sizeof(findName), "%s/scripts/*.arena", path);
+		arenafiles = FS_ListFiles(findName, &narenas, 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM);
+
+		for (i=0; i < narenas && narenanames < MAX_ARENAS; i++)
+		{
+			if (!arenafiles || !arenafiles[i])
+				continue;
+
+			p = arenafiles[i] + strlen(path) + 1;	// skip over path and next slash
+
+			if (!strstr(p, ".arena"))
+				continue;
+
+			if (!FS_ItemInList(p, narenanames, tmplist)) // check if already in list
+			{
+				if (UI_ParseArenaFromFile (p, shortname, longname, gametypes, MAX_TOKEN_CHARS))
+				{
+					Com_sprintf(scratch, sizeof(scratch), "%s\n%s", longname, shortname);
+					
+					for (j=0; j<NUM_MAPTYPES; j++)
+						type_supported[j] = false;
+					s = gametypes;
+					tok = strdup(COM_Parse (&s));
+					while (s != NULL)
+					{
+						for (j=0; j<NUM_MAPTYPES; j++)
+						{
+							s2 = gametype_names[j].tokens;
+							tok2 = COM_Parse (&s2);
+							while (s2 != NULL) {
+								if ( !Q_strcasecmp(tok, tok2) )
+									type_supported[j] = true;
+								tok2 = COM_Parse (&s2);
+							}
+						}
+						if (tok)	free (tok);
+						tok = strdup(COM_Parse(&s));
+					}
+					if (tok)	free (tok);
+
+					for (j=0; j<NUM_MAPTYPES; j++)
+						if (type_supported[j]) {
+							ui_svr_arena_mapnames[j][ui_svr_arena_nummaps[j]] = malloc(strlen(scratch) + 1);
+						//	strncpy(ui_svr_arena_mapnames[j][ui_svr_arena_nummaps[j]], scratch);
+							Q_strncpyz(ui_svr_arena_mapnames[j][ui_svr_arena_nummaps[j]], scratch, strlen(scratch) + 1);
+							ui_svr_arena_nummaps[j]++;
+						}
+
+				//	Com_Printf ("UI_LoadArenas: successfully loaded arena file %s: mapname: %s levelname: %s gametypes: %s\n", p, shortname, longname, gametypes);
+					narenanames++;
+					FS_InsertInList(tmplist, p, narenanames, 0); // add to list
+				}			
+			}
+		}
+		if (narenas)
+			FS_FreeFileList (arenafiles, narenas);
+		
+		path = FS_NextPath (path);
+	}
+
+	//
 	// check in paks for .arena files
 	//
 	if (arenafiles = FS_ListPak("scripts/", &narenas))
@@ -252,10 +324,6 @@ void UI_LoadArenas (void)
 
 			if (!FS_ItemInList(p, narenanames, tmplist)) // check if already in list
 			{
-				char	shortname[MAX_TOKEN_CHARS];
-				char	longname[MAX_TOKEN_CHARS];
-				char	gametypes[MAX_TOKEN_CHARS];
-				char	scratch[200];
 				if (UI_ParseArenaFromFile (p, shortname, longname, gametypes, MAX_TOKEN_CHARS))
 				{
 					Com_sprintf(scratch, sizeof(scratch), "%s\n%s", longname, shortname);

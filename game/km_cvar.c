@@ -212,7 +212,7 @@ void InitLithiumVars (void)
 
 	add_velocity_throw = gi.cvar("add_velocity_throw", "0", CVAR_ARCHIVE);
 
-	falling_armor_damage = gi.cvar("falling_armor_damage", "1", CVAR_ARCHIVE);
+	falling_armor_damage = gi.cvar("falling_armor_damage", "0", CVAR_ARCHIVE);
 	player_jump_sounds = gi.cvar("player_jump_sounds", "1", CVAR_ARCHIVE);
 
 	player_max_speed = gi.cvar("player_max_speed", "300", 0);

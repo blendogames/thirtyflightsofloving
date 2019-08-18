@@ -55,6 +55,8 @@ Changes as of v0.20 update 8:
 
 - Now ignores maps.lst file inside pak/pk3 files when the same file can be loaded from outside paks in the same game folder.
 
+- Added support for loading .arena files from disk.  Previously they were only loaded from inside pak/pk3 files.
+
 - Removed target_animation from Lazarus DLL, as it breaks when loading/saving game and there's no good way
 	to implement it properly.
 

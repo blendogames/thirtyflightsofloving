@@ -100,6 +100,10 @@ StringSetParams
 */
 qboolean StringSetParams (char modifier, int *red, int *green, int *blue, int *bold, int *shadow, int *italic, int *reset)
 {
+	// sanity check
+	if (!red || !green || !blue || !bold || !shadow || !italic || !reset)
+		return false;
+
 	if (!alt_text_color)
 		alt_text_color = Cvar_Get ("alt_text_color", "2", CVAR_ARCHIVE);
 

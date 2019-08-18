@@ -1054,12 +1054,14 @@ qboolean M_CheckAttack (edict_t *self)
 	if (enemy_range == RANGE_FAR)
 		return false;
 
-	if (self->enemy->flags == FL_REFLECT)
+	// Knightmare- Shouldn't this be self->enemy->flags & FL_REFLECT?
+//	if (self->enemy->flags == FL_REFLECT)
+	if (self->enemy->flags & FL_REFLECT)
 	{
 		// no waiting for reflections - shoot 'em NOW
 		chance = 2.0;
 	}
-	if (self->monsterinfo.aiflags & AI_STAND_GROUND)
+	else if (self->monsterinfo.aiflags & AI_STAND_GROUND)
 	{
 		chance = 0.4;
 	}
