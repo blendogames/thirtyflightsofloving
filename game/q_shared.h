@@ -141,6 +141,8 @@ __inline int Q_vsnprintf (char *Dest, size_t Count, const char *Format, va_list 
 #define LOOP_SOUND_ATTENUATION
 // enable to read compressed savegame files
 #define READ_COMPRESSED_SAVEGAMES
+// enable to save compressed savegame files
+#define WRITE_COMPRESSED_SAVEGAMES
 #endif
 
 #define ROQ_SUPPORT // whether to use new cinematic system

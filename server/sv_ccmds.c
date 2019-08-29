@@ -271,7 +271,11 @@ void SV_CopySaveGame (char *src, char *dst)
 	}
 }
 
-
+#ifdef WRITE_COMPRESSED_SAVEGAMES
+void		CM_WritePortalState (fileHandle_t f);
+#else // WRITE_COMPRESSED_SAVEGAMES
+void		CM_WritePortalState (FILE *f);
+#endif // WRITE_COMPRESSED_SAVEGAMES
 /*
 ==============
 SV_WriteLevelFile
@@ -280,6 +284,24 @@ SV_WriteLevelFile
 */
 void SV_WriteLevelFile (void)
 {
+#ifdef WRITE_COMPRESSED_SAVEGAMES
+	char			name[MAX_OSPATH], zipName[MAX_QPATH], intName[MAX_QPATH];
+	fileHandle_t	f;
+
+	Com_DPrintf("SV_WriteLevelFile()\n");
+
+	Com_sprintf (zipName, sizeof(zipName), "/save/current/%s.savz", sv.name);
+	Com_sprintf (intName, sizeof(intName), "%s.sv2", sv.name);
+	FS_FOpenCompressedFile (zipName, intName, &f, FS_WRITE);
+	if (!f)
+	{
+		Com_Printf ("Failed to open %s\n", zipName);
+		return;
+	}
+	FS_Write (sv.configstrings, sizeof(sv.configstrings), f);
+	CM_WritePortalState (f);
+	FS_FCloseFile (f);
+#else // WRITE_COMPRESSED_SAVEGAMES	char	name[MAX_OSPATH];
 	char	name[MAX_OSPATH];
 	FILE	*f;
 
@@ -295,11 +317,20 @@ void SV_WriteLevelFile (void)
 	fwrite (sv.configstrings, sizeof(sv.configstrings), 1, f);
 	CM_WritePortalState (f);
 	fclose (f);
+#endif // WRITE_COMPRESSED_SAVEGAMES
 
 	Com_sprintf (name, sizeof(name), "%s/save/current/%s.sav", FS_Gamedir(), sv.name);
 	ge->WriteLevel (name);
-}
+#ifdef WRITE_COMPRESSED_SAVEGAMES
+	// compress .sav into .savz
+	Com_sprintf (zipName, sizeof(zipName), "/save/current/%s.savz", sv.name);
+	Com_sprintf (intName, sizeof(intName), "%s.sav", sv.name);
+	FS_CompressFile (name, zipName, intName);
 
+	// delete .sav
+	remove (name);
+#endif // WRITE_COMPRESSED_SAVEGAMES}
+}
 
 void	CM_ReadPortalState (fileHandle_t f);
 /*
@@ -367,14 +398,15 @@ SV_WriteServerFile
 
 ==============
 */
-void SV_WriteServerFile (qboolean autosave)
+void SV_WriteServerFile (qboolean autosave, qboolean quicksave)
 {
 	FILE	*f;
 	cvar_t	*var;
 	char	fileName[MAX_OSPATH], varName[128], string[128];
-	char	comment[32];
+	char	comment[32], infoHeader[10], mapname[32], dummy[18];
 	time_t	aclock;
 	struct tm	*newtime;
+	int		i;
 
 	Com_DPrintf("SV_WriteServerFile(%s)\n", autosave ? "true" : "false");
 
@@ -388,10 +420,11 @@ void SV_WriteServerFile (qboolean autosave)
 	// write the comment field
 	memset (comment, 0, sizeof(comment));
 
+	time (&aclock);
+	newtime = localtime (&aclock);
+
 	if (!autosave)
 	{
-		time (&aclock);
-		newtime = localtime (&aclock);
 		Com_sprintf (comment,sizeof(comment), "%2i:%i%i %2i/%2i  ", newtime->tm_hour
 			, newtime->tm_min/10, newtime->tm_min%10,
 			newtime->tm_mon+1, newtime->tm_mday);
@@ -406,6 +439,34 @@ void SV_WriteServerFile (qboolean autosave)
 
 	// write the mapcmd
 	fwrite (svs.mapcmd, 1, sizeof(svs.mapcmd), f);
+
+	// write extra save info in first cvar slot
+	memset (infoHeader, 0, sizeof(infoHeader));
+	memset (mapname, 0, sizeof(mapname));
+	memset (comment, 0, sizeof(comment));
+	memset (dummy, 0, sizeof(dummy));
+	memset (string, 0, sizeof(string));
+
+	Com_sprintf (infoHeader, sizeof(infoHeader), "KMQ2SSV01");
+	Com_sprintf (mapname, sizeof(mapname), "%s", sv.configstrings[CS_NAME]);
+
+	// replace newline in mapname with space
+	for (i = 0; i < sizeof(mapname)-1; i++) {
+		if ( (mapname[i] == '\n') || (mapname[i] == '\r') )
+			mapname[i] = ' ';
+	}
+	
+	if (autosave)
+		Com_sprintf (comment, sizeof(comment), "AUTO SAVE");
+	else if (quicksave)
+		Com_sprintf (comment, sizeof(comment), "QUICK SAVE");
+
+	fwrite (infoHeader, 1, sizeof(infoHeader), f);
+	fwrite (newtime, 1, sizeof(struct tm), f);
+	fwrite (mapname, 1, sizeof(mapname), f);
+	fwrite (comment, 1, sizeof(comment), f);
+	fwrite (dummy, 1, sizeof(dummy), f);
+	fwrite (string, 1, sizeof(string), f);
 
 	// write all CVAR_LATCH cvars
 	// these will be things like coop, skill, deathmatch, etc
@@ -624,7 +685,7 @@ void SV_GameMap_f (void)
 		&& Q_strcasecmp (map+l-4, ".cin") && Q_strcasecmp (map+l-4, ".roq")
 		&& Q_strcasecmp (map+l-4, ".pcx"))
 	{
-		SV_WriteServerFile (true);
+		SV_WriteServerFile (true, false);
 		SV_CopySaveGame ("current", "kmq2save0");
 	}
 }
@@ -745,6 +806,7 @@ extern	char fs_gamedir[MAX_OSPATH];
 void SV_Savegame_f (void)
 {
 	char	*dir;
+	qboolean	quicksave = false;
 
 	if (sv.state != ss_game)
 	{
@@ -780,6 +842,8 @@ void SV_Savegame_f (void)
 		return;
 	}
 
+	quicksave = ( !dedicated->value && (!strcmp(Cmd_Argv(1), "quick") || !strcmp(Cmd_Argv(1), "quik")) );
+
 	// Knightmare- grab screen for quicksave
 	if ( !dedicated->value && (!strcmp(Cmd_Argv(1), "quick") || !strcmp(Cmd_Argv(1), "quik")) )
 		R_GrabScreen();
@@ -804,7 +868,7 @@ void SV_Savegame_f (void)
 	SV_WriteLevelFile ();
 
 	// save server state
-	SV_WriteServerFile (false);
+	SV_WriteServerFile (false, quicksave);
 
 	// take screenshot
 	SV_WriteScreenshot ();

@@ -11,6 +11,9 @@ Changes as of v0.20 update 8:
 	
 - Added Windows DPI scaling detection from Yamagi Quake2.
 
+- Now compresses .sav and .sv2 savegame files into .savz files.  It will still read savegames from earlier
+	KMQ2 versions (with the same game DLL).  This should improve load and save times in multi-level units.
+
 - Screenshots now go up to 9999.
 
 - Added cvar r_fog_skyratio, for proportional sky fog distance.  Default is 10.
