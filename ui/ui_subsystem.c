@@ -100,6 +100,26 @@ void InsertInList (char **list, char *insert, int len, int start)
 }
 #endif
 
+/*
+==========================
+IsValidImageFilename
+==========================
+*/
+qboolean IsValidImageFilename (char *name)
+{
+	int		len = (int)strlen(name);
+
+	if (	!strcmp(name+max(len-4,0), ".pcx")
+		||	!strcmp(name+max(len-4,0), ".tga")
+#ifdef PNG_SUPPORT
+		||	!strcmp(name+max(len-4,0), ".png")
+#endif	// PNG_SUPPORT
+		||  !strcmp(name+max(len-4,0), ".jpg")
+		 )
+		return true;
+
+	return false;
+}
 
 /*
 =======================================================================

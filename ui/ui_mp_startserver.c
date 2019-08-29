@@ -223,7 +223,7 @@ void UI_LoadArenas (void)
 	char		longname[MAX_TOKEN_CHARS];
 	char		gametypes[MAX_TOKEN_CHARS];
 	char		scratch[200];
-	int			i, j, narenas = 0, narenanames = 0;
+	int			i, j, len, narenas = 0, narenanames = 0;
 	qboolean	type_supported[NUM_MAPTYPES];
 
 	//
@@ -255,10 +255,11 @@ void UI_LoadArenas (void)
 			if (!arenafiles || !arenafiles[i])
 				continue;
 
-			p = arenafiles[i] + strlen(path) + 1;	// skip over path and next slash
-
-			if (!strstr(p, ".arena"))
+			len = (int)strlen(arenafiles[i]);
+			if ( strcmp(arenafiles[i]+max(len-6,0), ".arena") )
 				continue;
+
+			p = arenafiles[i] + strlen(path) + 1;	// skip over path and next slash
 
 			if (!FS_ItemInList(p, narenanames, tmplist)) // check if already in list
 			{
@@ -317,10 +318,11 @@ void UI_LoadArenas (void)
 			if (!arenafiles || !arenafiles[i])
 				continue;
 
-			p = arenafiles[i];
-
-			if (!strstr(p, ".arena"))
+			len = (int)strlen(arenafiles[i]);
+			if ( strcmp(arenafiles[i]+max(len-6,0), ".arena") )
 				continue;
+
+			p = arenafiles[i];
 
 			if (!FS_ItemInList(p, narenanames, tmplist)) // check if already in list
 			{

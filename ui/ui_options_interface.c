@@ -187,16 +187,10 @@ char **SetFontNames (void)
 			if (!fontfiles || !fontfiles[i])	// Knightmare added array base check
 				continue;
 
-			p = strstr(fontfiles[i], "/fonts/"); p++;
-			p = strstr(p, "/"); p++;
-
-			if (	!strstr(p, ".tga")
-#ifdef PNG_SUPPORT
-				&&	!strstr(p, ".png")
-#endif	// PNG_SUPPORT
-				&&	!strstr(p, ".jpg")
-				&&	!strstr(p, ".pcx") )
+			if ( !IsValidImageFilename(fontfiles[i]) )
 				continue;
+
+			p = strrchr(fontfiles[i], '/'); p++;
 
 			num = strlen(p)-4;
 			p[num] = 0;//NULL;
@@ -228,18 +222,13 @@ char **SetFontNames (void)
 			if (!fontfiles || !fontfiles[i])	// Knightmare added array base check
 				continue;
 
-			p = strstr(fontfiles[i], "/"); p++;
-
-			if (	!strstr(p, ".tga")
-#ifdef PNG_SUPPORT
-				&&	!strstr(p, ".png")
-#endif	// PNG_SUPPORT
-				&&	!strstr(p, ".jpg")
-				&&	!strstr(p, ".pcx") )
+			if ( !IsValidImageFilename(fontfiles[i]) )
 				continue;
 
+			p = strrchr(fontfiles[i], '/'); p++;
+
 			num = strlen(p)-4;
-			p[num] = 0; //NULL;
+			p[num] = 0; // NULL
 
 			curFont = p;
 

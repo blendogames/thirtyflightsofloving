@@ -185,16 +185,10 @@ char **SetCrosshairNames (void)
 			if (!crosshairfiles || !crosshairfiles[i])
 				continue;
 
-			p = strstr(crosshairfiles[i], "/pics/"); p++;
-			p = strstr(p, "/"); p++;
-
-			if (	!strstr(p, ".tga")
-#ifdef PNG_SUPPORT
-				&&	!strstr(p, ".png")
-#endif	// PNG_SUPPORT
-				&&	!strstr(p, ".jpg")
-				&&	!strstr(p, ".pcx") )
+			if ( !IsValidImageFilename(crosshairfiles[i]) )
 				continue;
+
+			p = strrchr(crosshairfiles[i], '/'); p++;
 
 			// filename must be chxxx
 			if (strncmp(p, "ch", 2)) 
@@ -240,15 +234,10 @@ char **SetCrosshairNames (void)
 			if (!crosshairfiles || !crosshairfiles[i])
 				continue;
 
-			p = strstr(crosshairfiles[i], "/"); p++;
-
-			if (	!strstr(p, ".tga")
-#ifdef PNG_SUPPORT
-				&&	!strstr(p, ".png")
-#endif	// PNG_SUPPORT
-				&&	!strstr(p, ".jpg")
-				&&	!strstr(p, ".pcx") )
+			if ( !IsValidImageFilename(crosshairfiles[i]) )
 				continue;
+
+			p = strrchr(crosshairfiles[i], '/'); p++;
 
 			// filename must be chxxx
 			if (strncmp(p, "ch", 2))

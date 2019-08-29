@@ -265,6 +265,8 @@ static char *creditsBuffer;
 void ActionStartMod (char *mod);
 
 // ui_subsystem.c
+qboolean IsValidImageFilename (char *name);
+
 void UI_AddButton (buttonmenuobject_t *thisObj, int index, float x, float y, float w, float h);
 void UI_AddMainButton (mainmenuobject_t *thisObj, int index, int x, int y, char *name);
 void UI_RefreshCursorMenu (void);
