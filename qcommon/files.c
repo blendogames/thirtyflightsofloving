@@ -137,6 +137,7 @@ cvar_t	*fs_basedir;
 cvar_t	*fs_cddir;
 cvar_t	*fs_basegamedir;
 cvar_t	*fs_basegamedir2;
+cvar_t	*fs_basegamedir3;	// So we can mount Rogue, Xatrix, and Zaero assets at once
 cvar_t	*fs_gamedirvar;
 cvar_t	*fs_debug;
 cvar_t	*fs_roguegame;
@@ -2106,6 +2107,7 @@ void FS_InitFilesystem (void)
 	fs_roguegame = Cvar_Get("roguegame", "0", CVAR_LATCH);
 	fs_basegamedir = Cvar_Get ("basegame", "", CVAR_LATCH);
 	fs_basegamedir2 = Cvar_Get ("basegame2", "", CVAR_LATCH);
+	fs_basegamedir3 = Cvar_Get ("basegame3", "", CVAR_LATCH);	// Knightmare added
 	fs_gamedirvar = Cvar_Get ("game", "", CVAR_LATCH|CVAR_SERVERINFO);
 
 	// check and load game directory
@@ -2176,7 +2178,7 @@ Sets the gamedir and path to a different directory.
 void FS_SetGamedir (char *dir)
 {
 	fsSearchPath_t	*next;
-	qboolean		basegame1_loaded = false;
+	qboolean		basegame1_loaded = false, basegame2_loaded = false;
 
 	if (strstr(dir, "..") || strstr(dir, "/")
 		|| strstr(dir, "\\") || strstr(dir, ":") )
@@ -2215,6 +2217,23 @@ void FS_SetGamedir (char *dir)
 		{
 			Cvar_Set ("basegame2", "");
 			Com_Printf ("Basegame2 should not be the same as "BASEDIRNAME", gamedir, or basegame.\n");
+		}
+	}
+
+	// Knightmare- check basegame3 var
+	if ( fs_basegamedir3->string[0] )
+	{
+		if (strstr(fs_basegamedir3->string, "..") || strstr(fs_basegamedir3->string, "/")
+			|| strstr(fs_basegamedir3->string, "\\") || strstr(fs_basegamedir3->string, ":") )
+		{
+			Cvar_Set ("basegame3", "");
+			Com_Printf ("Basegame3 should be a single filename, not a path.\n");
+		}
+		if ( !Q_stricmp(fs_basegamedir3->string, BASEDIRNAME) || !Q_stricmp(fs_basegamedir3->string, dir)
+			|| !Q_stricmp(fs_basegamedir3->string, fs_basegamedir->string) || !Q_stricmp(fs_basegamedir3->string, fs_basegamedir2->string) )
+		{
+			Cvar_Set ("basegame3", "");
+			Com_Printf ("Basegame3 should not be the same as "BASEDIRNAME", gamedir, basegame, or basegame2.\n");
 		}
 	}
 
@@ -2272,6 +2291,16 @@ void FS_SetGamedir (char *dir)
 			if (fs_cddir->string[0])
 				FS_AddGameDirectory (va("%s/%s", fs_cddir->string, fs_basegamedir2->string) );
 			FS_AddGameDirectory (va("%s/%s", fs_basedir->string, fs_basegamedir2->string) );
+			basegame2_loaded = true;
+		}
+
+		// third basegame so mods can utilize Rogue, Xatrix, and Zaero assets
+		if ( basegame1_loaded && basegame2_loaded && fs_basegamedir3->string[0] )
+		{
+		//	Com_Printf("Adding basegame3 path %s/%s\n", fs_basedir->string, fs_basegamedir3->string);
+			if (fs_cddir->string[0])
+				FS_AddGameDirectory (va("%s/%s", fs_cddir->string, fs_basegamedir3->string) );
+			FS_AddGameDirectory (va("%s/%s", fs_basedir->string, fs_basegamedir3->string) );
 		}
 
 		Cvar_FullSet ("gamedir", dir, CVAR_SERVERINFO|CVAR_NOSET);
