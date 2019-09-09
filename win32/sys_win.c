@@ -675,12 +675,16 @@ NoExtFunction:
 				case 1:
 					if (extModel == 1)	// Summit Ridge
 						Q_strncatz(cpuString, " Ryzen 7/5/3 1x00", maxSize);
-					else if (extModel == 11)	// Raven Ridge
+					else if (extModel == 0x11)	// Raven Ridge
 						Q_strncatz(cpuString, " Ryzen 5/3 2x00G", maxSize);
+					else if (extModel == 0x71)	// Matisse (Zen 2)
+						Q_strncatz(cpuString, " Ryzen 9/7/5/3 3x00", maxSize);
 					break;
 				case 8:
 					if (extModel == 8)	// Pinnacle Ridge
 						Q_strncatz(cpuString, " Ryzen 7/5/3 2x00", maxSize);
+					else if (extModel == 0x18)	// Picasso
+						Q_strncatz(cpuString, " Ryzen 5/3 3x00G", maxSize);
 					break;
 				}
 			}
