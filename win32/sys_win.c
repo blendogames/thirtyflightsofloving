@@ -1122,6 +1122,18 @@ void Sys_Init (void)
 			else
 				Q_strncpyz (string, "Windows Server 2008 2012", sizeof(string));
 		}
+		else if (osInfo.dwMajorVersion == 6 && osInfo.dwMinorVersion == 3) {
+			if (osInfo.wProductType == VER_NT_WORKSTATION)
+				Q_strncpyz (string, "Windows 8.1", sizeof(string));
+			else
+				Q_strncpyz (string, "Windows Server 2012 R2", sizeof(string));
+		}
+		else if (osInfo.dwMajorVersion == 10 && osInfo.dwMinorVersion == 0) {
+			if (osInfo.wProductType == VER_NT_WORKSTATION)
+				Q_strncpyz (string, "Windows 10", sizeof(string));
+			else
+				Q_strncpyz (string, "Windows Server 2016", sizeof(string));
+		}
 		else
 			Q_strncpyz (string, va("Windows %i.%i", osInfo.dwMajorVersion, osInfo.dwMinorVersion), sizeof(string));
 
