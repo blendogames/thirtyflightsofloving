@@ -739,7 +739,7 @@ qboolean CL_CheckOrDownloadFile (char *filename)
 	// download to a temp name, and only rename
 	// to the real name when done, so if interrupted
 	// a runt file wont be left
-	COM_StripExtension (cls.downloadname, cls.downloadtempname);
+	COM_StripExtension (cls.downloadname, cls.downloadtempname, sizeof(cls.downloadtempname));
 //	strncat (cls.downloadtempname, ".tmp");
 	Q_strncatz (cls.downloadtempname, ".tmp", sizeof(cls.downloadtempname));
 
@@ -817,7 +817,7 @@ void CL_Download_f (void)
 	// download to a temp name, and only rename
 	// to the real name when done, so if interrupted
 	// a runt file wont be left
-	COM_StripExtension (cls.downloadname, cls.downloadtempname);
+	COM_StripExtension (cls.downloadname, cls.downloadtempname, sizeof(cls.downloadtempname));
 //	strncat (cls.downloadtempname, ".tmp");
 	Q_strncatz (cls.downloadtempname, ".tmp", sizeof(cls.downloadtempname));
 

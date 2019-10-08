@@ -190,7 +190,7 @@ char *Sys_FindFirst (char *path, unsigned musthave, unsigned canhave)
 	if (fdir)
 		Sys_Error ("Sys_BeginFind without close");
 
-//	COM_FilePath (path, findbase);
+//	COM_FilePath (path, findbase, sizeof(filebase));
 //	strncpy(findbase, path);
 	Q_strncpyz(findbase, path, sizeof(findbase));
 

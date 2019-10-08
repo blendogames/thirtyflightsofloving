@@ -1662,7 +1662,7 @@ void Mod_LoadModelScript (model_t *mod, maliasmodel_t *aliasmod)
 			aliasmod->meshes[i].skins[j].glowimage = NULL;
 		}
 
-	COM_StripExtension (mod->name, scriptname);
+	COM_StripExtension (mod->name, scriptname, sizeof(scriptname));
 //	strncat (scriptname, ".script");
 	Q_strncatz (scriptname, ".script", sizeof(scriptname));
 	buf_size = FS_LoadFile (scriptname, &buf);

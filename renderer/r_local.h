@@ -635,7 +635,7 @@ char	*va(char *format, ...);
 #endif
 
 
-void COM_StripExtension (char *in, char *out);
+//void COM_StripExtension (char *in, char *out, size_t outSize);
 
 //
 // r_draw.c

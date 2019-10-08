@@ -29,7 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 								// increased from 256, fixes buffer overflow if vert res > 2048
 								// allows max vert res of 8192 for fullscreen console 
 
-#define		CON_TEXTSIZE	32768
+#define		CON_TEXTSIZE	131072	// Knightmare- increased from 32768
 typedef struct
 {
 	qboolean	initialized;

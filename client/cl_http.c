@@ -565,7 +565,7 @@ qboolean CL_QueueHTTPDownload (const char *quakePath)
 
 		Com_sprintf (filePath, sizeof(filePath), "%s/%s", cl.gamedir, quakePath);
 
-		COM_StripExtension (filePath, listPath);
+		COM_StripExtension (filePath, listPath, sizeof(listPath));
 	//	strncat (listPath, ".filelist");
 		Q_strncatz (listPath, ".filelist", sizeof(listPath));
 		

@@ -998,11 +998,27 @@ char *COM_SkipPath (char *pathname)
 COM_StripExtension
 ============
 */
-void COM_StripExtension (char *in, char *out)
+void COM_StripExtension (char *in, char *out, size_t outSize)
 {
-	while (*in && *in != '.')
+/*	while (*in && *in != '.')
 		*out++ = *in++;
 	*out = 0;
+	*/
+	char	*s, *last;
+
+	s = last = in + strlen(in);
+	while (*s != '/' && *s != '\\' && s != in)
+	{
+		if (*s == '.'){
+			last = s;
+			break;
+		}
+		s--;
+	}
+
+	Q_strncpyz(out, in, outSize);
+	if (last-in < outSize)
+		out[last-in] = 0;
 }
 
 /*
@@ -1031,7 +1047,7 @@ char *COM_FileExtension (char *in)
 COM_FileBase
 ============
 */
-void COM_FileBase (char *in, char *out)
+void COM_FileBase (char *in, char *out, size_t outSize)
 {
 	char *s, *s2;
 	
@@ -1048,8 +1064,11 @@ void COM_FileBase (char *in, char *out)
 	else
 	{
 		s--;
-		strncpy (out,s2+1, s-s2);
-		out[s-s2] = 0;
+	//	strncpy (out,s2+1, s-s2);
+	//	out[s-s2] = 0;
+		Q_strncpyz (out, s2+1, outSize);
+		if (s-s2 < outSize)
+			out[s-s2] = 0;
 	}
 }
 
@@ -1060,7 +1079,7 @@ COM_FilePath
 Returns the path up to, but not including the last /
 ============
 */
-void COM_FilePath (char *in, char *out)
+void COM_FilePath (char *in, char *out, size_t outSize)
 {
 	char *s;
 	
@@ -1069,8 +1088,11 @@ void COM_FilePath (char *in, char *out)
 	while (s != in && *s != '/')
 		s--;
 
-	strncpy (out,in, s-in);
-	out[s-in] = 0;
+//	strncpy (out,in, s-in);
+//	out[s-in] = 0;
+	Q_strncpyz (out, in, outSize);
+	if (s-in < outSize)
+		out[s-in] = 0;
 }
 
 

@@ -44,7 +44,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #endif // NET_SERVER_BUILD
 #endif // ERASER_COMPAT_BUILD
 
-#define MAX_OUTPUT					32768
+#define MAX_OUTPUT					131072	// increased from 32768
 #define MAX_INPUT					256
 #define	MAX_PRINTMSG				8192
 
