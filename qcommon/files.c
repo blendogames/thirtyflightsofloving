@@ -1227,6 +1227,10 @@ char **FS_FindFiles (const char *path, const char *extension, int *num)
 			pak = search->pack;
 			for (i=0 ; i<pak->numFiles ; i++)
 			{
+				// skip blacklisted pak entries
+				if (pak->files[i].ignore)
+					continue;
+
 				// check path
 				COM_FilePath (pak->files[i].name, dir, sizeof(dir));
 				if ( Q_stricmp((char *)path, dir) )
@@ -1329,6 +1333,10 @@ char **FS_FilteredFindFiles (const char *pattern, int *num)
 			pak = search->pack;
 			for (i=0 ; i<pak->numFiles ; i++)
 			{
+				// skip blacklisted pak entries
+				if (pak->files[i].ignore)
+					continue;
+
 				// match pattern
 				if ( !Q_GlobMatch(pattern, pak->files[i].name, false) )
 					continue;
