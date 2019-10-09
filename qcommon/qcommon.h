@@ -834,12 +834,12 @@ void		FS_InsertInList (char **list, char *insert, int len, int start);
 void		FS_Dir_f (void);
 
 void		FS_ExecAutoexec (void);
-int			FS_GetFileList (const char *path, const char *extension, char *buffer, int size, fsSearchType_t searchType);
 
 int			FS_LoadFile (char *path, void **buffer);
 void		FS_AddPAKFile (const char *packPath); // add pak file function
 void		FS_AddPK3File (const char *packPath); // add pk3 file function
 char		**FS_ListPak (char *find, int *num); // pak list function
+char		**FS_GetFileList (const char *path, const char *extension, int *num);
 void		FS_SetGamedir (char *dir);
 char		*FS_Gamedir (void);
 void		FS_FreeFile (void *buffer);

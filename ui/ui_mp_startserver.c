@@ -218,7 +218,7 @@ void UI_LoadArenas (void)
 	char		**arenafiles;
 	char		**tmplist = 0;
 	char		*path = NULL;
-	char		findName[1024];
+//	char		findName[1024];
 	char		shortname[MAX_TOKEN_CHARS];
 	char		longname[MAX_TOKEN_CHARS];
 	char		gametypes[MAX_TOKEN_CHARS];
@@ -241,6 +241,63 @@ void UI_LoadArenas (void)
 	tmplist = malloc( sizeof( char * ) * MAX_ARENAS );
 	memset( tmplist, 0, sizeof( char * ) * MAX_ARENAS );
 
+#if 1
+	arenafiles = FS_GetFileList ("scripts", "arena", &narenas);
+//	arenafiles = FS_GetFileList ("scripts/*.arena", NULL, &narenas);
+	for (i = 0; i < narenas && narenanames < MAX_ARENAS; i++)
+	{
+		if (!arenafiles || !arenafiles[i])
+			continue;
+
+		len = (int)strlen(arenafiles[i]);
+		if ( strcmp(arenafiles[i]+max(len-6,0), ".arena") )
+			continue;
+
+		p = arenafiles[i];
+
+		if (!FS_ItemInList(p, narenanames, tmplist)) // check if already in list
+		{
+			if (UI_ParseArenaFromFile (p, shortname, longname, gametypes, MAX_TOKEN_CHARS))
+			{
+			//	Com_sprintf(scratch, sizeof(scratch), MAPLIST_FORMAT, longname, shortname);
+				Com_sprintf(scratch, sizeof(scratch), "%s\n%s", longname, shortname);
+				
+				for (j=0; j<NUM_MAPTYPES; j++)
+					type_supported[j] = false;
+				s = gametypes;
+				tok = strdup(COM_Parse (&s));
+				while (s != NULL)
+				{
+					for (j=0; j<NUM_MAPTYPES; j++)
+					{
+						s2 = gametype_names[j].tokens;
+						tok2 = COM_Parse (&s2);
+						while (s2 != NULL) {
+							if ( !Q_strcasecmp(tok, tok2) )
+								type_supported[j] = true;
+							tok2 = COM_Parse (&s2);
+						}
+					}
+					if (tok)	free (tok);
+					tok = strdup(COM_Parse(&s));
+				}
+				if (tok)	free (tok);
+
+				for (j=0; j<NUM_MAPTYPES; j++)
+					if (type_supported[j]) {
+						ui_svr_arena_mapnames[j][ui_svr_arena_nummaps[j]] = malloc(strlen(scratch) + 1);
+					//	strncpy(ui_svr_arena_mapnames[j][ui_svr_arena_nummaps[j]], scratch);
+						Q_strncpyz(ui_svr_arena_mapnames[j][ui_svr_arena_nummaps[j]], scratch, strlen(scratch) + 1);
+						ui_svr_arena_nummaps[j]++;
+					}
+
+			//	Com_Printf ("UI_LoadArenas: successfully loaded arena file %s: mapname: %s levelname: %s gametypes: %s\n", p, shortname, longname, gametypes);
+				narenanames++;
+				FS_InsertInList(tmplist, p, narenanames, 0); // add to list
+			}
+		}
+	}
+#else
 	//
 	// search in searchpaths for .arena files
 	//
@@ -366,6 +423,8 @@ void UI_LoadArenas (void)
 			}
 		}
 	}
+#endif
+
 	if (narenas)
 		FS_FreeFileList (arenafiles, narenas);
 

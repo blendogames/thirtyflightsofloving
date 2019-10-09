@@ -413,6 +413,7 @@ void SV_InitGameProgs (void)
 	import.GameDir = FS_GameDir;
 	import.SaveGameDir = FS_GameDir;
 	import.CreatePath = FS_CreatePath;
+	import.GetFileList = FS_GetFileList;
 
 	import.SetAreaPortalState = CM_SetAreaPortalState;
 	import.AreasConnected = CM_AreasConnected;

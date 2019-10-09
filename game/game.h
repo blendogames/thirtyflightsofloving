@@ -206,6 +206,7 @@ typedef struct
 	char	*(*GameDir) (void);
 	char	*(*SaveGameDir) (void);
 	void	(*CreatePath) (char *path);
+	char	**(*GetFileList) (const char *path, const char *extension, int *num);
 #endif
 
 } game_import_t;

@@ -445,7 +445,17 @@ void Com_PageInMemory (byte *buffer, int size);
 
 //=============================================
 
-// portable case insensitive compare
+// Matches the pattern against text
+qboolean	Q_GlobMatch (const char *pattern, const char *text, qboolean caseSensitive);
+
+// portable string compare
+int Q_strncmp (const char *string1, const char *string2, int n);
+int Q_strcmp (const char *string1, const char *string2);
+
+// string compare for qsort calls
+int Q_SortStrcmp (const char **arg1, const char **arg2);
+
+// portable case insensitive string compare
 int Q_stricmp (char *s1, char *s2);
 int Q_strcasecmp (char *s1, char *s2);
 int Q_strncasecmp (char *s1, char *s2, int n);

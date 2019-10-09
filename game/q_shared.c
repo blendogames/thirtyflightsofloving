@@ -1587,6 +1587,195 @@ void Com_PageInMemory (byte *buffer, int size)
 ============================================================================
 */
 
+/*
+=================
+Q_GlobMatchAfterStar
+
+From Q2E
+Like Q_GlobMatch, but match pattern against any final segment of text
+=================
+*/
+static qboolean Q_GlobMatchAfterStar (const char *pattern, const char *text, qboolean caseSensitive){
+
+	const char	*p = pattern;
+	const char	*t = text;
+	char		c1, c2;
+
+	while ((c1 = *p++) == '?' || c1 == '*'){
+		if (c1 == '?' && *t++ == '\0')
+			return false;
+	}
+
+	if (c1 == '\0')
+		return true;
+
+	if (c1 == '\\')
+		c2 = *p;
+	else
+		c2 = c1;
+
+	while (1){
+		if (caseSensitive){
+			if (c1 == '[' || *t == c2){
+				if (Q_GlobMatch(p - 1, t, caseSensitive))
+					return true;
+			}
+		}
+		else {
+			if (c1 == '[' || tolower(*t) == tolower(c2)){
+				if (Q_GlobMatch(p - 1, t, caseSensitive))
+					return true;
+			}
+		}
+
+		if (*t++ == '\0')
+			return false;
+	}
+}
+
+/*
+=================
+Q_GlobMatch
+
+From Q2E
+Matches the pattern against text.
+Returns true if matches, false otherwise.
+
+A match means the entire text is used up in matching.
+
+In the pattern string, '*' matches any sequence of characters, '?'
+matches any character, '[SET]' matches any character in the specified
+set, '[!SET]' matches any character not in the specified set.
+
+A set is composed of characters or ranges. A range looks like character
+hyphen character (as in 0-9 or A-Z).
+[0-9a-zA-Z_] is the set of characters allowed in C identifiers.
+Any other character in the pattern must be matched exactly.
+
+To suppress the special syntactic significance of any of '[]*?!-\', and
+match the character exactly, precede it with a '\'.
+=================
+*/
+qboolean Q_GlobMatch (const char *pattern, const char *text, qboolean caseSensitive){
+
+	const char	*p = pattern;
+	const char	*t = text;
+	char		c1, c2, start, end;
+	qboolean	invert;
+
+	while ((c1 = *p++) != '\0'){
+		switch (c1){
+		case '?':
+			if (*t == '\0')
+				return false;
+			else
+				++t;
+
+			break;
+		case '\\':
+			if (caseSensitive){
+				if (*p++ != *t++)
+					return false;
+			}
+			else {
+				if (tolower(*p++) != tolower(*t++))
+					return false;
+			}
+
+			break;
+		case '*':
+			return Q_GlobMatchAfterStar(p, t, caseSensitive);
+
+		case '[':
+			c2 = *t++;
+			if (!c2)
+				return false;
+
+			invert = (*p == '!');
+			if (invert)
+				p++;
+
+			c1 = *p++;
+			while (1){
+				start = c1;
+				end = c1;
+
+				if (c1 == '\\'){
+					start = *p++;
+					end = start;
+				}
+				if (c1 == '\0')
+					return false;
+
+				c1 = *p++;
+				if (c1 == '-' && *p != ']'){
+					end = *p++;
+					if (end == '\\')
+						end = *p++;
+					if (end == '\0')
+						return false;
+
+					c1 = *p++;
+				}
+
+				if (caseSensitive){
+					if (c2 >= start && c2 <= end)
+						goto match;
+				}
+				else {
+					if (tolower(c2) >= tolower(start) && tolower(c2) <= tolower(end))
+						goto match;
+				}
+
+				if (c1 == ']')
+					break;
+			}
+
+			if (!invert)
+				return false;
+
+			break;
+
+match:
+			while (c1 != ']'){
+				if (c1 == '\0')
+					return false;
+
+				c1 = *p++;
+				if (c1 == '\0')
+					return false;
+				else if (c1 == '\\')
+					++p;
+			}
+
+			if (invert)
+				return false;
+
+			break;
+
+		default:
+			if (caseSensitive){
+				if (c1 != *t++)
+					return false;
+			}
+			else {
+				if (tolower(c1) != tolower(*t++))
+					return false;
+			}
+
+			break;
+		}
+	}
+
+	return (*t == '\0');
+}
+
+
+/*
+=================
+Q_stricmp
+=================
+*/
 // FIXME: replace all Q_stricmp with Q_strcasecmp
 int Q_stricmp (char *s1, char *s2)
 {
@@ -1598,6 +1787,74 @@ int Q_stricmp (char *s1, char *s2)
 }
 
 
+/*
+=================
+Q_strncmp
+
+From Q2E
+=================
+*/
+int Q_strncmp (const char *string1, const char *string2, int n)
+{
+	int		c1, c2;
+
+	if (string1 == NULL)
+	{
+		if (string2 == NULL)
+			return 0;
+		else
+			return -1;
+	}
+	else if (string2 == NULL)
+		return 1;
+
+	do
+	{
+		c1 = *string1++;
+		c2 = *string2++;
+
+		if (!n--)
+			return 0;	// Strings are equal until end point
+
+		if (c1 != c2)
+			return c1 < c2 ? -1 : 1;
+	} while (c1);
+
+	return 0;			// Strings are equal
+}
+
+
+/*
+=================
+Q_strcmp
+
+From Q2E
+=================
+*/
+int Q_strcmp (const char *string1, const char *string2)
+{
+	return Q_strncmp(string1, string2, 99999);
+}
+
+
+/*
+=================
+Q_SortStrcmp
+
+From Q2E
+=================
+*/
+int Q_SortStrcmp (const char **arg1, const char **arg2)
+{
+	return Q_strcmp(*arg1, *arg2);
+}
+
+
+/*
+=================
+Q_strncasecmp
+=================
+*/
 int Q_strncasecmp (char *s1, char *s2, int n)
 {
 	int		c1, c2;
@@ -1625,6 +1882,11 @@ int Q_strncasecmp (char *s1, char *s2, int n)
 }
 
 
+/*
+=================
+Q_strcasecmp
+=================
+*/
 int Q_strcasecmp (char *s1, char *s2)
 {
 	return Q_strncasecmp (s1, s2, 99999);

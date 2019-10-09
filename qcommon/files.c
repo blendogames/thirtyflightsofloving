@@ -1203,6 +1203,212 @@ char **FS_ListPak (char *find, int *num)
 
 /*
 =================
+FS_FindFiles
+
+Generates a listing of files in the given path with an optional extension.
+Lists all files if extension is NULL.
+=================
+*/
+char **FS_FindFiles (const char *path, const char *extension, int *num)
+{
+	fsSearchPath_t	*search;
+	fsPack_t		*pak;
+	char			dir[MAX_OSPATH], ext[16], findName[1024];
+	char			*name, **itemFiles, *tmpList[MAX_FIND_FILES], **outList = NULL;
+	int				nFound = 0;
+	int				i, nItems;	// len, extLen;
+
+	memset (tmpList, 0, sizeof(tmpList));
+
+	for (search = fs_searchPaths; search; search = search->next)
+	{
+		if (search->pack)	// search inside a pak/pk3 file
+		{
+			pak = search->pack;
+			for (i=0 ; i<pak->numFiles ; i++)
+			{
+				// check path
+				COM_FilePath (pak->files[i].name, dir, sizeof(dir));
+				if ( Q_stricmp((char *)path, dir) )
+					continue;
+
+				// check extension
+				if ( (extension != NULL) && (strlen(extension) > 0) ) {
+					Com_FileExtension(pak->files[i].name, ext, sizeof(ext));
+					if ( Q_stricmp((char *)extension, ext) )
+						continue;
+				}
+
+				// found something
+				name = pak->files[i].name;
+				if (nFound < (MAX_FIND_FILES-1))
+				{
+					if (!FS_ItemInList(name, nFound, tmpList)) // check if already in list
+					{
+						tmpList[nFound] = strdup(name);
+						nFound++;
+					}
+				}
+			}
+		}
+		else	// search in a directory tree
+		{
+			if ( (extension != NULL) && (strlen(extension) > 0) )
+				Com_sprintf (findName, sizeof(findName), "%s/%s/*.%s", search->path, path, extension);
+			else
+				Com_sprintf (findName, sizeof(findName), "%s/%s/*.*", search->path, path);
+
+			itemFiles = FS_ListFiles(findName, &nItems, 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM);
+
+			for (i=0; i < nItems; i++)
+			{
+				if (!itemFiles || !itemFiles[i])
+					continue;
+
+				// check extension
+			/*	if ( (extension != NULL) && (strlen(extension) > 0) ) {
+					len = (int)strlen(itemFiles[i]);
+					extLen = (int)strlen(extension);
+					if ( strcmp(itemFiles[i]+max(len-(extLen+1),0), va(".%s", extension)) )
+						continue;
+				}*/
+
+				// found something
+				name = itemFiles[i] + strlen(search->path) + 1; // skip over search path and /
+				if (nFound < (MAX_FIND_FILES-1))
+				{
+					if (!FS_ItemInList(name, nFound, tmpList)) // check if already in list
+					{
+						tmpList[nFound] = strdup(name);
+						nFound++;
+					}
+				}
+			}
+			if (nItems)
+				FS_FreeFileList (itemFiles, nItems);
+		}
+	}
+
+	// sort the list
+	qsort(tmpList, nFound, sizeof(char *), Q_SortStrcmp);
+
+	// alloc and copy output list
+	outList = malloc(sizeof(char *) * (nFound+1));
+	memset(outList, 0, sizeof(char *) * (nFound+1));
+	for (i=0; i<nFound; i++) {
+		outList[i] = tmpList[i];
+	}
+	
+	if (num)
+		*num = nFound;
+	return outList;
+}
+
+/*
+=================
+FS_FilteredFindFiles
+
+Generates a listing of files that matches the given filter/widlcards.
+=================
+*/
+char **FS_FilteredFindFiles (const char *pattern, int *num)
+{
+	fsSearchPath_t	*search;
+	fsPack_t		*pak;
+	char			findName[1024];
+	char			*name, **itemFiles, *tmpList[MAX_FIND_FILES], **outList = NULL;
+	int				nFound = 0;
+	int				i, nItems;
+
+	memset (tmpList, 0, sizeof(tmpList));
+
+	for (search = fs_searchPaths; search; search = search->next)
+	{
+		if (search->pack)	// search inside a pak/pk3 file
+		{
+			pak = search->pack;
+			for (i=0 ; i<pak->numFiles ; i++)
+			{
+				// match pattern
+				if ( !Q_GlobMatch(pattern, pak->files[i].name, false) )
+					continue;
+
+				// found something
+				name = pak->files[i].name;
+				if (nFound < (MAX_FIND_FILES-1))
+				{
+					if (!FS_ItemInList(name, nFound, tmpList)) // check if already in list
+					{
+						tmpList[nFound] = strdup(name);
+						nFound++;
+					}
+				}
+			}
+		}
+		else	// search in a directory tree
+		{
+			Com_sprintf (findName, sizeof(findName), "%s/%s", search->path, pattern);
+			itemFiles = FS_ListFiles(findName, &nItems, 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM);
+
+			for (i=0; i < nItems; i++)
+			{
+				if (!itemFiles || !itemFiles[i])
+					continue;
+
+				// match pattern
+				if ( !Q_GlobMatch(pattern, itemFiles[i] + strlen(search->path) + 1, false) )
+					continue;
+
+				// found something
+				name = itemFiles[i] + strlen(search->path) + 1; // skip over search path and /
+				if (nFound < (MAX_FIND_FILES-1))
+				{
+					if (!FS_ItemInList(name, nFound, tmpList)) // check if already in list
+					{
+						tmpList[nFound] = strdup(name);
+						nFound++;
+					}
+				}
+			}
+			if (nItems)
+				FS_FreeFileList (itemFiles, nItems);
+		}
+	}
+
+	// sort the list
+	qsort(tmpList, nFound, sizeof(char *), Q_SortStrcmp);
+
+	// alloc and copy output list
+	outList = malloc(sizeof(char *) * (nFound+1));
+	memset(outList, 0, sizeof(char *) * (nFound+1));
+	for (i=0; i<nFound; i++) {
+		outList[i] = tmpList[i];
+	}
+
+	if (num)
+		*num = nFound;
+	return outList;
+}
+
+/*
+=================
+FS_GetFileList
+
+Generates a listing of files in the given path with the specified optional extension
+If extension is NULL, retuns all files in the path.  Also does filtered search based on wildcards.
+=================
+*/
+char **FS_GetFileList (const char *path, const char *extension, int *num)
+{
+	// If wildcards are in path, use filtered search instead of extension
+	if ( strchr(path, '*') || strchr(path, '?') || strchr(path, '[') || strchr(path, ']') )
+		return FS_FilteredFindFiles (path, num);
+	else
+		return FS_FindFiles (path, extension, num);
+}
+
+/*
+=================
 FS_Seek
 =================
 */
