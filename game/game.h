@@ -194,7 +194,7 @@ typedef struct
 	// This can be used to load script files, etc
 	// Also support open, read/write and closing files
 #ifdef KMQUAKE2_ENGINE_MOD
-	char	**(*ListPak) (char *find, int *num);
+	char	**(*ListPak) (char *find, int *num);	// Deprecated- DO NOT USE!
 	int		(*LoadFile) (char *name, void **buf);
 	void	(*FreeFile) (void *buf);
 	void	(*FreeFileList) (char **list, int n);

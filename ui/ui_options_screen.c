@@ -97,8 +97,8 @@ Crosshair loading
 */
 
 #define MAX_CROSSHAIRS 100
-char **crosshair_names;
-int	numcrosshairs;
+char **crosshair_names = NULL;
+int	numcrosshairs = 0;
 
 /*static void OldCrosshairFunc( void *unused )
 {
@@ -169,7 +169,7 @@ char **SetCrosshairNames (void)
 	list = malloc( sizeof( char * ) * MAX_CROSSHAIRS+1 );
 	memset( list, 0, sizeof( char * ) * MAX_CROSSHAIRS+1 );
 
-	list[0] = strdup("none"); //was default
+	list[0] = strdup("none"); // was default
 	ncrosshairnames = 1;
 
 	path = FS_NextPath( path );
@@ -343,6 +343,11 @@ void Options_Screen_MenuInit ( void )
 	s_options_screen_header.generic.x		= MENU_FONT_SIZE/2 * strlen(s_options_screen_header.generic.name);
 	s_options_screen_header.generic.y		= 0;
 
+	// free any loaded crosshairs to prevent memory leak
+	if (numcrosshairs > 0) {
+		FS_FreeFileList (crosshair_names, numcrosshairs);
+	}
+	numcrosshairs = 0;
 	crosshair_names = SetCrosshairNames ();
 	s_options_screen_crosshair_box.generic.type				= MTYPE_SPINCONTROL;
 	s_options_screen_crosshair_box.generic.x				= 0;

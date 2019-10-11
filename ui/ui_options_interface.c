@@ -101,8 +101,8 @@ Font loading
 */
 cvar_t *con_font;
 #define MAX_FONTS 32
-char **font_names;
-int	numfonts;
+char **font_names = NULL;
+int	numfonts = 0;
 
 static void FontSizeFunc( void *unused )
 {
@@ -122,7 +122,7 @@ void SetFontCursor (void)
 	if (!con_font)
 		con_font = Cvar_Get ("con_font", "default", CVAR_ARCHIVE);
 
-	if (numfonts>1)
+	if (numfonts > 1)
 		for (i=0; font_names[i]; i++)
 		{
 			if (!Q_strcasecmp(con_font->string, font_names[i]))
@@ -203,7 +203,7 @@ char **SetFontNames (void)
 				nfontnames++;
 			}
 			
-			//set back so whole string get deleted.
+			// set back so whole string get deleted.
 			p[num] = '.';
 		}
 		if (nfonts)
@@ -234,7 +234,7 @@ char **SetFontNames (void)
 
 			if (!FS_ItemInList(curFont, nfontnames, list))
 			{
-				insertFont(list, strdup(curFont),nfontnames);
+				insertFont(list, strdup(curFont), nfontnames);
 				nfontnames++;
 			}
 			
@@ -348,6 +348,11 @@ void Options_Interface_MenuInit ( void )
 	s_options_interface_menualpha_slider.maxvalue			= 20;
 	s_options_interface_menualpha_slider.generic.statusbar	= "changes opacity of menu background";
 
+	// free any loaded fonts to prevent memory leak
+	if (numfonts > 0) {
+		FS_FreeFileList (font_names, numfonts);
+	}
+	numfonts = 0;
 	font_names = SetFontNames ();
 	s_options_interface_font_box.generic.type				= MTYPE_SPINCONTROL;
 	s_options_interface_font_box.generic.x					= 0;
