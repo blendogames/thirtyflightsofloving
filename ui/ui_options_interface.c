@@ -139,7 +139,7 @@ void insertFont (char **list, char *insert, int len )
 	int i, j;
 	if (!list) return;
 
-	//i=1 so default stays first!
+	// i=1 so default stays first!
 	for (i=1; i<len; i++)
 	{
 		if (!list[i])
@@ -161,7 +161,7 @@ char **SetFontNames (void)
 {
 	char *curFont;
 	char **list = 0, *p;//, *s;
-	char findname[1024];
+//	char findname[1024];
 	int nfonts = 0, nfontnames;
 	char **fontfiles;
 	char *path = NULL;
@@ -174,6 +174,37 @@ char **SetFontNames (void)
 
 	nfontnames = 1;
 
+#if 1
+	fontfiles = FS_GetFileList("fonts/*.*", NULL, &nfonts);
+	for (i=0;i<nfonts && nfontnames<MAX_FONTS;i++)
+	{
+		int num;
+
+		if (!fontfiles || !fontfiles[i])	// Knightmare added array base check
+			continue;
+
+		if ( !IsValidImageFilename(fontfiles[i]) )
+			continue;
+
+		p = strrchr(fontfiles[i], '/'); p++;
+
+		num = strlen(p)-4;
+		p[num] = 0; // NULL
+
+		curFont = p;
+
+		if (!FS_ItemInList(curFont, nfontnames, list))
+		{
+			// insertFont not needed due to sorting in FS_GetFileList()
+		//	insertFont (list, strdup(curFont), nfontnames);
+			FS_InsertInList(list, strdup(curFont), nfontnames, 1);	// start=1 so default stays first!
+			nfontnames++;
+		}
+		
+		// set back so whole string get deleted.
+		p[num] = '.';
+	}
+#else
 	path = FS_NextPath( path );
 	while (path) 
 	{
@@ -199,7 +230,7 @@ char **SetFontNames (void)
 
 			if (!FS_ItemInList(curFont, nfontnames, list))
 			{
-				insertFont(list, strdup(curFont),nfontnames);
+				insertFont (list, strdup(curFont), nfontnames);
 				nfontnames++;
 			}
 			
@@ -238,10 +269,12 @@ char **SetFontNames (void)
 				nfontnames++;
 			}
 			
-			//set back so whole string get deleted.
+			// set back so whole string get deleted.
 			p[num] = '.';
 		}
 	}
+#endif
+
 	if (nfonts)
 		FS_FreeFileList( fontfiles, nfonts );
 

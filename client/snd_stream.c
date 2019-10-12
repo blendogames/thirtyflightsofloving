@@ -37,9 +37,9 @@ qboolean		ogg_started = false;	// Initialization flag
 ogg_status_t	ogg_status;		// Status indicator
 
 #define			MAX_OGGLIST 512
-char			**ogg_filelist;		// List of Ogg Vorbis files
-int				ogg_curfile;		// Index of currently played file
-int				ogg_numfiles;		// Number of Ogg Vorbis files
+char			**ogg_filelist = NULL;	// List of Ogg Vorbis files
+int				ogg_curfile;			// Index of currently played file
+int				ogg_numfiles = 0;		// Number of Ogg Vorbis files
 int				ogg_loopcounter;
 
 cvar_t			*ogg_loopcount;
@@ -616,6 +616,8 @@ void S_OGG_Shutdown (void)
 		free(ogg_filelist[i]);
 	if (ogg_numfiles > 0)
 		free(ogg_filelist);
+	ogg_filelist = NULL;
+	ogg_numfiles = 0;
 
 	// Remove console commands
 	Cmd_RemoveCommand("ogg");
@@ -651,14 +653,36 @@ void S_OGG_LoadFileList (void)
 {
 	char	*p, *path = NULL;
 	char	**list;			// List of .ogg files
-	char	findname[MAX_OSPATH];
+//	char	findname[MAX_OSPATH];
 	char	lastPath[MAX_OSPATH];	// Knightmare added
-	int		i, numfiles = 0;
+	int		i, len, numfiles = 0;
 
 	ogg_filelist = malloc(sizeof(char *) * MAX_OGGLIST);
 	memset( ogg_filelist, 0, sizeof( char * ) * MAX_OGGLIST );
 	lastPath[0] = 0;
 
+#if 1
+	list = FS_GetFileList("music", "ogg", &numfiles);
+	// Add valid Ogg Vorbis file to the list
+	for (i=0; i<numfiles && ogg_numfiles<MAX_OGGLIST; i++)
+	{
+		if (!list || !list[i])
+			continue;
+
+		len = (int)strlen(list[i]);
+		if ( strcmp(list[i]+max(len-4,0), ".ogg") )
+			continue;
+
+		p = list[i];
+
+		if (!FS_ItemInList(p, ogg_numfiles, ogg_filelist)) // check if already in list
+		{
+			ogg_filelist[ogg_numfiles] = malloc(strlen(p)+1);
+			Com_sprintf (ogg_filelist[ogg_numfiles], strlen(p)+1, "%s\0", p);
+			ogg_numfiles++;
+		}
+	}
+#else
 	// Set search path
 	path = FS_NextPath(path);
 	while (path) 
@@ -677,15 +701,20 @@ void S_OGG_LoadFileList (void)
 		{
 			if (!list || !list[i])
 				continue;
-			p = list[i];
-			if (!strstr(p, ".ogg"))
+
+			len = (int)strlen(list[i]);
+			if ( strcmp(list[i]+max(len-4,0), ".ogg") )
 				continue;
+
+			p = list[i];
+		//	if (!strstr(p, ".ogg"))
+		//		continue;
 		//	if (!S_OGG_Check(p))
 		//		continue;
 			if (!FS_ItemInList(p, ogg_numfiles, ogg_filelist)) // check if already in list
 			{
 				ogg_filelist[ogg_numfiles] = malloc(strlen(p)+1);
-				sprintf(ogg_filelist[ogg_numfiles], "%s\0", p);
+				Com_sprintf (ogg_filelist[ogg_numfiles], strlen(p)+1, "%s\0", p);
 				ogg_numfiles++;
 			}
 		}
@@ -703,19 +732,26 @@ void S_OGG_LoadFileList (void)
 		{
 			if (!list || !list[i])
 				continue;
-			p = list[i];
-			if (!strstr(p, ".ogg"))
+
+			len = (int)strlen(list[i]);
+			if ( strcmp(list[i]+max(len-4,0), ".ogg") )
 				continue;
+
+			p = list[i];
+		//	if (!strstr(p, ".ogg"))
+		//		continue;
 		//	if (!S_OGG_Check(p))
 		//		continue;
 			if (!FS_ItemInList(p, ogg_numfiles, ogg_filelist)) // check if already in list
 			{
 				ogg_filelist[ogg_numfiles] = malloc(strlen(p)+1);
-				sprintf(ogg_filelist[ogg_numfiles], "%s\0", p);
+				Com_sprintf (ogg_filelist[ogg_numfiles], strlen(p)+1, "%s\0", p);
 				ogg_numfiles++;
 			}
 		}
 	}
+#endif
+
 	if (numfiles)
 		FS_FreeFileList(list, numfiles);
 }

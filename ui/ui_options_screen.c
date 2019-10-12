@@ -160,7 +160,7 @@ char **SetCrosshairNames (void)
 {
 	char *curCrosshair;
 	char **list = 0, *p;
-	char findname[1024];
+//	char findname[1024];
 	int ncrosshairs = 0, ncrosshairnames;
 	char **crosshairfiles;
 	char *path = NULL;
@@ -172,6 +172,49 @@ char **SetCrosshairNames (void)
 	list[0] = strdup("none"); // was default
 	ncrosshairnames = 1;
 
+#if 1
+	crosshairfiles = FS_GetFileList("pics/ch*.*", NULL,  &ncrosshairs);
+	for (i=0; i<ncrosshairs && ncrosshairnames < MAX_CROSSHAIRS; i++)
+	{
+		int	num, namelen;
+
+		if ( !crosshairfiles || !crosshairfiles[i] )
+			continue;
+
+		if ( !IsValidImageFilename(crosshairfiles[i]) )
+			continue;
+
+		p = strrchr(crosshairfiles[i], '/'); p++;
+
+		// filename must be chxxx
+		if (strncmp(p, "ch", 2))
+			continue;
+		namelen = strlen(strdup(p));
+		if (namelen < 7 || namelen > 9)
+			continue;
+		if (!isNumeric(p[2]))
+			continue;
+		if (namelen >= 8 && !isNumeric(p[3]))
+			continue;
+		// ch100 is only valid 5-char name
+		if (namelen == 9 && (p[2] != '1' || p[3] != '0' || p[4] != '0'))
+			continue;
+
+		num = strlen(p)-4;
+		p[num] = 0; //NULL;
+
+		curCrosshair = p;
+
+		if (!FS_ItemInList(curCrosshair, ncrosshairnames, list))
+		{
+			FS_InsertInList(list, strdup(curCrosshair), ncrosshairnames, 1);	// i=1 so none stays first!
+			ncrosshairnames++;
+		}
+		
+		//set back so whole string get deleted.
+		p[num] = '.';
+	}
+#else
 	path = FS_NextPath( path );
 	while (path) 
 	{
@@ -268,6 +311,8 @@ char **SetCrosshairNames (void)
 			p[num] = '.';
 		}
 	}
+#endif
+
 	// sort the list
 	sortCrosshairs (list, ncrosshairnames);
 
