@@ -73,7 +73,7 @@ gametype_names_t gametype_names[] =
 	{MAP_3TCTF, "3tctf"},
 };
 
-#define MAX_ARENAS 1024
+#define MAX_ARENAS 4096
 #define MAX_ARENAS_TEXT 8192
 
 static maptype_t ui_svr_maptype;
@@ -215,8 +215,8 @@ UI_LoadArenas
 void UI_LoadArenas (void)
 {
 	char		*p, *s, *s2, *tok, *tok2;
-	char		**arenafiles;
-	char		**tmplist = 0;
+	char		**arenafiles = NULL;
+	char		**tmplist = NULL;
 	char		*path = NULL;
 //	char		findName[1024];
 	char		shortname[MAX_TOKEN_CHARS];

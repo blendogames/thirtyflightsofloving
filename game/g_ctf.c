@@ -158,18 +158,18 @@ char *ctf_statusbar =
   "pic 9 "
 "endif "
 
-//  help / weapon icon 
+// help / weapon icon 
 "if 11 "
   "xv 148 "
   "pic 11 "
 "endif "
 
-//  frags
+// frags
 "xr	-50 "
 "yt 2 "
 "num 3 14 "
 
-//tech
+// tech
 "yb -129 "
 "if 26 "
   "xr -26 "
@@ -184,7 +184,7 @@ char *ctf_statusbar =
 "endif "
 "xr -62 "
 "num 2 18 "
-//joined overlay
+// joined overlay
 "if 22 "
   "yb -104 "
   "xr -28 "
@@ -199,6 +199,7 @@ char *ctf_statusbar =
 "endif "
 "xr -62 "
 "num 2 20 "
+// joined overlay
 "if 23 "
   "yb -77 "
   "xr -28 "
@@ -297,18 +298,18 @@ char *ttctf_statusbar =
   "pic 9 "
 "endif "
 
-//  help / weapon icon 
+// help / weapon icon 
 "if 11 "
   "xv 148 "
   "pic 11 "
 "endif "
 
-//  frags
+// frags
 "xr	-50 "
 "yt 2 "
 "num 3 14 "
 
-//tech
+// tech
 "yb -129 "
 "if 26 "
   "xr -26 "
@@ -323,7 +324,7 @@ char *ttctf_statusbar =
 "endif "
 "xr -62 "
 "num 2 18 "
-//joined overlay
+// joined overlay
 "if 22 "
   "yb -104 "
   "xr -28 "
@@ -338,7 +339,7 @@ char *ttctf_statusbar =
 "endif "
 "xr -62 "
 "num 2 20 "
-//joined overlay
+// joined overlay
 "if 23 "
   "yb -77 "
   "xr -28 "
@@ -353,7 +354,7 @@ char *ttctf_statusbar =
 "endif "
 "xr -62 "
 "num 2 33 "
-//joined overlay
+// joined overlay
 "if 34 "
   "yb -50 "
   "xr -28 "
@@ -2456,6 +2457,7 @@ CTFScoreboardMessage
 void CTFScoreboardMessage (edict_t *ent, edict_t *killer)
 {
 	char	entry[1024];
+	char	tmp[128];	// Knightmare added
 	char	string[1400];
 	int		len;
 	int		i, j, k, n;
@@ -2532,7 +2534,7 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer)
 			totalscore[0], total[0],
 			totalscore[1], total[1]);
 
-	len = strlen(string);
+	len = (int)strlen(string);
 
 	for (i=0; i<16; i++)
 	{
@@ -2547,51 +2549,69 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer)
 			cl = &game.clients[sorted[0][i]];
 			cl_ent = g_edicts + 1 + sorted[0][i];
 			
-		if (ttctf->value)
-			sprintf(entry+strlen(entry),
-		#ifdef KMQUAKE2_ENGINE_MOD
-				"3tctf -72 %d %d %d %d ",
-		#else
-				"ctf -72 %d %d %d %d ",
-		#endif
-				42 + i * 8,
-				sorted[0][i],
-				cl->resp.score,
-				cl->ping > 999 ? 999 : cl->ping);
-		else
-			sprintf(entry+strlen(entry),
-				"ctf 0 %d %d %d %d ",
-				42 + i * 8,
-				sorted[0][i],
-				cl->resp.score,
-				cl->ping > 999 ? 999 : cl->ping);
+			if (ttctf->value) {
+			//	sprintf(entry+strlen(entry),
+				Com_sprintf(tmp, sizeof(tmp),
+			#ifdef KMQUAKE2_ENGINE_MOD
+					"3tctf -72 %d %d %d %d ",
+			#else
+					"ctf -72 %d %d %d %d ",
+			#endif
+					42 + i * 8,
+					sorted[0][i],
+					cl->resp.score,
+					cl->ping > 999 ? 999 : cl->ping);
+				Q_strncatz (entry, tmp, sizeof(entry));
+			}
+			else {
+			//	sprintf(entry+strlen(entry),
+				Com_sprintf(tmp, sizeof(tmp),
+					"ctf 0 %d %d %d %d ",
+					42 + i * 8,
+					sorted[0][i],
+					cl->resp.score,
+					cl->ping > 999 ? 999 : cl->ping);
+				Q_strncatz (entry, tmp, sizeof(entry));
+			}
 			
 			if (ttctf->value)
 			{
 				if (cl_ent->client->pers.inventory[ITEM_INDEX(flag2_item)]
 					&& cl_ent->client->pers.inventory[ITEM_INDEX(flag3_item)])
 				{
-					sprintf(entry + strlen(entry), "xv -16 yv %d picn sbfctf2 "
+				//	sprintf(entry + strlen(entry), "xv -16 yv %d picn sbfctf2 "
+					Com_sprintf(tmp, sizeof(tmp), "xv -16 yv %d picn sbfctf2 "
 												   "xv -8 yv %d picn sbfctf3 ", 42 + i * 8, 42 + i * 8);
+					Q_strncatz (entry, tmp, sizeof(entry));
 					/*if (level.framenum & 1)
-						sprintf(entry + strlen(entry), "xv -16 yv %d picn sbfctf2 ", 42 + i * 8);
+						Com_sprintf(tmp, sizeof(tmp), "xv -16 yv %d picn sbfctf2 ", 42 + i * 8);
 					else
-						sprintf(entry + strlen(entry), "xv -16 yv %d picn sbfctf3 ", 42 + i * 8);*/
+						Com_sprintf(tmp, sizeof(tmp), "xv -16 yv %d picn sbfctf3 ", 42 + i * 8);
+					Q_strncatz (entry, tmp, sizeof(entry));
+					*/
 				}
-				else if (cl_ent->client->pers.inventory[ITEM_INDEX(flag2_item)])
-					sprintf(entry + strlen(entry), "xv -16 yv %d picn sbfctf2 ", 42 + i * 8);
-				else if (cl_ent->client->pers.inventory[ITEM_INDEX(flag3_item)])
-					sprintf(entry + strlen(entry), "xv -16 yv %d picn sbfctf3 ", 42 + i * 8);
+				else if (cl_ent->client->pers.inventory[ITEM_INDEX(flag2_item)]) {
+				//	sprintf(entry + strlen(entry), "xv -16 yv %d picn sbfctf2 ", 42 + i * 8);
+					Com_sprintf(tmp, sizeof(tmp), "xv -16 yv %d picn sbfctf2 ", 42 + i * 8);
+					Q_strncatz (entry, tmp, sizeof(entry));
+				}
+				else if (cl_ent->client->pers.inventory[ITEM_INDEX(flag3_item)]) {
+				//	sprintf(entry + strlen(entry), "xv -16 yv %d picn sbfctf3 ", 42 + i * 8);
+					Com_sprintf(tmp, sizeof(tmp), "xv -16 yv %d picn sbfctf3 ", 42 + i * 8);
+					Q_strncatz (entry, tmp, sizeof(entry));
+				}
 			}
 			else
-				if (cl_ent->client->pers.inventory[ITEM_INDEX(flag2_item)])
-					sprintf(entry + strlen(entry), "xv 56 yv %d picn sbfctf2 ",
-						42 + i * 8);
+				if (cl_ent->client->pers.inventory[ITEM_INDEX(flag2_item)]) {
+				//	sprintf(entry + strlen(entry), "xv 56 yv %d picn sbfctf2 ", 42 + i * 8);
+					Com_sprintf (tmp, sizeof(tmp), "xv 56 yv %d picn sbfctf2 ", 42 + i * 8);
+					Q_strncatz (entry, tmp, sizeof(entry));
+				}
 
 			if (maxsize - len > strlen(entry)) {
 			//	strncat(string, entry);
 				Q_strncatz(string, entry, sizeof(string));
-				len = strlen(string);
+				len = (int)strlen(string);
 				last[0] = i;
 			}
 		}
@@ -2602,50 +2622,69 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer)
 			cl = &game.clients[sorted[1][i]];
 			cl_ent = g_edicts + 1 + sorted[1][i];
 			
-		if (ttctf->value)
-			sprintf(entry+strlen(entry),
-		#ifdef KMQUAKE2_ENGINE_MOD
-				"3tctf 88 %d %d %d %d ",
-		#else
-				"ctf 88 %d %d %d %d ",
-		#endif
-				42 + i * 8,
-				sorted[1][i],
-				cl->resp.score,
-				cl->ping > 999 ? 999 : cl->ping);
-		else
-			sprintf(entry+strlen(entry),
-				"ctf 160 %d %d %d %d ",
-				42 + i * 8,
-				sorted[1][i],
-				cl->resp.score,
-				cl->ping > 999 ? 999 : cl->ping);
-			
+			if (ttctf->value) {
+			//	sprintf(entry+strlen(entry),
+				Com_sprintf (tmp, sizeof(tmp),
+			#ifdef KMQUAKE2_ENGINE_MOD
+					"3tctf 88 %d %d %d %d ",
+			#else
+					"ctf 88 %d %d %d %d ",
+			#endif
+					42 + i * 8,
+					sorted[1][i],
+					cl->resp.score,
+					cl->ping > 999 ? 999 : cl->ping);
+				Q_strncatz (entry, tmp, sizeof(entry));
+			}
+			else {
+			//	sprintf(entry+strlen(entry),
+				Com_sprintf (tmp, sizeof(tmp),
+					"ctf 160 %d %d %d %d ",
+					42 + i * 8,
+					sorted[1][i],
+					cl->resp.score,
+					cl->ping > 999 ? 999 : cl->ping);
+				Q_strncatz (entry, tmp, sizeof(entry));
+			}
+				
 			if (ttctf->value)
 			{
 				if (cl_ent->client->pers.inventory[ITEM_INDEX(flag1_item)]
 					&& cl_ent->client->pers.inventory[ITEM_INDEX(flag3_item)])
 				{
-					sprintf(entry + strlen(entry), "xv 144 yv %d picn sbfctf1 "
+				//	sprintf(entry + strlen(entry), "xv 144 yv %d picn sbfctf1 "
+					Com_sprintf (tmp, sizeof(tmp), "xv 144 yv %d picn sbfctf1 "
 												   "xv 152 yv %d picn sbfctf3 ", 42 + i * 8, 42 + i * 8);
+					Q_strncatz (entry, tmp, sizeof(entry));
 					/*if (level.framenum & 1)
-						sprintf(entry + strlen(entry), "xv 144 yv %d picn sbfctf1 ", 42 + i * 8);
+						Com_sprintf (tmp, sizeof(tmp), "xv 144 yv %d picn sbfctf1 ", 42 + i * 8);
 					else
-						sprintf(entry + strlen(entry), "xv 144 yv %d picn sbfctf3", 42 + i * 8);*/
+						Com_sprintf (tmp, sizeof(tmp), "xv 144 yv %d picn sbfctf3", 42 + i * 8);
+					Q_strncatz (entry, tmp, sizeof(entry));
+					*/
 				}
-				else if (cl_ent->client->pers.inventory[ITEM_INDEX(flag1_item)])
-					sprintf(entry + strlen(entry), "xv 144 yv %d picn sbfctf1 ", 42 + i * 8);
-				else if (cl_ent->client->pers.inventory[ITEM_INDEX(flag3_item)])
-					sprintf(entry + strlen(entry), "xv 144 yv %d picn sbfctf3 ", 42 + i * 8);			
+				else if (cl_ent->client->pers.inventory[ITEM_INDEX(flag1_item)]) {
+				//	sprintf(entry + strlen(entry), "xv 144 yv %d picn sbfctf1 ", 42 + i * 8);
+					Com_sprintf (tmp, sizeof(tmp), "xv 144 yv %d picn sbfctf1 ", 42 + i * 8);
+					Q_strncatz (entry, tmp, sizeof(entry));
+				}
+				else if (cl_ent->client->pers.inventory[ITEM_INDEX(flag3_item)]) {
+				//	sprintf(entry + strlen(entry), "xv 144 yv %d picn sbfctf3 ", 42 + i * 8);
+					Com_sprintf (tmp, sizeof(tmp), "xv 144 yv %d picn sbfctf3 ", 42 + i * 8);
+					Q_strncatz (entry, tmp, sizeof(entry));
+				}
 			}
 			else
-				if (cl_ent->client->pers.inventory[ITEM_INDEX(flag1_item)])
-					sprintf(entry + strlen(entry), "xv 216 yv %d picn sbfctf1 ", 42 + i * 8);
+				if (cl_ent->client->pers.inventory[ITEM_INDEX(flag1_item)]) {
+				//	sprintf(entry + strlen(entry), "xv 216 yv %d picn sbfctf1 ", 42 + i * 8);
+					Com_sprintf (tmp, sizeof(tmp), "xv 216 yv %d picn sbfctf1 ", 42 + i * 8);
+					Q_strncatz (entry, tmp, sizeof(entry));
+				}
 			
 			if (maxsize - len > strlen(entry)) {
 			//	strncat(string, entry);
 				Q_strncatz(string, entry, sizeof(string));
-				len = strlen(string);
+				len = (int)strlen(string);
 				last[1] = i;
 			}
 		}
@@ -2656,7 +2695,8 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer)
 			cl = &game.clients[sorted[2][i]];
 			cl_ent = g_edicts + 1 + sorted[2][i];
 			
-			sprintf(entry+strlen(entry),
+		//	sprintf(entry+strlen(entry),
+			Com_sprintf (tmp, sizeof(tmp),
 		#ifdef KMQUAKE2_ENGINE_MOD
 				"3tctf 248 %d %d %d %d ",
 		#else
@@ -2666,26 +2706,37 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer)
 				sorted[2][i],
 				cl->resp.score,
 				cl->ping > 999 ? 999 : cl->ping);
+			Q_strncatz (entry, tmp, sizeof(entry));
 			
 			if (cl_ent->client->pers.inventory[ITEM_INDEX(flag1_item)]
 				&& cl_ent->client->pers.inventory[ITEM_INDEX(flag2_item)])
 			{
-				sprintf(entry + strlen(entry), "xv 304 yv %d picn sbfctf1 "
+			//	sprintf(entry + strlen(entry), "xv 304 yv %d picn sbfctf1 "
+				Com_sprintf (tmp, sizeof(tmp), "xv 304 yv %d picn sbfctf1 "
 											   "xv 312 yv %d picn sbfctf2 ", 42 + i * 8, 42 + i * 8);
+				Q_strncatz (entry, tmp, sizeof(entry));
 				/*if (level.framenum & 1)
-					sprintf(entry + strlen(entry), "xv 304 yv %d picn sbfctf1 ", 42 + i * 8);
+					Com_sprintf (tmp, sizeof(tmp), "xv 304 yv %d picn sbfctf1 ", 42 + i * 8);
 				else
-					sprintf(entry + strlen(entry), "xv 304 yv %d picn sbfctf2", 42 + i * 8);*/
+					Com_sprintf (tmp, sizeof(tmp), "xv 304 yv %d picn sbfctf2", 42 + i * 8);
+				Q_strncatz (entry, tmp, sizeof(entry));
+				*/
 			}
-			else if (cl_ent->client->pers.inventory[ITEM_INDEX(flag1_item)])
-				sprintf(entry + strlen(entry), "xv 304 yv %d picn sbfctf1 ", 42 + i * 8);
-			else if (cl_ent->client->pers.inventory[ITEM_INDEX(flag2_item)])
-				sprintf(entry + strlen(entry), "xv 304 yv %d picn sbfctf2 ", 42 + i * 8);			
+			else if (cl_ent->client->pers.inventory[ITEM_INDEX(flag1_item)]) {
+			//	sprintf(entry + strlen(entry), "xv 304 yv %d picn sbfctf1 ", 42 + i * 8);
+				Com_sprintf (tmp, sizeof(tmp), "xv 304 yv %d picn sbfctf1 ", 42 + i * 8);
+				Q_strncatz (entry, tmp, sizeof(entry));
+			}
+			else if (cl_ent->client->pers.inventory[ITEM_INDEX(flag2_item)]) {
+			//	sprintf(entry + strlen(entry), "xv 304 yv %d picn sbfctf2 ", 42 + i * 8);			
+				Com_sprintf (tmp, sizeof(tmp), "xv 304 yv %d picn sbfctf2 ", 42 + i * 8);			
+				Q_strncatz (entry, tmp, sizeof(entry));
+			}
 			
 			if (maxsize - len > strlen(entry)) {
 			//	strncat(string, entry);
 				Q_strncatz(string, entry, sizeof(string));
-				len = strlen(string);
+				len = (int)strlen(string);
 				last[2] = i;
 			}
 		}
@@ -2725,24 +2776,27 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer)
 			if (!k)
 			{
 				k = 1;
-				sprintf(entry, "xv 0 yv %d string2 \"Spectators\" ", j);
+			//	sprintf(entry, "xv 0 yv %d string2 \"Spectators\" ", j);
+				Com_sprintf (entry, sizeof(entry), "xv 0 yv %d string2 \"Spectators\" ", j);
 			//	strncat(string, entry);
 				Q_strncatz(string, entry, sizeof(string));
-				len = strlen(string);
+				len = (int)strlen(string);
 				j += 8;
 			}
 			
-			sprintf(entry+strlen(entry),
+		//	sprintf(entry+strlen(entry),
+			Com_sprintf (tmp, sizeof(tmp),
 				"ctf %d %d %d %d %d ",
 				(n & 1) ? 160 : 0, // x
 				j, // y
 				i, // playernum
 				cl->resp.score,
 				cl->ping > 999 ? 999 : cl->ping);
+			Q_strncatz (entry, tmp, sizeof(entry));
 			if (maxsize - len > strlen(entry)) {
 			//	strncat(string, entry);
 				Q_strncatz(string, entry, sizeof(string));
-				len = strlen(string);
+				len = (int)strlen(string);
 			}
 			
 			if (n & 1)
@@ -2753,24 +2807,39 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer)
 	
 	if (ttctf->value)
 	{
-		if (total[0] - last[0] > 1) // couldn't fit everyone
-			sprintf(string + strlen(string), "xv -64 yv %d string \"..and %d more\" ",
-			42 + (last[0]+1)*8, total[0] - last[0] - 1);
-		if (total[1] - last[1] > 1) // couldn't fit everyone
-			sprintf(string + strlen(string), "xv 96 yv %d string \"..and %d more\" ",
-			42 + (last[1]+1)*8, total[1] - last[1] - 1);
-		if (total[2] - last[2] > 1) // couldn't fit everyone
-			sprintf(string + strlen(string), "xv 256 yv %d string \"..and %d more\" ",
-			42 + (last[2]+1)*8, total[2] - last[2] - 1);
+		if (total[0] - last[0] > 1) { // couldn't fit everyone
+		//	sprintf(string + strlen(string), "xv -64 yv %d string \"..and %d more\" ",
+			Com_sprintf (tmp, sizeof(tmp), "xv -64 yv %d string \"..and %d more\" ",
+				42 + (last[0]+1)*8, total[0] - last[0] - 1);
+			Q_strncatz (string, tmp, sizeof(string));
+		}
+		if (total[1] - last[1] > 1) { // couldn't fit everyone
+		//	sprintf(string + strlen(string), "xv 96 yv %d string \"..and %d more\" ",
+			Com_sprintf (tmp, sizeof(tmp), "xv 96 yv %d string \"..and %d more\" ",
+				42 + (last[1]+1)*8, total[1] - last[1] - 1);
+			Q_strncatz (string, tmp, sizeof(string));
+		}
+		if (total[2] - last[2] > 1) { // couldn't fit everyone
+		//	sprintf(string + strlen(string), "xv 256 yv %d string \"..and %d more\" ",
+			Com_sprintf (tmp, sizeof(tmp), "xv 256 yv %d string \"..and %d more\" ",
+				42 + (last[2]+1)*8, total[2] - last[2] - 1);
+			Q_strncatz (string, tmp, sizeof(string));
+		}
 	}
 	else
 	{
-		if (total[0] - last[0] > 1) // couldn't fit everyone
-			sprintf(string + strlen(string), "xv 8 yv %d string \"..and %d more\" ",
-			42 + (last[0]+1)*8, total[0] - last[0] - 1);
-		if (total[1] - last[1] > 1) // couldn't fit everyone
-			sprintf(string + strlen(string), "xv 168 yv %d string \"..and %d more\" ",
-			42 + (last[1]+1)*8, total[1] - last[1] - 1);
+		if (total[0] - last[0] > 1) { // couldn't fit everyone
+		//	sprintf(string + strlen(string), "xv 8 yv %d string \"..and %d more\" ",
+			Com_sprintf (tmp, sizeof(tmp), "xv 8 yv %d string \"..and %d more\" ",
+				42 + (last[0]+1)*8, total[0] - last[0] - 1);
+			Q_strncatz (string, tmp, sizeof(string));
+		}
+		if (total[1] - last[1] > 1) { // couldn't fit everyone
+		//	sprintf(string + strlen(string), "xv 168 yv %d string \"..and %d more\" ",
+			Com_sprintf (tmp, sizeof(tmp), "xv 168 yv %d string \"..and %d more\" ",
+				42 + (last[1]+1)*8, total[1] - last[1] - 1);
+			Q_strncatz (string, tmp, sizeof(string));
+		}
 	}
 
 	gi.WriteByte (svc_layout);
@@ -2964,7 +3033,7 @@ void CTFDeadDropTech (edict_t *ent)
 			// hack the velocity to make it bounce random
 			dropped->velocity[0] = (rand() % 600) - 300;
 			dropped->velocity[1] = (rand() % 600) - 300;
-			dropped->nextthink = level.time + tech_life->value; //was CTF_TECH_TIMEOUT
+			dropped->nextthink = level.time + tech_life->value; // was CTF_TECH_TIMEOUT
 			dropped->think = TechThink;
 			dropped->owner = NULL;
 			ent->client->pers.inventory[ITEM_INDEX(tech)] = 0;
@@ -3156,7 +3225,7 @@ void CheckNumTechs (void)
 		gi.cvar_forceset("tech_flags", "15");
 	}
 
-	//count number of tech types enabled
+	// count number of tech types enabled
 	i = 0;
 	while (tnames[i]) {
 		if ((int)(tech_flags->value) & (0x1 << i))
@@ -3164,7 +3233,7 @@ void CheckNumTechs (void)
 		i++;
 	}
 	
-	//count num. of clients
+	// count num of clients
 	numclients = 0;
 	for (i = 0; i < game.maxclients; i++)
 	{
@@ -3174,19 +3243,19 @@ void CheckNumTechs (void)
 	}
 
 	newtechcount = tech_perplayer->value * numclients;
-	if (newtechcount > tech_max->value) //cap at tech_max
+	if (newtechcount > tech_max->value) // cap at tech_max
 		newtechcount = tech_max->value;
-	if (newtechcount < numtechtypes) //leave at least 1 of each enabled tech
+	if (newtechcount < numtechtypes) // leave at least 1 of each enabled tech
 		newtechcount = numtechtypes;
 	numtechs = TechCount();
 	if (newtechcount > numtechs)
 	{
-		//gi.dprintf ("Number of techs to spawn: %d\n", newtechcount);
+	//	gi.dprintf ("Number of techs to spawn: %d\n", newtechcount);
 		SpawnMoreTechs (numtechs, newtechcount, numtechtypes);
 	}
 	if (newtechcount < numtechs)
 	{
-		//gi.dprintf ("Number of techs to spawn: %d\n", newtechcount);
+	//	gi.dprintf ("Number of techs to spawn: %d\n", newtechcount);
 		RemoveTechs (numtechs, newtechcount, numtechtypes);
 	}
 }
@@ -3224,7 +3293,7 @@ void CheckNumTechs (void)
 	VectorScale (forward, 100, ent->velocity);
 	ent->velocity[2] = 300;
 
-	//ent->nextthink = level.time + CTF_TECH_TIMEOUT;
+//	ent->nextthink = level.time + CTF_TECH_TIMEOUT;
 	ent->nextthink = level.time + tech_life->value;
 	ent->think = TechThink;
 
@@ -3609,7 +3678,7 @@ struct {
 };
 
 
-/*static*/ void CTFSay_Team_Location (edict_t *who, char *buf, int bufSize)
+/*static*/ void CTFSay_Team_Location (edict_t *who, char *buf, size_t bufSize)
 {
 	edict_t *what = NULL;
 	edict_t *hot = NULL;
@@ -3725,11 +3794,12 @@ struct {
 	Q_strncatz(buf, item->pickup_name, bufSize);
 }
 
-/*static*/ void CTFSay_Team_Armor (edict_t *who, char *buf, int bufSize)
+/*static*/ void CTFSay_Team_Armor (edict_t *who, char *buf, size_t bufSize)
 {
 	gitem_t		*item;
 	int			index, cells;
 	int			power_armor_type;
+	char		tmp[128];	// Knightmare added
 
 	*buf = 0;
 
@@ -3737,10 +3807,13 @@ struct {
 	if (power_armor_type)
 	{
 		cells = who->client->pers.inventory[ITEM_INDEX(FindItem ("cells"))];
-		if (cells)
-			sprintf(buf+strlen(buf), "%s with %i cells ",
+		if (cells) {
+		//	sprintf(buf+strlen(buf), "%s with %i cells ",
+			Com_sprintf (tmp, sizeof(tmp), "%s with %i cells ",
 				(power_armor_type == POWER_ARMOR_SCREEN) ?
 				"Power Screen" : "Power Shield", cells);
+			Q_strncatz (buf, tmp, bufSize);
+		}
 	}
 
 	index = ArmorIndex (who);
@@ -3751,8 +3824,10 @@ struct {
 			if (*buf)
 			//	strncat(buf, "and ");
 				Q_strncatz(buf, "and ", bufSize);
-			sprintf(buf+strlen(buf), "%i units of %s",
+		//	sprintf(buf+strlen(buf), "%i units of %s",
+			Com_sprintf (tmp, sizeof(tmp), "%i units of %s",
 				who->client->pers.inventory[index], item->pickup_name);
+			Q_strncatz (buf, tmp, bufSize);
 		}
 	}
 
@@ -3761,7 +3836,7 @@ struct {
 		Q_strncpyz(buf, "no armor", bufSize);
 }
 
-/*static*/ void CTFSay_Team_Health (edict_t *who, char *buf, int bufSize)
+/*static*/ void CTFSay_Team_Health (edict_t *who, char *buf, size_t bufSize)
 {
 	if (who->health <= 0)
 	//	strncpy(buf, "dead", bufSize);
@@ -3770,7 +3845,7 @@ struct {
 		Com_sprintf(buf, bufSize, "%i health", who->health);
 }
 
-/*static*/ void CTFSay_Team_Tech (edict_t *who, char *buf, int bufSize)
+/*static*/ void CTFSay_Team_Tech (edict_t *who, char *buf, size_t bufSize)
 {
 	gitem_t *tech;
 	int i;
@@ -3789,7 +3864,7 @@ struct {
 	Q_strncpyz(buf, "no powerup", bufSize);
 }
 
-/*static*/ void CTFSay_Team_Weapon (edict_t *who, char *buf, int bufSize)
+/*static*/ void CTFSay_Team_Weapon (edict_t *who, char *buf, size_t bufSize)
 {
 	if (who->client->pers.weapon)
 	//	strncpy(buf, who->client->pers.weapon->pickup_name, bufSize);
@@ -3799,7 +3874,7 @@ struct {
 		Q_strncpyz(buf, "none", bufSize);
 }
 
-/*static*/ void CTFSay_Team_Sight (edict_t *who, char *buf, int bufSize)
+/*static*/ void CTFSay_Team_Sight (edict_t *who, char *buf, size_t bufSize)
 {
 	int i;
 	edict_t *targ;
@@ -5684,11 +5759,12 @@ void CTFAdmin(edict_t *ent)
 
 void CTFStats(edict_t *ent)
 {
-	int i, e;
+	int		i, e;
 	ghost_t *g;
-	char st[80];
-	char text[1024];
-	edict_t *e2;
+	char	st[80];
+	char	text[1024];
+	char	tmp[128];	// Knightmare added
+	edict_t	*e2;
 
 	*text = 0;
 	if (ctfgame.match == MATCH_SETUP)
@@ -5743,7 +5819,9 @@ void CTFStats(edict_t *ent)
 			e);
 		if (strlen(text) + strlen(st) > sizeof(text) - 50)
 		{
-			sprintf(text+strlen(text), "And more...\n");
+		//	sprintf(text+strlen(text), "And more...\n");
+			Com_sprintf(tmp, sizeof(tmp), "And more...\n");
+			Q_strncatz (text, tmp, sizeof(text));
 			safe_cprintf(ent, PRINT_HIGH, "%s", text);
 			return;
 		}
@@ -5755,10 +5833,11 @@ void CTFStats(edict_t *ent)
 
 void CTFPlayerList(edict_t *ent)
 {
-	int i;
-	char st[80];
-	char text[1400];
-	edict_t *e2;
+	int		i;
+	char	st[80];
+	char	text[1400];
+	char	tmp[128];	// Knightmare added
+	edict_t	*e2;
 
 #if 0
 	*text = 0;
@@ -5799,7 +5878,9 @@ void CTFPlayerList(edict_t *ent)
 			e2->client->resp.admin ? " (admin)" : "");
 
 		if (strlen(text) + strlen(st) > sizeof(text) - 50) {
-			sprintf(text+strlen(text), "And more...\n");
+		//	sprintf(text+strlen(text), "And more...\n");
+			Com_sprintf (tmp, sizeof(tmp), "And more...\n");
+			Q_strncatz (text, tmp, sizeof(text));
 			safe_cprintf(ent, PRINT_HIGH, "%s", text);
 			return;
 		}
