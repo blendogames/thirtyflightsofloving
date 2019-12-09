@@ -4,6 +4,8 @@ Changes as of v0.20 update 8:
 
 - Added 3840x1600 and 4096x2160 video modes.
 
+- Added 160Hz and 240Hz refresh rates.
+
 - Added support for triple-monitor surround modes via custom resolutions.  Monitors must be bound as a single logical display.
 	Keeps all menu/HUD elements on the center screen, set the cvar scr_surroundlayout to 0 to disable this.
 	Cvars scr_surroundleft and scr_surroundright set placement of left and right of center screen.

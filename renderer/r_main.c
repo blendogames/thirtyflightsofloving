@@ -908,7 +908,7 @@ void R_Register (void)
 	r_speeds = Cvar_Get ("r_speeds", "0", 0);
 	r_ignorehwgamma = Cvar_Get ("r_ignorehwgamma", "0", CVAR_ARCHIVE);	// hardware gamma
 	r_displayrefresh = Cvar_Get ("r_displayrefresh", "0", CVAR_ARCHIVE); // refresh rate control
-	AssertCvarRange (r_displayrefresh, 0, 150, true);
+	AssertCvarRange (r_displayrefresh, 0, 240, true);
 
 	// lerped dlights on models
 	r_dlights_normal = Cvar_Get("r_dlights_normal", "1", CVAR_ARCHIVE);

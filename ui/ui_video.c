@@ -176,6 +176,12 @@ static void ApplyChanges( void *unused )
 	// Knightmare- refesh rate option
 	switch (s_refresh_box.curvalue)
 	{
+	case 12:
+		Cvar_SetValue ("r_displayrefresh", 240);
+		break;
+	case 11:
+		Cvar_SetValue ("r_displayrefresh", 160);
+		break;
 	case 10:
 		Cvar_SetValue ("r_displayrefresh", 150);
 		break;
@@ -256,7 +262,11 @@ int refresh_box_setval (void)
 {
 	int refreshVar = (int)Cvar_VariableValue ("r_displayrefresh");
 
-	if (refreshVar == 150)
+	if (refreshVar == 240)
+		return 12;
+	else if (refreshVar == 160)
+		return 11;
+	else if (refreshVar == 150)
 		return 10;
 	else if (refreshVar == 144)
 		return 9;
@@ -380,6 +390,8 @@ void Menu_Video_Init (void)
 		"[120Hz  ]",
 		"[144Hz  ]",
 		"[150Hz  ]",
+		"[160Hz  ]",
+		"[240Hz  ]",
 		0
 	};
 	static const char *yesno_names[] =
