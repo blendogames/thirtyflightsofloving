@@ -93,6 +93,7 @@
 			/>
 			<Tool
 				Name="VCManifestTool"
+				AdditionalManifestFiles="kmquake2.exe.manifest"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -192,6 +193,7 @@
 			/>
 			<Tool
 				Name="VCManifestTool"
+				AdditionalManifestFiles="kmquake2.exe.manifest"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -669,11 +671,11 @@
 			Filter="h;hpp;hxx;hm;inl;fi;fd"
 			>
 			<File
-				RelativePath="..\..\client\anorms.h"
+				RelativePath="..\..\renderer\anorms.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\renderer\anorms.h"
+				RelativePath="..\..\client\anorms.h"
 				>
 			</File>
 			<File
