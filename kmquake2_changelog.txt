@@ -18,6 +18,8 @@ Changes as of v0.20 update 8:
 
 - Screenshots now go up to 9999.
 
+- Removed size limit of 512x256 for .wal textures.  This fixes the "GL_Upload8: too large" error with 512x512 or larger .wal textures.
+
 - Added cvar r_fog_skyratio, for proportional sky fog distance.  Default is 10.
 
 - Added basegame3 cvar to load data from up to 3 other other mods.  Works in conjunction with basegame and basegame2,
