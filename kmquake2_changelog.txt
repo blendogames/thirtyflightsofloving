@@ -32,6 +32,8 @@ Changes as of v0.20 update 8:
 
 - Fixed crash when rapidly pressing the Esc key during a map load.
 
+- Fixed potential crash caused by infinite recursion in client footstep code.
+
 - Fixed fatal error when too many alias models are loaded (such as many unique player models in a multiplayer game).
 
 - Fixed light blooms killing performance if texture compression is enabled.

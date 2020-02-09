@@ -111,7 +111,7 @@ Since this is a replacement for plain Jane EV_FOOTSTEP, we already know
 the player is definitely on the ground when this is called.
 ===============
 */
-void CL_FootSteps (entity_state_t *ent, qboolean loud)
+void CL_FootSteps (entity_state_t *ent, qboolean loud, qboolean recursed)
 {
 	trace_t	tr;
 	vec3_t	end;
@@ -174,20 +174,25 @@ void CL_FootSteps (entity_state_t *ent, qboolean loud)
 		volume = 1.0;
 		break;
 	default:
-		if (cl_footstep_override->value && num_texsurfs)
+		if (cl_footstep_override->value && num_texsurfs && !recursed)
 		{
 			int	i;
 			for (i=0; i<num_texsurfs; i++)
 				if (strstr(tr.surface->name,tex_surf[i].tex) && tex_surf[i].step_id > 0)
 				{
+					tr.surface->flags &= ~SURF_STEPMASK;
 					tr.surface->flags |= (SURF_METAL << (tex_surf[i].step_id - 1));
-					CL_FootSteps (ent, loud); // start over
+					CL_FootSteps (ent, loud, true); // start over
 					return;
 				}
 		}
-		tr.surface->flags |= SURF_STANDARD;
-		CL_FootSteps (ent, loud); // start over
-		return;
+	//	tr.surface->flags &= ~SURF_STEPMASK;
+	//	tr.surface->flags |= SURF_STANDARD;
+	//	CL_FootSteps (ent, loud, true); // start over
+	//	return;
+		stepsound = clMedia.sfx_footsteps[r];
+		volume = 1.0;
+		break;
 	}
 
 	if (loud)
@@ -227,11 +232,11 @@ void CL_EntityEvent (entity_state_t *ent)
 		if (cl_footsteps->value)
 //Knightmare- Lazarus footsteps
 			//S_StartSound (NULL, ent->number, CHAN_BODY, clMedia.sfx_footsteps[rand()&3], 1, ATTN_NORM, 0);
-			CL_FootSteps (ent, false);
+			CL_FootSteps (ent, false, false);
 		break;
 	case EV_LOUDSTEP:
 		if (cl_footsteps->value)
-			CL_FootSteps (ent, true);
+			CL_FootSteps (ent, true, false);
 		break;
 //end Knightmare
 	case EV_FALLSHORT:
