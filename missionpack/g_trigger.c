@@ -886,10 +886,10 @@ void SP_trigger_gravity (edict_t *self)
 //	self->gravity = atoi(st.gravity);
 	self->gravity = atof(st.gravity);
 
-	if(self->spawnflags & 1)				// TOGGLE
+	if (self->spawnflags & 1)				// TOGGLE
 		self->use = trigger_gravity_use;
 
-	if(self->spawnflags & 2)				// START_OFF
+	if (self->spawnflags & 2)				// START_OFF
 	{
 		self->use = trigger_gravity_use;
 		self->solid = SOLID_NOT;

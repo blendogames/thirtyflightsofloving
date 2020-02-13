@@ -60,9 +60,9 @@ void AI_SetSightClient (void)
 			// Do NOT do this for players using a
 			// target_monitor, though... in this case
 			// both player and fake player are ignored.
-			if(ent->client && ent->client->camplayer)
+			if (ent->client && ent->client->camplayer)
 			{
-				if(ent->client->spycam)
+				if (ent->client->spycam)
 				{
 					level.sight_client = ent->client->camplayer;
 					return;

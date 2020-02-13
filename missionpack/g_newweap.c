@@ -225,10 +225,10 @@ movefield:
 		self->velocity[2] += offset[1] * host->avelocity[ROLL] * M_PI / 180;
 	}
 	VectorScale (host->avelocity, FRAMETIME, amove);
-	VectorAdd(self->child_attach_angles, host_angle_change, self->s.angles); //add rotation to angles
+	VectorAdd(self->child_attach_angles, host_angle_change, self->s.angles); // add rotation to angles
 //	VectorAdd(self->s.angles, amove, self->s.angles); //add rotation to angles
 
-	if(amove[YAW]) // Cross fingers here... move bounding box
+	if (amove[YAW]) // Cross fingers here... move bounding box
 	{
 		float       ca, sa, yaw;
 		vec3_t      p00, p01, p10, p11;

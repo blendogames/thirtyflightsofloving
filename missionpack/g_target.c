@@ -25,6 +25,10 @@ void SP_target_temp_entity (edict_t *ent)
 /*QUAKED target_speaker (1 0 0) (-8 -8 -8) (8 8 8) looped-on looped-off reliable
 "noise"		wav file to play
 "attenuation"
+DWH
+-2 = only played (full volume) for player who triggered the target_speaker
+end DWH
+
 -1 = none, send to whole level
 1 = normal fighting sounds
 2 = idle sound level
@@ -43,8 +47,9 @@ void Use_Target_Speaker (edict_t *ent, edict_t *other, edict_t *activator)
 
 	if (ent->spawnflags & 3)
 	{	// looping sound toggles
-		if (ent->s.sound)
+		if (ent->s.sound) {
 			ent->s.sound = 0;	// turn it off
+		}
 		else {
 			ent->s.sound = ent->noise_index;	// start it
 #ifdef LOOP_SOUND_ATTENUATION
@@ -53,14 +58,31 @@ void Use_Target_Speaker (edict_t *ent, edict_t *other, edict_t *activator)
 		}
 	}
 	else
-	{	// normal sound
-		if (ent->spawnflags & 4)
-			chan = CHAN_VOICE|CHAN_RELIABLE;
+	{
+		if (ent->attenuation == -2)
+		{
+			if (ent->spawnflags & 4)
+				chan = CHAN_VOICE|CHAN_RELIABLE;
+			else
+				chan = CHAN_VOICE;
+			gi.sound (activator, chan, ent->noise_index, 1, ATTN_NORM, 0);
+		}
 		else
-			chan = CHAN_VOICE;
-		// use a positioned_sound, because this entity won't normally be
-		// sent to any clients because it is invisible
-		gi.positioned_sound (ent->s.origin, ent, chan, ent->noise_index, ent->volume, ent->attenuation, 0);
+		{	// normal sound
+			if (ent->spawnflags & 4)
+				chan = CHAN_VOICE|CHAN_RELIABLE;
+			else
+				chan = CHAN_VOICE;
+			// use a positioned_sound, because this entity won't normally be
+			// sent to any clients because it is invisible
+			gi.positioned_sound (ent->s.origin, ent, chan, ent->noise_index, ent->volume, ent->attenuation, 0);
+		}
+
+		ent->count--;
+		if (!ent->count) {
+			ent->think = G_FreeEdict;
+			ent->nextthink = level.time + 1;
+		}
 	}
 }
 

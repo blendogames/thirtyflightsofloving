@@ -2281,6 +2281,10 @@ void PutClientInServer (edict_t *ent)
 	// copy some data from the client to the entity
 	FetchClientEntData (ent);
 
+	// Lazarus: Starting health < max. Presumably player was hurt in a crash
+	if( (spawn_health > 0) && !deathmatch->value && !coop->value)
+		ent->health = min(ent->health, spawn_health);
+
 	// clear entity values
 	ent->groundentity = NULL;
 	ent->client = &game.clients[index];

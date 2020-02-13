@@ -100,9 +100,9 @@ void camera_on (edict_t *ent)
 	// "viewer" can control camera aim (2nd player to come along and use
 	// camera cannot)
 	camera = ent->client->spycam;
-	if(camera->monsterinfo.aiflags & AI_ACTOR)
+	if (camera->monsterinfo.aiflags & AI_ACTOR)
 		camera->flags |= FL_ROBOT;
-	if(!camera->viewer)
+	if (!camera->viewer)
 		camera->viewer = ent;
 
 	// save current viewangles and restore them with camera_off
@@ -162,16 +162,17 @@ void camera_on (edict_t *ent)
 
 	// check to see if we're the enemy of any monster. If so, make the 
 	// faker the enemy
-	for(i=maxclients->value+1, monster=g_edicts+i; i<globals.num_edicts; i++, monster++) {
-		if(!monster->inuse) continue;
-		if(!(monster->svflags & SVF_MONSTER)) continue;
-		if(monster->enemy == ent) {
+	for (i=maxclients->value+1, monster=g_edicts+i; i<globals.num_edicts; i++, monster++)
+	{
+		if (!monster->inuse) continue;
+		if (!(monster->svflags & SVF_MONSTER)) continue;
+		if (monster->enemy == ent) {
 			monster->enemy = faker;
 			FoundTarget(monster);
 		}
 	}
 
-	if(ent->client->spycam->viewmessage)
+	if (ent->client->spycam->viewmessage)
 		gi.centerprintf(ent,ent->client->spycam->viewmessage);
 }
 

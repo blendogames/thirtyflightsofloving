@@ -3063,8 +3063,8 @@ void train_move_prox (edict_t *self)
 	}
 }
 
-//Knightmare- this function moves the movewith chilren
-//Most of this code is by David Hyde, he got tired of just helping me piecemeal...
+// Knightmare- this function moves the movewith children
+// Most of this code is by David Hyde, he got tired of just helping me piecemeal...
 void turret_stand (edict_t *self);
 void train_move_children (edict_t *self)
 {
@@ -3080,30 +3080,30 @@ void train_move_children (edict_t *self)
 	if (!self->targetname)
 		return;
 
-	ent = g_edicts+1; // skip the worldspawn
+	ent = g_edicts+1; // Skip the worldspawn
 	for (i = 1; i < globals.num_edicts; i++, ent++)
 	{
 		if (!ent->classname)
 			continue;
 		if (!ent->movewith)
 			continue;
-		if(!ent->inuse)
+		if (!ent->inuse)
 			return;
 		if (!strcmp(ent->movewith, self->targetname))
 		{
 			ent->movewith_ent = self;
-			//backup and set movetype to push
-			if (ent->movetype && (ent->movetype != MOVETYPE_PUSH)) //backup only non-push movetypes
+			// Backup and set movetype to push
+			if (ent->movetype && (ent->movetype != MOVETYPE_PUSH)) // backup only non-push movetypes
 				ent->oldmovetype = ent->movetype;
 			ent->movetype = MOVETYPE_PUSH;
 
-			//set rotational offset
+			// Set rotational offset
 			if (!ent->movewith_set) 
 			{
 				VectorCopy(ent->mins, ent->org_mins);
 				VectorCopy(ent->maxs, ent->org_maxs);
 				VectorSubtract (ent->s.origin, self->s.origin, ent->movewith_offset);
-				//Remeber child's and parent's angles when child was attached
+				// Remeber child's and parent's angles when child was attached
 				VectorCopy(self->s.angles, ent->parent_attach_angles);
 				VectorCopy(ent->s.angles, ent->child_attach_angles);
 
@@ -3113,32 +3113,33 @@ void train_move_children (edict_t *self)
 
 				ent->movewith_set = 1;
 			}
-			//Get change in parent's angles from when child was attached, this tells us how far we need to rotate
+			// Get change in parent's angles from when child was attached, this tells us how far we need to rotate
 			VectorSubtract(self->s.angles, ent->parent_attach_angles, parent_angle_change);
 			AngleVectors(parent_angle_change, forward, right, up);
 			VectorNegate(right, right);
 
-			//if(!strncmp(ent->classname,"monster_",8))
+		//	if (!strncmp(ent->classname,"monster_",8))
 			if(ent->svflags & SVF_MONSTER)
 				is_monster = true;
 			else
 				is_monster = false;
 
-			/*My old rotational movement code, the children always hanged off a bit...
-			//get length of offset
+		/*	My old rotational movement code, the children always hanged off a bit...
+			// Get length of offset
 			offset_length = VectorLength (ent->movewith_offset);
-			//get angular vector
+			// Get angular vector
 			vectoangles (ent->movewith_offset, dir);
-			//get rotation for this server frame
+			// Get rotation for this server frame
 			VectorScale (self->avelocity, FRAMETIME, amove);
-			//add rotation
+			// Add rotation
 			VectorAdd (dir, amove, dir);
-			//reduce to angular vector
+			// Reduce to angular vector
 			AngleVectors (dir, dir, NULL, NULL);
-			//restore to original length
+			// Restore to original length
 			VectorScale (dir, offset_length, ent->movewith_offset);
-			//add to origin of parent
-			VectorAdd (self->s.origin, ent->movewith_offset, ent->s.origin);*/
+			// Add to origin of parent
+			VectorAdd (self->s.origin, ent->movewith_offset, ent->s.origin);
+			*/
 
 			// For all but buttons, doors, and plats, move origin and match velocities
 			if( strcmp(ent->classname,"func_door") && strcmp(ent->classname,"func_button")
@@ -3155,23 +3156,23 @@ void train_move_children (edict_t *self)
 
 			// If parent is spinning, add appropriate velocities
 			VectorSubtract(ent->s.origin, self->s.origin, offset);
-			if(self->avelocity[PITCH] != 0)
+			if (self->avelocity[PITCH] != 0)
 			{
 				ent->velocity[2] -= offset[0] * self->avelocity[PITCH] * M_PI / 180;
 				ent->velocity[0] += offset[2] * self->avelocity[PITCH] * M_PI / 180;
 			}
-			if(self->avelocity[YAW] != 0)
+			if (self->avelocity[YAW] != 0)
 			{
 				ent->velocity[0] -= offset[1] * self->avelocity[YAW] * M_PI / 180.;
 				ent->velocity[1] += offset[0] * self->avelocity[YAW] * M_PI / 180.;
 			}
-			if(self->avelocity[ROLL] != 0)
+			if (self->avelocity[ROLL] != 0)
 			{
 				ent->velocity[1] -= offset[2] * self->avelocity[ROLL] * M_PI / 180;
 				ent->velocity[2] += offset[1] * self->avelocity[ROLL] * M_PI / 180;
 			}
 			VectorScale (self->avelocity, FRAMETIME, amove);
-			//match angular velocities
+			// Match angular velocities
 			if (self->turn_rider)
 			{
 				if (!strcmp(ent->classname,"func_rotating"))
@@ -3182,7 +3183,8 @@ void train_move_children (edict_t *self)
 					//	ent->s.angles[1] += amove[1];
 						ent->s.angles[1] += (ent->child_attach_angles[1] + parent_angle_change[1]);
 					else if(ent->movedir[2] > 0)
-						ent->s.angles[1] = self->s.angles[1];*/
+						ent->s.angles[1] = self->s.angles[1];
+					*/
 					float	cr, sr;
 					float	cy, sy;
 
@@ -3190,17 +3192,17 @@ void train_move_children (edict_t *self)
 					sy = sin((ent->s.angles[1]-parent_angle_change[1])*M_PI/180);
 					cr = cos((ent->s.angles[2]-parent_angle_change[2])*M_PI/180);
 					sr = sin((ent->s.angles[2]-parent_angle_change[2])*M_PI/180);
-					if(ent->movedir[0] > 0)
+					if (ent->movedir[0] > 0)
 					{
 						ent->s.angles[1] = parent_angle_change[1];
 					}
-					else if(ent->movedir[1] > 0)
+					else if (ent->movedir[1] > 0)
 					{
 						ent->s.angles[1] += amove[1];
 						ent->s.angles[2] =  parent_angle_change[2]*cy;
 						ent->s.angles[0] = -parent_angle_change[2]*sy;
 					}
-					else if(ent->movedir[2] > 0)
+					else if (ent->movedir[2] > 0)
 					{
 						ent->s.angles[1] = parent_angle_change[0]*-sy;
 					}
@@ -3209,9 +3211,9 @@ void train_move_children (edict_t *self)
 				else if (!is_monster)
 				{   // Not a monster/actor. We want monsters/actors to be able to turn on
 					// their own.
-					if(!ent->do_not_rotate)
+					if (!ent->do_not_rotate)
 					{
-						if(!strcmp(ent->classname,"turret_breach") || !strcmp(ent->classname,"turret_base"))
+						if (!strcmp(ent->classname,"turret_breach") || !strcmp(ent->classname,"turret_base"))
 							VectorCopy(self->avelocity, ent->avelocity);
 						else if (!strcmp(ent->classname,"func_door_rotating"))
 						{
@@ -3230,13 +3232,13 @@ void train_move_children (edict_t *self)
 						}
 						//don't move child's angles if not moving self
 						else if (ent->solid == SOLID_BSP) //&& (VectorLength(self->velocity) || VectorLength(self->avelocity)) )
-						{	// brush models always start out with angles=0,0,0 (after G_SetMoveDir).
+						{	// Brush models always start out with angles=0,0,0 (after G_SetMoveDir).
 							// Use more accuracy here.
 							VectorCopy(self->avelocity, ent->avelocity);
 						//	VectorCopy(self->s.angles, ent->s.angles);
 							VectorAdd(ent->child_attach_angles, parent_angle_change, ent->s.angles);
 						}
-						else if(ent->movetype == MOVETYPE_NONE)
+						else if (ent->movetype == MOVETYPE_NONE)
 						{
 							VectorCopy(self->avelocity, ent->avelocity);
 						//	VectorCopy(self->s.angles, ent->s.angles);
@@ -3270,8 +3272,8 @@ void train_move_children (edict_t *self)
 						if (ent->s.frame < 2)
 							VectorAdd(ent->child_attach_angles, parent_angle_change, ent->s.angles);
 						// update aiming
-						//else if (!strcmp(self->classname, "func_rotating") || !strcmp(self->classname, "func_rotating_dh"))
-						//	TurretAim (ent);
+					//	else if (!strcmp(self->classname, "func_rotating") || !strcmp(self->classname, "func_rotating_dh"))
+					//		TurretAim (ent);
 					}
 					// otherwise don't re-angle turrets
 					//else if (strcmp(ent->classname,"monster_turret"))
@@ -3288,7 +3290,7 @@ void train_move_children (edict_t *self)
 			{
 				VectorAdd(ent->s.angles, ent->org_angles, angles);
 				G_SetMovedir (angles, ent->movedir);
-				//Knightmare- these entities need special calculations
+				// Knightmare- these entities need special calculations
 				if (!strcmp(ent->classname,"monster_turret") || !strcmp(ent->classname,"turret_wall")) 
 				{
 					vec3_t		eforward, tangles;
@@ -3326,7 +3328,7 @@ void train_move_children (edict_t *self)
 						VectorScale(eforward, ent->length, eforward);
 					else
 						VectorScale(eforward, ent->length * -1 , eforward);
-					if (ent->spawnflags & 32) //SEC_MOVE_RIGHT
+					if (ent->spawnflags & 32) // SEC_MOVE_RIGHT
 						VectorScale(eright, ent->width, eright);
 					else
 						VectorScale(eright, ent->width * -1, eright);
@@ -3438,7 +3440,7 @@ void train_move_children (edict_t *self)
 				FMOD_UpdateSpeakerPos(ent);
 
 			// Correct func_door_rotating start/end positions
-	/*		if (!strcmp(ent->classname,"func_door_rotating") && (!ent->do_not_rotate))
+		/*	if (!strcmp(ent->classname,"func_door_rotating") && (!ent->do_not_rotate))
 			{
 				VectorCopy (ent->s.angles, ent->pos1);
 				VectorMA (ent->s.angles, ent->moveinfo.distance, ent->movedir, ent->pos2);
