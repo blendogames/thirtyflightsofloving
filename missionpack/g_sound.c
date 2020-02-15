@@ -668,7 +668,7 @@ void FootStep (edict_t *ent)
 	}
 }
 
-#endif //FMOD footsteps
+#endif // FMOD footsteps
 /* All other footstep-related code is in p_view.c. Short version: replace all 
    "ent->s.event = EV_FOOTSTEP" with a call to Footstep and check out G_SetClientEvent,
    where water and ladder sounds are played. */

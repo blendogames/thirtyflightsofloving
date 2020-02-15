@@ -1,24 +1,24 @@
-# Microsoft Developer Studio Project File - Name="game" - Package Owner=<4>
+# Microsoft Developer Studio Project File - Name="missionpack" - Package Owner=<4>
 # Microsoft Developer Studio Generated Build File, Format Version 6.00
 # ** DO NOT EDIT **
 
 # TARGTYPE "Win32 (x86) Dynamic-Link Library" 0x0102
 
-CFG=game - Win32 Release
+CFG=missionpack - Win32 Release
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
 !MESSAGE use the Export Makefile command and run
 !MESSAGE 
-!MESSAGE NMAKE /f "game.mak".
+!MESSAGE NMAKE /f "missionpack.mak".
 !MESSAGE 
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE 
-!MESSAGE NMAKE /f "game.mak" CFG="game - Win32 Release"
+!MESSAGE NMAKE /f "missionpack.mak" CFG="missionpack - Win32 Release"
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
-!MESSAGE "game - Win32 Release" (based on "Win32 (x86) Dynamic-Link Library")
-!MESSAGE "game - Win32 Debug" (based on "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "missionpack - Win32 Release" (based on "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "missionpack - Win32 Debug" (based on "Win32 (x86) Dynamic-Link Library")
 !MESSAGE 
 
 # Begin Project
@@ -29,7 +29,7 @@ CPP=cl.exe
 MTL=midl.exe
 RSC=rc.exe
 
-!IF  "$(CFG)" == "game - Win32 Release"
+!IF  "$(CFG)" == "missionpack - Win32 Release"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
@@ -59,7 +59,7 @@ SOURCE="$(InputPath)"
 PreLink_Cmds=.\extractfuncs\extractfuncs.bat
 # End Special Build Tool
 
-!ELSEIF  "$(CFG)" == "game - Win32 Debug"
+!ELSEIF  "$(CFG)" == "missionpack - Win32 Debug"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
@@ -94,8 +94,8 @@ PreLink_Cmds=.\extractfuncs\extractfuncs.bat
 
 # Begin Target
 
-# Name "game - Win32 Release"
-# Name "game - Win32 Debug"
+# Name "missionpack - Win32 Release"
+# Name "missionpack - Win32 Debug"
 # Begin Group "Source Files"
 
 # PROP Default_Filter "*.c"

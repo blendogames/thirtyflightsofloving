@@ -2368,7 +2368,7 @@ struct edict_s
 	// item identification
 	char		*datafile;
 
-	//Mappack- for the camera to backup the players position, ammo, powerups, etc
+	// Mappack- for the camera to backup the players position, ammo, powerups, etc
 	backup_t	backup;	//this holds the client data
 
 	vec3_t		fog_color;
@@ -2389,7 +2389,7 @@ struct edict_s
 	char		*idle_noise;
 	float		radius;
 
-	//Mappack - for the sprite/model spawner
+	// Mappack - for the sprite/model spawner
 	char		*usermodel;
 	int			startframe;
 	int			framenumbers;
@@ -2400,10 +2400,10 @@ struct edict_s
 	vec3_t		bleft;
 	vec3_t		tright;
 
-	//Knightmare- to support Lazarus func_train movewith
+	// Knightmare- to support Lazarus func_train movewith
 	char			*movewith;
-	char			*dmgteam; //for target_monsterbattle
-	int				do_not_rotate;  //whether to movewith rotate a func_door
+	char			*dmgteam;		// for target_monsterbattle
+	int				do_not_rotate;	// whether to movewith rotate a func_door
 //=========
 //ROGUE
 	int			plat2flags;
