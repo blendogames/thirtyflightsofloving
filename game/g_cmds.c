@@ -1946,7 +1946,10 @@ void ClientCommand (edict_t *ent)
 	}
 	if (Q_stricmp (cmd, "say_team") == 0)
 	{
-		Cmd_Say_f (ent, true, false);
+		if (ctf->value)
+			CTFSay_Team (ent, gi.args());
+		else
+			Cmd_Say_f (ent, true, false);
 		return;
 	}
 	if (Q_stricmp (cmd, "score") == 0)
