@@ -240,6 +240,7 @@ void CreateDSTTex_NV (void)
 	qglTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 }
 
+#if 0
 /*
 ===============
 CreateDSTTex_ARB
@@ -272,6 +273,7 @@ void CreateDSTTex_ARB (void)
 	qglHint(GL_GENERATE_MIPMAP_HINT_SGIS, GL_NICEST);
 	qglTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP_SGIS, GL_TRUE);
 }
+#endif
 
 /*
 ===============
@@ -283,9 +285,10 @@ Needed after a vid_restart.
 */
 void R_InitDSTTex (void)
 {
-	dst_texture_NV = dst_texture_ARB = 0;
+	dst_texture_NV = 0;
+//	dst_texture_ARB = 0;
 	CreateDSTTex_NV ();
-	CreateDSTTex_ARB ();
+//	CreateDSTTex_ARB ();
 }
 //end MrG
 
@@ -335,7 +338,8 @@ void RB_RenderWarpSurface (msurface_t *fa)
 		GL_MBind(0, image->texnum);
 
 		GL_EnableTexture(1);
-		GL_MBind(1, dst_texture_ARB);
+	//	GL_MBind(1, dst_texture_ARB);
+		GL_MBind(1, glMedia.distTextureARB->texnum);
 
 		GL_Enable (GL_FRAGMENT_PROGRAM_ARB);
 		qglBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, fragment_programs[F_PROG_WARP]);

@@ -100,12 +100,12 @@ static char fragment_program_warp[] =
 "ADD coord.y, fragment.texcoord[0].y, offset.w;\n"
 "TEX dist, coord, texture[0], 2D;\n"
 "MUL col, dist, fragment.color;\n"
+
+// scale by rgbscale
 "MUL result.color, col, rgbscale;\n"
 
 "END\n";
-
 #else
-
 static char fragment_program_warp[] =
 "!!ARBfp1.0\n"
 //"OPTION ARB_precision_hint_fastest;\n"
@@ -126,6 +126,36 @@ static char fragment_program_warp[] =
 
 "END\n";
 #endif
+
+
+static char fragment_program_warp_lightmap[] =
+"!!ARBfp1.0\n"
+//"OPTION ARB_precision_hint_fastest;\n"
+"OPTION ARB_precision_hint_nicest;\n"
+
+"PARAM rgbscale = program.local[0];\n"
+"TEMP offset, light, coord, dist, unlit, col;\n"
+
+"TEX offset, fragment.texcoord[2], texture[2], 2D;\n"
+"MUL offset, offset, 0.5;\n"
+
+"TEX light, fragment.texcoord[1], texture[1], 2D;\n"
+"MOV light.w, 1.0;\n"
+
+// fetch the water texture
+"ADD coord.x, fragment.texcoord[0].x, offset.z;\n"
+"ADD coord.y, fragment.texcoord[0].y, offset.w;\n"
+"TEX dist, coord, texture[0], 2D;\n"
+"MUL unlit, dist, fragment.color;\n"
+
+// blend lightmap
+"MUL col, unlit, light;\n"
+
+// scale by rgbscale
+"MUL result.color, col, rgbscale;\n"
+
+"END\n";
+
 
 static char fragment_program_water_distort[] =
 "!!ARBfp1.0\n"
@@ -261,6 +291,7 @@ static char *fragment_progs[NUM_FRAGMENT_PROGRAM] =
 {
 	fragment_program_heathazemask,
 	fragment_program_warp,
+	fragment_program_warp_lightmap,
 	fragment_program_water_distort
 };
 

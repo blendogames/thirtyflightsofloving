@@ -192,6 +192,10 @@ cvar_t	*vid_ref;
 
 cvar_t  *r_bloom;	// BLOOMS
 
+// Discoloda's cel shading
+cvar_t  *r_celshading;
+cvar_t  *r_celshading_width;
+
 cvar_t	*r_skydistance;		// variable sky range
 cvar_t	*r_fog_skyratio;	// variable sky fog ratio
 cvar_t	*r_saturation;		//** DMP
@@ -1038,6 +1042,9 @@ void R_Register (void)
 	vid_ref = Cvar_Get( "vid_ref", "gl", CVAR_ARCHIVE );
 
 	r_bloom = Cvar_Get( "r_bloom", "0", CVAR_ARCHIVE );	// BLOOMS
+
+	r_celshading = Cvar_Get( "r_celshading", "0", CVAR_ARCHIVE );
+	r_celshading_width = Cvar_Get( "r_celshading_width", "4", CVAR_ARCHIVE );
 
 	r_skydistance = Cvar_Get("r_skydistance", "24000", CVAR_ARCHIVE); // variable sky range
 	r_fog_skyratio = Cvar_Get("r_fog_skyratio", "10", CVAR_ARCHIVE);	// variable sky fog ratio
@@ -1932,7 +1939,8 @@ void R_Shutdown (void)
 	Mod_FreeAll ();
 
 	R_ShutdownImages ();
-	R_ClearDisplayLists ();
+//	R_ClearDisplayLists ();
+	R_ShutdownMedia ();
 
 	//
 	// shut down OS specific OpenGL stuff like contexts, etc.

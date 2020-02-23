@@ -71,6 +71,116 @@ image_t * R_CreateNullTexture (void)
 
 /*
 ==================
+R_CreateDistTextureARB
+==================
+*/
+#define DIST_SIZE 16
+image_t *R_CreateDistTextureARB (void)
+{
+	byte	dist[DIST_SIZE][DIST_SIZE][4];
+	int		x, y;
+	image_t	*image;
+
+	srand(Sys_TickCount());
+	for (x=0; x<DIST_SIZE; x++)
+		for (y=0; y<DIST_SIZE; y++) {
+			dist[x][y][0] = rand()%255;
+			dist[x][y][1] = rand()%255;
+			dist[x][y][2] = rand()%48;
+			dist[x][y][3] = rand()%48;
+		}
+	image = R_LoadPic ("*disttexture", (byte *)dist, DIST_SIZE, DIST_SIZE, it_wall, 32);
+
+	qglBindTexture(GL_TEXTURE_2D, image->texnum);
+
+	qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	qglHint(GL_GENERATE_MIPMAP_HINT_SGIS, GL_NICEST);
+	qglTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP_SGIS, GL_TRUE);
+
+	return image;
+}
+
+
+/*
+==================
+R_CreateCelShadeTexture
+==================
+*/
+#define CEL_SHADE_SIZE 32
+const byte cel_tex_colors[CEL_SHADE_SIZE][2] = 
+{
+	// + 3 = 3
+	0,		255,
+	0,		255, 
+	0,		255,
+
+	// + 5 = 8
+	0,		170,
+	0,		170,
+	0,		170,
+	0,		170,
+	0,		170,
+
+	// + 8 = 16
+	0,		85,
+	0,		85,
+	0,		85,
+	0,		85,
+	0,		85,
+	0,		85,
+	0,		85,
+	0,		85,
+
+	// + 8 = 24
+	0,		0,
+	0,		0,
+	0,		0,
+	0,		0,
+	0,		0,
+	0,		0,
+	0,		0,
+	0,		0,
+
+	// + 8 = 32
+	255,	0,
+	255,	0,
+	255,	0,
+	255,	0,
+	255,	0,
+	255,	0,
+	255,	0,
+	255,	0,
+};
+
+image_t *R_CreateCelShadeTexture (void)
+{
+	byte	cel_tex[CEL_SHADE_SIZE][CEL_SHADE_SIZE][4];
+	int		x, y;
+	image_t	*image;
+
+	for (x=0; x<CEL_SHADE_SIZE; x++)
+		for (y=0; y<CEL_SHADE_SIZE; y++) {
+			cel_tex[x][y][0] = (byte)cel_tex_colors[y][0];
+			cel_tex[x][y][1] = (byte)cel_tex_colors[y][0];
+			cel_tex[x][y][2] = (byte)cel_tex_colors[y][0];
+			cel_tex[x][y][3] = (byte)cel_tex_colors[y][1];
+		}
+
+	image = R_LoadPic ("*celshadetexture", (byte *)cel_tex, CEL_SHADE_SIZE, CEL_SHADE_SIZE, it_pic, 32);
+
+	qglBindTexture(GL_TEXTURE_2D, image->texnum);
+	qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	return image;
+}
+
+
+/*
+==================
 LoadPartImg
 ==================
 */
@@ -195,6 +305,8 @@ void R_InitMedia (void)
 	memset (whitetex, 255, sizeof(whitetex));
 	glMedia.whitetexture = R_LoadPic ("***whitetexture***", (byte *)whitetex, NULLTEX_SIZE, NULLTEX_SIZE, it_wall, 32);
 
+	glMedia.distTextureARB = R_CreateDistTextureARB ();			// Generate warp distortion texture
+
 #ifdef ROQ_SUPPORT
 	memset(data2D, 255, 256*256*4);
 	glMedia.rawtexture = R_LoadPic ("***rawtexture***", data2D, 256, 256, it_pic, 32);
@@ -203,6 +315,9 @@ void R_InitMedia (void)
 	glMedia.envmappic = LoadPartImg ("gfx/effects/envmap.tga", it_wall);
 	glMedia.spheremappic = LoadPartImg ("gfx/effects/spheremap.tga", it_skin);
 	glMedia.shelltexture = LoadPartImg ("gfx/effects/shell_generic.tga", it_skin);
+
+	glMedia.celshadetexture = R_CreateCelShadeTexture ();
+
 	glMedia.causticwaterpic = LoadPartImg ("gfx/water/caustic_water.tga", it_wall);
 	glMedia.causticslimepic = LoadPartImg ("gfx/water/caustic_slime.tga", it_wall);
 	glMedia.causticlavapic = LoadPartImg ("gfx/water/caustic_lava.tga", it_wall);
@@ -218,6 +333,37 @@ void R_InitMedia (void)
 	R_CreateDisplayLists ();
 
 	CL_SetParticleImages ();
+}
+
+
+/*
+==================
+R_ShutdownMedia
+==================
+*/
+void R_ShutdownMedia (void)
+{
+	int		i;
+
+	glMedia.notexture = NULL;
+	glMedia.whitetexture = NULL;
+	glMedia.distTextureARB = NULL;
+	glMedia.rawtexture = NULL;
+	
+	glMedia.envmappic = NULL;
+	glMedia.spheremappic = NULL;
+	glMedia.shelltexture = NULL;
+	glMedia.celshadetexture = NULL;
+
+	glMedia.causticwaterpic = NULL;
+	glMedia.causticslimepic = NULL;
+	glMedia.causticlavapic = NULL;
+	glMedia.particlebeam = NULL;
+
+	for (i=0; i<PARTICLE_TYPES; i++)
+		glMedia.particletextures[i] = NULL;
+
+	R_ClearDisplayLists ();
 }
 
 

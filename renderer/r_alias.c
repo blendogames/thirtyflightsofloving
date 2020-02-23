@@ -39,10 +39,10 @@ float	aliasShadowAlpha;
 
 /*
 =================
-R_LightAliasModel
+R_LightAliasVertex
 =================
 */
-void R_LightAliasModel (vec3_t baselight, vec3_t normal, vec3_t lightOut, byte normalindex, qboolean shaded)
+void R_LightAliasVertex (vec3_t baselight, vec3_t normal, vec3_t lightOut, byte normalindex, qboolean shaded)
 {
 	int		i;
 	float	l;
@@ -85,6 +85,70 @@ void R_LightAliasModel (vec3_t baselight, vec3_t normal, vec3_t lightOut, byte n
 
 	for (i=0; i<3; i++)
 		lightOut[i] = max(min(lightOut[i], 1.0f), 0.0f);
+}
+
+
+/*
+=================
+R_LightAliasVertexCel
+
+Adds dlights only for cel shading
+=================
+*/
+void R_LightAliasVertexCel (vec3_t baselight, vec3_t normal, vec3_t lightOut, byte normalindex)
+{
+	int		i;
+	float	l;
+
+	if (r_fullbright->integer != 0) {
+		VectorSet (lightOut, 1.0f, 1.0f, 1.0f);
+		return;
+	}
+		
+	VectorCopy(baselight, lightOut);
+
+	if (model_dlights_num)
+		for (i=0; i<model_dlights_num; i++)
+		{
+			l = 2.0 * VLight_GetLightValue (normal, model_dlights[i].direction,
+				currententity->angles[PITCH], currententity->angles[YAW], true);
+			VectorMA(lightOut, l, model_dlights[i].color, lightOut);
+		}
+
+	for (i=0; i<3; i++)
+		lightOut[i] = max(min(lightOut[i], 1.0f), 0.0f);
+}
+
+
+/*
+=================
+R_CelTexCoord
+=================
+*/
+#define CEL_OUTLINEDROPOFF 1024.0f	// distance for cel shading outline to disappear
+#define CEL_TEX_MIN (0.5f/32.0f)
+#define CEL_TEX_MAX (31.5f/32.0f)
+float R_CelTexCoord (vec3_t meshlight, vec3_t normal, byte lightnormalindex)
+{
+	float	shadeCoord;
+	int		i, highest = 0;
+	vec3_t	lightColor;
+	
+	R_LightAliasVertex (meshlight, normal, lightColor, lightnormalindex, true);
+
+	for (i=0; i<3; i++) {
+		if (lightColor[i] > lightColor[highest])
+			highest = i;
+	}
+
+	for (i=0; i<3; i++) {
+		lightColor[i] = min(max(lightColor[i], 0.0f), 1.0f);
+	}
+
+	shadeCoord = lightColor[highest];
+	shadeCoord = min(max(shadeCoord, CEL_TEX_MIN), CEL_TEX_MAX);
+
+	return shadeCoord;
 }
 
 
@@ -154,7 +218,7 @@ void RB_RenderAliasMesh (maliasmodel_t *paliashdr, unsigned meshnum, unsigned sk
 {
 	entity_t		*e = currententity;
 	maliasmesh_t	*mesh;
-	renderparms_t	skinParms;
+	renderparms_t	*skinParms;
 	int				i;
 	float			thisalpha = colorArray[0][3];
 	qboolean		shellModel = e->flags & RF_MASK_SHELL;
@@ -168,25 +232,25 @@ void RB_RenderAliasMesh (maliasmodel_t *paliashdr, unsigned meshnum, unsigned sk
 		GL_Bind(skin->texnum);
 
 	// md3 skin scripting
-	skinParms = mesh->skins[skinnum].renderparms;
+	skinParms = &mesh->skins[skinnum].renderparms;
 
-	if (skinParms.twosided)
+	if (skinParms->twosided)
 		GL_Disable (GL_CULL_FACE);
 	else
 		GL_Enable (GL_CULL_FACE);
 
-	if (skinParms.alphatest && !shellModel)
+	if (skinParms->alphatest && !shellModel)
 		GL_Enable (GL_ALPHA_TEST);
 	else
 		GL_Disable (GL_ALPHA_TEST);
 
-	if (thisalpha < 1.0f || skinParms.blend)
+	if (thisalpha < 1.0f || skinParms->blend)
 		GL_Enable (GL_BLEND);
 	else
 		GL_Disable (GL_BLEND);
 
-	if (skinParms.blend && !shellModel)
-		GL_BlendFunc (skinParms.blendfunc_src, skinParms.blendfunc_dst);
+	if (skinParms->blend && !shellModel)
+		GL_BlendFunc (skinParms->blendfunc_src, skinParms->blendfunc_dst);
 	else if (shellModel)
 		GL_BlendFunc (GL_ONE, GL_ONE);
 	else
@@ -200,7 +264,7 @@ void RB_RenderAliasMesh (maliasmodel_t *paliashdr, unsigned meshnum, unsigned sk
 	if (mesh->skins[skinnum].glowimage && !shellModel)
 	{
 		float	glowcolor;
-		if (skinParms.glow.type > -1)
+		if (skinParms->glow.type > -1)
 			glowcolor = RB_CalcGlowColor (skinParms);
 		else
 			glowcolor = 1.0;
@@ -219,7 +283,7 @@ void RB_RenderAliasMesh (maliasmodel_t *paliashdr, unsigned meshnum, unsigned sk
 	}
 
 	// envmap pass
-	if (skinParms.envmap > 0.0f && !shellModel)
+	if (skinParms->envmap > 0.0f && !shellModel)
 	{
 		GL_Enable (GL_BLEND);
 		GL_BlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -228,7 +292,7 @@ void RB_RenderAliasMesh (maliasmodel_t *paliashdr, unsigned meshnum, unsigned sk
 		qglTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
 		// apply alpha to array
 		for (i=0; i<rb_vertex; i++)
-			colorArray[i][3] = thisalpha*skinParms.envmap;
+			colorArray[i][3] = thisalpha*skinParms->envmap;
 
 		GL_Bind(glMedia.envmappic->texnum);
 
@@ -239,6 +303,51 @@ void RB_RenderAliasMesh (maliasmodel_t *paliashdr, unsigned meshnum, unsigned sk
 
 		qglDisable(GL_TEXTURE_GEN_S);
 		qglDisable(GL_TEXTURE_GEN_T);
+	}
+
+	// cel shading
+	if ( r_celshading->integer && !(thisalpha < 1.0f || skinParms->blend) )
+	{
+		float	strength, len;
+		vec3_t	offset;
+
+		// blend cel shade texture
+		qglDepthMask (false);
+		GL_Enable (GL_BLEND);
+		GL_BlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+		GL_Bind (glMedia.celshadetexture->texnum);
+
+		qglTexCoordPointer (2, GL_FLOAT, sizeof(celTexCoordArray[0]), celTexCoordArray[0]);
+		qglDisableClientState (GL_COLOR_ARRAY);
+		qglColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+
+		RB_DrawArrays ();
+
+		qglTexCoordPointer (2, GL_FLOAT, sizeof(texCoordArray[0][0]), texCoordArray[0][0]);
+	//	qglEnableClientState (GL_COLOR_ARRAY);
+
+		GL_Disable (GL_BLEND);
+		qglDepthMask (true);
+
+		// draw outlines
+		VectorSubtract (r_newrefdef.vieworg, currententity->origin, offset);
+		len = VectorNormalize(offset);
+		strength = (CEL_OUTLINEDROPOFF - len) / CEL_OUTLINEDROPOFF;
+		strength = min(max(strength, 0.0f), 1.0f);
+
+		qglPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		GL_CullFace(GL_BACK);
+		qglColor4f(0.0f, 0.0f, 0.0f, 1.0f);
+		qglLineWidth(r_celshading_width->value * strength);
+
+		RB_DrawArrays ();
+
+		qglLineWidth(1.0f);
+		qglColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+		GL_CullFace(GL_FRONT);
+		qglEnableClientState (GL_COLOR_ARRAY);
+		qglPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
 
 	RB_DrawMeshTris ();
@@ -272,6 +381,7 @@ void R_DrawAliasMeshes (maliasmodel_t *paliashdr, entity_t *e, qboolean lerpOnly
 	image_t			*skin;
 	renderparms_t	skinParms;
 	qboolean		shellModel = e->flags & RF_MASK_SHELL;
+	qboolean		meshCelShaded;	// added for cel shading
 
 	frontlerp = 1.0 - backlerp;
 
@@ -348,6 +458,9 @@ void R_DrawAliasMeshes (maliasmodel_t *paliashdr, entity_t *e, qboolean lerpOnly
 		meshalpha = alpha * skinParms.basealpha;
 		// md3 skin scripting
 
+		// is this mesh cel shaded?
+		meshCelShaded = (r_celshading->integer && !(meshalpha < 1.0f || skinParms.blend));
+
 		v = mesh.vertexes + e->frame * mesh.num_verts;
 		ov = mesh.vertexes + e->oldframe * mesh.num_verts;
 		baseindex = rb_vertex;
@@ -394,8 +507,10 @@ void R_DrawAliasMeshes (maliasmodel_t *paliashdr, entity_t *e, qboolean lerpOnly
 			// calc lighting and alpha
 			if (shellModel)
 				VectorCopy(meshlight, lightcolor);
+			else if (meshCelShaded)
+				R_LightAliasVertexCel (meshlight, tempNormalsArray[i], lightcolor, v->lightnormalindex);	// added for cel shading
 			else
-				R_LightAliasModel (meshlight, tempNormalsArray[i], lightcolor, v->lightnormalindex, !skinParms.nodiffuse);
+				R_LightAliasVertex (meshlight, tempNormalsArray[i], lightcolor, v->lightnormalindex, !skinParms.nodiffuse);
 			//thisalpha = R_CalcEntAlpha(meshalpha, tempVertexArray[meshnum][i]);
 			thisalpha = meshalpha;
 
@@ -412,10 +527,13 @@ void R_DrawAliasMeshes (maliasmodel_t *paliashdr, entity_t *e, qboolean lerpOnly
 			VA_SetElem2(texCoordArray[0][rb_vertex], tempSkinCoord[0], tempSkinCoord[1]);
 			VA_SetElem3(vertexArray[rb_vertex], tempVertexArray[meshnum][i][0], tempVertexArray[meshnum][i][1], tempVertexArray[meshnum][i][2]);
 			VA_SetElem4(colorArray[rb_vertex], lightcolor[0], lightcolor[1], lightcolor[2], thisalpha);
+			if (meshCelShaded) {
+				VA_SetElem2(celTexCoordArray[rb_vertex], R_CelTexCoord(meshlight, tempNormalsArray[i], v->lightnormalindex), 0);	// added for cel shading
+			}
 			rb_vertex++;
 		}
 		if (!shellModel)
-			RB_ModifyTextureCoords (&texCoordArray[0][baseindex][0], &vertexArray[baseindex][0], mesh.num_verts, skinParms);
+			RB_ModifyTextureCoords (&texCoordArray[0][baseindex][0], &vertexArray[baseindex][0], mesh.num_verts, &skinParms);
 
 		// compare renderparms for next mesh and check for overflow
 		if ( k < (paliashdr->num_meshes-1) ) {
@@ -996,6 +1114,12 @@ void R_DrawAliasModel (entity_t *e)
 	else if (e->flags & RF_MIRRORMODEL)
 		mirrormodel = true;
 	// end mirroring support
+
+	// clamp r_celshading_width to >= 1.0
+	if (!r_celshading_width)
+		r_celshading_width = Cvar_Get("r_celshading_width", "4", 0);
+	if (r_celshading_width->value < 1.0f)
+		Cvar_SetValue( "r_celshading_width", 1.0f);
 
 	paliashdr = (maliasmodel_t *)currentmodel->extradata;
 

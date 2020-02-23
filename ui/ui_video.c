@@ -126,6 +126,7 @@ static void ResetVideoDefaults ( void *unused )
 	Cvar_SetToDefault ("r_shadows");
 	Cvar_SetToDefault ("r_stencilTwoSide");
 	Cvar_SetToDefault ("r_shelltype");
+	Cvar_SetToDefault ("r_celshading");
 //	Cvar_SetToDefault ("r_screenshot_jpeg");
 	Cvar_SetToDefault ("r_screenshot_format");
 	Cvar_SetToDefault ("r_screenshot_jpeg_quality");

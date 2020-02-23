@@ -593,7 +593,7 @@ void R_DrawCameraEffect (void)
 		cameraParms.scale_y = texparms[i][1];
 		cameraParms.scroll_x = texparms[i][2];
 		cameraParms.scroll_y = texparms[i][3];
-		RB_ModifyTextureCoords (&texCoord[0][0], &verts[0][0], 4, cameraParms);
+		RB_ModifyTextureCoords (&texCoord[0][0], &verts[0][0], 4, &cameraParms);
 		for (j=0; j<4; j++) {
 			VA_SetElem2(texCoordArray[0][j], texCoord[j][0], texCoord[j][1]);
 			VA_SetElem3(vertexArray[j], verts[j][0], verts[j][1], verts[j][2]);

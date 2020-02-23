@@ -166,10 +166,12 @@ typedef enum {
 typedef struct glmedia_s {
 	image_t		*notexture;			// used for bad textures
 	image_t		*whitetexture;		// used for solid colors
+	image_t		*distTextureARB;	// used for warp distortion
 	image_t		*rawtexture;		// used for cinematics
 	image_t		*envmappic;
 	image_t		*spheremappic;
 	image_t		*shelltexture;
+	image_t		*celshadetexture;
 	image_t		*causticwaterpic;
 	image_t		*causticslimepic;
 	image_t		*causticlavapic;
@@ -328,6 +330,10 @@ extern	cvar_t	*r_saturation;		//** DMP
 
 extern  cvar_t  *r_bloom;
 
+// Discoloda's cel shading
+extern  cvar_t  *r_celshading;
+extern  cvar_t  *r_celshading_width;
+
 extern	cvar_t	*vid_fullscreen;
 extern	cvar_t	*vid_gamma;
 
@@ -474,6 +480,7 @@ void R_SetPalette ( const unsigned char *palette);
 void R_CreateDisplayLists (void);
 void R_ClearDisplayLists (void);
 void R_InitMedia (void);
+void R_ShutdownMedia (void);
 void R_ScreenShot_f (void);
 void R_ScreenShot_Silent_f (void);
 void R_ScreenShot_TGA_f (void);
@@ -557,15 +564,16 @@ void R_DrawAliasModelBBox (vec3_t bbox[8], entity_t *e, float red, float green, 
 
 extern unsigned	indexArray[MAX_INDICES];
 extern float	texCoordArray[MAX_TEXTURE_UNITS][MAX_VERTICES][2];
-extern float	inTexCoordArray[MAX_VERTICES][2];
 extern float	vertexArray[MAX_VERTICES][3];
 extern float	colorArray[MAX_VERTICES][4];
+extern float	inTexCoordArray[MAX_VERTICES][2];
+extern float	celTexCoordArray[MAX_VERTICES][2];	// for cel shading
 extern unsigned rb_vertex, rb_index;
 // end vertex array stuff
 
 void RB_InitBackend (void);
-float RB_CalcGlowColor (renderparms_t parms);
-void RB_ModifyTextureCoords (float *inArray, float *vertexArray, int numVerts, renderparms_t parms);
+float RB_CalcGlowColor (renderparms_t *parms);
+void RB_ModifyTextureCoords (float *inArray, float *inVerts, int numVerts, renderparms_t *parms);
 qboolean RB_CheckArrayOverflow (int numVerts, int numIndex);
 void RB_RenderMeshGeneric (qboolean drawTris);
 void RB_DrawArrays (void);
@@ -581,6 +589,7 @@ typedef enum
 {
 	F_PROG_HEATHAZEMASK = 0,
 	F_PROG_WARP,
+	F_PROG_WARP_LM,
 	F_PROG_WATER_DISTORT,
 	NUM_FRAGMENT_PROGRAM
 } fr_progs;

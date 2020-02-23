@@ -39,6 +39,7 @@ float		texCoordArray[MAX_TEXTURE_UNITS][MAX_VERTICES][2];
 float		vertexArray[MAX_VERTICES][3];
 float		colorArray[MAX_VERTICES][4];
 float		inTexCoordArray[MAX_VERTICES][2];
+float		celTexCoordArray[MAX_VERTICES][2];	// for cel shading
 
 unsigned	rb_vertex, rb_index;
 
@@ -120,15 +121,17 @@ void RB_InitBackend (void)
 RB_CalcGlowColor
 =================
 */
-float RB_CalcGlowColor (renderparms_t parms)
+float RB_CalcGlowColor (renderparms_t *parms)
 {
 	float	*table, rad, out=1.0f;
 
-	if (parms.glow.type > -1)
+	if (!parms)	return 0.0f;
+
+	if (parms->glow.type > -1)
 	{
-		table = RB_TableForFunc(&parms.glow);
-		rad = parms.glow.params[2] + parms.glow.params[3] * r_newrefdef.time;
-		out = table[((int)(rad * TABLE_SIZE)) & TABLE_MASK] * parms.glow.params[1] + parms.glow.params[0];
+		table = RB_TableForFunc(&parms->glow);
+		rad = parms->glow.params[2] + parms->glow.params[3] * r_newrefdef.time;
+		out = table[((int)(rad * TABLE_SIZE)) & TABLE_MASK] * parms->glow.params[1] + parms->glow.params[0];
 		out = max(min(out, 1.0f), 0.0f); // clamp
 	}
 	return out;
@@ -140,22 +143,25 @@ RB_ModifyTextureCoords
 borrowed from EGL & Q2E
 =================
 */
-void RB_ModifyTextureCoords (float *inArray, float *inVerts, int numVerts, renderparms_t parms)
+void RB_ModifyTextureCoords (float *inArray, float *inVerts, int numVerts, renderparms_t *parms)
 {
 	int		i;
 	float	t1, t2, sint, cost, rad;
 	float	*tcArray, *vertArray, *table;
 
-	if (parms.translate_x != 0.0f)
-		for (tcArray=inArray, i=0; i<numVerts; i++, tcArray+=2)
-			tcArray[0] += parms.translate_x;
-	if (parms.translate_y != 0.0f)
-		for (tcArray=inArray, i=0; i<numVerts; i++, tcArray+=2)
-			tcArray[1] += parms.translate_y;
+	if (!inArray || !inVerts || !parms)
+		return;
 
-	if (parms.rotate != 0.0f)
+	if (parms->translate_x != 0.0f)
+		for (tcArray=inArray, i=0; i<numVerts; i++, tcArray+=2)
+			tcArray[0] += parms->translate_x;
+	if (parms->translate_y != 0.0f)
+		for (tcArray=inArray, i=0; i<numVerts; i++, tcArray+=2)
+			tcArray[1] += parms->translate_y;
+
+	if (parms->rotate != 0.0f)
 	{
-		rad = -DEG2RAD(parms.rotate * r_newrefdef.time);
+		rad = -DEG2RAD(parms->rotate * r_newrefdef.time);
 		sint = sin(rad);
 		cost = cos(rad);
 
@@ -167,11 +173,11 @@ void RB_ModifyTextureCoords (float *inArray, float *inVerts, int numVerts, rende
 		}
 	}
 
-	if (parms.stretch.type > -1)
+	if (parms->stretch.type > -1)
 	{
-		table = RB_TableForFunc(&parms.stretch);
-		rad = parms.stretch.params[2] + parms.stretch.params[3] * r_newrefdef.time;
-		t1 = table[((int)(rad * TABLE_SIZE)) & TABLE_MASK] * parms.stretch.params[1] + parms.stretch.params[0];
+		table = RB_TableForFunc(&parms->stretch);
+		rad = parms->stretch.params[2] + parms->stretch.params[3] * r_newrefdef.time;
+		t1 = table[((int)(rad * TABLE_SIZE)) & TABLE_MASK] * parms->stretch.params[1] + parms->stretch.params[0];
 		
 		t1 = (t1) ? 1.0 / t1 : 1.0;
 		t2 = 0.5 - 0.5 * t1;
@@ -182,31 +188,30 @@ void RB_ModifyTextureCoords (float *inArray, float *inVerts, int numVerts, rende
 		}
 	}
 
-	if (parms.scale_x != 1.0f)
+	if (parms->scale_x != 1.0f)
 		for (tcArray=inArray, i=0; i<numVerts; i++, tcArray+=2)
-			tcArray[0] = tcArray[0] / parms.scale_x;
-	if (parms.scale_y != 1.0f)
+			tcArray[0] = tcArray[0] / parms->scale_x;
+	if (parms->scale_y != 1.0f)
 		for (tcArray=inArray, i=0; i<numVerts; i++, tcArray+=2)
-			tcArray[1] = tcArray[1] / parms.scale_y;
+			tcArray[1] = tcArray[1] / parms->scale_y;
 
-	if (parms.turb.type > -1)
+	if (parms->turb.type > -1)
 	{
-		table = RB_TableForFunc(&parms.turb);
-		t1 = parms.turb.params[2] + parms.turb.params[3] * r_newrefdef.time;
+		table = RB_TableForFunc(&parms->turb);
+		t1 = parms->turb.params[2] + parms->turb.params[3] * r_newrefdef.time;
 
 		for (tcArray=inArray, vertArray=inVerts, i=0; i<numVerts; i++, tcArray+=2, vertArray+=3) {
-			tcArray[0] += (table[((int)(((vertArray[0] + vertArray[2]) * 1.0/128 * 0.125 + t1) * TABLE_SIZE)) & TABLE_MASK] * parms.turb.params[1] + parms.turb.params[0]);
-			tcArray[1] += (table[((int)(((vertArray[1]) * 1.0/128 * 0.125 + t1) * TABLE_SIZE)) & TABLE_MASK] * parms.turb.params[1] + parms.turb.params[0]);
+			tcArray[0] += (table[((int)(((vertArray[0] + vertArray[2]) * 1.0/128 * 0.125 + t1) * TABLE_SIZE)) & TABLE_MASK] * parms->turb.params[1] + parms->turb.params[0]);
+			tcArray[1] += (table[((int)(((vertArray[1]) * 1.0/128 * 0.125 + t1) * TABLE_SIZE)) & TABLE_MASK] * parms->turb.params[1] + parms->turb.params[0]);
 		}
-
 	}
 
-	if (parms.scroll_x != 0.0f)
+	if (parms->scroll_x != 0.0f)
 		for (tcArray=inArray, i=0; i<numVerts; i++, tcArray+=2)
-			tcArray[0] += r_newrefdef.time * parms.scroll_x;
-	if (parms.scroll_y != 0.0f)
+			tcArray[0] += r_newrefdef.time * parms->scroll_x;
+	if (parms->scroll_y != 0.0f)
 		for (tcArray=inArray, i=0; i<numVerts; i++, tcArray+=2)
-			tcArray[1] += r_newrefdef.time * parms.scroll_y;
+			tcArray[1] += r_newrefdef.time * parms->scroll_y;
 }
 
 /*

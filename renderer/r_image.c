@@ -2387,15 +2387,17 @@ void R_FreeUnusedImages (void)
 	// never free notexture or particle textures
 	glMedia.notexture->registration_sequence = registration_sequence;
 	glMedia.whitetexture->registration_sequence = registration_sequence;
+	glMedia.distTextureARB->registration_sequence = registration_sequence;
 #ifdef ROQ_SUPPORT
 	glMedia.rawtexture->registration_sequence = registration_sequence;
 #endif // ROQ_SUPPORT
 	glMedia.envmappic->registration_sequence = registration_sequence;
 	glMedia.spheremappic->registration_sequence = registration_sequence;
+	glMedia.shelltexture->registration_sequence = registration_sequence;
+	glMedia.celshadetexture->registration_sequence = registration_sequence;
 	glMedia.causticwaterpic->registration_sequence = registration_sequence;
 	glMedia.causticslimepic->registration_sequence = registration_sequence;
 	glMedia.causticlavapic->registration_sequence = registration_sequence;
-	glMedia.shelltexture->registration_sequence = registration_sequence;
 	glMedia.particlebeam->registration_sequence = registration_sequence;
 
 	for (i=0; i<PARTICLE_TYPES; i++)

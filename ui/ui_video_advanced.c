@@ -56,6 +56,7 @@ static menulist_s		s_modelshading_box;
 static menulist_s		s_shadows_box;
 static menulist_s		s_two_side_stencil_box;
 static menulist_s  		s_ent_shell_box;
+static menulist_s  		s_celshading_box;
 static menulist_s  		s_glass_envmap_box;
 //static menulist_s  		s_screenshotjpeg_box;
 static menulist_s  		s_screenshotformat_box;
@@ -122,6 +123,9 @@ static void Video_Advanced_MenuSetValues ( void )
 
 	Cvar_SetValue( "r_shelltype", ClampCvar( 0, 2, Cvar_VariableValue("r_shelltype") ) );
 	s_ent_shell_box.curvalue = Cvar_VariableValue("r_shelltype");
+
+	Cvar_SetValue( "r_celshading", ClampCvar( 0, 1, Cvar_VariableValue("r_celshading") ) );
+	s_celshading_box.curvalue = Cvar_VariableValue("r_celshading");
 
 //	Cvar_SetValue( "r_screenshot_jpeg", ClampCvar( 0, 1, Cvar_VariableValue("r_screenshot_jpeg") ) );
 //	s_screenshotjpeg_box.curvalue = Cvar_VariableValue("r_screenshot_jpeg");
@@ -224,6 +228,11 @@ static void TwoSideStencilCallback ( void *unused )
 static void EntShellCallback ( void *unused )
 {
 	Cvar_SetValue( "r_shelltype", s_ent_shell_box.curvalue);
+}
+
+static void CelShadingCallback ( void *unused )
+{
+	Cvar_SetValue( "r_celshading", s_celshading_box.curvalue);
 }
 
 /*
@@ -482,6 +491,15 @@ void Menu_Video_Advanced_Init (void)
 	s_ent_shell_box.generic.callback			= EntShellCallback;
 	s_ent_shell_box.itemnames					= shell_names;
 	s_ent_shell_box.generic.statusbar			= "envmap effect may cause instability on ATI cards";
+
+	s_celshading_box.generic.type				= MTYPE_SPINCONTROL;
+	s_celshading_box.generic.x					= 0;
+	s_celshading_box.generic.y					= y += MENU_LINE_SIZE;
+	s_celshading_box.generic.name				= "cel shading";
+	s_celshading_box.generic.callback			= CelShadingCallback;
+	s_celshading_box.itemnames					= yesno_names;
+	s_celshading_box.generic.statusbar			= "cartoon-style rendering of models";
+
 /*
 	s_screenshotjpeg_box.generic.type			= MTYPE_SPINCONTROL;
 	s_screenshotjpeg_box.generic.x				= 0;
@@ -549,6 +567,7 @@ void Menu_Video_Advanced_Init (void)
 	Menu_AddItem( &s_video_advanced_menu, ( void * ) &s_shadows_box );
 	Menu_AddItem( &s_video_advanced_menu, ( void * ) &s_two_side_stencil_box );
 	Menu_AddItem( &s_video_advanced_menu, ( void * ) &s_ent_shell_box );
+	Menu_AddItem( &s_video_advanced_menu, ( void * ) &s_celshading_box );
 //	Menu_AddItem( &s_video_advanced_menu, ( void * ) &s_screenshotjpeg_box );
 	Menu_AddItem( &s_video_advanced_menu, ( void * ) &s_screenshotformat_box );
 	Menu_AddItem( &s_video_advanced_menu, ( void * ) &s_screenshotjpegquality_slider );

@@ -871,8 +871,8 @@ void Mod_LoadFaces (lump_t *l)
 			out->flags |= SURF_DRAWTURB;
 			for (i=0; i<2; i++)
 			{
-				out->extents[i] = 16384;
-				out->texturemins[i] = -8192;
+				out->extents[i] = (WORLD_SIZE*2);	// was 16384
+				out->texturemins[i] = -WORLD_SIZE;	// was -8192
 			}
 			R_SubdivideSurface (out);	// cut up polygon for warps
 		}
