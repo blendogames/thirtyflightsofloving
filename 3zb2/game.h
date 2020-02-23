@@ -1,4 +1,5 @@
-
+#ifndef GAMEHEAD
+#define GAMEHEAD
 // game.h -- game dll information visible to server
 
 #define	GAME_API_VERSION	3
@@ -8,15 +9,7 @@
 #define	SVF_NOCLIENT			0x00000001	// don't send entity to clients, even if it has effects
 #define	SVF_DEADMONSTER			0x00000002	// treat as CONTENTS_DEADMONSTER for collision
 #define	SVF_MONSTER				0x00000004	// treat as CONTENTS_MONSTER for collision
-//ROGUE -- added for things that are damageable, but not monsters
-// right now, only the tesla has this
-#define SVF_DAMAGEABLE			0x00000008
-//ROGUE end
-#define	SVF_GIB					0x00000010	//Knightmare- gib flag
-#define SVF_TRIGGER_CAMOWNER    0x00000020
-#define	SVF_MUD					0x00000040  //mud flag
-#define	SVF_CLONED				0x00000080	//How to tell if this entity is a clone
-#define	SVF_OLDPLAYER			0x00000080	//How to tell if this entity is a clone
+#define	SVF_GIB					0x00000040	// Knightmare- gib flag
 
 // edict->solid values
 
@@ -56,18 +49,18 @@ typedef struct gclient_s gclient_t;
 
 #ifndef GAME_INCLUDE
 
-struct gclient_s
+typedef struct gclient_s
 {
 	player_state_t	ps;		// communicated by server to clients
 	int				ping;
 	// the game dll can add anything it wants after
 	// this point in the structure
-};
+} gclient_t;
 
 
 struct edict_s
 {
-	entity_state_t		s;
+	entity_state_t	s;
 	struct gclient_s	*client;
 	qboolean	inuse;
 	int			linkcount;
@@ -118,7 +111,8 @@ typedef struct
 
 	void	(*error) (char *fmt, ...);
 
-	// the *index functions create configstrings and some internal server state
+	// new names can only be added during spawning
+	// existing names can be looked up at any time
 	int		(*modelindex) (char *name);
 	int		(*soundindex) (char *name);
 	int		(*imageindex) (char *name);
@@ -187,8 +181,8 @@ typedef struct
 	void	(*CloseFile) (fileHandle_t f);
 	int		(*FRead) (void *buffer, int size, fileHandle_t f);
 	int		(*FWrite) (const void *buffer, int size, fileHandle_t f);
-	char	*(*GameDir) (void);
-	char	*(*SaveGameDir) (void);
+	char	*(*FS_GameDir) (void);
+	char	*(*FS_SaveGameDir) (void);
 	void	(*CreatePath) (char *path);
 	char	**(*GetFileList) (const char *path, const char *extension, int *num);
 #endif
@@ -215,16 +209,17 @@ typedef struct
 	// about the world state and the clients.
 	// WriteGame is called every time a level is exited.
 	// ReadGame is called on a loadgame.
-	void		(*WriteGame) (char *filename, qboolean autosave);
+	void		(*WriteGame) (char *filename);
 	void		(*ReadGame) (char *filename);
 
 	// ReadLevel is called after the default map information has been
-	// loaded with SpawnEntities
+	// loaded with SpawnEntities, so any stored client spawn spots will
+	// be used when the clients reconnect.
 	void		(*WriteLevel) (char *filename);
 	void		(*ReadLevel) (char *filename);
 
-	qboolean	(*ClientConnect) (edict_t *ent, char *userinfo);
-	void		(*ClientBegin) (edict_t *ent);
+	qboolean	(*ClientConnect) (edict_t *ent, char *userinfo, qboolean loadgame);
+	void		(*ClientBegin) (edict_t *ent, qboolean loadgame);
 	void		(*ClientUserinfoChanged) (edict_t *ent, char *userinfo);
 	void		(*ClientDisconnect) (edict_t *ent);
 	void		(*ClientCommand) (edict_t *ent);
@@ -253,3 +248,4 @@ typedef struct
 } game_export_t;
 
 game_export_t *GetGameApi (game_import_t *import);
+#endif

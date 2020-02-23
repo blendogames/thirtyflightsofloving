@@ -8,15 +8,7 @@
 #define	SVF_NOCLIENT			0x00000001	// don't send entity to clients, even if it has effects
 #define	SVF_DEADMONSTER			0x00000002	// treat as CONTENTS_DEADMONSTER for collision
 #define	SVF_MONSTER				0x00000004	// treat as CONTENTS_MONSTER for collision
-//ROGUE -- added for things that are damageable, but not monsters
-// right now, only the tesla has this
-#define SVF_DAMAGEABLE			0x00000008
-//ROGUE end
-#define	SVF_GIB					0x00000010	//Knightmare- gib flag
-#define SVF_TRIGGER_CAMOWNER    0x00000020
-#define	SVF_MUD					0x00000040  //mud flag
-#define	SVF_CLONED				0x00000080	//How to tell if this entity is a clone
-#define	SVF_OLDPLAYER			0x00000080	//How to tell if this entity is a clone
+#define	SVF_GIB					0x00000040	// Knightmare- gib flag
 
 // edict->solid values
 
@@ -67,7 +59,7 @@ struct gclient_s
 
 struct edict_s
 {
-	entity_state_t		s;
+	entity_state_t	s;
 	struct gclient_s	*client;
 	qboolean	inuse;
 	int			linkcount;
