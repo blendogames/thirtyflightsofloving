@@ -214,7 +214,7 @@ RB_RenderAliasMesh
 Backend for R_DrawAliasMeshes
 =================
 */
-void RB_RenderAliasMesh (maliasmodel_t *paliashdr, unsigned meshnum, unsigned skinnum, image_t *skin)
+void RB_RenderAliasMesh (maliasmodel_t *paliashdr, unsigned meshnum, unsigned skinnum, image_t *skin, qboolean reverseCull)
 {
 	entity_t		*e = currententity;
 	maliasmesh_t	*mesh;
@@ -337,7 +337,10 @@ void RB_RenderAliasMesh (maliasmodel_t *paliashdr, unsigned meshnum, unsigned sk
 		strength = min(max(strength, 0.0f), 1.0f);
 
 		qglPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		GL_CullFace(GL_BACK);
+		if (reverseCull)
+			GL_CullFace(GL_FRONT);
+		else
+			GL_CullFace(GL_BACK);
 		qglColor4f(0.0f, 0.0f, 0.0f, 1.0f);
 		qglLineWidth(r_celshading_width->value * strength);
 
@@ -345,7 +348,10 @@ void RB_RenderAliasMesh (maliasmodel_t *paliashdr, unsigned meshnum, unsigned sk
 
 		qglLineWidth(1.0f);
 		qglColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-		GL_CullFace(GL_FRONT);
+		if (reverseCull)
+			GL_CullFace(GL_BACK);
+		else
+			GL_CullFace(GL_FRONT);
 		qglEnableClientState (GL_COLOR_ARRAY);
 		qglPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
@@ -366,7 +372,7 @@ void RB_RenderAliasMesh (maliasmodel_t *paliashdr, unsigned meshnum, unsigned sk
 R_DrawAliasMeshes
 =================
 */
-void R_DrawAliasMeshes (maliasmodel_t *paliashdr, entity_t *e, qboolean lerpOnly, qboolean mirrored)
+void R_DrawAliasMeshes (maliasmodel_t *paliashdr, entity_t *e, qboolean lerpOnly, qboolean mirrored, qboolean viewFlipped)
 {
 	int				i, k, meshnum, skinnum, baseindex;	// numCalls
 	maliasframe_t	*frame, *oldframe;
@@ -542,7 +548,7 @@ void R_DrawAliasMeshes (maliasmodel_t *paliashdr, entity_t *e, qboolean lerpOnly
 				continue;
 		}
 
-		RB_RenderAliasMesh (paliashdr, meshnum, skinnum, skin);
+		RB_RenderAliasMesh (paliashdr, meshnum, skinnum, skin, (mirrored || viewFlipped));
 
 	//	numCalls++;
 	} // end new outer loop
@@ -1104,7 +1110,6 @@ void R_DrawAliasModel (entity_t *e)
 			return;
 		else if (r_lefthand->value == 1)
 			mirrorview = true;
-	//		mirrormodel = true;
 	}
 	else if (e->renderfx & RF2_CAMERAMODEL)
 	{
@@ -1165,7 +1170,7 @@ void R_DrawAliasModel (entity_t *e)
 	if (!r_lerpmodels->value)
 		e->backlerp = 0;
 
-	R_DrawAliasMeshes (paliashdr, e, false, mirrormodel);
+	R_DrawAliasMeshes (paliashdr, e, false, mirrormodel, mirrorview);
 
 	qglPopMatrix ();
 
@@ -1243,7 +1248,7 @@ void R_DrawAliasModelShadow (entity_t *e)
 
 	if (e->renderfx & RF2_CAMERAMODEL)
 	{
-		if (r_lefthand->value==1)
+		if (r_lefthand->value == 1)
 			mirrormodel = true;
 	}
 	else if (e->flags & RF_MIRRORMODEL)
@@ -1270,7 +1275,7 @@ void R_DrawAliasModelShadow (entity_t *e)
 	//if ( !r_lerpmodels->value )
 	//	e->backlerp = 0;
 	
-	R_DrawAliasMeshes (paliashdr, e, true, mirrormodel);
+	R_DrawAliasMeshes (paliashdr, e, true, mirrormodel, false);
 
 	qglPushMatrix ();
 	GL_DisableTexture(0);
