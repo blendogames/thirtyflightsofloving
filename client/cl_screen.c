@@ -605,7 +605,17 @@ Hud_DrawStringAlt
 */
 void Hud_DrawStringAlt (int x, int y, const char *string, int alpha, qboolean isStatusBar)
 {
-	DrawStringGeneric (x, y, string, alpha, (isStatusBar) ? SCALETYPE_HUD : SCALETYPE_MENU, true);
+	int		i, len;
+	char	highString[1024];
+
+//	Com_sprintf (highString, sizeof(highString), S_COLOR_ALT"%s", string);
+	Com_sprintf (highString, sizeof(highString), "%s", string);
+	len = (int)strlen(highString);
+	for (i=0; i<len; i++) {
+		highString[i] ^= 128;
+	}
+	DrawStringGeneric (x, y, highString, alpha, (isStatusBar) ? SCALETYPE_HUD : SCALETYPE_MENU, false);
+//	DrawStringGeneric (x, y, string, alpha, (isStatusBar) ? SCALETYPE_HUD : SCALETYPE_MENU, true);
 }
 
 
@@ -2051,12 +2061,17 @@ void SizeHUDString (char *string, int *w, int *h, qboolean isStatusBar)
 	*h = lines * scaleForScreen(8);
 }
 
-void _DrawHUDString (char *string, int x, int y, int centerwidth, int xor, qboolean isStatusBar)
+/*
+================
+CL_DrawLayoutString
+================
+*/
+void CL_DrawLayoutString (char *string, int x, int y, int centerwidth, int xor, qboolean isStatusBar)
 {
 	int		margin;
-	char	line[1024];
 	int		width, visibleWidth;
-	//int		i, len;
+	int		i, len;
+	char	line[1024];
 	float	(*scaleForScreen)(float in);
 
 	// Get our scaling function
@@ -2067,7 +2082,7 @@ void _DrawHUDString (char *string, int x, int y, int centerwidth, int xor, qbool
 
 	margin = x;
 
-	//len = strlen(string);
+//	len = strlen(string);
 
 	while (*string)
 	{
@@ -2089,17 +2104,21 @@ void _DrawHUDString (char *string, int x, int y, int centerwidth, int xor, qbool
 
 		if (xor)
 		{	// Knightmare- text color hack
-			Com_sprintf (line, sizeof(line), S_COLOR_ALT"%s", line);
-			Hud_DrawStringAlt(x, y, line, 255, isStatusBar);
+		//	Com_sprintf (line, sizeof(line), S_COLOR_ALT"%s", line);
+		//	Hud_DrawStringAlt(x, y, line, 255, isStatusBar);
+			len = (int)strlen(line);
+			for (i=0; i<len; i++) {
+				line[i] ^= xor;
+			}
 		}
-		else
+	//	else
 			Hud_DrawString(x, y, line, 255, isStatusBar);
 
 		if (*string)
 		{
 			string++;	// skip the \n
 			x = margin;
-//			y += scaledHud(8);
+		//	y += scaledHud(8);
 			y += scaleForScreen(8);
 		}
 	}
@@ -2218,7 +2237,7 @@ void SCR_ExecuteLayoutString (char *s, qboolean isStatusBar)
 	int		x, y;
 	int		value;
 	char	*token;
-	char	string[1024];
+//	char	string[1024];
 	int		width;
 	int		index;
 	clientinfo_t	*ci;
@@ -2524,7 +2543,7 @@ void SCR_ExecuteLayoutString (char *s, qboolean isStatusBar)
 		if (!strcmp(token, "cstring"))
 		{
 			token = COM_Parse (&s);
-			_DrawHUDString (token, x, y, scaleForScreen(320), 0, isStatusBar);
+			CL_DrawLayoutString (token, x, y, scaleForScreen(320), 0, isStatusBar);
 			continue;
 		}
 
@@ -2538,15 +2557,16 @@ void SCR_ExecuteLayoutString (char *s, qboolean isStatusBar)
 		if (!strcmp(token, "cstring2"))
 		{
 			token = COM_Parse (&s);
-			_DrawHUDString (token, x, y, scaleForScreen(320), 0x80, isStatusBar);
+			CL_DrawLayoutString (token, x, y, scaleForScreen(320), 0x80, isStatusBar);
 			continue;
 		}
 
 		if (!strcmp(token, "string2"))
 		{
 			token = COM_Parse (&s);
-			Com_sprintf (string, sizeof(string), S_COLOR_ALT"%s", token);
-			Hud_DrawStringAlt (x, y, string, 255, isStatusBar);
+		//	Com_sprintf (string, sizeof(string), S_COLOR_ALT"%s", token);
+		//	Hud_DrawStringAlt (x, y, string, 255, isStatusBar);
+			Hud_DrawStringAlt (x, y, token, 255, isStatusBar);
 			continue;
 		}
 

@@ -49,6 +49,8 @@ Changes as of v0.20 update 8:
 
 - Fixed fog disappearing after a vid_restart.
 
+- Fixed handling of high-bit alt color strings.
+
 - Fixed alignment issue with colored text on help computer and centerprints.
 
 - Fixed  text color and formatting disappearing after word wrap in console.

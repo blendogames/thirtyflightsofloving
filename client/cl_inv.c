@@ -109,9 +109,9 @@ void CL_DrawInventory (void)
 	SCR_DrawPic (x, y, 256, 192, ALIGN_CENTER, "inventory", hud_alpha->value);
 	x += 24;
 	y += 20;
-	SCR_DrawString (x, y, ALIGN_CENTER, S_COLOR_BOLD"hotkey ### item", 255);
+	SCR_DrawString (x, y, ALIGN_CENTER, S_COLOR_WHITE"hotkey ### item", 255);
 	y += 8;
-	SCR_DrawString (x, y, ALIGN_CENTER, S_COLOR_BOLD"------ --- ----", 255);
+	SCR_DrawString (x, y, ALIGN_CENTER, S_COLOR_WHITE"------ --- ----", 255);
 	x += 16;
 	y += 8;
 
@@ -141,12 +141,12 @@ void CL_DrawInventory (void)
 		{
 			if (item != selected)
 			{
-				Com_sprintf (string, sizeof(string), " "S_COLOR_BOLD S_COLOR_ALT"%3s %3i %7s", bind, cl.inventory[item],
+				Com_sprintf (string, sizeof(string), " "S_COLOR_ALT"%3s %3i %7s", bind, cl.inventory[item],
 					cl.configstrings[OLD_CS_ITEMS+item] );
 			}
 			else	// draw a blinky cursor by the selected item
 			{
-				Com_sprintf (string, sizeof(string), S_COLOR_BOLD">"S_COLOR_ITALIC"%3s %3i %7s", bind, cl.inventory[item],
+				Com_sprintf (string, sizeof(string), S_COLOR_WHITE">"S_COLOR_ITALIC"%3s %3i %7s", bind, cl.inventory[item],
 					cl.configstrings[OLD_CS_ITEMS+item] );
 			}
 		}
@@ -154,12 +154,12 @@ void CL_DrawInventory (void)
 		{
 			if (item != selected)
 			{
-				Com_sprintf (string, sizeof(string), " "S_COLOR_BOLD S_COLOR_ALT"%3s %3i %7s", bind, cl.inventory[item],
+				Com_sprintf (string, sizeof(string), " "S_COLOR_ALT"%3s %3i %7s", bind, cl.inventory[item],
 					cl.configstrings[CS_ITEMS+item] );
 			}
 			else	// draw a blinky cursor by the selected item
 			{
-				Com_sprintf (string, sizeof(string), S_COLOR_BOLD">"S_COLOR_ITALIC"%3s %3i %7s", bind, cl.inventory[item],
+				Com_sprintf (string, sizeof(string), S_COLOR_WHITE">"S_COLOR_ITALIC"%3s %3i %7s", bind, cl.inventory[item],
 					cl.configstrings[CS_ITEMS+item] );
 			}
 		}
