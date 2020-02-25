@@ -57,6 +57,7 @@ static menulist_s		s_shadows_box;
 static menulist_s		s_two_side_stencil_box;
 static menulist_s  		s_ent_shell_box;
 static menulist_s  		s_celshading_box;
+static menuslider_s  	s_celshading_width_slider;
 static menulist_s  		s_glass_envmap_box;
 //static menulist_s  		s_screenshotjpeg_box;
 static menulist_s  		s_screenshotformat_box;
@@ -71,10 +72,10 @@ static void Video_Advanced_MenuSetValues ( void )
 	char	*sshotformat;
 
 	Cvar_SetValue( "r_modulate", ClampCvar( 1, 2, Cvar_VariableValue("r_modulate") ) );
-	s_lightmapscale_slider.curvalue = (Cvar_VariableValue("r_modulate") -1) * 10;
+	s_lightmapscale_slider.curvalue = (Cvar_VariableValue("r_modulate") - 1) * 10;
 
 	Cvar_SetValue( "r_intensity", ClampCvar( 1, 2, Cvar_VariableValue("r_intensity") ) );
-	s_textureintensity_slider.curvalue = (Cvar_VariableValue("r_intensity") -1) * 10;
+	s_textureintensity_slider.curvalue = (Cvar_VariableValue("r_intensity") - 1) * 10;
 
 	Cvar_SetValue( "r_rgbscale", ClampCvar( 1, 2, Cvar_VariableValue("r_rgbscale") ) );
 	if (Cvar_VariableValue("r_rgbscale") == 1)
@@ -126,6 +127,9 @@ static void Video_Advanced_MenuSetValues ( void )
 
 	Cvar_SetValue( "r_celshading", ClampCvar( 0, 1, Cvar_VariableValue("r_celshading") ) );
 	s_celshading_box.curvalue = Cvar_VariableValue("r_celshading");
+
+	Cvar_SetValue( "r_celshading_width", ClampCvar( 1, 12, Cvar_VariableValue("r_celshading_width") ) );
+	s_celshading_width_slider.curvalue = Cvar_VariableValue("r_celshading_width") - 1;
 
 //	Cvar_SetValue( "r_screenshot_jpeg", ClampCvar( 0, 1, Cvar_VariableValue("r_screenshot_jpeg") ) );
 //	s_screenshotjpeg_box.curvalue = Cvar_VariableValue("r_screenshot_jpeg");
@@ -235,6 +239,10 @@ static void CelShadingCallback ( void *unused )
 	Cvar_SetValue( "r_celshading", s_celshading_box.curvalue);
 }
 
+static void CelShadingWidthCallback ( void *unused )
+{
+	Cvar_SetValue( "r_celshading_width", s_celshading_width_slider.curvalue + 1);
+}
 /*
 static void JPEGScreenshotCallback ( void *unused )
 {
@@ -500,6 +508,15 @@ void Menu_Video_Advanced_Init (void)
 	s_celshading_box.itemnames					= yesno_names;
 	s_celshading_box.generic.statusbar			= "cartoon-style rendering of models";
 
+	s_celshading_width_slider.generic.type		= MTYPE_SLIDER;
+	s_celshading_width_slider.generic.x			= 0;
+	s_celshading_width_slider.generic.y			= y += MENU_LINE_SIZE;
+	s_celshading_width_slider.generic.name		= "cel shading width";
+	s_celshading_width_slider.generic.callback	= CelShadingWidthCallback;
+	s_celshading_width_slider.minvalue			= 0;
+	s_celshading_width_slider.maxvalue			= 11;
+	s_celshading_width_slider.generic.statusbar	= "width of cel shading outlines";
+
 /*
 	s_screenshotjpeg_box.generic.type			= MTYPE_SPINCONTROL;
 	s_screenshotjpeg_box.generic.x				= 0;
@@ -568,6 +585,7 @@ void Menu_Video_Advanced_Init (void)
 	Menu_AddItem( &s_video_advanced_menu, ( void * ) &s_two_side_stencil_box );
 	Menu_AddItem( &s_video_advanced_menu, ( void * ) &s_ent_shell_box );
 	Menu_AddItem( &s_video_advanced_menu, ( void * ) &s_celshading_box );
+	Menu_AddItem( &s_video_advanced_menu, ( void * ) &s_celshading_width_slider );
 //	Menu_AddItem( &s_video_advanced_menu, ( void * ) &s_screenshotjpeg_box );
 	Menu_AddItem( &s_video_advanced_menu, ( void * ) &s_screenshotformat_box );
 	Menu_AddItem( &s_video_advanced_menu, ( void * ) &s_screenshotjpegquality_slider );

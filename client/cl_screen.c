@@ -2105,14 +2105,12 @@ void CL_DrawLayoutString (char *string, int x, int y, int centerwidth, int xor, 
 		if (xor)
 		{	// Knightmare- text color hack
 		//	Com_sprintf (line, sizeof(line), S_COLOR_ALT"%s", line);
-		//	Hud_DrawStringAlt(x, y, line, 255, isStatusBar);
 			len = (int)strlen(line);
 			for (i=0; i<len; i++) {
 				line[i] ^= xor;
 			}
 		}
-	//	else
-			Hud_DrawString(x, y, line, 255, isStatusBar);
+		Hud_DrawString(x, y, line, 255, isStatusBar);
 
 		if (*string)
 		{
@@ -2237,7 +2235,6 @@ void SCR_ExecuteLayoutString (char *s, qboolean isStatusBar)
 	int		x, y;
 	int		value;
 	char	*token;
-//	char	string[1024];
 	int		width;
 	int		index;
 	clientinfo_t	*ci;
@@ -2564,8 +2561,6 @@ void SCR_ExecuteLayoutString (char *s, qboolean isStatusBar)
 		if (!strcmp(token, "string2"))
 		{
 			token = COM_Parse (&s);
-		//	Com_sprintf (string, sizeof(string), S_COLOR_ALT"%s", token);
-		//	Hud_DrawStringAlt (x, y, string, 255, isStatusBar);
 			Hud_DrawStringAlt (x, y, token, 255, isStatusBar);
 			continue;
 		}

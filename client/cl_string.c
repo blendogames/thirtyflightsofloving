@@ -242,26 +242,11 @@ void DrawStringGeneric (int x, int y, const char *string, int alpha, textscalety
 		case SCALETYPE_HUD:
 			textSize = scaledHud(HUD_FONT_SIZE);
 			textScale = HudScale();
-			// hack for alternate text color
-		/*	if (altBit) {
-				if (!modified) {
-					character ^= 0x80;
-					if (character & 128)
-						TextColor((int)alt_text_color->value, &red, &green, &blue);
-				}
-			}
-			else {
-				if (!modified && (character & 128))
-					TextColor((int)alt_text_color->value, &red, &green, &blue);
-			}*/
 			break;
 		case SCALETYPE_CONSOLE:
 		default:
 			textSize = FONT_SIZE;
 			textScale = FONT_SIZE/8.0f;
-			// hack for alternate text color
-		//	if (!modified && (character & 128))
-		//		TextColor((int)alt_text_color->value, &red, &green, &blue);
 			break;
 		}
 
@@ -271,6 +256,6 @@ void DrawStringGeneric (int x, int y, const char *string, int alpha, textscalety
 			R_DrawChar( ( x + (j-1)*textSize+textSize/4 ), y+(textSize/8), 
 				character, textScale, 0, 0, 0, alpha, italic, false );
 		R_DrawChar( ( x + (j-1)*textSize ), y,
-			character, textScale, red, green, blue, alpha, italic, flushChar );	// (i==(len-1)) );
+			character, textScale, red, green, blue, alpha, italic, flushChar );
 	}
 }
