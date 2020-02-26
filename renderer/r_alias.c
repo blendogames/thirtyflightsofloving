@@ -306,7 +306,7 @@ void RB_RenderAliasMesh (maliasmodel_t *paliashdr, unsigned meshnum, unsigned sk
 	}
 
 	// cel shading
-	if ( r_celshading->integer && !(thisalpha < 1.0f || skinParms->blend) )
+	if ( r_celshading->integer && !(thisalpha < 1.0f || skinParms->blend || skinParms->alphatest) )
 	{
 		float	strength, len;
 		vec3_t	offset;
@@ -465,7 +465,7 @@ void R_DrawAliasMeshes (maliasmodel_t *paliashdr, entity_t *e, qboolean lerpOnly
 		// md3 skin scripting
 
 		// is this mesh cel shaded?
-		meshCelShaded = (r_celshading->integer && !(meshalpha < 1.0f || skinParms.blend));
+		meshCelShaded = (r_celshading->integer && !(meshalpha < 1.0f || skinParms.blend || skinParms.alphatest));
 
 		v = mesh.vertexes + e->frame * mesh.num_verts;
 		ov = mesh.vertexes + e->oldframe * mesh.num_verts;
