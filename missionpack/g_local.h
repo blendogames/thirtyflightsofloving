@@ -1108,11 +1108,7 @@ char	*vtos (vec3_t v);
 
 float vectoyaw (vec3_t vec);
 float vectopitch (vec3_t vec); // Knightmare added
-
 void vectoangles (vec3_t vec, vec3_t angles);
-
-float	PointDist (vec3_t x, vec3_t y);
-
 void stuffcmd(edict_t *ent, char *s);
 
 qboolean point_infront (edict_t *self, vec3_t point);
