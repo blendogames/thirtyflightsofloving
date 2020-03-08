@@ -577,7 +577,7 @@ void SP_monster_berserk (edict_t *self)
 		self->blood_type = 3; //sparks and blood
 
 	// Lazarus
-	if(self->powerarmor)
+	if (self->powerarmor)
 	{
 		if (self->powerarmortype == 1)
 			self->monsterinfo.power_armor_type = POWER_ARMOR_SCREEN;
@@ -585,8 +585,10 @@ void SP_monster_berserk (edict_t *self)
 			self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
 		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
-	if(!self->monsterinfo.flies)
+
+	if (!self->monsterinfo.flies)
 		self->monsterinfo.flies = 0.20;
+
 	self->common_name = "Berserker";
 
 	gi.linkentity (self);

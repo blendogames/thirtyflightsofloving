@@ -2034,7 +2034,7 @@ void tesla_think_active (edict_t *self)
 	vec3_t	dir, start;
 	trace_t	tr;
 
-	if(level.time > self->air_finished)
+	if (level.time > self->air_finished)
 	{
 		tesla_remove(self);
 		return;
@@ -2044,28 +2044,28 @@ void tesla_think_active (edict_t *self)
 	start[2] += 12; // was 16
 
 	num = gi.BoxEdicts(self->teamchain->absmin, self->teamchain->absmax, touch, MAX_EDICTS, AREA_SOLID);
-	for(i=0;i<num;i++)
+	for (i=0;i<num;i++)
 	{
 		// if the tesla died while zapping things, stop zapping.
 		if(!(self->inuse))
 			break;
 
 		hit=touch[i];
-		if(!hit->inuse)
+		if (!hit->inuse)
 			continue;
-		if(hit == self)
+		if (hit == self)
 			continue;
-		if(hit->health < 1)
+		if (hit->health < 1)
 			continue;
 		// don't hit clients in single-player or coop
-		if(hit->client)
+		if (hit->client)
 			if (coop->value || !deathmatch->value)
 				continue;
-		if(!(hit->svflags & (SVF_MONSTER | SVF_DAMAGEABLE)) && !hit->client)
+		if (!(hit->svflags & (SVF_MONSTER | SVF_DAMAGEABLE)) && !hit->client)
 			continue;
 
 		tr = gi.trace(start, vec3_origin, vec3_origin, hit->s.origin, self, MASK_SHOT);
-		if(tr.fraction==1 || tr.ent==hit)// || tr.ent->client || (tr.ent->svflags & (SVF_MONSTER | SVF_DAMAGEABLE)))
+		if (tr.fraction == 1 || tr.ent == hit)// || tr.ent->client || (tr.ent->svflags & (SVF_MONSTER | SVF_DAMAGEABLE)))
 		{
 			VectorSubtract(hit->s.origin, start, dir);
 
@@ -2079,7 +2079,7 @@ void tesla_think_active (edict_t *self)
 			}
 
 			// PGM - don't do knockback to walking monsters
-			if((hit->svflags & SVF_MONSTER) && !(hit->flags & (FL_FLY|FL_SWIM)))
+			if ((hit->svflags & SVF_MONSTER) && !(hit->flags & (FL_FLY|FL_SWIM)))
 				T_Damage (hit, self, self->teammaster, dir, tr.endpos, tr.plane.normal,
 					self->dmg, 0, 0, MOD_TESLA);
 			else
@@ -2100,7 +2100,7 @@ void tesla_think_active (edict_t *self)
 		}
 	}
 
-	if(self->inuse)
+	if (self->inuse)
 	{
 		self->think = tesla_think_active;
 		self->nextthink = level.time + FRAMETIME;

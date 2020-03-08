@@ -299,6 +299,33 @@ void SP_misc_crashviper_origin (edict_t *ent);
 void SP_misc_strogg_ship_origin (edict_t *ent);
 void SP_misc_transport_origin (edict_t *ent);
 
+// Knightmare- Q1 monsters/entities
+void SP_monster_q1_chthon (edict_t *self);
+void SP_monster_q1_dog (edict_t *self);
+void SP_monster_q1_enforcer (edict_t *self);
+void SP_monster_q1_fiend (edict_t *self);
+void SP_monster_q1_grunt (edict_t *self);
+void SP_monster_q1_hknight (edict_t *self);
+void SP_monster_q1_knight (edict_t *self);
+void SP_monster_q1_ogre (edict_t *self);     
+void SP_monster_q1_rotfish (edict_t *self);
+void SP_monster_q1_scrag (edict_t *self); 
+void SP_monster_q1_shalrath (edict_t *self);
+void SP_monster_q1_shambler (edict_t *self);
+void SP_monster_q1_tarbaby (edict_t *self);
+void SP_monster_q1_zombie (edict_t *self);
+
+void SP_misc_q1_zombie_crucified (edict_t *self);
+void SP_misc_q1_air_bubbles (edict_t *self);
+void SP_misc_q1_large_flame(edict_t *self);
+void SP_misc_q1_small_flame (edict_t *self);
+void SP_misc_q1_torch(edict_t *self);
+void SP_target_q1_trap(edict_t *self);
+void SP_misc_q1_explobox(edict_t *self);  
+void SP_misc_q1_fireball(edict_t *self);
+void SP_misc_q1_globe(edict_t *self);
+// end Knightmare
+
 // transition entities
 void SP_bolt (edict_t *self);
 void SP_bolt2 (edict_t *self);
@@ -447,7 +474,7 @@ spawn_t	spawns[] = {
 //Knightmare- experiment gekks
 	{"misc_gekk_writhe", SP_misc_gekk_writhe},
 
-	//Knightmare- Coconut Monkey 3 Flame entities
+	// Knightmare- Coconut Monkey 3 Flame entities
 	{"light_flame1", SP_light_flame1}, 
 	{"light_flame1s", SP_light_flame1s}, 
 	{"light_flame2", SP_light_flame2}, 
@@ -626,6 +653,51 @@ spawn_t	spawns[] = {
 	{"misc_strogg_ship_origin", SP_misc_strogg_ship_origin},
 	{"misc_transport_origin", SP_misc_transport_origin},
 
+// Knightmare- Q1 monsters/entities
+	// Generations spawn names
+//	{"q1_monster_chton", SP_monster_q1_chthon},	
+	{"q1_monster_dog", SP_monster_q1_dog},
+	{"q1_monster_enforcer", SP_monster_q1_enforcer},
+	{"q1_monster_fiend", SP_monster_q1_fiend},
+	{"q1_monster_soldier", SP_monster_q1_grunt},
+	{"q1_monster_hknight", SP_monster_q1_hknight},
+	{"q1_monster_knight", SP_monster_q1_knight},
+	{"q1_monster_ogre", SP_monster_q1_ogre},
+	{"q1_monster_fish", SP_monster_q1_rotfish},
+	{"q1_monster_scrag", SP_monster_q1_scrag},
+	{"q1_monster_shambler", SP_monster_q1_shambler},
+	{"q1_monster_shalrath", SP_monster_q1_shalrath},
+	{"q1_monster_tarbaby", SP_monster_q1_tarbaby},
+	{"q1_monster_zombie", SP_monster_q1_zombie},
+
+	// Q2Infighter spawn names
+//	{"monster_q1_chthon", SP_monster_q1_chthon},	
+	{"monster_q1_dog", SP_monster_q1_dog},
+	{"monster_q1_enforcer", SP_monster_q1_enforcer},
+	{"monster_q1_demon", SP_monster_q1_fiend},
+	{"monster_q1_army", SP_monster_q1_grunt},
+	{"monster_q1_hknight", SP_monster_q1_hknight},
+	{"monster_q1_knight", SP_monster_q1_knight},
+	{"monster_q1_ogre", SP_monster_q1_ogre},
+	{"monster_q1_fish", SP_monster_q1_rotfish},
+	{"monster_q1_wizard", SP_monster_q1_scrag},
+	{"monster_q1_shambler", SP_monster_q1_shambler},
+	{"monster_q1_shalrath", SP_monster_q1_shalrath},
+	{"monster_q1_tarbaby", SP_monster_q1_tarbaby},
+	{"monster_q1_zombie", SP_monster_q1_zombie},
+
+	// misc Q1 entities
+	{"misc_q1_zombie_crucified", SP_misc_q1_zombie_crucified},
+	{"misc_q1_air_bubbles", SP_misc_q1_air_bubbles},
+	{"misc_q1_large_flame", SP_misc_q1_large_flame},
+	{"misc_q1_small_flame", SP_misc_q1_small_flame},
+	{"misc_q1_torch", SP_misc_q1_torch},
+	{"target_q1_trap", SP_target_q1_trap},
+	{"misc_q1_light_globe", SP_misc_q1_globe},
+	{"misc_q1_explobox", SP_misc_q1_explobox},
+	{"misc_q1_fireball",SP_misc_q1_fireball},
+// end Knightmare
+
 // transition entities
 	{"bolt", SP_bolt},
 	{"bolt2", SP_bolt2},
@@ -703,9 +775,9 @@ void ED_CallSpawn (edict_t *ent)
 		&& IsXatrixMap() && !strcmp(ent->classname, "monster_brain"))
 		ent->classname = "monster_brain_beta";
 
-	//Knightmare- mission pack monster replacement
+	// Knightmare- mission pack monster replacement
 	if (mp_monster_replace->value)
-	{	//gladiator
+	{	// gladiator
 		if (!strcmp(ent->classname, "monster_gladiator"))
 		{
 			ent->classname = "monster_gladb";
@@ -716,10 +788,10 @@ void ED_CallSpawn (edict_t *ent)
 					st.item = NULL;
 				}
 		}
-		//brain
+		// brain
 		if (!strcmp(ent->classname, "monster_brain"))
 			ent->classname = "monster_brain_beta";
-		//soldiers
+		// soldiers
 		if (!strcmp(ent->classname, "monster_soldier_light"))
 		{
 			ent->classname = "monster_soldier_ripper";
@@ -750,16 +822,16 @@ void ED_CallSpawn (edict_t *ent)
 					st.item = NULL;
 				}
 		}
-		//icarus
+		// icarus
 		if (!strcmp(ent->classname, "monster_hover"))
 			ent->classname = "monster_daedalus";
-		//supertank
+		// supertank
 		if (!strcmp(ent->classname, "monster_supertank"))
 			ent->classname = "monster_boss5";
-		//chick
+		// chick
 		if (!strcmp(ent->classname, "monster_chick"))
 			ent->classname = "monster_chick_heat";
-		//medic
+		// medic
 		if (!strcmp(ent->classname, "monster_medic")
 			//don't spawn another medic commander from medic commander
 			&& !(ent->monsterinfo.monsterflags & MFL_DO_NOT_COUNT))

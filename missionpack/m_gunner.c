@@ -1109,11 +1109,11 @@ void SP_monster_gunner (edict_t *self)
 	VectorSet (self->mins, -16, -16, -24);
 	VectorSet (self->maxs, 16, 16, 32);
 
-	if(!self->health)
+	if (!self->health)
 		self->health = 175;
-	if(!self->gib_health)
+	if (!self->gib_health)
 		self->gib_health = -150;
-	if(!self->mass)
+	if (!self->mass)
 		self->mass = 200;
 
 	self->pain = gunner_pain;
@@ -1139,7 +1139,7 @@ void SP_monster_gunner (edict_t *self)
 		self->blood_type = 3; //sparks and blood
 
 	// Lazarus
-	if(self->powerarmor)
+	if (self->powerarmor)
 	{
 		if (self->powerarmortype == 1)
 			self->monsterinfo.power_armor_type = POWER_ARMOR_SCREEN;
@@ -1147,8 +1147,9 @@ void SP_monster_gunner (edict_t *self)
 			self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
 		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
-	if(!self->monsterinfo.flies)
+	if (!self->monsterinfo.flies)
 		self->monsterinfo.flies = 0.30;
+
 	self->common_name = "Gunner";
 
 	gi.linkentity (self);

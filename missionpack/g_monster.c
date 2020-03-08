@@ -814,7 +814,7 @@ void M_MoveFrame (edict_t *self)
 
 	// Lazarus: For live monsters weaker than gladiator who aren't already running from
 	//          something, evade live grenades on the ground.
-	if((self->health > 0) && (self->max_health < 400) && !(self->monsterinfo.aiflags & AI_CHASE_THING) && self->monsterinfo.run)
+	if ((self->health > 0) && (self->max_health < 400) && !(self->monsterinfo.aiflags & AI_CHASE_THING) && self->monsterinfo.run)
 		Grenade_Evade (self);
 
 	move = self->monsterinfo.currentmove;
@@ -948,6 +948,12 @@ void monster_triggered_spawn (edict_t *self)
 	self->movetype = MOVETYPE_STEP;
 	self->svflags &= ~SVF_NOCLIENT;
 	self->air_finished = level.time + 12;
+	// Knightmare- teleport effect for Q1 monsters
+	if (self->flags & FL_Q1_MONSTER) {
+		self->s.event = EV_PLAYER_TELEPORT;
+		Q1TeleportSounds(self);
+	}
+	// end Knightmare
 	gi.linkentity (self);
 
 	monster_start_go (self);
@@ -1097,7 +1103,7 @@ qboolean monster_start (edict_t *self)
 	self->air_finished = level.time + 12;
 	self->use = monster_use;
 	// Lazarus - don't reset max_health unnecessarily
-	if(!self->max_health)
+	if (!self->max_health)
 		self->max_health = self->health;
 /*	if (self->health < (self->max_health / 2))
 		self->s.skinnum |= 1;
@@ -1110,28 +1116,28 @@ qboolean monster_start (edict_t *self)
 	self->deadflag = DEAD_NO;
 	self->svflags &= ~SVF_DEADMONSTER;
 
-	if(self->monsterinfo.flies > 1.0)
+	if (self->monsterinfo.flies > 1.0)
 	{
 		self->s.effects |= EF_FLIES;
 		self->s.sound = gi.soundindex ("infantry/inflies1.wav");
 	}
 
 	// Lazarus
-	if(self->health <= 0)
+	if (self->health <= 0)
 	{
 		self->svflags |= SVF_DEADMONSTER;
 		self->movetype = MOVETYPE_TOSS;
 		self->takedamage = DAMAGE_YES;
 		self->monsterinfo.pausetime = 100000000;
 		self->monsterinfo.aiflags &= ~AI_RESPAWN_FINDPLAYER;
-		if(self->max_health > 0)
+		if (self->max_health > 0)
 		{
 			// This must be a dead monster who changed levels
 			// via trigger_transition
 			self->nextthink = 0;
 			self->deadflag = DEAD_DEAD;
 		}
-		if(self->s.effects & EF_FLIES && self->monsterinfo.flies <= 1.0)
+		if (self->s.effects & EF_FLIES && self->monsterinfo.flies <= 1.0)
 		{
 			self->think = M_FliesOff;
 			self->nextthink = level.time + 1 + random()*60;
@@ -1438,19 +1444,19 @@ void InitiallyDead (edict_t *self)
 {
 	int	damage;
 
-	if(self->max_health > 0)
+	if (self->max_health > 0)
 		return;
 
 //	gi.dprintf("InitiallyDead on %s at %s\n",self->classname,vtos(self->s.origin));
 	
 	// initially dead bad guys shouldn't count against totals
-	if((self->max_health <= 0) && !(self->monsterinfo.aiflags & AI_GOOD_GUY))
+	if ((self->max_health <= 0) && !(self->monsterinfo.aiflags & AI_GOOD_GUY))
 	{
 		level.total_monsters--;
 		if(self->deadflag != DEAD_DEAD)
 			level.killed_monsters--;
 	}
-	if(self->deadflag != DEAD_DEAD)
+	if (self->deadflag != DEAD_DEAD)
 	{
 		damage = 1 - self->health;
 		self->health = 1;
@@ -1520,61 +1526,61 @@ int PatchMonsterModel (char *modelname)
 
 	numskins = 8;
 	// special cases
-	if(!strcmp(modelname,"models/monsters/tank/tris.md2"))
+	if (!strcmp(modelname,"models/monsters/tank/tris.md2"))
 	{
 		is_tank = true;
 		numskins = 16;
 	}
-	else if(!strcmp(modelname,"models/monsters/soldier/tris.md2"))
+	else if (!strcmp(modelname,"models/monsters/soldier/tris.md2"))
 	{
 		is_soldier = true;
 		numskins = 24;
 	}
 	// Knightmare added
 #ifdef CITADELMOD_FEATURES
-	else if(!strcmp(modelname,"models/monsters/brain/tris.md2"))
+	else if (!strcmp(modelname,"models/monsters/brain/tris.md2"))
 	{
 		is_brain = true;
 		numskins = 16;
 	}
 #endif
-	else if(!strcmp(modelname,"models/monsters/gekk/tris.md2"))
+	else if (!strcmp(modelname,"models/monsters/gekk/tris.md2"))
 	{
 		is_gekk = true;
 		numskins = 12;
 	}
-	else if(!strcmp(modelname,"models/monsters/fixbot/tris.md2"))
+	else if (!strcmp(modelname,"models/monsters/fixbot/tris.md2"))
 	{
 		is_fixbot = true;
 		numskins = 4;
 	}
-	else if(!strcmp(modelname,"models/monsters/bitch/tris.md2")
+	else if (!strcmp(modelname,"models/monsters/bitch/tris.md2")
 		|| !strcmp(modelname,"models/monsters/bitch2/tris.md2"))
 	{
 		is_chick = true;
 		numskins = 16;
 	}
-	else if(!strcmp(modelname,"models/monsters/soldierh/tris.md2"))
+	else if (!strcmp(modelname,"models/monsters/soldierh/tris.md2"))
 	{
 		is_soldierh = true;
 		numskins = 24;
 	}
-	else if(!strcmp(modelname,"models/monsters/carrier/tris.md2"))
+	else if (!strcmp(modelname,"models/monsters/carrier/tris.md2"))
 	{
 		is_carrier = true;
 		numskins = 8;
 	}
-	else if(!strcmp(modelname,"models/monsters/hover/tris.md2"))
+	else if (!strcmp(modelname,"models/monsters/hover/tris.md2"))
 	{
 		is_hover = true;
 		numskins = 16;
 	}
-	else if(!strcmp(modelname,"models/monsters/medic/tris.md2"))
+	else if (!strcmp(modelname,"models/monsters/medic/tris.md2"))
 	{
 		is_medic = true;
 		numskins = 16;
 	}
-	else if(!strcmp(modelname,"models/monsters/turret/tris.md2"))
+	else if (!strcmp(modelname,"models/monsters/turret/tris.md2"))
 	{
 		is_turret = true;
 		numskins = 12;

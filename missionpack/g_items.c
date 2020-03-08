@@ -67,6 +67,15 @@ int	tesla_index;
 int	trap_index;
 int	shocksphere_index;
 
+// added for convenience with triger_key sound hack
+int	key_q1_med_silver_index;
+int	key_q1_med_gold_index;
+int	key_q1_rune_silver_index;
+int	key_q1_rune_gold_index;
+int	key_q1_base_silver_index;
+int	key_q1_base_gold_index;
+
+
 #define HEALTH_IGNORE_MAX	1
 #define HEALTH_TIMED		2
 #define	HEALTH_FOODCUBE		4
@@ -2118,7 +2127,7 @@ gitem_t	itemlist[] =
 // ARMOR
 //
 
-//1
+// 1
 /*QUAKED item_armor_body (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -2142,7 +2151,7 @@ gitem_t	itemlist[] =
 		"" //precache
 	},
 
-//2
+// 2
 /*QUAKED item_armor_combat (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -2166,7 +2175,7 @@ gitem_t	itemlist[] =
 		"" //precache
 	},
 
-//3
+// 3
 /*QUAKED item_armor_jacket (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -2190,7 +2199,7 @@ gitem_t	itemlist[] =
 		"" //precache
 	},
 
-//4
+// 4
 /*QUAKED item_armor_shard (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -2219,7 +2228,7 @@ gitem_t	itemlist[] =
 	},
 
 //Knightmare- armor shard that lies flat on the ground
-//5
+// 5
 /*QUAKED item_armor_shard_flat (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -2247,7 +2256,7 @@ gitem_t	itemlist[] =
 		"" //precache
 	},
 
-//6
+// 6
 /*QUAKED item_power_screen (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -2271,7 +2280,7 @@ gitem_t	itemlist[] =
 		"misc/power2.wav misc/power1.wav" //precache
 	},
 
-//7
+// 7
 /*QUAKED item_power_shield (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -2298,7 +2307,7 @@ gitem_t	itemlist[] =
 	//
 	// WEAPONS 
 	//
-//8
+// 8
 /* weapon_blaster (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
 	{
@@ -2326,7 +2335,7 @@ gitem_t	itemlist[] =
 #endif
 	},
 
-//9
+// 9
 /*QUAKED weapon_shotgun (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -2350,7 +2359,7 @@ gitem_t	itemlist[] =
 		"weapons/shotgf1b.wav weapons/shotgr1b.wav" //precache
 	},
 
-//10
+// 10
 /*QUAKED weapon_supershotgun (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -2374,7 +2383,7 @@ gitem_t	itemlist[] =
 		"weapons/sshotf1b.wav" //precache
 	},
 
-//11
+// 11
 /*QUAKED weapon_machinegun (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -2398,7 +2407,7 @@ gitem_t	itemlist[] =
 		"weapons/machgf1b.wav weapons/machgf2b.wav weapons/machgf3b.wav weapons/machgf4b.wav weapons/machgf5b.wav" //precache
 	},
 
-//12
+// 12
 /*QUAKED weapon_chaingun (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -2422,7 +2431,7 @@ gitem_t	itemlist[] =
 		"weapons/chngnu1a.wav weapons/chngnl1a.wav weapons/machgf3b.wav` weapons/chngnd1a.wav" //precache
 	},
 
-//13
+// 13
 // ROGUE
 /*QUAKED weapon_etf_rifle (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
@@ -2448,7 +2457,7 @@ gitem_t	itemlist[] =
 	},
 	// rogue
 
-//14
+// 14
 /*QUAKED ammo_grenades (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -2472,7 +2481,7 @@ gitem_t	itemlist[] =
 		"weapons/hgrent1a.wav weapons/hgrena1b.wav weapons/hgrenc1b.wav weapons/hgrenb1a.wav weapons/hgrenb2a.wav" //precache
 	},
 
-//15
+// 15
 /*QUAKED weapon_grenadelauncher (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -2496,7 +2505,7 @@ gitem_t	itemlist[] =
 		"models/objects/grenade/tris.md2 weapons/grenlf1a.wav weapons/grenlr1b.wav weapons/grenlb1b.wav" //precache
 	},
 
-//16
+// 16
 // ROGUE
 /*QUAKED weapon_proxlauncher (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
@@ -2522,7 +2531,7 @@ gitem_t	itemlist[] =
 	},
 	// rogue
 
-//17
+// 17
 /*QUAKED weapon_rocketlauncher (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -2546,7 +2555,7 @@ gitem_t	itemlist[] =
 		"models/objects/rocket/tris.md2 weapons/rockfly.wav weapons/rocklf1a.wav weapons/rocklr1b.wav models/objects/debris2/tris.md2" //precache
 	},
 
-//18
+// 18
 /*QUAKED weapon_hyperblaster (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -2574,7 +2583,7 @@ gitem_t	itemlist[] =
 #endif
 	},
 
-//19
+// 19
 // ROGUE
 /*QUAKED weapon_plasmabeam (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */ 
@@ -2600,7 +2609,7 @@ gitem_t	itemlist[] =
 	},
 	//rogue
 
-//20
+// 20
 /*QUAKED weapon_boomer (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
 
@@ -2629,7 +2638,7 @@ gitem_t	itemlist[] =
 #endif
 	},
 
-//21
+// 21
 /*QUAKED weapon_railgun (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -2653,7 +2662,7 @@ gitem_t	itemlist[] =
 		"weapons/rg_hum.wav weapons/railgf1a.wav" //precache
 	},
 
-//22
+// 22
 /*QUAKED weapon_phalanx (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
 
@@ -2682,7 +2691,7 @@ gitem_t	itemlist[] =
 #endif
 	},
 
-//23
+// 23
 /*QUAKED weapon_bfg (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -2713,7 +2722,7 @@ gitem_t	itemlist[] =
 // =========================
 // ROGUE WEAPONS
 
-//24
+// 24
 /*QUAKED weapon_disintegrator (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -2737,7 +2746,7 @@ gitem_t	itemlist[] =
 		"models/items/spawngro/tris.md2 models/proj/disintegrator/tris.md2 weapons/disrupt.wav weapons/disint2.wav weapons/disrupthit.wav",	// precaches
 	},
 
-//25
+// 25
 /*QUAKED weapon_chainfist (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -2763,7 +2772,7 @@ gitem_t	itemlist[] =
 // ROGUE WEAPONS
 // =========================
 
-//26
+// 26
 /*QUAKED weapon_shockwave (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -2787,7 +2796,7 @@ gitem_t	itemlist[] =
 		"weapons/shockactive.wav weapons/shock_hum.wav weapons/shockfire.wav weapons/shockaway.wav weapons/shockhit.wav weapons/shockexp.wav models/objects/shocksphere/tris.md2 models/objects/shockfield/tris.md2 sprites/s_trap.sp2"
 	},
 
-//27
+// 27
 /*QUAKED weapon_hml (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
 	{
@@ -2811,7 +2820,7 @@ gitem_t	itemlist[] =
 		"models/objects/rocket/tris.md2 weapons/rockfly.wav weapons/rocklf1a.wav weapons/rocklr1b.wav models/objects/debris2/tris.md2"
 	},
 
-//28
+// 28
 // Lazarus: No weapon - we HAVE to have a weapon
 	{
 		"weapon_null",
@@ -2837,7 +2846,7 @@ gitem_t	itemlist[] =
 	// AMMO ITEMS
 	//
 
-//29
+// 29
 /*QUAKED ammo_shells (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -2861,7 +2870,7 @@ gitem_t	itemlist[] =
 		"" //precache
 	},
 
-//30
+// 30
 /*QUAKED ammo_bullets (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -2885,7 +2894,7 @@ gitem_t	itemlist[] =
 		"" //precache
 	},
 
-//31
+// 31
 /*QUAKED ammo_cells (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -2909,7 +2918,7 @@ gitem_t	itemlist[] =
 		"" //precache
 	},
 
-//32
+// 32
 /*QUAKED ammo_rockets (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -2933,7 +2942,7 @@ gitem_t	itemlist[] =
 		"" //precache
 	},
 
-//33
+// 33
 /*QUAKED ammo_homing_missiles (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
 	{
@@ -2957,7 +2966,7 @@ gitem_t	itemlist[] =
 		"" //precache
 	},
 
-//34
+// 34
 /*QUAKED ammo_slugs (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -2981,7 +2990,7 @@ gitem_t	itemlist[] =
 		"" //precache
 	},
 
-//35
+// 35
 /*QUAKED ammo_magslug (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
 	{
@@ -3008,7 +3017,7 @@ gitem_t	itemlist[] =
 // =======================================
 // ROGUE AMMO
 
-//36
+// 36
 /*QUAKED ammo_flechettes (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -3031,7 +3040,7 @@ gitem_t	itemlist[] =
 		AMMO_FLECHETTES
 	},
 
-//37
+// 37
 /*QUAKED ammo_disruptor (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -3054,7 +3063,7 @@ gitem_t	itemlist[] =
 		AMMO_DISRUPTOR,							// tag
 	},
 
-//38
+// 38
 /*QUAKED ammo_prox (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -3078,7 +3087,7 @@ gitem_t	itemlist[] =
 		"models/weapons/g_prox/tris.md2 weapons/proxwarn.wav"	// precaches
 	},
 
-//39
+// 39
 /*QUAKED ammo_shocksphere (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -3102,7 +3111,7 @@ gitem_t	itemlist[] =
 		""	// precache
 	},
 
-//40
+// 40
 /*QUAKED ammo_tesla (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -3127,7 +3136,7 @@ gitem_t	itemlist[] =
 		"models/weapons/v_tesla2/tris.md2 weapons/teslaopen.wav weapons/hgrenb1a.wav weapons/hgrenb2a.wav models/weapons/g_tesla/tris.md2"	// precache
 	},
 
-//41
+// 41
 /*QUAKED ammo_trap (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
 	{
@@ -3151,7 +3160,7 @@ gitem_t	itemlist[] =
 		"weapons/trapcock.wav weapons/traploop.wav weapons/trapsuck.wav weapons/trapdown.wav" //precache
 	},
 
-//42
+// 42
 /*QUAKED ammo_nuke (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -3175,7 +3184,7 @@ gitem_t	itemlist[] =
 		"weapons/nukewarn2.wav world/rumble.wav"
 	},
 
-//43
+// 43
 /*QUAKED ammo_nbomb (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -3203,7 +3212,7 @@ gitem_t	itemlist[] =
 		"weapons/nukewarn2.wav world/rumble.wav"
 	},
 
-//44
+// 44
 /*QUAKED ammo_fuel (.3 .3 1) (-16 -16 -16) (16 16 16)
 model="models/items/ammo/fuel/medium/"
 */
@@ -3234,7 +3243,7 @@ model="models/items/ammo/fuel/medium/"
 	//
 	// POWERUP ITEMS
 	//
-//45
+// 45
 /*QUAKED item_quad (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -3258,7 +3267,7 @@ model="models/items/ammo/fuel/medium/"
 		"items/damage.wav items/damage2.wav items/damage3.wav" //precache
 	},
 
-//46
+// 46
 /*QUAKED item_double (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -3282,7 +3291,7 @@ model="models/items/ammo/fuel/medium/"
 		"misc/ddamage1.wav misc/ddamage2.wav misc/ddamage3.wav" //precache
 	},
 
-//47
+// 47
 /*QUAKED item_quadfire (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
 	{
@@ -3306,7 +3315,7 @@ model="models/items/ammo/fuel/medium/"
 		"items/quadfire1.wav items/quadfire2.wav items/quadfire3.wav" //precache
 	},
 
-//48
+// 48
 /*QUAKED item_invulnerability (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -3330,7 +3339,7 @@ model="models/items/ammo/fuel/medium/"
 /* precache */ "items/protect.wav items/protect2.wav items/protect4.wav" //precache
 	},
 
-//49
+// 49
 /*QUAKED item_silencer (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -3354,7 +3363,7 @@ model="models/items/ammo/fuel/medium/"
 		"" //precache
 	},
 
-//50
+// 50
 /*QUAKED item_breather (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -3378,7 +3387,7 @@ model="models/items/ammo/fuel/medium/"
 		"player/u_breath1.wav player/u_breath2.wav items/airout.wav" //precache
 	},
 
-//51
+// 51
 /*QUAKED item_enviro (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -3402,7 +3411,7 @@ model="models/items/ammo/fuel/medium/"
 		"player/u_breath1.wav player/u_breath2.wav items/airout.wav" //precache
 	},
 
-//52
+// 52
 /*QUAKED item_ir_goggles (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 gives +1 to maximum health
 */
@@ -3427,7 +3436,7 @@ gives +1 to maximum health
 		"misc/ir_start.wav" //precache
 	},
 
-//53
+// 53
 /*QUAKED item_ancient_head (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 Special item that gives +2 to maximum health
 */
@@ -3454,7 +3463,7 @@ Special item that gives +2 to maximum health
 
 // New item (sorta) for Citadel pack by Andrea Rosa
 #ifdef CITADELMOD_FEATURES
-//54
+// 54
 /*QUAKED item_steroid_pack (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 Special item that gives +2 to maximum health
 */
@@ -3480,7 +3489,7 @@ Special item that gives +2 to maximum health
 	},
 #endif
 
-//54
+// 54
 /*QUAKED item_adrenaline (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 gives +1 to maximum health
 */
@@ -3505,7 +3514,7 @@ gives +1 to maximum health
 		"" //precache
 	},
 
-//55
+// 55
 /*QUAKED item_bandolier (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -3529,7 +3538,7 @@ gives +1 to maximum health
 		"" //precache
 	},
 
-//56
+// 56
 /*QUAKED item_pack (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -3554,7 +3563,7 @@ gives +1 to maximum health
 	},
 
 #ifdef JETPACK_MOD
-//57
+// 57
 /*QUAKED item_jetpack (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 model="models/items/jet/"
 */
@@ -3608,7 +3617,7 @@ model="models/items/jet/"
 		"" //precache
 	},*/
 
-//58
+// 58
 /*QUAKED item_flashlight (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -3632,7 +3641,7 @@ model="models/items/jet/"
 		"" //precache
 	},
 
-//59
+// 59
 /*QUAKED item_compass (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -3656,7 +3665,7 @@ model="models/items/jet/"
 		"" //precache
 	},
 
-//60
+// 60
 /*QUAKED item_sphere_vengeance (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -3680,7 +3689,7 @@ model="models/items/jet/"
 		"spheres/v_idle.wav" //precache
 	},
 
-//61
+// 61
 /*QUAKED item_sphere_hunter (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -3704,7 +3713,7 @@ model="models/items/jet/"
 		"spheres/h_idle.wav spheres/h_active.wav spheres/h_lurk.wav" //precache
 	},
 
-//62
+// 62
 /*QUAKED item_sphere_defender (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -3728,7 +3737,7 @@ model="models/items/jet/"
 		"models/proj/laser2/tris.md2 models/items/shell/tris.md2 spheres/d_idle.wav" // precache
 	},
 
-//63
+// 63
 /*QUAKED item_doppleganger (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -3752,7 +3761,7 @@ model="models/items/jet/"
 		"models/objects/dopplebase/tris.md2 models/items/spawngro2/tris.md2 models/items/hunter/tris.md2 models/items/vengnce/tris.md2",		// precaches
 	},
 
-//64
+// 64
 /*QUAKED item_freeze (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -3776,7 +3785,7 @@ model="models/items/jet/"
 		"items/stasis_start.wav items/stasis.wav items/stasis_stop.wav"
 	},
 
-//65
+// 65
 	{
 		"dm_tag_token",										// classname
 	//	NULL,												// classname
@@ -3806,7 +3815,7 @@ model="models/items/jet/"
 	//
 	// KEYS
 	//
-//66
+// 66
 /*QUAKED key_data_cd (0 .5 .8) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 key for computer centers
 */
@@ -3831,7 +3840,7 @@ key for computer centers
 		"" //precache
 	},
 
-//67
+// 67
 /*QUAKED key_dstarchart (0 .5 .8) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 starchart in Makron's tomb
 */
@@ -3856,7 +3865,7 @@ starchart in Makron's tomb
 		"" //precache
 	},
 
-//68
+// 68
 /*QUAKED key_power_cube (0 .5 .8) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN NO_TOUCH
 warehouse circuits
 */
@@ -3883,7 +3892,7 @@ warehouse circuits
 
 // New item (sorta) for Citadel pack by Andrea Rosa
 #ifdef CITADELMOD_FEATURES
-//69
+// 69
 /*QUAKED key_mystery (0 .5 .8) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 key for Citadel Pack 3.0
 */
@@ -3909,7 +3918,7 @@ key for Citadel Pack 3.0
 	},
 #endif
 
-//69
+// 69
 /*QUAKED key_pyramid (0 .5 .8) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 key for the entrance of jail3
 */
@@ -3934,7 +3943,7 @@ key for the entrance of jail3
 		"" //precache
 	},
 
-//70
+// 70
 /*QUAKED key_data_spinner (0 .5 .8) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 key for the city computer
 */
@@ -3959,7 +3968,7 @@ key for the city computer
 		"" //precache
 	},
 
-//71
+// 71
 /*QUAKED key_pass (0 .5 .8) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 security pass for the security level
 */
@@ -3984,7 +3993,7 @@ security pass for the security level
 		"" //precache
 	},
 
-//72
+// 72
 /*QUAKED key_blue_key (0 .5 .8) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 normal door key - blue
 */
@@ -4009,7 +4018,7 @@ normal door key - blue
 		"" //precache
 	},
 
-//73
+// 73
 /*QUAKED key_red_key (0 .5 .8) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 normal door key - red
 */
@@ -4034,9 +4043,9 @@ normal door key - red
 		"" //precache
 	},
 
-//74
+// 74
 // RAFAEL
-/*QUAKED key_green_key (0 .5 .8) (-16 -16 -16) (16 16 16)
+/*QUAKED key_green_key (0 .5 .8) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 normal door key - green
 */
 	{
@@ -4060,7 +4069,7 @@ normal door key - green
 		"" //precache
 	},
 
-//75
+// 75
 /*QUAKED key_commander_head (0 .5 .8) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 tank commander's head
 */
@@ -4085,7 +4094,7 @@ tank commander's head
 		"" //precache
 	},
 
-//76
+// 76
 /*QUAKED key_airstrike_target (0 .5 .8) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 marker for airstrike
 */
@@ -4112,7 +4121,7 @@ marker for airstrike
 
 // ======================================
 // PGM
-//77
+// 77
 /*QUAKED key_nuke_container (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -4136,7 +4145,7 @@ marker for airstrike
 		""													// precache
 	},
 
-//78
+// 78
 /*QUAKED key_nuke (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -4162,6 +4171,162 @@ marker for airstrike
 // PGM
 // ======================================
 
+// 79
+/*QUAKED key_q1_gold (0 .5 .8) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
+medevial door key - gold
+model="models/items/q1keys/gold/tris.md2"
+*/
+	{
+		"key_q1_gold",
+		Pickup_Key,
+		NULL,
+		Drop_General,
+		NULL,
+		"q1items/medkey.wav",
+		"models/items/q1keys/gold/tris.md2", 0, EF_ROTATE,
+		NULL,
+		"q1hud/items/SbKeyG",						
+		"Gold Key",
+		2,
+		0,
+		NULL,
+		IT_STAY_COOP|IT_KEY|IT_Q1,
+		0,
+		NULL,
+		0,
+/* precache */ ""
+	},
+
+// 80
+/*QUAKED key_q1_silver (0 .5 .8) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
+medevial door key - silver
+model="models/items/q1keys/silver/tris.md2"
+*/
+	{
+		"key_q1_silver",
+		Pickup_Key,
+		NULL,
+		Drop_General,
+		NULL,
+		"q1items/medkey.wav",
+		"models/items/q1keys/silver/tris.md2", 0, EF_ROTATE,
+		NULL,
+		"q1hud/items/SbKeyS",								
+		"Silver Key",
+		2,
+		0,
+		NULL,
+		IT_STAY_COOP|IT_KEY|IT_Q1,
+		0,
+		NULL,
+		0,
+/* precache */ ""
+	},
+
+// 81
+/*QUAKED runekey_q1_gold (0 .5 .8) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
+runic door key - gold
+model="models/items/q1keys/gold/rune/tris.md2"
+*/
+	{
+		"runekey_q1_gold",
+		Pickup_Key,
+		NULL,
+		Drop_General,
+		NULL,
+		"q1items/runekey.wav",
+		"models/items/q1keys/gold/rune/tris.md2", 0, EF_ROTATE,
+		NULL,
+		"q1hud/items/SbKeyG",						
+		"Gold Rune Key",
+		2,
+		0,
+		NULL,
+		IT_STAY_COOP|IT_KEY|IT_Q1,
+		0,
+		NULL,
+		0,
+/* precache */ ""
+	},
+
+// 82
+/*QUAKED runekey_q1_silver (0 .5 .8) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
+runic door key - silver
+model="models/items/q1keys/silver/rune/tris.md2"
+*/
+	{
+		"runekey_q1_silver",
+		Pickup_Key,
+		NULL,
+		Drop_General,
+		NULL,
+		"q1items/runekey.wav",
+		"models/items/q1keys/silver/rune/tris.md2", 0, EF_ROTATE,
+		NULL,
+		"q1hud/items/SbKeyS",						
+		"Silver Rune Key",
+		2,
+		0,
+		NULL,
+		IT_STAY_COOP|IT_KEY|IT_Q1,
+		0,
+		NULL,
+		0,
+/* precache */ ""
+	},
+
+// 83
+/*QUAKED basekey_q1_gold (0 .5 .8) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
+base door key - gold
+model="models/items/q1keys/gold/base/tris.md2"
+*/
+	{
+		"basekey_q1_gold",
+		Pickup_Key,
+		NULL,
+		Drop_General,
+		NULL,
+		"q1items/basekey.wav",
+		"models/items/q1keys/gold/base/tris.md2", 0, EF_ROTATE,
+		NULL,
+		"q1hud/items/SbKeyG",						
+		"Gold Keycard",
+		2,
+		0,
+		NULL,
+		IT_STAY_COOP|IT_KEY|IT_Q1,
+		0,
+		NULL,
+		0,
+/* precache */ ""
+	},
+
+// 84
+/*QUAKED basekey_q1_silver (0 .5 .8) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
+base door key - silver
+model="models/items/q1keys/silver/base/tris.md2"
+*/
+	{
+		"basekey_q1_silver",
+		Pickup_Key,
+		NULL,
+		Drop_General,
+		NULL,
+		"q1items/basekey.wav",
+		"models/items/q1keys/silver/base/tris.md2", 0, EF_ROTATE,
+		NULL,
+		"q1hud/items/SbKeyS",						
+		"Silver Keycard",
+		2,
+		0,
+		NULL,
+		IT_STAY_COOP|IT_KEY|IT_Q1,
+		0,
+		NULL,
+		0,
+/* precache */ ""
+	},
+
 	/*
 	Insert new key items here
 
@@ -4175,7 +4340,7 @@ marker for airstrike
 	full (pickup) name
 	*/
 
-//79
+// 85
 	{
 		NULL,
 		Pickup_Health,
@@ -4335,6 +4500,14 @@ void SetItemNames (void)
 	tesla_index			= ITEM_INDEX(FindItem("Tesla"));
 	trap_index			= ITEM_INDEX(FindItem("Trap"));
 	shocksphere_index	= ITEM_INDEX(FindItem("Shocksphere"));
+
+	// added for convenience with triger_key sound hack
+	key_q1_med_silver_index = ITEM_INDEX(FindItem("Silver Key"));
+	key_q1_med_gold_index = ITEM_INDEX(FindItem("Gold Key"));
+	key_q1_rune_silver_index = ITEM_INDEX(FindItem("Silver Rune Key"));
+	key_q1_rune_gold_index = ITEM_INDEX(FindItem("Gold Rune Key"));
+	key_q1_base_silver_index = ITEM_INDEX(FindItem("Silver Keycard"));
+	key_q1_base_gold_index = ITEM_INDEX(FindItem("Gold Keycard"));
 }
 
 #ifdef JETPACK_MOD

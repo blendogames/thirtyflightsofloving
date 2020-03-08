@@ -3049,7 +3049,7 @@ void SP_monster_soldier_x (edict_t *self)
 //=====
 
 	// Lazarus
-	if(self->powerarmor)
+	if (self->powerarmor)
 	{
 		if (self->powerarmortype == 1)
 			self->monsterinfo.power_armor_type = POWER_ARMOR_SCREEN;
@@ -3057,13 +3057,13 @@ void SP_monster_soldier_x (edict_t *self)
 			self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
 		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
-	if(!self->monsterinfo.flies)
+	if (!self->monsterinfo.flies)
 		self->monsterinfo.flies = 0.40;
 
 	gi.linkentity (self);
 
 	self->monsterinfo.stand (self);
-	if(self->health < 0)
+	if (self->health < 0)
 	{
 		mmove_t	*deathmoves[] = {&soldier_move_death1,
 			                     &soldier_move_death2,
@@ -3219,14 +3219,14 @@ void SP_monster_soldier_h (edict_t *self)
 			self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
 		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
-	if(!self->monsterinfo.flies)
+	if (!self->monsterinfo.flies)
 		self->monsterinfo.flies = 0.40;
 
 	gi.linkentity (self);
 
 	// self->monsterinfo.stand (self);
 	self->monsterinfo.currentmove = &soldierh_move_stand3;	
-	if(self->health < 0)
+	if (self->health < 0)
 	{
 		mmove_t	*deathmoves[] = {&soldierh_move_death1,
 			                     &soldierh_move_death2,

@@ -477,7 +477,7 @@ void fire_blueblaster (edict_t *self, vec3_t start, vec3_t dir, int damage, int 
 //       entities.
 void bolt_delayed_start (edict_t *bolt)
 {
-	if(g_edicts[1].linkcount)
+	if (g_edicts[1].linkcount)
 	{
 		VectorScale(bolt->movedir,bolt->moveinfo.speed,bolt->velocity);
 		bolt->nextthink = level.time + 2;
@@ -490,9 +490,9 @@ void bolt_delayed_start (edict_t *bolt)
 
 void SP_bolt (edict_t *bolt)
 {
-	if (bolt->count == 2) //green bolt
+	if (bolt->count == 2) // green bolt
 		bolt->s.modelindex = gi.modelindex ("models/objects/laser2/tris.md2");
-	else if (bolt->count == 3) //blue bolt
+	else if (bolt->count == 3) // blue bolt
 		bolt->s.modelindex = gi.modelindex ("models/objects/blaser/tris.md2");
 	else //orange bolt
 		bolt->s.modelindex = gi.modelindex ("models/objects/laser/tris.md2");

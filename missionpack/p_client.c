@@ -918,6 +918,48 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 			// Rottweiler
 			else if (!strcmp(attacker->classname, "monster_dog"))
 				message = "was mauled by a";
+		// Quake 1 Monsters
+			// Fiend
+			else if ( !Q_stricmp(attacker->classname, "q1_monster_fiend") || !Q_stricmp(attacker->classname, "monster_q1_demon") )
+				message ="was eviscerated by a";
+			// Quake Grunt
+			else if ( !Q_stricmp(attacker->classname, "q1_monster_soldier") || !Q_stricmp(attacker->classname, "monster_q1_army") )
+				message = "was shot by a";
+			// Quake Enforcer
+			else if ( !Q_stricmp(attacker->classname, "q1_monster_enforcer") || !Q_stricmp(attacker->classname, "monster_q1_enforcer") )
+				message = "was blasted by an";
+			// Ogre
+			else if ( !Q_stricmp(attacker->classname, "q1_monster_ogre") || !Q_stricmp(attacker->classname, "monster_q1_ogre") )
+				message = "was destroyed by an";
+			// Knight
+			else if ( !Q_stricmp(attacker->classname, "q1_monster_knight") || !Q_stricmp(attacker->classname, "monster_q1_knight") )
+				message = "was slashed by a";
+			// Scrag
+			else if ( !Q_stricmp(attacker->classname, "q1_monster_scrag") || !Q_stricmp(attacker->classname, "monster_q1_wizard") )
+				message = "was scragged by a";
+			// Zombie
+			else if ( !Q_stricmp(attacker->classname, "q1_monster_zombie") || !Q_stricmp(attacker->classname, "monster_q1_zombie") ) {
+				message = "joins the";
+				message2 = "s";
+			}
+			// Shambler
+			else if ( !Q_stricmp(attacker->classname, "q1_monster_shambler") || !Q_stricmp(attacker->classname, "monster_q1_shambler") )
+				message = "was smashed by a";
+			// Rottweiler
+			else if ( !Q_stricmp(attacker->classname, "q1_monster_dog") || !Q_stricmp(attacker->classname, "monster_q1_dog") )
+				message = "was mauled by a";
+			// Rotfish
+			else if ( !Q_stricmp(attacker->classname, "q1_monster_fish") || !Q_stricmp(attacker->classname, "monster_q1_fish") )
+				message = "was fed to the";
+			// Hell Knight
+			else if ( !Q_stricmp(attacker->classname, "q1_monster_hknight") || !Q_stricmp(attacker->classname, "monster_q1_hknight") )
+				message = "was slain by at";
+			// Vore
+			else if ( !Q_stricmp(attacker->classname, "q1_monster_shalrath") || !Q_stricmp(attacker->classname, "monster_q1_shalrath") )
+				message = "was exploded by a";
+			// Spawn
+			else if ( !Q_stricmp(attacker->classname, "q1_monster_tarbaby") || !Q_stricmp(attacker->classname, "monster_q1_tarbaby") )
+				message = "was slimed by a";
 		}
 		if (message)
 		{

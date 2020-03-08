@@ -1,13 +1,13 @@
 /*
 ==============================================================================
 
-Rottweiler
+QUAKE DOG
 
 ==============================================================================
 */
 
 #include "g_local.h"
-#include "m_dog.h"
+#include "m_q1dog.h"
 
 
 static int	sound_pain;
@@ -17,20 +17,20 @@ static int	sound_sight;
 static int	sound_idle;
 
 
-/*static*/ void dog_idle (edict_t *self)
+void q1dog_idle (edict_t *self)
 {
-	if (random() < 0.2)
-		gi.sound (self, CHAN_VOICE, sound_idle, 1, ATTN_IDLE, 0);
+	if(random() < 0.2)
+	gi.sound (self, CHAN_VOICE, sound_idle, 1, ATTN_IDLE, 0);
 }
 
-void dog_sight (edict_t *self, edict_t *other)
+void q1dog_sight (edict_t *self, edict_t *other)
 {
 	gi.sound (self, CHAN_VOICE, sound_sight, 1, ATTN_NORM, 0);
 }
 
 //STAND
 
-mframe_t dog_frames_stand [] =
+mframe_t q1dog_frames_stand [] =
 {
 	ai_stand, 0, NULL,
 	ai_stand, 0, NULL,
@@ -42,18 +42,18 @@ mframe_t dog_frames_stand [] =
 	ai_stand, 0, NULL,
 	ai_stand, 0, NULL
 };
-mmove_t	dog_move_stand = {FRAME_stand1, FRAME_stand9, dog_frames_stand, NULL};
+mmove_t	q1dog_move_stand = {FRAME_stand1, FRAME_stand9, q1dog_frames_stand, NULL};
 
-void dog_stand (edict_t *self)
+void q1dog_stand (edict_t *self)
 {
-	self->monsterinfo.currentmove = &dog_move_stand;
+	self->monsterinfo.currentmove = &q1dog_move_stand;
 }
 
 // WALK
 
-mframe_t dog_frames_walk [] =
+mframe_t q1dog_frames_walk [] =
 {
-	ai_walk, 7, dog_idle,
+	ai_walk, 7, q1dog_idle,
 	ai_walk, 7, NULL,
 	ai_walk, 7, NULL,
 	ai_walk, 7, NULL,
@@ -62,18 +62,18 @@ mframe_t dog_frames_walk [] =
 	ai_walk, 7, NULL,
 	ai_walk, 7, NULL
 };
-mmove_t dog_move_walk = {FRAME_walk1, FRAME_walk8, dog_frames_walk, NULL};
+mmove_t q1dog_move_walk = {FRAME_walk1, FRAME_walk8, q1dog_frames_walk, NULL};
 
-void dog_walk (edict_t *self)
+void q1dog_walk (edict_t *self)
 {
-	self->monsterinfo.currentmove = &dog_move_walk;
+	self->monsterinfo.currentmove = &q1dog_move_walk;
 }
 
 // RUN
 
-mframe_t dog_frames_run [] =
+mframe_t q1dog_frames_run [] =
 {
-	ai_run, 12, dog_idle,
+	ai_run, 12, q1dog_idle,
 	ai_run, 20, NULL,
 	ai_run, 20, NULL,
 	ai_run, 16, NULL,
@@ -86,19 +86,19 @@ mframe_t dog_frames_run [] =
 	ai_run, 22, NULL,
 	ai_run, 20, NULL
 };
-mmove_t dog_move_run = {FRAME_run1, FRAME_run12, dog_frames_run, NULL};
+mmove_t q1dog_move_run = {FRAME_run1, FRAME_run12, q1dog_frames_run, NULL};
 
-void dog_run (edict_t *self)
+void q1dog_run (edict_t *self)
 {
 	if (self->monsterinfo.aiflags & AI_STAND_GROUND)
-		self->monsterinfo.currentmove = &dog_move_walk;
+		self->monsterinfo.currentmove = &q1dog_move_walk;
 	else
-		self->monsterinfo.currentmove = &dog_move_run;
+		self->monsterinfo.currentmove = &q1dog_move_run;
 }
 
 // PAIN
 
-mframe_t dog_frames_pain1 [] =
+mframe_t q1dog_frames_pain1 [] =
 {
 	ai_move, 0, NULL,
 	ai_move, 0, NULL,
@@ -107,9 +107,9 @@ mframe_t dog_frames_pain1 [] =
 	ai_move, 0,	NULL,
 	ai_move, 0,	NULL
 };
-mmove_t dog_move_pain1 = {FRAME_pain1, FRAME_pain6, dog_frames_pain1, dog_run};
+mmove_t q1dog_move_pain1 = {FRAME_pain1, FRAME_pain6, q1dog_frames_pain1, q1dog_run};
 
-mframe_t dog_frames_pain2 [] =
+mframe_t q1dog_frames_pain2 [] =
 {
 	ai_move, 0, NULL,
 	ai_move, 0, NULL,
@@ -128,15 +128,12 @@ mframe_t dog_frames_pain2 [] =
 	ai_move, 0,	NULL,
 	ai_move, 0,	NULL
 };
-mmove_t dog_move_pain2 = {FRAME_painb1, FRAME_painb16, dog_frames_pain2, dog_run};
+mmove_t q1dog_move_pain2 = {FRAME_painb1, FRAME_painb16, q1dog_frames_pain2, q1dog_run};
 
-void dog_pain (edict_t *self, edict_t *other, float kick, int damage)
+void q1dog_pain (edict_t *self, edict_t *other, float kick, int damage)
 {
-	if (self->health < (self->max_health / 2))
-		self->s.skinnum |= 1;
-
 	if (level.time < self->pain_debounce_time)
-		return;
+	return;
 
 	self->pain_debounce_time = level.time + 1;
 	
@@ -147,15 +144,15 @@ void dog_pain (edict_t *self, edict_t *other, float kick, int damage)
 		gi.sound (self, CHAN_VOICE, sound_pain, 1, ATTN_NORM, 0); //WAS ATTN_IDLE
 	
 
-	if (random() < 0.5)
-		self->monsterinfo.currentmove = &dog_move_pain1;
+	if(random() < 0.5)
+		self->monsterinfo.currentmove = &q1dog_move_pain1;
 	else
-		self->monsterinfo.currentmove = &dog_move_pain2;
+		self->monsterinfo.currentmove = &q1dog_move_pain2;
 }
 
 // MELEE
 
-/*static*/ void dog_bite (edict_t *self)
+void q1dog_bite (edict_t *self)
 {
 	vec3_t	aim;
 
@@ -165,7 +162,7 @@ void dog_pain (edict_t *self, edict_t *other, float kick, int damage)
 }
 
 
-/*static*/ void dog_checkrefire (edict_t *self)
+void q1dog_checkrefire (edict_t *self)
 {
 	if (!self->enemy || !self->enemy->inuse || self->enemy->health <= 0)
 		return;
@@ -175,28 +172,28 @@ void dog_pain (edict_t *self, edict_t *other, float kick, int damage)
 }
 
 
-mframe_t dog_frames_attack []=
+mframe_t q1dog_frames_attack []=
 {
 	ai_charge, 10, NULL,
 	ai_charge, 10, NULL,
 	ai_charge, 10, NULL,
-	ai_charge, 10, dog_bite,
+	ai_charge, 10, q1dog_bite,
 	ai_charge, 10, NULL,
 	ai_charge, 10, NULL,
 	ai_charge, 10, NULL,
-	ai_charge, 10, dog_checkrefire
+	ai_charge, 10, q1dog_checkrefire
 };
-mmove_t dog_move_attack = {FRAME_attack1, FRAME_attack8, dog_frames_attack, dog_run};
+mmove_t q1dog_move_attack = {FRAME_attack1, FRAME_attack8, q1dog_frames_attack, q1dog_run};
 
-void dog_melee (edict_t *self)
+void q1dog_melee (edict_t *self)
 {
-	self->monsterinfo.currentmove = &dog_move_attack;
+	self->monsterinfo.currentmove = &q1dog_move_attack;
 }		
 
 
 // LEAP
 
-/*static*/ void dog_jump_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
+void q1dog_jump_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
 	if (self->health <= 0)
 	{
@@ -208,8 +205,7 @@ void dog_melee (edict_t *self)
 	{
 		if (VectorLength(self->velocity) > 300)
 		{
-			vec3_t	point;
-			vec3_t	normal;
+			vec3_t	point, normal;
 			int		damage;
 
 			VectorCopy (self->velocity, normal);
@@ -234,7 +230,7 @@ void dog_melee (edict_t *self)
 }
 
 
-/*static*/ void dogtakeoff (edict_t *self)
+void q1dog_takeoff (edict_t *self)
 {
 	vec3_t	forward;
 
@@ -245,10 +241,10 @@ void dog_melee (edict_t *self)
 	self->velocity[2] = 220;
 	self->groundentity = NULL;
 	self->monsterinfo.attack_finished = level.time + 2;
-	self->touch = dog_jump_touch;
+	self->touch = q1dog_jump_touch;
 }
 
-/*static*/ void dogchecklanding (edict_t *self)
+void q1dog_checklanding (edict_t *self)
 {
 	if (self->groundentity)
 	{
@@ -261,37 +257,37 @@ void dog_melee (edict_t *self)
 }
 
 
-mframe_t dog_frames_leap [] =
+mframe_t q1dog_frames_leap [] =
 {
 	ai_charge,	0,	NULL,
-	ai_charge,	0,	dogtakeoff,
+	ai_charge,	0,	q1dog_takeoff,
 	ai_charge,	0,	NULL,
 	ai_charge,	0,	NULL,
 	ai_charge,	0,	NULL,
 	ai_charge,	0,	NULL,
 	ai_charge,	0,	NULL,
 	ai_charge,	0,	NULL,
-	ai_charge,	0,	dogchecklanding
+	ai_charge,	0,	q1dog_checklanding
 };
-mmove_t dog_move_leap = {FRAME_leap1, FRAME_leap9, dog_frames_leap, dog_run};
+mmove_t q1dog_move_leap = {FRAME_leap1, FRAME_leap9, q1dog_frames_leap, q1dog_run};
 
-void dog_leap (edict_t *self)
+void q1dog_leap (edict_t *self)
 {
-	self->monsterinfo.currentmove = &dog_move_leap;
+	self->monsterinfo.currentmove = &q1dog_move_leap;
 }
 
 //
 // CHECKATTACK
 //
 
-static qboolean dog_check_melee (edict_t *self)
+static qboolean q1dog_check_melee (edict_t *self)
 {
 	if (range (self, self->enemy) == RANGE_MELEE)
 		return true;
 	return false;
 }
 
-static qboolean dog_check_jump (edict_t *self)
+static qboolean q1dog_check_jump (edict_t *self)
 {
 	vec3_t	v;
 	float	distance;
@@ -331,18 +327,18 @@ static qboolean dog_check_jump (edict_t *self)
 	return true;
 }
 
-qboolean dog_checkattack (edict_t *self)
+qboolean q1dog_checkattack (edict_t *self)
 {
 	if (!self->enemy || self->enemy->health <= 0)
 		return false;
 
-	if (dog_check_melee(self))
+	if (q1dog_check_melee(self))
 	{
 		self->monsterinfo.attack_state = AS_MELEE;
 		return true;
 	}
 
-	if (dog_check_jump(self))
+	if (q1dog_check_jump(self))
 	{
 		self->monsterinfo.attack_state = AS_MISSILE;
 		return true;
@@ -353,28 +349,24 @@ qboolean dog_checkattack (edict_t *self)
 
 // DEAD
 
-void dog_dead (edict_t *self)
+void q1dog_dead (edict_t *self)
 {
 	VectorSet (self->mins, -16, -16, -24);
 	VectorSet (self->maxs, 16, 16, -8);
 	self->movetype = MOVETYPE_TOSS;
 	self->svflags |= SVF_DEADMONSTER;
 	gi.linkentity (self);
-	M_FlyCheck (self);
-
-	// Lazarus monster fade
-	if(world->effects & FX_WORLDSPAWN_CORPSEFADE)
-	{
-		self->think = FadeDieSink;
-		self->nextthink = level.time+corpse_fadetime->value;
-	}
 }
 
+void q1dog_nogib (edict_t *self)
+{
+	self->gib_health = -10000;
+}
 
-mframe_t dog_frames_death1 [] =
+mframe_t q1dog_frames_death1 [] =
 {
 	ai_move,	0,	NULL,
-	ai_move,	0,	NULL,
+	ai_move,	0,	q1dog_nogib,
 	ai_move,	0,	NULL,
 	ai_move,	0,	NULL,
 	ai_move,	0,	NULL,
@@ -383,12 +375,12 @@ mframe_t dog_frames_death1 [] =
 	ai_move,	0,	NULL,
 	ai_move,	0,	NULL
 };
-mmove_t dog_move_death1 = {FRAME_death1, FRAME_death9, dog_frames_death1, dog_dead};
+mmove_t q1dog_move_death1 = {FRAME_death1, FRAME_death9, q1dog_frames_death1, q1dog_dead};
 
-mframe_t dog_frames_death2 [] =
+mframe_t q1dog_frames_death2 [] =
 {
 	ai_move,	0,	NULL,
-	ai_move,	0,	NULL,
+	ai_move,	0,	q1dog_nogib,
 	ai_move,	0,	NULL,
 	ai_move,	0,	NULL,
 	ai_move,	0,	NULL,
@@ -397,22 +389,20 @@ mframe_t dog_frames_death2 [] =
 	ai_move,	0,	NULL,
 	ai_move,	0,	NULL
 };
-mmove_t dog_move_death2 = {FRAME_deathb1, FRAME_deathb9, dog_frames_death2, dog_dead};
+mmove_t q1dog_move_death2 = {FRAME_deathb1, FRAME_deathb9, q1dog_frames_death2, q1dog_dead};
 
-void dog_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+void q1dog_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
 	int		n;
 
-	self->s.skinnum |= 1;
-
 	if (self->health <= self->gib_health && !(self->spawnflags & SF_MONSTER_NOGIB))
 	{
-		gi.sound (self, CHAN_VOICE, gi.soundindex ("misc/udeath.wav"), 1, ATTN_NORM, 0);
+		gi.sound (self, CHAN_VOICE|CHAN_RELIABLE, gi.soundindex ("q1monstr/udeath.wav"), 1, ATTN_NORM, 0);
+		
+		ThrowGib (self, "models/objects/q1gibs/q1gib1/tris.md2", damage, GIB_ORGANIC);
 		for (n= 0; n < 2; n++)
-			ThrowGib (self, "models/objects/gibs/bone/tris.md2", damage, GIB_ORGANIC);
-		for (n= 0; n < 4; n++)
-			ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
-		ThrowHead (self, "models/monsters/dog/h_dog.md2", damage, GIB_ORGANIC);
+			ThrowGib (self, "models/objects/q1gibs/q1gib3/tris.md2", damage, GIB_ORGANIC);
+		ThrowHead (self, "models/monsters/q1dog/head/tris.md2", damage, GIB_ORGANIC);
 
 		self->deadflag = DEAD_DEAD;
 		return;
@@ -426,32 +416,31 @@ void dog_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, 
 	self->takedamage = DAMAGE_YES;
 
 	if(random() < 0.5)
-		self->monsterinfo.currentmove = &dog_move_death1;
+		self->monsterinfo.currentmove = &q1dog_move_death1;
 	else
-		self->monsterinfo.currentmove = &dog_move_death2;
+		self->monsterinfo.currentmove = &q1dog_move_death2;
 }		
-
 
 
 //
 // SPAWN
 //
 
-/*QUAKED monster_dog (1 .5 0) (-32 -16 -24) (32 16 32) Ambush Trigger_Spawn Sight GoodGuy NoGib
-model="models/monsters/dog/"
+/*QUAKED monster_q1_dog (1 .5 0) (-32 -32 -24) (32 32 32) Ambush Trigger_Spawn Sight
+model="models/monsters/q1dog/tris.md2"
 */
-void SP_monster_dog (edict_t *self)
+void SP_monster_q1_dog (edict_t *self)
 {
 	if (deathmatch->value)
 	{
 		G_FreeEdict (self);
 		return;
 	}
-	sound_pain = gi.soundindex ("dog/dpain1.wav");
-	sound_death = gi.soundindex ("dog/ddeath.wav");
-	sound_attack = gi.soundindex ("dog/dattack1.wav");
-	sound_sight = gi.soundindex ("dog/dsight.wav");
-	sound_idle = gi.soundindex ("dog/idle.wav");
+	sound_pain = gi.soundindex ("q1dog/dpain1.wav");
+	sound_death = gi.soundindex ("q1dog/ddeath.wav");
+	sound_attack = gi.soundindex ("q1dog/dattack1.wav");
+	sound_sight = gi.soundindex ("q1dog/dsight.wav");
+	sound_idle = gi.soundindex ("q1dog/idle.wav");
 	
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;
@@ -459,34 +448,36 @@ void SP_monster_dog (edict_t *self)
 	// Lazarus: special purpose skins
 	if ( self->style )
 	{
-		PatchMonsterModel("models/monsters/dog/dog.md2");
+		PatchMonsterModel("models/monsters/q1dog/tris.md2");
 		self->s.skinnum = self->style * 2;
 	}
 
-	self->s.modelindex = gi.modelindex ("models/monsters/dog/dog.md2");
-	VectorSet (self->mins, -16, -16, -24);
-	VectorSet (self->maxs, 16, 16, 8);
+	self->s.modelindex = gi.modelindex ("models/monsters/q1dog/tris.md2");
+	VectorSet (self->mins, -32, -32, -24);
+	VectorSet (self->maxs, 32, 32, 32);
 
-	if(!self->health)
-		self->health = 50;
-	if(!self->gib_health)
-		self->gib_health = -100;
-	if(!self->mass)
+	if (!self->health)
+		self->health = 30;
+	if (!self->gib_health)
+		self->gib_health = -35;
+	if (!self->mass)
 		self->mass = 80;
 
-	self->pain = dog_pain;
-	self->die = dog_die;
+	self->pain = q1dog_pain;
+	self->die = q1dog_die;
 
-	self->monsterinfo.stand = dog_stand;
-	self->monsterinfo.walk = dog_walk;
-	self->monsterinfo.run = dog_run;
+	self->flags |= FL_Q1_MONSTER;
+
+	self->monsterinfo.stand = q1dog_stand;
+	self->monsterinfo.walk = q1dog_walk;
+	self->monsterinfo.run = q1dog_run;
 	self->monsterinfo.dodge = NULL;
-	self->monsterinfo.attack = dog_leap;
-	self->monsterinfo.melee = dog_melee;
-	self->monsterinfo.sight = dog_sight;
-	self->monsterinfo.search = dog_stand;
-	self->monsterinfo.idle = dog_stand;
-	self->monsterinfo.checkattack = dog_checkattack;
+	self->monsterinfo.attack = q1dog_leap;
+	self->monsterinfo.melee = q1dog_melee;
+	self->monsterinfo.sight = q1dog_sight;
+	self->monsterinfo.search = q1dog_stand;
+	self->monsterinfo.idle = q1dog_stand;
+	self->monsterinfo.checkattack = q1dog_checkattack;
 
 	if (!self->monsterinfo.flies)
 		self->monsterinfo.flies = 0.60;
@@ -504,7 +495,7 @@ void SP_monster_dog (edict_t *self)
 
 	gi.linkentity (self);
 	
-	self->monsterinfo.currentmove = &dog_move_stand;
+	self->monsterinfo.currentmove = &q1dog_move_stand;
 
 	self->monsterinfo.scale = MODEL_SCALE;
 	walkmonster_start (self);

@@ -455,13 +455,13 @@ void CallMyFriends (edict_t *targ, edict_t *attacker)
 			}
 		}
 	}
-	if( targ->client && (attacker->svflags & SVF_MONSTER) )
+	if ( targ->client && (attacker->svflags & SVF_MONSTER) )
 	{
 		// target is player; attacker is monster... alert "good guys", if any
 //		trace_t	tr;
 		edict_t	*teammate = NULL;
 		teammate = G_Find(NULL,FOFS(dmgteam),"player");
-		while(teammate)
+		while (teammate)
 		{
 			if((teammate->health > 0) && !(teammate->monsterinfo.aiflags & AI_CHASE_THING) && (teammate != attacker))
 			{
@@ -484,7 +484,7 @@ void CallMyFriends (edict_t *targ, edict_t *attacker)
 		}
 	}
 	// If player attacks a GOODGUY, turn GOODGUY stuff off
-	//Knightmare- gekks and stalkers use different spawnflag
+	// Knightmare- gekks and stalkers use different spawnflag
 	if ( attacker->client && (targ->svflags & SVF_MONSTER)
 		&& UseSpecialGoodGuyFlag(targ) && (targ->spawnflags & 16) )
 	{
@@ -885,6 +885,11 @@ void T_Damage (edict_t *in_targ, edict_t *inflictor, edict_t *in_attacker, vec3_
 	if (!targ->takedamage)
 		return;
 
+	// no drowning damage for zombies!
+	if ( (mod == MOD_WATER) &&
+		(!Q_stricmp(targ->classname, "q1_monster_zombie") || !Q_stricmp(targ->classname, "monster_q1_zombie")) )
+			return;
+
 	sphere_notified = false;		// PGM
 
 	// Lazarus: If monster/actor is currently being forced to use
@@ -907,7 +912,7 @@ void T_Damage (edict_t *in_targ, edict_t *inflictor, edict_t *in_attacker, vec3_
 	{
 		if (targ->target_ent && targ->target_ent->client && targ->target_ent->client->spycam)
 		{
-			if(attacker->enemy == targ)
+			if (attacker->enemy == targ)
 			{
 				attacker->enemy = targ->target_ent;
 				attacker->goalentity = NULL;
@@ -916,7 +921,7 @@ void T_Damage (edict_t *in_targ, edict_t *inflictor, edict_t *in_attacker, vec3_
 			targ = targ->target_ent;
 			camera_off(targ);
 			if (attacker->svflags & SVF_MONSTER)
-			{	//Knightmare- gekks and stalkers use different spawnflag	
+			{	// Knightmare- gekks and stalkers use different spawnflag	
 				if ( (UseRegularGoodGuyFlag(attacker) && (attacker->spawnflags & SF_MONSTER_GOODGUY))
 					|| (UseSpecialGoodGuyFlag(attacker) && (attacker->spawnflags & 16)) )
 				{
@@ -926,13 +931,13 @@ void T_Damage (edict_t *in_targ, edict_t *inflictor, edict_t *in_attacker, vec3_
 						attacker->monsterinfo.aiflags &= ~AI_FOLLOW_LEADER;
 						attacker->monsterinfo.attack_finished = 0;
 						attacker->monsterinfo.pausetime = level.time + 100000000;
-						if(attacker->monsterinfo.stand)
+						if (attacker->monsterinfo.stand)
 							attacker->monsterinfo.stand(attacker);
 					}
 				}
 				else
 				{
-					if(attacker->enemy == targ)
+					if (attacker->enemy == targ)
 						FoundTarget(attacker);
 				}
 			}
@@ -947,10 +952,10 @@ void T_Damage (edict_t *in_targ, edict_t *inflictor, edict_t *in_attacker, vec3_
 	{
 		edict_t	*monster;
 		monster = targ->child;
-		if(monster)
+		if (monster)
 		{
 			monster->health = targ->health;
-			if(targ->target_ent)
+			if (targ->target_ent)
 			{
 				targ->target_ent->spawnflags &= ~4;
 				targ->target_ent->move_angles[0] = 0;
@@ -988,12 +993,12 @@ void T_Damage (edict_t *in_targ, edict_t *inflictor, edict_t *in_attacker, vec3_
 	// allow the deathmatch game to change values
 	if (deathmatch->value && gamerules && gamerules->value)
 	{
-		if(DMGame.ChangeDamage)
+		if (DMGame.ChangeDamage)
 			damage = DMGame.ChangeDamage(targ, attacker, damage, mod);
-		if(DMGame.ChangeKnockback)
+		if (DMGame.ChangeKnockback)
 			knockback = DMGame.ChangeKnockback(targ, attacker, knockback, mod);
 
-		if(!damage)
+		if (!damage)
 			return;
 	}
 //ROGUE
@@ -1023,16 +1028,25 @@ void T_Damage (edict_t *in_targ, edict_t *inflictor, edict_t *in_attacker, vec3_
 
 	VectorNormalize(dir);
 
-// bonus damage for suprising a monster
-	if (!(dflags & DAMAGE_RADIUS) && (targ->svflags & SVF_MONSTER) && (attacker->client) && (!targ->enemy) && (targ->health > 0))
+	// bonus damage for suprising a monster
+	if ( !(dflags & DAMAGE_RADIUS) && (targ->svflags & SVF_MONSTER) && (attacker->client) && (!targ->enemy) && (targ->health > 0) )
 		damage *= 2;
 
-	if ((targ->flags & FL_NO_KNOCKBACK) || (mod == MOD_ETF_SPLASH) || (mod == MOD_ETF_RIFLE))
+	// Shamblers take half damage from explosives
+	if ( (targ->svflags & SVF_MONSTER) &&
+		( (Q_stricmp(targ->classname,"q1_monster_shambler") == 0) || (Q_stricmp(targ->classname,"monster_q1_shambler") == 0) ) &&
+		( (Q_stricmp(inflictor->classname, "grenade") == 0) || (Q_stricmp(inflictor->classname, "prox") == 0) ||
+		(Q_stricmp(inflictor->classname, "plasma") == 0) ||
+		(Q_stricmp(inflictor->classname, "rocket") == 0) || (Q_stricmp(inflictor->classname, "homing rocket") == 0) ) )
+		damage = (int)((float)damage * 0.5f);
+
+	// Skid - q1 monsters don't go flying
+	if ( (targ->flags & (FL_NO_KNOCKBACK|FL_Q1_MONSTER)) || (mod == MOD_ETF_SPLASH) || (mod == MOD_ETF_RIFLE))
 		knockback = 0;
 
 // figure momentum add
 	if (!(dflags & DAMAGE_NO_KNOCKBACK)
-	//Knightmare- no knockback from negative damage lasers and triggers
+	// Knightmare- no knockback from negative damage lasers and triggers
 		&& ( (damage > 0) || ((mod != MOD_TRIGGER_HURT) && (mod != MOD_TARGET_LASER)) ))
 	{
 		if ((knockback) && (targ->movetype != MOVETYPE_NONE) && (targ->movetype != MOVETYPE_BOUNCE) && (targ->movetype != MOVETYPE_PUSH) && (targ->movetype != MOVETYPE_STOP))
@@ -1165,9 +1179,9 @@ void T_Damage (edict_t *in_targ, edict_t *inflictor, edict_t *in_attacker, vec3_
 		//PGM
 		}
 
-		if(targ->client)
+		if (targ->client)
 		{
-			if(in_targ != targ)
+			if (in_targ != targ)
 			{
 				// Then player has taken the place of whatever was originally
 				// damaged, as in switching from func_monitor usage. Limit
@@ -1186,11 +1200,11 @@ void T_Damage (edict_t *in_targ, edict_t *inflictor, edict_t *in_attacker, vec3_
 		{
 			// Lazarus: For func_explosive target, check spawnflags and, if needed,
 			//          damage type
-			if(targ->classname && !Q_stricmp(targ->classname,"func_explosive"))
+			if (targ->classname && !Q_stricmp(targ->classname,"func_explosive"))
 			{
 				qboolean good_damage = true;
 
-				if(targ->spawnflags & 16)  // explosion only
+				if (targ->spawnflags & 16)  // explosion only
 				{
 					good_damage = false;
 					if(mod == MOD_GRENADE)     good_damage = true;
@@ -1215,21 +1229,22 @@ void T_Damage (edict_t *in_targ, edict_t *inflictor, edict_t *in_attacker, vec3_
 					if(mod == MOD_SHOCK_SPLASH) good_damage = true;
 					if(mod == MOD_ETF_SPLASH)  good_damage = true;
 				}
-				if(!good_damage) return;
+				if (!good_damage) return;
 			}
 			targ->health = targ->health - take;
 		}
 
 //PGM - spheres need to know who to shoot at
-		if(client && client->owned_sphere)
+		if (client && client->owned_sphere)
 		{
 			sphere_notified = true;
-			if(client->owned_sphere->pain)
+			if (client->owned_sphere->pain)
 				client->owned_sphere->pain (client->owned_sphere, attacker, 0, 0);
 		}
 //PGM
-
-		if (targ->health <= 0)
+		// Knocked down Q1 zombies can't be killed
+	//	if (targ->health <= 0)
+		if ( (targ->health <= 0) && !( (!Q_stricmp(targ->classname, "q1_monster_zombie") || !Q_stricmp(targ->classname, "monster_q1_zombie")) && targ->count) )
 		{
 			if ((targ->svflags & SVF_MONSTER) || (client))
 				targ->flags |= FL_NO_KNOCKBACK;

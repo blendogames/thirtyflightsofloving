@@ -80,18 +80,18 @@
 #define FL_NO_KNOCKBACK			0x00000800
 #define FL_POWER_SHIELD			0x00001000	// power armor (if any) is active
 #define FL_POWER_SCREEN			0x00002000
-//ROGUE
+// ROGUE
 #define FL_MECHANICAL			0x00004000	// entity is mechanical, use sparks not blood
 #define FL_SAM_RAIMI			0x00008000	// entity is in sam raimi cam mode
 #define FL_DISGUISED			0x00010000	// entity is in disguise, monsters will not recognize.
 #define	FL_NUKED				0x00020000	// player has been vaporized by a nuke, drop no gibs
-//ROGUE
-//Mappack - this flag says the player is in a turret and controlling it
+// ROGUE
+// Mappack - this flag says the player is in a turret and controlling it
 #define	FL_TURRET_OWNER			0x00040000
-//Knightmare- this says that an entity is set to move with another
+// Knightmare- this says that an entity is set to move with another
 #define	FL_MOVESLAVE			0x00080000
 
-//Knightmare- flags for trains
+// Knightmare- flags for trains
 #define FL_TRACKTRAIN			0x00100000
 #define	FL_ROTTRAIN				0x00200000
 #define	FL_REVERSIBLE			0x00400000
@@ -99,6 +99,8 @@
 #define	FL_BOB					0x01000000
 #define FL_ROBOT				0x02000000	// Player-controlled robot or monster. Relax yaw constraints
 #define FL_REFLECT              0x04000000	// Reflection entity
+
+#define FL_Q1_MONSTER			0x08000000	
 
 #define FL_RESPAWN				0x80000000	// used for item respawning
 
@@ -315,6 +317,8 @@ typedef struct
 #define IT_STAY_COOP		0x00000008
 #define IT_KEY				0x00000010
 #define IT_POWERUP			0x00000020
+
+#define IT_Q1				0x00000080		// added for Q1 keys
 
 // ROGUE
 #define IT_MELEE			0x00000040
@@ -738,6 +742,14 @@ extern	int tesla_index;
 extern	int trap_index;
 extern	int shocksphere_index;
 
+// added for convenience with triger_key sound hack
+extern	int	key_q1_med_silver_index;
+extern	int	key_q1_med_gold_index;
+extern	int	key_q1_rune_silver_index;
+extern	int	key_q1_rune_gold_index;
+extern	int	key_q1_base_silver_index;
+extern	int	key_q1_base_gold_index;
+
 // mxd added
 extern int gibsthisframe;
 extern int lastgibframe;
@@ -819,6 +831,26 @@ extern int lastgibframe;
 #define MOD_KICK				66
 #define MOD_MISSILE				67
 #define MOD_MISSILE_SPLASH		68
+
+//===============================
+// Extra MODs
+// Quake1     -Skid
+//===============================
+#define MOD_Q1_AXE				69
+#define MOD_Q1_SG				70
+#define MOD_Q1_SSG				71
+#define MOD_Q1_NG				72
+#define MOD_Q1_SNG				73
+#define MOD_Q1_GL				74
+#define MOD_Q1_RL				75
+#define MOD_Q1_LG				76
+#define MOD_Q1_GL_SPLASH		77
+#define MOD_Q1_RL_SPLASH		78
+#define MOD_Q1_LG_SPLASH		79
+#define MOD_Q1_LASER			80
+#define MOD_Q1_FLAMEBOLT		81
+#define MOD_Q1_FIREPOD			82
+
 
 extern	int	meansOfDeath;
 
@@ -1075,9 +1107,12 @@ float	*tv (float x, float y, float z);
 char	*vtos (vec3_t v);
 
 float vectoyaw (vec3_t vec);
-float vectopitch (vec3_t vec); //Knightmare
+float vectopitch (vec3_t vec); // Knightmare added
 
 void vectoangles (vec3_t vec, vec3_t angles);
+
+float	PointDist (vec3_t x, vec3_t y);
+
 void stuffcmd(edict_t *ent, char *s);
 
 qboolean point_infront (edict_t *self, vec3_t point);
@@ -1097,13 +1132,19 @@ qboolean CheckCoop_MapHacks (edict_t *ent); // FS: Coop: Check if we have to mod
 qboolean UseSpecialGoodGuyFlag (edict_t *monster); //Knightmare added
 qboolean UseRegularGoodGuyFlag (edict_t *monster); //Knightmare added
 
-
 //ROGUE
 void	G_ProjectSource2 (vec3_t point, vec3_t distance, vec3_t forward, vec3_t right, vec3_t up, vec3_t result);
 float	vectoyaw2 (vec3_t vec);
 void	vectoangles2 (vec3_t vec, vec3_t angles);
 edict_t *findradius2 (edict_t *from, vec3_t org, float rad);
 //ROGUE
+
+//
+// g_utils_q1.c
+//
+float PointDist (vec3_t x, vec3_t y);
+void Q1TeleportSounds (edict_t *ent);
+void Q1TeleportSounds2 (edict_t *ent1, edict_t *ent2);
 
 //
 // g_combat.c
@@ -1301,10 +1342,10 @@ qboolean infront (edict_t *self, edict_t *other);
 qboolean visible (edict_t *self, edict_t *other);
 qboolean FacingIdeal(edict_t *self);
 qboolean ai_chicken (edict_t *ent, edict_t *badguy);
+
 //
 // g_weapon.c
 //
-
 #define BLASTER_ORANGE	1
 #define BLASTER_GREEN	2
 #define BLASTER_BLUE	3
@@ -1333,6 +1374,22 @@ void Cmd_KillTrap_f (edict_t *ent);
 void Trap_Explode (edict_t *ent);
 qboolean AimGrenade (edict_t *launcher, vec3_t start, vec3_t target, vec_t speed, vec3_t aim);
 void Grenade_Evade (edict_t *monster);
+
+//
+// g_weapon_q1.c
+//
+void q1_fire_nail (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, qboolean sng);
+void q1_fire_laser (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed);
+void q1_fire_flame (edict_t *self, vec3_t start, vec3_t dir, float leftrightoff);
+void q1_explode (edict_t *self);
+void q1_fire_grenade (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, float timer, float damage_radius);
+void q1_fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage);
+void q1_fire_lightning (edict_t *self, vec3_t start, vec3_t dir, int damage);
+void q1_fire_firepod (edict_t *self, vec3_t dir);
+void q1_fire_lavaball (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage);
+void q1_fire_acidspit (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed);
+void q1_fire_gib (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed);
+
 
 //
 // m_actor.c

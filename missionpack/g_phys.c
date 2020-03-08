@@ -2129,9 +2129,17 @@ void SV_Physics_Step (edict_t *ent)
 			return;
 
 		if (ent->groundentity)
+		{
 			if (!wasonground)
-				if (hitsound)
-					gi.sound (ent, 0, gi.soundindex("world/land.wav"), 1, 1, 0);
+			{
+				if (hitsound) {
+					if (ent->flags & FL_Q1_MONSTER)
+						gi.sound (ent, 0, gi.soundindex("q1fiend/dland2.wav"), 1, ATTN_NORM, 0);
+					else
+						gi.sound (ent, 0, gi.soundindex("world/land.wav"), 1, 1, 0);
+				}
+			}
+		}
 
 		// Move func_pushable riders
 		if (ent->movetype == MOVETYPE_PUSHABLE)

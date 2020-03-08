@@ -491,6 +491,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\g_misc_q1.c"
+				>
+			</File>
+			<File
 				RelativePath="g_monster.c"
 				>
 			</File>
@@ -583,11 +587,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\g_utils_q1.c"
+				>
+			</File>
+			<File
 				RelativePath="g_vehicle.c"
 				>
 			</File>
 			<File
 				RelativePath="g_weapon.c"
+				>
+			</File>
+			<File
+				RelativePath=".\g_weapon_q1.c"
 				>
 			</File>
 			<File
@@ -712,6 +724,58 @@
 			</File>
 			<File
 				RelativePath="m_parasite.c"
+				>
+			</File>
+			<File
+				RelativePath=".\m_q1dog.c"
+				>
+			</File>
+			<File
+				RelativePath=".\m_q1enforcer.c"
+				>
+			</File>
+			<File
+				RelativePath=".\m_q1fiend.c"
+				>
+			</File>
+			<File
+				RelativePath=".\m_q1grunt.c"
+				>
+			</File>
+			<File
+				RelativePath=".\m_q1hknight.c"
+				>
+			</File>
+			<File
+				RelativePath=".\m_q1knight.c"
+				>
+			</File>
+			<File
+				RelativePath=".\m_q1ogre.c"
+				>
+			</File>
+			<File
+				RelativePath=".\m_q1rotfish.c"
+				>
+			</File>
+			<File
+				RelativePath=".\m_q1scrag.c"
+				>
+			</File>
+			<File
+				RelativePath=".\m_q1shalrath.c"
+				>
+			</File>
+			<File
+				RelativePath=".\m_q1shambler.c"
+				>
+			</File>
+			<File
+				RelativePath=".\m_q1tarbaby.c"
+				>
+			</File>
+			<File
+				RelativePath=".\m_q1zombie.c"
 				>
 			</File>
 			<File
@@ -905,6 +969,58 @@
 			</File>
 			<File
 				RelativePath="m_player.h"
+				>
+			</File>
+			<File
+				RelativePath=".\m_q1dog.h"
+				>
+			</File>
+			<File
+				RelativePath=".\m_q1enforcer.h"
+				>
+			</File>
+			<File
+				RelativePath=".\m_q1fiend.h"
+				>
+			</File>
+			<File
+				RelativePath=".\m_q1grunt.h"
+				>
+			</File>
+			<File
+				RelativePath=".\m_q1hknight.h"
+				>
+			</File>
+			<File
+				RelativePath=".\m_q1knight.h"
+				>
+			</File>
+			<File
+				RelativePath=".\m_q1ogre.h"
+				>
+			</File>
+			<File
+				RelativePath=".\m_q1rotfish.h"
+				>
+			</File>
+			<File
+				RelativePath=".\m_q1scrag.h"
+				>
+			</File>
+			<File
+				RelativePath=".\m_q1shalrath.h"
+				>
+			</File>
+			<File
+				RelativePath=".\m_q1shambler.h"
+				>
+			</File>
+			<File
+				RelativePath=".\m_q1tarbaby.h"
+				>
+			</File>
+			<File
+				RelativePath=".\m_q1zombie.h"
 				>
 			</File>
 			<File

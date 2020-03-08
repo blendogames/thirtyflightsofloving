@@ -865,7 +865,7 @@ void SP_monster_infantry (edict_t *self)
 		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
 
-	if(!self->monsterinfo.flies)
+	if (!self->monsterinfo.flies)
 		self->monsterinfo.flies = 0.40;
 
 	self->common_name = "Enforcer";

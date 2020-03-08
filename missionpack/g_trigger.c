@@ -352,19 +352,45 @@ void trigger_key_use (edict_t *self, edict_t *other, edict_t *activator)
 		if (level.time < self->touch_debounce_time)
 			return;
 		self->touch_debounce_time = level.time + 5.0;
-		if(!(self->spawnflags & 4))
+		if (!(self->spawnflags & 4))
 		{
 			if (self->key_message && strlen(self->key_message))
 				gi.centerprintf (activator, self->key_message);
 			else
 				gi.centerprintf (activator, "You need the %s", self->item->pickup_name);
+			// Skid added		
+			if (self->item->flags & IT_Q1)
+			{
+				if (index == key_q1_med_gold_index || index == key_q1_med_silver_index)
+					gi.sound (activator, CHAN_AUTO, gi.soundindex ("q1world/doors/medtry.wav"), 1, ATTN_NORM, 0);
+				else if (index == key_q1_base_gold_index || index == key_q1_base_silver_index)
+					gi.sound (activator, CHAN_AUTO, gi.soundindex ("q1world/doors/basetry.wav"), 1, ATTN_NORM, 0);
+				else 
+					gi.sound (activator, CHAN_AUTO, gi.soundindex ("q1world/doors/runetry.wav"), 1, ATTN_NORM, 0);
+			}
+			else
+			// end Skid
 			gi.sound (activator, CHAN_AUTO, gi.soundindex ("misc/keytry.wav"), 1, ATTN_NORM, 0);
 		}
 		return;
 	}
 
-	if(!(self->spawnflags & 4))
+	if (!(self->spawnflags & 4))
+	{
+		// Skid added		
+		if (self->item->flags & IT_Q1)
+		{
+			if (index == key_q1_med_gold_index || index == key_q1_med_silver_index)
+				gi.sound (activator, CHAN_AUTO, gi.soundindex ("q1world/doors/meduse.wav"), 1, ATTN_NORM, 0);
+			else if (index == key_q1_base_gold_index || index == key_q1_base_silver_index)
+				gi.sound (activator, CHAN_AUTO, gi.soundindex ("q1world/doors/baseuse.wav"), 1, ATTN_NORM, 0);
+			else
+				gi.sound (activator, CHAN_AUTO, gi.soundindex ("q1world/doors/runeuse.wav"), 1, ATTN_NORM, 0);
+		}
+		else
+		// end Skid	
 		gi.sound (activator, CHAN_AUTO, gi.soundindex ("misc/keyuse.wav"), 1, ATTN_NORM, 0);
+	}
 	if (coop->value)
 	{
 		int		player;

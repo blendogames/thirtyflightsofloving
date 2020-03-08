@@ -415,11 +415,11 @@ void SP_monster_flipper (edict_t *self)
 	self->monsterinfo.sight = flipper_sight;
 	self->monsterinfo.search = flipper_search;	//Knightmare added
 
-	if(!self->monsterinfo.flies)
+	if (!self->monsterinfo.flies)
 		self->monsterinfo.flies = 0.90;
 
 	// Lazarus
-	if(self->powerarmor)
+	if (self->powerarmor)
 	{
 		if (self->powerarmortype == 1)
 			self->monsterinfo.power_armor_type = POWER_ARMOR_SCREEN;

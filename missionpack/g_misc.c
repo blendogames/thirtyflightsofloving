@@ -397,6 +397,11 @@ void ThrowHead (edict_t *self, char *gibname, int damage, int type)
 		VectorSet (self->mins, -4, -4, -4);
 		VectorSet (self->maxs, 4, 4, 4);
 	}
+	else if (self->flags & FL_Q1_MONSTER) // Q1 monster heads have bigger bbox
+	{
+		VectorSet (self->mins, -16, -16, 0);
+		VectorSet (self->maxs, 16, 16, 32);
+	}
 	else
 	{
 		VectorSet (self->mins, -4, -4, 0);
@@ -445,8 +450,16 @@ void ThrowHead (edict_t *self, char *gibname, int damage, int type)
 
 	self->avelocity[YAW] = crandom()*600;
 
-	self->think = gib_fade; //Knightmare- gib fade, was G_FreeEdict
-	self->nextthink = level.time + 10 + random()*10;
+	if (self->flags & FL_Q1_MONSTER) // Q1 monster heads don't disappear
+	{
+		self->think = NULL;
+		self->nextthink = 0;
+	}
+	else
+	{
+		self->think = gib_fade; // Knightmare- gib fade, was G_FreeEdict
+		self->nextthink = level.time + 10 + random()*10;
+	}
 
 //PGM
 	self->s.renderfx |= RF_IR_VISIBLE;

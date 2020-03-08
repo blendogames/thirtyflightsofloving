@@ -837,9 +837,16 @@ void plat_blocked (edict_t *self, edict_t *other)
 		return;
 	}
 
+	// Remove dead Q1 monsters, as they can't be gibbed
+	if ( (other->svflags & SVF_DEADMONSTER) && (other->flags & FL_Q1_MONSTER) )
+	{
+		G_FreeEdict(other);
+		return;
+	}
+
 //PGM
 	// gib dead things
-	if(other->health < 1)
+	if (other->health < 1)
 	{
 		T_Damage(other, self, self, vec3_origin, other->s.origin, vec3_origin, 100, 1, 0, MOD_CRUSH);
 	}
@@ -1298,6 +1305,13 @@ void plat2_blocked (edict_t *self, edict_t *other)
 		return;
 	}
 
+	// Remove dead Q1 monsters, as they can't be gibbed
+	if ( (other->svflags & SVF_DEADMONSTER) && (other->flags & FL_Q1_MONSTER) )
+	{
+		G_FreeEdict(other);
+		return;
+	}
+
 	// gib dead things
 	if(other->health < 1)
 	{
@@ -1568,6 +1582,13 @@ void rotating_decel (edict_t *self)
 
 void rotating_blocked (edict_t *self, edict_t *other)
 {
+	// Remove dead Q1 monsters, as they can't be gibbed
+	if ( (other->svflags & SVF_DEADMONSTER) && (other->flags & FL_Q1_MONSTER) )
+	{
+		G_FreeEdict(other);
+		return;
+	}
+
 	T_Damage (other, self, self, vec3_origin, other->s.origin, vec3_origin, self->dmg, 1, 0, MOD_CRUSH);
 }
 
@@ -2461,6 +2482,13 @@ void door_blocked  (edict_t *self, edict_t *other)
 		return;
 	}
 
+	// Remove dead Q1 monsters, as they can't be gibbed
+	if ( (other->svflags & SVF_DEADMONSTER) && (other->flags & FL_Q1_MONSTER) )
+	{
+		G_FreeEdict(other);
+		return;
+	}
+
 	T_Damage (other, self, self, vec3_origin, other->s.origin, vec3_origin, self->dmg, 1, 0, MOD_CRUSH);
 
 	if (self->spawnflags & DOOR_CRUSHER)
@@ -2900,6 +2928,13 @@ void smart_water_blocked (edict_t *self, edict_t *other)
 		// if it's still there, nuke it
 		if (other && other->inuse)		// PGM
 			BecomeExplosion1 (other);
+		return;
+	}
+
+	// Remove dead Q1 monsters, as they can't be gibbed
+	if ( (other->svflags & SVF_DEADMONSTER) && (other->flags & FL_Q1_MONSTER) )
+	{
+		G_FreeEdict(other);
 		return;
 	}
 
@@ -3690,6 +3725,13 @@ void train_blocked (edict_t *self, edict_t *other)
 		return;
 	}
 	VectorClear (self->avelocity); //don't turn children when blocked
+
+	// Remove dead Q1 monsters, as they can't be gibbed
+	if ( (other->svflags & SVF_DEADMONSTER) && (other->flags & FL_Q1_MONSTER) )
+	{
+		G_FreeEdict(other);
+		return;
+	}
 
 	if (level.time < self->touch_debounce_time)
 		return;
@@ -4991,6 +5033,13 @@ void door_secret_blocked  (edict_t *self, edict_t *other)
 		return;
 	}
 
+	// Remove dead Q1 monsters, as they can't be gibbed
+	if ( (other->svflags & SVF_DEADMONSTER) && (other->flags & FL_Q1_MONSTER) )
+	{
+		G_FreeEdict(other);
+		return;
+	}
+
 	if (level.time < self->touch_debounce_time)
 		return;
 	self->touch_debounce_time = level.time + 0.5;
@@ -5983,7 +6032,7 @@ void SP_func_bobbingwater(edict_t *self)
 //
 void pivot_blocked (edict_t *self, edict_t *other)
 {
-	VectorCopy(vec3_origin,self->avelocity);
+	VectorCopy(vec3_origin ,self->avelocity);
 	gi.linkentity(self);
 }
 

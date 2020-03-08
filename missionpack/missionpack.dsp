@@ -169,6 +169,10 @@ SOURCE=.\g_misc.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\g_misc_q1.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\g_monster.c
 # End Source File
 # Begin Source File
@@ -261,11 +265,19 @@ SOURCE=.\g_utils.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\g_utils_q1.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\g_vehicle.c
 # End Source File
 # Begin Source File
 
 SOURCE=.\g_weapon.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\g_weapon_q1.c
 # End Source File
 # Begin Source File
 
@@ -390,6 +402,58 @@ SOURCE=.\m_mutant.c
 # Begin Source File
 
 SOURCE=.\m_parasite.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\m_q1dog.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\m_q1enforcer.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\m_q1fiend.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\m_q1grunt.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\m_q1hknight.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\m_q1knight.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\m_q1ogre.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\m_q1rotfish.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\m_q1scrag.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\m_q1shalrath.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\m_q1shambler.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\m_q1tarbaby.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\m_q1zombie.c
 # End Source File
 # Begin Source File
 
@@ -582,6 +646,58 @@ SOURCE=.\m_parasite.h
 # Begin Source File
 
 SOURCE=.\m_player.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\m_q1dog.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\m_q1enforcer.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\m_q1fiend.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\m_q1grunt.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\m_q1hknight.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\m_q1knight.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\m_q1ogre.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\m_q1rotfish.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\m_q1scrag.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\m_q1shalrath.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\m_q1shambler.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\m_q1tarbaby.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\m_q1zombie.h
 # End Source File
 # Begin Source File
 

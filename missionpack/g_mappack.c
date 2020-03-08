@@ -62,7 +62,7 @@ void bigflame_think (edict_t *self)
 	self->nextthink = level.time + FRAMETIME;
 }
 
-void SP_light_flame (edict_t *self) //New function by Beel. (small flame)
+void SP_light_flame (edict_t *self) // New function by Beel. (small flame)
 {
 	self->movetype = MOVETYPE_NONE;
 	self->solid = SOLID_NOT;
@@ -72,7 +72,7 @@ void SP_light_flame (edict_t *self) //New function by Beel. (small flame)
 	self->s.frame = 0;
 	self->s.renderfx |=	RF_IR_VISIBLE | RF_FULLBRIGHT;		// PGM
 	self->s.effects |= EF_PLASMA;
-	//Knightmare- only one size for this model
+	// Knightmare- only one size for this model
 	//ed - spawnflag of 2 gives a big flame
 //	if (self->spawnflags & 2)
 //		self->think = bigflame_think;

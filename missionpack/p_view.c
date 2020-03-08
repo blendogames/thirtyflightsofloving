@@ -712,7 +712,7 @@ void P_SlamDamage (edict_t *ent)
 	vec3_t	dir;
 	vec3_t	deltav;
 
-	if (ent->s.modelindex != (MAX_MODELS-1)) //was 255
+	if (ent->s.modelindex != (MAX_MODELS-1)) // was 255
 		return;		// not in the player model
 
 	if (ent->movetype == MOVETYPE_NOCLIP)
@@ -731,11 +731,11 @@ void P_SlamDamage (edict_t *ent)
 				ent->s.event = EV_FALLFAR;
 			else
 				ent->s.event = EV_FALL;*/
-			//play correct PPM sounds while in third person mode
+			// play correct PPM sounds while in third person mode
 			if (delta >= 65*(player_max_speed->value/300)) // Knightmare changed
-				gi.sound(ent,CHAN_VOICE,gi.soundindex("*fall1.wav"),1.0,ATTN_NORM,0);
+				gi.sound(ent, CHAN_VOICE, gi.soundindex("*fall1.wav"), 1.0, ATTN_NORM, 0);
 			else
-				gi.sound(ent,CHAN_VOICE,gi.soundindex("*fall2.wav"),1.0,ATTN_NORM,0);
+				gi.sound(ent, CHAN_VOICE, gi.soundindex("*fall2.wav"), 1.0, ATTN_NORM, 0);
 		}
 		ent->pain_debounce_time = level.time;	// no normal pain sound
 		damage = (delta-40*(player_max_speed->value/300))/2; // Knightmare changed
@@ -764,7 +764,7 @@ void P_FallingDamage (edict_t *ent)
 	if (ent->s.modelindex != (MAX_MODELS-1)) //was 255
 		return;		// not in the player model
 
-	//Knightmare- no falling if player is controlling a turret
+	// Knightmare- no falling if player is controlling a turret
 	if (ent->flags & FL_TURRET_OWNER)
 		return;
 
@@ -799,11 +799,11 @@ void P_FallingDamage (edict_t *ent)
 
 	// Lazarus: Changed here to NOT play footstep sounds if ent isn't on the ground.
 	//          So player will no longer play footstep sounds when descending a ladder.
-	if (delta < 7) //Knightmare- was 15, changed to 7
+	if (delta < 7) // Knightmare- was 15, changed to 7
 	{
 		if (!(ent->watertype & CONTENTS_MUD) && !ent->vehicle && !ent->turret && (ent->groundentity || PlayerOnFloor(ent)) )
 #ifndef FMOD_FOOTSTEPS
-			ent->s.event = EV_FOOTSTEP; //Knightmare- move Lazarus footsteps client-side
+			ent->s.event = EV_FOOTSTEP; // Knightmare- move Lazarus footsteps client-side
 #else
 			FootStep(ent);
 #endif
@@ -823,11 +823,11 @@ void P_FallingDamage (edict_t *ent)
 				ent->s.event = EV_FALLFAR;
 			else
 				ent->s.event = EV_FALL;*/
-			//play correct PPM sounds while in third person mode
+			// play correct PPM sounds while in third person mode
 			if (delta >= 55)
-				gi.sound(ent,CHAN_VOICE,gi.soundindex("*fall1.wav"),1.0,ATTN_NORM,0);
+				gi.sound(ent, CHAN_VOICE, gi.soundindex("*fall1.wav"), 1.0, ATTN_NORM, 0);
 			else
-				gi.sound(ent,CHAN_VOICE,gi.soundindex("*fall2.wav"),1.0,ATTN_NORM,0);
+				gi.sound(ent, CHAN_VOICE, gi.soundindex("*fall2.wav"), 1.0, ATTN_NORM,0);
 
 			if (world->effects & FX_WORLDSPAWN_ALERTSOUNDS)
 				PlayerNoise(ent,ent->s.origin,PNOISE_SELF);

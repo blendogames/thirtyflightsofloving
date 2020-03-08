@@ -18,21 +18,21 @@ field_t fields[] = {
 	{"spawnflags", FOFS(spawnflags), F_INT},
 	{"speed", FOFS(speed), F_FLOAT},
 
-	//Knightmare- movetype backup
+	// Knightmare- movetype backup
 	{"oldmovetype", FOFS(oldmovetype), F_INT},
 	{"relative_velocity", FOFS(relative_velocity), F_VECTOR}, 	//relative velocity
 	{"relative_avelocity", FOFS(relative_avelocity), F_VECTOR}, //relative angular velocity
 	{"oldvelocity", FOFS(oldvelocity), F_VECTOR}, //relative angular velocity
-	//Knightmare- rotating train stuff
+	// Knightmare- rotating train stuff
 	{"movewith_set", FOFS(movewith_set), F_INT},
 	{"bounce_me", FOFS(bounce_me), F_INT},
 	{"in_mud", FOFS(in_mud), F_INT},
 
-	{"width", FOFS(width), F_FLOAT},	//Knightmare- these are needed to update func_door_secret's positions
+	{"width", FOFS(width), F_FLOAT},	// Knightmare- these are needed to update func_door_secret's positions
 	{"length", FOFS(length), F_FLOAT},
 	{"side", FOFS(side), F_FLOAT},
 
-	{"move_origin", FOFS(move_origin), F_VECTOR}, //relative angular velocity
+	{"move_origin", FOFS(move_origin), F_VECTOR}, // relative angular velocity
 	{"org_angles", FOFS(org_angles), F_VECTOR},
 	{"deploy_angles", FOFS(deploy_angles), F_VECTOR},
 	{"aim_point", FOFS(aim_point), F_VECTOR},
@@ -41,7 +41,7 @@ field_t fields[] = {
 	{"ideal_yaw", FOFS(ideal_yaw), F_FLOAT},
 	{"ideal_roll", FOFS(ideal_roll), F_FLOAT},
 
-	//Knightmare- misc ent stuff
+	// Knightmare- misc ent stuff
 	{"common_name", FOFS(common_name), F_LSTRING},
 	{"newteam", FOFS(newteam), F_LSTRING},
 	{"musictrack", FOFS(musictrack), F_LSTRING},
@@ -53,7 +53,7 @@ field_t fields[] = {
 	{"shift", FOFS(shift), F_FLOAT},
 
 	{"last_attacked_framenum", FOFS(last_attacked_framenum), F_INT},
-	//Knightmare
+	// Knightmare
 
 	{"accel", FOFS(accel), F_FLOAT},
 	{"decel", FOFS(decel), F_FLOAT},

@@ -966,7 +966,8 @@ qboolean FindTarget (edict_t *self)
 	{
 		vec3_t	temp;
 
-		if (self->spawnflags & SF_MONSTER_SIGHT)
+		// Skid - No spawnflag check for noise for Q1 monsters - they seem excessively stupid that way		
+		if ( (self->spawnflags & SF_MONSTER_SIGHT) || (self->flags & FL_Q1_MONSTER) )
 		{
 			if (!visible (self, client))
 				return false;
@@ -987,9 +988,11 @@ qboolean FindTarget (edict_t *self)
 		// check area portals - if they are different and not connected then we can't hear it
 		if (!(client->flags & FL_REFLECT))	// Lazarus reflections
 		{
-			if (client->areanum != self->areanum)
-				if ((!gi.AreasConnected(self->areanum, client->areanum)) )
+			if (client->areanum != self->areanum) {
+				// Skid - Q1 monsters dont hear too far				 
+				if ( (!gi.AreasConnected(self->areanum, client->areanum)) || (self->flags & (FL_Q1_MONSTER)) ) 
 					return false;
+			}
 		}
 
 		self->ideal_yaw = vectoyaw(temp);
