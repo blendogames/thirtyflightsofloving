@@ -552,10 +552,11 @@ void q1_fireball_fly (edict_t *self)
 								   ((random() * 100) - 50),
 								   (self->speed + (random() * 150)));
 
-	lavaball->movetype = MOVETYPE_FLYMISSILE;
+//	lavaball->movetype = MOVETYPE_FLYMISSILE;
+	lavaball->movetype = MOVETYPE_TOSS;
 	lavaball->clipmask = MASK_SHOT;
 	lavaball->solid = SOLID_BBOX;
-	lavaball->s.effects |= EF_ROCKET; //EF_FLAG1
+	lavaball->s.effects |= EF_ROCKET; // EF_FLAG1
 	lavaball->s.renderfx |= RF_GLOW;
 	VectorClear (lavaball->mins);
 	VectorClear (lavaball->maxs);
@@ -587,7 +588,7 @@ void SP_misc_q1_fireball (edict_t *self)
 	self->think = q1_fireball_fly;
 	self->classname = "fireball";
 
-	self->common_name = "Lavaball spawner";
+	self->common_name = "Lavaball Spawner";
 
 	gi.linkentity(self);
 }

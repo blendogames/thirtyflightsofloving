@@ -1588,11 +1588,11 @@ void SV_Physics_Toss (edict_t *ent)
 
 // add gravity
 	if (ent->movetype != MOVETYPE_FLY
-	&& ent->movetype != MOVETYPE_FLYMISSILE
-	// RAFAEL- move type for rippergun projectile
-	&& ent->movetype != MOVETYPE_WALLBOUNCE
-	&& ent->movetype != MOVETYPE_VEHICLE
-	&& ent->movetype != MOVETYPE_RAIN)
+		&& ent->movetype != MOVETYPE_FLYMISSILE
+		// RAFAEL- move type for rippergun projectile
+		&& ent->movetype != MOVETYPE_WALLBOUNCE
+		&& ent->movetype != MOVETYPE_VEHICLE
+		&& ent->movetype != MOVETYPE_RAIN)
 		SV_AddGravity (ent);
 
 // move angles
@@ -1656,10 +1656,14 @@ void SV_Physics_Toss (edict_t *ent)
 		else
 			ent->waterlevel = 0;
 
-		if (!wasinwater && isinwater)
-			gi.positioned_sound (old_origin, g_edicts, CHAN_AUTO, gi.soundindex("misc/h2ohit1.wav"), 1, 1, 0);
-		else if (wasinwater && !isinwater)
-			gi.positioned_sound (ent->s.origin, g_edicts, CHAN_AUTO, gi.soundindex("misc/h2ohit1.wav"), 1, 1, 0);
+		if (!wasinwater && isinwater) {
+			if (strcmp(ent->classname, "lavaball") && strcmp(ent->classname, "bubble"))
+				gi.positioned_sound (old_origin, g_edicts, CHAN_AUTO, gi.soundindex("misc/h2ohit1.wav"), 1, 1, 0);
+		}
+		else if (wasinwater && !isinwater) {
+			if (strcmp(ent->classname, "lavaball") && strcmp(ent->classname, "bubble"))
+				gi.positioned_sound (ent->s.origin, g_edicts, CHAN_AUTO, gi.soundindex("misc/h2ohit1.wav"), 1, 1, 0);
+		}
 	}
 
 	// move teamslaves

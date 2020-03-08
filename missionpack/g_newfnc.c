@@ -135,6 +135,13 @@ void fd_secret_done(edict_t *self)
 
 void secret_blocked(edict_t *self, edict_t *other)
 {
+	// Remove dead Q1 monsters, as they can't be gibbed
+	if ( (other->svflags & SVF_DEADMONSTER) && (other->flags & FL_Q1_MONSTER) )
+	{
+		G_FreeEdict(other);
+		return;
+	}
+
 	if (!(self->flags & FL_TEAMSLAVE))
 		T_Damage (other, self, self, self->pos0, other->s.origin, self->pos0, self->dmg, 0, 0, MOD_CRUSH);
 
