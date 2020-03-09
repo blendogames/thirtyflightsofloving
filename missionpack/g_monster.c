@@ -950,8 +950,12 @@ void monster_triggered_spawn (edict_t *self)
 	self->air_finished = level.time + 12;
 	// Knightmare- teleport effect for Q1 monsters
 	if (self->flags & FL_Q1_MONSTER) {
+#ifdef KMQUAKE2_ENGINE_MOD
+		self->s.event = EV_PLAYER_TELEPORT_Q1;
+#else
 		self->s.event = EV_PLAYER_TELEPORT;
 		Q1TeleportSounds(self);
+#endif
 	}
 	// end Knightmare
 	gi.linkentity (self);

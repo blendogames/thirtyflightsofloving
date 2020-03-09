@@ -221,11 +221,17 @@ void CL_EntityEvent (entity_state_t *ent)
 	switch (ent->event)
 	{
 	case EV_ITEM_RESPAWN:
-		S_StartSound (NULL, ent->number, CHAN_WEAPON, S_RegisterSound("items/respawn1.wav"), 1, ATTN_IDLE, 0);
+	//	S_StartSound (NULL, ent->number, CHAN_WEAPON, S_RegisterSound("items/respawn1.wav"), 1, ATTN_IDLE, 0);
+		S_StartSound (NULL, ent->number, CHAN_WEAPON, clMedia.sfx_item_respawn, 1, ATTN_IDLE, 0);
 		CL_ItemRespawnParticles (ent->origin);
 		break;
 	case EV_PLAYER_TELEPORT:
-		S_StartSound (NULL, ent->number, CHAN_WEAPON, S_RegisterSound("misc/tele1.wav"), 1, ATTN_IDLE, 0);
+	//	S_StartSound (NULL, ent->number, CHAN_WEAPON, S_RegisterSound("misc/tele1.wav"), 1, ATTN_IDLE, 0);
+		S_StartSound (NULL, ent->number, CHAN_WEAPON, clMedia.sfx_player_teleport, 1, ATTN_IDLE, 0);
+		CL_TeleportParticles (ent->origin);
+		break;
+	case EV_PLAYER_TELEPORT_Q1:
+		S_StartSound (NULL, ent->number, CHAN_WEAPON, clMedia.sfx_player_teleport_q1[rand()%6], 1, ATTN_IDLE, 0);
 		CL_TeleportParticles (ent->origin);
 		break;
 	case EV_FOOTSTEP:
@@ -240,7 +246,8 @@ void CL_EntityEvent (entity_state_t *ent)
 		break;
 //end Knightmare
 	case EV_FALLSHORT:
-		S_StartSound (NULL, ent->number, CHAN_AUTO, S_RegisterSound ("player/land1.wav"), 1, ATTN_NORM, 0);
+	//	S_StartSound (NULL, ent->number, CHAN_AUTO, S_RegisterSound ("player/land1.wav"), 1, ATTN_NORM, 0);
+		S_StartSound (NULL, ent->number, CHAN_AUTO, clMedia.sfx_player_land, 1, ATTN_NORM, 0);
 		break;
 	case EV_FALL:
 		S_StartSound (NULL, ent->number, CHAN_AUTO, S_RegisterSound ("*fall2.wav"), 1, ATTN_NORM, 0);
@@ -248,7 +255,7 @@ void CL_EntityEvent (entity_state_t *ent)
 	case EV_FALLFAR:
 		S_StartSound (NULL, ent->number, CHAN_AUTO, S_RegisterSound ("*fall1.wav"), 1, ATTN_NORM, 0);
 		break;
-//Knightmare- more Lazarus sounds
+// Knightmare- more Lazarus sounds
 	case EV_SLOSH:
 		S_StartSound (NULL, ent->number, CHAN_BODY, clMedia.sfx_slosh[rand()&3], 0.5, ATTN_NORM, 0);
 		break;

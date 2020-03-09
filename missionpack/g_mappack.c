@@ -21,7 +21,7 @@ void torch_think (edict_t *self)
 	self->nextthink = level.time + FRAMETIME;
 }
 
-void SP_light_torch (edict_t *self) //New function by Beel.
+void SP_light_torch (edict_t *self) // New function by Beel.
 {
 	self->movetype = MOVETYPE_NONE;
 	self->solid = SOLID_NOT;
@@ -46,7 +46,7 @@ model=models/objects/fire/"
 */
 void smallflame_think (edict_t *self)
 {
-	if(self->s.frame >= 10) //was 5
+	if (self->s.frame >= 10) // was 5
 		self->s.frame = 0;
 	else
 		self->s.frame++;

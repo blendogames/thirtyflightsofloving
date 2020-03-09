@@ -1494,13 +1494,14 @@ typedef enum
 	EV_FALLFAR,
 	EV_PLAYER_TELEPORT,
 	EV_OTHER_TELEPORT,
-	//Knightmare added
-	EV_LOUDSTEP, //loud footstep from landing
-	EV_SLOSH, //Sloshing in ankle-deep water
-	EV_WADE, //wading or treading water
-	EV_WADE_MUD, //wading in mud
-	EV_CLIMB_LADDER //climbing ladder
-	//end Knightmare
+	// Knightmare added
+	EV_LOUDSTEP, // loud footstep from landing
+	EV_SLOSH, // Sloshing in ankle-deep water
+	EV_WADE, // wading or treading water
+	EV_WADE_MUD, // wading in mud
+	EV_CLIMB_LADDER, //climbing ladder
+	EV_PLAYER_TELEPORT_Q1	// Q1 teleport, sounds in rogue pak0.pak
+	// end Knightmare
 } entity_event_t;
 
 

@@ -4481,7 +4481,7 @@ void misc_gekk_writhe_think (edict_t *self)
 	}
 }
 
-//gib function
+// gib function
 void misc_gekk_writhe_use (edict_t *self, edict_t *other, edict_t *activator)
 {
 	int damage = 20;

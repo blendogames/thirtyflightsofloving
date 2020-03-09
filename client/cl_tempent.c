@@ -199,12 +199,24 @@ void CL_RegisterTEntSounds (void)
 		Com_sprintf (name, sizeof(name), "player/pl_ladder%i.wav", i+1);
 		clMedia.sfx_ladder[i] = S_RegisterSound (name);
 	}
+	// player loud step
+	clMedia.sfx_player_land = S_RegisterSound ("player/land1.wav");
+	// player teleport
+	clMedia.sfx_player_teleport = S_RegisterSound ("misc/tele1.wav");
+	// Q1 player teleport (in rogue pak0.pak)
+	for (i=0; i<5; i++) {
+		Com_sprintf (name, sizeof(name), "misc/r_tele%i.wav", i+1);
+		clMedia.sfx_player_teleport_q1[i] = S_RegisterSound (name);
+	}
+	// item respawn
+	clMedia.sfx_item_respawn = S_RegisterSound ("items/respawn1.wav");
+
 	// read footstep defintion file
 	if (cl_footstep_override->value)
 		ReadTextureSurfaceAssignments();
 	// end Lazarus footstep sounds
 
-	S_RegisterSound ("player/land1.wav");
+//	S_RegisterSound ("player/land1.wav");
 	S_RegisterSound ("player/fall2.wav");
 	S_RegisterSound ("player/fall1.wav");
 }	

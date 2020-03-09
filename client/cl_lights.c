@@ -376,7 +376,8 @@ void CL_ParseMuzzleFlash (void)
 		dl->die = cl.time + 1.0;
 		//Knightmare changed
 	//	S_StartSound (NULL, i, CHAN_WEAPON, S_RegisterSound("weapons/grenlf1a.wav"), 1, ATTN_NORM, 0);
-		S_StartSound (NULL, i, CHAN_WEAPON, S_RegisterSound("misc/tele1.wav"), 1, ATTN_NORM, 0);
+	//	S_StartSound (NULL, i, CHAN_WEAPON, S_RegisterSound("misc/tele1.wav"), 1, ATTN_NORM, 0);
+		S_StartSound (NULL, i, CHAN_WEAPON, clMedia.sfx_player_teleport, 1, ATTN_NORM, 0);
 		CL_LogoutEffect (pl->current.origin, weapon);
 		break;
 	case MZ_LOGOUT:
@@ -384,7 +385,8 @@ void CL_ParseMuzzleFlash (void)
 		dl->die = cl.time + 1.0;
 		//Knightmare changed
 	//	S_StartSound (NULL, i, CHAN_WEAPON, S_RegisterSound("weapons/grenlf1a.wav"), 1, ATTN_NORM, 0);
-		S_StartSound (NULL, i, CHAN_WEAPON, S_RegisterSound("misc/tele1.wav"), 1, ATTN_NORM, 0);
+	//	S_StartSound (NULL, i, CHAN_WEAPON, S_RegisterSound("misc/tele1.wav"), 1, ATTN_NORM, 0);
+		S_StartSound (NULL, i, CHAN_WEAPON, clMedia.sfx_player_teleport, 1, ATTN_NORM, 0);
 		CL_LogoutEffect (pl->current.origin, weapon);
 		break;
 	case MZ_RESPAWN:
