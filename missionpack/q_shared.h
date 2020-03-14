@@ -101,7 +101,7 @@ __inline int Q_vsnprintf (char *Dest, size_t Count, const char *Format, va_list 
 
 #define SAVEGAME_USE_FUNCTION_TABLE
 #define SAVEGAME_DLLNAME "Rogue + Xatrix + Lazarus integrated mod"
-#define SAVEGAME_VERSION 2
+#define SAVEGAME_VERSION 3
 
 // angle indexes
 #define	PITCH				0		// up / down

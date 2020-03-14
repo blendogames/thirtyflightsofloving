@@ -64,7 +64,7 @@ field_t fields[] = {
 	{"killtarget", FOFS(killtarget), F_LSTRING},
 	{"combattarget", FOFS(combattarget), F_LSTRING},
 	{"message", FOFS(message), F_LSTRING},
-	{"key_message", FOFS(key_message), F_LSTRING}, //Knightmare added
+	{"key_message", FOFS(key_message), F_LSTRING}, // Knightmare added
 	{"team", FOFS(team), F_LSTRING},
 	{"wait", FOFS(wait), F_FLOAT},
 	{"delay", FOFS(delay), F_FLOAT},
@@ -76,7 +76,7 @@ field_t fields[] = {
 	{"style", FOFS(style), F_INT},
 	{"count", FOFS(count), F_INT},
 
-	{"touch_debounce_time", FOFS(touch_debounce_time), F_FLOAT}, //Knightmare added
+	{"touch_debounce_time", FOFS(touch_debounce_time), F_FLOAT}, // Knightmare added
 	{"pain_debounce_time", FOFS(pain_debounce_time), F_FLOAT},
 	{"damage_debounce_time", FOFS(damage_debounce_time), F_FLOAT},
 	{"gravity_debounce_time", FOFS(gravity_debounce_time), F_FLOAT},
@@ -173,10 +173,7 @@ field_t fields[] = {
 	{"goal_frame", FOFS(goal_frame), F_FLOAT},
 	{"chasedist1", FOFS(chasedist1), F_INT},
 	{"chasedist2", FOFS(chasedist2), F_INT},
-
-	//Mappack - end of new fields.
-	//Knightmare- for Lazarus compatibility
-	{"key_message", FOFS(key_message), F_LSTRING},
+	// Mappack - end of new fields.
 
 	// Lazarus additions
 	{"actor_current_weapon", FOFS(actor_current_weapon), F_INT},
