@@ -75,7 +75,7 @@ static int		screen_texture_width, screen_texture_height;
 //static int		r_screenbackuptexture_size;
 static int      r_screenbackuptexture_width, r_screenbackuptexture_height;
 
-//current refdef size:
+// current refdef size:
 static int	curView_x;
 static int	curView_y;
 static int	curView_width;
@@ -183,27 +183,31 @@ void R_Bloom_InitEffectTexture (void)
 	byte	*data;
 	float	bloomsizecheck;
 	
-	if( (int)r_bloom_sample_size->value < 32 )
+	if ( (int)r_bloom_sample_size->value < 32 )
 		Cvar_SetValue ("r_bloom_sample_size", 32);
 
-	//make sure bloom size is a power of 2
+	// make sure bloom size is a power of 2
 	BLOOM_SIZE = (int)r_bloom_sample_size->value;
 	bloomsizecheck = (float)BLOOM_SIZE;
 	while(bloomsizecheck > 1.0f) bloomsizecheck /= 2.0f;
-	if( bloomsizecheck != 1.0f )
+	if ( bloomsizecheck != 1.0f )
 	{
 		BLOOM_SIZE = 32;
 		while( BLOOM_SIZE < (int)r_bloom_sample_size->value )
 			BLOOM_SIZE *= 2;
 	}
 
-	//make sure bloom size doesn't have stupid values
-	if( BLOOM_SIZE > screen_texture_width ||
+	// make sure bloom size doesn't have stupid values
+	if ( BLOOM_SIZE > screen_texture_width ||
 		BLOOM_SIZE > screen_texture_height )
 		BLOOM_SIZE = min( screen_texture_width, screen_texture_height );
 
-	if( BLOOM_SIZE != (int)r_bloom_sample_size->value )
+	if ( BLOOM_SIZE != (int)r_bloom_sample_size->value )
 		Cvar_SetValue ("r_bloom_sample_size", BLOOM_SIZE);
+
+	// Knightmare- catch too large bloom size
+	while ( ((BLOOM_SIZE * 2) > vid.height) || ((BLOOM_SIZE * 2) > vid.width) )
+		BLOOM_SIZE /= 2;
 
 	data = malloc( BLOOM_SIZE * BLOOM_SIZE * 4 );
 	memset( data, 0, BLOOM_SIZE * BLOOM_SIZE * 4 );
@@ -223,12 +227,12 @@ void R_Bloom_InitTextures (void)
 	byte	*data;
 	int		size;
 
-	//find closer power of 2 to screen size 
+	// find closer power of 2 to screen size 
 	for (screen_texture_width = 1; screen_texture_width < vid.width; screen_texture_width *= 2);
 	for (screen_texture_height = 1; screen_texture_height < vid.height; screen_texture_height *= 2);
 
-	//disable blooms if we can't handle a texture of that size
-/*	if( screen_texture_width > glConfig.maxTextureSize ||
+	// disable blooms if we can't handle a texture of that size
+/*	if ( screen_texture_width > glConfig.maxTextureSize ||
 		screen_texture_height > glConfig.maxTextureSize ) {
 		screen_texture_width = screen_texture_height = 0;
 		Cvar_SetValue ("r_bloom", 0);
@@ -243,13 +247,13 @@ void R_Bloom_InitTextures (void)
 	r_bloomscreentexture = R_LoadPic ("***r_bloomscreentexture***", (byte *)data, screen_texture_width, screen_texture_height, it_pic, 3);
 	free ( data );
 
-	//validate bloom size and init the bloom effect texture
+	// validate bloom size and init the bloom effect texture
 	R_Bloom_InitEffectTexture ();
 
-	//if screensize is more than 2x the bloom effect texture, set up for stepped downsampling
+	// if screensize is more than 2x the bloom effect texture, set up for stepped downsampling
 	r_bloomdownsamplingtexture = NULL;
 	r_screendownsamplingtexture_size = 0;
-	if( vid.width > (BLOOM_SIZE * 2) && !r_bloom_fast_sample->value )
+	if ( vid.width > (BLOOM_SIZE * 2) && !r_bloom_fast_sample->value )
 	{
 		r_screendownsamplingtexture_size = (int)(BLOOM_SIZE * 2);
 		data = malloc( r_screendownsamplingtexture_size * r_screendownsamplingtexture_size * 4 );
@@ -258,8 +262,8 @@ void R_Bloom_InitTextures (void)
 		free ( data );
 	}
 
-	//Init the screen backup texture
-	if( r_screendownsamplingtexture_size )
+	// Init the screen backup texture
+	if ( r_screendownsamplingtexture_size )
 		R_Bloom_InitBackUpTexture( r_screendownsamplingtexture_size, r_screendownsamplingtexture_size );
 	else
 		R_Bloom_InitBackUpTexture( BLOOM_SIZE, BLOOM_SIZE );
@@ -274,7 +278,7 @@ R_InitBloomTextures
 void R_InitBloomTextures (void)
 {
 
-	//r_bloom = Cvar_Get( "r_bloom", "0", CVAR_ARCHIVE );
+//	r_bloom = Cvar_Get( "r_bloom", "0", CVAR_ARCHIVE );
 	r_bloom_alpha = Cvar_Get( "r_bloom_alpha", "0.25", CVAR_ARCHIVE );			// was 0.33
 	r_bloom_diamond_size = Cvar_Get( "r_bloom_diamond_size", "8", CVAR_ARCHIVE );
 	r_bloom_intensity = Cvar_Get( "r_bloom_intensity", "2.5", CVAR_ARCHIVE );	// was 0.6
@@ -343,7 +347,7 @@ void R_Bloom_GeneratexCross (void)
 {
 	int				i;
 	static int		BLOOM_BLUR_RADIUS = 8;
-	//static float	BLOOM_BLUR_INTENSITY = 2.5f;
+//	static float	BLOOM_BLUR_INTENSITY = 2.5f;
 	float			BLOOM_BLUR_INTENSITY;
 	static float	intensity;
 	static float	range;
@@ -370,7 +374,7 @@ void R_Bloom_GeneratexCross (void)
 		GL_TexEnv(GL_MODULATE);
 
 		R_Bloom_DrawStart
-		for(i=0; i<r_bloom_darken->value ;i++) {
+		for (i=0; i<r_bloom_darken->value ;i++) {
 			R_Bloom_SamplePass( 0, 0, 1.0f, 1.0f, 1.0f, 1.0f );
 		}
 		R_Bloom_DrawFinish
@@ -386,7 +390,7 @@ void R_Bloom_GeneratexCross (void)
 		range = (float)BLOOM_BLUR_RADIUS;
 
 		BLOOM_BLUR_INTENSITY = r_bloom_intensity->value;
-		//diagonal-cross draw 4 passes to add initial smooth
+		// diagonal-cross draw 4 passes to add initial smooth
 		R_Bloom_DrawStart
 		R_Bloom_SamplePass( 1, 1, 0.5f, 0.5f, 0.5f, 1.0 );
 		R_Bloom_SamplePass( -1, 1, 0.5f, 0.5f, 0.5f, 1.0 );
@@ -396,23 +400,23 @@ void R_Bloom_GeneratexCross (void)
 		qglCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, sample_width, sample_height);
 
 		R_Bloom_DrawStart
-		for(i=-(BLOOM_BLUR_RADIUS+1);i<BLOOM_BLUR_RADIUS;i++) {
+		for (i=-(BLOOM_BLUR_RADIUS+1);i<BLOOM_BLUR_RADIUS;i++) {
 			intensity = BLOOM_BLUR_INTENSITY/(range*2+1)*(1 - fabs(i*i)/(float)(range*range));
-			if( intensity < 0.05f ) continue;
+			if ( intensity < 0.05f ) continue;
 			R_Bloom_SamplePass( i, 0, intensity, intensity, intensity, 1.0f );
-			//R_Bloom_SamplePass( -i, 0 );
+		//	R_Bloom_SamplePass( -i, 0 );
 		}
 		R_Bloom_DrawFinish
 
 		qglCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, sample_width, sample_height);
 
 		R_Bloom_DrawStart
-		//for(i=0;i<BLOOM_BLUR_RADIUS;i++) {
-		for(i=-(BLOOM_BLUR_RADIUS+1);i<BLOOM_BLUR_RADIUS;i++) {
+	//	for (i=0;i<BLOOM_BLUR_RADIUS;i++) {
+		for (i=-(BLOOM_BLUR_RADIUS+1);i<BLOOM_BLUR_RADIUS;i++) {
 			intensity = BLOOM_BLUR_INTENSITY/(range*2+1)*(1 - fabs(i*i)/(float)(range*range));
-			if( intensity < 0.05f ) continue;
+			if ( intensity < 0.05f ) continue;
 			R_Bloom_SamplePass( 0, i, intensity, intensity, intensity, 1.0f );
-			//R_Bloom_SamplePass( 0, -i );
+		//	R_Bloom_SamplePass( 0, -i );
 		}
 		R_Bloom_DrawFinish
 
@@ -518,7 +522,7 @@ void R_Bloom_GeneratexDiamonds (void)
 	
 	qglCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, sample_width, sample_height);
 
-	//restore full screen workspace
+	// restore full screen workspace
 	qglViewport( 0, 0, vid.width, vid.height );
 	qglMatrixMode( GL_PROJECTION );
     qglLoadIdentity ();
@@ -590,7 +594,7 @@ void R_BloomBlend ( refdef_t *fd )
 	
 	// set up full screen workspace
 	qglViewport ( 0, 0, vid.width, vid.height );
-	GL_TexEnv (GL_REPLACE); // Knightmare added
+	GL_TexEnv (GL_REPLACE);	// Knightmare added
 	GL_Disable (GL_DEPTH_TEST);
 	qglMatrixMode (GL_PROJECTION);
     qglLoadIdentity ();
@@ -627,17 +631,17 @@ void R_BloomBlend ( refdef_t *fd )
 	// create the bloom image
 	R_Bloom_DownsampleView();
 	R_Bloom_GeneratexDiamonds();
-	//R_Bloom_GeneratexCross();
+//	R_Bloom_GeneratexCross();
 
 	// restore the screen-backup to the screen
 	GL_Disable(GL_BLEND);
 	GL_Bind(r_bloombackuptexture->texnum);
-	/*R_Bloom_Quad( 0, 
+/*	R_Bloom_Quad( 0, 
 		vid.height - (r_screenbackuptexture_size * sampleText_tch),
 		r_screenbackuptexture_size * sampleText_tcw,
 		r_screenbackuptexture_size * sampleText_tch,
 		sampleText_tcw,
-		sampleText_tch, 1, 1, 1, 1 );*/
+		sampleText_tch, 1, 1, 1, 1 ); */
 	R_Bloom_Quad( 0, vid.height - r_screenbackuptexture_height,
 		r_screenbackuptexture_width,
 		r_screenbackuptexture_height, 1.0, 1.0, 1, 1, 1, 1 );
@@ -648,5 +652,5 @@ void R_BloomBlend ( refdef_t *fd )
 	R_SetupGL ();
 	GL_BlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	GL_EnableTexture (0);
-	//qglColor4f(1,1,1,1);
+//	qglColor4f(1,1,1,1);
 }

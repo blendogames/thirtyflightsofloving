@@ -307,12 +307,12 @@ void RB_RenderWarpSurface (msurface_t *fa)
 	float		args[7] = {0,0.05,0,0,0.04,0,0};
 	float		alpha = colorArray[0][3];
 	image_t		*image = R_TextureAnimation (fa);
-	qboolean	light = r_warp_lighting->value && !(fa->texinfo->flags & SURF_NOLIGHTENV);
-	qboolean	texShaderWarpNV = glConfig.NV_texshaders && glConfig.multitexture && r_pixel_shader_warp->value;
-	qboolean	texShaderWarpARB = glConfig.arb_fragment_program && glConfig.multitexture && r_pixel_shader_warp->value;
+	qboolean	light = r_warp_lighting->integer && !(fa->texinfo->flags & SURF_NOLIGHTENV);
+	qboolean	texShaderWarpNV = glConfig.NV_texshaders && glConfig.multitexture && r_pixel_shader_warp->integer;
+	qboolean	texShaderWarpARB = glConfig.arb_fragment_program && glConfig.multitexture && r_pixel_shader_warp->integer;
 	qboolean	texShaderWarp = (texShaderWarpNV || texShaderWarpARB);
 	if (texShaderWarpNV && texShaderWarpARB)
-		texShaderWarpARB = (r_pixel_shader_warp->value == 1.0f);
+		texShaderWarpARB = (r_pixel_shader_warp->integer == 1);
 
 	if (rb_vertex == 0 || rb_index == 0) // nothing to render
 		return;
@@ -414,10 +414,10 @@ void R_DrawWarpSurface (msurface_t *fa, float alpha, qboolean render)
 	float		*v, s, t, scroll, dstscroll, rdt = r_newrefdef.time;
 	vec3_t		point;
 	int			i;
-	qboolean	light = r_warp_lighting->value && !r_fullbright->value && !(fa->texinfo->flags & SURF_NOLIGHTENV);
+	qboolean	light = r_warp_lighting->integer && !r_fullbright->integer && !(fa->texinfo->flags & SURF_NOLIGHTENV);
 	qboolean	texShaderNV = glConfig.NV_texshaders && glConfig.multitexture
-								&& ( (!glConfig.arb_fragment_program && r_pixel_shader_warp->value)
-									|| (glConfig.arb_fragment_program && r_pixel_shader_warp->value > 1) );
+								&& ( (!glConfig.arb_fragment_program && r_pixel_shader_warp->integer)
+									|| (glConfig.arb_fragment_program && r_pixel_shader_warp->integer > 1) );
 
 	c_brush_surfs++;
 

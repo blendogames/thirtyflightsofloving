@@ -2680,6 +2680,9 @@ void SCR_UpdateScreen (void)
 	else if ( cl_stereo_separation->value < 0 )
 		Cvar_SetValue( "cl_stereo_separation", 0.0 );
 
+	// Re-init screen scale
+	SCR_InitScreenScale ();
+
 	if ( cl_stereo->value )
 	{
 		numframes = 2;
