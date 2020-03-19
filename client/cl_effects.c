@@ -383,7 +383,7 @@ void CL_Explosion_Sparks (vec3_t org, int size, int count)
 {
 	int	i;
 
-	for (i=0; i < (count/cl_particle_scale->value); i++) // was 256
+	for (i=0; i < (count/max(cl_particle_scale->value, 1.0f)); i++) // was 256
 	{
 		CL_SetupParticle (
 			0,	0,	0,
@@ -1278,7 +1278,7 @@ void CL_BigTeleportParticles (vec3_t org)
 	static int colortable1[4] = {150,150,50,10};
 	static int colortable2[4] = {50,10,10,150};
 
-	for (i=0; i<(1024/cl_particle_scale->value); i++) // was 4096
+	for (i=0; i<(1024/max(cl_particle_scale->value, 1.0f)); i++) // was 4096
 	{
 
 		index = rand()&3;
@@ -1874,7 +1874,7 @@ void CL_RocketTrail (vec3_t start, vec3_t end, centity_t *old)
 	VectorSubtract (end, start, vec);
 	totallen = len = VectorNormalize (vec);
 
-	dec = 1*cl_particle_scale->value;
+	dec = 1 * cl_particle_scale->value;
 	VectorScale (vec, dec, vec);
 
 	while (len > 0)
@@ -1907,11 +1907,11 @@ void CL_RocketTrail (vec3_t start, vec3_t end, centity_t *old)
 	VectorCopy (start, move);
 	VectorSubtract (end, start, vec);
 	totallen = len = VectorNormalize (vec);
-	dec = 1.5*cl_particle_scale->value;
+	dec = 1.5 * cl_particle_scale->value;
 	VectorScale (vec, dec, vec);
 /*	len = totallen;
 	VectorCopy (start, move);
-	dec = 1.5;//*cl_particle_scale->value;
+	dec = 1.5;// * cl_particle_scale->value;
 	VectorScale (vec, dec, vec);*/
 
 	while (len > 0)
@@ -1987,9 +1987,9 @@ void CL_RailSprial (vec3_t start, vec3_t end, qboolean isRed)
 	len = min (len, cl_rail_length->value);  // cap length
 	MakeNormalVectors (vec, right, up);
 
-	VectorScale(vec, cl_rail_space->value*cl_particle_scale->value, vec);
+	VectorScale(vec, cl_rail_space->value * cl_particle_scale->value, vec);
 
-	for (i=0; i<len; i += cl_rail_space->value*cl_particle_scale->value)
+	for (i=0; i<len; i += cl_rail_space->value * cl_particle_scale->value)
 	{
 		d = i * 0.1;
 		c = cos(d);
@@ -2232,7 +2232,7 @@ void CL_IonripperTrail (vec3_t start, vec3_t ent)
 
 	MakeNormalVectors (vec, leftdir, up);
 
-	dec = 3*cl_particle_scale->value;
+	dec = 3 * cl_particle_scale->value;
 	VectorScale (vec, dec, vec);
 
 	while (len > 0)
@@ -2874,7 +2874,7 @@ void CL_HeatbeamParticles (vec3_t start, vec3_t forward)
 	VectorScale (vec, step, vec);
 
 	//Com_Printf ("%f\n", ltime);
-	rstep = M_PI/10.0*min(cl_particle_scale->value, 2);
+	rstep = M_PI/10.0 * min(cl_particle_scale->value, 2);
 	for (i=start_pt; i<len; i+=step)
 	{
 		if (i>step*maxsteps) // don't bother after the nth ring
@@ -3042,8 +3042,8 @@ void CL_TrackerTrail (vec3_t start, vec3_t end)
 	vectoangles2 (forward, angle_dir);
 	AngleVectors (angle_dir, forward, right, up);
 
-	dec = 3*max(cl_particle_scale->value/2, 1);
-	VectorScale (vec, 3*max(cl_particle_scale->value/2, 1), vec);
+	dec = 3 * max(cl_particle_scale->value/2, 1);
+	VectorScale (vec, 3 * max(cl_particle_scale->value/2, 1), vec);
 
 	// FIXME: this is a really silly way to have a loop
 	while (len > 0)
@@ -3080,13 +3080,13 @@ void CL_TrackerTrail (vec3_t start, vec3_t end)
 CL_TrackerShell
 ===============
 */
-void CL_Tracker_Shell(vec3_t origin)
+void CL_Tracker_Shell (vec3_t origin)
 {
 	vec3_t			dir;
 	int				i;
 	cparticle_t		*p;
 
-	for(i=0; i < (300/cl_particle_scale->value); i++)
+	for(i=0; i < (300/max(cl_particle_scale->value, 1.0f)); i++)
 	{
 		p = CL_SetupParticle (
 			0,	0,	0,
@@ -3221,7 +3221,7 @@ void CL_Nukeblast (cl_sustain_t *self)
 	ratio = 1.0 - (((float)self->endtime - (float)cl.time)/1000.0);
 	size = ratio*ratio;
 
-	for(i=0; i<(700/cl_particle_scale->value); i++)
+	for(i=0; i<(700/max(cl_particle_scale->value, 1.0f)); i++)
 	{
 		index = rand()&3;
 		p = CL_SetupParticle (
@@ -3306,7 +3306,7 @@ void CL_Tracker_Explode (vec3_t	origin)
 	int				i;
 	cparticle_t		*p;
 
-	for (i=0; i<(300/cl_particle_scale->value); i++)
+	for (i=0; i<(300/max(cl_particle_scale->value, 1.0f)); i++)
 	{
 		p = CL_SetupParticle (
 			0,		0,		0,

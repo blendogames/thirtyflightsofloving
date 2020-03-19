@@ -555,6 +555,27 @@ void CL_DecalAlphaThink (cparticle_t *p, vec3_t org, vec3_t angle, float *alpha,
 
 /*
 ===============
+CL_FixParticleCvars
+===============
+*/
+void CL_FixParticleCvars (void)
+{
+	// clamp to acceptable value (don't allow infinite particles)
+	if (cl_particle_scale->value < 1.0f)
+		Cvar_SetValue("cl_particle_scale", 1);
+
+	// clamp to acceptable minimum length
+	if (cl_rail_length->value < MIN_RAIL_LENGTH)
+		Cvar_SetValue("cl_rail_length", MIN_RAIL_LENGTH);
+
+	// clamp to acceptable minimum duration
+	if (r_decal_life->value < MIN_DECAL_LIFE)
+		Cvar_SetValue("r_decal_life", MIN_DECAL_LIFE);
+}
+
+
+/*
+===============
 CL_AddParticles
 ===============
 */
@@ -570,6 +591,8 @@ void CL_AddParticles (void)
 	active = NULL;
 	tail = NULL;
 	decals = 0;
+
+	CL_FixParticleCvars (); // clamp critical effects vars to acceptable bounds
 
 	for (p=active_particles; p; p=next)
 	{

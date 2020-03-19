@@ -1122,12 +1122,20 @@ void CL_AddPacketEntities (frame_t *frame)
 	entity_t			ent;
 	entity_state_t		*s1;
 	float				autorotate;
-	int					i;
-	int					pnum;
+	int					i, pnum, autoanim;
+	int					max_models;
 	centity_t			*cent;
-	int					autoanim;
 	clientinfo_t		*ci;
 	unsigned int		effects, renderfx;
+
+	// Knightmare- hack for connected to server using old protocol
+	// Changed config strings require different parsing
+	if ( LegacyProtocol() )
+		max_models = OLD_MAX_MODELS;
+	else
+		max_models = MAX_MODELS;
+
+	CL_FixParticleCvars (); // clamp critical effects vars to acceptable bounds
 
 	// bonus items rotate at a fixed rate
 	autorotate = anglemod(cl.time/10);
@@ -1237,9 +1245,11 @@ void CL_AddPacketEntities (frame_t *frame)
 		else
 		{
 			// set skin
-			if ( s1->modelindex == MAX_MODELS-1 //was 255
+		/*	if ( s1->modelindex == MAX_MODELS-1 //was 255
 				//Knightmare- GROSS HACK for old demos, use modelindex 255
-				|| ( LegacyProtocol() && s1->modelindex == OLD_MAX_MODELS-1 ) )
+				|| ( LegacyProtocol() && s1->modelindex == OLD_MAX_MODELS-1 ) ) */
+			if ( s1->modelindex == (max_models-1)) // was 255
+
 			{	// use custom player skin
 				ent.skinnum = 0;
 				ci = &cl.clientinfo[s1->skinnum & 0xff];
@@ -1391,8 +1401,9 @@ void CL_AddPacketEntities (frame_t *frame)
 				V_AddLight (ent.origin, 225, -1.0, -1.0, -1.0);	//PGM
 
 			// Knightmare- save off current player weapon model for player config menu
-			if (s1->modelindex2 == MAX_MODELS-1
-				|| ( LegacyProtocol() && s1->modelindex2 == OLD_MAX_MODELS-1 ) )
+		/*	if (s1->modelindex2 == MAX_MODELS-1
+				|| ( LegacyProtocol() && s1->modelindex2 == OLD_MAX_MODELS-1 ) ) */
+			if (s1->modelindex2 == max_models-1)
 			{
 				ci = &cl.clientinfo[s1->skinnum & 0xff];
 				i = (s1->skinnum >> 8); // 0 is default weapon model
@@ -1510,9 +1521,10 @@ void CL_AddPacketEntities (frame_t *frame)
 		// duplicate for linked models
 		if (s1->modelindex2)
 		{
-			if (s1->modelindex2 == MAX_MODELS-1
+		/*	if (s1->modelindex2 == MAX_MODELS-1
 				//Knightmare- GROSS HACK for old demos, use modelindex 255
-				|| ( LegacyProtocol() && s1->modelindex2 == OLD_MAX_MODELS-1 ) )
+				|| ( LegacyProtocol() && s1->modelindex2 == OLD_MAX_MODELS-1 ) ) */
+			if (s1->modelindex2 == (max_models-1))
 			{	// custom weapon
 				ci = &cl.clientinfo[s1->skinnum & 0xff];
 				i = (s1->skinnum >> 8); // 0 is default weapon model

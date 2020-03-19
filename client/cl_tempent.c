@@ -786,6 +786,8 @@ void CL_ParseTEnt (void)
 	int		ent;
 	int		magnitude;
 
+	CL_FixParticleCvars (); // clamp critical effects vars to acceptable bounds
+
 	type = MSG_ReadByte (&net_message);
 
 	switch (type)

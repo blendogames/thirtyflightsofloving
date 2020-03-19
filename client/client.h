@@ -985,6 +985,7 @@ extern cparticle_t	*active_particles, *free_particles;
 extern cparticle_t	particles[MAX_PARTICLES];
 extern int			cl_numparticles;
 
+void CL_FixParticleCvars (void);
 int CL_GetRandomBloodParticle (void);
 void CL_ClipDecal (cparticle_t *part, float radius, float orient, vec3_t origin, vec3_t dir);
 float CL_NewParticleTime (void);
