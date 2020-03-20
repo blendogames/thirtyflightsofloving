@@ -151,7 +151,7 @@ void R_SetLightingMode (int renderflags)
 		GL_TexEnv (GL_REPLACE);
 		GL_SelectTexture (1);
 
-		if (r_lightmap->value)
+		if (r_lightmap->integer)
 			GL_TexEnv (GL_REPLACE);
 		else 
 			GL_TexEnv (GL_MODULATE);
@@ -177,7 +177,7 @@ void R_SetLightingMode (int renderflags)
 
 		GL_SelectTexture (1);
 		GL_TexEnv (GL_COMBINE_ARB);
-		if (r_lightmap->value) 
+		if (r_lightmap->integer != 0) 
 		{
 			qglTexEnvi (GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB, GL_REPLACE);
 			qglTexEnvi (GL_TEXTURE_ENV, GL_SOURCE0_RGB_ARB, GL_TEXTURE);
@@ -195,9 +195,9 @@ void R_SetLightingMode (int renderflags)
 			qglTexEnvi (GL_TEXTURE_ENV, GL_SOURCE1_ALPHA_ARB, GL_PREVIOUS_ARB);
 		}
 
-		if (r_rgbscale->value)
+		if (r_rgbscale->integer)
 		{
-			qglTexEnvi(GL_TEXTURE_ENV, GL_RGB_SCALE_ARB, r_rgbscale->value);
+			qglTexEnvi(GL_TEXTURE_ENV, GL_RGB_SCALE_ARB, r_rgbscale->integer);
 		}
 	}
 #else
@@ -221,7 +221,7 @@ void R_SetLightingMode (int renderflags)
 
 		GL_SelectTexture (1);
 		GL_TexEnv (GL_COMBINE_EXT);
-		if (r_lightmap->value) 
+		if (r_lightmap->integer) 
 		{
 			qglTexEnvi (GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_REPLACE);
 			qglTexEnvi (GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE);
@@ -239,9 +239,9 @@ void R_SetLightingMode (int renderflags)
 			qglTexEnvi (GL_TEXTURE_ENV, GL_SOURCE1_ALPHA_EXT, GL_PREVIOUS_EXT);
 		}
 
-		if (r_rgbscale->value)
+		if (r_rgbscale->integer)
 		{
-			qglTexEnvi(GL_TEXTURE_ENV, GL_RGB_SCALE_EXT, r_rgbscale->value);
+			qglTexEnvi(GL_TEXTURE_ENV, GL_RGB_SCALE_EXT, r_rgbscale->integer);
 		}
 	}
 #endif
@@ -255,7 +255,7 @@ SurfAlphaCalc
 */
 float SurfAlphaCalc (int flags)
 {
-	if ((flags & SURF_TRANS33) && (flags & SURF_TRANS66) && r_solidalpha->value)
+	if ((flags & SURF_TRANS33) && (flags & SURF_TRANS66) && r_solidalpha->integer)
 //		return DIV254BY255;
 		return 1.0;
 	else if (flags & SURF_TRANS33)
@@ -277,7 +277,7 @@ qboolean R_SurfIsDynamic (msurface_t *surf, int *mapNum)
 	qboolean	is_dynamic = false;
 
 	if (!surf)	return false;
-	if (r_fullbright->value != 0)
+	if (r_fullbright->integer != 0)
 		return false;
 
 	for (map = 0; map < MAXLIGHTMAPS && surf->styles[map] != 255; map++) {
@@ -294,9 +294,9 @@ qboolean R_SurfIsDynamic (msurface_t *surf, int *mapNum)
 	{
 dynamic:
 #ifdef BATCH_LM_UPDATES
-		if (r_dynamic->value || surf->cached_dlight) {
+		if (r_dynamic->integer || surf->cached_dlight) {
 #else
-		if (r_dynamic->value) {
+		if (r_dynamic->integer) {
 #endif	// BATCH_LM_UPDATES
 			if ( !(surf->texinfo->flags & (SURF_SKY|SURF_WARP|SURF_NOLIGHTENV)) )
 				is_dynamic = true;
@@ -318,15 +318,15 @@ qboolean R_SurfIsLit (msurface_t *s)
 	if (!s || !s->texinfo)
 		return false;
 
-	if (r_fullbright->value != 0)
+	if (r_fullbright->integer != 0)
 		return false;
 
 	if (s->flags & SURF_DRAWTURB)		
 		return (s->texinfo->flags & (SURF_TRANS33|SURF_TRANS66))
-				&& !(s->texinfo->flags & SURF_NOLIGHTENV) && r_warp_lighting->value;
+				&& !(s->texinfo->flags & SURF_NOLIGHTENV) && r_warp_lighting->integer;
 	else
 		return (s->texinfo->flags & (SURF_TRANS33|SURF_TRANS66))
-				&& !(s->texinfo->flags & SURF_NOLIGHTENV) && r_trans_lighting->value;
+				&& !(s->texinfo->flags & SURF_NOLIGHTENV) && r_trans_lighting->integer;
 }
 
 /*
@@ -340,8 +340,8 @@ qboolean R_SurfHasEnvMap (msurface_t *s)
 	if (!s || !s->texinfo)
 		return false;
 
-	solidAlpha = ( (s->texinfo->flags & SURF_TRANS33) && (s->texinfo->flags & SURF_TRANS66) && r_solidalpha->value );
-	return ( (s->flags & SURF_ENVMAP) && r_glass_envmaps->value && !solidAlpha);
+	solidAlpha = ( (s->texinfo->flags & SURF_TRANS33) && (s->texinfo->flags & SURF_TRANS66) && r_solidalpha->integer );
+	return ( (s->flags & SURF_ENVMAP) && r_glass_envmaps->integer && !solidAlpha);
 }
 
 
@@ -363,9 +363,9 @@ void RB_RenderGLPoly (msurface_t *surf, qboolean light)
 	if (rb_vertex == 0 || rb_index == 0) // nothing to render
 		return;
 
-	glowPass = ( r_glows->value && (glow != glMedia.notexture) && glConfig.multitexture && light );
+	glowPass = ( r_glows->integer && (glow != glMedia.notexture) && glConfig.multitexture && light );
 	envMap = R_SurfHasEnvMap (surf);
-	causticPass = ( r_caustics->value && (surf->flags & SURF_MASK_CAUSTIC) && glConfig.multitexture && light );
+	causticPass = ( r_caustics->integer && (surf->flags & SURF_MASK_CAUSTIC) && glConfig.multitexture && light );
 
 	c_brush_calls++;
 
@@ -388,7 +388,7 @@ void RB_RenderGLPoly (msurface_t *surf, qboolean light)
 
 	if (envMap && !causticPass)
 	{	// vertex-lit trans surfaces have more solid envmapping
-		float	envAlpha = (r_trans_lighting->value && !(surf->texinfo->flags & SURF_NOLIGHTENV)) ? 0.15 : 0.10;
+		float	envAlpha = (r_trans_lighting->integer && !(surf->texinfo->flags & SURF_NOLIGHTENV)) ? 0.15 : 0.10;
 		for (i=0; i<rb_vertex; i++) 
 			colorArray[i][3] = envAlpha;
 		RB_DrawEnvMap ();
@@ -504,10 +504,10 @@ void R_DrawTriangleOutlines (void)
 	// not used in multitexture mode
 	if (glConfig.multitexture)
 		return;
-	if (!r_showtris->value)
+	if (!r_showtris->integer)
 		return;
 
-	if (r_showtris->value == 1)
+	if (r_showtris->integer == 1)
 		GL_Disable(GL_DEPTH_TEST);
 
 	GL_DisableTexture (0);
@@ -544,7 +544,7 @@ void R_DrawTriangleOutlines (void)
 	qglPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
 	GL_EnableTexture(0);
 
-	if (r_showtris->value == 1)
+	if (r_showtris->integer == 1)
 		GL_Enable(GL_DEPTH_TEST);
 }
 
@@ -601,7 +601,7 @@ void R_BlendLightmaps (void)
 	if (glConfig.multitexture)
 		return;
 	// don't bother if we're set to fullbright
-	if (r_fullbright->value)
+	if (r_fullbright->integer)
 		return;
 	if (!r_worldmodel->lightdata)
 		return;
@@ -611,11 +611,11 @@ void R_BlendLightmaps (void)
 
 	// set the appropriate blending mode unless we're only looking at the
 	// lightmaps.
-	if (!r_lightmap->value)
+	if (!r_lightmap->integer)
 	{
 		GL_Enable (GL_BLEND);
 
-		if (r_saturatelighting->value)
+		if (r_saturatelighting->integer)
 		{
 			GL_BlendFunc( GL_ONE, GL_ONE );
 		}
@@ -665,7 +665,7 @@ void R_BlendLightmaps (void)
 	}
 
 	// render dynamic lightmaps
-	if (r_dynamic->value)
+	if (r_dynamic->integer)
 	{
 		LM_InitBlock();
 
@@ -785,7 +785,7 @@ void R_RenderBrushPoly (msurface_t *fa)
 	if ((fa->dlightframe == r_framecount))
 	{
 dynamic:
-		if (r_dynamic->value)
+		if (r_dynamic->integer)
 		{
 			if ( !(fa->texinfo->flags & (SURF_SKY|SURF_TRANS33|SURF_TRANS66|SURF_WARP)) )
 			{
@@ -861,19 +861,19 @@ qboolean R_SurfsAreBatchable (msurface_t *s1, msurface_t *s2)
 	else if ( (s1->texinfo->flags & (SURF_TRANS33|SURF_TRANS66))
 		&& (s2->texinfo->flags & (SURF_TRANS33|SURF_TRANS66)) )
 	{
-		if (r_trans_lighting->value == 2
+		if (r_trans_lighting->integer == 2
 			&& ((R_SurfIsLit(s1) && s1->lightmaptexturenum) || (R_SurfIsLit(s2) && s2->lightmaptexturenum)))
 			return false;
 		if (R_SurfIsLit(s1) != R_SurfIsLit(s2))
 			return false;
 		// must be single pass to be batchable
-		if ( r_glows->value
+		if ( r_glows->integer
 			&& ((R_TextureAnimationGlow(s1) != glMedia.notexture)
 				|| (R_TextureAnimationGlow(s2) != glMedia.notexture)) )
 			return false;
 		if (R_SurfHasEnvMap(s1) || R_SurfHasEnvMap(s2))
 			return false;
-		if ( r_caustics->value
+		if ( r_caustics->integer
 			&& ((s1->flags & SURF_MASK_CAUSTIC) || (s2->flags & SURF_MASK_CAUSTIC)) )
 			return false;
 		return true;
@@ -941,11 +941,11 @@ void R_DrawAlphaSurfaces (void)
 
 		light = R_SurfIsLit(s);
 	//	solidAlpha = ( (s->texinfo->flags & SURF_TRANS33|SURF_TRANS66) == SURF_TRANS33|SURF_TRANS66 );
-	//	envMap = ( (s->flags & SURF_ENVMAP) && r_glass_envmaps->value && !solidAlpha);
+	//	envMap = ( (s->flags & SURF_ENVMAP) && r_glass_envmaps->integer && !solidAlpha);
 
 		if (s->flags & SURF_DRAWTURB)		
 			R_DrawWarpSurface (s, SurfAlphaCalc(s->texinfo->flags), !R_SurfsAreBatchable (s, s->texturechain));
-		else if (r_trans_lighting->value == 2 && glConfig.multitexture && light && s->lightmaptexturenum)
+		else if (r_trans_lighting->integer == 2 && glConfig.multitexture && light && s->lightmaptexturenum)
 		{
 			GL_EnableMultitexture (true);
 			R_SetLightingMode (RF_TRANSLUCENT);
@@ -1245,7 +1245,7 @@ static void RB_DrawCaustics (msurface_t *surf)
 	float		scrollh, scrollv, scaleh, scalev, dstscroll;	// *v,
 	image_t		*causticpic = RB_CausticForSurface (surf);
 	qboolean	previousBlend = false;
-	qboolean	fragmentWarp = glConfig.multitexture && glConfig.arb_fragment_program && (r_caustics->value > 1.0);
+	qboolean	fragmentWarp = glConfig.multitexture && glConfig.arb_fragment_program && (r_caustics->integer > 1.0);
 //	glpoly_t	*p;
 	
 	// adjustment for texture size and caustic image
@@ -1321,10 +1321,10 @@ static void RB_RenderLightmappedSurface (msurface_t *surf)
 	if (rb_vertex == 0 || rb_index == 0) // nothing to render
 		return;
 
-	glowLayer = ( r_glows->value && (glow != glMedia.notexture) && (glConfig.max_texunits > 2) );
-	glowPass = ( r_glows->value && (glow != glMedia.notexture) && !glowLayer );
+	glowLayer = ( r_glows->integer && (glow != glMedia.notexture) && (glConfig.max_texunits > 2) );
+	glowPass = ( r_glows->integer && (glow != glMedia.notexture) && !glowLayer );
 	envMap = R_SurfHasEnvMap (surf);
-	causticPass = ( r_caustics->value && !(surf->texinfo->flags & SURF_ALPHATEST)
+	causticPass = ( r_caustics->integer && !(surf->texinfo->flags & SURF_ALPHATEST)
 		&& (surf->flags & SURF_MASK_CAUSTIC) );
 
 	c_brush_calls++;
@@ -1365,7 +1365,7 @@ static void RB_RenderLightmappedSurface (msurface_t *surf)
 		GL_Enable (GL_ALPHA_TEST);
 
 	GL_MBind (0, image->texnum);
-	if ( (r_fullbright->value != 0) || (surf->texinfo->flags & SURF_NOLIGHTENV) )
+	if ( (r_fullbright->integer != 0) || (surf->texinfo->flags & SURF_NOLIGHTENV) )
 		GL_MBind (1, glMedia.whitetexture->texnum);
 	else
 		GL_MBind (1, glState.lightmap_textures + lmtex);
@@ -1505,7 +1505,7 @@ qboolean SurfInFront (msurface_t *surf1, msurface_t *surf2)
 	float dist1, dist2;
 	vec3_t org1, org2;
 
-	if (!r_trans_surf_sorting->value) // check if sorting disabled
+	if (!r_trans_surf_sorting->integer) // check if sorting disabled
 		return true;
 
 	if (!surf1->plane || !surf2->plane)
@@ -1563,7 +1563,7 @@ void R_DrawInlineBModel (entity_t *e, int causticflag)
 	}
 
 	// calculate dynamic lighting for bmodel
-	if (!r_flashblend->value)
+	if (!r_flashblend->integer)
 	{
 		lt = r_newrefdef.dlights;
 		if (currententity->angles[0] || currententity->angles[1] || currententity->angles[2])
@@ -1803,7 +1803,7 @@ void R_DrawBrushModel (entity_t *e)
 	}
 
 	// check for caustics, based on code by Berserker
-	if (r_caustics->value)
+	if (r_caustics->integer)
 	{
 		VectorSet(org, mins[0], mins[1], mins[2]);
 	//	contents[0] = Mod_PointInLeaf(org, r_worldmodel)->contents;
@@ -2007,7 +2007,7 @@ void R_DrawWorld (void)
 {
 	entity_t	ent;
 
-	if (!r_drawworld->value)
+	if (!r_drawworld->integer)
 		return;
 
 	if ( r_newrefdef.rdflags & RDF_NOWORLDMODEL )
@@ -2076,12 +2076,13 @@ void R_MarkLeaves (void)
 	mleaf_t	*leaf;
 	int		cluster;
 
-	if (r_oldviewcluster == r_viewcluster && r_oldviewcluster2 == r_viewcluster2 && !r_novis->value && r_viewcluster != -1)
+	if (r_oldviewcluster == r_viewcluster && r_oldviewcluster2 == r_viewcluster2
+		&& !r_novis->integer && r_viewcluster != -1)
 		return;
 
 	// development aid to let you run around and see exactly where
 	// the pvs ends
-	if (r_lockpvs->value)
+	if (r_lockpvs->integer)
 		return;
 
 	if (!r_worldmodel)	// Knightmare- potential crash fix
@@ -2091,7 +2092,7 @@ void R_MarkLeaves (void)
 	r_oldviewcluster = r_viewcluster;
 	r_oldviewcluster2 = r_viewcluster2;
 
-	if (r_novis->value || r_viewcluster == -1 || !r_worldmodel->vis)
+	if (r_novis->integer || r_viewcluster == -1 || !r_worldmodel->vis)
 	{
 		// mark everything
 		for (i=0 ; i<r_worldmodel->numleafs ; i++)
@@ -2224,9 +2225,9 @@ void R_BuildVertexLight (msurface_t *surf)
 	glpoly_t	*poly;
 
 	if (surf->flags & SURF_DRAWTURB)
-	{	if (!r_warp_lighting->value)	return;	}
+	{	if (!r_warp_lighting->integer)	return;	}
 	else
-	{	if (!r_trans_lighting->value)	return;	}
+	{	if (!r_trans_lighting->integer)	return;	}
 
 	if (!surf->polys)
 		return;

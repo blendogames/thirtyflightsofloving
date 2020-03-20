@@ -513,7 +513,7 @@ void R_ScaledScreenshot (char *name)
 
 	// Optional hi-res saveshots
 	saveshotWidth = saveshotHeight = 256;
-	if (r_saveshotsize->value)
+	if (r_saveshotsize->integer)
 	{
 		if (grab_width >= 1024)
 			saveshotWidth = 1024;
@@ -525,9 +525,9 @@ void R_ScaledScreenshot (char *name)
 		else if (vid.height >= 512)
 			saveshotHeight = 512;
 	}
-/*	if (r_saveshotsize->value && (grab_width >= 1024) && (vid.height >= 1024))
+/*	if (r_saveshotsize->integer && (grab_width >= 1024) && (vid.height >= 1024))
 		saveshotsize = 1024;
-	else if (r_saveshotsize->value && (grab_width >= 512) && (vid.height >= 512))
+	else if (r_saveshotsize->integer && (grab_width >= 512) && (vid.height >= 512))
 		saveshotsize = 512;
 	else
 		saveshotsize = 256;*/
@@ -698,9 +698,9 @@ void R_ScreenShot_JPG (qboolean silent)
 	cinfo.in_color_space = JCS_RGB;
 	cinfo.input_components = 3;
 	jpeg_set_defaults(&cinfo);
-	if ((r_screenshot_jpeg_quality->value >= 101) || (r_screenshot_jpeg_quality->value <= 0))
+	if ((r_screenshot_jpeg_quality->integer >= 101) || (r_screenshot_jpeg_quality->integer <= 0))
 		Cvar_Set("r_screenshot_jpeg_quality", "85");
-	jpeg_set_quality(&cinfo, r_screenshot_jpeg_quality->value, TRUE);
+	jpeg_set_quality(&cinfo, r_screenshot_jpeg_quality->integer, TRUE);
 
 	// Start Compression
 	jpeg_start_compress(&cinfo, true);
@@ -882,7 +882,7 @@ void R_ScreenShot_TGA (qboolean silent)
 	FILE		*f;
 
 /*	// Heffo - JPEG Screenshots
-	if (r_screenshot_jpeg->value)
+	if (r_screenshot_jpeg->integer)
 	{
 		R_ScreenShot_JPG();
 		return;
@@ -1055,7 +1055,7 @@ void GL_UpdateSwapInterval (void)
 		{
 #ifdef _WIN32
 			if ( qwglSwapIntervalEXT )
-				qwglSwapIntervalEXT( (registration_active) ? 0 : r_swapinterval->value );
+				qwglSwapIntervalEXT( (registration_active) ? 0 : r_swapinterval->integer );
 #endif
 		}
 	}

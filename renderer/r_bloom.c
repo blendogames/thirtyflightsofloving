@@ -183,17 +183,17 @@ void R_Bloom_InitEffectTexture (void)
 	byte	*data;
 	float	bloomsizecheck;
 	
-	if ( (int)r_bloom_sample_size->value < 32 )
+	if ( r_bloom_sample_size->integer < 32 )
 		Cvar_SetValue ("r_bloom_sample_size", 32);
 
 	// make sure bloom size is a power of 2
-	BLOOM_SIZE = (int)r_bloom_sample_size->value;
+	BLOOM_SIZE = r_bloom_sample_size->integer;
 	bloomsizecheck = (float)BLOOM_SIZE;
 	while(bloomsizecheck > 1.0f) bloomsizecheck /= 2.0f;
 	if ( bloomsizecheck != 1.0f )
 	{
 		BLOOM_SIZE = 32;
-		while( BLOOM_SIZE < (int)r_bloom_sample_size->value )
+		while( BLOOM_SIZE < r_bloom_sample_size->integer )
 			BLOOM_SIZE *= 2;
 	}
 
@@ -202,7 +202,7 @@ void R_Bloom_InitEffectTexture (void)
 		BLOOM_SIZE > screen_texture_height )
 		BLOOM_SIZE = min( screen_texture_width, screen_texture_height );
 
-	if ( BLOOM_SIZE != (int)r_bloom_sample_size->value )
+	if ( BLOOM_SIZE != r_bloom_sample_size->integer )
 		Cvar_SetValue ("r_bloom_sample_size", BLOOM_SIZE);
 
 	// Knightmare- catch too large bloom size
@@ -253,7 +253,7 @@ void R_Bloom_InitTextures (void)
 	// if screensize is more than 2x the bloom effect texture, set up for stepped downsampling
 	r_bloomdownsamplingtexture = NULL;
 	r_screendownsamplingtexture_size = 0;
-	if ( vid.width > (BLOOM_SIZE * 2) && !r_bloom_fast_sample->value )
+	if ( vid.width > (BLOOM_SIZE * 2) && !r_bloom_fast_sample->integer )
 	{
 		r_screendownsamplingtexture_size = (int)(BLOOM_SIZE * 2);
 		data = malloc( r_screendownsamplingtexture_size * r_screendownsamplingtexture_size * 4 );
@@ -288,7 +288,7 @@ void R_InitBloomTextures (void)
 	r_bloom_fast_sample = Cvar_Get( "r_bloom_fast_sample", "0", CVAR_ARCHIVE );
 
 	BLOOM_SIZE = 0;
-	if (!r_bloom->value)
+	if (!r_bloom->integer)
 		return;
 
 	R_Bloom_InitTextures ();
@@ -368,13 +368,13 @@ void R_Bloom_GeneratexCross (void)
 	GL_Enable(GL_BLEND);
 
 	// darkening passes
-	if (r_bloom_darken->value)
+	if (r_bloom_darken->integer)
 	{
 		GL_BlendFunc(GL_DST_COLOR, GL_ZERO);
 		GL_TexEnv(GL_MODULATE);
 
 		R_Bloom_DrawStart
-		for (i=0; i<r_bloom_darken->value ;i++) {
+		for (i=0; i<r_bloom_darken->integer; i++) {
 			R_Bloom_SamplePass( 0, 0, 1.0f, 1.0f, 1.0f, 1.0f );
 		}
 		R_Bloom_DrawFinish
@@ -460,13 +460,13 @@ void R_Bloom_GeneratexDiamonds (void)
 	GL_Enable(GL_BLEND);
 
 	// darkening passes
-	if ( r_bloom_darken->value )
+	if ( r_bloom_darken->integer )
 	{
 		GL_BlendFunc(GL_DST_COLOR, GL_ZERO);
 		GL_TexEnv(GL_MODULATE);
 		
 		R_Bloom_DrawStart
-		for (i=0; i<r_bloom_darken->value; i++) {
+		for (i=0; i<r_bloom_darken->integer; i++) {
 			R_Bloom_SamplePass( 0, 0, 1.0f, 1.0f, 1.0f, 1.0f );
 		}
 		R_Bloom_DrawFinish
@@ -477,13 +477,13 @@ void R_Bloom_GeneratexDiamonds (void)
 	// GL_BlendFunc(GL_ONE, GL_ONE);
 	GL_BlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
 	
-	if ( r_bloom_diamond_size->value > 7 || r_bloom_diamond_size->value <= 3)
+	if ( r_bloom_diamond_size->integer > 7 || r_bloom_diamond_size->integer <= 3)
 	{
-		if ( (int)r_bloom_diamond_size->value != 8 ) Cvar_SetValue( "r_bloom_diamond_size", 8 );
+		if ( r_bloom_diamond_size->integer != 8 ) Cvar_SetValue( "r_bloom_diamond_size", 8 );
 
 		R_Bloom_DrawStart
-		for (i=0; i<r_bloom_diamond_size->value; i++) {
-			for (j=0; j<r_bloom_diamond_size->value; j++) {
+		for (i=0; i<r_bloom_diamond_size->integer; i++) {
+			for (j=0; j<r_bloom_diamond_size->integer; j++) {
 				intensity = r_bloom_intensity->value * 0.3 * Diamond8x[i][j];
 				if ( intensity < r_bloom_threshold->value ) continue;
 				R_Bloom_SamplePass( i-4, j-4, intensity, intensity, intensity, 1.0 );
@@ -491,13 +491,13 @@ void R_Bloom_GeneratexDiamonds (void)
 		}
 		R_Bloom_DrawFinish			
 	}
-	else if ( r_bloom_diamond_size->value > 5 )
+	else if ( r_bloom_diamond_size->integer > 5 )
 	{
-		if ( r_bloom_diamond_size->value != 6 ) Cvar_SetValue( "r_bloom_diamond_size", 6 );
+		if ( r_bloom_diamond_size->integer != 6 ) Cvar_SetValue( "r_bloom_diamond_size", 6 );
 
 		R_Bloom_DrawStart
-		for (i=0; i<r_bloom_diamond_size->value; i++) {
-			for (j=0; j<r_bloom_diamond_size->value; j++) {
+		for (i=0; i<r_bloom_diamond_size->integer; i++) {
+			for (j=0; j<r_bloom_diamond_size->integer; j++) {
 				intensity = r_bloom_intensity->value * 0.5 * Diamond6x[i][j];
 				if ( intensity < r_bloom_threshold->value ) continue;
 				R_Bloom_SamplePass( i-3, j-3, intensity, intensity, intensity, 1.0 );
@@ -505,13 +505,13 @@ void R_Bloom_GeneratexDiamonds (void)
 		}
 		R_Bloom_DrawFinish			
 	}
-	else if ( r_bloom_diamond_size->value > 3 )
+	else if ( r_bloom_diamond_size->integer > 3 )
 	{
-		if ( (int)r_bloom_diamond_size->value != 4 ) Cvar_SetValue( "r_bloom_diamond_size", 4 );
+		if ( r_bloom_diamond_size->integer != 4 ) Cvar_SetValue( "r_bloom_diamond_size", 4 );
 
 		R_Bloom_DrawStart
-		for (i=0; i<r_bloom_diamond_size->value; i++) {
-			for (j=0; j<r_bloom_diamond_size->value; j++) {
+		for (i=0; i<r_bloom_diamond_size->integer; i++) {
+			for (j=0; j<r_bloom_diamond_size->integer; j++) {
 				intensity = r_bloom_intensity->value * 0.8f * Diamond4x[i][j];
 				if ( intensity < r_bloom_threshold->value ) continue;
 				R_Bloom_SamplePass( i-2, j-2, intensity, intensity, intensity, 1.0 );
@@ -582,7 +582,7 @@ R_BloomBlend
 void R_SetupGL (void);
 void R_BloomBlend ( refdef_t *fd )
 {
-	if ( (fd->rdflags & RDF_NOWORLDMODEL) || !r_bloom->value || r_showtris->value )
+	if ( (fd->rdflags & RDF_NOWORLDMODEL) || !r_bloom->integer || r_showtris->integer )
 		return;
 
 	if ( !BLOOM_SIZE )

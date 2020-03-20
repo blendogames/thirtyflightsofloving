@@ -158,14 +158,14 @@ stenciling for shadows & color shells
 */
 void GL_Stencil (qboolean enable, qboolean shell)
 {
-	if (!glConfig.have_stencil || !r_stencil->value) 
+	if (!glConfig.have_stencil || !r_stencil->integer) 
 		return;
 
 	if (enable)
 	{
-		if (shell || r_shadows->value == 3) {
+		if (shell || r_shadows->integer == 3) {
 			qglPushAttrib(GL_STENCIL_BUFFER_BIT);
-			if ( r_shadows->value == 3)
+			if ( r_shadows->integer == 3)
 				qglClearStencil(1);
 			qglClear(GL_STENCIL_BUFFER_BIT);
 		}
@@ -177,14 +177,14 @@ void GL_Stencil (qboolean enable, qboolean shell)
 	else
 	{
 		GL_Disable(GL_STENCIL_TEST);
-		if (shell || r_shadows->value == 3)
+		if (shell || r_shadows->integer == 3)
 			qglPopAttrib();
 	}
 }
 
 qboolean GL_HasStencil (void)
 {
-	return (glConfig.have_stencil && r_stencil->value);
+	return (glConfig.have_stencil && r_stencil->integer);
 }
 
 /*
@@ -197,7 +197,7 @@ particles only over trans surfaces
 extern	cvar_t	*r_particle_overdraw;
 void R_ParticleStencil (int passnum)
 {
-	if (!glConfig.have_stencil || !r_particle_overdraw->value) 
+	if (!glConfig.have_stencil || !r_particle_overdraw->integer) 
 		return;
 
 	if (passnum == 1) // write area of trans surfaces to stencil buffer
@@ -512,7 +512,7 @@ void GL_Bind (int texnum)
 {
 	extern	image_t	*draw_chars;
 
-	if (r_nobind->value && draw_chars)		// performance evaluation option
+	if (r_nobind->integer && draw_chars)		// performance evaluation option
 		texnum = draw_chars->texnum;
 	if (glState.currenttextures[glState.currenttmu] == texnum)
 		return;

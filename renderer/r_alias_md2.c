@@ -69,14 +69,14 @@ void R_LightAliasMD2Model (vec3_t baselight, dtrivertx_t *verts, dtrivertx_t *ov
 	int		i;
 	float	l; // tmp;
 
-	if (r_model_shading->value)
+	if (r_model_shading->integer)
 	{
 		//l = 2.0 * VLight_LerpLight (verts->lightnormalindex, ov->lightnormalindex,
 		//						backlerp, lightdir_md2, currententity->angles, false);
 		//tmp = shadedots[verts->lightnormalindex] + (shadedots[ov->lightnormalindex] - shadedots[verts->lightnormalindex]) * backlerp;
-		if (r_model_shading->value == 3)
+		if (r_model_shading->integer == 3)
 			l = 2.0 * shadedots[verts->lightnormalindex] - 1;
-		else if (r_model_shading->value == 2)
+		else if (r_model_shading->integer == 2)
 			l = 1.5 * shadedots[verts->lightnormalindex] - 0.5;
 		else
 			l = shadedots[verts->lightnormalindex];
@@ -518,7 +518,7 @@ void R_DrawAliasMD2VolumeShadow (dmdl_t *paliashdr, vec3_t bbox[8])
 	light[1] = (cost * (it - 0) + sint * (is - 0) + 0);
 	light[2] += 8;
 
-	if (!r_shadowvolumes->value)
+	if (!r_shadowvolumes->integer)
 	{
 		qglColorMask(0,0,0,0);
 		qglPushAttrib(GL_STENCIL_BUFFER_BIT); // save stencil buffer
@@ -530,10 +530,10 @@ void R_DrawAliasMD2VolumeShadow (dmdl_t *paliashdr, vec3_t bbox[8])
 		qglStencilFunc( GL_ALWAYS, 0, 0xFF);
 	}
 
-	R_BuildMD2ShadowVolume(paliashdr, light, projected_distance, r_shadowvolumes->value||!zfail);
+	R_BuildMD2ShadowVolume(paliashdr, light, projected_distance, r_shadowvolumes->integer||!zfail);
 	GL_LockArrays(md2shadow_va);
 
-	if (!r_shadowvolumes->value)
+	if (!r_shadowvolumes->integer)
 	{	// increment stencil if backface is behind depthbuffer
 		if (zfail) { // Carmack reverse
 			GL_CullFace(GL_BACK); // quake is backwards, this culls front faces
@@ -614,7 +614,7 @@ void R_DrawAliasMD2VolumeShadow (dmdl_t *paliashdr, vec3_t bbox[8])
 		dl++; // increment dl 
 	}*/
 
-	if (!r_shadowvolumes->value)
+	if (!r_shadowvolumes->integer)
 	{
 		GL_CullFace(GL_FRONT);
 		GL_Disable(GL_STENCIL_TEST);
@@ -643,7 +643,7 @@ void R_DrawAliasMD2PlanarShadow (dmdl_t *paliashdr, qboolean mirrored)
 	GLenum	mode;
 	int		i, count, /*va, index,*/ vertcount, baseindex;
 
-	//if (r_shadows->value == 2) // dynamic lighted shadows - psychospaz
+	//if (r_shadows->integer == 2) // dynamic lighted shadows - psychospaz
 		R_ShadowLight (currententity->origin, shadevector);
 	/*else {
 		an = currententity->angles[1]/180*M_PI;
@@ -849,7 +849,7 @@ void R_DrawAliasMD2Model (entity_t *e)
 	if ( !(e->flags & RF_WEAPONMODEL || e->flags & RF_VIEWERMODEL || e->renderfx & RF2_CAMERAMODEL) )
 	{
 		if (R_CullAliasMD2Model(bbox, e))
-			/*if (r_shadows->value == 3)
+			/*if (r_shadows->integer == 3)
 				shadowonly = true;
 			else*/
 				return;
@@ -857,14 +857,14 @@ void R_DrawAliasMD2Model (entity_t *e)
 
 	if (e->flags & RF_WEAPONMODEL)
 	{
-		if (r_lefthand->value == 2)
+		if (r_lefthand->integer == 2)
 			return;
-		else if (r_lefthand->value == 1)
+		else if (r_lefthand->integer == 1)
 			mirrormodel = true;
 	}
 	else if (e->renderfx & RF2_CAMERAMODEL)
 	{
-		if (r_lefthand->value==1)
+		if (r_lefthand->integer==1)
 			mirrormodel = true;
 	}
 	else if (e->flags & RF_MIRRORMODEL)
@@ -937,7 +937,7 @@ void R_DrawAliasMD2Model (entity_t *e)
 		e->oldframe = 0;
 	}
 
-	if ( !r_lerpmodels->value )
+	if ( !r_lerpmodels->integer )
 		e->backlerp = 0;
 
 	R_SetBlendModeOn (skin); // Q2max add
@@ -966,14 +966,14 @@ void R_DrawAliasMD2Model (entity_t *e)
 	if ( !(e->flags & (RF_WEAPONMODEL | RF_NOSHADOW))
 		// no shadows from shells
 		&& !( (e->flags & RF_MASK_SHELL) && (e->flags & RF_TRANSLUCENT) ) 
-		&& r_shadows->value >= 1 && shadowalpha_md2 >= DIV255)
+		&& r_shadows->integer >= 1 && shadowalpha_md2 >= DIV255)
 	{
  		qglPushMatrix ();
 		R_RotateForEntity (e, false);
 		GL_DisableTexture(0);
 		GL_Enable (GL_BLEND);
 
-		if ((r_shadows->value == 3) && currentmodel->edge_tri)
+		if ((r_shadows->integer == 3) && currentmodel->edge_tri)
 			R_DrawAliasMD2VolumeShadow (paliashdr, bbox);
 		else
 			R_DrawAliasMD2PlanarShadow (paliashdr, mirrormodel);
@@ -998,7 +998,7 @@ void R_DrawAliasMD2ModelShadow (entity_t *e)
 	qboolean	mirrormodel = false;
 	//float		an;
 
-	if (!r_shadows->value)
+	if (!r_shadows->integer)
 		return;
 	if (e->flags & (RF_WEAPONMODEL | RF_NOSHADOW))
 		return;
@@ -1019,7 +1019,7 @@ void R_DrawAliasMD2ModelShadow (entity_t *e)
 
 	if (e->renderfx & RF2_CAMERAMODEL)
 	{
-		if (r_lefthand->value==1)
+		if (r_lefthand->integer==1)
 			mirrormodel = true;
 	}
 	else if (e->flags & RF_MIRRORMODEL)
@@ -1044,15 +1044,15 @@ void R_DrawAliasMD2ModelShadow (entity_t *e)
 		e->oldframe = 0;
 	}
 
-	//if ( !r_lerpmodels->value )
-	//	e->backlerp = 0;
+//	if ( !r_lerpmodels->integer )
+//		e->backlerp = 0;
 
 	/*an = e->angles[1]/180*M_PI;
 	shadevector[0] = cos(-an);
 	shadevector[1] = sin(-an);
 	shadevector[2] = 1;
 	VectorNormalize (shadevector);
-	switch ((int)(r_shadows->value))
+	switch ((r_shadows->integer))
 	{
 	case 0:
 		break;
@@ -1066,7 +1066,7 @@ void R_DrawAliasMD2ModelShadow (entity_t *e)
 			GL_DisableTexture(0);
 			GL_Enable (GL_BLEND);
 						
-			if ((r_shadows->value == 3) && currentmodel->edge_tri)
+			if ((r_shadows->integer == 3) && currentmodel->edge_tri)
 				R_DrawAliasMD2VolumeShadow (paliashdr, bbox);
 			else
 				R_DrawAliasMD2PlanarShadow (paliashdr, mirrormodel);

@@ -133,7 +133,7 @@ from stenciled volume
 */
 void R_ShadowBlend (float shadowalpha)
 {
-	if (r_shadows->value != 3)
+	if (r_shadows->integer != 3)
 		return;
 
 	qglPushMatrix();
@@ -206,7 +206,7 @@ R_SetVertexRGBScale
 */
 void R_SetVertexRGBScale (qboolean toggle)
 {
-	if (!r_rgbscale->value || !glConfig.mtexcombine)
+	if (!r_rgbscale->integer || !glConfig.mtexcombine)
 		return;
 
 	if (toggle) // turn on
@@ -214,14 +214,14 @@ void R_SetVertexRGBScale (qboolean toggle)
 #if 1
 		qglTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_ARB);
 		qglTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB, GL_MODULATE);
-		qglTexEnvi(GL_TEXTURE_ENV, GL_RGB_SCALE_ARB, r_rgbscale->value);
+		qglTexEnvi(GL_TEXTURE_ENV, GL_RGB_SCALE_ARB, r_rgbscale->integer);
 		qglTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA_ARB, GL_MODULATE);
 		
 		GL_TexEnv(GL_COMBINE_ARB);
 #else
 		qglTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_EXT);
 		qglTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_MODULATE);
-		qglTexEnvi(GL_TEXTURE_ENV, GL_RGB_SCALE_ARB, r_rgbscale->value);
+		qglTexEnvi(GL_TEXTURE_ENV, GL_RGB_SCALE_ARB, r_rgbscale->integer);
 		qglTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA_ARB, GL_MODULATE);
 
 		GL_TexEnv(GL_COMBINE_EXT);
@@ -242,8 +242,8 @@ EnvMapShell
 */
 qboolean EnvMapShell (void)
 {
-	return ( (r_shelltype->value == 2)
-		|| (r_shelltype->value == 1 && currententity->alpha == 1.0f) );
+	return ( (r_shelltype->integer == 2)
+		|| (r_shelltype->integer == 1 && currententity->alpha == 1.0f) );
 }
 
 
@@ -254,7 +254,7 @@ FlowingShell
 */
 qboolean FlowingShell (void)
 {
-	return (r_shelltype->value == 1 && currententity->alpha != 1.0f);
+	return (r_shelltype->integer == 1 && currententity->alpha != 1.0f);
 }
 
 
@@ -426,9 +426,9 @@ void R_SetShadeLight (void)
 	else
 	{
 		// Set up basic lighting...
-		if (r_model_shading->value && r_model_dlights->value)
+		if (r_model_shading->integer && r_model_dlights->integer)
 		{
-			int max = r_model_dlights->value;
+			int max = r_model_dlights->integer;
 
 			if (max<0) max=0;
 			if (max>MAX_MODEL_DLIGHTS) max=MAX_MODEL_DLIGHTS;
@@ -491,13 +491,13 @@ void R_SetShadeLight (void)
 	if ( currententity->flags & RF_MINLIGHT )
 	{
 		for (i=0; i<3; i++)
-			if (shadelight[i] > 0.02)
+			if (shadelight[i] > r_model_minlight->value) // 0.02
 				break;
 		if (i == 3)
 		{
-			shadelight[0] = 0.02;
-			shadelight[1] = 0.02;
-			shadelight[2] = 0.02;
+			shadelight[0] = r_model_minlight->value; // 0.02
+			shadelight[1] = r_model_minlight->value; // 0.02
+			shadelight[2] = r_model_minlight->value; // 0.02
 		}
 	}
 
@@ -553,7 +553,7 @@ void R_DrawAliasModelBBox (vec3_t bbox[8], entity_t *e, float red, float green, 
 {
 	int	i;
 
-	if (!r_showbbox->value)
+	if (!r_showbbox->integer)
 		return;
 
 	if (e->flags & RF_WEAPONMODEL || e->flags & RF_VIEWERMODEL || e->flags & RF_BEAM || e->renderfx & RF2_CAMERAMODEL)

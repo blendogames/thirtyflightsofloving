@@ -48,7 +48,7 @@ R_RollMult
 */
 int R_RollMult (void)
 {
-	if (r_entity_fliproll->value)
+	if (r_entity_fliproll->integer)
 		return -1;
 	else
 		return 1;
@@ -94,7 +94,7 @@ void R_DrawNullModel (void)
 	R_RotateForEntity (currententity, true);
 	GL_DisableTexture (0);
 
-	if (r_old_nullmodel->value)
+	if (r_old_nullmodel->integer)
 	{
 		if (currententity->flags & RF_FULLBRIGHT)
 			VectorSet (shadelight, 1.0f, 1.0f, 1.0f);
@@ -339,7 +339,7 @@ void R_DrawAllEntities (qboolean addViewWeaps)
 	qboolean alpha;
 	int i;
 	
-	if (!r_drawentities->value)
+	if (!r_drawentities->integer)
 		return;
 
 	resetEntSortList();
@@ -408,7 +408,7 @@ void R_DrawSolidEntities ()
 	qboolean alpha;
 	int		i;
 
-	if (!r_drawentities->value)
+	if (!r_drawentities->integer)
 		return;
 
 	resetEntSortList();
@@ -449,7 +449,7 @@ R_DrawEntitiesOnList
 */
 void R_DrawEntitiesOnList (sortedelement_t *list)
 {
-	if (!r_drawentities->value)
+	if (!r_drawentities->integer)
 		return;
 
 	RenderEntTree(list);
@@ -489,10 +489,10 @@ void R_DrawAllEntityShadows (void)
 {
 	int i;
 	
-	if (!r_drawentities->value)
+	if (!r_drawentities->integer)
 		return;
-	//if (!r_shadows->value)
-	if (r_shadows->value != 3)
+//	if (!r_shadows->integer)
+	if (r_shadows->integer != 3)
 		return;
 
 	for (i=0;i<r_newrefdef.num_entities; i++)

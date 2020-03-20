@@ -401,8 +401,10 @@ void R_SetSky (char *name, float rotate, vec3_t axis)
 
 	for (i=0 ; i<6 ; i++)
 	{
-		if (r_skymip->value) // take less memory
-			r_picmip->value++;
+		if (r_skymip->integer) { // take less memory
+		//	r_picmip->integer++;	// directly setting cvar values is bad bad bad!!!
+			Cvar_SetInteger("r_picmip", r_picmip->integer + 1);
+		}
 
 		Com_sprintf (pathname, sizeof(pathname), "env/%s%s.tga", skyname, suf[i]);
 		sky_images[i] = R_FindImage (pathname, it_sky);
@@ -419,8 +421,9 @@ void R_SetSky (char *name, float rotate, vec3_t axis)
 		else
 			imagesize = 256.0;
 
-		if (r_skymip->value) {
-			r_picmip->value--; // take less memory
+		if (r_skymip->integer) { // take less memory
+		//	r_picmip->integer--;	// directly setting cvar values is bad bad bad!!!
+			Cvar_SetInteger("r_picmip", r_picmip->integer - 1);
 			imagesize = min(512.0, imagesize); // cap at 512
 		}
 		else
@@ -429,9 +432,9 @@ void R_SetSky (char *name, float rotate, vec3_t axis)
 		sky_min = 1.0/imagesize; // was 256
 		sky_max = (imagesize-1.0)/imagesize;
 
-		/*if (r_skymip->value)
-		{	// take less memory
-			r_picmip->value--;
+		/*if (r_skymip->integer) {	// take less memory
+		//	r_picmip->integer--;	// directly setting cvar values is bad bad bad!!!
+			Cvar_SetInteger("r_picmip", r_picmip->integer - 1);
 			sky_min = 1.0/512; // was 256
 			sky_max = 511.0/512;
 		}

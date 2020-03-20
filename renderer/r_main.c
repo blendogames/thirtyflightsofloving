@@ -100,6 +100,7 @@ cvar_t	*r_saveshotsize;//  save shot size option
 cvar_t	*r_dlights_normal; // lerped dlights on models
 cvar_t	*r_model_shading;
 cvar_t	*r_model_dlights;
+cvar_t	*r_model_minlight;
 
 cvar_t	*r_lightlevel;	// FIXME: This is a HACK to get the client's light level
 
@@ -124,6 +125,7 @@ cvar_t	*r_arb_vertex_buffer_object;
 cvar_t	*r_pixel_shader_warp; // allow disabling the nVidia water warp
 cvar_t	*r_trans_lighting; // disabling of lightmaps on trans surfaces
 cvar_t	*r_warp_lighting; // allow disabling of lighting on warp surfaces
+cvar_t	*r_warp_lighting_sample_offset; // allow adjustment of lighting sampling offset
 cvar_t	*r_solidalpha;			// allow disabling of trans33+trans66 surface flag combining
 cvar_t	*r_entity_fliproll;		// allow disabling of backwards alias model roll
 cvar_t	*r_old_nullmodel;		// allow selection of nullmodel
@@ -214,7 +216,7 @@ qboolean R_CullBox (vec3_t mins, vec3_t maxs)
 {
 	int		i;
 
-	if (r_nocull->value)
+	if (r_nocull->integer)
 		return false;
 
 	for (i=0 ; i<4 ; i++)
@@ -231,7 +233,7 @@ R_PolyBlend
 */
 void R_PolyBlend (void)
 {
-	if (!r_polyblend->value)
+	if (!r_polyblend->integer)
 		return;
 	if (!v_blend[3])
 		return;
@@ -518,7 +520,7 @@ void R_SetupGL (void)
 	//
 	// set drawing parms
 	//
-	if (r_cull->value)
+	if (r_cull->integer)
 		GL_Enable(GL_CULL_FACE);
 	else
 		GL_Disable(GL_CULL_FACE);
@@ -540,14 +542,14 @@ void R_Clear (void)
 {
 	GLbitfield	clearBits = 0;	// bitshifter's consolidation
 
-	if (gl_clear->value)
+	if (gl_clear->integer)
 		clearBits |= GL_COLOR_BUFFER_BIT;
 
-	if (r_ztrick->value)
+	if (r_ztrick->integer)
 	{
 		static int trickframe;
 
-	//	if (gl_clear->value)
+	//	if (gl_clear->integer)
 	//		qglClear (GL_COLOR_BUFFER_BIT);
 
 		trickframe++;
@@ -566,7 +568,7 @@ void R_Clear (void)
 	}
 	else
 	{
-	//	if (gl_clear->value)
+	//	if (gl_clear->integer)
 	//		qglClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	//	else
 	//		qglClear (GL_DEPTH_BUFFER_BIT);
@@ -582,7 +584,7 @@ void R_Clear (void)
 	// added stencil buffer
 	if (glConfig.have_stencil)
 	{
-		if (r_shadows->value == 3) // BeefQuake R6 shadows
+		if (r_shadows->integer == 3) // BeefQuake R6 shadows
 			qglClearStencil(0);
 		else
 			qglClearStencil(1);
@@ -631,7 +633,7 @@ r_newrefdef must be set before the first call
 */
 void R_RenderView (refdef_t *fd)
 {
-	if (r_norefresh->value)
+	if (r_norefresh->integer)
 		return;
 
 	r_newrefdef = *fd;
@@ -639,7 +641,7 @@ void R_RenderView (refdef_t *fd)
 	if (!r_worldmodel && !( r_newrefdef.rdflags & RDF_NOWORLDMODEL ) )
 		VID_Error (ERR_DROP, "R_RenderView: NULL worldmodel");
 
-	if (r_speeds->value)
+	if (r_speeds->integer)
 	{
 		c_brush_calls = 0;
 		c_brush_surfs = 0;
@@ -650,7 +652,7 @@ void R_RenderView (refdef_t *fd)
 
 	R_PushDlights ();
 
-	if (r_finish->value)
+	if (r_finish->integer)
 		qglFinish ();
 
 	R_SetupFrame ();
@@ -681,7 +683,7 @@ void R_RenderView (refdef_t *fd)
 
 		R_RenderDlights();
 
-		if (r_transrendersort->value) {
+		if (r_transrendersort->integer) {
 			//R_BuildParticleList();
 			R_SortParticlesOnList();
 			R_DrawAllDecals();
@@ -704,7 +706,7 @@ void R_RenderView (refdef_t *fd)
 		R_ParticleStencil (2);
 
 		R_ParticleStencil (3);
-		if (r_particle_overdraw->value) // redraw over alpha surfaces, those behind are occluded
+		if (r_particle_overdraw->integer) // redraw over alpha surfaces, those behind are occluded
 			R_DrawAllParticles ();
 		R_ParticleStencil (4);
 
@@ -745,7 +747,7 @@ void R_SetGL2D (void)
 	qglColor4f (1,1,1,1);
 
 	// Knightmare- draw r_speeds (modified from Echon's tutorial)
-	if (r_speeds->value && !(r_newrefdef.rdflags & RDF_NOWORLDMODEL)) // don't do this for options menu
+	if (r_speeds->integer && !(r_newrefdef.rdflags & RDF_NOWORLDMODEL)) // don't do this for options menu
 	{
 		char	S[128];
 		int		lines, i, x, y, n = 0;
@@ -764,7 +766,7 @@ void R_SetGL2D (void)
 				case 6: n = sprintf (S, S_COLOR_ALT S_COLOR_SHADOW"%5i lmaps", c_visible_lightmaps); break;
 				default: break;
 			}
-			if (scr_netgraph_pos->value)
+			if (scr_netgraph_pos->integer)
 				x = r_newrefdef.width - (n*FONT_SIZE + FONT_SIZE/2);
 			else
 				x = FONT_SIZE/2;
@@ -928,6 +930,7 @@ void R_Register (void)
 	r_dlights_normal = Cvar_Get("r_dlights_normal", "1", CVAR_ARCHIVE);
 	r_model_shading = Cvar_Get( "r_model_shading", "2", CVAR_ARCHIVE );
 	r_model_dlights = Cvar_Get( "r_model_dlights", "8", CVAR_ARCHIVE );
+	r_model_minlight = Cvar_Get ("r_model_minlight", "0.02", CVAR_ARCHIVE );
 
 	r_lightlevel = Cvar_Get ("r_lightlevel", "0", 0);
 	// added Vic's RGB brightening
@@ -1020,6 +1023,9 @@ void R_Register (void)
 	// allow disabling of lighting on warp surfaces
 	r_warp_lighting = Cvar_Get( "r_warp_lighting", "1", CVAR_ARCHIVE );
 
+	// allow adjustment of lighting sampling offset
+	r_warp_lighting_sample_offset = Cvar_Get( "r_warp_lighting_sample_offset", "1", CVAR_ARCHIVE );
+
 	// allow disabling of trans33+trans66 surface flag combining
 	r_solidalpha = Cvar_Get( "r_solidalpha", "1", CVAR_ARCHIVE );
 	
@@ -1088,23 +1094,23 @@ qboolean R_SetMode (void)
 	if ( vid_fullscreen->modified && !glConfig.allowCDS )
 	{
 		VID_Printf (PRINT_ALL, "R_SetMode() - CDS not allowed with this driver\n" );
-		Cvar_SetValue( "vid_fullscreen", !vid_fullscreen->value );
+		Cvar_SetValue( "vid_fullscreen", !vid_fullscreen->integer );
 		vid_fullscreen->modified = false;
 	}
 
-	fullscreen = vid_fullscreen->value;
+	fullscreen = vid_fullscreen->integer;
 	r_skydistance->modified = true; // skybox size variable
 
 	// don't allow modes 0, 1, or 2
-	/*if ((r_mode->value > -1) && (r_mode->value < 3))
+	/*if ((r_mode->integer > -1) && (r_mode->integer < 3))
 		Cvar_SetValue( "r_mode", 3);*/
 
 	vid_fullscreen->modified = false;
 	r_mode->modified = false;
 
-	if ( ( err = GLimp_SetMode( &vid.width, &vid.height, r_mode->value, fullscreen ) ) == rserr_ok )
+	if ( ( err = GLimp_SetMode( &vid.width, &vid.height, r_mode->integer, fullscreen ) ) == rserr_ok )
 	{
-		glState.prev_mode = r_mode->value;
+		glState.prev_mode = r_mode->integer;
 	}
 	else
 	{
@@ -1113,7 +1119,7 @@ qboolean R_SetMode (void)
 			Cvar_SetValue( "vid_fullscreen", 0);
 			vid_fullscreen->modified = false;
 			VID_Printf (PRINT_ALL, "ref_gl::R_SetMode() - fullscreen unavailable in this mode\n" );
-			if ( ( err = GLimp_SetMode( &vid.width, &vid.height, r_mode->value, false ) ) == rserr_ok )
+			if ( ( err = GLimp_SetMode( &vid.width, &vid.height, r_mode->integer, false ) ) == rserr_ok )
 				return true;
 		}
 		else if ( err == rserr_invalid_mode )
@@ -1207,7 +1213,7 @@ qboolean R_CheckGLExtensions (char *reason)
 	}
 	if ( (!glConfig.multitexture) && StringContainsToken( glConfig.extensions_string, "GL_ARB_multitexture" ) )
 	{
-		if (r_ext_multitexture->value)
+		if (r_ext_multitexture->integer)
 		{
 			qglMultiTexCoord2fARB = (void *) qwglGetProcAddress( "glMultiTexCoord2fARB" );
 			qglActiveTextureARB = (void *) qwglGetProcAddress( "glActiveTextureARB" );
@@ -1233,7 +1239,7 @@ qboolean R_CheckGLExtensions (char *reason)
 	if ( StringContainsToken( glConfig.extensions_string, "GL_EXT_compiled_vertex_array" ) || 
 		 StringContainsToken( glConfig.extensions_string, "GL_SGI_compiled_vertex_array" ) )
 	{
-		if (r_ext_compiled_vertex_array->value) {
+		if (r_ext_compiled_vertex_array->integer) {
 			qglLockArraysEXT = (void *) qwglGetProcAddress( "glLockArraysEXT" );
 			qglUnlockArraysEXT = (void *) qwglGetProcAddress( "glUnlockArraysEXT" );
 			if (!qglLockArraysEXT || !qglUnlockArraysEXT) {
@@ -1256,7 +1262,7 @@ qboolean R_CheckGLExtensions (char *reason)
 	glConfig.drawRangeElements = false;
 	if ( (glConfig.version_major >= 2) || (glConfig.version_major == 1 && glConfig.version_minor >= 2) )
 	{
-		if (r_ext_draw_range_elements->value)
+		if (r_ext_draw_range_elements->integer)
 		{
 			qglDrawRangeElementsEXT = (void *) qwglGetProcAddress("glDrawRangeElements");
 			if (!qglDrawRangeElementsEXT)
@@ -1273,7 +1279,7 @@ qboolean R_CheckGLExtensions (char *reason)
 	}
 	else if ( StringContainsToken( glConfig.extensions_string, "GL_EXT_draw_range_elements" ) )
 	{
-		if (r_ext_draw_range_elements->value)
+		if (r_ext_draw_range_elements->integer)
 		{
 			qglDrawRangeElementsEXT = (void *) qwglGetProcAddress("glDrawRangeElementsEXT");
 			if (!qglDrawRangeElementsEXT)
@@ -1296,7 +1302,7 @@ qboolean R_CheckGLExtensions (char *reason)
 	glConfig.arbTextureNonPowerOfTwo = false;
 	if ( StringContainsToken( glConfig.extensions_string, "GL_ARB_texture_non_power_of_two" ) )
 	{
-		if (r_arb_texturenonpoweroftwo->value) {
+		if (r_arb_texturenonpoweroftwo->integer) {
 			VID_Printf (PRINT_ALL, "...using GL_ARB_texture_non_power_of_two\n");
 			glConfig.arbTextureNonPowerOfTwo = true;
 		}
@@ -1323,7 +1329,7 @@ qboolean R_CheckGLExtensions (char *reason)
 #if 0
 	if ( StringContainsToken( glConfig.extensions_string, "GL_EXT_point_parameters" ) )
 	{
-		if ( gl_ext_pointparameters->value )
+		if ( gl_ext_pointparameters->integer )
 		{
 			qglPointParameterfEXT = ( void (APIENTRY *)( GLenum, GLfloat ) ) qwglGetProcAddress( "glPointParameterfEXT" );
 			qglPointParameterfvEXT = ( void (APIENTRY *)( GLenum, const GLfloat * ) ) qwglGetProcAddress( "glPointParameterfvEXT" );
@@ -1339,7 +1345,7 @@ qboolean R_CheckGLExtensions (char *reason)
 		StringContainsToken( glConfig.extensions_string, "GL_EXT_paletted_texture" ) && 
 		StringContainsToken( glConfig.extensions_string, "GL_EXT_shared_texture_palette" ) )
 	{
-		if (gl_ext_palettedtexture->value)
+		if (gl_ext_palettedtexture->integer)
 		{
 			VID_Printf (PRINT_ALL, "...using GL_EXT_shared_texture_palette\n" );
 			qglColorTableEXT = ( void ( APIENTRY * ) ( int, int, int, int, int, const void * ) ) qwglGetProcAddress( "glColorTableEXT" );
@@ -1355,7 +1361,7 @@ qboolean R_CheckGLExtensions (char *reason)
 	glConfig.vertexBufferObject = false;
 	if ( StringContainsToken( glConfig.extensions_string, "GL_ARB_vertex_buffer_object" ) )
 	{
-		/*if (r_arb_vertex_buffer_object->value)
+		/*if (r_arb_vertex_buffer_object->integer)
 		{
 			VID_Printf(PRINT_ALL, "...using GL_ARB_vertex_buffer_object\n" );
 			glConfig.vertexBufferObject = true;
@@ -1378,7 +1384,7 @@ qboolean R_CheckGLExtensions (char *reason)
 	glConfig.mtexcombine = false;
 	if (StringContainsToken(glConfig.extensions_string, "GL_ARB_texture_env_combine"))
 	{
-		if (r_ext_mtexcombine->value)
+		if (r_ext_mtexcombine->integer)
 		{
 			VID_Printf (PRINT_ALL, "...using GL_ARB_texture_env_combine\n");
 			glConfig.mtexcombine = true;
@@ -1395,7 +1401,7 @@ qboolean R_CheckGLExtensions (char *reason)
 	{
 		if (StringContainsToken(glConfig.extensions_string, "GL_EXT_texture_env_combine"))
 		{
-			if (r_ext_mtexcombine->value)
+			if (r_ext_mtexcombine->integer)
 			{
 				VID_Printf (PRINT_ALL, "..using GL_EXT_texture_env_combine\n");
 				glConfig.mtexcombine = true;
@@ -1422,7 +1428,7 @@ qboolean R_CheckGLExtensions (char *reason)
 	glConfig.atiSeparateStencil = false;
 	if (StringContainsToken(glConfig.extensions_string, "GL_ATI_separate_stencil"))
 	{
-	//	if (r_stencilTwoSide->value)
+	//	if (r_stencilTwoSide->integer)
 	//	{
 			qglStencilOpSeparateATI = (void *) qwglGetProcAddress("glStencilOpSeparateATI");
 			qglStencilFuncSeparateATI = (void *) qwglGetProcAddress("glStencilFuncSeparateATI");
@@ -1445,7 +1451,7 @@ qboolean R_CheckGLExtensions (char *reason)
 	glConfig.extStencilTwoSide = false;
 	if (StringContainsToken(glConfig.extensions_string, "GL_EXT_stencil_two_side"))
 	{
-	//	if (r_stencilTwoSide->value)
+	//	if (r_stencilTwoSide->integer)
 	//	{
 			qglActiveStencilFaceEXT = (void *) qwglGetProcAddress( "glActiveStencilFaceEXT" );
 			if (!qglActiveStencilFaceEXT) {
@@ -1467,7 +1473,7 @@ qboolean R_CheckGLExtensions (char *reason)
 	glConfig.arb_fragment_program = false;
 	if (StringContainsToken(glConfig.extensions_string, "GL_ARB_fragment_program"))
 	{
-		if (r_arb_fragment_program->value)
+		if (r_arb_fragment_program->integer)
 		{
 			qglProgramStringARB = (void *) qwglGetProcAddress( "glProgramStringARB" );
 			qglBindProgramARB = (void *) qwglGetProcAddress( "glBindProgramARB" );
@@ -1515,7 +1521,7 @@ qboolean R_CheckGLExtensions (char *reason)
 	{
 		if (StringContainsToken(glConfig.extensions_string, "GL_ARB_vertex_program"))
 		{
-			if (r_arb_vertex_program->value)
+			if (r_arb_vertex_program->integer)
 			{
 				qglGetVertexAttribdvARB = (void *) qwglGetProcAddress( "glGetVertexAttribdvARB" );
 				qglGetVertexAttribfvARB	= (void *) qwglGetProcAddress( "glGetVertexAttribfvARB" );
@@ -1592,7 +1598,7 @@ qboolean R_CheckGLExtensions (char *reason)
 	// GL_SGIS_generate_mipmap
 	if ( StringContainsToken( glConfig.extensions_string, "GL_SGIS_generate_mipmap") )
 	{
-		if (r_sgis_generatemipmap->value) {
+		if (r_sgis_generatemipmap->integer) {
 			VID_Printf (PRINT_ALL, "...using GL_SGIS_generate_mipmap\n" );
 			glState.sgis_mipmap = true;
 		}
@@ -1610,7 +1616,7 @@ qboolean R_CheckGLExtensions (char *reason)
 	// GL_ARB_texture_compression - Heffo
 	if ( StringContainsToken( glConfig.extensions_string, "GL_ARB_texture_compression" ) )
 	{
-		if(!r_ext_texture_compression->value)
+		if(!r_ext_texture_compression->integer)
 		{
 			VID_Printf (PRINT_ALL, "...ignoring GL_ARB_texture_compression\n" );
 			glState.texture_compression = false;
@@ -1632,7 +1638,7 @@ qboolean R_CheckGLExtensions (char *reason)
 	// WGL_3DFX_gamma_control
 	if ( StringContainsToken(glConfig.extensions_string, "WGL_3DFX_gamma_control") )
 	{
-		if (!r_ignorehwgamma->value)
+		if (!r_ignorehwgamma->integer)
 		{
 			qwglGetDeviceGammaRamp3DFX	= ( BOOL (WINAPI *)(HDC, LPVOID)) qwglGetProcAddress( "wglGetDeviceGammaRamp3DFX" );
 			qwglSetDeviceGammaRamp3DFX	= ( BOOL (WINAPI *)(HDC, LPVOID)) qwglGetProcAddress( "wglSetDeviceGammaRamp3DFX" );
@@ -1735,7 +1741,7 @@ qboolean R_Init ( void *hinstance, void *hWnd, char *reason )
 
 	glConfig.extensions_string = qglGetString (GL_EXTENSIONS);
 //	VID_Printf (PRINT_DEVELOPER, "GL_EXTENSIONS: %s\n", glConfig.extensions_string );
-	if (developer->value > 0)	// print extensions 2 to a line
+	if (developer->integer > 0)	// print extensions 2 to a line
 	{
 		char		*extString, *extTok;
 		unsigned	line = 0;
@@ -1814,7 +1820,7 @@ qboolean R_Init ( void *hinstance, void *hWnd, char *reason )
 
 	if (glConfig.rendType & GLREND_3DLABS)
 	{
-		if ( r_3dlabs_broken->value )
+		if ( r_3dlabs_broken->integer )
 			glConfig.allowCDS = false;
 		else
 			glConfig.allowCDS = true;
@@ -1831,7 +1837,7 @@ qboolean R_Init ( void *hinstance, void *hWnd, char *reason )
 	// use the texture formats determined by gl_texturesolidmode and gl_texturealphamode.
 	if ( Q_stricmp(gl_driver->string, "opengl32") || glConfig.rendType == GLREND_VOODOO
 		|| (glConfig.version_major < 2 && glConfig.version_minor < 2)
-		|| (!r_newlightmapformat || !r_newlightmapformat->value) )
+		|| (!r_newlightmapformat || !r_newlightmapformat->integer) )
 	{
 		VID_Printf (PRINT_ALL, "...using legacy lightmap format\n" );
 		glConfig.newLMFormat = false;
@@ -1985,9 +1991,9 @@ void R_BeginFrame( float camera_separation )
 
 	if (con_font_size->modified)
 	{
-		if (con_font_size->value < 4)
+		if (con_font_size->integer < 4)
 			Cvar_Set( "con_font_size", "4" );
-		else if (con_font_size->value > 24)
+		else if (con_font_size->integer > 24)
 			Cvar_Set( "con_font_size", "24" );
 
 		con_font_size->modified = false;
@@ -2007,11 +2013,11 @@ void R_BeginFrame( float camera_separation )
 
 	if ( r_log->modified )
 	{
-		GLimp_EnableLogging( r_log->value );
+		GLimp_EnableLogging( r_log->integer );
 		r_log->modified = false;
 	}
 
-	if ( r_log->value )
+	if ( r_log->integer )
 	{
 		GLimp_LogNewFrame();
 	}

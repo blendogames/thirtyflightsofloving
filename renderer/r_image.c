@@ -385,7 +385,7 @@ void LoadPCX (char *filename, byte **pic, byte **palette, int *width, int *heigh
 	if (!raw)
 	{
 		// Knightmare- skip this unless developer >= 2 because it spams the console
-		if (developer->value > 1)
+		if (developer->integer > 1)
 			VID_Printf (PRINT_DEVELOPER, "Bad pcx file %s\n", filename);
 		return;
 	}
@@ -1123,7 +1123,7 @@ void R_LoadPNG (char *filename, byte **pic, int *width, int *height)
 
 	if (!raw)
 	{	// Knightmare- skip this unless developer >= 2 because it spams the console
-		if (developer->value > 1)
+		if (developer->integer > 1)
 			VID_Printf (PRINT_DEVELOPER, "Bad png file %s\n", filename);
 		return;
 	}
@@ -1276,7 +1276,7 @@ void R_LoadJPG (char *filename, byte **pic, int *width, int *height)
 	if (!rawdata)
 	{
 		// Knightmare- skip this unless developer >= 2 because it spams the console
-		if (developer->value > 1)
+		if (developer->integer > 1)
 			VID_Printf (PRINT_DEVELOPER, "Bad jpg file %s\n", filename);
 		return;	
 	}
@@ -1797,7 +1797,7 @@ qboolean GL_Upload32 (unsigned *data, int width, int height, imagetype_t type)
 	//
 	// find sizes to scale to
 	//
-	if ( glConfig.arbTextureNonPowerOfTwo && (!mipmap || r_nonpoweroftwo_mipmaps->value) ) {
+	if ( glConfig.arbTextureNonPowerOfTwo && (!mipmap || r_nonpoweroftwo_mipmaps->integer) ) {
 		scaled_width = width;
 		scaled_height = height;
 	}
@@ -1814,13 +1814,13 @@ qboolean GL_Upload32 (unsigned *data, int width, int height, imagetype_t type)
 	//
 	// allow sampling down of the world textures for speed
 	//
-	if (mipmap && (int)r_picmip->value > 0)
+	if (mipmap && r_picmip->integer > 0)
 	{
 		int maxsize;
 
-		if ((int)r_picmip->value == 1)		// clamp to 512x512
+		if (r_picmip->integer == 1)		// clamp to 512x512
 			maxsize = 512;
-		else if ((int)r_picmip->value == 2) // clamp to 256x256
+		else if (r_picmip->integer == 2) // clamp to 256x256
 			maxsize = 256;
 		else								// clamp to 128x128
 			maxsize = 128;
@@ -1831,8 +1831,8 @@ qboolean GL_Upload32 (unsigned *data, int width, int height, imagetype_t type)
 			scaled_width >>= 1;
 			scaled_height >>= 1;
 		}
-		//scaled_width >>= (int)r_picmip->value;
-		//scaled_height >>= (int)r_picmip->value;
+	//	scaled_width >>= r_picmip->integer;
+	//	scaled_height >>= r_picmip->integer;
 	}
 
 	//

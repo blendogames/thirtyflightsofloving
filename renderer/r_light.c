@@ -92,7 +92,7 @@ void R_RenderDlights (void)
 	int		i;
 	dlight_t	*l;
 
-	if (!r_flashblend->value)
+	if (!r_flashblend->integer)
 		return;
 
 	r_dlightframecount = r_framecount + 1;	// because the count hasn't
@@ -132,7 +132,6 @@ DYNAMIC LIGHTS
 R_MarkLights
 =============
 */
-extern cvar_t *r_dlights_normal;
 void R_MarkLights (dlight_t *light, int num, mnode_t *node)
 {
 	cplane_t	*splitplane;
@@ -163,7 +162,7 @@ void R_MarkLights (dlight_t *light, int num, mnode_t *node)
 	for (i=0; i<node->numsurfaces; i++, surf++)
 	{
 		// Knightmare- Discoloda's dynamic light clipping
-		if (r_dlights_normal->value)
+		if (r_dlights_normal->integer)
 		{
 			dist = DotProduct (light->origin, surf->plane->normal) - surf->plane->dist;
 			if (dist >= 0)
@@ -203,7 +202,7 @@ void R_PushDlights (void)
 	int		i;
 	dlight_t	*l;
 
-	if (r_flashblend->value)
+	if (r_flashblend->integer)
 		return;
 
 	r_dlightframecount = r_framecount + 1;	// because the count hasn't
@@ -527,9 +526,10 @@ R_SurfLightPoint
 */
 void R_SurfLightPoint (msurface_t *surf, vec3_t p, vec3_t color, qboolean baselight)
 {
-	vec3_t		start, end, dist;
+	vec3_t		start, end, dist, bestColor;
 	vec3_t		dlorigin, temp, forward, right, up;
-	vec3_t		startOffset[4] = { {0,0,0}, {-1,0,0}, {0,-1,0}, {-1,-1,0} };
+//	vec3_t		startOffset[4] = { {0,0,0}, {-1,0,0}, {0,-1,0}, {-1,-1,0} };
+	vec3_t		startOffset[9] = { {0,0,0}, {-1,0,0}, {-1,-1,0}, {0,-1,0}, {1,-1,0}, {1,0,0}, {1,1,0}, {0,1,0}, {-1,1,0} };
 	float		r, light, add;
 	int			lnum, i;
 	dlight_t	*dl;
@@ -554,6 +554,24 @@ void R_SurfLightPoint (msurface_t *surf, vec3_t p, vec3_t color, qboolean baseli
 
 	if (baselight)
 	{
+#if 1
+		VectorCopy (vec3_origin, bestColor);
+		for (i=0; i<9; i++) // test multiple offset points to avoid dark corners, select brightest
+		{
+			vec3_t tempOffset;
+			VectorCopy (p, start);
+			VectorScale (startOffset[i], min(max(r_warp_lighting_sample_offset->value,1.0f),16.0f), tempOffset);
+			VectorAdd (start, tempOffset, start);
+			end[0] = start[0];
+			end[1] = start[1];
+			end[2] = start[2] - 2048;
+
+			r = RecursiveLightPoint (r_worldmodel->nodes, start, end);
+
+			if ( (r != -1) && (VectorLength(pointcolor) > VectorLength(bestColor)) )
+				VectorCopy (pointcolor, bestColor);
+		}
+#else
 		for (i=0; i<4; i++) // test multiple points to avoid dark corners
 		{
 			VectorCopy (p, start);
@@ -566,6 +584,7 @@ void R_SurfLightPoint (msurface_t *surf, vec3_t p, vec3_t color, qboolean baseli
 
 			if (r != -1)	break;
 		}
+#endif
 		/*
 		end[0] = p[0];
 		end[1] = p[1];
@@ -594,7 +613,7 @@ void R_SurfLightPoint (msurface_t *surf, vec3_t p, vec3_t color, qboolean baseli
 		{
 			if (dl->spotlight) // spotlights
 				continue;
-			if (r_flashblend->value || !r_dynamic->value) // no dlight casting
+			if (r_flashblend->integer || !r_dynamic->integer) // no dlight casting
 				continue;
 
 			// Knightmare- fix for moving surfaces
@@ -647,7 +666,7 @@ void R_ShadowLight (vec3_t pos, vec3_t lightAdd)
 	//
 	// add dynamic light shadow angles
 	//
-	if (r_shadows->value == 2)
+	if (r_shadows->integer == 2)
 	{
 		dl = r_newrefdef.dlights;
 		for (lnum=0; lnum<r_newrefdef.num_dlights; lnum++, dl++)

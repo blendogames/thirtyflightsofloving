@@ -233,8 +233,10 @@ extern	cvar_t  *r_glows;		// texture glows
 extern	cvar_t	*r_saveshotsize;// Knightmare- save shot size option
 
 // Knightmare- lerped dlights on models
+extern	cvar_t *r_dlights_normal;
 extern	cvar_t	*r_model_shading;
 extern	cvar_t	*r_model_dlights;
+extern	cvar_t	*r_model_minlight;
 
 extern	cvar_t	*r_lightlevel;	// FIXME: This is a HACK to get the client's light level
 
@@ -263,6 +265,7 @@ extern	cvar_t	*r_arb_vertex_buffer_object;
 extern	cvar_t	*r_pixel_shader_warp; // allow disabling the nVidia water warp
 extern	cvar_t	*r_trans_lighting; // allow disabling of lighting on trans surfaces
 extern	cvar_t	*r_warp_lighting; // allow disabling of lighting on warp surfaces
+extern	cvar_t	*r_warp_lighting_sample_offset; // allow adjustment of lighting sampling offset
 extern	cvar_t	*r_solidalpha;			// allow disabling of trans33+trans66 surface flag combining
 extern	cvar_t	*r_entity_fliproll;		// allow disabling of backwards alias model roll
 extern	cvar_t	*r_old_nullmodel;		// allow selection of nullmodel

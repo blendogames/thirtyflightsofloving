@@ -148,7 +148,7 @@ int transCompare (const void *arg1, const void *arg2 )
 	const sortedpart_t *a1, *a2;
 	a1 = (sortedpart_t *) arg1;
 	a2 = (sortedpart_t *) arg2;
-	if ((r_transrendersort->value == 1) && a1->p && a2->p)
+	if ((r_transrendersort->integer == 1) && a1->p && a2->p)
 	{
 		int image1, image2;
 		// FIXME: use hash of imagenum, blendfuncs, & critical flags
@@ -492,7 +492,7 @@ void GetParticleLight (particle_t *p, vec3_t pos, float lighting, vec3_t shadeli
 	int j;
 	float lightest = 0;
 
-	if ( (r_fullbright->value != 0) || !lighting )
+	if ( (r_fullbright->integer != 0) || !lighting )
 	{
 		VectorSet(shadelight, p->red, p->green, p->blue);
 		return;
@@ -935,7 +935,7 @@ void R_DrawAllParticles (void)
 
 	for ( i=0; i < r_newrefdef.num_particles; i++)
 	{
-		if (r_transrendersort->value && !(r_newrefdef.rdflags & RDF_NOWORLDMODEL))
+		if (r_transrendersort->integer && !(r_newrefdef.rdflags & RDF_NOWORLDMODEL))
 		{
 			p = sorted_parts[i].p;
 			if ( r_particledistance->value > 0 && sorted_parts[i].len > (100.0*r_particledistance->value))

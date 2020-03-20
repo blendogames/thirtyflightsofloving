@@ -262,10 +262,10 @@ void RB_DrawMeshTris (void)
 {
 	int i, numTMUs = 0;
 
-	if (!r_showtris->value)
+	if (!r_showtris->integer)
 		return;
 
-	if (r_showtris->value == 1)
+	if (r_showtris->integer == 1)
 		GL_Disable(GL_DEPTH_TEST);
 
 	qglPolygonMode (GL_FRONT_AND_BACK, GL_LINE);
@@ -282,7 +282,7 @@ void RB_DrawMeshTris (void)
 		GL_EnableTexture(i);
 	qglPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
 
-	if (r_showtris->value == 1)
+	if (r_showtris->integer == 1)
 		GL_Enable(GL_DEPTH_TEST);
 }
 
