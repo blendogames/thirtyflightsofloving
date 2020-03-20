@@ -450,17 +450,25 @@ void R_SetShadeLight (void)
 			// as the mono value returned by software
 			if (shadelight[0] > shadelight[1])
 			{
-				if (shadelight[0] > shadelight[2])
-					r_lightlevel->value = 150*shadelight[0];
-				else
-					r_lightlevel->value = 150*shadelight[2];
+				if (shadelight[0] > shadelight[2]) {
+				//	r_lightlevel->value = 150*shadelight[0];
+					Cvar_SetValue ("r_lightlevel", 150.0f*shadelight[0]);
+				}
+				else {
+				//	r_lightlevel->value = 150*shadelight[2];
+					Cvar_SetValue ("r_lightlevel", 150.0f*shadelight[2]);
+				}
 			}
 			else
 			{
-				if (shadelight[1] > shadelight[2])
-					r_lightlevel->value = 150*shadelight[1];
-				else
-					r_lightlevel->value = 150*shadelight[2];
+				if (shadelight[1] > shadelight[2]) {
+				//	r_lightlevel->value = 150*shadelight[1];
+					Cvar_SetValue ("r_lightlevel", 150.0f*shadelight[1]);
+				}
+				else {
+				//	r_lightlevel->value = 150*shadelight[2];
+					Cvar_SetValue ("r_lightlevel", 150.0f*shadelight[2]);
+				}
 			}
 
 		}

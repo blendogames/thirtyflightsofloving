@@ -147,6 +147,8 @@ cvar_t	*r_shadows;
 cvar_t	*r_shadowalpha;
 cvar_t	*r_shadowrange;
 cvar_t	*r_shadowvolumes;
+cvar_t	*r_shadow_self;
+cvar_t	*r_shadow_zfail;
 cvar_t	*r_stencil;
 cvar_t	*r_transrendersort; // correct trasparent sorting
 cvar_t	*r_particle_lighting;	// particle lighting
@@ -835,17 +837,25 @@ void R_SetLightLevel (void)
 	// as the mono value returned by software
 	if (shadelight[0] > shadelight[1])
 	{
-		if (shadelight[0] > shadelight[2])
-			r_lightlevel->value = 150*shadelight[0];
-		else
-			r_lightlevel->value = 150*shadelight[2];
+		if (shadelight[0] > shadelight[2]) {
+		//	r_lightlevel->value = 150*shadelight[0];
+			Cvar_SetValue ("r_lightlevel", 150.0f*shadelight[0]);
+		}
+		else {
+		//	r_lightlevel->value = 150*shadelight[2];
+			Cvar_SetValue ("r_lightlevel", 150.0f*shadelight[2]);
+		}
 	}
 	else
 	{
-		if (shadelight[1] > shadelight[2])
-			r_lightlevel->value = 150*shadelight[1];
-		else
-			r_lightlevel->value = 150*shadelight[2];
+		if (shadelight[1] > shadelight[2]) {
+		//	r_lightlevel->value = 150*shadelight[1];
+			Cvar_SetValue ("r_lightlevel", 150.0f*shadelight[1]);
+		}
+		else {
+		//	r_lightlevel->value = 150*shadelight[2];
+			Cvar_SetValue ("r_lightlevel", 150.0f*shadelight[2]);
+		}
 	}
 
 }
@@ -946,6 +956,8 @@ void R_Register (void)
 	r_shadowalpha = Cvar_Get ("r_shadowalpha", "0.4", CVAR_ARCHIVE );
 	r_shadowrange  = Cvar_Get ("r_shadowrange", "768", CVAR_ARCHIVE );
 	r_shadowvolumes = Cvar_Get ("r_shadowvolumes", "0", CVAR_CHEAT );
+	r_shadow_self = Cvar_Get ("r_shadow_self", "1", CVAR_ARCHIVE );
+	r_shadow_zfail = Cvar_Get ("r_shadow_zfail", "1", CVAR_ARCHIVE );
 	r_stencil = Cvar_Get ("r_stencil", "1", CVAR_ARCHIVE );
 
 	r_dynamic = Cvar_Get ("r_dynamic", "1", 0);
@@ -1410,8 +1422,8 @@ qboolean R_CheckGLExtensions (char *reason)
 	glConfig.atiSeparateStencil = false;
 	if (StringContainsToken(glConfig.extensions_string, "GL_ATI_separate_stencil"))
 	{
-		if (r_stencilTwoSide->value)
-		{
+	//	if (r_stencilTwoSide->value)
+	//	{
 			qglStencilOpSeparateATI = (void *) qwglGetProcAddress("glStencilOpSeparateATI");
 			qglStencilFuncSeparateATI = (void *) qwglGetProcAddress("glStencilFuncSeparateATI");
 			if (!qglStencilOpSeparateATI) {
@@ -1422,9 +1434,9 @@ qboolean R_CheckGLExtensions (char *reason)
 				VID_Printf (PRINT_ALL, "...using GL_ATI_separate_stencil\n");
 				glConfig.atiSeparateStencil = true;
 			}
-		}
-		else
-			VID_Printf (PRINT_ALL, "...ignoring GL_ATI_separate_stencil\n");
+	//	}
+	//	else
+	//		VID_Printf (PRINT_ALL, "...ignoring GL_ATI_separate_stencil\n");
 	}
 	else
 		VID_Printf (PRINT_ALL, "...GL_ATI_separate_stencil not found\n");
@@ -1433,8 +1445,8 @@ qboolean R_CheckGLExtensions (char *reason)
 	glConfig.extStencilTwoSide = false;
 	if (StringContainsToken(glConfig.extensions_string, "GL_EXT_stencil_two_side"))
 	{
-		if (r_stencilTwoSide->value)
-		{
+	//	if (r_stencilTwoSide->value)
+	//	{
 			qglActiveStencilFaceEXT = (void *) qwglGetProcAddress( "glActiveStencilFaceEXT" );
 			if (!qglActiveStencilFaceEXT) {
 				VID_Printf (PRINT_ALL, "..." S_COLOR_RED "GL_EXT_stencil_two_side not properly supported!\n");
@@ -1444,9 +1456,9 @@ qboolean R_CheckGLExtensions (char *reason)
 				VID_Printf (PRINT_ALL, "...using GL_EXT_stencil_two_side\n");
 				glConfig.extStencilTwoSide = true;
 			}
-		}
-		else
-			VID_Printf (PRINT_ALL, "...ignoring GL_EXT_stencil_two_side\n");
+	//	}
+	//	else
+	//		VID_Printf (PRINT_ALL, "...ignoring GL_EXT_stencil_two_side\n");
 	}
 	else
 		Com_Printf("...GL_EXT_stencil_two_side not found\n");

@@ -610,7 +610,7 @@ void Con_DrawInput (void)
 {
 	int		y;
 	int		i;
-	char	*text, output[2048];
+	char	*text, output[2048], addch[8];
 	float	conLeft = 0;
 
 	if (!cls.consoleActive && cls.state == ca_active)
@@ -645,10 +645,18 @@ void Con_DrawInput (void)
 	Com_sprintf (output, sizeof(output), "");
 	for (i=0; i<con.linewidth; i++)
 	{
-		if (con.backedit == key_linepos-i && ((int)(cls.realtime>>8)&1))
-			Com_sprintf (output, sizeof(output), "%s%c", output, 11 );
-		else
-			Com_sprintf (output, sizeof(output), "%s%c", output, text[i]);
+		if (con.backedit == key_linepos-i && ((int)(cls.realtime>>8)&1)) {
+		//	Com_sprintf (output, sizeof(output), "%s%c", output, 11 );
+			addch[0] = 11;
+			addch[1] = '\0';
+			Q_strncatz (output, addch, sizeof(output));
+		}
+		else {
+		//	Com_sprintf (output, sizeof(output), "%s%c", output, text[i]);
+			addch[0] = text[i];
+			addch[1] = '\0';
+			Q_strncatz (output, addch, sizeof(output));
+		}
 	}
 	Con_DrawString ( (int)conLeft + FONT_SIZE/2, con.vislines - (int)(2.75*FONT_SIZE), output, 255);
 
@@ -666,7 +674,7 @@ Draws the last few lines of output transparently over the game top
 void Con_DrawNotify (void)
 {
 	int		x;
-	char	*text, output[2048];
+	char	*text, output[2048], addch[8];
 	int		i, j;
 	//int		time;
 	char	*s;
@@ -697,16 +705,28 @@ void Con_DrawNotify (void)
 
 		while(s[x])
 		{
-			if (chat_backedit && chat_backedit == chat_bufferlen-x && ((int)(cls.realtime>>8)&1))
-				Com_sprintf (output, sizeof(output), "%s%c", output, 11 );
-			else
-				Com_sprintf (output, sizeof(output), "%s%c", output, (char)s[x]);
+			if (chat_backedit && chat_backedit == chat_bufferlen-x && ((int)(cls.realtime>>8)&1)) {
+			//	Com_sprintf (output, sizeof(output), "%s%c", output, 11 );
+				addch[0] = 11;
+				addch[1] = '\0';
+				Q_strncatz (output, addch, sizeof(output));
+			}
+			else {
+			//	Com_sprintf (output, sizeof(output), "%s%c", output, (char)s[x]);
+				addch[0] = s[x];
+				addch[1] = '\0';
+				Q_strncatz (output, addch, sizeof(output));
+			}
 
 			x++;
 		}
 
-		if (!chat_backedit)
-			Com_sprintf (output, sizeof(output), "%s%c", output, 10+((int)(cls.realtime>>8)&1) );		
+		if (!chat_backedit) {
+		//	Com_sprintf (output, sizeof(output), "%s%c", output, 10+((int)(cls.realtime>>8)&1) );		
+			addch[0] = 10+((int)(cls.realtime>>8)&1);
+			addch[1] = '\0';
+			Q_strncatz (output, addch, sizeof(output));
+		}
 
 		Con_DrawString ((int)conLeft, v, output, 255);
 
@@ -749,8 +769,12 @@ void Con_DrawNotify (void)
 			if (alpha > 255) alpha=255;
 
 			Com_sprintf (output, sizeof(output), "");
-			for (x = 0 ; x < con.linewidth ; x++)
-				Com_sprintf (output, sizeof(output), "%s%c", output, (char)text[x]);
+			for (x = 0 ; x < con.linewidth ; x++) {
+			//	Com_sprintf (output, sizeof(output), "%s%c", output, (char)text[x]);
+				addch[0] = (char)text[x];
+				addch[1] = '\0';
+				Q_strncatz (output, addch, sizeof(output));
+			}
 
 			Con_DrawString ((int)conLeft + FONT_SIZE/2, v, output, alpha);
 
@@ -844,7 +868,7 @@ void Con_DrawConsole (float frac, qboolean trans)
 {
 	int				i, x, y;
 	int				rows;
-	char			*text, output[1024];
+	char			*text, output[1024], addch[8];
 	int				row;
 	int				lines;
 	char			version[64];
@@ -943,8 +967,12 @@ void Con_DrawConsole (float frac, qboolean trans)
 		text = con.text + (row % con.totallines)*con.linewidth;
 
 		Com_sprintf (output, sizeof(output), "");
-		for (x=0; x<con.linewidth; x++)
-			Com_sprintf (output, sizeof(output), "%s%c", output, text[x]);
+		for (x=0; x<con.linewidth; x++) {
+		//	Com_sprintf (output, sizeof(output), "%s%c", output, text[x]);
+			addch[0] = text[x];
+			addch[1] = '\0';
+			Q_strncatz (output, addch, sizeof(output));
+		}
 		Con_DrawString ((int)conLeft + 4, y, output, 255);
 	}
 

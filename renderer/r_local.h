@@ -287,6 +287,8 @@ extern	cvar_t	*r_shadows;
 extern	cvar_t	*r_shadowalpha;
 extern	cvar_t	*r_shadowrange;
 extern	cvar_t	*r_shadowvolumes;
+extern	cvar_t	*r_shadow_self;
+extern	cvar_t	*r_shadow_zfail;
 extern	cvar_t	*r_stencil; //  stenciling for color shells
 extern	cvar_t	*r_transrendersort; // correct trasparent sorting
 extern	cvar_t	*r_particle_lighting; //  particle lighting

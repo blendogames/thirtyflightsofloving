@@ -47,18 +47,18 @@ void R_LightAliasVertex (vec3_t baselight, vec3_t normal, vec3_t lightOut, byte 
 	int		i;
 	float	l;
 
-	if (r_fullbright->value != 0) {
+	if (r_fullbright->integer != 0) {
 		VectorSet (lightOut, 1.0f, 1.0f, 1.0f);
 		return;
 	}
 
-	if (r_model_shading->value)
+	if (r_model_shading->integer)
 	{
 		if (shaded)
 		{
-			if (r_model_shading->value == 3)
+			if (r_model_shading->integer == 3)
 				l = 2.0 * shadedots[normalindex] - 1;
-			else if (r_model_shading->value == 2)
+			else if (r_model_shading->integer == 2)
 				l = 1.5 * shadedots[normalindex] - 0.5;
 			else
 				l = shadedots[normalindex];
@@ -372,7 +372,8 @@ void RB_RenderAliasMesh (maliasmodel_t *paliashdr, unsigned meshnum, unsigned sk
 R_DrawAliasMeshes
 =================
 */
-void R_DrawAliasMeshes (maliasmodel_t *paliashdr, entity_t *e, qboolean lerpOnly, qboolean mirrored, qboolean viewFlipped)
+//void R_DrawAliasMeshes (maliasmodel_t *paliashdr, entity_t *e, qboolean lerpOnly, qboolean mirrored, qboolean viewFlipped)
+void R_DrawAliasMeshes (maliasmodel_t *paliashdr, entity_t *e, qboolean mirrored, qboolean viewFlipped, qboolean preLerped, qboolean lerpOnly)
 {
 	int				i, k, meshnum, skinnum, baseindex;	// numCalls
 	maliasframe_t	*frame, *oldframe;
@@ -389,6 +390,8 @@ void R_DrawAliasMeshes (maliasmodel_t *paliashdr, entity_t *e, qboolean lerpOnly
 	qboolean		shellModel = e->flags & RF_MASK_SHELL;
 	qboolean		meshCelShaded;	// added for cel shading
 
+	if (lerpOnly)	preLerped = false;
+
 	frontlerp = 1.0 - backlerp;
 
 	if (shellModel && FlowingShell())
@@ -401,23 +404,26 @@ void R_DrawAliasMeshes (maliasmodel_t *paliashdr, entity_t *e, qboolean lerpOnly
 	frame = paliashdr->frames + e->frame;
 	oldframe = paliashdr->frames + e->oldframe;
 
-	VectorScale(frame->scale, frontlerp, curScale);
-	VectorScale(oldframe->scale, backlerp, oldScale);
+	if (!preLerped)
+	{
+		VectorScale(frame->scale, frontlerp, curScale);
+		VectorScale(oldframe->scale, backlerp, oldScale);
 
-	mirrormult = (mirrored) ? -1.0f : 1.0f;
+		mirrormult = (mirrored) ? -1.0f : 1.0f;
 
-	// move should be the delta back to the previous frame * backlerp
-	VectorSubtract (e->oldorigin, e->origin, delta);
-	AngleVectors (e->angles, vectors[0], vectors[1], vectors[2]);
+		// move should be the delta back to the previous frame * backlerp
+		VectorSubtract (e->oldorigin, e->origin, delta);
+		AngleVectors (e->angles, vectors[0], vectors[1], vectors[2]);
 
-	move[0] = DotProduct (delta, vectors[0]);	// forward
-	move[1] = -DotProduct (delta, vectors[1]);	// left
-	move[2] = DotProduct (delta, vectors[2]);	// up
+		move[0] = DotProduct (delta, vectors[0]);	// forward
+		move[1] = -DotProduct (delta, vectors[1]);	// left
+		move[2] = DotProduct (delta, vectors[2]);	// up
 
-	VectorAdd (move, oldframe->translate, move);
+		VectorAdd (move, oldframe->translate, move);
 
-	for (i=0 ; i<3 ; i++)
-		move[i] = backlerp*move[i] + frontlerp*frame->translate[i];
+		for (i=0 ; i<3 ; i++)
+			move[i] = backlerp*move[i] + frontlerp*frame->translate[i];
+	}
 
 	GL_ShadeModel (GL_SMOOTH);
 	GL_TexEnv (GL_MODULATE);
@@ -482,33 +488,36 @@ void R_DrawAliasMeshes (maliasmodel_t *paliashdr, entity_t *e, qboolean lerpOnly
 		for (i=0; i<mesh.num_verts; i++, v++, ov++)
 		{
 			// lerp verts
-			curNormal[0] = r_sinTable[v->normal[0]] * r_cosTable[v->normal[1]];
-			curNormal[1] = r_sinTable[v->normal[0]] * r_sinTable[v->normal[1]];
-			curNormal[2] = r_cosTable[v->normal[0]];
+			if (!preLerped)
+			{
+				curNormal[0] = r_sinTable[v->normal[0]] * r_cosTable[v->normal[1]];
+				curNormal[1] = r_sinTable[v->normal[0]] * r_sinTable[v->normal[1]];
+				curNormal[2] = r_cosTable[v->normal[0]];
 
-			oldNormal[0] = r_sinTable[ov->normal[0]] * r_cosTable[ov->normal[1]];
-			oldNormal[1] = r_sinTable[ov->normal[0]] * r_sinTable[ov->normal[1]];
-			oldNormal[2] = r_cosTable[ov->normal[0]];
+				oldNormal[0] = r_sinTable[ov->normal[0]] * r_cosTable[ov->normal[1]];
+				oldNormal[1] = r_sinTable[ov->normal[0]] * r_sinTable[ov->normal[1]];
+				oldNormal[2] = r_cosTable[ov->normal[0]];
 
-			VectorSet ( tempNormalsArray[i],
-					curNormal[0] + (oldNormal[0] - curNormal[0])*backlerp,
-					curNormal[1] + (oldNormal[1] - curNormal[1])*backlerp,
-					curNormal[2] + (oldNormal[2] - curNormal[2])*backlerp );
+				VectorSet ( tempNormalsArray[i],
+						curNormal[0] + (oldNormal[0] - curNormal[0])*backlerp,
+						curNormal[1] + (oldNormal[1] - curNormal[1])*backlerp,
+						curNormal[2] + (oldNormal[2] - curNormal[2])*backlerp );
 
-			if (shellModel) 
-				shellscale = (e->flags & RF_WEAPONMODEL) ? WEAPON_SHELL_SCALE: POWERSUIT_SCALE;
-			else
-				shellscale = 0.0;
+				if (shellModel) 
+					shellscale = (e->flags & RF_WEAPONMODEL) ? WEAPON_SHELL_SCALE: POWERSUIT_SCALE;
+				else
+					shellscale = 0.0;
 
-			VectorSet ( tempVertexArray[meshnum][i], 
-					move[0] + ov->xyz[0]*oldScale[0] + v->xyz[0]*curScale[0] + tempNormalsArray[i][0]*shellscale,
-					mirrormult * (move[1] + ov->xyz[1]*oldScale[1] + v->xyz[1]*curScale[1] + tempNormalsArray[i][1]*shellscale),
-					move[2] + ov->xyz[2]*oldScale[2] + v->xyz[2]*curScale[2] + tempNormalsArray[i][2]*shellscale );
+				VectorSet ( tempVertexArray[meshnum][i], 
+						move[0] + ov->xyz[0]*oldScale[0] + v->xyz[0]*curScale[0] + tempNormalsArray[i][0]*shellscale,
+						mirrormult * (move[1] + ov->xyz[1]*oldScale[1] + v->xyz[1]*curScale[1] + tempNormalsArray[i][1]*shellscale),
+						move[2] + ov->xyz[2]*oldScale[2] + v->xyz[2]*curScale[2] + tempNormalsArray[i][2]*shellscale );
+
+				tempNormalsArray[i][1] *= mirrormult;
+			}
 
 			// skip drawing if we're only lerping the verts for a shadow-only rendering pass
 			if (lerpOnly)	continue;
-
-			tempNormalsArray[i][1] *= mirrormult;
 
 			// calc lighting and alpha
 			if (shellModel)
@@ -538,6 +547,7 @@ void R_DrawAliasMeshes (maliasmodel_t *paliashdr, entity_t *e, qboolean lerpOnly
 			}
 			rb_vertex++;
 		}
+
 		if (!shellModel)
 			RB_ModifyTextureCoords (&texCoordArray[0][baseindex][0], &vertexArray[baseindex][0], mesh.num_verts, &skinParms);
 
@@ -702,26 +712,22 @@ void R_BuildShadowVolume (maliasmodel_t *hdr, int meshnum, vec3_t light, float p
 		if (!triangleFacingLight[i]) // changed to draw only front facing polys- thanx to Kirk Barnes
 			continue;
 
-	//	if (triangleFacingLight[i])
-	//	{
-			VectorCopy(tempVertexArray[meshnum][mesh.indexes[3*i+0]], v0);
-			VectorCopy(tempVertexArray[meshnum][mesh.indexes[3*i+1]], v1);
-			VectorCopy(tempVertexArray[meshnum][mesh.indexes[3*i+2]], v2);
+		VectorCopy(tempVertexArray[meshnum][mesh.indexes[3*i+0]], v0);
+		VectorCopy(tempVertexArray[meshnum][mesh.indexes[3*i+1]], v1);
+		VectorCopy(tempVertexArray[meshnum][mesh.indexes[3*i+2]], v2);
 
-			VA_SetElem3(vertexArray[shadow_va], v0[0], v0[1], v0[2]);
-			VA_SetElem4(colorArray[shadow_va], 0, 0, 0, thisAlpha);
-			indexArray[shadow_index++] = shadow_va;
-			shadow_va++;
-			VA_SetElem3(vertexArray[shadow_va], v1[0], v1[1], v1[2]);
-			VA_SetElem4(colorArray[shadow_va], 0, 0, 0, thisAlpha);
-			indexArray[shadow_index++] = shadow_va;
-			shadow_va++;
-			VA_SetElem3(vertexArray[shadow_va], v2[0], v2[1], v2[2]);
-			VA_SetElem4(colorArray[shadow_va], 0, 0, 0, thisAlpha);
-			indexArray[shadow_index++] = shadow_va;
-			shadow_va++;
-	//		continue;
-	//	}
+		VA_SetElem3(vertexArray[shadow_va], v0[0], v0[1], v0[2]);
+		VA_SetElem4(colorArray[shadow_va], 0, 0, 0, thisAlpha);
+		indexArray[shadow_index++] = shadow_va;
+		shadow_va++;
+		VA_SetElem3(vertexArray[shadow_va], v1[0], v1[1], v1[2]);
+		VA_SetElem4(colorArray[shadow_va], 0, 0, 0, thisAlpha);
+		indexArray[shadow_index++] = shadow_va;
+		shadow_va++;
+		VA_SetElem3(vertexArray[shadow_va], v2[0], v2[1], v2[2]);
+		VA_SetElem4(colorArray[shadow_va], 0, 0, 0, thisAlpha);
+		indexArray[shadow_index++] = shadow_va;
+		shadow_va++;
 
 		// rear with reverse order
 		for (j=0; j<3; j++)
@@ -766,19 +772,103 @@ void R_DrawShadowVolume (void)
 
 /*
 =============
+R_CalcAliasVolumeShadowLightVector
+=============
+*/
+float R_CalcAliasVolumeShadowLightVector (vec3_t bbox[8], vec3_t lightVec)
+{
+	vec3_t		temp, vecAdd;
+	int			i, lnum;
+	float		dist, highest, lowest, projected_distance;
+	float		angle, cosp, sinp, cosy, siny, cosr, sinr, ix, iy, iz;
+	dlight_t	*dl;
+
+	dl = r_newrefdef.dlights;
+
+	VectorSet(vecAdd, 680, 0, 1024); // set base vector, was 576,0,1024
+
+	// compute average light vector from dlights
+	for (i=0, lnum=0; i<r_newrefdef.num_dlights; i++, dl++)
+	{
+		if (VectorCompare(dl->origin, currententity->origin))
+			continue;
+		
+		VectorSubtract(dl->origin, currententity->origin, temp);
+		dist = dl->intensity - VectorLength(temp);
+		if (dist <= 0)
+			continue;
+		
+		lnum++;
+		// Factor in the intensity of a dlight
+		VectorScale (temp, dist*0.25, temp);
+		VectorAdd (vecAdd, temp, vecAdd);
+	}
+	VectorNormalize(vecAdd);
+	VectorScale(vecAdd, 1024, vecAdd);
+
+	// get projection distance from lightspot height
+	highest = lowest = bbox[0][2];
+	for (i=0; i<8; i++) {
+		if (bbox[i][2] > highest) highest = bbox[i][2];
+		if (bbox[i][2] < lowest) lowest = bbox[i][2];
+	}
+	projected_distance = fabs((highest - lightspot[2]) + (highest-lowest)) / fabs(vecAdd[2]);
+//	projected_distance = 1.5f * (fabs(highest - lightspot[2])) / fabs(vecAdd[2]);
+
+	VectorCopy(vecAdd, lightVec);
+	
+	// reverse-rotate light vector based on angles
+	angle = -currententity->angles[PITCH] / 180 * M_PI;
+	cosp = cos(angle), sinp = sin(angle);
+	angle = -currententity->angles[YAW] / 180 * M_PI;
+	cosy = cos(angle), siny = sin(angle);
+	angle = -currententity->angles[ROLL] / 180 * M_PI * R_RollMult(); // roll is backwards
+	cosr = cos(angle), sinr = sin(angle);
+
+	// rotate for yaw (z axis)
+	ix = lightVec[0], iy = lightVec[1];
+	lightVec[0] = cosy * ix - siny * iy + 0;
+	lightVec[1] = siny * ix + cosy * iy + 0;
+
+	// rotate for pitch (y axis)
+	ix = lightVec[0], iz = lightVec[2];
+	lightVec[0] = cosp * ix + 0 + sinp * iz;
+	lightVec[2] = -sinp * ix + 0 + cosp * iz;
+
+	// rotate for roll (x axis)
+	iy = lightVec[1], iz = lightVec[2];
+	lightVec[1] = 0 + cosr * iy - sinr * iz;
+	lightVec[2] = 0 + sinr * iy + cosr * iz;
+
+//	for (i=0; i<3; i++)
+//		shadowVec[i] = -lightVec[i] * projected_distance;
+//	for (i=0; i<8; i++)
+//		VectorAdd (bbox[i], shadowVec, endBBox[i]);
+
+	return projected_distance;
+}
+
+
+/*
+=============
 R_DrawAliasVolumeShadow
 based on code from BeefQuake R6
 =============
 */
 void R_DrawAliasVolumeShadow (maliasmodel_t *paliashdr, vec3_t bbox[8])
 {
-	vec3_t		light, temp, vecAdd;
-	float		dist, highest, lowest, projected_distance;
-	float		angle, cosp, sinp, cosy, siny, cosr, sinr, ix, iy, iz;
-	int			i, lnum, skinnum;
-	//GLenum		incr, decr;
-	dlight_t	*dl;
+	vec3_t		light, vecAdd;	// temp
+	vec3_t		shadowVec, endBBox[8], volumeMins, volumeMaxs;
+	float		projected_distance;
+	int			i, j, skinnum;	// lnum
+	qboolean	zFail = (r_shadow_zfail->integer != 0);
+	qboolean	inVolume = false;
+//	GLenum		incr, decr;
+//	float		dist, highest, lowest;
+//	float		angle, cosp, sinp, cosy, siny, cosr, sinr, ix, iy, iz;
+//	dlight_t	*dl;
 
+#if 0
 	dl = r_newrefdef.dlights;
 
 	VectorSet(vecAdd, 680,0,1024); // set base vector, was 576,0,1024
@@ -834,10 +924,45 @@ void R_DrawAliasVolumeShadow (maliasmodel_t *paliashdr, vec3_t bbox[8])
 	iy = light[1], iz = light[2];
 	light[1] = 0 + cosr * iy - sinr * iz;
 	light[2] = 0 + sinr * iy + cosr * iz;
+#endif
 
+	projected_distance = R_CalcAliasVolumeShadowLightVector (bbox, light);
+
+	// For Z-Pass method, calc bbox for shadow volume to see if vieworg is likely to be inside it
+	if (!zFail)
+	{
+		// calc bbox for end of shadow volume
+		for (i=0; i<3; i++)
+			shadowVec[i] = -vecAdd[i] * projected_distance;
+		for (i=0; i<8; i++)
+			VectorAdd (bbox[i], shadowVec, endBBox[i]);
+
+		// get bbox for entire shadow volume
+		VectorCopy (currententity->origin, volumeMaxs);
+		VectorCopy (currententity->origin, volumeMins);
+		for (i=0; i<8; i++)
+		{
+			for (j=0; j<3; j++)
+			{
+				if (bbox[i][j] < volumeMins[j])
+					volumeMins[j] = bbox[i][j];
+				if (endBBox[i][j] < volumeMins[j])
+					volumeMins[j] = endBBox[i][j];
+
+				if (bbox[i][j] > volumeMaxs[j])
+					volumeMaxs[j] = bbox[i][j];
+				if (endBBox[i][j] > volumeMaxs[j])
+					volumeMaxs[j] = endBBox[i][j];
+			}
+		}
+		// if the vieworg is inside the volume bbox, assume it's inside the volume
+		if ( (r_newrefdef.vieworg[0] >= volumeMins[0] && r_newrefdef.vieworg[1] >= volumeMins[1] && r_newrefdef.vieworg[2] >= volumeMins[2]) &&
+			(r_newrefdef.vieworg[0] <= volumeMaxs[0] && r_newrefdef.vieworg[1] <= volumeMaxs[1] && r_newrefdef.vieworg[2] <= volumeMaxs[2]) )
+			inVolume = true;
+	}
 
 	// set up stenciling
-	if (!r_shadowvolumes->value)
+	if (!r_shadowvolumes->integer)
 	{
 		/*if (glConfig.extStencilWrap)
 		{	incr = GL_INCR_WRAP_EXT;	decr = GL_DECR_WRAP_EXT;	}
@@ -864,12 +989,12 @@ void R_DrawAliasVolumeShadow (maliasmodel_t *paliashdr, vec3_t bbox[8])
 		if (paliashdr->meshes[i].skins[skinnum].renderparms.noshadow)
 			continue;
 
-		R_BuildShadowVolume (paliashdr, i, light, projected_distance, r_shadowvolumes->value);
+		R_BuildShadowVolume (paliashdr, i, light, projected_distance, r_shadowvolumes->integer);
 		GL_LockArrays (shadow_va);
 
-		if (!r_shadowvolumes->value)
+		if (!r_shadowvolumes->integer)
 		{
-			if (glConfig.atiSeparateStencil && glConfig.extStencilWrap) // Barnes ATI stenciling
+			if (zFail &&glConfig.atiSeparateStencil && glConfig.extStencilWrap && r_stencilTwoSide->integer) // Barnes ATI stenciling
 			{
 				GL_Disable(GL_CULL_FACE);
 
@@ -880,7 +1005,7 @@ void R_DrawAliasVolumeShadow (maliasmodel_t *paliashdr, vec3_t bbox[8])
 
 				GL_Enable(GL_CULL_FACE);
 			}
-			else if (glConfig.extStencilTwoSide && glConfig.extStencilWrap) // Echon's two-sided stenciling
+			else if (zFail && glConfig.extStencilTwoSide && glConfig.extStencilWrap && r_stencilTwoSide->integer) // Echon's two-sided stenciling
 			{
 				GL_Disable(GL_CULL_FACE);
 				qglEnable (GL_STENCIL_TEST_TWO_SIDE_EXT);
@@ -895,8 +1020,9 @@ void R_DrawAliasVolumeShadow (maliasmodel_t *paliashdr, vec3_t bbox[8])
 				qglDisable (GL_STENCIL_TEST_TWO_SIDE_EXT);
 				GL_Enable(GL_CULL_FACE);
 			}
-			else
-			{	// increment stencil if backface is behind depthbuffer
+			else if (zFail)
+			{
+				// increment stencil if backface is behind depthbuffer
 				GL_CullFace(GL_BACK); // quake is backwards, this culls front faces
 				qglStencilOp(GL_KEEP, GL_INCR, GL_KEEP);
 				R_DrawShadowVolume ();
@@ -904,6 +1030,32 @@ void R_DrawAliasVolumeShadow (maliasmodel_t *paliashdr, vec3_t bbox[8])
 				// decrement stencil if frontface is behind depthbuffer
 				GL_CullFace(GL_FRONT); // quake is backwards, this culls back faces
 				qglStencilOp(GL_KEEP, GL_DECR, GL_KEEP);
+				R_DrawShadowVolume ();
+			}
+			else	// Z-Pass
+			{
+				// Fix for z-Pass shadows if viewpoint is inside volume
+				// Same as Carmack's patent-free method for Doom3 GPL source
+				// This pre-loads the stencil buffer with # of volumes
+				// that get clipped by the near or far clip plane.
+				if (inVolume)
+				{
+					GL_CullFace(GL_BACK); // quake is backwards, this culls front faces
+					qglStencilOp(GL_KEEP, GL_INCR, GL_INCR);
+					R_DrawShadowVolume ();
+					GL_CullFace(GL_FRONT); // quake is backwards, this culls back faces
+					qglStencilOp(GL_KEEP, GL_DECR, GL_DECR);
+					R_DrawShadowVolume ();
+				}
+
+				// increment stencil if frontface is behind depthbuffer
+				GL_CullFace(GL_FRONT); // quake is backwards, this culls back faces
+				qglStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
+				R_DrawShadowVolume ();
+
+				// decrement stencil if backface is behind depthbuffer
+				GL_CullFace(GL_BACK); // quake is backwards, this culls front faces
+				qglStencilOp(GL_KEEP, GL_KEEP, GL_DECR);
 				R_DrawShadowVolume ();
 			}
 		}
@@ -914,7 +1066,7 @@ void R_DrawAliasVolumeShadow (maliasmodel_t *paliashdr, vec3_t bbox[8])
 	}
 
 	// end stenciling and draw stenciled volume
-	if (!r_shadowvolumes->value)
+	if (!r_shadowvolumes->integer)
 	{
 		GL_CullFace(GL_FRONT);
 		GL_Disable(GL_STENCIL_TEST);
@@ -997,14 +1149,15 @@ void R_DrawAliasPlanarShadow (maliasmodel_t *paliashdr)
 R_CullAliasModel
 =================
 */
-static qboolean R_CullAliasModel ( vec3_t bbox[8], entity_t *e )
+//static qboolean R_CullAliasModel ( vec3_t bbox[8], entity_t *e )
+static qboolean R_CullAliasModel (vec3_t bbox[8], vec3_t shadowBBox[8], entity_t *e, qboolean volumeShadow)
 {
-	int			i, j;
-	vec3_t		mins, maxs, tmp; //angles;
-	vec3_t		vectors[3];
+	int			i, j, mask, aggregatemask = ~0;
+	float		dp, volProjDist;
+	vec3_t		mins, maxs, tmp, vectors[3]; //angles;
+	vec3_t		lightVec, shadowVec, tmp_bbox[8], end_bbox[8], volumeMins, volumeMaxs;
 	maliasmodel_t	*paliashdr;
 	maliasframe_t	*pframe, *poldframe;
-	int			mask, aggregatemask = ~0;			
 
 	paliashdr = (maliasmodel_t *)currentmodel->extradata;
 
@@ -1058,9 +1211,52 @@ static qboolean R_CullAliasModel ( vec3_t bbox[8], entity_t *e )
 		tmp[1] = ((i & 2) ? mins[1] : maxs[1]);
 		tmp[2] = ((i & 4) ? mins[2] : maxs[2]);
 
+		VectorCopy(tmp, tmp_bbox[i]);	// save off un-rotated bbox
+		VectorAdd(tmp, e->origin, end_bbox[i]);	// version with e->origin added for light vector calc
+
 		bbox[i][0] = vectors[0][0] * tmp[0] + vectors[1][0] * tmp[1] + vectors[2][0] * tmp[2] + e->origin[0];
 		bbox[i][1] = vectors[0][1] * tmp[0] + vectors[1][1] * tmp[1] + vectors[2][1] * tmp[2] + e->origin[1];
 		bbox[i][2] = vectors[0][2] * tmp[0] + vectors[1][2] * tmp[1] + vectors[2][2] * tmp[2] + e->origin[2];
+	}
+
+	// calc shadow volume bbox and rotate
+	if (volumeShadow)
+	{
+		R_LightPoint (e->origin, shadelight, false);
+		volProjDist = R_CalcAliasVolumeShadowLightVector (end_bbox, lightVec);
+
+		for (i=0; i<3; i++)
+			shadowVec[i] = -lightVec[i] * volProjDist;
+
+		VectorCopy (vec3_origin, volumeMaxs);
+		VectorCopy (vec3_origin, volumeMins);
+
+		for (i = 0; i < 8; i++)
+		{
+			VectorAdd(tmp_bbox[i], shadowVec, end_bbox[i]);
+		//	VectorCopy(end_bbox[i], tmp);
+		
+			for (j=0; j<3; j++)
+			{
+				if (tmp_bbox[i][j] < volumeMins[j])
+					volumeMins[j] = tmp_bbox[i][j];
+				if (end_bbox[i][j] < volumeMins[j])
+					volumeMins[j] = end_bbox[i][j];
+
+				if (tmp_bbox[i][j] > volumeMaxs[j])
+					volumeMaxs[j] = tmp_bbox[i][j];
+				if (end_bbox[i][j] > volumeMaxs[j])
+					volumeMaxs[j] = end_bbox[i][j];
+			}
+
+			tmp[0] = ((i & 1) ? volumeMins[0] : volumeMaxs[0]);
+			tmp[1] = ((i & 2) ? volumeMins[1] : volumeMaxs[1]);
+			tmp[2] = ((i & 4) ? volumeMins[2] : volumeMaxs[2]);
+		
+			shadowBBox[i][0] = vectors[0][0] * tmp[0] + vectors[1][0] * tmp[1] + vectors[2][0] * tmp[2] + e->origin[0];
+			shadowBBox[i][1] = vectors[0][1] * tmp[0] + vectors[1][1] * tmp[1] + vectors[2][1] * tmp[2] + e->origin[1];
+			shadowBBox[i][2] = vectors[0][2] * tmp[0] + vectors[1][2] * tmp[1] + vectors[2][2] * tmp[2] + e->origin[2];
+		}
 	}
 
 	// cull
@@ -1069,11 +1265,40 @@ static qboolean R_CullAliasModel ( vec3_t bbox[8], entity_t *e )
 		mask = 0;
 		for (j=0; j<4; j++)
 		{
-			float dp = DotProduct(frustum[j].normal, bbox[i]);
+			dp = DotProduct(frustum[j].normal, bbox[i]);
 			if ( ( dp - frustum[j].dist ) < 0 )
 				mask |= (1<<j);
 		}
 
+		aggregatemask &= mask;
+	}
+
+	if ( aggregatemask )
+		return true;
+
+	return false;
+}
+
+
+/*
+=================
+R_CullAliasShadow
+=================
+*/
+static qboolean R_CullAliasShadow (vec3_t bbox[8], entity_t *e)
+{
+	int			i, j, mask, aggregatemask = ~0;
+	float		dp;
+
+	for (i=0; i<8; i++)
+	{
+		mask = 0;
+		for (j=0; j<4; j++)
+		{
+			dp = DotProduct(frustum[j].normal, bbox[i]);
+			if ( ( dp - frustum[j].dist ) < 0 )
+				mask |= (1<<j);
+		}
 		aggregatemask &= mask;
 	}
 
@@ -1092,28 +1317,56 @@ R_DrawAliasModel
 void R_DrawAliasModel (entity_t *e)
 {
 	maliasmodel_t	*paliashdr;
-	vec3_t		bbox[8];
+	vec3_t		bbox[8], shadowBBox[8];
 	qboolean	mirrorview = false, mirrormodel = false;
+	qboolean	planarShadow = false, volumeShadow = false, volumeShadowOnly = false;
+	qboolean	preLerped = false;
 	int			i;
+
+	// determine if this model will have a volume shadow
+	if ( (r_shadows->integer >= 1) &&
+		!(r_newrefdef.rdflags & RDF_NOWORLDMODEL) &&
+		(r_worldmodel != NULL) && (r_worldmodel->lightdata != 0) &&
+		!(e->flags & (RF_WEAPONMODEL | RF_NOSHADOW)) &&
+		!( (e->flags & RF_MASK_SHELL) && (e->flags & RF_TRANSLUCENT) ) )	// no shadows from shells
+	{
+		aliasShadowAlpha = R_CalcShadowAlpha(e);
+		if ( (r_shadows->integer == 3) && (aliasShadowAlpha >= DIV255) )
+			volumeShadow = true;
+		else if (aliasShadowAlpha >= DIV255)
+			planarShadow = true;
+	}
 
 	// also skip this for viewermodels and cameramodels
 	if ( !(e->flags & RF_WEAPONMODEL || e->flags & RF_VIEWERMODEL || e->renderfx & RF2_CAMERAMODEL) )
 	{
-		if (R_CullAliasModel(bbox, e))
+	//	if (R_CullAliasModel(bbox, e))
+	//		return;
+		qboolean culled = R_CullAliasModel(bbox, shadowBBox, e, volumeShadow);
+		if (volumeShadow)
+		{
+			if (culled) {
+				if ( R_CullAliasShadow(shadowBBox, e) )
+					return;
+				else
+					volumeShadowOnly = true;
+			}
+		}
+		else if (culled)
 			return;
 	}
 
 	// mirroring support
 	if (e->flags & RF_WEAPONMODEL)
 	{
-		if (r_lefthand->value == 2)
+		if (r_lefthand->integer == 2)
 			return;
-		else if (r_lefthand->value == 1)
+		else if (r_lefthand->integer == 1)
 			mirrorview = true;
 	}
 	else if (e->renderfx & RF2_CAMERAMODEL)
 	{
-		if (r_lefthand->value == 1)
+		if (r_lefthand->integer == 1)
 			mirrormodel = true;
 	}
 	else if (e->flags & RF_MIRRORMODEL)
@@ -1167,10 +1420,42 @@ void R_DrawAliasModel (entity_t *e)
 		e->oldframe = 0;
 	}
 
-	if (!r_lerpmodels->value)
+	if (!r_lerpmodels->integer)
 		e->backlerp = 0;
 
-	R_DrawAliasMeshes (paliashdr, e, false, mirrormodel, mirrorview);
+	// draw shadow only here
+	if ( volumeShadowOnly || (volumeShadow && r_shadow_self->integer == 0) )
+	{
+		preLerped = true;
+		R_DrawAliasMeshes (paliashdr, e, mirrormodel, mirrorview, false, true);
+
+		GL_DisableTexture(0);
+		GL_Enable (GL_BLEND);
+
+		R_DrawAliasVolumeShadow (paliashdr, bbox);
+
+		GL_Disable (GL_BLEND);
+		GL_EnableTexture(0);
+
+		// the following is not called if drawing shadow volume before model
+		if ( volumeShadowOnly )
+		{
+			qglPopMatrix ();
+			if (mirrorview || mirrormodel)
+				R_FlipModel (false, mirrormodel);
+			if (e->flags & RF_DEPTHHACK)
+				GL_DepthRange (gldepthmin, gldepthmax);
+			if (r_showbbox->integer) {
+				GL_Disable (GL_DEPTH_TEST);
+				R_DrawAliasModelBBox (shadowBBox, e, 0.0f, 0.0f, 1.0f, 1.0f);
+				GL_Enable (GL_DEPTH_TEST);
+			}
+			return;
+		}
+	}
+
+//	R_DrawAliasMeshes (paliashdr, e, false, mirrormodel, mirrorview);
+	R_DrawAliasMeshes (paliashdr, e, mirrormodel, mirrorview, preLerped, false);
 
 	qglPopMatrix ();
 
@@ -1181,29 +1466,40 @@ void R_DrawAliasModel (entity_t *e)
 		R_FlipModel (false, mirrormodel);
 
 	// show model bounding box
-	R_DrawAliasModelBBox (bbox, e, 1.0f, 1.0f, 1.0f, 1.0f);
+//	R_DrawAliasModelBBox (bbox, e, 1.0f, 1.0f, 1.0f, 1.0f);
+	if (r_showbbox->integer) {
+		R_DrawAliasModelBBox (bbox, e, 1.0f, 1.0f, 1.0f, 1.0f);
+		if (volumeShadow) {
+			GL_Disable (GL_DEPTH_TEST);
+			R_DrawAliasModelBBox (shadowBBox, e, 0.0f, 0.0f, 1.0f, 1.0f);
+			GL_Enable (GL_DEPTH_TEST);
+		}
+	}
 
 	if (e->flags & RF_DEPTHHACK)
 		GL_DepthRange (gldepthmin, gldepthmax);
 
-	aliasShadowAlpha = R_CalcShadowAlpha(e);
+//	aliasShadowAlpha = R_CalcShadowAlpha(e);
 
-	if ( !(e->flags & (RF_WEAPONMODEL | RF_NOSHADOW))
+/*	if ( !(e->flags & (RF_WEAPONMODEL | RF_NOSHADOW))
 		// no shadows from shells
 		&& !( (e->flags & RF_MASK_SHELL) && (e->flags & RF_TRANSLUCENT) )
-		&& r_shadows->value >= 1 && aliasShadowAlpha >= DIV255)
+		&& r_shadows->integer >= 1 && aliasShadowAlpha >= DIV255) */
+	if ( volumeShadow || planarShadow)
 	{
  		qglPushMatrix ();
 		GL_DisableTexture(0);
 		GL_Enable (GL_BLEND);
 
-		if (r_shadows->value == 3) {
+	//	if (r_shadows->integer == 3) {
+		if (volumeShadow && r_shadow_self->integer != 0) {
 			e->angles[ROLL] = e->angles[ROLL] * R_RollMult();	// roll is backwards
 			R_RotateForEntity (e, true);
 			e->angles[ROLL] = e->angles[ROLL] * R_RollMult();	// roll is backwards
 			R_DrawAliasVolumeShadow (paliashdr, bbox);
 		}
-		else {
+	//	else {
+		else if (planarShadow) {
 			R_RotateForEntity (e, false);
 			R_DrawAliasPlanarShadow (paliashdr);
 		}
@@ -1227,7 +1523,7 @@ void R_DrawAliasModelShadow (entity_t *e)
 	vec3_t		bbox[8];
 	qboolean	mirrormodel = false;
 
-	if (!r_shadows->value)
+	if (!r_shadows->integer)
 		return;
 	if (e->flags & (RF_WEAPONMODEL | RF_NOSHADOW))
 		return;
@@ -1248,17 +1544,13 @@ void R_DrawAliasModelShadow (entity_t *e)
 
 	if (e->renderfx & RF2_CAMERAMODEL)
 	{
-		if (r_lefthand->value == 1)
+		if (r_lefthand->integer == 1)
 			mirrormodel = true;
 	}
 	else if (e->flags & RF_MIRRORMODEL)
 		mirrormodel = true;
 
 	paliashdr = (maliasmodel_t *)currentmodel->extradata;
-
-	// mirroring support
-//	if (mirrormodel)
-//		R_FlipModel(true);
 
 	if ( (e->frame >= paliashdr->num_frames) || (e->frame < 0) )
 	{
@@ -1272,16 +1564,17 @@ void R_DrawAliasModelShadow (entity_t *e)
 		e->oldframe = 0;
 	}
 
-	//if ( !r_lerpmodels->value )
-	//	e->backlerp = 0;
+//	if ( !r_lerpmodels->integer )
+//		e->backlerp = 0;
 	
-	R_DrawAliasMeshes (paliashdr, e, true, mirrormodel, false);
+//	R_DrawAliasMeshes (paliashdr, e, true, mirrormodel);
+	R_DrawAliasMeshes (paliashdr, e, mirrormodel, false, false, true);
 
 	qglPushMatrix ();
 	GL_DisableTexture(0);
 	GL_Enable (GL_BLEND);
 				
-	if (r_shadows->value == 3) {
+	if (r_shadows->integer == 3) {
 		e->angles[ROLL] = e->angles[ROLL] * R_RollMult();	// roll is backwards
 		R_RotateForEntity (e, true);
 		e->angles[ROLL] = e->angles[ROLL] * R_RollMult();	// roll is backwards
@@ -1295,9 +1588,5 @@ void R_DrawAliasModelShadow (entity_t *e)
 	GL_Disable (GL_BLEND);
 	GL_EnableTexture(0);
 	qglPopMatrix ();
-
-	// mirroring support
-//	if (mirrormodel)
-//		R_FlipModel(false);
 }
 #endif

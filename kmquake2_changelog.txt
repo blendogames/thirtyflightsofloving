@@ -51,6 +51,8 @@ Changes as of v0.20 update 8:
 
 - Fixed fog disappearing after a vid_restart.
 
+- Shadow volumes will now be drawn even if the model isn't in view.
+
 - Fixed text scale not changing after changing video modes.
 
 - Fixed handling of high-bit alt color strings.
