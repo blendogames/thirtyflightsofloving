@@ -262,8 +262,8 @@ void chick_pain (edict_t *self, edict_t *other, float kick, int damage)
 		//Knightmare- fixed this invalid classname check
 		if (self->spawnflags & SF_MONSTER_SPECIAL)
 		{
-			if (!(self->fogclip & 2)) //custom bloodtype flag check
-				self->blood_type = 0; //ordinary blood
+			if (!(self->fogclip & 2)) // custom bloodtype flag check
+				self->blood_type = 0; // ordinary blood
 		}
 		self->s.skinnum |= 1;
 	}

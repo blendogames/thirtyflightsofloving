@@ -440,12 +440,12 @@ typedef struct
 	int			disguise_violation_framenum;
 
 	// Lazarus
-	int			fogs;
-	int			trigger_fogs;
+	int			num_fogs;
+	int			num_trigger_fogs;
 	int			active_target_fog;
 	int			active_fog;
 	int			last_active_fog;
-	fog_t		fog;
+	fog_t		current_fog;
 	int			flashlight_cost;	// cost/10 seconds for flashlight
 	int			mud_puddles;
 	int			num_3D_sounds;
@@ -938,6 +938,7 @@ void cleanupHealTarget (edict_t *ent);
 #define DEFAULT_DEATHMATCH_SHOTGUN_COUNT	12
 #define DEFAULT_SHOTGUN_COUNT	12
 #define DEFAULT_SSHOTGUN_COUNT	20
+
 //
 // g_cmds.c
 //
@@ -948,22 +949,26 @@ void Use_Flashlight(edict_t *ent,gitem_t *item);
 void SetLazarusCrosshair (edict_t *ent);
 void SetSensitivities(edict_t *ent,qboolean reset);
 void ShiftItem(edict_t *ent, int direction);
+
 //
 // g_crane.c
 //
 void G_FindCraneParts();
 void crane_control_action(edict_t *crane, edict_t *activator, vec3_t point);
 void Moving_Speaker_Think(edict_t *ent);
+
 //
 // g_fog.c
 //
-#define MAX_FOGS 16
+#define MAX_FOGS 64	// was 16
 extern fog_t gfogs[MAX_FOGS];
 void Cmd_Fog_f (edict_t *ent);
 void Fog_Init (void);
-void Fog (edict_t *ent); //vec3_t viewpoint);
-void Fog_Off (qboolean gameShutdown);
+void Fog (edict_t *ent);
+void Fog_Off (edict_t *ent);
+void Fog_Off_Global (void);
 void Fog_SetFogParms (void);
+
 //
 // g_func.c
 //

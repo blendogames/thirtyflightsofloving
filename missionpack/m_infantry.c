@@ -310,7 +310,7 @@ void infantry_sight (edict_t *self, edict_t *other)
 	gi.sound (self, CHAN_BODY, sound_sight, 1, ATTN_NORM, 0);
 }
 
-//Knightmare- this was missing
+// Knightmare- this was missing
 void infantry_search (edict_t *self)
 {
 	gi.sound (self, CHAN_VOICE, sound_search, 1, ATTN_NORM, 0);
@@ -789,6 +789,25 @@ void infantry_sidestep (edict_t *self)
 		self->monsterinfo.currentmove = &infantry_move_run;
 }
 
+// Zaero added
+void SP_monster_infantry_precache (void)
+{
+	sound_pain1 = gi.soundindex ("infantry/infpain1.wav");
+	sound_pain2 = gi.soundindex ("infantry/infpain2.wav");
+	sound_die1 = gi.soundindex ("infantry/infdeth1.wav");
+	sound_die2 = gi.soundindex ("infantry/infdeth2.wav");
+
+	sound_gunshot = gi.soundindex ("infantry/infatck1.wav");
+	sound_weapon_cock = gi.soundindex ("infantry/infatck3.wav");
+	sound_punch_swing = gi.soundindex ("infantry/infatck2.wav");
+	sound_punch_hit = gi.soundindex ("infantry/melee2.wav");
+	
+	sound_sight = gi.soundindex ("infantry/infsght1.wav");
+	sound_search = gi.soundindex ("infantry/infsrch1.wav");
+	sound_idle = gi.soundindex ("infantry/infidle1.wav");
+}
+// end Zaero
+
 /*QUAKED monster_infantry (1 .5 0) (-16 -16 -24) (16 16 32) Ambush Trigger_Spawn Sight GoodGuy NoGib
 */
 void SP_monster_infantry (edict_t *self)
@@ -813,7 +832,6 @@ void SP_monster_infantry (edict_t *self)
 	sound_search = gi.soundindex ("infantry/infsrch1.wav");
 	sound_idle = gi.soundindex ("infantry/infidle1.wav");
 	
-
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;
 
@@ -828,11 +846,11 @@ void SP_monster_infantry (edict_t *self)
 	VectorSet (self->mins, -16, -16, -24);
 	VectorSet (self->maxs, 16, 16, 32);
 
-	if(!self->health)
+	if (!self->health)
 		self->health = 100;
-	if(!self->gib_health)
+	if (!self->gib_health)
 		self->gib_health = -50;
-	if(!self->mass)
+	if (!self->mass)
 		self->mass = 200;
 
 	self->pain = infantry_pain;
@@ -851,12 +869,12 @@ void SP_monster_infantry (edict_t *self)
 	self->monsterinfo.attack = infantry_attack;
 	self->monsterinfo.melee = NULL;
 	self->monsterinfo.sight = infantry_sight;
-	self->monsterinfo.search = infantry_search; //Knightmare- this was missing
+	self->monsterinfo.search = infantry_search; // Knightmare- this was missing
 	self->monsterinfo.idle = infantry_fidget;
 	self->monsterinfo.blocked = infantry_blocked;
 
 	// Lazarus
-	if(self->powerarmor)
+	if (self->powerarmor)
 	{
 		if (self->powerarmortype == 1)
 			self->monsterinfo.power_armor_type = POWER_ARMOR_SCREEN;
@@ -873,7 +891,7 @@ void SP_monster_infantry (edict_t *self)
 	gi.linkentity (self);
 
 	self->monsterinfo.currentmove = &infantry_move_stand;
-	if(self->health < 0)
+	if (self->health < 0)
 	{
 		mmove_t	*deathmoves[] = {&infantry_move_death1,
 			                     &infantry_move_death2,
@@ -885,3 +903,42 @@ void SP_monster_infantry (edict_t *self)
 
 	walkmonster_start (self);
 }
+
+// Zaero added
+void handler_ConvertToInfantry (edict_t *self)
+{
+	self->s.modelindex = gi.modelindex("models/monsters/infantry/tris.md2");
+
+	VectorSet (self->mins, -16, -16, -24);
+	VectorSet (self->maxs, 16, 16, 32);
+
+	self->pain = infantry_pain;
+	self->die = infantry_die;
+
+	self->s.origin[0] -= 18;
+	self->s.origin[1] -= 9;
+
+	self->monsterinfo.stand = infantry_stand;
+	self->monsterinfo.walk = infantry_walk;
+	self->monsterinfo.run = infantry_run;
+	// pmm
+	self->monsterinfo.dodge = M_MonsterDodge;
+	self->monsterinfo.duck = infantry_duck;
+	self->monsterinfo.unduck = monster_duck_up;
+	self->monsterinfo.sidestep = infantry_sidestep;
+//	self->monsterinfo.dodge = infantry_dodge;
+	// pmm
+	self->monsterinfo.attack = infantry_attack;
+	self->monsterinfo.melee = NULL;
+	self->monsterinfo.sight = infantry_sight;
+	self->monsterinfo.search = infantry_search; // Knightmare- this was missing
+	self->monsterinfo.idle = infantry_fidget;
+	self->monsterinfo.blocked = infantry_blocked;
+
+	self->s.frame = FRAME_run01;
+
+//	self->common_name = "Enforcer";
+
+	infantry_run (self);
+}
+// end Zaero

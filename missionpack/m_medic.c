@@ -436,7 +436,7 @@ void medic_idle (edict_t *self)
 	// AND the medic has previously called FoundTarget (trail_time set to
 	// level.time), then look for hint_path chain and follow it, hopefully
 	// to find monsters to resurrect
-	if(self->monsterinfo.aiflags & AI_HINT_TEST)
+	if (self->monsterinfo.aiflags2 & AI2_HINT_TEST)
 		return;
 
 	if(hint_paths_present && !(self->monsterinfo.aiflags & AI_STAND_GROUND)

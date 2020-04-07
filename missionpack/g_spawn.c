@@ -176,9 +176,20 @@ void SP_monster_boss5 (edict_t *self);
 
 // Zaero
 void SP_monster_hound (edict_t *self);
+void SP_monster_handler (edict_t *self);
 void SP_monster_sentien(edict_t *self);
+void SP_monster_zboss (edict_t *self);
+void SP_target_zboss_target(edict_t *self);
+void SP_func_barrier(edict_t *self);
+void SP_trigger_laser(edict_t *self);
+void SP_misc_commdish (edict_t *self);
+void SP_misc_crate(edict_t *self);
+void SP_misc_crate_medium(edict_t *self);
+void SP_misc_crate_small(edict_t *self);
+void SP_misc_seat(edict_t *self);
+// end Zaero
 
-//Knightmare- the dog from Coconut Monkey 3
+// Knightmare- the dog from Coconut Monkey 3
 void SP_monster_dog (edict_t *self);
 
 void SP_rotating_light (edict_t *self);
@@ -532,7 +543,7 @@ spawn_t	spawns[] = {
 	// END 14-APR-98
 	// RAFAEL 12-MAY-98
 
-	//Rogue monsters
+	// Rogue monsters
 	{"monster_daedalus", SP_monster_hover},
 	{"monster_medic_commander", SP_monster_medic},
 	{"monster_stalker", SP_monster_stalker},
@@ -544,9 +555,20 @@ spawn_t	spawns[] = {
 
 	// Zaero
 	{"monster_hound", SP_monster_hound},
+	{"monster_handler", SP_monster_handler},
 	{"monster_sentien", SP_monster_sentien},
+	{"monster_zboss", SP_monster_zboss},
+	{"target_zboss_target", SP_target_zboss_target},
+	{"func_barrier", SP_func_barrier},
+	{"trigger_laser", SP_trigger_laser},
+	{"misc_commdish", SP_misc_commdish},
+	{"misc_crate", SP_misc_crate},
+	{"misc_crate_medium", SP_misc_crate_medium},
+	{"misc_crate_small", SP_misc_crate_small},
+	{"misc_seat", SP_misc_seat},
+	// end Zaero
 
-	//Knightmare- the dog from Coconut Monkey 3
+	// Knightmare- the dog from Coconut Monkey 3
 	{"monster_dog", SP_monster_dog},
 
 	{"misc_nuke", SP_misc_nuke},
@@ -771,7 +793,7 @@ void ED_CallSpawn (edict_t *ent)
 
 	// replace brains in Reckoning
 	gamedir = gi.cvar("game", "", 0);
-	if (*gamedir->string && !Q_stricmp(gamedir->string, "xatrix")
+	if (gamedir->string && !Q_stricmp(gamedir->string, "xatrix")
 		&& IsXatrixMap() && !strcmp(ent->classname, "monster_brain"))
 		ent->classname = "monster_brain_beta";
 
@@ -1609,6 +1631,7 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 			ent = g_edicts;
 		else
 			ent = G_Spawn ();
+		ent->spawnflags2 = 0;	// Zaero added
 		entities = ED_ParseEdict (entities, ent);
 
 		// yet another map hack
@@ -1630,7 +1653,7 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 		{
 			if (deathmatch->value)
 			{
-				if ( ent->spawnflags & SPAWNFLAG_NOT_DEATHMATCH )
+				if (ent->spawnflags & SPAWNFLAG_NOT_DEATHMATCH)
 				{
 					G_FreeEdict (ent);	
 					inhibit++;
@@ -1982,6 +2005,7 @@ void SP_worldspawn (edict_t *ent)
 	ent->solid = SOLID_BSP;
 	ent->inuse = true;			// since the world doesn't use G_Spawn()
 	ent->s.modelindex = 1;		// world model is always index 1
+	ent->spawnflags2 = 0;		// Zaero added
 
 	//---------------
 
@@ -2102,9 +2126,9 @@ void SP_worldspawn (edict_t *ent)
 		gi.modelindex ("#w_phalanx.md2");			// Knightmare added
 		gi.modelindex ("#w_ripper.md2");			// Knightmare added
 		gi.modelindex ("#w_shockwave.md2");			// Knightmare added
-//		gi.modelindex ("#a_trap.md2");				// Knightmare added
-//		gi.modelindex ("#a_tesla.md2");				// Knightmare added
-//		gi.modelindex ("#w_grapple.md2");
+	//	gi.modelindex ("#a_trap.md2");				// Knightmare added
+	//	gi.modelindex ("#a_tesla.md2");				// Knightmare added
+	//	gi.modelindex ("#w_grapple.md2");
 	}
 	//-------------------
 
@@ -2119,24 +2143,24 @@ void SP_worldspawn (edict_t *ent)
 	gi.soundindex ("mud/mud_in2.wav");		// feet hitting mud
 	gi.soundindex ("mud/mud_out1.wav");		// feet leaving mud
 	gi.soundindex ("mud/mud_un1.wav");		// head going under mud
-	//gi.soundindex ("mud/wade_mud1.wav");
-	//gi.soundindex ("mud/wade_mud2.wav");
+//	gi.soundindex ("mud/wade_mud1.wav");
+//	gi.soundindex ("mud/wade_mud2.wav");
 
-	//Knightmare- moved these precaches to item data blocks
-	//gi.soundindex ("player/u_breath1.wav");
-	//gi.soundindex ("player/u_breath2.wav");
+	// Knightmare- moved these precaches to item data blocks
+//	gi.soundindex ("player/u_breath1.wav");
+//	gi.soundindex ("player/u_breath2.wav");
 
 	gi.soundindex ("items/pkup.wav");		// bonus item pickup
 	gi.soundindex ("world/land.wav");		// landing thud
 	gi.soundindex ("misc/h2ohit1.wav");		// landing splash
 
-	//gi.soundindex ("items/damage.wav");
+//	gi.soundindex ("items/damage.wav");
 	// ROGUE - double damage
-	//gi.soundindex ("misc/ddamage1.wav");
+//	gi.soundindex ("misc/ddamage1.wav");
 	// rogue
 
-	//gi.soundindex ("items/protect.wav");
-	//gi.soundindex ("items/protect4.wav");
+//	gi.soundindex ("items/protect.wav");
+//	gi.soundindex ("items/protect4.wav");
 	gi.soundindex ("weapons/noammo.wav");
 
 	// Knightmare- does this even get used in deathmatch?
@@ -2154,22 +2178,22 @@ void SP_worldspawn (edict_t *ent)
 
 	// Fog clipping - if "fogclip" is non-zero, force gl_clear to a good
 	// value for obscuring HOM with fog... "good" is driver-dependent
-	if(ent->fogclip)
+	if (ent->fogclip)
 	{
-		if(gl_driver && !Q_stricmp(gl_driver->string,"3dfxgl"))
+		if ( gl_driver && !Q_stricmp(gl_driver->string, "3dfxgl") )
 			gi.cvar_forceset("gl_clear", "0");
 		else
 			gi.cvar_forceset("gl_clear", "1");
 	}
 
 	// FMOD 3D sound attenuation:
-	if(ent->attenuation <= 0.)
+	if (ent->attenuation <= 0.)
 		ent->attenuation = 1.0;
 
 	// FMOD 3D sound Doppler shift:
-	if(st.shift > 0)
+	if (st.shift > 0)
 		ent->moveinfo.distance = st.shift;
-	else if(st.shift < 0)
+	else if (st.shift < 0)
 		ent->moveinfo.distance = 0.0;
 	else
 		ent->moveinfo.distance = 1.0;

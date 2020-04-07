@@ -917,7 +917,7 @@ void monster_use (edict_t *self, edict_t *other, edict_t *activator)
 
 	// if monster is "used" by player, turn off good guy stuff
 	if (activator->client)
-	{	//Knightmare- gekks and stalkers use different spawnflag
+	{	// Knightmare- gekks and stalkers use different spawnflag
 		if (UseSpecialGoodGuyFlag(self))
 			self->spawnflags &= ~16;
 		else if (UseRegularGoodGuyFlag(self))
@@ -951,7 +951,7 @@ void monster_triggered_spawn (edict_t *self)
 	// Knightmare- teleport effect for Q1 monsters
 	if (self->flags & FL_Q1_MONSTER) {
 #ifdef KMQUAKE2_ENGINE_MOD
-		self->s.event = EV_PLAYER_TELEPORT_Q1;
+		self->s.event = EV_PLAYER_TELEPORT2;
 #else
 		self->s.event = EV_PLAYER_TELEPORT;
 		Q1TeleportSounds(self);
@@ -1496,20 +1496,22 @@ int PatchMonsterModel (char *modelname)
 	byte		*data;				// model data
 	int			datasize;			// model data size (bytes)
 	int			newoffset;			// model data offset (after skins)
-	qboolean	is_tank=false;
-	qboolean	is_soldier=false;
-	//Knightmare added
-	qboolean	is_brain=false;
-	qboolean	is_gekk=false;
-	qboolean	is_fixbot=false;
-	qboolean	is_chick=false;
-	qboolean	is_soldierh=false;
-	qboolean	is_carrier=false;
-	qboolean	is_hover=false;
-	qboolean	is_medic=false;
-	qboolean	is_turret=false;
+	qboolean	is_tank = false;
+	qboolean	is_soldier = false;
+	// Knightmare added
+	qboolean	is_brain = false;
+	qboolean	is_gekk = false;
+	qboolean	is_fixbot = false;
+	qboolean	is_chick = false;
+	qboolean	is_soldierh = false;
+	qboolean	is_carrier = false;
+	qboolean	is_hover = false;
+	qboolean	is_medic = false;
+	qboolean	is_turret = false;
+	qboolean	is_zboss_mech = false;
+	qboolean	is_zboss_pilot = false;
 
-	qboolean	gamedirpakfile=false;
+	qboolean	gamedirpakfile = false;
 
 	// get game (moddir) name
 	gamedir = gi.cvar("game", "", 0);
@@ -1589,7 +1591,18 @@ int PatchMonsterModel (char *modelname)
 		is_turret = true;
 		numskins = 12;
 	}
-	//end Knightmare
+	else if (!strcmp(modelname,"models/monsters/bossz/mech/tris.md2"))
+	{
+		is_zboss_mech = true;
+		numskins = 12;
+	}
+	else if (!strcmp(modelname,"models/monsters/bossz/pilot/tris.md2"))
+	{
+		is_zboss_pilot = true;
+		numskins = 12;
+	}
+
+	// end Knightmare
 
 	for (j=0; j<numskins; j++)
 	{
@@ -1818,7 +1831,7 @@ int PatchMonsterModel (char *modelname)
 				Com_strcat (skins[j], sizeof(skins[j]), "custombeta_p3.pcx"); break;
 			}
 		}
-		else if(is_soldierh)
+		else if (is_soldierh)
 		{
 			switch (j)
 			{
@@ -1872,7 +1885,7 @@ int PatchMonsterModel (char *modelname)
 				Com_strcat (skins[j], sizeof(skins[j]), "custom3sold3_p.pcx"); break;
 			}
 		}
-		else if(is_carrier)
+		else if (is_carrier)
 		{
 			switch (j)
 			{
@@ -1894,7 +1907,7 @@ int PatchMonsterModel (char *modelname)
 				Com_strcat (skins[j], sizeof(skins[j]), "custompain3.pcx"); break;
 			}
 		}
-		else if(is_hover || is_medic)
+		else if (is_hover || is_medic)
 		{
 			switch (j)
 			{
@@ -1932,7 +1945,7 @@ int PatchMonsterModel (char *modelname)
 				Com_strcat (skins[j], sizeof(skins[j]), "custombeta_p2.pcx"); break;
 			}
 		}
-		else if(is_turret)
+		else if (is_turret)
 		{
 			switch (j)
 			{
@@ -1960,6 +1973,36 @@ int PatchMonsterModel (char *modelname)
 				Com_strcat (skins[j], sizeof(skins[j]), "custom3_2.pcx"); break;
 			case 11:
 				Com_strcat (skins[j], sizeof(skins[j]), "custom3_3.pcx"); break;
+			}
+		}
+		else if (is_zboss_mech || is_zboss_pilot)
+		{
+			switch (j)
+			{
+			case 0:
+				Com_strcat (skins[j], sizeof(skins[j]), "skin.pcx"); break;
+			case 1:
+				Com_strcat (skins[j], sizeof(skins[j]), "pain1.pcx"); break;
+			case 2:
+				Com_strcat (skins[j], sizeof(skins[j]), "pain2.pcx"); break;
+			case 3:
+				Com_strcat (skins[j], sizeof(skins[j]), "custom1.pcx"); break;
+			case 4:
+				Com_strcat (skins[j], sizeof(skins[j]), "custom1_p1.pcx"); break;
+			case 5:
+				Com_strcat (skins[j], sizeof(skins[j]), "custom1_p2.pcx"); break;
+			case 6:
+				Com_strcat (skins[j], sizeof(skins[j]), "custom2.pcx"); break;
+			case 7:
+				Com_strcat (skins[j], sizeof(skins[j]), "custom2_p1.pcx"); break;
+			case 8:
+				Com_strcat (skins[j], sizeof(skins[j]), "custom2_p2.pcx"); break;
+			case 9:
+				Com_strcat (skins[j], sizeof(skins[j]), "custom3.pcx"); break;
+			case 10:
+				Com_strcat (skins[j], sizeof(skins[j]), "custom3_p1.pcx"); break;
+			case 11:
+				Com_strcat (skins[j], sizeof(skins[j]), "custom3_p2.pcx"); break;
 			}
 		}
 		// end Knightmare

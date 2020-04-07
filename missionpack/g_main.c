@@ -16,6 +16,7 @@ edict_t		*g_edicts;
 cvar_t	*deathmatch;
 cvar_t	*coop;
 cvar_t	*dmflags;
+cvar_t	*zdmflags;	// Zaero added
 cvar_t	*skill;
 cvar_t	*fraglimit;
 cvar_t	*timelimit;
@@ -151,9 +152,12 @@ void ShutdownGame (void)
 		//gi.cvar_forceset("cd_loopcount", va("%d",lazarus_cd_loop->value));
 		//gi.cvar_forceset("gl_clear", va("%d", lazarus_gl_clear->value));
 	}
+
 	// Lazarus: Turn off fog if it's on
-	if (!dedicated->value)
-		Fog_Off (true);
+	if (!dedicated->value) {
+	//	Fog_Off (true);
+		Fog_Off_Global ();
+	}
 	// and shut down FMOD
 	FMOD_Shutdown();
 
@@ -340,6 +344,7 @@ edict_t *CreateTargetChangeLevel(char *map)
 	ent->classname = "target_changelevel";
 	Com_sprintf(level.nextmap, sizeof(level.nextmap), "%s", map);
 	ent->map = level.nextmap;
+	ent->spawnflags2 = 0;	// Zaero added
 	return ent;
 }
 

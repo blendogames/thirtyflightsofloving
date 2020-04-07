@@ -930,7 +930,7 @@ typedef struct {
 	struct sfx_s	*sfx_ladder[4];
 	struct sfx_s	*sfx_player_land;
 	struct sfx_s	*sfx_player_teleport;
-	struct sfx_s	*sfx_player_teleport_q1[5];
+	struct sfx_s	*sfx_player_teleport2[5];
 	struct sfx_s	*sfx_item_respawn;
 
 	struct model_s	*mod_explode;

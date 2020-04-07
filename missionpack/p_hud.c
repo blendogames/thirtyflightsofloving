@@ -38,6 +38,7 @@ void MoveClientToIntermission (edict_t *ent)
 	ent->client->breather_framenum = 0;
 	ent->client->enviro_framenum = 0;
 	ent->client->grenade_blew_up = false;
+	ent->client->bfg_missfire = false;	// Knightmare- added for Zaero EMP Nuke
 	ent->client->grenade_time = 0;
 
 	ent->client->ps.rdflags &= ~RDF_IRGOGGLES;		// PGM

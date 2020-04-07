@@ -233,7 +233,7 @@ void use_target_monsterbattle(edict_t *self, edict_t *other, edict_t *activator)
 		grouchmate = G_Find(NULL,FOFS(dmgteam),grouch->dmgteam);
 		while(grouchmate)
 		{
-			grouchmate->monsterinfo.moreaiflags |= AI_FREEFORALL;
+			grouchmate->monsterinfo.aiflags2 |= AI2_FREEFORALL;
 			grouchmate = G_Find(grouchmate,FOFS(dmgteam),grouch->dmgteam);
 		}
 	}
@@ -242,7 +242,7 @@ void use_target_monsterbattle(edict_t *self, edict_t *other, edict_t *activator)
 		targetmate = G_Find(NULL,FOFS(dmgteam),target->dmgteam);
 		while(targetmate)
 		{
-			targetmate->monsterinfo.moreaiflags |= AI_FREEFORALL;
+			targetmate->monsterinfo.aiflags2 |= AI2_FREEFORALL;
 			targetmate = G_Find(targetmate,FOFS(dmgteam),target->dmgteam);
 		}
 	}

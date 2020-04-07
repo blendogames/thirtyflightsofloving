@@ -230,8 +230,8 @@ void CL_EntityEvent (entity_state_t *ent)
 		S_StartSound (NULL, ent->number, CHAN_WEAPON, clMedia.sfx_player_teleport, 1, ATTN_IDLE, 0);
 		CL_TeleportParticles (ent->origin);
 		break;
-	case EV_PLAYER_TELEPORT_Q1:
-		S_StartSound (NULL, ent->number, CHAN_WEAPON, clMedia.sfx_player_teleport_q1[rand()%5], 1, ATTN_IDLE, 0);
+	case EV_PLAYER_TELEPORT2:
+		S_StartSound (NULL, ent->number, CHAN_WEAPON, clMedia.sfx_player_teleport2[rand()%5], 1, ATTN_IDLE, 0);
 		CL_TeleportParticles (ent->origin);
 		break;
 	case EV_FOOTSTEP:

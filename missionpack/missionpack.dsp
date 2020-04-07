@@ -521,11 +521,35 @@ SOURCE=.\q_shared.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\z_ai.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\z_boss.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\z_handler.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\z_hound.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\z_item.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\z_sentien.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\z_trigger.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\z_weapon.c
 # End Source File
 # End Group
 # Begin Group "Header Files"
@@ -750,6 +774,14 @@ SOURCE=.\q_shared.h
 # Begin Source File
 
 SOURCE=.\z_anim.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\z_boss.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\z_handler.h
 # End Source File
 # Begin Source File
 

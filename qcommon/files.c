@@ -827,12 +827,17 @@ bypassing the pak system.
 */
 int FS_FOpenCompressedFile (const char *zipName, const char *fileName, fileHandle_t *f, fsMode_t mode)
 {
-	fsHandle_t	*handle;
+	fsHandle_t	*handle = NULL;
 	char		name[MAX_OSPATH];
 	int			size;
 
 	Com_sprintf (name, sizeof(name), "%s/%s", zipName, fileName);
 	handle = FS_HandleForFile(name, f);
+
+	if (!handle) {	// case of no handles available
+		*f = 0;
+		return -1;
+	}
 
 	Q_strncpyz(handle->name, name, sizeof(handle->name));
 	handle->mode = mode;

@@ -328,6 +328,15 @@ qboolean Cbuf_AddLateCommands (void)
 			Q_strncatz (text, " ", s+1);
 	}
 	
+	// start quake2:// support
+	// R1ch: awful hack to prevent arbitrary cmd execution with quake2:// links due to Q2's bad quote parser
+	if (!strncmp (text, "+connect \"quake2://", 19))
+	{
+		if (strchr (text + 1, '+'))
+			Com_Error (ERR_FATAL, "Attempt to use multiple commands in a quake2:// protocol handler:\n\n%s", text);
+	}
+	// end quake2:// support 
+
 // pull out the commands
 	build = Z_Malloc (s+1);
 	build[0] = 0;

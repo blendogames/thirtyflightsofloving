@@ -24,6 +24,21 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "resource.h"
 #include "winquake.h"
 
+// defines for MSVC6
+#if (_MSC_VER < 1300)
+#ifndef LONG_PTR
+#define LONG_PTR LONG
+#endif
+
+#ifndef SetWindowLongPtr
+#define SetWindowLongPtr SetWindowLong
+#endif
+
+#ifndef GWLP_WNDPROC
+#define GWLP_WNDPROC GWL_WNDPROC
+#endif
+#endif	// _MSC_VER
+
 
 #ifdef NEW_DED_CONSOLE
 
@@ -88,7 +103,7 @@ char *Sys_ConsoleInput (void)
 	if (!sys_console.cmdBuffer[0])
 		return NULL;
 
-	strncpy(buffer, sys_console.cmdBuffer, sizeof(buffer));
+	strncpy(buffer, sys_console.cmdBuffer, sizeof(buffer)-1);
 	sys_console.cmdBuffer[0] = 0;
 
 	return buffer;
@@ -164,7 +179,6 @@ void Sys_Error (char *error, ...)
 	Qcommon_Shutdown();
 
 	va_start(argPtr, error);
-//	vsprintf(string, error, argPtr);
 	Q_vsnprintf (string, sizeof(string), error, argPtr);
 	va_end(argPtr);
 
@@ -362,27 +376,37 @@ Sys_ShutdownConsole
 */
 void Sys_ShutdownConsole (void)
 {
-	if (sys_console.timerActive)
+	if (sys_console.timerActive) {
 		KillTimer(sys_console.hWnd, 1);
+	}
 
-	if (sys_console.hLogoImage)
+	if (sys_console.hLogoImage) {
 		DeleteObject(sys_console.hLogoImage);
-	if (sys_console.hBrushMsg)
+	}
+	if (sys_console.hBrushMsg) {
 		DeleteObject(sys_console.hBrushMsg);
-	if (sys_console.hBrushOutput)
+	}
+	if (sys_console.hBrushOutput) {
 		DeleteObject(sys_console.hBrushOutput);
-	if (sys_console.hBrushInput)
+	}
+	if (sys_console.hBrushInput) {
 		DeleteObject(sys_console.hBrushInput);
-
-	if (sys_console.hFont)
+	}
+	if (sys_console.hFont) {
 		DeleteObject(sys_console.hFont);
-	if (sys_console.hFontBold)
+	}
+	if (sys_console.hFontBold) {
 		DeleteObject(sys_console.hFontBold);
+	}
 
-	if (sys_console.defOutputProc)
-		SetWindowLong(sys_console.hWndOutput, GWL_WNDPROC, (LONG)sys_console.defOutputProc);
-	if (sys_console.defInputProc)
-		SetWindowLong(sys_console.hWndInput, GWL_WNDPROC, (LONG)sys_console.defInputProc);
+	if (sys_console.defOutputProc) {
+	//	SetWindowLong(sys_console.hWndOutput, GWL_WNDPROC, (LONG)sys_console.defOutputProc);
+		SetWindowLongPtr(sys_console.hWndOutput, GWLP_WNDPROC, (LONG_PTR)sys_console.defOutputProc);
+	}
+	if (sys_console.defInputProc) {
+	//	SetWindowLong(sys_console.hWndInput, GWL_WNDPROC, (LONG)sys_console.defInputProc);
+		SetWindowLongPtr(sys_console.hWndInput, GWLP_WNDPROC, (LONG_PTR)sys_console.defInputProc);
+	}
 
 	ShowWindow(sys_console.hWnd, SW_HIDE);
 	DestroyWindow(sys_console.hWnd);
@@ -477,8 +501,10 @@ void Sys_InitDedConsole (void)
 	sys_console.hBrushInput = CreateSolidBrush(RGB(255, 255, 255));
 
 	// Subclass edit boxes
-	sys_console.defOutputProc = (WNDPROC)SetWindowLong(sys_console.hWndOutput, GWL_WNDPROC, (LONG)Sys_ConsoleEditProc);
-	sys_console.defInputProc = (WNDPROC)SetWindowLong(sys_console.hWndInput, GWL_WNDPROC, (LONG)Sys_ConsoleEditProc);
+//	sys_console.defOutputProc = (WNDPROC)SetWindowLong(sys_console.hWndOutput, GWL_WNDPROC, (LONG)Sys_ConsoleEditProc);
+//	sys_console.defInputProc = (WNDPROC)SetWindowLong(sys_console.hWndInput, GWL_WNDPROC, (LONG)Sys_ConsoleEditProc);
+	sys_console.defOutputProc = (WNDPROC)SetWindowLongPtr(sys_console.hWndOutput, GWLP_WNDPROC, (LONG_PTR)Sys_ConsoleEditProc);
+	sys_console.defInputProc = (WNDPROC)SetWindowLongPtr(sys_console.hWndInput, GWLP_WNDPROC, (LONG_PTR)Sys_ConsoleEditProc);
 
 	// Set text limit for input edit box
 	SendMessage(sys_console.hWndInput, EM_SETLIMITTEXT, (WPARAM)(MAX_INPUT-1), 0);

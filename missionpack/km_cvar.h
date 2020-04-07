@@ -153,6 +153,12 @@ extern	cvar_t	*sk_dm_start_rounds;
 extern	cvar_t	*sk_dm_start_prox;
 extern	cvar_t	*sk_dm_start_tesla;
 extern	cvar_t	*sk_dm_start_shocksphere;
+/*
+extern	cvar_t	*sk_dm_start_flares;
+extern	cvar_t	*sk_dm_start_tbombs;
+extern	cvar_t	*sk_dm_start_empnuke;
+extern	cvar_t	*sk_dm_start_plasmashield;
+*/
 
 extern	cvar_t	*sk_dm_start_shotgun;
 extern	cvar_t	*sk_dm_start_sshotgun;
@@ -174,6 +180,7 @@ extern	cvar_t	*sk_dm_start_shockwave;
 
 // maximum values
 extern	cvar_t	*sk_max_health;
+extern	cvar_t	*sk_max_health_dm;
 extern	cvar_t	*sk_max_foodcube_health;
 extern	cvar_t	*sk_max_armor;
 extern	cvar_t	*sk_max_armor_jacket;
@@ -193,6 +200,13 @@ extern	cvar_t	*sk_max_prox;
 extern	cvar_t	*sk_max_tesla;
 extern	cvar_t	*sk_max_shocksphere;
 extern	cvar_t	*sk_max_fuel;
+/*
+extern	cvar_t	*sk_max_flares;
+extern	cvar_t	*sk_max_tbombs;
+extern	cvar_t	*sk_max_a2k;
+extern	cvar_t	*sk_max_empnuke;
+extern	cvar_t	*sk_max_plasmashield;
+*/
 
 // maximum settings if a player gets a bandolier
 extern	cvar_t	*sk_bando_bullets;
@@ -203,6 +217,7 @@ extern	cvar_t	*sk_bando_magslugs;
 extern	cvar_t	*sk_bando_flechettes;
 extern	cvar_t	*sk_bando_rounds;
 extern	cvar_t	*sk_bando_fuel;
+//extern	cvar_t	*sk_bando_flares;
 
 // maximum settings if a player gets a pack
 extern	cvar_t	*sk_pack_bullets;
@@ -219,8 +234,17 @@ extern	cvar_t	*sk_pack_prox;
 extern	cvar_t	*sk_pack_tesla;
 extern	cvar_t	*sk_pack_shocksphere;
 extern	cvar_t	*sk_pack_fuel;
+/*
+extern	cvar_t	*sk_pack_flares;
+extern	cvar_t	*sk_pack_tbombs;
+extern	cvar_t	*sk_pack_a2k;
+extern	cvar_t	*sk_pack_empnuke;
+extern	cvar_t	*sk_pack_plasmashield;
+*/
+
 extern	cvar_t	*sk_pack_give_xatrix_ammo;
 extern	cvar_t	*sk_pack_give_rogue_ammo;
+//extern	cvar_t	*sk_pack_give_zaero_ammo;
 
 // pickup values
 extern	cvar_t	*sk_box_shells; //value of shells
@@ -237,6 +261,12 @@ extern	cvar_t	*sk_box_disruptors; //value of disruptor pack
 extern	cvar_t	*sk_box_shocksphere; //value of shocksphere
 extern	cvar_t	*sk_box_trap; //value of trap
 extern	cvar_t	*sk_box_fuel; //value of fuel
+/*
+extern	cvar_t	*sk_box_flares;
+extern	cvar_t	*sk_box_tbombs;
+extern	cvar_t	*sk_box_empnuke;
+extern	cvar_t	*sk_box_plasmashield;
+*/
 
 // items/powerups
 extern	cvar_t	*sk_armor_bonus_value; //value of armor shards
@@ -261,3 +291,8 @@ extern	cvar_t	*sk_double_time;
 extern	cvar_t	*sk_quad_fire_time;
 extern	cvar_t	*sk_doppleganger_time;
 extern	cvar_t	*sk_stasis_time;
+/*
+extern	cvar_t	*sk_visor_time;
+extern	cvar_t	*sk_sniper_charge_time;
+extern	cvar_t	*sk_a2k_detonate_time;
+*/

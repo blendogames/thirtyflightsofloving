@@ -435,7 +435,7 @@ qboolean Pickup_Bandolier (edict_t *ent, edict_t *other)
 	gitem_t	*item;
 	int		index;
 
-	//Knightmare- override ammo pickup values with cvars
+	// Knightmare- override ammo pickup values with cvars
 	SetAmmoPickupValues ();
 
 	if (other->client->pers.max_bullets < sk_bando_bullets->value)
@@ -450,15 +450,20 @@ qboolean Pickup_Bandolier (edict_t *ent, edict_t *other)
 	if (other->client->pers.max_magslug < sk_bando_magslugs->value)
 		other->client->pers.max_magslug = sk_bando_magslugs->value;
 
-	//PMM
+	// PMM
 	if (other->client->pers.max_flechettes < sk_bando_flechettes->value)
 		other->client->pers.max_flechettes = sk_bando_flechettes->value;
 	if (other->client->pers.max_disruptors < sk_bando_rounds->value)
 		other->client->pers.max_disruptors = sk_bando_rounds->value;
+	// pmm
+
 	if (other->client->pers.max_fuel  < sk_bando_fuel->value)
 		other->client->pers.max_fuel  = sk_bando_fuel->value;
 
-	//pmm
+	// Zaero
+/*	if (other->client->pers.max_flares < sk_bando_flares->value)
+		other->client->pers.max_flares = sk_bando_flares->value;*/
+	// end Zaero
 
 	item = FindItem("Bullets");
 	if (item)
@@ -489,7 +494,7 @@ qboolean Pickup_Pack (edict_t *ent, edict_t *other)
 	gitem_t	*item;
 	int		index;
 
-	//Knightmare- override ammo pickup values with cvars
+	// Knightmare- override ammo pickup values with cvars
 	SetAmmoPickupValues ();
 
 	if (other->client->pers.max_bullets < sk_pack_bullets->value)
@@ -509,7 +514,7 @@ qboolean Pickup_Pack (edict_t *ent, edict_t *other)
 	if (other->client->pers.max_trap < sk_pack_traps->value)
 		other->client->pers.max_trap = sk_pack_traps->value;
 
-	//PMM
+	// PMM
 	if (other->client->pers.max_flechettes < sk_pack_flechettes->value)
 		other->client->pers.max_flechettes = sk_pack_flechettes->value;
 	if (other->client->pers.max_prox < sk_pack_prox->value)
@@ -522,9 +527,24 @@ qboolean Pickup_Pack (edict_t *ent, edict_t *other)
 		other->client->pers.max_shockspheres = sk_pack_shocksphere->value;
 	if (other->client->pers.max_homing_rockets < sk_pack_rockets->value)
 		other->client->pers.max_homing_rockets = sk_pack_rockets->value;
+	// pmm
+
 	if (other->client->pers.max_fuel  < sk_pack_fuel->value)
 		other->client->pers.max_fuel  = sk_pack_fuel->value;
-	//pmm
+
+	// Zaero
+/*	if (other->client->pers.max_flares < sk_pack_flares->value)
+		other->client->pers.max_flares = sk_pack_flares->value;
+	if (other->client->pers.max_tbombs < sk_pack_tbombs->value)
+		other->client->pers.max_tbombs = sk_pack_tbombs->value;
+	if (other->client->pers.max_a2k < sk_pack_a2k->value)
+		other->client->pers.max_a2k = sk_pack_a2k->value;
+	if (other->client->pers.max_empnuke < sk_pack_empnuke->value)
+		other->client->pers.max_empnuke = sk_pack_empnuke->value;
+	if (other->client->pers.max_plasmashield < sk_pack_plasmashield->value)
+		other->client->pers.max_plasmashield = sk_pack_plasmashield->value;*/
+	// end Zaero
+
 
 	item = FindItem("Bullets");
 	if (item)
@@ -588,7 +608,7 @@ qboolean Pickup_Pack (edict_t *ent, edict_t *other)
 			other->client->pers.inventory[index] = other->client->pers.max_magslug;
 	}
 
-//PMM
+// PMM
 	item = FindItem("Flechettes");
 	if (item && sk_pack_give_rogue_ammo->value)
 	{
@@ -605,7 +625,7 @@ qboolean Pickup_Pack (edict_t *ent, edict_t *other)
 		if (other->client->pers.inventory[index] > other->client->pers.max_disruptors)
 			other->client->pers.inventory[index] = other->client->pers.max_disruptors;
 	}
-//pmm
+// pmm
 	if (!(ent->spawnflags & DROPPED_ITEM) && (deathmatch->value))
 		SetRespawn (ent, ent->item->quantity);
 
@@ -3890,34 +3910,6 @@ warehouse circuits
 		"" //precache
 	},
 
-// New item (sorta) for Citadel pack by Andrea Rosa
-#ifdef CITADELMOD_FEATURES
-// 69
-/*QUAKED key_mystery (0 .5 .8) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
-key for Citadel Pack 3.0
-*/
-	{
-		"key_mystery",
-		Pickup_Key,
-		NULL,
-		Drop_General,
-		NULL,
-		"items/pkup.wav",
-		"models/items/keys/mystery/tris.md2", 0, EF_ROTATE,
-		NULL,
-		"k_mystery",
-		"Mystery Key",
-		2,
-		0,
-		NULL,
-		IT_STAY_COOP|IT_KEY,
-		0,
-		NULL,
-		0,
-		"" //precache
-	},
-#endif
-
 // 69
 /*QUAKED key_pyramid (0 .5 .8) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 key for the entrance of jail3
@@ -4172,6 +4164,179 @@ marker for airstrike
 // ======================================
 
 // 79
+// New item (sorta) for Citadel pack by Andrea Rosa
+/*QUAKED key_mystery (0 .5 .8) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
+key for Citadel Pack 3.0
+*/
+	{
+		"key_mystery",
+		Pickup_Key,
+		NULL,
+		Drop_General,
+		NULL,
+		"items/pkup.wav",
+		"models/items/keys/mystery/tris.md2", 0, EF_ROTATE,
+		NULL,
+		"k_mystery",
+		"Mystery Key",
+		2,
+		0,
+		NULL,
+		IT_STAY_COOP|IT_KEY,
+		0,
+		NULL,
+		0,
+		"" //precache
+	},
+
+// Zaero keys
+// 80
+/*QUAKED key_landing_arena (0 .5 .8) (-16 -16 -16) (16 16 16)
+landing arena key - blue
+*/
+	{
+		"key_landing_area",
+		Pickup_Key,
+		NULL,
+		Drop_General,
+		NULL,
+		"items/pkup.wav",
+		"models/items/keys/key/tris.md2", 0, EF_ROTATE,
+		NULL,
+		"k_bluekey",
+		"Airfield Pass",
+		2,
+		0,
+		NULL,
+		IT_STAY_COOP|IT_KEY,
+		0,
+		NULL,
+		0,
+/* precache */ ""
+	},
+
+// 81
+/*QUAKED key_lab (0 .5 .8) (-16 -16 -16) (16 16 16)
+security pass for the laboratory
+*/
+	{
+		"key_lab",
+		Pickup_Key,
+		NULL,
+		Drop_General,
+		NULL,
+		"items/pkup.wav",
+		"models/items/keys/pass/tris.md2", 0, EF_ROTATE,
+		NULL,
+		"k_security",
+		"Laboratory Key",
+		2,
+		0,
+		NULL,
+		IT_STAY_COOP|IT_KEY,
+		0,
+		NULL,
+		0,
+/* precache */ ""
+	},
+
+// 82
+/*QUAKED key_clearancepass (0 .5 .8) (-16 -16 -16) (16 16 16)
+*/
+	{
+		"key_clearancepass",
+		Pickup_Key,
+		NULL,
+		Drop_General,
+		NULL,
+		"items/pkup.wav",
+		"models/items/keys/pass/tris.md2", 0, EF_ROTATE,
+		NULL,
+		"k_security",
+		"Clearance Pass",
+		2,
+		0,
+		NULL,
+		IT_STAY_COOP|IT_KEY,
+		0,
+		NULL,
+		0,
+/* precache */ ""
+	},
+
+// 83
+/*QUAKED key_energy (0 .5 .8) (-16 -16 -16) (16 16 16)
+*/
+	{
+		"key_energy",
+		Pickup_Key,
+		NULL,
+		Drop_General,
+		NULL,
+		"items/pkup.wav",
+		"models/items/keys/energy/tris.md2", 0, EF_ROTATE,
+		NULL,
+		"k_energy",
+		"Energy Key",
+		2,
+		0,
+		NULL,
+		IT_STAY_COOP|IT_KEY,
+		0,
+		NULL,
+		0,
+/* precache */ ""
+	},
+
+// 84
+/*QUAKED key_lava (0 .5 .8) (-16 -16 -16) (16 16 16)
+*/
+	{
+		"key_lava",
+		Pickup_Key,
+		NULL,
+		Drop_General,
+		NULL,
+		"items/pkup.wav",
+		"models/items/keys/lava/tris.md2", 0, EF_ROTATE,
+		NULL,
+		"k_lava",
+		"Lava Key",
+		2,
+		0,
+		NULL,
+		IT_STAY_COOP|IT_KEY,
+		0,
+		NULL,
+		0,
+/* precache */ ""
+	},
+
+// 85
+/*QUAKED key_slime (0 .5 .8) (-16 -16 -16) (16 16 16)
+*/
+	{
+		"key_slime",
+		Pickup_Key,
+		NULL,
+		Drop_General,
+		NULL,
+		"items/pkup.wav",
+		"models/items/keys/slime/tris.md2", 0, EF_ROTATE,
+		NULL,
+		"k_slime",
+		"Slime Key",
+		2,
+		0,
+		NULL,
+		IT_STAY_COOP|IT_KEY,
+		0,
+		NULL,
+		0,
+/* precache */ ""
+	},
+
+// 86
 /*QUAKED key_q1_gold (0 .5 .8) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 medevial door key - gold
 model="models/items/q1keys/gold/tris.md2"
@@ -4197,7 +4362,7 @@ model="models/items/q1keys/gold/tris.md2"
 /* precache */ ""
 	},
 
-// 80
+// 87
 /*QUAKED key_q1_silver (0 .5 .8) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 medevial door key - silver
 model="models/items/q1keys/silver/tris.md2"
@@ -4223,7 +4388,7 @@ model="models/items/q1keys/silver/tris.md2"
 /* precache */ ""
 	},
 
-// 81
+// 88
 /*QUAKED runekey_q1_gold (0 .5 .8) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 runic door key - gold
 model="models/items/q1keys/gold/rune/tris.md2"
@@ -4249,7 +4414,7 @@ model="models/items/q1keys/gold/rune/tris.md2"
 /* precache */ ""
 	},
 
-// 82
+// 89
 /*QUAKED runekey_q1_silver (0 .5 .8) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 runic door key - silver
 model="models/items/q1keys/silver/rune/tris.md2"
@@ -4275,7 +4440,7 @@ model="models/items/q1keys/silver/rune/tris.md2"
 /* precache */ ""
 	},
 
-// 83
+// 90
 /*QUAKED basekey_q1_gold (0 .5 .8) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 base door key - gold
 model="models/items/q1keys/gold/base/tris.md2"
@@ -4301,7 +4466,7 @@ model="models/items/q1keys/gold/base/tris.md2"
 /* precache */ ""
 	},
 
-// 84
+// 91
 /*QUAKED basekey_q1_silver (0 .5 .8) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 base door key - silver
 model="models/items/q1keys/silver/base/tris.md2"

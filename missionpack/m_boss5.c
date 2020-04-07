@@ -434,8 +434,8 @@ void boss5_pain (edict_t *self, edict_t *other, float kick, int damage)
 	if (self->health < (self->max_health / 2))
 	{
 		self->s.skinnum |= 1;
-		if (!(self->fogclip & 2)) //custom bloodtype flag check
-			self->blood_type = 3; //sparks and blood
+		if (!(self->fogclip & 2)) // custom bloodtype flag check
+			self->blood_type = 3; // sparks and blood
 	}
 
 	if (level.time < self->pain_debounce_time)

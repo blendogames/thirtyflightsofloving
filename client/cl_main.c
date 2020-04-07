@@ -605,7 +605,8 @@ CL_Connect_f
 */
 void CL_Connect_f (void)
 {
-	char	*server;
+	char		*server, *p;
+	netadr_t	serverAdr;
 
 	if (Cmd_Argc() != 2)
 	{
@@ -625,7 +626,23 @@ void CL_Connect_f (void)
 
 	server = Cmd_Argv (1);
 
+	// start quake2:// support
+	if (!strncmp (server, "quake2://", 9))
+		server += 9;
+
+	p = strchr (server, '/');	// remove trailing slash
+	if (p)
+		p[0] = '\0';
+	// end quake2:// support 
+
 	NET_Config (true);		// allow remote
+
+	// validate server address
+	if (!NET_StringToAdr (server, &serverAdr))
+	{
+		Com_Printf ("Bad server address: %s\n", server);
+		return;
+	}
 
 	CL_Disconnect ();
 
@@ -1543,7 +1560,7 @@ void CL_InitLocal (void)
 	cl_maxfps = Cvar_Get ("cl_maxfps", "90", 0);
 
 #ifdef CLIENT_SPLIT_NETFRAME
-	cl_async = Cvar_Get ("cl_async", "1", 0);
+	cl_async = Cvar_Get ("cl_async", "1", CVAR_ARCHIVE);
 	net_maxfps = Cvar_Get ("net_maxfps", "60", 0);
 	r_maxfps = Cvar_Get ("r_maxfps", "125", 0);
 #endif

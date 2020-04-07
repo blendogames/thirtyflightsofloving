@@ -114,8 +114,8 @@ void Killed (edict_t *targ, edict_t *inflictor, edict_t *attacker, int damage, v
 	if ((targ->svflags & SVF_MONSTER) && (targ->deadflag != DEAD_DEAD))
 	{
 //		targ->svflags |= SVF_DEADMONSTER;	// now treat as a different content type
-		//ROGUE - free up slot for spawned monster if it's spawned
-		//if (targ->monsterinfo.aiflags & AI_SPAWNED_CARRIER)
+		// ROGUE - free up slot for spawned monster if it's spawned
+	//	if (targ->monsterinfo.aiflags & AI_SPAWNED_CARRIER)
 		if (targ->monsterinfo.monsterflags & MFL_SPAWNED_CARRIER)
 		{
 			if (targ->monsterinfo.commander && targ->monsterinfo.commander->inuse &&
@@ -126,7 +126,7 @@ void Killed (edict_t *targ, edict_t *inflictor, edict_t *attacker, int damage, v
 //					gi.dprintf ("g_combat: freeing up carrier slot - %d left\n", targ->monsterinfo.commander->monsterinfo.monster_slots);
 			}
 		}
-		//if (targ->monsterinfo.aiflags & AI_SPAWNED_MEDIC_C)
+	//	if (targ->monsterinfo.aiflags & AI_SPAWNED_MEDIC_C)
 		if (targ->monsterinfo.monsterflags & MFL_SPAWNED_MEDIC_C)
 		{
 			if (targ->monsterinfo.commander)
@@ -145,7 +145,7 @@ void Killed (edict_t *targ, edict_t *inflictor, edict_t *attacker, int damage, v
 //				gi.dprintf ("My commander is GONE\n");
 
 		}
-		//if (targ->monsterinfo.aiflags & AI_SPAWNED_WIDOW)
+	//	if (targ->monsterinfo.aiflags & AI_SPAWNED_WIDOW)
 		if (targ->monsterinfo.monsterflags & MFL_SPAWNED_WIDOW)
 		{
 			// need to check this because we can have variable numbers of coop players
@@ -159,7 +159,7 @@ void Killed (edict_t *targ, edict_t *inflictor, edict_t *attacker, int damage, v
 			}
 		}
 		//Rogue
-		//if (!(targ->monsterinfo.aiflags & AI_GOOD_GUY) && !(targ->monsterinfo.aiflags & AI_DO_NOT_COUNT))
+	//	if (!(targ->monsterinfo.aiflags & AI_GOOD_GUY) && !(targ->monsterinfo.aiflags & AI_DO_NOT_COUNT))
 		if (!(targ->monsterinfo.aiflags & AI_GOOD_GUY) && !(targ->monsterinfo.monsterflags & MFL_DO_NOT_COUNT))
 		{
 			level.killed_monsters++;
@@ -415,7 +415,7 @@ void CallMyFriends (edict_t *targ, edict_t *attacker)
 					}
 				}
 				else if( !(targ->svflags & SVF_MONSTER) || !(attacker->svflags & SVF_MONSTER) ||
-					(targ->monsterinfo.moreaiflags & AI_FREEFORALL) ||
+					(targ->monsterinfo.aiflags2 & AI2_FREEFORALL) ||
 					((targ->monsterinfo.aiflags & AI_GOOD_GUY) != (attacker->monsterinfo.aiflags & AI_GOOD_GUY)) )
 				{
 					// Either target is not a monster, or attacker is not a monster, or
@@ -908,7 +908,7 @@ void T_Damage (edict_t *in_targ, edict_t *inflictor, edict_t *in_attacker, vec3_
 
 	// If targ is a fake player for the real player viewing camera, get that player
 	// out of the camera and do the damage to him
-	if (!Q_stricmp(targ->classname,"camplayer"))
+	if (!Q_stricmp(targ->classname, "camplayer"))
 	{
 		if (targ->target_ent && targ->target_ent->client && targ->target_ent->client->spycam)
 		{
@@ -1010,6 +1010,16 @@ void T_Damage (edict_t *in_targ, edict_t *inflictor, edict_t *in_attacker, vec3_
 		if (!damage)
 			damage = 1;
 	}
+
+	// Zaero
+	if ((targ->svflags & SVF_MONSTER) && ((targ->monsterinfo.aiflags2 & AI2_REDUCEDDAMAGE) ||
+		((targ->monsterinfo.aiflags2 & AI2_MONREDUCEDDAMAGE) && (inflictor->svflags & SVF_MONSTER))))
+	{
+		damage *= targ->monsterinfo.reducedDamageAmount;
+		if (!damage)
+			damage = 1;
+	}
+	// end Zaero
 
 	client = targ->client;
 
@@ -1191,9 +1201,9 @@ void T_Damage (edict_t *in_targ, edict_t *inflictor, edict_t *in_attacker, vec3_
 				targ->client->invincible_framenum = level.framenum+2;
 				targ->pain_debounce_time = max(targ->pain_debounce_time,level.time+0.3);
 			}
-			else if(level.framenum - targ->client->startframe > 30)
+			else if (level.framenum - targ->client->startframe > 30)
 				targ->health = targ->health - take;
-			else if(targ->health > 10)
+			else if (targ->health > 10)
 				targ->health = max(10,targ->health - take);
 		}
 		else
@@ -1207,27 +1217,27 @@ void T_Damage (edict_t *in_targ, edict_t *inflictor, edict_t *in_attacker, vec3_
 				if (targ->spawnflags & 16)  // explosion only
 				{
 					good_damage = false;
-					if(mod == MOD_GRENADE)     good_damage = true;
-					if(mod == MOD_G_SPLASH)    good_damage = true;
-					if(mod == MOD_ROCKET)      good_damage = true;
-					if(mod == MOD_R_SPLASH)    good_damage = true;
-					if(mod == MOD_BFG_BLAST)   good_damage = true;
-					if(mod == MOD_HANDGRENADE) good_damage = true;
-					if(mod == MOD_HG_SPLASH)   good_damage = true;
-					if(mod == MOD_EXPLOSIVE)   good_damage = true;
-					if(mod == MOD_BARREL)      good_damage = true;
-					if(mod == MOD_BOMB)        good_damage = true;
-					//Knightmare added
-					if(mod == MOD_PHALANX)     good_damage = true;
-					if(mod == MOD_PHALANX_SPLASH) good_damage = true;
-					if(mod == MOD_TRACKER)	   good_damage = true;
-					if(mod == MOD_PROX)        good_damage = true;
-					if(mod == MOD_PROX_SPLASH) good_damage = true;
-					if(mod == MOD_NUKE)        good_damage = true;
-					if(mod == MOD_NBOMB)       good_damage = true;
-					if(mod == MOD_DOPPLE_EXPLODE) good_damage = true;
-					if(mod == MOD_SHOCK_SPLASH) good_damage = true;
-					if(mod == MOD_ETF_SPLASH)  good_damage = true;
+					if (mod == MOD_GRENADE)     good_damage = true;
+					if (mod == MOD_G_SPLASH)    good_damage = true;
+					if (mod == MOD_ROCKET)      good_damage = true;
+					if (mod == MOD_R_SPLASH)    good_damage = true;
+					if (mod == MOD_BFG_BLAST)   good_damage = true;
+					if (mod == MOD_HANDGRENADE) good_damage = true;
+					if (mod == MOD_HG_SPLASH)   good_damage = true;
+					if (mod == MOD_EXPLOSIVE)   good_damage = true;
+					if (mod == MOD_BARREL)      good_damage = true;
+					if (mod == MOD_BOMB)        good_damage = true;
+					// Knightmare added
+					if (mod == MOD_PHALANX)     good_damage = true;
+					if (mod == MOD_PHALANX_SPLASH) good_damage = true;
+					if (mod == MOD_TRACKER)	   good_damage = true;
+					if (mod == MOD_PROX)        good_damage = true;
+					if (mod == MOD_PROX_SPLASH) good_damage = true;
+					if (mod == MOD_NUKE)        good_damage = true;
+					if (mod == MOD_NBOMB)       good_damage = true;
+					if (mod == MOD_DOPPLE_EXPLODE) good_damage = true;
+					if (mod == MOD_SHOCK_SPLASH) good_damage = true;
+					if (mod == MOD_ETF_SPLASH)  good_damage = true;
 				}
 				if (!good_damage) return;
 			}

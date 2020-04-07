@@ -280,9 +280,15 @@ void ai_charge (edict_t *self, float dist)
 	// PMM - made AI_MANUAL_STEERING affect things differently here .. they turn, but
 	// don't set the ideal_yaw
 
+	// Zaero
+	if (self->monsterinfo.aiflags2 & AI2_ONESHOTTARGET)
+	{
+		VectorSubtract (self->monsterinfo.shottarget, self->s.origin, v);
+	}
+
 	// This is put in there so monsters won't move towards the origin after killing
 	// a tesla. This could be problematic, so keep an eye on it.
-	if(!self->enemy || !self->enemy->inuse)		//PGM
+	if (!self->enemy || !self->enemy->inuse)		//PGM
 		return;									//PGM
 
 	// PMM - save blindfire target
@@ -431,17 +437,17 @@ qboolean visible (edict_t *self, edict_t *other)
 
 	if ( (trace.fraction == 1.0) || (trace.ent == other))
 	{
-		if( (level.active_fog) && (self->svflags & SVF_MONSTER) )
+		if ( (level.active_fog) && (self->svflags & SVF_MONSTER) )
 		{
 			fog_t	*pfog;
 			float	r;
 			float	dw;
 			vec3_t	v;
 
-			pfog = &level.fog;
+			pfog = &level.current_fog;
 			VectorSubtract(spot2,spot1,v);
 			r = VectorLength(v);
-			switch(pfog->Model)
+			switch (pfog->Model)
 			{
 			case 1:
 				dw = pfog->Density/10000. * r;
@@ -452,17 +458,17 @@ qboolean visible (edict_t *self, edict_t *other)
 				self->monsterinfo.visibility = exp( -dw*dw );
 				break;
 			default:
-				if((r < pfog->Near) || (pfog->Near == pfog->Far))
+				if ((r < pfog->Near) || (pfog->Near == pfog->Far))
 					self->monsterinfo.visibility = 1.0;
-				else if(r > pfog->Far)
+				else if (r > pfog->Far)
 					self->monsterinfo.visibility = 0.0;
 				else
 					self->monsterinfo.visibility = 1.0 - (r - pfog->Near)/(pfog->Far - pfog->Near);
 				break;
 			}
-//			if(developer->value)
-//				gi.dprintf("r=%g, vis=%g\n",r,self->monsterinfo.visibility);
-			if(self->monsterinfo.visibility < 0.05)
+		//	if (developer->value)
+		//		gi.dprintf("r=%g, vis=%g\n",r,self->monsterinfo.visibility);
+			if (self->monsterinfo.visibility < 0.05)
 				return false;
 			else
 				return true;
@@ -674,7 +680,7 @@ qboolean FindTarget (edict_t *self)
 	edict_t		*reflection = NULL;		
 	edict_t		*self_reflection = NULL;
 
-//	if(self->monsterinfo.aiflags & (AI_CHASE_THING /*| AI_HINT_TEST*/))
+//	if  ((self->monsterinfo.aiflags & AI_CHASE_THING) || (self->monsterinfo.aiflags2 & AI2_HINT_TEST) )
 //		return false;
 
 	if (self->monsterinfo.aiflags & AI_GOOD_GUY) 

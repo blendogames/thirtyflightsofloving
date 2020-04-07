@@ -60,6 +60,7 @@ void SP_misc_teleporter_dest (edict_t *ent);
 	{
 		spot = G_Spawn();
 		spot->classname = "info_player_coop";
+		spot->spawnflags2 = 0;	// Zaero added
 		spot->s.origin[0] = 188 - 64;
 		spot->s.origin[1] = -164;
 		spot->s.origin[2] = 80;
@@ -68,6 +69,7 @@ void SP_misc_teleporter_dest (edict_t *ent);
 
 		spot = G_Spawn();
 		spot->classname = "info_player_coop";
+		spot->spawnflags2 = 0;	// Zaero added
 		spot->s.origin[0] = 188 + 64;
 		spot->s.origin[1] = -164;
 		spot->s.origin[2] = 80;
@@ -76,6 +78,7 @@ void SP_misc_teleporter_dest (edict_t *ent);
 
 		spot = G_Spawn();
 		spot->classname = "info_player_coop";
+		spot->spawnflags2 = 0;	// Zaero added
 		spot->s.origin[0] = 188 + 128;
 		spot->s.origin[1] = -164;
 		spot->s.origin[2] = 80;
@@ -914,7 +917,36 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 			}
 			// Hound
 			else if (!strcmp(attacker->classname, "monster_hound"))
-				message = "was mauled by a";
+			//	message = "was mauled by a";
+				message = "was leg humped to death by a";
+			// Handler
+			else if (!strcmp(attacker->classname, "monster_handler"))
+			{
+			//	message = "was ravished by an";
+				if (mod == MOD_HIT)
+					message = "was bludgened by an";
+				else
+					message = "was pumped full of lead by an";
+			}
+			// ZBoss
+			else if (!strcmp(attacker->classname, "monster_zboss"))
+			{
+			//	message = "was killed by a big, bad";
+				if (mod == MOD_HIT)
+					message = "was pulverized by a big, bad";
+				else if (mod == MOD_ROCKET) {
+					message = "ate a big, bad";
+					message2 = "'s rocket";
+				}
+				else if (mod == MOD_R_SPLASH) {
+					message = "almost dodged a big, bad";
+					message2 = "'s rocket";
+				}
+				else {
+					message = "was obliterated by a big, bad";
+					message2 = "'s plasma cannon";
+				}
+			}
 			// Rottweiler
 			else if (!strcmp(attacker->classname, "monster_dog"))
 				message = "was mauled by a";
@@ -1578,7 +1610,10 @@ void InitClientPersistant (gclient_t *client, int style)
 	//client->pers.weapon = item;
 	
 	client->pers.health			= 100;
-	client->pers.max_health		= sk_max_health->value;
+	if (deathmatch->value)
+		client->pers.max_health		= sk_max_health_dm->value;
+	else
+		client->pers.max_health		= sk_max_health->value;
 	client->pers.max_fc_health	= sk_max_foodcube_health->value;
 	client->pers.max_bullets	= sk_max_bullets->value;
 	client->pers.max_shells		= sk_max_shells->value;
@@ -1592,12 +1627,22 @@ void InitClientPersistant (gclient_t *client, int style)
 	client->pers.max_homing_rockets = sk_max_rockets->value;
 	client->pers.max_fuel       = sk_max_fuel->value;
 
-//ROGUE
+// ROGUE
 	client->pers.max_prox		= sk_max_prox->value;
 	client->pers.max_tesla		= sk_max_tesla->value;
 	client->pers.max_flechettes = sk_max_flechettes->value;
 	client->pers.max_disruptors = sk_max_rounds->value;
-//ROGUE
+// end ROGUE
+
+// Zaero
+	// These are currently unused, but init them anyway.
+	client->pers.max_flares			= 30;	// sk_max_flares->value;
+	client->pers.max_tbombs		    = 30;	// sk_max_tbombs->value;
+	client->pers.max_a2k			= 1;	// sk_max_a2k->value;
+	client->pers.max_empnuke		= 50;	// sk_max_empnuke->value;
+	client->pers.max_plasmashield	= 20;	// sk_max_plasmashield->value;
+// end Zaero
+
 	client->pers.fire_mode      = 0;  // Lazarus alternate fire mode
 
 	client->pers.connected = true;
@@ -2581,7 +2626,7 @@ void ClientBegin (edict_t *ent)
 		return;
 	}
 
-	Fog_Off (false);
+	Fog_Off (ent);
 
 	stuffcmd(ent,"alias +zoomin zoomin;alias -zoomin zoominstop\n");
 	stuffcmd(ent,"alias +zoomout zoomout;alias -zoomout zoomoutstop\n");

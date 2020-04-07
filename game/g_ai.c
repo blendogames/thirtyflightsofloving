@@ -414,7 +414,7 @@ qboolean visible (edict_t *self, edict_t *other)
 			float	dw;
 			vec3_t	v;
 
-			pfog = &level.fog;
+			pfog = &level.current_fog;
 			VectorSubtract(spot2,spot1,v);
 			r = VectorLength(v);
 			switch(pfog->Model)

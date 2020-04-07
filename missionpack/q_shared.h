@@ -1316,7 +1316,7 @@ typedef enum
 	EV_WADE, // wading or treading water
 	EV_WADE_MUD, // wading in mud
 	EV_CLIMB_LADDER, //climbing ladder
-	EV_PLAYER_TELEPORT_Q1	// Q1 teleport, sounds in rogue pak0.pak
+	EV_PLAYER_TELEPORT2	// Q1-style teleport, sounds in rogue pak0.pak
 	// end Knightmare
 } entity_event_t;
 

@@ -1461,12 +1461,22 @@ void Weapon_RocketLauncher_Fire (edict_t *ent, qboolean altfire)
 
 	VectorSet(offset, 8, 8, ent->viewheight-8);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
+
+	// Zaero add
+	if (EMPNukeCheck(ent, start))
+	{
+		ent->client->ps.gunframe++;
+		gi.sound (ent, CHAN_AUTO, gi.soundindex("items/empnuke/emp_missfire.wav"), 1, ATTN_NORM, 0);
+		return;
+	}
+	// end Zaero
+
 	// KM changed constant 650 for cvar sk_rocket_speed->value
-	if(ent->client->pers.fire_mode)
+	if (ent->client->pers.fire_mode)
 	{
 		edict_t	*target;
 
-		if(ent->client->homing_rocket && ent->client->homing_rocket->inuse)
+		if (ent->client->homing_rocket && ent->client->homing_rocket->inuse)
 		{
 			ent->client->ps.gunframe++;
 			return;
@@ -1479,9 +1489,9 @@ void Weapon_RocketLauncher_Fire (edict_t *ent, qboolean altfire)
 		fire_rocket (ent, start, forward, damage, sk_rocket_speed->value, damage_radius, radius_damage, NULL);
 
 	// send muzzle flash
-	//Knightmare- Gen cam code
-//	if(ent->client && ent->client->chasetoggle)
-	if(ent->client && ent->client->chaseactive)
+	// Knightmare- Gen cam code
+//	if (ent->client && ent->client->chasetoggle)
+	if (ent->client && ent->client->chaseactive)
 	{
 		gi.WriteByte (svc_muzzleflash);
 		gi.WriteShort (ent->client->oldplayer-g_edicts);
@@ -1536,7 +1546,8 @@ BLASTER / HYPERBLASTER
 ======================================================================
 */
 
-void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, int effect, int color)
+//void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, int effect, int color)
+int Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, int effect, int color)
 {
 	vec3_t	forward, right;
 	vec3_t	start;
@@ -1555,6 +1566,14 @@ void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, in
 
 	VectorScale (forward, -2, ent->client->kick_origin);
 	ent->client->kick_angles[0] = -1;
+
+	// Zaero add
+	if (EMPNukeCheck(ent, start))
+	{
+		gi.sound (ent, CHAN_AUTO, gi.soundindex("items/empnuke/emp_missfire.wav"), 1, ATTN_NORM, 0);
+		return 0;
+	}
+	// end Zaero
 
 	if (!hyper)
 		fire_blaster (ent, start, forward, damage, sk_blaster_speed->value, effect, hyper, color);
@@ -1614,6 +1633,7 @@ void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, in
 		gi.multicast (ent->s.origin, MULTICAST_PVS);
 	}	
 	PlayerNoise(ent, start, PNOISE_WEAPON);
+	return 1;
 }
 
 
@@ -1723,9 +1743,11 @@ void Weapon_HyperBlaster_Fire (edict_t *ent, qboolean altfire)
 				damage = sk_hyperblaster_damage_dm->value;
 			else
 				damage = sk_hyperblaster_damage->value;
-			Blaster_Fire (ent, offset, damage, true, effect, color);
-			if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
-				ent->client->pers.inventory[ent->client->ammo_index]--;
+		//	Blaster_Fire (ent, offset, damage, true, effect, color);
+			if ( Blaster_Fire (ent, offset, damage, true, effect, color) ) {
+				if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
+					ent->client->pers.inventory[ent->client->ammo_index]--;
+			}
 
 			ent->client->anim_priority = ANIM_ATTACK;
 			if (ent->client->ps.pmove.pm_flags & PMF_DUCKED)
@@ -1980,7 +2002,7 @@ void Chaingun_Fire (edict_t *ent, qboolean altfire)
 //		kick *= damage_multiplier;
 //PGM
 	}
-		if (is_double)
+	if (is_double)
 	{
 		damage *= 2;
 		kick *= 2;
@@ -1991,6 +2013,14 @@ void Chaingun_Fire (edict_t *ent, qboolean altfire)
 		ent->client->kick_origin[i] = crandom() * 0.35;
 		ent->client->kick_angles[i] = crandom() * 0.7;
 	}
+
+	// Zaero add
+	if (EMPNukeCheck(ent, ent->s.origin))
+	{
+		gi.sound (ent, CHAN_AUTO, gi.soundindex("items/empnuke/emp_missfire.wav"), 1, ATTN_NORM, 0);
+		return;
+	}
+	// end Zaero
 
 	for (i=0 ; i<shots ; i++)
 	{
@@ -2257,12 +2287,22 @@ void weapon_railgun_fire (edict_t *ent, qboolean altfire)
 
 	VectorSet(offset, 0, 7,  ent->viewheight-8);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
+
+	// Zaero add
+	if (EMPNukeCheck(ent, start))
+	{
+		ent->client->ps.gunframe++;
+		gi.sound (ent, CHAN_AUTO, gi.soundindex("items/empnuke/emp_missfire.wav"), 1, ATTN_NORM, 0);
+		return;
+	}
+	// end Zaero
+
 	fire_rail (ent, start, forward, damage, kick);
 
 	// send muzzle flash
-	//Knightmare- Gen cam code
-//	if(ent->client && ent->client->chasetoggle)
-	if(ent->client && ent->client->chaseactive)
+	// Knightmare- Gen cam code
+//	if (ent->client && ent->client->chasetoggle)
+	if (ent->client && ent->client->chaseactive)
 	{
 		gi.WriteByte (svc_muzzleflash);
 		gi.WriteShort (ent->client->oldplayer-g_edicts);
@@ -2312,6 +2352,34 @@ void weapon_bfg_fire (edict_t *ent, qboolean altfire)
 	int		damage;
 	float	damage_radius = sk_bfg_radius->value;
 
+	// Zaero- moved AngleVectors/VectorSet/P_ProjectSource here
+	AngleVectors (ent->client->v_angle, forward, right, NULL);
+	VectorSet (offset, 8, 8, ent->viewheight-8);
+	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
+
+	// Zaero add
+	if (ent->client->ps.gunframe == 9)
+	{
+	//	ent->flags &= ~FL_BFGMISSFIRE;
+		ent->client->bfg_missfire = false;
+	}
+
+//	if ( !(ent->flags & FL_BFGMISSFIRE) && EMPNukeCheck(ent, start))
+	if ( !ent->client->bfg_missfire && EMPNukeCheck(ent, start) )
+	{
+	//	ent->flags |= FL_BFGMISSFIRE;
+		ent->client->bfg_missfire = true;
+		gi.sound (ent, CHAN_AUTO, gi.soundindex("items/empnuke/emp_missfire.wav"), 1, ATTN_NORM, 0);
+	}
+
+//	if (ent->flags & FL_BFGMISSFIRE)
+	if (ent->client->bfg_missfire)
+	{
+		ent->client->ps.gunframe++;
+		return;
+	}
+	// end Zaero
+
 	if (deathmatch->value)
 		damage = sk_bfg_damage_dm->value;
 	else
@@ -2320,9 +2388,9 @@ void weapon_bfg_fire (edict_t *ent, qboolean altfire)
 	if (ent->client->ps.gunframe == 9)
 	{
 		// send muzzle flash
-		//Knightmare- Gen cam code
-//		if(ent->client && ent->client->chasetoggle)
-		if(ent->client && ent->client->chaseactive)
+		// Knightmare- Gen cam code
+//		if (ent->client && ent->client->chasetoggle)
+		if (ent->client && ent->client->chaseactive)
 		{
 			gi.WriteByte (svc_muzzleflash);
 			gi.WriteShort (ent->client->oldplayer-g_edicts);
@@ -2361,8 +2429,8 @@ void weapon_bfg_fire (edict_t *ent, qboolean altfire)
 		damage *= 2;
 	}
 
-	AngleVectors (ent->client->v_angle, forward, right, NULL);
-
+//	Zaero- moved above
+//	AngleVectors (ent->client->v_angle, forward, right, NULL);
 	VectorScale (forward, -2, ent->client->kick_origin);
 
 	// make a big pitch kick with an inverse fall
@@ -2370,8 +2438,10 @@ void weapon_bfg_fire (edict_t *ent, qboolean altfire)
 	ent->client->v_dmg_roll = crandom()*8;
 	ent->client->v_dmg_time = level.time + DAMAGE_TIME;
 
-	VectorSet(offset, 8, 8, ent->viewheight-8);
+/*	VectorSet(offset, 8, 8, ent->viewheight-8);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
+*/
+
 	fire_bfg (ent, start, forward, damage, sk_bfg_speed->value, damage_radius); //was 400
 
 	ent->client->ps.gunframe++;
@@ -2445,6 +2515,15 @@ void weapon_ionripper_fire (edict_t *ent, qboolean altfire)
 	VectorSet (offset, 16, 7, ent->viewheight - 8);
 
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
+
+	// Zaero add
+	if (EMPNukeCheck(ent, start))
+	{
+		ent->client->ps.gunframe++;
+		gi.sound (ent, CHAN_AUTO, gi.soundindex("items/empnuke/emp_missfire.wav"), 1, ATTN_NORM, 0);
+		return;
+	}
+	// end Zaero
 
 	fire_ionripper (ent, start, forward, damage, sk_ionripper_speed->value, EF_IONRIPPER);
 
@@ -2527,6 +2606,15 @@ void weapon_phalanx_fire (edict_t *ent, qboolean altfire)
 	VectorSet(offset, 0, 8,  ent->viewheight-8);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 
+	// Zaero add
+	if (EMPNukeCheck(ent, start))
+	{
+		ent->client->ps.gunframe++;
+		gi.sound (ent, CHAN_AUTO, gi.soundindex("items/empnuke/emp_missfire.wav"), 1, ATTN_NORM, 0);
+		return;
+	}
+	// end Zaero
+
 	if (ent->client->ps.gunframe == 8)
 	{
 		v[PITCH] = ent->client->v_angle[PITCH];
@@ -2548,9 +2636,9 @@ void weapon_phalanx_fire (edict_t *ent, qboolean altfire)
 		fire_plasma (ent, start, forward, damage, sk_phalanx_speed->value, damage_radius, radius_damage);
 
 		// send muzzle flash
-		//Knightmare- Gen cam code
-//		if(ent->client && ent->client->chasetoggle)
-		if(ent->client && ent->client->chaseactive)
+		// Knightmare- Gen cam code
+//		if (ent->client && ent->client->chasetoggle)
+		if (ent->client && ent->client->chaseactive)
 		{
 			gi.WriteByte (svc_muzzleflash);
 			gi.WriteShort (ent->client->oldplayer-g_edicts);
@@ -2636,7 +2724,7 @@ void Weapon_Trap (edict_t *ent)
 		ChangeWeapon (ent);
 		return;
 	}
-	//Knightmare- no throwing traps while controlling turret
+	// Knightmare- no throwing traps while controlling turret
 	if (ent->flags & FL_TURRET_OWNER)
 	{
 		ent->client->ps.gunframe = 0;
@@ -2773,7 +2861,7 @@ void weapon_chainfist_fire (edict_t *ent, qboolean altfire)
 		damage = sk_chainfist_damage->value;
 
 	if (is_quad)
-//		damage *= damage_multiplier;
+	//	damage *= damage_multiplier;
 		damage *= 4;
 	if (is_double)
 		damage *= 2;
@@ -2852,23 +2940,23 @@ void Weapon_ChainFist (edict_t *ent)
 	{
 		if((ent->client->pers.hand != CENTER_HANDED) && random() < 0.4)
 			chainfist_smoke(ent);
-//		ent->client->ps.gunframe = 40;
+	//	ent->client->ps.gunframe = 40;
 	}
 	else if(ent->client->ps.gunframe == 51 && (rand()&7))
 	{
 		if((ent->client->pers.hand != CENTER_HANDED) && random() < 0.4)
 			chainfist_smoke(ent);
-//		ent->client->ps.gunframe = 49;
+	//	ent->client->ps.gunframe = 49;
 	}	
 
 	// set the appropriate weapon sound.
 	if(ent->client->weaponstate == WEAPON_FIRING)
-//		ent->client->weapon_sound = attack_index;
+	//	ent->client->weapon_sound = attack_index;
 		ent->client->weapon_sound = gi.soundindex("weapons/sawhit.wav");
 	else if(ent->client->weaponstate == WEAPON_DROPPING)
 		ent->client->weapon_sound = 0;
 	else
-//		ent->client->weapon_sound = idle_index;
+	//	ent->client->weapon_sound = idle_index;
 		ent->client->weapon_sound = gi.soundindex("weapons/sawidle.wav");
 
 	Weapon_Generic (ent, 4, 32, 57, 60, pause_frames, fire_frames, weapon_chainfist_fire);
@@ -2942,23 +3030,32 @@ void weapon_tracker_fire (edict_t *self, qboolean altfire)
 	VectorSet(offset, 24, 8, self->viewheight-8);
 	P_ProjectSource (self->client, self->s.origin, offset, forward, right, start);
 
+	// Zaero add
+	if (EMPNukeCheck(self, start))
+	{
+		self->client->ps.gunframe++;
+		gi.sound (self, CHAN_AUTO, gi.soundindex("items/empnuke/emp_missfire.wav"), 1, ATTN_NORM, 0);
+		return;
+	}
+	// end Zaero
+
 	// FIXME - can we shorten this? do we need to?
 	VectorMA (start, WORLD_SIZE, forward, end);	// was 8192
 	enemy = NULL;
 	//PMM - doing two traces .. one point and one box.  
 	tr = gi.trace (start, vec3_origin, vec3_origin, end, self, MASK_SHOT);
-	if(tr.ent != world)
+	if (tr.ent != world)
 	{	//Knightmare- track all destroyable objects
-		if(tr.ent->svflags & SVF_MONSTER || tr.ent->client || tr.ent->svflags & SVF_DAMAGEABLE || tr.ent->takedamage == DAMAGE_YES)
+		if (tr.ent->svflags & SVF_MONSTER || tr.ent->client || tr.ent->svflags & SVF_DAMAGEABLE || tr.ent->takedamage == DAMAGE_YES)
 		{
-			if(tr.ent->health > 0)
+			if (tr.ent->health > 0)
 				enemy = tr.ent;
 		}
 	}
 	else
 	{
 		tr = gi.trace (start, mins, maxs, end, self, MASK_SHOT);
-		if(tr.ent != world)
+		if (tr.ent != world)
 		{
 			if(tr.ent->svflags & SVF_MONSTER || tr.ent->client || tr.ent->svflags & SVF_DAMAGEABLE)
 			{
@@ -2974,9 +3071,9 @@ void weapon_tracker_fire (edict_t *self, qboolean altfire)
 	fire_tracker (self, start, forward, damage, sk_disruptor_speed->value, enemy);
 
 	// send muzzle flash
-	//Knightmare- Gen cam code
-//	if(self->client && self->client->chasetoggle)
-	if(self->client && self->client->chaseactive)
+	// Knightmare- Gen cam code
+//	if (self->client && self->client->chasetoggle)
+	if (self->client && self->client->chaseactive)
 	{
 		gi.WriteByte (svc_muzzleflash);
 		gi.WriteShort (self->client->oldplayer-g_edicts);
@@ -3031,13 +3128,13 @@ void weapon_etf_rifle_fire (edict_t *ent, qboolean altfire)
 	damage_radius = sk_etf_rifle_radius->value;
 	radius_damage = sk_etf_rifle_radius_damage->value;
 
-	if(deathmatch->value)
+	if (deathmatch->value)
 		damage = sk_etf_rifle_damage->value;
 	else
 		damage = sk_etf_rifle_damage->value;
 
 	// PGM - adjusted to use the quantity entry in the weapon structure.
-	if(ent->client->pers.inventory[ent->client->ammo_index] < ent->client->pers.weapon->quantity)
+	if (ent->client->pers.inventory[ent->client->ammo_index] < ent->client->pers.weapon->quantity)
 	{
 		VectorClear (ent->client->kick_origin);
 		VectorClear (ent->client->kick_angles);
@@ -3063,7 +3160,7 @@ void weapon_etf_rifle_fire (edict_t *ent, qboolean altfire)
 		damage_radius *= 2;
 	}
 
-	for(i=0;i<3;i++)
+	for (i=0;i<3;i++)
 	{
 		ent->client->kick_origin[i] = crandom() * 0.85;
 		ent->client->kick_angles[i] = crandom() * 0.85;
@@ -3077,7 +3174,7 @@ void weapon_etf_rifle_fire (edict_t *ent, qboolean altfire)
 
 	// FIXME - set correct frames for different offsets.
 
-	if(ent->client->ps.gunframe == 6)					// right barrel
+	if (ent->client->ps.gunframe == 6)					// right barrel
 	{
 	//	gi.dprintf("right\n");
 		VectorSet(offset, 15, 8, -8);
@@ -3096,7 +3193,7 @@ void weapon_etf_rifle_fire (edict_t *ent, qboolean altfire)
 
 	// send muzzle flash
 	//Knightmare- Gen cam code
-	if(ent->client && ent->client->chaseactive)
+	if (ent->client && ent->client->chaseactive)
 	{
 		gi.WriteByte (svc_muzzleflash);
 		gi.WriteShort (ent->client->oldplayer-g_edicts);
@@ -3192,7 +3289,9 @@ void Heatbeam_Fire (edict_t *ent, qboolean altfire)
 //	}
 
 	ent->client->ps.gunframe++;
-	if(ent->client && !ent->client->chaseactive) //Knightmare- fix for third person mode
+
+	// Zaero- moved below
+	if (ent->client && !ent->client->chaseactive) // Knightmare- fix for third person mode
 		ent->client->ps.gunindex = gi.modelindex ("models/weapons/v_beamer2/tris.md2");
 
 	if (is_quad)
@@ -3207,20 +3306,27 @@ void Heatbeam_Fire (edict_t *ent, qboolean altfire)
 	// get start / end positions
 	AngleVectors (ent->client->v_angle, forward, right, up);
 
-// This offset is the "view" offset for the beam start (used by trace)
-	
+	// This offset is the "view" offset for the beam start (used by trace)
 	VectorSet(offset, 7, 2, ent->viewheight-3);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 
 	// This offset is the entity offset
 	VectorSet(offset, 2, 7, -3);
 
+	// Zaero add
+	if (EMPNukeCheck(ent, start))
+	{
+		gi.sound (ent, CHAN_AUTO, gi.soundindex("items/empnuke/emp_missfire.wav"), 1, ATTN_NORM, 0);
+		return;
+	}
+	// end Zaero
+
 	fire_heat (ent, start, forward, offset, damage, kick, false);
 
 	// send muzzle flash
-	//Knightmare- Gen cam code
-//	if(ent->client && ent->client->chasetoggle)
-	if(ent->client && ent->client->chaseactive)
+	// Knightmare- Gen cam code
+//	if (ent->client && ent->client->chasetoggle)
+	if (ent->client && ent->client->chaseactive)
 	{
 		gi.WriteByte (svc_muzzleflash);
 		gi.WriteShort (ent->client->oldplayer-g_edicts);
@@ -3290,7 +3396,7 @@ void Weapon_Heatbeam (edict_t *ent)
 //				ent->client->ps.gunframe = 8;
 //				ent->client->ps.gunskin = 0;
 //				ent->client->ps.gunindex = on_model;
-				if(ent->client && !ent->client->chaseactive) //Knightmare- fix for third person mode
+				if (ent->client && !ent->client->chaseactive) //Knightmare- fix for third person mode
 					ent->client->ps.gunindex = gi.modelindex ("models/weapons/v_beamer2/tris.md2");
 			}
 			else
@@ -3315,7 +3421,7 @@ void Weapon_Heatbeam (edict_t *ent)
 	{
 //		ent->client->ps.gunskin = 1;
 //		ent->client->ps.gunindex = off_model;
-		if(ent->client && !ent->client->chaseactive) //Knightmare- fix for third person mode
+		if (ent->client && !ent->client->chaseactive) //Knightmare- fix for third person mode
 			ent->client->ps.gunindex = gi.modelindex ("models/weapons/v_beamer/tris.md2");
 		ent->client->weapon_sound = 0;
 	}
@@ -3337,11 +3443,12 @@ SHOCKWAVE
 
 void Shockwave_Fire (edict_t *ent, qboolean altfire)
 {
-	vec3_t	offset, start;
-	vec3_t	forward, right;
-	int		damage;
-	float	damage_radius;
-	int		radius_damage;
+	vec3_t		offset, start;
+	vec3_t		forward, right;
+	int			damage;
+	float		damage_radius;
+	int			radius_damage;
+	qboolean	emp_missfire = false;	// added for Zaero
 
 	damage = sk_shockwave_damage->value + (int)(random() * sk_shockwave_damage2->value);
 	radius_damage = sk_shockwave_rdamage->value;
@@ -3358,9 +3465,29 @@ void Shockwave_Fire (edict_t *ent, qboolean altfire)
 		radius_damage *= 2;
 	}
 
-	if (ent->client->ps.gunframe == 5) //spin up and fire sound
+	// Zaero- moved here
+	AngleVectors (ent->client->v_angle, forward, right, NULL);
+	VectorScale (forward, -2, ent->client->kick_origin);
+	ent->client->kick_angles[0] = -1;
+	VectorSet(offset, 0, 7, ent->viewheight-8);
+	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
+
+	// Zaero add
+	if (EMPNukeCheck(ent, start))
 	{
-		gi.sound (ent, CHAN_AUTO, gi.soundindex("weapons/shockfire.wav"), 1.0, ATTN_NORM, 0);
+		emp_missfire = true;
+	//	ent->client->ps.gunframe++;
+	//	gi.sound (ent, CHAN_AUTO, gi.soundindex("items/empnuke/emp_missfire.wav"), 1, ATTN_NORM, 0);
+	//	return;
+	}
+	// end Zaero
+
+	if (ent->client->ps.gunframe == 5) // spin up and fire sound
+	{
+		if (emp_missfire)
+			gi.sound (ent, CHAN_AUTO, gi.soundindex("items/empnuke/emp_missfire.wav"), 1, ATTN_NORM, 0);
+		else
+			gi.sound (ent, CHAN_AUTO, gi.soundindex("weapons/shockfire.wav"), 1.0, ATTN_NORM, 0);
 		ent->client->ps.gunframe++;
 		return;
 	}
@@ -3375,16 +3502,27 @@ void Shockwave_Fire (edict_t *ent, qboolean altfire)
 		return;
 	}
 
+	// Zaero add
+	if (emp_missfire)
+	{
+		ent->client->ps.gunframe++;
+		return;
+	}
+	// end Zaero
+
+/*	Zaero- moved above
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
 	VectorScale (forward, -2, ent->client->kick_origin);
 	ent->client->kick_angles[0] = -1;
 	VectorSet(offset, 0, 7, ent->viewheight-8);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
+*/
+
 	fire_shock_sphere (ent, start, forward, damage, sk_shockwave_speed->value, damage_radius, radius_damage);
 
 	// send muzzle flash and sound
-	//Knightmare- Gen cam code
-	if(ent->client && ent->client->chaseactive)
+	// Knightmare- Gen cam code
+	if (ent->client && ent->client->chaseactive)
 	{
 		gi.WriteByte (svc_muzzleflash);
 		gi.WriteShort (ent->client->oldplayer-g_edicts);
@@ -3418,7 +3556,7 @@ void Weapon_Shockwave (edict_t *ent)
 }
 
 //======================================================================
-void Weapon_Null(edict_t *ent)
+void Weapon_Null (edict_t *ent)
 {
 	if (ent->client->newweapon)
 		ChangeWeapon(ent);
@@ -3435,7 +3573,7 @@ void kick_attack (edict_t * ent )
 	trace_t		tr;
 	vec3_t		end;
 
-	if(ent->client->quad_framenum > level.framenum)
+	if (ent->client->quad_framenum > level.framenum)
 	{
 		damage *= 4;
 		kick *= 4;

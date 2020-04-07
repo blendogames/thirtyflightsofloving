@@ -843,11 +843,35 @@
 				>
 			</File>
 			<File
+				RelativePath=".\z_ai.c"
+				>
+			</File>
+			<File
+				RelativePath=".\z_boss.c"
+				>
+			</File>
+			<File
+				RelativePath=".\z_handler.c"
+				>
+			</File>
+			<File
 				RelativePath="z_hound.c"
 				>
 			</File>
 			<File
+				RelativePath=".\z_item.c"
+				>
+			</File>
+			<File
 				RelativePath="z_sentien.c"
+				>
+			</File>
+			<File
+				RelativePath=".\z_trigger.c"
+				>
+			</File>
+			<File
+				RelativePath=".\z_weapon.c"
 				>
 			</File>
 		</Filter>
@@ -1073,6 +1097,14 @@
 			</File>
 			<File
 				RelativePath="z_anim.h"
+				>
+			</File>
+			<File
+				RelativePath=".\z_boss.h"
+				>
+			</File>
+			<File
+				RelativePath=".\z_handler.h"
 				>
 			</File>
 			<File

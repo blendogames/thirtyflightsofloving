@@ -1435,7 +1435,7 @@ qboolean CheckCoop_MapHacks (edict_t *ent)
 }
 
 
-//Knightmare added
+// Knightmare added
 /*
 ====================
 UseSpecialGoodGuyFlag
@@ -1451,13 +1451,14 @@ qboolean UseSpecialGoodGuyFlag (edict_t *monster)
 		return false;
 
 	if (!strcmp(monster->classname, "monster_gekk")
-		|| !strcmp(monster->classname, "monster_stalker"))
+		|| !strcmp(monster->classname, "monster_stalker")
+		|| !strcmp(monster->classname, "monster_handler"))
 		return true;
 
 	return false;
 }
 
-//Knightmare added
+// Knightmare added
 /*
 ====================
 UseRegularGoodGuyFlag
@@ -1475,7 +1476,8 @@ qboolean UseRegularGoodGuyFlag (edict_t *monster)
 	if (strcmp(monster->classname, "monster_gekk")
 		&& strcmp(monster->classname, "monster_stalker")
 		&& strcmp(monster->classname, "monster_turret")
-		&& strcmp(monster->classname, "monster_fixbot"))
+		&& strcmp(monster->classname, "monster_fixbot")
+		&& strcmp(monster->classname, "monster_handler"))
 		return true;
 
 	return false;

@@ -149,6 +149,7 @@ void ValidateSelectedItem (edict_t *ent)
 static void Cmd_Give_Usage (edict_t *ent, char *parm1)
 {
 	gi.cprintf (ent, PRINT_HIGH, "usage: give %s {xatrix | rogue | neither | both}\n", parm1);
+//	gi.cprintf (ent, PRINT_HIGH, "usage: give %s {xatrix | rogue | zaero | neither | both}\n", parm1);
 }
 
 qboolean Cmd_Give_ParseFlags (edict_t *ent, char *parm1, int *flags)
@@ -166,6 +167,8 @@ qboolean Cmd_Give_ParseFlags (edict_t *ent, char *parm1, int *flags)
 		*flags |= 4;
 	else if (Q_stricmp(gi.argv(2), "both") == 0)
 		*flags |= 6;
+//	else if (Q_stricmp(gi.argv(2), "zaero") == 0)
+//		*flags |= 8;
 	else if (Q_stricmp(gi.argv(2), "neither")) {
 		Cmd_Give_Usage (ent, parm1);
 		return false;
@@ -196,7 +199,7 @@ void Cmd_Give_f (edict_t *ent)
 		return;
 	}
 	
-	//Knightmare- override ammo pickup values with cvars
+	// Knightmare- override ammo pickup values with cvars
 	SetAmmoPickupValues ();
 
 	name = gi.args();
@@ -251,6 +254,8 @@ void Cmd_Give_f (edict_t *ent)
 				continue;
 			if ( (it->flags & IT_ROGUE) && !(give_flags & 4) )
 				continue;
+			if ( (it->flags & IT_ZAERO) && !(give_flags & 8) )
+				continue;
 			ent->client->pers.inventory[i] += 1;
 		}
 		if (!give_all)
@@ -270,6 +275,8 @@ void Cmd_Give_f (edict_t *ent)
 			if ( (it->flags & IT_XATRIX) && !(give_flags & 2) )
 				continue;
 			if ( (it->flags & IT_ROGUE) && !(give_flags & 4) )
+				continue;
+			if ( (it->flags & IT_ZAERO) && !(give_flags & 8) )
 				continue;
 			if (it->classname && !Q_stricmp(it->classname,"ammo_fuel") && !developer->value)
 				continue;
@@ -327,6 +334,8 @@ void Cmd_Give_f (edict_t *ent)
 			if ( (it->flags & IT_XATRIX) && !(give_flags & 2) )
 				continue;
 			if ( (it->flags & IT_ROGUE) && !(give_flags & 4) )
+				continue;
+			if ( (it->flags & IT_ZAERO) && !(give_flags & 8) )
 				continue;
 			if (it->classname && !Q_stricmp(it->classname,"item_jetpack") && !developer->value)
 				continue;

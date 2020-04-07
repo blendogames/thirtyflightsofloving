@@ -164,8 +164,10 @@ void ShutdownGame (void)
 		//gi.cvar_forceset("gl_clear", va("%d", lazarus_gl_clear->value));
 	}
 	// Lazarus: Turn off fog if it's on
-	if (!dedicated->value)
-		Fog_Off (true);
+	if (!dedicated->value) {
+	//	Fog_Off (true);
+		Fog_Off_Global ();
+	}
 
 	gi.FreeTags (TAG_LEVEL);
 	gi.FreeTags (TAG_GAME);

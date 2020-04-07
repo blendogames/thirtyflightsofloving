@@ -603,27 +603,27 @@ void q1_fire_lightning (edict_t *self, vec3_t start, vec3_t dir, int damage)
 		// trace 2
 		tr = gi.trace (start, NULL, NULL, end, self, MASK_SHOT);
 	
-		if(self->client->chasetoggle)
+		if (self->client->chasetoggle)
 		{
 			gi.WriteByte (svc_temp_entity);
 			gi.WriteByte (TE_MEDIC_CABLE_ATTACK);
-//			gi.WriteByte (TE_HEATBEAM);
+		//	gi.WriteByte (TE_HEATBEAM);
 			gi.WriteShort (self->client->oldplayer - g_edicts);
 			gi.WritePosition (start);
 			gi.WritePosition (tr.endpos); 
 			gi.multicast (self->client->oldplayer->s.origin, MULTICAST_PVS);
-//			gi.multicast (self->client->oldplayer->s.origin, MULTICAST_ALL);
+		//	gi.multicast (self->client->oldplayer->s.origin, MULTICAST_ALL);
 		}
 		else
 		{
 			gi.WriteByte (svc_temp_entity);
 			gi.WriteByte (TE_MEDIC_CABLE_ATTACK);
-//			gi.WriteByte (TE_HEATBEAM);
+		//	gi.WriteByte (TE_HEATBEAM);
 			gi.WriteShort (self - g_edicts);
 			gi.WritePosition (start);
 			gi.WritePosition (tr.endpos); 
 			gi.multicast (self->s.origin, MULTICAST_PVS);
-//			gi.multicast (self->s.origin, MULTICAST_ALL);
+		//	gi.multicast (self->s.origin, MULTICAST_ALL);
 		}
 
 		if ((tr.ent != self) && (tr.ent->takedamage))
@@ -969,12 +969,12 @@ Fires a gib projectile.  Used by the Zombie.
 		gi.multicast (ent->s.origin, MULTICAST_PVS);
 	}
 		
-// no more touches	
+//	no more touches	
 	ent->touch = NULL;
 
 	ent->nextthink = level.time + 3;
 	ent->think = G_FreeEdict;
-	//G_FreeEdict (ent);
+//	G_FreeEdict (ent);
 }
 
 
@@ -991,7 +991,7 @@ void q1_fire_gib (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int sp
 	VectorCopy (start, gib->s.origin);
 	VectorScale (aimdir, speed, gib->velocity);
 	VectorMA (gib->velocity, 200, up, gib->velocity);
-	//VectorMA (gib->velocity, 20, right, gib->velocity);
+//	VectorMA (gib->velocity, 20, right, gib->velocity);
 	
 	VectorSet (gib->avelocity, 3000, 1000, 2000);
 	gib->movetype = MOVETYPE_BOUNCE;

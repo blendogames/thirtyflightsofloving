@@ -103,7 +103,7 @@ field_t fields[] = {
 #endif
 
 	{"aiflags", FOFS(monsterinfo.aiflags), F_INT},
-	{"moreaiflags", FOFS(monsterinfo.moreaiflags), F_INT},
+	{"aiflags2", FOFS(monsterinfo.aiflags2), F_INT},
 	{"goalentity", FOFS(goalentity), F_EDICT, FFL_NOSPAWN},
 	{"movetarget", FOFS(movetarget), F_EDICT, FFL_NOSPAWN},
 	{"enemy", FOFS(enemy), F_EDICT, FFL_NOSPAWN},
@@ -157,7 +157,7 @@ field_t fields[] = {
 	{"phase", STOFS(phase), F_FLOAT, FFL_SPAWNTEMP},
 	{"shift", STOFS(shift), F_FLOAT, FFL_SPAWNTEMP},
 
-//need for item field in edict struct, FFL_SPAWNTEMP item will be skipped on saves
+	// need for item field in edict struct, FFL_SPAWNTEMP item will be skipped on saves
 	{"item", FOFS(item), F_ITEM},
 
 	{"gravity", STOFS(gravity), F_LSTRING, FFL_SPAWNTEMP},
@@ -302,6 +302,40 @@ field_t fields[] = {
 //	{"sidestep", FOFS(monsterinfo.sidestep), F_MMOVE, FFL_NOSPAWN},
 	// ROGUE	
 
+	// Zaero
+	{"model2", FOFS(model2), F_LSTRING},
+	{"model3", FOFS(model3), F_LSTRING},
+	{"model4", FOFS(model4), F_LSTRING},
+	
+	{"aspeed", FOFS(aspeed), F_FLOAT},
+	{"timeout", FOFS(timeout), F_FLOAT},
+	{"active", FOFS(active), F_INT},
+	{"seq", FOFS(seq), F_INT},
+	{"spawnflags2", FOFS(spawnflags2), F_INT},
+	{"oldentnum", FOFS(oldentnum), F_INT},
+	{"laser", FOFS(laser), F_EDICT, FFL_NOSPAWN},
+	{"weaponsound_time", FOFS(weaponsound_time), F_FLOAT},
+
+	{"zRaduisList", FOFS(zRaduisList), F_EDICT, FFL_NOSPAWN},
+	{"zSchoolChain", FOFS(zSchoolChain), F_EDICT, FFL_NOSPAWN},
+	{"zDistance", FOFS(zDistance), F_FLOAT},
+	
+	{"rideWith0", FOFS(rideWith[0]), F_EDICT, FFL_NOSPAWN},
+	{"rideWith1", FOFS(rideWith[1]), F_EDICT, FFL_NOSPAWN},
+	{"rideWithOffset0", FOFS(rideWithOffset[0]), F_VECTOR},
+	{"rideWithOffset1", FOFS(rideWithOffset[1]), F_VECTOR},
+
+	{"mangle", FOFS(mangle), F_VECTOR},
+	{"visorFrames", FOFS(visorFrames), F_INT},
+	{"mteam", FOFS(mteam), F_LSTRING},
+	{"onFloor", FOFS(onFloor), F_INT},
+	{"bossFireTimeout", FOFS(bossFireTimeout), F_FLOAT},
+	{"bossFireCount", FOFS(bossFireCount), F_INT},
+
+	{"mirrortarget", 0, F_IGNORE},
+	{"mirrorlevelsave", 0, F_IGNORE},
+	// end Zaero
+
 	{0, 0, 0, 0}
 
 };
@@ -319,6 +353,9 @@ field_t		levelfields[] =
 	{"disguise_violator", LLOFS(disguise_violator), F_EDICT},
 	// ROGUE
 
+	// Knightmare added
+	{"current_fog_ent", LLOFS(current_fog.ent), F_EDICT},
+
 	{NULL, 0, F_INT}
 };
 
@@ -329,13 +366,17 @@ field_t		clientfields[] =
 	{"newweapon", CLOFS(newweapon), F_ITEM},
 	// ROGUE
 	{"owned_sphere", CLOFS(owned_sphere), F_EDICT},
-	// ROGUE
-	//Knightmare
+	// end ROGUE
+	// Knightmare
 	{"chasecam", CLOFS(chasecam), F_EDICT},
 	{"oldplayer", CLOFS(oldplayer), F_EDICT},
 	{"push", CLOFS(push), F_EDICT},
 	{"spycam", CLOFS(spycam), F_EDICT},
 	{"homing_rocket", CLOFS(homing_rocket), F_EDICT},
+	// Zaero
+	{"zCameraTrack", CLOFS(zCameraTrack), F_EDICT},
+	{"zCameraLocalEntity", CLOFS(zCameraLocalEntity), F_EDICT},
+	// end Zaero
 	{NULL, 0, F_INT}
 };
 
@@ -397,6 +438,7 @@ void InitGame (void)
 
 	// change anytime vars
 	dmflags = gi.cvar ("dmflags", "0", CVAR_SERVERINFO);
+	zdmflags = gi.cvar ("zdmflags", "0", CVAR_SERVERINFO);	// Zaero added
 	fraglimit = gi.cvar ("fraglimit", "0", CVAR_SERVERINFO);
 	timelimit = gi.cvar ("timelimit", "0", CVAR_SERVERINFO);
 	password = gi.cvar ("password", "", CVAR_USERINFO);

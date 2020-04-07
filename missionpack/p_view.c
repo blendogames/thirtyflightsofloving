@@ -612,7 +612,7 @@ void SV_CalcBlend (edict_t *ent)
 	}
 
 //PGM
-	if(ent->client->nuke_framenum > level.framenum)
+	if (ent->client->nuke_framenum > level.framenum)
 	{
 		float brightness;
 		brightness = (ent->client->nuke_framenum - level.framenum) / 20.0;
@@ -652,6 +652,18 @@ void SV_CalcBlend (edict_t *ent)
 	if (ent->client->bonus_alpha > 0)
 		SV_AddBlend (0.85, 0.7, 0.3, ent->client->bonus_alpha, ent->client->ps.blend);
 
+	// Zaero added
+	// for blinding
+	if (ent->client->flashTime > 0)
+	{
+		float alpha = (float)ent->client->flashTime / (float)ent->client->flashBase;
+		if (alpha > 1)
+			alpha = 1;
+		SV_AddBlend(1, 1, 1, alpha, ent->client->ps.blend);
+		ent->client->flashTime--;
+	}
+	// end Zaero
+
 	// drop the damage value
 	ent->client->damage_alpha -= 0.06;
 	if (ent->client->damage_alpha < 0)
@@ -671,7 +683,7 @@ void SV_CalcBlend (edict_t *ent)
 		if ((ent->health <= 0) && (Q_stricmp(vid_ref->string,"gl")) && (Q_stricmp(vid_ref->string,"kmgl")))
 			ent->client->fadein = 0;
 
-		if(ent->client->fadein > level.framenum)
+		if (ent->client->fadein > level.framenum)
 		{
 			alpha = ent->client->fadealpha*(1.0 - (ent->client->fadein-level.framenum)/(ent->client->fadein-ent->client->fadestart));
 			SV_AddBlend (ent->client->fadecolor[0],
@@ -679,14 +691,14 @@ void SV_CalcBlend (edict_t *ent)
 						 ent->client->fadecolor[2],
 						 alpha, ent->client->ps.blend);
 		}
-		else if(ent->client->fadehold > level.framenum)
+		else if (ent->client->fadehold > level.framenum)
 		{
 			SV_AddBlend (ent->client->fadecolor[0],
 			             ent->client->fadecolor[1],
 						 ent->client->fadecolor[2],
 						 ent->client->fadealpha, ent->client->ps.blend);
 		}
-		else if(ent->client->fadeout > level.framenum)
+		else if (ent->client->fadeout > level.framenum)
 		{
 			alpha = ent->client->fadealpha*((ent->client->fadeout-level.framenum)/(ent->client->fadeout-ent->client->fadehold));
 			SV_AddBlend (ent->client->fadecolor[0],

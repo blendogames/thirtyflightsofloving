@@ -203,10 +203,10 @@ void CL_RegisterTEntSounds (void)
 	clMedia.sfx_player_land = S_RegisterSound ("player/land1.wav");
 	// player teleport
 	clMedia.sfx_player_teleport = S_RegisterSound ("misc/tele1.wav");
-	// Q1 player teleport (in rogue pak0.pak)
+	// Q1-style player teleport (in rogue pak0.pak)
 	for (i=0; i<5; i++) {
 		Com_sprintf (name, sizeof(name), "misc/r_tele%i.wav", i+1);
-		clMedia.sfx_player_teleport_q1[i] = S_RegisterSound (name);
+		clMedia.sfx_player_teleport2[i] = S_RegisterSound (name);
 	}
 	// item respawn
 	clMedia.sfx_item_respawn = S_RegisterSound ("items/respawn1.wav");

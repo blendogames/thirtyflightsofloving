@@ -43,26 +43,26 @@ void hound_sight (edict_t *self, edict_t *other)
 
 mframe_t hound_frames_stand1 [] =
 {
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,  // 10
+	ai_schoolStand, 0, NULL,
+	ai_schoolStand, 0, NULL,
+	ai_schoolStand, 0, NULL,
+	ai_schoolStand, 0, NULL,
+	ai_schoolStand, 0, NULL,
+	ai_schoolStand, 0, NULL,
+	ai_schoolStand, 0, NULL,
+	ai_schoolStand, 0, NULL,
+	ai_schoolStand, 0, NULL,
+	ai_schoolStand, 0, NULL,  // 10
 
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL
+	ai_schoolStand, 0, NULL,
+	ai_schoolStand, 0, NULL,
+	ai_schoolStand, 0, NULL,
+	ai_schoolStand, 0, NULL,
+	ai_schoolStand, 0, NULL,
+	ai_schoolStand, 0, NULL,
+	ai_schoolStand, 0, NULL,
+	ai_schoolStand, 0, NULL,
+	ai_schoolStand, 0, NULL
 };
 mmove_t hound_stand1 = {FRAME_stand1start, FRAME_stand1end, hound_frames_stand1, hound_stand};
 
@@ -70,29 +70,29 @@ mmove_t hound_stand1 = {FRAME_stand1start, FRAME_stand1end, hound_frames_stand1,
 
 mframe_t hound_frames_stand2 [] =
 {
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL, // 10
+	ai_schoolStand, 0, NULL,
+	ai_schoolStand, 0, NULL,
+	ai_schoolStand, 0, NULL,
+	ai_schoolStand, 0, NULL,
+	ai_schoolStand, 0, NULL,
+	ai_schoolStand, 0, NULL,
+	ai_schoolStand, 0, NULL,
+	ai_schoolStand, 0, NULL,
+	ai_schoolStand, 0, NULL,
+	ai_schoolStand, 0, NULL, // 10
 
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL, // 20
+	ai_schoolStand, 0, NULL,
+	ai_schoolStand, 0, NULL,
+	ai_schoolStand, 0, NULL,
+	ai_schoolStand, 0, NULL,
+	ai_schoolStand, 0, NULL,
+	ai_schoolStand, 0, NULL,
+	ai_schoolStand, 0, NULL,
+	ai_schoolStand, 0, NULL,
+	ai_schoolStand, 0, NULL,
+	ai_schoolStand, 0, NULL, // 20
 
-	ai_stand, 0, NULL
+	ai_schoolStand, 0, NULL
 };
 mmove_t hound_stand2 = {FRAME_stand2start, FRAME_stand2end, hound_frames_stand2, hound_stand};
 
@@ -101,13 +101,13 @@ mmove_t hound_stand2 = {FRAME_stand2start, FRAME_stand2end, hound_frames_stand2,
 void hound_stand (edict_t *self)
 {
 	if (random() < 0.8)
-  {
-  	self->monsterinfo.currentmove = &hound_stand1;
-  }
-  else
-  {
-  	self->monsterinfo.currentmove = &hound_stand2;
-  }
+	{
+		self->monsterinfo.currentmove = &hound_stand1;
+	}
+	else
+	{
+		self->monsterinfo.currentmove = &hound_stand2;
+	}
 }
 
 //
@@ -117,13 +117,13 @@ void hound_stand (edict_t *self)
 
 mframe_t hound_frames_run [] =
 {
-	ai_run, 60, NULL,
-	ai_run, 60, NULL,
-	ai_run, 40, NULL,
-	ai_run, 30, NULL,
-	ai_run, 30, NULL,
-	ai_run, 30, NULL,
-	ai_run, 40, NULL
+	ai_schoolRun, 60, NULL,
+	ai_schoolRun, 60, NULL,
+	ai_schoolRun, 40, NULL,
+	ai_schoolRun, 30, NULL,
+	ai_schoolRun, 30, NULL,
+	ai_schoolRun, 30, NULL,
+	ai_schoolRun, 40, NULL
 };
 mmove_t hound_move_run = {FRAME_runStart, FRAME_runEnd, hound_frames_run, NULL};
 
@@ -131,7 +131,7 @@ mmove_t hound_move_run = {FRAME_runStart, FRAME_runEnd, hound_frames_run, NULL};
 void hound_run (edict_t *self)
 {
 	if (self->monsterinfo.aiflags & AI_STAND_GROUND)
-    hound_stand(self);
+		hound_stand(self);
 	else
 		self->monsterinfo.currentmove = &hound_move_run;
 }
@@ -143,14 +143,14 @@ void hound_run (edict_t *self)
 
 mframe_t hound_frames_walk [] =
 {
-	ai_walk,  7, NULL,
-	ai_walk,  7, NULL,
-	ai_walk,  7, NULL,
-	ai_walk,  7, NULL,
-	ai_walk,  7, NULL,
-	ai_walk,  7, NULL,
-	ai_walk,  7, NULL,
-	ai_walk,  7, NULL
+	ai_schoolWalk,  7, NULL,
+	ai_schoolWalk,  7, NULL,
+	ai_schoolWalk,  7, NULL,
+	ai_schoolWalk,  7, NULL,
+	ai_schoolWalk,  7, NULL,
+	ai_schoolWalk,  7, NULL,
+	ai_schoolWalk,  7, NULL,
+	ai_schoolWalk,  7, NULL
 };
 mmove_t hound_move_walk = {FRAME_walkStart, FRAME_walkEnd, hound_frames_walk, hound_walk};
 
@@ -241,29 +241,29 @@ void hound_bite2 (edict_t *self)
 
 mframe_t hound_frames_attack1 [] =
 {
-	ai_charge, 0,	hound_launch,
-	ai_charge, 0,	NULL,
-	ai_charge, 0,	hound_bite,
-	ai_charge, 0,	hound_bite2
+	ai_schoolCharge, 0,	hound_launch,
+	ai_schoolCharge, 0,	NULL,
+	ai_schoolCharge, 0,	hound_bite,
+	ai_schoolCharge, 0,	hound_bite2
 };
 mmove_t hound_move_attack1 = {FRAME_attack1Start, FRAME_attack1End, hound_frames_attack1, hound_run};
 
 
 mframe_t hound_frames_attack2 [] =
 {
-	ai_charge, 0,	hound_launch,
-	ai_charge, 0,	NULL,
-	ai_charge, 0,	NULL,
-	ai_charge, 0,	NULL,
-	ai_charge, 0,	NULL,
-	ai_charge, 0,	NULL,
-	ai_charge, 0,	NULL,
-	ai_charge, 0,	NULL,
-	ai_charge, 0,	hound_bite,
-	ai_charge, 0,	hound_bite2,
-	ai_charge, 0,	hound_bite2,
-	ai_charge, 0,	hound_bite2,
-	ai_charge, 0,	NULL,
+	ai_schoolCharge, 0,	hound_launch,
+	ai_schoolCharge, 0,	NULL,
+	ai_schoolCharge, 0,	NULL,
+	ai_schoolCharge, 0,	NULL,
+	ai_schoolCharge, 0,	NULL,
+	ai_schoolCharge, 0,	NULL,
+	ai_schoolCharge, 0,	NULL,
+	ai_schoolCharge, 0,	NULL,
+	ai_schoolCharge, 0,	hound_bite,
+	ai_schoolCharge, 0,	hound_bite2,
+	ai_schoolCharge, 0,	hound_bite2,
+	ai_schoolCharge, 0,	hound_bite2,
+	ai_schoolCharge, 0,	NULL,
 };
 mmove_t hound_move_attack2 = {FRAME_attack2Start, FRAME_attack2End, hound_frames_attack2, hound_run};
 
@@ -271,13 +271,13 @@ mmove_t hound_move_attack2 = {FRAME_attack2Start, FRAME_attack2End, hound_frames
 void hound_attack (edict_t *self)
 {
 	if (random() < 0.6)
-  {
-	  self->monsterinfo.currentmove = &hound_move_attack1;
-  }
-  else
-  {
-	  self->monsterinfo.currentmove = &hound_move_attack2;
-  }
+	{
+		self->monsterinfo.currentmove = &hound_move_attack1;
+	}
+	else
+	{
+		self->monsterinfo.currentmove = &hound_move_attack2;
+	}
 }
 
 
@@ -482,6 +482,12 @@ Death Stuff Starts
 
 void hound_dead (edict_t *self)
 {
+	// Lazarus: Stupid... if flies aren't set by M_FlyCheck, monster_think
+	//          will cause us to come back here over and over and over
+	//          until flies ARE set or monster is gibbed.
+	//          This line fixes that:
+	self->nextthink = 0;
+
 	VectorSet (self->mins, -16, -16, -24);
 	VectorSet (self->maxs, 16, 16, -8);
 	self->movetype = MOVETYPE_TOSS;
@@ -491,7 +497,7 @@ void hound_dead (edict_t *self)
 	M_FlyCheck (self);
 
 	// Lazarus monster fade
-	if(world->effects & FX_WORLDSPAWN_CORPSEFADE)
+	if (world->effects & FX_WORLDSPAWN_CORPSEFADE)
 	{
 		self->think = FadeDieSink;
 		self->nextthink = level.time+corpse_fadetime->value;
@@ -590,16 +596,19 @@ void SP_monster_hound (edict_t *self)
 	self->solid = SOLID_BBOX;
 	self->yaw_speed = 30;
 
-	self->health = 175;
-	self->gib_health = -50;
-	self->mass = 250;
+	if (!self->health)
+		self->health = 175;
+	if (!self->gib_health)
+		self->gib_health = -50;
+	if (!self->mass)
+		self->mass = 250;
 
 	self->pain = hound_pain;
 	self->die = hound_die;
 
-/*	if (self->spawnflags & 0x8)
+	if (self->spawnflags & 0x8)
 	{
-		self->monsterinfo.aiflags = AI_SCHOOLING;
+		self->monsterinfo.aiflags2 = AI2_SCHOOLING;
 	}
 
 	self->monsterinfo.zSchoolSightRadius = 500;
@@ -609,7 +618,7 @@ void SP_monster_hound (edict_t *self)
 	self->monsterinfo.zSpeedWalkMax = 3;
 	self->monsterinfo.zSchoolDecayRate = 0.95;
 	self->monsterinfo.zSchoolMinimumDistance = 100;
-*/
+
 	self->monsterinfo.stand = hound_stand;
 	self->monsterinfo.walk = hound_walk;
 	self->monsterinfo.run = hound_run;
@@ -631,7 +640,8 @@ void SP_monster_hound (edict_t *self)
 			self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
 		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
-	self->common_name = "Hound";
+
+	self->common_name = "HellHound";
 
 	gi.linkentity (self);
 
@@ -639,4 +649,81 @@ void SP_monster_hound (edict_t *self)
 	self->monsterinfo.scale = MODEL_SCALE;
 
 	walkmonster_start (self);
+}
+
+void monster_think (edict_t *self);
+qboolean monster_start (edict_t *self);
+void hound_createHound (edict_t *self, float healthPercent)
+{
+	edict_t *hound;
+	
+	hound = G_Spawn();
+	
+	//*hound = *self;
+	
+	hound->classname = "monster_hound";
+	hound->s.modelindex = gi.modelindex ("models/monsters/guard/hound/tris.md2");
+	VectorSet (hound->mins, -16, -16, -24);
+	VectorSet (hound->maxs, 16, 16, 24);
+	VectorCopy(self->s.origin, hound->s.origin);
+	VectorCopy(self->s.old_origin, hound->s.old_origin);
+	VectorCopy(self->s.angles, hound->s.angles);
+	hound->movetype = MOVETYPE_STEP;
+	hound->solid = SOLID_BBOX;
+	hound->takedamage = DAMAGE_YES;
+	hound->svflags |= SVF_MONSTER;
+	hound->svflags &= ~SVF_DEADMONSTER;
+	hound->s.renderfx |= RF_FRAMELERP;
+	hound->clipmask = MASK_MONSTERSOLID;
+	hound->deadflag = DEAD_NO;
+	hound->owner = self;
+	hound->yaw_speed = 30;
+	hound->enemy = self->enemy;
+	hound->ideal_yaw = self->ideal_yaw;
+
+	hound->health = 175.0 * healthPercent;
+	hound->gib_health = -50;
+	hound->mass = 250;
+
+	hound->pain = hound_pain;
+	hound->die = hound_die;
+
+	hound->monsterinfo.stand = hound_stand;
+	hound->monsterinfo.walk = hound_walk;
+	hound->monsterinfo.run = hound_run;
+	hound->monsterinfo.attack = hound_jump;
+	hound->monsterinfo.melee = hound_attack;
+	hound->monsterinfo.sight = hound_sight;
+	hound->monsterinfo.idle = hound_stand;
+	hound->monsterinfo.checkattack = hound_checkattack;
+
+	hound->monsterinfo.currentmove = &hound_move_handlerjump;	
+	hound->monsterinfo.scale = MODEL_SCALE;
+
+	hound->think = monster_think;
+	hound->nextthink = level.time + FRAMETIME;
+
+	// Lazarus
+	hound->powerarmor = self->powerarmor;
+	if (hound->powerarmor)
+	{
+		if (hound->powerarmortype == 1)
+			hound->monsterinfo.power_armor_type = POWER_ARMOR_SCREEN;
+		else
+			hound->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
+		hound->monsterinfo.power_armor_power = self->powerarmor;
+	}
+
+	hound->monsterinfo.flies = self->monsterinfo.flies;
+	if (!hound->monsterinfo.flies)
+		hound->monsterinfo.flies = 0.60;
+
+	hound->common_name = "HellHound";
+
+//	monster_start(hound);
+
+	gi.linkentity (hound);
+
+	// move the fucker now!!!
+	ai_move (hound, 20);
 }

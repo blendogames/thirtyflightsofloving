@@ -2564,14 +2564,14 @@ void SP_misc_viper (edict_t *ent)
 
 	ent->movetype = MOVETYPE_PUSH;
 	ent->solid = SOLID_NOT;
-	//Mappack
-	if(ent->spawnflags & 2)
+	// Mappack
+	if (ent->spawnflags & 2)
 	{
 		ent->solid = SOLID_BBOX;
 		ent->s.modelindex = gi.modelindex ("models/ships/bigviper/tris.md2");
 		VectorSet (ent->mins, -176, -120, -24);
 		VectorSet (ent->maxs, 176, 120, 72);
-	} //Mappack
+	}	// Mappack
 	else
 	{
 		ent->s.modelindex = gi.modelindex ("models/ships/viper/tris.md2");

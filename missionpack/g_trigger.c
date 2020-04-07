@@ -341,9 +341,9 @@ void trigger_key_use (edict_t *self, edict_t *other, edict_t *activator)
 {
 	int			index;
 
-	if (!self->item)
+	if (!self || !self->item)
 		return;
-	if (!activator->client)
+	if (!activator || !activator->client)
 		return;
 
 	index = ITEM_INDEX(self->item);
@@ -355,7 +355,7 @@ void trigger_key_use (edict_t *self, edict_t *other, edict_t *activator)
 		if (!(self->spawnflags & 4))
 		{
 			if (self->key_message && strlen(self->key_message))
-				gi.centerprintf (activator, self->key_message);
+				gi.centerprintf (activator, "%s", self->key_message);
 			else
 				gi.centerprintf (activator, "You need the %s", self->item->pickup_name);
 			// Skid added		
@@ -363,10 +363,10 @@ void trigger_key_use (edict_t *self, edict_t *other, edict_t *activator)
 			{
 				if (index == key_q1_med_gold_index || index == key_q1_med_silver_index)
 					gi.sound (activator, CHAN_AUTO, gi.soundindex ("q1world/doors/medtry.wav"), 1, ATTN_NORM, 0);
+				else if (index == key_q1_rune_gold_index || index == key_q1_rune_silver_index)
+					gi.sound (activator, CHAN_AUTO, gi.soundindex ("q1world/doors/runetry.wav"), 1, ATTN_NORM, 0);
 				else if (index == key_q1_base_gold_index || index == key_q1_base_silver_index)
 					gi.sound (activator, CHAN_AUTO, gi.soundindex ("q1world/doors/basetry.wav"), 1, ATTN_NORM, 0);
-				else 
-					gi.sound (activator, CHAN_AUTO, gi.soundindex ("q1world/doors/runetry.wav"), 1, ATTN_NORM, 0);
 			}
 			else
 			// end Skid
@@ -382,10 +382,10 @@ void trigger_key_use (edict_t *self, edict_t *other, edict_t *activator)
 		{
 			if (index == key_q1_med_gold_index || index == key_q1_med_silver_index)
 				gi.sound (activator, CHAN_AUTO, gi.soundindex ("q1world/doors/meduse.wav"), 1, ATTN_NORM, 0);
+			else if (index == key_q1_rune_gold_index || index == key_q1_rune_silver_index)
+				gi.sound (activator, CHAN_AUTO, gi.soundindex ("q1world/doors/runeuse.wav"), 1, ATTN_NORM, 0);
 			else if (index == key_q1_base_gold_index || index == key_q1_base_silver_index)
 				gi.sound (activator, CHAN_AUTO, gi.soundindex ("q1world/doors/baseuse.wav"), 1, ATTN_NORM, 0);
-			else
-				gi.sound (activator, CHAN_AUTO, gi.soundindex ("q1world/doors/runeuse.wav"), 1, ATTN_NORM, 0);
 		}
 		else
 		// end Skid	
@@ -510,7 +510,7 @@ If NoMessage is not set, it will print "1 more...2 more..." etc, when triggered 
 "count" triggers before firing; default=2
 */
 
-void trigger_counter_use(edict_t *self, edict_t *other, edict_t *activator)
+void trigger_counter_use (edict_t *self, edict_t *other, edict_t *activator)
 {
 	if (self->count == 0)
 		return;

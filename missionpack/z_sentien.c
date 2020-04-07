@@ -828,8 +828,8 @@ void sentien_attack(edict_t *self)
 
 void sentien_fend_ready (edict_t *self)
 {
-	//if (self->monsterinfo.aiflags & AI_REDUCEDDAMAGE)
-	//	return;
+	if (self->monsterinfo.aiflags2 & AI2_REDUCEDDAMAGE)
+		return;
 	self->monsterinfo.pausetime = level.time + 1;
 }
 
@@ -838,11 +838,12 @@ void sentien_fend_hold (edict_t *self)
 	if (level.time >= self->monsterinfo.pausetime)
 	{
 		self->monsterinfo.aiflags &= ~AI_HOLD_FRAME;
-	//	self->monsterinfo.aiflags &= ~AI_REDUCEDDAMAGE;
+		self->monsterinfo.aiflags2 &= ~AI2_REDUCEDDAMAGE;
 	}
 	else
 	{
-		self->monsterinfo.aiflags |= (AI_HOLD_FRAME);// | AI_REDUCEDDAMAGE);
+		self->monsterinfo.aiflags |= AI_HOLD_FRAME;
+		self->monsterinfo.aiflags2 |= AI2_REDUCEDDAMAGE;
 	}
 }
 
@@ -1219,11 +1220,11 @@ void SP_monster_sentien(edict_t *self)
 
 	SP_monster_sentien_precache();
 
-	if(!self->health)
+	if (!self->health)
 		self->health = 900;
-	if(!self->gib_health)
+	if (!self->gib_health)
 		self->gib_health = -425;
-	if(!self->mass)
+	if (!self->mass)
 		self->mass = 500;
 
 	// Lazarus: special purpose skins
@@ -1253,15 +1254,15 @@ void SP_monster_sentien(edict_t *self)
 	self->monsterinfo.sight = NULL;
 	self->monsterinfo.idle = NULL;
 
-	//self->monsterinfo.reducedDamageAmount = 0.85;
+	self->monsterinfo.reducedDamageAmount = 0.85;
 
 	// Lazarus
 	if (!self->blood_type)
-		self->blood_type = 2; //sparks
+		self->blood_type = 2; // sparks
 	else
-		self->fogclip |= 2; //custom bloodtype flag
+		self->fogclip |= 2; // custom bloodtype flag
 
-	if(self->powerarmor)
+	if (self->powerarmor)
 	{
 		if (self->powerarmortype == 1)
 			self->monsterinfo.power_armor_type = POWER_ARMOR_SCREEN;
@@ -1269,7 +1270,7 @@ void SP_monster_sentien(edict_t *self)
 			self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
 		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
-	if(!self->monsterinfo.flies)
+	if (!self->monsterinfo.flies)
 		self->monsterinfo.flies = 0.10;
 	self->common_name = "Sentien";
 	// end Lazarus
@@ -1281,12 +1282,12 @@ void SP_monster_sentien(edict_t *self)
 
 	create_sentien_laser(self);
 
-	if(skill->value == 2)
+	if (skill->value == 2)
 	{
 		self->flash->dmg *= 1.5;
 		self->yaw_speed *= 1.5;
 	}
-	else if(skill->value >= 3)
+	else if (skill->value >= 3)
 	{
 		self->flash->dmg *= 2.5;
 		self->yaw_speed *= 2;
@@ -1297,5 +1298,3 @@ void SP_monster_sentien(edict_t *self)
 
 	walkmonster_start(self);
 }
-
-

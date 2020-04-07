@@ -5323,7 +5323,7 @@ qboolean box_walkmove (edict_t *ent, float yaw, float dist)
 	return box_movestep(ent, move, true);
 }
 
-void box_water_friction(edict_t *ent)
+void box_water_friction (edict_t *ent)
 {
 	int i;
 	float		speed, newspeed, control;
@@ -5336,9 +5336,9 @@ void box_water_friction(edict_t *ent)
 		ent->nextthink = 0;
 		return;
 	}
-	for(i=0; i<2; i++)
+	for (i=0; i<2; i++)
 	{
-		if(ent->velocity[i] != 0)
+		if (ent->velocity[i] != 0)
 		{
 			speed = fabs(ent->velocity[i]);
 			control = speed < 100 ? 100 : speed;
@@ -5364,7 +5364,7 @@ void box_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf
 	vec3_t	origin;
 	edict_t *bottom, *top;
 
-	//Knightmare- ignore prox mines attached to self
+	// Knightmare- ignore prox mines attached to self
 	if (!strcmp(other->classname, "prox") && other->movewith_ent && other->movewith_ent == self)
 		return;
 
@@ -5378,7 +5378,7 @@ void box_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf
 		vec3_t	dir, impact_v;
 
 		// Check for impact damage first
-		if(self->health > 0)
+		if (self->health > 0)
 		{
 			VectorSubtract(other->velocity,self->velocity,impact_v);
 			delta = VectorLength(impact_v);
@@ -5391,16 +5391,16 @@ void box_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf
 					VectorSubtract(self->s.origin,other->s.origin,dir);
 					VectorNormalize(dir);
 					T_Damage (self, other, other, dir, self->s.origin, vec3_origin, damage, 0, 0, MOD_FALLING);
-					if(self->health <= 0) return;
+					if (self->health <= 0) return;
 				}
 			}
 		}
-		if(self->waterlevel==0) return;
+		if (self->waterlevel == 0) return;
 
 		// 06/03/00 change: If either func_pushable is currently being moved 
 		// by crane, bail out.
-		if(self->crane_control) return;
-		if(other->crane_control) return;
+		if (self->crane_control) return;
+		if (other->crane_control) return;
 
 		// Since func_pushables have a bounding box, impact will ALWAYS be on one of the
 		// planes of the bounding box. The "plane" argument isn't always used, but since 
@@ -5413,8 +5413,8 @@ void box_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf
 		VectorSubtract(v1,v2,v);
 		VectorNormalize(v);
 		axis = 0;
-		if(fabs(v[1]) > fabs(v[axis])) axis = 1;
-		if(fabs(v[2]) > fabs(v[axis])) axis = 2;
+		if (fabs(v[1]) > fabs(v[axis])) axis = 1;
+		if (fabs(v[2]) > fabs(v[axis])) axis = 2;
 
 		e = 0.5; // coefficient of restitution
 		m = (float)(other->mass)/(float)(self->mass);
@@ -5429,28 +5429,29 @@ void box_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf
 		// other two directions (so velocity doesn't change)... BUT we want 
 		// to get the bottom crate out from underneath the other one,
 		// so we're gonna be a little "creative"
-		if(axis==2)
+		if (axis == 2)
 		{
-			if(v[2] > 0)
+			if (v[2] > 0)
 			{
 				bottom = other;
 				top = self;
 				VectorNegate(v,v);
-			} else {
+			} 
+			else {
 				bottom = self;
 				top = other;
 			}
 			v[2] = 0;
 			VectorNormalize(v);
-			if(!VectorLength(v))
+			if (!VectorLength(v))
 			{
 				v[0] = crandom();
 				v[1] = sqrt(1.0 - v[0]*v[0]);
 			}
 			vslide = 10;
-			if(fabs(bottom->velocity[0]) < 50)
+			if (fabs(bottom->velocity[0]) < 50)
 				bottom->velocity[0] += v[0] * vslide;
-			if(fabs(bottom->velocity[1]) < 50)
+			if (fabs(bottom->velocity[1]) < 50)
 				bottom->velocity[1] += v[1] * vslide;
 			top->velocity[0] = -bottom->velocity[0]/2;
 			top->velocity[1] = -bottom->velocity[1]/2;
@@ -5475,25 +5476,25 @@ void box_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf
 	// if other is a monster or a player and box is on other's head and moving down,
 	// do impact damage
 	VectorAdd(self->s.origin,self->origin_offset,origin);
-	if( other->client || (other->svflags & SVF_MONSTER) )
+	if ( other->client || (other->svflags & SVF_MONSTER) )
 	{
 		VectorAdd (self->absmax,self->absmin,v1);
 		VectorScale(v1,0.5,v1);
 		VectorSubtract(v1,other->s.origin,v);
 		VectorNormalize(v);
 		axis = 0;
-		if(fabs(v[1]) > fabs(v[axis])) axis = 1;
-		if(fabs(v[2]) > fabs(v[axis])) axis = 2;
-		if(axis == 2 && v[axis] > 0) {
+		if (fabs(v[1]) > fabs(v[axis])) axis = 1;
+		if (fabs(v[2]) > fabs(v[axis])) axis = 2;
+		if (axis == 2 && v[axis] > 0) {
 			v11 = VectorLength(self->velocity);
 			VectorCopy(self->velocity,v);
 			VectorNormalize(v);
-			if(!other->groundentity)
+			if (!other->groundentity)
 			{
 				other->velocity[2] = self->velocity[2];
 				gi.linkentity(other);
 			}
-			else if((v11 > 0) && (v[2] < -0.7))
+			else if ((v11 > 0) && (v[2] < -0.7))
 			{
 				int		damage;
 				float	delta;
@@ -5512,7 +5513,7 @@ void box_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf
 				return;
 			}
 		}
-		else if( (other->groundentity == self) && (self->velocity[2] > 0))
+		else if ( (other->groundentity == self) && (self->velocity[2] > 0))
 		{
 			self->bounce_me = 2;
 			other->velocity[2] = self->velocity[2];
@@ -5538,7 +5539,7 @@ void box_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf
 	// something else, return
 	if ((other->client->push != NULL) && (other->client->push != self))
 	{
-		if(self->activator == other) self->activator = NULL;
+		if (self->activator == other) self->activator = NULL;
 		return;
 	}
 
@@ -5560,7 +5561,7 @@ void box_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf
 	// if func_pushable isn't in front of pusher, do nothing
 	if (!point_infront(other,v1))
 	{
-		if(self->activator == other) self->activator = NULL;
+		if (self->activator == other) self->activator = NULL;
 		return;
 	}
 
@@ -5573,9 +5574,10 @@ void box_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf
 	}
 
 	// if this box has another box stacked on top, balk
-	if( CrateOnTop (NULL, self) )
+	if ( CrateOnTop (NULL, self) )
 	{
-		if(self->activator == other) self->activator = NULL;
+		if (self->activator == other)
+			self->activator = NULL;
 		return;
 	}
 
@@ -5592,7 +5594,7 @@ void box_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf
 	ratio = (float)other->mass / (float)self->mass;
 	other->client->maxvelocity = 20. * ratio;
 	// Knightmare- don't autoswitch if client-side chasecam is on
-	if(tpp_auto->value && (!cl_thirdperson->value || deathmatch->value || coop->value)
+	if (tpp_auto->value && (!cl_thirdperson->value || deathmatch->value || coop->value)
 		&& !other->client->chasetoggle && !other->client->chaseactive)
 	{
 	//	Cmd_Chasecam_Toggle(other);
@@ -5624,8 +5626,8 @@ void SP_func_pushable (edict_t *self)
 
 	self->class_id = ENTITY_FUNC_PUSHABLE;
 
-	//Knightmare- precache different gib types
-	PrecacheDebris(self->gib_type);
+	// Knightmare- precache different gib types
+	PrecacheDebris (self->gib_type);
 
 	gi.setmodel (self, self->model);
 
@@ -5641,15 +5643,15 @@ void SP_func_pushable (edict_t *self)
 	}
 
 	// Game places a 2 unit border around brush model absmin and absmax
-	VectorAdd(self->mins,border,self->mins);
-	VectorSubtract(self->maxs,border,self->maxs);
-	VectorAdd(self->absmin,border,self->absmin);
-	VectorSubtract(self->absmax,border,self->absmax);
+	VectorAdd (self->mins, border, self->mins);
+	VectorSubtract (self->maxs, border, self->maxs);
+	VectorAdd (self->absmin, border, self->absmin);
+	VectorSubtract (self->absmax, border, self->absmax);
 
 	if (!self->mass)
 		self->mass = 400;
 
-	if (st.item) //Knightmare- item support
+	if (st.item) // Knightmare- item support
 	{
 		self->item = FindItemByClassname (st.item);
 		if (!self->item)
@@ -5704,7 +5706,7 @@ void SP_func_pushable (edict_t *self)
 		break;
 	}
 
-	if(self->sounds && !VectorLength(self->s.origin) )
+	if (self->sounds && !VectorLength(self->s.origin) )
 	{
 		edict_t *speaker;
 

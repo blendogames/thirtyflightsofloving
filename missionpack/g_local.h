@@ -18,6 +18,23 @@
 #include "km_cvar.h"
 #define JETPACK_MOD
 
+// Zaero
+// some custom defines
+//#define USE_ZAERO_ITEMS_WEAPONS	// enable for Zaero player weapons
+#ifdef Z_MAX
+#undef Z_MAX
+#endif // Z_MAX
+#define Z_MAX(a,b)	((a) > (b) ? (a) : (b))
+
+#ifdef Z_MIN
+#undef Z_MIN
+#endif // Z_MIN
+#define Z_MIN(a,b)	((a) < (b) ? (a) : (b))
+
+#define Z_MALLOC(size)	gi.TagMalloc(size, TAG_GAME)
+#define Z_FREE(block)	gi.TagFree(block)
+// end Zaero
+
 // the "gameversion" client command will print this plus compile date
 #define	GAMEVERSION	"Q2MP4"
 
@@ -64,6 +81,14 @@
 #define	SPAWNFLAG_NOT_HARD			0x00000400	// 1024
 #define	SPAWNFLAG_NOT_DEATHMATCH	0x00000800	// 2048
 #define	SPAWNFLAG_NOT_COOP			0x00001000	// 4096
+
+// Zaero start
+// edict->spawnflags2
+// these are set with checkboxes on each entity in the map editor
+#define	SPAWNFLAG2_MIRRORLEVEL  0x0001
+#define	SPAWNFLAG2_NOT_COOP		0x0002
+#define SPAWNFLAG2_NOT_SINGLE   0x0004
+// end Zaero
 
 // edict->flags
 #define	FL_FLY					0x00000001
@@ -119,7 +144,9 @@ typedef enum
 {
 	DAMAGE_NO,
 	DAMAGE_YES,			// will take damage if hit
-	DAMAGE_AIM			// auto targeting recognizes this
+	DAMAGE_AIM,			// auto targeting recognizes this
+	// Zaero
+	DAMAGE_IMMORTAL		// similar to DAMAGE_YES, but health is not deducted
 } damage_t;
 
 typedef enum 
@@ -149,7 +176,13 @@ typedef enum
 	// Knightmare
 	AMMO_SHOCKSPHERE,
 	AMMO_FUEL,
-	AMMO_HOMING_ROCKETS
+	AMMO_HOMING_ROCKETS,
+	// Zaero (unused for now)
+	AMMO_FLARES,
+	AMMO_LASERTRIPBOMB,
+	AMMO_EMPNUKE,
+	AMMO_A2K,
+	AMMO_PLASMASHIELD
 } ammo_t;
 
 
@@ -187,10 +220,10 @@ typedef enum
 #define AI_MEDIC				0x00002000
 #define AI_RESURRECTING			0x00004000
 #define AI_MANUAL_STEERING		0x00008000
-#define AI_TARGET_ANGER			0x00010000	//Lazarus keep
+#define AI_TARGET_ANGER			0x00010000	// Lazarus keep
 #define AI_DODGING				0x00020000
 #define AI_CHARGING				0x00040000
-#define AI_HINT_PATH			0x00080000	//Lazarus keep
+#define AI_HINT_PATH			0x00080000	// Lazarus keep
 #define	AI_IGNORE_SHOTS			0x00100000
 #define	AI_BLOCKED				0x00200000	// used by blocked_checkattack: set to say I'm attacking while blocked 
 											// (prevents run-attacks)
@@ -209,13 +242,20 @@ typedef enum
 #define AI_CROUCH               0x40000000
 #define AI_EVADE_GRENADE		0x80000000
 
-//Knightmare- thes are for moreaiflags
-#define AI_FREEFORALL           0x00000001  // Set by target_monsterbattle, lets dmgteam monsters
+// Knightmare- thes are for aiflags2
+#define AI2_FREEFORALL           0x00000001  // Set by target_monsterbattle, lets dmgteam monsters
                                             // attack monsters on opposion dmgteam
-#define AI_RANGE_PAUSE          0x00000002
-#define AI_HINT_TEST            0x00000004
+#define AI2_RANGE_PAUSE          0x00000002
+#define AI2_HINT_TEST            0x00000004
+// Zaero
+#define AI2_SCHOOLING			 0x00000008
+#define AI2_REDUCEDDAMAGE		 0x00000010
+#define AI2_DODGETIMEOUT		 0x00000020
+#define AI2_MONREDUCEDDAMAGE	 0x00000040
+#define AI2_ONESHOTTARGET		 0x00000080
+// end Zaero
 
-//Knightmare- monster flags
+// Knightmare- monster flags
 #define MFL_WALK_WALLS			1
 #define	MFL_DO_NOT_COUNT		2	// set for healed monsters
 #define	MFL_SPAWNED_CARRIER		4	// both do_not_count and spawned are set for spawned monsters
@@ -223,7 +263,7 @@ typedef enum
 #define	MFL_SPAWNED_WIDOW		16	// both do_not_count and spawned are set for spawned monsters
 #define	MFL_SPAWNED_MASK		32	// mask to catch all three flavors of spawned
 
-//monster attack state
+// monster attack state
 #define AS_STRAIGHT				1
 #define AS_SLIDING				2
 #define	AS_MELEE				3
@@ -295,7 +335,12 @@ MOVETYPE_RAIN,			// identical to MOVETYPE_FLYMISSILE, but doesn't cause splash n
 MOVETYPE_PENDULUM,		// same as MOVETYPE_PUSH, but used only for pendulums to grab special-case
 
 MOVETYPE_CONVEYOR,		// conveyor
-MOVETYPE_SHOCKBOUNCE	// Knightmare- added for shockwave
+MOVETYPE_SHOCKBOUNCE,	// Knightmare- added for shockwave
+// Zaero
+MOVETYPE_FREEZE,		// player freeze, used for Zaero Camera
+MOVETYPE_FALLFLOAT,		// falls down slopes and floats in water
+MOVETYPE_RIDE			// basically won't move unless it rides on a MOVETYPE_PUSH entity
+// end Zaero
 } movetype_t;
 
 
@@ -328,6 +373,7 @@ typedef struct
 #define IT_XATRIX			0x00000100	// Xatrix item
 #define IT_ROGUE			0x00000200	// Rogue item
 #define IT_LAZARUS			0x00000400	// Lazarus item
+#define IT_ZAERO			0x00000800	// Zaero item
 
 // gitem_t->weapmodel for weapons indicates model index
 #define WEAP_BLASTER			1 
@@ -492,15 +538,15 @@ typedef struct
 	// ROGUE
 	edict_t		*disguise_violator;
 	int			disguise_violation_framenum;
-	// ROGUE
+	// end ROGUE
 
 	// Lazarus
-	int			fogs;
-	int			trigger_fogs;
+	int			num_fogs;
+	int			num_trigger_fogs;
 	int			active_target_fog;
 	int			active_fog;
 	int			last_active_fog;
-	fog_t		fog;
+	fog_t		current_fog;
 	int			flashlight_cost;	// cost/10 seconds for flashlight
 	int			mud_puddles;
 	int			num_3D_sounds;
@@ -510,7 +556,11 @@ typedef struct
 	int			next_skill;
 	int			num_reflectors;
 	qboolean	intermission_letterbox;		// Knightmare- letterboxing
+	// end Lazarus
 
+	// Zaero
+	int			fadeFrames;
+	// end Zaero
 } level_locals_t;
 
 
@@ -550,7 +600,7 @@ typedef struct
 	vec3_t		start_angles;
 	vec3_t		end_origin;
 	vec3_t		end_angles;
-	//Knightmare- these are for the bezier curves
+	// Knightmare- these are for the bezier curves
 //	vec3_t		last_pathpoint_origin;
 //	vec3_t		last_pathpoint_angles;
 //	vec3_t		bezier_begin_point;
@@ -606,8 +656,8 @@ typedef struct
 	mmove_t		*currentmove;
 	mmove_t		*savemove;
 	unsigned int	aiflags;		// PGM - unsigned, since we're close to the max
-	unsigned int	moreaiflags;	//Knightmare- more AI flags, needed for Lazarus stuff
-	unsigned int	monsterflags;	//Knightmare- moved some of the Rogue AI flags here
+	unsigned int	aiflags2;		// Knightmare- more AI flags, needed for Lazarus stuff
+	unsigned int	monsterflags;	// Knightmare- moved some of the Rogue AI flags here
 	int			nextframe;
 	float		scale;
 
@@ -638,20 +688,20 @@ typedef struct
 	int			power_armor_type;
 	int			power_armor_power;
 
-	//Mappack - array for ai.
+	// Mappack - array for ai.
 	//vec3_t	radial_chk[8];
 
-	//Mappack - for the pathing rountine
+	// Mappack - for the pathing rountine
 	qboolean	following_nodes;
-	edict_t	*target_node;
+	edict_t		*target_node;
 
-	//Mappack - for buoy system
-	edict_t	*buoy;
+	// Mappack - for buoy system
+	edict_t		*buoy;
 
-	//Mappack - damit I need one
-	vec3_t	tempvec;
+	// Mappack - damit I need one
+	vec3_t		tempvec;
 
-//ROGUE
+// ROGUE
 	qboolean	(*blocked)(edict_t *self, float dist);
 //	edict_t		*last_hint;			// last hint_path the monster touched
 	float		last_hint_time;		// last time the monster checked for hintpaths.
@@ -682,11 +732,11 @@ typedef struct
 	float		quad_framenum;
 	float		double_framenum;
 	float		invincible_framenum;
-//ROGUE
+// ROGUE
 	edict_t		*leader;
 	edict_t		*old_leader;
-//ROGUE
-//Lazarus
+// ROGUE
+// Lazarus
 	float		min_range;		// Monsters stop chasing enemy at this distance
 	float		max_range;		// Monsters won't notice or attack targets farther than this
 	float		ideal_range[2];	// Ideal low and high range from target, weapon-specific
@@ -697,7 +747,27 @@ typedef struct
 	int			chicken_framenum;
 	int			pathdir;		// Up/down a hint_path chain flag for medic
 	float		visibility;		// Ratio of visibility (it's a fog thang)
-//end Lazarus
+// end Lazarus
+// Zaero
+	int			flashTime;
+	int			flashBase;
+
+	// strafing
+	float		flyStrafePitch;
+	float		flyStraanimfeTimeout;
+
+	// schooling info
+	float		zSchoolSightRadius;
+	float		zSchoolMaxSpeed, zSchoolMinSpeed;
+	float		zSpeedStandMax, zSpeedWalkMax;
+	float		zSchoolDecayRate, zSchoolMinimumDistance;
+	int			zSchoolFlags;
+
+	float		reducedDamageAmount;
+	float		dodgetimeout;
+
+	vec3_t		shottarget;
+// end Zaero
 } monsterinfo_t;
 
 // ROGUE
@@ -789,18 +859,17 @@ extern int lastgibframe;
 #define MOD_TRIGGER_HURT	31
 #define MOD_HIT				32
 #define MOD_TARGET_BLASTER	33
-//Xatrix
+
+// Xatrix
 #define MOD_RIPPER				34
 #define MOD_PHALANX				35
 #define MOD_BRAINTENTACLE		36
 #define MOD_BLASTOFF			37
 #define MOD_GEKK				38
 #define MOD_TRAP				39
-//Xatrix
-#define MOD_FRIENDLY_FIRE	0x8000000
+// Xatrix
 
-//========
-//ROGUE
+// ROGUE
 #define MOD_CHAINFIST			40
 #define MOD_DISINTEGRATOR		41
 #define MOD_ETF_RIFLE			42
@@ -818,9 +887,9 @@ extern int lastgibframe;
 #define MOD_DOPPLE_EXPLODE		55
 #define MOD_DOPPLE_VENGEANCE	56
 #define MOD_DOPPLE_HUNTER		57
-//ROGUE
-//========
-//Knightmare
+// aned ROGUE
+
+// Knightmare
 #define MOD_SHOCK_SPHERE		58
 #define MOD_SHOCK_SPLASH		59
 #define MOD_PROX_SPLASH			60
@@ -832,25 +901,36 @@ extern int lastgibframe;
 #define MOD_MISSILE				67
 #define MOD_MISSILE_SPLASH		68
 
+// Zaero
+#define MOD_SNIPERRIFLE			69
+#define MOD_TRIPBOMB		    70
+#define MOD_FLARE				71
+#define MOD_A2K					72
+#define MOD_SONICCANNON			73
+#define MOD_AUTOCANNON			74
+#define MOD_GL_POLYBLEND		75
+// end Zaero
+
 //===============================
 // Extra MODs
 // Quake1     -Skid
 //===============================
-#define MOD_Q1_AXE				69
-#define MOD_Q1_SG				70
-#define MOD_Q1_SSG				71
-#define MOD_Q1_NG				72
-#define MOD_Q1_SNG				73
-#define MOD_Q1_GL				74
-#define MOD_Q1_RL				75
-#define MOD_Q1_LG				76
-#define MOD_Q1_GL_SPLASH		77
-#define MOD_Q1_RL_SPLASH		78
-#define MOD_Q1_LG_SPLASH		79
-#define MOD_Q1_LASER			80
-#define MOD_Q1_FLAMEBOLT		81
-#define MOD_Q1_FIREPOD			82
+#define MOD_Q1_AXE				76
+#define MOD_Q1_SG				77
+#define MOD_Q1_SSG				78
+#define MOD_Q1_NG				79
+#define MOD_Q1_SNG				80
+#define MOD_Q1_GL				81
+#define MOD_Q1_RL				82
+#define MOD_Q1_LG				83
+#define MOD_Q1_GL_SPLASH		84
+#define MOD_Q1_RL_SPLASH		85
+#define MOD_Q1_LG_SPLASH		86
+#define MOD_Q1_LASER			87
+#define MOD_Q1_FLAMEBOLT		88
+#define MOD_Q1_FIREPOD			89
 
+#define MOD_FRIENDLY_FIRE	0x8000000
 
 extern	int	meansOfDeath;
 
@@ -869,6 +949,7 @@ extern	cvar_t	*maxentities;
 extern	cvar_t	*deathmatch;
 extern	cvar_t	*coop;
 extern	cvar_t	*dmflags;
+extern	cvar_t	*zdmflags;	// Zaero added
 extern	cvar_t	*skill;
 extern	cvar_t	*fraglimit;
 extern	cvar_t	*timelimit;
@@ -1160,13 +1241,14 @@ void cleanupHealTarget (edict_t *ent);
 //
 // g_fog.c
 //
-#define MAX_FOGS 16
+#define MAX_FOGS 64	// was 16
 extern fog_t gfogs[MAX_FOGS];
 void Cmd_Fog_f (edict_t *ent);
-void Fog_Init ();
-void Fog (edict_t *ent); //vec3_t viewpoint);
-void Fog_Off (qboolean gameShutdown);
-void Fog_SetFogParms ();
+void Fog_Init (void);
+void Fog (edict_t *ent);
+void Fog_Off (edict_t *ent);
+void Fog_Off_Global (void);
+void Fog_SetFogParms (void);
 
 //
 // km_cvar.c
@@ -1765,6 +1847,31 @@ typedef struct
 
 qboolean HasSpawnFunction(edict_t *ent);
 int trigger_transition_ents (edict_t *changelevel, edict_t *self);
+
+// Zaero
+//
+// z_item.c
+//
+qboolean EMPNukeCheck(edict_t	*ent, vec3_t pos);
+
+//
+// z_weapon.c
+//
+void fire_bb (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, float timer, float damage_radius);
+void fire_flare (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage);
+
+//
+// z_ai.c
+//
+void ai_schoolStand (edict_t *self, float dist);
+void ai_schoolRun (edict_t *self, float dist);
+void ai_schoolWalk (edict_t *self, float dist);
+void ai_schoolCharge (edict_t *self, float dist);
+void ai_schoolBackWalk (edict_t *self, float dist);
+void ai_schoolSideStepRight (edict_t *self, float dist);
+void ai_schoolSideStepLeft (edict_t *self, float dist);
+// end Zaero
+
 //============================================================================
 
 // client_t->anim_priority
@@ -1820,21 +1927,20 @@ typedef struct
 
 	qboolean	spectator;			// client is a spectator
 
-//=========
-//ROGUE
+// ROGUE
 	int			max_tesla;
 	int			max_prox;
 	int			max_mines;
 	int			max_flechettes;
 	int			max_disruptors;
-//ROGUE
-//=========
-	//Knightmare
+// end ROGUE
+
+	// Knightmare added
 	int			max_shockspheres;
 	int			max_fuel;
 	int			max_homing_rockets;
 
-	int			max_armor; // KM
+//	int			max_armor; // KM
 
 	qboolean	spawn_landmark;
 	qboolean	spawn_levelchange;
@@ -1848,7 +1954,15 @@ typedef struct
 	int			spawn_anim_end;
 	gitem_t		*newweapon;
 
+	// Zaero
+	int			max_flares;
+	int			max_tbombs;
+	int			max_a2k;
+	int			max_empnuke;
+	int			max_plasmashield;
 
+	float		visorFrames;
+	// end Zaero
 } client_persistant_t;
 
 // client data that stays across deathmatch respawns
@@ -1970,10 +2084,10 @@ struct gclient_s
 	usercmd_t	ucmd;				// Lazarus: Copied for convenience in ClientThink
 	int			use;				// indicates whether +use key is pressed
 
-	//Mappack - set when the client is a camera. Change this to a flag
+	// Mappack - set when the client is a camera. Change this to a flag
 	qboolean		incamera;
 	//=====================================================
-	//Chasecam	
+	// Chasecam	
 	//=====================================================
 	int             chasetoggle; //whether chasecam is toggled on
 	int				chaseactive; //whether chasecam is active
@@ -1981,7 +2095,7 @@ struct gclient_s
 	edict_t         *oldplayer;
 
 	//=====================================================
-	//Misc Timing Vars
+	// Misc Timing Vars
 	//=====================================================	
 
 	float			oldweapon;				//Lightning gun, Chainsaw etc
@@ -2036,8 +2150,7 @@ struct gclient_s
 	int			leftfoot;			// 0 or 1, used for footstep sounds
 	int			jumping;			// 0 or 1, used for jumpkick
 
-//=======
-//ROGUE
+// ROGUE
 	float		double_framenum;
 	float		ir_framenum;
 //	float		torch_framenum;
@@ -2045,8 +2158,30 @@ struct gclient_s
 	float		tracker_pain_framenum;
 
 	edict_t		*owned_sphere;		// this points to the player's sphere
-//ROGUE
-//=======
+// end ROGUE
+
+// Zaero
+	float		a2kFramenum;
+
+	// used for blinding
+	int			flashTime;
+	int			flashBase;
+
+	edict_t		*zCameraTrack;    // the entity to see through
+	vec3_t		zCameraOffset;   // offset from camera origin
+	edict_t		*zCameraLocalEntity;
+	float		zCameraStaticFramenum;
+
+	qboolean	showOrigin;
+
+	// for sniper rifle
+	int			sniperFramenum;
+
+	// for sonic cannon
+	float		startFireTime;
+// end Zaero
+
+	qboolean	bfg_missfire;	// Knightmare- added for Zaero EMP Nuke
 };
 
 /*
@@ -2196,11 +2331,11 @@ struct edict_s
 	edict_t		*prevpath;
 
 	float		speed, accel, decel;
-	//=============
-	//Knightmare
-	int			oldmovetype; //backup of movetype
-	vec3_t		relative_velocity; //relative velocity of movewith children
-	vec3_t		relative_avelocity; //relative angular velocity of movewith children
+
+	// Knightmare added
+	int			oldmovetype;		// backup of movetype
+	vec3_t		relative_velocity;	// relative velocity of movewith children
+	vec3_t		relative_avelocity;	// relative angular velocity of movewith children
 	vec3_t		movewith_offset;
 	vec3_t		old_offset;
 	int			movewith_set;
@@ -2210,7 +2345,7 @@ struct edict_s
 	float		width;
 	float		length;
 	float		side;
-	vec3_t		origin_offset;  //These are from Lazarus for the rider code
+	vec3_t		origin_offset;  // These are from Lazarus for the rider code
 	vec3_t		org_angles;
 	vec3_t		org_mins;
 	vec3_t		org_maxs;
@@ -2236,14 +2371,12 @@ struct edict_s
 	edict_t     *crane_light;
 	vec_t       crane_bonk;
 
-	//Knightmare
-	//=============
 	vec3_t		movedir;
 	vec3_t		pos1, pos2;
-	vec3_t		pos0; //Knightmare- initial position for secret doors
+	vec3_t		pos0;	// Knightmare- initial position for secret doors
 
 	vec3_t		velocity;
-	vec3_t		oldvelocity; //Knightmare added
+	vec3_t		oldvelocity; // Knightmare added
 	vec3_t		avelocity;
 	int			mass;
 	float		density;
@@ -2262,7 +2395,8 @@ struct edict_s
 
 	edict_t		*goalentity;
 	edict_t		*movetarget;
-	//Knightmare- rotating train stuff
+
+	// Knightmare- rotating train stuff
 	float		pitch_speed;
 	float		yaw_speed;
 	float		roll_speed;
@@ -2312,8 +2446,8 @@ struct edict_s
 	float		nextthink;
 	void		(*prethink) (edict_t *ent);
 	void		(*think)(edict_t *self);
-	void		(*postthink) (edict_t *ent); //Knightmare added
-	void		(*blocked)(edict_t *self, edict_t *other);	//move to moveinfo?
+	void		(*postthink) (edict_t *ent); // Knightmare added
+	void		(*blocked)(edict_t *self, edict_t *other);	// move to moveinfo?
 	void		(*touch)(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf);
 	void		(*use)(edict_t *self, edict_t *other, edict_t *activator);
 	void		(*pain)(edict_t *self, edict_t *other, float kick, int damage);
@@ -2326,9 +2460,9 @@ struct edict_s
 	float		damage_debounce_time;
 	float		gravity_debounce_time;		// used by item_ movement commands to prevent
 											// monsters from dropping to floor
-	float		fly_sound_debounce_time;	//move to clientinfo
+	float		fly_sound_debounce_time;	// move to clientinfo
 	float		last_move_time;
-	float		last_fire_time; //Knightmare added
+	float		last_fire_time; // Knightmare added
 
 	int			health;
 	int			max_health;
@@ -2434,7 +2568,7 @@ struct edict_s
 								// should be forced to a good value for fog obscuration
 								// of HOM
 
-	//Mappack - for ridahs controllable turret (but beels weapon thing)
+	// Mappack - for ridahs controllable turret (but beels weapon thing)
 	edict_t		*turret;	//ugly ?
 	edict_t		*child;			// "real" infantry guy, child of remote turret_driver
 
@@ -2457,8 +2591,8 @@ struct edict_s
 	char			*movewith;
 	char			*dmgteam;		// for target_monsterbattle
 	int				do_not_rotate;	// whether to movewith rotate a func_door
-//=========
-//ROGUE
+
+// ROGUE
 	int			plat2flags;
 	vec3_t		offset;
 	vec3_t		gravityVector;
@@ -2469,8 +2603,60 @@ struct edict_s
 	int			hint_chain_id;
 	// FIXME - debug help!
 	float		lastMoveTime;
-//ROGUE
-//=========
+// end ROGUE
+
+// Zaero
+	char		*model2;
+	char		*model3;
+	char		*model4;
+	
+	float		aspeed;
+
+	// can use this for misc. timeouts
+	float		timeout;
+
+//	int			blood_type; // specifies blood effect
+
+	// for func_door, also used by monster_autocannon, and misc_securitycamera
+	int			active;
+	int			seq;
+	
+	// between level saves/loads
+	int			spawnflags2;
+	int			oldentnum;
+	
+	// titan laser
+	edict_t		*laser;
+
+	float		weaponsound_time;
+
+	// schooling info
+	edict_t		*zRaduisList, *zSchoolChain;
+	float		zDistance;
+
+	// this is for MOVETYPE_RIDE
+	edict_t		*rideWith[2];
+	vec3_t		rideWithOffset[2];
+
+	// camera number
+	vec3_t		mangle;
+	
+	// time left for the visor (stored if a visor is dropped)
+	int			visorFrames;
+
+	// monster team
+	char		*mteam;
+
+	// for random func_timer targets
+//	char		targets[16][MAX_QPATH];
+//	int			numTargets;
+
+	// used by floor-mounted autocannon
+	int			onFloor;
+
+	float		bossFireTimeout;
+	int			bossFireCount;
+// end Zaero
 };
 
 //=============
@@ -2550,3 +2736,7 @@ int  DBall_CheckDMRules (void);
 #define FLASHLIGHT_USE POWERUP_NEW_ENT
 #define FLASHLIGHT_DRAIN     60
 #define FLASHLIGHT_ITEM      "Cells"
+
+// Zaero dmflags
+#define ZDM_NO_GL_POLYBLEND_DAMAGE	1
+#define ZDM_ZAERO_ITEMS				2
