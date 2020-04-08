@@ -32,6 +32,9 @@ This sets the actual text color, can be called from anywhere
 */
 void CL_TextColor (int colornum, int *red, int *green, int *blue)
 {
+	if (!red || !green || !blue) // paranoia
+		return;
+
 	switch (colornum)
 	{
 		case 1:		// red

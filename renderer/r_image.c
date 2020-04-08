@@ -1307,7 +1307,7 @@ void R_LoadJPG (char *filename, byte **pic, int *width, int *height)
 	// Check Color Components
 	if (cinfo.output_components != 3)
 	{
-		VID_Printf(PRINT_ALL, "Invalid JPEG color components\n");
+		VID_Printf(PRINT_ALL, "Invalid JPEG color components in %s\n", filename);
 		jpeg_destroy_decompress(&cinfo);
 		FS_FreeFile(rawdata);
 		return;
