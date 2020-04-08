@@ -148,7 +148,7 @@ void	VID_Init (void)
     ri.Cvar_Set = Cvar_Set;
     ri.Cvar_SetValue = Cvar_SetValue;
     ri.Vid_GetModeInfo = VID_GetModeInfo;
-	ri.TextColor = TextColor; // Knightmare added
+	ri.TextColor = CL_TextColor; // Knightmare added
 	ri.SetParticlePics = CL_SetParticleImages; // Knightmare added
 
     re = GetRefAPI(ri);
