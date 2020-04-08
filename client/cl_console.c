@@ -703,9 +703,9 @@ void Con_DrawNotify (void)
 		if (chat_bufferlen > (viddef.width/FONT_SIZE)-(strlen(output)+1))
 			x += chat_bufferlen - (int)((viddef.width/FONT_SIZE)-(strlen(output)+1));
 
-		while(s[x])
+		while (s[x])
 		{
-			if (chat_backedit && chat_backedit == chat_bufferlen-x && ((int)(cls.realtime>>8)&1)) {
+			if ( chat_backedit && (chat_backedit == chat_bufferlen-x) && ((int)(cls.realtime>>8)&1) ) {
 			//	Com_sprintf (output, sizeof(output), "%s%c", output, 11 );
 				addch[0] = 11;
 				addch[1] = '\0';
@@ -733,7 +733,7 @@ void Con_DrawNotify (void)
 		v += FONT_SIZE*2; // make extra space so we have room
 	}
 
-	for (i= con.current-NUM_CON_TIMES+1; i<=con.current; i++)
+	for (i = con.current-NUM_CON_TIMES+1; i <= con.current; i++)
 	{
 		if (i < 0)
 			continue;
@@ -748,9 +748,9 @@ void Con_DrawNotify (void)
 		lines++;
 	}
 
-	//v = 0;
+//	v = 0;
 	if (lines)
-		for (j=0, i= con.current-NUM_CON_TIMES+1; i<=con.current; i++, j++)
+		for (j = 0, i = con.current-NUM_CON_TIMES+1; i <= con.current; i++, j++)
 		{
 			if (i < 0)
 				continue;
@@ -764,12 +764,12 @@ void Con_DrawNotify (void)
 			text = con.text + (i % con.totallines)*con.linewidth;
 			
 			alpha = 255 * sqrt( (1.0-time/(con_notifytime->value*1000.0+1.0)) * (((float)v+8.0)) / (8.0*lines) );
-			//alpha = (1-time/(con_notifytime->value*1000.0+2)) * (255*(v+16)) / (4*lines);
-			if (alpha < 0) alpha=0;
-			if (alpha > 255) alpha=255;
+		//	alpha = (1-time/(con_notifytime->value*1000.0+2)) * (255*(v+16)) / (4*lines);
+			if (alpha < 0) alpha = 0;
+			if (alpha > 255) alpha = 255;
 
 			Com_sprintf (output, sizeof(output), "");
-			for (x = 0 ; x < con.linewidth ; x++) {
+			for (x = 0; x < con.linewidth; x++) {
 			//	Com_sprintf (output, sizeof(output), "%s%c", output, (char)text[x]);
 				addch[0] = (char)text[x];
 				addch[1] = '\0';
@@ -881,7 +881,7 @@ void Con_DrawConsole (float frac, qboolean trans)
 	conWidth = picWidth = SCREEN_WIDTH;
 	picHeight = SCREEN_HEIGHT;
 	SCR_AdjustFrom640 (&picLeft, NULL, &picWidth, &picHeight, ALIGN_CENTER);
-	TextColor((int)alt_text_color->value, &red, &green, &blue);
+	CL_TextColor ((int)alt_text_color->value, &red, &green, &blue);
 	if ( (newconback_found && con_newconback->value) || con_oldconbar->value ) {
 		barheight = 2;
 		SCR_AdjustFrom640 (&conLeft, NULL, &conWidth, &barheight, ALIGN_STRETCH);
@@ -949,8 +949,8 @@ void Con_DrawConsole (float frac, qboolean trans)
 	if (con.display != con.current)
 	{
 	// draw arrows to show the buffer is backscrolled
-		for (x=0; x<con.linewidth; x+=4)
-			R_DrawChar((int)conLeft + (x+1)*FONT_SIZE, y, '^', CON_FONT_SCALE, 255, 0, 0, 255, false, ((x+4)>=con.linewidth) );
+		for (x = 0; x < con.linewidth; x+=4)
+			R_DrawChar ((int)conLeft + (x+1)*FONT_SIZE, y, '^', CON_FONT_SCALE, 255, 0, 0, 255, false, ((x+4)>=con.linewidth) );
 	
 		y -= FONT_SIZE;
 		rows--;

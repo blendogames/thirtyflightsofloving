@@ -1305,7 +1305,7 @@ void R_LoadJPG (char *filename, byte **pic, int *width, int *height)
 	jpeg_start_decompress(&cinfo);
 
 	// Check Color Components
-	if(cinfo.output_components != 3)
+	if (cinfo.output_components != 3)
 	{
 		VID_Printf(PRINT_ALL, "Invalid JPEG color components\n");
 		jpeg_destroy_decompress(&cinfo);
@@ -1315,7 +1315,7 @@ void R_LoadJPG (char *filename, byte **pic, int *width, int *height)
 
 	// Allocate Memory for decompressed image
 	rgbadata = malloc(cinfo.output_width * cinfo.output_height * 4);
-	if(!rgbadata)
+	if (!rgbadata)
 	{
 		VID_Printf(PRINT_ALL, "Insufficient RAM for JPEG buffer\n");
 		jpeg_destroy_decompress(&cinfo);
@@ -1328,7 +1328,7 @@ void R_LoadJPG (char *filename, byte **pic, int *width, int *height)
 
 	// Allocate Scanline buffer
 	scanline = malloc(cinfo.output_width * 3);
-	if(!scanline)
+	if (!scanline)
 	{
 		VID_Printf(PRINT_ALL, "Insufficient RAM for JPEG scanline buffer\n");
 		free(rgbadata);
@@ -1339,12 +1339,12 @@ void R_LoadJPG (char *filename, byte **pic, int *width, int *height)
 
 	// Read Scanlines, and expand from RGB to RGBA
 	q = rgbadata;
-	while(cinfo.output_scanline < cinfo.output_height)
+	while (cinfo.output_scanline < cinfo.output_height)
 	{
 		p = scanline;
 		jpeg_read_scanlines(&cinfo, &scanline, 1);
 
-		for(i=0; i<cinfo.output_width; i++)
+		for (i=0; i<cinfo.output_width; i++)
 		{
 			q[0] = p[0];
 			q[1] = p[1];

@@ -1194,8 +1194,8 @@ qboolean R_CheckGLExtensions (char *reason)
 	// OpenGL multitexture on GL 1.2.1 or later or GL_ARB_multitexture
 	glConfig.multitexture = false;
 	glConfig.max_texunits = 1;
-	if ( (glConfig.version_major >= 2) || (glConfig.version_major >= 1 && glConfig.version_minor > 2)
-		|| (glConfig.version_major >= 1 && glConfig.version_minor >= 2 && glConfig.version_release >= 1) )
+	if ( (glConfig.version_major >= 2) || (glConfig.version_major == 1 && glConfig.version_minor > 2)
+		|| (glConfig.version_major == 1 && glConfig.version_minor == 2 && glConfig.version_release >= 1) )
 	{
 		qglMultiTexCoord2fARB = (void *) qwglGetProcAddress( "glMultiTexCoord2f" );
 		qglActiveTextureARB = (void *) qwglGetProcAddress( "glActiveTexture" );

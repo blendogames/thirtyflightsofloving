@@ -1402,7 +1402,7 @@ void SCR_DrawLoadingBar (float x, float y, float w, float h, int percent, float 
 	float	iRatio, hiRatio;
 
 	// changeable download/map load bar color
-	TextColor((int)alt_text_color->value, &red, &green, &blue);
+	CL_TextColor ((int)alt_text_color->value, &red, &green, &blue);
 	iRatio = 1 - fabs(sizeRatio);
 	hiRatio = iRatio * 0.5;
 

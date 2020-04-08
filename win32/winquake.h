@@ -28,6 +28,25 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //#define	WINDOW_STYLE	(WS_OVERLAPPED|WS_BORDER|WS_CAPTION|WS_VISIBLE)
 #define	WINDOW_STYLE	(WS_OVERLAPPED|WS_BORDER|WS_CAPTION|WS_SYSMENU|WS_VISIBLE)
 
+// defines for MSVC6
+#if (_MSC_VER < 1300)
+#ifndef LONG_PTR
+#define LONG_PTR LONG
+#endif
+
+#ifndef SetWindowLongPtr
+#define SetWindowLongPtr SetWindowLong
+#endif
+
+#ifndef GetWindowLongPtr
+#define GetWindowLongPtr GetWindowLong
+#endif
+
+#ifndef GWLP_WNDPROC
+#define GWLP_WNDPROC GWL_WNDPROC
+#endif
+#endif	// _MSC_VER
+
 extern	HINSTANCE	global_hInstance;
 
 extern LPDIRECTSOUND pDS;

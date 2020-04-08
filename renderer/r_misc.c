@@ -666,7 +666,7 @@ void R_ScreenShot_JPG (qboolean silent)
 
 	// Open the file for Binary Output
 	file = fopen(checkname, "wb");
-	if(!file)
+	if (!file)
 	{
 		VID_Printf (PRINT_ALL, "R_ScreenShot_JPG: Couldn't create a file\n"); 
 		return;
@@ -678,7 +678,7 @@ void R_ScreenShot_JPG (qboolean silent)
 
 	// Allocate room for a copy of the framebuffer
 	rgbdata = malloc(grab_width * vid.height * 3);
-	if(!rgbdata)
+	if (!rgbdata)
 	{
 		fclose(file);
 		return;
@@ -798,7 +798,7 @@ void R_ScreenShot_PNG (qboolean silent)
 
 	// Allocate room for a copy of the framebuffer
 	rgbdata = malloc(grab_width * vid.height * 3);
-	if(!rgbdata)
+	if (!rgbdata)
 	{
 		return;
 	}
@@ -835,7 +835,7 @@ void R_ScreenShot_PNG (qboolean silent)
 
 	// open png file
 	file = fopen(checkname, "wb");
-	if(!file)
+	if (!file)
 	{
 		png_destroy_info_struct(png_sptr, &png_infoptr);
 		png_destroy_write_struct (&png_sptr, 0);
@@ -943,7 +943,7 @@ void R_ScreenShot_TGA (qboolean silent)
 
 	// swap rgb to bgr
 	c = 18+grab_width*vid.height*3;
-	for (i=18; i<c; i+=3)
+	for (i = 18; i < c; i += 3)
 	{
 		temp = buffer[i];
 		buffer[i] = buffer[i+2];
@@ -951,6 +951,11 @@ void R_ScreenShot_TGA (qboolean silent)
 	}
 
 	f = fopen (checkname, "wb");
+	if (!f) {
+		free (buffer);
+		VID_Printf (PRINT_ALL, "R_ScreenShot_TGA: Couldn't create a file\n"); 
+		return;
+ 	}
 	fwrite (buffer, 1, c, f);
 	fclose (f);
 

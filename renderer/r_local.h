@@ -977,7 +977,7 @@ void	 Cvar_SetValue (char *name, float value);
 qboolean	VID_GetModeInfo (int *width, int *height, int mode);
 void		VID_NewWindow (int width, int height);
 // Knightmare- added import of text color for renderer
-void		TextColor (int colornum, int *red, int *green, int *blue);
+void		CL_TextColor (int colornum, int *red, int *green, int *blue);
 
 /*
 ====================================================================

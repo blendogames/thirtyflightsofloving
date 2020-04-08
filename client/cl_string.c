@@ -26,35 +26,35 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 /*
 ================
-TextColor
+CL_TextColor
 This sets the actual text color, can be called from anywhere
 ================
 */
-void TextColor (int colornum, int *red, int *green, int *blue)
+void CL_TextColor (int colornum, int *red, int *green, int *blue)
 {
 	switch (colornum)
 	{
-		case 1:		//red
+		case 1:		// red
 			*red =	255;
 			*green=	0;
 			*blue =	0;
 			break;
-		case 2:		//green
+		case 2:		// green
 			*red =	0;
 			*green=	255;
 			*blue =	0;
 			break;
-		case 3:		//yellow
+		case 3:		// yellow
 			*red =	255;
 			*green=	255;
 			*blue =	0;
 			break;
-		case 4:		//blue
+		case 4:		// blue
 			*red =	0;
 			*green=	0;
 			*blue =	255;
 			break;
-		case 5:		//cyan
+		case 5:		// cyan
 			*red =	0;
 			*green=	255;
 			*blue =	255;
@@ -64,27 +64,27 @@ void TextColor (int colornum, int *red, int *green, int *blue)
 			*green=	0;
 			*blue =	255;
 			break;
-		case 7:		//white
+		case 7:		// white
 			*red =	255;
 			*green=	255;
 			*blue =	255;
 			break;
-		case 8:		//black
+		case 8:		// black
 			*red =	0;
 			*green=	0;
 			*blue =	0;
 			break;
-		case 9:		//orange
+		case 9:		// orange
 			*red =	255;
 			*green=	135;
 			*blue =	0;
 			break;
-		case 0:		//gray
+		case 0:		// gray
 			*red =	155;
 			*green=	155;
 			*blue =	155;
 			break;
-		default:	//white
+		default:	// white
 			*red =	255;
 			*green=	255;
 			*blue =	255;
@@ -95,10 +95,10 @@ void TextColor (int colornum, int *red, int *green, int *blue)
 
 /*
 ================
-StringSetParams
+CL_StringSetParams
 ================
 */
-qboolean StringSetParams (char modifier, int *red, int *green, int *blue, int *bold, int *shadow, int *italic, int *reset)
+qboolean CL_StringSetParams (char modifier, int *red, int *green, int *blue, int *bold, int *shadow, int *italic, int *reset)
 {
 	// sanity check
 	if (!red || !green || !blue || !bold || !shadow || !italic || !reset)
@@ -118,21 +118,21 @@ qboolean StringSetParams (char modifier, int *red, int *green, int *blue, int *b
 			if (*bold) 
 				*bold = false;
 			else 
-				*bold=true;
+				*bold = true;
 			return true;
 		case 'S':
 		case 's':
 			if (*shadow) 
-				*shadow=false; 
+				*shadow = false; 
 			else 
-				*shadow=true;
+				*shadow = true;
 			return true;
 		case 'I':
 		case 'i':
 			if (*italic) 
-				*italic=false; 
+				*italic = false; 
 			else 
-				*italic=true;
+				*italic = true;
 			return true;
 		case COLOR_RED:
 		case COLOR_GREEN:
@@ -144,11 +144,12 @@ qboolean StringSetParams (char modifier, int *red, int *green, int *blue, int *b
 		case COLOR_BLACK:
 		case COLOR_ORANGE:
 		case COLOR_GRAY:
-			TextColor(atoi(&modifier), red, green, blue);
+			CL_TextColor (atoi(&modifier), red, green, blue);
 			return true;
-		case 'A':	//alt text color
+		case 'A':	// alt text color
 		case 'a':
-			TextColor((int)alt_text_color->value, red, green, blue);
+		//	CL_TextColor ((int)alt_text_color->value, red, green, blue);
+			CL_TextColor ((int)alt_text_color->integer, red, green, blue);
 			return true;
 	}
 	
@@ -181,19 +182,22 @@ void DrawStringGeneric (int x, int y, const char *string, int alpha, textscalety
 	for ( i = 0, j = 0; i < len; i++ )
 	{
 		modifier = (byte)string[i];
-		if (modifier&128) modifier &= ~128;
+		if (modifier & 128) modifier &= ~128;
 
 		if (modifier == '^' && i < len)
 		{
 			i++;
 
-			reset = 0;
+			reset = false;
 			modifier = (byte)string[i];
-			if (modifier&128) modifier &= ~128;
+			if (modifier & 128) modifier &= ~128;
 
-			if (modifier!='^')
+			if (modifier != '^')
 			{
-				modified = StringSetParams(modifier, &red, &green, &blue, &bold, &shadow, &italic, &reset);
+				modified = CL_StringSetParams (modifier, &red, &green, &blue, &bold, &shadow, &italic, &reset);
+
+				if ( (modifier != 'r') && (modifier != 'R') )	// fix false reset flag
+					reset = false;
 
 				if (reset)
 				{
@@ -225,7 +229,8 @@ void DrawStringGeneric (int x, int y, const char *string, int alpha, textscalety
 		if (!modified)
 		{
 			if (character & 128) {
-				TextColor((int)alt_text_color->value, &red, &green, &blue);
+			//	CL_TextColor ((int)alt_text_color->value, &red, &green, &blue);
+				CL_TextColor ((int)alt_text_color->integer, &red, &green, &blue);
 				if ( (red != 255) || (green != 255) || (blue != 255) )
 					character &= ~128;
 			}

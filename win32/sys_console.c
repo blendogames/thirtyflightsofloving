@@ -24,21 +24,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "resource.h"
 #include "winquake.h"
 
-// defines for MSVC6
-#if (_MSC_VER < 1300)
-#ifndef LONG_PTR
-#define LONG_PTR LONG
-#endif
-
-#ifndef SetWindowLongPtr
-#define SetWindowLongPtr SetWindowLong
-#endif
-
-#ifndef GWLP_WNDPROC
-#define GWLP_WNDPROC GWL_WNDPROC
-#endif
-#endif	// _MSC_VER
-
 
 #ifdef NEW_DED_CONSOLE
 
