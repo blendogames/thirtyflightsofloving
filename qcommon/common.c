@@ -47,6 +47,7 @@ cvar_t	*timescale;
 cvar_t	*fixedtime;
 cvar_t	*logfile_active;	// 1 = buffer log, 2 = flush after each print
 cvar_t	*showtrace;
+cvar_t	*con_show_description;	// Knightmare added
 cvar_t	*dedicated;
 
 // Knightmare- for the game DLL to tell what engine it's running under
@@ -1676,6 +1677,9 @@ void Qcommon_Init (int argc, char **argv)
 	fixedtime = Cvar_Get ("fixedtime", "0", CVAR_CHEAT);
 	logfile_active = Cvar_Get ("logfile", "0", 0);
 	showtrace = Cvar_Get ("showtrace", "0", 0);
+	con_show_description = Cvar_Get ("con_show_description", "1", CVAR_ARCHIVE);	// Knightmare added
+	Cvar_SetDescription ("con_show_description", "Toggles output of descriptions for cvars.  This cvar will always show its description.");
+
 #ifdef DEDICATED_ONLY
 	dedicated = Cvar_Get ("dedicated", "1", CVAR_NOSET);
 #else

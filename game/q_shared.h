@@ -67,30 +67,40 @@ typedef enum {false, true}	qboolean;
 #ifdef _WIN32 
 #  ifndef __GNUC__	// MSVC/Borland
 	typedef __int64 qint64;
+	typedef unsigned __int64 uint64;
 #  else	// Cygwin
 #	include <_G_config.h>
 	typedef _G_int64_t qint64;
+	typedef unsigned _G_int64_t uint64;
 #  endif
 #elif defined(__MACOS__)
 #	include <sys/types.h>
 	typedef SInt64 qint64;
+	typedef UInt64 uint64;
 #elif defined(__APPLE__) || defined(MACOSX) // MacOS X Framework build
 #	include <sys/types.h>
 	typedef int64_t qint64;
+	typedef unsigned int64_t uint64;
 #elif defined(__linux__) // Linux
 #	include <_G_config.h>
 	typedef _G_int64_t qint64;
+	typedef unsigned _G_int64_t uint64;
 #elif defined(__BEOS__)	// Be
 #	include <inttypes.h>
 	typedef int64_t qint64;
+	typedef unsigned int64_t uint64;
 #elif defined (__EMX__)	// OS/2 GCC
 	typedef long long qint64;
+	typedef unsigned long long uint64;
 #elif defined (DJGPP)	// DJGPP
 	typedef long long qint64;
+	typedef unsigned long long uint64;
 #elif defined(R5900)	// PS2 EE
 	typedef long qint64;
+	typedef unsigned long uint64;
 #elif defined(linux)
 	typedef int64_t qint64;
+	typedef unsigned int64_t uint64;
 #endif
 
 #ifndef NULL
@@ -571,6 +581,7 @@ typedef struct cvar_s
 #ifdef KMQUAKE2_ENGINE_MOD
 	char		*default_string;
 	int			integer;
+	char		*description;
 #endif
 } cvar_t;
 

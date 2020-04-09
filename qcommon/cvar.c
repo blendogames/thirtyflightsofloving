@@ -238,6 +238,7 @@ cvar_t *Cvar_Get (char *var_name, char *var_value, int flags)
 	var->modified = true;
 	var->value = atof (var->string);
 	var->integer = atoi(var->string);
+	var->description = NULL;	// Knightmare- added descriptions from From Maraa'kate's cvar code
 
 	// link the variable in
 	var->next = cvar_vars;
@@ -380,6 +381,50 @@ cvar_t *Cvar_SetToDefault (char *var_name)
 
 /*
 ============
+Cvar_SetDescription
+Knightmare added
+From Maraa'kate's cvar code
+============
+*/
+void Cvar_SetDescription (char *var_name, char *description)
+{
+	cvar_t *var;
+	
+	var = Cvar_FindVar (var_name);
+	if (!var) {
+		Com_DPrintf ("Cvar_SetDescription: cvar %s is invalid, can't set description!\n", var_name);
+		return;
+	}
+	if (var->description) {
+		free(var->description);
+	}
+	if ( description && (strlen(description) > 1) ) {
+		var->description = strdup(description);
+	}
+}
+
+
+/*
+============
+Cvar_SetModified
+Knightmare added
+Used to force the modified field of a cvar on.
+Used mainly for vid_ref, to force a vid_restart. 
+============
+*/
+void Cvar_SetModified (char *var_name, qboolean value)
+{
+	cvar_t *var;
+	
+	var = Cvar_FindVar (var_name);
+	if (!var)
+		return;
+	var->modified = value;
+}
+
+
+/*
+============
 Cvar_FullSet
 ============
 */
@@ -437,6 +482,70 @@ void Cvar_SetInteger (char *var_name, int integer)
 
 	Com_sprintf (val, sizeof(val), "%i",integer);
 	Cvar_Set (var_name, val);
+}
+
+
+/*
+=================
+Cvar_ClampValue
+
+From Q2Pro
+=================
+*/
+float Cvar_ClampValue (cvar_t *var, float min, float max)
+{
+    char    val[32];
+
+    if (var->value < min)
+	{
+        if (min == (int)min) {
+            Com_sprintf (val, sizeof(val), "%i", (int)min);
+        }
+		else {
+            Com_sprintf (val, sizeof(val), "%f", min);
+        }
+		Cvar_Set (var->name, val);
+        return min;
+    }
+    if (var->value > max)
+	{
+        if (max == (int)max) {
+            Com_sprintf (val, sizeof(val), "%i", (int)max);
+        }
+		else {
+            Com_sprintf (val, sizeof(val), "%f", max);
+        }
+		Cvar_Set (var->name, val);
+        return max;
+    }
+    return var->value;
+}
+
+
+/*
+=================
+Cvar_ClampInteger
+
+From Q2Pro
+=================
+*/
+int Cvar_ClampInteger (cvar_t *var, int min, int max)
+{
+    char    val[32];
+
+    if (var->integer < min)
+	{
+        Com_sprintf (val, sizeof(val), "%i", min);
+        Cvar_Set (var->name, val);
+        return min;
+    }
+    if (var->integer > max)
+	{
+        Com_sprintf (val, sizeof(val), "%i", max);
+        Cvar_Set (var->name, val);
+        return max;
+    }
+    return var->integer;
 }
 
 
@@ -524,6 +633,13 @@ qboolean Cvar_Command (void)
 			Com_Printf ("\"%s\" is \"%s\" : default is \"%s\" : latched to \"%s\"\n", v->name, v->string, v->default_string, v->latched_string);
 		else
 			Com_Printf ("\"%s\" is \"%s\" : default is \"%s\"\n", v->name, v->string, v->default_string);
+
+		// Knightmare- added descriptions from From Maraa'kate's cvar code
+		if ( (v->description != NULL) && (con_show_description->integer || !strcmp(v->name, "con_show_description")) )
+			Com_Printf ("Description: %s\n", v->description);
+	//	else if ( (v->description != NULL) && !strcmp(v->name, "con_show_description") )	// Always show description for con_show_description
+	//		Com_Printf ("Description: %s\n", v->description);
+		// end Knightmare
 
 		return true;
 	}
@@ -709,6 +825,12 @@ void Cvar_List_f (void)
 			else
 				Com_Printf(" ");
 
+			// Knightmare- added descriptions from From Maraa'kate's cvar code
+			if (var->description != NULL)
+				Com_Printf("D");
+			else
+				Com_Printf(" ");
+
 			// show latched value if applicable
 			if ((var->flags & CVAR_LATCH) && var->latched_string)
 				Com_Printf (" %s \"%s\" - default: \"%s\" - latched: \"%s\"\n", var->name, var->string, var->default_string, var->latched_string);
@@ -716,6 +838,7 @@ void Cvar_List_f (void)
 				Com_Printf (" %s \"%s\" - default: \"%s\"\n", var->name, var->string, var->default_string);
 		}
 	}
+	Com_Printf ("Legend: \'A\'=Archive \'U\'=Userinfo \'S\'=Serverinfo \'-\'=Write Protected \'L\'=Latched  \'C\'=Cheat \'D\'=Has Description\n");
 	Com_Printf (" %i cvars, %i matching\n", i, j);
 }
 

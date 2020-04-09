@@ -1074,7 +1074,9 @@ void R_Register (void)
 	Cmd_AddCommand ("screenshot_silent", R_ScreenShot_Silent_f);
 	Cmd_AddCommand ("screenshot_tga", R_ScreenShot_TGA_f);
 	Cmd_AddCommand ("screenshot_jpg", R_ScreenShot_JPG_f);
+#ifdef PNG_SUPPORT
 	Cmd_AddCommand ("screenshot_png", R_ScreenShot_PNG_f);
+#endif	// PNG_SUPPORT
 	Cmd_AddCommand ("modellist", Mod_Modellist_f);
 	Cmd_AddCommand ("gl_strings", GL_Strings_f);
 //	Cmd_AddCommand ("resetvertexlights", R_ResetVertextLights_f);
@@ -1944,7 +1946,9 @@ void R_Shutdown (void)
 	Cmd_RemoveCommand ("screenshot_silent");
 	Cmd_RemoveCommand ("screenshot_tga");
 	Cmd_RemoveCommand ("screenshot_jpg");
+#ifdef PNG_SUPPORT
 	Cmd_RemoveCommand ("screenshot_png");
+#endif	// PNG_SUPPORT
 	Cmd_RemoveCommand ("imagelist");
 	Cmd_RemoveCommand ("gl_strings");
 //	Cmd_RemoveCommand ("resetvertexlights");

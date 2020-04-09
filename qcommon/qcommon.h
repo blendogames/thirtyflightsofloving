@@ -526,6 +526,15 @@ void	Cvar_SetValue (char *var_name, float value);
 void Cvar_SetInteger (char *var_name, int integer);
 // expands value to a string and calls Cvar_Set
 
+void	Cvar_SetModified (char *var_name, qboolean value);
+// sets modified attribute of cvar
+
+float Cvar_ClampValue (cvar_t *var, float min, float max);
+// clamps cvar to range, expands value to a string and calls Cvar_Set
+
+int Cvar_ClampInteger (cvar_t *var, int min, int max);
+// clamps cvar to range, expands value to a string and calls Cvar_Set
+
 float	Cvar_VariableValue (char *var_name);
 // returns 0 if not defined or non numeric
 
@@ -889,6 +898,7 @@ extern	cvar_t	*developer;
 extern	cvar_t	*dedicated;
 extern	cvar_t	*host_speeds;
 extern	cvar_t	*log_stats;
+extern	cvar_t	*con_show_description;	// Knightmare added
 
 // Knightmare- for the game DLL to tell what engine it's running under
 extern	cvar_t *sv_engine;
