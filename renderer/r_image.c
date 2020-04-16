@@ -125,6 +125,39 @@ gltmode_t gl_solid_modes[] = {
 
 #define NUM_GL_SOLID_MODES (sizeof(gl_solid_modes) / sizeof (gltmode_t))
 
+
+/*
+===============
+GL_UpdateAnisoMode
+===============
+*/
+void GL_UpdateAnisoMode (void)
+{
+	int		i;
+	image_t	*glt;
+
+	// clamp selected anisotropy
+	if (glConfig.anisotropic)
+	{
+		if (r_anisotropic->value > glConfig.max_anisotropy)
+			Cvar_SetValue("r_anisotropic", glConfig.max_anisotropy);
+		else if (r_anisotropic->value < 1.0)
+			Cvar_SetValue("r_anisotropic", 1.0);
+	}
+
+	// change all the existing mipmap texture objects
+	for (i=0, glt=gltextures; i<numgltextures; i++, glt++)
+	{
+		if ( (glt->type != it_pic) && (glt->type != it_font) && (glt->type != it_sky) )
+		{
+			GL_Bind (glt->texnum);
+			// Set anisotropic filter if supported and enabled
+			if (glConfig.anisotropic && r_anisotropic->value)
+				qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, r_anisotropic->value);
+		}
+	}
+}
+
 /*
 ===============
 GL_TextureMode
@@ -160,21 +193,18 @@ void GL_TextureMode( char *string )
 	}
 
 	// change all the existing mipmap texture objects
-	for (i=0, glt=gltextures ; i<numgltextures ; i++, glt++)
+	for (i=0, glt=gltextures; i<numgltextures; i++, glt++)
 	{
-		if (glt->type != it_pic && glt->type != it_sky)
+	//	if (glt->type != it_pic && glt->type != it_sky)
+		if ( (glt->type != it_pic) && (glt->type != it_font) && (glt->type != it_sky) )
 		{
 			GL_Bind (glt->texnum);
 			qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_min);
 			qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_max);
 
 			// Set anisotropic filter if supported and enabled
-			if (glConfig.anisotropic && r_anisotropic->value)
-			{
+			if (glConfig.anisotropic && r_anisotropic->value) {
 				qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, r_anisotropic->value);
-				//GLfloat largest_supported_anisotropy;
-				//qglGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &largest_supported_anisotropy);
-				//qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, largest_supported_anisotropy);
 			}
 		}
 	}
@@ -266,6 +296,9 @@ void R_ImageList_f (void)
 		case it_pic:
 			VID_Printf (PRINT_ALL, "P");
 			break;
+		case it_font:
+			VID_Printf (PRINT_ALL, "F");
+			break;
 		case it_part:
 			VID_Printf (PRINT_ALL, "P");
 			break;
@@ -293,11 +326,11 @@ void R_ImageList_f (void)
 */
 
 #define	MAX_SCRAPS		1
-#define	BLOCK_WIDTH		256
-#define	BLOCK_HEIGHT	256
+#define	SCRAP_BLOCK_WIDTH		256
+#define	SCRAP_BLOCK_HEIGHT	256
 
-int			scrap_allocated[MAX_SCRAPS][BLOCK_WIDTH];
-byte		scrap_texels[MAX_SCRAPS][BLOCK_WIDTH*BLOCK_HEIGHT];
+int			scrap_allocated[MAX_SCRAPS][SCRAP_BLOCK_WIDTH];
+byte		scrap_texels[MAX_SCRAPS][SCRAP_BLOCK_WIDTH*SCRAP_BLOCK_HEIGHT];
 qboolean	scrap_dirty;
 
 // returns a texture number and the position inside it
@@ -307,11 +340,11 @@ int Scrap_AllocBlock (int w, int h, int *x, int *y)
 	int		best, best2;
 	int		texnum;
 
-	for (texnum=0 ; texnum<MAX_SCRAPS ; texnum++)
+	for (texnum=0; texnum<MAX_SCRAPS; texnum++)
 	{
-		best = BLOCK_HEIGHT;
+		best = SCRAP_BLOCK_HEIGHT;
 
-		for (i=0 ; i<BLOCK_WIDTH-w ; i++)
+		for (i=0; i<SCRAP_BLOCK_WIDTH-w; i++)
 		{
 			best2 = 0;
 
@@ -329,7 +362,7 @@ int Scrap_AllocBlock (int w, int h, int *x, int *y)
 			}
 		}
 
-		if (best + h > BLOCK_HEIGHT)
+		if (best + h > SCRAP_BLOCK_HEIGHT)
 			continue;
 
 		for (i=0 ; i<w ; i++)
@@ -348,7 +381,7 @@ void Scrap_Upload (void)
 {
 	scrap_uploads++;
 	GL_Bind(TEXNUM_SCRAPS);
-	GL_Upload8 (scrap_texels[0], BLOCK_WIDTH, BLOCK_HEIGHT, it_pic);
+	GL_Upload8 (scrap_texels[0], SCRAP_BLOCK_WIDTH, SCRAP_BLOCK_HEIGHT, it_pic);
 	scrap_dirty = false;
 }
 
@@ -1610,6 +1643,51 @@ void GL_ResampleTexture (unsigned *in, int inwidth, int inheight, unsigned *out,
 
 /*
 ================
+GL_UpscaleTexture
+================
+*/
+void GL_UpscaleTexture (void *indata, int inwidth, int inheight, void *outdata, int scaleFactor)
+{
+	if ( !indata || !outdata || (scaleFactor < 1) || (scaleFactor > 5) )
+		return;
+
+	if ( (r_font_upscale->integer >= 2) && (scaleFactor == 1) ) {
+		R_Upscale2x_Render (outdata, indata, inwidth, inheight);
+	}
+	else if ( (r_font_upscale->integer >= 2) && (scaleFactor == 2) ) {
+		R_Upscale4x_Render (outdata, indata, inwidth, inheight);
+	}
+	else // if (scaleFactor >= 3)	// just block-copy each pixel
+	{
+		int			sizeMult = (1 << scaleFactor);
+		int			x, y, i, j;
+		unsigned	*inL, *inP, *outL, *outP;
+
+		for (y = 0; y < inheight; y++)
+		{
+			inL = (unsigned *)indata + (y * inwidth);
+			outL = (unsigned *)outdata + (y * inwidth * sizeMult * sizeMult);
+
+			for (x = 0; x < inwidth; x++)
+			{
+				inP = inL + x;
+				outP = outL + (x * sizeMult);
+				// copy each input pixel to sizeMult^2 pixels
+				for (i = 0; i < sizeMult; i++)
+				{
+					for (j = 0; j < sizeMult; j++)
+					{
+						*(outP + (i * inwidth * sizeMult) + j) = *inP;
+					}
+				}
+			}
+		}
+	}
+}
+
+
+/*
+================
 GL_LightScaleTexture
 
 Scale up the pixel values in a texture to increase the
@@ -1728,7 +1806,7 @@ static qboolean IsPowerOf2 (int value)
 }
 */
 
-int nearest_power_of_2 (int size)
+int NearestPowerOf2 (int size)
 {
 	int i = 2;
 
@@ -1742,15 +1820,16 @@ int nearest_power_of_2 (int size)
 		i <<= 1;
 		if (size == i)
 			return i;
-		if (size > i && size < (i <<1)) 
+		if (size > i && size < (i << 1)) 
 		{
-			if (size >= ((i+(i<<1))/2))
-				return i<<1;
+			if (size >= ((i + (i << 1))/2))
+				return i << 1;
 			else
 				return i;
 		}
 	};
 }
+
 
 /*
 ===============
@@ -1762,37 +1841,49 @@ Returns has_alpha
 //#define USE_GLMIPMAP
 qboolean GL_Upload32 (unsigned *data, int width, int height, imagetype_t type)
 {
-	int			samples;
-	unsigned 	*scaled;
+	unsigned 	*scaled = NULL;
 	int			scaled_width, scaled_height;
-	int			i, c, comp;
-	qboolean	mipmap;
+//	int			samples;
+	int			i, c, comp, idealFontRes = 256, upscaleFactor = 0;
+	qboolean	mipmap, hasAlpha, isNPOT, resampled = false;
 	byte		*scan;
 
-	mipmap = ((type != it_pic) && (type != it_sky));
+//	mipmap = ((type != it_pic) && (type != it_sky));
+	mipmap = ( (type != it_pic) && (type != it_font) && (type != it_sky) );
 	uploaded_paletted = false;
+
+	// get best upscale size for old fonts
+	if ( (type == it_font) && (width == 128) && (height == 128) && r_font_upscale->integer ) {
+		idealFontRes = NearestPowerOf2(min(vid.width, vid.height)) / 2;
+		idealFontRes = min(idealFontRes, glConfig.max_texsize);
+		idealFontRes = max(idealFontRes, 256);
+	//	VID_Printf (PRINT_DEVELOPER, "GL_Upload32: ideal font res is %d.\n", idealFontRes);
+	}
 
 	//
 	// scan the texture for any non-255 alpha
 	//
 	c = width*height;
 	scan = ((byte *)data) + 3;
-	samples = gl_solid_format;
-	for (i=0 ; i<c ; i++, scan += 4)
+//	samples = gl_solid_format;
+	hasAlpha = false;
+	for (i = 0; i < c; i++, scan += 4)
 	{
-		if ( *scan != 255 )
-		{
-			samples = gl_alpha_format;
+		if ( *scan != 255 ) {
+			hasAlpha = true;
+		//	samples = gl_alpha_format;
 			break;
 		}
 	}
 
 	// Heffo - ARB Texture Compression
 	qglHint(GL_TEXTURE_COMPRESSION_HINT_ARB, GL_NICEST);
-	if (samples == gl_solid_format)
-		comp = (glState.texture_compression && (type != it_pic)) ? GL_COMPRESSED_RGB_ARB : gl_tex_solid_format;
+/*	if (samples == gl_solid_format)
+		comp = (glState.texture_compression && (type != it_pic) && (type != it_font)) ? GL_COMPRESSED_RGB_ARB : gl_tex_solid_format;
 	else if (samples == gl_alpha_format)
-		comp = (glState.texture_compression && (type != it_pic)) ? GL_COMPRESSED_RGBA_ARB : gl_tex_alpha_format;
+		comp = (glState.texture_compression && (type != it_pic) && (type != it_font)) ? GL_COMPRESSED_RGBA_ARB : gl_tex_alpha_format;
+	*/
+	comp = (glState.texture_compression && (type != it_pic) && (type != it_font)) ? GL_COMPRESSED_RGBA_ARB : GL_RGBA;
 
 	//
 	// find sizes to scale to
@@ -1800,10 +1891,12 @@ qboolean GL_Upload32 (unsigned *data, int width, int height, imagetype_t type)
 	if ( glConfig.arbTextureNonPowerOfTwo && (!mipmap || r_nonpoweroftwo_mipmaps->integer) ) {
 		scaled_width = width;
 		scaled_height = height;
+		isNPOT = ( (NearestPowerOf2(width) != width) || (NearestPowerOf2(height) != height) );
 	}
 	else {
-		scaled_width = nearest_power_of_2 (width);
-		scaled_height = nearest_power_of_2 (height);
+		scaled_width = NearestPowerOf2 (width);
+		scaled_height = NearestPowerOf2 (height);
+		isNPOT = false;
 	}
 
 	if (scaled_width > glConfig.max_texsize)
@@ -1818,12 +1911,23 @@ qboolean GL_Upload32 (unsigned *data, int width, int height, imagetype_t type)
 	{
 		int maxsize;
 
+#if 1
+		if (r_picmip->integer == 1)		// clamp to 1024x1024
+			maxsize = 1024;
+		else if (r_picmip->integer == 2) // clamp to 512x512
+			maxsize = 512;
+		else if (r_picmip->integer == 3) // clamp to 256x256
+			maxsize = 256;
+		else								// clamp to 128x128
+			maxsize = 128;
+#else
 		if (r_picmip->integer == 1)		// clamp to 512x512
 			maxsize = 512;
 		else if (r_picmip->integer == 2) // clamp to 256x256
 			maxsize = 256;
 		else								// clamp to 128x128
 			maxsize = 128;
+#endif
 
 		while (1) {
 			if (scaled_width <= maxsize && scaled_height <= maxsize)
@@ -1838,16 +1942,42 @@ qboolean GL_Upload32 (unsigned *data, int width, int height, imagetype_t type)
 	//
 	// resample texture if needed
 	//
-	if (scaled_width != width || scaled_height != height) 
+	if ( (type == it_font) && r_font_upscale->integer && (scaled_width == scaled_height) && ((scaled_width * 2) <= idealFontRes) )	// scale up fonts
 	{
+		while (1) {
+			if ( ((scaled_width * 2) > idealFontRes) && ((scaled_height * 2) > idealFontRes) )
+				break;
+			if (upscaleFactor >= 5)	// don't go past 32x scaling
+				break;
+			scaled_width <<= 1;
+			scaled_height <<= 1;
+			upscaleFactor++;
+		}
+		if (upscaleFactor > 0)
+		{
+			upscaleFactor = min(upscaleFactor, 5);	// clamp to 5 (32x scaling)
+			VID_Printf (PRINT_DEVELOPER, "GL_Upload32: scaling font image from %dx%d to %dx%d.\n", width, height, scaled_width, scaled_height);
+			scaled = malloc((scaled_width * scaled_height) * 4);
+			GL_UpscaleTexture (data, width, height, scaled, upscaleFactor);
+			resampled = true;
+		}
+		else {
+			scaled_width = width;
+			scaled_height = height;
+			scaled = data;
+			resampled = false;
+		}
+	}
+	else if (scaled_width != width || scaled_height != height) {
 		scaled = malloc((scaled_width * scaled_height) * 4);
 		GL_ResampleTexture (data, width, height, scaled, scaled_width, scaled_height);
+		resampled = true;
 	}
-	else
-	{
+	else {
 		scaled_width = width;
 		scaled_height = height;
 		scaled = data;
+		resampled = false;
 	}
 
 	if (!glState.gammaRamp)
@@ -1886,7 +2016,8 @@ qboolean GL_Upload32 (unsigned *data, int width, int height, imagetype_t type)
 		qglTexImage2D (GL_TEXTURE_2D, 0, comp, scaled_width, scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, scaled);
 #endif
 
-	if (scaled_width != width || scaled_height != height)
+//	if (scaled_width != width || scaled_height != height)
+	if (resampled)
 		free(scaled);
 
 	upload_width = scaled_width;	upload_height = scaled_height;
@@ -1898,8 +2029,10 @@ qboolean GL_Upload32 (unsigned *data, int width, int height, imagetype_t type)
 	if (mipmap && glConfig.anisotropic && r_anisotropic->value)
 		qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, r_anisotropic->value);
 
-	return (samples == gl_alpha_format || samples == GL_COMPRESSED_RGBA_ARB);
+//	return (samples == gl_alpha_format || samples == GL_COMPRESSED_RGBA_ARB);
+	return hasAlpha;
 }
+
 
 /*
 ===============
@@ -1974,9 +2107,9 @@ image_t *R_LoadPic (char *name, byte *pic, int width, int height, imagetype_t ty
 {
 	image_t		*image;
 	int			i;
-	//Nexus'added vars
-	int len; 
-	char s[128]; 
+	// Nexus'added vars
+	int			nameLen; 
+	char		refName[128]; 
 
 	// find a free image_t
 	for (i=0, image=gltextures ; i<numgltextures ; i++,image++)
@@ -2007,22 +2140,23 @@ image_t *R_LoadPic (char *name, byte *pic, int width, int height, imagetype_t ty
 	if (type == it_skin && bits == 8)
 		R_FloodFillSkin(pic, width, height);
 
-// replacement scaling hack for TGA/JPEG HUD images and skins
-// NOTE: replace this with shaders as soon as they are supported
-	len = strlen(name); 
+	// replacement scaling hack for TGA/JPEG HUD images and skins
+	// TODO: replace this with shaders as soon as they are supported
+	nameLen = (int)strlen(name); 
 //	strncpy(s,name);
-	Q_strncpyz(s, name, sizeof(s));
-	// check if we have a tga/jpg pic
+	Q_strncpyz(refName, name, sizeof(refName));
+
+	// Load .pcx for size refereence, check if we have a tga/jpg/png pic
 #ifdef PNG_SUPPORT
-	if ((type == it_pic) && (!strcmp(s+len-4, ".tga") || !strcmp(s+len-4, ".png") || !strcmp(s+len-4, ".jpg")) )
+	if ( ((type == it_pic) || (type == it_font)) && (!strcmp(refName+nameLen-4, ".tga") || !strcmp(refName+nameLen-4, ".png") || !strcmp(refName+nameLen-4, ".jpg")) )
 #else	// PNG_SUPPORT
-	if ((type == it_pic) && (!strcmp(s+len-4, ".tga") || !strcmp(s+len-4, ".jpg")) )
+	if ( ((type == it_pic) || (type == it_font)) && (!strcmp(refName+nameLen-4, ".tga") || !strcmp(refName+nameLen-4, ".jpg")) )
 #endif	// PNG_SUPPORT
 	{ 
 		byte	*pic, *palette;
 		int		pcxwidth, pcxheight;
-		s[len-3]='p'; s[len-2]='c'; s[len-1]='x'; // replace extension 
-		LoadPCX (s, &pic, &palette, &pcxwidth, &pcxheight); // load .pcx file 
+		refName[nameLen-3]='p'; refName[nameLen-2]='c'; refName[nameLen-1]='x'; // replace extension 
+		LoadPCX (refName, &pic, &palette, &pcxwidth, &pcxheight); // load .pcx file 
 		
 		if (pic && (pcxwidth > 0) && (pcxheight > 0)) {
 			image->replace_scale_w = (float)pcxwidth/image->width;
@@ -2033,8 +2167,8 @@ image_t *R_LoadPic (char *name, byte *pic, int width, int height, imagetype_t ty
 	}	
 
 	// load little pics into the scrap
-	if (image->type == it_pic && bits == 8
-		&& image->width < 64 && image->height < 64)
+	if ( (image->type == it_pic) && (bits == 8)
+		&& (image->width < 64) && (image->height < 64) )
 	{
 		int		x, y;
 		int		i, j, k;
@@ -2049,14 +2183,14 @@ image_t *R_LoadPic (char *name, byte *pic, int width, int height, imagetype_t ty
 		k = 0;
 		for (i=0 ; i<image->height ; i++)
 			for (j=0 ; j<image->width ; j++, k++)
-				scrap_texels[texnum][(y+i)*BLOCK_WIDTH + x + j] = pic[k];
+				scrap_texels[texnum][(y+i)*SCRAP_BLOCK_WIDTH + x + j] = pic[k];
 		image->texnum = TEXNUM_SCRAPS + texnum;
 		image->scrap = true;
 		image->has_alpha = true;
-		image->sl = (x+0.01)/(float)BLOCK_WIDTH;
-		image->sh = (x+image->width-0.01)/(float)BLOCK_WIDTH;
-		image->tl = (y+0.01)/(float)BLOCK_WIDTH;
-		image->th = (y+image->height-0.01)/(float)BLOCK_WIDTH;
+		image->sl = (x+0.01)/(float)SCRAP_BLOCK_WIDTH;
+		image->sh = (x+image->width-0.01)/(float)SCRAP_BLOCK_WIDTH;
+		image->tl = (y+0.01)/(float)SCRAP_BLOCK_WIDTH;
+		image->th = (y+image->height-0.01)/(float)SCRAP_BLOCK_WIDTH;
 	}
 	else
 	{
@@ -2065,11 +2199,11 @@ nonscrap:
 		image->texnum = TEXNUM_IMAGES + (image - gltextures);
 		GL_Bind(image->texnum);
 		if (bits == 8)
-		//	image->has_alpha = GL_Upload8 (pic, width, height, (image->type != it_pic && image->type != it_sky), image->type == it_sky );
-			image->has_alpha = GL_Upload8 (pic, width, height, type);
+		//	image->has_alpha = GL_Upload8 (pic, width, height, ((image->type != it_pic) && (image->type != it_font) && (image->type != it_sky)), (image->type == it_sky) );
+			image->has_alpha = GL_Upload8 (pic, width, height, image->type);
 		else
-		//	image->has_alpha = GL_Upload32 ((unsigned *)pic, width, height, (image->type != it_pic && image->type != it_sky) );
-			image->has_alpha = GL_Upload32 ((unsigned *)pic, width, height, type);
+		//	image->has_alpha = GL_Upload32 ((unsigned *)pic, width, height, ((image->type != it_pic) && (image->type != it_font) && (image->type != it_sky)) );
+			image->has_alpha = GL_Upload32 ((unsigned *)pic, width, height, image->type);
 		image->upload_width = upload_width;		// after power of 2 and scales
 		image->upload_height = upload_height;
 		image->paletted = uploaded_paletted;
@@ -2197,6 +2331,7 @@ image_t	*R_FindImage (char *name, imagetype_t type)
 	image_t	*image;
 	int		i, len;
 	byte	*pic, *palette;
+	unsigned int	hash;
 	int		width, height;
 	char	s[128];
 	char	*tmp;
@@ -2217,12 +2352,15 @@ image_t	*R_FindImage (char *name, imagetype_t type)
     }
 
 	// look for it
+	hash = Com_HashFileName(name, 0, false);
 	for (i=0, image=gltextures; i<numgltextures; i++,image++)
 	{
-		if (!strcmp(name, image->name))
-		{
-			image->registration_sequence = registration_sequence;
-			return image;
+		if (hash == image->hash) {	// compare hash first
+			if (!strcmp(name, image->name))
+			{
+				image->registration_sequence = registration_sequence;
+				return image;
+			}
 		}
 	}
 
@@ -2410,8 +2548,9 @@ void R_FreeUnusedImages (void)
 			continue;		// used this sequence
 		if (!image->registration_sequence)
 			continue;		// free image_t slot
-		if (image->type == it_pic)
-			continue;		// don't free pics
+	//	if (image->type == it_pic)
+		if ( (image->type == it_pic) || (image->type == it_font) )
+			continue;		// don't free pics or fonts
 
 		//Heffo - Free Cinematic
 		//if(image->is_cin)
@@ -2575,6 +2714,8 @@ void R_InitImages (void)
 			j = 255;
 		intensitytable[i] = j;
 	}
+
+	R_Upscale_Init ();
 
 	R_InitBloomTextures (); // BLOOMS
 }

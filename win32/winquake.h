@@ -45,6 +45,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef GWLP_WNDPROC
 #define GWLP_WNDPROC GWL_WNDPROC
 #endif
+
+#ifndef PROCESSOR_ARCHITECTURE_AMD64
+#define PROCESSOR_ARCHITECTURE_AMD64 9
+#endif
 #endif	// _MSC_VER
 
 extern	HINSTANCE	global_hInstance;

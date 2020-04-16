@@ -21,6 +21,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "client.h"
 
+void Hud_DrawString (int x, int y, int size, const char *string, int alpha, qboolean isStatusBar);
+
 /*
 ================
 CL_ParseInventory
@@ -30,27 +32,17 @@ void CL_ParseInventory (void)
 {
 	int		i;
 
-	for (i=0 ; i<MAX_ITEMS ; i++)
+	for (i = 0; i < MAX_ITEMS; i++)
 		cl.inventory[i] = MSG_ReadShort (&net_message);
 }
 
-
-/*
-================
-Inv_DrawString
-================
-*/
-void Hud_DrawString (int x, int y, const char *string, int alpha, qboolean isStatusBar);
-void Inv_DrawString (int x, int y, char *string)
-{
-	Hud_DrawString(x, y, string, 255, false);
-}
 
 void SetStringHighBit (char *s)
 {
 	while (*s)
 		*s++ |= 128;
 }
+
 
 /*
 ================
@@ -95,23 +87,23 @@ void CL_DrawInventory (void)
 
 	//x = (viddef.width-256)/2;
 	//y = (viddef.height-240)/2;
-//	x = viddef.width/2 - scaledHud(128);
-//	y = viddef.height/2 - scaledHud(120);
+//	x = viddef.width/2 - SCR_ScaledHud(128);
+//	y = viddef.height/2 - SCR_ScaledHud(120);
 	x = SCREEN_WIDTH/2 - 128;
 	y = SCREEN_HEIGHT/2 - 116;
 
-//	R_DrawScaledPic (x, y+scaledHud(8), HudScale(), hud_alpha->value, "inventory");
-//	y += scaledHud(24);
-//	x += scaledHud(24);
-//	Inv_DrawString (x, y, S_COLOR_BOLD"hotkey ### item");
-//	Inv_DrawString (x, y+scaledHud(8), S_COLOR_BOLD"------ --- ----");
-//	y += scaledHud(16);
+//	R_DrawScaledPic (x, y+SCR_ScaledHud(8), SCR_GetHudScale(), hud_alpha->value, "inventory");
+//	y += SCR_ScaledHud(24);
+//	x += SCR_ScaledHud(24);
+//	Hud_DrawString (x, y, S_COLOR_BOLD"hotkey ### item");
+//	Hud_DrawString (x, y+SCR_ScaledHud(8), S_COLOR_BOLD"------ --- ----");
+//	y += SCR_ScaledHud(16);
 	SCR_DrawPic (x, y, 256, 192, ALIGN_CENTER, "inventory", hud_alpha->value);
 	x += 24;
 	y += 20;
-	SCR_DrawString (x, y, ALIGN_CENTER, S_COLOR_WHITE"hotkey ### item", 255);
+	SCR_DrawString (x, y, 8, ALIGN_CENTER, S_COLOR_WHITE"hotkey ### item", 255);
 	y += 8;
-	SCR_DrawString (x, y, ALIGN_CENTER, S_COLOR_WHITE"------ --- ----", 255);
+	SCR_DrawString (x, y, 8, ALIGN_CENTER, S_COLOR_WHITE"------ --- ----", 255);
 	x += 16;
 	y += 8;
 
@@ -164,9 +156,9 @@ void CL_DrawInventory (void)
 			}
 		}
 
-//		Inv_DrawString (x, y, string);
-//		y += scaledHud(8);
-		SCR_DrawString (x, y, ALIGN_CENTER, string, 255);
+//		Hud_DrawString (x, y, string);
+//		y += SCR_ScaledHud(8);
+		SCR_DrawString (x, y, 8, ALIGN_CENTER, string, 255);
 		y += 8;
 	}
 

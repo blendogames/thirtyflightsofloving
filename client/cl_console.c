@@ -44,7 +44,7 @@ Con_DrawString
 */
 void Con_DrawString (int x, int y, char *string, int alpha)
 {
-	DrawStringGeneric (x, y, string, alpha, SCALETYPE_CONSOLE, false);
+	CL_DrawStringGeneric (x, y, string, alpha, FONT_SIZE, SCALETYPE_CONSOLE, false);
 }
 
 

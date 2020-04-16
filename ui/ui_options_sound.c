@@ -95,9 +95,9 @@ static void UpdateSoundQualityFunc ( void *unused )
 	Cvar_SetValue ("s_primary", s_options_sound_compatibility_list.curvalue);
 
 	Menu_DrawTextBox (168, 192, 36, 3);
-	SCR_DrawString (188, 192+MENU_FONT_SIZE, ALIGN_CENTER, S_COLOR_ALT"Restarting the sound system. This", 255);
-	SCR_DrawString (188, 192+MENU_FONT_SIZE*2, ALIGN_CENTER, S_COLOR_ALT"could take up to a minute, so", 255);
-	SCR_DrawString (188, 192+MENU_FONT_SIZE*3, ALIGN_CENTER, S_COLOR_ALT"please be patient.", 255);
+	SCR_DrawString (188, 192+MENU_FONT_SIZE, MENU_FONT_SIZE, ALIGN_CENTER, S_COLOR_ALT"Restarting the sound system. This", 255);
+	SCR_DrawString (188, 192+MENU_FONT_SIZE*2, MENU_FONT_SIZE, ALIGN_CENTER, S_COLOR_ALT"could take up to a minute, so", 255);
+	SCR_DrawString (188, 192+MENU_FONT_SIZE*3, MENU_FONT_SIZE, ALIGN_CENTER, S_COLOR_ALT"please be patient.", 255);
 
 	// the text box won't show up unless we do a buffer swap
 	GLimp_EndFrame();
@@ -134,9 +134,9 @@ static void SoundResetDefaultsFunc ( void *unused )
 	Cvar_SetToDefault ("s_primary");
 
 	Menu_DrawTextBox (168, 192, 36, 3);
-	SCR_DrawString (188, 192+MENU_FONT_SIZE, ALIGN_CENTER, S_COLOR_ALT"Restarting the sound system. This", 255);
-	SCR_DrawString (188, 192+MENU_FONT_SIZE*2, ALIGN_CENTER, S_COLOR_ALT"could take up to a minute, so", 255);
-	SCR_DrawString (188, 192+MENU_FONT_SIZE*3, ALIGN_CENTER, S_COLOR_ALT"please be patient.", 255);
+	SCR_DrawString (188, 192+MENU_FONT_SIZE, MENU_FONT_SIZE, ALIGN_CENTER, S_COLOR_ALT"Restarting the sound system. This", 255);
+	SCR_DrawString (188, 192+MENU_FONT_SIZE*2, MENU_FONT_SIZE, ALIGN_CENTER, S_COLOR_ALT"could take up to a minute, so", 255);
+	SCR_DrawString (188, 192+MENU_FONT_SIZE*3, MENU_FONT_SIZE, ALIGN_CENTER, S_COLOR_ALT"please be patient.", 255);
 
 	// the text box won't show up unless we do a buffer swap
 	GLimp_EndFrame();
@@ -176,11 +176,13 @@ void Options_Sound_MenuInit ( void )
 	s_options_sound_menu.nitems = 0;
 
 	s_options_sound_header.generic.type		= MTYPE_SEPARATOR;
+	s_options_sound_header.generic.textSize	= MENU_HEADER_FONT_SIZE;
 	s_options_sound_header.generic.name		= "Sound";
-	s_options_sound_header.generic.x		= MENU_FONT_SIZE/2 * strlen(s_options_sound_header.generic.name);
-	s_options_sound_header.generic.y		= 0;
+	s_options_sound_header.generic.x		= MENU_HEADER_FONT_SIZE/2 * strlen(s_options_sound_header.generic.name);
+	s_options_sound_header.generic.y		= -2*MENU_LINE_SIZE;	// 0
 
 	s_options_sound_sfxvolume_slider.generic.type		= MTYPE_SLIDER;
+	s_options_sound_sfxvolume_slider.generic.textSize	= MENU_FONT_SIZE;
 	s_options_sound_sfxvolume_slider.generic.x			= 0;
 	s_options_sound_sfxvolume_slider.generic.y			= y;
 	s_options_sound_sfxvolume_slider.generic.name		= "effects volume";
@@ -191,6 +193,7 @@ void Options_Sound_MenuInit ( void )
 	s_options_sound_sfxvolume_slider.generic.statusbar	= "volume of sound effects";
 
 	s_options_sound_musicvolume_slider.generic.type			= MTYPE_SLIDER;
+	s_options_sound_musicvolume_slider.generic.textSize		= MENU_FONT_SIZE;
 	s_options_sound_musicvolume_slider.generic.x			= 0;
 	s_options_sound_musicvolume_slider.generic.y			= y+=MENU_LINE_SIZE;
 	s_options_sound_musicvolume_slider.generic.name			= "music volume";
@@ -201,6 +204,7 @@ void Options_Sound_MenuInit ( void )
 	s_options_sound_musicvolume_slider.generic.statusbar	= "volume of ogg vorbis music";
 
 	s_options_sound_oggmusic_box.generic.type		= MTYPE_SPINCONTROL;
+	s_options_sound_oggmusic_box.generic.textSize	= MENU_FONT_SIZE;
 	s_options_sound_oggmusic_box.generic.x			= 0;
 	s_options_sound_oggmusic_box.generic.y			= y+=MENU_LINE_SIZE;
 	s_options_sound_oggmusic_box.generic.name		= "ogg vorbis music";
@@ -210,6 +214,7 @@ void Options_Sound_MenuInit ( void )
 	s_options_sound_oggmusic_box.generic.statusbar	= "override of CD music with ogg vorbis tracks";
 
 	s_options_sound_cdvolume_box.generic.type		= MTYPE_SPINCONTROL;
+	s_options_sound_cdvolume_box.generic.textSize	= MENU_FONT_SIZE;
 	s_options_sound_cdvolume_box.generic.x			= 0;
 	s_options_sound_cdvolume_box.generic.y			= y+=MENU_LINE_SIZE;
 	s_options_sound_cdvolume_box.generic.name		= "CD music";
@@ -219,6 +224,7 @@ void Options_Sound_MenuInit ( void )
 	s_options_sound_cdvolume_box.generic.statusbar	= "enables or disables CD music";
 
 	s_options_sound_quality_list.generic.type		= MTYPE_SPINCONTROL;
+	s_options_sound_quality_list.generic.textSize	= MENU_FONT_SIZE;
 	s_options_sound_quality_list.generic.x			= 0;
 	s_options_sound_quality_list.generic.y			= y+=MENU_LINE_SIZE;
 	s_options_sound_quality_list.generic.name		= "sound quality";
@@ -228,6 +234,7 @@ void Options_Sound_MenuInit ( void )
 	s_options_sound_quality_list.generic.statusbar	= "changes quality of sound";
 
 	s_options_sound_compatibility_list.generic.type			= MTYPE_SPINCONTROL;
+	s_options_sound_compatibility_list.generic.textSize		= MENU_FONT_SIZE;
 	s_options_sound_compatibility_list.generic.x			= 0;
 	s_options_sound_compatibility_list.generic.y			= y+=MENU_LINE_SIZE;
 	s_options_sound_compatibility_list.generic.name			= "sound compatibility";
@@ -237,6 +244,7 @@ void Options_Sound_MenuInit ( void )
 	s_options_sound_compatibility_list.generic.statusbar	= "changes buffering mode of sound system";
 
 	s_options_sound_defaults_action.generic.type		= MTYPE_ACTION;
+	s_options_sound_defaults_action.generic.textSize	= MENU_FONT_SIZE;
 	s_options_sound_defaults_action.generic.x			= MENU_FONT_SIZE;
 	s_options_sound_defaults_action.generic.y			= 18*MENU_LINE_SIZE;
 	s_options_sound_defaults_action.generic.name		= "reset defaults";
@@ -244,6 +252,7 @@ void Options_Sound_MenuInit ( void )
 	s_options_sound_defaults_action.generic.statusbar	= "resets all sound settings to internal defaults";
 
 	s_options_sound_back_action.generic.type			= MTYPE_ACTION;
+	s_options_sound_back_action.generic.textSize		= MENU_FONT_SIZE;
 	s_options_sound_back_action.generic.x				= MENU_FONT_SIZE;
 	s_options_sound_back_action.generic.y				= 20*MENU_LINE_SIZE;
 	s_options_sound_back_action.generic.name			= "back to options";

@@ -68,7 +68,7 @@ static void CrosshairPulseFunc( void *unused )
 // hud scaling option
 static void HudScaleFunc( void *unused )
 {
-	Cvar_SetValue( "hud_scale", s_options_screen_hudscale_slider.curvalue-1);
+	Cvar_SetValue( "hud_scale", s_options_screen_hudscale_slider.curvalue);
 }
 
 // hud trans option
@@ -341,8 +341,8 @@ static void ScreenSetMenuItemValues( void )
 	Cvar_SetValue( "crosshair_pulse", ClampCvar( 0, 0.5, Cvar_VariableValue("crosshair_pulse") ) );
 	s_options_screen_crosshairpulse_slider.curvalue	= Cvar_VariableValue("crosshair_pulse")*20;
 
-	Cvar_SetValue( "hud_scale", ClampCvar( 0, 7, Cvar_VariableValue("hud_scale") ) );
-	s_options_screen_hudscale_slider.curvalue		= Cvar_VariableValue("hud_scale")+1;
+	Cvar_SetValue( "hud_scale", ClampCvar( 0, 8, Cvar_VariableValue("hud_scale") ) );
+	s_options_screen_hudscale_slider.curvalue		= Cvar_VariableValue("hud_scale");
 
 	Cvar_SetValue( "hud_alpha", ClampCvar( 0, 1, Cvar_VariableValue("hud_alpha") ) );
 	s_options_screen_hudalpha_slider.curvalue		= Cvar_VariableValue("hud_alpha")*10 + 1;
@@ -383,10 +383,11 @@ void Options_Screen_MenuInit ( void )
 	s_options_screen_menu.y = SCREEN_HEIGHT*0.5 - 58;
 	s_options_screen_menu.nitems = 0;
 
-	s_options_screen_header.generic.type	= MTYPE_SEPARATOR;
-	s_options_screen_header.generic.name	= "Screen";
-	s_options_screen_header.generic.x		= MENU_FONT_SIZE/2 * strlen(s_options_screen_header.generic.name);
-	s_options_screen_header.generic.y		= 0;
+	s_options_screen_header.generic.type		= MTYPE_SEPARATOR;
+	s_options_screen_header.generic.textSize	= MENU_HEADER_FONT_SIZE;
+	s_options_screen_header.generic.name		= "Screen";
+	s_options_screen_header.generic.x			= MENU_HEADER_FONT_SIZE/2 * strlen(s_options_screen_header.generic.name);
+	s_options_screen_header.generic.y			= -2*MENU_LINE_SIZE;	// 0
 
 	// free any loaded crosshairs to prevent memory leak
 	if (numcrosshairs > 0) {
@@ -395,6 +396,7 @@ void Options_Screen_MenuInit ( void )
 	numcrosshairs = 0;
 	crosshair_names = SetCrosshairNames ();
 	s_options_screen_crosshair_box.generic.type				= MTYPE_SPINCONTROL;
+	s_options_screen_crosshair_box.generic.textSize			= MENU_FONT_SIZE;
 	s_options_screen_crosshair_box.generic.x				= 0;
 	s_options_screen_crosshair_box.generic.y				= y;
 	s_options_screen_crosshair_box.generic.name				= "crosshair";
@@ -403,45 +405,50 @@ void Options_Screen_MenuInit ( void )
 	s_options_screen_crosshair_box.generic.statusbar		= "changes crosshair";
 
 	// Psychospaz's changeable size crosshair
-	s_options_screen_crosshairscale_slider.generic.type		= MTYPE_SLIDER;
-	s_options_screen_crosshairscale_slider.generic.x		= 0;
-	s_options_screen_crosshairscale_slider.generic.y		= y += 5*MENU_LINE_SIZE;
-	s_options_screen_crosshairscale_slider.generic.name		= "crosshair scale";
-	s_options_screen_crosshairscale_slider.generic.callback = CrosshairSizeFunc;
-	s_options_screen_crosshairscale_slider.minvalue			= 1;
-	s_options_screen_crosshairscale_slider.maxvalue			= 20;
-	s_options_screen_crosshairscale_slider.generic.statusbar = "changes size of crosshair";
+	s_options_screen_crosshairscale_slider.generic.type			= MTYPE_SLIDER;
+	s_options_screen_crosshairscale_slider.generic.textSize		= MENU_FONT_SIZE;
+	s_options_screen_crosshairscale_slider.generic.x			= 0;
+	s_options_screen_crosshairscale_slider.generic.y			= y += 5*MENU_LINE_SIZE;
+	s_options_screen_crosshairscale_slider.generic.name			= "crosshair scale";
+	s_options_screen_crosshairscale_slider.generic.callback		= CrosshairSizeFunc;
+	s_options_screen_crosshairscale_slider.minvalue				= 1;
+	s_options_screen_crosshairscale_slider.maxvalue				= 20;
+	s_options_screen_crosshairscale_slider.generic.statusbar	= "changes size of crosshair";
 
-	s_options_screen_crosshairalpha_slider.generic.type		= MTYPE_SLIDER;
-	s_options_screen_crosshairalpha_slider.generic.x		= 0;
-	s_options_screen_crosshairalpha_slider.generic.y		= y += MENU_LINE_SIZE;
-	s_options_screen_crosshairalpha_slider.generic.name		= "crosshair alpha";
-	s_options_screen_crosshairalpha_slider.generic.callback = CrosshairAlphaFunc;
-	s_options_screen_crosshairalpha_slider.minvalue			= 1;
-	s_options_screen_crosshairalpha_slider.maxvalue			= 20;
-	s_options_screen_crosshairalpha_slider.generic.statusbar = "changes opacity of crosshair";
+	s_options_screen_crosshairalpha_slider.generic.type			= MTYPE_SLIDER;
+	s_options_screen_crosshairalpha_slider.generic.textSize		= MENU_FONT_SIZE;
+	s_options_screen_crosshairalpha_slider.generic.x			= 0;
+	s_options_screen_crosshairalpha_slider.generic.y			= y += MENU_LINE_SIZE;
+	s_options_screen_crosshairalpha_slider.generic.name			= "crosshair alpha";
+	s_options_screen_crosshairalpha_slider.generic.callback		= CrosshairAlphaFunc;
+	s_options_screen_crosshairalpha_slider.minvalue				= 1;
+	s_options_screen_crosshairalpha_slider.maxvalue				= 20;
+	s_options_screen_crosshairalpha_slider.generic.statusbar	= "changes opacity of crosshair";
 
-	s_options_screen_crosshairpulse_slider.generic.type		= MTYPE_SLIDER;
-	s_options_screen_crosshairpulse_slider.generic.x		= 0;
-	s_options_screen_crosshairpulse_slider.generic.y		= y += MENU_LINE_SIZE;
-	s_options_screen_crosshairpulse_slider.generic.name		= "crosshair pulse";
-	s_options_screen_crosshairpulse_slider.generic.callback = CrosshairPulseFunc;
-	s_options_screen_crosshairpulse_slider.minvalue			= 0;
-	s_options_screen_crosshairpulse_slider.maxvalue			= 10;
-	s_options_screen_crosshairpulse_slider.generic.statusbar = "changes pulse amplitude of crosshair";
+	s_options_screen_crosshairpulse_slider.generic.type			= MTYPE_SLIDER;
+	s_options_screen_crosshairpulse_slider.generic.textSize		= MENU_FONT_SIZE;
+	s_options_screen_crosshairpulse_slider.generic.x			= 0;
+	s_options_screen_crosshairpulse_slider.generic.y			= y += MENU_LINE_SIZE;
+	s_options_screen_crosshairpulse_slider.generic.name			= "crosshair pulse";
+	s_options_screen_crosshairpulse_slider.generic.callback		= CrosshairPulseFunc;
+	s_options_screen_crosshairpulse_slider.minvalue				= 0;
+	s_options_screen_crosshairpulse_slider.maxvalue				= 10;
+	s_options_screen_crosshairpulse_slider.generic.statusbar	= "changes pulse amplitude of crosshair";
 
 	// hud scaling option
 	s_options_screen_hudscale_slider.generic.type			= MTYPE_SLIDER;
+	s_options_screen_hudscale_slider.generic.textSize		= MENU_FONT_SIZE;
 	s_options_screen_hudscale_slider.generic.x				= 0;
 	s_options_screen_hudscale_slider.generic.y				= y += 2*MENU_LINE_SIZE;
 	s_options_screen_hudscale_slider.generic.name			= "status bar scale";
 	s_options_screen_hudscale_slider.generic.callback		= HudScaleFunc;
-	s_options_screen_hudscale_slider.minvalue				= 1;
-	s_options_screen_hudscale_slider.maxvalue				= 7;
+	s_options_screen_hudscale_slider.minvalue				= 0;
+	s_options_screen_hudscale_slider.maxvalue				= 8;
 	s_options_screen_hudscale_slider.generic.statusbar		= "changes size of HUD elements";
 
 	// hud trans option
 	s_options_screen_hudalpha_slider.generic.type			= MTYPE_SLIDER;
+	s_options_screen_hudalpha_slider.generic.textSize		= MENU_FONT_SIZE;
 	s_options_screen_hudalpha_slider.generic.x				= 0;
 	s_options_screen_hudalpha_slider.generic.y				= y += MENU_LINE_SIZE;
 	s_options_screen_hudalpha_slider.generic.name			= "status bar transparency";
@@ -452,6 +459,7 @@ void Options_Screen_MenuInit ( void )
 
 	// hud squeeze digits option
 	s_options_screen_hudsqueezedigits_box.generic.type		= MTYPE_SPINCONTROL;
+	s_options_screen_hudsqueezedigits_box.generic.textSize	= MENU_FONT_SIZE;
 	s_options_screen_hudsqueezedigits_box.generic.x			= 0;
 	s_options_screen_hudsqueezedigits_box.generic.y			= y += MENU_LINE_SIZE;
 	s_options_screen_hudsqueezedigits_box.generic.name		= "status bar digit squeezing";
@@ -460,6 +468,7 @@ void Options_Screen_MenuInit ( void )
 	s_options_screen_hudsqueezedigits_box.generic.statusbar	= "enables showing of longer numbers on HUD";
 
 	s_options_screen_fps_box.generic.type				= MTYPE_SPINCONTROL;
+	s_options_screen_fps_box.generic.textSize			= MENU_FONT_SIZE;
 	s_options_screen_fps_box.generic.x					= 0;
 	s_options_screen_fps_box.generic.y					= y += 2*MENU_LINE_SIZE;
 	s_options_screen_fps_box.generic.name				= "FPS counter";
@@ -468,6 +477,7 @@ void Options_Screen_MenuInit ( void )
 	s_options_screen_fps_box.generic.statusbar			= "enables FPS counter";
 
 	s_options_screen_defaults_action.generic.type		= MTYPE_ACTION;
+	s_options_screen_defaults_action.generic.textSize	= MENU_FONT_SIZE;
 	s_options_screen_defaults_action.generic.x			= MENU_FONT_SIZE;
 	s_options_screen_defaults_action.generic.y			= y+=2*MENU_LINE_SIZE;
 	s_options_screen_defaults_action.generic.name		= "reset defaults";
@@ -475,6 +485,7 @@ void Options_Screen_MenuInit ( void )
 	s_options_screen_defaults_action.generic.statusbar	= "resets all screen settings to internal defaults";
 
 	s_options_screen_back_action.generic.type			= MTYPE_ACTION;
+	s_options_screen_back_action.generic.textSize		= MENU_FONT_SIZE;
 	s_options_screen_back_action.generic.x				= MENU_FONT_SIZE;
 	s_options_screen_back_action.generic.y				= y+=2*MENU_LINE_SIZE;
 	s_options_screen_back_action.generic.name			= "back to options";

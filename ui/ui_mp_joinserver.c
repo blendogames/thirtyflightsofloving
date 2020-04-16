@@ -198,9 +198,9 @@ void SearchLocalGames( void )
 		Q_strncpyz (local_server_names[i], NO_SERVER_STRING, sizeof(local_server_names[i]));
 
 	Menu_DrawTextBox (168, 192, 36, 3);
-	SCR_DrawString (188, 192+MENU_FONT_SIZE, ALIGN_CENTER, S_COLOR_ALT"Searching for local servers, this", 255);
-	SCR_DrawString (188, 192+MENU_FONT_SIZE*2, ALIGN_CENTER, S_COLOR_ALT"could take up to a minute, so", 255);
-	SCR_DrawString (188, 192+MENU_FONT_SIZE*3, ALIGN_CENTER, S_COLOR_ALT"please be patient.", 255);
+	SCR_DrawString (188, 192+MENU_FONT_SIZE, MENU_FONT_SIZE, ALIGN_CENTER, S_COLOR_ALT"Searching for local servers, this", 255);
+	SCR_DrawString (188, 192+MENU_FONT_SIZE*2, MENU_FONT_SIZE, ALIGN_CENTER, S_COLOR_ALT"could take up to a minute, so", 255);
+	SCR_DrawString (188, 192+MENU_FONT_SIZE*3, MENU_FONT_SIZE, ALIGN_CENTER, S_COLOR_ALT"please be patient.", 255);
 
 	// the text box won't show up unless we do a buffer swap
 	GLimp_EndFrame();
@@ -235,11 +235,13 @@ void JoinServer_MenuInit( void )
 
 	// init client compatibility menu option
 	s_joinserver_compat_title.generic.type = MTYPE_SEPARATOR;
+	s_joinserver_compat_title.generic.textSize = MENU_FONT_SIZE;
 	s_joinserver_compat_title.generic.name = "client protocol compatibility";
 	s_joinserver_compat_title.generic.x    = 200;
 	s_joinserver_compat_title.generic.y	   = y;
 
 	s_joinserver_compatibility_box.generic.type = MTYPE_SPINCONTROL;
+	s_joinserver_compatibility_box.generic.textSize = MENU_FONT_SIZE;
 	s_joinserver_compatibility_box.generic.name	= "";
 	s_joinserver_compatibility_box.generic.x	= -32;
 	s_joinserver_compatibility_box.generic.y	= y += MENU_LINE_SIZE;
@@ -249,6 +251,7 @@ void JoinServer_MenuInit( void )
 	s_joinserver_compatibility_box.itemnames = compatibility_names;
 
 	s_joinserver_address_book_action.generic.type	= MTYPE_ACTION;
+	s_joinserver_address_book_action.generic.textSize	= MENU_FONT_SIZE;
 	s_joinserver_address_book_action.generic.name	= "address book";
 	s_joinserver_address_book_action.generic.flags	= QMF_LEFT_JUSTIFY;
 	s_joinserver_address_book_action.generic.x		= 0;
@@ -256,6 +259,7 @@ void JoinServer_MenuInit( void )
 	s_joinserver_address_book_action.generic.callback = AddressBookFunc;
 
 	s_joinserver_search_action.generic.type = MTYPE_ACTION;
+	s_joinserver_search_action.generic.textSize = MENU_FONT_SIZE;
 	s_joinserver_search_action.generic.name	= "refresh server list";
 	s_joinserver_search_action.generic.flags	= QMF_LEFT_JUSTIFY;
 	s_joinserver_search_action.generic.x	= 0;
@@ -264,6 +268,7 @@ void JoinServer_MenuInit( void )
 	s_joinserver_search_action.generic.statusbar = "search for servers";
 
 	s_joinserver_server_title.generic.type = MTYPE_SEPARATOR;
+	s_joinserver_server_title.generic.textSize = MENU_FONT_SIZE;
 	s_joinserver_server_title.generic.name = "connect to...";
 	s_joinserver_server_title.generic.x    = 80;
 	s_joinserver_server_title.generic.y	   = y += 2*MENU_LINE_SIZE;
@@ -272,6 +277,7 @@ void JoinServer_MenuInit( void )
 	for ( i = 0; i < MAX_LOCAL_SERVERS; i++ )
 	{
 		s_joinserver_server_actions[i].generic.type	= MTYPE_ACTION;
+		s_joinserver_server_actions[i].generic.textSize	= MENU_FONT_SIZE;
 	//	strncpy (local_server_names[i], NO_SERVER_STRING);
 		Q_strncpyz (local_server_names[i], NO_SERVER_STRING, sizeof(local_server_names[i]));
 		s_joinserver_server_actions[i].generic.name	= local_server_names[i];
@@ -283,6 +289,7 @@ void JoinServer_MenuInit( void )
 	}
 
 	s_joinserver_back_action.generic.type = MTYPE_ACTION;
+	s_joinserver_back_action.generic.textSize = MENU_FONT_SIZE;
 	s_joinserver_back_action.generic.name	= "back to multiplayer";
 	s_joinserver_back_action.generic.flags	= QMF_LEFT_JUSTIFY;
 	s_joinserver_back_action.generic.x	= 0;

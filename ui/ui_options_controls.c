@@ -179,12 +179,14 @@ void Options_Controls_MenuInit ( void )
 	s_options_controls_menu.y = SCREEN_HEIGHT*0.5 - 58;
 	s_options_controls_menu.nitems = 0;
 
-	s_options_controls_header.generic.type	= MTYPE_SEPARATOR;
-	s_options_controls_header.generic.name	= "Controls";
-	s_options_controls_header.generic.x		= MENU_FONT_SIZE/2 * strlen(s_options_controls_header.generic.name);
-	s_options_controls_header.generic.y		= 0;
+	s_options_controls_header.generic.type		= MTYPE_SEPARATOR;
+	s_options_controls_header.generic.textSize	= MENU_HEADER_FONT_SIZE;
+	s_options_controls_header.generic.name		= "Controls";
+	s_options_controls_header.generic.x			= MENU_HEADER_FONT_SIZE/2 * strlen(s_options_controls_header.generic.name);
+	s_options_controls_header.generic.y			= -2*MENU_LINE_SIZE;	// 0
 
 	s_options_controls_sensitivity_slider.generic.type		= MTYPE_SLIDER;
+	s_options_controls_sensitivity_slider.generic.textSize	= MENU_FONT_SIZE;
 	s_options_controls_sensitivity_slider.generic.x			= 0;
 	s_options_controls_sensitivity_slider.generic.y			= y;
 	s_options_controls_sensitivity_slider.generic.name		= "mouse speed";
@@ -194,6 +196,7 @@ void Options_Controls_MenuInit ( void )
 	s_options_controls_sensitivity_slider.generic.statusbar	= "changes sensitivity of mouse for head movement";
 
 	s_options_controls_invertmouse_box.generic.type			= MTYPE_SPINCONTROL;
+	s_options_controls_invertmouse_box.generic.textSize		= MENU_FONT_SIZE;
 	s_options_controls_invertmouse_box.generic.x			= 0;
 	s_options_controls_invertmouse_box.generic.y			= y+=MENU_LINE_SIZE;
 	s_options_controls_invertmouse_box.generic.name			= "invert mouse";
@@ -202,6 +205,7 @@ void Options_Controls_MenuInit ( void )
 	s_options_controls_invertmouse_box.generic.statusbar	= "inverts mouse y-axis movement";
 
 	s_options_controls_autosensitivity_box.generic.type			= MTYPE_SPINCONTROL;
+	s_options_controls_autosensitivity_box.generic.textSize		= MENU_FONT_SIZE;
 	s_options_controls_autosensitivity_box.generic.x			= 0;
 	s_options_controls_autosensitivity_box.generic.y			= y+=MENU_LINE_SIZE;
 	s_options_controls_autosensitivity_box.generic.name			= "scale mouse to FOV";
@@ -210,6 +214,7 @@ void Options_Controls_MenuInit ( void )
 	s_options_controls_autosensitivity_box.generic.statusbar	= "adjusts mouse sensitivity to zoomed FOV";
 
 	s_options_controls_thirdperson_box.generic.type			= MTYPE_SPINCONTROL;
+	s_options_controls_thirdperson_box.generic.textSize		= MENU_FONT_SIZE;
 	s_options_controls_thirdperson_box.generic.x			= 0;
 	s_options_controls_thirdperson_box.generic.y			= y+=2*MENU_LINE_SIZE;
 	s_options_controls_thirdperson_box.generic.name			= "third person";
@@ -218,6 +223,7 @@ void Options_Controls_MenuInit ( void )
 	s_options_controls_thirdperson_box.generic.statusbar	= "enables third-person mode";
 
 	s_options_controls_thirdperson_distance_slider.generic.type			= MTYPE_SLIDER;
+	s_options_controls_thirdperson_distance_slider.generic.textSize		= MENU_FONT_SIZE;
 	s_options_controls_thirdperson_distance_slider.generic.x			= 0;
 	s_options_controls_thirdperson_distance_slider.generic.y			= y+=MENU_LINE_SIZE;
 	s_options_controls_thirdperson_distance_slider.generic.name			= "camera distance";
@@ -227,6 +233,7 @@ void Options_Controls_MenuInit ( void )
 	s_options_controls_thirdperson_distance_slider.generic.statusbar	= "changes camera distance in third-person mode";
 
 	s_options_controls_thirdperson_angle_slider.generic.type		= MTYPE_SLIDER;
+	s_options_controls_thirdperson_angle_slider.generic.textSize	= MENU_FONT_SIZE;
 	s_options_controls_thirdperson_angle_slider.generic.x			= 0;
 	s_options_controls_thirdperson_angle_slider.generic.y			= y+=MENU_LINE_SIZE;
 	s_options_controls_thirdperson_angle_slider.generic.name		= "camera angle";
@@ -236,6 +243,7 @@ void Options_Controls_MenuInit ( void )
 	s_options_controls_thirdperson_angle_slider.generic.statusbar	= "changes camera angle in third-person mode";
 
 	s_options_controls_alwaysrun_box.generic.type		= MTYPE_SPINCONTROL;
+	s_options_controls_alwaysrun_box.generic.textSize	= MENU_FONT_SIZE;
 	s_options_controls_alwaysrun_box.generic.x			= 0;
 	s_options_controls_alwaysrun_box.generic.y			= y+=2*MENU_LINE_SIZE;
 	s_options_controls_alwaysrun_box.generic.name		= "always run";
@@ -244,6 +252,7 @@ void Options_Controls_MenuInit ( void )
 	s_options_controls_alwaysrun_box.generic.statusbar	= "enables running as default movement";
 
 	s_options_controls_lookspring_box.generic.type		= MTYPE_SPINCONTROL;
+	s_options_controls_lookspring_box.generic.textSize	= MENU_FONT_SIZE;
 	s_options_controls_lookspring_box.generic.x			= 0;
 	s_options_controls_lookspring_box.generic.y			= y+=MENU_LINE_SIZE;
 	s_options_controls_lookspring_box.generic.name		= "lookspring";
@@ -251,6 +260,7 @@ void Options_Controls_MenuInit ( void )
 	s_options_controls_lookspring_box.itemnames			= yesno_names;
 
 	s_options_controls_lookstrafe_box.generic.type		= MTYPE_SPINCONTROL;
+	s_options_controls_lookstrafe_box.generic.textSize	= MENU_FONT_SIZE;
 	s_options_controls_lookstrafe_box.generic.x			= 0;
 	s_options_controls_lookstrafe_box.generic.y			= y+=MENU_LINE_SIZE;
 	s_options_controls_lookstrafe_box.generic.name		= "lookstrafe";
@@ -258,6 +268,7 @@ void Options_Controls_MenuInit ( void )
 	s_options_controls_lookstrafe_box.itemnames			= yesno_names;
 
 	s_options_controls_freelook_box.generic.type		= MTYPE_SPINCONTROL;
+	s_options_controls_freelook_box.generic.textSize	= MENU_FONT_SIZE;
 	s_options_controls_freelook_box.generic.x			= 0;
 	s_options_controls_freelook_box.generic.y			= y+=MENU_LINE_SIZE;
 	s_options_controls_freelook_box.generic.name		= "free look";
@@ -266,6 +277,7 @@ void Options_Controls_MenuInit ( void )
 	s_options_controls_freelook_box.generic.statusbar	= "enables free head movement with mouse";
 
 	s_options_controls_joystick_box.generic.type		= MTYPE_SPINCONTROL;
+	s_options_controls_joystick_box.generic.textSize	= MENU_FONT_SIZE;
 	s_options_controls_joystick_box.generic.x			= 0;
 	s_options_controls_joystick_box.generic.y			= y+=MENU_LINE_SIZE;
 	s_options_controls_joystick_box.generic.name		= "use joystick";
@@ -274,23 +286,26 @@ void Options_Controls_MenuInit ( void )
 	s_options_controls_joystick_box.generic.statusbar	= "enables use of joystick";
 
 	s_options_controls_customize_keys_action.generic.type		= MTYPE_ACTION;
+	s_options_controls_customize_keys_action.generic.textSize	= MENU_FONT_SIZE;
 	s_options_controls_customize_keys_action.generic.x			= MENU_FONT_SIZE;
 	s_options_controls_customize_keys_action.generic.y			= y+=2*MENU_LINE_SIZE;
 	s_options_controls_customize_keys_action.generic.name		= "customize controls";
 	s_options_controls_customize_keys_action.generic.callback	= CustomizeControlsFunc;
 
 	s_options_controls_defaults_action.generic.type			= MTYPE_ACTION;
+	s_options_controls_defaults_action.generic.textSize		= MENU_FONT_SIZE;
 	s_options_controls_defaults_action.generic.x			= MENU_FONT_SIZE;
 	s_options_controls_defaults_action.generic.y			= 18*MENU_LINE_SIZE;
 	s_options_controls_defaults_action.generic.name			= "reset defaults";
 	s_options_controls_defaults_action.generic.callback		= ControlsResetDefaultsFunc;
 	s_options_controls_defaults_action.generic.statusbar	= "resets all control settings to internal defaults";
 
-	s_options_controls_back_action.generic.type		= MTYPE_ACTION;
-	s_options_controls_back_action.generic.x		= MENU_FONT_SIZE;
-	s_options_controls_back_action.generic.y		= 20*MENU_LINE_SIZE;
-	s_options_controls_back_action.generic.name		= "back to options";
-	s_options_controls_back_action.generic.callback	= UI_BackMenu;
+	s_options_controls_back_action.generic.type			= MTYPE_ACTION;
+	s_options_controls_back_action.generic.textSize		= MENU_FONT_SIZE;
+	s_options_controls_back_action.generic.x			= MENU_FONT_SIZE;
+	s_options_controls_back_action.generic.y			= 20*MENU_LINE_SIZE;
+	s_options_controls_back_action.generic.name			= "back to options";
+	s_options_controls_back_action.generic.callback		= UI_BackMenu;
 
 	Menu_AddItem( &s_options_controls_menu, ( void * ) &s_options_controls_header );
 	Menu_AddItem( &s_options_controls_menu, ( void * ) &s_options_controls_sensitivity_slider );

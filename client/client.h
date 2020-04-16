@@ -453,8 +453,6 @@ extern	cvar_t	*menu_sensitivity;
 extern	cvar_t	*menu_rotate;
 extern	cvar_t	*menu_alpha;
 extern	cvar_t	*hud_scale;
-extern	cvar_t	*hud_width;
-extern	cvar_t	*hud_height;
 extern	cvar_t	*hud_alpha;
 
 extern	cvar_t	*m_pitch;
@@ -538,26 +536,26 @@ float ClampCvar( float min, float max, float value );
 void CL_TextColor (int colornum, int *red, int *green, int *blue);
 qboolean CL_StringSetParams (char modifier, int *red, int *green, int *blue, int *bold, int *shadow, int *italic, int *reset);
 void Con_DrawString (int x, int y, char *s, int alpha);
-void DrawStringGeneric (int x, int y, const char *string, int alpha, textscaletype_t scaleType, qboolean altBit);
+void CL_DrawStringGeneric (int x, int y, const char *string, int alpha, int fontSize, textscaletype_t scaleType, qboolean altBit);
 
-//cl_scrn.c
+// cl_scrn.c
 typedef struct
 {
 	float x;
 	float y;
-	float avg;
+	float min;
 } hudscale_t;
 
-hudscale_t hudScale;
+//hudscale_t hudScale;
 
-float scaledHud (float param);
-float HudScale (void);
-void InitHudScale (void);
+float	SCR_ScaledHud (float param);
+float	SCR_GetHudScale (void);
+void	SCR_InitHudScale (void);
 
-void CL_AddNetgraph (void); //here!!
+void CL_AddNetgraph (void); // here!!
 
 
-//ROGUE
+// ROGUE
 typedef struct cl_sustain
 {
 	int			id;

@@ -159,6 +159,23 @@ char *Cvar_DefaultString (char *var_name)
 
 /*
 ============
+Cvar_IsModified
+Knightmare added
+============
+*/
+qboolean Cvar_IsModified (char *var_name)
+{
+	cvar_t *var;
+	
+	var = Cvar_FindVar (var_name);
+	if (!var)
+		return false;
+	return var->modified;
+}
+
+
+/*
+============
 Cvar_CompleteVariable
 ============
 */
@@ -637,8 +654,6 @@ qboolean Cvar_Command (void)
 		// Knightmare- added descriptions from From Maraa'kate's cvar code
 		if ( (v->description != NULL) && (con_show_description->integer || !strcmp(v->name, "con_show_description")) )
 			Com_Printf ("Description: %s\n", v->description);
-	//	else if ( (v->description != NULL) && !strcmp(v->name, "con_show_description") )	// Always show description for con_show_description
-	//		Com_Printf ("Description: %s\n", v->description);
 		// end Knightmare
 
 		return true;

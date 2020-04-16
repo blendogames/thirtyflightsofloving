@@ -17,6 +17,9 @@ Changes as of v0.20 update 8:
 
 - Added cel shading support.  Uses cvars r_celshading to enable, and r_celshading_width for line width (1-10).
 
+- Added Skuller's font upscaling from Q2Pro for old 128x128 fonts.  Use cvar r_font_upscale to enable, value of 1 is pixel copy,
+	value of 2 enables blending.  Requires vid_restart for changes to take effect.
+
 - Now compresses .sav and .sv2 savegame files into .savz files.  It will still read savegames from earlier
 	KMQ2 versions (with the same game DLL).  This should improve load and save times in multi-level units.
 

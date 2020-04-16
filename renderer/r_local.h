@@ -75,8 +75,9 @@ typedef enum
 	it_sprite,
 	it_wall,
 	it_pic,
+	it_font,
 	it_sky,
-	it_part //Knightmare added
+	it_part // Knightmare added
 } imagetype_t;
 
 typedef struct image_s
@@ -320,6 +321,7 @@ extern	cvar_t	*r_3dlabs_broken;
 extern	cvar_t	*r_swapinterval;
 extern	cvar_t	*r_anisotropic;
 extern	cvar_t	*r_anisotropic_avail;
+extern	cvar_t	*r_font_upscale;
 extern	cvar_t	*r_nvfog_dist;
 extern	cvar_t	*r_nvfog_dist_mode;
 extern	cvar_t	*r_texturemode;
@@ -684,14 +686,15 @@ void GL_ResampleTexture (void *indata, int inwidth, int inheight, void *outdata,
 struct image_s *R_RegisterSkin (char *name);
 
 void LoadPCX (char *filename, byte **pic, byte **palette, int *width, int *height);
-//Knightmare added
+// Knightmare added
 void LoadTGA (char *name, byte **pic, int *width, int *height);
 void LoadJPG (char *filename, byte **pic, int *width, int *height);
 
 image_t *R_LoadPic (char *name, byte *pic, int width, int height, imagetype_t type, int bits);
 image_t	*R_FindImage (char *name, imagetype_t type);
-void	GL_TextureMode( char *string );
-void	R_ImageList_f (void);
+void GL_UpdateAnisoMode (void);
+void GL_TextureMode( char *string );
+void R_ImageList_f (void);
 //void	GL_SetTexturePalette( unsigned palette[256] );
 void R_InitFailedImgList (void);
 void R_InitImages (void);
@@ -699,6 +702,13 @@ void R_ShutdownImages (void);
 void R_FreeUnusedImages (void);
 void GL_TextureAlphaMode( char *string );
 void GL_TextureSolidMode( char *string );
+
+//
+// r_upscale.c
+//
+void R_Upscale2x_Render (unsigned int *output, const unsigned int *input, int width, int height);
+void R_Upscale4x_Render (unsigned int *output, const unsigned int *input, int width, int height);
+void R_Upscale_Init (void);
 
 /*
 ** GL extension emulation functions

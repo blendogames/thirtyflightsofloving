@@ -73,8 +73,6 @@ cvar_t		*scr_surroundleft;		// left placement of HUD/menu elements on center scr
 cvar_t		*scr_surroundright;		// right placement of HUD/menu elements on center screen in triple-wide video modes
 
 cvar_t		*hud_scale;
-cvar_t		*hud_width;
-cvar_t		*hud_height;
 cvar_t		*hud_alpha;
 cvar_t		*hud_squeezedigits;
 
@@ -89,6 +87,8 @@ cvar_t		*cl_drawfps;
 cvar_t		*cl_demomessage;
 cvar_t		*cl_loadpercent;
 
+float		scr_screenScale;
+float		scr_hudScale;
 float		scr_screenAspect;
 
 char		crosshair_pic[MAX_QPATH];
@@ -105,6 +105,79 @@ void SCR_Loading_f (void);
 #define	ICON_SPACE	8
 
 /*
+===============================================================
+
+HUD SCALING
+
+===============================================================
+*/
+
+viddef_t hudScale_list[] =
+{
+	{ -1, -1 },
+	{ 1024, 768 },
+	{ 960, 720 },
+	{ 800, 600 },
+	{ 720, 540 },
+	{ 640, 480 },
+	{ 512, 384 },
+	{ 400, 300 },
+	{ 320, 240 }
+};
+
+#define HUDSCALE_NUM_SIZES ( sizeof(hudScale_list) / sizeof(hudScale_list[0]) )
+
+/*
+=================
+SCR_InitHudScale
+=================
+*/
+void SCR_InitHudScale (void)
+{
+	float	refWidth, refHeight;
+	int		sizeIndex;
+
+//	sizeIndex = min(max((int)hud_scale->value, 0), HUDSCALE_NUM_SIZES-1);
+	sizeIndex = min(max(hud_scale->integer, 0), HUDSCALE_NUM_SIZES-1);
+
+	if (sizeIndex == 0) {
+		refWidth = viddef.width;
+		refHeight = viddef.height;
+	}
+	else {
+		refWidth = hudScale_list[sizeIndex].width;
+		refHeight = hudScale_list[sizeIndex].height;
+	}
+
+	// don't scale if < refWidth, then it would be smaller
+	if ( viddef.width > refWidth && viddef.height > refHeight ) {
+	//	hudScale.x = (float)viddef.width / refWidth;
+	//	hudScale.y = (float)viddef.height / refHeight;
+	//	hudScale.min = min(hudScale.x, hudScale.y); // use smaller value instead of average
+		scr_hudScale = min( ((float)viddef.width / refWidth), ((float)viddef.height / refHeight) );
+	}
+	else {
+	//	hudScale.x = 1.0f;
+	//	hudScale.y = 1.0f;
+	//	hudScale.min = 1.0f;
+		scr_hudScale = 1.0f;
+	}
+}
+
+float SCR_ScaledHud (float param)
+{
+//	return param*hudScale.min;
+	return param * scr_hudScale;
+}
+
+float SCR_GetHudScale (void)
+{
+//	return hudScale.min;
+	return scr_hudScale;
+}
+
+
+/*
 ===============================================================================
 
 SCREEN SCALING
@@ -119,22 +192,25 @@ SCR_InitScreenScale
 */
 void SCR_InitScreenScale (void)
 {
-	screenScale.x = viddef.width/SCREEN_WIDTH;
-	screenScale.y = viddef.height/SCREEN_HEIGHT;
-	screenScale.min = min(screenScale.x, screenScale.y); // use smaller value instead of average
+//	screenScale.x = viddef.width/SCREEN_WIDTH;
+//	screenScale.y = viddef.height/SCREEN_HEIGHT;
+//	screenScale.min = min(screenScale.x, screenScale.y); // use smaller value instead of average
+	scr_screenScale = min( ((float)viddef.width / SCREEN_WIDTH), ((float)viddef.height / SCREEN_HEIGHT) );
 	scr_screenAspect = (float)viddef.width / (float)viddef.height;
 }
 
 
-float SCR_ScaledVideo (float param)
+float SCR_ScaledScreen (float param)
 {
-	return param * screenScale.min;
+//	return param * screenScale.min;
+	return param * scr_screenScale;
 }
 
 
-float SCR_VideoScale (void)
+float SCR_GetScreenScale (void)
 {
-	return screenScale.min;
+//	return screenScale.min;
+	return scr_screenScale;
 }
 
 
@@ -568,8 +644,10 @@ Coordinates are 640*480 virtual values
 */
 void SCR_DrawChar (float x, float y, scralign_t align, int num, int red, int green, int blue, int alpha, qboolean italic, qboolean last)
 {
+	float	scale = SCR_GetScreenScale();
+
 	SCR_AdjustFrom640 (&x, &y, NULL, NULL, align);
-	R_DrawChar(x, y, num, screenScale.min, red, green, blue, alpha, italic, last);
+	R_DrawChar(x, y, num, scale, red, green, blue, alpha, italic, last);
 }
 
 /*
@@ -578,10 +656,10 @@ SCR_DrawString
 Coordinates are 640*480 virtual values
 =================
 */
-void SCR_DrawString (float x, float y, scralign_t align, const char *string, int alpha)
+void SCR_DrawString (float x, float y, int size, scralign_t align, const char *string, int alpha)
 {
 	SCR_AdjustFrom640 (&x, &y, NULL, NULL, align);
-	DrawStringGeneric (x, y, string, alpha, SCALETYPE_MENU, false);
+	CL_DrawStringGeneric (x, y, string, alpha, size, SCALETYPE_MENU, false);
 }
 
 //===============================================================================
@@ -594,7 +672,7 @@ Hud_DrawString
 */
 void Hud_DrawString (int x, int y, const char *string, int alpha, qboolean isStatusBar)
 {
-	DrawStringGeneric (x, y, string, alpha, (isStatusBar) ? SCALETYPE_HUD : SCALETYPE_MENU, false);
+	CL_DrawStringGeneric (x, y, string, alpha, HUD_FONT_SIZE, (isStatusBar) ? SCALETYPE_HUD : SCALETYPE_MENU, false);
 }
 
 
@@ -614,8 +692,8 @@ void Hud_DrawStringAlt (int x, int y, const char *string, int alpha, qboolean is
 	for (i=0; i<len; i++) {
 		highString[i] ^= 128;
 	}
-	DrawStringGeneric (x, y, highString, alpha, (isStatusBar) ? SCALETYPE_HUD : SCALETYPE_MENU, false);
-//	DrawStringGeneric (x, y, string, alpha, (isStatusBar) ? SCALETYPE_HUD : SCALETYPE_MENU, true);
+	CL_DrawStringGeneric (x, y, highString, alpha, HUD_FONT_SIZE, (isStatusBar) ? SCALETYPE_HUD : SCALETYPE_MENU, false);
+//	CL_DrawStringGeneric (x, y, string, alpha, HUD_FONT_SIZE, (isStatusBar) ? SCALETYPE_HUD : SCALETYPE_MENU, true);
 }
 
 
@@ -638,7 +716,7 @@ static void SCR_ShowFPS (void)
 	if ((cls.state != ca_active) || !(cl_drawfps->value))
 		return;
 
-	InitHudScale ();
+	SCR_InitHudScale ();
 	if ((cl.time + 1000) < fpscounter)
 		fpscounter = cl.time + 100;
 
@@ -663,16 +741,16 @@ static void SCR_ShowFPS (void)
 		fpscounter = cl.time + 100;
 	}
 	// leave space for 3-digit frag counter
-	//x = (viddef.width - strlen(fpsText)*FONT_SIZE - 3*HudScale()*(CHAR_WIDTH+2));
-//	x = (viddef.width - strlen(fpsText)*HUD_FONT_SIZE*HudScale() - 3*HudScale()*(CHAR_WIDTH+2));
+	//x = (viddef.width - strlen(fpsText)*FONT_SIZE - 3*SCR_GetHudScale()*(CHAR_WIDTH+2));
+//	x = (viddef.width - strlen(fpsText)*HUD_FONT_SIZE*SCR_GetHudScale() - 3*SCR_GetHudScale()*(CHAR_WIDTH+2));
 	scrLeft = SCREEN_WIDTH;
 	SCR_AdjustFrom640 (&scrLeft, NULL, NULL, NULL, ALIGN_STRETCH);
-	fragsSize = HudScale() * 3 * (CHAR_WIDTH+2);
-//	x = ( viddef.width - strlen(fpsText)*HUD_FONT_SIZE*SCR_VideoScale() - max(fragsSize, SCR_ScaledVideo(68)) );
-	x = (scrLeft - stringLen(fpsText)*HUD_FONT_SIZE*SCR_VideoScale() - max(fragsSize, SCR_ScaledVideo(68)));
+	fragsSize = SCR_GetHudScale() * 3 * (CHAR_WIDTH+2);
+//	x = ( viddef.width - strlen(fpsText)*HUD_FONT_SIZE*SCR_GetScreenScale() - max(fragsSize, SCR_ScaledScreen(68)) );
+	x = (scrLeft - stringLen(fpsText)*HUD_FONT_SIZE*SCR_GetScreenScale() - max(fragsSize, SCR_ScaledScreen(68)));
 	y = 0;
-//	DrawStringGeneric (x, y, fpsText, 255, SCALETYPE_HUD, false); // SCALETYPE_CONSOLE
-	DrawStringGeneric (x, y, fpsText, 255, SCALETYPE_MENU, false); // SCALETYPE_HUD
+//	CL_DrawStringGeneric (x, y, fpsText, 255, MENU_FONT_SIZE, SCALETYPE_HUD, false); // SCALETYPE_CONSOLE
+	CL_DrawStringGeneric (x, y, fpsText, 255, MENU_FONT_SIZE, SCALETYPE_MENU, false); // SCALETYPE_HUD
 }
 
 /*
@@ -810,8 +888,8 @@ void SCR_DrawDebugGraph (void)
 		ping = currentping;
 	}
 
-	DrawStringGeneric (x, y + 5, va(S_COLOR_SHADOW"fps: %3i", fps), 255, SCALETYPE_CONSOLE, false);
-	DrawStringGeneric (x, y + 5 + FONT_SIZE , va(S_COLOR_SHADOW"ping:%3i", ping), 255, SCALETYPE_CONSOLE, false);
+	CL_DrawStringGeneric (x, y + 5, va(S_COLOR_SHADOW"fps: %3i", fps), 255, FONT_SIZE, SCALETYPE_CONSOLE, false);
+	CL_DrawStringGeneric (x, y + 5 + FONT_SIZE , va(S_COLOR_SHADOW"ping:%3i", ping), 255, FONT_SIZE, SCALETYPE_CONSOLE, false);
 
 	// draw border
 	R_DrawFill (x,			y,			(w+2),	1,		0, 0, 0, 255);
@@ -940,7 +1018,7 @@ void SCR_DrawCenterString (void)
 			if (!remaining--)
 				return;
 		}
-		DrawStringGeneric ( (int)((viddef.width-stringLen(line)*FONT_SIZE)*0.5), y, line, alpha, SCALETYPE_CONSOLE, false);
+		CL_DrawStringGeneric ( (int)((viddef.width-stringLen(line)*FONT_SIZE)*0.5), y, line, alpha, FONT_SIZE, SCALETYPE_CONSOLE, false);
 		y += FONT_SIZE;
 
 		while (*start && *start != '\n')
@@ -1003,7 +1081,7 @@ Keybinding command
 */
 void SCR_SizeUp_f (void)
 {	
-	//Cvar_SetValue ("viewsize",scr_viewsize->value+10);
+//	Cvar_SetValue ("viewsize", scr_viewsize->value+10);
 /*
 	// now handle HUD alpha
 	float hudalpha = Cvar_VariableValue("hud_alpha")+0.1;
@@ -1012,7 +1090,7 @@ void SCR_SizeUp_f (void)
 */
 	// now handle HUD scale
 	int hudscale = Cvar_VariableValue("hud_scale")+1;
-	if (hudscale > 6) hudscale = 6;
+	if (hudscale > HUDSCALE_NUM_SIZES-1) hudscale = HUDSCALE_NUM_SIZES-1;
 	Cvar_SetValue ("hud_scale", hudscale);
 }
 
@@ -1026,11 +1104,11 @@ Keybinding command
 */
 void SCR_SizeDown_f (void)
 {
-	//Cvar_SetValue ("viewsize",scr_viewsize->value-10);
+//	Cvar_SetValue ("viewsize", scr_viewsize->value-10);
 
 	// now handle HUD scale
 	int hudscale = Cvar_VariableValue("hud_scale")-1;
-	if (hudscale < 1) hudscale = 1;
+	if (hudscale < 0) hudscale = 0;
 	Cvar_SetValue ("hud_scale", hudscale);
 }
 
@@ -1222,8 +1300,6 @@ void SCR_Init (void)
 	scr_surroundright = Cvar_Get ("scr_surroundright", "0.666666666667", CVAR_ARCHIVE);		// right placement of HUD/menu elements on center screen in triple-wide video modes
 
 	hud_scale = Cvar_Get ("hud_scale", "3", CVAR_ARCHIVE);
-	hud_width = Cvar_Get ("hud_width", "640", CVAR_ARCHIVE);
-	hud_height = Cvar_Get ("hud_height", "480", CVAR_ARCHIVE);
 	hud_alpha = Cvar_Get ("hud_alpha", "1", CVAR_ARCHIVE);
 	hud_squeezedigits = Cvar_Get ("hud_squeezedigits", "1", CVAR_ARCHIVE);
 
@@ -1238,7 +1314,7 @@ void SCR_Init (void)
 	Cmd_AddCommand ("dumpstatuslayout", SCR_DumpStatusLayout_f);
 
 	SCR_InitScreenScale ();
-	InitHudScale ();
+	SCR_InitHudScale ();
 
 	scr_initialized = true;
 }
@@ -1307,7 +1383,7 @@ void SCR_DrawNet (void)
 		< CMD_BACKUP-1)
 		return;
 
-	R_DrawPic (scr_vrect.x+scaledHud(64), scr_vrect.y, "net");
+	R_DrawPic (scr_vrect.x + SCR_ScaledHud(64), scr_vrect.y, "net");
 }
 
 
@@ -1321,7 +1397,7 @@ void SCR_DrawAlertMessagePicture (char *name, qboolean center, int yOffset)
 	float ratio;//, scale;
 	int w, h;
 
-	//scale = SCR_VideoScale();
+	//scale = SCR_GetScreenScale();
 
 	R_DrawGetPicSize (&w, &h, name);
 	if (w)
@@ -1439,8 +1515,6 @@ void SCR_GetPicPosWidth (char *pic, int *x, int *w)
 
 
 char *load_saveshot;
-//void Menu_DrawString( int x, int y, const char *string, int alpha );
-//int stringLen (char *string);
 
 /*
 ==============
@@ -1531,7 +1605,7 @@ void SCR_DrawLoading (void)
 				loadMsg = va("Downloading ["S_COLOR_ALT"%s"S_COLOR_WHITE"]: %3d%%", cls.downloadname, cls.downloadpercent);
 
 			SCR_DrawString (SCREEN_WIDTH*0.5 - MENU_FONT_SIZE*stringLen(loadMsg)*0.5,
-							SCREEN_HEIGHT*0.5 + (plaqueOffset + 48), ALIGN_CENTER, loadMsg, 255);
+							SCREEN_HEIGHT*0.5 + (plaqueOffset + 48), MENU_FONT_SIZE, ALIGN_CENTER, loadMsg, 255);
 
 			SCR_DrawLoadingTagProgress ("downloading_bar", plaqueOffset, cls.downloadpercent);
 		}
@@ -1541,7 +1615,7 @@ void SCR_DrawLoading (void)
 			loadMsg = va("Downloading ["S_COLOR_ALT"%s"S_COLOR_WHITE"]", cls.downloadname);
 
 			SCR_DrawString (SCREEN_WIDTH*0.5 - MENU_FONT_SIZE*stringLen(loadMsg)*0.5,
-							SCREEN_HEIGHT*0.5 + MENU_FONT_SIZE*4.5, ALIGN_CENTER, loadMsg, 255);
+							SCREEN_HEIGHT*0.5 + MENU_FONT_SIZE*4.5, MENU_FONT_SIZE, ALIGN_CENTER, loadMsg, 255);
 
 			if (cls.downloadrate > 0.0f)
 				loadMsg = va("%3d%% (%4.2fKB/s)", cls.downloadpercent, cls.downloadrate);
@@ -1549,7 +1623,7 @@ void SCR_DrawLoading (void)
 				loadMsg = va("%3d%%", cls.downloadpercent);
 
 			SCR_DrawString (SCREEN_WIDTH*0.5 - MENU_FONT_SIZE*stringLen(loadMsg)*0.5,
-							SCREEN_HEIGHT*0.5 + MENU_FONT_SIZE*6, ALIGN_CENTER, loadMsg, 255);
+							SCREEN_HEIGHT*0.5 + MENU_FONT_SIZE*6, MENU_FONT_SIZE, ALIGN_CENTER, loadMsg, 255);
 
 			SCR_DrawLoadingBar (SCREEN_WIDTH*0.5 - 180, SCREEN_HEIGHT*0.5 + 60, 360, 24, cls.downloadpercent, 0.75);
 			SCR_DrawAlertMessagePicture("downloading", false, -plaqueOffset);
@@ -1574,12 +1648,12 @@ void SCR_DrawLoading (void)
 		if (drawMapName) {
 			loadMsg = va(S_COLOR_SHADOW S_COLOR_WHITE"Loading Map ["S_COLOR_ALT"%s"S_COLOR_WHITE"]", cl.configstrings[CS_NAME]);
 			SCR_DrawString (SCREEN_WIDTH*0.5 - MENU_FONT_SIZE*stringLen(loadMsg)*0.5,
-							SCREEN_HEIGHT*0.5 + (plaqueOffset + 48), ALIGN_CENTER, loadMsg, 255);	// was - MENU_FONT_SIZE*7.5
+							SCREEN_HEIGHT*0.5 + (plaqueOffset + 48), MENU_FONT_SIZE, ALIGN_CENTER, loadMsg, 255);	// was - MENU_FONT_SIZE*7.5
 		}
 		if (drawLoadingMsg) {
 			loadMsg = va(S_COLOR_SHADOW"%s", loadingMessages);
 			SCR_DrawString (SCREEN_WIDTH*0.5 - MENU_FONT_SIZE*stringLen(loadMsg)*0.5,
-							SCREEN_HEIGHT*0.5 + (plaqueOffset + 72), ALIGN_CENTER, loadMsg, 255);	// was - MENU_FONT_SIZE*4.5
+							SCREEN_HEIGHT*0.5 + (plaqueOffset + 72), MENU_FONT_SIZE, ALIGN_CENTER, loadMsg, 255);	// was - MENU_FONT_SIZE*4.5
 		}
 
 		if (simplePlaque)
@@ -1951,72 +2025,6 @@ char		*sb_nums[2][11] =
 	"anum_6", "anum_7", "anum_8", "anum_9", "anum_minus"}
 };
 
-// Knghtmare- scaled HUD support functions
-float scaledHud (float param)
-{
-	return param*hudScale.avg;
-}
-
-float HudScale (void)
-{
-	return hudScale.avg;
-}
-
-void InitHudScale (void)
-{
-	switch ((int)hud_scale->value)
-	{
-	case 0:
-		Cvar_SetValue( "hud_width", 0);
-		Cvar_SetValue( "hud_height", 0);
-		break;
-	case 1:
-		Cvar_SetValue( "hud_width", 1024);
-		Cvar_SetValue( "hud_height", 768);
-		break;
-	case 2:
-		Cvar_SetValue( "hud_width", 800);
-		Cvar_SetValue( "hud_height", 600);
-		break;
-	case 3:
-		Cvar_SetValue( "hud_width", 640);
-		Cvar_SetValue( "hud_height", 480);
-		break;
-	case 4:
-		Cvar_SetValue( "hud_width", 512);
-		Cvar_SetValue( "hud_height", 384);
-		break;
-	case 5:
-		Cvar_SetValue( "hud_width", 400);
-		Cvar_SetValue( "hud_height", 300);
-		break;
-	case 6:
-		Cvar_SetValue( "hud_width", 320);
-		Cvar_SetValue( "hud_height", 240);
-		break;
-	default:
-		Cvar_SetValue( "hud_width", 640);
-		Cvar_SetValue( "hud_height", 480);
-		break;
-	}
-	// allow disabling of hud scaling
-	// also, don't scale if < hud_width, then it would be smaller
-	if (hud_scale->value && viddef.width > hud_width->value )
-	{
-		hudScale.x = viddef.width/hud_width->value;
-		hudScale.y = viddef.height/hud_height->value;
-		//hudScale.avg = (hudScale.x + hudScale.y)*0.5f;
-		hudScale.avg = min(hudScale.x, hudScale.y); // use smaller value instead of average
-	}
-	else
-	{
-		hudScale.x = 1;
-		hudScale.y = 1;
-		hudScale.avg = 1;
-	}
-}
-// end Knightmare
-
 /*
 ================
 SizeHUDString
@@ -2031,9 +2039,9 @@ void SizeHUDString (char *string, int *w, int *h, qboolean isStatusBar)
 
 	// Get our scaling function
 	if (isStatusBar)
-		scaleForScreen = scaledHud;
+		scaleForScreen = SCR_ScaledHud;
 	else
-		scaleForScreen = SCR_ScaledVideo;
+		scaleForScreen = SCR_ScaledScreen;
 
 	lines = 1;
 	width = 0;
@@ -2076,9 +2084,9 @@ void CL_DrawLayoutString (char *string, int x, int y, int centerwidth, int xor, 
 
 	// Get our scaling function
 	if (isStatusBar)
-		scaleForScreen = scaledHud;
+		scaleForScreen = SCR_ScaledHud;
 	else
-		scaleForScreen = SCR_ScaledVideo;
+		scaleForScreen = SCR_ScaledScreen;
 
 	margin = x;
 
@@ -2110,7 +2118,7 @@ void CL_DrawLayoutString (char *string, int x, int y, int centerwidth, int xor, 
 				line[i] ^= xor;
 			}
 		}
-		Hud_DrawString(x, y, line, 255, isStatusBar);
+		Hud_DrawString (x, y, line, 255, isStatusBar);
 
 		if (*string)
 		{
@@ -2142,12 +2150,12 @@ void SCR_DrawField (int x, int y, int color, int width, int value, qboolean flas
 
 	// Get our scaling functions
 	if (isStatusBar) {
-		scaleForScreen = scaledHud;
-		getScreenScale = HudScale;
+		scaleForScreen = SCR_ScaledHud;
+		getScreenScale = SCR_GetHudScale;
 	}
 	else {
-		scaleForScreen = SCR_ScaledVideo;
-		getScreenScale = SCR_VideoScale;
+		scaleForScreen = SCR_ScaledScreen;
+		getScreenScale = SCR_GetScreenScale;
 	}
 
 	// draw number string
@@ -2250,15 +2258,15 @@ void SCR_ExecuteLayoutString (char *s, qboolean isStatusBar)
 
 	// Get our scaling functions
 	if (isStatusBar) {
-		scaleForScreen = scaledHud;
-		getScreenScale = HudScale;
+		scaleForScreen = SCR_ScaledHud;
+		getScreenScale = SCR_GetHudScale;
 	}
 	else {
-		scaleForScreen = SCR_ScaledVideo;
-		getScreenScale = SCR_VideoScale;
+		scaleForScreen = SCR_ScaledScreen;
+		getScreenScale = SCR_GetScreenScale;
 	}
 
-	InitHudScale ();
+	SCR_InitHudScale ();
 	x = 0;
 	y = 0;
 	width = 3;
@@ -2632,9 +2640,9 @@ void DrawDemoMessage (void)
 		char *message = "Running Demo";
 		len = strlen(message);
 
-		SCR_DrawFill (0, SCREEN_HEIGHT-(MENU_FONT_SIZE+2), SCREEN_WIDTH, MENU_FONT_SIZE+2, ALIGN_BOTTOM_STRETCH, 60,60,60,255);
+		SCR_DrawFill (0, SCREEN_HEIGHT-(MENU_FONT_SIZE+3), SCREEN_WIDTH, MENU_FONT_SIZE+3, ALIGN_BOTTOM_STRETCH, 60,60,60,255);
 		SCR_DrawFill (0, SCREEN_HEIGHT-(MENU_FONT_SIZE+3), SCREEN_WIDTH, 1, ALIGN_BOTTOM_STRETCH, 0,0,0,255);
-		SCR_DrawString (SCREEN_WIDTH/2-(len/2)*MENU_FONT_SIZE, SCREEN_HEIGHT-(MENU_FONT_SIZE+1), ALIGN_BOTTOM, message, 255);
+		SCR_DrawString (SCREEN_WIDTH/2-(len/2)*MENU_FONT_SIZE, SCREEN_HEIGHT-(MENU_FONT_SIZE+1), MENU_FONT_SIZE, ALIGN_BOTTOM, message, 255);
 	}
 }
 

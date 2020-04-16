@@ -267,6 +267,7 @@ void DMOptions_MenuInit( void )
 	s_dmoptions_menu.nitems = 0;
 
 	s_falls_box.generic.type = MTYPE_SPINCONTROL;
+	s_falls_box.generic.textSize = MENU_FONT_SIZE;
 	s_falls_box.generic.x	= 0;
 	s_falls_box.generic.y	= y; // 0
 	s_falls_box.generic.name	= "falling damage";
@@ -275,6 +276,7 @@ void DMOptions_MenuInit( void )
 	s_falls_box.curvalue = ( dmflags & DF_NO_FALLING ) == 0;
 
 	s_weapons_stay_box.generic.type = MTYPE_SPINCONTROL;
+	s_weapons_stay_box.generic.textSize = MENU_FONT_SIZE;
 	s_weapons_stay_box.generic.x	= 0;
 	s_weapons_stay_box.generic.y	= y += MENU_LINE_SIZE;
 	s_weapons_stay_box.generic.name	= "weapons stay";
@@ -283,6 +285,7 @@ void DMOptions_MenuInit( void )
 	s_weapons_stay_box.curvalue = ( dmflags & DF_WEAPONS_STAY ) != 0;
 
 	s_instant_powerups_box.generic.type = MTYPE_SPINCONTROL;
+	s_instant_powerups_box.generic.textSize = MENU_FONT_SIZE;
 	s_instant_powerups_box.generic.x	= 0;
 	s_instant_powerups_box.generic.y	= y += MENU_LINE_SIZE;
 	s_instant_powerups_box.generic.name	= "instant powerups";
@@ -291,6 +294,7 @@ void DMOptions_MenuInit( void )
 	s_instant_powerups_box.curvalue = ( dmflags & DF_INSTANT_ITEMS ) != 0;
 
 	s_powerups_box.generic.type = MTYPE_SPINCONTROL;
+	s_powerups_box.generic.textSize = MENU_FONT_SIZE;
 	s_powerups_box.generic.x	= 0;
 	s_powerups_box.generic.y	= y += MENU_LINE_SIZE;
 	s_powerups_box.generic.name	= "allow powerups";
@@ -299,6 +303,7 @@ void DMOptions_MenuInit( void )
 	s_powerups_box.curvalue = ( dmflags & DF_NO_ITEMS ) == 0;
 
 	s_health_box.generic.type = MTYPE_SPINCONTROL;
+	s_health_box.generic.textSize = MENU_FONT_SIZE;
 	s_health_box.generic.x	= 0;
 	s_health_box.generic.y	= y += MENU_LINE_SIZE;
 	s_health_box.generic.callback = DMFlagCallback;
@@ -307,6 +312,7 @@ void DMOptions_MenuInit( void )
 	s_health_box.curvalue = ( dmflags & DF_NO_HEALTH ) == 0;
 
 	s_armor_box.generic.type = MTYPE_SPINCONTROL;
+	s_armor_box.generic.textSize = MENU_FONT_SIZE;
 	s_armor_box.generic.x	= 0;
 	s_armor_box.generic.y	= y += MENU_LINE_SIZE;
 	s_armor_box.generic.name	= "allow armor";
@@ -315,6 +321,7 @@ void DMOptions_MenuInit( void )
 	s_armor_box.curvalue = ( dmflags & DF_NO_ARMOR ) == 0;
 
 	s_spawn_farthest_box.generic.type = MTYPE_SPINCONTROL;
+	s_spawn_farthest_box.generic.textSize = MENU_FONT_SIZE;
 	s_spawn_farthest_box.generic.x	= 0;
 	s_spawn_farthest_box.generic.y	= y += MENU_LINE_SIZE;
 	s_spawn_farthest_box.generic.name	= "spawn farthest";
@@ -323,6 +330,7 @@ void DMOptions_MenuInit( void )
 	s_spawn_farthest_box.curvalue = ( dmflags & DF_SPAWN_FARTHEST ) != 0;
 
 	s_samelevel_box.generic.type = MTYPE_SPINCONTROL;
+	s_samelevel_box.generic.textSize = MENU_FONT_SIZE;
 	s_samelevel_box.generic.x	= 0;
 	s_samelevel_box.generic.y	= y += MENU_LINE_SIZE;
 	s_samelevel_box.generic.name	= "same map";
@@ -331,6 +339,7 @@ void DMOptions_MenuInit( void )
 	s_samelevel_box.curvalue = ( dmflags & DF_SAME_LEVEL ) != 0;
 
 	s_force_respawn_box.generic.type = MTYPE_SPINCONTROL;
+	s_force_respawn_box.generic.textSize = MENU_FONT_SIZE;
 	s_force_respawn_box.generic.x	= 0;
 	s_force_respawn_box.generic.y	= y += MENU_LINE_SIZE;
 	s_force_respawn_box.generic.name	= "force respawn";
@@ -339,6 +348,7 @@ void DMOptions_MenuInit( void )
 	s_force_respawn_box.curvalue = ( dmflags & DF_FORCE_RESPAWN ) != 0;
 
 	s_teamplay_box.generic.type = MTYPE_SPINCONTROL;
+	s_teamplay_box.generic.textSize = MENU_FONT_SIZE;
 	s_teamplay_box.generic.x	= 0;
 	s_teamplay_box.generic.y	= y += MENU_LINE_SIZE;
 	s_teamplay_box.generic.name	= "teamplay";
@@ -347,6 +357,7 @@ void DMOptions_MenuInit( void )
 	s_teamplay_box.curvalue = (dmflags & DF_SKINTEAMS) ? 1 : ((dmflags & DF_MODELTEAMS) ? 2 : 0);
 
 	s_allow_exit_box.generic.type = MTYPE_SPINCONTROL;
+	s_allow_exit_box.generic.textSize = MENU_FONT_SIZE;
 	s_allow_exit_box.generic.x	= 0;
 	s_allow_exit_box.generic.y	= y += MENU_LINE_SIZE;
 	s_allow_exit_box.generic.name	= "allow exit";
@@ -355,6 +366,7 @@ void DMOptions_MenuInit( void )
 	s_allow_exit_box.curvalue = ( dmflags & DF_ALLOW_EXIT ) != 0;
 
 	s_infinite_ammo_box.generic.type = MTYPE_SPINCONTROL;
+	s_infinite_ammo_box.generic.textSize = MENU_FONT_SIZE;
 	s_infinite_ammo_box.generic.x	= 0;
 	s_infinite_ammo_box.generic.y	= y += MENU_LINE_SIZE;
 	s_infinite_ammo_box.generic.name	= "infinite ammo";
@@ -363,6 +375,7 @@ void DMOptions_MenuInit( void )
 	s_infinite_ammo_box.curvalue = ( dmflags & DF_INFINITE_AMMO ) != 0;
 
 	s_fixed_fov_box.generic.type = MTYPE_SPINCONTROL;
+	s_fixed_fov_box.generic.textSize = MENU_FONT_SIZE;
 	s_fixed_fov_box.generic.x	= 0;
 	s_fixed_fov_box.generic.y	= y += MENU_LINE_SIZE;
 	s_fixed_fov_box.generic.name	= "fixed FOV";
@@ -371,6 +384,7 @@ void DMOptions_MenuInit( void )
 	s_fixed_fov_box.curvalue = ( dmflags & DF_FIXED_FOV ) != 0;
 
 	s_quad_drop_box.generic.type = MTYPE_SPINCONTROL;
+	s_quad_drop_box.generic.textSize = MENU_FONT_SIZE;
 	s_quad_drop_box.generic.x	= 0;
 	s_quad_drop_box.generic.y	= y += MENU_LINE_SIZE;
 	s_quad_drop_box.generic.name	= "quad drop";
@@ -379,6 +393,7 @@ void DMOptions_MenuInit( void )
 	s_quad_drop_box.curvalue = ( dmflags & DF_QUAD_DROP ) != 0;
 
 	s_friendlyfire_box.generic.type = MTYPE_SPINCONTROL;
+	s_friendlyfire_box.generic.textSize = MENU_FONT_SIZE;
 	s_friendlyfire_box.generic.x	= 0;
 	s_friendlyfire_box.generic.y	= y += MENU_LINE_SIZE;
 	s_friendlyfire_box.generic.name	= "friendly fire";
@@ -390,6 +405,7 @@ void DMOptions_MenuInit( void )
 	if (FS_ModType("xatrix"))
 	{
 		s_quadfire_drop_box.generic.type = MTYPE_SPINCONTROL;
+		s_quadfire_drop_box.generic.textSize = MENU_FONT_SIZE;
 		s_quadfire_drop_box.generic.x	= 0;
 		s_quadfire_drop_box.generic.y	= y += MENU_LINE_SIZE;
 		s_quadfire_drop_box.generic.name	= "dualfire drop";
@@ -399,10 +415,11 @@ void DMOptions_MenuInit( void )
 	}
 //============
 //ROGUE
-	//Knightmare 12/23/2001
+	// Knightmare 12/23/2001
 	else if (FS_RoguePath())
 	{
 		s_no_mines_box.generic.type = MTYPE_SPINCONTROL;
+		s_no_mines_box.generic.textSize = MENU_FONT_SIZE;
 		s_no_mines_box.generic.x	= 0;
 		s_no_mines_box.generic.y	= y += MENU_LINE_SIZE;
 		s_no_mines_box.generic.name	= "remove mines";
@@ -411,6 +428,7 @@ void DMOptions_MenuInit( void )
 		s_no_mines_box.curvalue = ( dmflags & DF_NO_MINES ) != 0;
 
 		s_no_nukes_box.generic.type = MTYPE_SPINCONTROL;
+		s_no_nukes_box.generic.textSize = MENU_FONT_SIZE;
 		s_no_nukes_box.generic.x	= 0;
 		s_no_nukes_box.generic.y	= y += MENU_LINE_SIZE;
 		s_no_nukes_box.generic.name	= "remove nukes";
@@ -419,6 +437,7 @@ void DMOptions_MenuInit( void )
 		s_no_nukes_box.curvalue = ( dmflags & DF_NO_NUKES ) != 0;
 
 		s_stack_double_box.generic.type = MTYPE_SPINCONTROL;
+		s_stack_double_box.generic.textSize = MENU_FONT_SIZE;
 		s_stack_double_box.generic.x	= 0;
 		s_stack_double_box.generic.y	= y += MENU_LINE_SIZE;
 		s_stack_double_box.generic.name	= "2x/4x stacking off";
@@ -427,6 +446,7 @@ void DMOptions_MenuInit( void )
 		s_stack_double_box.curvalue = ( dmflags & DF_NO_STACK_DOUBLE ) != 0;
 
 		s_no_spheres_box.generic.type = MTYPE_SPINCONTROL;
+		s_no_spheres_box.generic.textSize = MENU_FONT_SIZE;
 		s_no_spheres_box.generic.x	= 0;
 		s_no_spheres_box.generic.y	= y += MENU_LINE_SIZE;
 		s_no_spheres_box.generic.name	= "remove spheres";
@@ -441,6 +461,7 @@ void DMOptions_MenuInit( void )
 	else if (CTF_menumode())
 	{
 		s_ctf_forceteam_box.generic.type = MTYPE_SPINCONTROL;
+		s_ctf_forceteam_box.generic.textSize = MENU_FONT_SIZE;
 		s_ctf_forceteam_box.generic.x	= 0;
 		s_ctf_forceteam_box.generic.y	= y += MENU_LINE_SIZE;
 		s_ctf_forceteam_box.generic.name	= "force team join";
@@ -449,6 +470,7 @@ void DMOptions_MenuInit( void )
 		s_ctf_forceteam_box.curvalue = ( dmflags & DF_CTF_FORCEJOIN ) != 0;
 
 		s_ctf_armor_protect_box.generic.type = MTYPE_SPINCONTROL;
+		s_ctf_armor_protect_box.generic.textSize = MENU_FONT_SIZE;
 		s_ctf_armor_protect_box.generic.x	= 0;
 		s_ctf_armor_protect_box.generic.y	= y += MENU_LINE_SIZE;
 		s_ctf_armor_protect_box.generic.name	= "team armor protect";
@@ -457,6 +479,7 @@ void DMOptions_MenuInit( void )
 		s_ctf_armor_protect_box.curvalue = ( dmflags & DF_ARMOR_PROTECT ) != 0;
 
 		s_ctf_notechs_box.generic.type = MTYPE_SPINCONTROL;
+		s_ctf_notechs_box.generic.textSize = MENU_FONT_SIZE;
 		s_ctf_notechs_box.generic.x	= 0;
 		s_ctf_notechs_box.generic.y	= y += MENU_LINE_SIZE;
 		s_ctf_notechs_box.generic.name	= "disable techs";
@@ -466,6 +489,7 @@ void DMOptions_MenuInit( void )
 	}
 
 	s_dmoptions_back_action.generic.type = MTYPE_ACTION;
+	s_dmoptions_back_action.generic.textSize = MENU_FONT_SIZE;
 	s_dmoptions_back_action.generic.flags = QMF_LEFT_JUSTIFY;
 	s_dmoptions_back_action.generic.x	= 0;
 	s_dmoptions_back_action.generic.y	= y += 3*MENU_LINE_SIZE;

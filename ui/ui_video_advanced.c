@@ -28,8 +28,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "ui_local.h"
 
 extern cvar_t *vid_ref;
-// this cvar is needed for checking if it's been modified
+// these cvars are needed for checking if they've been modified
 cvar_t	*r_intensity;
+cvar_t	*r_font_upscale;
 
 /*
 =======================================================================
@@ -63,6 +64,8 @@ static menulist_s  		s_glass_envmap_box;
 static menulist_s  		s_screenshotformat_box;
 static menuslider_s  	s_screenshotjpegquality_slider;
 static menulist_s  		s_saveshotsize_box;
+static menulist_s		s_upscale_font_box;
+
 static menuaction_s		s_advanced_apply_action;
 static menuaction_s		s_back_action;
 
@@ -147,6 +150,9 @@ static void Video_Advanced_MenuSetValues ( void )
 
 	Cvar_SetValue( "r_saveshotsize", ClampCvar( 0, 1, Cvar_VariableValue("r_saveshotsize") ) );
 	s_saveshotsize_box.curvalue	= Cvar_VariableValue("r_saveshotsize");
+
+	Cvar_SetValue( "r_font_upscale", ClampCvar( 0, 2, Cvar_VariableValue("r_font_upscale") ) );
+	s_upscale_font_box.curvalue = Cvar_VariableValue("r_font_upscale");
 }
 
 static void LightMapScaleCallback ( void *unused )
@@ -277,10 +283,15 @@ static void SaveshotSizeCallback ( void *unused )
 	Cvar_SetValue( "r_saveshotsize", s_saveshotsize_box.curvalue);
 }
 
+static void UpscaleFontCallback ( void *unused )
+{
+	Cvar_SetValue( "r_font_upscale", s_upscale_font_box.curvalue);
+}
+
 static void AdvancedMenuApplyChanges ( void *unused )
 {
 	// update for modified r_intensity and r_stencilTwoSide
-	if (r_intensity->modified)
+	if ( r_intensity->modified || r_font_upscale->modified )
 		vid_ref->modified = true;
 }
 
@@ -347,20 +358,30 @@ void Menu_Video_Advanced_Init (void)
 		"TGA",
 		0
 	};
+	static const char *font_upscale_names[] =
+	{
+		"no",
+		"pixel copy",
+		"blended",
+		0
+	};
 	int y = 0;
 
 	r_intensity = Cvar_Get ("r_intensity", "1", 0);
+	r_font_upscale  = Cvar_Get ("r_font_upscale", "1", 0);
 
 	s_video_advanced_menu.x = SCREEN_WIDTH*0.5;
 	s_video_advanced_menu.y = SCREEN_HEIGHT*0.5 - 100;
 	s_video_advanced_menu.nitems = 0;
 
 	s_options_advanced_header.generic.type		= MTYPE_SEPARATOR;
+	s_options_advanced_header.generic.textSize	= MENU_HEADER_FONT_SIZE;
 	s_options_advanced_header.generic.name		= "Advanced Options";
-	s_options_advanced_header.generic.x			= MENU_FONT_SIZE/2 * strlen(s_options_advanced_header.generic.name);
+	s_options_advanced_header.generic.x			= MENU_HEADER_FONT_SIZE/2 * strlen(s_options_advanced_header.generic.name);
 	s_options_advanced_header.generic.y			= y;
 
 	s_lightmapscale_slider.generic.type			= MTYPE_SLIDER;
+	s_lightmapscale_slider.generic.textSize		= MENU_FONT_SIZE;
 	s_lightmapscale_slider.generic.x			= 0;
 	s_lightmapscale_slider.generic.y			= y += 2*MENU_LINE_SIZE;
 	s_lightmapscale_slider.generic.name			= "lightmap scale";
@@ -370,6 +391,7 @@ void Menu_Video_Advanced_Init (void)
 	s_lightmapscale_slider.generic.statusbar	= "leave at minimum, washes out textures";
 
 	s_textureintensity_slider.generic.type		= MTYPE_SLIDER;
+	s_textureintensity_slider.generic.textSize	= MENU_FONT_SIZE;
 	s_textureintensity_slider.generic.x			= 0;
 	s_textureintensity_slider.generic.y			= y += MENU_LINE_SIZE;
 	s_textureintensity_slider.generic.name		= "texture intensity";
@@ -379,6 +401,7 @@ void Menu_Video_Advanced_Init (void)
 	s_textureintensity_slider.generic.statusbar	= "leave at minimum, washes out textures";
 
 	s_rgbscale_box.generic.type				= MTYPE_SPINCONTROL;
+	s_rgbscale_box.generic.textSize			= MENU_FONT_SIZE;
 	s_rgbscale_box.generic.x				= 0;
 	s_rgbscale_box.generic.y				= y += MENU_LINE_SIZE;
 	s_rgbscale_box.generic.name				= "RGB enhance";
@@ -387,6 +410,7 @@ void Menu_Video_Advanced_Init (void)
 	s_rgbscale_box.generic.statusbar		= "brightens textures without washing them out";
 
 	s_trans_lighting_box.generic.type		= MTYPE_SPINCONTROL;
+	s_trans_lighting_box.generic.textSize	= MENU_FONT_SIZE;
 	s_trans_lighting_box.generic.x			= 0;
 	s_trans_lighting_box.generic.y			= y += MENU_LINE_SIZE;
 	s_trans_lighting_box.generic.name		= "translucent lighting";
@@ -395,6 +419,7 @@ void Menu_Video_Advanced_Init (void)
 	s_trans_lighting_box.generic.statusbar	= "lighting on translucent surfaces";
 
 	s_warp_lighting_box.generic.type		= MTYPE_SPINCONTROL;
+	s_warp_lighting_box.generic.textSize	= MENU_FONT_SIZE;
 	s_warp_lighting_box.generic.x			= 0;
 	s_warp_lighting_box.generic.y			= y += MENU_LINE_SIZE;
 	s_warp_lighting_box.generic.name		= "warp surface lighting";
@@ -403,6 +428,7 @@ void Menu_Video_Advanced_Init (void)
 	s_warp_lighting_box.generic.statusbar	= "vertex lighting on water and other warping surfaces";
 
 	s_lightcutoff_slider.generic.type		= MTYPE_SLIDER;
+	s_lightcutoff_slider.generic.textSize	= MENU_FONT_SIZE;
 	s_lightcutoff_slider.generic.x			= 0;
 	s_lightcutoff_slider.generic.y			= y += MENU_LINE_SIZE;
 	s_lightcutoff_slider.generic.name		= "dynamic light cutoff";
@@ -412,6 +438,7 @@ void Menu_Video_Advanced_Init (void)
 	s_lightcutoff_slider.generic.statusbar	= "lower = smoother blend, higher = faster";
 
 	s_glass_envmap_box.generic.type			= MTYPE_SPINCONTROL;
+	s_glass_envmap_box.generic.textSize		= MENU_FONT_SIZE;
 	s_glass_envmap_box.generic.x			= 0;
 	s_glass_envmap_box.generic.y			= y += MENU_LINE_SIZE;
 	s_glass_envmap_box.generic.name			= "glass envmaps";
@@ -420,6 +447,7 @@ void Menu_Video_Advanced_Init (void)
 	s_glass_envmap_box.generic.statusbar	= "enable environment mapping on transparent surfaces";
 
 	s_solidalpha_box.generic.type			= MTYPE_SPINCONTROL;
+	s_solidalpha_box.generic.textSize		= MENU_FONT_SIZE;
 	s_solidalpha_box.generic.x				= 0;
 	s_solidalpha_box.generic.y				= y += MENU_LINE_SIZE;
 	s_solidalpha_box.generic.name			= "solid alphas";
@@ -428,6 +456,7 @@ void Menu_Video_Advanced_Init (void)
 	s_solidalpha_box.generic.statusbar		= "enable solid drawing of trans33 + trans66 surfaces";
 
 	s_texshader_warp_box.generic.type		= MTYPE_SPINCONTROL;
+	s_texshader_warp_box.generic.textSize	= MENU_FONT_SIZE;
 	s_texshader_warp_box.generic.x			= 0;
 	s_texshader_warp_box.generic.y			= y += MENU_LINE_SIZE;
 	s_texshader_warp_box.generic.name		= "texture shader warp";
@@ -436,6 +465,7 @@ void Menu_Video_Advanced_Init (void)
 	s_texshader_warp_box.generic.statusbar	= "enables hardware water warping effect";
 
 	s_waterwave_slider.generic.type			= MTYPE_SLIDER;
+	s_waterwave_slider.generic.textSize		= MENU_FONT_SIZE;
 	s_waterwave_slider.generic.x			= 0;
 	s_waterwave_slider.generic.y			= y += MENU_LINE_SIZE;
 	s_waterwave_slider.generic.name			= "water wave size";
@@ -445,6 +475,7 @@ void Menu_Video_Advanced_Init (void)
 	s_waterwave_slider.generic.statusbar	= "size of waves on flat water surfaces";
 
 	s_caustics_box.generic.type				= MTYPE_SPINCONTROL;
+	s_caustics_box.generic.textSize			= MENU_FONT_SIZE;
 	s_caustics_box.generic.x				= 0;
 	s_caustics_box.generic.y				= y += MENU_LINE_SIZE;
 	s_caustics_box.generic.name				= "underwater caustics";
@@ -453,6 +484,7 @@ void Menu_Video_Advanced_Init (void)
 	s_caustics_box.generic.statusbar		= "caustic effect on underwater surfaces";
 
 	s_particle_overdraw_box.generic.type		= MTYPE_SPINCONTROL;
+	s_particle_overdraw_box.generic.textSize	= MENU_FONT_SIZE;
 	s_particle_overdraw_box.generic.x			= 0;
 	s_particle_overdraw_box.generic.y			= y += 2*MENU_LINE_SIZE;
 	s_particle_overdraw_box.generic.name		= "particle overdraw";
@@ -461,6 +493,7 @@ void Menu_Video_Advanced_Init (void)
 	s_particle_overdraw_box.generic.statusbar	= "redraw particles over trans surfaces";
 
 	s_lightbloom_box.generic.type			= MTYPE_SPINCONTROL;
+	s_lightbloom_box.generic.textSize		= MENU_FONT_SIZE;
 	s_lightbloom_box.generic.x				= 0;
 	s_lightbloom_box.generic.y				= y += MENU_LINE_SIZE;
 	s_lightbloom_box.generic.name			= "light blooms";
@@ -469,6 +502,7 @@ void Menu_Video_Advanced_Init (void)
 	s_lightbloom_box.generic.statusbar		= "enables blooming of bright lights";
 
 	s_modelshading_box.generic.type			= MTYPE_SPINCONTROL;
+	s_modelshading_box.generic.textSize		= MENU_FONT_SIZE;
 	s_modelshading_box.generic.x			= 0;
 	s_modelshading_box.generic.y			= y += MENU_LINE_SIZE;
 	s_modelshading_box.generic.name			= "model shading";
@@ -477,6 +511,7 @@ void Menu_Video_Advanced_Init (void)
 	s_modelshading_box.generic.statusbar	= "level of shading to use on models";
 
 	s_shadows_box.generic.type				= MTYPE_SPINCONTROL;
+	s_shadows_box.generic.textSize			= MENU_FONT_SIZE;
 	s_shadows_box.generic.x					= 0;
 	s_shadows_box.generic.y					= y += MENU_LINE_SIZE;
 	s_shadows_box.generic.name				= "entity shadows";
@@ -485,6 +520,7 @@ void Menu_Video_Advanced_Init (void)
 	s_shadows_box.generic.statusbar			= "type of model shadows to draw";
 
 	s_two_side_stencil_box.generic.type			= MTYPE_SPINCONTROL;
+	s_two_side_stencil_box.generic.textSize		= MENU_FONT_SIZE;
 	s_two_side_stencil_box.generic.x			= 0;
 	s_two_side_stencil_box.generic.y			= y += MENU_LINE_SIZE;
 	s_two_side_stencil_box.generic.name			= "two-sided stenciling";
@@ -493,6 +529,7 @@ void Menu_Video_Advanced_Init (void)
 	s_two_side_stencil_box.generic.statusbar	= "use single-pass shadow stenciling";
 
 	s_ent_shell_box.generic.type				= MTYPE_SPINCONTROL;
+	s_ent_shell_box.generic.textSize			= MENU_FONT_SIZE;
 	s_ent_shell_box.generic.x					= 0;
 	s_ent_shell_box.generic.y					= y += MENU_LINE_SIZE;
 	s_ent_shell_box.generic.name				= "entity shell type";
@@ -501,6 +538,7 @@ void Menu_Video_Advanced_Init (void)
 	s_ent_shell_box.generic.statusbar			= "envmap effect may cause instability on ATI cards";
 
 	s_celshading_box.generic.type				= MTYPE_SPINCONTROL;
+	s_celshading_box.generic.textSize			= MENU_FONT_SIZE;
 	s_celshading_box.generic.x					= 0;
 	s_celshading_box.generic.y					= y += MENU_LINE_SIZE;
 	s_celshading_box.generic.name				= "cel shading";
@@ -509,6 +547,7 @@ void Menu_Video_Advanced_Init (void)
 	s_celshading_box.generic.statusbar			= "cartoon-style rendering of models";
 
 	s_celshading_width_slider.generic.type		= MTYPE_SLIDER;
+	s_celshading_width_slider.generic.textSize	= MENU_FONT_SIZE;
 	s_celshading_width_slider.generic.x			= 0;
 	s_celshading_width_slider.generic.y			= y += MENU_LINE_SIZE;
 	s_celshading_width_slider.generic.name		= "cel shading width";
@@ -519,6 +558,7 @@ void Menu_Video_Advanced_Init (void)
 
 /*
 	s_screenshotjpeg_box.generic.type			= MTYPE_SPINCONTROL;
+	s_screenshotjpeg_box.generic.textSize		= MENU_FONT_SIZE;
 	s_screenshotjpeg_box.generic.x				= 0;
 	s_screenshotjpeg_box.generic.y				= y += 2*MENU_LINE_SIZE;
 	s_screenshotjpeg_box.generic.name			= "JPEG screenshots";
@@ -528,6 +568,7 @@ void Menu_Video_Advanced_Init (void)
 */
 
 	s_screenshotformat_box.generic.type			= MTYPE_SPINCONTROL;
+	s_screenshotformat_box.generic.textSize		= MENU_FONT_SIZE;
 	s_screenshotformat_box.generic.x			= 0;
 	s_screenshotformat_box.generic.y			= y += 2*MENU_LINE_SIZE;
 	s_screenshotformat_box.generic.name			= "screenshot format";
@@ -536,6 +577,7 @@ void Menu_Video_Advanced_Init (void)
 	s_screenshotformat_box.generic.statusbar	= "image format for screenshots";
 
 	s_screenshotjpegquality_slider.generic.type			= MTYPE_SLIDER;
+	s_screenshotjpegquality_slider.generic.textSize		= MENU_FONT_SIZE;
 	s_screenshotjpegquality_slider.generic.x			= 0;
 	s_screenshotjpegquality_slider.generic.y			= y += MENU_LINE_SIZE;
 	s_screenshotjpegquality_slider.generic.name			= "JPEG screenshot quality";
@@ -545,6 +587,7 @@ void Menu_Video_Advanced_Init (void)
 	s_screenshotjpegquality_slider.generic.statusbar	= "quality of JPG screenshots, 50-100%";
 
 	s_saveshotsize_box.generic.type				= MTYPE_SPINCONTROL;
+	s_saveshotsize_box.generic.textSize			= MENU_FONT_SIZE;
 	s_saveshotsize_box.generic.x				= 0;
 	s_saveshotsize_box.generic.y				= y += MENU_LINE_SIZE;
 	s_saveshotsize_box.generic.name				= "hi-res saveshots";
@@ -552,17 +595,28 @@ void Menu_Video_Advanced_Init (void)
 	s_saveshotsize_box.itemnames				= yesno_names;
 	s_saveshotsize_box.generic.statusbar		= "hi-res saveshots when running at 800x600 or higher";
 
+	s_upscale_font_box.generic.type				= MTYPE_SPINCONTROL;
+	s_upscale_font_box.generic.textSize			= MENU_FONT_SIZE;
+	s_upscale_font_box.generic.x				= 0;
+	s_upscale_font_box.generic.y				= y += 2*MENU_LINE_SIZE;
+	s_upscale_font_box.generic.name				= "upscale old fonts";
+	s_upscale_font_box.generic.callback			= UpscaleFontCallback;
+	s_upscale_font_box.itemnames				= font_upscale_names;
+	s_upscale_font_box.generic.statusbar		= "upscales 128x128 fonts to higher res based on screen resolution";
+
 	s_advanced_apply_action.generic.type		= MTYPE_ACTION;
+	s_advanced_apply_action.generic.textSize	= MENU_FONT_SIZE;
 	s_advanced_apply_action.generic.name		= "apply changes";
 	s_advanced_apply_action.generic.x			= 0;
 	s_advanced_apply_action.generic.y			= y += 2*MENU_LINE_SIZE;
 	s_advanced_apply_action.generic.callback	= AdvancedMenuApplyChanges;
 
-	s_back_action.generic.type = MTYPE_ACTION;
-	s_back_action.generic.name = "back";
-	s_back_action.generic.x    = 0;
-	s_back_action.generic.y    = y += 2*MENU_LINE_SIZE;
-	s_back_action.generic.callback = UI_BackMenu;
+	s_back_action.generic.type					= MTYPE_ACTION;
+	s_back_action.generic.textSize				= MENU_FONT_SIZE;
+	s_back_action.generic.name					= "back";
+	s_back_action.generic.x						= 0;
+	s_back_action.generic.y						= y += 2*MENU_LINE_SIZE;
+	s_back_action.generic.callback				= UI_BackMenu;
 
 	Video_Advanced_MenuSetValues();
 
@@ -589,7 +643,8 @@ void Menu_Video_Advanced_Init (void)
 //	Menu_AddItem( &s_video_advanced_menu, ( void * ) &s_screenshotjpeg_box );
 	Menu_AddItem( &s_video_advanced_menu, ( void * ) &s_screenshotformat_box );
 	Menu_AddItem( &s_video_advanced_menu, ( void * ) &s_screenshotjpegquality_slider );
-	Menu_AddItem( &s_video_advanced_menu, ( void * ) &	s_saveshotsize_box );
+	Menu_AddItem( &s_video_advanced_menu, ( void * ) &s_saveshotsize_box );
+	Menu_AddItem( &s_video_advanced_menu, ( void * ) &s_upscale_font_box );
 
 	Menu_AddItem( &s_video_advanced_menu, ( void * ) &s_advanced_apply_action );
 

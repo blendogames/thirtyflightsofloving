@@ -132,10 +132,6 @@ cvar_t	*sensitivity;
 cvar_t	*menu_sensitivity;
 cvar_t	*menu_rotate;
 cvar_t	*menu_alpha;
-//cvar_t	*hud_scale;
-//cvar_t	*hud_width;
-//cvar_t	*hud_height;
-//cvar_t	*hud_alpha;
 
 cvar_t	*m_pitch;
 cvar_t	*m_yaw;
@@ -1624,10 +1620,6 @@ void CL_InitLocal (void)
 	menu_sensitivity = Cvar_Get ("menu_sensitivity", "1", CVAR_ARCHIVE);
 	menu_rotate = Cvar_Get ("menu_rotate", "0", CVAR_ARCHIVE);
 	menu_alpha = Cvar_Get ("menu_alpha", "0.6", CVAR_ARCHIVE);
-//	hud_scale = Cvar_Get ("hud_scale", "3", CVAR_ARCHIVE);
-//	hud_width = Cvar_Get ("hud_width", "640", CVAR_ARCHIVE);
-//	hud_height = Cvar_Get ("hud_height", "480", CVAR_ARCHIVE);
-//	hud_alpha = Cvar_Get ("hud_alpha", "1", CVAR_ARCHIVE);
 
 	m_pitch = Cvar_Get ("m_pitch", "0.022", CVAR_ARCHIVE);
 	m_yaw = Cvar_Get ("m_yaw", "0.022", 0);

@@ -132,6 +132,7 @@ static void ResetVideoDefaults ( void *unused )
 	Cvar_SetToDefault ("r_screenshot_format");
 	Cvar_SetToDefault ("r_screenshot_jpeg_quality");
 	Cvar_SetToDefault ("r_saveshotsize");
+	Cvar_SetToDefault ("r_font_upscale");
 
 	Menu_Video_Init();
 }
@@ -173,7 +174,8 @@ static void ApplyChanges( void *unused )
 	Cvar_SetValue( "vid_fullscreen", s_fs_box.curvalue );
 	// invert sense so greater = brighter, and scale to a range of 0.3 to 1.3
 	Cvar_SetValue( "vid_gamma", (1.3 - (s_brightness_slider.curvalue/20.0)) );
-	Cvar_SetValue( "r_picmip", 3-s_texqual_box.curvalue );
+//	Cvar_SetValue( "r_picmip", 3-s_texqual_box.curvalue );
+	Cvar_SetValue( "r_picmip", 4-s_texqual_box.curvalue );
 
 	// Knightmare- refesh rate option
 	switch (s_refresh_box.curvalue)
@@ -408,6 +410,17 @@ void Menu_Video_Init (void)
 		"trilinear",
 		0
 	};
+#if 1
+	static const char *lmh_names[] =
+	{
+		"lowest",
+		"low",
+		"medium",
+		"high",
+		"highest",
+		0
+	};
+#else
 	static const char *lmh_names[] =
 	{
 		"low",
@@ -416,7 +429,7 @@ void Menu_Video_Init (void)
 		"highest",
 		0
 	};
-
+#endif
 	int		y = 0;
 	float	temp;
 	char	*customStr;
@@ -430,6 +443,7 @@ void Menu_Video_Init (void)
 	s_video_menu.nitems = 0;
 
 	s_mode_list.generic.type		= MTYPE_SPINCONTROL;
+	s_mode_list.generic.textSize	= MENU_FONT_SIZE;
 	s_mode_list.generic.name		= "video mode";
 	s_mode_list.generic.x			= 0;
 	s_mode_list.generic.y			= y;
@@ -439,13 +453,15 @@ void Menu_Video_Init (void)
 	s_mode_list.curvalue			= (temp == -1) ? 0 : max(temp - 2, 1); // offset for getting rid of < 640x480 resolutions
 	s_mode_list.generic.statusbar	= "changes screen resolution";
 
-	s_customwidth_title.generic.type	= MTYPE_SEPARATOR;
-	s_customwidth_title.generic.flags	= (s_mode_list.curvalue != 0) ? QMF_HIDDEN : 0;
-	s_customwidth_title.generic.name	= "custom width";
-	s_customwidth_title.generic.x		= -2*MENU_FONT_SIZE;
-	s_customwidth_title.generic.y		= y += 1.5*MENU_LINE_SIZE;
+	s_customwidth_title.generic.type		= MTYPE_SEPARATOR;
+	s_customwidth_title.generic.textSize	= MENU_FONT_SIZE;
+	s_customwidth_title.generic.flags		= (s_mode_list.curvalue != 0) ? QMF_HIDDEN : 0;
+	s_customwidth_title.generic.name		= "custom width";
+	s_customwidth_title.generic.x			= -2*MENU_FONT_SIZE;
+	s_customwidth_title.generic.y			= y += 1.5*MENU_LINE_SIZE;
 
 	s_customwidth_field.generic.type		= MTYPE_FIELD;
+	s_customwidth_field.generic.textSize	= MENU_FONT_SIZE;
 	s_customwidth_field.generic.flags		= (s_mode_list.curvalue != 0) ? (QMF_NUMBERSONLY|QMF_HIDDEN) : QMF_NUMBERSONLY;
 //	s_customwidth_field.generic.name		= "custom width";
 	s_customwidth_field.generic.callback	= 0;
@@ -457,13 +473,15 @@ void Menu_Video_Init (void)
 	Q_strncpyz( s_customwidth_field.buffer, customStr, sizeof(s_customwidth_field.buffer) );
 	s_customwidth_field.cursor				= strlen( customStr );
 
-	s_customheight_title.generic.type	= MTYPE_SEPARATOR;
-	s_customheight_title.generic.flags	= (s_mode_list.curvalue != 0) ? QMF_HIDDEN : 0;
-	s_customheight_title.generic.name	= "custom height";
-	s_customheight_title.generic.x		= 14.5*MENU_FONT_SIZE;
-	s_customheight_title.generic.y		= y;
+	s_customheight_title.generic.type		= MTYPE_SEPARATOR;
+	s_customheight_title.generic.textSize	= MENU_FONT_SIZE;
+	s_customheight_title.generic.flags		= (s_mode_list.curvalue != 0) ? QMF_HIDDEN : 0;
+	s_customheight_title.generic.name		= "custom height";
+	s_customheight_title.generic.x			= 14.5*MENU_FONT_SIZE;
+	s_customheight_title.generic.y			= y;
 
 	s_customheight_field.generic.type		= MTYPE_FIELD;
+	s_customheight_field.generic.textSize	= MENU_FONT_SIZE;
 	s_customheight_field.generic.flags		= (s_mode_list.curvalue != 0) ? (QMF_NUMBERSONLY|QMF_HIDDEN) : QMF_NUMBERSONLY;
 //	s_customheight_field.generic.name		= "custom height";
 	s_customheight_field.generic.callback	= 0;
@@ -476,6 +494,7 @@ void Menu_Video_Init (void)
 	s_customheight_field.cursor				= strlen( customStr );
 
 	s_fs_box.generic.type			= MTYPE_SPINCONTROL;
+	s_fs_box.generic.textSize		= MENU_FONT_SIZE;
 	s_fs_box.generic.x				= 0;
 	s_fs_box.generic.y				= y += 3.5*MENU_LINE_SIZE;
 	s_fs_box.generic.name			= "fullscreen";
@@ -484,6 +503,7 @@ void Menu_Video_Init (void)
 	s_fs_box.generic.statusbar		= "changes bettween fullscreen and windowed display";
 
 	s_brightness_slider.generic.type		= MTYPE_SLIDER;
+	s_brightness_slider.generic.textSize	= MENU_FONT_SIZE;
 	s_brightness_slider.generic.x			= 0;
 	s_brightness_slider.generic.y			= y += MENU_LINE_SIZE;
 	s_brightness_slider.generic.name		= "brightness";
@@ -494,6 +514,7 @@ void Menu_Video_Init (void)
 	s_brightness_slider.generic.statusbar	= "changes display brightness";
 
 	s_texfilter_box.generic.type		= MTYPE_SPINCONTROL;
+	s_texfilter_box.generic.textSize	= MENU_FONT_SIZE;
 	s_texfilter_box.generic.x			= 0;
 	s_texfilter_box.generic.y			= y += 2*MENU_LINE_SIZE;
 	s_texfilter_box.generic.name		= "texture filter";
@@ -502,6 +523,7 @@ void Menu_Video_Init (void)
 	s_texfilter_box.generic.statusbar	= "changes texture filtering mode";
 
 	s_aniso_box.generic.type		= MTYPE_SPINCONTROL;
+	s_aniso_box.generic.textSize	= MENU_FONT_SIZE;
 	s_aniso_box.generic.x			= 0;
 	s_aniso_box.generic.y			= y += MENU_LINE_SIZE;
 	s_aniso_box.generic.name		= "anisotropic filter";
@@ -510,14 +532,17 @@ void Menu_Video_Init (void)
 	s_aniso_box.generic.statusbar	= "changes level of anisotropic mipmap filtering";
 
 	s_texqual_box.generic.type		= MTYPE_SPINCONTROL;
+	s_texqual_box.generic.textSize	= MENU_FONT_SIZE;
 	s_texqual_box.generic.x			= 0;
 	s_texqual_box.generic.y			= y += MENU_LINE_SIZE;
 	s_texqual_box.generic.name		= "texture quality";
-	s_texqual_box.curvalue			= ClampCvar (0, 3, 3-Cvar_VariableValue("r_picmip"));
+//	s_texqual_box.curvalue			= ClampCvar (0, 3, 3-Cvar_VariableValue("r_picmip"));
+	s_texqual_box.curvalue			= ClampCvar (0, 4, 4-Cvar_VariableValue("r_picmip"));
 	s_texqual_box.itemnames			= lmh_names;
 	s_texqual_box.generic.statusbar	= "changes maximum texture size (highest = no limit)";
 
 	s_npot_mipmap_box.generic.type		= MTYPE_SPINCONTROL;
+	s_npot_mipmap_box.generic.textSize	= MENU_FONT_SIZE;
 	s_npot_mipmap_box.generic.x			= 0;
 	s_npot_mipmap_box.generic.y			= y += MENU_LINE_SIZE;
 	s_npot_mipmap_box.generic.name		= "non-power-of-2 mipmaps";
@@ -526,6 +551,7 @@ void Menu_Video_Init (void)
 	s_npot_mipmap_box.generic.statusbar	= "enables non-power-of-2 mipmapped textures (requires driver support)";
 
 	s_sgis_mipmap_box.generic.type		= MTYPE_SPINCONTROL;
+	s_sgis_mipmap_box.generic.textSize	= MENU_FONT_SIZE;
 	s_sgis_mipmap_box.generic.x			= 0;
 	s_sgis_mipmap_box.generic.y			= y += MENU_LINE_SIZE;
 	s_sgis_mipmap_box.generic.name		= "SGIS mipmaps";
@@ -534,6 +560,7 @@ void Menu_Video_Init (void)
 	s_sgis_mipmap_box.generic.statusbar	= "enables driver-based mipmap generation";
 /*
 	s_texcompress_box.generic.type		= MTYPE_SPINCONTROL;
+	s_texcompress_box.generic.textSize	= MENU_FONT_SIZE;
 	s_texcompress_box.generic.x			= 0;
 	s_texcompress_box.generic.y			= y += MENU_LINE_SIZE;
 	s_texcompress_box.generic.name		= "texture compression";
@@ -542,6 +569,7 @@ void Menu_Video_Init (void)
 	s_texcompress_box.generic.statusbar	= "reduces quality, increases performance (leave off unless needed)";
 */
 	s_vsync_box.generic.type			= MTYPE_SPINCONTROL;
+	s_vsync_box.generic.textSize		= MENU_FONT_SIZE;
 	s_vsync_box.generic.x				= 0;
 	s_vsync_box.generic.y				= y += 2*MENU_LINE_SIZE;
 	s_vsync_box.generic.name			= "video sync";
@@ -552,6 +580,7 @@ void Menu_Video_Init (void)
 
 	// Knightmare- refresh rate option
 	s_refresh_box.generic.type			= MTYPE_SPINCONTROL;
+	s_refresh_box.generic.textSize		= MENU_FONT_SIZE;
 	s_refresh_box.generic.x				= 0;
 	s_refresh_box.generic.y				= y += MENU_LINE_SIZE;
 	s_refresh_box.generic.name			= "refresh rate";
@@ -560,6 +589,7 @@ void Menu_Video_Init (void)
 	s_refresh_box.generic.statusbar		= "sets refresh rate for fullscreen modes";
 
 	s_adjust_fov_box.generic.type		= MTYPE_SPINCONTROL;
+	s_adjust_fov_box.generic.textSize	= MENU_FONT_SIZE;
 	s_adjust_fov_box.generic.x			= 0;
 	s_adjust_fov_box.generic.y			= y += MENU_LINE_SIZE;
 	s_adjust_fov_box.generic.name		= "fov autoscaling";
@@ -569,6 +599,7 @@ void Menu_Video_Init (void)
 	s_adjust_fov_box.generic.statusbar	= "automatic scaling of fov for widescreen modes";
 
 	s_async_box.generic.type			= MTYPE_SPINCONTROL;
+	s_async_box.generic.textSize		= MENU_FONT_SIZE;
 	s_async_box.generic.x				= 0;
 	s_async_box.generic.y				= y += MENU_LINE_SIZE;
 	s_async_box.generic.name			= "async refresh";
@@ -578,12 +609,14 @@ void Menu_Video_Init (void)
 	s_async_box.generic.statusbar		= "decouples network framerate from render framerate";
 
 	s_advanced_action.generic.type		= MTYPE_ACTION;
+	s_advanced_action.generic.textSize	= MENU_FONT_SIZE;
 	s_advanced_action.generic.name		= "advanced options";
 	s_advanced_action.generic.x			= 0;
 	s_advanced_action.generic.y			= y += 3*MENU_LINE_SIZE;
 	s_advanced_action.generic.callback	= AdvancedOptions;
 
 	s_defaults_action.generic.type		= MTYPE_ACTION;
+	s_defaults_action.generic.textSize	= MENU_FONT_SIZE;
 	s_defaults_action.generic.name		= "reset to defaults";
 	s_defaults_action.generic.x			= 0;
 	s_defaults_action.generic.y			= y += 3*MENU_LINE_SIZE;
@@ -592,12 +625,14 @@ void Menu_Video_Init (void)
 
 	// changed cancel to apply changes, thanx to MrG
 	s_apply_action.generic.type			= MTYPE_ACTION;
+	s_apply_action.generic.textSize		= MENU_FONT_SIZE;
 	s_apply_action.generic.name			= "apply changes";
 	s_apply_action.generic.x			= 0;
 	s_apply_action.generic.y			= y += 2*MENU_LINE_SIZE;
 	s_apply_action.generic.callback		= ApplyChanges;
 
 	s_backmain_action.generic.type		= MTYPE_ACTION;
+	s_backmain_action.generic.textSize	= MENU_FONT_SIZE;
 	s_backmain_action.generic.name		= "back to main";
 	s_backmain_action.generic.x			= 0;
 	s_backmain_action.generic.y			= y += 2*MENU_LINE_SIZE;

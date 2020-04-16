@@ -457,7 +457,7 @@ void M_Credits_MenuDraw (void)
 
 		x = ( SCREEN_WIDTH - len * MENU_FONT_SIZE - stringoffset * MENU_FONT_SIZE ) / 2
 			+ stringoffset * MENU_FONT_SIZE;
-		Menu_DrawString (x, y, credits[i], alpha*255);
+		Menu_DrawString (x, y, MENU_FONT_SIZE, credits[i], alpha*255);
 	}
 }
 

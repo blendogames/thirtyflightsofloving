@@ -123,13 +123,13 @@ static void M_FindKeysForCommand (char *command, int *twokeys)
 	}
 }
 
-static void KeysBackCursorDrawFunc ( menuaction_s *self ) // back action
+static void KeysBackCursorDrawFunc (menuaction_s *self) // back action
 {
 	SCR_DrawChar (SCREEN_WIDTH*0.5 - 24, s_keys_menu.y + self->generic.y, ALIGN_CENTER,
 					12+((int)(Sys_Milliseconds()/250)&1), 255,255,255,255, false, true);
 }
 
-static void KeyCursorDrawFunc( menuframework_s *menu )
+static void KeyCursorDrawFunc (menuframework_s *menu)
 {
 	if (bind_grab)
 		SCR_DrawChar (menu->x, menu->y + menu->cursor * MENU_LINE_SIZE, ALIGN_CENTER,
@@ -139,7 +139,7 @@ static void KeyCursorDrawFunc( menuframework_s *menu )
 						12+((int)(Sys_Milliseconds()/250)&1), 255,255,255,255, false, true);
 }
 
-static void DrawKeyBindingFunc( void *self )
+static void DrawKeyBindingFunc (void *self)
 {
 	int keys[2];
 	menuaction_s *a = ( menuaction_s * ) self;
@@ -149,7 +149,7 @@ static void DrawKeyBindingFunc( void *self )
 	if (keys[0] == -1)
 	{
 		Menu_DrawString (a->generic.x + a->generic.parent->x + 16,
-						a->generic.y + a->generic.parent->y, "???", 255);
+						a->generic.y + a->generic.parent->y, a->generic.textSize, "???", 255);
 	}
 	else
 	{
@@ -159,21 +159,21 @@ static void DrawKeyBindingFunc( void *self )
 		name = Key_KeynumToString (keys[0]);
 
 		Menu_DrawString (a->generic.x + a->generic.parent->x + 16,
-						a->generic.y + a->generic.parent->y, name , 255);
+						a->generic.y + a->generic.parent->y, a->generic.textSize, name , 255);
 
 		x = strlen(name) * MENU_FONT_SIZE;
 
 		if (keys[1] != -1)
 		{
 			Menu_DrawString (a->generic.x + a->generic.parent->x + MENU_FONT_SIZE*3 + x,
-							a->generic.y + a->generic.parent->y, "or", 255);
+							a->generic.y + a->generic.parent->y, a->generic.textSize, "or", 255);
 			Menu_DrawString (a->generic.x + a->generic.parent->x + MENU_FONT_SIZE*6 + x,
-							a->generic.y + a->generic.parent->y, Key_KeynumToString(keys[1]), 255);
+							a->generic.y + a->generic.parent->y, a->generic.textSize, Key_KeynumToString(keys[1]), 255);
 		}
 	}
 }
 
-static void KeyBindingFunc( void *self )
+static void KeyBindingFunc (void *self)
 {
 	menuaction_s *a = ( menuaction_s * ) self;
 	int keys[2];
@@ -191,6 +191,7 @@ static void KeyBindingFunc( void *self )
 void addBindOption (int i, char* list[][2])
 {		
 	s_keys_binds[i].generic.type	= MTYPE_ACTION;
+	s_keys_binds[i].generic.textSize = MENU_FONT_SIZE;
 	s_keys_binds[i].generic.flags  = QMF_GRAYED;
 	s_keys_binds[i].generic.x		= 0;
 	s_keys_binds[i].generic.y		= i*MENU_LINE_SIZE;
@@ -203,7 +204,7 @@ void addBindOption (int i, char* list[][2])
 		s_keys_binds[i].generic.type	= MTYPE_SEPARATOR;
 }
 
-static void Keys_MenuInit( void )
+static void Keys_MenuInit (void)
 {
 	int BINDS_MAX;
 	int i = 0;
@@ -218,6 +219,7 @@ static void Keys_MenuInit( void )
 		addBindOption(i, bindnames);
 
 	s_keys_back_action.generic.type = MTYPE_ACTION;
+	s_keys_back_action.generic.textSize = MENU_FONT_SIZE;
 	s_keys_back_action.generic.flags = QMF_LEFT_JUSTIFY;
 	s_keys_back_action.generic.x	= 0;
 	s_keys_back_action.generic.y	= (BINDS_MAX+2)*MENU_LINE_SIZE;
@@ -242,7 +244,7 @@ static void Keys_MenuDraw (void)
 	Menu_Draw( &s_keys_menu );
 }
 
-static const char *Keys_MenuKey( int key )
+static const char *Keys_MenuKey (int key)
 {
 	menuaction_s *item = ( menuaction_s * ) Menu_ItemAtCursor( &s_keys_menu );
 

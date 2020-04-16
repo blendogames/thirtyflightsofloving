@@ -558,6 +558,12 @@ char	*Cvar_DefaultString (char *var_name);
 cvar_t *Cvar_SetToDefault (char *var_name);
 // end Knightmare
 
+void Cvar_SetDescription (char *var_name, char *description);
+// sets description string of given cvar
+
+qboolean Cvar_IsModified (char *var_name);
+// returns true if modified field is set
+
 char 	*Cvar_CompleteVariable (char *partial);
 // attempts to match a partial variable name for command line completion
 // returns NULL if nothing fits

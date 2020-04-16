@@ -57,26 +57,29 @@ void Quit_MenuInit ( void )
 	s_quit_menu.y = SCREEN_HEIGHT*0.5 - 58;
 	s_quit_menu.nitems = 0;
 
-	s_quit_header.generic.type	= MTYPE_SEPARATOR;
-	s_quit_header.generic.name	= "Quit game?";
-	s_quit_header.generic.x	= MENU_FONT_SIZE*0.7 * strlen(s_quit_header.generic.name);
-	s_quit_header.generic.y	= 20;
+	s_quit_header.generic.type		= MTYPE_SEPARATOR;
+	s_quit_header.generic.textSize	= MENU_FONT_SIZE;
+	s_quit_header.generic.name		= "Quit game?";
+	s_quit_header.generic.x			= MENU_FONT_SIZE*0.7 * strlen(s_quit_header.generic.name);
+	s_quit_header.generic.y			= 20;
 
-	s_quit_yes_action.generic.type	= MTYPE_ACTION;
-	s_quit_yes_action.generic.flags  = QMF_LEFT_JUSTIFY;
-	s_quit_yes_action.generic.x		= MENU_FONT_SIZE*3;
-	s_quit_yes_action.generic.y		= 60;
-	s_quit_yes_action.generic.name	= "yes";
-	s_quit_yes_action.generic.callback = QuitYesFunc;
-	s_quit_yes_action.generic.cursor_offset = -MENU_FONT_SIZE;
+	s_quit_yes_action.generic.type			= MTYPE_ACTION;
+	s_quit_yes_action.generic.textSize		= MENU_FONT_SIZE;
+	s_quit_yes_action.generic.flags			= QMF_LEFT_JUSTIFY;
+	s_quit_yes_action.generic.x				= MENU_FONT_SIZE*3;
+	s_quit_yes_action.generic.y				= 60;
+	s_quit_yes_action.generic.name			= "yes";
+	s_quit_yes_action.generic.callback		= QuitYesFunc;
+	s_quit_yes_action.generic.cursor_offset	= -MENU_FONT_SIZE;
 
-	s_quit_no_action.generic.type	= MTYPE_ACTION;
-	s_quit_no_action.generic.flags  = QMF_LEFT_JUSTIFY;
-	s_quit_no_action.generic.x		= MENU_FONT_SIZE*3;
-	s_quit_no_action.generic.y		= 80;
-	s_quit_no_action.generic.name	= "no";
-	s_quit_no_action.generic.callback = UI_BackMenu;
-	s_quit_no_action.generic.cursor_offset = -MENU_FONT_SIZE;
+	s_quit_no_action.generic.type			= MTYPE_ACTION;
+	s_quit_no_action.generic.textSize		= MENU_FONT_SIZE;
+	s_quit_no_action.generic.flags			= QMF_LEFT_JUSTIFY;
+	s_quit_no_action.generic.x				= MENU_FONT_SIZE*3;
+	s_quit_no_action.generic.y				= 80;
+	s_quit_no_action.generic.name			= "no";
+	s_quit_no_action.generic.callback		= UI_BackMenu;
+	s_quit_no_action.generic.cursor_offset	= -MENU_FONT_SIZE;
 
 	Menu_AddItem( &s_quit_menu, ( void * ) &s_quit_header );
 	Menu_AddItem( &s_quit_menu, ( void * ) &s_quit_yes_action );

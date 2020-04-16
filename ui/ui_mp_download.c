@@ -99,48 +99,58 @@ void DownloadOptions_MenuInit( void )
 {
 	static const char *yes_no_names[] =
 	{
-		"no", "yes", 0
+		"no",
+		"yes",
+		0
 	};
-	int y = 0;
+
+//	int y = 0;
+	int y = 3*MENU_LINE_SIZE;
 
 	s_downloadoptions_menu.x = SCREEN_WIDTH*0.5;
+	s_downloadoptions_menu.y = SCREEN_HEIGHT*0.5 - 58;
 //	s_downloadoptions_menu.x = viddef.width * 0.50;
 //	s_downloadoptions_menu.y = 0;
 	s_downloadoptions_menu.nitems = 0;
 
-	s_download_title.generic.type = MTYPE_SEPARATOR;
-	s_download_title.generic.name = "Download Options";
-	s_download_title.generic.x    = MENU_FONT_SIZE/2 * strlen(s_download_title.generic.name); // was 48
-	s_download_title.generic.y	 = y;
+	s_download_title.generic.type		= MTYPE_SEPARATOR;
+	s_download_title.generic.textSize	= MENU_HEADER_FONT_SIZE;
+	s_download_title.generic.name		= "Download Options";
+	s_download_title.generic.x			= MENU_HEADER_FONT_SIZE/2 * strlen(s_download_title.generic.name); // was 48
+	s_download_title.generic.y			= y - 2.75*MENU_LINE_SIZE;	// y
 
-	s_allow_download_box.generic.type = MTYPE_SPINCONTROL;
-	s_allow_download_box.generic.x	= 0;
-	s_allow_download_box.generic.y	= y += 2*MENU_LINE_SIZE;
-	s_allow_download_box.generic.name	= "allow downloading";
-	s_allow_download_box.generic.callback = DownloadCallback;
-	s_allow_download_box.itemnames = yes_no_names;
-	s_allow_download_box.curvalue = (Cvar_VariableValue("allow_download") != 0);
+	s_allow_download_box.generic.type		= MTYPE_SPINCONTROL;
+	s_allow_download_box.generic.textSize	= MENU_FONT_SIZE;
+	s_allow_download_box.generic.x			= 0;
+	s_allow_download_box.generic.y			= y += 2*MENU_LINE_SIZE;
+	s_allow_download_box.generic.name		= "allow downloading";
+	s_allow_download_box.generic.callback	= DownloadCallback;
+	s_allow_download_box.itemnames			= yes_no_names;
+	s_allow_download_box.curvalue			= (Cvar_VariableValue("allow_download") != 0);
 
 #ifdef USE_CURL	// HTTP downloading from R1Q2
-	s_allow_http_download_box.generic.type = MTYPE_SPINCONTROL;
-	s_allow_http_download_box.generic.x	= 0;
-	s_allow_http_download_box.generic.y	= y += MENU_LINE_SIZE;
-	s_allow_http_download_box.generic.name	= "HTTP downloading";
-	s_allow_http_download_box.generic.callback = DownloadCallback;
-	s_allow_http_download_box.itemnames = yes_no_names;
-	s_allow_http_download_box.curvalue = (Cvar_VariableValue("cl_http_downloads") != 0);
+	s_allow_http_download_box.generic.type		= MTYPE_SPINCONTROL;
+	s_allow_http_download_box.generic.textSize	= MENU_FONT_SIZE;
+	s_allow_http_download_box.generic.x			= 0;
+	s_allow_http_download_box.generic.y			= y += MENU_LINE_SIZE;
+	s_allow_http_download_box.generic.name		= "HTTP downloading";
+	s_allow_http_download_box.generic.callback	= DownloadCallback;
+	s_allow_http_download_box.itemnames			= yes_no_names;
+	s_allow_http_download_box.curvalue			= (Cvar_VariableValue("cl_http_downloads") != 0);
 #endif	// USE_CURL
 
-	s_allow_download_maps_box.generic.type = MTYPE_SPINCONTROL;
-	s_allow_download_maps_box.generic.x	= 0;
-	s_allow_download_maps_box.generic.y	= y += 2*MENU_LINE_SIZE;
-	s_allow_download_maps_box.generic.name	= "maps/textures";
-	s_allow_download_maps_box.generic.callback = DownloadCallback;
-	s_allow_download_maps_box.itemnames = yes_no_names;
-	s_allow_download_maps_box.curvalue = (Cvar_VariableValue("allow_download_maps") != 0);
+	s_allow_download_maps_box.generic.type		= MTYPE_SPINCONTROL;
+	s_allow_download_maps_box.generic.textSize	= MENU_FONT_SIZE;
+	s_allow_download_maps_box.generic.x			= 0;
+	s_allow_download_maps_box.generic.y			= y += 2*MENU_LINE_SIZE;
+	s_allow_download_maps_box.generic.name		= "maps/textures";
+	s_allow_download_maps_box.generic.callback	= DownloadCallback;
+	s_allow_download_maps_box.itemnames			= yes_no_names;
+	s_allow_download_maps_box.curvalue			= (Cvar_VariableValue("allow_download_maps") != 0);
 
 	// Knightmare- option to allow downloading 24-bit textures
 	s_allow_download_textures_24bit_box.generic.type		= MTYPE_SPINCONTROL;
+	s_allow_download_textures_24bit_box.generic.textSize	= MENU_FONT_SIZE;
 	s_allow_download_textures_24bit_box.generic.x			= 0;
 	s_allow_download_textures_24bit_box.generic.y			= y += MENU_LINE_SIZE;
 	s_allow_download_textures_24bit_box.generic.name		= "24-bit textures";
@@ -149,36 +159,40 @@ void DownloadOptions_MenuInit( void )
 	s_allow_download_textures_24bit_box.itemnames			= yes_no_names;
 	s_allow_download_textures_24bit_box.curvalue			= (Cvar_VariableValue("allow_download_textures_24bit") != 0);
 
-	s_allow_download_players_box.generic.type = MTYPE_SPINCONTROL;
-	s_allow_download_players_box.generic.x	= 0;
-	s_allow_download_players_box.generic.y	= y += MENU_LINE_SIZE;
-	s_allow_download_players_box.generic.name	= "player models/skins";
-	s_allow_download_players_box.generic.callback = DownloadCallback;
-	s_allow_download_players_box.itemnames = yes_no_names;
-	s_allow_download_players_box.curvalue = (Cvar_VariableValue("allow_download_players") != 0);
+	s_allow_download_players_box.generic.type		= MTYPE_SPINCONTROL;
+	s_allow_download_players_box.generic.textSize	= MENU_FONT_SIZE;
+	s_allow_download_players_box.generic.x			= 0;
+	s_allow_download_players_box.generic.y			= y += MENU_LINE_SIZE;
+	s_allow_download_players_box.generic.name		= "player models/skins";
+	s_allow_download_players_box.generic.callback	= DownloadCallback;
+	s_allow_download_players_box.itemnames			= yes_no_names;
+	s_allow_download_players_box.curvalue			= (Cvar_VariableValue("allow_download_players") != 0);
 
-	s_allow_download_models_box.generic.type = MTYPE_SPINCONTROL;
-	s_allow_download_models_box.generic.x	= 0;
-	s_allow_download_models_box.generic.y	= y += MENU_LINE_SIZE;
-	s_allow_download_models_box.generic.name	= "models";
-	s_allow_download_models_box.generic.callback = DownloadCallback;
-	s_allow_download_models_box.itemnames = yes_no_names;
-	s_allow_download_models_box.curvalue = (Cvar_VariableValue("allow_download_models") != 0);
+	s_allow_download_models_box.generic.type		= MTYPE_SPINCONTROL;
+	s_allow_download_models_box.generic.textSize	= MENU_FONT_SIZE;
+	s_allow_download_models_box.generic.x			= 0;
+	s_allow_download_models_box.generic.y			= y += MENU_LINE_SIZE;
+	s_allow_download_models_box.generic.name		= "models";
+	s_allow_download_models_box.generic.callback	= DownloadCallback;
+	s_allow_download_models_box.itemnames			= yes_no_names;
+	s_allow_download_models_box.curvalue			= (Cvar_VariableValue("allow_download_models") != 0);
 
-	s_allow_download_sounds_box.generic.type = MTYPE_SPINCONTROL;
-	s_allow_download_sounds_box.generic.x	= 0;
-	s_allow_download_sounds_box.generic.y	= y += MENU_LINE_SIZE;
-	s_allow_download_sounds_box.generic.name	= "sounds";
-	s_allow_download_sounds_box.generic.callback = DownloadCallback;
-	s_allow_download_sounds_box.itemnames = yes_no_names;
-	s_allow_download_sounds_box.curvalue = (Cvar_VariableValue("allow_download_sounds") != 0);
+	s_allow_download_sounds_box.generic.type		= MTYPE_SPINCONTROL;
+	s_allow_download_sounds_box.generic.textSize	= MENU_FONT_SIZE;
+	s_allow_download_sounds_box.generic.x			= 0;
+	s_allow_download_sounds_box.generic.y			= y += MENU_LINE_SIZE;
+	s_allow_download_sounds_box.generic.name		= "sounds";
+	s_allow_download_sounds_box.generic.callback	= DownloadCallback;
+	s_allow_download_sounds_box.itemnames			= yes_no_names;
+	s_allow_download_sounds_box.curvalue			= (Cvar_VariableValue("allow_download_sounds") != 0);
 
-	s_download_back_action.generic.type = MTYPE_ACTION;
-	s_download_back_action.generic.flags = QMF_LEFT_JUSTIFY;
-	s_download_back_action.generic.x	= 0;
-	s_download_back_action.generic.y	= y += 3*MENU_LINE_SIZE;
-	s_download_back_action.generic.name	= " back";
-	s_download_back_action.generic.callback = UI_BackMenu;
+	s_download_back_action.generic.type			= MTYPE_ACTION;
+	s_download_back_action.generic.textSize		= MENU_FONT_SIZE;
+	s_download_back_action.generic.flags		= QMF_LEFT_JUSTIFY;
+	s_download_back_action.generic.x			= 0;
+	s_download_back_action.generic.y			= y += 3*MENU_LINE_SIZE;
+	s_download_back_action.generic.name			= " back";
+	s_download_back_action.generic.callback		= UI_BackMenu;
 
 	Menu_AddItem( &s_downloadoptions_menu, &s_download_title );
 	Menu_AddItem( &s_downloadoptions_menu, &s_allow_download_box );

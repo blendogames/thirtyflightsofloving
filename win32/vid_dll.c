@@ -397,7 +397,6 @@ LONG WINAPI MainWndProc (
 				r.right  = 1;
 				r.bottom = 1;
 
-			//	style = GetWindowLong( hWnd, GWL_STYLE );
 				style = GetWindowLongPtr( hWnd, GWL_STYLE );
 				AdjustWindowRect( &r, style, FALSE );
 
@@ -522,7 +521,6 @@ void VID_Restart_f (void)
 
 void VID_Front_f( void )
 {
-//	SetWindowLong( cl_hwnd, GWL_EXSTYLE, WS_EX_TOPMOST );
 	SetWindowLongPtr( cl_hwnd, GWL_EXSTYLE, WS_EX_TOPMOST );
 	SetForegroundWindow( cl_hwnd );
 }
@@ -578,7 +576,6 @@ void VID_UpdateWindowPosAndSize ( int x, int y )
 	r.right  = viddef.width;
 	r.bottom = viddef.height;
 
-//	style = GetWindowLong( cl_hwnd, GWL_STYLE );
 	style = GetWindowLongPtr( cl_hwnd, GWL_STYLE );
 	AdjustWindowRect( &r, style, FALSE );
 

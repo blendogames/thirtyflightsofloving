@@ -184,6 +184,7 @@ cvar_t	*r_texturealphamode;
 cvar_t	*r_texturesolidmode;
 cvar_t	*r_anisotropic;
 cvar_t	*r_anisotropic_avail;
+cvar_t	*r_font_upscale;
 cvar_t	*r_nvfog_dist;
 cvar_t	*r_nvfog_dist_mode;
 cvar_t	*r_lockpvs;
@@ -728,8 +729,8 @@ R_SetGL2D
 ================
 */
 void	Con_DrawString (int x, int y, char *string, int alpha);
-float	SCR_ScaledVideo (float param);
-#define	FONT_SIZE		SCR_ScaledVideo(con_font_size->value)
+float	SCR_ScaledScreen (float param);
+#define	FONT_SIZE		SCR_ScaledScreen(con_font_size->value)
 
 void R_SetGL2D (void)
 {
@@ -983,6 +984,8 @@ void R_Register (void)
 	r_texturesolidmode = Cvar_Get( "r_texturesolidmode", "default", CVAR_ARCHIVE );
 	r_anisotropic = Cvar_Get( "r_anisotropic", "0", CVAR_ARCHIVE );
 	r_anisotropic_avail = Cvar_Get( "r_anisotropic_avail", "0", 0 );
+
+	r_font_upscale = Cvar_Get ("r_font_upscale", "1", CVAR_ARCHIVE);
 
 	r_nvfog_dist = Cvar_Get( "r_nvfog_dist", "1", CVAR_ARCHIVE );
 	r_nvfog_dist_mode = Cvar_Get( "r_nvfog_dist_mode", "GL_EYE_RADIAL_NV", CVAR_ARCHIVE );
@@ -2110,6 +2113,12 @@ void R_BeginFrame( float camera_separation )
 	{
 		GL_TextureMode( r_texturemode->string );
 		r_texturemode->modified = false;
+	}
+
+	if (r_anisotropic->modified) // added anisotropic filter update
+	{
+		GL_UpdateAnisoMode ();
+		r_anisotropic->modified = false;
 	}
 
 	if ( r_texturealphamode->modified )

@@ -50,6 +50,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define QMF_HIDDEN			0x00000010
 
 //
+#define MENU_SUBTEXT_FONT_SIZE	6
+#define MENU_HEADER_FONT_SIZE	10
+#define MENU_HEADER_LINE_SIZE	13
 #define RCOLUMN_OFFSET  MENU_FONT_SIZE*2	// was 16
 #define LCOLUMN_OFFSET -MENU_FONT_SIZE*2	// was -16
 
@@ -80,6 +83,7 @@ typedef struct
 	menuframework_s *parent;
 	int cursor_offset;
 	int	localdata[4];
+	int textSize;
 	unsigned flags;
 
 	const char *statusbar;
@@ -187,10 +191,10 @@ void	Menu_SetStatusBar (menuframework_s *s, const char *string);
 void	Menu_SlideItem (menuframework_s *s, int dir);
 int		Menu_TallySlots (menuframework_s *menu);
 
-void	Menu_DrawString (int x, int y, const char *string, int alpha);
-void	Menu_DrawStringDark (int x, int y, const char *string, int alpha);
-void	Menu_DrawStringR2L (int x, int y, const char *string, int alpha);
-void	Menu_DrawStringR2LDark (int x, int y, const char *string, int alpha);
+void	Menu_DrawString (int x, int y, int size, const char *string, int alpha);
+void	Menu_DrawStringDark (int x, int y, int size, const char *string, int alpha);
+void	Menu_DrawStringR2L (int x, int y, int size, const char *string, int alpha);
+void	Menu_DrawStringR2LDark (int x, int y, int size, const char *string, int alpha);
 
 void	Menu_DrawTextBox (int x, int y, int width, int lines);
 void	Menu_DrawBanner (char *name);

@@ -437,6 +437,7 @@ qboolean PlayerConfig_MenuInit (void)
 	s_player_config_menu.nitems = 0;
 	
 	s_player_name_field.generic.type = MTYPE_FIELD;
+	s_player_name_field.generic.textSize = MENU_FONT_SIZE;
 	s_player_name_field.generic.flags = QMF_LEFT_JUSTIFY;
 	s_player_name_field.generic.name = "name";
 	s_player_name_field.generic.callback = 0;
@@ -448,12 +449,14 @@ qboolean PlayerConfig_MenuInit (void)
 	s_player_name_field.cursor = strlen( name->string );
 	
 	s_player_model_title.generic.type = MTYPE_SEPARATOR;
+	s_player_model_title.generic.textSize = MENU_FONT_SIZE;
 	s_player_model_title.generic.flags = QMF_LEFT_JUSTIFY;
 	s_player_model_title.generic.name = "model";
 	s_player_model_title.generic.x    = -MENU_FONT_SIZE;
 	s_player_model_title.generic.y	 = y += 3*MENU_LINE_SIZE;
 	
 	s_player_model_box.generic.type = MTYPE_SPINCONTROL;
+	s_player_model_box.generic.textSize = MENU_FONT_SIZE;
 	s_player_model_box.generic.x	= -7*MENU_FONT_SIZE;
 	s_player_model_box.generic.y	= y += MENU_LINE_SIZE;
 	s_player_model_box.generic.callback = ModelCallback;
@@ -462,12 +465,14 @@ qboolean PlayerConfig_MenuInit (void)
 	s_player_model_box.itemnames = s_pmnames;
 	
 	s_player_skin_title.generic.type = MTYPE_SEPARATOR;
+	s_player_skin_title.generic.textSize = MENU_FONT_SIZE;
 	s_player_skin_title.generic.flags = QMF_LEFT_JUSTIFY;
 	s_player_skin_title.generic.name = "skin";
 	s_player_skin_title.generic.x    = -2*MENU_FONT_SIZE;
 	s_player_skin_title.generic.y	 = y += 2*MENU_LINE_SIZE;
 	
 	s_player_skin_box.generic.type = MTYPE_SPINCONTROL;
+	s_player_skin_box.generic.textSize = MENU_FONT_SIZE;
 	s_player_skin_box.generic.x	= -7*MENU_FONT_SIZE;
 	s_player_skin_box.generic.y	= y += MENU_LINE_SIZE;
 	s_player_skin_box.generic.name	= 0;
@@ -478,12 +483,14 @@ qboolean PlayerConfig_MenuInit (void)
 	s_player_skin_box.generic.flags |= QMF_SKINLIST;
 	
 	s_player_hand_title.generic.type = MTYPE_SEPARATOR;
+	s_player_hand_title.generic.textSize = MENU_FONT_SIZE;
 	s_player_hand_title.generic.flags = QMF_LEFT_JUSTIFY;
 	s_player_hand_title.generic.name = "handedness";
 	s_player_hand_title.generic.x    = 4*MENU_FONT_SIZE;
 	s_player_hand_title.generic.y	 = y += 2*MENU_LINE_SIZE;
 	
 	s_player_handedness_box.generic.type = MTYPE_SPINCONTROL;
+	s_player_handedness_box.generic.textSize = MENU_FONT_SIZE;
 	s_player_handedness_box.generic.x	= -7*MENU_FONT_SIZE;
 	s_player_handedness_box.generic.y	= y += MENU_LINE_SIZE;
 	s_player_handedness_box.generic.name	= 0;
@@ -497,12 +504,14 @@ qboolean PlayerConfig_MenuInit (void)
 			break;
 		
 	s_player_rate_title.generic.type = MTYPE_SEPARATOR;
+	s_player_rate_title.generic.textSize = MENU_FONT_SIZE;
 	s_player_rate_title.generic.flags = QMF_LEFT_JUSTIFY;
 	s_player_rate_title.generic.name = "connect speed";
 	s_player_rate_title.generic.x    = 7*MENU_FONT_SIZE;
 	s_player_rate_title.generic.y	 = y += 2*MENU_LINE_SIZE;
 		
 	s_player_rate_box.generic.type = MTYPE_SPINCONTROL;
+	s_player_rate_box.generic.textSize = MENU_FONT_SIZE;
 	s_player_rate_box.generic.x	= -7*MENU_FONT_SIZE;
 	s_player_rate_box.generic.y	= y += MENU_LINE_SIZE;
 	s_player_rate_box.generic.name	= 0;
@@ -512,6 +521,7 @@ qboolean PlayerConfig_MenuInit (void)
 	s_player_rate_box.itemnames = rate_names;
 	
 	s_player_back_action.generic.type = MTYPE_ACTION;
+	s_player_back_action.generic.textSize = MENU_FONT_SIZE;
 	s_player_back_action.generic.name	= "back to multiplayer";
 	s_player_back_action.generic.flags = QMF_LEFT_JUSTIFY;
 	s_player_back_action.generic.x	= -5*MENU_FONT_SIZE;
@@ -673,7 +683,7 @@ void PlayerConfig_DrawSkinSelection (void)
 	float	x, y, w, h;
 	int		i, count, color[3];
 
-	TextColor((int)Cvar_VariableValue("alt_text_color"), &color[0], &color[1], &color[2]);
+	CL_TextColor ((int)Cvar_VariableValue("alt_text_color"), &color[0], &color[1], &color[2]);
 
 	if (s_pmi[s_player_model_box.curvalue].nskins<NUM_SKINBOX_ITEMS || s_player_skin_box.curvalue<4)
 		i=0;

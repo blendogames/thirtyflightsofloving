@@ -26,7 +26,7 @@ typedef struct
 	float min;
 } screenscale_t;
 
-screenscale_t screenScale;
+//screenscale_t screenScale;
 
 
 typedef enum
@@ -74,14 +74,14 @@ void	SCR_RunConsole (void);
 
 void	SCR_InitScreenScale (void);
 void	SCR_AdjustFrom640 (float *x, float *y, float *w, float *h, scralign_t align);
-float	SCR_ScaledVideo (float param);
-float	SCR_VideoScale (void);
+float	SCR_ScaledScreen (float param);
+float	SCR_GetScreenScale (void);
 
 void	SCR_AdjustFrom640 (float *x, float *y, float *w, float *h, scralign_t align);
 void	SCR_DrawFill (float x, float y, float width, float height, scralign_t align, int red, int green, int blue, int alpha);
 void	SCR_DrawPic (float x, float y, float width, float height, scralign_t align, char *pic, float alpha);
 void	SCR_DrawChar (float x, float y, scralign_t align, int num, int red, int green, int blue, int alpha, qboolean italic, qboolean last);
-void	SCR_DrawString (float x, float y, scralign_t align, const char *string, int alpha);
+void	SCR_DrawString (float x, float y, int size, scralign_t align, const char *string, int alpha);
 void	SCR_DrawCrosshair (void);
 
 
@@ -112,8 +112,8 @@ extern	int			crosshair_width, crosshair_height;
 #define STANDARD_ASPECT_RATIO ((float)SCREEN_WIDTH/(float)SCREEN_HEIGHT)
 
 // rendered size of console font - everthing adjusts to this...
-#define	FONT_SIZE		SCR_ScaledVideo(con_font_size->value)
-#define CON_FONT_SCALE	SCR_ScaledVideo(con_font_size->value)/8
+#define	FONT_SIZE		SCR_ScaledScreen(con_font_size->value)
+#define CON_FONT_SCALE	SCR_ScaledScreen(con_font_size->value)/8.0f
 
 #define MENU_FONT_SIZE	8
 #define MENU_LINE_SIZE	10

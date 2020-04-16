@@ -78,6 +78,7 @@ void AddressBook_MenuInit( void )
 		adr = Cvar_Get( buffer, "", CVAR_ARCHIVE );
 
 		s_addressbook_fields[i].generic.type = MTYPE_FIELD;
+		s_addressbook_fields[i].generic.textSize = MENU_FONT_SIZE;
 		s_addressbook_fields[i].generic.name = 0;
 		s_addressbook_fields[i].generic.callback = 0;
 		s_addressbook_fields[i].generic.x		= 0;
@@ -93,6 +94,7 @@ void AddressBook_MenuInit( void )
 	}
 
 	s_addressbook_back_action.generic.type = MTYPE_ACTION;
+	s_addressbook_back_action.generic.textSize = MENU_FONT_SIZE;
 	s_addressbook_back_action.generic.flags = QMF_LEFT_JUSTIFY;
 	s_addressbook_back_action.generic.x	= 24;
 	s_addressbook_back_action.generic.y	= (NUM_ADDRESSBOOK_ENTRIES*2.25+0.5)*MENU_LINE_SIZE;

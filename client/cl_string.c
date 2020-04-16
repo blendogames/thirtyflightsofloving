@@ -162,10 +162,10 @@ qboolean CL_StringSetParams (char modifier, int *red, int *green, int *blue, int
 
 /*
 ================
-DrawStringGeneric
+CL_DrawStringGeneric
 ================
 */
-void DrawStringGeneric (int x, int y, const char *string, int alpha, textscaletype_t scaleType, qboolean altBit)
+void CL_DrawStringGeneric (int x, int y, const char *string, int alpha, int fontSize, textscaletype_t scaleType, qboolean altBit)
 {
 	unsigned	i, j;
 	int			len, red, green, blue, italic, shadow, bold, reset;
@@ -244,17 +244,17 @@ void DrawStringGeneric (int x, int y, const char *string, int alpha, textscalety
 		switch (scaleType)
 		{
 		case SCALETYPE_MENU:
-			textSize = SCR_ScaledVideo(MENU_FONT_SIZE);
-			textScale = SCR_VideoScale();
+			textSize = SCR_ScaledScreen(fontSize);	// MENU_FONT_SIZE
+			textScale = SCR_GetScreenScale()*((float)fontSize/(float)MENU_FONT_SIZE);
 			break;
 		case SCALETYPE_HUD:
-			textSize = scaledHud(HUD_FONT_SIZE);
-			textScale = HudScale();
+			textSize = SCR_ScaledHud(fontSize);		// HUD_FONT_SIZE
+			textScale = SCR_GetHudScale()*((float)fontSize/(float)HUD_FONT_SIZE);
 			break;
 		case SCALETYPE_CONSOLE:
 		default:
-			textSize = FONT_SIZE;
-			textScale = FONT_SIZE/8.0f;
+			textSize = fontSize;	// FONT_SIZE;
+			textScale = (float)fontSize/8.0f;	// FONT_SIZE/8.0f
 			break;
 		}
 

@@ -560,6 +560,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\renderer\r_upscale.c"
+					>
+				</File>
+				<File
 					RelativePath="..\..\renderer\r_vlights.c"
 					>
 				</File>

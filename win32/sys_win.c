@@ -1090,16 +1090,48 @@ void Sys_Init (void)
 	if (osInfo.dwPlatformId == VER_PLATFORM_WIN32_NT)
 	{
 		
-		if (osInfo.dwMajorVersion == 4)
+// wProductType field not supported in MSVC6
+#if (_MSC_VER < 1300)
+		if (osInfo.dwMajorVersion == 4) {
 			Q_strncpyz (string, "Windows NT", sizeof(string));
+		}
+		else if (osInfo.dwMajorVersion == 5 && osInfo.dwMinorVersion == 0) {
+			Q_strncpyz (string, "Windows 2000", sizeof(string));
+		}
+		else if (osInfo.dwMajorVersion == 5 && osInfo.dwMinorVersion == 1) {
+			Q_strncpyz (string, "Windows XP", sizeof(string));
+		}
+		else if (osInfo.dwMajorVersion == 5 && osInfo.dwMinorVersion == 2) {
+			Q_strncpyz (string, "Windows XP", sizeof(string));
+		}
+		else if (osInfo.dwMajorVersion == 6 && osInfo.dwMinorVersion == 0) {
+			Q_strncpyz (string, "Windows Vista", sizeof(string));
+		}
+		else if (osInfo.dwMajorVersion == 6 && osInfo.dwMinorVersion == 1) {
+			Q_strncpyz (string, "Windows 7", sizeof(string));
+		}
+		else if (osInfo.dwMajorVersion == 6 && osInfo.dwMinorVersion == 2) {
+			Q_strncpyz (string, "Windows 8", sizeof(string));
+		}
+		else if (osInfo.dwMajorVersion == 6 && osInfo.dwMinorVersion == 3) {
+			Q_strncpyz (string, "Windows 8.1", sizeof(string));
+		}
+		else if (osInfo.dwMajorVersion == 10 && osInfo.dwMinorVersion == 0) {
+			Q_strncpyz (string, "Windows 10", sizeof(string));
+		}
+#else	// (_MSC_VER < 1300)
+		if (osInfo.dwMajorVersion == 4) {
+			Q_strncpyz (string, "Windows NT", sizeof(string));
+		}
 		else if (osInfo.dwMajorVersion == 5 && osInfo.dwMinorVersion == 0) {
 			if (osInfo.wProductType == VER_NT_WORKSTATION)
 				Q_strncpyz (string, "Windows 2000", sizeof(string));
 			else
 				Q_strncpyz (string, "Windows 2000 Server", sizeof(string));
 		}
-		else if (osInfo.dwMajorVersion == 5 && osInfo.dwMinorVersion == 1)
+		else if (osInfo.dwMajorVersion == 5 && osInfo.dwMinorVersion == 1) {
 			Q_strncpyz (string, "Windows XP", sizeof(string));
+		}
 		else if (osInfo.dwMajorVersion == 5 && osInfo.dwMinorVersion == 2) {
 		//	if ( (osInfo.wProductType == VER_NT_WORKSTATION) && (sysInfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64) )
 		//		Q_strncpyz (string, "Windows XP x64 Edition", sizeof(string));
@@ -1124,7 +1156,7 @@ void Sys_Init (void)
 			if (osInfo.wProductType == VER_NT_WORKSTATION)
 				Q_strncpyz (string, "Windows 8", sizeof(string));
 			else
-				Q_strncpyz (string, "Windows Server 2008 2012", sizeof(string));
+				Q_strncpyz (string, "Windows Server 2012", sizeof(string));
 		}
 		else if (osInfo.dwMajorVersion == 6 && osInfo.dwMinorVersion == 3) {
 			if (osInfo.wProductType == VER_NT_WORKSTATION)
@@ -1138,8 +1170,10 @@ void Sys_Init (void)
 			else
 				Q_strncpyz (string, "Windows Server 2016", sizeof(string));
 		}
-		else
+#endif	// (_MSC_VER < 1300)
+		else {
 			Q_strncpyz (string, va("Windows %i.%i", osInfo.dwMajorVersion, osInfo.dwMinorVersion), sizeof(string));
+		}
 
 		if (sysInfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64)
 			Q_strncatz (string, " x64", sizeof(string));

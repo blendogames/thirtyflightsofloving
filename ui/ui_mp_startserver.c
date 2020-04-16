@@ -764,21 +764,23 @@ void StartServer_MenuInit (void)
 	//s_startserver_menu.y = 0;
 	s_startserver_menu.nitems = 0;
 
-	s_startmap_list.generic.type	= MTYPE_SPINCONTROL;
-	s_startmap_list.generic.x		= 0;
-	s_startmap_list.generic.y		= y;
-	s_startmap_list.generic.name	= "initial map";
-	s_startmap_list.itemnames		= ui_svr_mapnames;
+	s_startmap_list.generic.type		= MTYPE_SPINCONTROL;
+	s_startmap_list.generic.textSize	= MENU_FONT_SIZE;
+	s_startmap_list.generic.x			= 0;
+	s_startmap_list.generic.y			= y;
+	s_startmap_list.generic.name		= "initial map";
+	s_startmap_list.itemnames			= ui_svr_mapnames;
 
-	s_rules_box.generic.type	= MTYPE_SPINCONTROL;
-	s_rules_box.generic.x		= 0;
-	s_rules_box.generic.y		= y += 2*MENU_LINE_SIZE;
-	s_rules_box.generic.name	= "rules";
+	s_rules_box.generic.type		= MTYPE_SPINCONTROL;
+	s_rules_box.generic.textSize	= MENU_FONT_SIZE;
+	s_rules_box.generic.x			= 0;
+	s_rules_box.generic.y			= y += 2*MENU_LINE_SIZE;
+	s_rules_box.generic.name		= "rules";
 //PGM - rogue games only available with rogue DLL.
 	if (FS_RoguePath())
-		s_rules_box.itemnames	= dm_coop_names_rogue;
+		s_rules_box.itemnames		= dm_coop_names_rogue;
 	else
-		s_rules_box.itemnames	= dm_coop_names;
+		s_rules_box.itemnames		= dm_coop_names;
 //PGM
 	if (Cvar_VariableValue("ttctf"))
 		s_rules_box.curvalue = 3;
@@ -790,9 +792,10 @@ void StartServer_MenuInit (void)
 		s_rules_box.curvalue = 1;
 	else
 		s_rules_box.curvalue = 0;
-	s_rules_box.generic.callback = RulesChangeFunc;
+	s_rules_box.generic.callback	= RulesChangeFunc;
 
 	s_timelimit_field.generic.type		= MTYPE_FIELD;
+	s_timelimit_field.generic.textSize	= MENU_FONT_SIZE;
 	s_timelimit_field.generic.name		= "time limit";
 	s_timelimit_field.generic.flags		= QMF_NUMBERSONLY;
 	s_timelimit_field.generic.x			= 0;
@@ -805,6 +808,7 @@ void StartServer_MenuInit (void)
 	s_timelimit_field.cursor			= strlen( s_timelimit_field.buffer );
 
 	s_fraglimit_field.generic.type		= MTYPE_FIELD;
+	s_fraglimit_field.generic.textSize	= MENU_FONT_SIZE;
 	s_fraglimit_field.generic.name		= "frag limit";
 	s_fraglimit_field.generic.flags		= QMF_NUMBERSONLY;
 	s_fraglimit_field.generic.x			= 0;
@@ -823,6 +827,7 @@ void StartServer_MenuInit (void)
 	** Clamping will be done when the server is actually started.
 	*/
 	s_maxclients_field.generic.type			= MTYPE_FIELD;
+	s_maxclients_field.generic.textSize		= MENU_FONT_SIZE;
 	s_maxclients_field.generic.name			= "max players";
 	s_maxclients_field.generic.flags		= QMF_NUMBERSONLY;
 	s_maxclients_field.generic.x			= 0;
@@ -839,6 +844,7 @@ void StartServer_MenuInit (void)
 	s_maxclients_field.cursor				= strlen( s_maxclients_field.buffer );
 
 	s_hostname_field.generic.type			= MTYPE_FIELD;
+	s_hostname_field.generic.textSize		= MENU_FONT_SIZE;
 	s_hostname_field.generic.name			= "hostname";
 	s_hostname_field.generic.flags			= 0;
 	s_hostname_field.generic.x				= 0;
@@ -850,27 +856,30 @@ void StartServer_MenuInit (void)
 	Q_strncpyz( s_hostname_field.buffer, Cvar_VariableString("hostname"), sizeof(s_hostname_field.buffer) );
 	s_hostname_field.cursor					= strlen( s_hostname_field.buffer );
 
-	s_startserver_dmoptions_action.generic.type = MTYPE_ACTION;
-	s_startserver_dmoptions_action.generic.name	= " deathmatch flags";
-	s_startserver_dmoptions_action.generic.flags= QMF_LEFT_JUSTIFY;
-	s_startserver_dmoptions_action.generic.x	= 24;
-	s_startserver_dmoptions_action.generic.y	= y += 2.25*MENU_FONT_SIZE;
-	s_startserver_dmoptions_action.generic.statusbar = NULL;
-	s_startserver_dmoptions_action.generic.callback = DMOptionsFunc;
+	s_startserver_dmoptions_action.generic.type			= MTYPE_ACTION;
+	s_startserver_dmoptions_action.generic.textSize		= MENU_FONT_SIZE;
+	s_startserver_dmoptions_action.generic.name			= " deathmatch flags";
+	s_startserver_dmoptions_action.generic.flags		= QMF_LEFT_JUSTIFY;
+	s_startserver_dmoptions_action.generic.x			= 24;
+	s_startserver_dmoptions_action.generic.y			= y += 2.25*MENU_FONT_SIZE;
+	s_startserver_dmoptions_action.generic.statusbar	= NULL;
+	s_startserver_dmoptions_action.generic.callback		= DMOptionsFunc;
 
-	s_startserver_start_action.generic.type = MTYPE_ACTION;
-	s_startserver_start_action.generic.name	= " begin";
-	s_startserver_start_action.generic.flags= QMF_LEFT_JUSTIFY;
-	s_startserver_start_action.generic.x	= 24;
-	s_startserver_start_action.generic.y	= y += 2*MENU_LINE_SIZE;
-	s_startserver_start_action.generic.callback = StartServerActionFunc;
+	s_startserver_start_action.generic.type		= MTYPE_ACTION;
+	s_startserver_start_action.generic.textSize	= MENU_FONT_SIZE;
+	s_startserver_start_action.generic.name		= " begin";
+	s_startserver_start_action.generic.flags	= QMF_LEFT_JUSTIFY;
+	s_startserver_start_action.generic.x		= 24;
+	s_startserver_start_action.generic.y		= y += 2*MENU_LINE_SIZE;
+	s_startserver_start_action.generic.callback	= StartServerActionFunc;
 
-	s_startserver_back_action.generic.type = MTYPE_ACTION;
-	s_startserver_back_action.generic.name	= " back to multiplayer";
-	s_startserver_back_action.generic.flags= QMF_LEFT_JUSTIFY;
-	s_startserver_back_action.generic.x	= 24;
-	s_startserver_back_action.generic.y	= y += 3*MENU_LINE_SIZE;
-	s_startserver_back_action.generic.callback = UI_BackMenu;
+	s_startserver_back_action.generic.type		= MTYPE_ACTION;
+	s_startserver_back_action.generic.textSize	= MENU_FONT_SIZE;
+	s_startserver_back_action.generic.name		= " back to multiplayer";
+	s_startserver_back_action.generic.flags		= QMF_LEFT_JUSTIFY;
+	s_startserver_back_action.generic.x			= 24;
+	s_startserver_back_action.generic.y			= y += 3*MENU_LINE_SIZE;
+	s_startserver_back_action.generic.callback	= UI_BackMenu;
 
 	Menu_AddItem( &s_startserver_menu, &s_startmap_list );
 	Menu_AddItem( &s_startserver_menu, &s_rules_box );

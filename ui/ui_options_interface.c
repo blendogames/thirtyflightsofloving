@@ -358,12 +358,14 @@ void Options_Interface_MenuInit ( void )
 	s_options_interface_menu.nitems = 0;
 
 	s_options_interface_header.generic.type		= MTYPE_SEPARATOR;
+	s_options_interface_header.generic.textSize	= MENU_HEADER_FONT_SIZE;
 	s_options_interface_header.generic.name		= "Interface";
-	s_options_interface_header.generic.x		= MENU_FONT_SIZE/2 * strlen(s_options_interface_header.generic.name);
-	s_options_interface_header.generic.y		= 0;
+	s_options_interface_header.generic.x		= MENU_HEADER_FONT_SIZE/2 * strlen(s_options_interface_header.generic.name);
+	s_options_interface_header.generic.y		= -2*MENU_LINE_SIZE;	// 0
 
 	// Knightmare- Psychospaz's menu mouse support
 	s_options_interface_menumouse_slider.generic.type		= MTYPE_SLIDER;
+	s_options_interface_menumouse_slider.generic.textSize	= MENU_FONT_SIZE;
 	s_options_interface_menumouse_slider.generic.x			= 0;
 	s_options_interface_menumouse_slider.generic.y			= y;
 	s_options_interface_menumouse_slider.generic.name		= "mouse speed";
@@ -373,6 +375,7 @@ void Options_Interface_MenuInit ( void )
 	s_options_interface_menumouse_slider.generic.statusbar	= "changes sensitivity of mouse in menus";
 
 	s_options_interface_menualpha_slider.generic.type		= MTYPE_SLIDER;
+	s_options_interface_menualpha_slider.generic.textSize	= MENU_FONT_SIZE;
 	s_options_interface_menualpha_slider.generic.x			= 0;
 	s_options_interface_menualpha_slider.generic.y			= y+=MENU_LINE_SIZE;
 	s_options_interface_menualpha_slider.generic.name		= "ingame menu transparency";
@@ -388,6 +391,7 @@ void Options_Interface_MenuInit ( void )
 	numfonts = 0;
 	font_names = SetFontNames ();
 	s_options_interface_font_box.generic.type				= MTYPE_SPINCONTROL;
+	s_options_interface_font_box.generic.textSize			= MENU_FONT_SIZE;
 	s_options_interface_font_box.generic.x					= 0;
 	s_options_interface_font_box.generic.y					= y+=2*MENU_LINE_SIZE;
 	s_options_interface_font_box.generic.name				= "font";
@@ -396,6 +400,7 @@ void Options_Interface_MenuInit ( void )
 	s_options_interface_font_box.generic.statusbar			= "changes console and menu text font";
 
 	s_options_interface_fontsize_slider.generic.type		= MTYPE_SLIDER;
+	s_options_interface_fontsize_slider.generic.textSize	= MENU_FONT_SIZE;
 	s_options_interface_fontsize_slider.generic.x			= 0;
 	s_options_interface_fontsize_slider.generic.y			= y+=MENU_LINE_SIZE;
 	s_options_interface_fontsize_slider.generic.name		= "console font size";
@@ -405,6 +410,7 @@ void Options_Interface_MenuInit ( void )
 	s_options_interface_fontsize_slider.generic.statusbar	= "changes size of console text";
 
 	s_options_interface_alt_text_color_box.generic.type		= MTYPE_SPINCONTROL;
+	s_options_interface_alt_text_color_box.generic.textSize	= MENU_FONT_SIZE;
 	s_options_interface_alt_text_color_box.generic.x		= 0;
 	s_options_interface_alt_text_color_box.generic.y		= y+=MENU_LINE_SIZE;
 	s_options_interface_alt_text_color_box.generic.name		= "alt text color";
@@ -413,6 +419,7 @@ void Options_Interface_MenuInit ( void )
 	s_options_interface_alt_text_color_box.generic.statusbar	= "changes color of highlighted text";
 
 	s_options_interface_conalpha_slider.generic.type		= MTYPE_SLIDER;
+	s_options_interface_conalpha_slider.generic.textSize	= MENU_FONT_SIZE;
 	s_options_interface_conalpha_slider.generic.x			= 0;
 	s_options_interface_conalpha_slider.generic.y			= y+=2*MENU_LINE_SIZE;
 	s_options_interface_conalpha_slider.generic.name		= "console transparency";
@@ -422,16 +429,18 @@ void Options_Interface_MenuInit ( void )
 	s_options_interface_conalpha_slider.generic.statusbar	= "changes opacity of console";
 
 	/*
-	s_options_interface_conheight_slider.generic.type	= MTYPE_SLIDER;
-	s_options_interface_conheight_slider.generic.x		= 0;
-	s_options_interface_conheight_slider.generic.y		= y+=MENU_LINE_SIZE;
-	s_options_interface_conheight_slider.generic.name	= "console height";
-	s_options_interface_conheight_slider.generic.callback = ConHeightFunc;
-	s_options_interface_conheight_slider.minvalue		= 0;
-	s_options_interface_conheight_slider.maxvalue		= 10;
+	s_options_interface_conheight_slider.generic.type		= MTYPE_SLIDER;
+	s_options_interface_conheight_slider.generic.textSize	= MENU_FONT_SIZE;
+	s_options_interface_conheight_slider.generic.x			= 0;
+	s_options_interface_conheight_slider.generic.y			= y+=MENU_LINE_SIZE;
+	s_options_interface_conheight_slider.generic.name		= "console height";
+	s_options_interface_conheight_slider.generic.callback	= ConHeightFunc;
+	s_options_interface_conheight_slider.minvalue			= 0;
+	s_options_interface_conheight_slider.maxvalue			= 10;
 	*/
 
 	s_options_interface_simple_loadscreen_box.generic.type		= MTYPE_SPINCONTROL;
+	s_options_interface_simple_loadscreen_box.generic.textSize	= MENU_FONT_SIZE;
 	s_options_interface_simple_loadscreen_box.generic.x			= 0;
 	s_options_interface_simple_loadscreen_box.generic.y			= y+=2*MENU_LINE_SIZE;
 	s_options_interface_simple_loadscreen_box.generic.name		= "simple load screens";
@@ -440,6 +449,7 @@ void Options_Interface_MenuInit ( void )
 	s_options_interface_simple_loadscreen_box.generic.statusbar	= "toggles simple map load screen";
 
 	s_options_interface_newconback_box.generic.type			= MTYPE_SPINCONTROL;
+	s_options_interface_newconback_box.generic.textSize		= MENU_FONT_SIZE;
 	s_options_interface_newconback_box.generic.x			= 0;
 	s_options_interface_newconback_box.generic.y			= y+=MENU_LINE_SIZE;
 	s_options_interface_newconback_box.generic.name			= "new console background";
@@ -448,6 +458,7 @@ void Options_Interface_MenuInit ( void )
 	s_options_interface_newconback_box.generic.statusbar	= "enables Q3-style console background";
 
 	s_options_interface_noalttab_box.generic.type		= MTYPE_SPINCONTROL;
+	s_options_interface_noalttab_box.generic.textSize	= MENU_FONT_SIZE;
 	s_options_interface_noalttab_box.generic.x			= 0;
 	s_options_interface_noalttab_box.generic.y			= y+=2*MENU_LINE_SIZE;
 	s_options_interface_noalttab_box.generic.name		= "disable alt-tab";
@@ -456,6 +467,7 @@ void Options_Interface_MenuInit ( void )
 	s_options_interface_noalttab_box.generic.statusbar	= "disables alt-tabbing to desktop";
 
 	s_options_interface_defaults_action.generic.type		= MTYPE_ACTION;
+	s_options_interface_defaults_action.generic.textSize	= MENU_FONT_SIZE;
 	s_options_interface_defaults_action.generic.x			= MENU_FONT_SIZE;
 	s_options_interface_defaults_action.generic.y			= 18*MENU_LINE_SIZE;
 	s_options_interface_defaults_action.generic.name		= "reset defaults";
@@ -463,6 +475,7 @@ void Options_Interface_MenuInit ( void )
 	s_options_interface_defaults_action.generic.statusbar	= "resets all interface settings to internal defaults";
 
 	s_options_interface_back_action.generic.type		= MTYPE_ACTION;
+	s_options_interface_back_action.generic.textSize	= MENU_FONT_SIZE;
 	s_options_interface_back_action.generic.x			= MENU_FONT_SIZE;
 	s_options_interface_back_action.generic.y			= 20*MENU_LINE_SIZE;
 	s_options_interface_back_action.generic.name		= "back to options";

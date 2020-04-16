@@ -192,11 +192,13 @@ void Options_Effects_MenuInit ( void )
 	s_options_effects_menu.nitems = 0;
 
 	s_options_effects_header.generic.type			= MTYPE_SEPARATOR;
+	s_options_effects_header.generic.textSize		= MENU_HEADER_FONT_SIZE;
 	s_options_effects_header.generic.name			= "Effects";
-	s_options_effects_header.generic.x				= MENU_FONT_SIZE/2 * strlen(s_options_effects_header.generic.name);
-	s_options_effects_header.generic.y				= 0;
+	s_options_effects_header.generic.x				= MENU_HEADER_FONT_SIZE/2 * strlen(s_options_effects_header.generic.name);
+	s_options_effects_header.generic.y				= -2*MENU_LINE_SIZE;	//	0
 	
 	s_options_effects_blood_box.generic.type		= MTYPE_SPINCONTROL;
+	s_options_effects_blood_box.generic.textSize	= MENU_FONT_SIZE;
 	s_options_effects_blood_box.generic.x			= 0;
 	s_options_effects_blood_box.generic.y			= y;
 	s_options_effects_blood_box.generic.name		= "blood type";
@@ -205,6 +207,7 @@ void Options_Effects_MenuInit ( void )
 	s_options_effects_blood_box.generic.statusbar	= "changes blood effect type";
 
 	s_options_effects_oldexplosions_box.generic.type		= MTYPE_SPINCONTROL;
+	s_options_effects_oldexplosions_box.generic.textSize	= MENU_FONT_SIZE;
 	s_options_effects_oldexplosions_box.generic.x			= 0;
 	s_options_effects_oldexplosions_box.generic.y			= y += 2*MENU_LINE_SIZE;
 	s_options_effects_oldexplosions_box.generic.name		= "old style explosions";
@@ -213,6 +216,7 @@ void Options_Effects_MenuInit ( void )
 	s_options_effects_oldexplosions_box.generic.statusbar	= "brings back those cheesy model explosions";
 
 	s_options_effects_plasmaexplosound_box.generic.type			= MTYPE_SPINCONTROL;
+	s_options_effects_plasmaexplosound_box.generic.textSize		= MENU_FONT_SIZE;
 	s_options_effects_plasmaexplosound_box.generic.x			= 0;
 	s_options_effects_plasmaexplosound_box.generic.y			= y += MENU_LINE_SIZE;
 	s_options_effects_plasmaexplosound_box.generic.name			= "unique plasma explode sound";
@@ -221,6 +225,7 @@ void Options_Effects_MenuInit ( void )
 	s_options_effects_plasmaexplosound_box.generic.statusbar	= "gives Phalanx Cannon plasma explosions a unique sound";
 
 	s_options_effects_itembob_box.generic.type					= MTYPE_SPINCONTROL;
+	s_options_effects_itembob_box.generic.textSize				= MENU_FONT_SIZE;
 	s_options_effects_itembob_box.generic.x						= 0;
 	s_options_effects_itembob_box.generic.y						= y += MENU_LINE_SIZE;
 	s_options_effects_itembob_box.generic.name					= "item bobbing";
@@ -229,6 +234,7 @@ void Options_Effects_MenuInit ( void )
 	s_options_effects_itembob_box.generic.statusbar				= "adds bobbing effect to rotating items";
 
 	s_options_effects_decal_slider.generic.type					= MTYPE_SLIDER;
+	s_options_effects_decal_slider.generic.textSize				= MENU_FONT_SIZE;
 	s_options_effects_decal_slider.generic.x					= 0;
 	s_options_effects_decal_slider.generic.y					= y += 2*MENU_LINE_SIZE;
 	s_options_effects_decal_slider.generic.name					= "decal quantity";
@@ -238,6 +244,7 @@ void Options_Effects_MenuInit ( void )
 	s_options_effects_decal_slider.generic.statusbar			= "how many decals to display at once (max = 1000)";
 
 	s_options_effects_particle_comp_slider.generic.type			= MTYPE_SLIDER;
+	s_options_effects_particle_comp_slider.generic.textSize		= MENU_FONT_SIZE;
 	s_options_effects_particle_comp_slider.generic.x			= 0;
 	s_options_effects_particle_comp_slider.generic.y			= y += MENU_LINE_SIZE;
 	s_options_effects_particle_comp_slider.generic.name			= "particle effect complexity";
@@ -248,6 +255,7 @@ void Options_Effects_MenuInit ( void )
 
 	// Psychospaz's changeable rail trail
 	s_options_effects_railtrail_box.generic.type			= MTYPE_SPINCONTROL;
+	s_options_effects_railtrail_box.generic.textSize		= MENU_FONT_SIZE;
 	s_options_effects_railtrail_box.generic.x				= 0;
 	s_options_effects_railtrail_box.generic.y				= y += 2*MENU_LINE_SIZE;
 	s_options_effects_railtrail_box.generic.name			= "railtrail type";
@@ -256,6 +264,7 @@ void Options_Effects_MenuInit ( void )
 	s_options_effects_railtrail_box.generic.statusbar		= "changes railgun particle effect";
 
 	s_options_effects_railcolor_slider[0].generic.type		= MTYPE_SLIDER;
+	s_options_effects_railcolor_slider[0].generic.textSize	= MENU_FONT_SIZE;
 	s_options_effects_railcolor_slider[0].generic.x			= 0;
 	s_options_effects_railcolor_slider[0].generic.y			= y += MENU_LINE_SIZE;
 	s_options_effects_railcolor_slider[0].generic.name		= "railtrail - red";
@@ -265,6 +274,7 @@ void Options_Effects_MenuInit ( void )
 	s_options_effects_railcolor_slider[0].generic.statusbar	= "changes railtrail red component";
 
 	s_options_effects_railcolor_slider[1].generic.type		= MTYPE_SLIDER;
+	s_options_effects_railcolor_slider[1].generic.textSize	= MENU_FONT_SIZE;
 	s_options_effects_railcolor_slider[1].generic.x			= 0;
 	s_options_effects_railcolor_slider[1].generic.y			= y += MENU_LINE_SIZE;
 	s_options_effects_railcolor_slider[1].generic.name		= "railtrail - green";
@@ -274,6 +284,7 @@ void Options_Effects_MenuInit ( void )
 	s_options_effects_railcolor_slider[1].generic.statusbar	= "changes railtrail green component";
 
 	s_options_effects_railcolor_slider[2].generic.type		= MTYPE_SLIDER;
+	s_options_effects_railcolor_slider[2].generic.textSize	= MENU_FONT_SIZE;
 	s_options_effects_railcolor_slider[2].generic.x			= 0;
 	s_options_effects_railcolor_slider[2].generic.y			= y += MENU_LINE_SIZE;
 	s_options_effects_railcolor_slider[2].generic.name		= "railtrail - blue";
@@ -284,6 +295,7 @@ void Options_Effects_MenuInit ( void )
 
 	// foostep override option
 	s_options_effects_footstep_box.generic.type			= MTYPE_SPINCONTROL;
+	s_options_effects_footstep_box.generic.textSize		= MENU_FONT_SIZE;
 	s_options_effects_footstep_box.generic.x			= 0;
 	s_options_effects_footstep_box.generic.y			= y += 2*MENU_LINE_SIZE;
 	s_options_effects_footstep_box.generic.name			= "override footstep sounds";
@@ -292,6 +304,7 @@ void Options_Effects_MenuInit ( void )
 	s_options_effects_footstep_box.generic.statusbar	= "sets footstep sounds with definitions in texsurfs.txt";
 
 	s_options_effects_defaults_action.generic.type		= MTYPE_ACTION;
+	s_options_effects_defaults_action.generic.textSize	= MENU_FONT_SIZE;
 	s_options_effects_defaults_action.generic.x			= MENU_FONT_SIZE;
 	s_options_effects_defaults_action.generic.y			= y += 2*MENU_LINE_SIZE;
 	s_options_effects_defaults_action.generic.name		= "reset defaults";
@@ -299,6 +312,7 @@ void Options_Effects_MenuInit ( void )
 	s_options_effects_defaults_action.generic.statusbar	= "resets all effects settings to internal defaults";
 
 	s_options_effects_back_action.generic.type			= MTYPE_ACTION;
+	s_options_effects_back_action.generic.textSize		= MENU_FONT_SIZE;
 	s_options_effects_back_action.generic.x				= MENU_FONT_SIZE;
 	s_options_effects_back_action.generic.y				= y += 2*MENU_LINE_SIZE;
 	s_options_effects_back_action.generic.name			= "back to options";
