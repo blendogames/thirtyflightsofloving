@@ -124,7 +124,8 @@ void R_DrawChar (float x, float y, int num, float scale,
 {
 	int			row, col, i;
 	float		frow, fcol, size, cscale, italicAdd;
-	vec2_t		texCoord[4], verts[4];
+	vec2_t		texCoord[4];	// verts[4]
+	int			verts[4][2];	// forcing this to int fixes wrap artifacts at odd resolutions
 	qboolean	addChar = true;
 
 	num &= 255;
