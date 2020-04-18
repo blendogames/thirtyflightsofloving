@@ -642,9 +642,9 @@ SCR_DrawChar
 Coordinates are 640*480 virtual values
 =================
 */
-void SCR_DrawChar (float x, float y, scralign_t align, int num, int red, int green, int blue, int alpha, qboolean italic, qboolean last)
+void SCR_DrawChar (float x, float y, int size, scralign_t align, int num, int red, int green, int blue, int alpha, qboolean italic, qboolean last)
 {
-	float	scale = SCR_GetScreenScale();
+	float	scale = SCR_ScaledScreen((float)size / (float)MENU_FONT_SIZE);	// SCR_GetScreenScale()
 
 	SCR_AdjustFrom640 (&x, &y, NULL, NULL, align);
 	R_DrawChar(x, y, num, scale, red, green, blue, alpha, italic, last);
@@ -2640,7 +2640,7 @@ void DrawDemoMessage (void)
 		char *message = "Running Demo";
 		len = strlen(message);
 
-		SCR_DrawFill (0, SCREEN_HEIGHT-(MENU_FONT_SIZE+3), SCREEN_WIDTH, MENU_FONT_SIZE+3, ALIGN_BOTTOM_STRETCH, 60,60,60,255);
+		SCR_DrawFill (0, SCREEN_HEIGHT-(MENU_FONT_SIZE+3), SCREEN_WIDTH, MENU_FONT_SIZE+4, ALIGN_BOTTOM_STRETCH, 60,60,60,255);	// go 1 pixel past screen bottom to prevent gap from scaling
 		SCR_DrawFill (0, SCREEN_HEIGHT-(MENU_FONT_SIZE+3), SCREEN_WIDTH, 1, ALIGN_BOTTOM_STRETCH, 0,0,0,255);
 		SCR_DrawString (SCREEN_WIDTH/2-(len/2)*MENU_FONT_SIZE, SCREEN_HEIGHT-(MENU_FONT_SIZE+1), MENU_FONT_SIZE, ALIGN_BOTTOM, message, 255);
 	}

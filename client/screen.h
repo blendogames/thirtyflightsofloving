@@ -80,7 +80,7 @@ float	SCR_GetScreenScale (void);
 void	SCR_AdjustFrom640 (float *x, float *y, float *w, float *h, scralign_t align);
 void	SCR_DrawFill (float x, float y, float width, float height, scralign_t align, int red, int green, int blue, int alpha);
 void	SCR_DrawPic (float x, float y, float width, float height, scralign_t align, char *pic, float alpha);
-void	SCR_DrawChar (float x, float y, scralign_t align, int num, int red, int green, int blue, int alpha, qboolean italic, qboolean last);
+void	SCR_DrawChar (float x, float y, int size, scralign_t align, int num, int red, int green, int blue, int alpha, qboolean italic, qboolean last);
 void	SCR_DrawString (float x, float y, int size, scralign_t align, const char *string, int alpha);
 void	SCR_DrawCrosshair (void);
 

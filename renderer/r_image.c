@@ -1911,7 +1911,6 @@ qboolean GL_Upload32 (unsigned *data, int width, int height, imagetype_t type)
 	{
 		int maxsize;
 
-#if 1
 		if (r_picmip->integer == 1)		// clamp to 1024x1024
 			maxsize = 1024;
 		else if (r_picmip->integer == 2) // clamp to 512x512
@@ -1920,14 +1919,6 @@ qboolean GL_Upload32 (unsigned *data, int width, int height, imagetype_t type)
 			maxsize = 256;
 		else								// clamp to 128x128
 			maxsize = 128;
-#else
-		if (r_picmip->integer == 1)		// clamp to 512x512
-			maxsize = 512;
-		else if (r_picmip->integer == 2) // clamp to 256x256
-			maxsize = 256;
-		else								// clamp to 128x128
-			maxsize = 128;
-#endif
 
 		while (1) {
 			if (scaled_width <= maxsize && scaled_height <= maxsize)

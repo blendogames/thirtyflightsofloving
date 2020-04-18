@@ -596,7 +596,8 @@ void GL_SetDefaultState (void)
 	qglDepthFunc(GL_LEQUAL);
 	qglDepthMask(GL_TRUE);
 
-	qglClearColor (1,0, 0.5, 0.5);
+//	qglClearColor (1,0, 0.5, 0.5);
+	qglClearColor (r_clearColor[0], r_clearColor[1], r_clearColor[2], r_clearColor[3]);
 	qglClearDepth(1.0);
 	qglClearStencil(128);
 

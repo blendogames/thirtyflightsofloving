@@ -17,8 +17,8 @@ Changes as of v0.20 update 8:
 
 - Added cel shading support.  Uses cvars r_celshading to enable, and r_celshading_width for line width (1-10).
 
-- Added Skuller's font upscaling from Q2Pro for old 128x128 fonts.  Use cvar r_font_upscale to enable, value of 1 is pixel copy,
-	value of 2 enables blending.  Requires vid_restart for changes to take effect.
+- Added font upscaling (with optional blending by Skuller from Q2Pro) for old 128x128 fonts.  Use cvar r_font_upscale to enable,
+	value of 1 is pixel copy, value of 2 enables blending.  Requires vid_restart for changes to take effect.
 
 - Now compresses .sav and .sv2 savegame files into .savz files.  It will still read savegames from earlier
 	KMQ2 versions (with the same game DLL).  This should improve load and save times in multi-level units.
@@ -34,6 +34,9 @@ Changes as of v0.20 update 8:
 
 - Added SGIS mipmaps menu option and cvar r_sgis_generatemipmap, for toggling SGIS mipmap generation.  Default is 1,
 	set to 0 and use vid_restart to disable.
+	
+- Added changeable gl_clear color controlled by cvars r_clearcolor_r, r_clearcolor_g, and r_clearcolor_b.
+	Values are normalized (0-1).	
 	
 - Fixed Shift-Ins to paste text not working in menus.
 	

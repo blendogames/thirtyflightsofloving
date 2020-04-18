@@ -119,7 +119,7 @@ void Field_Draw (menufield_s *f)
 
 	if (f->generic.name)
 		Menu_DrawStringR2LDark (f->generic.x + f->generic.parent->x + LCOLUMN_OFFSET,
-								f->generic.y + f->generic.parent->y, MENU_FONT_SIZE, f->generic.name, 255);
+								f->generic.y + f->generic.parent->y, f->generic.textSize, f->generic.name, 255);
 
 	if (xtra = stringLengthExtra(f->buffer))
 	{
@@ -139,29 +139,29 @@ void Field_Draw (menufield_s *f)
 		offset = strlen(tempbuffer);
 	}
 
-	SCR_DrawChar (f->generic.x + f->generic.parent->x + MENU_FONT_SIZE*2,
-				f->generic.y + f->generic.parent->y - 4, ALIGN_CENTER, 18, 255,255,255,255, false, false);
-	SCR_DrawChar (f->generic.x + f->generic.parent->x + MENU_FONT_SIZE*2,
-				f->generic.y + f->generic.parent->y + 4, ALIGN_CENTER, 24, 255,255,255,255, false, false);
-	SCR_DrawChar (f->generic.x + f->generic.parent->x + (3+f->visible_length)*MENU_FONT_SIZE,
-				f->generic.y + f->generic.parent->y - 4, ALIGN_CENTER, 20,255,255,255,255, false, false);
-	SCR_DrawChar (f->generic.x + f->generic.parent->x + (3+f->visible_length)*MENU_FONT_SIZE,
-				f->generic.y + f->generic.parent->y + 4, ALIGN_CENTER, 26, 255,255,255,255, false, false);
+	SCR_DrawChar (f->generic.x + f->generic.parent->x + RCOLUMN_OFFSET,
+				f->generic.y + f->generic.parent->y - 4, f->generic.textSize, ALIGN_CENTER, 18, 255,255,255,255, false, false);
+	SCR_DrawChar (f->generic.x + f->generic.parent->x + RCOLUMN_OFFSET,
+				f->generic.y + f->generic.parent->y + 4, f->generic.textSize, ALIGN_CENTER, 24, 255,255,255,255, false, false);
+	SCR_DrawChar (f->generic.x + f->generic.parent->x + (1+f->visible_length)*f->generic.textSize + RCOLUMN_OFFSET,
+				f->generic.y + f->generic.parent->y - 4, f->generic.textSize, ALIGN_CENTER, 20,255,255,255,255, false, false);
+	SCR_DrawChar (f->generic.x + f->generic.parent->x + (1+f->visible_length)*f->generic.textSize + RCOLUMN_OFFSET,
+				f->generic.y + f->generic.parent->y + 4, f->generic.textSize, ALIGN_CENTER, 26, 255,255,255,255, false, false);
 
 	for (i = 0; i < f->visible_length; i++)
 	{
-		SCR_DrawChar (f->generic.x + f->generic.parent->x + (3+i)*MENU_FONT_SIZE,
-					f->generic.y + f->generic.parent->y - 4, ALIGN_CENTER, 19, 255,255,255,255, false, false);
-		SCR_DrawChar (f->generic.x + f->generic.parent->x + (3+i)*MENU_FONT_SIZE,
-					f->generic.y + f->generic.parent->y + 4, ALIGN_CENTER, 25, 255,255,255,255, false, (i==(f->visible_length-1)));
+		SCR_DrawChar (f->generic.x + f->generic.parent->x + (1+i)*f->generic.textSize + RCOLUMN_OFFSET,
+					f->generic.y + f->generic.parent->y - 4, f->generic.textSize, ALIGN_CENTER, 19, 255,255,255,255, false, false);
+		SCR_DrawChar (f->generic.x + f->generic.parent->x + (1+i)*f->generic.textSize + RCOLUMN_OFFSET,
+					f->generic.y + f->generic.parent->y + 4, f->generic.textSize, ALIGN_CENTER, 25, 255,255,255,255, false, (i==(f->visible_length-1)));
 	}
 
 	// add cursor thingie
-	if ( Menu_ItemAtCursor(f->generic.parent)==f  && ((int)(Sys_Milliseconds()/250))&1 )
+	if ( (Menu_ItemAtCursor(f->generic.parent) == f)  && ((int)(Sys_Milliseconds()/250))&1 )
 		Com_sprintf(tempbuffer, sizeof(tempbuffer),	"%s%c", tempbuffer, 11);
 
-	Menu_DrawString (f->generic.x + f->generic.parent->x + MENU_FONT_SIZE*3,
-					f->generic.y + f->generic.parent->y, MENU_FONT_SIZE, tempbuffer, alpha);
+	Menu_DrawString (f->generic.x + f->generic.parent->x + f->generic.textSize*3,
+					f->generic.y + f->generic.parent->y, f->generic.textSize, tempbuffer, alpha);
 }
 
 qboolean Field_Key (menufield_s *f, int key)
@@ -313,9 +313,9 @@ void MenuList_Draw (menulist_s *l)
 {
 	const char **n;
 	int y = 0, alpha = mouseOverAlpha(&l->generic);
-
-	Menu_DrawStringR2LDark (l->generic.x + l->generic.parent->x - 2*MENU_FONT_SIZE,
-						l->generic.y + l->generic.parent->y, MENU_FONT_SIZE, l->generic.name, alpha);
+	
+	Menu_DrawStringR2LDark (l->generic.x + l->generic.parent->x + LCOLUMN_OFFSET,	// - 2*MENU_FONT_SIZE,
+						l->generic.y + l->generic.parent->y, l->generic.textSize, l->generic.name, alpha);
 
 	n = l->itemnames;
 
@@ -327,7 +327,7 @@ void MenuList_Draw (menulist_s *l)
 	while (*n)
 	{
 		Menu_DrawStringR2LDark (l->generic.x + l->generic.parent->x + LCOLUMN_OFFSET,
-							l->generic.y + l->generic.parent->y + y + MENU_LINE_SIZE, MENU_FONT_SIZE, *n, alpha);
+							l->generic.y + l->generic.parent->y + y + MENU_LINE_SIZE, l->generic.textSize, *n, alpha);
 		n++;
 		y += MENU_LINE_SIZE;
 	}
@@ -362,7 +362,7 @@ void Slider_Draw (menuslider_s *s)
 	int	i, alpha = mouseOverAlpha(&s->generic);
 
 	Menu_DrawStringR2LDark (s->generic.x + s->generic.parent->x + LCOLUMN_OFFSET,
-							s->generic.y + s->generic.parent->y, MENU_FONT_SIZE, s->generic.name, alpha);
+							s->generic.y + s->generic.parent->y, s->generic.textSize, s->generic.name, alpha);
 
 	s->range = (s->curvalue - s->minvalue) / (float)(s->maxvalue - s->minvalue);
 
@@ -372,17 +372,17 @@ void Slider_Draw (menuslider_s *s)
 		s->range = 1;
 
 	SCR_DrawChar (s->generic.x + s->generic.parent->x + RCOLUMN_OFFSET,
-				s->generic.y + s->generic.parent->y, ALIGN_CENTER, 128, 255,255,255,255, false, false);
+				s->generic.y + s->generic.parent->y, s->generic.textSize, ALIGN_CENTER, 128, 255,255,255,255, false, false);
 
 	for (i = 0; i < SLIDER_RANGE; i++)
-		SCR_DrawChar (s->generic.x + s->generic.parent->x + (i+1)*MENU_FONT_SIZE + RCOLUMN_OFFSET,
-					s->generic.y + s->generic.parent->y, ALIGN_CENTER, 129, 255,255,255,255, false, false);
+		SCR_DrawChar (s->generic.x + s->generic.parent->x + (i+1)*s->generic.textSize + RCOLUMN_OFFSET,
+					s->generic.y + s->generic.parent->y, s->generic.textSize, ALIGN_CENTER, 129, 255,255,255,255, false, false);
 
-	SCR_DrawChar (s->generic.x + s->generic.parent->x + (i+1)*MENU_FONT_SIZE + RCOLUMN_OFFSET,
-				s->generic.y + s->generic.parent->y, ALIGN_CENTER, 130, 255,255,255,255, false, false);
+	SCR_DrawChar (s->generic.x + s->generic.parent->x + (i+1)*s->generic.textSize + RCOLUMN_OFFSET,
+				s->generic.y + s->generic.parent->y, s->generic.textSize, ALIGN_CENTER, 130, 255,255,255,255, false, false);
 
-	SCR_DrawChar (s->generic.x + s->generic.parent->x + MENU_FONT_SIZE*((SLIDER_RANGE-1)*s->range+1) + RCOLUMN_OFFSET,
-				s->generic.y + s->generic.parent->y, ALIGN_CENTER, 131, 255,255,255,255, false, true);
+	SCR_DrawChar (s->generic.x + s->generic.parent->x + s->generic.textSize*((SLIDER_RANGE-1)*s->range+1) + RCOLUMN_OFFSET,
+				s->generic.y + s->generic.parent->y, s->generic.textSize, ALIGN_CENTER, 131, 255,255,255,255, false, true);
 }
 
 void SpinControl_DoEnter (menulist_s *s)
@@ -431,12 +431,12 @@ void SpinControl_Draw (menulist_s *s)
 	if (s->generic.name)
 	{
 		Menu_DrawStringR2LDark (s->generic.x + s->generic.parent->x + LCOLUMN_OFFSET,
-								s->generic.y + s->generic.parent->y, MENU_FONT_SIZE, s->generic.name, alpha);
+								s->generic.y + s->generic.parent->y, s->generic.textSize, s->generic.name, alpha);
 	}
 	if (!strchr(s->itemnames[s->curvalue], '\n'))
 	{
 		Menu_DrawString (s->generic.x + s->generic.parent->x + RCOLUMN_OFFSET,
-						s->generic.y + s->generic.parent->y, MENU_FONT_SIZE, s->itemnames[s->curvalue], alpha);
+						s->generic.y + s->generic.parent->y, s->generic.textSize, s->itemnames[s->curvalue], alpha);
 	}
 	else
 	{
@@ -444,11 +444,11 @@ void SpinControl_Draw (menulist_s *s)
 		Q_strncpyz(buffer, s->itemnames[s->curvalue], sizeof(buffer));
 		*strchr(buffer, '\n') = 0;
 		Menu_DrawString (s->generic.x + s->generic.parent->x + RCOLUMN_OFFSET,
-						s->generic.y + s->generic.parent->y, MENU_FONT_SIZE, buffer, alpha);
+						s->generic.y + s->generic.parent->y, s->generic.textSize, buffer, alpha);
 	//	strncpy(buffer, strchr( s->itemnames[s->curvalue], '\n' ) + 1 );
 		Q_strncpyz(buffer, strchr( s->itemnames[s->curvalue], '\n' ) + 1, sizeof(buffer) );
 		Menu_DrawString (s->generic.x + s->generic.parent->x + RCOLUMN_OFFSET,
-						s->generic.y + s->generic.parent->y + MENU_LINE_SIZE, MENU_FONT_SIZE, buffer, alpha);
+						s->generic.y + s->generic.parent->y + MENU_LINE_SIZE, s->generic.textSize, buffer, alpha);
 	}
 }
 
@@ -660,7 +660,7 @@ void Menu_Draw (menuframework_s *menu)
 
 			x1 = menu->x + item->x + RCOLUMN_OFFSET; // + 2 chars for space + cursor
 			y1 = menu->y + item->y;
-			w1 = 0;			h1 = MENU_FONT_SIZE;
+			w1 = 0;			h1 = item->textSize;	// MENU_FONT_SIZE
 			SCR_AdjustFrom640 (&x1, &y1, &w1, &h1, ALIGN_CENTER);
 			min[0] = x1;	max[0] = x1+w1;
 			min[1] = y1;	max[1] = y1+h1;
@@ -677,10 +677,12 @@ void Menu_Draw (menuframework_s *menu)
 						if (item->flags & QMF_LEFT_JUSTIFY)
 						{
 							min[0] += SCR_ScaledScreen(LCOLUMN_OFFSET*2);
-							max[0] = min[0] + SCR_ScaledScreen(len*MENU_FONT_SIZE);
+						//	max[0] = min[0] + SCR_ScaledScreen(len*MENU_FONT_SIZE);
+							max[0] = min[0] + SCR_ScaledScreen(len*item->textSize);
 						}
 						else
-							min[0] -= SCR_ScaledScreen(len*MENU_FONT_SIZE + MENU_FONT_SIZE*3);
+						//	min[0] -= SCR_ScaledScreen(len*MENU_FONT_SIZE + MENU_FONT_SIZE*3);
+							min[0] -= SCR_ScaledScreen(len*item->textSize + item->textSize*3);
 
 						type = MENUITEM_ACTION;
 					}
@@ -690,11 +692,13 @@ void Menu_Draw (menuframework_s *menu)
 						if (item->name)
 						{
 							len = strlen(item->name);
-							min[0] -= SCR_ScaledScreen(len*MENU_FONT_SIZE - LCOLUMN_OFFSET*2);
+						//	min[0] -= SCR_ScaledScreen(len*MENU_FONT_SIZE - LCOLUMN_OFFSET*2);
+							min[0] -= SCR_ScaledScreen(len*item->textSize - LCOLUMN_OFFSET*2);
 						}
 						else
 							min[0] -= SCR_ScaledScreen(16);
-						max[0] += SCR_ScaledScreen((SLIDER_RANGE + 4)*MENU_FONT_SIZE);
+					//	max[0] += SCR_ScaledScreen((SLIDER_RANGE + 4) * MENU_FONT_SIZE);
+						max[0] += SCR_ScaledScreen((SLIDER_RANGE + 4) * item->textSize);
 						type = MENUITEM_SLIDER;
 					}
 					break;
@@ -708,11 +712,13 @@ void Menu_Draw (menuframework_s *menu)
 						if (item->name)
 						{
 							len = strlen(item->name);
-							min[0] -= SCR_ScaledScreen(len*MENU_FONT_SIZE - LCOLUMN_OFFSET*2);
+						//	min[0] -= SCR_ScaledScreen(len*MENU_FONT_SIZE - LCOLUMN_OFFSET*2);
+							min[0] -= SCR_ScaledScreen(len*item->textSize - LCOLUMN_OFFSET*2);
 						}
 
 						len = strlen(spin->itemnames[spin->curvalue]);
-						max[0] += SCR_ScaledScreen(len*MENU_FONT_SIZE);
+					//	max[0] += SCR_ScaledScreen(len*MENU_FONT_SIZE);
+						max[0] += SCR_ScaledScreen(len*item->textSize);
 
 						type = MENUITEM_ROTATE;
 					}
@@ -723,7 +729,8 @@ void Menu_Draw (menuframework_s *menu)
 
 						len = text->visible_length + 2;
 
-						max[0] += SCR_ScaledScreen(len*MENU_FONT_SIZE);
+					//	max[0] += SCR_ScaledScreen(len*MENU_FONT_SIZE);
+						max[0] += SCR_ScaledScreen(len*item->textSize);
 						type = MENUITEM_TEXT;
 					}
 					break;
@@ -776,13 +783,15 @@ void Menu_Draw (menuframework_s *menu)
 		if (item->flags & QMF_LEFT_JUSTIFY)
 		{
 			SCR_DrawChar (menu->x+item->x+item->cursor_offset-24, menu->y+item->y,
-						ALIGN_CENTER, 12+((int)(Sys_Milliseconds()/250)&1),
+			//			MENU_FONT_SIZE, ALIGN_CENTER, 12+((int)(Sys_Milliseconds()/250)&1),
+						item->textSize, ALIGN_CENTER, 12+((int)(Sys_Milliseconds()/250)&1),
 						255,255,255,255, false, true);
 		}
 		else
 		{
 			SCR_DrawChar (menu->x+item->cursor_offset, menu->y+item->y,
-						ALIGN_CENTER, 12+((int)(Sys_Milliseconds()/250)&1),
+			//			MENU_FONT_SIZE, ALIGN_CENTER, 12+((int)(Sys_Milliseconds()/250)&1),
+						item->textSize, ALIGN_CENTER, 12+((int)(Sys_Milliseconds()/250)&1),
 						255,255,255,255, false, true);
 		}
 	}
@@ -806,7 +815,7 @@ void Menu_DrawStatusBar (const char *string)
 	{
 		int l = strlen( string );
 
-		SCR_DrawFill( 0, SCREEN_HEIGHT-(MENU_FONT_SIZE+3), SCREEN_WIDTH, MENU_FONT_SIZE+3, ALIGN_BOTTOM_STRETCH, 60,60,60,255 );
+		SCR_DrawFill( 0, SCREEN_HEIGHT-(MENU_FONT_SIZE+3), SCREEN_WIDTH, MENU_FONT_SIZE+4, ALIGN_BOTTOM_STRETCH, 60,60,60,255 );	// go 1 pixel past screen bottom to prevent gap from scaling
 		SCR_DrawFill( 0, SCREEN_HEIGHT-(MENU_FONT_SIZE+3), SCREEN_WIDTH, 1, ALIGN_BOTTOM_STRETCH, 0,0,0,255 );
 		SCR_DrawString( SCREEN_WIDTH/2-(l/2)*MENU_FONT_SIZE, SCREEN_HEIGHT-(MENU_FONT_SIZE+1), MENU_FONT_SIZE, ALIGN_BOTTOM, string, 255 );
 	}
@@ -856,36 +865,36 @@ void Menu_DrawTextBox (int x, int y, int width, int lines)
 	// draw left side
 	cx = x;
 	cy = y;
-	SCR_DrawChar (cx, cy, ALIGN_CENTER, 1, 255,255,255,255, false, false);
+	SCR_DrawChar (cx, cy, MENU_FONT_SIZE, ALIGN_CENTER, 1, 255,255,255,255, false, false);
 	for (n = 0; n < lines; n++) {
 		cy += MENU_FONT_SIZE;
-		SCR_DrawChar (cx, cy, ALIGN_CENTER, 4, 255,255,255,255, false, false);
+		SCR_DrawChar (cx, cy, MENU_FONT_SIZE, ALIGN_CENTER, 4, 255,255,255,255, false, false);
 	}
-	SCR_DrawChar (cx, cy+MENU_FONT_SIZE, ALIGN_CENTER, 7, 255,255,255,255, false, false);
+	SCR_DrawChar (cx, cy+MENU_FONT_SIZE, MENU_FONT_SIZE, ALIGN_CENTER, 7, 255,255,255,255, false, false);
 
 	// draw middle
 	cx += MENU_FONT_SIZE;
 	while (width > 0)
 	{
 		cy = y;
-		SCR_DrawChar (cx, cy, ALIGN_CENTER, 2, 255,255,255,255, false, false);
+		SCR_DrawChar (cx, cy, MENU_FONT_SIZE, ALIGN_CENTER, 2, 255,255,255,255, false, false);
 		for (n = 0; n < lines; n++) {
 			cy += MENU_FONT_SIZE;
-			SCR_DrawChar (cx, cy, ALIGN_CENTER, 5, 255,255,255,255, false, false);
+			SCR_DrawChar (cx, cy, MENU_FONT_SIZE, ALIGN_CENTER, 5, 255,255,255,255, false, false);
 		}
-		SCR_DrawChar (cx, cy+MENU_FONT_SIZE, ALIGN_CENTER, 8, 255,255,255,255, false, false);
+		SCR_DrawChar (cx, cy+MENU_FONT_SIZE, MENU_FONT_SIZE, ALIGN_CENTER, 8, 255,255,255,255, false, false);
 		width -= 1;
 		cx += MENU_FONT_SIZE;
 	}
 
 	// draw right side
 	cy = y;
-	SCR_DrawChar (cx, cy, ALIGN_CENTER, 3, 255,255,255,255, false, false);
+	SCR_DrawChar (cx, cy, MENU_FONT_SIZE, ALIGN_CENTER, 3, 255,255,255,255, false, false);
 	for (n = 0; n < lines; n++) {
 		cy += MENU_FONT_SIZE;
-		SCR_DrawChar (cx, cy, ALIGN_CENTER, 6, 255,255,255,255, false, false);
+		SCR_DrawChar (cx, cy, MENU_FONT_SIZE, ALIGN_CENTER, 6, 255,255,255,255, false, false);
 	}
-	SCR_DrawChar (cx, cy+MENU_FONT_SIZE, ALIGN_CENTER, 9, 255,255,255,255, false, true);
+	SCR_DrawChar (cx, cy+MENU_FONT_SIZE, MENU_FONT_SIZE, ALIGN_CENTER, 9, 255,255,255,255, false, true);
 }
 
 

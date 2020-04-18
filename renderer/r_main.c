@@ -62,6 +62,7 @@ vec3_t	r_origin;
 
 float	r_world_matrix[16];
 float	r_base_world_matrix[16];
+vec4_t	r_clearColor = {0, 0.5, 0.5, 0.5};				// for gl_clear
 
 GLdouble	r_farz;	// Knightmare- variable sky range, made this a global var
 
@@ -194,6 +195,11 @@ cvar_t	*r_3dlabs_broken;
 cvar_t	*vid_fullscreen;
 cvar_t	*vid_gamma;
 cvar_t	*vid_ref;
+
+// Changable color for r_clearcolor (enabled by gl_clar)
+cvar_t	*r_clearcolor_r;
+cvar_t	*r_clearcolor_g;
+cvar_t	*r_clearcolor_b;
 
 cvar_t  *r_bloom;	// BLOOMS
 
@@ -404,7 +410,8 @@ void R_SetupFrame (void)
 		qglClearColor( 0.3, 0.3, 0.3, 1 );
 		qglScissor( r_newrefdef.x, vid.height - r_newrefdef.height - r_newrefdef.y, r_newrefdef.width, r_newrefdef.height );
 		qglClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-		qglClearColor( 1, 0, 0.5, 0.5 );
+	//	qglClearColor( 1, 0, 0.5, 0.5 );
+		qglClearColor (r_clearColor[0], r_clearColor[1], r_clearColor[2], r_clearColor[3]);
 		GL_Disable( GL_SCISSOR_TEST );
 	}*/
 }
@@ -1061,6 +1068,11 @@ void R_Register (void)
 	vid_fullscreen = Cvar_Get( "vid_fullscreen", "1", CVAR_ARCHIVE );
 	vid_gamma = Cvar_Get( "vid_gamma", "0.8", CVAR_ARCHIVE ); // was 1.0
 	vid_ref = Cvar_Get( "vid_ref", "gl", CVAR_ARCHIVE );
+
+	// Changable color for r_clearcolor (enabled by gl_clar)
+	r_clearcolor_r = Cvar_Get( "r_clearcolor_r", "0", CVAR_ARCHIVE );
+	r_clearcolor_g = Cvar_Get( "r_clearcolor_g", "0.5", CVAR_ARCHIVE );
+	r_clearcolor_b = Cvar_Get( "r_clearcolor_b", "0.5", CVAR_ARCHIVE );
 
 	r_bloom = Cvar_Get( "r_bloom", "0", CVAR_ARCHIVE );	// BLOOMS
 
@@ -1866,6 +1878,11 @@ qboolean R_Init ( void *hinstance, void *hWnd, char *reason )
 	Com_Printf( "Size of decals: %i\n", sizeof (particle_t)*MAX_DECAL_FRAGS );
 */
 
+	// set r_clearColor
+	r_clearColor[0] = min(max(r_clearcolor_r->value, 0.0f), 1.0f);
+	r_clearColor[1] = min(max(r_clearcolor_g->value, 0.0f), 1.0f);
+	r_clearColor[2] = min(max(r_clearcolor_b->value, 0.0f), 1.0f);
+
 	GL_SetDefaultState();
 
 	// draw our stereo patterns
@@ -1989,6 +2006,7 @@ void UpdateGammaRamp (void); //Knightmare added
 void RefreshFont (void);
 void R_BeginFrame( float camera_separation )
 {
+	qboolean clearColor_modified = false;
 
 	glState.camera_separation = camera_separation;
 
@@ -2048,6 +2066,26 @@ void R_BeginFrame( float camera_separation )
 			glConfig.nvFogMode = (int)GL_EYE_RADIAL_NV;
 			Cvar_Set ("r_nvfog_dist_mode", "GL_EYE_RADIAL_NV");
 		}
+	}
+
+	// change r_clearColor if necessary
+	if (r_clearcolor_r->modified) {
+		r_clearcolor_r->modified = false;
+		clearColor_modified = true;
+		r_clearColor[0] = min(max(r_clearcolor_r->value, 0.0f), 1.0f);
+	}
+	if (r_clearcolor_g->modified) {
+		r_clearcolor_g->modified = false;
+		clearColor_modified = true;
+		r_clearColor[1] = min(max(r_clearcolor_g->value, 0.0f), 1.0f);
+	}
+	if (r_clearcolor_b->modified) {
+		r_clearcolor_b->modified = false;
+		clearColor_modified = true;
+		r_clearColor[2] = min(max(r_clearcolor_b->value, 0.0f), 1.0f);
+	}
+	if (clearColor_modified) {
+		qglClearColor (r_clearColor[0], r_clearColor[1], r_clearColor[2], r_clearColor[3]);
 	}
 
 	//
@@ -2181,5 +2219,6 @@ void R_SetPalette ( const unsigned char *palette)
 
 	qglClearColor (0,0,0,0);
 	qglClear (GL_COLOR_BUFFER_BIT);
-	qglClearColor (1,0, 0.5 , 0.5);
+//	qglClearColor (1,0, 0.5 , 0.5);
+	qglClearColor (r_clearColor[0], r_clearColor[1], r_clearColor[2], r_clearColor[3]);
 }

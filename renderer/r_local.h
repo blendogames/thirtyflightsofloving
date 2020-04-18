@@ -335,6 +335,11 @@ extern	cvar_t	*r_skydistance;		// variable sky range
 extern	cvar_t	*r_fog_skyratio;	// variable sky fog ratio
 extern	cvar_t	*r_saturation;		//** DMP
 
+// Changable color for r_clearcolor (enabled by gl_clar)
+extern	cvar_t	*r_clearcolor_r;
+extern	cvar_t	*r_clearcolor_g;
+extern	cvar_t	*r_clearcolor_b;
+
 extern  cvar_t  *r_bloom;
 
 // Discoloda's cel shading
@@ -355,6 +360,8 @@ extern	int		c_visible_lightmaps;
 extern	int		c_visible_textures;
 
 extern	float	r_world_matrix[16];
+
+extern	vec4_t	r_clearColor;			// for gl_clear
 
 // entity sorting struct
 typedef struct sortedelement_s sortedelement_t;

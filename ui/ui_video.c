@@ -174,7 +174,6 @@ static void ApplyChanges( void *unused )
 	Cvar_SetValue( "vid_fullscreen", s_fs_box.curvalue );
 	// invert sense so greater = brighter, and scale to a range of 0.3 to 1.3
 	Cvar_SetValue( "vid_gamma", (1.3 - (s_brightness_slider.curvalue/20.0)) );
-//	Cvar_SetValue( "r_picmip", 3-s_texqual_box.curvalue );
 	Cvar_SetValue( "r_picmip", 4-s_texqual_box.curvalue );
 
 	// Knightmare- refesh rate option
@@ -410,7 +409,6 @@ void Menu_Video_Init (void)
 		"trilinear",
 		0
 	};
-#if 1
 	static const char *lmh_names[] =
 	{
 		"lowest",
@@ -420,16 +418,6 @@ void Menu_Video_Init (void)
 		"highest",
 		0
 	};
-#else
-	static const char *lmh_names[] =
-	{
-		"low",
-		"medium",
-		"high",
-		"highest",
-		0
-	};
-#endif
 	int		y = 0;
 	float	temp;
 	char	*customStr;
@@ -536,7 +524,6 @@ void Menu_Video_Init (void)
 	s_texqual_box.generic.x			= 0;
 	s_texqual_box.generic.y			= y += MENU_LINE_SIZE;
 	s_texqual_box.generic.name		= "texture quality";
-//	s_texqual_box.curvalue			= ClampCvar (0, 3, 3-Cvar_VariableValue("r_picmip"));
 	s_texqual_box.curvalue			= ClampCvar (0, 4, 4-Cvar_VariableValue("r_picmip"));
 	s_texqual_box.itemnames			= lmh_names;
 	s_texqual_box.generic.statusbar	= "changes maximum texture size (highest = no limit)";

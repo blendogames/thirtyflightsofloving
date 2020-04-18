@@ -363,8 +363,6 @@ typedef struct
 #define IT_KEY				0x00000010
 #define IT_POWERUP			0x00000020
 
-#define IT_Q1				0x00000080		// added for Q1 keys
-
 // ROGUE
 #define IT_MELEE			0x00000040
 #define IT_NOT_GIVEABLE		0x00000080	// item can not be given
@@ -374,6 +372,8 @@ typedef struct
 #define IT_ROGUE			0x00000200	// Rogue item
 #define IT_LAZARUS			0x00000400	// Lazarus item
 #define IT_ZAERO			0x00000800	// Zaero item
+
+#define IT_Q1				0x00001000		// added for Q1 keys
 
 // gitem_t->weapmodel for weapons indicates model index
 #define WEAP_BLASTER			1 
