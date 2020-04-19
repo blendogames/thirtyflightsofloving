@@ -768,7 +768,7 @@ void q1_fire_firepod (edict_t *self, vec3_t dir)
 
 /*
 =================
-q1_fire_firepod
+q1_fire_lavaball
 
 Fires a lavaball.  Used by Chthon.
 =================

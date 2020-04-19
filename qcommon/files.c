@@ -27,6 +27,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "../include/zlibpng/zip.h"
 #endif
 
+#ifdef _WIN32
+#include "../win32/winquake.h"
+#endif
+
 // enables faster binary pak searck, still experimental
 #define BINARY_PACK_SEARCH
 
@@ -68,6 +72,7 @@ instruct clients to write files over areas they shouldn't.
 #define MAX_WRITE				0x10000
 #define MAX_FIND_FILES			0x04000
 
+//#define	USE_SAVEGAMEDIR			// whether to use new Ffs_savegamedir/fs_downloaddir paths
 
 //
 // in memory
@@ -142,6 +147,9 @@ cvar_t	*fs_gamedirvar;
 cvar_t	*fs_debug;
 cvar_t	*fs_roguegame;
 
+#ifdef _WIN32
+cvar_t	*win_use_profile_dir;	// whether to use user profile dir for savegames, configs, screenshots, etc
+#endif
 
 void CDAudio_Stop (void);
 void Com_FileExtension (const char *path, char *dst, int dstSize);
@@ -2303,6 +2311,7 @@ void FS_InitFilesystem (void)
 	// basedir <path>
 	// allows the game to run from outside the data tree
 	fs_basedir = Cvar_Get ("basedir", ".", CVAR_NOSET);
+//	fs_basedir = Cvar_Get ("basedir", (char *)Sys_ExeDir(), CVAR_NOSET);
 
 	// cddir <path>
 	// Logically concatenates the cddir after the basedir for 
@@ -2313,7 +2322,6 @@ void FS_InitFilesystem (void)
 
 	// start up with baseq2 by default
 	FS_AddGameDirectory (va("%s/"BASEDIRNAME, fs_basedir->string) );
-
 	// any set gamedirs will be freed up to here
 	fs_baseSearchPaths = fs_searchPaths;
 
@@ -2328,6 +2336,17 @@ void FS_InitFilesystem (void)
 	fs_basegamedir2 = Cvar_Get ("basegame2", "", CVAR_LATCH);
 	fs_basegamedir3 = Cvar_Get ("basegame3", "", CVAR_LATCH);	// Knightmare added
 	fs_gamedirvar = Cvar_Get ("game", "", CVAR_LATCH|CVAR_SERVERINFO);
+
+	// set up pref dir under Win32 here
+#ifdef _WIN32
+	// whether to use user profile dir for savegames, configs, screenshots, etc
+	if ( COM_CheckParm ("-portable") || COM_CheckParm ("+portable") || (FS_LoadFile("portable.cfg", NULL) != -1) )
+		win_use_profile_dir = Cvar_Get ("win_use_profile_dir", "0", CVAR_NOSET);
+	else
+		win_use_profile_dir = Cvar_Get ("win_use_profile_dir", "1", CVAR_NOSET);
+
+	Sys_InitPrefDir ();	// set up pref dir now instead of calling a function every time it's needed
+#endif
 
 	// check and load game directory
 	if (fs_gamedirvar->string[0])

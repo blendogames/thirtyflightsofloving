@@ -963,6 +963,20 @@ void	Sys_Quit (void);
 char	*Sys_GetClipboardData( void );
 void	Sys_CopyProtect (void);
 
+// DG: returns the directory the executable (kmquake2.exe on Win32) resides in
+//     *without* a path seperator ("/" or "\") at the end
+const char* Sys_ExeDir();
+
+// DG: returns the directory where user data (savegames, configs, demos,
+//     ... - everything written by the game really)
+//     should be written to, e.g. $HOME/.local/share/KMQuake2
+//     *without* path seperator ("/" or "\") at the end
+const char* Sys_PrefDir();
+
+// Knightmare- returns the directory where autodownload content
+//		(maps, textures, sounds, skies, models, etc) should be written to
+const char* Sys_DownloadDir();
+
 /*
 ==============================================================
 

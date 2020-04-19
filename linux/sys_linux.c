@@ -50,6 +50,11 @@ unsigned	sys_frame_time;
 uid_t saved_euid;
 qboolean stdin_active = true;
 
+// Knightmare- added exe / pref dirs
+static char exe_dir[MAX_OSPATH];
+static char pref_dir[MAX_OSPATH];
+static char	download_dir[MAX_OSPATH];
+
 // =======================================================================
 // General routines
 // =======================================================================
@@ -202,6 +207,11 @@ char *Sys_ConsoleInput(void)
 	return text;
 }
 
+// Knightmare added
+void Sys_ShowConsole (qboolean show)
+{
+}
+
 /*****************************************************************************/
 
 static void *game_library;
@@ -302,6 +312,99 @@ char *Sys_GetClipboardData(void)
 	return NULL;
 }
 
+/*****************************************************************************/
+
+// Knightmare- adapted from DK 1.3 Linux port
+const char* Sys_ExeDir(void)
+{
+	return exe_dir;
+}
+
+const char* Sys_PrefDir(void)
+{
+	return pref_dir;
+}
+
+const char* Sys_DownloadDir(void)
+{
+	return download_dir;
+}
+
+static void Init_ExeDir (const char* argv0)
+{
+#if 1
+	memset(exe_dir, 0, sizeof(exe_dir));
+	Q_snprintfz(exe_dir, sizeof(exe_dir), ".");
+#else
+	char buf[MAX_OSPATH] = {0};
+	const char	*lastSlash;
+	static int mib[4] = {CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, -1};
+	size_t buflen;
+	size_t len = lastSlash ? (lastSlash - buf) : 0;
+
+	memset(exe_dir, 0, sizeof(exe_dir));
+
+#ifdef __linux__
+	readlink("/proc/self/exe", buf, MAX_OSPATH-1);
+#elif __FreeBSD__
+	sysctl(mib, sizeof(mib)/sizeof(*mib), buf, &buflen, NULL, 0);
+#endif
+
+	 if (!*buf)
+	 {
+		 printf("WARNING: Couldn't get path to executable, reading from argv[0]!\n");
+
+		 if (strlen(argv0) < sizeof(buf))
+		 {
+			 Q_strncpyz(buf, argv0, sizeof(buf));
+		 }
+		 else
+		 {
+			 buf[0] = '\0';
+		 }
+	 }
+
+	// starting at the last slash the executable name begins - we only want the path up to there
+	lastSlash = strrchr(buf, '/');
+	len = lastSlash ? (lastSlash - buf) : 0;
+	if (lastSlash == NULL || len >= sizeof(exe_dir) || len == 0)
+	{
+		printf("WARNING: Couldn't get path to executable! Defaulting to \".\"!\n");
+		Q_snprintfz(exe_dir, sizeof(exe_dir), ".");
+	}
+	else
+	{
+		memcpy(exe_dir, buf, len);
+	}
+#endif
+}
+
+static void Sys_InitPrefDir (void)
+{
+	char *pp = getenv("XDG_DATA_HOME");
+
+	memset(pref_dir, 0, sizeof(pref_dir));
+
+	if (pp == NULL)
+	{
+		Q_snprintfz(pref_dir, sizeof(pref_dir), "%s/.local/share/Daikatana", getenv("HOME"));
+		return;
+	}
+
+	if (strlen(pp) >= sizeof(pref_dir) - 1)
+	{
+		printf("WARNING: $XDG_DATA_HOME contains a too long path, defaulting to installation dir!\n");
+		Q_strncpyz(pref_dir, exe_dir, sizeof(pref_dir));
+		return;
+	}
+
+	Q_strncpyz (pref_dir, pp, sizeof(pref_dir));
+	Q_strncpyz (download_dir, pp, sizeof(download_dir));
+}
+// end Knightmare
+
+/*****************************************************************************/
+
 int main (int argc, char **argv)
 {
 	int 	time, oldtime, newtime;
@@ -309,6 +412,10 @@ int main (int argc, char **argv)
 	// go back to real user for config loads
 	saved_euid = geteuid();
 	seteuid(getuid());
+
+	// Knightmare- init exe/pref dirs
+	Init_ExeDir(argv[0]);
+	Sys_InitPrefDir();
 
 	Qcommon_Init(argc, argv);
 

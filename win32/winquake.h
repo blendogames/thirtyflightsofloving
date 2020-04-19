@@ -67,6 +67,10 @@ void IN_MouseEvent (int mstate);
 extern int		window_center_x, window_center_y;
 extern RECT		window_rect;
 
+// win_main.c
+extern cvar_t		*win_use_profile_dir;
+void Sys_InitPrefDir (void);
+
 extern HWND		hwnd_dialog; // Knightmare added
 
 #define NEW_DED_CONSOLE // enable new dedicated console

@@ -29,6 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <direct.h>
 #include <io.h>
 #include <conio.h>
+#include <shlobj.h>
 #include "../win32/conproc.h"
 
 // [Slipyx] mingw support for _controlfp. from float.h. these would be defined
@@ -45,6 +46,10 @@ _CRTIMP unsigned int __cdecl __MINGW_NOTHROW _controlfp (unsigned int unNew, uns
 
 qboolean s_win95;
 
+qboolean	s_win9X;
+qboolean	s_winNT;
+qboolean	s_winNT6;
+
 int			starttime;
 int			ActiveApp;
 qboolean	Minimized;
@@ -60,6 +65,32 @@ static HANDLE		qwclsemaphore;
 #define	MAX_NUM_ARGVS	128
 int			argc;
 char		*argv[MAX_NUM_ARGVS];
+
+#define NT5_SAVEDIR "My Games/KMQuake2"
+#define NT6_SAVEDIR "KMQuake2"
+#define NT5_DLDIR "My Downloads/KMQuake2"
+#define NT6_DLDIR "KMQuake2"
+static char exe_dir[MAX_OSPATH];
+static char	pref_dir[MAX_OSPATH];
+static char	download_dir[MAX_OSPATH];
+
+qboolean Detect_WinNT5orLater (void);
+qboolean Detect_WinNT6orLater (void);
+
+typedef HRESULT (WINAPI *SHGETFOLDERPATHW) (HWND hwnd, int CSIDL, HANDLE hToken, DWORD dwFlags, LPWSTR pszPath);
+SHGETFOLDERPATHW fnSHGetFolderPathW = NULL;
+
+// from DarkPlaces
+const GUID qFOLDERID_SavedGames = {0x4C5C32FF, 0xBB9D, 0x43b0, {0xB5, 0xB4, 0x2D, 0x72, 0xE5, 0x4E, 0xAA, 0xA4}}; 
+const GUID qFOLDERID_Downloads = {0x374DE290, 0x123F, 0x4565, {0x91, 0x64, 0x39, 0xC4, 0x92, 0x5E, 0x46, 0x7B}}; 
+#define qREFKNOWNFOLDERID const GUID *
+#define qKF_FLAG_CREATE 0x8000
+#define qKF_FLAG_NO_ALIAS 0x1000
+static HRESULT (WINAPI *fnSHGetKnownFolderPath) (qREFKNOWNFOLDERID rfid, DWORD dwFlags, HANDLE hToken, PWSTR *ppszPath);
+static HRESULT (WINAPI *fnCoInitializeEx)(LPVOID pvReserved, DWORD dwCoInit);
+static void (WINAPI *fnCoUninitialize)(void);
+static void (WINAPI *fnCoTaskMemFree)(LPVOID pv);
+// end DarkPlaces code
 
 
 #ifndef NEW_DED_CONSOLE
@@ -1397,6 +1428,352 @@ void ParseCommandLine (LPSTR lpCmdLine)
 
 /*
 ==================
+ReplaceBackSlashes
+
+Replaces backslashes in a path with slashes.
+==================
+*/
+static void ReplaceBackSlashes (char *path)
+{
+	char		*cur, *old;
+
+	cur = old = path;
+	if (strstr(cur, "\\") != NULL)
+	{
+		while (cur != NULL)
+		{
+			if ((cur - old) > 1) {
+				*cur = '/';
+			}
+			old = cur;
+			cur = strchr(old + 1, '\\');
+		}
+	}
+}
+
+
+/*
+==================
+Sys_ExeDir
+==================
+*/
+const char *Sys_ExeDir (void)
+{
+	return exe_dir;
+}
+
+
+/*
+==================
+Sys_PrefDir
+==================
+*/
+const char *Sys_PrefDir (void)
+{
+	return pref_dir;
+}
+
+
+/*
+==================
+Sys_DownloadDir
+==================
+*/
+const char *Sys_DownloadDir (void)
+{
+	return download_dir;
+}
+
+
+/*
+==================
+Sys_InitPrefDir
+
+Adapted from DK 1.3 source
+==================
+*/
+void Sys_InitPrefDir (void)
+{
+	if ( win_use_profile_dir && win_use_profile_dir->integer )
+	{
+		char		profile[MAX_PATH], dlPath[MAX_PATH];
+		const char	*reason = "No error!";
+		const char	*reason_dl = "No error!";
+		int			len, len_dl;
+		qboolean	bGotNT6SavedGames=false, bGotNT6Downloads=false;
+
+		// Use Saved Games/KMQuake2 on Win Vista and later, unless "mygames" parameter is set
+		if ( Detect_WinNT6orLater() && !COM_CheckParm ("-mygames") && !COM_CheckParm ("+mygames")  )
+		{
+			WCHAR		*wprofile, *wDLPath;
+			HMODULE		hShell32 = LoadLibrary("shell32");
+			HMODULE		hOle32 = LoadLibrary("ole32");
+
+			if ( !hShell32 || !hOle32 ) {
+				reason = reason_dl = "shell32.dll or ole32.dll couldn't be loaded";
+			}
+			else
+			{
+				fnSHGetKnownFolderPath = (void *)GetProcAddress (hShell32, "SHGetKnownFolderPath");
+				fnCoInitializeEx = (void *)GetProcAddress (hOle32, "CoInitializeEx");
+				fnCoUninitialize = (void *)GetProcAddress (hOle32, "CoUninitialize");
+				fnCoTaskMemFree =  (void *)GetProcAddress (hOle32, "CoTaskMemFree");
+				if ( !fnSHGetKnownFolderPath || !fnCoInitializeEx || !fnCoUninitialize || !fnCoTaskMemFree ) {
+					reason = reason_dl = "functions SHGetKnownFolderPath / CoInitializeEx / CoUninitialize / CoTaskMemFree couldn't be mapped";
+				}
+				else
+				{
+					// from DarkPlaces
+					memset (profile, 0, sizeof(profile));
+					fnCoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
+					if (fnSHGetKnownFolderPath(&qFOLDERID_SavedGames, qKF_FLAG_CREATE | qKF_FLAG_NO_ALIAS, NULL, &wprofile) == S_OK)
+					{
+						memset(profile, 0, sizeof(profile));
+				#if _MSC_VER >= 1400
+						wcstombs_s(NULL, profile, sizeof(profile), wprofile, sizeof(profile)-1);
+				#else
+						wcstombs(profile, wprofile, sizeof(profile)-1);
+				#endif
+						fnCoTaskMemFree(wprofile);
+					}
+					// Also get Downloads Folder from qFOLDERID_Downloads
+					if (fnSHGetKnownFolderPath(&qFOLDERID_Downloads, qKF_FLAG_CREATE | qKF_FLAG_NO_ALIAS, NULL, &wDLPath) == S_OK)
+					{
+						memset(dlPath, 0, sizeof(dlPath));
+				#if _MSC_VER >= 1400
+						wcstombs_s(NULL, dlPath, sizeof(dlPath), wDLPath, sizeof(dlPath)-1);
+				#else
+						wcstombs(dlPath, wDLPath, sizeof(dlPath)-1);
+				#endif
+						fnCoTaskMemFree(wDLPath);
+					}
+					fnCoUninitialize();
+					// end DarkPlaces code
+
+					len = (int)strlen(profile);
+					if (len == 0) {
+						reason = "SHGetKnownFolderPath()/wcstombs() returned 0 length string";
+					}
+					else
+					{
+						// Check if path is too long
+						if ( (len + strlen(NT6_SAVEDIR) + 3) >= 256 ) {
+							reason = "the resulting path would be too long (>= 256 chars)";
+						}
+						else
+						{
+							// Replace backslashes with slashes
+							ReplaceBackSlashes (profile);
+							Com_sprintf (pref_dir, sizeof(pref_dir), "%s/%s", profile, NT6_SAVEDIR);
+							bGotNT6SavedGames = true;
+						//	return;
+						}
+					}
+
+					len_dl = (int)strlen(dlPath);
+					if (len_dl == 0) {
+						reason_dl = "SHGetKnownFolderPath()/wcstombs() returned 0 length string";
+					}
+					else
+					{
+						// Check if path is too long
+						if ( (len_dl + strlen(NT6_DLDIR) + 3) >= 256 ) {
+							reason_dl = "the resulting path would be too long (>= 256 chars)";
+						}
+						else
+						{
+							// Replace backslashes with slashes
+							ReplaceBackSlashes (dlPath);
+							Com_sprintf (download_dir, sizeof(download_dir), "%s/%s", dlPath, NT6_DLDIR);
+							bGotNT6Downloads = true;
+						//	return;
+						}
+					}
+				}
+			}
+			if (bGotNT6SavedGames && bGotNT6Downloads)	// successfully got both dirs, return now
+				return;
+
+			// Output reason for why one or both dirs couldn't be found, then fall back on NT5 path
+			if (!bGotNT6SavedGames)
+				Com_Printf("Couldn't get PrefDir (Saved Games/KMQuake2), because %s.\n", reason);
+			if (!bGotNT6Downloads)
+				Com_Printf("Couldn't get DownloadDir (Downloads/KMQuake2), because %s.\n", reason_dl);
+		}
+
+		// Use My Documents/My Games/KMQuake2 on Win2K / XP
+		if ( Detect_WinNT5orLater() )
+		{
+			WCHAR		sprofile[MAX_PATH];
+			WCHAR		uprofile[MAX_PATH];
+			HMODULE		hShell32 = LoadLibrary("shell32");
+
+			if (!hShell32) {
+				reason = "shell32.dll couldn't be loaded";
+			}
+			else
+			{
+				fnSHGetFolderPathW = (SHGETFOLDERPATHW)GetProcAddress (hShell32, "SHGetFolderPathW");
+				if (!fnSHGetFolderPathW) {
+					reason = "function SHGetFolderPathW couldn't be mapped";
+				}
+				else
+				{
+					memset (pref_dir, 0, sizeof(pref_dir));
+
+					/* The following lines implement a horrible
+					   hack to connect the UTF-16 WinAPI to the
+					   ASCII Quake II. While this should work in
+					   most cases, it'll fail if the "Windows to
+					   DOS filename translation" is switched off.
+					   In that case the function will return NULL
+					   and no homedir is used. */
+
+					// Get path to "My Documents" folder
+					fnSHGetFolderPathW (NULL, CSIDL_PERSONAL, NULL, 8, uprofile);
+
+					// Create a UTF-16 DOS path
+					len = GetShortPathNameW (uprofile, sprofile, sizeof(sprofile));
+
+					if (len == 0) {
+						reason = "GetShortPathNameW() returned 0";
+					}
+					else
+					{
+						// Since the DOS path contains no UTF-16 characters, just convert it to ASCII
+						len = WideCharToMultiByte (CP_ACP, 0, sprofile, -1, profile, sizeof(profile), NULL, NULL);
+
+						if (len == 0) {
+							reason = "WideCharToMultiByte() returned 0";
+						}
+						else
+						{
+							// Check if path is too long
+							if ( ((len + strlen(NT5_SAVEDIR) + 3) >= 256) || ((len + strlen(NT5_DLDIR) + 3) >= 256) ) {
+								reason = "The resulting path would be too long (>= 256 chars)";
+							}
+							else
+							{
+								// Replace backslashes with slashes
+								ReplaceBackSlashes (profile);
+								// Allow splitting of dirs from above NT6 section if only one failed
+								if (!bGotNT6SavedGames)
+									Com_sprintf (pref_dir, sizeof(pref_dir), "%s/%s", profile, NT5_SAVEDIR);
+								if (!bGotNT6Downloads)
+									Com_sprintf (download_dir, sizeof(download_dir), "%s/%s", profile, NT5_DLDIR);
+								return;
+							}
+						}
+					}
+				}
+			}
+			Com_Printf("Couldn't get PrefDir (My Documents/My Games/KMQuake2), because %s.\n", reason);
+		}
+	}
+
+	Com_sprintf (pref_dir, sizeof(pref_dir), exe_dir);
+	Com_sprintf (download_dir, sizeof(download_dir), exe_dir);
+}
+
+
+/*
+==================
+Init_ExeDir
+==================
+*/
+static void Init_ExeDir (void)
+{
+#if 0
+	memset(exe_dir, 0, sizeof(exe_dir));
+	Q_snprintfz (exe_dir, sizeof(exe_dir), ".");
+#else
+	char		buf[MAX_PATH];
+	const char	*lastSlash;
+	int			dirLen;
+
+	memset(buf, 0, sizeof(buf));
+	memset(exe_dir, 0, sizeof(exe_dir));
+
+	GetModuleFileName (NULL, buf, sizeof(buf)-1);
+
+	// get path up to last backslash
+	lastSlash = strrchr(buf, '\\');
+	if (lastSlash == NULL)
+		lastSlash = strrchr(buf, '/');
+
+	dirLen = lastSlash ? (lastSlash - buf) : 0;
+	if ( lastSlash == NULL || dirLen == 0 || dirLen >= sizeof(exe_dir) ) {
+		Q_snprintfz (exe_dir, sizeof(exe_dir), ".");
+	}
+	else {
+		memcpy(exe_dir, buf, dirLen);
+	}
+#endif
+}
+
+/*
+==================
+Detect_WinNT5orLater
+==================
+*/
+qboolean Detect_WinNT5orLater (void)
+{
+	DWORD	WinVersion;
+	DWORD	WinLowByte, WinHighByte;
+
+	WinVersion = GetVersion();
+	WinLowByte = (DWORD)(LOBYTE(LOWORD(WinVersion)));
+	WinHighByte = (DWORD)(HIBYTE(HIWORD(WinVersion)));
+
+	if (WinLowByte <= 4) {
+		Com_DPrintf("Windows 9x or NT 4 detected.\n");
+		return false;
+	}
+
+	if (WinLowByte >= 5) {
+		Com_DPrintf("Windows 5.x or later detected.\n");
+		return true;
+	}
+
+	return false;
+}
+
+
+/*
+==================
+Detect_WinNT6orLater
+==================
+*/
+qboolean Detect_WinNT6orLater (void)
+{
+	DWORD	WinVersion;
+	DWORD	WinLowByte, WinHighByte;
+
+	WinVersion = GetVersion();
+	WinLowByte = (DWORD)(LOBYTE(LOWORD(WinVersion)));
+	WinHighByte = (DWORD)(HIBYTE(HIWORD(WinVersion)));
+
+	if (WinLowByte <= 4) {
+		Com_DPrintf("Windows 9x or NT 4 detected.\n");
+		return false;
+	}
+
+	if (WinLowByte == 5) {
+		Com_DPrintf("Windows 5.x (Win2K / XP / Server 2003) detected.\n");
+		return false;
+	}
+
+	if (WinLowByte >= 6) {
+		Com_DPrintf("Windows 6.x (WinVista / 7 / 8) detected.\n");
+		return true;
+	}
+
+	return false;
+}
+
+
+/*
+==================
 Sys_SetHighDPIMode
 
 From Yamagi Quake2
@@ -1466,6 +1843,8 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 	ParseCommandLine (lpCmdLine);
 
 	Sys_SetHighDPIMode ();	// setup DPI awareness
+
+	Init_ExeDir ();	// Knightmare added
 
 #ifndef NEW_DED_CONSOLE
 	// Knightmare- startup logo, code from TomazQuake
@@ -1552,7 +1931,7 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 			newtime = Sys_Milliseconds();
 			time = newtime - oldtime;
 			if (time > 0) break;
-			Sleep(0); // may also use Speep(1); to free more CPU, but it can lower your fps
+			Sleep(0); // may also use Sleep(1); to free more CPU, but it can lower your fps
 		}
 		/*do
 		{

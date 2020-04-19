@@ -820,7 +820,7 @@ void Menu_DrawStatusBar (const char *string)
 		SCR_DrawString( SCREEN_WIDTH/2-(l/2)*MENU_FONT_SIZE, SCREEN_HEIGHT-(MENU_FONT_SIZE+1), MENU_FONT_SIZE, ALIGN_BOTTOM, string, 255 );
 	}
 	else
-		SCR_DrawFill( 0, SCREEN_HEIGHT-(MENU_FONT_SIZE+3), SCREEN_WIDTH, MENU_FONT_SIZE+3, ALIGN_BOTTOM_STRETCH, 0,0,0,255 );
+		SCR_DrawFill( 0, SCREEN_HEIGHT-(MENU_FONT_SIZE+3), SCREEN_WIDTH, MENU_FONT_SIZE+4, ALIGN_BOTTOM_STRETCH, 0,0,0,255 );	// go 1 pixel past screen bottom to prevent gap from scaling
 }
 
 void Menu_DrawString (int x, int y, int size, const char *string, int alpha)

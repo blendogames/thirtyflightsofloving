@@ -83,6 +83,7 @@ void Options_MenuInit ( void )
 	s_options_sound_section.generic.x			= 0;
 	s_options_sound_section.generic.y			= MENU_FONT_SIZE * 2;
 	s_options_sound_section.generic.callback	= MenuSoundFunc;
+	s_options_sound_section.generic.statusbar		= "change sound settings";
 //	s_options_sound_section.generic.cursor_offset = -(MENU_FONT_SIZE*10);
 	
 	s_options_controls_section.generic.type		= MTYPE_ACTION;
@@ -92,6 +93,7 @@ void Options_MenuInit ( void )
 	s_options_controls_section.generic.x		= 0;
 	s_options_controls_section.generic.y		= MENU_FONT_SIZE * 4;
 	s_options_controls_section.generic.callback = MenuControlsFunc;
+	s_options_controls_section.generic.statusbar	= "change control settings and bind keys";
 //	s_options_controls_section.generic.cursor_offset = -(MENU_FONT_SIZE*10);
 	
 	s_options_screen_section.generic.type		= MTYPE_ACTION;
@@ -101,6 +103,7 @@ void Options_MenuInit ( void )
 	s_options_screen_section.generic.x			= 0;
 	s_options_screen_section.generic.y			= MENU_FONT_SIZE * 6;
 	s_options_screen_section.generic.callback	= MenuScreenFunc;
+	s_options_screen_section.generic.statusbar		= "change HUD/crosshair settings";
 //	s_options_screen_section.generic.cursor_offset = -(MENU_FONT_SIZE*10);
 
 	s_options_effects_section.generic.type		= MTYPE_ACTION;
@@ -110,6 +113,7 @@ void Options_MenuInit ( void )
 	s_options_effects_section.generic.x			= 0;
 	s_options_effects_section.generic.y			= MENU_FONT_SIZE * 8;
 	s_options_effects_section.generic.callback	= MenuEffectsFunc;
+	s_options_effects_section.generic.statusbar		= "change ingame effects settings";
 //	s_options_effects_section.generic.cursor_offset = -(MENU_FONT_SIZE*10);
 
 	s_options_interface_section.generic.type		= MTYPE_ACTION;
@@ -119,6 +123,7 @@ void Options_MenuInit ( void )
 	s_options_interface_section.generic.x			= 0;
 	s_options_interface_section.generic.y			= MENU_FONT_SIZE * 10;
 	s_options_interface_section.generic.callback	= MenuInterfaceFunc;
+	s_options_interface_section.generic.statusbar	= "change menu/console settings";
 //	s_options_interface_section.generic.cursor_offset = -(MENU_FONT_SIZE*10);
 
 	s_options_back_action.generic.type		= MTYPE_ACTION;
