@@ -1683,7 +1683,7 @@ Init_ExeDir
 */
 static void Init_ExeDir (void)
 {
-#if 0
+#if 1
 	memset(exe_dir, 0, sizeof(exe_dir));
 	Q_snprintfz (exe_dir, sizeof(exe_dir), ".");
 #else
@@ -1710,6 +1710,41 @@ static void Init_ExeDir (void)
 	}
 #endif
 }
+
+
+/*
+==================
+FixWorkingDirectory
+==================
+*/
+void FixWorkingDirectory (void)
+{
+	int		i;
+	char	*p;
+	char	curDir[MAX_PATH];
+
+	GetModuleFileName (NULL, curDir, sizeof(curDir)-1);
+
+	p = strrchr (curDir, '\\');
+	p[0] = 0;
+
+	for (i = 1; i < argc; i++)
+	{
+		if (!strcmp (argv[i], "-nopathcheck"))
+			goto skipPathCheck;
+
+		if (!strcmp (argv[i], "-nocwdcheck"))
+			return;
+	}
+
+	if (strlen(curDir) > (MAX_OSPATH - MAX_QPATH))
+		Sys_Error ("Current path is too long. Please move your Quake II installation to a shorter path.");
+
+skipPathCheck:
+
+	SetCurrentDirectory (curDir);
+}
+
 
 /*
 ==================
@@ -1843,6 +1878,9 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 	ParseCommandLine (lpCmdLine);
 
 	Sys_SetHighDPIMode ();	// setup DPI awareness
+
+	// r1ch: always change to our directory (ugh)
+	FixWorkingDirectory ();
 
 	Init_ExeDir ();	// Knightmare added
 
