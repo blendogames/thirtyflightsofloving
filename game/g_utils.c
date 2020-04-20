@@ -750,7 +750,7 @@ float AtLeast(float x, float dx)
 	return xx;
 }
 
-edict_t	*LookingAt(edict_t *ent, int filter, vec3_t endpos, float *range)
+edict_t	*LookingAt (edict_t *ent, int filter, vec3_t endpos, float *range)
 {
 	edict_t		*who;
 	edict_t		*trigger[MAX_EDICTS];
@@ -761,7 +761,7 @@ edict_t	*LookingAt(edict_t *ent, int filter, vec3_t endpos, float *range)
 	vec3_t		dir, entp, mins, maxs;
 	int			i, num;
 
-	if(!ent->client)
+	if (!ent->client)
 	{
 		if(endpos) VectorClear(endpos);
 		if(range) *range = 0;
@@ -774,7 +774,7 @@ edict_t	*LookingAt(edict_t *ent, int filter, vec3_t endpos, float *range)
 		VectorCopy(ent->client->chasecam->s.origin,start);
 		ignore = ent->client->chasecam;
 	}
-	else if(ent->client->spycam)
+	else if (ent->client->spycam)
 	{
 		AngleVectors(ent->client->ps.viewangles, forward, NULL, NULL);
 		VectorCopy(ent->s.origin,start);
@@ -808,13 +808,13 @@ edict_t	*LookingAt(edict_t *ent, int filter, vec3_t endpos, float *range)
 		VectorSubtract(who->s.origin,start,dir);
 		r = VectorLength(dir);
 		VectorMA(start, r, forward, entp);
-		if(entp[0] < who->s.origin[0] - 17) continue;
-		if(entp[1] < who->s.origin[1] - 17) continue;
-		if(entp[2] < who->s.origin[2] - 17) continue;
-		if(entp[0] > who->s.origin[0] + 17) continue;
-		if(entp[1] > who->s.origin[1] + 17) continue;
-		if(entp[2] > who->s.origin[2] + 17) continue;
-		if(endpos)
+		if (entp[0] < who->s.origin[0] - 17) continue;
+		if (entp[1] < who->s.origin[1] - 17) continue;
+		if (entp[2] < who->s.origin[2] - 17) continue;
+		if (entp[0] > who->s.origin[0] + 17) continue;
+		if (entp[1] > who->s.origin[1] + 17) continue;
+		if (entp[2] > who->s.origin[2] + 17) continue;
+		if (endpos)
 			VectorCopy(who->s.origin,endpos);
 		if (range)
 			*range = r;
@@ -828,37 +828,37 @@ edict_t	*LookingAt(edict_t *ent, int filter, vec3_t endpos, float *range)
 		gi.sound (ent, CHAN_AUTO, gi.soundindex ("misc/talk1.wav"), 1, ATTN_NORM, 0);
 		return NULL;
 	}
-	if(!tr.ent)
+	if (!tr.ent)
 	{
 		// no hit
 		gi.sound (ent, CHAN_AUTO, gi.soundindex ("misc/talk1.wav"), 1, ATTN_NORM, 0);
 		return NULL;
 	}
-	if(!tr.ent->classname)
+	if (!tr.ent->classname)
 	{
 		// should never happen
 		gi.sound (ent, CHAN_AUTO, gi.soundindex ("misc/talk1.wav"), 1, ATTN_NORM, 0);
 		return NULL;
 	}
 
-	if((strstr(tr.ent->classname,"func_") != NULL) && (filter & LOOKAT_NOBRUSHMODELS))
+	if ((strstr(tr.ent->classname,"func_") != NULL) && (filter & LOOKAT_NOBRUSHMODELS))
 	{
 		// don't hit on brush models
 		gi.sound (ent, CHAN_AUTO, gi.soundindex ("misc/talk1.wav"), 1, ATTN_NORM, 0);
 		return NULL;
 	}
-	if((Q_stricmp(tr.ent->classname,"worldspawn") == 0) && (filter & LOOKAT_NOWORLD))
+	if ((Q_stricmp(tr.ent->classname,"worldspawn") == 0) && (filter & LOOKAT_NOWORLD))
 	{
 		// world brush
 		gi.sound (ent, CHAN_AUTO, gi.soundindex ("misc/talk1.wav"), 1, ATTN_NORM, 0);
 		return NULL;
 	}
-	if(endpos) {
+	if (endpos) {
 		endpos[0] = tr.endpos[0];
 		endpos[1] = tr.endpos[1];
 		endpos[2] = tr.endpos[2];
 	}
-	if(range) {
+	if (range) {
 		VectorSubtract(tr.endpos,start,start);
 		*range = VectorLength(start);
 	}
@@ -867,6 +867,9 @@ edict_t	*LookingAt(edict_t *ent, int filter, vec3_t endpos, float *range)
 
 void GameDirRelativePath(char *filename, char *output, size_t outputSize)
 {
+#ifdef KMQUAKE2_ENGINE_MOD
+	Com_sprintf(output, outputSize, "%s/%s", gi.GameDir(), filename);
+#else	// KMQUAKE2_ENGINE_MOD
 	cvar_t	*basedir, *gamedir;
 
 	basedir = gi.cvar("basedir", "", 0);
@@ -875,6 +878,48 @@ void GameDirRelativePath(char *filename, char *output, size_t outputSize)
 		Com_sprintf(output, outputSize, "%s/%s/%s", basedir->string, gamedir->string, filename);
 	else
 		Com_sprintf(output, outputSize, "%s/%s", basedir->string, filename);
+#endif	// KMQUAKE2_ENGINE_MOD
+}
+
+void SavegameDirRelativePath (char *filename, char *output, size_t outputSize)
+{
+#ifdef KMQUAKE2_ENGINE_MOD
+	Com_sprintf(output, outputSize, "%s/%s", gi.SaveGameDir(), filename);
+#else	// KMQUAKE2_ENGINE_MOD
+	cvar_t	*basedir, *gamedir;
+
+	basedir = gi.cvar("basedir", "", 0);
+	gamedir = gi.cvar("gamedir", "", 0);
+	if (strlen(gamedir->string))
+		Com_sprintf(output, outputSize, "%s/%s/%s", basedir->string, gamedir->string, filename);
+	else
+		Com_sprintf(output, outputSize, "%s/%s", basedir->string, filename);
+#endif	// KMQUAKE2_ENGINE_MOD
+}
+
+void CreatePath (char *path)
+{
+#ifdef KMQUAKE2_ENGINE_MOD
+	gi.CreatePath (path);
+#else	// KMQUAKE2_ENGINE_MOD
+	char	*ofs;
+
+	if (strstr(path, "..") || strstr(path, "::") || strstr(path, "\\\\") || strstr(path, "//"))
+	{
+		gi.dprintf("WARNING: refusing to create relative path '%s'\n", path);
+		return;
+	}
+
+	for (ofs = path+1 ; *ofs ; ofs++)
+	{
+		if (*ofs == '/' || *ofs == '\\')
+		{	// create the directory
+			*ofs = 0;
+			_mkdir (path);
+			*ofs = '/';
+		}
+	}
+#endif	// KMQUAKE2_ENGINE_MOD
 }
 
 /* Lazarus: G_UseTarget is similar to G_UseTargets, but only triggers

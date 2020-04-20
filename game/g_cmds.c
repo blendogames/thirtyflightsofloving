@@ -2086,10 +2086,12 @@ void ClientCommand (edict_t *ent)
 		Cmd_attack2_f(ent,true);*/
 
 	// zoom
-	else if (!Q_stricmp(cmd, "zoomin")) {
-		if(!deathmatch->value && !coop->value && !ent->client->chasetoggle) {
-			if(ent->client->ps.fov > 5) {
-				if(cl_gun->value)
+	else if (!Q_stricmp(cmd, "zoomin"))
+	{
+		if (!deathmatch->value && !coop->value && !ent->client->chasetoggle)
+		{
+			if (ent->client->ps.fov > 5) {
+				if (cl_gun->value)
 					stuffcmd(ent,"cl_gun 0\n");
 				ent->client->frame_zoomrate = zoomrate->value * ent->client->secs_per_frame;
 				ent->client->zooming = 1;
@@ -2097,10 +2099,11 @@ void ClientCommand (edict_t *ent)
 			}
 		}
 	}
-	else if (!Q_stricmp(cmd, "zoomout")) {
-		if(!deathmatch->value && !coop->value && !ent->client->chasetoggle) {
-			if(ent->client->ps.fov < ent->client->original_fov) {
-				if(cl_gun->value)
+	else if (!Q_stricmp(cmd, "zoomout"))
+	{
+		if (!deathmatch->value && !coop->value && !ent->client->chasetoggle) {
+			if (ent->client->ps.fov < ent->client->original_fov) {
+				if (cl_gun->value)
 					stuffcmd(ent,"cl_gun 0\n");
 				ent->client->frame_zoomrate = zoomrate->value * ent->client->secs_per_frame;
 				ent->client->zooming = -1;
@@ -2108,7 +2111,8 @@ void ClientCommand (edict_t *ent)
 			}
 		}
 	}
-	else if (!Q_stricmp(cmd, "zoom")) {
+	else if (!Q_stricmp(cmd, "zoom"))
+	{
 		if (!deathmatch->value && !coop->value && !ent->client->chasetoggle)
 		{
 			if (!parm)
@@ -2118,7 +2122,9 @@ void ClientCommand (edict_t *ent)
 				ent->client->zooming = 0;
 				ent->client->zoomed = false;
 				SetSensitivities(ent,true);
-			} else if (!ent->client->zoomed && !ent->client->zooming) {
+			}
+			else if (!ent->client->zoomed && !ent->client->zooming)
+			{
 				ent->client->ps.fov = zoomsnap->value;
 				ent->client->pers.hand = 2;
 				if (cl_gun->value)
@@ -2129,7 +2135,8 @@ void ClientCommand (edict_t *ent)
 			}
 		}
 	}
-	else if (!Q_stricmp(cmd, "zoomoff")) {
+	else if (!Q_stricmp(cmd, "zoomoff"))
+	{
 		if (!deathmatch->value && !coop->value && !ent->client->chasetoggle) {
 			if (ent->client->zoomed && !ent->client->zooming) {
 				ent->client->ps.fov = ent->client->original_fov;
@@ -2139,9 +2146,12 @@ void ClientCommand (edict_t *ent)
 			}
 		}
 	}
-	else if (!Q_stricmp(cmd, "zoomon")) {
-		if (!deathmatch->value && !coop->value && !ent->client->chasetoggle) {
-			if (!ent->client->zoomed && !ent->client->zooming) {
+	else if (!Q_stricmp(cmd, "zoomon"))
+	{
+		if (!deathmatch->value && !coop->value && !ent->client->chasetoggle)
+		{
+			if (!ent->client->zoomed && !ent->client->zooming)
+			{
 				ent->client->ps.fov = zoomsnap->value;
 				ent->client->pers.hand = 2;
 				if (cl_gun->value)
@@ -2152,28 +2162,33 @@ void ClientCommand (edict_t *ent)
 			}
 		}
 	}
-	else if (!Q_stricmp(cmd, "zoominstop")) {
+	else if (!Q_stricmp(cmd, "zoominstop"))
+	{
 		if (!deathmatch->value && !coop->value && !ent->client->chasetoggle) {
 			if (ent->client->zooming > 0) {
 				ent->client->zooming = 0;
 				if (ent->client->ps.fov == ent->client->original_fov) {
 					ent->client->zoomed = false;
 					SetSensitivities(ent,true);
-				} else {
+				}
+				else {
 					gi.cvar_forceset("zoomsnap",va("%f",ent->client->ps.fov));
 					SetSensitivities(ent,false);
 				}
 			}
 		}
 	}
-	else if (!Q_stricmp(cmd, "zoomoutstop")) {
-		if (!deathmatch->value && !coop->value && !ent->client->chasetoggle) {
+	else if (!Q_stricmp(cmd, "zoomoutstop"))
+	{
+		if (!deathmatch->value && !coop->value && !ent->client->chasetoggle)
+		{
 			if (ent->client->zooming < 0) {
 				ent->client->zooming = 0;
 				if (ent->client->ps.fov == ent->client->original_fov) {
 					ent->client->zoomed = false;
 					SetSensitivities(ent,true);
-				} else {
+				}
+				else {
 					gi.cvar_forceset("zoomsnap",va("%f",ent->client->ps.fov));
 					SetSensitivities(ent,false);
 				}
@@ -2181,8 +2196,10 @@ void ClientCommand (edict_t *ent)
 		}
 	}
 
-	else if(!Q_stricmp(cmd, "entlist")) {
-		if(parm) {
+	else if (!Q_stricmp(cmd, "entlist"))
+	{
+		if (parm)
+		{
 			edict_t	*e;
 			FILE	*f;
 			int		i;
@@ -2190,7 +2207,8 @@ void ClientCommand (edict_t *ent)
 			int		count;
 
 			f = fopen(parm,"w");
-			if(f) {
+			if (f)
+			{
 				fprintf(f,"Movetype codes\n"
 					      " 0 MOVETYPE_NONE\n"
 						  " 1 MOVETYPE_NOCLIP\n"
@@ -2238,14 +2256,15 @@ void ClientCommand (edict_t *ent)
 
 				fprintf(f,"============================================================\n");
 				count = 0;
-				for(i=0, e=&g_edicts[0]; i<globals.num_edicts; i++, e++) {
+				for (i=0, e=&g_edicts[0]; i<globals.num_edicts; i++, e++)
+				{
 					VectorAdd(e->s.origin,e->origin_offset,origin);
 					fprintf(f,"entity #%d, classname = %s at %s, velocity = %s\n",i,e->classname,vtos(origin),vtos(e->velocity));
 					fprintf(f,"health=%d, mass=%d, dmg=%d, wait=%g, angles=%s\n",e->health, e->mass, e->dmg, e->wait, vtos(e->s.angles));
 					fprintf(f,"targetname=%s, target=%s, spawnflags=0x%04x\n",e->targetname,e->target,e->spawnflags);
 					fprintf(f,"absmin,absmax,size=%s, %s, %s\n",vtos(e->absmin),vtos(e->absmax),vtos(e->size));
 					fprintf(f,"groundentity=%s\n",(e->groundentity ? e->groundentity->classname : "NULL"));
-					if(e->classname)
+					if (e->classname)
 					{
 						// class-specific output
 						if(!Q_stricmp(e->classname,"target_changelevel"))
@@ -2253,66 +2272,71 @@ void ClientCommand (edict_t *ent)
 					}
 					fprintf(f,"movetype=%d, solid=%d, clipmask=0x%08x\n",e->movetype,e->solid,e->clipmask);
 					fprintf(f,"================================================================================\n");
-					if(e->inuse) count++;
+					if (e->inuse) count++;
 				}
 				fprintf(f,"Total number of entities = %d\n",count);
 				fclose(f);
 				gi.dprintf("done!\n");
-			} else {
+			}
+			else {
 				gi.dprintf("Error opening %s\n",parm);
 			}
-		} else {
+		}
+		else {
 			gi.dprintf("syntax: entlist <filename>\n");
 		}
 	}
-	else if(!Q_stricmp(cmd, "properties"))
+	else if (!Q_stricmp(cmd, "properties"))
 	{
-		if(parm) {
+		if (parm)
+		{
 			char	filename[MAX_QPATH];
 			edict_t	*e;
 			FILE	*f;
-//			int		i;
+		//	int		i;
 
 			e = LookingAt(ent,0,NULL,NULL);
 			if(!e) return;
 	
-			GameDirRelativePath(parm, filename, sizeof(filename));
+		//	GameDirRelativePath(parm, filename, sizeof(filename));
+			SavegameDirRelativePath(parm, filename, sizeof(filename));
 		//	strncat(filename, ".txt");
 			Q_strncatz(filename, ".txt", sizeof(filename));
 			f = fopen(filename, "w");
-//			for(i=0; i<globals.num_edicts; i++)
-//			{
-//				e = &g_edicts[i];
+		//	for(i=0; i<globals.num_edicts; i++)
+		//	{
+		//		e = &g_edicts[i];
 				SaveEntProps(e,f);
-//			}
+		//	}
 			fclose(f);
-		} else {
+		}
+		else {
 			gi.dprintf("syntax: properties <filename>\n");
 		}
 	}
-	else if(!Q_stricmp(cmd,"go"))
+	else if (!Q_stricmp(cmd,"go"))
 	{
 		edict_t *viewing;
 		float	range;
 
 		viewing = LookingAt(ent,0,NULL,&range);
-		if(range > 512)
+		if (range > 512)
 			return;
-		if(!(viewing->monsterinfo.aiflags & AI_ACTOR))
+		if (!(viewing->monsterinfo.aiflags & AI_ACTOR))
 			return;
-		if(viewing->enemy)
+		if (viewing->enemy)
 			return;
-		if(!(viewing->monsterinfo.aiflags & AI_FOLLOW_LEADER))
+		if (!(viewing->monsterinfo.aiflags & AI_FOLLOW_LEADER))
 			return;
 		actor_moveit(ent,viewing);
 	}
-	else if(!Q_stricmp(cmd,"hud"))
+	else if (!Q_stricmp(cmd,"hud"))
 	{
-		if(parm)
+		if (parm)
 		{
 			int	state = atoi(parm);
 
-			if(state)
+			if (state)
 				Hud_On();
 			else
 				Hud_Off();
@@ -2320,9 +2344,9 @@ void ClientCommand (edict_t *ent)
 		else
 			Cmd_ToggleHud();
 	}
-	else if(!Q_stricmp(cmd,"whatsit"))
+	else if (!Q_stricmp(cmd,"whatsit"))
 	{
-		if(parm)
+		if (parm)
 		{
 			int state = atoi(parm);
 			if(state)
@@ -2334,9 +2358,9 @@ void ClientCommand (edict_t *ent)
 			world->effects ^= FX_WORLDSPAWN_WHATSIT;
 	}
 
-/*	else if(!Q_stricmp(cmd,"lsight"))
+/*	else if (!Q_stricmp(cmd,"lsight"))
 	{
-		if(ent->client->laser_sight)
+		if (ent->client->laser_sight)
 		{
 			G_FreeEdict(ent->client->laser_sight);
 			ent->client->laser_sight = NULL;
@@ -2359,40 +2383,41 @@ void ClientCommand (edict_t *ent)
 			laser->think(laser);
 		}
 	} */
-	else if(!Q_stricmp(cmd,"whereis"))
+	else if (!Q_stricmp(cmd,"whereis"))
 	{
-		if(parm)
+		if (parm)
 		{
 			edict_t	*e;
 			int		i;
 			int		count=0;
 
-			for(i=1; i<globals.num_edicts; i++)
+			for (i=1; i<globals.num_edicts; i++)
 			{
 				e = &g_edicts[i];
-				if(e->classname && !Q_stricmp(parm,e->classname))
+				if (e->classname && !Q_stricmp(parm,e->classname))
 				{
 					count++;
 					gi.dprintf("%d. %s\n",count,vtos(e->s.origin));
 				}
 			}
-			if(!count)
+			if (!count)
 				gi.dprintf("none found\n");
 		}
 		else
 			gi.dprintf("syntax: whereis <classname>\n");
 	}
 	// debugging/developer stuff
-	else if(developer->value) {
+	else if (developer->value)
+	{
 		if (!Q_stricmp(cmd,"lightswitch"))
 			ToggleLights();
 		else if (!Q_stricmp(cmd,"bbox"))
 			Cmd_Bbox_f (ent);
-		else if(!Q_stricmp(cmd,"forcewall"))
+		else if (!Q_stricmp(cmd,"forcewall"))
 		{
 			SpawnForcewall(ent);
 		}
-		else if(!Q_stricmp(cmd,"forcewall_off"))
+		else if (!Q_stricmp(cmd,"forcewall_off"))
 		{
 			ForcewallOff(ent);
 		}
@@ -2413,7 +2438,7 @@ void ClientCommand (edict_t *ent)
 			edict_t *viewing;
 			int		result;
 			viewing = LookingAt(ent,LOOKAT_MD2,NULL,NULL);
-			if(!viewing)
+			if (!viewing)
 				return;
 			if(viewing->monsterinfo.aiflags & AI_HINT_TEST)
 			{
@@ -2443,12 +2468,13 @@ void ClientCommand (edict_t *ent)
 			default: gi.dprintf("Unknown error\n");
 			}
 		}
-		else if (!Q_stricmp(cmd,"entid")) {
+		else if (!Q_stricmp(cmd,"entid"))
+		{
 			edict_t *viewing;
 			vec3_t	origin;
 			float	range;
 			viewing = LookingAt(ent,0,NULL,&range);
-			if(!viewing) 
+			if (!viewing) 
 				return;
 			VectorAdd(viewing->s.origin,viewing->origin_offset,origin);
 			gi.dprintf("classname = %s at %s, velocity = %s\n",viewing->classname,vtos(origin),vtos(viewing->velocity));
@@ -2479,7 +2505,7 @@ void ClientCommand (edict_t *ent)
 			ShiftItem(ent,512);
 		else if (!Q_stricmp(cmd, "item_release"))
 			ent->client->shift_dir = 0;
-		else if(!Q_stricmp(cmd,"medic_test"))
+		else if (!Q_stricmp(cmd,"medic_test"))
 		{
 			extern	int	medic_test;
 			if(parm)
@@ -2490,33 +2516,34 @@ void ClientCommand (edict_t *ent)
 				medic_test = 1;
 			gi.dprintf("medic_test is %s\n",(medic_test ? "on" : "off"));
 		}
-		else if (strstr(cmd, "muzzle")) {
+		else if (strstr(cmd, "muzzle"))
+		{
 			edict_t	*viewing;
-			viewing = LookingAt(ent,0,NULL,NULL);
-			if(!viewing)
+			viewing = LookingAt(ent, 0, NULL, NULL);
+			if (!viewing)
 				return;
-			if(!viewing->classname)
+			if (!viewing->classname)
 				return;
-			if(!(viewing->monsterinfo.aiflags & AI_ACTOR))
+			if (!(viewing->monsterinfo.aiflags & AI_ACTOR))
 				return;
-			if(gi.argc() < 2)
+			if (gi.argc() < 2)
 			{
 				gi.dprintf("Muzzle offset=%g, %g, %g\n",
 					viewing->muzzle[0],viewing->muzzle[1],viewing->muzzle[2]);
 			}
 			else
 			{
-				if(!Q_stricmp(cmd,"muzzlex"))
+				if (!Q_stricmp(cmd,"muzzlex"))
 					viewing->muzzle[0] = atof(gi.argv(1));
-				else if(!Q_stricmp(cmd,"muzzley"))
+				else if (!Q_stricmp(cmd,"muzzley"))
 					viewing->muzzle[1] = atof(gi.argv(1));
-				else if(!Q_stricmp(cmd,"muzzlez"))
+				else if (!Q_stricmp(cmd,"muzzlez"))
 					viewing->muzzle[2] = atof(gi.argv(1));
 				else
 					gi.dprintf("Syntax: muzzle[x|y|z] <value>\n");
 			}
 		}
-		else if(!Q_stricmp(cmd,"range"))
+		else if (!Q_stricmp(cmd,"range"))
 		{
 			vec3_t	forward, point, start;
 			trace_t	tr;
@@ -2529,8 +2556,9 @@ void ClientCommand (edict_t *ent)
 			VectorSubtract(tr.endpos,start,point);
 			gi.dprintf("range=%g\n",VectorLength(point));
 		}
-		else if (!Q_stricmp(cmd,"setskill")) {
-			if(gi.argc() < 2)
+		else if (!Q_stricmp(cmd, "setskill"))
+		{
+			if (gi.argc() < 2)
 				gi.dprintf("Syntax: setskill X\n");
 			else
 			{
@@ -2538,15 +2566,16 @@ void ClientCommand (edict_t *ent)
 				gi.cvar_forceset("skill", va("%i", s));
 			}
 		}
-		else if (!Q_stricmp(cmd,"sk")) {
+		else if (!Q_stricmp(cmd, "sk"))
+		{
 			edict_t *viewing;
 			int		skinnum;
 
 			viewing = LookingAt(ent,0,NULL,NULL);
-			if(!viewing) 
+			if (!viewing) 
 				return;
 
-			if(parm) {
+			if (parm) {
 				skinnum = atoi(parm);
 				viewing->s.skinnum = skinnum;
 				gi.linkentity(viewing);
@@ -2555,12 +2584,12 @@ void ClientCommand (edict_t *ent)
 				gi.dprintf("Currently using skin #%i\n",viewing->s.skinnum);
 
 		}
-		else if(!Q_stricmp(cmd,"spawn"))
+		else if (!Q_stricmp(cmd,"spawn"))
 		{
 			edict_t	*e;
 			vec3_t	forward;
 		
-			if(!parm)
+			if (!parm)
 			{
 				gi.dprintf("syntax: spawn <classname>\n");
 				return;
@@ -2573,12 +2602,12 @@ void ClientCommand (edict_t *ent)
 			e->s.angles[YAW] = ent->s.angles[YAW];
 			ED_CallSpawn(e);
 		}
-		else if(!Q_stricmp(cmd,"spawngoodguy"))
+		else if (!Q_stricmp(cmd,"spawngoodguy"))
 		{
 			edict_t	*e;
 			vec3_t	forward;
 		
-			if(gi.argc() < 3)
+			if (gi.argc() < 3)
 			{
 				gi.dprintf("syntax: spawngoodguy <modelname> <weapon>\n");
 				return;
@@ -2596,7 +2625,7 @@ void ClientCommand (edict_t *ent)
 			ED_CallSpawn(e);
 			actor_files();
 		}
-		else if(!Q_stricmp(cmd,"spawnself"))
+		else if (!Q_stricmp(cmd,"spawnself"))
 		{
 			edict_t	*decoy;
 			vec3_t	forward;
@@ -2627,14 +2656,15 @@ void ClientCommand (edict_t *ent)
 			VectorCopy(ent->maxs,decoy->maxs);
 			gi.linkentity (decoy); 
 		}
-		else if (!Q_stricmp(cmd,"switch")) {
+		else if (!Q_stricmp(cmd,"switch"))
+		{
 			extern mmove_t	actor_move_switch;
 			edict_t *viewing;
 
 			viewing = LookingAt(ent,0,NULL,NULL);
 			if(!viewing)
 				return;
-			if(!(viewing->monsterinfo.aiflags & AI_ACTOR))
+			if (!(viewing->monsterinfo.aiflags & AI_ACTOR))
 			{
 				gi.dprintf("Must be a misc_actor\n");
 				return;
@@ -2642,11 +2672,12 @@ void ClientCommand (edict_t *ent)
 			viewing->monsterinfo.currentmove = &actor_move_switch;
 		}
 #ifndef KMQUAKE2_ENGINE_MOD // these functions moved clientside in engine
-		else if(!Q_stricmp(cmd,"texture")) {
+		else if(!Q_stricmp(cmd,"texture"))
+		{
 			trace_t	tr;
 			vec3_t	forward, start, end;
 
-			if(ent->client->chasetoggle)
+			if (ent->client->chasetoggle)
 				VectorCopy(ent->client->chasecam->s.origin,start);
 			else {
 				VectorCopy(ent->s.origin, start);
@@ -2655,21 +2686,22 @@ void ClientCommand (edict_t *ent)
 			AngleVectors(ent->client->v_angle, forward, NULL, NULL);
 			VectorMA(start, WORLD_SIZE, forward, end);	// was 8192
 			tr = gi.trace(start,NULL,NULL,end,ent,MASK_ALL);
-			if(!tr.ent)
+			if (!tr.ent)
 				gi.dprintf("Nothing hit?\n");
 			else {
-				if(!tr.surface)
+				if (!tr.surface)
 					gi.dprintf("Not a brush\n");
 				else
 					gi.dprintf("Texture=%s, surface=0x%08x, value=%d\n",tr.surface->name,tr.surface->flags,tr.surface->value);
 			}
 		}
-		else if(!Q_stricmp(cmd,"surf")) {
+		else if (!Q_stricmp(cmd,"surf"))
+		{
 			trace_t	tr;
 			vec3_t	forward, start, end;
 			int		s;
 
-			if(gi.argc() < 2)
+			if (gi.argc() < 2)
 			{
 				gi.dprintf("Syntax: surf <value>\n");
 				return;
@@ -2677,7 +2709,7 @@ void ClientCommand (edict_t *ent)
 			else
 				s = atoi(gi.argv(1));
 
-			if(ent->client->chasetoggle)
+			if (ent->client->chasetoggle)
 				VectorCopy(ent->client->chasecam->s.origin,start);
 			else {
 				VectorCopy(ent->s.origin, start);
@@ -2686,11 +2718,11 @@ void ClientCommand (edict_t *ent)
 			AngleVectors(ent->client->v_angle, forward, NULL, NULL);
 			VectorMA(start, WORLD_SIZE, forward, end);	// was 8192
 			tr = gi.trace(start,NULL,NULL,end,ent,MASK_ALL);
-			if(!tr.ent)
+			if (!tr.ent)
 				gi.dprintf("Nothing hit?\n");
 			else
 			{
-				if(!tr.surface)
+				if (!tr.surface)
 					gi.dprintf("Not a brush\n");
 				else
 					tr.surface->flags = s;

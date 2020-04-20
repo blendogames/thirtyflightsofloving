@@ -1024,6 +1024,7 @@ int PatchMonsterModel (char *modelname)
 	char		skins[MAX_SKINS][MAX_SKINNAME];	// skin entries
 	char		infilename[MAX_OSPATH];
 	char		outfilename[MAX_OSPATH];
+	char		tempname[MAX_OSPATH];
 	char		*p;
 	FILE		*infile;
 	FILE		*outfile;
@@ -1039,23 +1040,26 @@ int PatchMonsterModel (char *modelname)
 	if (!*gamedir->string)
 		return 0;	// we're in baseq2
 
-	Com_sprintf (outfilename, sizeof(outfilename), "%s/%s", gamedir->string, modelname);
+//	Com_sprintf (outfilename, sizeof(outfilename), "%s/%s", gamedir->string, modelname);
+	Com_sprintf (tempname, sizeof(tempname), modelname);
+	SavegameDirRelativePath (tempname, outfilename, sizeof(outfilename));
 	if (outfile = fopen (outfilename, "rb"))
 	{
 		// output file already exists, move along
 		fclose (outfile);
+	//	gi.dprintf ("PatchMonsterModel: Could not save %s, file already exists\n", outfilename);
 		return 0;
 	}
 
 
 	numskins = 8;
 	// special cases
-	if(!strcmp(modelname,"models/monsters/tank/tris.md2"))
+	if (!strcmp(modelname,"models/monsters/tank/tris.md2"))
 	{
 		is_tank = true;
 		numskins = 16;
 	}
-	else if(!strcmp(modelname,"models/monsters/soldier/tris.md2"))
+	else if (!strcmp(modelname,"models/monsters/soldier/tris.md2"))
 	{
 		is_soldier = true;
 		numskins = 24;
@@ -1200,7 +1204,7 @@ int PatchMonsterModel (char *modelname)
 		int				k, numitems;
 
 		fpak = fopen("baseq2/pak0.pak","rb");
-		if(!fpak)
+		if (!fpak)
 		{
 			cvar_t	*cddir;
 			char	pakfile[MAX_OSPATH];
@@ -1208,7 +1212,7 @@ int PatchMonsterModel (char *modelname)
 			cddir = gi.cvar("cddir", "", 0);
 			Com_sprintf(pakfile, sizeof(pakfile), "%s/baseq2/pak0.pak",cddir->string);
 			fpak = fopen(pakfile,"rb");
-			if(!fpak)
+			if (!fpak)
 			{
 				gi.dprintf("PatchMonsterModel: Cannot find pak0.pak\n");
 				return 0;
@@ -1218,10 +1222,10 @@ int PatchMonsterModel (char *modelname)
 		numitems = pakheader.dsize/sizeof(pak_item_t);
 		fseek(fpak,pakheader.dstart,SEEK_SET);
 		data = NULL;
-		for(k=0; k<numitems && !data; k++)
+		for (k=0; k<numitems && !data; k++)
 		{
 			fread(&pakitem,1,sizeof(pak_item_t),fpak);
-			if(!Q_stricmp(pakitem.name,modelname))
+			if (!Q_stricmp(pakitem.name,modelname))
 			{
 				fseek(fpak,pakitem.start,SEEK_SET);
 				fread(&model, sizeof(dmdl_t), 1, fpak);
@@ -1236,7 +1240,7 @@ int PatchMonsterModel (char *modelname)
 			}
 		}
 		fclose(fpak);
-		if(!data)
+		if (!data)
 		{
 			gi.dprintf("PatchMonsterModel: Could not find %s in baseq2/pak0.pak\n",modelname);
 			return 0;
@@ -1268,7 +1272,7 @@ int PatchMonsterModel (char *modelname)
 	model.ofs_end    += newoffset;
 	
 	// save new model
-	Com_sprintf (outfilename, sizeof(outfilename), "%s/models", gamedir->string);	// make some dirs if needed
+/*	Com_sprintf (outfilename, sizeof(outfilename), "%s/models", gamedir->string);	// make some dirs if needed
 	_mkdir (outfilename);
 	Q_strncatz (outfilename,"/monsters", sizeof(outfilename));
 	_mkdir (outfilename);
@@ -1276,9 +1280,12 @@ int PatchMonsterModel (char *modelname)
 	p = strstr(outfilename,"/tris.md2");
 	*p = 0;
 	_mkdir (outfilename);
-
 	Com_sprintf (outfilename, sizeof(outfilename), "%s/%s", gamedir->string, modelname);
-	
+*/
+	Com_sprintf (tempname, sizeof(tempname), modelname);
+	SavegameDirRelativePath (tempname, outfilename, sizeof(outfilename));
+	CreatePath (outfilename);
+
 	if ( !(outfile = fopen (outfilename, "wb")) )
 	{
 		// file couldn't be created for some other reason

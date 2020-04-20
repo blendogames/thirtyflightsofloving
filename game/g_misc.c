@@ -4206,6 +4206,7 @@ int PatchDeadSoldier (void)
 	char		skins[NUM_SKINS][MAX_SKINNAME];	// skin entries
 	char		infilename[MAX_OSPATH];
 	char		outfilename[MAX_OSPATH];
+	char		tempname[MAX_OSPATH];
 	int			j;
 	char		*p;
 	FILE		*infile;
@@ -4220,8 +4221,9 @@ int PatchDeadSoldier (void)
 	if (!*gamedir->string)
 		return 0;	// we're in baseq2
 
-//	sprintf (outfilename, "%s/%s", gamedir->string,DEADSOLDIER_MODEL);
-	Com_sprintf (outfilename, sizeof(outfilename), "%s/%s", gamedir->string,DEADSOLDIER_MODEL);
+//	Com_sprintf (outfilename, sizeof(outfilename), "%s/%s", gamedir->string, DEADSOLDIER_MODEL);
+	Com_sprintf (tempname, sizeof(tempname), DEADSOLDIER_MODEL);
+	SavegameDirRelativePath (tempname, outfilename, sizeof(outfilename));
 	if (outfile = fopen (outfilename, "rb"))
 	{
 		// output file already exists, move along
@@ -4264,7 +4266,7 @@ int PatchDeadSoldier (void)
 		int				k, numitems;
 
 		fpak = fopen("baseq2/pak0.pak","rb");
-		if(!fpak)
+		if (!fpak)
 		{
 			cvar_t	*cddir;
 			char	pakfile[MAX_OSPATH];
@@ -4273,7 +4275,7 @@ int PatchDeadSoldier (void)
 		//	sprintf(pakfile,"%s/baseq2/pak0.pak",cddir->string);
 			Com_sprintf(pakfile, sizeof(pakfile), "%s/baseq2/pak0.pak",cddir->string);
 			fpak = fopen(pakfile,"rb");
-			if(!fpak)
+			if (!fpak)
 			{
 				gi.dprintf("PatchDeadSoldier: Cannot find pak0.pak\n");
 				return 0;
@@ -4283,10 +4285,10 @@ int PatchDeadSoldier (void)
 		numitems = pakheader.dsize/sizeof(pak_item_t);
 		fseek(fpak,pakheader.dstart,SEEK_SET);
 		data = NULL;
-		for(k=0; k<numitems && !data; k++)
+		for (k=0; k<numitems && !data; k++)
 		{
 			fread(&pakitem,1,sizeof(pak_item_t),fpak);
-			if(!Q_stricmp(pakitem.name,DEADSOLDIER_MODEL))
+			if (!Q_stricmp(pakitem.name,DEADSOLDIER_MODEL))
 			{
 				fseek(fpak,pakitem.start,SEEK_SET);
 				fread(&model, sizeof(dmdl_t), 1, fpak);
@@ -4301,7 +4303,7 @@ int PatchDeadSoldier (void)
 			}
 		}
 		fclose(fpak);
-		if(!data)
+		if (!data)
 		{
 			gi.dprintf("PatchDeadSoldier: Could not find %s in baseq2/pak0.pak\n",DEADSOLDIER_MODEL);
 			return 0;
@@ -4335,22 +4337,22 @@ int PatchDeadSoldier (void)
 	model.ofs_end    += newoffset;
 	
 	// save new model
-//	sprintf (outfilename, "%s/models", gamedir->string);	// make some dirs if needed
-	Com_sprintf (outfilename, sizeof(outfilename), "%s/models", gamedir->string);	// make some dirs if needed
+/*	Com_sprintf (outfilename, sizeof(outfilename), "%s/models", gamedir->string);	// make some dirs if needed
 	_mkdir (outfilename);
 	Q_strncatz (outfilename, "/deadbods", sizeof(outfilename));
 	_mkdir (outfilename);
 	Q_strncatz (outfilename, "/dude", sizeof(outfilename));
 	_mkdir (outfilename);
-//	sprintf (outfilename, "%s/%s", gamedir->string, DEADSOLDIER_MODEL);
 	Com_sprintf (outfilename, sizeof(outfilename), "%s/%s", gamedir->string, DEADSOLDIER_MODEL);
 	p = strstr(outfilename,"/tris.md2");
 	*p = 0;
 	_mkdir (outfilename);
-
-//	sprintf (outfilename, "%s/%s", gamedir->string, DEADSOLDIER_MODEL);
 	Com_sprintf (outfilename, sizeof(outfilename), "%s/%s", gamedir->string, DEADSOLDIER_MODEL);
-	
+*/
+	Com_sprintf (tempname, sizeof(tempname), DEADSOLDIER_MODEL);
+	SavegameDirRelativePath (tempname, outfilename, sizeof(outfilename));
+	CreatePath (outfilename);
+
 	if ( !(outfile = fopen (outfilename, "wb")) )
 	{
 		// file couldn't be created for some other reason

@@ -223,130 +223,130 @@ void InitLithiumVars (void)
 	use_vwep = gi.cvar("use_vwep", "1", CVAR_ARCHIVE);
 
 	// weapon balancing
-	sk_blaster_damage = gi.cvar("blaster_damage", "10", 0);
-	sk_blaster_damage_dm = gi.cvar("blaster_damage_dm", "15", 0);
-	sk_blaster_speed = gi.cvar("blaster_speed", "1000", 0);
-	sk_blaster_color = gi.cvar("blaster_color", "1", 0);
+	sk_blaster_damage = gi.cvar("sk_blaster_damage", "10", 0);
+	sk_blaster_damage_dm = gi.cvar("sk_blaster_damage_dm", "15", 0);
+	sk_blaster_speed = gi.cvar("sk_blaster_speed", "1000", 0);
+	sk_blaster_color = gi.cvar("sk_blaster_color", "1", 0);
 
-	sk_shotgun_damage = gi.cvar("shotgun_damage", "4", 0);
-	sk_shotgun_count = gi.cvar("shotgun_count", "12", 0);
-	sk_shotgun_hspread = gi.cvar("shotgun_hspread", "500", 0);
-	sk_shotgun_vspread = gi.cvar("shotgun_vspread", "500", 0);
+	sk_shotgun_damage = gi.cvar("sk_shotgun_damage", "4", 0);
+	sk_shotgun_count = gi.cvar("sk_shotgun_count", "12", 0);
+	sk_shotgun_hspread = gi.cvar("sk_shotgun_hspread", "500", 0);
+	sk_shotgun_vspread = gi.cvar("sk_shotgun_vspread", "500", 0);
 
-	sk_sshotgun_damage = gi.cvar("sshotgun_damage", "6", 0);
-	sk_sshotgun_count = gi.cvar("sshotgun_count", "20", 0);
-	sk_sshotgun_hspread = gi.cvar("sshotgun_hspread", "1000", 0);
-	sk_sshotgun_vspread = gi.cvar("sshotgun_vspread", "500", 0);
+	sk_sshotgun_damage = gi.cvar("sk_sshotgun_damage", "6", 0);
+	sk_sshotgun_count = gi.cvar("sk_sshotgun_count", "20", 0);
+	sk_sshotgun_hspread = gi.cvar("sk_sshotgun_hspread", "1000", 0);
+	sk_sshotgun_vspread = gi.cvar("sk_sshotgun_vspread", "500", 0);
 
-	sk_machinegun_damage = gi.cvar("machinegun_damage", "8", 0);
-	sk_machinegun_hspread = gi.cvar("machinegun_hspread", "300", 0);
-	sk_machinegun_vspread = gi.cvar("machinegun_vspread", "500", 0);
+	sk_machinegun_damage = gi.cvar("sk_machinegun_damage", "8", 0);
+	sk_machinegun_hspread = gi.cvar("sk_machinegun_hspread", "300", 0);
+	sk_machinegun_vspread = gi.cvar("sk_machinegun_vspread", "500", 0);
 
-	sk_chaingun_damage = gi.cvar("chaingun_damage", "8", 0);
-	sk_chaingun_damage_dm = gi.cvar("chaingun_damage_dm", "6", 0);
-	sk_chaingun_hspread = gi.cvar("chaingun_hspread", "300", 0);
-	sk_chaingun_vspread = gi.cvar("chaingun_vspread", "500", 0);
+	sk_chaingun_damage = gi.cvar("sk_chaingun_damage", "8", 0);
+	sk_chaingun_damage_dm = gi.cvar("sk_chaingun_damage_dm", "6", 0);
+	sk_chaingun_hspread = gi.cvar("sk_chaingun_hspread", "300", 0);
+	sk_chaingun_vspread = gi.cvar("sk_chaingun_vspread", "500", 0);
 
-	sk_grenade_damage = gi.cvar("grenade_damage", "120", 0);
-	sk_grenade_radius = gi.cvar("grenade_radius", "160", 0);
-	sk_grenade_speed = gi.cvar("grenade_speed", "600", 0);
+	sk_grenade_damage = gi.cvar("sk_grenade_damage", "120", 0);
+	sk_grenade_radius = gi.cvar("sk_grenade_radius", "160", 0);
+	sk_grenade_speed = gi.cvar("sk_grenade_speed", "600", 0);
 
-	sk_hand_grenade_damage = gi.cvar("hand_grenade_damage", "125", 0);
-	sk_hand_grenade_radius = gi.cvar("hand_grenade_radius", "165", 0);
+	sk_hand_grenade_damage = gi.cvar("sk_hand_grenade_damage", "125", 0);
+	sk_hand_grenade_radius = gi.cvar("sk_hand_grenade_radius", "165", 0);
 	
-	sk_rocket_damage = gi.cvar("rocket_damage", "100", 0);
-	sk_rocket_damage2 = gi.cvar("rocket_damage2", "20", 0);
-	sk_rocket_rdamage = gi.cvar("rocket_rdamage", "120", 0);
-	sk_rocket_radius = gi.cvar("rocket_radius", "140", 0);
-	sk_rocket_speed = gi.cvar("rocket_speed", "650", 0);
+	sk_rocket_damage = gi.cvar("sk_rocket_damage", "100", 0);
+	sk_rocket_damage2 = gi.cvar("sk_rocket_damage2", "20", 0);
+	sk_rocket_rdamage = gi.cvar("sk_rocket_rdamage", "120", 0);
+	sk_rocket_radius = gi.cvar("sk_rocket_radius", "140", 0);
+	sk_rocket_speed = gi.cvar("sk_rocket_speed", "650", 0);
 
-	sk_hyperblaster_damage = gi.cvar("hyperblaster_damage", "10", 0);
-	sk_hyperblaster_damage_dm = gi.cvar("hyperblaster_damage_dm", "15", 0);
-	sk_hyperblaster_speed = gi.cvar("hyperblaster_speed", "1000", 0);
-	sk_hyperblaster_color = gi.cvar("hyperblaster_color", "1", 0);
+	sk_hyperblaster_damage = gi.cvar("sk_hyperblaster_damage", "10", 0);
+	sk_hyperblaster_damage_dm = gi.cvar("sk_hyperblaster_damage_dm", "15", 0);
+	sk_hyperblaster_speed = gi.cvar("sk_hyperblaster_speed", "1000", 0);
+	sk_hyperblaster_color = gi.cvar("sk_hyperblaster_color", "1", 0);
 
-	sk_railgun_damage = gi.cvar("railgun_damage", "150", 0);
-	sk_railgun_damage_dm = gi.cvar("railgun_damage_dm", "100", 0);
-	sk_rail_color = gi.cvar("rail_color", "1", 0);
+	sk_railgun_damage = gi.cvar("sk_railgun_damage", "150", 0);
+	sk_railgun_damage_dm = gi.cvar("sk_railgun_damage_dm", "100", 0);
+	sk_rail_color = gi.cvar("sk_rail_color", "1", 0);
 
-	sk_bfg_damage = gi.cvar("bfg_damage", "500", 0);
-	sk_bfg_damage_dm = gi.cvar("bfg_damage_dm", "200", 0);
-	sk_bfg_damage2 = gi.cvar("bfg_damage2", "10", 0);
-	sk_bfg_damage2_dm = gi.cvar("bfg_damage2_dm", "5", 0);
-	sk_bfg_rdamage = gi.cvar("bfg_rdamage", "200", 0);
-	sk_bfg_radius = gi.cvar("bfg_radius", "1000", 0);
-	sk_bfg_speed = gi.cvar("bfg_speed", "400", 0);
+	sk_bfg_damage = gi.cvar("sk_bfg_damage", "500", 0);
+	sk_bfg_damage_dm = gi.cvar("sk_bfg_damage_dm", "200", 0);
+	sk_bfg_damage2 = gi.cvar("sk_bfg_damage2", "10", 0);
+	sk_bfg_damage2_dm = gi.cvar("sk_bfg_damage2_dm", "5", 0);
+	sk_bfg_rdamage = gi.cvar("sk_bfg_rdamage", "200", 0);
+	sk_bfg_radius = gi.cvar("sk_bfg_radius", "1000", 0);
+	sk_bfg_speed = gi.cvar("sk_bfg_speed", "400", 0);
 
-	sk_jump_kick_damage = gi.cvar("jump_kick_damage", "10", 0);
+	sk_jump_kick_damage = gi.cvar("sk_jump_kick_damage", "10", 0);
 
 	// DM start values
-	sk_dm_start_shells = gi.cvar("dm_start_shells", "0", 0);
-	sk_dm_start_bullets = gi.cvar("dm_start_bullets", "0", 0);
-	sk_dm_start_rockets = gi.cvar("dm_start_rockets", "0", 0);
-	sk_dm_start_homing = gi.cvar("dm_start_homing", "0", 0);
-	sk_dm_start_grenades = gi.cvar("dm_start_grenades", "0", 0);
-	sk_dm_start_cells = gi.cvar("dm_start_cells", "0", 0);
-	sk_dm_start_slugs = gi.cvar("dm_start_slugs", "0", 0);
+	sk_dm_start_shells = gi.cvar("sk_dm_start_shells", "0", 0);
+	sk_dm_start_bullets = gi.cvar("sk_dm_start_bullets", "0", 0);
+	sk_dm_start_rockets = gi.cvar("sk_dm_start_rockets", "0", 0);
+	sk_dm_start_homing = gi.cvar("sk_dm_start_homing", "0", 0);
+	sk_dm_start_grenades = gi.cvar("sk_dm_start_grenades", "0", 0);
+	sk_dm_start_cells = gi.cvar("sk_dm_start_cells", "0", 0);
+	sk_dm_start_slugs = gi.cvar("sk_dm_start_slugs", "0", 0);
 
-	sk_dm_start_shotgun = gi.cvar("dm_start_shotgun", "0", 0);
-	sk_dm_start_sshotgun = gi.cvar("dm_start_sshotgun", "0", 0);
-	sk_dm_start_machinegun = gi.cvar("dm_start_machinegun", "0", 0);
-	sk_dm_start_chaingun = gi.cvar("dm_start_chaingun", "0", 0);
-	sk_dm_start_grenadelauncher = gi.cvar("dm_start_grenadelauncher", "0", 0);
-	sk_dm_start_rocketlauncher = gi.cvar("dm_start_rocketlauncher", "0", 0);
-	sk_dm_start_hyperblaster = gi.cvar("dm_start_hyperblaster", "0", 0);
-	sk_dm_start_railgun = gi.cvar("dm_start_railgun", "0", 0);
-	sk_dm_start_bfg = gi.cvar("dm_start_bfg", "0", 0);
+	sk_dm_start_shotgun = gi.cvar("sk_dm_start_shotgun", "0", 0);
+	sk_dm_start_sshotgun = gi.cvar("sk_dm_start_sshotgun", "0", 0);
+	sk_dm_start_machinegun = gi.cvar("sk_dm_start_machinegun", "0", 0);
+	sk_dm_start_chaingun = gi.cvar("sk_dm_start_chaingun", "0", 0);
+	sk_dm_start_grenadelauncher = gi.cvar("sk_dm_start_grenadelauncher", "0", 0);
+	sk_dm_start_rocketlauncher = gi.cvar("sk_dm_start_rocketlauncher", "0", 0);
+	sk_dm_start_hyperblaster = gi.cvar("sk_dm_start_hyperblaster", "0", 0);
+	sk_dm_start_railgun = gi.cvar("sk_dm_start_railgun", "0", 0);
+	sk_dm_start_bfg = gi.cvar("sk_dm_start_bfg", "0", 0);
 
 	// maximum values
-	sk_max_health = gi.cvar("max_health", "100", 0);
-	sk_max_health_dm = gi.cvar("max_health_dm", "120", 0);
-	sk_max_armor_jacket = gi.cvar("max_armor_jacket", "50", 0);
-	sk_max_armor_combat = gi.cvar("max_armor_combat", "100", 0);
-	sk_max_armor_body = gi.cvar("max_armor_body", "200", 0);
-	sk_max_bullets = gi.cvar("max_bullets", "200", 0);
-	sk_max_shells = gi.cvar("max_shells", "100", 0);
-	sk_max_rockets = gi.cvar("max_rockets", "50", 0);
-	sk_max_grenades = gi.cvar("max_grenades", "50", 0);
-	sk_max_cells = gi.cvar("max_cells", "200", 0);
-	sk_max_slugs = gi.cvar("max_slugs", "50", 0);
-	sk_max_fuel = gi.cvar("max_fuel", "1000", 0);
+	sk_max_health = gi.cvar("sk_max_health", "100", 0);
+	sk_max_health_dm = gi.cvar("sk_max_health_dm", "120", 0);
+	sk_max_armor_jacket = gi.cvar("sk_max_armor_jacket", "50", 0);
+	sk_max_armor_combat = gi.cvar("sk_max_armor_combat", "100", 0);
+	sk_max_armor_body = gi.cvar("sk_max_armor_body", "200", 0);
+	sk_max_bullets = gi.cvar("sk_max_bullets", "200", 0);
+	sk_max_shells = gi.cvar("sk_max_shells", "100", 0);
+	sk_max_rockets = gi.cvar("sk_max_rockets", "50", 0);
+	sk_max_grenades = gi.cvar("sk_max_grenades", "50", 0);
+	sk_max_cells = gi.cvar("sk_max_cells", "200", 0);
+	sk_max_slugs = gi.cvar("sk_max_slugs", "50", 0);
+	sk_max_fuel = gi.cvar("sk_max_fuel", "1000", 0);
 
 	// maximum settings if a player gets a bandolier
-	sk_bando_bullets = gi.cvar("bando_bullets", "250", 0);
-	sk_bando_shells = gi.cvar("bando_shells", "150", 0);
-	sk_bando_cells = gi.cvar("bando_cells", "250", 0);
-	sk_bando_slugs = gi.cvar("bando_slugs", "75", 0);
-	sk_bando_fuel = gi.cvar("bando_fuel", "1500", 0);
+	sk_bando_bullets = gi.cvar("sk_bando_bullets", "250", 0);
+	sk_bando_shells = gi.cvar("sk_bando_shells", "150", 0);
+	sk_bando_cells = gi.cvar("sk_bando_cells", "250", 0);
+	sk_bando_slugs = gi.cvar("sk_bando_slugs", "75", 0);
+	sk_bando_fuel = gi.cvar("sk_bando_fuel", "1500", 0);
 
 	// maximum settings if a player gets a pack
-	sk_pack_bullets = gi.cvar("pack_bullets", "300", 0);
-	sk_pack_shells = gi.cvar("pack_shells", "200", 0);
-	sk_pack_rockets = gi.cvar("pack_rockets", "100", 0);
-	sk_pack_grenades = gi.cvar("pack_grenades", "100", 0);
-	sk_pack_cells = gi.cvar("pack_cells", "300", 0);
-	sk_pack_slugs = gi.cvar("pack_slugs", "100", 0);
-	sk_pack_fuel = gi.cvar("pack_fuel", "2000", 0);
+	sk_pack_bullets = gi.cvar("sk_pack_bullets", "300", 0);
+	sk_pack_shells = gi.cvar("sk_pack_shells", "200", 0);
+	sk_pack_rockets = gi.cvar("sk_pack_rockets", "100", 0);
+	sk_pack_grenades = gi.cvar("sk_pack_grenades", "100", 0);
+	sk_pack_cells = gi.cvar("sk_pack_cells", "300", 0);
+	sk_pack_slugs = gi.cvar("sk_pack_slugs", "100", 0);
+	sk_pack_fuel = gi.cvar("sk_pack_fuel", "2000", 0);
 
 	// pickup values
-	sk_box_shells = gi.cvar("box_shells", "10", 0);
-	sk_box_bullets = gi.cvar("box_bullets", "50", 0);
-	sk_box_grenades = gi.cvar("box_grenades", "5", 0);
-	sk_box_rockets = gi.cvar("box_rockets", "5", 0);
-	sk_box_cells = gi.cvar("box_cells", "50", 0);
-	sk_box_slugs = gi.cvar("box_slugs", "10", 0);
-	sk_box_fuel = gi.cvar("box_fuel", "500", 0);
+	sk_box_shells = gi.cvar("sk_box_shells", "10", 0);
+	sk_box_bullets = gi.cvar("sk_box_bullets", "50", 0);
+	sk_box_grenades = gi.cvar("sk_box_grenades", "5", 0);
+	sk_box_rockets = gi.cvar("sk_box_rockets", "5", 0);
+	sk_box_cells = gi.cvar("sk_box_cells", "50", 0);
+	sk_box_slugs = gi.cvar("sk_box_slugs", "10", 0);
+	sk_box_fuel = gi.cvar("sk_box_fuel", "500", 0);
 
 	// items/powerups
-	sk_armor_bonus_value = gi.cvar("armor_bonus_value", "2", 0);
-	sk_health_bonus_value = gi.cvar("health_bonus_value", "2", 0);
-	sk_powerup_max = gi.cvar("powerup_max", "2", 0);
-	sk_quad_time = gi.cvar("quad_time", "30", 0);
-	sk_inv_time = gi.cvar("inv_time", "30", 0);
-	sk_breather_time = gi.cvar("breather_time", "30", 0);
-	sk_enviro_time = gi.cvar("enviro_time", "30", 0);
-	sk_silencer_shots = gi.cvar("silencer_shots", "30", 0);
-	sk_stasis_time = gi.cvar("stasis_time", "30", 0);
+	sk_armor_bonus_value = gi.cvar("sk_armor_bonus_value", "2", 0);
+	sk_health_bonus_value = gi.cvar("sk_health_bonus_value", "2", 0);
+	sk_powerup_max = gi.cvar("sk_powerup_max", "2", 0);
+	sk_quad_time = gi.cvar("sk_quad_time", "30", 0);
+	sk_inv_time = gi.cvar("sk_inv_time", "30", 0);
+	sk_breather_time = gi.cvar("sk_breather_time", "30", 0);
+	sk_enviro_time = gi.cvar("sk_enviro_time", "30", 0);
+	sk_silencer_shots = gi.cvar("sk_silencer_shots", "30", 0);
+	sk_stasis_time = gi.cvar("sk_stasis_time", "30", 0);
 
 	// CTF stuff
 	use_techs = gi.cvar("use_techs", "0", 0);

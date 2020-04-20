@@ -704,24 +704,24 @@ void ACEND_RemoveNodeEdge(edict_t *self, int from, int to)
 ///////////////////////////////////////////////////////////////////////
 void ACEND_ResolveAllPaths()
 {
-	int i, from, to;
-	int num=0;
+	int		i, from, to;
+	int		num=0;
 	
 	safe_bprintf(PRINT_HIGH,"Resolving all paths...");
 
-	for(from=0;from<numnodes;from++)
-	for(to=0;to<numnodes;to++)
+	for (from=0; from<numnodes; from++)
+	for (to=0; to<numnodes; to++)
 	{
 		// update unresolved paths
 		// Not equal to itself, not equal to -1 and equal to the last link
-		if(from != to && path_table[from][to] == to)
+		if ( (from != to) && (path_table[from][to] == to) )
 		{
 			num++;
 
 			// Now for the self-referencing part linear time for each link added
-			for(i=0;i<numnodes;i++)
-				if(path_table[i][from] != -1)
-					if(i == to)
+			for (i=0; i<numnodes; i++)
+				if (path_table[i][from] != -1)
+					if (i == to)
 						path_table[i][to] = -1; // make sure we terminate
 					else
 						path_table[i][to] = path_table[i][from];
@@ -741,12 +741,13 @@ void ACEND_ResolveAllPaths()
 ///////////////////////////////////////////////////////////////////////
 void ACEND_SaveNodes()
 {
-	FILE *pOut;
-	char tempname[MAX_QPATH] = "";
-	char filename[MAX_QPATH] = "";
-//	char filename[60];
-	int i,j;
-	int version = 1;
+	FILE	*pOut;
+	char	tempname[MAX_QPATH] = "";
+	char	dirname[MAX_OSPATH] = "";
+	char	filename[MAX_QPATH] = "";
+//	char	filename[60];
+	int		i, j;
+	int		version = 1;
 	
 	// Resolve paths
 	ACEND_ResolveAllPaths();
@@ -754,25 +755,28 @@ void ACEND_SaveNodes()
 	safe_bprintf(PRINT_MEDIUM,"Saving node table...");
 
 	// Knightmare- rewote this
-	GameDirRelativePath ("nav", filename, sizeof(filename)); // create nav dir if needed
-	_mkdir (filename);
+	// Knightmare- rewrote this to use fs_savegamedir
+	// create nav dir if needed
+	SavegameDirRelativePath ("nav", dirname, sizeof(dirname)); 
+//	_mkdir (filename);
+	CreatePath (dirname);
 	Com_sprintf (tempname, sizeof(tempname), "nav/%s.nod", level.mapname);
-	GameDirRelativePath (tempname, filename, sizeof(filename));
-	//Q_strncpyz(filename, "ace\\nav\\", sizeof(filename));
-	//Q_strncatz(filename, level.mapname, sizeof(filename));
-	//Q_strncatz(filename, ".nod", sizeof(filename));
+	SavegameDirRelativePath (tempname, filename, sizeof(filename));
+//	Q_strncpyz(filename, "ace\\nav\\", sizeof(filename));
+//	Q_strncatz(filename, level.mapname, sizeof(filename));
+//	Q_strncatz(filename, ".nod", sizeof(filename));
 
-	if((pOut = fopen(filename, "wb" )) == NULL)
+	if ((pOut = fopen(filename, "wb" )) == NULL)
 		return; // bail
 	
-	fwrite(&version,sizeof(int),1,pOut); // write version
-	fwrite(&numnodes,sizeof(int),1,pOut); // write count
-	fwrite(&num_items,sizeof(int),1,pOut); // write facts count
+	fwrite(&version,sizeof(int), 1, pOut); // write version
+	fwrite(&numnodes,sizeof(int), 1, pOut); // write count
+	fwrite(&num_items,sizeof(int), 1, pOut); // write facts count
 	
-	fwrite(nodes,sizeof(node_t),numnodes,pOut); // write nodes
+	fwrite(nodes, sizeof(node_t), numnodes, pOut); // write nodes
 	
-	for(i=0;i<numnodes;i++)
-		for(j=0;j<numnodes;j++)
+	for (i=0; i<numnodes; i++)
+		for (j=0; j<numnodes; j++)
 			fwrite(&path_table[i][j],sizeof(short int),1,pOut); // write count
 		
 	fwrite(item_table,sizeof(item_table_t),num_items,pOut); 		// write out the fact table
@@ -787,33 +791,39 @@ void ACEND_SaveNodes()
 ///////////////////////////////////////////////////////////////////////
 void ACEND_LoadNodes(void)
 {
-	FILE *pIn;
-	int i,j;
-	char tempname[MAX_QPATH] = "";
-	char filename[MAX_QPATH] = "";
-	//char filename[60];
-	int version;
+	FILE	*pIn;
+	int		i,j;
+	char	tempname[MAX_QPATH] = "";
+	char	filename[MAX_QPATH] = "";
+//	char	filename[60];
+	int	version;
 
 	// Knightmare- rewote this
 	Com_sprintf (tempname, sizeof(tempname), "nav/%s.nod", level.mapname);
-	GameDirRelativePath (tempname, filename, sizeof(filename));
-	//Q_strncpyz(filename, "ace\\nav\\", sizeof(filename));
-	//Q_strncatz(filename, level.mapname, sizeof(filename));
-	//Q_strncatz(filename, ".nod", sizeof(filename));
+#ifdef KMQUAKE2_ENGINE_MOD	// look in fs_savegamedir first
+	SavegameDirRelativePath (tempname, filename, sizeof(filename));
+	if ((pIn = fopen(filename, "rb" )) == NULL)
+#endif
+	{
+		GameDirRelativePath (tempname, filename, sizeof(filename));
+	//	Q_strncpyz(filename, "ace\\nav\\", sizeof(filename));
+	//	Q_strncatz(filename, level.mapname, sizeof(filename));
+	//	Q_strncatz(filename, ".nod", sizeof(filename));
 
-	if((pIn = fopen(filename, "rb" )) == NULL)
-    {
-		// Create item table
-		safe_bprintf(PRINT_MEDIUM, "ACE: No node file found, creating new one...");
-		ACEIT_BuildItemNodeTable(false);
-		safe_bprintf(PRINT_MEDIUM, "done.\n");
-		return; 
+		if ((pIn = fopen(filename, "rb" )) == NULL)
+		{
+			// Create item table
+			safe_bprintf(PRINT_MEDIUM, "ACE: No node file found, creating new one...");
+			ACEIT_BuildItemNodeTable(false);
+			safe_bprintf(PRINT_MEDIUM, "done.\n");
+			return; 
+		}
 	}
 
 	// determine version
 	fread(&version,sizeof(int),1,pIn); // read version
 	
-	if(version == 1) 
+	if (version == 1) 
 	{
 		safe_bprintf(PRINT_MEDIUM,"ACE: Loading node table...");
 
@@ -822,8 +832,8 @@ void ACEND_LoadNodes(void)
 		
 		fread(nodes,sizeof(node_t),numnodes,pIn);
 
-		for(i=0;i<numnodes;i++)
-			for(j=0;j<numnodes;j++)
+		for (i=0;i<numnodes;i++)
+			for (j=0;j<numnodes;j++)
 				fread(&path_table[i][j],sizeof(short int),1,pIn); // write count
 	
 		// Knightmare- is this needed?  It's all re-built anyway, and may cause problems.
@@ -845,4 +855,3 @@ void ACEND_LoadNodes(void)
 	ACEIT_BuildItemNodeTable(true);
 
 }
-

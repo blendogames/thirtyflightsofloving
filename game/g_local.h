@@ -1172,9 +1172,11 @@ float SnapToEights(float x);
 // Lazarus
 float AtLeast(float x, float dx);
 edict_t	*LookingAt(edict_t *ent, int filter, vec3_t endpos, float *range);
-void	GameDirRelativePath(char *filename, char *output, size_t outputSize);
-void	G_UseTarget (edict_t *ent, edict_t *activator, edict_t *target);
-qboolean IsIdMap (void); //Knightmare added
+void GameDirRelativePath(char *filename, char *output, size_t outputSize);
+void SavegameDirRelativePath(char *filename, char *output, size_t outputSize);
+void CreatePath (char *path);
+void G_UseTarget (edict_t *ent, edict_t *activator, edict_t *target);
+qboolean IsIdMap (void); // Knightmare added
 void my_bprintf (int printlevel, char *fmt, ...);
 
 void	G_ProjectSource2 (vec3_t point, vec3_t distance, vec3_t forward, vec3_t right, vec3_t up, vec3_t result);

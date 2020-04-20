@@ -47,6 +47,7 @@ int PatchPlayerModels (char *modelname)
 	char	skins[MAX_MD2SKINS][MAX_SKINNAME];	// skin entries
 	char	infilename[MAX_OSPATH];
 	char	outfilename[MAX_OSPATH];
+	char	tempname[MAX_OSPATH];
 	FILE	*infile;
 	FILE	*outfile;
 	dmdl_t	model;		// model header
@@ -59,12 +60,14 @@ int PatchPlayerModels (char *modelname)
 	if (!*game->string)
 		return 0;	// we're in baseq2
 
-	Com_sprintf (outfilename, sizeof(outfilename), "%s/players/%s/tris.md2", game->string, modelname);
+//	Com_sprintf (outfilename, sizeof(outfilename), "%s/players/%s/tris.md2", game->string, modelname);
+	Com_sprintf (tempname, sizeof(tempname), "players/%s/tris.md2", modelname);
+	SavegameDirRelativePath (tempname, outfilename, sizeof(outfilename));
 	if (outfile = fopen (outfilename, "rb"))
 	{
 		// output file already exists, move along
 		fclose (outfile);
-//		gi.dprintf ("PatchPlayerModels: Could not save %s, file already exists\n", outfilename);
+	//	gi.dprintf ("PatchPlayerModels: Could not save %s, file already exists\n", outfilename);
 		return 0;
 	}
 
@@ -73,7 +76,7 @@ int PatchPlayerModels (char *modelname)
 		memset (skins[j], 0, MAX_SKINNAME);
 
 	// set model-specific data
-	if(!Q_stricmp(modelname,"male"))
+	if (!Q_stricmp(modelname,"male"))
 	{
 		numskins = 15;
 		Com_sprintf (skins[0],	sizeof(skins[0]), "players/male/cipher.pcx");
@@ -92,7 +95,7 @@ int PatchPlayerModels (char *modelname)
 		Com_sprintf (skins[13], sizeof(skins[13]), "players/male/sniper.pcx");
 		Com_sprintf (skins[14], sizeof(skins[14]), "players/male/viper.pcx");
 	}
-	else if(!Q_stricmp(modelname,"female"))
+	else if (!Q_stricmp(modelname,"female"))
 	{
 		numskins = 10;
 		Com_sprintf (skins[0],  sizeof(skins[0]), "players/female/athena.pcx");
@@ -106,7 +109,7 @@ int PatchPlayerModels (char *modelname)
 		Com_sprintf (skins[8],  sizeof(skins[8]), "players/female/venus.pcx");
 		Com_sprintf (skins[9],  sizeof(skins[9]), "players/female/voodoo.pcx");
 	}
-	else if(!Q_stricmp(modelname,"cyborg"))
+	else if (!Q_stricmp(modelname,"cyborg"))
 	{
 		numskins = 3;
 		Com_sprintf (skins[0],  sizeof(skins[0]), "players/cyborg/oni911.pcx");
@@ -117,7 +120,7 @@ int PatchPlayerModels (char *modelname)
 		return 0;
 
 	// fill in 32 slots with "customXX"
-	for(j=numskins; j<32; j++)
+	for (j=numskins; j<32; j++)
 		Com_sprintf( skins[j], sizeof(skins[j]), "players/%s/custom%d.pcx", modelname, j-numskins+1);
 	numskins = 32;
 
@@ -149,12 +152,16 @@ int PatchPlayerModels (char *modelname)
 	model.ofs_end    += newoffset;
 	
 	// save new player model
-	Com_sprintf (outfilename, sizeof(outfilename), "%s/players", game->string);	// make some dirs if needed
+/*	Com_sprintf (outfilename, sizeof(outfilename), "%s/players", game->string);	// make some dirs if needed
 	_mkdir (outfilename);
 	Com_sprintf (outfilename, sizeof(outfilename), "%s/players/%s", game->string, modelname);
 	_mkdir (outfilename);
 	Com_sprintf (outfilename, sizeof(outfilename), "%s/players/%s/tris.md2", game->string, modelname);
-	
+*/
+	Com_sprintf (tempname, sizeof(tempname), "players/%s/tris.md2", modelname);
+	SavegameDirRelativePath (tempname, outfilename, sizeof(outfilename));
+	CreatePath (outfilename);
+
 	if ( !(outfile = fopen (outfilename, "wb")) )
 	{
 		// file couldn't be created for some other reason

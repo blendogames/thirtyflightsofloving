@@ -1568,7 +1568,7 @@ entlist_t DoNotMove[] = {
 
 void trans_ent_filename (char *filename, size_t filenameSize)
 {
-	GameDirRelativePath("save/trans.ent", filename, filenameSize);
+	SavegameDirRelativePath("save/trans.ent", filename, filenameSize);
 }
 
 int trigger_transition_ents (edict_t *changelevel, edict_t *self)
