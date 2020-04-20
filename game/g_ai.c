@@ -934,7 +934,8 @@ qboolean FindTarget (edict_t *self)
 		}
 		else if(!(client->flags & FL_REFLECT))
 		{
-			if (!gi.inPHS(self->s.origin, client->s.origin))
+			// Knightmare- exclude turret drivers from this check
+			if ( !gi.inPHS(self->s.origin, client->s.origin) && strcmp(self->classname, "turret_driver") )
 				return false;
 		}
 
@@ -1035,7 +1036,7 @@ qboolean M_CheckAttack (edict_t *self)
 	if (enemy_range == RANGE_MELEE)
 	{
 		// don't always melee in easy mode
-		if (skill->value == 0 && (rand()&3) )
+		if ( (skill->value == 0) && (rand()&3) )
 			return false;
 		if (self->monsterinfo.melee)
 			self->monsterinfo.attack_state = AS_MELEE;
@@ -1078,7 +1079,9 @@ qboolean M_CheckAttack (edict_t *self)
 		chance = 0.02;
 	}
 	else
+	{
 		return false;
+	}
 
 	if (skill->value == 0)
 		chance *= 0.5;
@@ -1186,12 +1189,18 @@ qboolean ai_checkattack (edict_t *self, float dist)
 	vec3_t		temp;
 	qboolean	hesDeadJim;
 
+//	if (!self || !self-enemy)	// Knightmare- check those pointers!
+	if (!self)	// Knightmare- check those pointers!
+		return false;
+
 	// this causes monsters to run blindly to the combat point w/o firing
 	if (self->goalentity)
 	{
 		if (self->monsterinfo.aiflags & AI_COMBAT_POINT)
 			return false;
 
+		// Caedes fix for monsters ignoring player
+	//	if (self->monsterinfo.aiflags & AI_SOUND_TARGET)
 		if ( !visible(self, self->goalentity) && (self->monsterinfo.aiflags & AI_SOUND_TARGET) )
 		{
 			if (self->enemy && (level.time - self->enemy->teleport_time) > 5.0)	//mxd. Added self->enemy check
@@ -1311,7 +1320,7 @@ qboolean ai_checkattack (edict_t *self, float dist)
 	}
 
 // look for other coop players here
-//	if (coop && self->monsterinfo.search_time < level.time)
+//	if (coop->value && self->monsterinfo.search_time < level.time)
 //	{
 //		if (FindTarget (self))
 //			return true;

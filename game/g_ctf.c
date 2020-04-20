@@ -3925,6 +3925,7 @@ void CTFSay_Team (edict_t *who, char *msg)
 	int i;
 	char *p;
 	edict_t *cl_ent;
+//	size_t	outmsgSize = sizeof(outmsg);
 
 	if (CheckFlood(who))
 		return;
@@ -3936,15 +3937,20 @@ void CTFSay_Team (edict_t *who, char *msg)
 		msg++;
 	}
 
-	for (p = outmsg; *msg && (p - outmsg) < sizeof(outmsg) - 2; msg++) {
-		if (*msg == '%') {
-			switch (*++msg) {
+	for (p = outmsg; *msg && (p - outmsg) < sizeof(outmsg) - 2; msg++)
+	{
+		if (*msg == '%')
+		{
+			switch (*++msg)
+			{
 				case 'l' :
 				case 'L' :
 					CTFSay_Team_Location(who, buf, sizeof(buf));
 					if (strlen(buf) + (p - outmsg) < sizeof(outmsg) - 2) {
 						strcpy(p, buf);
+					//	Q_strncpyz(p, buf, outmsgSize);
 						p += strlen(buf);
+					//	outmsgSize -= strlen(buf);
 					}
 					break;
 				case 'a' :
@@ -3952,7 +3958,9 @@ void CTFSay_Team (edict_t *who, char *msg)
 					CTFSay_Team_Armor(who, buf, sizeof(buf));
 					if (strlen(buf) + (p - outmsg) < sizeof(outmsg) - 2) {
 						strcpy(p, buf);
+					//	Q_strncpyz(p, buf, outmsgSize);
 						p += strlen(buf);
+					//	outmsgSize -= strlen(buf);
 					}
 					break;
 				case 'h' :
@@ -3960,7 +3968,9 @@ void CTFSay_Team (edict_t *who, char *msg)
 					CTFSay_Team_Health(who, buf, sizeof(buf));
 					if (strlen(buf) + (p - outmsg) < sizeof(outmsg) - 2) {
 						strcpy(p, buf);
+					//	Q_strncpyz(p, buf, outmsgSize);
 						p += strlen(buf);
+					//	outmsgSize -= strlen(buf);
 					}
 					break;
 				case 't' :
@@ -3968,7 +3978,9 @@ void CTFSay_Team (edict_t *who, char *msg)
 					CTFSay_Team_Tech(who, buf, sizeof(buf));
 					if (strlen(buf) + (p - outmsg) < sizeof(outmsg) - 2) {
 						strcpy(p, buf);
+					//	Q_strncpyz(p, buf, outmsgSize);
 						p += strlen(buf);
+					//	outmsgSize -= strlen(buf);
 					}
 					break;
 				case 'w' :
@@ -3976,7 +3988,9 @@ void CTFSay_Team (edict_t *who, char *msg)
 					CTFSay_Team_Weapon(who, buf, sizeof(buf));
 					if (strlen(buf) + (p - outmsg) < sizeof(outmsg) - 2) {
 						strcpy(p, buf);
+					//	Q_strncpyz(p, buf, outmsgSize);
 						p += strlen(buf);
+					//	outmsgSize -= strlen(buf);
 					}
 					break;
 
@@ -3985,19 +3999,23 @@ void CTFSay_Team (edict_t *who, char *msg)
 					CTFSay_Team_Sight(who, buf, sizeof(buf));
 					if (strlen(buf) + (p - outmsg) < sizeof(outmsg) - 2) {
 						strcpy(p, buf);
+					//	Q_strncpyz(p, buf, outmsgSize);
 						p += strlen(buf);
+					//	outmsgSize -= strlen(buf);
 					}
 					break;
 
 				default :
 					*p++ = *msg;
 			}
-		} else
+		}
+		else
 			*p++ = *msg;
 	}
 	*p = 0;
 
-	for (i = 0; i < maxclients->value; i++) {
+	for (i = 0; i < maxclients->value; i++)
+	{
 		cl_ent = g_edicts + 1 + i;
 		if (!cl_ent->inuse)
 			continue;

@@ -44,7 +44,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 						   if match_length is greater than this */
 #define NIL			N	/* index for root of binary search trees */
 
-unsigned long int
+unsigned /*long*/ int
 		textsize = 0,	/* text size counter */
 		codesize = 0,	/* code size counter */
 		printcount = 0;	/* counter for reporting progress every 1K bytes */

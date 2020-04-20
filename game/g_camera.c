@@ -173,10 +173,11 @@ void camera_on (edict_t *ent)
 
 	// check to see if we're the enemy of any monster. If so, make the 
 	// faker the enemy
-	for(i=maxclients->value+1, monster=g_edicts+i; i<globals.num_edicts; i++, monster++) {
-		if(!monster->inuse) continue;
-		if(!(monster->svflags & SVF_MONSTER)) continue;
-		if(monster->enemy == ent) {
+	for (i=maxclients->value+1, monster=g_edicts+i; i<globals.num_edicts; i++, monster++)
+	{
+		if (!monster->inuse) continue;
+		if (!(monster->svflags & SVF_MONSTER)) continue;
+		if (monster->enemy == ent) {
 			monster->enemy = faker;
 			FoundTarget(monster);
 		}

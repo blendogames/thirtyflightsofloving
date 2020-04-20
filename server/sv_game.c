@@ -411,7 +411,7 @@ void SV_InitGameProgs (void)
 	import.FRead = FS_Read;
 	import.FWrite = FS_Write;
 	import.GameDir = FS_GameDir;
-	import.SaveGameDir = FS_GameDir;
+	import.SaveGameDir = FS_GameDir;	// change to FS_SaveGameDir when ready
 	import.CreatePath = FS_CreatePath;
 	import.GetFileList = FS_GetFileList;
 

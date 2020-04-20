@@ -2914,7 +2914,7 @@ void target_string_use (edict_t *self, edict_t *other, edict_t *activator)
 	int		n, l;
 	char	c;
 
-	l = strlen(self->message);
+	l = (int)strlen(self->message);
 	for (e = self->teammaster; e; e = e->teamchain)
 	{
 		if (!e->count)
@@ -3436,16 +3436,20 @@ void teleporter_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_
 	gi.linkentity (other);
 }
 
-void use_teleporter (edict_t *self, edict_t *other, edict_t *activator) {
+void use_teleporter (edict_t *self, edict_t *other, edict_t *activator)
+{
 
-	if(!(self->spawnflags & 1)) {
+	if (!(self->spawnflags & 1))
+	{
 		if(!(self->spawnflags & 2))
 			return;
 		self->spawnflags |= 1;
 		self->s.effects &= ~EF_TELEPORTER;
 		self->target_ent->solid = SOLID_NOT;
 		self->s.sound = 0;
-	} else {
+	}
+	else
+	{
 		self->spawnflags &= ~1;
 		if(!(self->spawnflags & 4))
 			self->s.effects |= EF_TELEPORTER;
@@ -3470,7 +3474,8 @@ void SP_misc_teleporter (edict_t *ent)
 		return;
 	}
 
-	if(!(ent->spawnflags & 4)) {
+	if (!(ent->spawnflags & 4))
+	{
 		gi.setmodel (ent, "models/objects/dmspot/tris.md2");
 		ent->s.skinnum = 1;
 		if(!(ent->spawnflags & 1)) {
@@ -3479,12 +3484,13 @@ void SP_misc_teleporter (edict_t *ent)
 		}
 	}
 
-	if(ent->spawnflags & 3)
+	if (ent->spawnflags & 3)
 		ent->use = use_teleporter;
 
 	if (ent->spawnflags & 4) {
 		ent->solid = SOLID_NOT;
-	} else {
+	}
+	else {
 		ent->solid = SOLID_BBOX;
 		VectorSet (ent->mins, -32, -32, -24);
 		VectorSet (ent->maxs, 32, 32, -16);
@@ -4208,7 +4214,7 @@ int PatchDeadSoldier (void)
 	char		outfilename[MAX_OSPATH];
 	char		tempname[MAX_OSPATH];
 	int			j;
-	char		*p;
+//	char		*p;
 	FILE		*infile;
 	FILE		*outfile;
 	dmdl_t		model;				// model header
@@ -4228,6 +4234,7 @@ int PatchDeadSoldier (void)
 	{
 		// output file already exists, move along
 		fclose (outfile);
+	//	gi.dprintf ("PatchDeadSoldier: Could not save %s, file already exists\n", outfilename);
 		return 0;
 	}
 

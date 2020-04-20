@@ -170,7 +170,7 @@ typedef struct
 	void	(*WriteAngle) (float f);
 
 	// managed memory allocation
-	void	*(*TagMalloc) (int size, int tag);
+	void	*(*TagMalloc) (size_t size, int tag);	// Knightmare- was int size
 	void	(*TagFree) (void *block);
 	void	(*FreeTags) (int tag);
 
@@ -207,6 +207,7 @@ typedef struct
 	char	*(*SaveGameDir) (void);
 	void	(*CreatePath) (char *path);
 	char	**(*GetFileList) (const char *path, const char *extension, int *num);
+//	void	(*cvar_setdescription) (char *var_name, char *description);
 #endif
 
 } game_import_t;

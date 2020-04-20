@@ -80,32 +80,32 @@ qboolean debug_mode=false;
 ///////////////////////////////////////////////////////////////////////
 // Special command processor
 ///////////////////////////////////////////////////////////////////////
-qboolean ACECM_Commands(edict_t *ent)
+qboolean ACECM_Commands (edict_t *ent)
 {
 	char	*cmd;
 	int node;
 
 	cmd = gi.argv(0);
 
-	if(Q_stricmp (cmd, "addnode") == 0 && debug_mode)
+	if (Q_stricmp (cmd, "addnode") == 0 && debug_mode)
 		ent->last_node = ACEND_AddNode(ent,atoi(gi.argv(1))); 
 	
-	else if(Q_stricmp (cmd, "removelink") == 0 && debug_mode)
+	else if (Q_stricmp (cmd, "removelink") == 0 && debug_mode)
 		ACEND_RemoveNodeEdge(ent,atoi(gi.argv(1)), atoi(gi.argv(2)));
 
-	else if(Q_stricmp (cmd, "addlink") == 0 && debug_mode)
+	else if (Q_stricmp (cmd, "addlink") == 0 && debug_mode)
 		ACEND_UpdateNodeEdge(atoi(gi.argv(1)), atoi(gi.argv(2)));
 	
-	else if(Q_stricmp (cmd, "showpath") == 0 && debug_mode)
+	else if (Q_stricmp (cmd, "showpath") == 0 && debug_mode)
     	ACEND_ShowPath(ent,atoi(gi.argv(1)));
 
-	else if(Q_stricmp (cmd, "findnode") == 0 && debug_mode)
+	else if (Q_stricmp (cmd, "findnode") == 0 && debug_mode)
 	{
 		node = ACEND_FindClosestReachableNode(ent,NODE_DENSITY, NODE_ALL);
 		safe_bprintf(PRINT_MEDIUM,"node: %d type: %d x: %f y: %f z %f\n",node,nodes[node].type,nodes[node].origin[0],nodes[node].origin[1],nodes[node].origin[2]);
 	}
 
-	else if(Q_stricmp (cmd, "movenode") == 0 && debug_mode)
+	else if (Q_stricmp (cmd, "movenode") == 0 && debug_mode)
 	{
 		node = atoi(gi.argv(1));
 		nodes[node].origin[0] = atof(gi.argv(2));
@@ -124,7 +124,7 @@ qboolean ACECM_Commands(edict_t *ent)
 ///////////////////////////////////////////////////////////////////////
 // Called when the level changes, store maps and bots (disconnected)
 ///////////////////////////////////////////////////////////////////////
-void ACECM_Store()
+void ACECM_Store (void)
 {
 	ACEND_SaveNodes();
 }
@@ -145,7 +145,7 @@ void ACECM_Store()
 ///////////////////////////////////////////////////////////////////////
 // Debug print, could add a "logging" feature to print to a file
 ///////////////////////////////////////////////////////////////////////
-void debug_printf(char *fmt, ...)
+void debug_printf (char *fmt, ...)
 {
 	int     i;
 	char	bigbuffer[0x10000];
@@ -158,7 +158,8 @@ void debug_printf(char *fmt, ...)
 	va_end (argptr);
 
 	if (dedicated->value)
-		gi.cprintf(NULL, PRINT_MEDIUM, bigbuffer);
+	//	gi.cprintf(NULL, PRINT_MEDIUM, bigbuffer);
+		gi.cprintf(NULL, PRINT_MEDIUM, "%s", bigbuffer);
 
 	for (i=0 ; i<maxclients->value ; i++)
 	{
@@ -166,8 +167,8 @@ void debug_printf(char *fmt, ...)
 		if (!cl_ent->inuse || cl_ent->is_bot)
 			continue;
 
+	//	gi.cprintf(cl_ent,  PRINT_MEDIUM, bigbuffer);
 		gi.cprintf(cl_ent, PRINT_MEDIUM, "%s", bigbuffer);
-		//gi.cprintf(cl_ent,  PRINT_MEDIUM, bigbuffer);
 	}
 
 }
@@ -188,8 +189,8 @@ void safe_cprintf (edict_t *ent, int printlevel, char *fmt, ...)
 	len = Q_vsnprintf (bigbuffer, sizeof(bigbuffer), fmt, argptr);
 	va_end (argptr);
 
+//	gi.cprintf(ent, printlevel, bigbuffer);
 	gi.cprintf(ent, printlevel, "%s", bigbuffer);
-	//gi.cprintf(ent, printlevel, bigbuffer);
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -208,8 +209,8 @@ void safe_centerprintf (edict_t *ent, char *fmt, ...)
 	len = Q_vsnprintf (bigbuffer, sizeof(bigbuffer), fmt, argptr);
 	va_end (argptr);
 	
+//	gi.centerprintf(ent, bigbuffer);
 	gi.centerprintf(ent, "%s", bigbuffer);
-	//gi.centerprintf(ent, bigbuffer);
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -228,7 +229,8 @@ void safe_bprintf (int printlevel, char *fmt, ...)
 	va_end (argptr);
 
 	if (dedicated->value)
-		gi.cprintf(NULL, printlevel, bigbuffer);
+	//	gi.cprintf(NULL, printlevel, bigbuffer);
+		gi.cprintf(NULL, printlevel, "%s", bigbuffer);
 
 	for (i=0 ; i<maxclients->value ; i++)
 	{
@@ -236,8 +238,7 @@ void safe_bprintf (int printlevel, char *fmt, ...)
 		if (!cl_ent->inuse || cl_ent->is_bot)
 			continue;
 
+	//	gi.cprintf(cl_ent, printlevel, bigbuffer);
 		gi.cprintf(cl_ent, printlevel, "%s", bigbuffer);
-		//gi.cprintf(cl_ent, printlevel, bigbuffer);
 	}
 }
-

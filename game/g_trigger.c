@@ -1341,13 +1341,13 @@ void trigger_speaker_think (edict_t *self)
 	touching = NULL;
 	for (i = 1; i <= maxclients->value && !touching; i++) {
 		player = &g_edicts[i];
-		if(!player->inuse) continue;
-		if(player->s.origin[0] < self->s.origin[0] + self->bleft[0]) continue;
-		if(player->s.origin[1] < self->s.origin[1] + self->bleft[1]) continue;
-		if(player->s.origin[2] < self->s.origin[2] + self->bleft[2]) continue;
-		if(player->s.origin[0] > self->s.origin[0] + self->tright[0]) continue;
-		if(player->s.origin[1] > self->s.origin[1] + self->tright[1]) continue;
-		if(player->s.origin[2] > self->s.origin[2] + self->tright[2]) continue;
+		if (!player->inuse) continue;
+		if (player->s.origin[0] < self->s.origin[0] + self->bleft[0]) continue;
+		if (player->s.origin[1] < self->s.origin[1] + self->bleft[1]) continue;
+		if (player->s.origin[2] < self->s.origin[2] + self->bleft[2]) continue;
+		if (player->s.origin[0] > self->s.origin[0] + self->tright[0]) continue;
+		if (player->s.origin[1] > self->s.origin[1] + self->tright[1]) continue;
+		if (player->s.origin[2] > self->s.origin[2] + self->tright[2]) continue;
 		touching = player;
 	}
 	if(touching)
@@ -1448,7 +1448,7 @@ void WriteTransitionEdict (FILE *f, edict_t *changelevel, edict_t *ent)
 	if (!Q_stricmp(e.classname,"target_speaker"))
 		e.spawnflags |= 8;  // indicates that "message" contains noise
 
-	if(changelevel->s.angles[YAW])
+	if (changelevel->s.angles[YAW])
 	{
 		vec3_t	angles;
 		vec3_t	forward, right, v;
@@ -1568,7 +1568,11 @@ entlist_t DoNotMove[] = {
 
 void trans_ent_filename (char *filename, size_t filenameSize)
 {
+#if defined (_M_X64) || defined (_M_AMD64) || defined (__x86_64__)
+	SavegameDirRelativePath("save_x64/trans.ent", filename, filenameSize);
+#else
 	SavegameDirRelativePath("save/trans.ent", filename, filenameSize);
+#endif
 }
 
 int trigger_transition_ents (edict_t *changelevel, edict_t *self)
@@ -1583,25 +1587,25 @@ int trigger_transition_ents (edict_t *changelevel, edict_t *self)
 
 	trans_ent_filename(t_file, sizeof(t_file));
 	f = fopen(t_file,"wb");
-	if(!f)
+	if (!f)
 	{
 		gi.dprintf("Error opening %s for writing\n",t_file);
 		return 0;
 	}
 	// First scan entities for brush models that SHOULD change levels, e.g. func_tracktrain,
 	// which had better have a partner train in the next map... or we'll bitch loudly
-	for(i=game.maxclients+1; i<globals.num_edicts; i++)
+	for (i=game.maxclients+1; i<globals.num_edicts; i++)
 	{
 		ent = &g_edicts[i];
-		if(!ent->inuse) continue;
-		if(ent->solid != SOLID_BSP) continue;
-		if(ent->s.origin[0] > self->maxs[0]) continue;
-		if(ent->s.origin[1] > self->maxs[1]) continue;
-		if(ent->s.origin[2] > self->maxs[2]) continue;
-		if(ent->s.origin[0] < self->mins[0]) continue;
-		if(ent->s.origin[1] < self->mins[1]) continue;
-		if(ent->s.origin[2] < self->mins[2]) continue;
-		if(!Q_stricmp(ent->classname,"func_tracktrain") && !(ent->spawnflags & 8) && ent->targetname)
+		if (!ent->inuse) continue;
+		if (ent->solid != SOLID_BSP) continue;
+		if (ent->s.origin[0] > self->maxs[0]) continue;
+		if (ent->s.origin[1] > self->maxs[1]) continue;
+		if (ent->s.origin[2] > self->maxs[2]) continue;
+		if (ent->s.origin[0] < self->mins[0]) continue;
+		if (ent->s.origin[1] < self->mins[1]) continue;
+		if (ent->s.origin[2] < self->mins[2]) continue;
+		if (!Q_stricmp(ent->classname,"func_tracktrain") && !(ent->spawnflags & 8) && ent->targetname)
 		{
 			edict_t	*e;
 
@@ -1626,7 +1630,7 @@ int trigger_transition_ents (edict_t *changelevel, edict_t *self)
 			e->radius = ent->moveinfo.distance;
 			e->solid = SOLID_NOT;
 			e->svflags |= SVF_NOCLIENT;
-			if(ent->owner)
+			if (ent->owner)
 				e->style = ent->owner - g_edicts;
 			else
 				e->style = 0;
@@ -1641,32 +1645,32 @@ int trigger_transition_ents (edict_t *changelevel, edict_t *self)
 		}
 	}
 
-	for(i=game.maxclients+1; i<globals.num_edicts; i++)
+	for (i=game.maxclients+1; i<globals.num_edicts; i++)
 	{
 		ent = &g_edicts[i];
 		ent->id = 0;
-		if(!ent->inuse) continue;
+		if (!ent->inuse) continue;
 		// Pass up owned entities not owned by the player on this pass...
 		// get 'em next pass so we'll know whether owner is in our list
-		if(ent->owner && !ent->owner->client) continue;
-		if(ent->movewith) continue;
-		if(ent->s.origin[0] > self->maxs[0]) continue;
-		if(ent->s.origin[1] > self->maxs[1]) continue;
-		if(ent->s.origin[2] > self->maxs[2]) continue;
-		if(ent->s.origin[0] < self->mins[0]) continue;
-		if(ent->s.origin[1] < self->mins[1]) continue;
-		if(ent->s.origin[2] < self->mins[2]) continue;
-		if(ent->solid == SOLID_BSP) continue;
-		if((ent->solid == SOLID_TRIGGER) && !FindItemByClassname(ent->classname)) continue;
+		if (ent->owner && !ent->owner->client) continue;
+		if (ent->movewith) continue;
+		if (ent->s.origin[0] > self->maxs[0]) continue;
+		if (ent->s.origin[1] > self->maxs[1]) continue;
+		if (ent->s.origin[2] > self->maxs[2]) continue;
+		if (ent->s.origin[0] < self->mins[0]) continue;
+		if (ent->s.origin[1] < self->mins[1]) continue;
+		if (ent->s.origin[2] < self->mins[2]) continue;
+		if (ent->solid == SOLID_BSP) continue;
+		if ((ent->solid == SOLID_TRIGGER) && !FindItemByClassname(ent->classname)) continue;
 		// Do not under any circumstances move these entities:
-		for(p=DoNotMove, nogo=false; p->name && !nogo; p++)
-			if(!Q_stricmp(ent->classname,p->name))
+		for (p=DoNotMove, nogo=false; p->name && !nogo; p++)
+			if (!Q_stricmp(ent->classname,p->name))
 				nogo = true;
-		if(nogo) continue;
-		if(!HasSpawnFunction(ent)) continue;
+		if (nogo) continue;
+		if (!HasSpawnFunction(ent)) continue;
 		total++;
 		ent->id = total;
-		if(ent->owner)
+		if (ent->owner)
 			ent->owner_id = -(ent->owner - g_edicts);
 		else
 			ent->owner_id = 0;
@@ -1675,34 +1679,34 @@ int trigger_transition_ents (edict_t *changelevel, edict_t *self)
 		ent->inuse = false;
 	}
 	// Repeat, ONLY for ents owned by non-players
-	for(i=game.maxclients+1; i<globals.num_edicts; i++)
+	for (i=game.maxclients+1; i<globals.num_edicts; i++)
 	{
 		ent = &g_edicts[i];
-		if(!ent->inuse) continue;
-		if(!ent->owner) continue;
-		if(ent->owner->client) continue;
-		if(ent->movewith) continue;
-		if(ent->solid == SOLID_BSP) continue;
-		if((ent->solid == SOLID_TRIGGER) && !FindItemByClassname(ent->classname)) continue;
+		if (!ent->inuse) continue;
+		if (!ent->owner) continue;
+		if (ent->owner->client) continue;
+		if (ent->movewith) continue;
+		if (ent->solid == SOLID_BSP) continue;
+		if ((ent->solid == SOLID_TRIGGER) && !FindItemByClassname(ent->classname)) continue;
 		// Do not under any circumstances move these entities:
-		for(p=DoNotMove, nogo=false; p->name && !nogo; p++)
-			if(!Q_stricmp(ent->classname,p->name))
+		for (p=DoNotMove, nogo=false; p->name && !nogo; p++)
+			if (!Q_stricmp(ent->classname,p->name))
 				nogo = true;
-		if(nogo) continue;
-		if(!HasSpawnFunction(ent)) continue;
-		if(ent->s.origin[0] > self->maxs[0]) continue;
-		if(ent->s.origin[1] > self->maxs[1]) continue;
-		if(ent->s.origin[2] > self->maxs[2]) continue;
-		if(ent->s.origin[0] < self->mins[0]) continue;
-		if(ent->s.origin[1] < self->mins[1]) continue;
-		if(ent->s.origin[2] < self->mins[2]) continue;
+		if (nogo) continue;
+		if (!HasSpawnFunction(ent)) continue;
+		if (ent->s.origin[0] > self->maxs[0]) continue;
+		if (ent->s.origin[1] > self->maxs[1]) continue;
+		if (ent->s.origin[2] > self->maxs[2]) continue;
+		if (ent->s.origin[0] < self->mins[0]) continue;
+		if (ent->s.origin[1] < self->mins[1]) continue;
+		if (ent->s.origin[2] < self->mins[2]) continue;
 		ent->owner_id = 0;
-		for(j=game.maxclients+1; j<globals.num_edicts && !ent->owner_id; j++)
+		for (j=game.maxclients+1; j<globals.num_edicts && !ent->owner_id; j++)
 		{
-			if(ent->owner == &g_edicts[j])
+			if (ent->owner == &g_edicts[j])
 				ent->owner_id = g_edicts[j].id;
 		}
-		if(!ent->owner_id) continue;
+		if (!ent->owner_id) continue;
 		total++;
 		ent->id = total;
 		WriteTransitionEdict(f,changelevel,ent);
@@ -1717,7 +1721,7 @@ int trigger_transition_ents (edict_t *changelevel, edict_t *self)
 
 void SP_trigger_transition (edict_t *self)
 {
-	if(!self->targetname)
+	if (!self->targetname)
 	{
 		gi.dprintf("trigger_transition w/o a targetname\n");
 		G_FreeEdict(self);

@@ -524,7 +524,7 @@ char *ED_NewString (char *string)
 	char	*newb, *new_p;
 	int		i,l;
 	
-	l = strlen(string) + 1;
+	l = (int)strlen(string) + 1;
 
 	newb = gi.TagMalloc (l, TAG_LEVEL);
 
@@ -685,7 +685,7 @@ qboolean LoadAliasFile (char *name)
 
 		basedir = gi.cvar("basedir", "", 0);
 		gamedir = gi.cvar("gamedir", "", 0);
-		strncpy(filename, basedir->string, sizeof(filename));
+		Q_strncpyz(filename, basedir->string, sizeof(filename));
 		Com_sprintf(textname, sizeof(textname), name);
 
 		if (strlen(gamedir->string))
@@ -809,7 +809,7 @@ qboolean ED_ParseEntityAlias (char *data, edict_t *ent)
 			gi.error ("ED_ParseEntityAlias: closing brace without entity data");
 		// if we've found the classname, exit loop
 		if (classname_found) {
-			strncpy (entclassname, search_token, sizeof(entclassname)-1);
+			Q_strncpyz (entclassname, search_token, sizeof(entclassname));
 			break;
 		}
 	}
@@ -861,7 +861,7 @@ qboolean ED_ParseEntityAlias (char *data, edict_t *ent)
 				}
 				if (search_token[0] == '}')
 					break;
-				strncpy (keyname, search_token, sizeof(keyname)-1);
+				Q_strncpyz (keyname, search_token, sizeof(keyname));
 				
 			// parse value	
 				search_token = COM_Parse (&search_data);
@@ -918,7 +918,7 @@ char *ED_ParseEdict (char *data, edict_t *ent)
 		if (!data)
 			gi.error ("ED_ParseEntity: EOF without closing brace");
 
-		strncpy (keyname, com_token, sizeof(keyname)-1);
+		Q_strncpyz (keyname, com_token, sizeof(keyname));
 		
 	// parse value	
 		com_token = COM_Parse (&data);
@@ -1150,8 +1150,8 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 	// Lazarus: last frame a gib was spawned in
 	lastgibframe = 0;
 
-	strncpy (level.mapname, mapname, sizeof(level.mapname)-1);
-	strncpy (game.spawnpoint, spawnpoint, sizeof(game.spawnpoint)-1);
+	Q_strncpyz (level.mapname, mapname, sizeof(level.mapname));
+	Q_strncpyz (game.spawnpoint, spawnpoint, sizeof(game.spawnpoint));
 
 	// set client fields on player ents
 	for (i=0 ; i<game.maxclients ; i++)
@@ -1573,10 +1573,10 @@ void SP_worldspawn (edict_t *ent)
 	if (ent->message && ent->message[0])
 	{
 		gi.configstring (CS_NAME, ent->message);
-		strncpy (level.level_name, ent->message, sizeof(level.level_name));
+		Q_strncpyz (level.level_name, ent->message, sizeof(level.level_name));
 	}
 	else
-		strncpy (level.level_name, level.mapname, sizeof(level.level_name));
+		Q_strncpyz (level.level_name, level.mapname, sizeof(level.level_name));
 
 	if (st.sky && st.sky[0])
 		gi.configstring (CS_SKY, st.sky);
@@ -1727,6 +1727,7 @@ void SP_worldspawn (edict_t *ent)
 
 	sm_meat_index = gi.modelindex ("models/objects/gibs/sm_meat/tris.md2");
 	gi.modelindex ("models/objects/gibs/arm/tris.md2");
+	gi.modelindex ("models/objects/gibs/leg/tris.md2");
 	gi.modelindex ("models/objects/gibs/bone/tris.md2");
 	gi.modelindex ("models/objects/gibs/bone2/tris.md2");
 	gi.modelindex ("models/objects/gibs/chest/tris.md2");

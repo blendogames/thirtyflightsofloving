@@ -153,7 +153,7 @@ void Sys_ConsoleOutput (char *text)
 Sys_Error
 =================
 */
-void Sys_Error (char *error, ...)
+void Sys_Error (const char *error, ...)
 {
 	char	string[1024];
 	va_list	argPtr;

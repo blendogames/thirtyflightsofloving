@@ -1234,7 +1234,7 @@ void Weapon_HyperBlaster_Fire (edict_t *ent, qboolean altfire)
 
 			// Knightmare- select color
 			color = sk_hyperblaster_color->value;
-			// hyperblaster_color could be any other value, so clamp this
+			// hyperblaster_color could be any other value, so clamp it
 			if (sk_hyperblaster_color->value < 2 || sk_hyperblaster_color->value > 4)
 				color = BLASTER_ORANGE;
 			// CTF color override

@@ -1320,11 +1320,12 @@ typedef struct zhead_s
 	struct zhead_s	*prev, *next;
 	short	magic;
 	short	tag;			// for group free
-	int		size;
+	size_t		size;
 } zhead_t;
 
 zhead_t		z_chain;
-int		z_count, z_bytes;
+int			z_count;
+size_t		z_bytes;
 
 /*
 ========================
@@ -1381,7 +1382,7 @@ void Z_FreeTags (int tag)
 Z_TagMalloc
 ========================
 */
-void *Z_TagMalloc (int size, int tag)
+void *Z_TagMalloc (size_t size, int tag)
 {
 	zhead_t	*z;
 	
@@ -1409,7 +1410,7 @@ void *Z_TagMalloc (int size, int tag)
 Z_Malloc
 ========================
 */
-void *Z_Malloc (int size)
+void *Z_Malloc (size_t size)
 {
 	return Z_TagMalloc (size, 0);
 }

@@ -23,6 +23,23 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "g_local.h"
 
+/* Func_reflect is adopted from psychospaz' original floor reflection code. See
+   psychospaz' stuff at http://modscape.telefragged.com
+
+   Chief differences:
+   1) The obvious - reflections work in 6 directions, not just the floor.
+   2) Uses a new entity rather than automatically doing reflections based on surface
+      or content properties of the floor.
+   3) Most TE_ effects are reflected, in addition to entities. This requires calls to
+      the appropriate ReflectXXXXX routine in several places scattered around the code.
+   4) Roll angle is correct.
+
+  You can have up to 16 func_reflects in one map. To increase that number change
+  MAX_MIRRORS below. The only reason to use a static limit is that the func_reflect
+  entity addresses get copied to g_mirror, which makes searching for func_reflects
+  much easier.
+*/
+
 #define MAX_MIRRORS 16
 edict_t	*g_mirror[MAX_MIRRORS];
 

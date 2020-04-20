@@ -173,7 +173,7 @@ void hrocket_turret_fire (edict_t *self, edict_t *owner, vec3_t start, vec3_t di
 }
 //CW--
 
-static unsigned long HB_Shots;
+static unsigned int /*long*/ HB_Shots;
 
 void turret_breach_fire (edict_t *self)
 {

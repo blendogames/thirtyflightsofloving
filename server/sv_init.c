@@ -142,16 +142,16 @@ void SV_CheckForSavegame (void)
 	Com_sprintf (name, sizeof(name), "%s/save/current/%s.sav", FS_Gamedir(), sv.name);
 	f = fopen (name, "rb");
 	if (!f)
-#ifdef READ_COMPRESSED_SAVEGAMES
+#ifdef COMPRESSED_SAVEGAMES
 	{
 		Com_sprintf (name, sizeof(name), "%s/save/current/%s.savz", FS_Gamedir(), sv.name);
 		f = fopen (name, "rb");
 		if (!f)
 			return;		// no savegame
 	}
-#else // READ_COMPRESSED_SAVEGAMES
+#else // COMPRESSED_SAVEGAMES
 		return;		// no savegame
-#endif // READ_COMPRESSED_SAVEGAMES
+#endif // COMPRESSED_SAVEGAMES
 
 	fclose (f);
 

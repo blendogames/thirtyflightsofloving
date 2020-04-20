@@ -1790,16 +1790,17 @@ CM_WritePortalState
 Writes the portal state to a savegame file
 ===================
 */
-#ifdef WRITE_COMPRESSED_SAVEGAMES
+#ifdef COMPRESSED_SAVEGAMES
 void	CM_WritePortalState (fileHandle_t f)
 {
 	FS_Write (portalopen, sizeof(portalopen), f);
 }
-#else // WRITE_COMPRESSED_SAVEGAMESvoid	CM_WritePortalState (FILE *f)
+#else // COMPRESSED_SAVEGAMES
+void	CM_WritePortalState (FILE *f)
 {
 	fwrite (portalopen, sizeof(portalopen), 1, f);
 }
-#endif // WRITE_COMPRESSED_SAVEGAMES
+#endif // COMPRESSED_SAVEGAMES
 
 /*
 ===================

@@ -1397,7 +1397,8 @@ qboolean CheckFlood(edict_t *ent)
 	int		i;
 	gclient_t *cl;
 
-	if (flood_msgs->value) {
+	if (flood_msgs->value)
+	{
 		cl = ent->client;
 
         if (level.time < cl->flood_locktill) {
@@ -1475,7 +1476,8 @@ void Cmd_Say_f (edict_t *ent, qboolean team, qboolean arg0)
 //	strncat(text, "\n");
 	Q_strncatz(text, "\n", sizeof(text));
 
-	if (flood_msgs->value) {
+	if (flood_msgs->value)
+	{
 		cl = ent->client;
 
         if (level.time < cl->flood_locktill) {
@@ -1516,6 +1518,21 @@ void Cmd_Say_f (edict_t *ent, qboolean team, qboolean arg0)
 		safe_cprintf(other, PRINT_CHAT, "%s", text);
 	}
 }
+
+// Knightmare added
+void Cmd_EntCount_f (edict_t *ent)
+{
+	int cnt = 0;
+	edict_t *e;
+
+	for (e = g_edicts; e < &g_edicts[globals.num_edicts]; e++)
+	{
+		if (e->inuse)
+			cnt++;
+	}
+	gi.dprintf ("%d entities active\n", cnt);
+}
+// end Knightmare
 
 void Cmd_PlayerList_f(edict_t *ent)
 {
@@ -2079,6 +2096,10 @@ void ClientCommand (edict_t *ent)
 	//	tpp->value = ent->client->chasetoggle;
 	}
 
+	// Knightmare- added entcount cmd
+	else if (Q_stricmp (cmd, "entcount") == 0)
+		Cmd_EntCount_f(ent);
+
 	// alternate attack mode
 	/*else if (!Q_stricmp(cmd,"attack2_off"))
 		Cmd_attack2_f(ent,false);
@@ -2101,7 +2122,8 @@ void ClientCommand (edict_t *ent)
 	}
 	else if (!Q_stricmp(cmd, "zoomout"))
 	{
-		if (!deathmatch->value && !coop->value && !ent->client->chasetoggle) {
+		if (!deathmatch->value && !coop->value && !ent->client->chasetoggle)
+		{
 			if (ent->client->ps.fov < ent->client->original_fov) {
 				if (cl_gun->value)
 					stuffcmd(ent,"cl_gun 0\n");
@@ -2137,7 +2159,8 @@ void ClientCommand (edict_t *ent)
 	}
 	else if (!Q_stricmp(cmd, "zoomoff"))
 	{
-		if (!deathmatch->value && !coop->value && !ent->client->chasetoggle) {
+		if (!deathmatch->value && !coop->value && !ent->client->chasetoggle)
+		{
 			if (ent->client->zoomed && !ent->client->zooming) {
 				ent->client->ps.fov = ent->client->original_fov;
 				ent->client->zooming = 0;
@@ -2164,8 +2187,10 @@ void ClientCommand (edict_t *ent)
 	}
 	else if (!Q_stricmp(cmd, "zoominstop"))
 	{
-		if (!deathmatch->value && !coop->value && !ent->client->chasetoggle) {
-			if (ent->client->zooming > 0) {
+		if (!deathmatch->value && !coop->value && !ent->client->chasetoggle)
+		{
+			if (ent->client->zooming > 0)
+			{
 				ent->client->zooming = 0;
 				if (ent->client->ps.fov == ent->client->original_fov) {
 					ent->client->zoomed = false;
@@ -2267,7 +2292,7 @@ void ClientCommand (edict_t *ent)
 					if (e->classname)
 					{
 						// class-specific output
-						if(!Q_stricmp(e->classname,"target_changelevel"))
+						if (!Q_stricmp(e->classname,"target_changelevel"))
 							fprintf(f,"map=%s\n",e->map);
 					}
 					fprintf(f,"movetype=%d, solid=%d, clipmask=0x%08x\n",e->movetype,e->solid,e->clipmask);
@@ -2298,7 +2323,6 @@ void ClientCommand (edict_t *ent)
 			e = LookingAt(ent,0,NULL,NULL);
 			if(!e) return;
 	
-		//	GameDirRelativePath(parm, filename, sizeof(filename));
 			SavegameDirRelativePath(parm, filename, sizeof(filename));
 		//	strncat(filename, ".txt");
 			Q_strncatz(filename, ".txt", sizeof(filename));

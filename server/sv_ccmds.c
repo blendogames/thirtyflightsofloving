@@ -271,11 +271,11 @@ void SV_CopySaveGame (char *src, char *dst)
 	}
 }
 
-#ifdef WRITE_COMPRESSED_SAVEGAMES
+#ifdef COMPRESSED_SAVEGAMES
 void		CM_WritePortalState (fileHandle_t f);
-#else // WRITE_COMPRESSED_SAVEGAMES
+#else // COMPRESSED_SAVEGAMES
 void		CM_WritePortalState (FILE *f);
-#endif // WRITE_COMPRESSED_SAVEGAMES
+#endif // COMPRESSED_SAVEGAMES
 /*
 ==============
 SV_WriteLevelFile
@@ -284,7 +284,7 @@ SV_WriteLevelFile
 */
 void SV_WriteLevelFile (void)
 {
-#ifdef WRITE_COMPRESSED_SAVEGAMES
+#ifdef COMPRESSED_SAVEGAMES
 	char			name[MAX_OSPATH], zipName[MAX_QPATH], intName[MAX_QPATH];
 	fileHandle_t	f;
 
@@ -301,7 +301,7 @@ void SV_WriteLevelFile (void)
 	FS_Write (sv.configstrings, sizeof(sv.configstrings), f);
 	CM_WritePortalState (f);
 	FS_FCloseFile (f);
-#else // WRITE_COMPRESSED_SAVEGAMES	char	name[MAX_OSPATH];
+#else // COMPRESSED_SAVEGAMES
 	char	name[MAX_OSPATH];
 	FILE	*f;
 
@@ -317,11 +317,11 @@ void SV_WriteLevelFile (void)
 	fwrite (sv.configstrings, sizeof(sv.configstrings), 1, f);
 	CM_WritePortalState (f);
 	fclose (f);
-#endif // WRITE_COMPRESSED_SAVEGAMES
+#endif // COMPRESSED_SAVEGAMES
 
 	Com_sprintf (name, sizeof(name), "%s/save/current/%s.sav", FS_Gamedir(), sv.name);
 	ge->WriteLevel (name);
-#ifdef WRITE_COMPRESSED_SAVEGAMES
+#ifdef COMPRESSED_SAVEGAMES
 	// compress .sav into .savz
 	Com_sprintf (zipName, sizeof(zipName), "/save/current/%s.savz", sv.name);
 	Com_sprintf (intName, sizeof(intName), "%s.sav", sv.name);
@@ -329,7 +329,7 @@ void SV_WriteLevelFile (void)
 
 	// delete .sav
 	remove (name);
-#endif // WRITE_COMPRESSED_SAVEGAMES}
+#endif // COMPRESSED_SAVEGAMES
 }
 
 void	CM_ReadPortalState (fileHandle_t f);
@@ -343,14 +343,14 @@ void SV_ReadLevelFile (void)
 {
 	char			name[MAX_OSPATH];
 	fileHandle_t	f;
-#ifdef READ_COMPRESSED_SAVEGAMES // check for compressed .savz file here
+#ifdef COMPRESSED_SAVEGAMES // check for compressed .savz file here
 	char			zipName[MAX_QPATH], intName[MAX_QPATH];
 	FILE			*fp;
-#endif // READ_COMPRESSED_SAVEGAMES
+#endif // COMPRESSED_SAVEGAMES
 
 	Com_DPrintf("SV_ReadLevelFile()\n");
 
-#ifdef READ_COMPRESSED_SAVEGAMES // check for compressed .savz file here
+#ifdef COMPRESSED_SAVEGAMES // check for compressed .savz file here
 	Com_sprintf (zipName, sizeof(zipName), "save/current/%s.savz", sv.name);
 	Com_sprintf (intName, sizeof(intName), "%s.sv2", sv.name);
 	
@@ -362,7 +362,7 @@ void SV_ReadLevelFile (void)
 		FS_FCloseFile(f);
 	}
 	else 
-#endif // READ_COMPRESSED_SAVEGAMES
+#endif // COMPRESSED_SAVEGAMES
 	{
 		Com_sprintf (name, sizeof(name), "save/current/%s.sv2", sv.name);
 		FS_FOpenFile (name, &f, FS_READ);
@@ -377,7 +377,7 @@ void SV_ReadLevelFile (void)
 	}
 
 	Com_sprintf (name, sizeof(name), "%s/save/current/%s.sav", FS_Gamedir(), sv.name);
-#ifdef READ_COMPRESSED_SAVEGAMES
+#ifdef COMPRESSED_SAVEGAMES
 	// check for .sav; if not present, decompress from .savz
 	fp = fopen (name, "rb");	
 	if (!fp) {
@@ -388,7 +388,7 @@ void SV_ReadLevelFile (void)
 	else {
 		fclose (fp);
 	}
-#endif // READ_COMPRESSED_SAVEGAMES
+#endif // COMPRESSED_SAVEGAMES
 	ge->ReadLevel (name);
 }
 

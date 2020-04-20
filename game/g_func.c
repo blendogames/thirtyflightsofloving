@@ -975,15 +975,14 @@ void plat_spawn_inside_trigger (edict_t *ent)
 
 
 /*QUAKED func_plat (0 .5 .8) ? PLAT_LOW_TRIGGER
-speed	default 150
-
 Plats are always drawn in the extended position, so they will light correctly.
 
 If the plat is the target of another trigger or button, it will start out disabled in the extended position until it is trigger, when it will lower and become a normal plat.
 
-"speed"	overrides default 200.
-"accel" overrides default 500
-"lip"	overrides default 8 pixel lip
+"speed"	overrides default 200
+"accel" overrides default 50
+"decel" overrides default 50
+"lip"	overrides default 8 unit lip
 
 If the "height" key is set, that will determine the amount the plat moves, instead of being implicitly determoveinfoned by the model's height.
 
@@ -2540,7 +2539,7 @@ void train_wait (edict_t *self)
 			self->spawnflags &= ~TRAIN_START_ON;
 			VectorClear (self->velocity);
 			if ( !(self->spawnflags & TRAIN_ROTATE_CONSTANT) )
-				VectorClear (self->avelocity); //Knightmare added
+				VectorClear (self->avelocity); // Knightmare added
 			// Lazarus: turn off animation for stationary trains
 			if (!strcmp(self->classname, "func_train"))
 				self->s.effects &= ~(EF_ANIM_ALL | EF_ANIM_ALLFAST);

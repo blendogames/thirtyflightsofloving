@@ -459,7 +459,8 @@ typedef struct
 #define	CONTENTS_SLIME			16
 #define	CONTENTS_WATER			32
 #define	CONTENTS_MIST			64
-#define	LAST_VISIBLE_CONTENTS	64
+#define	CONTENTS_FOG			1024	// fog
+#define	LAST_VISIBLE_CONTENTS	1024	// was 64
 
 // remaining contents are non-visible, and don't eat brushes
 

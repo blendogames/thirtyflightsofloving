@@ -1633,7 +1633,8 @@ void spectator_respawn (edict_t *ent)
 	// if the user wants to become a spectator, make sure he doesn't
 	// exceed max_spectators
 
-	if (ent->client->pers.spectator) {
+	if (ent->client->pers.spectator)
+	{
 		char *value = Info_ValueForKey (ent->client->pers.userinfo, "spectator");
 		if (*spectator_password->string && 
 			strcmp(spectator_password->string, "none") && 
@@ -1651,7 +1652,8 @@ void spectator_respawn (edict_t *ent)
 			if (g_edicts[i].inuse && g_edicts[i].client->pers.spectator)
 				numspec++;
 
-		if (numspec >= maxspectators->value) {
+		if (numspec >= maxspectators->value)
+		{
 			safe_cprintf(ent, PRINT_HIGH, "Server spectator limit is full.");
 			ent->client->pers.spectator = false;
 			// reset his spectator var
@@ -1660,12 +1662,15 @@ void spectator_respawn (edict_t *ent)
 			gi.unicast(ent, true);
 			return;
 		}
-	} else {
+	}
+	else
+	{
 		// he was a spectator and wants to join the game
 		// he must have the right password
 		char *value = Info_ValueForKey (ent->client->pers.userinfo, "password");
 		if (*password->string && strcmp(password->string, "none") && 
-			strcmp(password->string, value)) {
+			strcmp(password->string, value))
+		{
 			safe_cprintf(ent, PRINT_HIGH, "Password incorrect.\n");
 			ent->client->pers.spectator = true;
 			gi.WriteByte (svc_stufftext);
@@ -1682,7 +1687,8 @@ void spectator_respawn (edict_t *ent)
 	PutClientInServer (ent);
 
 	// add a teleportation effect
-	if (!ent->client->pers.spectator)  {
+	if (!ent->client->pers.spectator) 
+	{
 		// send effect
 		gi.WriteByte (svc_muzzleflash);
 		gi.WriteShort (ent-g_edicts);
@@ -1935,7 +1941,8 @@ void PutClientInServer (edict_t *ent)
 	VectorCopy (client->ps.viewangles, client->v_angle);
 
 	// spawn a spectator
-	if (client->pers.spectator) {
+	if (client->pers.spectator)
+	{
 		client->chase_target = NULL;
 
 		client->resp.spectator = true;
@@ -1946,7 +1953,8 @@ void PutClientInServer (edict_t *ent)
 		ent->client->ps.gunindex = 0;
 		gi.linkentity (ent);
 		return;
-	} else
+	}
+	else
 		client->resp.spectator = false;
 
 	// DWH:
@@ -2091,6 +2099,7 @@ void ClientBegin (edict_t *ent)
 	}
 
 	Fog_Off (ent);
+//	Fog (ent);
 
 	stuffcmd(ent,"alias +zoomin zoomin;alias -zoomin zoominstop\n");
 	stuffcmd(ent,"alias +zoomout zoomout;alias -zoomout zoomoutstop\n");
@@ -2188,7 +2197,7 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo)
 	// check for malformed or illegal info strings
 	if (!Info_Validate(userinfo))
 	{
-	//	strcpy (userinfo, "\\name\\badinfo\\skin\\male/grunt");
+	//	strncpy (userinfo, "\\name\\badinfo\\skin\\male/grunt");
 		Q_strncpyz (userinfo, "\\name\\badinfo\\skin\\male/grunt", MAX_INFO_STRING);	// userinfo is always length of MAX_INFO_STRING 
 	}
 
@@ -3257,6 +3266,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		for (i=0 ; i<3 ; i++)
 		{
 			pm.s.origin[i] = ent->s.origin[i]*8;
+			// FIXME: make sure this short doesn't overflow
 			pm.s.velocity[i] = ent->velocity[i]*8;
 		}
 

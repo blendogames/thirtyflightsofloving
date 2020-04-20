@@ -134,10 +134,6 @@ __inline int Q_vsnprintf (char *Dest, size_t Count, const char *Format, va_list 
 // Eraser Bot's precompiled p_trail.c not compatible with modified entity state structure
 //#define ERASER_COMPAT_BUILD
 
-// enable to build exe to host net games
-// (to bring MAX_MSG_LENGTH in line with UDP packet size)
-//#define NET_SERVER_BUILD
-
 #ifdef KMQUAKE2_ENGINE_MOD
 #ifndef ERASER_COMPAT_BUILD
 #define NEW_ENTITY_STATE_MEMBERS
@@ -149,21 +145,16 @@ __inline int Q_vsnprintf (char *Dest, size_t Count, const char *Format, va_list 
 // enable to include looping of attenuated sounds
 // changes entity_state_t struct
 #define LOOP_SOUND_ATTENUATION
-// enable to read compressed savegame files
-#define READ_COMPRESSED_SAVEGAMES
 // enable to save compressed savegame files
-#define WRITE_COMPRESSED_SAVEGAMES
+#define COMPRESSED_SAVEGAMES
 #endif
 
 #define ROQ_SUPPORT // whether to use new cinematic system
-
 #define OGG_SUPPORT // whether to use Ogg Vorbis soundtrack
-
 #define PNG_SUPPORT // whether to include PNG image support
+#define LOC_SUPPORT	// whether to include loc file support
 
 #define USE_CURL	// whether to include HTTP downloading
-
-#define LOC_SUPPORT	// whether to include loc file support
 
 #define MD2_AS_MD3 // whether to load md2s into md3 memory representation
 
@@ -218,6 +209,7 @@ __inline int Q_vsnprintf (char *Dest, size_t Count, const char *Format, va_list 
 #define	OLD_MAX_SOUNDS		256
 #define	OLD_MAX_IMAGES		256
 #define	OLD_MAX_ITEMS		256
+#define	OLD_MAX_LIGHTSTYLES	256
 //end Knightmare
 
 #define	MAX_ITEMS			256
@@ -316,7 +308,7 @@ extern vec4_t vec4_origin;
 //float Q_fabs (float f);
 //#define	fabs(f) Q_fabs(f)
 #if !defined C_ONLY && !defined __linux__ && !defined __sgi
-extern long Q_ftol( float f );
+extern int Q_ftol( float f );
 #else
 #define Q_ftol( f ) ( long ) (f)
 #endif
@@ -370,6 +362,7 @@ void AnglesToAxis (const vec3_t angles, vec3_t axis[3]);
 void AxisClear (vec3_t axis[3]);
 void AxisCopy (const vec3_t in[3], vec3_t out[3]);
 qboolean AxisCompare (const vec3_t axis1[3], const vec3_t axis2[3]);
+void MatrixMultiply (float in1[3][3], float in2[3][3], float out[3][3]);
 
 
 void R_ConcatRotations (float in1[3][3], float in2[3][3], float out[3][3]);
@@ -417,7 +410,7 @@ char *COM_Parse (char **data_p);
 char *COM_ParseExt (char **data_p, qboolean allowNewLines);
 
 void Com_sprintf (char *dest, size_t size, char *fmt, ...);
-long Com_HashFileName (const char *fname, int hashSize, qboolean sized);
+unsigned int Com_HashFileName (const char *fname, int hashSize, qboolean sized);
 
 void Com_PageInMemory (byte *buffer, int size);
 
@@ -468,7 +461,7 @@ int Q_SortStrcmp (const char **arg1, const char **arg2);
 // portable case insensitive string compare
 int Q_stricmp (char *s1, char *s2);
 int Q_strcasecmp (char *s1, char *s2);
-int Q_strncasecmp (char *s1, char *s2, int n);
+int Q_strncasecmp (char *s1, char *s2, size_t n);
 
 void Q_strncpyz (char *dst, const char *src, size_t dstSize);
 void Q_strncatz (char *dst, const char *src, size_t dstSize);
@@ -519,10 +512,10 @@ void	Sys_Mkdir (char *path);
 void	Sys_Rmdir (char *path);
 
 // large block stack allocation routines
-void	*Hunk_Begin (int maxsize);
-void	*Hunk_Alloc (int size);
+void	*Hunk_Begin (size_t maxsize);
+void	*Hunk_Alloc (size_t size);
 void	Hunk_Free (void *buf);
-int		Hunk_End (void);
+size_t	Hunk_End (void);
 
 // directory searching
 #define SFF_ARCH    0x01
@@ -542,7 +535,7 @@ void	Sys_Sleep (int msec);
 unsigned	Sys_TickCount (void);
 
 // this is only here so the functions in q_shared.c and q_shwin.c can link
-void Sys_Error (char *error, ...);
+void Sys_Error (const char *error, ...);
 void Com_Printf (char *msg, ...);
 
 
@@ -603,8 +596,9 @@ COLLISION DETECTION
 #define	CONTENTS_SLIME			16
 #define	CONTENTS_WATER			32
 #define	CONTENTS_MIST			64
-#define	LAST_VISIBLE_CONTENTS	64
 #define CONTENTS_MUD            128    // not a "real" content property - used only for watertype
+#define	CONTENTS_FOG			1024	// fog
+#define	LAST_VISIBLE_CONTENTS	1024	// was 64
 
 // remaining contents are non-visible, and don't eat brushes
 
@@ -667,6 +661,7 @@ COLLISION DETECTION
 
 #define SURF_NOLIGHTENV	0x01000000	// no lightmap or envmap trans/warp surface
 #define SURF_ALPHATEST	0x02000000	// alpha test flag
+#define SURF_FOGPLANE	0x04000000	// fog surface
 
 #define	SURF_MIRROR		0x10000000
 #define	SURF_CHOPPY		0x20000000
@@ -876,16 +871,16 @@ typedef struct
 #define EF_PLASMA			0x01000000
 #define EF_TRAP				0x02000000
 
-//ROGUE
+// ROGUE
 #define EF_TRACKER			0x04000000
 #define	EF_DOUBLE			0x08000000
 #define	EF_SPHERETRANS		0x10000000
 #define EF_TAGTRAIL			0x20000000
 #define EF_HALF_DAMAGE		0x40000000
 #define EF_TRACKERTRAIL		0x80000000
-//ROGUE
+// ROGUE
 
-//mappack.h
+// mappack.h
 #define	EF_EDARK 			0x84000000  	// pulsing dynamic black light
 #define	EF_BLUEC			0x08208000		// violet or pale blue shell
 #define	EF_REDC 			0x30050001   	// ef_rotate, red shell, transparent and a redlight
@@ -909,12 +904,12 @@ typedef struct
 #define RF_TRANS_ADDITIVE	8192
 #define RF_MIRRORMODEL		16384
 
-//ROGUE
+// ROGUE
 #define RF_IR_VISIBLE		0x00008000		// 32768
 #define	RF_SHELL_DOUBLE		0x00010000		// 65536
 #define	RF_SHELL_HALF_DAM	0x00020000
 #define RF_USE_DISGUISE		0x00040000
-//ROGUE
+// ROGUE
 
 #define RF_NOSHADOW			0x00080000 // Knightmare- no shadow flag
 
@@ -932,7 +927,7 @@ typedef struct
 #define RDF_CAMERAEFFECT	16		// Camera effect
 #define RDF_LETTERBOX		32		// Letterboxed view
 
-//Mappack - laser colors
+// Mappack - laser colors
 
 #define	LASER_RED		0xf2f2f0f0
 #define	LASER_GREEN		0xd0d1d2d3
@@ -966,7 +961,7 @@ typedef struct
 #define MZ_PHALANX			18
 #define MZ_SILENCED			128		// bit flag ORed with one of the above numbers
 
-//ROGUE
+// ROGUE
 #define MZ_ETF_RIFLE		30
 #define MZ_UNUSED			31
 #define MZ_SHOTGUN2			32
@@ -977,14 +972,14 @@ typedef struct
 #define	MZ_NUKE2			37
 #define	MZ_NUKE4			38
 #define	MZ_NUKE8			39
-//Knightmare 1/3/2002- blue blaster and green hyperblaster
+// ROGUE
+// Knightmare 1/3/2002- blue blaster and green hyperblaster
 #define	MZ_BLUEBLASTER		40
 #define	MZ_GREENHYPERBLASTER	41
 #define	MZ_REDBLASTER		42
 #define	MZ_REDHYPERBLASTER	43
-//end Knightmare
+// end Knightmare
 
-//ROGUE
 
 //
 // monster muzzle flashes
@@ -1476,7 +1471,7 @@ ROGUE - VERSIONS
 #define OLD_CS_SOUNDS			(CS_MODELS+OLD_MAX_MODELS)
 #define	OLD_CS_IMAGES			(OLD_CS_SOUNDS+OLD_MAX_SOUNDS)
 #define	OLD_CS_LIGHTS			(OLD_CS_IMAGES+OLD_MAX_IMAGES)
-#define	OLD_CS_ITEMS			(OLD_CS_LIGHTS+MAX_LIGHTSTYLES)
+#define	OLD_CS_ITEMS			(OLD_CS_LIGHTS+OLD_MAX_LIGHTSTYLES)
 #define	OLD_CS_PLAYERSKINS		(OLD_CS_ITEMS+OLD_MAX_ITEMS)
 #define OLD_CS_GENERAL			(OLD_CS_PLAYERSKINS+MAX_CLIENTS)
 #define	OLD_MAX_CONFIGSTRINGS	(OLD_CS_GENERAL+MAX_GENERAL)

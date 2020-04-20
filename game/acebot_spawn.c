@@ -276,7 +276,7 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn, int team)
 			client->ps.fov = 160;
 	}
 
-	// Knightmare- fix for null model?
+	// Knightmare- fix for null model
 	if (client->pers.weapon && client->pers.weapon->view_model)
 		client->ps.gunindex = gi.modelindex(client->pers.weapon->view_model);
 
@@ -291,8 +291,9 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn, int team)
 	VectorCopy (bot->s.origin, bot->s.old_origin);	// Knightmare- was missing oldorigin!
 
 	// set the delta angle
-	for (i=0 ; i<3 ; i++)
+	for (i=0 ; i<3 ; i++) {
 		client->ps.pmove.delta_angles[i] = ANGLE2SHORT(spawn_angles[i] - client->resp.cmd_angles[i]);
+	}
 
 	bot->s.angles[PITCH] = 0;
 	bot->s.angles[YAW] = spawn_angles[YAW];

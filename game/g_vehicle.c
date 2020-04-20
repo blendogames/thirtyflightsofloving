@@ -39,7 +39,7 @@ void func_vehicle_explode (edict_t *self, edict_t *inflictor, edict_t *attacker,
 	int		count;
 	int		mass;
 
-	if(self->deathtarget)
+	if (self->deathtarget)
 	{
 		self->target = self->deathtarget;
 		G_UseTargets (self, attacker);
@@ -70,7 +70,7 @@ void func_vehicle_explode (edict_t *self, edict_t *inflictor, edict_t *attacker,
 		count = mass / 100;
 		if (count > 8)
 			count = 8;
-		while(count--)
+		while (count--)
 		{
 			chunkorigin[0] = origin[0] + crandom() * size[0];
 			chunkorigin[1] = origin[1] + crandom() * size[1];
@@ -83,7 +83,7 @@ void func_vehicle_explode (edict_t *self, edict_t *inflictor, edict_t *attacker,
 	count = mass / 25;
 	if (count > 16)
 		count = 16;
-	while(count--)
+	while (count--)
 	{
 		chunkorigin[0] = origin[0] + crandom() * size[0];
 		chunkorigin[1] = origin[1] + crandom() * size[1];
@@ -101,7 +101,7 @@ void vehicle_blocked (edict_t *self, edict_t *other)
 {
 	edict_t	*attacker;
 
-	if((self->spawnflags & VEHICLE_BLOCK_STOPS) || (other == world))
+	if ((self->spawnflags & VEHICLE_BLOCK_STOPS) || (other == world))
 	{
 		VectorClear(self->velocity);
 		VectorClear(self->avelocity);
@@ -162,7 +162,7 @@ void vehicle_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *
 	// players and monsters
 	if (!other->client && !(other->svflags & SVF_MONSTER)) return;
 	vspeed = VectorLength(self->velocity);
-	if(!vspeed) return;
+	if (!vspeed) return;
 	VectorSubtract(other->s.origin,self->s.origin,dir);
 	dir[2] = 0;
 	VectorNormalize(dir);
@@ -174,10 +174,10 @@ void vehicle_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *
 	vspeed *= DotProduct(dir,v);
 	mspeed = VectorLength(other->velocity) * DotProduct(dir,v);
 	vspeed -= mspeed;
-	if(vspeed <= 0.) return;
+	if (vspeed <= 0.0) return;
 	// for speed < 200, don't do damage but move monster
-	if(vspeed < 200) {
-		if(other->mass > self->mass) vspeed *= (float)self->mass/other->mass;
+	if (vspeed < 200) {
+		if (other->mass > self->mass) vspeed *= (float)self->mass/other->mass;
 		VectorMA(other->velocity,vspeed,dir,new_velocity);
 		VectorMA(other->s.origin,FRAMETIME,new_velocity,new_origin);
 		new_origin[2] += 2;
@@ -185,7 +185,7 @@ void vehicle_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *
 		VectorCopy(new_origin,end);
 		end[2] -= 1;
 		tr = gi.trace(new_origin,other->mins,other->maxs,end,self,CONTENTS_SOLID);
-		if(tr.startsolid)
+		if (tr.startsolid)
 			// splat
 			T_Damage (other, self, self->owner, dir, self->s.origin, vec3_origin,
 						other->health - other->gib_health + 1, 0, 0, MOD_VEHICLE);
@@ -207,7 +207,7 @@ void vehicle_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *
 	dir[2] = 0.2; // make knockback slightly upward
 	VectorMA(other->velocity,vspeed,dir,new_velocity);
 	VectorMA(other->s.origin,FRAMETIME,new_velocity,new_origin);
-	if(gi.pointcontents(new_origin) & CONTENTS_SOLID)
+	if (gi.pointcontents(new_origin) & CONTENTS_SOLID)
 		knockback = (160.0f/500.0f) * 200.0f * (self->mass/2000.0f * vspeed*vspeed/160000);
 	else {
 		knockback = 0;
@@ -226,7 +226,7 @@ void vehicle_disengage (edict_t *vehicle)
 	vec3_t	forward, left, f1, l1;
 
 	driver = vehicle->owner;
-	if(!driver) return;
+	if (!driver) return;
 
 	AngleVectors(vehicle->s.angles, forward, left, NULL);
 	VectorCopy(vehicle->velocity,driver->velocity);
@@ -257,12 +257,12 @@ void vehicle_think (edict_t *self)
 	VectorCopy(self->oldvelocity,v);
 	v[2] = 0;
 	speed = VectorLength(v);
-	if(speed > 0)
+	if (speed > 0)
 		self->s.effects |= EF_ANIM_ALL;
 	else
 		self->s.effects &= ~EF_ANIM_ALL;
 	AngleVectors(self->s.angles, forward, left, NULL);
-	if(DotProduct(forward,self->oldvelocity) < 0) speed = -speed;
+	if (DotProduct(forward,self->oldvelocity) < 0) speed = -speed;
 	self->moveinfo.current_speed = speed;
 
 	if (self->owner)
@@ -277,7 +277,7 @@ void vehicle_think (edict_t *self)
 		{
 			// if he's pressing the use key, and he didn't just
 			// get on or off, disengage
-			if(level.framenum - self->owner->client->vehicle_framenum > 2)
+			if (level.framenum - self->owner->client->vehicle_framenum > 2)
 			{
 				VectorCopy(self->velocity,self->oldvelocity);
 				vehicle_disengage(self);
@@ -286,9 +286,9 @@ void vehicle_think (edict_t *self)
 		}
 		if (self->owner->client->ucmd.forwardmove != 0 && level.time > self->moveinfo.wait)
 		{
-			if(self->owner->client->ucmd.forwardmove > 0)
+			if (self->owner->client->ucmd.forwardmove > 0)
 			{
-				if(self->moveinfo.state < FAST)
+				if (self->moveinfo.state < FAST)
 				{
 					self->moveinfo.state++;
 					self->moveinfo.next_speed = self->moveinfo.state * self->speed/3;
@@ -297,7 +297,7 @@ void vehicle_think (edict_t *self)
 			}
 			else
 			{
-				if(self->moveinfo.state > RFAST)
+				if (self->moveinfo.state > RFAST)
 				{
 					self->moveinfo.state--;
 					self->moveinfo.next_speed = self->moveinfo.state * self->speed/3;
@@ -305,27 +305,27 @@ void vehicle_think (edict_t *self)
 				}
 			}
 		}
-		if(self->moveinfo.current_speed < self->moveinfo.next_speed)
+		if (self->moveinfo.current_speed < self->moveinfo.next_speed)
 		{
 			speed = self->moveinfo.current_speed + self->accel/10;
-			if(speed > self->moveinfo.next_speed) speed = self->moveinfo.next_speed;
+			if (speed > self->moveinfo.next_speed) speed = self->moveinfo.next_speed;
 		}
-		else if(self->moveinfo.current_speed > self->moveinfo.next_speed)
+		else if (self->moveinfo.current_speed > self->moveinfo.next_speed)
 		{
 			speed = self->moveinfo.current_speed - self->decel/10;
-			if(speed < self->moveinfo.next_speed) speed = self->moveinfo.next_speed;
+			if (speed < self->moveinfo.next_speed) speed = self->moveinfo.next_speed;
 		}
 		VectorScale(forward,speed,self->velocity);
 		if (self->owner->client->ucmd.sidemove != 0 && speed != 0 )
 		{
 			aspeed = 180.*speed/(M_PI*self->radius);
-			if(self->owner->client->ucmd.sidemove > 0) aspeed = -aspeed;
+			if (self->owner->client->ucmd.sidemove > 0) aspeed = -aspeed;
 			self->avelocity[1] = aspeed;
 		}
 		else
 			self->avelocity[1] = 0;
 
-		if(speed != 0)
+		if (speed != 0)
 			self->s.sound = self->noise_index;
 		else
 			self->s.sound = self->noise_index2;
@@ -343,7 +343,7 @@ void vehicle_think (edict_t *self)
 		VectorAdd(self->owner->s.origin,l1,self->owner->s.origin);
 		self->owner->s.origin[2] += self->move_origin[2];
 		// If moving, turn driver
-		if(speed != 0)
+		if (speed != 0)
 		{
 			float	yaw;
 			yaw = self->avelocity[1]*FRAMETIME;
@@ -364,9 +364,9 @@ void vehicle_think (edict_t *self)
 		//
 		// if vehicle has stopped, drop it to ground.
 		// otherwise slow it down
-		if(speed==0)
+		if (speed==0)
 		{
-			if(!self->groundentity)
+			if (!self->groundentity)
 				SV_AddGravity (self);
 		}
 		else
@@ -374,7 +374,7 @@ void vehicle_think (edict_t *self)
 			// no driver... slow to an eventual stop in no more than 5 sec.
 			self->moveinfo.next_speed = 0;
 			self->moveinfo.state = STOP;
-			if(speed > 0)
+			if (speed > 0)
 				newspeed = max(0.,speed - self->speed/50);
 			else
 				newspeed = min(0.,speed + self->speed/50);
@@ -410,7 +410,7 @@ void vehicle_think (edict_t *self)
 				self->s.origin[2] += 1;
 				gi.linkentity(self);
 
-				if(self->message)
+				if (self->message)
 					safe_centerprintf(ent,self->message);
 				self->owner = ent;
 				ent->movetype = MOVETYPE_PUSH;
@@ -431,7 +431,7 @@ void vehicle_think (edict_t *self)
 			}
 		}
 	}
-	if(self->movewith_next && (self->movewith_next->movewith_ent == self))
+	if (self->movewith_next && (self->movewith_next->movewith_ent == self))
 		set_child_movement(self);
 }
 

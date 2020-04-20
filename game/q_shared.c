@@ -304,7 +304,7 @@ float Q_fabs (float f)
 
 #if defined _M_IX86 && !defined C_ONLY
 #pragma warning (disable:4035)
-__declspec( naked ) long Q_ftol( float f )
+__declspec( naked ) int Q_ftol( float f )
 {
 	static int tmp;
 	__asm fld dword ptr [esp+4]
@@ -313,6 +313,11 @@ __declspec( naked ) long Q_ftol( float f )
 	__asm ret
 }
 #pragma warning (default:4035)
+#else
+int Q_ftol( float f )
+{
+	return (int)f;
+}
 #endif
 
 /*
@@ -384,11 +389,17 @@ int BoxOnPlaneSide2 (vec3_t emins, vec3_t emaxs, struct cplane_s *p)
 BoxOnPlaneSide
 
 Returns 1, 2, or 1 + 2
+
+Which means (THANKS FOR THE FUCKING COMMENTS CARMACK!):
+	1 = PSIDE_FRONT (front of plane)
+	2 = PSIDE_BACK	(back of plane)
+	3 = PSIDE_BOTH	(both sides of plane)
 ==================
 */
 //#if !id386 || defined __linux__ 
 //#ifndef id386
-#ifndef _WIN32
+//#ifndef _WIN32
+#if !defined (_WIN32) || !defined (_M_IX86)
 int BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, struct cplane_s *p)
 {
 	float	dist1, dist2;
@@ -971,12 +982,43 @@ qboolean AxisCompare (const vec3_t axis1[3], const vec3_t axis2[3])
 	return true;
 }
 
+/*
+================
+MatrixMultiply
+
+From Q3A
+================
+*/
+void MatrixMultiply (float in1[3][3], float in2[3][3], float out[3][3])
+{
+	out[0][0] = in1[0][0] * in2[0][0] + in1[0][1] * in2[1][0] +
+				in1[0][2] * in2[2][0];
+	out[0][1] = in1[0][0] * in2[0][1] + in1[0][1] * in2[1][1] +
+				in1[0][2] * in2[2][1];
+	out[0][2] = in1[0][0] * in2[0][2] + in1[0][1] * in2[1][2] +
+				in1[0][2] * in2[2][2];
+	out[1][0] = in1[1][0] * in2[0][0] + in1[1][1] * in2[1][0] +
+				in1[1][2] * in2[2][0];
+	out[1][1] = in1[1][0] * in2[0][1] + in1[1][1] * in2[1][1] +
+				in1[1][2] * in2[2][1];
+	out[1][2] = in1[1][0] * in2[0][2] + in1[1][1] * in2[1][2] +
+				in1[1][2] * in2[2][2];
+	out[2][0] = in1[2][0] * in2[0][0] + in1[2][1] * in2[1][0] +
+				in1[2][2] * in2[2][0];
+	out[2][1] = in1[2][0] * in2[0][1] + in1[2][1] * in2[1][1] +
+				in1[2][2] * in2[2][1];
+	out[2][2] = in1[2][0] * in2[0][2] + in1[2][1] * in2[1][2] +
+				in1[2][2] * in2[2][2];
+}
+
 
 //====================================================================================
 
 /*
 ============
 COM_SkipPath
+
+Skips the file path
 ============
 */
 char *COM_SkipPath (char *pathname)
@@ -996,6 +1038,8 @@ char *COM_SkipPath (char *pathname)
 /*
 ============
 COM_StripExtension
+
+Removes the file extension, if any
 ============
 */
 void COM_StripExtension (char *in, char *out, size_t outSize)
@@ -1419,6 +1463,9 @@ skipwhite:
 			c = *data++;
 			if (c=='\"' || !c)
 			{
+				if (len == MAX_TOKEN_CHARS)	// Knightmare- discard if > MAX_TOKEN_CHARS-1
+					len = 0;
+
 				com_token[len] = 0;
 				*data_p = data;
 				return com_token;
@@ -1855,7 +1902,7 @@ int Q_SortStrcmp (const char **arg1, const char **arg2)
 Q_strncasecmp
 =================
 */
-int Q_strncasecmp (char *s1, char *s2, int n)
+int Q_strncasecmp (char *s1, char *s2, size_t n)
 {
 	int		c1, c2;
 	
@@ -2037,11 +2084,11 @@ void Com_sprintf (char *dest, size_t size, char *fmt, ...)
 Com_HashFileName
 =============
 */
-long Com_HashFileName (const char *fname, int hashSize, qboolean sized)
+unsigned int Com_HashFileName (const char *fname, int hashSize, qboolean sized)
 {
-	int		i = 0;
-	long	hash = 0;
-	char	letter;
+	int				i = 0;
+	unsigned int	hash = 0;
+	char			letter;
 
 	if (fname[0] == '/' || fname[0] == '\\') i++;	// skip leading slash
 	while (fname[i] != '\0')
