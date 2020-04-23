@@ -175,6 +175,8 @@ void SP_monster_gladb (edict_t *self);
 void SP_monster_boss5 (edict_t *self);
 
 // Zaero
+void SP_monster_autocannon (edict_t *self);
+void SP_monster_autocannon_floor (edict_t *self);
 void SP_monster_hound (edict_t *self);
 void SP_monster_handler (edict_t *self);
 void SP_monster_sentien(edict_t *self);
@@ -554,6 +556,8 @@ spawn_t	spawns[] = {
 	{"monster_widow2", SP_monster_widow2},
 
 	// Zaero
+	{"monster_autocannon", SP_monster_autocannon},
+	{"monster_autocannon_floor", SP_monster_autocannon_floor},
 	{"monster_hound", SP_monster_hound},
 	{"monster_handler", SP_monster_handler},
 	{"monster_sentien", SP_monster_sentien},

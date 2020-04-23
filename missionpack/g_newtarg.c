@@ -829,9 +829,11 @@ void target_effect_lightning(edict_t *self, edict_t *activator)
 {
 	edict_t	*target;
 
-	if(!self->target) return;
+	if (!self->target)
+		return;
 	target = G_Find(NULL,FOFS(targetname),self->target);
-	if(!target) return;
+	if (!target)
+		return;
 
 	gi.WriteByte (svc_temp_entity);
 	gi.WriteByte (self->style);

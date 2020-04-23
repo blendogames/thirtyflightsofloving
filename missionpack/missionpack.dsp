@@ -521,6 +521,10 @@ SOURCE=.\q_shared.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\z_acannon.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\z_ai.c
 # End Source File
 # Begin Source File

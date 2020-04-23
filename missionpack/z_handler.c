@@ -422,7 +422,10 @@ void SP_monster_handler_precache(void)
 }
 
 
-/*QUAKED monster_handler (1 .5 0) (-16 -16 -24) (16 16 32) Ambush Trigger_Spawn Sight
+/*QUAKED monster_handler (1 .5 0) (-32 -32 -24) (32 32 32) Ambush Trigger_Spawn Sight
+Enforcer with hound.  Releases hound on sight.
+model="models/monsters/guard/handler/"
+model2="models/monsters/guard/hound/"
 */
 void SP_monster_handler (edict_t *self)
 {

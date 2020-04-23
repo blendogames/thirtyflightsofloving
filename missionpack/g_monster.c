@@ -1066,7 +1066,7 @@ qboolean monster_start (edict_t *self)
 	}
 
 	// Lazarus: Good guys
-	//Knightmare- gekks and stalkers use different spawnflag
+	// Knightmare- gekks and stalkers use different spawnflag
 	if ( (UseRegularGoodGuyFlag(self) && (self->spawnflags & SF_MONSTER_GOODGUY))	
 		|| (UseSpecialGoodGuyFlag(self) && (self->spawnflags & 16)) )
 	{

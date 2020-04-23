@@ -570,7 +570,8 @@ void SP_monster_hound_precache(void)
 }
 
 
-/*QUAKED monster_hound (1 .5 0) (-16 -16 -24) (16 16 32) Ambush Trigger_Spawn Sight
+/*QUAKED monster_hound (1 .5 0) (-16 -16 -24) (16 16 24) Ambush Trigger_Spawn Sight GoodGuy NoGib
+model="models/monsters/guard/hound/"
 */
 void SP_monster_hound (edict_t *self)
 {

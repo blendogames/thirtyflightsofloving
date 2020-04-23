@@ -587,8 +587,8 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 				return;
 			}
 		}
-		//Knightmare- Single-player obits
-		if (attacker->svflags & SVF_MONSTER)
+		// Knightmare- Single-player obits
+		if (attacker->svflags & (SVF_MONSTER|SVF_AUTOMATON))
 		{	// Light Guard
 			if (!strcmp(attacker->classname, "monster_soldier_light"))
 				message = "was blasted by a";
@@ -907,6 +907,24 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 				else
 					message = "was slashed to death by a";
 			}
+			// Autocannon
+			else if (!strcmp(attacker->classname, "monster_autocannon") || !strcmp(attacker->classname, "monster_autocannon_floor"))
+			{
+				if (mod == MOD_HYPERBLASTER || mod == MOD_BLASTER) {
+					message = "was melted by an";
+					message2 = "'s blaster";
+				}
+				else if (mod == MOD_ROCKET) {
+					message = "ate an";
+					message2 = "'s rocket";
+				}
+				else if (mod == MOD_R_SPLASH) {
+					message = "almost dodged an";
+					message2 = "'s rocket";
+				}
+				else
+					message = "was pumped full of lead by an";
+			}
 			// Sentien
 			else if (!strcmp(attacker->classname, "monster_sentien"))
 			{
@@ -1003,7 +1021,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 		}
 		// end Knightmare
 	}
-	//Knightmare- for diagnostics, print name of killing entity
+	// Knightmare- for diagnostics, print name of killing entity
 	/*if (strlen(attacker->classname))
 		gi.bprintf (PRINT_MEDIUM,"%s was killed by %s.\n", self->client->pers.netname, attacker->classname);
 	else*/
@@ -1638,7 +1656,7 @@ void InitClientPersistant (gclient_t *client, int style)
 	// These are currently unused, but init them anyway.
 	client->pers.max_flares			= 30;	// sk_max_flares->value;
 	client->pers.max_tbombs		    = 30;	// sk_max_tbombs->value;
-	client->pers.max_a2k			= 1;	// sk_max_a2k->value;
+	client->pers.max_a2k			= 1;
 	client->pers.max_empnuke		= 50;	// sk_max_empnuke->value;
 	client->pers.max_plasmashield	= 20;	// sk_max_plasmashield->value;
 // end Zaero

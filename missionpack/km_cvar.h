@@ -203,7 +203,6 @@ extern	cvar_t	*sk_max_fuel;
 /*
 extern	cvar_t	*sk_max_flares;
 extern	cvar_t	*sk_max_tbombs;
-extern	cvar_t	*sk_max_a2k;
 extern	cvar_t	*sk_max_empnuke;
 extern	cvar_t	*sk_max_plasmashield;
 */
@@ -237,7 +236,6 @@ extern	cvar_t	*sk_pack_fuel;
 /*
 extern	cvar_t	*sk_pack_flares;
 extern	cvar_t	*sk_pack_tbombs;
-extern	cvar_t	*sk_pack_a2k;
 extern	cvar_t	*sk_pack_empnuke;
 extern	cvar_t	*sk_pack_plasmashield;
 */
@@ -291,8 +289,4 @@ extern	cvar_t	*sk_double_time;
 extern	cvar_t	*sk_quad_fire_time;
 extern	cvar_t	*sk_doppleganger_time;
 extern	cvar_t	*sk_stasis_time;
-/*
-extern	cvar_t	*sk_visor_time;
-extern	cvar_t	*sk_sniper_charge_time;
-extern	cvar_t	*sk_a2k_detonate_time;
-*/
+//extern	cvar_t	*sk_visor_time;

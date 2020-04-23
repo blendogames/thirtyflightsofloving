@@ -1732,7 +1732,10 @@ void SP_monster_zboss_precache (void)
 }
 
 
-/*QUAKED monster_zboss (1 .5 0) (-16 -16 -24) (16 16 32) Ambush Trigger_Spawn Sight
+/*QUAKED monster_zboss (1 .5 0) (-32 -32 -16) (32 32 72) Ambush Trigger_Spawn Sight GoodGuy NoGib
+model="models/monsters/bossz/mech/"
+model2="models/monsters/bossz/pilot/"
+model3="models/monsters/bossz/grapple/"
 */
 void SP_monster_zboss (edict_t *self)
 {

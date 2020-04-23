@@ -12,11 +12,12 @@
 // right now, only the tesla has this
 #define SVF_DAMAGEABLE			0x00000008
 //ROGUE end
-#define	SVF_GIB					0x00000010	//Knightmare- gib flag
+#define	SVF_GIB					0x00000010	// Knightmare- gib flag
 #define SVF_TRIGGER_CAMOWNER    0x00000020
-#define	SVF_MUD					0x00000040  //mud flag
-#define	SVF_CLONED				0x00000080	//How to tell if this entity is a clone
-#define	SVF_OLDPLAYER			0x00000080	//How to tell if this entity is a clone
+#define	SVF_MUD					0x00000040  // mud flag
+#define	SVF_CLONED				0x00000080	// How to tell if this entity is a clone
+#define	SVF_OLDPLAYER			0x00000080	// How to tell if this entity is a clone
+#define	SVF_AUTOMATON			0x00000100	// Not exactly a monster (but causes client obit)...
 
 // edict->solid values
 

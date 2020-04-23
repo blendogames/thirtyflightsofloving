@@ -206,7 +206,6 @@ cvar_t	*sk_max_fuel;
 /*
 cvar_t	*sk_max_flares;
 cvar_t	*sk_max_tbombs;
-cvar_t	*sk_max_a2k;
 cvar_t	*sk_max_empnuke;
 cvar_t	*sk_max_plasmashield;
 */
@@ -242,7 +241,6 @@ cvar_t	*sk_pack_fuel;
 /*
 cvar_t	*sk_pack_flares;	// 60
 cvar_t	*sk_pack_tbombs;	// 100
-cvar_t	*sk_pack_a2k;		// 1
 cvar_t	*sk_pack_empnuke;	// 100
 cvar_t	*sk_pack_plasmashield; // 40
 */
@@ -295,11 +293,7 @@ cvar_t	*sk_ir_time;
 cvar_t	*sk_double_time;
 cvar_t	*sk_quad_fire_time;
 cvar_t	*sk_stasis_time;
-/*
-cvar_t	*sk_visor_time;
-cvar_t	*sk_sniper_charge_time;
-cvar_t	*sk_a2k_detonate_time;
-*/
+//cvar_t	*sk_visor_time;
 
 
 void InitLithiumVars (void)
@@ -505,7 +499,6 @@ void InitLithiumVars (void)
 /*
 	sk_max_flares = gi.cvar("sk_max_flares", "30", 0);
 	sk_max_tbombs = gi.cvar("sk_max_tbombs", "30", 0);
-	sk_max_a2k = gi.cvar("sk_max_a2k", "1", 0);
 	sk_max_empnuke = gi.cvar("sk_max_empnuke", "50", 0);
 	sk_max_plasmashield = gi.cvar("sk_max_plasmashield", "20", 0);
 */
@@ -541,7 +534,6 @@ void InitLithiumVars (void)
 /*
 	sk_pack_flares = gi.cvar("sk_pack_flares", "100", 0);
 	sk_pack_tbombs = gi.cvar("sk_pack_tbombs", "100", 0);
-	sk_pack_a2k = gi.cvar("sk_pack_a2k", "1", 0);
 	sk_pack_empnuke = gi.cvar("sk_pack_empnuke", "100", 0);
 	sk_pack_plasmashield = gi.cvar("sk_pack_plasmashield", "40", 0);
 */
@@ -595,9 +587,5 @@ void InitLithiumVars (void)
 	sk_double_time = gi.cvar("sk_double_time", "30", 0);
 	sk_quad_fire_time = gi.cvar("sk_quad_fire_time", "30", 0);
 	sk_stasis_time = gi.cvar("sk_stasis_time", "30", 0);
-/*
-	sk_visor_time = gi.cvar("sk_visor_time", "30", 0);
-	sk_sniper_charge_time = gi.cvar("sk_sniper_charge_time", "3", 0);
-	sk_a2k_detonate_time = gi.cvar("sk_a2k_detonate_time", "5", 0);
-*/
+//	sk_visor_time = gi.cvar("sk_visor_time", "30", 0);
 }

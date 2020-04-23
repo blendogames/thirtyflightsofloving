@@ -843,6 +843,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\z_acannon.c"
+				>
+			</File>
+			<File
 				RelativePath=".\z_ai.c"
 				>
 			</File>

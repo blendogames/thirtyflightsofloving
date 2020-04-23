@@ -42,6 +42,7 @@ vec_t VectorLengthSquared (vec3_t v)
 
 	return length;
 }
+#endif
 
 void angleToward (edict_t *self, vec3_t point, float speed)
 {
@@ -65,7 +66,6 @@ void angleToward (edict_t *self, vec3_t point, float speed)
 	vel = VectorLength(self->velocity);
 	VectorScale(forward, vel, self->velocity);
 }
-#endif
 
 #define MAXROTATION 20
 
