@@ -607,15 +607,10 @@ NET
 
 #define	PORT_ANY	-1
 
-//Knightmare- increase max message size to eliminate SZ_Getspace: Overflow
-//Mark Shan is just gonna love this!!
-#ifndef NET_SERVER_BUILD
+// Knightmare- increase max message size to eliminate SZ_Getspace: Overflow
 #define	MAX_MSGLEN		44800
-#else
-#define	MAX_MSGLEN		2800
-#endif
 #define	MAX_MSGLEN_MP	2800
-//end Knightmare
+// end Knightmare
 
 #define	PACKET_HEADER	10			// two ints and a short
 
