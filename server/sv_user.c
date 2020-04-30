@@ -488,7 +488,8 @@ void SV_BeginDownload_f(void)
 		sv_client->downloadcount = sv_client->downloadsize;
 
 	// ZOID- special check for maps, if it came from a pak file, don't allow download  
-	if (!sv_client->download || (strncmp(name, "maps/", 5) == 0 && file_from_pak))
+//	if (!sv_client->download || (strncmp(name, "maps/", 5) == 0 && file_from_pak))
+	if (!sv_client->download || (strncmp(name, "maps/", 5) == 0 && file_from_protected_pak))	// protected pak check from Yamagi Q2
 	{
 		Com_DPrintf ("Couldn't download %s to %s\n", name, sv_client->name);
 		if (sv_client->download)

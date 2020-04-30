@@ -40,8 +40,11 @@ static int		pendingCount = 0;
 static int		abortDownloads = HTTPDL_ABORT_NONE;
 static qboolean	downloading_pak = false;
 static qboolean	httpDown = false;
-static qboolean	thisMapAbort = false; // Knightmare- whether to fall back to UDP for this map
-static int		prevSize;			// Knightmare- for KBps counter
+static qboolean	thisMapAbort = false;	// Knightmare- whether to fall back to UDP for this map
+static int		prevSize;				// Knightmare- for KBps counter
+static qboolean	downloadError = false;	// YQ2 UDP fallback addition
+static qboolean	downloadFileList = true;	// YQ2 addition for downloading filelist once
+static char		remoteGamedir[MAX_QPATH];	// YQ2 addition for Q2Pro downloads
 
 /*
 ===============================
@@ -162,11 +165,6 @@ static size_t /*EXPORT*/ CL_HTTP_Header (void *ptr, size_t size, size_t nmemb, v
 	return bytes;
 }
 
-/*void CL_RemoveHTTPDownload (const char *quakePath)
-{
-
-}*/
-
 /*
 ===============
 CL_EscapeHTTPPath
@@ -205,8 +203,8 @@ static void CL_EscapeHTTPPath (const char *filePath, char *escaped)
 	}
 	p[0] = 0;
 
-	//using ./ in a url is legal, but all browsers condense the path and some IDS / request
-	//filtering systems act a bit funky if http requests come in with uncondensed paths.
+	// using ./ in a url is legal, but all browsers condense the path and some IDS / request
+	// filtering systems act a bit funky if http requests come in with uncondensed paths.
 	len = strlen(escaped);
 	p = escaped;
 	while ((p = strstr (p, "./")))
@@ -272,6 +270,41 @@ int /*EXPORT*/ CL_CURL_Debug (CURL *c, curl_infotype type, char *data, size_t si
 	return 0;
 }
 
+/*void CL_RemoveHTTPDownload (const char *quakePath)
+{
+
+}*/
+
+/*
+===============
+CL_RemoveDownloadFromQueue
+
+Adapted from Yamagi Quake2.
+Removes an entry from the download queue.
+===============
+*/
+#if 1
+qboolean CL_RemoveDownloadFromQueue (dlqueue_t *entry)
+{
+	dlqueue_t	*last = &cls.downloadQueue;
+	dlqueue_t	*cur = last->next;
+
+	while (cur)
+	{
+		if (last->next == entry)
+		{
+			last->next = cur->next;
+			Z_Free (cur);
+			cur = NULL;
+			return true;
+		}
+		last = cur;
+		cur = cur->next;
+	}
+	return false;
+}
+#endif
+
 /*
 ===============
 CL_StartHTTPDownload
@@ -283,11 +316,11 @@ handle.
 static void CL_StartHTTPDownload (dlqueue_t *entry, dlhandle_t *dl)
 {
 	size_t		len;
-	char		tempFile[MAX_OSPATH];
+	char		remoteFilePath[MAX_OSPATH];		// Knightmare added
 	char		escapedFilePath[MAX_QPATH*4];
 	
-	//yet another hack to accomodate filelists, how i wish i could push :(
-	//NULL file handle indicates filelist.
+	// yet another hack to accomodate filelists, how i wish i could push :(
+	// NULL file handle indicates filelist.
 	len = strlen (entry->quakePath);
 	if (len > 9 && !strcmp (entry->quakePath + len - 9, ".filelist"))
 	{
@@ -298,24 +331,31 @@ static void CL_StartHTTPDownload (dlqueue_t *entry, dlhandle_t *dl)
 	{
 		CL_HTTP_Reset_KBps_counter ();	// Knightmare- for KB/s counter
 
-		Com_sprintf (dl->filePath, sizeof(dl->filePath), "%s/%s", FS_Gamedir(), entry->quakePath);
+		Com_sprintf (dl->filePath, sizeof(dl->filePath), "%s/%s", FS_Downloaddir(), entry->quakePath);	// was FS_Gamedir()
+	//	Com_sprintf (remoteFilePath, sizeof(remoteFilePath), "/%s/%s", cl.gamedir, entry->quakePath);	// always use cl.gamedir (with leading slash) for remote server path
+		// YQ2 Q2pro download addition
+		// Use remoteGamedir for remote server path if set
+		if (remoteGamedir[0] == '\0')
+			Com_sprintf (remoteFilePath, sizeof(remoteFilePath), "/%s", entry->quakePath);
+		else
+			Com_sprintf (remoteFilePath, sizeof(remoteFilePath), "/%s/%s", remoteGamedir, entry->quakePath);
 
-		Com_sprintf (tempFile, sizeof(tempFile), "%s/%s", cl.gamedir, entry->quakePath);
-		CL_EscapeHTTPPath (dl->filePath, escapedFilePath);
+	//	CL_EscapeHTTPPath (dl->filePath, escapedFilePath);
+		CL_EscapeHTTPPath (remoteFilePath, escapedFilePath);
 
 	//	strncat (dl->filePath, ".tmp");
 		Q_strncatz (dl->filePath, ".tmp", sizeof(dl->filePath));
 
 		FS_CreatePath (dl->filePath);
 
-		//don't bother with http resume... too annoying if server doesn't support it.
+		// don't bother with http resume... too annoying if server doesn't support it.
 		dl->file = fopen (dl->filePath, "wb");
 		if (!dl->file)
 		{
 			Com_Printf ("CL_StartHTTPDownload: Couldn't open %s for writing.\n", dl->filePath);
 			entry->state = DLQ_STATE_DONE;
 			pendingCount--;	// Knightmare- fix for curl_update limbo from [HCI]Maraa'kate
-			//CL_RemoveHTTPDownload (entry->quakePath);
+		//	CL_RemoveHTTPDownload (entry->quakePath);
 			return;
 		}
 	}
@@ -392,6 +432,8 @@ A new server is specified, so we nuke all our state.
 void CL_SetHTTPServer (const char *URL)
 {
 	dlqueue_t	*q, *last;
+	char		*fixedURL = NULL;
+	size_t		URLlen;
 
 	CL_HTTP_Cleanup (false);
 
@@ -422,10 +464,28 @@ void CL_SetHTTPServer (const char *URL)
 	abortDownloads = HTTPDL_ABORT_NONE;
 	handleCount = pendingCount = 0;
 
-	strncpy (cls.downloadServer, URL, sizeof(cls.downloadServer)-1);
+//	strncpy (cls.downloadServer, URL, sizeof(cls.downloadServer)-1);
+
+	// from YQ2: remove trailing '/' from URL
+	URLlen = strlen(URL);
+	fixedURL = strdup(URL);
+	if (fixedURL[URLlen-1] == '/') {
+		fixedURL[URLlen-1] = '\0';
+	}
+
+	// From Q2Pro- ignore non-HTTP DL server URLs
+	if ( (strncmp(fixedURL, "http://", 7) != 0) && (strncmp(fixedURL, "https://", 8) != 0) ) {
+		Com_Printf("[HTTP] Ignoring download server with non-HTTP protocol.\n");
+		return;
+	}
+
+	Q_strncpyz (cls.downloadServer, fixedURL, sizeof(cls.downloadServer));
+	free(fixedURL);
+	fixedURL = NULL;
 
 	// FS: Added because Whale's Weapons HTTP server rejects you after a lot of 404s.  Then you lose HTTP until a hard reconnect.
 	cls.downloadServerRetry[0] = 0;
+	downloadError = false;	// YQ2 UDP fallback addition- reset this for new server
 }
 /*
 ===============
@@ -434,7 +494,6 @@ CL_CancelHTTPDownloads
 Cancel all downloads and nuke the queue.
 ===============
 */
-void CL_ResetPrecacheCheck (void);
 void CL_CancelHTTPDownloads (qboolean permKill)
 {
 	dlqueue_t	*q;
@@ -470,21 +529,24 @@ Called from the precache check to queue a download. Return value of
 false will cause standard UDP downloading to be used instead.
 ===============
 */
-qboolean CL_QueueHTTPDownload (const char *quakePath)
+qboolean CL_QueueHTTPDownload (const char *quakePath, qboolean filelistUseGamedir)
 {
 	size_t		len;
 	dlqueue_t	*q, *check, *last;
-	qboolean	needList, isPak = false, isFilelist = false;
+	qboolean	needList = false, isPak = false, isFilelist = false;
 
 	// no http server (or we got booted)
-	if (!cls.downloadServer[0] || abortDownloads || thisMapAbort || !cl_http_downloads->value)
+	if (!cls.downloadServer[0] || abortDownloads || thisMapAbort || !cl_http_downloads->integer)
 		return false;
 
-	needList = false;
+//	needList = false;
 
 	// first download queued, so we want the mod filelist
-	if (!cls.downloadQueue.next && cl_http_filelists->value)
+//	if ( !cls.downloadQueue.next && cl_http_filelists->integer ) {
+	if ( downloadFileList && cl_http_filelists->integer ) {
 		needList = true;
+		downloadFileList = false;
+	}
 
 	len = strlen (quakePath);
 	if (len > 4 && (!Q_stricmp((char *)quakePath + len - 4, ".pak") || !Q_stricmp((char *)quakePath + len - 4, ".pk3")) )
@@ -542,8 +604,16 @@ qboolean CL_QueueHTTPDownload (const char *quakePath)
 
 	if (needList)
 	{
-		//grab the filelist
-		CL_QueueHTTPDownload (va("%s.filelist", cl.gamedir));
+		// grab the filelist
+	//	CL_QueueHTTPDownload (va("%s.filelist", cl.gamedir));
+		// YQ2 Q2pro download addition
+		if (filelistUseGamedir) {
+			CL_QueueHTTPDownload (va("/%s/.filelist", remoteGamedir), false);
+		}
+		else {
+			// YQ2 uses /.filelist here instead of /<modname>.filelist, but I've found that doesn't work on R1Q2 servers
+			CL_QueueHTTPDownload (va("/%s.filelist", cl.gamedir), false);	// YQ2 change- added leading slash
+		}
 
 		// this is a nasty hack to let the server know what we're doing so admins don't
 		// get confused by a ton of people stuck in CNCT state. it's assumed the server
@@ -556,20 +626,26 @@ qboolean CL_QueueHTTPDownload (const char *quakePath)
 		MSG_WriteString (&cls.netchan.message, "download http\n");
 	}
 
-	// special case for map file lists, i really wanted a server-push mechanism for this, but oh well
+	// special case for map file lists, I really wanted a server-push mechanism for this, but oh well
 	len = strlen (quakePath);
-	if (cl_http_filelists->value && len > 4 && !Q_stricmp ((char *)(quakePath + len - 4), ".bsp"))
+	if (cl_http_filelists->integer && len > 4 && !Q_stricmp ((char *)(quakePath + len - 4), ".bsp"))
 	{
 		char	listPath[MAX_OSPATH];
 		char	filePath[MAX_OSPATH];
 
-		Com_sprintf (filePath, sizeof(filePath), "%s/%s", cl.gamedir, quakePath);
+	//	Com_sprintf (filePath, sizeof(filePath), "%s/%s", cl.gamedir, quakePath);
+		// YQ2 Q2pro download addition
+		// Use remoteGamedir for remote server path if set
+		if (remoteGamedir[0] == '\0')
+			Com_sprintf (filePath, sizeof(filePath), "/%s", quakePath);
+		else
+			Com_sprintf (filePath, sizeof(filePath), "/%s/%s", remoteGamedir, quakePath);
 
 		COM_StripExtension (filePath, listPath, sizeof(listPath));
 	//	strncat (listPath, ".filelist");
 		Q_strncatz (listPath, ".filelist", sizeof(listPath));
 		
-		CL_QueueHTTPDownload (listPath);
+		CL_QueueHTTPDownload (listPath, false);
 	}
 
 	// if a download entry has made it this far, CL_FinishHTTPDownload is guaranteed to be called.
@@ -689,11 +765,29 @@ static void CL_CheckAndQueueDownload (char *path)
 
 		if (pak)
 		{
-			Com_sprintf (gamePath, sizeof(gamePath),"%s/%s", FS_Gamedir(), path);
+			Com_sprintf (gamePath, sizeof(gamePath),"%s/%s", FS_Downloaddir(), path);	// was FS_Gamedir()
 			f = fopen (gamePath, "rb");
 			if (!f)
 			{
-				exists = false;
+				if ( !stricmp(FS_Downloaddir(), FS_Gamedir()) )	// if fs_gamedir and fs_downloaddir are the same, don't bother trying fs_gamedir
+				{
+					exists = false;
+				}
+				else
+				{
+					Com_sprintf (gamePath, sizeof(gamePath),"%s/%s", FS_Gamedir(), path);
+					f = fopen (gamePath, "rb");
+					if (!f)
+					{
+						exists = false;
+					}
+					else
+					{
+					//	Com_Printf ("[HTTP] NOTICE: pak file (%s) specified in filelist already exists\n", gamePath);
+						exists = true;
+						fclose (f);
+					}
+				}
 			}
 			else
 			{
@@ -705,12 +799,12 @@ static void CL_CheckAndQueueDownload (char *path)
 		else
 		{
 		//	exists = FS_ExistsInGameDir (path);
-			exists = FS_LocalFileExists (path);
+			exists = (FS_DownloadFileExists (path) || FS_LocalFileExists(path));
 		}
 
 		if (!exists)
 		{
-			if (CL_QueueHTTPDownload (path))
+			if (CL_QueueHTTPDownload (path, false))
 			{
 				// Paks get bumped to the top and HTTP switches to single downloading.
 				// This prevents someone on 28k dialup trying to do both the main .pak
@@ -757,7 +851,7 @@ static void CL_ParseFileList (dlhandle_t *dl)
 	char	 *list;
 	char	*p;
 
-	if (!cl_http_filelists->value)
+	if (!cl_http_filelists->integer)
 		return;
 
 	list = dl->tempBuffer;
@@ -905,6 +999,7 @@ static void CL_FinishHTTPDownload (void)
 	double		fileSize;
 	char		tempName[MAX_OSPATH];
 	qboolean	isFile;
+	size_t		len;
 
 	do
 	{
@@ -941,7 +1036,7 @@ static void CL_FinishHTTPDownload (void)
 		// attempts.
 		dl->queueEntry->state = DLQ_STATE_DONE;
 
-		//filelist processing is done on read
+		// filelist processing is done on read
 		if (dl->file)
 			isFile = true;
 		else
@@ -953,11 +1048,11 @@ static void CL_FinishHTTPDownload (void)
 			dl->file = NULL;
 		}
 
-		//might be aborted
+		// might be aborted
 		if (pendingCount)
 			pendingCount--;
 		handleCount--;
-		//Com_Printf ("finished dl: hc = %d\n", LOG_GENERAL, handleCount);
+	//	Com_Printf ("finished dl: hc = %d\n", LOG_GENERAL, handleCount);
 		cls.downloadname[0] = 0;
 		cls.downloadposition = 0;
 
@@ -972,9 +1067,8 @@ static void CL_FinishHTTPDownload (void)
 				curl_easy_getinfo (curl, CURLINFO_RESPONSE_CODE, &responseCode);
 				if (responseCode == 404)
 				{
-					i = strlen (dl->queueEntry->quakePath);
-					if ( !strcmp (dl->queueEntry->quakePath + i - 4, ".pak")
-						|| !strcmp (dl->queueEntry->quakePath + i - 4, ".pk3") )
+					len = strlen (dl->queueEntry->quakePath);
+					if ( len > 4 && ( !strcmp (dl->queueEntry->quakePath + len - 4, ".pak") || !strcmp (dl->queueEntry->quakePath + len - 4, ".pk3")) )
 						downloading_pak = false;
 
 					if (isFile) {
@@ -994,15 +1088,25 @@ static void CL_FinishHTTPDownload (void)
 					else */
 					{
 						curl_multi_remove_handle (multi, dl->curl);
-						// Knightmare- fall back to UDP download for this map if failure on .bsp
-						if ( !strncmp(dl->queueEntry->quakePath, "maps/", 5) && !strcmp(dl->queueEntry->quakePath + i - 4, ".bsp") )
+
+						// Fall back to UDP download for this map if failure on .bsp
+					/*	if ( !strncmp(dl->queueEntry->quakePath, "maps/", 5) && !strcmp(dl->queueEntry->quakePath + i - 4, ".bsp") )
 						{
-							Com_Printf ("[HTTP] Failed to download %s, falling back to UDP until next map.\n", dl->queueEntry->quakePath);
+							Com_Printf ("[HTTP]: failed to download %s, falling back to UDP until next map.\n", dl->queueEntry->quakePath);
 							thisMapAbort = true;
 							CL_CancelHTTPDownloads (false);
 							CL_ResetPrecacheCheck ();
 						}
+						else { */
+							// Remove queue entry from CURL multihandle queue
+							CL_RemoveDownloadFromQueue (dl->queueEntry);
+							dl->queueEntry = NULL;
+					//	}
 						// end Knightmare
+						// YQ2 UDP fallback addition
+						if (isFile) {
+							downloadError = true;
+						}
 						continue;
 					}
 				}
@@ -1016,7 +1120,7 @@ static void CL_FinishHTTPDownload (void)
 				// every other code is treated as fatal, fallthrough here
 				Com_Printf ("[HTTP] Bad response code %d for %s, aborting HTTP downloading.\n", responseCode, dl->queueEntry->quakePath);
 
-			//fatal error, disable http
+			// fatal error, disable http
 			case CURLE_COULDNT_RESOLVE_HOST:
 			case CURLE_COULDNT_CONNECT:
 			case CURLE_COULDNT_RESOLVE_PROXY:
@@ -1031,8 +1135,8 @@ static void CL_FinishHTTPDownload (void)
 				CL_CancelHTTPDownloads (true);
 				continue;
 			default:
-				i = strlen (dl->queueEntry->quakePath);
-				if ( !strcmp (dl->queueEntry->quakePath + i - 4, ".pak") || !strcmp (dl->queueEntry->quakePath + i - 4, ".pk3") )
+				len = strlen (dl->queueEntry->quakePath);
+				if (len > 4 && (!strcmp (dl->queueEntry->quakePath + len - 4, ".pak") || !strcmp (dl->queueEntry->quakePath + len - 4, ".pk3")) )
 					downloading_pak = false;
 				if (isFile) {
 					remove (dl->filePath);
@@ -1045,8 +1149,8 @@ static void CL_FinishHTTPDownload (void)
 
 		if (isFile)
 		{
-			//rename the temp file
-			Com_sprintf (tempName, sizeof(tempName), "%s/%s", FS_Gamedir(), dl->queueEntry->quakePath);
+			// rename the temp file
+			Com_sprintf (tempName, sizeof(tempName), "%s/%s", FS_Downloaddir(), dl->queueEntry->quakePath);	// was FS_Gamedir()
 
 			if (rename (dl->filePath, tempName))
 				Com_Printf ("[HTTP] Failed to rename %s for some odd reason...", dl->filePath);
@@ -1057,30 +1161,31 @@ static void CL_FinishHTTPDownload (void)
 			{
 			//	FS_FlushCache ();
 			//	FS_ReloadPAKs ();
-				// Knightmare- just add the pk3/ pak file
+				// Knightmare- just add the pk3 / pak file
 				if (!strcmp (tempName + i - 4, ".pk3")) 
-					FS_AddPK3File (tempName);
+					FS_AddPK3File (tempName, false);
 				else
-					FS_AddPAKFile (tempName);
+					FS_AddPAKFile (tempName, false);
 
 				CL_ReVerifyHTTPQueue ();
 				downloading_pak = false;
 			}
 		}
 
-		//show some stats
+		// show some stats
 		curl_easy_getinfo (curl, CURLINFO_TOTAL_TIME, &timeTaken);
 		curl_easy_getinfo (curl, CURLINFO_SIZE_DOWNLOAD, &fileSize);
 
-		//FIXME:
-		//technically i shouldn't need to do this as curl will auto reuse the
-		//existing handle when you change the URL. however, the handleCount goes
-		//all weird when reusing a download slot in this way. if you can figure
-		//out why, please let me know.
+		// FIXME:
+		// Technically i shouldn't need to do this as curl will auto reuse the
+		// existing handle when you change the URL. however, the handleCount goes
+		// all weird when reusing a download slot in this way. if you can figure
+		// out why, please let me know.
 		curl_multi_remove_handle (multi, dl->curl);
 
 		Com_Printf ("[HTTP] (%s): %.f bytes, %.2fkB/sec [%d remaining files]\n", dl->queueEntry->quakePath, fileSize, (fileSize / 1024.0) / timeTaken, pendingCount);
-	} while (msgs_in_queue > 0);
+	}
+	while (msgs_in_queue > 0);
 
 //	FS_FlushCache ();
 
@@ -1163,6 +1268,58 @@ static void CL_StartNextHTTPDownload (void)
 
 /*
 ===============
+CL_CheckHTTPError
+
+YQ2 UDP fallback addition
+
+Checks if thre was an error.
+Returns true if yes, false if no.
+Resets flag if it was set.
+===============
+*/
+qboolean CL_CheckHTTPError (void)
+{
+	if (downloadError) {
+		downloadError = false;
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+/*
+===============
+CL_HTTP_EnableGenericFilelist
+
+YQ2 UDP fallback addition
+
+Enables generic filelist download
+starting with the next file.
+===============
+*/
+void CL_HTTP_EnableGenericFilelist (void)
+{
+	downloadFileList = true;
+}
+
+/*
+===============
+CL_HTTP_SetDownloadGamedir
+
+YQ2 Q2pro download addition
+
+Sets the gamedir to be used by the URL generator
+to determine the remote file path.
+===============
+*/
+void CL_HTTP_SetDownloadGamedir (const char *gamedir)
+{
+	Q_strncpyz(remoteGamedir, gamedir, sizeof(remoteGamedir));
+}
+
+/*
+===============
 CL_RunHTTPDownloads
 
 This calls curl_multi_perform do actually do stuff. Called every frame while
@@ -1178,11 +1335,11 @@ void CL_RunHTTPDownloads (void)
 	if (!cls.downloadServer[0])
 		return;
 
-	//Com_Printf ("handle %d, pending %d\n", LOG_GENERAL, handleCount, pendingCount);
+//	Com_Printf ("handle %d, pending %d\n", LOG_GENERAL, handleCount, pendingCount);
 
-	//not enough downloads running, queue some more!
-	if (pendingCount && abortDownloads == HTTPDL_ABORT_NONE &&
-		!downloading_pak && handleCount < cl_http_max_connections->value)
+	// not enough downloads running, queue some more!
+	if (pendingCount && (abortDownloads == HTTPDL_ABORT_NONE) &&
+		!downloading_pak && (handleCount < cl_http_max_connections->integer) )
 		CL_StartNextHTTPDownload ();
 
 	do
@@ -1190,8 +1347,8 @@ void CL_RunHTTPDownloads (void)
 		ret = curl_multi_perform (multi, &newHandleCount);
 		if (newHandleCount < handleCount)
 		{
-			//Com_Printf ("runnd dl: hc = %d, nc = %d\n", LOG_GENERAL, handleCount, newHandleCount);
-			//hmm, something either finished or errored out.
+		//	Com_Printf ("runnd dl: hc = %d, nc = %d\n", LOG_GENERAL, handleCount, newHandleCount);
+			// hmm, something either finished or errored out.
 			CL_FinishHTTPDownload ();
 			handleCount = newHandleCount;
 		}
@@ -1204,9 +1361,9 @@ void CL_RunHTTPDownloads (void)
 		CL_CancelHTTPDownloads (true);
 	}
 
-	//not enough downloads running, queue some more!
-	if (pendingCount && abortDownloads == HTTPDL_ABORT_NONE &&
-		!downloading_pak && handleCount < cl_http_max_connections->value)
+	// not enough downloads running, queue some more!
+	if (pendingCount && (abortDownloads == HTTPDL_ABORT_NONE) &&
+		!downloading_pak && (handleCount < cl_http_max_connections->integer) )
 		CL_StartNextHTTPDownload ();
 }
 

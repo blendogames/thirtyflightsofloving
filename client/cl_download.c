@@ -39,6 +39,26 @@ int precache_pak;	// Knightmare added
 
 byte *precache_model; // used for skin checking in alias models
 
+#ifdef USE_CURL
+qboolean	precache_forceUDP = false;	// force all downloads to UDP
+qboolean	filelistUseGamedir = false;
+
+// HTTP Fallback handling
+// First we're trying to download all files over HTTP with r1q2-style URLs.
+// If we encountered errors, we reset the complete precacher state and retry with HTTP and q2pro-style URLs.
+// If we still got errors we're falling back to UDP.
+// Iteration 1: Initial state, R1Q2-style URLs.
+// Iteration 2: Q2Pro-style URLs.
+// Iteration 3: UDP downloads.
+typedef enum {
+	ITER_HTTP_R1Q2 = 0,
+	ITER_HTTP_Q2PRO = 1,
+	ITER_UDP = 2,
+} precacheIteration_t;
+
+static precacheIteration_t precache_iteration = ITER_HTTP_R1Q2;
+#endif	// USE_CURL
+
 #define PLAYER_MULT 5
 
 // ENV_CNT is map load, ENV_CNT+1 is first env map
@@ -105,8 +125,28 @@ void CL_RequestNextDownload (void)
 		texture_cnt		= TEXTURE_CNT;
 	}
 
+	// YQ2 Q2pro download addition
+#ifdef USE_CURL
+	if (precache_iteration == ITER_HTTP_R1Q2) {
+		CL_HTTP_SetDownloadGamedir (cl.gamedir);
+	}
+	else if (precache_iteration == ITER_HTTP_Q2PRO)
+	{
+		if (cl.gamedir[0] == '\0')
+			CL_HTTP_SetDownloadGamedir (BASEDIRNAME);
+		else
+			CL_HTTP_SetDownloadGamedir (cl.gamedir);
+		// try filelist again with a different path
+		filelistUseGamedir = true;
+		CL_HTTP_EnableGenericFilelist ();
+	}
+	else {	// if (precache_iteration == ITER_UDP)
+		precache_forceUDP = true;
+	}
+#endif	// USE_CURL
+
 	// Skip to loading map if downloading disabled or on local server
-	if ( (Com_ServerState() || !allow_download->value) && precache_check < env_cnt)
+	if ( (Com_ServerState() || !allow_download->integer) && precache_check < env_cnt)
 		precache_check = env_cnt;
 
 	// Try downloading pk3 file for current map from server, hack by Jay Dolan
@@ -122,22 +162,25 @@ void CL_RequestNextDownload (void)
 	// ZOID
 	if (precache_check == CS_MODELS) { // confirm map
 		precache_check = CS_MODELS+2; // 0 isn't used
-		if (allow_download_maps->value)
+		if (allow_download_maps->integer) {
 			if (!CL_CheckOrDownloadFile(cl.configstrings[CS_MODELS+1]))
 				return; // started a download
+		}
 	}
 	if (precache_check >= CS_MODELS && precache_check < CS_MODELS+max_models)
 	{
-		if (allow_download_models->value)
+		if (allow_download_models->integer)
 		{
 			while (precache_check < CS_MODELS+max_models &&
-				cl.configstrings[precache_check][0]) {
+				cl.configstrings[precache_check][0])
+			{
 				if (cl.configstrings[precache_check][0] == '*' ||
 					cl.configstrings[precache_check][0] == '#') {
 					precache_check++;
 					continue;
 				}
-				if (precache_model_skin == 0) {
+				if (precache_model_skin == 0)
+				{
 					if (!CL_CheckOrDownloadFile(cl.configstrings[precache_check])) {
 						precache_model_skin = 1;
 						return; // started a download
@@ -147,14 +190,14 @@ void CL_RequestNextDownload (void)
 
 #ifdef USE_CURL	// HTTP downloading from R1Q2
 				// pending downloads (models), let's wait here before we can check skins.
-				if ( CL_PendingHTTPDownloads() )
+				if ( CL_PendingHTTPDownloads() ) {
 					return;
+				}
 #endif	// USE_CURL
 
 				// checking for skins in the model
 				if (!precache_model)
 				{
-
 					FS_LoadFile (cl.configstrings[precache_check], (void **)&precache_model);
 					if (!precache_model) {
 						precache_model_skin = 0;
@@ -228,7 +271,8 @@ void CL_RequestNextDownload (void)
 						else if (strlen(skinname) > MAX_SKINNAME-1)
 							Com_Error (ERR_DROP, "Model %s has too long a skin path: %s", cl.configstrings[precache_check], skinname);
 
-						if (!CL_CheckOrDownloadFile(skinname)) {
+						if (!CL_CheckOrDownloadFile(skinname))
+						{
 							precache_model_skin++;
 							return; // started a download
 						}
@@ -300,8 +344,7 @@ void CL_RequestNextDownload (void)
 	}
 	if (precache_check >= cs_sounds && precache_check < cs_sounds+max_sounds)
 	{ 
-		if (allow_download_sounds->value)
-		{
+		if (allow_download_sounds->integer) {
 			if (precache_check == cs_sounds)
 				precache_check++; // zero is blank
 			while (precache_check < cs_sounds+max_sounds &&
@@ -317,13 +360,12 @@ void CL_RequestNextDownload (void)
 		}
 		precache_check = cs_images;
 	}
-	if (precache_check >= cs_images && precache_check < cs_images+max_images)
+	if (precache_check >= cs_images && precache_check < CS_IMAGES+max_images)
 	{
 		if (precache_check == cs_images)
 			precache_check++; // zero is blank
 		while (precache_check < cs_images+max_images &&
-			cl.configstrings[precache_check][0])
-		{	
+			cl.configstrings[precache_check][0]) {
 			Com_sprintf(fn, sizeof(fn), "pics/%s.pcx", cl.configstrings[precache_check++]);
 			if (!CL_CheckOrDownloadFile(fn))
 				return; // started a download
@@ -335,7 +377,7 @@ void CL_RequestNextDownload (void)
 	// so precache_check is now *3
 	if (precache_check >= cs_playerskins && precache_check < cs_playerskins + MAX_CLIENTS * PLAYER_MULT)
 	{
-		if (allow_download_players->value)
+		if (allow_download_players->integer)
 		{
 			while (precache_check < cs_playerskins + MAX_CLIENTS * PLAYER_MULT)
 			{
@@ -427,8 +469,21 @@ void CL_RequestNextDownload (void)
 
 #ifdef USE_CURL	// HTTP downloading from R1Q2
 	// pending downloads (possibly the map), let's wait here.
-	if ( CL_PendingHTTPDownloads() )
+	if ( CL_PendingHTTPDownloads() ) {
 		return;
+	}
+	// YQ2 UDP fallback addition
+	if ( CL_CheckHTTPError() )	// Download errors detected, so start over with next iteration
+	{
+		precache_iteration++;
+		if (precache_iteration == ITER_HTTP_Q2PRO)
+			Com_Printf ("[HTTP] One or more HTTP downloads failed on R1Q2 path, falling back to Q2Pro path.\n");
+		else	// if (precache_iteration == ITER_UDP)
+			Com_Printf ("[HTTP] One or more HTTP downloads failed on both R1Q2 and Q2Pro paths, falling back to UDP.\n");
+		CL_ResetPrecacheCheck ();
+		CL_RequestNextDownload ();
+		return;
+	}
 #endif	// USE_CURL
 
 	if (precache_check == env_cnt)
@@ -449,7 +504,7 @@ void CL_RequestNextDownload (void)
 
 	if (precache_check > env_cnt && precache_check < texture_cnt)
 	{
-		if (allow_download->value && allow_download_maps->value)
+		if (allow_download->integer && allow_download_maps->integer)
 		{
 			while (precache_check < texture_cnt)
 			{
@@ -472,14 +527,14 @@ void CL_RequestNextDownload (void)
 		precache_check = texture_cnt+1;
 		precache_tex = 0;
 	}
+
 	// confirm existance of .wal textures, download any that don't exist
 	if (precache_check == texture_cnt+1)
-	{
-		// from qcommon/cmodel.c
+	{	// from qcommon/cmodel.c
 		extern int			numtexinfo;
 		extern mapsurface_t	map_surfaces[];
 
-		if (allow_download->value && allow_download_maps->value)
+		if (allow_download->integer && allow_download_maps->integer)
 		{
 			while (precache_tex < numtexinfo)
 			{
@@ -490,19 +545,19 @@ void CL_RequestNextDownload (void)
 					return; // started a download
 			}
 		}
-		//precache_check = texture_cnt+999;
+	//	precache_check = texture_cnt+999;
 		precache_check = texture_cnt+2;
 		precache_tex = 0;
 	}
 
 	// confirm existance of .tga textures, try to download any that don't exist
 	if (precache_check == texture_cnt+2)
-	{
-		// from qcommon/cmodel.c
+	{	// from qcommon/cmodel.c
 		extern int			numtexinfo;
 		extern mapsurface_t	map_surfaces[];
 
-		if (allow_download->value && allow_download_maps->value && allow_download_textures_24bit->value)
+		if (allow_download->integer && allow_download_maps->integer
+			&& allow_download_textures_24bit->integer)
 		{
 			while (precache_tex < numtexinfo)
 			{
@@ -524,7 +579,8 @@ void CL_RequestNextDownload (void)
 		extern int			numtexinfo;
 		extern mapsurface_t	map_surfaces[];
 
-		if (allow_download->value && allow_download_maps->value && allow_download_textures_24bit->value)
+		if (allow_download->integer && allow_download_maps->integer
+			&& allow_download_textures_24bit->integer)
 		{
 			while (precache_tex < numtexinfo)
 			{
@@ -545,12 +601,12 @@ void CL_RequestNextDownload (void)
 	// confirm existance of .jpg textures, try to download any that don't exist
 	if (precache_check == texture_cnt+3)
 #endif	// PNG_SUPPORT
-	{
-		// from qcommon/cmodel.c
+	{	// from qcommon/cmodel.c
 		extern int			numtexinfo;
 		extern mapsurface_t	map_surfaces[];
 
-		if (allow_download->value && allow_download_maps->value && allow_download_textures_24bit->value)
+		if (allow_download->integer && allow_download_maps->integer
+			&& allow_download_textures_24bit->integer)
 		{
 			while (precache_tex < numtexinfo)
 			{
@@ -563,12 +619,20 @@ void CL_RequestNextDownload (void)
 		}
 		precache_check = texture_cnt+999;
 	}
-//ZOID
+// ZOID
 
 #ifdef USE_CURL	// HTTP downloading from R1Q2
 	// pending downloads (possibly textures), let's wait here.
-	if ( CL_PendingHTTPDownloads() )
+	if ( CL_PendingHTTPDownloads() ) {
 		return;
+	}
+
+	// This map is done downloading, reset HTTP for next map
+	precache_forceUDP = false;
+	filelistUseGamedir = false;
+	precache_iteration = ITER_HTTP_R1Q2;
+
+	CL_HTTP_EnableGenericFilelist ();	// re-enable generic filelists for next map
 #endif	// USE_CURL
 
 	CL_RegisterSounds ();
@@ -582,12 +646,22 @@ void CL_RequestNextDownload (void)
 
 //=============================================================================
 
-void CL_DownloadFileName(char *dest, int destlen, char *fn)
+/*
+===============
+CL_DownloadFileName
+===============
+*/
+void CL_DownloadFileName (char *dest, int destlen, char *fn)
 {
-	if (strncmp(fn, "players", 7) == 0)
-		Com_sprintf (dest, destlen, "%s/%s", BASEDIRNAME, fn);
+	if ( !stricmp(FS_Downloaddir(), FS_Gamedir()) )	// use basedir/gamedir if fs_downloaddir is the same as fs_gamedir
+	{
+		if (strncmp(fn, "players", 7) == 0)
+			Com_sprintf (dest, destlen, "%s/%s", BASEDIRNAME, fn);
+		else
+			Com_sprintf (dest, destlen, "%s/%s", FS_Gamedir(), fn);	// was FS_Gamedir()
+	}
 	else
-		Com_sprintf (dest, destlen, "%s/%s", FS_Gamedir(), fn);
+		Com_sprintf (dest, destlen, "%s/%s", FS_Downloaddir(), fn);
 }
 
 
@@ -611,6 +685,7 @@ void CL_InitFailedDownloadList (void)
 	failedDlListIndex = 0;
 }
 
+
 /*
 ===============
 CL_CheckDownloadFailed
@@ -630,6 +705,7 @@ qboolean CL_CheckDownloadFailed (char *name)
 	return false;
 }
 
+
 /*
 ===============
 CL_AddToFailedDownloadList
@@ -639,7 +715,7 @@ void CL_AddToFailedDownloadList (char *name)
 {
 	int			i;
 	qboolean	found = false;
-	qboolean	added = false;
+//	qboolean	added = false;
 
 	// check if this name is already in the table
 	for (i=0; i<NUM_FAIL_DLDS; i++)
@@ -653,13 +729,15 @@ void CL_AddToFailedDownloadList (char *name)
 	// if it isn't already in the table, then we need to add it
 	if (!found)
 	{
-		Com_sprintf(lastfaileddownload[failedDlListIndex++], sizeof(lastfaileddownload[failedDlListIndex++]), "%s", name);
+		Com_sprintf(lastfaileddownload[failedDlListIndex], sizeof(lastfaileddownload[failedDlListIndex]), "%s", name);
+		failedDlListIndex++;
 
 		// wrap around to start of list
 		if (failedDlListIndex >= NUM_FAIL_DLDS)
 			failedDlListIndex = 0;
 	}	
 }
+
 
 /*
 ===============
@@ -671,11 +749,11 @@ to start a download from the server.
 */
 qboolean CL_CheckOrDownloadFile (char *filename)
 {
-	FILE *fp;
+	FILE	*fp;
 	char	name[MAX_OSPATH];
-	int len; // Knightmare added
-	char s[128];
-	//int i;
+	int		len; // Knightmare added
+	char	s[128];
+	//int	i;
 
 	if (strstr (filename, ".."))
 	{
@@ -694,7 +772,7 @@ qboolean CL_CheckOrDownloadFile (char *filename)
 
 #ifdef PNG_SUPPORT
 	// don't download a .png texture which already has a .tga counterpart
-	len = strlen(filename); 
+	len = (int)strlen(filename); 
 //	strncpy(s, filename); 
 	Q_strncpyz(s, filename, sizeof(s)); 
 	if (strstr(s, "textures/") && !strcmp(s+len-4, ".png")) // look if we have a .png texture 
@@ -705,9 +783,9 @@ qboolean CL_CheckOrDownloadFile (char *filename)
 	}
 #endif	// PNG_SUPPORT
 
-	// don't download a .jpg texture which already has a .tga counterpart
-	len = strlen(filename); 
-//	strncpy(s,filename); 
+	// don't download a .jpg texture which already has a .tga or .png counterpart
+	len = (int)strlen(filename); 
+//	strncpy(s, filename); 
 	Q_strncpyz(s, filename, sizeof(s)); 
 	if (strstr(s, "textures/") && !strcmp(s+len-4, ".jpg")) // look if we have a .jpg texture 
 	{ 
@@ -722,15 +800,32 @@ qboolean CL_CheckOrDownloadFile (char *filename)
 	}
 
 #ifdef USE_CURL	// HTTP downloading from R1Q2
-	if ( CL_QueueHTTPDownload(filename) )
+	if (!precache_forceUDP)	// YQ2 UDP fallback additon
 	{
-		// We return true so that the precache check keeps feeding us more files.
-		// Since we have multiple HTTP connections we want to minimize latency
-		// and be constantly sending requests, not one at a time.
-		return true;
+		if ( CL_QueueHTTPDownload(filename, filelistUseGamedir) )
+		{
+			// We return true so that the precache check keeps feeding us more files.
+			// Since we have multiple HTTP connections we want to minimize latency
+			// and be constantly sending requests, not one at a time.
+			return true;
+		}
 	}
-	else
+	else	// YQ2 UDP fallback additon
 	{
+	/*	There are 2 cases that get us here:
+		1. forceUDP was set after a 404. In this case we want to retry that
+			single file over UDP and all later files over HTTP.
+		2. forceUDP was set after another error code.  In that case the HTTP
+			code aborts all HTTP downloads and CL_QueueHTTPDownload() returns false.
+	*/
+		precache_forceUDP = false;
+	/*	We might be connected to an r1q2-style HTTP server that missed just one file.
+		So reset the precacher iteration counter to start over.
+	*/
+		precache_iteration = ITER_HTTP_R1Q2;
+	}
+//	else
+//	{
 #endif	// USE_CURL
 
 //	strncpy (cls.downloadname, filename);
@@ -746,12 +841,13 @@ qboolean CL_CheckOrDownloadFile (char *filename)
 //ZOID
 	// check to see if we already have a tmp for this file, if so, try to resume
 	// open the file if not opened yet
-	CL_DownloadFileName(name, sizeof(name), cls.downloadtempname);
+	CL_DownloadFileName (name, sizeof(name), cls.downloadtempname);
 
 //	FS_CreatePath (name);
 
 	fp = fopen (name, "r+b");
-	if (fp) { // it exists
+	if (fp)
+	{	// it exists
 		int len;
 		fseek(fp, 0, SEEK_END);
 		len = ftell(fp);
@@ -776,9 +872,10 @@ qboolean CL_CheckOrDownloadFile (char *filename)
 	return false;
 
 #ifdef USE_CURL	// HTTP downloading from R1Q2
-	}
+//	}
 #endif	// USE_CURL
 }
+
 
 /*
 ===============
@@ -841,7 +938,7 @@ void CL_ParseDownload (void)
 {
 	int		size, percent;
 	char	name[MAX_OSPATH];
-	int		r;//, i;
+	int		r;	// i
 
 	// read the data
 	size = MSG_ReadShort (&net_message);
@@ -868,7 +965,7 @@ void CL_ParseDownload (void)
 	{
 		CL_Download_Reset_KBps_counter ();	// Knightmare- for KB/s counter
 
-		CL_DownloadFileName(name, sizeof(name), cls.downloadtempname);
+		CL_DownloadFileName (name, sizeof(name), cls.downloadtempname);
 
 		FS_CreatePath (name);
 
@@ -909,13 +1006,13 @@ void CL_ParseDownload (void)
 		char	oldn[MAX_OSPATH];
 		char	newn[MAX_OSPATH];
 
-//		Com_Printf ("100%%\n");
+	//	Com_Printf ("100%%\n");
 
 		fclose (cls.download);
 
 		// rename the temp file to it's final name
-		CL_DownloadFileName(oldn, sizeof(oldn), cls.downloadtempname);
-		CL_DownloadFileName(newn, sizeof(newn), cls.downloadname);
+		CL_DownloadFileName (oldn, sizeof(oldn), cls.downloadtempname);
+		CL_DownloadFileName (newn, sizeof(newn), cls.downloadname);
 		r = rename (oldn, newn);
 		if (r)
 			Com_Printf ("failed to rename.\n");
@@ -925,7 +1022,7 @@ void CL_ParseDownload (void)
 
 		// add new pk3s to search paths, hack by Jay Dolan
 		if (strstr(newn, ".pk3")) 
-			FS_AddPK3File (newn);
+			FS_AddPK3File (newn, false);
 
 		// get another file if needed
 

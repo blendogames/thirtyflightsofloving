@@ -13,6 +13,8 @@ Changes as of v0.20 update 8:
 	
 - Added Windows DPI scaling detection from Yamagi Quake2.
 
+- Added UDP fallback from HTTP downloads and support for Q2Pro-style HTTP URLs.
+
 - Added support for quake2:// URLs.
 
 - Added cel shading support.  Uses cvars r_celshading to enable, and r_celshading_width for line width (1-10).

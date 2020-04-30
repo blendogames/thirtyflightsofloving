@@ -62,7 +62,7 @@ Menu screen by MDK
 
 Load screen by Christopher "Sherpa" Owen
 
-Weapon glow skins in kmquake2_extras.pk3 by Odium and Kman
+Weapon glow skins in kmquake2_extras.pk3 by Odium and Kman and from Quake2XP
 
 Uses Zlib compression library, (c) 1995-2002 Jean-loup Gailly and Mark Adler
 

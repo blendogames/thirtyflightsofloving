@@ -790,6 +790,9 @@ FILESYSTEM
 ==============================================================
 */
 
+#define		FS_Gamedir FS_GameDir
+#define		FS_Savegamedir FS_SaveGameDir
+#define		FS_Downloaddir FS_DownloadDir
 
 typedef int fileHandle_t;
 
@@ -811,6 +814,7 @@ typedef enum {
 	FS_SEARCH_FULL_PATH
 } fsSearchType_t;
 
+extern	int		file_from_protected_pak;	// from Yamagi Q2
 extern	int		file_from_pak;
 extern	int		file_from_pk3;
 extern	char	last_pk3_name[MAX_QPATH];
@@ -834,14 +838,20 @@ int			FS_FTell (fileHandle_t f);
 int			FS_Tell (fileHandle_t f);
 qboolean	FS_FileExists (char *path);
 qboolean	FS_LocalFileExists (char *path);
+qboolean	FS_SaveFileExists (char *path);
+qboolean	FS_DownloadFileExists (char *path);
 void		FS_CopyFile (char *src, char *dst);
 void		FS_RenameFile (const char *oldPath, const char *newPath);
 void		FS_DeleteFile (const char *path);
 
 char		*FS_GameDir (void);
+char		*FS_SaveGameDir (void);
+char		*FS_DownloadDir (void);
+char		*FS_HomePath (void);
 void		FS_CreatePath (char *path);
 void		FS_DeletePath (char *path);
 char		*FS_NextPath (char *prevPath);
+char		*FS_NextGamePath (char *prevPath);
 char		**FS_ListFiles (char *findname, int *numfiles, unsigned musthave, unsigned canthave);
 void		FS_FreeFileList (char **list, int n);
 qboolean	FS_ItemInList (char *check, int num, char **list);
@@ -851,8 +861,8 @@ void		FS_Dir_f (void);
 void		FS_ExecAutoexec (void);
 
 int			FS_LoadFile (char *path, void **buffer);
-void		FS_AddPAKFile (const char *packPath); // add pak file function
-void		FS_AddPK3File (const char *packPath); // add pk3 file function
+void		FS_AddPAKFile (const char *packPath, qboolean isProtected); // add pak file function
+void		FS_AddPK3File (const char *packPath, qboolean isProtected); // add pk3 file function
 char		**FS_ListPak (char *find, int *num); // pak list function
 char		**FS_GetFileList (const char *path, const char *extension, int *num);
 void		FS_SetGamedir (char *dir);

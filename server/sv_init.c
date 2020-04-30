@@ -192,7 +192,7 @@ void SV_SpawnServer (char *server, char *spawnpoint, server_state_t serverstate,
 {
 	int			i;
 	unsigned	checksum;
-	fileHandle_t	f;
+//	fileHandle_t	f;
 
 	if (attractloop)
 		Cvar_Set ("paused", "0");
@@ -260,10 +260,14 @@ void SV_SpawnServer (char *server, char *spawnpoint, server_state_t serverstate,
 			"maps/%s.bsp", server);
 	
 		// resolve CS_PAKFILE, hack by Jay Dolan
-		FS_FOpenFile(sv.configstrings[CS_MODELS + 1], &f, FS_READ);
-	//	strncpy(sv.configstrings[CS_PAKFILE], (last_pk3_name ? last_pk3_name : ""));
-		Q_strncpyz(sv.configstrings[CS_PAKFILE], (last_pk3_name ? last_pk3_name : ""), sizeof(sv.configstrings[CS_PAKFILE]));
-		FS_FCloseFile(f);
+	//	FS_FOpenFile(sv.configstrings[CS_MODELS + 1], &f, FS_READ);
+		FS_FileExists (sv.configstrings[CS_MODELS + 1]);
+		if (!file_from_protected_pak) {		// protected pak check from Yamagi Q2
+		//	strncpy(sv.configstrings[CS_PAKFILE], (last_pk3_name ? last_pk3_name : ""));
+			Q_strncpyz(sv.configstrings[CS_PAKFILE], ((strlen(last_pk3_name) > 0) ? last_pk3_name : ""), sizeof(sv.configstrings[CS_PAKFILE]));
+		//	Com_Printf ("SV_SpawnServer: CS_PAKFILE set to %s\n", last_pk3_name);
+	//	FS_FCloseFile(f);
+		}
 	
 		sv.models[1] = CM_LoadMap (sv.configstrings[CS_MODELS+1], false, &checksum);
 	}

@@ -114,6 +114,7 @@ typedef struct {
 	int				numFiles;
 	fsPackFile_t	*files;
 	unsigned int	contentFlags;
+	qboolean		isProtectedPak;	// from Yamagi Q2
 } fsPack_t;
 
 typedef struct fsSearchPath_s {
@@ -128,11 +129,14 @@ fsSearchPath_t	*fs_searchPaths;
 fsSearchPath_t	*fs_baseSearchPaths;
 
 char			fs_gamedir[MAX_OSPATH];
+char			fs_savegamedir[MAX_OSPATH];
+char			fs_downloaddir[MAX_OSPATH];
 static char		fs_currentGame[MAX_QPATH];
 
 static char				fs_fileInPath[MAX_OSPATH];
 static qboolean			fs_fileInPack;
 
+int		file_from_protected_pak;	// This is set by FS_FOpenFile, from Yamagi Q2
 int		file_from_pak = 0;		// This is set by FS_FOpenFile
 int		file_from_pk3 = 0;		// This is set by FS_FOpenFile
 char	last_pk3_name[MAX_QPATH];	// This is set by FS_FOpenFile
@@ -354,9 +358,50 @@ char *FS_GameDir (void)
 	return fs_gamedir;
 }
 
-char *FS_Gamedir (void)
+/*char *FS_Gamedir (void)
 {
 	return fs_gamedir;
+}*/
+
+
+/*
+=================
+FS_SaveGameDir
+
+Called to find where to write and read save games.
+Either fs_savegamedir (which results in Sys_PrefDir()/<gamedir>) or FS_Gamedir()
+=================
+*/
+char *FS_SaveGameDir (void)
+{
+	return (strlen(fs_savegamedir) > 0) ? fs_savegamedir : FS_GameDir();
+}
+
+
+/*
+=================
+FS_DownloadDir
+
+Called to find where to download game content.
+Either fs_downloaddir (which results in Sys_DownloadDir()/<gamedir>) or FS_Gamedir()
+=================
+*/
+char *FS_DownloadDir (void)
+{
+	return (strlen(fs_downloaddir) > 0) ? fs_downloaddir : FS_GameDir();
+}
+
+
+/*
+=================
+FS_HomePath
+
+Called to find game root path
+=================
+*/
+char *FS_HomePath (void)
+{
+	return fs_homepath->string;
 }
 
 
@@ -507,7 +552,12 @@ int FS_FOpenFileAppend (fsHandle_t *handle)
 {
 	char	path[MAX_OSPATH];
 
-	FS_CreatePath(handle->name);
+//	FS_CreatePath(handle->name);
+	// include game path, but check for leading /
+	if (handle->name[0] == '/')
+		FS_CreatePath (va("%s%s", fs_gamedir, handle->name));
+	else
+		FS_CreatePath (va("%s/%s", fs_gamedir, handle->name));
 
 	Com_sprintf(path, sizeof(path), "%s/%s", fs_gamedir, handle->name);
 
@@ -538,7 +588,12 @@ int FS_FOpenFileWrite (fsHandle_t *handle)
 {
 	char	path[MAX_OSPATH];
 
-	FS_CreatePath(handle->name);
+//	FS_CreatePath(handle->name);
+	// include game path, but check for leading /
+	if (handle->name[0] == '/')
+		FS_CreatePath (va("%s%s", fs_gamedir, handle->name));
+	else
+		FS_CreatePath (va("%s/%s", fs_gamedir, handle->name));
 
 	Com_sprintf(path, sizeof(path), "%s/%s", fs_gamedir, handle->name);
 
@@ -576,6 +631,7 @@ int FS_FOpenFileRead (fsHandle_t *handle)
 	unsigned int	typeFlag;
 
 	// Knightmare- hack global vars for autodownloads
+	file_from_protected_pak = 0;			// from Yamagi Q2
 	file_from_pak = 0;
 	file_from_pk3 = 0;
 	Com_sprintf(last_pk3_name, sizeof(last_pk3_name), "\0");
@@ -621,6 +677,7 @@ int FS_FOpenFileRead (fsHandle_t *handle)
 					if (pack->pak)
 					{	// PAK
 						file_from_pak = 1; // Knightmare added
+						file_from_protected_pak = pack->isProtectedPak ? 1 : 0;		// from Yamagi Q2
 						handle->file = fopen(pack->name, "rb");
 						handle->pakFile = &pack->files[i];	// set pakfile pointer
 						if (handle->file)
@@ -633,6 +690,7 @@ int FS_FOpenFileRead (fsHandle_t *handle)
 					else if (pack->pk3)
 					{	// PK3
 						file_from_pk3 = 1; // Knightmare added
+						file_from_protected_pak = pack->isProtectedPak ? 1 : 0;		// from Yamagi Q2
 						Com_sprintf(last_pk3_name, sizeof(last_pk3_name), strrchr(pack->name, '/')+1); // Knightmare added
 						handle->zip = unzOpen(pack->name);
 						if (handle->zip)
@@ -1580,6 +1638,43 @@ qboolean FS_LocalFileExists (char *path)
 }
 
 /*
+=================
+FS_SaveFileExists
+================
+*/
+qboolean FS_SaveFileExists (char *path)
+{
+	char		realPath[MAX_OSPATH];
+	FILE		*f;
+
+	Com_sprintf (realPath, sizeof(realPath), "%s/%s", FS_SaveGameDir(), path);	// was FS_GameDir()
+	f = fopen (realPath, "rb");
+	if (f) {
+		fclose(f);
+		return true;
+	}
+	return false;
+}
+
+/*
+=================
+FS_DownloadFileExists
+================
+*/
+qboolean FS_DownloadFileExists (char *path)
+{
+	char		realPath[MAX_OSPATH];
+	FILE		*f;
+
+	Com_sprintf (realPath, sizeof(realPath), "%s/%s", FS_DownloadDir(), path);
+	f = fopen (realPath, "rb");
+	if (f) {
+		fclose(f);
+		return true;
+	}
+	return false;
+}
+/*
 ================
 FS_CopyFile
 ================
@@ -1894,7 +1989,7 @@ FS_AddPAKFile
 Adds a Pak file to the searchpath
 =================
 */
-void FS_AddPAKFile (const char *packPath)
+void FS_AddPAKFile (const char *packPath, qboolean isProtected)
 {
 	fsSearchPath_t	*search;
 	fsPack_t		*pack;
@@ -1902,6 +1997,7 @@ void FS_AddPAKFile (const char *packPath)
     pack = FS_LoadPAK (packPath);
     if (!pack)
         return;
+	pack->isProtectedPak = isProtected;	// From Yamagi Q2
     search = Z_Malloc (sizeof(fsSearchPath_t));
     search->pack = pack;
     search->next = fs_searchPaths;
@@ -2035,7 +2131,7 @@ FS_AddPK3File
 Adds a Pk3 file to the searchpath
 =================
 */
-void FS_AddPK3File (const char *packPath)
+void FS_AddPK3File (const char *packPath, qboolean isProtected)
 {
 	fsSearchPath_t	*search;
 	fsPack_t		*pack;
@@ -2043,6 +2139,7 @@ void FS_AddPK3File (const char *packPath)
     pack = FS_LoadPK3 (packPath);
     if (!pack)
         return;
+	pack->isProtectedPak = isProtected;	// From Yamagi Q2
     search = Z_Malloc (sizeof(fsSearchPath_t));
     search->pack = pack;
     search->next = fs_searchPaths;
@@ -2051,40 +2148,24 @@ void FS_AddPK3File (const char *packPath)
 
 /*
 =================
-FS_AddGameDirectory
+FS_AddPaksInDirectory
 
-Sets fs_gameDir, adds the directory to the head of the path, then loads
-and adds all the pack files found (in alphabetical order).
- 
+Used by FS_AddGameDirectory() and FS_AddDownloadDirectory().
+Loads and adds all the pack files found
+(first numerically 0-99 and then in alphabetical order).
 PK3 files are loaded later so they override PAK files.
 =================
 */
-void FS_AddGameDirectory (const char *dir)
+void FS_AddPaksInDirectory (const char *dir)
 {
-	fsSearchPath_t	*search;
-//	fsPack_t		*pack;
-	char			packPath[MAX_OSPATH];
-	int				i, j;
+	char	packPath[MAX_OSPATH];
+	int		i, j;
 	// VoiD -S- *.pak support
-	char *path = NULL;
-	char findname[1024];
-	char **dirnames;
-	int ndirs;
-	char *tmp;
+	char	findname[1024];
+	char	**dirnames;
+	int		ndirs;
+	char	*tmp;
 	// VoiD -E- *.pak support
-
-//	strncpy(fs_gamedir, dir);
-	Q_strncpyz(fs_gamedir, dir, sizeof(fs_gamedir));
-
-	//
-	// Add the directory to the search path
-	//
-	search = Z_Malloc(sizeof(fsSearchPath_t));
-//	strncpy(search->path, dir);
-	Q_strncpyz(search->path, dir, sizeof(search->path));
-	search->path[sizeof(search->path)-1] = 0;
-	search->next = fs_searchPaths;
-	fs_searchPaths = search;
 
 	//
 	// add any pak files in the format pak0.pak pak1.pak, ...
@@ -2092,7 +2173,7 @@ void FS_AddGameDirectory (const char *dir)
 	for (i=0; i<100; i++)    // Pooy - paks can now go up to 100
 	{
 		Com_sprintf (packPath, sizeof(packPath), "%s/pak%i.pak", dir, i);
-		FS_AddPAKFile (packPath);
+		FS_AddPAKFile (packPath, ((i<10) ? true : false));	// pak0.pak is protected
 	}
     //
     // NeVo - pak3's!
@@ -2101,7 +2182,7 @@ void FS_AddGameDirectory (const char *dir)
     for (i=0; i<100; i++)    // Pooy - paks can now go up to 100
     {
         Com_sprintf (packPath, sizeof(packPath), "%s/pak%i.pk3", dir, i);
-        FS_AddPK3File (packPath);
+        FS_AddPK3File (packPath, false);
     }
 
     for (i=0; i<2; i++)
@@ -2146,10 +2227,10 @@ void FS_AddGameDirectory (const char *dir)
 					continue;
                 if ( strrchr( dirnames[j], '/' ) )
                 {
-					if (i==1)
-						FS_AddPK3File (dirnames[j]);
+					if (i == 1)
+						FS_AddPK3File (dirnames[j], false);
 					else
-						FS_AddPAKFile (dirnames[j]);
+						FS_AddPAKFile (dirnames[j], false);
                 }
                 free( dirnames[j] );
             }
@@ -2158,6 +2239,116 @@ void FS_AddGameDirectory (const char *dir)
         // VoiD -E- *.pack support
     } 
 }
+
+/*
+=================
+FS_AddGameDirectory
+
+Sets fs_gamedir, adds the directory to the head of the path,
+then loads any pack files in that path by calling FS_AddPaksInDirectory().
+=================
+*/
+void FS_AddGameDirectory (const char *dir)
+{
+	fsSearchPath_t	*search;
+
+	Q_strncpyz(fs_gamedir, dir, sizeof(fs_gamedir));
+
+	//
+	// Add the directory to the search path
+	//
+	search = Z_Malloc(sizeof(fsSearchPath_t));
+	Q_strncpyz(search->path, dir, sizeof(search->path));
+	search->path[sizeof(search->path)-1] = 0;
+	search->next = fs_searchPaths;
+	fs_searchPaths = search;
+
+	//
+	// Load pack files
+	//
+	FS_AddPaksInDirectory (dir);
+}
+
+
+#ifdef USE_SAVEGAMEDIR
+/*
+=================
+FS_AddSaveGameDirectory
+
+Adds the savegame directory to the head of the path.
+Should only be called after the final FS_AddGameDirectory() call.
+Sets fs_savegamedir, not fs_gamedir, and does not load any pack files.
+=================
+*/
+void FS_AddSaveGameDirectory (char *dir)
+{
+	fsSearchPath_t	*search;
+
+	if (!dir)
+		return;
+	if (strlen(dir) < 1)	// catch 0-length string
+		return;
+
+	Com_sprintf (fs_savegamedir, sizeof(fs_savegamedir), "%s/%s", Sys_PrefDir(), dir);
+
+	if (!stricmp(fs_savegamedir, fs_gamedir))	// only add if different from fs_gamedir
+		return;
+
+	FS_CreatePath (va("%s/", fs_savegamedir));	// create savegamedir if it doesn't yet exist
+
+	//
+	// Add the directory to the search path
+	//
+	search = Z_Malloc(sizeof(fsSearchPath_t));
+	Q_strncpyz(search->path, fs_savegamedir, sizeof(search->path));
+	search->path[sizeof(search->path)-1] = 0;
+	search->next = fs_searchPaths;
+	fs_searchPaths = search;
+}
+
+
+/*
+=================
+FS_AddDownloadDirectory
+
+Adds the download directory to the head of the path.
+Should only be called after the final FS_AddGameDirectory() call.
+Sets fs_downloaddir, not fs_gamedir, and loads any pack files
+in that path by calling FS_AddPaksInDirectory().
+=================
+*/
+void FS_AddDownloadDirectory (char *dir)
+{
+	fsSearchPath_t	*search;
+
+	if (!dir)
+		return;
+	if (strlen(dir) < 1)	// catch 0-length string
+		return;
+
+	Com_sprintf (fs_downloaddir, sizeof(fs_downloaddir), "%s/%s", Sys_DownloadDir(), dir);
+
+	if (!stricmp(fs_downloaddir, fs_gamedir))	// only add if different from fs_gamedir
+		return;
+
+	FS_CreatePath (va("%s/", fs_downloaddir));	//  create downloaddir if it doesn't yet exist
+
+	//
+	// Add the directory to the search path
+	//
+	search = Z_Malloc(sizeof(fsSearchPath_t));
+	Q_strncpyz(search->path, fs_downloaddir, sizeof(search->path));
+	search->path[sizeof(search->path)-1] = 0;
+	search->next = fs_searchPaths;
+	fs_searchPaths = search;
+
+	//
+	// Load pack files
+	//
+	FS_AddPaksInDirectory (dir);
+}
+#endif // USE_SAVEGAMEDIR
+
 
 /*
 =================
@@ -2178,6 +2369,44 @@ char *FS_NextPath (char *prevPath)
 	for (search = fs_searchPaths; search; search = search->next)
 	{
 		if (search->pack)
+			continue;
+
+		if (prevPath == prev)
+			return search->path;
+
+		prev = search->path;
+	}
+	return NULL;
+}
+
+
+/*
+=================
+FS_NextGamePath
+
+Allows enumerating all of the directories in the search path
+Only called from Sys_GetGameAPI
+Skips fs_savegamedir and fs_downloaddir,
+so as not to load game library from there.
+=================
+*/
+char *FS_NextGamePath (char *prevPath)
+{
+	fsSearchPath_t	*search;
+	char			*prev;
+
+	if (!prevPath)
+		return fs_gamedir;
+
+	prev = fs_gamedir;
+	for (search = fs_searchPaths; search; search = search->next)
+	{
+		if (search->pack)
+			continue;
+
+		// explicitly skip fs_savegamedir and fs_downloaddir
+		if ( (strlen(search->path) > 0) &&
+			((Q_stricmp(search->path, fs_savegamedir) == 0) || (Q_stricmp(search->path, fs_downloaddir) == 0)) )
 			continue;
 
 		if (prevPath == prev)
@@ -2214,7 +2443,12 @@ void FS_Path_f (void)
 			Com_Printf("%s\n", search->path);
 	}
 
-	//Com_Printf("\n");
+//	Com_Printf("\n");
+	Com_Printf("Current game dir: %s\n", fs_gamedir);
+#ifdef USE_SAVEGAMEDIR
+	Com_Printf("Current savegame dir: %s\n", fs_savegamedir);
+	Com_Printf("Current download dir: %s\n", fs_downloaddir);
+#endif
 
 	for (i = 0, handle = fs_handles; i < MAX_HANDLES; i++, handle++)
 	{
@@ -2237,6 +2471,7 @@ FS_Startup
 TODO: close open files for game dir
 =================
 */
+#if 0
 void FS_Startup (void)
 {
 	if (strstr(fs_gamedirvar->string, "..") || strstr(fs_gamedirvar->string, ".")
@@ -2289,6 +2524,61 @@ void FS_Startup (void)
 
 	FS_Path_f();
 }
+#endif
+
+
+#ifdef USE_SAVEGAMEDIR
+/*
+=================
+FS_CopyConfigsToSavegameDir
+=================
+*/
+void FS_CopyConfigsToSavegameDir (void)
+{
+	FILE	*kmq2ConfigFile;
+	char	cfgPattern[MAX_OSPATH];
+	char	*srcCfgPath;
+	char	dstCfgPath[MAX_OSPATH];
+	char	*cfgName;
+
+	// check if fs_savegamedir and fs_gamedir are the same, so we don't try to copy the files over each other
+	if (!stricmp(FS_SaveGameDir(), fs_gamedir))
+		return;
+
+	// check if kmq2config.cfg exists in FS_SaveGameDir() so we can skip copying
+	kmq2ConfigFile = fopen(va("%s/kmq2config.cfg", FS_SaveGameDir()), "rb");
+	if (kmq2ConfigFile != NULL)
+	{
+		fclose(kmq2ConfigFile);
+		return;
+	}
+
+	// create savegamedir if it doesn't yet exist
+	FS_CreatePath (va("%s/", fs_savegamedir));
+
+	Com_sprintf (cfgPattern, sizeof(cfgPattern), "%s/*.cfg", fs_gamedir);
+	for (srcCfgPath = Sys_FindFirst(cfgPattern, 0, SFF_SUBDIR|SFF_HIDDEN|SFF_SYSTEM);
+		srcCfgPath != NULL;
+		srcCfgPath = Sys_FindNext (0, SFF_SUBDIR|SFF_HIDDEN|SFF_SYSTEM))
+	{
+		cfgName = strrchr(srcCfgPath, '/');
+		if (cfgName == NULL) {
+			continue;
+		}
+		++cfgName;	// move to after the '/'
+		// don't copy configs written by other engines
+		// TODO: keep this up to date!
+		// config.cfg, aprconfig.cfg, bqconfig.cfg, eglcfg.cfg, maxconfig.cfg, q2config.cfg, q2b_config.cfg, q2econfig.cfg, xpconfig.cfg, yq2.cfg
+		if ( (strstr(cfgName, "config.cfg") && stricmp(cfgName, "kmq2config.cfg")) || !stricmp(cfgName, "eglcfg.cfg") || !stricmp(cfgName, "yq2.cfg") ) {
+			continue;
+		}
+		Com_sprintf (dstCfgPath, sizeof(dstCfgPath), "%s/%s", FS_SaveGameDir(), cfgName);
+		FS_CopyFile (srcCfgPath, dstCfgPath);
+	}
+	Sys_FindClose();
+}
+#endif	// USE_SAVEGAMEDIR
+
 
 /*
 =================
@@ -2301,6 +2591,10 @@ char *Sys_GetCurrentDirectory (void);
 
 void FS_InitFilesystem (void)
 {
+	// init savegame/download dirs as null string
+	fs_savegamedir[0] = '\0';
+	fs_downloaddir[0] = '\0';
+
 	// Register our commands and cvars
 	Cmd_AddCommand("path", FS_Path_f);
 	Cmd_AddCommand("link", FS_Link_f);
@@ -2347,9 +2641,25 @@ void FS_InitFilesystem (void)
 	Sys_InitPrefDir ();	// set up pref dir now instead of calling a function every time it's needed
 #endif
 
+	// set our savegame/download dirs with Sys_PrefDir() and baseq2
+#ifdef USE_SAVEGAMEDIR
+	FS_AddDownloadDirectory (BASEDIRNAME);
+	FS_AddSaveGameDirectory (BASEDIRNAME);
+//	Com_sprintf (fs_savegamedir, sizeof(fs_savegamedir), "%s/%s", Sys_PrefDir(), BASEDIRNAME);
+//	Com_sprintf (fs_downloaddir, sizeof(fs_downloaddir), "%s/%s", Sys_DownloadDir(), BASEDIRNAME);
+#else
+	Q_strncpyz(fs_savegamedir, fs_gamedir, sizeof(fs_savegamedir));
+	Q_strncpyz(fs_downloaddir, fs_gamedir, sizeof(fs_downloaddir));
+#endif	// USE_SAVEGAMEDIR
+
 	// check and load game directory
 	if (fs_gamedirvar->string[0])
 		FS_SetGamedir (fs_gamedirvar->string);
+
+#ifdef USE_SAVEGAMEDIR
+	// copy over configs from gamedir to savegamedir if it's empty
+	FS_CopyConfigsToSavegameDir ();
+#endif	// USE_SAVEGAMEDIR
 
 	FS_Path_f(); // output path data
 }
@@ -2508,6 +2818,16 @@ void FS_SetGamedir (char *dir)
 	{
 		Cvar_FullSet ("gamedir", "", CVAR_SERVERINFO|CVAR_NOSET);
 		Cvar_FullSet ("game", "", CVAR_LATCH|CVAR_SERVERINFO);
+		// set our savegame/download dirs with Sys_PrefDir() and baseq2
+#ifdef USE_SAVEGAMEDIR
+		FS_AddDownloadDirectory (BASEDIRNAME);
+		FS_AddSaveGameDirectory (BASEDIRNAME);
+	//	Com_sprintf (fs_savegamedir, sizeof(fs_savegamedir), "%s/%s", Sys_PrefDir(), BASEDIRNAME);
+	//	Com_sprintf (fs_downloaddir, sizeof(fs_downloaddir), "%s/%s", Sys_DownloadDir(), BASEDIRNAME);
+#else
+		Q_strncpyz(fs_savegamedir, fs_gamedir, sizeof(fs_savegamedir));
+		Q_strncpyz(fs_downloaddir, fs_gamedir, sizeof(fs_downloaddir));
+#endif	// USE_SAVEGAMEDIR
 	}
 	else
 	{
@@ -2544,6 +2864,17 @@ void FS_SetGamedir (char *dir)
 		if (fs_cddir->string[0])
 			FS_AddGameDirectory (va("%s/%s", fs_cddir->string, dir) );
 		FS_AddGameDirectory (va("%s/%s", fs_basedir->string, dir) );
+
+		// set our savegame/download dirs with Sys_PrefDir() and baseq2
+#ifdef USE_SAVEGAMEDIR
+		FS_AddDownloadDirectory (dir);
+		FS_AddSaveGameDirectory (dir);
+	//	Com_sprintf (fs_savegamedir, sizeof(fs_savegamedir), "%s/%s", Sys_PrefDir(), dir);
+	//	Com_sprintf (fs_downloaddir, sizeof(fs_downloaddir), "%s/%s", Sys_DownloadDir(), dir);
+#else
+		Q_strncpyz(fs_savegamedir, fs_gamedir, sizeof(fs_savegamedir));
+		Q_strncpyz(fs_downloaddir, fs_gamedir, sizeof(fs_downloaddir));
+#endif	// USE_SAVEGAMEDIR
 	}
 }
 

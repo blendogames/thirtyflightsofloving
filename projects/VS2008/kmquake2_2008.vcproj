@@ -73,7 +73,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="wsock32.lib winmm.lib glu32.lib libjpeg_d.lib zlib_d.lib libogg_d.lib libvorbisfile_d.lib libpng_d.lib libcurl_r.lib"
+				AdditionalDependencies="wsock32.lib winmm.lib glu32.lib libjpeg_d.lib zlib_d.lib libogg_d.lib libvorbisfile_d.lib libpng_d.lib libcurl_d.lib"
 				OutputFile="./kmquake2.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"

@@ -125,12 +125,15 @@ extern int num_cl_weaponmodels;
 
 void CL_CancelHTTPDownloads (qboolean permKill);
 void CL_InitHTTPDownloads (void);
-qboolean CL_QueueHTTPDownload (const char *quakePath);
+qboolean CL_QueueHTTPDownload (const char *quakePath, qboolean filelistUseGamedir);	// YQ2 Q2pro download addition
 void CL_RunHTTPDownloads (void);
 qboolean CL_PendingHTTPDownloads (void);
 void CL_SetHTTPServer (const char *URL);
 void CL_HTTP_Cleanup (qboolean fullShutdown);
 void CL_HTTP_ResetMapAbort (void);	// Knightmare added
+qboolean CL_CheckHTTPError (void);	// YQ2 UDP fallback addition
+void CL_HTTP_EnableGenericFilelist (void);	// YQ2 UDP fallback addition
+void CL_HTTP_SetDownloadGamedir (const char *gamedir);	// YQ2 Q2pro download addition
 
 typedef enum
 {
@@ -853,6 +856,7 @@ void CL_ParseClientinfo (int player);
 //
 // cl_download.c
 //
+void CL_ResetPrecacheCheck (void);
 void CL_RequestNextDownload (void);
 qboolean CL_CheckOrDownloadFile (char *filename);
 void CL_Download_f (void);
