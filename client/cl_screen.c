@@ -1299,7 +1299,7 @@ void SCR_Init (void)
 	scr_surroundleft = Cvar_Get ("scr_surroundleft", "0.333333333333", CVAR_ARCHIVE);		// left placement of HUD/menu elements on center screen in triple-wide video modes
 	scr_surroundright = Cvar_Get ("scr_surroundright", "0.666666666667", CVAR_ARCHIVE);		// right placement of HUD/menu elements on center screen in triple-wide video modes
 
-	hud_scale = Cvar_Get ("hud_scale", "3", CVAR_ARCHIVE);
+	hud_scale = Cvar_Get ("hud_scale", "5", CVAR_ARCHIVE);
 	hud_alpha = Cvar_Get ("hud_alpha", "1", CVAR_ARCHIVE);
 	hud_squeezedigits = Cvar_Get ("hud_squeezedigits", "1", CVAR_ARCHIVE);
 

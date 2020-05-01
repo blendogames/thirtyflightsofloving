@@ -218,6 +218,8 @@ PROTOCOL
 // the svc_strings[] array in cl_parse.c should mirror this
 //==================
 
+extern	char *svc_strings[];
+
 //
 // server to client
 //
@@ -248,7 +250,9 @@ enum svc_ops_e
 	svc_packetentities,			// [...]
 	svc_deltapacketentities,	// [...]
 	svc_frame,
-	svc_fog						// = 21 Knightmare added
+	svc_fog,					// = 21 Knightmare added
+
+	num_svc_ops
 };
 
 //==============================================

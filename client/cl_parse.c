@@ -45,7 +45,8 @@ char *svc_strings[256] =
 	"svc_playerinfo",
 	"svc_packetentities",
 	"svc_deltapacketentities",
-	"svc_frame"
+	"svc_frame",
+	"svc_fog"					// Knightmare added
 };
 
 //=============================================================================
