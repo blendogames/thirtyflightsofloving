@@ -139,12 +139,12 @@ void SV_CheckForSavegame (void)
 	if (Cvar_VariableValue ("deathmatch"))
 		return;
 
-	Com_sprintf (name, sizeof(name), "%s/save/current/%s.sav", FS_Gamedir(), sv.name);
+	Com_sprintf (name, sizeof(name), "%s/save/current/%s.sav", FS_Savegamedir(), sv.name);	// was FS_Gamedir()
 	f = fopen (name, "rb");
 	if (!f)
 #ifdef COMPRESSED_SAVEGAMES
 	{
-		Com_sprintf (name, sizeof(name), "%s/save/current/%s.savz", FS_Gamedir(), sv.name);
+		Com_sprintf (name, sizeof(name), "%s/save/current/%s.savz", FS_Savegamedir(), sv.name);	// was FS_Gamedir()
 		f = fopen (name, "rb");
 		if (!f)
 			return;		// no savegame

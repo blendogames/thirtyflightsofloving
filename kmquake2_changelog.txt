@@ -22,6 +22,13 @@ Changes as of v0.20 update 8:
 - Added font upscaling (with optional blending by Skuller from Q2Pro) for old 128x128 fonts.  Use cvar r_font_upscale to enable,
 	value of 1 is pixel copy, value of 2 enables blending.  Requires vid_restart for changes to take effect.
 
+- Now reads/writes savegames, config files, demos, etc. to Saved Games/KMQuake2 on Windows Vista and later, and to
+	 My Documents/My Games/KMQuake2 on Windows 2000/XP/2003.
+	Autodownloaded files are now written to Downloads/KMQuake2 on Windows Vista and later, and My Documents/My Downloads/KMQuake2 on
+	Windows 2000/XP/2003.
+	The classic Quake 2 behavior of writing to the Quake2 folder can be restored by adding the parameter"-portable" to the command line,
+	or by placing an empty text file called "portable.cfg" in the baseq2 folder.
+
 - Now compresses .sav and .sv2 savegame files into .savz files.  It will still read savegames from earlier
 	KMQ2 versions (with the same game DLL).  This should improve load and save times in multi-level units.
 

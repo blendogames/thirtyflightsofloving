@@ -1365,7 +1365,8 @@ void *Sys_GetGameAPI (void *parms)
 			path = NULL;
 			while (1)
 			{
-				path = FS_NextPath (path);
+			//	path = FS_NextPath (path);
+				path = FS_NextGamePath (path);
 				if (!path)
 					return NULL;		// couldn't find one anywhere
 				Com_sprintf (name, sizeof(name), "%s/%s", path, gamename);

@@ -630,7 +630,7 @@ void R_ScreenShot_JPG (qboolean silent)
 	int								i, offset, grab_width, grab_x;
 
 	// Create the screenshots directory if it doesn't exist
-	Com_sprintf (checkname, sizeof(checkname), "%s/screenshots", FS_Gamedir());
+	Com_sprintf (checkname, sizeof(checkname), "%s/screenshots", FS_Savegamedir());	// was FS_Gamedir()
 	Sys_Mkdir (checkname);
 
 	// Knightmare- changed screenshot filenames, up to 10000 screenies
@@ -652,7 +652,7 @@ void R_ScreenShot_JPG (qboolean silent)
 	//	one = i - hundred*100 - ten*10;
 
 		Com_sprintf (picname, sizeof(picname), "kmquake2_%i%i%i%i.jpg", thousand, hundred, ten, one);
-		Com_sprintf (checkname, sizeof(checkname), "%s/screenshots/%s", FS_Gamedir(), picname);
+		Com_sprintf (checkname, sizeof(checkname), "%s/screenshots/%s", FS_Savegamedir(), picname);	// was FS_Gamedir()
 		file = fopen (checkname, "rb");
 		if (!file)
 			break;	// file doesn't exist
@@ -755,7 +755,7 @@ void R_ScreenShot_PNG (qboolean silent)
 	FILE		*file;
 
 	// create the screenshots directory if it doesn't exist
-	Com_sprintf (checkname, sizeof(checkname), "%s/screenshots", FS_Gamedir());
+	Com_sprintf (checkname, sizeof(checkname), "%s/screenshots", FS_Savegamedir());	// was FS_Gamedir()
 	Sys_Mkdir (checkname);
 
 // 
@@ -780,7 +780,7 @@ void R_ScreenShot_PNG (qboolean silent)
 	//	one = i - hundred*100 - ten*10;
 
 		Com_sprintf (picname, sizeof(picname), "kmquake2_%i%i%i%i.png", thousand, hundred, ten, one);
-		Com_sprintf (checkname, sizeof(checkname), "%s/screenshots/%s", FS_Gamedir(), picname);
+		Com_sprintf (checkname, sizeof(checkname), "%s/screenshots/%s", FS_Savegamedir(), picname);	// was FS_Gamedir()
 		file = fopen (checkname, "rb");
 		if (!file)
 			break;	// file doesn't exist
@@ -889,7 +889,7 @@ void R_ScreenShot_TGA (qboolean silent)
 	}*/
 
 	// create the screenshots directory if it doesn't exist
-	Com_sprintf (checkname, sizeof(checkname), "%s/screenshots", FS_Gamedir());
+	Com_sprintf (checkname, sizeof(checkname), "%s/screenshots", FS_Savegamedir());	// was FS_Gamedir()
 	Sys_Mkdir (checkname);
 
 // 
@@ -914,7 +914,7 @@ void R_ScreenShot_TGA (qboolean silent)
 	//	one = i - hundred*100 - ten*10;
 
 		Com_sprintf (picname, sizeof(picname), "kmquake2_%i%i%i%i.tga", thousand, hundred, ten, one);
-		Com_sprintf (checkname, sizeof(checkname), "%s/screenshots/%s", FS_Gamedir(), picname);
+		Com_sprintf (checkname, sizeof(checkname), "%s/screenshots/%s", FS_Savegamedir(), picname);	// was FS_Gamedir()
 		f = fopen (checkname, "rb");
 		if (!f)
 			break;	// file doesn't exist

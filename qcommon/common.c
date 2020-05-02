@@ -142,7 +142,7 @@ void Com_Printf (char *fmt, ...)
 		
 		if (!logfile)
 		{
-			Com_sprintf (name, sizeof(name), "%s/qconsole.log", FS_Gamedir ());
+			Com_sprintf (name, sizeof(name), "%s/qconsole.log", FS_Savegamedir ());	// was FS_Gamedir()
 			if (logfile_active->value > 2)
 				logfile = fopen (name, "a");
 			else

@@ -26,6 +26,10 @@ int	curtime;
 
 unsigned	sys_frame_time;
 
+// Knightmare- added exe / pref dirs
+static char exe_dir[MAX_OSPATH];
+static char pref_dir[MAX_OSPATH];
+static char	download_dir[MAX_OSPATH];
 
 void Sys_mkdir (char *path)
 {
@@ -84,12 +88,12 @@ char *Sys_GetClipboardData( void )
 	return NULL;
 }
 
-void	*Hunk_Begin (int maxsize)
+void	*Hunk_Begin (size_t maxsize)
 {
 	return NULL;
 }
 
-void	*Hunk_Alloc (int size)
+void	*Hunk_Alloc (size_t size)
 {
 	return NULL;
 }
@@ -98,7 +102,7 @@ void	Hunk_Free (void *buf)
 {
 }
 
-int		Hunk_End (void)
+size_t	Hunk_End (void)
 {
 	return 0;
 }
@@ -130,6 +134,35 @@ void	Sys_Init (void)
 {
 }
 
+//=============================================================================
+
+// Knightmare- adapted from DK 1.3 Linux port
+const char* Sys_ExeDir(void)
+{
+	return exe_dir;
+}
+
+const char* Sys_PrefDir(void)
+{
+	return pref_dir;
+}
+
+const char* Sys_DownloadDir(void)
+{
+	return download_dir;
+}
+
+static void Init_ExeDir (const char* argv0)
+{
+	memset(exe_dir, 0, sizeof(exe_dir));
+	Q_snprintfz(exe_dir, sizeof(exe_dir), ".");
+}
+
+static void Sys_InitPrefDir (void)
+{
+	// TODO: get system-specific user path/homedir here
+}
+// end Knightmare
 
 //=============================================================================
 

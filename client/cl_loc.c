@@ -182,7 +182,7 @@ void CL_LoadLoc (void)
 
 	Com_Printf("CL_LoadLoc: Loaded %d locations from %s.\n", nLines, filename);
 
-/*	Com_sprintf (filename, sizeof(filename), "%s/locs/%s.loc", FS_Gamedir(), mapname);
+/*	Com_sprintf (filename, sizeof(filename), "%s/locs/%s.loc", FS_Savegamedir(), mapname);	// was FS_Gamedir()
 	if (!(f = fopen(filename, "r"))) {
 		Com_DPrintf("CL_LoadLoc: Couldn't load locs/%s.loc\n", mapname);
 		return;
@@ -344,7 +344,7 @@ void CL_LocWrite (void)
 //	strncpy(mapname, cl.configstrings[CS_MODELS + 1] + 5);   // Xile; lets just keep saving em to one file mmmkay?
 	Q_strncpyz(mapname, cl.configstrings[CS_MODELS + 1] + 5, sizeof(mapname));
 	mapname[strlen(mapname) - 4] = 0;
-	Com_sprintf (filename, sizeof(filename), "%s/locs/%s.loc", FS_Gamedir(), mapname);
+	Com_sprintf (filename, sizeof(filename), "%s/locs/%s.loc", FS_Savegamedir(), mapname);	// was FS_Gamedir()
 
 //	Sys_Mkdir("locs");
 	FS_CreatePath (filename);

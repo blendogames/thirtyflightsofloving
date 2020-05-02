@@ -70,7 +70,7 @@ void Load_Savestrings (qboolean update)
 
 	for (i=0; i<MAX_SAVEGAMES; i++)
 	{
-		Com_sprintf (name, sizeof(name), "%s/save/kmq2save%i/server.ssv", FS_Gamedir(), i);
+		Com_sprintf (name, sizeof(name), "%s/save/kmq2save%i/server.ssv", FS_Savegamedir(), i);	// was FS_Gamedir()
 
 		old_timestamp = m_savetimestamps[i];
 		stat(name, &st);

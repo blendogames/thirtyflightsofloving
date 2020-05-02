@@ -72,7 +72,7 @@ instruct clients to write files over areas they shouldn't.
 #define MAX_WRITE				0x10000
 #define MAX_FIND_FILES			0x04000
 
-//#define	USE_SAVEGAMEDIR			// whether to use new Ffs_savegamedir/fs_downloaddir paths
+#define	USE_SAVEGAMEDIR			// whether to use new fs_savegamedir/fs_downloaddir paths
 
 //
 // in memory
@@ -555,11 +555,11 @@ int FS_FOpenFileAppend (fsHandle_t *handle)
 //	FS_CreatePath(handle->name);
 	// include game path, but check for leading /
 	if (handle->name[0] == '/')
-		FS_CreatePath (va("%s%s", fs_gamedir, handle->name));
+		FS_CreatePath (va("%s%s", fs_savegamedir, handle->name));	// was fs_gamedir
 	else
-		FS_CreatePath (va("%s/%s", fs_gamedir, handle->name));
+		FS_CreatePath (va("%s/%s", fs_savegamedir, handle->name));	// was fs_gamedir
 
-	Com_sprintf(path, sizeof(path), "%s/%s", fs_gamedir, handle->name);
+	Com_sprintf(path, sizeof(path), "%s/%s", fs_savegamedir, handle->name);	// was fs_gamedir
 
 	handle->file = fopen(path, "ab");
 	if (handle->file)
@@ -591,11 +591,11 @@ int FS_FOpenFileWrite (fsHandle_t *handle)
 //	FS_CreatePath(handle->name);
 	// include game path, but check for leading /
 	if (handle->name[0] == '/')
-		FS_CreatePath (va("%s%s", fs_gamedir, handle->name));
+		FS_CreatePath (va("%s%s", fs_savegamedir, handle->name));	// was fs_gamedir
 	else
-		FS_CreatePath (va("%s/%s", fs_gamedir, handle->name));
+		FS_CreatePath (va("%s/%s", fs_savegamedir, handle->name));	// was fs_gamedir
 
-	Com_sprintf(path, sizeof(path), "%s/%s", fs_gamedir, handle->name);
+	Com_sprintf(path, sizeof(path), "%s/%s", fs_savegamedir, handle->name);	// was fs_gamedir
 
 	handle->file = fopen(path, "wb");
 	if (handle->file)
@@ -802,11 +802,11 @@ int FS_FOpenCompressedFileWrite (fsHandle_t *handle, const char *zipName, const 
 //	FS_CreatePath (va("%s", zipName));
 	// include game path, but check for leading /
 	if (*zipName == '/')
-		FS_CreatePath (va("%s%s", fs_gamedir, zipName));
+		FS_CreatePath (va("%s%s", fs_savegamedir, zipName));	// was fs_gamedir
 	else
-		FS_CreatePath (va("%s/%s", fs_gamedir, zipName));
+		FS_CreatePath (va("%s/%s", fs_savegamedir, zipName));	// was fs_gamedir
 
-	Com_sprintf(path, sizeof(path), "%s/%s", fs_gamedir, zipName);
+	Com_sprintf(path, sizeof(path), "%s/%s", fs_savegamedir, zipName);	// was fs_gamedir
 
 	append = add ? (FS_LocalFileExists ((char *)zipName) ? 2 : 0) : 0;
 	handle->writeZip = zipOpen(path, append);
@@ -2291,7 +2291,7 @@ void FS_AddSaveGameDirectory (char *dir)
 
 	Com_sprintf (fs_savegamedir, sizeof(fs_savegamedir), "%s/%s", Sys_PrefDir(), dir);
 
-	if (!stricmp(fs_savegamedir, fs_gamedir))	// only add if different from fs_gamedir
+	if (!Q_stricmp(fs_savegamedir, fs_gamedir))	// only add if different from fs_gamedir
 		return;
 
 	FS_CreatePath (va("%s/", fs_savegamedir));	// create savegamedir if it doesn't yet exist
@@ -2328,7 +2328,7 @@ void FS_AddDownloadDirectory (char *dir)
 
 	Com_sprintf (fs_downloaddir, sizeof(fs_downloaddir), "%s/%s", Sys_DownloadDir(), dir);
 
-	if (!stricmp(fs_downloaddir, fs_gamedir))	// only add if different from fs_gamedir
+	if (!Q_stricmp(fs_downloaddir, fs_gamedir))	// only add if different from fs_gamedir
 		return;
 
 	FS_CreatePath (va("%s/", fs_downloaddir));	//  create downloaddir if it doesn't yet exist
@@ -2360,12 +2360,18 @@ Allows enumerating all of the directories in the search path
 char *FS_NextPath (char *prevPath)
 {
 	fsSearchPath_t	*search;
-	char			*prev;
+	char			*prev, *firstPath;
+
+	// only use fs_savegamedir if different from fs_gamedir
+	if (!Q_stricmp(fs_savegamedir, fs_gamedir))
+		firstPath = fs_gamedir;
+	else
+		firstPath = fs_savegamedir;
 
 	if (!prevPath)
-		return fs_gamedir;
+		return firstPath;	// was fs_gamedir
 
-	prev = fs_gamedir;
+	prev = firstPath;	// was fs_gamedir
 	for (search = fs_searchPaths; search; search = search->next)
 	{
 		if (search->pack)
@@ -2404,9 +2410,10 @@ char *FS_NextGamePath (char *prevPath)
 		if (search->pack)
 			continue;
 
-		// explicitly skip fs_savegamedir and fs_downloaddir
+		// explicitly skip fs_savegamedir and fs_downloaddir (if different from fs_gamedir)
 		if ( (strlen(search->path) > 0) &&
-			((Q_stricmp(search->path, fs_savegamedir) == 0) || (Q_stricmp(search->path, fs_downloaddir) == 0)) )
+			(	((Q_stricmp(search->path, fs_savegamedir) == 0) && (Q_stricmp(fs_savegamedir, fs_gamedir) != 0)) ||
+				((Q_stricmp(search->path, fs_downloaddir) == 0) && (Q_stricmp(fs_downloaddir, fs_gamedir) != 0)) ) )
 			continue;
 
 		if (prevPath == prev)
@@ -2542,7 +2549,7 @@ void FS_CopyConfigsToSavegameDir (void)
 	char	*cfgName;
 
 	// check if fs_savegamedir and fs_gamedir are the same, so we don't try to copy the files over each other
-	if (!stricmp(FS_SaveGameDir(), fs_gamedir))
+	if (!Q_stricmp(FS_SaveGameDir(), fs_gamedir))
 		return;
 
 	// check if kmq2config.cfg exists in FS_SaveGameDir() so we can skip copying

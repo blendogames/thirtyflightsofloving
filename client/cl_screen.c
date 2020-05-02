@@ -1171,7 +1171,7 @@ void SCR_DumpStatusLayout_f (void)
 		return;
 	}
 
-	Com_sprintf (name, sizeof(name), "%s/%s.txt", FS_Gamedir(), Cmd_Argv(1));
+	Com_sprintf (name, sizeof(name), "%s/%s.txt", FS_Savegamedir(), Cmd_Argv(1));	// was FS_Gamedir()
 
 	FS_CreatePath (name);
 	f = fopen (name, "w");
@@ -1257,6 +1257,67 @@ void SCR_DumpStatusLayout_f (void)
 	Com_Printf ("Dumped statusbar layout to %s.\n", name);
 }
 
+
+/*
+================
+SCR_DumpGeneralLayout_f
+
+Saves the general layout to a file
+================
+*/
+void SCR_DumpGeneralLayout_f (void)
+{
+	char	buffer[2048];
+	int		i, bufcount;
+	FILE	*f;
+	char	*p;
+	char	name[MAX_OSPATH];
+
+	if (Cmd_Argc() != 2)
+	{
+		Com_Printf ("usage: dumpgenerallayout <filename>\n");
+		return;
+	}
+
+	Com_sprintf (name, sizeof(name), "%s/%s.txt", FS_Savegamedir(), Cmd_Argv(1));	// was FS_Gamedir()
+
+	FS_CreatePath (name);
+	f = fopen (name, "w");
+	if (!f)
+	{
+		Com_Printf ("ERROR: couldn't open.\n");
+		return;
+	}
+
+	// general layout is in cl.layout
+	p = &buffer[0];
+	bufcount = 0;
+
+	for (i=0; i<sizeof(cl.layout); i++)
+	{
+		// check for end
+		if (cl.layout[i] == '\0')
+			break;
+
+		*p = cl.layout[i];
+
+		// check for "endif", insert newline after
+		if (*p == 'f' && *(p-1) == 'i' && *(p-2) == 'd' && *(p-3) == 'n' && *(p-4) == 'e')
+		{
+			p++;
+			bufcount++;
+			*p = '\n';
+		}
+		p++;
+		bufcount++;
+	}
+
+	fwrite(&buffer, 1, bufcount, f);
+	fclose (f);
+
+	Com_Printf ("Dumped general layout to %s.\n", name);
+}
+
 //============================================================================
 
 /*
@@ -1312,6 +1373,7 @@ void SCR_Init (void)
 	Cmd_AddCommand ("sizedown",SCR_SizeDown_f);
 	Cmd_AddCommand ("sky",SCR_Sky_f);
 	Cmd_AddCommand ("dumpstatuslayout", SCR_DumpStatusLayout_f);
+	Cmd_AddCommand ("dumpgenerallayout", SCR_DumpGeneralLayout_f);
 
 	SCR_InitScreenScale ();
 	SCR_InitHudScale ();

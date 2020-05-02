@@ -270,7 +270,7 @@ void CL_Record_f (void)
 	//
 	// open the demo file
 	//
-	Com_sprintf (name, sizeof(name), "%s/demos/%s.dm2", FS_Gamedir(), Cmd_Argv(1));
+	Com_sprintf (name, sizeof(name), "%s/demos/%s.dm2", FS_Savegamedir(), Cmd_Argv(1));	// was FS_Gamedir()
 
 	Com_Printf ("recording to %s.\n", name);
 	FS_CreatePath (name);
@@ -1763,9 +1763,8 @@ qboolean CL_WriteConfiguration (char *cfgName)
 		return false;
 
 	// Knightmare changed- use separate config for better cohabitation
-	//Com_sprintf (path, sizeof(path),"%s/config.cfg",FS_Gamedir());
-//	Com_sprintf (path, sizeof(path),"%s/kmq2config.cfg",FS_Gamedir());
-	Com_sprintf (path, sizeof(path),"%s/%s.cfg", FS_Gamedir(), cfgName);
+//	Com_sprintf (path, sizeof(path),"%s/kmq2config.cfg", FS_Savegamedir());
+	Com_sprintf (path, sizeof(path),"%s/%s.cfg", FS_Savegamedir(), cfgName);	// was FS_Gamedir()
 	f = fopen (path, "w");
 	if (!f)
 	{	// Knightmare changed- use separate config for better cohabitation
@@ -1804,7 +1803,7 @@ void CL_WriteConfig_f (void)
 			strncpy (cfgName, Cmd_Argv(1), sizeof(cfgName));
 
 		if (CL_WriteConfiguration (cfgName))
-			Com_Printf ("Wrote config file %s/%s.cfg.\n", FS_Gamedir(), cfgName);
+			Com_Printf ("Wrote config file %s/%s.cfg.\n", FS_Savegamedir(), cfgName);	// was FS_Gamedir()
 	}
 	else
 		Com_Printf ("Usage: writeconfig <name>\n");
