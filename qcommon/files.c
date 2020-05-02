@@ -808,7 +808,7 @@ int FS_FOpenCompressedFileWrite (fsHandle_t *handle, const char *zipName, const 
 
 	Com_sprintf(path, sizeof(path), "%s/%s", fs_savegamedir, zipName);	// was fs_gamedir
 
-	append = add ? (FS_LocalFileExists ((char *)zipName) ? 2 : 0) : 0;
+	append = add ? (FS_SaveFileExists ((char *)zipName) ? 2 : 0) : 0;	// was FS_LocalFileExists()
 	handle->writeZip = zipOpen(path, append);
 	if (handle->writeZip)
 	{
@@ -1135,7 +1135,7 @@ int FS_CompressFile (const char *fileName, const char *zipName, const char *inte
 	if (!fp)
 		return -1;
 
-	mode = FS_LocalFileExists((char *)zipName) ? FS_APPEND : FS_WRITE;
+	mode = FS_SaveFileExists((char *)zipName) ? FS_APPEND : FS_WRITE;	// was FS_LocalFileExists()
 	size = FS_FOpenCompressedFile (zipName, internalName, &f, mode);
 	if (size == -1) {
 		fclose (fp);

@@ -239,9 +239,9 @@ void SV_CopySaveGame (char *src, char *dst)
 		FS_CopyFile (name, name2);
 	}
 
-	Com_sprintf (name, sizeof(name), "%s/save/%s/", FS_Gamedir(), src);
+	Com_sprintf (name, sizeof(name), "%s/save/%s/", FS_Savegamedir(), src);	// was FS_Gamedir()
 	len = strlen(name);
-//	Com_sprintf (name, sizeof(name), "%s/save/%s/*.sav", FS_Gamedir(), src);
+//	Com_sprintf (name, sizeof(name), "%s/save/%s/*.sav", FS_Savegamedir(), src);	// was FS_Gamedir()
 	for (i = 0; i < 2; i++)
 	{
 		Com_sprintf (name, sizeof(name), "%s/save/%s/*.%s", FS_Savegamedir(), src, saveExtensions[i]);	// was FS_Gamedir()
