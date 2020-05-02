@@ -111,6 +111,14 @@ How To Run
 
 	to the command line.  This is disabled by default.
 
+	KMQuake2 writes/reads savegames, config files, demos, etc. to <userprofile>/Saved Games/KMQuake2 on Windows Vista
+	and later, and to My Documents/My Games/KMQuake2 on Windows 2000/XP/2003.
+	Auto-downloaded files are saved to <userprofile>/Downloads/KMQuake2 on Windows Vista and later, and
+	My Documents/My Downloads/KMQuake2 on Windows 2000/XP/2003.
+	
+	The classic Quake 2 behavior of writing to the Quake2 folder can be restored by adding the parameter
+	"-portable" to the command line, or by placing an empty text file called "portable.cfg" in the baseq2 folder.
+
 	An OpenGL 1.2 compatible 3D accelerator, OpenGL 1.4 support or higher (GeForce FX/Radeon 9500 or better) recommended.
 	(Note: 3Dfx cards are NOT supported)
 	Pentium III or Athlon 800MHz+
