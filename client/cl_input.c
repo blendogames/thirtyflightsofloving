@@ -281,6 +281,10 @@ Send the intended movement message to the server
 void CL_BaseMove (usercmd_t *cmd)
 {	
 	CL_AdjustAngles ();
+
+	// overhead cam doesn't allow vertical aiming
+	if ( (cg_thirdperson->integer > 0) && (cg_thirdperson_overhead->integer > 0) ) 
+		cl.viewangles[PITCH] = 0;
 	
 	memset (cmd, 0, sizeof(*cmd));
 	

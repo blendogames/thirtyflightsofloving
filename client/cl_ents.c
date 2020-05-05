@@ -1379,7 +1379,7 @@ void CL_AddPacketEntities (frame_t *frame)
 				ent.angles[i] = LerpAngle (a2, a1, cl.lerpfrac);
 			}
 		}
-		//AnglesToAxis(ent.angles, ent.axis);
+	//	AnglesToAxis(ent.angles, ent.axis);
 
 		if (s1->number == cl.playernum+1)
 		{
@@ -1412,10 +1412,8 @@ void CL_AddPacketEntities (frame_t *frame)
 				currentweaponmodel = cl_weaponmodels[i];
 			}
 
-		//	if (!cg_thirdperson->value)
 			// fix for third-person in demos
-			if ( !(cg_thirdperson->value
-					&& !(cl.attractloop && !(cl.cinematictime > 0 && cls.realtime - cl.cinematictime > 1000))) )
+			if ( !IsThirdPerson() )
 				continue;
 		}
 
@@ -1467,13 +1465,12 @@ void CL_AddPacketEntities (frame_t *frame)
 			continue;
 
 		// add to refresh list
-		if (drawEnt) //Knightmare added
+		if (drawEnt) // Knightmare added
 			V_AddEntity (&ent);
 
 
 		// color shells generate a seperate entity for the main model
-		if (effects & EF_COLOR_SHELL && (!isclientviewer || (cg_thirdperson->value
-			&& !(cl.attractloop && !(cl.cinematictime > 0 && cls.realtime - cl.cinematictime > 1000)))))
+		if ( (effects & EF_COLOR_SHELL) && (!isclientviewer || IsThirdPerson()) )
 		{
 			// PMM - at this point, all of the shells have been handled
 			// if we're in the rogue pack, set up the custom mixing, otherwise just
@@ -1816,8 +1813,7 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 #endif
 
 	// dont draw if outside body...
-	if (cg_thirdperson->value
-		&& !(cl.attractloop && !(cl.cinematictime > 0 && cls.realtime - cl.cinematictime > 1000)))
+	if ( IsThirdPerson() )
 		return;
 	// allow the gun to be completely removed
 	if (!cl_gun->value)
@@ -2034,103 +2030,117 @@ SetUpCamera
 
 ===============
 */
-
-void CalcViewerCamTrans(float dist);
-void ClipCam (vec3_t start, vec3_t end, vec3_t newpos);
 // Knightmare- backup of client angles
 vec3_t old_viewangles;
 
 void SetUpCamera (void)
 {
-	if (cg_thirdperson->value && !(cl.attractloop && !(cl.cinematictime > 0 && cls.realtime - cl.cinematictime > 1000)))
+	vec3_t end, oldorg, camPosition, camForward;
+	float dist_up, dist_back, dist_offset, angle;
+
+	if ( !IsThirdPerson() )
+		return;
+
+	if (cg_thirdperson_dist->value < 0)
+		Cvar_SetValue( "cg_thirdperson_dist", 0 );
+
+	// Knightmare- backup old viewangles
+	VectorCopy(cl.refdef.viewangles, old_viewangles);
+
+	// and who said trig was pointless?
+	angle = M_PI * cg_thirdperson_angle->value/180.0f;
+	dist_up = cg_thirdperson_dist->value * sin( angle  );
+	dist_back =  cg_thirdperson_dist->value * cos ( angle );
+	dist_offset = cg_thirdperson_offset->value * ((hand->integer == 1) ? -1.0f : 1.0f);
+	// finish polar vector
+
+	VectorCopy(cl.refdef.vieworg, oldorg);
+	if (cg_thirdperson_overhead->integer)
 	{
-		vec3_t end, oldorg, _3dcamposition, _3dcamforward;
-		float dist_up, dist_back, angle;
+		VectorCopy (cl.refdef.vieworg, end);
+		end[2] += cg_thirdperson_overhead_dist->value;
 
-		if (cg_thirdperson_dist->value < 0)
-			Cvar_SetValue( "cg_thirdperson_dist", 0 );
+		V_ClipCam (cl.refdef.vieworg, end, camPosition);
+	}
+	else if (cg_thirdperson_chase->integer)
+	{
+		vec3_t temp, temp2;
 
-		// Knightmare- backup old viewangles
-		VectorCopy(cl.refdef.viewangles, old_viewangles);
+		VectorMA(cl.refdef.vieworg, -dist_back, cl.v_forward, end);
+		VectorMA(end, dist_up, cl.v_up, end);
+		VectorMA (end, dist_offset, cl.v_right, end);
 
-		//and who said trig was pointless?
-		angle = M_PI * cg_thirdperson_angle->value/180.0f;
-		dist_up = cg_thirdperson_dist->value * sin( angle  );
-		dist_back =  cg_thirdperson_dist->value * cos ( angle );
-		//finish polar vector
+		// move back so looking straight down want make us look towards ourself
+		vectoangles2 (cl.v_forward, temp);
+		temp[PITCH] = 0;
+		temp[ROLL] = 0;
+		AngleVectors (temp, temp2, NULL, NULL);
+		VectorMA (end, -(dist_back/1.8f), temp2, end);
 
-		VectorCopy(cl.refdef.vieworg, oldorg);
-		if (cg_thirdperson_chase->value)
+		V_ClipCam (cl.refdef.vieworg, end, camPosition);
+	}
+	else
+	{
+		vec3_t temp, viewForward, viewUp;
+
+		vectoangles2(cl.v_forward, temp);
+		temp[PITCH] = 0;
+		temp[ROLL] = 0;
+		AngleVectors(temp, viewForward, NULL, viewUp);
+
+		VectorScale(viewForward, dist_up*0.5f, camForward);
+
+		VectorMA(cl.refdef.vieworg, -dist_back, viewForward, end);
+		VectorMA(end, dist_up, viewUp, end);
+		
+		V_ClipCam (cl.refdef.vieworg, end, camPosition);
+	}
+
+
+	VectorSubtract(camPosition, oldorg, end);
+	V_CalcViewerCamTrans(VectorLength(end));
+
+	if (cg_thirdperson_overhead->integer)
+	{
+		vec3_t newDir;
+
+		newDir[PITCH] = 90;
+		newDir[ROLL] = 0;
+		if (cg_thirdperson_adjust->integer)
+			newDir[YAW] = cl.refdef.viewangles[YAW];
+		VectorCopy (newDir, cl.refdef.viewangles);
+		VectorCopy (camPosition, cl.refdef.vieworg);
+	}
+	else if (cg_thirdperson_chase->integer)
+	{	// now aim at where ever client is...
+		vec3_t newDir, dir;
+
+		if (cg_thirdperson_adjust->integer)
 		{
-			VectorMA(cl.refdef.vieworg, -dist_back, cl.v_forward, end);
-			VectorMA(end, dist_up, cl.v_up, end);
+			VectorMA(cl.refdef.vieworg, 8000, cl.v_forward, dir);
+			V_ClipCam (cl.refdef.vieworg, dir, newDir); 
 
-			//move back so looking straight down want make us look towards ourself
-			{
-				vec3_t temp, temp2;
+			VectorSubtract (newDir, camPosition, dir);
+			VectorNormalize (dir);
+			vectoangles2 (dir, newDir);
 
-				vectoangles2(cl.v_forward, temp);
-				temp[PITCH]=0;
-				temp[ROLL]=0;
-				AngleVectors(temp, temp2, NULL, NULL);
-				VectorMA(end, -(dist_back/1.8f), temp2, end);
-			}
-
-			ClipCam (cl.refdef.vieworg, end, _3dcamposition);
-		}
-		else
-		{
-			vec3_t temp, viewForward, viewUp;
-
-			vectoangles2(cl.v_forward, temp);
-			temp[PITCH]=0;
-			temp[ROLL]=0;
-			AngleVectors(temp, viewForward, NULL, viewUp);
-
-			VectorScale(viewForward, dist_up*0.5f, _3dcamforward);
-
-			VectorMA(cl.refdef.vieworg, -dist_back, viewForward, end);
-			VectorMA(end, dist_up, viewUp, end);
-			
-			ClipCam (cl.refdef.vieworg, end, _3dcamposition);
+			AngleVectors (newDir, cl.v_forward, cl.v_right, cl.v_up);
+			VectorCopy (newDir, cl.refdef.viewangles);
 		}
 
+		VectorCopy(camPosition, cl.refdef.vieworg);
+	}
+	else
+	{
+		vec3_t newDir[2], newPos;
 
-		VectorSubtract(_3dcamposition, oldorg, end);
+		VectorSubtract (cl.predicted_origin, camPosition, newDir[0]);
+		VectorNormalize (newDir[0]);
+		vectoangles2 (newDir[0],newDir[1]);
+		VectorCopy (newDir[1], cl.refdef.viewangles);
 
-		CalcViewerCamTrans(VectorLength(end));
-
-		if (!cg_thirdperson_chase->value)
-		{
-			vec3_t newDir[2], newPos;
-
-			VectorSubtract(cl.predicted_origin, _3dcamposition, newDir[0]);
-			VectorNormalize(newDir[0]);
-			vectoangles2(newDir[0],newDir[1]);
-			VectorCopy(newDir[1], cl.refdef.viewangles);
-
-			VectorAdd(_3dcamforward, cl.refdef.vieworg, newPos);
-			ClipCam (cl.refdef.vieworg, newPos, cl.refdef.vieworg);
-		}
-		else //now aim at where ever client is...
-		{
-			vec3_t newDir, dir;
-
-			if (cg_thirdperson_adjust->value)
-			{
-				VectorMA(cl.refdef.vieworg, 8000, cl.v_forward, dir);
-				ClipCam (cl.refdef.vieworg, dir, newDir); 
-
-				VectorSubtract(newDir, _3dcamposition, dir);
-				VectorNormalize(dir);
-				vectoangles2(dir, newDir);
-
-				AngleVectors(newDir, cl.v_forward, cl.v_right, cl.v_up);
-				VectorCopy(newDir, cl.refdef.viewangles);
-			}
-
-			VectorCopy(_3dcamposition, cl.refdef.vieworg);
-		}
+		VectorAdd (camForward, cl.refdef.vieworg, newPos);
+		V_ClipCam (cl.refdef.vieworg, newPos, cl.refdef.vieworg);
 	}
 }
 
@@ -2277,8 +2287,8 @@ void CL_AddEntities (void)
 	CL_CalcViewValues ();
 
 	// Knightmare- added Psychospaz's chasecam
-	//if (cg_thirdperson->value)
-	//	CalcViewerCamTrans ();
+//	if ( IsThirdPerson() )
+//		V_CalcViewerCamTrans ();
 
 	// PMM - moved this here so the heat beam has the right values for the vieworg, and can lock the beam to the gun
 	CL_AddPacketEntities (&cl.frame);

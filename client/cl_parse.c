@@ -101,41 +101,6 @@ void CL_RegisterSounds (void)
 
 /*
 ==================
-LegacyProtocol
-A utility function that determines
-if parsing of old protocol should be used.
-==================
-*/
-qboolean LegacyProtocol (void)
-{
-	//if (dedicated->value)	// Server always uses new protocol
-	//	return false;
-	if ( (Com_ServerState() && cls.serverProtocol <= OLD_PROTOCOL_VERSION)
-		|| (cls.serverProtocol == OLD_PROTOCOL_VERSION) )
-		return true;
-	return false;
-}
-
-
-/*
-==================
-R1Q2Protocol
-A utility function that determines
-if parsing of R1Q2 protocol should be used.
-==================
-*/
-qboolean R1Q2Protocol (void)
-{
-	//if (dedicated->value)	// Server always uses new protocol
-	//	return false;
-	if ( cls.serverProtocol == R1Q2_PROTOCOL_VERSION )
-		return true;
-	return false;
-}
-
-
-/*
-==================
 CL_ParseServerData
 ==================
 */

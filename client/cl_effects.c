@@ -1940,23 +1940,6 @@ void CL_RocketTrail (vec3_t start, vec3_t end, centity_t *old)
 
 /*
 ===============
-FartherPoint
-Returns true if the first vector
-is farther from the viewpoint.
-===============
-*/
-qboolean FartherPoint (vec3_t pt1, vec3_t pt2)
-{
-	vec3_t		distance1, distance2;
-
-	VectorSubtract(pt1, cl.refdef.vieworg, distance1);
-	VectorSubtract(pt2, cl.refdef.vieworg, distance2);
-	return (VectorLength(distance1) > VectorLength(distance2));
-}
-
-
-/*
-===============
 CL_RailSprial
 ===============
 */
@@ -2848,7 +2831,7 @@ void CL_HeatbeamParticles (vec3_t start, vec3_t forward)
 	VectorCopy (cl.v_right, right);
 	VectorCopy (cl.v_up, up);
 
-	if (cg_thirdperson->value) {
+	if (cg_thirdperson->integer) {
 		ltime = (float) cl.time/250.0;
 		step = 96;
 		maxsteps = 10;

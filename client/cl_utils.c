@@ -147,6 +147,11 @@ qboolean isNumeric (char ch)
 
 //=================================================
 
+/*
+==========================
+vectoangles
+==========================
+*/
 void vectoangles (vec3_t value1, vec3_t angles)
 {
 	float	forward;
@@ -185,6 +190,11 @@ void vectoangles (vec3_t value1, vec3_t angles)
 }
 
 
+/*
+==========================
+vectoangles2
+==========================
+*/
 void vectoangles2 (vec3_t value1, vec3_t angles)
 {
 	float	forward;
@@ -220,4 +230,102 @@ void vectoangles2 (vec3_t value1, vec3_t angles)
 	angles[PITCH] = -pitch;
 	angles[YAW] = yaw;
 	angles[ROLL] = 0;
+}
+
+/*
+===============
+FartherPoint
+Returns true if the first vector
+is farther from the viewpoint.
+===============
+*/
+qboolean FartherPoint (vec3_t pt1, vec3_t pt2)
+{
+	vec3_t		distance1, distance2;
+
+	VectorSubtract(pt1, cl.refdef.vieworg, distance1);
+	VectorSubtract(pt2, cl.refdef.vieworg, distance2);
+	return (VectorLength(distance1) > VectorLength(distance2));
+}
+
+/*
+==================
+LegacyProtocol
+A utility function that determines
+if parsing of old protocol should be used.
+==================
+*/
+qboolean LegacyProtocol (void)
+{
+	//if (dedicated->value)	// Server always uses new protocol
+	//	return false;
+	if ( (Com_ServerState() && cls.serverProtocol <= OLD_PROTOCOL_VERSION)
+		|| (cls.serverProtocol == OLD_PROTOCOL_VERSION) )
+		return true;
+	return false;
+}
+
+/*
+==================
+R1Q2Protocol
+A utility function that determines
+if parsing of R1Q2 protocol should be used.
+==================
+*/
+qboolean R1Q2Protocol (void)
+{
+	//if (dedicated->value)	// Server always uses new protocol
+	//	return false;
+	if ( cls.serverProtocol == R1Q2_PROTOCOL_VERSION )
+		return true;
+	return false;
+}
+
+/*
+===============
+IsRunningDemo
+Returns true if a demo is currently running.
+===============
+*/
+qboolean IsRunningDemo (void)
+{
+	if ( cl.attractloop && !(cl.cinematictime > 0 && cls.realtime - cl.cinematictime > 1000) )
+		return true;
+	return false;
+}
+
+/*
+===============
+IsThirdPerson
+Returns true if the thirdperson
+cvar is set and other conditons are met.
+===============
+*/
+qboolean IsThirdPerson (void)
+{
+	if ( cg_thirdperson->integer && (!IsRunningDemo() || cg_thirdperson_indemo->integer) )
+		return true;
+	return false;
+}
+
+/*
+================
+CL_EntityCmpFnc
+================
+*/
+int CL_EntityCmpFnc (const entity_t *a, const entity_t *b)
+{
+	/*
+	** all other models are sorted by model then skin
+	*/
+	if ( a->model == b->model )
+	{
+	//	return ( ( int ) a->skin - ( int ) b->skin );
+		return ( ( size_t ) a->skin - ( size_t ) b->skin );
+	}
+	else
+	{
+	//	return ( ( int ) a->model - ( int ) b->model );
+		return ( ( size_t ) a->model - ( size_t ) b->model );
+	}
 }

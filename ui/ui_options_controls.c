@@ -41,6 +41,7 @@ static menuslider_s		s_options_controls_sensitivity_slider;
 static menulist_s		s_options_controls_alwaysrun_box;
 static menulist_s		s_options_controls_thirdperson_box;
 static menuslider_s		s_options_controls_thirdperson_distance_slider;
+static menuslider_s		s_options_controls_thirdperson_offset_slider;
 static menuslider_s		s_options_controls_thirdperson_angle_slider;
 static menulist_s		s_options_controls_invertmouse_box;
 static menulist_s		s_options_controls_autosensitivity_box;
@@ -72,6 +73,11 @@ static void ThirdPersonFunc( void *unused )
 static void ThirdPersonDistFunc( void *unused )
 {
 	Cvar_SetValue( "cg_thirdperson_dist", (int)(s_options_controls_thirdperson_distance_slider.curvalue * 25) );
+}
+
+static void ThirdPersonOffsetFunc( void *unused )
+{
+	Cvar_SetValue( "cg_thirdperson_offset", (int)(s_options_controls_thirdperson_offset_slider.curvalue * 4) );
 }
 
 static void ThirdPersonAngleFunc( void *unused )
@@ -125,6 +131,7 @@ static void ControlsSetMenuItemValues( void )
 	Cvar_SetValue( "cg_thirdperson", ClampCvar( 0, 1, Cvar_VariableValue("cg_thirdperson") ) );
 	s_options_controls_thirdperson_box.curvalue		= Cvar_VariableValue("cg_thirdperson");
 	s_options_controls_thirdperson_distance_slider.curvalue	= Cvar_VariableValue("cg_thirdperson_dist") / 25;
+	s_options_controls_thirdperson_offset_slider.curvalue	= Cvar_VariableValue("cg_thirdperson_offset") / 4;
 	s_options_controls_thirdperson_angle_slider.curvalue	= Cvar_VariableValue("cg_thirdperson_angle") / 10;
 
 	Cvar_SetValue( "cl_run", ClampCvar( 0, 1, Cvar_VariableValue("cl_run") ) );
@@ -151,6 +158,7 @@ static void ControlsResetDefaultsFunc ( void *unused )
 
 	Cvar_SetToDefault ("cg_thirdperson");
 	Cvar_SetToDefault ("cg_thirdperson_dist");
+	Cvar_SetToDefault ("cg_thirdperson_offset");
 	Cvar_SetToDefault ("cg_thirdperson_angle");
 	//Cvar_SetToDefault ("cl_run");
 	//Cvar_SetToDefault ("lookspring");
@@ -231,6 +239,16 @@ void Options_Controls_MenuInit ( void )
 	s_options_controls_thirdperson_distance_slider.minvalue				= 1;
 	s_options_controls_thirdperson_distance_slider.maxvalue				= 5;
 	s_options_controls_thirdperson_distance_slider.generic.statusbar	= "changes camera distance in third-person mode";
+
+	s_options_controls_thirdperson_offset_slider.generic.type		= MTYPE_SLIDER;
+	s_options_controls_thirdperson_offset_slider.generic.textSize	= MENU_FONT_SIZE;
+	s_options_controls_thirdperson_offset_slider.generic.x			= 0;
+	s_options_controls_thirdperson_offset_slider.generic.y			= y+=MENU_LINE_SIZE;
+	s_options_controls_thirdperson_offset_slider.generic.name		= "camera offset";
+	s_options_controls_thirdperson_offset_slider.generic.callback	= ThirdPersonOffsetFunc;
+	s_options_controls_thirdperson_offset_slider.minvalue			= 0;
+	s_options_controls_thirdperson_offset_slider.maxvalue			= 8;
+	s_options_controls_thirdperson_offset_slider.generic.statusbar	= "changes horizontal camera offset in third-person mode";
 
 	s_options_controls_thirdperson_angle_slider.generic.type		= MTYPE_SLIDER;
 	s_options_controls_thirdperson_angle_slider.generic.textSize	= MENU_FONT_SIZE;
@@ -313,6 +331,7 @@ void Options_Controls_MenuInit ( void )
 	Menu_AddItem( &s_options_controls_menu, ( void * ) &s_options_controls_autosensitivity_box );
 	Menu_AddItem( &s_options_controls_menu, ( void * ) &s_options_controls_thirdperson_box );
 	Menu_AddItem( &s_options_controls_menu, ( void * ) &s_options_controls_thirdperson_distance_slider );
+	Menu_AddItem( &s_options_controls_menu, ( void * ) &s_options_controls_thirdperson_offset_slider );
 	Menu_AddItem( &s_options_controls_menu, ( void * ) &s_options_controls_thirdperson_angle_slider );
 	Menu_AddItem( &s_options_controls_menu, ( void * ) &s_options_controls_alwaysrun_box );
 	Menu_AddItem( &s_options_controls_menu, ( void * ) &s_options_controls_lookspring_box );

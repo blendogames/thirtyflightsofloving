@@ -82,8 +82,12 @@ cvar_t	*cg_thirdperson;
 cvar_t	*cg_thirdperson_angle;
 cvar_t	*cg_thirdperson_chase;
 cvar_t	*cg_thirdperson_dist;
+cvar_t	*cg_thirdperson_offset;
 cvar_t	*cg_thirdperson_alpha;
 cvar_t	*cg_thirdperson_adjust;
+cvar_t	*cg_thirdperson_indemo;
+cvar_t	*cg_thirdperson_overhead;
+cvar_t	*cg_thirdperson_overhead_dist;
 
 cvar_t	*cl_blood;
 cvar_t	*cl_old_explosions;	// Option for old explosions
@@ -1578,9 +1582,13 @@ void CL_InitLocal (void)
 	cg_thirdperson = Cvar_Get ("cg_thirdperson", "0", CVAR_ARCHIVE);
 	cg_thirdperson_angle = Cvar_Get ("cg_thirdperson_angle", "10", CVAR_ARCHIVE);
 	cg_thirdperson_dist = Cvar_Get ("cg_thirdperson_dist", "50", CVAR_ARCHIVE);
+	cg_thirdperson_offset = Cvar_Get ("cg_thirdperson_offset", "16", CVAR_ARCHIVE);
 	cg_thirdperson_alpha = Cvar_Get ("cg_thirdperson_alpha", "0", CVAR_ARCHIVE);
 	cg_thirdperson_chase = Cvar_Get ("cg_thirdperson_chase", "1", CVAR_ARCHIVE);
 	cg_thirdperson_adjust = Cvar_Get ("cg_thirdperson_adjust", "1", CVAR_ARCHIVE);
+	cg_thirdperson_indemo = Cvar_Get ("cg_thirdperson_indemo", "0", CVAR_ARCHIVE);
+	cg_thirdperson_overhead = Cvar_Get ("cg_thirdperson_overhead", "0", CVAR_ARCHIVE);
+	cg_thirdperson_overhead_dist = Cvar_Get ("cg_thirdperson_overhead_dist", "192", CVAR_ARCHIVE);
 
 	cl_blood = Cvar_Get ("cl_blood", "2", CVAR_ARCHIVE);
 

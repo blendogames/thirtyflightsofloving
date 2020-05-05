@@ -110,7 +110,7 @@ typedef struct image_s
 #define	TEXNUM_SCRAPS		TEXNUM_LIGHTMAPS + MAX_LIGHTMAPS
 #define	TEXNUM_IMAGES		TEXNUM_SCRAPS + 1
 
-#define	MAX_GLTEXTURES	4096 // Knightmare increased, was 1024
+#define	MAX_GLTEXTURES	16384	// 4096 // Knightmare increased, was 1024
 
 //Harven MD3 ++
 #include "r_alias.h" // needs image_t struct

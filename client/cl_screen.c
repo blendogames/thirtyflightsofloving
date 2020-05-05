@@ -1975,21 +1975,6 @@ void SCR_Loading_f (void)
 SCR_TimeRefresh_f
 ================
 */
-int entitycmpfnc( const entity_t *a, const entity_t *b )
-{
-	/*
-	** all other models are sorted by model then skin
-	*/
-	if ( a->model == b->model )
-	{
-		return ( ( int ) a->skin - ( int ) b->skin );
-	}
-	else
-	{
-		return ( ( int ) a->model - ( int ) b->model );
-	}
-}
-
 void SCR_TimeRefresh_f (void)
 {
 	int		i;
@@ -2696,7 +2681,8 @@ void SCR_DrawLayout (void)
 void DrawDemoMessage (void)
 {
 	// running demo message
-	if ( cl.attractloop && !(cl.cinematictime > 0 && cls.realtime - cl.cinematictime > 1000))
+//	if ( cl.attractloop && !(cl.cinematictime > 0 && cls.realtime - cl.cinematictime > 1000))
+	if ( IsRunningDemo() )
 	{
 		int len;
 		char *message = "Running Demo";

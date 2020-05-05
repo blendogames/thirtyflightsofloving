@@ -85,7 +85,7 @@ void V_ClearScene (void)
 #define CAM_MAXALPHADIST 0.000111
 float viewermodelalpha;
 
-void ClipCam (vec3_t start, vec3_t end, vec3_t newpos)
+void V_ClipCam (vec3_t start, vec3_t end, vec3_t newpos)
 {
 	int i;
 
@@ -94,9 +94,9 @@ void ClipCam (vec3_t start, vec3_t end, vec3_t newpos)
 		newpos[i]=tr.endpos[i];
 }
 
-void AddViewerEntAlpha (entity_t *ent)
+void V_AddViewerEntAlpha (entity_t *ent)
 {
-	if (viewermodelalpha == 1 || !cg_thirdperson_alpha->value)
+	if (viewermodelalpha == 1 || !cg_thirdperson_alpha->integer)
 		return;
 
 	ent->alpha *= viewermodelalpha;
@@ -105,7 +105,7 @@ void AddViewerEntAlpha (entity_t *ent)
 }
 
 #define ANGLEMAX 90.0
-void CalcViewerCamTrans (float distance)
+void V_CalcViewerCamTrans (float distance)
 {
 	float alphacalc = cg_thirdperson_dist->value;
 
@@ -132,16 +132,17 @@ void V_AddEntity (entity_t *ent)
 	{	int i; 
 
 		// what was i thinking before!?
-		for (i=0;i<3;i++)
+		for (i=0; i<3; i++)
 			clientOrg[i] = ent->oldorigin[i] = ent->origin[i] = cl.predicted_origin[i];
 
 		if (hand->value == 1) //lefthanded
 			ent->flags |= RF_MIRRORMODEL;
 
-		if (cg_thirdperson->value
-			&& !(cl.attractloop && !(cl.cinematictime > 0 && cls.realtime - cl.cinematictime > 1000)))
+	//	if (cg_thirdperson->integer
+	//		&& !(cl.attractloop && !(cl.cinematictime > 0 && cls.realtime - cl.cinematictime > 1000)))
+		if ( IsThirdPerson() )
 		{
-			AddViewerEntAlpha(ent);
+			V_AddViewerEntAlpha(ent);
 			ent->flags &= ~RF_VIEWERMODEL;
 			ent->renderfx |= RF2_CAMERAMODEL;
 		}
@@ -666,8 +667,7 @@ V_RenderView
 */
 void V_RenderView (float stereo_separation)
 {
-	extern int entitycmpfnc( const entity_t *, const entity_t * );
-	float f; // Barnes added
+	float	f; // Barnes added
 
 	if (cls.state != ca_active)
 		return;
@@ -784,7 +784,7 @@ void V_RenderView (float stereo_separation)
 		memcpy (&cl.refdef.foginfo, &r_foginfo, sizeof (foginfo_t));
 
 		cl.refdef.rdflags = cl.frame.playerstate.rdflags;
-        qsort( cl.refdef.entities, cl.refdef.num_entities, sizeof( cl.refdef.entities[0] ), (int (*)(const void *, const void *))entitycmpfnc );
+        qsort( cl.refdef.entities, cl.refdef.num_entities, sizeof( cl.refdef.entities[0] ), (int (*)(const void *, const void *))CL_EntityCmpFnc );
 	}
 
 	R_RenderFrame (&cl.refdef);

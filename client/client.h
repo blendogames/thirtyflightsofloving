@@ -398,8 +398,12 @@ extern	cvar_t	*cg_thirdperson;
 extern	cvar_t	*cg_thirdperson_angle;
 extern	cvar_t	*cg_thirdperson_chase;
 extern	cvar_t	*cg_thirdperson_dist;
+extern	cvar_t	*cg_thirdperson_offset;
 extern	cvar_t	*cg_thirdperson_alpha;
 extern	cvar_t	*cg_thirdperson_adjust;
+extern	cvar_t	*cg_thirdperson_indemo;
+extern	cvar_t	*cg_thirdperson_overhead;
+extern	cvar_t	*cg_thirdperson_overhead_dist;
 
 extern	cvar_t	*cl_blood;
 extern	cvar_t	*cl_old_explosions;	// Option for old explosions
@@ -882,6 +886,8 @@ float loadingPercent;
 
 float CalcFov (float fov_x, float width, float height);
 void V_RenderView( float stereo_separation );
+void V_ClipCam (vec3_t start, vec3_t end, vec3_t newpos);
+void V_CalcViewerCamTrans (float dist);
 void V_AddEntity (entity_t *ent);
 void V_Init (void);
 
@@ -1086,6 +1092,12 @@ int listSize (char *list[][2]);
 qboolean isNumeric (char ch);
 void vectoangles (vec3_t value1, vec3_t angles);
 void vectoangles2 (vec3_t value1, vec3_t angles);
+qboolean FartherPoint (vec3_t pt1, vec3_t pt2);
+qboolean LegacyProtocol (void);
+qboolean R1Q2Protocol (void);
+qboolean IsRunningDemo (void);
+qboolean IsThirdPerson (void);
+int CL_EntityCmpFnc (const entity_t *a, const entity_t *b);
 
 
 #ifdef LOC_SUPPORT	// Xile/NiceAss LOC
