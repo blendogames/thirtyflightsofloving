@@ -186,25 +186,26 @@ targets: $(TARGETS)
 QUAKE2_OBJS = \
 	$(BUILDDIR)/client/cl_cin.o \
 	$(BUILDDIR)/client/cl_cinematic.o \
+	$(BUILDDIR)/client/cl_console.o \
 	$(BUILDDIR)/client/cl_download.o \
+	$(BUILDDIR)/client/cl_effects.o \
 	$(BUILDDIR)/client/cl_ents.o \
 	$(BUILDDIR)/client/cl_event.o \
-	$(BUILDDIR)/client/cl_effects.o \
+	$(BUILDDIR)/client/cl_http.o \
 	$(BUILDDIR)/client/cl_input.o \
 	$(BUILDDIR)/client/cl_inv.o \
+	$(BUILDDIR)/client/cl_keys.o \
 	$(BUILDDIR)/client/cl_lights.o \
 	$(BUILDDIR)/client/cl_loc.o \
 	$(BUILDDIR)/client/cl_main.o \
 	$(BUILDDIR)/client/cl_parse.o \
 	$(BUILDDIR)/client/cl_particle.o \
 	$(BUILDDIR)/client/cl_pred.o \
-	$(BUILDDIR)/client/cl_tempent.o \
-	$(BUILDDIR)/client/cl_utils.o \
 	$(BUILDDIR)/client/cl_screen.o \
 	$(BUILDDIR)/client/cl_string.o \
+	$(BUILDDIR)/client/cl_tempent.o \
+	$(BUILDDIR)/client/cl_utils.o \
 	$(BUILDDIR)/client/cl_view.o \
-	$(BUILDDIR)/client/cl_console.o \
-	$(BUILDDIR)/client/cl_keys.o \
 	$(BUILDDIR)/client/snd_dma.o \
 	$(BUILDDIR)/client/snd_mem.o \
 	$(BUILDDIR)/client/snd_mix.o \
@@ -266,10 +267,13 @@ QUAKE2_OBJS = \
 	$(BUILDDIR)/client/q_shared.o \
 	$(BUILDDIR)/client/pmove.o \
 	\
+	$(BUILDDIR)/ref_gl/r_alias.o \
+	$(BUILDDIR)/ref_gl/r_alias_md2.o \
+	$(BUILDDIR)/ref_gl/r_alias_misc.o \
+	$(BUILDDIR)/ref_gl/r_arb_program.o \
 	$(BUILDDIR)/ref_gl/r_backend.o \
 	$(BUILDDIR)/ref_gl/r_beam.o \
 	$(BUILDDIR)/ref_gl/r_bloom.o \
-	$(BUILDDIR)/ref_gl/r_cin.o \
 	$(BUILDDIR)/ref_gl/r_draw.o \
 	$(BUILDDIR)/ref_gl/r_entity.o \
 	$(BUILDDIR)/ref_gl/r_fog.o \
@@ -278,19 +282,16 @@ QUAKE2_OBJS = \
 	$(BUILDDIR)/ref_gl/r_image.o \
 	$(BUILDDIR)/ref_gl/r_light.o \
 	$(BUILDDIR)/ref_gl/r_main.o \
-	$(BUILDDIR)/ref_gl/r_alias.o \
-	$(BUILDDIR)/ref_gl/r_alias_md2.o \
-	$(BUILDDIR)/ref_gl/r_alias_misc.o \
-	$(BUILDDIR)/ref_gl/r_arb_program.o \
 	$(BUILDDIR)/ref_gl/r_misc.o \
 	$(BUILDDIR)/ref_gl/r_model.o \
 	$(BUILDDIR)/ref_gl/r_particle.o \
 	$(BUILDDIR)/ref_gl/r_sky.o \
 	$(BUILDDIR)/ref_gl/r_sprite.o \
-	$(BUILDDIR)/ref_gl/r_surf.o \
+	$(BUILDDIR)/ref_gl/r_surface.o \
+	$(BUILDDIR)/ref_gl/r_upscale.o \
 	$(BUILDDIR)/ref_gl/r_vlights.o \
-	$(BUILDDIR)/ref_gl/gl_glx.o \
 	$(BUILDDIR)/ref_gl/r_warp.o \
+	$(BUILDDIR)/ref_gl/gl_glx.o \
 	\
 	$(BUILDDIR)/ref_gl/qgl_unix.o
 	
@@ -323,7 +324,13 @@ $(BUILDDIR)/client/cl_cin.o :     	$(CLIENT_DIR)/cl_cin.c
 $(BUILDDIR)/client/cl_cinematic.o :     $(CLIENT_DIR)/cl_cinematic.c
 	$(DO_CC)
 	
+$(BUILDDIR)/client/cl_console.o :    	$(CLIENT_DIR)/cl_console.c
+	$(DO_CC)
+
 $(BUILDDIR)/client/cl_download.o :     	$(CLIENT_DIR)/cl_download.c
+	$(DO_CC)
+
+$(BUILDDIR)/client/cl_effects.o :      	$(CLIENT_DIR)/cl_effects.c
 	$(DO_CC)
 
 $(BUILDDIR)/client/cl_ents.o :    	$(CLIENT_DIR)/cl_ents.c
@@ -332,13 +339,16 @@ $(BUILDDIR)/client/cl_ents.o :    	$(CLIENT_DIR)/cl_ents.c
 $(BUILDDIR)/client/cl_event.o :    	$(CLIENT_DIR)/cl_event.c
 	$(DO_CC)
 
-$(BUILDDIR)/client/cl_effects.o :      	$(CLIENT_DIR)/cl_effects.c
+$(BUILDDIR)/client/cl_http.o :      	$(CLIENT_DIR)/cl_http.c
 	$(DO_CC)
 
 $(BUILDDIR)/client/cl_input.o :   	$(CLIENT_DIR)/cl_input.c
 	$(DO_CC)
 
 $(BUILDDIR)/client/cl_inv.o :     	$(CLIENT_DIR)/cl_inv.c
+	$(DO_CC)
+
+$(BUILDDIR)/client/cl_keys.o :       	$(CLIENT_DIR)/cl_keys.c
 	$(DO_CC)
 
 $(BUILDDIR)/client/cl_lights.o :    	$(CLIENT_DIR)/cl_lights.c
@@ -359,25 +369,19 @@ $(BUILDDIR)/client/cl_particle.o :   	$(CLIENT_DIR)/cl_particle.c
 $(BUILDDIR)/client/cl_pred.o :    	$(CLIENT_DIR)/cl_pred.c
 	$(DO_CC)
 
-$(BUILDDIR)/client/cl_tempent.o :    	$(CLIENT_DIR)/cl_tempent.c
-	$(DO_CC)
-	
-$(BUILDDIR)/client/cl_utils.o :    	$(CLIENT_DIR)/cl_utils.c
-	$(DO_CC)
-
 $(BUILDDIR)/client/cl_screen.o :    	$(CLIENT_DIR)/cl_screen.c
 	$(DO_CC)
 	
 $(BUILDDIR)/client/cl_string.o :    	$(CLIENT_DIR)/cl_string.c
 	$(DO_CC)
 
+$(BUILDDIR)/client/cl_tempent.o :    	$(CLIENT_DIR)/cl_tempent.c
+	$(DO_CC)
+	
+$(BUILDDIR)/client/cl_utils.o :    	$(CLIENT_DIR)/cl_utils.c
+	$(DO_CC)
+
 $(BUILDDIR)/client/cl_view.o :    	$(CLIENT_DIR)/cl_view.c
-	$(DO_CC)
-
-$(BUILDDIR)/client/cl_console.o :    	$(CLIENT_DIR)/cl_console.c
-	$(DO_CC)
-
-$(BUILDDIR)/client/cl_keys.o :       	$(CLIENT_DIR)/cl_keys.c
 	$(DO_CC)
 
 $(BUILDDIR)/client/snd_dma.o :    	$(CLIENT_DIR)/snd_dma.c
@@ -560,6 +564,18 @@ $(BUILDDIR)/client/unzip.o :		$(UNIX_DIR)/zip/unzip.c
 $(BUILDDIR)/client/ioapi.o :		$(UNIX_DIR)/zip/ioapi.c
 	$(DO_CC)
 	
+$(BUILDDIR)/ref_gl/r_alias.o :       	$(REF_GL_DIR)/r_alias.c
+	$(DO_GL_SHLIB_CC)
+
+$(BUILDDIR)/ref_gl/r_alias_md2.o :        	$(REF_GL_DIR)/r_alias_md2.c
+	$(DO_GL_SHLIB_CC)
+	
+$(BUILDDIR)/ref_gl/r_alias_misc.o :        	$(REF_GL_DIR)/r_alias_misc.c
+	$(DO_GL_SHLIB_CC)
+	
+$(BUILDDIR)/ref_gl/r_arb_program.o :        	$(REF_GL_DIR)/r_arb_program.c
+	$(DO_GL_SHLIB_CC)
+
 $(BUILDDIR)/ref_gl/r_backend.o :        	$(REF_GL_DIR)/r_backend.c
 	$(DO_GL_SHLIB_CC)
 	
@@ -567,9 +583,6 @@ $(BUILDDIR)/ref_gl/r_beam.o :        	$(REF_GL_DIR)/r_beam.c
 	$(DO_GL_SHLIB_CC)
 	
 $(BUILDDIR)/ref_gl/r_bloom.o :        	$(REF_GL_DIR)/r_bloom.c
-	$(DO_GL_SHLIB_CC)
-	
-$(BUILDDIR)/ref_gl/r_cin.o :        	$(REF_GL_DIR)/r_cin.c
 	$(DO_GL_SHLIB_CC)
 	
 $(BUILDDIR)/ref_gl/r_draw.o :        	$(REF_GL_DIR)/r_draw.c
@@ -596,18 +609,6 @@ $(BUILDDIR)/ref_gl/r_light.o :       	$(REF_GL_DIR)/r_light.c
 $(BUILDDIR)/ref_gl/r_main.o :       	$(REF_GL_DIR)/r_main.c
 	$(DO_GL_SHLIB_CC)
 
-$(BUILDDIR)/ref_gl/r_alias.o :       	$(REF_GL_DIR)/r_alias.c
-	$(DO_GL_SHLIB_CC)
-
-$(BUILDDIR)/ref_gl/r_alias_md2.o :        	$(REF_GL_DIR)/r_alias_md2.c
-	$(DO_GL_SHLIB_CC)
-	
-$(BUILDDIR)/ref_gl/r_alias_misc.o :        	$(REF_GL_DIR)/r_alias_misc.c
-	$(DO_GL_SHLIB_CC)
-	
-$(BUILDDIR)/ref_gl/r_arb_program.o :        	$(REF_GL_DIR)/r_arb_program.c
-	$(DO_GL_SHLIB_CC)
-
 $(BUILDDIR)/ref_gl/r_misc.o :       	$(REF_GL_DIR)/r_misc.c
 	$(DO_GL_SHLIB_CC)
 
@@ -623,7 +624,10 @@ $(BUILDDIR)/ref_gl/r_sky.o :       	$(REF_GL_DIR)/r_sky.c
 $(BUILDDIR)/ref_gl/r_sprite.o :       	$(REF_GL_DIR)/r_sprite.c
 	$(DO_GL_SHLIB_CC)
 
-$(BUILDDIR)/ref_gl/r_surf.o :       	$(REF_GL_DIR)/r_surf.c
+$(BUILDDIR)/ref_gl/r_surface.o :       	$(REF_GL_DIR)/r_surface.c
+	$(DO_GL_SHLIB_CC)
+
+$(BUILDDIR)/ref_gl/r_upscale.o :       	$(REF_GL_DIR)/r_upscale.c
 	$(DO_GL_SHLIB_CC)
 
 $(BUILDDIR)/ref_gl/r_vlights.o :       	$(REF_GL_DIR)/r_vlights.c

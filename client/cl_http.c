@@ -22,11 +22,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #ifdef USE_CURL
 
-cvar_t	*cl_http_downloads;
-cvar_t	*cl_http_filelists;
-cvar_t	*cl_http_proxy;
-cvar_t	*cl_http_max_connections;
-
 static enum
 {
 	HTTPDL_ABORT_NONE,
@@ -60,6 +55,79 @@ Since CURL natively supports gzip content encoding, any files
 on the HTTP server should ideally be gzipped to conserve
 bandwidth.
 */
+
+
+// Knightmare- store the names of last HTTP downloads from this server that failed
+// This is needed because some player model download failures can cause endless HTTP download loops
+#define NUM_FAIL_DLDS 64
+char lastFailedHTTPDownload[NUM_FAIL_DLDS][MAX_OSPATH];
+static unsigned failed_HTTP_Dl_ListIndex;
+
+/*
+===============
+CL_InitFailedHTTPDownloadList
+===============
+*/
+void CL_InitFailedHTTPDownloadList (void)
+{
+	int		i;
+
+	for (i=0; i<NUM_FAIL_DLDS; i++)
+		Com_sprintf(lastFailedHTTPDownload[i], sizeof(lastFailedHTTPDownload[i]), "\0");
+
+	failed_HTTP_Dl_ListIndex = 0;
+}
+
+
+/*
+===============
+CL_CheckHTTPDownloadFailed
+===============
+*/
+qboolean CL_CheckHTTPDownloadFailed (char *name)
+{
+	int		i;
+
+	for (i=0; i<NUM_FAIL_DLDS; i++)
+		if ( (strlen(lastFailedHTTPDownload[i]) > 0) && !strcmp(name, lastFailedHTTPDownload[i]) )
+		{	// we already tried downlaoding this, server didn't have it
+			return true;
+		}
+
+	return false;
+}
+
+
+/*
+===============
+CL_AddToFailedHTTPDownloadList
+===============
+*/
+void CL_AddToFailedHTTPDownloadList (char *name)
+{
+	int			i;
+	qboolean	found = false;
+
+	// check if this name is already in the table
+	for (i=0; i<NUM_FAIL_DLDS; i++)
+		if ( (strlen(lastFailedHTTPDownload[i]) > 0) && !strcmp(name, lastFailedHTTPDownload[i]) )
+		{
+			found = true;
+			break;
+		}
+
+	// if it isn't already in the table, then we need to add it
+	if (!found)
+	{
+		Com_sprintf(lastFailedHTTPDownload[failed_HTTP_Dl_ListIndex], sizeof(lastFailedHTTPDownload[failed_HTTP_Dl_ListIndex]), "%s", name);
+		failed_HTTP_Dl_ListIndex++;
+
+		// wrap around to start of list
+		if (failed_HTTP_Dl_ListIndex >= NUM_FAIL_DLDS)
+			failed_HTTP_Dl_ListIndex = 0;
+	}	
+}
+// end Knightmare
 
 
 /*
@@ -486,7 +554,10 @@ void CL_SetHTTPServer (const char *URL)
 	// FS: Added because Whale's Weapons HTTP server rejects you after a lot of 404s.  Then you lose HTTP until a hard reconnect.
 	cls.downloadServerRetry[0] = 0;
 	downloadError = false;	// YQ2 UDP fallback addition- reset this for new server
+
+	CL_InitFailedHTTPDownloadList ();	// Knightmare- init failed HTTP downloads list
 }
+
 /*
 ===============
 CL_CancelHTTPDownloads
@@ -553,6 +624,14 @@ qboolean CL_QueueHTTPDownload (const char *quakePath, qboolean filelistUseGamedi
 		isPak = true;
 	if (len > 9 && !Q_stricmp((char *)quakePath + len - 9, ".filelist") )
 		isFilelist = true;
+
+	// Knightmare- don't try again to download via HTTP a file that failed
+	if ( !isFilelist /*&& !needList*/ ) {
+		if (CL_CheckHTTPDownloadFailed((char *)quakePath)) {
+			Com_Printf ("[HTTP] Refusing to download %s again, already in failed HTTP download list.\n", quakePath);
+			return false;
+		}
+	}
 
 	if (isFilelist)	// Knightmare- always insert filelist at head of queue
 	{
@@ -1098,6 +1177,9 @@ static void CL_FinishHTTPDownload (void)
 							CL_ResetPrecacheCheck ();
 						}
 						else { */
+							// Knightmare- added this entry to faild HTTP downloads list
+							CL_AddToFailedHTTPDownloadList (dl->queueEntry->quakePath);
+
 							// Remove queue entry from CURL multihandle queue
 							CL_RemoveDownloadFromQueue (dl->queueEntry);
 							dl->queueEntry = NULL;
@@ -1301,6 +1383,10 @@ starting with the next file.
 void CL_HTTP_EnableGenericFilelist (void)
 {
 	downloadFileList = true;
+
+	// Knightmare- also re-init failed HTTP download list
+	// here, as we'll be downloading on a different path
+	CL_InitFailedHTTPDownloadList ();
 }
 
 /*

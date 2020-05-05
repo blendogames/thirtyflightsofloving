@@ -1,6 +1,6 @@
 KMQuake2_Lazarus
 
-Version 2.219
+Version 2.230
 
 
 NOTE: This game DLL requires KMQuake2 to run!
@@ -101,23 +101,23 @@ Lithium weapon and item balancing cvars, including how much ammo you can pick up
 		tech_vampiremax-		maximum health vampire tech will add up to
 
 	Other cvars:
-		dm_start_shells-	Number of shells to spawn with
-		dm_start_bullets-	Number of bullets to spawn with
-		dm_start_rockets-	Number of rockets to spawn with
-		dm_start_homing-	Number of homing rockets to spawn with (requires Lazarus data files)
-		dm_start_grenades-	Number of grenades to spawn with
-		dm_start_cells-		Number of cells to spawn with
-		dm_start_slugs-		Number of slugs to spawn with
+		sk_dm_start_shells-		Number of shells to spawn with
+		sk_dm_start_bullets-	Number of bullets to spawn with
+		sk_dm_start_rockets-	Number of rockets to spawn with
+		sk_dm_start_homing-		Number of homing rockets to spawn with (requires Lazarus data files)
+		sk_dm_start_grenades-	Number of grenades to spawn with
+		sk_dm_start_cells-		Number of cells to spawn with
+		sk_dm_start_slugs-		Number of slugs to spawn with
 
-		dm_start_shotgun-		Whether to start with with shotgun in DM
-		dm_start_sshotgun-		Whether to start with with super shotgun in DM
-		dm_start_machinegun-		Whether to start with with machinegun in DM
-		dm_start_chaingun-		Whether to start with with shotgun in DM
-		dm_start_grenadelauncher-	Whether to start with with grenade launcher in DM
-		dm_start_rocketlauncher-	Whether to start with with rocket launcher in DM
-		dm_start_hyperblaster-		Whether to start with with hyperblaster in DM
-		dm_start_railgun-		Whether to start with with railgun in DM
-		dm_start_bfg-			Whether to start with with bfg in DM
+		sk_dm_start_shotgun-			Whether to start with with shotgun in DM
+		sk_dm_start_sshotgun-			Whether to start with with super shotgun in DM
+		sk_dm_start_machinegun-			Whether to start with with machinegun in DM
+		sk_dm_start_chaingun-			Whether to start with with shotgun in DM
+		sk_dm_start_grenadelauncher-	Whether to start with with grenade launcher in DM
+		sk_dm_start_rocketlauncher-		Whether to start with with rocket launcher in DM
+		sk_dm_start_hyperblaster-		Whether to start with with hyperblaster in DM
+		sk_dm_start_railgun-			Whether to start with with railgun in DM
+		sk_dm_start_bfg-				Whether to start with with bfg in DM
 
 Entity alias script support- this enables mappers to create predefined entity aliases, allowing easy placement of
 	pre-configured entities in maps, based on highly configurable generic entities like model_spawn and model_train.

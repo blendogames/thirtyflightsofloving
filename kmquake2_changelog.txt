@@ -13,7 +13,8 @@ Changes as of v0.20 update 8:
 	
 - Added Windows DPI scaling detection from Yamagi Quake2.
 
-- Added UDP fallback from HTTP downloads and support for Q2Pro-style HTTP URLs.
+- Added UDP fallback from HTTP downloads and support for Q2Pro-style HTTP URLs.  This can be disabled by
+	setting the cvar cl_http_fallback to 0 or disabling "HTTP fallback" in the download options menu.
 
 - Added support for quake2:// URLs.
 
@@ -45,7 +46,10 @@ Changes as of v0.20 update 8:
 	set to 0 and use vid_restart to disable.
 	
 - Added changeable gl_clear color controlled by cvars r_clearcolor_r, r_clearcolor_g, and r_clearcolor_b.
-	Values are normalized (0-1).	
+	Values are normalized (0-1).
+	
+- Added a check to prevent game code from sending unicasts to non-present clients (i.e. bots).  This would
+	previously cause a fatal server error.
 	
 - Fixed Shift-Ins to paste text not working in menus.
 	

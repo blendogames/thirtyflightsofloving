@@ -45,6 +45,18 @@ void PF_Unicast (edict_t *ent, qboolean reliable)
 
 	client = svs.clients + (p-1);
 
+	// r1ch: trap bad writes from game dll
+//	if (client->state <= cs_spawning)
+	if (client->state < cs_spawned)
+	{
+		int msgType = (sv.multicast.cursize > 0) ? sv.multicast.data[0] : 0;
+		msgType = min(max(msgType, 0), (num_svc_ops-1));
+		Com_Printf (S_COLOR_RED"PF_Unicast: game logic error: Attempted to write %d byte %s to not-in-game client %d, ignored.\n", sv.multicast.cursize, svc_strings[msgType], p-1);
+		
+		SZ_Clear (&sv.multicast);
+		return;
+	}
+
 	if (reliable)
 		SZ_Write (&client->netchan.message, sv.multicast.data, sv.multicast.cursize);
 	else

@@ -160,6 +160,14 @@ cvar_t	*cl_vwep;
 cvar_t *cl_engine;
 cvar_t *cl_engine_version;
 
+#ifdef USE_CURL	// HTTP downloading from R1Q2
+cvar_t	*cl_http_downloads;
+cvar_t	*cl_http_filelists;
+cvar_t	*cl_http_proxy;
+cvar_t	*cl_http_max_connections;
+cvar_t	*cl_http_fallback;
+#endif	// USE_CURL
+
 #ifdef LOC_SUPPORT	// Xile/NiceAss LOC
 cvar_t	*cl_drawlocs;
 cvar_t	*loc_here;
@@ -1671,6 +1679,7 @@ void CL_InitLocal (void)
 	cl_http_downloads = Cvar_Get ("cl_http_downloads", "1", CVAR_ARCHIVE);
 	cl_http_max_connections = Cvar_Get ("cl_http_max_connections", "4", 0);
 //	cl_http_max_connections->changed = _cl_http_max_connections_changed;
+	cl_http_fallback = Cvar_Get ("cl_http_fallback", "1", CVAR_ARCHIVE);
 #endif	// USE_CURL
 
 	//

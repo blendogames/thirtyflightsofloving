@@ -504,6 +504,7 @@ extern	cvar_t	*cl_http_downloads;
 extern	cvar_t	*cl_http_filelists;
 extern	cvar_t	*cl_http_proxy;
 extern	cvar_t	*cl_http_max_connections;
+extern	cvar_t	*cl_http_fallback;
 #endif	// USE_CURL
 
 typedef struct

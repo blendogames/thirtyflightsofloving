@@ -136,9 +136,6 @@ void CL_RequestNextDownload (void)
 			CL_HTTP_SetDownloadGamedir (BASEDIRNAME);
 		else
 			CL_HTTP_SetDownloadGamedir (cl.gamedir);
-		// try filelist again with a different path
-		filelistUseGamedir = true;
-		CL_HTTP_EnableGenericFilelist ();
 	}
 	else {	// if (precache_iteration == ITER_UDP)
 		precache_forceUDP = true;
@@ -381,15 +378,15 @@ void CL_RequestNextDownload (void)
 		{
 			while (precache_check < cs_playerskins + MAX_CLIENTS * PLAYER_MULT)
 			{
-				int i, n;
-				char model[MAX_QPATH], skin[MAX_QPATH], *p;
+				int			i, j, n, len;
+				char		model[MAX_QPATH], skin[MAX_QPATH], *p;
+				qboolean	badSkinName = false;
 
 				i = (precache_check - cs_playerskins)/PLAYER_MULT;
 				n = (precache_check - cs_playerskins)%PLAYER_MULT;
 
 				// from R1Q2- skip invalid player skins data
-				if (i >= cl.maxclients)
-				{
+				if (i >= cl.maxclients) {
 					precache_check = env_cnt;
 					continue;
 				}
@@ -399,23 +396,63 @@ void CL_RequestNextDownload (void)
 					continue;
 				}
 
-				if ((p = strchr(cl.configstrings[cs_playerskins+i], '\\')) != NULL)
+				if ((p = strchr(cl.configstrings[cs_playerskins+i], '\\')) != NULL) {
 					p++;
-				else
+				}
+				else {
 					p = cl.configstrings[cs_playerskins+i];
+				}
+
 			//	strncpy(model, p);
 				Q_strncpyz(model, p, sizeof(model));
 				p = strchr(model, '/');
 				if (!p)
 					p = strchr(model, '\\');
-				if (p) {
-					*p++ = 0;
-				//	strncpy(skin, p);
-					Q_strncpyz(skin, p, sizeof(skin));
-				} else
-					*skin = 0;
 
-				switch (n) {
+				if (p)
+				{
+					*p++ = 0;
+					if (!p[0] || !model[0]) {
+						precache_check = cs_playerskins + (i + 1) * PLAYER_MULT;
+						continue;
+					}
+					else {
+					//	strncpy(skin, p);
+						Q_strncpyz(skin, p, sizeof(skin));
+					}
+				}
+				else {
+				//	*skin = 0;
+					precache_check = cs_playerskins + (i + 1) * PLAYER_MULT;
+					continue;
+				}
+
+				// from R1Q2: check model and skin name for invalid chars
+				len = (int)strlen(model);
+				for (j = 0; j < len; j++)
+				{
+					if ( !IsValidChar(model[j]) ) {
+						Com_Printf (S_COLOR_YELLOW"Bad character '%c' in player model '%s'\n", model[j], model);
+						badSkinName = true;
+					}
+				}
+
+				len = (int)strlen(skin);
+				for (j = 0; j < len; j++)
+				{
+					if ( !IsValidChar(skin[j]) ) {
+						Com_Printf (S_COLOR_YELLOW"Bad character '%c' in player skin '%s'\n", skin[j], skin);
+						badSkinName = true;
+					}
+				}
+				if (badSkinName) {
+					precache_check = cs_playerskins + (i + 1) * PLAYER_MULT;
+					continue;
+				}
+				// end R1Q2 name check
+
+				switch (n)
+				{
 				case 0: // model
 					Com_sprintf(fn, sizeof(fn), "players/%s/tris.md2", model);
 					if (!CL_CheckOrDownloadFile(fn)) {
@@ -458,9 +495,13 @@ void CL_RequestNextDownload (void)
 						precache_check = cs_playerskins + i * PLAYER_MULT + 5;
 						return; // started a download
 					}
+				//	n = 5;	// from R1Q2
+
 					// move on to next model
-					precache_check = cs_playerskins + (i + 1) * PLAYER_MULT;
+				//	precache_check = cs_playerskins + (i + 1) * PLAYER_MULT;
 				}
+				// move on to next model
+				precache_check = cs_playerskins + (i + 1) * PLAYER_MULT;
 			}
 		}
 		// precache phase completed
@@ -473,14 +514,19 @@ void CL_RequestNextDownload (void)
 		return;
 	}
 	// YQ2 UDP fallback addition
-	if ( CL_CheckHTTPError() )	// Download errors detected, so start over with next iteration
+	if ( CL_CheckHTTPError() && cl_http_fallback->integer )	// Download errors detected, so start over with next iteration
 	{
 		precache_iteration++;
-		if (precache_iteration == ITER_HTTP_Q2PRO)
+		if (precache_iteration == ITER_HTTP_Q2PRO) {
 			Com_Printf ("[HTTP] One or more HTTP downloads failed on R1Q2 path, falling back to Q2Pro path.\n");
+			// try filelist again with a different path
+			filelistUseGamedir = true;
+			CL_HTTP_EnableGenericFilelist ();
+		}
 		else	// if (precache_iteration == ITER_UDP)
 			Com_Printf ("[HTTP] One or more HTTP downloads failed on both R1Q2 and Q2Pro paths, falling back to UDP.\n");
 		CL_ResetPrecacheCheck ();
+
 		CL_RequestNextDownload ();
 		return;
 	}
@@ -667,7 +713,7 @@ void CL_DownloadFileName (char *dest, int destlen, char *fn)
 
 // Knightmare- store the names of last downloads that failed
 #define NUM_FAIL_DLDS 64
-char lastfaileddownload[NUM_FAIL_DLDS][MAX_OSPATH];
+char lastFailedDownload[NUM_FAIL_DLDS][MAX_OSPATH];
 static unsigned failedDlListIndex;
 
 /*
@@ -680,7 +726,7 @@ void CL_InitFailedDownloadList (void)
 	int		i;
 
 	for (i=0; i<NUM_FAIL_DLDS; i++)
-		Com_sprintf(lastfaileddownload[i], sizeof(lastfaileddownload[i]), "\0");
+		Com_sprintf(lastFailedDownload[i], sizeof(lastFailedDownload[i]), "\0");
 
 	failedDlListIndex = 0;
 }
@@ -696,8 +742,7 @@ qboolean CL_CheckDownloadFailed (char *name)
 	int		i;
 
 	for (i=0; i<NUM_FAIL_DLDS; i++)
-		if (lastfaileddownload[i] && strlen(lastfaileddownload[i])
-			&& !strcmp(name, lastfaileddownload[i]))
+		if ( (strlen(lastFailedDownload[i]) > 0) && !strcmp(name, lastFailedDownload[i]) )
 		{	// we already tried downlaoding this, server didn't have it
 			return true;
 		}
@@ -715,12 +760,10 @@ void CL_AddToFailedDownloadList (char *name)
 {
 	int			i;
 	qboolean	found = false;
-//	qboolean	added = false;
 
 	// check if this name is already in the table
 	for (i=0; i<NUM_FAIL_DLDS; i++)
-		if (lastfaileddownload[i] && strlen(lastfaileddownload[i])
-			&& !strcmp(name, lastfaileddownload[i]))
+		if ( (strlen(lastFailedDownload[i]) > 0) && !strcmp(name, lastFailedDownload[i]) )
 		{
 			found = true;
 			break;
@@ -729,7 +772,7 @@ void CL_AddToFailedDownloadList (char *name)
 	// if it isn't already in the table, then we need to add it
 	if (!found)
 	{
-		Com_sprintf(lastfaileddownload[failedDlListIndex], sizeof(lastfaileddownload[failedDlListIndex]), "%s", name);
+		Com_sprintf(lastFailedDownload[failedDlListIndex], sizeof(lastFailedDownload[failedDlListIndex]), "%s", name);
 		failedDlListIndex++;
 
 		// wrap around to start of list
@@ -767,8 +810,8 @@ qboolean CL_CheckOrDownloadFile (char *filename)
 	}
 
 	// don't try again to download a file that just failed
-	if (CL_CheckDownloadFailed(filename))
-		return true;
+//	if (CL_CheckDownloadFailed(filename))
+//		return true;
 
 #ifdef PNG_SUPPORT
 	// don't download a .png texture which already has a .tga counterpart
@@ -827,6 +870,10 @@ qboolean CL_CheckOrDownloadFile (char *filename)
 //	else
 //	{
 #endif	// USE_CURL
+
+	// don't try again to download a file that just failed
+	if (CL_CheckDownloadFailed(filename))
+		return true;
 
 //	strncpy (cls.downloadname, filename);
 	Q_strncpyz (cls.downloadname, filename, sizeof(cls.downloadname));
