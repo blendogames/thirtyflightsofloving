@@ -1914,7 +1914,7 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 
 #ifdef NEW_DED_CONSOLE // init debug console
 	Sys_InitDedConsole ();
-	Com_Printf("KMQ2 %4.2f %s %s %s\n", VERSION, CPUSTRING, BUILDSTRING, __DATE__);
+	Com_Printf("KMQ2 %4.2f %s %s %s %s\n", VERSION, CPUSTRING, OS_STRING, COMPILETYPE_STRING, __DATE__);
 #endif
 
 	// Knightmare- scan for cd command line option

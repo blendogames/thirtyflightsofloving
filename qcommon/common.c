@@ -1692,7 +1692,7 @@ void Qcommon_Init (int argc, char **argv)
 	sv_engine_version = Cvar_Get ("sv_engine_version", va("%4.2f",VERSION), CVAR_SERVERINFO | CVAR_NOSET | CVAR_LATCH);
 	// end Knightmare
 	
-	s = va("%4.2f %s %s %s", VERSION, CPUSTRING, __DATE__, BUILDSTRING);
+	s = va("KMQ2 %4.2f %s %s %s %s", VERSION, CPUSTRING, OS_STRING, COMPILETYPE_STRING, __DATE__);
 	Cvar_Get ("version", s, CVAR_SERVERINFO|CVAR_NOSET);
 
 	if (dedicated->value)

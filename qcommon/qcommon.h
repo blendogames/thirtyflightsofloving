@@ -24,7 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "../game/q_shared.h"
 
-#define	VERSION		0.20 //was 3.21
+#define	VERSION		0.20 // was 3.21
 
 #define	BASEDIRNAME	"baseq2"
 
@@ -34,46 +34,78 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #ifdef WIN32
 
-#ifdef NDEBUG
-#define BUILDSTRING "Win32 RELEASE"
-#else
-#define BUILDSTRING "Win32 DEBUG"
-#endif
-
-#ifdef _M_IX86
+#if defined (_M_X64) || defined (_M_AMD64) || defined (__x86_64__)
+#define	CPUSTRING	"x64"
+#define OS_STRING	"Win64"
+#define STOCK_Q2_GAME_LIBRARY_NAME "gamex86.dll"
+#define KMQ2_GAME_LIBRARY_NAME "kmq2gamex64.dll"
+//#ifdef _M_IX86
+#elif defined(_M_IX86) || defined (__i386__) // [Slipyx] mingw case
 #define	CPUSTRING	"x86"
+#define OS_STRING	"Win32"
+#define STOCK_Q2_GAME_LIBRARY_NAME "gamex86.dll"
+#define KMQ2_GAME_LIBRARY_NAME "kmq2gamex86.dll"
 #elif defined _M_ALPHA
 #define	CPUSTRING	"AXP"
+#define OS_STRING	"Win32"
+#define STOCK_Q2_GAME_LIBRARY_NAME "gameaxp.dll"
+#define KMQ2_GAME_LIBRARY_NAME "kmq2gameaxp.dll"
 #endif
 
 #elif defined __linux__
 
-#define BUILDSTRING "Linux"
+#define OS_STRING "Linux"
 
-#ifdef __i386__
+#if defined (_M_X64) || defined (_M_AMD64) || defined (__x86_64__)
+#define	CPUSTRING	"AMD64"
+#define STOCK_Q2_GAME_LIBRARY_NAME "gamei386.so"
+#define KMQ2_GAME_LIBRARY_NAME "kmq2gameamd64.so"
+#elif defined __i386__
 #define CPUSTRING "i386"
+#define STOCK_Q2_GAME_LIBRARY_NAME "gamei386.so"
+#define KMQ2_GAME_LIBRARY_NAME "kmq2gamei386.so"
 #elif defined __alpha__
 #define CPUSTRING "axp"
+#define STOCK_Q2_GAME_LIBRARY_NAME "gameaxp.so"
+#define KMQ2_GAME_LIBRARY_NAME "kmq2gameaxp.so"
 #else
 #define CPUSTRING "Unknown"
 #endif
 
 #elif defined __sun__
 
-#define BUILDSTRING "Solaris"
+#define OS_STRING "Solaris"
 
 #ifdef __i386__
 #define CPUSTRING "i386"
+#define STOCK_Q2_GAME_LIBRARY_NAME "gamei386.so"
+#define KMQ2_GAME_LIBRARY_NAME "kmq2gamei386.so"
 #else
 #define CPUSTRING "sparc"
+#define STOCK_Q2_GAME_LIBRARY_NAME "gamesparc.so"
+#define KMQ2_GAME_LIBRARY_NAME "kmq2gamesparc.so"
 #endif
+
+#elif defined(__APPLE__) || defined(MACOSX)
+
+#define OS_STRING "MacOS"
+
+#define STOCK_Q2_GAME_LIBRARY_NAME "GameMac.q2plug"
+#define KMQ2_GAME_LIBRARY_NAME "GameMac.kmq2plug"
 
 #else	// !WIN32
 
-#define BUILDSTRING "NON-WIN32"
+#define OS_STRING "NON-WIN32"
 #define	CPUSTRING	"NON-WIN32"
 
 #endif
+
+#ifdef NDEBUG
+#define COMPILETYPE_STRING "RELEASE"
+#else
+#define COMPILETYPE_STRING "DEBUG"
+#endif // NDEBUG
+
 
 //============================================================================
 
