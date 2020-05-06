@@ -1847,6 +1847,25 @@ void CL_FixCvarCheats (void)
 }
 
 
+/*
+==================
+CL_AdvertiseVersion
+
+Adapted from R1Q2
+==================
+*/
+void CL_AdvertiseVersion (void)
+{
+	char adBuf[128];
+
+	Com_sprintf (adBuf, sizeof(adBuf), "say \"KMQuake2 %4.2f %s %s %s [www.markshan.com/knightmare]\"\n",
+										VERSION, CPUSTRING, BUILDSTRING, __DATE__);
+	Cbuf_AddText (adBuf);
+	cls.lastAdvertiseTime = cls.realtime;
+	cls.advertiseTime = 0;
+}
+
+
 #ifdef CLIENT_SPLIT_NETFRAME
 /*
 ==================
@@ -2038,7 +2057,13 @@ void CL_Frame_Async (int msec)
 		S_Update (cl.refdef.vieworg, cl.v_forward, cl.v_right, cl.v_up);
 		
 		if (miscFrame)
+		{
 			CDAudio_Update();
+
+			// Advertise engine version, from R1Q2
+			if ( (cls.advertiseTime != 0) && (cls.advertiseTime < cls.realtime) )
+				CL_AdvertiseVersion ();
+		}
 
 		// Advance local effects for next frame
 		CL_RunDLights ();
@@ -2217,6 +2242,10 @@ void CL_Frame (int msec)
 	S_Update (cl.refdef.vieworg, cl.v_forward, cl.v_right, cl.v_up);
 	
 	CDAudio_Update();
+
+	// Advertise engine version, from R1Q2
+	if ( (cls.advertiseTime != 0) && (cls.advertiseTime < cls.realtime) )
+		CL_AdvertiseVersion ();
 
 	// advance local effects for next frame
 	CL_RunDLights ();

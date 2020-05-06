@@ -871,7 +871,7 @@ NoExtFunction:
 				case 5:
 					if (extModel == 0x25)		// Clarkdale / Arrandale
 						Q_strncatz(cpuString, " Core i5/i3 6xx / Core i3 5xx", maxSize);
-					else if (extModel == 0x55)	// Skylake-X
+					else if (extModel == 0x55)	// Skylake-X, Cascade Lake-X
 						Q_strncatz(cpuString, " Core i9/i7 79xx / 78xx", maxSize);
 					break;
 				case 7:		
@@ -907,6 +907,8 @@ NoExtFunction:
 						Q_strncatz(cpuString, " Core i7 49xx / 48xx", maxSize);
 					else if (extModel == 0x5E)	// Skylake
 						Q_strncatz(cpuString, " Core i7/i5/i3 6xxx", maxSize);
+					else if (extModel == 0x7E)	// Ice lake
+						Q_strncatz(cpuString, " Core i9/i7/i5/i3 10xxx", maxSize);
 					else if (extModel == 0x9E)	// Coffee Lake
 						Q_strncatz(cpuString, " Core i7/i5/i3 8xxx", maxSize);
 					break;

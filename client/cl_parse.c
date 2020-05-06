@@ -634,6 +634,37 @@ void CL_ParseStartSoundPacket(void)
 }       
 
 
+/*
+==================
+CL_ParsePrint
+==================
+*/
+void CL_ParsePrint (void)
+{
+	int		i;
+	char	*s;
+
+	i = MSG_ReadByte (&net_message);
+	s = MSG_ReadString (&net_message);
+
+	if (i == PRINT_CHAT)
+	{
+		S_StartLocalSound ("misc/talk.wav");
+	//	con.ormask = 128;	// made redundant by color code
+
+		// Set advertise timer for !version, from R1Q2
+		if ( (strstr(s, "!kmq2_version") || strstr(s, "!version")) &&
+			( (cls.lastAdvertiseTime == 0) || (cls.realtime > cls.lastAdvertiseTime + 300000) ) )
+			cls.advertiseTime = cls.realtime + (int)(random() * 1500);
+
+		Com_Printf (S_COLOR_ALT"%s", s); // add green flag
+	}
+	else
+		Com_Printf ("%s", s);
+	con.ormask = 0;
+}
+
+
 void SHOWNET(char *s)
 {
 	if (cl_shownet->value>=2)
@@ -808,7 +839,7 @@ void CL_ParseServerMessage (void)
 {
 	int			cmd;
 	char		*s;
-	int			i;
+//	int			i;
 
 //
 // if recording demos, copy the message out
@@ -873,7 +904,7 @@ void CL_ParseServerMessage (void)
 			break;
 
 		case svc_print:
-			i = MSG_ReadByte (&net_message);
+		/*	i = MSG_ReadByte (&net_message);
 			if (i == PRINT_CHAT)
 			{
 				S_StartLocalSound ("misc/talk.wav");
@@ -882,7 +913,8 @@ void CL_ParseServerMessage (void)
 			}
 			else
 				Com_Printf ("%s", MSG_ReadString (&net_message));
-			con.ormask = 0;
+			con.ormask = 0;*/
+			CL_ParsePrint ();
 			break;
 			
 		case svc_centerprint:

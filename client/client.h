@@ -296,10 +296,13 @@ typedef struct
 
 	qboolean	consoleActive;
 
-	int			framecount;
-	int			realtime;			// always increasing, no clamping, etc
-	float		netFrameTime;		// seconds since last packet frame
-	float		renderFrameTime;	// seconds since last refresh frame
+	int				framecount;
+	unsigned int	realtime;			// always increasing, no clamping, etc	// Knightmare- was int
+	float			netFrameTime;		// seconds since last packet frame
+	float			renderFrameTime;	// seconds since last refresh frame
+
+	unsigned int	advertiseTime;		// for advertising version number
+	unsigned int	lastAdvertiseTime;	// seconds since last version advertisement
 
 // screen rendering information
 	float		disable_screen;		// showing loading plaque between levels
