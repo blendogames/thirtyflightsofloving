@@ -87,22 +87,22 @@ qboolean M_SetDeath(edict_t *self, mmove_t **deathmoves)
 	mmove_t	*move=NULL;
 	mmove_t *dmove;
 
-	if(self->health > 0)
+	if (self->health > 0)
 		return false;
 
 	while(*deathmoves && !move)
 	{
 		dmove = *deathmoves;
-		if( (self->s.frame >= dmove->firstframe) &&
+		if ( (self->s.frame >= dmove->firstframe) &&
 			(self->s.frame <= dmove->lastframe)     )
 			move = dmove;
 		else
 			deathmoves++;
 	}
-	if(move)
+	if (move)
 	{
 		self->monsterinfo.currentmove = move;
-		if(self->monsterinfo.currentmove->endfunc)
+		if (self->monsterinfo.currentmove->endfunc)
 			self->monsterinfo.currentmove->endfunc(self);
 		self->s.frame = move->lastframe;
 		self->s.skinnum |= 1;
@@ -659,7 +659,7 @@ void M_droptofloor (edict_t *ent)
 
 #ifdef ROGUE_GRAVITY
 //PGM
-	if(ent->gravityVector[2] < 0)
+	if (ent->gravityVector[2] < 0)
 	{
 		ent->s.origin[2] += 1;
 		VectorCopy (ent->s.origin, end);
@@ -918,15 +918,17 @@ void monster_use (edict_t *self, edict_t *other, edict_t *activator)
 	// if monster is "used" by player, turn off good guy stuff
 	if (activator->client)
 	{	// Knightmare- gekks and stalkers use different spawnflag
-		if (UseSpecialGoodGuyFlag(self))
+		if (UseSpecialGoodGuyFlag(self)) {
 			self->spawnflags &= ~16;
-		else if (UseRegularGoodGuyFlag(self))
+		}
+		else if (UseRegularGoodGuyFlag(self)) {
 			self->spawnflags &= ~SF_MONSTER_GOODGUY;
-		//Knightmare- don't include goodguy monsters turned bad in body count
+		}
+		// Knightmare- don't include goodguy monsters turned bad in body count
 		if (self->monsterinfo.aiflags & AI_GOOD_GUY)
 			self->monsterinfo.monsterflags |= MFL_DO_NOT_COUNT;
 		self->monsterinfo.aiflags &= ~(AI_GOOD_GUY + AI_FOLLOW_LEADER);
-		if(self->dmgteam && !Q_stricmp(self->dmgteam,"player"))
+		if (self->dmgteam && !Q_stricmp(self->dmgteam,"player"))
 			self->dmgteam = NULL;
 	}
 
@@ -964,7 +966,7 @@ void monster_triggered_spawn (edict_t *self)
 
 	if (self->enemy && !(self->spawnflags & 1) && !(self->enemy->flags & FL_NOTARGET))
 	{
-		if(!(self->enemy->flags & FL_DISGUISED))		// PGM
+		if (!(self->enemy->flags & FL_DISGUISED))		// PGM
 			FoundTarget (self);
 		else // PMM - just in case, make sure to clear the enemy so FindTarget doesn't get confused
 			self->enemy = NULL;
@@ -984,7 +986,7 @@ void monster_triggered_spawn_use (edict_t *self, edict_t *other, edict_t *activa
 	if (activator->client && !(self->monsterinfo.aiflags & AI_GOOD_GUY))
 		self->enemy = activator;
 	// Lazarus: Add 'em up
-//	if(!(self->monsterinfo.aiflags & AI_GOOD_GUY))
+//	if (!(self->monsterinfo.aiflags & AI_GOOD_GUY))
 //		level.total_monsters++;
 	self->use = monster_use;
 }
@@ -1026,7 +1028,7 @@ void monster_death_use (edict_t *self)
 	// turn camera off for that player
 	for(i=0,player=g_edicts+1; i<maxclients->value; i++, player++)
 	{
-		if(player->client && player->client->spycam == self)
+		if (player->client && player->client->spycam == self)
 			camera_off(player);
 	}
 
@@ -1071,7 +1073,7 @@ qboolean monster_start (edict_t *self)
 		|| (UseSpecialGoodGuyFlag(self) && (self->spawnflags & 16)) )
 	{
 		self->monsterinfo.aiflags |= AI_GOOD_GUY;
-		if(!self->dmgteam)
+		if (!self->dmgteam)
 		{
 			self->dmgteam = gi.TagMalloc(8*sizeof(char), TAG_LEVEL);
 			strcpy(self->dmgteam,"player");
@@ -1194,7 +1196,7 @@ void monster_start_go (edict_t *self)
 	}
 	
 	// Lazarus: move_origin for func_monitor
-	if(!VectorLength(self->move_origin))
+	if (!VectorLength(self->move_origin))
 		VectorSet(self->move_origin,0,0,self->viewheight);
 
 	// check for target to combat_point and change to combattarget
@@ -1257,7 +1259,7 @@ void monster_start_go (edict_t *self)
 		{
 			// Lazarus: Don't wipe out target for trigger spawned monsters
 			// that aren't triggered yet
-			if( !(self->spawnflags & MONSTER_TRIGGER_SPAWN) )
+			if ( !(self->spawnflags & MONSTER_TRIGGER_SPAWN) )
 			{
 				VectorSubtract (self->goalentity->s.origin, self->s.origin, v);
 				self->ideal_yaw = self->s.angles[YAW] = vectoyaw(v);
@@ -1378,7 +1380,7 @@ void stationarymonster_triggered_spawn (edict_t *self)
 
 	if (self->enemy && !(self->spawnflags & 1) && !(self->enemy->flags & FL_NOTARGET))
 	{
-		if(!(self->enemy->flags & FL_DISGUISED))		// PGM
+		if (!(self->enemy->flags & FL_DISGUISED))		// PGM
 			FoundTarget (self);
 		else // PMM - just in case, make sure to clear the enemy so FindTarget doesn't get confused
 			self->enemy = NULL;
@@ -1398,7 +1400,7 @@ void stationarymonster_triggered_spawn_use (edict_t *self, edict_t *other, edict
 	if (activator->client && !(self->monsterinfo.aiflags & AI_GOOD_GUY))
 		self->enemy = activator;
 	// Lazarus: Add 'em up
-//	if(!(self->monsterinfo.aiflags & AI_GOOD_GUY))
+//	if (!(self->monsterinfo.aiflags & AI_GOOD_GUY))
 //		level.total_monsters++;
 	self->use = monster_use;
 }
@@ -1457,7 +1459,7 @@ void InitiallyDead (edict_t *self)
 	if ((self->max_health <= 0) && !(self->monsterinfo.aiflags & AI_GOOD_GUY))
 	{
 		level.total_monsters--;
-		if(self->deadflag != DEAD_DEAD)
+		if (self->deadflag != DEAD_DEAD)
 			level.killed_monsters--;
 	}
 	if (self->deadflag != DEAD_DEAD)
@@ -1465,7 +1467,7 @@ void InitiallyDead (edict_t *self)
 		damage = 1 - self->health;
 		self->health = 1;
 		T_Damage (self, world, world, vec3_origin, self->s.origin, vec3_origin, damage, 0, DAMAGE_NO_ARMOR, 0);
-		if(self->svflags & SVF_MONSTER)
+		if (self->svflags & SVF_MONSTER)
 		{
 			self->svflags |= SVF_DEADMONSTER;
 			self->think = monster_think;
@@ -1609,7 +1611,7 @@ int PatchMonsterModel (char *modelname)
 		memset (skins[j], 0, MAX_SKINNAME);
 		Com_strcpy( skins[j], sizeof(skins[j]), modelname );
 		p = strstr( skins[j], "tris.md2" );
-		if(!p)
+		if (!p)
 		{
 			fclose (outfile);
 			gi.dprintf( "Error patching %s\n",modelname);

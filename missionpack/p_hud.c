@@ -247,7 +247,7 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer)
 		// allow new DM games to override the tag picture
 		if (gamerules && gamerules->value)
 		{
-			if(DMGame.DogTag)
+			if (DMGame.DogTag)
 				DMGame.DogTag(cl_ent, killer, &tag);
 		}
 //ROGUE
@@ -421,7 +421,7 @@ void WhatIsIt (edict_t *ent)
 	tr = gi.trace(start, NULL, NULL, end, ent, MASK_SHOT|CONTENTS_SLIME|CONTENTS_LAVA);
 	if (tr.ent > world)
 	{
-		if(tr.ent->common_name)
+		if (tr.ent->common_name)
 			ent->client->whatsit = tr.ent->common_name;
 //		else
 //			ent->client->whatsit = tr.ent->classname;
@@ -450,16 +450,16 @@ void WhatIsIt (edict_t *ent)
 		VectorSubtract(who->s.origin,viewp,dir);
 		range = VectorLength(dir);
 		VectorMA(viewp, range, forward, entp);
-		if(entp[0] < who->s.origin[0] - 17) continue;
-		if(entp[1] < who->s.origin[1] - 17) continue;
-		if(entp[2] < who->s.origin[2] - 17) continue;
-		if(entp[0] > who->s.origin[0] + 17) continue;
-		if(entp[1] > who->s.origin[1] + 17) continue;
-		if(entp[2] > who->s.origin[2] + 17) continue;
+		if (entp[0] < who->s.origin[0] - 17) continue;
+		if (entp[1] < who->s.origin[1] - 17) continue;
+		if (entp[2] < who->s.origin[2] - 17) continue;
+		if (entp[0] > who->s.origin[0] + 17) continue;
+		if (entp[1] > who->s.origin[1] + 17) continue;
+		if (entp[2] > who->s.origin[2] + 17) continue;
 		best = who;
 		break;
 	}
-	if(best)
+	if (best)
 	{
 		ent->client->whatsit = best->item->pickup_name;
 		return;
@@ -622,15 +622,15 @@ void G_SetStats (edict_t *ent)
 	else if (ent->client->owned_sphere)
 	{
 		int sphere_time;
-		if(ent->client->owned_sphere->spawnflags == 1) {			// defender
+		if (ent->client->owned_sphere->spawnflags == 1) {			// defender
 			ent->client->ps.stats[STAT_TIMER_ICON] = gi.imageindex ("p_defender");
 			sphere_time = sk_defender_time->value;
 		}
-		else if(ent->client->owned_sphere->spawnflags == 2) {		// hunter
+		else if (ent->client->owned_sphere->spawnflags == 2) {		// hunter
 			ent->client->ps.stats[STAT_TIMER_ICON] = gi.imageindex ("p_hunter");
 			sphere_time = sk_hunter_time->value;
 		}
-		else if(ent->client->owned_sphere->spawnflags == 4) {		// vengeance
+		else if (ent->client->owned_sphere->spawnflags == 4) {		// vengeance
 			ent->client->ps.stats[STAT_TIMER_ICON] = gi.imageindex ("p_vengeance");
 			sphere_time = sk_vengeance_time->value;
 		}
@@ -694,9 +694,9 @@ void G_SetStats (edict_t *ent)
 	ent->client->ps.stats[STAT_SELECTED_ITEM] = ent->client->pers.selected_item;
 
 	// Lazarus vehicle/tracktrain
-	if(ent->vehicle && !(ent->vehicle->spawnflags & 16))
+	if (ent->vehicle && !(ent->vehicle->spawnflags & 16))
 	{
-		switch(ent->vehicle->moveinfo.state)
+		switch (ent->vehicle->moveinfo.state)
 		{
 		case -3: ent->client->ps.stats[STAT_SPEED] = gi.imageindex("speedr3"); break;
 		case -2: ent->client->ps.stats[STAT_SPEED] = gi.imageindex("speedr2"); break;
@@ -715,13 +715,13 @@ void G_SetStats (edict_t *ent)
 	{
 		if (ent->client->showscores || ent->client->showhelp || ent->client->showinventory)
 			ent->client->whatsit = NULL;
-		else if(!(level.framenum % 5))    // only update every 1/2 second
+		else if (!(level.framenum % 5))    // only update every 1/2 second
 		{
 			char *temp = ent->client->whatsit;
 
 			ent->client->whatsit = NULL;
 			WhatIsIt(ent);
-			if(ent->client->whatsit && !temp)
+			if (ent->client->whatsit && !temp)
 				WhatsIt(ent);
 		}
 	}
@@ -778,7 +778,7 @@ void G_SetStats (edict_t *ent)
 
 	ent->client->ps.stats[STAT_SPECTATOR] = 0;
 
-	if(ent->client->zoomed)
+	if (ent->client->zoomed)
 		ent->client->ps.stats[STAT_ZOOM] = gi.imageindex("zoom");
 	else
 		ent->client->ps.stats[STAT_ZOOM] = 0;

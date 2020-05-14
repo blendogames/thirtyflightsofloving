@@ -731,6 +731,7 @@
 {"vehicle_touch", (byte *)vehicle_touch},
 {"vehicle_blocked", (byte *)vehicle_blocked},
 {"func_vehicle_explode", (byte *)func_vehicle_explode},
+{"UseRegularGoodGuyFlag", (byte *)UseRegularGoodGuyFlag},
 {"my_bprintf", (byte *)my_bprintf},
 {"IsIdMap", (byte *)IsIdMap},
 {"G_UseTarget", (byte *)G_UseTarget},

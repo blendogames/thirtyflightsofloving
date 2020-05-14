@@ -1206,8 +1206,8 @@ qboolean IsIdMap (void); //Knightmare added
 qboolean IsRogueMap (void); //Knightmare added
 qboolean IsXatrixMap (void); //Knightmare added
 qboolean CheckCoop_MapHacks (edict_t *ent); // FS: Coop: Check if we have to modify some stuff for coop so we don't have to rely on distributing ent files
-qboolean UseSpecialGoodGuyFlag (edict_t *monster); //Knightmare added
-qboolean UseRegularGoodGuyFlag (edict_t *monster); //Knightmare added
+qboolean UseSpecialGoodGuyFlag (edict_t *monster); // Knightmare added
+qboolean UseRegularGoodGuyFlag (edict_t *monster); // Knightmare added
 
 //ROGUE
 void	G_ProjectSource2 (vec3_t point, vec3_t distance, vec3_t forward, vec3_t right, vec3_t up, vec3_t result);

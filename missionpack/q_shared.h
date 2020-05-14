@@ -1282,7 +1282,7 @@ ROGUE - VERSIONS
 #define	CS_PAKFILE			(CS_GENERAL+MAX_GENERAL)
 #define	MAX_CONFIGSTRINGS	(CS_PAKFILE+1)
 
-//Knightmare- hacked configstring offsets for backward compatiblity
+// Knightmare- hacked configstring offsets for backward compatiblity
 #define OLD_CS_SOUNDS			(CS_MODELS+OLD_MAX_MODELS)
 #define	OLD_CS_IMAGES			(OLD_CS_SOUNDS+OLD_MAX_SOUNDS)
 #define	OLD_CS_LIGHTS			(OLD_CS_IMAGES+OLD_MAX_IMAGES)
@@ -1290,7 +1290,7 @@ ROGUE - VERSIONS
 #define	OLD_CS_PLAYERSKINS		(OLD_CS_ITEMS+MAX_ITEMS)
 #define OLD_CS_GENERAL			(OLD_CS_PLAYERSKINS+MAX_CLIENTS)
 #define	OLD_MAX_CONFIGSTRINGS	(OLD_CS_GENERAL+MAX_GENERAL)
-//end Knightmare
+// end Knightmare
 
 
 //==============================================

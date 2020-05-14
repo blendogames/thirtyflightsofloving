@@ -1258,7 +1258,7 @@ qboolean IsIdMap (void)
 }
 
 
-//Knightmare added
+// Knightmare added
 /*
 ====================
 IsXatrixMap
@@ -1323,7 +1323,7 @@ qboolean IsXatrixMap (void)
 	return false;
 }
 
-//Knightmare added
+// Knightmare added
 /*
 ====================
 IsRogueMap
@@ -1450,9 +1450,9 @@ qboolean UseSpecialGoodGuyFlag (edict_t *monster)
 	if (!monster || !monster->inuse || !monster->classname)
 		return false;
 
-	if (!strcmp(monster->classname, "monster_gekk")
+	if ( !strcmp(monster->classname, "monster_gekk")
 		|| !strcmp(monster->classname, "monster_stalker")
-		|| !strcmp(monster->classname, "monster_handler"))
+		|| !strcmp(monster->classname, "monster_handler") )
 		return true;
 
 	return false;
@@ -1473,11 +1473,12 @@ qboolean UseRegularGoodGuyFlag (edict_t *monster)
 	if (!monster || !monster->inuse || !monster->classname)
 		return false;
 
-	if (strcmp(monster->classname, "monster_gekk")
+	if ( strcmp(monster->classname, "monster_gekk")
 		&& strcmp(monster->classname, "monster_stalker")
 		&& strcmp(monster->classname, "monster_turret")
 		&& strcmp(monster->classname, "monster_fixbot")
-		&& strcmp(monster->classname, "monster_handler"))
+		&& strcmp(monster->classname, "monster_handler")
+		&& strcmp(monster->classname, "misc_insane") )
 		return true;
 
 	return false;

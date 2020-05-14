@@ -862,7 +862,7 @@ void P_FallingDamage (edict_t *ent)
 	}
 	else // if delta > 7
 #ifndef FMOD_FOOTSTEPS
-		ent->s.event = EV_LOUDSTEP; //Knightmare- loud footstep for softer landing
+		ent->s.event = EV_LOUDSTEP; // Knightmare- loud footstep for softer landing
 #else
 		FootStep(ent);
 #endif
@@ -1226,7 +1226,7 @@ void G_SetClientEvent (edict_t *ent)
 			if ( (level.framenum % 10) == 0 )
 			{
 			#ifndef FMOD_FOOTSTEPS
-					ent->s.event = EV_WADE_MUD; // Knightmare- move this client-side
+				ent->s.event = EV_WADE_MUD; // Knightmare- move this client-side
 			#else
 				if ( rand() & 1 )
 				//	gi.sound(ent, CHAN_BODY, gi.soundindex("mud/wade_mud1.wav"), 1, ATTN_NORM, 0);
@@ -1263,16 +1263,16 @@ void G_SetClientEvent (edict_t *ent)
 	#endif
 	}
 	// Ladder sounds
-	else if( (level.framenum % 4) == 0)
+	else if ( (level.framenum % 4) == 0)
 	{
-		if(!ent->waterlevel && (ent->movetype != MOVETYPE_NOCLIP) && (fabs(ent->velocity[2]) > 50))
+		if (!ent->waterlevel && (ent->movetype != MOVETYPE_NOCLIP) && (fabs(ent->velocity[2]) > 50))
 		{
 			vec3_t	end, forward;
 			trace_t	tr;
 			AngleVectors(ent->s.angles,forward,NULL,NULL);
 			VectorMA(ent->s.origin,2,forward,end);
 			tr = gi.trace(ent->s.origin,ent->mins,ent->maxs,end,ent,CONTENTS_LADDER);
-			if(tr.fraction < 1.0)
+			if (tr.fraction < 1.0)
 		#ifndef FMOD_FOOTSTEPS
 				ent->s.event = EV_CLIMB_LADDER;	 // Knightmare- move Lazarus footsteps client-side
 		#else
@@ -1378,7 +1378,7 @@ void G_SetClientFrame (edict_t *ent)
 	qboolean	duck, run;
 	qboolean	floor;
 
-	if (ent->s.modelindex != (MAX_MODELS-1)) //was 255
+	if (ent->s.modelindex != (MAX_MODELS-1)) // was 255
 		return;		// not in the player model
 
 	client = ent->client;
@@ -1444,7 +1444,7 @@ newanim:
 	client->anim_run = run;
 
 	// Knightmare- added swimming check
-	if (!ent->groundentity && (!floor || ent->waterlevel > 2)) //CDawg modify this
+	if (!ent->groundentity && (!floor || ent->waterlevel > 2)) // CDawg modify this
 	{
 		client->anim_priority = ANIM_JUMP;
 		if (ent->s.frame != FRAME_jump2)

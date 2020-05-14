@@ -1160,3 +1160,29 @@ void my_bprintf (int printlevel, char *fmt, ...)
 		safe_cprintf(cl_ent, printlevel, bigbuffer);
 	}
 }
+
+// Knightmare added
+/*
+====================
+UseRegularGoodGuyFlag
+
+Checks the classname to see if a monster should use
+the standard goodguy flag (e.g. not a gekk, stalker, turret, or fixbot).
+====================
+*/
+qboolean UseRegularGoodGuyFlag (edict_t *monster)
+{
+	// check for bad entity reference
+	if (!monster || !monster->inuse || !monster->classname)
+		return false;
+
+	if ( /*strcmp(monster->classname, "monster_gekk")
+		&& strcmp(monster->classname, "monster_stalker")
+		&& strcmp(monster->classname, "monster_turret")
+		&& strcmp(monster->classname, "monster_fixbot")
+		&& strcmp(monster->classname, "monster_handler")
+		&&*/ strcmp(monster->classname, "misc_insane") )
+		return true;
+
+	return false;
+}

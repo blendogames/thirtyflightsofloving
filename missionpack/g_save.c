@@ -431,7 +431,7 @@ void InitGame (void)
 	coop = gi.cvar ("coop", "0", CVAR_LATCH);
 	skill = gi.cvar ("skill", "1", CVAR_LATCH);
 
-	//Knightmare- increase maxentities
+	// Knightmare- increase maxentities
 	//maxentities = gi.cvar ("maxentities", "1024", CVAR_LATCH);
 	maxentities = gi.cvar ("maxentities", va("%i",MAX_EDICTS), CVAR_LATCH);
 	gamerules = gi.cvar ("gamerules", "0", CVAR_LATCH);			//PGM

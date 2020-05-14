@@ -508,7 +508,7 @@ mframe_t brainbeta_frames_attack2 [] =
 };
 mmove_t brainbeta_move_attack2 = {FRAME_attak201, FRAME_attak217, brainbeta_frames_attack2, brainbeta_run};
 
-//Knightmare- replaced by brainbeta_attack
+// Knightmare- replaced by brainbeta_attack
 /*
 void brainbeta_melee (edict_t *self)
 {
@@ -968,7 +968,7 @@ void SP_monster_brain_beta (edict_t *self)
 //	self->monsterinfo.dodge = brainbeta_dodge;
 // pmm
 	self->monsterinfo.attack = brainbeta_attack;
-	self->monsterinfo.melee = NULL; //was brainbeta_melee;
+	self->monsterinfo.melee = NULL; // was brainbeta_melee
 	self->monsterinfo.sight = brainbeta_sight;
 	self->monsterinfo.search = brainbeta_search;
 	self->monsterinfo.idle = brainbeta_idle;

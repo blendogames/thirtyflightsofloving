@@ -503,7 +503,8 @@ void insane_pain (edict_t *self, edict_t *other, float kick, int damage)
 		return;		// no pain anims in nightmare
 
 	// Don't go into pain frames if crucified.
-	if (self->spawnflags & 8)
+//	if (self->spawnflags & 8)
+	if ( (self->spawnflags & 8) || (self->moreflags & 8) )	// Knightmare- use moreflags field instead
 	{
 		self->monsterinfo.currentmove = &insane_move_struggle_cross;			
 		return;
@@ -547,7 +548,8 @@ void insane_checkup (edict_t *self)
 
 void insane_stand (edict_t *self)
 {
-	if (self->spawnflags & 8)			// If crucified
+//	if (self->spawnflags & 8)			// If crucified
+	if ( (self->spawnflags & 8) || (self->moreflags & 8) )	// If crucified		// Knightmare- use moreflags field instead
 	{
 		self->monsterinfo.currentmove = &insane_move_cross;
 		self->monsterinfo.aiflags |= AI_STAND_GROUND;
@@ -564,7 +566,8 @@ void insane_stand (edict_t *self)
 
 void insane_dead (edict_t *self)
 {
-	if (self->spawnflags & 8)
+//	if (self->spawnflags & 8)
+	if ( (self->spawnflags & 8) || (self->moreflags & 8) )	// Knightmare- use moreflags field instead
 	{
 		self->flags |= FL_FLY;
 	}
@@ -580,7 +583,7 @@ void insane_dead (edict_t *self)
 	M_FlyCheck(self);
 
 	// Lazarus monster fade
-	if(world->effects & FX_WORLDSPAWN_CORPSEFADE)
+	if (world->effects & FX_WORLDSPAWN_CORPSEFADE)
 	{
 		self->think=FadeDieSink;
 		self->nextthink=level.time+corpse_fadetime->value;
@@ -612,7 +615,8 @@ void insane_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_YES;
 
-	if (self->spawnflags & 8)
+//	if (self->spawnflags & 8)
+	if ( (self->spawnflags & 8) || (self->moreflags & 8) )	// Knightmare- use moreflags field instead
 	{
 		insane_dead (self);
 	}
@@ -657,11 +661,11 @@ void SP_misc_insane (edict_t *self)
 	VectorSet (self->mins, -16, -16, -24);
 	VectorSet (self->maxs, 16, 16, 32);
 
-	if(!self->health)
+	if (!self->health)
 		self->health = 100;
-	if(!self->gib_health)
+	if (!self->gib_health)
 		self->gib_health = -50;
-	if(!self->mass)
+	if (!self->mass)
 		self->mass = 300;
 
 	self->pain = insane_pain;
@@ -689,7 +693,7 @@ void SP_misc_insane (edict_t *self)
 
 	self->monsterinfo.currentmove = &insane_move_stand_normal;
 
-	if(!self->monsterinfo.flies)
+	if (!self->monsterinfo.flies)
 		self->monsterinfo.flies = 0.30;
 
 	self->common_name = "Insane Marine";
@@ -698,6 +702,9 @@ void SP_misc_insane (edict_t *self)
 
 	if (self->spawnflags & 8)			// Crucified ?
 	{
+		// Knightmare- Spawnflag 8 collides with SF_MONSTER_GOODGUY, and can be cleared in some instances.
+		// This prevents it from screwing up crucified insanes.
+		self->moreflags |= 8;
 		VectorSet (self->mins, -16, 0, 0);
 		VectorSet (self->maxs, 16, 8, 32);
 		self->flags |= FL_NO_KNOCKBACK;

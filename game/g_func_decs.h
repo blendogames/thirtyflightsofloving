@@ -731,6 +731,7 @@ extern void vehicle_disengage ( edict_t * vehicle ) ;
 extern void vehicle_touch ( edict_t * self , edict_t * other , cplane_t * plane , csurface_t * surf ) ;
 extern void vehicle_blocked ( edict_t * self , edict_t * other ) ;
 extern void func_vehicle_explode ( edict_t * self , edict_t * inflictor , edict_t * attacker , int damage , vec3_t point ) ;
+extern qboolean UseRegularGoodGuyFlag ( edict_t * monster ) ;
 extern void my_bprintf ( int printlevel , char * fmt , ... ) ;
 extern qboolean IsIdMap ( void ) ;
 extern void G_UseTarget ( edict_t * ent , edict_t * activator , edict_t * target ) ;

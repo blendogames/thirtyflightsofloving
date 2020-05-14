@@ -572,7 +572,9 @@ void monster_use (edict_t *self, edict_t *other, edict_t *activator)
 	// if monster is "used" by player, turn off good guy stuff
 	if (activator->client)
 	{
-		self->spawnflags &= ~SF_MONSTER_GOODGUY;
+		if (UseRegularGoodGuyFlag(self)) {
+			self->spawnflags &= ~SF_MONSTER_GOODGUY;
+		}
 		self->monsterinfo.aiflags &= ~(AI_GOOD_GUY + AI_FOLLOW_LEADER);
 		if(self->dmgteam && !Q_stricmp(self->dmgteam,"player"))
 			self->dmgteam = NULL;
@@ -696,7 +698,8 @@ qboolean monster_start (edict_t *self)
 	}
 
 	// Lazarus: Good guys
-	if (self->spawnflags & SF_MONSTER_GOODGUY) {
+	if ( UseRegularGoodGuyFlag(self) && (self->spawnflags & SF_MONSTER_GOODGUY) )
+	{
 		self->monsterinfo.aiflags |= AI_GOOD_GUY;
 		if(!self->dmgteam) {
 			self->dmgteam = gi.TagMalloc(8*sizeof(char), TAG_LEVEL);

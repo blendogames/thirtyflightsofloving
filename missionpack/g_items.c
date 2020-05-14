@@ -1467,7 +1467,7 @@ int PowerArmorType (edict_t *ent)
 	return POWER_ARMOR_NONE;
 }
 
-//Knightmare- rewrote this to differentiate between power shield and power screen
+// Knightmare- rewrote this to differentiate between power shield and power screen
 void Use_PowerArmor (edict_t *ent, gitem_t *item)
 {
 	int		index;
@@ -1816,7 +1816,7 @@ void droptofloor (edict_t *ent)
 		ent->movetype = MOVETYPE_TOSS;  
 	ent->touch = Touch_Item;
 
-	if (!(ent->spawnflags & ITEM_NO_DROPTOFLOOR))	//Knightmare- allow marked items to spawn in solids
+	if (!(ent->spawnflags & ITEM_NO_DROPTOFLOOR))	// Knightmare- allow marked items to spawn in solids
 	{
 		v = tv(0,0,-128);
 		VectorAdd (ent->s.origin, v, dest);

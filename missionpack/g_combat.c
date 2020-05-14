@@ -489,7 +489,7 @@ void CallMyFriends (edict_t *targ, edict_t *attacker)
 		&& UseSpecialGoodGuyFlag(targ) && (targ->spawnflags & 16) )
 	{
 		targ->spawnflags &= ~16;
-		//Knightmare- don't add to body count
+		// Knightmare- don't add to body count
 		targ->monsterinfo.monsterflags |= MFL_DO_NOT_COUNT;
 		targ->monsterinfo.aiflags &= ~(AI_GOOD_GUY + AI_FOLLOW_LEADER);
 		if (targ->dmgteam && !Q_stricmp(targ->dmgteam,"player"))

@@ -1178,6 +1178,7 @@ void CreatePath (char *path);
 void G_UseTarget (edict_t *ent, edict_t *activator, edict_t *target);
 qboolean IsIdMap (void); // Knightmare added
 void my_bprintf (int printlevel, char *fmt, ...);
+qboolean UseRegularGoodGuyFlag (edict_t *monster); // Knightmare added
 
 void	G_ProjectSource2 (vec3_t point, vec3_t distance, vec3_t forward, vec3_t right, vec3_t up, vec3_t result);
 float	vectoyaw2 (vec3_t vec);

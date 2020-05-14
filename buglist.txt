@@ -39,6 +39,11 @@ fatal error when loading too many md2 models (VirtualAlloc reserve failure)
 	
 game menu text doesn't show when connected to RA2 server
 	- FIXED by allowing CS_STATUSBAR to overflow thru CS_AIRACCEL-1
+	
+Crucified insane in jail4 moving downward when player is shot by blaster guard.
+	Causes startsolid error for key_security_pass spawned by target_spawner in air above floor.
+	This is due to insane's earlier death by crusher, spawning key_security_pass when crusher overlaps its bbox.
+	- FIXED by using moreflags edict_t field for internal crucified checks
 
 Thirdperson player shadow not drawn correctly at times (start of hangar1)
 
