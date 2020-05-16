@@ -15,6 +15,7 @@ extern int Q_SortStrcmp ( const char * * arg1 , const char * * arg2 ) ;
 extern int Q_strcmp ( const char * string1 , const char * string2 ) ;
 extern int Q_strncmp ( const char * string1 , const char * string2 , int n ) ;
 extern int Q_stricmp ( char * s1 , char * s2 ) ;
+extern qboolean Q_StrScanToken ( const char * string , const char * findToken , qboolean isCommand ) ;
 extern qboolean Q_GlobMatch ( const char * pattern , const char * text , qboolean caseSensitive ) ;
 extern void Com_PageInMemory ( byte * buffer , int size ) ;
 extern char * COM_ParseExt ( char * * data_p , qboolean allowNewLines ) ;

@@ -458,6 +458,9 @@ int Q_strcmp (const char *string1, const char *string2);
 // string compare for qsort calls
 int Q_SortStrcmp (const char **arg1, const char **arg2);
 
+// non-ambiguous string token search
+qboolean Q_StrScanToken (const char *string, const char *findToken, qboolean isCommand);
+
 // portable case insensitive string compare
 int Q_stricmp (char *s1, char *s2);
 int Q_strcasecmp (char *s1, char *s2);

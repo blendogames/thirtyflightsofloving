@@ -783,7 +783,8 @@ qboolean CL_FilterStuffText (char *stufftext)
 	// code by xian- cycle through list of malicious commands
 	while (bad_stuffcmds[i] != NULL)
 	{
-		if ( strstr(parsetext, bad_stuffcmds[i]) )
+	//	if ( strstr(parsetext, bad_stuffcmds[i]) )
+		if ( Q_StrScanToken(parsetext, bad_stuffcmds[i], true) )
 			return false;
 		i++;
 	}

@@ -1156,7 +1156,7 @@ qboolean R_SetMode (void)
 	return true;
 }
 
-
+#if 0	// replaced by Q_StrScanToken()
 /*
 ===============
 StringContainsToken
@@ -1197,7 +1197,7 @@ qboolean StringContainsToken (const char *string, const char *findToken)
 
 	return false;
 }
-
+#endif
 
 /*
 ===============
@@ -1228,7 +1228,7 @@ qboolean R_CheckGLExtensions (char *reason)
 			glConfig.multitexture = true;
 		}
 	}
-	if ( (!glConfig.multitexture) && StringContainsToken( glConfig.extensions_string, "GL_ARB_multitexture" ) )
+	if ( (!glConfig.multitexture) && Q_StrScanToken( glConfig.extensions_string, "GL_ARB_multitexture", false ) )
 	{
 		if (r_ext_multitexture->integer)
 		{
@@ -1253,8 +1253,8 @@ qboolean R_CheckGLExtensions (char *reason)
 	// GL_EXT_compiled_vertex_array
 	// GL_SGI_compiled_vertex_array
 	glConfig.extCompiledVertArray = false;
-	if ( StringContainsToken( glConfig.extensions_string, "GL_EXT_compiled_vertex_array" ) || 
-		 StringContainsToken( glConfig.extensions_string, "GL_SGI_compiled_vertex_array" ) )
+	if ( Q_StrScanToken( glConfig.extensions_string, "GL_EXT_compiled_vertex_array", false ) || 
+		 Q_StrScanToken( glConfig.extensions_string, "GL_SGI_compiled_vertex_array", false ) )
 	{
 		if (r_ext_compiled_vertex_array->integer) {
 			qglLockArraysEXT = (void *) qwglGetProcAddress( "glLockArraysEXT" );
@@ -1294,7 +1294,7 @@ qboolean R_CheckGLExtensions (char *reason)
 		else
 			VID_Printf (PRINT_ALL, "...ignoring glDrawRangeElements\n");
 	}
-	else if ( StringContainsToken( glConfig.extensions_string, "GL_EXT_draw_range_elements" ) )
+	else if ( Q_StrScanToken( glConfig.extensions_string, "GL_EXT_draw_range_elements", false ) )
 	{
 		if (r_ext_draw_range_elements->integer)
 		{
@@ -1317,7 +1317,7 @@ qboolean R_CheckGLExtensions (char *reason)
 
 	// GL_ARB_texture_non_power_of_two
 	glConfig.arbTextureNonPowerOfTwo = false;
-	if ( StringContainsToken( glConfig.extensions_string, "GL_ARB_texture_non_power_of_two" ) )
+	if ( Q_StrScanToken( glConfig.extensions_string, "GL_ARB_texture_non_power_of_two", false ) )
 	{
 		if (r_arb_texturenonpoweroftwo->integer) {
 			VID_Printf (PRINT_ALL, "...using GL_ARB_texture_non_power_of_two\n");
@@ -1333,7 +1333,7 @@ qboolean R_CheckGLExtensions (char *reason)
 
 #ifdef _WIN32
 	// WGL_EXT_swap_control
-	if ( StringContainsToken( glConfig.extensions_string, "WGL_EXT_swap_control" ) )
+	if ( Q_StrScanToken( glConfig.extensions_string, "WGL_EXT_swap_control", false ) )
 	{
 		qwglSwapIntervalEXT = ( BOOL (WINAPI *)(int)) qwglGetProcAddress( "wglSwapIntervalEXT" );
 		VID_Printf (PRINT_ALL, "...enabling WGL_EXT_swap_control\n" );
@@ -1344,7 +1344,7 @@ qboolean R_CheckGLExtensions (char *reason)
 
 
 #if 0
-	if ( StringContainsToken( glConfig.extensions_string, "GL_EXT_point_parameters" ) )
+	if ( Q_StrScanToken( glConfig.extensions_string, "GL_EXT_point_parameters", false ) )
 	{
 		if ( gl_ext_pointparameters->integer )
 		{
@@ -1359,8 +1359,8 @@ qboolean R_CheckGLExtensions (char *reason)
 		VID_Printf (PRINT_ALL, "...GL_EXT_point_parameters not found\n" );
 
 	if ( !qglColorTableEXT &&
-		StringContainsToken( glConfig.extensions_string, "GL_EXT_paletted_texture" ) && 
-		StringContainsToken( glConfig.extensions_string, "GL_EXT_shared_texture_palette" ) )
+		Q_StrScanToken( glConfig.extensions_string, "GL_EXT_paletted_texture", false ) && 
+		Q_StrScanToken( glConfig.extensions_string, "GL_EXT_shared_texture_palette", false ) )
 	{
 		if (gl_ext_palettedtexture->integer)
 		{
@@ -1376,7 +1376,7 @@ qboolean R_CheckGLExtensions (char *reason)
 
 	// GL_ARB_vertex_buffer_object
 	glConfig.vertexBufferObject = false;
-	if ( StringContainsToken( glConfig.extensions_string, "GL_ARB_vertex_buffer_object" ) )
+	if ( Q_StrScanToken( glConfig.extensions_string, "GL_ARB_vertex_buffer_object", false ) )
 	{
 		/*if (r_arb_vertex_buffer_object->integer)
 		{
@@ -1399,7 +1399,7 @@ qboolean R_CheckGLExtensions (char *reason)
 
 	// GL_ARB_texture_env_combine - Vic
 	glConfig.mtexcombine = false;
-	if (StringContainsToken(glConfig.extensions_string, "GL_ARB_texture_env_combine"))
+	if ( Q_StrScanToken( glConfig.extensions_string, "GL_ARB_texture_env_combine", false ) )
 	{
 		if (r_ext_mtexcombine->integer)
 		{
@@ -1416,7 +1416,7 @@ qboolean R_CheckGLExtensions (char *reason)
 	// GL_EXT_texture_env_combine - Vic
 	if (!glConfig.mtexcombine)
 	{
-		if (StringContainsToken(glConfig.extensions_string, "GL_EXT_texture_env_combine"))
+		if ( Q_StrScanToken( glConfig.extensions_string, "GL_EXT_texture_env_combine", false ) )
 		{
 			if (r_ext_mtexcombine->integer)
 			{
@@ -1433,7 +1433,7 @@ qboolean R_CheckGLExtensions (char *reason)
 
 	// GL_EXT_stencil_wrap
 	glConfig.extStencilWrap = false;
-	if (StringContainsToken(glConfig.extensions_string, "GL_EXT_stencil_wrap"))
+	if ( Q_StrScanToken( glConfig.extensions_string, "GL_EXT_stencil_wrap", false ) )
 	{
 		VID_Printf (PRINT_ALL, "...using GL_EXT_stencil_wrap\n");
 		glConfig.extStencilWrap = true;
@@ -1443,7 +1443,7 @@ qboolean R_CheckGLExtensions (char *reason)
 
 	// GL_ATI_separate_stencil - Barnes
 	glConfig.atiSeparateStencil = false;
-	if (StringContainsToken(glConfig.extensions_string, "GL_ATI_separate_stencil"))
+	if ( Q_StrScanToken( glConfig.extensions_string, "GL_ATI_separate_stencil", false ) )
 	{
 	//	if (r_stencilTwoSide->integer)
 	//	{
@@ -1466,7 +1466,7 @@ qboolean R_CheckGLExtensions (char *reason)
 
 	// GL_EXT_stencil_two_side - Echon
 	glConfig.extStencilTwoSide = false;
-	if (StringContainsToken(glConfig.extensions_string, "GL_EXT_stencil_two_side"))
+	if ( Q_StrScanToken( glConfig.extensions_string, "GL_EXT_stencil_two_side", false ) )
 	{
 	//	if (r_stencilTwoSide->integer)
 	//	{
@@ -1488,7 +1488,7 @@ qboolean R_CheckGLExtensions (char *reason)
 
 	// GL_ARB_fragment_program
 	glConfig.arb_fragment_program = false;
-	if (StringContainsToken(glConfig.extensions_string, "GL_ARB_fragment_program"))
+	if ( Q_StrScanToken( glConfig.extensions_string, "GL_ARB_fragment_program", false ) )
 	{
 		if (r_arb_fragment_program->integer)
 		{
@@ -1536,7 +1536,7 @@ qboolean R_CheckGLExtensions (char *reason)
 	glConfig.arb_vertex_program = false;
 	if (glConfig.arb_fragment_program)
 	{
-		if (StringContainsToken(glConfig.extensions_string, "GL_ARB_vertex_program"))
+		if ( Q_StrScanToken( glConfig.extensions_string, "GL_ARB_vertex_program", false ) )
 		{
 			if (r_arb_vertex_program->integer)
 			{
@@ -1562,7 +1562,7 @@ qboolean R_CheckGLExtensions (char *reason)
 	R_Compile_ARB_Programs ();
 
 	// GL_NV_texture_shader - MrG
-	if ( StringContainsToken( glConfig.extensions_string, "GL_NV_texture_shader" ) )
+	if ( Q_StrScanToken( glConfig.extensions_string, "GL_NV_texture_shader", false ) )
 	{
 		VID_Printf (PRINT_ALL, "...using GL_NV_texture_shader\n" );
 		glConfig.NV_texshaders = true;
@@ -1575,7 +1575,7 @@ qboolean R_CheckGLExtensions (char *reason)
 
 	// GL_EXT_texture_filter_anisotropic - NeVo
 	glConfig.anisotropic = false;
-	if ( StringContainsToken( glConfig.extensions_string, "GL_EXT_texture_filter_anisotropic" ) )
+	if ( Q_StrScanToken( glConfig.extensions_string, "GL_EXT_texture_filter_anisotropic", false ) )
 	{
 		VID_Printf (PRINT_ALL,"...using GL_EXT_texture_filter_anisotropic\n" );
 		glConfig.anisotropic = true;
@@ -1593,7 +1593,7 @@ qboolean R_CheckGLExtensions (char *reason)
 	// GL_NV_fog_distance
 	glConfig.nvFogAvailable = false;
 	glConfig.nvFogMode = 0;
-	if ( StringContainsToken( glConfig.extensions_string, "GL_NV_fog_distance") )
+	if ( Q_StrScanToken( glConfig.extensions_string, "GL_NV_fog_distance", false ) )
 	{
 		if (r_nvfog_dist->integer)
 		{
@@ -1613,7 +1613,7 @@ qboolean R_CheckGLExtensions (char *reason)
 	}
 
 	// GL_SGIS_generate_mipmap
-	if ( StringContainsToken( glConfig.extensions_string, "GL_SGIS_generate_mipmap") )
+	if ( Q_StrScanToken( glConfig.extensions_string, "GL_SGIS_generate_mipmap", false ) )
 	{
 		if (r_sgis_generatemipmap->integer) {
 			VID_Printf (PRINT_ALL, "...using GL_SGIS_generate_mipmap\n" );
@@ -1631,7 +1631,7 @@ qboolean R_CheckGLExtensions (char *reason)
 	}
 
 	// GL_ARB_texture_compression - Heffo
-	if ( StringContainsToken( glConfig.extensions_string, "GL_ARB_texture_compression" ) )
+	if ( Q_StrScanToken( glConfig.extensions_string, "GL_ARB_texture_compression", false ) )
 	{
 		if(!r_ext_texture_compression->integer)
 		{
@@ -1653,7 +1653,7 @@ qboolean R_CheckGLExtensions (char *reason)
 
 #ifdef _WIN32
 	// WGL_3DFX_gamma_control
-	if ( StringContainsToken(glConfig.extensions_string, "WGL_3DFX_gamma_control") )
+	if ( Q_StrScanToken(glConfig.extensions_string, "WGL_3DFX_gamma_control", false ) )
 	{
 		if (!r_ignorehwgamma->integer)
 		{

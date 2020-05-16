@@ -1819,6 +1819,55 @@ match:
 
 
 /*
+===============
+Q_StrScanToken
+
+A non-ambiguous alternative to strstr.
+Useful for parsing the GL extension string.
+Similar to code in Fruitz of Dojo Quake2 MacOSX Port.
+isCommand parm allows for ';' as separator.
+===============
+*/
+qboolean Q_StrScanToken (const char *string, const char *findToken, qboolean isCommand)
+{
+	int			tokenLen;
+	const char	*strPos;
+	char		*tokPos, *terminatorPos;
+
+	if ( !string || !findToken ) 
+		return false;
+	if ( (strchr(findToken, ' ') != NULL) || (findToken[0] == 0) )
+		return false;
+
+	strPos = string;
+	tokenLen = (int)strlen(findToken);
+	
+	while (1)
+	{
+		tokPos = strstr (strPos, findToken);
+
+		if ( !tokPos )
+			break;
+
+		terminatorPos = tokPos + tokenLen;
+
+		if (isCommand) {
+			if ( (tokPos == strPos || *(tokPos - 1) == ';' || *(tokPos - 1) == ' ') && (*terminatorPos == ';'  || *terminatorPos == ' ' || *terminatorPos == 0) )
+				return true;
+		}
+		else {
+			if ( (tokPos == strPos || *(tokPos - 1) == ' ') && (*terminatorPos == ' ' || *terminatorPos == 0) )
+				return true;
+		}
+
+		strPos = terminatorPos;
+	}
+
+	return false;
+}
+
+
+/*
 =================
 Q_stricmp
 =================

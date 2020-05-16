@@ -15,6 +15,7 @@
 {"Q_strcmp", (byte *)Q_strcmp},
 {"Q_strncmp", (byte *)Q_strncmp},
 {"Q_stricmp", (byte *)Q_stricmp},
+{"Q_StrScanToken", (byte *)Q_StrScanToken},
 {"Q_GlobMatch", (byte *)Q_GlobMatch},
 {"Com_PageInMemory", (byte *)Com_PageInMemory},
 {"COM_ParseExt", (byte *)COM_ParseExt},
