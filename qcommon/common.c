@@ -945,7 +945,7 @@ float MSG_ReadFloat (sizebuf_t *msg_read)
 
 char *MSG_ReadString (sizebuf_t *msg_read)
 {
-	static char	string[2048];
+	static char	string[MSG_STRING_SIZE];	// 2048
 	int		l,c;
 	
 	l = 0;
@@ -965,7 +965,7 @@ char *MSG_ReadString (sizebuf_t *msg_read)
 
 char *MSG_ReadStringLine (sizebuf_t *msg_read)
 {
-	static char	string[2048];
+	static char	string[MSG_STRING_SIZE];	// 2048
 	int		l,c;
 	
 	l = 0;
@@ -1689,7 +1689,7 @@ void Qcommon_Init (int argc, char **argv)
 
 	// Knightmare- for the game DLL to tell what engine it's running under
 	sv_engine = Cvar_Get ("sv_engine", "KMQuake2", CVAR_SERVERINFO | CVAR_NOSET | CVAR_LATCH);
-	sv_engine_version = Cvar_Get ("sv_engine_version", va("%4.2f",VERSION), CVAR_SERVERINFO | CVAR_NOSET | CVAR_LATCH);
+	sv_engine_version = Cvar_Get ("sv_engine_version", va("%4.2f", VERSION), CVAR_SERVERINFO | CVAR_NOSET | CVAR_LATCH);
 	// end Knightmare
 	
 	s = va("KMQ2 %4.2f %s %s %s %s", VERSION, CPUSTRING, OS_STRING, COMPILETYPE_STRING, __DATE__);

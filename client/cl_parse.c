@@ -711,12 +711,13 @@ or error, same effect as kicking the player.
 Uses list of malicious commands from xian.
 =====================
 */
-qboolean CL_FilterStuffText (char *stufftext)
+qboolean CL_FilterStuffText (char *stufftext, size_t textSize)
 {
-	int		i = 0, len;
-	char	*parsetext = stufftext;
-	char	*s, *execname;
-	char	*bad_stuffcmds[] =
+	int			i = 0, len;
+	qboolean	inEcho = false;
+	char		*parsetext = stufftext;
+	char		*s, *execname;
+	char		*bad_stuffcmds[] =
 	{
 /*		"+use",
 		"+mlook",
@@ -734,17 +735,88 @@ qboolean CL_FilterStuffText (char *stufftext)
 		"unbindall",
 		"unbind",
 		"bind",
-		"exec",
+	//	"exec",
 		"kill",
 		"rate",
 		"cl_maxfps",
 		"r_maxfps",
 		"net_maxfps",
-		"quit",
-		"error",
+	//	"quit",
+	//	"error",
 		0
 	};
 
+	// nothing to filter?
+	if ( !stufftext || (strlen(stufftext) == 0) )
+		return true;
+
+#if 1
+	for (parsetext = stufftext; ((parsetext - stufftext) < (textSize-1)) && (*parsetext != '\0'); parsetext++)
+	{
+		// skip spaces
+		if (*parsetext == ' ')	continue;
+
+		// skip semicolon
+		if (*parsetext == ';') {
+			inEcho = false;		// terminate echo skipping
+			continue;
+		}
+
+		// skip text in echo commands until semicolon
+		if (inEcho)	continue;
+
+		// the echo command can print anything in the console, skip over it until we hit a semicolon
+		if ( !strncmp(parsetext, "echo", 4) ) {
+			inEcho = true;
+			continue;
+		}
+
+		// handle quit and error stuffs specially
+		if (!strncmp(parsetext, "quit", 4) || !strncmp(parsetext, "error", 5)) {
+			Com_Printf(S_COLOR_YELLOW"CL_FilterStuffText: Server stuffed 'quit' or 'error' command, disconnecting...\n");
+			CL_Disconnect ();
+			return false;
+		}
+
+		// don't allow stuffing of renderer cvars
+		if ( !strncmp(parsetext, "gl_", 3) || !strncmp(parsetext, "r_", 2) )  {   	
+			return false;
+		}
+
+		// the Generations mod stuffs exec g*.cfg  for classes, so limit exec stuffs to .cfg files
+		if ( !strncmp(parsetext, "exec", 4) )
+		{
+			s = parsetext;
+			execname = COM_Parse (&s);
+			if (!s) {
+				Com_Printf(S_COLOR_YELLOW"CL_FilterStuffText: Server stuffed 'exec' command with no file\n");
+				return false;	// catch case of no text after 'exec'
+			}
+
+			execname = COM_Parse (&s);
+			len = (int)strlen(execname);
+
+			if ( (len > 1) && (execname[len-1] == ';') )	// catch token ending with ;
+				len--;
+
+			if ( (len < 5) || (strncmp(execname+len-4, ".cfg", 4) != 0) ) {
+				Com_Printf(S_COLOR_YELLOW"CL_FilterStuffText: Server stuffed 'exec' command for non-cfg file\n");
+				return false;
+			}
+			continue;
+		}
+
+		// code by xian- cycle through list of malicious commands
+		i = 0;
+		while (bad_stuffcmds[i] != NULL)
+		{
+			len = (int)strlen(bad_stuffcmds[i]);
+			if ( Q_strncmp(parsetext, bad_stuffcmds[i], len) == 0 )
+				return false;
+			i++;
+		}
+	}
+#else
 	// skip leading spaces
 	while (*parsetext == ' ') parsetext++;
 
@@ -788,6 +860,7 @@ qboolean CL_FilterStuffText (char *stufftext)
 			return false;
 		i++;
 	}
+#endif
 	return true;
 }
 
@@ -925,7 +998,7 @@ void CL_ParseServerMessage (void)
 		case svc_stufftext:
 			s = MSG_ReadString (&net_message);
 			// Knightmare- filter malicious stufftext
-			if ( !CL_FilterStuffText(s) ) {
+			if ( !CL_FilterStuffText(s, MSG_STRING_SIZE) ) {
 				Com_Printf(S_COLOR_YELLOW"CL_ParseServerMessage: Malicious stufftext from server:  %s\n", s);
 				break;
 			}

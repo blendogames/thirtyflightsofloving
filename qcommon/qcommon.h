@@ -130,6 +130,9 @@ void SZ_Print (sizebuf_t *buf, char *data);	// strcats onto the sizebuf
 struct usercmd_s;
 struct entity_state_s;
 
+// Knightmare- max size for strings read thru MSG_ReadString()/MSG_ReadStringLine()
+#define MSG_STRING_SIZE		2048
+
 void MSG_WriteChar (sizebuf_t *sb, int c);
 void MSG_WriteByte (sizebuf_t *sb, int c);
 void MSG_WriteShort (sizebuf_t *sb, int c);
