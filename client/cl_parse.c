@@ -131,7 +131,7 @@ void CL_ParseServerData (void)
 		Cvar_ForceSet ("cl_servertrick", "0");	// force this off for local games
 	else if (i != PROTOCOL_VERSION)	*/
 	else if ( (i != PROTOCOL_VERSION) && (i != OLD_PROTOCOL_VERSION) )
-		Com_Error (ERR_DROP,"Server returned version %i, not %i", i, PROTOCOL_VERSION);
+		Com_Error (ERR_DROP, "Server returned version %i, not %i or %i", i, PROTOCOL_VERSION, OLD_PROTOCOL_VERSION);
 
 	cl.servercount = MSG_ReadLong (&net_message);
 	cl.attractloop = MSG_ReadByte (&net_message);
@@ -713,24 +713,11 @@ Uses list of malicious commands from xian.
 */
 qboolean CL_FilterStuffText (char *stufftext, size_t textSize)
 {
-	int			i = 0, len;
-	qboolean	inEcho = false;
+	int			i, quotes, stuffLen, execLen, cmdLen, textLen;
 	char		*parsetext = stufftext;
-	char		*s, *execname;
+	char		*s, *execname, *p;
 	char		*bad_stuffcmds[] =
 	{
-/*		"+use",
-		"+mlook",
-		"+klook",
-		"+attack",
-		"+speed",
-		"+strafe",
-		"+back",
-		"+forward",
-		"+right",
-		"+left",
-		"+look",
-		"+move",	*/
 		"sensitivity",
 		"unbindall",
 		"unbind",
@@ -746,42 +733,42 @@ qboolean CL_FilterStuffText (char *stufftext, size_t textSize)
 		0
 	};
 
+	stuffLen = (int)strlen(stufftext);
+
 	// nothing to filter?
-	if ( !stufftext || (strlen(stufftext) == 0) )
+	if ( !stufftext || (stuffLen == 0) )
 		return true;
 
 #if 1
-	for (parsetext = stufftext; ((parsetext - stufftext) < (textSize-1)) && (*parsetext != '\0'); parsetext++)
+	do
 	{
-		// skip spaces
-		if (*parsetext == ' ')	continue;
+		if ( ((parsetext - stufftext) >= (textSize-1)) || ((parsetext - stufftext) >= stuffLen) )
+			break;
 
-		// skip semicolon
-		if (*parsetext == ';') {
-			inEcho = false;		// terminate echo skipping
-			continue;
-		}
+		// skip ;
+		if (*parsetext == ';') parsetext++;
 
-		// skip text in echo commands until semicolon
-		if (inEcho)	continue;
+		if ( ((parsetext - stufftext) >= (textSize-1)) || ((parsetext - stufftext) >= stuffLen) )
+			break;
 
-		// the echo command can print anything in the console, skip over it until we hit a semicolon
-		if ( !strncmp(parsetext, "echo", 4) ) {
-			inEcho = true;
-			continue;
-		}
+		// skip leading spaces
+		while ( (*parsetext == ' ') && ((parsetext - stufftext) < (textSize-1)) && ((parsetext - stufftext) < stuffLen) )
+			parsetext++;
+
+		if ( ((parsetext - stufftext) >= (textSize-1)) || ((parsetext - stufftext) >= stuffLen) )
+			break;
 
 		// handle quit and error stuffs specially
-		if (!strncmp(parsetext, "quit", 4) || !strncmp(parsetext, "error", 5)) {
+		if (!strncmp(parsetext, "quit", 4) || !strncmp(parsetext, "error", 5))
+		{
 			Com_Printf(S_COLOR_YELLOW"CL_FilterStuffText: Server stuffed 'quit' or 'error' command, disconnecting...\n");
 			CL_Disconnect ();
 			return false;
 		}
 
 		// don't allow stuffing of renderer cvars
-		if ( !strncmp(parsetext, "gl_", 3) || !strncmp(parsetext, "r_", 2) )  {   	
+		if ( !strncmp(parsetext, "gl_", 3) || !strncmp(parsetext, "r_", 2) )    	
 			return false;
-		}
 
 		// the Generations mod stuffs exec g*.cfg  for classes, so limit exec stuffs to .cfg files
 		if ( !strncmp(parsetext, "exec", 4) )
@@ -794,28 +781,42 @@ qboolean CL_FilterStuffText (char *stufftext, size_t textSize)
 			}
 
 			execname = COM_Parse (&s);
-			len = (int)strlen(execname);
+			execLen = (int)strlen(execname);
 
-			if ( (len > 1) && (execname[len-1] == ';') )	// catch token ending with ;
-				len--;
+			if ( (execLen > 1) && (execname[execLen-1] == ';') )	// catch token ending with ;
+				execLen--;
 
-			if ( (len < 5) || (strncmp(execname+len-4, ".cfg", 4) != 0) ) {
+			if ( (execLen < 5) || (strncmp(execname+execLen-4, ".cfg", 4) != 0) ) {
 				Com_Printf(S_COLOR_YELLOW"CL_FilterStuffText: Server stuffed 'exec' command for non-cfg file\n");
 				return false;
 			}
-			continue;
+			return true;
 		}
 
 		// code by xian- cycle through list of malicious commands
 		i = 0;
 		while (bad_stuffcmds[i] != NULL)
 		{
-			len = (int)strlen(bad_stuffcmds[i]);
-			if ( Q_strncmp(parsetext, bad_stuffcmds[i], len) == 0 )
+			cmdLen = (int)strlen(bad_stuffcmds[i]);
+			if ( Q_strncmp(parsetext, bad_stuffcmds[i], cmdLen) == 0 )
 				return false;
 			i++;
 		}
-	}
+
+		// find a ; for next pass
+		quotes = 0;
+		textLen = (int)strlen(parsetext);
+		p = NULL;
+		for (i = 0; i < textLen; i++)
+		{
+			if (parsetext[i] == '"')
+				quotes++;
+			// don't break if in a quoted string
+			if ( !(quotes & 1) && (parsetext[i] == ';') )
+				p = &parsetext[i];
+		}
+		parsetext = p;
+	} while (parsetext != NULL);
 #else
 	// skip leading spaces
 	while (*parsetext == ' ') parsetext++;
@@ -837,15 +838,18 @@ qboolean CL_FilterStuffText (char *stufftext, size_t textSize)
 	{
 		s = parsetext;
 		execname = COM_Parse (&s);
-		if (!s)	return false;	// catch case of no text after 'exec'
+		if (!s) {
+			Com_Printf(S_COLOR_YELLOW"CL_FilterStuffText: Server stuffed 'exec' command with no file\n");
+			return false;	// catch case of no text after 'exec'
+		}
 
 		execname = COM_Parse (&s);
-		len = (int)strlen(execname);
+		execLen = (int)strlen(execname);
 
-		if ( (len > 1) && (execname[len-1] == ';') )	// catch token ending with ;
-			len--;
+		if ( (execLen > 1) && (execname[execLen-1] == ';') )	// catch token ending with ;
+			execLen--;
 
-		if ( (len < 5) || strncmp(execname+len-4, ".cfg", 4) ) {
+		if ( (execLen < 5) || (strncmp(execname+execLen-4, ".cfg", 4) != 0) ) {
 			Com_Printf(S_COLOR_YELLOW"CL_FilterStuffText: Server stuffed 'exec' command for non-cfg file\n");
 			return false;
 		}
@@ -853,9 +857,9 @@ qboolean CL_FilterStuffText (char *stufftext, size_t textSize)
 	}
 
 	// code by xian- cycle through list of malicious commands
+	i = 0;
 	while (bad_stuffcmds[i] != NULL)
 	{
-	//	if ( strstr(parsetext, bad_stuffcmds[i]) )
 		if ( Q_StrScanToken(parsetext, bad_stuffcmds[i], true) )
 			return false;
 		i++;
