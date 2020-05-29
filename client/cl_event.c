@@ -174,7 +174,8 @@ void CL_FootSteps (entity_state_t *ent, qboolean loud, qboolean recursed)
 		volume = 1.0;
 		break;
 	default:
-		if (cl_footstep_override->value && num_texsurfs && !recursed)
+	//	if (cl_footstep_override->value && num_texsurfs && !recursed)
+		if (cl_footstep_override->integer && num_texsurfs && !recursed)
 		{
 			int	i;
 			for (i=0; i<num_texsurfs; i++)
@@ -235,13 +236,15 @@ void CL_EntityEvent (entity_state_t *ent)
 		CL_TeleportParticles (ent->origin);
 		break;
 	case EV_FOOTSTEP:
-		if (cl_footsteps->value)
+	//	if (cl_footsteps->value)
+		if (cl_footsteps->integer)
 //Knightmare- Lazarus footsteps
 			//S_StartSound (NULL, ent->number, CHAN_BODY, clMedia.sfx_footsteps[rand()&3], 1, ATTN_NORM, 0);
 			CL_FootSteps (ent, false, false);
 		break;
 	case EV_LOUDSTEP:
-		if (cl_footsteps->value)
+	//	if (cl_footsteps->value)
+		if (cl_footsteps->integer)
 			CL_FootSteps (ent, true, false);
 		break;
 //end Knightmare

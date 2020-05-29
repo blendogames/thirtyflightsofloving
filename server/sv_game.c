@@ -47,7 +47,7 @@ void PF_Unicast (edict_t *ent, qboolean reliable)
 
 	// r1ch: trap bad writes from game dll
 //	if (client->state <= cs_spawning)
-	if (client->state < cs_spawned)
+	if ( (client->state < cs_spawned) && (sv.multicast.cursize > 0) )
 	{
 		int msgType = (sv.multicast.cursize > 0) ? sv.multicast.data[0] : 0;
 		msgType = min(max(msgType, 0), (num_svc_ops-1));

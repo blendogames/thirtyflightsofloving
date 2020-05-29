@@ -135,7 +135,8 @@ void V_AddEntity (entity_t *ent)
 		for (i=0; i<3; i++)
 			clientOrg[i] = ent->oldorigin[i] = ent->origin[i] = cl.predicted_origin[i];
 
-		if (hand->value == 1) //lefthanded
+	//	if (hand->value == 1) // lefthanded
+		if (hand->integer == 1) // lefthanded
 			ent->flags |= RF_MIRRORMODEL;
 
 	//	if (cg_thirdperson->integer
@@ -675,7 +676,8 @@ void V_RenderView (float stereo_separation)
 	if (!cl.refresh_prepped)
 		return;			// still loading
 
-	if (cl_timedemo->value)
+//	if (cl_timedemo->value)
+	if (cl_timedemo->integer)
 	{
 		if (!cl.timedemo_start)
 			cl.timedemo_start = Sys_Milliseconds ();
@@ -684,7 +686,8 @@ void V_RenderView (float stereo_separation)
 
 	// an invalid frame will just use the exact previous refdef
 	// we can't use the old frame if the video mode has changed, though...
-	if ( cl.frame.valid && (cl.force_refdef || !cl_paused->value) )
+//	if ( cl.frame.valid && (cl.force_refdef || !cl_paused->value) )
+	if ( cl.frame.valid && (cl.force_refdef || !cl_paused->integer) )
 	{
 		cl.force_refdef = false;
 
@@ -695,13 +698,17 @@ void V_RenderView (float stereo_separation)
 		// v_forward, etc.
 		CL_AddEntities ();
 
-		if (cl_testparticles->value)
+	//	if (cl_testparticles->value)
+		if (cl_testparticles->integer)
 			V_TestParticles ();
-		if (cl_testentities->value)
+	//	if (cl_testentities->value)
+		if (cl_testentities->integer)
 			V_TestEntities ();
-		if (cl_testlights->value)
+	//	if (cl_testlights->value)
+		if (cl_testlights->integer)
 			V_TestLights ();
-		if (cl_testblend->value)
+	//	if (cl_testblend->value)
+		if (cl_testblend->integer)
 		{
 			cl.refdef.blend[0] = 1;
 			cl.refdef.blend[1] = 0.5;
@@ -731,7 +738,8 @@ void V_RenderView (float stereo_separation)
 		cl.refdef.height = scr_vrect.height;
 
 		// adjust fov for wide aspect ratio
-		if (cl_widescreen_fov->value)
+	//	if (cl_widescreen_fov->value)
+		if (cl_widescreen_fov->integer)
 		{
 		//	float standardRatio, currentRatio;
 		//	standardRatio = (float)SCREEN_WIDTH/(float)SCREEN_HEIGHT;
@@ -757,13 +765,17 @@ void V_RenderView (float stereo_separation)
 
 		cl.refdef.areabits = cl.frame.areabits;
 
-		if (!cl_add_entities->value)
+	//	if (!cl_add_entities->value)
+		if (!cl_add_entities->integer)
 			r_numentities = 0;
-		if (!cl_add_particles->value)
+	//	if (!cl_add_particles->value)
+		if (!cl_add_particles->integer)
 			r_numparticles = 0;
-		if (!cl_add_lights->value)
+	//	if (!cl_add_lights->value)
+		if (!cl_add_lights->integer)
 			r_numdlights = 0;
-		if (!cl_add_blend->value)
+	//	if (!cl_add_blend->value)
+		if (!cl_add_blend->integer)
 		{
 			VectorClear (cl.refdef.blend);
 		}
@@ -788,9 +800,11 @@ void V_RenderView (float stereo_separation)
 	}
 
 	R_RenderFrame (&cl.refdef);
-	if (cl_stats->value)
+//	if (cl_stats->value)
+	if (cl_stats->integer)
 		Com_Printf ("ent:%i  lt:%i  part:%i\n", r_numentities, r_numdlights, r_numparticles);
-	if ( log_stats->value && ( log_stats_file != 0 ) )
+//	if ( log_stats->value && ( log_stats_file != 0 ) )
+	if ( log_stats->integer && ( log_stats_file != 0 ) )
 		fprintf( log_stats_file, "%i,%i,%i,",r_numentities, r_numdlights, r_numparticles);
 }
 
@@ -818,7 +832,8 @@ void V_Texture_f (void)
 	trace_t	tr;
 	vec3_t	forward, start, end;
 
-	if (!developer->value) // only works in developer mode
+//	if (!developer->value) // only works in developer mode
+	if (!developer->integer) // only works in developer mode
 		return;
 
 	VectorCopy(cl.refdef.vieworg, start);
@@ -831,7 +846,7 @@ void V_Texture_f (void)
 		if (!tr.surface)
 			Com_Printf("Not a brush\n");
 		else
-			Com_Printf("Texture=%s, surface=0x%08x, value=%d\n",tr.surface->name,tr.surface->flags,tr.surface->value);
+			Com_Printf("Texture=%s, surface=0x%08x, value=%d\n", tr.surface->name, tr.surface->flags, tr.surface->value);
 	}
 }
 
@@ -846,7 +861,8 @@ void V_Surf_f (void)
 	vec3_t	forward, start, end;
 	int		s;
 
-	if (!developer->value) // only works in developer mode
+//	if (!developer->value) // only works in developer mode
+	if (!developer->integer) // only works in developer mode
 		return;
 
 	// Disable this in multiplayer

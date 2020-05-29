@@ -383,7 +383,8 @@ qboolean PlayerConfig_MenuInit (void)
 	if (s_numplayermodels == 0)
 		return false;
 
-	if ( hand->value < 0 || hand->value > 2 )
+//	if ( hand->value < 0 || hand->value > 2 )
+	if ( hand->integer < 0 || hand->integer > 2 )
 		Cvar_SetValue( "hand", 0 );
 
 //	strncpy( currentdirectory, skin->string );
@@ -765,7 +766,8 @@ void PlayerConfig_MenuDraw (void)
 
 		yaw = anglemod(cl.time/10);
 
-		VectorSet (modelOrg, 150, (hand->value==1)?25:-25, 0); // was 80, 0, 0
+	//	VectorSet (modelOrg, 150, (hand->value==1)?25:-25, 0); // was 80, 0, 0
+		VectorSet (modelOrg, 150, (hand->integer == 1)?25:-25, 0); // was 80, 0, 0
 
 		// Setup player model
 		ent = &entity[0];
@@ -776,7 +778,8 @@ void PlayerConfig_MenuDraw (void)
 		ent->skin = playerskin;
 
 		ent->flags = RF_FULLBRIGHT|RF_NOSHADOW|RF_DEPTHHACK;
-		if (hand->value == 1)
+	//	if (hand->value == 1)
+		if (hand->integer == 1)
 			ent->flags |= RF_MIRRORMODEL;
 
 		ent->origin[0] = modelOrg[0];
@@ -791,7 +794,8 @@ void PlayerConfig_MenuDraw (void)
 		//if ( ++yaw > 360 )
 		//	yaw -= 360;
 		
-		if (hand->value == 1)
+	//	if (hand->value == 1)
+		if (hand->integer == 1)
 			ent->angles[1] = 360 - ent->angles[1];
 
 		refdef.num_entities++;
@@ -809,7 +813,8 @@ void PlayerConfig_MenuDraw (void)
 			ent->skinnum = 0;
 
 			ent->flags = RF_FULLBRIGHT|RF_NOSHADOW|RF_DEPTHHACK;
-			if (hand->value == 1)
+		//	if (hand->value == 1)
+			if (hand->integer == 1)
 				ent->flags |= RF_MIRRORMODEL;
 
 			ent->origin[0] = modelOrg[0];
@@ -822,7 +827,8 @@ void PlayerConfig_MenuDraw (void)
 			ent->backlerp = 0.0;
 			ent->angles[1] = yaw;
 			
-			if (hand->value == 1)
+		//	if (hand->value == 1)
+			if (hand->integer == 1)
 				ent->angles[1] = 360 - ent->angles[1];
 
 			refdef.num_entities++;

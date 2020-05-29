@@ -257,7 +257,7 @@ if parsing of old protocol should be used.
 */
 qboolean LegacyProtocol (void)
 {
-	//if (dedicated->value)	// Server always uses new protocol
+	//if (dedicated->integer)	// Server always uses new protocol
 	//	return false;
 	if ( (Com_ServerState() && cls.serverProtocol <= OLD_PROTOCOL_VERSION)
 		|| (cls.serverProtocol == OLD_PROTOCOL_VERSION) )
@@ -274,7 +274,7 @@ if parsing of R1Q2 protocol should be used.
 */
 qboolean R1Q2Protocol (void)
 {
-	//if (dedicated->value)	// Server always uses new protocol
+	//if (dedicated->integer)	// Server always uses new protocol
 	//	return false;
 	if ( cls.serverProtocol == R1Q2_PROTOCOL_VERSION )
 		return true;

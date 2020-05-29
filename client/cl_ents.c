@@ -530,7 +530,8 @@ void CL_ParsePacketEntities (frame_t *oldframe, frame_t *newframe)
 
 		while (oldnum < newnum)
 		{	// one or more entities from the old packet are unchanged
-			if (cl_shownet->value == 3)
+		//	if (cl_shownet->value == 3)
+			if (cl_shownet->integer == 3)
 				Com_Printf ("   unchanged: %i\n", oldnum);
 			CL_DeltaEntity (newframe, oldnum, oldstate, 0);
 			
@@ -547,7 +548,8 @@ void CL_ParsePacketEntities (frame_t *oldframe, frame_t *newframe)
 
 		if (bits & U_REMOVE)
 		{	// the entity present in oldframe is not in the current frame
-			if (cl_shownet->value == 3)
+		//	if (cl_shownet->value == 3)
+			if (cl_shownet->integer == 3)
 				Com_Printf ("   remove: %i\n", newnum);
 			if (oldnum != newnum)
 				Com_Printf ("U_REMOVE: oldnum != newnum\n");
@@ -566,7 +568,8 @@ void CL_ParsePacketEntities (frame_t *oldframe, frame_t *newframe)
 
 		if (oldnum == newnum)
 		{	// delta from previous state
-			if (cl_shownet->value == 3)
+		//	if (cl_shownet->value == 3)
+			if (cl_shownet->integer == 3)
 				Com_Printf ("   delta: %i\n", newnum);
 			CL_DeltaEntity (newframe, newnum, oldstate, bits);
 
@@ -584,7 +587,8 @@ void CL_ParsePacketEntities (frame_t *oldframe, frame_t *newframe)
 
 		if (oldnum > newnum)
 		{	// delta from baseline
-			if (cl_shownet->value == 3)
+		//	if (cl_shownet->value == 3)
+			if (cl_shownet->integer == 3)
 				Com_Printf ("   baseline: %i\n", newnum);
 			CL_DeltaEntity (newframe, newnum, &cl_entities[newnum].baseline, bits);
 			continue;
@@ -595,7 +599,8 @@ void CL_ParsePacketEntities (frame_t *oldframe, frame_t *newframe)
 	// any remaining entities in the old frame are copied over
 	while (oldnum != 99999)
 	{	// one or more entities from the old packet are unchanged
-		if (cl_shownet->value == 3)
+	//	if (cl_shownet->value == 3)
+		if (cl_shownet->integer == 3)
 			Com_Printf ("   unchanged: %i\n", oldnum);
 		CL_DeltaEntity (newframe, oldnum, oldstate, 0);
 		
@@ -950,7 +955,8 @@ void CL_ParseFrame (void)
 	if (cls.serverProtocol != 26)
 		cl.surpressCount = MSG_ReadByte (&net_message);
 
-	if (cl_shownet->value == 3)
+//	if (cl_shownet->value == 3)
+	if (cl_shownet->integer == 3)
 		Com_Printf ("   frame:%i  delta:%i\n", cl.frame.serverframe,
 		cl.frame.deltaframe);
 
@@ -1346,7 +1352,8 @@ void CL_AddPacketEntities (frame_t *frame)
 			ent.angles[1] = autorotate;
 			ent.angles[2] = 0;
 			// bobbing items by QuDos
-			if (cl_item_bobbing->value) {
+		//	if (cl_item_bobbing->value) {
+			if (cl_item_bobbing->integer) {
 				float	bob_scale = (0.005 + s1->number * 0.00001) * 0.5;
 				float	bob = cos((cl.time + 1000) * bob_scale) * 5;
 				ent.oldorigin[2] += bob;
@@ -1407,7 +1414,8 @@ void CL_AddPacketEntities (frame_t *frame)
 			{
 				ci = &cl.clientinfo[s1->skinnum & 0xff];
 				i = (s1->skinnum >> 8); // 0 is default weapon model
-				if (!cl_vwep->value || i > MAX_CLIENTWEAPONMODELS - 1)
+			//	if (!cl_vwep->value || i > MAX_CLIENTWEAPONMODELS - 1)
+				if (!cl_vwep->integer || i > MAX_CLIENTWEAPONMODELS - 1)
 					i = 0;
 				currentweaponmodel = cl_weaponmodels[i];
 			}
@@ -1525,7 +1533,8 @@ void CL_AddPacketEntities (frame_t *frame)
 			{	// custom weapon
 				ci = &cl.clientinfo[s1->skinnum & 0xff];
 				i = (s1->skinnum >> 8); // 0 is default weapon model
-				if (!cl_vwep->value || i > MAX_CLIENTWEAPONMODELS - 1)
+			//	if (!cl_vwep->value || i > MAX_CLIENTWEAPONMODELS - 1)
+				if (!cl_vwep->integer || i > MAX_CLIENTWEAPONMODELS - 1)
 					i = 0;
 				ent.model = ci->weaponmodel[i];
 				if (!ent.model) {
@@ -1659,7 +1668,8 @@ void CL_AddPacketEntities (frame_t *frame)
 				}
 				else
 				{
-					if ((effects & EF_GREENGIB) && cl_blood->value >= 1) // EF_BLASTER|EF_GREENGIB effect
+				//	if ((effects & EF_GREENGIB) && cl_blood->value >= 1) // EF_BLASTER|EF_GREENGIB effect
+					if ((effects & EF_GREENGIB) && cl_blood->integer >= 1) // EF_BLASTER|EF_GREENGIB effect
 						CL_DiminishingTrail (cent->lerp_origin, ent.origin, cent, effects);
 					else
 						CL_BlasterTrail (cent->lerp_origin, ent.origin, 255, 150, 50, 0, -90, -30);
@@ -1685,7 +1695,8 @@ void CL_AddPacketEntities (frame_t *frame)
 			}
 			else if (effects & EF_GIB)
 			{
-				if (cl_blood->value >= 1)
+			//	if (cl_blood->value >= 1)
+				if (cl_blood->integer >= 1)
 					CL_DiminishingTrail (cent->lerp_origin, ent.origin, cent, effects);
 			}
 			else if (effects & EF_GRENADE)
@@ -1771,7 +1782,8 @@ void CL_AddPacketEntities (frame_t *frame)
 			// RAFAEL
 			else if (effects & EF_GREENGIB)
 			{
-				if (cl_blood->value >= 1) // disable blood option
+			//	if (cl_blood->value >= 1) // disable blood option
+				if (cl_blood->integer >= 1) // disable blood option
 					CL_DiminishingTrail (cent->lerp_origin, ent.origin, cent, effects);				
 			}
 			// RAFAEL
@@ -1816,7 +1828,8 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 	if ( IsThirdPerson() )
 		return;
 	// allow the gun to be completely removed
-	if (!cl_gun->value)
+//	if (!cl_gun->value)
+	if (!cl_gun->integer)
 		return;
 
 	// don't draw gun if in wide angle view
@@ -1878,7 +1891,8 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 		V_AddEntity (&gun);
 
 		//add shells for viewweaps (all of em!)
-		if (cl_weapon_shells->value)
+	//	if (cl_weapon_shells->value)
+		if (cl_weapon_shells->integer)
 		{
 			int oldeffects = gun.flags, pnum;
 			entity_state_t	*s1;
@@ -1963,7 +1977,8 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 		V_AddEntity (&gun2);
 
 		//add shells for viewweaps (all of em!)
-		if (cl_weapon_shells->value)
+	//	if (cl_weapon_shells->value)
+		if (cl_weapon_shells->integer)
 		{
 			int oldeffects = gun2.flags, pnum;
 			entity_state_t	*s1;
@@ -2178,7 +2193,8 @@ void CL_CalcViewValues (void)
 	lerp = cl.lerpfrac;
 
 	// calculate the origin
-	if ( (cl_predict->value) && !(cl.frame.playerstate.pmove.pm_flags & PMF_NO_PREDICTION)
+//	if ( (cl_predict->value) && !(cl.frame.playerstate.pmove.pm_flags & PMF_NO_PREDICTION)
+	if ( (cl_predict->integer) && !(cl.frame.playerstate.pmove.pm_flags & PMF_NO_PREDICTION)
 		&& !cl.attractloop ) // Jay Dolan fix- so long as we're not viewing a demo 
 	{	// use predicted values
 		unsigned	delta;
@@ -2260,14 +2276,16 @@ void CL_AddEntities (void)
 
 	if (cl.time > cl.frame.servertime)
 	{
-		if (cl_showclamp->value)
+	//	if (cl_showclamp->value)
+		if (cl_showclamp->integer)
 			Com_Printf ("high clamp %i\n", cl.time - cl.frame.servertime);
 		cl.time = cl.frame.servertime;
 		cl.lerpfrac = 1.0;
 	}
 	else if (cl.time < cl.frame.servertime - 100)
 	{
-		if (cl_showclamp->value)
+	//	if (cl_showclamp->value)
+		if (cl_showclamp->integer)
 			Com_Printf ("low clamp %i\n", cl.frame.servertime-100 - cl.time);
 		cl.time = cl.frame.servertime - 100;
 		cl.lerpfrac = 0;
@@ -2275,7 +2293,8 @@ void CL_AddEntities (void)
 	else
 		cl.lerpfrac = 1.0 - (cl.frame.servertime - cl.time) * 0.01;
 
-	if (cl_timedemo->value)
+//	if (cl_timedemo->value)
+	if (cl_timedemo->integer)
 		cl.lerpfrac = 1.0;
 
 //	CL_AddPacketEntities (&cl.frame);

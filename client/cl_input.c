@@ -310,7 +310,8 @@ void CL_BaseMove (usercmd_t *cmd)
 //
 // adjust for speed key / running
 //
-	if ( (in_speed.state & 1) ^ (int)(cl_run->value) )
+//	if ( (in_speed.state & 1) ^ (int)(cl_run->value) )
+	if ( (in_speed.state & 1) ^ (cl_run->integer) )
 	{
 		cmd->forwardmove *= 2;
 		cmd->sidemove *= 2;
@@ -666,7 +667,8 @@ void CL_SendCmd_Async (void)
 
 	// let the server know what the last frame we
 	// got was, so the next message can be delta compressed
-	if (cl_nodelta->value || !cl.frame.valid || cls.demowaiting)
+//	if (cl_nodelta->value || !cl.frame.valid || cls.demowaiting)
+	if (cl_nodelta->integer || !cl.frame.valid || cls.demowaiting)
 		MSG_WriteLong (&buf, -1);	// no compression
 	else
 		MSG_WriteLong (&buf, cl.frame.serverframe);
@@ -770,7 +772,8 @@ void CL_SendCmd (void)
 
 	// let the server know what the last frame we
 	// got was, so the next message can be delta compressed
-	if (cl_nodelta->value || !cl.frame.valid || cls.demowaiting)
+//	if (cl_nodelta->value || !cl.frame.valid || cls.demowaiting)
+	if (cl_nodelta->integer || !cl.frame.valid || cls.demowaiting)
 		MSG_WriteLong (&buf, -1);	// no compression
 	else
 		MSG_WriteLong (&buf, cl.frame.serverframe);

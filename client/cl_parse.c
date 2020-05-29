@@ -218,7 +218,8 @@ void CL_LoadClientinfo (clientinfo_t *ci, char *s)
 		s = t+1;
 	}
 
-	if (cl_noskins->value || *s == 0)
+//	if (cl_noskins->value || *s == 0)
+	if (cl_noskins->integer || *s == 0)
 	{
 		Com_sprintf (model_filename, sizeof(model_filename), "players/male/tris.md2");
 		Com_sprintf (weapon_filename, sizeof(weapon_filename), "players/male/weapon.md2");
@@ -293,7 +294,8 @@ void CL_LoadClientinfo (clientinfo_t *ci, char *s)
 				Com_sprintf (weapon_filename, sizeof(weapon_filename), "players/male/%s", cl_weaponmodels[i]);
 				ci->weaponmodel[i] = R_RegisterModel(weapon_filename);
 			}
-			if (!cl_vwep->value)
+		//	if (!cl_vwep->value)
+			if (!cl_vwep->integer)
 				break; // only one when vwep is off
 		}
 
@@ -350,7 +352,8 @@ as track02-track11, and the Rogue CD as track12-track21.
 */
 int CL_MissionPackCDTrack (int tracknum)
 {
-	if (FS_ModType("rogue") || cl_rogue_music->value)
+//	if (FS_ModType("rogue") || cl_rogue_music->value)
+	if (FS_ModType("rogue") || cl_rogue_music->integer)
 	{
 		if (tracknum >= 2 && tracknum <= 11)
 			return tracknum + 10;
@@ -358,7 +361,8 @@ int CL_MissionPackCDTrack (int tracknum)
 			return tracknum;
 	}
 	// an out-of-order mix from Q2 and Rogue CDs
-	else if (FS_ModType("xatrix") || cl_xatrix_music->value)
+//	else if (FS_ModType("xatrix") || cl_xatrix_music->value)
+	else if (FS_ModType("xatrix") || cl_xatrix_music->integer)
 	{
 		switch(tracknum)
 		{
@@ -420,7 +424,8 @@ void CL_PlayBackgroundTrack (void)
 
 	// If an OGG file exists play it, otherwise fall back to CD audio
 	Com_sprintf (name, sizeof(name), "music/track%02i.ogg", CL_MissionPackCDTrack(track));
-	if ( (FS_LoadFile(name, NULL) != -1) && cl_ogg_music->value )
+//	if ( (FS_LoadFile(name, NULL) != -1) && cl_ogg_music->value )
+	if ( (FS_LoadFile(name, NULL) != -1) && cl_ogg_music->integer )
 		S_StartBackgroundTrack(name, name);
 	else
 		CDAudio_Play(track, true);
@@ -667,7 +672,8 @@ void CL_ParsePrint (void)
 
 void SHOWNET(char *s)
 {
-	if (cl_shownet->value>=2)
+//	if (cl_shownet->value >= 2)
+	if (cl_shownet->integer >= 2)
 		Com_Printf ("%3i:%s\n", net_message.readcount-1, s);
 }
 
@@ -922,9 +928,11 @@ void CL_ParseServerMessage (void)
 //
 // if recording demos, copy the message out
 //
-	if (cl_shownet->value == 1)
+//	if (cl_shownet->value == 1)
+	if (cl_shownet->integer == 1)
 		Com_Printf ("%i ",net_message.cursize);
-	else if (cl_shownet->value >= 2)
+//	else if (cl_shownet->value >= 2)
+	else if (cl_shownet->integer >= 2)
 		Com_Printf ("------------------\n");
 
 
@@ -947,7 +955,8 @@ void CL_ParseServerMessage (void)
 			break;
 		}
 
-		if (cl_shownet->value>=2)
+	//	if (cl_shownet->value >= 2)
+		if (cl_shownet->integer >= 2)
 		{
 			if (!svc_strings[cmd])
 				Com_Printf ("%3i:BAD CMD %i\n", net_message.readcount-1,cmd);

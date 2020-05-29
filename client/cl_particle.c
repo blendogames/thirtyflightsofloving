@@ -606,7 +606,8 @@ void CL_AddParticles (void)
 			alpha = p->alpha + time*p->alphavel;
 			if (flags&PART_DECAL)
 			{
-				if (decals >= r_decals->value || alpha <= 0)
+			//	if (decals >= r_decals->value || alpha <= 0)
+				if (decals >= r_decals->integer || alpha <= 0)
 				{	// faded out
 					p->alpha = 0;
 					p->flags = 0;

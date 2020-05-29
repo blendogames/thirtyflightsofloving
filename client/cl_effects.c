@@ -148,7 +148,8 @@ CL_Explosion_Decal
 */
 void CL_Explosion_Decal (vec3_t org, float size, int decalnum)
 {
-	if (r_decals->value)
+//	if (r_decals->value)
+	if (r_decals->integer)
 	{
 		int			i, j, offset=8;	//size/2
 		cparticle_t	*p;
@@ -486,7 +487,8 @@ void CL_ParticleBloodThink (cparticle_t *p, vec3_t org, vec3_t angle, float *alp
 
 	if (trace.fraction < 1.0) // delete and stain...
 	{
-		if (r_decals->value && (p->flags & PART_LEAVEMARK)
+	//	if (r_decals->value && (p->flags & PART_LEAVEMARK)
+		if (r_decals->integer && (p->flags & PART_LEAVEMARK)
 			&& !VectorCompare(trace.plane.normal, vec3_origin)
 			&& !(CM_PointContents(p->oldorg,0) & MASK_WATER)) // no blood splatters underwater...
 		{
@@ -662,13 +664,13 @@ CL_BloodHit
 */
 void CL_BloodHit (vec3_t org, vec3_t dir)
 {
-	if (cl_blood->value < 1) // disable blood option
+	if (cl_blood->integer < 1) // disable blood option
 		return;
-	if (cl_blood->value == 2) // splat
+	if (cl_blood->integer == 2) // splat
 		CL_BloodSmack(org, dir);
-	else if (cl_blood->value == 3) // bleed
+	else if (cl_blood->integer == 3) // bleed
 		CL_BloodBleed (org, dir, 6);
-	else if (cl_blood->value == 4) // gore
+	else if (cl_blood->integer == 4) // gore
 		CL_BloodBleed (org, dir, 16);
 	else // 1 = puff
 		CL_BloodPuff(org, dir, 5);
@@ -687,7 +689,7 @@ void CL_GreenBloodHit (vec3_t org, vec3_t dir)
 	int		i;
 	float	d;
 
-	if (cl_blood->value < 1) // disable blood option
+	if (cl_blood->integer < 1) // disable blood option
 		return;
 
 	for (i=0;i<5;i++)
@@ -943,7 +945,7 @@ void CL_ParticleBulletDecal (vec3_t org, vec3_t dir, float size)
 	vec3_t		ang, angle, end, origin;
 	trace_t		tr;
 
-	if (!r_decals->value)
+	if (!r_decals->integer)
 		return;
 
 	VectorMA(org, DECAL_OFFSET, dir, origin);
@@ -987,7 +989,7 @@ void CL_ParticleRailDecal (vec3_t org, vec3_t dir, float size, qboolean isRed)
 	vec3_t		ang, angle, end, origin;
 	trace_t		tr;
 
-	if (!r_decals->value)
+	if (!r_decals->integer)
 		return;
 
 	VectorMA(org, -RAIL_DECAL_OFFSET, dir, origin);
@@ -1058,7 +1060,7 @@ void CL_ParticleBlasterDecal (vec3_t org, vec3_t dir, float size, int red, int g
 	vec3_t		ang, angle, end, origin;
 	trace_t		tr;
 
-	if (!r_decals->value)
+	if (!r_decals->integer)
 		return;
  
 	VectorMA(org, DECAL_OFFSET, dir, origin);
@@ -1129,7 +1131,7 @@ void CL_ParticlePlasmaBeamDecal (vec3_t org, vec3_t dir, float size)
 	vec3_t		ang, angle, end, origin;
 	trace_t		tr;
 
-	if (!r_decals->value)
+	if (!r_decals->integer)
 		return;
  
 	VectorMA(org, DECAL_OFFSET, dir, origin);
@@ -1566,11 +1568,10 @@ void CL_BlasterTracer (vec3_t origin, vec3_t angle, int red, int green, int blue
 void CL_HyperBlasterEffect (vec3_t start, vec3_t end, vec3_t angle, int red, int green, int blue,
 										int reddelta, int greendelta, int bluedelta, float len, float size)
 {
-	if (cl_particle_scale->value < 2)
+	CL_BlasterTracer (end, angle, red, green, blue, len, size);
+	if (cl_particle_scale->integer < 2)
 	//	CL_HyperBlasterTrail (start, end, red, green, blue, reddelta, greendelta, bluedelta);
 		CL_HyperBlasterGlow (start, end, red, green, blue, reddelta, greendelta, bluedelta);
-	//else //if (cl_particle_scale->value >= 2)
-		CL_BlasterTracer (end, angle, red, green, blue, len, size);
 }
 
 
@@ -1742,7 +1743,7 @@ void CL_DiminishingTrail (vec3_t start, vec3_t end, centity_t *old, int flags)
 			{
 				if (flags & EF_GIB)
 				{
-					if (cl_blood->value > 1)
+					if (cl_blood->integer > 1)
 						p = CL_SetupParticle (
 							0,	0,	random()*360,
 							move[0] + crand()*orgscale,	move[1] + crand()*orgscale,	move[2] + crand()*orgscale,
@@ -2126,13 +2127,13 @@ void CL_RailTrail (vec3_t start, vec3_t end, qboolean isRed)
 	int			i;
 	int			beamred, beamgreen, beamblue;
 	float		len;//, dec;
-	qboolean	colored = (cl_railtype->value!=0);
+	qboolean	colored = (cl_railtype->integer != 0);
 
 	VectorSubtract (end, start, vec);
 	VectorNormalize(vec);
 	CL_ParticleRailDecal (end, vec, 7, isRed);
 
-	if (cl_railtype->value == 2)
+	if (cl_railtype->integer == 2)
 	{
 		CL_DevRailTrail (start, end, isRed);
 		return;
@@ -2147,7 +2148,7 @@ void CL_RailTrail (vec3_t start, vec3_t end, qboolean isRed)
 		VectorSubtract (end, start, vec);
 	}
 	len = VectorNormalize (vec);
-	if (cl_railtype->value == 0)
+	if (cl_railtype->integer == 0)
 		len = min (len, cl_rail_length->value);  // cap length
 	VectorCopy (vec, point);
 	VectorScale (vec, RAILTRAILSPACE, vec);
@@ -2189,7 +2190,7 @@ void CL_RailTrail (vec3_t start, vec3_t end, qboolean isRed)
 				PART_BEAM,
 				NULL,0);
 	}
-	if (cl_railtype->value == 0)
+	if (cl_railtype->integer == 0)
 		CL_RailSprial (start, end, isRed);
 }
 
@@ -3069,7 +3070,7 @@ void CL_Tracker_Shell (vec3_t origin)
 	int				i;
 	cparticle_t		*p;
 
-	for(i=0; i < (300/max(cl_particle_scale->value, 1.0f)); i++)
+	for (i=0; i < (300/max(cl_particle_scale->value, 1.0f)); i++)
 	{
 		p = CL_SetupParticle (
 			0,	0,	0,
@@ -3204,7 +3205,7 @@ void CL_Nukeblast (cl_sustain_t *self)
 	ratio = 1.0 - (((float)self->endtime - (float)cl.time)/1000.0);
 	size = ratio*ratio;
 
-	for(i=0; i<(700/max(cl_particle_scale->value, 1.0f)); i++)
+	for (i=0; i<(700/max(cl_particle_scale->value, 1.0f)); i++)
 	{
 		index = rand()&3;
 		p = CL_SetupParticle (

@@ -1196,7 +1196,8 @@ void UI_Think_MouseCursor (void)
 			{
 				if (cursor.menuitemtype == MENUITEM_ROTATE)
 				{
-					if (menu_rotate->value)					
+				//	if (menu_rotate->value)					
+					if (menu_rotate->integer)					
 						Menu_SlideItem( m, -1 );
 					else			
 						Menu_SlideItem( m, 1 );
@@ -1226,7 +1227,8 @@ void UI_Think_MouseCursor (void)
 			{
 				if (cursor.menuitemtype == MENUITEM_ROTATE)
 				{
-					if (menu_rotate->value)					
+				//	if (menu_rotate->value)					
+					if (menu_rotate->integer)					
 						Menu_SlideItem( m, 1 );
 					else			
 						Menu_SlideItem( m, -1 );

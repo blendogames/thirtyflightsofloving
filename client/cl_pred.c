@@ -33,7 +33,8 @@ void CL_CheckPredictionError (void)
 	int		i;
 	int		len;
 
-	if (!cl_predict->value || (cl.frame.playerstate.pmove.pm_flags & PMF_NO_PREDICTION))
+//	if (!cl_predict->value || (cl.frame.playerstate.pmove.pm_flags & PMF_NO_PREDICTION))
+	if (!cl_predict->integer || (cl.frame.playerstate.pmove.pm_flags & PMF_NO_PREDICTION))
 		return;
 
 	// calculate the last usercmd_t we sent that the server has processed
@@ -51,7 +52,8 @@ void CL_CheckPredictionError (void)
 	}
 	else
 	{
-		if (cl_showmiss->value && (delta[0] || delta[1] || delta[2]) )
+	//	if (cl_showmiss->value && (delta[0] || delta[1] || delta[2]) )
+		if (cl_showmiss->integer && (delta[0] || delta[1] || delta[2]) )
 			Com_Printf ("prediction miss on %i: %i\n", cl.frame.serverframe, 
 			delta[0] + delta[1] + delta[2]);
 
@@ -451,10 +453,12 @@ void CL_PredictMovement (void)
 	if (cls.state != ca_active)
 		return;
 
-	if (cl_paused->value)
+//	if (cl_paused->value)
+	if (cl_paused->integer)
 		return;
 
-	if (!cl_predict->value || (cl.frame.playerstate.pmove.pm_flags & PMF_NO_PREDICTION))
+//	if (!cl_predict->value || (cl.frame.playerstate.pmove.pm_flags & PMF_NO_PREDICTION))
+	if (!cl_predict->integer || (cl.frame.playerstate.pmove.pm_flags & PMF_NO_PREDICTION))
 	{	// just set angles
 		for (i=0 ; i<3 ; i++)
 		{
@@ -469,7 +473,8 @@ void CL_PredictMovement (void)
 	// if we are too far out of date, just freeze
 	if (current - ack >= CMD_BACKUP)
 	{
-		if (cl_showmiss->value)
+	//	if (cl_showmiss->value)
+		if (cl_showmiss->integer)
 			Com_Printf ("exceeded CMD_BACKUP\n");
 		return;	
 	}
@@ -488,7 +493,8 @@ void CL_PredictMovement (void)
 	frame = 0;
 
 #ifdef CLIENT_SPLIT_NETFRAME
-	if (cl_async->value)
+//	if (cl_async->value)
+	if (cl_async->integer)
 	{
 		// run frames
 		while (++ack <= current) // Changed '<' to '<=' cause current is our pending cmd

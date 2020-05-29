@@ -473,7 +473,8 @@ void CL_Pause_f (void)
 		return;
 	}
 
-	Cvar_SetValue ("paused", !cl_paused->value);
+//	Cvar_SetValue ("paused", !cl_paused->value);
+	Cvar_SetValue ("paused", !cl_paused->integer);
 }
 
 /*
@@ -538,7 +539,8 @@ void CL_SendConnectPacket (void)
 
 	// if in compatibility mode, lie to server about this
 	// client's protocol, but exclude localhost for this.
-	if (cl_servertrick->value && strcmp(cls.servername, "localhost"))
+//	if (cl_servertrick->value && strcmp(cls.servername, "localhost"))
+	if (cl_servertrick->integer && strcmp(cls.servername, "localhost"))
 		Netchan_OutOfBandPrint (NS_CLIENT, adr, "connect %i %i %i \"%s\"\n",
 			OLD_PROTOCOL_VERSION, port, cls.challenge, Cvar_Userinfo() );
 	else
@@ -765,7 +767,8 @@ void CL_Disconnect (void)
 	if (cls.state == ca_disconnected)
 		return;
 
-	if (cl_timedemo && cl_timedemo->value)
+//	if (cl_timedemo && cl_timedemo->value)
+	if (cl_timedemo && cl_timedemo->integer)
 	{
 		int	time;
 		
@@ -1011,14 +1014,16 @@ void CL_PingServers_f (void)
 
 		// if the server is using the old protocol,
 		// lie to it about this client's protocol
-		if (cl_servertrick->value)
+	//	if (cl_servertrick->value)
+		if (cl_servertrick->integer)
 			Netchan_OutOfBandPrint (NS_CLIENT, adr, va("info %i", OLD_PROTOCOL_VERSION));
 		else
 	        Netchan_OutOfBandPrint (NS_CLIENT, adr, va("info %i", PROTOCOL_VERSION));
 	}
 
 	noudp = Cvar_Get ("noudp", "0", CVAR_NOSET);
-	if (!noudp->value)
+//	if (!noudp->value)
+	if (!noudp->integer)
 	{
         global_udp_server_time = Sys_Milliseconds() ;
 		adr.type = NA_BROADCAST;
@@ -1026,21 +1031,24 @@ void CL_PingServers_f (void)
 
 		// if the server is using the old protocol,
 		// lie to it about this client's protocol
-		if (cl_servertrick->value)
+	//	if (cl_servertrick->value)
+		if (cl_servertrick->integer)
 			Netchan_OutOfBandPrint (NS_CLIENT, adr, va("info %i", OLD_PROTOCOL_VERSION));
 		else
 			Netchan_OutOfBandPrint (NS_CLIENT, adr, va("info %i", PROTOCOL_VERSION));
 	}
 
 	noipx = Cvar_Get ("noipx", "0", CVAR_NOSET);
-	if (!noipx->value)
+//	if (!noipx->value)
+	if (!noipx->integer)
 	{
         global_ipx_server_time = Sys_Milliseconds() ;
 		adr.type = NA_BROADCAST_IPX;
 		adr.port = BigShort(PORT_SERVER);
 		// if the server is using the old protocol,
 		// lie to it about this client's protocol
-		if (cl_servertrick->value)
+	//	if (cl_servertrick->value)
+		if (cl_servertrick->integer)
 			Netchan_OutOfBandPrint (NS_CLIENT, adr, va("info %i", OLD_PROTOCOL_VERSION));
 		else
 			Netchan_OutOfBandPrint (NS_CLIENT, adr, va("info %i", PROTOCOL_VERSION));
@@ -1063,26 +1071,26 @@ void CL_PingServers_f (void)
 	Com_Printf ("pinging broadcast...\n");
 
 	noudp = Cvar_Get ("noudp", "0", CVAR_NOSET);
-	if (!noudp->value)
+	if (!noudp->integer)
 	{
 		adr.type = NA_BROADCAST;
 		adr.port = BigShort(PORT_SERVER);
 		// if the server is using the old protocol,
 		// lie to it about this client's protocol
-		if (cl_servertrick->value)
+		if (cl_servertrick->integer)
 			Netchan_OutOfBandPrint (NS_CLIENT, adr, va("info %i", OLD_PROTOCOL_VERSION));
 		else
 			Netchan_OutOfBandPrint (NS_CLIENT, adr, va("info %i", PROTOCOL_VERSION));
 	}
 
 	noipx = Cvar_Get ("noipx", "0", CVAR_NOSET);
-	if (!noipx->value)
+	if (!noipx->integer)
 	{
 		adr.type = NA_BROADCAST_IPX;
 		adr.port = BigShort(PORT_SERVER);
 		// if the server is using the old protocol,
 		// lie to it about this client's protocol
-		if (cl_servertrick->value)
+		if (cl_servertrick->integer)
 			Netchan_OutOfBandPrint (NS_CLIENT, adr, va("info %i", OLD_PROTOCOL_VERSION));
 		else
 			Netchan_OutOfBandPrint (NS_CLIENT, adr, va("info %i", PROTOCOL_VERSION));
@@ -1106,7 +1114,7 @@ void CL_PingServers_f (void)
 			adr.port = BigShort(PORT_SERVER);
 		// if the server is using the old protocol,
 		// lie to it about this client's protocol
-		if (cl_servertrick->value)
+		if (cl_servertrick->integer)
 			Netchan_OutOfBandPrint (NS_CLIENT, adr, va("info %i", OLD_PROTOCOL_VERSION));
 		else
 			Netchan_OutOfBandPrint (NS_CLIENT, adr, va("info %i", PROTOCOL_VERSION));
@@ -1366,7 +1374,8 @@ void CL_FixUpGender(void)
 	char *p;
 	char sk[80];
 
-	if (gender_auto->value)
+//	if (gender_auto->value)
+	if (gender_auto->integer)
 	{
 		if (gender->modified)
 		{
@@ -1960,7 +1969,8 @@ void CL_Frame_Async (int msec)
 	if (msec > 5000)
 		cls.netchan.last_received = Sys_Milliseconds ();
 
-	if (!cl_timedemo->value)
+//	if (!cl_timedemo->value)
+	if (!cl_timedemo->integer)
 	{	// Don't flood packets out while connecting
 		if (cls.state == ca_connected && packetDelta < 100)
 			packetFrame = false;
@@ -1979,7 +1989,8 @@ void CL_Frame_Async (int msec)
 		
 		if (!packetFrame && !renderFrame && !cls.forcePacket && !userinfo_modified)
 		{	// Pooy's CPU usage fix
-			if (cl_sleep->value)
+		//	if (cl_sleep->value)
+			if (cl_sleep->integer)
 			{
 				int temptime = min( (1000.0 / net_maxfps->value - packetDelta), (1000.0 / r_maxfps->value - renderDelta) );
 				if (temptime > 1)
@@ -2047,10 +2058,12 @@ void CL_Frame_Async (int msec)
 	//	CL_PredictMovement ();
 
 		// update the screen
-		if (host_speeds->value)
+	//	if (host_speeds->value)
+		if (host_speeds->integer)
 			time_before_ref = Sys_Milliseconds ();
 		SCR_UpdateScreen ();
-		if (host_speeds->value)
+	//	if (host_speeds->value)
+		if (host_speeds->integer)
 			time_after_ref = Sys_Milliseconds ();
 
 		// Update audio
@@ -2074,7 +2087,8 @@ void CL_Frame_Async (int msec)
 
 		cls.framecount++;
 
-		if (log_stats->value)
+	//	if (log_stats->value)
+		if (log_stats->integer)
 		{
 			if (cls.state == ca_active)
 			{
@@ -2138,11 +2152,13 @@ void CL_Frame (int msec)
 	static int	extratime;
 	static int  lasttimecalled;
 
-	if (dedicated->value)
+//	if (dedicated->value)
+	if (dedicated->integer)
 		return;
 
 #ifdef CLIENT_SPLIT_NETFRAME
-	if (cl_async->value && !cl_timedemo->value)
+//	if (cl_async->value && !cl_timedemo->value)
+	if (cl_async->integer && !cl_timedemo->value)
 	{
 		CL_Frame_Async (msec);
 		return;
@@ -2158,14 +2174,16 @@ void CL_Frame (int msec)
 	if (cl_maxfps->value > 500)
 		Cvar_SetValue("cl_maxfps", 500);
 
-	if (!cl_timedemo->value)
+//	if (!cl_timedemo->value)
+	if (!cl_timedemo->integer)
 	{
 		if (cls.state == ca_connected && extratime < 100)
 			return;			// don't flood packets out while connecting
 		if (extratime < 1000.0 / cl_maxfps->value)
 		{	
 			// Pooy's CPU usage fix
-			if (cl_sleep->value)
+		//	if (cl_sleep->value)
+			if (cl_sleep->integer)
 			{
 				int temptime = 1000 / cl_maxfps->value - extratime;
 				if (temptime > 1)
@@ -2232,10 +2250,12 @@ void CL_Frame (int msec)
 		CL_PrepRefresh ();
 
 	// update the screen
-	if (host_speeds->value)
+//	if (host_speeds->value)
+	if (host_speeds->integer)
 		time_before_ref = Sys_Milliseconds ();
 	SCR_UpdateScreen ();
-	if (host_speeds->value)
+//	if (host_speeds->value)
+	if (host_speeds->integer)
 		time_after_ref = Sys_Milliseconds ();
 
 	// update audio
@@ -2256,7 +2276,8 @@ void CL_Frame (int msec)
 
 	cls.framecount++;
 
-	if ( log_stats->value )
+//	if ( log_stats->value )
+	if ( log_stats->integer )
 	{
 		if ( cls.state == ca_active )
 		{
@@ -2288,7 +2309,8 @@ CL_Init
 */
 void CL_Init (void)
 {
-	if (dedicated->value)
+//	if (dedicated->value)
+	if (dedicated->integer)
 		return;		// nothing running on the client
 
 	// all archived variables will now be loaded

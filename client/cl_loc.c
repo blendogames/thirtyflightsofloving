@@ -422,7 +422,8 @@ void CL_AddViewLocs (void)
 	vec3_t	point;
 	int		i, index, num = 0;
 
-	if (!cl_drawlocs->value)
+//	if (!cl_drawlocs->value)
+	if (!cl_drawlocs->integer)
 		return;
 
 	point[0] = cl.frame.playerstate.pmove.origin[0] * 0.125f;

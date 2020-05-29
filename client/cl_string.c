@@ -152,7 +152,7 @@ qboolean CL_StringSetParams (char modifier, int *red, int *green, int *blue, int
 		case 'A':	// alt text color
 		case 'a':
 		//	CL_TextColor ((int)alt_text_color->value, red, green, blue);
-			CL_TextColor ((int)alt_text_color->integer, red, green, blue);
+			CL_TextColor (alt_text_color->integer, red, green, blue);
 			return true;
 	}
 	
@@ -233,7 +233,7 @@ void CL_DrawStringGeneric (int x, int y, const char *string, int alpha, int font
 		{
 			if (character & 128) {
 			//	CL_TextColor ((int)alt_text_color->value, &red, &green, &blue);
-				CL_TextColor ((int)alt_text_color->integer, &red, &green, &blue);
+				CL_TextColor (alt_text_color->integer, &red, &green, &blue);
 				if ( (red != 255) || (green != 255) || (blue != 255) )
 					character &= ~128;
 			}

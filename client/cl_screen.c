@@ -713,7 +713,8 @@ static void SCR_ShowFPS (void)
 	int			i, time, total, fps, x, y, fragsSize;
 	float		scrLeft;
 
-	if ((cls.state != ca_active) || !(cl_drawfps->value))
+//	if ((cls.state != ca_active) || !(cl_drawfps->value))
+	if ((cls.state != ca_active) || !(cl_drawfps->integer))
 		return;
 
 	SCR_InitHudScale ();
@@ -781,7 +782,8 @@ void CL_AddNetgraph (void)
 
 	// if using the debuggraph for something else, don't
 	// add the net lines
-	if (scr_debuggraph->value || scr_timegraph->value)
+//	if (scr_debuggraph->value || scr_timegraph->value)
+	if (scr_debuggraph->integer || scr_timegraph->integer)
 		return;
 
 	for (i=0 ; i<cls.netchan.dropped ; i++)
@@ -843,7 +845,8 @@ void SCR_DrawDebugGraph (void)
 	SCR_AdjustFrom640 (&scrLeft, NULL, &scrWidth, NULL, ALIGN_STRETCH);
 	scrRight = scrLeft + scrWidth;
 
-	if (scr_netgraph_pos->value == 0) // bottom right
+//	if (scr_netgraph_pos->value == 0) // bottom right
+	if (scr_netgraph_pos->integer == 0) // bottom right
 	{
 	//	x = scr_vrect.width - (w+2) - 1;
 		x = scrRight - (w+2) - 1;
@@ -1054,12 +1057,15 @@ static void SCR_CalcVrect (void)
 	int		size;
 
 	// bound viewsize
-	if (scr_viewsize->value < 40)
+//	if (scr_viewsize->value < 40)
+	if (scr_viewsize->integer < 40)
 		Cvar_Set ("viewsize","40");
-	if (scr_viewsize->value > 100)
+//	if (scr_viewsize->value > 100)
+	if (scr_viewsize->integer > 100)
 		Cvar_Set ("viewsize","100");
 
-	size = scr_viewsize->value;
+//	size = scr_viewsize->value;
+	size = scr_viewsize->integer;
 
 	scr_vrect.width = viddef.width*size/100;
 	scr_vrect.width &= ~1;	// Knightmare- was ~7, fixes undersized viewport at 1366x768
@@ -1082,12 +1088,7 @@ Keybinding command
 void SCR_SizeUp_f (void)
 {	
 //	Cvar_SetValue ("viewsize", scr_viewsize->value+10);
-/*
-	// now handle HUD alpha
-	float hudalpha = Cvar_VariableValue("hud_alpha")+0.1;
-	if (hudalpha > 1) hudalpha = 0.1;
-	Cvar_SetValue ("hud_alpha", hudalpha);
-*/
+
 	// now handle HUD scale
 	int hudscale = Cvar_VariableValue("hud_scale")+1;
 	if (hudscale > HUDSCALE_NUM_SIZES-1) hudscale = HUDSCALE_NUM_SIZES-1;
@@ -1396,7 +1397,8 @@ void SCR_DrawCrosshair (void)
 {	
 	float	/*scale,*/ scaledSize, alpha, pulsealpha;
 
-	if (!crosshair->value || scr_hidehud)
+//	if (!crosshair->value || scr_hidehud)
+	if (!crosshair->integer || scr_hidehud)
 		return;
 
 	if (crosshair->modified)
@@ -1489,10 +1491,12 @@ void SCR_DrawPause (void)
 {
 	int		w, h;
 
-	if (!scr_showpause->value)		// turn off for screenshots
+//	if (!scr_showpause->value)		// turn off for screenshots
+	if (!scr_showpause->integer)		// turn off for screenshots
 		return;
 
-	if (!cl_paused->value)
+//	if (!cl_paused->value)
+	if (!cl_paused->integer)
 		return;
 
 	// Knightmare- no need to draw when in menu
@@ -1540,7 +1544,8 @@ void SCR_DrawLoadingBar (float x, float y, float w, float h, int percent, float 
 	float	iRatio, hiRatio;
 
 	// changeable download/map load bar color
-	CL_TextColor ((int)alt_text_color->value, &red, &green, &blue);
+//	CL_TextColor ((int)alt_text_color->value, &red, &green, &blue);
+	CL_TextColor (alt_text_color->integer, &red, &green, &blue);
 	iRatio = 1 - fabs(sizeRatio);
 	hiRatio = iRatio * 0.5;
 
@@ -1589,7 +1594,8 @@ void SCR_DrawLoading (void)
 	char		mapfile[64], picName[MAX_QPATH];
 	char		*loadMsg;
 	qboolean	isMap = false, haveMapPic = false, widescreen;
-	qboolean	simplePlaque = (scr_simple_loadscreen->value != 0);
+//	qboolean	simplePlaque = (scr_simple_loadscreen->value != 0);
+	qboolean	simplePlaque = (scr_simple_loadscreen->integer != 0);
 
 	if (!scr_draw_loading) {
 		loadingPercent = 0;
@@ -1745,7 +1751,8 @@ SCR_RunLetterbox
 void SCR_RunLetterbox (void)
 {
 	// decide on the height of the letterbox
-	if (scr_letterbox->value && (cl.refdef.rdflags & RDF_LETTERBOX)) {
+//	if (scr_letterbox->value && (cl.refdef.rdflags & RDF_LETTERBOX)) {
+	if (scr_letterbox->integer && (cl.refdef.rdflags & RDF_LETTERBOX)) {
 		scr_letterbox_lines = (1 - min(1, viddef.width*LETTERBOX_RATIO/viddef.height)) * 0.5;
 		scr_letterbox_active = true;
 		scr_hidehud = true;
@@ -1927,7 +1934,8 @@ void SCR_BeginLoadingPlaque (void)
 	CDAudio_Stop ();
 	//if (cls.disable_screen)
 	//	return;
-	if (developer->value)
+//	if (developer->value)
+	if (developer->integer)
 		return;
 
 	cls.consoleActive = false; // Knightmare added
@@ -2028,7 +2036,8 @@ void SCR_TileClear (void)
 
 	if (scr_con_current == 1.0)
 		return;		// full screen console
-	if (scr_viewsize->value == 100)
+//	if (scr_viewsize->value == 100)
+	if (scr_viewsize->integer == 100)
 		return;		// full screen rendering
 	if (cl.cinematictime > 0)
 		return;		// full screen cinematic
@@ -2214,7 +2223,8 @@ void SCR_DrawField (int x, int y, int color, int width, int value, qboolean flas
 	l = strlen(num);
 	if (l > width)
 	{
-		if (hud_squeezedigits->value) {
+	//	if (hud_squeezedigits->value) {
+		if (hud_squeezedigits->integer) {
 			l = min(l, width+2);
 			fieldScale =  (1.0 - ((1.0 - (float)width/(float)l) * 0.5)) * getScreenScale();
 		}
@@ -2267,12 +2277,16 @@ void SCR_TouchPics (void)
 		for (j=0 ; j<11 ; j++)
 			R_DrawFindPic (sb_nums[i][j]);
 
-	if (crosshair->value)
+//	if (crosshair->value)
+	if (crosshair->integer)
 	{
-		if (crosshair->value > 100 || crosshair->value < 0) //Knightmare increased
-			crosshair->value = 1;
+	//	if (crosshair->value > 100 || crosshair->value < 0) //Knightmare increased
+	//		crosshair->value = 1;
+		if (crosshair->integer > 100 || crosshair->integer < 0) //Knightmare increased
+			Cvar_SetInteger ("crosshair", 1);
 
-		Com_sprintf (crosshair_pic, sizeof(crosshair_pic), "ch%i", (int)(crosshair->value));
+	//	Com_sprintf (crosshair_pic, sizeof(crosshair_pic), "ch%i", (int)(crosshair->value));
+		Com_sprintf (crosshair_pic, sizeof(crosshair_pic), "ch%i", crosshair->integer);
 		R_DrawGetPicSize (&crosshair_width, &crosshair_height, crosshair_pic);
 		if (!crosshair_width)
 			crosshair_pic[0] = 0;
@@ -2739,7 +2753,8 @@ void SCR_UpdateScreen (void)
 	// Re-init screen scale
 	SCR_InitScreenScale ();
 
-	if ( cl_stereo->value )
+//	if ( cl_stereo->value )
+	if ( cl_stereo->integer )
 	{
 		numframes = 2;
 		separation[0] = -cl_stereo_separation->value / 2;
@@ -2831,18 +2846,21 @@ void SCR_UpdateScreen (void)
 			SCR_DrawNet ();
 			SCR_CheckDrawCenterString ();
 
-			if (scr_timegraph->value)
+		//	if (scr_timegraph->value)
+			if (scr_timegraph->integer)
 				SCR_DebugGraph (cls.netFrameTime*300, 0);
 
-			if (scr_debuggraph->value || scr_timegraph->value || scr_netgraph->value)
+		//	if (scr_debuggraph->value || scr_timegraph->value || scr_netgraph->value)
+			if (scr_debuggraph->integer || scr_timegraph->integer || scr_netgraph->integer)
 				SCR_DrawDebugGraph ();
 
 			SCR_DrawPause ();
 
-			if (cl_demomessage->value)
+		//	if (cl_demomessage->value)
+			if (cl_demomessage->integer)
 				DrawDemoMessage();
 
-			//if ((cl_drawfps->value) && (cls.state == ca_active))
+		//	if ((cl_drawfps->integer) && (cls.state == ca_active))
 			SCR_ShowFPS ();
 
 			UI_Draw ();

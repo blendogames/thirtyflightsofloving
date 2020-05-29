@@ -876,13 +876,17 @@ void Con_DrawConsole (float frac, qboolean trans)
 	// changeable download bar color
 	int				red, green, blue;
 
+//	CL_TextColor ((int)alt_text_color->value, &red, &green, &blue);
+	CL_TextColor (alt_text_color->integer, &red, &green, &blue);
+
 	// Q3-style console bottom bar
 	conLeft = picLeft = 0;
 	conWidth = picWidth = SCREEN_WIDTH;
 	picHeight = SCREEN_HEIGHT;
 	SCR_AdjustFrom640 (&picLeft, NULL, &picWidth, &picHeight, ALIGN_CENTER);
-	CL_TextColor ((int)alt_text_color->value, &red, &green, &blue);
-	if ( (newconback_found && con_newconback->value) || con_oldconbar->value ) {
+
+//	if ( (newconback_found && con_newconback->value) || con_oldconbar->value ) {
+	if ( (newconback_found && con_newconback->integer) || con_oldconbar->integer ) {
 		barheight = 2;
 		SCR_AdjustFrom640 (&conLeft, NULL, &conWidth, &barheight, ALIGN_STRETCH);
 	}
@@ -900,14 +904,16 @@ void Con_DrawConsole (float frac, qboolean trans)
 
 	// Psychospaz's transparent console
 	//alpha = (trans) ? ((frac/ (newconback_found?0.5:con_height->value) )*con_alpha->value) : 1;
-	alpha = trans ? ((newconback_found && con_newconback->value) ? con_alpha->value : 2*frac*con_alpha->value) : 1;
+//	alpha = trans ? ((newconback_found && con_newconback->value) ? con_alpha->value : 2*frac*con_alpha->value) : 1;
+	alpha = trans ? ((newconback_found && con_newconback->integer) ? con_alpha->value : 2*frac*con_alpha->value) : 1;
 
 	// draw the background
 	//i = newconback_found ? lines - barheight : lines*(1/con_height->value);
 	//j = newconback_found ? 0 : (con_height->value-1)*i - barheight;
 	y = lines - barheight;
 	if (y < 1)	y = 0;
-	else if (newconback_found && con_newconback->value)	// Q3-style console
+//	else if (newconback_found && con_newconback->value)	// Q3-style console
+	else if (newconback_found && con_newconback->integer)	// Q3-style console
 		R_DrawStretchPic ((int)picLeft, 0, picWidth, lines-barheight, "/gfx/ui/newconback.pcx", alpha);
 	else
 		R_DrawStretchPic ((int)picLeft, (lines-(int)picHeight-(int)barheight), picWidth, (int)picHeight, "conback", alpha);
@@ -929,7 +935,8 @@ void Con_DrawConsole (float frac, qboolean trans)
 
 	Con_DrawString ((int)(conLeft+conWidth)-FONT_SIZE*(stringLen((const char *)&version))-3, y-(int)(1.25*FONT_SIZE), version, 255);
 
-	if ( (newconback_found && con_newconback->value) || con_oldconbar->value ) // Q3-style console bottom bar
+//	if ( (newconback_found && con_newconback->value) || con_oldconbar->value ) // Q3-style console bottom bar
+	if ( (newconback_found && con_newconback->integer) || con_oldconbar->integer ) // Q3-style console bottom bar
 		R_DrawFill ((int)conLeft, y, conWidth, barheight, red, green, blue, 255);
 
 	// draw the text

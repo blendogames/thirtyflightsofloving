@@ -212,7 +212,8 @@ void CL_RegisterTEntSounds (void)
 	clMedia.sfx_item_respawn = S_RegisterSound ("items/respawn1.wav");
 
 	// read footstep defintion file
-	if (cl_footstep_override->value)
+//	if (cl_footstep_override->value)
+	if (cl_footstep_override->integer)
 		ReadTextureSurfaceAssignments();
 	// end Lazarus footstep sounds
 
@@ -902,7 +903,8 @@ void CL_ParseTEnt (void)
 	case TE_GRENADE_EXPLOSION:
 	case TE_GRENADE_EXPLOSION_WATER:
 		MSG_ReadPos (&net_message, pos);
-		if (cl_old_explosions->value)
+	//	if (cl_old_explosions->value)
+		if (cl_old_explosions->integer)
 		{
 			ex = CL_AllocExplosion ();
 			VectorCopy (pos, ex->ent.origin);
@@ -935,7 +937,8 @@ void CL_ParseTEnt (void)
 	// RAFAEL
 	case TE_PLASMA_EXPLOSION:
 		MSG_ReadPos (&net_message, pos);
-		if (cl_old_explosions->value)
+	//	if (cl_old_explosions->value)
+		if (cl_old_explosions->integer)
 		{
 			ex = CL_AllocExplosion ();
 			VectorCopy (pos, ex->ent.origin);
@@ -958,7 +961,8 @@ void CL_ParseTEnt (void)
 		}
 		CL_Explosion_Sparks (pos, 16, 128);
 		CL_Explosion_Decal (pos, 50, particle_burnmark);
-		if (cl_plasma_explo_sound->value)
+	//	if (cl_plasma_explo_sound->value)
+		if (cl_plasma_explo_sound->integer)
 			S_StartSound (pos, 0, 0, clMedia.sfx_plasexp, 1, ATTN_NORM, 0);
 		else
 			S_StartSound (pos, 0, 0, clMedia.sfx_rockexp, 1, ATTN_NORM, 0);
@@ -966,7 +970,8 @@ void CL_ParseTEnt (void)
 
 	case TE_EXPLOSION1_BIG:						// PMM
 		MSG_ReadPos (&net_message, pos);
-		if (cl_old_explosions->value)
+	//	if (cl_old_explosions->value)
+		if (cl_old_explosions->integer)
 		{
 			ex = CL_AllocExplosion ();
 			VectorCopy (pos, ex->ent.origin);
@@ -993,7 +998,8 @@ void CL_ParseTEnt (void)
 
 	case TE_EXPLOSION1_NP:						// PMM
 		MSG_ReadPos (&net_message, pos);
-		if (cl_old_explosions->value)
+	//	if (cl_old_explosions->value)
+		if (cl_old_explosions->integer)
 		{
 			ex = CL_AllocExplosion ();
 			VectorCopy (pos, ex->ent.origin);
@@ -1023,7 +1029,8 @@ void CL_ParseTEnt (void)
 	case TE_ROCKET_EXPLOSION:
 	case TE_ROCKET_EXPLOSION_WATER:
 		MSG_ReadPos (&net_message, pos);
-		if (cl_old_explosions->value)
+	//	if (cl_old_explosions->value)
+		if (cl_old_explosions->integer)
 		{
 			ex = CL_AllocExplosion ();
 			VectorCopy (pos, ex->ent.origin);
@@ -1153,7 +1160,8 @@ void CL_ParseTEnt (void)
 	case TE_FLECHETTE:			// flechette hitting wall
 		MSG_ReadPos (&net_message, pos);
 		MSG_ReadDir (&net_message, dir);
-		if (cl_old_explosions->value)
+	//	if (cl_old_explosions->value)
+		if (cl_old_explosions->integer)
 		{
 			ex = CL_AllocExplosion ();
 			VectorCopy (pos, ex->ent.origin);
@@ -1214,8 +1222,10 @@ void CL_ParseTEnt (void)
 		// Psychospaz's enhanced particle code	
 		{
 			int		red, green, blue, numparts;
-			float	partsize = (cl_old_explosions->value) ? 2 : 4;
-			numparts = (cl_old_explosions->value) ? 12 : (32 / max(cl_particle_scale->value/2, 1));
+		//	float	partsize = (cl_old_explosions->value) ? 2 : 4;
+			float	partsize = (cl_old_explosions->integer) ? 2 : 4;
+		//	numparts = (cl_old_explosions->value) ? 12 : (32 / max(cl_particle_scale->value/2, 1));
+			numparts = (cl_old_explosions->integer) ? 12 : (32 / max(cl_particle_scale->value/2, 1));
 			if (type == TE_BLASTER2) {
 				CL_BlasterParticles (pos, dir, numparts, partsize, 50, 235, 50, -10, 0, -10);
 				red=50; green=235; blue=50; }
@@ -1418,9 +1428,11 @@ void CL_AddBeams (void)
 	// chasecam grapple offset stuff
 	if (hand)
 	{
-		if (hand->value == 2)
+	//	if (hand->value == 2)
+		if (hand->integer == 2)
 			handmult = 1;
-		else if (hand->value == 1)
+	//	else if (hand->value == 1)
+		else if (hand->integer == 1)
 			handmult = -1;
 		else
 			handmult = 1;
@@ -1436,8 +1448,10 @@ void CL_AddBeams (void)
 		if (!b->model || b->endtime < cl.time)
 			continue;
 
-		firstperson = ((b->entity == cl.playernum+1) && !cg_thirdperson->value);
-		chasecam = ((b->entity == cl.playernum+1) && cg_thirdperson->value);
+	//	firstperson = ((b->entity == cl.playernum+1) && !cg_thirdperson->value);
+	//	chasecam = ((b->entity == cl.playernum+1) && cg_thirdperson->value);
+		firstperson = ((b->entity == cl.playernum+1) && !cg_thirdperson->integer);
+		chasecam = ((b->entity == cl.playernum+1) && cg_thirdperson->integer);
 
 		// if coming from the player, update the start position
 		if (firstperson)	// entity 0 is the world
@@ -1614,9 +1628,11 @@ void CL_AddPlayerBeams (void)
 //PMM
 	if (hand)
 	{
-		if (hand->value == 2)
+	//	if (hand->value == 2)
+		if (hand->integer == 2)
 			hand_multiplier = 0;
-		else if (hand->value == 1)
+	//	else if (hand->value == 1)
+		else if (hand->integer == 1)
 			hand_multiplier = -1;
 		else
 			hand_multiplier = 1;
@@ -1643,8 +1659,10 @@ void CL_AddPlayerBeams (void)
 		if (!b->model || b->endtime < cl.time)
 			continue;
 
-		firstperson = ((b->entity == cl.playernum+1) && !cg_thirdperson->value);
-		chasecam = ((b->entity == cl.playernum+1) && cg_thirdperson->value);
+	//	firstperson = ((b->entity == cl.playernum+1) && !cg_thirdperson->value);
+	//	chasecam = ((b->entity == cl.playernum+1) && cg_thirdperson->value);
+		firstperson = ((b->entity == cl.playernum+1) && !cg_thirdperson->integer);
+		chasecam = ((b->entity == cl.playernum+1) && cg_thirdperson->integer);
 
 		if(clMedia.mod_heatbeam && (b->model == clMedia.mod_heatbeam))
 		{
@@ -1690,7 +1708,8 @@ void CL_AddPlayerBeams (void)
 					VectorMA (b->start, (hand_multiplier * b->offset[0]), cl.v_right, org);
 					VectorMA (     org, b->offset[1], cl.v_forward, org);
 					VectorMA (     org, b->offset[2], cl.v_up, org);
-					if ((hand) && (hand->value == 2)) {
+				//	if ((hand) && (hand->value == 2)) {
+					if ((hand) && (hand->integer == 2)) {
 						VectorMA (org, -1, cl.v_up, org);
 					}
 					// FIXME - take these out when final
@@ -1735,7 +1754,8 @@ void CL_AddPlayerBeams (void)
 				VectorMA (dist, thirdp_pbeam_offset[1], f, dist);
 				VectorMA (dist, thirdp_pbeam_offset[2], u, dist);
 			}
-			if ((hand) && (hand->value == 2) && !chasecam)
+		//	if ((hand) && (hand->value == 2) && !chasecam)
+			if ((hand) && (hand->integer == 2) && !chasecam)
 				VectorMA (org, -1, cl.v_up, org);
 		}
 //PMM
