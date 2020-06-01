@@ -1681,8 +1681,8 @@ void CL_InitLocal (void)
 	cl_vwep = Cvar_Get ("cl_vwep", "1", CVAR_ARCHIVE);
 
 	// for the server to tell which version the client is
-	cl_engine = Cvar_Get ("cl_engine", "KMQuake2", CVAR_USERINFO | CVAR_NOSET | CVAR_LATCH);
-	cl_engine_version = Cvar_Get ("cl_engine_version", va("%4.2f",VERSION), CVAR_USERINFO | CVAR_NOSET | CVAR_LATCH);
+	cl_engine = Cvar_Get ("cl_engine", "KMQuake2", /*CVAR_USERINFO |*/ CVAR_NOSET | CVAR_LATCH);
+	cl_engine_version = Cvar_Get ("cl_engine_version", va("%4.2f",VERSION), /*CVAR_USERINFO |*/ CVAR_NOSET | CVAR_LATCH);
 
 #ifdef LOC_SUPPORT	// Xile/NiceAss LOC
 	cl_drawlocs =		Cvar_Get("cl_drawlocs", "0", 0);
