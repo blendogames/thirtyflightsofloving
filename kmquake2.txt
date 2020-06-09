@@ -64,7 +64,15 @@ Load screen by Christopher "Sherpa" Owen
 
 Weapon glow skins in kmquake2_extras.pk3 by Odium and Kman and from Quake2XP
 
-Uses Zlib compression library, (c) 1995-2002 Jean-loup Gailly and Mark Adler
+Uses Zlib compression library, (C) 1995-2017 Jean-loup Gailly and Mark Adler
+
+Uses libjpeg (Independent JPEG Group's software) Copyright (C) 1994-2013, Thomas G. Lane, Guido Vollbeding
+
+Uses libpng image library, Copyright (c) 1998-2017 Glenn Randers-Pehrson
+
+Uses libogg and libvorbis audio libraries, Copyright (c) 2002-2015 Xiph.org Foundation
+
+Uses libcurl data transfer library, Copyright (c) 1996 - 2020, Daniel Stenberg
 
 ------------------------------
 Key Features
