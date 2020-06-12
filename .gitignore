@@ -1,0 +1,16 @@
+*.user
+*.suo
+*.ncb
+*.sdf
+*.xml
+*.filters
+*.plg
+*.opt
+.vs/
+debug/
+debugaxp/
+release/
+releaseaxp/
+ipch/
+_upgradereport_files/
+makefile

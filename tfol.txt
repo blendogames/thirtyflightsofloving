@@ -1,0 +1,20 @@
+Thirty Flights of Loving source code
+
+This is the source code to Thirty Flights of Loving. The code
+is all licensed under the terms of the GPL (GNU Public License).
+
+This code is based on the work of:
+  Quake II, by id Software (idsoftware.com)
+  KMQuake II, by Knightmare (markshan.com/knightmare)
+  Lazarus, by David Hyde and Mad Dog
+
+This code utilizes the libraries:
+  OGG Vorbis
+  ZLib
+  Libpng
+  Libjpeg
+
+
+Brendon Chung
+blendogames.com
+July 2012

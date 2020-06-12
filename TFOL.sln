@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual C++ Express 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lazarus", "game\lazarus.vcxproj", "{FA5966DD-4258-4D72-873C-2FEB46DAEF0C}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "quake2", "quake2.vcxproj", "{04453DD4-7340-4482-93BD-9C47E209B383}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug Alpha|Win32 = Debug Alpha|Win32
+		Debug|Win32 = Debug|Win32
+		Release Alpha|Win32 = Release Alpha|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FA5966DD-4258-4D72-873C-2FEB46DAEF0C}.Debug Alpha|Win32.ActiveCfg = Debug Alpha|Win32
+		{FA5966DD-4258-4D72-873C-2FEB46DAEF0C}.Debug Alpha|Win32.Build.0 = Debug Alpha|Win32
+		{FA5966DD-4258-4D72-873C-2FEB46DAEF0C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{FA5966DD-4258-4D72-873C-2FEB46DAEF0C}.Debug|Win32.Build.0 = Debug|Win32
+		{FA5966DD-4258-4D72-873C-2FEB46DAEF0C}.Release Alpha|Win32.ActiveCfg = Release Alpha|Win32
+		{FA5966DD-4258-4D72-873C-2FEB46DAEF0C}.Release Alpha|Win32.Build.0 = Release Alpha|Win32
+		{FA5966DD-4258-4D72-873C-2FEB46DAEF0C}.Release|Win32.ActiveCfg = Release|Win32
+		{FA5966DD-4258-4D72-873C-2FEB46DAEF0C}.Release|Win32.Build.0 = Release|Win32
+		{04453DD4-7340-4482-93BD-9C47E209B383}.Debug Alpha|Win32.ActiveCfg = Debug Alpha|Win32
+		{04453DD4-7340-4482-93BD-9C47E209B383}.Debug Alpha|Win32.Build.0 = Debug Alpha|Win32
+		{04453DD4-7340-4482-93BD-9C47E209B383}.Debug|Win32.ActiveCfg = Debug|Win32
+		{04453DD4-7340-4482-93BD-9C47E209B383}.Debug|Win32.Build.0 = Debug|Win32
+		{04453DD4-7340-4482-93BD-9C47E209B383}.Release Alpha|Win32.ActiveCfg = Release Alpha|Win32
+		{04453DD4-7340-4482-93BD-9C47E209B383}.Release Alpha|Win32.Build.0 = Release Alpha|Win32
+		{04453DD4-7340-4482-93BD-9C47E209B383}.Release|Win32.ActiveCfg = Release|Win32
+		{04453DD4-7340-4482-93BD-9C47E209B383}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

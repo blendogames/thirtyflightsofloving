@@ -1,0 +1,72 @@
+KMQuake2 0.20 supports scripting for md3 and md2 models on a per-mesh, per-skin basis.
+
+The name of the script file is the same as the md3 or md2 model, but with a .script extension,
+e.g. the script for models/mapobjects/gargoyle.md3 is models/mapobjects/gargoyle.script
+
+Inside the script file, the scripting parameters for each mesh and skin is enclosed in
+curly braces, proceeded by the skin name formatted as <meshname>.<skinnum>
+For md2 models (which only have one mesh), the meshname is always md2mesh.
+
+For example, if the mesh name to be scripted for is gargoyle, and the skinnum is 0
+(the first skinnum), the skin name would be gargoyle.0
+
+Here's an example of scripting parameters for this skin:
+
+gargoyle.0
+{
+noshadow
+nodiffuse
+envmap 0.15
+}
+
+This script specifies that this particular skin is to cast no shadow, not be vertex lit,
+and be envmapped with a translucency of 0.15.
+
+If the mesh has a second skin that a different effect is desired for, a set of parameters
+can also be scripted for that skin:
+
+gargoyle.1
+{
+noshadow
+trans 0.6
+scroll 0.5 0.5
+}
+
+This makes this particular skin cast no shadow, have a translucencly of 0.6, and scroll
+0.5 units on both the x and y axis.
+
+Here's a list of parameters that can be used on skins:
+
+twosided				- makes this skin render as two-sided.
+alphatest				- makes this skin render with alpha testing enabled (requires alpha channel).
+fullbright				- makes this skin always be drawn at full brightness.
+nodraw					- makes this mesh not be rendered for this skinnum.
+noshadow				- makes this mesh with this skin not cast a shadow.
+nodiffuse				- makes this mesh with this skin not vertex lit.
+envmap <value>			- makes this skin be envmapped with a specified translucency between 0 and 1
+trans <value>			- makes this skin be tranlucent with the specified value between 0 and 1
+alpha <value>			- same as trans
+blendfunc <type>		- sets the transparent blendfunc for this skin- add, filter, or blend, 
+blendfunc <src> <dst>	- similar to above, but uses a specifed combination of src and dst blendfuncs.
+
+glow <imagename> identity	
+						- draws imagename as a fullbright glow over the texture
+glow <imagename> wave <func> <base> <amplitude> <phase> <freq>
+						- draws imagename as a glow over the texture, brightness controlled by using
+						func waveform (sin, triangle, square, sawtooth, inversesawtooth, noise)
+
+tcmod 					- supports most of the tcmod functions that Q3 shaders do
+
+tcmod rotate <rotspeed>	- rotates the texture by rotspeed degrees
+
+tcmod scale	<xScale> <yScale>
+						- scales the texture by x and y factors
+						
+tcmod stretch <func> <base> <amplitude> <phase> <freq>	
+						- stretches the texture using func waveform (sin, triangle, square, sawtooth, inversesawtooth, noise)
+
+tcmod turb <base> <amplitude> <phase> <freq>	
+						- warps the texture (base is not used)
+						
+tcmod scroll <xScroll> <yScroll>	
+						- scrolls the texture by x and y

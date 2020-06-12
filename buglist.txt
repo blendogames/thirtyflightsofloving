@@ -1,0 +1,14 @@
+vertex lights become dark after map transition (vid_restart fixes)
+	- FIXED, caused by allocating 0x800000 max size for md2 models
+	
+crash on darksun1.bsp when vertexlight/vertexlightbase fields not properly allocated (Hunk_Alloc problem?)
+	- FIXED, caused by allocating same size for each poly in a surface
+
+tries to load map twice (drop to console) when transitioning from demo to normal map (Belly of the Beast)
+	- bypass by loading autosave slot
+
+alpha test textures not displaying properly on ATI cards (lightmap blended into alpha channel?)
+
+2D disappearing when in 3rd person mode	- related to projection shadows, goes away after drawing particles
+
+depthhacked model appearing at player origin in Lazarus model test map

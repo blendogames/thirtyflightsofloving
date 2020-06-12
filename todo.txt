@@ -1,0 +1,231 @@
+Fix spinning turrets bug								- done!!
+
+fix blinking lasers bug									- done!!
+
+fix plasma beam chasecam bug							- done!!
+
+fix player config menu with Lazarus patched player models bug	- done!!
+
+show current player weapon model in player config menu	- done!!
+
+Add support for game dll-specified flipped models		- needs rendering fix
+
+implement Quake2Max menu mouse support					- done!!
+
+implement scaled menus									- done!!
+
+implement colored text support							- done!!
+
+implement cvar defaults									- done!!
+
+implement command auto-completion						- done!!
+
+change screenshots to 1000 max							- done!!
+
+implement server-side speed control						- done!!
+
+implement game DLL pak file loading support				- done!!
+
+implement overbrights on transparent surfaces			- done!!
+
+fix transparent surfaces not moving						- done!!
+
+implment powerup shells									- done!!
+
+re-write Rogue code in Lazarus							- done!!
+
+add texsurfs.txt support (Lazarus footstep defaults)	- done!!
+
+clean up particle image assignment code					- done!!
+
+add light glows for blaster puffs						- done!!
+
+integrate Lazarus texture and surf developer commands	- done!!
+
+add 3Team CTF support to Lazarus						- done!!
+
+add scalability option for particle effects				- done!!
+
+add overbrights and specified render mode to particle effects	- done!!
+
+implement new blood types								- done!!
+
+fix lighting on bmodels									- done!!
+
+add support for additional crosshairs, show them in menu	- done!!
+
+add screenshots to savegames							- done!!
+
+fix crash on fact2 under Lazarus						- done!!
+
+fix medic not healing under Lazarus						- done!!
+
+fix static pics not loading								- done!!
+
+add support for maps with large chop sizes (up to 1024)	- done!!
+
+fix crash/bomb out with join server menu & unplugged LAN cable	- done!!
+
+fix menu not opening back up (hang) after disconnect in DM mode	- done!!
+
+fix invisible weapon model bug							- done!!
+
+add ACE bots to Lazarus									- done!!
+
+add md3 support											- done!!
+
+--------------------------------------------------------------------------
+
+fix "id" Lazarus command conflict with CTF				- done!!
+
+add option for high-quality saveshots					- done!!
+
+show levelshots for autosaves in load game menu			- done!!
+
+make crosshair display clickable						- done!!
+
+implement Q2Max 0.44 player setup display				- done!!
+
+add support for JPG skies								- done!!
+
+interpolate entity alpha								- done!!
+
+make blaster puffs bounce								- done!!
+
+move particle rendering code into separate file			- done!!
+
+move download code into sepaate file					- done!!
+
+separate menu code										- done!!
+
+add pk3 file support									- done!!
+
+show menu when disconnected								- done!!
+
+implement clipped decals								- out of frustum culling?
+
+fix vid_restart crash									- done!!
+
+add custom sound support for doors						- done!!
+
+fix ATI color depth bug									- fixed in latest ATI drivers
+
+implement vertex lighting on alias models				- done!!
+
+fix anisotropic filtering								- done!!
+
+fix sound sourcing for bmodels							- done!!
+
+fix crash on exiting biggun								- done!!
+
+fix misc_actor sound loading from *.pak/pk3 files		- done!!
+
+swap in Lazarus for exe/dll shared files 				- done!!
+
+change reset defaults menu action to use cvar defaults	- done!!
+
+add RoQ support											- done!!
+
+integrate Lazarus fog into client/renderer				- needs DLL support
+
+increase +/-4096 map coordinate limit					- done!!
+
+integrate renderer into exe								- done!!
+
+add support for custom resolutions						- done!!
+
+depth-sort trans bmodel surfaces			- disabled depth testing on bmodel alpha surfaces instead
+
+add projection shadows									- done!!
+
+add Ogg Vorbis support									- done!!
+
+add light blooms										- done!!
+
+--------------------------------------------------------------------------
+
+add underwater caustics									- done!!
+
+rename cvars in renderer from gl_* to r_*				- done!!
+
+add support in exe for .ent files						- done!!
+
+add support for alpha test testures						- done!!
+
+add improved dedicated console							- done!!
+
+add GL state manager									- done!!
+
+add bmodels to r_showtris								- done!!
+
+add .arena file support									- done!!
+
+add md3 render scripts									- done!!
+
+separate all menus into separate files					- done!!
+
+add beta-class brain for Xatrix maps					- done!!
+
+optimize particle/decal rendering						- done!!
+
+optimize md3 rendering, add vertex lights				- done!!
+
+rewrite md3 struct to use compressed verts/normals		- done!!
+
+fix projection shadows wih zpass / zfail				- fixed with better neighbor tris func
+
+optimize sprite and beam rendering						- done!!
+
+optimize warp surface rendering							- done!!
+
+optimize world rendering								- surface batching?
+
+add texture overlay glows								- do in same pass on quad-texturing cards?
+
+optimize r_showtis										- done!!
+
+optimize image loading									- done!!
+
+optimize 2D rendering									- done!!
+
+simplify multitexture state funcs						- done!!
+
+revamp cheat cvar handling								- done!!
+
+add shadow range culling								- done!!
+
+load md2s into md3 struct								- done!!
+
+reverse-rotate shadow vector for angles					- done!!
+
+implement two-sided shadow stenciling					- done, but has more artifacts
+
+single function for string drawing (menu+hud+console)	- done!!
+
+clean up UI screen coords with SCR_ wrapper funcs		- done!!
+
+clean up loading screen coords with SCR_ wrapper funcs	- done!!
+
+--------------------------------------------------------------------------
+
+replace ACE bot with JA bot
+
+render real lightmaps on alpha surfaces
+
+batch alpha surfaces?
+
+decouple net FPS and vid FPS?
+
+filter specific objects for light blooms?
+
+add caustics for moving water?
+
+--------------------------------------------------------------------------
+
+add reflective shader water
+
+add 44KHz sound support
+
+add shader support
+
+add Q3 BSP support

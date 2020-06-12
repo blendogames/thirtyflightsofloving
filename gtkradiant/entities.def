@@ -1,0 +1,2092 @@
+//Lazarus QERadiant entity definition file created by Ricebug
+//October 2001, for Lazarus Revision 2.1
+//email problems with this def file to ricebug@earthlink.net
+//Go to the Lazarus website for more info on how to use these ents.
+//http://lazarus.gamedesign.net
+
+
+//modified for Gravity Bone.
+
+
+/*QUAKED worldspawn (0 0 0) ?
+Only used for the world.
+Lazarus-Only Settings
+---------------------
+"attenuation"
+Sets the global attenuation rolloff factor for target_playback 3D sounds. Setting this value makes the sound drop off faster or slower. The higher the value, the faster volume will fall off. The lower the value, the slower it will fall off. Default= 1
+
+"effects" Global map effects
+   0 : Combine effects
+   1 : Custom Help
+   2 : Footsteps
+   4 : Item ID
+   8 : Sound Alert
+  16 : Corpse Fade
+
+"style" default weapon at beginning of map
+   -10 : BFG (no blaster)
+   -9 : RailGun (no blaster)
+   -8 : Hyperblaster (no blaster)
+   -7 : RocketLauncher (no blaster)
+   -6 : GrenadeLauncher (no blaster)
+   -5 : ChainGun (no blaster)
+   -4 : MachineGun (no blaster)
+   -3 : SuperShotgun (no blaster)
+   -2 : Shotgun (no blaster)
+   -1 : None
+   1 : Blaster (default)
+   2 : SG w/blaster
+   3 : SSG w/blaster
+   4 : MG w/blaster
+   5 : CG w/blaster
+   6 : GL w/blaster
+   7 : RL w/blaster
+   8 : HB w/blaster
+   9 : RG w/blaster
+   10 :BFG w/blaster
+"fogclip"
+   0 : leave gl_clear alone (default)
+   1 : use for fog clipping
+-------------------
+Vanilla Q2 Settings
+-------------------
+"sky"	environment map name
+"skyaxis"	vector axis for rotating sky
+"skyrotate"	speed of rotation in degrees/second
+"sounds"	music cd track number
+"gravity"	800 is default gravity
+"message"	text to print at user logon
+_ambient	global light-RGB or level
+_sun_light 	s1 brightness
+_sun_color(color1) 	s1 RGB color
+_sun_angle	s1 yaw/pitch
+_sun_vector	s1 spot XYZ target
+_sun_diffuse	s1 shadow edges
+_sun_diffade	s1 diffuse fade dist
+_sun_ambient	all minlite-RGB or level
+_sun_surface	all minsurf-RGB or level
+
+To apply the same values to other suns (you can have 4 suns in a map), simply enter _sun2_xxxx, _sun3_xxx, and _sun4_xxx
+*/
+
+
+/THESE ENTS ARE LAZARUS-SPECIFIC=================================
+
+/*QUAKED path_track (.1 .2 .3) (-8 -8 -8) (8 8 8) AltPath Disabled FireOnce TrainOff AbsSpeed
+Tracktrain Path
+
+"targetname" name of path_track
+"target" next1 path_track
+"target2" next2 path_track
+"pathtarget" fire on pass
+"combattarget" fire on deadend
+"speed" new train speed (Default=0)
+
+*/
+
+/*QUAKED func_trackchange (.1 .2 .3) ? ActTrain x x StartBottom x x X_Axis Y_Axis
+Train track changing platform
+
+"combattarget" bottom track
+"distance" spin amount in degrees (Default=0)
+"height" travel in units (Default=0)
+"pathtarget" top track
+"speed" time to destination (Default=0)
+"target" train to switch
+"targetname" of trackchanger
+*/
+
+/*QUAKED func_tracktrain (.1 .2 .3) ? NoPitch NoCntrl OneWay OtherMap NoHUD AnimInd Anim Disable
+
+"targetname"
+"target" first path_track
+"sounds"
+   0: "None"
+   1: "Nada 1"
+   2: "Nada 2"
+   3: "Nada 3"
+   4: "Nada 4"
+   5: "Nada 5"
+   6: "Nada 6"
+"distance" wheelbase (Default=50)
+"height" units above track (Default=4)
+"speed" units/second (Default=64)
+"dmg" damage on crush (Default=0)
+"roll" turn bank angle (Default=0)
+"bleft" min driver bbox (Default= -16 -16 -16)
+"tright" max driver bbox (Default= 16 16 16)
+*/
+
+/*QUAKED func_reflect (1 0 0) ? StartOff Toggle
+Entity mirror
+
+"targetname" to trigger reflect mode
+"Style"
+   0 : Floor
+   1 : Ceiling
+   2 : East wall
+   3 : West wall
+   4 : North wall
+   5 : South wall
+"lip" offset from surface
+*/
+
+/*QUAKED target_precipitation (0 0 .8) (-8 -8 -8) (8 8 8) StartOn Splash Bounce FireOnce StartFade
+Rain, snow, & leaves. USE SPARINGLY!
+
+"angles1" direction of downpour
+"attenuation" Rebound amount
+"style"
+    0: Single raindrop (Default)
+    1: Raindrops
+    2: Snowflakes
+    3: Leaves
+    4: User-Defined
+"bleft" Min extent (Default = 0 0 0)
+"count" Number/frames (Default = 1)
+"fadeout" Leaf life
+"gravity" sv_gravity ratio
+"mass" weight of model (Default = 0)
+"mass2" Number of splash particles (Default = 8)
+"random" Count variance
+"sounds" color index (Default = 183)
+"speed" Falling speed (Default = 300)
+"targetname" if triggered
+"tright" Max extent (Default = 0 0 0)
+"yaw_speed" deg/sec
+"pitch_speed" deg/sec
+"roll_speed" deg/sec
+"usermodel" model path/name
+
+*/
+
+/*QUAKED func_pendulum (0 .5 .9) ? StartOn StopTop
+
+"attenuation" Rebound (0-1)
+"distance" Rotation (complete arc) Default=90
+"dmg" Swing damage/100 units/sec Default=5
+"health" Sustainable damage
+"mass" Weight of pendulum" Default=100
+"move_origin" Vector to mass. Default=0 0 0
+"noise" Custom impact sound
+"phase" Rotation offset (0-1)
+"radius" Length of pendulum Default=100
+
+*/
+
+
+/*QUAKED target_bmodel_spawner (1 0 0) (-8 -8 -8) (8 8 8) StartOn
+Clones brush entities
+
+"angle" facing angle of the spawned brush entity on the XY plane, relative to its referenced parent model. Default=0.
+"angles" facing angle of the spawned brush entity in 3 dimensions, relative to its referenced parent model, as defined by pitch, yaw, and roll. Default=0 0 0.
+"count" When non-zero, specifies the number of times the target_bmodel_spawner will be called before being auto-killtargeted. Default=0.
+"newtargetname" Targetname value which will be inherited by the spawned clone. If no value is given to this key, then the clone will not have a targetname.
+"newteam" Team value which will be inherited by the spawned clone. If no value is given to this key, then the clone will not be on a team. (This should be used with START_ON, so that there's no chance one teammate can be in the process of moving while another teammate is being spawned).
+"source" Targetname of the brush model entity which is to be used as a model reference.
+"target" value which will be inherited by the spawned clone. If no value is given to this key, then the clone will not have a target.
+"targetname" Name of the specific target_bmodel_spawner.
+"team" value which will be inherited by the spawned clone. If no value is given to this key, then the clone will not be on a team. (This should be used with START_ON, so that there's no chance one teammate can be in the process of moving while another teammate is being spawned
+
+*/
+
+
+/*QUAKED target_movewith (1 0 0) (-8 -8 -8) (8 8 8) Detach
+Adds/removes 'movewith' association
+
+"count" number of times it can be used
+"target" movewith child
+"targetname" when triggered
+"pathtarget" movewith parent
+*/
+
+
+
+/*QUAKED target_set_effect (1 0 0) (-8 -8 -8) (8 8 8)
+Add eyecandy to other entities
+
+"target" name of ent to enhance
+"tremoreffects" See Lazarus docs
+
+*/
+
+
+/*QUAKED target_sky (1 0 0) (-8 -8 -8) (8 8 8)
+Change env sky
+
+"sky" env map name
+"count" number of times it can be used
+
+*/
+
+/*QUAKED target_fade (1 0 0) (-8 -8 -8) (8 8 8)
+Fade the screen
+
+"color" fade color (default = "0 0 0")
+"alpha" obscuration (0-1) (default=0)
+"fadein" fade-in time in seconds (default=0)
+"holdtime" time to hold fade in seconds (default=0)
+"fadeout" fade-out time in seconds (default=0)
+"count" number of times it can be used
+
+*/
+
+/*QUAKED target_failure (1 0 0) (-8 -8 -8) (8 8 8) File NoBckgrnd
+Mission failure
+
+"message" string or path/file.txt
+"noise" sound to play
+]
+
+/*QUAKED target_change (1 0 0) (-8 -8 -8) (8 8 8) Spawnflags Spawnflags Spawnflags Spawnflags Spawnflags Spawnflags Spawnflags Spawnflags
+An entity changer
+
+SPAWNFLAGS Virtually any other keyvalue may be assigned, assuming the targeted entity can use it.
+
+"newtargetname" The new targetname value you may wish to assign to the targeted entity.
+
+"target" Two values are valid here; the first is the targetname of the entity whose keyvalue(s) you wish to alter, and the second (optional) value is the new value for "target" that you may wish to assign to the targeted entity. If two values are used, then they should be separated by a comma. Syntax: targeted_entity_name,new_target_value.
+
+"targetname" The name of the specific target_change.
+"angles" new angles
+"deathtarget" new deathtarget
+"delay" new delay
+"distance" new distance
+"dmg" new dmg
+"health" new health
+"item" new item
+"killtarget" new killtarget
+"mass" new mass
+"message" new message
+"noise" new noise
+"pathtarget" new pathtarget
+"random" new random
+"speed" new speed
+"style" new style
+"team" new team
+"wait" new wait
+
+*/
+
+/*QUAKED func_door_swinging (0 .5 .9) ? Ignore Revolve Crusher NoMonster Animated Toggle X_Axis Y_Axis
+A 2-way rotating door
+
+IGNORE: (Ignore Activator) determines what side of the door the activator is on is disabled.
+  
+REVOLVING: The door will never close, but instead can be repeatedly triggered to rotate distance degrees again, in either direction.
+
+"distance" deg/rotation (default=90)
+"dmg" damage when blocked (default=2)
+"health" if activated by shooting at it
+"followtarget" info_notnull opp. origin
+"killtarget" entity to attack
+"message" to print when trigger is inactive
+"movewith" make it part of a train or other mover
+"pathtarget" Targetname of the entity whose origin the func_door_swinging is to use as a spawning location at runtime. Normally this locating entity should be an info_notnull.
+"sounds"
+     0 = Audible (default)
+     1 = Silent
+"speed" in degrees/sec door swings (Default=100)
+"target" Targetname of the entity to be triggered when the door opens. If the target is a func_areaportal, the areaportal will be triggered again when the door closes.
+"targetname" Name of the specific door. A door with a targetname cannot be opened without another triggering entity which targets it, but it can be shot (if health>0).
+"team" Team name of the specific door. Doors with a identical team names will move together, and will all stop if one is blocked.
+"turn_rider" If non-zero, a player or other entity riding on the door will rotate as the door rotates. (Default=0)
+"wait" If REVOLVING is not set, this is the time in seconds for the door to wait before returning to its closed position. If wait=-1, the door will never return. For non-REVOLVING doors, the default=3. If REVOLVING is set, this is the time in seconds to wait before the door will accept another trigger input after it completes its move. If wait=-1, the door cannot be triggered again. For REVOLVING doors, the default=0.
+  
+*/
+
+/*QUAKED target_effect (1 0 0) (-2 -2 -2) (2 2 2) LoopOn LoopOff
+Calls an effect when used
+
+"target" ent aimed at
+"sounds" splash or pallete index
+"count" pixels/splash (1-255)
+"wait" steam duration
+"speed" steam speed
+"style" Select from the list below
+
+0 : Gunshot
+1 : Blood
+2 : Blaster
+3 : Railtrail
+4 : Shotgun
+5 : Explosion1
+6 : Explosion2
+7 : Rocket explosion
+8 : Grenade explosion
+9 : Sparks
+10 : Splash
+11 : Bubbletrail
+12 : Screen sparks
+13 : Shield sparks
+14 : Bullet sparks
+15 : Laser sparks
+16 : Parasite attack
+17 : Rocket expl (water)
+18 : Grenade expl (water)
+19 : Medic cable attack
+20 : BFG explosion
+21 : BFG big explosion
+22 : BossTport
+23 : BFG laser
+24 : Grapple cable
+25 : Welding sparks
+26 : GreenBlood
+28 : Plasma explosion
+29 : Tunnel sparks
+30 : Blaster2
+33 : Lightning
+34 : Debugtrail
+35 : Plain explosion
+36 : Flashlight
+38 : Heatbeam
+39 : Monster heatbeam
+40 : Steam
+41 : Bubbletrail2
+42 : MoreBlood
+43 : Heatbeam sparks
+44 : Heatbeam steam
+45 : Chainfist smoke
+46 : Electric sparks
+47 : Tracker explosion
+48 : Teleport effect
+49 : DBall goal
+50 : WidowBeamOut
+51 : NukeBlast
+52 : WidowSplash
+53 : Explosion1 Big
+54 : Explosion1 NP
+55 : Flechette
+
+*/
+
+
+/*QUAKED target_animation (.9 .2 .2) (-8 -8 -8) 8 8 8)
+An entity "animator"
+
+sounds of the Actor animation:
+   0 : Specify frames (Default)
+   1 : Jump
+   2 : Flipoff
+   3 : Salute
+   4 : Taunt
+   5 : Wave
+   6 : Point
+
+"target" ent to animate
+"startframe" first frame #
+"framenumbers" # of add'l frames; Default=1
+"count" number of times it can be used
+*/
+
+/*QUAKED func_force_wall (1 0 0) ? StartOn
+A force field wall.
+Entities caught when wall is activated will be killed.
+
+"dmg" hurts the player (default=0)
+"count" number of times it can be used
+"style" color of particles to use (These are index color numbers.)
+     0: black
+   208: green
+   215: white
+   220: yellow
+   240: red
+   241: blue
+   224: orange
+*/
+
+
+/*QUAKED hint_path (.5 .5 0) (-8 -8 -8) (8 8 8) End
+Monster hint path
+
+The END spawnflag sets a hint_path to be a chain end. The two hint_paths at either end of the sequence chain should use this flag. END hint_paths should have a target or targetname, but not both.
+
+"target" name of the next hint_path in a sequence. All hint_paths other than the last in a sequence should have a target.
+"targetname" name of the specific hint_path. All hint_paths other than the first in a sequence should have a targetname.
+"wait" Specifies the time in seconds that a monster should pause at a hint_path before proceeding to the next. Default=0.
+
+*/
+
+/*QUAKED target_anger (.8 .1 .1) (-8 -8 -8) (8 8 8) x x x x Hold Brutal
+Make someone mad.
+
+"count" specifies how many times a player can use it
+"height" vert jump velocity
+"killtarget" entity to attack
+"pathtarget" move to
+"speed" horiz jump velocity
+"target" monster angered
+"targetname" name of target_anger
+
+*/
+
+/*QUAKED trigger_bbox (.5 .5 .5) (-8 -8 -8) (8 8 8) Monster NoPlayer Triggered x Turret
+Multiple fire trigger
+
+"count" number of times it can be used
+"delay" seconds to initiate
+"health" if shootable
+"killtarget" ent to remove when triggered
+"message" to print when triggered
+"movewith" ent to move with
+"pathtarget"
+"sounds"
+   0 Beep beep (Default)
+   1 Secret
+   2 F1 prompt
+   3 Silent"
+"targetname" when triggered
+"target" name of ent to shoot
+"wait" seconds between triggers. Default=0
+"bleft" Min b-box coords XYZ. Default = -16 -16 -16
+"tright" Max b-box coords XYZ. Default = 16 16 16
+*/
+
+/*QUAKED trigger_look (.5 .5 .5) ? x x Trig UseReq'd Turret LookTarget
+"count" number of times it can be used
+"wait" seconds between triggers. Default = 0
+"movewith" ent to move with
+"bleft" Minimum b-box coords XYZ. Default is -16 -16 -16
+"tright" Maximum b-box coords XYZ. Default is 16 16 16
+*/
+
+/*QUAKED trigger_fog (1 0 0) ? x Toggle x StartOff 
+Fog field
+
+"fog_color" specify an RGB color: Default = .5 .5 .5
+"fog_model" default = 1
+   0 :Linear
+   1 :Exp
+   2 :Exp2
+
+"fog_near" Starting distance from player. Default =  64
+"fog_far" How far the player can see into the fog. Default = 1024
+"fog_density" Default = 20
+"density" at 180 degrees; Default=0
+"delay" ramp time in seconds
+"count" number of times it can be used
+
+*/
+
+/*QUAKED target_attractor (1 1 .5) (-8 -8 -8) (8 8 8) StartOn Player NoGravity Monster Sight Single
+
+"accel" acceleration
+"count" number of times it can be used
+"distance" maximum range
+"movewith" ent to follow
+"noise" sound (path/file.wav)
+"pathtarget" used with "movewith"
+"sounds"
+   0: None
+   1: Medic cable
+   2: BFG laser
+"speed" of entity
+"target" entity to attract
+"targetname" of attractor
+
+*/
+
+/*QUAKED tremorModel (1 0 0) ? x Toggle x Player No_Model
+"usermodel" Must provide the path/filename.md2
+"framenumbers" Additional frames
+"startframe" The first frame #"
+"solidstate" 1=Nonsolid 2=Bounding Box
+Set "style" to one of the following animation types:
+	
+0 :(use framenumbers)
+1 :Anim01
+2 :Anim23
+3 :Anim All
+4 :Anim AllFast
+
+"health" Default= 0
+"bleft" The minimum bounding box XYZ coords
+"tright" The max bounding box XYZ coords
+"effects" Choose from one of the following:
+
+0: add values
+1: rotate
+2: gib
+8: blaster
+16: rocket
+32: grenade
+64: hyperblaster
+128: bfg
+256: color_shell
+512: powerscreen
+16384: flies
+32768: quad
+65536: pent
+131072: teleporter
+262144: flag1
+524288: flag2
+1048576: ionripper
+2097152: greengib
+4194304: blue_hb
+8388608: spinning_lights
+16777216: plasma
+33554432: trap
+67108864: tracker
+134217728: double
+268435456: spheretrans
+536870912: tagtrail
+1073741824: half_damage
+2147483648: tracker_trail
+
+"renderfx" Choose from one of the following:
+
+0: add values
+1: minlight
+2: viewermodel
+4: weaponmodel
+8: fullbright
+16: depthhack
+32: translucent
+64: framelerp
+128: beam
+512: glow
+1024: shell_red
+2048: shell_green
+4096: shell_blue
+32768: ir_visible
+65536: shell_double
+131072: shell_half_damage
+262144: use_disguise
+*/
+
+
+/*QUAKED func_bobbingwater (0 .5 .8) ? StartOn Mud
+Moveable, bobbing water
+The water only bobs when triggered. When allowed to "close" on its own, it will not bob during movement to its original position. If you want the func_bobbingwater to bob at both ends of its motion, then don't set its wait to >=0. Instead, use wait -1 and re-trigger it to "close".
+
+"angle" Direction the bobbingwater will move on the XY plane. Default=0.
+"angles" Direction the bobbingwater will move in 3 dimensions, specified by pitch and yaw. Roll is ignored. Syntax is pitch yaw 0. Default=0 0 0.
+"speed" in units/second that the bobbingwater moves. Default=25.
+"targetname" Name of the specific bobbingwater.
+"team" name of the specific bobbingwater. Bobbingwaters with a identical team names will move together, and if solid, will all stop if one is blocked. A func_bobbingwater may be teamed with a func_water.
+"wait" in seconds for the bobbingwater to wait before it returns to its "closed" position. If wait=-1, the bobbingwater must be retriggered in order for it to close. This will also result in the bob effect taking place on both ends of the bobbingwater's motion, rather than just its "opening" motion. Default=-1
+"lip" Lip units visible after move
+"sounds" Default= 1
+   0 :No Sounds
+   1 :Water (Default)
+   2 :Lava
+"bob" Amplitude of motion" Default= 16
+"duration" Time between bobbing cycles. Default= 8
+*/
+
+/*QUAKED func_door_rot_DH (0 .5 .8) ? StartOpen Reverse Crusher No_Monsters Animated Toggle X_Axis Y_Axis
+Identical to func_door_rotating, but "pathtarget" specifies location of origin at runtime
+
+"turn_rider" rotates player. 0=don't turn; 1=player turns with model
+"team" func_door or func_door_rotating
+"distance" The degree of rotation. Default= 90
+"message" Message to print when trigger is inactive
+"health" Damage inflicted before being triggered
+"wait" Number of seconds until it can be reset. Default= 3. -1=Stay Open
+"pathtarget" origin at runtime"
+"dmg" Damage inflicted when blocked. Default= 2
+"movewith" targetname of entity to move with
+"sounds" Noise when moving. 0=Audible (default); 1=Silent
+*/
+
+
+/*QUAKED func_pushable (0 .5 .8) ? x TrigSpawn
+Makes any brush(es) pushable by the player
+
+"dmg" amount of damage in hit points that the pushable will do at its origin when destroyed. If dmg=0, no explosion effect or sound will occur. Default=0.
+"deathtarget" Targetname of ent to be triggered upon the pushable's destruction.
+"health" hit points before the pushable will be destroyed. If health=0, the pushable is immune to weapon fire and falling/impact damage, but will still explode if it blocks a moving brush model. If health<0 the pushable is completely invulnerable and will block moving brush models indefinitely. Default=0.
+"killtarget" Targetname of ent to be removed from the map upon the pushable's destruction.
+"mass" Weight of the func_pushable. The mass value will determine how quickly it can be pushed, if it floats or sinks in a liquid, and how much damage it will do if dropped on another damageable entity. Default=400.
+"message" Specifies the character string to print to the screen upon the pushable's destruction.
+"sounds" to be played when the pushable is moved along while on the ground. Choices are:
+   0: Silent (default)
+   1: Tank thud (sound/tank/thud.wav)
+   2: Railgun hum (sound/weapons/rg_hum.wav)
+   3: Rocket fly (sound/weapons/rockfly.wav)
+"targetname" Name of the specific func_pushable. The pushable may be triggered and made to explode like a func_explosive
+
+*/
+
+/*QUAKED func_rotating_dh (0 .5 .8) ? StartOn Reverse X_Axis Y_Axis TouchPain BlockStops Animate AnimFast
+Identical to func_rotating, but "pathtarget" specifies location of origin at runtime
+
+"turn_rider" rotates player. 0=don't turn; 1=player turns with model
+"team" func_train or func_rotating
+"pathtarget" Brush origin at runtime
+"dmg" Damage inflicted when blocked. Default= 2
+*/
+
+/*QUAKED func_trainbutton (0 .5 .8) ? +Attack NoTouch
+Identical to a func_button, but moves along with the train specified by "movewith"
+
+"movewith" The train's targetname
+*/
+
+/*QUAKED func_vehicle (0 .5 .8) ? x x BlockStops x NoHUD
+A player-controlled vehicle
+
+"angle" Specifies the facing angle of the vehicle on the XY plane. The func_vehicle should be constructed so that its intended "front" faces 0; the value of angle determines the direction the front will face when the map is loaded. Default=0
+
+"dmg" Damage at origin. Default=2
+"deathtarget" ent to trigger at death
+"health" Damage inflicted before vehicle will move. Default=0
+"mass" Weight of vehicle. Default=2000
+"message" Message to print when player takes control of vehicle for the first time
+"move_origin" XYZ driver offset. Default= 0 0 0
+"radius" vehicle's turning radius (default=256)
+"speed" In units/sec. Default=200
+"targetname" name of this vehicle
+"turn_rider"
+     0=Don't turn children (default)
+     1=Turn children w/vehicle
+*/
+
+/*QUAKED model_train (1 0 0) (-8 -8 -8) (8 8 8) StartOn Toggle BlockStops Player NoModel Rotate RotConstant Smooth
+A moving model. The "team" key allows you to team train entities together.
+
+"target" first path_corner"
+"team" func_train or func_rotating
+"usermodel" model (path/file.md2)
+"startframe" first frame #
+"solidstate"
+     1 = Not solid (default)
+     2 = Bounding box
+"style" Animation Type
+     0 = None (default)
+     3 = Anim All
+     4 = Anim AllFast
+"bleft(string) : "Bleft>Min b-box coords XYZ"
+"tright(string) : "Tright>Max b-box coords XYZ"
+"pitch_speed(string) : "Pitch_Speed>deg/sec"
+"yaw_speed(string) : "Yaw_Speed>deg/sec" 
+"roll_speed(string) : "Roll_Speed>deg/sec"
+"dmg" Damage inflicted when blocked. Default=2
+"noise" Sound model makes while moving(path/file.wav)
+"health" Damage inflicted before vehicle will move. Default=0
+"pitch_speed" deg/sec
+"yaw_speed" deg/sec 
+"roll_speed" deg/sec
+"effects" 
+         1: ROTATE Rotate like a weapon
+         2: GIB
+         8: BLASTER Yellowish orange glow plus particles
+        16: ROCKET Rocket trail
+        32: GRENADE Grenade trail
+        64: HYPERBLASTER BLASTER w/o the particles
+       128: BFG Big green ball
+       256: COLOR_SHELL
+       512: POWERSCREEN Green power shield
+     16384: FLIES
+     32768: QUAD Blue shell
+     65536: PENT Red shell
+    131072: TELEPORTER Teleporter particles
+    262144: FLAG1 Red glow
+    524288: FLAG2 Blue glow
+   1048576: IONRIPPER 
+   2097152: GREENGIB
+   4194304: BLUE_HB Blue hyperblaster glow
+   8388608: SPINNING_LIGHTS Red spinning lights
+  16777216: PLASMA
+  33554432: TRAP
+  67108864: TRACKER
+ 134217728: DOUBLE Yellow shell
+ 268435456: SPHERETRANS Transparent
+ 536870912: TAGTRAIL
+1073741824: HALF_DAMAGE
+2147483648: TRACKER_TRAIL
+
+*/
+
+
+/*QUAKED target_fog (1 0 0) (-8 -8 -8) (8 8 8) StartOn Toggle TurnOff
+Turns a brush into fog. You can define your own fog values, using the linear settings. Or, choose one of the exp values. 
+
+The difference between "fog_density" and "density" is dependent on the "angle" key. So you can have a thick fog in one direction and a light fog in the other. So, if "angle" is set to 90, the player will see the thick fog facing in that direction and the light fog in the opposite.
+
+"angle" 0-360 Determines the polar values between "fog_density" and "density"
+"angles" Determines a pitch/roll/yaw of the fog.
+"fog_color" Specify an RGB value
+"fog_model" Choices are:
+   0 :Linear (Default)
+   1 :Exponential
+   2 :Exponential2
+"fog_near" How close the player must get before he sees the fog. Default=64
+"fog_far" How far the player can see into the fog. Default=1024
+"fog_density" dens*10K (exp&exp2) Default=20
+"density" Specifies how player see fog. Direction is in degrees. Default=0
+"delay" ramp time in seconds
+"count" number of times it can be used
+
+*/
+
+/*QUAKED target_fountain (0 0 .9) (-8 -8 -8) (8 8 8) StartOn Splash Bounce FireOnce StartFade
+An MD2 fountain model
+
+"targetname" if triggered
+"tremoreffects" See Lazarus Homepage
+"attenuation" Rebound
+"bleft" Min extent (Default= 0 0 0)
+"count" Number/frames (Default=1)
+"fadeout" Leaf life
+"gravity" sv_gravity ratio
+"mass" Weight of model (Default=0)
+"mass2" Num. splash particles (Default=8)
+"random" Count variance
+"sounds" color index (Default=183)
+"speed" Falling speed (Default=300)
+"tright" Max extent (Default=0 0 0)
+"pitch_speed" deg/sec
+"yaw_speed" deg/sec
+"roll_speed" deg/sec
+"usermodel" model path/name
+*/
+
+/*QUAKED target_lightramp (0 .5 .8) (-8 -8 -8) (8 8 8) Toggle Custom Loop
+Used for dimming or brightening an area. Can simulate lightning effects. You can only specify start/end values.
+
+"count" number of times it can be used
+"target" for spotlights
+"targetname" when triggered
+"speed" How many seconds to cover light value range
+"message" The light range specified from a-m (i.e., message/aj)
+*/
+
+
+/*QUAKED target_locator (1 0 0) (-8 -8 -8) (8 8 8)
+The target of the target_locator is the targetname of the entity you want to "randomize". The targeted entity will spawn at the path_corner specified by the target_locator's pathtarget. Now that path_corner can target another path_corner, which can target another one - so the targeted entity will spawn at any one of those path_corners. Which one? Who knows? It's a randomizing element to prevent someone from knowing where all the goodies are and cheesing the map - it can be different at every map load.
+
+"target" Entity randomized
+"pathtarget" Targetname of 1st path_corner
+*/
+
+
+
+/*QUAKED target_monsterbattle (.5 .5 .5) (-8 -8 -8) (8 8 8)
+Make monster teams fight
+You can only have one target. One monster on dmgteam 1 attacks a monster on dmgteam 2. Everybody on dmgteam 2 gets mad at him, and attacks, bringing the rest of dmgteam 1 into the fight. Very powerful, and with the addition of the dmgteam key to the trigger_relay, many things are possible.
+
+"count" number of times you can stir up trouble
+"target" The monster who gets pissed off and starts the fight.
+"targetname" when triggered
+"killtarget" The monster he goes off on.
+*/
+
+/*QUAKED target_rocks (.5 .5 .5) (-8 -8 -8) (8 8 8)
+Causes a rock slide
+"count" Number of times you can use it.
+"mass" Debris amount. Default=500
+"speed" How fast the rocks come down in units/sec. Default=400
+"style" model ID (Default=0)
+"targetname" when triggered
+
+*/
+
+/*QUAKED target_rotation (.5 .5 .5) (-8 -8 -8) (8 8 8) NoLoop Random
+A target "cycler." Every time you trigger it, it picks from among its string of targets, either in order, or randomly depending on the spawnflag setting.
+
+"count" how many times it can be used
+"target" ents to trigger
+"targetname" when triggered
+*/
+
+/*QUAKED target_temp_entity (1 0 0) (-8 -8 -8) (8 8 8)
+A temporary entity
+
+"movewith" targetname of train or other mover
+"count" how many times it can be used
+"style" Effect type
+   20 :Green Fireball
+   21 :Particles #1
+   22 :Particles #2 (Default)
+*/
+
+
+/*QUAKED target_text (1 0 0) (-4 -4 -4) (4 4 4) File NoBckgrnd
+General text display. You can enter text using the "message" key, or you can refer to a text file. 
+
+"message" string or path/file.txt
+"targetname" when triggered
+*/
+
+/*QUAKED trigger_inside (.5 .5 .5) ? x x Triggered
+A multiple fire trigger that fires its targets when the bounding box of the pathtarget entity is completely inside the trigger field.
+
+"movewith" ent to move with
+"targetname" when triggered
+"wait" Seconds between triggers. Default=0
+"pathtarget" Name of activator
+*/
+
+/*QUAKED trigger_relay (.5 .5 .5) (-4 -4 -4) (4 4 4) 
+Relay trigger
+
+"count" how many times it can be used
+"dmgteam" Monster dmgteam
+"delay" How long before the relay activates in x seconds
+"message" Message to print when activated.
+"sounds" 
+   0 :Beep beep (Default)
+   1 :Secret
+   2 :F1 prompt
+   3 :Silent
+*/
+
+
+/*QUAKED tremor_trigger_multiple (.5 1 .5) ? Monster NoPlayer x x Turret
+Multiple fire toggling trigger
+"count" number of times it can be used
+"wait" Number of seconds between triggers. Default=0
+*/
+
+
+
+
+
+/=====================================================================
+
+/==========================QUAKE 2 ENTS===============================
+
+/THESE ARE FUNC_ ENTS=================================================
+
+/*QUAKED func_train (0 .5 .8) ? StartOn Toggle BlockStops Rotate RotConst Anim AniFast Smooth
+A moving platform that a player can ride on.
+
+"target" Targetname of first path_corner
+"team" Team func_train or func_rotating
+"dmg" Damage inflicted when blocked. Default= 2
+"noise" Sound train makes while in motion (path/file.wav)
+"health" Damage inflicted before train will move. Default=0
+"pitch_speed" (Nose up & Down) in degrees per second 
+"yaw_speed" (Side-to-side "wiggle") in degrees per second
+"roll_speed" (Banking) in degrees per second
+"turn_rider" rotates player. 0=don't turn; 1=player turns with model
+
+*/
+
+/*QUAKED func_rotating (0 .5 .8) ? StartOn Reverse X_Axis Y_Axis TouchPain BlockStop Animated FastAnim
+You need to have an origin brush as part of this entity. The center of that brush will be the point around which it is rotated. It will rotate around the Z axis by default. You can check either the X_Axis or Y_Axis box to change that.
+
+"dmg" Damage in hit points the func_rotating will do to an entity that blocks its movement. Default=2.
+  
+"movewith" Targetname of the parent entity the func_rotating is to movewith.
+  
+"noise" Specifies the .wav file to be played when turning. Syntax: [path]/[file].wav.
+  
+"speed" Speed in degrees/second that the func_rotating turns. Default=100.
+  
+"targetname" Name of the specific func_rotating. When triggered, it will toggle on/off.
+  
+"team" Team name of the specific func_rotating. Func_rotatings with a identical team names will turn together, and will all stop if one is blocked. With some care concerning timing elements, a func_rotating may be teamed with a func_train.
+  
+"turn_rider" If non-zero, a player or other entity riding on the func_rotating will rotate as the func_rotating rotates. See this page for details. Default=0.
+  
+*/
+
+
+/*QUAKED func_button (0 .5 .8) ? killOnUse USEable NoMove
+When a button is touched, it moves some distance in the direction of it's angle, triggers all of it's targets, waits some time, then returns to it's original position where it can be triggered again.
+
+"angle"	determines the opening direction
+"target" all entities with a matching targetname will be used
+"speed"	override the default 40 speed
+"wait" override the default 1 second wait (-1 = never return)
+"lip" override the default 4 pixel lip remaining at end of move
+"health" if set, the button must be "killed" instead of touched
+"message" to print when activated
+"sounds"
+   0 = Audible
+   1 = Silent
+*/
+
+/*QUAKED func_plat (0 .5 .8) ? LowTrigger
+Plats are always drawn in the extended position, so they will light correctly.
+
+If the plat is the target of another trigger or button, it will start out disabled in the extended position until it is trigger, when it will lower and become a normal plat.
+
+"speed" default 200.
+"accel" default 500
+"lip" default 8 pixels
+"height" the movement distance
+If the "height" key is set, that will determine the amount the plat moves, instead of being implicitly determined by the model's height.
+
+Set "sounds" to one of the following:
+1) base fast
+2) chain slow
+*/
+
+/*QUAKED func_door (0 .5 .8) ? Start_Open USEable Crusher NoMonster Animated Toggle FastAnim
+Toggle: Wait in both the start and end states for a trigger event.
+Start_Open: The door to moves to its destination when spawned, and operate in reverse.  It is used to temporarily or permanently close off an area when triggered (not useful for touch or takedamage doors).
+NoMonster: Monsters will not trigger this door
+
+"gib_type" Type of material door is made of
+
+   0 : Default
+   1 : Metal
+   2 : Glass
+   3 : Barrel
+   4 : Crate
+   5 : Rock
+   6 : Crystal
+   7 : Mechanical
+   8 : Wood
+   9 : Tech
+"message" is printed when the door is touched if it is a trigger door and it hasn't been fired yet
+"angle"	determines the opening direction
+"targetname" if set, no touch field will be spawned and a remote button or trigger field activates the door.
+"health" if set, door must be shot open
+"speed"	movement speed (100 default)
+"wait" wait before returning (3 default, -1 = never return)
+"lip" lip remaining at end of move (8 default)
+"team" (targetname of another ent)
+"movewith" (targetname of another ent)
+"dmg" damage to inflict when blocked (2 default)
+"accel" speed increases as it opens
+"decel" speed decreases as it closes
+"sounds" 0=Audible; 1=Silent
+
+*/
+
+/*QUAKED func_door_rotating (0 .5 .8) ? StartOpen Reverse Crusher NoMonster Animated Toggle X_Axis Y_Axis
+Toggle causes the door to wait in both the start and end states for a trigger event.
+
+"gib_type" Type of material door is made of
+
+   0 : Default
+   1 : Metal
+   2 : Glass
+   3 : Barrel
+   4 : Crate
+   5 : Rock
+   6 : Crystal
+   7 : Mechanical
+   8 : Wood
+   9 : Tech
+Start_Open: The door to moves to its destination when spawned, and operate in reverse. It is used to temporarily or permanently close off an area when triggered (not useful for touch or takedamage doors).
+
+NoMonster: Monsters will not trigger this door
+
+You need to have an origin brush as part of this entity.  The center of that brush will be the point around which it is rotated. It will rotate around the Z axis by default. You can check either the X_Axis or Y_Axis box to change that.
+
+"distance" is how many degrees the door will be rotated.
+"dmg" damage to inflict when blocked (2 default)
+"health" if set, door must be shot open
+"killtarget" Targetname of the entity to be killtargeted when the door is activated.
+"message" is printed when the door is touched if it is a trigger door and it hasn't been fired yet
+"movewith" targetname of entity to move with
+"sounds"  0=Audible; 1=Silent
+"speed" determines how fast the door moves; default value is 100.
+"target" Targetname of the entity to be triggered when the door opens. If the target is a func_areaportal, the areaportal will be triggered again when the door closes.
+"targetname" if set, no touch field will be spawned and a remote button or trigger field activates the door.
+"team" Team name of the specific door. Doors with a identical team names will move together, and will all stop if one is blocked. With some care concerning timing elements, a func_door_rotating may be teamed with a func_door.
+"turn_rider" 0 = Don't turn rider (default); 1 = Turn rider
+"wait" wait before returning (3 default, -1 = never return)
+*/
+
+/*QUAKED func_water (0 .5 .8) ? StartOn Mud
+A moveable water brush.  It must be targeted to operate.  Use a non-water texture at your own risk.
+
+"angle" Direction the bobbingwater will move on the XY plane. Default=0.
+"angles" Direction the bobbingwater will move in 3 dimensions, specified by pitch and yaw. Roll is ignored. Syntax is pitch yaw 0. Default=0 0 0.
+"speed" in units/second that the bobbingwater moves. Default=25.
+"targetname" Name of the specific bobbingwater.
+"team" name of the specific bobbingwater. Bobbingwaters with a identical team names will move together, and if solid, will all stop if one is blocked. A func_bobbingwater may be teamed with a func_water.
+"wait" in seconds for the bobbingwater to wait before it returns to its "closed" position. If wait=-1, the bobbingwater must be retriggered in order for it to close. This will also result in the bob effect taking place on both ends of the bobbingwater's motion, rather than just its "opening" motion. Default=-1
+"wait" Number of seconds until reset. Continuous = -1
+"lip" Lip units visible after move
+"sounds" Default= 1
+   0 :No Sounds
+   1 :Water (Default)
+   2 :Lava
+
+*/
+
+
+/*QUAKED func_timer (0.3 0.1 0.6) (-8 -8 -8) (8 8 8) StartOn
+"count" number of times it can be used
+"wait" seconds between firing, Default = 1
+"random" wait variance, either + or -, Default= 0
+"delay"	delay before first firing when turned on, Default= 0
+"pausetime" initial delay used only the very first time and only if spawned with StartOn
+Therefore, the basic time between firing is a random time between (wait - random) and (wait + random)
+
+*/
+
+/*QUAKED func_conveyor (0 .5 .8) ? StartOn Toggle
+Conveyors are stationary brushes that move what's on them. The brush should be have a surface with at least one current content enabled. 
+
+"speed"	Default= 100
+"targetname" for switchable conveyors
+*/
+
+/*QUAKED func_door_secret (0 .5 .8) ? Shootable 1st_Lft 1st_Dwn
+A secret door.  Slide back and then to the side.
+
+1st_Left: 1st move is to the left
+1st_Down: 1st move is downwards
+Shootable: Door is shootable even if targeted
+
+"angle" determines the direction
+"dmg"	damage to inflict when blocked (default 2)
+"wait"	how long to hold in the open position (default 5, -1 means hold)
+"message" to be printed when activated
+*/
+
+/*QUAKED func_killbox (1 0 0) ?
+Kills everything inside when fired, irrespective of protection.
+"count" specifies how many times a player can use it
+*/
+
+/*QUAKED func_group (0 0 0) ?
+Used to group brushes or ents together just for editor convenience.
+*/
+
+/*QUAKED func_areaportal (0 0 0) ?
+This is a non-visible object that divides the world into
+areas that are seperated when this portal is not activated.
+Usually enclosed in the middle of a door.
+*/
+
+/*QUAKED func_wall (0 .5 .8) ? TrigSpawn Toggle StartOn Animated FastAnim
+This is just a solid wall if not inhibited
+
+TrigSpawn: The wall will not be present until triggered it will then blink in to existence; it will kill anything that is in its way
+Toggle: Only valid for TrigSpawn walls. Allows the wall to be turned on and off
+StartOn: Only valid for TrigSpawn walls. The wall will initially be present
+"count" number of times it can be used
+*/
+
+/*QUAKED func_object (0 .5 .8) ? TrigSpawn Animated FastAnim
+This is solid bmodel that will fall if it's support it removed.
+
+"dmg" Damage when blocked. Default=1000
+
+*/
+
+/*QUAKED func_explosive (0 .5 .8) ? TrigSpawn Animated FastAnim
+Any brush that you want to explode or break apart.  If you want an explosion, set dmg and it will do a radius explosion of that amount at the center of the brush. If targeted, it will not be shootable.
+
+"gib_type" Type of explosive debris
+
+   0 : Default
+   1 : Metal
+   2 : Glass
+   3 : Barrel
+   4 : Crate
+   5 : Rock
+   6 : Crystal
+   7 : Mechanical
+   8 : Wood
+   9 : Tech
+"skinnum" skin number
+"delay" Specifies the delay, in seconds, after a func_explosive is triggered or killed before it detonates. Default=0. 
+"dmg" The amount of damage in hit points that the explosive will do at its origin when triggered. If dmg=0, no explosion effect or sound will occur. Default=0.
+"health" Specifies hit points before the explosive will fire. Default=100.
+"killtarget" Targetname of the entity to be removed from the map when the explosive fires.
+"mass" The amount of debris to spawn when the explosive fires. Also specifies mass used in impact damage calculations. Default=75.
+"movewith" Targetname of the parent entity the explosive is to movewith.
+"target" Targetname of the entity to be triggered when the explosive fires.
+"targetname" Specific name of the explosive. An explosive with a targetname cannot be damaged by weapon fire or impact damage, but instead must be triggered by another triggering entity, UNLESS the TRIGGER_SPAWN flag is set.
+
+*/
+
+
+
+
+/THESE ARE ITEM_ ENTS===========================================
+
+
+
+/THESE ARE KEY_ ENTS=======================================
+
+
+
+
+
+
+
+/THESE ARE MISC_ ENTS===================================================
+
+
+
+
+/*QUAKED misc_teleporter (1 0 0) (-32 -32 -24) (32 32 -16) StartOff Toggle NoModel Monster Landmark
+Stepping onto this disc will teleport players to the targeted misc_teleporter_dest object.
+
+"target" name of misc_teleporter_dest
+"targetname" to trigger it on/off
+"angles"
+"movewith" if you want it on a train or other moving ent!
+
+*/
+
+/*QUAKED misc_teleporter_dest (1 0 0) (-32 -32 -24) (32 32 -16)
+Point teleporters at these.
+*/
+
+
+
+/THESE ARE LIGHT_ ENTS========================================================
+
+/*QUAKED light (0 1 0) (-8 -8 -8) (8 8 8) StartOff
+Non-displayed light.
+
+"count" number of times it can be used (if targeted)
+"light" strength of the light. Default=300.
+"target" will toggle between on and off.
+"_cone" default=10; max is 90 (used to set size of spotlights)
+"_falloff" 0=linear; 1=inverse; 2=inverse square
+"_fade" default is 1
+"_angfade" fade on angled surfaces; default=1
+"_color" RGB color 
+"_focus" fades light edges
+"_spotangle" aim yaw (0 to 360)/pitch (-90 to 90)
+"_spotpoint" spot aims at XYZ point
+"style" choose from one of the following:
+   0=Normal (default)
+   1=Flicker #1
+   6=Flicker #2
+   2=Slow Strong Pulse
+   3=Candle #1
+   7=Candle #2
+   8=Candle #3
+   4=Fast Strobe
+   5=Gentle Pulse #1
+   9=Slow Strobe
+  10=Fluorescent Flicker
+  11=Slow pulse, no black
+
+*/
+
+/*QUAKED light_mine1 (0 1 0) (-2 -2 -12) (2 2 12)
+A dusty flourescent light
+
+"light" strength of the light. Default=300.
+"target" will toggle between on and off.
+"_cone" default=10; max is 90 (used to set size of spotlights)
+"_falloff" 0=linear; 1=inverse; 2=inverse square
+"_fade" default is 1
+"_angfade" fade on angled surfaces; default=1
+"_color" RGB color 
+"_focus" fades light edges
+"_spotangle" aim yaw (0 to 360)/pitch (-90 to 90)
+"_spotpoint" spot aims at XYZ point
+"style" choose from one of the following:
+
+0=Normal (default)
+1=Flicker #1
+6=Flicker #2
+2=Slow Strong Pulse
+3=Candle #1
+7=Candle #2
+8=Candle #3
+4=Fast Strobe
+5=Gentle Pulse #1
+9=Slow Strobe
+10=Fluorescent Flicker
+11=Slow pulse, no black
+
+model="models/objects/minelite/light1/"
+*/
+
+
+/*QUAKED light_mine2 (0 1 0) (-2 -2 -12) (2 2 12)
+A clean flourescent light
+
+"light" strength of the light. Default=300.
+"target" will toggle between on and off.
+"_cone" default=10; max is 90 (used to set size of spotlights)
+"_falloff" 0=linear; 1=inverse; 2=inverse square
+"_fade" default is 1
+"_angfade" fade on angled surfaces; default=1
+"_color" RGB color 
+"_focus" fades light edges
+"_spotangle" aim yaw (0 to 360)/pitch (-90 to 90)
+"_spotpoint" spot aims at XYZ point
+"style" choose from one of the following:
+
+0=Normal (default)
+1=Flicker #1
+6=Flicker #2
+2=Slow Strong Pulse
+3=Candle #1
+7=Candle #2
+8=Candle #3
+4=Fast Strobe
+5=Gentle Pulse #1
+9=Slow Strobe
+10=Fluorescent Flicker
+11=Slow pulse, no black
+
+model="models/objects/minelite/light2/"
+*/
+
+/THESE ARE TARGET_ ENTS=======================================================
+
+
+/*QUAKED target_speaker (1 0 0) (-2 -2 -2) (2 2 2) Looped NoLoop Reliable
+
+"attenuation"
+   -1 = none, send to whole level
+   -2 = Activator only
+    1 = normal fighting sounds
+    2 = idle sound level
+    3 = ambient sound level
+"count" how many times it can be used (N/A for looped sounds)
+"movewith" name of ent to track
+"noise" WAV file to play
+"volume" 0.0 to 1.0
+
+Normal sounds play each time the target is used.  The reliable flag can be set for crucial voiceovers.
+Looped sounds are allways atten 3 / vol 1, and the use function toggles it on/off.
+Multiple identical looping sounds will just increase volume without any speed cost.
+*/
+
+
+/*QUAKED target_explosion (1 0 0) (-8 -8 -8) (8 8 8)
+Spawns an explosion temporary entity when used.
+
+"count" number of times it can be used
+"delay" Wait this long before going off
+"dmg" How much radius damage should be done. Default= 0
+"killtarget" name of ent to remove from map
+"movewith" name of ent to move with
+"targetname" when triggered
+
+*/
+
+/*QUAKED target_changelevel (1 0 0) (-8 -8 -8) (8 8 8) Clr_Inven Landmark NoGun
+Changes level to "map" when fired
+
+Clr_Inven: Causes the player to drop all items, keys, weapons, etc upon entering new level.
+Landmark: Allows you to have Half-Life-style transition zones from one map to the next.
+
+"map" the name of the next map. The value formula is entered as such: e1m1$123. "e1m1" is the name of the actual bsp file; the $ sign is a separator; "123" is the targetname of the info_player_start located in the next map.
+
+*/
+
+/*QUAKED target_splash (1 0 0) (-8 -8 -8) (8 8 8)
+Creates a particle splash effect when used.
+
+Set "sounds" to one of the following:
+  1) sparks
+  2) blue water
+  3) brown water
+  4) slime
+  5) lava
+  6) blood
+(NOTE: All except 'sparks' are silent.)
+"angles1" for aiming
+"count"	how many pixels in the splash
+"dmg"	if set, does a radius damage at this location when it splashes. Useful for lava/sparks
+"movewith" ent to travel with
+*/
+
+/*QUAKED target_spawner (1 0 0) (-8 -8 -8) (8 8 8)
+
+"target" type of entity you want spawned
+"count" how many times it can be used
+Useful for spawning monsters and gibs in the factory levels.
+For monsters: Set facing direction you want it to have.
+For gibs,set direction if you want them moving and "speed" (how fast it should be moving). Otherwise, they will just be dropped
+*/
+
+
+/*QUAKED target_blaster (1 0 0) (-8 -8 -8) (8 8 8) NoTrail NoEffects StartOn If_Visible x x x SeekPlayer
+Fires a blaster bolt in the set direction when triggered.
+
+"angles" direction to fire
+"count" number of times it can be used (wait>0 only)
+"dmg" Default= 15
+"movewith" targetname of train or other ent to move with
+"sounds"
+   0 = Blaster
+   1 = Railgun
+   2 = Rocket
+   3 = BFG
+   4 = Homing rockets
+"speed"	Default=1000
+"target" name of ent to shoot at
+"targetname" when triggered
+"wait" firing rate per second; default=0
+
+*/
+
+
+/*QUAKED target_laser (0 .5 .8) (-8 -8 -8) (8 8 8) StartOn Red Green Blue Yellow Orange Fat SeekPlayer
+When triggered, fires a laser.  You can either set a target or a direction.
+
+"angle" aiming direction on the XY plane. Default=0. Ignored if target is used, and/or SEEK_PLAYER is set.
+  
+"angles" aiming direction in 3 dimensions, defined by pitch and yaw (roll is ignored). Default=0 0 0. Ignored if target is used, and/or SEEK_PLAYER is set.
+  
+"count" When non-zero, specifies the number of times the laser will be turned off before it is auto-killtargeted (see this page for details). Default=0.
+  
+"delay" amount of time, in seconds, that a laser pulse will be on. This value must be less than the value of wait. Default=0. Ignored if wait=0.
+  
+"dmg" the number of damage hit points the laser will do every 0.1 seconds. Default=100. If set to a negative value, the laser will give health, but will not cause pain effects. Ignored when style>0.
+  
+"mass" Sets the width of the laser. When 0, uses the default internal value of 4 for normal lasers, or 16 for fat lasers. When non-zero, FAT is ignored. Default=0.
+  
+"movewith" Targetname of parent entity the laser is to movewith.
+  
+"style" Sets the behavior of the laser. When non-zero, dmg is ignored. Choices are:
+   0: Affects health, monsters avoid, creates sparks (normal, default laser).
+   1: No damage; monsters avoid; creates sparks.
+   2: No damage; monsters ignore; creates sparks.
+   3: No damage; monsters ignore; no sparks.
+  
+"target" Targetname of the entity the laser will fire at. If SEEK_PLAYER is set, the player is a higher priority target, and therefore the entity specified by "target" will be ignored, assuming the laser has a clear shot at the player. In the event SEEK_PLAYER is set and the laser has no clear shot at him, it will fall back to firing at its "target".
+  
+"targetname" the specific target_laser.
+  
+"wait" If non-zero, specifies that the laser will pulse on and off automatically. The value specified here sets the amount of time (in seconds) between pulse cycles. Default=0. Also requires the use of delay. (Please see the notes below regarding timing issues when using pulse lasers).
+  
+*/
+
+/*QUAKED target_earthquake (1 0 0) (-8 -8 -8) (8 8 8)
+When triggered, this initiates a level-wide earthquake.
+All players and monsters are affected.
+"speed"	severity of the quake (default:200)
+"count"	duration of the quake (default:5)
+*/
+
+
+/THESE ARE TRIGGER_ ENTS=========================================================
+
+/*QUAKED trigger_multiple (.5 .5 .5) ? Monster NoPlayer Triggered
+Variable sized repeatable trigger.  Must be targeted at one or more entities.
+If "delay" is set, the trigger waits some time after activating before firing.
+"wait" : Seconds between triggerings. (.2 default)
+"sounds"
+1) secret
+2) beep beep
+3) large switch
+
+set "message" to text string
+*/
+
+
+/*QUAKED trigger_once (.5 .5 .5) ? x x Triggered x Turret
+Triggers once, then removes itself.
+You must set the key "target" to the name of another object in the level that has a matching "targetname".
+
+If triggered, this trigger must be triggered before it is live.
+
+"sounds"
+ 1 = secret
+ 2 = beep beep
+ 3 = large switch
+"message" string to be displayed when triggered
+*/
+
+/*QUAKED trigger_key (.5 .5 .5) (-8 -8 -8) (8 8 8) MultiUse KeepKey Silent
+A relay trigger that only fires it's targets if player has the proper key.
+If the Silent spawnflag is set, neither the success or failure sounds are played, and the "You need the..." message is not displayed. Useful for removing items from players.
+
+"item" specifies the key; for example "key_data_cd"
+"message" printed when successful
+"key_message" printed when player doesn't have key
+*/
+
+
+/*QUAKED trigger_counter (.5 .5 .5) (-8 -8 -8) (8 8 8) NoMessage
+Acts as an intermediary for an action that takes multiple inputs.
+
+If NoMessage is not set, it will print "1 more...2 more..." etc, when triggered and "sequence complete" when finished. After the counter has been triggered "count" times (default 2), it will fire all of it's targets and remove itself.
+
+"killtarget" ent to remove when triggered
+"message" to print when triggered
+"sounds"
+   0 Beep beep (Default)
+   1 Secret
+   2 F1 prompt
+   3 Silent"
+"targetname" when triggered
+"target"
+"delay" trigger activates in X seconds
+"count" triggers before firing; default=2
+ 
+*/
+
+/*QUAKED trigger_teleporter (.5 .5 .5) ? x Triggered x Monster NoEffects Sound Landmark
+Teleporter field that can transport monsters or players
+
+Use the 'SOUND' spawnflag and then choose your own custom sound.
+"noise" (path/file.wav)
+"target" destination
+*/
+
+
+/*QUAKED trigger_always (.5 .5 .5) (-8 -8 -8) (8 8 8)
+This trigger will always fire.  It is activated by the world.
+
+"count" number of times it can be used
+"delay" seconds to initiate
+"killtarget" ent to remove when triggered
+"message" to print when triggered
+"sounds"
+   0 Beep beep (Default)
+   1 Secret
+   2 F1 prompt
+   3 Silent"
+"target"
+
+*/
+
+
+/*QUAKED trigger_push (.5 .5 .5) ? PushOnce Sound
+Pushes the player
+If SOUND spawnflag is not set, it will use the default "wind" sound
+
+"speed"	defaults to 1000
+"noise" (path/file.wav) 
+
+*/
+
+/*QUAKED trigger_hurt (.5 .5 .5) ? StartOff Toggle Silent NoProtect Slow NoGib Enviro
+Any entity that touches this will be hurt.
+
+SPAWNFLAGS
+   Silent: Supresses playing the sound
+   Slow: Changes the damage rate to once per second
+   NoProtect: *nothing* stops the damage
+   NoGib: The player will only die and not be gibbed
+   Enviro: will not hurt if wearing environment suit
+
+"dmg" Specifies the number of damage hit points the trigger_hurt will do every 0.1 seconds. Default=5. If set to a negative value, the trigger_hurt will give health, but will not cause pain effects.
+"movewith" Targetname of the parent entity the trigger_hurt is to movewith.
+"targetname" Name of the specific trigger_hurt.
+
+*/
+
+
+/*QUAKED trigger_gravity (.5 .5 .5) ?
+Changes the touching entites gravity to the value of "gravity".  1.0 is standard gravity for the level.
+*/
+
+
+
+/THESE ARE MONSTER_ ENTS======================================================
+
+/*QUAKED monster_berserk (1 .5 0) (-16 -16 -24) (16 16 32) Ambush TrigSpawn Sight GoodGuy NoGib x x IgnoreFire
+"angle" Specifies the facing angle of the monster on the XY plane. Default=0
+"angles" facing angle in 3 dimensions as defined by pitch, yaw & roll
+"blood_type"
+   0 : Default
+   1 : Green
+   2 : Robot sparks
+"combattarget" to the first point_combat
+"deathtarget" trigger a specific entity at death
+"dmgteam" for use with target_monsterbattle
+"flies" percent chance of flies; Default=.20
+"gib_health" means gib level; default= -60
+"gib_type" models/objects/gibX Default=0
+"health" hit points before death; default=240
+"item" to spawn at death
+"killtarget" at death remove a specific entity from map
+"movewith" targetname of entity to move with
+"mass" default=250
+"powerarmor" amount of optional power shield armor the monster has. Default=0
+"style" specifies skin monster will use
+   0 = standard skin (default)
+   1 = 1st custom skin
+   2 = 2nd custom skin
+   3 = 3rd custom skin
+"target"  to path_corner/killtarget
+"targetname" name of this monster
+
+model="models/monsters/berserk/"
+*/
+
+
+/*QUAKED monster_mutant (1 .5 0) (-32 -32 -24) (32 32 32) Ambush TrigSpawn Sight GoodGuy NoGib x x IgnoreFire
+"angle" Specifies the facing angle of the monster on the XY plane. Default=0
+"angles" facing angle in 3 dimensions as defined by pitch, yaw & roll
+"blood_type"
+   0 : Default
+   1 : Green
+   2 : Robot sparks
+"combattarget" to the first point_combat
+"deathtarget" trigger a specific entity at death
+"dmgteam" for use with target_monsterbattle
+"flies" percent chance of flies; Default=.90
+"gib_health" means gib level; default= -120
+"gib_type" models/objects/gibX Default=0
+"health" hit points before death; default=300
+"item" to spawn at death
+"killtarget" at death remove a specific entity from map
+"movewith" targetname of entity to move with
+"mass" default=300
+"powerarmor" amount of optional power shield armor the monster has. Default=0
+"style" specifies skin monster will use
+   0 = standard skin (default)
+   1 = 1st custom skin
+   2 = 2nd custom skin
+   3 = 3rd custom skin
+"target"  to path_corner/killtarget
+"targetname" name of this monster
+
+model="models/monsters/mutant/"
+*/
+
+
+
+
+/THESE ARE INFO_ ENTS=======================================================
+
+/*QUAKED info_player_start (1 0 0) (-16 -16 -24) (16 16 32)
+The normal starting point for a level.
+"angle" Specifies a facing direction on the XY plane. Default=0.
+
+"angles" Specifies a facing direction in 3 dimensions, defined by pitch, yaw, and roll. Default=0 0 0.
+
+"count" When non-zero, specifies the number of times the start will be used as a spawn point before being auto-killtargeted. Default=0. Ignored unless deathmatch=0.
+
+"style" Specifies the player's starting weapon. Overrides the style setting used by worldspawn. If non-zero, the player's current inventory will be cleared; this will not serve to add a weapon to his current arsenal. Choices are:
+   0: Don't specify (default)
+   1: Blaster
+   2: Shotgun, Blaster backup
+   3: Super Shotgun, Blaster backup
+   4: Machinegun, Blaster backup
+   5: Chaingun, Blaster backup
+   6: Grenade Launcher, Blaster backup
+   7: Rocket Launcher, Blaster backup
+   8: Hyperblaster, Blaster backup
+   9: Railgun, Blaster backup
+   10: BFG10K, Blaster backup
+   -1: No weapon at all
+   -2: Shotgun, no Blaster
+   -3: Super Shotgun, no Blaster
+   -4: Machinegun, no Blaster
+   -5: Chaingun, no Blaster
+   -6: Grenade Launcher, no Blaster
+   -7: Rocket Launcher, no Blaster
+   -8: Hyperblaster, no Blaster
+   -9: Railgun, no Blaster
+   -10: BFG10K, no Blaster
+
+"targetname" Name of the specific info_player_start. When loading a map with multiple info_player_starts from the console, the start that the player will spawn at will be the first unnamed start found in the map file. If all starts are named, it will be the first start found.
+  
+*/
+
+
+
+/*QUAKED info_player_coop (1 0 1) (-16 -16 -24) (16 16 32)
+Potential spawning position for coop games
+"angle" Specifies a facing direction on the XY plane. Default=0.
+
+"angles" Specifies a facing direction in 3 dimensions, defined by pitch, yaw, and roll. Default=0 0 0.
+
+"style" Specifies the player's starting weapon. Overrides the style setting used by worldspawn. If non-zero, the player's current inventory will be cleared; this will not serve to add a weapon to his current arsenal. Choices are:
+   0: Don't specify (default)
+   1: Blaster
+   2: Shotgun, Blaster backup
+   3: Super Shotgun, Blaster backup
+   4: Machinegun, Blaster backup
+   5: Chaingun, Blaster backup
+   6: Grenade Launcher, Blaster backup
+   7: Rocket Launcher, Blaster backup
+   8: Hyperblaster, Blaster backup
+   9: Railgun, Blaster backup
+   10: BFG10K, Blaster backup
+   -1: No weapon at all
+   -2: Shotgun, no Blaster
+   -3: Super Shotgun, no Blaster
+   -4: Machinegun, no Blaster
+   -5: Chaingun, no Blaster
+   -6: Grenade Launcher, no Blaster
+   -7: Rocket Launcher, no Blaster
+   -8: Hyperblaster, no Blaster
+   -9: Railgun, no Blaster
+   -10: BFG10K, no Blaster
+
+"targetname" Name of the specific info_player_coop
+
+
+*/
+
+
+
+/*QUAKED info_null (0 0.5 0) (-4 -4 -4) (4 4 4)
+Used as a positional target for spotlights, etc.
+*/
+
+/*QUAKED info_notnull (0 0.5 0) (-4 -4 -4) (4 4 4)
+Used as a positional target for lightning.
+*/
+
+
+
+/EVERYTHING ELSE GOES HERE========================================
+
+/*QUAKED path_corner (.5 .3 0) (-8 -8 -8) (8 8 8) Teleport NoRotate
+Defines paths for trains, monsters, etc. "Teleport" brings the ent back to the first PC to start over.
+
+"count" number of times it can be used by entity
+"target" next path corner
+"wait"  number of seconds before continuing; -1 = wait for retrigger
+"speed" speed of train
+"pitch_speed" (Nose up & Down) in degrees per second 
+"yaw_speed" (Side-to-side "wiggle") in degrees per second
+"roll_speed" (Banking) in degrees per second
+
+*/
+
+/*QUAKED point_combat (.5 .3 0) (-8 -8 -8) (8 8 8) Hold DriveTrain
+Makes this the target of a monster and it will head here when first activated before going after the activator. If hold is selected, it will stay here.
+
+"count" number of times it can be used
+"pathtarget" targetname of entity to be triggered when the point_combat is used.
+"target" targetname of the next point_combat in the path
+"targetname" name of the specific p_c
+*/
+
+
+
+
+
+
+
+
+
+
+/*QUAKED model_spawn (1 0 0) (-4 -4 -4) (4 4 4) x Toggle x Player NoModel AnimOnce
+A MapPack model spawner. See Lazarus website for more info.
+
+Spawnflags:
+TOGGLE: Start active, when triggered become inactive 
+PLAYER: Set this if you want to use a player model. If usermodel is blank, model_spawn will use the model of the player. Otherwise the model found at players/<usermodel>/tris.md2 will be used. Note that if you specify a player model using usermodel, it must be a model that has been modified as described in the ActorPak documentation, or the model will not be skinned.
+NOMODEL: Don't use a model. Useful for placing particle effects and dynamic lights.
+ANIMONCE: Cycles through the animation once and then stops. Useful for lightning effects.   
+---------------------
+Key/Value pairs:
+"style" Specifies the animation type to use.
+   0: None (unless startframe and framenumbers are used)
+   1: ANIM01 - cycle between frames 0 and 1 at 2 hz
+   2: ANIM23 - cycle between frames 2 and 3 at 2 hz
+   3: ANIM_ALL - cycle through all frames at 2 hz
+   4: ANIM_ALLFAST - cycle through all frames at 10 hz
+
+Note: The animation flags override startframe and framenumbers settings you may have enterered. ANIM_ALL and ANIM_ALLFAST don't do what you might think - rather than setting a framerate, these apparently cause the model to cycle through its ENTIRE sequence of animations in 0.5 or 0.1 seconds... which for monster and player models is of course not possible. Looks exceptionally goofy. 
+
+"usermodel" The model to load ("models/" will be tacked on to the front, or if PLAYER is set, "players/" will be tacked on to the front and "/tris.md2" to the end). 
+"startframe" The starting frame : default 0 
+"framenumbers" The number of frames you want to display after startframe 
+"health" If non-zero and solidstate is 3 or 4 (solid), the entity will be shootable. When destroyed, it blows up with a no-damage explosion. 
+"solidstate" 
+   1 - not solid at all. These models do not obey any sort of physics. If you place them up in the air or embedded in a wall they will stay there and be perfectly happy about it. 
+   2 - solid. These models will "droptofloor" when spawned. If the health value is set they may be damaged. 
+   3 - solid. Same as above but not affected by gravity. Model will remain in the same location. 
+   4 - not solid but affected by gravity. Model will "droptofloor" when spawned. 
+NOTE : if you want the model to be solid and/or drop to the floor then you must enter vector values into the following fields: 
+"bleft" the point that is at the bottom left of the models bounding box in a model editor 
+"tright" the point that is at the top left of the models bounding box in a model editor 
+"effects" 
+         1: ROTATE Rotate like a weapon
+         2: GIB
+         8: BLASTER Yellowish orange glow plus particles
+        16: ROCKET Rocket trail
+        32: GRENADE Grenade trail
+        64: HYPERBLASTER BLASTER w/o the particles
+       128: BFG Big green ball
+       256: COLOR_SHELL
+       512: POWERSCREEN Green power shield
+     16384: FLIES Ewwww
+     32768: QUAD Blue shell
+     65536: PENT Red shell
+    131072: TELEPORTER Teleporter particles
+    262144: FLAG1 Red glow
+    524288: FLAG2 Blue glow
+   1048576: IONRIPPER 
+   2097152: GREENGIB
+   4194304: BLUE_HB Blue hyperblaster glow
+   8388608: SPINNING_LIGHTS Red spinning lights
+  16777216: PLASMA
+  33554432: TRAP
+  67108864: TRACKER
+ 134217728: DOUBLE Yellow shell
+ 268435456: SPHERETRANS Transparent
+ 536870912: TAGTRAIL
+1073741824: HALF_DAMAGE
+2147483648: TRACKER_TRAIL
+"renderfx" 
+     1: MINLIGHT Never completely dark
+     2: VIEWERMODEL
+     4: WEAPONMODEL
+     8: FULLBRIGHT
+    16: DEPTHHACK
+    32: TRANSLUCENT Transparent
+    64: FRAMELERP
+   128: BEAM
+   512: GLOW Pulsating glow of normal Q2 pickup items
+  1024: SHELL_RED
+  2048: SHELL_GREEN
+  4096: SHELL_BLUE
+ 32768: IR_VISIBLE
+ 65536: SHELL_DOUBLE
+131072: SHELL_HALF_DAMAGE White shell
+262144: USE_DISGUISE 
+"movewith" Targetname of the entity to move with 
+
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*QUAKED info_player_team1 (1 0 0) (-16 -16 -24) (16 16 32)
+*/
+
+/*QUAKED info_player_team2 (1 0 0) (-16 -16 -24) (16 16 32)
+*/
+
+/*QUAKED info_player_deathmatch (0 1 0) (-16 -16 -24) (16 16 32) x x nonsolid
+*/
+
+
+
+/*QUAKED item_health_large (.3 .3 1) (-16 -16 -16) (16 16 16) x x NoSpin NoDrop Shootable
+model="models/items/backpack/tris.md2"
+*/
+
+
+
+/*QUAKED item_armor_body (.3 .3 1) (-16 -16 -16) (16 16 16) x x NoSpin NoDrop Shootable
+model="models/items/armor/body/tris.md2"
+*/
+
+
+
+/*QUAKED ammo_shells (.3 .3 1) (-16 -16 -16) (16 16 16) x x x NoDrop Shootable
+model="models/items/backpack/tris.md2"
+*/
+
+
+/*QUAKED ammo_rockets (.3 .3 1) (-16 -16 -16) (16 16 16) x x x NoDrop Shootable
+model="models/items/backpack/tris.md2"
+*/
+
+
+
+
+
+
+/*QUAKED target_help (1 0 1) (-8 -8 -8) (8 8 8) Help1
+When fired, the "message" key becomes the current personal computer string, and the message light will be set on all clients status bars.
+
+To fill in the Secondary Objective field, a second target_help is needed, only do not check the HELP1 spawnflag.
+
+Help1: the prime objective
+"message" to display
+"count" number of times it can be used
+*/
+
+
+/*QUAKED target_cd (0 1 0) (-8 -8 -8) (8 8 8)
+A CD track player
+
+"count" number of times it can be used
+"dmg" times to loop; default=1
+"sounds" CD track number; default=2
+"targetname" when triggered
+*/
+
+
+
+/*QUAKED target_monitor (0 1 0) (-8 -8 -8) (8 8 8) ChaseCam
+A temporary viewpoint
+
+"angle" facing direction on the XY plane. Default=0. Ignored if a target value exists.
+  
+"angles" facing direction in 3 dimensions, defined by pitch, yaw, and roll. Default=0 0 0. Ignored if a target value exists.
+  
+"count" When non-zero, specifies the number of times the target_monitor will be called before being auto-killtargeted. Default=0.
+  
+"distance" Sets the distance of the viewpoint from the targeted entity. Ignored if CHASE_CAM is not set. Default=128.
+  
+"height" Sets the vertical distance of the viewpoint above or below the top of the bounding box of the targeted entity. Ignored if CHASE_CAM is not set. Default=16.
+  
+"movewith" Targetname of the parent entity the monitor is to movewith.
+  
+"noise" .wav file to play when the view shifts. This sound is only heard by the player that triggers the monitor.
+  
+"target" Targetname of the entity the monitor will aim at.
+  
+"targetname" Name of the specific monitor.
+  
+"wait" Time in seconds for the monitor to wait before it returns the player view to normal. If wait=-1, the monitor must be retriggered for this to happen. Default=3.
+
+*/
+
+
+//=================================== GRAVITY BONE CUSTOM ENTITIES ===================================
+//====================================================================================================
+
+
+
+
+//here be the custom stuffs
+
+
+/*QUAKED item_freezable(0 1 0) (-3 -3 -3) (3 3 3) 
+A padlock. Player can use freon and hammer to smash it open.
+
+"target" what to fire when frozen and broken.
+*/
+
+/*QUAKED item_doorknob(0 1 1) (-4 -4 -3) (4 4 3) 
+model="models/doorknob.md2"
+a doorknob that can be +USEd to open doors. Standard location is 36 units above the ground, 4 units away from doorframe.
+
+"style" 2 = locked.
+"movewith" the door to attach to.
+"target" the door to attach to.
+*/
+
+
+
+
+/*QUAKED item_lever(0 1 0) (-4 -4 -4) (4 4 4) 
+A lever that's mounted on a wall. Don't place this in a wall; code will traceline and smush it against nearby geometry.
+*/
+
+/*QUAKED func_lavashooter (.5 .5 .5) ? 
+Shoot a lava ball!
+*/
+
+
+/*QUAKED item_chain(0.3 0.3 1) (-4 -4 -4) (4 4 4) 
+A chain that does a traceline to extend to the ceiling. Used for catwalks, etc.
+*/
+
+/*QUAKED item_pickable(1 0 0) (-4 -4 0) (4 4 8) StartOff
+Object that disappears when +use'd.  
+
+"target" what to fire when +use'd.
+"usermodel" The model to load ("models" will be tacked onto the front)
+
+Flags:
+StartOff = start invisible. Trigger it to make it visible.
+*/
+
+/*QUAKED target_hinttitle(0 1 0) (-4 -4 -4) (4 4 4) 
+hud text. must be triggered to toggle it on/off.
+
+style
+0 = main title (default)
+1 = contract complete!
+2 = find the exit!
+*/
+
+
+/*QUAKED item_partyguest(1 0 0) (-8 -8 0) (8 8 52) 
+model="models/monsters/partyguest/tris.md2"
+
+a party guest that stands around in idle animation.
+*/
+
+/*QUAKED monster_dinnerguest(1 0 0) (-8 -8 0) (8 8 52) 
+model="models/monsters/dinnerguest/body.md2"
+
+a dinner guest that sits in a chair and gawks at the player.
+*/
+
+
+
+
+/*QUAKED model_animated(0 1 0) (-4 -4 -4) (4 4 4) StartOn
+Animated prop. Triggerign it will play the animation; trigger again to play it backwards.
+
+"usermodel" The model to load ("models" will be tacked onto the front)
+"startframe" The starting frame : default 0 
+"framenumbers" The number of frames you want to display after startframe 
+"pathtarget" attach a modelindex2 to this mesh.
+*/
+
+
+/*QUAKED item_suitcase(0 1 1) (-8 -8 0) (8 8 16) 
+model="models/objects/suitcase/tris.md2"
+
+A suitcase. Player can +USE it to open/close it. Used to play the mission briefing. 
+*/
+
+
+/*QUAKED target_equip(0 1 0) (-8 -8 -8) (8 8 8) RemoveCard
+equip player with item or weapon. must be triggered. removes the "No Weapon" when triggered.
+
+"style"
+    1  = pressurized freon spraycan.
+    2  = ball peen hammer.
+    3  = nikita powerdrill.
+    4  = camera.
+    10 = fine wine platter.
+    11 = the teletran card.
+
+
+Flags:
+RemoveCard = remove the teletran card item from player inventory.
+*/
+
+/*QUAKED item_wallbutton(0 1 1) (-3 -3 -3) (3 3 3) StartOff
+model="models/objects/wallbutton/tris.md2"
+
+a button on the wall the player can +USE. Standard height is 40 units above ground. Don't place this in the wall or else the sounds won't  play; code will automatically do a traceline and smush it against solid geometry.
+*/
+
+
+
+
+/*QUAKED func_usebutton (0 .5 .8) ? KillOnUse StartOff
+A brush button the player has to +USE to activate.
+
+"target" all entities with a matching targetname will be used
+"wait" override the default 1 second wait (-1 = never return)
+"sounds"
+   0 = Audible
+   1 = Silent
+
+flags:
+KillOnUse = button permanently disappears when used.
+StartOff = starts invisible
+*/
+
+/*QUAKED monster_reynard (0 1 1) (-3 -3 -3) (3 3 3) 
+model="models/monsters/reynard/tris.md2"
+
+Reynard Muldrake!  Has custom code that removes the platter weapon from player.
+
+*/
+
+
+/*QUAKED monster_olive (0 1 1) (-3 -3 -3) (3 3 3) 
+model="models/monsters/olive/tris.md2"
+
+Olive! Reading a good book.
+
+*/
+
+
+/*QUAKED monster_olivesmoker (0 1 1) (-3 -3 -3) (3 3 3) 
+model="models/monsters/olive/tris.md2"
+
+Special scripted olive for the train tunnel.
+
+*/
+
+
+/*QUAKED monster_oliveshooter (0 1 1) (-3 -3 -3) (3 3 3) 
+model="models/monsters/olive/tris.md2"
+
+Special scripted olive for the catwalk shoot.
+
+*/
+
+
+
+
+/*QUAKED monster_goon (0 1 1) (-3 -3 -3) (3 3 3) 
+model="models/monsters/goon/tris.md2"
+
+special goon for the car chase. fires gun at random intervals.
+
+*/
+
+
+
+
+/*QUAKED monster_guard (0 1 1) (-3 -3 -3) (3 3 3) 
+model="models/monsters/guard/body.md2"
+
+A disembodied head that tracks the player.
+*/
+
+
+
+/*QUAKED monster_worker (0 1 1) (-3 -3 -3) (3 3 3) 
+model="models/monsters/worker/tris.md2"
+
+office dude
+*/
+
+
+
+/*QUAKED target_checkpoint(0 1 0) (-8 -8 -8) (8 8 8)
+target this to do an autosave checkpoint. for example, before you toss the player into a pit of exploding tigers.
+
+"targetname" - must have a targetname, must be triggered.
+
+*/
+
+
+
+
+/*QUAKED item_flagpole (0 1 1) (-3 -3 -3) (3 3 3) 
+model="models/objects/flagpole/tris.md2"
+
+a flagpole.
+*/
+
+
+
+/*QUAKED item_photoitem(1 0 0) (-4 -4 0) (4 4 8) 
+an item you can take a picture of. 
+
+"target" what to fire when player takes its picture.
+"usermodel" The model to load ("models" will be tacked onto the front)
+
+*/
+
+
+
+/*QUAKED item_breakable(0 1 0) (-4 -4 -4) (4 4 4) 
+breakable item used during the dinner table sequence. breaks automatically when player steps on it.
+
+Style
+ 0 - wine glass
+
+*/
+
+
+/*QUAKED target_photocounter (.5 .5 .5) (-8 -8 -8) (8 8 8) NoMessage
+counter for taking photos
+
+"targetname" when triggered
+"target"
+"count" how much photos; default=2
+ 
+*/
+
+
+/*QUAKED target_blood(0 1 0) (-8 -8 -8) (8 8 8) 
+shoots blood.
+*/
+
+
+
+/*QUAKED target_screenshake(0 1 0) (-8 -8 -8) (8 8 8) 
+shakes player's screen.
+*/
+
+
+/*QUAKED target_viewlock(0 1 0) (-8 -8 -8) (8 8 8) 
+lock player viewport
+*/
+
+/*QUAKED target_freeze(0 1 0) (-8 -8 -8) (8 8 8) 
+lock player in place
+*/
+
+
+
