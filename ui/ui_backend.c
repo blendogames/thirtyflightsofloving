@@ -811,7 +811,13 @@ void Menu_Draw (menuframework_s *menu)
 							min[0] -= SCR_ScaledVideo(len*MENU_FONT_SIZE - LCOLUMN_OFFSET*2);
 						}
 
-						len = strlen(spin->itemnames[spin->curvalue]);
+						//len = strlen(spin->itemnames[spin->curvalue]);
+
+						if (spin->curvalue >= 0) //BC 6-15-2020 crash fix if curvalue is < 0
+							len = strlen(spin->itemnames[spin->curvalue]);
+						else
+							len = 3;
+
 						max[0] += SCR_ScaledVideo(len*MENU_FONT_SIZE);
 
 						type = MENUITEM_ROTATE;

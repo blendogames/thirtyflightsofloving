@@ -6,6 +6,7 @@
 *.filters
 *.plg
 *.opt
+*.opensdf
 .vs/
 debug/
 debugaxp/
