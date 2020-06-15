@@ -678,8 +678,9 @@ void fire_freon (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed,
 	
 	AngleVectors (dir, forward, right, up);
 
-	VectorMA (dir, -0.1, right, dir);
-	VectorMA (dir, 0.07, up, dir);
+	//BC 6-14-2020 remove the offset. make freon aim toward center crosshair.
+	//VectorMA (dir, -0.1, right, dir);
+	//VectorMA (dir, 0.07, up, dir);
 
 
 	VectorMA (dir, crandom() * 0.04, right, dir);
@@ -718,7 +719,7 @@ void fire_freon (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed,
 
 	bolt->owner = self;
 	bolt->touch = freon_touch;
-	bolt->nextthink = level.time + 0.24;  //8-17-2012 was .16, increased higher.
+	bolt->nextthink = level.time + 0.25;  //8-17-2012 was .16, increased higher.  //BC 6-14-2020 synced up to same value as gravitybone standalone.
 	bolt->think = G_FreeEdict;
 	bolt->dmg = 1;
 	bolt->classname = "bolt";
