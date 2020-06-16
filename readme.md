@@ -3,7 +3,7 @@
 ## About
 This is the source code to [Thirty Flights of Loving (2012)](http://blendogames.com/thirtyflightsofloving).
 
-Thirty Flights of Loving uses idTech2, otherwise known as the Quake 2 engine.
+Thirty Flights of Loving uses [idTech2](https://en.wikipedia.org/wiki/Quake_II_engine), otherwise known as the Quake 2 engine.
 
 ## License
 This source code is licensed under the [GNU General Public License](https://github.com/blendogames/thirtyflightsofloving/blob/master/LICENSE).
