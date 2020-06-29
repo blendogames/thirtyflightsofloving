@@ -180,6 +180,11 @@ cvar_t	*loc_here;
 cvar_t	*loc_there;
 #endif	// LOC_SUPPORT
 
+// Chat Ignore from R1Q2/Q2Pro
+chatIgnore_t	cl_chatNickIgnores;
+chatIgnore_t	cl_chatTextIgnores;
+// end R1Q2/Q2Pro Chat Ignore
+
 client_static_t	cls;
 client_state_t	cl;
 
@@ -187,14 +192,7 @@ centity_t		cl_entities[MAX_EDICTS];
 
 entity_state_t	cl_parse_entities[MAX_PARSE_ENTITIES];
 
-
-float ClampCvar( float min, float max, float value )
-{
-	if ( value < min ) return min;
-	if ( value > max ) return max;
-	return value;
-}
-
+qboolean		local_initialized = false;
 
 //======================================================================
 
@@ -366,6 +364,353 @@ void CL_Record_f (void)
 	// the rest of the demo file will be individual frames
 }
 
+//======================================================================
+// Chat Ignore from R1Q2/Q2Pro
+//======================================================================
+
+/*
+===================
+CL_FindChatIgnore
+===================
+*/
+chatIgnore_t *CL_FindChatIgnore (chatIgnore_t *ignoreList, const char *match)
+{
+	chatIgnore_t	*cur=NULL;
+
+	if (!ignoreList || !ignoreList->next)	// no list to search
+		return NULL;
+	if ( !match || (strlen(match) < 1) )	// no search string
+		return NULL;
+
+	for (cur = ignoreList->next; cur != NULL; cur = cur->next)
+	{
+		if ( !cur->text || (strlen(cur->text) < 1) )
+			continue;
+		if (!strcmp(cur->text, match))
+			return cur;
+	}
+
+	return NULL;
+}
+
+
+/*
+===================
+CL_AddChatIgnore
+===================
+*/
+qboolean CL_AddChatIgnore (chatIgnore_t *ignoreList, const char *add)
+{
+	chatIgnore_t	*next=NULL, *newEntry=NULL;
+	size_t			textLen;
+
+	if (!ignoreList)	// nothing to remove
+		return false;
+	if ( !add || (strlen(add) < 1) )	// no string to add
+		return false;
+
+	// Don't add the same ignore twice
+	if ( CL_FindChatIgnore (ignoreList, add) ) {
+		Com_Printf ("%s is already in ignore list.\n", add);
+		return false;
+	}
+
+	next = ignoreList->next;	// should be NULL for first entry
+	textLen = strlen(Cmd_Argv(1))+1;
+	newEntry = Z_Malloc (sizeof(chatIgnore_t));
+	newEntry->numHits = 0;
+	newEntry->text = Z_Malloc (textLen);
+	Q_strncpyz (newEntry->text, Cmd_Argv(1), textLen);
+	newEntry->next = next;
+	ignoreList->next = newEntry;
+
+	return true;
+}
+
+
+/*
+===================
+CL_RemoveChatIgnore
+===================
+*/
+qboolean CL_RemoveChatIgnore (chatIgnore_t *ignoreList, const char *match)
+{
+	chatIgnore_t	*cur=NULL, *last=NULL, *next=NULL;
+
+	if (!ignoreList || !ignoreList->next)	// nothing to remove
+		return false;
+	if ( !match || (strlen(match) < 1) )	// no search string
+		return false;
+
+	for (last = ignoreList, cur = ignoreList->next; cur != NULL; last = cur, cur = cur->next)
+	{
+		if ( !cur->text || (strlen(cur->text) < 1) )
+			continue;
+		if ( !strcmp(match, cur->text) )
+		{
+			next = cur->next;
+			last->next = next;
+
+			Z_Free (cur->text);
+			cur->text = NULL;
+			Z_Free (cur);
+
+			return true;
+		}
+	}
+
+	Com_Printf ("Can't find ignore filter \"%s\"\n", match);
+	return false;
+}
+
+
+/*
+===================
+CL_RemoveAllChatIgnores
+===================
+*/
+void CL_RemoveAllChatIgnores (chatIgnore_t *ignoreList)
+{
+	chatIgnore_t	*cur=NULL, *next=NULL;
+	int				count = 0;
+
+	if (!ignoreList || !ignoreList->next)	// nothing to remove
+		return;
+
+	cur = ignoreList->next;
+	next = cur->next;
+	do
+	{
+		if (cur->text != NULL) {
+			Z_Free (cur->text);
+			cur->text = NULL;
+		}
+		next = cur->next;
+		Z_Free (cur);
+		cur = next;
+		count++;
+	} while (cur != NULL);
+
+	ignoreList->next = NULL;
+
+	Com_Printf ("Removed %i ignore filter(s).\n", count);
+}
+
+
+/*
+===================
+CL_ListChatIgnores
+===================
+*/
+void CL_ListChatIgnores (chatIgnore_t *ignoreList)
+{
+	chatIgnore_t	*cur=NULL;
+
+	if (!ignoreList || !ignoreList->next)	// no list to output
+		return;
+
+	Com_Printf ("Current ignore filters:\n");
+	for (cur = ignoreList->next; cur != NULL; cur = cur->next)
+	{
+		if ( !cur->text || (strlen(cur->text) < 1) )
+			continue;
+		Com_Printf ("\"%s\" (%i hits)\n", cur->text, cur->numHits);
+	}
+}
+
+
+/*
+===================
+CL_IgnoreChatNick_f
+===================
+*/
+void CL_IgnoreChatNick_f (void)
+{
+	qboolean		added;
+
+	if (Cmd_Argc() < 2) {
+		Com_Printf ("Usage: ignorenick <nick>\n");
+		CL_ListChatIgnores (&cl_chatNickIgnores);	// output list if no param
+		return;
+	}
+
+	added = CL_AddChatIgnore (&cl_chatNickIgnores, Cmd_Argv(1));
+
+	if (added)
+		Com_Printf ("%s added to nick ignore list.\n", Cmd_Argv(1));
+}
+
+
+/*
+===================
+CL_UnIgnoreChatNick_f
+===================
+*/
+void CL_UnIgnoreChatNick_f (void)
+{
+	qboolean		removed;
+
+	if (Cmd_Argc() < 2) {
+		Com_Printf ("Usage: unignorenick <nick>\n");
+		CL_ListChatIgnores (&cl_chatNickIgnores);	// output list if no param
+		return;
+	}
+
+	if ( (Cmd_Argc() == 2) && !strcmp(Cmd_Argv(1), "all") ) {
+		 CL_RemoveAllChatIgnores (&cl_chatNickIgnores);
+		 return;
+	}
+
+	removed = CL_RemoveChatIgnore (&cl_chatNickIgnores, Cmd_Argv(1));
+
+	if (removed)
+		Com_Printf ("%s removed from nick ignore list.\n", Cmd_Argv(1));
+}
+
+
+/*
+===================
+CL_IgnoreChatText_f
+===================
+*/
+void CL_IgnoreChatText_f (void)
+{
+	qboolean		added;
+
+	if (Cmd_Argc() < 2) {
+		Com_Printf ("Usage: ignoretext <text>\n");
+		CL_ListChatIgnores (&cl_chatTextIgnores);	// output list if no param
+		return;
+	}
+
+	added = CL_AddChatIgnore (&cl_chatTextIgnores, Cmd_Argv(1));
+
+	if (added)
+		Com_Printf ("%s added to text ignore list.\n", Cmd_Argv(1));
+}
+
+
+/*
+===================
+CL_UnIgnoreChatText_f
+===================
+*/
+void CL_UnIgnoreChatText_f (void)
+{
+	qboolean		removed;
+
+	if (Cmd_Argc() < 2) {
+		Com_Printf ("Usage: unignoretext <text>\n");
+		CL_ListChatIgnores (&cl_chatTextIgnores);	// output list if no param
+		return;
+	}
+
+	if ( (Cmd_Argc() == 2) && !strcmp(Cmd_Argv(1), "all") ) {
+		 CL_RemoveAllChatIgnores (&cl_chatTextIgnores);
+		 return;
+	}
+
+	removed = CL_RemoveChatIgnore (&cl_chatTextIgnores, Cmd_Argv(1));
+
+	if (removed)
+		Com_Printf ("%s removed from text ignore list.\n", Cmd_Argv(1));
+}
+
+
+/*
+===================
+CL_ChatMatchIgnoreNick
+===================
+*/
+qboolean CL_ChatMatchIgnoreNick (const char *buf, size_t bufSize, const char *nick)
+{
+	size_t		nickLen = strlen(nick);
+	char		*string = (char *)buf, *p = NULL;
+	int			idx = 0;
+	qboolean	clanTag;
+
+//	Com_Printf ("CL_ChatMatchIgnoreNick: Searching for nick %s in chat message %s\n", nick, buf);
+
+	do
+	{
+		clanTag = false;
+		idx++;
+
+		// catch nick with ": " following
+		if ( !strncmp(string, nick, nickLen) && !strncmp(string + nickLen, ": ", 2) )
+			return true;
+		
+		if (*string == '(')	// catch nick in parenthesis
+		{
+			if (!strncmp(string + 1, nick, nickLen) && !strncmp(string + 1 + nickLen, "): ", 3) )
+				return true;
+		}
+
+		// skip over clan tag in []
+		if (*string == '[') {
+			p = strstr(string + 1, "] ");
+			if (p) {
+			//	Com_Printf ("CL_ChatMatchIgnoreNick: skipping over clan tag\n");
+				clanTag = true;
+				string = p + 2;
+			}
+		}
+	}
+	while ( clanTag && (idx < 2) && (string < (buf + bufSize)) );
+
+	return false;
+}
+
+
+/*
+===================
+CL_CheckforChatIgnore
+===================
+*/
+qboolean CL_CheckForChatIgnore (const char *string)
+{
+	char			chatBuf[MSG_STRING_SIZE];
+	chatIgnore_t	*compare=NULL;
+
+	if (!cl_chatNickIgnores.next && !cl_chatTextIgnores.next)	// nothing in lists to compare
+		return false;
+
+	Q_strncpyz (chatBuf, unformattedString(string), sizeof(chatBuf));
+//	Com_Printf ("CL_CheckForChatIgnore: scanning chat message \"%s\" for ignore nicks and text\n", chatBuf);
+
+	if (cl_chatNickIgnores.next != NULL)
+	{
+		for (compare = cl_chatNickIgnores.next; compare != NULL; compare = compare->next)
+		{
+			if ( (compare->text != NULL) && (strlen(compare->text) > 0) ) {
+				if ( CL_ChatMatchIgnoreNick(chatBuf, sizeof(chatBuf), compare->text) ) {
+				//	Com_Printf ("CL_CheckForChatIgnore: filtered nick %s in chat message\n", compare->text);
+					compare->numHits++;
+					return true;
+				}
+			}
+		}
+	}
+
+	if (cl_chatTextIgnores.next != NULL)
+	{
+		for (compare = cl_chatTextIgnores.next; compare != NULL; compare = compare->next)
+		{
+			if ( (compare->text != NULL) && (strlen(compare->text) > 0) ) {
+				if ( Q_StrScanToken (chatBuf, compare->text, false) ) {
+				//	Com_Printf ("CL_CheckForChatIgnore: filtered text %s in chat message\n", compare->text);
+					compare->numHits++;
+					return true;
+				}
+			}
+		}
+	}
+
+	return false;
+}
+
+//======================================================================
+// end R1Q2/Q2Pro Chat Ignore
 //======================================================================
 
 /*
@@ -1736,6 +2081,13 @@ void CL_InitLocal (void)
 
 	Cmd_AddCommand ("aacskey", CL_AACSkey_f);
 
+	// Chat Ignore from R1Q2/Q2Pro
+	Cmd_AddCommand ("ignorenick", CL_IgnoreChatNick_f);
+	Cmd_AddCommand ("unignorenick", CL_UnIgnoreChatNick_f);
+	Cmd_AddCommand ("ignoretext", CL_IgnoreChatText_f);
+	Cmd_AddCommand ("unignoretext", CL_UnIgnoreChatText_f);
+	// end R1Q2/Q2Pro Chat Ignore
+
 #ifdef LOC_SUPPORT	// Xile/NiceAss LOC
 	Cmd_AddCommand ("loc_add", CL_AddLoc_f);
 	Cmd_AddCommand ("loc_del", CL_DeleteLoc_f);
@@ -1768,6 +2120,16 @@ void CL_InitLocal (void)
 	Cmd_AddCommand ("invdrop", NULL);
 	Cmd_AddCommand ("weapnext", NULL);
 	Cmd_AddCommand ("weapprev", NULL);
+
+	// Chat Ignore from R1Q2/Q2Pro
+	// Init list pointers
+	cl_chatNickIgnores.next = NULL;
+	cl_chatNickIgnores.text = NULL;
+	cl_chatTextIgnores.next = NULL;
+	cl_chatTextIgnores.text = NULL;
+	// end R1Q2/Q2Pro Chat Ignore
+
+	local_initialized = true;
 }
 
 

@@ -657,6 +657,10 @@ void CL_ParsePrint (void)
 
 	if (i == PRINT_CHAT)
 	{
+		// Chat Ignore from R1Q2/Q2Pro
+		if ( CL_CheckForChatIgnore(s) )
+			return;
+
 		S_StartLocalSound ("misc/talk.wav");
 	//	con.ormask = 128;	// made redundant by color code
 

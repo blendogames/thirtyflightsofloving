@@ -53,6 +53,19 @@ int	color8blue (int color8)
 
 /*
 ==========================
+ClampCvar
+==========================
+*/
+float ClampCvar (float min, float max, float value)
+{
+	if ( value < min ) return min;
+	if ( value > max ) return max;
+	return value;
+}
+
+
+/*
+==========================
 stringLen
 ==========================
 */
@@ -94,26 +107,33 @@ unformattedString
 */
 char *unformattedString (const char *string)
 {
-	unsigned i;
-	int len;
-	char character;
-	char *newstring = "";
+	unsigned int	i;
+	size_t			len;
+	char			character;
+//	char			*newstring = "";
+	static char		newstring[MSG_STRING_SIZE];
+	char			addchar[2];
 
 	len = strlen (string);
+	newstring[0] = '\0';	// init as blank
 
 	for ( i = 0; i < len; i++ )
 	{
-		character = string[i];
+		character = (string[i] & ~128);
 
-		if (character&128) character &= ~128;
-		if (character == '^' && i < len)
-		{
+		if ( (character == '^') && (i < len) ) {	// skip formatting codes
 			i++;
 			continue;
 		}
-		character = string[i];
 
-		va("%s%c", newstring, character);
+		if (character < 32) {	// skip unprintable chars
+			continue;
+		}
+
+	//	va("%s%c", newstring, character);
+		addchar[0] = character;
+		addchar[1] = '\0';
+		Q_strncatz (newstring, addchar, sizeof(newstring));
 	}
 
 	return newstring;

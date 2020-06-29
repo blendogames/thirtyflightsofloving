@@ -169,6 +169,21 @@ typedef struct dlhandle_s
 #endif	// USE_CURL
 
 
+// Chat Ignore from R1Q2/Q2Pro
+typedef struct chatIgnore_s
+{
+	struct chatIgnore_s		*next;
+	char					*text;
+	int						numHits;
+} chatIgnore_t;
+
+extern chatIgnore_t		cl_chatNickIgnores;
+extern chatIgnore_t		cl_chatTextIgnores;
+
+qboolean CL_CheckForChatIgnore (const char *string);
+// end R1Q2/Q2Pro Chat Ignore
+
+
 //
 // the client_state_t structure is wiped completely at every
 // server map change
@@ -543,8 +558,6 @@ extern	entity_state_t	cl_parse_entities[MAX_PARSE_ENTITIES];
 
 extern	netadr_t	net_from;
 extern	sizebuf_t	net_message;
-
-float ClampCvar( float min, float max, float value );
 
 // for use with the alt_text_color cvar
 void CL_TextColor (int colornum, int *red, int *green, int *blue);
@@ -1091,6 +1104,7 @@ void CL_WidowSplash (vec3_t org);
 int	color8red (int color8);
 int	color8green (int color8);
 int	color8blue (int color8);
+float ClampCvar (float min, float max, float value);
 int stringLen (const char *string);
 int stringLengthExtra (const char *string);
 char *unformattedString (const char *string);
