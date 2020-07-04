@@ -250,11 +250,11 @@ extern	cvar_t	*r_rgbscale;
 extern	cvar_t	*con_font;
 extern	cvar_t	*con_font_size;
 
-extern	cvar_t	*r_vertex_arrays;
+//extern	cvar_t	*r_vertex_arrays;	// unused
 
 //extern	cvar_t	*gl_ext_palettedtexture;
 //extern	cvar_t	*gl_ext_pointparameters;
-extern	cvar_t	*r_ext_swapinterval;
+//extern	cvar_t	*r_ext_swapinterval;	// unused
 extern	cvar_t	*r_ext_multitexture;
 extern	cvar_t	*r_ext_draw_range_elements;
 extern	cvar_t	*r_ext_compiled_vertex_array;
@@ -274,7 +274,7 @@ extern	cvar_t	*r_entity_fliproll;		// allow disabling of backwards alias model r
 extern	cvar_t	*r_old_nullmodel;		// allow selection of nullmodel
 
 extern	cvar_t	*r_glass_envmaps; // Psychospaz's envmapping
-extern	cvar_t	*r_trans_surf_sorting; // trans bmodel sorting
+//extern	cvar_t	*r_trans_surf_sorting; // trans bmodel sorting
 extern	cvar_t	*r_shelltype; // entity shells: 0 = solid, 1 = warp, 2 = spheremap
 
 extern	cvar_t	*r_ext_texture_compression; // Heffo - ARB Texture Compression
@@ -283,8 +283,9 @@ extern	cvar_t	*r_lightcutoff;	//** DMP - allow dynamic light cutoff to be user-s
 extern	cvar_t	*r_screenshot_format;		// determines screenshot format
 //extern	cvar_t	*r_screenshot_jpeg;			// Heffo - JPEG Screenshots
 extern	cvar_t	*r_screenshot_jpeg_quality;	// Heffo - JPEG Screenshots
+extern	cvar_t	*r_screenshot_gamma_correct;	// gamma correction for screenshots
 
-extern	cvar_t	*r_nosubimage;
+//extern	cvar_t	*r_nosubimage;	// unused
 extern	cvar_t	*r_bitdepth;
 extern	cvar_t	*r_mode;
 extern	cvar_t	*r_log;
@@ -305,10 +306,10 @@ extern	cvar_t	*r_particledistance;
 extern	cvar_t	*r_dynamic;
 extern  cvar_t  *r_monolightmap;
 extern	cvar_t	*r_nobind;
-extern	cvar_t	*r_round_down;
+//extern	cvar_t	*r_round_down;	// unused
 extern	cvar_t	*r_picmip;
 extern	cvar_t	*r_skymip;
-extern	cvar_t	*r_playermip;
+//extern	cvar_t	*r_playermip;	// unused
 extern	cvar_t	*r_showtris;
 extern	cvar_t	*r_showbbox;	// Knightmare- show model bounding box
 extern	cvar_t	*r_finish;
@@ -327,15 +328,15 @@ extern	cvar_t	*r_font_upscale;
 extern	cvar_t	*r_nvfog_dist;
 extern	cvar_t	*r_nvfog_dist_mode;
 extern	cvar_t	*r_texturemode;
-extern	cvar_t	*r_texturealphamode;
-extern	cvar_t	*r_texturesolidmode;
+//extern	cvar_t	*r_texturealphamode;
+//extern	cvar_t	*r_texturesolidmode;
 extern  cvar_t  *r_saturatelighting;
 extern  cvar_t  *r_lockpvs;
 extern	cvar_t	*r_intensity;
 
 extern	cvar_t	*r_skydistance;		// variable sky range
 extern	cvar_t	*r_fog_skyratio;	// variable sky fog ratio
-extern	cvar_t	*r_saturation;		//** DMP
+//extern	cvar_t	*r_saturation;		//** DMP
 
 // Changable color for r_clearcolor (enabled by gl_clar)
 extern	cvar_t	*r_clearcolor_r;
@@ -709,8 +710,8 @@ void R_InitFailedImgList (void);
 void R_InitImages (void);
 void R_ShutdownImages (void);
 void R_FreeUnusedImages (void);
-void GL_TextureAlphaMode( char *string );
-void GL_TextureSolidMode( char *string );
+//void GL_TextureAlphaMode( char *string );
+//void GL_TextureSolidMode( char *string );
 
 //
 // r_upscale.c

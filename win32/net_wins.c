@@ -42,7 +42,7 @@ typedef struct
 } loopback_t;
 
 
-cvar_t		*net_shownet;
+//cvar_t			*net_shownet;	// unused
 static cvar_t	*noudp;
 static cvar_t	*noipx;
 
@@ -814,9 +814,11 @@ void NET_Init (void)
 	Com_Printf("Winsock Initialized\n");
 
 	noudp = Cvar_Get ("noudp", "0", CVAR_NOSET);
+	Cvar_SetDescription ("noudp", "Disables use of UDP protocol when set to 1.");
 	noipx = Cvar_Get ("noipx", "0", CVAR_NOSET);
+	Cvar_SetDescription ("noipx", "Disables use if IPX protocol when set to 1.");
 
-	net_shownet = Cvar_Get ("net_shownet", "0", 0);
+//	net_shownet = Cvar_Get ("net_shownet", "0", 0);	// unused
 }
 
 

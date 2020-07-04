@@ -283,12 +283,19 @@ void R_InitBloomTextures (void)
 
 //	r_bloom = Cvar_Get( "r_bloom", "0", CVAR_ARCHIVE );
 	r_bloom_alpha = Cvar_Get( "r_bloom_alpha", "0.25", CVAR_ARCHIVE );			// was 0.33
+	Cvar_SetDescription ("r_bloom_alpha", "Sets opacity of bloom blends.");
 	r_bloom_diamond_size = Cvar_Get( "r_bloom_diamond_size", "8", CVAR_ARCHIVE );
+	Cvar_SetDescription ("r_bloom_diamond_size", "Sets size of bloom diamonds.  Accepted values are 4, 6, or 8.");
 	r_bloom_intensity = Cvar_Get( "r_bloom_intensity", "2.5", CVAR_ARCHIVE );	// was 0.6
+	Cvar_SetDescription ("r_bloom_intensity", "Sets intensity of bloom effect.");
 	r_bloom_threshold = Cvar_Get( "r_bloom_threshold", "0.68", CVAR_ARCHIVE );	// was 0.08
+	Cvar_SetDescription ("r_bloom_threshold", "Sets brightness threshold for bloom effect.");
 	r_bloom_darken = Cvar_Get( "r_bloom_darken", "5", CVAR_ARCHIVE );			// was 4
+	Cvar_SetDescription ("r_bloom_darken", "Sets number of darkening pass for bloom effect.");
 	r_bloom_sample_size = Cvar_Get( "r_bloom_sample_size", "256", CVAR_ARCHIVE );	// was 128
+	Cvar_SetDescription ("r_bloom_sample_size", "Sets sample size in pixels for bloom effect.");
 	r_bloom_fast_sample = Cvar_Get( "r_bloom_fast_sample", "0", CVAR_ARCHIVE );
+	Cvar_SetDescription ("r_bloom_fast_sample", "Disables downsampling of screen buffer for bloom sampling when set to 1.");
 
 	BLOOM_SIZE = 0;
 	if (!r_bloom->integer)

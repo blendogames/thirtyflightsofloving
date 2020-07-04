@@ -29,6 +29,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "../client/client.h"
 #include "ui_local.h"
 
+cvar_t	*ui_sensitivity;
+cvar_t	*ui_background_alpha;
+cvar_t	*ui_item_rotate;
 cvar_t	*ui_cursor_scale;
 
 qboolean	m_entersound;		// play after drawing a frame, so caching
@@ -531,7 +534,14 @@ void UI_Init (void)
 	if (!alt_text_color)
 		alt_text_color = Cvar_Get ("alt_text_color", "2", CVAR_ARCHIVE);
 
+	ui_sensitivity = Cvar_Get ("ui_sensitivity", "1", CVAR_ARCHIVE);
+	Cvar_SetDescription ("ui_sensitivity", "Sets sensitvity of mouse in menus.");
+	ui_background_alpha = Cvar_Get ("ui_background_alpha", "0.6", CVAR_ARCHIVE);
+	Cvar_SetDescription ("ui_background_alpha", "Sets opacity of background menu image when ingame.");
+	ui_item_rotate = Cvar_Get ("ui_item_rotate", "0", CVAR_ARCHIVE);
+	Cvar_SetDescription ("ui_item_rotate", "Reverses direction of mouse click rotation for menu lists.");
 	ui_cursor_scale = Cvar_Get ("ui_cursor_scale", "0.4", 0);
+	Cvar_SetDescription ("ui_cursor_scale", "Sets scale for drawing the menu mouse cursor.");
 
 	UI_LoadMapList();	// load map list
 	UI_InitSavegameData ();	// load savegame data
@@ -579,18 +589,18 @@ void UI_Draw (void)
 		if (R_DrawFindPic(UI_BACKGROUND_NAME))
 		{
 		//	R_DrawStretchPic (0, 0, viddef.width, viddef.height, UI_BACKGROUND_NAME, 1.0f);
-			R_DrawFill (0,0,viddef.width, viddef.height, 0,0,0,255);
+			R_DrawFill (0,0,viddef.width, viddef.height, 0 ,0, 0, 255);
 			SCR_DrawPic(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, ALIGN_CENTER, UI_BACKGROUND_NAME, 1.0f);
 		}
 		else
-			R_DrawFill (0,0,viddef.width, viddef.height, 0,0,0,255);
+			R_DrawFill (0,0,viddef.width, viddef.height, 0, 0, 0, 255);
 	}
 	// ingame menu uses alpha
 	else if (R_DrawFindPic(UI_BACKGROUND_NAME))
-	//	R_DrawStretchPic (0, 0, viddef.width, viddef.height, UI_BACKGROUND_NAME, menu_alpha->value);
-		SCR_DrawPic(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, ALIGN_CENTER, UI_BACKGROUND_NAME, menu_alpha->value);
+	//	R_DrawStretchPic (0, 0, viddef.width, viddef.height, UI_BACKGROUND_NAME, ui_background_alpha->value);
+		SCR_DrawPic(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, ALIGN_CENTER, UI_BACKGROUND_NAME, ui_background_alpha->value);
 	else
-		R_DrawFill (0,0,viddef.width, viddef.height, 0,0,0,(int)(menu_alpha->value*255));
+		R_DrawFill (0,0,viddef.width, viddef.height, 0, 0, 0, (int)(ui_background_alpha->value*255.0f));
 
 	// Knigthmare- added Psychospaz's mouse support
 	UI_RefreshCursorMenu();

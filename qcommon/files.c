@@ -2614,11 +2614,13 @@ void FS_InitFilesystem (void)
 	// basedir <path>
 	// allows the game to run from outside the data tree
 	fs_basedir = Cvar_Get ("basedir", ".", CVAR_NOSET);
+	Cvar_SetDescription ("basedir", "Sets the root folder where KMQuake2 mounts game directories.  Only settable from the command line with +set basedir <dir>.  Only change this if you want KMQ2 to run with data files outside the Quake2 folder.");
 
 	// cddir <path>
 	// Logically concatenates the cddir after the basedir for 
 	// allows the game to run from outside the data tree
 	fs_cddir = Cvar_Get("cddir", "", CVAR_NOSET);
+	Cvar_SetDescription ("cddir", "Sets the path to where the data files on the game CD are.  Only settable from the command line with +set cddir <path>.  Only used if the full game install was not done.");
 	if (fs_cddir->string[0])
 		FS_AddGameDirectory (va("%s/"BASEDIRNAME, fs_cddir->string) );
 
@@ -2632,12 +2634,19 @@ void FS_InitFilesystem (void)
 
 	// check for game override
 	fs_homepath = Cvar_Get("homepath", Sys_GetCurrentDirectory(), CVAR_NOSET);
+	Cvar_SetDescription ("homepath", "Current directory that KMQuake2 is running in.  This is a NOSET value.");
 	fs_debug = Cvar_Get("fs_debug", "0", 0);
+	Cvar_SetDescription ("fs_debug", "Enables console output of filesystem operations.");
 	fs_roguegame = Cvar_Get("roguegame", "0", CVAR_LATCH);
+	Cvar_SetDescription ("roguegame", "Enables Rogue-specific features in start server menu when not running under the Rogue gamedir.");
 	fs_basegamedir = Cvar_Get ("basegame", "", CVAR_LATCH);
+	Cvar_SetDescription ("basegame", "Additional game data path.  Use in conjunction with game to load content from one mod while running another.");
 	fs_basegamedir2 = Cvar_Get ("basegame2", "", CVAR_LATCH);
+	Cvar_SetDescription ("basegame2", "Second additional game data path.  Use in conjunction with basegame and game to load content from two mods while running another.");
 	fs_basegamedir3 = Cvar_Get ("basegame3", "", CVAR_LATCH);	// Knightmare added
-	fs_gamedirvar = Cvar_Get ("game", "", CVAR_LATCH|CVAR_SERVERINFO);
+	Cvar_SetDescription ("basegame3", "Third additional game data path.  Use in conjunction with basegame2, basegame, and game to load content from three mods while running another.");
+	fs_gamedirvar = Cvar_Get ("game", "", CVAR_LATCH|CVAR_SERVERINFO|CVAR_SAVE_IGNORE);
+	Cvar_SetDescription ("game", "Sets the mod/game dir.  Only set this from the command line with \"+set game <moddir>\".  Use the \"changegame\" command to change game folders while KMQuake2 is running.");
 
 	// set up pref dir under Win32 here
 #ifdef _WIN32
@@ -2646,6 +2655,7 @@ void FS_InitFilesystem (void)
 		win_use_profile_dir = Cvar_Get ("win_use_profile_dir", "0", CVAR_NOSET);
 	else
 		win_use_profile_dir = Cvar_Get ("win_use_profile_dir", "1", CVAR_NOSET);
+	Cvar_SetDescription ("win_use_profile_dir", "Internal value that determines whether to use the <userprofile>/Saved Games/KMQuake2 folder on Windows Vista and later for config files, saved games, screenshots, etc.  On Win 2000/XP it uses Documents/My Games/KMQuake2.  To disable this, add -portable to the command line or add an empty portable.cfg file in the Quake2/baseq2 folder.");
 
 	Sys_InitPrefDir ();	// set up pref dir now instead of calling a function every time it's needed
 #endif
@@ -2825,8 +2835,8 @@ void FS_SetGamedir (char *dir)
 
 	if (!strcmp(dir,BASEDIRNAME) || (*dir == 0))
 	{
-		Cvar_FullSet ("gamedir", "", CVAR_SERVERINFO|CVAR_NOSET);
-		Cvar_FullSet ("game", "", CVAR_LATCH|CVAR_SERVERINFO);
+		Cvar_FullSet ("gamedir", "", CVAR_SERVERINFO|CVAR_NOSET|CVAR_SAVE_IGNORE);
+		Cvar_FullSet ("game", "", CVAR_LATCH|CVAR_SERVERINFO|CVAR_SAVE_IGNORE);
 		// set our savegame/download dirs with Sys_PrefDir() and baseq2
 #ifdef USE_SAVEGAMEDIR
 		FS_AddDownloadDirectory (BASEDIRNAME);
@@ -2869,7 +2879,7 @@ void FS_SetGamedir (char *dir)
 			FS_AddGameDirectory (va("%s/%s", fs_basedir->string, fs_basegamedir3->string) );
 		}
 
-		Cvar_FullSet ("gamedir", dir, CVAR_SERVERINFO|CVAR_NOSET);
+		Cvar_FullSet ("gamedir", dir, CVAR_SERVERINFO|CVAR_NOSET|CVAR_SAVE_IGNORE);
 		if (fs_cddir->string[0])
 			FS_AddGameDirectory (va("%s/%s", fs_cddir->string, dir) );
 		FS_AddGameDirectory (va("%s/%s", fs_basedir->string, dir) );

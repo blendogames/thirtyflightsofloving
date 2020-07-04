@@ -40,6 +40,10 @@ written by Maxim Stepin (MaxSt). it is not 100% identical, but very similar.
 #define UINT64_C(val)	val##ui64
 #define FIX(x)			(int)((x) * (1 << 16))
 
+cvar_t *r_upscale_y;
+cvar_t *r_upscale_cb;
+cvar_t *r_upscale_cr;
+
 typedef union {
 	uint32_t u32;
 	uint8_t u8[4];
@@ -538,9 +542,12 @@ void R_Upscale_Init (void)
 {
 	int		n;
 
-	cvar_t *r_upscale_y  = Cvar_Get("r_upscale_y", "48", 0);	// was CVAR_FILES
-	cvar_t *r_upscale_cb = Cvar_Get("r_upscale_cb", "7", 0);	// was CVAR_FILES
-	cvar_t *r_upscale_cr = Cvar_Get("r_upscale_cr", "6", 0);	// was CVAR_FILES
+	r_upscale_y  = Cvar_Get("r_upscale_y", "48", 0);	// was CVAR_FILES
+	Cvar_SetDescription ("r_upscale_y", "Sets threshold for y channel for texture upscaler");
+	r_upscale_cb = Cvar_Get("r_upscale_cb", "7", 0);	// was CVAR_FILES
+	Cvar_SetDescription ("r_upscale_cb", "Sets threshold for cb channel for texture upscaler");
+	r_upscale_cr = Cvar_Get("r_upscale_cr", "6", 0);	// was CVAR_FILES
+	Cvar_SetDescription ("r_upscale_cr", "Sets threshold for cr channel for texture upscaler");
 
 	maxY  = FIX(Cvar_ClampValue(r_upscale_y,  0, 256));
 	maxCb = FIX(Cvar_ClampValue(r_upscale_cb, 0, 256));

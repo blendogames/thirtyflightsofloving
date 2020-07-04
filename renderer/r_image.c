@@ -48,10 +48,12 @@ float		d_8to24tablef[256][3]; //Knightmare- MrG's Vertex array stuff
 qboolean GL_Upload8 (byte *data, int width, int height, imagetype_t type);
 qboolean GL_Upload32 (unsigned *data, int width, int height, imagetype_t type);
 
+/*
 int		gl_solid_format = 3;
 int		gl_alpha_format = 4;
 int		gl_tex_solid_format = 3;
 int		gl_tex_alpha_format = 4;
+*/
 int		gl_filter_min = GL_LINEAR_MIPMAP_NEAREST;
 int		gl_filter_max = GL_LINEAR;
 
@@ -212,12 +214,13 @@ void GL_TextureMode( char *string )
 	}
 }
 
+#if 0	// removed
 /*
 ===============
 GL_TextureAlphaMode
 ===============
 */
-void GL_TextureAlphaMode( char *string )
+void GL_TextureAlphaMode (char *string)
 {
 	int		i;
 
@@ -241,7 +244,7 @@ void GL_TextureAlphaMode( char *string )
 GL_TextureSolidMode
 ===============
 */
-void GL_TextureSolidMode( char *string )
+void GL_TextureSolidMode (char *string)
 {
 	int		i;
 
@@ -259,6 +262,7 @@ void GL_TextureSolidMode( char *string )
 
 	gl_tex_solid_format = gl_solid_modes[i].mode;
 }
+#endif
 
 /*
 ===============
@@ -2640,10 +2644,12 @@ void R_InitImages (void)
 
 	// Knightmare- reinitialize these after a vid_restart
 	// this is needed because the renderer is no longer a DLL
+/*
 	gl_solid_format = 3;
 	gl_alpha_format = 4;
 	gl_tex_solid_format = 3;
 	gl_tex_alpha_format = 4;
+*/
 	gl_filter_min = GL_LINEAR_MIPMAP_NEAREST;
 	gl_filter_max = GL_LINEAR;
 
@@ -2657,6 +2663,7 @@ void R_InitImages (void)
 		r_intensity = Cvar_Get ("r_intensity", "1", 0);
 	else
 		r_intensity = Cvar_Get ("r_intensity", "2", 0);
+	Cvar_SetDescription ("r_intensity", "Sets intensity value for gamma table.  Value range is >= 1.");
 	// end Knightmare
 
 	if ( r_intensity->value <= 1 )

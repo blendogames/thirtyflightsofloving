@@ -596,6 +596,7 @@ cmodel_t *CM_LoadMap (char *name, qboolean clientload, unsigned *checksum)
 	static unsigned	last_checksum;
 
 	map_noareas = Cvar_Get ("map_noareas", "0", 0);
+	Cvar_SetDescription ("map_noareas", "Areaportal disable option.  Disables areaportals when set to 1.");
 
 	if (  !strcmp (map_name, name) && (clientload || !Cvar_VariableValue ("flushmap")) )
 	{

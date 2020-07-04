@@ -331,12 +331,17 @@ void Con_Init (void)
 // register our commands
 //
 	con_notifytime = Cvar_Get ("con_notifytime", "4", 0); // Knightmare- increased for fade
+	Cvar_SetDescription ("con_notifytime", "Time in seconds for console notify messages to fade away.");
+
 	// Knightmare- Psychospaz's transparent console
 	con_alpha = Cvar_Get ("con_alpha", "0.5", CVAR_ARCHIVE);
+	Cvar_SetDescription ("con_alpha", "Opacity of console background.");
 	// Knightmare- how far the console drops down
 	//con_height = Cvar_Get ("con_height", "0.5", CVAR_ARCHIVE);
 	con_newconback = Cvar_Get ("con_newconback", "0", CVAR_ARCHIVE);	// whether to use new console background
+	Cvar_SetDescription ("con_newconback", "Toggles use of new console background.");
 	con_oldconbar = Cvar_Get ("con_oldconbar", "1", CVAR_ARCHIVE);		// whether to draw bottom bar on old console
+	Cvar_SetDescription ("con_oldconbar", "Toggles drawing of solid color bottom bar on console with standard conback image.");
 
 	// whether to use new-style console background
 	newconback_found = false;

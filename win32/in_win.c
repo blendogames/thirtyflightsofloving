@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "../client/client.h"
 #include "winquake.h"
+#include "../ui/ui_local.h"
 
 extern	unsigned	sys_msg_time;
 
@@ -58,7 +59,7 @@ cvar_t	*m_noaccel; //sul
 cvar_t	*in_mouse;
 cvar_t	*in_joystick;
 
-cvar_t	*autosensitivity;
+cvar_t	*in_autosensitivity;
 
 
 // none of these cvars are saved over a session
@@ -240,6 +241,7 @@ void IN_StartupMouse (void)
 	cvar_t		*cv;
 
 	cv = Cvar_Get ("in_initmouse", "1", CVAR_NOSET);
+	Cvar_SetDescription ("in_initmouse", "Enables the initialization of the mouse.");
 	if ( !cv->value ) 
 		return; 
 
@@ -331,8 +333,8 @@ void IN_MouseMove (usercmd_t *cmd)
 {
 	int		mx, my;
 
-	if (!autosensitivity)
-		autosensitivity = Cvar_Get ("autosensitivity", "1", CVAR_ARCHIVE);
+	if (!in_autosensitivity)
+		in_autosensitivity = Cvar_Get ("in_autosensitivity", "1", CVAR_ARCHIVE);
 
 	if (!mouseactive)
 		return;
@@ -369,8 +371,8 @@ void IN_MouseMove (usercmd_t *cmd)
 		cursor.oldx = cursor.x;
 		cursor.oldy = cursor.y;
 
-		cursor.x += mouse_x * menu_sensitivity->value;
-		cursor.y += mouse_y * menu_sensitivity->value;
+		cursor.x += mouse_x * ui_sensitivity->value;
+		cursor.y += mouse_y * ui_sensitivity->value;
 
 		if (cursor.x!=cursor.oldx || cursor.y!=cursor.oldy)
 			cursor.mouseaction = true;
@@ -386,7 +388,7 @@ void IN_MouseMove (usercmd_t *cmd)
 		cursor.oldy = 0;
 
 		//psychospaz - zooming in preserves sensitivity
-		if (autosensitivity->value && cl.base_fov < 90)
+		if (in_autosensitivity->value && cl.base_fov < 90)
 		{
 			mouse_x *= sensitivity->value * (cl.base_fov/90.0);
 			mouse_y *= sensitivity->value * (cl.base_fov/90.0);
@@ -438,13 +440,18 @@ IN_Init
 void IN_Init (void)
 {
 	// mouse variables
-	autosensitivity			= Cvar_Get ("autosensitivity",			"1",		CVAR_ARCHIVE);
+	in_autosensitivity		= Cvar_Get ("in_autosensitivity",			"1",		CVAR_ARCHIVE);
+	Cvar_SetDescription ("in_autosensitivity", "Enables scaling of mouse and joystick sensitivty when zoomed in.");
 	m_noaccel				= Cvar_Get ("m_noaccel",				"0",		CVAR_ARCHIVE); //sul  enables mouse acceleration XP fix?
+	Cvar_SetDescription ("m_noaccel", "Disables mouse acceleration when set to 1.");
 	m_filter				= Cvar_Get ("m_filter",					"0",		0);
+	Cvar_SetDescription ("m_filter", "Enables mouse input filtering.");
     in_mouse				= Cvar_Get ("in_mouse",					"1",		CVAR_ARCHIVE);
+	Cvar_SetDescription ("in_mouse", "Enables mouse input.");
 
 	// joystick variables
 	in_joystick				= Cvar_Get ("in_joystick",				"0",		CVAR_ARCHIVE);
+	Cvar_SetDescription ("in_joystick", "Enables joystick input.");
 	joy_name				= Cvar_Get ("joy_name",					"joystick",	0);
 	joy_advanced			= Cvar_Get ("joy_advanced",				"0",		0);
 	joy_advaxisx			= Cvar_Get ("joy_advaxisx",				"0",		0);
@@ -599,6 +606,7 @@ void IN_StartupJoystick (void)
 
 	// abort startup if user requests no joystick
 	cv = Cvar_Get ("in_initjoy", "1", CVAR_NOSET);
+	Cvar_SetDescription ("in_initjoy", "Enables the initialization of the joystick.");
 	if ( !cv->value ) 
 		return; 
  
@@ -910,14 +918,14 @@ void IN_JoyMove (usercmd_t *cmd)
 					// only absolute control support here (joy_advanced is false)
 					if (m_pitch->value < 0.0)
 					{
-						if (autosensitivity->value && cl.base_fov < 90) // Knightmare added
+						if (in_autosensitivity->value && cl.base_fov < 90) // Knightmare added
 							cl.viewangles[PITCH] -= (fAxisValue * joy_pitchsensitivity->value * (cl.base_fov/90.0)) * aspeed * cl_pitchspeed->value;
 						else
 							cl.viewangles[PITCH] -= (fAxisValue * joy_pitchsensitivity->value) * aspeed * cl_pitchspeed->value;
 					}
 					else
 					{
-						if (autosensitivity->value && cl.base_fov < 90) // Knightmare added
+						if (in_autosensitivity->value && cl.base_fov < 90) // Knightmare added
 							cl.viewangles[PITCH] += (fAxisValue * joy_pitchsensitivity->value * (cl.base_fov/90.0)) * aspeed * cl_pitchspeed->value;
 						else
 							cl.viewangles[PITCH] += (fAxisValue * joy_pitchsensitivity->value) * aspeed * cl_pitchspeed->value;
@@ -964,14 +972,14 @@ void IN_JoyMove (usercmd_t *cmd)
 				{
 					if(dwControlMap[i] == JOY_ABSOLUTE_AXIS)
 					{
-						if (autosensitivity->value && cl.base_fov < 90) // Knightmare added
+						if (in_autosensitivity->value && cl.base_fov < 90) // Knightmare added
 							cl.viewangles[YAW] += (fAxisValue * joy_yawsensitivity->value * (cl.base_fov/90.0)) * aspeed * cl_yawspeed->value;
 						else
 							cl.viewangles[YAW] += (fAxisValue * joy_yawsensitivity->value) * aspeed * cl_yawspeed->value;
 					}
 					else
 					{
-						if (autosensitivity->value && cl.base_fov < 90) // Knightmare added
+						if (in_autosensitivity->value && cl.base_fov < 90) // Knightmare added
 							cl.viewangles[YAW] += (fAxisValue * joy_yawsensitivity->value * (cl.base_fov/90.0)) * speed * 180.0;
 						else
 							cl.viewangles[YAW] += (fAxisValue * joy_yawsensitivity->value) * speed * 180.0;
@@ -989,14 +997,14 @@ void IN_JoyMove (usercmd_t *cmd)
 					// pitch movement detected and pitch movement desired by user
 					if(dwControlMap[i] == JOY_ABSOLUTE_AXIS)
 					{
-						if (autosensitivity->value && cl.base_fov < 90) // Knightmare added
+						if (in_autosensitivity->value && cl.base_fov < 90) // Knightmare added
 							cl.viewangles[PITCH] += (fAxisValue * joy_pitchsensitivity->value * (cl.base_fov/90.0)) * aspeed * cl_pitchspeed->value;
 						else
 							cl.viewangles[PITCH] += (fAxisValue * joy_pitchsensitivity->value) * aspeed * cl_pitchspeed->value;
 					}
 					else
 					{
-						if (autosensitivity->value && cl.base_fov < 90) // Knightmare added
+						if (in_autosensitivity->value && cl.base_fov < 90) // Knightmare added
 							cl.viewangles[PITCH] += (fAxisValue * joy_pitchsensitivity->value * (cl.base_fov/90.0)) * speed * 180.0;
 						else
 							cl.viewangles[PITCH] += (fAxisValue * joy_pitchsensitivity->value) * speed * 180.0;

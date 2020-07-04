@@ -960,11 +960,16 @@ void V_Init (void)
 	hand = Cvar_Get ("hand", "0", CVAR_ARCHIVE);
 
 	cl_testblend = Cvar_Get ("cl_testblend", "0", 0);
+	Cvar_SetDescription ("cl_testblend", "Enables testing screen color blend.");
 	cl_testparticles = Cvar_Get ("cl_testparticles", "0", 0);
+	Cvar_SetDescription ("cl_testparticles", "Enables testing particles.");
 	cl_testentities = Cvar_Get ("cl_testentities", "0", 0);
+	Cvar_SetDescription ("cl_testentities", "Enables testing entities.");
 	cl_testlights = Cvar_Get ("cl_testlights", "0", CVAR_CHEAT);
+	Cvar_SetDescription ("cl_testlights", "Enables testing lights.  This is considered a cheat CVAR for multiplayer.");
 
 	cl_stats = Cvar_Get ("cl_stats", "0", 0);
+	Cvar_SetDescription ("cl_stats", "Enables output of entity and particle rendering counts.");
 
 	// Knightmare- init fog info
 	V_ClearFogInfo ();

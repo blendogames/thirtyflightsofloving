@@ -2554,6 +2554,8 @@ void R_CreateSurfaceLightmap (msurface_t *surf)
 }
 
 
+#define gl_tex_solid_format		3
+#define gl_tex_alpha_format		4
 /*
 ==================
 R_BeginBuildingLightmaps

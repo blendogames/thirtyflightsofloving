@@ -400,7 +400,7 @@ extern	cvar_t	*cl_add_entities;
 extern	cvar_t	*cl_predict;
 extern	cvar_t	*cl_footsteps;
 extern	cvar_t	*cl_noskins;
-extern	cvar_t	*cl_autoskins;
+//extern	cvar_t	*cl_autoskins;	// unused
 
 // reduction factor for particle effects
 extern	cvar_t	*cl_particle_scale;
@@ -477,9 +477,7 @@ extern	cvar_t	*cl_showclamp;
 extern	cvar_t	*lookspring;
 extern	cvar_t	*lookstrafe;
 extern	cvar_t	*sensitivity;
-extern	cvar_t	*menu_sensitivity;
-extern	cvar_t	*menu_rotate;
-extern	cvar_t	*menu_alpha;
+
 extern	cvar_t	*hud_scale;
 extern	cvar_t	*hud_alpha;
 

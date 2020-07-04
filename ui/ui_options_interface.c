@@ -55,13 +55,13 @@ static menuaction_s		s_options_interface_back_action;
 
 static void MouseMenuFunc( void *unused )
 {
-	Cvar_SetValue( "menu_sensitivity", s_options_interface_menumouse_slider.curvalue / 4.0F );
+	Cvar_SetValue( "ui_sensitivity", s_options_interface_menumouse_slider.curvalue / 4.0F );
 }
 
 // menu alpha option
 static void MenuAlphaFunc( void *unused )
 {
-	Cvar_SetValue( "menu_alpha", s_options_interface_menualpha_slider.curvalue / 20.0F);
+	Cvar_SetValue( "ui_background_alpha", s_options_interface_menualpha_slider.curvalue / 20.0F);
 }
 
 static void AltTextColorFunc( void *unused )
@@ -291,8 +291,8 @@ static void InterfaceSetMenuItemValues( void )
 {
 	SetFontCursor();
 
-	s_options_interface_menumouse_slider.curvalue		= ( Cvar_VariableValue("menu_sensitivity") ) * 4;
-	s_options_interface_menualpha_slider.curvalue		= ( Cvar_VariableValue("menu_alpha") ) * 20;
+	s_options_interface_menumouse_slider.curvalue		= ( Cvar_VariableValue("ui_sensitivity") ) * 4;
+	s_options_interface_menualpha_slider.curvalue		= ( Cvar_VariableValue("ui_background_alpha") ) * 20;
 	s_options_interface_fontsize_slider.curvalue		= ( Cvar_VariableValue("con_font_size") ) * 0.5;
 
 	Cvar_SetValue( "alt_text_color", ClampCvar( 0, 9, Cvar_VariableValue("alt_text_color") ) );
@@ -315,8 +315,8 @@ static void InterfaceSetMenuItemValues( void )
 
 static void InterfaceResetDefaultsFunc ( void *unused )
 {
-	Cvar_SetToDefault ("menu_sensitivity");	
-	Cvar_SetToDefault ("menu_alpha");	
+	Cvar_SetToDefault ("ui_sensitivity");	
+	Cvar_SetToDefault ("ui_background_alpha");	
 	Cvar_SetToDefault ("con_font");	
 	Cvar_SetToDefault ("con_font_size");	
 	Cvar_SetToDefault ("alt_text_color");	

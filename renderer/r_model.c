@@ -2726,6 +2726,7 @@ void R_BeginRegistration (char *model)
 	// explicitly free the old map if different
 	// this guarantees that mod_known[0] is the world map
 	flushmap = Cvar_Get ("flushmap", "0", 0);
+	Cvar_SetDescription ("flushmap", "Forces reload of same map when set to 1.");
 	if (strcmp(mod_known[0].name, fullname) || flushmap->integer) {
 		Mod_Free (&mod_known[0]);
 		// clear this on map change (case of different server and autodownloading)

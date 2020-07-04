@@ -27,6 +27,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 cvar_t	*cvar_vars;
 
 qboolean	cvar_allowCheats = true;
+qboolean	userinfo_modified;
 
 /*
 ============
@@ -812,8 +813,8 @@ void Cvar_List_f (void)
 	j = 0;
 	for (var = cvar_vars; var; var = var->next, i++)
 	{
-		if (wildcardfit (wc, var->name))
-		//if (strstr (var->name, Cmd_Argv(1)))
+		if ( wildcardfit (wc, var->name) )
+	//	if (strstr (var->name, Cmd_Argv(1)))
 		{
 			j++;
 			if (var->flags & CVAR_ARCHIVE)
@@ -839,15 +840,15 @@ void Cvar_List_f (void)
 				Com_Printf (" ");
 
 			if (var->flags & CVAR_CHEAT)
-				Com_Printf("C");
+				Com_Printf ("C");
 			else
-				Com_Printf(" ");
+				Com_Printf (" ");
 
 			// Knightmare- added descriptions from From Maraa'kate's cvar code
 			if (var->description != NULL)
-				Com_Printf("D");
+				Com_Printf ("D");
 			else
-				Com_Printf(" ");
+				Com_Printf (" ");
 
 			// show latched value if applicable
 			if ((var->flags & CVAR_LATCH) && var->latched_string)
@@ -861,7 +862,106 @@ void Cvar_List_f (void)
 }
 
 
-qboolean userinfo_modified;
+/*
+============
+DumpCvars_f
+
+Knightmare added
+Dumps a list of cvars with their descriptions to cvarlist.txt.
+Accepts an optional wildcard as a parameter.
+============
+*/
+void DumpCvars_f (void)
+{
+	cvar_t	*var;
+	int		i, j, c;
+	char	name[MAX_QPATH];
+	char	var_line[2048];
+	char	line2[1024];
+	char	*wc;
+	FILE	*cvar_list_file;
+
+	// RIOT's Quake3-sytle cvarlist
+	c = Cmd_Argc();
+
+	if (c != 1 && c!= 2)
+	{
+		Com_Printf ("usage: dumpcvars [wildcard]\n");
+		return;
+	}
+
+	if (c == 2)
+		wc = Cmd_Argv(1);
+	else
+		wc = "*";
+
+	Com_sprintf (name, sizeof(name), "%s/cvarlist.txt", FS_Savegamedir());
+	cvar_list_file = fopen ( name, "w" );
+	if ( !cvar_list_file ) {
+		Com_Printf ("DumpCvars_f: coudn't open %s\n", name);
+		return;
+	}
+
+	fprintf (cvar_list_file, "Legend: \'A\'=Archive \'U\'=Userinfo \'S\'=Serverinfo \'-\'=Write Protected \'L\'=Latched  \'C\'=Cheat\n\n");
+	i = 0;
+	j = 0;
+	for (var = cvar_vars; var; var = var->next, i++)
+	{
+		var_line[0] = '\0';
+		if ( wildcardfit (wc, var->name) )
+		{
+			j++;
+			if (var->flags & CVAR_ARCHIVE)
+				Com_sprintf (var_line, sizeof(var_line), "A");
+			else
+				Com_sprintf (var_line, sizeof(var_line), " ");
+
+			if (var->flags & CVAR_USERINFO)
+				Q_strncatz (var_line, "U", sizeof(var_line));
+			else
+				Q_strncatz (var_line, " ", sizeof(var_line));
+
+			if (var->flags & CVAR_SERVERINFO)
+				Q_strncatz (var_line, "S", sizeof(var_line));
+			else
+				Q_strncatz (var_line, " ", sizeof(var_line));
+
+			if (var->flags & CVAR_NOSET)
+				Q_strncatz (var_line, "-", sizeof(var_line));
+			else if (var->flags & CVAR_LATCH)
+				Q_strncatz (var_line, "L", sizeof(var_line));
+			else
+				Q_strncatz (var_line, " ", sizeof(var_line));
+
+			if (var->flags & CVAR_CHEAT)
+				Q_strncatz (var_line, "C", sizeof(var_line));
+			else
+				Q_strncatz (var_line, " ", sizeof(var_line));
+
+			// show latched value if applicable
+			if ((var->flags & CVAR_LATCH) && var->latched_string) {
+				Com_sprintf (line2, sizeof(line2), " %s \"%s\" - default: \"%s\", latched to: \"%s\"\n", var->name, var->string, var->default_string, var->latched_string);
+			}
+			else {
+				Com_sprintf (line2, sizeof(line2), " %s \"%s\" - default: \"%s\"\n", var->name, var->string, var->default_string);
+			}
+			Q_strncatz (var_line, line2, sizeof(var_line));
+			fprintf (cvar_list_file, var_line);
+
+			// Knightmare- added descriptions from From Maraa'kate's cvar code
+			if (var->description != NULL) {
+				Com_sprintf (var_line, sizeof(var_line), "%s\n\n", var->description);
+			}
+			else {
+				Com_sprintf (var_line, sizeof(var_line), "This variable does not have a description.\n\n");
+			}
+			fprintf (cvar_list_file, var_line);
+		}
+	}
+	fprintf (cvar_list_file, " %i cvars, %i matching\n", i, j);
+	fclose ( cvar_list_file );
+	Com_Printf ("DumpCvars_f: wrote %i matching cvars to %s\n", j, name);
+}
 
 
 char	*Cvar_BitInfo (int bit)
@@ -923,5 +1023,5 @@ void Cvar_Init (void)
 	Cmd_AddCommand ("toggle", Cvar_Toggle_f);
 	Cmd_AddCommand ("reset", Cvar_Reset_f);
 	Cmd_AddCommand ("cvarlist", Cvar_List_f);
-
+	Cmd_AddCommand ("dumpcvars", DumpCvars_f);	// Knightmare added
 }

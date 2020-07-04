@@ -606,6 +606,7 @@ int SNDDMA_Init(void)
 	memset ((void *)&dma, 0, sizeof (dma));
 
 	s_wavonly = Cvar_Get ("s_wavonly", "0", 0);
+	Cvar_SetDescription ("s_wavonly", "Sets wav-only sound mode.  Disables use of DirectSound when set to 1.");
 
 	dsound_init = wav_init = 0;
 

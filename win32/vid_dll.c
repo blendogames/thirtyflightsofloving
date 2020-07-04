@@ -727,14 +727,23 @@ void VID_Init (void)
 {
 	/* Create the video variables so we know how to start the graphics drivers */
 	vid_ref = Cvar_Get ("vid_ref", "gl", CVAR_ARCHIVE);
+	Cvar_SetDescription ("vid_ref", "Video renderer module in use.  This is always set to \"gl\" in KMQuake2.");
 	vid_xpos = Cvar_Get ("vid_xpos", "3", CVAR_ARCHIVE);
+	Cvar_SetDescription ("vid_xpos", "Sets horizontal desktop position of window in windowed mode.");
 	vid_ypos = Cvar_Get ("vid_ypos", "22", CVAR_ARCHIVE);
+	Cvar_SetDescription ("vid_ypos", "Sets vertical desktop position of window in windowed mode.");
 	vid_fullscreen = Cvar_Get ("vid_fullscreen", "1", CVAR_ARCHIVE);
+	Cvar_SetDescription ("vid_fullscreen", "Enables fullscreen video mode.");
 	vid_gamma = Cvar_Get( "vid_gamma", "0.8", CVAR_ARCHIVE ); // was 1.0
+	Cvar_SetDescription ("vid_gamma", "Screen brightness value.  Uses inverse scale.");
 	win_noalttab = Cvar_Get( "win_noalttab", "0", CVAR_ARCHIVE );
+	Cvar_SetDescription ("win_noalttab", "Disables alt-tab out of game when set to 1.");
 	win_alttab_restore_desktop = Cvar_Get( "win_alttab_restore_desktop", "1", CVAR_ARCHIVE );	// Knightmare- whether to restore desktop resolution on alt-tab
+	Cvar_SetDescription ("win_alttab_restore_desktop", "Enables restoration of desktop resolution when alt-tabbing.");
 	r_customwidth = Cvar_Get( "r_customwidth", "1600", CVAR_ARCHIVE );
+	Cvar_SetDescription ("r_customwidth", "Sets resolution width when using custom video mode (-1).");
 	r_customheight = Cvar_Get( "r_customheight", "1024", CVAR_ARCHIVE );
+	Cvar_SetDescription ("r_customheight", "Sets resolution height when using custom video mode (-1).");
 	// Knightmare- just here to enable command line option without error
 	scanforcd = Cvar_Get( "scanforcd", "0", 0 );
 

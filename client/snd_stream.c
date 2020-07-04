@@ -573,7 +573,9 @@ void S_OGG_Init (void)
 
 	// Cvars
 	ogg_loopcount = Cvar_Get ("ogg_loopcount", "5", CVAR_ARCHIVE);
+	Cvar_SetDescription ("ogg_loopcount", "Sets number of music track loops until the ambient music track is played.");
 	ogg_ambient_track = Cvar_Get ("ogg_ambient_track", "track11", CVAR_ARCHIVE);
+	Cvar_SetDescription ("ogg_ambient_track", "Sets the name of the Ogg Vorbis file used for the ambient music track.");
 
 	// Console commands
 	Cmd_AddCommand("ogg", S_OGG_ParseCmd);

@@ -246,10 +246,12 @@ int CDAudio_Init()
 		return -1;
 
 	cd_nocd = Cvar_Get ("cd_nocd", "0", CVAR_ARCHIVE );
+	Cvar_SetDescription ("cd_nocd", "CD music disable option.  Disables CD music when set to 1.");
 	if ( cd_nocd->value)
 		return -1;
 
 	cd_volume = Cvar_Get ("cd_volume", "1", CVAR_ARCHIVE);
+	Cvar_SetDescription ("cd_volume", "Sets the CD music volume (normalized).  0 = mute, 1.0 = max.");
 
 	if (SDL_WasInit(SDL_INIT_EVERYTHING) == 0) {
 		if (SDL_Init(SDL_INIT_CDROM) < 0) {

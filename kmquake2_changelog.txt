@@ -18,8 +18,6 @@ Changes as of v0.20 update 8:
 
 - Added support for quake2:// URLs.
 
-- Added ignorenick/unignorenick and ignoretext/unignoretext client commands from Q2Pro.
-
 - Added cel shading support.  Uses cvars r_celshading to enable, and r_celshading_width for line width (1-10).
 
 - Added horizontal offset to third-person mode.  Offset distance is controlled by cvar cg_thirdperson_offset.
@@ -36,6 +34,13 @@ Changes as of v0.20 update 8:
 
 - Now compresses .sav and .sv2 savegame files into .savz files.  It will still read savegames from earlier
 	KMQ2 versions (with the same game DLL).  This should improve load and save times in multi-level units.
+
+- Added descriptions for most cvars.
+
+- Added dumpcvars command to output a list of cvars with their descriptions to cvarlist.txt.  Takes an optional wildcard.  Usage:
+	dumpcvars <wildcard>
+
+- Added ignorenick/unignorenick and ignoretext/unignoretext client commands from Q2Pro.
 
 - Screenshots now go up to 9999.
 

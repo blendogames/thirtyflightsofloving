@@ -55,18 +55,18 @@ cvar_t		*scr_viewsize;
 cvar_t		*scr_conspeed;
 cvar_t		*scr_letterbox;
 cvar_t		*scr_centertime;
-cvar_t		*scr_showturtle;
+//cvar_t		*scr_showturtle;	// unused
 cvar_t		*scr_showpause;
-cvar_t		*scr_printspeed;
+//cvar_t		*scr_printspeed;	// unused
 
 cvar_t		*scr_netgraph;
 cvar_t		*scr_netgraph_pos;
 cvar_t		*scr_timegraph;
 cvar_t		*scr_debuggraph;
-cvar_t		*scr_graphheight;
+//cvar_t		*scr_graphheight;	// unused
 cvar_t		*scr_graphscale;
 cvar_t		*scr_graphshift;
-cvar_t		*scr_drawall;
+//cvar_t		*scr_drawall;	// unused
 
 cvar_t		*scr_simple_loadscreen;	// whether to use reduced load screen
 
@@ -87,7 +87,7 @@ cvar_t		*crosshair_pulse;
 cvar_t		*cl_drawfps;
 //end Knightmare
 cvar_t		*cl_demomessage;
-cvar_t		*cl_loadpercent;
+//cvar_t		*cl_loadpercent;	// unused
 
 float		scr_screenScale;
 float		scr_hudScale;
@@ -1330,42 +1330,65 @@ SCR_Init
 */
 void SCR_Init (void)
 {
-	//Knightmare 12/28/2001- FPS counter
 	cl_drawfps = Cvar_Get ("cl_drawfps", "0", CVAR_ARCHIVE);
+	Cvar_SetDescription ("cl_drawfps", "Enables drawing of FPS counter on the screen.");
 	cl_demomessage = Cvar_Get ("cl_demomessage", "1", CVAR_ARCHIVE);
-	cl_loadpercent = Cvar_Get ("cl_loadpercent", "0", CVAR_ARCHIVE);
+	Cvar_SetDescription ("cl_demomessage", "Enables display of \"Running Demo\" message when a demo is playing.");
+//	cl_loadpercent = Cvar_Get ("cl_loadpercent", "0", CVAR_ARCHIVE);	// unused
 
 	scr_viewsize = Cvar_Get ("viewsize", "100", CVAR_ARCHIVE);
+	Cvar_SetDescription ("viewsize", "Draw size of screen in percent, from 40 to 100.");
 	scr_conspeed = Cvar_Get ("scr_conspeed", "3", 0);
+	Cvar_SetDescription ("scr_conspeed", "Scrolling speed of the console.");
 	scr_letterbox = Cvar_Get ("scr_letterbox", "1", CVAR_ARCHIVE);
-	scr_showturtle = Cvar_Get ("scr_showturtle", "0", 0);
+	Cvar_SetDescription ("scr_letterbox", "Enables letterbox effect for cameras and cutscenes.");
+//	scr_showturtle = Cvar_Get ("scr_showturtle", "0", 0);	// unused
 	scr_showpause = Cvar_Get ("scr_showpause", "1", 0);
-	// Knightmare- increased for fade
-	scr_centertime = Cvar_Get ("scr_centertime", "3.5", 0);
-	scr_printspeed = Cvar_Get ("scr_printspeed", "8", 0);
+	Cvar_SetDescription ("scr_showpause", "Toggles drawing of pause plaque.");
+	scr_centertime = Cvar_Get ("scr_centertime", "3.5", 0);	// Knightmare- increased for fade
+	Cvar_SetDescription ("scr_centertime", "Time in seconds for centerprints to fade away.");
+//	scr_printspeed = Cvar_Get ("scr_printspeed", "8", 0);	// unused
+
 	scr_netgraph = Cvar_Get ("netgraph", "0", 0);
+	Cvar_SetDescription ("netgraph", "Enables drawing of network activity graph.");
 	scr_netgraph_pos = Cvar_Get ("netgraph_pos", "0", CVAR_ARCHIVE);
+	Cvar_SetDescription ("netgraph_pos", "Sets draw position of network activity graph.  0 = bottom right, 1 = bottom left.");
 	scr_timegraph = Cvar_Get ("timegraph", "0", 0);
+	Cvar_SetDescription ("timegraph", "Enables drawing of frame time graph.");
 	scr_debuggraph = Cvar_Get ("debuggraph", "0", 0);
-	scr_graphheight = Cvar_Get ("graphheight", "32", 0);
+	Cvar_SetDescription ("debuggraph", "Enables drawing of debug graph.");
+//	scr_graphheight = Cvar_Get ("graphheight", "32", 0);	// unused
 	scr_graphscale = Cvar_Get ("graphscale", "1", 0);
+	Cvar_SetDescription ("graphscale", "Sets vertical scale of activity graph.");
 	scr_graphshift = Cvar_Get ("graphshift", "0", 0);
-	scr_drawall = Cvar_Get ("scr_drawall", "0", 0);
+	Cvar_SetDescription ("graphshift", "Sets vertical shift of activity graph.");
+//	scr_drawall = Cvar_Get ("scr_drawall", "0", 0);	// unused
 
 	crosshair = Cvar_Get ("crosshair", "1", CVAR_ARCHIVE);
+	Cvar_SetDescription ("crosshair", "Sets crosshair image.  0 = no crosshair");
 	crosshair_scale = Cvar_Get ("crosshair_scale", "1", CVAR_ARCHIVE);
+	Cvar_SetDescription ("crosshair_scale", "Sets crosshair size.  Min = 0.25, Max = 15.");
 	crosshair_alpha = Cvar_Get ("crosshair_alpha", "1", CVAR_ARCHIVE);
+	Cvar_SetDescription ("crosshair_alpha", "Sets base opacity of crosshair.");
 	crosshair_pulse = Cvar_Get ("crosshair_pulse", "0.25", CVAR_ARCHIVE);
+	Cvar_SetDescription ("crosshair_pulse", "Sets opacity pulse amplitude of crosshair.");
 
 	scr_simple_loadscreen = Cvar_Get ("scr_simple_loadscreen", "1", CVAR_ARCHIVE);
+	Cvar_SetDescription ("scr_simple_loadscreen", "Toggles use of simplified load screen.  Value of 0 enables Quake2Max-style verbose load screen.");
 
 	scr_surroundlayout = Cvar_Get ("scr_surroundlayout", "1", CVAR_ARCHIVE);	// whether to keep HUD/menu elements on center screen in triple-wide video modes
+	Cvar_SetDescription ("scr_surroundlayout", "Enables use of triple-monitor surround layout with all HUD/menu graphics on center monitor.");
 	scr_surroundleft = Cvar_Get ("scr_surroundleft", "0.333333333333", CVAR_ARCHIVE);		// left placement of HUD/menu elements on center screen in triple-wide video modes
+	Cvar_SetDescription ("scr_surroundleft", "Changes left boundary for center monitor in triple-monitor surround layout.  Only change if you have a surround setup with different size monitors.");
 	scr_surroundright = Cvar_Get ("scr_surroundright", "0.666666666667", CVAR_ARCHIVE);		// right placement of HUD/menu elements on center screen in triple-wide video modes
+	Cvar_SetDescription ("scr_surroundright", "Changes right boundary for center monitor in triple-monitor surround layout.  Only change if you have a surround setup with different size monitors.");
 
 	hud_scale = Cvar_Get ("hud_scale", "5", CVAR_ARCHIVE);
+	Cvar_SetDescription ("hud_scale", "Sets scale for HUD.");
 	hud_alpha = Cvar_Get ("hud_alpha", "1", CVAR_ARCHIVE);
+	Cvar_SetDescription ("hud_alpha", "Sets opacity of HUD.");
 	hud_squeezedigits = Cvar_Get ("hud_squeezedigits", "1", CVAR_ARCHIVE);
+	Cvar_SetDescription ("hud_squeezedigits", "Enables display of 4 and 5-digit numbers on HUD.");
 
 //
 // register our commands

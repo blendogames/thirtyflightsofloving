@@ -225,6 +225,9 @@ void	UI_Draw_Cursor (void);
 
 #define UI_MOUSECURSOR_PIC			"/gfx/ui/cursors/m_mouse_cursor.pcx"
 
+extern	cvar_t	*ui_sensitivity;
+extern	cvar_t	*ui_background_alpha;
+extern	cvar_t	*ui_item_rotate;
 extern	cvar_t	*ui_cursor_scale;
 
 static char *menu_in_sound		= "misc/menu1.wav";

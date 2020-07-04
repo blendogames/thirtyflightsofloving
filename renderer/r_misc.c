@@ -388,6 +388,35 @@ typedef struct _TargaHeader {
 
 /*
 ================
+R_ScreenShot_Read_Buffer
+from Daikatana v1.3
+================
+*/
+void R_ScreenShot_Read_Buffer (int grab_x, int grab_width, byte *buffer) /* FS */
+{
+	float g = 0.0f;
+
+	if (!buffer)
+		return;
+
+	if (!r_screenshot_gamma_correct->integer)
+	{
+		qglReadPixels (grab_x, 0, grab_width, vid.height, GL_RGB, GL_UNSIGNED_BYTE, buffer);
+		return;
+	}
+
+	g = 1.0f - (vid_gamma->value - 1.0f);
+	qglPushAttrib(GL_PIXEL_MODE_BIT);
+	qglPixelTransferf(GL_RED_SCALE, g);
+	qglPixelTransferf(GL_GREEN_SCALE, g);
+	qglPixelTransferf(GL_BLUE_SCALE, g);
+	qglReadPixels (grab_x, 0, grab_width, vid.height, GL_RGB, GL_UNSIGNED_BYTE, buffer);
+	qglPopAttrib();
+}
+
+
+/*
+================
 R_ResampleShotLerpLine
 from DarkPlaces
 ================
@@ -687,7 +716,8 @@ void R_ScreenShot_JPG (qboolean silent)
 	}
 
 	// Read the framebuffer into our storage
-	qglReadPixels(grab_x, 0, grab_width, vid.height, GL_RGB, GL_UNSIGNED_BYTE, rgbdata);
+//	qglReadPixels(grab_x, 0, grab_width, vid.height, GL_RGB, GL_UNSIGNED_BYTE, rgbdata);
+	R_ScreenShot_Read_Buffer(grab_x, grab_width, rgbdata);
 
 	// Initialise the JPEG compression object
 	cinfo.err = jpeg_std_error(&jerr);
@@ -806,7 +836,8 @@ void R_ScreenShot_PNG (qboolean silent)
 	}
 
 	// Read the framebuffer into our storage
-	qglReadPixels(grab_x, 0, grab_width, vid.height, GL_RGB, GL_UNSIGNED_BYTE, rgbdata);
+//	qglReadPixels(grab_x, 0, grab_width, vid.height, GL_RGB, GL_UNSIGNED_BYTE, rgbdata);
+	R_ScreenShot_Read_Buffer(grab_x, grab_width, rgbdata);
 
 	png_sptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
 	if (!png_sptr)
@@ -941,7 +972,8 @@ void R_ScreenShot_TGA (qboolean silent)
 	buffer[15] = vid.height>>8;
 	buffer[16] = 24;	// pixel size
 
-	qglReadPixels (grab_x, 0, grab_width, vid.height, GL_RGB, GL_UNSIGNED_BYTE, buffer+18 ); 
+//	qglReadPixels (grab_x, 0, grab_width, vid.height, GL_RGB, GL_UNSIGNED_BYTE, buffer+18 ); 
+	R_ScreenShot_Read_Buffer(grab_x, grab_width, buffer+18);
 
 	// swap rgb to bgr
 	c = 18+grab_width*vid.height*3;

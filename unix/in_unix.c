@@ -23,6 +23,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // in_unix.c -- unix mouse and joystick code
 
 #include "../client/client.h"
+#include "../ui/ui_local.h"
 
 cvar_t	*in_mouse;
 cvar_t	*in_joystick;
@@ -58,26 +59,32 @@ void Force_CenterView_f (void)
 
 void IN_Init (void)
 {
-    in_mouse = Cvar_Get ("in_mouse", "1", CVAR_ARCHIVE);
-    in_joystick = Cvar_Get ("in_joystick", "0", CVAR_ARCHIVE);
-    m_filter = Cvar_Get ("m_filter", "0", 0);
-    in_dgamouse = Cvar_Get ("in_dgamouse", "1", CVAR_ARCHIVE);
-    in_menumouse = Cvar_Get ("in_menumouse", "0", CVAR_ARCHIVE);
-    
-    Cmd_AddCommand ("+mlook", IN_MLookDown);
-    Cmd_AddCommand ("-mlook", IN_MLookUp);
-    Cmd_AddCommand ("force_centerview", Force_CenterView_f);
+	in_mouse = Cvar_Get ("in_mouse", "1", CVAR_ARCHIVE);
+	Cvar_SetDescription ("in_mouse", "Enables mouse input.");
+	in_joystick = Cvar_Get ("in_joystick", "0", CVAR_ARCHIVE);
+	Cvar_SetDescription ("in_joystick", "Enables joystick input.");
+	m_filter = Cvar_Get ("m_filter", "0", 0);
+	Cvar_SetDescription ("m_filter", "Enables mouse input filtering.");
+	in_dgamouse = Cvar_Get ("in_dgamouse", "1", CVAR_ARCHIVE);
+	in_menumouse = Cvar_Get ("in_menumouse", "0", CVAR_ARCHIVE);
+	// Knightmare added
+	autosensitivity = Cvar_Get ("autosensitivity", "1", CVAR_ARCHIVE);
+	Cvar_SetDescription ("autosensitivity", "Enables scaling of mouse and joystick sensitivty when zoomed in.");
 
-    mx = my = 0.0;  
-    
-    if (in_mouse->value)
+	Cmd_AddCommand ("+mlook", IN_MLookDown);
+	Cmd_AddCommand ("-mlook", IN_MLookUp);
+	Cmd_AddCommand ("force_centerview", Force_CenterView_f);
+
+	mx = my = 0.0;  
+
+	if (in_mouse->value)
 		mouse_avail = true;
-    else
+	else
 		mouse_avail = false;
 
-    // Knightmare- added Psychospaz's menu mouse support
-    UI_RefreshCursorMenu();
-    UI_RefreshCursorLink();
+	// Knightmare- added Psychospaz's menu mouse support
+	UI_RefreshCursorMenu();
+	UI_RefreshCursorLink();
 }
 
 void IN_Shutdown (void)
@@ -116,14 +123,14 @@ void IN_Move (usercmd_t *cmd)
 	old_mouse_x = mx;
 	old_mouse_y = my;
 
-	//now to set the menu cursor
+	// now to set the menu cursor
 	if (cls.key_dest == key_menu)
 	{
 		cursor.oldx = cursor.x;
 		cursor.oldy = cursor.y;
 
-		cursor.x += mx *  menu_sensitivity->value;
-		cursor.y += my *  menu_sensitivity->value;
+		cursor.x += mx *  ui_sensitivity->value;
+		cursor.y += my *  ui_sensitivity->value;
 
 		if (cursor.x!=cursor.oldx || cursor.y!=cursor.oldy)
 			cursor.mouseaction = true;
@@ -134,9 +141,18 @@ void IN_Move (usercmd_t *cmd)
 		if (cursor.y > viddef.height) cursor.y = viddef.height;
 		M_Think_MouseCursor();
 	}
-	
-	mx *= sensitivity->value;
-	my *= sensitivity->value;
+
+	// psychospaz - zooming in preserves sensitivity
+	if (in_autosensitivity->integer && cl.base_fov < 90)
+	{
+		mx *= sensitivity->value * (cl.base_fov/90.0);
+		my *= sensitivity->value * (cl.base_fov/90.0);
+	}
+	else
+	{
+		mx *= sensitivity->value;
+		my *= sensitivity->value;
+	}
 
 	// add mouse X/Y movement to cmd
 	if ((in_strafe.state & 1) || (lookstrafe->value && mlooking))

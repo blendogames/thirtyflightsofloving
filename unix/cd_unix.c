@@ -534,14 +534,19 @@ int CDAudio_Init(void)
 		return -1;
 
 	cd_nocd = Cvar_Get ("cd_nocd", "0", CVAR_ARCHIVE );
+	Cvar_SetDescription ("cd_nocd", "CD music disable option.  Disables CD music when set to 1.");
 	cd_loopcount = Cvar_Get ("cd_loopcount", "10", CVAR_ARCHIVE);	// Knightmare increased, was 4, added archive flag
+	Cvar_SetDescription ("cd_loopcount", "Sets number of CD track loops until the ambient CD track is played.");
 	cd_looptrack = Cvar_Get ("cd_looptrack", "11", 0);
+	Cvar_SetDescription ("cd_looptrack", "Sets the number of the ambient CD track.");
 	if ( cd_nocd->value)
 		return -1;
 
 	cd_volume = Cvar_Get ("cd_volume", "1", CVAR_ARCHIVE);
+	Cvar_SetDescription ("cd_volume", "Sets the CD music volume (normalized).  0 = mute, 1.0 = max.");
 
 	cd_dev = Cvar_Get("cd_dev", "/dev/cdrom", CVAR_ARCHIVE);
+	Cvar_SetDescription ("cd_dev", "Sets device name for CD playback.");
 
 	seteuid(saved_euid);
 

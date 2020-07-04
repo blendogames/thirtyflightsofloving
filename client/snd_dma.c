@@ -126,19 +126,28 @@ void S_Init (void)
 	Com_Printf("\n------- Sound Initialization -------\n");
 
 	cv = Cvar_Get ("s_initsound", "1", 0);
+	Cvar_SetDescription ("s_initsound", "Enables the initialization of the sound subsystem.");
 	if (!cv->value)
 		Com_Printf ("not initializing.\n");
 	else
 	{
 		s_volume = Cvar_Get ("s_volume", "1.0", CVAR_ARCHIVE);
+		Cvar_SetDescription ("s_volume", "Sets the sound volume (normalized).  0 = mute, 1.0 = max.");
 		s_khz = Cvar_Get ("s_khz", "22", CVAR_ARCHIVE);
+		Cvar_SetDescription ("s_khz", "Sets the sound sampling rate in KHz.");
 		s_loadas8bit = Cvar_Get ("s_loadas8bit", "0", CVAR_ARCHIVE);
+		Cvar_SetDescription ("s_loadas8bit", "Forces 8-bit low quality sounds when set to 1.");
 		s_mixahead = Cvar_Get ("s_mixahead", "0.2", CVAR_ARCHIVE);
+		Cvar_SetDescription ("s_mixahead", "Sets sound mix-ahead time in seconds.");
 		s_show = Cvar_Get ("s_show", "0", 0);
+		Cvar_SetDescription ("s_show", "Enables sound debugging output.");
 		s_testsound = Cvar_Get ("s_testsound", "0", 0);
+		Cvar_SetDescription ("s_testsound", "Enables generated test sound.");
 		s_primary = Cvar_Get ("s_primary", "0", CVAR_ARCHIVE);	// win32 specific
+		Cvar_SetDescription ("s_primary", "Enables primary sound buffer.  Set to 1 for better performance, or 0 for improved compatibility.");
 	#ifdef OGG_SUPPORT
 		s_musicvolume = Cvar_Get ("s_musicvolume", "1.0", CVAR_ARCHIVE); // Q2E
+		Cvar_SetDescription ("s_musicvolume", "Sets the music volume (normalized).  0 = mute, 1.0 = max.");
 	#endif
 
 		Cmd_AddCommand("play", S_Play);

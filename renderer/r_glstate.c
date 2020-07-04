@@ -607,9 +607,10 @@ void GL_SetDefaultState (void)
 
 	qglPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-	GL_TextureMode( r_texturemode->string );
-	GL_TextureAlphaMode( r_texturealphamode->string );
-	GL_TextureSolidMode( r_texturesolidmode->string );
+	GL_TextureMode (r_texturemode->string);
+
+//	GL_TextureAlphaMode (r_texturealphamode->string);
+//	GL_TextureSolidMode (r_texturesolidmode->string);
 
 	qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_min);
 	qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_max);

@@ -294,6 +294,36 @@ fix dark corners on warp surfaces						- done!!
 
 decouple net FPS and vid FPS							- done!!
 
+implement fseek and ftell inside pak files				- done!!
+
+implement shadow volume endpoint culling				- done!!
+
+implement non-self-shadowing shadows					- done!!
+
+add HTTP download support								- done!!
+
+add .loc file support									- done!!
+
+add stufftext filtering									- done!!
+
+change filesystem/savegame/config code to write savegames/configs/demos to prefs dir under user profile	- done!!
+
+implement FS_GetFileList() to seach in all paths AND paks with given dir and extension	- done!!
+
+add cel shading											- done!!
+
+implement UDP fallback and Q2Pro filelists in HTTP downloading	- done!!
+
+implement client chat filtering (ignorenick/ignoretext)	- done!!
+
+add font upscaling										- done!!
+
+add scrap upscaling
+
+implement cvar descriptions								- done!!
+
+add screenshot gamma correction							- done!!
+
 --------------------------------------------------------------------------
 
 add lightmap bluring

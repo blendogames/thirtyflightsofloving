@@ -443,6 +443,7 @@ void CL_InitInput (void)
 	Cmd_AddCommand ("-klook", IN_KLookUp);
 
 	cl_nodelta = Cvar_Get ("cl_nodelta", "0", 0);
+	Cvar_SetDescription ("cl_nodelta", "Disables delta compression of client commands when set to 1.");
 }
 
 

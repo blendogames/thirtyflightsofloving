@@ -109,10 +109,10 @@ cvar_t	*r_lightlevel;	// FIXME: This is a HACK to get the client's light level
 
 cvar_t	*r_rgbscale; // Vic's RGB brightening
 
-cvar_t	*r_nosubimage;
-cvar_t	*r_vertex_arrays;
+//cvar_t	*r_nosubimage;	// unused
+//cvar_t	*r_vertex_arrays;	// unused
 
-cvar_t	*r_ext_swapinterval;
+//cvar_t	*r_ext_swapinterval;	// unused
 cvar_t	*r_ext_multitexture;
 cvar_t	*r_ext_draw_range_elements;
 cvar_t	*r_ext_compiled_vertex_array;
@@ -134,12 +134,13 @@ cvar_t	*r_entity_fliproll;		// allow disabling of backwards alias model roll
 cvar_t	*r_old_nullmodel;		// allow selection of nullmodel
 
 cvar_t	*r_glass_envmaps; // Psychospaz's envmapping
-cvar_t	*r_trans_surf_sorting; // trans bmodel sorting
+//cvar_t	*r_trans_surf_sorting; // trans bmodel sorting
 cvar_t	*r_shelltype; // entity shells: 0 = solid, 1 = warp, 2 = spheremap
 cvar_t	*r_ext_texture_compression; // Heffo - ARB Texture Compression
 cvar_t	*r_screenshot_format;		// determines screenshot format
 //cvar_t	*r_screenshot_jpeg;			// Heffo - JPEG Screenshots
 cvar_t	*r_screenshot_jpeg_quality;	// Heffo - JPEG Screenshots
+cvar_t	*r_screenshot_gamma_correct;	// gamma correction for screenshots
 
 //cvar_t	*r_motionblur;				// motionblur
 cvar_t	*r_lightcutoff;	//** DMP - allow dynamic light cutoff to be user-settable
@@ -169,10 +170,10 @@ cvar_t  *r_monolightmap;
 
 cvar_t	*r_modulate;
 cvar_t	*r_nobind;
-cvar_t	*r_round_down;
+//cvar_t	*r_round_down;	// unused
 cvar_t	*r_picmip;
 cvar_t	*r_skymip;
-cvar_t	*r_playermip;
+//cvar_t	*r_playermip;	// unused
 cvar_t	*r_showtris;
 cvar_t	*r_showbbox;	// show model bounding box
 cvar_t	*r_ztrick;
@@ -183,8 +184,8 @@ cvar_t	*r_flashblend;
 cvar_t  *r_saturatelighting;
 cvar_t	*r_swapinterval;
 cvar_t	*r_texturemode;
-cvar_t	*r_texturealphamode;
-cvar_t	*r_texturesolidmode;
+//cvar_t	*r_texturealphamode;
+//cvar_t	*r_texturesolidmode;
 cvar_t	*r_anisotropic;
 cvar_t	*r_anisotropic_avail;
 cvar_t	*r_font_upscale;
@@ -211,7 +212,7 @@ cvar_t  *r_celshading_width;
 
 cvar_t	*r_skydistance;		// variable sky range
 cvar_t	*r_fog_skyratio;	// variable sky fog ratio
-cvar_t	*r_saturation;		//** DMP
+//cvar_t	*r_saturation;		//** DMP
 
 
 /*
@@ -915,176 +916,284 @@ void R_Register (void)
 {
 	// added Psychospaz's console font size option
 	con_font = Cvar_Get ("con_font", "default", CVAR_ARCHIVE);
+	Cvar_SetDescription ("con_font", "Sets name of font image for console/HUD/menu text.");
 	con_font_size = Cvar_Get ("con_font_size", "8", CVAR_ARCHIVE);
+//	Cvar_SetDescription ("con_font_size", "Sets size of console font.  Values > 8 are larger than default, < 8 are smaller.");
 	alt_text_color = Cvar_Get ("alt_text_color", "2", CVAR_ARCHIVE);
+//	Cvar_SetDescription ("alt_text_color", "Sets color of high-bit highlighted text.");
+
 	scr_netgraph_pos = Cvar_Get ("netgraph_pos", "0", CVAR_ARCHIVE);
 
 	gl_driver = Cvar_Get( "gl_driver", "opengl32", CVAR_ARCHIVE );
+	Cvar_SetDescription ("gl_driver", "Sets driver for OpenGL.  This should stay as \"opengl32\".");
 	gl_allow_software = Cvar_Get( "gl_allow_software", "0", 0 );
+	Cvar_SetDescription ("gl_allow_software", "Whether to allow software implementations of OpenGL.");
 	gl_clear = Cvar_Get ("gl_clear", "0", 0);
+	Cvar_SetDescription ("gl_clear", "Enables clearing of the screen to prevent HOM effects.");
 
 	r_lefthand = Cvar_Get( "hand", "0", CVAR_USERINFO | CVAR_ARCHIVE );
 	r_norefresh = Cvar_Get ("r_norefresh", "0", CVAR_CHEAT);
+	Cvar_SetDescription ("r_norefresh", "Disables rendering of viewport when set to 1.");
 	r_fullbright = Cvar_Get ("r_fullbright", "0", CVAR_CHEAT);
+	Cvar_SetDescription ("r_fullbright", "Enables fullbright rendering (no lighting).");
 	r_drawentities = Cvar_Get ("r_drawentities", "1", 0);
+	Cvar_SetDescription ("r_drawentities", "Enables drawing of entities.");
 	r_drawworld = Cvar_Get ("r_drawworld", "1", CVAR_CHEAT);
+	Cvar_SetDescription ("r_drawworld", "Enables drawing of the world.");
 	r_novis = Cvar_Get ("r_novis", "0", CVAR_CHEAT);
+	Cvar_SetDescription ("r_novis", "Disables use of VIS tables when set to 1.");
 	r_nocull = Cvar_Get ("r_nocull", "0", CVAR_CHEAT);
+	Cvar_SetDescription ("r_nocull", "Disables culling of nodes and bmodels when set to 1.");
 	r_lerpmodels = Cvar_Get ("r_lerpmodels", "1", 0);
-	r_speeds = Cvar_Get ("r_speeds", "0", 0);
+	Cvar_SetDescription ("r_lerpmodels", "Enables frame interpolation of models.");
 	r_ignorehwgamma = Cvar_Get ("r_ignorehwgamma", "0", CVAR_ARCHIVE);	// hardware gamma
+	Cvar_SetDescription ("r_ignorehwgamma", "Disables hardware gamma control when set to 1.");
 	r_displayrefresh = Cvar_Get ("r_displayrefresh", "0", CVAR_ARCHIVE); // refresh rate control
+	Cvar_SetDescription ("r_displayrefresh", "Sets display refresh rate.");
 	AssertCvarRange (r_displayrefresh, 0, 240, true);
+	r_speeds = Cvar_Get ("r_speeds", "0", 0);
+	Cvar_SetDescription ("r_speeds", "Enables output of rendering surface/polygon total for surfaces, entities, and particles.");
 
 	// lerped dlights on models
 	r_dlights_normal = Cvar_Get("r_dlights_normal", "1", CVAR_ARCHIVE);
+	Cvar_SetDescription ("r_dlights_normal", "Enables surface clipping of dynamic lights.");
 	r_model_shading = Cvar_Get( "r_model_shading", "2", CVAR_ARCHIVE );
+	Cvar_SetDescription ("r_model_shading", "Enables shading on alias models.  Accepted values are 0, 1, 2, or 3.");
 	r_model_dlights = Cvar_Get( "r_model_dlights", "8", CVAR_ARCHIVE );
+	Cvar_SetDescription ("r_model_dlights", "Sets maximum number of dynamic lights for a model.");
 	r_model_minlight = Cvar_Get ("r_model_minlight", "0.02", CVAR_ARCHIVE );
+	Cvar_SetDescription ("r_model_minlight", "Sets minimum light level for alias model rendering.");
 
 	r_lightlevel = Cvar_Get ("r_lightlevel", "0", 0);
-	// added Vic's RGB brightening
-	r_rgbscale = Cvar_Get ("r_rgbscale", "2", CVAR_ARCHIVE);
+	Cvar_SetDescription ("r_lightlevel", "Hack to send player's light level to server.  This is overwritten every render frame.");
+	r_rgbscale = Cvar_Get ("r_rgbscale", "2", CVAR_ARCHIVE);	// Vic's RGB brightening
+	Cvar_SetDescription ("r_rgbscale", "Sets RGB scaling factor.  Accepted values are 1,  2, or 4.");
 
 	r_waterwave = Cvar_Get ("r_waterwave", "0", CVAR_ARCHIVE );
+	Cvar_SetDescription ("r_waterwave", "Sets amplitude of water waves.");
 	r_caustics = Cvar_Get ("r_caustics", "1", CVAR_ARCHIVE );
+	Cvar_SetDescription ("r_caustics", "Enables rendering of underwater caustic effect.  0 = disabled, 1 = normal, 2 = fragment warp.");
 	r_glows = Cvar_Get ("r_glows", "1", CVAR_ARCHIVE );
+	Cvar_SetDescription ("r_glows", "Enables rendering of texture glow layers.");
 	r_saveshotsize = Cvar_Get ("r_saveshotsize", "1", CVAR_ARCHIVE );
-	r_nosubimage = Cvar_Get( "r_nosubimage", "0", 0 );
+	Cvar_SetDescription ("r_saveshotsize", "Enables saveshot resolutions above 256x256.");
+//	r_nosubimage = Cvar_Get( "r_nosubimage", "0", 0 );	// unused
 
 	// correct trasparent sorting
 	r_transrendersort = Cvar_Get ("r_transrendersort", "1", CVAR_ARCHIVE );
+	Cvar_SetDescription ("r_transrendersort", "Enables sorting of transparent entities and particles.");
 	r_particle_lighting = Cvar_Get ("r_particle_lighting", "1.0", CVAR_ARCHIVE );
+	Cvar_SetDescription ("r_particle_lighting", "Lighting scale for particles.");
 	r_particledistance = Cvar_Get ("r_particledistance", "0", CVAR_ARCHIVE );
+	Cvar_SetDescription ("r_particledistance", "Sets maximum distance for rendering particle effects. 0 = no limit.");
 	r_particle_overdraw = Cvar_Get ("r_particle_overdraw", "0", CVAR_ARCHIVE );
+	Cvar_SetDescription ("r_particle_overdraw", "Enables redrawing of particles over translucent surfaces.");
 	r_particle_min = Cvar_Get ("r_particle_min", "0", CVAR_ARCHIVE );
+	Cvar_SetDescription ("r_particle_min", "Sets minimum clipping distance for particle rendering.");
 	r_particle_max = Cvar_Get ("r_particle_max", "0", CVAR_ARCHIVE );
+	Cvar_SetDescription ("r_particle_max", "Sets maximum clipping distance for particle rendering.");
 
 	r_modulate = Cvar_Get ("r_modulate", "1", CVAR_ARCHIVE );
+	Cvar_SetDescription ("r_modulate", "Sets scale for lightmaps.");
 	r_log = Cvar_Get( "r_log", "0", 0 );
+	Cvar_SetDescription ("r_log", "Enables logging of OpenGL API calls.");
 	r_bitdepth = Cvar_Get( "r_bitdepth", "0", 0 );
+	Cvar_SetDescription ("r_bitdepth", "Sets color bit depth.  0 = desktop setting.");
 	r_mode = Cvar_Get( "r_mode", "4", CVAR_ARCHIVE );
+	Cvar_SetDescription ("r_mode", "Sets enumerated video mode for renderer.  -1 = custom mode.");
 	r_lightmap = Cvar_Get ("r_lightmap", "0", 0);
+	Cvar_SetDescription ("r_lightmap", "Enables lightmap-only world rendering.");
 	r_shadows = Cvar_Get ("r_shadows", "0", CVAR_ARCHIVE );
+	Cvar_SetDescription ("r_shadows", "Enables rendering of shadows.  0 = none, 1 = planar, 2 = dynamic planar, 3 = projection.");
 	r_shadowalpha = Cvar_Get ("r_shadowalpha", "0.4", CVAR_ARCHIVE );
+	Cvar_SetDescription ("r_shadowalpha", "Sets opacity of shadows.");
 	r_shadowrange  = Cvar_Get ("r_shadowrange", "768", CVAR_ARCHIVE );
+	Cvar_SetDescription ("r_shadowrange", "Sets maximum range for shadow rendering.");
 	r_shadowvolumes = Cvar_Get ("r_shadowvolumes", "0", CVAR_CHEAT );
+	Cvar_SetDescription ("r_shadowvolumes", "Enables rendering of shadow volumes for debugging.");
 	r_shadow_self = Cvar_Get ("r_shadow_self", "1", CVAR_ARCHIVE );
+	Cvar_SetDescription ("r_shadow_self", "Enables self-shadowing of models.");
 	r_shadow_zfail = Cvar_Get ("r_shadow_zfail", "1", CVAR_ARCHIVE );
+	Cvar_SetDescription ("r_shadow_zfail", "Enables z-fail shadow rendering method.  0 = z-pass shadows.");
 	r_stencil = Cvar_Get ("r_stencil", "1", CVAR_ARCHIVE );
+	Cvar_SetDescription ("r_stencil", "Enables use of stencil buffer.");
 
 	r_dynamic = Cvar_Get ("r_dynamic", "1", 0);
+	Cvar_SetDescription ("r_dynamic", "Enables dynamic lights.");
 	r_nobind = Cvar_Get ("r_nobind", "0", CVAR_CHEAT);
-	r_round_down = Cvar_Get ("r_round_down", "1", 0);
+	Cvar_SetDescription ("r_nobind", "Disables binding of textures for performance testing.");
+//	r_round_down = Cvar_Get ("r_round_down", "1", 0);	// unused
 	r_picmip = Cvar_Get ("r_picmip", "0", 0);
+	Cvar_SetDescription ("r_picmip", "Sets maximum size for textures.  0 = no limit, 1 = 1024, 2 = 512, 3 = 256, 4 = 128.");
 	r_skymip = Cvar_Get ("r_skymip", "0", 0);
+	Cvar_SetDescription ("r_skymip", "Enables scaling down of skybox textures by a factor of 2.");
 	r_showtris = Cvar_Get ("r_showtris", "0", CVAR_CHEAT);
+	Cvar_SetDescription ("r_showtris", "Enables drawing of triangle outlines.  0 = disabled, 1 = no depth testing, 2 = depth testing enabled.");
 	r_showbbox = Cvar_Get ("r_showbbox", "0", CVAR_CHEAT); // show model bounding box
+	Cvar_SetDescription ("r_showbbox", "Enables drawing of entity culling bounding boxes.");
 	r_ztrick = Cvar_Get ("r_ztrick", "0", 0);
+	Cvar_SetDescription ("r_ztrick", "Enables the skipping of clearing the depth buffer before each render frame.");
 	r_finish = Cvar_Get ("r_finish", "0", CVAR_ARCHIVE);
+	Cvar_SetDescription ("r_finish", "Enables the delaying of view rendering until all buffered GL operations are complete.");
 	r_cull = Cvar_Get ("r_cull", "1", 0);
+	Cvar_SetDescription ("r_cull", "Enables backface culling.");
 	r_polyblend = Cvar_Get ("r_polyblend", "1", 0);
+	Cvar_SetDescription ("r_polyblend", "Enables view blending.");
 	r_flashblend = Cvar_Get ("r_flashblend", "0", 0);
-	r_playermip = Cvar_Get ("r_playermip", "0", 0);
+	Cvar_SetDescription ("r_flashblend", "Enables drawing of dynamic lights as glows instead of dynamicly lighting surfaces.");
+//	r_playermip = Cvar_Get ("r_playermip", "0", 0);	// unused
 	r_monolightmap = Cvar_Get( "r_monolightmap", "0", 0 );
-	// changed default texture mode to bilinear
-	r_texturemode = Cvar_Get( "r_texturemode", "GL_LINEAR_MIPMAP_NEAREST", CVAR_ARCHIVE );
-	r_texturealphamode = Cvar_Get( "r_texturealphamode", "default", CVAR_ARCHIVE );
-	r_texturesolidmode = Cvar_Get( "r_texturesolidmode", "default", CVAR_ARCHIVE );
+	Cvar_SetDescription ("r_monolightmap", "Enables monochrome lightmaps.");
+
 	r_anisotropic = Cvar_Get( "r_anisotropic", "0", CVAR_ARCHIVE );
+	Cvar_SetDescription ("r_anisotropic", "Sets level of anisotropic filtering.");
 	r_anisotropic_avail = Cvar_Get( "r_anisotropic_avail", "0", 0 );
+	Cvar_SetDescription ("r_anisotropic_avail", "The level of anisotropic filtering supported by the GL driver.");
 
 	r_font_upscale = Cvar_Get ("r_font_upscale", "1", CVAR_ARCHIVE);
+	Cvar_SetDescription ("r_font_upscale", "Enables upscaling of 128x128 fonts.");
 
 	r_nvfog_dist = Cvar_Get( "r_nvfog_dist", "1", CVAR_ARCHIVE );
+	Cvar_SetDescription ("r_nvfog_dist", "Enables use of nVidia distance fog.");
 	r_nvfog_dist_mode = Cvar_Get( "r_nvfog_dist_mode", "GL_EYE_RADIAL_NV", CVAR_ARCHIVE );
+	Cvar_SetDescription ("r_nvfog_dist_mode", "Sets nVidia distance fog mode.  Accepted values are GL_EYE_PLANE_ABSOLUTE_NV, GL_EYE_PLANE, and GL_EYE_RADIAL_NV.");
 
+	// changed default texture mode to bilinear
+	r_texturemode = Cvar_Get( "r_texturemode", "GL_LINEAR_MIPMAP_NEAREST", CVAR_ARCHIVE );
+	Cvar_SetDescription ("r_texturemode", "Sets texture filtering mode.  Accepted values are GL_LINEAR_MIPMAP_NEAREST and GL_LINEAR_MIPMAP_LINEAR.");
+//	r_texturealphamode = Cvar_Get( "r_texturealphamode", "default", CVAR_ARCHIVE );
+//	r_texturesolidmode = Cvar_Get( "r_texturesolidmode", "default", CVAR_ARCHIVE );
 	r_lockpvs = Cvar_Get( "r_lockpvs", "0", 0 );
+	Cvar_SetDescription ("r_lockpvs", "Enables locking of PVS to current viewpoint for testing map VIS.");
 
-	r_vertex_arrays = Cvar_Get( "r_vertex_arrays", "1", CVAR_ARCHIVE );
+//	r_vertex_arrays = Cvar_Get( "r_vertex_arrays", "1", CVAR_ARCHIVE );	// unused
 
-	//gl_ext_palettedtexture = Cvar_Get( "gl_ext_palettedtexture", "0", CVAR_ARCHIVE );
-	//gl_ext_pointparameters = Cvar_Get( "gl_ext_pointparameters", "1", CVAR_ARCHIVE );
-	r_ext_swapinterval = Cvar_Get( "r_ext_swapinterval", "1", CVAR_ARCHIVE );
+//	gl_ext_palettedtexture = Cvar_Get( "gl_ext_palettedtexture", "0", CVAR_ARCHIVE );
+//	gl_ext_pointparameters = Cvar_Get( "gl_ext_pointparameters", "1", CVAR_ARCHIVE );
+//	r_ext_swapinterval = Cvar_Get( "r_ext_swapinterval", "1", CVAR_ARCHIVE );	// unused
 	r_ext_multitexture = Cvar_Get( "r_ext_multitexture", "1", CVAR_ARCHIVE );
+	Cvar_SetDescription ("r_ext_multitexture", "Enables multitexture rendering of lightmapped surfaces.");
 	r_ext_draw_range_elements = Cvar_Get("r_ext_draw_range_elements", "1", CVAR_ARCHIVE /*| CVAR_LATCH*/);
+	Cvar_SetDescription ("r_ext_draw_range_elements", "Enables use of glDrawRangeElements().");
 	r_ext_compiled_vertex_array = Cvar_Get( "r_ext_compiled_vertex_array", "1", CVAR_ARCHIVE );
+	Cvar_SetDescription ("r_ext_compiled_vertex_array", "Enables use of compiled vertex arrays.");
 	r_arb_texturenonpoweroftwo  = Cvar_Get("r_arb_texturenonpoweroftwo", "1", CVAR_ARCHIVE /*| CVAR_LATCH*/);
+	Cvar_SetDescription ("r_arb_texturenonpoweroftwo", "Enables support for non-power-of-2 textures.");
 	r_nonpoweroftwo_mipmaps = Cvar_Get("r_nonpoweroftwo_mipmaps", "1", CVAR_ARCHIVE /*| CVAR_LATCH*/);
+	Cvar_SetDescription ("r_nonpoweroftwo_mipmaps", "Enables support for non-power-of-2 mipmaps.  This is not correctly supported by some drivers and may produce incorrect mipmaps.");
 	r_sgis_generatemipmap = Cvar_Get("r_sgis_generatemipmap", "1", CVAR_ARCHIVE /*| CVAR_LATCH*/);
+	Cvar_SetDescription ("r_sgis_generatemipmap", "Enables driver-based mipmap generation.  Set to 0 if you encounter corrupt or missing mipmaps.");
 
 	r_newlightmapformat = Cvar_Get("r_newlightmapformat", "1", CVAR_ARCHIVE);	// whether to use new lightmap format
+	Cvar_SetDescription ("r_newlightmapformat", "Enables modern, more efficient BGRA format for lightmaps.");
 
 	// added Vic's RGB brightening
 	r_ext_mtexcombine = Cvar_Get ("r_ext_mtexcombine", "1", CVAR_ARCHIVE);
+	Cvar_SetDescription ("r_ext_mtexcombine", "Enables OpenGL register combiners.");
 
 	// Echon's two-sided stenciling
 	r_stencilTwoSide = Cvar_Get ("r_stencilTwoSide", "0", CVAR_ARCHIVE);
+	Cvar_SetDescription ("r_stencilTwoSide", "Enables two-sided stenciling for projection shadows.");
 
 	r_arb_fragment_program = Cvar_Get ("r_arb_fragment_program", "1", CVAR_ARCHIVE);
-	r_arb_vertex_program = Cvar_Get ("_arb_vertex_program", "1", CVAR_ARCHIVE);
+	Cvar_SetDescription ("r_arb_fragment_program", "Enables use of ARB fragment programs.");
+	r_arb_vertex_program = Cvar_Get ("r_arb_vertex_program", "1", CVAR_ARCHIVE);
+	Cvar_SetDescription ("r_arb_vertex_program", "Enables use of ARB vertex programs.");
 
 	r_arb_vertex_buffer_object = Cvar_Get ("r_arb_vertex_buffer_object", "1", CVAR_ARCHIVE);
+	Cvar_SetDescription ("r_arb_vertex_buffer_object", "Enables use of ARB vertex buffer objects.");
 
 	// allow disabling the nVidia water warp
 	r_pixel_shader_warp = Cvar_Get( "r_pixel_shader_warp", "1", CVAR_ARCHIVE );
+	Cvar_SetDescription ("r_pixel_shader_warp", "Enables pixel shader water warp effect.");
 
 	// allow disabling of lightmaps on trans surfaces
 	r_trans_lighting = Cvar_Get( "r_trans_lighting", "2", CVAR_ARCHIVE );
+	Cvar_SetDescription ("r_trans_lighting", "Enables lighting on translucent surfaces. 0 = disabled, 1 = vertex lighting, 2 = lightmap.");
 
 	// allow disabling of lighting on warp surfaces
 	r_warp_lighting = Cvar_Get( "r_warp_lighting", "1", CVAR_ARCHIVE );
+	Cvar_SetDescription ("r_warp_lighting", "Enables lighting on warp/water surfaces. 0 = disabled, 1 = vertex lighting.");
 
 	// allow adjustment of lighting sampling offset
 	r_warp_lighting_sample_offset = Cvar_Get( "r_warp_lighting_sample_offset", "1", CVAR_ARCHIVE );
+	Cvar_SetDescription ("r_warp_lighting_sample_offset", "Sets offset sampling distance for vertex light sampling.");
 
 	// allow disabling of trans33+trans66 surface flag combining
 	r_solidalpha = Cvar_Get( "r_solidalpha", "1", CVAR_ARCHIVE );
+	Cvar_SetDescription ("r_solidalpha", "Enables rendering of solid alphas (1.0f) when both trans33 and trans66 flags are set.");
 	
 	// allow disabling of backwards alias model roll
 	r_entity_fliproll = Cvar_Get( "r_entity_fliproll", "1", CVAR_ARCHIVE );
+	Cvar_SetDescription ("r_entity_fliproll", "Enables reversing of backwards entity roll.");
 
 	// allow selection of nullmodel
 	r_old_nullmodel = Cvar_Get( "r_old_nullmodel", "0", CVAR_ARCHIVE );	
+	Cvar_SetDescription ("r_old_nullmodel", "Enables reversing of backwards entity roll.");
 
 	// added Psychospaz's envmapping
 	r_glass_envmaps = Cvar_Get( "r_glass_envmaps", "1", CVAR_ARCHIVE );
-	r_trans_surf_sorting = Cvar_Get( "r_trans_surf_sorting", "0", CVAR_ARCHIVE );
+	Cvar_SetDescription ("r_glass_envmaps", "Enables environment maps on transparent surfaces.");
+//	r_trans_surf_sorting = Cvar_Get( "r_trans_surf_sorting", "0", CVAR_ARCHIVE );	// unused
+
 	r_shelltype = Cvar_Get( "r_shelltype", "1", CVAR_ARCHIVE );
+	Cvar_SetDescription ("r_shelltype", "Sets render type for entity color shells.  0 = solid, 1 = flowing, 2 = envmap.");
 
 	r_ext_texture_compression = Cvar_Get( "r_ext_texture_compression", "0", CVAR_ARCHIVE ); // Heffo - ARB Texture Compression
+	Cvar_SetDescription ("r_ext_texture_compression", "Enables ARB texure compression.");
 
 	r_screenshot_format = Cvar_Get( "r_screenshot_format", "jpg", CVAR_ARCHIVE );			// determines screenshot format
+	Cvar_SetDescription ("r_screenshot_format", "Sets the image format for screenshots.  Accepted values are tga, jpg, and png.");
 //	r_screenshot_jpeg = Cvar_Get( "r_screenshot_jpeg", "1", CVAR_ARCHIVE );					// Heffo - JPEG Screenshots
 	r_screenshot_jpeg_quality = Cvar_Get( "r_screenshot_jpeg_quality", "85", CVAR_ARCHIVE );	// Heffo - JPEG Screenshots
+	Cvar_SetDescription ("r_screenshot_jpeg_quality", "Sets the image quality for JPEG screenshots.  Accepted values are 1-100.");
+	r_screenshot_gamma_correct = Cvar_Get( "r_screenshot_gamma_correct", "0", CVAR_ARCHIVE );	// gamma correction for screenshots
+	Cvar_SetDescription ("r_screenshot_gamma_correct", "Enables gamma correction of screenshots.");
 
 	//r_motionblur = Cvar_Get( "r_motionblur", "0", CVAR_ARCHIVE );	// motionblur
 
 	r_drawbuffer = Cvar_Get( "r_drawbuffer", "GL_BACK", 0 );
+	Cvar_SetDescription ("r_drawbuffer", "Sets draw buffer type.  Accepted values are GL_BACK and GL_FRONT.");
 	r_swapinterval = Cvar_Get( "r_swapinterval", "1", CVAR_ARCHIVE );
+	Cvar_SetDescription ("r_swapinterval", "Enables video sync.");
 
 	r_saturatelighting = Cvar_Get( "r_saturatelighting", "0", 0 );
+	Cvar_SetDescription ("r_saturatelighting", "Enables additive blend of lightmaps in single-texture rendering mode.");
 
 	r_3dlabs_broken = Cvar_Get( "r_3dlabs_broken", "1", CVAR_ARCHIVE );
+	Cvar_SetDescription ("r_3dlabs_broken", "Enables CDS hack for broken 3DLabs drivers.");
 
 	vid_fullscreen = Cvar_Get( "vid_fullscreen", "1", CVAR_ARCHIVE );
+	Cvar_SetDescription ("vid_fullscreen", "Enables fullscreen video mode.");
 	vid_gamma = Cvar_Get( "vid_gamma", "0.8", CVAR_ARCHIVE ); // was 1.0
+	Cvar_SetDescription ("vid_gamma", "Screen brightness value.  Uses inverse scale.");
 	vid_ref = Cvar_Get( "vid_ref", "gl", CVAR_ARCHIVE );
+	Cvar_SetDescription ("vid_ref", "Video renderer module in use.  This is always set to \"gl\" in KMQuake2.");
 
 	// Changable color for r_clearcolor (enabled by gl_clar)
 	r_clearcolor_r = Cvar_Get( "r_clearcolor_r", "0", CVAR_ARCHIVE );
+	Cvar_SetDescription ("r_clearcolor_r", "Sets red component (normalized) of background color used with gl_clear set to 1.  Accepted values are 0-1.");
 	r_clearcolor_g = Cvar_Get( "r_clearcolor_g", "0.5", CVAR_ARCHIVE );
+	Cvar_SetDescription ("r_clearcolor_g", "Sets green component (normalized) of background color used with gl_clear set to 1.  Accepted values are 0-1.");
 	r_clearcolor_b = Cvar_Get( "r_clearcolor_b", "0.5", CVAR_ARCHIVE );
+	Cvar_SetDescription ("r_clearcolor_b", "Sets blue component (normalized) of background color used with gl_clear set to 1.  Accepted values are 0-1.");
 
 	r_bloom = Cvar_Get( "r_bloom", "0", CVAR_ARCHIVE );	// BLOOMS
+	Cvar_SetDescription ("r_bloom", "Enables bloom postprocess effect.");
 
 	r_celshading = Cvar_Get( "r_celshading", "0", CVAR_ARCHIVE );
+	Cvar_SetDescription ("r_celshading", "Enables cel shaded rendering of models.");
 	r_celshading_width = Cvar_Get( "r_celshading_width", "4", CVAR_ARCHIVE );
+	Cvar_SetDescription ("r_celshading_width", "Sets width in pixels of cel shading outlines.");
 
 	r_skydistance = Cvar_Get("r_skydistance", "24000", CVAR_ARCHIVE); // variable sky range
+	Cvar_SetDescription ("r_skydistance", "Sets render distance of skybox.  Larger values mean a longer visible distance areas with the skybox visible.");
 	r_fog_skyratio = Cvar_Get("r_fog_skyratio", "10", CVAR_ARCHIVE);	// variable sky fog ratio
-	r_saturation = Cvar_Get( "r_saturation", "1.0", CVAR_ARCHIVE );	//** DMP saturation setting (.89 good for nvidia)
+	Cvar_SetDescription ("r_fog_skyratio", "Sets ratio of fog far distance for skyboxes versus standard world surfaces.");
+
+//	r_saturation = Cvar_Get( "r_saturation", "1.0", CVAR_ARCHIVE );	//** DMP saturation setting (.89 good for nvidia)
 	r_lightcutoff = Cvar_Get( "r_lightcutoff", "0", CVAR_ARCHIVE );	//** DMP dynamic light cutoffnow variable
+	Cvar_SetDescription ("r_lightcutoff", "Sets cutoff distance for dynamic lights.  Lower = smoother.  Higher = faster.");
 
 	Cmd_AddCommand ("imagelist", R_ImageList_f);
 	Cmd_AddCommand ("screenshot", R_ScreenShot_f);
@@ -1258,7 +1367,8 @@ qboolean R_CheckGLExtensions (char *reason)
 	if ( Q_StrScanToken( glConfig.extensions_string, "GL_EXT_compiled_vertex_array", false ) || 
 		 Q_StrScanToken( glConfig.extensions_string, "GL_SGI_compiled_vertex_array", false ) )
 	{
-		if (r_ext_compiled_vertex_array->integer) {
+		if (r_ext_compiled_vertex_array->integer)
+		{
 			qglLockArraysEXT = (void *) qwglGetProcAddress( "glLockArraysEXT" );
 			qglUnlockArraysEXT = (void *) qwglGetProcAddress( "glUnlockArraysEXT" );
 			if (!qglLockArraysEXT || !qglUnlockArraysEXT) {
@@ -1824,7 +1934,7 @@ qboolean R_Init ( void *hinstance, void *hWnd, char *reason )
 			Cvar_Set( "r_monolightmap", "0" );
 	}
 
-	Cvar_Set( "scr_drawall", "0" );
+//	Cvar_Set( "scr_drawall", "0" );
 
 #ifdef __linux__
 	Cvar_SetValue( "r_finish", 1 );
@@ -2160,19 +2270,19 @@ void R_BeginFrame( float camera_separation )
 		GL_UpdateAnisoMode ();
 		r_anisotropic->modified = false;
 	}
-
+/*
 	if ( r_texturealphamode->modified )
 	{
-		GL_TextureAlphaMode( r_texturealphamode->string );
+		GL_TextureAlphaMode (r_texturealphamode->string);
 		r_texturealphamode->modified = false;
 	}
 
 	if ( r_texturesolidmode->modified )
 	{
-		GL_TextureSolidMode( r_texturesolidmode->string );
+		GL_TextureSolidMode (r_texturesolidmode->string);
 		r_texturesolidmode->modified = false;
 	}
-
+*/
 	//
 	// swapinterval stuff
 	//
