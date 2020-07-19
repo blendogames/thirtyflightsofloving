@@ -152,7 +152,7 @@ void GL_UpdateAnisoMode (void)
 	// change all the existing mipmap texture objects
 	for (i=0, glt=gltextures; i<numgltextures; i++, glt++)
 	{
-		if ( (glt->type != it_pic) && (glt->type != it_font) && (glt->type != it_sky) )
+		if ( (glt->type != it_pic) && (glt->type != it_font) && (glt->type != it_scrap) && (glt->type != it_sky) )
 		{
 			GL_Bind (glt->texnum);
 			// Set anisotropic filter if supported and enabled
@@ -199,8 +199,7 @@ void GL_TextureMode( char *string )
 	// change all the existing mipmap texture objects
 	for (i=0, glt=gltextures; i<numgltextures; i++, glt++)
 	{
-	//	if (glt->type != it_pic && glt->type != it_sky)
-		if ( (glt->type != it_pic) && (glt->type != it_font) && (glt->type != it_sky) )
+		if ( (glt->type != it_pic) && (glt->type != it_font) && (glt->type != it_scrap) && (glt->type != it_sky) )
 		{
 			GL_Bind (glt->texnum);
 			qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_min);
@@ -305,6 +304,9 @@ void R_ImageList_f (void)
 		case it_font:
 			VID_Printf (PRINT_ALL, "F");
 			break;
+		case it_scrap:
+			VID_Printf (PRINT_ALL, "C");
+			break;
 		case it_part:
 			VID_Printf (PRINT_ALL, "P");
 			break;
@@ -387,7 +389,7 @@ void Scrap_Upload (void)
 {
 	scrap_uploads++;
 	GL_Bind(TEXNUM_SCRAPS);
-	GL_Upload8 (scrap_texels[0], SCRAP_BLOCK_WIDTH, SCRAP_BLOCK_HEIGHT, it_pic);
+	GL_Upload8 (scrap_texels[0], SCRAP_BLOCK_WIDTH, SCRAP_BLOCK_HEIGHT, it_scrap);	// was it_pic
 	scrap_dirty = false;
 }
 
@@ -1647,20 +1649,23 @@ void GL_ResampleTexture (unsigned *in, int inwidth, int inheight, unsigned *out,
 }*/
 
 
+#define MAX_UPSAMPLE_FACTOR	5	// limit to 5 (32x scaling)
 /*
 ================
 GL_UpscaleTexture
 ================
 */
-void GL_UpscaleTexture (void *indata, int inwidth, int inheight, void *outdata, int scaleFactor)
+void GL_UpscaleTexture (void *indata, int inwidth, int inheight, void *outdata, int scaleFactor, qboolean blend)
 {
-	if ( !indata || !outdata || (scaleFactor < 1) || (scaleFactor > 5) )
+	if ( !indata || !outdata || (scaleFactor < 1) || (scaleFactor > MAX_UPSAMPLE_FACTOR) )
 		return;
 
-	if ( (r_font_upscale->integer >= 2) && (scaleFactor == 1) ) {
+//	if ( (r_font_upscale->integer >= 2) && (scaleFactor == 1) ) {
+	if ( blend && (scaleFactor == 1) ) {
 		R_Upscale2x_Render (outdata, indata, inwidth, inheight);
 	}
-	else if ( (r_font_upscale->integer >= 2) && (scaleFactor == 2) ) {
+//	else if ( (r_font_upscale->integer >= 2) && (scaleFactor == 2) ) {
+	else if ( blend && (scaleFactor == 2) ) {
 		R_Upscale4x_Render (outdata, indata, inwidth, inheight);
 	}
 	else // if (scaleFactor >= 3)	// just block-copy each pixel
@@ -1849,21 +1854,26 @@ qboolean GL_Upload32 (unsigned *data, int width, int height, imagetype_t type)
 {
 	unsigned 	*scaled = NULL;
 	int			scaled_width, scaled_height;
-//	int			samples;
-	int			i, c, comp, idealFontRes = 256, upscaleFactor = 0;
+	int			i, c, comp, idealImgRes = 256, upscaleFactor = 0;
 	qboolean	mipmap, hasAlpha, isNPOT, resampled = false;
 	byte		*scan;
 
-//	mipmap = ((type != it_pic) && (type != it_sky));
-	mipmap = ( (type != it_pic) && (type != it_font) && (type != it_sky) );
+	mipmap = ( (type != it_pic) && (type != it_font) && (type != it_scrap) && (type != it_sky) );
 	uploaded_paletted = false;
 
 	// get best upscale size for old fonts
 	if ( (type == it_font) && (width == 128) && (height == 128) && r_font_upscale->integer ) {
-		idealFontRes = NearestPowerOf2(min(vid.width, vid.height)) / 2;
-		idealFontRes = min(idealFontRes, glConfig.max_texsize);
-		idealFontRes = max(idealFontRes, 256);
-	//	VID_Printf (PRINT_DEVELOPER, "GL_Upload32: ideal font res is %d.\n", idealFontRes);
+		idealImgRes = NearestPowerOf2(min(vid.width, vid.height)) / 2;
+		idealImgRes = min(idealImgRes, glConfig.max_texsize);
+		idealImgRes = max(idealImgRes, 256);
+	//	VID_Printf (PRINT_DEVELOPER, "GL_Upload32: ideal font res is %d.\n", idealImgRes);
+	}
+	// get best upscale size for scrap
+	if ( (type == it_scrap) && r_scrap_upscale->integer ) {
+		idealImgRes = NearestPowerOf2(min(vid.width, vid.height));
+		idealImgRes = min(idealImgRes, glConfig.max_texsize);
+		idealImgRes = max(idealImgRes, 256);
+	//	VID_Printf (PRINT_DEVELOPER, "GL_Upload32: ideal scrap res is %d.\n", idealImgRes);
 	}
 
 	//
@@ -1871,25 +1881,18 @@ qboolean GL_Upload32 (unsigned *data, int width, int height, imagetype_t type)
 	//
 	c = width*height;
 	scan = ((byte *)data) + 3;
-//	samples = gl_solid_format;
 	hasAlpha = false;
 	for (i = 0; i < c; i++, scan += 4)
 	{
 		if ( *scan != 255 ) {
 			hasAlpha = true;
-		//	samples = gl_alpha_format;
 			break;
 		}
 	}
 
 	// Heffo - ARB Texture Compression
 	qglHint(GL_TEXTURE_COMPRESSION_HINT_ARB, GL_NICEST);
-/*	if (samples == gl_solid_format)
-		comp = (glState.texture_compression && (type != it_pic) && (type != it_font)) ? GL_COMPRESSED_RGB_ARB : gl_tex_solid_format;
-	else if (samples == gl_alpha_format)
-		comp = (glState.texture_compression && (type != it_pic) && (type != it_font)) ? GL_COMPRESSED_RGBA_ARB : gl_tex_alpha_format;
-	*/
-	comp = (glState.texture_compression && (type != it_pic) && (type != it_font)) ? GL_COMPRESSED_RGBA_ARB : GL_RGBA;
+	comp = (glState.texture_compression && (type != it_pic) && (type != it_font) && (type != it_scrap)) ? GL_COMPRESSED_RGBA_ARB : GL_RGBA;
 
 	//
 	// find sizes to scale to
@@ -1939,12 +1942,13 @@ qboolean GL_Upload32 (unsigned *data, int width, int height, imagetype_t type)
 	//
 	// resample texture if needed
 	//
-	if ( (type == it_font) && r_font_upscale->integer && (scaled_width == scaled_height) && ((scaled_width * 2) <= idealFontRes) )	// scale up fonts
+	if ( ( (type == it_font) && r_font_upscale->integer ) || ( (type == it_scrap) && r_scrap_upscale->integer )
+		&& (scaled_width == scaled_height) && ((scaled_width * 2) <= idealImgRes) )	// scale up fonts
 	{
 		while (1) {
-			if ( ((scaled_width * 2) > idealFontRes) && ((scaled_height * 2) > idealFontRes) )
+			if ( ((scaled_width * 2) > idealImgRes) && ((scaled_height * 2) > idealImgRes) )
 				break;
-			if (upscaleFactor >= 5)	// don't go past 32x scaling
+			if (upscaleFactor >= MAX_UPSAMPLE_FACTOR)	// don't go past 32x scaling
 				break;
 			scaled_width <<= 1;
 			scaled_height <<= 1;
@@ -1952,10 +1956,13 @@ qboolean GL_Upload32 (unsigned *data, int width, int height, imagetype_t type)
 		}
 		if (upscaleFactor > 0)
 		{
-			upscaleFactor = min(upscaleFactor, 5);	// clamp to 5 (32x scaling)
+			upscaleFactor = min(upscaleFactor, MAX_UPSAMPLE_FACTOR);	// clamp to max upscale factor
 			VID_Printf (PRINT_DEVELOPER, "GL_Upload32: scaling font image from %dx%d to %dx%d.\n", width, height, scaled_width, scaled_height);
 			scaled = malloc((scaled_width * scaled_height) * 4);
-			GL_UpscaleTexture (data, width, height, scaled, upscaleFactor);
+			if (type == it_font)
+				GL_UpscaleTexture (data, width, height, scaled, upscaleFactor, (r_font_upscale->integer >= 2));
+			else
+				GL_UpscaleTexture (data, width, height, scaled, upscaleFactor, (r_scrap_upscale->integer >= 2));
 			resampled = true;
 		}
 		else {
@@ -2026,7 +2033,6 @@ qboolean GL_Upload32 (unsigned *data, int width, int height, imagetype_t type)
 	if (mipmap && glConfig.anisotropic && r_anisotropic->value)
 		qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, r_anisotropic->value);
 
-//	return (samples == gl_alpha_format || samples == GL_COMPRESSED_RGBA_ARB);
 	return hasAlpha;
 }
 
@@ -2196,10 +2202,8 @@ nonscrap:
 		image->texnum = TEXNUM_IMAGES + (image - gltextures);
 		GL_Bind(image->texnum);
 		if (bits == 8)
-		//	image->has_alpha = GL_Upload8 (pic, width, height, ((image->type != it_pic) && (image->type != it_font) && (image->type != it_sky)), (image->type == it_sky) );
 			image->has_alpha = GL_Upload8 (pic, width, height, image->type);
 		else
-		//	image->has_alpha = GL_Upload32 ((unsigned *)pic, width, height, ((image->type != it_pic) && (image->type != it_font) && (image->type != it_sky)) );
 			image->has_alpha = GL_Upload32 ((unsigned *)pic, width, height, image->type);
 		image->upload_width = upload_width;		// after power of 2 and scales
 		image->upload_height = upload_height;
@@ -2546,7 +2550,7 @@ void R_FreeUnusedImages (void)
 		if (!image->registration_sequence)
 			continue;		// free image_t slot
 	//	if (image->type == it_pic)
-		if ( (image->type == it_pic) || (image->type == it_font) )
+		if ( (image->type == it_pic) || (image->type == it_font) || (image->type == it_scrap) )
 			continue;		// don't free pics or fonts
 
 		//Heffo - Free Cinematic

@@ -25,6 +25,10 @@ Changes as of v0.20 update 8:
 - Added font upscaling (with optional blending by Skuller from Q2Pro) for old 128x128 fonts.  Use cvar r_font_upscale to enable,
 	value of 1 is pixel copy, value of 2 enables blending.  Requires vid_restart for changes to take effect.
 	
+- Added upscaling of the scrap image (with optional blending by Skuller from Q2Pro) used to atlas 8-bit HUD pics.
+	Use cvar r_scrap_upscale to enable, value of 1 is pixel copy, value of 2 enables blending.
+	Requires vid_restart for changes to take effect.
+
 - Now reads/writes savegames, config files, demos, etc. to <userprofile>/Saved Games/KMQuake2 on Windows Vista
 	and later, and to My Documents/My Games/KMQuake2 on Windows 2000/XP/2003.
 	Autodownloaded files are now written to <userprofile>/Downloads/KMQuake2 on Windows Vista and later,

@@ -77,9 +77,10 @@ typedef enum
 	it_sprite,
 	it_wall,
 	it_pic,
-	it_font,
+	it_font,	// Knightmare added
+	it_scrap,	// Knightmare added
 	it_sky,
-	it_part // Knightmare added
+	it_part		// Knightmare added
 } imagetype_t;
 
 typedef struct image_s
@@ -325,6 +326,7 @@ extern	cvar_t	*r_swapinterval;
 extern	cvar_t	*r_anisotropic;
 extern	cvar_t	*r_anisotropic_avail;
 extern	cvar_t	*r_font_upscale;
+extern	cvar_t	*r_scrap_upscale;
 extern	cvar_t	*r_nvfog_dist;
 extern	cvar_t	*r_nvfog_dist_mode;
 extern	cvar_t	*r_texturemode;

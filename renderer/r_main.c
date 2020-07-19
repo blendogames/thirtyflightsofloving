@@ -189,6 +189,7 @@ cvar_t	*r_texturemode;
 cvar_t	*r_anisotropic;
 cvar_t	*r_anisotropic_avail;
 cvar_t	*r_font_upscale;
+cvar_t	*r_scrap_upscale;
 cvar_t	*r_nvfog_dist;
 cvar_t	*r_nvfog_dist_mode;
 cvar_t	*r_lockpvs;
@@ -1052,6 +1053,8 @@ void R_Register (void)
 
 	r_font_upscale = Cvar_Get ("r_font_upscale", "1", CVAR_ARCHIVE);
 	Cvar_SetDescription ("r_font_upscale", "Enables upscaling of 128x128 fonts.");
+	r_scrap_upscale = Cvar_Get ("r_scrap_upscale", "1", CVAR_ARCHIVE);
+	Cvar_SetDescription ("r_scrap_upscale", "Enables upscaling of the atlassed scrap image.");
 
 	r_nvfog_dist = Cvar_Get( "r_nvfog_dist", "1", CVAR_ARCHIVE );
 	Cvar_SetDescription ("r_nvfog_dist", "Enables use of nVidia distance fog.");

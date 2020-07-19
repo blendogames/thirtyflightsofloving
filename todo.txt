@@ -318,7 +318,7 @@ implement client chat filtering (ignorenick/ignoretext)	- done!!
 
 add font upscaling										- done!!
 
-add scrap upscaling
+add scrap upscaling										- done!!
 
 implement cvar descriptions								- done!!
 
