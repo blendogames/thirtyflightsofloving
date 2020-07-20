@@ -676,7 +676,7 @@ qboolean LoadAliasFile (char *name)
 	if (!alias_data)
 	{
 		cvar_t			*basedir, *gamedir;
-		char			filename[256];
+		char			gamepath[256];
 		char			pakfile[256];
 		char			textname[128];
 		int				i, k, num, numitems;
@@ -687,41 +687,45 @@ qboolean LoadAliasFile (char *name)
 
 		basedir = gi.cvar("basedir", "", 0);
 		gamedir = gi.cvar("gamedir", "", 0);
-		Q_strncpyz(filename, basedir->string, sizeof(filename));
 		Com_sprintf(textname, sizeof(textname), name);
 
 		if (strlen(gamedir->string))
-			Q_strncpyz(filename, gamedir->string, sizeof(filename));
+		//	Q_strncpyz(gamepath, gamedir->string, sizeof(gamepath));
+			Com_sprintf(gamepath, sizeof(gamepath), "%s/%s", basedir->string, gamedir->string);
+		else
+		//	Q_strncpyz(gamepath, basedir->string, sizeof(gamepath));
+			Com_sprintf(gamepath, sizeof(gamepath), "%s/baseq2", basedir->string);
+
 		// check all pakfiles in current gamedir
 		for (i=0; i<10; i++)
 		{
-			Com_sprintf(pakfile, sizeof(pakfile), "%s/pak%d.pak",filename,i);
+			Com_sprintf(pakfile, sizeof(pakfile), "%s/pak%d.pak", gamepath, i);
 			if (NULL != (fpak = fopen(pakfile, "rb")))
 			{
-				num=fread(&pakheader,1,sizeof(pak_header_t),fpak);
-				if(num >= sizeof(pak_header_t))
+				num = fread(&pakheader, 1, sizeof(pak_header_t), fpak);
+				if (num >= sizeof(pak_header_t))
 				{
 					if (pakheader.id[0] == 'P' &&
 						pakheader.id[1] == 'A' &&
 						pakheader.id[2] == 'C' &&
 						pakheader.id[3] == 'K'   )
 					{
-						numitems = pakheader.dsize/sizeof(pak_item_t);
-						fseek(fpak,pakheader.dstart,SEEK_SET);
-						for(k=0; k<numitems && !in_pak; k++)
+						numitems = pakheader.dsize / sizeof(pak_item_t);
+						fseek(fpak, pakheader.dstart, SEEK_SET);
+						for (k=0; k<numitems && !in_pak; k++)
 						{
-							fread(&pakitem,1,sizeof(pak_item_t),fpak);
+							fread(&pakitem, 1, sizeof(pak_item_t), fpak);
 							if (!Q_stricmp(pakitem.name,textname))
 							{
 								in_pak = true;
-								fseek(fpak,pakitem.start,SEEK_SET);
+								fseek(fpak, pakitem.start, SEEK_SET);
 								alias_data = gi.TagMalloc(pakitem.size + 1, TAG_LEVEL);
 								if (!alias_data) {
 									fclose(fpak);
 									gi.dprintf("LoadAliasData: Memory allocation failure for entalias.dat\n");
 									return false;
 								}
-								alias_data_size = fread(alias_data,1,pakitem.size,fpak);
+								alias_data_size = fread(alias_data, 1, pakitem.size, fpak);
 								alias_data[pakitem.size] = 0; // put end marker
 								alias_from_pak = true;
 							}

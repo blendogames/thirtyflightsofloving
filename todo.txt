@@ -320,6 +320,8 @@ add font upscaling										- done!!
 
 add scrap upscaling										- done!!
 
+implement ifeq, ifneq, ifgt, ifge, iflt, ifle, ifbit, ifnbit layout script commands		- done!!
+
 implement cvar descriptions								- done!!
 
 add screenshot gamma correction							- done!!

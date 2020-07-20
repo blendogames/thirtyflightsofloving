@@ -236,21 +236,21 @@ static char *FootFile (char *in)
 		gamedir = gi.cvar("gamedir", "", 0);
 		if (strlen(gamedir->string))
 		{
-			if (strstr(in, "mud")) //Knightmare- mud sounds are in different subdir
-				Com_sprintf(prefix, sizeof(prefix), "%s/%s/sound/mud/",basedir->string,gamedir->string);
+			if (strstr(in, "mud")) // Knightmare- mud sounds are in different subdir
+				Com_sprintf (prefix, sizeof(prefix), "%s/%s/sound/mud/", basedir->string, gamedir->string);
 			else
-				Com_sprintf(prefix, sizeof(prefix), "%s/%s/sound/player/",basedir->string,gamedir->string);
+				Com_sprintf (prefix, sizeof(prefix), "%s/%s/sound/player/", basedir->string, gamedir->string);
 		}
 		else
 		{
-			if (strstr(in, "mud")) //Knightmare- mud sounds are in different subdir
-				Com_sprintf(prefix, sizeof(prefix), "%s/sound/mud/",basedir->string);
+			if (strstr(in, "mud")) // Knightmare- mud sounds are in different subdir
+				Com_sprintf (prefix, sizeof(prefix), "%s/baseq2/sound/mud/", basedir->string);
 			else
-				Com_sprintf(prefix, sizeof(prefix), "%s/sound/player/",basedir->string);
+				Com_sprintf (prefix, sizeof(prefix), "%s/baseq2/sound/player/", basedir->string);
 		}
 		init = 1;
 	}
-	Com_sprintf(filename, sizeof(filename), "%s%s",prefix,in);
+	Com_sprintf (filename, sizeof(filename), "%s%s", prefix ,in);
 	return filename;
 }
 

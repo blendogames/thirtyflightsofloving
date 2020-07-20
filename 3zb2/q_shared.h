@@ -84,7 +84,7 @@ typedef enum {false, true}	qboolean;
 // per-level limits
 //
 #define	MAX_CLIENTS			256		// absolute limit
-#ifdef KMQUAKE2_ENGINE_MOD		//Knightmare- increase MAX_EDICTS
+#ifdef KMQUAKE2_ENGINE_MOD		// Knightmare- increase MAX_EDICTS
 #define	MAX_EDICTS			8192	// must change protocol to increase more
 #else
 #define	MAX_EDICTS			1024	// must change protocol to increase more
@@ -101,11 +101,11 @@ typedef enum {false, true}	qboolean;
 #define	MAX_IMAGES			256
 #endif
 
-//Knightmare- hacked offsets for old demos
+// Knightmare- hacked offsets for old demos
 #define	OLD_MAX_MODELS		256
 #define	OLD_MAX_SOUNDS		256
 #define	OLD_MAX_IMAGES		256
-//end Knightmare
+// end Knightmare
 
 #define	MAX_ITEMS			256
 #define MAX_GENERAL			(MAX_CLIENTS*2)	// general config strings

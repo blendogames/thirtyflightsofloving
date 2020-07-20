@@ -303,24 +303,27 @@ void Do_Text_Display(edict_t *activator, int flags, char *message)
 		
 		basedir = gi.cvar("basedir", "", 0);
 		gamedir = gi.cvar("gamedir", "", 0);
-	//	strncpy(filename, basedir->string);
+	/*
 		Q_strncpyz(filename, basedir->string, sizeof(filename));
 		if (strlen(gamedir->string))
 		{
-		//	strncat(filename, "\\");
-		//	strncat(filename, gamedir->string);
 			Q_strncatz(filename, "\\", sizeof(filename));
 			Q_strncatz(filename, gamedir->string, sizeof(filename));
 		}
+	*/
+		if (strlen(gamedir->string))
+			Com_sprintf(filename, sizeof(filename), "%s\\%s", basedir->string, gamedir->string);
+		else
+			Com_sprintf(filename, sizeof(filename), "%s\\baseq2", basedir->string);
+
 		// First check for existence of text file in pak0.pak -> pak9.pak
 		in_pak = false;
 		for (i=0; i<=9 && !in_pak; i++)
 		{
-		//	sprintf(pakfile,"%s\\pak%d.pak",filename,i);
-			Com_sprintf(pakfile, sizeof(pakfile), "%s\\pak%d.pak",filename,i);
+			Com_sprintf(pakfile, sizeof(pakfile), "%s\\pak%d.pak", filename, i);
 			if (NULL != (f = fopen(pakfile, "rb")))
 			{
-				num=fread(&pakheader,1,sizeof(pak_header_t),f);
+				num = fread(&pakheader,1,sizeof(pak_header_t),f);
 				if (num >= sizeof(pak_header_t))
 				{
 					if ( pakheader.id[0] == 'P' &&
@@ -330,15 +333,15 @@ void Do_Text_Display(edict_t *activator, int flags, char *message)
 					{
 						numitems = pakheader.dsize/sizeof(pak_item_t);
 					//	sprintf(textname,"maps/%s",message);
-						Com_sprintf(textname, sizeof(textname), "maps/%s",message);
-						fseek(f,pakheader.dstart,SEEK_SET);
+						Com_sprintf(textname, sizeof(textname), "maps/%s", message);
+						fseek(f, pakheader.dstart, SEEK_SET);
 						for (k=0; k<numitems && !in_pak; k++)
 						{
-							fread(&pakitem,1,sizeof(pak_item_t),f);
+							fread(&pakitem, 1, sizeof(pak_item_t), f);
 							if (!Q_stricmp(pakitem.name,textname))
 							{
 								in_pak = true;
-								fseek(f,pakitem.start,SEEK_SET);
+								fseek(f, pakitem.start, SEEK_SET);
 								hnd->allocated = pakitem.size + 128;  // add some slop for additional control characters
 								hnd->buffer = gi.TagMalloc(hnd->allocated, TAG_LEVEL);
 								if (!hnd->buffer)
@@ -348,8 +351,8 @@ void Do_Text_Display(edict_t *activator, int flags, char *message)
 									Text_Close(activator);
 									return;
 								}
-								memset(hnd->buffer,0,hnd->allocated);
-								fread(hnd->buffer,1,pakitem.size,f);
+								memset(hnd->buffer, 0, hnd->allocated);
+								fread(hnd->buffer, 1, pakitem.size, f);
 								hnd->buffer[pakitem.size] = 0;
 							}
 						}

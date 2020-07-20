@@ -2327,10 +2327,8 @@ SCR_ExecuteLayoutString
 void SCR_ExecuteLayoutString (char *s, qboolean isStatusBar)
 {
 	int		x, y;
-	int		value;
+	int		value, stat, width, index, cs_images, max_images;
 	char	*token;
-	int		width;
-	int		index;
 	clientinfo_t	*ci;
 	float			(*scaleForScreen)(float in);
 	float			(*getScreenScale)(void);
@@ -2341,6 +2339,17 @@ void SCR_ExecuteLayoutString (char *s, qboolean isStatusBar)
 
 	if (!s[0])
 		return;
+
+	// Knightmare- hack for connected to server using old protocol
+	// Changed config strings require different parsing
+	if ( LegacyProtocol() ) {
+		cs_images = OLD_CS_IMAGES;
+		max_images = OLD_MAX_IMAGES;
+	}
+	else {
+		cs_images = CS_IMAGES;
+		max_images = MAX_IMAGES;
+	}
 
 	// Get our scaling functions
 	if (isStatusBar) {
@@ -2406,37 +2415,21 @@ void SCR_ExecuteLayoutString (char *s, qboolean isStatusBar)
 		if (!strcmp(token, "pic"))
 		{	// draw a pic from a stat number
 			token = COM_Parse (&s);
-			value = cl.frame.playerstate.stats[atoi(token)];
-			// Knightmare- 1/2/2002- BIG UGLY HACK for old demos or
-			// connected to server using old protocol;
-			// Changed config strings require different offsets
-			if ( LegacyProtocol() )
+		//	value = cl.frame.playerstate.stats[atoi(token)];
+			stat = atoi(token);
+			if (stat < 0 || stat >= MAX_STATS)	// check bounds on stat
+				Com_Error (ERR_DROP, "Bad pic stat index");
+			value = cl.frame.playerstate.stats[stat];
+			if (value >= max_images) // Knightmare- don't bomb out
+			//	Com_Error (ERR_DROP, "Pic >= MAX_IMAGES");
 			{
-				if (value >= OLD_MAX_IMAGES) // Knightmare- don't bomb out
-				//	Com_Error (ERR_DROP, "Pic >= MAX_IMAGES");
-				{
-					Com_Printf (S_COLOR_YELLOW"Warning: Pic >= MAX_IMAGES\n");
-					value = OLD_MAX_IMAGES-1;
-				}
-				if (cl.configstrings[OLD_CS_IMAGES+value])
-				{
-					R_DrawScaledPic (x, y, getScreenScale(), hud_alpha->value, cl.configstrings[OLD_CS_IMAGES+value]);
-				}
+				Com_Printf (S_COLOR_YELLOW"WARNING: Pic >= MAX_IMAGES\n");
+				value = max_images-1;
 			}
-			else
+			if (cl.configstrings[cs_images+value])
 			{
-				if (value >= MAX_IMAGES) // Knightmare- don't bomb out
-				//	Com_Error (ERR_DROP, "Pic >= MAX_IMAGES");
-				{
-					Com_Printf (S_COLOR_YELLOW"Warning: Pic >= MAX_IMAGES\n");
-					value = MAX_IMAGES-1;
-				}
-				if (cl.configstrings[CS_IMAGES+value])
-				{
-					R_DrawScaledPic (x, y, getScreenScale(), hud_alpha->value, cl.configstrings[CS_IMAGES+value]);
-				}
+				R_DrawScaledPic (x, y, getScreenScale(), hud_alpha->value, cl.configstrings[cs_images+value]);
 			}
-			//end Knightmare
 			continue;
 		}
 
@@ -2554,7 +2547,11 @@ void SCR_ExecuteLayoutString (char *s, qboolean isStatusBar)
 			token = COM_Parse (&s);
 			width = atoi(token);
 			token = COM_Parse (&s);
-			value = cl.frame.playerstate.stats[atoi(token)];
+		//	value = cl.frame.playerstate.stats[atoi(token)];
+			stat = atoi(token);
+			if (stat < 0 || stat >= MAX_STATS)	// check bounds on stat
+				Com_Error (ERR_DROP, "Bad num stat index");
+			value = cl.frame.playerstate.stats[stat];
 			SCR_DrawField (x, y, 0, width, value, false, isStatusBar);
 			continue;
 		}
@@ -2621,12 +2618,12 @@ void SCR_ExecuteLayoutString (char *s, qboolean isStatusBar)
 		if (!strcmp(token, "stat_string"))
 		{
 			token = COM_Parse (&s);
-			index = atoi(token);
+			stat = atoi(token);
+			if (stat < 0 || stat >= MAX_STATS)	// MAX_CONFIGSTRINGS
+				Com_Error (ERR_DROP, "Bad stat_string stat index");
+			index = cl.frame.playerstate.stats[stat];
 			if (index < 0 || index >= MAX_CONFIGSTRINGS)
-				Com_Error (ERR_DROP, "Bad stat_string index");
-			index = cl.frame.playerstate.stats[index];
-			if (index < 0 || index >= MAX_CONFIGSTRINGS)
-				Com_Error (ERR_DROP, "Bad stat_string index");
+				Com_Error (ERR_DROP, "Bad stat_string configstring index");
 			Hud_DrawString (x, y, cl.configstrings[index], 255, isStatusBar);
 			continue;
 		}
@@ -2662,7 +2659,11 @@ void SCR_ExecuteLayoutString (char *s, qboolean isStatusBar)
 		if (!strcmp(token, "if"))
 		{	// draw a number
 			token = COM_Parse (&s);
-			value = cl.frame.playerstate.stats[atoi(token)];
+		//	value = cl.frame.playerstate.stats[atoi(token)];
+			stat = atoi(token);
+			if (stat < 0 || stat >= MAX_STATS)	// check bounds on stat
+				Com_Error (ERR_DROP, "Bad if stat index");
+			value = cl.frame.playerstate.stats[stat];
 			if (!value)
 			{	// skip to endif
 				while (s && strcmp(token, "endif") )
@@ -2674,7 +2675,150 @@ void SCR_ExecuteLayoutString (char *s, qboolean isStatusBar)
 			continue;
 		}
 
+		// ifeq <stat> <value>
+		// ifbit <stat> <value>
 
+		// Knightmare- added more commands
+		if (!strcmp(token, "ifeq"))
+		{
+			token = COM_Parse (&s);
+			stat = atoi(token);
+			if (stat < 0 || stat >= MAX_STATS)
+				Com_Error (ERR_DROP, "Bad ifeq stat index");
+			token = COM_Parse (&s);
+			value = atoi(token);
+			if (cl.frame.playerstate.stats[stat] != value)
+			{	// skip to endif
+				while (s && strcmp(token, "endif") )
+				{
+					token = COM_Parse (&s);
+				}			
+			}
+		}
+
+		if (!strcmp(token, "ifneq"))
+		{
+			token = COM_Parse (&s);
+			stat = atoi(token);
+			if (stat < 0 || stat >= MAX_STATS)
+				Com_Error (ERR_DROP, "Bad ifneq stat index");
+			token = COM_Parse (&s);
+			value = atoi(token);
+			if (cl.frame.playerstate.stats[stat] == value)
+			{	// skip to endif
+				while (s && strcmp(token, "endif") )
+				{
+					token = COM_Parse (&s);
+				}			
+			}
+		}
+
+		if (!strcmp(token, "ifgt"))
+		{
+			token = COM_Parse (&s);
+			stat = atoi(token);
+			if (stat < 0 || stat >= MAX_STATS)
+				Com_Error (ERR_DROP, "Bad ifgt stat index");
+			token = COM_Parse (&s);
+			value = atoi(token);
+			if (cl.frame.playerstate.stats[stat] <= value)
+			{	// skip to endif
+				while (s && strcmp(token, "endif") )
+				{
+					token = COM_Parse (&s);
+				}			
+			}
+		}
+
+		if (!strcmp(token, "ifge"))
+		{
+			token = COM_Parse (&s);
+			stat = atoi(token);
+			if (stat < 0 || stat >= MAX_STATS)
+				Com_Error (ERR_DROP, "Bad ifge stat index");
+			token = COM_Parse (&s);
+			value = atoi(token);
+			if (cl.frame.playerstate.stats[stat] < value)
+			{	// skip to endif
+				while (s && strcmp(token, "endif") )
+				{
+					token = COM_Parse (&s);
+				}			
+			}
+		}
+
+		if (!strcmp(token, "iflt"))
+		{
+			token = COM_Parse (&s);
+			stat = atoi(token);
+			if (stat < 0 || stat >= MAX_STATS)
+				Com_Error (ERR_DROP, "Bad iflt stat index");
+			token = COM_Parse (&s);
+			value = atoi(token);
+			if (cl.frame.playerstate.stats[stat] >= value)
+			{	// skip to endif
+				while (s && strcmp(token, "endif") )
+				{
+					token = COM_Parse (&s);
+				}			
+			}
+		}
+
+		if (!strcmp(token, "ifle"))
+		{
+			token = COM_Parse (&s);
+			stat = atoi(token);
+			if (stat < 0 || stat >= MAX_STATS)
+				Com_Error (ERR_DROP, "Bad ifle stat index");
+			token = COM_Parse (&s);
+			value = atoi(token);
+			if (cl.frame.playerstate.stats[stat] > value)
+			{	// skip to endif
+				while (s && strcmp(token, "endif") )
+				{
+					token = COM_Parse (&s);
+				}			
+			}
+		}
+
+		if (!strcmp(token, "ifbit"))
+		{
+			token = COM_Parse (&s);
+			stat = atoi(token);
+			if (stat < 0 || stat >= MAX_STATS)
+				Com_Error (ERR_DROP, "Bad ifbit stat index");
+			token = COM_Parse (&s);
+			value = atoi(token);
+			if (value < 1 || value > 16)
+				Com_Error (ERR_DROP, "Bad ifbit bit value");
+			if ( !(cl.frame.playerstate.stats[stat] & (1<<(value-1))) )
+			{	// skip to endif
+				while (s && strcmp(token, "endif") )
+				{
+					token = COM_Parse (&s);
+				}			
+			}
+		}
+
+		if (!strcmp(token, "ifnbit"))
+		{
+			token = COM_Parse (&s);
+			stat = atoi(token);
+			if (stat < 0 || stat >= MAX_STATS)
+				Com_Error (ERR_DROP, "Bad ifnbit stat index");
+			token = COM_Parse (&s);
+			value = atoi(token);
+			if (value < 1 || value > 16)
+				Com_Error (ERR_DROP, "Bad ifnbit bit value");
+			if ( cl.frame.playerstate.stats[stat] & (1<<(value-1)) )
+			{	// skip to endif
+				while (s && strcmp(token, "endif") )
+				{
+					token = COM_Parse (&s);
+				}			
+			}
+		}
+		// end Knightmare
 	}
 }
 

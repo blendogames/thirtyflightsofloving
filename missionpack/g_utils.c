@@ -996,7 +996,7 @@ void GameDirRelativePath (char *filename, char *output, size_t outputSize)
 	if (strlen(gamedir->string))
 		Com_sprintf(output, outputSize, "%s/%s/%s", basedir->string, gamedir->string, filename);
 	else
-		Com_sprintf(output, outputSize, "%s/%s", basedir->string, filename);
+		Com_sprintf(output, outputSize, "%s/baseq2/%s", basedir->string, filename);
 #endif	// KMQUAKE2_ENGINE_MOD
 }
 
@@ -1012,7 +1012,7 @@ void SavegameDirRelativePath (char *filename, char *output, size_t outputSize)
 	if (strlen(gamedir->string))
 		Com_sprintf(output, outputSize, "%s/%s/%s", basedir->string, gamedir->string, filename);
 	else
-		Com_sprintf(output, outputSize, "%s/%s", basedir->string, filename);
+		Com_sprintf(output, outputSize, "%s/baseq2/%s", basedir->string, filename);
 #endif	// KMQUAKE2_ENGINE_MOD
 }
 

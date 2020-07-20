@@ -629,15 +629,19 @@ qboolean KillBox (edict_t *ent)
 }
 
 // Knightmare added
-void GameDirRelativePath(char *filename, char *output)
+void GameDirRelativePath (char *filename, char *output, size_t outputSize)
 {
+#ifdef KMQUAKE2_ENGINE_MOD
+	Com_sprintf(output, outputSize, "%s/%s", gi.GameDir(), filename);
+#else	// KMQUAKE2_ENGINE_MOD
 	cvar_t	*basedir, *gamedir;
 
 	basedir = gi.cvar("basedir", "", 0);
 	gamedir = gi.cvar("gamedir", "", 0);
 	if (strlen(gamedir->string))
-		sprintf(output, "%s/%s/%s", basedir->string, gamedir->string, filename);
+		Com_sprintf(output, outputSize, "%s/%s/%s", basedir->string, gamedir->string, filename);
 	else
-		sprintf(output, "%s/%s", basedir->string, filename);
+		Com_sprintf(output, outputSize, "%s/baseq2/%s", basedir->string, filename);
+#endif	// KMQUAKE2_ENGINE_MOD
 }
 // end Knightmare
