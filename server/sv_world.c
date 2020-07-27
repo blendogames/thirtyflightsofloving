@@ -368,7 +368,8 @@ void SV_AreaEdicts_r (areanode_t *node)
 	else
 		start = &node->trigger_edicts;
 
-	for (l=start->next  ; l != start ; l = next)
+//	for (l=start->next  ; l != start ; l = next)
+	for (l = start->next; l && (l != start); l = next)	// Knightmare- catch null 'l' pointer
 	{
 		next = l->next;
 		check = EDICT_FROM_AREA(l);

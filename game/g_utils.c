@@ -208,7 +208,7 @@ void G_UseTargets (edict_t *ent, edict_t *activator)
 //
 // print the message
 //
-	if ((ent->message) && !(activator->svflags & SVF_MONSTER))
+	if ( (ent->message) && (activator) && !(activator->svflags & SVF_MONSTER) )
 	{
 //		Lazarus - change so that noise_index < 0 means no sound
 		safe_centerprintf (activator, "%s", ent->message);

@@ -995,7 +995,7 @@ void R_Register (void)
 	Cvar_SetDescription ("r_particle_max", "Sets maximum clipping distance for particle rendering.");
 
 	r_modulate = Cvar_Get ("r_modulate", "1", CVAR_ARCHIVE );
-	Cvar_SetDescription ("r_modulate", "Sets scale for lightmaps.");
+	Cvar_SetDescription ("r_modulate", "Sets brightness scale for lightmaps.");
 	r_log = Cvar_Get( "r_log", "0", 0 );
 	Cvar_SetDescription ("r_log", "Enables logging of OpenGL API calls.");
 	r_bitdepth = Cvar_Get( "r_bitdepth", "0", 0 );

@@ -61,6 +61,8 @@ Changes as of v0.20 update 8:
 - Added changeable gl_clear color controlled by cvars r_clearcolor_r, r_clearcolor_g, and r_clearcolor_b.
 	Values are normalized (0-1).
 	
+- Added ifeq, ifneq, ifgt, ifge, iflt, ifle, ifbit, and ifnbit layout script commands.
+	
 - Added a check to prevent game code from sending unicasts to non-present clients (i.e. bots).  This would
 	previously cause a fatal server error.
 	
