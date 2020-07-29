@@ -1035,7 +1035,16 @@ void sentien_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dama
 {
 	int n;
 
-	target_laser_off (self->laser);
+//	target_laser_off (self->laser);
+	// Knightmare- free laser on death, as resurrection by a medic will call
+	// the spawn function again, and would leak the exisiting laser entity.
+	if (self->laser) {
+	//	gi.dprintf ("removing sentien laser on death.\n");
+		target_laser_off (self->laser);
+		G_FreeEdict (self->laser);
+		self->laser = NULL;
+	}
+	// end Knightmare
 
 	// gib code to go here
 	if (self->health <= self->gib_health)

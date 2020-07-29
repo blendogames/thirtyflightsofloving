@@ -2,6 +2,8 @@
 
 #include "g_local.h"
 
+void target_laser_off (edict_t *self);	// Knightmare added
+
 
 void G_ProjectSource (vec3_t point, vec3_t distance, vec3_t forward, vec3_t right, vec3_t result)
 {
@@ -195,6 +197,28 @@ void G_UseTargets (edict_t *ent, edict_t *activator)
 		t = NULL;
 		while ((t = G_Find (t, FOFS(targetname), ent->killtarget)))
 		{
+
+			// Knightmare- free sentien's laser first!
+			if (Q_stricmp(t->classname, "monster_sentien") == 0)
+			{
+				if (t->laser) {
+				//	gi.dprintf ("removing sentien laser before removing sentien.\n");
+					target_laser_off (t->laser);
+					G_FreeEdict (t->laser);
+					t->laser = NULL;
+				}
+			}
+			// Also free the Titan's hook
+			if (Q_stricmp(t->classname, "monster_zboss") == 0)
+			{
+				if (t->laser) {
+				//	gi.dprintf ("removing titan hook before removing titan.\n");
+					G_FreeEdict (t->laser);
+					t->laser = NULL;
+				}
+			}
+			// end Knightmare
+
 			G_FreeEdict (t);
 			if (!ent->inuse)
 			{
