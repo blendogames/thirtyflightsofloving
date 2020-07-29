@@ -208,9 +208,9 @@ void hound_pain (edict_t *self, edict_t *other, float kick, int damage)
 		return;		// no pain anims in nightmare
 
 	if (random() < 0.5)
-	  self->monsterinfo.currentmove = &hound_move_pain1;
-  else
-	  self->monsterinfo.currentmove = &hound_move_pain2;
+		self->monsterinfo.currentmove = &hound_move_pain1;
+	else
+		self->monsterinfo.currentmove = &hound_move_pain2;
 }
 
 //
@@ -271,13 +271,13 @@ mmove_t hound_move_attack2 = {FRAME_attack2Start, FRAME_attack2End, hound_frames
 void hound_attack (edict_t *self)
 {
 	if (random() < 0.6)
-  {
-	  self->monsterinfo.currentmove = &hound_move_attack1;
-  }
-  else
-  {
-	  self->monsterinfo.currentmove = &hound_move_attack2;
-  }
+	{
+		self->monsterinfo.currentmove = &hound_move_attack1;
+	}
+	else
+	{
+		self->monsterinfo.currentmove = &hound_move_attack2;
+	}
 }
 
 

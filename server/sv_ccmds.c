@@ -242,12 +242,12 @@ void SV_CopySaveGame (char *src, char *dst)
 	}
 
 	Com_sprintf (name, sizeof(name), "%s/save/%s/", FS_Savegamedir(), src);	// was FS_Gamedir()
-	len = strlen(name);
+	len = (int)strlen(name);
 //	Com_sprintf (name, sizeof(name), "%s/save/%s/*.sav", FS_Savegamedir(), src);	// was FS_Gamedir()
 	for (i = 0; i < 2; i++)
 	{
 		Com_sprintf (name, sizeof(name), "%s/save/%s/*.%s", FS_Savegamedir(), src, saveExtensions[i]);	// was FS_Gamedir()
-		extLen = strlen (saveExtensions[i]);
+		extLen = (int)strlen (saveExtensions[i]);
 		found = Sys_FindFirst (name, 0, 0);
 		while (found)
 		{
@@ -259,10 +259,10 @@ void SV_CopySaveGame (char *src, char *dst)
 			if (i == 0)
 			{
 				// change sav to sv2
-				l = strlen(name);
+				l = (int)strlen(name);
 			//	strncpy (name+l-3, "sv2");
 				Q_strncpyz (name+l-3, "sv2", sizeof(name)-l+3);
-				l = strlen(name2);
+				l = (int)strlen(name2);
 			//	strncpy (name2+l-3, "sv2");
 				Q_strncpyz (name2+l-3, "sv2", sizeof(name2)-l+3);
 				FS_CopyFile (name, name2);
@@ -684,7 +684,7 @@ void SV_GameMap_f (void)
 
 	// copy off the level to the autosave slot
 	// Knightmare- don't do this in deathmatch or for cinematics
-	l = strlen(map);
+	l = (int)strlen(map);
 	//l = strcspn(map, "+");
 	if (!dedicated->value && !Cvar_VariableValue("deathmatch")
 		&& Q_strcasecmp (map+l-4, ".cin") && Q_strcasecmp (map+l-4, ".roq")
@@ -957,7 +957,7 @@ void SV_Status_f (void)
 		}
 
 		Com_Printf ("%s", cl->name);
-		l = 16 - strlen(cl->name);
+		l = 16 - (int)strlen(cl->name);
 		for (j=0 ; j<l ; j++)
 			Com_Printf (" ");
 
@@ -965,7 +965,7 @@ void SV_Status_f (void)
 
 		s = NET_AdrToString ( cl->netchan.remote_address);
 		Com_Printf ("%s", s);
-		l = 22 - strlen(s);
+		l = 22 - (int)strlen(s);
 		for (j=0 ; j<l ; j++)
 			Com_Printf (" ");
 		

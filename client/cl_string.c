@@ -183,7 +183,7 @@ void CL_DrawStringGeneric (int x, int y, const char *string, int alpha, int font
 	shadow = false;
 	bold = false;
 
-	len = strlen( string );
+	len = (int)strlen( string );
 	for ( i = 0, j = 0; i < len; i++ )
 	{
 		modifier = (byte)string[i];

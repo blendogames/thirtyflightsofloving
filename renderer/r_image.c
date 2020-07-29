@@ -2339,7 +2339,7 @@ image_t	*R_FindImage (char *name, imagetype_t type)
 
 	if (!name)
 		return NULL;
-	len = strlen(name);
+	len = (int)strlen(name);
 	if (len<5)
 		return NULL;
 

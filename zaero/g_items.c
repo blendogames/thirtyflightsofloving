@@ -317,7 +317,7 @@ qboolean Pickup_Bandolier (edict_t *ent, edict_t *other)
 	gitem_t	*item;
 	int		index;
 
-	//Knightmare- override ammo pickup values with cvars
+	// Knightmare- override ammo pickup values with cvars
 	SetAmmoPickupValues ();
 
 	if (other->client->pers.max_bullets < sk_bando_bullets->value)
@@ -360,7 +360,7 @@ qboolean Pickup_Pack (edict_t *ent, edict_t *other)
 	gitem_t	*item;
 	int		index;
 
-	//Knightmare- override ammo pickup values with cvars
+	// Knightmare- override ammo pickup values with cvars
 	SetAmmoPickupValues ();
 
 	if (other->client->pers.max_bullets < sk_pack_bullets->value)
@@ -438,6 +438,15 @@ qboolean Pickup_Pack (edict_t *ent, edict_t *other)
 		other->client->pers.inventory[index] += item->quantity;
 		if (other->client->pers.inventory[index] > other->client->pers.max_slugs)
 			other->client->pers.inventory[index] = other->client->pers.max_slugs;
+	}
+
+	item = FindItem("Flares");
+	if (item)
+	{
+		index = ITEM_INDEX(item);
+		other->client->pers.inventory[index] += item->quantity;
+		if (other->client->pers.inventory[index] > other->client->pers.max_empnuke)
+			other->client->pers.inventory[index] = other->client->pers.max_empnuke;
 	}
 
 	item = FindItem("IRED");

@@ -188,7 +188,7 @@ char *Cvar_CompleteVariable (char *partial)
 	cvar_t		*cvar;
 	int			len;
 	
-	len = strlen(partial);
+	len = (int)strlen(partial);
 	
 	if (!len)
 		return NULL;

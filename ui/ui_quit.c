@@ -62,7 +62,7 @@ void Quit_MenuInit ( void )
 	s_quit_header.generic.type		= MTYPE_SEPARATOR;
 	s_quit_header.generic.textSize	= MENU_FONT_SIZE;
 	s_quit_header.generic.name		= "Quit game?";
-	s_quit_header.generic.x			= MENU_FONT_SIZE*0.7 * strlen(s_quit_header.generic.name);
+	s_quit_header.generic.x			= MENU_FONT_SIZE*0.7 * (int)strlen(s_quit_header.generic.name);
 	s_quit_header.generic.y			= 20;
 
 	s_quit_yes_action.generic.type			= MTYPE_ACTION;

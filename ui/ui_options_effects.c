@@ -196,7 +196,7 @@ void Options_Effects_MenuInit ( void )
 	s_options_effects_header.generic.type			= MTYPE_SEPARATOR;
 	s_options_effects_header.generic.textSize		= MENU_HEADER_FONT_SIZE;
 	s_options_effects_header.generic.name			= "Effects";
-	s_options_effects_header.generic.x				= MENU_HEADER_FONT_SIZE/2 * strlen(s_options_effects_header.generic.name);
+	s_options_effects_header.generic.x				= MENU_HEADER_FONT_SIZE/2 * (int)strlen(s_options_effects_header.generic.name);
 	s_options_effects_header.generic.y				= -2*MENU_LINE_SIZE;	//	0
 	
 	s_options_effects_blood_box.generic.type		= MTYPE_SPINCONTROL;

@@ -474,7 +474,7 @@ void SV_Map (qboolean attractloop, char *levelstring, qboolean loadgame)
 //	if (level[0] == '*')
 //		strncpy (level, level+1);
 
-	l = strlen(level);
+	l = (int)strlen(level);
 #ifdef	ROQ_SUPPORT
 	if (l > 4 && (!strcmp (level+l-4, ".cin") || !strcmp (level+l-4, ".roq")) )
 #else

@@ -222,7 +222,7 @@ char	*SV_StatusString (void)
 //	strncat (status, "\n");
 	Q_strncpyz (status, Cvar_Serverinfo(), sizeof(status));
 	Q_strncatz (status, "\n", sizeof(status));
-	statusLength = strlen(status);
+	statusLength = (int)strlen(status);
 
 	for (i=0 ; i<maxclients->value ; i++)
 	{
@@ -231,7 +231,7 @@ char	*SV_StatusString (void)
 		{
 			Com_sprintf (player, sizeof(player), "%i %i \"%s\"\n", 
 				cl->edict->client->ps.stats[STAT_FRAGS], cl->ping, cl->name);
-			playerLength = strlen(player);
+			playerLength = (int)strlen(player);
 			if (statusLength + playerLength >= sizeof(status) )
 				break;		// can't hold any more
 		//	strncpy (status + statusLength, player);

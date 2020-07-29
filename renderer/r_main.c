@@ -1292,7 +1292,7 @@ qboolean StringContainsToken (const char *string, const char *findToken)
 		return false;
 
 	strPos = string;
-	tokenLen = strlen(findToken);
+	tokenLen = (int)strlen(findToken);
 	
 	while (1)
 	{

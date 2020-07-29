@@ -157,7 +157,7 @@ static qboolean IconOfSkinExists (char *skin, char **files, int nfiles, char *su
 // adds menu support for TGA and JPG skins
 static qboolean IsValidSkin (char **filelist, int numFiles, int index)
 {
-	int		len = strlen(filelist[index]);
+	int		len = (int)strlen(filelist[index]);
 
 	if (	!strcmp (filelist[index]+max(len-4,0), ".pcx")
 		||  !strcmp (filelist[index]+max(len-4,0), ".tga")
@@ -449,7 +449,7 @@ qboolean PlayerConfig_MenuInit (void)
 	s_player_name_field.length	= 20;
 	s_player_name_field.visible_length = 20;
 	Q_strncpyz( s_player_name_field.buffer, name->string, sizeof(s_player_name_field.buffer) );
-	s_player_name_field.cursor = strlen( name->string );
+	s_player_name_field.cursor = (int)strlen( name->string );
 	
 	s_player_model_title.generic.type = MTYPE_SEPARATOR;
 	s_player_model_title.generic.textSize = MENU_FONT_SIZE;

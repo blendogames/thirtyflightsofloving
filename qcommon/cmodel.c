@@ -539,7 +539,7 @@ void CMod_LoadEntityString (lump_t *l, char *name)
 		char	*buffer = NULL;
 		int		nameLen, bufLen;
 
-		nameLen = strlen(name);
+		nameLen = (int)strlen(name);
 		Q_strncpyz (s, name, sizeof(s));
 		s[nameLen-3] = 'e';	s[nameLen-2] = 'n';	s[nameLen-1] = 't';
 		bufLen = FS_LoadFile (s, (void **)&buffer);

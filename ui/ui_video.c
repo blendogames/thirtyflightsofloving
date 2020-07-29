@@ -167,11 +167,11 @@ static void ApplyChanges( void *unused )
 		// update fields in case values were clamped
 		customStr = Cvar_VariableString("r_customwidth");
 		Q_strncpyz( s_customwidth_field.buffer, customStr, sizeof(s_customwidth_field.buffer) );
-		s_customwidth_field.cursor = strlen( customStr );
+		s_customwidth_field.cursor = (int)strlen( customStr );
 		
 		customStr = Cvar_VariableString("r_customheight");
 		Q_strncpyz(s_customheight_field.buffer, customStr, sizeof(s_customwidth_field.buffer) );
-		s_customheight_field.cursor = strlen( customStr );
+		s_customheight_field.cursor = (int)strlen( customStr );
 	}
 	Cvar_SetValue( "vid_fullscreen", s_fs_box.curvalue );
 	// invert sense so greater = brighter, and scale to a range of 0.3 to 1.3
@@ -461,7 +461,7 @@ void Menu_Video_Init (void)
 	s_customwidth_field.visible_length		= 6;
 	customStr = Cvar_VariableString("r_customwidth");
 	Q_strncpyz( s_customwidth_field.buffer, customStr, sizeof(s_customwidth_field.buffer) );
-	s_customwidth_field.cursor				= strlen( customStr );
+	s_customwidth_field.cursor				= (int)strlen( customStr );
 
 	s_customheight_title.generic.type		= MTYPE_SEPARATOR;
 	s_customheight_title.generic.textSize	= MENU_FONT_SIZE;
@@ -481,7 +481,7 @@ void Menu_Video_Init (void)
 	s_customheight_field.visible_length		= 6;
 	customStr = Cvar_VariableString("r_customheight");
 	Q_strncpyz(s_customheight_field.buffer, customStr, sizeof(s_customheight_field.buffer) );
-	s_customheight_field.cursor				= strlen( customStr );
+	s_customheight_field.cursor				= (int)strlen( customStr );
 
 	s_fs_box.generic.type			= MTYPE_SPINCONTROL;
 	s_fs_box.generic.textSize		= MENU_FONT_SIZE;

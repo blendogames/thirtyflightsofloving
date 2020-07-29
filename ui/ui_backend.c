@@ -126,7 +126,7 @@ void Field_Draw (menufield_s *f)
 	if (xtra = stringLengthExtra(f->buffer))
 	{
 		strncpy( tempbuffer, f->buffer + f->visible_offset, f->visible_length );
-		offset = strlen(tempbuffer) - xtra;
+		offset = (int)strlen(tempbuffer) - xtra;
 
 		if (offset > f->visible_length)
 		{
@@ -138,7 +138,7 @@ void Field_Draw (menufield_s *f)
 	else
 	{
 		strncpy( tempbuffer, f->buffer + f->visible_offset, f->visible_length );
-		offset = strlen(tempbuffer);
+		offset = (int)strlen(tempbuffer);
 	}
 
 	SCR_DrawChar (f->generic.x + f->generic.parent->x + RCOLUMN_OFFSET,
@@ -245,7 +245,7 @@ qboolean Field_Key (menufield_s *f, int key)
 			strtok( cbd, "\n\r\b" );
 
 			strncpy( f->buffer, cbd, f->length - 1 );
-			f->cursor = strlen( f->buffer );
+			f->cursor = (int)strlen( f->buffer );
 			f->visible_offset = f->cursor - f->visible_length;
 			if ( f->visible_offset < 0 )
 				f->visible_offset = 0;
@@ -674,7 +674,7 @@ void Menu_Draw (menuframework_s *menu)
 			{
 				case MTYPE_ACTION:
 					{
-						len = strlen(item->name);
+						len = (int)strlen(item->name);
 						
 						if (item->flags & QMF_LEFT_JUSTIFY)
 						{
@@ -693,7 +693,7 @@ void Menu_Draw (menuframework_s *menu)
 					{
 						if (item->name)
 						{
-							len = strlen(item->name);
+							len = (int)strlen(item->name);
 						//	min[0] -= SCR_ScaledScreen(len*MENU_FONT_SIZE - LCOLUMN_OFFSET*2);
 							min[0] -= SCR_ScaledScreen(len*item->textSize - LCOLUMN_OFFSET*2);
 						}
@@ -713,12 +713,12 @@ void Menu_Draw (menuframework_s *menu)
 
 						if (item->name)
 						{
-							len = strlen(item->name);
+							len = (int)strlen(item->name);
 						//	min[0] -= SCR_ScaledScreen(len*MENU_FONT_SIZE - LCOLUMN_OFFSET*2);
 							min[0] -= SCR_ScaledScreen(len*item->textSize - LCOLUMN_OFFSET*2);
 						}
 
-						len = strlen(spin->itemnames[spin->curvalue]);
+						len = (int)strlen(spin->itemnames[spin->curvalue]);
 					//	max[0] += SCR_ScaledScreen(len*MENU_FONT_SIZE);
 						max[0] += SCR_ScaledScreen(len*item->textSize);
 
@@ -815,7 +815,7 @@ void Menu_DrawStatusBar (const char *string)
 {
 	if (string)
 	{
-		int l = strlen( string );
+		int l = (int)strlen( string );
 
 		SCR_DrawFill( 0, SCREEN_HEIGHT-(MENU_FONT_SIZE+3), SCREEN_WIDTH, MENU_FONT_SIZE+4, ALIGN_BOTTOM_STRETCH, 60,60,60,255 );	// go 1 pixel past screen bottom to prevent gap from scaling
 		SCR_DrawFill( 0, SCREEN_HEIGHT-(MENU_FONT_SIZE+3), SCREEN_WIDTH, 1, ALIGN_BOTTOM_STRETCH, 0,0,0,255 );

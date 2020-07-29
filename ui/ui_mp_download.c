@@ -123,7 +123,7 @@ void DownloadOptions_MenuInit( void )
 	s_download_title.generic.type		= MTYPE_SEPARATOR;
 	s_download_title.generic.textSize	= MENU_HEADER_FONT_SIZE;
 	s_download_title.generic.name		= "Download Options";
-	s_download_title.generic.x			= MENU_HEADER_FONT_SIZE/2 * strlen(s_download_title.generic.name); // was 48
+	s_download_title.generic.x			= MENU_HEADER_FONT_SIZE/2 * (int)strlen(s_download_title.generic.name); // was 48
 	s_download_title.generic.y			= y - 2.75*MENU_LINE_SIZE;	// y
 
 	s_allow_download_box.generic.type		= MTYPE_SPINCONTROL;

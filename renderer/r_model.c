@@ -2759,7 +2759,7 @@ struct model_s *R_RegisterModel (char *name)
 // Harven-- MD3
 
 	// Knightmare- MD3 autoreplace code
-	int len = strlen(name);
+	int len = (int)strlen(name);
 	if (!strcmp(name+len-4, ".md2")) // look if we have a .md2 file
 	{
 		char s[128];

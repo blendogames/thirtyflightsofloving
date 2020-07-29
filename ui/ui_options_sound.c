@@ -180,7 +180,7 @@ void Options_Sound_MenuInit ( void )
 	s_options_sound_header.generic.type		= MTYPE_SEPARATOR;
 	s_options_sound_header.generic.textSize	= MENU_HEADER_FONT_SIZE;
 	s_options_sound_header.generic.name		= "Sound";
-	s_options_sound_header.generic.x		= MENU_HEADER_FONT_SIZE/2 * strlen(s_options_sound_header.generic.name);
+	s_options_sound_header.generic.x		= MENU_HEADER_FONT_SIZE/2 * (int)strlen(s_options_sound_header.generic.name);
 	s_options_sound_header.generic.y		= -2*MENU_LINE_SIZE;	// 0
 
 	s_options_sound_sfxvolume_slider.generic.type		= MTYPE_SLIDER;

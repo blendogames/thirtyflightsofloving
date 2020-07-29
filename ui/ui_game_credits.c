@@ -455,7 +455,7 @@ void M_Credits_MenuDraw (void)
 		else
 			alpha = 1;
 
-		len = strlen(credits[i]) - stringLengthExtra(credits[i]);
+		len = (int)strlen(credits[i]) - stringLengthExtra(credits[i]);
 
 		x = ( SCREEN_WIDTH - len * MENU_FONT_SIZE - stringoffset * MENU_FONT_SIZE ) / 2
 			+ stringoffset * MENU_FONT_SIZE;

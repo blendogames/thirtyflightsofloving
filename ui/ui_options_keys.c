@@ -81,7 +81,7 @@ static void M_UnbindCommand (char *command)
 	int		l;
 	char	*b;
 
-	l = strlen(command);
+	l = (int)strlen(command);
 
 	for (j=0 ; j<256 ; j++)
 	{
@@ -104,7 +104,7 @@ static void M_FindKeysForCommand (char *command, int *twokeys)
 	char	*b;
 
 	twokeys[0] = twokeys[1] = -1;
-	l = strlen(command);
+	l = (int)strlen(command);
 	count = 0;
 
 	for (j=0 ; j<256 ; j++)
@@ -163,7 +163,7 @@ static void DrawKeyBindingFunc (void *self)
 		Menu_DrawString (a->generic.x + a->generic.parent->x + 16,
 						a->generic.y + a->generic.parent->y, a->generic.textSize, name , 255);
 
-		x = strlen(name) * MENU_FONT_SIZE;
+		x = (int)strlen(name) * MENU_FONT_SIZE;
 
 		if (keys[1] != -1)
 		{

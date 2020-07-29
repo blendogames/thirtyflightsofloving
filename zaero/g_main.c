@@ -198,14 +198,14 @@ void EndDMLevel (void)
 		ent = G_Spawn ();
 		ent->classname = "target_changelevel";
 		ent->map = level.mapname;
-    ent->spawnflags2 = 0;
+		ent->spawnflags2 = 0;
 	}
 	else if (level.nextmap[0])
 	{	// go to a specific map
 		ent = G_Spawn ();
 		ent->classname = "target_changelevel";
 		ent->map = level.nextmap;
-    ent->spawnflags2 = 0;
+		ent->spawnflags2 = 0;
 	}
 	else
 	{	// search for a changeleve
@@ -216,7 +216,7 @@ void EndDMLevel (void)
 			ent = G_Spawn ();
 			ent->classname = "target_changelevel";
 			ent->map = level.mapname;
-      ent->spawnflags2 = 0;
+			ent->spawnflags2 = 0;
 		}
 	}
 

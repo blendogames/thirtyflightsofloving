@@ -379,7 +379,7 @@ void Menu_Video_Advanced_Init (void)
 	s_options_advanced_header.generic.type		= MTYPE_SEPARATOR;
 	s_options_advanced_header.generic.textSize	= MENU_HEADER_FONT_SIZE;
 	s_options_advanced_header.generic.name		= "Advanced Options";
-	s_options_advanced_header.generic.x			= MENU_HEADER_FONT_SIZE/2 * strlen(s_options_advanced_header.generic.name);
+	s_options_advanced_header.generic.x			= MENU_HEADER_FONT_SIZE/2 * (int)strlen(s_options_advanced_header.generic.name);
 	s_options_advanced_header.generic.y			= y;
 
 	s_lightmapscale_slider.generic.type			= MTYPE_SLIDER;

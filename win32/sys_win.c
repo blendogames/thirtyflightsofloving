@@ -472,16 +472,62 @@ Borrowed from Q2E
 */
 static qboolean Sys_DetectCPU (char *cpuString, int maxSize)
 {
-#if defined (_M_IX86) && !defined(__GNUC__)	// [Slipyx] mingw support
+#if ( defined (_M_IX86) || defined (_M_X64) || defined (_M_AMD64) || defined (__x86_64__) ) && !defined(__GNUC__)	// [Slipyx] mingw support
 
 	char				vendor[16];
-	int					stdBits, features, moreFeatures, extFeatures;
+//	int					numLogicalCores=1, numCores=1;
+	int					maxExtFunc, stdBits, features, moreFeatures, extFeatures;
 	int					family, extFamily, model, extModel;
 	unsigned __int64	start, end, counter, stop, frequency;
 	unsigned			speed;
 	qboolean			hasMMX, hasMMXExt, has3DNow, has3DNowExt, hasSSE, hasSSE2, hasSSE3, hasSSE41, hasSSE42, hasSSE4a, hasAVX;
 	SYSTEM_INFO			sysInfo;
 
+#if defined (_M_X64) || defined (_M_AMD64) || defined (__x86_64__)
+	#define rdtsc	__asm __emit 0fh __asm __emit 031h
+	int					registers[4];
+
+	// Get vendor identifier
+	__cpuid(registers, 0);
+	memset(vendor, 0, sizeof(vendor));
+	memcpy(vendor+0, &registers[1], sizeof(char)*4);	// ebx
+	memcpy(vendor+4, &registers[3], sizeof(char)*4);	// edx
+	memcpy(vendor+8, &registers[2], sizeof(char)*4);	// ecx
+
+	// Get standard bits and features
+	__cpuid(registers, 1);
+	stdBits = registers[0];
+	moreFeatures = registers[2];
+	features = registers[3];
+//	numLogicalCores = (registers[1] >> 16) & 255;
+
+	// Check if extended functions are present
+	__cpuid(registers, 0x80000000);
+	maxExtFunc = registers[0];
+
+	// Get extended features
+	if (maxExtFunc >= 0x80000001)
+	{
+		__cpuid(registers, 0x80000001);
+		extFeatures = registers[3];
+	}
+/*	
+	// Get non-threaded core count
+	if (!Q_stricmp(vendor, "AuthenticAMD"))
+	{
+		if (maxExtFunc >= 0x80000008) {
+			__cpuid(registers, 0x80000008);
+			numCores = 1 + (registers[2] & 255);
+		}
+	}
+	else if (!Q_stricmp(vendor, "GenuineIntel"))
+	{
+		__cpuid(registers, 4);
+		numCores = 1 + ( (registers[0] >> 26) & 63 );
+	}
+*/
+#elif defined (_M_IX86)
+//	int		tempThreads, tempCores;
 	// Check if CPUID instruction is supported
 	__try {
 		__asm {
@@ -509,11 +555,13 @@ static qboolean Sys_DetectCPU (char *cpuString, int maxSize)
 		mov stdBits, eax
 		mov moreFeatures, ecx ; // Knightmare added
 		mov features, edx
+//		mov tempThreads, ebx ; // Knightmare added
 
 		; // Check if extended functions are present
 		mov extFeatures, 0
 		mov eax, 80000000h
 		cpuid
+		mov maxExtFunc, eax	;	// Knightmare added
 		cmp eax, 80000000h
 		jbe NoExtFunction
 
@@ -524,6 +572,33 @@ static qboolean Sys_DetectCPU (char *cpuString, int maxSize)
 
 NoExtFunction:
 	}
+/*
+	numLogicalCores = (tempThreads >> 16) & 255;
+
+	// Get non-threaded core count
+	if (!Q_stricmp(vendor, "AuthenticAMD"))
+	{
+		if (maxExtFunc >= 0x80000008)
+		{
+			__asm {
+				mov eax, 80000008h
+				cpuid
+				mov tempCores, ecx
+			}
+			numCores = 1 + (tempCores & 255);
+		}
+	}
+	else if (!Q_stricmp(vendor, "GenuineIntel"))
+	{
+		__asm {
+			mov eax, 4
+			cpuid
+			mov tempCores, eax
+		}
+		numCores = 1 + ( (tempCores >> 26) & 63 );
+	}
+*/
+#endif
 
 	// Get CPU name
 	family = (stdBits >> 8) & 15;
@@ -985,11 +1060,15 @@ NoExtFunction:
 		// Measure CPU speed
 		QueryPerformanceFrequency((LARGE_INTEGER *)&frequency);
 
+#if defined (_M_X64) || defined (_M_AMD64) || defined (__x86_64__)
+		start = __rdtsc();
+#elif defined (_M_IX86)
 		__asm {
 			rdtsc
 			mov dword ptr[start+0], eax
 			mov dword ptr[start+4], edx
 		}
+#endif
 
 		QueryPerformanceCounter((LARGE_INTEGER *)&stop);
 		stop += frequency;
@@ -998,11 +1077,15 @@ NoExtFunction:
 			QueryPerformanceCounter((LARGE_INTEGER *)&counter);
 		} while (counter < stop);
 
+#if defined (_M_X64) || defined (_M_AMD64) || defined (__x86_64__)
+		end = __rdtsc();
+#elif defined (_M_IX86)
 		__asm {
 			rdtsc
 			mov dword ptr[end+0], eax
 			mov dword ptr[end+4], edx
 		}
+#endif
 
 		speed = (unsigned)((end - start) / 1000000);
 
@@ -1016,6 +1099,15 @@ NoExtFunction:
 	GetSystemInfo(&sysInfo);
 	if (sysInfo.dwNumberOfProcessors > 1)
 		Q_strncatz(cpuString, va(" (%u logical CPUs)", sysInfo.dwNumberOfProcessors), maxSize);
+/*
+	if (numLogicalCores >= 2 || numCores >= 2)
+	{
+		if (numLogicalCores > numCores)	// Hyperthreading or SMT
+			Q_strncatz(cpuString, va(" (%u cores, %u threads)", numCores, numLogicalCores), maxSize);
+		else
+			Q_strncatz(cpuString, va(" (%u cores)", numCores), maxSize);
+	}
+*/
 
 	// Get extended instruction sets supported
 	hasMMX = (features >> 23) & 1;

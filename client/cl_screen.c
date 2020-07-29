@@ -744,7 +744,7 @@ static void SCR_ShowFPS (void)
 		fpscounter = cl.time + 100;
 	}
 	// leave space for 3-digit frag counter
-	//x = (viddef.width - strlen(fpsText)*FONT_SIZE - 3*SCR_GetHudScale()*(CHAR_WIDTH+2));
+//	x = (viddef.width - strlen(fpsText)*FONT_SIZE - 3*SCR_GetHudScale()*(CHAR_WIDTH+2));
 //	x = (viddef.width - strlen(fpsText)*HUD_FONT_SIZE*SCR_GetHudScale() - 3*SCR_GetHudScale()*(CHAR_WIDTH+2));
 	scrLeft = SCREEN_WIDTH;
 	SCR_AdjustFrom640 (&scrLeft, NULL, NULL, NULL, ALIGN_STRETCH);
@@ -2245,7 +2245,7 @@ void SCR_DrawField (int x, int y, int color, int width, int value, qboolean flas
 		width = 5;
 
 	Com_sprintf (num, sizeof(num), "%i", value);
-	l = strlen(num);
+	l = (int)strlen(num);
 	if (l > width)
 	{
 	//	if (hud_squeezedigits->value) {
@@ -2869,7 +2869,7 @@ void DrawDemoMessage (void)
 	{
 		int len;
 		char *message = "Running Demo";
-		len = strlen(message);
+		len = (int)strlen(message);
 
 		SCR_DrawFill (0, SCREEN_HEIGHT-(MENU_FONT_SIZE+3), SCREEN_WIDTH, MENU_FONT_SIZE+4, ALIGN_BOTTOM_STRETCH, 60,60,60,255);	// go 1 pixel past screen bottom to prevent gap from scaling
 		SCR_DrawFill (0, SCREEN_HEIGHT-(MENU_FONT_SIZE+3), SCREEN_WIDTH, 1, ALIGN_BOTTOM_STRETCH, 0,0,0,255);

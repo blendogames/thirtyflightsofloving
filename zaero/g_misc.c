@@ -120,7 +120,7 @@ void gib_fade2 (edict_t *self)
 
 void gib_fade (edict_t *self)
 {
-	if (self->s.effects & EF_BLASTER)  //Remove glow from gekk gibs
+	if (self->s.effects & EF_BLASTER)  // Remove glow from gekk gibs
 		self->s.effects &= ~EF_BLASTER;
 	self->s.renderfx = RF_TRANSLUCENT;
 	self->nextthink = level.time + 2;
@@ -1416,44 +1416,44 @@ void SP_misc_viper (edict_t *ent)
 
 	ent->movetype = MOVETYPE_PUSH;
 
-  if (ent->spawnflags & 2)
+	if (ent->spawnflags & 2)
 	{
-	  ent->solid = SOLID_BBOX;
-  }
-  else
-  {
-	  ent->solid = SOLID_NOT;
-  }
-
-  if(ent->model)
-  {
-	  ent->s.modelindex = gi.modelindex (ent->model);
-  }
-  else
-  {
-	  ent->s.modelindex = gi.modelindex ("models/ships/viper/tris.md2");
-  }
-
-  if(ent->model2)
-  {
-	  ent->s.modelindex2 = gi.modelindex (ent->model2);
-  }
-
-  if(ent->model3)
-  {
-	  ent->s.modelindex3 = gi.modelindex (ent->model3);
-  }
-
-  if(ent->model4)
-  {
-	  ent->s.modelindex4 = gi.modelindex (ent->model4);
-  }
-
-  if (!(ent->spawnflags & 4))
+		ent->solid = SOLID_BBOX;
+	}
+	else
 	{
-	  VectorSet (ent->mins, -16, -16, 0);
-	  VectorSet (ent->maxs, 16, 16, 32);
-  }
+		ent->solid = SOLID_NOT;
+	}
+
+	if (ent->model)
+	{
+		ent->s.modelindex = gi.modelindex (ent->model);
+	}
+	else
+	{
+		ent->s.modelindex = gi.modelindex ("models/ships/viper/tris.md2");
+	}
+
+	if (ent->model2)
+	{
+		ent->s.modelindex2 = gi.modelindex (ent->model2);
+	}
+
+	if (ent->model3)
+	{
+		ent->s.modelindex3 = gi.modelindex (ent->model3);
+	}
+
+	if (ent->model4)
+	{
+		ent->s.modelindex4 = gi.modelindex (ent->model4);
+	}
+
+	if (!(ent->spawnflags & 4))
+	{
+		VectorSet (ent->mins, -16, -16, 0);
+		VectorSet (ent->maxs, 16, 16, 32);
+	}
 
 	ent->think = func_train_find;
 	ent->nextthink = level.time + FRAMETIME;

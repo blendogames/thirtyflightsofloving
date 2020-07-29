@@ -807,7 +807,7 @@ void StartServer_MenuInit (void)
 	s_timelimit_field.visible_length	= 4;
 //	strncpy( s_timelimit_field.buffer, Cvar_VariableString("timelimit") );
 	Q_strncpyz( s_timelimit_field.buffer, Cvar_VariableString("timelimit"), sizeof(s_timelimit_field.buffer) );
-	s_timelimit_field.cursor			= strlen( s_timelimit_field.buffer );
+	s_timelimit_field.cursor			= (int)strlen( s_timelimit_field.buffer );
 
 	s_fraglimit_field.generic.type		= MTYPE_FIELD;
 	s_fraglimit_field.generic.textSize	= MENU_FONT_SIZE;
@@ -820,7 +820,7 @@ void StartServer_MenuInit (void)
 	s_fraglimit_field.visible_length	= 4;
 //	strncpy( s_fraglimit_field.buffer, Cvar_VariableString("fraglimit") );
 	Q_strncpyz( s_fraglimit_field.buffer, Cvar_VariableString("fraglimit"), sizeof(s_fraglimit_field.buffer) );
-	s_fraglimit_field.cursor			= strlen( s_fraglimit_field.buffer );
+	s_fraglimit_field.cursor			= (int)strlen( s_fraglimit_field.buffer );
 
 	/*
 	** maxclients determines the maximum number of players that can join
@@ -843,7 +843,7 @@ void StartServer_MenuInit (void)
 	else 
 	//	strncpy( s_maxclients_field.buffer, Cvar_VariableString("maxclients") );
 		Q_strncpyz( s_maxclients_field.buffer, Cvar_VariableString("maxclients"), sizeof(s_maxclients_field.buffer) );
-	s_maxclients_field.cursor				= strlen( s_maxclients_field.buffer );
+	s_maxclients_field.cursor				= (int)strlen( s_maxclients_field.buffer );
 
 	s_hostname_field.generic.type			= MTYPE_FIELD;
 	s_hostname_field.generic.textSize		= MENU_FONT_SIZE;
@@ -856,7 +856,7 @@ void StartServer_MenuInit (void)
 	s_hostname_field.visible_length			= 12;
 //	strncpy( s_hostname_field.buffer, Cvar_VariableString("hostname") );
 	Q_strncpyz( s_hostname_field.buffer, Cvar_VariableString("hostname"), sizeof(s_hostname_field.buffer) );
-	s_hostname_field.cursor					= strlen( s_hostname_field.buffer );
+	s_hostname_field.cursor					= (int)strlen( s_hostname_field.buffer );
 
 	s_startserver_dmoptions_action.generic.type			= MTYPE_ACTION;
 	s_startserver_dmoptions_action.generic.textSize		= MENU_FONT_SIZE;

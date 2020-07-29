@@ -176,11 +176,11 @@ void ai_charge (edict_t *self, float dist)
 {
 	vec3_t	v;
 
-	if(self->monsterinfo.aiflags & AI_ONESHOTTARGET)
+	if (self->monsterinfo.aiflags & AI_ONESHOTTARGET)
 	{
 		VectorSubtract (self->monsterinfo.shottarget, self->s.origin, v);
 	}
-	else if(!self->enemy)
+	else if (!self->enemy)
 	{
 		return;
 	}

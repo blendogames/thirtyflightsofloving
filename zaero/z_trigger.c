@@ -201,11 +201,8 @@ void SP_trigger_laser(edict_t *self)
 }
 
 
-
-
-
-
 /*QUAKED misc_commdish (0 .5 .8) (-16 -16 0) (16 16 40)
+model=models/objects/satdish/
 */
 
 void Anim_CommDish(edict_t *self)

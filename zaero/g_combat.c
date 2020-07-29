@@ -170,7 +170,7 @@ static int CheckPowerArmor (edict_t *ent, vec3_t point, vec3_t normal, int damag
 	if (dflags & DAMAGE_NO_ARMOR)
 		return 0;
 
-  if(EMPNukeCheck(ent, point))
+  if (EMPNukeCheck(ent, point))
   {
     return 0;
   }
@@ -189,7 +189,7 @@ static int CheckPowerArmor (edict_t *ent, vec3_t point, vec3_t normal, int damag
 		power_armor_type = ent->monsterinfo.power_armor_type;
 		power = ent->monsterinfo.power_armor_power;
 	}
-	else if(strcmp(ent->classname, "PlasmaShield") == 0)
+	else if (strcmp(ent->classname, "PlasmaShield") == 0)
   {
     power_armor_type = POWER_ARMOR_SHIELD;
 		power = ent->health;
@@ -219,7 +219,7 @@ static int CheckPowerArmor (edict_t *ent, vec3_t point, vec3_t normal, int damag
 		damagePerCell = 1;
 		pa_te_type = TE_SCREEN_SPARKS;
 
-    if(!(dflags & DAMAGE_ARMORMOSTLY))
+    if (!(dflags & DAMAGE_ARMORMOSTLY))
     {
 		  damage = damage / 3;
     }
@@ -229,7 +229,7 @@ static int CheckPowerArmor (edict_t *ent, vec3_t point, vec3_t normal, int damag
 		damagePerCell = 2;
 		pa_te_type = TE_SHIELD_SPARKS;
 
-    if(!(dflags & DAMAGE_ARMORMOSTLY))
+    if (!(dflags & DAMAGE_ARMORMOSTLY))
     {
   		damage = (2 * damage) / 3;
     }
@@ -240,7 +240,7 @@ static int CheckPowerArmor (edict_t *ent, vec3_t point, vec3_t normal, int damag
 	if (!save)
 		return 0;
 
-  if(dflags & DAMAGE_ARMORMOSTLY)
+  if (dflags & DAMAGE_ARMORMOSTLY)
   {
     save *= 2;
   }
@@ -296,10 +296,10 @@ static int CheckArmor (edict_t *ent, vec3_t point, vec3_t normal, int damage, in
 
 	client->pers.inventory[index] -= save;
 
-  if(dflags & DAMAGE_ARMORMOSTLY)
-  {
-    save *= 2;
-  }
+	if (dflags & DAMAGE_ARMORMOSTLY)
+	{
+		save *= 2;
+	}
 
 	SpawnDamage (te_sparks, point, normal, save);
 
@@ -362,7 +362,7 @@ void M_ReactToDamage (edict_t *targ, edict_t *attacker)
 		if (!(targ->monsterinfo.aiflags & AI_DUCKED))
 			FoundTarget (targ);
 	}
-	else if(attacker->enemy)
+	else if (attacker->enemy)
 	// otherwise get mad at whoever they are mad at (help our buddy)
 	{
 		if (targ->enemy)
@@ -376,8 +376,8 @@ void M_ReactToDamage (edict_t *targ, edict_t *attacker)
 
 qboolean CheckTeamDamage (edict_t *targ, edict_t *attacker)
 {
-		//FIXME make the next line real and uncomment this block
-		// if ((ability to damage a teammate == OFF) && (targ's team == attacker's team))
+	// FIXME make the next line real and uncomment this block
+//	if ((ability to damage a teammate == OFF) && (targ's team == attacker's team))
 	return false;
 }
 
@@ -503,7 +503,7 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 			vec3_t	kvel;
 			float	mass;
 
-      if((dflags & DAMAGE_ARMORMOSTLY) && damage > take)
+      if ((dflags & DAMAGE_ARMORMOSTLY) && damage > take)
       {
         knockback = (int)((float)knockback * (((float)(damage - take) / (float)damage) + 1.0));
       }
@@ -533,7 +533,7 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 		{
 			// Knightmare- added support for sparks and blood
 			//	SpawnDamage ( BloodType(targ->blood_type), point, normal );
-			if(targ->blood_type == 1)
+			if (targ->blood_type == 1)
 				SpawnDamage (TE_GREENBLOOD, point, normal, take);
 			else if (targ->blood_type == 2)
 			{

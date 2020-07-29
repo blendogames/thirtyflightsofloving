@@ -615,7 +615,7 @@ void FireFlare(edict_t *self)
 
 	G_ProjectSource (self->s.origin, rocketoffset[offset], forward, right, start);
 
-	if(self->monsterinfo.aiflags & AI_ONESHOTTARGET)
+	if (self->monsterinfo.aiflags & AI_ONESHOTTARGET)
 	{
 		VectorCopy(	self->monsterinfo.shottarget, vec );
 	}

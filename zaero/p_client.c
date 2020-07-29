@@ -59,7 +59,7 @@ void stopCamera(edict_t *ent);
 	{
 		spot = G_Spawn();
 		spot->classname = "info_player_coop";
-    spot->spawnflags2 = 0;
+		spot->spawnflags2 = 0;
 		spot->s.origin[0] = 188 - 64;
 		spot->s.origin[1] = -164;
 		spot->s.origin[2] = 80;
@@ -68,7 +68,7 @@ void stopCamera(edict_t *ent);
 
 		spot = G_Spawn();
 		spot->classname = "info_player_coop";
-    spot->spawnflags2 = 0;
+		spot->spawnflags2 = 0;
 		spot->s.origin[0] = 188 + 64;
 		spot->s.origin[1] = -164;
 		spot->s.origin[2] = 80;
@@ -77,7 +77,7 @@ void stopCamera(edict_t *ent);
 
 		spot = G_Spawn();
 		spot->classname = "info_player_coop";
-    spot->spawnflags2 = 0;
+		spot->spawnflags2 = 0;
 		spot->s.origin[0] = 188 + 128;
 		spot->s.origin[1] = -164;
 		spot->s.origin[2] = 80;
@@ -1714,7 +1714,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		return;
 	}
 
-	if(ent->movetype == MOVETYPE_FREEZE)
+	if (ent->movetype == MOVETYPE_FREEZE)
 	{
 		client->ps.pmove.pm_type = PM_FREEZE;
 		return;

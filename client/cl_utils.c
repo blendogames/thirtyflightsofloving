@@ -71,7 +71,7 @@ stringLen
 */
 int stringLen (const char *string)
 {
-	return strlen(string) - stringLengthExtra(string);
+	return (int)strlen(string) - stringLengthExtra(string);
 }
 
 
@@ -82,9 +82,10 @@ stringLengthExtra
 */
 int stringLengthExtra (const char *string)
 {
-	unsigned i, j;
-	char modifier;
-	float len = strlen( string );
+	unsigned	i, j;
+	char		modifier;
+//	float		len = strlen( string );
+	int			len = (int)strlen( string );
 
 	for ( i = 0, j = 0; i < len; i++ )
 	{

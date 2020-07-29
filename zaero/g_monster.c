@@ -570,7 +570,7 @@ qboolean monster_start (edict_t *self)
 
 	if (!(self->monsterinfo.aiflags & AI_GOOD_GUY))
 	{
-		if(!(self->spawnflags & 16))
+		if (!(self->spawnflags & 16))
 		{
 			level.total_monsters++;
 		}

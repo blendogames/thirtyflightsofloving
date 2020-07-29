@@ -191,7 +191,7 @@ char **SetCrosshairNames (void)
 		// filename must be chxxx
 		if (strncmp(p, "ch", 2))
 			continue;
-		namelen = strlen(strdup(p));
+		namelen = (int)strlen(strdup(p));
 		if (namelen < 7 || namelen > 9)
 			continue;
 		if (!isNumeric(p[2]))
@@ -202,7 +202,7 @@ char **SetCrosshairNames (void)
 		if (namelen == 9 && (p[2] != '1' || p[3] != '0' || p[4] != '0'))
 			continue;
 
-		num = strlen(p)-4;
+		num = (int)strlen(p)-4;
 		p[num] = 0; //NULL;
 
 		curCrosshair = p;
@@ -238,7 +238,7 @@ char **SetCrosshairNames (void)
 			// filename must be chxxx
 			if (strncmp(p, "ch", 2)) 
 				continue;
-			namelen = strlen(strdup(p));
+			namelen = (int)strlen(strdup(p));
 			if (namelen < 7 || namelen > 9)
 				continue;
 			if (!isNumeric(p[2]))
@@ -249,7 +249,7 @@ char **SetCrosshairNames (void)
 			if (namelen == 9 && (p[2] != '1' || p[3] != '0' || p[4] != '0'))
 				continue;
 
-			num = strlen(p)-4;
+			num = (int)strlen(p)-4;
 			p[num] = 0; //NULL;
 
 			curCrosshair = p;
@@ -287,7 +287,7 @@ char **SetCrosshairNames (void)
 			// filename must be chxxx
 			if (strncmp(p, "ch", 2))
 				continue;
-			namelen = strlen(strdup(p));
+			namelen = (int)strlen(strdup(p));
 			if (namelen < 7 || namelen > 9)
 				continue;
 			if (!isNumeric(p[2]))
@@ -298,7 +298,7 @@ char **SetCrosshairNames (void)
 			if (namelen == 9 && (p[2] != '1' || p[3] != '0' || p[4] != '0'))
 				continue;
 
-			num = strlen(p)-4;
+			num = (int)strlen(p)-4;
 			p[num] = 0; //NULL;
 
 			curCrosshair = p;
@@ -388,7 +388,7 @@ void Options_Screen_MenuInit ( void )
 	s_options_screen_header.generic.type		= MTYPE_SEPARATOR;
 	s_options_screen_header.generic.textSize	= MENU_HEADER_FONT_SIZE;
 	s_options_screen_header.generic.name		= "Screen";
-	s_options_screen_header.generic.x			= MENU_HEADER_FONT_SIZE/2 * strlen(s_options_screen_header.generic.name);
+	s_options_screen_header.generic.x			= MENU_HEADER_FONT_SIZE/2 * (int)strlen(s_options_screen_header.generic.name);
 	s_options_screen_header.generic.y			= -2*MENU_LINE_SIZE;	// 0
 
 	// free any loaded crosshairs to prevent memory leak

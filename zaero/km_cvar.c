@@ -183,19 +183,19 @@ cvar_t	*sk_pack_a2k;		// 1
 cvar_t	*sk_pack_empnuke;	// 100
 cvar_t	*sk_pack_plasmashield; // 40
 
-cvar_t	*sk_box_shells;	//value of shells
-cvar_t	*sk_box_bullets;	//value of bullets
-cvar_t	*sk_box_grenades;	//value of grenade pack
-cvar_t	*sk_box_rockets;	//value of rocket pack
-cvar_t	*sk_box_cells;		//value of cell pack
-cvar_t	*sk_box_slugs;		//value of slug box
-cvar_t	*sk_box_flares;	//value of flares box
-cvar_t	*sk_box_tbombs;	//value of IRED box
-cvar_t	*sk_box_empnuke;	//value of EMP nuke
-cvar_t	*sk_box_plasmashield;	//value of plasma shield
+cvar_t	*sk_box_shells;		// value of shells
+cvar_t	*sk_box_bullets;	// value of bullets
+cvar_t	*sk_box_grenades;	// value of grenade pack
+cvar_t	*sk_box_rockets;	// value of rocket pack
+cvar_t	*sk_box_cells;		// value of cell pack
+cvar_t	*sk_box_slugs;		// value of slug box
+cvar_t	*sk_box_flares;	// value of flares box
+cvar_t	*sk_box_tbombs;	// value of IRED box
+cvar_t	*sk_box_empnuke;	// value of EMP nuke
+cvar_t	*sk_box_plasmashield;	// value of plasma shield
 
-cvar_t	*sk_armor_bonus_value;		//value of armor shards
-cvar_t	*sk_health_bonus_value;	//value of stimpacks
+cvar_t	*sk_armor_bonus_value;		// value of armor shards
+cvar_t	*sk_health_bonus_value;	// value of stimpacks
 cvar_t	*sk_powerup_max;
 cvar_t	*sk_quad_time;
 cvar_t	*sk_inv_time;
@@ -214,7 +214,7 @@ void InitLithiumVars (void)
 
 	adjust_train_corners = gi.cvar("adjust_train_corners", "0", CVAR_ARCHIVE);
 
-	falling_armor_damage = gi.cvar("falling_armor_damage", "1", CVAR_ARCHIVE);
+	falling_armor_damage = gi.cvar("falling_armor_damage", "0", CVAR_ARCHIVE);
 	player_jump_sounds = gi.cvar("player_jump_sounds", "1", CVAR_ARCHIVE);
 
 	use_vwep = gi.cvar("use_vwep", "1", CVAR_ARCHIVE);
@@ -352,7 +352,7 @@ void InitLithiumVars (void)
 	sk_bando_shells = gi.cvar("sk_bando_shells", "150", 0);
 	sk_bando_cells = gi.cvar("sk_bando_cells", "250", 0);
 	sk_bando_slugs = gi.cvar("sk_bando_slugs", "75", 0);
-	sk_bando_flares = gi.cvar("sk_bando_flares", "50", 0);
+	sk_bando_flares = gi.cvar("sk_bando_flares", "45", 0);
 
 	// maximum settings if a player gets a pack
 	sk_pack_bullets = gi.cvar("sk_pack_bullets", "300", 0);
@@ -361,7 +361,7 @@ void InitLithiumVars (void)
 	sk_pack_grenades = gi.cvar("sk_pack_grenades", "100", 0);
 	sk_pack_cells = gi.cvar("sk_pack_cells", "300", 0);
 	sk_pack_slugs = gi.cvar("sk_pack_slugs", "100", 0);
-	sk_pack_flares = gi.cvar("sk_pack_flares", "100", 0);
+	sk_pack_flares = gi.cvar("sk_pack_flares", "60", 0);
 	sk_pack_tbombs = gi.cvar("sk_pack_tbombs", "100", 0);
 	sk_pack_a2k = gi.cvar("sk_pack_a2k", "1", 0);
 	sk_pack_empnuke = gi.cvar("sk_pack_empnuke", "100", 0);
@@ -377,7 +377,7 @@ void InitLithiumVars (void)
 	sk_box_flares = gi.cvar("sk_box_flares", "3", 0);
 	sk_box_tbombs = gi.cvar("sk_box_tbombs", "3", 0);
 	sk_box_empnuke = gi.cvar("sk_box_empnuke", "1", 0);
-	sk_box_plasmashield = gi.cvar("sk_box_plasmashield", "1", 0);
+	sk_box_plasmashield = gi.cvar("sk_box_plasmashield", "5", 0);
 
 	// items/powerups
 	sk_armor_bonus_value = gi.cvar("sk_armor_bonus_value", "2", 0);

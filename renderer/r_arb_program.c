@@ -326,7 +326,7 @@ void R_Compile_ARB_Programs (void)
     {
 		qglBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, fragment_programs[i]);
 		qglProgramStringARB(GL_FRAGMENT_PROGRAM_ARB, GL_PROGRAM_FORMAT_ASCII_ARB,
-							strlen(fragment_progs[i]), fragment_progs[i]);
+							(int)strlen(fragment_progs[i]), fragment_progs[i]);
 		qglGetIntegerv(GL_PROGRAM_ERROR_POSITION_ARB, &error_pos);
 		if (error_pos != -1) 
 		{
@@ -346,7 +346,7 @@ void R_Compile_ARB_Programs (void)
 		{
 			qglBindProgramARB(GL_VERTEX_PROGRAM_ARB, vertex_programs[i]);
 			qglProgramStringARB(GL_VERTEX_PROGRAM_ARB, GL_PROGRAM_FORMAT_ASCII_ARB,
-								strlen(vertex_progs[i]), vertex_progs[i]);
+								(int)strlen(vertex_progs[i]), vertex_progs[i]);
 			qglGetIntegerv(GL_PROGRAM_ERROR_POSITION_ARB, &error_pos);
 			if (error_pos != -1)
 			{

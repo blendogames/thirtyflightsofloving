@@ -169,7 +169,7 @@ void Q_strncat (char *dst, const char *src, int dstSize)
 {
 	int	len;
 
-	len = strlen(dst);
+	len = (int)strlen(dst);
 	if (len >= dstSize)
 		Com_Error(ERR_FATAL, "Q_strncat: already overflowed");
 
@@ -1381,7 +1381,7 @@ void SCR_PlayCinematic (char *name)
 	Com_DPrintf("SCR_PlayCinematic( %s )\n", name);
 
 	cl.cinematicframe = 0;
-	if (!Q_stricmp(name+strlen(name)-4, ".pcx"))
+	if (!Q_stricmp(name + strlen(name)-4, ".pcx"))
 	{
 		Q_strncpyz(filename, name, sizeof(filename));
 		Com_DefaultPath(filename, sizeof(filename), "pics");
@@ -1536,7 +1536,7 @@ cinHandle_t CIN_PlayCinematic (const char *name, int x, int y, int w, int h, int
 	{
 		char s[MAX_QPATH];
 		int len;
-		len = strlen(name);
+		len = (int)strlen(name);
 	//	strncpy (s, name);
 		Q_strncpyz (s, name, sizeof(s));
 		s[len-3]='r'; s[len-2]='o'; s[len-1]='q';

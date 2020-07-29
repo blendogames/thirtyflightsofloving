@@ -93,7 +93,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
     FILE *pOut;
 	int i,count = 0;
 	    			
-	if((pOut = fopen("ace\\bots.tmp", "wb" )) == NULL)
+	if ((pOut = fopen("ace\\bots.tmp", "wb" )) == NULL)
 		return; // bail
 	
 	// Get number of bots
@@ -131,12 +131,12 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 	char userinfo[MAX_INFO_STRING];
 	int i, count;
 
-	if((pIn = fopen("ace\\bots.tmp", "rb" )) == NULL)
+	if ((pIn = fopen("ace\\bots.tmp", "rb" )) == NULL)
 		return; // bail
 	
 	fread(&count,sizeof (int),1,pIn); 
 
-	for(i=0;i<count;i++)
+	for (i=0;i<count;i++)
 	{
 		fread(userinfo,sizeof(char) * MAX_INFO_STRING,1,pIn); 
 		ACESP_SpawnBot (NULL, NULL, NULL, userinfo);
@@ -166,7 +166,7 @@ void ACESP_HoldSpawn(edict_t *self)
 	gi.WriteByte (MZ_LOGIN);
 	gi.multicast (self->s.origin, MULTICAST_PVS);
 
-	if(ctf->value)
+	if (ctf->value)
 	safe_bprintf(PRINT_MEDIUM, "%s joined the %s team.\n",
 		self->client->pers.netname, CTFTeamName(self->client->resp.ctf_team));
 	else
@@ -242,7 +242,7 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn, int team)
 	bot->svflags &= ~SVF_DEADMONSTER;
 	bot->is_jumping = false;
 	
-	if(ctf->value)
+	if (ctf->value)
 	{
 		client->resp.ctf_team = team;
 		client->resp.ctf_state = CTF_STATE_START;
@@ -319,7 +319,7 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn, int team)
 	bot->suicide_timeout = level.time + 15.0;
 
 	// If we are not respawning hold off for up to three seconds before releasing into game
-    if(!respawn)
+    if (!respawn)
 	{
 		bot->think = ACESP_HoldSpawn;
 		bot->nextthink = level.time + 0.1;
@@ -352,7 +352,7 @@ void ACESP_Respawn (edict_t *self)
 {
 	CopyToBodyQue (self);
 
-	if(ctf->value)
+	if (ctf->value)
 		ACESP_PutClientInServer (self,true, self->client->resp.ctf_team);
 	else
 		ACESP_PutClientInServer (self,true,0);
@@ -382,7 +382,7 @@ edict_t *ACESP_FindFreeClient (void)
 	{
 		bot = g_edicts + i + 1;
 		
-		if(bot->count > max_count)
+		if (bot->count > max_count)
 			max_count = bot->count;
 	}
 
@@ -432,7 +432,7 @@ void ACESP_LoadBotInfo()
 		return;
 	// Knightmare- rewote this
 	GameDirRelativePath ("bots.cfg", filename, sizeof(filename));
-	if((pIn = fopen(filename, "rb" )) == NULL)
+	if ((pIn = fopen(filename, "rb" )) == NULL)
 	{
 		safe_bprintf(PRINT_MEDIUM,"ACE: No bots.cfg file found, using default bots.\n");
 		return; // bail
@@ -523,7 +523,7 @@ void ACESP_SetName(edict_t *bot, char *name, char *skin, char *team)
 
 	// Set the name for the bot.
 	// name
-	if(strlen(name) == 0)
+	if (strlen(name) == 0)
 	{
 		// Randomly select from the name/skin table
 		if (num_botinfo > 0)
@@ -562,7 +562,7 @@ void ACESP_SetName(edict_t *bot, char *name, char *skin, char *team)
 		Q_strncpyz(bot_name, name, sizeof(bot_name));
 
 	// skin
-	if(strlen(skin) == 0)
+	if (strlen(skin) == 0)
 	{	// check if this bot is in the table
 		for (i = 0; i < num_botinfo; i++)
 			if (!Q_stricmp(bot_name, bot_info[i].name))
@@ -618,7 +618,7 @@ void ACESP_SpawnBot (char *team, char *name, char *skin, char *userinfo)
 	bot->is_bot = true;
 
 	// To allow bots to respawn
-	if(userinfo == NULL)
+	if (userinfo == NULL)
 		ACESP_SetName(bot, name, skin, team);
 	else
 		ClientConnect (bot, userinfo);
@@ -725,12 +725,12 @@ void ACESP_RemoveBot(char *name)
 	qboolean freed=false;
 	edict_t *bot;
 
-	for(i=0;i<maxclients->value;i++)
+	for (i=0;i<maxclients->value;i++)
 	{
 		bot = g_edicts + i + 1;
-		if(bot->inuse)
+		if (bot->inuse)
 		{
-			if(bot->is_bot && (Q_stricmp(bot->client->pers.netname,name)==0 || Q_stricmp(name,"all")==0))
+			if (bot->is_bot && (Q_stricmp(bot->client->pers.netname,name)==0 || Q_stricmp(name,"all")==0))
 			{
 				bot->health = 0;
 				player_die (bot, bot, bot, 100000, vec3_origin);
@@ -757,7 +757,7 @@ void ACESP_RemoveBot(char *name)
 		}
 	}
 
-	if(!freed)	
+	if (!freed)	
 		safe_bprintf (PRINT_MEDIUM, "%s not found\n", name);
 	// Knightmare- removed this
 	//ACESP_SaveBots(); // Save them again

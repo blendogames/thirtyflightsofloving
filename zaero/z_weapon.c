@@ -515,7 +515,7 @@ void Weapon_LaserTripBomb (edict_t *ent)
 		if ( ((ent->client->latched_buttons|ent->client->buttons) & BUTTON_ATTACK) )
 		{
 			ent->client->latched_buttons &= ~BUTTON_ATTACK;
-			if(ent->client->pers.inventory[ent->client->ammo_index])
+			if (ent->client->pers.inventory[ent->client->ammo_index])
 			{
 				ent->client->ps.gunframe = fireFirst;
 				ent->client->weaponstate = WEAPON_FIRING;
@@ -644,14 +644,14 @@ void weapon_sc_fire (edict_t *ent)
 	{
 		ent->client->ps.gunframe++;
 
-		if(ent->client->weapon_sound && ent->client->ps.gunframe < 18)
+		if (ent->client->weapon_sound && ent->client->ps.gunframe < 18)
 		{
 			ent->client->ps.gunframe = 18;
 		}
 	}
 	else
 	{
-		if(EMPNukeCheck(ent, ent->s.origin))
+		if (EMPNukeCheck(ent, ent->s.origin))
 		{
 			gi.sound (ent, CHAN_AUTO, gi.soundindex("items/empnuke/emp_missfire.wav"), 1, ATTN_NORM, 0);
 
@@ -664,11 +664,11 @@ void weapon_sc_fire (edict_t *ent)
 			return;
 		}
 
-		if(!ent->client->startFireTime)
+		if (!ent->client->startFireTime)
 		{
 			ent->client->startFireTime = level.time;
 		}
-		else if(level.time - ent->client->startFireTime >= maxfiretime)
+		else if (level.time - ent->client->startFireTime >= maxfiretime)
 		{
 			ent->client->ps.gunframe = 17;
 		}
@@ -677,11 +677,11 @@ void weapon_sc_fire (edict_t *ent)
 			int old_cells = (int)ent->dmg_radius;
 			ent->dmg_radius = ((level.time - ent->client->startFireTime) /  maxfiretime) * sk_soniccannon_maxcells->value;
 
-			if(old_cells < (int)ent->dmg_radius)
+			if (old_cells < (int)ent->dmg_radius)
 			{
 				old_cells = (int)ent->dmg_radius - old_cells;
 
-				if(ent->client->pers.inventory[ent->client->ammo_index] < old_cells)
+				if (ent->client->pers.inventory[ent->client->ammo_index] < old_cells)
 				{
 					ent->dmg_radius -= (old_cells - ent->client->pers.inventory[ent->client->ammo_index]);
 					ent->client->pers.inventory[ent->client->ammo_index] = 0;
@@ -693,7 +693,7 @@ void weapon_sc_fire (edict_t *ent)
 			}
 		}
 
-		if(!ent->client->pers.inventory[ent->client->ammo_index])
+		if (!ent->client->pers.inventory[ent->client->ammo_index])
 		{
 			ent->client->ps.gunframe = 17;
 
@@ -706,7 +706,7 @@ void weapon_sc_fire (edict_t *ent)
 		}
 		else
 		{
-			if(ent->weaponsound_time < level.time)
+			if (ent->weaponsound_time < level.time)
 			{
 				ent->client->weapon_sound = gi.soundindex("weapons/sonic/sc_fire.wav");
 			}
@@ -724,7 +724,7 @@ void weapon_sc_fire (edict_t *ent)
 		ent->client->weapon_sound = 0;
 		ent->weaponsound_time = 0;
 
-		if(EMPNukeCheck(ent, ent->s.origin))
+		if (EMPNukeCheck(ent, ent->s.origin))
 		{
 			gi.sound (ent, CHAN_AUTO, gi.soundindex("items/empnuke/emp_missfire.wav"), 1, ATTN_NORM, 0);
 		}
@@ -735,7 +735,7 @@ void weapon_sc_fire (edict_t *ent)
 			else
 				gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/sonic/sc_cool.wav"), 0.4, ATTN_NORM, 0);
 
-			if(ent->dmg_radius)
+			if (ent->dmg_radius)
 			{
 				fire_sconnan (ent);
 			}
@@ -781,7 +781,7 @@ void Weapon_SonicCannon (edict_t *ent)
 				gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/sonic/sc_dact.wav"), 0.4, ATTN_NORM, 0);
 		}
 	}
-	else if((ent->client->buttons & BUTTON_ATTACK) && ent->weaponsound_time == 0)
+	else if ((ent->client->buttons & BUTTON_ATTACK) && ent->weaponsound_time == 0)
 	{
 		ent->weaponsound_time = level.time + 0.4;
 
@@ -909,7 +909,7 @@ void fire_sconnan (edict_t *self)
 #define FLASH_RANGE		256.0
 void FoundTarget (edict_t *self);
 
-void flare_flash(edict_t *ent)
+void flare_flash (edict_t *ent)
 {
 	edict_t *target = NULL;
 	
@@ -975,7 +975,7 @@ void flare_flash(edict_t *ent)
 	}
 }
 
-void flare_think(edict_t *self)
+void flare_think (edict_t *self)
 {
 	edict_t *target = NULL;
 	edict_t *closestEnt = NULL;

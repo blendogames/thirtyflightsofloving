@@ -1143,7 +1143,7 @@ void SZ_Print (sizebuf_t *buf, char *data)
 {
 	int		len;
 	
-	len = strlen(data)+1;
+	len = (int)strlen(data)+1;
 
 	if (buf->cursize)
 	{

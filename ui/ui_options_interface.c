@@ -190,7 +190,7 @@ char **SetFontNames (void)
 
 		p = strrchr(fontfiles[i], '/'); p++;
 
-		num = strlen(p)-4;
+		num = (int)strlen(p)-4;
 		p[num] = 0; // NULL
 
 		curFont = p;
@@ -225,7 +225,7 @@ char **SetFontNames (void)
 
 			p = strrchr(fontfiles[i], '/'); p++;
 
-			num = strlen(p)-4;
+			num = (int)strlen(p)-4;
 			p[num] = 0;//NULL;
 
 			curFont = p;
@@ -260,7 +260,7 @@ char **SetFontNames (void)
 
 			p = strrchr(fontfiles[i], '/'); p++;
 
-			num = strlen(p)-4;
+			num = (int)strlen(p)-4;
 			p[num] = 0; // NULL
 
 			curFont = p;
@@ -362,7 +362,7 @@ void Options_Interface_MenuInit ( void )
 	s_options_interface_header.generic.type		= MTYPE_SEPARATOR;
 	s_options_interface_header.generic.textSize	= MENU_HEADER_FONT_SIZE;
 	s_options_interface_header.generic.name		= "Interface";
-	s_options_interface_header.generic.x		= MENU_HEADER_FONT_SIZE/2 * strlen(s_options_interface_header.generic.name);
+	s_options_interface_header.generic.x		= MENU_HEADER_FONT_SIZE/2 * (int)strlen(s_options_interface_header.generic.name);
 	s_options_interface_header.generic.y		= -2*MENU_LINE_SIZE;	// 0
 
 	// Knightmare- Psychospaz's menu mouse support

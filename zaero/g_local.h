@@ -135,11 +135,11 @@ typedef enum
 #define RANGE_MID				  2
 #define RANGE_FAR				  3
 
-//gib types
+// gib types
 #define GIB_ORGANIC				0
 #define GIB_METALLIC			1
 
-//monster ai flags
+// monster ai flags
 #define AI_STAND_GROUND					0x00000001
 #define AI_TEMP_STAND_GROUND		0x00000002
 #define AI_SOUND_TARGET					0x00000004
@@ -165,7 +165,7 @@ typedef enum
 #define AI_ONESHOTTARGET				0x00400000
 
 
-//monster attack state
+// monster attack state
 #define AS_STRAIGHT				1
 #define AS_SLIDING				2
 #define	AS_MELEE				  3
@@ -496,12 +496,12 @@ typedef struct
 	float flyStrafePitch;
 	float flyStrafeTimeout;
 
-  //schooling info
-  float zSchoolSightRadius;
-  float zSchoolMaxSpeed, zSchoolMinSpeed;
-  float zSpeedStandMax, zSpeedWalkMax;
-  float zSchoolDecayRate, zSchoolMinimumDistance;
-  int   zSchoolFlags;
+	// schooling info
+	float zSchoolSightRadius;
+	float zSchoolMaxSpeed, zSchoolMinSpeed;
+	float zSpeedStandMax, zSpeedWalkMax;
+	float zSchoolDecayRate, zSchoolMinimumDistance;
+	int   zSchoolFlags;
 
 	float reducedDamageAmount;
 

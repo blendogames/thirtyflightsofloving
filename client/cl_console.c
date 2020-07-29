@@ -586,7 +586,7 @@ void Con_CenteredPrint (char *text)
 	int		l;
 	char	buffer[1024];
 
-	l = strlen(text);
+	l = (int)strlen(text);
 	l = (con.linewidth-l)/2;
 	if (l < 0)
 		l = 0;

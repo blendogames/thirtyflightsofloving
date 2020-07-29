@@ -206,14 +206,14 @@ void monster_autocannon_fire(edict_t *self)
 	VectorMA(self->s.origin, 24, forward, start);
 	G_ProjectSource (self->s.origin, fireOffset[self->style], forward, right, start);
 
-	if(EMPNukeCheck(self, start))
+	if (EMPNukeCheck(self, start))
 	{
 		gi.sound (self, CHAN_AUTO, gi.soundindex("items/empnuke/emp_missfire.wav"), 1, ATTN_NORM, 0);
 		return;
 	}
 
 	// what to fire?
-	switch(self->style)
+	switch (self->style)
 	{
 	case 1:
 	default:
@@ -248,11 +248,11 @@ qboolean angleBetween(float *ang, float *min, float *max)
 		return true;
 
 	// make positive
-	while(*min < 0)
+	while (*min < 0)
 		*min += 360.0;
-	while(*ang < *min)
+	while (*ang < *min)
 		*ang += 360.0;
-	while(*max < *min)
+	while (*max < *min)
 		*max += 360.0;
 
 	if (*ang > *min && *ang < *max)
@@ -263,9 +263,9 @@ qboolean angleBetween(float *ang, float *min, float *max)
 
 float mod180(float val)
 {
-	while(val > 180)
+	while (val > 180)
 		val -= 360.0;
-	while(val < -180)
+	while (val < -180)
 		val += 360.0;
 	return val;
 }
@@ -344,7 +344,7 @@ void monster_autocannon_findenemy(edict_t *self)
 		}
 	}
 
-	while(self->enemy == NULL)
+	while (self->enemy == NULL)
 	{
 		e = findradius(e, self->s.origin, AC_RANGE);
 		if (e == NULL)
@@ -489,9 +489,9 @@ void monster_autocannon_turn(edict_t *self)
 	}
 	
 	// get our angles between 180 and -180
-	while(self->s.angles[PITCH] > 180)
+	while (self->s.angles[PITCH] > 180)
 		self->s.angles[PITCH] -= 360.0;
-	while(self->s.angles[PITCH] < -180)
+	while (self->s.angles[PITCH] < -180)
 		self->s.angles[PITCH] += 360;
 
 	// outside of the pitch extents?

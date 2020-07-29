@@ -2940,7 +2940,7 @@ void FS_Link_f (void)
 	l->next = fs_links;
 	fs_links = l;
 	l->from = CopyString(Cmd_Argv(1));
-	l->length = strlen(l->from);
+	l->length = (int)strlen(l->from);
 	l->to = CopyString(Cmd_Argv(2));
 }
 
