@@ -167,15 +167,19 @@ void SV_WipeSavegame (char *savename)
 
 	Com_DPrintf("SV_WipeSaveGame(%s)\n", savename);
 
-	Com_sprintf (name, sizeof(name), "%s/save/%s/server.ssv", FS_Savegamedir (), savename);	// was FS_Gamedir()
+//	Com_sprintf (name, sizeof(name), "%s/save/%s/server.ssv", FS_Savegamedir (), savename);	// was FS_Gamedir()
+	Com_sprintf (name, sizeof(name), "%s/"SAVEDIRNAME"/%s/server.ssv", FS_Savegamedir (), savename);	// was FS_Gamedir()
 	remove (name);
-	Com_sprintf (name, sizeof(name), "%s/save/%s/game.ssv", FS_Savegamedir (), savename);	// was FS_Gamedir()
+//	Com_sprintf (name, sizeof(name), "%s/save/%s/game.ssv", FS_Savegamedir (), savename);	// was FS_Gamedir()
+	Com_sprintf (name, sizeof(name), "%s/"SAVEDIRNAME"/%s/game.ssv", FS_Savegamedir (), savename);	// was FS_Gamedir()
 	remove (name);
 	// Knightmare- delete screenshot
-	Com_sprintf (name, sizeof(name), "%s/save/%s/shot.jpg", FS_Savegamedir (), savename);	// was FS_Gamedir()
+//	Com_sprintf (name, sizeof(name), "%s/save/%s/shot.jpg", FS_Savegamedir (), savename);	// was FS_Gamedir()
+	Com_sprintf (name, sizeof(name), "%s/"SAVEDIRNAME"/%s/shot.jpg", FS_Savegamedir (), savename);	// was FS_Gamedir()
 	remove (name);
 
-	Com_sprintf (name, sizeof(name), "%s/save/%s/*.sav", FS_Savegamedir (), savename);	// was FS_Gamedir()
+//	Com_sprintf (name, sizeof(name), "%s/save/%s/*.sav", FS_Savegamedir (), savename);	// was FS_Gamedir()
+	Com_sprintf (name, sizeof(name), "%s/"SAVEDIRNAME"/%s/*.sav", FS_Savegamedir (), savename);	// was FS_Gamedir()
 	s = Sys_FindFirst( name, 0, 0 );
 	while (s)
 	{
@@ -183,7 +187,8 @@ void SV_WipeSavegame (char *savename)
 		s = Sys_FindNext( 0, 0 );
 	}
 	Sys_FindClose ();
-	Com_sprintf (name, sizeof(name), "%s/save/%s/*.sv2", FS_Savegamedir (), savename);	// was FS_Gamedir()
+//	Com_sprintf (name, sizeof(name), "%s/save/%s/*.sv2", FS_Savegamedir (), savename);	// was FS_Gamedir()
+	Com_sprintf (name, sizeof(name), "%s/"SAVEDIRNAME"/%s/*.sv2", FS_Savegamedir (), savename);	// was FS_Gamedir()
 	s = Sys_FindFirst(name, 0, 0 );
 	while (s)
 	{
@@ -191,7 +196,8 @@ void SV_WipeSavegame (char *savename)
 		s = Sys_FindNext( 0, 0 );
 	}
 	Sys_FindClose ();
-	Com_sprintf (name, sizeof(name), "%s/save/%s/*.savz", FS_Savegamedir(), savename);	// was FS_Gamedir()
+//	Com_sprintf (name, sizeof(name), "%s/save/%s/*.savz", FS_Savegamedir(), savename);	// was FS_Gamedir()
+	Com_sprintf (name, sizeof(name), "%s/"SAVEDIRNAME"/%s/*.savz", FS_Savegamedir(), savename);	// was FS_Gamedir()
 	s = Sys_FindFirst(name, 0, 0 );
 	while (s)
 	{
@@ -224,36 +230,45 @@ void SV_CopySaveGame (char *src, char *dst)
 	SV_WipeSavegame (dst);
 
 	// copy the savegame over
-	Com_sprintf (name, sizeof(name), "%s/save/%s/server.ssv", FS_Savegamedir(), src);	// was FS_Gamedir()
-	Com_sprintf (name2, sizeof(name2), "%s/save/%s/server.ssv", FS_Savegamedir(), dst);	// was FS_Gamedir()
+//	Com_sprintf (name, sizeof(name), "%s/save/%s/server.ssv", FS_Savegamedir(), src);	// was FS_Gamedir()
+//	Com_sprintf (name2, sizeof(name2), "%s/save/%s/server.ssv", FS_Savegamedir(), dst);	// was FS_Gamedir()
+	Com_sprintf (name, sizeof(name), "%s/"SAVEDIRNAME"/%s/server.ssv", FS_Savegamedir(), src);	// was FS_Gamedir()
+	Com_sprintf (name2, sizeof(name2), "%s/"SAVEDIRNAME"/%s/server.ssv", FS_Savegamedir(), dst);	// was FS_Gamedir()
 	FS_CreatePath (name2);
 	FS_CopyFile (name, name2);
 
-	Com_sprintf (name, sizeof(name), "%s/save/%s/game.ssv", FS_Savegamedir(), src);	// was FS_Gamedir()
-	Com_sprintf (name2, sizeof(name2), "%s/save/%s/game.ssv", FS_Savegamedir(), dst);	// was FS_Gamedir()
+//	Com_sprintf (name, sizeof(name), "%s/save/%s/game.ssv", FS_Savegamedir(), src);	// was FS_Gamedir()
+//	Com_sprintf (name2, sizeof(name2), "%s/save/%s/game.ssv", FS_Savegamedir(), dst);	// was FS_Gamedir()
+	Com_sprintf (name, sizeof(name), "%s/"SAVEDIRNAME"/%s/game.ssv", FS_Savegamedir(), src);	// was FS_Gamedir()
+	Com_sprintf (name2, sizeof(name2), "%s/"SAVEDIRNAME"/%s/game.ssv", FS_Savegamedir(), dst);	// was FS_Gamedir()
 	FS_CopyFile (name, name2);
 
 	// Knightmare- copy screenshot
 	if (strcmp(dst, "kmq2save0")) // no screenshot for start of level autosaves
 	{
-		Com_sprintf (name, sizeof(name), "%s/save/%s/shot.jpg", FS_Savegamedir(), src);	// was FS_Gamedir()
-		Com_sprintf (name2, sizeof(name2), "%s/save/%s/shot.jpg", FS_Savegamedir(), dst);	// was FS_Gamedir()
+	//	Com_sprintf (name, sizeof(name), "%s/save/%s/shot.jpg", FS_Savegamedir(), src);	// was FS_Gamedir()
+	//	Com_sprintf (name2, sizeof(name2), "%s/save/%s/shot.jpg", FS_Savegamedir(), dst);	// was FS_Gamedir()
+		Com_sprintf (name, sizeof(name), "%s/"SAVEDIRNAME"/%s/shot.jpg", FS_Savegamedir(), src);	// was FS_Gamedir()
+		Com_sprintf (name2, sizeof(name2), "%s/"SAVEDIRNAME"/%s/shot.jpg", FS_Savegamedir(), dst);	// was FS_Gamedir()
 		FS_CopyFile (name, name2);
 	}
 
-	Com_sprintf (name, sizeof(name), "%s/save/%s/", FS_Savegamedir(), src);	// was FS_Gamedir()
+//	Com_sprintf (name, sizeof(name), "%s/save/%s/", FS_Savegamedir(), src);	// was FS_Gamedir()
+	Com_sprintf (name, sizeof(name), "%s/"SAVEDIRNAME"/%s/", FS_Savegamedir(), src);	// was FS_Gamedir()
 	len = (int)strlen(name);
 //	Com_sprintf (name, sizeof(name), "%s/save/%s/*.sav", FS_Savegamedir(), src);	// was FS_Gamedir()
 	for (i = 0; i < 2; i++)
 	{
-		Com_sprintf (name, sizeof(name), "%s/save/%s/*.%s", FS_Savegamedir(), src, saveExtensions[i]);	// was FS_Gamedir()
+	//	Com_sprintf (name, sizeof(name), "%s/save/%s/*.%s", FS_Savegamedir(), src, saveExtensions[i]);	// was FS_Gamedir()
+		Com_sprintf (name, sizeof(name), "%s/"SAVEDIRNAME"/%s/*.%s", FS_Savegamedir(), src, saveExtensions[i]);	// was FS_Gamedir()
 		extLen = (int)strlen (saveExtensions[i]);
 		found = Sys_FindFirst (name, 0, 0);
 		while (found)
 		{
 		//	strncpy (name+len, found+len);
 			Q_strncpyz (name+len, found+len, sizeof(name)-len);
-			Com_sprintf (name2, sizeof(name2), "%s/save/%s/%s", FS_Savegamedir(), dst, found+len);	// was FS_Gamedir()
+		//	Com_sprintf (name2, sizeof(name2), "%s/save/%s/%s", FS_Savegamedir(), dst, found+len);	// was FS_Gamedir()
+			Com_sprintf (name2, sizeof(name2), "%s/"SAVEDIRNAME"/%s/%s", FS_Savegamedir(), dst, found+len);	// was FS_Gamedir()
 			FS_CopyFile (name, name2);
 
 			if (i == 0)
@@ -292,7 +307,8 @@ void SV_WriteLevelFile (void)
 
 	Com_DPrintf("SV_WriteLevelFile()\n");
 
-	Com_sprintf (zipName, sizeof(zipName), "/save/current/%s.savz", sv.name);
+//	Com_sprintf (zipName, sizeof(zipName), "/save/current/%s.savz", sv.name);
+	Com_sprintf (zipName, sizeof(zipName), "/"SAVEDIRNAME"/current/%s.savz", sv.name);
 	Com_sprintf (intName, sizeof(intName), "%s.sv2", sv.name);
 	FS_FOpenCompressedFile (zipName, intName, &f, FS_WRITE);
 	if (!f)
@@ -309,7 +325,8 @@ void SV_WriteLevelFile (void)
 
 	Com_DPrintf("SV_WriteLevelFile()\n");
 
-	Com_sprintf (name, sizeof(name), "%s/save/current/%s.sv2", FS_Savegamedir(), sv.name);	// was FS_Gamedir()
+//	Com_sprintf (name, sizeof(name), "%s/save/current/%s.sv2", FS_Savegamedir(), sv.name);	// was FS_Gamedir()
+	Com_sprintf (name, sizeof(name), "%s/"SAVEDIRNAME"/current/%s.sv2", FS_Savegamedir(), sv.name);	// was FS_Gamedir()
 	f = fopen(name, "wb");
 	if (!f)
 	{
@@ -321,11 +338,13 @@ void SV_WriteLevelFile (void)
 	fclose (f);
 #endif // COMPRESSED_SAVEGAMES
 
-	Com_sprintf (name, sizeof(name), "%s/save/current/%s.sav", FS_Savegamedir(), sv.name);	// was FS_Gamedir()
+//	Com_sprintf (name, sizeof(name), "%s/save/current/%s.sav", FS_Savegamedir(), sv.name);	// was FS_Gamedir()
+	Com_sprintf (name, sizeof(name), "%s/"SAVEDIRNAME"/current/%s.sav", FS_Savegamedir(), sv.name);	// was FS_Gamedir()
 	ge->WriteLevel (name);
 #ifdef COMPRESSED_SAVEGAMES
 	// compress .sav into .savz
-	Com_sprintf (zipName, sizeof(zipName), "/save/current/%s.savz", sv.name);
+//	Com_sprintf (zipName, sizeof(zipName), "/save/current/%s.savz", sv.name);
+	Com_sprintf (zipName, sizeof(zipName), "/"SAVEDIRNAME"/current/%s.savz", sv.name);
 	Com_sprintf (intName, sizeof(intName), "%s.sav", sv.name);
 	FS_CompressFile (name, zipName, intName);
 
@@ -353,7 +372,8 @@ void SV_ReadLevelFile (void)
 	Com_DPrintf("SV_ReadLevelFile()\n");
 
 #ifdef COMPRESSED_SAVEGAMES // check for compressed .savz file here
-	Com_sprintf (zipName, sizeof(zipName), "save/current/%s.savz", sv.name);
+//	Com_sprintf (zipName, sizeof(zipName), "save/current/%s.savz", sv.name);
+	Com_sprintf (zipName, sizeof(zipName), SAVEDIRNAME"/current/%s.savz", sv.name);
 	Com_sprintf (intName, sizeof(intName), "%s.sv2", sv.name);
 	
 	FS_FOpenCompressedFile (zipName, intName, &f, FS_READ);
@@ -366,7 +386,8 @@ void SV_ReadLevelFile (void)
 	else 
 #endif // COMPRESSED_SAVEGAMES
 	{
-		Com_sprintf (name, sizeof(name), "save/current/%s.sv2", sv.name);
+	//	Com_sprintf (name, sizeof(name), "save/current/%s.sv2", sv.name);
+		Com_sprintf (name, sizeof(name), SAVEDIRNAME"/current/%s.sv2", sv.name);
 		FS_FOpenFile (name, &f, FS_READ);
 		if (!f)
 		{
@@ -378,12 +399,14 @@ void SV_ReadLevelFile (void)
 		FS_FCloseFile(f);
 	}
 
-	Com_sprintf (name, sizeof(name), "%s/save/current/%s.sav", FS_Savegamedir(), sv.name);	// was FS_Gamedir()
+//	Com_sprintf (name, sizeof(name), "%s/save/current/%s.sav", FS_Savegamedir(), sv.name);	// was FS_Gamedir()
+	Com_sprintf (name, sizeof(name), "%s/"SAVEDIRNAME"/current/%s.sav", FS_Savegamedir(), sv.name);	// was FS_Gamedir()
 #ifdef COMPRESSED_SAVEGAMES
 	// check for .sav; if not present, decompress from .savz
 	fp = fopen (name, "rb");	
 	if (!fp) {
-		Com_sprintf (zipName, sizeof(zipName), "save/current/%s.savz", sv.name);
+	//	Com_sprintf (zipName, sizeof(zipName), "save/current/%s.savz", sv.name);
+		Com_sprintf (zipName, sizeof(zipName), SAVEDIRNAME"/current/%s.savz", sv.name);
 		Com_sprintf (intName, sizeof(intName), "%s.sav", sv.name);
 		FS_DecompressFile (name, zipName, intName);
 	}
@@ -409,7 +432,8 @@ void SV_WriteScreenshot (void)
 
 	Com_DPrintf("SV_WriteScreenshot()\n");
 
-	Com_sprintf (name, sizeof(name), "%s/save/current/shot.jpg", FS_Savegamedir());	// was FS_Gamedir()
+//	Com_sprintf (name, sizeof(name), "%s/save/current/shot.jpg", FS_Savegamedir());	// was FS_Gamedir()
+	Com_sprintf (name, sizeof(name), "%s/"SAVEDIRNAME"/current/shot.jpg", FS_Savegamedir());	// was FS_Gamedir()
 
 	R_ScaledScreenshot(name);
 }
@@ -433,7 +457,8 @@ void SV_WriteServerFile (qboolean autosave, qboolean quicksave)
 
 	Com_DPrintf("SV_WriteServerFile(%s)\n", autosave ? "true" : "false");
 
-	Com_sprintf (fileName, sizeof(fileName), "%s/save/current/server.ssv", FS_Savegamedir());	// was FS_Gamedir()
+//	Com_sprintf (fileName, sizeof(fileName), "%s/save/current/server.ssv", FS_Savegamedir());	// was FS_Gamedir()
+	Com_sprintf (fileName, sizeof(fileName), "%s/"SAVEDIRNAME"/current/server.ssv", FS_Savegamedir());	// was FS_Gamedir()
 	f = fopen (fileName, "wb");
 	if (!f)
 	{
@@ -518,7 +543,8 @@ void SV_WriteServerFile (qboolean autosave, qboolean quicksave)
 	fclose (f);
 
 	// write game state
-	Com_sprintf (fileName, sizeof(fileName), "%s/save/current/game.ssv", FS_Savegamedir());	// was FS_Gamedir()
+//	Com_sprintf (fileName, sizeof(fileName), "%s/save/current/game.ssv", FS_Savegamedir());	// was FS_Gamedir()
+	Com_sprintf (fileName, sizeof(fileName), "%s/"SAVEDIRNAME"/current/game.ssv", FS_Savegamedir());	// was FS_Gamedir()
 	ge->WriteGame (fileName, autosave);
 }
 
@@ -538,7 +564,8 @@ void SV_ReadServerFile (void)
 
 	Com_DPrintf("SV_ReadServerFile()\n");
 
-	Com_sprintf (fileName, sizeof(fileName), "save/current/server.ssv");
+//	Com_sprintf (fileName, sizeof(fileName), "save/current/server.ssv");
+	Com_sprintf (fileName, sizeof(fileName), SAVEDIRNAME"/current/server.ssv");
 	FS_FOpenFile (fileName, &f, FS_READ);
 	if (!f)
 	{
@@ -583,7 +610,8 @@ void SV_ReadServerFile (void)
 	Q_strncpyz (svs.mapcmd, mapcmd, sizeof(svs.mapcmd));
 
 	// read game state
-	Com_sprintf (fileName, sizeof(fileName), "%s/save/current/game.ssv", FS_Savegamedir());	// was FS_Gamedir()
+//	Com_sprintf (fileName, sizeof(fileName), "%s/save/current/game.ssv", FS_Savegamedir());	// was FS_Gamedir()
+	Com_sprintf (fileName, sizeof(fileName), "%s/"SAVEDIRNAME"/current/game.ssv", FS_Savegamedir());	// was FS_Gamedir()
 	ge->ReadGame (fileName);
 }
 
@@ -643,7 +671,8 @@ void SV_GameMap_f (void)
 
 	Com_DPrintf("SV_GameMap(%s)\n", Cmd_Argv(1));
 
-	FS_CreatePath (va("%s/save/current/", FS_Savegamedir()));	// was FS_Gamedir()
+//	FS_CreatePath (va("%s/save/current/", FS_Savegamedir()));	// was FS_Gamedir()
+	FS_CreatePath (va("%s/"SAVEDIRNAME"/current/", FS_Savegamedir()));	// was FS_Gamedir()
 
 	// check for clearing the current savegame
 	map = Cmd_Argv(1);
@@ -771,7 +800,8 @@ void SV_Loadgame_f (void)
 	}
 
 	// make sure the server.ssv file exists
-	Com_sprintf (name, sizeof(name), "%s/save/%s/server.ssv", FS_Savegamedir(), Cmd_Argv(1));	// was FS_Gamedir()
+//	Com_sprintf (name, sizeof(name), "%s/save/%s/server.ssv", FS_Savegamedir(), Cmd_Argv(1));	// was FS_Gamedir()
+	Com_sprintf (name, sizeof(name), "%s/"SAVEDIRNAME"/%s/server.ssv", FS_Savegamedir(), Cmd_Argv(1));	// was FS_Gamedir()
 	f = fopen (name, "rb");
 	if (!f)
 	{
@@ -783,9 +813,11 @@ void SV_Loadgame_f (void)
 	// Knightmare- set saveshot name
 	if ( !dedicated->value && (!strcmp(Cmd_Argv(1), "quick") || !strcmp(Cmd_Argv(1), "quik")) )
 	{
-		Com_sprintf(sv_loadshotname, sizeof(sv_loadshotname), "save/%s/shot.jpg", Cmd_Argv(1));
+	//	Com_sprintf(sv_loadshotname, sizeof(sv_loadshotname), "save/%s/shot.jpg", Cmd_Argv(1));
+		Com_sprintf(sv_loadshotname, sizeof(sv_loadshotname), SAVEDIRNAME"/%s/shot.jpg", Cmd_Argv(1));
 		R_FreePic (sv_loadshotname);
-		Com_sprintf(sv_loadshotname, sizeof(sv_loadshotname), "/save/%s/shot.jpg", Cmd_Argv(1));
+	//	Com_sprintf(sv_loadshotname, sizeof(sv_loadshotname), "/save/%s/shot.jpg", Cmd_Argv(1));
+		Com_sprintf(sv_loadshotname, sizeof(sv_loadshotname), "/"SAVEDIRNAME"/%s/shot.jpg", Cmd_Argv(1));
 		load_saveshot = sv_loadshotname;
 	}
 

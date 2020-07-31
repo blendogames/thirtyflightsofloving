@@ -72,7 +72,8 @@ void Load_Savestrings (qboolean update)
 
 	for (i=0; i<MAX_SAVEGAMES; i++)
 	{
-		Com_sprintf (name, sizeof(name), "%s/save/kmq2save%i/server.ssv", FS_Savegamedir(), i);	// was FS_Gamedir()
+	//	Com_sprintf (name, sizeof(name), "%s/save/kmq2save%i/server.ssv", FS_Savegamedir(), i);	// was FS_Gamedir()
+		Com_sprintf (name, sizeof(name), "%s/"SAVEDIRNAME"/kmq2save%i/server.ssv", FS_Savegamedir(), i);	// was FS_Gamedir()
 
 		old_timestamp = m_savetimestamps[i];
 		stat(name, &st);
@@ -95,7 +96,8 @@ void Load_Savestrings (qboolean update)
 		else
 		{
 			fclose (fp);
-			Com_sprintf (name, sizeof(name), "save/kmq2save%i/server.ssv", i);
+		//	Com_sprintf (name, sizeof(name), "save/kmq2save%i/server.ssv", i);
+			Com_sprintf (name, sizeof(name), SAVEDIRNAME"/kmq2save%i/server.ssv", i);
 			FS_FOpenFile (name, &f, FS_READ);
 			if (!f)
 			{
@@ -142,9 +144,11 @@ void ValidateSaveshots (void)
 				Com_sprintf(shotname, sizeof(shotname), "/levelshots/%s.pcx", m_mapname);
 			else
 			{	// free previously loaded shots
-				Com_sprintf(shotname, sizeof(shotname), "save/kmq2save%i/shot.jpg", i);
+			//	Com_sprintf(shotname, sizeof(shotname), "save/kmq2save%i/shot.jpg", i);
+				Com_sprintf(shotname, sizeof(shotname), SAVEDIRNAME"/kmq2save%i/shot.jpg", i);
 				R_FreePic (shotname);
-				Com_sprintf(shotname, sizeof(shotname), "/save/kmq2save%i/shot.jpg", i);
+			//	Com_sprintf(shotname, sizeof(shotname), "/save/kmq2save%i/shot.jpg", i);
+				Com_sprintf(shotname, sizeof(shotname), "/"SAVEDIRNAME"/kmq2save%i/shot.jpg", i);
 			}
 			if (R_DrawFindPic(shotname))
 				m_saveshotvalid[i] = true;
@@ -232,7 +236,8 @@ void DrawSaveshot (qboolean loadmenu)
 	}
 	else if ( m_savevalid[i] && m_saveshotvalid[i] )
 	{
-		Com_sprintf(shotname, sizeof(shotname), "/save/kmq2save%i/shot.jpg", i);
+	//	Com_sprintf(shotname, sizeof(shotname), "/save/kmq2save%i/shot.jpg", i);
+		Com_sprintf(shotname, sizeof(shotname), "/"SAVEDIRNAME"/kmq2save%i/shot.jpg", i);
 
 		SCR_DrawPic (SCREEN_WIDTH/2+46, SCREEN_HEIGHT/2-58, 240, 180, ALIGN_CENTER, shotname, 1.0);
 	}
@@ -261,7 +266,8 @@ void LoadGameCallback (void *self)
 	// set saveshot name here
 	if ( m_saveshotvalid[ a->generic.localdata[0] ] && (a->generic.localdata[0] != 0) )	// autosave has no saveshot, but uses levelshot instead
 	{
-		Com_sprintf(loadshotname, sizeof(loadshotname), "/save/kmq2save%i/shot.jpg", a->generic.localdata[0]);
+	//	Com_sprintf(loadshotname, sizeof(loadshotname), "/save/kmq2save%i/shot.jpg", a->generic.localdata[0]);
+		Com_sprintf(loadshotname, sizeof(loadshotname), "/"SAVEDIRNAME"/kmq2save%i/shot.jpg", a->generic.localdata[0]);
 		load_saveshot = loadshotname; }
 	else {
 		load_saveshot = NULL;

@@ -30,6 +30,12 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define	BASEDIRNAME	"baseq2"
 
+#if defined (_M_X64) || defined (_M_AMD64) || defined (__x86_64__)
+#define SAVEDIRNAME "save_x64"
+#else
+#define SAVEDIRNAME "save"
+#endif
+
 #define DEFAULTPAK			"pak"
 #define DEFAULTMODEL		"male"
 #define DEFAULTSKIN			"grunt"
