@@ -110,7 +110,7 @@ static int ovc_close (void *datasource)
 }
 
 
-static long ovc_tell (void *datasource)
+static int /*long*/ ovc_tell (void *datasource)
 {
 	bgTrack_t	*track = (bgTrack_t *)datasource;
 

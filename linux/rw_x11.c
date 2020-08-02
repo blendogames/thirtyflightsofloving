@@ -93,12 +93,12 @@ int config_notify_width;
 int config_notify_height;
 						      
 typedef unsigned short PIXEL16;
-typedef unsigned long PIXEL24;
+typedef unsigned int PIXEL24;
 static PIXEL16 st2d_8to16table[256];
 static PIXEL24 st2d_8to24table[256];
 static int shiftmask_fl=0;
-static long r_shift,g_shift,b_shift;
-static unsigned long r_mask,g_mask,b_mask;
+static int r_shift,g_shift,b_shift;
+static unsigned int r_mask,g_mask,b_mask;
 
 void shiftmask_init(void)
 {
@@ -588,7 +588,7 @@ void ResetSharedFrameBuffers(void)
 			(void *) shmat(x_shminfo[frm].shmid, 0, 0);
 
 		ri.Con_Printf(PRINT_DEVELOPER, "MITSHM shared memory (id=%d, addr=0x%lx)\n", 
-			x_shminfo[frm].shmid, (long) x_shminfo[frm].shmaddr);
+			x_shminfo[frm].shmid, (int) x_shminfo[frm].shmaddr);
 
 		x_framebuffer[frm]->data = x_shminfo[frm].shmaddr;
 
@@ -1233,11 +1233,11 @@ void SWimp_AppActivate( qboolean active )
 Sys_MakeCodeWriteable
 ================
 */
-void Sys_MakeCodeWriteable (unsigned long startaddr, unsigned long length)
+void Sys_MakeCodeWriteable (unsigned int startaddr, unsigned int length)
 {
 
 	int r;
-	unsigned long addr;
+	unsigned int addr;
 	int psize = getpagesize();
 
 	addr = (startaddr & ~(psize-1)) - psize;

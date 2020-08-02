@@ -606,7 +606,7 @@ int GLimp_SetMode( int *pwidth, int *pheight, int mode, qboolean fullscreen )
 	Window root;
 	XVisualInfo *visinfo;
 	XSetWindowAttributes attr;
-	unsigned long mask;
+	unsigned int /*long*/ mask;
 	int MajorVersion, MinorVersion;
 	int actualWidth, actualHeight;
 	int i;

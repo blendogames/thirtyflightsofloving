@@ -12,7 +12,7 @@ typedef unsigned short int UINT2;
 #ifdef __alpha__
 typedef unsigned int UINT4;
 #else
-typedef unsigned long int UINT4;
+typedef unsigned /*long*/ int UINT4;
 #endif
 
   

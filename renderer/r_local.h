@@ -86,7 +86,7 @@ typedef enum
 typedef struct image_s
 {
 	char		name[MAX_QPATH];			// game path, including extension
-	long		hash;						// to speed up searching
+	unsigned int	hash;						// to speed up searching
 	imagetype_t	type;
 	int			width, height;				// source image
 	int			upload_width, upload_height;	// after power of two and picmip

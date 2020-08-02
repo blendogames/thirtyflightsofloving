@@ -52,9 +52,9 @@ cinematics_t	*cin;
 
 //=============================================================
 
-long GetInteger (byte *data)
+int GetInteger (byte *data)
 {
-	long b0, b1, b2, b3;
+	int b0, b1, b2, b3;
 
 	b0 = (data[0] & 0xFF);
 	b1 = (data[1] & 0xFF) << 8;

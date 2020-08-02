@@ -485,7 +485,7 @@ void Mod_LoadEdges (lump_t *l)
 // store the names of last textures that failed to load
 #define NUM_FAIL_TEXTURES 256
 char lastFailedTexture[NUM_FAIL_TEXTURES][MAX_OSPATH];
-long lastFailedTextureHash[NUM_FAIL_TEXTURES];
+unsigned int lastFailedTextureHash[NUM_FAIL_TEXTURES];
 static unsigned failedTexListIndex;
 
 /*
@@ -512,8 +512,8 @@ Mod_CheckTexFailed
 */
 qboolean Mod_CheckTexFailed (char *name)
 {
-	int		i;
-	long	hash;
+	int				i;
+	unsigned int	hash;
 
 	hash = Com_HashFileName(name, 0, false);
 	for (i=0; i<NUM_FAIL_TEXTURES; i++)
@@ -573,10 +573,10 @@ image_t	*Mod_FindTexture (char *name, imagetype_t type)
 // store the names and sizes of size reference .wal files
 typedef struct walsize_s
 {
-	char	name[MAX_OSPATH];
-	long	hash;
-	int		width;
-	int		height;
+	char			name[MAX_OSPATH];
+	unsigned int	hash;
+	int				width;
+	int				height;
 } walsize_t;
 
 #define NUM_WALSIZES 1024
@@ -608,8 +608,8 @@ Mod_CheckWalSizeList
 */
 qboolean Mod_CheckWalSizeList (const char *name, int *width, int *height)
 {
-	int		i;
-	long	hash;
+	int				i;
+	unsigned int	hash;
 
 	hash = Com_HashFileName(name, 0, false);
 	for (i=0; i<NUM_WALSIZES; i++)

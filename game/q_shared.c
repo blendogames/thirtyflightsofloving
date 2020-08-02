@@ -2147,7 +2147,7 @@ unsigned int Com_HashFileName (const char *fname, int hashSize, qboolean sized)
 		letter = tolower(fname[i]);
 	//	if (letter == '.') break;
 		if (letter == '\\') letter = '/';	// fix filepaths
-		hash += (long)(letter)*(i+119);
+		hash += (int)(letter)*(i+119);
 		i++;
 	}
 	hash = (hash ^ (hash >> 10) ^ (hash >> 20));

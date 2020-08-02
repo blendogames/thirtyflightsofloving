@@ -227,7 +227,7 @@ void Sys_ShowConsole (qboolean show)
 Sys_ConsoleProc
 =================
 */
-static LONG WINAPI Sys_ConsoleProc (HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+static LRESULT WINAPI Sys_ConsoleProc (HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch (uMsg)
 	{
@@ -269,14 +269,14 @@ static LONG WINAPI Sys_ConsoleProc (HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 			SetBkMode((HDC)wParam, TRANSPARENT);
 			SetBkColor((HDC)wParam, RGB(39, 115, 102));
 			SetTextColor((HDC)wParam, RGB(255, 255, 255));
-			return (LONG)sys_console.hBrushOutput;
+			return (LRESULT)sys_console.hBrushOutput;
 		}
 		else if ((HWND)lParam == sys_console.hWndInput)
 		{
 			SetBkMode((HDC)wParam, TRANSPARENT);
 			SetBkColor((HDC)wParam, RGB(255, 255, 255));
 			SetTextColor((HDC)wParam, RGB(0, 0, 0));
-			return (LONG)sys_console.hBrushInput;
+			return (LRESULT)sys_console.hBrushInput;
 		}
 
 		break;
@@ -291,7 +291,7 @@ static LONG WINAPI Sys_ConsoleProc (HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 			else
 				SetTextColor((HDC)wParam, RGB(0, 0, 0));
 
-			return (LONG)sys_console.hBrushMsg;
+			return (LRESULT)sys_console.hBrushMsg;
 		}
 
 		break;
@@ -311,7 +311,7 @@ static LONG WINAPI Sys_ConsoleProc (HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 Sys_ConsoleEditProc
 =================
 */
-static LONG WINAPI Sys_ConsoleEditProc (HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+static LRESULT WINAPI Sys_ConsoleEditProc (HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch (uMsg)
 	{
@@ -379,11 +379,9 @@ void Sys_ShutdownConsole (void)
 	}
 
 	if (sys_console.defOutputProc) {
-	//	SetWindowLong(sys_console.hWndOutput, GWL_WNDPROC, (LONG)sys_console.defOutputProc);
 		SetWindowLongPtr(sys_console.hWndOutput, GWLP_WNDPROC, (LONG_PTR)sys_console.defOutputProc);
 	}
 	if (sys_console.defInputProc) {
-	//	SetWindowLong(sys_console.hWndInput, GWL_WNDPROC, (LONG)sys_console.defInputProc);
 		SetWindowLongPtr(sys_console.hWndInput, GWLP_WNDPROC, (LONG_PTR)sys_console.defInputProc);
 	}
 
@@ -480,8 +478,6 @@ void Sys_InitDedConsole (void)
 	sys_console.hBrushInput = CreateSolidBrush(RGB(255, 255, 255));
 
 	// Subclass edit boxes
-//	sys_console.defOutputProc = (WNDPROC)SetWindowLong(sys_console.hWndOutput, GWL_WNDPROC, (LONG)Sys_ConsoleEditProc);
-//	sys_console.defInputProc = (WNDPROC)SetWindowLong(sys_console.hWndInput, GWL_WNDPROC, (LONG)Sys_ConsoleEditProc);
 	sys_console.defOutputProc = (WNDPROC)SetWindowLongPtr(sys_console.hWndOutput, GWLP_WNDPROC, (LONG_PTR)Sys_ConsoleEditProc);
 	sys_console.defInputProc = (WNDPROC)SetWindowLongPtr(sys_console.hWndInput, GWLP_WNDPROC, (LONG_PTR)Sys_ConsoleEditProc);
 

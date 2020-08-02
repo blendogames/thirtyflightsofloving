@@ -108,7 +108,7 @@ LClampDone2:
 #endif
 #endif
 
-void S_TransferStereo16 (unsigned long *pbuf, int endtime)
+void S_TransferStereo16 (unsigned int /*long*/ *pbuf, int endtime)
 {
 	int		lpos;
 	int		lpaintedtime;
@@ -151,9 +151,9 @@ void S_TransferPaintBuffer(int endtime)
 	int 	*p;
 	int 	step;
 	int		val;
-	unsigned long *pbuf;
+	unsigned int /*long*/ *pbuf;
 
-	pbuf = (unsigned long *)dma.buffer;
+	pbuf = (unsigned int /*long*/ *)dma.buffer;
 
 	if (s_testsound->value)
 	{

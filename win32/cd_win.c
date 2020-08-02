@@ -27,6 +27,13 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <windows.h>
 #include <process.h> // Knightmare added
 
+// defines for MSVC6
+#if (_MSC_VER < 1300)
+#ifndef LONG_PTR
+#define LONG_PTR LONG
+#endif
+#endif	// _MSC_VER
+
 extern	HWND	cl_hwnd;
 
 static qboolean cdValid = false;
@@ -55,7 +62,7 @@ static void CDAudio_EjectThread (void)
 {
 	DWORD	dwReturn;
 
-    if (dwReturn = mciSendCommand(wDeviceID, MCI_SET, MCI_SET_DOOR_OPEN, (DWORD)NULL))
+    if (dwReturn = mciSendCommand(wDeviceID, MCI_SET, MCI_SET_DOOR_OPEN, (LONG_PTR)NULL))
 		Com_DPrintf("MCI_SET_DOOR_OPEN failed (%i)\n", dwReturn);
 	_endthread();
 }
@@ -65,7 +72,7 @@ static void CDAudio_Eject (void)
 	//_beginthread(CDAudio_EjectThread, 0, NULL);
 	DWORD	dwReturn;
 
-    if (dwReturn = mciSendCommand(wDeviceID, MCI_SET, MCI_SET_DOOR_OPEN, (DWORD)NULL))
+    if (dwReturn = mciSendCommand(wDeviceID, MCI_SET, MCI_SET_DOOR_OPEN, (LONG_PTR)NULL))
 		Com_DPrintf("MCI_SET_DOOR_OPEN failed (%i)\n", dwReturn);
 }
 
@@ -74,7 +81,7 @@ static void CDAudio_CloseDoorThread (void)
 {
 	DWORD	dwReturn;
 
-    if (dwReturn = mciSendCommand(wDeviceID, MCI_SET, MCI_SET_DOOR_CLOSED, (DWORD)NULL))
+    if (dwReturn = mciSendCommand(wDeviceID, MCI_SET, MCI_SET_DOOR_CLOSED, (LONG_PTR)NULL))
 		Com_DPrintf("MCI_SET_DOOR_CLOSED failed (%i)\n", dwReturn);
 	_endthread();
 }
@@ -84,7 +91,7 @@ static void CDAudio_CloseDoor (void)
 	//_beginthread(CDAudio_CloseDoorThread, 0, NULL);
 	DWORD	dwReturn;
 
-    if (dwReturn = mciSendCommand(wDeviceID, MCI_SET, MCI_SET_DOOR_CLOSED, (DWORD)NULL))
+    if (dwReturn = mciSendCommand(wDeviceID, MCI_SET, MCI_SET_DOOR_CLOSED, (LONG_PTR)NULL))
 		Com_DPrintf("MCI_SET_DOOR_CLOSED failed (%i)\n", dwReturn);
 }
 
@@ -98,7 +105,7 @@ static int CDAudio_GetAudioDiskInfo (void)
 	cdValid = false;
 
 	mciStatusParms.dwItem = MCI_STATUS_READY;
-    dwReturn = mciSendCommand(wDeviceID, MCI_STATUS, MCI_STATUS_ITEM | MCI_WAIT, (DWORD) (LPVOID) &mciStatusParms);
+    dwReturn = mciSendCommand(wDeviceID, MCI_STATUS, MCI_STATUS_ITEM | MCI_WAIT, (LONG_PTR) (LPVOID) &mciStatusParms);
 	if (dwReturn)
 	{
 		Com_DPrintf("CDAudio: drive ready test - get status failed\n");
@@ -111,7 +118,7 @@ static int CDAudio_GetAudioDiskInfo (void)
 	}
 
 	mciStatusParms.dwItem = MCI_STATUS_NUMBER_OF_TRACKS;
-    dwReturn = mciSendCommand(wDeviceID, MCI_STATUS, MCI_STATUS_ITEM | MCI_WAIT, (DWORD) (LPVOID) &mciStatusParms);
+    dwReturn = mciSendCommand(wDeviceID, MCI_STATUS, MCI_STATUS_ITEM | MCI_WAIT, (LONG_PTR) (LPVOID) &mciStatusParms);
 	if (dwReturn)
 	{
 		Com_DPrintf("CDAudio: get tracks - status failed\n");
@@ -158,7 +165,7 @@ void CDAudio_Play2 (int track, qboolean looping)
 	// don't try to play a non-audio track
 	mciStatusParms.dwItem = MCI_CDA_STATUS_TYPE_TRACK;
 	mciStatusParms.dwTrack = track;
-    dwReturn = mciSendCommand(wDeviceID, MCI_STATUS, MCI_STATUS_ITEM | MCI_TRACK | MCI_WAIT, (DWORD) (LPVOID) &mciStatusParms);
+    dwReturn = mciSendCommand(wDeviceID, MCI_STATUS, MCI_STATUS_ITEM | MCI_TRACK | MCI_WAIT, (LONG_PTR) (LPVOID) &mciStatusParms);
 	if (dwReturn)
 	{
 		Com_DPrintf("MCI_STATUS failed (%i)\n", dwReturn);
@@ -173,7 +180,7 @@ void CDAudio_Play2 (int track, qboolean looping)
 	// get the length of the track to be played
 	mciStatusParms.dwItem = MCI_STATUS_LENGTH;
 	mciStatusParms.dwTrack = track;
-    dwReturn = mciSendCommand(wDeviceID, MCI_STATUS, MCI_STATUS_ITEM | MCI_TRACK | MCI_WAIT, (DWORD) (LPVOID) &mciStatusParms);
+    dwReturn = mciSendCommand(wDeviceID, MCI_STATUS, MCI_STATUS_ITEM | MCI_TRACK | MCI_WAIT, (LONG_PTR) (LPVOID) &mciStatusParms);
 	if (dwReturn)
 	{
 		Com_DPrintf("MCI_STATUS failed (%i)\n", dwReturn);
@@ -189,8 +196,8 @@ void CDAudio_Play2 (int track, qboolean looping)
 
     mciPlayParms.dwFrom = MCI_MAKE_TMSF(track, 0, 0, 0);
 	mciPlayParms.dwTo = (mciStatusParms.dwReturn << 8) | track;
-    mciPlayParms.dwCallback = (DWORD)cl_hwnd;
-    dwReturn = mciSendCommand(wDeviceID, MCI_PLAY, MCI_NOTIFY | MCI_FROM | MCI_TO, (DWORD)(LPVOID) &mciPlayParms);
+    mciPlayParms.dwCallback = (LONG_PTR)cl_hwnd;
+    dwReturn = mciSendCommand(wDeviceID, MCI_PLAY, MCI_NOTIFY | MCI_FROM | MCI_TO, (LONG_PTR)(LPVOID) &mciPlayParms);
 	if (dwReturn)
 	{
 		Com_DPrintf("CDAudio: MCI_PLAY failed (%i)\n", dwReturn);
@@ -225,7 +232,7 @@ void CDAudio_Stop (void)
 	if (!playing)
 		return;
 
-    if (dwReturn = mciSendCommand(wDeviceID, MCI_STOP, 0, (DWORD)NULL))
+    if (dwReturn = mciSendCommand(wDeviceID, MCI_STOP, 0, (LONG_PTR)NULL))
 		Com_DPrintf("MCI_STOP failed (%i)", dwReturn);
 
 	wasPlaying = false;
@@ -244,8 +251,8 @@ void CDAudio_Pause (void)
 	if (!playing)
 		return;
 
-	mciGenericParms.dwCallback = (DWORD)cl_hwnd;
-    if (dwReturn = mciSendCommand(wDeviceID, MCI_PAUSE, 0, (DWORD)(LPVOID) &mciGenericParms))
+	mciGenericParms.dwCallback = (LONG_PTR)cl_hwnd;
+    if (dwReturn = mciSendCommand(wDeviceID, MCI_PAUSE, 0, (LONG_PTR)(LPVOID) &mciGenericParms))
 		Com_DPrintf("MCI_PAUSE failed (%i)", dwReturn);
 
 	wasPlaying = playing;
@@ -269,8 +276,8 @@ void CDAudio_Resume (void)
 	
     mciPlayParms.dwFrom = MCI_MAKE_TMSF(playTrack, 0, 0, 0);
     mciPlayParms.dwTo = MCI_MAKE_TMSF(playTrack + 1, 0, 0, 0);
-    mciPlayParms.dwCallback = (DWORD)cl_hwnd;
-    dwReturn = mciSendCommand(wDeviceID, MCI_PLAY, MCI_TO | MCI_NOTIFY, (DWORD)(LPVOID) &mciPlayParms);
+    mciPlayParms.dwCallback = (LONG_PTR)cl_hwnd;
+    dwReturn = mciSendCommand(wDeviceID, MCI_PLAY, MCI_TO | MCI_NOTIFY, (LONG_PTR)(LPVOID) &mciPlayParms);
 	if (dwReturn)
 	{
 		Com_DPrintf("CDAudio: MCI_PLAY failed (%i)\n", dwReturn);
@@ -487,7 +494,7 @@ int CDAudio_Init (void)
 		return -1;
 
 	mciOpenParms.lpstrDeviceType = "cdaudio";
-	if (dwReturn = mciSendCommand(0, MCI_OPEN, MCI_OPEN_TYPE | MCI_OPEN_SHAREABLE, (DWORD) (LPVOID) &mciOpenParms))
+	if (dwReturn = mciSendCommand(0, MCI_OPEN, MCI_OPEN_TYPE | MCI_OPEN_SHAREABLE, (LONG_PTR) (LPVOID) &mciOpenParms))
 	{
 		Com_Printf("CDAudio_Init: MCI_OPEN failed (%i)\n", dwReturn);
 		return -1;
@@ -496,10 +503,10 @@ int CDAudio_Init (void)
 
     // Set the time format to track/minute/second/frame (TMSF).
     mciSetParms.dwTimeFormat = MCI_FORMAT_TMSF;
-    if (dwReturn = mciSendCommand(wDeviceID, MCI_SET, MCI_SET_TIME_FORMAT, (DWORD)(LPVOID) &mciSetParms))
+    if (dwReturn = mciSendCommand(wDeviceID, MCI_SET, MCI_SET_TIME_FORMAT, (LONG_PTR)(LPVOID) &mciSetParms))
     {
 		Com_Printf("MCI_SET_TIME_FORMAT failed (%i)\n", dwReturn);
-        mciSendCommand(wDeviceID, MCI_CLOSE, 0, (DWORD)NULL);
+        mciSendCommand(wDeviceID, MCI_CLOSE, 0, (LONG_PTR)NULL);
 		return -1;
     }
 
@@ -528,7 +535,7 @@ void CDAudio_Shutdown(void)
 	if (!initialized)
 		return;
 	CDAudio_Stop();
-	if (mciSendCommand(wDeviceID, MCI_CLOSE, MCI_WAIT, (DWORD)NULL))
+	if (mciSendCommand(wDeviceID, MCI_CLOSE, MCI_WAIT, (LONG_PTR)NULL))
 		Com_DPrintf("CDAudio_Shutdown: MCI_CLOSE failed\n");
 }
 

@@ -501,11 +501,11 @@ void Sys_CopyProtect(void)
 Sys_MakeCodeWriteable
 ================
 */
-void Sys_MakeCodeWriteable (unsigned long startaddr, unsigned long length)
+void Sys_MakeCodeWriteable (unsigned int startaddr, unsigned int length)
 {
 
 	int r;
-	unsigned long addr;
+	unsigned int addr;
 	int psize = getpagesize();
 
 	addr = (startaddr & ~(psize-1)) - psize;

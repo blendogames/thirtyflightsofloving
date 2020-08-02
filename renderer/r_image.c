@@ -1057,9 +1057,9 @@ typedef struct png_handle_s
 {
 	char	*tmpBuf;
 	int		tmpi;
-	long	fBgColor;		// DL Background color Added 30/05/2000
+	int /*long*/	fBgColor;		// DL Background color Added 30/05/2000
 	int		fTransparent;	// DL Is this Image Transparent?   Added 30/05/2000
-	long	fRowBytes;		// DL Added 30/05/2000
+	int /*long*/	fRowBytes;		// DL Added 30/05/2000
 	double	fGamma;			// DL Added 07/06/2000
 	double	fScreenGamma;	// DL Added 07/06/2000
 	char	*fRowPtrs;		// DL Changed for consistancy 30/05/2000  
@@ -1082,8 +1082,8 @@ png_handle_t	*r_png_handle = 0;
 
 void R_InitializePNGData (void) 
 {
-	long* cvaluep; //ub
-	long y;
+	size_t /*long*/	*cvaluep; //ub
+	int /*long*/	y;
 
 	// Initialize Data and RowPtrs
 	if (r_png_handle->data) 
@@ -1101,10 +1101,10 @@ void R_InitializePNGData (void)
 
 	if ((r_png_handle->data)&&(r_png_handle->fRowPtrs)) 
 	{
-		cvaluep = (long*)r_png_handle->fRowPtrs;    
+		cvaluep = (size_t /*long*/*)r_png_handle->fRowPtrs;    
 		for (y=0; y<r_png_handle->height; y++)
 		{
-			cvaluep[y] = (long)r_png_handle->data + ( y * (long)r_png_handle->fRowBytes ); //DL Added 08/07/2000      
+			cvaluep[y] = (size_t /*long*/)r_png_handle->data + ( y * (size_t /*long*/)r_png_handle->fRowBytes ); //DL Added 08/07/2000      
 		}
 	}
 }
@@ -1264,17 +1264,17 @@ By Robert 'Heffo' Heffernan
 =================================================================
 */
 
-void jpg_null(j_decompress_ptr cinfo)
+void jpg_null (j_decompress_ptr cinfo)
 {
 }
 
-unsigned char jpg_fill_input_buffer(j_decompress_ptr cinfo)
+unsigned char jpg_fill_input_buffer (j_decompress_ptr cinfo)
 {
     VID_Printf(PRINT_ALL, "Premature end of JPEG data\n");
     return 1;
 }
 
-void jpg_skip_input_data(j_decompress_ptr cinfo, long num_bytes)
+void jpg_skip_input_data (j_decompress_ptr cinfo, long num_bytes)
 {
         
     cinfo->src->next_input_byte += (size_t) num_bytes;
@@ -1285,7 +1285,7 @@ void jpg_skip_input_data(j_decompress_ptr cinfo, long num_bytes)
 }
 
 //void jpeg_mem_src(j_decompress_ptr cinfo, byte *mem, int len)
-void jpeg_mem_src(j_decompress_ptr cinfo, const byte *mem, unsigned long len)
+void jpeg_mem_src (j_decompress_ptr cinfo, const byte *mem, unsigned long len)
 {
     cinfo->src = (struct jpeg_source_mgr *)(*cinfo->mem->alloc_small)((j_common_ptr) cinfo, JPOOL_PERMANENT, sizeof(struct jpeg_source_mgr));
     cinfo->src->init_source = jpg_null;
@@ -2221,7 +2221,7 @@ nonscrap:
 // store the names of last images that failed to load
 #define NUM_FAIL_IMAGES 1024
 char lastFailedImage[NUM_FAIL_IMAGES][MAX_OSPATH];
-long lastFailedImageHash[NUM_FAIL_IMAGES];
+unsigned int lastFailedImageHash[NUM_FAIL_IMAGES];
 static unsigned failedImgListIndex;
 
 /*
@@ -2248,8 +2248,8 @@ R_CheckImgFailed
 */
 qboolean R_CheckImgFailed (char *name)
 {
-	int		i;
-	long	hash;
+	int				i;
+	unsigned int	hash;
 
 	hash = Com_HashFileName(name, 0, false);
 	for (i=0; i<NUM_FAIL_IMAGES; i++)

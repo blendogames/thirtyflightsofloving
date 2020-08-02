@@ -86,7 +86,7 @@ instruct clients to write files over areas they shouldn't.
 
 typedef struct {
 	char			name[MAX_QPATH];
-	long			hash;				// To speed up searching
+	unsigned int	hash;				// To speed up searching
 	int				size;
 	int				offset;				// This is ignored in PK3 files
 	qboolean		ignore;				// Whether this file should be ignored
@@ -500,7 +500,7 @@ Performs a binary search by hashed filename
 to find pack items in a sorted pack
 =================
 */
-int FS_FindPackItem (fsPack_t *pack, char *itemName, long itemHash)
+int FS_FindPackItem (fsPack_t *pack, char *itemName, unsigned int itemHash)
 {
 	int		smax, smin, smidpt;	//, counter = 0;
 	int		i;	//, matchStart, matchEnd;
@@ -628,7 +628,7 @@ int FS_FOpenFileRead (fsHandle_t *handle)
 	fsSearchPath_t	*search;
 	fsPack_t		*pack;
 	char			path[MAX_OSPATH];
-	long			hash;
+	unsigned int	hash;
 	int				i;
 	unsigned int	typeFlag;
 
@@ -1203,7 +1203,7 @@ int FS_FTell (fileHandle_t f)
 	handle = FS_GetFileByHandle(f);
 
 	if (handle->pakFile) {	// inside .pak file uses offset/size
-		long	pos = ftell(handle->file);
+		int	pos = ftell(handle->file);
 		if (pos != -1)
 			pos -= handle->pakFile->offset;
 		return pos;
@@ -1589,7 +1589,7 @@ int FS_Tell (fileHandle_t f)
 	handle = FS_GetFileByHandle(f);
 
 	if (handle->pakFile) {	// inside .pak file uses offset/size
-		long	pos = ftell(handle->file);
+		int	pos = ftell(handle->file);
 		if (pos != -1)
 			pos -= handle->pakFile->offset;
 		return pos;
@@ -1867,7 +1867,7 @@ FS_PakFileCompare
 Used for sorting pak entries by hash
 =================
 */
-long *nameHashes = NULL;
+unsigned int *nameHashes = NULL;
 int FS_PakFileCompare (const void *f1, const void *f2)
 {
 	if (!nameHashes)
@@ -1899,7 +1899,7 @@ fsPack_t *FS_LoadPAK (const char *packPath)
 	unsigned		contentFlags = 0;
 #ifdef BINARY_PACK_SEARCH
 	int				*sortIndices;
-	long			*sortHashes;
+	unsigned int	*sortHashes;
 #endif	// BINARY_PACK_SEARCH
 
 	handle = fopen(packPath, "rb");
@@ -2030,7 +2030,7 @@ fsPack_t *FS_LoadPK3 (const char *packPath)
 #ifdef BINARY_PACK_SEARCH
 	fsPackFile_t	*tmpFiles;
 	int				*sortIndices;
-	long			*sortHashes;
+	unsigned int	*sortHashes;
 #endif	// BINARY_PACK_SEARCH
 
 	handle = unzOpen(packPath);

@@ -503,7 +503,7 @@ int GLimp_SetMode( int *pwidth, int *pheight, int mode, qboolean fullscreen )
 	Window root;
 	XVisualInfo *visinfo;
 	XSetWindowAttributes attr;
-	unsigned long mask;
+	unsigned int mask;
 	int MajorVersion, MinorVersion;
 	int actualWidth, actualHeight;
 	XSizeHints *sizehints;
@@ -641,7 +641,7 @@ int GLimp_SetMode( int *pwidth, int *pheight, int mode, qboolean fullscreen )
 		#include "q2icon.xbm"
 
 		Pixmap icon_pixmap, icon_mask;
-		unsigned long fg, bg;
+		unsigned int fg, bg;
 		int i;
 		
 		fg = BlackPixel(dpy, visinfo->screen);
@@ -829,7 +829,7 @@ char *Sys_GetClipboardData()
 {
 	Window sowner;
 	Atom type, property;
-	unsigned long len, bytes_left, tmp;
+	unsigned int len, bytes_left, tmp;
 	unsigned char *data;
 	int format, result;
 	char *ret = NULL;
