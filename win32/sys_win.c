@@ -1413,8 +1413,18 @@ void *Sys_GetGameAPI (void *parms)
 	char	name[MAX_OSPATH];
 	char	*path;
 	char	cwd[MAX_OSPATH];
-#if defined _M_IX86
-	//Knightmare- changed DLL name for better cohabitation
+
+#if defined (_M_X64) || defined (_M_AMD64) || defined (__x86_64__)
+	const char *gamename = "kmq2gamex64.dll"; 
+
+#ifdef NDEBUG
+	const char *debugdir = "release";
+#else
+	const char *debugdir = "debug";
+#endif
+
+#elif defined (_M_IX86)
+	// Knightmare- changed DLL name for better cohabitation
 	const char *gamename = "kmq2gamex86.dll"; 
 
 #ifdef NDEBUG

@@ -1224,7 +1224,7 @@ void R_LoadPNG (char *filename, byte **pic, int *width, int *height)
 	// update the info structure
 	png_read_update_info( png, pnginfo );
 
-	r_png_handle->fRowBytes = png_get_rowbytes (png, pnginfo);
+	r_png_handle->fRowBytes = (int)png_get_rowbytes (png, pnginfo);
 	r_png_handle->bytesPerPixel = png_get_channels (png, pnginfo);  // DL Added 30/08/2000
 
 	R_InitializePNGData ();

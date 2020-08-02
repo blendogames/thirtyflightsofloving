@@ -984,7 +984,7 @@ int FS_Read (void *buffer, int size, fileHandle_t f)
 	while (remaining)
 	{
 		if (handle->file)
-			r = fread(buf, 1, remaining, handle->file);
+			r = (int)fread(buf, 1, remaining, handle->file);
 		else if (handle->zip)
 			r = unzReadCurrentFile(handle->zip, buf, remaining);
 		else
@@ -1043,7 +1043,7 @@ int FS_FRead (void *buffer, int size, int count, fileHandle_t f)
 		while (remaining)
 		{
 			if (handle->file)
-				r = fread(buf, 1, remaining, handle->file);
+				r = (int)fread(buf, 1, remaining, handle->file);
 			else if (handle->zip)
 				r = unzReadCurrentFile(handle->zip, buf, remaining);
 			else
@@ -1094,7 +1094,7 @@ int FS_Write (const void *buffer, int size, fileHandle_t f){
 	while (remaining)
 	{
 		if (handle->file)
-			w = fwrite(buf, 1, remaining, handle->file);
+			w = (int)fwrite(buf, 1, remaining, handle->file);
 		else if (handle->writeZip)
 		{
 			if (zipWriteInFileInZip(handle->writeZip, buf, remaining) == ZIP_OK)
@@ -1684,7 +1684,7 @@ FS_CopyFile
 void FS_CopyFile (char *src, char *dst)
 {
 	FILE	*f1, *f2;
-	int		l;
+	size_t	l;
 	byte	buffer[65536];
 
 	Com_DPrintf ("FS_CopyFile (%s, %s)\n", src, dst);

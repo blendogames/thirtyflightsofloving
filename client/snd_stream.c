@@ -66,7 +66,9 @@ static size_t ovc_read (void *ptr, size_t size, size_t nmemb, void *datasource)
 #ifdef OGG_DIRECT_FILE
 	return fread(ptr, 1, size * nmemb, track->file) / size;
 #else
-	return FS_Read(ptr, size * nmemb, track->file) / size;
+//	return FS_Read(ptr, size * nmemb, track->file) / size;
+	// should use FS_FRead instead
+	return FS_FRead(ptr, size * nmemb, 1, track->file) / size;
 #endif
 }
 

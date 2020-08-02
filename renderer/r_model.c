@@ -162,7 +162,7 @@ void Mod_Modellist_f (void)
 {
 	int		i;
 	model_t	*mod;
-	int		total;
+	size_t	total;
 
 	total = 0;
 	VID_Printf (PRINT_ALL,"Loaded models:\n");

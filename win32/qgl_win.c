@@ -3266,7 +3266,7 @@ qboolean QGL_Init( const char *dllname )
 	qglGetPixelMapusv            = 	dllGetPixelMapusv            = GPA( "glGetPixelMapusv" );
 	qglGetPointerv               = 	dllGetPointerv               = GPA( "glGetPointerv" );
 	qglGetPolygonStipple         = 	dllGetPolygonStipple         = GPA( "glGetPolygonStipple" );
-	qglGetString                 = 	dllGetString                 = GPA( "glGetString" );
+	qglGetString                 = 	dllGetString                 = (const GLubyte *)GPA( "glGetString" );
 	qglGetTexEnvfv               = 	dllGetTexEnvfv               = GPA( "glGetTexEnvfv" );
 	qglGetTexEnviv               = 	dllGetTexEnviv               = GPA( "glGetTexEnviv" );
 	qglGetTexGendv               = 	dllGetTexGendv               = GPA( "glGetTexGendv" );
@@ -3487,14 +3487,14 @@ qboolean QGL_Init( const char *dllname )
 	qglViewport                  = 	dllViewport                  = GPA( "glViewport" );
 
 	qwglCopyContext              = GPA( "wglCopyContext" );
-	qwglCreateContext            = GPA( "wglCreateContext" );
-	qwglCreateLayerContext       = GPA( "wglCreateLayerContext" );
+	qwglCreateContext            = (HGLRC)GPA( "wglCreateContext" );
+	qwglCreateLayerContext       = (HGLRC)GPA( "wglCreateLayerContext" );
 	qwglDeleteContext            = GPA( "wglDeleteContext" );
 	qwglDescribeLayerPlane       = GPA( "wglDescribeLayerPlane" );
-	qwglGetCurrentContext        = GPA( "wglGetCurrentContext" );
-	qwglGetCurrentDC             = GPA( "wglGetCurrentDC" );
+	qwglGetCurrentContext        = (HGLRC)GPA( "wglGetCurrentContext" );
+	qwglGetCurrentDC             = (HDC)GPA( "wglGetCurrentDC" );
 	qwglGetLayerPaletteEntries   = GPA( "wglGetLayerPaletteEntries" );
-	qwglGetProcAddress           = GPA( "wglGetProcAddress" );
+	qwglGetProcAddress           = (PROC *)GPA( "wglGetProcAddress" );
 	qwglMakeCurrent              = GPA( "wglMakeCurrent" );
 	qwglRealizeLayerPalette      = GPA( "wglRealizeLayerPalette" );
 	qwglSetLayerPaletteEntries   = GPA( "wglSetLayerPaletteEntries" );
