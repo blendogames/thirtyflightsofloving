@@ -6,7 +6,6 @@ bin/
 # ignore all the windows binaries - they shouldn't be committed! 
 Debug/
 Release/
-x64/
 .vs/
 *.log
 *.ncb
