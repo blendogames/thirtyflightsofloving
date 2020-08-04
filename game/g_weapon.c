@@ -156,7 +156,7 @@ This is an internal support routine used for bullet/pellet based weapons.
 	{
 		vectoangles (aimdir, dir);
 		AngleVectors (dir, forward, right, up);
-
+		
 		r = crandom()*hspread; 
 		u = crandom()*vspread;
 		// Knightmare- adjust spread for expanded world size
@@ -254,8 +254,8 @@ This is an internal support routine used for bullet/pellet based weapons.
 					gi.WriteDir (tr.plane.normal);
 					gi.multicast (tr.endpos, MULTICAST_PVS);
 
-					if(level.num_reflectors)
-						ReflectSparks(te_impact,tr.endpos,tr.plane.normal);
+					if (level.num_reflectors)
+						ReflectSparks (te_impact, tr.endpos, tr.plane.normal);
 
 					if (self->client)
 						PlayerNoise(self, tr.endpos, PNOISE_IMPACT);
@@ -340,7 +340,7 @@ void blaster_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *
 		return;
 	}
 
-	if (self->owner->client)
+	if (self->owner && self->owner->client)
 		PlayerNoise(self->owner, self->s.origin, PNOISE_IMPACT);
 
 	if (other->takedamage)
@@ -395,10 +395,10 @@ void fire_blaster (edict_t *self, vec3_t start, vec3_t dir, int damage, int spee
 	edict_t	*bolt;
 	trace_t	tr;
 
-	//Knightmare- only change color with blaster_color cvar if self is a player or actor
-	qboolean color_changeable = false;
-	if ( (self->client && !(self->flags & FL_TURRET_OWNER)) || !strcmp(self->classname, "target_actor"))
-		color_changeable = true;
+	// Knightmare- only change color with blaster_color cvar if self is a player or actor
+//	qboolean color_changeable = false;
+//	if ( (self->client && !(self->flags & FL_TURRET_OWNER)) || !strcmp(self->classname, "target_actor"))
+//		color_changeable = true;
 
 	VectorNormalize (dir);
 
@@ -417,17 +417,17 @@ void fire_blaster (edict_t *self, vec3_t start, vec3_t dir, int damage, int spee
 	bolt->clipmask = MASK_SHOT;
 	bolt->solid = SOLID_BBOX;
 	bolt->s.effects |= effect;
-	bolt->s.renderfx |= RF_NOSHADOW; //Knightmare- no shadow
+	bolt->s.renderfx |= RF_NOSHADOW; // Knightmare- no shadow
 	VectorClear (bolt->mins);
 	VectorClear (bolt->maxs);
 
-	if (color == BLASTER_GREEN) //green
+	if (color == BLASTER_GREEN) // green
 		bolt->s.modelindex = gi.modelindex ("models/objects/laser2/tris.md2");
-	else if (color == BLASTER_BLUE) //blue
+	else if (color == BLASTER_BLUE) // blue
 		bolt->s.modelindex = gi.modelindex ("models/objects/blaser/tris.md2");
-	else if (color == BLASTER_RED) //red
+	else if (color == BLASTER_RED) // red
 		bolt->s.modelindex = gi.modelindex ("models/objects/rlaser/tris.md2");
-	else //standard orange
+	else // standard orange
 		bolt->s.modelindex = gi.modelindex ("models/objects/laser/tris.md2");
 	bolt->style = color;
 
@@ -435,7 +435,7 @@ void fire_blaster (edict_t *self, vec3_t start, vec3_t dir, int damage, int spee
 
 	bolt->owner = self;
 	bolt->touch = blaster_touch;
-	bolt->nextthink = level.time + 2;
+	bolt->nextthink = level.time + 4;	// was  2
 	bolt->think = G_FreeEdict;
 	bolt->dmg = damage;
 	bolt->classname = "bolt";
@@ -447,7 +447,7 @@ void fire_blaster (edict_t *self, vec3_t start, vec3_t dir, int damage, int spee
 		check_dodge (self, bolt->s.origin, dir, speed);
 
 	tr = gi.trace (self->s.origin, NULL, NULL, bolt->s.origin, bolt, MASK_SHOT);
-	if (tr.fraction < 1.0)
+	if (tr.fraction < 1.0 && !(self->flags & FL_TURRET_OWNER))
 	{
 		VectorMA (bolt->s.origin, -10, dir, bolt->s.origin);
 		bolt->touch (bolt, tr.ent, NULL, NULL);
@@ -459,7 +459,7 @@ void fire_blaster (edict_t *self, vec3_t start, vec3_t dir, int damage, int spee
 // entities.
 void bolt_delayed_start (edict_t *bolt)
 {
-	if(g_edicts[1].linkcount)
+	if (g_edicts[1].linkcount)
 	{
 		VectorScale(bolt->movedir,bolt->moveinfo.speed,bolt->velocity);
 		bolt->nextthink = level.time + 2;
@@ -505,27 +505,27 @@ void Grenade_Evade (edict_t *monster)
 	// We assume on entry here that monster is alive and that he's not already
 	// AI_CHASE_THING
 	grenade = world->next_grenade;
-	while(grenade)
+	while (grenade)
 	{
 		// we only care about grenades on the ground
-		if(grenade->inuse && grenade->groundentity)
+		if (grenade->inuse && grenade->groundentity)
 		{
 			// if it ain't in the PVS, it can't hurt us (I think?)
-			if(gi.inPVS(grenade->s.origin,monster->s.origin))
+			if (gi.inPVS(grenade->s.origin,monster->s.origin))
 			{
 				VectorSubtract(grenade->s.origin,monster->s.origin,grenade_vec);
 				grenade_dist = VectorNormalize(grenade_vec);
-				if(grenade_dist <= grenade->dmg_radius)
+				if (grenade_dist <= grenade->dmg_radius)
 					break;
 			}
 		}
 		grenade = grenade->next_grenade;
 	}
-	if(!grenade)
+	if (!grenade)
 		return;
 	// Find best escape route.
 	best_r = 9999;
-	for(i=0; i<8; i++)
+	for (i=0; i<8; i++)
 	{
 		yaw = anglemod( i*45 );
 		forward[0] = cos( DEG2RAD(yaw) );
@@ -533,18 +533,18 @@ void Grenade_Evade (edict_t *monster)
 		forward[2] = 0;
 		// Estimate of required distance to run. This is conservative.
 		r = grenade->dmg_radius + grenade_dist*DotProduct(forward,grenade_vec) + monster->size[0] + 16;
-		if( r < best_r )
+		if ( r < best_r )
 		{
 			VectorMA(monster->s.origin,r,forward,pos);
 			tr = gi.trace(monster->s.origin,monster->mins,monster->maxs,pos,monster,MASK_MONSTERSOLID);
-			if(tr.fraction < 1.0)
+			if (tr.fraction < 1.0)
 				continue;
 			best_r = r;
 			best_yaw = yaw;
 			VectorCopy(tr.endpos,best_pos);
 		}
 	}
-	if(best_r < 9000)
+	if (best_r < 9000)
 	{
 		edict_t	*thing = SpawnThing();
 		VectorCopy(best_pos,thing->s.origin);
@@ -1292,7 +1292,7 @@ void fire_rail (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick
 		}
 		else
 		{
-			// ZOID--added so rail goes through SOLID_BBOX entities (gibs, etc)
+			//ZOID--added so rail goes through SOLID_BBOX entities (gibs, etc)
 			if ((tr.ent->svflags & SVF_MONSTER) || (tr.ent->client) ||
 				(tr.ent->solid == SOLID_BBOX))
 				ignore = tr.ent;
@@ -1422,7 +1422,7 @@ void bfg_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf
 	gi.multicast (self->s.origin, MULTICAST_PVS);
 
 	if (level.num_reflectors)
-		ReflectExplosion(TE_BFG_BIGEXPLOSION,self->s.origin);
+		ReflectExplosion (TE_BFG_BIGEXPLOSION, self->s.origin);
 }
 
 
