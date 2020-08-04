@@ -35,9 +35,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 // Added Musashi's double barreled turret code
 //CW++
-#define	FL_TURRET_DOUBLE			0x00000001
-#define	FL_TURRET_DOUBLE_ALT		0x00000002
-#define	FL_TURRET_DOUBLE_ALT_FIRING	0x00000004
 //CW--
 
 void NoAmmoWeaponChange (edict_t *ent);
@@ -149,19 +146,19 @@ void turret_blocked(edict_t *self, edict_t *other)
 //CW++
 void hrocket_turret_fire (edict_t *self, edict_t *owner, vec3_t start, vec3_t dir, vec3_t start2, vec3_t dir2, int damage, int speed, float damage_radius, int radius_damage, edict_t *home_target)
 {
-	if (self->moreflags & FL_TURRET_DOUBLE)
+	if (self->moreflags & FL2_TURRET_DOUBLE)
 	{
-		if (self->moreflags & FL_TURRET_DOUBLE_ALT)
+		if (self->moreflags & FL2_TURRET_DOUBLE_ALT)
 		{
-			if (self->moreflags & FL_TURRET_DOUBLE_ALT_FIRING)
+			if (self->moreflags & FL2_TURRET_DOUBLE_ALT_FIRING)
 			{
 				fire_rocket(owner, start2, dir2, damage, speed, 150, damage, home_target);
-				self->moreflags &= ~FL_TURRET_DOUBLE_ALT_FIRING;
+				self->moreflags &= ~FL2_TURRET_DOUBLE_ALT_FIRING;
 			}
 			else
 			{
 				fire_rocket(owner, start, dir, damage, speed, 150, damage, home_target);
-				self->moreflags |= FL_TURRET_DOUBLE_ALT_FIRING;
+				self->moreflags |= FL2_TURRET_DOUBLE_ALT_FIRING;
 			}
 		}
 		else
@@ -195,7 +192,7 @@ void turret_breach_fire (edict_t *self)
 	VectorMA (start, self->move_origin[2], up, start);
 
 //CW++
-	if (self->moreflags & FL_TURRET_DOUBLE)
+	if (self->moreflags & FL2_TURRET_DOUBLE)
 	{ 
 		AngleVectors(self->s.angles, forward2, right2, up2);
 		VectorMA(self->s.origin, self->muzzle2[0], forward2, start2);
@@ -226,19 +223,19 @@ void turret_breach_fire (edict_t *self)
 			{
 				damage = 150;	//CWFIXME use self->mass
 //CW++
-				if (self->moreflags & FL_TURRET_DOUBLE)
+				if (self->moreflags & FL2_TURRET_DOUBLE)
 				{
-					if (self->moreflags & FL_TURRET_DOUBLE_ALT)
+					if (self->moreflags & FL2_TURRET_DOUBLE_ALT)
 					{
-						if (self->moreflags & FL_TURRET_DOUBLE_ALT_FIRING)
+						if (self->moreflags & FL2_TURRET_DOUBLE_ALT_FIRING)
 						{
 							fire_rail(owner, start2, forward2, damage, 0);
-							self->moreflags &= ~FL_TURRET_DOUBLE_ALT_FIRING;
+							self->moreflags &= ~FL2_TURRET_DOUBLE_ALT_FIRING;
 						}
 						else
 						{
 							fire_rail(owner, start, forward, damage, 0);
-							self->moreflags |= FL_TURRET_DOUBLE_ALT_FIRING;
+							self->moreflags |= FL2_TURRET_DOUBLE_ALT_FIRING;
 						}
 					}
 					else
@@ -266,19 +263,19 @@ void turret_breach_fire (edict_t *self)
 			{
 				damage = 100 + random() * 50;
 //CW++
-				if (self->moreflags & FL_TURRET_DOUBLE)
+				if (self->moreflags & FL2_TURRET_DOUBLE)
 				{
-					if (self->moreflags & FL_TURRET_DOUBLE_ALT)
+					if (self->moreflags & FL2_TURRET_DOUBLE_ALT)
 					{
-						if (self->moreflags & FL_TURRET_DOUBLE_ALT_FIRING)
+						if (self->moreflags & FL2_TURRET_DOUBLE_ALT_FIRING)
 						{
 							fire_rocket(owner, start2, forward2, damage, speed, 150, damage, NULL);
-							self->moreflags &= ~FL_TURRET_DOUBLE_ALT_FIRING;
+							self->moreflags &= ~FL2_TURRET_DOUBLE_ALT_FIRING;
 						}
 						else
 						{
 							fire_rocket(owner, start, forward, damage, speed, 150, damage, NULL);
-							self->moreflags |= FL_TURRET_DOUBLE_ALT_FIRING;
+							self->moreflags |= FL2_TURRET_DOUBLE_ALT_FIRING;
 						}
 					}
 					else
@@ -300,19 +297,19 @@ void turret_breach_fire (edict_t *self)
 			{
 				damage = 500;
 //CW++
-				if (self->moreflags & FL_TURRET_DOUBLE)
+				if (self->moreflags & FL2_TURRET_DOUBLE)
 				{
-					if (self->moreflags & FL_TURRET_DOUBLE_ALT)
+					if (self->moreflags & FL2_TURRET_DOUBLE_ALT)
 					{
-						if (self->moreflags & FL_TURRET_DOUBLE_ALT_FIRING)
+						if (self->moreflags & FL2_TURRET_DOUBLE_ALT_FIRING)
 						{
 							fire_bfg(owner, start2, forward2, damage, speed, 1000);
-							self->moreflags &= ~FL_TURRET_DOUBLE_ALT_FIRING;
+							self->moreflags &= ~FL2_TURRET_DOUBLE_ALT_FIRING;
 						}
 						else
 						{
 							fire_bfg(owner, start, forward, damage, speed, 1000);
-							self->moreflags |= FL_TURRET_DOUBLE_ALT_FIRING;
+							self->moreflags |= FL2_TURRET_DOUBLE_ALT_FIRING;
 						}
 					}
 					else
@@ -359,19 +356,19 @@ void turret_breach_fire (edict_t *self)
 			{
 				// "wait" = damage for machinegun - default = 2
 //CW++
-				if (self->moreflags & FL_TURRET_DOUBLE)
+				if (self->moreflags & FL2_TURRET_DOUBLE)
 				{
-					if (self->moreflags & FL_TURRET_DOUBLE_ALT)
+					if (self->moreflags & FL2_TURRET_DOUBLE_ALT)
 					{
-						if (self->moreflags & FL_TURRET_DOUBLE_ALT_FIRING)
+						if (self->moreflags & FL2_TURRET_DOUBLE_ALT_FIRING)
 						{
 							fire_bullet(owner, start2, forward2, self->wait, 4, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, MOD_MACHINEGUN);
-							self->moreflags &= ~FL_TURRET_DOUBLE_ALT_FIRING;
+							self->moreflags &= ~FL2_TURRET_DOUBLE_ALT_FIRING;
 						}
 						else
 						{
 							fire_bullet(owner, start, forward, self->wait, 4, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, MOD_MACHINEGUN);
-							self->moreflags |= FL_TURRET_DOUBLE_ALT_FIRING;
+							self->moreflags |= FL2_TURRET_DOUBLE_ALT_FIRING;
 						}
 					}
 					else
@@ -394,19 +391,19 @@ void turret_breach_fire (edict_t *self)
 			{
 				HB_Shots++;
 //CW++
-				if (self->moreflags & FL_TURRET_DOUBLE)
+				if (self->moreflags & FL2_TURRET_DOUBLE)
 				{
-					if (self->moreflags & FL_TURRET_DOUBLE_ALT)
+					if (self->moreflags & FL2_TURRET_DOUBLE_ALT)
 					{
-						if (self->moreflags & FL_TURRET_DOUBLE_ALT_FIRING)
+						if (self->moreflags & FL2_TURRET_DOUBLE_ALT_FIRING)
 						{
 							fire_blaster (owner, start2, forward2, self->wait, 1000, (!(HB_Shots % 4))?EF_HYPERBLASTER:0, true, BLASTER_ORANGE);
-							self->moreflags &= ~FL_TURRET_DOUBLE_ALT_FIRING;
+							self->moreflags &= ~FL2_TURRET_DOUBLE_ALT_FIRING;
 						}
 						else
 						{
 							fire_blaster (owner, start, forward, self->wait, 1000, (!(HB_Shots % 4))?EF_HYPERBLASTER:0, true, BLASTER_ORANGE);
-							self->moreflags |= FL_TURRET_DOUBLE_ALT_FIRING;
+							self->moreflags |= FL2_TURRET_DOUBLE_ALT_FIRING;
 						}
 					}
 					else
@@ -425,19 +422,19 @@ void turret_breach_fire (edict_t *self)
 			case 7: // Grenade launcher
 			{
 //CW++
-				if (self->moreflags & FL_TURRET_DOUBLE)
+				if (self->moreflags & FL2_TURRET_DOUBLE)
 				{
-					if (self->moreflags & FL_TURRET_DOUBLE_ALT)
+					if (self->moreflags & FL2_TURRET_DOUBLE_ALT)
 					{
-						if (self->moreflags & FL_TURRET_DOUBLE_ALT_FIRING)
+						if (self->moreflags & FL2_TURRET_DOUBLE_ALT_FIRING)
 						{
 							fire_grenade (owner, start2, forward2, 50, self->fog_far, 2.5, 90, false);
-							self->moreflags &= ~FL_TURRET_DOUBLE_ALT_FIRING;
+							self->moreflags &= ~FL2_TURRET_DOUBLE_ALT_FIRING;
 						}
 						else
 						{
 							fire_grenade (owner, start, forward, 50, self->fog_far, 2.5, 90, false);
-							self->moreflags |= FL_TURRET_DOUBLE_ALT_FIRING;
+							self->moreflags |= FL2_TURRET_DOUBLE_ALT_FIRING;
 						}
 					}
 					else
@@ -460,19 +457,19 @@ void turret_breach_fire (edict_t *self)
 			{
 				damage = 100;
 //CW++
-				if (self->moreflags & FL_TURRET_DOUBLE)
+				if (self->moreflags & FL2_TURRET_DOUBLE)
 				{
-					if (self->moreflags & FL_TURRET_DOUBLE_ALT)
+					if (self->moreflags & FL2_TURRET_DOUBLE_ALT)
 					{
-						if (self->moreflags & FL_TURRET_DOUBLE_ALT_FIRING)
+						if (self->moreflags & FL2_TURRET_DOUBLE_ALT_FIRING)
 						{
 							fire_rocket(owner, start2, forward2, damage, speed, 150, damage, NULL);
-							self->moreflags &= ~FL_TURRET_DOUBLE_ALT_FIRING;
+							self->moreflags &= ~FL2_TURRET_DOUBLE_ALT_FIRING;
 						}
 						else
 						{
 							fire_rocket(owner, start, forward, damage, speed, 150, damage, NULL);
-							self->moreflags |= FL_TURRET_DOUBLE_ALT_FIRING;
+							self->moreflags |= FL2_TURRET_DOUBLE_ALT_FIRING;
 						}
 					}
 					else
@@ -1153,9 +1150,9 @@ void turret_breach_finish_init (edict_t *self)
 		if (self->target_ent)
 		{
 			VectorSubtract(self->target_ent->s.origin, self->s.origin, self->muzzle2);
-			self->moreflags |= FL_TURRET_DOUBLE;
+			self->moreflags |= FL2_TURRET_DOUBLE;
 			if (self->style > 0)
-				self->moreflags |= FL_TURRET_DOUBLE_ALT;
+				self->moreflags |= FL2_TURRET_DOUBLE_ALT;
 
 			G_FreeEdict(self->target_ent);
 		}
