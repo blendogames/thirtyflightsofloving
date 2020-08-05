@@ -192,6 +192,8 @@ void turret_breach_fire (edict_t *self)
 	VectorMA (self->s.origin, self->move_origin[0], forward, start);
 	VectorMA (start, self->move_origin[1], right, start);
 	VectorMA (start, self->move_origin[2], up, start);
+	// FIXME: add forward vector to start to offset to prevent clipping issues
+	VectorAdd (start, forward, start);
 
 //CW++
 	if (self->moreflags & FL2_TURRET_DOUBLE)
@@ -200,8 +202,11 @@ void turret_breach_fire (edict_t *self)
 		VectorMA (self->s.origin, self->muzzle2[0], forward2, start2);
 		VectorMA (start2, self->muzzle2[1], right2, start2);
 		VectorMA (start2, self->muzzle2[2], up2, start2);
+		// FIXME: add forward vector to start to offset to prevent clipping issues
+		VectorAdd (start2, forward2, start2);
 	}
 //CW--
+
 
 	speed = 550 + 50 * skill->value;
 
@@ -397,6 +402,9 @@ void turret_breach_fire (edict_t *self)
 			case 6: // Hyperblaster
 			case 8: // Blue Hyperblaster
 			case 9: // Green Hyperblaster
+#ifdef KMQUAKE2_ENGINE_MOD
+			case 10:	// Red Hyperblaster
+#endif	// KMQUAKE2_ENGINE_MOD
 			{
 				unsigned int	effect, color;
 				if (self->sounds == 6)
@@ -405,12 +413,11 @@ void turret_breach_fire (edict_t *self)
 				{	effect = EF_BLUEHYPERBLASTER; color = BLASTER_BLUE;	}
 				if (self->sounds == 9)
 				{	effect = EF_HYPERBLASTER|EF_TRACKER; color = BLASTER_GREEN;	}
-
+#ifdef KMQUAKE2_ENGINE_MOD
+				if (self->sounds == 10)
+				{	effect = EF_HYPERBLASTER|EF_IONRIPPER; color = BLASTER_RED;	}
+#endif	// KMQUAKE2_ENGINE_MOD
 				HB_Shots++;
-
-				// FIXME: add forward vectors to starts to offset to prevent clipping issues
-				VectorAdd (start, forward, start);
-				VectorAdd (start2, forward2, start2);
 //CW++
 				if (self->moreflags & FL2_TURRET_DOUBLE)
 				{
@@ -809,7 +816,19 @@ void turret_breach_think (edict_t *self)
 
 			gi.linkentity(self->owner);
 
-			if (self->owner->client->ps.pmove.velocity[2] > 15) 
+			// should the turret shoot now?
+			if ((self->owner->client->buttons & BUTTON_ATTACK) && (self->delay < level.time))	// 1 second break between shots
+			{
+				turret_breach_fire (self);
+				//self->delay = level.time + 1;
+			}
+
+			// has the player abondoned the turret?
+			// jump button disables turret
+
+		//	if (self->owner->client->ps.pmove.velocity[2] > 15) 
+		//		turret_disengage(self);
+			else if (self->owner->client->ucmd.upmove >= 20)
 				turret_disengage(self);
 		}
 	}
@@ -845,6 +864,11 @@ void turret_breach_think (edict_t *self)
 
 			if (VectorLength(dir) < 16)
 			{	// player has taken control of turret
+
+				// Knightmare- leave thirdperson mode
+				if (ent->client->chasetoggle)
+					ChasecamRemove (ent, OPTION_OFF);
+
 				self->owner = ent;
 				ent->movetype = MOVETYPE_PUSH;	// don't let them move, or they'll get stuck
 				ent->gravity = 0;

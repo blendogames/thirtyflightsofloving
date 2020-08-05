@@ -242,17 +242,17 @@ void ChangeWeapon (edict_t *ent)
 	ent->client->ps.gunframe = 0;
 
 	// DWH: Don't display weapon if in 3rd person
-	if(!ent->client->chasetoggle)
+	if (!ent->client->chasetoggle)
 		ent->client->ps.gunindex = gi.modelindex(ent->client->pers.weapon->view_model);
 
 	// DWH: change weapon model index if necessary
-	if(ITEM_INDEX(ent->client->pers.weapon) == noweapon_index)
+	if (ITEM_INDEX(ent->client->pers.weapon) == noweapon_index)
 		ent->s.modelindex2 = 0;
 	else
 		ent->s.modelindex2 = MAX_MODELS-1;
 
 	ent->client->anim_priority = ANIM_PAIN;
-	if(ent->client->ps.pmove.pm_flags & PMF_DUCKED)
+	if (ent->client->ps.pmove.pm_flags & PMF_DUCKED)
 	{
 			ent->s.frame = FRAME_crpain1;
 			ent->client->anim_end = FRAME_crpain4;
@@ -338,10 +338,13 @@ void Think_Weapon (edict_t *ent)
 
 	if (ent->flags & FL_TURRET_OWNER)
 	{
+		// Knightmare- no weapon activity while controlling turret
+		ent->client->ps.gunframe = 0;
+		ent->client->weaponstate = WEAPON_ACTIVATING;
 		if ( ((ent->client->latched_buttons|ent->client->buttons) & BUTTONS_ATTACK) )
 		{
 			ent->client->latched_buttons &= ~BUTTONS_ATTACK;
-			turret_breach_fire(ent->turret);
+			turret_breach_fire (ent->turret);
 		}
 		return;
 	}
@@ -383,9 +386,9 @@ void Use_Weapon (edict_t *ent, gitem_t *in_item)
 		 ( (index == rl_index)  && (current_weapon_index == hml_index) ) ||
 		 ( (index == hml_index) && (current_weapon_index == rl_index)  )    )
 	{
-		if(current_weapon_index == rl_index)
+		if (current_weapon_index == rl_index)
 		{
-			if(ent->client->pers.inventory[homing_index] > 0)
+			if (ent->client->pers.inventory[homing_index] > 0)
 			{
 				item = FindItem("homing rocket launcher");
 				index = hml_index;
@@ -393,9 +396,9 @@ void Use_Weapon (edict_t *ent, gitem_t *in_item)
 			else
 				return;
 		}
-		else if(current_weapon_index == hml_index)
+		else if (current_weapon_index == hml_index)
 		{
-			if(ent->client->pers.inventory[rockets_index] > 0)
+			if (ent->client->pers.inventory[rockets_index] > 0)
 			{
 				item = FindItem("rocket launcher");
 				index = rl_index;
@@ -416,9 +419,9 @@ void Use_Weapon (edict_t *ent, gitem_t *in_item)
 		{
 			// Lazarus: If player is attempting to switch to RL and doesn't have rockets,
 			//          but DOES have homing rockets, switch to HRL
-			if(index == rl_index)
+			if (index == rl_index)
 			{
-				if( (ent->client->pers.inventory[homing_index] > 0) &&
+				if ( (ent->client->pers.inventory[homing_index] > 0) &&
 					(ent->client->pers.inventory[hml_index]    > 0)    )
 				{
 					ent->client->newweapon = FindItem("homing rocket launcher");
@@ -467,7 +470,7 @@ void Drop_Weapon (edict_t *ent, gitem_t *item)
 	{
 		int	current_weapon_index;
 		current_weapon_index = ITEM_INDEX(ent->client->pers.weapon);
-		if(current_weapon_index == hml_index)
+		if (current_weapon_index == hml_index)
 		{
 			safe_cprintf (ent, PRINT_HIGH, "Can't drop current weapon\n");
 			return;
@@ -496,11 +499,11 @@ A generic function to handle the basics of weapon thinking
 
 void Weapon_Generic2 (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST, int FRAME_IDLE_LAST, int FRAME_DEACTIVATE_LAST, int *pause_frames, int *fire_frames, void (*fire)(edict_t *ent, qboolean altfire))
 {
-	int		n;
-	int oldstate = ent->client->weaponstate;
-	qboolean haste_applied = false;
+	int			n;
+	int			oldstate = ent->client->weaponstate;
+	qboolean	haste_applied = false;
 
-	if(ent->deadflag || ent->s.modelindex != MAX_MODELS-1) // VWep animations screw up corpses
+	if (ent->deadflag || ent->s.modelindex != MAX_MODELS-1) // VWep animations screw up corpses
 	{
 		return;
 	}
@@ -515,7 +518,7 @@ void Weapon_Generic2 (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST
 		else if ((FRAME_DEACTIVATE_LAST - ent->client->ps.gunframe) == 4)
 		{
 			ent->client->anim_priority = ANIM_REVERSE;
-			if(ent->client->ps.pmove.pm_flags & PMF_DUCKED)
+			if (ent->client->ps.pmove.pm_flags & PMF_DUCKED)
 			{
 				ent->s.frame = FRAME_crpain4+1;
 				ent->client->anim_end = FRAME_crpain1;
@@ -553,7 +556,7 @@ void Weapon_Generic2 (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST
 		if ((FRAME_DEACTIVATE_LAST - FRAME_DEACTIVATE_FIRST) < 4)
 		{
 			ent->client->anim_priority = ANIM_REVERSE;
-			if(ent->client->ps.pmove.pm_flags & PMF_DUCKED)
+			if (ent->client->ps.pmove.pm_flags & PMF_DUCKED)
 			{
 				ent->s.frame = FRAME_crpain4+1;
 				ent->client->anim_end = FRAME_crpain1;
@@ -757,7 +760,7 @@ void weapon_grenade_fire (edict_t *ent, qboolean held)
 
 	ent->client->grenade_time = level.time + 1.0;
 
-	if(ent->deadflag || ent->s.modelindex != MAX_MODELS-1) // VWep animations screw up corpses
+	if (ent->deadflag || ent->s.modelindex != MAX_MODELS-1) // VWep animations screw up corpses
 	{
 		return;
 	}
@@ -973,7 +976,7 @@ edict_t	*rocket_target(edict_t *self, vec3_t start, vec3_t forward)
 			continue;
 		VectorMA(who->absmin,0.5,who->size,end);
 		tr = gi.trace (start, vec3_origin, vec3_origin, end, self, MASK_OPAQUE);
-		if(tr.fraction < 1.0)
+		if (tr.fraction < 1.0)
 			continue;
 		VectorSubtract(end, self->s.origin, dir);
 		VectorNormalize(dir);
@@ -1018,7 +1021,7 @@ void Weapon_RocketLauncher_Fire (edict_t *ent, qboolean altfire)
 	{
 		edict_t	*target;
 
-		if(ent->client->homing_rocket && ent->client->homing_rocket->inuse)
+		if (ent->client->homing_rocket && ent->client->homing_rocket->inuse)
 		{
 			ent->client->ps.gunframe++;
 			return;
@@ -1134,7 +1137,7 @@ void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, in
 	
 	// send muzzle flash
 	// Knightmare- different flash if in chasecam mode
-	if(ent->client && ent->client->chasetoggle)
+	if (ent->client && ent->client->chasetoggle)
 	{
 		gi.WriteByte (svc_muzzleflash);
 		gi.WriteShort (ent-g_edicts);
@@ -1807,7 +1810,7 @@ void kick_attack (edict_t *ent)
 	trace_t		tr;
 	vec3_t		end;
 
-	if(ent->client->quad_framenum > level.framenum)
+	if (ent->client->quad_framenum > level.framenum)
 	{
 		damage *= 4;
 		kick *= 4;

@@ -266,6 +266,10 @@ void SV_CalcViewOffset (edict_t *ent)
 		angles[PITCH] += ratio * ent->client->v_dmg_pitch;
 		angles[ROLL] += ratio * ent->client->v_dmg_roll;
 
+		// Knightmare- no bobbing if player is controlling a turret
+		if (ent->flags & FL_TURRET_OWNER)
+			return;
+
 		// add pitch based on fall kick
 
 		ratio = (ent->client->fall_time - level.time) / FALL_TIME;
@@ -456,13 +460,13 @@ void SV_CalcBlend (edict_t *ent)
 	else
 		ent->client->ps.rdflags &= ~RDF_UNDERWATER;
 
-	if (contents & CONTENTS_LAVA) //(CONTENTS_SOLID|CONTENTS_LAVA))
+	if (contents & CONTENTS_LAVA) // (CONTENTS_SOLID|CONTENTS_LAVA))
 		SV_AddBlend (1.0, 0.3, 0.0, 0.6, ent->client->ps.blend);
 	else if (contents & CONTENTS_SLIME)
 		SV_AddBlend (0.0, 0.1, 0.05, 0.6, ent->client->ps.blend);
 	else if (contents & CONTENTS_WATER)
 	{
-		if(ent->in_mud == 3)
+		if (ent->in_mud == 3)
 			SV_AddBlend (0.4, 0.3, 0.2, 0.9, ent->client->ps.blend);
 		else
 			SV_AddBlend (0.5, 0.3, 0.2, 0.4, ent->client->ps.blend);
@@ -555,7 +559,7 @@ void SV_CalcBlend (edict_t *ent)
 		if ( (ent->health <= 0) && (Q_stricmp(vid_ref->string,"gl")) && (Q_stricmp(vid_ref->string,"kmgl")) )
 			ent->client->fadein = 0;
 
-		if(ent->client->fadein > level.framenum)
+		if (ent->client->fadein > level.framenum)
 		{
 			alpha = ent->client->fadealpha*(1.0 - (ent->client->fadein-level.framenum)/(ent->client->fadein-ent->client->fadestart));
 			SV_AddBlend (ent->client->fadecolor[0],
@@ -563,14 +567,14 @@ void SV_CalcBlend (edict_t *ent)
 						 ent->client->fadecolor[2],
 						 alpha, ent->client->ps.blend);
 		}
-		else if(ent->client->fadehold > level.framenum)
+		else if (ent->client->fadehold > level.framenum)
 		{
 			SV_AddBlend (ent->client->fadecolor[0],
 			             ent->client->fadecolor[1],
 						 ent->client->fadecolor[2],
 						 ent->client->fadealpha, ent->client->ps.blend);
 		}
-		else if(ent->client->fadeout > level.framenum)
+		else if (ent->client->fadeout > level.framenum)
 		{
 			alpha = ent->client->fadealpha*((ent->client->fadeout-level.framenum)/(ent->client->fadeout-ent->client->fadehold));
 			SV_AddBlend (ent->client->fadecolor[0],
@@ -624,11 +628,11 @@ void P_SlamDamage (edict_t *ent)
 				ent->s.event = EV_FALLFAR;
 			else
 				ent->s.event = EV_FALL;*/
-			//play correct PPM sounds while in third person mode
+			// play correct PPM sounds while in third person mode
 			if (delta >= 65*(player_max_speed->value/300)) // Knightmare changed
-				gi.sound(ent,CHAN_VOICE,gi.soundindex("*fall1.wav"),1.0,ATTN_NORM,0);
+				gi.sound(ent, CHAN_VOICE, gi.soundindex("*fall1.wav"), 1.0, ATTN_NORM, 0);
 			else
-				gi.sound(ent,CHAN_VOICE,gi.soundindex("*fall2.wav"),1.0,ATTN_NORM,0);
+				gi.sound(ent, CHAN_VOICE, gi.soundindex("*fall2.wav"), 1.0, ATTN_NORM, 0);
 		}
 		ent->pain_debounce_time = level.time;	// no normal pain sound
 		damage = (delta-40*(player_max_speed->value/300))/2; // Knightmare changed
@@ -656,6 +660,10 @@ void P_FallingDamage (edict_t *ent)
 
 	if (ent->s.modelindex != MAX_MODELS-1)
 		return;		// not in the player model
+
+	// Knightmare- no falling if player is controlling a turret
+	if (ent->flags & FL_TURRET_OWNER)
+		return;
 
 	if (ent->movetype == MOVETYPE_NOCLIP)
 		return;
@@ -722,13 +730,13 @@ void P_FallingDamage (edict_t *ent)
 			else
 				ent->s.event = EV_FALL;
 */			
-			//play correct PPM sounds while in third person mode
+			// play correct PPM sounds while in third person mode
 			if (delta >= 55)
-				gi.sound(ent,CHAN_VOICE,gi.soundindex("*fall1.wav"),1.0,ATTN_NORM,0);
+				gi.sound(ent, CHAN_VOICE, gi.soundindex("*fall1.wav"), 1.0, ATTN_NORM, 0);
 			else
-				gi.sound(ent,CHAN_VOICE,gi.soundindex("*fall2.wav"),1.0,ATTN_NORM,0);
+				gi.sound(ent, CHAN_VOICE, gi.soundindex("*fall2.wav"), 1.0, ATTN_NORM, 0);
 
-			if(world->effects & FX_WORLDSPAWN_ALERTSOUNDS)
+			if (world->effects & FX_WORLDSPAWN_ALERTSOUNDS)
 				PlayerNoise(ent,ent->s.origin,PNOISE_SELF);
 
 		}
@@ -745,7 +753,7 @@ void P_FallingDamage (edict_t *ent)
 	else if (delta > 15)
 	{
 		ent->s.event = EV_FALLSHORT;
-		if(world->effects & FX_WORLDSPAWN_ALERTSOUNDS)
+		if (world->effects & FX_WORLDSPAWN_ALERTSOUNDS)
 			PlayerNoise(ent,ent->s.origin,PNOISE_SELF);
 		return;
 	}
