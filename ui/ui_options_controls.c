@@ -315,7 +315,7 @@ void Options_Controls_MenuInit ( void )
 	s_options_controls_defaults_action.generic.type			= MTYPE_ACTION;
 	s_options_controls_defaults_action.generic.textSize		= MENU_FONT_SIZE;
 	s_options_controls_defaults_action.generic.x			= MENU_FONT_SIZE;
-	s_options_controls_defaults_action.generic.y			= 18*MENU_LINE_SIZE;
+	s_options_controls_defaults_action.generic.y			= 20*MENU_LINE_SIZE;
 	s_options_controls_defaults_action.generic.name			= "reset defaults";
 	s_options_controls_defaults_action.generic.callback		= ControlsResetDefaultsFunc;
 	s_options_controls_defaults_action.generic.statusbar	= "resets all control settings to internal defaults";
@@ -323,7 +323,7 @@ void Options_Controls_MenuInit ( void )
 	s_options_controls_back_action.generic.type			= MTYPE_ACTION;
 	s_options_controls_back_action.generic.textSize		= MENU_FONT_SIZE;
 	s_options_controls_back_action.generic.x			= MENU_FONT_SIZE;
-	s_options_controls_back_action.generic.y			= 20*MENU_LINE_SIZE;
+	s_options_controls_back_action.generic.y			= 22*MENU_LINE_SIZE;
 	s_options_controls_back_action.generic.name			= "back to options";
 	s_options_controls_back_action.generic.callback		= UI_BackMenu;
 
