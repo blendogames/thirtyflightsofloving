@@ -400,23 +400,20 @@ void turret_breach_fire (edict_t *self)
 				break;
 			}
 			case 6: // Hyperblaster
-			case 8: // Blue Hyperblaster
-			case 9: // Green Hyperblaster
-#ifdef KMQUAKE2_ENGINE_MOD
-			case 10:	// Red Hyperblaster
-#endif	// KMQUAKE2_ENGINE_MOD
 			{
 				unsigned int	effect, color;
-				if (self->sounds == 6)
-				{	effect = EF_HYPERBLASTER; color = BLASTER_ORANGE;	}
-				if (self->sounds == 8)
+
+				if (self->effects == 1)	// Blue
 				{	effect = EF_BLUEHYPERBLASTER; color = BLASTER_BLUE;	}
-				if (self->sounds == 9)
+				else if (self->effects == 2)	// Green
 				{	effect = EF_HYPERBLASTER|EF_TRACKER; color = BLASTER_GREEN;	}
 #ifdef KMQUAKE2_ENGINE_MOD
-				if (self->sounds == 10)
+				else if (self->effects == 3)	// Red
 				{	effect = EF_HYPERBLASTER|EF_IONRIPPER; color = BLASTER_RED;	}
 #endif	// KMQUAKE2_ENGINE_MOD
+				else // (self->effects == 0) // Orange
+				{	effect = EF_HYPERBLASTER; color = BLASTER_ORANGE;	}
+
 				HB_Shots++;
 //CW++
 				if (self->moreflags & FL2_TURRET_DOUBLE)
