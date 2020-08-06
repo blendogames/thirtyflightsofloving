@@ -208,6 +208,11 @@ void UpdateVideoRef (void)
 
 		Com_Printf( "------------------------------------\n");
 
+#ifdef CLIENT_SPLIT_NETFRAME
+		// auto-set r_maxfps based on r_displayrefresh
+		CL_SetFramerateCap ();
+#endif	// CLIENT_SPLIT_NETFRAME
+
 		kmgl_active = true;
 		//==========================
 	}

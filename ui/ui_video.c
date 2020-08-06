@@ -145,11 +145,6 @@ static void prepareVideoRefresh( void )
 	Cvar_Set( "vid_ref", "gl" );
 	Cvar_Set( "gl_driver", "opengl32" );
 
-#ifdef CLIENT_SPLIT_NETFRAME
-	// auto-set r_maxfps based on r_displayrefresh
-	CL_SetFramerateCap ();
-#endif	// CLIENT_SPLIT_NETFRAME
-
 	// tell them they're modified so they refresh
 	vid_ref->modified = true;
 }

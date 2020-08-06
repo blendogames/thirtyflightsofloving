@@ -348,6 +348,12 @@ qboolean VID_LoadRefresh( char *name )
 	setegid(getgid());
 
 	Com_Printf( "------------------------------------\n");
+
+#ifdef CLIENT_SPLIT_NETFRAME
+	// auto-set r_maxfps based on r_displayrefresh
+	CL_SetFramerateCap ();
+#endif	// CLIENT_SPLIT_NETFRAME
+
 	reflib_active = true;
 	return true;
 }

@@ -64,6 +64,7 @@ cvar_t	*cl_maxfps;
 cvar_t	*cl_async;
 cvar_t	*net_maxfps;
 cvar_t	*r_maxfps;
+cvar_t	*r_maxfps_autoset;
 #endif
 
 cvar_t	*cl_sleep; 
@@ -1957,6 +1958,8 @@ void CL_InitLocal (void)
 	Cvar_SetDescription ("net_maxfps", "Framerate cap for network frames when cl_async (asynchronous frames) is set to 1.");
 	r_maxfps = Cvar_Get ("r_maxfps", "125", 0);
 	Cvar_SetDescription ("r_maxfps", "Framerate cap for video frames when cl_async (asynchronous frames) is set to 1.");
+	r_maxfps_autoset = Cvar_Get ("r_maxfps_autoset", "1", CVAR_ARCHIVE);
+	Cvar_SetDescription ("r_maxfps_autoset", "Enables automatic setting of framerate cap (r_maxfps) based on refresh rate.  Does nothing when refresh rate is left at default.");
 #endif
 
 	cl_sleep = Cvar_Get ("cl_sleep", "1", 0); 
@@ -2221,11 +2224,6 @@ void CL_InitLocal (void)
 	Cmd_AddCommand ("weapnext", NULL);
 	Cmd_AddCommand ("weapprev", NULL);
 
-#ifdef CLIENT_SPLIT_NETFRAME
-	// auto-set r_maxfps based on r_displayrefresh
-	CL_SetFramerateCap ();
-#endif	// CLIENT_SPLIT_NETFRAME
-
 	// Chat Ignore from R1Q2/Q2Pro
 	// Init list pointers
 	cl_chatNickIgnores.next = NULL;
@@ -2356,15 +2354,23 @@ Does nothing if r_displayrefresh is not set.
 void CL_SetFramerateCap (void)
 {
 	int		displayFreq = Cvar_VariableInteger("r_displayrefresh");
+	cvar_t	*autoSet = Cvar_Get ("r_maxfps_autoset", "1", CVAR_ARCHIVE);
+
+	if (!autoSet->integer)
+		return;
 
 	// if no refresh set, leave framerate cap at default
 	if (displayFreq <= 0) {
 	//	Cvar_SetInteger ("r_maxfps", 125);	// 8ms frame interval
 		return;
 	}
-
-	// isn't 250 fps enough for any display?
-	if (displayFreq > 200)
+	
+	// surely refresh rates will never go over 500Hz, right?
+	if (displayFreq > 334)
+		Cvar_SetInteger ("r_maxfps", 500);	// 2ms frame interval
+	else if (displayFreq > 250)
+		Cvar_SetInteger ("r_maxfps", 334);	// 3ms frame interval
+	else if (displayFreq > 200)
 		Cvar_SetInteger ("r_maxfps", 250);	// 4ms frame interval
 	else if (displayFreq > 167)
 		Cvar_SetInteger ("r_maxfps", 200);	// 5ms frame interval
