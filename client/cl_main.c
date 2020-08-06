@@ -2406,8 +2406,8 @@ void CL_Frame_Async (int msec)
 	// Don't allow setting maxfps too low or too high
 	if (net_maxfps->value < 10)
 		Cvar_SetValue("net_maxfps", 10);
-	if (net_maxfps->value > 90)
-		Cvar_SetValue("net_maxfps", 90);
+	if (net_maxfps->value > 100)
+		Cvar_SetValue("net_maxfps", 100);
 	if (r_maxfps->value < 10)
 		Cvar_SetValue("r_maxfps", 10);
 	if (r_maxfps->value > 1000)
