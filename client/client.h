@@ -816,8 +816,9 @@ void CL_GetChallengePacket (void);
 void CL_PingServers_f (void);
 void CL_Snd_Restart_f (void);
 void CL_WriteConfig_f (void);
-
-void vectoangles2 (vec3_t value1, vec3_t angles);
+#ifdef CLIENT_SPLIT_NETFRAME
+void CL_SetFramerateCap (void);
+#endif	// CLIENT_SPLIT_NETFRAME
 
 //
 // cl_input

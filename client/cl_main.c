@@ -2221,6 +2221,11 @@ void CL_InitLocal (void)
 	Cmd_AddCommand ("weapnext", NULL);
 	Cmd_AddCommand ("weapprev", NULL);
 
+#ifdef CLIENT_SPLIT_NETFRAME
+	// auto-set r_maxfps based on r_displayrefresh
+	CL_SetFramerateCap ();
+#endif	// CLIENT_SPLIT_NETFRAME
+
 	// Chat Ignore from R1Q2/Q2Pro
 	// Init list pointers
 	cl_chatNickIgnores.next = NULL;
@@ -2342,6 +2347,36 @@ void CL_AdvertiseVersion (void)
 #ifdef CLIENT_SPLIT_NETFRAME
 /*
 ==================
+CL_SetFramerateCap
+
+Auto-sets r_maxfps based on r_displayrefresh.
+Does nothing if r_displayrefresh is not set.
+==================
+*/
+void CL_SetFramerateCap (void)
+{
+	int		displayFreq = Cvar_VariableInteger("r_displayrefresh");
+
+	// if no refresh set, leave framerate cap at default
+	if (displayFreq <= 0) {
+	//	Cvar_SetInteger ("r_maxfps", 125);	// 8ms frame interval
+		return;
+	}
+
+	// isn't 250 fps enough for any display?
+	if (displayFreq > 200)
+		Cvar_SetInteger ("r_maxfps", 250);	// 4ms frame interval
+	else if (displayFreq > 167)
+		Cvar_SetInteger ("r_maxfps", 200);	// 5ms frame interval
+	else if (displayFreq > 125)
+		Cvar_SetInteger ("r_maxfps", 167);	// 6ms frame interval
+	else	// 125 fps is default cap
+		Cvar_SetInteger ("r_maxfps", 125);	// 8ms frame interval
+}
+
+
+/*
+==================
 CL_RefreshInputs
 ==================
 */
@@ -2404,14 +2439,14 @@ void CL_Frame_Async (int msec)
 	qboolean	miscFrame = true;
 
 	// Don't allow setting maxfps too low or too high
-	if (net_maxfps->value < 10)
-		Cvar_SetValue("net_maxfps", 10);
-	if (net_maxfps->value > 100)
-		Cvar_SetValue("net_maxfps", 100);
-	if (r_maxfps->value < 10)
-		Cvar_SetValue("r_maxfps", 10);
-	if (r_maxfps->value > 1000)
-		Cvar_SetValue("r_maxfps", 1000);
+	if (net_maxfps->integer < 10)
+		Cvar_SetInteger ("net_maxfps", 10);
+	if (net_maxfps->integer > 100)
+		Cvar_SetInteger ("net_maxfps", 100);
+	if (r_maxfps->integer < 10)
+		Cvar_SetInteger ("r_maxfps", 10);
+	if (r_maxfps->integer > 1000)
+		Cvar_SetInteger ("r_maxfps", 1000);
 
 	packetDelta += msec;
 	renderDelta += msec;
@@ -2633,10 +2668,10 @@ void CL_Frame (int msec)
 
 	// don't allow setting maxfps too low (or game could stop responding)
 	// don't allow too high, either
-	if (cl_maxfps->value < 10)
-		Cvar_SetValue("cl_maxfps", 10);
-	if (cl_maxfps->value > 500)
-		Cvar_SetValue("cl_maxfps", 500);
+	if (cl_maxfps->integer < 10)
+		Cvar_SetInteger ("cl_maxfps", 10);
+	if (cl_maxfps->integer > 500)
+		Cvar_SetInteger ("cl_maxfps", 500);
 
 //	if (!cl_timedemo->value)
 	if (!cl_timedemo->integer)
@@ -2681,15 +2716,15 @@ void CL_Frame (int msec)
 		
 	// clamp this to acceptable values (don't allow infinite particles)
 	if (cl_particle_scale->value < 1.0f)
-		Cvar_SetValue("cl_particle_scale", 1);
+		Cvar_SetValue ("cl_particle_scale", 1);
 
 	// clamp this to acceptable minimum length
 	if (cl_rail_length->value < MIN_RAIL_LENGTH)
-		Cvar_SetValue("cl_rail_length", MIN_RAIL_LENGTH);
+		Cvar_SetValue ("cl_rail_length", MIN_RAIL_LENGTH);
 
 	// clamp this to acceptable minimum duration
 	if (r_decal_life->value < MIN_DECAL_LIFE)
-		Cvar_SetValue("r_decal_life", MIN_DECAL_LIFE);
+		Cvar_SetValue ("r_decal_life", MIN_DECAL_LIFE);
 
 	// if in the debugger last frame, don't timeout
 	if (msec > 5000)
