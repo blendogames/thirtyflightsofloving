@@ -95,13 +95,13 @@ void CL_DrawInventory (void)
 	x = SCREEN_WIDTH/2 - 128;
 	y = SCREEN_HEIGHT/2 - 116;
 
-//	R_DrawScaledPic (x, y+SCR_ScaledHud(8), SCR_GetHudScale(), hud_alpha->value, "inventory");
+//	R_DrawScaledPic (x, y+SCR_ScaledHud(8), SCR_GetHudScale(), scr_hudalpha->value, "inventory");
 //	y += SCR_ScaledHud(24);
 //	x += SCR_ScaledHud(24);
 //	Hud_DrawString (x, y, S_COLOR_BOLD"hotkey ### item");
 //	Hud_DrawString (x, y+SCR_ScaledHud(8), S_COLOR_BOLD"------ --- ----");
 //	y += SCR_ScaledHud(16);
-	SCR_DrawPic (x, y, 256, 192, ALIGN_CENTER, "inventory", hud_alpha->value);
+	SCR_DrawPic (x, y, 256, 192, ALIGN_CENTER, "inventory", scr_hudalpha->value);
 	x += 24;
 	y += 20;
 	SCR_DrawString (x, y, 8, ALIGN_CENTER, S_COLOR_WHITE"hotkey ### item", 255);

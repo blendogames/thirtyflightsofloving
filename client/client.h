@@ -478,8 +478,9 @@ extern	cvar_t	*lookspring;
 extern	cvar_t	*lookstrafe;
 extern	cvar_t	*sensitivity;
 
-extern	cvar_t	*hud_scale;
-extern	cvar_t	*hud_alpha;
+extern	cvar_t	*scr_hudsize;
+extern	cvar_t	*scr_hudalpha;
+extern	cvar_t	*scr_hudsqueezedigits;
 
 extern	cvar_t	*m_pitch;
 extern	cvar_t	*m_yaw;

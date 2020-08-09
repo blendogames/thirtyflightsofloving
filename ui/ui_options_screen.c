@@ -70,19 +70,19 @@ static void CrosshairPulseFunc( void *unused )
 // hud scaling option
 static void HudScaleFunc( void *unused )
 {
-	Cvar_SetValue( "hud_scale", s_options_screen_hudscale_slider.curvalue);
+	Cvar_SetValue( "scr_hudsize", s_options_screen_hudscale_slider.curvalue);
 }
 
 // hud trans option
 static void HudAlphaFunc( void *unused )
 {
-	Cvar_SetValue( "hud_alpha", (s_options_screen_hudalpha_slider.curvalue-1)/10);
+	Cvar_SetValue( "scr_hudalpha", (s_options_screen_hudalpha_slider.curvalue-1)/10);
 }
 
 // hud squeeze digits option
 static void HudSqueezeDigitsFunc( void *unused )
 {
-	Cvar_SetValue( "hud_squeezedigits", s_options_screen_hudsqueezedigits_box.curvalue);
+	Cvar_SetValue( "scr_hudsqueezedigits", s_options_screen_hudsqueezedigits_box.curvalue);
 }
 
 // FPS counter option
@@ -343,14 +343,14 @@ static void ScreenSetMenuItemValues( void )
 	Cvar_SetValue( "crosshair_pulse", ClampCvar( 0, 0.5, Cvar_VariableValue("crosshair_pulse") ) );
 	s_options_screen_crosshairpulse_slider.curvalue	= Cvar_VariableValue("crosshair_pulse")*20;
 
-	Cvar_SetValue( "hud_scale", ClampCvar( 0, 8, Cvar_VariableValue("hud_scale") ) );
-	s_options_screen_hudscale_slider.curvalue		= Cvar_VariableValue("hud_scale");
+	Cvar_SetValue( "scr_hudsize", ClampCvar( 0, 8, Cvar_VariableValue("scr_hudsize") ) );
+	s_options_screen_hudscale_slider.curvalue		= Cvar_VariableValue("scr_hudsize");
 
-	Cvar_SetValue( "hud_alpha", ClampCvar( 0, 1, Cvar_VariableValue("hud_alpha") ) );
-	s_options_screen_hudalpha_slider.curvalue		= Cvar_VariableValue("hud_alpha")*10 + 1;
+	Cvar_SetValue( "scr_hudalpha", ClampCvar( 0, 1, Cvar_VariableValue("scr_hudalpha") ) );
+	s_options_screen_hudalpha_slider.curvalue		= Cvar_VariableValue("scr_hudalpha")*10 + 1;
 
-	Cvar_SetValue( "hud_squeezedigits", ClampCvar( 0, 1, Cvar_VariableValue("hud_squeezedigits") ) );
-	s_options_screen_hudsqueezedigits_box.curvalue	= Cvar_VariableValue("hud_squeezedigits");
+	Cvar_SetValue( "scr_hudsqueezedigits", ClampCvar( 0, 1, Cvar_VariableValue("scr_hudsqueezedigits") ) );
+	s_options_screen_hudsqueezedigits_box.curvalue	= Cvar_VariableValue("scr_hudsqueezedigits");
 
 	Cvar_SetValue( "cl_drawfps", ClampCvar( 0, 1, Cvar_VariableValue("cl_drawfps") ) );
 	s_options_screen_fps_box.curvalue				= Cvar_VariableValue("cl_drawfps");
@@ -362,9 +362,9 @@ static void ScreenResetDefaultsFunc ( void *unused )
 	Cvar_SetToDefault ("crosshair_scale");
 	Cvar_SetToDefault ("crosshair_alpha");
 	Cvar_SetToDefault ("crosshair_pulse");
-	Cvar_SetToDefault ("hud_scale");
-	Cvar_SetToDefault ("hud_alpha");
-	Cvar_SetToDefault ("hud_squeezedigits");
+	Cvar_SetToDefault ("scr_hudsize");
+	Cvar_SetToDefault ("scr_hudalpha");
+	Cvar_SetToDefault ("scr_hudsqueezedigits");
 	Cvar_SetToDefault ("cl_drawfps");
 
 	ScreenSetMenuItemValues();

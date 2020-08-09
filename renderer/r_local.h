@@ -370,11 +370,11 @@ extern	vec4_t	r_clearColor;			// for gl_clear
 
 // entity sorting struct
 typedef struct sortedelement_s sortedelement_t;
-typedef struct sortedelement_s 
+struct sortedelement_s 
 {
-	void  *data;
-	vec_t len;
-	vec3_t org;
+	void			*data;
+	vec_t			len;
+	vec3_t			org;
 	sortedelement_t *left, *right;
 };
 

@@ -74,9 +74,9 @@ cvar_t		*scr_surroundlayout;	// whether to keep HUD/menu elements on center scre
 cvar_t		*scr_surroundleft;		// left placement of HUD/menu elements on center screen in triple-wide video modes
 cvar_t		*scr_surroundright;		// right placement of HUD/menu elements on center screen in triple-wide video modes
 
-cvar_t		*hud_scale;
-cvar_t		*hud_alpha;
-cvar_t		*hud_squeezedigits;
+cvar_t		*scr_hudsize;
+cvar_t		*scr_hudalpha;
+cvar_t		*scr_hudsqueezedigits;
 
 cvar_t		*crosshair;
 cvar_t		*crosshair_scale; // Psychospaz's scalable corsshair
@@ -88,6 +88,8 @@ cvar_t		*cl_drawfps;
 //end Knightmare
 cvar_t		*cl_demomessage;
 //cvar_t		*cl_loadpercent;	// unused
+cvar_t		*cl_hud;				// placeholder cvar
+cvar_t		*cl_hud_variant;		// placeholder cvar
 
 float		scr_screenScale;
 float		scr_hudScale;
@@ -139,8 +141,8 @@ void SCR_InitHudScale (void)
 	float	refWidth, refHeight;
 	int		sizeIndex;
 
-//	sizeIndex = min(max((int)hud_scale->value, 0), HUDSCALE_NUM_SIZES-1);
-	sizeIndex = min(max(hud_scale->integer, 0), HUDSCALE_NUM_SIZES-1);
+//	sizeIndex = min(max((int)scr_hudsize->value, 0), HUDSCALE_NUM_SIZES-1);
+	sizeIndex = min(max(scr_hudsize->integer, 0), HUDSCALE_NUM_SIZES-1);
 
 	if (sizeIndex == 0) {
 		refWidth = viddef.width;
@@ -1092,9 +1094,9 @@ void SCR_SizeUp_f (void)
 //	Cvar_SetValue ("viewsize", scr_viewsize->value+10);
 
 	// now handle HUD scale
-	int hudscale = Cvar_VariableValue("hud_scale")+1;
+	int hudscale = Cvar_VariableValue("scr_hudsize")+1;
 	if (hudscale > HUDSCALE_NUM_SIZES-1) hudscale = HUDSCALE_NUM_SIZES-1;
-	Cvar_SetValue ("hud_scale", hudscale);
+	Cvar_SetValue ("scr_hudsize", hudscale);
 }
 
 
@@ -1110,9 +1112,9 @@ void SCR_SizeDown_f (void)
 //	Cvar_SetValue ("viewsize", scr_viewsize->value-10);
 
 	// now handle HUD scale
-	int hudscale = Cvar_VariableValue("hud_scale")-1;
+	int hudscale = Cvar_VariableValue("scr_hudsize")-1;
 	if (hudscale < 0) hudscale = 0;
-	Cvar_SetValue ("hud_scale", hudscale);
+	Cvar_SetValue ("scr_hudsize", hudscale);
 }
 
 /*
@@ -1335,6 +1337,10 @@ void SCR_Init (void)
 	cl_demomessage = Cvar_Get ("cl_demomessage", "1", CVAR_ARCHIVE);
 	Cvar_SetDescription ("cl_demomessage", "Enables display of \"Running Demo\" message when a demo is playing.");
 //	cl_loadpercent = Cvar_Get ("cl_loadpercent", "0", CVAR_ARCHIVE);	// unused
+	cl_hud = Cvar_Get ("cl_hud", "default", CVAR_ARCHIVE|CVAR_NOSET);
+	Cvar_SetDescription ("cl_hud", "This is a placeholder cvar for cohabitation with a future release.");
+	cl_hud_variant = Cvar_Get ("cl_hud_variant", "default", CVAR_ARCHIVE|CVAR_NOSET);
+	Cvar_SetDescription ("cl_hud_variant", "This is a placeholder cvar for cohabitation with a future release.");
 
 	scr_viewsize = Cvar_Get ("viewsize", "100", CVAR_ARCHIVE);
 	Cvar_SetDescription ("viewsize", "Draw size of screen in percent, from 40 to 100.");
@@ -1383,12 +1389,12 @@ void SCR_Init (void)
 	scr_surroundright = Cvar_Get ("scr_surroundright", "0.666666666667", CVAR_ARCHIVE);		// right placement of HUD/menu elements on center screen in triple-wide video modes
 	Cvar_SetDescription ("scr_surroundright", "Changes right boundary for center monitor in triple-monitor surround layout.  Only change if you have a surround setup with different size monitors.");
 
-	hud_scale = Cvar_Get ("hud_scale", "5", CVAR_ARCHIVE);
-	Cvar_SetDescription ("hud_scale", "Sets scale for HUD.");
-	hud_alpha = Cvar_Get ("hud_alpha", "1", CVAR_ARCHIVE);
-	Cvar_SetDescription ("hud_alpha", "Sets opacity of HUD.");
-	hud_squeezedigits = Cvar_Get ("hud_squeezedigits", "1", CVAR_ARCHIVE);
-	Cvar_SetDescription ("hud_squeezedigits", "Enables display of 4 and 5-digit numbers on HUD.");
+	scr_hudsize = Cvar_Get ("scr_hudsize", "5", CVAR_ARCHIVE);
+	Cvar_SetDescription ("scr_hudsize", "Sets scale for HUD.");
+	scr_hudalpha = Cvar_Get ("scr_hudalpha", "1", CVAR_ARCHIVE);
+	Cvar_SetDescription ("scr_hudalpha", "Sets opacity of HUD.");
+	scr_hudsqueezedigits = Cvar_Get ("scr_hudsqueezedigits", "1", CVAR_ARCHIVE);
+	Cvar_SetDescription ("scr_hudsqueezedigits", "Enables display of 4 and 5-digit numbers on HUD.");
 
 //
 // register our commands
@@ -2248,8 +2254,8 @@ void SCR_DrawField (int x, int y, int color, int width, int value, qboolean flas
 	l = (int)strlen(num);
 	if (l > width)
 	{
-	//	if (hud_squeezedigits->value) {
-		if (hud_squeezedigits->integer) {
+	//	if (scr_hudsqueezedigits->value) {
+		if (scr_hudsqueezedigits->integer) {
 			l = min(l, width+2);
 			fieldScale =  (1.0 - ((1.0 - (float)width/(float)l) * 0.5)) * getScreenScale();
 		}
@@ -2265,7 +2271,7 @@ void SCR_DrawField (int x, int y, int color, int width, int value, qboolean flas
 	flash_x = x;
 
 	if (flash)
-		R_DrawStretchPic (flash_x, y, flashWidth, scaleForScreen(ICON_HEIGHT), "field_3", hud_alpha->value);
+		R_DrawStretchPic (flash_x, y, flashWidth, scaleForScreen(ICON_HEIGHT), "field_3", scr_hudalpha->value);
 
 	ptr = num;
 	while (*ptr && l)
@@ -2275,11 +2281,11 @@ void SCR_DrawField (int x, int y, int color, int width, int value, qboolean flas
 		else
 			frame = *ptr -'0';
 
-//		R_DrawScaledPic (x, y, HudScale(), hud_alpha->value,sb_nums[color][frame]);
+//		R_DrawScaledPic (x, y, HudScale(), scr_hudalpha->value,sb_nums[color][frame]);
 //		x += scaledHud(CHAR_WIDTH);
-//		R_DrawScaledPic (x, y, getScreenScale(), hud_alpha->value, sb_nums[color][frame]);
+//		R_DrawScaledPic (x, y, getScreenScale(), scr_hudalpha->value, sb_nums[color][frame]);
 //		x += scaleForScreen(CHAR_WIDTH);
-		R_DrawStretchPic (x, y, digitWidth, scaleForScreen(ICON_HEIGHT), sb_nums[color][frame], hud_alpha->value);
+		R_DrawStretchPic (x, y, digitWidth, scaleForScreen(ICON_HEIGHT), sb_nums[color][frame], scr_hudalpha->value);
 		x += digitWidth;
 		ptr++;
 		l--;
@@ -2428,7 +2434,7 @@ void SCR_ExecuteLayoutString (char *s, qboolean isStatusBar)
 			}
 			if (cl.configstrings[cs_images+value])
 			{
-				R_DrawScaledPic (x, y, getScreenScale(), hud_alpha->value, cl.configstrings[cs_images+value]);
+				R_DrawScaledPic (x, y, getScreenScale(), scr_hudalpha->value, cl.configstrings[cs_images+value]);
 			}
 			continue;
 		}
@@ -2465,7 +2471,7 @@ void SCR_ExecuteLayoutString (char *s, qboolean isStatusBar)
 
 			if (!ci->icon)
 				ci = &cl.baseclientinfo;
-			R_DrawScaledPic(x, y, getScreenScale(), hud_alpha->value,  ci->iconname);
+			R_DrawScaledPic(x, y, getScreenScale(), scr_hudalpha->value,  ci->iconname);
 			continue;
 		}
 
@@ -2538,7 +2544,7 @@ void SCR_ExecuteLayoutString (char *s, qboolean isStatusBar)
 		if (!strcmp(token, "picn"))
 		{	// draw a pic from a name
 			token = COM_Parse (&s);
-			R_DrawScaledPic (x, y, getScreenScale(), hud_alpha->value, token);
+			R_DrawScaledPic (x, y, getScreenScale(), scr_hudalpha->value, token);
 			continue;
 		}
 
@@ -2570,7 +2576,7 @@ void SCR_ExecuteLayoutString (char *s, qboolean isStatusBar)
 				color = 1;
 
 		//	if (cl.frame.playerstate.stats[STAT_FLASHES] & 1)
-		//		R_DrawScaledPic (x, y, getScreenScale(), hud_alpha->value, "field_3");
+		//		R_DrawScaledPic (x, y, getScreenScale(), scr_hudalpha->value, "field_3");
 
 			SCR_DrawField (x, y, color, width, value, (cl.frame.playerstate.stats[STAT_FLASHES] & 1), isStatusBar);
 			continue;
@@ -2590,7 +2596,7 @@ void SCR_ExecuteLayoutString (char *s, qboolean isStatusBar)
 				continue;	// negative number = don't show
 
 		//	if (cl.frame.playerstate.stats[STAT_FLASHES] & 4)
-		//		R_DrawScaledPic (x, y, getScreenScale(), hud_alpha->value, "field_3");
+		//		R_DrawScaledPic (x, y, getScreenScale(), scr_hudalpha->value, "field_3");
 
 			SCR_DrawField (x, y, color, width, value, (cl.frame.playerstate.stats[STAT_FLASHES] & 4), isStatusBar);
 			continue;
@@ -2608,7 +2614,7 @@ void SCR_ExecuteLayoutString (char *s, qboolean isStatusBar)
 			color = 0;	// green
 
 		//	if (cl.frame.playerstate.stats[STAT_FLASHES] & 2)
-		//		R_DrawScaledPic (x, y, getScreenScale(), hud_alpha->value, "field_3");
+		//		R_DrawScaledPic (x, y, getScreenScale(), scr_hudalpha->value, "field_3");
 
 			SCR_DrawField (x, y, color, width, value, (cl.frame.playerstate.stats[STAT_FLASHES] & 2), isStatusBar);
 			continue;
