@@ -140,7 +140,7 @@ void abortHeal (edict_t *self, qboolean change_frame, qboolean gib, qboolean mar
 //		if ((g_showlogic) && (g_showlogic->value))
 //			gi.dprintf ("%s - gibbing bad heal target", self->classname);
 
-		if(self->enemy->gib_health)
+		if (self->enemy->gib_health)
 			hurt = - self->enemy->gib_health;
 		else
 			hurt = 500;
@@ -186,7 +186,7 @@ qboolean embedded (edict_t *ent)
 	trace_t	tr;
 
 	tr = gi.trace(ent->s.origin,ent->mins,ent->maxs,ent->s.origin,ent,MASK_MONSTERSOLID);
-	if(tr.startsolid)
+	if (tr.startsolid)
 		return true;
 	else
 		return false;
@@ -262,7 +262,7 @@ edict_t *medic_FindDeadMonster (edict_t *self)
 		self->timestamp = level.time + MEDIC_TRY_TIME;
 		FoundTarget (self);
 
-		if(developer->value)
+		if (developer->value)
 			gi.dprintf("medic found dead monster: %s at %s\n",
 			best->classname,vtos(best->s.origin));
 	}
@@ -276,7 +276,7 @@ void medic_StopPatrolling (edict_t *self)
 	self->monsterinfo.aiflags &= ~AI_MEDIC_PATROL;
 	if (!(self->monsterinfo.aiflags & AI_MEDIC))
 	{
-		if(medic_FindDeadMonster(self))
+		if (medic_FindDeadMonster(self))
 			return;
 	}
 	if (has_valid_enemy(self))
@@ -289,7 +289,7 @@ void medic_StopPatrolling (edict_t *self)
 		HuntTarget (self);
 		return;
 	}
-	if(self->monsterinfo.aiflags & AI_MEDIC)
+	if (self->monsterinfo.aiflags & AI_MEDIC)
 		abortHeal(self,false,false,false);
 }
 
@@ -302,21 +302,21 @@ void medic_NextPatrolPoint (edict_t *self, edict_t *hint)
 
 	self->monsterinfo.aiflags &= ~AI_MEDIC_PATROL;
 
-//	if(self->monsterinfo.aiflags & AI_MEDIC)
+//	if (self->monsterinfo.aiflags & AI_MEDIC)
 //		return;
 
-	if(self->goalentity == hint)
+	if (self->goalentity == hint)
 		self->goalentity = NULL;
-	if(self->movetarget == hint)
+	if (self->movetarget == hint)
 		self->movetarget = NULL;
 	if (!(self->monsterinfo.aiflags & AI_MEDIC))
 	{
-		if(medic_FindDeadMonster(self))
+		if (medic_FindDeadMonster(self))
 			return;
 	}
-	if(self->monsterinfo.pathdir == 1)
+	if (self->monsterinfo.pathdir == 1)
 	{
-		if(hint->hint_chain)
+		if (hint->hint_chain)
 			next = hint->hint_chain;
 		else
 		{
@@ -324,12 +324,12 @@ void medic_NextPatrolPoint (edict_t *self, edict_t *hint)
 			switch_paths = true;
 		}
 	}
-	if(self->monsterinfo.pathdir == -1)
+	if (self->monsterinfo.pathdir == -1)
 	{
 		e = hint_path_start[hint->hint_chain_id];
-		while(e)
+		while (e)
 		{
-			if(e->hint_chain == hint)
+			if (e->hint_chain == hint)
 			{
 				next = e;
 				break;
@@ -337,7 +337,7 @@ void medic_NextPatrolPoint (edict_t *self, edict_t *hint)
 			e = e->hint_chain;
 		}
 	}
-	if(!next)
+	if (!next)
 	{
 		self->monsterinfo.pathdir = 1;
 		next = hint->hint_chain;
@@ -345,7 +345,7 @@ void medic_NextPatrolPoint (edict_t *self, edict_t *hint)
 	}
 	// If switch_paths is true, we reached the end of a hint_chain. Just for grins,
 	// search for *another* visible hint_path chain and use it if it's reasonably close
-	if(switch_paths && num_hint_paths > 1)
+	if (switch_paths && num_hint_paths > 1)
 	{
 		edict_t	*e;
 		edict_t	*alternate=NULL;
@@ -354,31 +354,31 @@ void medic_NextPatrolPoint (edict_t *self, edict_t *hint)
 		int		i;
 		float	bestdistance=512;
 
-		for(i=game.maxclients+1; i<globals.num_edicts; i++)
+		for (i=game.maxclients+1; i<globals.num_edicts; i++)
 		{
 			e = &g_edicts[i];
-			if(!e->inuse)
+			if (!e->inuse)
 				continue;
-			if(Q_stricmp(e->classname,"hint_path"))
+			if (Q_stricmp(e->classname,"hint_path"))
 				continue;
-			if(next && (e->hint_chain_id == next->hint_chain_id))
+			if (next && (e->hint_chain_id == next->hint_chain_id))
 				continue;
-			if(!visible(self,e))
+			if (!visible(self,e))
 				continue;
-			if(!canReach(self,e))
+			if (!canReach(self,e))
 				continue;
 			VectorSubtract(e->s.origin,self->s.origin,dir);
 			dist = VectorLength(dir);
-			if(dist < bestdistance)
+			if (dist < bestdistance)
 			{
 				alternate = e;
 				bestdistance = dist;
 			}
 		}
-		if(alternate)
+		if (alternate)
 			next = alternate;
 	}
-	if(next)
+	if (next)
 	{
 		self->hint_chain_id = next->hint_chain_id;
 		VectorSubtract(next->s.origin, self->s.origin, dir);
@@ -401,7 +401,7 @@ void medic_idle (edict_t *self)
 {
 	//edict_t	*ent;
 
-	if(!(self->spawnflags & SF_MONSTER_AMBUSH))
+	if (!(self->spawnflags & SF_MONSTER_AMBUSH))
 	{
 		// PMM - commander sounds
 		if (strcmp(self->classname, "monster_medic_commander"))
@@ -410,7 +410,7 @@ void medic_idle (edict_t *self)
 			gi.sound (self, CHAN_VOICE, commander_sound_idle1, 1, ATTN_IDLE, 0);
 	}
 
-	if(self->monsterinfo.aiflags & AI_MEDIC)
+	if (self->monsterinfo.aiflags & AI_MEDIC)
 	{
 		// Then we must have reached this point after losing sight
 		// of our patient.
@@ -429,7 +429,7 @@ void medic_idle (edict_t *self)
 			FoundTarget (self);
 		}
 	}*/
-	if(medic_FindDeadMonster(self))
+	if (medic_FindDeadMonster(self))
 		return;
 
 	// If the map has hint_paths, AND the medic isn't at a HOLD point_combat,
@@ -439,7 +439,7 @@ void medic_idle (edict_t *self)
 	if (self->monsterinfo.aiflags2 & AI2_HINT_TEST)
 		return;
 
-	if(hint_paths_present && !(self->monsterinfo.aiflags & AI_STAND_GROUND)
+	if (hint_paths_present && !(self->monsterinfo.aiflags & AI_STAND_GROUND)
 		&& ((self->monsterinfo.trail_time > 0) /*|| medic_test*/) )
 	{
 		edict_t	*e;
@@ -449,29 +449,29 @@ void medic_idle (edict_t *self)
 		int		i;
 		float	bestdistance=99999;
 
-		for(i=game.maxclients+1; i<globals.num_edicts; i++)
+		for (i=game.maxclients+1; i<globals.num_edicts; i++)
 		{
 			e = &g_edicts[i];
-			if(!e->inuse)
+			if (!e->inuse)
 				continue;
-			if(Q_stricmp(e->classname,"hint_path"))
+			if (Q_stricmp(e->classname,"hint_path"))
 				continue;
-			if(!visible(self,e))
+			if (!visible(self,e))
 				continue;
-			if(!canReach(self,e))
+			if (!canReach(self,e))
 				continue;
 			VectorSubtract(e->s.origin,self->s.origin,dir);
 			dist = VectorLength(dir);
-			if(dist < bestdistance)
+			if (dist < bestdistance)
 			{
 				hint = e;
 				bestdistance = dist;
 			}
 		}
-		if(hint)
+		if (hint)
 		{
 			self->hint_chain_id = hint->hint_chain_id;
-			if(!self->monsterinfo.pathdir)
+			if (!self->monsterinfo.pathdir)
 				self->monsterinfo.pathdir = 1;
 			VectorSubtract(hint->s.origin, self->s.origin, dir);
 			self->ideal_yaw = vectoyaw(dir);
@@ -803,7 +803,7 @@ void medic_fire_blaster (edict_t *self)
 	end[2] += self->enemy->viewheight;
 
 	// Lazarus fog reduction of accuracy
-	if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+	if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 	{
 		end[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 		end[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -833,7 +833,7 @@ void medic_dead (edict_t *self)
 	M_FlyCheck (self);
 
 	// Lazarus monster fade
-	if(world->effects & FX_WORLDSPAWN_CORPSEFADE)
+	if (world->effects & FX_WORLDSPAWN_CORPSEFADE)
 	{
 		self->think=FadeDieSink;
 		self->nextthink=level.time+corpse_fadetime->value;
@@ -1078,7 +1078,7 @@ void medic_cable_attack (edict_t *self)
 	// Lazarus: Check for enemy behind muzzle... don't do these guys, 'cause usually this
 	// results in monster entanglement
 	/*VectorNormalize(dir);
-	if(DotProduct(dir,f) < 0.)
+	if (DotProduct(dir,f) < 0.)
 	{
 		gi.dprintf ("medic - aborting heal due to proximity to target ");
 		abortHeal (self, true, false, false);
@@ -1135,7 +1135,7 @@ void medic_cable_attack (edict_t *self)
 	{
 		vec3_t	maxs;
 
-		//Knightmare- remember nogib flag for monsters that get resurrected
+		// Knightmare- remember nogib flag for monsters that get resurrected
 		if ((!strcmp(self->enemy->classname, "monster_gekk") || !strcmp(self->enemy->classname, "monster_stalker"))
 			&& (self->enemy->spawnflags & 32))
 			targ_nogib = true;
@@ -1143,7 +1143,7 @@ void medic_cable_attack (edict_t *self)
 			targ_nogib = true;
 
 		self->enemy->spawnflags = 0;
-		//now restore nogib flag
+		// now restore nogib flag
 		if ((!strcmp(self->enemy->classname, "monster_gekk") || !strcmp(self->enemy->classname, "monster_stalker"))
 			&& targ_nogib)
 			self->enemy->spawnflags |= 32;
@@ -1156,35 +1156,35 @@ void medic_cable_attack (edict_t *self)
 		self->enemy->combattarget = NULL;
 		self->enemy->deathtarget = NULL;
 		self->enemy->monsterinfo.healer = self;
-		//self->enemy->owner = self;
+	//	self->enemy->owner = self;
 		VectorCopy (self->enemy->maxs, maxs);
 		maxs[2] += 48;   // compensate for change when they die
 
 		tr = gi.trace (self->enemy->s.origin, self->enemy->mins, maxs, self->enemy->s.origin, self->enemy, MASK_MONSTERSOLID);
 		if (tr.startsolid || tr.allsolid)
 		{
-//			if ((g_showlogic) && (g_showlogic->value))
-//				gi.dprintf ("Spawn point obstructed, aborting heal!\n");
+		//	if ((g_showlogic) && (g_showlogic->value))
+		//		gi.dprintf ("Spawn point obstructed, aborting heal!\n");
 			abortHeal (self, true, true, false);
 			return;
 		} 
 		else if (tr.ent != world)
 		{
-//			if ((g_showlogic) && (g_showlogic->value))
-//				gi.dprintf("heal in entity %s\n", tr.ent->classname);
+		//	if ((g_showlogic) && (g_showlogic->value))
+		//		gi.dprintf("heal in entity %s\n", tr.ent->classname);
 			abortHeal (self, true, true, false);
 			return;
 		}
-/*		else if (tr.ent == world)
+	/*	else if (tr.ent == world)
 		{
 			if ((g_showlogic) && (g_showlogic->value))
 				gi.dprintf ("heal in world, aborting!\n");
 			abortHeal (self, 1);
 			return;
-		}
-*/		else
+		}*/
+		else
 		{
-			//self->enemy->monsterinfo.aiflags |= AI_DO_NOT_COUNT;
+		//	self->enemy->monsterinfo.aiflags |= AI_DO_NOT_COUNT;
 			self->enemy->monsterinfo.monsterflags |= MFL_DO_NOT_COUNT;
 			// Lazarus: reset initially dead monsters to use the INVERSE of their
 			// initial health, and force gib_health to default value
@@ -1201,11 +1201,11 @@ void medic_cable_attack (edict_t *self)
 			self->enemy->damage_debounce_time = 0;
 			self->enemy->deadflag = DEAD_NO;
 			// turn off flies
-			if(self->enemy->s.effects & EF_FLIES)
+			if (self->enemy->s.effects & EF_FLIES)
 				M_FliesOff(self->enemy);
 			ED_CallSpawn (self->enemy);
 			self->enemy->monsterinfo.healer = NULL;
-			//self->enemy->owner = NULL;
+		//	self->enemy->owner = NULL;
 
 			// Knightmare- disable deadmonster_think
 			if (self->enemy->postthink)
@@ -1218,15 +1218,15 @@ void medic_cable_attack (edict_t *self)
 			}
 			self->enemy->monsterinfo.aiflags &= ~AI_RESURRECTING;
 			M_SetEffects(self->enemy);
-			//self->enemy->monsterinfo.aiflags |= AI_IGNORE_SHOTS|AI_DO_NOT_COUNT;
+		//	self->enemy->monsterinfo.aiflags |= AI_IGNORE_SHOTS|AI_DO_NOT_COUNT;
 			self->enemy->monsterinfo.aiflags |= AI_IGNORE_SHOTS;
 			self->enemy->monsterinfo.monsterflags |= MFL_DO_NOT_COUNT;
 
 			if ((self->oldenemy) && (self->oldenemy->inuse) && (self->oldenemy->health > 0)
 				&& (self->oldenemy != self->enemy)) // Knightmare- don't have monster attack himself
 			{	// turn healed monster on our enemy
-//				if ((g_showlogic) && (g_showlogic->value))
-//					gi.dprintf ("setting heal target's enemy to %s\n", self->oldenemy->classname);
+			//	if ((g_showlogic) && (g_showlogic->value))
+			//		gi.dprintf ("setting heal target's enemy to %s\n", self->oldenemy->classname);
 				self->enemy->enemy = self->oldenemy;
 				FoundTarget (self->enemy);
 			}
@@ -1240,8 +1240,8 @@ void medic_cable_attack (edict_t *self)
 			}
 			else
 			{
-//				if (g_showlogic && g_showlogic->value)
-//					gi.dprintf ("no valid enemy to set!\n");
+			//	if (g_showlogic && g_showlogic->value)
+			//		gi.dprintf ("no valid enemy to set!\n");
 				self->enemy->enemy = NULL;
 				if (!FindTarget (self->enemy))
 				{
@@ -1274,7 +1274,7 @@ void medic_cable_attack (edict_t *self)
 	// adjust start for beam origin being in middle of a segment
 	VectorMA (start, 8, f, start);
 
-	//Knightmare- if enemy went away, like after returning from another level, return
+	// Knightmare- if enemy went away, like after returning from another level, return
 	if (!self->enemy)
 		return;
 	// adjust end z for end spot since the monster is currently dead
@@ -2023,10 +2023,10 @@ void medic_sidestep (edict_t *self)
 //PGM
 qboolean medic_blocked (edict_t *self, float dist)
 {
-	if(blocked_checkshot (self, 0.25 + (0.05 * skill->value) ))
+	if (blocked_checkshot (self, 0.25 + (0.05 * skill->value) ))
 		return true;
 
-	if(blocked_checkplat (self, dist))
+	if (blocked_checkplat (self, dist))
 		return true;
 
 	return false;
@@ -2064,11 +2064,11 @@ void SP_monster_medic (edict_t *self)
 //PMM
 	if (strcmp(self->classname, "monster_medic_commander") == 0)
 	{
-		if(!self->health)
+		if (!self->health)
 			self->health = 600;			//	fixme
-		if(!self->gib_health)
+		if (!self->gib_health)
 			self->gib_health = -150;
-		if(!self->mass)
+		if (!self->mass)
 			self->mass = 600;
 		//PMM
 		self->monsterinfo.aiflags |= AI_IGNORE_SHOTS;
@@ -2080,11 +2080,11 @@ void SP_monster_medic (edict_t *self)
 	else
 	{
 //PMM
-		if(!self->health)
+		if (!self->health)
 			self->health = 300;
-		if(!self->gib_health)
+		if (!self->gib_health)
 			self->gib_health = -150;
-		if(!self->mass)
+		if (!self->mass)
 			self->mass = 400;
 	}
 
@@ -2113,7 +2113,7 @@ void SP_monster_medic (edict_t *self)
 		self->blood_type = 3; //sparks and blood
 
 	// Lazarus
-	if(self->powerarmor)
+	if (self->powerarmor)
 	{
 		if (self->powerarmortype == 1)
 			self->monsterinfo.power_armor_type = POWER_ARMOR_SCREEN;
@@ -2121,9 +2121,9 @@ void SP_monster_medic (edict_t *self)
 			self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
 		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
-	if(!self->monsterinfo.flies && strcmp(self->classname, "monster_medic_commander") == 0)
+	if (!self->monsterinfo.flies && strcmp(self->classname, "monster_medic_commander") == 0)
 		self->monsterinfo.flies = 0.10;
-	else if(!self->monsterinfo.flies)
+	else if (!self->monsterinfo.flies)
 		self->monsterinfo.flies = 0.15;
 
 	gi.linkentity (self);

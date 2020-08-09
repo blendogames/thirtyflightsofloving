@@ -28,7 +28,7 @@ void SP_misc_teleporter_dest (edict_t *ent);
 
 	spot = NULL;
 
-	while(1)
+	while (1)
 	{
 		spot = G_Find(spot, FOFS(classname), "info_player_start");
 		if (!spot)
@@ -148,7 +148,7 @@ void SP_info_player_coop(edict_t *self)
 		return;
 	}
 
-	if((Q_stricmp(level.mapname, "jail2") == 0)   ||
+	if ((Q_stricmp(level.mapname, "jail2") == 0)   ||
 	   (Q_stricmp(level.mapname, "jail4") == 0)   ||
 	   (Q_stricmp(level.mapname, "mine1") == 0)   ||
 	   (Q_stricmp(level.mapname, "mine2") == 0)   ||
@@ -200,6 +200,14 @@ void SP_info_player_intermission(edict_t *self) //was void
 void player_pain (edict_t *self, edict_t *other, float kick, int damage)
 {
 	// player pain is handled at the end of the frame in P_DamageFeedback
+
+	// Zaero
+	// if we're in a camera, get out
+	if (self->client->zCameraTrack)
+	{
+		stopCamera(self);
+	}
+	// end Zaero
 }
 
 
@@ -318,20 +326,11 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 					else
 						message = "blew himself up";
 					break;
-				case MOD_SHOCK_SPHERE:
-				case MOD_SHOCK_SPLASH:
-					if (IsNeutral(self))
-						message = "was pulverized by its own shock sphere";
-					else if (IsFemale(self))
-						message = "was pulverized by her own shock sphere";
-					else
-						message = "was pulverized by his own shock sphere";
-					break;
 
 				case MOD_BFG_BLAST:
 					message = "should have used a smaller gun";
 					break;
-//ROGUE
+		// ROGUE
 				case MOD_ETF_SPLASH:
 					message = "shouldn't have used the ETF Rifle at point blank";
 					break;
@@ -368,7 +367,35 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 					else
 						message = "got caught in his own trap";
 					break;
-//ROGUE
+		// ROGUE
+
+			// Knightmare added
+				case MOD_SHOCK_SPHERE:
+				case MOD_SHOCK_SPLASH:
+					if (IsNeutral(self))
+						message = "was pulverized by its own shock sphere";
+					else if (IsFemale(self))
+						message = "was pulverized by her own shock sphere";
+					else
+						message = "was pulverized by his own shock sphere";
+					break;
+
+		// SKWiD MOD
+ 				case MOD_PLASMA:
+ 					message = "gets shocked";
+ 					break;
+
+		// Zaero
+			case MOD_TRIPBOMB:
+				if (IsNeutral(self))
+					message = "tripped over its own trip bomb";
+				else if (IsFemale(self))
+					message = "tripped over her own trip bomb";
+				else
+					message = "tripped over his own trip bomb";
+				break;
+		// end Zaero
+
 				default:
 					if (IsNeutral(self))
 						message = "killed itself";
@@ -470,7 +497,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 				message2 = "'s foot";
 				break;
 //===============
-//XATRIX
+// XATRIX
 			case MOD_RIPPER:
 				message = "was ripped to shreds by";
 				message2 = "'s ION Ripper";
@@ -484,11 +511,11 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 				message = "was caught in";
 				message2 = "'s trap";
 				break;
-//XATRIX
+// XATRIX
 //===============
 
 //===============
-//ROGUE
+// ROGUE
 			case MOD_CHAINFIST:
 				message = "was shredded by";
 				message2 = "'s ripsaw";
@@ -552,31 +579,64 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 				message = "was hunted down by";
 				message2 = "'s doppleganger";
 				break;
+// ROGUE
+//===============
+		// Knightmare added
 			case MOD_SHOCK_SPHERE:
 			case MOD_SHOCK_SPLASH:
 				message = "was pulverized by";
 				message2 = "'s shock sphere";
 				break;
 
-//ROGUE
-//===============
+		// SKWiD MOD
+			case MOD_PLASMA:
+				message = "got an infusion of plasma from";
+				message2 = "'s plasma rifle";
+				break;
+
+		// Zaero
+		/*	case MOD_SNIPERRIFLE:
+				message = "was ventilated by";
+				message2 = "'s bullet";
+				break;*/
+			case MOD_TRIPBOMB:
+				message = "tripped over";
+				message2 = "'s trip bomb";
+				break;
+			case MOD_FLARE:
+				message = "didn't see";
+				message2 = "'s flare";
+				break;
+			case MOD_GL_POLYBLEND:
+				message = "turned off gl_polyblend and was damaged by";
+				message2 = "'s flare";
+				break;
+			case MOD_A2K:
+				message = "got dissassembled by";
+				message2 = "";
+				break;
+		/*	case MOD_SONICCANNON:
+				message = "got microwaved by";
+				message2 = "";
+				break;*/
+		// end Zaero
 			}
 			if (message)
 			{
 				gi.bprintf (PRINT_MEDIUM,"%s %s %s%s\n", self->client->pers.netname, message, attacker->client->pers.netname, message2);
-//ROGUE
+// ROGUE
 				if (gamerules && gamerules->value)
 				{
-					if(DMGame.Score)
+					if (DMGame.Score)
 					{
-						if(ff)		
+						if (ff)		
 							DMGame.Score(attacker, self, -1);
 						else
 							DMGame.Score(attacker, self, 1);
 					}
 					return;
 				}
-//ROGUE
+// ROGUE
 				if (deathmatch->value)
 				{
 					if (ff)
@@ -609,6 +669,11 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 			{
 				message = "saw a";
 				message2 = "'s light";
+			}
+			// Plasma Guard
+			else if (!strcmp(attacker->classname, "monster_soldier_plasma_re") || !strcmp(attacker->classname, "monster_soldier_plasma_sp"))
+			{
+				message = "got an infusion of plasma from a";
 			}
 			// Enforcer
 			else if (!strcmp(attacker->classname, "monster_infantry"))
@@ -1042,7 +1107,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 	{
 		if (gamerules && gamerules->value)
 		{
-			if(DMGame.Score)
+			if (DMGame.Score)
 			{
 				DMGame.Score(self, self, -1);
 			}
@@ -1153,10 +1218,18 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 {
 	int		n;
 
-//Knightmare- Gen cam code
-//Get rid of the chasecam crap  shouldnt be needed - Skid
-//	if(self->client->chasetoggle && !(self->client->resp.spectator))
-	if(self->client->chaseactive && !(self->client->resp.spectator))
+	// Zaero
+	// if we're in a camera, get out
+	if (self->client->zCameraTrack)
+	{
+		stopCamera(self);
+	}
+	// end Zaero
+
+	// Knightmare- Gen cam code
+	// Get rid of the chasecam crap  shouldnt be needed - Skid
+//	if (self->client->chasetoggle && !(self->client->resp.spectator))
+	if (self->client->chaseactive && !(self->client->resp.spectator))
 		self->svflags &= ~SVF_NOCLIENT;
 
 	self->client->pers.spawn_landmark = false; // paranoia check
@@ -1213,9 +1286,9 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 		}
 	}
 
-	if(gamerules && gamerules->value)	// if we're in a dm game, alert the game
+	if (gamerules && gamerules->value)	// if we're in a dm game, alert the game
 	{
-		if(DMGame.PlayerDeath)
+		if (DMGame.PlayerDeath)
 			DMGame.PlayerDeath(self, inflictor, attacker);
 	}
 
@@ -1228,7 +1301,8 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	self->client->flashlight_active = false;
 
 	// turn off alt-fire mode if on
-	self->client->pers.fire_mode=0;
+	self->client->pers.fire_mode = 0;
+	self->client->pers.plasma_mode = 0;  // SKWiD- plasma rifle fire mode
 	//self->client->nNewLatch &= ~BUTTON_ATTACK2;
 
 //==============
@@ -1238,7 +1312,7 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	// if there's a sphere around, let it know the player died.
 	// vengeance and hunter will die if they're not attacking,
 	// defender should always die
-	if(self->client->owned_sphere)
+	if (self->client->owned_sphere)
 	{
 		edict_t *sphere;
 
@@ -1247,14 +1321,14 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	}
 
 	// if we've been killed by the tracker, GIB!
-	if((meansOfDeath & ~MOD_FRIENDLY_FIRE) == MOD_TRACKER)
+	if ((meansOfDeath & ~MOD_FRIENDLY_FIRE) == MOD_TRACKER)
 	{
 		self->health = self->gib_health; //was -100
 		damage = 400;
 	}
 
 	// make sure no trackers are still hurting us.
-	if(self->client->tracker_pain_framenum)
+	if (self->client->tracker_pain_framenum)
 	{
 		RemoveAttackingPainDaemons (self);
 	}
@@ -1276,7 +1350,7 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 			// gib
 			gi.sound (self, CHAN_BODY, gi.soundindex ("misc/udeath.wav"), 1, ATTN_NORM, 0);
 			// more meaty gibs for your dollar!
-			if((deathmatch->value) && (self->health < (self->gib_health * 2)))
+			if ((deathmatch->value) && (self->health < (self->gib_health * 2)))
 				for (n= 0; n < 4; n++)
 					ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
 			for (n= 0; n < 4; n++)
@@ -1462,7 +1536,7 @@ void SelectStartWeapon (gclient_t *client, int style)
 		client->pers.inventory[shocksphere_index] = 0;
 	}
 
-	switch(style)
+	switch (style)
 	{
 	case -1:
 		item = FindItem("No Weapon");
@@ -1552,6 +1626,16 @@ void SelectStartWeapon (gclient_t *client, int style)
 	if (!deathmatch->value)
 		client->pers.inventory[ITEM_INDEX(FindItem("No Weapon"))] = 1;
 
+	// Zaero
+	if (!deathmatch->value && IsZaeroMap())
+	{
+		item = FindItem("Flare Gun");
+		client->pers.inventory[ITEM_INDEX(item)] = 1;
+		item = FindItem("Flares");
+		client->pers.inventory[ITEM_INDEX(item)] = 3;
+	}
+	// end Zaero
+
 	// and give him standard ammo
 	if (item->ammo)
 	{
@@ -1580,6 +1664,10 @@ void SelectStartWeapon (gclient_t *client, int style)
 		client->pers.inventory[ITEM_INDEX(FindItem("Prox"))] = sk_dm_start_prox->value;
 		client->pers.inventory[ITEM_INDEX(FindItem("Tesla"))] = sk_dm_start_tesla->value;
 		client->pers.inventory[ITEM_INDEX(FindItem("Shocksphere"))] = sk_dm_start_shocksphere->value;
+		client->pers.inventory[ITEM_INDEX(FindItem("Flares"))] = sk_dm_start_flares->value;
+		client->pers.inventory[ITEM_INDEX(FindItem("IRED"))] = sk_dm_start_tbombs->value;
+		client->pers.inventory[ITEM_INDEX(FindItem("EMPNuke"))] = sk_dm_start_empnuke->value;
+		client->pers.inventory[ITEM_INDEX(FindItem("Plasma Shield"))] = sk_dm_start_plasmashield->value;
 
 		client->pers.inventory[ITEM_INDEX(FindItem("Shotgun"))] = sk_dm_start_shotgun->value;
 		client->pers.inventory[ITEM_INDEX(FindItem("Super Shotgun"))] = sk_dm_start_sshotgun->value;
@@ -1599,6 +1687,10 @@ void SelectStartWeapon (gclient_t *client, int style)
 		client->pers.inventory[ITEM_INDEX(FindItem("Disintegrator"))] = sk_dm_start_disruptor->value;
 		client->pers.inventory[ITEM_INDEX(FindItem("Chainfist"))] = sk_dm_start_chainfist->value;
 		client->pers.inventory[ITEM_INDEX(FindItem("Shockwave"))] = sk_dm_start_shockwave->value;
+		client->pers.inventory[ITEM_INDEX(FindItem(PLASMA_PICKUP_NAME))] = sk_dm_start_plasmarifle->value;
+		client->pers.inventory[ITEM_INDEX(FindItem("Flare Gun"))] = sk_dm_start_flaregun->value;
+	//	client->pers.inventory[ITEM_INDEX(FindItem("Sniper Rifle"))] = sk_dm_start_sniperrifle->value;
+	//	client->pers.inventory[ITEM_INDEX(FindItem("Sonic Cannon"))] = sk_dm_start_soniccannon->value;
 
 		SwitchToBestStartWeapon (client);
 	}
@@ -1661,7 +1753,8 @@ void InitClientPersistant (gclient_t *client, int style)
 	client->pers.max_plasmashield	= 20;	// sk_max_plasmashield->value;
 // end Zaero
 
-	client->pers.fire_mode      = 0;  // Lazarus alternate fire mode
+	client->pers.fire_mode			= 0;  // Lazarus alternate fire mode
+	client->pers.plasma_mode		= 0;  // SKWiD- plasma rifle fire mode
 
 	client->pers.connected = true;
 
@@ -1819,7 +1912,7 @@ edict_t *SelectRandomDeathmatchSpawnPoint (void)
 		spot = G_Find (spot, FOFS(classname), "info_player_deathmatch");
 		if (spot == spot1 || spot == spot2)
 			selection++;
-	} while(selection--);
+	} while (selection--);
 
 	return spot;
 }
@@ -1896,13 +1989,13 @@ edict_t *SelectLavaCoopSpawnPoint (edict_t *ent)
 	while (1)
 	{
 		lava = G_Find (lava, FOFS(classname), "func_door");
-		if(!lava)
+		if (!lava)
 			break;
 		
 		VectorAdd (lava->absmax, lava->absmin, center);
 		VectorScale (center, 0.5, center);
 
-		if(lava->spawnflags & 2 && (gi.pointcontents(center) & MASK_WATER))
+		if (lava->spawnflags & 2 && (gi.pointcontents(center) & MASK_WATER))
 		{
 			if (lava->absmax[2] > lavatop)
 			{
@@ -1922,15 +2015,15 @@ edict_t *SelectLavaCoopSpawnPoint (edict_t *ent)
 	// find all the lava spawn points and store them in spawnPoints[]
 	spot = NULL;
 	numPoints = 0;
-	while(spot = G_Find (spot, FOFS(classname), "info_player_coop_lava"))
+	while (spot = G_Find (spot, FOFS(classname), "info_player_coop_lava"))
 	{
-		if(numPoints == 64)
+		if (numPoints == 64)
 			break;
 
 		spawnPoints[numPoints++] = spot;
 	}
 
-	if(numPoints < 1)
+	if (numPoints < 1)
 		return NULL;
 
 	// walk up the sorted list and return the lowest, open, non-lava spawn point
@@ -1939,12 +2032,12 @@ edict_t *SelectLavaCoopSpawnPoint (edict_t *ent)
 	pointWithLeastLava = NULL;
 	for (index = 0; index < numPoints; index++)
 	{
-		if(spawnPoints[index]->s.origin[2] < lavatop)
+		if (spawnPoints[index]->s.origin[2] < lavatop)
 			continue;
 
 		if (PlayersRangeFromSpot(spawnPoints[index]) > 32)
 		{
-			if(spawnPoints[index]->s.origin[2] < lowest)
+			if (spawnPoints[index]->s.origin[2] < lowest)
 			{
 				// save the last point
 				pointWithLeastLava = spawnPoints[index];
@@ -1955,7 +2048,7 @@ edict_t *SelectLavaCoopSpawnPoint (edict_t *ent)
 
 	// FIXME - better solution????
 	// well, we may telefrag someone, but oh well...
-	if(pointWithLeastLava)
+	if (pointWithLeastLava)
 		return pointWithLeastLava;
 
 	return NULL;
@@ -2137,7 +2230,7 @@ void respawn (edict_t *self)
 //CHASECAM Knightmare- Gen cam code
 		qboolean chase=false;
 		
-		if(self->client->chaseactive)
+		if (self->client->chaseactive)
 		{
 			chase = true;
 			if (self->client->oldplayer != NULL)
@@ -2167,7 +2260,7 @@ void respawn (edict_t *self)
 
 		self->client->respawn_time = level.time;
 
-		if(chase == true) //Knightmare- Gen cam code
+		if (chase == true) //Knightmare- Gen cam code
 			ChasecamStart(self);
 
 		return;
@@ -2319,7 +2412,7 @@ void PutClientInServer (edict_t *ent)
 	client->pers.spawn_landmark = false;
 	client->pers.spawn_levelchange = false;
 
-	if(spawn_landmark)
+	if (spawn_landmark)
 	{
 		spawn_origin[2] -= 9;
 		VectorAdd(spawn_origin,client->pers.spawn_offset,spawn_origin);
@@ -2387,7 +2480,7 @@ void PutClientInServer (edict_t *ent)
 	FetchClientEntData (ent);
 
 	// Lazarus: Starting health < max. Presumably player was hurt in a crash
-	if( (spawn_health > 0) && !deathmatch->value && !coop->value)
+	if ( (spawn_health > 0) && !deathmatch->value && !coop->value)
 		ent->health = min(ent->health, spawn_health);
 
 	// clear entity values
@@ -2423,7 +2516,7 @@ void PutClientInServer (edict_t *ent)
 
 	VectorCopy (mins, ent->mins);
 	VectorCopy (maxs, ent->maxs);
-	if(!spawn_landmark)
+	if (!spawn_landmark)
 	{
 		VectorClear (ent->velocity);
 		VectorClear (ent->relative_velocity);
@@ -2470,7 +2563,7 @@ void PutClientInServer (edict_t *ent)
 	// clear entity state values
 	ent->s.effects = 0;
 	ent->s.modelindex = MAX_MODELS-1;		// was 255, will use the skin specified model
-	if(ITEM_INDEX(client->pers.weapon) == noweapon_index)
+	if (ITEM_INDEX(client->pers.weapon) == noweapon_index)
 		ent->s.modelindex2 = 0;
 	else
 		ent->s.modelindex2 = MAX_MODELS-1;		// was 255, custom gun model
@@ -2490,7 +2583,7 @@ void PutClientInServer (edict_t *ent)
 	ent->s.angles[PITCH] = 0;
 	ent->s.angles[YAW] = spawn_angles[YAW];
 	ent->s.angles[ROLL] = 0;
-	if(spawn_landmark)
+	if (spawn_landmark)
 	{
 		VectorCopy(spawn_viewangles, client->ps.viewangles);
 //		client->ps.pmove.pm_flags |= PMF_NO_PREDICTION;
@@ -2526,11 +2619,11 @@ void PutClientInServer (edict_t *ent)
 
 	// My tribute to Cash's level-specific hacks. I hope I live
 	// up to his trailblazing cheese.
-	if(Q_stricmp(level.mapname, "rboss") == 0)
+	if (Q_stricmp(level.mapname, "rboss") == 0)
 	{
 		// if you get on to rboss in single player or coop, ensure
 		// the player has the nuke key. (not in DM)
-		if(!(deathmatch->value))
+		if (!(deathmatch->value))
 		{
 			gitem_t		*item;
 
@@ -2541,7 +2634,7 @@ void PutClientInServer (edict_t *ent)
 	}
 
 	
-	if(spawn_levelchange && !client->chasetoggle && !client->pers.newweapon)
+	if (spawn_levelchange && !client->chasetoggle && !client->pers.newweapon)
 	{
 		// we already had a weapon when the level changed... no need to bring it up
 		int	i;
@@ -2592,7 +2685,7 @@ void ClientBeginDeathmatch (edict_t *ent)
 	InitClientResp (ent->client);
 
 	//PGM
-	if(gamerules && gamerules->value && DMGame.ClientBegin)	
+	if (gamerules && gamerules->value && DMGame.ClientBegin)	
 	{
 		DMGame.ClientBegin (ent);
 	}
@@ -2699,19 +2792,19 @@ void ClientBegin (edict_t *ent)
 		// For SP games, check for monsters who were mad at player
 		// in previous level and have changed levels with the player
 		edict_t	*monster;
-		for(i=2; i<globals.num_edicts; i++)
+		for (i=2; i<globals.num_edicts; i++)
 		{
 			monster = &g_edicts[i];
-			if(!monster->inuse)
+			if (!monster->inuse)
 				continue;
-			if(!(monster->svflags & SVF_MONSTER))
+			if (!(monster->svflags & SVF_MONSTER))
 				continue;
-			if(monster->health <= 0)
+			if (monster->health <= 0)
 				continue;
-			if(monster->monsterinfo.aiflags & AI_RESPAWN_FINDPLAYER)
+			if (monster->monsterinfo.aiflags & AI_RESPAWN_FINDPLAYER)
 			{
 				monster->monsterinfo.aiflags &= ~AI_RESPAWN_FINDPLAYER;
-				if(!monster->enemy)
+				if (!monster->enemy)
 				{
 					monster->enemy = ent;
 					FoundTarget(monster);
@@ -2788,7 +2881,7 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo)
 			new_fov = 90;
 		else if (new_fov > 160)
 			new_fov = 160;
-		if(new_fov != ent->client->original_fov)
+		if (new_fov != ent->client->original_fov)
 		{
 			ent->client->ps.fov = new_fov;
 			ent->client->original_fov = new_fov;
@@ -2928,19 +3021,19 @@ void ClientDisconnect (edict_t *ent)
 //============
 //ROGUE
 	// make sure no trackers are still hurting us.
-	if(ent->client->tracker_pain_framenum)
+	if (ent->client->tracker_pain_framenum)
 		RemoveAttackingPainDaemons (ent);
 
 	if (ent->client->owned_sphere)
 	{
-		if(ent->client->owned_sphere->inuse)
+		if (ent->client->owned_sphere->inuse)
 			G_FreeEdict (ent->client->owned_sphere);
 		ent->client->owned_sphere = NULL;
 	}
 
 	if (gamerules && gamerules->value)
 	{
-		if(DMGame.PlayerDisconnect)
+		if (DMGame.PlayerDisconnect)
 			DMGame.PlayerDisconnect(ent);
 	}
 //ROGUE
@@ -2959,7 +3052,7 @@ void ClientDisconnect (edict_t *ent)
 	ent->classname = "disconnected";
 	ent->client->pers.connected = false;
 
-	if(ent->client->spycam)
+	if (ent->client->spycam)
 		camera_off(ent);
 
 	playernum = ent-g_edicts-1;
@@ -3020,23 +3113,23 @@ void ClientPushPushable(edict_t *ent)
 	vec3_t		new_origin, v, vbox;
 
 	VectorAdd (box->absmax,box->absmin,vbox);
-	VectorScale(vbox,0.5,vbox);
+	VectorScale (vbox,0.5,vbox);
 	if (point_infront(ent,vbox))
 	{
-		VectorSubtract(ent->s.origin,box->offset,new_origin);
-		VectorSubtract(new_origin,box->s.origin,v);
+		VectorSubtract (ent->s.origin, box->offset, new_origin);
+		VectorSubtract (new_origin, box->s.origin, v);
 		v[2] = 0;
 		dist = VectorLength(v);
-		if(dist > 8)
+		if (dist > 8)
 		{
 			// func_pushable got hung up somehow. Break off contact
 			RemovePush(ent);
 		}
-		else if(dist > 0)
+		else if (dist > 0)
 		{
-			if(!box->speaker)
+			if (!box->speaker)
 				box->s.sound = box->noise_index;
-			box_walkmove( box, vectoyaw(v), dist );
+			box_walkmove ( box, vectoyaw(v), dist );
 		}
 		else
 			box->s.sound = 0;
@@ -3058,32 +3151,32 @@ void ClientSpycam(edict_t *ent)
 	int			i;
 
 	memset (&pm, 0, sizeof(pm));
-	if(client->ucmd.sidemove && level.time > ent->last_move_time + 1)
+	if (client->ucmd.sidemove && level.time > ent->last_move_time + 1)
 	{
 		camera->flags &= ~FL_ROBOT;
-		if(camera->viewer == ent)
+		if (camera->viewer == ent)
 			camera->viewer = NULL;
-		if(client->ucmd.sidemove > 0)
+		if (client->ucmd.sidemove > 0)
 			camera = G_FindNextCamera(camera,client->monitor);
 		else
 			camera = G_FindPrevCamera(camera,client->monitor);
 		
-		if(camera)
+		if (camera)
 		{
-			if(!camera->viewer)
+			if (!camera->viewer)
 				camera->viewer = ent;
 			client->spycam = camera;
 			VectorAdd(camera->s.origin,camera->move_origin,ent->s.origin);
-			if(camera->viewmessage)
+			if (camera->viewmessage)
 				gi.centerprintf(ent,camera->viewmessage);
 			ent->last_move_time = level.time;
 		}
 		else
 			camera = client->spycam;
-		if(camera->monsterinfo.aiflags & AI_ACTOR)
+		if (camera->monsterinfo.aiflags & AI_ACTOR)
 		{
 			camera->flags |= FL_ROBOT;
-			if(camera->monsterinfo.aiflags & AI_FOLLOW_LEADER)
+			if (camera->monsterinfo.aiflags & AI_FOLLOW_LEADER)
 			{
 				camera->monsterinfo.aiflags &= ~AI_FOLLOW_LEADER;
 				camera->monsterinfo.old_leader  = NULL;
@@ -3093,17 +3186,17 @@ void ClientSpycam(edict_t *ent)
 			}
 		}
 	}
-	if((camera->svflags & SVF_MONSTER) && (camera->monsterinfo.aiflags & AI_ACTOR))
+	if ((camera->svflags & SVF_MONSTER) && (camera->monsterinfo.aiflags & AI_ACTOR))
 		is_actor = true;
 	else
 		is_actor = false;
-	if(camera->enemy && (camera->enemy->deadflag || !camera->enemy->inuse))
+	if (camera->enemy && (camera->enemy->deadflag || !camera->enemy->inuse))
 		camera->enemy = NULL;
 	AngleVectors(camera->s.angles,forward,left,up);
 
-	if(is_actor && !camera->enemy)
+	if (is_actor && !camera->enemy)
 	{
-		if((abs(client->ucmd.forwardmove) > 199) && (camera->groundentity))
+		if ((abs(client->ucmd.forwardmove) > 199) && (camera->groundentity))
 		{	// walk/run
 
 			edict_t	*thing;
@@ -3114,7 +3207,7 @@ void ClientSpycam(edict_t *ent)
 			
 			VectorMA(camera->s.origin, WORLD_SIZE, forward, end);	// was 8192
 			tr = gi.trace(camera->s.origin,camera->mins,camera->maxs,end,camera,MASK_SOLID);
-			if(client->ucmd.forwardmove < 0)
+			if (client->ucmd.forwardmove < 0)
 			{
 				trace_t	back;
 				VectorMA(camera->s.origin, -WORLD_SIZE, forward, end);	// was -8192
@@ -3129,9 +3222,9 @@ void ClientSpycam(edict_t *ent)
 				dist = VectorLength(end) - 8;
 				VectorMA(camera->s.origin,dist,forward,end);
 			}
-			if(dist > 8)
+			if (dist > 8)
 			{
-				if(!thing || !thing->inuse || Q_stricmp(thing->classname,"thing"))
+				if (!thing || !thing->inuse || Q_stricmp(thing->classname,"thing"))
 					thing = camera->vehicle = SpawnThing();
 				thing->touch_debounce_time = level.time + 5.0;
 				thing->target_ent = camera;
@@ -3145,16 +3238,16 @@ void ClientSpycam(edict_t *ent)
 				camera->monsterinfo.leader = thing;
 				VectorSubtract (thing->s.origin, camera->s.origin, dir);
 				camera->ideal_yaw = vectoyaw(dir);
-				if(client->ucmd.forwardmove > 300)
+				if (client->ucmd.forwardmove > 300)
 					actor_run(camera);
-				else if(client->ucmd.forwardmove > 199)
+				else if (client->ucmd.forwardmove > 199)
 					actor_walk(camera);
-				else if(client->ucmd.forwardmove < -300)
+				else if (client->ucmd.forwardmove < -300)
 					actor_run_back(camera);
 				else
 					actor_walk_back(camera);
 			}
-			else if(thing)
+			else if (thing)
 			{
 				camera->monsterinfo.aiflags &= ~AI_CHASE_THING;
 				camera->movetarget = camera->goalentity = NULL;
@@ -3163,11 +3256,11 @@ void ClientSpycam(edict_t *ent)
 				actor_stand(camera);
 			}
 		}
-		if((client->ucmd.forwardmove == 0) && (camera->groundentity))
+		if ((client->ucmd.forwardmove == 0) && (camera->groundentity))
 		{
 			// stop
 			edict_t	*thing = camera->vehicle;
-			if(thing)
+			if (thing)
 			{
 				camera->monsterinfo.aiflags &= ~AI_CHASE_THING;
 				camera->movetarget = camera->goalentity = NULL;
@@ -3177,28 +3270,28 @@ void ClientSpycam(edict_t *ent)
 			}
 		}
 		
-		if(client->ucmd.upmove)
+		if (client->ucmd.upmove)
 		{
-			if((client->ucmd.upmove > 0) && camera->groundentity && !camera->waterlevel)
+			if ((client->ucmd.upmove > 0) && camera->groundentity && !camera->waterlevel)
 			{
 				// jump
-				if(client->ucmd.forwardmove > 300)
+				if (client->ucmd.forwardmove > 300)
 					VectorScale(forward,400,camera->velocity);
-				else if(client->ucmd.forwardmove > 199)
+				else if (client->ucmd.forwardmove > 199)
 					VectorScale(forward,200,camera->velocity);
-				else if(client->ucmd.forwardmove < -300)
+				else if (client->ucmd.forwardmove < -300)
 					VectorScale(forward,-400,camera->velocity);
-				else if(client->ucmd.forwardmove < -199)
+				else if (client->ucmd.forwardmove < -199)
 					VectorScale(forward,-200,camera->velocity);
 				camera->velocity[2] = 250;
 				camera->monsterinfo.savemove = camera->monsterinfo.currentmove;
 				actor_jump(camera);
 				camera->groundentity = NULL;
 			}
-			else if((client->ucmd.upmove < 0) && (camera->groundentity) && !(camera->monsterinfo.aiflags & AI_CROUCH))
+			else if ((client->ucmd.upmove < 0) && (camera->groundentity) && !(camera->monsterinfo.aiflags & AI_CROUCH))
 			{
 				// crouch
-				if( (camera->monsterinfo.currentmove == &actor_move_walk)   ||
+				if ( (camera->monsterinfo.currentmove == &actor_move_walk)   ||
 					(camera->monsterinfo.currentmove == &actor_move_run)    ||
 					(camera->monsterinfo.currentmove == &actor_move_run_bad)  )
 				{
@@ -3208,7 +3301,7 @@ void ClientSpycam(edict_t *ent)
 					camera->move_origin[2] -= 28;
 					camera->monsterinfo.aiflags |= AI_CROUCH;
 				}
-				else if( (camera->monsterinfo.currentmove == &actor_move_walk_back) ||
+				else if ( (camera->monsterinfo.currentmove == &actor_move_walk_back) ||
 						 (camera->monsterinfo.currentmove == &actor_move_run_back)     )
 				{
 					camera->monsterinfo.currentmove = &actor_move_crouchwalk_back;
@@ -3227,26 +3320,26 @@ void ClientSpycam(edict_t *ent)
 				}
 			}
 		}
-		if( (client->ucmd.upmove >= 0) && (camera->monsterinfo.aiflags & AI_CROUCH))
+		if ( (client->ucmd.upmove >= 0) && (camera->monsterinfo.aiflags & AI_CROUCH))
 		{
 			// come out of crouch
 			camera->maxs[2] += 28;
 			camera->viewheight += 28;
 			camera->move_origin[2] += 28;
 			camera->monsterinfo.aiflags &= ~AI_CROUCH;
-			if(camera->monsterinfo.currentmove == &actor_move_crouchwalk)
+			if (camera->monsterinfo.currentmove == &actor_move_crouchwalk)
 				actor_walk(camera);
-			else if(camera->monsterinfo.currentmove == &actor_move_crouchwalk_back)
+			else if (camera->monsterinfo.currentmove == &actor_move_crouchwalk_back)
 				actor_walk_back(camera);
-			else if(camera->monsterinfo.currentmove == &actor_move_crouch)
+			else if (camera->monsterinfo.currentmove == &actor_move_crouch)
 				actor_stand(camera);
 		}
 	}
 
 	client->ps.pmove.pm_type = PM_FREEZE;
-	if(camera->viewer == ent)
+	if (camera->viewer == ent)
 	{
-		if( (client->old_owner_angles[0] != client->ucmd.angles[0]) ||
+		if ( (client->old_owner_angles[0] != client->ucmd.angles[0]) ||
 			(client->old_owner_angles[1] != client->ucmd.angles[1])   )
 		{
 			// Give game a bit of time to catch up after player
@@ -3255,18 +3348,18 @@ void ClientSpycam(edict_t *ent)
 			// hasn't hit +lookup/+lookdown
 			float	delta;
 			delta = level.time - camera->touch_debounce_time;
-			if( delta < 0 || delta > 1.0)
+			if ( delta < 0 || delta > 1.0)
 			{
-				if(is_actor)
+				if (is_actor)
 				{
 					float	diff;
 					diff = SHORT2ANGLE(client->ucmd.angles[1] - client->old_owner_angles[1]);
-					if(diff < -180)
+					if (diff < -180)
 						diff += 360;
-					if(diff > 180)
+					if (diff > 180)
 						diff -= 360;
 					camera->ideal_yaw += diff;
-					if((abs(diff) > 100) && camera->vehicle)
+					if ((abs(diff) > 100) && camera->vehicle)
 					{
 						vec3_t	angles;
 						vec3_t	end, f;
@@ -3280,9 +3373,9 @@ void ClientSpycam(edict_t *ent)
 					}
 					ai_turn(camera,0.);
 					diff = SHORT2ANGLE(client->ucmd.angles[0]-client->old_owner_angles[0]);
-					if(diff < -180)
+					if (diff < -180)
 						diff += 360;
-					if(diff > 180)
+					if (diff > 180)
 						diff -= 360;
 					camera->move_angles[0] += diff;
 					client->old_owner_angles[0] = client->ucmd.angles[0];
@@ -3295,24 +3388,24 @@ void ClientSpycam(edict_t *ent)
 			if (level.time >= camera->monsterinfo.attack_finished)
 			{
 				client->latched_buttons &= ~BUTTON_ATTACK;
-				if(!Q_stricmp(camera->classname,"turret_breach") || !Q_stricmp(camera->classname,"model_turret"))
+				if (!Q_stricmp(camera->classname,"turret_breach") || !Q_stricmp(camera->classname,"model_turret"))
 				{
-					if(camera->sounds==5 || camera->sounds==6)
+					if ( (camera->sounds == 5) || (camera->sounds == 6) )
 						camera->monsterinfo.attack_finished = level.time;
 					else
 						camera->monsterinfo.attack_finished = level.time + 1.0;
 					turret_breach_fire(camera);
 				}
-				else if(is_actor)
+				else if (is_actor)
 				{
 					int	weapon = camera->actor_weapon[camera->actor_current_weapon];
-					if(!camera->enemy)
+					if (!camera->enemy)
 					{
 						edict_t	*target;
 						target = LookingAt(ent,0,NULL,NULL);
-						if(target && target->takedamage && (target != client->camplayer))
+						if (target && target->takedamage && (target != client->camplayer))
 						{
-							if(camera->vehicle)
+							if (camera->vehicle)
 							{
 								// Currently following "thing" - turn that off
 								camera->monsterinfo.aiflags &= ~AI_CHASE_THING;
@@ -3323,7 +3416,7 @@ void ClientSpycam(edict_t *ent)
 							camera->enemy = target;
 							actor_fire(camera);
 							camera->enemy = NULL;
-							if(camera->monsterinfo.aiflags & AI_HOLD_FRAME)
+							if (camera->monsterinfo.aiflags & AI_HOLD_FRAME)
 								camera->monsterinfo.attack_finished = level.time + FRAMETIME;
 							else
 								camera->monsterinfo.attack_finished = level.time + 1.0;
@@ -3332,7 +3425,7 @@ void ClientSpycam(edict_t *ent)
 				}
 			}
 		}
-		if(client->zoomed)
+		if (client->zoomed)
 		{
 			camera->touch_debounce_time = 
 				max(camera->touch_debounce_time, level.time + 1.0);
@@ -3344,11 +3437,11 @@ void ClientSpycam(edict_t *ent)
 	VectorMA(start,            camera->move_origin[2],up,     start);
 	
 	tr = gi.trace(camera->s.origin, NULL, NULL, start, camera, MASK_SOLID);
-	if(tr.fraction < 1.0)
+	if (tr.fraction < 1.0)
 	{
 		VectorSubtract(tr.endpos,camera->s.origin,dir);
 		dist = VectorNormalize(dir) - 2;
-		if(dist < 0) dist = 0.;
+		if (dist < 0) dist = 0.;
 		VectorMA(camera->s.origin,dist,dir,start);
 	}
 	VectorCopy(start,ent->s.origin);
@@ -3415,9 +3508,9 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	else
 		ground_speed = 0;
 
-	//Knightmare- determine if client-side prediction should be on
-	//Thanks to DH
-	if( (ent->in_mud)               ||
+	// Knightmare- determine if client-side prediction should be on
+	// Thanks to DH
+	if ( (ent->in_mud)               ||
 		(ent->client->push)         ||
 		(ent->vehicle)              ||
 		(ent->client->chasetoggle)  ||
@@ -3436,41 +3529,41 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	client->ps.stopspeed = player_stopspeed->value;
 #endif
 
-	//VectorCopy(ent->s.origin,view);
-	//view[2] += ent->viewheight;
+//	VectorCopy(ent->s.origin,view);
+//	view[2] += ent->viewheight;
 	Fog (ent); //view);
 
 	// MUD - get mud level
-	if(level.mud_puddles)
+	if (level.mud_puddles)
 	{
 		edict_t	*mud;
 
 		ent->in_mud = 0;
-		for(i=game.maxclients+1; i<globals.num_edicts && !ent->in_mud; i++)
+		for (i=game.maxclients+1; i<globals.num_edicts && !ent->in_mud; i++)
 		{
 			mud = &g_edicts[i];
-			if(!mud->inuse) continue;
-			if(!(mud->svflags & SVF_MUD)) continue;
-			if(ent->absmin[0] > mud->absmax[0]) continue;
-			if(ent->absmin[1] > mud->absmax[1]) continue;
-			if(ent->absmin[2] > mud->absmax[2]) continue;
-			if(ent->absmax[0] < mud->absmin[0]) continue;
-			if(ent->absmax[1] < mud->absmin[1]) continue;
-			if(ent->absmax[2] < mud->absmin[2]) continue;
+			if (!mud->inuse) continue;
+			if (!(mud->svflags & SVF_MUD)) continue;
+			if (ent->absmin[0] > mud->absmax[0]) continue;
+			if (ent->absmin[1] > mud->absmax[1]) continue;
+			if (ent->absmin[2] > mud->absmax[2]) continue;
+			if (ent->absmax[0] < mud->absmin[0]) continue;
+			if (ent->absmax[1] < mud->absmin[1]) continue;
+			if (ent->absmax[2] < mud->absmin[2]) continue;
 			ent->in_mud = 1;
-			if(ent->s.origin[2] < mud->absmax[2])
+			if (ent->s.origin[2] < mud->absmax[2])
 				ent->in_mud = 2;
-			if(ent->s.origin[2] + ent->viewheight < mud->absmax[2])
+			if (ent->s.origin[2] + ent->viewheight < mud->absmax[2])
 				ent->in_mud = 3;
 		}
 	}
 
 	// USE - special actions taken when +use is pressed
-	if(!client->use && (ucmd->buttons & BUTTON_USE))
+	if (!client->use && (ucmd->buttons & BUTTON_USE))
 	{
 		// use key was NOT pressed, but now is
 		client->use = 1;
-		if(client->spycam)
+		if (client->spycam)
 			camera_off(ent);
 		else
 		{
@@ -3479,28 +3572,28 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 			float	range;
 
 			viewing = LookingAt(ent,0,intersect,&range);
-			if(viewing && viewing->classname)
+			if (viewing && viewing->classname)
 			{
-				if(!Q_stricmp(viewing->classname,"crane_control") && range <= 100)
+				if (!Q_stricmp(viewing->classname,"crane_control") && range <= 100)
 					crane_control_action(viewing,ent,intersect);
-				if(!Q_stricmp(viewing->classname,"target_lock_digit") && range <= 100)
+				if (!Q_stricmp(viewing->classname,"target_lock_digit") && range <= 100)
 					lock_digit_increment(viewing,ent);
-				if(!Q_stricmp(viewing->classname,"func_trainbutton") && (viewing->spawnflags & 1) && range <= 64)
+				if (!Q_stricmp(viewing->classname,"func_trainbutton") && (viewing->spawnflags & 1) && range <= 64)
 					trainbutton_use(viewing,ent,ent);
 				
 				// Knightmare- different range for chasecam
-				if(!Q_stricmp(viewing->classname,"func_monitor") && ((range <= 100) || (client->chaseactive && range <= 190)) )
+				if (!Q_stricmp(viewing->classname,"func_monitor") && ((range <= 100) || (client->chaseactive && range <= 190)) )
 				{
 					use_camera(viewing,ent,ent);
-					if(client->spycam && client->spycam->viewer == ent)
+					if (client->spycam && client->spycam->viewer == ent)
 					{
 						client->old_owner_angles[0] = ucmd->angles[0];
 						client->old_owner_angles[1] = ucmd->angles[1];
 					}
 				}
-				if(viewing->monsterinfo.aiflags & AI_ACTOR)
+				if (viewing->monsterinfo.aiflags & AI_ACTOR)
 				{
-					if(viewing->monsterinfo.aiflags & AI_FOLLOW_LEADER)
+					if (viewing->monsterinfo.aiflags & AI_FOLLOW_LEADER)
 					{
 						viewing->monsterinfo.aiflags    &= ~AI_FOLLOW_LEADER;
 						viewing->monsterinfo.old_leader  = NULL;
@@ -3515,7 +3608,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 						viewing->monsterinfo.leader   = ent;
 						VectorSubtract(ent->s.origin,viewing->s.origin,dir);
 						viewing->ideal_yaw = vectoyaw(dir);
-						if(fabs(viewing->s.angles[YAW] - viewing->ideal_yaw) < 90)
+						if (fabs(viewing->s.angles[YAW] - viewing->ideal_yaw) < 90)
 							actor_salute(viewing);
 					}
 				}
@@ -3523,20 +3616,20 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		}
 	}
 
-	if(ucmd->buttons & BUTTON_USE)
+	if (ucmd->buttons & BUTTON_USE)
 		client->use = 1;
 	else
 		client->use = 0;
 
-	if( client->push )
+	if ( client->push )
 	{
 		// currently pushing or pulling a func_pushable
-		if( !client->use )
+		if ( !client->use )
 		{
 			// whoops - released USE key
 			RemovePush(ent);
 		}
-		else if( (!ent->groundentity) && (ent->waterlevel==0 || client->push->waterlevel == 0 ) )
+		else if ( (!ent->groundentity) && (ent->waterlevel==0 || client->push->waterlevel == 0 ) )
 		{
 			// oops, we fall down
 			RemovePush(ent);
@@ -3545,7 +3638,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		{
 			// Scale client velocity by mass of func_pushable
 			t = VectorLength(ent->velocity);
-			if( t > client->maxvelocity )
+			if ( t > client->maxvelocity )
 				VectorScale(ent->velocity, client->maxvelocity/t, ent->velocity);
 			client->ps.pmove.pm_flags |= PMF_NO_PREDICTION;
 			t = 200./client->push->mass;
@@ -3554,10 +3647,10 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		}
 	}
 
-	if(ent->turret && ucmd->upmove > 20)
-		turret_disengage(ent->turret);
+	if (ent->turret && ucmd->upmove > 20)
+		turret_disengage (ent->turret);
 
-// INTERMISSION
+	// INTERMISSION
 	if (level.intermissiontime)
 	{
 		// Lazarus spycam
@@ -3571,13 +3664,21 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		return;
 	}
 
-//TARGET_MONITOR angles
+	// Zaero
+	if (ent->movetype == MOVETYPE_FREEZE)
+	{
+		client->ps.pmove.pm_type = PM_FREEZE;
+		return;
+	}
+	// Zaero
+
+	// TARGET_MONITOR angles
 	if (ent->target_ent && !Q_stricmp(ent->target_ent->classname,"target_monitor"))
 	{
 		edict_t	*monitor = ent->target_ent;
-		if(monitor->target_ent && monitor->target_ent->inuse)
+		if (monitor->target_ent && monitor->target_ent->inuse)
 		{
-			if(monitor->spawnflags & 2)
+			if (monitor->spawnflags & 2)
 				VectorCopy(monitor->target_ent->s.angles,client->ps.viewangles);
 			else
 			{
@@ -3596,7 +3697,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 // THIRDPERSON VIEW in/out
 // if NOT pushing something AND in third person AND use key is pressed,
 // move viewpoint in/out
-/*	if(client->chasetoggle && !client->push)
+/*	if (client->chasetoggle && !client->push)
 	{
 		if ((ucmd->buttons & BUTTON_USE) && (!deathmatch->value))
 		{
@@ -3627,12 +3728,12 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	if (client->zooming)
 	{
 		client->pers.hand = 2;
-		if(client->zooming > 0)
+		if (client->zooming > 0)
 		{
-			if(client->ps.fov > 5)
+			if (client->ps.fov > 5)
 			{
 				client->ps.fov -= client->frame_zoomrate;
-				if(client->ps.fov < 5)
+				if (client->ps.fov < 5)
 					client->ps.fov = 5;
 			} else {
 				client->ps.fov = 5;
@@ -3641,10 +3742,10 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		}
 		else
 		{
-			if(client->ps.fov < client->original_fov)
+			if (client->ps.fov < client->original_fov)
 			{
 				client->ps.fov += client->frame_zoomrate;
-				if(client->ps.fov > client->original_fov)
+				if (client->ps.fov > client->original_fov)
 				{
 					client->ps.fov = client->original_fov;
 					client->zoomed = false;
@@ -3661,7 +3762,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	}
 
 	//Mappack - stop client from turning when this flag is set.
-//	if(ent->client->incamera)
+//	if (ent->client->incamera)
 //		return;
 
 // SPYCAM
@@ -3684,13 +3785,13 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		client->resp.cmd_angles[2] = SHORT2ANGLE(ucmd->angles[2]);
 //Knightmare- Gen cam code
 // ### Hentai ### BEGIN - this is improved chasecam stuff
-		if(ucmd->forwardmove < 0)
+		if (ucmd->forwardmove < 0)
 		{
 			ent->speed--;
-			if(ent->speed < 0)
+			if (ent->speed < 0)
 				ent->speed = 0;
 		}
-		else if(ucmd->forwardmove > 0)
+		else if (ucmd->forwardmove > 0)
 		{
 			ent->speed++;
 		}
@@ -3711,7 +3812,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 			client->ps.pmove.pm_type = PM_NORMAL;
 
 	//PGM	trigger_gravity support
-		if(level.time > ent->gravity_debounce_time)
+		if (level.time > ent->gravity_debounce_time)
 	//	client->ps.pmove.gravity = sv_gravity->value;
 			client->ps.pmove.gravity = sv_gravity->value * ent->gravity;
 	//PGM
@@ -3721,11 +3822,11 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 #ifdef JETPACK_MOD
 		if ( client->jetpack )
 		{
-			if( (ucmd->upmove != 0) || (ucmd->forwardmove != 0) || (ucmd->sidemove != 0) )
+			if ( (ucmd->upmove != 0) || (ucmd->forwardmove != 0) || (ucmd->sidemove != 0) )
 			{
-				if(ucmd->upmove > 0 || !ent->groundentity)
+				if (ucmd->upmove > 0 || !ent->groundentity)
 				{
-					if(!client->jetpack_thrusting)
+					if (!client->jetpack_thrusting)
 					{
 						gi.sound (ent, CHAN_AUTO, gi.soundindex("jetpack/rev.wav"), 1, ATTN_NORM, 0);
 						client->jetpack_start_thrust = level.framenum;
@@ -3738,45 +3839,45 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 			else
 				client->jetpack_thrusting = false;
 
-			if(client->jetpack_framenum + client->pers.inventory[fuel_index] > level.framenum)
+			if (client->jetpack_framenum + client->pers.inventory[fuel_index] > level.framenum)
 			{
-				if(jetpack_weenie->value)
+				if (jetpack_weenie->value)
 				{
 					Jet_ApplyJet( ent, ucmd );
-					if(client->jetpack_framenum < level.framenum)
+					if (client->jetpack_framenum < level.framenum)
 					{
-						if(!client->jetpack_infinite)
+						if (!client->jetpack_infinite)
 							client->pers.inventory[fuel_index] -= 10;
 						client->jetpack_framenum = level.framenum + 10;
 					}
 				}
 				else
 				{
-					if(client->jetpack_thrusting)
+					if (client->jetpack_thrusting)
 						Jet_ApplyJet( ent, ucmd );
-					if(client->jetpack_framenum <= level.framenum)
+					if (client->jetpack_framenum <= level.framenum)
 					{
-						if(client->jetpack_thrusting)
+						if (client->jetpack_thrusting)
 						{
-							if(!client->jetpack_infinite)
+							if (!client->jetpack_infinite)
 								client->pers.inventory[fuel_index] -= 1;
 							client->jetpack_framenum = level.framenum + 10;
 						}
 						else
 						{
-							if(!client->jetpack_infinite)
+							if (!client->jetpack_infinite)
 								client->pers.inventory[fuel_index]--;
 							client->jetpack_framenum = level.framenum + 10;
 						}
 					}
-					if(ucmd->upmove == 0)
+					if (ucmd->upmove == 0)
 					{
 						// accelerate to 75% gravity in 2 seconds
 						float	gravity;
 						float	g_max = 0.75 * sv_gravity->value;
 
 						gravity = g_max * (level.framenum - client->jetpack_last_thrust)/20;
-						if(gravity > g_max) gravity = g_max;
+						if (gravity > g_max) gravity = g_max;
 						client->ps.pmove.gravity = (short)gravity;
 					}
 					else
@@ -3793,10 +3894,10 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 
 //Knightmare- Gen cam code
 //Smoother Chasecam ?
-//		if(client->chasetoggle || client->chase_target)
-		if(client->chaseactive || client->chase_target)
+//		if (client->chasetoggle || client->chase_target)
+		if (client->chaseactive || client->chase_target)
 		{
-			if(ent->groundentity)
+			if (ent->groundentity)
 				client->ps.pmove.gravity = 0;
 		}
 
@@ -3820,7 +3921,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		pm.trace = PM_trace;	// adds default parms
 		pm.pointcontents = gi.pointcontents;
 
-		if(ent->vehicle)
+		if (ent->vehicle)
 			pm.s.pm_flags |= PMF_ON_GROUND;
 
 		// perform a pmove
@@ -3845,14 +3946,14 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 #ifdef JETPACK_MOD
 		if ( client->jetpack && jetpack_weenie->value )
 		{
-			if( pm.groundentity )		// are we on ground
+			if ( pm.groundentity )		// are we on ground
 				if ( Jet_AvoidGround(ent) )	// then lift us if possible
 					pm.groundentity = NULL;		// now we are no longer on ground
 		}
 #endif
 
 // MUD - "correct" Pmove physics
-		if(pm.waterlevel && ent->in_mud)
+		if (pm.waterlevel && ent->in_mud)
 		{
 			vec3_t	point;
 			vec3_t	end;
@@ -3864,7 +3965,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 			ent->in_mud  = pm.waterlevel;
 			VectorSubtract(ent->s.origin,oldorigin,deltapos);
 			VectorSubtract(ent->velocity,oldvelocity,deltavel);
-			if(pm.waterlevel == 1)
+			if (pm.waterlevel == 1)
 			{
 				frac = MUD1BASE + MUD1AMP*sin( (float)(level.framenum%10)/10.*2*M_PI);
 				ent->s.origin[0] = oldorigin[0]   + frac*deltapos[0];
@@ -3874,7 +3975,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 				ent->velocity[1] = oldvelocity[1] + frac*deltavel[1];
 				ent->velocity[2] = oldvelocity[2] + 0.75*deltavel[2];
 			}
-			else if(pm.waterlevel == 2)
+			else if (pm.waterlevel == 2)
 			{
 				trace_t	tr;
 				float	dist;
@@ -3886,7 +3987,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 				dist = point[2] - tr.endpos[2];
 				// frac = waterlevel 1 frac at dist=32 or more,
 				//      = waterlevel 3 frac at dist=10 or less
-				if(dist <= 10)
+				if (dist <= 10)
 					frac = MUD3;
 				else
 					frac = MUD3 + (dist-10)/22.*(MUD1BASE-MUD3);
@@ -3896,7 +3997,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 				ent->velocity[0] = oldvelocity[0] + frac*deltavel[0];
 				ent->velocity[1] = oldvelocity[1] + frac*deltavel[1];
 				ent->velocity[2] = oldvelocity[2] + frac*deltavel[2];
-				if(!ent->groundentity)
+				if (!ent->groundentity)
 				{
 					// Player can't possibly move up
 					ent->s.origin[2] = min(oldorigin[2], ent->s.origin[2]);
@@ -3910,7 +4011,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 				ent->s.origin[1] = oldorigin[1]   + MUD3*deltapos[1];
 				ent->velocity[0] = oldvelocity[0] + MUD3*deltavel[0];
 				ent->velocity[1] = oldvelocity[1] + MUD3*deltavel[1];
-				if(ent->groundentity)
+				if (ent->groundentity)
 				{
 					ent->s.origin[2] = oldorigin[2]   + MUD3*deltapos[2];
 					ent->velocity[2] = oldvelocity[2] + MUD3*deltavel[2];
@@ -3942,7 +4043,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		} 
 
 	//ROGUE sam raimi cam support
-	/*	if(ent->flags & FL_SAM_RAIMI)
+	/*	if (ent->flags & FL_SAM_RAIMI)
 			ent->viewheight = 8;
 		else
 			ent->viewheight = pm.viewheight;*/
@@ -3997,12 +4098,12 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		if (ent->movetype != MOVETYPE_NOCLIP)
 			G_TouchTriggers (ent);
 			
-		if( (world->effects & FX_WORLDSPAWN_JUMPKICK) && (ent->client->jumping) && (ent->client->ucmd.upmove >= 20) && (ent->solid != SOLID_NOT))
+		if ( (world->effects & FX_WORLDSPAWN_JUMPKICK) && (ent->client->jumping) && (ent->client->ucmd.upmove >= 20) && (ent->solid != SOLID_NOT))
 			kick_attack(ent);
 
 		// touch other objects
 		// Lazarus: but NOT if game is frozen
-		if(!level.freeze)
+		if (!level.freeze)
 		{
 			for (i=0 ; i<pm.numtouch ; i++)
 			{
@@ -4089,9 +4190,9 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		if (other->inuse && other->client->chase_target == ent)
 			UpdateChaseCam(other);
 	}*/
-	if(client->push != NULL)
+	if (client->push != NULL)
 	{
-		if(client->use &&
+		if (client->use &&
 			( (ucmd->forwardmove != 0) || (ucmd->sidemove != 0) ) )
 			ClientPushPushable(ent);
 		else
@@ -4119,7 +4220,7 @@ void ClientBeginServerFrame (edict_t *ent)
 	client = ent->client;
 
 		// DWH
-	if(client->spycam)
+	if (client->spycam)
 		client = client->camplayer->client;
 
 	if (deathmatch->value &&
@@ -4135,6 +4236,15 @@ void ClientBeginServerFrame (edict_t *ent)
 		Think_Weapon (ent);
 	else
 		client->weapon_thunk = false;
+
+	// Zaero
+	// make sure the fov and weapon models are gone if we're in camera mode
+	if (client->zCameraTrack)
+	{
+		client->ps.fov = 90;
+		client->ps.gunindex = 0;
+	}
+	// end Zaero
 
 	if (ent->deadflag)
 	{
@@ -4179,13 +4289,13 @@ void RemoveAttackingPainDaemons (edict_t *self)
 	edict_t *tracker;
 
 	tracker = G_Find (NULL, FOFS(classname), "pain daemon");
-	while(tracker)
+	while (tracker)
 	{
-		if(tracker->enemy == self)
+		if (tracker->enemy == self)
 			G_FreeEdict(tracker);
 		tracker = G_Find (tracker, FOFS(classname), "pain daemon");
 	}
 
-	if(self->client)
+	if (self->client)
 		self->client->tracker_pain_framenum = 0;
 }

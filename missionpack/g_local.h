@@ -16,6 +16,7 @@
 #include "p_menu.h"
 #include "p_text.h"
 #include "km_cvar.h"
+#include "plasma.h"
 #define JETPACK_MOD
 
 // Zaero
@@ -129,6 +130,15 @@
 
 #define FL_RESPAWN				0x80000000	// used for item respawning
 
+// edict->moreflags
+#define	FL2_TURRET_DOUBLE		0x00000001	// this is a double-barreled turret
+#define	FL2_TURRET_DOUBLE_ALT	0x00000002	// this turret alternates firing its barrels (style is set)
+#define	FL2_TURRET_DOUBLE_ALT_FIRING	0x00000004	// secondary barrel in use for alternate firing
+#define FL2_CRUCIFIED			0x00000008	// insane is crucified 
+#define FL2_WEAPON_ALT			0x00000010	// plasma guard has spread mode
+#define FL2_DO_NOT_REFLECT		0x00000020	// do not reflect this entity
+
+
 #define	FRAMETIME		0.1
 
 // memory tags to allow dynamic memory to be cleaned up
@@ -165,7 +175,7 @@ typedef enum
 	AMMO_GRENADES,
 	AMMO_CELLS,
 	AMMO_SLUGS,
-	// RAFAEL
+	// Xatrix
 	AMMO_MAGSLUG,
 	AMMO_TRAP,
 	// ROGUE
@@ -173,7 +183,7 @@ typedef enum
 	AMMO_TESLA,
 	AMMO_PROX,
 	AMMO_DISRUPTOR,
-	// Knightmare
+	// Knightmare added
 	AMMO_SHOCKSPHERE,
 	AMMO_FUEL,
 	AMMO_HOMING_ROCKETS,
@@ -203,7 +213,7 @@ typedef enum
 #define GIB_ORGANIC				0
 #define GIB_METALLIC			1
 
-//monster ai flags
+// monster ai flags
 #define AI_STAND_GROUND			0x00000001
 #define AI_TEMP_STAND_GROUND	0x00000002
 #define AI_SOUND_TARGET			0x00000004
@@ -371,9 +381,9 @@ typedef struct
 #define IT_XATRIX			0x00000100	// Xatrix item
 #define IT_ROGUE			0x00000200	// Rogue item
 #define IT_LAZARUS			0x00000400	// Lazarus item
-#define IT_ZAERO			0x00000800	// Zaero item
-
-#define IT_Q1				0x00001000		// added for Q1 keys
+#define IT_LM				0x00000800	// Loki's Missions item
+#define IT_ZAERO			0x00001000	// Zaero item
+#define IT_Q1				0x00002000	// added for Q1 keys
 
 // gitem_t->weapmodel for weapons indicates model index
 #define WEAP_BLASTER			1 
@@ -396,10 +406,11 @@ typedef struct
 #define WEAP_PHALANX			17
 #define WEAP_BOOMER				18
 #define WEAP_SHOCKWAVE			19
-#define WEAP_TRAP				20
-#define WEAP_TESLA				21
-#define WEAP_GRAPPLE			22
-#define WEAP_NONE               23
+#define WEAP_PLASMARIFLE		20
+#define WEAP_TRAP				21
+#define WEAP_TESLA				22
+#define WEAP_GRAPPLE			23
+#define WEAP_NONE               24
 
 
 typedef struct gitem_s
@@ -804,6 +815,7 @@ extern	int	homing_index;
 extern	int	rl_index;
 extern	int	hml_index;
 extern	int	pl_index;
+extern	int	pr_index;		// SKWiD MOD
 extern	int magslug_index;
 extern	int flechettes_index;
 extern	int	prox_index;
@@ -887,7 +899,7 @@ extern int lastgibframe;
 #define MOD_DOPPLE_EXPLODE		55
 #define MOD_DOPPLE_VENGEANCE	56
 #define MOD_DOPPLE_HUNTER		57
-// aned ROGUE
+// end ROGUE
 
 // Knightmare
 #define MOD_SHOCK_SPHERE		58
@@ -900,15 +912,16 @@ extern int lastgibframe;
 #define MOD_KICK				66
 #define MOD_MISSILE				67
 #define MOD_MISSILE_SPLASH		68
+#define	MOD_PLASMA				69	// SKWiD MOD
 
 // Zaero
-#define MOD_SNIPERRIFLE			69
-#define MOD_TRIPBOMB		    70
-#define MOD_FLARE				71
-#define MOD_A2K					72
-#define MOD_SONICCANNON			73
-#define MOD_AUTOCANNON			74
-#define MOD_GL_POLYBLEND		75
+#define MOD_SNIPERRIFLE			70
+#define MOD_TRIPBOMB		    71
+#define MOD_FLARE				72
+#define MOD_A2K					73
+#define MOD_SONICCANNON			74
+#define MOD_AUTOCANNON			75
+#define MOD_GL_POLYBLEND		76
 // end Zaero
 
 //===============================
@@ -1167,6 +1180,7 @@ void Touch_Item (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf
 // g_utils.c
 //
 qboolean	KillBox (edict_t *ent);
+qboolean MonsterPlayerKillBox (edict_t *ent);	// Zaero added
 void	G_ProjectSource (vec3_t point, vec3_t distance, vec3_t forward, vec3_t right, vec3_t result);
 edict_t *G_Find (edict_t *from, size_t fieldofs, char *match);	// Knightmare- changed fieldofs from int
 edict_t *findradius (edict_t *from, vec3_t org, float rad);
@@ -1202,9 +1216,10 @@ void GameDirRelativePath(char *filename, char *output, size_t outputSize);
 void SavegameDirRelativePath(char *filename, char *output, size_t outputSize);
 void CreatePath (char *path);
 void G_UseTarget (edict_t *ent, edict_t *activator, edict_t *target);
-qboolean IsIdMap (void); //Knightmare added
-qboolean IsRogueMap (void); //Knightmare added
-qboolean IsXatrixMap (void); //Knightmare added
+qboolean IsIdMap (void); // Knightmare added
+qboolean IsXatrixMap (void); // Knightmare added
+qboolean IsRogueMap (void); // Knightmare added
+qboolean IsZaeroMap (void); // Knightmare added
 qboolean CheckCoop_MapHacks (edict_t *ent); // FS: Coop: Check if we have to modify some stuff for coop so we don't have to rely on distributing ent files
 qboolean UseSpecialGoodGuyFlag (edict_t *monster); // Knightmare added
 qboolean UseRegularGoodGuyFlag (edict_t *monster); // Knightmare added
@@ -1331,16 +1346,23 @@ void monster_fire_shotgun (edict_t *self, vec3_t start, vec3_t aimdir, int damag
 void monster_fire_blaster (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int flashtype, int effect, int color);
 void monster_fire_grenade (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, int flashtype);
 void monster_fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int flashtype, edict_t *homing_target);
-//Knightmare added
-void monster_fire_missile (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int flashtype, edict_t *homing_target);
+void monster_fire_missile (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int flashtype, edict_t *homing_target);	// Knightmare added
 void monster_fire_railgun (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, int flashtype);
 void monster_fire_bfg (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, int kick, float damage_radius, int flashtype);
+
 // RAFAEL
+void monster_fire_blueblaster (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int flashtype, int effect);
 void monster_fire_ionripper (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int flashtype, int effect);
 void monster_fire_rocket_heat (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int flashtype);
 void monster_dabeam (edict_t *self);
-void monster_fire_blueblaster (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int flashtype, int effect);
 
+// ROGUE
+void monster_fire_blaster2 (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int flashtype, int effect);
+void monster_fire_tracker (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, edict_t *enemy, int flashtype);
+void monster_fire_heat (edict_t *self, vec3_t start, vec3_t dir, vec3_t offset, int damage, int kick, int flashtype);
+// ROGUE
+
+void monster_fire_plasma_rifle (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int flashtype, qboolean spread);	// SKWiD MOD
 
 void M_droptofloor (edict_t *ent);
 void monster_think (edict_t *self);
@@ -1354,13 +1376,12 @@ void M_CatagorizePosition (edict_t *ent);
 qboolean M_CheckAttack (edict_t *self);
 void M_FlyCheck (edict_t *self);
 void M_CheckGround (edict_t *ent);
-//ROGUE
-void monster_fire_blaster2 (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int flashtype, int effect);
-void monster_fire_tracker (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, edict_t *enemy, int flashtype);
-void monster_fire_heat (edict_t *self, vec3_t start, vec3_t dir, vec3_t offset, int damage, int kick, int flashtype);
+
+// ROGUE
 void stationarymonster_start (edict_t *self);	
 void monster_done_dodge (edict_t *self);
-//ROGUE
+// ROGUE
+
 void InitiallyDead (edict_t *self);
 qboolean M_SetDeath(edict_t *self, mmove_t **deathmoves);
 int PatchMonsterModel (char *modelname);
@@ -1436,11 +1457,14 @@ void fire_grenade (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int s
 void fire_grenade2 (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, float timer, float damage_radius, qboolean held);
 //void fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage);
 void fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage, edict_t *home_target);
-//Knightmare added
-void fire_missile (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage, edict_t *home_target);
-void fire_shock_sphere (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage);
 void fire_rail (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick);
 void fire_bfg (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius);
+
+// Knightmare added
+void fire_missile (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage, edict_t *home_target);
+void fire_shock_sphere (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage);
+void fire_plasma_rifle (edict_t *ent, vec3_t start, vec3_t dir, int damage, int speed, qboolean spread);	// SKWiD MOD
+
 // RAFAEL
 void fire_ionripper (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, int effect);
 void fire_rocket_heat (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage);
@@ -1450,6 +1474,8 @@ void fire_trap (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int spee
 void Trap_Die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point);
 void Cmd_KillTrap_f (edict_t *ent);
 void Trap_Explode (edict_t *ent);
+
+// Lazarus
 qboolean AimGrenade (edict_t *launcher, vec3_t start, vec3_t target, vec_t speed, vec3_t aim);
 void Grenade_Evade (edict_t *monster);
 
@@ -1603,6 +1629,7 @@ qboolean M_CheckBottom (edict_t *ent);
 qboolean M_walkmove (edict_t *ent, float yaw, float dist);
 void M_MoveToGoal (edict_t *ent, float dist);
 void M_ChangeYaw (edict_t *ent);
+qboolean M_MoveAwayFromFlare(edict_t *self, float dist);	// Zaero
 
 //
 // g_phys.c
@@ -1853,6 +1880,9 @@ int trigger_transition_ents (edict_t *changelevel, edict_t *self);
 // z_item.c
 //
 qboolean EMPNukeCheck(edict_t	*ent, vec3_t pos);
+void updateVisorHud (edict_t *ent);
+void startVisorStatic (edict_t *ent);
+void stopCamera (edict_t *self);
 
 //
 // z_weapon.c
@@ -1917,7 +1947,8 @@ typedef struct
 	gitem_t		*weapon;
 	gitem_t		*lastweapon;
 
-	qboolean    fire_mode;              // Lazarus - alternate firing mode
+	qboolean    fire_mode;		// Lazarus - alternate firing mode
+	qboolean	plasma_mode;	// SKWiD MOD- plasma rifle mode
 
 	int			power_cubes;	// used for tracking the cubes in coop games
 	int			score;			// for calculating total unit score in coop games

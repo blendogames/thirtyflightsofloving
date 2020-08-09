@@ -174,6 +174,10 @@ void SP_monster_chick_heat (edict_t *self);
 void SP_monster_gladb (edict_t *self);
 void SP_monster_boss5 (edict_t *self);
 
+// Knightmare- LM Escape soldiers
+void SP_monster_soldier_plasma_re (edict_t *self);
+void SP_monster_soldier_plasma_sp (edict_t *self);
+
 // Zaero
 void SP_monster_autocannon (edict_t *self);
 void SP_monster_autocannon_floor (edict_t *self);
@@ -184,6 +188,7 @@ void SP_monster_zboss (edict_t *self);
 void SP_target_zboss_target(edict_t *self);
 void SP_func_barrier(edict_t *self);
 void SP_trigger_laser(edict_t *self);
+void SP_misc_securitycamera(edict_t *self);
 void SP_misc_commdish (edict_t *self);
 void SP_misc_crate(edict_t *self);
 void SP_misc_crate_medium(edict_t *self);
@@ -358,6 +363,7 @@ void SP_tesla (edict_t *self);
 void SP_trap (edict_t *self);
 void SP_rocket (edict_t *self);
 void SP_missile (edict_t *self);
+void SP_goop (edict_t *self);	// SKWiD MOD
 //
 // end Lazarus
 
@@ -482,9 +488,9 @@ spawn_t	spawns[] = {
 	{"misc_eastertank", SP_misc_eastertank},
 	{"misc_easterchick", SP_misc_easterchick},
 	{"misc_easterchick2", SP_misc_easterchick2},
-//Knightmare- patients for the infirmary
+// Knightmare- patients for the infirmary
 	{"misc_sick_guard", SP_misc_sick_guard},
-//Knightmare- experiment gekks
+// Knightmare- experiment gekks
 	{"misc_gekk_writhe", SP_misc_gekk_writhe},
 
 	// Knightmare- Coconut Monkey 3 Flame entities
@@ -555,6 +561,10 @@ spawn_t	spawns[] = {
 	{"monster_widow", SP_monster_widow},
 	{"monster_widow2", SP_monster_widow2},
 
+	// Knightmare- LM Escape soldiers
+	{"monster_soldier_plasma_re", SP_monster_soldier_plasma_re},
+	{"monster_soldier_plasma_sp", SP_monster_soldier_plasma_sp},
+
 	// Zaero
 	{"monster_autocannon", SP_monster_autocannon},
 	{"monster_autocannon_floor", SP_monster_autocannon_floor},
@@ -565,6 +575,7 @@ spawn_t	spawns[] = {
 	{"target_zboss_target", SP_target_zboss_target},
 	{"func_barrier", SP_func_barrier},
 	{"trigger_laser", SP_trigger_laser},
+	{"misc_securitycamera", SP_misc_securitycamera},
 	{"misc_commdish", SP_misc_commdish},
 	{"misc_crate", SP_misc_crate},
 	{"misc_crate_medium", SP_misc_crate_medium},
@@ -745,6 +756,7 @@ spawn_t	spawns[] = {
 	{"homing rocket", SP_rocket},
 	{"missile", SP_missile},
 	{"homing rocket", SP_missile},
+	{"goop", SP_goop},	// SKWiD MOD
 // end Lazarus
 
 	{NULL, NULL}
@@ -859,21 +871,29 @@ void ED_CallSpawn (edict_t *ent)
 			ent->classname = "monster_chick_heat";
 		// medic
 		if (!strcmp(ent->classname, "monster_medic")
-			//don't spawn another medic commander from medic commander
+			// don't spawn another medic commander from medic commander
 			&& !(ent->monsterinfo.monsterflags & MFL_DO_NOT_COUNT))
 			ent->classname = "monster_medic_commander";
 	}
 
-	//LM Escape monster replacement
-	if (!strcmp(ent->classname, "monster_soldier_plasma_re"))
+	// LM Escape monster replacement
+/*	if (!strcmp(ent->classname, "monster_soldier_plasma_re"))
 		ent->classname = "monster_soldier_ripper";
 	if (!strcmp(ent->classname, "monster_soldier_plasma_sp"))
 		ent->classname = "monster_soldier_hypergun";
-	//LM Escape Plasma gun
+	// LM Escape Plasma gun
 	if (!strcmp(ent->classname, "weapon_plasma"))
 		ent->classname = "weapon_boomer";
+*/
+	// Zaero item replacement
+	if (!strcmp(ent->classname, "weapon_sniperrifle"))
+		ent->classname = "weapon_railgun";
+	if (!strcmp(ent->classname, "weapon_soniccannon"))
+		ent->classname = "weapon_plasmabeam";
+	if (!strcmp(ent->classname, "ammo_a2k"))
+		ent->classname = "ammo_nbomb";
 
-	//Knightmare- replace Pierre in Coconut Monkey 3 with Daedalus
+	// Knightmare- replace Pierre in Coconut Monkey 3 with Daedalus
 	if (!strcmp(ent->classname, "monster_pierre_monkey"))
 	{
 		ent->classname = "monster_daedalus";
@@ -883,7 +903,7 @@ void ED_CallSpawn (edict_t *ent)
 		ent->powerarmor = 500;
 	}
 
-	//Knightmare- backup entity's original angles
+	// Knightmare- backup entity's original angles
 	VectorCopy (ent->s.angles, ent->org_angles);
 
 	// check item spawn functions
@@ -2134,6 +2154,7 @@ void SP_worldspawn (edict_t *ent)
 		gi.modelindex ("#w_phalanx.md2");			// Knightmare added
 		gi.modelindex ("#w_ripper.md2");			// Knightmare added
 		gi.modelindex ("#w_shockwave.md2");			// Knightmare added
+		gi.modelindex ("#w_plasmarifle.md2");		// SKWiD MOD
 	//	gi.modelindex ("#a_trap.md2");				// Knightmare added
 	//	gi.modelindex ("#a_tesla.md2");				// Knightmare added
 	//	gi.modelindex ("#w_grapple.md2");

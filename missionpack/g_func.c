@@ -47,6 +47,7 @@
 void plat2_spawn_danger_area (edict_t *ent);
 void plat2_kill_danger_area (edict_t *ent);
 void Move_Done (edict_t *ent);
+void door_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf);
 void train_children_think (edict_t *self);
 void train_blocked (edict_t *self, edict_t *other);
 void moving_speaker_think (edict_t *self);
@@ -74,10 +75,15 @@ void moving_speaker_think (edict_t *self);
 // !coop					4096
 #define DOOR_INACTIVE		8192
 
+// Zaero
+#define DOOR_ACTIVE_TOGGLE	1
+#define DOOR_ACTIVE_ON		2
+// end Zaero
+
 #define TRAIN_START_ON		1
 #define TRAIN_TOGGLE		2
 #define TRAIN_BLOCK_STOPS	4
-//Knightmare
+// Knightmare added
 #define	TRAIN_ROTATE		8
 #define	TRAIN_ROT_CONST		16
 #define	TRAIN_ANIM			32
@@ -90,7 +96,7 @@ void moving_speaker_think (edict_t *self);
 //
 
 //
-//Knightmare- smart functions for child movement
+// Knightmare- smart functions for child movement
 // These constantly check the updated destination point
 //
 
@@ -107,7 +113,7 @@ void Move_pos0_Final (edict_t *ent)
 		return;
 	}
 	VectorScale (ent->moveinfo.dir, ent->moveinfo.remaining_distance / FRAMETIME, ent->velocity);
-	VectorAdd(ent->movewith_ent->velocity, ent->velocity, ent->velocity);
+	VectorAdd (ent->movewith_ent->velocity, ent->velocity, ent->velocity);
 	ent->think = Move_Done;
 	ent->nextthink = level.time + FRAMETIME;
 }
@@ -125,7 +131,7 @@ void Move_pos0_Think (edict_t *ent)
 		return;
 	}
 	VectorScale (ent->moveinfo.dir, ent->moveinfo.speed, ent->velocity);
-	VectorAdd(ent->movewith_ent->velocity, ent->velocity, ent->velocity);
+	VectorAdd (ent->movewith_ent->velocity, ent->velocity, ent->velocity);
 	ent->nextthink = level.time + FRAMETIME;
 	ent->think = Move_pos0_Think;
 }
@@ -143,7 +149,7 @@ void Move_pos1_Final (edict_t *ent)
 		return;
 	}
 	VectorScale (ent->moveinfo.dir, ent->moveinfo.remaining_distance / FRAMETIME, ent->velocity);
-	VectorAdd(ent->movewith_ent->velocity, ent->velocity, ent->velocity);
+	VectorAdd (ent->movewith_ent->velocity, ent->velocity, ent->velocity);
 	ent->think = Move_Done;
 	ent->nextthink = level.time + FRAMETIME;
 }
@@ -161,7 +167,7 @@ void Move_pos1_Think (edict_t *ent)
 		return;
 	}
 	VectorScale (ent->moveinfo.dir, ent->moveinfo.speed, ent->velocity);
-	VectorAdd(ent->movewith_ent->velocity, ent->velocity, ent->velocity);
+	VectorAdd (ent->movewith_ent->velocity, ent->velocity, ent->velocity);
 	ent->nextthink = level.time + FRAMETIME;
 	ent->think = Move_pos1_Think;
 }
@@ -179,7 +185,7 @@ void Move_pos2_Final (edict_t *ent)
 		return;
 	}
 	VectorScale (ent->moveinfo.dir, ent->moveinfo.remaining_distance / FRAMETIME, ent->velocity);
-	VectorAdd(ent->movewith_ent->velocity, ent->velocity, ent->velocity);
+	VectorAdd (ent->movewith_ent->velocity, ent->velocity, ent->velocity);
 	ent->think = Move_Done;
 	ent->nextthink = level.time + FRAMETIME;
 }
@@ -197,7 +203,7 @@ void Move_pos2_Think (edict_t *ent)
 		return;
 	}
 	VectorScale (ent->moveinfo.dir, ent->moveinfo.speed, ent->velocity);
-	VectorAdd(ent->movewith_ent->velocity, ent->velocity, ent->velocity);
+	VectorAdd (ent->movewith_ent->velocity, ent->velocity, ent->velocity);
 	ent->nextthink = level.time + FRAMETIME;
 	ent->think = Move_pos2_Think;
 }
@@ -207,27 +213,27 @@ void Move_Done (edict_t *ent)
 	VectorClear (ent->velocity);
 	if (ent->movewith && ent->movewith_ent)
 	{
-		VectorCopy(ent->movewith_ent->velocity, ent->velocity);
+		VectorCopy (ent->movewith_ent->velocity, ent->velocity);
 	}
 	// call end function
-	if(ent->moveinfo.endfunc)
+	if (ent->moveinfo.endfunc)
 		ent->moveinfo.endfunc (ent);
 }
 
 void Move_Final (edict_t *ent)
 {
-	//if we're there, don't bother, we're done
+	// if we're there, don't bother, we're done
 	if (ent->moveinfo.remaining_distance == 0 || ent->smooth_movement)
 	{
 		Move_Done (ent);
 		return;
 	}
-	//velocity = direction * distance * 10
-	//so we always reach the goal in 0.1 seconds
+	// velocity = direction * distance * 10
+	// so we always reach the goal in 0.1 seconds
 	VectorScale (ent->moveinfo.dir, ent->moveinfo.remaining_distance / FRAMETIME, ent->velocity);
 	if (ent->movewith && ent->movewith_ent)
 	{
-		VectorAdd(ent->movewith_ent->velocity, ent->velocity, ent->velocity);
+		VectorAdd (ent->movewith_ent->velocity, ent->velocity, ent->velocity);
 	}
 	ent->think = Move_Done;
 	ent->nextthink = level.time + FRAMETIME;
@@ -243,11 +249,11 @@ void Move_Begin (edict_t *ent)
 		Move_Final (ent);
 		return;
 	}
-	//set object's velocity to direction times speed
+	// set object's velocity to direction times speed
 	VectorScale (ent->moveinfo.dir, ent->moveinfo.speed, ent->velocity);
 	if (ent->movewith && ent->movewith_ent)
 	{
-		VectorAdd(ent->movewith_ent->velocity, ent->velocity, ent->velocity);
+		VectorAdd (ent->movewith_ent->velocity, ent->velocity, ent->velocity);
 		ent->moveinfo.remaining_distance -= ent->moveinfo.speed * FRAMETIME;
 		ent->nextthink = level.time + FRAMETIME;
 		ent->think = Move_Begin;
@@ -267,18 +273,18 @@ void Move_Begin (edict_t *ent)
 			if (ent->spawnflags & TRAIN_ROTATE && !(ent->target_ent->spawnflags & 2))
 			{
 				vec3_t	v, angles;
-				if (ent->spawnflags & TRAIN_ORIGIN){	// Knightmare- func_train_origin support
+				if (ent->spawnflags & TRAIN_ORIGIN) {	// Knightmare- func_train_origin support
 					VectorSubtract(ent->target_ent->s.origin, ent->s.origin, v);
 				}
 				else {
-					VectorAdd(ent->s.origin, ent->mins, v);
+					VectorAdd (ent->s.origin, ent->mins, v);
 					VectorSubtract(ent->target_ent->s.origin, v, v);
 				}
 				vectoangles2(v,angles);
 				ent->ideal_yaw = angles[YAW];
 				ent->ideal_pitch = angles[PITCH];
-				if(ent->ideal_pitch < 0) ent->ideal_pitch += 360;
-				VectorClear(ent->movedir);
+				if (ent->ideal_pitch < 0) ent->ideal_pitch += 360;
+				VectorClear (ent->movedir);
 				ent->movedir[1] = 1.0;
 			}
 			VectorSubtract (dest, ent->s.origin, ent->moveinfo.dir);
@@ -304,7 +310,7 @@ void Move_Calc (edict_t *ent, vec3_t dest, void(*func)(edict_t*))
 	VectorClear (ent->velocity);
 	if (ent->movewith && ent->movewith_ent)
 	{
-		VectorCopy(ent->movewith_ent->velocity, ent->velocity);
+		VectorCopy (ent->movewith_ent->velocity, ent->velocity);
 	}
 	VectorSubtract (dest, ent->s.origin, ent->moveinfo.dir);
 	ent->moveinfo.remaining_distance = VectorNormalize (ent->moveinfo.dir);
@@ -378,14 +384,14 @@ void Spline_Calc (edict_t *train, vec3_t p1, vec3_t p2, vec3_t a1, vec3_t a2, fl
 	// The factor of 0.4 is simply based on experimentation, as a value that
 	// yields nice even curves.
 
-	AngleVectors(a1, v1, NULL, NULL);
-	AngleVectors(a2, v2, NULL, NULL);
+	AngleVectors (a1, v1, NULL, NULL);
+	AngleVectors (a2, v2, NULL, NULL);
 
 	VectorSubtract(p2, p1, d);
 	s = sqrt(d[0] * d[0] + d[1] * d[1] + d[2] * d[2]) * 0.4;
 
-	VectorMA(p1,  s, v1, c1);
-	VectorMA(p2, -s, v2, c2);
+	VectorMA (p1,  s, v1, c1);
+	VectorMA (p2, -s, v2, c2);
 
 	// cubic interpolation of the four points
 	// gives the position along the curve
@@ -413,12 +419,12 @@ void Train_Move_Spline (edict_t *self)
 	vec3_t	a;
 
 	train = self->enemy;
-	if(!train || !train->inuse)
+	if (!train || !train->inuse)
 		return;
-	//Knightmare- check for killtargeted path_corners
+	// Knightmare- check for killtargeted path_corners
 	if ((!train->from) || (!train->from->inuse) || (!train->to) || (!train->to->inuse))
 		return;
-	//Knightmare- check for removed spline flag- get da hell outta here
+	// Knightmare- check for removed spline flag- get da hell outta here
 	if ( !(train->spawnflags & TRAIN_SPLINE) )
 	{
 		self->think = train_children_think;
@@ -427,10 +433,10 @@ void Train_Move_Spline (edict_t *self)
 
 	if ( (train->from != train->to) && !train->moveinfo.is_blocked && (train->spawnflags & TRAIN_START_ON))
 	{
-		if (train->moveinfo.bezier_ratio >= 1.0) //Knightmare- don't keep moving at end of curve
+		if (train->moveinfo.bezier_ratio >= 1.0) // Knightmare- don't keep moving at end of curve
 		{
-			VectorClear(self->avelocity);
-			VectorClear(self->velocity);
+			VectorClear (self->avelocity);
+			VectorClear (self->velocity);
 			self->nextthink = level.time + FRAMETIME;
 			return;
 		}
@@ -440,9 +446,9 @@ void Train_Move_Spline (edict_t *self)
 		if ( !(train->spawnflags & TRAIN_ORIGIN) ) // Knightmare- func_train_origin support
 			VectorSubtract(p, train->mins, p);
 		VectorSubtract(p, train->s.origin, train->velocity);
-		VectorScale(train->velocity, 10, train->velocity);
+		VectorScale (train->velocity, 10, train->velocity);
 		VectorSubtract(a, train->s.angles, train->avelocity);
-		VectorScale(train->avelocity, 10, train->avelocity);
+		VectorScale (train->avelocity, 10, train->avelocity);
 		if (train->pitch_speed < 0)
 			train->avelocity[PITCH] = 0;
 		if (train->yaw_speed < 0)
@@ -473,7 +479,7 @@ void check_reverse_rotation (edict_t *self, vec3_t point)
 		return;
 
 	VectorSubtract(point,self->s.origin,vec);
-	VectorCopy(self->move_origin,vnext);
+	VectorCopy (self->move_origin,vnext);
 	VectorNormalize(vec);
 	VectorNormalize(vnext);
 
@@ -519,7 +525,7 @@ void AngleMove_Done (edict_t *ent)
 	//clear angular velocity
 	VectorClear (ent->avelocity);
 	//call end function
-	if(ent->moveinfo.endfunc)
+	if (ent->moveinfo.endfunc)
 		ent->moveinfo.endfunc (ent);
 }
 
@@ -553,10 +559,10 @@ void AngleMove_Begin (edict_t *ent)
 	float	frames;
 
 //PGM		accelerate as needed
-	if(ent->moveinfo.speed < ent->speed)
+	if (ent->moveinfo.speed < ent->speed)
 	{
 		ent->moveinfo.speed += ent->accel;
-		if(ent->moveinfo.speed > ent->speed)
+		if (ent->moveinfo.speed > ent->speed)
 			ent->moveinfo.speed = ent->speed;
 	}
 //PGM
@@ -585,7 +591,7 @@ void AngleMove_Begin (edict_t *ent)
 	VectorScale (destdelta, 1.0 / traveltime, ent->avelocity);
 //PGM
 	// if we're done accelerating, act as a normal rotation
-	if(ent->moveinfo.speed >= ent->speed)
+	if (ent->moveinfo.speed >= ent->speed)
 	{
 		// set nextthink to trigger a think when dest is reached
 		ent->nextthink = level.time + frames * FRAMETIME;
@@ -608,7 +614,7 @@ void AngleMove_Calc (edict_t *ent, void(*func)(edict_t*))
 
 //PGM
 	// if we're supposed to accelerate, this will tell anglemove_begin to do so
-	if(ent->accel != ent->speed)
+	if (ent->accel != ent->speed)
 		ent->moveinfo.speed = 0;
 //PGM
 
@@ -752,7 +758,7 @@ void Think_AccelMove (edict_t *ent)
 
 	VectorScale (ent->moveinfo.dir, ent->moveinfo.current_speed * 10, ent->velocity);
 	if (ent->movewith && ent->movewith_ent)
-		VectorAdd(ent->movewith_ent->velocity, ent->velocity, ent->velocity);
+		VectorAdd (ent->movewith_ent->velocity, ent->velocity, ent->velocity);
 	ent->nextthink = level.time + FRAMETIME;
 	ent->think = Think_AccelMove;
 }
@@ -1075,8 +1081,8 @@ void plat2_spawn_danger_area (edict_t *ent)
 {
 	vec3_t	mins, maxs;
 
-	VectorCopy(ent->mins, mins);
-	VectorCopy(ent->maxs, maxs);
+	VectorCopy (ent->mins, mins);
+	VectorCopy (ent->maxs, maxs);
 	maxs[2] = ent->mins[2] + 64;
 
 	SpawnBadArea(mins, maxs, 0, ent);
@@ -1089,7 +1095,7 @@ void plat2_kill_danger_area (edict_t *ent)
 	t = NULL;
 	while ((t = G_Find (t, FOFS(classname), "bad_area")))
 	{
-		if(t->owner == ent)
+		if (t->owner == ent)
 			G_FreeEdict(t);
 	}
 }
@@ -1104,20 +1110,20 @@ void plat2_hit_top (edict_t *ent)
 	}
 	ent->moveinfo.state = STATE_TOP;
 
-	if(ent->plat2flags & PLAT2_CALLED)
+	if (ent->plat2flags & PLAT2_CALLED)
 	{
 		ent->plat2flags = PLAT2_WAITING;
-		if(!(ent->spawnflags & PLAT2_TOGGLE))
+		if (!(ent->spawnflags & PLAT2_TOGGLE))
 		{
 			ent->think = plat2_go_down;
 			ent->nextthink = level.time + 5.0;
 		}
-		if(deathmatch->value)
+		if (deathmatch->value)
 			ent->last_move_time = level.time - 1.0;
 		else
 			ent->last_move_time = level.time - 2.0;
 	}
-	else if(!(ent->spawnflags & PLAT2_TOP) && !(ent->spawnflags & PLAT2_TOGGLE))
+	else if (!(ent->spawnflags & PLAT2_TOP) && !(ent->spawnflags & PLAT2_TOGGLE))
 	{
 		ent->plat2flags = 0;
 		ent->think = plat2_go_down;
@@ -1143,15 +1149,15 @@ void plat2_hit_bottom (edict_t *ent)
 	}
 	ent->moveinfo.state = STATE_BOTTOM;
 	
-	if(ent->plat2flags & PLAT2_CALLED)
+	if (ent->plat2flags & PLAT2_CALLED)
 	{
 		ent->plat2flags = PLAT2_WAITING;
-		if(!(ent->spawnflags & PLAT2_TOGGLE))
+		if (!(ent->spawnflags & PLAT2_TOGGLE))
 		{
 			ent->think = plat2_go_up;
 			ent->nextthink = level.time + 5.0;
 		}
-		if(deathmatch->value)
+		if (deathmatch->value)
 			ent->last_move_time = level.time - 1.0;
 		else
 			ent->last_move_time = level.time - 2.0;
@@ -1227,35 +1233,35 @@ void plat2_operate (edict_t *ent, edict_t *other)
 
 	platCenter = (trigger->absmin[2] + trigger->absmax[2]) / 2;
 
-	if(ent->moveinfo.state == STATE_TOP)
+	if (ent->moveinfo.state == STATE_TOP)
 	{
 		otherState = STATE_TOP;
-		if(ent->spawnflags & PLAT2_BOX_LIFT)
+		if (ent->spawnflags & PLAT2_BOX_LIFT)
 		{
-			if(platCenter > other->s.origin[2])
+			if (platCenter > other->s.origin[2])
 				otherState = STATE_BOTTOM;
 		}
 		else
 		{
-			if(trigger->absmax[2] > other->s.origin[2])
+			if (trigger->absmax[2] > other->s.origin[2])
 				otherState = STATE_BOTTOM;
 		}
 	}
 	else
 	{
 		otherState = STATE_BOTTOM;
-		if(other->s.origin[2] > platCenter)
+		if (other->s.origin[2] > platCenter)
 			otherState = STATE_TOP;
 	}
 
 	ent->plat2flags = PLAT2_MOVING;
 
-	if(deathmatch->value)
+	if (deathmatch->value)
 		pauseTime = 0.3;
 	else
 		pauseTime = 0.5;
 
-	if(ent->moveinfo.state != otherState)
+	if (ent->moveinfo.state != otherState)
 	{
 		ent->plat2flags |= PLAT2_CALLED;
 		pauseTime = 0.1;
@@ -1263,7 +1269,7 @@ void plat2_operate (edict_t *ent, edict_t *other)
 
 	ent->last_move_time = level.time;
 	
-	if(ent->moveinfo.state == STATE_BOTTOM)
+	if (ent->moveinfo.state == STATE_BOTTOM)
 	{
 		ent->think = plat2_go_up;
 		ent->nextthink = level.time + pauseTime;
@@ -1300,7 +1306,7 @@ void plat2_blocked (edict_t *self, edict_t *other)
 		// give it a chance to go away on it's own terms (like gibs)
 		T_Damage (other, self, self, vec3_origin, other->s.origin, vec3_origin, 100000, 1, 0, MOD_CRUSH);
 		// if it's still there, nuke it
-		if(other && other->inuse)
+		if (other && other->inuse)
 			BecomeExplosion1 (other);
 		return;
 	}
@@ -1313,7 +1319,7 @@ void plat2_blocked (edict_t *self, edict_t *other)
 	}
 
 	// gib dead things
-	if(other->health < 1)
+	if (other->health < 1)
 	{
 		T_Damage(other, self, self, vec3_origin, other->s.origin, vec3_origin, 100, 1, 0, MOD_CRUSH);
 	}
@@ -1331,9 +1337,9 @@ void Use_Plat2 (edict_t *ent, edict_t *other, edict_t *activator)
 	edict_t		*trigger;
 	int			i;
 
-	if(ent->moveinfo.state > STATE_BOTTOM)
+	if (ent->moveinfo.state > STATE_BOTTOM)
 		return;
-	if((ent->last_move_time + 2) > level.time)
+	if ((ent->last_move_time + 2) > level.time)
 		return;
 
 	for (i = 1, trigger = g_edicts + 1; i < globals.num_edicts; i++, trigger++)
@@ -1356,7 +1362,7 @@ void plat2_activate (edict_t *ent, edict_t *other, edict_t *activator)
 {
 	edict_t *trigger;
 
-//	if(ent->targetname)
+//	if (ent->targetname)
 //		ent->targetname[0] = 0;
 
 	ent->use = Use_Plat2;
@@ -1459,7 +1465,7 @@ void SP_func_plat2 (edict_t *ent)
 
 	ent->moveinfo.state = STATE_TOP;
 
-	if(ent->targetname)
+	if (ent->targetname)
 	{
 		ent->use = plat2_activate;
 	}
@@ -1479,7 +1485,7 @@ void SP_func_plat2 (edict_t *ent)
 
 		trigger->touch = Touch_Plat_Center2;		// Override trigger touch function
 
-		if(!(ent->spawnflags & PLAT2_TOP))
+		if (!(ent->spawnflags & PLAT2_TOP))
 		{
 			VectorCopy (ent->pos2, ent->s.origin);
 			ent->moveinfo.state = STATE_BOTTOM;
@@ -1543,7 +1549,7 @@ void rotating_accel (edict_t *self)
 	float	current_speed;
 
 	current_speed = VectorLength (self->avelocity);
-	if(current_speed >= (self->speed - self->accel))		// done
+	if (current_speed >= (self->speed - self->accel))		// done
 	{
 		VectorScale (self->movedir, self->speed, self->avelocity);
 		G_UseTargets (self, self);
@@ -1562,7 +1568,7 @@ void rotating_decel (edict_t *self)
 	float	current_speed;
 
 	current_speed = VectorLength (self->avelocity);
-	if(current_speed <= self->decel)		// done
+	if (current_speed <= self->decel)		// done
 	{
 		VectorClear (self->avelocity);
 		G_UseTargets (self, self);
@@ -1604,7 +1610,7 @@ void rotating_use (edict_t *self, edict_t *other, edict_t *activator)
 	{
 		self->s.sound = 0;
 //PGM
-		if(self->spawnflags & 8192)	// Decelerate
+		if (self->spawnflags & 8192)	// Decelerate
 			rotating_decel (self);
 		else
 		{
@@ -1621,7 +1627,7 @@ void rotating_use (edict_t *self, edict_t *other, edict_t *activator)
 		self->s.attenuation = self->attenuation;
 #endif
 //PGM
-		if(self->spawnflags & 8192)	// accelerate
+		if (self->spawnflags & 8192)	// accelerate
 			rotating_accel (self);
 		else
 		{
@@ -1645,7 +1651,7 @@ void SP_func_rotating (edict_t *ent)
 		ent->movetype = MOVETYPE_PUSH;
 
 	// set the axis of rotation
-	VectorClear(ent->movedir);
+	VectorClear (ent->movedir);
 	if (ent->spawnflags & 4)
 		ent->movedir[2] = 1.0;
 	else if (ent->spawnflags & 8)
@@ -1686,14 +1692,14 @@ void SP_func_rotating (edict_t *ent)
 		ent->s.effects |= EF_ANIM_ALLFAST;
 
 //PGM
-	if(ent->spawnflags & 8192)	// Accelerate / Decelerate
+	if (ent->spawnflags & 8192)	// Accelerate / Decelerate
 	{
-		if(!ent->accel)
+		if (!ent->accel)
 			ent->accel = 1;
 		else if (ent->accel > ent->speed)
 			ent->accel = ent->speed;
 
-		if(!ent->decel)
+		if (!ent->decel)
 			ent->decel = 1;
 		else if (ent->decel > ent->speed)
 			ent->decel = ent->speed;
@@ -1714,14 +1720,14 @@ void func_rotating_dh_init (edict_t *ent)
 	edict_t		*new_origin;
 
 	new_origin = G_Find (NULL, FOFS(targetname), ent->pathtarget);
-	if(new_origin)
-		VectorCopy(new_origin->s.origin,ent->s.origin);
+	if (new_origin)
+		VectorCopy (new_origin->s.origin,ent->s.origin);
 	SP_func_rotating (ent);
 }
 
 void SP_func_rotating_dh (edict_t *ent)
 {
-	if( !ent->pathtarget )
+	if ( !ent->pathtarget )
 	{
 		SP_func_rotating(ent);
 		return;
@@ -1980,22 +1986,22 @@ void trainbutton_killed (edict_t *self, edict_t *inflictor, edict_t *attacker, i
 	edict_t *e, *child;
 
 	// Unnamed entities can't be movewith parents
-	if(!ent->targetname) return;
+	if (!ent->targetname) return;
 
 	child = G_Find(NULL,FOFS(movewith),ent->targetname);
 	e = ent;
-	while(child)
+	while (child)
 	{
 		child->movewith_ent = ent;
 		// Copy parent's current angles to the child. They SHOULD be 0,0,0 at this point
 		// for all currently supported parents, but ya never know.
-		VectorCopy(ent->s.angles,child->parent_attach_angles);
-		if(child->org_movetype < 0)
+		VectorCopy (ent->s.angles,child->parent_attach_angles);
+		if (child->org_movetype < 0)
 			child->org_movetype = child->movetype;
-		if(child->movetype != MOVETYPE_NONE)
+		if (child->movetype != MOVETYPE_NONE)
 			child->movetype = MOVETYPE_PUSH;
-		VectorCopy(child->mins,child->org_mins);
-		VectorCopy(child->maxs,child->org_maxs);
+		VectorCopy (child->mins,child->org_mins);
+		VectorCopy (child->maxs,child->org_maxs);
 		VectorSubtract(child->s.origin,ent->s.origin,child->movewith_offset);
 		e->movewith_next = child;
 		e = child;
@@ -2005,7 +2011,7 @@ void trainbutton_killed (edict_t *self, edict_t *inflictor, edict_t *attacker, i
 
 void SP_func_trainbutton (edict_t *ent)
 {
-	if(!ent->movewith)
+	if (!ent->movewith)
 	{
 		SP_func_button(ent);
 		return;
@@ -2085,20 +2091,20 @@ void door_use_areaportals (edict_t *self, qboolean open)
 
 void door_go_down (edict_t *self);
 
-//Lazarus
+// Lazarus
 void swinging_door_reset (edict_t *self)
 {
 	self->moveinfo.state = STATE_BOTTOM;
 	self->health = self->max_health;
-	if(self->die)
+	if (self->die)
 		self->takedamage = DAMAGE_YES;
 	VectorCopy (self->pos2, self->pos1);
 	VectorMA (self->s.angles, self->moveinfo.distance, self->movedir, self->pos2);
 	VectorCopy (self->pos1, self->moveinfo.start_angles);
 	VectorCopy (self->pos2, self->moveinfo.end_angles);
 	vectoangles2(self->move_origin,self->move_origin);
-	VectorMA(self->move_origin,self->moveinfo.distance,self->movedir,self->move_origin);
-	AngleVectors(self->move_origin,self->move_origin,NULL,NULL);
+	VectorMA (self->move_origin,self->moveinfo.distance,self->movedir,self->move_origin);
+	AngleVectors (self->move_origin,self->move_origin,NULL,NULL);
 }
 
 void door_hit_top (edict_t *self)
@@ -2116,10 +2122,10 @@ void door_hit_top (edict_t *self)
 	self->s.sound = 0;	// Knightmare- make sure this is always set to 0, lead mover or not!
 
 	self->moveinfo.state = STATE_TOP;
-	if(self->flags & FL_REVOLVING) //Lazarus
+	if (self->flags & FL_REVOLVING) //Lazarus
 	{
 		self->think = swinging_door_reset;
-		if(self->moveinfo.wait > 0)
+		if (self->moveinfo.wait > 0)
 			self->nextthink = level.time + self->moveinfo.wait;
 		else
 			self->think(self);
@@ -2154,6 +2160,9 @@ void door_hit_bottom (edict_t *self)
 
 void door_go_down (edict_t *self)
 {
+	if (!self)	// sanity check
+		return;
+
 	if (!(self->flags & FL_TEAMSLAVE))
 	{
 		if (self->moveinfo.sound_start)
@@ -2189,6 +2198,9 @@ void door_go_down (edict_t *self)
 
 void door_go_up (edict_t *self, edict_t *activator)
 {
+	if (!self)	// sanity check
+		return;
+
 	if (self->moveinfo.state == STATE_UP)
 		return;		// already going up
 
@@ -2238,6 +2250,9 @@ void smart_water_go_up (edict_t *self)
 	float		lowestPlayerPt;
 	int			i;
 
+	if (!self)	// sanity check
+		return;
+
 	if (self->moveinfo.state == STATE_TOP)
 	{	// reset top wait time
 		if (self->moveinfo.wait >= 0)
@@ -2247,7 +2262,7 @@ void smart_water_go_up (edict_t *self)
 
 	if (self->health)
 	{
-		if(self->absmax[2] >= self->health)
+		if (self->absmax[2] >= self->health)
 		{
 			VectorClear (self->velocity);
 			self->nextthink = 0;
@@ -2274,7 +2289,7 @@ void smart_water_go_up (edict_t *self)
 		ent = &g_edicts[1+i];
 
 		// don't count dead or unused player slots
-		if((ent->inuse) && (ent->health > 0))
+		if ((ent->inuse) && (ent->health > 0))
 		{
 			if (ent->absmin[2] < lowestPlayerPt)
 			{
@@ -2284,7 +2299,7 @@ void smart_water_go_up (edict_t *self)
 		}
 	}
 
-	if(!lowestPlayer)
+	if (!lowestPlayer)
 	{
 		return;
 	}
@@ -2292,7 +2307,7 @@ void smart_water_go_up (edict_t *self)
 	distance = lowestPlayerPt - self->absmax[2];
 
 	// for the calculations, make sure we intend to go up at least a little.
-	if(distance < self->accel)
+	if (distance < self->accel)
 	{
 		distance = 100;
 		self->moveinfo.speed = 5;
@@ -2300,9 +2315,9 @@ void smart_water_go_up (edict_t *self)
 	else
 		self->moveinfo.speed = distance / self->accel;
 
-	if(self->moveinfo.speed < 5)
+	if (self->moveinfo.speed < 5)
 		self->moveinfo.speed = 5;
-	else if(self->moveinfo.speed > self->speed)
+	else if (self->moveinfo.speed > self->speed)
 		self->moveinfo.speed = self->speed;
 
 	// FIXME - should this allow any movement other than straight up?
@@ -2310,7 +2325,7 @@ void smart_water_go_up (edict_t *self)
 	VectorScale (self->moveinfo.dir, self->moveinfo.speed, self->velocity);
 	self->moveinfo.remaining_distance = distance;
 
-	if(self->moveinfo.state != STATE_UP)
+	if (self->moveinfo.state != STATE_UP)
 	{
 		G_UseTargets (self, lowestPlayer);
 		door_use_areaportals (self, true);
@@ -2323,10 +2338,79 @@ void smart_water_go_up (edict_t *self)
 //PGM
 //======
 
+// Knightmare- Zaero-specific door handling
+void door_openclose (edict_t *self, edict_t *other, edict_t *activator)
+{
+	edict_t	*ent;
+
+	if (!self)	// sanity check
+		return;
+
+	if (self->flags & FL_TEAMSLAVE)
+		return;
+
+	if (self->spawnflags & DOOR_TOGGLE)
+	{
+		if (self->moveinfo.state == STATE_UP || self->moveinfo.state == STATE_TOP)
+		{
+			// trigger all paired doors
+			for (ent = self; ent; ent = ent->teamchain)
+			{
+				char *m = ent->message;
+				ent->message = NULL;
+				ent->touch = NULL;
+				door_go_down (ent);
+				ent->message = m;
+			}
+			return;
+		}
+	}
+	
+	// trigger all paired doors
+	for (ent = self; ent; ent = ent->teamchain)
+	{
+		char *m = ent->message;
+		ent->message = NULL;
+		ent->touch = NULL;
+		door_go_up (ent, activator);
+		ent->message = m;
+	}
+};
+// end Zaero
+
+
 void door_use (edict_t *self, edict_t *other, edict_t *activator)
 {
 	edict_t	*ent;
-	vec3_t	center;			//PGM
+	vec3_t	center;			// PGM
+
+	if (!self)	// sanity check
+		return;
+
+	// Knightmare- Zaero-specific door handling
+	if ( IsZaeroMap() )
+	{
+		if (self->active & DOOR_ACTIVE_TOGGLE)
+		{
+			for (ent = self; ent; ent = ent->teamchain)
+			{
+				if (ent->active & DOOR_ACTIVE_ON)
+				{
+					ent->touch = door_touch;
+					ent->active &= ~DOOR_ACTIVE_ON;
+				}
+				else
+				{
+					ent->touch = NULL;
+					ent->active |= DOOR_ACTIVE_ON;
+				}
+			}
+			return;
+		}
+		door_openclose (self, other, activator);
+		return;
+	}
+	// end Zaero
 
 	if (self->flags & FL_TEAMSLAVE)
 		return;
@@ -2348,8 +2432,8 @@ void door_use (edict_t *self, edict_t *other, edict_t *activator)
 
 //PGM
 	// smart water is different
-	VectorAdd(self->mins, self->maxs, center);
-	VectorScale(center, 0.5, center);
+	VectorAdd (self->mins, self->maxs, center);
+	VectorScale (center, 0.5, center);
 	if ((gi.pointcontents (center) & MASK_WATER) && self->spawnflags & 2)
 	{
 		self->message = NULL;
@@ -2371,6 +2455,9 @@ void door_use (edict_t *self, edict_t *other, edict_t *activator)
 
 void Touch_DoorTrigger (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
+	if (!self || !other)	// sanity check
+		return;
+
 	if (other->health <= 0)
 		return;
 
@@ -2382,9 +2469,26 @@ void Touch_DoorTrigger (edict_t *self, edict_t *other, cplane_t *plane, csurface
 
 	if (level.time < self->touch_debounce_time)
 		return;
+
+	// Zaero
+	if ( IsZaeroMap() )
+	{
+		if ( (self->owner->active & DOOR_ACTIVE_TOGGLE) &&
+			!(self->owner->active & DOOR_ACTIVE_ON) )
+			return;
+	}
+	// end Zaero
+
 	self->touch_debounce_time = level.time + 1.0;
 
-	door_use (self->owner, other, other);
+	// Zaero
+	if ( IsZaeroMap() ) {
+		door_openclose (self->owner, other, other);
+	}
+	else {
+		door_use (self->owner, other, other);
+	}
+	// end Zaero
 }
 
 void Think_CalcMoveSpeed (edict_t *self)
@@ -2534,11 +2638,19 @@ void door_killed (edict_t *self, edict_t *inflictor, edict_t *attacker, int dama
 
 void door_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
+	if (!self || !other)	// sanity check
+		return;
+
 	if (!other->client)
+		return;
+
+	// Zaero
+	if ( IsZaeroMap() && (self->message == NULL) )
 		return;
 
 	if (level.time < self->touch_debounce_time)
 		return;
+
 	self->touch_debounce_time = level.time + 5.0;
 
 	gi.centerprintf (other, "%s", self->message);
@@ -2575,6 +2687,7 @@ void SP_func_door (edict_t *ent)
 
 	if (!VectorLength(ent->movedir))
 		G_SetMovedir (ent->s.angles, ent->movedir);
+
 	ent->movetype = MOVETYPE_PUSH;
 	ent->solid = SOLID_BSP;
 	gi.setmodel (ent, ent->model);
@@ -2603,11 +2716,11 @@ void SP_func_door (edict_t *ent)
 		speaker->spawnflags	= 7; // owner must be moving to play
 		ent->speaker		= speaker;
 		if (VectorLength(ent->s.origin))
-			VectorCopy(ent->s.origin,speaker->s.origin);
+			VectorCopy (ent->s.origin,speaker->s.origin);
 		else
 		{
-			VectorAdd(ent->absmin,ent->absmax,speaker->s.origin);
-			VectorScale(speaker->s.origin,0.5,speaker->s.origin);
+			VectorAdd (ent->absmin,ent->absmax,speaker->s.origin);
+			VectorScale (speaker->s.origin,0.5,speaker->s.origin);
 		}
 		VectorSubtract (speaker->s.origin, ent->s.origin, speaker->offset);
 	}*/
@@ -2691,12 +2804,32 @@ void SP_func_door (edict_t *ent)
 
 	gi.linkentity (ent);
 
-	ent->postthink = train_move_children; //Knightmare- now supports movewith
+	// Zaero
+	if ( IsZaeroMap() )
+	{	// toggle active
+		if (!(ent->active & DOOR_ACTIVE_TOGGLE))
+			ent->active = 0;
+	}
+	// end Zaero
+
+	ent->postthink = train_move_children; // Knightmare- now supports movewith
 	ent->nextthink = level.time + FRAMETIME;
-	if (ent->health || ent->targetname)
-		ent->think = Think_CalcMoveSpeed;
-	else
-		ent->think = Think_SpawnDoorTrigger;
+
+	// Zaero
+	if ( IsZaeroMap() )
+	{
+		if ( (ent->health || ent->targetname) && !(ent->active & DOOR_ACTIVE_TOGGLE) )
+			ent->think = Think_CalcMoveSpeed;
+		else
+			ent->think = Think_SpawnDoorTrigger;
+	}
+	else {
+		if (ent->health || ent->targetname)
+			ent->think = Think_CalcMoveSpeed;
+		else
+			ent->think = Think_SpawnDoorTrigger;
+	}
+	// end Zaero
 }
 
 //PGM
@@ -2758,7 +2891,7 @@ void SP_func_door_rotating (edict_t *ent)
 	VectorClear (ent->s.angles);
 
 	// set the axis of rotation
-	VectorClear(ent->movedir);
+	VectorClear (ent->movedir);
 	if (ent->spawnflags & DOOR_X_AXIS)
 		ent->movedir[2] = 1.0;
 	else if (ent->spawnflags & DOOR_Y_AXIS)
@@ -2895,8 +3028,8 @@ void func_door_rot_dh_init (edict_t *ent)
 	edict_t		*new_origin;
 
 	new_origin = G_Find (NULL, FOFS(targetname), ent->pathtarget);
-	if(new_origin) {
-		VectorCopy(new_origin->s.origin,ent->s.origin);
+	if (new_origin) {
+		VectorCopy (new_origin->s.origin,ent->s.origin);
 		VectorCopy (ent->s.origin, ent->moveinfo.start_origin);
 		VectorCopy (ent->s.origin, ent->moveinfo.end_origin);
 		gi.linkentity(ent);
@@ -2911,7 +3044,7 @@ void func_door_rot_dh_init (edict_t *ent)
 void SP_func_door_rot_dh (edict_t *ent)
 {
 	SP_func_door_rotating(ent);
-	if(!ent->pathtarget) return;
+	if (!ent->pathtarget) return;
 
 	// Wait a few frames so that we're sure pathtarget has been parsed.
 	ent->think = func_door_rot_dh_init;
@@ -2974,7 +3107,7 @@ void SP_func_water (edict_t *self)
 	self->solid = SOLID_BSP;
 	gi.setmodel (self, self->model);
 
-	if(self->spawnflags & 4)
+	if (self->spawnflags & 4)
 	{
 		level.mud_puddles++;
 		self->svflags |= SVF_MUD;
@@ -3031,7 +3164,7 @@ void SP_func_water (edict_t *self)
 	{
 		// this is actually the divisor of the lowest player's distance to determine speed.
 		// self->speed then becomes the cap of the speed.
-		if(!self->accel)
+		if (!self->accel)
 			self->accel = 20;
 		self->blocked = smart_water_blocked;
 	}
@@ -3135,26 +3268,26 @@ void train_move_children (edict_t *self)
 			// Set rotational offset
 			if (!ent->movewith_set) 
 			{
-				VectorCopy(ent->mins, ent->org_mins);
-				VectorCopy(ent->maxs, ent->org_maxs);
+				VectorCopy (ent->mins, ent->org_mins);
+				VectorCopy (ent->maxs, ent->org_maxs);
 				VectorSubtract (ent->s.origin, self->s.origin, ent->movewith_offset);
 				// Remeber child's and parent's angles when child was attached
-				VectorCopy(self->s.angles, ent->parent_attach_angles);
-				VectorCopy(ent->s.angles, ent->child_attach_angles);
+				VectorCopy (self->s.angles, ent->parent_attach_angles);
+				VectorCopy (ent->s.angles, ent->child_attach_angles);
 
 				// Knightmare- backup turret's old angle offset
-				if (!strcmp(ent->classname,"monster_turret") && ent->offset)
-					VectorCopy(ent->offset, ent->old_offset); 
+				if (!strcmp(ent->classname, "monster_turret") && ent->offset)
+					VectorCopy (ent->offset, ent->old_offset); 
 
 				ent->movewith_set = 1;
 			}
 			// Get change in parent's angles from when child was attached, this tells us how far we need to rotate
 			VectorSubtract(self->s.angles, ent->parent_attach_angles, parent_angle_change);
-			AngleVectors(parent_angle_change, forward, right, up);
+			AngleVectors (parent_angle_change, forward, right, up);
 			VectorNegate(right, right);
 
 		//	if (!strncmp(ent->classname,"monster_",8))
-			if(ent->svflags & SVF_MONSTER)
+			if (ent->svflags & SVF_MONSTER)
 				is_monster = true;
 			else
 				is_monster = false;
@@ -3177,16 +3310,16 @@ void train_move_children (edict_t *self)
 			*/
 
 			// For all but buttons, doors, and plats, move origin and match velocities
-			if( strcmp(ent->classname,"func_door") && strcmp(ent->classname,"func_button")
-				&& strcmp(ent->classname,"func_door_secret") && strcmp(ent->classname,"func_door_secret2")
-				&& strcmp(ent->classname,"func_plat") && strcmp(ent->classname,"func_plat2")
-				&& strcmp(ent->classname,"func_water") && strcmp(ent->classname,"turret_wall")
-				&& (strcmp(ent->classname,"monster_turret") || !(ent->spawnflags & 128)) )
+			if ( strcmp(ent->classname, "func_door") && strcmp(ent->classname, "func_button")
+				&& strcmp(ent->classname, "func_door_secret") && strcmp(ent->classname, "func_door_secret2")
+				&& strcmp(ent->classname, "func_plat") && strcmp(ent->classname, "func_plat2")
+				&& strcmp(ent->classname, "func_water") && strcmp(ent->classname, "turret_wall")
+				&& (strcmp(ent->classname, "monster_turret") || !(ent->spawnflags & 128)) )
 			{
-				VectorMA(self->s.origin, ent->movewith_offset[0], forward, ent->s.origin);
-				VectorMA(ent->s.origin, ent->movewith_offset[1], right, ent->s.origin);
-				VectorMA(ent->s.origin, ent->movewith_offset[2], up, ent->s.origin);
-				VectorCopy(self->velocity, ent->velocity);
+				VectorMA (self->s.origin, ent->movewith_offset[0], forward, ent->s.origin);
+				VectorMA (ent->s.origin, ent->movewith_offset[1], right, ent->s.origin);
+				VectorMA (ent->s.origin, ent->movewith_offset[2], up, ent->s.origin);
+				VectorCopy (self->velocity, ent->velocity);
 			}
 
 			// If parent is spinning, add appropriate velocities
@@ -3210,14 +3343,14 @@ void train_move_children (edict_t *self)
 			// Match angular velocities
 			if (self->turn_rider)
 			{
-				if (!strcmp(ent->classname,"func_rotating"))
+				if (!strcmp(ent->classname, "func_rotating"))
 				{
-				/*	if(ent->movedir[0] > 0)
+				/*	if (ent->movedir[0] > 0)
 						ent->s.angles[1] = self->s.angles[1];
-					else if(ent->movedir[1] > 0)
+					else if (ent->movedir[1] > 0)
 					//	ent->s.angles[1] += amove[1];
 						ent->s.angles[1] += (ent->child_attach_angles[1] + parent_angle_change[1]);
-					else if(ent->movedir[2] > 0)
+					else if (ent->movedir[2] > 0)
 						ent->s.angles[1] = self->s.angles[1];
 					*/
 					float	cr, sr;
@@ -3248,13 +3381,13 @@ void train_move_children (edict_t *self)
 					// their own.
 					if (!ent->do_not_rotate)
 					{
-						if (!strcmp(ent->classname,"turret_breach") || !strcmp(ent->classname,"turret_base"))
-							VectorCopy(self->avelocity, ent->avelocity);
-						else if (!strcmp(ent->classname,"func_door_rotating"))
+						if ( !strcmp(ent->classname, "turret_breach") || !strcmp(ent->classname, "turret_base") )
+							VectorCopy (self->avelocity, ent->avelocity);
+						else if (!strcmp(ent->classname, "func_door_rotating"))
 						{
-							VectorCopy(self->avelocity, ent->avelocity);
-						//	VectorCopy(parent_angle_change, ent->pos1);
-							VectorAdd(ent->child_attach_angles, parent_angle_change, ent->pos1);
+							VectorCopy (self->avelocity, ent->avelocity);
+						//	VectorCopy (parent_angle_change, ent->pos1);
+							VectorAdd (ent->child_attach_angles, parent_angle_change, ent->pos1);
 							VectorMA (ent->pos1, ent->moveinfo.distance, ent->movedir, ent->pos2);
 							if (ent->moveinfo.state == STATE_TOP)
 								VectorCopy (ent->pos2, ent->s.angles);
@@ -3269,29 +3402,29 @@ void train_move_children (edict_t *self)
 						else if (ent->solid == SOLID_BSP) //&& (VectorLength(self->velocity) || VectorLength(self->avelocity)) )
 						{	// Brush models always start out with angles=0,0,0 (after G_SetMoveDir).
 							// Use more accuracy here.
-							VectorCopy(self->avelocity, ent->avelocity);
-						//	VectorCopy(self->s.angles, ent->s.angles);
-							VectorAdd(ent->child_attach_angles, parent_angle_change, ent->s.angles);
+							VectorCopy (self->avelocity, ent->avelocity);
+						//	VectorCopy (self->s.angles, ent->s.angles);
+							VectorAdd (ent->child_attach_angles, parent_angle_change, ent->s.angles);
 						}
 						else if (ent->movetype == MOVETYPE_NONE)
 						{
-							VectorCopy(self->avelocity, ent->avelocity);
-						//	VectorCopy(self->s.angles, ent->s.angles);
-							VectorAdd(ent->child_attach_angles, parent_angle_change, ent->s.angles);
+							VectorCopy (self->avelocity, ent->avelocity);
+						//	VectorCopy (self->s.angles, ent->s.angles);
+							VectorAdd (ent->child_attach_angles, parent_angle_change, ent->s.angles);
 						}
 						else
 						{
 							// For point entities, best we can do is apply a delta to
 							// the angles. This may result in foulups if anything gets blocked
-						//	VectorAdd(ent->s.angles, amove, ent->s.angles);
-							VectorAdd(ent->child_attach_angles, parent_angle_change, ent->s.angles);
+						//	VectorAdd (ent->s.angles, amove, ent->s.angles);
+							VectorAdd (ent->child_attach_angles, parent_angle_change, ent->s.angles);
 						}
 					}
 				}
 				else if (is_monster)
 				{
 					// Knightmare- adjust monster_turret's aiming angles for yaw movement
-					if (!strcmp(ent->classname,"monster_turret") && amove[YAW] != 0)
+					if (!strcmp(ent->classname, "monster_turret") && amove[YAW] != 0)
 					{
 						if (ent->offset && ent->old_offset && (ent->offset[1] != -1 && ent->offset[1] != -2))
 						{
@@ -3305,85 +3438,85 @@ void train_move_children (edict_t *self)
 						}
 						// if it's inactive, rotate it like other point entities
 						if (ent->s.frame < 2)
-							VectorAdd(ent->child_attach_angles, parent_angle_change, ent->s.angles);
+							VectorAdd (ent->child_attach_angles, parent_angle_change, ent->s.angles);
 						// update aiming
 					//	else if (!strcmp(self->classname, "func_rotating") || !strcmp(self->classname, "func_rotating_dh"))
 					//		TurretAim (ent);
 					}
 					// otherwise don't re-angle turrets
-					//else if (strcmp(ent->classname,"monster_turret"))
-					//	VectorAdd(ent->s.angles, amove, ent->s.angles);
+				//	else if (strcmp(ent->classname,"monster_turret"))
+				//		VectorAdd (ent->s.angles, amove, ent->s.angles);
 				}
 			}
 			// Special cases:
 			// Func_door/func_button and trigger fields
-			if( !strcmp(ent->classname,"func_door") || !strcmp(ent->classname,"func_button")
-				|| !strcmp(ent->classname,"func_door_secret") || !strcmp(ent->classname,"func_door_secret2")
-				|| !strcmp(ent->classname,"func_plat") || !strcmp(ent->classname,"func_plat2")
-				|| !strcmp(ent->classname,"func_water") || !strcmp(ent->classname,"turret_wall")
-				|| (!strcmp(ent->classname,"monster_turret") && ent->spawnflags & 128) )
+			if ( !strcmp(ent->classname, "func_door") || !strcmp(ent->classname, "func_button")
+				|| !strcmp(ent->classname, "func_door_secret") || !strcmp(ent->classname, "func_door_secret2")
+				|| !strcmp(ent->classname, "func_plat") || !strcmp(ent->classname, "func_plat2")
+				|| !strcmp(ent->classname, "func_water") || !strcmp(ent->classname, "turret_wall")
+				|| (!strcmp(ent->classname, "monster_turret") && ent->spawnflags & 128) )
 			{
-				VectorAdd(ent->s.angles, ent->org_angles, angles);
+				VectorAdd (ent->s.angles, ent->org_angles, angles);
 				G_SetMovedir (angles, ent->movedir);
 				// Knightmare- these entities need special calculations
-				if (!strcmp(ent->classname,"monster_turret") || !strcmp(ent->classname,"turret_wall")) 
+				if (!strcmp(ent->classname, "monster_turret") || !strcmp(ent->classname, "turret_wall")) 
 				{
 					vec3_t		eforward, tangles;
 
-					VectorAdd(ent->deploy_angles, parent_angle_change, tangles);
+					VectorAdd (ent->deploy_angles, parent_angle_change, tangles);
 					AngleVectors (tangles, eforward, NULL, NULL);
-					VectorMA(self->s.origin, ent->movewith_offset[0], forward, ent->pos1);
-					VectorMA(ent->pos1, ent->movewith_offset[1], right, ent->pos1);
-					VectorMA(ent->pos1,  ent->movewith_offset[2], up, ent->pos1);
-					VectorMA(ent->pos1, 32, eforward, ent->pos2);
+					VectorMA (self->s.origin, ent->movewith_offset[0], forward, ent->pos1);
+					VectorMA (ent->pos1, ent->movewith_offset[1], right, ent->pos1);
+					VectorMA (ent->pos1,  ent->movewith_offset[2], up, ent->pos1);
+					VectorMA (ent->pos1, 32, eforward, ent->pos2);
 				}
-				else if (!strcmp(ent->classname,"func_door_secret"))
+				else if (!strcmp(ent->classname, "func_door_secret"))
 				{
 					vec3_t	eforward, eright, eup;
 
 					AngleVectors (ent->s.angles, eforward, eright, eup);
-					VectorMA(self->s.origin, ent->movewith_offset[0], forward, ent->pos0);
-					VectorMA(ent->pos0, ent->movewith_offset[1], right, ent->pos0);
-					VectorMA(ent->pos0,  ent->movewith_offset[2], up, ent->pos0);
+					VectorMA (self->s.origin, ent->movewith_offset[0], forward, ent->pos0);
+					VectorMA (ent->pos0, ent->movewith_offset[1], right, ent->pos0);
+					VectorMA (ent->pos0,  ent->movewith_offset[2], up, ent->pos0);
 					if (ent->spawnflags & 4) // SECRET_1ST_DOWN
 						VectorMA (ent->pos0, -1 * ent->width, eup, ent->pos1);
 					else
 						VectorMA (ent->pos0, ent->side * ent->width, eright, ent->pos1);
 					VectorMA (ent->pos1, ent->length, eforward, ent->pos2);
 				}
-				else if (!strcmp(ent->classname,"func_door_secret2"))
+				else if (!strcmp(ent->classname, "func_door_secret2"))
 				{
 					vec3_t	eforward, eright, eup;
 
-					AngleVectors(ent->s.angles, eforward, eright, eup);
-					VectorMA(self->s.origin, ent->movewith_offset[0], forward, ent->pos0);
-					VectorMA(ent->pos0, ent->movewith_offset[1], right, ent->pos0);
-					VectorMA(ent->pos0,  ent->movewith_offset[2], up, ent->pos0);
+					AngleVectors (ent->s.angles, eforward, eright, eup);
+					VectorMA (self->s.origin, ent->movewith_offset[0], forward, ent->pos0);
+					VectorMA (ent->pos0, ent->movewith_offset[1], right, ent->pos0);
+					VectorMA (ent->pos0,  ent->movewith_offset[2], up, ent->pos0);
 					if (ent->spawnflags & 64) // SEC_MOVE_FORWARD
-						VectorScale(eforward, ent->length, eforward);
+						VectorScale (eforward, ent->length, eforward);
 					else
-						VectorScale(eforward, ent->length * -1 , eforward);
+						VectorScale (eforward, ent->length * -1 , eforward);
 					if (ent->spawnflags & 32) // SEC_MOVE_RIGHT
-						VectorScale(eright, ent->width, eright);
+						VectorScale (eright, ent->width, eright);
 					else
-						VectorScale(eright, ent->width * -1, eright);
+						VectorScale (eright, ent->width * -1, eright);
 					if (ent->spawnflags & 4) // SEC_1ST_DOWN
 					{
-						VectorAdd(ent->pos0, eforward, ent->pos1);
-						VectorAdd(ent->pos1, eright, ent->pos2);
+						VectorAdd (ent->pos0, eforward, ent->pos1);
+						VectorAdd (ent->pos1, eright, ent->pos2);
 					}
 					else
 					{
-						VectorAdd(ent->pos0, eright, ent->pos1);
-						VectorAdd(ent->pos1, eforward, ent->pos2);
+						VectorAdd (ent->pos0, eright, ent->pos1);
+						VectorAdd (ent->pos1, eforward, ent->pos2);
 					}
 				}
-				else if (!strcmp(ent->classname,"func_plat") || !strcmp(ent->classname,"func_plat2"))
+				else if (!strcmp(ent->classname, "func_plat") || !strcmp(ent->classname, "func_plat2"))
 				{
-					VectorMA(self->s.origin, ent->movewith_offset[0], forward, ent->pos1);
-					VectorMA(ent->pos1, ent->movewith_offset[1], right, ent->pos1);
-					VectorMA(ent->pos1,  ent->movewith_offset[2], up, ent->pos1);
-					VectorCopy(ent->pos1, ent->pos2);
+					VectorMA (self->s.origin, ent->movewith_offset[0], forward, ent->pos1);
+					VectorMA (ent->pos1, ent->movewith_offset[1], right, ent->pos1);
+					VectorMA (ent->pos1,  ent->movewith_offset[2], up, ent->pos1);
+					VectorCopy (ent->pos1, ent->pos2);
 					ent->pos2[2] -= ent->moveinfo.distance;
 					VectorCopy (ent->pos1, ent->moveinfo.start_origin);
 					VectorCopy (ent->s.angles, ent->moveinfo.start_angles);
@@ -3392,49 +3525,49 @@ void train_move_children (edict_t *self)
 				}
 				else // func_button or func_door or func_water
 				{
-					VectorMA(self->s.origin, ent->movewith_offset[0], forward, ent->pos1);
-					VectorMA(ent->pos1, ent->movewith_offset[1], right, ent->pos1);
-					VectorMA(ent->pos1,  ent->movewith_offset[2], up, ent->pos1);
+					VectorMA (self->s.origin, ent->movewith_offset[0], forward, ent->pos1);
+					VectorMA (ent->pos1, ent->movewith_offset[1], right, ent->pos1);
+					VectorMA (ent->pos1,  ent->movewith_offset[2], up, ent->pos1);
 					VectorMA (ent->pos1, ent->moveinfo.distance, ent->movedir, ent->pos2);
-					VectorCopy(ent->pos1, ent->moveinfo.start_origin);
-					VectorCopy(ent->s.angles, ent->moveinfo.start_angles);
-					VectorCopy(ent->pos2, ent->moveinfo.end_origin);
-					VectorCopy(ent->s.angles, ent->moveinfo.end_angles);
+					VectorCopy (ent->pos1, ent->moveinfo.start_origin);
+					VectorCopy (ent->s.angles, ent->moveinfo.start_angles);
+					VectorCopy (ent->pos2, ent->moveinfo.end_origin);
+					VectorCopy (ent->s.angles, ent->moveinfo.end_angles);
 				}
 				if (ent->moveinfo.state == STATE_LOWEST || ent->moveinfo.state == STATE_BOTTOM
 					|| ent->moveinfo.state == STATE_TOP)
 				{
 					// Velocities for door/button movement are handled in normal
 					// movement routines
-					VectorCopy(self->velocity, ent->velocity);
+					VectorCopy (self->velocity, ent->velocity);
 					// Sanity insurance:
-					if (!strcmp(ent->classname,"func_plat") || !strcmp(ent->classname,"func_plat2"))
+					if (!strcmp(ent->classname, "func_plat") || !strcmp(ent->classname, "func_plat2"))
 					{	// top and bottom states are reversed for plats
 						if (ent->moveinfo.state == STATE_BOTTOM)
-							VectorCopy(ent->pos2, ent->s.origin);
+							VectorCopy (ent->pos2, ent->s.origin);
 						else if (ent->moveinfo.state == STATE_TOP)
-							VectorCopy(ent->pos1, ent->s.origin);
+							VectorCopy (ent->pos1, ent->s.origin);
 					}
 					else
 					{	// STATE_LOWEST is for func_door_secret in its starting postion
 						if (ent->moveinfo.state == STATE_LOWEST)
-							VectorCopy(ent->pos0, ent->s.origin);
+							VectorCopy (ent->pos0, ent->s.origin);
 						else if (ent->moveinfo.state == STATE_BOTTOM)
-							VectorCopy(ent->pos1, ent->s.origin);
+							VectorCopy (ent->pos1, ent->s.origin);
 						else if (ent->moveinfo.state == STATE_TOP)
-							VectorCopy(ent->pos2, ent->s.origin);
+							VectorCopy (ent->pos2, ent->s.origin);
 					}
 				}
 			}
 			if (amove[YAW])
 			{
 				// Cross fingers here... move bounding boxes of doors and buttons
-				if( !strcmp(ent->classname,"func_door") || !strcmp(ent->classname,"func_button")
-				|| !strcmp(ent->classname,"func_door_secret") || !strcmp(ent->classname,"func_door_secret2")
-				|| !strcmp(ent->classname,"func_plat") || !strcmp(ent->classname,"func_plat2")
-				|| !strcmp(ent->classname,"func_water") || (ent->solid == SOLID_TRIGGER)
-				|| !strcmp(ent->classname,"turret_wall")
-				|| (!strcmp(ent->classname,"monster_turret") && ent->spawnflags & 128) )
+				if ( !strcmp(ent->classname, "func_door") || !strcmp(ent->classname, "func_button")
+				|| !strcmp(ent->classname, "func_door_secret") || !strcmp(ent->classname, "func_door_secret2")
+				|| !strcmp(ent->classname, "func_plat") || !strcmp(ent->classname, "func_plat2")
+				|| !strcmp(ent->classname, "func_water") || (ent->solid == SOLID_TRIGGER)
+				|| !strcmp(ent->classname, "turret_wall")
+				|| (!strcmp(ent->classname, "monster_turret") && ent->spawnflags & 128) )
 				{
 					float       ca, sa, yaw;
 					vec3_t      p00, p01, p10, p11;
@@ -3452,26 +3585,26 @@ void train_move_children (edict_t *self)
 					p11[0] = ent->org_maxs[0]*ca - ent->org_maxs[1]*sa;
 					p11[1] = ent->org_maxs[1]*ca + ent->org_maxs[0]*sa;
 					ent->mins[0] = p00[0];
-					ent->mins[0] = min(ent->mins[0],p01[0]);
-					ent->mins[0] = min(ent->mins[0],p10[0]);
-					ent->mins[0] = min(ent->mins[0],p11[0]);
+					ent->mins[0] = min(ent->mins[0], p01[0]);
+					ent->mins[0] = min(ent->mins[0], p10[0]);
+					ent->mins[0] = min(ent->mins[0], p11[0]);
 					ent->mins[1] = p00[1];
-					ent->mins[1] = min(ent->mins[1],p01[1]);
-					ent->mins[1] = min(ent->mins[1],p10[1]);
-					ent->mins[1] = min(ent->mins[1],p11[1]);
+					ent->mins[1] = min(ent->mins[1], p01[1]);
+					ent->mins[1] = min(ent->mins[1], p10[1]);
+					ent->mins[1] = min(ent->mins[1], p11[1]);
 					ent->maxs[0] = p00[0];
-					ent->maxs[0] = max(ent->maxs[0],p01[0]);
-					ent->maxs[0] = max(ent->maxs[0],p10[0]);
-					ent->maxs[0] = max(ent->maxs[0],p11[0]);
+					ent->maxs[0] = max(ent->maxs[0], p01[0]);
+					ent->maxs[0] = max(ent->maxs[0], p10[0]);
+					ent->maxs[0] = max(ent->maxs[0], p11[0]);
 					ent->maxs[1] = p00[1];
-					ent->maxs[1] = max(ent->maxs[1],p01[1]);
-					ent->maxs[1] = max(ent->maxs[1],p10[1]);
-					ent->maxs[1] = max(ent->maxs[1],p11[1]);
+					ent->maxs[1] = max(ent->maxs[1], p01[1]);
+					ent->maxs[1] = max(ent->maxs[1], p10[1]);
+					ent->maxs[1] = max(ent->maxs[1], p11[1]);
 				}
 			}
 
 			// FMOD 
-			if(!Q_stricmp(ent->classname,"target_playback"))
+			if (!Q_stricmp(ent->classname, "target_playback"))
 				FMOD_UpdateSpeakerPos(ent);
 
 			// Correct func_door_rotating start/end positions
@@ -3488,7 +3621,7 @@ void train_move_children (edict_t *self)
 			gi.linkentity(ent);
 		}
 	}
-	//Knightmare- now move prox mines
+	// Knightmare- now move prox mines
 	if (self->spawnflags & TRAIN_SPLINE)
 		train_move_prox (self);
 }
@@ -3519,7 +3652,7 @@ void Throw_child_debris (edict_t *self)
 		count = mass / 100;
 		if (count > 8)
 			count = 8;
-		while(count--)
+		while (count--)
 		{
 			chunkorigin[0] = origin[0] + crandom() * size[0];
 			chunkorigin[1] = origin[1] + crandom() * size[1];
@@ -3531,7 +3664,7 @@ void Throw_child_debris (edict_t *self)
 	count = mass / 25;
 	if (count > 16)
 		count = 16;
-	while(count--)
+	while (count--)
 	{
 		chunkorigin[0] = origin[0] + crandom() * size[0];
 		chunkorigin[1] = origin[1] + crandom() * size[1];
@@ -3554,7 +3687,7 @@ void train_kill_children (edict_t *self)
 			continue;
 		if (!ent->movewith)
 			continue;
-		if(!ent->inuse)
+		if (!ent->inuse)
 			return;
 		if (!strcmp(ent->movewith, self->targetname))
 		{	//recursively destroy each child's children
@@ -3588,7 +3721,7 @@ void train_remove_children (edict_t *self)
 			continue;
 		if (!ent->movewith)
 			continue;
-		if(!ent->inuse)
+		if (!ent->inuse)
 			return;
 		if (!strcmp(ent->movewith, self->targetname))
 		{	//recursively remove each child's children
@@ -3618,7 +3751,7 @@ void fade_children (edict_t *self)
 			continue;
 		if (!ent->movewith)
 			continue;
-		if(!ent->inuse)
+		if (!ent->inuse)
 			return;
 		if (!strcmp(ent->movewith, self->targetname) && (ent->s.modelindex > 0))
 		{
@@ -3667,7 +3800,7 @@ void fade_children (edict_t *self)
 			continue;
 		if (!ent->movewith)
 			continue;
-		if(!ent->inuse)
+		if (!ent->inuse)
 			return;
 		if (!strcmp(ent->movewith, self->targetname)
 			&& (ent->s.modelindex > 0) && !(ent->s.effects & EF_SPHERETRANS) )			 
@@ -3691,7 +3824,7 @@ void fade_children2 (edict_t *self)
 			continue;
 		if (!ent->movewith)
 			continue;
-		if(!ent->inuse)
+		if (!ent->inuse)
 			return;
 		if (!strcmp(ent->movewith, self->targetname))
 		{
@@ -3718,13 +3851,13 @@ void train_blocked (edict_t *self, edict_t *other)
 		{
 			// Lazarus: Some of our ents don't have origin near the model
 			vec3_t save;
-			VectorCopy(other->s.origin,save);
+			VectorCopy (other->s.origin,save);
 			VectorMA (other->absmin, 0.5, other->size, other->s.origin);
 			BecomeExplosion1 (other);
 		}
 		return;
 	}
-	VectorClear (self->avelocity); //don't turn children when blocked
+	VectorClear (self->avelocity);	// don't turn children when blocked
 
 	// Remove dead Q1 monsters, as they can't be gibbed
 	if ( (other->svflags & SVF_DEADMONSTER) && (other->flags & FL_Q1_MONSTER) )
@@ -3795,8 +3928,8 @@ void train_wait (edict_t *self)
 		// Spline trains stop rotating when waiting
 		if (self->spawnflags & TRAIN_SPLINE)
 		{
-			VectorClear(self->avelocity);
-			VectorClear(self->velocity);
+			VectorClear (self->avelocity);
+			VectorClear (self->velocity);
 			train_move_children(self);
 		}
 		if (self->moveinfo.wait > 0)
@@ -3866,7 +3999,7 @@ void train_children_think (edict_t *self)
 		return;
 	}
 
-//	if(self->enemy->movewith_next && (self->enemy->movewith_next->movewith_ent == self->enemy))
+//	if (self->enemy->movewith_next && (self->enemy->movewith_next->movewith_ent == self->enemy))
 //	{
 //		set_child_movement(self->enemy);
 //		self->nextthink = level.time + FRAMETIME;
@@ -3883,10 +4016,10 @@ void train_rotate (edict_t *self)
 	float	Dist_1, Dist_2, Distance;
 	float	train_speed;
 
-	if(!self->enemy || !self->enemy->inuse)
+	if (!self->enemy || !self->enemy->inuse)
 		return;
 
-	if(self->enemy->spawnflags & TRAIN_ROT_CONST)
+	if (self->enemy->spawnflags & TRAIN_ROT_CONST)
 	{
 		// The the train was changed from TRAIN_ROTATE to TRAIN_ROT_CONST
 		// by a target_change... get da hell outta here.
@@ -3922,7 +4055,7 @@ void train_rotate (edict_t *self)
 		return;
 	}
 
-//YAW CHANGE CODE
+	// YAW CHANGE CODE
 	if (cur_yaw != idl_yaw)
 	{
 		if (cur_yaw < idl_yaw)
@@ -3973,8 +4106,8 @@ void train_rotate (edict_t *self)
 		if (self->enemy->s.angles[YAW] >= 360)
 			self->enemy->s.angles[YAW] -= 360;
 	}
-//Knightmare added
-//PITCH CHANGE CODE
+	// Knightmare added
+	// PITCH CHANGE CODE
 	if (cur_pitch != idl_pitch)
 	{
 		if (cur_pitch < idl_pitch)
@@ -4024,7 +4157,7 @@ void train_rotate (edict_t *self)
 		if (self->enemy->s.angles[PITCH] >= 360)
 			self->enemy->s.angles[PITCH] -= 360;
 	}
-//ROLL CHANGE CODE
+	// ROLL CHANGE CODE
 	if (cur_roll != idl_roll)
 	{
 		if (cur_roll < idl_roll)
@@ -4079,7 +4212,7 @@ void train_rotate (edict_t *self)
 
 	train_speed = VectorLength (self->enemy->velocity);
 	if (train_speed == 0) //Don't rotate if we're stopped
-		VectorClear(self->enemy->avelocity);
+		VectorClear (self->enemy->avelocity);
 
 	self->nextthink = level.time + FRAMETIME;
 }
@@ -4093,7 +4226,7 @@ void train_next (edict_t *self)
 	vec3_t		v, angles; //Rroff
 	// Knightmare added
 	vec3_t		adjusted_pathpoint;
-	vec3_t		corner_offset = {1,1,1};
+	vec3_t		corner_offset = {1, 1, 1};
 
 	// Knightmare- func_train_origin support
 //	if (self->spawnflags & TRAIN_ORIGIN)
@@ -4123,7 +4256,7 @@ again:
 	if ( adjust_train_corners->value )
 		VectorSubtract(ent->s.origin, corner_offset, adjusted_pathpoint);
 	else
-		VectorCopy(ent->s.origin, adjusted_pathpoint);
+		VectorCopy (ent->s.origin, adjusted_pathpoint);
 	self->target = ent->target;
 
 	// check for a teleport path_corner
@@ -4135,7 +4268,7 @@ again:
 			return;
 		}
 		first = false;
-		VectorCopy (self->s.origin, daoldorigin); //Knightmare- copy old orgin for reference
+		VectorCopy (self->s.origin, daoldorigin); // Knightmare- copy old orgin for reference
 		if (self->spawnflags & TRAIN_ORIGIN)	// Knightmare- func_train_origin support
 			VectorCopy (ent->s.origin, self->s.origin);
 		else
@@ -4162,7 +4295,7 @@ again:
 					continue;
 				if (!strcmp(e->movewith, self->targetname))
 				{
-					VectorAdd(dir, e->s.origin, e->s.origin);
+					VectorAdd (dir, e->s.origin, e->s.origin);
 					VectorCopy (e->s.origin, e->s.old_origin);
 					e->s.event = EV_OTHER_TELEPORT;
 					gi.linkentity (e);
@@ -4181,11 +4314,11 @@ again:
 	{
 		self->speed = ent->speed;
 		self->moveinfo.speed = ent->speed;
-		if(ent->accel)
+		if (ent->accel)
 			self->moveinfo.accel = ent->accel;
 		else
 			self->moveinfo.accel = ent->speed;
-		if(ent->decel)
+		if (ent->decel)
 			self->moveinfo.decel = ent->decel;
 		else
 			self->moveinfo.decel = ent->speed;
@@ -4210,6 +4343,7 @@ again:
 		VectorCopy (ent->s.origin, dest);
 	else
 		VectorSubtract (adjusted_pathpoint, self->mins, dest); // was ent->s.origin
+
 	self->moveinfo.state = STATE_TOP;
 	VectorCopy (self->s.origin, self->moveinfo.start_origin);
 	VectorCopy (dest, self->moveinfo.end_origin);
@@ -4243,7 +4377,7 @@ again:
 			VectorSubtract(ent->s.origin, self->s.origin, v);
 		}
 		else {
-			VectorAdd(self->s.origin, self->mins, v);
+			VectorAdd (self->s.origin, self->mins, v);
 			VectorSubtract(adjusted_pathpoint, v, v); // was ent->s.origin
 		}
 		vectoangles2(v, angles);
@@ -4253,7 +4387,7 @@ again:
 			self->ideal_pitch += 360;
 		self->ideal_roll = ent->roll;
 
-		VectorClear(self->movedir);
+		VectorClear (self->movedir);
 		self->movedir[1] = 1.0;
 	}
 	// Knightmare- add angular speed for ROT_CONST trains
@@ -4279,9 +4413,9 @@ again:
 			// this fixes the broken conveyors
 		//	if (strcmp(e->classname, "func_train") && strcmp(e->classname, "model_train"))
 			{
-				VectorAdd(dir, e->s.origin, dst);
-				VectorCopy(e->s.origin, e->moveinfo.start_origin);
-				VectorCopy(dst, e->moveinfo.end_origin);
+				VectorAdd (dir, e->s.origin, dst);
+				VectorCopy (e->s.origin, e->moveinfo.start_origin);
+				VectorCopy (dst, e->moveinfo.end_origin);
 
 				e->moveinfo.state = STATE_TOP;
 				e->speed = self->speed;
@@ -4305,25 +4439,25 @@ void train_resume (edict_t *self)
 	vec3_t		corner_offset = {1,1,1};
 
 	ent = self->target_ent;
-	//Knightmare- calc the real target for the train's mins,
-	//since that is 1 unit below the corner of the bmodel in all 3 dimensions
+	// Knightmare- calc the real target for the train's mins,
+	// since that is 1 unit below the corner of the bmodel in all 3 dimensions
 	if (adjust_train_corners->value)
 		VectorSubtract(ent->s.origin, corner_offset, adjusted_pathpoint);
 	else
-		VectorCopy(ent->s.origin, adjusted_pathpoint);
+		VectorCopy (ent->s.origin, adjusted_pathpoint);
 
 	if (self->spawnflags & TRAIN_ORIGIN)	// Knightmare- func_train_origin support
 		VectorCopy (ent->s.origin, dest);
 	else
-		VectorSubtract (adjusted_pathpoint, self->mins, dest); //was ent->s.origin
+		VectorSubtract (adjusted_pathpoint, self->mins, dest); // was ent->s.origin
 	self->moveinfo.state = STATE_TOP;
 	VectorCopy (self->s.origin, self->moveinfo.start_origin);
 	VectorCopy (dest, self->moveinfo.end_origin);
 
 	Move_Calc (self, dest, train_wait);
 	self->spawnflags |= TRAIN_START_ON;
-	// Lazarus:
-	if(self->spawnflags & TRAIN_ROT_CONST)
+	// Lazarus
+	if (self->spawnflags & TRAIN_ROT_CONST)
 	{
 		self->avelocity[0] = self->pitch_speed;
 		self->avelocity[1]   = self->yaw_speed;
@@ -4380,7 +4514,7 @@ void func_train_find (edict_t *self)
 	if (adjust_train_corners->value)
 		VectorSubtract(ent->s.origin, corner_offset, adjusted_pathpoint);
 	else
-		VectorCopy(ent->s.origin, adjusted_pathpoint);
+		VectorCopy (ent->s.origin, adjusted_pathpoint);
 	
 	// Rroff
 	// Knightmare- don't think_rotate if that flag isn't set
@@ -4436,11 +4570,11 @@ void func_train_find (edict_t *self)
 				if (!strcmp(e->classname, "turret_breach") || !strcmp(e->classname, "model_turret"))
 					VectorCopy (dir, e->aim_point);
 
-				VectorAdd(dir, e->s.origin, e->s.origin);
+				VectorAdd (dir, e->s.origin, e->s.origin);
 				VectorCopy (e->s.origin, e->s.old_origin);
 				//This is now the child's original position
-				if ( (e->solid == SOLID_BSP) && strcmp(e->classname,"func_rotating")
-					&& strcmp(e->classname,"func_door_rotating"))
+				if ( (e->solid == SOLID_BSP) && strcmp(e->classname, "func_rotating")
+					&& strcmp(e->classname, "func_door_rotating"))
 					ReInitialize_Entity(e);
 				gi.linkentity (e);
 			}
@@ -4500,7 +4634,7 @@ void train_use (edict_t *self, edict_t *other, edict_t *activator)
 		{
 			// Back up a step
 			self->moveinfo.bezier_ratio -= self->moveinfo.speed * FRAMETIME / self->moveinfo.distance;
-			if(self->moveinfo.bezier_ratio < 0.)
+			if (self->moveinfo.bezier_ratio < 0.)
 				self->moveinfo.bezier_ratio = 0.;
 		}
 
@@ -4550,8 +4684,8 @@ void SP_func_train (edict_t *self)
 			VectorSet(self->bleft, -16, -16, -16);
 			VectorSet(self->tright, 16, 16, 16);
 		}
-		VectorAdd(self->bleft,self->tright,self->move_origin);
-		VectorScale(self->move_origin,0.5,self->move_origin);
+		VectorAdd (self->bleft,self->tright,self->move_origin);
+		VectorScale (self->move_origin,0.5,self->move_origin);
 	}
 
 	if (self->spawnflags & TRAIN_SMOOTH)
@@ -4559,9 +4693,9 @@ void SP_func_train (edict_t *self)
 	else
 		self->smooth_movement = 0;
 
-	//David Hyde's code for the origin offset
-	VectorAdd(self->absmin, self->absmax, self->origin_offset);
-	VectorScale(self->origin_offset, 0.5, self->origin_offset);
+	// David Hyde's code for the origin offset
+	VectorAdd (self->absmin, self->absmax, self->origin_offset);
+	VectorScale (self->origin_offset, 0.5, self->origin_offset);
 	VectorSubtract(self->origin_offset, self->s.origin, self->origin_offset);
 
 	if (self->attenuation <= 0)
@@ -4584,11 +4718,11 @@ void SP_func_train (edict_t *self)
 		self->speaker = speaker;
 	//	VectorAdd (self->s.origin, self->origin_offset, speaker->s.origin);
 		if (VectorLength(self->s.origin))
-			VectorCopy(self->s.origin, speaker->s.origin);
+			VectorCopy (self->s.origin, speaker->s.origin);
 		else
 		{
-			VectorAdd(self->absmin,self->absmax, speaker->s.origin);
-			VectorScale(speaker->s.origin, 0.5, speaker->s.origin);
+			VectorAdd (self->absmin,self->absmax, speaker->s.origin);
+			VectorScale (speaker->s.origin, 0.5, speaker->s.origin);
 		}
 		VectorSubtract (speaker->s.origin, self->s.origin, speaker->offset);
 	//	gi.dprintf ("moving_speaker offset %s from func_train\n", vtos(speaker->offset));
@@ -5279,10 +5413,10 @@ qboolean box_movestep (edict_t *ent, vec3_t move, qboolean relink)
 
 void box_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
-	if(self->deathtarget)
+	if (self->deathtarget)
 	{
 		self->target = self->deathtarget;
-		if(self->activator)
+		if (self->activator)
 			G_UseTargets (self, self->activator);
 		else
 			G_UseTargets (self, attacker);
@@ -5407,9 +5541,9 @@ void box_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf
 		// all entities involved use a parallelepiped bounding box we can rely on offsets
 		// to centers to figure out which side the impact is on.
 		VectorAdd (self->absmax,self->absmin,v1);
-		VectorScale(v1,0.5,v1);
+		VectorScale (v1,0.5,v1);
 		VectorAdd (other->absmax,other->absmin,v2);
-		VectorScale(v2,0.5,v2);
+		VectorScale (v2,0.5,v2);
 		VectorSubtract(v1,v2,v);
 		VectorNormalize(v);
 		axis = 0;
@@ -5469,17 +5603,17 @@ void box_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf
 		}
 
 		// Override oldvelocity
-		VectorCopy(self->velocity,self->oldvelocity);
+		VectorCopy (self->velocity,self->oldvelocity);
 		gi.linkentity(self);
 		return;
 	}
 	// if other is a monster or a player and box is on other's head and moving down,
 	// do impact damage
-	VectorAdd(self->s.origin,self->origin_offset,origin);
+	VectorAdd (self->s.origin,self->origin_offset,origin);
 	if ( other->client || (other->svflags & SVF_MONSTER) )
 	{
 		VectorAdd (self->absmax,self->absmin,v1);
-		VectorScale(v1,0.5,v1);
+		VectorScale (v1,0.5,v1);
 		VectorSubtract(v1,other->s.origin,v);
 		VectorNormalize(v);
 		axis = 0;
@@ -5487,7 +5621,7 @@ void box_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf
 		if (fabs(v[2]) > fabs(v[axis])) axis = 2;
 		if (axis == 2 && v[axis] > 0) {
 			v11 = VectorLength(self->velocity);
-			VectorCopy(self->velocity,v);
+			VectorCopy (self->velocity,v);
 			VectorNormalize(v);
 			if (!other->groundentity)
 			{
@@ -5556,7 +5690,7 @@ void box_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf
 	}
 
 	VectorAdd (self->absmax,self->absmin,v1);
-	VectorScale(v1,0.5,v1);
+	VectorScale (v1,0.5,v1);
 
 	// if func_pushable isn't in front of pusher, do nothing
 	if (!point_infront(other,v1))
@@ -5569,7 +5703,7 @@ void box_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf
 	// OR if player is standing on this box, do nothing
 	if ( ((!other->groundentity) && (self->waterlevel==0)) || (other->groundentity == self) )
 	{
-		if(self->activator == other) self->activator = NULL;
+		if (self->activator == other) self->activator = NULL;
 		return;
 	}
 
@@ -5721,8 +5855,8 @@ void SP_func_pushable (edict_t *self)
 		speaker->nextthink   = level.time + 2*FRAMETIME;
 		speaker->spawnflags  = 11;       // owner must be moving and on ground to play
 		self->speaker        = speaker;
-		VectorAdd(self->absmin,self->absmax,speaker->s.origin);
-		VectorScale(speaker->s.origin,0.5,speaker->s.origin);
+		VectorAdd (self->absmin,self->absmax,speaker->s.origin);
+		VectorScale (speaker->s.origin,0.5,speaker->s.origin);
 		VectorSubtract(speaker->s.origin, self->s.origin, speaker->offset);
 	//	gi.dprintf ("moving_speaker offset %s from pushable\n", vtos(speaker->offset));
 	}
@@ -5830,7 +5964,7 @@ void func_door_swinging_init (edict_t *self)
 	edict_t		*follow;
 
 	follow = G_Find (NULL, FOFS(targetname), self->followtarget);
-	if(!follow)
+	if (!follow)
 	{
 		gi.dprintf("func_door_swinging at %s, followtarget not found\n",vtos(self->s.origin));
 		G_FreeEdict(self);
@@ -5839,10 +5973,10 @@ void func_door_swinging_init (edict_t *self)
 	VectorSubtract(follow->s.origin,self->s.origin,self->move_origin);
 	VectorNormalize(self->move_origin);
 	G_FreeEdict(follow);
-	if(self->pathtarget)
+	if (self->pathtarget)
 	{
 		new_origin = G_Find (NULL, FOFS(targetname), self->pathtarget);
-		if(new_origin)
+		if (new_origin)
 		{
 			VectorCopy (new_origin->s.origin,self->s.origin);
 			VectorCopy (self->s.origin, self->moveinfo.start_origin);
@@ -5866,12 +6000,12 @@ void SP_func_door_swinging (edict_t *self)
 	self->spawnflags &= ~1;			// off temporarily until normal door initialization
 									// is done
 
-	if(self->spawnflags & DOOR_REVERSE)
+	if (self->spawnflags & DOOR_REVERSE)
 	{
 		self->spawnflags &= ~DOOR_REVERSE;
 		self->flags |= FL_REVOLVING;
 	}
-	if(!self->followtarget)
+	if (!self->followtarget)
 	{
 		gi.dprintf("func_door_swinging with no followtarget at %s\n",vtos(self->s.origin));
 		G_FreeEdict(self);
@@ -5879,7 +6013,7 @@ void SP_func_door_swinging (edict_t *self)
 	}
 	SP_func_door_rotating (self);
 	self->spawnflags |= pivot;
-	if( pivot && (self->health > 0) )
+	if ( pivot && (self->health > 0) )
 		self->die = swinging_door_killed;
 
 	self->postthink = train_move_children; //supports movewith
@@ -5959,7 +6093,7 @@ void SP_func_bobbingwater(edict_t *self)
 	self->solid = SOLID_BSP;
 	gi.setmodel (self, self->model);
 
-	if(self->spawnflags & 2)
+	if (self->spawnflags & 2)
 	{
 		level.mud_puddles++;
 		self->svflags |= SVF_MUD;
@@ -6022,8 +6156,8 @@ void SP_func_bobbingwater(edict_t *self)
 	self->classname = "func_door";
 	self->flags |= FL_BOB;
 
-	if(!self->bob) self->bob = 16;
-	if(!self->duration) self->duration = 8;
+	if (!self->bob) self->bob = 16;
+	if (!self->duration) self->duration = 8;
 	self->think     = bob_init;
 	self->nextthink = level.time + FRAMETIME;
 	gi.linkentity (self);
@@ -6034,13 +6168,13 @@ void SP_func_bobbingwater(edict_t *self)
 //
 void pivot_blocked (edict_t *self, edict_t *other)
 {
-	VectorCopy(vec3_origin ,self->avelocity);
+	VectorCopy (vec3_origin ,self->avelocity);
 	gi.linkentity(self);
 }
 
 void pivot_stop(edict_t *ent)
 {
-	VectorClear(ent->avelocity);
+	VectorClear (ent->avelocity);
 	gi.linkentity(ent);
 }
 
@@ -6051,18 +6185,18 @@ void pivot_touch(edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf
 	vec3_t	avelocity;
 	vec3_t	delta;
 
-	if(!other->mass) return;               // other is weightless
-	if(!other->groundentity) return;       // other is in air
-	if(other->groundentity != ent) return; // other is not standing on ent
+	if (!other->mass) return;               // other is weightless
+	if (!other->groundentity) return;       // other is in air
+	if (other->groundentity != ent) return; // other is not standing on ent
 
 	VectorSubtract(ent->s.origin,other->s.origin,offset);
 	offset[2] = 0.; // z offset is irrelevant
-	VectorCopy(ent->avelocity,avelocity);
-	if(ent->spawnflags & 1)
+	VectorCopy (ent->avelocity,avelocity);
+	if (ent->spawnflags & 1)
 	{
 		avelocity[PITCH] = -other->mass*offset[0]/400;
-//		if(avelocity[PITCH] = ent->avelocity[PITCH]) return;
-		if(offset[0] > 0)
+//		if (avelocity[PITCH] = ent->avelocity[PITCH]) return;
+		if (offset[0] > 0)
 			ent->move_angles[PITCH] = ent->pos2[PITCH];
 		else
 			ent->move_angles[PITCH] = ent->pos1[PITCH];
@@ -6072,8 +6206,8 @@ void pivot_touch(edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf
 	else
 	{
 		avelocity[ROLL]  = other->mass*offset[1]/400;
-//		if(avelocity[ROLL] = ent->avelocity[ROLL]) return;
-		if(offset[1] > 0)
+//		if (avelocity[ROLL] = ent->avelocity[ROLL]) return;
+		if (offset[1] > 0)
 			ent->move_angles[ROLL] = ent->pos1[ROLL];
 		else
 			ent->move_angles[ROLL] = ent->pos2[ROLL];
@@ -6081,16 +6215,16 @@ void pivot_touch(edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf
 		time = delta[ROLL]/avelocity[ROLL];
 	}
 	gi.dprintf("time=%f, v=%f %f %f\n",time,avelocity[0],avelocity[1],avelocity[2]);
-	if(time > 0)
+	if (time > 0)
 	{
-		VectorCopy(avelocity,ent->avelocity);
+		VectorCopy (avelocity,ent->avelocity);
 		ent->think = pivot_stop;
 		ent->nextthink = level.time + time;
 		gi.linkentity(ent);
 	}
 	else
 	{
-		VectorClear(ent->avelocity);
+		VectorClear (ent->avelocity);
 		ent->nextthink = 0;
 	}
 }
@@ -6100,16 +6234,16 @@ void pivot_init (edict_t *ent)
 	trace_t	tr;
 	vec3_t	start, end;
 
-	VectorClear(ent->pos1);
-	VectorClear(ent->pos2);
-	if(ent->spawnflags & 1)
+	VectorClear (ent->pos1);
+	VectorClear (ent->pos2);
+	if (ent->spawnflags & 1)
 	{
 		end[0] = start[0] = ent->absmin[0];
 		end[1] = start[1] = (ent->absmin[1]+ent->absmax[1])/2;
 		start[2] = ent->absmin[2];
 		end[2]   = ent->absmin[2] - (ent->s.origin[0]-ent->absmin[0]);
 		tr=gi.trace(start,NULL,NULL,end,ent,MASK_SOLID);
-		if(tr.fraction < 1.0)
+		if (tr.fraction < 1.0)
 			zmin = tr.endpos[2];
 		else
 			zmin = end[2];
@@ -6118,7 +6252,7 @@ void pivot_init (edict_t *ent)
 		end[0] = start[0] = ent->absmax[0];
 		end[2] = ent->absmin[2] - (ent->absmax[0]-ent->s.origin[0]);
 		tr=gi.trace(start,NULL,NULL,end,ent,MASK_SOLID);
-		if(tr.fraction < 1.0)
+		if (tr.fraction < 1.0)
 			zmin = tr.endpos[2];
 		else
 			zmin = end[2];
@@ -6134,7 +6268,7 @@ void pivot_init (edict_t *ent)
 		start[2] = ent->absmin[2];
 		end[2]   = ent->absmin[2] - (ent->s.origin[1]-ent->absmin[1]);
 		tr=gi.trace(start,NULL,NULL,end,ent,MASK_SOLID);
-		if(tr.fraction < 1.0)
+		if (tr.fraction < 1.0)
 			zmin = tr.endpos[2];
 		else
 			zmin = end[2];
@@ -6143,7 +6277,7 @@ void pivot_init (edict_t *ent)
 		end[1] = start[1] = ent->absmax[1];
 		end[2] = ent->absmin[2] - (ent->absmax[1]-ent->s.origin[1]);
 		tr=gi.trace(start,NULL,NULL,end,ent,MASK_SOLID);
-		if(tr.fraction < 1.0)
+		if (tr.fraction < 1.0)
 			zmin = tr.endpos[2];
 		else
 			zmin = end[2];
@@ -6153,7 +6287,7 @@ void pivot_init (edict_t *ent)
 		ent->pos2[ROLL] *= -180/M_PI;
 	}
 
-	VectorClear(ent->move_angles);
+	VectorClear (ent->move_angles);
 	gi.linkentity(ent);
 }
 

@@ -649,6 +649,14 @@ void use_target_blaster (edict_t *self, edict_t *other, edict_t *activator)
 	vec3_t	movedir, start, target;
 	int effect;
 
+	// Zaero add
+	if (EMPNukeCheck(self, self->s.origin))
+	{
+		gi.sound (self, CHAN_AUTO, gi.soundindex("items/empnuke/emp_missfire.wav"), 1, ATTN_NORM, 0);
+		return;
+	}
+	// end Zaero
+
 	VectorCopy(self->s.origin,start);
 	if (self->enemy)
 	{

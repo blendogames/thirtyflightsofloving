@@ -390,17 +390,17 @@ void fire_blaster (edict_t *self, vec3_t start, vec3_t dir, int damage, int spee
 	bolt->clipmask = MASK_SHOT;
 	bolt->solid = SOLID_BBOX;
 	bolt->s.effects |= effect;
-	bolt->s.renderfx |= RF_NOSHADOW; //Knightmare- no shadow
+	bolt->s.renderfx |= RF_NOSHADOW; // Knightmare- no shadow
 	VectorClear (bolt->mins);
 	VectorClear (bolt->maxs);
 
-	if (color == BLASTER_GREEN) //green
+	if (color == BLASTER_GREEN) // green
 		bolt->s.modelindex = gi.modelindex ("models/objects/laser2/tris.md2");
-	else if (color == BLASTER_BLUE) //blue
+	else if (color == BLASTER_BLUE) // blue
 		bolt->s.modelindex = gi.modelindex ("models/objects/blaser/tris.md2");
-	else if (color == BLASTER_RED) //red
+	else if (color == BLASTER_RED) // red
 		bolt->s.modelindex = gi.modelindex ("models/objects/rlaser/tris.md2");
-	else //standard orange
+	else // standard orange
 		bolt->s.modelindex = gi.modelindex ("models/objects/laser/tris.md2");
 	bolt->style = color;
 
@@ -529,27 +529,27 @@ void Grenade_Evade (edict_t *monster)
 	// We assume on entry here that monster is alive and that he's not already
 	// AI_CHASE_THING
 	grenade = world->next_grenade;
-	while(grenade)
+	while (grenade)
 	{
 		// we only care about grenades on the ground
-		if(grenade->inuse && grenade->groundentity)
+		if (grenade->inuse && grenade->groundentity)
 		{
 			// if it ain't in the PVS, it can't hurt us (I think?)
-			if(gi.inPVS(grenade->s.origin,monster->s.origin))
+			if (gi.inPVS(grenade->s.origin,monster->s.origin))
 			{
 				VectorSubtract(grenade->s.origin,monster->s.origin,grenade_vec);
 				grenade_dist = VectorNormalize(grenade_vec);
-				if(grenade_dist <= grenade->dmg_radius)
+				if (grenade_dist <= grenade->dmg_radius)
 					break;
 			}
 		}
 		grenade = grenade->next_grenade;
 	}
-	if(!grenade)
+	if (!grenade)
 		return;
 	// Find best escape route.
 	best_r = 9999;
-	for(i=0; i<8; i++)
+	for (i=0; i<8; i++)
 	{
 		yaw = anglemod( i*45 );
 		forward[0] = cos( DEG2RAD(yaw) );
@@ -557,18 +557,18 @@ void Grenade_Evade (edict_t *monster)
 		forward[2] = 0;
 		// Estimate of required distance to run. This is conservative.
 		r = grenade->dmg_radius + grenade_dist*DotProduct(forward,grenade_vec) + monster->size[0] + 16;
-		if( r < best_r )
+		if ( r < best_r )
 		{
 			VectorMA(monster->s.origin,r,forward,pos);
 			tr = gi.trace(monster->s.origin,monster->mins,monster->maxs,pos,monster,MASK_MONSTERSOLID);
-			if(tr.fraction < 1.0)
+			if (tr.fraction < 1.0)
 				continue;
 			best_r = r;
 			best_yaw = yaw;
 			VectorCopy(tr.endpos,best_pos);
 		}
 	}
-	if(best_r < 9000)
+	if (best_r < 9000)
 	{
 		edict_t	*thing = SpawnThing();
 		VectorCopy(best_pos,thing->s.origin);
@@ -589,7 +589,7 @@ void Grenade_Evade (edict_t *monster)
 	edict_t	*ancestor;
 
 	ancestor = world;
-	while(ancestor->next_grenade && ancestor->next_grenade->inuse)
+	while (ancestor->next_grenade && ancestor->next_grenade->inuse)
 		ancestor = ancestor->next_grenade;
 	ancestor->next_grenade = grenade;
 	grenade->prev_grenade = ancestor;
@@ -597,12 +597,12 @@ void Grenade_Evade (edict_t *monster)
 
 /*static*/ void Grenade_Remove_From_Chain (edict_t *grenade)
 {
-	if(grenade->prev_grenade)
+	if (grenade->prev_grenade)
 	{
 		// "prev_grenade" should always be valid for other than player-thrown
 		// grenades that explode in player's hand
 		grenade->prev_grenade->next_grenade = grenade->next_grenade;
-		if(grenade->next_grenade)
+		if (grenade->next_grenade)
 			grenade->next_grenade->prev_grenade = grenade->prev_grenade;
 	}
 }
@@ -737,7 +737,7 @@ void fire_grenade (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int s
 	//Knightmare- add player's base velocity to grenade
 	if (add_velocity_throw->value && self->client)
 		VectorAdd (grenade->velocity, self->velocity, grenade->velocity);
-	else if(self->groundentity)
+	else if (self->groundentity)
 		VectorAdd (grenade->velocity, self->groundentity->velocity, grenade->velocity);
 
 	VectorSet (grenade->avelocity, 300, 300, 300);
@@ -780,7 +780,7 @@ void fire_grenade2 (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int 
 	//Knightmare- add player's base velocity to thrown grenade
 	if (add_velocity_throw->value && self->client)
 		VectorAdd (grenade->velocity, self->velocity, grenade->velocity);
-	else if(self->groundentity)
+	else if (self->groundentity)
 		VectorAdd (grenade->velocity, self->groundentity->velocity, grenade->velocity);
 
 	VectorSet (grenade->avelocity, 300, 300, 300);
@@ -819,7 +819,7 @@ void fire_grenade2 (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int 
 
 void grenade_delayed_start (edict_t *grenade)
 {
-	if(g_edicts[1].linkcount)
+	if (g_edicts[1].linkcount)
 	{
 		VectorScale(grenade->movedir,grenade->moveinfo.speed,grenade->velocity);
 		grenade->movetype  = MOVETYPE_BOUNCE;
@@ -837,7 +837,7 @@ void SP_grenade (edict_t *grenade)
 	grenade->touch = Grenade_Touch;
 
 	// For SP, freeze grenade until player spawns in
-	if(game.maxclients == 1)
+	if (game.maxclients == 1)
 	{
 		grenade->movetype  = MOVETYPE_NONE;
 		VectorCopy(grenade->velocity,grenade->movedir);
@@ -858,13 +858,13 @@ void SP_grenade (edict_t *grenade)
 
 void handgrenade_delayed_start (edict_t *grenade)
 {
-	if(g_edicts[1].linkcount)
+	if (g_edicts[1].linkcount)
 	{
 		VectorScale(grenade->movedir,grenade->moveinfo.speed,grenade->velocity);
 		grenade->movetype  = MOVETYPE_BOUNCE;
 		grenade->nextthink = level.time + 2.5;
 		grenade->think     = Grenade_Explode;
-		if(grenade->owner)
+		if (grenade->owner)
 			gi.sound (grenade->owner, CHAN_WEAPON, gi.soundindex ("weapons/hgrent1a.wav"), 1, ATTN_NORM, 0);
 		gi.linkentity(grenade);
 	}
@@ -878,7 +878,7 @@ void SP_handgrenade (edict_t *grenade)
 	grenade->touch = Grenade_Touch;
 
 	// For SP, freeze grenade until player spawns in
-	if(game.maxclients == 1)
+	if (game.maxclients == 1)
 	{
 		grenade->movetype  = MOVETYPE_NONE;
 		VectorCopy(grenade->velocity,grenade->movedir);
@@ -897,383 +897,6 @@ void SP_handgrenade (edict_t *grenade)
 	gi.linkentity (grenade);
 }
 
-/*
-=======================
-
-Shockwave
-
-=======================
-*/
-
-void Nuke_Quake (edict_t *self);
-
-void shock_effect_think (edict_t *self)
-{
-	if (++self->s.frame < 19)
-		self->nextthink = level.time + FRAMETIME;
-	else
-	{
-		self->s.frame = 0;
-		self->nextthink = level.time + FRAMETIME;
-	}
-	self->count--;
-
-	//fade out
-#ifdef KMQUAKE2_ENGINE_MOD
-	if (self->count <= 6)
-		self->s.alpha -= 0.10;
-	if (self->s.alpha < 0.10)
-		self->s.alpha = 0.10;
-#else
-	if (self->count == 5)
-	{
-		self->s.effects |= EF_SPHERETRANS;
-		self->s.renderfx &= ~RF_TRANSLUCENT;
-	}
-#endif
-	//remove after 6 secs
-	if (self->count == 0)
-		G_FreeEdict (self);
-	//inflict field damage on surroundings
-	T_RadiusDamage(self, self->owner, self->radius_dmg, NULL, self->dmg_radius, MOD_SHOCK_SPLASH);
-}
-
-void shock_effect_center_think (edict_t *self)
-{
-	self->nextthink = level.time + FRAMETIME;
-	if ((self->count % 5) == 0)
-	{
-		if (self->count > 10) // double effect for first 40 seconds
-		{
-			gi.WriteByte (svc_temp_entity);
-			gi.WriteByte (TE_NUKEBLAST);
-			gi.WritePosition (self->s.origin);
-			gi.multicast (self->s.origin, MULTICAST_ALL);
-		}
-		gi.WriteByte (svc_temp_entity);
-		gi.WriteByte (TE_NUKEBLAST);
-		gi.WritePosition (self->s.origin);
-		gi.multicast (self->s.origin, MULTICAST_ALL);
-	}
-	//fade out
-#ifdef KMQUAKE2_ENGINE_MOD
-	if (self->count <= 10)
-		self->s.alpha -= 0.10;
-	self->s.alpha = max(self->s.alpha, 1/255);
-	//remove after 5 secs
-	self->count--;
-	if (self->count == 0 || self->s.alpha <= 1/255)
-		G_FreeEdict (self);
-#else
-	if (self->count == 10)
-		self->s.renderfx |= RF_TRANSLUCENT;
-	if (self->count == 5)
-	{
-		self->s.effects |= EF_SPHERETRANS;
-		self->s.renderfx &= ~RF_TRANSLUCENT;
-	}
-	//remove after 5 secs
-	self->count--;
-	if (self->count == 0)
-		G_FreeEdict (self);
-#endif
-}
-
-void ShockEffect (edict_t *source, edict_t *attacker, float damage, float radius, cplane_t *plane)
-{
-	edict_t	*ent;
-	edict_t	*center;
-	vec3_t	hit_point;
-
-	if (plane->normal)
-	{	//put origin of effect 32 units away from last hit surface
-		VectorMA (source->s.origin, 32.0, plane->normal, hit_point);
-	}
-
-	ent = G_Spawn();
-	//same origin as exploding shock sphere
-	if (plane->normal)
-		VectorCopy (hit_point, ent->s.origin);
-	else
-		VectorCopy (source->s.origin, ent->s.origin);
-	ent->radius_dmg = sk_shockwave_effect_damage->value;
-	ent->dmg_radius = sk_shockwave_effect_radius->value;
-	ent->owner = attacker;
-	ent->movetype = MOVETYPE_NONE;
-	ent->solid = SOLID_NOT;
-	VectorSet (ent->mins, -8, -8, 8);
-	VectorSet (ent->maxs, 8, 8, 8);
-	ent->s.modelindex = gi.modelindex ("models/objects/shockfield/tris.md2");
-#ifdef KMQUAKE2_ENGINE_MOD
-	ent->s.alpha = 0.70;
-#else
-	ent->s.renderfx |= RF_TRANSLUCENT;
-#endif
-	ent->s.renderfx |= RF_NOSHADOW|RF_FULLBRIGHT;
-	ent->s.effects = EF_FLAG2;
-	ent->count = 60;  //lasts 6 seconds
-	ent->think = shock_effect_think;
-	ent->nextthink = level.time + 2 * FRAMETIME;
-	gi.linkentity (ent);
-
-	//center light burst effect
-	center = G_Spawn();
-	//same origin as exploding shock sphere
-	if (plane->normal)
-		VectorCopy (hit_point, center->s.origin);
-	else
-		VectorCopy (source->s.origin, center->s.origin);
-	center->movetype = MOVETYPE_NONE;
-	center->solid = SOLID_NOT;
-	VectorSet (center->mins, -8, -8, 8);
-	VectorSet (center->maxs, 8, 8, 8);
-	center->s.modelindex = gi.modelindex ("sprites/s_trap.sp2");
-	center->s.effects |= EF_FLAG2 | EF_ANIM_ALLFAST;
-#ifdef KMQUAKE2_ENGINE_MOD
-	center->s.alpha = 0.90;
-#endif
-	center->count = 50;  //lasts 5 seconds
-	center->think = shock_effect_center_think;
-	center->nextthink = level.time + 2 * FRAMETIME;
-	ent->teamchain = center;
-	gi.linkentity (center);
-}
-
-#ifndef KMQUAKE2_ENGINE_MOD
-void ShockSplashThink (edict_t *self)
-{
-	self->s.frame++;
-	if (self->s.frame > 8)
-	{
-		G_FreeEdict(self);
-		return;
-	}
-	self->nextthink = level.time + FRAMETIME;
-}
-#else
-// Gotta have this for extractfuncs...
-void ShockSplashThink (edict_t *self)
-{
-}
-#endif
-
-void ShockSplash(edict_t *self, cplane_t *plane)
-{
-#ifdef KMQUAKE2_ENGINE_MOD	// use new client-side effect
-	vec3_t shockdir;
-
-	if (!plane->normal)
-		AngleVectors(self->s.angles, shockdir, NULL, NULL);
-	else
-		VectorCopy (plane->normal, shockdir);
-
-	gi.WriteByte (svc_temp_entity);
-	gi.WriteByte (TE_SHOCKSPLASH);
-	gi.WritePosition (self->s.origin);
-	gi.WriteDir (shockdir);
-	gi.multicast (self->s.origin, MULTICAST_ALL);
-
-	// Lazarus reflections
-	if (level.num_reflectors)
-		ReflectSparks (TE_SHOCKSPLASH, self->s.origin, shockdir);
-
-#else
-	edict_t	*shockring;
-	int i;
-
-	gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, gi.soundindex ("weapons/shockhit.wav"), 1, ATTN_NONE, 0);
-
-	for (i = 0; i < 5; i++)
-	{
-		shockring = G_Spawn();
-		shockring->classname = "shock_ring";
-		if (plane->normal)
-		{	//put origin of impact effect 16*i+1 units away from last hit surface
-			VectorMA (self->s.origin, 16.0*(i+1), plane->normal, shockring->s.origin);
-			vectoangles(plane->normal, shockring->s.angles);
-		}
-		else
-		{
-			VectorCopy (self->s.origin, shockring->s.origin);
-			VectorCopy (self->s.angles, shockring->s.angles);
-		}
-		shockring->solid = SOLID_NOT;
-		shockring->movetype = MOVETYPE_NONE;
-		shockring->owner = self;
-		shockring->s.modelindex = gi.modelindex("models/objects/shocksplash/tris.md2");
-		shockring->s.frame = (4-i);
-		shockring->s.effects |= EF_SPHERETRANS;
-		shockring->s.renderfx |= (RF_FULLBRIGHT | RF_NOSHADOW);
-		shockring->nextthink = level.time + FRAMETIME;
-		shockring->think = ShockSplashThink;
-		gi.linkentity (shockring);
-	}
-#endif
-}
-
-void shock_sphere_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
-{
-	vec3_t	origin;
-	edict_t	*impact;
-
-	// ignore other projectiles
-	if ((other->movetype == MOVETYPE_FLYMISSILE) || (other->movetype == MOVETYPE_BOUNCE)
-		|| (other->movetype == MOVETYPE_WALLBOUNCE))
-		return;
-
-	ent->count++; //add to count
-	ent->movetype = MOVETYPE_BOUNCE;
-
-	if (other == ent->owner)
-		return;
-
-	//detonate if hit a monster
-	if (other->takedamage)
-		ent->count = sk_shockwave_bounces->value + 1;
-
-	if ( (ent->velocity[0] < 20) && (ent->velocity[0] > -20)
-	   && (ent->velocity[1] < 20) && (ent->velocity[1] > -20)
-	   && (ent->velocity[2] < 20) && (ent->velocity[2] > -20) )
-		ent->count = sk_shockwave_bounces->value + 1;
-
-	if (surf && (surf->flags & SURF_SKY))
-	{
-		G_FreeEdict (ent);
-		return;
-	}
-
-	if (ent->owner->client)
-		PlayerNoise(ent->owner, ent->s.origin, PNOISE_IMPACT);
-
-	// calculate position for the explosion entity
-	VectorMA (ent->s.origin, -0.02, ent->velocity, origin);
-
-	if (other->takedamage)
-		T_Damage (other, ent, ent->owner, ent->velocity, ent->s.origin, plane->normal, ent->dmg, 0, 0, MOD_SHOCK_SPHERE);
-	T_RadiusDamage(ent, ent->owner, ent->radius_dmg, other, ent->dmg_radius, MOD_SHOCK_SPLASH);
-
-	//spawn impact
-	impact = G_Spawn();
-	impact->classname = "shock_impact";
-	VectorCopy (ent->s.origin, impact->s.origin);
-	gi.linkentity (impact);
-	impact->think = Nuke_Quake;
-	impact->speed = 250;
-	impact->nextthink = level.time + FRAMETIME;
-
-	if ((ent->count <= sk_shockwave_bounces->value) && !other->takedamage) //no shock rings if hit a monster
-	{
-		ShockSplash (ent, plane); // Spawn shock rings
-
-		if (impact)
-			impact->timestamp = level.time + 3;
-	}
-	else //don't exploode until final hit or hit a monster
-	{ 
-		gi.sound (ent, CHAN_NO_PHS_ADD+CHAN_VOICE, gi.soundindex ("weapons/shockexp.wav"), 1, ATTN_NONE, 0);
-
-		ShockEffect (ent, ent->owner, ent->radius_dmg, ent->dmg_radius, plane);
-
-		if (impact)
-			impact->timestamp = level.time + 6;
-
-		//remove after x bounces
-		G_FreeEdict (ent);
-	}
-}
-
-void shock_sphere_think (edict_t *sphere)
-{
-	sphere->avelocity[PITCH] = 80;
-	sphere->avelocity[ROLL] = 80;
-	sphere->nextthink = level.time + FRAMETIME;
-}
-
-void fire_shock_sphere (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage)
-{
-	edict_t	*sphere;
-
-	sphere = G_Spawn();
-	sphere->classname = "shock_sphere";
-	sphere->class_id = ENTITY_SHOCK_SPHERE;
-	VectorCopy (start, sphere->s.origin);
-	VectorCopy (dir, sphere->movedir);
-	vectoangles (dir, sphere->s.angles);
-	VectorScale (dir, speed, sphere->velocity);
-	sphere->avelocity[PITCH] = 80;
-	sphere->avelocity[ROLL] = 80;
-	sphere->movetype = MOVETYPE_WALLBOUNCE;
-	sphere->count = 0;
-	sphere->clipmask = MASK_SHOT;
-	sphere->solid = SOLID_BBOX;
-	VectorClear (sphere->mins);
-	VectorClear (sphere->maxs);
-	VectorSet (sphere->mins, -14, -14, -14);
-	VectorSet (sphere->maxs, 14, 14, 14);
-	sphere->s.modelindex = gi.modelindex ("models/objects/shocksphere/tris.md2");
-	sphere->s.renderfx |= RF_IR_VISIBLE;
-	sphere->owner = self;
-	sphere->touch = shock_sphere_touch;
-	sphere->timestamp = level.time;
-	sphere->nextthink = level.time + 0.1;
-	sphere->think = shock_sphere_think;
-	sphere->dmg = damage;
-	sphere->radius_dmg = radius_damage;
-	sphere->dmg_radius = damage_radius;
-
-	if (self->client)
-		check_dodge (self, sphere->s.origin, dir, speed);
-	gi.linkentity (sphere);
-}
-
-// NOTE: SP_shocksphere should ONLY be used to spawn shockspheres that change maps
-//       via a trigger_transition. It should NOT be used for map entities.
-
-void shocksphere_delayed_start (edict_t *shocksphere)
-{
-	if (g_edicts[1].linkcount)
-	{
-		VectorScale(shocksphere->movedir,shocksphere->moveinfo.speed,shocksphere->velocity);
-		if (shocksphere->count > 0)
-			shocksphere->movetype  = MOVETYPE_BOUNCE;
-		else
-			shocksphere->movetype  = MOVETYPE_WALLBOUNCE;
-		shocksphere->nextthink = level.time + FRAMETIME;
-		shocksphere->think     = shock_sphere_think;
-		gi.linkentity(shocksphere);
-	}
-	else
-		shocksphere->nextthink = level.time + FRAMETIME;
-}
-
-void SP_shocksphere (edict_t *shocksphere)
-{
-	shocksphere->s.modelindex = gi.modelindex ("models/objects/shocksphere/tris.md2");
-	shocksphere->touch = shock_sphere_touch;
-
-	// For SP, freeze shocksphere until player spawns in
-	if(game.maxclients == 1)
-	{
-		shocksphere->movetype  = MOVETYPE_NONE;
-		VectorCopy(shocksphere->velocity,shocksphere->movedir);
-		VectorNormalize(shocksphere->movedir);
-		shocksphere->moveinfo.speed = VectorLength(shocksphere->velocity);
-		VectorClear(shocksphere->velocity);
-		shocksphere->think     = shocksphere_delayed_start;
-		shocksphere->nextthink = level.time + FRAMETIME;
-	}
-	else
-	{
-		if (shocksphere->count > 0)
-			shocksphere->movetype  = MOVETYPE_BOUNCE;
-		else
-			shocksphere->movetype  = MOVETYPE_WALLBOUNCE;
-		shocksphere->nextthink = level.time + FRAMETIME;
-		shocksphere->think     = shock_sphere_think;
-	}
-	gi.linkentity (shocksphere);
-
-}
 
 /*
 =================
@@ -1316,7 +939,7 @@ void missile_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *s
 			if ((surf) && !(surf->flags & (SURF_WARP|SURF_TRANS33|SURF_TRANS66|SURF_FLOWING)))
 			{
 				n = rand() % 5;
-				while(n--)
+				while (n--)
 					ThrowDebris (ent, "models/objects/debris2/tris.md2", 2, ent->s.origin, 0, 0);
 			}
 		}
@@ -1463,7 +1086,7 @@ void fire_missile (edict_t *self, vec3_t start, vec3_t dir, int damage, int spee
 
 void missile_delayed_start (edict_t *missile)
 {
-	if(g_edicts[1].linkcount)
+	if (g_edicts[1].linkcount)
 	{
 		VectorScale(missile->movedir,missile->moveinfo.speed,missile->velocity);
 		missile->nextthink = level.time + 8000/missile->moveinfo.speed;
@@ -1484,11 +1107,11 @@ void SP_missile (edict_t *missile)
 	AngleVectors(missile->s.angles,dir,NULL,NULL);
 	VectorCopy (dir, missile->movedir);
 	missile->moveinfo.speed = VectorLength(missile->velocity);
-	if(missile->moveinfo.speed <= 0)
+	if (missile->moveinfo.speed <= 0)
 		missile->moveinfo.speed = 650;
 
 	// For SP, freeze missile until player spawns in
-	if(game.maxclients == 1)
+	if (game.maxclients == 1)
 	{
 		VectorClear(missile->velocity);
 		missile->think = missile_delayed_start;
@@ -1514,23 +1137,23 @@ void homing_think (edict_t *self)
 	vec3_t	dir, target;
 	vec_t	speed;
 
-	if(level.time > self->endtime)
+	if (level.time > self->endtime)
 	{
 		if (self->owner->client && (self->owner->client->homing_rocket == self))
 			self->owner->client->homing_rocket = NULL;
 		BecomeExplosion1(self);
 		return;
 	}
-	if(self->enemy && self->enemy->inuse)
+	if (self->enemy && self->enemy->inuse)
 	{
 		VectorMA(self->enemy->absmin,0.5,self->enemy->size,target);
 		tr = gi.trace(self->s.origin,vec3_origin,vec3_origin,target,self,MASK_OPAQUE);
-		if(tr.fraction == 1)
+		if (tr.fraction == 1)
 		{
 			// target in view; apply correction
 			VectorSubtract(target, self->s.origin, dir);
 			VectorNormalize(dir);
-			if(self->enemy->client)
+			if (self->enemy->client)
 				VectorScale(dir, 0.8+0.1*skill->value, dir);
 			else
 				VectorScale(dir, 1.0, dir);  // 0=no correction, 1=turn on a dime
@@ -1541,9 +1164,9 @@ void homing_think (edict_t *self)
 			speed = VectorLength(self->velocity);
 			VectorScale(dir, speed, self->velocity);
 
-			if(level.time >= self->starttime && self->starttime > 0)
+			if (level.time >= self->starttime && self->starttime > 0)
 			{
-				if(level.time > self->owner->fly_sound_debounce_time)
+				if (level.time > self->owner->fly_sound_debounce_time)
 				{
 					// this prevents multiple lockon sounds resulting from
 					// monsters firing multiple rockets in quick succession
@@ -1602,34 +1225,34 @@ void Rocket_Evade (edict_t *rocket, vec3_t	dir, float speed)
 		rocket_dist = VectorNormalize(rocket_vec);
 
 		// Not much hope in evading if distance is < 1K or so.
-		if(rocket_dist < 1024)
+		if (rocket_dist < 1024)
 			continue;
 
 		// Find best escape route.
 		best_r = 9999;
-		for(i=0; i<8; i++)
+		for (i=0; i<8; i++)
 		{
 			yaw = anglemod( i*45 );
 			forward[0] = cos( DEG2RAD(yaw) );
 			forward[1] = sin( DEG2RAD(yaw) );
 			forward[2] = 0;
 			dot = DotProduct(forward,dir);
-			if((dot > 0.96) || (dot < -0.96))
+			if ((dot > 0.96) || (dot < -0.96))
 				continue;
 			// Estimate of required distance to run. This is conservative.
 			r = rocket->dmg_radius + rocket_dist*DotProduct(forward,rocket_vec) + ent->size[0] + 16;
-			if( r < best_r )
+			if ( r < best_r )
 			{
 				VectorMA(ent->s.origin,r,forward,pos);
 				tr = gi.trace(ent->s.origin,ent->mins,ent->maxs,pos,ent,MASK_MONSTERSOLID);
-				if(tr.fraction < 1.0)
+				if (tr.fraction < 1.0)
 					continue;
 				best_r = r;
 				best_yaw = yaw;
 				VectorCopy(tr.endpos,best_pos);
 			}
 		}
-		if(best_r < 9000)
+		if (best_r < 9000)
 		{
 			edict_t	*thing = SpawnThing();
 			VectorCopy(best_pos,thing->s.origin);
@@ -1682,7 +1305,7 @@ void rocket_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *su
 			if ((surf) && !(surf->flags & (SURF_WARP|SURF_TRANS33|SURF_TRANS66|SURF_FLOWING)))
 			{
 				n = rand() % 5;
-				while(n--)
+				while (n--)
 					ThrowDebris (ent, "models/objects/debris2/tris.md2", 2, ent->s.origin, 0, 0);
 			}
 		}
@@ -1842,7 +1465,7 @@ void fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed
 
 void rocket_delayed_start (edict_t *rocket)
 {
-	if(g_edicts[1].linkcount)
+	if (g_edicts[1].linkcount)
 	{
 		VectorScale(rocket->movedir,rocket->moveinfo.speed,rocket->velocity);
 		rocket->nextthink = level.time + 8000/rocket->moveinfo.speed;
@@ -1865,11 +1488,11 @@ void SP_rocket (edict_t *rocket)
 	AngleVectors(rocket->s.angles,dir,NULL,NULL);
 	VectorCopy (dir, rocket->movedir);
 	rocket->moveinfo.speed = VectorLength(rocket->velocity);
-	if(rocket->moveinfo.speed <= 0)
+	if (rocket->moveinfo.speed <= 0)
 		rocket->moveinfo.speed = 650;
 
 	// For SP, freeze rocket until player spawns in
-	if(game.maxclients == 1)
+	if (game.maxclients == 1)
 	{
 		VectorClear(rocket->velocity);
 		rocket->think = rocket_delayed_start;
@@ -1915,7 +1538,7 @@ void SP_rocket (edict_t *rocket)
 			if ((surf) && !(surf->flags & (SURF_WARP|SURF_TRANS33|SURF_TRANS66|SURF_FLOWING)))
 			{
 				n = rand() % 5;
-				while(n--)
+				while (n--)
 					ThrowDebris (ent, "models/objects/debris2/tris.md2", 2, ent->s.origin);
 			}
 		}
@@ -1979,7 +1602,7 @@ void fire_rail (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick
 	int			mask, tempevent, i=0;
 	qboolean	water;
 
-	//Knightmare- changeable trail color
+	// Knightmare- changeable trail color
 #ifdef KMQUAKE2_ENGINE_MOD
 	if (self->client && sk_rail_color->value == 2)
 		tempevent = TE_RAILTRAIL2;
@@ -1991,7 +1614,14 @@ void fire_rail (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick
 	VectorCopy (start, from);
 	ignore = self;
 	water = false;
-	mask = MASK_SHOT|CONTENTS_SLIME|CONTENTS_LAVA;
+
+	// Zaero- hack for zdef4 to shoot through window
+	if ( self->client && (Q_stricmp(level.mapname, "zdef4") == 0) )
+		mask = MASK_SHOT_NO_WINDOW|CONTENTS_SLIME|CONTENTS_LAVA;
+	else
+		mask = MASK_SHOT|CONTENTS_SLIME|CONTENTS_LAVA;
+	// end Zaero
+
 	while (ignore && i<256)
 	{
 		tr = gi.trace (from, NULL, NULL, end, ignore, mask);
@@ -2003,7 +1633,7 @@ void fire_rail (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick
 		}
 		else
 		{
-			//ZOID--added so rail goes through SOLID_BBOX entities (gibs, etc)
+			// ZOID--added so rail goes through SOLID_BBOX entities (gibs, etc)
 			if ((tr.ent->svflags & SVF_MONSTER) || (tr.ent->client) ||
 				(tr.ent->svflags & SVF_DAMAGEABLE) ||
 				(tr.ent->solid == SOLID_BBOX))
@@ -2185,7 +1815,7 @@ void bfg_think (edict_t *self)
 		ignore = self;
 		VectorCopy (self->s.origin, start);
 		VectorMA (start, 2048, dir, end);
-		while(1)
+		while (1)
 		{
 			tr = gi.trace (start, NULL, NULL, end, ignore, CONTENTS_SOLID|CONTENTS_MONSTER|CONTENTS_DEADMONSTER);
 
@@ -2391,7 +2021,7 @@ void fire_ionripper (edict_t *self, vec3_t start, vec3_t dir, int damage, int sp
 //       entities.
 void ion_delayed_start (edict_t *ion)
 {
-	if(g_edicts[1].linkcount)
+	if (g_edicts[1].linkcount)
 	{
 		VectorScale(ion->movedir,ion->moveinfo.speed,ion->velocity);
 		ion->nextthink = level.time + 3;
@@ -2695,9 +2325,9 @@ void fire_plasma (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed
 
 void plasma_delayed_start (edict_t *plasma)
 {
-	if(g_edicts[1].linkcount)
+	if (g_edicts[1].linkcount)
 	{
-		VectorScale(plasma->movedir,plasma->moveinfo.speed,plasma->velocity);
+		VectorScale(plasma->movedir, plasma->moveinfo.speed, plasma->velocity);
 		plasma->nextthink = level.time + 8000/plasma->moveinfo.speed;
 		plasma->think = G_FreeEdict;
 		gi.linkentity(plasma);
@@ -2714,14 +2344,14 @@ void SP_plasma (edict_t *plasma)
 	plasma->s.effects |= EF_PLASMA | EF_ANIM_ALLFAST;
 	plasma->s.sound      = gi.soundindex ("weapons/rockfly.wav");
 	plasma->touch = plasma_touch;
-	AngleVectors(plasma->s.angles,dir,NULL,NULL);
+	AngleVectors(plasma->s.angles, dir, NULL, NULL);
 	VectorCopy (dir, plasma->movedir);
 	plasma->moveinfo.speed = VectorLength(plasma->velocity);
-	if(plasma->moveinfo.speed <= 0)
+	if (plasma->moveinfo.speed <= 0)
 		plasma->moveinfo.speed = 650;
 
 	// For SP, freeze plasma until player spawns in
-	if(game.maxclients == 1)
+	if (game.maxclients == 1)
 	{
 		VectorClear(plasma->velocity);
 		plasma->think = plasma_delayed_start;
@@ -2781,13 +2411,13 @@ extern int lastgibframe;
 				
 				// Knightmare- forget this, enough gibs are spawned already
 				// Lazarus: Prevent gib showers from causing SZ_GetSpace: overflow
-				/*if(level.framenum > lastgibframe)
+				/*if (level.framenum > lastgibframe)
 				{
 					gibsthisframe = 0;
 					lastgibframe = level.framenum;
 				}
 				gibsthisframe++;
-				if(gibsthisframe <= sv_maxgibs->value)
+				if (gibsthisframe <= sv_maxgibs->value)
 				{
 					best = G_Spawn();
 
@@ -2996,10 +2626,10 @@ void fire_trap (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int spee
 	VectorScale (aimdir, speed, trap->velocity);
 	VectorMA (trap->velocity, 200 + crandom() * 10.0, up, trap->velocity);
 	VectorMA (trap->velocity, crandom() * 10.0, right, trap->velocity);
-	//Knightmare- add player's base velocity to thrown trap
+	// Knightmare- add player's base velocity to thrown trap
 	if (add_velocity_throw->value && self->client)
 		VectorAdd (trap->velocity, self->velocity, trap->velocity);
-	else if(self->groundentity)
+	else if (self->groundentity)
 		VectorAdd (trap->velocity, self->groundentity->velocity, trap->velocity);
 
 	VectorSet (trap->avelocity, 0, 300, 0);
@@ -3045,7 +2675,7 @@ void fire_trap (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int spee
 
 void trap_delayed_start (edict_t *trap)
 {
-	if(g_edicts[1].linkcount)
+	if (g_edicts[1].linkcount)
 	{
 		VectorScale(trap->movedir,trap->moveinfo.speed,trap->velocity);
 		trap->movetype  = MOVETYPE_BOUNCE;
@@ -3057,12 +2687,13 @@ void trap_delayed_start (edict_t *trap)
 		trap->nextthink = level.time + FRAMETIME;
 }
 
+
 void SP_trap (edict_t *trap)
 {
 	trap->s.modelindex = gi.modelindex ("models/weapons/z_trap/tris.md2");
 	trap->s.sound = gi.soundindex ("weapons/traploop.wav");
 	// For SP, freeze trap until player spawns in
-	if(game.maxclients == 1)
+	if (game.maxclients == 1)
 	{
 		trap->movetype  = MOVETYPE_NONE;
 		VectorCopy(trap->velocity,trap->movedir);
@@ -3081,10 +2712,12 @@ void SP_trap (edict_t *trap)
 	gi.linkentity (trap);
 }
 
+
 void Trap_Die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
 	Trap_Explode (self);
 }
+
 
 void Cmd_KillTrap_f (edict_t *ent)
 {
@@ -3100,9 +2733,10 @@ void Cmd_KillTrap_f (edict_t *ent)
 	}
 }
 
+
 void Trap_Explode (edict_t *ent)
 {
-	vec3_t		origin;
+	vec3_t	origin;
 
 	VectorMA (ent->s.origin, -0.02, ent->velocity, origin);
 	gi.WriteByte (svc_temp_entity);
@@ -3110,7 +2744,7 @@ void Trap_Explode (edict_t *ent)
 	gi.WritePosition (origin);
 	gi.multicast (ent->s.origin, MULTICAST_PVS);
 
-	//Grenade_Explode(ent);
+//	Grenade_Explode(ent);
 
 	// Lazarus reflections
 	if (level.num_reflectors)
@@ -3118,3 +2752,740 @@ void Trap_Explode (edict_t *ent)
 
 	G_FreeEdict (ent);
 }
+
+
+/*
+==============================================================================
+
+Shockwave
+
+==============================================================================
+*/
+
+void Nuke_Quake (edict_t *self);
+
+void shock_effect_think (edict_t *self)
+{
+	if (++self->s.frame < 19)
+		self->nextthink = level.time + FRAMETIME;
+	else
+	{
+		self->s.frame = 0;
+		self->nextthink = level.time + FRAMETIME;
+	}
+	self->count--;
+
+	// fade out
+#ifdef KMQUAKE2_ENGINE_MOD
+	if (self->count <= 6)
+		self->s.alpha -= 0.10;
+	if (self->s.alpha < 0.10)
+		self->s.alpha = 0.10;
+#else
+	if (self->count == 5)
+	{
+		self->s.effects |= EF_SPHERETRANS;
+		self->s.renderfx &= ~RF_TRANSLUCENT;
+	}
+#endif
+	// remove after 6 secs
+	if (self->count == 0)
+		G_FreeEdict (self);
+	// inflict field damage on surroundings
+	T_RadiusDamage(self, self->owner, self->radius_dmg, NULL, self->dmg_radius, MOD_SHOCK_SPLASH);
+}
+
+void shock_effect_center_think (edict_t *self)
+{
+	self->nextthink = level.time + FRAMETIME;
+	if ((self->count % 5) == 0)
+	{
+		if (self->count > 10) // double effect for first 40 seconds
+		{
+			gi.WriteByte (svc_temp_entity);
+			gi.WriteByte (TE_NUKEBLAST);
+			gi.WritePosition (self->s.origin);
+			gi.multicast (self->s.origin, MULTICAST_ALL);
+		}
+		gi.WriteByte (svc_temp_entity);
+		gi.WriteByte (TE_NUKEBLAST);
+		gi.WritePosition (self->s.origin);
+		gi.multicast (self->s.origin, MULTICAST_ALL);
+	}
+	// fade out
+#ifdef KMQUAKE2_ENGINE_MOD
+	if (self->count <= 10)
+		self->s.alpha -= 0.10;
+	self->s.alpha = max(self->s.alpha, 1/255);
+	// remove after 5 secs
+	self->count--;
+	if (self->count == 0 || self->s.alpha <= 1/255)
+		G_FreeEdict (self);
+#else
+	if (self->count == 10)
+		self->s.renderfx |= RF_TRANSLUCENT;
+	if (self->count == 5)
+	{
+		self->s.effects |= EF_SPHERETRANS;
+		self->s.renderfx &= ~RF_TRANSLUCENT;
+	}
+	//remove after 5 secs
+	self->count--;
+	if (self->count == 0)
+		G_FreeEdict (self);
+#endif
+}
+
+void ShockEffect (edict_t *source, edict_t *attacker, float damage, float radius, cplane_t *plane)
+{
+	edict_t	*ent;
+	edict_t	*center;
+	vec3_t	hit_point;
+
+	if (plane->normal)
+	{	// put origin of effect 32 units away from last hit surface
+		VectorMA (source->s.origin, 32.0, plane->normal, hit_point);
+	}
+
+	ent = G_Spawn();
+	// same origin as exploding shock sphere
+	if (plane->normal)
+		VectorCopy (hit_point, ent->s.origin);
+	else
+		VectorCopy (source->s.origin, ent->s.origin);
+	ent->radius_dmg = sk_shockwave_effect_damage->value;
+	ent->dmg_radius = sk_shockwave_effect_radius->value;
+	ent->owner = attacker;
+	ent->movetype = MOVETYPE_NONE;
+	ent->solid = SOLID_NOT;
+	VectorSet (ent->mins, -8, -8, 8);
+	VectorSet (ent->maxs, 8, 8, 8);
+	ent->s.modelindex = gi.modelindex ("models/objects/shockfield/tris.md2");
+#ifdef KMQUAKE2_ENGINE_MOD
+	ent->s.alpha = 0.70;
+#else
+	ent->s.renderfx |= RF_TRANSLUCENT;
+#endif
+	ent->s.renderfx |= RF_NOSHADOW|RF_FULLBRIGHT;
+	ent->s.effects = EF_FLAG2;
+	ent->count = 60;  // lasts 6 seconds
+	ent->think = shock_effect_think;
+	ent->nextthink = level.time + 2 * FRAMETIME;
+	gi.linkentity (ent);
+
+	// center light burst effect
+	center = G_Spawn();
+	// same origin as exploding shock sphere
+	if (plane->normal)
+		VectorCopy (hit_point, center->s.origin);
+	else
+		VectorCopy (source->s.origin, center->s.origin);
+	center->movetype = MOVETYPE_NONE;
+	center->solid = SOLID_NOT;
+	VectorSet (center->mins, -8, -8, 8);
+	VectorSet (center->maxs, 8, 8, 8);
+	center->s.modelindex = gi.modelindex ("sprites/s_trap.sp2");
+	center->s.effects |= EF_FLAG2 | EF_ANIM_ALLFAST;
+#ifdef KMQUAKE2_ENGINE_MOD
+	center->s.alpha = 0.90;
+#endif
+	center->count = 50;  // lasts 5 seconds
+	center->think = shock_effect_center_think;
+	center->nextthink = level.time + 2 * FRAMETIME;
+	ent->teamchain = center;
+	gi.linkentity (center);
+}
+
+#ifndef KMQUAKE2_ENGINE_MOD
+void ShockSplashThink (edict_t *self)
+{
+	self->s.frame++;
+	if (self->s.frame > 8)
+	{
+		G_FreeEdict(self);
+		return;
+	}
+	self->nextthink = level.time + FRAMETIME;
+}
+#else
+// Gotta have this for extractfuncs...
+void ShockSplashThink (edict_t *self)
+{
+}
+#endif
+
+void ShockSplash(edict_t *self, cplane_t *plane)
+{
+#ifdef KMQUAKE2_ENGINE_MOD	// use new client-side effect
+	vec3_t shockdir;
+
+	if (!plane->normal)
+		AngleVectors(self->s.angles, shockdir, NULL, NULL);
+	else
+		VectorCopy (plane->normal, shockdir);
+
+	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (TE_SHOCKSPLASH);
+	gi.WritePosition (self->s.origin);
+	gi.WriteDir (shockdir);
+	gi.multicast (self->s.origin, MULTICAST_ALL);
+
+	// Lazarus reflections
+	if (level.num_reflectors)
+		ReflectSparks (TE_SHOCKSPLASH, self->s.origin, shockdir);
+
+#else
+	edict_t	*shockring;
+	int i;
+
+	gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, gi.soundindex ("weapons/shockhit.wav"), 1, ATTN_NONE, 0);
+
+	for (i = 0; i < 5; i++)
+	{
+		shockring = G_Spawn();
+		shockring->classname = "shock_ring";
+		if (plane->normal)
+		{	//put origin of impact effect 16*i+1 units away from last hit surface
+			VectorMA (self->s.origin, 16.0*(i+1), plane->normal, shockring->s.origin);
+			vectoangles(plane->normal, shockring->s.angles);
+		}
+		else
+		{
+			VectorCopy (self->s.origin, shockring->s.origin);
+			VectorCopy (self->s.angles, shockring->s.angles);
+		}
+		shockring->solid = SOLID_NOT;
+		shockring->movetype = MOVETYPE_NONE;
+		shockring->owner = self;
+		shockring->s.modelindex = gi.modelindex("models/objects/shocksplash/tris.md2");
+		shockring->s.frame = (4-i);
+		shockring->s.effects |= EF_SPHERETRANS;
+		shockring->s.renderfx |= (RF_FULLBRIGHT | RF_NOSHADOW);
+		shockring->nextthink = level.time + FRAMETIME;
+		shockring->think = ShockSplashThink;
+		gi.linkentity (shockring);
+	}
+#endif
+}
+
+void shock_sphere_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
+{
+	vec3_t	origin;
+	edict_t	*impact;
+
+	// ignore other projectiles
+	if ((other->movetype == MOVETYPE_FLYMISSILE) || (other->movetype == MOVETYPE_BOUNCE)
+		|| (other->movetype == MOVETYPE_WALLBOUNCE))
+		return;
+
+	ent->count++; // add to count
+	ent->movetype = MOVETYPE_BOUNCE;
+
+	if (other == ent->owner)
+		return;
+
+	// detonate if hit a monster
+	if (other->takedamage)
+		ent->count = sk_shockwave_bounces->value + 1;
+
+	if ( (ent->velocity[0] < 20) && (ent->velocity[0] > -20)
+	   && (ent->velocity[1] < 20) && (ent->velocity[1] > -20)
+	   && (ent->velocity[2] < 20) && (ent->velocity[2] > -20) )
+		ent->count = sk_shockwave_bounces->value + 1;
+
+	if (surf && (surf->flags & SURF_SKY))
+	{
+		G_FreeEdict (ent);
+		return;
+	}
+
+	if (ent->owner->client)
+		PlayerNoise(ent->owner, ent->s.origin, PNOISE_IMPACT);
+
+	// calculate position for the explosion entity
+	VectorMA (ent->s.origin, -0.02, ent->velocity, origin);
+
+	if (other->takedamage)
+		T_Damage (other, ent, ent->owner, ent->velocity, ent->s.origin, plane->normal, ent->dmg, 0, 0, MOD_SHOCK_SPHERE);
+	T_RadiusDamage(ent, ent->owner, ent->radius_dmg, other, ent->dmg_radius, MOD_SHOCK_SPLASH);
+
+	// spawn impact
+	impact = G_Spawn();
+	impact->classname = "shock_impact";
+	VectorCopy (ent->s.origin, impact->s.origin);
+	gi.linkentity (impact);
+	impact->think = Nuke_Quake;
+	impact->speed = 250;
+	impact->nextthink = level.time + FRAMETIME;
+
+	if ((ent->count <= sk_shockwave_bounces->value) && !other->takedamage) //no shock rings if hit a monster
+	{
+		ShockSplash (ent, plane); // Spawn shock rings
+
+		if (impact)
+			impact->timestamp = level.time + 3;
+	}
+	else // don't exploode until final hit or hit a monster
+	{ 
+		gi.sound (ent, CHAN_NO_PHS_ADD+CHAN_VOICE, gi.soundindex ("weapons/shockexp.wav"), 1, ATTN_NONE, 0);
+
+		ShockEffect (ent, ent->owner, ent->radius_dmg, ent->dmg_radius, plane);
+
+		if (impact)
+			impact->timestamp = level.time + 6;
+
+		// remove after x bounces
+		G_FreeEdict (ent);
+	}
+}
+
+void shock_sphere_think (edict_t *sphere)
+{
+	sphere->avelocity[PITCH] = 80;
+	sphere->avelocity[ROLL] = 80;
+	sphere->nextthink = level.time + FRAMETIME;
+}
+
+void fire_shock_sphere (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage)
+{
+	edict_t	*sphere;
+
+	sphere = G_Spawn();
+	sphere->classname = "shocksphere";
+	sphere->class_id = ENTITY_SHOCK_SPHERE;
+	VectorCopy (start, sphere->s.origin);
+	VectorCopy (dir, sphere->movedir);
+	vectoangles (dir, sphere->s.angles);
+	VectorScale (dir, speed, sphere->velocity);
+	sphere->avelocity[PITCH] = 80;
+	sphere->avelocity[ROLL] = 80;
+	sphere->movetype = MOVETYPE_WALLBOUNCE;
+	sphere->count = 0;
+	sphere->clipmask = MASK_SHOT;
+	sphere->solid = SOLID_BBOX;
+	VectorClear (sphere->mins);
+	VectorClear (sphere->maxs);
+	VectorSet (sphere->mins, -14, -14, -14);
+	VectorSet (sphere->maxs, 14, 14, 14);
+	sphere->s.modelindex = gi.modelindex ("models/objects/shocksphere/tris.md2");
+	sphere->s.renderfx |= RF_IR_VISIBLE;
+	sphere->owner = self;
+	sphere->touch = shock_sphere_touch;
+	sphere->timestamp = level.time;
+	sphere->nextthink = level.time + 0.1;
+	sphere->think = shock_sphere_think;
+	sphere->dmg = damage;
+	sphere->radius_dmg = radius_damage;
+	sphere->dmg_radius = damage_radius;
+
+	if (self->client)
+		check_dodge (self, sphere->s.origin, dir, speed);
+	gi.linkentity (sphere);
+}
+
+// NOTE: SP_shocksphere should ONLY be used to spawn shockspheres that change maps
+//       via a trigger_transition. It should NOT be used for map entities.
+
+void shocksphere_delayed_start (edict_t *shocksphere)
+{
+	if (g_edicts[1].linkcount)
+	{
+		VectorScale(shocksphere->movedir,shocksphere->moveinfo.speed,shocksphere->velocity);
+		if (shocksphere->count > 0)
+			shocksphere->movetype  = MOVETYPE_BOUNCE;
+		else
+			shocksphere->movetype  = MOVETYPE_WALLBOUNCE;
+		shocksphere->nextthink = level.time + FRAMETIME;
+		shocksphere->think     = shock_sphere_think;
+		gi.linkentity(shocksphere);
+	}
+	else
+		shocksphere->nextthink = level.time + FRAMETIME;
+}
+
+void SP_shocksphere (edict_t *shocksphere)
+{
+	shocksphere->s.modelindex = gi.modelindex ("models/objects/shocksphere/tris.md2");
+	shocksphere->touch = shock_sphere_touch;
+
+	// For SP, freeze shocksphere until player spawns in
+	if (game.maxclients == 1)
+	{
+		shocksphere->movetype  = MOVETYPE_NONE;
+		VectorCopy(shocksphere->velocity,shocksphere->movedir);
+		VectorNormalize(shocksphere->movedir);
+		shocksphere->moveinfo.speed = VectorLength(shocksphere->velocity);
+		VectorClear(shocksphere->velocity);
+		shocksphere->think     = shocksphere_delayed_start;
+		shocksphere->nextthink = level.time + FRAMETIME;
+	}
+	else
+	{
+		if (shocksphere->count > 0)
+			shocksphere->movetype  = MOVETYPE_BOUNCE;
+		else
+			shocksphere->movetype  = MOVETYPE_WALLBOUNCE;
+		shocksphere->nextthink = level.time + FRAMETIME;
+		shocksphere->think     = shock_sphere_think;
+	}
+	gi.linkentity (shocksphere);
+}
+
+
+//==============================================================================
+/*
+ * M82 Plasma Rifle Source
+ * Copyright (C) 1999  Team HOSTILE
+ * Copyright (C) 1999  LMCTF 5.0
+ * created by James "SWKiD" Tomaschke
+ */
+
+/*
+==============================================================================
+plasma_rifle_bounce_touch
+
+If touched a hurtable object, hurt it.  Otherwise bounce with splash damage.
+==============================================================================
+*/
+void plasma_rifle_bounce_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf) 
+{
+	// sanity check
+	if (!self || !other) {
+		G_FreeEdict(self);
+		return;
+	}
+	
+	// If hit the sky, remove from world
+	if (surf && (surf->flags & SURF_SKY)) {
+		G_FreeEdict(self);
+		return;
+	}
+
+	if ( self->owner->client )
+		PlayerNoise (self->owner, self->s.origin, PNOISE_IMPACT);
+
+	if ( other->takedamage ) 
+	{
+		T_Damage (other, self, self->owner, self->velocity, self->s.origin, plane->normal, self->dmg, 1, DAMAGE_ENERGY, MOD_PLASMA);	// Knightmare- use parm damage
+			  
+		// play hit sound
+		gi.sound( self, CHAN_BODY, gi.soundindex(PLASMA_SOUND_HIT), 1, ATTN_IDLE, 0 );
+
+		self->solid = SOLID_NOT;
+		self->touch = NULL;
+		VectorMA (self->s.origin, -1*FRAMETIME, self->velocity, self->s.origin);
+		VectorClear (self->velocity);
+
+		// Run Plasma Hit Animation
+		self->s.modelindex = gi.modelindex (PLASMA_SPRITE_HIT);
+		self->s.frame = 0;
+		self->s.sound = 0;
+		self->think = G_FreeEdict;
+		self->nextthink = level.time + 0.1;
+	}
+	else
+	{	// fx to do when it bounces off something
+		// play reflection sound
+		gi.sound ( self, CHAN_BODY, gi.soundindex(PLASMA_SOUND_BOUNCE), 1, ATTN_STATIC, 0 );
+
+		// Draw blue sparks
+		gi.WriteByte (svc_temp_entity);
+		gi.WriteByte (TE_LASER_SPARKS);
+		gi.WriteByte (32);		// ammount
+		gi.WritePosition (self->s.origin);
+		gi.WriteDir (plane->normal);
+		gi.WriteByte (176);		// stecki's choice of id's blue
+		gi.multicast (self->s.origin, MULTICAST_PVS);
+
+		// -bat
+		T_RadiusDamage (self, self->owner, self->dmg, NULL, self->dmg+sk_plasma_rifle_radius->value, MOD_PLASMA);	// Knightmare- use parm damage and radius cvar
+	}
+}
+
+
+/*
+==============================================================================
+plasma_rifle_spread_touch
+
+If hits an entity, do some damage, otherwise do some splash damage.
+==============================================================================
+*/
+void plasma_rifle_spread_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf) 
+{
+	// sanity check
+	if (!self || !other) {
+		G_FreeEdict(self);
+		return;
+	}
+
+	// If hit the sky, remove from world
+	if (surf && (surf->flags & SURF_SKY)) {
+		G_FreeEdict(self);
+		return;
+	}
+
+	// Don't collide with other plasma goops
+	if ( Q_stricmp(other->classname, "goop") == 0 )
+		return;
+	
+	if ( self->owner->client )
+		PlayerNoise(self->owner, self->s.origin, PNOISE_IMPACT);
+
+	// If can damage, hurt it
+	if ( other->takedamage )
+	{
+		T_Damage (other, self, self->owner, self->velocity, self->s.origin, plane->normal, self->dmg, 1, DAMAGE_ENERGY, MOD_PLASMA);	// Knightmare- use parm damage
+	}		  
+	else	// otherwise, splash damage
+	{		
+		//-bat added sparks to this too.
+		// Draw blue sparks
+		gi.WriteByte (svc_temp_entity);
+		gi.WriteByte (TE_LASER_SPARKS);
+		gi.WriteByte (32);		// ammount
+		gi.WritePosition (self->s.origin);
+		gi.WriteDir (plane->normal);
+		gi.WriteByte (176);		// stecki's choice of id's blue
+		gi.multicast (self->s.origin, MULTICAST_PVS);
+
+		T_RadiusDamage (self, self->owner, self->dmg, NULL, self->dmg+sk_plasma_rifle_radius->value, MOD_PLASMA);	// Knightmare- use parm damage and radius cvar
+	}		  
+	// play hit sound
+	gi.sound ( self, CHAN_BODY, gi.soundindex(PLASMA_SOUND_HIT), 1, ATTN_IDLE,0 );	// idle static none
+
+	self->solid = SOLID_NOT;
+	self->touch = NULL;
+	VectorMA (self->s.origin, -1*FRAMETIME, self->velocity, self->s.origin);
+	VectorClear (self->velocity);
+
+	// Run Plasma Hit Animation
+	self->s.modelindex = gi.modelindex (PLASMA_SPRITE_HIT);
+	self->s.frame = 0;
+	self->s.sound = 0;
+	self->think = G_FreeEdict;
+	self->nextthink = level.time + 0.1;
+}
+
+
+/*
+==============================================================================
+Spawn_Goop
+
+Spawns the plasma entities, and defines values global to both weapon modes.
+==============================================================================
+*/
+edict_t *Spawn_Goop (edict_t *ent, vec3_t start)
+{
+	edict_t *goop;	// = G_Spawn();
+
+	// sanity check
+	if (!ent) {
+		return NULL;
+	}
+
+	goop = G_Spawn();
+
+	goop->owner = ent;
+	goop->clipmask = MASK_SHOT;
+	goop->solid = SOLID_BBOX;
+	goop->svflags = SVF_DEADMONSTER;
+	
+	VectorCopy (start, goop->s.origin);
+	goop->classname = "goop";
+
+	goop->s.effects |= EF_BLUEHYPERBLASTER | EF_ANIM_ALLFAST;
+	// bat to get rid of the blue flag effect
+//	goop->s.effects |= EF_IONRIPPER | EF_ANIM_ALLFAST;
+	goop->s.renderfx = RF_TRANSLUCENT;
+	goop->s.modelindex = gi.modelindex(PLASMA_SPRITE_FLY);
+	goop->s.sound = gi.soundindex(PLASMA_SOUND_FLYBY);
+
+	// give it some thickness for the bounce
+//	VectorSet (goop->mins, -12, -12, -12);
+//	VectorSet (goop->maxs, 12, 12, 12);
+	VectorSet (goop->mins, -6, -6, -6);
+	VectorSet (goop->maxs, 6, 6, 6);
+
+	return goop;
+}
+
+
+/*
+==============================================================================
+fire_plasma_rifle_bounce
+
+Unique code to fire a bouncy plasma goob.
+Uses MOVETYPE_WALLBOUNCE.
+==============================================================================
+*/
+void fire_plasma_rifle_bounce (edict_t *ent, vec3_t start, vec3_t dir, int damage, int speed)
+{
+	edict_t *goop = NULL;
+
+	// sanity check
+	if (!ent) {
+		return;
+	}
+
+	goop = Spawn_Goop (ent, start);
+	if (!goop) {
+		return;
+	}
+
+	goop->movetype = MOVETYPE_WALLBOUNCE;	// Knightmare- use same movetype as ION Ripper projectiles
+
+	VectorScale (dir, speed, goop->velocity);		// Knightmare- use parm speed
+	VectorCopy (goop->velocity, goop->s.angles);		// needed for post touch
+	
+	//-bat
+	goop->dmg = damage;		// Knightmare- use parm damage
+	goop->touch = plasma_rifle_bounce_touch;
+	
+	goop->think = G_FreeEdict;				// change this to handle
+//	goop->nextthink = level.time + 3.0;		// sprite animation?
+	goop->nextthink = level.time + 1.5;
+
+	gi.linkentity (goop);
+}
+
+
+/*
+==============================================================================
+fire_plasma_rifle_spread
+
+Unique code to fire a spread of three bullets, each with 1/3 the damage of
+one initial bouncy bullet.
+==============================================================================
+*/
+void fire_plasma_rifle_spread (edict_t *ent, vec3_t start, vec3_t dir, int damage, int speed)
+{
+	edict_t	*goop_l = NULL;
+	edict_t *goop_c = NULL;
+	edict_t	*goop_r = NULL;
+	vec3_t	angles;
+
+	// sanity check
+	if (!ent) {
+		return;
+	}
+
+	goop_l = Spawn_Goop (ent, start);
+	goop_c = Spawn_Goop (ent, start);
+	goop_r = Spawn_Goop (ent, start);
+	if (!goop_l || !goop_c || !goop_r) {
+		return;
+	}
+
+	goop_l->movetype = MOVETYPE_FLYMISSILE;
+	goop_c->movetype = MOVETYPE_FLYMISSILE;
+	goop_r->movetype = MOVETYPE_FLYMISSILE;
+
+	VectorClear (goop_l->mins);
+	VectorClear (goop_l->maxs);
+	VectorClear (goop_c->mins);
+	VectorClear (goop_c->maxs);
+	VectorClear (goop_r->mins);
+	VectorClear (goop_r->maxs);
+
+	// Knightmare- use parm damage
+	goop_l->dmg = damage;
+	goop_c->dmg = damage;
+	goop_r->dmg = damage;
+
+	// center spread, line of sight
+	VectorScale (dir, speed, goop_c->velocity);		// Knightmare- use parm speed
+	vectoangles (dir, angles);
+
+	// right spread, has 10+ in yaw
+	angles[YAW] -= 10;
+	AngleVectors( angles, dir, NULL, NULL );
+	VectorScale(dir, speed, goop_r->velocity);		// Knightmare- use parm speed
+
+	// left spread, has 10- in yaw
+	angles[YAW] += 20;
+	AngleVectors ( angles, dir, NULL, NULL );
+	VectorScale (dir, speed, goop_l->velocity);		// Knightmare- use parm speed
+
+	goop_l->touch = plasma_rifle_spread_touch;
+	goop_c->touch = plasma_rifle_spread_touch;
+	goop_r->touch = plasma_rifle_spread_touch;
+	
+	goop_l->think = G_FreeEdict;
+	goop_c->think = G_FreeEdict;
+	goop_r->think = G_FreeEdict;
+	goop_l->nextthink = level.time + 3.0;
+	goop_c->nextthink = level.time + 3.0;
+	goop_r->nextthink = level.time + 3.0;
+
+	gi.linkentity (goop_l);
+	gi.linkentity (goop_c);
+	gi.linkentity (goop_r);
+}
+
+
+/*
+==============================================================================
+fire_plasma_rifle
+
+If "reflect" is > 0, it will fire a bouncy shot, else, it will fire a spread.
+"start" and "dir" are not set here, but in 'p_weapon.c', where it is setup to
+handle weapon firing.
+==============================================================================
+*/
+void fire_plasma_rifle (edict_t *ent, vec3_t start, vec3_t dir, int damage, int speed, qboolean spread)
+{
+	if (spread) {
+		fire_plasma_rifle_spread (ent, start, dir, damage, speed);
+	}
+	else {
+		fire_plasma_rifle_bounce (ent, start, dir, damage, speed);
+	}
+}
+
+// NOTE: SP_goop should ONLY be used to spawn goop rifle shots that change maps
+//       via a trigger_transition. It should NOT be used for map entities.
+
+void goop_delayed_start (edict_t *goop)
+{
+	if (g_edicts[1].linkcount)
+	{
+		VectorScale(goop->movedir, goop->moveinfo.speed, goop->velocity);
+		goop->nextthink = level.time + 8000/goop->moveinfo.speed;
+		goop->think = G_FreeEdict;
+		gi.linkentity(goop);
+	}
+	else
+		goop->nextthink = level.time + FRAMETIME;
+}
+
+void SP_goop (edict_t *goop)
+{
+	vec3_t	dir;
+
+	goop->s.modelindex = gi.modelindex(PLASMA_SPRITE_FLY);
+	goop->s.effects |= EF_BLUEHYPERBLASTER | EF_ANIM_ALLFAST;
+	goop->s.sound = gi.soundindex(PLASMA_SOUND_FLYBY);
+
+	// set to the spread variant as we don't need a high speed bouncing projectile just after a map transition
+	goop->touch = plasma_rifle_spread_touch;
+	AngleVectors(goop->s.angles, dir, NULL, NULL);
+	VectorCopy (dir, goop->movedir);
+	goop->moveinfo.speed = VectorLength(goop->velocity);
+	if (goop->moveinfo.speed <= 0)
+		goop->moveinfo.speed = sk_plasma_rifle_speed_spread->value;	//	1200
+
+	// For SP, freeze goop until player spawns in
+	if (game.maxclients == 1)
+	{
+		VectorClear(goop->velocity);
+		goop->think = goop_delayed_start;
+		goop->nextthink = level.time + FRAMETIME;
+	}
+	else
+	{
+		goop->think = G_FreeEdict;
+		goop->nextthink = level.time + 8000/goop->moveinfo.speed;
+	}
+	gi.linkentity (goop);
+}
+// end M82 Plasma Rifle

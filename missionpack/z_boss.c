@@ -690,7 +690,7 @@ void zboss_reelInGraaple2 (edict_t *self)
 
 	if (length <= 80 || (self->laser->think == HookDragThink && self->laser->powerarmor_time < level.time))
 	{
-		G_FreeEdict(self->laser);
+		G_FreeEdict (self->laser);
 		self->laser = NULL;
 
 		self->s.modelindex3 = gi.modelindex ("models/monsters/bossz/grapple/tris.md2");
@@ -971,7 +971,7 @@ void PlasmaballBlastAnim (edict_t *ent)
 
 	if (ent->s.frame > 1)
 	{
-		G_FreeEdict(ent);
+		G_FreeEdict (ent);
 		return;
 	}
 	else
@@ -1543,7 +1543,7 @@ void DeadHookTouch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *s
 		T_Damage (other, ent, ent->owner, ent->velocity, ent->s.origin, plane->normal, 10, 0, 0, MOD_HIT);
 	}
 
-	G_FreeEdict(ent);
+	G_FreeEdict (ent);
 }
 
 
@@ -1568,7 +1568,7 @@ void FireDeadGrapple (edict_t *self)
 
 	gi.sound (self, CHAN_WEAPON, sound_hooklaunch, 1, ATTN_NORM, 0);
 
-	hook = G_Spawn();
+	hook = G_Spawn ();
 	VectorCopy (start, hook->s.origin);
 	VectorCopy (up, hook->movedir);
 	vectoangles (up, hook->s.angles);
@@ -1654,7 +1654,7 @@ void zboss_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 
 	if (self->laser)
 	{
-		G_FreeEdict(self->laser);
+		G_FreeEdict (self->laser);
 		self->laser = NULL;
 	}
 

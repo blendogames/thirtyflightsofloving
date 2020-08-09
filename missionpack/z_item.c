@@ -4,7 +4,7 @@
 extern qboolean is_quad;
 extern byte is_silenced;
 
-void playQuadSound(edict_t *ent);
+void playQuadSound (edict_t *ent);
 void Weapon_Generic (edict_t *ent, 
 					 int FRAME_ACTIVATE_LAST, 
 					 int FRAME_FIRE_LAST, 
@@ -17,13 +17,13 @@ void NoAmmoWeaponChange (edict_t *ent);
 void check_dodge (edict_t *self, vec3_t start, vec3_t dir, int speed);
 void barrel_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf);
 
-void Grenade_Explode(edict_t *ent);
+void Grenade_Explode (edict_t *ent);
 void P_ProjectSource (gclient_t *client, vec3_t point, vec3_t distance, vec3_t forward, vec3_t right, vec3_t result);
 
-#ifdef USE_ZAERO_ITEMS_WEAPONS
-void zCam_TrackEntity(struct edict_s *player, struct edict_s *track, qboolean playerVisiable, qboolean playerOffset);
-void zCam_Stop(struct edict_s *player);
-#endif	// USE_ZAERO_ITEMS_WEAPONS
+//#ifdef USE_ZAERO_ITEMS_WEAPONS
+void zCam_TrackEntity (struct edict_s *player, struct edict_s *track, qboolean playerVisiable, qboolean playerOffset);
+void zCam_Stop (struct edict_s *player);
+//#endif	// USE_ZAERO_ITEMS_WEAPONS
 
 void fire_empnuke(edict_t *ent, vec3_t center, int radius);
 
@@ -37,7 +37,7 @@ This is where the visor locates too...
 
 ======================================================================
 */
-#ifdef USE_ZAERO_ITEMS_WEAPONS
+//#ifdef USE_ZAERO_ITEMS_WEAPONS
 void use_securitycamera (edict_t *self, edict_t *other, edict_t *activator)
 {
 	self->active = !self->active;
@@ -45,7 +45,7 @@ void use_securitycamera (edict_t *self, edict_t *other, edict_t *activator)
 
 #define CAMERA_FRAME_FIRST	0
 #define CAMERA_FRAME_LAST	59
-void securitycamera_think(edict_t *self)
+void securitycamera_think (edict_t *self)
 {
 	if (self->active)
 	{
@@ -68,12 +68,12 @@ void securitycamera_think(edict_t *self)
 	self->nextthink = level.time + FRAMETIME;
 }
 
-void camera_pain(edict_t *self, edict_t *other, float kick, int damage)
+void camera_pain (edict_t *self, edict_t *other, float kick, int damage)
 {
 	self->timeout = level.time + FRAMETIME * 2;
 }
 
-void SP_misc_securitycamera(edict_t *self)
+void SP_misc_securitycamera (edict_t *self)
 {
 	vec3_t offset, forward, up;
 
@@ -115,8 +115,7 @@ void SP_misc_securitycamera(edict_t *self)
 	}
 	self->think = securitycamera_think;
 	self->nextthink = level.time + FRAMETIME;
-
-	self->health = 1;
+	self->health = 1000;	// Knightmare- was 1
 	self->takedamage = DAMAGE_IMMORTAL; // health will not be deducted
 	self->pain = camera_pain;
 
@@ -126,29 +125,30 @@ void SP_misc_securitycamera(edict_t *self)
 char *camera_statusbar =
 "xv 26 yb -75 string \"Tracking %s\" "
 // timer
-"if 20 "
+"if 24 "	// was "if 20"
 "	xv	246 "
-"	num	3	21 "
+"	num	3	25 "	// was "	num	3	21"
 "	xv	296 "
-"	pic	20 "
+"	pic	24 "	// was "	pic 20"
 "endif "
 ;
 
-void updateVisorHud(edict_t *ent)
+void updateVisorHud (edict_t *ent)
 {
 	static char buf[1024];
+
 	gi.WriteByte (svc_layout);
 //	sprintf(buf, camera_statusbar, ent->client->zCameraTrack->message);
 	Com_sprintf(buf, sizeof(buf), camera_statusbar, ent->client->zCameraTrack->message);
 	gi.WriteString(buf);
 }
 
-void startVisorStatic(edict_t *ent)
+void startVisorStatic (edict_t *ent)
 {
 	ent->client->zCameraStaticFramenum = level.time + FRAMETIME * 2;
 }
 
-void startVisor(edict_t *ent, edict_t *e)
+void startVisor (edict_t *ent, edict_t *e)
 {
 	// don't do anything if we're already at the destination camera
 	if (e == ent->client->zCameraTrack)
@@ -157,30 +157,30 @@ void startVisor(edict_t *ent, edict_t *e)
 	// no more time?
 	if (ent->client->pers.visorFrames <= 0)
 	{
-		gi.cprintf(ent, PRINT_HIGH, "No time left for visor\n");
+		gi.cprintf (ent, PRINT_HIGH, "No time left for visor\n");
 		return;
 	}
 
 	// look thru the camera
-	zCam_TrackEntity(ent, e, true, true);
+	zCam_TrackEntity (ent, e, true, true);
 
-	startVisorStatic(ent);
-	updateVisorHud(ent);
-	gi.unicast(ent, true);			// reliably send to ent
+	startVisorStatic (ent);
+	updateVisorHud (ent);
+	gi.unicast (ent, true);			// reliably send to ent
 	ent->client->showscores = true;
 
 	// play activation sound
-	gi.sound(ent, CHAN_AUTO, gi.soundindex("items/visor/act.wav"), 1, ATTN_NORM, 0);
+	gi.sound (ent, CHAN_AUTO, gi.soundindex("items/visor/act.wav"), 1, ATTN_NORM, 0);
 }
 
-void stopCamera(edict_t *self)
+void stopCamera (edict_t *self)
 {
-	zCam_Stop(self);
+	zCam_Stop (self);
 	self->client->showscores = false;
-	gi.sound(self, CHAN_AUTO, gi.soundindex("items/visor/deact.wav"), 1, ATTN_NORM, 0);
+	gi.sound (self, CHAN_AUTO, gi.soundindex("items/visor/deact.wav"), 1, ATTN_NORM, 0);
 }
 
-edict_t *findNextCamera(edict_t *old)
+edict_t *findNextCamera (edict_t *old)
 {
 	edict_t *e = NULL;
 	
@@ -221,7 +221,7 @@ void Use_Visor (edict_t *ent, gitem_t *item)
 
 		if (ent->client->pers.visorFrames == 0)
 			ent->client->pers.visorFrames = (sk_visor_time->value * 10);
-		startVisor(ent, e);
+		startVisor (ent, e);
 	}
 	else
 	{
@@ -232,13 +232,13 @@ void Use_Visor (edict_t *ent, gitem_t *item)
 			ent->client->zCameraTrack = e;
 			// play sound
 			gi.sound(ent, CHAN_AUTO, gi.soundindex("items/visor/act.wav"), 1, ATTN_NORM, 0);
-			startVisorStatic(ent);
-			updateVisorHud(ent);
-			gi.unicast(ent, true);			// reliably send to ent
+			startVisorStatic (ent);
+			updateVisorHud (ent);
+			gi.unicast (ent, true);			// reliably send to ent
 		}
 	}
 }
-#endif	// USE_ZAERO_ITEMS_WEAPONS
+//#endif	// USE_ZAERO_ITEMS_WEAPONS
 
 
 /*
@@ -344,6 +344,7 @@ void fire_empnuke (edict_t *ent, vec3_t center, int radius)
 	empnuke->s.skinnum = 0;
 //  empnuke->s.renderfx = RF_TRANSLUCENT | RF_FULLBRIGHT;
 //  empnuke->s.renderfx = RF_TRANSLUCENT;
+	empnuke->moreflags |= FL2_DO_NOT_REFLECT;	// Knightmare- do not reflect flag
 
 	empnuke->think = empBlastAnim;
 	empnuke->nextthink = level.time + FRAMETIME;
@@ -384,7 +385,7 @@ Plasma Shield
 
 ======================================================================
 */
-#ifdef USE_ZAERO_ITEMS_WEAPONS
+//#ifdef USE_ZAERO_ITEMS_WEAPONS
 void PlasmaShield_die (edict_t *self)
 {
 #ifndef	KMQUAKE2_ENGINE_MOD	// Knightmare- no need to worry about overflows...
@@ -409,12 +410,12 @@ void Use_PlasmaShield (edict_t *ent, gitem_t *item)
 	edict_t	*PlasmaShield;
 	vec3_t forward, right, up, frontbottomleft, backtopright;
 
-	if(!ent->client->pers.inventory[ammoIdx])
+	if (!ent->client->pers.inventory[ammoIdx])
 	{
 		return;
 	}
 
-	if(EMPNukeCheck(ent, ent->s.origin))
+	if (EMPNukeCheck(ent, ent->s.origin))
 	{
 		gi.sound (ent, CHAN_AUTO, gi.soundindex("items/empnuke/emp_missfire.wav"), 1, ATTN_NORM, 0);
 		return;
@@ -467,7 +468,7 @@ void Use_PlasmaShield (edict_t *ent, gitem_t *item)
 
 	gi.linkentity (PlasmaShield);
 }
-#endif
+//#endif	// USE_ZAERO_ITEMS_WEAPONS
 
 
 /*
@@ -553,11 +554,11 @@ misc_commdish
 ======================================================================
 */
 
-void Anim_CommDish(edict_t *self)
+void Anim_CommDish (edict_t *self)
 {
 	self->s.frame++;
 
-	if(self->s.frame >= 98)
+	if (self->s.frame >= 98)
 	{
 		self->s.frame = 98;
 	}
@@ -624,7 +625,7 @@ qboolean thruBarrier (edict_t *targ, edict_t *inflictor)
 		if (tr.ent->classname && Q_stricmp(tr.ent->classname, "func_barrier") == 0)
 			return true;
 
-		if(e == tr.ent)
+		if (e == tr.ent)
 			break;
 
 		e = tr.ent;
@@ -666,7 +667,6 @@ void barrier_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *
 		gi.sound (self, CHAN_AUTO, gi.soundindex("weapons/lashit.wav"), 1, ATTN_NORM, 0);
 		self->touch_debounce_time = level.time + FRAMETIME * 2;
 	}
-
 }
 
 void SP_func_barrier (edict_t *self)
@@ -680,7 +680,7 @@ void SP_func_barrier (edict_t *self)
 	self->think = barrier_think;
 	self->nextthink = level.time + FRAMETIME;
 	self->touch = barrier_touch;
-	self->health = 1;
+	self->health = 1000;	// Knightmare- was 1
 	self->takedamage = DAMAGE_IMMORTAL; // health will not be deducted
 	self->pain = barrier_pain;
 

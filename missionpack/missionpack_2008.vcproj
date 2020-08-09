@@ -855,6 +855,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\z_camera.c"
+				>
+			</File>
+			<File
 				RelativePath=".\z_handler.c"
 				>
 			</File>

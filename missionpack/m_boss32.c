@@ -399,11 +399,19 @@ void makronBFG (edict_t *self)
 	AngleVectors (self->s.angles, forward, right, NULL);
 	G_ProjectSource (self->s.origin, monster_flash_offset[MZ2_MAKRON_BFG], forward, right, start);
 
+	// Zaero add
+	if (EMPNukeCheck(self, start))
+	{
+		gi.sound (self, CHAN_AUTO, gi.soundindex("items/empnuke/emp_missfire.wav"), 1, ATTN_NORM, 0);
+		return;
+	}
+	// end Zaero
+
 	VectorCopy (self->enemy->s.origin, vec);
 	vec[2] += self->enemy->viewheight;
 
 	// Lazarus fog reduction of accuracy
-	if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+	if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 	{
 		vec[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 		vec[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -499,7 +507,7 @@ void MakronRailgun (edict_t *self)
 	G_ProjectSource (self->s.origin, monster_flash_offset[MZ2_MAKRON_RAILGUN_1], forward, right, start);
 
 	// Lazarus fog reduction of accuracy
-	if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+	if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 	{
 		self->pos1[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 		self->pos1[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -532,7 +540,7 @@ void MakronHyperblaster (edict_t *self)
 		VectorCopy (self->enemy->s.origin, vec);
 		vec[2] += self->enemy->viewheight;
 		// Lazarus fog reduction of accuracy
-		if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+		if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 		{
 			vec[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 			vec[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -625,7 +633,7 @@ void makron_attack(edict_t *self)
 	range = VectorLength (vec);
 	
 	//Knightmare- gross hack for map6 of COS3- no BFG attack
-	if(Q_stricmp(level.mapname, "grinsp3f") == 0)
+	if (Q_stricmp(level.mapname, "grinsp3f") == 0)
 	{
 		if (r <= 0.5)
 			self->monsterinfo.currentmove = &makron_move_attack4;
@@ -862,10 +870,10 @@ void MakronPrecache (void)
 //PGM
 qboolean Makron_blocked (edict_t *self, float dist)
 {
-	if(blocked_checkshot (self, 0.25 + (0.05 * skill->value) ))
+	if (blocked_checkshot (self, 0.25 + (0.05 * skill->value) ))
 		return true;
 
-	if(blocked_checkplat (self, dist))
+	if (blocked_checkplat (self, dist))
 		return true;
 
 	return false;
@@ -907,13 +915,13 @@ void SP_monster_makron_put (edict_t *self)
 	VectorSet (self->mins, -30, -30, 0);
 	VectorSet (self->maxs, 30, 30, 90);
 
-	if(!self->health)
+	if (!self->health)
 		self->health = 3000 + 1000 * (skill->value);
 	if (coop->value)
 		self->health += 500 * (skill->value);
-	if(!self->gib_health)
+	if (!self->gib_health)
 		self->gib_health = -800;
-	if(!self->mass)
+	if (!self->mass)
 		self->mass = 500;
 
 	self->pain = makron_pain;
@@ -938,7 +946,7 @@ void SP_monster_makron_put (edict_t *self)
 		self->fogclip |= 2; //custom bloodtype flag
 
 	// Lazarus
-	if(self->powerarmor)
+	if (self->powerarmor)
 	{
 		if (self->powerarmortype == 1)
 			self->monsterinfo.power_armor_type = POWER_ARMOR_SCREEN;
@@ -978,7 +986,7 @@ void MakronSpawn (edict_t *self)
 	SP_monster_makron_put (self);
 
 	//Knightmare- gross hack for map6 of COS3- don't jump
-	if(Q_stricmp(level.mapname, "grinsp3f") == 0)
+	if (Q_stricmp(level.mapname, "grinsp3f") == 0)
 		return;
 	// jump at player
 	player = level.sight_client;

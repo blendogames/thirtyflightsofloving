@@ -48,7 +48,7 @@ void flechette_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t
 	}
 	else
 	{
-		if(!plane)
+		if (!plane)
 			VectorClear (dir);
 		else
 			VectorScale (plane->normal, 256, dir);
@@ -112,7 +112,7 @@ void fire_flechette (edict_t *self, vec3_t start, vec3_t dir, int damage, int sp
 
 void flechette_delayed_start (edict_t *flechette)
 {
-	if(g_edicts[1].linkcount)
+	if (g_edicts[1].linkcount)
 	{
 		VectorScale(flechette->movedir,flechette->moveinfo.speed,flechette->velocity);
 		flechette->nextthink = level.time + 2;
@@ -209,17 +209,17 @@ movefield:
 
 	// If parent is spinning, add appropriate velocities
 	VectorSubtract(self->s.origin, host->s.origin, offset);
-	if(host->avelocity[PITCH] != 0)
+	if (host->avelocity[PITCH] != 0)
 	{
 		self->velocity[2] -= offset[0] * host->avelocity[PITCH] * M_PI / 180;
 		self->velocity[0] += offset[2] * host->avelocity[PITCH] * M_PI / 180;
 	}
-	if(host->avelocity[YAW] != 0)
+	if (host->avelocity[YAW] != 0)
 	{
 		self->velocity[0] -= offset[1] * host->avelocity[YAW] * M_PI / 180.;
 		self->velocity[1] += offset[0] * host->avelocity[YAW] * M_PI / 180.;
 	}
-	if(host->avelocity[ROLL] != 0)
+	if (host->avelocity[ROLL] != 0)
 	{
 		self->velocity[1] -= offset[2] * host->avelocity[ROLL] * M_PI / 180;
 		self->velocity[2] += offset[1] * host->avelocity[ROLL] * M_PI / 180;
@@ -281,11 +281,11 @@ void Prox_Explode (edict_t *ent)
 // free the trigger field
 
 	//PMM - changed teammaster to "mover" .. owner of the field is the prox
-	if(ent->teamchain && ent->teamchain->owner == ent)
+	if (ent->teamchain && ent->teamchain->owner == ent)
 		G_FreeEdict(ent->teamchain);
 
 	owner = ent;
-	if(ent->teammaster)
+	if (ent->teammaster)
 	{
 		owner = ent->teammaster;
 		PlayerNoise(owner, ent->s.origin, PNOISE_IMPACT);
@@ -323,7 +323,7 @@ void Prox_Explode (edict_t *ent)
 
 //===============
 //===============
-void prox_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+void prox_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
 	//gi.dprintf("prox_die\n");
 	// if set off by another prox, delay a little (chained explosions)
@@ -363,7 +363,7 @@ void Prox_Field_Touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t
 		return;
 	}
 
-	if(prox->teamchain == ent)
+	if (prox->teamchain == ent)
 	{
 		gi.sound (ent, CHAN_VOICE, gi.soundindex ("weapons/proxwarn.wav"), 1, ATTN_NORM, 0);
 		prox->think = Prox_Explode;
@@ -379,14 +379,14 @@ void Prox_Field_Touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t
 //===============
 void prox_seek (edict_t *ent)
 {
-	if(level.time > ent->wait)
+	if (level.time > ent->wait)
 	{
 		Prox_Explode(ent);
 	}
 	else
 	{
 		ent->s.frame++;
-		if(ent->s.frame > 13)
+		if (ent->s.frame > 13)
 			ent->s.frame = 9;
 		ent->think = prox_seek;
 		ent->nextthink = level.time + 0.1;
@@ -408,14 +408,14 @@ void prox_open (edict_t *ent)
 	search = NULL;
 //	gi.dprintf("prox_open %d\n", ent->s.frame);
 //	gi.dprintf("%f\n", ent->velocity[2]);
-	if(ent->s.frame == 9)	// end of opening animation
+	if (ent->s.frame == 9)	// end of opening animation
 	{
 		// set the owner to NULL so the owner can shoot it, etc.  needs to be done here so the owner
 		// doesn't get stuck on it while it's opening if fired at point blank wall
 		ent->s.sound = 0;
 		// Knightmare- the above never happens, and the owner pointer is needed for remote detonation
 		//ent->owner = NULL;
-		if(ent->teamchain)
+		if (ent->teamchain)
 			ent->teamchain->touch = Prox_Field_Touch;
 		while ((search = findradius(search, ent->s.origin, sk_prox_radius->value + 10)) != NULL)
 		{
@@ -530,7 +530,7 @@ void prox_land (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
 
 	if ((other->svflags & SVF_MONSTER) || other->client || (other->svflags & SVF_DAMAGEABLE))
 	{
-		if(other != ent->teammaster)
+		if (other != ent->teammaster)
 			Prox_Explode(ent);
 
 		return;
@@ -690,7 +690,7 @@ void fire_prox (edict_t *self, vec3_t start, vec3_t aimdir, int damage_multiplie
 	//Knightmare- add player's base velocity to prox
 	if (add_velocity_throw->value && self->client)
 		VectorAdd (prox->velocity, self->velocity, prox->velocity);
-	else if(self->groundentity)
+	else if (self->groundentity)
 		VectorAdd (prox->velocity, self->groundentity->velocity, prox->velocity);
 
 	VectorCopy (dir, prox->s.angles);
@@ -758,7 +758,7 @@ void Cmd_DetProx_f (edict_t *ent)
 
 void prox_delayed_start (edict_t *prox)
 {
-	if(g_edicts[1].linkcount)
+	if (g_edicts[1].linkcount)
 	{
 		VectorScale(prox->movedir,prox->moveinfo.speed,prox->velocity);
 		prox->movetype  = MOVETYPE_BOUNCE;
@@ -779,7 +779,7 @@ void SP_prox (edict_t *prox)
 	prox->postthink = NULL;
 
 	// For SP, freeze prox until player spawns in
-	if(game.maxclients == 1 && VectorLength (prox->velocity))
+	if (game.maxclients == 1 && VectorLength (prox->velocity))
 	{
 		prox->movetype  = MOVETYPE_NONE;
 		VectorCopy(prox->velocity,prox->movedir);
@@ -808,7 +808,7 @@ void SP_prox (edict_t *prox)
 
 void fire_remove (edict_t *ent)
 {
-	if(ent == ent->owner->teamchain)
+	if (ent == ent->owner->teamchain)
 		ent->owner->teamchain = NULL;
 
 	G_FreeEdict(ent);
@@ -885,27 +885,27 @@ void fire_maintain (edict_t *ent, edict_t *flame, vec3_t start, vec3_t aimdir, i
 	// player fire point to flame origin.
 	tr = gi.trace(start, flame->mins, flame->maxs,
 					flame->s.origin, flame, MASK_SHOT);
-	if(tr.fraction == 1.0)
+	if (tr.fraction == 1.0)
 	{
 		// origin to point 1
 		tr = gi.trace(flame->s.origin, flame->mins, flame->maxs,
 						flame->flameinfo.pos1, flame, MASK_SHOT);
-		if(tr.fraction == 1.0)
+		if (tr.fraction == 1.0)
 		{
 			// point 1 to point 2
 			tr = gi.trace(flame->flameinfo.pos1, flame->mins, flame->maxs,
 							flame->flameinfo.pos2, flame, MASK_SHOT);
-			if(tr.fraction == 1.0)
+			if (tr.fraction == 1.0)
 			{
 				// point 2 to point 3
 				tr = gi.trace(flame->flameinfo.pos2, flame->mins, flame->maxs,
 							flame->flameinfo.pos3, flame, MASK_SHOT);
-				if(tr.fraction == 1.0)
+				if (tr.fraction == 1.0)
 				{
 					// point 3 to point 4, point 3 valid
 					tr = gi.trace(flame->flameinfo.pos3, flame->mins, flame->maxs,
 								flame->flameinfo.pos4, flame, MASK_SHOT);
-					if(tr.fraction < 1.0) // point 4 blocked
+					if (tr.fraction < 1.0) // point 4 blocked
 					{
 						VectorCopy(tr.endpos, flame->flameinfo.pos4);
 					}
@@ -950,7 +950,7 @@ void fire_maintain (edict_t *ent, edict_t *flame, vec3_t start, vec3_t aimdir, i
 		VectorCopy(tr.endpos, flame->flameinfo.pos4);
 	}
 
-	if(tr.fraction < 1.0 && tr.ent->takedamage)
+	if (tr.fraction < 1.0 && tr.ent->takedamage)
 	{
 		T_Damage (tr.ent, flame, ent, flame->velocity, tr.endpos, tr.plane.normal,
 					damage, 0, DAMAGE_NO_KNOCKBACK | DAMAGE_ENERGY | DAMAGE_FIRE);
@@ -986,22 +986,22 @@ void flameshooter_think (edict_t *self)
 	vec3_t	forward, right, up;
 	edict_t *flame;
 
-	if(self->delay)
+	if (self->delay)
 	{
-		if(self->teamchain)
+		if (self->teamchain)
 			fire_remove (self->teamchain);
 		return;
 	}
 
 	self->s.angles[1] += self->speed;
-	if(self->s.angles[1] > 135 || self->s.angles[1] < 45)
+	if (self->s.angles[1] > 135 || self->s.angles[1] < 45)
 		self->speed = -self->speed;
 
 	AngleVectors (self->s.angles, forward, right, up);
 
 #ifdef FLAMESHOOTER_STREAM
 	flame = self->teamchain;
-	if(!self->teamchain)
+	if (!self->teamchain)
 		fire_flame (self, self->s.origin, forward, FLAMESHOOTER_DAMAGE, FLAMESHOOTER_VELOCITY);
 	else
 		fire_maintain (self, flame, self->s.origin, forward, FLAMESHOOTER_DAMAGE, FLAMESHOOTER_VELOCITY);
@@ -1018,7 +1018,7 @@ void flameshooter_think (edict_t *self)
 
 void flameshooter_use (edict_t *self, edict_t *other, edict_t *activator)
 {
-	if(self->delay)
+	if (self->delay)
 	{
 		self->delay = 0;
 		self->think = flameshooter_think;
@@ -1038,7 +1038,7 @@ void SP_trap_flameshooter(edict_t *self)
 	self->delay = 0;
 
 	self->use =	flameshooter_use;
-	if(self->delay == 0)
+	if (self->delay == 0)
 	{
 		self->think = flameshooter_think;
 		self->nextthink = level.time  + 0.1;
@@ -1082,20 +1082,20 @@ void fire_burst_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t
 		return;
 	}
 
-	if(other == ent->owner || ent == other)
+	if (other == ent->owner || ent == other)
 		return;
 
 	// don't let flame puffs blow each other up
-	if(other->classname && !strcmp(other->classname, ent->classname))
+	if (other->classname && !strcmp(other->classname, ent->classname))
 		return;
 
-	if(ent->waterlevel)
+	if (ent->waterlevel)
 	{
 //		gi.dprintf("Hit water. Removed\n");
 		G_FreeEdict(ent);
 	}
 
-	if(!(other->svflags & SVF_MONSTER) && !other->client)
+	if (!(other->svflags & SVF_MONSTER) && !other->client)
 	{
 		powerunits = FLAME_BURST_FRAMES - ent->s.frame;
 		damage = powerunits * 6;
@@ -1123,20 +1123,20 @@ void fire_burst_think (edict_t *self)
 {
 	int	current_radius;
 
-	if(self->waterlevel)
+	if (self->waterlevel)
 	{
 		G_FreeEdict(self);
 		return;
 	}
 
 	self->s.frame++;
-	if(self->s.frame >= FLAME_BURST_FRAMES)
+	if (self->s.frame >= FLAME_BURST_FRAMES)
 	{
 		G_FreeEdict(self);
 		return;
 	}
 
-	else if(self->s.frame < FLAME_BURST_MIDPOINT)
+	else if (self->s.frame < FLAME_BURST_MIDPOINT)
 	{
 		current_radius = (FLAME_BURST_MAX_SIZE / FLAME_BURST_MIDPOINT) * self->s.frame;
 	}
@@ -1145,7 +1145,7 @@ void fire_burst_think (edict_t *self)
 		current_radius = (FLAME_BURST_MAX_SIZE / FLAME_BURST_MIDPOINT) * (FLAME_BURST_FRAMES - self->s.frame);
 	}
 
-	if(self->s.frame == 3)
+	if (self->s.frame == 3)
 		self->s.skinnum = 1;
 	else if (self->s.frame == 7)
 		self->s.skinnum = 2;
@@ -1158,9 +1158,9 @@ void fire_burst_think (edict_t *self)
 	else if (self->s.frame == 19)
 		self->s.skinnum = 6;
 
-	if(current_radius < 8)
+	if (current_radius < 8)
 		current_radius = 8;
-	else if(current_radius > FLAME_BURST_MAX_SIZE)
+	else if (current_radius > FLAME_BURST_MAX_SIZE)
 		current_radius = FLAME_BURST_MAX_SIZE;
 
 	T_RadiusDamage(self, self->owner, self->dmg, self, current_radius, DAMAGE_FIRE);
@@ -1215,12 +1215,12 @@ void fire_burst (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int spe
 #ifdef INCLUDE_INCENDIARY
 void FireThink (edict_t *ent)
 {
-	if(level.time > ent->wait)
+	if (level.time > ent->wait)
 		G_FreeEdict(ent);
 	else
 	{
 		ent->s.frame++;
-		if(ent->s.frame>10)
+		if (ent->s.frame>10)
 			ent->s.frame = 0;
 		ent->nextthink = level.time + 0.05;
 		ent->think = FireThink;
@@ -1378,7 +1378,7 @@ void fire_player_melee (edict_t *self, vec3_t start, vec3_t aim, int reach, int 
 	tr = gi.trace(start, NULL, NULL, point, self, MASK_SHOT);
 	if (tr.fraction ==  1.0)
 	{
-		if(!quiet)
+		if (!quiet)
 			gi.sound (self, CHAN_WEAPON, gi.soundindex ("weapons/swish.wav"), 1, ATTN_NORM, 0);
 		//FIXME some sound here?
 		return;
@@ -1392,18 +1392,18 @@ void fire_player_melee (edict_t *self, vec3_t start, vec3_t aim, int reach, int 
 
 		// do the damage
 		// FIXME - make the damage appear at right spot and direction
-		if(mod == MOD_CHAINFIST)
+		if (mod == MOD_CHAINFIST)
 			T_Damage (tr.ent, self, self, vec3_origin, tr.ent->s.origin, vec3_origin, damage, kick/2,
 						DAMAGE_DESTROY_ARMOR | DAMAGE_NO_KNOCKBACK, mod);
 		else
 			T_Damage (tr.ent, self, self, vec3_origin, tr.ent->s.origin, vec3_origin, damage, kick/2, DAMAGE_NO_KNOCKBACK, mod);
 
-		if(!quiet)
+		if (!quiet)
 			gi.sound (self, CHAN_WEAPON, gi.soundindex ("weapons/meatht.wav"), 1, ATTN_NORM, 0);
 	}
 	else
 	{
-		if(!quiet)
+		if (!quiet)
 			gi.sound (self, CHAN_WEAPON, gi.soundindex ("weapons/tink1.wav"), 1, ATTN_NORM, 0);
 
 		VectorScale (tr.plane.normal, 256, point);
@@ -1587,7 +1587,7 @@ void Nuke_Think(edict_t *ent)
 	else if (level.time >= (ent->wait - sk_nuke_life->value))
 	{
 		ent->s.frame++;
-		if(ent->s.frame > 11)
+		if (ent->s.frame > 11)
 			ent->s.frame = 6;
 
 		if (gi.pointcontents (ent->s.origin) & (CONTENTS_SLIME|CONTENTS_LAVA))
@@ -1828,7 +1828,7 @@ void Nbomb_Think(edict_t *ent)
 	attenuation = default_atten/3.0;
 	muzzleflash = MZ_NUKE4;
 
-	if(ent->wait < level.time)
+	if (ent->wait < level.time)
 		Nbomb_Explode(ent);
 	else if (level.time >= (ent->wait - sk_nbomb_life->value))
 	{
@@ -1920,7 +1920,7 @@ void fire_nbomb (edict_t *self, vec3_t start, vec3_t aimdir, int speed)
 	VectorMA (nbomb->velocity, 200 + crandom() * 10.0, up, nbomb->velocity);
 	VectorMA (nbomb->velocity, crandom() * 10.0, right, nbomb->velocity);
 	//Knightmare- add player's base velocity to nbomb
-	if(self->groundentity)
+	if (self->groundentity)
 		VectorAdd (nbomb->velocity, self->groundentity->velocity, nbomb->velocity);
 
 	VectorClear (nbomb->avelocity);
@@ -1980,10 +1980,10 @@ void tesla_remove (edict_t *self)
 	edict_t		*cur, *next;
 
 	self->takedamage = DAMAGE_NO;
-	if(self->teamchain)
+	if (self->teamchain)
 	{
 		cur = self->teamchain;
-		while(cur)
+		while (cur)
 		{
 			next = cur->teamchain;
 			G_FreeEdict ( cur );
@@ -2047,7 +2047,7 @@ void tesla_think_active (edict_t *self)
 	for (i=0;i<num;i++)
 	{
 		// if the tesla died while zapping things, stop zapping.
-		if(!(self->inuse))
+		if (!(self->inuse))
 			break;
 
 		hit=touch[i];
@@ -2130,7 +2130,7 @@ void tesla_activate (edict_t *self)
 			// or it's a deathmatch start point
 			// and we can see it
 			// blow up
-			if(search->classname)
+			if (search->classname)
 			{
 				if (   ( (!strcmp(search->classname, "info_player_deathmatch"))
 					|| (!strcmp(search->classname, "info_player_start"))
@@ -2193,11 +2193,11 @@ void tesla_think (edict_t *ent)
 	else if (!ent->groundentity)
 		ent->s.effects |= EF_GRENADE;
 
-	if(!(ent->s.frame))
+	if (!(ent->s.frame))
 		gi.sound (ent, CHAN_VOICE, gi.soundindex ("weapons/teslaopen.wav"), 1, ATTN_NORM, 0);
 
 	ent->s.frame++;
-	if(ent->s.frame > 14)
+	if (ent->s.frame > 14)
 	{
 		ent->s.frame = 14;
 		ent->think = tesla_activate;
@@ -2205,9 +2205,9 @@ void tesla_think (edict_t *ent)
 	}
 	else
 	{
-		if(ent->s.frame > 9)
+		if (ent->s.frame > 9)
 		{
-			if(ent->s.frame == 10)
+			if (ent->s.frame == 10)
 			{
 				if (ent->owner && ent->owner->client)
 				{
@@ -2215,9 +2215,9 @@ void tesla_think (edict_t *ent)
 				}
 				ent->s.skinnum = 1;
 			}
-			else if(ent->s.frame == 12)
+			else if (ent->s.frame == 12)
 				ent->s.skinnum = 2;
-			else if(ent->s.frame == 14)
+			else if (ent->s.frame == 14)
 				ent->s.skinnum = 3;
 		}
 		ent->think = tesla_think;
@@ -2268,7 +2268,7 @@ void fire_tesla (edict_t *self, vec3_t start, vec3_t aimdir, int damage_multipli
 	//Knightmare- add player's base velocity to thrown tesla
 	if (add_velocity_throw->value && self->client)
 		VectorAdd (tesla->velocity, self->velocity, tesla->velocity);
-	else if(self->groundentity)
+	else if (self->groundentity)
 		VectorAdd (tesla->velocity, self->groundentity->velocity, tesla->velocity);
 
 //	VectorCopy (dir, tesla->s.angles);
@@ -2293,7 +2293,7 @@ void fire_tesla (edict_t *self, vec3_t start, vec3_t aimdir, int damage_multipli
 	// blow up on contact with lava & slime code
 	tesla->touch = tesla_lava;
 
-	if(deathmatch->value)
+	if (deathmatch->value)
 		// PMM - lowered from 50 - 7/29/1998
 		tesla->health = sk_tesla_health->value;
 	else
@@ -2316,7 +2316,7 @@ void fire_tesla (edict_t *self, vec3_t start, vec3_t aimdir, int damage_multipli
 
 void tesla_delayed_start (edict_t *tesla)
 {
-	if(g_edicts[1].linkcount)
+	if (g_edicts[1].linkcount)
 	{
 		VectorScale(tesla->movedir,tesla->moveinfo.speed,tesla->velocity);
 		tesla->movetype  = MOVETYPE_BOUNCE;
@@ -2334,7 +2334,7 @@ void SP_tesla (edict_t *tesla)
 	tesla->touch = tesla_lava;
 
 	// For SP, freeze tesla until player spawns in
-	if(game.maxclients == 1)
+	if (game.maxclients == 1)
 	{
 		tesla->movetype  = MOVETYPE_NONE;
 		VectorCopy(tesla->velocity,tesla->movedir);
@@ -2484,7 +2484,7 @@ void SP_tesla (edict_t *tesla)
 		VectorCopy (endpoint, beam_endpt);
 	}
 	// Knightmare- Gen cam code
-//	if(self->client->chasetoggle)
+//	if (self->client->chasetoggle)
 	if (self->client && self->client->chaseactive)
 	{
 		gi.WriteByte (svc_temp_entity);
@@ -2564,7 +2564,7 @@ void blaster2_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t 
 	{
 		// the only time players will be firing blaster2 bolts will be from the
 		// defender sphere.
-		if(self->owner->client)
+		if (self->owner->client)
 			mod = MOD_DEFENDER_SPHERE;
 		else
 			mod = MOD_BLASTER2;
@@ -2663,7 +2663,7 @@ void fire_blaster2 (edict_t *self, vec3_t start, vec3_t dir, int damage, int spe
 //       entities.
 void bolt2_delayed_start (edict_t *bolt)
 {
-	if(g_edicts[1].linkcount)
+	if (g_edicts[1].linkcount)
 	{
 		VectorScale(bolt->movedir,bolt->moveinfo.speed,bolt->velocity);
 		bolt->nextthink = level.time + 2;
@@ -2696,7 +2696,7 @@ void SP_bolt2 (edict_t *bolt)
 void tracker_boom_think (edict_t *self)
 {
 	self->s.frame--;
-	if(self->s.frame < 0)
+	if (self->s.frame < 0)
 		G_FreeEdict(self);
 	else
 		self->nextthink = level.time + 0.1;
@@ -2733,30 +2733,30 @@ void tracker_pain_daemon_think (edict_t *self)
 	static vec3_t	pain_normal = { 0, 0, 1 };
 	int				hurt;
 
-	if(!self->inuse)
+	if (!self->inuse)
 		return;
 
-	if((level.time - self->timestamp) > TRACKER_DAMAGE_TIME)
+	if ((level.time - self->timestamp) > TRACKER_DAMAGE_TIME)
 	{
-		if(!self->enemy->client)
+		if (!self->enemy->client)
 			self->enemy->s.effects &= ~EF_TRACKERTRAIL;
 		G_FreeEdict (self);
 	}
 	else
 	{
-		if(self->enemy->health > 0)
+		if (self->enemy->health > 0)
 		{
 //			gi.dprintf("ouch %x\n", self);
 			T_Damage (self->enemy, self, self->owner, vec3_origin, self->enemy->s.origin, pain_normal,
 						self->dmg, 0, TRACKER_DAMAGE_FLAGS, MOD_TRACKER);
 
 			// if we kill the player, we'll be removed.
-			if(self->inuse)
+			if (self->inuse)
 			{
 				// if we killed a monster, gib them.
 				if (self->enemy->health < 1)
 				{
-					if(self->enemy->gib_health)
+					if (self->enemy->gib_health)
 						hurt = - self->enemy->gib_health;
 					else
 						hurt = 500;
@@ -2766,7 +2766,7 @@ void tracker_pain_daemon_think (edict_t *self)
 								pain_normal, hurt, 0, TRACKER_DAMAGE_FLAGS, MOD_TRACKER);
 				}
 
-				if(self->enemy->client)
+				if (self->enemy->client)
 					self->enemy->client->tracker_pain_framenum = level.framenum + 1;
 				else
 					self->enemy->s.effects |= EF_TRACKERTRAIL;
@@ -2776,7 +2776,7 @@ void tracker_pain_daemon_think (edict_t *self)
 		}
 		else
 		{
-			if(!self->enemy->client)
+			if (!self->enemy->client)
 				self->enemy->s.effects &= ~EF_TRACKERTRAIL;
 			G_FreeEdict (self);
 		}
@@ -2787,7 +2787,7 @@ void tracker_pain_daemon_spawn (edict_t *owner, edict_t *enemy, int damage)
 {
 	edict_t	 *daemon;
 
-	if(enemy == NULL)
+	if (enemy == NULL)
 		return;
 
 	daemon = G_Spawn();
@@ -2804,7 +2804,7 @@ void tracker_explode (edict_t *self, cplane_t *plane)
 {
 	vec3_t	dir;
 
-	if(!plane)
+	if (!plane)
 		VectorClear (dir);
 	else
 		VectorScale (plane->normal, 256, dir);
@@ -2842,9 +2842,9 @@ void tracker_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *
 
 	if (other->takedamage)
 	{
-		if((other->svflags & SVF_MONSTER) || other->client)
+		if ((other->svflags & SVF_MONSTER) || other->client)
 		{
-			if(other->health > 0)		// knockback only for living creatures
+			if (other->health > 0)		// knockback only for living creatures
 			{
 				// PMM - kickback was times 4 .. reduced to 3
 				// now this does no damage, just knockback
@@ -2890,11 +2890,11 @@ void tracker_fly (edict_t *self)
 	}
 /*
 	VectorCopy (self->enemy->s.origin, dest);
-	if(self->enemy->client)
+	if (self->enemy->client)
 		dest[2] += self->enemy->viewheight;
 */
 	// PMM - try to hunt for center of enemy, if possible and not client
-	if(self->enemy->client)
+	if (self->enemy->client)
 	{
 		VectorCopy (self->enemy->s.origin, dest);
 		dest[2] += self->enemy->viewheight;
@@ -2950,7 +2950,7 @@ void fire_tracker (edict_t *self, vec3_t start, vec3_t dir, int damage, int spee
 	tracker->classname = "tracker";
 	gi.linkentity (tracker);
 
-	if(enemy)
+	if (enemy)
 	{
 		tracker->nextthink = level.time + 0.1;
 		tracker->think = tracker_fly;
@@ -2977,7 +2977,7 @@ void fire_tracker (edict_t *self, vec3_t start, vec3_t dir, int damage, int spee
 
 void tracker_delayed_start (edict_t *tracker)
 {
-	if(g_edicts[1].linkcount)
+	if (g_edicts[1].linkcount)
 	{
 		VectorScale(tracker->movedir,tracker->moveinfo.speed,tracker->velocity);
 		tracker->nextthink = level.time + 10;

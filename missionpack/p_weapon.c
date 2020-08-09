@@ -5,8 +5,8 @@
 
 qboolean	is_quad;
 qboolean	is_double;
-static qboolean is_quadfire;
-static byte		is_silenced;
+/*static*/ qboolean is_quadfire;
+/*static*/ byte		is_silenced;
 
 //PGM
 static byte		damage_multiplier;
@@ -18,21 +18,22 @@ void weapon_grenade_fire (edict_t *ent, qboolean held);
 
 //========
 //ROGUE
-byte P_DamageModifier(edict_t *ent)
+byte P_DamageModifier (edict_t *ent)
 {
 	is_quad = 0;
+	is_double = 0;
 	damage_multiplier = 1;
 
-	if(ent->client->quad_framenum > level.framenum)
+	if (ent->client->quad_framenum > level.framenum)
 	{
 		damage_multiplier *= 4;
 		is_quad = 1;
 
 		// if we're quad and DF_NO_STACK_DOUBLE is on, return now.
-		if(((int)(dmflags->value) & DF_NO_STACK_DOUBLE))
+		if (((int)(dmflags->value) & DF_NO_STACK_DOUBLE))
 			return damage_multiplier;
 	}
-	if(ent->client->double_framenum > level.framenum)
+	if (ent->client->double_framenum > level.framenum)
 	{
 		if ((deathmatch->value) || (damage_multiplier == 1))
 		{
@@ -176,7 +177,7 @@ qboolean Pickup_Weapon (edict_t *ent, edict_t *other)
 	{
 		// give them some ammo with it
 		// PGM -- IF APPROPRIATE!
-		if(ent->item->ammo)			//PGM
+		if (ent->item->ammo)			//PGM
 		{
 			ammo = FindItem (ent->item->ammo);
 			if ( (int)dmflags->value & DF_INFINITE_AMMO )
@@ -289,13 +290,13 @@ void ChangeWeapon (edict_t *ent)
 //end
 
 	// DWH: change weapon model index if necessary
-	if(ITEM_INDEX(ent->client->pers.weapon) == noweapon_index)
+	if (ITEM_INDEX(ent->client->pers.weapon) == noweapon_index)
 		ent->s.modelindex2 = 0;
 	else
 		ent->s.modelindex2 = MAX_MODELS-1; //was 255
 
 	ent->client->anim_priority = ANIM_PAIN;
-	if(ent->client->ps.pmove.pm_flags & PMF_DUCKED)
+	if (ent->client->ps.pmove.pm_flags & PMF_DUCKED)
 	{
 		ent->s.frame = FRAME_crpain1;
 		ent->client->anim_end = FRAME_crpain4;
@@ -422,7 +423,7 @@ void Think_Weapon (edict_t *ent)
 	if (ent->client->pers.weapon && ent->client->pers.weapon->weaponthink)
 	{
 //PGM
-		P_DamageModifier(ent);	
+		P_DamageModifier (ent);	
 //		is_quad = (ent->client->quad_framenum > level.framenum);
 //PGM
 		// RAFAEL
@@ -465,11 +466,12 @@ void Use_Weapon (edict_t *ent, gitem_t *in_item)
 	if ( (index == current_weapon_index) ||
 		 ( (index == rl_index)  && (current_weapon_index == hml_index) ) ||
 		 ( (index == hml_index) && (current_weapon_index == rl_index)  ) ||
-		 ( (index == pl_index) && (current_weapon_index == pl_index)  )    )
+		 ( (index == pl_index) && (current_weapon_index == pl_index)  ) ||
+		 ( (index == pr_index) && (current_weapon_index == pr_index)  ) )
 	{
-		if(current_weapon_index == rl_index)
+		if (current_weapon_index == rl_index)
 		{
-			if(ent->client->pers.inventory[homing_index] > 0)
+			if (ent->client->pers.inventory[homing_index] > 0)
 			{
 				item = FindItem("homing rocket launcher");
 				index = hml_index;
@@ -477,9 +479,9 @@ void Use_Weapon (edict_t *ent, gitem_t *in_item)
 			else
 				return;
 		}
-		else if(current_weapon_index == hml_index)
+		else if (current_weapon_index == hml_index)
 		{
-			if(ent->client->pers.inventory[rockets_index] > 0)
+			if (ent->client->pers.inventory[rockets_index] > 0)
 			{
 				item = FindItem("rocket launcher");
 				index = rl_index;
@@ -487,10 +489,21 @@ void Use_Weapon (edict_t *ent, gitem_t *in_item)
 			else
 				return;
 		}
-		//Knightmare- detprox command
-		else if(current_weapon_index == pl_index)
+		// Knightmare- detprox command
+		else if (current_weapon_index == pl_index)
 		{
 			Cmd_DetProx_f (ent);
+			return;
+		}
+		// Knightmare- we already have alterate weapon selection implemented here.
+		// So let's use it for the LM Plasma rifle, too!
+		else if (current_weapon_index == pr_index)	
+		{
+			ent->client->pers.plasma_mode = (!ent->client->pers.plasma_mode);
+			if (ent->client->pers.plasma_mode)
+				gi.cprintf (ent, PRINT_HIGH, "spread plasma\n");
+			else
+				gi.cprintf (ent, PRINT_HIGH, "bounce plasma\n");
 			return;
 		}
 		else
@@ -506,9 +519,9 @@ void Use_Weapon (edict_t *ent, gitem_t *in_item)
 		{
 			// Lazarus: If player is attempting to switch to RL and doesn't have rockets,
 			//          but DOES have homing rockets, switch to HRL
-			if(index == rl_index)
+			if (index == rl_index)
 			{
-				if( (ent->client->pers.inventory[homing_index] > 0) &&
+				if ( (ent->client->pers.inventory[homing_index] > 0) &&
 					(ent->client->pers.inventory[hml_index] > 0) )
 				{
 					ent->client->newweapon = FindItem("homing rocket launcher");
@@ -631,7 +644,7 @@ void Drop_Weapon (edict_t *ent, gitem_t *item)
 	{
 		int	current_weapon_index;
 		current_weapon_index = ITEM_INDEX(ent->client->pers.weapon);
-		if(current_weapon_index == hml_index)
+		if (current_weapon_index == hml_index)
 		{
 			gi.cprintf (ent, PRINT_HIGH, "Can't drop current weapon\n");
 			return;
@@ -661,8 +674,9 @@ A generic function to handle the basics of weapon thinking
 void Weapon_Generic (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST, int FRAME_IDLE_LAST, int FRAME_DEACTIVATE_LAST, int *pause_frames, int *fire_frames, void (*fire)(edict_t *ent, qboolean altfire))
 {
 	int		n;
+	int		current_weapon_index = ITEM_INDEX(ent->client->pers.weapon);
 
-	//Knightmare- no weapon activity while controlling turret
+	// Knightmare- no weapon activity while controlling turret
 	if (ent->flags & FL_TURRET_OWNER)
 	{
 		ent->client->ps.gunframe = 0;
@@ -675,7 +689,7 @@ void Weapon_Generic (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
 		return;
 	}
 
-	//Knightmare- activate and putaway sounds for ION Ripper and Shockwave
+	// Knightmare- activate and putaway sounds for ION Ripper and Shockwave
 	if (ion_ripper_extra_sounds->value && !strcmp (ent->client->pers.weapon->pickup_name, "ION Ripper"))
 	{
 		if (ent->client->ps.gunframe == 0)
@@ -703,7 +717,7 @@ void Weapon_Generic (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
 		else if ((FRAME_DEACTIVATE_LAST - ent->client->ps.gunframe) == 4)
 		{
 			ent->client->anim_priority = ANIM_REVERSE;
-			if(ent->client->ps.pmove.pm_flags & PMF_DUCKED)
+			if (ent->client->ps.pmove.pm_flags & PMF_DUCKED)
 			{
 				ent->s.frame = FRAME_crpain4+1;
 				ent->client->anim_end = FRAME_crpain1;
@@ -726,6 +740,13 @@ void Weapon_Generic (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
 		{
 			ent->client->weaponstate = WEAPON_READY;
 			ent->client->ps.gunframe = FRAME_IDLE_FIRST;
+			if (current_weapon_index == pr_index) // -bat plasma rifle bounce/spread switch
+			{
+				if (ent->client->pers.plasma_mode)
+					gi.cprintf(ent, PRINT_HIGH, "spread plasma\n");
+				else
+					gi.cprintf(ent, PRINT_HIGH, "bounce plasma\n");
+			}
 			return;
 		}
 
@@ -741,7 +762,7 @@ void Weapon_Generic (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
 		if ((FRAME_DEACTIVATE_LAST - FRAME_DEACTIVATE_FIRST) < 4)
 		{
 			ent->client->anim_priority = ANIM_REVERSE;
-			if(ent->client->ps.pmove.pm_flags & PMF_DUCKED)
+			if (ent->client->ps.pmove.pm_flags & PMF_DUCKED)
 			{
 				ent->s.frame = FRAME_crpain4+1;
 				ent->client->anim_end = FRAME_crpain1;
@@ -774,11 +795,22 @@ void Weapon_Generic (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
 		// Knightmare- catch alt fire commands
 		if ((ent->client->latched_buttons|ent->client->buttons) & BUTTON_ATTACK2)
 		{
-			int	current_weapon_index = ITEM_INDEX(ent->client->pers.weapon);
+		//	int	current_weapon_index = ITEM_INDEX(ent->client->pers.weapon);
 			
 			if (current_weapon_index == pl_index) // prox launcher detonate
 			{
 				Cmd_DetProx_f (ent);
+				ent->client->latched_buttons &= ~BUTTONS_ATTACK;
+				ent->client->buttons &= ~BUTTONS_ATTACK;
+			}
+			if (current_weapon_index == pr_index) // plasma rifle bounce/spread switch
+			{
+				ent->client->pers.plasma_mode = (!ent->client->pers.plasma_mode);
+				if (ent->client->pers.plasma_mode)
+					gi.cprintf (ent, PRINT_HIGH, "spread plasma\n");
+				else
+					gi.cprintf (ent, PRINT_HIGH, "bounce plasma\n");
+
 				ent->client->latched_buttons &= ~BUTTONS_ATTACK;
 				ent->client->buttons &= ~BUTTONS_ATTACK;
 			}
@@ -852,6 +884,13 @@ void Weapon_Generic (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
 				}
 			}
 
+			// SKWiD MOD
+			if (current_weapon_index == pr_index)
+			{
+				if ( ent->client->ps.gunframe == 35 )
+					gi.sound(ent, CHAN_WEAPON, gi.soundindex(PLASMA_SOUND_VENT), 1, ATTN_NORM,0 );
+			}
+
 			ent->client->ps.gunframe++;
 			return;
 		}
@@ -908,11 +947,13 @@ void weapon_grenade_fire (edict_t *ent, qboolean held)
 	float	radius;
 
 	radius = sk_hand_grenade_radius->value; //was damage + 40
-	if (is_quad)
+	if (is_quad) {
 		damage *= 4;
 //		damage *= damage_multiplier;		// PGM
-	if (is_double)
+	}
+	if (is_double) {
 		damage *= 2;
+	}
 
 	AngleVectors (ent->client->v_angle, forward, right, up);
 	if (ent->client->pers.weapon->tag == AMMO_TESLA)
@@ -956,7 +997,7 @@ void weapon_grenade_fire (edict_t *ent, qboolean held)
 
 	ent->client->grenade_time = level.time + 1.0;
 
-	if(ent->deadflag || ent->s.modelindex != (MAX_MODELS-1)) //was 255,  VWep animations screw up corpses
+	if (ent->deadflag || ent->s.modelindex != (MAX_MODELS-1)) //was 255,  VWep animations screw up corpses
 	{
 		return;
 	}
@@ -1100,13 +1141,15 @@ void Throw_Generic (edict_t *ent, int FRAME_FIRE_LAST, int FRAME_IDLE_LAST, int 
 		ChangeWeapon (ent);
 		return;
 	}
-	//Knightmare- no throwing things while controlling turret
+
+	// Knightmare- no throwing things while controlling turret
 	if (ent->flags & FL_TURRET_OWNER)
 	{
 		ent->client->ps.gunframe = 0;
 		ent->client->weaponstate = WEAPON_ACTIVATING;
 		return;
 	}
+
 	if (ent->client->weaponstate == WEAPON_ACTIVATING)
 	{
 		ent->client->weaponstate = WEAPON_READY;
@@ -1245,14 +1288,14 @@ void Weapon_Tesla (edict_t *ent)
 
 	if ((ent->client->ps.gunframe > 1) && (ent->client->ps.gunframe < 9))
 	{
-//		if(ent->client && !ent->client->chasetoggle) //Knightmare- fix for third person mode
-		if(ent->client && !ent->client->chaseactive) //Knightmare- fix for third person mode
+//		if (ent->client && !ent->client->chasetoggle) //Knightmare- fix for third person mode
+		if (ent->client && !ent->client->chaseactive) //Knightmare- fix for third person mode
 			ent->client->ps.gunindex = gi.modelindex  ("models/weapons/v_tesla2/tris.md2");
 	}
 	else
 	{
-//		if(ent->client && !ent->client->chasetoggle) //Knightmare- fix for third person mode
-		if(ent->client && !ent->client->chaseactive) //Knightmare- fix for third person mode
+//		if (ent->client && !ent->client->chasetoggle) //Knightmare- fix for third person mode
+		if (ent->client && !ent->client->chaseactive) //Knightmare- fix for third person mode
 			ent->client->ps.gunindex = gi.modelindex  ("models/weapons/v_tesla/tris.md2");
 	}
 
@@ -1293,15 +1336,13 @@ void weapon_grenadelauncher_fire (edict_t *ent, qboolean altfire)
 // PGM
 // =====
 
-	radius = sk_grenade_radius->value; //damage+40;
-	if (is_quad)
-	{
+	radius = sk_grenade_radius->value;	// damage + 40;
+	if (is_quad) {
 		damage *= 4;
-//		damage *= damage_multiplier;		//pgm
+	//	damage *= damage_multiplier;		//pgm
 		multiplier *= 4;
 	}
-	if (is_double)
-	{
+	if (is_double) {
 		damage *= 2;
 		multiplier *= 2;
 	}
@@ -1328,8 +1369,8 @@ void weapon_grenadelauncher_fire (edict_t *ent, qboolean altfire)
 // PGM
 // =====
 	//Knightmare- Gen cam code
-//	if(ent->client && ent->client->chasetoggle)
-	if(ent->client && ent->client->chaseactive)
+//	if (ent->client && ent->client->chasetoggle)
+	if (ent->client && ent->client->chaseactive)
 	{
 		gi.WriteByte (svc_muzzleflash);
 		gi.WriteShort (ent->client->oldplayer-g_edicts);
@@ -1413,7 +1454,7 @@ edict_t	*rocket_target(edict_t *self, vec3_t start, vec3_t forward)
 			continue;
 		VectorMA(who->absmin,0.5,who->size,end);
 		tr = gi.trace (start, vec3_origin, vec3_origin, end, self, MASK_OPAQUE);
-		if(tr.fraction < 1.0)
+		if (tr.fraction < 1.0)
 			continue;
 		VectorSubtract(end, self->s.origin, dir);
 		VectorNormalize(dir);
@@ -1440,17 +1481,15 @@ void Weapon_RocketLauncher_Fire (edict_t *ent, qboolean altfire)
 	damage = sk_rocket_damage->value + (int)(random() * sk_rocket_damage2->value);
 	radius_damage = sk_rocket_rdamage->value;
 	damage_radius = sk_rocket_radius->value;
-	if (is_quad)
-	{
+	if (is_quad) {
 //PGM
 		damage *= 4;
-//		damage *= damage_multiplier;
+	//	damage *= damage_multiplier;
 		radius_damage *= 4;
-//		radius_damage *= damage_multiplier;
+	//	radius_damage *= damage_multiplier;
 //PGM
 	}
-	if (is_double)
-	{
+	if (is_double) {
 		damage *= 2;
 		radius_damage *= 2;
 	}
@@ -1554,10 +1593,12 @@ int Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, int
 	vec3_t	offset;
 	int		muzzleflash;
 
-	if (is_quad)
+	if (is_quad) {
 		damage *= 4;		
-	if (is_double)
+	}
+	if (is_double) {
 		damage *= 2;
+	}
 
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
 	VectorSet(offset, 24, 8, ent->viewheight-8);
@@ -1618,7 +1659,7 @@ int Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, int
 
 	// send muzzle flash	
 	// Knightmare- Gen cam code
-	if(ent->client && ent->client->chaseactive)
+	if (ent->client && ent->client->chaseactive)
 	{
 		gi.WriteByte (svc_muzzleflash);
 		gi.WriteShort (ent->client->oldplayer-g_edicts);
@@ -1682,7 +1723,6 @@ void Weapon_Blaster (edict_t *ent)
 	Weapon_Generic (ent, 4, 8, 52, 55, pause_frames, fire_frames, Weapon_Blaster_Fire);
 	if (is_quadfire)
 		Weapon_Generic (ent, 4, 8, 52, 55, pause_frames, fire_frames, Weapon_Blaster_Fire);
-
 }
 
 void Weapon_HyperBlaster_Fire (edict_t *ent, qboolean altfire)
@@ -1782,7 +1822,6 @@ void Weapon_HyperBlaster (edict_t *ent)
 	Weapon_Generic (ent, 5, 20, 49, 53, pause_frames, fire_frames, Weapon_HyperBlaster_Fire);
 	if (is_quadfire)
 		Weapon_Generic (ent, 5, 20, 49, 53, pause_frames, fire_frames, Weapon_HyperBlaster_Fire);
-
 }
 
 /*
@@ -1827,17 +1866,15 @@ void Machinegun_Fire (edict_t *ent, qboolean altfire)
 		return;
 	}
 
-	if (is_quad)
-	{
+	if (is_quad) {
 //PGM
-//		damage *= 4;
+	//	damage *= 4;
 		damage *= damage_multiplier;
 		kick *= 4;
-//		kick *= damage_multiplier;
+	//	kick *= damage_multiplier;
 //PGM
 	}
-	if (is_double)
-	{
+	if (is_double) {
 		damage *= 2;
 		kick *= 2;
 	}
@@ -1866,8 +1903,8 @@ void Machinegun_Fire (edict_t *ent, qboolean altfire)
 	fire_bullet (ent, start, forward, damage, kick, sk_machinegun_hspread->value, sk_machinegun_vspread->value, MOD_MACHINEGUN);
 
 	//Knightmare- Gen cam code
-//	if(ent->client && ent->client->chasetoggle)
-	if(ent->client && ent->client->chaseactive)
+//	if (ent->client && ent->client->chasetoggle)
+	if (ent->client && ent->client->chaseactive)
 	{
 		gi.WriteByte (svc_muzzleflash);
 		gi.WriteShort (ent->client->oldplayer-g_edicts);
@@ -1993,17 +2030,15 @@ void Chaingun_Fire (edict_t *ent, qboolean altfire)
 		return;
 	}
 
-	if (is_quad)
-	{
+	if (is_quad) {
 //PGM
-//		damage *= 4;
+	//	damage *= 4;
 		damage *= damage_multiplier;
 		kick *= 4;
-//		kick *= damage_multiplier;
+	//	kick *= damage_multiplier;
 //PGM
 	}
-	if (is_double)
-	{
+	if (is_double) {
 		damage *= 2;
 		kick *= 2;
 	}
@@ -2036,8 +2071,8 @@ void Chaingun_Fire (edict_t *ent, qboolean altfire)
 
 	// send muzzle flash
 	// Knightmare- Gen cam code
-//	if(ent->client && ent->client->chasetoggle)
-	if(ent->client && ent->client->chaseactive)
+//	if (ent->client && ent->client->chasetoggle)
+	if (ent->client && ent->client->chaseactive)
 	{
 		gi.WriteByte (svc_muzzleflash);
 		gi.WriteShort (ent->client->oldplayer-g_edicts);
@@ -2067,7 +2102,6 @@ void Weapon_Chaingun (edict_t *ent)
 	Weapon_Generic (ent, 4, 31, 61, 64, pause_frames, fire_frames, Chaingun_Fire);
 	if (is_quadfire)
 		Weapon_Generic (ent, 4, 31, 61, 64, pause_frames, fire_frames, Chaingun_Fire);	
-	
 }
 
 
@@ -2101,17 +2135,15 @@ void weapon_shotgun_fire (edict_t *ent, qboolean altfire)
 	VectorSet(offset, 0, 8,  ent->viewheight-8);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 
-	if (is_quad)
-	{
+	if (is_quad) {
 //PGM
 		damage *= 4;
-//		damage *= damage_multiplier;
+	//	damage *= damage_multiplier;
 		kick *= 4;
-//		kick *= damage_multiplier;
+	//	kick *= damage_multiplier;
 //PGM
 	}
-	if (is_double)
-	{
+	if (is_double) {
 		damage *= 2;
 		kick *= 2;
 	}
@@ -2123,8 +2155,8 @@ void weapon_shotgun_fire (edict_t *ent, qboolean altfire)
 
 	// send muzzle flash
 	//Knightmare- Gen cam code
-//	if(ent->client && ent->client->chasetoggle)
-	if(ent->client && ent->client->chaseactive)
+//	if (ent->client && ent->client->chasetoggle)
+	if (ent->client && ent->client->chaseactive)
 	{
 		gi.WriteByte (svc_muzzleflash);
 		gi.WriteShort (ent->client->oldplayer-g_edicts);
@@ -2154,8 +2186,6 @@ void Weapon_Shotgun (edict_t *ent)
 	Weapon_Generic (ent, 7, 18, 36, 39, pause_frames, fire_frames, weapon_shotgun_fire);
 	if (is_quadfire)
 		Weapon_Generic (ent, 7, 18, 36, 39, pause_frames, fire_frames, weapon_shotgun_fire);
-
-
 }
 
 
@@ -2176,17 +2206,15 @@ void weapon_supershotgun_fire (edict_t *ent, qboolean altfire)
 	VectorSet(offset, 0, 8,  ent->viewheight-8);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 
-	if (is_quad)
-	{
+	if (is_quad) {
 //PGM
-//		damage *= 4;
+	//	damage *= 4;
 		damage *= damage_multiplier;
 		kick *= 4;
-//		kick *= damage_multiplier;
+	//	kick *= damage_multiplier;
 //PGM
 	}
-	if (is_double)
-	{
+	if (is_double) {
 		damage *= 2;
 		kick *= 2;
 	}
@@ -2202,8 +2230,8 @@ void weapon_supershotgun_fire (edict_t *ent, qboolean altfire)
 
 	// send muzzle flash
 	// Knightmare- Gen cam code
-//	if(ent->client && ent->client->chasetoggle)
-	if(ent->client && ent->client->chaseactive)
+//	if (ent->client && ent->client->chasetoggle)
+	if (ent->client && ent->client->chaseactive)
 	{
 		gi.WriteByte (svc_muzzleflash);
 		gi.WriteShort (ent->client->oldplayer-g_edicts);
@@ -2233,7 +2261,6 @@ void Weapon_SuperShotgun (edict_t *ent)
 	Weapon_Generic (ent, 6, 17, 57, 61, pause_frames, fire_frames, weapon_supershotgun_fire);
 	if (is_quadfire)
 		Weapon_Generic (ent, 6, 17, 57, 61, pause_frames, fire_frames, weapon_supershotgun_fire);
-
 }
 
 
@@ -2265,17 +2292,15 @@ void weapon_railgun_fire (edict_t *ent, qboolean altfire)
 		kick = 250;
 	}
 
-	if (is_quad)
-	{
+	if (is_quad) {
 //PGM
 		damage *= 4;
-//		damage *= damage_multiplier;
+	//	damage *= damage_multiplier;
 		kick *= 4;
-//		kick *= damage_multiplier;
+	//	kick *= damage_multiplier;
 //PGM
 	}
-	if (is_double)
-	{
+	if (is_double) {
 		damage *= 2;
 		kick *= 2;
 	}
@@ -2333,7 +2358,6 @@ void Weapon_Railgun (edict_t *ent)
 	Weapon_Generic (ent, 3, 18, 56, 61, pause_frames, fire_frames, weapon_railgun_fire);
 	if (is_quadfire)
 		Weapon_Generic (ent, 3, 18, 56, 61, pause_frames, fire_frames, weapon_railgun_fire);
-
 }
 
 
@@ -2419,13 +2443,13 @@ void weapon_bfg_fire (edict_t *ent, qboolean altfire)
 		return;
 	}
 
-	if (is_quad)
+	if (is_quad) {
 //PGM
 		damage *= 4;
-//		damage *= damage_multiplier;
+	//	damage *= damage_multiplier;
 //PGM
-	if (is_double)
-	{
+	}
+	if (is_double) {
 		damage *= 2;
 	}
 
@@ -2460,7 +2484,6 @@ void Weapon_BFG (edict_t *ent)
 	Weapon_Generic (ent, 8, 32, 55, 58, pause_frames, fire_frames, weapon_bfg_fire);
 	if (is_quadfire)
 		Weapon_Generic (ent, 8, 32, 55, 58, pause_frames, fire_frames, weapon_bfg_fire);
-
 }
 
 //======================================================================
@@ -2492,13 +2515,11 @@ void weapon_ionripper_fire (edict_t *ent, qboolean altfire)
 		kick = sk_ionripper_kick->value;	// 60
 	}
 	
-	if (is_quad)
-	{
+	if (is_quad) {
 		damage *= 4;
 		kick *= 4;
 	}
-	if (is_double)
-	{
+	if (is_double) {
 		damage *= 2;
 		kick *= 2;
 	}
@@ -2529,8 +2550,8 @@ void weapon_ionripper_fire (edict_t *ent, qboolean altfire)
 
 	// send muzzle flash
 	//Knightmare- Gen cam code
-//	if(ent->client && ent->client->chasetoggle)
-	if(ent->client && ent->client->chaseactive)
+//	if (ent->client && ent->client->chasetoggle)
+	if (ent->client && ent->client->chaseactive)
 	{
 		gi.WriteByte (svc_muzzleflash);
 		gi.WriteShort (ent->client->oldplayer-g_edicts);
@@ -2587,13 +2608,11 @@ void weapon_phalanx_fire (edict_t *ent, qboolean altfire)
 	radius_damage = sk_phalanx_radius_damage->value;
 	damage_radius = sk_phalanx_radius->value;
 	
-	if (is_quad)
-	{
+	if (is_quad) {
 		damage *= 4;
 		radius_damage *= 4;
 	}
-	if (is_double)
-	{
+	if (is_double) {
 		damage *= 2;
 		radius_damage *= 2;
 	}
@@ -2669,7 +2688,6 @@ void Weapon_Phalanx (edict_t *ent)
 
 	if (is_quadfire)
 		Weapon_Generic (ent, 5, 20, 58, 63, pause_frames, fire_frames, weapon_phalanx_fire);
-	
 }
 
 /*
@@ -2695,10 +2713,12 @@ void weapon_trap_fire (edict_t *ent, qboolean held)
 	float	radius;
 
 	radius = damage+40;
-	if (is_quad)
+	if (is_quad) {
 		damage *= 4;
-	if (is_double)
+	}
+	if (is_double) {
 		damage *= 2;
+	}
 
 	VectorSet(offset, 8, 8, ent->viewheight-8);
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
@@ -2724,6 +2744,7 @@ void Weapon_Trap (edict_t *ent)
 		ChangeWeapon (ent);
 		return;
 	}
+
 	// Knightmare- no throwing traps while controlling turret
 	if (ent->flags & FL_TURRET_OWNER)
 	{
@@ -2731,6 +2752,7 @@ void Weapon_Trap (edict_t *ent)
 		ent->client->weaponstate = WEAPON_ACTIVATING;
 		return;
 	}
+
 	if (ent->client->weaponstate == WEAPON_ACTIVATING)
 	{
 		ent->client->weaponstate = WEAPON_READY;
@@ -2860,11 +2882,13 @@ void weapon_chainfist_fire (edict_t *ent, qboolean altfire)
 	else
 		damage = sk_chainfist_damage->value;
 
-	if (is_quad)
+	if (is_quad) {
 	//	damage *= damage_multiplier;
 		damage *= 4;
-	if (is_double)
+	}
+	if (is_double) {
 		damage *= 2;
+	}
 
 	AngleVectors (ent->client->v_angle, forward, right, up);
 
@@ -2918,42 +2942,42 @@ void Weapon_ChainFist (edict_t *ent)
 	last_sequence = 0;
 
 	// load chainsaw sounds and store the indexes for later use.
-//	if(!idle_index && !attack_index)
+//	if (!idle_index && !attack_index)
 //	{
 //		idle_index = gi.soundindex("weapons/sawidle.wav");
 //		attack_index = gi.soundindex("weapons/sawhit.wav");
 //	}
 
-	if(ent->client->ps.gunframe == 13 ||
+	if (ent->client->ps.gunframe == 13 ||
 		ent->client->ps.gunframe == 23)			// end of attack, go idle
 		ent->client->ps.gunframe = 32;
 
 #if HOLD_FRAMES
-	else if(ent->client->ps.gunframe == 9 && ((ent->client->buttons) & BUTTONS_ATTACK))
+	else if (ent->client->ps.gunframe == 9 && ((ent->client->buttons) & BUTTONS_ATTACK))
 		ent->client->ps.gunframe = 7;
-	else if(ent->client->ps.gunframe == 18 && ((ent->client->buttons) & BUTTONS_ATTACK))
+	else if (ent->client->ps.gunframe == 18 && ((ent->client->buttons) & BUTTONS_ATTACK))
 		ent->client->ps.gunframe = 16;
 #endif
 
 	// holds for idle sequence
-	else if(ent->client->ps.gunframe == 42 && (rand()&7))
+	else if (ent->client->ps.gunframe == 42 && (rand()&7))
 	{
-		if((ent->client->pers.hand != CENTER_HANDED) && random() < 0.4)
+		if ((ent->client->pers.hand != CENTER_HANDED) && random() < 0.4)
 			chainfist_smoke(ent);
 	//	ent->client->ps.gunframe = 40;
 	}
-	else if(ent->client->ps.gunframe == 51 && (rand()&7))
+	else if (ent->client->ps.gunframe == 51 && (rand()&7))
 	{
-		if((ent->client->pers.hand != CENTER_HANDED) && random() < 0.4)
+		if ((ent->client->pers.hand != CENTER_HANDED) && random() < 0.4)
 			chainfist_smoke(ent);
 	//	ent->client->ps.gunframe = 49;
 	}	
 
 	// set the appropriate weapon sound.
-	if(ent->client->weaponstate == WEAPON_FIRING)
+	if (ent->client->weaponstate == WEAPON_FIRING)
 	//	ent->client->weapon_sound = attack_index;
 		ent->client->weapon_sound = gi.soundindex("weapons/sawhit.wav");
-	else if(ent->client->weaponstate == WEAPON_DROPPING)
+	else if (ent->client->weaponstate == WEAPON_DROPPING)
 		ent->client->weapon_sound = 0;
 	else
 	//	ent->client->weapon_sound = idle_index;
@@ -2962,9 +2986,9 @@ void Weapon_ChainFist (edict_t *ent)
 	Weapon_Generic (ent, 4, 32, 57, 60, pause_frames, fire_frames, weapon_chainfist_fire);
 
 //	gi.dprintf("chainfist %d\n", ent->client->ps.gunframe);
-	if((ent->client->buttons) & BUTTONS_ATTACK)
+	if ((ent->client->buttons) & BUTTONS_ATTACK)
 	{
-		if(ent->client->ps.gunframe == 13 ||
+		if (ent->client->ps.gunframe == 13 ||
 			ent->client->ps.gunframe == 23 ||
 			ent->client->ps.gunframe == 32)
 		{
@@ -2976,19 +3000,19 @@ void Weapon_ChainFist (edict_t *ent)
 	if (ent->client->ps.gunframe == 6)
 	{
 		chance = random();
-		if(last_sequence == 13)			// if we just did sequence 1, do 2 or 3.
+		if (last_sequence == 13)			// if we just did sequence 1, do 2 or 3.
 			chance -= 0.34;
-		else if(last_sequence == 23)	// if we just did sequence 2, do 1 or 3
+		else if (last_sequence == 23)	// if we just did sequence 2, do 1 or 3
 			chance += 0.33;
-		else if(last_sequence == 32)	// if we just did sequence 3, do 1 or 2
+		else if (last_sequence == 32)	// if we just did sequence 3, do 1 or 2
 		{
-			if(chance >= 0.33)
+			if (chance >= 0.33)
 				chance += 0.34;
 		}
 
-		if(chance < 0.33)
+		if (chance < 0.33)
 			ent->client->ps.gunframe = 14;
-		else if(chance < 0.66)
+		else if (chance < 0.66)
 			ent->client->ps.gunframe = 24;
 	}
 
@@ -3018,11 +3042,13 @@ void weapon_tracker_fire (edict_t *self, qboolean altfire)
 	else
 		damage = sk_disruptor_damage->value;
 
-	if (is_quad)
+	if (is_quad) {
 //		damage *= damage_multiplier;		//PGM
 		damage *= 4;
-	if (is_double)
+	}
+	if (is_double) {
 		damage *= 2;
+	}
 
 	VectorSet(mins, -16, -16, -16);
 	VectorSet(maxs, 16, 16, 16);
@@ -3057,9 +3083,9 @@ void weapon_tracker_fire (edict_t *self, qboolean altfire)
 		tr = gi.trace (start, mins, maxs, end, self, MASK_SHOT);
 		if (tr.ent != world)
 		{
-			if(tr.ent->svflags & SVF_MONSTER || tr.ent->client || tr.ent->svflags & SVF_DAMAGEABLE)
+			if (tr.ent->svflags & SVF_MONSTER || tr.ent->client || tr.ent->svflags & SVF_DAMAGEABLE)
 			{
-				if(tr.ent->health > 0)
+				if (tr.ent->health > 0)
 					enemy = tr.ent;
 			}
 		}
@@ -3104,7 +3130,6 @@ void Weapon_Disintegrator (edict_t *ent)
 	Weapon_Generic (ent, 4, 9, 29, 34, pause_frames, fire_frames, weapon_tracker_fire);
 	if (is_quadfire)
 		Weapon_Generic (ent, 4, 9, 29, 34, pause_frames, fire_frames, weapon_tracker_fire);
-
 }
 
 /*
@@ -3149,13 +3174,11 @@ void weapon_etf_rifle_fire (edict_t *ent, qboolean altfire)
 		return;
 	}
 
-	if (is_quad)
-	{
+	if (is_quad) {
 		damage *= 4;
 		damage_radius *= 4;
 	}
-	if (is_double)
-	{
+	if (is_double) {
 		damage *= 2;
 		damage_radius *= 2;
 	}
@@ -3246,12 +3269,11 @@ void Weapon_ETF_Rifle (edict_t *ent)
 	}
 
 	Weapon_Generic (ent, 4, 7, 37, 41, pause_frames, fire_frames, weapon_etf_rifle_fire);
-	if(ent->client->ps.gunframe == 8 && (ent->client->buttons & BUTTONS_ATTACK))
+	if (ent->client->ps.gunframe == 8 && (ent->client->buttons & BUTTONS_ATTACK))
 		ent->client->ps.gunframe = 6;
-	if (is_quadfire)
-	{
+	if (is_quadfire) {
 		Weapon_Generic (ent, 4, 7, 37, 41, pause_frames, fire_frames, weapon_etf_rifle_fire);
-		if(ent->client->ps.gunframe == 8 && (ent->client->buttons & BUTTONS_ATTACK))
+		if (ent->client->ps.gunframe == 8 && (ent->client->buttons & BUTTONS_ATTACK))
 			ent->client->ps.gunframe = 6;
 	}
 	//gi.dprintf("etf rifle %d\n", ent->client->ps.gunframe);
@@ -3282,7 +3304,7 @@ void Heatbeam_Fire (edict_t *ent, qboolean altfire)
 	else
 		kick = 30;
 
-//	if(ent->client->pers.inventory[ent->client->ammo_index] < HEATBEAM_AMMO_USE)
+//	if (ent->client->pers.inventory[ent->client->ammo_index] < HEATBEAM_AMMO_USE)
 //	{
 //		NoAmmoWeaponChange (ent);
 //		return;
@@ -3294,10 +3316,15 @@ void Heatbeam_Fire (edict_t *ent, qboolean altfire)
 	if (ent->client && !ent->client->chaseactive) // Knightmare- fix for third person mode
 		ent->client->ps.gunindex = gi.modelindex ("models/weapons/v_beamer2/tris.md2");
 
-	if (is_quad)
-	{
-		damage *= damage_multiplier;
-		kick *= damage_multiplier;
+	if (is_quad) {
+	//	damage *= damage_multiplier;
+		damage *= 4;
+	//	kick *= damage_multiplier;
+		kick *= 4;
+	}
+	if (is_double) {
+		damage *= 2;
+		kick *= 2;
 	}
 
 	VectorClear (ent->client->kick_origin);
@@ -3388,9 +3415,9 @@ void Weapon_Heatbeam (edict_t *ent)
 		ent->client->weapon_sound = gi.soundindex ("weapons/bfg__l1a.wav");
 		if ((ent->client->pers.inventory[ent->client->ammo_index] >= 2) && ((ent->client->buttons) & BUTTONS_ATTACK))
 		{
-//			if(ent->client->ps.gunframe >= 9 && ((ent->client->buttons) & BUTTON_ATTACK))
-//			if(ent->client->ps.gunframe >= 12 && ((ent->client->buttons) & BUTTON_ATTACK))
-			if(ent->client->ps.gunframe >= 13)
+//			if (ent->client->ps.gunframe >= 9 && ((ent->client->buttons) & BUTTON_ATTACK))
+//			if (ent->client->ps.gunframe >= 12 && ((ent->client->buttons) & BUTTON_ATTACK))
+			if (ent->client->ps.gunframe >= 13)
 			{
 				ent->client->ps.gunframe = 9;
 //				ent->client->ps.gunframe = 8;
@@ -3403,7 +3430,7 @@ void Weapon_Heatbeam (edict_t *ent)
 			{
 //				ent->client->ps.gunskin = 1;
 //				ent->client->ps.gunindex = on_model;
-				if(ent->client && !ent->client->chaseactive) //Knightmare- fix for third person mode
+				if (ent->client && !ent->client->chaseactive) //Knightmare- fix for third person mode
 					ent->client->ps.gunindex = gi.modelindex ("models/weapons/v_beamer2/tris.md2");
 			}
 		}
@@ -3413,7 +3440,7 @@ void Weapon_Heatbeam (edict_t *ent)
 			ent->client->ps.gunframe = 13;
 //			ent->client->ps.gunskin = 1;
 //			ent->client->ps.gunindex = off_model;
-			if(ent->client && !ent->client->chaseactive) //Knightmare- fix for third person mode
+			if (ent->client && !ent->client->chaseactive) //Knightmare- fix for third person mode
 				ent->client->ps.gunindex = gi.modelindex ("models/weapons/v_beamer/tris.md2");
 		}
 	}
@@ -3454,13 +3481,11 @@ void Shockwave_Fire (edict_t *ent, qboolean altfire)
 	radius_damage = sk_shockwave_rdamage->value;
 	damage_radius = sk_shockwave_radius->value;
 
-	if (is_quad)
-	{
+	if (is_quad) {
 		damage *= 4;
 		radius_damage *= 4;
 	}
-	if (is_double)
-	{
+	if (is_double) {
 		damage *= 2;
 		radius_damage *= 2;
 	}
@@ -3555,15 +3580,119 @@ void Weapon_Shockwave (edict_t *ent)
 		Weapon_Generic (ent, 4, 31, 61, 64, pause_frames, fire_frames, Shockwave_Fire);
 }
 
+// SKWiD MOD
+/*
+======================================================================
+
+Plasma Rifle
+
+======================================================================
+*/
+
+void weapon_plasma_rifle_fire (edict_t *ent, qboolean altfire)
+{
+	vec3_t	offset, start;
+	vec3_t	forward, right;
+	int		damage;
+
+	if ( ent->client->pers.plasma_mode ) {
+		if (deathmatch->value)	// tone down for deathmatch
+			damage = (int)sk_plasma_rifle_damage_spread_dm->value;
+		else
+			damage = (int)sk_plasma_rifle_damage_spread->value;
+	}
+	else {
+		if (deathmatch->value)	// tone down for deathmatch
+			damage = (int)sk_plasma_rifle_damage_bounce_dm->value;
+		else
+			damage = (int)sk_plasma_rifle_damage_bounce->value;
+	}
+
+	if (is_quad) {
+		damage *= 4;
+	}
+	if (is_double) {
+		damage *= 2;
+	}
+
+	// if outa ammo, don't fire
+	if (ent->client->pers.inventory[ent->client->ammo_index] < 1)
+	{
+		ent->client->ps.gunframe++;
+
+		if (level.time >= ent->pain_debounce_time)
+		{
+			gi.sound(ent, CHAN_VOICE, gi.soundindex(PLASMA_SOUND_EMPTY), 1, ATTN_NORM, 0);
+			ent->pain_debounce_time = level.time + 1;
+		}
+		
+		NoAmmoWeaponChange (ent);
+		return;
+	}
+
+	if (ent->client->ps.gunframe == 4)
+	{
+		AngleVectors (ent->client->v_angle, forward, right, NULL);
+		VectorScale (forward, -2, ent->client->kick_origin);
+		
+		// fire weapon
+		VectorSet(offset, 8, 8, ent->viewheight-8);
+		P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
+
+		if ( ent->client->pers.plasma_mode ) {
+			gi.sound( ent, CHAN_WEAPON, gi.soundindex(PLASMA_SOUND_FIRE2), 1, ATTN_NORM,0 );
+			fire_plasma_rifle (ent, start, forward, damage, (int)sk_plasma_rifle_speed_spread->value, true);
+		}
+		else {
+			gi.sound( ent, CHAN_WEAPON, gi.soundindex(PLASMA_SOUND_FIRE1), 1, ATTN_NORM,0 );
+			fire_plasma_rifle (ent, start, forward, damage, (int)sk_plasma_rifle_speed_bounce->value, false);
+		}
+
+		if ( !( (int)dmflags->value & DF_INFINITE_AMMO ) )
+			ent->client->pers.inventory[ent->client->ammo_index] -= PLASMA_CELLS_PER_SHOT;	// was -= 1
+
+		// make a big pitch kick with an inverse fall
+		ent->client->v_dmg_pitch = -2;
+		ent->client->v_dmg_roll = crandom()*2;
+		ent->client->v_dmg_time = level.time + DAMAGE_TIME;
+	}
+
+	//-bat Silence??
+	// send muzzle flash
+	//gi.WriteByte (svc_muzzleflash);
+	//gi.WriteShort (ent-g_edicts);
+	//gi.WriteByte (MZ_ROCKET | is_silenced);
+	//gi.multicast (ent->s.origin, MULTICAST_PVS);
+
+	ent->client->ps.gunframe++;
+
+	PlayerNoise(ent, start, PNOISE_WEAPON);
+}
+
+void Weapon_Plasma_Rifle (edict_t *ent)
+{
+	static int	pause_frames[]	= {16, 46, 0};
+	static int	fire_frames[]	= {4, 5, 0};
+
+	Weapon_Generic (ent, 3, 11, 46, 51, pause_frames, fire_frames, weapon_plasma_rifle_fire);
+
+	// RAFAEL
+	if (is_quadfire)
+		Weapon_Generic (ent, 3, 11, 46, 51, pause_frames, fire_frames, weapon_plasma_rifle_fire);
+}
+// end SKWiD MOD
+
 //======================================================================
+
 void Weapon_Null (edict_t *ent)
 {
 	if (ent->client->newweapon)
 		ChangeWeapon(ent);
 }
 //======================================================================
+
 qboolean Pickup_Health (edict_t *ent, edict_t *other);
-void kick_attack (edict_t * ent )
+void kick_attack (edict_t *ent )
 {
 	vec3_t		start;
 	vec3_t		forward, right;
@@ -3573,10 +3702,13 @@ void kick_attack (edict_t * ent )
 	trace_t		tr;
 	vec3_t		end;
 
-	if (ent->client->quad_framenum > level.framenum)
-	{
+	if (ent->client->quad_framenum > level.framenum) {
 		damage *= 4;
 		kick *= 4;
+	}
+	if (ent->client->double_framenum > level.framenum) {
+		damage *= 2;
+		kick *= 2;
 	}
 
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
@@ -3587,7 +3719,16 @@ void kick_attack (edict_t * ent )
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 	
 	VectorMA( start, 25, forward, end );
-	
+
+	// Zaero add
+	if (EMPNukeCheck(ent, start))
+	{
+		ent->client->ps.gunframe++;
+		gi.sound (ent, CHAN_AUTO, gi.soundindex("items/empnuke/emp_missfire.wav"), 1, ATTN_NORM, 0);
+		return;
+	}
+	// end Zaero
+
 	tr = gi.trace (ent->s.origin, NULL, NULL, end, ent, MASK_SHOT);
 	
 	// don't need to check for water
@@ -3599,25 +3740,25 @@ void kick_attack (edict_t * ent )
             {
 				if ( tr.ent->health <= 0 )
 					return;
-				//Knightmare- don't jump kick exploboxes or pushable crates, or insanes, or ambient models
+				// Knightmare- don't jump kick exploboxes or pushable crates, or insanes, or ambient models
 				if (!strcmp(tr.ent->classname, "misc_explobox") || !strcmp(tr.ent->classname, "func_pushable")
 					|| !strcmp(tr.ent->classname, "model_spawn") || !strcmp(tr.ent->classname, "model_train")
 					|| !strcmp(tr.ent->classname, "misc_insane"))
 					return;
-				//also don't jumpkick actors, unless they're bad guys
+				// also don't jumpkick actors, unless they're bad guys
 				if (!strcmp(tr.ent->classname, "misc_actor") && (tr.ent->monsterinfo.aiflags & AI_GOOD_GUY))
 					return;
-				//nor goodguy monsters
+				// nor goodguy monsters
 				if (strstr(tr.ent->classname, "monster_") && tr.ent->monsterinfo.aiflags & AI_GOOD_GUY)
 					return;
-				//nor shootable items
+				// nor shootable items
 				if (tr.ent->item && (strstr(tr.ent->classname, "ammo_") || strstr(tr.ent->classname, "weapon_")
 					|| strstr(tr.ent->classname, "item_") || strstr(tr.ent->classname, "key_") || tr.ent->item->pickup == Pickup_Health) )
 					return;
 				if (((tr.ent != ent) && ((deathmatch->value && ((int)(dmflags->value) & (DF_MODELTEAMS | DF_SKINTEAMS))) || coop->value) && OnSameTeam (tr.ent, ent)))
 					return;
 				// zucc stop powerful upwards kicking
-				//forward[2] = 0;
+			//	forward[2] = 0;
 				
 				// glass fx
 				T_Damage (tr.ent, ent, ent, forward, tr.endpos, tr.plane.normal, damage, kick, 0, MOD_KICK );

@@ -39,7 +39,7 @@ void soldier_stop_charge (edict_t *self)
 
 void soldier_idle (edict_t *self)
 {
-	if(!(self->spawnflags & SF_MONSTER_AMBUSH))
+	if (!(self->spawnflags & SF_MONSTER_AMBUSH))
 	{
 		if (random() > 0.8)
 			gi.sound (self, CHAN_VOICE, sound_idle, 1, ATTN_IDLE, 0);
@@ -306,7 +306,8 @@ void soldier_fire (edict_t *self, int);
 
 void soldier_fire_run (edict_t *self)
 {
-	if ( ((self->s.skinnum % 6) <= 1) && (self->enemy) && visible(self, self->enemy))
+//	if ( ((self->s.skinnum % 6) <= 1) && (self->enemy) && visible(self, self->enemy) )
+	if ( (self->skinnum <= 1) && (self->enemy) && visible(self, self->enemy) )
 	{
 		soldier_fire(self, 0);
 	}
@@ -527,12 +528,16 @@ void soldier_fire (edict_t *self, int in_flash_number)
 	else
 		flash_number = in_flash_number;
 
-	if ((self->s.skinnum % 6) < 2)
+//	if ((self->s.skinnum % 6) < 2)
+	if (self->skinnum < 2)
 		flash_index = blaster_flash[flash_number];
-	else if ((self->s.skinnum % 6) < 4)
+//	else if ((self->s.skinnum % 6) < 4)
+	else if (self->skinnum < 4)
 		flash_index = shotgun_flash[flash_number];
-	else
+	else if (self->skinnum < 6)
 		flash_index = machinegun_flash[flash_number];
+	else // if (self->skinnum < 8)
+		flash_index = blaster_flash[flash_number];
 
 	AngleVectors (self->s.angles, forward, right, NULL);
 	G_ProjectSource (self->s.origin, monster_flash_offset[flash_index], forward, right, start);
@@ -547,7 +552,7 @@ void soldier_fire (edict_t *self, int in_flash_number)
 		end[2] += self->enemy->viewheight;
 
 		// Lazarus fog reduction of accuracy
-		if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+		if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 		{
 			end[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 			end[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -568,13 +573,13 @@ void soldier_fire (edict_t *self, int in_flash_number)
 			//gi.dprintf ("Dot Product:  %f", DotProduct (aim_norm, forward));
 			if (angle < 0.9)  // ~25 degree angle
 			{
-//				if(g_showlogic && g_showlogic->value)
+//				if (g_showlogic && g_showlogic->value)
 //					gi.dprintf (" not firing due to bad dotprod %f\n", angle);
 				return;
 			}
 //			else
 //			{
-//				if(g_showlogic && g_showlogic->value)
+//				if (g_showlogic && g_showlogic->value)
 //					gi.dprintf (" firing:  dotprod = %f\n", angle);
 //			}
 		}
@@ -611,21 +616,23 @@ void soldier_fire (edict_t *self, int in_flash_number)
 		tr = gi.trace (start, NULL, NULL, aim_good, self, MASK_SHOT);
 		if ((tr.ent != self->enemy) && (tr.ent != world))
 		{
-//			if(g_showlogic && g_showlogic->value)
+//			if (g_showlogic && g_showlogic->value)
 //				gi.dprintf ("infantry shot aborted due to bad target\n");
 			return;
 		}
 	}
 #endif
-	if ((self->s.skinnum % 6) <= 1)
+//	if ((self->s.skinnum % 6) <= 1)
+	if (self->skinnum <= 1)
 	{
 		monster_fire_blaster (self, start, aim, 5, 600, flash_index, EF_BLASTER, BLASTER_ORANGE);
 	}
-	else if ((self->s.skinnum % 6) <= 3)
+//	else if ((self->s.skinnum % 6) <= 3)
+	else if (self->skinnum <= 3)
 	{
 		monster_fire_shotgun (self, start, aim, 2, 1, DEFAULT_SHOTGUN_HSPREAD, DEFAULT_SHOTGUN_VSPREAD, DEFAULT_SHOTGUN_COUNT, flash_index);
 	}
-	else
+	else if (self->skinnum <= 5)
 	{
 		// PMM - changed to wait from pausetime to not interfere with dodge code
 		if (!(self->monsterinfo.aiflags & AI_HOLD_FRAME))
@@ -637,6 +644,13 @@ void soldier_fire (edict_t *self, int in_flash_number)
 			self->monsterinfo.aiflags &= ~AI_HOLD_FRAME;
 		else
 			self->monsterinfo.aiflags |= AI_HOLD_FRAME;
+	}
+	else // if (self->skinnum <= 7)
+	{
+		if (self->moreflags & FL2_WEAPON_ALT)
+			monster_fire_plasma_rifle (self, start, aim, PLASMA_SPREAD_DAMAGE, PLASMA_SPREAD_SPEED, flash_index, true);
+		else
+			monster_fire_plasma_rifle (self, start, aim, PLASMA_BOUNCE_DAMAGE, PLASMA_BOUNCE_SPEED, flash_index, false);
 	}
 }
 
@@ -660,7 +674,8 @@ void soldier_attack1_refire1 (edict_t *self)
 	if (!self->enemy)
 		return;
 
-	if ((self->s.skinnum % 6) > 1)
+//	if ((self->s.skinnum % 6) > 1)
+	if (self->skinnum > 1)
 		return;
 
 	if (self->enemy->health <= 0)
@@ -677,7 +692,8 @@ void soldier_attack1_refire2 (edict_t *self)
 	if (!self->enemy)
 		return;
 
-	if ((self->s.skinnum % 6) < 2)
+//	if ((self->s.skinnum % 6) < 2)
+	if (self->skinnum < 2)
 		return;
 
 	if (self->enemy->health <= 0)
@@ -716,7 +732,8 @@ void soldier_attack2_refire1 (edict_t *self)
 	if (!self->enemy)
 		return;
 
-	if ((self->s.skinnum % 6) > 1)
+//	if ((self->s.skinnum % 6) > 1)
+	if (self->skinnum > 1)
 		return;
 
 	if (self->enemy->health <= 0)
@@ -733,7 +750,8 @@ void soldier_attack2_refire2 (edict_t *self)
 	if (!self->enemy)
 		return;
 
-	if ((self->s.skinnum % 6) < 2)
+//	if ((self->s.skinnum % 6) < 2)
+	if (self->skinnum < 2)
 		return;
 
 	if (self->enemy->health <= 0)
@@ -978,16 +996,18 @@ void soldier_attack(edict_t *self)
 
 	r = random();
 
-	if ((!(self->monsterinfo.aiflags & (AI_BLOCKED|AI_STAND_GROUND))) &&
+	if ( (!(self->monsterinfo.aiflags & (AI_BLOCKED|AI_STAND_GROUND))) &&
 		(range(self, self->enemy) >= RANGE_NEAR) && 
 		(r < (skill->value*0.25) && 
-		((self->s.skinnum % 6) <= 3)))
+	//	((self->s.skinnum % 6) <= 3)) )
+		(self->skinnum <= 3)) )
 	{
 		self->monsterinfo.currentmove = &soldier_move_attack6;
 	}
 	else
 	{
-		if ((self->s.skinnum % 6) < 4)
+	//	if ((self->s.skinnum % 6) < 4)
+		if (self->skinnum < 4)
 		{
 			if (random() < 0.5)
 			{
@@ -1010,7 +1030,7 @@ void soldier_attack(edict_t *self)
 // SIGHT
 //
 
-void soldier_sight(edict_t *self, edict_t *other)
+void soldier_sight (edict_t *self, edict_t *other)
 {
 	if (random() < 0.5)
 		gi.sound (self, CHAN_VOICE, sound_sight1, 1, ATTN_NORM, 0);
@@ -1021,11 +1041,12 @@ void soldier_sight(edict_t *self, edict_t *other)
 	if ((skill->value > 0) && (self->enemy) && (range(self, self->enemy) >= RANGE_NEAR))
 	{
 //	PMM - don't let machinegunners run & shoot
-		if ((random() > 0.75) && ((self->s.skinnum % 6) <= 3))
+	//	if ((random() > 0.75) && ((self->s.skinnum % 6) <= 3))
+		if ((random() > 0.75) && (self->skinnum <= 3))
 		{
-//			if ((self->classname == "monster_soldier_ripper") || (self->classname == "monster_soldier_hypergun") || (self->classname == "monster_soldier_lasergun"))
-//				self->monsterinfo.currentmove = &soldierh_move_attack6;
-//			else
+		//	if ((self->classname == "monster_soldier_ripper") || (self->classname == "monster_soldier_hypergun") || (self->classname == "monster_soldier_lasergun"))
+		//		self->monsterinfo.currentmove = &soldierh_move_attack6;
+		//	else
 				self->monsterinfo.currentmove = &soldier_move_attack6;
 		}
 	}
@@ -1135,7 +1156,8 @@ void soldier_dodge (edict_t *self, edict_t *attacker, float eta, trace_t *tr)
 		self->monsterinfo.aiflags |= AI_DODGING;
 		self->monsterinfo.attack_state = AS_SLIDING;
 
-		else if ((self->s.skinnum % 6) <= 3)
+	//	else if ((self->s.skinnum % 6) <= 3)
+		else if (self->skinnum  <= 3)
 		{
 			if ((g_showlogic) && (g_showlogic->value))
 				gi.dprintf ("shooting back!\n");
@@ -1202,16 +1224,16 @@ qboolean soldier_blocked (edict_t *self, float dist)
 	if ((self->monsterinfo.aiflags & AI_DODGING) || (self->monsterinfo.aiflags & AI_DUCKED))
 		return false;
 
-	if(blocked_checkshot (self, 0.25 + (0.05 * skill->value) ))
+	if (blocked_checkshot (self, 0.25 + (0.05 * skill->value) ))
 		return true;
 
-//	if(blocked_checkjump (self, dist, 192, 40))
+//	if (blocked_checkjump (self, dist, 192, 40))
 //	{
 //		soldier_jump(self);
 //		return true;
 //	}
 
-	if(blocked_checkplat (self, dist))
+	if (blocked_checkplat (self, dist))
 		return true;
 
 	return false;
@@ -1242,10 +1264,10 @@ void soldier_dead (edict_t *self)
 	M_FlyCheck (self);
 
 	// Lazarus monster fade
-	if(world->effects & FX_WORLDSPAWN_CORPSEFADE)
+	if (world->effects & FX_WORLDSPAWN_CORPSEFADE)
 	{
-		self->think=FadeDieSink;
-		self->nextthink=level.time+corpse_fadetime->value;
+		self->think = FadeDieSink;
+		self->nextthink = level.time+corpse_fadetime->value;
 	}
 }
 
@@ -1558,9 +1580,11 @@ void soldier_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dama
 	self->s.skinnum |= 1;
 	self->monsterinfo.power_armor_type = POWER_ARMOR_NONE;
 
-	if ((self->s.skinnum % 6) == 1)
+//	if ((self->s.skinnum % 6) == 1)
+	if (self->s.skinnum <= 1)
 		gi.sound (self, CHAN_VOICE, sound_death_light, 1, ATTN_NORM, 0);
-	else if ((self->s.skinnum % 6) == 3)
+//	else if ((self->s.skinnum % 6) == 3)
+	else if (self->s.skinnum <= 3)
 		gi.sound (self, CHAN_VOICE, sound_death, 1, ATTN_NORM, 0);
 	else // ((self->s.skinnum % 6) == 5)
 		gi.sound (self, CHAN_VOICE, sound_death_ss, 1, ATTN_NORM, 0);
@@ -1642,7 +1666,7 @@ void soldier_blind (edict_t *self)
 
 void soldierh_idle (edict_t *self)
 {
-	if(!(self->spawnflags & SF_MONSTER_AMBUSH))
+	if (!(self->spawnflags & SF_MONSTER_AMBUSH))
 	{  
 		if (random() > 0.8)
 			gi.sound (self, CHAN_VOICE, sound_idle, 1, ATTN_IDLE, 0);
@@ -2006,8 +2030,8 @@ void soldierh_laserbeam (edict_t *self, int flash_index)
 
 	// RAFAEL
 	// this sound can't be called this frequent
-	if (random() > 0.8)
-		gi.sound(self, CHAN_AUTO, gi.soundindex("misc/lasfly.wav"), 1, ATTN_STATIC, 0);
+//	if (random() > 0.8)
+//		gi.sound (self, CHAN_AUTO, gi.soundindex("misc/lasfly.wav"), 1, ATTN_STATIC, 0);
 
 	VectorCopy (self->s.origin, start);
 	VectorCopy (self->enemy->s.origin, end);
@@ -2015,6 +2039,19 @@ void soldierh_laserbeam (edict_t *self, int flash_index)
 	vectoangles (dir, angles);
 	VectorCopy (monster_flash_offset[flash_index], tempvec);
 	
+	// Zaero add
+	if (EMPNukeCheck(self, self->s.origin))
+	{
+		gi.sound (self, CHAN_AUTO, gi.soundindex("items/empnuke/emp_missfire.wav"), 1, ATTN_NORM, 0);
+		return;
+	}
+	// end Zaero
+
+	// RAFAEL
+	// this sound can't be called this frequent
+	if (random() > 0.8)
+		gi.sound (self, CHAN_AUTO, gi.soundindex("misc/lasfly.wav"), 1, ATTN_STATIC, 0);
+
 	ent = G_Spawn ();
 	VectorCopy (self->s.origin, ent->s.origin);
 	VectorCopy (angles, tempang);
@@ -2057,9 +2094,11 @@ void soldierh_fire (edict_t *self, int flash_number)
 	int		flash_index;
 	qboolean tone = true;
 
-	if ((self->s.skinnum % 6) < 2)
+//	if ((self->s.skinnum % 6) < 2)
+	if (self->skinnum < 2)
 		flash_index = blaster_flash[flash_number]; // ripper
-	else if ((self->s.skinnum % 6) < 4)
+//	else if ((self->s.skinnum % 6) < 4)
+	else if (self->skinnum < 4)
 		flash_index = blaster_flash[flash_number]; // hyperblaster
 	else
 		flash_index = machinegun_flash[flash_number]; // laserbeam
@@ -2077,7 +2116,7 @@ void soldierh_fire (edict_t *self, int flash_number)
 		end[2] += self->enemy->viewheight;
 
 		// Lazarus fog reduction of accuracy
-		if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+		if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 		{
 			end[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 			end[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -2103,13 +2142,15 @@ void soldierh_fire (edict_t *self, int flash_number)
 		VectorNormalize (aim);
 	}
 
-	if ((self->s.skinnum % 6) <= 1)
+//	if ((self->s.skinnum % 6) <= 1)
+	if (self->skinnum <= 1)
 	{
 		// RAFAEL 24-APR-98
 		// droped the damage from 15 to 5 
 		monster_fire_ionripper (self, start, aim, 8, 600, flash_index, EF_IONRIPPER);
 	}
-	else if ((self->s.skinnum % 6) <= 3)
+//	else if ((self->s.skinnum % 6) <= 3)
+	else if (self->skinnum <= 3)
 	{
 	//	monster_fire_blaster (self, start, aim, 4, 600, MZ_BLUEHYPERBLASTER, EF_BLUEHYPERBLASTER, BLASTER_BLUE);
 		monster_fire_blueblaster (self, start, aim, 4, 600, MZ_BLUEHYPERBLASTER, EF_BLUEHYPERBLASTER);
@@ -2132,9 +2173,11 @@ void soldierh_fire (edict_t *self, int flash_number)
 
 void soldierh_hyper_refire1 (edict_t *self)
 {
-	if ((self->s.skinnum % 6) < 2)
+//	if ((self->s.skinnum % 6) < 2)
+	if (self->skinnum < 2)
 		return;
-	else if ((self->s.skinnum % 6) < 4)
+//	else if ((self->s.skinnum % 6) < 4)
+	else if (self->skinnum < 4)
 	{
 		if (random() < 0.7)
 			self->s.frame = FRAME_attak103;
@@ -2145,9 +2188,11 @@ void soldierh_hyper_refire1 (edict_t *self)
 
 void soldierh_ripper1 (edict_t *self)
 {
-	if ((self->s.skinnum % 6) < 2)
+//	if ((self->s.skinnum % 6) < 2)
+	if (self->skinnum < 2)
 		soldierh_fire (self, 0);
-	else if ((self->s.skinnum % 6) < 4)
+//	else if ((self->s.skinnum % 6) < 4)
+	else if (self->skinnum < 4)
 		soldierh_fire (self, 0);
 }
 
@@ -2159,7 +2204,8 @@ void soldierh_fire1 (edict_t *self)
 
 void soldierh_attack1_refire1 (edict_t *self)
 {
-	if ((self->s.skinnum % 6) > 1)
+//	if ((self->s.skinnum % 6) > 1)
+	if (self->skinnum > 1)
 		return;
 
 	if (self->enemy->health <= 0)
@@ -2173,7 +2219,8 @@ void soldierh_attack1_refire1 (edict_t *self)
 
 void soldierh_attack1_refire2 (edict_t *self)
 {
-	if ((self->s.skinnum % 6) < 2)
+//	if ((self->s.skinnum % 6) < 2)
+	if (self->skinnum < 2)
 		return;
 
 	if (self->enemy->health <= 0)
@@ -2185,9 +2232,11 @@ void soldierh_attack1_refire2 (edict_t *self)
 
 void soldierh_hyper_sound (edict_t *self)
 {
-	if ((self->s.skinnum % 6) < 2)
+//	if ((self->s.skinnum % 6) < 2)
+	if (self->skinnum < 2)
 		return;
-	else if ((self->s.skinnum % 6) < 4)
+//	else if ((self->s.skinnum % 6) < 4)
+	else if (self->skinnum < 4)
 		gi.sound(self, CHAN_AUTO, gi.soundindex("weapons/hyprbl1a.wav"), 1, ATTN_NORM, 0);
 	else
 		return;
@@ -2214,9 +2263,11 @@ mmove_t soldierh_move_attack1 = {FRAME_attak101, FRAME_attak112, soldierh_frames
 
 void soldierh_hyper_refire2 (edict_t *self)
 {
-	if ((self->s.skinnum % 6) < 2)
+//	if ((self->s.skinnum % 6) < 2)
+	if (self->skinnum < 2)
 		return;
-	else if ((self->s.skinnum % 6) < 4)
+//	else if ((self->s.skinnum % 6) < 4)
+	else if (self->skinnum < 4)
 	{
 		if (random() < 0.7)
 			self->s.frame = FRAME_attak205;
@@ -2227,9 +2278,11 @@ void soldierh_hyper_refire2 (edict_t *self)
 
 void soldierh_ripper2 (edict_t *self)
 {
-	if ((self->s.skinnum % 6) < 2)
+//	if ((self->s.skinnum % 6) < 2)
+	if (self->skinnum < 2)
 		soldierh_fire (self, 1);
-	else if ((self->s.skinnum % 6) < 4)
+//	else if ((self->s.skinnum % 6) < 4)
+	else if (self->skinnum < 4)
 		soldierh_fire (self, 1);
 }
 
@@ -2241,7 +2294,8 @@ void soldierh_fire2 (edict_t *self)
 
 void soldierh_attack2_refire1 (edict_t *self)
 {
-	if ((self->s.skinnum % 6) > 1)
+//	if ((self->s.skinnum % 6) > 1)
+	if (self->skinnum > 1)
 		return;
 
 	if (self->enemy->health <= 0)
@@ -2255,14 +2309,16 @@ void soldierh_attack2_refire1 (edict_t *self)
 
 void soldierh_attack2_refire2 (edict_t *self)
 {
-	if ((self->s.skinnum % 6) < 2)
+//	if ((self->s.skinnum % 6) < 2)
+	if (self->skinnum < 2)
 		return;
 
 	if (self->enemy->health <= 0)
 		return;
 
 	if ( ((skill->value == 3) && (random() < 0.5))
-		|| (range(self, self->enemy) == RANGE_MELEE) && (self->s.skinnum % 6) < 4)
+	//	|| (range(self, self->enemy) == RANGE_MELEE) && (self->s.skinnum % 6) < 4)
+		|| (range(self, self->enemy) == RANGE_MELEE) && (self->skinnum < 4) )
 		self->monsterinfo.nextframe = FRAME_attak204;
 }
 
@@ -2429,7 +2485,7 @@ mframe_t soldierh_frames_attack6 [] =
 };
 mmove_t soldierh_move_attack6 = {FRAME_runs01, FRAME_runs14, soldierh_frames_attack6, soldierh_run};
 
-void soldierh_attack(edict_t *self)
+void soldierh_attack (edict_t *self)
 {
 	float r, chance;
 
@@ -2482,13 +2538,15 @@ void soldierh_attack(edict_t *self)
 	if ((!(self->monsterinfo.aiflags & (AI_BLOCKED|AI_STAND_GROUND))) &&
 		(range(self, self->enemy) >= RANGE_NEAR) && 
 		(r < (skill->value*0.25) && 
-		((self->s.skinnum % 6) <= 3)))
+	//	((self->s.skinnum % 6) <= 3)))
+		(self->skinnum <= 3)))
 	{
 		self->monsterinfo.currentmove = &soldierh_move_attack6;
 	}
 	else
 	{
-		if ((self->s.skinnum % 6) < 4)
+	//	if ((self->s.skinnum % 6) < 4)
+		if (self->skinnum < 4)
 		{
 			if (random() < 0.5)
 				self->monsterinfo.currentmove = &soldierh_move_attack1;
@@ -2507,7 +2565,7 @@ void soldierh_attack(edict_t *self)
 // SIGHT
 //
 
-void soldierh_sight(edict_t *self, edict_t *other)
+void soldierh_sight (edict_t *self, edict_t *other)
 {
 	if (random() < 0.5)
 		gi.sound (self, CHAN_VOICE, sound_sight1, 1, ATTN_NORM, 0);
@@ -2518,7 +2576,8 @@ void soldierh_sight(edict_t *self, edict_t *other)
 	{
 		if (random() > 0.5)
 		{
-			if ((self->s.skinnum % 6) < 4)	
+		//	if ((self->s.skinnum % 6) < 4)	
+			if (self->skinnum < 4)	
 				self->monsterinfo.currentmove = &soldierh_move_attack6;
 			else
 				self->monsterinfo.currentmove = &soldierh_move_attack4;
@@ -2592,10 +2651,11 @@ void soldierh_dodge (edict_t *self, edict_t *attacker, float eta)
 //
 // NEW DODGE CODE
 //
-//Knightmare- moved this code down here below soldierh frame declarations
+// Knightmare- moved this code down here below soldierh frame declarations
 void soldier_sidestep (edict_t *self)
 {
-	if ((self->s.skinnum % 6) <= 3)
+//	if ((self->s.skinnum % 6) <= 3)
+	if (self->skinnum <= 3)
 	{
 //		if ((g_showlogic) && (g_showlogic->value))
 //			gi.dprintf ("shooting back!\n");
@@ -2665,7 +2725,8 @@ void soldierh_fire6 (edict_t *self)
 {
 	
 	// no fire laser
-	if ((self->s.skinnum % 6) < 4)
+//	if ((self->s.skinnum % 6) < 4)
+	if (self->skinnum < 4)
 		soldierh_fire (self, 5);
 
 }
@@ -2674,7 +2735,8 @@ void soldierh_fire7 (edict_t *self)
 {
 	
 	// no fire laser
-	if ((self->s.skinnum % 6) < 4)
+//	if ((self->s.skinnum % 6) < 4)
+	if (self->skinnum < 4)
 		soldierh_fire (self, 6);
 
 }
@@ -2690,7 +2752,7 @@ void soldierh_dead (edict_t *self)
 	M_FlyCheck (self);
 
 	// Lazarus monster fade
-	if(world->effects & FX_WORLDSPAWN_CORPSEFADE)
+	if (world->effects & FX_WORLDSPAWN_CORPSEFADE)
 	{
 		self->think=FadeDieSink;
 		self->nextthink=level.time+corpse_fadetime->value;
@@ -2973,9 +3035,11 @@ void soldierh_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dam
 	self->s.skinnum |= 1;
 	self->monsterinfo.power_armor_type = POWER_ARMOR_NONE;
 
-	if ((self->s.skinnum % 6) == 1)
+//	if ((self->s.skinnum % 6) == 1)
+	if (self->skinnum <= 1)
 		gi.sound (self, CHAN_VOICE, sound_death_light, 1, ATTN_NORM, 0);
-	else if ((self->s.skinnum % 6) == 3)
+//	else if ((self->s.skinnum % 6) == 3)
+	else if (self->skinnum <= 3)
 		gi.sound (self, CHAN_VOICE, sound_death, 1, ATTN_NORM, 0);
 	else // ((self->s.skinnum % 6) == 5)
 		gi.sound (self, CHAN_VOICE, sound_death_ss, 1, ATTN_NORM, 0);
@@ -2999,6 +3063,7 @@ void soldierh_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dam
 	else
 		self->monsterinfo.currentmove = &soldierh_move_death6;
 }
+
 //
 // SPAWN
 //
@@ -3025,7 +3090,7 @@ void SP_monster_soldier_x (edict_t *self)
 	sound_sight2 =	gi.soundindex ("soldier/solsrch1.wav");
 	sound_cock =	gi.soundindex ("infantry/infatck3.wav");
 
-	if(!self->mass)
+	if (!self->mass)
 		self->mass = 100;
 
 	self->pain = soldier_pain;
@@ -3095,11 +3160,11 @@ void SP_monster_soldier_light (edict_t *self)
 	gi.soundindex ("soldier/solatck2.wav");
 	self->common_name = "Light Guard";
 
-	//self->s.skinnum = 0;
-	if(!self->health)
+//	self->s.skinnum = 0;
+	if (!self->health)
 		self->health = 20;
-	if(!self->gib_health)
-		self->gib_health = -40; //was -30
+	if (!self->gib_health)
+		self->gib_health = -40; // was -30
 
 	// PMM - blindfire
 	self->monsterinfo.blindfire = true;
@@ -3107,7 +3172,8 @@ void SP_monster_soldier_light (edict_t *self)
 	// calls walkmonster_start, which the health and everything else need to be set up for
 	SP_monster_soldier_x (self);
 	// Lazarus: custom skins
-	self->s.skinnum = 6*self->style;
+	self->s.skinnum = 0 + 8 * self->style;	// was 0 + 6 * self->style
+	self->skinnum = 0;	// Knightmare- simplify skinnum checks by excluding custom styles
 }
 
 /*QUAKED monster_soldier (1 .5 0) (-16 -16 -24) (16 16 32) Ambush Trigger_Spawn Sight GoodGuy NoGib
@@ -3126,16 +3192,17 @@ void SP_monster_soldier (edict_t *self)
 	gi.soundindex ("soldier/solatck1.wav");
 	self->common_name = "Shotgun Guard";
 
-	//self->s.skinnum = 2;
-	if(!self->health)
+//	self->s.skinnum = 2;
+	if (!self->health)
 		self->health = 30;
-	if(!self->gib_health)
+	if (!self->gib_health)
 		self->gib_health = -40;
-	//Knightmare- call generic spawn function LAST, because it
+	// Knightmare- call generic spawn function LAST, because it
 	// calls walkmonster_start, which the health and everything else need to be set up for
 	SP_monster_soldier_x (self);
 	// Lazarus: custom skins
-	self->s.skinnum = 2 + 6*self->style;
+	self->s.skinnum = 2 + 8 * self->style;	// was 2 + 6 * self->style
+	self->skinnum = 2;	// Knightmare- simplify skinnum checks by excluding custom styles
 }
 
 /*QUAKED monster_soldier_ss (1 .5 0) (-16 -16 -24) (16 16 32) Ambush Trigger_Spawn Sight GoodGuy NoGib
@@ -3153,16 +3220,82 @@ void SP_monster_soldier_ss (edict_t *self)
 	gi.soundindex ("soldier/solatck3.wav");
 	self->common_name = "Machinegun Guard";
 
-	//self->s.skinnum = 4;
-	if(!self->health)
+//	self->s.skinnum = 4;
+	if (!self->health)
 		self->health = 40;
-	if(!self->gib_health)
+	if (!self->gib_health)
 		self->gib_health = -40;
-	//Knightmare- call generic spawn function LAST, because it
+	// Knightmare- call generic spawn function LAST, because it
 	// calls walkmonster_start, which the health and everything else need to be set up for
 	SP_monster_soldier_x (self);
 	// Lazarus: custom skins
-	self->s.skinnum = 4 + 6*self->style;
+	self->s.skinnum = 4 + 8 * self->style;	// was 4 + 6 * self->style
+	self->skinnum = 4;	// Knightmare- simplify skinnum checks by excluding custom styles
+}
+
+/*QUAKED monster_soldier_plasma_re (1 .5 0) (-16 -16 -24) (16 16 32) Ambush Trigger_Spawn Sight GoodGuy NoGib
+*/
+void SP_monster_soldier_plasma_re (edict_t *self)
+{
+	if (deathmatch->value)
+	{
+		G_FreeEdict (self);
+		return;
+	}
+
+	sound_pain_ss = gi.soundindex ("soldier/solpain3.wav");
+	sound_death_ss = gi.soundindex ("soldier/soldeth3.wav");
+	gi.modelindex ("models/objects/laser/tris.md2");
+	gi.soundindex ("misc/lasfly.wav");
+	gi.soundindex ("soldier/solatck2.wav");
+	self->common_name = "Plasma Guard";
+
+//	self->s.skinnum = 0;
+	if (!self->health)
+		self->health = 50;
+	if (!self->gib_health)
+		self->gib_health = -40; // was -30
+
+	// PMM - blindfire
+	self->monsterinfo.blindfire = false;
+	// Knightmare- call generic spawn function LAST, because it
+	// calls walkmonster_start, which the health and everything else need to be set up for
+	SP_monster_soldier_x (self);
+	// Lazarus: custom skins
+	self->s.skinnum = 6 + 8 * self->style;
+	self->skinnum = 6;	// Knightmare- simplify skinnum checks by excluding custom styles
+}
+
+/*QUAKED monster_soldier_plasma_sp (1 .5 0) (-16 -16 -24) (16 16 32) Ambush Trigger_Spawn Sight GoodGuy NoGib
+*/
+void SP_monster_soldier_plasma_sp (edict_t *self)
+{
+	if (deathmatch->value)
+	{
+		G_FreeEdict (self);
+		return;
+	}
+
+	sound_pain_ss = gi.soundindex ("soldier/solpain3.wav");
+	sound_death_ss = gi.soundindex ("soldier/soldeth3.wav");
+	gi.soundindex ("soldier/solatck1.wav");
+	self->common_name = "Plasma Guard";
+
+//	self->s.skinnum = 2;
+	if (!self->health)
+		self->health = 50;
+	if (!self->gib_health)
+		self->gib_health = -40;
+
+	// PMM - blindfire
+	self->monsterinfo.blindfire = true;
+	// Knightmare- call generic spawn function LAST, because it
+	// calls walkmonster_start, which the health and everything else need to be set up for
+	SP_monster_soldier_x (self);
+	// Lazarus: custom skins
+	self->s.skinnum = 6 + 8 * self->style;
+	self->skinnum = 6;	// Knightmare- simplify skinnum checks by excluding custom styles
+	self->moreflags |= FL2_WEAPON_ALT;	// special flag for spread mode
 }
 
 //
@@ -3187,7 +3320,7 @@ void SP_monster_soldier_h (edict_t *self)
 	sound_sight2 =	gi.soundindex ("soldier/solsrch1.wav");
 	sound_cock =	gi.soundindex ("infantry/infatck3.wav");
 
-	if(!self->mass)
+	if (!self->mass)
 		self->mass = 100;
 
 	self->pain = soldierh_pain;
@@ -3211,7 +3344,7 @@ void SP_monster_soldier_h (edict_t *self)
 //=====
 
 	// Lazarus
-	if(self->powerarmor)
+	if (self->powerarmor)
 	{
 		if (self->powerarmortype == 1)
 			self->monsterinfo.power_armor_type = POWER_ARMOR_SCREEN;
@@ -3261,9 +3394,9 @@ void SP_monster_soldier_ripper (edict_t *self)
 	self->common_name = "Ripper Guard";
 
 	//self->s.skinnum = 0;
-	if(!self->health)
+	if (!self->health)
 		self->health = 50;
-	if(!self->gib_health)
+	if (!self->gib_health)
 		self->gib_health = -40;
 
 	// PMM - blindfire
@@ -3272,7 +3405,8 @@ void SP_monster_soldier_ripper (edict_t *self)
 	// calls walkmonster_start, which the health and everything else need to be set up for
 	SP_monster_soldier_h (self);
 	// Lazarus: custom skins
-	self->s.skinnum = 6*self->style;
+	self->s.skinnum = 0 + 6 * self->style;
+	self->skinnum = 0;	// Knightmare- simplify skinnum checks by excluding custom styles
 }
 
 /*QUAKED monster_soldier_hypergun (1 .5 0) (-16 -16 -24) (16 16 32) Ambush Trigger_Spawn Sight GoodGuy NoGib
@@ -3294,9 +3428,9 @@ void SP_monster_soldier_hypergun (edict_t *self)
 	self->common_name = "Hyperblaster Guard";
 
 	//self->s.skinnum = 2;
-	if(!self->health)
+	if (!self->health)
 		self->health = 60;
-	if(!self->gib_health)
+	if (!self->gib_health)
 		self->gib_health = -40;
 
 	// PMM - blindfire
@@ -3305,7 +3439,8 @@ void SP_monster_soldier_hypergun (edict_t *self)
 	// calls walkmonster_start, which the health and everything else need to be set up for
 	SP_monster_soldier_h (self);
 	// Lazarus: custom skins
-	self->s.skinnum = 2 + 6*self->style;
+	self->s.skinnum = 2 + 6 * self->style;
+	self->skinnum = 2;	// Knightmare- simplify skinnum checks by excluding custom styles
 }
 
 /*QUAKED monster_soldier_lasergun (1 .5 0) (-16 -16 -24) (16 16 32) Ambush Trigger_Spawn Sight GoodGuy NoGib ThroughGlass
@@ -3324,16 +3459,17 @@ void SP_monster_soldier_lasergun (edict_t *self)
 	self->common_name = "Laser Guard";
 
 	//self->s.skinnum = 4;
-	if(!self->health)
+	if (!self->health)
 		self->health = 70;
-	if(!self->gib_health)
+	if (!self->gib_health)
 		self->gib_health = -40;
 
 	// Knightmare- call generic spawn function LAST, because it
 	// calls walkmonster_start, which the health and everything else need to be set up for
 	SP_monster_soldier_h (self);
 	// Lazarus: custom skins
-	self->s.skinnum = 4 + 6*self->style;
+	self->s.skinnum = 4 + 6 * self->style;
+	self->skinnum = 4;	// Knightmare- simplify skinnum checks by excluding custom styles
 }
 
 // END 13-APR-98

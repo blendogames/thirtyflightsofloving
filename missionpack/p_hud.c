@@ -782,6 +782,23 @@ void G_SetStats (edict_t *ent)
 		ent->client->ps.stats[STAT_ZOOM] = gi.imageindex("zoom");
 	else
 		ent->client->ps.stats[STAT_ZOOM] = 0;
+
+	// Zaero
+	if (ent->client->zCameraTrack)
+	{
+		ent->client->ps.stats[STAT_CAMERA_ICON] = gi.imageindex("i_visor");
+		ent->client->ps.stats[STAT_CAMERA_TIMER] = ent->client->pers.visorFrames/10;
+#ifdef KMQUAKE2_ENGINE_MOD	// for enhanced HUD
+//		ent->client->ps.stats[STAT_CAMERA_RANGE] = min(max((int)sk_visor_time->value, 0), 10000);
+#endif
+	}
+	else {
+		ent->client->ps.stats[STAT_CAMERA_ICON] = 0;
+#ifdef KMQUAKE2_ENGINE_MOD	// for enhanced HUD
+//		ent->client->ps.stats[STAT_CAMERA_RANGE] = 0;
+#endif
+	}
+	// end Zaero
 }
 
 /*

@@ -113,7 +113,7 @@ void Killed (edict_t *targ, edict_t *inflictor, edict_t *attacker, int damage, v
 
 	if ((targ->svflags & SVF_MONSTER) && (targ->deadflag != DEAD_DEAD))
 	{
-//		targ->svflags |= SVF_DEADMONSTER;	// now treat as a different content type
+	//	targ->svflags |= SVF_DEADMONSTER;	// now treat as a different content type
 		// ROGUE - free up slot for spawned monster if it's spawned
 	//	if (targ->monsterinfo.aiflags & AI_SPAWNED_CARRIER)
 		if (targ->monsterinfo.monsterflags & MFL_SPAWNED_CARRIER)
@@ -122,8 +122,8 @@ void Killed (edict_t *targ, edict_t *inflictor, edict_t *attacker, int damage, v
 				!strcmp(targ->monsterinfo.commander->classname, "monster_carrier"))
 			{
 				targ->monsterinfo.commander->monsterinfo.monster_slots++;
-//				if ((g_showlogic) && (g_showlogic->value))
-//					gi.dprintf ("g_combat: freeing up carrier slot - %d left\n", targ->monsterinfo.commander->monsterinfo.monster_slots);
+			//	if ((g_showlogic) && (g_showlogic->value))
+			//		gi.dprintf ("g_combat: freeing up carrier slot - %d left\n", targ->monsterinfo.commander->monsterinfo.monster_slots);
 			}
 		}
 	//	if (targ->monsterinfo.aiflags & AI_SPAWNED_MEDIC_C)
@@ -134,15 +134,14 @@ void Killed (edict_t *targ, edict_t *inflictor, edict_t *attacker, int damage, v
 				if (targ->monsterinfo.commander->inuse && !strcmp(targ->monsterinfo.commander->classname, "monster_medic_commander"))
 				{
 					targ->monsterinfo.commander->monsterinfo.monster_slots++;
-//					if ((g_showlogic) && (g_showlogic->value))
-//						gi.dprintf ("g_combat: freeing up medic slot - %d left\n", targ->monsterinfo.commander->monsterinfo.monster_slots);
+				//	if ((g_showlogic) && (g_showlogic->value))
+				//		gi.dprintf ("g_combat: freeing up medic slot - %d left\n", targ->monsterinfo.commander->monsterinfo.monster_slots);
 				}
-//				else
-//					if ((g_showlogic) && (g_showlogic->value))
-//						gi.dprintf ("my commander is dead!  he's a %s\n", targ->monsterinfo.commander->classname);
+			//	else if ((g_showlogic) && (g_showlogic->value))
+			//		gi.dprintf ("my commander is dead!  he's a %s\n", targ->monsterinfo.commander->classname);
 			}
-//			else if ((g_showlogic) && (g_showlogic->value))
-//				gi.dprintf ("My commander is GONE\n");
+		//	else if ((g_showlogic) && (g_showlogic->value))
+		//		gi.dprintf ("My commander is GONE\n");
 
 		}
 	//	if (targ->monsterinfo.aiflags & AI_SPAWNED_WIDOW)
@@ -154,21 +153,23 @@ void Killed (edict_t *targ, edict_t *inflictor, edict_t *attacker, int damage, v
 			{
 				if (targ->monsterinfo.commander->monsterinfo.monster_used > 0)
 					targ->monsterinfo.commander->monsterinfo.monster_used--;
-//				if ((g_showlogic) && (g_showlogic->value))
-//					gi.dprintf ("g_combat: freeing up black widow slot - %d used\n", targ->monsterinfo.commander->monsterinfo.monster_used);
+			//	if ((g_showlogic) && (g_showlogic->value))
+			//		gi.dprintf ("g_combat: freeing up black widow slot - %d used\n", targ->monsterinfo.commander->monsterinfo.monster_used);
 			}
 		}
-		//Rogue
+		// Rogue
 	//	if (!(targ->monsterinfo.aiflags & AI_GOOD_GUY) && !(targ->monsterinfo.aiflags & AI_DO_NOT_COUNT))
-		if (!(targ->monsterinfo.aiflags & AI_GOOD_GUY) && !(targ->monsterinfo.monsterflags & MFL_DO_NOT_COUNT))
+	//	if ( !(targ->monsterinfo.aiflags & AI_GOOD_GUY) && !(targ->monsterinfo.monsterflags & MFL_DO_NOT_COUNT) )
+		// Zaero- spawnflag 16 = do not count
+		if ( !(targ->monsterinfo.aiflags & AI_GOOD_GUY) && !(targ->monsterinfo.monsterflags & MFL_DO_NOT_COUNT) && !(IsZaeroMap() && (targ->spawnflags & 16)) )
 		{
 			level.killed_monsters++;
 			if (coop->value && attacker->client)
 				attacker->client->resp.score++;
 			// medics won't heal monsters that they kill themselves
 			// PMM - now they will
-//			if (strcmp(attacker->classname, "monster_medic") == 0)
-//				targ->owner = attacker;
+		//	if (strcmp(attacker->classname, "monster_medic") == 0)
+		//		targ->owner = attacker;
 		}
 	}
 
@@ -256,6 +257,13 @@ static int CheckPowerArmor (edict_t *ent, vec3_t point, vec3_t normal, int damag
 
 	if (dflags & (DAMAGE_NO_ARMOR | DAMAGE_NO_POWER_ARMOR))		// PGM
 		return 0;
+
+	// Zaero add
+	if (EMPNukeCheck(ent, point))
+	{
+		return 0;
+	}
+	// end Zaero
 
 	if (client)
 	{
@@ -522,6 +530,12 @@ void M_ReactToDamage (edict_t *targ, edict_t *attacker, edict_t *inflictor)
 	qboolean new_tesla;
 	qboolean is_turret;
 
+	// sanity check
+	if (!targ || !targ->classname)
+		return;
+	if (!attacker || !attacker->classname)
+		return;
+
 //	if (!(attacker->client) && !(attacker->svflags & SVF_MONSTER))
 //		return;
 
@@ -537,7 +551,7 @@ void M_ReactToDamage (edict_t *targ, edict_t *attacker, edict_t *inflictor)
 	if (targ->flags & FL_ROBOT)
 		return;
 
-	is_turret = (attacker->classname && !Q_stricmp(attacker->classname,"turret_breach"));
+	is_turret = (attacker->classname && !Q_stricmp(attacker->classname, "turret_breach"));
 
 //=======
 //ROGUE
@@ -584,34 +598,37 @@ void M_ReactToDamage (edict_t *targ, edict_t *attacker, edict_t *inflictor)
 			vec_t	best_dist=0;
 			trace_t	trace1, trace2;
 
-			VectorCopy(targ->mins,mins);
+			VectorCopy (targ->mins, mins);
 			mins[2] += 16; // max step height? not sure about this
-			if (mins[2] > 0) mins[2] = 0;
-			VectorCopy(targ->maxs,maxs);
-			if ( (attacker==world) ||
-				(!Q_stricmp(attacker->classname,"func_door") )   ||
-				(!Q_stricmp(attacker->classname,"func_water"))   ||
-				(!Q_stricmp(attacker->classname,"func_pushable"))  )
+			if (mins[2] > 0)
+				mins[2] = 0;
+			VectorCopy (targ->maxs, maxs);
+			if ( (attacker == world) ||
+				( attacker->classname &&
+				( !Q_stricmp(attacker->classname, "func_door") ||
+				!Q_stricmp(attacker->classname, "func_water") ||
+				!Q_stricmp(attacker->classname, "func_pushable") )
+				) )
 			{
 				// Just send the monster straight ahead and hope for the best.
 				thing = SpawnThing();
-				VectorCopy(targ->s.angles,thing->s.angles);
-				AngleVectors(targ->s.angles,dir,NULL,NULL);
+				VectorCopy (targ->s.angles, thing->s.angles);
+				AngleVectors (targ->s.angles, dir, NULL, NULL);
 				for (i=0; i<5; i++)
 				{
 					dir[2] = 0.1*i;
-					VectorNormalize(dir);
-					VectorMA(targ->s.origin, WORLD_SIZE, dir, end);	// was 8192
-					trace1 = gi.trace(targ->s.origin,mins,maxs,end,targ,MASK_MONSTERSOLID);
+					VectorNormalize (dir);
+					VectorMA (targ->s.origin, WORLD_SIZE, dir, end);	// was 8192
+					trace1 = gi.trace(targ->s.origin, mins, maxs, end, targ ,MASK_MONSTERSOLID);
 					dist = trace1.fraction * WORLD_SIZE;	// was 8192
 					if (dist > best_dist)
 					{
 						best_dist = dist;
-						VectorCopy(dir,best_dir);
+						VectorCopy (dir, best_dir);
 					}
 				}
 			}
-			else if (!Q_stricmp(attacker->classname,"target_laser")) 
+			else if ( attacker->classname && !Q_stricmp(attacker->classname, "target_laser") )
 			{
 				// Send the monster in a direction perpendicular to laser
 				// path, whichever direction is closest to current angles
@@ -619,18 +636,18 @@ void M_ReactToDamage (edict_t *targ, edict_t *attacker, edict_t *inflictor)
 				if (attacker->movedir[2] > 0.7)
 				{
 					// Just move straight ahead and hope for the best
-					AngleVectors(targ->s.angles,best_dir,NULL,NULL);
+					AngleVectors (targ->s.angles, best_dir, NULL, NULL);
 				}
 				else
 				{
-					VectorCopy(attacker->movedir,best_dir);
+					VectorCopy (attacker->movedir, best_dir);
 					best_dir[2] =  best_dir[0];
 					best_dir[0] = -best_dir[1];
 					best_dir[1] =  best_dir[2];
 					best_dir[2] =  0;
-					AngleVectors(targ->s.angles,dir,NULL,NULL);
-					if (DotProduct(best_dir,dir) < 0)
-						VectorNegate(best_dir,best_dir);
+					AngleVectors (targ->s.angles, dir,NULL,NULL);
+					if (DotProduct(best_dir, dir) < 0)
+						VectorNegate (best_dir, best_dir);
 				}
 			}
 			else
@@ -641,15 +658,15 @@ void M_ReactToDamage (edict_t *targ, edict_t *attacker, edict_t *inflictor)
 				if (!VectorLength(attacker->size))
 				{
 					// point entity
-					VectorCopy(attacker->s.origin,atk);
+					VectorCopy (attacker->s.origin, atk);
 				}
 				else
 				{
 					// brush model... can't rely on origin
-					VectorMA(attacker->mins,0.5,attacker->size,atk);
+					VectorMA (attacker->mins, 0.5, attacker->size, atk);
 				}
-				VectorClear(best_dir);
-				AngleVectors(targ->s.angles,forward,NULL,NULL);
+				VectorClear (best_dir);
+				AngleVectors (targ->s.angles, forward, NULL, NULL);
 				for (i=0; i<32 && best_dist == 0; i++) {
 					// Weight escape route tests in favor of forward-facing direction
 					if (random() > 0.5)
@@ -664,10 +681,10 @@ void M_ReactToDamage (edict_t *targ, edict_t *attacker, edict_t *inflictor)
 						dir[1] = crandom();
 						dir[2] = 0;
 					}
-					VectorNormalize(dir);
-					VectorMA(targ->s.origin, WORLD_SIZE, dir, end);	// was 8192
-					trace1 = gi.trace(targ->s.origin,mins,maxs,end,targ,MASK_MONSTERSOLID);
-					trace2 = gi.trace(trace1.endpos,NULL,NULL,atk,targ,MASK_SOLID);
+					VectorNormalize (dir);
+					VectorMA (targ->s.origin, WORLD_SIZE, dir, end);	// was 8192
+					trace1 = gi.trace (targ->s.origin, mins, maxs, end, targ, MASK_MONSTERSOLID);
+					trace2 = gi.trace (trace1.endpos, NULL, NULL, atk, targ, MASK_SOLID);
 					if (trace2.fraction == 1.0) continue;
 					dist = trace1.fraction * WORLD_SIZE;	// was 8192
 					if (dist > best_dist)
@@ -679,24 +696,24 @@ void M_ReactToDamage (edict_t *targ, edict_t *attacker, edict_t *inflictor)
 				if (best_dist == 0.)
 					return;
 				thing = SpawnThing();
-				vectoangles(best_dir,thing->s.angles);
+				vectoangles (best_dir, thing->s.angles);
 			}
-			if ( (!Q_stricmp(attacker->classname,"func_door"))    ||
-				(!Q_stricmp(attacker->classname,"func_pushable"))   )
+			if ( attacker->classname &&
+				(!Q_stricmp(attacker->classname, "func_door") || !Q_stricmp(attacker->classname, "func_pushable")) )
 				run = 256;
 			else
 				run = WORLD_SIZE;	// was 8192
-			VectorMA(targ->s.origin,run,best_dir,end);
-			trace1 = gi.trace(targ->s.origin,mins,maxs,end,targ,MASK_MONSTERSOLID);
+			VectorMA (targ->s.origin, run, best_dir, end);
+			trace1 = gi.trace (targ->s.origin, mins, maxs, end, targ, MASK_MONSTERSOLID);
 			dist = trace1.fraction * run;
-			VectorMA(targ->s.origin, dist, best_dir, thing->s.origin);
+			VectorMA (targ->s.origin, dist, best_dir, thing->s.origin);
 			// If monster already has an enemy, use a short lifespan for thing
 			if (targ->enemy)
 				thing->touch_debounce_time = level.time + 2.0;
 			else
 				thing->touch_debounce_time = level.time + max(5.0,dist/50.);
 			thing->target_ent = targ;
-			ED_CallSpawn(thing);
+			ED_CallSpawn (thing);
 			targ->movetarget = targ->goalentity = thing;
 			targ->monsterinfo.aiflags &= ~AI_SOUND_TARGET;
 			targ->monsterinfo.aiflags |= AI_CHASE_THING;
@@ -708,13 +725,13 @@ void M_ReactToDamage (edict_t *targ, edict_t *attacker, edict_t *inflictor)
 	// Lazarus: If in a no-win situation, actors run away
 	if (targ->monsterinfo.aiflags & AI_ACTOR)
 	{
-		if (targ->health < targ->max_health/3)
+		if ( targ->health < (targ->max_health/3) )
 		{
-			if (attacker->health > attacker->max_health/2)
+			if ( attacker->health > (attacker->max_health/2) )
 			{
 				if (attacker->health > targ->health)
 				{
-					if (ai_chicken(targ,attacker))
+					if ( ai_chicken(targ, attacker) )
 						return;
 				}
 			}
@@ -723,9 +740,10 @@ void M_ReactToDamage (edict_t *targ, edict_t *attacker, edict_t *inflictor)
 
 	// Zaero- handle autocanon
 //	if ( !(attacker->client) && !(attacker->svflags & SVF_MONSTER) &&
-//		(strncmp (attacker->classname, "monster_autocannon", 18) != 0) )
-	if ( !strncmp (attacker->classname, "monster_autocannon", 18) )
+//		(attacker->classname && (strncmp(attacker->classname, "monster_autocannon", 18) != 0) ) )
+	if ( attacker->classname && !strncmp(attacker->classname, "monster_autocannon", 18) )
 		return;
+	// end Zaero
 
 	if (attacker == targ || attacker == targ->enemy)
 		return;
@@ -813,17 +831,19 @@ void M_ReactToDamage (edict_t *targ, edict_t *attacker, edict_t *inflictor)
 	/*
 	if (((targ->flags & (FL_FLY|FL_SWIM)) == (attacker->flags & (FL_FLY|FL_SWIM))) &&
 		 (strcmp (targ->classname, attacker->classname) != 0) &&
-		 (strcmp(attacker->classname, "monster_tank") != 0) &&
+		 (strncmp(attacker->classname, "monster_tank", 12) != 0) &&
 		 (strcmp(attacker->classname, "monster_supertank") != 0) &&
 		 (strcmp(attacker->classname, "monster_makron") != 0) &&
 		 (strcmp(attacker->classname, "monster_jorg") != 0) &&
 		 (strcmp(attacker->classname, "monster_carrier") != 0) &&
- 		 (strncmp(attacker->classname, "monster_medic", 12) != 0) ) // this should get medics & medic_commanders
+ 		 (strncmp(attacker->classname, "monster_medic", 13) != 0) ) // this should get medics & medic_commanders
 	*/
-	if (((targ->flags & (FL_FLY|FL_SWIM)) == (attacker->flags & (FL_FLY|FL_SWIM))) &&
-		(strcmp (targ->classname, attacker->classname) != 0) &&
+	if ( ( (targ->flags & (FL_FLY|FL_SWIM)) == (attacker->flags & (FL_FLY|FL_SWIM)) ) &&
+		(strcmp(targ->classname, attacker->classname) != 0) &&
 		!(attacker->monsterinfo.aiflags & AI_IGNORE_SHOTS) &&
-		!(targ->monsterinfo.aiflags & AI_IGNORE_SHOTS) )
+		!(targ->monsterinfo.aiflags & AI_IGNORE_SHOTS)  &&
+		!( IsZaeroMap() && attacker->mteam && targ->mteam && (strcmp(attacker->mteam, targ->mteam) == 0) )	// Zaero- added monster team field
+		)
 	{
 		if (targ->enemy && targ->enemy->client)
 			targ->oldenemy = targ->enemy;
@@ -1160,9 +1180,9 @@ void T_Damage (edict_t *in_targ, edict_t *inflictor, edict_t *in_attacker, vec3_
 	if (take)
 	{
 		// Lazarus: dmgteam stuff
-		CallMyFriends(targ,attacker);
+		CallMyFriends (targ, attacker);
 
-		//Knightmare- no blood/particles from negative damage lasers and triggers or shockwave detonation effect
+		// Knightmare- no blood/particles from negative damage lasers and triggers or shockwave detonation effect
 		if ( (mod != MOD_SHOCK_SPLASH) && ((damage > 0) || ((mod != MOD_TRIGGER_HURT) && (mod != MOD_TARGET_LASER))) )
 		{
 		//PGM-	need more blood for chainfist.
@@ -1216,7 +1236,7 @@ void T_Damage (edict_t *in_targ, edict_t *inflictor, edict_t *in_attacker, vec3_
 		{
 			// Lazarus: For func_explosive target, check spawnflags and, if needed,
 			//          damage type
-			if (targ->classname && !Q_stricmp(targ->classname,"func_explosive"))
+			if (targ->classname && !Q_stricmp(targ->classname, "func_explosive"))
 			{
 				qboolean good_damage = true;
 
@@ -1244,13 +1264,17 @@ void T_Damage (edict_t *in_targ, edict_t *inflictor, edict_t *in_attacker, vec3_
 					if (mod == MOD_DOPPLE_EXPLODE) good_damage = true;
 					if (mod == MOD_SHOCK_SPLASH) good_damage = true;
 					if (mod == MOD_ETF_SPLASH)  good_damage = true;
+					// Zaero
+					if (mod == MOD_TRIPBOMB)  good_damage = true;
 				}
 				if (!good_damage) return;
 			}
-			targ->health = targ->health - take;
+			// Zaero
+			if (targ->takedamage != DAMAGE_IMMORTAL)
+				targ->health = targ->health - take;
 		}
 
-//PGM - spheres need to know who to shoot at
+// PGM - spheres need to know who to shoot at
 		if (client && client->owned_sphere)
 		{
 			sphere_notified = true;

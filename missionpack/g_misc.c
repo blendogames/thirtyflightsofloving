@@ -359,7 +359,7 @@ void ThrowHead (edict_t *self, char *gibname, int damage, int type)
 	char	*p;
 
 	// Lazarus reflections
-	DeleteReflection(self,-1);
+	DeleteReflection (self,-1);
 
 	if (self->movewith) // Knightmare- remove stuff for movewith monsters
 	{
@@ -375,7 +375,7 @@ void ThrowHead (edict_t *self, char *gibname, int damage, int type)
 	VectorClear (self->maxs);
 
 	Com_strcpy(modelname, sizeof(modelname), gibname);
-	p = strstr(modelname,"models/objects/gibs/");
+	p = strstr(modelname, "models/objects/gibs/");
 	if(p && self->gib_type)
 	{
 		p += 18;
@@ -737,6 +737,14 @@ void path_corner_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface
 
 	if (self->wait > 0)
 	{
+		// Zaero
+		if ( IsZaeroMap() && (other->goalentity) )
+		{
+			VectorSubtract (other->goalentity->s.origin, other->s.origin, v);
+			other->ideal_yaw = vectoyaw (v);
+		}
+		// end Zaero
+
 		other->monsterinfo.pausetime = level.time + self->wait;
 		other->monsterinfo.stand (other);
 		return;
@@ -1039,7 +1047,7 @@ void SP_func_wall (edict_t *self)
 	// it must be TRIGGER_SPAWN
 	if (!(self->spawnflags & 1))
 	{
-//		gi.dprintf("func_wall missing TRIGGER_SPAWN\n");
+	//	gi.dprintf("func_wall missing TRIGGER_SPAWN\n");
 		self->spawnflags |= 1;
 	}
 
@@ -2557,13 +2565,52 @@ void SP_misc_viper (edict_t *ent)
 		return;
 	}
 
+	// Zaero
+	if ( IsZaeroMap() && (ent->spawnflags & 1) )
+	{
+		ent->s.effects |= EF_ROCKET;
+		ent->spawnflags &= ~1; // turn this off so that it doesn't mess up the trains
+	}
+	// end Zaero
+
 	ent->class_id = ENTITY_MISC_VIPER;
 
 	if (!ent->speed)
 		ent->speed = 300;
 
 	ent->movetype = MOVETYPE_PUSH;
-	ent->solid = SOLID_NOT;
+
+	// Zaero
+	if ( IsZaeroMap() && (ent->spawnflags & 2) ) {
+		ent->solid = SOLID_BBOX;
+	}
+	else {
+		ent->solid = SOLID_NOT;
+	}
+	// end Zaero
+
+	// Zaero
+	if ( IsZaeroMap() )
+	{
+		if (ent->model) {
+			ent->s.modelindex = gi.modelindex (ent->model);
+		}
+		else {
+			ent->s.modelindex = gi.modelindex ("models/ships/viper/tris.md2");
+		}
+		if (ent->model2) {
+			ent->s.modelindex2 = gi.modelindex (ent->model2);
+		}
+		if (ent->model3) {
+			ent->s.modelindex3 = gi.modelindex (ent->model3);
+		}
+		if (ent->model4) {
+			ent->s.modelindex4 = gi.modelindex (ent->model4);
+		}
+		ent->spawnflags |= TRAIN_SMOOTH|TRAIN_ORIGIN;	// set smooth movement and origin flag for zdef4
+	}
+	else
+	// end Zaero
 	// Mappack
 	if (ent->spawnflags & 2)
 	{
@@ -2580,7 +2627,7 @@ void SP_misc_viper (edict_t *ent)
 	}
 	ent->s.renderfx |= RF_IR_VISIBLE;
 
-	if (st.noise) // Kngihtmare added- movement sound
+	if (st.noise) // Knightmare- added movement sound
 		ent->noise_index = gi.soundindex  (st.noise);
 
 	ent->think = func_train_find;
@@ -2594,15 +2641,15 @@ void SP_misc_viper (edict_t *ent)
 	else
 		ent->smooth_movement = 0;
 
-	//Knightmare- change both rotate flags to spline flag
-	if ((ent->spawnflags & TRAIN_ROTATE) && (ent->spawnflags &TRAIN_ROT_CONST))
+	// Knightmare- change both rotate flags to spline flag
+	if ( (ent->spawnflags & TRAIN_ROTATE) && (ent->spawnflags & TRAIN_ROT_CONST) )
 	{
 		ent->spawnflags &= ~TRAIN_ROTATE;
 		ent->spawnflags &= ~TRAIN_ROT_CONST;
 		ent->spawnflags |= TRAIN_SPLINE;
 	}
 
-	//Mappack
+	// Mappack
 	if(!ent->accel)
 		ent->moveinfo.accel = ent->speed;
 	else
@@ -2612,7 +2659,7 @@ void SP_misc_viper (edict_t *ent)
 	else
 		ent->moveinfo.decel = ent->decel;
 	ent->moveinfo.speed = ent->speed;
-	//Mappack
+	// Mappack
 
 //	ent->moveinfo.accel = ent->moveinfo.decel = ent->moveinfo.speed = ent->speed;
 
@@ -3189,15 +3236,15 @@ void SP_misc_strogg_ship (edict_t *ent)
 
 	ent->blood_type = 2; //for smoking gibs
 
-	//Knightmare- change both rotate flags to spline flag
-	if ((ent->spawnflags & TRAIN_ROTATE) && (ent->spawnflags &TRAIN_ROT_CONST))
+	// Knightmare- change both rotate flags to spline flag
+	if ( (ent->spawnflags & TRAIN_ROTATE) && (ent->spawnflags & TRAIN_ROT_CONST) )
 	{
 		ent->spawnflags &= ~TRAIN_ROTATE;
 		ent->spawnflags &= ~TRAIN_ROT_CONST;
 		ent->spawnflags |= TRAIN_SPLINE;
 	}
 
-	//Mappack
+	// Mappack
 	if(!ent->accel)
 		ent->moveinfo.accel = ent->speed;
 	else
@@ -3207,7 +3254,7 @@ void SP_misc_strogg_ship (edict_t *ent)
 	else
 		ent->moveinfo.decel = ent->decel;
 	ent->moveinfo.speed = ent->speed;
-	//Mappack
+	// Mappack
 //	ent->moveinfo.accel = ent->moveinfo.decel = ent->moveinfo.speed = ent->speed;
 
 	gi.linkentity (ent);
@@ -3264,8 +3311,8 @@ void SP_misc_transport (edict_t *ent)
 	else
 		ent->smooth_movement = 0;
 
-	//Knightmare- change both rotate flags to spline flag
-	if ((ent->spawnflags & TRAIN_ROTATE) && (ent->spawnflags &TRAIN_ROT_CONST))
+	// Knightmare- change both rotate flags to spline flag
+	if ( (ent->spawnflags & TRAIN_ROTATE) && (ent->spawnflags & TRAIN_ROT_CONST) )
 	{
 		ent->spawnflags &= ~TRAIN_ROTATE;
 		ent->spawnflags &= ~TRAIN_ROT_CONST;

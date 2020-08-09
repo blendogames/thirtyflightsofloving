@@ -203,7 +203,7 @@ void CarrierGrenade (edict_t *self)
 	VectorCopy (self->enemy->s.origin, vec);
 
 	// Lazarus fog reduction of accuracy
-	if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+	if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 	{
 		vec[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 		vec[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -216,9 +216,9 @@ void CarrierGrenade (edict_t *self)
 	VectorMA (aim, spreadR, right, aim);
 	VectorMA (aim, spreadU, up, aim);
 
-	if(aim[2] > 0.15)
+	if (aim[2] > 0.15)
 		aim[2] = 0.15;
-	else if(aim[2] < -0.5)
+	else if (aim[2] < -0.5)
 		aim[2] = -0.5;
 
 	flash_number = MZ2_GUNNER_GRENADE_1;
@@ -272,9 +272,9 @@ void CarrierRocket (edict_t *self)
 	vec3_t	dir;
 	vec3_t	vec;
 
-	if(self->enemy)
+	if (self->enemy)
 	{
-		if(self->enemy->client && random() < 0.5)
+		if (self->enemy->client && random() < 0.5)
 		{
 			CarrierPredictiveRocket(self);
 			return;
@@ -292,7 +292,7 @@ void CarrierRocket (edict_t *self)
 	vec[2] -= 15;
 
 	// Lazarus fog reduction of accuracy
-	if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+	if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 	{
 		vec[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 		vec[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -313,7 +313,7 @@ void CarrierRocket (edict_t *self)
 //	vec[2] += self->enemy->viewheight;
 
 	// Lazarus fog reduction of accuracy
-	if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+	if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 	{
 		vec[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 		vec[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -334,7 +334,7 @@ void CarrierRocket (edict_t *self)
 //	vec[2] += self->enemy->viewheight;
 
 	// Lazarus fog reduction of accuracy
-	if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+	if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 	{
 		vec[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 		vec[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -355,7 +355,7 @@ void CarrierRocket (edict_t *self)
 //	vec[2] += self->enemy->viewheight;
 
 	// Lazarus fog reduction of accuracy
-	if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+	if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 	{
 		vec[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 		vec[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -400,22 +400,29 @@ void carrier_firebullet_right (edict_t *self)
 	target[2] += self->enemy->viewheight;
 
 	// Lazarus fog reduction of accuracy
-	if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+	if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 	{
 		target[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 		target[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 		target[2] += crandom() * 320 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 	}
-
 /*
-			gi.WriteByte (svc_temp_entity);
-			gi.WriteByte (TE_DEBUGTRAIL);
-			gi.WritePosition (start);
-			gi.WritePosition (target);
-			gi.multicast (start, MULTICAST_ALL);	
+	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (TE_DEBUGTRAIL);
+	gi.WritePosition (start);
+	gi.WritePosition (target);
+	gi.multicast (start, MULTICAST_ALL);	
 */
 	VectorSubtract (target, start, forward);
 	VectorNormalize (forward);
+
+	// Zaero add
+	if (EMPNukeCheck(self, start))
+	{
+		gi.sound (self, CHAN_AUTO, gi.soundindex("items/empnuke/emp_missfire.wav"), 1, ATTN_NORM, 0);
+		return;
+	}
+	// end Zaero
 
 	monster_fire_bullet (self, start, forward, 6, 4, DEFAULT_BULLET_HSPREAD*3, DEFAULT_BULLET_VSPREAD, flashnum);
 }	
@@ -440,22 +447,29 @@ void carrier_firebullet_left (edict_t *self)
 	target[2] += self->enemy->viewheight;
 
 	// Lazarus fog reduction of accuracy
-	if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+	if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 	{
 		target[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 		target[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 		target[2] += crandom() * 320 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 	}
-
-	VectorSubtract (target, start, forward);
 /*
-			gi.WriteByte (svc_temp_entity);
-			gi.WriteByte (TE_DEBUGTRAIL);
-			gi.WritePosition (start);
-			gi.WritePosition (target);
-			gi.multicast (start, MULTICAST_ALL);	
+	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (TE_DEBUGTRAIL);
+	gi.WritePosition (start);
+	gi.WritePosition (target);
+	gi.multicast (start, MULTICAST_ALL);	
 */
+	VectorSubtract (target, start, forward);
 	VectorNormalize (forward);
+
+	// Zaero add
+	if (EMPNukeCheck(self, start))
+	{
+		gi.sound (self, CHAN_AUTO, gi.soundindex("items/empnuke/emp_missfire.wav"), 1, ATTN_NORM, 0);
+		return;
+	}
+	// end Zaero
 
 	monster_fire_bullet (self, start, forward, 6, 4, DEFAULT_BULLET_HSPREAD*3, DEFAULT_BULLET_VSPREAD, flashnum);
 }	
@@ -783,7 +797,7 @@ void CarrierRail (edict_t *self)
 	G_ProjectSource (self->s.origin, monster_flash_offset[MZ2_CARRIER_RAILGUN], forward, right, start);
 
 	// Lazarus fog reduction of accuracy
-	if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+	if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 	{
 		self->pos1[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 		self->pos1[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -1209,7 +1223,7 @@ qboolean Carrier_CheckAttack (edict_t *self)
 			}
 				
 			// PGM - we want them to go ahead and shoot at info_notnulls if they can.
-			if(self->enemy->solid != SOLID_NOT || tr.fraction < 1.0)		//PGM
+			if (self->enemy->solid != SOLID_NOT || tr.fraction < 1.0)		//PGM
 				return false;
 		}
 	}
@@ -1355,14 +1369,14 @@ void SP_monster_carrier (edict_t *self)
 	VectorSet (self->maxs, 56, 56, 44);
 
 	// 2000 - 4000 health
-	if(!self->health)
+	if (!self->health)
 		self->health = max (2000, 2000 + 1000*((skill->value)-1));
 	// add health in coop (500 * skill)
 	if (coop->value)
 		self->health += 500*(skill->value);	
-	if(!self->gib_health)
+	if (!self->gib_health)
 		self->gib_health = -200;
-	if(!self->mass)
+	if (!self->mass)
 		self->mass = 1000;
 
 	self->yaw_speed = 15;
@@ -1390,7 +1404,7 @@ void SP_monster_carrier (edict_t *self)
 		self->fogclip |= 2; //custom bloodtype flag
 
 	// Lazarus
-	if(self->powerarmor)
+	if (self->powerarmor)
 	{
 		if (self->powerarmortype == 1)
 			self->monsterinfo.power_armor_type = POWER_ARMOR_SCREEN;

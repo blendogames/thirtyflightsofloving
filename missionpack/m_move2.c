@@ -37,7 +37,7 @@ qboolean M_CheckBottom (edict_t *ent)
 #ifdef ROGUE_GRAVITY
 	// FIXME - this will only handle 0,0,1 and 0,0,-1 gravity vectors
 	start[2] = mins[2] - 1;
-	if(ent->gravityVector[2] > 0)
+	if (ent->gravityVector[2] > 0)
 		start[2] = maxs[2] + 1;
 #else
 	start[2] = mins[2] - 1;
@@ -69,7 +69,7 @@ realcheck:
 
 //PGM
 #ifdef ROGUE_GRAVITY
-	if(ent->gravityVector[2] < 0)
+	if (ent->gravityVector[2] < 0)
 	{
 		start[2] = mins[2];
 		stop[2] = start[2] - STEPSIZE - STEPSIZE;
@@ -102,7 +102,7 @@ realcheck:
 //PGM
 #ifdef ROGUE_GRAVITY
 			// FIXME - this will only handle 0,0,1 and 0,0,-1 gravity vectors
-			if(ent->gravityVector[2] > 0)
+			if (ent->gravityVector[2] > 0)
 			{
 				if (trace.fraction != 1.0 && trace.endpos[2] < bottom)
 					bottom = trace.endpos[2];
@@ -157,23 +157,23 @@ qboolean SV_movestep (edict_t *ent, vec3_t move, qboolean relink)
 //======
 //PGM
 	current_bad = CheckForBadArea(ent);
-	if(current_bad)
+	if (current_bad)
 	{
 //		gi.dprintf("in bad area\n");
 		ent->bad_area = current_bad;
 
-		if(ent->enemy && !strcmp(ent->enemy->classname, "tesla"))
+		if (ent->enemy && !strcmp(ent->enemy->classname, "tesla"))
 		{
 //			gi.dprintf("%s  -->>  ", vtos(move));
 			VectorScale(move, -1, move);
 //			gi.dprintf("%s\n", vtos(move));
 		}
 	}
-	else if(ent->bad_area)
+	else if (ent->bad_area)
 	{
 		// if we're no longer in a bad area, get back to business.
 		ent->bad_area = NULL;
-		if(ent->oldenemy)// && ent->bad_area->owner == ent->enemy)
+		if (ent->oldenemy)// && ent->bad_area->owner == ent->enemy)
 		{
 //			gi.dprintf("resuming being pissed at %s\n", ent->oldenemy->classname);
 			ent->enemy = ent->oldenemy;
@@ -269,7 +269,7 @@ qboolean SV_movestep (edict_t *ent, vec3_t move, qboolean relink)
 				VectorCopy (trace.endpos, ent->s.origin);
 //=====
 //PGM
-				if(!current_bad && CheckForBadArea(ent))
+				if (!current_bad && CheckForBadArea(ent))
 				{
 //						gi.dprintf("Oooh! Bad Area!\n");
 					VectorCopy (oldorg, ent->s.origin);
@@ -333,7 +333,7 @@ qboolean SV_movestep (edict_t *ent, vec3_t move, qboolean relink)
 #ifdef ROGUE_GRAVITY
 		test[0] = trace.endpos[0];
 		test[1] = trace.endpos[1];
-		if(ent->gravityVector[2] > 0)
+		if (ent->gravityVector[2] > 0)
 			test[2] = trace.endpos[2] + ent->maxs[2] - 1;
 		else
 			test[2] = trace.endpos[2] + ent->mins[2] + 1;
@@ -373,7 +373,7 @@ qboolean SV_movestep (edict_t *ent, vec3_t move, qboolean relink)
 
 //PGM
 	new_bad = CheckForBadArea(ent);
-	if(!current_bad && new_bad)
+	if (!current_bad && new_bad)
 	{
 		if (new_bad->owner)
 		{
@@ -518,7 +518,7 @@ qboolean SV_StepDirection (edict_t *ent, float yaw, float dist)
 	vec3_t		move, oldorigin;
 	float		delta;
 
-	if(!ent->inuse)	return true;		// PGM g_touchtrigger free problem
+	if (!ent->inuse)	return true;		// PGM g_touchtrigger free problem
 
 	ent->ideal_yaw = yaw;
 	M_ChangeYaw (ent);
@@ -531,7 +531,7 @@ qboolean SV_StepDirection (edict_t *ent, float yaw, float dist)
 	VectorCopy (ent->s.origin, oldorigin);
 	if (SV_movestep (ent, move, false))
 	{
-		if(!ent->inuse)	return true;		// PGM g_touchtrigger free problem
+		if (!ent->inuse)	return true;		// PGM g_touchtrigger free problem
 
 		delta = ent->s.angles[YAW] - ent->ideal_yaw;
 		if (strncmp(ent->classname, "monster_widow", 13))
@@ -627,9 +627,9 @@ void SV_NewChaseDir (edict_t *actor, edict_t *enemy, float dist)
 			return;
 
 //ROGUE
-	if(actor->monsterinfo.blocked)
+	if (actor->monsterinfo.blocked)
 	{
-		if((actor->monsterinfo.blocked)(actor, dist))
+		if ((actor->monsterinfo.blocked)(actor, dist))
 			return;
 	}
 //ROGUE

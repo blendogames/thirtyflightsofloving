@@ -190,7 +190,7 @@ void P_DamageFeedback (edict_t *player)
 //end Skid
 ======================================================================*/
 
-/*static*/ void CommonViewOffsets(edict_t *ent, vec3_t v)
+/*static*/ void CommonViewOffsets (edict_t *ent, vec3_t v)
 {
 	// absolutely bound offsets
 	// so the view can never be outside the player box
@@ -208,12 +208,12 @@ void P_DamageFeedback (edict_t *player)
 		}
 	}
 //CHASECAM added	
-	//Lazarus
-	else if(ent->client->spycam)
+	// Lazarus
+	else if (ent->client->spycam)
 	{
 		VectorSet (v, 0, 0, 0);
         VectorCopy (ent->client->spycam->s.angles, ent->client->ps.viewangles); 
-		if(ent->client->spycam->svflags & SVF_MONSTER)
+		if (ent->client->spycam->svflags & SVF_MONSTER)
 			ent->client->ps.viewangles[PITCH] = ent->client->spycam->move_angles[PITCH];
 	}
 //	if (!ent->client->chasetoggle)
@@ -269,11 +269,11 @@ void SV_CalcViewOffset (edict_t *ent)
 	// if dead, fix the angle and don't add any kick
 	if (ent->deadflag)
 	{
-		if(ent->deadflag != DEAD_FROZEN)
+		if (ent->deadflag != DEAD_FROZEN)
 		{
 			VectorClear (angles);
 
-			if(ent->flags & FL_SAM_RAIMI)
+			if (ent->flags & FL_SAM_RAIMI)
 			{
 				ent->client->ps.viewangles[ROLL] = 0;
 				ent->client->ps.viewangles[PITCH] = 0;
@@ -304,7 +304,7 @@ void SV_CalcViewOffset (edict_t *ent)
 		angles[PITCH] += ratio * ent->client->v_dmg_pitch;
 		angles[ROLL] += ratio * ent->client->v_dmg_roll;
 
-		//Knightmare- no bobbing if player is controlling a turret
+		// Knightmare- no bobbing if player is controlling a turret
 		if (ent->flags & FL_TURRET_OWNER)
 			return;
 
@@ -366,49 +366,98 @@ void SV_CalcViewOffset (edict_t *ent)
 
 	VectorAdd (v, ent->client->kick_origin, v);
 
-//	CommonViewOffsets(ent,v);
+//	CommonViewOffsets(ent, v);
 
 	// absolutely bound offsets
 	// so the view can never be outside the player box
 
-	//CHASECAM added
-	if (ent->client->chaseactive)
+	// Zaero
+	if (ent->client->zCameraTrack)
 	{
-		VectorSet (v, 0, 0, 0);
-		if (ent->client->chasecam != NULL)
+		int		i;
+
+		VectorAdd (ent->client->zCameraTrack->s.origin, ent->client->zCameraOffset, v);
+
+		if (ent->client->zCameraTrack->client)
 		{
-			ent->client->ps.pmove.origin[0] = ent->client->chasecam->s.origin[0]*8;
-			ent->client->ps.pmove.origin[1] = ent->client->chasecam->s.origin[1]*8;
-			ent->client->ps.pmove.origin[2] = ent->client->chasecam->s.origin[2]*8;
-			VectorCopy (ent->client->chasecam->s.angles, ent->client->ps.viewangles);
+			vec3_t f;
+
+			VectorAdd(ent->client->zCameraTrack->client->ps.viewoffset, v, v);
+			//    	AngleVectors (ent->client->zCameraTrack->client->v_angle, f, NULL, NULL);
+			AngleVectors (ent->client->zCameraTrack->s.angles, f, NULL, NULL);
+			VectorMA(v, 10, f, v);
+		}
+		else if (Q_stricmp(ent->client->zCameraTrack->classname, "misc_securitycamera") == 0)
+		{
+			float framepercent = sin(((float)(level.framenum & 63) / 64.0) * M_PI * 2);
+			VectorCopy(ent->client->zCameraTrack->move_origin, v);
+			VectorCopy(ent->client->zCameraTrack->move_angles, ent->client->ps.viewangles);
+			
+			// adjust yaw a bit due to sway
+			ent->client->ps.viewangles[YAW] += framepercent * 15;
+		}
+		else
+			VectorCopy (ent->client->zCameraTrack->s.angles, ent->client->ps.viewangles);  
+
+		for (i = 0; i < 3; i++)
+		{
+			ent->client->ps.pmove.origin[i] = v[i] * 8;
+		}
+
+		VectorSet (ent->client->ps.viewoffset, 0, 0, 0);
+		// make our "double" do what we're doing
+		if (ent->client->zCameraLocalEntity)
+		{
+			edict_t *e = ent->client->zCameraLocalEntity;
+			VectorCopy(ent->s.origin, e->s.origin);
+			e->s.frame = ent->s.frame;
+			e->s.modelindex = ent->s.modelindex;
+			e->s.modelindex2 = ent->s.modelindex2;
+			e->s.skinnum = ent->s.skinnum;
 		}
 	}
-//CHASECAM added	
-	//Lazarus
-	else if(ent->client->spycam)
-	{
-		VectorSet (v, 0, 0, 0);
-        VectorCopy (ent->client->spycam->s.angles, ent->client->ps.viewangles); 
-		if(ent->client->spycam->svflags & SVF_MONSTER)
-			ent->client->ps.viewangles[PITCH] = ent->client->spycam->move_angles[PITCH];
-	}
 	else
+	// end Zaero
 	{
-		if (v[0] < -14)
-			v[0] = -14;
-		else if (v[0] > 14)
-			v[0] = 14;
-		if (v[1] < -14)
-			v[1] = -14;
-		else if (v[1] > 14)
-			v[1] = 14;
-		if (v[2] < -22)
-			v[2] = -22;
-		else if (v[2] > 30)
-			v[2] = 30;
-	}
+		// CHASECAM added
+		if (ent->client->chaseactive)
+		{
+			VectorSet (v, 0, 0, 0);
+			if (ent->client->chasecam != NULL)
+			{
+				ent->client->ps.pmove.origin[0] = ent->client->chasecam->s.origin[0]*8;
+				ent->client->ps.pmove.origin[1] = ent->client->chasecam->s.origin[1]*8;
+				ent->client->ps.pmove.origin[2] = ent->client->chasecam->s.origin[2]*8;
+				VectorCopy (ent->client->chasecam->s.angles, ent->client->ps.viewangles);
+			}
+		}
+		// CHASECAM added	
+		// Lazarus
+		else if (ent->client->spycam)
+		{
+			VectorSet (v, 0, 0, 0);
+			VectorCopy (ent->client->spycam->s.angles, ent->client->ps.viewangles); 
+			if (ent->client->spycam->svflags & SVF_MONSTER)
+				ent->client->ps.viewangles[PITCH] = ent->client->spycam->move_angles[PITCH];
+		}
+		else
+		{
+			if (v[0] < -14)
+				v[0] = -14;
+			else if (v[0] > 14)
+				v[0] = 14;
+			if (v[1] < -14)
+				v[1] = -14;
+			else if (v[1] > 14)
+				v[1] = 14;
+			if (v[2] < -22)
+				v[2] = -22;
+			else if (v[2] > 30)
+				v[2] = 30;
+		}
 
-	VectorCopy (v, ent->client->ps.viewoffset);
+		VectorCopy (v, ent->client->ps.viewoffset);
+	}
 }
 
 /*
@@ -420,13 +469,13 @@ void SV_CalcGunOffset (edict_t *ent)
 {
 	int		i;
 	float	delta;
-	//ROGUE
+	// ROGUE
 	static gitem_t	*heatbeam;
 
 	if (!heatbeam)
 		heatbeam = FindItemByClassname ("weapon_plasmabeam");
 
-	//ROGUE - heatbeam shouldn't bob so the beam looks right
+	// ROGUE - heatbeam shouldn't bob so the beam looks right
 	if (ent->client->pers.weapon != heatbeam)
 	{
 	// ROGUE
@@ -534,7 +583,7 @@ void SV_CalcBlend (edict_t *ent)
 			SV_AddBlend (0.0, 0.1, 0.05, 0.6, ent->client->ps.blend);
 		else if (contents & CONTENTS_WATER)
 		{
-			if(ent->in_mud == 3)
+			if (ent->in_mud == 3)
 				SV_AddBlend (0.4, 0.3, 0.2, 0.9, ent->client->ps.blend);
 			else
 				SV_AddBlend (0.5, 0.3, 0.2, 0.4, ent->client->ps.blend);
@@ -621,7 +670,7 @@ void SV_CalcBlend (edict_t *ent)
 	if (ent->client->ir_framenum > level.framenum)
 	{
 		remaining = ent->client->ir_framenum - level.framenum;
-		if(remaining > 30 || (remaining & 4))
+		if (remaining > 30 || (remaining & 4))
 		{
 			ent->client->ps.rdflags |= RDF_IRGOGGLES;
 			SV_AddBlend (1, 0, 0, 0.2, ent->client->ps.blend);
@@ -659,8 +708,12 @@ void SV_CalcBlend (edict_t *ent)
 		float alpha = (float)ent->client->flashTime / (float)ent->client->flashBase;
 		if (alpha > 1)
 			alpha = 1;
-		SV_AddBlend(1, 1, 1, alpha, ent->client->ps.blend);
+		SV_AddBlend (1, 1, 1, alpha, ent->client->ps.blend);
 		ent->client->flashTime--;
+	}
+
+	if (ent->client->zCameraStaticFramenum > level.time) {
+		SV_AddBlend (1, 1, 1, 1, ent->client->ps.blend);
 	}
 	// end Zaero
 
@@ -739,7 +792,7 @@ void P_SlamDamage (edict_t *ent)
 	{
 		if (ent->health > 0)
 		{
-		/*	if(delta > 65)
+		/*	if (delta > 65)
 				ent->s.event = EV_FALLFAR;
 			else
 				ent->s.event = EV_FALL;*/
@@ -1080,12 +1133,12 @@ void G_SetClientEffects (edict_t *ent)
 
 //=========
 //PGM
-	if(ent->flags & FL_DISGUISED)
+	if (ent->flags & FL_DISGUISED)
 		ent->s.renderfx |= RF_USE_DISGUISE;
 
 	if (gamerules && gamerules->value)
 	{
-		if(DMGame.PlayerEffects)
+		if (DMGame.PlayerEffects)
 			DMGame.PlayerEffects(ent);
 	}
 //PGM
@@ -1339,6 +1392,10 @@ void G_SetClientSound (edict_t *ent)
 		ent->s.sound = gi.soundindex ("weapons/ion_hum.wav");
 	else if (strcmp (weap, "weapon_shockwave") == 0)
 		ent->s.sound = gi.soundindex ("weapons/shock_hum.wav");
+// SKWiD MOD
+	else if (strcmp(weap, "weapon_plasma") == 0)
+		ent->s.sound = gi.soundindex(PLASMA_SOUND_IDLE);
+// END
 #endif
 	else if (ent->client->weapon_sound)
 		ent->s.sound = ent->client->weapon_sound;
@@ -1411,9 +1468,9 @@ void G_SetClientFrame (edict_t *ent)
 	if (!ent->groundentity && client->anim_priority <= ANIM_WAVE && (!floor || ent->waterlevel > 2))
 		goto newanim;
 
-	if(client->anim_priority == ANIM_REVERSE)
+	if (client->anim_priority == ANIM_REVERSE)
 	{
-		if(ent->s.frame > client->anim_end)
+		if (ent->s.frame > client->anim_end)
 		{
 			ent->s.frame--;
 			return;
@@ -1451,7 +1508,8 @@ newanim:
 			ent->s.frame = FRAME_jump1;
 		client->anim_end = FRAME_jump2;
 	}
-	else if (run)
+//	else if (run)
+	else if (run && client->zCameraTrack == NULL)	// Zaero
 	{	// running
 		if (duck)
 		{
@@ -1577,7 +1635,7 @@ void ClientEndServerFrame (edict_t *ent)
 		bobmove = 0;
 		current_client->bobtime = 0;	// start at beginning of cycle again
 	}
-	//Kngightmare- exception for wading
+	// Kngightmare- exception for wading
 	else if (ent->groundentity || ent->waterlevel == 2)
 	{	// so bobbing only cycles when on ground
 		if (xyspeed > 450) // Knightmare added
@@ -1601,7 +1659,7 @@ void ClientEndServerFrame (edict_t *ent)
 
 	bobcycle = (int)bobtime;
 	// Lazarus: vehicle drivers don't bob
-	if(ent->vehicle)
+	if (ent->vehicle)
 		bobfracsin = 0.;
 	else
 		bobfracsin = fabs(sin(bobtime*M_PI));
@@ -1658,19 +1716,39 @@ void ClientEndServerFrame (edict_t *ent)
 		if (ent->client->showscores)
 		{
 			if (ent->client->menu)
-				PMenu_Update(ent);
+				PMenu_Update (ent);
 			else if (ent->client->textdisplay)
-				Text_Update(ent);
+				Text_Update (ent);
+			// Zaero
+			else if (ent->client->zCameraTrack)
+				updateVisorHud (ent);
+			// end Zaero
 			else
 				DeathmatchScoreboardMessage (ent, ent->enemy);
 			gi.unicast (ent, false);
 		}
-		else if(ent->client->whatsit)
-			WhatsIt(ent);
+		else if (ent->client->whatsit)
+			WhatsIt (ent);
 	}
+
+	// Zaero
+	// this we want to do regardless
+	if (ent->client->zCameraTrack)
+	{
+		// decrease the visor frame time
+		ent->client->pers.visorFrames--;
+		if (ent->client->pers.visorFrames == 0)
+		{
+			stopCamera (ent);
+			ent->client->pers.inventory[ITEM_INDEX(FindItem("Visor"))]--;
+			ValidateSelectedItem (ent);
+		}
+	}
+	// end Zaero
+
 // CHASECAM Knightmare- Gen cam code
 //	if (ent->client->chasetoggle == 1)
 	if (ent->client->chaseactive == 1)
-         CheckChasecam_Viewent(ent);
+         CheckChasecam_Viewent (ent);
 }
 

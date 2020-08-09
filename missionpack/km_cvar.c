@@ -142,6 +142,47 @@ cvar_t	*sk_shockwave_speed;
 cvar_t	*sk_shockwave_effect_damage;
 cvar_t	*sk_shockwave_effect_radius;
 
+cvar_t	*sk_plasma_rifle_damage_bounce;
+cvar_t	*sk_plasma_rifle_damage_bounce_dm;
+cvar_t	*sk_plasma_rifle_damage_spread;
+cvar_t	*sk_plasma_rifle_damage_spread_dm;
+cvar_t	*sk_plasma_rifle_speed_bounce;
+cvar_t	*sk_plasma_rifle_speed_spread;
+cvar_t	*sk_plasma_rifle_radius;
+
+cvar_t	*sk_flaregun_damage;
+cvar_t	*sk_flaregun_rdamage;
+cvar_t	*sk_flaregun_radius;
+cvar_t	*sk_flaregun_speed;
+cvar_t	*sk_flare_life;
+
+cvar_t	*sk_tbomb_damage;
+cvar_t	*sk_tbomb_radius;
+cvar_t	*sk_tbomb_shrapnel;
+cvar_t	*sk_tbomb_shrapnel_damage;
+cvar_t	*sk_tbomb_life;
+cvar_t	*sk_tbomb_health;
+/*
+cvar_t	*sk_sniperrifle_damage;
+cvar_t	*sk_sniperrifle_damage_dm;
+cvar_t	*sk_sniperrifle_kick;
+cvar_t	*sk_sniperrifle_kick_dm;
+
+cvar_t	*sk_soniccannon_damage;
+cvar_t	*sk_soniccannon_damage2;
+cvar_t	*sk_soniccannon_radius;
+cvar_t	*sk_soniccannon_maxfiretime;
+cvar_t	*sk_soniccannon_maxcells;
+*/
+cvar_t	*sk_empnuke_radius;
+/*
+cvar_t	*sk_a2k_damage;
+cvar_t	*sk_a2k_radius;
+*/
+cvar_t	*sk_plasmashield_health;
+cvar_t	*sk_plasmashield_life;
+
+
 // DM start values
 cvar_t	*sk_dm_start_shells;
 cvar_t	*sk_dm_start_bullets;
@@ -157,12 +198,10 @@ cvar_t	*sk_dm_start_rounds;
 cvar_t	*sk_dm_start_prox;
 cvar_t	*sk_dm_start_tesla;
 cvar_t	*sk_dm_start_shocksphere;
-/*
 cvar_t	*sk_dm_start_flares;
 cvar_t	*sk_dm_start_tbombs;
 cvar_t	*sk_dm_start_empnuke;
 cvar_t	*sk_dm_start_plasmashield;
-*/
 
 cvar_t	*sk_dm_start_shotgun;
 cvar_t	*sk_dm_start_sshotgun;
@@ -181,6 +220,10 @@ cvar_t	*sk_dm_start_plasmabeam;
 cvar_t	*sk_dm_start_disruptor;
 cvar_t	*sk_dm_start_chainfist;
 cvar_t	*sk_dm_start_shockwave;
+cvar_t	*sk_dm_start_plasmarifle;
+cvar_t	*sk_dm_start_flaregun;
+//cvar_t	*sk_dm_start_sniperrifle;
+//cvar_t	*sk_dm_start_soniccannon;
 
 // maximum values
 cvar_t	*sk_max_health;
@@ -203,12 +246,11 @@ cvar_t	*sk_max_flechettes;
 cvar_t	*sk_max_rounds;
 cvar_t	*sk_max_shocksphere;
 cvar_t	*sk_max_fuel;
-/*
 cvar_t	*sk_max_flares;
 cvar_t	*sk_max_tbombs;
 cvar_t	*sk_max_empnuke;
 cvar_t	*sk_max_plasmashield;
-*/
+//cvar_t	*sk_max_a2k;
 
 // maximum settings if a player gets a bandolier
 cvar_t	*sk_bando_bullets;  // 300
@@ -219,7 +261,7 @@ cvar_t	*sk_bando_magslugs;
 cvar_t	*sk_bando_flechettes; // 250
 cvar_t	*sk_bando_rounds; // 150
 cvar_t	*sk_bando_fuel;
-//cvar_t	*sk_bando_flares;	// 45
+cvar_t	*sk_bando_flares;	// 50
 
 // maximum settings if a player gets a pack
 cvar_t	*sk_pack_health;
@@ -238,15 +280,15 @@ cvar_t	*sk_pack_prox;
 cvar_t	*sk_pack_tesla;
 cvar_t	*sk_pack_shocksphere;
 cvar_t	*sk_pack_fuel;
-/*
 cvar_t	*sk_pack_flares;	// 60
 cvar_t	*sk_pack_tbombs;	// 100
 cvar_t	*sk_pack_empnuke;	// 100
 cvar_t	*sk_pack_plasmashield; // 40
-*/
+//cvar_t	*sk_pack_a2k;		// 1
+
 cvar_t	*sk_pack_give_xatrix_ammo;
 cvar_t	*sk_pack_give_rogue_ammo;
-//cvar_t	*sk_pack_give_zaero_ammo;
+cvar_t	*sk_pack_give_zaero_ammo;
 
 // pickup values
 cvar_t	*sk_box_shells; // value of shells
@@ -263,12 +305,10 @@ cvar_t	*sk_box_disruptors; // value of disruptor pack
 cvar_t	*sk_box_shocksphere; // value of shocksphere
 cvar_t	*sk_box_trap; // value of trap
 cvar_t	*sk_box_fuel; // value of fuel
-/*
 cvar_t	*sk_box_flares;	// value of flares box
 cvar_t	*sk_box_tbombs;	// value of IRED box
 cvar_t	*sk_box_empnuke;	// value of EMP nuke
 cvar_t	*sk_box_plasmashield;	// value of plasma shield
-*/
 
 // items/powerups
 cvar_t	*sk_armor_bonus_value; // value of armor shards
@@ -293,7 +333,9 @@ cvar_t	*sk_ir_time;
 cvar_t	*sk_double_time;
 cvar_t	*sk_quad_fire_time;
 cvar_t	*sk_stasis_time;
-//cvar_t	*sk_visor_time;
+cvar_t	*sk_visor_time;
+//cvar_t	*sk_sniper_charge_time;
+//cvar_t	*sk_a2k_detonate_time;
 
 
 void InitLithiumVars (void)
@@ -435,6 +477,46 @@ void InitLithiumVars (void)
 	sk_shockwave_effect_damage = gi.cvar("sk_shockwave_effect_damage", "100", 0);
 	sk_shockwave_effect_radius = gi.cvar("sk_shockwave_effect_radius", "340", 0);
 
+	sk_plasma_rifle_damage_bounce = gi.cvar("sk_plasma_rifle_damage_bounce", "60", 0);
+	sk_plasma_rifle_damage_bounce_dm = gi.cvar("sk_plasma_rifle_damage_bounce_dm", "39", 0);
+	sk_plasma_rifle_damage_spread = gi.cvar("sk_plasma_rifle_damage_spread", "43", 0);
+	sk_plasma_rifle_damage_spread_dm = gi.cvar("sk_plasma_rifle_damage_spread_dm", "28", 0);
+	sk_plasma_rifle_speed_bounce = gi.cvar("sk_plasma_rifle_speed_bounce", "1200", 0);
+	sk_plasma_rifle_speed_spread = gi.cvar("sk_plasma_rifle_speed_spread", "1200", 0);
+	sk_plasma_rifle_radius = gi.cvar("sk_plasma_rifle_radius", "70", 0);
+
+	sk_flaregun_damage = gi.cvar("sk_flaregun_damage", "1", 0);
+	sk_flaregun_rdamage = gi.cvar("sk_flaregun_rdamage", "1", 0);
+	sk_flaregun_radius = gi.cvar("sk_flaregun_radius", "1", 0);
+	sk_flaregun_speed = gi.cvar("sk_flaregun_speed", "600", 0);
+	sk_flare_life = gi.cvar("sk_flare_life", "12", 0);
+
+	sk_tbomb_damage = gi.cvar("sk_tbomb_damage", "150", 0);
+	sk_tbomb_radius = gi.cvar("sk_tbomb_radius", "384", 0);
+	sk_tbomb_shrapnel = gi.cvar("sk_tbomb_shrapnel", "5", 0);
+	sk_tbomb_shrapnel_damage = gi.cvar("sk_tbomb_shrapnel_damage", "15", 0);
+	sk_tbomb_life = gi.cvar("sk_tbomb_life", "180", 0);
+	sk_tbomb_health = gi.cvar("sk_tbomb_health", "30", 0);
+/*
+	sk_sniperrifle_damage = gi.cvar("sk_sniperrifle_damage", "250", 0);
+	sk_sniperrifle_damage_dm = gi.cvar("sk_sniperrifle_damage_dm", "150", 0);
+	sk_sniperrifle_kick = gi.cvar("sk_sniperrifle_kick", "400", 0);
+	sk_sniperrifle_kick_dm = gi.cvar("sk_sniperrifle_kick_dm", "300", 0);
+
+	sk_soniccannon_damage = gi.cvar("sk_soniccannon_damage", "10", 0);
+	sk_soniccannon_damage2 = gi.cvar("sk_soniccannon_damage2", "990", 0);
+	sk_soniccannon_radius = gi.cvar("sk_soniccannon_radius", "500", 0);
+	sk_soniccannon_maxfiretime = gi.cvar("sk_soniccannon_maxfiretime", "5", 0);
+	sk_soniccannon_maxcells = gi.cvar("sk_soniccannon_maxcells", "100", 0);
+*/
+	sk_empnuke_radius = gi.cvar("sk_empnuke_radius", "1024", 0);
+/*
+	sk_a2k_damage = gi.cvar("sk_a2k_damage", "2500", 0);
+	sk_a2k_radius = gi.cvar("sk_a2k_radius", "512", 0);
+*/
+	sk_plasmashield_health = gi.cvar("sk_plasmashield_health", "4000", 0);
+	sk_plasmashield_life = gi.cvar("sk_plasmashield_life", "10", 0);
+
 	// DM start values
 	sk_dm_start_shells = gi.cvar("sk_dm_start_shells", "0", 0);
 	sk_dm_start_bullets = gi.cvar("sk_dm_start_bullets", "0", 0);
@@ -450,12 +532,10 @@ void InitLithiumVars (void)
 	sk_dm_start_prox = gi.cvar("sk_dm_start_prox", "0", 0);
 	sk_dm_start_tesla = gi.cvar("sk_dm_start_tesla", "0", 0);
 	sk_dm_start_shocksphere = gi.cvar("sk_dm_start_shocksphere", "0", 0);
-/*
 	sk_dm_start_flares = gi.cvar("sk_dm_start_flares", "0", 0);
 	sk_dm_start_tbombs = gi.cvar("sk_dm_start_tbombs", "0", 0);
 	sk_dm_start_empnuke = gi.cvar("sk_dm_start_empnuke", "0", 0);
 	sk_dm_start_plasmashield = gi.cvar("sk_dm_start_plasmashield", "0", 0);
-*/
 
 	sk_dm_start_shotgun = gi.cvar("sk_dm_start_shotgun", "0", 0);
 	sk_dm_start_sshotgun = gi.cvar("sk_dm_start_sshotgun", "0", 0);
@@ -474,6 +554,10 @@ void InitLithiumVars (void)
 	sk_dm_start_disruptor = gi.cvar("sk_dm_start_disruptor", "0", 0);
 	sk_dm_start_chainfist = gi.cvar("sk_dm_start_chainfist", "0", 0);
 	sk_dm_start_shockwave = gi.cvar("sk_dm_start_shockwave", "0", 0);
+	sk_dm_start_plasmarifle = gi.cvar("sk_dm_start_plasmarifle", "0", 0);
+	sk_dm_start_flaregun = gi.cvar("sk_dm_start_flaregun", "0", 0);
+//	sk_dm_start_sniperrifle = gi.cvar("sk_dm_start_sniperrifle", "0", 0);
+//	sk_dm_start_soniccannon = gi.cvar("sk_dm_start_soniccannon", "0", 0);
 
 	// maximum values
 	sk_max_health = gi.cvar("sk_max_health", "100", 0);
@@ -496,12 +580,11 @@ void InitLithiumVars (void)
 	sk_max_rounds = gi.cvar("sk_max_rounds", "100", 0);
 	sk_max_shocksphere = gi.cvar("sk_max_shocksphere", "10", 0);
 	sk_max_fuel = gi.cvar("sk_max_fuel", "1000", 0);
-/*
 	sk_max_flares = gi.cvar("sk_max_flares", "30", 0);
 	sk_max_tbombs = gi.cvar("sk_max_tbombs", "30", 0);
 	sk_max_empnuke = gi.cvar("sk_max_empnuke", "50", 0);
 	sk_max_plasmashield = gi.cvar("sk_max_plasmashield", "20", 0);
-*/
+//	sk_max_a2k = gi.cvar("sk_max_a2k", "1", 0);
 
 	// maximum settings if a player gets a bandolier
 	sk_bando_bullets = gi.cvar("sk_bando_bullets", "250", 0);
@@ -512,7 +595,7 @@ void InitLithiumVars (void)
 	sk_bando_flechettes = gi.cvar("sk_bando_flechettes", "250", 0);
 	sk_bando_rounds = gi.cvar("sk_bando_rounds", "150", 0);
 	sk_bando_fuel = gi.cvar("sk_bando_fuel", "1500", 0);
-//	sk_bando_flares = gi.cvar("sk_bando_flares", "50", 0);
+	sk_bando_flares = gi.cvar("sk_bando_flares", "45", 0);
 
 	// maximum settings if a player gets a pack
 	sk_pack_health = gi.cvar("sk_pack_health", "120", 0);
@@ -531,16 +614,15 @@ void InitLithiumVars (void)
 	sk_pack_tesla = gi.cvar("sk_pack_tesla", "100", 0);
 	sk_pack_shocksphere = gi.cvar("sk_pack_shocksphere", "20", 0);
 	sk_pack_fuel = gi.cvar("sk_pack_fuel", "2000", 0);
-/*
-	sk_pack_flares = gi.cvar("sk_pack_flares", "100", 0);
+	sk_pack_flares = gi.cvar("sk_pack_flares", "60", 0);
 	sk_pack_tbombs = gi.cvar("sk_pack_tbombs", "100", 0);
 	sk_pack_empnuke = gi.cvar("sk_pack_empnuke", "100", 0);
 	sk_pack_plasmashield = gi.cvar("sk_pack_plasmashield", "40", 0);
-*/
+//	sk_pack_a2k = gi.cvar("sk_pack_a2k", "1", 0);
 
 	sk_pack_give_xatrix_ammo = gi.cvar("sk_pack_give_xatrix_ammo", "0", CVAR_ARCHIVE);
 	sk_pack_give_rogue_ammo = gi.cvar("sk_pack_give_rogue_ammo", "0", CVAR_ARCHIVE);
-//	sk_pack_give_zaero_ammo = gi.cvar("sk_pack_give_zaero_ammo", "0", CVAR_ARCHIVE);
+	sk_pack_give_zaero_ammo = gi.cvar("sk_pack_give_zaero_ammo", "0", CVAR_ARCHIVE);
 
 	// pickup values
 	sk_box_shells = gi.cvar("sk_box_shells", "10", 0);
@@ -557,12 +639,10 @@ void InitLithiumVars (void)
 	sk_box_shocksphere = gi.cvar("sk_box_shocksphere", "1", 0);
 	sk_box_trap = gi.cvar("sk_box_trap", "1", 0);
 	sk_box_fuel = gi.cvar("sk_box_fuel", "500", 0);
-/*
 	sk_box_flares = gi.cvar("sk_box_flares", "3", 0);
 	sk_box_tbombs = gi.cvar("sk_box_tbombs", "3", 0);
 	sk_box_empnuke = gi.cvar("sk_box_empnuke", "1", 0);
-	sk_box_plasmashield = gi.cvar("sk_box_plasmashield", "1", 0);
-*/
+	sk_box_plasmashield = gi.cvar("sk_box_plasmashield", "5", 0);
 
 	// items/powerups
 	sk_armor_bonus_value = gi.cvar("sk_armor_bonus_value", "2", 0);
@@ -587,5 +667,7 @@ void InitLithiumVars (void)
 	sk_double_time = gi.cvar("sk_double_time", "30", 0);
 	sk_quad_fire_time = gi.cvar("sk_quad_fire_time", "30", 0);
 	sk_stasis_time = gi.cvar("sk_stasis_time", "30", 0);
-//	sk_visor_time = gi.cvar("sk_visor_time", "30", 0);
+	sk_visor_time = gi.cvar("sk_visor_time", "30", 0);
+//	sk_sniper_charge_time = gi.cvar("sk_sniper_charge_time", "3", 0);
+//	sk_a2k_detonate_time = gi.cvar("sk_a2k_detonate_time", "5", 0);
 }

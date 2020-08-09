@@ -37,7 +37,7 @@ qboolean M_CheckBottom (edict_t *ent)
 #ifdef ROGUE_GRAVITY
 	// FIXME - this will only handle 0,0,1 and 0,0,-1 gravity vectors
 	start[2] = mins[2] - 1;
-	if(ent->gravityVector[2] > 0)
+	if (ent->gravityVector[2] > 0)
 		start[2] = maxs[2] + 1;
 #else
 	start[2] = mins[2] - 1;
@@ -69,7 +69,7 @@ realcheck:
 
 //PGM
 #ifdef ROGUE_GRAVITY
-	if(ent->gravityVector[2] < 0)
+	if (ent->gravityVector[2] < 0)
 	{
 		start[2] = mins[2];
 		stop[2] = start[2] - STEPSIZE - STEPSIZE;
@@ -102,7 +102,7 @@ realcheck:
 //PGM
 #ifdef ROGUE_GRAVITY
 			// FIXME - this will only handle 0,0,1 and 0,0,-1 gravity vectors
-			if(ent->gravityVector[2] > 0)
+			if (ent->gravityVector[2] > 0)
 			{
 				if (trace.fraction != 1.0 && trace.endpos[2] < bottom)
 					bottom = trace.endpos[2];
@@ -156,7 +156,7 @@ qboolean IsBadAhead (edict_t *self, edict_t *bad, vec3_t move)
 
 	return false;
 /*
-	if(DotProduct(forward, dir) > 0)
+	if (DotProduct(forward, dir) > 0)
 	{
 //		gi.dprintf ("bad ahead...\n");
 		return true;
@@ -179,8 +179,8 @@ possible, no move is done, false is returned, and
 pr_global_struct->trace_normal is set to the normal of the blocking wall
 =============
 */
-//FIXME since we need to test end position contents here, can we avoid doing
-//it again later in catagorize position?
+// FIXME since we need to test end position contents here, can we avoid doing
+// it again later in catagorize position?
 qboolean SV_movestep (edict_t *ent, vec3_t move, qboolean relink)
 {
 	float		dz;
@@ -210,33 +210,42 @@ qboolean SV_movestep (edict_t *ent, vec3_t move, qboolean relink)
 	if (ent->health > 0)
 	{
 		current_bad = CheckForBadArea(ent);
-		if(current_bad)
+		if (current_bad)
 		{
 			ent->bad_area = current_bad;
 
-			if(ent->enemy && !strcmp(ent->enemy->classname, "tesla"))
+			if (ent->enemy && !strcmp(ent->enemy->classname, "tesla"))
 			{
 				// if the tesla is in front of us, back up...
 				if (IsBadAhead (ent, current_bad, move))
 					VectorScale(move, -1, move);
 			}
 		}
-		else if(ent->bad_area)
+		else if (ent->bad_area)
 		{
 			// if we're no longer in a bad area, get back to business.
 			ent->bad_area = NULL;
-			if(ent->oldenemy)// && ent->bad_area->owner == ent->enemy)
+			if (ent->oldenemy)	// && ent->bad_area->owner == ent->enemy)
 			{
 	//			gi.dprintf("resuming being pissed at %s\n", ent->oldenemy->classname);
 				ent->enemy = ent->oldenemy;
 				ent->goalentity = ent->oldenemy;
 				FoundTarget(ent);
-	// FIXME - remove this when ready!!!
-//	if (ent->lastMoveTime == level.time)
-//		if ((g_showlogic) && (g_showlogic->value))
-//			gi.dprintf ("Duplicate move detected for %s, please tell programmers!\n", ent->classname);
-//	ent->lastMoveTime = level.time;
-	// FIXME
+
+				// Knightmare- added missing relink
+				if (relink)
+				{
+					gi.linkentity (ent);
+					G_TouchTriggers (ent);
+				}
+				// end Knightmare
+
+				// FIXME - remove this when ready!!!
+			//	if (ent->lastMoveTime == level.time)
+			//		if ((g_showlogic) && (g_showlogic->value))
+			//			gi.dprintf ("Duplicate move detected for %s, please tell programmers!\n", ent->classname);
+			//	ent->lastMoveTime = level.time;
+				// FIXME
 
 				return true;
 			}
@@ -245,25 +254,25 @@ qboolean SV_movestep (edict_t *ent, vec3_t move, qboolean relink)
 //PGM
 //======
 
-// try the move
+	// try the move
 	VectorCopy (ent->s.origin, oldorg);
 	VectorAdd (ent->s.origin, move, neworg);
 
 	// Lazarus
-	AngleVectors(ent->s.angles,forward,NULL,up);
-	if(ent->enemy)
+	AngleVectors (ent->s.angles, forward, NULL, up);
+	if (ent->enemy)
 		target = ent->enemy;
-	else if(ent->movetarget)
+	else if (ent->movetarget)
 		target = ent->movetarget;
 	else
 		target = NULL;
 	// end Lazarus
 
-// flying monsters don't step up
+	// flying monsters don't step up
 	if ( ent->flags & (FL_SWIM | FL_FLY) )
 	{
-	// try one move with vertical motion, then one without
-		for (i=0 ; i<2 ; i++)
+		// try one move with vertical motion, then one without
+		for (i = 0; i < 2; i++)
 		{
 			VectorAdd (ent->s.origin, move, neworg);
 			if (i == 0 && ent->enemy)
@@ -280,9 +289,8 @@ qboolean SV_movestep (edict_t *ent, vec3_t move, qboolean relink)
 						minheight = 104;
 					else
 						minheight = 40;
-//					if (dz > 40)
-					if (dz > minheight)
-//	pmm
+				//	if (dz > 40)
+					if (dz > minheight)	//	pmm
 						neworg[2] -= 8;
 					if (!((ent->flags & FL_SWIM) && (ent->waterlevel < 2)))
 						if (dz < (minheight - 10))
@@ -339,7 +347,7 @@ qboolean SV_movestep (edict_t *ent, vec3_t move, qboolean relink)
 				VectorCopy (trace.endpos, ent->s.origin);
 //=====
 //PGM
-				if(!current_bad && CheckForBadArea(ent))
+				if (!current_bad && CheckForBadArea(ent))
 				{
 //					gi.dprintf("Oooh! Bad Area!\n");
 					VectorCopy (oldorg, ent->s.origin);
@@ -351,12 +359,12 @@ qboolean SV_movestep (edict_t *ent, vec3_t move, qboolean relink)
 						gi.linkentity (ent);
 						G_TouchTriggers (ent);
 					}
-	// FIXME - remove this when ready!!!
-//	if (ent->lastMoveTime == level.time)
-//		if ((g_showlogic) && (g_showlogic->value))
-//			gi.dprintf ("Duplicate move detected for %s, please tell programmers!\n", ent->classname);
-//	ent->lastMoveTime = level.time;
-	// FIXME
+					// FIXME - remove this when ready!!!
+				//	if (ent->lastMoveTime == level.time)
+				//		if ((g_showlogic) && (g_showlogic->value))
+				//			gi.dprintf ("Duplicate move detected for %s, please tell programmers!\n", ent->classname);
+				//	ent->lastMoveTime = level.time;
+					// FIXME
 
 					return true;
 				}
@@ -371,7 +379,7 @@ qboolean SV_movestep (edict_t *ent, vec3_t move, qboolean relink)
 		return false;
 	}
 
-// push down from a step height above the wished position
+	// push down from a step height above the wished position
 	if (!(ent->monsterinfo.aiflags & AI_NOSTEP))
 		stepsize = STEPSIZE;
 	else
@@ -393,13 +401,13 @@ qboolean SV_movestep (edict_t *ent, vec3_t move, qboolean relink)
 
 	// Lazarus- Determine whether monster is capable of and/or should jump
 	jump = 0;
-	if((ent->monsterinfo.jump) && !(ent->monsterinfo.aiflags & AI_DUCKED))
+	if ((ent->monsterinfo.jump) && !(ent->monsterinfo.aiflags & AI_DUCKED))
 	{
 		// Don't jump if path is blocked by monster or player. Otherwise,
 		// monster might attempt to jump OVER the monster/player, which 
 		// ends up looking a bit goofy. Also don't jump if the monster's
 		// movement isn't deliberate (target=NULL)
-		if(trace.ent && (trace.ent->client || (trace.ent->svflags & SVF_MONSTER)))
+		if (trace.ent && (trace.ent->client || (trace.ent->svflags & SVF_MONSTER)))
 			canjump = false;
 		else if (target)
 		{
@@ -409,7 +417,7 @@ qboolean SV_movestep (edict_t *ent, vec3_t move, qboolean relink)
 			d1 = VectorLength(dir);
 			VectorSubtract(target->s.origin, trace.endpos, dir);
 			d2 = VectorLength(dir);
-			if(d2 < d1)
+			if (d2 < d1)
 				canjump = true;
 			else
 				canjump = false;
@@ -423,13 +431,13 @@ qboolean SV_movestep (edict_t *ent, vec3_t move, qboolean relink)
 	if (trace.allsolid)
 	//	return false;
 	{
-		if(canjump && (ent->monsterinfo.jumpup > 0))
+		if (canjump && (ent->monsterinfo.jumpup > 0))
 		{
 			neworg[2] += ent->monsterinfo.jumpup - stepsize;
 			trace = gi.trace (neworg, ent->mins, ent->maxs, end, ent, MASK_MONSTERSOLID);
 			if (!trace.allsolid && !trace.startsolid && trace.fraction > 0 && (trace.plane.normal[2] > 0.9))
 			{
-				if(!trace.ent || (!trace.ent->client && !(trace.ent->svflags & SVF_MONSTER) && !(trace.ent->svflags & SVF_DEADMONSTER)))
+				if (!trace.ent || (!trace.ent->client && !(trace.ent->svflags & SVF_MONSTER) && !(trace.ent->svflags & SVF_DEADMONSTER)))
 				{
 					// Good plane to jump on. Make sure monster is more or less facing
 					// the obstacle to avoid cutting-corners jumps
@@ -438,7 +446,7 @@ qboolean SV_movestep (edict_t *ent, vec3_t move, qboolean relink)
 
 					VectorMA(ent->s.origin,1024,forward,p2);
 					tr = gi.trace(ent->s.origin,ent->mins,ent->maxs,p2,ent,MASK_MONSTERSOLID);
-					if(DotProduct(tr.plane.normal,forward) < -0.95)
+					if (DotProduct(tr.plane.normal,forward) < -0.95)
 					{
 						jump = 1;
 						jumpheight = trace.endpos[2] - ent->s.origin[2];
@@ -489,12 +497,12 @@ qboolean SV_movestep (edict_t *ent, vec3_t move, qboolean relink)
 #ifdef ROGUE_GRAVITY //PGM
 		test[0] = trace.endpos[0];
 		test[1] = trace.endpos[1];
-		if(ent->gravityVector[2] > 0)
+		if (ent->gravityVector[2] > 0)
 			test[2] = trace.endpos[2] + ent->maxs[2] - 1;
 		else
 			test[2] = trace.endpos[2] + ent->mins[2] + 1;
 #else
-		test[0] = trace.en dpos[0];
+		test[0] = trace.endpos[0];
 		test[1] = trace.endpos[1];
 		test[2] = trace.endpos[2] + ent->mins[2] + 1;
 #endif //PGM
@@ -507,16 +515,16 @@ qboolean SV_movestep (edict_t *ent, vec3_t move, qboolean relink)
 	// Lazarus: Don't intentionally move closer to a grenade,
 	//          but don't perform this check if we're already evading some
 	//          other problem (maybe even this grenade)
-	if(!(ent->monsterinfo.aiflags & AI_CHASE_THING))
+	if (!(ent->monsterinfo.aiflags & AI_CHASE_THING))
 	{
 		grenade = NULL;
-		while( (grenade = findradius(grenade,neworg,128)) != NULL)
+		while ( (grenade = findradius(grenade,neworg,128)) != NULL)
 		{
-			if(!grenade->inuse)
+			if (!grenade->inuse)
 				continue;
-			if(!grenade->classname)
+			if (!grenade->classname)
 				continue;
-			if(!Q_stricmp(grenade->classname,"grenade") || !Q_stricmp(grenade->classname,"hgrenade"))
+			if (!Q_stricmp(grenade->classname,"grenade") || !Q_stricmp(grenade->classname,"hgrenade"))
 			{
 				VectorSubtract(grenade->s.origin,oldorg,dir);
 				g1 = VectorLength(dir);
@@ -530,7 +538,7 @@ qboolean SV_movestep (edict_t *ent, vec3_t move, qboolean relink)
 
 	// Lazarus: Don't intentionally walk into lasers.
 	dist = VectorLength(move);
-	if(dist > 0.)
+	if (dist > 0.)
 	{
 		edict_t		*e;
 		trace_t		laser_trace;
@@ -539,26 +547,26 @@ qboolean SV_movestep (edict_t *ent, vec3_t move, qboolean relink)
 		vec3_t		laser_start, laser_end;
 		vec3_t		monster_mins, monster_maxs;
 
-		for(i=game.maxclients+1; i<globals.num_edicts; i++)
+		for (i = game.maxclients+1; i < globals.num_edicts; i++)
 		{
 			e = &g_edicts[i];
-			if(!e->inuse)
+			if (!e->inuse)
 				continue;
-			if(!e->classname)
+			if (!e->classname)
 				continue;
-			if(Q_stricmp(e->classname,"target_laser"))
+			if (Q_stricmp(e->classname,"target_laser"))
 				continue;
-			if(e->svflags & SVF_NOCLIENT)
+			if (e->svflags & SVF_NOCLIENT)
 				continue;
-			if( (e->style == 2) || (e->style == 3))
+			if ( (e->style == 2) || (e->style == 3))
 				continue;
-			if(!gi.inPVS(ent->s.origin,e->s.origin))
+			if (!gi.inPVS(ent->s.origin,e->s.origin))
 				continue;
 			// Check to see if monster is ALREADY in the path of this laser.
 			// If so, allow the move so he can get out.
 			VectorMA(e->s.origin,2048,e->movedir,laser_end);
 			laser_trace = gi.trace(e->s.origin,NULL,NULL,laser_end,NULL,CONTENTS_SOLID|CONTENTS_MONSTER);
-			if(laser_trace.ent == ent)
+			if (laser_trace.ent == ent)
 				continue;
 			VectorCopy(laser_trace.endpos,laser_end);
 			laser_mins[0] = min(e->s.origin[0],laser_end[0]);
@@ -589,9 +597,9 @@ qboolean SV_movestep (edict_t *ent, vec3_t move, qboolean relink)
 			// the total distance he's proposing moving.
 			delta = min(16,dist);
 			VectorNormalize2(move,dir);
-			while(delta < dist+15.875)
+			while (delta < dist+15.875)
 			{
-				if(delta > dist) delta = dist;
+				if (delta > dist) delta = dist;
 				VectorMA(e->s.origin,    -delta,dir,laser_start);
 				VectorMA(e->s.old_origin,-delta,dir,laser_end);
 				laser_trace = gi.trace(laser_start,NULL,NULL,laser_end,world,CONTENTS_SOLID|CONTENTS_MONSTER);
@@ -607,15 +615,15 @@ qboolean SV_movestep (edict_t *ent, vec3_t move, qboolean relink)
 	{
 		end[2] = oldorg[2] + move[2] - ent->monsterinfo.jumpdn;
 		trace = gi.trace (neworg, ent->mins, ent->maxs, end, ent, MASK_MONSTERSOLID | MASK_WATER);
-		if(trace.fraction < 1 && (trace.plane.normal[2] > 0.9) && (trace.contents & MASK_SOLID) && (neworg[2] - 16 > trace.endpos[2]))
+		if (trace.fraction < 1 && (trace.plane.normal[2] > 0.9) && (trace.contents & MASK_SOLID) && (neworg[2] - 16 > trace.endpos[2]))
 		{
-			if(!trace.ent || (!trace.ent->client && !(trace.ent->svflags & SVF_MONSTER) && !(trace.ent->svflags & SVF_DEADMONSTER)))
+			if (!trace.ent || (!trace.ent->client && !(trace.ent->svflags & SVF_MONSTER) && !(trace.ent->svflags & SVF_DEADMONSTER)))
 				jump = -1;
 		}
 	}
 
-	//if (trace.fraction == 1)
-	if ((trace.fraction == 1) && !jump)
+	// if (trace.fraction == 1)
+	if ( (trace.fraction == 1) && !jump )
 	//  end Lazarus
 	{
 	// if monster had the ground pulled out, go ahead and fall
@@ -628,13 +636,12 @@ qboolean SV_movestep (edict_t *ent, vec3_t move, qboolean relink)
 				G_TouchTriggers (ent);
 			}
 			ent->groundentity = NULL;
-	// FIXME - remove this when ready!!!
-//	if (ent->lastMoveTime == level.time)
-//		if ((g_showlogic) && (g_showlogic->value))
-//			gi.dprintf ("Duplicate move detected for %s, please tell programmers!\n", ent->classname);
-//	ent->lastMoveTime = level.time;
-	// FIXME
-
+			// FIXME - remove this when ready!!!
+		//	if (ent->lastMoveTime == level.time)
+		//		if ((g_showlogic) && (g_showlogic->value))
+		//			gi.dprintf ("Duplicate move detected for %s, please tell programmers!\n", ent->classname);
+		//	ent->lastMoveTime = level.time;
+			// FIXME
 			return true;
 		}
 
@@ -650,59 +657,59 @@ qboolean SV_movestep (edict_t *ent, vec3_t move, qboolean relink)
 	{
 		// use AI_BLOCKED to tell the calling layer that we're now mad at a tesla
 		new_bad = CheckForBadArea(ent);
-		if(!current_bad && new_bad)
+		if (!current_bad && new_bad)
 		{
 			if (new_bad->owner)
 			{
-//				if ((g_showlogic) && (g_showlogic->value))
-//					gi.dprintf("Blocked -");
+			//	if ((g_showlogic) && (g_showlogic->value))
+			//		gi.dprintf("Blocked -");
 				if (!strcmp(new_bad->owner->classname, "tesla"))
 				{
-//					if ((g_showlogic) && (g_showlogic->value))
-//						gi.dprintf ("it's a tesla -");
+				//	if ((g_showlogic) && (g_showlogic->value))
+				//		gi.dprintf ("it's a tesla -");
 					if ((!(ent->enemy)) || (!(ent->enemy->inuse)))
 					{
-//						if ((g_showlogic) && (g_showlogic->value))
-//							gi.dprintf ("I don't have a valid enemy, attacking tesla!\n");
+					//	if ((g_showlogic) && (g_showlogic->value))
+					//		gi.dprintf ("I don't have a valid enemy, attacking tesla!\n");
 						TargetTesla (ent, new_bad->owner);
 						ent->monsterinfo.aiflags |= AI_BLOCKED;
 					}
 					else if (!strcmp(ent->enemy->classname, "telsa"))
 					{
-//						if ((g_showlogic) && (g_showlogic->value))
-//							gi.dprintf ("but we're already mad at a tesla\n");
+					//	if ((g_showlogic) && (g_showlogic->value))
+					//		gi.dprintf ("but we're already mad at a tesla\n");
 					}
 					else if ((ent->enemy) && (ent->enemy->client))
 					{
-//						if ((g_showlogic) && (g_showlogic->value))
-//							gi.dprintf ("we have a player enemy -");
+					//	if ((g_showlogic) && (g_showlogic->value))
+					//		gi.dprintf ("we have a player enemy -");
 						if (visible(ent, ent->enemy))
 						{
-//							if ((g_showlogic) && (g_showlogic->value))
-//								gi.dprintf ("we can see him -");
+						//	if ((g_showlogic) && (g_showlogic->value))
+						//		gi.dprintf ("we can see him -");
 						}
 						else
 						{
-//							if ((g_showlogic) && (g_showlogic->value))
-//								gi.dprintf ("can't see him, kill the tesla! -");
+						//	if ((g_showlogic) && (g_showlogic->value))
+						//		gi.dprintf ("can't see him, kill the tesla! -");
 							TargetTesla (ent, new_bad->owner);
 							ent->monsterinfo.aiflags |= AI_BLOCKED;
 						}
 					}
 					else
 					{
-//						if ((g_showlogic) && (g_showlogic->value))
-//							gi.dprintf ("the enemy isn't a player, killing tesla -");
+					//	if ((g_showlogic) && (g_showlogic->value))
+					//		gi.dprintf ("the enemy isn't a player, killing tesla -");
 						TargetTesla (ent, new_bad->owner);
 						ent->monsterinfo.aiflags |= AI_BLOCKED;
 					}
 				}
-//				else if ((g_showlogic) && (g_showlogic->value))
-//				{
-//					gi.dprintf(" by non-tesla bad area!");
-//				}
+			/*	else if ((g_showlogic) && (g_showlogic->value))
+				{
+					gi.dprintf(" by non-tesla bad area!");
+				}*/
 			}
-//			gi.dprintf ("\n");
+		//	gi.dprintf ("\n");
 
 			VectorCopy (oldorg, ent->s.origin);
 			return false;
@@ -720,13 +727,12 @@ qboolean SV_movestep (edict_t *ent, vec3_t move, qboolean relink)
 				gi.linkentity (ent);
 				G_TouchTriggers (ent);
 			}
-	// FIXME - remove this when ready!!!
-//	if (ent->lastMoveTime == level.time)
-//		if ((g_showlogic) && (g_showlogic->value))
-//			gi.dprintf ("Duplicate move detected for %s, please tell programmers!\n", ent->classname);
-//	ent->lastMoveTime = level.time;
-	// FIXME
-
+			// FIXME - remove this when ready!!!
+		//	if (ent->lastMoveTime == level.time)
+		//		if ((g_showlogic) && (g_showlogic->value))
+		//			gi.dprintf ("Duplicate move detected for %s, please tell programmers!\n", ent->classname);
+		//	ent->lastMoveTime = level.time;
+			// FIXME
 			return true;
 		}
 		VectorCopy (oldorg, ent->s.origin);
@@ -752,7 +758,6 @@ qboolean SV_movestep (edict_t *ent, vec3_t move, qboolean relink)
 //			gi.dprintf ("Duplicate move detected for %s, please tell programmers!\n", ent->classname);
 //	ent->lastMoveTime = level.time;
 	// FIXME
-
 	return true;
 }
 
@@ -811,7 +816,6 @@ SV_StepDirection
 
 Turns to the movement direction, and walks the current distance if
 facing it.
-
 ======================
 */
 qboolean SV_StepDirection (edict_t *ent, float yaw, float dist)
@@ -819,7 +823,7 @@ qboolean SV_StepDirection (edict_t *ent, float yaw, float dist)
 	vec3_t		move, oldorigin;
 	float		delta;
 
-	if(!ent->inuse)	return true;		// PGM g_touchtrigger free problem
+	if (!ent->inuse)	return true;		// PGM g_touchtrigger free problem
 
 	ent->ideal_yaw = yaw;
 	M_ChangeYaw (ent);
@@ -830,13 +834,13 @@ qboolean SV_StepDirection (edict_t *ent, float yaw, float dist)
 	move[2] = 0;
 
 	VectorCopy (ent->s.origin, oldorigin);
-	if (SV_movestep (ent, move, false))
+	if ( SV_movestep (ent, move, false) )
 	{
 		ent->monsterinfo.aiflags &= ~AI_BLOCKED;
-		if(!ent->inuse)	return true;		// PGM g_touchtrigger free problem
+		if ( !ent->inuse )	return true;		// PGM g_touchtrigger free problem
 
 		delta = ent->s.angles[YAW] - ent->ideal_yaw;
-		if (strncmp(ent->classname, "monster_widow", 13))
+		if ( strncmp(ent->classname, "monster_widow", 13) )
 		{
 			if (delta > 45 && delta < 315)
 			{		// not turned far enough, so don't take the step
@@ -878,7 +882,7 @@ void SV_NewChaseDir (edict_t *actor, edict_t *enemy, float dist)
 	float	d[3];
 	float	tdir, olddir, turnaround;
 
-	//FIXME: how did we get here with no enemy
+	// FIXME: how did we get here with no enemy
 	if (!enemy)
 		return;
 
@@ -888,17 +892,17 @@ void SV_NewChaseDir (edict_t *actor, edict_t *enemy, float dist)
 	deltax = enemy->s.origin[0] - actor->s.origin[0];
 	deltay = enemy->s.origin[1] - actor->s.origin[1];
 	if (deltax>10)
-		d[1]= 0;
+		d[1] = 0;
 	else if (deltax<-10)
-		d[1]= 180;
+		d[1] = 180;
 	else
-		d[1]= DI_NODIR;
+		d[1] = DI_NODIR;
 	if (deltay<-10)
-		d[2]= 270;
+		d[2] = 270;
 	else if (deltay>10)
-		d[2]= 90;
+		d[2] = 90;
 	else
-		d[2]= DI_NODIR;
+		d[2] = DI_NODIR;
 
 // try direct route
 	if (d[1] != DI_NODIR && d[2] != DI_NODIR)
@@ -912,28 +916,28 @@ void SV_NewChaseDir (edict_t *actor, edict_t *enemy, float dist)
 			return;
 	}
 
-// try other directions
-	if ( ((rand()&3) & 1) ||  abs(deltay)>abs(deltax))
+	// try other directions
+	if ( ((rand()&3) & 1) || (abs(deltay) > abs(deltax)) )
 	{
-		tdir=d[1];
-		d[1]=d[2];
-		d[2]=tdir;
+		tdir = d[1];
+		d[1] = d[2];
+		d[2] = tdir;
 	}
 
-	if (d[1]!=DI_NODIR && d[1]!=turnaround
+	if (d[1] != DI_NODIR && d[1] != turnaround
 	&& SV_StepDirection(actor, d[1], dist))
 			return;
 
-	if (d[2]!=DI_NODIR && d[2]!=turnaround
+	if (d[2] != DI_NODIR && d[2] != turnaround
 	&& SV_StepDirection(actor, d[2], dist))
 			return;
 
 //ROGUE
-	if(actor->monsterinfo.blocked)
+	if (actor->monsterinfo.blocked)
 	{
 		if ((actor->inuse) && (actor->health > 0))
 		{
-			if((actor->monsterinfo.blocked)(actor, dist))
+			if ((actor->monsterinfo.blocked)(actor, dist))
 				return;
 		}
 	}
@@ -941,19 +945,19 @@ void SV_NewChaseDir (edict_t *actor, edict_t *enemy, float dist)
 
 /* there is no direct path to the player, so pick another direction */
 
-	if (olddir!=DI_NODIR && SV_StepDirection(actor, olddir, dist))
+	if (olddir != DI_NODIR && SV_StepDirection(actor, olddir, dist))
 			return;
 
 	if (rand()&1) 	/*randomly determine direction of search*/
 	{
-		for (tdir=0 ; tdir<=315 ; tdir += 45)
+		for (tdir = 0; tdir <= 315; tdir += 45)
 			if (tdir!=turnaround && SV_StepDirection(actor, tdir, dist) )
 					return;
 	}
 	else
 	{
-		for (tdir=315 ; tdir >=0 ; tdir -= 45)
-			if (tdir!=turnaround && SV_StepDirection(actor, tdir, dist) )
+		for (tdir = 315; tdir >= 0; tdir -= 45)
+			if (tdir != turnaround && SV_StepDirection(actor, tdir, dist) )
 					return;
 	}
 
@@ -1003,21 +1007,21 @@ void M_MoveToGoal (edict_t *ent, float dist)
 	if (!ent->groundentity && !(ent->flags & (FL_FLY|FL_SWIM)))
 		return;
 
-	if( (ent->monsterinfo.aiflags & AI_FOLLOW_LEADER) &&
+	if ( (ent->monsterinfo.aiflags & AI_FOLLOW_LEADER) &&
 		(ent->movetarget) &&
 		(ent->movetarget->inuse) &&
 		(ent->movetarget->health > 0) )
 	{
-		if(ent->enemy)
+		if (ent->enemy)
 			ent->monsterinfo.currentmove = &actor_move_run;
 		else
 		{
 			float	R;
 
 			R = realrange(ent,ent->movetarget);
-			if(R > ACTOR_FOLLOW_RUN_RANGE)
+			if (R > ACTOR_FOLLOW_RUN_RANGE)
 				ent->monsterinfo.currentmove = &actor_move_run;
-			else if(R < ACTOR_FOLLOW_STAND_RANGE && ent->movetarget->client)
+			else if (R < ACTOR_FOLLOW_STAND_RANGE && ent->movetarget->client)
 			{
 				ent->monsterinfo.pausetime = level.time + 0.5;
 				ent->monsterinfo.currentmove = &actor_move_stand;
@@ -1075,5 +1079,65 @@ qboolean M_walkmove (edict_t *ent, float yaw, float dist)
 	ent->monsterinfo.aiflags &= ~AI_BLOCKED;
 	return retval;
 	// PMM
-	//return SV_movestep(ent, move, true);
+//	return SV_movestep(ent, move, true);
 }
+
+
+// Zaero add
+qboolean ai_checkattack (edict_t *self, float dist);
+/*
+====================
+M_MoveAwayFromFlare
+====================
+*/
+qboolean M_MoveAwayFromFlare (edict_t *self, float dist)
+{
+	edict_t *e = NULL;
+	edict_t *goal = NULL;
+	vec3_t delta;
+	vec3_t forward;
+
+	// find the closest flare
+	while (1)
+	{
+		e = findradius(e, self->s.origin, 256);
+		if (e == NULL)
+			break;
+
+		if (Q_stricmp(e->classname, "flare") == 0)
+			break;
+	}
+	
+	goal = G_Spawn();
+	self->goalentity = goal;
+	if (e == NULL)
+	{
+		// just move forward
+		AngleVectors(self->s.angles, forward, NULL, NULL);
+		VectorMA(self->s.origin, 128, forward, goal->s.origin);
+	}
+	else /* e != NULL */
+	{
+		VectorSubtract(self->s.origin, e->s.origin, delta);
+		VectorNormalize(delta);
+		VectorMA(self->s.origin, 128, delta, goal->s.origin);
+	}
+
+	if ( (rand() & 7) == 1 )
+	{
+		// set the ideal_yaw
+		VectorSubtract(goal->s.origin, self->s.origin, delta);
+		self->ideal_yaw = vectoyaw(delta);
+	}
+
+	if ( (rand()&3)==1 || !SV_StepDirection (self, self->ideal_yaw, dist))
+	{
+		SV_NewChaseDir (self, goal, dist);
+	}
+
+	self->goalentity = NULL;
+	G_FreeEdict(goal);
+
+	return true;
+}
+// end Zaero

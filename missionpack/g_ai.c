@@ -115,9 +115,9 @@ void ai_stand (edict_t *self, float dist)
 	if (dist)
 		M_walkmove (self, self->s.angles[YAW], dist);
 
-	if(self->monsterinfo.aiflags & AI_FOLLOW_LEADER)
+	if (self->monsterinfo.aiflags & AI_FOLLOW_LEADER)
 	{
-		if(!self->enemy || !self->enemy->inuse)
+		if (!self->enemy || !self->enemy->inuse)
 		{
 			self->movetarget = self->goalentity = self->monsterinfo.leader;
 			self->monsterinfo.aiflags &= ~(AI_STAND_GROUND | AI_TEMP_STAND_GROUND);
@@ -132,7 +132,7 @@ void ai_stand (edict_t *self, float dist)
 		{
 			self->monsterinfo.aiflags &= ~(AI_CHICKEN | AI_STAND_GROUND);
 			self->monsterinfo.pausetime = 0;
-			if(self->enemy)
+			if (self->enemy)
 				FoundTarget(self);
 		}
 	}
@@ -183,9 +183,9 @@ void ai_stand (edict_t *self, float dist)
 	{
 		// Lazarus: Solve problem of monsters pausing at path_corners, taking off in 
 		//          original direction
-		if(self->enemy && self->enemy->inuse)
+		if (self->enemy && self->enemy->inuse)
 			VectorSubtract (self->enemy->s.origin, self->s.origin, v);
-		else if(self->goalentity)
+		else if (self->goalentity)
 			VectorSubtract (self->goalentity->s.origin, self->s.origin, v);
 		else {
 			self->monsterinfo.pausetime = level.time + random() * 15;
@@ -194,14 +194,14 @@ void ai_stand (edict_t *self, float dist)
 		self->ideal_yaw = vectoyaw (v);
 
 		// Lazarus: Let misc_actors who are following their leader RUN even when not mad
-		if( (self->monsterinfo.aiflags & AI_FOLLOW_LEADER) && (self->movetarget) &&
+		if ( (self->monsterinfo.aiflags & AI_FOLLOW_LEADER) && (self->movetarget) &&
 			(self->movetarget->inuse) )
 		{
 			float	R;
 			R = realrange(self,self->movetarget);
-			if(R > ACTOR_FOLLOW_RUN_RANGE)
+			if (R > ACTOR_FOLLOW_RUN_RANGE)
 				self->monsterinfo.run (self);
-			else if(R > ACTOR_FOLLOW_STAND_RANGE || !self->movetarget->client)
+			else if (R > ACTOR_FOLLOW_STAND_RANGE || !self->movetarget->client)
 				self->monsterinfo.walk (self);
 		}
 		else
@@ -211,7 +211,7 @@ void ai_stand (edict_t *self, float dist)
 
 	if (!(self->spawnflags & SF_MONSTER_SIGHT) && (self->monsterinfo.idle) && (level.time > self->monsterinfo.idle_time))
 	{
-			if(self->monsterinfo.aiflags & AI_MEDIC)
+			if (self->monsterinfo.aiflags & AI_MEDIC)
 			abortHeal(self,false, false, false);
 
 		if (self->monsterinfo.idle_time)
@@ -280,11 +280,12 @@ void ai_charge (edict_t *self, float dist)
 	// PMM - made AI_MANUAL_STEERING affect things differently here .. they turn, but
 	// don't set the ideal_yaw
 
-	// Zaero
+	// Zaero add
 	if (self->monsterinfo.aiflags2 & AI2_ONESHOTTARGET)
 	{
 		VectorSubtract (self->monsterinfo.shottarget, self->s.origin, v);
 	}
+	// end Zaero
 
 	// This is put in there so monsters won't move towards the origin after killing
 	// a tesla. This could be problematic, so keep an eye on it.
@@ -426,6 +427,12 @@ qboolean visible (edict_t *self, edict_t *other)
 	vec3_t	spot1;
 	vec3_t	spot2;
 	trace_t	trace;
+
+	// Zaero add
+	// Monsters blinded by flare can't see anything!
+	if (self->monsterinfo.flashTime > 0)
+		return false;
+	// end Zaero
 
 	VectorCopy (self->s.origin, spot1);
 	spot1[2] += self->viewheight;
@@ -585,19 +592,19 @@ void FoundTarget (edict_t *self)
 		level.sight_entity->light_level = 128;
 
 		goodguy = NULL;
-		goodguy = G_Find(NULL,FOFS(dmgteam),"player");
-		while(goodguy)
+		goodguy = G_Find(NULL,FOFS(dmgteam), "player");
+		while (goodguy)
 		{
-			if(goodguy->health > 0)
+			if (goodguy->health > 0)
 			{
-				if(!goodguy->enemy)
+				if (!goodguy->enemy)
 				{
-					if(goodguy->monsterinfo.aiflags & AI_ACTOR)
+					if (goodguy->monsterinfo.aiflags & AI_ACTOR)
 					{
 						// Can he see enemy?
 					//	tr = gi.trace(goodguy->s.origin,vec3_origin,vec3_origin,self->enemy->s.origin,goodguy,MASK_OPAQUE);
-					//	if(tr.fraction == 1.0)
-						if(gi.inPVS(goodguy->s.origin,self->enemy->s.origin))
+					//	if (tr.fraction == 1.0)
+						if (gi.inPVS(goodguy->s.origin,self->enemy->s.origin))
 						{
 							goodguy->monsterinfo.aiflags |= AI_FOLLOW_LEADER;
 							goodguy->monsterinfo.old_leader = NULL;
@@ -634,8 +641,9 @@ void FoundTarget (edict_t *self)
 		gi.dprintf("%s at %s, combattarget %s not found\n", self->classname, vtos(self->s.origin), self->combattarget);
 		return;
 	}
+
 	// Lazarus: Huh? How come yaw for combattarget isn't set?
-	VectorSubtract(self->movetarget->s.origin,self->s.origin,v);
+	VectorSubtract(self->movetarget->s.origin, self->s.origin, v);
 	self->ideal_yaw = vectoyaw(v);
 
 	// clear out our combattarget, these are a one shot deal
@@ -645,7 +653,7 @@ void FoundTarget (edict_t *self)
 	// clear the targetname, that point is ours!
 	// Lazarus: Why, why, why???? This doesn't remove the point_combat, only makes it inaccessible!
 	// to other monsters. 
-	//self->movetarget->targetname = NULL;
+//	self->movetarget->targetname = NULL;
 	self->monsterinfo.pausetime = 0;
 
 	// run for it
@@ -842,10 +850,10 @@ qboolean FindTarget (edict_t *self)
 		int		i;
 		edict_t *ref;
 
-		for(i=0; i<6 && !reflection; i++)
+		for (i=0; i<6 && !reflection; i++)
 		{
 			ref = client->reflection[i];
-			if(ref && visible(self,ref) && infront(self,ref))
+			if (ref && visible(self,ref) && infront(self,ref))
 			{
 				reflection = ref;
 				self_reflection = self->reflection[i];
@@ -922,7 +930,7 @@ qboolean FindTarget (edict_t *self)
 			// If MORON or DUMMY for the parent func_reflect is set,
 			// attack the reflection (in the case of DUMMY, only
 			// if monster doesn't see himself in the same mirror)
-			if( (reflection->activator->spawnflags & 4) ||
+			if ( (reflection->activator->spawnflags & 4) ||
 				( (reflection->activator->spawnflags & 8) &&
 				(!self_reflection || !visible(self,self_reflection)) ) ) // crashes here
 			{
@@ -1018,7 +1026,7 @@ got_one:
 	// PMM - if we got an enemy, we need to bail out of hint paths, so take over here
 	if (self->monsterinfo.aiflags & AI_HINT_PATH)
 	{
-	//	if(g_showlogic && g_showlogic->value)
+	//	if (g_showlogic && g_showlogic->value)
 	//		gi.dprintf("stopped following hint paths in FindTarget\n");
 
 		// this calls foundtarget for us
@@ -1098,8 +1106,9 @@ qboolean M_CheckAttack (edict_t *self)
 			{
 				// PMM - if we can't see our target, and we're not blocked by a monster, go into blind fire if available
 				if ((!(tr.ent->svflags & SVF_MONSTER)) && (!visible(self, self->enemy)))
-				{
-					if ((self->monsterinfo.blindfire) && (self->monsterinfo.blind_fire_delay <= 20.0))
+				{	// Knightmare- disable blindfire for Zaero maps, as it causes undesired behavior in zdef4
+				//	if ((self->monsterinfo.blindfire) && (self->monsterinfo.blind_fire_delay <= 20.0))
+					if ( !IsZaeroMap() && (self->monsterinfo.blindfire) && (self->monsterinfo.blind_fire_delay <= 20.0) )
 					{
 						if (level.time < self->monsterinfo.attack_finished)
 						{
@@ -1494,16 +1503,16 @@ qboolean ai_checkattack (edict_t *self, float dist)
 			{
 				self->goalentity = self->movetarget;
 				// Lazarus: Let misc_actors who are following their leader RUN even when not mad
-				if( (self->monsterinfo.aiflags & AI_FOLLOW_LEADER) &&
+				if ( (self->monsterinfo.aiflags & AI_FOLLOW_LEADER) &&
 					(self->movetarget) &&
 					(self->movetarget->inuse) )
 				{
 					float	R;
 
 					R = realrange(self,self->movetarget); 
-					if(R > ACTOR_FOLLOW_RUN_RANGE)
+					if (R > ACTOR_FOLLOW_RUN_RANGE)
 						self->monsterinfo.run (self);
-					else if(R > ACTOR_FOLLOW_STAND_RANGE || !self->movetarget->client)
+					else if (R > ACTOR_FOLLOW_STAND_RANGE || !self->movetarget->client)
 						self->monsterinfo.walk (self);
 					else
 					{
@@ -1640,6 +1649,15 @@ void ai_run (edict_t *self, float dist)
 	qboolean	gotcha = false;
 	edict_t		*realEnemy;
 
+	// Zaero add
+	// Monsters try to run away from flares
+	if (self->monsterinfo.flashTime > 0)
+	{
+		M_MoveAwayFromFlare (self, dist);
+		return;
+	}
+	// end Zaero
+
 	// if we're going to a combat point, just proceed
 	if (self->monsterinfo.aiflags & (AI_COMBAT_POINT | AI_CHASE_THING))
 	{
@@ -1738,16 +1756,16 @@ void ai_run (edict_t *self, float dist)
 //		self->ideal_yaw = v_forward[YAW];
 //		gi.dprintf("seeking hintpath. origin: %s %0.1f\n", vtos(v), self->ideal_yaw);
 		M_MoveToGoal (self, dist);
-		if(!self->inuse)
+		if (!self->inuse)
 			return;			// PGM - g_touchtrigger free problem
 //		return;
 
 		// if we've already seen the player, and can't see him now, return
-//		if(self->enemy && !visible(self, self->enemy))
+//		if (self->enemy && !visible(self, self->enemy))
 //			return;
 
 		// if not and can't find the player, return
-//		if(!FindTarget(self))
+//		if (!FindTarget(self))
 //			return;
 
 		// first off, make sure we're looking for the player, not a noise he made
@@ -1789,14 +1807,14 @@ void ai_run (edict_t *self, float dist)
 		}
 		else
 		{
-			if(self->enemy && visible(self, realEnemy))
+			if (self->enemy && visible(self, realEnemy))
 				gotcha = true;
 		}
 
 		// if we see the player, stop following hintpaths.
 		if (gotcha)
 		{
-//			if(g_showlogic && g_showlogic->value)
+//			if (g_showlogic && g_showlogic->value)
 //				gi.dprintf("stopped following hint paths in ai_run\n");
 
 			// disconnect from hintpaths and start looking normally for players.
@@ -1827,7 +1845,7 @@ void ai_run (edict_t *self, float dist)
 		// PMM - prevent double moves for sound_targets
 		alreadyMoved = true;
 		// pmm
-		if(!self->inuse)
+		if (!self->inuse)
 			return;			// PGM - g_touchtrigger free problem
 
 		if (!FindTarget (self))
@@ -1910,7 +1928,7 @@ void ai_run (edict_t *self, float dist)
 		// PMM - check for alreadyMoved
 		if (!alreadyMoved)
 			M_MoveToGoal (self, dist);
-		if(!self->inuse)
+		if (!self->inuse)
 			return;			// PGM - g_touchtrigger free problem
 
 		self->monsterinfo.aiflags &= ~AI_LOST_SIGHT;
@@ -1927,14 +1945,14 @@ void ai_run (edict_t *self, float dist)
 //PGM
 	// if we've been looking (unsuccessfully) for the player for 10 seconds
 	// PMM - reduced to 5, makes them much nastier
-	if((self->monsterinfo.trail_time + 5) <= level.time)
+	if ((self->monsterinfo.trail_time + 5) <= level.time)
 	{
 		// and we haven't checked for valid hint paths in the last 10 seconds
-		if((self->monsterinfo.last_hint_time + 10) <= level.time)
+		if ((self->monsterinfo.last_hint_time + 10) <= level.time)
 		{
 			// check for hint_paths.
 			self->monsterinfo.last_hint_time = level.time;
-			if(monsterlost_checkhint(self))
+			if (monsterlost_checkhint(self))
 				return;
 		}
 	}
@@ -2090,7 +2108,7 @@ void ai_run (edict_t *self, float dist)
 	}
 
 	M_MoveToGoal (self, dist);
-	if(!self->inuse)
+	if (!self->inuse)
 		return;			// PGM - g_touchtrigger free problem
 
 	G_FreeEdict(tempgoal);
@@ -2112,25 +2130,25 @@ qboolean ai_chicken (edict_t *self, edict_t *badguy)
 	trace_t	trace1, trace2;
 
 	// No point in hiding from attacker if he's gone
-	if(!badguy || !badguy->inuse)
+	if (!badguy || !badguy->inuse)
 		return false;
 
-	if(!self || !self->inuse || (self->health <= 0))
+	if (!self || !self->inuse || (self->health <= 0))
 		return false;
 
-	if(!actorchicken->value)
+	if (!actorchicken->value)
 		return false;
 
 	// If we've already been here, quit
-	if(self->monsterinfo.aiflags & AI_CHICKEN)
+	if (self->monsterinfo.aiflags & AI_CHICKEN)
 	{
-		if(self->movetarget && !Q_stricmp(self->movetarget->classname,"thing"))
+		if (self->movetarget && !Q_stricmp(self->movetarget->classname,"thing"))
 			return true;
 	}
 
 	VectorCopy(self->mins,mins);
 	mins[2] += 18;
-	if(mins[2] > 0) mins[2] = 0;
+	if (mins[2] > 0) mins[2] = 0;
 	VectorCopy(self->maxs,maxs);
 
 	// Find a vector that will hide the actor from his enemy
@@ -2141,7 +2159,7 @@ qboolean ai_chicken (edict_t *self, edict_t *badguy)
 	dir[2] = 0;
 	for (travel=512; travel>63 && best_dist == 0; travel /= 2)
 	{
-		for(i=0; i<5 && best_dist == 0; i++)
+		for (i=0; i<5 && best_dist == 0; i++)
 		{
 			yaw = self->s.angles[YAW] + chase_angle[i];
 			yaw = (int)(yaw/45)*45;
@@ -2155,29 +2173,29 @@ qboolean ai_chicken (edict_t *self, edict_t *badguy)
 			// isn't foolproof - tests against 1) new origin, 2) new origin + maxs,
 			// 3) new origin + mins, and 4) new origin + min x,y, max z.
 			trace2 = gi.trace(trace1.endpos,NULL,NULL,atk,self,MASK_SOLID);
-			if(trace2.fraction == 1.0) continue;
+			if (trace2.fraction == 1.0) continue;
 
 			VectorAdd(trace1.endpos,self->maxs,testpos);
 			trace2 = gi.trace(testpos,NULL,NULL,atk,self,MASK_SOLID);
-			if(trace2.fraction == 1.0) continue;
+			if (trace2.fraction == 1.0) continue;
 
 			VectorAdd(trace1.endpos,self->mins,testpos);
 			trace2 = gi.trace(testpos,NULL,NULL,atk,self,MASK_SOLID);
-			if(trace2.fraction == 1.0) continue;
+			if (trace2.fraction == 1.0) continue;
 
 			testpos[2] = trace1.endpos[2] + self->maxs[2];
 			trace2 = gi.trace(testpos,NULL,NULL,atk,self,MASK_SOLID);
-			if(trace2.fraction == 1.0) continue;
+			if (trace2.fraction == 1.0) continue;
 
 			best_dist = trace1.fraction * travel;
-			if(best_dist < 32) // not much point to this move
+			if (best_dist < 32) // not much point to this move
 				continue;
 			VectorCopy(dir,best_dir);
 		}
 	}
 	return false;
 
-	if(best_dist < 32)
+	if (best_dist < 32)
 		return false;
 
 	// This snaps the angles, which may not be all that good but it sure

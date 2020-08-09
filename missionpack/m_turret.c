@@ -41,24 +41,38 @@ mmove_t turret_move_fire_blind;
 
 void TurretAim (edict_t *self)
 {
-	vec3_t	end, dir;
-	vec3_t	ang;
-	float	move, idealPitch, idealYaw, current, speed;
-	int		orientation;
-	qboolean is_spinning = false;
+	vec3_t		end, dir;
+	vec3_t		ang;
+	float		move, idealPitch, idealYaw, current, speed, turn_yaw=0.0f;
+	int			orientation;
+	qboolean	is_spinning = false;
+	qboolean	is_turning = false;
 
-// gi.dprintf("turret_aim: %d %d\n", self->s.frame, self->monsterinfo.nextframe);
+//	gi.dprintf("turret_aim: %d %d\n", self->s.frame, self->monsterinfo.nextframe);
 
 	if (self->movewith_set && self->movewith_ent && self->movewith_ent->inuse
 		&& (!strcmp(self->movewith_ent->classname, "func_rotating")
 			|| !strcmp(self->movewith_ent->classname, "func_rotating_dh")
 			|| !strcmp(self->movewith_ent->classname, "func_trackchange") )
-		&& (self->movewith_ent->avelocity[YAW]))
+			&& (self->movewith_ent->avelocity[YAW])) {
 		is_spinning = true;
+		turn_yaw = self->movewith_ent->avelocity[YAW] * FRAMETIME;
+	}
+
+	if (self->movewith_set && self->movewith_ent && self->movewith_ent->inuse
+		&& (!strcmp(self->movewith_ent->classname, "func_train")
+			|| !strcmp(self->movewith_ent->classname, "func_tracktrain")
+			|| !strcmp(self->movewith_ent->classname, "model_train")
+			|| !strcmp(self->movewith_ent->classname, "func_door_rotating")
+			|| !strcmp(self->movewith_ent->classname, "func_door_swinging") )
+			&& (self->movewith_ent->avelocity[YAW])) {
+		is_turning = true;
+		turn_yaw = self->movewith_ent->avelocity[YAW] * FRAMETIME;
+	}
 
 	if (!self->enemy || self->enemy == world)
 	{
-		if(!FindTarget (self))
+		if (!FindTarget (self))
 			return;
 	}
 
@@ -68,19 +82,19 @@ void TurretAim (edict_t *self)
 		return;
 
 	// if turret is still in inactive mode, ready the gun, but don't aim
-	if(self->s.frame < FRAME_active01)
+	if (self->s.frame < FRAME_active01)
 	{
-		turret_ready_gun(self);
+		turret_ready_gun (self);
 		return;
 	}
 	// if turret is still readying, don't aim.
-	if(self->s.frame < FRAME_run01)
+	if (self->s.frame < FRAME_run01)
 		return;
 
 	// PMM - blindfire aiming here
-	if (self->monsterinfo.currentmove == &turret_move_fire_blind)// && !is_spinning)
+	if (self->monsterinfo.currentmove == &turret_move_fire_blind)	// && !is_spinning)
 	{
-		VectorCopy(self->monsterinfo.blind_fire_target, end);
+		VectorCopy (self->monsterinfo.blind_fire_target, end);
 		if (self->enemy->s.origin[2] < self->monsterinfo.blind_fire_target[2])
 			end[2] += self->enemy->viewheight + 10;
 		else
@@ -88,13 +102,13 @@ void TurretAim (edict_t *self)
 	}
 	else
 	{
-		VectorCopy(self->enemy->s.origin, end);
+		VectorCopy (self->enemy->s.origin, end);
 		if (self->enemy->client)
 			end[2] += self->enemy->viewheight;
 	}
 
-	VectorSubtract(end, self->s.origin, dir);
-	vectoangles2(dir, ang);
+	VectorSubtract (end, self->s.origin, dir);
+	vectoangles2 (dir, ang);
 
 	//
 	// Clamp first
@@ -131,23 +145,34 @@ void TurretAim (edict_t *self)
 				idealPitch = 85;
 			else if (idealPitch < -85)
 				idealPitch = -85;
-
-			if (idealYaw > orientation+180)
+		
+			if ( idealYaw > (orientation+180) )
 				idealYaw -= 360;
-			if (idealYaw < orientation-180)
+			if ( idealYaw < (orientation-180) )
 				idealYaw += 360;
-
-			if (idealYaw > orientation+85) {
-				if (is_spinning)	// Knightmare- if out of range, point to front
-					idealYaw = orientation;
-				else
-					idealYaw = orientation+85;
+		
+			if (is_turning)	// Knightmare- factor in avelocity of parent entity
+			{
+			//	gi.dprintf("turret_aim: clamping yaw for turning parent entity\n");
+				if ( idealYaw > (orientation + turn_yaw + 85) )
+					idealYaw = orientation + turn_yaw + 85;
+				else if ( idealYaw < (orientation + turn_yaw - 85) )
+					idealYaw = orientation + turn_yaw - 85;
 			}
-			else if (idealYaw < orientation-85) {
-				if (is_spinning)	// Knightmare- if out of range, point to front
+			else if (is_spinning)	// Knightmare- if out of range, point to front
+			{
+			//	gi.dprintf("turret_aim: clamping yaw for spinning parent entity\n");
+				if ( idealYaw > (orientation + 85) )
 					idealYaw = orientation;
-				else
-					idealYaw = orientation-85;
+				else if ( idealYaw < (orientation - 85) )
+					idealYaw = orientation;
+			}
+			else
+			{
+				if ( idealYaw > (orientation + 85) )
+					idealYaw = orientation + 85;
+				else if ( idealYaw < (orientation - 85) )
+					idealYaw = orientation - 85;
 			}
 			break;
 		// end Knightmare
@@ -159,18 +184,18 @@ void TurretAim (edict_t *self)
 	current = self->s.angles[PITCH];
 	speed = self->yaw_speed;
 
-	if(idealPitch != current)
+	if (idealPitch != current)
 	{
 		move = idealPitch - current;
 
-		while(move >= 360)
+		while (move >= 360)
 			move -= 360;
 		if (move >= 90)
 		{
 			move = move - 360;
 		}
 
-		while(move <= -360)
+		while (move <= -360)
 			move += 360;
 		if (move <= -90)
 		{
@@ -197,7 +222,7 @@ void TurretAim (edict_t *self)
 	current = self->s.angles[YAW];
 	speed = self->yaw_speed;
 
-	if(idealYaw != current)
+	if (idealYaw != current)
 	{
 		move = idealYaw - current;
 
@@ -239,7 +264,7 @@ mmove_t turret_move_stand = {FRAME_stand01, FRAME_stand02, turret_frames_stand, 
 
 void turret_stand (edict_t *self)
 {
-//gi.dprintf("turret_stand\n");
+//	gi.dprintf("turret_stand\n");
 	self->monsterinfo.currentmove = &turret_move_stand;
 }
 
@@ -271,7 +296,7 @@ mmove_t turret_move_seek = {FRAME_run01, FRAME_run02, turret_frames_seek, NULL};
 
 void turret_walk (edict_t *self)
 {
-	if(self->s.frame < FRAME_run01)
+	if (self->s.frame < FRAME_run01)
 		turret_ready_gun(self);
 	else
 		self->monsterinfo.currentmove = &turret_move_seek;
@@ -287,7 +312,7 @@ mmove_t turret_move_run = {FRAME_run01, FRAME_run02, turret_frames_run, turret_r
 
 void turret_run (edict_t *self)
 {
-	if(self->s.frame < FRAME_run01)
+	if (self->s.frame < FRAME_run01)
 		turret_ready_gun(self);
 	else
 		self->monsterinfo.currentmove = &turret_move_run;
@@ -305,12 +330,12 @@ void Turret_Railgun_Fire (edict_t *self)
 {
 	vec3_t	start, dir;
 
-	TurretAim(self);
+	TurretAim (self);
 
-	VectorCopy(self->s.origin, start);
+	VectorCopy (self->s.origin, start);
 	// trail the target....
 //	VectorMA(end, -0.2, self->enemy->velocity, end);
-	VectorSubtract(self->aim_point, start, dir);
+	VectorSubtract (self->aim_point, start, dir);
 	VectorNormalize(dir);
 
 	monster_fire_railgun (self, start, dir, 50, 0, MZ2_GLADIATOR_RAILGUN_1);
@@ -323,12 +348,12 @@ void Turret_Railgun_Aim (edict_t *self)
 {
 	vec3_t	end;
 
-	TurretAim(self);
+	TurretAim (self);
 
-	if(!self->enemy || !self->enemy->inuse)
+	if (!self->enemy || !self->enemy->inuse)
 		return;
 
-	VectorCopy(self->enemy->s.origin, end);
+	VectorCopy (self->enemy->s.origin, end);
 	// aim for the head.
 	if ((self->enemy) && (self->enemy->client))
 		end[2]+=self->enemy->viewheight;
@@ -348,16 +373,16 @@ void TurretFire (edict_t *self)
 	trace_t	trace;
 	int		rocketSpeed;
 
-	TurretAim(self);
+	TurretAim (self);
 
-	if(!self->enemy || !self->enemy->inuse)
+	if (!self->enemy || !self->enemy->inuse)
 		return;
 
-	VectorSubtract(self->enemy->s.origin, self->s.origin, dir);
+	VectorSubtract (self->enemy->s.origin, self->s.origin, dir);
 	VectorNormalize(dir);
 	AngleVectors(self->s.angles, forward, NULL, NULL);
 	chance = DotProduct(dir, forward);
-	if(chance < 0.98)
+	if (chance < 0.98)
 	{
 //		gi.dprintf("off-angle\n");
 		return;
@@ -394,10 +419,10 @@ void TurretFire (edict_t *self)
 	// up the fire chance 20% per skill level.
 	chance = chance - (0.2 * skill->value);
 
-	if(/*chance < 0.5 && */visible(self, self->enemy))
+	if (/*chance < 0.5 && */visible(self, self->enemy))
 	{
-		VectorCopy(self->s.origin, start);
-		VectorCopy(self->enemy->s.origin, end);
+		VectorCopy (self->s.origin, start);
+		VectorCopy (self->enemy->s.origin, end);
 		
 		// aim for the head.
 		if ((self->enemy) && (self->enemy->client))
@@ -413,16 +438,16 @@ void TurretFire (edict_t *self)
 			end[2] += crandom() * 320 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 		}
 
-		VectorSubtract(end, start, dir);
+		VectorSubtract (end, start, dir);
 		dist = VectorLength(dir);
 		
 		// check for predictive fire if distance less than 512
-		if(!(self->spawnflags & SPAWN_INSTANT_WEAPON) && (dist<512))
+		if (!(self->spawnflags & SPAWN_INSTANT_WEAPON) && (dist<512))
 		{
 			chance = random();
 			// ramp chance. easy - 50%, avg - 60%, hard - 70%, nightmare - 80%
 			chance += (3 - skill->value) * 0.1;
-			if(chance < 0.8)
+			if (chance < 0.8)
 			{
 				// lead the target....
 				time = dist / 1000;
@@ -436,17 +461,17 @@ void TurretFire (edict_t *self)
 					end[2] += crandom() * 320 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 				}
 
-				VectorSubtract(end, start, dir);
+				VectorSubtract (end, start, dir);
 			}
 		}
 
 		VectorNormalize(dir);
 		trace = gi.trace(start, vec3_origin, vec3_origin, end, self, MASK_SHOT);
-		if(trace.ent == self->enemy || trace.ent == world || (self->monsterinfo.visibility < FOG_CANSEEGOOD))
+		if (trace.ent == self->enemy || trace.ent == world || (self->monsterinfo.visibility < FOG_CANSEEGOOD))
 		{
-			if(self->spawnflags & SPAWN_BLASTER)
+			if (self->spawnflags & SPAWN_BLASTER)
 				monster_fire_blaster(self, start, dir, 20, rocketSpeed, MZ2_TURRET_BLASTER, EF_BLASTER, BLASTER_ORANGE);
-			else if(self->spawnflags & SPAWN_RAILGUN && self->last_fire_time <= level.time) //was SPAWN_MACHINEGUN
+			else if (self->spawnflags & SPAWN_RAILGUN && self->last_fire_time <= level.time) //was SPAWN_MACHINEGUN
 			{
 				//monster_fire_bullet (self, start, dir, TURRET_BULLET_DAMAGE, 0, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, MZ2_TURRET_MACHINEGUN);
 				gi.sound (self, CHAN_WEAPON, gi.soundindex ("gladiator/railgun.wav"), 1, ATTN_NORM, 0);
@@ -454,9 +479,9 @@ void TurretFire (edict_t *self)
 				self->nextthink = level.time + 2 * FRAMETIME;
 				self->last_fire_time = level.time + 1.5;
 			}
-			else if(self->spawnflags & SPAWN_ROCKET)
+			else if (self->spawnflags & SPAWN_ROCKET)
 			{
-				if(dist * trace.fraction > 72)
+				if (dist * trace.fraction > 72)
 					monster_fire_rocket (self, start, dir, 50, rocketSpeed, MZ2_TURRET_ROCKET, NULL);
 			}
 		}	
@@ -471,16 +496,16 @@ void TurretFireBlind (edict_t *self)
 	float	dist, chance;
 	int		rocketSpeed;
 
-	TurretAim(self);
+	TurretAim (self);
 
-	if(!self->enemy || !self->enemy->inuse)
+	if (!self->enemy || !self->enemy->inuse)
 		return;
 
-	VectorSubtract(self->monsterinfo.blind_fire_target, self->s.origin, dir);
+	VectorSubtract (self->monsterinfo.blind_fire_target, self->s.origin, dir);
 	VectorNormalize(dir);
 	AngleVectors(self->s.angles, forward, NULL, NULL);
 	chance = DotProduct(dir, forward);
-	if(chance < 0.98)
+	if (chance < 0.98)
 	{
 //		gi.dprintf("off-angle\n");
 		return;
@@ -499,22 +524,22 @@ void TurretFireBlind (edict_t *self)
 		}
 	}
 
-	VectorCopy(self->s.origin, start);
-	VectorCopy(self->monsterinfo.blind_fire_target, end);
+	VectorCopy (self->s.origin, start);
+	VectorCopy (self->monsterinfo.blind_fire_target, end);
 		
 	if (self->enemy->s.origin[2] < self->monsterinfo.blind_fire_target[2])
 		end[2] += self->enemy->viewheight + 10;
 	else
 		end[2] += self->enemy->mins[2] - 10;
 
-	VectorSubtract(end, start, dir);
+	VectorSubtract (end, start, dir);
 	dist = VectorLength(dir);
 		
 	VectorNormalize(dir);
 
 	if (self->spawnflags & SPAWN_BLASTER)
 		monster_fire_blaster(self, start, dir, 20, 1000, MZ2_TURRET_BLASTER, EF_BLASTER, BLASTER_ORANGE);
-	else if(self->spawnflags & SPAWN_ROCKET)
+	else if (self->spawnflags & SPAWN_ROCKET)
 		monster_fire_rocket (self, start, dir, 50, rocketSpeed, MZ2_TURRET_ROCKET, NULL);
 }
 //pmm
@@ -545,7 +570,7 @@ void turret_attack(edict_t *self)
 {
 	float r, chance;
 
-	if(self->s.frame < FRAME_run01)
+	if (self->s.frame < FRAME_run01)
 		turret_ready_gun(self);
 	// PMM
 	else if (self->monsterinfo.attack_state != AS_BLIND)
@@ -614,7 +639,7 @@ void turret_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	ThrowDebris (self, "models/objects/debris1/tris.md2", 1, start, 0, 0);
 	ThrowDebris (self, "models/objects/debris1/tris.md2", 2, start, 0, 0);
 
-	if(self->teamchain)
+	if (self->teamchain)
 	{
 		base = self->teamchain;
 		base->solid = SOLID_BBOX;
@@ -623,9 +648,9 @@ void turret_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 		gi.linkentity (base);
 	}
 
-	if(self->target)
+	if (self->target)
 	{
-		if(self->enemy && self->enemy->inuse)
+		if (self->enemy && self->enemy->inuse)
 			G_UseTargets (self, self->enemy);
 		else
 			G_UseTargets (self, self);
@@ -646,15 +671,15 @@ void turret_wall_spawn (edict_t *turret)
 
 	ent = G_Spawn();
 	ent->classname = "turret_wall";
-	VectorCopy(turret->s.origin, ent->s.origin);
-	VectorCopy(turret->s.angles, turret->deploy_angles);
-	VectorCopy(turret->s.angles, ent->s.angles);
-	VectorCopy(ent->s.angles, ent->deploy_angles);
+	VectorCopy (turret->s.origin, ent->s.origin);
+	VectorCopy (turret->s.angles, turret->deploy_angles);
+	VectorCopy (turret->s.angles, ent->s.angles);
+	VectorCopy (ent->s.angles, ent->deploy_angles);
 
 	angle = ent->s.angles[1];
-	if(ent->s.angles[0] == 90)
+	if (ent->s.angles[0] == 90)
 		angle = -1;
-	else if(ent->s.angles[0] == 270)
+	else if (ent->s.angles[0] == 270)
 		angle = -2;
 	switch (angle)
 	{
@@ -706,22 +731,22 @@ void turret_wall_spawn (edict_t *turret)
 			break;
 	}
 
-	/*if (turret->s.angles[0] == 270)
-		VectorSet (forward, 0,0,1);
+/*	if (turret->s.angles[0] == 270)
+		VectorSet (forward, 0, 0, 1);
 	else if (turret->s.angles[0] == 90)
-		VectorSet (forward, 0,0,-1);
+		VectorSet (forward, 0, 0, -1);
 	else if (turret->s.angles[1] == 0)
-		VectorSet (forward, 1,0,0);
+		VectorSet (forward, 1, 0, 0);
 	else if (turret->s.angles[1] == 90)
-		VectorSet (forward, 0,1,0);
+		VectorSet (forward, 0, 1, 0);
 	else if (turret->s.angles[1] == 180)
-		VectorSet (forward, -1,0,0);
+		VectorSet (forward, -1, 0, 0);
 	else if (turret->s.angles[1] == 270)
-		VectorSet (forward, 0,-1,0);*/
-
-	//Knightmare- set up the turret's movement positions here
+		VectorSet (forward, 0, -1, 0);
+*/
+	// Knightmare- set up the turret's movement positions here
 	AngleVectors (turret->s.angles, forward, NULL, NULL);
-	//Move turret wall backward a bit so it will be flush with surrounding wall
+	// Move turret wall backward a bit so it will be flush with surrounding wall
 	VectorMA (ent->s.origin, -2, forward, ent->s.origin);
 
 	VectorCopy (turret->s.origin, turret->pos1);
@@ -742,14 +767,14 @@ void turret_wall_spawn (edict_t *turret)
 	ent->flags |= FL_TEAMSLAVE;
 	ent->owner = turret;
 
-	//Knightmare- set movewith if applicable and backup original angles
+	// Knightmare- set movewith if applicable and backup original angles
 	if (turret->movewith)
 		ent->movewith = turret->movewith;
 
 	VectorCopy (ent->s.angles, ent->org_angles);
 
 	ent->s.modelindex = gi.modelindex("models/monsters/turretbase/tris.md2");
-	ent->s.renderfx |= RF_NOSHADOW; // Knightmare added
+	ent->s.renderfx |= RF_NOSHADOW;	// Knightmare added
 
 	gi.linkentity (ent);
 }
@@ -760,7 +785,7 @@ void turret_wake (edict_t *self)
 	// just return without doing anything. Easiest way to have a null function.
 	self->moveinfo.state = STATE_TOP;
 
-	if(self->flags & FL_TEAMSLAVE)
+	if (self->flags & FL_TEAMSLAVE)
 		return;
 
 	self->monsterinfo.stand = turret_stand;
@@ -782,9 +807,9 @@ void turret_wake (edict_t *self)
 
 	stationarymonster_start (self);
 	
-	if(self->spawnflags & SPAWN_RAILGUN) //was SPAWN_MACHINEGUN
+	if (self->spawnflags & SPAWN_RAILGUN) //was SPAWN_MACHINEGUN
 		self->s.skinnum = 1;
-	else if(self->spawnflags & SPAWN_ROCKET)
+	else if (self->spawnflags & SPAWN_ROCKET)
 		self->s.skinnum = 2;
 
 	// but we do want the death to count
@@ -800,8 +825,8 @@ void turret_activate (edict_t *self, edict_t *other, edict_t *activator)
 	edict_t		*base;
 
 	self->movetype = MOVETYPE_PUSH;
-	self->use = NULL; //Knightmare added
-	if(!self->speed)
+	self->use = NULL; // Knightmare added
+	if (!self->speed)
 		self->speed = 15;
 	self->moveinfo.speed = self->speed;
 	self->moveinfo.accel = self->speed;
@@ -812,7 +837,7 @@ void turret_activate (edict_t *self, edict_t *other, edict_t *activator)
 	Move_Calc(self, self->pos2, turret_wake);
 
 	base = self->teamchain;
-	if(base)
+	if (base)
 	{
 		base->movetype = MOVETYPE_PUSH;
 		base->speed = self->speed;
@@ -1036,7 +1061,7 @@ void SP_monster_turret (edict_t *self)
 	self->gravity = 0;
 	self->last_fire_time = 0;
 
-	VectorCopy(self->s.angles, self->offset);
+	VectorCopy (self->s.angles, self->offset);
 
 	angle = (int)self->s.angles[1];
 	switch (angle)
@@ -1094,9 +1119,9 @@ void SP_monster_turret (edict_t *self)
 	{
 	//	vec3_t		forward;
 
-		if(!self->targetname)
+		if (!self->targetname)
 		{
-//			gi.dprintf("Wall Unit Turret without targetname! %s\n", vtos(self->s.origin));
+		//	gi.dprintf("Wall Unit Turret without targetname! %s\n", vtos(self->s.origin));
 			G_FreeEdict(self);
 			return;
 		}

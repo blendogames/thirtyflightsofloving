@@ -141,7 +141,100 @@ void monster_fire_shotgun (edict_t *self, vec3_t start, vec3_t aimdir, int damag
 
 void monster_fire_blaster (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int flashtype, int effect, int color)
 {
+	// Zaero add
+	if (EMPNukeCheck(self, start))
+	{
+		gi.sound (self, CHAN_AUTO, gi.soundindex("items/empnuke/emp_missfire.wav"), 1, ATTN_NORM, 0);
+		return;
+	}
+	// end Zaero
+
 	fire_blaster (self, start, dir, damage, speed, effect, false, color);
+
+	gi.WriteByte (svc_muzzleflash2);
+	gi.WriteShort (self - g_edicts);
+	gi.WriteByte (flashtype);
+	gi.multicast (start, MULTICAST_PVS);
+}
+
+void monster_fire_grenade (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, int flashtype)
+{
+	fire_grenade (self, start, aimdir, damage, speed, 2.5, damage+40, false);
+
+	gi.WriteByte (svc_muzzleflash2);
+	gi.WriteShort (self - g_edicts);
+	gi.WriteByte (flashtype);
+	gi.multicast (start, MULTICAST_PVS);
+}
+
+void monster_fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int flashtype, edict_t *homing_target)
+{
+	// Zaero add
+	if (EMPNukeCheck(self, start))
+	{
+		gi.sound (self, CHAN_AUTO, gi.soundindex("items/empnuke/emp_missfire.wav"), 1, ATTN_NORM, 0);
+		return;
+	}
+	// end Zaero
+
+	fire_rocket (self, start, dir, damage, speed, damage+20, damage, homing_target);
+
+	gi.WriteByte (svc_muzzleflash2);
+	gi.WriteShort (self - g_edicts);
+	gi.WriteByte (flashtype);
+	gi.multicast (start, MULTICAST_PVS);
+}
+
+// Knightmare added
+void monster_fire_missile (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int flashtype, edict_t *homing_target)
+{
+	// Zaero add
+	if (EMPNukeCheck(self, start))
+	{
+		gi.sound (self, CHAN_AUTO, gi.soundindex("items/empnuke/emp_missfire.wav"), 1, ATTN_NORM, 0);
+		return;
+	}
+	// end Zaero
+
+	fire_missile (self, start, dir, damage, speed, damage+20, damage, homing_target);
+
+	gi.WriteByte (svc_muzzleflash2);
+	gi.WriteShort (self - g_edicts);
+	gi.WriteByte (flashtype);
+	gi.multicast (start, MULTICAST_PVS);
+}
+
+void monster_fire_railgun (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, int flashtype)
+{
+	// Zaero add
+	if (EMPNukeCheck(self, start))
+	{
+		gi.sound (self, CHAN_AUTO, gi.soundindex("items/empnuke/emp_missfire.wav"), 1, ATTN_NORM, 0);
+		return;
+	}
+	// end Zaero
+
+	// PMM
+	if (!(gi.pointcontents (start) & MASK_SOLID))
+		fire_rail (self, start, aimdir, damage, kick);
+
+	gi.WriteByte (svc_muzzleflash2);
+	gi.WriteShort (self - g_edicts);
+	gi.WriteByte (flashtype);
+	gi.multicast (start, MULTICAST_PVS);
+}
+
+void monster_fire_bfg (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, int kick, float damage_radius, int flashtype)
+{
+	// Zaero add
+	if (EMPNukeCheck(self, start))
+	{
+		gi.sound (self, CHAN_AUTO, gi.soundindex("items/empnuke/emp_missfire.wav"), 1, ATTN_NORM, 0);
+		return;
+	}
+	// end Zaero
+
+	fire_bfg (self, start, aimdir, damage, speed, damage_radius);
 
 	gi.WriteByte (svc_muzzleflash2);
 	gi.WriteShort (self - g_edicts);
@@ -152,6 +245,14 @@ void monster_fire_blaster (edict_t *self, vec3_t start, vec3_t dir, int damage, 
 // RAFAEL
 void monster_fire_blueblaster (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int flashtype, int effect)
 {
+	// Zaero add
+	if (EMPNukeCheck(self, start))
+	{
+		gi.sound (self, CHAN_AUTO, gi.soundindex("items/empnuke/emp_missfire.wav"), 1, ATTN_NORM, 0);
+		return;
+	}
+	// end Zaero
+
 	fire_blueblaster (self, start, dir, damage, speed, effect);
 
 	gi.WriteByte (svc_muzzleflash2);
@@ -163,6 +264,14 @@ void monster_fire_blueblaster (edict_t *self, vec3_t start, vec3_t dir, int dama
 // RAFAEL
 void monster_fire_ionripper (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int flashtype, int effect)
 {
+	// Zaero add
+	if (EMPNukeCheck(self, start))
+	{
+		gi.sound (self, CHAN_AUTO, gi.soundindex("items/empnuke/emp_missfire.wav"), 1, ATTN_NORM, 0);
+		return;
+	}
+	// end Zaero
+
 	fire_ionripper (self, start, dir, damage, speed, effect);
 
 	gi.WriteByte (svc_muzzleflash2);
@@ -174,6 +283,14 @@ void monster_fire_ionripper (edict_t *self, vec3_t start, vec3_t dir, int damage
 // RAFAEL
 void monster_fire_rocket_heat (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int flashtype)
 {
+	// Zaero add
+	if (EMPNukeCheck(self, start))
+	{
+		gi.sound (self, CHAN_AUTO, gi.soundindex("items/empnuke/emp_missfire.wav"), 1, ATTN_NORM, 0);
+		return;
+	}
+	// end Zaero
+
 	fire_rocket_heat (self, start, dir, damage, speed, damage, damage);
 
 	gi.WriteByte (svc_muzzleflash2);
@@ -181,39 +298,6 @@ void monster_fire_rocket_heat (edict_t *self, vec3_t start, vec3_t dir, int dama
 	gi.WriteByte (flashtype);
 	gi.multicast (start, MULTICAST_PVS);
 }
-
-//ROGUE
-void monster_fire_blaster2 (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int flashtype, int effect)
-{
-	fire_blaster2 (self, start, dir, damage, speed, effect, false);
-
-	gi.WriteByte (svc_muzzleflash2);
-	gi.WriteShort (self - g_edicts);
-	gi.WriteByte (flashtype);
-	gi.multicast (start, MULTICAST_PVS);
-}
-
-// FIXME -- add muzzle flash
-void monster_fire_tracker (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, edict_t *enemy, int flashtype)
-{
-	fire_tracker (self, start, dir, damage, speed, enemy);
-
-	gi.WriteByte (svc_muzzleflash2);
-	gi.WriteShort (self - g_edicts);
-	gi.WriteByte (flashtype);
-	gi.multicast (start, MULTICAST_PVS);
-}
-
-void monster_fire_heat (edict_t *self, vec3_t start, vec3_t dir, vec3_t offset, int damage, int kick, int flashtype)
-{
-	fire_heat (self, start, dir, offset, damage, kick, true);
-
-	gi.WriteByte (svc_muzzleflash2);
-	gi.WriteShort (self - g_edicts);
-	gi.WriteByte (flashtype);
-	gi.multicast (start, MULTICAST_PVS);
-}
-//ROGUE
 
 // RAFAEL
 void dabeam_hit (edict_t *self)
@@ -325,10 +409,18 @@ void monster_dabeam (edict_t *self)
 	self->svflags &= ~SVF_NOCLIENT;
 }
 
-
-void monster_fire_grenade (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, int flashtype)
+// ROGUE
+void monster_fire_blaster2 (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int flashtype, int effect)
 {
-	fire_grenade (self, start, aimdir, damage, speed, 2.5, damage+40, false);
+	// Zaero add
+	if (EMPNukeCheck(self, start))
+	{
+		gi.sound (self, CHAN_AUTO, gi.soundindex("items/empnuke/emp_missfire.wav"), 1, ATTN_NORM, 0);
+		return;
+	}
+	// end Zaero
+
+	fire_blaster2 (self, start, dir, damage, speed, effect, false);
 
 	gi.WriteByte (svc_muzzleflash2);
 	gi.WriteShort (self - g_edicts);
@@ -336,9 +428,18 @@ void monster_fire_grenade (edict_t *self, vec3_t start, vec3_t aimdir, int damag
 	gi.multicast (start, MULTICAST_PVS);
 }
 
-void monster_fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int flashtype, edict_t *homing_target)
+// FIXME -- add muzzle flash
+void monster_fire_tracker (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, edict_t *enemy, int flashtype)
 {
-	fire_rocket (self, start, dir, damage, speed, damage+20, damage, homing_target);
+	// Zaero add
+	if (EMPNukeCheck(self, start))
+	{
+		gi.sound (self, CHAN_AUTO, gi.soundindex("items/empnuke/emp_missfire.wav"), 1, ATTN_NORM, 0);
+		return;
+	}
+	// end Zaero
+
+	fire_tracker (self, start, dir, damage, speed, enemy);
 
 	gi.WriteByte (svc_muzzleflash2);
 	gi.WriteShort (self - g_edicts);
@@ -346,39 +447,43 @@ void monster_fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, i
 	gi.multicast (start, MULTICAST_PVS);
 }
 
-//Knightmare added
-void monster_fire_missile (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int flashtype, edict_t *homing_target)
+void monster_fire_heat (edict_t *self, vec3_t start, vec3_t dir, vec3_t offset, int damage, int kick, int flashtype)
 {
-	fire_missile (self, start, dir, damage, speed, damage+20, damage, homing_target);
+	// Zaero add
+	if (EMPNukeCheck(self, start))
+	{
+		gi.sound (self, CHAN_AUTO, gi.soundindex("items/empnuke/emp_missfire.wav"), 1, ATTN_NORM, 0);
+		return;
+	}
+	// end Zaero
+
+	fire_heat (self, start, dir, offset, damage, kick, true);
 
 	gi.WriteByte (svc_muzzleflash2);
 	gi.WriteShort (self - g_edicts);
 	gi.WriteByte (flashtype);
 	gi.multicast (start, MULTICAST_PVS);
 }
+// ROGUE
 
-void monster_fire_railgun (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, int flashtype)
+// SKWiD MOD
+void monster_fire_plasma_rifle (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int flashtype, qboolean spread)
 {
-	// PMM
-	if (!(gi.pointcontents (start) & MASK_SOLID))
-		fire_rail (self, start, aimdir, damage, kick);
+	// Zaero add
+	if (EMPNukeCheck(self, start))
+	{
+		gi.sound (self, CHAN_AUTO, gi.soundindex("items/empnuke/emp_missfire.wav"), 1, ATTN_NORM, 0);
+		return;
+	}
+	// end Zaero
+
+	fire_plasma_rifle (self, start, dir, damage, speed, spread);
 
 	gi.WriteByte (svc_muzzleflash2);
 	gi.WriteShort (self - g_edicts);
 	gi.WriteByte (flashtype);
 	gi.multicast (start, MULTICAST_PVS);
 }
-
-void monster_fire_bfg (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, int kick, float damage_radius, int flashtype)
-{
-	fire_bfg (self, start, aimdir, damage, speed, damage_radius);
-
-	gi.WriteByte (svc_muzzleflash2);
-	gi.WriteShort (self - g_edicts);
-	gi.WriteByte (flashtype);
-	gi.multicast (start, MULTICAST_PVS);
-}
-
 
 
 //
@@ -404,7 +509,7 @@ void M_FliesOn (edict_t *self)
 
 void M_FlyCheck (edict_t *self)
 {	
-	//Knightmare- keep running lava check
+	// Knightmare- keep running lava check
 	self->postthink = deadmonster_think;
 
 	if (self->monsterinfo.flies > 1.0)
@@ -418,7 +523,7 @@ void M_FlyCheck (edict_t *self)
 	if (self->waterlevel)
 		return;
 
-	if (random() > self->monsterinfo.flies) //was 0.33
+	if (random() > self->monsterinfo.flies) // was 0.33
 		return;
 
 	if (world->effects & FX_WORLDSPAWN_CORPSEFADE)
@@ -498,9 +603,11 @@ void M_CheckGround (edict_t *ent)
 	//          a dead monster who is laying on a brush model will cause the 
 	//          dead monster to drop through the brush model. This change *may*
 	//          have other consequences, though, so watch out for this.
+	// Knightmare- this wrecks aiming for many/most monster_turrets in a map!
+	// Leave this commented out, or disable it for turrets!
+//	ent->groundentity = trace.ent;
+//	ent->groundentity_linkcount = trace.ent->linkcount;
 
-	ent->groundentity = trace.ent;
-	ent->groundentity_linkcount = trace.ent->linkcount;
 //	if (!trace.startsolid && !trace.allsolid)
 //		VectorCopy (trace.endpos, ent->s.origin);
 	if (!trace.startsolid && !trace.allsolid)
@@ -616,7 +723,7 @@ void M_WorldEffects (edict_t *ent)
 			T_Damage (ent, world, world, vec3_origin, ent->s.origin, vec3_origin, 10*ent->waterlevel, 0, 0, MOD_LAVA);
 		}
 	}
-	//No slime damage for dead monsters
+	// No slime damage for dead monsters
 	if ((ent->watertype & CONTENTS_SLIME) && !(ent->flags & FL_IMMUNE_SLIME) && !(ent->svflags & SVF_DEADMONSTER))
 	{
 		if (ent->damage_debounce_time < level.time)
@@ -882,6 +989,12 @@ void monster_think (edict_t *self)
 	M_CatagorizePosition (self);
 	M_WorldEffects (self);
 	M_SetEffects (self);
+
+	// Zaero add
+	// decrease blindness
+	if (self->monsterinfo.flashTime > 0)
+		self->monsterinfo.flashTime--;
+	// end Zaero
 }
 
 // Knightmare- for dead monsters to check
@@ -950,6 +1063,7 @@ void monster_triggered_spawn (edict_t *self)
 	self->movetype = MOVETYPE_STEP;
 	self->svflags &= ~SVF_NOCLIENT;
 	self->air_finished = level.time + 12;
+
 	// Knightmare- teleport effect for Q1 monsters
 	if (self->flags & FL_Q1_MONSTER) {
 #ifdef KMQUAKE2_ENGINE_MOD
@@ -960,8 +1074,15 @@ void monster_triggered_spawn (edict_t *self)
 #endif
 	}
 	// end Knightmare
-	gi.linkentity (self);
 
+	// Zaero add
+/*	if ( IsZaeroMap() ) {
+		self->s.event = EV_PLAYER_TELEPORT;
+		MonsterPlayerKillBox (self);
+	}*/
+	// end Zaero
+
+	gi.linkentity (self);
 	monster_start_go (self);
 
 	if (self->enemy && !(self->spawnflags & 1) && !(self->enemy->flags & FL_NOTARGET))
@@ -982,9 +1103,11 @@ void monster_triggered_spawn_use (edict_t *self, edict_t *other, edict_t *activa
 	// we have a one frame delay here so we don't telefrag the guy who activated us
 	self->think = monster_triggered_spawn;
 	self->nextthink = level.time + FRAMETIME;
+
 	// Knightmare- good guy monsters shouldn't have an enemy from this
 	if (activator->client && !(self->monsterinfo.aiflags & AI_GOOD_GUY))
 		self->enemy = activator;
+
 	// Lazarus: Add 'em up
 //	if (!(self->monsterinfo.aiflags & AI_GOOD_GUY))
 //		level.total_monsters++;
@@ -1095,11 +1218,14 @@ qboolean monster_start (edict_t *self)
 		self->spawnflags &= ~MONSTER_SIGHT;
 		self->spawnflags |= MONSTER_AMBUSH;
 	} */
-	if ((self->spawnflags & SF_MONSTER_AMBUSH) && !(self->monsterinfo.aiflags & AI_GOOD_GUY))
+	if ( (self->spawnflags & SF_MONSTER_AMBUSH) && !(self->monsterinfo.aiflags & AI_GOOD_GUY) )
 		self->spawnflags |= SF_MONSTER_SIGHT;
 
-	//if (!(self->monsterinfo.aiflags & AI_GOOD_GUY) && !(self->monsterinfo.aiflags & AI_DO_NOT_COUNT))
-	if (!(self->monsterinfo.aiflags & AI_GOOD_GUY) && !(self->monsterinfo.monsterflags & MFL_DO_NOT_COUNT)/* && !(self->spawnflags & SF_MONSTER_TRIGGER_SPAWN*/)
+	// Zaero- spawnflag 16 = do not count
+	//	if ( !(self->monsterinfo.aiflags & AI_GOOD_GUY) && !(self->monsterinfo.aiflags & AI_DO_NOT_COUNT) )
+	//	if ( !(self->monsterinfo.aiflags & AI_GOOD_GUY) && !(self->monsterinfo.monsterflags & MFL_DO_NOT_COUNT)/* && !(self->spawnflags & SF_MONSTER_TRIGGER_SPAWN*/ )
+	// Zaero- spawnflag 16 = do not count
+	if ( !(self->monsterinfo.aiflags & AI_GOOD_GUY) && !(self->monsterinfo.monsterflags & MFL_DO_NOT_COUNT) && !(IsZaeroMap() && (self->spawnflags & 16)) )
 		level.total_monsters++;
 
 	self->nextthink = level.time + FRAMETIME;
@@ -1542,7 +1668,7 @@ int PatchMonsterModel (char *modelname)
 	else if (!strcmp(modelname,"models/monsters/soldier/tris.md2"))
 	{
 		is_soldier = true;
-		numskins = 24;
+		numskins = 32;	// was 24
 	}
 	// Knightmare added
 #ifdef CITADELMOD_FEATURES
@@ -1635,41 +1761,57 @@ int PatchMonsterModel (char *modelname)
 			case 5:
 				Com_strcat (skins[j], sizeof(skins[j]), "skin_ssp.pcx"); break;
 			case 6:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom1_lt.pcx"); break;
+				Com_strcat (skins[j], sizeof(skins[j]), "skin_pl.pcx"); break;
 			case 7:
-				Com_strcat (skins[j], sizeof(skins[j]), "custompain1_lt.pcx"); break;
+				Com_strcat (skins[j], sizeof(skins[j]), "skin_plp.pcx"); break;
 			case 8:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom1.pcx"); break;
+				Com_strcat (skins[j], sizeof(skins[j]), "custom1_lt.pcx"); break;
 			case 9:
-				Com_strcat (skins[j], sizeof(skins[j]), "custompain1.pcx"); break;
+				Com_strcat (skins[j], sizeof(skins[j]), "custompain1_lt.pcx"); break;
 			case 10:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom1_ss.pcx"); break;
+				Com_strcat (skins[j], sizeof(skins[j]), "custom1.pcx"); break;
 			case 11:
-				Com_strcat (skins[j], sizeof(skins[j]), "custompain1_ss.pcx"); break;
+				Com_strcat (skins[j], sizeof(skins[j]), "custompain1.pcx"); break;
 			case 12:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom2_lt.pcx"); break;
+				Com_strcat (skins[j], sizeof(skins[j]), "custom1_ss.pcx"); break;
 			case 13:
-				Com_strcat (skins[j], sizeof(skins[j]), "custompain2_lt.pcx"); break;
+				Com_strcat (skins[j], sizeof(skins[j]), "custompain1_ss.pcx"); break;
 			case 14:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom2.pcx"); break;
+				Com_strcat (skins[j], sizeof(skins[j]), "custom1_pl.pcx"); break;
 			case 15:
-				Com_strcat (skins[j], sizeof(skins[j]), "custompain2.pcx"); break;
+				Com_strcat (skins[j], sizeof(skins[j]), "custompain1_pl.pcx"); break;
 			case 16:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom2_ss.pcx"); break;
+				Com_strcat (skins[j], sizeof(skins[j]), "custom2_lt.pcx"); break;
 			case 17:
-				Com_strcat (skins[j], sizeof(skins[j]), "custompain2_ss.pcx"); break;
+				Com_strcat (skins[j], sizeof(skins[j]), "custompain2_lt.pcx"); break;
 			case 18:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom3_lt.pcx"); break;
+				Com_strcat (skins[j], sizeof(skins[j]), "custom2.pcx"); break;
 			case 19:
-				Com_strcat (skins[j], sizeof(skins[j]), "custompain3_lt.pcx"); break;
+				Com_strcat (skins[j], sizeof(skins[j]), "custompain2.pcx"); break;
 			case 20:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom3.pcx"); break;
+				Com_strcat (skins[j], sizeof(skins[j]), "custom2_ss.pcx"); break;
 			case 21:
-				Com_strcat (skins[j], sizeof(skins[j]), "custompain3.pcx"); break;
+				Com_strcat (skins[j], sizeof(skins[j]), "custompain2_ss.pcx"); break;
 			case 22:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom3_ss.pcx"); break;
+				Com_strcat (skins[j], sizeof(skins[j]), "custom2_pl.pcx"); break;
 			case 23:
+				Com_strcat (skins[j], sizeof(skins[j]), "custompain2_pl.pcx"); break;
+			case 24:
+				Com_strcat (skins[j], sizeof(skins[j]), "custom3_lt.pcx"); break;
+			case 25:
+				Com_strcat (skins[j], sizeof(skins[j]), "custompain3_lt.pcx"); break;
+			case 26:
+				Com_strcat (skins[j], sizeof(skins[j]), "custom3.pcx"); break;
+			case 27:
+				Com_strcat (skins[j], sizeof(skins[j]), "custompain3.pcx"); break;
+			case 28:
+				Com_strcat (skins[j], sizeof(skins[j]), "custom3_ss.pcx"); break;
+			case 29:
 				Com_strcat (skins[j], sizeof(skins[j]), "custompain3_ss.pcx"); break;
+			case 30:
+				Com_strcat (skins[j], sizeof(skins[j]), "custom3_pl.pcx"); break;
+			case 31:
+				Com_strcat (skins[j], sizeof(skins[j]), "custompain3_pl.pcx"); break;
 			}
 		}
 		else if (is_tank)

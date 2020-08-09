@@ -138,6 +138,48 @@ extern	cvar_t	*sk_shockwave_radius;
 extern	cvar_t	*sk_shockwave_effect_damage;
 extern	cvar_t	*sk_shockwave_effect_radius;
 
+extern	cvar_t	*sk_plasma_rifle_damage_bounce;
+extern	cvar_t	*sk_plasma_rifle_damage_bounce_dm;
+extern	cvar_t	*sk_plasma_rifle_damage_spread;
+extern	cvar_t	*sk_plasma_rifle_damage_spread_dm;
+extern	cvar_t	*sk_plasma_rifle_speed_bounce;
+extern	cvar_t	*sk_plasma_rifle_speed_spread;
+extern	cvar_t	*sk_plasma_rifle_radius;
+
+extern	cvar_t	*sk_flaregun_damage;
+extern	cvar_t	*sk_flaregun_rdamage;
+extern	cvar_t	*sk_flaregun_radius;
+extern	cvar_t	*sk_flaregun_speed;
+extern	cvar_t	*sk_flare_life;
+
+extern	cvar_t	*sk_tbomb_damage;
+extern	cvar_t	*sk_tbomb_radius;
+extern	cvar_t	*sk_tbomb_shrapnel;
+extern	cvar_t	*sk_tbomb_shrapnel_damage;
+extern	cvar_t	*sk_tbomb_life;
+extern	cvar_t	*sk_tbomb_health;
+
+/*
+extern	cvar_t	*sk_sniperrifle_damage;
+extern	cvar_t	*sk_sniperrifle_damage_dm;
+extern	cvar_t	*sk_sniperrifle_kick;
+extern	cvar_t	*sk_sniperrifle_kick_dm;
+
+extern	cvar_t	*sk_soniccannon_damage;
+extern	cvar_t	*sk_soniccannon_damage2;
+extern	cvar_t	*sk_soniccannon_radius;
+extern	cvar_t	*sk_soniccannon_maxfiretime;
+extern	cvar_t	*sk_soniccannon_maxcells;
+*/
+extern	cvar_t	*sk_empnuke_radius;
+/*
+extern	cvar_t	*sk_a2k_damage;
+extern	cvar_t	*sk_a2k_radius;
+*/
+extern	cvar_t	*sk_plasmashield_health;
+extern	cvar_t	*sk_plasmashield_life;
+
+
 // DM start values
 extern	cvar_t	*sk_dm_start_shells;
 extern	cvar_t	*sk_dm_start_bullets;
@@ -153,12 +195,10 @@ extern	cvar_t	*sk_dm_start_rounds;
 extern	cvar_t	*sk_dm_start_prox;
 extern	cvar_t	*sk_dm_start_tesla;
 extern	cvar_t	*sk_dm_start_shocksphere;
-/*
 extern	cvar_t	*sk_dm_start_flares;
 extern	cvar_t	*sk_dm_start_tbombs;
 extern	cvar_t	*sk_dm_start_empnuke;
 extern	cvar_t	*sk_dm_start_plasmashield;
-*/
 
 extern	cvar_t	*sk_dm_start_shotgun;
 extern	cvar_t	*sk_dm_start_sshotgun;
@@ -177,6 +217,10 @@ extern	cvar_t	*sk_dm_start_plasmabeam;
 extern	cvar_t	*sk_dm_start_disruptor;
 extern	cvar_t	*sk_dm_start_chainfist;
 extern	cvar_t	*sk_dm_start_shockwave;
+extern	cvar_t	*sk_dm_start_plasmarifle;
+extern	cvar_t	*sk_dm_start_flaregun;
+//extern	cvar_t	*sk_dm_start_sniperrifle;
+//extern	cvar_t	*sk_dm_start_soniccannon;
 
 // maximum values
 extern	cvar_t	*sk_max_health;
@@ -200,12 +244,11 @@ extern	cvar_t	*sk_max_prox;
 extern	cvar_t	*sk_max_tesla;
 extern	cvar_t	*sk_max_shocksphere;
 extern	cvar_t	*sk_max_fuel;
-/*
 extern	cvar_t	*sk_max_flares;
 extern	cvar_t	*sk_max_tbombs;
 extern	cvar_t	*sk_max_empnuke;
 extern	cvar_t	*sk_max_plasmashield;
-*/
+//extern	cvar_t	*sk_max_a2k;
 
 // maximum settings if a player gets a bandolier
 extern	cvar_t	*sk_bando_bullets;
@@ -216,7 +259,7 @@ extern	cvar_t	*sk_bando_magslugs;
 extern	cvar_t	*sk_bando_flechettes;
 extern	cvar_t	*sk_bando_rounds;
 extern	cvar_t	*sk_bando_fuel;
-//extern	cvar_t	*sk_bando_flares;
+extern	cvar_t	*sk_bando_flares;
 
 // maximum settings if a player gets a pack
 extern	cvar_t	*sk_pack_bullets;
@@ -233,38 +276,35 @@ extern	cvar_t	*sk_pack_prox;
 extern	cvar_t	*sk_pack_tesla;
 extern	cvar_t	*sk_pack_shocksphere;
 extern	cvar_t	*sk_pack_fuel;
-/*
 extern	cvar_t	*sk_pack_flares;
 extern	cvar_t	*sk_pack_tbombs;
 extern	cvar_t	*sk_pack_empnuke;
 extern	cvar_t	*sk_pack_plasmashield;
-*/
+//extern	cvar_t	*sk_pack_a2k;
 
 extern	cvar_t	*sk_pack_give_xatrix_ammo;
 extern	cvar_t	*sk_pack_give_rogue_ammo;
-//extern	cvar_t	*sk_pack_give_zaero_ammo;
+extern	cvar_t	*sk_pack_give_zaero_ammo;
 
 // pickup values
-extern	cvar_t	*sk_box_shells; //value of shells
-extern	cvar_t	*sk_box_bullets; //value of bullets
-extern	cvar_t	*sk_box_grenades; //value of grenade pack
-extern	cvar_t	*sk_box_rockets; //value of rocket pack
-extern	cvar_t	*sk_box_cells; //value of cell pack
-extern	cvar_t	*sk_box_slugs; //value of slug box
-extern	cvar_t	*sk_box_magslugs; //value ofmagslug box
-extern	cvar_t	*sk_box_flechettes; //value of flechettes
-extern	cvar_t	*sk_box_prox; //value of prox
-extern	cvar_t	*sk_box_tesla; //value of tesla pack
-extern	cvar_t	*sk_box_disruptors; //value of disruptor pack
-extern	cvar_t	*sk_box_shocksphere; //value of shocksphere
-extern	cvar_t	*sk_box_trap; //value of trap
-extern	cvar_t	*sk_box_fuel; //value of fuel
-/*
-extern	cvar_t	*sk_box_flares;
-extern	cvar_t	*sk_box_tbombs;
-extern	cvar_t	*sk_box_empnuke;
-extern	cvar_t	*sk_box_plasmashield;
-*/
+extern	cvar_t	*sk_box_shells; // value of shells
+extern	cvar_t	*sk_box_bullets; // value of bullets
+extern	cvar_t	*sk_box_grenades; // value of grenade pack
+extern	cvar_t	*sk_box_rockets; // value of rocket pack
+extern	cvar_t	*sk_box_cells; // value of cell pack
+extern	cvar_t	*sk_box_slugs; // value of slug box
+extern	cvar_t	*sk_box_magslugs; // value ofmagslug box
+extern	cvar_t	*sk_box_flechettes; // value of flechettes
+extern	cvar_t	*sk_box_prox; // value of prox
+extern	cvar_t	*sk_box_tesla; // value of tesla pack
+extern	cvar_t	*sk_box_disruptors; // value of disruptor pack
+extern	cvar_t	*sk_box_shocksphere; // value of shocksphere
+extern	cvar_t	*sk_box_trap; // value of trap
+extern	cvar_t	*sk_box_fuel; // value of fuel
+extern	cvar_t	*sk_box_flares;	// value of flares box
+extern	cvar_t	*sk_box_tbombs;	// value of IRED box
+extern	cvar_t	*sk_box_empnuke;	// value of EMP nuke
+extern	cvar_t	*sk_box_plasmashield;	// value of plasma shield
 
 // items/powerups
 extern	cvar_t	*sk_armor_bonus_value; //value of armor shards
@@ -289,4 +329,6 @@ extern	cvar_t	*sk_double_time;
 extern	cvar_t	*sk_quad_fire_time;
 extern	cvar_t	*sk_doppleganger_time;
 extern	cvar_t	*sk_stasis_time;
-//extern	cvar_t	*sk_visor_time;
+extern	cvar_t	*sk_visor_time;
+//extern	cvar_t	*sk_sniper_charge_time;
+//extern	cvar_t	*sk_a2k_detonate_time;

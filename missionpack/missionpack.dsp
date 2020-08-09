@@ -533,6 +533,10 @@ SOURCE=.\z_boss.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\z_camera.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\z_handler.c
 # End Source File
 # Begin Source File

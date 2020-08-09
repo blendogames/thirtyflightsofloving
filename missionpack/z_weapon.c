@@ -2,9 +2,11 @@
 #include "m_player.h"
 
 extern qboolean is_quad;
+extern qboolean	is_double;
+extern qboolean is_quadfire;
 extern byte is_silenced;
 
-void playQuadSound(edict_t *ent);
+//void playQuadSound(edict_t *ent);
 void Weapon_Generic (edict_t *ent, 
 					 int FRAME_ACTIVATE_LAST, 
 					 int FRAME_FIRE_LAST, 
@@ -19,10 +21,10 @@ void check_dodge (edict_t *self, vec3_t start, vec3_t dir, int speed);
 void Grenade_Explode(edict_t *ent);
 void P_ProjectSource (gclient_t *client, vec3_t point, vec3_t distance, vec3_t forward, vec3_t right, vec3_t result);
 
-#ifdef USE_ZAERO_ITEMS_WEAPONS
+#ifdef USE_ZAERO_WEAPONS
 void fire_sconnan (edict_t *self);
 void fire_sconnanEffects (edict_t *self);
-#endif // USE_ZAERO_ITEMS_WEAPONS
+#endif // USE_ZAERO_WEAPONS
 
 const int SC_MAXFIRETIME    = 5;         // in seconds...
 const int SC_BASEDAMAGE     = 10;        // minimum damage
@@ -72,6 +74,8 @@ void angleToward (edict_t *self, vec3_t point, float speed)
 /*
 	Laser Trip Bombs
 */
+#define TBOMB_KILLABLE
+
 // spawnflags
 #define CHECK_BACK_WALL 1
 
@@ -85,7 +89,7 @@ void angleToward (edict_t *self, vec3_t point, float speed)
 #define TBOMB_SHRAPNEL_DMG	15
 #define TBOMB_MAX_EXIST	25
 
-#ifdef USE_ZAERO_ITEMS_WEAPONS
+//#ifdef USE_ZAERO_ITEMS_WEAPONS
 void shrapnel_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
 	// do damage if we can
@@ -102,33 +106,42 @@ void shrapnel_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *
 
 void TripBomb_Explode (edict_t *ent)
 {
-	vec3_t origin;
-	int i = 0;
+	vec3_t	origin;
+	int		i = 0, type;
 
 	T_RadiusDamage(ent, ent->owner ? ent->owner : ent, ent->dmg, ent->enemy, ent->dmg_radius, MOD_TRIPBOMB);
 
 	VectorMA (ent->s.origin, -0.02, ent->velocity, origin);
 
-	gi.WriteByte (svc_temp_entity);
 	if (ent->waterlevel)
 	{
 		if (ent->groundentity)
-			gi.WriteByte (TE_GRENADE_EXPLOSION_WATER);
+		//	gi.WriteByte (TE_GRENADE_EXPLOSION_WATER);
+			type = TE_GRENADE_EXPLOSION_WATER;
 		else
-			gi.WriteByte (TE_ROCKET_EXPLOSION_WATER);
+		//	gi.WriteByte (TE_ROCKET_EXPLOSION_WATER);
+			type = TE_ROCKET_EXPLOSION_WATER;
 	}
 	else
 	{
 		if (ent->groundentity)
-			gi.WriteByte (TE_GRENADE_EXPLOSION);
+		//	gi.WriteByte (TE_GRENADE_EXPLOSION);
+			type = TE_GRENADE_EXPLOSION;
 		else
-			gi.WriteByte (TE_ROCKET_EXPLOSION);
+		//	gi.WriteByte (TE_ROCKET_EXPLOSION);
+			type = TE_ROCKET_EXPLOSION;
 	}
+	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (type);
 	gi.WritePosition (origin);
 	gi.multicast (ent->s.origin, MULTICAST_PHS);
 
+	// Lazarus reflections
+	if (level.num_reflectors)
+		ReflectExplosion (type, origin);
+
 	// throw off some debris
-	for (i = 0; i < sk_tbomb_shrapnel->value; i++)
+	for (i = 0; i < (int)sk_tbomb_shrapnel->value; i++)
 	{
 		edict_t *sh = G_Spawn();
 		vec3_t forward, right, up;
@@ -146,12 +159,46 @@ void TripBomb_Explode (edict_t *ent)
 		VectorMA(forward, crandom()*500, up, forward);
 		VectorCopy(forward, sh->velocity);
 		sh->touch = shrapnel_touch;
+#ifdef KMQUAKE2_ENGINE_MOD
+		sh->think = gib_fade;	// Knightmare- have the debris fade away
+#else
 		sh->think = G_FreeEdict;
+#endif // KMQUAKE2_ENGINE_MOD
 		sh->nextthink = level.time + 3.0 + crandom() * 1.5;
 	}
 
-	G_FreeEdict(ent);
+	G_FreeEdict (ent);
 }
+
+// Knightmare added
+#ifdef TBOMB_KILLABLE
+void tripbomb_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+{
+//	gi.dprintf("tripbomb_die\n");
+	// if set off by another TripBomb, delay a little (chained explosions)
+	if ( strcmp(inflictor->classname, "ired") )
+	{
+		self->takedamage = DAMAGE_NO;
+		if (self->chain) {
+			G_FreeEdict (self->chain);
+			self->chain = NULL;
+		}
+		TripBomb_Explode (self);
+	}
+	else
+	{
+		self->takedamage = DAMAGE_NO;
+		if (self->chain) {
+			G_FreeEdict (self->chain);
+			self->chain = NULL;
+		}
+		self->think = TripBomb_Explode;
+		self->nextthink = level.time + FRAMETIME;
+	}
+
+}
+#endif	// TBOMB_KILLABLE
+// end Knightmare
 
 void tripbomb_laser_think (edict_t *self)
 {
@@ -254,7 +301,7 @@ void create_tripbomb_laser (edict_t *bomb)
 	laser->think = tripbomb_laser_on;
 	laser->nextthink = level.time + FRAMETIME;
 	laser->svflags |= SVF_NOCLIENT;
-	laser->timeout = level.time + TBOMB_TIMEOUT;
+	laser->timeout = level.time + sk_tbomb_life->value;	// was TBOMB_TIMEOUT;
 	gi.linkentity (laser);
 }
 
@@ -263,12 +310,12 @@ void use_tripbomb (edict_t *self, edict_t *other, edict_t *activator)
 	if (self->chain)
 	{
 		// we already have a laser, remove it
-		G_FreeEdict(self->chain);
+		G_FreeEdict (self->chain);
 		self->chain = NULL;
 	}
 	else
 		// create the laser
-		create_tripbomb_laser(self);
+		create_tripbomb_laser (self);
 }
 
 void turnOffGlow (edict_t *self)
@@ -279,6 +326,12 @@ void turnOffGlow (edict_t *self)
 	self->nextthink = 0;
 }
 
+// Knightmare- removed this for shootable tripbombs
+#ifdef TBOMB_KILLABLE
+void tripbomb_pain (edict_t *self, edict_t *other, float kick, int damage)
+{
+}
+#else
 void tripbomb_pain (edict_t *self, edict_t *other, float kick, int damage)
 {
 	// play the green glow sound
@@ -296,6 +349,8 @@ void tripbomb_pain (edict_t *self, edict_t *other, float kick, int damage)
 		self->think = turnOffGlow;
 	}
 }
+#endif	// TBOMB_KILLABLE
+
 
 void tripbomb_think (edict_t *self)
 {
@@ -334,12 +389,20 @@ void setupBomb (edict_t *bomb, char *classname, float damage, float damage_radiu
 	bomb->radius_dmg = damage;
 	bomb->dmg = damage;
 	bomb->dmg_radius = damage_radius;
+	// Knightmare- made the tripbomb destroyable
+#ifdef TBOMB_KILLABLE
+	bomb->health = (int)sk_tbomb_health->value;	// was 1
+	bomb->takedamage = DAMAGE_AIM;
+	bomb->pain = NULL;
+	bomb->die = tripbomb_die;
+#else
 	bomb->health = 1;
 	bomb->takedamage = DAMAGE_IMMORTAL; // health will not be deducted
 	bomb->pain = tripbomb_pain;
+#endif	// TBOMB_KILLABLE
 }
 
-void removeOldest ()
+void removeOldest (void)
 {
 	edict_t *oldestEnt = NULL;
 	edict_t *e = NULL;
@@ -387,23 +450,23 @@ qboolean fire_lasertripbomb (edict_t *self, vec3_t start, vec3_t dir, float time
 	if (tr.fraction == 1.0)
 	{
 		// not close enough
-		//gi.cprintf(self, PRINT_HIGH, "Not close enough to a wall");
+	//	gi.cprintf(self, PRINT_HIGH, "Not close enough to a wall");
 		return false;
 	}
 
 	if (Q_stricmp(tr.ent->classname, "worldspawn") != 0)
 	{
-		//gi.cprintf(self, PRINT_HIGH, "Hit something other than a wall");
+	//	gi.cprintf(self, PRINT_HIGH, "Hit something other than a wall");
 		return false;
 	}
 
 	// create the bomb
 	bomb = G_Spawn();
-	//VectorCopy(tr.endpos, bomb->s.origin);
+//	VectorCopy(tr.endpos, bomb->s.origin);
 	VectorMA(tr.endpos, 3, tr.plane.normal, bomb->s.origin);
 	vectoangles(tr.plane.normal, bomb->s.angles);
 	bomb->owner = self;
-	setupBomb(bomb, "ired", damage, damage_radius);
+	setupBomb (bomb, "ired", damage, damage_radius);
 	gi.linkentity(bomb);
 
 	bomb->timestamp = level.time;
@@ -430,6 +493,8 @@ void weapon_lasertripbomb_fire (edict_t *ent)
 		float radius = sk_tbomb_radius->value;
 		if (is_quad)
 			damage *= 4;
+		if (is_double)
+			damage *= 2;
 
 		// place the trip bomb
 		VectorSet(offset, 0, 0, ent->viewheight * 0.75);
@@ -444,7 +509,7 @@ void weapon_lasertripbomb_fire (edict_t *ent)
 			ent->client->ps.gunindex = gi.modelindex("models/weapons/v_ired/hand.md2");
 
 			// play quad sound
-			playQuadSound(ent);
+		//	playQuadSound (ent);
 		}
 	}
 	else if (ent->client->ps.gunframe == 15)
@@ -598,9 +663,9 @@ void SP_misc_lasertripbomb (edict_t *bomb)
 	// precache
 	gi.soundindex("weapons/ired/las_set.wav");
 	gi.soundindex("weapons/ired/las_arm.wav");
-	//gi.soundindex("weapons/ired/las_tink.wav");
-	//gi.soundindex("weapons/ired/las_trig.wav");
-	//gi.soundindex("weapons/ired/las_glow.wav");
+//	gi.soundindex("weapons/ired/las_tink.wav");
+//	gi.soundindex("weapons/ired/las_trig.wav");
+//	gi.soundindex("weapons/ired/las_glow.wav");
 	gi.modelindex("models/objects/shrapnel/tris.md2");
 	gi.modelindex("models/objects/ired/tris.md2");
 
@@ -630,7 +695,7 @@ void SP_misc_lasertripbomb (edict_t *bomb)
 	}
 	gi.linkentity(bomb);
 }
-#endif	// USE_ZAERO_ITEMS_WEAPONS
+//#endif	// USE_ZAERO_ITEMS_WEAPONS
 
 /*
 ======================================================================
@@ -639,7 +704,7 @@ Sonic Cannon
 
 ======================================================================
 */
-#ifdef USE_ZAERO_ITEMS_WEAPONS
+#ifdef USE_ZAERO_WEAPONS
 void weapon_sc_fire (edict_t *ent)
 {
 	int		maxfiretime = sk_soniccannon_maxfiretime->value;
@@ -794,6 +859,8 @@ void Weapon_SonicCannon (edict_t *ent)
 	}
 
 	Weapon_Generic (ent, 6, 22, 52, 57, pause_frames, fire_frames, weapon_sc_fire);
+	if (is_quadfire)
+		Weapon_Generic (ent, 6, 22, 52, 57, pause_frames, fire_frames, weapon_sc_fire);
 }
 
 
@@ -899,9 +966,9 @@ void fire_sconnan (edict_t *self)
 	}
 
 	// play quad damage sound
-	playQuadSound(self);
+//	playQuadSound (self);
 }
-#endif	// USE_ZAERO_ITEMS_WEAPONS
+#endif	// USE_ZAERO_WEAPONS
 
 
 
@@ -1052,7 +1119,7 @@ void fire_flare (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed,
 	gi.linkentity (flare);
 }
 
-#ifdef USE_ZAERO_ITEMS_WEAPONS
+//#ifdef USE_ZAERO_ITEMS_WEAPONS
 void Weapon_FlareLauncher_Fire (edict_t *ent)
 {
 	vec3_t	offset, start;
@@ -1069,7 +1136,7 @@ void Weapon_FlareLauncher_Fire (edict_t *ent)
 	PlayerNoise(ent, start, PNOISE_WEAPON);
 
 	// play quad sound
-	playQuadSound(ent);
+//	playQuadSound (ent);
 
 	if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
 		ent->client->pers.inventory[ent->client->ammo_index]--;
@@ -1087,8 +1154,10 @@ void Weapon_FlareGun (edict_t *ent)
 	static int	fire_frames[]	= {8, 0};
 
 	Weapon_Generic (ent, 5, 14, 44, 48, pause_frames, fire_frames, Weapon_FlareLauncher_Fire);
+	if (is_quadfire)
+		Weapon_Generic (ent, 5, 14, 44, 48, pause_frames, fire_frames, Weapon_FlareLauncher_Fire);
 }
-#endif	// USE_ZAERO_ITEMS_WEAPONS
+//#endif	// USE_ZAERO_ITEMS_WEAPONS
 
 /*
 ======================================================================
@@ -1097,7 +1166,7 @@ Sniper Rifle
 
 ======================================================================
 */
-#ifdef USE_ZAERO_ITEMS_WEAPONS
+#ifdef USE_ZAERO_WEAPONS
 void fire_sniper_bullet (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick)
 {
 	trace_t		tr;
@@ -1107,7 +1176,7 @@ void fire_sniper_bullet (edict_t *self, vec3_t start, vec3_t aimdir, int damage,
 
 	VectorMA	(start, WORLD_SIZE, aimdir, end);	// was 8192
 	VectorCopy(start, s);
-	while (i<256) // Knightmare- prevent infinite loop, was 1
+	while (i < 256) // Knightmare- prevent infinite loop, was 1
 	{
 		tr = gi.trace (s, NULL, NULL, end, ignore, MASK_SHOT_NO_WINDOW);
 		if (tr.fraction >= 1.0)
@@ -1164,10 +1233,13 @@ void weapon_sniperrifle_fire (edict_t *ent)
 		kick = 	sk_sniperrifle_kick->value; // 400
 	}
 
-	if (is_quad)
-	{
+	if (is_quad) {
 		damage *= 4;
 		kick *= 4;
+	}
+	if (is_double) {
+		damage *= 2;
+		kick *= 2;
 	}
 
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
@@ -1184,7 +1256,7 @@ void weapon_sniperrifle_fire (edict_t *ent)
   	PlayerNoise(ent, start, PNOISE_WEAPON);
 
 	// play quad sound
-	playQuadSound(ent);
+//	playQuadSound (ent);
 
 	VectorScale (forward, -20, ent->client->kick_origin);
 	ent->client->kick_angles[0] = -2;
@@ -1339,7 +1411,7 @@ void Weapon_SniperRifle(edict_t *ent)
 		ent->client->sniperFramenum = level.framenum + (sk_sniper_charge_time->value * 10);	// SNIPER_CHARGE_TIME;
 	}
 }
-#endif // USE_ZAERO_ITEMS_WEAPONS
+#endif // USE_ZAERO_WEAPONS
 
 /*
 ======================================================================
@@ -1348,7 +1420,7 @@ Armageddon 2000
 
 ======================================================================
 */
-#ifdef USE_ZAERO_ITEMS_WEAPONS
+#ifdef USE_ZAERO_WEAPONS
 void weapon_a2k_exp_think(edict_t *self)
 {
 	self->s.frame++;
@@ -1406,12 +1478,12 @@ void weapon_a2k_fire (edict_t *ent)
 		ent->client->ps.gunframe++;
 		
 		// start scream sound
-		//ent->client->weapon_sound = gi.soundindex("weapons/a2k/countdn.wav");
+	//	ent->client->weapon_sound = gi.soundindex("weapons/a2k/countdn.wav");
 		gi.sound(ent, CHAN_WEAPON, gi.soundindex("weapons/a2k/countdn.wav"), 1, ATTN_NORM, 0);
-		//gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/a2k/ak_trig.wav"), 1, ATTN_NORM, 0);
+	//	gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/a2k/ak_trig.wav"), 1, ATTN_NORM, 0);
 
 		// play quad sound
-		playQuadSound(ent);
+	//	playQuadSound (ent);
 	}
 	else if (ent->client->a2kFramenum == level.framenum)
 	{
@@ -1422,12 +1494,16 @@ void weapon_a2k_fire (edict_t *ent)
 		float		dmg_radius = sk_a2k_radius->value; // was 512
 
 		// play quad sound
-		playQuadSound(ent);
-		if (is_quad)
-		{
+	//	playQuadSound (ent);
+		if (is_quad) {
 			damage *= 4;
 			dmg_radius *= 4;
 		}
+		if (is_double) {
+			damage *= 4;
+			dmg_radius *= 4;
+		}
+
 		// do some damage
 		T_RadiusDamage(ent, ent, damage, NULL, dmg_radius, MOD_A2K);
 		
@@ -1474,7 +1550,7 @@ void Weapon_A2k (edict_t *ent)
 
 	Weapon_Generic (ent, 9, 19, 49, 55, pause_frames, fire_frames, weapon_a2k_fire);
 }
-#endif	// USE_ZAERO_ITEMS_WEAPONS
+#endif	// USE_ZAERO_WEAPONS
 
 
 /*

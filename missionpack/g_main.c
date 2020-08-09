@@ -300,7 +300,7 @@ void ClientEndServerFrames (void)
 		ClientEndServerFrame (ent);
 	}
 
-	//reflection stuff -- modified from psychospaz' original code
+	// reflection stuff -- modified from psychospaz' original code
 	if (level.num_reflectors)
 	{
 		ent = &g_edicts[0];
@@ -323,7 +323,9 @@ void ClientEndServerFrames (void)
 			if ( (ent->solid == SOLID_BSP) && (ent->movetype != MOVETYPE_PUSHABLE))
 				continue;
 			if (ent->client && (ent->client->resp.spectator || (ent->health <= 0) || (ent->deadflag == DEAD_DEAD)) )
-				continue;		
+				continue;
+			if (ent->moreflags & FL2_DO_NOT_REFLECT)	// Knightmare- don't reflect flagged entities
+				continue;
 			AddReflection(ent);	
 		}
 	}

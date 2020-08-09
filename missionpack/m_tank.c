@@ -322,7 +322,7 @@ void TankBlaster (edict_t *self)
 	vec3_t	dir;
 	int		flash_number;
 
-	if(!self->enemy || !self->enemy->inuse)		//PGM
+	if (!self->enemy || !self->enemy->inuse)		//PGM
 		return;									//PGM
 
 	if (self->s.frame == FRAME_attak110)
@@ -339,7 +339,7 @@ void TankBlaster (edict_t *self)
 	end[2] += self->enemy->viewheight;
 
 	// Lazarus fog reduction of accuracy
-	if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+	if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 	{
 		end[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 		end[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -368,11 +368,12 @@ void TankRocket (edict_t *self)
 	vec3_t	target;
 	qboolean blindfire = false;
 
-	if(!self->enemy || !self->enemy->inuse)		//PGM
+	if (!self->enemy || !self->enemy->inuse)		//PGM
 		return;									//PGM
 
 	// pmm - blindfire check
 	if (self->monsterinfo.aiflags & AI_MANUAL_STEERING)
+//	if ( (self->monsterinfo.aiflags & AI_MANUAL_STEERING) && !IsZaeroMap() )	// Knightmare- no blind firing on Zaero maps, fix undesired airfield behavior
 		blindfire = true;
 	else
 		blindfire = false;
@@ -409,7 +410,7 @@ void TankRocket (edict_t *self)
 	}
 	// pmm
 	// don't shoot at feet if they're above me.
-	else if(random() < 0.66 || (start[2] < self->enemy->absmin[2]))
+	else if (random() < 0.66 || (start[2] < self->enemy->absmin[2]))
 	{
 //		gi.dprintf("normal shot\n");
 		VectorCopy (self->enemy->s.origin, vec);
@@ -423,7 +424,7 @@ void TankRocket (edict_t *self)
 	}
 //PGM
 	// Lazarus fog reduction of accuracy
-	if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+	if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 	{
 		vec[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 		vec[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -435,7 +436,7 @@ void TankRocket (edict_t *self)
 	// 20, 35, 50, 65 chance of leading
 	// Lazarus: Switched this around from Rogue code... it led target more often
 	//          for Easy, which seemed backwards
-	if((!blindfire) && (random() < (0.2 + skill->value * 0.15))
+	if ((!blindfire) && (random() < (0.2 + skill->value * 0.15))
 		&& !(self->spawnflags & SF_MONSTER_SPECIAL))
 	{
 		float	dist;
@@ -500,9 +501,9 @@ void TankRocket (edict_t *self)
 	else
 	{
 		trace = gi.trace(start, vec3_origin, vec3_origin, vec, self, MASK_SHOT);
-		if(trace.ent == self->enemy || trace.ent == world)
+		if (trace.ent == self->enemy || trace.ent == world)
 		{
-			if(trace.fraction > 0.5 || (trace.ent && trace.ent->client))
+			if (trace.fraction > 0.5 || (trace.ent && trace.ent->client))
 			//	monster_fire_rocket (self, start, dir, 50, rocketSpeed, MZ2_CHICK_ROCKET_1);
 				monster_fire_rocket (self, start, dir, 50, rocketSpeed, MZ2_CHICK_ROCKET_1,
 					(self->spawnflags & SF_MONSTER_SPECIAL ? self->enemy : NULL) );
@@ -521,7 +522,7 @@ void TankMachineGun (edict_t *self)
 	vec3_t	forward, right;
 	int		flash_number;
 
-	if(!self->enemy || !self->enemy->inuse)		//PGM
+	if (!self->enemy || !self->enemy->inuse)		//PGM
 		return;									//PGM
 
 	flash_number = MZ2_TANK_MACHINEGUN_1 + (self->s.frame - FRAME_attak406);
@@ -535,7 +536,7 @@ void TankMachineGun (edict_t *self)
 		vec[2] += self->enemy->viewheight;
 
 		// Lazarus fog reduction of accuracy
-		if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+		if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 		{
 			vec[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 			vec[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -557,6 +558,14 @@ void TankMachineGun (edict_t *self)
 	dir[2] = 0;
 
 	AngleVectors (dir, forward, NULL, NULL);
+
+	// Zaero
+	if (EMPNukeCheck(self, start))
+	{
+		gi.sound (self, CHAN_AUTO, gi.soundindex("items/empnuke/emp_missfire.wav"), 1, ATTN_NORM, 0);
+		return;
+	}
+	// end Zaero
 
 	monster_fire_bullet (self, start, forward, 20, 4, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, flash_number);
 }	
@@ -907,7 +916,7 @@ void tank_dead (edict_t *self)
 
 	//Knightmare- dead tanks are really too big to fade away
 	// Lazarus monster fade
-/*	if(world->effects & FX_WORLDSPAWN_CORPSEFADE)
+/*	if (world->effects & FX_WORLDSPAWN_CORPSEFADE)
 	{
 		self->think=FadeDieSink;
 		self->nextthink=level.time+corpse_fadetime->value;
@@ -991,10 +1000,10 @@ void tank_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
 //PGM
 qboolean tank_blocked (edict_t *self, float dist)
 {
-	if(blocked_checkshot (self, 0.25 + (0.05 * skill->value) ))
+	if (blocked_checkshot (self, 0.25 + (0.05 * skill->value) ))
 		return true;
 
-	if(blocked_checkplat (self, dist))
+	if (blocked_checkplat (self, dist))
 		return true;
 
 	return false;
@@ -1052,22 +1061,22 @@ void SP_monster_tank (edict_t *self)
 
 	if (strcmp(self->classname, "monster_tank_commander") == 0)
 	{
-		if(!self->health)
+		if (!self->health)
 			self->health = 1000;
-		if(!self->gib_health)
+		if (!self->gib_health)
 			self->gib_health = -400;
 		self->common_name = "Tank Commander";
 	}
 	else
 	{
-		if(!self->health)
+		if (!self->health)
 			self->health = 750;
-		if(!self->gib_health)
+		if (!self->gib_health)
 			self->gib_health = -400;
 		self->common_name = "Tank";
 	}
 
-	if(!self->mass)
+	if (!self->mass)
 		self->mass = 500;
 
 	self->pain = tank_pain;
@@ -1088,7 +1097,7 @@ void SP_monster_tank (edict_t *self)
 		self->fogclip |= 2; //custom bloodtype flag
 
 	// Lazarus
-	if(self->powerarmor)
+	if (self->powerarmor)
 	{
 		if (self->powerarmortype == 1)
 			self->monsterinfo.power_armor_type = POWER_ARMOR_SCREEN;
@@ -1097,7 +1106,7 @@ void SP_monster_tank (edict_t *self)
 		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
 
-	if(!self->monsterinfo.flies)
+	if (!self->monsterinfo.flies)
 		self->monsterinfo.flies = 0.05;
 
 	gi.linkentity (self);
@@ -1108,7 +1117,7 @@ void SP_monster_tank (edict_t *self)
 	walkmonster_start(self);
 
 	// PMM
-	//self->monsterinfo.aiflags |= AI_IGNORE_SHOTS;
+//	self->monsterinfo.aiflags |= AI_IGNORE_SHOTS;
 	self->monsterinfo.blindfire = true;
-	//pmm
+	// pmm
 }

@@ -86,7 +86,7 @@ void Use_Multi (edict_t *ent, edict_t *other, edict_t *activator)
 //PGM
 	if (ent->spawnflags & TRIGGER_TOGGLE)
 	{
-		if(ent->solid == SOLID_TRIGGER)
+		if (ent->solid == SOLID_TRIGGER)
 			ent->solid = SOLID_NOT;
 		else
 			ent->solid = SOLID_TRIGGER;
@@ -102,7 +102,7 @@ void Use_Multi (edict_t *ent, edict_t *other, edict_t *activator)
 
 void Touch_Multi (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
-	if(other->client || (other->flags & FL_ROBOT))
+	if (other->client || (other->flags & FL_ROBOT))
 	{
 		if (self->spawnflags & TRIGGER_NOT_PLAYER)
 			return;
@@ -115,7 +115,7 @@ void Touch_Multi (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *su
 	else
 		return;
 
-	if( (self->spawnflags & TRIGGER_CAMOWNER) && (!other->client || !other->client->spycam))
+	if ( (self->spawnflags & TRIGGER_CAMOWNER) && (!other->client || !other->client->spycam))
 		return;
 
 	if (!VectorCompare(self->movedir, vec3_origin))
@@ -304,7 +304,7 @@ void SP_trigger_relay (edict_t *self)
 		self->noise_index = gi.soundindex ("misc/talk.wav");
 	else if (self->sounds == 3)
 		self->noise_index = -1;
-	if(!self->count) self->count=-1;
+	if (!self->count) self->count=-1;
 // end DWH
 	self->use = trigger_relay_use;
 }
@@ -431,13 +431,13 @@ void trigger_key_use (edict_t *self, edict_t *other, edict_t *activator)
 				if (!ent->client)
 					continue;
 				// DWH: keep key
-				if(!(self->spawnflags & 2))
+				if (!(self->spawnflags & 2))
 					ent->client->pers.inventory[index] = 0;
 			}
 		}
 	}
 	// DWH: keep key
-	else if(!(self->spawnflags & 2))
+	else if (!(self->spawnflags & 2))
 	{
 		activator->client->pers.inventory[index]--;
 	}
@@ -445,7 +445,7 @@ void trigger_key_use (edict_t *self, edict_t *other, edict_t *activator)
 	G_UseTargets (self, activator);
 
 	// DWH - multi-use
-	if(!(self->spawnflags & 1))
+	if (!(self->spawnflags & 1))
 	{
 		self->use       = NULL;
 		self->think     = G_FreeEdict;
@@ -475,7 +475,7 @@ void SP_trigger_key (edict_t *self)
 		return;
 	}
 	//Knightmare- don't load these sounds if it is silent
-	if(!(self->spawnflags & 4))
+	if (!(self->spawnflags & 4))
 	{
 		gi.soundindex ("misc/keytry.wav");
 		gi.soundindex ("misc/keyuse.wav");
@@ -606,9 +606,9 @@ void trigger_push_touch (edict_t *self, edict_t *other, cplane_t *plane, csurfac
 			if (other->fly_sound_debounce_time < level.time)
 			{
 				other->fly_sound_debounce_time = level.time + 1.5;
-				if(self->spawnflags & PUSH_CUSTOM_SND)
+				if (self->spawnflags & PUSH_CUSTOM_SND)
 				{
-					if(self->noise_index)
+					if (self->noise_index)
 						gi.sound(other, CHAN_AUTO, self->noise_index, 1, ATTN_NORM, 0);
 				}
 				else
@@ -953,10 +953,10 @@ void SP_trigger_gravity_bbox (edict_t *self)
 //	self->gravity = atoi(st.gravity);
 	self->gravity = atof(st.gravity);
 
-	if(self->spawnflags & 1)				// TOGGLE
+	if (self->spawnflags & 1)				// TOGGLE
 		self->use = trigger_gravity_use;
 
-	if(self->spawnflags & 2)				// START_OFF
+	if (self->spawnflags & 2)				// START_OFF
 	{
 		self->use = trigger_gravity_use;
 		self->solid = SOLID_NOT;
@@ -1071,12 +1071,12 @@ void SP_trigger_mass (edict_t *self)
 //		self->noise_index = gi.soundindex ("misc/trigger1.wav");
 		self->noise_index = -1;
 
-	if(!self->wait)
+	if (!self->wait)
 		self->wait = 0.2;
 	self->touch = trigger_mass_touch;
 	self->movetype = MOVETYPE_NONE;
 	self->svflags |= SVF_NOCLIENT;
-	if(self->spawnflags & TRIGGER_TRIGGERED)
+	if (self->spawnflags & TRIGGER_TRIGGERED)
 	{
 		self->solid = SOLID_NOT;
 		self->use = trigger_enable;
@@ -1086,7 +1086,7 @@ void SP_trigger_mass (edict_t *self)
 		self->solid = SOLID_TRIGGER;
 		self->use = Use_Multi;
 	}
-	if(!self->mass)
+	if (!self->mass)
 		self->mass = 100;
 
 	gi.setmodel (self, self->model);
@@ -1118,12 +1118,12 @@ void SP_trigger_mass_bbox (edict_t *self)
 //		self->noise_index = gi.soundindex ("misc/trigger1.wav");
 		self->noise_index = -1;
 
-	if(!self->wait) self->wait = 0.2;
+	if (!self->wait) self->wait = 0.2;
 	self->touch = trigger_mass_touch;
 
 	InitTriggerBbox (self);
 
-	if(self->spawnflags & TRIGGER_TRIGGERED)
+	if (self->spawnflags & TRIGGER_TRIGGERED)
 	{
 		self->solid = SOLID_NOT;
 		self->use = trigger_enable;
@@ -1133,7 +1133,7 @@ void SP_trigger_mass_bbox (edict_t *self)
 		self->solid = SOLID_TRIGGER;
 		self->use = Use_Multi;
 	}
-	if(!self->mass)
+	if (!self->mass)
 		self->mass = 100;
 
 	gi.linkentity (self);
@@ -1182,13 +1182,13 @@ void SP_trigger_inside (edict_t *self)
 	vec3_t v;
 
 	VectorMA (self->mins, 0.5, self->size, v);
-	if(!self->target)
+	if (!self->target)
 	{
 		gi.dprintf("trigger_inside with no target at %s.\n",vtos(v));
 		G_FreeEdict(self);
 		return;
 	}
-	if(!self->pathtarget)
+	if (!self->pathtarget)
 	{
 		gi.dprintf("trigger_inside with no pathtarget at %s.\n",vtos(v));
 		G_FreeEdict(self);
@@ -1197,7 +1197,7 @@ void SP_trigger_inside (edict_t *self)
 	self->movetype = MOVETYPE_NONE;
 	self->svflags  |= SVF_NOCLIENT;
 	self->solid    = SOLID_TRIGGER;
-	if(!self->wait)
+	if (!self->wait)
 		self->wait = 0.2;
 
 	gi.setmodel (self,self->model);
@@ -1224,13 +1224,13 @@ void SP_trigger_inside_bbox (edict_t *self)
 	vec3_t v;
 
 	VectorMA (self->mins, 0.5, self->size, v);
-	if(!self->target)
+	if (!self->target)
 	{
 		gi.dprintf("trigger_inside_bbox with no target at %s.\n",vtos(v));
 		G_FreeEdict(self);
 		return;
 	}
-	if(!self->pathtarget)
+	if (!self->pathtarget)
 	{
 		gi.dprintf("trigger_inside_bbox with no pathtarget at %s.\n",vtos(v));
 		G_FreeEdict(self);
@@ -1238,7 +1238,7 @@ void SP_trigger_inside_bbox (edict_t *self)
 	}
 	InitTriggerBbox (self);
 
-	if(!self->wait)
+	if (!self->wait)
 		self->wait = 0.2;
 
 	self->think     = trigger_inside_think;
@@ -1256,10 +1256,10 @@ float weight_on_top(edict_t *ent)
 	int i;
 	edict_t *e;
 	weight = 0.0;
-	for(i=1, e=g_edicts+i; i<globals.num_edicts; i++, e++)
+	for (i=1, e=g_edicts+i; i<globals.num_edicts; i++, e++)
 	{
-		if(!e->inuse) continue;
-		if(e->groundentity == ent)
+		if (!e->inuse) continue;
+		if (e->groundentity == ent)
 		{
 			weight += e->mass;
 			weight += weight_on_top(e);
@@ -1283,19 +1283,19 @@ void trigger_scales_think (edict_t *self)
 		if (!hit->inuse) continue;
 		if (!hit->mass) continue;
 		fx = fy = 0.0;
-		if(hit->absmin[0] < self->absmin[0])
+		if (hit->absmin[0] < self->absmin[0])
 			fx += (self->absmin[0] - hit->absmin[0])/hit->size[0];
-		if(hit->absmax[0] > self->absmax[0])
+		if (hit->absmax[0] > self->absmax[0])
 			fx += (hit->absmax[0] - self->absmax[0])/hit->size[0];
-		if(hit->absmin[1] < self->absmin[1])
+		if (hit->absmin[1] < self->absmin[1])
 			fy += (self->absmin[1] - hit->absmin[1])/hit->size[1];
-		if(hit->absmax[1] > self->absmax[1])
+		if (hit->absmax[1] > self->absmax[1])
 			fy += (hit->absmax[1] - self->absmax[1])/hit->size[1];
 		f = (1.0 - fx - fy + fx*fy);
-		if(f > 0) weight += f * hit->mass;
+		if (f > 0) weight += f * hit->mass;
 		weight += f*weight_on_top(hit);
 	}
-	if(weight != self->mass)
+	if (weight != self->mass)
 	{
 		self->mass = weight;
 		for (e = self->teammaster; e; e = e->teamchain)
@@ -1303,7 +1303,7 @@ void trigger_scales_think (edict_t *self)
 			if (!e->count)
 				continue;
 			num = e->count;
-			if(weight < pow(10,num-1))
+			if (weight < pow(10,num-1))
 				e->s.frame = 12;
 			else
 				e->s.frame = ( weight % (int)pow(10,num) ) / ( pow(10,num-1) );
@@ -1318,7 +1318,7 @@ void SP_trigger_scales (edict_t *self)
 	vec3_t v;
 
 	VectorMA (self->mins, 0.5, self->size, v);
-	if(!self->team)
+	if (!self->team)
 	{
 		gi.dprintf("trigger_scales with no team at %s.\n",vtos(v));
 		G_FreeEdict(self);
@@ -1339,7 +1339,7 @@ void SP_trigger_scales_bbox (edict_t *self)
 	vec3_t v;
 
 	VectorMA (self->mins, 0.5, self->size, v);
-	if(!self->team)
+	if (!self->team)
 	{
 		gi.dprintf("trigger_scales_bbox with no team at %s.\n",vtos(v));
 		G_FreeEdict(self);
@@ -1367,19 +1367,19 @@ void trigger_look_touch (edict_t *self, edict_t *other, cplane_t *plane, csurfac
 	vec_t	dist;
 	vec3_t	dir, forward, left, up, end, start;
 
-	if(!other->client)
+	if (!other->client)
 		return;
 
 	if (self->nextthink)
 		return;		// already been triggered
 
-	if( (self->spawnflags & TRIGGER_TOGGLE) && !(other->client->use))
+	if ( (self->spawnflags & TRIGGER_TOGGLE) && !(other->client->use))
 		return;
 
-	if( (self->spawnflags & TRIGGER_CAMOWNER) && !other->client->spycam)
+	if ( (self->spawnflags & TRIGGER_CAMOWNER) && !other->client->spycam)
 		return;
 
-	if( self->spawnflags & 32 )
+	if ( self->spawnflags & 32 )
 	{
 		// Then trigger only fires if looking at TARGET, not trigger bbox
 		edict_t	*target;
@@ -1388,10 +1388,10 @@ void trigger_look_touch (edict_t *self, edict_t *other, cplane_t *plane, csurfac
 		vec3_t	endpos;
 
 		target = G_Find(NULL,FOFS(targetname),self->target);
-		while(target && !num_triggered)
+		while (target && !num_triggered)
 		{
 			what = LookingAt(other,0,endpos,NULL);
-			if(target->inuse && (LookingAt(other,0,NULL,NULL) == target))
+			if (target->inuse && (LookingAt(other,0,NULL,NULL) == target))
 			{
 				num_triggered++;
 				self->activator = other;
@@ -1400,12 +1400,12 @@ void trigger_look_touch (edict_t *self, edict_t *other, cplane_t *plane, csurfac
 			else
 				target = G_Find(target,FOFS(targetname),self->target);
 		}
-		if(!num_triggered)
+		if (!num_triggered)
 			return;
 	}
 	else
 	{
-		if(other->client->spycam)
+		if (other->client->spycam)
 		{
 			vec3_t	f1, l1, u1;
 
@@ -1434,17 +1434,17 @@ void trigger_look_touch (edict_t *self, edict_t *other, cplane_t *plane, csurfac
 		// bleft-tright box is roughly a cube. If it's considerably
 		// longer in one direction we'll get false misses.
 		
-		if(end[0] < self->s.origin[0] + self->bleft[0])
+		if (end[0] < self->s.origin[0] + self->bleft[0])
 			return;
-		if(end[1] < self->s.origin[1] + self->bleft[1])
+		if (end[1] < self->s.origin[1] + self->bleft[1])
 			return;
-		if(end[2] < self->s.origin[2] + self->bleft[2])
+		if (end[2] < self->s.origin[2] + self->bleft[2])
 			return;
-		if(end[0] > self->s.origin[0] + self->tright[0])
+		if (end[0] > self->s.origin[0] + self->tright[0])
 			return;
-		if(end[1] > self->s.origin[1] + self->tright[1])
+		if (end[1] > self->s.origin[1] + self->tright[1])
 			return;
-		if(end[2] > self->s.origin[2] + self->tright[2])
+		if (end[2] > self->s.origin[2] + self->tright[2])
 			return;
 		
 		self->activator = other;
@@ -1470,7 +1470,7 @@ void trigger_look_enable (edict_t *self, edict_t *other, edict_t *activator);
 void trigger_look_disable (edict_t *self, edict_t *other, edict_t *activator)
 {
 	self->count--;
-	if(self->count == 0)
+	if (self->count == 0)
 	{
 		self->think = G_FreeEdict;
 		self->nextthink = level.time + 1;
@@ -1532,16 +1532,16 @@ void trigger_speaker_think (edict_t *self)
 	touching = NULL;
 	for (i = 1; i <= maxclients->value && !touching; i++) {
 		player = &g_edicts[i];
-		if(!player->inuse) continue;
-		if(player->s.origin[0] < self->s.origin[0] + self->bleft[0]) continue;
-		if(player->s.origin[1] < self->s.origin[1] + self->bleft[1]) continue;
-		if(player->s.origin[2] < self->s.origin[2] + self->bleft[2]) continue;
-		if(player->s.origin[0] > self->s.origin[0] + self->tright[0]) continue;
-		if(player->s.origin[1] > self->s.origin[1] + self->tright[1]) continue;
-		if(player->s.origin[2] > self->s.origin[2] + self->tright[2]) continue;
+		if (!player->inuse) continue;
+		if (player->s.origin[0] < self->s.origin[0] + self->bleft[0]) continue;
+		if (player->s.origin[1] < self->s.origin[1] + self->bleft[1]) continue;
+		if (player->s.origin[2] < self->s.origin[2] + self->bleft[2]) continue;
+		if (player->s.origin[0] > self->s.origin[0] + self->tright[0]) continue;
+		if (player->s.origin[1] > self->s.origin[1] + self->tright[1]) continue;
+		if (player->s.origin[2] > self->s.origin[2] + self->tright[2]) continue;
 		touching = player;
 	}
-	if(touching)
+	if (touching)
 		gi.sound (touching, CHAN_VOICE, self->noise_index, 1, ATTN_NORM, 0);
 	self->nextthink = level.time + FRAMETIME;
 }
@@ -1565,7 +1565,7 @@ void SP_trigger_speaker (edict_t *self)
 {
 	char	buffer[MAX_QPATH];
 
-	if(!st.noise)
+	if (!st.noise)
 	{
 		gi.dprintf("trigger_speaker with no noise set at %s\n", vtos(self->s.origin));
 		return;
@@ -1609,7 +1609,7 @@ qboolean HasSpawnFunction(edict_t *ent)
 	gitem_t	*item;
 	int		i;
 
-	if(!ent->classname)
+	if (!ent->classname)
 		return false;
 
 	// check item spawn functions
@@ -1644,7 +1644,7 @@ void WriteTransitionEdict (FILE *f, edict_t *changelevel, edict_t *ent)
 	if (!Q_stricmp(e.classname,"target_speaker"))
 		e.spawnflags |= 8;  // indicates that "message" contains noise
 
-	if(changelevel->s.angles[YAW])
+	if (changelevel->s.angles[YAW])
 	{
 		vec3_t	angles;
 		vec3_t	forward, right, v;
@@ -1672,7 +1672,7 @@ void WriteTransitionEdict (FILE *f, edict_t *changelevel, edict_t *ent)
 	temp = (byte *)&e;
 	for (field=fields ; field->name ; field++)
 	{
-		if((field->type == F_EDICT) || (field->type == F_FUNCTION))
+		if ((field->type == F_EDICT) || (field->type == F_FUNCTION))
 		{
 			p = (void *)(temp + field->ofs);
 			*(edict_t **)p = NULL;
@@ -1696,10 +1696,10 @@ void WriteTransitionEdict (FILE *f, edict_t *changelevel, edict_t *ent)
 	e.noise_index = 0;
 	// If the ent is a live bad guy monster, remove him from the total
 	// monster count. He'll be added back in in the new map.
-	if( (e.svflags & SVF_MONSTER) && !(e.monsterinfo.aiflags & AI_GOOD_GUY)
+	if ( (e.svflags & SVF_MONSTER) && !(e.monsterinfo.aiflags & AI_GOOD_GUY)
 		&& !(e.monsterinfo.monsterflags & MFL_DO_NOT_COUNT) )
 	{
-		if(e.health > 0)
+		if (e.health > 0)
 			level.total_monsters--;
 		else
 			e.max_health = -1;
@@ -1707,12 +1707,12 @@ void WriteTransitionEdict (FILE *f, edict_t *changelevel, edict_t *ent)
 	// Enemy isn't preserved... let's try a new flag for
 	// single-player only that tells monster to find
 	// the player again at startup
-	if(!coop->value && !deathmatch->value)
+	if (!coop->value && !deathmatch->value)
 	{
-		if(ent->enemy == &g_edicts[1] && ent->health > 0)
+		if (ent->enemy == &g_edicts[1] && ent->health > 0)
 			e.monsterinfo.aiflags = AI_RESPAWN_FINDPLAYER;
 	}
-	if(e.classname &&
+	if (e.classname &&
 	   ( !Q_stricmp(e.classname,"misc_actor") || strstr(e.classname,"monster_") ) &&
 	   //Knightmare- changed this from a gib_health check, to take into account no_gib monsters
 	   (e.svflags & SVF_GIB) )
@@ -1792,30 +1792,30 @@ int trigger_transition_ents (edict_t *changelevel, edict_t *self)
 	entlist_t	*p;
 	FILE		*f;
 
-	if(developer->value)
+	if (developer->value)
 		gi.dprintf("==== WriteTransitionEnts ====\n");
 
 	trans_ent_filename (t_file, sizeof(t_file));
 	f = fopen(t_file,"wb");
-	if(!f)
+	if (!f)
 	{
 		gi.dprintf("Error opening %s for writing\n",t_file);
 		return 0;
 	}
 	// First scan entities for brush models that SHOULD change levels, e.g. func_tracktrain,
 	// which had better have a partner train in the next map... or we'll bitch loudly
-	for(i=game.maxclients+1; i<globals.num_edicts; i++)
+	for (i=game.maxclients+1; i<globals.num_edicts; i++)
 	{
 		ent = &g_edicts[i];
-		if(!ent->inuse) continue;
-		if(ent->solid != SOLID_BSP) continue;
-		if(ent->s.origin[0] > self->maxs[0]) continue;
-		if(ent->s.origin[1] > self->maxs[1]) continue;
-		if(ent->s.origin[2] > self->maxs[2]) continue;
-		if(ent->s.origin[0] < self->mins[0]) continue;
-		if(ent->s.origin[1] < self->mins[1]) continue;
-		if(ent->s.origin[2] < self->mins[2]) continue;
-		if(!Q_stricmp(ent->classname,"func_tracktrain") && !(ent->spawnflags & 8) && ent->targetname)
+		if (!ent->inuse) continue;
+		if (ent->solid != SOLID_BSP) continue;
+		if (ent->s.origin[0] > self->maxs[0]) continue;
+		if (ent->s.origin[1] > self->maxs[1]) continue;
+		if (ent->s.origin[2] > self->maxs[2]) continue;
+		if (ent->s.origin[0] < self->mins[0]) continue;
+		if (ent->s.origin[1] < self->mins[1]) continue;
+		if (ent->s.origin[2] < self->mins[2]) continue;
+		if (!Q_stricmp(ent->classname,"func_tracktrain") && !(ent->spawnflags & 8) && ent->targetname)
 		{
 			edict_t	*e;
 
@@ -1840,7 +1840,7 @@ int trigger_transition_ents (edict_t *changelevel, edict_t *self)
 			e->radius = ent->moveinfo.distance;
 			e->solid = SOLID_NOT;
 			e->svflags |= SVF_NOCLIENT;
-			if(ent->owner)
+			if (ent->owner)
 				e->style = ent->owner - g_edicts;
 			else
 				e->style = 0;
@@ -1855,32 +1855,32 @@ int trigger_transition_ents (edict_t *changelevel, edict_t *self)
 		}
 	}
 
-	for(i=game.maxclients+1; i<globals.num_edicts; i++)
+	for (i=game.maxclients+1; i<globals.num_edicts; i++)
 	{
 		ent = &g_edicts[i];
 		ent->id = 0;
-		if(!ent->inuse) continue;
+		if (!ent->inuse) continue;
 		// Pass up owned entities not owned by the player on this pass...
 		// get 'em next pass so we'll know whether owner is in our list
-		if(ent->owner && !ent->owner->client) continue;
-		if(ent->movewith) continue;
-		if(ent->s.origin[0] > self->maxs[0]) continue;
-		if(ent->s.origin[1] > self->maxs[1]) continue;
-		if(ent->s.origin[2] > self->maxs[2]) continue;
-		if(ent->s.origin[0] < self->mins[0]) continue;
-		if(ent->s.origin[1] < self->mins[1]) continue;
-		if(ent->s.origin[2] < self->mins[2]) continue;
-		if(ent->solid == SOLID_BSP) continue;
-		if((ent->solid == SOLID_TRIGGER) && !FindItemByClassname(ent->classname)) continue;
+		if (ent->owner && !ent->owner->client) continue;
+		if (ent->movewith) continue;
+		if (ent->s.origin[0] > self->maxs[0]) continue;
+		if (ent->s.origin[1] > self->maxs[1]) continue;
+		if (ent->s.origin[2] > self->maxs[2]) continue;
+		if (ent->s.origin[0] < self->mins[0]) continue;
+		if (ent->s.origin[1] < self->mins[1]) continue;
+		if (ent->s.origin[2] < self->mins[2]) continue;
+		if (ent->solid == SOLID_BSP) continue;
+		if ((ent->solid == SOLID_TRIGGER) && !FindItemByClassname(ent->classname)) continue;
 		// Do not under any circumstances move these entities:
-		for(p=DoNotMove, nogo=false; p->name && !nogo; p++)
-			if(!Q_stricmp(ent->classname,p->name))
+		for (p=DoNotMove, nogo=false; p->name && !nogo; p++)
+			if (!Q_stricmp(ent->classname,p->name))
 				nogo = true;
-		if(nogo) continue;
-		if(!HasSpawnFunction(ent)) continue;
+		if (nogo) continue;
+		if (!HasSpawnFunction(ent)) continue;
 		total++;
 		ent->id = total;
-		if(ent->owner)
+		if (ent->owner)
 			ent->owner_id = -(ent->owner - g_edicts);
 		else
 			ent->owner_id = 0;
@@ -1889,34 +1889,34 @@ int trigger_transition_ents (edict_t *changelevel, edict_t *self)
 		ent->inuse = false;
 	}
 	// Repeat, ONLY for ents owned by non-players
-	for(i=game.maxclients+1; i<globals.num_edicts; i++)
+	for (i=game.maxclients+1; i<globals.num_edicts; i++)
 	{
 		ent = &g_edicts[i];
-		if(!ent->inuse) continue;
-		if(!ent->owner) continue;
-		if(ent->owner->client) continue;
-		if(ent->movewith) continue;
-		if(ent->solid == SOLID_BSP) continue;
-		if((ent->solid == SOLID_TRIGGER) && !FindItemByClassname(ent->classname)) continue;
+		if (!ent->inuse) continue;
+		if (!ent->owner) continue;
+		if (ent->owner->client) continue;
+		if (ent->movewith) continue;
+		if (ent->solid == SOLID_BSP) continue;
+		if ((ent->solid == SOLID_TRIGGER) && !FindItemByClassname(ent->classname)) continue;
 		// Do not under any circumstances move these entities:
-		for(p=DoNotMove, nogo=false; p->name && !nogo; p++)
-			if(!Q_stricmp(ent->classname,p->name))
+		for (p=DoNotMove, nogo=false; p->name && !nogo; p++)
+			if (!Q_stricmp(ent->classname,p->name))
 				nogo = true;
-		if(nogo) continue;
-		if(!HasSpawnFunction(ent)) continue;
-		if(ent->s.origin[0] > self->maxs[0]) continue;
-		if(ent->s.origin[1] > self->maxs[1]) continue;
-		if(ent->s.origin[2] > self->maxs[2]) continue;
-		if(ent->s.origin[0] < self->mins[0]) continue;
-		if(ent->s.origin[1] < self->mins[1]) continue;
-		if(ent->s.origin[2] < self->mins[2]) continue;
+		if (nogo) continue;
+		if (!HasSpawnFunction(ent)) continue;
+		if (ent->s.origin[0] > self->maxs[0]) continue;
+		if (ent->s.origin[1] > self->maxs[1]) continue;
+		if (ent->s.origin[2] > self->maxs[2]) continue;
+		if (ent->s.origin[0] < self->mins[0]) continue;
+		if (ent->s.origin[1] < self->mins[1]) continue;
+		if (ent->s.origin[2] < self->mins[2]) continue;
 		ent->owner_id = 0;
-		for(j=game.maxclients+1; j<globals.num_edicts && !ent->owner_id; j++)
+		for (j=game.maxclients+1; j<globals.num_edicts && !ent->owner_id; j++)
 		{
-			if(ent->owner == &g_edicts[j])
+			if (ent->owner == &g_edicts[j])
 				ent->owner_id = g_edicts[j].id;
 		}
-		if(!ent->owner_id) continue;
+		if (!ent->owner_id) continue;
 		total++;
 		ent->id = total;
 		WriteTransitionEdict(f,changelevel,ent);
@@ -1931,7 +1931,7 @@ int trigger_transition_ents (edict_t *changelevel, edict_t *self)
 
 void SP_trigger_transition (edict_t *self)
 {
-	if(!self->targetname)
+	if (!self->targetname)
 	{
 		gi.dprintf("trigger_transition w/o a targetname\n");
 		G_FreeEdict(self);
@@ -1944,7 +1944,7 @@ void SP_trigger_transition (edict_t *self)
 
 void SP_trigger_transition_bbox (edict_t *self)
 {
-	if(!self->targetname)
+	if (!self->targetname)
 	{
 		gi.dprintf("trigger_transition_bbox w/o a targetname\n");
 		G_FreeEdict(self);
@@ -2025,17 +2025,17 @@ void trigger_switch_usetargets (edict_t *ent, edict_t *activator)
 		while ((t = G_Find (t, FOFS(targetname), ent->killtarget)))
 		{
 			// Lazarus: remove LIVE killtargeted monsters from total_monsters
-			if((t->svflags & SVF_MONSTER) && (t->deadflag == DEAD_NO))
+			if ((t->svflags & SVF_MONSTER) && (t->deadflag == DEAD_NO))
 			{
-				if(!t->dmgteam || strcmp(t->dmgteam,"player"))
-					if(!(t->monsterinfo.aiflags & AI_GOOD_GUY))
+				if (!t->dmgteam || strcmp(t->dmgteam,"player"))
+					if (!(t->monsterinfo.aiflags & AI_GOOD_GUY))
 						level.total_monsters--;
 			}
 			// and decrement secret count if target_secret is removed
-			else if(t->class_id == ENTITY_TARGET_SECRET)
+			else if (t->class_id == ENTITY_TARGET_SECRET)
 				level.total_secrets--;
 			// same deal with target_goal, but also turn off CD music if applicable
-			else if(t->class_id == ENTITY_TARGET_GOAL)
+			else if (t->class_id == ENTITY_TARGET_GOAL)
 			{
 				level.total_goals--;
 				if (level.found_goals >= level.total_goals)
@@ -2064,15 +2064,15 @@ void trigger_switch_usetargets (edict_t *ent, edict_t *activator)
 			{
 				gi.dprintf ("WARNING: Entity used itself.\n");
 			}
-			else if(t->use)
+			else if (t->use)
 			{
 				on = 0;
-				switch(t->class_id)
+				switch (t->class_id)
 				{
 				case ENTITY_FUNC_CONVEYOR:
 				case ENTITY_FUNC_FORCE_WALL:
 				case ENTITY_FUNC_WALL:
-					if(t->solid == SOLID_BSP)
+					if (t->solid == SOLID_BSP)
 						on=1;
 					break;
 				case ENTITY_FUNC_PENDULUM:
@@ -2087,42 +2087,42 @@ void trigger_switch_usetargets (edict_t *ent, edict_t *activator)
 				case ENTITY_TARGET_LASER:
 				case ENTITY_TARGET_MAL_LASER:
 				case ENTITY_TARGET_PRECIPITATION:
-					if(t->spawnflags & 1)
+					if (t->spawnflags & 1)
 						on=1;
 					break;
 				case ENTITY_FUNC_REFLECT:
-					if(!(t->spawnflags & 1))
+					if (!(t->spawnflags & 1))
 						on=1;
 					break;
 				case ENTITY_FUNC_ROTATING:
 					on = VectorCompare (t->avelocity, vec3_origin);
 					break;
 				case ENTITY_FUNC_TIMER:
-					if(t->nextthink)
+					if (t->nextthink)
 						on=1;
 					break;
 				case ENTITY_FUNC_TRACKTRAIN:
-					if(!(t->spawnflags & 128))
+					if (!(t->spawnflags & 128))
 						on=1;
 					break;
 				case ENTITY_MODEL_TURRET:
 				case ENTITY_TURRET_BREACH:
-					if(t->spawnflags & 16)
+					if (t->spawnflags & 16)
 						on=1;
 					break;
 				case ENTITY_TARGET_EFFECT:
-					if(t->spawnflags & 3)
+					if (t->spawnflags & 3)
 					{
-						if(t->spawnflags & 1)
+						if (t->spawnflags & 1)
 							on=1;
 					}
 					else
 						on = -1;
 					break;
 				case ENTITY_TARGET_SPEAKER:
-					if(t->spawnflags & 3)
+					if (t->spawnflags & 3)
 					{
-						if(t->s.sound)
+						if (t->s.sound)
 							on=1;
 					}
 					else
@@ -2133,13 +2133,13 @@ void trigger_switch_usetargets (edict_t *ent, edict_t *activator)
 				}
 
 
-				if(ent->spawnflags & TRIGGER_TARGET_OFF)
+				if (ent->spawnflags & TRIGGER_TARGET_OFF)
 				{
 					// Only use target if it is currently ON
-					if(on==1)
+					if (on==1)
 						t->use (t, ent, activator);
 				}
-				else if(on==0)
+				else if (on==0)
 				{
 					// Only use target if it is currently OFF
 					t->use (t, ent, activator);
@@ -2177,7 +2177,7 @@ void trigger_switch (edict_t *ent)
 
 void touch_trigger_switch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
-	if(other->client || (other->flags & FL_ROBOT))
+	if (other->client || (other->flags & FL_ROBOT))
 	{
 		if (self->spawnflags & TRIGGER_NOT_PLAYER)
 			return;
@@ -2190,7 +2190,7 @@ void touch_trigger_switch (edict_t *self, edict_t *other, cplane_t *plane, csurf
 	else
 		return;
 
-	if( (self->spawnflags & TRIGGER_CAMOWNER) && (!other->client || !other->client->spycam))
+	if ( (self->spawnflags & TRIGGER_CAMOWNER) && (!other->client || !other->client->spycam))
 		return;
 
 	if (!VectorCompare(self->movedir, vec3_origin))

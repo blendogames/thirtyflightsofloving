@@ -326,6 +326,8 @@ field_t fields[] = {
 	{"rideWithOffset1", FOFS(rideWithOffset[1]), F_VECTOR},
 
 	{"mangle", FOFS(mangle), F_VECTOR},
+	{"mins", FOFS(mins), F_VECTOR},
+	{"maxs", FOFS(maxs), F_VECTOR},
 	{"visorFrames", FOFS(visorFrames), F_INT},
 	{"mteam", FOFS(mteam), F_LSTRING},
 	{"onFloor", FOFS(onFloor), F_INT},

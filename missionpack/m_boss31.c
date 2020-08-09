@@ -471,7 +471,7 @@ void jorgBFG (edict_t *self)
 	vec[2] += self->enemy->viewheight;
 
 	// Lazarus fog reduction of accuracy
-	if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+	if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 	{
 		vec[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 		vec[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -504,7 +504,7 @@ void jorg_firebullet_right (edict_t *self)
 	target[2] += self->enemy->viewheight;
 
 	// Lazarus fog reduction of accuracy
-	if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+	if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 	{
 		target[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 		target[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -513,6 +513,14 @@ void jorg_firebullet_right (edict_t *self)
 
 	VectorSubtract (target, start, forward);
 	VectorNormalize (forward);
+
+	// Zaero add
+	if (EMPNukeCheck(self, start))
+	{
+		gi.sound (self, CHAN_AUTO, gi.soundindex("items/empnuke/emp_missfire.wav"), 1, ATTN_NORM, 0);
+		return;
+	}
+	// end Zaero
 
 	monster_fire_bullet (self, start, forward, 6, 4, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, MZ2_JORG_MACHINEGUN_R1);
 }	
@@ -529,12 +537,20 @@ void jorg_firebullet_left (edict_t *self)
 	target[2] += self->enemy->viewheight;
 
 	// Lazarus fog reduction of accuracy
-	if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+	if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 	{
 		target[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 		target[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 		target[2] += crandom() * 320 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 	}
+
+	// Zaero add
+	if (EMPNukeCheck(self, start))
+	{
+		gi.sound (self, CHAN_AUTO, gi.soundindex("items/empnuke/emp_missfire.wav"), 1, ATTN_NORM, 0);
+		return;
+	}
+	// end Zaero
 
 	VectorSubtract (target, start, forward);
 	VectorNormalize (forward);
@@ -870,18 +886,18 @@ void SP_monster_jorg (edict_t *self)
 	self->s.origin[2] += 8;
 
 	//Knightmare- gross hack for map6 of COS3- 3000 health
-	if(Q_stricmp(level.mapname, "grinsp3f") == 0)
+	if (Q_stricmp(level.mapname, "grinsp3f") == 0)
 		self->health = 3000;
 	else
 	{
-		if(!self->health)
+		if (!self->health)
 			self->health = 3000 + 1000 * (skill->value);
 	}
 	if (coop->value)
 		self->health += 500 * (skill->value);
-	if(!self->gib_health)
+	if (!self->gib_health)
 		self->gib_health = -999;
-	if(!self->mass)
+	if (!self->mass)
 		self->mass = 1000;
 
 	self->pain = jorg_pain;
@@ -907,7 +923,7 @@ void SP_monster_jorg (edict_t *self)
 	self->monsterinfo.scale = MODEL_SCALE;
 
 	// Lazarus
-	if(self->powerarmor)
+	if (self->powerarmor)
 	{
 		if (self->powerarmortype == 1)
 			self->monsterinfo.power_armor_type = POWER_ARMOR_SCREEN;

@@ -148,8 +148,8 @@ void ValidateSelectedItem (edict_t *ent)
 
 static void Cmd_Give_Usage (edict_t *ent, char *parm1)
 {
-	gi.cprintf (ent, PRINT_HIGH, "usage: give %s {xatrix | rogue | neither | both}\n", parm1);
-//	gi.cprintf (ent, PRINT_HIGH, "usage: give %s {xatrix | rogue | zaero | neither | both}\n", parm1);
+//	gi.cprintf (ent, PRINT_HIGH, "usage: give %s {xatrix | rogue | neither | both}\n", parm1);
+	gi.cprintf (ent, PRINT_HIGH, "usage: give %s {xatrix | rogue | lm | zaero | neither | both}\n", parm1);
 }
 
 qboolean Cmd_Give_ParseFlags (edict_t *ent, char *parm1, int *flags)
@@ -167,9 +167,11 @@ qboolean Cmd_Give_ParseFlags (edict_t *ent, char *parm1, int *flags)
 		*flags |= 4;
 	else if (Q_stricmp(gi.argv(2), "both") == 0)
 		*flags |= 6;
-//	else if (Q_stricmp(gi.argv(2), "zaero") == 0)
-//		*flags |= 8;
-	else if (Q_stricmp(gi.argv(2), "neither")) {
+	else if (Q_stricmp(gi.argv(2), "lm") == 0)
+		*flags |= 8;
+	else if (Q_stricmp(gi.argv(2), "zaero") == 0)
+		*flags |= 16;
+	else if (Q_stricmp(gi.argv(2), "neither") != 0) {
 		Cmd_Give_Usage (ent, parm1);
 		return false;
 	}
@@ -204,7 +206,7 @@ void Cmd_Give_f (edict_t *ent)
 
 	name = gi.args();
 
-	if (!Q_stricmp(name,"jetpack"))
+	if (!Q_stricmp(name, "jetpack"))
 	{
 		gitem_t *fuel;
 		fuel = FindItem("fuel");
@@ -254,7 +256,9 @@ void Cmd_Give_f (edict_t *ent)
 				continue;
 			if ( (it->flags & IT_ROGUE) && !(give_flags & 4) )
 				continue;
-			if ( (it->flags & IT_ZAERO) && !(give_flags & 8) )
+			if ( (it->flags & IT_LM) && !(give_flags & 8) )
+				continue;
+			if ( (it->flags & IT_ZAERO) && !(give_flags & 16) )
 				continue;
 			ent->client->pers.inventory[i] += 1;
 		}
@@ -276,7 +280,9 @@ void Cmd_Give_f (edict_t *ent)
 				continue;
 			if ( (it->flags & IT_ROGUE) && !(give_flags & 4) )
 				continue;
-			if ( (it->flags & IT_ZAERO) && !(give_flags & 8) )
+			if ( (it->flags & IT_LM) && !(give_flags & 8) )
+				continue;
+			if ( (it->flags & IT_ZAERO) && !(give_flags & 16) )
 				continue;
 			if (it->classname && !Q_stricmp(it->classname,"ammo_fuel") && !developer->value)
 				continue;
@@ -335,7 +341,9 @@ void Cmd_Give_f (edict_t *ent)
 				continue;
 			if ( (it->flags & IT_ROGUE) && !(give_flags & 4) )
 				continue;
-			if ( (it->flags & IT_ZAERO) && !(give_flags & 8) )
+			if ( (it->flags & IT_LM) && !(give_flags & 8) )
+				continue;
+			if ( (it->flags & IT_ZAERO) && !(give_flags & 16) )
 				continue;
 			if (it->classname && !Q_stricmp(it->classname,"item_jetpack") && !developer->value)
 				continue;
@@ -364,13 +372,13 @@ void Cmd_Give_f (edict_t *ent)
 		return;
 	}
 
-//ROGUE
+// ROGUE
 	if (it->flags & IT_NOT_GIVEABLE)		
 	{
 		gi.dprintf ("item cannot be given\n");
 		return;							
 	}
-//ROGUE
+// ROGUE
 
 	index = ITEM_INDEX(it);
 
@@ -384,6 +392,15 @@ void Cmd_Give_f (edict_t *ent)
 			else
 				ent->client->pers.inventory[index] += it->quantity;
 		}
+		// Zaero- special case for "plasma shield"
+		else if (it->tag == AMMO_PLASMASHIELD)
+		{
+			if (gi.argc() == 4)
+				ent->client->pers.inventory[index] = atoi(gi.argv(3));
+			else
+				ent->client->pers.inventory[index] += it->quantity;
+		}
+		// end Zaero
 		else
 		{
 			if (gi.argc() == 3)
@@ -527,19 +544,19 @@ void Cmd_Use_f (edict_t *ent)
 	}
 	index = ITEM_INDEX(it);
 #ifdef JETPACK_MOD
-	if(!Q_stricmp(s,"jetpack"))
+	if (!Q_stricmp(s,"jetpack"))
 	{
 		// Special case - turns on/off
-		if(!ent->client->jetpack)
+		if (!ent->client->jetpack)
 		{
-			if(ent->waterlevel > 0)
+			if (ent->waterlevel > 0)
 				return;
-			if(!ent->client->pers.inventory[index])
+			if (!ent->client->pers.inventory[index])
 			{
 				gi.cprintf(ent, PRINT_HIGH, "Out of item: %s\n", s);
 				return;
 			}
-			else if(ent->client->pers.inventory[fuel_index] <= 0)
+			else if (ent->client->pers.inventory[fuel_index] <= 0)
 			{
 				gi.cprintf(ent, PRINT_HIGH, "No fuel for: %s\n", s);
 				return;
@@ -553,7 +570,7 @@ void Cmd_Use_f (edict_t *ent)
 	if (!Q_stricmp(s,"stasis generator"))
 	{
 		// Special case - turn freeze off if already on
-		if(level.freeze)
+		if (level.freeze)
 		{
 			level.freeze = false;
 			level.freezeframes = 0;
@@ -640,7 +657,7 @@ void Cmd_Inven_f (edict_t *ent)
 		// Don't show "No Weapon" or "Homing Rocket Launcher" in inventory
 		if ((i == noweapon_index) || (i == hml_index))
 			gi.WriteShort (0);
-		else if((i == fuel_index) && (ent->client->jetpack_infinite))
+		else if ((i == fuel_index) && (ent->client->jetpack_infinite))
 			gi.WriteShort (0);
 		else
 			gi.WriteShort (cl->pers.inventory[i]);
@@ -672,13 +689,13 @@ void Cmd_InvUse_f (edict_t *ent)
 		return;
 	}
 #ifdef JETPACK_MOD
-	if(!Q_stricmp(it->classname,"item_jetpack"))
+	if (!Q_stricmp(it->classname,"item_jetpack"))
 	{
-		if(!ent->client->jetpack)
+		if (!ent->client->jetpack)
 		{
-			if(ent->waterlevel > 0)
+			if (ent->waterlevel > 0)
 				return;
-			if(ent->client->pers.inventory[fuel_index] <= 0)
+			if (ent->client->pers.inventory[fuel_index] <= 0)
 			{
 				gi.cprintf(ent, PRINT_HIGH, "No fuel for jetpack\n" );
 				return;
@@ -832,7 +849,7 @@ Cmd_Kill_f
 */
 void Cmd_Kill_f (edict_t *ent)
 {
-	if((level.time - ent->client->respawn_time) < 5)
+	if ((level.time - ent->client->respawn_time) < 5)
 		return;
 	ent->flags &= ~FL_GODMODE;
 	ent->health = 0;
@@ -840,7 +857,7 @@ void Cmd_Kill_f (edict_t *ent)
 
 //ROGUE
 	// make sure no trackers are still hurting us.
-	if(ent->client->tracker_pain_framenum)
+	if (ent->client->tracker_pain_framenum)
 		RemoveAttackingPainDaemons (ent);
 
 	if (ent->client->owned_sphere)
@@ -867,6 +884,11 @@ void Cmd_PutAway_f (edict_t *ent)
 		PMenu_Close(ent);
 	if (ent->client->textdisplay)
 		Text_Close(ent);
+
+	// Zaero
+	if (ent->client->zCameraTrack)
+		stopCamera(ent);
+	// end Zaero
 }
 
 
@@ -1082,7 +1104,7 @@ void Cmd_Ent_Count_f (edict_t *ent)
 
 	for (e=g_edicts;e < &g_edicts[globals.num_edicts] ; e++)
 	{
-		if(e->inuse)
+		if (e->inuse)
 			x++;
 	}
 
@@ -1211,9 +1233,9 @@ void Cmd_Bbox_f (edict_t *ent)
 {
 	edict_t	*viewing;
 
-	viewing = LookingAt(ent, 0, NULL, NULL);
-	if(!viewing) return;
-	DrawBBox(viewing);
+	viewing = LookingAt (ent, 0, NULL, NULL);
+	if (!viewing) return;
+	DrawBBox (viewing);
 }
 
 void SetLazarusCrosshair (edict_t *ent)
@@ -1313,19 +1335,20 @@ Cmd_attack2_f
 Alternate firing mode
 =====================
 */
-/*void Cmd_attack2_f(edict_t *ent, qboolean bOn)
+/*
+void Cmd_attack2_f(edict_t *ent, qboolean bOn)
 {
-	if(!ent->client) return;
-	if(ent->health <= 0) return;
+	if (!ent->client) return;
+	if (ent->health <= 0) return;
 
-	if(bOn)
+	if (bOn)
 	{
-		ent->client->pers.fire_mode=1;
+		ent->client->pers.fire_mode = 1;
 		//ent->client->nNewLatch |= BUTTON_ATTACK2;
 	}
 	else
 	{
-		ent->client->pers.fire_mode=0;
+		ent->client->pers.fire_mode = 0;
 		//ent->client->nNewLatch &= ~BUTTON_ATTACK2;
 	}
 }*/
@@ -1338,35 +1361,35 @@ void decoy_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
 
 void decoy_think(edict_t *self)
 {
-	if(self->s.frame < 0 || self->s.frame > 39)
+	if (self->s.frame < 0 || self->s.frame > 39)
 	{
 		self->s.frame = 0;
 	}
 	else
 	{
 		self->s.frame++;
-		if(self->s.frame > 39)
+		if (self->s.frame > 39)
 			self->s.frame = 0;
 	}
 
 	// Every 2 seconds, make visible monsters mad at me
-	if(level.framenum % 20 == 0)
+	if (level.framenum % 20 == 0)
 	{
 		edict_t	*e;
 		int		i;
 
-		for(i=game.maxclients+1; i<globals.num_edicts; i++)
+		for (i=game.maxclients+1; i<globals.num_edicts; i++)
 		{
 			e = &g_edicts[i];
-			if(!e->inuse)
+			if (!e->inuse)
 				continue;
-			if(!(e->svflags & SVF_MONSTER))
+			if (!(e->svflags & SVF_MONSTER))
 				continue;
-			if(e->monsterinfo.aiflags & AI_GOOD_GUY)
+			if (e->monsterinfo.aiflags & AI_GOOD_GUY)
 				continue;
-			if(!visible(e,self))
+			if (!visible(e,self))
 				continue;
-			if(e->enemy == self)
+			if (e->enemy == self)
 				continue;
 			e->enemy = e->goalentity = self;
 			e->monsterinfo.aiflags |= AI_TARGET_ANGER;
@@ -1403,7 +1426,7 @@ void SpawnForcewall(edict_t	*player)
 	tr = gi.trace(start,NULL,NULL,point,player,MASK_SOLID);
 	VectorCopy(tr.endpos,wall->s.origin);
 	
-	if(fabs(forward[0]) > fabs(forward[1]))
+	if (fabs(forward[0]) > fabs(forward[1]))
 	{
 		wall->pos1[0] = wall->pos2[0] = wall->s.origin[0];
 		wall->mins[0] =  -1;
@@ -1468,12 +1491,12 @@ void ForcewallOff(edict_t *player)
 	AngleVectors(player->client->v_angle,forward,NULL,NULL);
 	VectorMA(start, WORLD_SIZE, forward, point);	// was 8192
 	tr = gi.trace(start,NULL,NULL,point,player,MASK_SHOT);
-	if(Q_stricmp(tr.ent->classname,"forcewall"))
+	if (Q_stricmp(tr.ent->classname,"forcewall"))
 	{
 		gi.cprintf(player,PRINT_HIGH,"Not a forcewall!\n");
 		return;
 	}
-	if(tr.ent->activator != player)
+	if (tr.ent->activator != player)
 	{
 		gi.cprintf(player,PRINT_HIGH,"You don't own this forcewall, bub!\n");
 		return;
@@ -1500,10 +1523,36 @@ void ClientCommand (edict_t *ent)
 		return;		// not fully in game yet
 
 	cmd = gi.argv(0);
-	if(gi.argc() < 2)
+	if (gi.argc() < 2)
 		parm = NULL;
 	else
 		parm = gi.argv(1);
+
+	// Zaero
+	// if we're viewing thru the camera, only allow some things to happen
+	if (ent->client->zCameraTrack && !level.intermissiontime)
+	{
+		if (Q_stricmp (cmd, "putaway") == 0)
+			Cmd_PutAway_f (ent);
+		else if (Q_stricmp(cmd, "use") == 0)
+		{
+			if (Q_stricmp(gi.args(), "Visor") == 0)
+				Cmd_Use_f (ent);
+		}
+		else if (Q_stricmp (cmd, "invuse") == 0)
+		{
+			// only use the visor
+			if (ent->client->pers.selected_item == ITEM_INDEX(FindItem("Visor")))
+				Cmd_InvUse_f (ent);
+		}
+		else if (Q_stricmp (cmd, "invnext") == 0)
+			SelectNextItem (ent, -1);
+		else if (Q_stricmp (cmd, "invprev") == 0)
+			SelectPrevItem (ent, -1);
+	
+		return;
+	}
+	// end Zaero
 
 	if (Q_stricmp (cmd, "players") == 0)
 	{
@@ -1606,11 +1655,11 @@ void ClientCommand (edict_t *ent)
 	// zoom
 	else if (!Q_stricmp(cmd, "zoomin"))
 	{
-		if(!deathmatch->value && !coop->value && !ent->client->chasetoggle)
+		if (!deathmatch->value && !coop->value && !ent->client->chasetoggle)
 		{
-			if(ent->client->ps.fov > 5)
+			if (ent->client->ps.fov > 5)
 			{
-				if(cl_gun->value)
+				if (cl_gun->value)
 					stuffcmd(ent,"cl_gun 0\n");
 				ent->client->frame_zoomrate = zoomrate->value * ent->client->secs_per_frame;
 				ent->client->zooming = 1;
@@ -1620,11 +1669,11 @@ void ClientCommand (edict_t *ent)
 	}
 	else if (!Q_stricmp(cmd, "zoomout"))
 	{
-		if(!deathmatch->value && !coop->value && !ent->client->chasetoggle)
+		if (!deathmatch->value && !coop->value && !ent->client->chasetoggle)
 		{
-			if(ent->client->ps.fov < ent->client->original_fov)
+			if (ent->client->ps.fov < ent->client->original_fov)
 			{
-				if(cl_gun->value)
+				if (cl_gun->value)
 					stuffcmd(ent,"cl_gun 0\n");
 				ent->client->frame_zoomrate = zoomrate->value * ent->client->secs_per_frame;
 				ent->client->zooming = -1;
@@ -1634,9 +1683,9 @@ void ClientCommand (edict_t *ent)
 	}
 	else if (!Q_stricmp(cmd, "zoom"))
 	{
-		if(!deathmatch->value && !coop->value && !ent->client->chasetoggle)
+		if (!deathmatch->value && !coop->value && !ent->client->chasetoggle)
 		{
-			if(!parm)
+			if (!parm)
 			{
 				gi.dprintf("syntax: zoom [0/1]  (0=off, 1=on)\n");
 			}
@@ -1651,7 +1700,7 @@ void ClientCommand (edict_t *ent)
 			{
 				ent->client->ps.fov = zoomsnap->value;
 				ent->client->pers.hand = 2;
-				if(cl_gun->value)
+				if (cl_gun->value)
 					stuffcmd(ent,"cl_gun 0\n");
 				ent->client->zooming = 0;
 				ent->client->zoomed = true;
@@ -1661,9 +1710,9 @@ void ClientCommand (edict_t *ent)
 	}
 	else if (!Q_stricmp(cmd, "zoomoff"))
 	{
-		if(!deathmatch->value && !coop->value && !ent->client->chasetoggle)
+		if (!deathmatch->value && !coop->value && !ent->client->chasetoggle)
 		{
-			if(ent->client->zoomed && !ent->client->zooming)
+			if (ent->client->zoomed && !ent->client->zooming)
 			{
 				ent->client->ps.fov = ent->client->original_fov;
 				ent->client->zooming = 0;
@@ -1674,13 +1723,13 @@ void ClientCommand (edict_t *ent)
 	}
 	else if (!Q_stricmp(cmd, "zoomon"))
 	{
-		if(!deathmatch->value && !coop->value && !ent->client->chasetoggle)
+		if (!deathmatch->value && !coop->value && !ent->client->chasetoggle)
 		{
-			if(!ent->client->zoomed && !ent->client->zooming)
+			if (!ent->client->zoomed && !ent->client->zooming)
 			{
 				ent->client->ps.fov = zoomsnap->value;
 				ent->client->pers.hand = 2;
-				if(cl_gun->value)
+				if (cl_gun->value)
 					stuffcmd(ent,"cl_gun 0\n");
 				ent->client->zooming = 0;
 				ent->client->zoomed = true;
@@ -1690,12 +1739,12 @@ void ClientCommand (edict_t *ent)
 	}
 	else if (!Q_stricmp(cmd, "zoominstop"))
 	{
-		if(!deathmatch->value && !coop->value && !ent->client->chasetoggle)
+		if (!deathmatch->value && !coop->value && !ent->client->chasetoggle)
 		{
-			if(ent->client->zooming > 0)
+			if (ent->client->zooming > 0)
 			{
 				ent->client->zooming = 0;
-				if(ent->client->ps.fov == ent->client->original_fov)
+				if (ent->client->ps.fov == ent->client->original_fov)
 				{
 					ent->client->zoomed = false;
 					SetSensitivities(ent,true);
@@ -1710,12 +1759,12 @@ void ClientCommand (edict_t *ent)
 	}
 	else if (!Q_stricmp(cmd, "zoomoutstop"))
 	{
-		if(!deathmatch->value && !coop->value && !ent->client->chasetoggle)
+		if (!deathmatch->value && !coop->value && !ent->client->chasetoggle)
 		{
-			if(ent->client->zooming < 0)
+			if (ent->client->zooming < 0)
 			{
 				ent->client->zooming = 0;
-				if(ent->client->ps.fov == ent->client->original_fov)
+				if (ent->client->ps.fov == ent->client->original_fov)
 				{
 					ent->client->zoomed = false;
 					SetSensitivities(ent,true);
@@ -1729,18 +1778,18 @@ void ClientCommand (edict_t *ent)
 		}
 	}
 #ifndef DISABLE_FMOD
-	else if(!Q_stricmp(cmd, "playsound"))
+	else if (!Q_stricmp(cmd, "playsound"))
 	{
 		vec3_t	pos = {0, 0, 0};
 		vec3_t	vel = {0, 0, 0};
-		if(s_primary->value)
+		if (s_primary->value)
 		{
 			gi.dprintf("target_playback requires s_primary be set to 0.\n"
 				       "At the console type:\n"
 					   "s_primary 0;sound_restart\n");
 			return;
 		}
-		if(parm)
+		if (parm)
 		{
 			edict_t *temp;
 
@@ -1749,7 +1798,7 @@ void ClientCommand (edict_t *ent)
 			temp->message = parm;
 			temp->volume = 255;
 
-			if( strstr(parm,".mod") ||
+			if ( strstr(parm,".mod") ||
 				strstr(parm,".s3m") ||
 				strstr(parm,".xm")  ||
 				strstr(parm,".mid")   )
@@ -1761,7 +1810,7 @@ void ClientCommand (edict_t *ent)
 		else
 			gi.dprintf("syntax: playsound <soundfile>, path relative to gamedir\n");
 	}
-	else if(!Q_stricmp(cmd,"sound_restart"))
+	else if (!Q_stricmp(cmd,"sound_restart"))
 	{
 		// replacement for snd_restart to get around DirectSound/FMOD problem
 		edict_t	*temp;
@@ -1772,13 +1821,13 @@ void ClientCommand (edict_t *ent)
 		temp->nextthink = level.time + 2;
 	}
 #endif // DISABLE_FMOD
-	else if(!Q_stricmp(cmd,"hud"))
+	else if (!Q_stricmp(cmd,"hud"))
 	{
-		if(parm)
+		if (parm)
 		{
 			int	state = atoi(parm);
 
-			if(state)
+			if (state)
 				Hud_On();
 			else
 				Hud_Off();
@@ -1786,12 +1835,12 @@ void ClientCommand (edict_t *ent)
 		else
 			Cmd_ToggleHud();
 	}
-	else if(!Q_stricmp(cmd,"whatsit"))
+	else if (!Q_stricmp(cmd,"whatsit"))
 	{
-		if(parm)
+		if (parm)
 		{
 			int state = atoi(parm);
-			if(state)
+			if (state)
 				world->effects |= FX_WORLDSPAWN_WHATSIT;
 			else
 				world->effects &= ~FX_WORLDSPAWN_WHATSIT;
@@ -1801,23 +1850,23 @@ void ClientCommand (edict_t *ent)
 	}
 	else if (!Q_stricmp(cmd,"bbox"))
 		Cmd_Bbox_f (ent);
-	else if(!Q_stricmp(cmd,"forcewall"))
+	else if (!Q_stricmp(cmd,"forcewall"))
 		SpawnForcewall(ent);
-	else if(!Q_stricmp(cmd,"forcewall_off"))
+	else if (!Q_stricmp(cmd,"forcewall_off"))
 		ForcewallOff(ent);
 	else if (!Q_stricmp(cmd,"freeze"))
 	{
-		if(level.freeze)
+		if (level.freeze)
 			level.freeze = false;
 		else
 		{
-			if(ent->client->jetpack)
+			if (ent->client->jetpack)
 				gi.dprintf("Cannot use freeze while using jetpack\n");
 			else
 				level.freeze = true;
 		}
 	}
-	else if(developer->value)
+	else if (developer->value)
 	{
 	//	if (!Q_stricmp(cmd,"lightswitch"))
 	//		ToggleLights();

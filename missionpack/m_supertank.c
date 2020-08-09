@@ -481,7 +481,7 @@ void supertankRocket (edict_t *self)
 	vec3_t	vec;
 	int		flash_number;
 
-	if(!self->enemy || !self->enemy->inuse)		//PGM
+	if (!self->enemy || !self->enemy->inuse)		//PGM
 		return;									//PGM
 
 	if (self->s.frame == FRAME_attak2_8)
@@ -498,7 +498,7 @@ void supertankRocket (edict_t *self)
 	vec[2] += self->enemy->viewheight;
 
 	// Lazarus fog reduction of accuracy
-	if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+	if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 	{
 		vec[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 		vec[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -521,7 +521,7 @@ void supertankMachineGun (edict_t *self)
 	vec3_t	forward, right;
 	int		flash_number;
 
-	if(!self->enemy || !self->enemy->inuse)		//PGM
+	if (!self->enemy || !self->enemy->inuse)		//PGM
 		return;									//PGM
 
 	flash_number = MZ2_SUPERTANK_MACHINEGUN_1 + (self->s.frame - FRAME_attak1_1);
@@ -541,7 +541,7 @@ void supertankMachineGun (edict_t *self)
 		vec[2] += self->enemy->viewheight;
 
 		// Lazarus fog reduction of accuracy
-		if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+		if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 		{
 			vec[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 			vec[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -550,7 +550,15 @@ void supertankMachineGun (edict_t *self)
 
 		VectorSubtract (vec, start, forward);
 		VectorNormalize (forward);
-  }
+	}
+
+	// Zaero add
+	if (EMPNukeCheck(self, start))
+	{
+		gi.sound (self, CHAN_AUTO, gi.soundindex("items/empnuke/emp_missfire.wav"), 1, ATTN_NORM, 0);
+		return;
+	}
+	// end Zaero
 
 	monster_fire_bullet (self, start, forward, 6, 4, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, flash_number);
 }	
@@ -713,10 +721,10 @@ void supertank_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int da
 //PGM
 qboolean supertank_blocked (edict_t *self, float dist)
 {
-	if(blocked_checkshot (self, 0.25 + (0.05 * skill->value) ))
+	if (blocked_checkshot (self, 0.25 + (0.05 * skill->value) ))
 		return true;
 
-	if(blocked_checkplat (self, dist))
+	if (blocked_checkplat (self, dist))
 		return true;
 
 	return false;
@@ -762,11 +770,11 @@ void SP_monster_supertank (edict_t *self)
 	VectorSet (self->mins, -64, -64, 0);
 	VectorSet (self->maxs, 64, 64, 112);
 
-	if(!self->health)
+	if (!self->health)
 		self->health = 1500;
-	if(!self->gib_health)
+	if (!self->gib_health)
 		self->gib_health = -999;
-	if(!self->mass)
+	if (!self->mass)
 		self->mass = 800;
 
 	self->pain = supertank_pain;
@@ -787,7 +795,7 @@ void SP_monster_supertank (edict_t *self)
 		self->fogclip |= 2; //custom bloodtype flag
 
 	// Lazarus
-	if(self->powerarmor)
+	if (self->powerarmor)
 	{
 		if (self->powerarmortype == 1)
 			self->monsterinfo.power_armor_type = POWER_ARMOR_SCREEN;

@@ -4,6 +4,7 @@
 
 #define SF_PLAYBACK_3D	16
 
+void sentien_laser_off (edict_t *self); // Zaero add
 
 void G_ProjectSource (vec3_t point, vec3_t distance, vec3_t forward, vec3_t right, vec3_t result)
 {
@@ -159,7 +160,7 @@ edict_t *G_PickTarget (char *targetname)
 		return NULL;
 	}
 
-	while(1)
+	while (1)
 	{
 		ent = G_Find (ent, FOFS(targetname), targetname);
 		if (!ent)
@@ -208,6 +209,8 @@ void G_UseTargets (edict_t *ent, edict_t *activator)
 	edict_t		*master;
 	qboolean	done = false;
 
+	if (!ent)	// sanity check
+		return;
 //
 // check for a delay
 //
@@ -231,7 +234,7 @@ void G_UseTargets (edict_t *ent, edict_t *activator)
 //
 // print the message
 //
-	if ((ent->message) && !(activator->svflags & SVF_MONSTER))
+	if ( (ent->message) && (activator) && !(activator->svflags & SVF_MONSTER) )
 	{
 	//	Lazarus - change so that noise_index < 0 means no sound
 		gi.centerprintf (activator, "%s", ent->message);
@@ -250,21 +253,24 @@ void G_UseTargets (edict_t *ent, edict_t *activator)
 		while ((t = G_Find (t, FOFS(targetname), ent->killtarget)))
 		{
 			// Lazarus: remove LIVE killtargeted monsters from total_monsters
-			if((t->svflags & SVF_MONSTER) && (t->deadflag == DEAD_NO))
+			if ( (t->svflags & SVF_MONSTER) && (t->deadflag == DEAD_NO) )
 			{
-				if(!t->dmgteam || strcmp(t->dmgteam,"player"))
-					if(!(t->monsterinfo.aiflags & AI_GOOD_GUY))
+				if ( !t->dmgteam || strcmp(t->dmgteam, "player") ) {
+				//	if ( !(t->monsterinfo.aiflags & AI_GOOD_GUY) )
+					// Zaero- spawnflag 16 = do not count
+					if ( !(t->monsterinfo.aiflags & AI_GOOD_GUY) && !(t->monsterinfo.monsterflags & MFL_DO_NOT_COUNT) && !(IsZaeroMap() && (t->spawnflags & 16)) )
 						level.total_monsters--;
+				}
 			}
 			// and decrement secret count if target_secret is removed
-			else if(!Q_stricmp(t->classname,"target_secret"))
+			else if ( !Q_stricmp(t->classname, "target_secret") )
 				level.total_secrets--;
 			// same deal with target_goal, but also turn off CD music if applicable
-			else if(!Q_stricmp(t->classname,"target_goal"))
+			else if ( !Q_stricmp(t->classname, "target_goal") )
 			{
 				level.total_goals--;
 				if (level.found_goals >= level.total_goals)
-				gi.configstring (CS_CDTRACK, "0");
+					gi.configstring (CS_CDTRACK, "0");
 			}
 			// PMM - if this entity is part of a train, cleanly remove it
 			else if (t->flags & FL_TEAMSLAVE)
@@ -287,7 +293,7 @@ void G_UseTargets (edict_t *ent, edict_t *activator)
 						{
 						//	if ((g_showlogic) && (g_showlogic->value))
 						//		gi.dprintf ("Couldn't find myself in master's chain, ignoring!\n");
-							//Knightmare- why the hell didin't Rogue put this here?  Ijits.
+							// Knightmare- why the hell didin't Rogue put this here?  Ijits.
 							break; 
 						}
 					}
@@ -299,6 +305,28 @@ void G_UseTargets (edict_t *ent, edict_t *activator)
 				}
 			}
 			// PMM
+
+			// Zaero- free sentien's laser first!
+			if (Q_stricmp(t->classname, "monster_sentien") == 0)
+			{
+				if (t->flash) {
+				//	gi.dprintf ("removing sentien laser before removing sentien.\n");
+					sentien_laser_off (t->flash);
+					G_FreeEdict (t->flash);
+					t->flash = NULL;
+				}
+			}
+			// Also free the Titan's hook
+			if (Q_stricmp(t->classname, "monster_zboss") == 0)
+			{
+				if (t->laser) {
+				//	gi.dprintf ("removing titan hook before removing titan.\n");
+					G_FreeEdict (t->laser);
+					t->laser = NULL;
+				}
+			}
+			// end Zaero
+
 			G_FreeEdict (t);
 			if (!ent->inuse)
 			{
@@ -599,8 +627,8 @@ void G_InitEdict (edict_t *e)
 	//   since freetime = nextthink - 0.1
 	if (e->nextthink)
 	{
-//		if ((g_showlogic) && (g_showlogic->value))
-//			gi.dprintf ("G_SPAWN:  Fixed bad nextthink time\n");
+	//	if ((g_showlogic) && (g_showlogic->value))
+	//		gi.dprintf ("G_SPAWN:  Fixed bad nextthink time\n");
 		e->nextthink = 0;
 	}
 	// ROGUE
@@ -813,15 +841,57 @@ qboolean KillBox (edict_t *ent)
 	return true;		// all clear
 }
 
+
+// Zaero add
+/*
+=================
+MonsterPlayerKillBox
+
+Kills all entities except players that would touch the proposed new 
+positioning of ent.  Ent should be unlinked before calling this!
+=================
+*/
+qboolean MonsterPlayerKillBox (edict_t *ent)
+{
+	trace_t		tr;
+
+	while (1)
+	{
+		tr = gi.trace (ent->s.origin, ent->mins, ent->maxs, ent->s.origin, ent, MASK_PLAYERSOLID);
+		if (!tr.ent)
+			break;
+
+		if ((ent->svflags & SVF_MONSTER) && tr.ent->client && tr.ent->health)
+		{
+			// nail myself
+			T_Damage (ent, ent, ent, vec3_origin, ent->s.origin, vec3_origin, 100000, 0, DAMAGE_NO_PROTECTION, MOD_TELEFRAG);
+			return true;
+		}
+		else
+		{
+			// nail it
+			T_Damage (tr.ent, ent, ent, vec3_origin, ent->s.origin, vec3_origin, 100000, 0, DAMAGE_NO_PROTECTION, MOD_TELEFRAG);
+		}
+
+		// if we didn't kill it, fail
+		if (tr.ent->solid)
+			return false;
+	}
+
+	return true;		// all clear
+}
+// end Zaero
+
+
 void AnglesNormalize(vec3_t vec)
 {
-	while(vec[0] > 180)
+	while (vec[0] > 180)
 		vec[0] -= 360;
-	while(vec[0] < -180)
+	while (vec[0] < -180)
 		vec[0] += 360;
-	while(vec[1] > 360)
+	while (vec[1] > 360)
 		vec[1] -= 360;
-	while(vec[1] < 0)
+	while (vec[1] < 0)
 		vec[1] += 360;
 }
 
@@ -865,7 +935,7 @@ float AtLeast(float x, float dx)
 	float xx;
 
 	xx = (float)(floor(x/dx - 0.5)+1.)*dx;
-	if(xx < x) xx += dx;
+	if (xx < x) xx += dx;
 	return xx;
 }
 
@@ -880,20 +950,20 @@ edict_t	*LookingAt(edict_t *ent, int filter, vec3_t endpos, float *range)
 	vec3_t		dir, entp, mins, maxs;
 	int			i, num;
 
-	if(!ent->client)
+	if (!ent->client)
 	{
-		if(endpos) VectorClear(endpos);
-		if(range) *range = 0;
+		if (endpos) VectorClear(endpos);
+		if (range) *range = 0;
 		return NULL;
 	}
 	VectorClear(end);
-	if(ent->client->chasetoggle)
+	if (ent->client->chasetoggle)
 	{
 		AngleVectors(ent->client->v_angle, forward, NULL, NULL);
 		VectorCopy(ent->client->chasecam->s.origin,start);
 		ignore = ent->client->chasecam;
 	}
-	else if(ent->client->spycam)
+	else if (ent->client->spycam)
 	{
 		AngleVectors(ent->client->ps.viewangles, forward, NULL, NULL);
 		VectorCopy(ent->s.origin,start);
@@ -927,15 +997,15 @@ edict_t	*LookingAt(edict_t *ent, int filter, vec3_t endpos, float *range)
 		VectorSubtract(who->s.origin,start,dir);
 		r = VectorLength(dir);
 		VectorMA(start, r, forward, entp);
-		if(entp[0] < who->s.origin[0] - 17) continue;
-		if(entp[1] < who->s.origin[1] - 17) continue;
-		if(entp[2] < who->s.origin[2] - 17) continue;
-		if(entp[0] > who->s.origin[0] + 17) continue;
-		if(entp[1] > who->s.origin[1] + 17) continue;
-		if(entp[2] > who->s.origin[2] + 17) continue;
-		if(endpos)
+		if (entp[0] < who->s.origin[0] - 17) continue;
+		if (entp[1] < who->s.origin[1] - 17) continue;
+		if (entp[2] < who->s.origin[2] - 17) continue;
+		if (entp[0] > who->s.origin[0] + 17) continue;
+		if (entp[1] > who->s.origin[1] + 17) continue;
+		if (entp[2] > who->s.origin[2] + 17) continue;
+		if (endpos)
 			VectorCopy(who->s.origin,endpos);
-		if(range)
+		if (range)
 			*range = r;
 		return who;
 	}
@@ -947,37 +1017,37 @@ edict_t	*LookingAt(edict_t *ent, int filter, vec3_t endpos, float *range)
 		gi.sound (ent, CHAN_AUTO, gi.soundindex ("misc/talk1.wav"), 1, ATTN_NORM, 0);
 		return NULL;
 	}
-	if(!tr.ent)
+	if (!tr.ent)
 	{
 		// no hit
 		gi.sound (ent, CHAN_AUTO, gi.soundindex ("misc/talk1.wav"), 1, ATTN_NORM, 0);
 		return NULL;
 	}
-	if(!tr.ent->classname)
+	if (!tr.ent->classname)
 	{
 		// should never happen
 		gi.sound (ent, CHAN_AUTO, gi.soundindex ("misc/talk1.wav"), 1, ATTN_NORM, 0);
 		return NULL;
 	}
 
-	if((strstr(tr.ent->classname,"func_") != NULL) && (filter & LOOKAT_NOBRUSHMODELS))
+	if ((strstr(tr.ent->classname,"func_") != NULL) && (filter & LOOKAT_NOBRUSHMODELS))
 	{
 		// don't hit on brush models
 		gi.sound (ent, CHAN_AUTO, gi.soundindex ("misc/talk1.wav"), 1, ATTN_NORM, 0);
 		return NULL;
 	}
-	if((Q_stricmp(tr.ent->classname,"worldspawn") == 0) && (filter & LOOKAT_NOWORLD))
+	if ((Q_stricmp(tr.ent->classname,"worldspawn") == 0) && (filter & LOOKAT_NOWORLD))
 	{
 		// world brush
 		gi.sound (ent, CHAN_AUTO, gi.soundindex ("misc/talk1.wav"), 1, ATTN_NORM, 0);
 		return NULL;
 	}
-	if(endpos) {
+	if (endpos) {
 		endpos[0] = tr.endpos[0];
 		endpos[1] = tr.endpos[1];
 		endpos[2] = tr.endpos[2];
 	}
-	if(range) {
+	if (range) {
 		VectorSubtract(tr.endpos,start,start);
 		*range = VectorLength(start);
 	}
@@ -1098,10 +1168,10 @@ void G_UseTarget (edict_t *ent, edict_t *activator, edict_t *target)
 		while ((t = G_Find (t, FOFS(targetname), ent->killtarget)))
 		{
 			// Lazarus: remove killtargeted monsters from total_monsters
-			if(t->svflags & SVF_MONSTER)
+			if (t->svflags & SVF_MONSTER)
 			{
-				if(!t->dmgteam || strcmp(t->dmgteam,"player"))
-					if(!(t->monsterinfo.aiflags & AI_GOOD_GUY))
+				if (!t->dmgteam || strcmp(t->dmgteam,"player"))
+					if (!(t->monsterinfo.aiflags & AI_GOOD_GUY))
 						level.total_monsters--;
 			}
 			G_FreeEdict (t);
@@ -1397,6 +1467,50 @@ qboolean IsRogueMap (void)
 }
 
 
+
+// Knightmare added
+/*
+====================
+IsZaeroMap
+
+Checks if the current map is from the Zaero mission pack.
+This is used for certain hacks.
+====================
+*/
+qboolean IsZaeroMap (void)
+{
+	if (Q_stricmp(level.mapname, "zbase1") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "zbase2") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "zboss") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "zdef1") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "zdef2") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "zdef3") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "zdef4") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "ztomb1") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "ztomb2") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "ztomb3") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "ztomb4") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "zwaste1") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "zwaste2") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "zwaste3") == 0)
+		return true;
+	return false;
+}
+
+
 /*
 ====================
 CheckCoop_MapHacks
@@ -1457,6 +1571,7 @@ qboolean UseSpecialGoodGuyFlag (edict_t *monster)
 
 	return false;
 }
+
 
 // Knightmare added
 /*
