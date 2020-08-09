@@ -3346,6 +3346,10 @@ void fire_plasma_rifle_bounce (edict_t *ent, vec3_t start, vec3_t dir, int damag
 	goop->nextthink = level.time + 1.5;
 
 	gi.linkentity (goop);
+
+	// Knightmare- added missing check_dodge() call
+	if (ent->client)
+		check_dodge (ent, goop->s.origin, dir, speed);
 }
 
 
@@ -3362,7 +3366,7 @@ void fire_plasma_rifle_spread (edict_t *ent, vec3_t start, vec3_t dir, int damag
 	edict_t	*goop_l = NULL;
 	edict_t *goop_c = NULL;
 	edict_t	*goop_r = NULL;
-	vec3_t	angles;
+	vec3_t	dir_r, dir_l, angles;
 
 	// sanity check
 	if (!ent) {
@@ -3398,13 +3402,13 @@ void fire_plasma_rifle_spread (edict_t *ent, vec3_t start, vec3_t dir, int damag
 
 	// right spread, has 10+ in yaw
 	angles[YAW] -= 10;
-	AngleVectors( angles, dir, NULL, NULL );
-	VectorScale(dir, speed, goop_r->velocity);		// Knightmare- use parm speed
+	AngleVectors (angles, dir_r, NULL, NULL);
+	VectorScale (dir_r, speed, goop_r->velocity);		// Knightmare- use parm speed
 
 	// left spread, has 10- in yaw
 	angles[YAW] += 20;
-	AngleVectors ( angles, dir, NULL, NULL );
-	VectorScale (dir, speed, goop_l->velocity);		// Knightmare- use parm speed
+	AngleVectors (angles, dir_l, NULL, NULL);
+	VectorScale (dir_l, speed, goop_l->velocity);		// Knightmare- use parm speed
 
 	goop_l->touch = plasma_rifle_spread_touch;
 	goop_c->touch = plasma_rifle_spread_touch;
@@ -3420,6 +3424,13 @@ void fire_plasma_rifle_spread (edict_t *ent, vec3_t start, vec3_t dir, int damag
 	gi.linkentity (goop_l);
 	gi.linkentity (goop_c);
 	gi.linkentity (goop_r);
+
+	// Knightmare- added missing check_dodge() calls
+	if (ent->client) {
+		check_dodge (ent, goop_c->s.origin, dir, speed);
+		check_dodge (ent, goop_r->s.origin, dir_r, speed);
+		check_dodge (ent, goop_l->s.origin, dir_l, speed);
+	}
 }
 
 
@@ -3442,7 +3453,7 @@ void fire_plasma_rifle (edict_t *ent, vec3_t start, vec3_t dir, int damage, int 
 	}
 }
 
-// NOTE: SP_goop should ONLY be used to spawn goop rifle shots that change maps
+// NOTE: SP_goop should ONLY be used to spawn plasma rifle shots that change maps
 //       via a trigger_transition. It should NOT be used for map entities.
 
 void goop_delayed_start (edict_t *goop)
