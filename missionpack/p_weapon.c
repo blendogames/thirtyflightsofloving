@@ -3639,6 +3639,15 @@ void weapon_plasma_rifle_fire (edict_t *ent, qboolean altfire)
 		VectorSet(offset, 8, 8, ent->viewheight-8);
 		P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 
+		// Zaero add
+		if (EMPNukeCheck(ent, start))
+		{
+			ent->client->ps.gunframe++;
+			gi.sound (ent, CHAN_AUTO, gi.soundindex("items/empnuke/emp_missfire.wav"), 1, ATTN_NORM, 0);
+			return;
+		}
+		// end Zaero
+
 		if ( ent->client->pers.plasma_mode ) {
 			gi.sound( ent, CHAN_WEAPON, gi.soundindex(PLASMA_SOUND_FIRE2), 1, ATTN_NORM,0 );
 			fire_plasma_rifle (ent, start, forward, damage, (int)sk_plasma_rifle_speed_spread->value, true);
@@ -3719,15 +3728,6 @@ void kick_attack (edict_t *ent )
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 	
 	VectorMA( start, 25, forward, end );
-
-	// Zaero add
-	if (EMPNukeCheck(ent, start))
-	{
-		ent->client->ps.gunframe++;
-		gi.sound (ent, CHAN_AUTO, gi.soundindex("items/empnuke/emp_missfire.wav"), 1, ATTN_NORM, 0);
-		return;
-	}
-	// end Zaero
 
 	tr = gi.trace (ent->s.origin, NULL, NULL, end, ent, MASK_SHOT);
 	
