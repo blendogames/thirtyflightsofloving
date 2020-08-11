@@ -67,7 +67,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #if defined (_M_X64) || defined (_M_AMD64) || defined (__x86_64__)
 #define	CPUSTRING	"AMD64"
 #define STOCK_Q2_GAME_LIBRARY_NAME "gamei386.so"
-#define KMQ2_GAME_LIBRARY_NAME "kmq2gameamd64.so"
+#define KMQ2_GAME_LIBRARY_NAME "kmq2gamex86_64.so"
 #elif defined __i386__
 #define CPUSTRING "i386"
 #define STOCK_Q2_GAME_LIBRARY_NAME "gamei386.so"
