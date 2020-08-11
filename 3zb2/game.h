@@ -172,8 +172,8 @@ typedef struct
 	// Knightmare- support game DLL loading from pak files thru engine
 	// This can be used to load script files, etc
 #ifdef KMQUAKE2_ENGINE_MOD
-	char	**(*ListPak) (char *find, int *num);	// Deprecated- DO NOT USE!
-	int		(*LoadFile) (char *name, void **buf);
+	char	**(*ListPak) (const char *find, int *num);	// Deprecated- DO NOT USE!
+	int		(*LoadFile) (const char *name, void **buf);
 	void	(*FreeFile) (void *buf);
 	void	(*FreeFileList) (char **list, int n);
 	int		(*OpenFile) (const char *name, fileHandle_t *f, fsMode_t mode);
@@ -181,9 +181,9 @@ typedef struct
 	void	(*CloseFile) (fileHandle_t f);
 	int		(*FRead) (void *buffer, int size, fileHandle_t f);
 	int		(*FWrite) (const void *buffer, int size, fileHandle_t f);
-	char	*(*FS_GameDir) (void);
-	char	*(*FS_SaveGameDir) (void);
-	void	(*CreatePath) (char *path);
+	char	*(*GameDir) (void);
+	char	*(*SaveGameDir) (void);
+	void	(*CreatePath) (const char *path);
 	char	**(*GetFileList) (const char *path, const char *extension, int *num);
 #endif
 

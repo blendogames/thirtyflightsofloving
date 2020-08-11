@@ -714,7 +714,12 @@ char	*vtos (vec3_t v);
 
 float vectoyaw (vec3_t vec);
 void vectoangles (vec3_t vec, vec3_t angles);
-void	vectoangles2 (vec3_t vec, vec3_t angles);	// Knightmare added
+// Knightmare added
+void	vectoangles2 (vec3_t vec, vec3_t angles);
+void GameDirRelativePath (const char *filename, char *output, size_t outputSize);
+void SavegameDirRelativePath (const char *filename, char *output, size_t outputSize);
+void CreatePath (const char *path);
+// end Knightmare
 
 //
 // g_combat.c

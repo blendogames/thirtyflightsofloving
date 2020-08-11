@@ -878,11 +878,11 @@ int			FS_Write (const void *buffer, int size, fileHandle_t f);
 void		FS_Seek (fileHandle_t f, int offset, fsOrigin_t origin);
 int			FS_FTell (fileHandle_t f);
 int			FS_Tell (fileHandle_t f);
-qboolean	FS_FileExists (char *path);
-qboolean	FS_LocalFileExists (char *path);
-qboolean	FS_SaveFileExists (char *path);
-qboolean	FS_DownloadFileExists (char *path);
-void		FS_CopyFile (char *src, char *dst);
+qboolean	FS_FileExists (const char *path);
+qboolean	FS_LocalFileExists (const char *path);
+qboolean	FS_SaveFileExists (const char *path);
+qboolean	FS_DownloadFileExists (const char *path);
+void		FS_CopyFile (const char *src, const char *dst);
 void		FS_RenameFile (const char *oldPath, const char *newPath);
 void		FS_DeleteFile (const char *path);
 
@@ -890,29 +890,29 @@ char		*FS_GameDir (void);
 char		*FS_SaveGameDir (void);
 char		*FS_DownloadDir (void);
 char		*FS_HomePath (void);
-void		FS_CreatePath (char *path);
-void		FS_DeletePath (char *path);
-char		*FS_NextPath (char *prevPath);
-char		*FS_NextGamePath (char *prevPath);
-char		**FS_ListFiles (char *findname, int *numfiles, unsigned musthave, unsigned canthave);
+void		FS_CreatePath (const char *path);
+void		FS_DeletePath (const char *path);
+char		*FS_NextPath (const char *prevPath);
+char		*FS_NextGamePath (const char *prevPath);
+char		**FS_ListFiles (const char *findname, int *numfiles, unsigned musthave, unsigned canthave);
 void		FS_FreeFileList (char **list, int n);
-qboolean	FS_ItemInList (char *check, int num, char **list);
-void		FS_InsertInList (char **list, char *insert, int len, int start);
+qboolean	FS_ItemInList (const char *check, int num, const char **list);
+void		FS_InsertInList (char **list, const char *insert, int len, int start);
 void		FS_Dir_f (void);
 
 void		FS_ExecAutoexec (void);
 
-int			FS_LoadFile (char *path, void **buffer);
+int			FS_LoadFile (const char *path, void **buffer);
 void		FS_AddPAKFile (const char *packPath, qboolean isProtected); // add pak file function
 void		FS_AddPK3File (const char *packPath, qboolean isProtected); // add pk3 file function
-char		**FS_ListPak (char *find, int *num); // pak list function
+char		**FS_ListPak (const char *find, int *num); // pak list function
 char		**FS_GetFileList (const char *path, const char *extension, int *num);
-void		FS_SetGamedir (char *dir);
+void		FS_SetGamedir (const char *dir);
 char		*FS_Gamedir (void);
 void		FS_FreeFile (void *buffer);
 
 // Psychospaz's mod detector
-qboolean	FS_ModType (char *name);
+qboolean	FS_ModType (const char *name);
 qboolean	FS_RoguePath (void);
 
 

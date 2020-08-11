@@ -1603,7 +1603,7 @@ void InitiallyDead (edict_t *self)
 	gi.linkentity(self);
 }
 
-#define MAX_SKINS		24 //max is 32, but we only need 24
+#define MAX_SKINS		32 // max is 32, and we need all of them!
 #define MAX_SKINNAME	64
 
 #include "pak.h"

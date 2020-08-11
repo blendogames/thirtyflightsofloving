@@ -1054,7 +1054,7 @@ edict_t	*LookingAt(edict_t *ent, int filter, vec3_t endpos, float *range)
 	return tr.ent;
 }
 
-void GameDirRelativePath (char *filename, char *output, size_t outputSize)
+void GameDirRelativePath (const char *filename, char *output, size_t outputSize)
 {
 #ifdef KMQUAKE2_ENGINE_MOD
 	Com_sprintf(output, outputSize, "%s/%s", gi.GameDir(), filename);
@@ -1070,7 +1070,7 @@ void GameDirRelativePath (char *filename, char *output, size_t outputSize)
 #endif	// KMQUAKE2_ENGINE_MOD
 }
 
-void SavegameDirRelativePath (char *filename, char *output, size_t outputSize)
+void SavegameDirRelativePath (const char *filename, char *output, size_t outputSize)
 {
 #ifdef KMQUAKE2_ENGINE_MOD
 	Com_sprintf(output, outputSize, "%s/%s", gi.SaveGameDir(), filename);
@@ -1086,11 +1086,12 @@ void SavegameDirRelativePath (char *filename, char *output, size_t outputSize)
 #endif	// KMQUAKE2_ENGINE_MOD
 }
 
-void CreatePath (char *path)
+void CreatePath (const char *path)
 {
 #ifdef KMQUAKE2_ENGINE_MOD
 	gi.CreatePath (path);
 #else	// KMQUAKE2_ENGINE_MOD
+	char	tmpBuf[MAX_OSPATH];
 	char	*ofs;
 
 	if (strstr(path, "..") || strstr(path, "::") || strstr(path, "\\\\") || strstr(path, "//"))
@@ -1098,13 +1099,14 @@ void CreatePath (char *path)
 		gi.dprintf("WARNING: refusing to create relative path '%s'\n", path);
 		return;
 	}
+	Q_strncpyz (tmpBuf, path, sizeof(tmpBuf));
 
-	for (ofs = path+1 ; *ofs ; ofs++)
+	for (ofs = tmpBuf+1 ; *ofs ; ofs++)
 	{
 		if (*ofs == '/' || *ofs == '\\')
 		{	// create the directory
 			*ofs = 0;
-			_mkdir (path);
+			_mkdir (tmpBuf);
 			*ofs = '/';
 		}
 	}

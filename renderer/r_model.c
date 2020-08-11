@@ -220,7 +220,7 @@ model_t *Mod_ForName (char *name, qboolean crash)
 	//
 	// search the currently loaded models
 	//
-	for (i=0 , mod=mod_known ; i<mod_numknown ; i++, mod++)
+	for (i=0, mod=mod_known; i<mod_numknown; i++, mod++)
 	{
 		if (!mod->name[0])
 			continue;
@@ -231,7 +231,7 @@ model_t *Mod_ForName (char *name, qboolean crash)
 	//
 	// find a free model slot spot
 	//
-	for (i=0 , mod=mod_known ; i<mod_numknown ; i++, mod++)
+	for (i=0, mod=mod_known; i<mod_numknown; i++, mod++)
 	{
 		if (!mod->name[0])
 			break;	// free spot

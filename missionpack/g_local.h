@@ -1210,11 +1210,11 @@ qboolean point_infront (edict_t *self, vec3_t point);
 void AnglesNormalize(vec3_t vec);
 float SnapToEights(float x);
 // Lazarus
-float AtLeast(float x, float dx);
-edict_t	*LookingAt(edict_t *ent, int filter, vec3_t endpos, float *range);
-void GameDirRelativePath(char *filename, char *output, size_t outputSize);
-void SavegameDirRelativePath(char *filename, char *output, size_t outputSize);
-void CreatePath (char *path);
+float AtLeast (float x, float dx);
+edict_t	*LookingAt (edict_t *ent, int filter, vec3_t endpos, float *range);
+void GameDirRelativePath (const char *filename, char *output, size_t outputSize);
+void SavegameDirRelativePath (const char *filename, char *output, size_t outputSize);
+void CreatePath (const char *path);
 void G_UseTarget (edict_t *ent, edict_t *activator, edict_t *target);
 qboolean IsIdMap (void); // Knightmare added
 qboolean IsXatrixMap (void); // Knightmare added

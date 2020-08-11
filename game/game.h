@@ -196,8 +196,8 @@ typedef struct
 	// This can be used to load script files, etc
 	// Also support open, read/write and closing files
 #ifdef KMQUAKE2_ENGINE_MOD
-	char	**(*ListPak) (char *find, int *num);	// Deprecated- DO NOT USE!
-	int		(*LoadFile) (char *name, void **buf);
+	char	**(*ListPak) (const char *find, int *num);	// Deprecated- DO NOT USE!
+	int		(*LoadFile) (const char *name, void **buf);
 	void	(*FreeFile) (void *buf);
 	void	(*FreeFileList) (char **list, int n);
 	int		(*OpenFile) (const char *name, fileHandle_t *f, fsMode_t mode);
@@ -207,9 +207,9 @@ typedef struct
 	int		(*FWrite) (const void *buffer, int size, fileHandle_t f);
 	char	*(*GameDir) (void);
 	char	*(*SaveGameDir) (void);
-	void	(*CreatePath) (char *path);
+	void	(*CreatePath) (const char *path);
 	char	**(*GetFileList) (const char *path, const char *extension, int *num);
-//	void	(*cvar_setdescription) (char *var_name, char *description);
+//	void	(*cvar_setdescription) (char *var_name, const char *description);
 #endif
 
 } game_import_t;

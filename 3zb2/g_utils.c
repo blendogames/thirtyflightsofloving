@@ -629,7 +629,7 @@ qboolean KillBox (edict_t *ent)
 }
 
 // Knightmare added
-void GameDirRelativePath (char *filename, char *output, size_t outputSize)
+void GameDirRelativePath (const char *filename, char *output, size_t outputSize)
 {
 #ifdef KMQUAKE2_ENGINE_MOD
 	Com_sprintf(output, outputSize, "%s/%s", gi.GameDir(), filename);
@@ -642,6 +642,49 @@ void GameDirRelativePath (char *filename, char *output, size_t outputSize)
 		Com_sprintf(output, outputSize, "%s/%s/%s", basedir->string, gamedir->string, filename);
 	else
 		Com_sprintf(output, outputSize, "%s/baseq2/%s", basedir->string, filename);
+#endif	// KMQUAKE2_ENGINE_MOD
+}
+
+void SavegameDirRelativePath (const char *filename, char *output, size_t outputSize)
+{
+#ifdef KMQUAKE2_ENGINE_MOD
+	Com_sprintf(output, outputSize, "%s/%s", gi.SaveGameDir(), filename);
+#else	// KMQUAKE2_ENGINE_MOD
+	cvar_t	*basedir, *gamedir;
+
+	basedir = gi.cvar("basedir", "", 0);
+	gamedir = gi.cvar("gamedir", "", 0);
+	if (strlen(gamedir->string))
+		Com_sprintf(output, outputSize, "%s/%s/%s", basedir->string, gamedir->string, filename);
+	else
+		Com_sprintf(output, outputSize, "%s/baseq2/%s", basedir->string, filename);
+#endif	// KMQUAKE2_ENGINE_MOD
+}
+
+void CreatePath (const char *path)
+{
+#ifdef KMQUAKE2_ENGINE_MOD
+	gi.CreatePath (path);
+#else	// KMQUAKE2_ENGINE_MOD
+	char	tmpBuf[MAX_OSPATH];
+	char	*ofs;
+
+	if (strstr(path, "..") || strstr(path, "::") || strstr(path, "\\\\") || strstr(path, "//"))
+	{
+		gi.dprintf("WARNING: refusing to create relative path '%s'\n", path);
+		return;
+	}
+	Q_strncpyz (tmpBuf, path, sizeof(tmpBuf));
+
+	for (ofs = tmpBuf+1 ; *ofs ; ofs++)
+	{
+		if (*ofs == '/' || *ofs == '\\')
+		{	// create the directory
+			*ofs = 0;
+			_mkdir (tmpBuf);
+			*ofs = '/';
+		}
+	}
 #endif	// KMQUAKE2_ENGINE_MOD
 }
 // end Knightmare

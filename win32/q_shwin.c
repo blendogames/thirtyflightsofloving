@@ -134,7 +134,7 @@ int Sys_Milliseconds (void)
 	return curtime;
 }
 
-void Sys_Mkdir (char *path)
+void Sys_Mkdir (const char *path)
 {
 	_mkdir (path);
 }
@@ -142,9 +142,9 @@ void Sys_Mkdir (char *path)
 //
 // added from Q2E
 //
-void Sys_Rmdir (char *path)
+void Sys_Rmdir (const char *path)
 {
-	_rmdir(path);
+	_rmdir (path);
 }
 
 /*

@@ -985,7 +985,7 @@ void	VID_Printf (int print_level, char *str, ...);
 // a -1 return means the file does not exist
 // NULL can be passed for buf to just determine existance
 char	**FS_GetFileList (const char *path, const char *extension, int *num);
-int		FS_LoadFile (char *name, void **buf);
+int		FS_LoadFile (const char *name, void **buf);
 void	FS_FreeFile (void *buf);
 
 // gamedir will be the current directory that generated

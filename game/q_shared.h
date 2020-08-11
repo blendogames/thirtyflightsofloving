@@ -512,8 +512,8 @@ SYSTEM SPECIFIC
 extern	int	curtime;		// time returned by last Sys_Milliseconds
 
 int		Sys_Milliseconds (void);
-void	Sys_Mkdir (char *path);
-void	Sys_Rmdir (char *path);
+void	Sys_Mkdir (const char *path);
+void	Sys_Rmdir (const char *path);
 
 // large block stack allocation routines
 void	*Hunk_Begin (size_t maxsize);

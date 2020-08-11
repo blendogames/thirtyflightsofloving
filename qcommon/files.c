@@ -168,8 +168,8 @@ Com_FilePath
 Returns the path up to, but not including the last /
 =================
 */
-void Com_FilePath (const char *path, char *dst, int dstSize){
-
+void Com_FilePath (const char *path, char *dst, int dstSize)
+{
 	const char	*s, *last;
 
 	s = last = path + strlen(path);
@@ -219,7 +219,7 @@ FS_TypeFlagForPakItem
 Returns bit flag based on pak item's extension.
 =================
 */
-unsigned int FS_TypeFlagForPakItem (char *itemName)
+unsigned int FS_TypeFlagForPakItem (const char *itemName)
 {
 	int		i;	
 	char	extension[8];
@@ -278,8 +278,9 @@ FS_CreatePath
 Creates any directories needed to store the given filename
 ============
 */
-void FS_CreatePath (char *path)
+void FS_CreatePath (const char *path)
 {
+	char	tmpBuf[MAX_OSPATH];
 	char	*ofs;
 
 	FS_DPrintf("FS_CreatePath( %s )\n", path);
@@ -289,14 +290,15 @@ void FS_CreatePath (char *path)
 		Com_Printf(S_COLOR_YELLOW"WARNING: refusing to create relative path '%s'\n", path);
 		return;
 	}
+	Q_strncpyz (tmpBuf, path, sizeof(tmpBuf));
 
-	for (ofs = path+1 ; *ofs ; ofs++)
+	for (ofs = tmpBuf+1 ; *ofs ; ofs++)
 	{
 		if (*ofs == '/' || *ofs == '\\') // Q2E changed
 		//if (*ofs == '/')
 		{	// create the directory
 			*ofs = 0;
-			Sys_Mkdir (path);
+			Sys_Mkdir (tmpBuf);
 			*ofs = '/';
 		}
 	}
@@ -304,7 +306,7 @@ void FS_CreatePath (char *path)
 
 
 // Psychospaz's mod detector
-qboolean FS_ModType (char *name)
+qboolean FS_ModType (const char *name)
 {
 	fsSearchPath_t	*search;
 
@@ -313,7 +315,7 @@ qboolean FS_ModType (char *name)
 		if (strstr (search->path, name))
 			return true;
 	}
-	return (0);
+	return false;
 }
 
 
@@ -414,7 +416,7 @@ FS_DeletePath
 TODO: delete tree contents
 =================
 */
-void FS_DeletePath (char *path)
+void FS_DeletePath (const char *path)
 {
 	FS_DPrintf("FS_DeletePath( %s )\n", path);
 
@@ -1223,7 +1225,7 @@ FS_ListPak
 Generates a listing of the contents of a pak file
 =================
 */
-char **FS_ListPak (char *find, int *num)
+char **FS_ListPak (const char *find, int *num)
 {
 	fsSearchPath_t	*search;
 	//char			netpath[MAX_OSPATH];
@@ -1607,7 +1609,7 @@ int FS_Tell (fileHandle_t f)
 FS_FileExists
 ================
 */
-qboolean FS_FileExists (char *path)
+qboolean FS_FileExists (const char *path)
 {
 	fileHandle_t f;
 
@@ -1625,7 +1627,7 @@ qboolean FS_FileExists (char *path)
 FS_LocalFileExists
 ================
 */
-qboolean FS_LocalFileExists (char *path)
+qboolean FS_LocalFileExists (const char *path)
 {
 	char		realPath[MAX_OSPATH];
 	FILE		*f;
@@ -1644,7 +1646,7 @@ qboolean FS_LocalFileExists (char *path)
 FS_SaveFileExists
 ================
 */
-qboolean FS_SaveFileExists (char *path)
+qboolean FS_SaveFileExists (const char *path)
 {
 	char		realPath[MAX_OSPATH];
 	FILE		*f;
@@ -1663,7 +1665,7 @@ qboolean FS_SaveFileExists (char *path)
 FS_DownloadFileExists
 ================
 */
-qboolean FS_DownloadFileExists (char *path)
+qboolean FS_DownloadFileExists (const char *path)
 {
 	char		realPath[MAX_OSPATH];
 	FILE		*f;
@@ -1681,7 +1683,7 @@ qboolean FS_DownloadFileExists (char *path)
 FS_CopyFile
 ================
 */
-void FS_CopyFile (char *src, char *dst)
+void FS_CopyFile (const char *src, const char *dst)
 {
 	FILE	*f1, *f2;
 	size_t	l;
@@ -1746,7 +1748,7 @@ Returns file size or -1 if the file is not found.
 A NULL buffer will just return the file size without loading.
 =================
 */
-int FS_LoadFile (char *path, void **buffer)
+int FS_LoadFile (const char *path, void **buffer)
 {
 	fileHandle_t	f;
 	byte			*buf;
@@ -1818,14 +1820,14 @@ Checks against a blacklist to see if a file
 should not be loaded from a pak.
 =================
 */
-qboolean FS_FileInPakBlacklist (char *filename, qboolean isPk3)
+qboolean FS_FileInPakBlacklist (const char *filename, qboolean isPk3)
 {
 	int			i;
 	char		*compare;
 	qboolean	ignore = false;
 	qboolean	loadExtFirst = false;
 
-	compare = filename;
+	compare = (char *)filename;
 	if (compare[0] == '/')	// remove leading slash
 		compare++;
 
@@ -2282,7 +2284,7 @@ Should only be called after the final FS_AddGameDirectory() call.
 Sets fs_savegamedir, not fs_gamedir, and does not load any pack files.
 =================
 */
-void FS_AddSaveGameDirectory (char *dir)
+void FS_AddSaveGameDirectory (const char *dir)
 {
 	fsSearchPath_t	*search;
 
@@ -2319,7 +2321,7 @@ Sets fs_downloaddir, not fs_gamedir, and loads any pack files
 in that path by calling FS_AddPaksInDirectory().
 =================
 */
-void FS_AddDownloadDirectory (char *dir)
+void FS_AddDownloadDirectory (const char *dir)
 {
 	fsSearchPath_t	*search;
 
@@ -2359,7 +2361,7 @@ FS_NextPath
 Allows enumerating all of the directories in the search path
 =================
 */
-char *FS_NextPath (char *prevPath)
+char *FS_NextPath (const char *prevPath)
 {
 	fsSearchPath_t	*search;
 	char			*prev, *firstPath;
@@ -2398,7 +2400,7 @@ Skips fs_savegamedir and fs_downloaddir,
 so as not to load game library from there.
 =================
 */
-char *FS_NextGamePath (char *prevPath)
+char *FS_NextGamePath (const char *prevPath)
 {
 	fsSearchPath_t	*search;
 	char			*prev;
@@ -2741,7 +2743,7 @@ FS_SetGamedir
 Sets the gamedir and path to a different directory.
 ================
 */
-void FS_SetGamedir (char *dir)
+void FS_SetGamedir (const char *dir)
 {
 	fsSearchPath_t	*next;
 	qboolean		basegame1_loaded = false, basegame2_loaded = false;
@@ -2762,7 +2764,7 @@ void FS_SetGamedir (char *dir)
 			Cvar_Set ("basegame", "");
 			Com_Printf ("Basegame should be a single filename, not a path\n");
 		}
-		if ( !Q_stricmp(fs_basegamedir->string, BASEDIRNAME) || !Q_stricmp(fs_basegamedir->string, dir) )
+		if ( !Q_stricmp(fs_basegamedir->string, BASEDIRNAME) || !Q_stricmp(fs_basegamedir->string, (char *)dir) )
 		{
 			Cvar_Set ("basegame", "");
 			Com_Printf ("Basegame should not be the same as "BASEDIRNAME" or gamedir.\n");
@@ -2778,7 +2780,7 @@ void FS_SetGamedir (char *dir)
 			Cvar_Set ("basegame2", "");
 			Com_Printf ("Basegame2 should be a single filename, not a path\n");
 		}
-		if ( !Q_stricmp(fs_basegamedir2->string, BASEDIRNAME) || !Q_stricmp(fs_basegamedir2->string, dir)
+		if ( !Q_stricmp(fs_basegamedir2->string, BASEDIRNAME) || !Q_stricmp(fs_basegamedir2->string, (char *)dir)
 			|| !Q_stricmp(fs_basegamedir2->string, fs_basegamedir->string) )
 		{
 			Cvar_Set ("basegame2", "");
@@ -2795,7 +2797,7 @@ void FS_SetGamedir (char *dir)
 			Cvar_Set ("basegame3", "");
 			Com_Printf ("Basegame3 should be a single filename, not a path.\n");
 		}
-		if ( !Q_stricmp(fs_basegamedir3->string, BASEDIRNAME) || !Q_stricmp(fs_basegamedir3->string, dir)
+		if ( !Q_stricmp(fs_basegamedir3->string, BASEDIRNAME) || !Q_stricmp(fs_basegamedir3->string, (char *)dir)
 			|| !Q_stricmp(fs_basegamedir3->string, fs_basegamedir->string) || !Q_stricmp(fs_basegamedir3->string, fs_basegamedir2->string) )
 		{
 			Cvar_Set ("basegame3", "");
@@ -2879,7 +2881,7 @@ void FS_SetGamedir (char *dir)
 			FS_AddGameDirectory (va("%s/%s", fs_basedir->string, fs_basegamedir3->string) );
 		}
 
-		Cvar_FullSet ("gamedir", dir, CVAR_SERVERINFO|CVAR_NOSET|CVAR_SAVE_IGNORE);
+		Cvar_FullSet ("gamedir", (char *)dir, CVAR_SERVERINFO|CVAR_NOSET|CVAR_SAVE_IGNORE);
 		if (fs_cddir->string[0])
 			FS_AddGameDirectory (va("%s/%s", fs_cddir->string, dir) );
 		FS_AddGameDirectory (va("%s/%s", fs_basedir->string, dir) );
@@ -2970,13 +2972,13 @@ void FS_ExecAutoexec (void)
 FS_ListFiles
 ================
 */
-char **FS_ListFiles (char *findname, int *numfiles, unsigned musthave, unsigned canthave)
+char **FS_ListFiles (const char *findname, int *numfiles, unsigned musthave, unsigned canthave)
 {
 	char *s;
 	int nfiles = 0;
 	char **list = 0;
 
-	s = Sys_FindFirst( findname, musthave, canthave );
+	s = Sys_FindFirst( (char *)findname, musthave, canthave );
 	while ( s )
 	{
 		if ( s[strlen(s)-1] != '.' )
@@ -2996,7 +2998,7 @@ char **FS_ListFiles (char *findname, int *numfiles, unsigned musthave, unsigned 
 	list = malloc( sizeof( char * ) * nfiles );
 	memset( list, 0, sizeof( char * ) * nfiles );
 
-	s = Sys_FindFirst( findname, musthave, canthave );
+	s = Sys_FindFirst( (char *)findname, musthave, canthave );
 	nfiles = 0;
 	while ( s )
 	{
@@ -3040,12 +3042,19 @@ void FS_FreeFileList (char **list, int n)
 FS_ItemInList
 =================
 */
-qboolean FS_ItemInList (char *check, int num, char **list)
+qboolean FS_ItemInList (const char *check, int num, const char **list)
 {
-	int i;
-	for (i=0;i<num;i++)
-		if (!Q_strcasecmp(check, list[i]))
+	int		i;
+
+	if (!check || !list)
+		return false;
+	for (i=0; i<num; i++)
+	{
+		if (!list[i])
+			continue;
+		if ( !Q_strcasecmp((char *)check, (char *)list[i]) )
 			return true;
+	}
 	return false;
 }
 
@@ -3054,10 +3063,14 @@ qboolean FS_ItemInList (char *check, int num, char **list)
 FS_InsertInList
 =================
 */
-void FS_InsertInList (char **list, char *insert, int len, int start)
+void FS_InsertInList (char **list, const char *insert, int len, int start)
 {
-	int i;
-	if (!list) return;
+	int		i;
+
+	if (!list || !insert) return;
+	if (len < 1 || start < 0) return;
+//	if (start >= len) return;
+	if (start > len) return;
 
 	for (i=start; i<len; i++)
 	{
