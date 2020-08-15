@@ -1,14 +1,13 @@
 //Microsoft Developer Studio generated resource script.
 //
-#include "..\..\win32\resource.h"
+#include "resource.h"
 
 #define APSTUDIO_READONLY_SYMBOLS
 /////////////////////////////////////////////////////////////////////////////
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
-#include "winresrc.h"
-#include "winuser.h"
+#include "afxres.h"
 
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
@@ -55,34 +54,34 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,2,0,8
- PRODUCTVERSION 0,2,0,8
+ FILEVERSION 0,9,9,0
+ PRODUCTVERSION 0,9,9,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
- FILEFLAGS 0x1L
+ FILEFLAGS 0x29L
 #else
- FILEFLAGS 0x0L
+ FILEFLAGS 0x28L
 #endif
  FILEOS 0x40004L
- FILETYPE 0x1L
+ FILETYPE 0x2L
  FILESUBTYPE 0x0L
 BEGIN
     BLOCK "StringFileInfo"
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "Comments", "Licensed under the GPL.  Source available at www.markshan.com/knightmare\0"
-            VALUE "CompanyName", " \0"
-            VALUE "FileDescription", "KMQuake2 engine mod (64-bit)\0"
-            VALUE "FileVersion", "0, 2, 0, 8\0"
-            VALUE "InternalName", "kmquake2_x64\0"
+            VALUE "Comments", "Used by Pax Imperia: http://www.markshan.com/podstrn/noviprj.htm\0"
+            VALUE "CompanyName", "\0"
+            VALUE "FileDescription", "Rogue + Xatrix + Lazarus integrated game DLL (64-bit)\0"
+            VALUE "FileVersion", "0.990\0"
+            VALUE "InternalName", "kmq2gamex64.dll\0"
             VALUE "LegalCopyright", "\0"
             VALUE "LegalTrademarks", "\0"
-            VALUE "OriginalFilename", "kmquake2_x64.exe\0"
+            VALUE "OriginalFilename", "kmq2gamex64.dll\0"
             VALUE "PrivateBuild", "\0"
-            VALUE "ProductName", "KMQuake2\0"
-            VALUE "ProductVersion", "0, 2, 0, 8\0"
-            VALUE "SpecialBuild", "\0"
+            VALUE "ProductName", "KMQuake2 Missionpacks + Lazarus DLL\0"
+            VALUE "ProductVersion", "0.990\0"
+            VALUE "SpecialBuild", "KMQuake2 v0.20 update 8 compatible version created by Knightmare\0"
         END
     END
     BLOCK "VarFileInfo"
@@ -96,35 +95,25 @@ END
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// Bitmap
+// Accelerator
 //
 
-IDB_BITMAP2             BITMAP  DISCARDABLE     "..\..\win32\startup2.bmp"
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Dialog
-//
-
-IDD_DIALOG1 DIALOGEX 0, 0, 133, 56
-STYLE DS_SETFOREGROUND | DS_CENTER | WS_POPUP
-EXSTYLE WS_EX_TOOLWINDOW
-FONT 16, "Times New Roman", 0, 0, 0x1
+IDR_ACCELERATOR1 ACCELERATORS DISCARDABLE 
 BEGIN
-    CONTROL         115,DLGC_STATIC,"Static",SS_BITMAP,0,0,133,70
+    "&",            40001,                  ASCII,  NOINVERT
 END
 
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// Icon
+// String Table
 //
 
-// Icon with lowest ID value placed first to ensure application icon
-// remains consistent on all systems.
-IDI_ICON1               ICON    DISCARDABLE     "..\..\win32\q2.ico"
-IDI_ICON2               ICON    DISCARDABLE     "..\..\win32\q2mp1.ico"
-IDI_ICON3               ICON    DISCARDABLE     "..\..\win32\q2mp2.ico"
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_STRING1             "*"
+END
+
 #endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 

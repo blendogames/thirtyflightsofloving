@@ -74,14 +74,14 @@ BEGIN
             VALUE "CompanyName", "\0"
             VALUE "FileDescription", "Rogue + Xatrix + Lazarus integrated game DLL\0"
             VALUE "FileVersion", "0.990\0"
-            VALUE "InternalName", "gamex86.dll\0"
+            VALUE "InternalName", "kmq2gamex86.dll\0"
             VALUE "LegalCopyright", "\0"
             VALUE "LegalTrademarks", "\0"
-            VALUE "OriginalFilename", "gamex86.dll\0"
+            VALUE "OriginalFilename", "kmq2gamex86.dll\0"
             VALUE "PrivateBuild", "\0"
-            VALUE "ProductName", "Missionpacks + Lazarus DLL\0"
+            VALUE "ProductName", "KMQuake2 Missionpacks + Lazarus DLL\0"
             VALUE "ProductVersion", "0.990\0"
-            VALUE "SpecialBuild", "\0"
+            VALUE "SpecialBuild", "KMQuake2 v0.20 update 8 compatible version created by Knightmare\0"
         END
     END
     BLOCK "VarFileInfo"
