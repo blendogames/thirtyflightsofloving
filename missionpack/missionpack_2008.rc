@@ -15,6 +15,14 @@
 /////////////////////////////////////////////////////////////////////////////
 // English (U.S.) resources
 
+#ifdef _WIN64
+#define VER_FILEDESCRIPTION_STR		"Rogue + Xatrix + Lazarus integrated game DLL (64-bit)\0"
+#define VER_ORIGINALFILENAME_STR	"kmq2gamex64.dll\0"
+#else
+#define VER_FILEDESCRIPTION_STR		"Rogue + Xatrix + Lazarus integrated game DLL\0"
+#define VER_ORIGINALFILENAME_STR	"kmq2gamex86.dll\0"
+#endif
+
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
@@ -72,12 +80,12 @@ BEGIN
         BEGIN
             VALUE "Comments", "Used by Pax Imperia: http://www.markshan.com/podstrn/noviprj.htm\0"
             VALUE "CompanyName", "\0"
-            VALUE "FileDescription", "Rogue + Xatrix + Lazarus integrated game DLL\0"
+            VALUE "FileDescription", VER_FILEDESCRIPTION_STR
             VALUE "FileVersion", "0.990\0"
-            VALUE "InternalName", "kmq2gamex86.dll\0"
+            VALUE "InternalName", VER_ORIGINALFILENAME_STR
             VALUE "LegalCopyright", "\0"
             VALUE "LegalTrademarks", "\0"
-            VALUE "OriginalFilename", "kmq2gamex86.dll\0"
+            VALUE "OriginalFilename", VER_ORIGINALFILENAME_STR
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "KMQuake2 Missionpacks + Lazarus DLL\0"
             VALUE "ProductVersion", "0.990\0"

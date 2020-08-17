@@ -290,8 +290,14 @@ void Drop_General (edict_t *ent, gitem_t *item)
 
 qboolean Pickup_Adrenaline (edict_t *ent, edict_t *other)
 {
-	if (!deathmatch->value)
+	if (!deathmatch->value) {
 		other->max_health += 1;
+		// Knightmare- copy max health to client_persistant_t
+		// Fixes health reverting to prev max_health value on
+		// map change when game is not saved first
+		if (other->client)
+			other->client->pers.max_health = other->max_health;
+	}
 
 	if (other->health < other->max_health)
 		other->health = other->max_health;
@@ -305,6 +311,11 @@ qboolean Pickup_Adrenaline (edict_t *ent, edict_t *other)
 qboolean Pickup_AncientHead (edict_t *ent, edict_t *other)
 {
 	other->max_health += 2;
+	// Knightmare- copy max health to client_persistant_t
+	// Fixes health reverting to prev max_health value on
+	// map change when game is not saved first
+	if (other->client)
+		other->client->pers.max_health = other->max_health;
 
 	if (!(ent->spawnflags & DROPPED_ITEM) && (deathmatch->value))
 		SetRespawn (ent, ent->item->quantity);

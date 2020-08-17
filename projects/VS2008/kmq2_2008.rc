@@ -16,6 +16,14 @@
 /////////////////////////////////////////////////////////////////////////////
 // English (U.S.) resources
 
+#ifdef _WIN64
+#define VER_FILEDESCRIPTION_STR		"KMQuake2 engine mod (64-bit)\0"
+#define VER_ORIGINALFILENAME_STR	"kmquake2_x64.exe\0"
+#else
+#define VER_FILEDESCRIPTION_STR		"KMQuake2 engine mod\0"
+#define VER_ORIGINALFILENAME_STR	"kmquake2.exe\0"
+#endif
+
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
@@ -73,12 +81,12 @@ BEGIN
         BEGIN
             VALUE "Comments", "Licensed under the GPL.  Source available at www.markshan.com/knightmare\0"
             VALUE "CompanyName", " \0"
-            VALUE "FileDescription", "KMQuake2 engine mod\0"
+            VALUE "FileDescription", VER_FILEDESCRIPTION_STR
             VALUE "FileVersion", "0, 2, 0, 8\0"
             VALUE "InternalName", "kmquake2\0"
             VALUE "LegalCopyright", "\0"
             VALUE "LegalTrademarks", "\0"
-            VALUE "OriginalFilename", "kmquake2.exe\0"
+            VALUE "OriginalFilename", VER_ORIGINALFILENAME_STR
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "KMQuake2\0"
             VALUE "ProductVersion", "0, 2, 0, 8\0"

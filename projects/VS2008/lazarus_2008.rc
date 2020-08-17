@@ -18,6 +18,14 @@
 /////////////////////////////////////////////////////////////////////////////
 // English (U.S.) resources
 
+#ifdef _WIN64
+#define VER_FILEDESCRIPTION_STR		"Lazarus Quake II mod with CTF and ACE Bot (64-bit)\0"
+#define VER_ORIGINALFILENAME_STR	"kmq2gamex64.dll\0"
+#else
+#define VER_FILEDESCRIPTION_STR		"Lazarus Quake II mod with CTF and ACE Bot\0"
+#define VER_ORIGINALFILENAME_STR	"kmq2gamex86.dll\0"
+#endif
+
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
@@ -49,12 +57,12 @@ BEGIN
         BEGIN
             VALUE "Comments", "Visit our home at http://www.planetquake.com/lazarus\0"
             VALUE "CompanyName", "Hyde/Ferrara\0"
-            VALUE "FileDescription", "Lazarus Quake II mod with CTF and ACE Bot\0"
+            VALUE "FileDescription", VER_FILEDESCRIPTION_STR
             VALUE "FileVersion", "2.230\0"
-            VALUE "InternalName", "kmq2gamex86.dll\0"
+            VALUE "InternalName", VER_ORIGINALFILENAME_STR
             VALUE "LegalCopyright", "Mr. Hyde and Mad Dog\0"
             VALUE "LegalTrademarks", "Lazarus is a registered trademark... oops... no it ain't, but don't use it anyway or we'll come get ya.\0"
-            VALUE "OriginalFilename", "kmq2gamex86.dll\0"
+            VALUE "OriginalFilename", VER_ORIGINALFILENAME_STR
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "Lazarus Quake II mod with Threewave/3Team CTF and ACE Bot support\0"
             VALUE "ProductVersion", "2.230\0"
