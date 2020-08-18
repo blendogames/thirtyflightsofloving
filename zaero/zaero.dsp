@@ -507,5 +507,9 @@ SOURCE=.\z_menu.h
 SOURCE=.\z_sentien.h
 # End Source File
 # End Group
+# Begin Source File
+
+SOURCE=.\zaero.rc
+# End Source File
 # End Target
 # End Project
