@@ -499,16 +499,17 @@ void CL_ParseConfigString (void)
 		strncpy (cl.configstrings[i], s, (sizeof(cl.configstrings[i]) * (CS_AIRACCEL - i))-1 );
 		cl.configstrings[CS_AIRACCEL-1][MAX_QPATH-1] = 0;	// null terminate end of section
 	}
-	else if ( LegacyProtocol() && (i >= OLD_CS_GENERAL && i < OLD_MAX_CONFIGSTRINGS) ) {	// allow writes to general strings to overflow
+	// Removed these because strncpy() overwrites destination with trailing zeroes until count is reached
+/*	else if ( LegacyProtocol() && (i >= OLD_CS_GENERAL && i < OLD_MAX_CONFIGSTRINGS) ) {	// allow writes to general strings to overflow
 		strncpy (cl.configstrings[i], s, (sizeof(cl.configstrings[i]) * (OLD_MAX_CONFIGSTRINGS - i))-1 );
 		cl.configstrings[OLD_MAX_CONFIGSTRINGS-1][MAX_QPATH-1] = 0;	// null terminate end of section
-		Com_Printf("CL_ParseConfigString: CS_GENERAL %i: '%s', maxlen=%i\n", i, s, (sizeof(cl.configstrings[i]) * (OLD_MAX_CONFIGSTRINGS - i))-1);	// FIXME: remove this!
+	//	Com_Printf("CL_ParseConfigString: CS_GENERAL %i: '%s', maxlen=%i\n", i, s, (sizeof(cl.configstrings[i]) * (OLD_MAX_CONFIGSTRINGS - i))-1);
 	}
 	else if ( !LegacyProtocol() && (i >= CS_GENERAL && i < CS_PAKFILE) ) {	// allow writes to general strings to overflow
 		strncpy (cl.configstrings[i], s, (sizeof(cl.configstrings[i]) * (CS_PAKFILE - i))-1 );
 		cl.configstrings[CS_PAKFILE-1][MAX_QPATH-1] = 0;	// null terminate end of section
-		Com_Printf("CL_ParseConfigString: CS_GENERAL %i: '%s', maxlen=%i\n", i, s, (sizeof(cl.configstrings[i]) * (CS_PAKFILE - i))-1);	// FIXME: remove this!
-	}
+	//	Com_Printf("CL_ParseConfigString: CS_GENERAL %i: '%s', maxlen=%i\n", i, s, (sizeof(cl.configstrings[i]) * (CS_PAKFILE - i))-1);
+	}*/
 	else {
 		if (length >= MAX_QPATH)
 			Com_Printf(S_COLOR_YELLOW"CL_ParseConfigString: string %d of length %d exceeds MAX_QPATH.\n", i, (int)length);

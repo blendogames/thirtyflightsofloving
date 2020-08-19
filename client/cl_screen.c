@@ -1237,14 +1237,6 @@ void SCR_DumpStatusLayout_f (void)
 	bufcount += (int)strlen(formatLine);
 	for (i = cs_general; i < (cs_general + MAX_GENERAL); i++)
 	{
-	/*	memset(rawLine, 0, sizeof(rawLine));
-		for (j=0; j<MAX_QPATH; j++) {
-			rawLine[j] = cl.configstrings[i][j];
-			if (rawLine[j] == '\0')	rawLine[j] = ' ';
-			if (rawLine[j] == '\t')	rawLine[j] = ' ';
-		}
-		rawLine[MAX_QPATH] = ' ';
-		Com_sprintf(formatLine, sizeof(formatLine), "%i: %s\n", i, rawLine);*/
 		Com_sprintf(formatLine, sizeof(formatLine), "%i: %s\n", i, cl.configstrings[i]);
 		// prevent overflow of buffer
 		if ( (bufcount + strlen(formatLine)) >= sizeof(buffer) ) {
