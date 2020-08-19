@@ -103,10 +103,6 @@ void SCR_Loading_f (void);
 
 #define LOADSCREEN_NAME "/gfx/ui/unknownmap.pcx"
 
-#define	ICON_WIDTH	24
-#define	ICON_HEIGHT	24
-#define	CHAR_WIDTH	16
-#define	ICON_SPACE	8
 
 /*
 ===============================================================
@@ -668,39 +664,6 @@ void SCR_DrawString (float x, float y, int size, scralign_t align, const char *s
 
 //===============================================================================
 
-
-/*
-================
-Hud_DrawString
-================
-*/
-void Hud_DrawString (int x, int y, const char *string, int alpha, qboolean isStatusBar)
-{
-	CL_DrawStringGeneric (x, y, string, alpha, HUD_FONT_SIZE, (isStatusBar) ? SCALETYPE_HUD : SCALETYPE_MENU, false);
-}
-
-
-/*
-================
-Hud_DrawStringAlt
-================
-*/
-void Hud_DrawStringAlt (int x, int y, const char *string, int alpha, qboolean isStatusBar)
-{
-	int		i, len;
-	char	highString[1024];
-
-//	Com_sprintf (highString, sizeof(highString), S_COLOR_ALT"%s", string);
-	Com_sprintf (highString, sizeof(highString), "%s", string);
-	len = (int)strlen(highString);
-	for (i=0; i<len; i++) {
-		highString[i] ^= 128;
-	}
-	CL_DrawStringGeneric (x, y, highString, alpha, HUD_FONT_SIZE, (isStatusBar) ? SCALETYPE_HUD : SCALETYPE_MENU, false);
-//	CL_DrawStringGeneric (x, y, string, alpha, HUD_FONT_SIZE, (isStatusBar) ? SCALETYPE_HUD : SCALETYPE_MENU, true);
-}
-
-
 /*
 ================
 SCR_ShowFPS
@@ -1164,11 +1127,17 @@ Saves the statusbar layout to a file
 */
 void SCR_DumpStatusLayout_f (void)
 {
-	char	buffer[2048], rawLine[MAX_QPATH+1], statLine[32];
-	int		i, j, bufcount;
+	char	buffer[2048], rawLine[MAX_QPATH+1], formatLine[80], statLine[32];
+	int		i, j, cs_general, bufcount = 0;
 	FILE	*f;
 	char	*p;
 	char	name[MAX_OSPATH];
+
+	// starting index is based on protocol for CS_GENERAL section
+	if ( LegacyProtocol() )
+		cs_general = OLD_CS_GENERAL;
+	else
+		cs_general = CS_GENERAL;
 
 	if (Cmd_Argc() != 2)
 	{
@@ -1188,6 +1157,12 @@ void SCR_DumpStatusLayout_f (void)
 
 	// statusbar layout is in multiple configstrings
 	// starting at CS_STATUSBAR and ending at CS_AIRACCEL
+	Com_sprintf(formatLine, sizeof(formatLine), "\nFormatted Dump\n--------------\n");
+	Q_strncatz (buffer, formatLine, sizeof(buffer));
+	bufcount += (int)strlen(formatLine);
+	fwrite(&buffer, 1, bufcount, f);
+	buffer[0] = 0;
+	bufcount = 0;
 	p = &buffer[0];
 	bufcount = 0;
 	for (i=CS_STATUSBAR; i<CS_AIRACCEL; i++)
@@ -1218,9 +1193,9 @@ void SCR_DumpStatusLayout_f (void)
 	bufcount = 0;
 
 	// write out the raw dump
-	Com_sprintf(statLine, sizeof(statLine), "\nRaw Dump\n--------\n");
-	Q_strncatz (buffer, statLine, sizeof(buffer));
-	bufcount += (int)strlen(statLine);
+	Com_sprintf(formatLine, sizeof(formatLine), "\nRaw Dump\n--------\n");
+	Q_strncatz (buffer, formatLine, sizeof(buffer));
+	bufcount += (int)strlen(formatLine);
 	fwrite(&buffer, 1, bufcount, f);
 	buffer[0] = 0;
 	bufcount = 0;
@@ -1237,10 +1212,9 @@ void SCR_DumpStatusLayout_f (void)
 	}
 
 	// write out the stat values for debugging
-	Com_sprintf(statLine, sizeof(statLine), "\nStat Values\n-----------\n");
-	Q_strncatz (buffer, statLine, sizeof(buffer));
-	bufcount += (int)strlen(statLine);
-
+	Com_sprintf(formatLine, sizeof(formatLine), "\nStat Values\n-----------\n");
+	Q_strncatz (buffer, formatLine, sizeof(buffer));
+	bufcount += (int)strlen(formatLine);
 	for (i=0; i<MAX_STATS; i++)
 	{
 		Com_sprintf(statLine, sizeof(statLine), "%i: %i\n", i, cl.frame.playerstate.stats[i]);
@@ -1252,6 +1226,34 @@ void SCR_DumpStatusLayout_f (void)
 		}
 		Q_strncatz (buffer, statLine, sizeof(buffer));
 		bufcount += (int)strlen(statLine);
+	}
+	fwrite(&buffer, 1, bufcount, f);
+	buffer[0] = 0;
+	bufcount = 0;
+
+	// write out CS_GENERAL for stat_string tokens
+	Com_sprintf(formatLine, sizeof(formatLine), "\nGeneral Configstrings\n---------------------\n");
+	Q_strncatz (buffer, formatLine, sizeof(buffer));
+	bufcount += (int)strlen(formatLine);
+	for (i = cs_general; i < (cs_general + MAX_GENERAL); i++)
+	{
+	/*	memset(rawLine, 0, sizeof(rawLine));
+		for (j=0; j<MAX_QPATH; j++) {
+			rawLine[j] = cl.configstrings[i][j];
+			if (rawLine[j] == '\0')	rawLine[j] = ' ';
+			if (rawLine[j] == '\t')	rawLine[j] = ' ';
+		}
+		rawLine[MAX_QPATH] = ' ';
+		Com_sprintf(formatLine, sizeof(formatLine), "%i: %s\n", i, rawLine);*/
+		Com_sprintf(formatLine, sizeof(formatLine), "%i: %s\n", i, cl.configstrings[i]);
+		// prevent overflow of buffer
+		if ( (bufcount + strlen(formatLine)) >= sizeof(buffer) ) {
+			fwrite(&buffer, 1, bufcount, f);
+			buffer[0] = 0;
+			bufcount = 0;
+		}
+		Q_strncatz (buffer, formatLine, sizeof(buffer));
+		bufcount += (int)strlen(formatLine);
 	}
 	fwrite(&buffer, 1, bufcount, f);
 	buffer[0] = 0;
@@ -2096,204 +2098,6 @@ void SCR_TileClear (void)
 
 
 /*
-===============================================================
-
-HUD CODE
-
-===============================================================
-*/
-
-#define STAT_MINUS		10	// num frame for '-' stats digit
-char		*sb_nums[2][11] = 
-{
-	{"num_0", "num_1", "num_2", "num_3", "num_4", "num_5",
-	"num_6", "num_7", "num_8", "num_9", "num_minus"},
-	{"anum_0", "anum_1", "anum_2", "anum_3", "anum_4", "anum_5",
-	"anum_6", "anum_7", "anum_8", "anum_9", "anum_minus"}
-};
-
-/*
-================
-SizeHUDString
-
-Allow embedded \n in the string
-================
-*/
-void SizeHUDString (char *string, int *w, int *h, qboolean isStatusBar)
-{
-	int		lines, width, current;
-	float	(*scaleForScreen)(float in);
-
-	// Get our scaling function
-	if (isStatusBar)
-		scaleForScreen = SCR_ScaledHud;
-	else
-		scaleForScreen = SCR_ScaledScreen;
-
-	lines = 1;
-	width = 0;
-
-	current = 0;
-	while (*string)
-	{
-		if (*string == '\n')
-		{
-			lines++;
-			current = 0;
-		}
-		else
-		{
-			current++;
-			if (current > width)
-				width = current;
-		}
-		string++;
-	}
-
-//	*w = width * scaledHud(8);
-//	*h = lines * scaledHud(8);
-	*w = width * scaleForScreen(8);
-	*h = lines * scaleForScreen(8);
-}
-
-/*
-================
-CL_DrawLayoutString
-================
-*/
-void CL_DrawLayoutString (char *string, int x, int y, int centerwidth, int xor, qboolean isStatusBar)
-{
-	int		margin;
-	int		width, visibleWidth;
-	int		i, len;
-	char	line[1024];
-	float	(*scaleForScreen)(float in);
-
-	// Get our scaling function
-	if (isStatusBar)
-		scaleForScreen = SCR_ScaledHud;
-	else
-		scaleForScreen = SCR_ScaledScreen;
-
-	margin = x;
-
-//	len = strlen(string);
-
-	while (*string)
-	{
-		// scan out one line of text from the string
-		width = 0;
-		while (*string && *string != '\n')
-			line[width++] = *string++;
-
-		line[width] = 0;
-		visibleWidth = stringLen(line);
-
-		if (centerwidth)
-		//	x = margin + (centerwidth - width*scaledHud(8))/2;
-		//	x = margin + (centerwidth - width*scaleForScreen(8))/2;
-			x = margin + (centerwidth - visibleWidth*scaleForScreen(8))/2;
-		else
-			x = margin;
-
-
-		if (xor)
-		{	// Knightmare- text color hack
-		//	Com_sprintf (line, sizeof(line), S_COLOR_ALT"%s", line);
-			len = (int)strlen(line);
-			for (i=0; i<len; i++) {
-				line[i] ^= xor;
-			}
-		}
-		Hud_DrawString (x, y, line, 255, isStatusBar);
-
-		if (*string)
-		{
-			string++;	// skip the \n
-			x = margin;
-		//	y += scaledHud(8);
-			y += scaleForScreen(8);
-		}
-	}
-}
-
-
-/*
-==============
-SCR_DrawField
-==============
-*/
-void SCR_DrawField (int x, int y, int color, int width, int value, qboolean flash, qboolean isStatusBar)
-{
-	char		num[16], *ptr;
-	int			l, frame;
-	float		digitWidth, digitOffset, fieldScale;
-	float		flash_x, flashWidth;
-	float		(*scaleForScreen)(float in);
-	float		(*getScreenScale)(void);
-
-	if (width < 1)
-		return;
-
-	// Get our scaling functions
-	if (isStatusBar) {
-		scaleForScreen = SCR_ScaledHud;
-		getScreenScale = SCR_GetHudScale;
-	}
-	else {
-		scaleForScreen = SCR_ScaledScreen;
-		getScreenScale = SCR_GetScreenScale;
-	}
-
-	// draw number string
-	fieldScale = getScreenScale();
-	if (width > 5)
-		width = 5;
-
-	Com_sprintf (num, sizeof(num), "%i", value);
-	l = (int)strlen(num);
-	if (l > width)
-	{
-	//	if (scr_hudsqueezedigits->value) {
-		if (scr_hudsqueezedigits->integer) {
-			l = min(l, width+2);
-			fieldScale =  (1.0 - ((1.0 - (float)width/(float)l) * 0.5)) * getScreenScale();
-		}
-		else
-			l = width;
-	}
-	digitWidth = fieldScale*(float)CHAR_WIDTH;
-	digitOffset = width*scaleForScreen(CHAR_WIDTH) - l*digitWidth;
-//	x += 2 + scaledHud(CHAR_WIDTH)*(width - l);
-//	x += 2 + scaleForScreen(CHAR_WIDTH)*(width - l);
-	x += 2 + digitOffset;
-	flashWidth = l*digitWidth;
-	flash_x = x;
-
-	if (flash)
-		R_DrawStretchPic (flash_x, y, flashWidth, scaleForScreen(ICON_HEIGHT), "field_3", scr_hudalpha->value);
-
-	ptr = num;
-	while (*ptr && l)
-	{
-		if (*ptr == '-')
-			frame = STAT_MINUS;
-		else
-			frame = *ptr -'0';
-
-//		R_DrawScaledPic (x, y, HudScale(), scr_hudalpha->value,sb_nums[color][frame]);
-//		x += scaledHud(CHAR_WIDTH);
-//		R_DrawScaledPic (x, y, getScreenScale(), scr_hudalpha->value, sb_nums[color][frame]);
-//		x += scaleForScreen(CHAR_WIDTH);
-		R_DrawStretchPic (x, y, digitWidth, scaleForScreen(ICON_HEIGHT), sb_nums[color][frame], scr_hudalpha->value);
-		x += digitWidth;
-		ptr++;
-		l--;
-	}
-}
-
-
-/*
 ===============
 SCR_TouchPics
 
@@ -2322,547 +2126,6 @@ void SCR_TouchPics (void)
 		if (!crosshair_width)
 			crosshair_pic[0] = 0;
 	}
-}
-
-/*
-================
-SCR_ExecuteLayoutString 
-
-================
-*/
-void SCR_ExecuteLayoutString (char *s, qboolean isStatusBar)
-{
-	int		x, y;
-	int		value, stat, width, index, cs_images, max_images;
-	char	*token;
-	clientinfo_t	*ci;
-	float			(*scaleForScreen)(float in);
-	float			(*getScreenScale)(void);
-	float			scrLeft, scrWidth;
-
-	if (cls.state != ca_active || !cl.refresh_prepped)
-		return;
-
-	if (!s[0])
-		return;
-
-	// Knightmare- hack for connected to server using old protocol
-	// Changed config strings require different parsing
-	if ( LegacyProtocol() ) {
-		cs_images = OLD_CS_IMAGES;
-		max_images = OLD_MAX_IMAGES;
-	}
-	else {
-		cs_images = CS_IMAGES;
-		max_images = MAX_IMAGES;
-	}
-
-	// Get our scaling functions
-	if (isStatusBar) {
-		scaleForScreen = SCR_ScaledHud;
-		getScreenScale = SCR_GetHudScale;
-	}
-	else {
-		scaleForScreen = SCR_ScaledScreen;
-		getScreenScale = SCR_GetScreenScale;
-	}
-
-	SCR_InitHudScale ();
-	x = 0;
-	y = 0;
-	width = 3;
-
-	scrLeft = 0;
-	scrWidth = SCREEN_WIDTH;
-	SCR_AdjustFrom640 (&scrLeft, NULL, &scrWidth, NULL, ALIGN_STRETCH);
-
-	while (s)
-	{
-		token = COM_Parse (&s);
-		if (!strcmp(token, "xl"))
-		{
-			token = COM_Parse (&s);
-		//	x = scaleForScreen(atoi(token));
-			x = (int)scrLeft + scaleForScreen(atoi(token));
-			continue;
-		}
-		if (!strcmp(token, "xr"))
-		{
-			token = COM_Parse (&s);
-		//	x = viddef.width + scaleForScreen(atoi(token));
-			x = (int)(scrLeft + scrWidth) + scaleForScreen(atoi(token));
-			continue;
-		}
-		if (!strcmp(token, "xv"))
-		{
-			token = COM_Parse (&s);
-			x = viddef.width/2 - scaleForScreen(160) + scaleForScreen(atoi(token));
-			continue;
-		}
-		if (!strcmp(token, "yt"))
-		{
-			token = COM_Parse (&s);
-			y = scaleForScreen(atoi(token));
-			continue;
-		}
-		if (!strcmp(token, "yb"))
-		{
-			token = COM_Parse (&s);
-			y = viddef.height + scaleForScreen(atoi(token));
-			continue;
-		}
-		if (!strcmp(token, "yv"))
-		{
-			token = COM_Parse (&s);
-			y = viddef.height/2 - scaleForScreen(120) + scaleForScreen(atoi(token));
-			continue;
-		}
-
-		if (!strcmp(token, "pic"))
-		{	// draw a pic from a stat number
-			token = COM_Parse (&s);
-		//	value = cl.frame.playerstate.stats[atoi(token)];
-			stat = atoi(token);
-			if (stat < 0 || stat >= MAX_STATS)	// check bounds on stat
-				Com_Error (ERR_DROP, "Bad pic stat index");
-			value = cl.frame.playerstate.stats[stat];
-			if (value >= max_images) // Knightmare- don't bomb out
-			//	Com_Error (ERR_DROP, "Pic >= MAX_IMAGES");
-			{
-				Com_Printf (S_COLOR_YELLOW"WARNING: Pic >= MAX_IMAGES\n");
-				value = max_images-1;
-			}
-			if (cl.configstrings[cs_images+value])
-			{
-				R_DrawScaledPic (x, y, getScreenScale(), scr_hudalpha->value, cl.configstrings[cs_images+value]);
-			}
-			continue;
-		}
-
-		if (!strcmp(token, "client"))
-		{	// draw a deathmatch client block
-			int		score, ping, time;
-
-			token = COM_Parse (&s);
-			x = viddef.width/2 - scaleForScreen(160) + scaleForScreen(atoi(token));
-			token = COM_Parse (&s);
-			y = viddef.height/2 - scaleForScreen(120) + scaleForScreen(atoi(token));
-
-			token = COM_Parse (&s);
-			value = atoi(token);
-			if (value >= MAX_CLIENTS || value < 0)
-				Com_Error (ERR_DROP, "client >= MAX_CLIENTS");
-			ci = &cl.clientinfo[value];
-
-			token = COM_Parse (&s);
-			score = atoi(token);
-
-			token = COM_Parse (&s);
-			ping = atoi(token);
-
-			token = COM_Parse (&s);
-			time = atoi(token);
-
-			Hud_DrawStringAlt (x+scaleForScreen(32), y, va(S_COLOR_ALT"%s", ci->name), 255, isStatusBar);
-			Hud_DrawString (x+scaleForScreen(32), y+scaleForScreen(8),  "Score: ", 255, isStatusBar);
-			Hud_DrawStringAlt (x+scaleForScreen(32+7*8), y+scaleForScreen(8),  va(S_COLOR_ALT"%i", score), 255, isStatusBar);
-			Hud_DrawString (x+scaleForScreen(32), y+scaleForScreen(16), va("Ping:  %i", ping), 255, isStatusBar);
-			Hud_DrawString (x+scaleForScreen(32), y+scaleForScreen(24), va("Time:  %i", time), 255, isStatusBar);
-
-			if (!ci->icon)
-				ci = &cl.baseclientinfo;
-			R_DrawScaledPic(x, y, getScreenScale(), scr_hudalpha->value,  ci->iconname);
-			continue;
-		}
-
-		if (!strcmp(token, "ctf"))
-		{	// draw a ctf client block
-			int		score, ping;
-			char	block[80];
-
-			token = COM_Parse (&s);
-			x = viddef.width/2 - scaleForScreen(160) + scaleForScreen(atoi(token));
-			token = COM_Parse (&s);
-			y = viddef.height/2 - scaleForScreen(120) + scaleForScreen(atoi(token));
-
-			token = COM_Parse (&s);
-			value = atoi(token);
-			if (value >= MAX_CLIENTS || value < 0)
-				Com_Error (ERR_DROP, "client >= MAX_CLIENTS");
-			ci = &cl.clientinfo[value];
-
-			token = COM_Parse (&s);
-			score = atoi(token);
-
-			token = COM_Parse (&s);
-			ping = atoi(token);
-			if (ping > 999)
-				ping = 999;
-
-			sprintf(block, "%3d %3d %-12.12s", score, ping, ci->name);
-
-			if (value == cl.playernum)
-				Hud_DrawStringAlt (x, y, block, 255, isStatusBar);
-			else
-				Hud_DrawString (x, y, block, 255, isStatusBar);
-			continue;
-		}
-		
-		if (!strcmp(token, "3tctf")) // Knightmare- 3Team CTF block
-		{	// draw a 3Team CTF client block
-			int		score, ping;
-			char	block[80];
-
-			token = COM_Parse (&s);
-			x = viddef.width/2 - scaleForScreen(160) + scaleForScreen(atoi(token));
-			token = COM_Parse (&s);
-			y = viddef.height/2 - scaleForScreen(120) + scaleForScreen(atoi(token));
-
-			token = COM_Parse (&s);
-			value = atoi(token);
-			if (value >= MAX_CLIENTS || value < 0)
-				Com_Error (ERR_DROP, "client >= MAX_CLIENTS");
-			ci = &cl.clientinfo[value];
-
-			token = COM_Parse (&s);
-			score = atoi(token);
-
-			token = COM_Parse (&s);
-			ping = atoi(token);
-			if (ping > 999)
-				ping = 999;
-			// double spaced before player name for 2 flag icons
-			sprintf(block, "%3d %3d  %-12.12s", score, ping, ci->name);
-
-			if (value == cl.playernum)
-				Hud_DrawStringAlt (x, y, block, 255, isStatusBar);
-			else
-				Hud_DrawString (x, y, block, 255, isStatusBar);
-			continue;
-		}
-
-		if (!strcmp(token, "picn"))
-		{	// draw a pic from a name
-			token = COM_Parse (&s);
-			R_DrawScaledPic (x, y, getScreenScale(), scr_hudalpha->value, token);
-			continue;
-		}
-
-		if (!strcmp(token, "num"))
-		{	// draw a number
-			token = COM_Parse (&s);
-			width = atoi(token);
-			token = COM_Parse (&s);
-		//	value = cl.frame.playerstate.stats[atoi(token)];
-			stat = atoi(token);
-			if (stat < 0 || stat >= MAX_STATS)	// check bounds on stat
-				Com_Error (ERR_DROP, "Bad num stat index");
-			value = cl.frame.playerstate.stats[stat];
-			SCR_DrawField (x, y, 0, width, value, false, isStatusBar);
-			continue;
-		}
-
-		if (!strcmp(token, "hnum"))
-		{	// health number
-			int		color;
-
-			width = 3;
-			value = cl.frame.playerstate.stats[STAT_HEALTH];
-			if (value > 25)
-				color = 0;	// green
-			else if (value > 0)
-				color = (cl.frame.serverframe>>2) & 1;		// flash
-			else
-				color = 1;
-
-		//	if (cl.frame.playerstate.stats[STAT_FLASHES] & 1)
-		//		R_DrawScaledPic (x, y, getScreenScale(), scr_hudalpha->value, "field_3");
-
-			SCR_DrawField (x, y, color, width, value, (cl.frame.playerstate.stats[STAT_FLASHES] & 1), isStatusBar);
-			continue;
-		}
-
-		if (!strcmp(token, "anum"))
-		{	// ammo number
-			int		color;
-
-			width = 3;
-			value = cl.frame.playerstate.stats[STAT_AMMO];
-			if (value > 5)
-				color = 0;	// green
-			else if (value >= 0)
-				color = (cl.frame.serverframe>>2) & 1;		// flash
-			else
-				continue;	// negative number = don't show
-
-		//	if (cl.frame.playerstate.stats[STAT_FLASHES] & 4)
-		//		R_DrawScaledPic (x, y, getScreenScale(), scr_hudalpha->value, "field_3");
-
-			SCR_DrawField (x, y, color, width, value, (cl.frame.playerstate.stats[STAT_FLASHES] & 4), isStatusBar);
-			continue;
-		}
-
-		if (!strcmp(token, "rnum"))
-		{	// armor number
-			int		color;
-
-			width = 3;
-			value = cl.frame.playerstate.stats[STAT_ARMOR];
-			if (value < 1)
-				continue;
-
-			color = 0;	// green
-
-		//	if (cl.frame.playerstate.stats[STAT_FLASHES] & 2)
-		//		R_DrawScaledPic (x, y, getScreenScale(), scr_hudalpha->value, "field_3");
-
-			SCR_DrawField (x, y, color, width, value, (cl.frame.playerstate.stats[STAT_FLASHES] & 2), isStatusBar);
-			continue;
-		}
-
-
-		if (!strcmp(token, "stat_string"))
-		{
-			token = COM_Parse (&s);
-			stat = atoi(token);
-			if (stat < 0 || stat >= MAX_STATS)	// MAX_CONFIGSTRINGS
-				Com_Error (ERR_DROP, "Bad stat_string stat index");
-			index = cl.frame.playerstate.stats[stat];
-			if (index < 0 || index >= MAX_CONFIGSTRINGS)
-				Com_Error (ERR_DROP, "Bad stat_string configstring index");
-			Hud_DrawString (x, y, cl.configstrings[index], 255, isStatusBar);
-			continue;
-		}
-
-		if (!strcmp(token, "cstring"))
-		{
-			token = COM_Parse (&s);
-			CL_DrawLayoutString (token, x, y, scaleForScreen(320), 0, isStatusBar);
-			continue;
-		}
-
-		if (!strcmp(token, "string"))
-		{
-			token = COM_Parse (&s);
-			Hud_DrawString (x, y, token, 255, isStatusBar);
-			continue;
-		}
-
-		if (!strcmp(token, "cstring2"))
-		{
-			token = COM_Parse (&s);
-			CL_DrawLayoutString (token, x, y, scaleForScreen(320), 0x80, isStatusBar);
-			continue;
-		}
-
-		if (!strcmp(token, "string2"))
-		{
-			token = COM_Parse (&s);
-			Hud_DrawStringAlt (x, y, token, 255, isStatusBar);
-			continue;
-		}
-
-		if (!strcmp(token, "if"))
-		{	// draw a number
-			token = COM_Parse (&s);
-		//	value = cl.frame.playerstate.stats[atoi(token)];
-			stat = atoi(token);
-			if (stat < 0 || stat >= MAX_STATS)	// check bounds on stat
-				Com_Error (ERR_DROP, "Bad if stat index");
-			value = cl.frame.playerstate.stats[stat];
-			if (!value)
-			{	// skip to endif
-				while (s && strcmp(token, "endif") )
-				{
-					token = COM_Parse (&s);
-				}
-			}
-
-			continue;
-		}
-
-		// ifeq <stat> <value>
-		// ifbit <stat> <value>
-
-		// Knightmare- added more commands
-		if (!strcmp(token, "ifeq"))
-		{
-			token = COM_Parse (&s);
-			stat = atoi(token);
-			if (stat < 0 || stat >= MAX_STATS)
-				Com_Error (ERR_DROP, "Bad ifeq stat index");
-			token = COM_Parse (&s);
-			value = atoi(token);
-			if (cl.frame.playerstate.stats[stat] != value)
-			{	// skip to endif
-				while (s && strcmp(token, "endif") )
-				{
-					token = COM_Parse (&s);
-				}			
-			}
-		}
-
-		if (!strcmp(token, "ifneq"))
-		{
-			token = COM_Parse (&s);
-			stat = atoi(token);
-			if (stat < 0 || stat >= MAX_STATS)
-				Com_Error (ERR_DROP, "Bad ifneq stat index");
-			token = COM_Parse (&s);
-			value = atoi(token);
-			if (cl.frame.playerstate.stats[stat] == value)
-			{	// skip to endif
-				while (s && strcmp(token, "endif") )
-				{
-					token = COM_Parse (&s);
-				}			
-			}
-		}
-
-		if (!strcmp(token, "ifgt"))
-		{
-			token = COM_Parse (&s);
-			stat = atoi(token);
-			if (stat < 0 || stat >= MAX_STATS)
-				Com_Error (ERR_DROP, "Bad ifgt stat index");
-			token = COM_Parse (&s);
-			value = atoi(token);
-			if (cl.frame.playerstate.stats[stat] <= value)
-			{	// skip to endif
-				while (s && strcmp(token, "endif") )
-				{
-					token = COM_Parse (&s);
-				}			
-			}
-		}
-
-		if (!strcmp(token, "ifge"))
-		{
-			token = COM_Parse (&s);
-			stat = atoi(token);
-			if (stat < 0 || stat >= MAX_STATS)
-				Com_Error (ERR_DROP, "Bad ifge stat index");
-			token = COM_Parse (&s);
-			value = atoi(token);
-			if (cl.frame.playerstate.stats[stat] < value)
-			{	// skip to endif
-				while (s && strcmp(token, "endif") )
-				{
-					token = COM_Parse (&s);
-				}			
-			}
-		}
-
-		if (!strcmp(token, "iflt"))
-		{
-			token = COM_Parse (&s);
-			stat = atoi(token);
-			if (stat < 0 || stat >= MAX_STATS)
-				Com_Error (ERR_DROP, "Bad iflt stat index");
-			token = COM_Parse (&s);
-			value = atoi(token);
-			if (cl.frame.playerstate.stats[stat] >= value)
-			{	// skip to endif
-				while (s && strcmp(token, "endif") )
-				{
-					token = COM_Parse (&s);
-				}			
-			}
-		}
-
-		if (!strcmp(token, "ifle"))
-		{
-			token = COM_Parse (&s);
-			stat = atoi(token);
-			if (stat < 0 || stat >= MAX_STATS)
-				Com_Error (ERR_DROP, "Bad ifle stat index");
-			token = COM_Parse (&s);
-			value = atoi(token);
-			if (cl.frame.playerstate.stats[stat] > value)
-			{	// skip to endif
-				while (s && strcmp(token, "endif") )
-				{
-					token = COM_Parse (&s);
-				}			
-			}
-		}
-
-		if (!strcmp(token, "ifbit"))
-		{
-			token = COM_Parse (&s);
-			stat = atoi(token);
-			if (stat < 0 || stat >= MAX_STATS)
-				Com_Error (ERR_DROP, "Bad ifbit stat index");
-			token = COM_Parse (&s);
-			value = atoi(token);
-			if (value < 1 || value > 16)
-				Com_Error (ERR_DROP, "Bad ifbit bit value");
-			if ( !(cl.frame.playerstate.stats[stat] & (1<<(value-1))) )
-			{	// skip to endif
-				while (s && strcmp(token, "endif") )
-				{
-					token = COM_Parse (&s);
-				}			
-			}
-		}
-
-		if (!strcmp(token, "ifnbit"))
-		{
-			token = COM_Parse (&s);
-			stat = atoi(token);
-			if (stat < 0 || stat >= MAX_STATS)
-				Com_Error (ERR_DROP, "Bad ifnbit stat index");
-			token = COM_Parse (&s);
-			value = atoi(token);
-			if (value < 1 || value > 16)
-				Com_Error (ERR_DROP, "Bad ifnbit bit value");
-			if ( cl.frame.playerstate.stats[stat] & (1<<(value-1)) )
-			{	// skip to endif
-				while (s && strcmp(token, "endif") )
-				{
-					token = COM_Parse (&s);
-				}			
-			}
-		}
-		// end Knightmare
-	}
-}
-
-
-/*
-================
-SCR_DrawStats
-
-The status bar is a small layout program that
-is based on the stats array
-================
-*/
-void SCR_DrawStats (void)
-{
-	SCR_ExecuteLayoutString (cl.configstrings[CS_STATUSBAR], true);
-}
-
-
-/*
-================
-SCR_DrawLayout
-
-================
-*/
-#define	STAT_LAYOUTS		13
-
-void SCR_DrawLayout (void)
-{
-	qboolean isStatusBar = false;
-
-	if (!cl.frame.playerstate.stats[STAT_LAYOUTS])
-		return;
-
-	// Special hack for visor HUD addition in Zaero
-	if ( strstr(cl.layout, "\"Tracking ") )
-		isStatusBar = true;
-
-	SCR_ExecuteLayoutString (cl.layout, isStatusBar);
 }
 
 //=======================================================
@@ -3009,9 +2272,9 @@ void SCR_UpdateScreen (void)
 
 			if (!scr_hidehud)
 			{
-				SCR_DrawStats ();
+				CL_DrawStatus ();
 				if (cl.frame.playerstate.stats[STAT_LAYOUTS] & 1)
-					SCR_DrawLayout ();
+					CL_DrawLayout ();
 				if (cl.frame.playerstate.stats[STAT_LAYOUTS] & 2)
 					CL_DrawInventory ();
 			}

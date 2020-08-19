@@ -1145,11 +1145,9 @@ void UI_AddToServerList (netadr_t adr, char *info);
 void M_Menu_Main_f (void);
 
 //
-// cl_inv.c
+// cl_hud.c
 //
 void CL_ParseInventory (void);
-void CL_KeyInventory (int key);
-void CL_DrawInventory (void);
 
 //
 // cl_pred.c

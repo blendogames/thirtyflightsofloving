@@ -157,11 +157,11 @@ SOURCE=..\..\client\cl_http.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\client\cl_input.c
+SOURCE=..\..\client\cl_hud.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\client\cl_inv.c
+SOURCE=..\..\client\cl_input.c
 # End Source File
 # Begin Source File
 

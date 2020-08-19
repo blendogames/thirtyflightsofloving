@@ -284,11 +284,11 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\client\cl_input.c"
+					RelativePath="..\..\client\cl_hud.c"
 					>
 				</File>
 				<File
-					RelativePath="..\..\client\cl_inv.c"
+					RelativePath="..\..\client\cl_input.c"
 					>
 				</File>
 				<File

@@ -502,10 +502,12 @@ void CL_ParseConfigString (void)
 	else if ( LegacyProtocol() && (i >= OLD_CS_GENERAL && i < OLD_MAX_CONFIGSTRINGS) ) {	// allow writes to general strings to overflow
 		strncpy (cl.configstrings[i], s, (sizeof(cl.configstrings[i]) * (OLD_MAX_CONFIGSTRINGS - i))-1 );
 		cl.configstrings[OLD_MAX_CONFIGSTRINGS-1][MAX_QPATH-1] = 0;	// null terminate end of section
+		Com_Printf("CL_ParseConfigString: CS_GENERAL %i: '%s', maxlen=%i\n", i, s, (sizeof(cl.configstrings[i]) * (OLD_MAX_CONFIGSTRINGS - i))-1);	// FIXME: remove this!
 	}
 	else if ( !LegacyProtocol() && (i >= CS_GENERAL && i < CS_PAKFILE) ) {	// allow writes to general strings to overflow
 		strncpy (cl.configstrings[i], s, (sizeof(cl.configstrings[i]) * (CS_PAKFILE - i))-1 );
 		cl.configstrings[CS_PAKFILE-1][MAX_QPATH-1] = 0;	// null terminate end of section
+		Com_Printf("CL_ParseConfigString: CS_GENERAL %i: '%s', maxlen=%i\n", i, s, (sizeof(cl.configstrings[i]) * (CS_PAKFILE - i))-1);	// FIXME: remove this!
 	}
 	else {
 		if (length >= MAX_QPATH)
@@ -752,7 +754,6 @@ qboolean CL_FilterStuffText (char *stufftext, size_t textSize)
 	if ( !stufftext || (stuffLen == 0) )
 		return true;
 
-#if 1
 	do
 	{
 		if ( ((parsetext - stufftext) >= (textSize-1)) || ((parsetext - stufftext) >= stuffLen) )
@@ -830,54 +831,7 @@ qboolean CL_FilterStuffText (char *stufftext, size_t textSize)
 		}
 		parsetext = p;
 	} while (parsetext != NULL);
-#else
-	// skip leading spaces
-	while (*parsetext == ' ') parsetext++;
 
-	// handle quit and error stuffs specially
-	if (!strncmp(parsetext, "quit", 4) || !strncmp(parsetext, "error", 5))
-	{
-		Com_Printf(S_COLOR_YELLOW"CL_FilterStuffText: Server stuffed 'quit' or 'error' command, disconnecting...\n");
-		CL_Disconnect ();
-		return false;
-	}
-
-	// don't allow stuffing of renderer cvars
-	if ( !strncmp(parsetext, "gl_", 3) || !strncmp(parsetext, "r_", 2) )    	
-		return false;
-
-	// the Generations mod stuffs exec g*.cfg  for classes, so limit exec stuffs to .cfg files
-	if ( !strncmp(parsetext, "exec", 4) )
-	{
-		s = parsetext;
-		execname = COM_Parse (&s);
-		if (!s) {
-			Com_Printf(S_COLOR_YELLOW"CL_FilterStuffText: Server stuffed 'exec' command with no file\n");
-			return false;	// catch case of no text after 'exec'
-		}
-
-		execname = COM_Parse (&s);
-		execLen = (int)strlen(execname);
-
-		if ( (execLen > 1) && (execname[execLen-1] == ';') )	// catch token ending with ;
-			execLen--;
-
-		if ( (execLen < 5) || (strncmp(execname+execLen-4, ".cfg", 4) != 0) ) {
-			Com_Printf(S_COLOR_YELLOW"CL_FilterStuffText: Server stuffed 'exec' command for non-cfg file\n");
-			return false;
-		}
-		return true;
-	}
-
-	// code by xian- cycle through list of malicious commands
-	i = 0;
-	while (bad_stuffcmds[i] != NULL)
-	{
-		if ( Q_StrScanToken(parsetext, bad_stuffcmds[i], true) )
-			return false;
-		i++;
-	}
-#endif
 	return true;
 }
 

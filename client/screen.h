@@ -57,36 +57,11 @@ SCALETYPE_HUD,
 SCALETYPE_MENU
 } textscaletype_t;
 
+#define	STAT_MINUS		10	// num frame for '-' stats digit
+#define CHAR_WIDTH		16
 
-void	SCR_Init (void);
 
-void	SCR_UpdateScreen (void);
-
-void	SCR_SizeUp (void);
-void	SCR_SizeDown (void);
-void	SCR_CenterPrint (char *str);
-void	SCR_BeginLoadingPlaque (void);
-void	SCR_EndLoadingPlaque (void);
-
-void	SCR_DebugGraph (float value, int color);
-
-void	SCR_TouchPics (void);
-
-void	SCR_RunLetterbox (void);
-void	SCR_RunConsole (void);
-
-void	SCR_InitScreenScale (void);
-void	SCR_AdjustFrom640 (float *x, float *y, float *w, float *h, scralign_t align);
-float	SCR_ScaledScreen (float param);
-float	SCR_GetScreenScale (void);
-
-void	SCR_AdjustFrom640 (float *x, float *y, float *w, float *h, scralign_t align);
-void	SCR_DrawFill (float x, float y, float width, float height, scralign_t align, int red, int green, int blue, int alpha);
-void	SCR_DrawPic (float x, float y, float width, float height, scralign_t align, char *pic, float alpha);
-void	SCR_DrawChar (float x, float y, int size, scralign_t align, int num, int red, int green, int blue, int alpha, qboolean italic, qboolean last);
-void	SCR_DrawString (float x, float y, int size, scralign_t align, const char *string, int alpha);
-void	SCR_DrawCrosshair (void);
-
+extern	char		*sb_nums[2][11];
 
 extern	float		scr_con_current;
 extern	float		scr_conlines;		// lines of console to display
@@ -123,13 +98,51 @@ extern	int			crosshair_width, crosshair_height;
 
 #define HUD_FONT_SIZE	8.0
 
+//
+// cl_screen.c
+//
+void	SCR_Init (void);
+void	SCR_UpdateScreen (void);
+
+void	SCR_SizeUp (void);
+void	SCR_SizeDown (void);
+void	SCR_CenterPrint (char *str);
+void	SCR_BeginLoadingPlaque (void);
+void	SCR_EndLoadingPlaque (void);
+
+void	SCR_DebugGraph (float value, int color);
+
+void	SCR_TouchPics (void);
+
+void	SCR_RunLetterbox (void);
+void	SCR_RunConsole (void);
+
+void	SCR_InitScreenScale (void);
+void	SCR_AdjustFrom640 (float *x, float *y, float *w, float *h, scralign_t align);
+float	SCR_ScaledScreen (float param);
+float	SCR_GetScreenScale (void);
+
+void	SCR_AdjustFrom640 (float *x, float *y, float *w, float *h, scralign_t align);
+void	SCR_DrawFill (float x, float y, float width, float height, scralign_t align, int red, int green, int blue, int alpha);
+void	SCR_DrawPic (float x, float y, float width, float height, scralign_t align, char *pic, float alpha);
+void	SCR_DrawChar (float x, float y, int size, scralign_t align, int num, int red, int green, int blue, int alpha, qboolean italic, qboolean last);
+void	SCR_DrawString (float x, float y, int size, scralign_t align, const char *string, int alpha);
+void	SCR_DrawCrosshair (void);
 
 //
-// scr_cin.c
+// cl_hud.c
 //
-void SCR_PlayCinematic (char *name);
+void	Hud_DrawString (int x, int y, const char *string, int alpha, qboolean isStatusBar);
+void	Hud_DrawStringAlt (int x, int y, const char *string, int alpha, qboolean isStatusBar);
+void	CL_DrawStatus (void);
+void	CL_DrawLayout (void);
+void	CL_DrawInventory (void);
+
+//
+// cl_cin.c
+//
+void	SCR_PlayCinematic (char *name);
 qboolean SCR_DrawCinematic (void);
-void SCR_RunCinematic (void);
-void SCR_StopCinematic (void);
-void SCR_FinishCinematic (void);
-
+void	SCR_RunCinematic (void);
+void	SCR_StopCinematic (void);
+void	SCR_FinishCinematic (void);
