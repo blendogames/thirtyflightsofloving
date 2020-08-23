@@ -77,6 +77,9 @@ __inline int Q_vsnprintf (char *Dest, size_t Count, const char *Format, va_list 
 #define Q_vsnprintf vsnprintf
 #endif
 
+// Knightmare- whether to include enhancements supported by Q2E 0.40b
+//#define	Q2E_ENGINE_MOD
+
 // Knightmare- whether to include new engine enhancements
 #define	KMQUAKE2_ENGINE_MOD
 
@@ -100,7 +103,11 @@ __inline int Q_vsnprintf (char *Dest, size_t Count, const char *Format, va_list 
 //#define CITADELMOD_FEATURES
 
 #define SAVEGAME_USE_FUNCTION_TABLE
+#ifdef CITADELMOD_FEATURES
+#define SAVEGAME_DLLNAME "Citadel Quake II mod"
+#else
 #define SAVEGAME_DLLNAME "Rogue + Xatrix + Lazarus integrated mod"
+#endif	// CITADELMOD_FEATURES
 #define SAVEGAME_VERSION 4
 
 // angle indexes
@@ -405,6 +412,7 @@ typedef struct cvar_s
 #ifdef KMQUAKE2_ENGINE_MOD
 	char		*default_string;
 	int			integer;
+	char		*description;
 #endif
 } cvar_t;
 
@@ -791,12 +799,12 @@ typedef struct
 #define	MZ_NUKE2			37
 #define	MZ_NUKE4			38
 #define	MZ_NUKE8			39
-//Knightmare 1/3/2002- blue blaster and green hyperblaster
+// Knightmare 1/3/2002- blue blaster and green hyperblaster
 #define	MZ_BLUEBLASTER		40
 #define	MZ_GREENHYPERBLASTER	41
 #define	MZ_REDBLASTER		42
 #define	MZ_REDHYPERBLASTER	43
-//end Knightmare
+// end Knightmare
 //ROGUE
 
 //

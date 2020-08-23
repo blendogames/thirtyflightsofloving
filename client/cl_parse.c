@@ -484,8 +484,6 @@ void CL_ParseConfigString (void)
 		Com_Error (ERR_DROP, "configstring > MAX_CONFIGSTRINGS");
 	s = MSG_ReadString(&net_message);
 
-//	strncpy (olds, cl.configstrings[i], sizeof(olds));
-//	olds[sizeof(olds) - 1] = 0;
 	Q_strncpyz (olds, cl.configstrings[i], sizeof(olds));
 
 	// check length
@@ -493,23 +491,10 @@ void CL_ParseConfigString (void)
 	if ( length >= (sizeof(cl.configstrings[0]) * (MAX_CONFIGSTRINGS - i)) - 1 )
 		Com_Error (ERR_DROP, "CL_ParseConfigString: string %d exceeds available buffer space!", i);
 
-	// Don't use a null-terminated strncpy here!!
-//	strcpy (cl.configstrings[i], s);
 	if (i >= CS_STATUSBAR && i < CS_AIRACCEL) {	// allow writes to statusbar strings to overflow
 		strncpy (cl.configstrings[i], s, (sizeof(cl.configstrings[i]) * (CS_AIRACCEL - i))-1 );
 		cl.configstrings[CS_AIRACCEL-1][MAX_QPATH-1] = 0;	// null terminate end of section
 	}
-	// Removed these because strncpy() overwrites destination with trailing zeroes until count is reached
-/*	else if ( LegacyProtocol() && (i >= OLD_CS_GENERAL && i < OLD_MAX_CONFIGSTRINGS) ) {	// allow writes to general strings to overflow
-		strncpy (cl.configstrings[i], s, (sizeof(cl.configstrings[i]) * (OLD_MAX_CONFIGSTRINGS - i))-1 );
-		cl.configstrings[OLD_MAX_CONFIGSTRINGS-1][MAX_QPATH-1] = 0;	// null terminate end of section
-	//	Com_Printf("CL_ParseConfigString: CS_GENERAL %i: '%s', maxlen=%i\n", i, s, (sizeof(cl.configstrings[i]) * (OLD_MAX_CONFIGSTRINGS - i))-1);
-	}
-	else if ( !LegacyProtocol() && (i >= CS_GENERAL && i < CS_PAKFILE) ) {	// allow writes to general strings to overflow
-		strncpy (cl.configstrings[i], s, (sizeof(cl.configstrings[i]) * (CS_PAKFILE - i))-1 );
-		cl.configstrings[CS_PAKFILE-1][MAX_QPATH-1] = 0;	// null terminate end of section
-	//	Com_Printf("CL_ParseConfigString: CS_GENERAL %i: '%s', maxlen=%i\n", i, s, (sizeof(cl.configstrings[i]) * (CS_PAKFILE - i))-1);
-	}*/
 	else {
 		if (length >= MAX_QPATH)
 			Com_Printf(S_COLOR_YELLOW"CL_ParseConfigString: string %d of length %d exceeds MAX_QPATH.\n", i, (int)length);

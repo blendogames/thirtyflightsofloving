@@ -1625,14 +1625,16 @@ int Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, int
 	if (hyper)
 	{
 		if (color == BLASTER_GREEN)
-	#ifdef KMQUAKE2_ENGINE_MOD
+//	#ifdef KMQUAKE2_ENGINE_MOD
+	#if defined (KMQUAKE2_ENGINE_MOD) || defined (Q2E_ENGINE_MOD)
 			muzzleflash = MZ_GREENHYPERBLASTER;
 	#else
 			muzzleflash = MZ_HYPERBLASTER;
 	#endif
 		else if (color == BLASTER_BLUE)
 			muzzleflash = MZ_BLUEHYPERBLASTER;
-	#ifdef KMQUAKE2_ENGINE_MOD
+//	#ifdef KMQUAKE2_ENGINE_MOD
+	#if defined (KMQUAKE2_ENGINE_MOD) || defined (Q2E_ENGINE_MOD)
 		else if (color == BLASTER_RED)
 			muzzleflash = MZ_REDHYPERBLASTER;
 	#endif
@@ -1644,12 +1646,14 @@ int Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, int
 		if (color == BLASTER_GREEN)
 			muzzleflash = MZ_BLASTER2;
 		else if (color == BLASTER_BLUE)
-	#ifdef KMQUAKE2_ENGINE_MOD
+//	#ifdef KMQUAKE2_ENGINE_MOD
+	#if defined (KMQUAKE2_ENGINE_MOD) || defined (Q2E_ENGINE_MOD)
 			muzzleflash = MZ_BLUEBLASTER;
 	#else
 			muzzleflash = MZ_BLASTER;
 	#endif
-	#ifdef KMQUAKE2_ENGINE_MOD
+//	#ifdef KMQUAKE2_ENGINE_MOD
+	#if defined (KMQUAKE2_ENGINE_MOD) || defined (Q2E_ENGINE_MOD)
 		else if (color == BLASTER_RED)
 			muzzleflash = MZ_REDBLASTER;
 	#endif
@@ -1692,16 +1696,18 @@ void Weapon_Blaster_Fire (edict_t *ent, qboolean altfire)
 	// Knightmare- select color
 	color = sk_blaster_color->value;
 	// blaster_color could be any other value, so clamp it
-	if (sk_blaster_color->value < 2 || sk_blaster_color->value >4)
+	if (sk_blaster_color->value < 2 || sk_blaster_color->value > 4)
 		color = BLASTER_ORANGE;
-#ifndef KMQUAKE2_ENGINE_MOD
+//#ifndef KMQUAKE2_ENGINE_MOD
+#if !defined (KMQUAKE2_ENGINE_MOD) && !defined (Q2E_ENGINE_MOD)
 	if (color == BLASTER_RED) color = BLASTER_ORANGE;
 #endif
 
 	if (color == BLASTER_GREEN)
 		effect = EF_BLASTER|EF_TRACKER;
 	else if (color == BLASTER_BLUE)
-#ifdef KMQUAKE2_ENGINE_MOD
+//#ifdef KMQUAKE2_ENGINE_MOD
+#if defined (KMQUAKE2_ENGINE_MOD) || defined (Q2E_ENGINE_MOD)
 		effect = EF_BLASTER|EF_BLUEHYPERBLASTER;
 #else
 		effect = EF_BLUEHYPERBLASTER;
@@ -1761,7 +1767,8 @@ void Weapon_HyperBlaster_Fire (edict_t *ent, qboolean altfire)
 			color = sk_hyperblaster_color->value;
 			if (sk_hyperblaster_color->value < 2 || sk_hyperblaster_color->value > 4)
 				color = BLASTER_ORANGE;
-		#ifndef KMQUAKE2_ENGINE_MOD
+	//	#ifndef KMQUAKE2_ENGINE_MOD
+		#if !defined (KMQUAKE2_ENGINE_MOD) && !defined (Q2E_ENGINE_MOD)
 			if (color == BLASTER_RED) color = BLASTER_ORANGE;
 		#endif
 

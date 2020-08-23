@@ -335,12 +335,14 @@ void blaster_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *
 		if (self->style == BLASTER_GREEN) //green
 			tempevent = TE_BLASTER2;
 		else if (self->style == BLASTER_BLUE) //blue
-	#ifdef KMQUAKE2_ENGINE_MOD // Knightmare- looks better than flechette
-			tempevent =  TE_BLUEHYPERBLASTER;
+//	#ifdef KMQUAKE2_ENGINE_MOD
+	#if defined (KMQUAKE2_ENGINE_MOD) || defined (Q2E_ENGINE_MOD)
+			tempevent =  TE_BLUEHYPERBLASTER; // Knightmare- looks better than flechette
 	#else
 			tempevent = TE_FLECHETTE;
 	#endif
-	#ifdef KMQUAKE2_ENGINE_MOD
+//	#ifdef KMQUAKE2_ENGINE_MOD
+	#if defined (KMQUAKE2_ENGINE_MOD) || defined (Q2E_ENGINE_MOD)
 		else if (self->style == BLASTER_RED) //red
 			tempevent =  TE_REDBLASTER;
 	#endif
@@ -1603,7 +1605,8 @@ void fire_rail (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick
 	qboolean	water;
 
 	// Knightmare- changeable trail color
-#ifdef KMQUAKE2_ENGINE_MOD
+//#ifdef KMQUAKE2_ENGINE_MOD
+#if defined (KMQUAKE2_ENGINE_MOD) || defined (Q2E_ENGINE_MOD)
 	if (self->client && sk_rail_color->value == 2)
 		tempevent = TE_RAILTRAIL2;
 	else
@@ -3343,7 +3346,8 @@ void fire_plasma_rifle_bounce (edict_t *ent, vec3_t start, vec3_t dir, int damag
 	
 	goop->think = G_FreeEdict;				// change this to handle
 //	goop->nextthink = level.time + 3.0;		// sprite animation?
-	goop->nextthink = level.time + 1.5;
+//	goop->nextthink = level.time + 1.5;
+	goop->nextthink = level.time + sk_plasma_rifle_life_bounce->value;
 
 	gi.linkentity (goop);
 
@@ -3417,9 +3421,12 @@ void fire_plasma_rifle_spread (edict_t *ent, vec3_t start, vec3_t dir, int damag
 	goop_l->think = G_FreeEdict;
 	goop_c->think = G_FreeEdict;
 	goop_r->think = G_FreeEdict;
-	goop_l->nextthink = level.time + 3.0;
-	goop_c->nextthink = level.time + 3.0;
-	goop_r->nextthink = level.time + 3.0;
+//	goop_l->nextthink = level.time + 3.0;
+//	goop_c->nextthink = level.time + 3.0;
+//	goop_r->nextthink = level.time + 3.0;
+	goop_l->nextthink = level.time + sk_plasma_rifle_life_spread->value;
+	goop_c->nextthink = level.time + sk_plasma_rifle_life_spread->value;
+	goop_r->nextthink = level.time + sk_plasma_rifle_life_spread->value;
 
 	gi.linkentity (goop_l);
 	gi.linkentity (goop_c);

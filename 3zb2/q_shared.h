@@ -353,6 +353,8 @@ typedef struct cvar_s
 	// Knightmare- added cvar defaults
 #ifdef KMQUAKE2_ENGINE_MOD
 	char		*default_string;
+	int			integer;
+	char		*description;
 #endif
 } cvar_t;
 

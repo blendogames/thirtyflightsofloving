@@ -2146,6 +2146,7 @@ void SP_worldspawn (edict_t *ent)
 		gi.modelindex ("#w_railgun.md2");
 		gi.modelindex ("#w_bfg.md2");
 
+#ifdef KMQUAKE2_ENGINE_MOD	// only allow missionpack vweps for KMQ2 builds
 		gi.modelindex ("#w_disrupt.md2");			// PGM
 		gi.modelindex ("#w_etfrifle.md2");			// PGM
 		gi.modelindex ("#w_plasma.md2");			// PGM
@@ -2155,9 +2156,11 @@ void SP_worldspawn (edict_t *ent)
 		gi.modelindex ("#w_ripper.md2");			// Knightmare added
 		gi.modelindex ("#w_shockwave.md2");			// Knightmare added
 		gi.modelindex ("#w_plasmarifle.md2");		// SKWiD MOD
+
 	//	gi.modelindex ("#a_trap.md2");				// Knightmare added
 	//	gi.modelindex ("#a_tesla.md2");				// Knightmare added
 	//	gi.modelindex ("#w_grapple.md2");
+#endif	// KMQUAKE2_ENGINE_MOD
 	}
 	//-------------------
 

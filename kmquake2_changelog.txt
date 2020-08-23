@@ -90,6 +90,8 @@ Changes as of v0.20 update 8:
 
 - Fixed missing menu text when joining a Rocket Arena 2 server.
 
+- Fixed missing HUD text when joining an OSP Tourney server.
+
 - Fixed fog disappearing after a vid_restart.
 
 - Shadow volumes will now be drawn even if the model isn't in view.

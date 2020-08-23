@@ -2237,7 +2237,7 @@ always owned, never in the world
 //		WEAP_CHAINGUN,
 		NULL,
 		0,
-/* precache */ "weapons/chngnu1a.wav weapons/chngnl1a.wav weapons/machgf3b.wav` weapons/chngnd1a.wav"
+/* precache */ "weapons/chngnu1a.wav weapons/chngnl1a.wav weapons/machgf3b.wav weapons/chngnd1a.wav"
 	},
 
 /*QUAKED ammo_trap (.3 .3 1) (-16 -16 -16) (16 16 16)

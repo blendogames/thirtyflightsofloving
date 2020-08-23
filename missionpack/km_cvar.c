@@ -149,6 +149,8 @@ cvar_t	*sk_plasma_rifle_damage_spread_dm;
 cvar_t	*sk_plasma_rifle_speed_bounce;
 cvar_t	*sk_plasma_rifle_speed_spread;
 cvar_t	*sk_plasma_rifle_radius;
+cvar_t	*sk_plasma_rifle_life_bounce;
+cvar_t	*sk_plasma_rifle_life_spread;
 
 cvar_t	*sk_flaregun_damage;
 cvar_t	*sk_flaregun_rdamage;
@@ -484,6 +486,8 @@ void InitLithiumVars (void)
 	sk_plasma_rifle_speed_bounce = gi.cvar("sk_plasma_rifle_speed_bounce", "1200", 0);
 	sk_plasma_rifle_speed_spread = gi.cvar("sk_plasma_rifle_speed_spread", "1200", 0);
 	sk_plasma_rifle_radius = gi.cvar("sk_plasma_rifle_radius", "70", 0);
+	sk_plasma_rifle_life_bounce = gi.cvar("sk_plasma_rifle_life_bounce", "3", 0);
+	sk_plasma_rifle_life_spread = gi.cvar("sk_plasma_rifle_life_spread", "3", 0);
 
 	sk_flaregun_damage = gi.cvar("sk_flaregun_damage", "1", 0);
 	sk_flaregun_rdamage = gi.cvar("sk_flaregun_rdamage", "1", 0);

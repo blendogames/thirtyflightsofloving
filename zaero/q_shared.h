@@ -366,10 +366,11 @@ typedef struct cvar_s
 	qboolean	modified;	// set each time the cvar is changed
 	float		value;
 	struct cvar_s *next;
-		// Knightmare- added cvar defaults
+	// Knightmare- added cvar defaults
 #ifdef KMQUAKE2_ENGINE_MOD
 	char		*default_string;
 	int			integer;
+	char		*description;
 #endif
 } cvar_t;
 

@@ -145,6 +145,8 @@ extern	cvar_t	*sk_plasma_rifle_damage_spread_dm;
 extern	cvar_t	*sk_plasma_rifle_speed_bounce;
 extern	cvar_t	*sk_plasma_rifle_speed_spread;
 extern	cvar_t	*sk_plasma_rifle_radius;
+extern	cvar_t	*sk_plasma_rifle_life_bounce;
+extern	cvar_t	*sk_plasma_rifle_life_spread;
 
 extern	cvar_t	*sk_flaregun_damage;
 extern	cvar_t	*sk_flaregun_rdamage;
