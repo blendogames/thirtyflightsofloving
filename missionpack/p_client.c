@@ -1627,7 +1627,7 @@ void SelectStartWeapon (gclient_t *client, int style)
 		client->pers.inventory[ITEM_INDEX(FindItem("No Weapon"))] = 1;
 
 	// Zaero
-	if (!deathmatch->value && IsZaeroMap())
+	if ( !deathmatch->value && (level.maptype == MAPTYPE_ZAERO) )
 	{
 		item = FindItem("Flare Gun");
 		client->pers.inventory[ITEM_INDEX(item)] = 1;

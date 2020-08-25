@@ -810,7 +810,7 @@ void ED_CallSpawn (edict_t *ent)
 	// replace brains in Reckoning
 	gamedir = gi.cvar("game", "", 0);
 	if (gamedir->string && !Q_stricmp(gamedir->string, "xatrix")
-		&& IsXatrixMap() && !strcmp(ent->classname, "monster_brain"))
+		&& (level.maptype == MAPTYPE_XATRIX) && !strcmp(ent->classname, "monster_brain"))
 		ent->classname = "monster_brain_beta";
 
 	// Knightmare- mission pack monster replacement
@@ -1426,7 +1426,7 @@ void G_FixTeams (void)
 			continue; 
 		if (!strcmp(e->classname, "func_train"))
 		{
-			if(e->flags & FL_TEAMSLAVE)
+			if (e->flags & FL_TEAMSLAVE)
 			{
 				chain = e;
 				e->teammaster = e;
@@ -1506,11 +1506,11 @@ void G_FindTeams (void)
 
 void trans_ent_filename (char *filename, size_t filenameSize);
 void ReadEdict (FILE *f, edict_t *ent);
-void LoadTransitionEnts()
+void LoadTransitionEnts (void)
 {
-	if(developer->value)
+	if (developer->value)
 		gi.dprintf("==== LoadTransitionEnts ====\n");
-	if(game.transition_ents)
+	if (game.transition_ents)
 	{
 		char		t_file[MAX_QPATH];
 		int			i, j;
@@ -1520,12 +1520,12 @@ void LoadTransitionEnts()
 		edict_t		*spawn;
 		
 		VectorClear(v_spawn);
-		if(strlen(game.spawnpoint))
+		if (strlen(game.spawnpoint))
 		{
 			spawn = G_Find(NULL,FOFS(targetname),game.spawnpoint);
-			while(spawn)
+			while (spawn)
 			{
-				if(!Q_stricmp(spawn->classname,"info_player_start"))
+				if (!Q_stricmp(spawn->classname,"info_player_start"))
 				{
 					VectorCopy(spawn->s.origin,v_spawn);
 					break;
@@ -1535,25 +1535,25 @@ void LoadTransitionEnts()
 		}
 		trans_ent_filename (t_file, sizeof(t_file));
 		f = fopen(t_file,"rb");
-		if(!f)
+		if (!f)
 			gi.error("LoadTransitionEnts: Cannot open %s\n",t_file);
 		else
 		{
-			for(i=0; i<game.transition_ents; i++)
+			for (i=0; i<game.transition_ents; i++)
 			{
 				ent = G_Spawn();
 				ReadEdict(f,ent);
 				// Correction for monsters with health EXACTLY 0
 				// If we don't do this, spawn function will bring
 				// 'em back to life
-				if(ent->svflags & SVF_MONSTER)
+				if (ent->svflags & SVF_MONSTER)
 				{
-					if(!ent->health)
+					if (!ent->health)
 					{
 						ent->health = -1;
 						ent->deadflag = DEAD_DEAD;
 					}
-					else if(ent->deadflag == DEAD_DEAD)
+					else if (ent->deadflag == DEAD_DEAD)
 					{
 						ent->health = min(ent->health,-1);
 					}
@@ -1561,9 +1561,9 @@ void LoadTransitionEnts()
 				VectorAdd(ent->s.origin,v_spawn,ent->s.origin);
 				VectorCopy(ent->s.origin,ent->s.old_origin);
 				ED_CallSpawn (ent);
-				if(ent->owner_id)
+				if (ent->owner_id)
 				{
-					if(ent->owner_id < 0)
+					if (ent->owner_id < 0)
 					{
 						ent->owner = &g_edicts[-ent->owner_id];
 					}
@@ -1572,9 +1572,9 @@ void LoadTransitionEnts()
 						// We KNOW owners precede owned ents in the 
 						// list because of the way it was constructed
 						ent->owner = NULL;
-						for(j=game.maxclients+1; j<globals.num_edicts && !ent->owner; j++)
+						for (j=game.maxclients+1; j<globals.num_edicts && !ent->owner; j++)
 						{
-							if(ent->owner_id == g_edicts[j].id)
+							if (ent->owner_id == g_edicts[j].id)
 								ent->owner = &g_edicts[j];
 						}
 					}
@@ -1641,9 +1641,35 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 	ent = NULL;
 	inhibit = 0;
 
+	// Knightmare- set maptype for pack-specific changes
+	if ( IsIdMap() ) {
+		level.maptype = MAPTYPE_ID;
+	//	gi.dprintf ("Maptype is Id.\n");
+	}
+	else if ( IsXatrixMap() ) {
+		level.maptype = MAPTYPE_XATRIX;
+	//	gi.dprintf ("Maptype is Xatrix.\n");
+	}
+	else if ( IsRogueMap() ) {
+		level.maptype = MAPTYPE_ROGUE;
+	//	gi.dprintf ("Maptype is Rogue.\n");
+	}
+	else if ( IsZaeroMap() ) {
+		level.maptype = MAPTYPE_ZAERO;
+	//	gi.dprintf ("Maptype is Zaero.\n");
+	}
+	else {
+		level.maptype = MAPTYPE_CUSTOM;
+	//	gi.dprintf ("Maptype is Custom.\n");
+	}
+
+	// Also set railgun thru window hack for zdef4
+	level.isZaeroRailgunHackMap = IsZaeroRailgunHackMap();
+	// end Knightmare
+
 	// Knightmare- load the entity alias script file
 	LoadAliasData();
-	//gi.dprintf ("Size of alias data: %i\n", alias_data_size);
+//	gi.dprintf ("Size of alias data: %i\n", alias_data_size);
 
 // parse ents
 	while (1)
@@ -1690,7 +1716,7 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 			}
 			else if ( coop->value )	
 			{
-				if ( IsRogueMap() )	// Knightmare- this breaks non-Rogue maps in coop
+				if (level.maptype == MAPTYPE_ROGUE)	// Knightmare- this breaks non-Rogue maps in coop
 				{
 					if (ent->spawnflags & SPAWNFLAG_NOT_COOP)
 					{
@@ -1804,9 +1830,9 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 	PlayerTrail_Init ();
 
 //ROGUE
-	if(deathmatch->value)
+	if (deathmatch->value)
 	{
-		if(randomrespawn && randomrespawn->value)
+		if (randomrespawn && randomrespawn->value)
 			PrecacheForRandomRespawn();
 	}
 	else
@@ -2409,7 +2435,7 @@ qboolean FindSpawnPoint (vec3_t startpoint, vec3_t mins, vec3_t maxs, vec3_t spa
 	height = maxs[2] - mins[2];
 
 	tr = gi.trace (startpoint, mins, maxs, startpoint, NULL, MASK_MONSTERSOLID|CONTENTS_PLAYERCLIP);
-	if((tr.startsolid || tr.allsolid) || (tr.ent != world))
+	if ((tr.startsolid || tr.allsolid) || (tr.ent != world))
 	{
 //		if ( ((tr.ent->svflags & SVF_MONSTER) && (tr.ent->health <= 0)) ||
 //			 (tr.ent->svflags & SVF_DAMAGEABLE) )
@@ -2472,7 +2498,7 @@ qboolean CheckSpawnPoint (vec3_t origin, vec3_t mins, vec3_t maxs)
 	}
 
 	tr = gi.trace (origin, mins, maxs, origin, NULL, MASK_MONSTERSOLID);
-	if(tr.startsolid || tr.allsolid)
+	if (tr.startsolid || tr.allsolid)
 	{
 //		if ((g_showlogic) && (g_showlogic->value))
 //			gi.dprintf("createmonster in wall. removing\n");
@@ -2543,7 +2569,7 @@ qboolean CheckGroundSpawnPoint (vec3_t origin, vec3_t entMins, vec3_t entMaxs, f
 		//
 #ifdef ROGUE_GRAVITY
 		// FIXME - this will only handle 0,0,1 and 0,0,-1 gravity vectors
-		if(gravity > 0)
+		if (gravity > 0)
 			start[2] = maxs[2] + 1;
 		else
 			start[2] = mins[2] - 1;
@@ -2579,7 +2605,7 @@ realcheck:
 		mid = bottom = tr.endpos[2];
 
 #ifdef ROGUE_GRAVITY
-		if(gravity < 0)
+		if (gravity < 0)
 		{
 			start[2] = mins[2];
 			stop[2] = start[2] - STEPSIZE - STEPSIZE;
@@ -2614,7 +2640,7 @@ realcheck:
 //PGM
 #ifdef ROGUE_GRAVITY
 // FIXME - this will only handle 0,0,1 and 0,0,-1 gravity vectors
-				if(gravity > 0)
+				if (gravity > 0)
 				{
 					if (tr.fraction != 1.0 && tr.endpos[2] < bottom)
 						bottom = tr.endpos[2];

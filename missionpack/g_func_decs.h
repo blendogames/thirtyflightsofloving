@@ -1648,6 +1648,7 @@ extern float PointDist ( vec3_t x , vec3_t y ) ;
 extern qboolean UseRegularGoodGuyFlag ( edict_t * monster ) ;
 extern qboolean UseSpecialGoodGuyFlag ( edict_t * monster ) ;
 extern qboolean CheckCoop_MapHacks ( edict_t * ent ) ;
+extern qboolean IsZaeroRailgunHackMap ( void ) ;
 extern qboolean IsZaeroMap ( void ) ;
 extern qboolean IsRogueMap ( void ) ;
 extern qboolean IsXatrixMap ( void ) ;
@@ -1904,7 +1905,7 @@ extern edict_t * CreateFlyMonster ( vec3_t origin , vec3_t angles , vec3_t mins 
 extern edict_t * CreateMonster ( vec3_t origin , vec3_t angles , char * classname ) ;
 extern void SP_worldspawn ( edict_t * ent ) ;
 extern void SpawnEntities ( char * mapname , char * entities , char * spawnpoint ) ;
-extern void LoadTransitionEnts ( ) ;
+extern void LoadTransitionEnts ( void ) ;
 extern void G_FindTeams ( void ) ;
 extern void G_FixTeams ( void ) ;
 extern char * ED_ParseEdict ( char * data , edict_t * ent ) ;

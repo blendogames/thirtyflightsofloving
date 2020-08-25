@@ -443,8 +443,6 @@ typedef struct gitem_s
 	char		*precaches;		// string of all models, sounds, and images this item will use
 } gitem_t;
 
-
-
 //
 // this structure is left intact through an entire game
 // it should be initialized at dll load time, and read/written to
@@ -477,7 +475,6 @@ typedef struct
 	// Lazarus: number of entities moved between maps (not counting players)
 	int			transition_ents;
 
-
 	// items
 	int			num_items;
 
@@ -500,6 +497,15 @@ struct fog_s
 };
 typedef struct fog_s fog_t;
 
+// Knightmare- map vendor for pack-specific code changes
+typedef enum
+{
+	MAPTYPE_ID,
+	MAPTYPE_XATRIX,
+	MAPTYPE_ROGUE,
+	MAPTYPE_ZAERO,
+	MAPTYPE_CUSTOM
+} maptype_t;
 
 //
 // this structure is cleared as each map is entered
@@ -571,7 +577,10 @@ typedef struct
 
 	// Zaero
 	int			fadeFrames;
-	// end Zaero
+
+	// Knightmare- for map-specific logic switching
+	maptype_t	maptype;				// map vendor for pack-specific code changes
+	qboolean	isZaeroRailgunHackMap;	// railgun thru window hack for zdef4
 } level_locals_t;
 
 
@@ -1220,6 +1229,7 @@ qboolean IsIdMap (void); // Knightmare added
 qboolean IsXatrixMap (void); // Knightmare added
 qboolean IsRogueMap (void); // Knightmare added
 qboolean IsZaeroMap (void); // Knightmare added
+qboolean IsZaeroRailgunHackMap (void); // Knightmare added
 qboolean CheckCoop_MapHacks (edict_t *ent); // FS: Coop: Check if we have to modify some stuff for coop so we don't have to rely on distributing ent files
 qboolean UseSpecialGoodGuyFlag (edict_t *monster); // Knightmare added
 qboolean UseRegularGoodGuyFlag (edict_t *monster); // Knightmare added

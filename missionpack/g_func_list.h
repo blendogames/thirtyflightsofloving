@@ -1648,6 +1648,7 @@
 {"UseRegularGoodGuyFlag", (byte *)UseRegularGoodGuyFlag},
 {"UseSpecialGoodGuyFlag", (byte *)UseSpecialGoodGuyFlag},
 {"CheckCoop_MapHacks", (byte *)CheckCoop_MapHacks},
+{"IsZaeroRailgunHackMap", (byte *)IsZaeroRailgunHackMap},
 {"IsZaeroMap", (byte *)IsZaeroMap},
 {"IsRogueMap", (byte *)IsRogueMap},
 {"IsXatrixMap", (byte *)IsXatrixMap},

@@ -1108,7 +1108,7 @@ qboolean M_CheckAttack (edict_t *self)
 				if ((!(tr.ent->svflags & SVF_MONSTER)) && (!visible(self, self->enemy)))
 				{	// Knightmare- disable blindfire for Zaero maps, as it causes undesired behavior in zdef4
 				//	if ((self->monsterinfo.blindfire) && (self->monsterinfo.blind_fire_delay <= 20.0))
-					if ( !IsZaeroMap() && (self->monsterinfo.blindfire) && (self->monsterinfo.blind_fire_delay <= 20.0) )
+					if ( (level.maptype != MAPTYPE_ZAERO) && (self->monsterinfo.blindfire) && (self->monsterinfo.blind_fire_delay <= 20.0) )
 					{
 						if (level.time < self->monsterinfo.attack_finished)
 						{

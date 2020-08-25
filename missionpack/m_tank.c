@@ -373,7 +373,6 @@ void TankRocket (edict_t *self)
 
 	// pmm - blindfire check
 	if (self->monsterinfo.aiflags & AI_MANUAL_STEERING)
-//	if ( (self->monsterinfo.aiflags & AI_MANUAL_STEERING) && !IsZaeroMap() )	// Knightmare- no blind firing on Zaero maps, fix undesired airfield behavior
 		blindfire = true;
 	else
 		blindfire = false;

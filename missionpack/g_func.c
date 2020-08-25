@@ -1050,7 +1050,7 @@ void SP_func_plat (edict_t *ent)
 	VectorCopy (ent->s.angles, ent->moveinfo.end_angles);
 	ent->moveinfo.distance = ent->pos1[2] - ent->pos2[2]; //Knightmare- store distance
 
-	if (ent->sounds > 1 && ent->sounds < 100) // custom sounds
+	if ( (level.maptype == MAPTYPE_CUSTOM) && (ent->sounds > 1) && (ent->sounds < 100) ) // custom sounds
 	{
 		ent->moveinfo.sound_start = gi.soundindex  (va("plats/pt%02i_strt.wav", ent->sounds));
 		ent->moveinfo.sound_middle = gi.soundindex  (va("plats/pt%02i_mid.wav", ent->sounds));
@@ -1506,7 +1506,7 @@ void SP_func_plat2 (edict_t *ent)
 	VectorCopy (ent->s.angles, ent->moveinfo.end_angles);
 	ent->moveinfo.distance = ent->pos1[2] - ent->pos2[2]; // Knightmare- store distance
 
-	if (ent->sounds > 1 && ent->sounds < 100) // custom sounds
+	if ( (level.maptype == MAPTYPE_CUSTOM) && (ent->sounds > 1) && (ent->sounds < 100) ) // custom sounds
 	{
 		ent->moveinfo.sound_start = gi.soundindex  (va("plats/pt%02i_strt.wav", ent->sounds));
 		ent->moveinfo.sound_middle = gi.soundindex  (va("plats/pt%02i_mid.wav", ent->sounds));
@@ -1847,7 +1847,7 @@ void SP_func_button (edict_t *ent)
 	ent->solid = SOLID_BSP;
 	gi.setmodel (ent, ent->model);
 
-	if (ent->sounds > 1 && ent->sounds < 100) // custom sounds
+	if ( (level.maptype == MAPTYPE_CUSTOM) && (ent->sounds > 1) && (ent->sounds < 100) ) // custom sounds
 		ent->moveinfo.sound_start = gi.soundindex  (va("switches/butn%02i.wav", ent->sounds));
 	else if (ent->sounds != 1)
 		ent->moveinfo.sound_start = gi.soundindex ("switches/butn2.wav");
@@ -2023,7 +2023,7 @@ void SP_func_trainbutton (edict_t *ent)
 	ent->solid = SOLID_BSP;
 	gi.setmodel (ent, ent->model);
 
-	if (ent->sounds > 1 && ent->sounds < 100) // custom sounds
+	if ( (ent->sounds > 1) && (ent->sounds < 100) ) // custom sounds
 		ent->moveinfo.sound_start = gi.soundindex  (va("switches/butn%02i.wav", ent->sounds));
 	else if (ent->sounds != 1)
 		ent->moveinfo.sound_start = gi.soundindex ("switches/butn2.wav");
@@ -2388,7 +2388,7 @@ void door_use (edict_t *self, edict_t *other, edict_t *activator)
 		return;
 
 	// Knightmare- Zaero-specific door handling
-	if ( IsZaeroMap() )
+	if (level.maptype == MAPTYPE_ZAERO)
 	{
 		if (self->active & DOOR_ACTIVE_TOGGLE)
 		{
@@ -2471,7 +2471,7 @@ void Touch_DoorTrigger (edict_t *self, edict_t *other, cplane_t *plane, csurface
 		return;
 
 	// Zaero
-	if ( IsZaeroMap() )
+	if (level.maptype == MAPTYPE_ZAERO)
 	{
 		if ( (self->owner->active & DOOR_ACTIVE_TOGGLE) &&
 			!(self->owner->active & DOOR_ACTIVE_ON) )
@@ -2482,7 +2482,7 @@ void Touch_DoorTrigger (edict_t *self, edict_t *other, cplane_t *plane, csurface
 	self->touch_debounce_time = level.time + 1.0;
 
 	// Zaero
-	if ( IsZaeroMap() ) {
+	if (level.maptype == MAPTYPE_ZAERO) {
 		door_openclose (self->owner, other, other);
 	}
 	else {
@@ -2644,8 +2644,8 @@ void door_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *sur
 	if (!other->client)
 		return;
 
-	// Zaero
-	if ( IsZaeroMap() && (self->message == NULL) )
+	// Zaero 
+	if ( (level.maptype == MAPTYPE_ZAERO) && (self->message == NULL) )
 		return;
 
 	if (level.time < self->touch_debounce_time)
@@ -2663,7 +2663,7 @@ void SP_func_door (edict_t *ent)
 
 	ent->class_id = ENTITY_FUNC_DOOR;
 
-	if (ent->sounds > 4 && ent->sounds < 100) // custom sounds
+	if ( (level.maptype == MAPTYPE_CUSTOM) && (ent->sounds > 4) && (ent->sounds < 100) ) // custom sounds
 	{
 		ent->moveinfo.sound_start = gi.soundindex  (va("doors/dr%02i_strt.wav", ent->sounds));
 		ent->moveinfo.sound_middle = gi.soundindex  (va("doors/dr%02i_mid.wav", ent->sounds));
@@ -2805,7 +2805,7 @@ void SP_func_door (edict_t *ent)
 	gi.linkentity (ent);
 
 	// Zaero
-	if ( IsZaeroMap() )
+	if (level.maptype == MAPTYPE_ZAERO)
 	{	// toggle active
 		if (!(ent->active & DOOR_ACTIVE_TOGGLE))
 			ent->active = 0;
@@ -2816,7 +2816,7 @@ void SP_func_door (edict_t *ent)
 	ent->nextthink = level.time + FRAMETIME;
 
 	// Zaero
-	if ( IsZaeroMap() )
+	if (level.maptype == MAPTYPE_ZAERO)
 	{
 		if ( (ent->health || ent->targetname) && !(ent->active & DOOR_ACTIVE_TOGGLE) )
 			ent->think = Think_CalcMoveSpeed;
@@ -2934,7 +2934,7 @@ void SP_func_door_rotating (edict_t *ent)
 	if (!ent->dmg)
 		ent->dmg = 2;
 
-	if (ent->sounds > 4 && ent->sounds < 100) // custom sounds
+	if ( (level.maptype == MAPTYPE_CUSTOM) && (ent->sounds > 4) && (ent->sounds < 100) ) // custom sounds
 	{
 		ent->moveinfo.sound_start = gi.soundindex  (va("doors/dr%02i_strt.wav", ent->sounds));
 		ent->moveinfo.sound_middle = gi.soundindex  (va("doors/dr%02i_mid.wav", ent->sounds));
@@ -3894,8 +3894,8 @@ void train_wait (edict_t *self)
 	}
 
 	// Lazarus: rotating trains
-	if (self->target_ent && !(IsRogueMap()))
-	{	//Knightmare- skip this for Rogue maps
+	if ( self->target_ent && (level.maptype != MAPTYPE_ROGUE) )	// Knightmare- skip this for Rogue maps
+	{
 		// train speed changes are handled differently
 		if (self->target_ent->speed)
 		{
@@ -3943,7 +3943,7 @@ void train_wait (edict_t *self)
 		else if (self->spawnflags & TRAIN_TOGGLE)  // && wait < 0
 		{
 			// PMM - clear target_ent, let train_next get called when we get used
-			if (IsRogueMap()) // Knightmare- only do this for Rogue maps
+			if (level.maptype == MAPTYPE_ROGUE) // Knightmare- only do this for Rogue maps
 				self->target_ent = NULL;
 			else
 				train_next (self);
@@ -4310,7 +4310,7 @@ again:
 //      Set speed before train_next is called
 // Knightmare- this is only used for Rogue maps
 // train speed changes are handled differently
-	if ((ent->speed) && IsRogueMap())
+	if ( (ent->speed) && (level.maptype == MAPTYPE_ROGUE))
 	{
 		self->speed = ent->speed;
 		self->moveinfo.speed = ent->speed;
@@ -4324,7 +4324,7 @@ again:
 			self->moveinfo.decel = ent->speed;
 		self->moveinfo.current_speed = 0;
 	}
-//PGM
+// PGM
 
 	self->moveinfo.wait = ent->wait;
 	self->target_ent = ent;
@@ -4402,7 +4402,7 @@ again:
 	self->spawnflags |= TRAIN_START_ON;
 
 //PGM
-	if (self->team && IsRogueMap())
+	if ( self->team && (level.maptype == MAPTYPE_ROGUE) )
 	{
 		edict_t *e;
 		vec3_t	dir, dst;
@@ -5193,7 +5193,7 @@ void SP_func_door_secret (edict_t *ent)
 
 	ent->class_id = ENTITY_FUNC_DOOR_SECRET;
 
-	if (ent->sounds > 4 && ent->sounds < 100) // custom sounds
+	if ( (level.maptype == MAPTYPE_CUSTOM) && (ent->sounds > 4) && (ent->sounds < 100) ) // custom sounds
 	{
 		ent->moveinfo.sound_start = gi.soundindex  (va("doors/dr%02i_strt.wav", ent->sounds));
 		ent->moveinfo.sound_middle = gi.soundindex  (va("doors/dr%02i_mid.wav", ent->sounds));

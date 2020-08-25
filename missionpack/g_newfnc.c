@@ -206,9 +206,18 @@ void SP_func_door_secret2 (edict_t *ent)
 
 	ent->class_id = ENTITY_FUNC_DOOR_SECRET2;
 
-	ent->moveinfo.sound_start = gi.soundindex  ("doors/dr1_strt.wav");
-	ent->moveinfo.sound_middle = gi.soundindex  ("doors/dr1_mid.wav");
-	ent->moveinfo.sound_end = gi.soundindex  ("doors/dr1_end.wav");
+	if ( (level.maptype == MAPTYPE_CUSTOM) && (ent->sounds > 4) && (ent->sounds < 100) ) // custom sounds
+	{
+		ent->moveinfo.sound_start = gi.soundindex  (va("doors/dr%02i_strt.wav", ent->sounds));
+		ent->moveinfo.sound_middle = gi.soundindex  (va("doors/dr%02i_mid.wav", ent->sounds));
+		ent->moveinfo.sound_end = gi.soundindex  (va("doors/dr%02i_end.wav", ent->sounds));
+	}
+	else
+	{
+		ent->moveinfo.sound_start = gi.soundindex  ("doors/dr1_strt.wav");
+		ent->moveinfo.sound_middle = gi.soundindex  ("doors/dr1_mid.wav");
+		ent->moveinfo.sound_end = gi.soundindex  ("doors/dr1_end.wav");
+	}
 
 	if (!ent->dmg)
 		ent->dmg = 2;

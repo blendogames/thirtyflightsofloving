@@ -1607,7 +1607,7 @@ void fire_rail (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick
 	// Knightmare- changeable trail color
 //#ifdef KMQUAKE2_ENGINE_MOD
 #if defined (KMQUAKE2_ENGINE_MOD) || defined (Q2E_ENGINE_MOD)
-	if (self->client && sk_rail_color->value == 2)
+	if ( (self->client) && (sk_rail_color->value == 2) )
 		tempevent = TE_RAILTRAIL2;
 	else
 #endif
@@ -1618,8 +1618,8 @@ void fire_rail (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick
 	ignore = self;
 	water = false;
 
-	// Zaero- hack for zdef4 to shoot through window
-	if ( self->client && (Q_stricmp(level.mapname, "zdef4") == 0) )
+	// Zaero- hack for certain maps to shoot through windows
+	if ( (self->client) && level.isZaeroRailgunHackMap )
 		mask = MASK_SHOT_NO_WINDOW|CONTENTS_SLIME|CONTENTS_LAVA;
 	else
 		mask = MASK_SHOT|CONTENTS_SLIME|CONTENTS_LAVA;

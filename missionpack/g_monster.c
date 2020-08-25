@@ -1076,7 +1076,7 @@ void monster_triggered_spawn (edict_t *self)
 	// end Knightmare
 
 	// Zaero add
-/*	if ( IsZaeroMap() ) {
+/*	if (level.maptype == MAPTYPE_ZAERO) {
 		self->s.event = EV_PLAYER_TELEPORT;
 		MonsterPlayerKillBox (self);
 	}*/
@@ -1225,7 +1225,7 @@ qboolean monster_start (edict_t *self)
 	//	if ( !(self->monsterinfo.aiflags & AI_GOOD_GUY) && !(self->monsterinfo.aiflags & AI_DO_NOT_COUNT) )
 	//	if ( !(self->monsterinfo.aiflags & AI_GOOD_GUY) && !(self->monsterinfo.monsterflags & MFL_DO_NOT_COUNT)/* && !(self->spawnflags & SF_MONSTER_TRIGGER_SPAWN*/ )
 	// Zaero- spawnflag 16 = do not count
-	if ( !(self->monsterinfo.aiflags & AI_GOOD_GUY) && !(self->monsterinfo.monsterflags & MFL_DO_NOT_COUNT) && !(IsZaeroMap() && (self->spawnflags & 16)) )
+	if ( !(self->monsterinfo.aiflags & AI_GOOD_GUY) && !(self->monsterinfo.monsterflags & MFL_DO_NOT_COUNT) && !( (level.maptype == MAPTYPE_ZAERO) && (self->spawnflags & 16) ) )
 		level.total_monsters++;
 
 	self->nextthink = level.time + FRAMETIME;

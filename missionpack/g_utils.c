@@ -258,7 +258,7 @@ void G_UseTargets (edict_t *ent, edict_t *activator)
 				if ( !t->dmgteam || strcmp(t->dmgteam, "player") ) {
 				//	if ( !(t->monsterinfo.aiflags & AI_GOOD_GUY) )
 					// Zaero- spawnflag 16 = do not count
-					if ( !(t->monsterinfo.aiflags & AI_GOOD_GUY) && !(t->monsterinfo.monsterflags & MFL_DO_NOT_COUNT) && !(IsZaeroMap() && (t->spawnflags & 16)) )
+					if ( !(t->monsterinfo.aiflags & AI_GOOD_GUY) && !(t->monsterinfo.monsterflags & MFL_DO_NOT_COUNT) && !( (level.maptype == MAPTYPE_ZAERO) && (t->spawnflags & 16) ) )
 						level.total_monsters--;
 				}
 			}
@@ -1395,6 +1395,7 @@ qboolean IsXatrixMap (void)
 	return false;
 }
 
+
 // Knightmare added
 /*
 ====================
@@ -1469,7 +1470,6 @@ qboolean IsRogueMap (void)
 }
 
 
-
 // Knightmare added
 /*
 ====================
@@ -1513,6 +1513,24 @@ qboolean IsZaeroMap (void)
 }
 
 
+// Knightmare added
+/*
+====================
+IsZaeroRailgunHackMap
+
+Checks if the current map is from the Zaero mission pack
+and needs to allow the player to shoot the railgun through
+windows to progress.
+====================
+*/
+qboolean IsZaeroRailgunHackMap (void)
+{
+	if (Q_stricmp(level.mapname, "zdef4") == 0)
+		return true;
+	return false;
+}
+
+
 /*
 ====================
 CheckCoop_MapHacks
@@ -1526,7 +1544,7 @@ qboolean CheckCoop_MapHacks (edict_t *ent)
 	if ( !coop->value || !ent )
 		return false;
 
-	if ( IsXatrixMap() )
+	if (level.maptype == MAPTYPE_XATRIX)
 	{
 		if ( !Q_stricmp(level.mapname, "xsewer1") )	// FS: Coop: Progress breaker hack in xsewer1.bsp
 		{

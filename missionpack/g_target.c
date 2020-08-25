@@ -452,7 +452,7 @@ void use_target_changelevel (edict_t *self, edict_t *other, edict_t *activator)
 
 	// Knightmare- some of id's stock Q2 maps have this spawnflag
 	//	set on their trigger_changelevels, so exclude those maps
-	if ((self->spawnflags & 1) && !IsIdMap() && allow_clear_inventory->value)
+	if ( (self->spawnflags & 1) && (level.maptype != MAPTYPE_ID) && (int)allow_clear_inventory->value )
 	{
 		int n;
 		if(activator && activator->client)
@@ -478,7 +478,7 @@ void use_target_changelevel (edict_t *self, edict_t *other, edict_t *activator)
 	game.transition_ents = 0;
 	if(self->spawnflags & 2 && activator->client)
 	{
-		transition = G_Find(NULL,FOFS(classname),"trigger_transition");
+		transition = G_Find(NULL,FOFS(classname), "trigger_transition");
 		while(transition)
 		{
 			if(!Q_stricmp(transition->targetname,self->targetname))
@@ -488,7 +488,7 @@ void use_target_changelevel (edict_t *self, edict_t *other, edict_t *activator)
 					gi.dprintf("Number of transition ents saved: %i\n", game.transition_ents);
 				break;
 			}
-			transition = G_Find(transition,FOFS(classname),"trigger_transition");
+			transition = G_Find(transition,FOFS(classname), "trigger_transition");
 		}
 	}
 

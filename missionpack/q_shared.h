@@ -108,7 +108,7 @@ __inline int Q_vsnprintf (char *Dest, size_t Count, const char *Format, va_list 
 #else
 #define SAVEGAME_DLLNAME "Rogue + Xatrix + Lazarus integrated mod"
 #endif	// CITADELMOD_FEATURES
-#define SAVEGAME_VERSION 4
+#define SAVEGAME_VERSION 5
 
 // angle indexes
 #define	PITCH				0		// up / down

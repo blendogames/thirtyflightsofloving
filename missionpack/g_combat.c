@@ -161,7 +161,7 @@ void Killed (edict_t *targ, edict_t *inflictor, edict_t *attacker, int damage, v
 	//	if (!(targ->monsterinfo.aiflags & AI_GOOD_GUY) && !(targ->monsterinfo.aiflags & AI_DO_NOT_COUNT))
 	//	if ( !(targ->monsterinfo.aiflags & AI_GOOD_GUY) && !(targ->monsterinfo.monsterflags & MFL_DO_NOT_COUNT) )
 		// Zaero- spawnflag 16 = do not count
-		if ( !(targ->monsterinfo.aiflags & AI_GOOD_GUY) && !(targ->monsterinfo.monsterflags & MFL_DO_NOT_COUNT) && !(IsZaeroMap() && (targ->spawnflags & 16)) )
+		if ( !(targ->monsterinfo.aiflags & AI_GOOD_GUY) && !(targ->monsterinfo.monsterflags & MFL_DO_NOT_COUNT) && !( (level.maptype == MAPTYPE_ZAERO) && (targ->spawnflags & 16) ) )
 		{
 			level.killed_monsters++;
 			if (coop->value && attacker->client)
@@ -841,8 +841,8 @@ void M_ReactToDamage (edict_t *targ, edict_t *attacker, edict_t *inflictor)
 	if ( ( (targ->flags & (FL_FLY|FL_SWIM)) == (attacker->flags & (FL_FLY|FL_SWIM)) ) &&
 		(strcmp(targ->classname, attacker->classname) != 0) &&
 		!(attacker->monsterinfo.aiflags & AI_IGNORE_SHOTS) &&
-		!(targ->monsterinfo.aiflags & AI_IGNORE_SHOTS)  &&
-		!( IsZaeroMap() && attacker->mteam && targ->mteam && (strcmp(attacker->mteam, targ->mteam) == 0) )	// Zaero- added monster team field
+		!(targ->monsterinfo.aiflags & AI_IGNORE_SHOTS)  && 
+		!( (level.maptype == MAPTYPE_ZAERO) && attacker->mteam && targ->mteam && (strcmp(attacker->mteam, targ->mteam) == 0) )	// Zaero- added monster team field
 		)
 	{
 		if (targ->enemy && targ->enemy->client)
