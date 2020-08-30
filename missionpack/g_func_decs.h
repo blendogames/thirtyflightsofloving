@@ -2790,6 +2790,8 @@ extern void SelectPrevItem ( edict_t * ent , int itflags ) ;
 extern void SelectNextItem ( edict_t * ent , int itflags ) ;
 extern qboolean OnSameTeam ( edict_t * ent1 , edict_t * ent2 ) ;
 extern char * ClientTeam ( edict_t * ent ) ;
+extern void ShiftItem ( edict_t * ent , int direction ) ;
+extern void SaveEntProps ( edict_t * e , FILE * f ) ;
 extern void GetChaseTarget ( edict_t * ent ) ;
 extern void ChasePrev ( edict_t * ent ) ;
 extern void ChaseNext ( edict_t * ent ) ;

@@ -2790,6 +2790,8 @@
 {"SelectNextItem", (byte *)SelectNextItem},
 {"OnSameTeam", (byte *)OnSameTeam},
 {"ClientTeam", (byte *)ClientTeam},
+{"ShiftItem", (byte *)ShiftItem},
+{"SaveEntProps", (byte *)SaveEntProps},
 {"GetChaseTarget", (byte *)GetChaseTarget},
 {"ChasePrev", (byte *)ChasePrev},
 {"ChaseNext", (byte *)ChaseNext},
