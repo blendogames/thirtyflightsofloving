@@ -2062,7 +2062,7 @@ void ClientCommand (edict_t *ent)
 	{
 		if (parm)
 		{
-			char	filename[MAX_QPATH];
+			char	filename[MAX_OSPATH];
 			edict_t	*e;
 			FILE	*f;
 			int		i;
@@ -2157,7 +2157,7 @@ void ClientCommand (edict_t *ent)
 	{
 		if (parm)
 		{
-			char	filename[MAX_QPATH];
+			char	filename[MAX_OSPATH];
 			edict_t	*e;
 			FILE	*f;
 		//	int		i;
