@@ -2062,16 +2062,21 @@ void ClientCommand (edict_t *ent)
 	{
 		if (parm)
 		{
+			char	filename[MAX_QPATH];
 			edict_t	*e;
 			FILE	*f;
 			int		i;
 			vec3_t	origin;
 			int		count;
 
-			f = fopen(parm,"w");
+		//	f = fopen(parm, "w");
+			SavegameDirRelativePath(parm, filename, sizeof(filename));
+			Com_strcat (filename, sizeof(filename), ".txt");
+			gi.dprintf("Writing entity list to %s... ", filename);
+			f = fopen(filename, "w");
 			if (f)
 			{
-				fprintf(f,"Movetype codes\n"
+				fprintf(f, "Movetype codes\n"
 					      " 0 MOVETYPE_NONE\n"
 						  " 1 MOVETYPE_NOCLIP\n"
 						  " 2 MOVETYPE_PUSH       (most moving brush models)\n"
@@ -2163,13 +2168,15 @@ void ClientCommand (edict_t *ent)
 			SavegameDirRelativePath(parm, filename, sizeof(filename));
 		//	strncat(filename, ".txt");
 			Com_strcat (filename, sizeof(filename), ".txt");
+			gi.dprintf("Writing entity properties to %s... ", filename);
 			f = fopen(filename, "w");
 		//	for (i=0; i<globals.num_edicts; i++)
 		//	{
 		//		e = &g_edicts[i];
-				SaveEntProps(e,f);
+				SaveEntProps (e ,f);
 		//	}
 			fclose(f);
+			gi.dprintf("done!\n");
 		}
 		else {
 			gi.dprintf("syntax: properties <filename>\n");

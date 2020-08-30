@@ -27,7 +27,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 int	nostatus = 0;
 
 
-void RotateAngles(vec3_t in, vec3_t delta, vec3_t out)
+void RotateAngles (vec3_t in, vec3_t delta, vec3_t out)
 {
 	// Rotates input angles (in) by delta angles around
 	// the local coordinate system, returns new angles
@@ -37,7 +37,7 @@ void RotateAngles(vec3_t in, vec3_t delta, vec3_t out)
 	float	angle, c, s;
 	float	xtemp, ytemp, ztemp;
 
-	if(delta[ROLL] != 0)
+	if (delta[ROLL] != 0)
 	{
 		// Rotate about the X axis by delta roll
 		angle = DEG2RAD(delta[ROLL]);
@@ -50,7 +50,7 @@ void RotateAngles(vec3_t in, vec3_t delta, vec3_t out)
 		ztemp = c*Y[2] + s*Y[1];
 		Y[1] = ytemp; Y[2] = ztemp;
 	}
-	if(delta[PITCH] != 0)
+	if (delta[PITCH] != 0)
 	{
 		// Rotate about the Y axis by delta yaw
 		angle = -DEG2RAD(delta[PITCH]);
@@ -63,7 +63,7 @@ void RotateAngles(vec3_t in, vec3_t delta, vec3_t out)
 		xtemp = c*Y[0] + s*Y[2];
 		Y[0] = xtemp; Y[2] = ztemp;
 	}
-	if(delta[YAW] != 0)
+	if (delta[YAW] != 0)
 	{
 		// Rotate about the Z axis by delta yaw
 		angle = DEG2RAD(delta[YAW]);
@@ -76,7 +76,7 @@ void RotateAngles(vec3_t in, vec3_t delta, vec3_t out)
 		ytemp = c*Y[1] + s*Y[0];
 		Y[0] = xtemp; Y[1] = ytemp;
 	}
-	if(in[ROLL] != 0)
+	if (in[ROLL] != 0)
 	{
 		// Rotate about X axis by input roll
 		angle = DEG2RAD(in[ROLL]);
@@ -89,7 +89,7 @@ void RotateAngles(vec3_t in, vec3_t delta, vec3_t out)
 		ztemp = c*Y[2] + s*Y[1];
 		Y[1] = ytemp; Y[2] = ztemp;
 	}
-	if(in[PITCH] != 0)
+	if (in[PITCH] != 0)
 	{
 		// Rotate about Y axis by input pitch
 		angle = -DEG2RAD(in[PITCH]);
@@ -102,7 +102,7 @@ void RotateAngles(vec3_t in, vec3_t delta, vec3_t out)
 		xtemp = c*Y[0] + s*Y[2];
 		Y[0] = xtemp; Y[2] = ztemp;
 	}
-	if(in[YAW] != 0)
+	if (in[YAW] != 0)
 	{
 		// Rotate about Z axis by input yaw
 		angle = DEG2RAD(in[YAW]);
@@ -117,7 +117,7 @@ void RotateAngles(vec3_t in, vec3_t delta, vec3_t out)
 	}
 
 	out[YAW]   = (180./M_PI) * atan2(X[1],X[0]);
-	if(out[YAW] != 0)
+	if (out[YAW] != 0)
 	{
 		angle = -DEG2RAD(out[YAW]);
 		c = cos(angle);
@@ -131,7 +131,7 @@ void RotateAngles(vec3_t in, vec3_t delta, vec3_t out)
 	}
 	
 	out[PITCH] = (180./M_PI) * atan2(X[2],X[0]);
-	if(out[PITCH] != 0)
+	if (out[PITCH] != 0)
 	{
 		angle = DEG2RAD(out[PITCH]);
 		c = cos(angle);
@@ -144,14 +144,14 @@ void RotateAngles(vec3_t in, vec3_t delta, vec3_t out)
 
 }
 
-void laser_sight_think(edict_t *laser)
+void laser_sight_think (edict_t *laser)
 {
 	edict_t	*player;
 	vec3_t	end, forward, right, offset;
 	trace_t	tr;
 
 
-	if(!laser->activator)
+	if (!laser->activator)
 		return;
 	player = laser->activator;
 
@@ -170,7 +170,7 @@ void laser_sight_think(edict_t *laser)
 	laser->nextthink = level.time + FRAMETIME;
 }
 
-void SaveEntProps(edict_t *e, FILE *f)
+void SaveEntProps (edict_t *e, FILE *f)
 {
 	fprintf(f,
 		"================================\n"
@@ -366,17 +366,17 @@ void SaveEntProps(edict_t *e, FILE *f)
 		e->monsterinfo.power_armor_power,e->monsterinfo.min_range);
 }
 
-void ShiftItem(edict_t *ent, int direction)
+void ShiftItem (edict_t *ent, int direction)
 {
 	vec3_t      end, forward, start;
 	vec3_t		move;
 
 	edict_t		*target;
 
-	if(!ent->client) return;
+	if (!ent->client) return;
 
 	target = LookingAt(ent,0,NULL,NULL);
-	if(!target) return;
+	if (!target) return;
 
 	ent->client->shift_dir = direction;
 	
@@ -386,42 +386,42 @@ void ShiftItem(edict_t *ent, int direction)
 	VectorSubtract(end,start,forward);
 	VectorNormalize(forward);
 	VectorScale(forward,shift_distance->value,forward);
-	if(direction & 1)
+	if (direction & 1)
 	{
-		if(fabs(forward[0]) > fabs(forward[1]))
+		if (fabs(forward[0]) > fabs(forward[1]))
 			move[1] += forward[0];
 		else
 			move[0] -= forward[1];
 	}
-	if(direction & 2)
+	if (direction & 2)
 	{
-		if(fabs(forward[0]) > fabs(forward[1]))
+		if (fabs(forward[0]) > fabs(forward[1]))
 			move[1] -= forward[0];
 		else
 			move[0] += forward[1];
 	}
-	if(direction & 4)
+	if (direction & 4)
 	{
-		if(fabs(forward[0]) > fabs(forward[1]))
+		if (fabs(forward[0]) > fabs(forward[1]))
 			move[0] += forward[0];
 		else
 			move[1] += forward[1];
 	}
-	if(direction & 8)
+	if (direction & 8)
 	{
-		if(fabs(forward[0]) > fabs(forward[1]))
+		if (fabs(forward[0]) > fabs(forward[1]))
 			move[0] -= forward[0];
 		else
 			move[1] -= forward[1];
 	}
-	if(direction & 16)
+	if (direction & 16)
 		move[2] += shift_distance->value;
 
-	if(direction & 32)
+	if (direction & 32)
 		move[2] -= shift_distance->value;
 
-	if(direction & 64) {
-		if( target->movetype == MOVETYPE_TOSS     ||
+	if (direction & 64) {
+		if ( target->movetype == MOVETYPE_TOSS     ||
 			target->movetype == MOVETYPE_BOUNCE   ||
 			target->movetype == MOVETYPE_STEP     ||
 			target->movetype == MOVETYPE_PUSHABLE ||
@@ -430,24 +430,24 @@ void ShiftItem(edict_t *ent, int direction)
 		}
 	}
 
-	if(direction & 128) {
+	if (direction & 128) {
 		target->s.angles[PITCH] += rotate_distance->value;
-		if(target->s.angles[PITCH] > 360) target->s.angles[PITCH] -= 360;
-		if(target->s.angles[PITCH] <   0) target->s.angles[PITCH] += 360;
+		if (target->s.angles[PITCH] > 360) target->s.angles[PITCH] -= 360;
+		if (target->s.angles[PITCH] <   0) target->s.angles[PITCH] += 360;
 	}
-	if(direction & 256) {
+	if (direction & 256) {
 		target->s.angles[YAW] += rotate_distance->value;
-		if(target->s.angles[YAW] > 360) target->s.angles[YAW] -= 360;
-		if(target->s.angles[YAW] <   0) target->s.angles[YAW] += 360;
+		if (target->s.angles[YAW] > 360) target->s.angles[YAW] -= 360;
+		if (target->s.angles[YAW] <   0) target->s.angles[YAW] += 360;
 	}
-	if(direction & 512) {
+	if (direction & 512) {
 		target->s.angles[ROLL] += rotate_distance->value;
-		if(target->s.angles[ROLL] > 360) target->s.angles[ROLL] -= 360;
-		if(target->s.angles[ROLL] <   0) target->s.angles[ROLL] += 360;
+		if (target->s.angles[ROLL] > 360) target->s.angles[ROLL] -= 360;
+		if (target->s.angles[ROLL] <   0) target->s.angles[ROLL] += 360;
 	}
 
 	VectorAdd(target->s.origin,move,target->s.origin);
-	if(!(direction & 64)) target->gravity_debounce_time = level.time + 1.0;
+	if (!(direction & 64)) target->gravity_debounce_time = level.time + 1.0;
 	gi.linkentity(target);
 }
 
@@ -620,9 +620,9 @@ void Cmd_Give_f (edict_t *ent)
 
 	name = gi.args();
 
-	if(!Q_stricmp(name,"jetpack"))
+	if (!Q_stricmp(name,"jetpack"))
 	{
-		if(!developer->value)
+		if (!developer->value)
 		{
 			safe_cprintf(ent, PRINT_HIGH, "Jetpack not available via give cheat\n");
 			return;
@@ -634,9 +634,9 @@ void Cmd_Give_f (edict_t *ent)
 			Add_Ammo(ent,fuel,500);
 		}
 	}
-	if(!developer->value)
+	if (!developer->value)
 	{
-		if( !Q_stricmp(name,"flashlight")      ||
+		if ( !Q_stricmp(name,"flashlight")      ||
 			!Q_stricmp(name,"fuel")            ||
 			!Q_stricmp(name,"homing rockets") ||
 			!Q_stricmp(name,"stasis generator")   )
@@ -917,19 +917,19 @@ void Cmd_Use_f (edict_t *ent)
 	}
 	index = ITEM_INDEX(it);
 #ifdef JETPACK_MOD
-	if(!Q_stricmp(s,"jetpack"))
+	if (!Q_stricmp(s,"jetpack"))
 	{
 		// Special case - turns on/off
-		if(!ent->client->jetpack)
+		if (!ent->client->jetpack)
 		{
-			if(ent->waterlevel > 0)
+			if (ent->waterlevel > 0)
 				return;
-			if(!ent->client->pers.inventory[index])
+			if (!ent->client->pers.inventory[index])
 			{
 				safe_cprintf(ent, PRINT_HIGH, "Out of item: %s\n", s);
 				return;
 			}
-			else if(ent->client->pers.inventory[fuel_index] <= 0)
+			else if (ent->client->pers.inventory[fuel_index] <= 0)
 			{
 				safe_cprintf(ent, PRINT_HIGH, "No fuel for: %s\n", s);
 				return;
@@ -942,7 +942,7 @@ void Cmd_Use_f (edict_t *ent)
 	if (!Q_stricmp(s,"stasis generator"))
 	{
 		// Special case - turn freeze off if already on
-		if(level.freeze)
+		if (level.freeze)
 		{
 			level.freeze = false;
 			level.freezeframes = 0;
@@ -1059,9 +1059,9 @@ void Cmd_Inven_f (edict_t *ent)
 	for (i=0 ; i<MAX_ITEMS ; i++)
 	{
 		// Don't show "No Weapon" or "Homing Rocket Launcher" in inventory
-		if((i == noweapon_index) || (i == hml_index))
+		if ((i == noweapon_index) || (i == hml_index))
 			gi.WriteShort (0);
-		else if((i == fuel_index) && (ent->client->jetpack_infinite))
+		else if ((i == fuel_index) && (ent->client->jetpack_infinite))
 			gi.WriteShort (0);
 		else
 			gi.WriteShort (cl->pers.inventory[i]);
@@ -1099,13 +1099,13 @@ void Cmd_InvUse_f (edict_t *ent)
 	}
 
 #ifdef JETPACK_MOD
-	if(!Q_stricmp(it->classname,"item_jetpack"))
+	if (!Q_stricmp(it->classname,"item_jetpack"))
 	{
-		if(!ent->client->jetpack)
+		if (!ent->client->jetpack)
 		{
-			if(ent->waterlevel > 0)
+			if (ent->waterlevel > 0)
 				return;
-			if(ent->client->pers.inventory[fuel_index] <= 0)
+			if (ent->client->pers.inventory[fuel_index] <= 0)
 			{
 				safe_cprintf(ent, PRINT_HIGH, "No fuel for jetpack\n" );
 				return;
@@ -1254,7 +1254,7 @@ void Cmd_Kill_f (edict_t *ent)
 		return;
 //ZOID
 
-	if((level.time - ent->client->respawn_time) < 5)
+	if ((level.time - ent->client->respawn_time) < 5)
 		return;
 	ent->flags &= ~FL_GODMODE;
 	ent->health = 0;
@@ -1521,6 +1521,7 @@ void Cmd_Say_f (edict_t *ent, qboolean team, qboolean arg0)
 	}
 }
 
+
 // Knightmare added
 void Cmd_EntCount_f (edict_t *ent)
 {
@@ -1536,7 +1537,7 @@ void Cmd_EntCount_f (edict_t *ent)
 }
 // end Knightmare
 
-void Cmd_PlayerList_f(edict_t *ent)
+void Cmd_PlayerList_f (edict_t *ent)
 {
 	int i;
 	char st[80];
@@ -1659,7 +1660,7 @@ void Cmd_Bbox_f (edict_t *ent)
 	edict_t	*viewing;
 
 	viewing = LookingAt(ent, 0, NULL, NULL);
-	if(!viewing) return;
+	if (!viewing) return;
 	DrawBBox(viewing);
 }
 
@@ -1710,7 +1711,7 @@ void SetSensitivities (edict_t *ent, qboolean reset)
 	{
 		float	ratio;
 
-		//save in lazarus_crosshair
+		// save in lazarus_crosshair
 		Com_sprintf(string, sizeof(string), "lazarus_crosshair %i\n",atoi(crosshair->string));
 		stuffcmd(ent,string);
 		Com_sprintf(string, sizeof(string), "crosshair 0");
@@ -1762,10 +1763,10 @@ Alternate firing mode
 */
 /*void Cmd_attack2_f(edict_t *ent, qboolean bOn)
 {
-	if(!ent->client) return;
-	if(ent->health <= 0) return;
+	if (!ent->client) return;
+	if (ent->health <= 0) return;
 
-	if(bOn)
+	if (bOn)
 	{
 		ent->client->pers.fire_mode=1;
 		ent->client->nNewLatch |= BUTTON_ATTACK2;
@@ -1784,19 +1785,19 @@ void decoy_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
 
 void decoy_think(edict_t *self)
 {
-	if(self->s.frame < 0 || self->s.frame > 39)
+	if (self->s.frame < 0 || self->s.frame > 39)
 	{
 		self->s.frame = 0;
 	}
 	else
 	{
 		self->s.frame++;
-		if(self->s.frame > 39)
+		if (self->s.frame > 39)
 			self->s.frame = 0;
 	}
 
 	// Every 2 seconds, make visible monsters mad at me
-	if(level.framenum % 20 == 0)
+	if (level.framenum % 20 == 0)
 	{
 		edict_t	*e;
 		int		i;
@@ -1804,15 +1805,15 @@ void decoy_think(edict_t *self)
 		for(i=game.maxclients+1; i<globals.num_edicts; i++)
 		{
 			e = &g_edicts[i];
-			if(!e->inuse)
+			if (!e->inuse)
 				continue;
-			if(!(e->svflags & SVF_MONSTER))
+			if (!(e->svflags & SVF_MONSTER))
 				continue;
-			if(e->monsterinfo.aiflags & AI_GOOD_GUY)
+			if (e->monsterinfo.aiflags & AI_GOOD_GUY)
 				continue;
-			if(!visible(e,self))
+			if (!visible(e,self))
 				continue;
-			if(e->enemy == self)
+			if (e->enemy == self)
 				continue;
 			e->enemy = e->goalentity = self;
 			e->monsterinfo.aiflags |= AI_TARGET_ANGER;
@@ -1849,7 +1850,7 @@ void SpawnForcewall(edict_t	*player)
 	tr = gi.trace(start,NULL,NULL,point,player,MASK_SOLID);
 	VectorCopy(tr.endpos,wall->s.origin);
 	
-	if(fabs(forward[0]) > fabs(forward[1]))
+	if (fabs(forward[0]) > fabs(forward[1]))
 	{
 		wall->pos1[0] = wall->pos2[0] = wall->s.origin[0];
 		wall->mins[0] =  -1;
@@ -1914,12 +1915,12 @@ void ForcewallOff(edict_t *player)
 	AngleVectors(player->client->v_angle,forward,NULL,NULL);
 	VectorMA(start, WORLD_SIZE, forward, point);	// was 8192
 	tr = gi.trace(start,NULL,NULL,point,player,MASK_SHOT);
-	if(Q_stricmp(tr.ent->classname,"forcewall"))
+	if (Q_stricmp(tr.ent->classname,"forcewall"))
 	{
 		safe_cprintf(player,PRINT_HIGH,"Not a forcewall!\n");
 		return;
 	}
-	if(tr.ent->activator != player)
+	if (tr.ent->activator != player)
 	{
 		safe_cprintf(player,PRINT_HIGH,"You don't own this forcewall, bub!\n");
 		return;
@@ -1948,7 +1949,7 @@ void ClientCommand (edict_t *ent)
 // ACEBOT_END
 
 	cmd = gi.argv(0);
-	if(gi.argc() < 2)
+	if (gi.argc() < 2)
 		parm = NULL;
 	else
 		parm = gi.argv(1);
@@ -2102,6 +2103,7 @@ void ClientCommand (edict_t *ent)
 	else if (Q_stricmp (cmd, "entcount") == 0)
 		Cmd_EntCount_f(ent);
 
+
 	// alternate attack mode
 	/*else if (!Q_stricmp(cmd,"attack2_off"))
 		Cmd_attack2_f(ent,false);
@@ -2222,21 +2224,25 @@ void ClientCommand (edict_t *ent)
 			}
 		}
 	}
-
 	else if (!Q_stricmp(cmd, "entlist"))
 	{
 		if (parm)
 		{
+			char	filename[MAX_QPATH];
 			edict_t	*e;
 			FILE	*f;
 			int		i;
 			vec3_t	origin;
 			int		count;
 
-			f = fopen(parm,"w");
+		//	f = fopen(parm, "w");
+			SavegameDirRelativePath(parm, filename, sizeof(filename));
+			Q_strncatz (filename, ".txt", sizeof(filename));
+			gi.dprintf("Writing entity list to %s... ", filename);
+			f = fopen(filename, "w");
 			if (f)
 			{
-				fprintf(f,"Movetype codes\n"
+				fprintf(f, "Movetype codes\n"
 					      " 0 MOVETYPE_NONE\n"
 						  " 1 MOVETYPE_NOCLIP\n"
 						  " 2 MOVETYPE_PUSH       (most moving brush models)\n"
@@ -2323,24 +2329,26 @@ void ClientCommand (edict_t *ent)
 		//	int		i;
 
 			e = LookingAt(ent,0,NULL,NULL);
-			if(!e) return;
+			if (!e) return;
 	
 			SavegameDirRelativePath(parm, filename, sizeof(filename));
 		//	strncat(filename, ".txt");
-			Q_strncatz(filename, ".txt", sizeof(filename));
+			Q_strncatz (filename, ".txt", sizeof(filename));
+			gi.dprintf("Writing entity properties to %s... ", filename);
 			f = fopen(filename, "w");
-		//	for(i=0; i<globals.num_edicts; i++)
+		//	for (i=0; i<globals.num_edicts; i++)
 		//	{
 		//		e = &g_edicts[i];
-				SaveEntProps(e,f);
+				SaveEntProps (e, f);
 		//	}
 			fclose(f);
+			gi.dprintf("done!\n");
 		}
 		else {
 			gi.dprintf("syntax: properties <filename>\n");
 		}
 	}
-	else if (!Q_stricmp(cmd,"go"))
+	else if (!Q_stricmp(cmd, "go"))
 	{
 		edict_t *viewing;
 		float	range;
@@ -2375,7 +2383,7 @@ void ClientCommand (edict_t *ent)
 		if (parm)
 		{
 			int state = atoi(parm);
-			if(state)
+			if (state)
 				world->effects |= FX_WORLDSPAWN_WHATSIT;
 			else
 				world->effects &= ~FX_WORLDSPAWN_WHATSIT;
@@ -2409,7 +2417,7 @@ void ClientCommand (edict_t *ent)
 			laser->think(laser);
 		}
 	} */
-	else if (!Q_stricmp(cmd,"whereis"))
+	else if (!Q_stricmp(cmd, "whereis"))
 	{
 		if (parm)
 		{
@@ -2449,11 +2457,11 @@ void ClientCommand (edict_t *ent)
 		}
 		else if (!Q_stricmp(cmd,"freeze"))
 		{
-			if(level.freeze)
+			if (level.freeze)
 				level.freeze = false;
 			else
 			{
-				if(ent->client->jetpack)
+				if (ent->client->jetpack)
 					gi.dprintf("Cannot use freeze while using jetpack\n");
 				else
 					level.freeze = true;
@@ -2466,17 +2474,17 @@ void ClientCommand (edict_t *ent)
 			viewing = LookingAt(ent,LOOKAT_MD2,NULL,NULL);
 			if (!viewing)
 				return;
-			if(viewing->monsterinfo.aiflags & AI_HINT_TEST)
+			if (viewing->monsterinfo.aiflags & AI_HINT_TEST)
 			{
 				viewing->monsterinfo.aiflags &= ~AI_HINT_TEST;
 				gi.dprintf("%s (%s): Back to my normal self now.\n",
 					viewing->classname,viewing->targetname);
 				return;
 			}
-			if(!(viewing->svflags & SVF_MONSTER))
+			if (!(viewing->svflags & SVF_MONSTER))
 				gi.dprintf("hint_test is only valid for monsters and actors.\n");
 			result = HintTestStart(viewing);
-			switch(result)
+			switch (result)
 			{
 			case -1:
 				gi.dprintf("%s (%s): I cannot see any hint_paths from here.\n");
@@ -2531,12 +2539,12 @@ void ClientCommand (edict_t *ent)
 			ShiftItem(ent,512);
 		else if (!Q_stricmp(cmd, "item_release"))
 			ent->client->shift_dir = 0;
-		else if (!Q_stricmp(cmd,"medic_test"))
+		else if (!Q_stricmp(cmd, "medic_test"))
 		{
 			extern	int	medic_test;
-			if(parm)
+			if (parm)
 				medic_test = atoi(parm);
-			else if(medic_test)
+			else if (medic_test)
 				medic_test = 0;
 			else
 				medic_test = 1;
@@ -2545,7 +2553,7 @@ void ClientCommand (edict_t *ent)
 		else if (strstr(cmd, "muzzle"))
 		{
 			edict_t	*viewing;
-			viewing = LookingAt(ent, 0, NULL, NULL);
+			viewing = LookingAt(ent,0,NULL,NULL);
 			if (!viewing)
 				return;
 			if (!viewing->classname)
@@ -2569,7 +2577,7 @@ void ClientCommand (edict_t *ent)
 					gi.dprintf("Syntax: muzzle[x|y|z] <value>\n");
 			}
 		}
-		else if (!Q_stricmp(cmd,"range"))
+		else if (!Q_stricmp(cmd, "range"))
 		{
 			vec3_t	forward, point, start;
 			trace_t	tr;
@@ -2610,7 +2618,7 @@ void ClientCommand (edict_t *ent)
 				gi.dprintf("Currently using skin #%i\n",viewing->s.skinnum);
 
 		}
-		else if (!Q_stricmp(cmd,"spawn"))
+		else if (!Q_stricmp(cmd, "spawn"))
 		{
 			edict_t	*e;
 			vec3_t	forward;
@@ -2628,7 +2636,7 @@ void ClientCommand (edict_t *ent)
 			e->s.angles[YAW] = ent->s.angles[YAW];
 			ED_CallSpawn(e);
 		}
-		else if (!Q_stricmp(cmd,"spawngoodguy"))
+		else if (!Q_stricmp(cmd, "spawngoodguy"))
 		{
 			edict_t	*e;
 			vec3_t	forward;
@@ -2640,7 +2648,7 @@ void ClientCommand (edict_t *ent)
 			}
 			e = G_Spawn();
 			e->classname = gi.TagMalloc(12,TAG_LEVEL);
-			strcpy(e->classname,"misc_actor");
+			strcpy(e->classname, "misc_actor");
 			e->usermodel = gi.argv(1);
 			e->sounds = atoi(gi.argv(2));
 			e->spawnflags = SF_MONSTER_GOODGUY;
@@ -2651,7 +2659,7 @@ void ClientCommand (edict_t *ent)
 			ED_CallSpawn(e);
 			actor_files();
 		}
-		else if (!Q_stricmp(cmd,"spawnself"))
+		else if (!Q_stricmp(cmd, "spawnself"))
 		{
 			edict_t	*decoy;
 			vec3_t	forward;
@@ -2682,13 +2690,13 @@ void ClientCommand (edict_t *ent)
 			VectorCopy(ent->maxs,decoy->maxs);
 			gi.linkentity (decoy); 
 		}
-		else if (!Q_stricmp(cmd,"switch"))
+		else if (!Q_stricmp(cmd, "switch"))
 		{
 			extern mmove_t	actor_move_switch;
 			edict_t *viewing;
 
 			viewing = LookingAt(ent,0,NULL,NULL);
-			if(!viewing)
+			if (!viewing)
 				return;
 			if (!(viewing->monsterinfo.aiflags & AI_ACTOR))
 			{
@@ -2698,7 +2706,7 @@ void ClientCommand (edict_t *ent)
 			viewing->monsterinfo.currentmove = &actor_move_switch;
 		}
 #ifndef KMQUAKE2_ENGINE_MOD // these functions moved clientside in engine
-		else if(!Q_stricmp(cmd,"texture"))
+		else if (!Q_stricmp(cmd, "texture"))
 		{
 			trace_t	tr;
 			vec3_t	forward, start, end;
@@ -2711,7 +2719,7 @@ void ClientCommand (edict_t *ent)
 			}
 			AngleVectors(ent->client->v_angle, forward, NULL, NULL);
 			VectorMA(start, WORLD_SIZE, forward, end);	// was 8192
-			tr = gi.trace(start,NULL,NULL,end,ent,MASK_ALL);
+			tr = gi.trace(start, NULL, NULL, end, ent, MASK_ALL);
 			if (!tr.ent)
 				gi.dprintf("Nothing hit?\n");
 			else {
@@ -2721,7 +2729,7 @@ void ClientCommand (edict_t *ent)
 					gi.dprintf("Texture=%s, surface=0x%08x, value=%d\n",tr.surface->name,tr.surface->flags,tr.surface->value);
 			}
 		}
-		else if (!Q_stricmp(cmd,"surf"))
+		else if (!Q_stricmp(cmd, "surf"))
 		{
 			trace_t	tr;
 			vec3_t	forward, start, end;
@@ -2743,7 +2751,7 @@ void ClientCommand (edict_t *ent)
 			}
 			AngleVectors(ent->client->v_angle, forward, NULL, NULL);
 			VectorMA(start, WORLD_SIZE, forward, end);	// was 8192
-			tr = gi.trace(start,NULL,NULL,end,ent,MASK_ALL);
+			tr = gi.trace(start, NULL, NULL, end, ent, MASK_ALL);
 			if (!tr.ent)
 				gi.dprintf("Nothing hit?\n");
 			else
