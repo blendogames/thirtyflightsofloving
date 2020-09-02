@@ -249,6 +249,7 @@ void Move_Begin (edict_t *ent)
 		Move_Final (ent);
 		return;
 	}
+
 	// set object's velocity to direction times speed
 	VectorScale (ent->moveinfo.dir, ent->moveinfo.speed, ent->velocity);
 	if (ent->movewith && ent->movewith_ent)
@@ -315,23 +316,27 @@ void Move_Calc (edict_t *ent, vec3_t dest, void(*func)(edict_t*))
 	VectorSubtract (dest, ent->s.origin, ent->moveinfo.dir);
 	ent->moveinfo.remaining_distance = VectorNormalize (ent->moveinfo.dir);
 	ent->moveinfo.endfunc = func;
+
+	// Knightmare- use smart functions for child movement
 	if (ent->movewith && ent->movewith_ent)
-	{	// Knightmare- use smart functions for child movement
+	{
 		if (VectorCompare(dest, ent->pos0))
-			Move_pos0_Think(ent);
+			Move_pos0_Think (ent);
 		else if (VectorCompare(dest, ent->pos1))
-			Move_pos1_Think(ent);
+			Move_pos1_Think (ent);
 		else if (VectorCompare(dest, ent->pos2))
-			Move_pos2_Think(ent);
+			Move_pos2_Think (ent);
 		else
 			Move_Begin (ent);
 	}
 	else if (ent->moveinfo.speed == ent->moveinfo.accel && ent->moveinfo.speed == ent->moveinfo.decel)
-	{	// what does this mean?
-		if (level.current_entity == ((ent->flags & FL_TEAMSLAVE) ? ent->teammaster : ent))
+	{
+		if (level.current_entity == ((ent->flags & FL_TEAMSLAVE) ? ent->teammaster : ent)) {
 			Move_Begin (ent);
-		else if (ent->movewith)
+		}
+		else if (ent->movewith) {
 			Move_Begin (ent);
+		}
 		else // wait 0.1 second to start moving
 		{
 			ent->nextthink = level.time + FRAMETIME;
@@ -3311,7 +3316,8 @@ void train_move_children (edict_t *self)
 
 			// For all but buttons, doors, and plats, move origin and match velocities
 			if ( strcmp(ent->classname, "func_door") && strcmp(ent->classname, "func_button")
-				&& strcmp(ent->classname, "func_door_secret") && strcmp(ent->classname, "func_door_secret2")
+			//	&& strcmp(ent->classname, "func_door_secret") && strcmp(ent->classname, "func_door_secret2")
+				&& (ent->class_id != ENTITY_FUNC_DOOR_SECRET) && (ent->class_id != ENTITY_FUNC_DOOR_SECRET2)
 				&& strcmp(ent->classname, "func_plat") && strcmp(ent->classname, "func_plat2")
 				&& strcmp(ent->classname, "func_water") && strcmp(ent->classname, "turret_wall")
 				&& (strcmp(ent->classname, "monster_turret") || !(ent->spawnflags & 128)) )
@@ -3451,7 +3457,8 @@ void train_move_children (edict_t *self)
 			// Special cases:
 			// Func_door/func_button and trigger fields
 			if ( !strcmp(ent->classname, "func_door") || !strcmp(ent->classname, "func_button")
-				|| !strcmp(ent->classname, "func_door_secret") || !strcmp(ent->classname, "func_door_secret2")
+			//	|| !strcmp(ent->classname, "func_door_secret") || !strcmp(ent->classname, "func_door_secret2")
+				|| (ent->class_id == ENTITY_FUNC_DOOR_SECRET) || (ent->class_id == ENTITY_FUNC_DOOR_SECRET2)
 				|| !strcmp(ent->classname, "func_plat") || !strcmp(ent->classname, "func_plat2")
 				|| !strcmp(ent->classname, "func_water") || !strcmp(ent->classname, "turret_wall")
 				|| (!strcmp(ent->classname, "monster_turret") && ent->spawnflags & 128) )
@@ -3470,7 +3477,8 @@ void train_move_children (edict_t *self)
 					VectorMA (ent->pos1,  ent->movewith_offset[2], up, ent->pos1);
 					VectorMA (ent->pos1, 32, eforward, ent->pos2);
 				}
-				else if (!strcmp(ent->classname, "func_door_secret"))
+			//	else if (!strcmp(ent->classname, "func_door_secret"))
+				if (ent->class_id == ENTITY_FUNC_DOOR_SECRET)
 				{
 					vec3_t	eforward, eright, eup;
 
@@ -3484,7 +3492,8 @@ void train_move_children (edict_t *self)
 						VectorMA (ent->pos0, ent->side * ent->width, eright, ent->pos1);
 					VectorMA (ent->pos1, ent->length, eforward, ent->pos2);
 				}
-				else if (!strcmp(ent->classname, "func_door_secret2"))
+			//	else if (!strcmp(ent->classname, "func_door_secret2"))
+				else if (ent->class_id == ENTITY_FUNC_DOOR_SECRET2)
 				{
 					vec3_t	eforward, eright, eup;
 
@@ -3563,11 +3572,12 @@ void train_move_children (edict_t *self)
 			{
 				// Cross fingers here... move bounding boxes of doors and buttons
 				if ( !strcmp(ent->classname, "func_door") || !strcmp(ent->classname, "func_button")
-				|| !strcmp(ent->classname, "func_door_secret") || !strcmp(ent->classname, "func_door_secret2")
-				|| !strcmp(ent->classname, "func_plat") || !strcmp(ent->classname, "func_plat2")
-				|| !strcmp(ent->classname, "func_water") || (ent->solid == SOLID_TRIGGER)
-				|| !strcmp(ent->classname, "turret_wall")
-				|| (!strcmp(ent->classname, "monster_turret") && ent->spawnflags & 128) )
+				//	|| !strcmp(ent->classname, "func_door_secret") || !strcmp(ent->classname, "func_door_secret2")
+					|| (ent->class_id == ENTITY_FUNC_DOOR_SECRET) || (ent->class_id == ENTITY_FUNC_DOOR_SECRET2)
+					|| !strcmp(ent->classname, "func_plat") || !strcmp(ent->classname, "func_plat2")
+					|| !strcmp(ent->classname, "func_water") || (ent->solid == SOLID_TRIGGER)
+					|| !strcmp(ent->classname, "turret_wall")
+					|| (!strcmp(ent->classname, "monster_turret") && ent->spawnflags & 128) )
 				{
 					float       ca, sa, yaw;
 					vec3_t      p00, p01, p10, p11;
@@ -5034,23 +5044,24 @@ void door_secret_use (edict_t *self, edict_t *other, edict_t *activator)
 	if ((self->moveinfo.state != STATE_LOWEST) && (self->moveinfo.state != STATE_TOP))
 		return;
 
-	//added sound
+	// added sound
 	if (self->moveinfo.sound_start)
 		gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_start, 1, self->attenuation, 0); // was ATTN_STATIC
-	if (self->moveinfo.sound_middle) {
+	if (self->moveinfo.sound_middle)
+	{
 		self->s.sound = self->moveinfo.sound_middle;
 #ifdef LOOP_SOUND_ATTENUATION
 		self->s.attenuation = self->attenuation;
 #endif
 	}
+
 	if (self->moveinfo.state == STATE_LOWEST)
 	{
 		self->moveinfo.state = STATE_DOWN;
 		Move_Calc (self, self->pos1, door_secret_move1);
 		door_use_areaportals (self, true);
-
 	}
-	else //Knightmare added
+	else	// Knightmare added
 	{
 		self->moveinfo.state = STATE_UP;
 		Move_Calc (self, self->pos1, door_secret_move5);
@@ -5062,7 +5073,8 @@ void door_secret_move1 (edict_t *self)
 	self->nextthink = level.time + 1.0;
 	self->think = door_secret_move2;
 	self->moveinfo.state = STATE_BOTTOM;
-    //added sound
+
+	// added sound
 	self->s.sound = 0;
 	if (self->moveinfo.sound_end)
 		gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_end, 1, self->attenuation, 0); // was ATTN_STATIC
@@ -5070,7 +5082,7 @@ void door_secret_move1 (edict_t *self)
 
 void door_secret_move2 (edict_t *self)
 {
-    //added sound
+	// added sound
 	if (self->moveinfo.sound_start)
 		gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_start, 1, self->attenuation, 0); // was ATTN_STATIC
 	if (self->moveinfo.sound_middle) {
@@ -5079,6 +5091,7 @@ void door_secret_move2 (edict_t *self)
 		self->s.attenuation = self->attenuation;
 #endif
 	}
+
 	self->moveinfo.state = STATE_UP;
 	Move_Calc (self, self->pos2, door_secret_move3);
 }
@@ -5086,7 +5099,8 @@ void door_secret_move2 (edict_t *self)
 void door_secret_move3 (edict_t *self)
 {
 	self->moveinfo.state = STATE_TOP;
-    //added sound
+
+	// added sound
 	self->s.sound = 0;
 	if (self->moveinfo.sound_end)
 		gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_end, 1, self->attenuation, 0); // was ATTN_STATIC
@@ -5100,7 +5114,7 @@ void door_secret_move3 (edict_t *self)
 
 void door_secret_move4 (edict_t *self)
 {
-    //added sound
+	// added sound
 	if (self->moveinfo.sound_start)
 		gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_start, 1, self->attenuation, 0); // was ATTN_STATIC
 	if (self->moveinfo.sound_middle) {
@@ -5118,7 +5132,8 @@ void door_secret_move5 (edict_t *self)
 	self->nextthink = level.time + 1.0;
 	self->think = door_secret_move6;
 	self->moveinfo.state = STATE_BOTTOM;
-    //added sound
+
+	// added sound
 	self->s.sound = 0;
 	if (self->moveinfo.sound_end)
 		gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_end, 1, self->attenuation, 0); // was ATTN_STATIC
@@ -5126,7 +5141,7 @@ void door_secret_move5 (edict_t *self)
 
 void door_secret_move6 (edict_t *self)
 {
-    //added sound
+	// added sound
 	if (self->moveinfo.sound_start)
 		gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_start, 1, self->attenuation, 0); // was ATTN_STATIC
 	if (self->moveinfo.sound_middle) {
@@ -5135,6 +5150,7 @@ void door_secret_move6 (edict_t *self)
 		self->s.attenuation = self->attenuation;
 #endif
 	}
+
 	self->moveinfo.state = STATE_DOWN;
 	Move_Calc (self, self->pos0, door_secret_done);
 }
@@ -5147,7 +5163,8 @@ void door_secret_done (edict_t *self)
 		self->takedamage = DAMAGE_YES;
 	}
 	self->moveinfo.state = STATE_LOWEST;
-    //added sound
+
+    // added sound
 	self->s.sound = 0;
 	if (self->moveinfo.sound_end)
 		gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_end, 1, self->attenuation, 0); // was ATTN_STATIC
@@ -5160,7 +5177,8 @@ void door_secret_blocked  (edict_t *self, edict_t *other)
 	if (!(other->svflags & SVF_MONSTER) && (!other->client) )
 	{
 		// give it a chance to go away on it's own terms (like gibs)
-		T_Damage (other, self, self, self->pos0, other->s.origin, self->pos0, 100000, 1, 0, MOD_CRUSH);
+	//	T_Damage (other, self, self, self->pos0, other->s.origin, self->pos0, 100000, 1, 0, MOD_CRUSH);
+		T_Damage (other, self, self, vec3_origin, other->s.origin, vec3_origin, 100000, 1, 0, MOD_CRUSH);
 		// if it's still there, nuke it
 		if (other && other->inuse)
 			BecomeExplosion1 (other);
@@ -5178,7 +5196,8 @@ void door_secret_blocked  (edict_t *self, edict_t *other)
 		return;
 	self->touch_debounce_time = level.time + 0.5;
 
-	T_Damage (other, self, self, self->pos0, other->s.origin, self->pos0, self->dmg, 1, 0, MOD_CRUSH);
+//	T_Damage (other, self, self, self->pos0, other->s.origin, self->pos0, self->dmg, 1, 0, MOD_CRUSH);
+	T_Damage (other, self, self, vec3_origin, other->s.origin, vec3_origin, self->dmg, 1, 0, MOD_CRUSH);
 }
 
 void door_secret_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
@@ -5244,7 +5263,7 @@ void SP_func_door_secret (edict_t *ent)
 	VectorCopy (ent->s.origin, ent->pos0);
 	AngleVectors (ent->s.angles, forward, right, up);
 	VectorClear (ent->s.angles);
-	//ent->side = 1.0 - (ent->spawnflags & SECRET_1ST_LEFT);
+//	ent->side = 1.0 - (ent->spawnflags & SECRET_1ST_LEFT);
 
 	if (ent->spawnflags & SECRET_1ST_LEFT)
 		ent->side = -1.0;
@@ -5277,7 +5296,7 @@ void SP_func_door_secret (edict_t *ent)
 		ent->touch = door_touch;
 	}
 	ent->classname = "func_door";
-	ent->postthink = train_move_children; //Knightmare- now supports movewith
+	ent->postthink = train_move_children; // Knightmare- now supports movewith
 
 	gi.linkentity (ent);
 }

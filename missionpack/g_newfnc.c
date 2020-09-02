@@ -40,18 +40,29 @@ void fd_secret_use (edict_t *self, edict_t *other, edict_t *activator)
 	if (self->flags & FL_TEAMSLAVE)
 		return;
 
+	// added sound
+	if (self->moveinfo.sound_start)
+		gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_start, 1, self->attenuation, 0); // was ATTN_STATIC
+	if (self->moveinfo.sound_middle) {
+		self->s.sound = self->moveinfo.sound_middle;
+#ifdef LOOP_SOUND_ATTENUATION
+		self->s.attenuation = self->attenuation;
+#endif
+	}
+
 	// trigger all paired doors
-	for (ent = self ; ent ; ent = ent->teamchain)
+	for (ent = self; ent; ent = ent->teamchain)
 	{
 		if (self->moveinfo.state == STATE_LOWEST)
 		{
 			ent->moveinfo.state = STATE_DOWN;
-			Move_Calc(ent, ent->pos1, fd_secret_move1);
+			Move_Calc (ent, ent->pos1, fd_secret_move1);
+			door_use_areaportals (self, true);
 		}
-		else if (self->moveinfo.state == STATE_TOP) //Knightmare added
+		else if (self->moveinfo.state == STATE_TOP) // Knightmare added
 		{
-			self->moveinfo.state = STATE_UP;
-			Move_Calc(self, self->pos1, fd_secret_move5);
+			ent->moveinfo.state = STATE_UP;
+			Move_Calc (ent, ent->pos1, fd_secret_move5);
 		}
 	}
 }
@@ -69,24 +80,39 @@ void fd_secret_killed (edict_t *self, edict_t *inflictor, edict_t *attacker, int
 }
 
 // Wait after first movement...
-void fd_secret_move1(edict_t *self) 
+void fd_secret_move1 (edict_t *self) 
 {
 //	gi.dprintf("fd_secret_move1\n");
 	self->nextthink = level.time + 1.0;
 	self->think = fd_secret_move2;
 	self->moveinfo.state = STATE_BOTTOM;
+
+	// added sound
+	self->s.sound = 0;
+	if (self->moveinfo.sound_end)
+		gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_end, 1, self->attenuation, 0); // was ATTN_STATIC
 }
 
 // Start moving sideways w/sound...
-void fd_secret_move2(edict_t *self)
+void fd_secret_move2 (edict_t *self)
 {
 //	gi.dprintf("fd_secret_move2\n");
+    // added sound
+	if (self->moveinfo.sound_start)
+		gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_start, 1, self->attenuation, 0); // was ATTN_STATIC
+	if (self->moveinfo.sound_middle) {
+		self->s.sound = self->moveinfo.sound_middle;
+#ifdef LOOP_SOUND_ATTENUATION
+		self->s.attenuation = self->attenuation;
+#endif
+	}
+
 	self->moveinfo.state = STATE_UP;
-	Move_Calc(self, self->pos2, fd_secret_move3);
+	Move_Calc (self, self->pos2, fd_secret_move3);
 }
 
 // Wait here until time to go back...
-void fd_secret_move3(edict_t *self)
+void fd_secret_move3 (edict_t *self)
 {
 //	gi.dprintf("fd_secret_move3\n");
 	if (!(self->spawnflags & SEC_OPEN_ONCE))
@@ -95,45 +121,82 @@ void fd_secret_move3(edict_t *self)
 		self->think = fd_secret_move4;
 	}
 	self->moveinfo.state = STATE_TOP;
+
+	// added sound
+	self->s.sound = 0;
+	if (self->moveinfo.sound_end)
+		gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_end, 1, self->attenuation, 0); // was ATTN_STATIC
 }
 
 // Move backward...
-void fd_secret_move4(edict_t *self)
+void fd_secret_move4 (edict_t *self)
 {
 //	gi.dprintf("fd_secret_move4\n");
+	// added sound
+	if (self->moveinfo.sound_start)
+		gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_start, 1, self->attenuation, 0); // was ATTN_STATIC
+	if (self->moveinfo.sound_middle) {
+		self->s.sound = self->moveinfo.sound_middle;
+#ifdef LOOP_SOUND_ATTENUATION
+		self->s.attenuation = self->attenuation;
+#endif
+	}
+
 	self->moveinfo.state = STATE_UP;
-	Move_Calc(self, self->pos1, fd_secret_move5);          
+	Move_Calc (self, self->pos1, fd_secret_move5);          
 }
 
 // Wait 1 second...
-void fd_secret_move5(edict_t *self)
+void fd_secret_move5 (edict_t *self)
 {
 //	gi.dprintf("fd_secret_move5\n");
 	self->nextthink = level.time + 1.0;
 	self->think = fd_secret_move6;
 	self->moveinfo.state = STATE_BOTTOM;
+
+	// added sound
+	self->s.sound = 0;
+	if (self->moveinfo.sound_end)
+		gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_end, 1, self->attenuation, 0); // was ATTN_STATIC
 }
 
-void fd_secret_move6(edict_t *self)
+void fd_secret_move6 (edict_t *self)
 {
 //	gi.dprintf("fd_secret_move6\n");
+    // added sound
+	if (self->moveinfo.sound_start)
+		gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_start, 1, self->attenuation, 0); // was ATTN_STATIC
+	if (self->moveinfo.sound_middle)
+		self->s.sound = self->moveinfo.sound_middle;
+#ifdef LOOP_SOUND_ATTENUATION
+		self->s.attenuation = self->attenuation;
+#endif
+
 	self->moveinfo.state = STATE_DOWN;
-	Move_Calc(self, self->pos0, fd_secret_done);
+	Move_Calc (self, self->pos0, fd_secret_done);
 }
 
-void fd_secret_done(edict_t *self)
+void fd_secret_done (edict_t *self)
 {
 //	gi.dprintf("fd_secret_done\n");
 	if (!self->targetname || self->spawnflags & SEC_YES_SHOOT)
 	{
-		self->health = 1;
+	//	self->health = 1;
+		self->health = self->max_health;
 		self->takedamage = DAMAGE_YES;
 		self->die = fd_secret_killed;   
 	}
 	self->moveinfo.state = STATE_LOWEST;
+
+	// added sound
+	self->s.sound = 0;
+	if (self->moveinfo.sound_end)
+		gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_end, 1, self->attenuation, 0); // was ATTN_STATIC
+
+	door_use_areaportals (self, false);
 }
 
-void secret_blocked(edict_t *self, edict_t *other)
+void secret_blocked (edict_t *self, edict_t *other)
 {
 	// Remove dead Q1 monsters, as they can't be gibbed
 	if ( (other->svflags & SVF_DEADMONSTER) && (other->flags & FL_Q1_MONSTER) )
@@ -143,7 +206,7 @@ void secret_blocked(edict_t *self, edict_t *other)
 	}
 
 	if (!(self->flags & FL_TEAMSLAVE))
-		T_Damage (other, self, self, self->pos0, other->s.origin, self->pos0, self->dmg, 0, 0, MOD_CRUSH);
+		T_Damage (other, self, self, vec3_origin, other->s.origin, vec3_origin, self->dmg, 0, 0, MOD_CRUSH);
 
 //	if (time < self->attack_finished)
 //		return;
@@ -158,22 +221,24 @@ secret_touch
 Prints messages
 ================
 */
-void secret_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
+void secret_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
 	if (other->health <= 0)
 		return;
 
-	if (!(other->client))
+//	if (!(other->client))
+	// Lazarus: Allows robot usage
+	if (!other->client && !(other->flags & FL_ROBOT))
 		return;
 
 	if (self->monsterinfo.attack_finished > level.time)
 		return;
-
 	self->monsterinfo.attack_finished = level.time + 2;
 	
 	if (self->message)
 	{
 		gi.centerprintf (other, self->message);
+		gi.sound (other, CHAN_AUTO, gi.soundindex ("misc/talk1.wav"), 1, ATTN_NORM, 0);
 //		fixme - put this sound back??
 //		gi.sound (other, CHAN_BODY, "misc/talk.wav", 1, ATTN_NORM);
 	}
@@ -212,11 +277,17 @@ void SP_func_door_secret2 (edict_t *ent)
 		ent->moveinfo.sound_middle = gi.soundindex  (va("doors/dr%02i_mid.wav", ent->sounds));
 		ent->moveinfo.sound_end = gi.soundindex  (va("doors/dr%02i_end.wav", ent->sounds));
 	}
-	else
+	else if (ent->sounds != 1)
 	{
 		ent->moveinfo.sound_start = gi.soundindex  ("doors/dr1_strt.wav");
 		ent->moveinfo.sound_middle = gi.soundindex  ("doors/dr1_mid.wav");
 		ent->moveinfo.sound_end = gi.soundindex  ("doors/dr1_end.wav");
+	}
+	else
+	{
+		ent->moveinfo.sound_start = 0;
+		ent->moveinfo.sound_middle = 0;
+		ent->moveinfo.sound_end = 0;
 	}
 
 	if (!ent->dmg)
@@ -234,19 +305,20 @@ void SP_func_door_secret2 (edict_t *ent)
 	if (ent->move_angles[1] == 0 || ent->move_angles[1] == 180)
 	{
 		if (!ent->width)
-			ent->width = ent->size[1] - 2; //was lrSize
+			ent->width = ent->size[1] - 2; // was lrSize
 		if (!ent->length)
-			ent->length = ent->size[0] - 2; //was fbSize
+			ent->length = ent->size[0] - 2; // was fbSize
 	}		
-	else if(ent->move_angles[1] == 90 || ent->move_angles[1] == 270)
+	else if (ent->move_angles[1] == 90 || ent->move_angles[1] == 270)
 	{
 		if (!ent->width)
-			ent->width = ent->size[0] - 2; //was lrSize
+			ent->width = ent->size[0] - 2; // was lrSize
 		if (!ent->length)
-			ent->length = ent->size[1] - 2; //was fbSize
+			ent->length = ent->size[1] - 2; // was fbSize
 	}		
-	else
-		gi.dprintf("Secret door not at 0,90,180,270!\n");
+	else {
+		gi.dprintf("func_door_secret2 angles not set at 0, 90, 180, 270!\n");
+	}
 
 	if (ent->spawnflags & SEC_MOVE_FORWARD)
 		VectorScale(forward, ent->length, forward);
@@ -258,20 +330,21 @@ void SP_func_door_secret2 (edict_t *ent)
 	else
 		VectorScale(right, ent->width * -1, right);
 
-	if(ent->spawnflags & SEC_1ST_DOWN)
+	if (ent->spawnflags & SEC_1ST_DOWN)
 	{
-		VectorAdd(ent->s.origin, forward, ent->pos1); //was ent->moveinfo.start_origin
-		VectorAdd(ent->pos1, right, ent->pos2); //was ent->moveinfo.end_origin
+		VectorAdd(ent->s.origin, forward, ent->pos1); // was ent->moveinfo.start_origin
+		VectorAdd(ent->pos1, right, ent->pos2); // was ent->moveinfo.end_origin
 	}
 	else
 	{
-		VectorAdd(ent->s.origin, right, ent->pos1); //was ent->moveinfo.start_origin
-		VectorAdd(ent->pos1, forward, ent->pos2); //was ent->moveinfo.end_origin
+		VectorAdd(ent->s.origin, right, ent->pos1); // was ent->moveinfo.start_origin
+		VectorAdd(ent->pos1, forward, ent->pos2); // was ent->moveinfo.end_origin
 	}
 
 	ent->touch = secret_touch;
 	ent->blocked = secret_blocked;
 	ent->use = fd_secret_use;
+
 	ent->moveinfo.speed = 50;
 	ent->moveinfo.accel = 50;
 	ent->moveinfo.decel = 50;
@@ -279,7 +352,9 @@ void SP_func_door_secret2 (edict_t *ent)
 
 	if (!ent->targetname || ent->spawnflags & SEC_YES_SHOOT)
 	{
-		ent->health = 1;
+		if (!ent->health) {
+			ent->health = 1;
+		}
 		ent->max_health = ent->health;
 		ent->takedamage = DAMAGE_YES;
 		ent->die = fd_secret_killed;
@@ -351,7 +426,7 @@ void force_wall_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_
 			gi.sound (other, CHAN_AUTO, self->noise_index, 1, ATTN_NORM, 0);
 	}
 
-	T_Damage (other, self, self, self->pos0, other->s.origin, self->pos0, self->dmg, self->dmg, 0, MOD_TRIGGER_HURT);
+	T_Damage (other, self, self, vec3_origin, other->s.origin, vec3_origin, self->dmg, self->dmg, 0, MOD_TRIGGER_HURT);
 }
 
 /*QUAKED func_force_wall (1 0 1) ? START_ON
@@ -380,7 +455,7 @@ void SP_func_force_wall(edict_t *ent)
 
 	ent->pos1[2] = ent->absmax[2];
 	ent->pos2[2] = ent->absmax[2];
-	if(ent->size[0] > ent->size[1])
+	if (ent->size[0] > ent->size[1])
 	{
 		ent->pos1[0] = ent->absmin[0];
 		ent->pos2[0] = ent->absmax[0];
@@ -395,13 +470,13 @@ void SP_func_force_wall(edict_t *ent)
 		ent->pos2[1] = ent->absmax[1];
 	}
 	
-	if(!ent->style)
+	if (!ent->style)
 		ent->style = 208;
 
 	ent->movetype = MOVETYPE_NONE;
 	ent->wait = 1;
 
-	if(ent->spawnflags & FWALL_START_ON)
+	if (ent->spawnflags & FWALL_START_ON)
 	{
 		ent->solid = SOLID_BSP;
 		ent->think = force_wall_think;

@@ -1125,13 +1125,13 @@ void target_movewith_use (edict_t *self, edict_t *activator, edict_t *other)
 	{
 		if (self->spawnflags & 1)
 		{
-			if (t->oldmovetype) //restore movetype
+			if (t->oldmovetype) // restore movetype
 				t->movetype = t->oldmovetype;
 			t->movewith_ent = NULL;
 			t->movewith = NULL;
 			VectorClear(t->movewith_offset);
 			t->movewith_set = 0;
-			if (t->svflags & SVF_MONSTER) //toss monsters up a little bit so they won't be stuck
+			if (t->svflags & SVF_MONSTER) // toss monsters up a little bit so they won't be stuck
 				t->s.origin[2] += 2;
 		}
 		else if (self->pathtarget)

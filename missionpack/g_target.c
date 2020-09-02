@@ -88,9 +88,9 @@ void Use_Target_Speaker (edict_t *ent, edict_t *other, edict_t *activator)
 
 void SP_target_speaker (edict_t *ent)
 {
-	if(!(ent->spawnflags & 8))
+	if (!(ent->spawnflags & 8))
 	{
-		if(!st.noise)
+		if (!st.noise)
 		{
 			gi.dprintf("target_speaker with no noise set at %s\n", vtos(ent->s.origin));
 			G_FreeEdict(ent);
@@ -288,7 +288,7 @@ void target_explosion_explode (edict_t *self)
 	self->delay = save;
 
 	self->count--;
-	if(!self->count)
+	if (!self->count)
 	{
 		self->think = G_FreeEdict;
 		self->nextthink = level.time + 1;
@@ -366,7 +366,7 @@ void use_target_changelevel (edict_t *self, edict_t *other, edict_t *activator)
 
 	if (activator->client)
 	{
-		if(!activator->vehicle)
+		if (!activator->vehicle)
 			activator->client->ps.pmove.pm_flags &= ~PMF_NO_PREDICTION;
 	}
 
@@ -378,7 +378,7 @@ void use_target_changelevel (edict_t *self, edict_t *other, edict_t *activator)
 		game.lock_revealed = 0;
 		game.lock_hud = 0;
 		game.transition_ents = 0;
-		if(activator->client)
+		if (activator->client)
 		{
 			activator->client->pers.spawn_landmark = false;
 			activator->client->pers.spawn_levelchange = false;
@@ -386,7 +386,7 @@ void use_target_changelevel (edict_t *self, edict_t *other, edict_t *activator)
 	}
 	else
 	{
-		if(self->spawnflags & 2 && activator->client)
+		if (self->spawnflags & 2 && activator->client)
 		{
 			activator->client->pers.spawn_landmark = true;
 			VectorSubtract(activator->s.origin,self->s.origin,
@@ -396,7 +396,7 @@ void use_target_changelevel (edict_t *self, edict_t *other, edict_t *activator)
 			activator->client->pers.spawn_angles[ROLL] = 0;
 			VectorCopy(activator->client->ps.viewangles,activator->client->pers.spawn_viewangles);
 			activator->client->pers.spawn_pm_flags = activator->client->ps.pmove.pm_flags;
-			if(self->s.angles[YAW])
+			if (self->s.angles[YAW])
 			{
 				vec3_t	angles;
 				vec3_t	forward, right, v;
@@ -422,7 +422,7 @@ void use_target_changelevel (edict_t *self, edict_t *other, edict_t *activator)
 				activator->client->pers.spawn_landmark = false;
 		}
 
-		if((self->spawnflags & 4) && activator->client && !deathmatch->value && !coop->value)
+		if ((self->spawnflags & 4) && activator->client && !deathmatch->value && !coop->value)
 		{
 			nostatus = 1;
 			stuffcmd(activator,"cl_gun 0;crosshair 0\n");
@@ -436,26 +436,26 @@ void use_target_changelevel (edict_t *self, edict_t *other, edict_t *activator)
 		}
 	}
 
-	if(level.next_skill > 0)
+	if (level.next_skill > 0)
 	{
 		gi.cvar_forceset("skill", va("%d",level.next_skill-1));
 		level.next_skill = 0;	// reset
 	}
-	else if(self->spawnflags & 8)
+	else if (self->spawnflags & 8)
 		gi.cvar_forceset("skill", "0");
-	else if(self->spawnflags & 16)
+	else if (self->spawnflags & 16)
 		gi.cvar_forceset("skill", "1");
-	else if(self->spawnflags & 32)
+	else if (self->spawnflags & 32)
 		gi.cvar_forceset("skill", "2");
-	else if(self->spawnflags & 64)
+	else if (self->spawnflags & 64)
 		gi.cvar_forceset("skill", "3");
 
 	// Knightmare- some of id's stock Q2 maps have this spawnflag
-	//	set on their trigger_changelevels, so exclude those maps
-	if ( (self->spawnflags & 1) && (level.maptype != MAPTYPE_ID) && (int)allow_clear_inventory->value )
+	// set on their trigger_changelevels, so only allow this on custom maps
+	if ( (self->spawnflags & 1) && (level.maptype == MAPTYPE_CUSTOM) && (int)allow_clear_inventory->value )
 	{
 		int n;
-		if(activator && activator->client)
+		if (activator && activator->client)
 		{
 			for (n = 0; n < MAX_ITEMS; n++)
 			{
@@ -476,12 +476,12 @@ void use_target_changelevel (edict_t *self, edict_t *other, edict_t *activator)
 		}
 	}
 	game.transition_ents = 0;
-	if(self->spawnflags & 2 && activator->client)
+	if (self->spawnflags & 2 && activator->client)
 	{
 		transition = G_Find(NULL,FOFS(classname), "trigger_transition");
-		while(transition)
+		while (transition)
 		{
-			if(!Q_stricmp(transition->targetname,self->targetname))
+			if (!Q_stricmp(transition->targetname,self->targetname))
 			{
 				game.transition_ents = trigger_transition_ents(self,transition);
 				if (developer->value)
@@ -512,7 +512,7 @@ void SP_target_changelevel (edict_t *ent)
 	}
 
 	// ugly hack because *SOMEBODY* screwed up their map
-	if((Q_stricmp(level.mapname, "fact1") == 0) && (Q_stricmp(ent->map, "fact3") == 0))
+	if ((Q_stricmp(level.mapname, "fact1") == 0) && (Q_stricmp(ent->map, "fact3") == 0))
 		ent->map = "fact3$secret1";
 
 	ent->use = use_target_changelevel;
@@ -665,9 +665,9 @@ void use_target_blaster (edict_t *self, edict_t *other, edict_t *activator)
 			self->enemy = NULL;
 			return;
 		}
-		if(self->sounds == 6)
+		if (self->sounds == 6)
 		{
-			if(!AimGrenade (self, start, self->enemy->s.origin, self->speed, movedir))
+			if (!AimGrenade (self, start, self->enemy->s.origin, self->speed, movedir))
 				return;
 		}
 		else
@@ -691,7 +691,7 @@ void use_target_blaster (edict_t *self, edict_t *other, edict_t *activator)
 		effect = EF_BLASTER;
 
 	// Lazarus: weapon choices
-	if(self->sounds == 1)
+	if (self->sounds == 1)
 	{
 		fire_rail (self, start, movedir, self->dmg, 0);
 		gi.WriteByte (svc_muzzleflash);
@@ -699,22 +699,22 @@ void use_target_blaster (edict_t *self, edict_t *other, edict_t *activator)
 		gi.WriteByte (MZ_RAILGUN);
 		gi.multicast (start, MULTICAST_PVS);
 	}
-	else if(self->sounds == 2)
+	else if (self->sounds == 2)
 	{
 		fire_rocket(self, start, movedir, self->dmg, self->speed, self->dmg, self->dmg, NULL);
 		gi.positioned_sound (start, self, CHAN_WEAPON, gi.soundindex("weapons/rocklf1a.wav"), 1, ATTN_NORM, 0);
 	}
-	else if(self->sounds == 3)
+	else if (self->sounds == 3)
 	{
 		fire_bfg(self, start, movedir, self->dmg, self->speed, self->dmg);
 		gi.positioned_sound (start, self, CHAN_WEAPON, gi.soundindex("weapons/laser2.wav"), 1, ATTN_NORM, 0);
 	}
-	else if(self->sounds == 4)
+	else if (self->sounds == 4)
 	{
 		fire_rocket(self, start, movedir, self->dmg, self->speed, self->dmg, self->dmg, self->enemy);
 		gi.positioned_sound (start, self, CHAN_WEAPON, gi.soundindex("weapons/rocklf1a.wav"), 1, ATTN_NORM, 0);
 	}
-	else if(self->sounds == 5)
+	else if (self->sounds == 5)
 	{
 		fire_bullet(self, start, movedir, self->dmg, 2, 0, 0, MOD_TARGET_BLASTER);
 		gi.WriteByte(svc_temp_entity);
@@ -723,7 +723,7 @@ void use_target_blaster (edict_t *self, edict_t *other, edict_t *activator)
 		gi.multicast(start, MULTICAST_PVS);
 		gi.positioned_sound(start,self,CHAN_WEAPON,gi.soundindex(va("weapons/machgf%db.wav",rand() % 5 + 1)),1,ATTN_NORM,0);
 	}
-	else if(self->sounds == 6)
+	else if (self->sounds == 6)
 	{
 		fire_grenade(self, start, movedir, self->dmg, self->speed, 2.5, self->dmg+40, false);
 		gi.WriteByte (svc_muzzleflash2);
@@ -748,7 +748,7 @@ void target_blaster_think (edict_t *self)
 	vec3_t	target;
 	int		i;
 
-	if(self->spawnflags & BLASTER_SEEK_PLAYER)
+	if (self->spawnflags & BLASTER_SEEK_PLAYER)
 	{
 		// this takes precedence over everything else
 
@@ -760,9 +760,9 @@ void target_blaster_think (edict_t *self)
 		// Is currently targeted player alive and not using notarget?
 		if (self->enemy)
 		{
-			if(self->enemy->flags & FL_NOTARGET)
+			if (self->enemy->flags & FL_NOTARGET)
 				self->enemy = NULL;
-			else if(!self->enemy->inuse || self->enemy->health < 0)
+			else if (!self->enemy->inuse || self->enemy->health < 0)
 				self->enemy = NULL;
 		}
 
@@ -772,7 +772,7 @@ void target_blaster_think (edict_t *self)
 		{
 			VectorMA(self->enemy->absmin,0.5,self->enemy->size,target);
 			tr = gi.trace(self->s.origin,vec3_origin,vec3_origin,target,self,MASK_OPAQUE);
-			if(tr.fraction != 1.0)
+			if (tr.fraction != 1.0)
 				self->enemy = NULL;
 		}
 
@@ -780,25 +780,25 @@ void target_blaster_think (edict_t *self)
 		if (self->enemy)
 		{
 			use_target_blaster(self,self,self);
-			if(self->wait)
+			if (self->wait)
 				self->nextthink = level.time + self->wait;
 			return;
 		}
 	
 		// Find a player - note that we search the entire entity list so we'll
 		// also hit on func_monitor-viewing fake players
-		for(i=1, player=g_edicts+1; i<globals.num_edicts && !self->enemy; i++, player++) {
-			if(!player->inuse) continue;
-			if(!player->client) continue;
-			if(player->svflags & SVF_NOCLIENT) continue;
-			if(player->health >= 0 && !(player->flags & FL_NOTARGET) )
+		for (i=1, player=g_edicts+1; i<globals.num_edicts && !self->enemy; i++, player++) {
+			if (!player->inuse) continue;
+			if (!player->client) continue;
+			if (player->svflags & SVF_NOCLIENT) continue;
+			if (player->health >= 0 && !(player->flags & FL_NOTARGET) )
 			{
-				if(self->spawnflags & BLASTER_IF_VISIBLE)
+				if (self->spawnflags & BLASTER_IF_VISIBLE)
 				{
 					// player must be seen to shoot
 					VectorMA(player->s.origin,0.5,player->size,target);
 					tr = gi.trace(self->s.origin,vec3_origin,vec3_origin,target,self,MASK_OPAQUE);
-					if(tr.fraction == 1.0)
+					if (tr.fraction == 1.0)
 						self->enemy = player;
 				}
 				else
@@ -812,7 +812,7 @@ void target_blaster_think (edict_t *self)
 		if (self->enemy)
 		{
 			use_target_blaster(self,self,self);
-			if(self->wait)
+			if (self->wait)
 				self->nextthink = level.time + self->wait;
 			return;
 		}
@@ -828,10 +828,10 @@ void target_blaster_think (edict_t *self)
 			// have a target, don't care whether it's visible; cannot be a gibbed monster
 			self->enemy = NULL;
 			ent = G_Find (NULL, FOFS(targetname), self->target);
-			while(ent && !self->enemy)
+			while (ent && !self->enemy)
 			{
 				// if target is not a monster, we're done
-				if( !(ent->svflags & SVF_MONSTER))
+				if ( !(ent->svflags & SVF_MONSTER))
 				{
 					self->enemy = ent;
 					break;
@@ -844,21 +844,21 @@ void target_blaster_think (edict_t *self)
 			// has a target, but must be visible and not a monster
 			self->enemy = NULL;
 			ent = G_Find (NULL, FOFS(targetname), self->target);
-			while(ent && !self->enemy)
+			while (ent && !self->enemy)
 			{
 				// if the target isn't a monster, we don't care whether 
 				// it can be seen or not.
-				if( !(ent->svflags & SVF_MONSTER) )
+				if ( !(ent->svflags & SVF_MONSTER) )
 				{
 					self->enemy = ent;
 					break;
 				}
-				if( ent->health > ent->gib_health)
+				if ( ent->health > ent->gib_health)
 				{
 					// Not a gibbed monster
 					VectorMA(ent->absmin,0.5,ent->size,target);
 					tr = gi.trace(self->s.origin,vec3_origin,vec3_origin,target,self,MASK_OPAQUE);
-					if(tr.fraction == 1.0)
+					if (tr.fraction == 1.0)
 					{
 						self->enemy = ent;
 						break;
@@ -868,13 +868,13 @@ void target_blaster_think (edict_t *self)
 			}
 		}
 	}
-	if(self->enemy || !(self->spawnflags & BLASTER_IF_VISIBLE) )
+	if (self->enemy || !(self->spawnflags & BLASTER_IF_VISIBLE) )
 	{
 		use_target_blaster(self,self,self);
-		if(self->wait)
+		if (self->wait)
 			self->nextthink = level.time + self->wait;
 	}
-	else if(self->wait)
+	else if (self->wait)
 		self->nextthink = level.time + FRAMETIME;
 }
 
@@ -890,7 +890,7 @@ void toggle_target_blaster (edict_t *self, edict_t *other, edict_t *activator)
 	if (self->spawnflags & 4)
 	{
 		self->count--;
-		if(self->count == 0)
+		if (self->count == 0)
 		{
 			self->think = G_FreeEdict;
 			self->nextthink = level.time + 1;
@@ -910,11 +910,11 @@ void toggle_target_blaster (edict_t *self, edict_t *other, edict_t *activator)
 
 void target_blaster_init (edict_t *self)
 {
-	if(self->target)
+	if (self->target)
 	{
 		edict_t	*ent;
 		ent = G_Find (NULL, FOFS(targetname), self->target);
-		if(!ent)
+		if (!ent)
 			gi.dprintf("%s at %s: %s is a bad target\n", self->classname, vtos(self->s.origin), self->target);
 		self->enemy = ent;
 	}
@@ -943,15 +943,15 @@ void SP_target_blaster (edict_t *self)
 		self->use = toggle_target_blaster;
 		self->enemy = NULL; // for now
 		self->think = target_blaster_think;
-		if(self->spawnflags & 4)
+		if (self->spawnflags & 4)
 			self->nextthink = level.time + 1;
 		else
 			self->nextthink = 0;
 	}
-	else if(self->target || (self->spawnflags & BLASTER_SEEK_PLAYER))
+	else if (self->target || (self->spawnflags & BLASTER_SEEK_PLAYER))
 	{
 		self->use = find_target_blaster_target;
-		if(self->target)
+		if (self->target)
 		{
 			self->think = target_blaster_init;
 			self->nextthink = level.time + 2*FRAMETIME;
@@ -1073,13 +1073,13 @@ void target_laser_ps_think (edict_t *self)
 	int		count;
 	int		i;
 
-	if( self->wait > 0) {
-		if( level.time >= self->starttime )
+	if ( self->wait > 0) {
+		if ( level.time >= self->starttime )
 		{
 			self->starttime = level.time + self->wait;
 			self->endtime   = level.time + self->delay;
 		}
-		else if( level.time >= self->endtime )
+		else if ( level.time >= self->endtime )
 		{
 			self->nextthink = level.time + FRAMETIME;
 			return;
@@ -1092,14 +1092,14 @@ void target_laser_ps_think (edict_t *self)
 		count = 4;
 
 	if (self->enemy) {
-		if(self->enemy->flags & FL_NOTARGET || (self->enemy->health < self->enemy->gib_health) )
+		if (self->enemy->flags & FL_NOTARGET || (self->enemy->health < self->enemy->gib_health) )
 			self->enemy = NULL;
 		else
 		{
 			// first make sure laser can see the center of the enemy
 			VectorMA(self->enemy->absmin,0.5,self->enemy->size,target);
 			tr = gi.trace(self->s.origin,vec3_origin,vec3_origin,target,self,MASK_OPAQUE);
-			if(tr.fraction != 1.0)
+			if (tr.fraction != 1.0)
 				self->enemy = NULL;
 		}
 	}
@@ -1107,16 +1107,16 @@ void target_laser_ps_think (edict_t *self)
 	{
 		// find a player - as with target_blaster, search entire entity list so
 		// we'll pick up fake players representing camera-viewers
-		for(i=1, player=g_edicts+1; i<globals.num_edicts && !self->enemy; i++, player++)
+		for (i=1, player=g_edicts+1; i<globals.num_edicts && !self->enemy; i++, player++)
 		{
-			if(!player->inuse) continue;
-			if(!player->client) continue;
-			if(player->svflags & SVF_NOCLIENT) continue;
-			if((player->health >= player->gib_health) && !(player->flags & FL_NOTARGET) )
+			if (!player->inuse) continue;
+			if (!player->client) continue;
+			if (player->svflags & SVF_NOCLIENT) continue;
+			if ((player->health >= player->gib_health) && !(player->flags & FL_NOTARGET) )
 			{
 				VectorMA(player->absmin,0.5,player->size,target);
 				tr = gi.trace(self->s.origin,vec3_origin,vec3_origin,target,self,MASK_OPAQUE);
-				if(tr.fraction == 1.0) {
+				if (tr.fraction == 1.0) {
 					self->enemy = player;
 					self->spawnflags |= 0x80000001;
 					count = 8;
@@ -1142,7 +1142,7 @@ void target_laser_ps_think (edict_t *self)
 	ignore = self;
 	VectorCopy (self->s.origin, start);
 	VectorMA (start, 2048, self->movedir, end);
-	while(1)
+	while (1)
 	{
 		tr = gi.trace (start, NULL, NULL, end, ignore, CONTENTS_SOLID|CONTENTS_MONSTER|CONTENTS_DEADMONSTER);
 
@@ -1152,12 +1152,12 @@ void target_laser_ps_think (edict_t *self)
 		// hurt it if we can
 		if (tr.ent->takedamage && !self->style)
 		{
-			if(!(tr.ent->flags & FL_IMMUNE_LASER) && (self->dmg > 0) )
+			if (!(tr.ent->flags & FL_IMMUNE_LASER) && (self->dmg > 0) )
 				T_Damage (tr.ent, self, self->activator, self->movedir, tr.endpos, vec3_origin, self->dmg, 1, DAMAGE_ENERGY, MOD_TARGET_LASER);
-			else if(self->dmg < 0)
+			else if (self->dmg < 0)
 			{
 				tr.ent->health -= self->dmg;
-				if(tr.ent->health > tr.ent->max_health)
+				if (tr.ent->health > tr.ent->max_health)
 					tr.ent->health = tr.ent->max_health;
 			}
 		}
@@ -1192,7 +1192,7 @@ void target_laser_ps_on (edict_t *self)
 		self->activator = self;
 	self->spawnflags |= 0x80000001;
 //	self->svflags &= ~SVF_NOCLIENT;
-	if(self->wait > 0)
+	if (self->wait > 0)
 	{
 		self->starttime = level.time + self->wait;
 		self->endtime = level.time + self->delay;
@@ -1214,7 +1214,7 @@ void target_laser_ps_use (edict_t *self, edict_t *other, edict_t *activator)
 	{
 		target_laser_ps_off (self);
 		self->count--;
-		if(!self->count)
+		if (!self->count)
 		{
 			self->think = G_FreeEdict;
 			self->nextthink = level.time + 1;
@@ -1236,15 +1236,15 @@ void target_laser_think (edict_t *self)
 	vec3_t	realmin;
 
 	// DWH
-	if( self->wait > 0)
+	if ( self->wait > 0)
 	{
 		// pulsed laser
-		if( level.time >= self->starttime )
+		if ( level.time >= self->starttime )
 		{
 			self->starttime = level.time + self->wait;
 			self->endtime   = level.time + self->delay;
 		}
-		else if( level.time >= self->endtime )
+		else if ( level.time >= self->endtime )
 		{
 			self->nextthink = level.time + FRAMETIME;
 			return;
@@ -1281,11 +1281,11 @@ void target_laser_think (edict_t *self)
 	//	VectorMA (start, 1, self->movedir, start);
 
 	VectorMA (start, 2048, self->movedir, end);
-	while(1)
+	while (1)
 	{
 //======
 // PGM
-		if(self->spawnflags & LASER_STOPWINDOW)
+		if (self->spawnflags & LASER_STOPWINDOW)
 			tr = gi.trace (start, NULL, NULL, end, ignore, MASK_SHOT);
 		else
 			tr = gi.trace (start, NULL, NULL, end, ignore, CONTENTS_SOLID|CONTENTS_MONSTER|CONTENTS_DEADMONSTER);
@@ -1302,7 +1302,7 @@ void target_laser_think (edict_t *self)
 			else
 			{
 				tr.ent->health -= self->dmg;
-				if(tr.ent->health > tr.ent->max_health)
+				if (tr.ent->health > tr.ent->max_health)
 					tr.ent->health = tr.ent->max_health;
 			}
 		}
@@ -1337,7 +1337,7 @@ void target_laser_think (edict_t *self)
 
 void target_laser_on (edict_t *self)
 {
-	if(self->wait > 0)
+	if (self->wait > 0)
 	{
 		self->starttime = level.time + self->wait;
 		self->endtime = level.time + self->delay;
@@ -1363,7 +1363,7 @@ void target_laser_use (edict_t *self, edict_t *other, edict_t *activator)
 	{
 		target_laser_off (self);
 		self->count--;
-		if(!self->count)
+		if (!self->count)
 		{
 			self->think = G_FreeEdict;
 			self->nextthink = level.time + 1;
@@ -1566,7 +1566,7 @@ void old_target_laser_think (edict_t *self)
 	ignore = self;
 	VectorCopy (self->s.origin, start);
 	VectorMA (start, 2048, self->movedir, end);
-	while(1)
+	while (1)
 	{
 		tr = gi.trace (start, NULL, NULL, end, ignore, CONTENTS_SOLID|CONTENTS_MONSTER|CONTENTS_DEADMONSTER);
 
@@ -1626,7 +1626,7 @@ void target_mal_laser_use (edict_t *self, edict_t *other, edict_t *activator)
 	{
 		target_mal_laser_off (self);
 		self->count--;
-		if(!self->count)
+		if (!self->count)
 		{
 			self->think = G_FreeEdict;
 			self->nextthink = level.time + 1;
@@ -1726,9 +1726,9 @@ void target_lightramp_think (edict_t *self)
 {
 	char	style[2];
 
-	if(self->spawnflags & LIGHTRAMP_CUSTOM)
+	if (self->spawnflags & LIGHTRAMP_CUSTOM)
 	{
-		if(self->movedir[2] > 0)
+		if (self->movedir[2] > 0)
 			style[0] = self->message[(int)self->movedir[0]];
 		else
 			style[0] = self->message[(int)(self->movedir[1]-self->movedir[0])];
@@ -1741,15 +1741,15 @@ void target_lightramp_think (edict_t *self)
 	style[1] = 0;
 	gi.configstring (CS_LIGHTS+self->enemy->style, style);
 
-	if(self->spawnflags & LIGHTRAMP_CUSTOM)
+	if (self->spawnflags & LIGHTRAMP_CUSTOM)
 	{
-		if((self->movedir[0] <= self->movedir[1]) ||
+		if ((self->movedir[0] <= self->movedir[1]) ||
 		   ((self->spawnflags & LIGHTRAMP_LOOP) && (self->spawnflags & LIGHTRAMP_ACTIVE)) ) {
 			self->nextthink = level.time + FRAMETIME;
-			if(self->movedir[0] > self->movedir[1])
+			if (self->movedir[0] > self->movedir[1])
 			{
 				self->movedir[0] = 0;
-				if(self->spawnflags & LIGHTRAMP_TOGGLE)
+				if (self->spawnflags & LIGHTRAMP_TOGGLE)
 					self->movedir[2] *= -1;
 			}
 		}
@@ -1781,7 +1781,7 @@ void target_lightramp_think (edict_t *self)
 			self->movedir[0] = self->movedir[1];
 			self->movedir[1] = temp;
 			self->movedir[2] *= -1;
-			if( (self->spawnflags & LIGHTRAMP_LOOP) && (self->spawnflags & LIGHTRAMP_ACTIVE) )
+			if ( (self->spawnflags & LIGHTRAMP_LOOP) && (self->spawnflags & LIGHTRAMP_ACTIVE) )
 			{
 				self->timestamp = level.time;
 				self->nextthink = level.time + FRAMETIME;
@@ -1810,7 +1810,7 @@ void target_lightramp_use (edict_t *self, edict_t *other, edict_t *activator)
 {
 	if (self->spawnflags & LIGHTRAMP_LOOP)
 	{
-		if(self->spawnflags & LIGHTRAMP_ACTIVE)
+		if (self->spawnflags & LIGHTRAMP_ACTIVE)
 		{
 			self->spawnflags &= ~LIGHTRAMP_ACTIVE;	// already on, turn it off
 			target_lightramp_think(self);
@@ -1895,7 +1895,7 @@ void SP_target_lightramp (edict_t *self)
 	self->use = target_lightramp_use;
 	self->think = target_lightramp_think;
 
-	if(self->spawnflags & LIGHTRAMP_CUSTOM)
+	if (self->spawnflags & LIGHTRAMP_CUSTOM)
 	{
 		self->movedir[0] = 0;                        // index into message
 		self->movedir[1] = strlen(self->message)-1;  // position of last character
@@ -1924,7 +1924,7 @@ void target_earthquake_think (edict_t *self)
 	int		i;
 	edict_t	*e;
 
-	if(!(self->spawnflags & 1))					// PGM
+	if (!(self->spawnflags & 1))					// PGM
 	{											// PGM
 		if (self->last_move_time < level.time)
 		{
@@ -1977,7 +1977,7 @@ void target_earthquake_think (edict_t *self)
 void target_earthquake_use (edict_t *self, edict_t *other, edict_t *activator)
 {
 	// PGM
-//	if(g_showlogic && g_showlogic->value)
+//	if (g_showlogic && g_showlogic->value)
 //		gi.dprintf("earthquake: %0.1f\n", self->speed);
 	// PGM
 	self->timestamp = level.time + self->count;
@@ -2005,6 +2005,6 @@ void SP_target_earthquake (edict_t *self)
 	self->think = target_earthquake_think;
 	self->use = target_earthquake_use;
 
-	if(!(self->spawnflags & 1))									// PGM
+	if (!(self->spawnflags & 1))									// PGM
 		self->noise_index = gi.soundindex ("world/quake.wav");
 }

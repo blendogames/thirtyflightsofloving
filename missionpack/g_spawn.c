@@ -1512,7 +1512,7 @@ void LoadTransitionEnts (void)
 		gi.dprintf("==== LoadTransitionEnts ====\n");
 	if (game.transition_ents)
 	{
-		char		t_file[MAX_QPATH];
+		char		t_file[MAX_OSPATH];
 		int			i, j;
 		FILE		*f;
 		vec3_t		v_spawn;
@@ -1522,10 +1522,10 @@ void LoadTransitionEnts (void)
 		VectorClear(v_spawn);
 		if (strlen(game.spawnpoint))
 		{
-			spawn = G_Find(NULL,FOFS(targetname),game.spawnpoint);
+			spawn = G_Find(NULL,FOFS(targetname), game.spawnpoint);
 			while (spawn)
 			{
-				if (!Q_stricmp(spawn->classname,"info_player_start"))
+				if (!Q_stricmp(spawn->classname, "info_player_start"))
 				{
 					VectorCopy(spawn->s.origin,v_spawn);
 					break;
@@ -1536,7 +1536,7 @@ void LoadTransitionEnts (void)
 		trans_ent_filename (t_file, sizeof(t_file));
 		f = fopen(t_file,"rb");
 		if (!f)
-			gi.error("LoadTransitionEnts: Cannot open %s\n",t_file);
+			gi.error("LoadTransitionEnts: Cannot open %s\n", t_file);
 		else
 		{
 			for (i=0; i<game.transition_ents; i++)

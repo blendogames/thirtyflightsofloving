@@ -304,7 +304,7 @@ void Do_Text_Display (edict_t *activator, int flags, char *message)
 			Com_sprintf(pakfile, sizeof(pakfile), "%s\\pak%d.pak", filename, i);
 			if (NULL != (f = fopen(pakfile, "rb")))
 			{
-				num = fread(&pakheader,1,sizeof(pak_header_t),f);
+				num = (int)fread(&pakheader, 1, sizeof(pak_header_t), f);
 				if (num >= sizeof(pak_header_t))
 				{
 					if ( pakheader.id[0] == 'P' &&

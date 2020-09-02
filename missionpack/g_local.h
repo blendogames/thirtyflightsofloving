@@ -1303,6 +1303,7 @@ void ChasecamStart (edict_t *ent);
 #define TRAIN_SPLINE        8192
 #define TRAIN_ORIGIN        16384
 
+void door_use_areaportals (edict_t *self, qboolean open);
 qboolean box_walkmove (edict_t *ent, float yaw, float dist);
 void button_use (edict_t *self, edict_t *other, edict_t *activator);
 void trainbutton_use (edict_t *self, edict_t *other, edict_t *activator);
