@@ -1095,7 +1095,7 @@ disk, and then from a pak file.
 */
 qboolean LoadAliasFile (char *name)
 {
-	char aliasfilename[MAX_QPATH] = "";
+	char aliasfilename[MAX_OSPATH] = "";
 
 	alias_from_pak = false;
 
