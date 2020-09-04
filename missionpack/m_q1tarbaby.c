@@ -364,7 +364,9 @@ void SP_monster_q1_tarbaby (edict_t *self)
 			self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
 		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
+
 	self->common_name = "Spawn";
+	self->class_id = ENTITY_MONSTER_Q1_TARBABY;
 
 	gi.linkentity (self);
 

@@ -828,7 +828,8 @@ void SP_monster_hover (edict_t *self)
 		// Knightmare- precache blaster bolt
 		gi.modelindex ("models/proj/laser2/tris.md2");
 		// pmm
-		self->common_name = "Daedalus"; //Knightmare
+		self->common_name = "Daedalus"; // Knightmare
+		self->class_id = ENTITY_MONSTER_DAEDALUS;
 	}
 	else
 	{
@@ -848,7 +849,8 @@ void SP_monster_hover (edict_t *self)
 		gi.soundindex ("hover/hovatck1.wav");	
 
 		self->s.sound = gi.soundindex ("hover/hovidle1.wav");
-		self->common_name = "Icarus"; //Knightmare
+		self->common_name = "Icarus"; // Knightmare
+		self->class_id = ENTITY_MONSTER_HOVER;
 	}
 //PGM
 

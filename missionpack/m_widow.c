@@ -1766,6 +1766,7 @@ void SP_monster_widow (edict_t *self)
 		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
 	self->common_name = "Black Widow";
+	self->class_id = ENTITY_MONSTER_WIDOW;
 
 	gi.linkentity (self);
 

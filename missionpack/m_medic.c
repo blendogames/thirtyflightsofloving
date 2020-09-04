@@ -2162,7 +2162,8 @@ void SP_monster_medic (edict_t *self)
 		commander_sound_spawn = gi.soundindex ("medic_commander/monsterspawn1.wav");
 		gi.soundindex ("tank/tnkatck3.wav");
 
-		self->common_name = "Medic Commander"; //Knightmare
+		self->common_name = "Medic Commander"; // Knightmare
+		self->class_id = ENTITY_MONSTER_MEDIC_COMMANDER;
 	}
 	else
 	{
@@ -2179,7 +2180,8 @@ void SP_monster_medic (edict_t *self)
 		gi.soundindex ("medic/medatck1.wav");
 
 	//	self->s.skinnum = 0;
-		self->common_name = "Medic"; //Knightmare
+		self->common_name = "Medic"; // Knightmare
+		self->class_id = ENTITY_MONSTER_MEDIC;
 	}
 	//pmm
 }

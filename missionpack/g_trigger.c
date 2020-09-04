@@ -157,6 +157,8 @@ void trigger_enable (edict_t *self, edict_t *other, edict_t *activator)
 
 void SP_trigger_multiple (edict_t *ent)
 {
+	ent->class_id = ENTITY_TRIGGER_MULTIPLE;
+
 	if (ent->sounds == 1)
 		ent->noise_index = gi.soundindex ("misc/secret.wav");
 	else if (ent->sounds == 2)
@@ -226,6 +228,8 @@ void SP_trigger_once(edict_t *ent)
 
 	ent->wait = -1;
 	SP_trigger_multiple (ent);
+
+	ent->class_id = ENTITY_TRIGGER_ONCE;
 }
 
 //Knightmare 
@@ -284,7 +288,7 @@ count -	how many times it can be used before being auto-killtargeted
 void trigger_relay_use (edict_t *self, edict_t *other, edict_t *activator)
 {
 	G_UseTargets (self, activator);
-	//Knightmare- decrement count and auto-killtarget
+	// Knightmare- decrement count and auto-killtarget
 	self->count--;
 	if (self->count == 0)
 	{
@@ -296,6 +300,8 @@ void trigger_relay_use (edict_t *self, edict_t *other, edict_t *activator)
 
 void SP_trigger_relay (edict_t *self)
 {
+	self->class_id = ENTITY_TRIGGER_RELAY;
+
 // DWH - gives trigger_relay same message-displaying, sound-playing capabilities
 //       as trigger_multiple and trigger_once
 	if (self->sounds == 1)
@@ -306,6 +312,7 @@ void SP_trigger_relay (edict_t *self)
 		self->noise_index = -1;
 	if (!self->count) self->count=-1;
 // end DWH
+
 	self->use = trigger_relay_use;
 }
 
@@ -474,11 +481,34 @@ void SP_trigger_key (edict_t *self)
 		gi.dprintf("%s at %s has no target\n", self->classname, vtos(self->s.origin));
 		return;
 	}
-	//Knightmare- don't load these sounds if it is silent
+
+	self->class_id = ENTITY_TRIGGER_KEY;
+
+	// Knightmare- don't load these sounds if it is silent
 	if (!(self->spawnflags & 4))
 	{
-		gi.soundindex ("misc/keytry.wav");
-		gi.soundindex ("misc/keyuse.wav");
+		int		index;
+
+		index = ITEM_INDEX(self->item);
+		if (self->item->flags & IT_Q1)
+		{
+			if (index == key_q1_med_gold_index || index == key_q1_med_silver_index) {
+				gi.soundindex ("q1world/doors/medtry.wav");
+				gi.soundindex ("q1world/doors/meduse.wav");
+			}
+			else if (index == key_q1_rune_gold_index || index == key_q1_rune_silver_index) {
+				gi.soundindex ("q1world/doors/runetry.wav");
+				gi.soundindex ("q1world/doors/runeuse.wav");
+			}
+			else if (index == key_q1_base_gold_index || index == key_q1_base_silver_index) {
+				gi.soundindex ("q1world/doors/basetry.wav");
+				gi.soundindex ("q1world/doors/baseuse.wav");
+			}
+		}
+		else {
+			gi.soundindex ("misc/keytry.wav");
+			gi.soundindex ("misc/keyuse.wav");
+		}
 	}
 	self->use = trigger_key_use;
 }
@@ -538,6 +568,8 @@ void trigger_counter_use (edict_t *self, edict_t *other, edict_t *activator)
 
 void SP_trigger_counter (edict_t *self)
 {
+	self->class_id = ENTITY_TRIGGER_COUNTER;
+
 	self->wait = -1;
 	if (!self->count)
 		self->count = 2;
@@ -559,6 +591,8 @@ This trigger will always fire.  It is activated by the world.
 */
 void SP_trigger_always (edict_t *ent)
 {
+	ent->class_id = ENTITY_TRIGGER_ALWAYS;
+
 	// we must have some delay to make sure our use targets are present
 	if (ent->delay < 0.2)
 		ent->delay = 0.2;
@@ -648,7 +682,10 @@ SILENT - Doesn't make wind noise
 
 void SP_trigger_push (edict_t *self)
 {
+	self->class_id = ENTITY_TRIGGER_PUSH;
+
 	InitTrigger (self);
+
 	if (self->spawnflags & PUSH_CUSTOM_SND)
 	{
 		if (st.noise)
@@ -706,6 +743,7 @@ SILENT - Doesn't make wind noise
 void SP_trigger_push_bbox (edict_t *self)
 {
 	InitTriggerBbox (self);
+
 	if (self->spawnflags & PUSH_CUSTOM_SND)
 	{
 		if (st.noise)
@@ -808,6 +846,8 @@ void hurt_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *sur
 
 void SP_trigger_hurt (edict_t *self)
 {
+	self->class_id = ENTITY_TRIGGER_HURT;
+
 	InitTrigger (self);
 
 	self->noise_index = gi.soundindex ("world/electro.wav");
@@ -847,6 +887,8 @@ tright Max b-box coords XYZ. Default = 16 16 16
 void SP_trigger_hurt_bbox (edict_t *self)
 {
 	InitTriggerBbox (self);
+
+	self->class_id = ENTITY_TRIGGER_HURT;
 
 	self->noise_index = gi.soundindex ("world/electro.wav");
 	self->touch = hurt_touch;
@@ -905,8 +947,9 @@ void SP_trigger_gravity (edict_t *self)
 		G_FreeEdict  (self);
 		return;
 	}
-
 	InitTrigger (self);
+
+	self->class_id = ENTITY_TRIGGER_GRAVITY;
 
 //PGM
 //	self->gravity = atoi(st.gravity);
@@ -948,6 +991,8 @@ void SP_trigger_gravity_bbox (edict_t *self)
 	}
 
 	InitTriggerBbox (self);
+
+	self->class_id = ENTITY_TRIGGER_GRAVITY;
 
 //PGM
 //	self->gravity = atoi(st.gravity);
@@ -1005,6 +1050,8 @@ void trigger_monsterjump_touch (edict_t *self, edict_t *other, cplane_t *plane, 
 
 void SP_trigger_monsterjump (edict_t *self)
 {
+	self->class_id = ENTITY_TRIGGER_MONSTERJUMP;
+
 	if (!self->speed)
 		self->speed = 200;
 
@@ -1014,13 +1061,17 @@ void SP_trigger_monsterjump (edict_t *self)
 		st.height = 200;
 	if (self->s.angles[YAW] == 0)
 		self->s.angles[YAW] = 360;
+
 	InitTrigger (self);
+
 	self->touch = trigger_monsterjump_touch;
 	self->movedir[2] = st.height;
 }
 
 void SP_trigger_monsterjump_bbox (edict_t *self)
 {
+	self->class_id = ENTITY_TRIGGER_MONSTERJUMP;
+
 	if (!self->speed)
 		self->speed = 200;
 	if (self->height)
@@ -1060,6 +1111,8 @@ void trigger_mass_touch (edict_t *self, edict_t *other, cplane_t *plane, csurfac
 
 void SP_trigger_mass (edict_t *self)
 {
+	self->class_id = ENTITY_TRIGGER_MASS;
+
 	// Fires its target if touched by an entity weighing at least
 	// self->mass
 	if (self->sounds == 1)
@@ -1107,6 +1160,8 @@ tright Max b-box coords XYZ. Default = 16 16 16
 
 void SP_trigger_mass_bbox (edict_t *self)
 {
+	self->class_id = ENTITY_TRIGGER_MASS;
+
 	// Fires its target if touched by an entity weighing at least
 	// self->mass
 	if (self->sounds == 1)
@@ -1194,6 +1249,9 @@ void SP_trigger_inside (edict_t *self)
 		G_FreeEdict(self);
 		return;
 	}
+
+	self->class_id = ENTITY_TRIGGER_INSIDE;
+
 	self->movetype = MOVETYPE_NONE;
 	self->svflags  |= SVF_NOCLIENT;
 	self->solid    = SOLID_TRIGGER;
@@ -1238,6 +1296,8 @@ void SP_trigger_inside_bbox (edict_t *self)
 	}
 	InitTriggerBbox (self);
 
+	self->class_id = ENTITY_TRIGGER_INSIDE;
+
 	if (!self->wait)
 		self->wait = 0.2;
 
@@ -1250,7 +1310,7 @@ void SP_trigger_inside_bbox (edict_t *self)
 // TRIGGER_SCALES - coupled with target_characters, displays the weight of all
 //                  entities that are "standing on" the trigger.
 //==================================================================================
-float weight_on_top(edict_t *ent)
+float weight_on_top (edict_t *ent)
 {
 	float weight;
 	int i;
@@ -1324,6 +1384,8 @@ void SP_trigger_scales (edict_t *self)
 		G_FreeEdict(self);
 		return;
 	}
+	self->class_id = ENTITY_TRIGGER_SCALES;
+
 	self->movetype = MOVETYPE_NONE;
 	self->svflags  |= SVF_NOCLIENT;
 	self->solid    = SOLID_TRIGGER;
@@ -1345,8 +1407,9 @@ void SP_trigger_scales_bbox (edict_t *self)
 		G_FreeEdict(self);
 		return;
 	}
-
 	InitTriggerBbox (self);
+
+	self->class_id = ENTITY_TRIGGER_SCALES;
 
 	self->think     = trigger_scales_think;
 	self->nextthink = level.time + 1.0;
@@ -1494,6 +1557,8 @@ void SP_trigger_look (edict_t *self)
 {
 	InitTriggerBbox (self);
 
+	self->class_id = ENTITY_TRIGGER_LOOK;
+
 	if (self->sounds == 1)
 		self->noise_index = gi.soundindex ("misc/secret.wav");
 	else if (self->sounds == 2)
@@ -1570,6 +1635,9 @@ void SP_trigger_speaker (edict_t *self)
 		gi.dprintf("trigger_speaker with no noise set at %s\n", vtos(self->s.origin));
 		return;
 	}
+
+	self->class_id = ENTITY_TRIGGER_SPEAKER;
+
 	if (!strstr (st.noise, ".wav"))
 		Com_sprintf (buffer, sizeof(buffer), "%s.wav", st.noise);
 	else
@@ -1603,7 +1671,7 @@ void SP_trigger_speaker (edict_t *self)
 //==============================================================================
 void WriteEdict (FILE *f, edict_t *ent);
 
-qboolean HasSpawnFunction(edict_t *ent)
+qboolean HasSpawnFunction (edict_t *ent)
 {
 	spawn_t	*s;
 	gitem_t	*item;
@@ -1637,11 +1705,11 @@ void WriteTransitionEdict (FILE *f, edict_t *changelevel, edict_t *ent)
 	void		*p;
 
 	memcpy(&e,ent,sizeof(edict_t));
-	if (!Q_stricmp(e.classname,"target_laser") ||
-		!Q_stricmp(e.classname,"target_blaster")  )
+	if (!Q_stricmp(e.classname, "target_laser") ||
+		!Q_stricmp(e.classname, "target_blaster")  )
 		vectoangles(e.movedir,e.s.angles);
 
-	if (!Q_stricmp(e.classname,"target_speaker"))
+	if (!Q_stricmp(e.classname, "target_speaker"))
 		e.spawnflags |= 8;  // indicates that "message" contains noise
 
 	if (changelevel->s.angles[YAW])
@@ -1759,7 +1827,7 @@ entlist_t DoNotMove[] = {
 	{"target_lock_digit"},
 	{"target_rotation"},
 	{"target_secret"},
-	{"target_speaker"}, //Knightmare- don't move speakers
+	{"target_speaker"},		// Knightmare- don't move speakers
 	{"target_splash"},
 	{"target_steam"},
 	{"target_string"},
@@ -1936,6 +2004,8 @@ void SP_trigger_transition (edict_t *self)
 		gi.dprintf("trigger_transition w/o a targetname\n");
 		G_FreeEdict(self);
 	}
+	self->class_id = ENTITY_TRIGGER_TRANSITION;
+
 	self->solid = SOLID_NOT;
 	self->movetype = MOVETYPE_NONE;
 	gi.setmodel (self, self->model);
@@ -1949,6 +2019,8 @@ void SP_trigger_transition_bbox (edict_t *self)
 		gi.dprintf("trigger_transition_bbox w/o a targetname\n");
 		G_FreeEdict(self);
 	}
+	self->class_id = ENTITY_TRIGGER_TRANSITION;
+
 	self->solid = SOLID_NOT;
 	self->movetype = MOVETYPE_NONE;
 	if ( (!VectorLength(self->bleft)) && (!VectorLength(self->tright)) )
@@ -2073,7 +2145,7 @@ void trigger_switch_usetargets (edict_t *ent, edict_t *activator)
 				case ENTITY_FUNC_FORCE_WALL:
 				case ENTITY_FUNC_WALL:
 					if (t->solid == SOLID_BSP)
-						on=1;
+						on = 1;
 					break;
 				case ENTITY_FUNC_PENDULUM:
 				case ENTITY_FUNC_TRAIN:
@@ -2088,33 +2160,33 @@ void trigger_switch_usetargets (edict_t *ent, edict_t *activator)
 				case ENTITY_TARGET_MAL_LASER:
 				case ENTITY_TARGET_PRECIPITATION:
 					if (t->spawnflags & 1)
-						on=1;
+						on = 1;
 					break;
 				case ENTITY_FUNC_REFLECT:
 					if (!(t->spawnflags & 1))
-						on=1;
+						on = 1;
 					break;
 				case ENTITY_FUNC_ROTATING:
 					on = VectorCompare (t->avelocity, vec3_origin);
 					break;
 				case ENTITY_FUNC_TIMER:
 					if (t->nextthink)
-						on=1;
+						on = 1;
 					break;
 				case ENTITY_FUNC_TRACKTRAIN:
 					if (!(t->spawnflags & 128))
-						on=1;
+						on = 1;
 					break;
 				case ENTITY_MODEL_TURRET:
 				case ENTITY_TURRET_BREACH:
 					if (t->spawnflags & 16)
-						on=1;
+						on = 1;
 					break;
 				case ENTITY_TARGET_EFFECT:
 					if (t->spawnflags & 3)
 					{
 						if (t->spawnflags & 1)
-							on=1;
+							on = 1;
 					}
 					else
 						on = -1;
@@ -2123,23 +2195,23 @@ void trigger_switch_usetargets (edict_t *ent, edict_t *activator)
 					if (t->spawnflags & 3)
 					{
 						if (t->s.sound)
-							on=1;
+							on = 1;
 					}
 					else
-						on=-1;
+						on = -1;
 					break;
 				default:
-					on=-1;
+					on = -1;
 				}
 
 
 				if (ent->spawnflags & TRIGGER_TARGET_OFF)
 				{
 					// Only use target if it is currently ON
-					if (on==1)
+					if (on == 1)
 						t->use (t, ent, activator);
 				}
-				else if (on==0)
+				else if (on == 0)
 				{
 					// Only use target if it is currently OFF
 					t->use (t, ent, activator);
@@ -2215,6 +2287,7 @@ void use_trigger_switch (edict_t *ent, edict_t *other, edict_t *activator)
 void SP_trigger_switch (edict_t *ent)
 {
 	ent->class_id = ENTITY_TRIGGER_SWITCH;
+
 	if (ent->sounds == 1)
 		ent->noise_index = gi.soundindex ("misc/secret.wav");
 	else if (ent->sounds == 2)

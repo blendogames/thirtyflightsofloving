@@ -474,6 +474,9 @@ qboolean fire_lasertripbomb (edict_t *self, vec3_t start, vec3_t dir, float time
 	bomb->nextthink = level.time + FRAMETIME;
 	bomb->think = tripbomb_think;
 
+	bomb->common_name = "Laser Trip Bomb";
+	bomb->class_id = ENTITY_Z_TBOMB;
+
 	// remove the oldest trip bomb
 	removeOldest();
 
@@ -682,7 +685,7 @@ void SP_misc_lasertripbomb (edict_t *bomb)
 	}
 
 	// set up ourself
-	setupBomb(bomb, "misc_ired", sk_tbomb_damage->value, sk_tbomb_radius->value);
+	setupBomb (bomb, "misc_ired", sk_tbomb_damage->value, sk_tbomb_radius->value);
 	
 	if (bomb->targetname)
 	{
@@ -693,6 +696,10 @@ void SP_misc_lasertripbomb (edict_t *bomb)
 		bomb->think = create_tripbomb_laser;
 		bomb->nextthink = level.time + TBOMB_DELAY;
 	}
+
+	bomb->common_name = "Laser Trip Bomb";
+	bomb->class_id = ENTITY_Z_TBOMB;
+
 	gi.linkentity(bomb);
 }
 //#endif	// USE_ZAERO_ITEMS_WEAPONS
@@ -1112,6 +1119,9 @@ void fire_flare (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed,
 	flare->radius_dmg = radius_damage;
 	flare->dmg_radius = damage_radius;
 	flare->classname = "flare";
+
+	flare->common_name = "Flare";
+	flare->class_id = ENTITY_Z_FLARE;
 
 	if (self->client)
 		check_dodge (self, flare->s.origin, dir, speed);

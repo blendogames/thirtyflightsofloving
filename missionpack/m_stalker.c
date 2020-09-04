@@ -1263,6 +1263,7 @@ void SP_monster_stalker (edict_t *self)
 		self->monsterinfo.flies = 0.40;
 
 	self->common_name = "Stalker";
+	self->class_id = ENTITY_STALKER;
 
 	gi.linkentity (self);
 

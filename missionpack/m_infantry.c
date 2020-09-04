@@ -887,6 +887,7 @@ void SP_monster_infantry (edict_t *self)
 		self->monsterinfo.flies = 0.40;
 
 	self->common_name = "Enforcer";
+	self->class_id = ENTITY_MONSTER_INFANTRY;
 
 	gi.linkentity (self);
 

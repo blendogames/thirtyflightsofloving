@@ -1281,7 +1281,9 @@ void SP_monster_sentien (edict_t *self)
 	}
 	if (!self->monsterinfo.flies)
 		self->monsterinfo.flies = 0.10;
+
 	self->common_name = "Sentien";
+	self->class_id = ENTITY_MONSTER_SENTIEN;
 	// end Lazarus
 
 	gi.linkentity (self);

@@ -1313,7 +1313,7 @@ void turret_breach_finish_init (edict_t *self)
 		// Knightmare- if we've been moved by a func_train before initializing,
 		// shift firing point by the distance moved
 		if (VectorLength(self->aim_point))
-			VectorAdd(self->move_origin, self->aim_point, self->move_origin);
+			VectorAdd (self->move_origin, self->aim_point, self->move_origin);
 
 		G_FreeEdict(self->target_ent);
 
@@ -1326,7 +1326,7 @@ void turret_breach_finish_init (edict_t *self)
 			// Knightmare- if we've been moved by a func_train before initializing,
 			// shift firing point by the distance moved
 			if (VectorLength(self->aim_point))
-				VectorAdd(self->muzzle2, self->aim_point, self->muzzle2);
+				VectorAdd (self->muzzle2, self->aim_point, self->muzzle2);
 
 			self->moreflags |= FL2_TURRET_DOUBLE;
 			if (self->style > 0)
@@ -2177,6 +2177,8 @@ void SP_turret_invisible_brain (edict_t *self)
 		self->think = turret_brain_link;
 		self->nextthink = level.time + FRAMETIME;
 	}
+
+	self->class_id = ENTITY_TURRET_INVISIBLE_BRAIN;
 
 	self->movetype = MOVETYPE_PUSH;
 	gi.linkentity (self);

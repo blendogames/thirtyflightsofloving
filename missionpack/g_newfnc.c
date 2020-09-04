@@ -182,7 +182,7 @@ void fd_secret_done (edict_t *self)
 	if (!self->targetname || self->spawnflags & SEC_YES_SHOOT)
 	{
 	//	self->health = 1;
-		self->health = self->max_health;
+		self->health = self->max_health;	// Knightmare- restore max health
 		self->takedamage = DAMAGE_YES;
 		self->die = fd_secret_killed;   
 	}
@@ -239,8 +239,8 @@ void secret_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *s
 	{
 		gi.centerprintf (other, self->message);
 		gi.sound (other, CHAN_AUTO, gi.soundindex ("misc/talk1.wav"), 1, ATTN_NORM, 0);
-//		fixme - put this sound back??
-//		gi.sound (other, CHAN_BODY, "misc/talk.wav", 1, ATTN_NORM);
+	//	fixme - put this sound back??
+	//	gi.sound (other, CHAN_BODY, "misc/talk.wav", 1, ATTN_NORM);
 	}
 }
 
@@ -290,14 +290,17 @@ void SP_func_door_secret2 (edict_t *ent)
 		ent->moveinfo.sound_end = 0;
 	}
 
+	if (ent->attenuation <= 0)
+		ent->attenuation = ATTN_STATIC;
+
 	if (!ent->dmg)
 		ent->dmg = 2;
 		
-	AngleVectors(ent->s.angles, forward, right, up);
-	VectorCopy(ent->s.origin, ent->pos0);
-	VectorCopy(ent->s.angles, ent->move_angles);
-
+	AngleVectors (ent->s.angles, forward, right, up);
+	VectorCopy (ent->s.origin, ent->pos0);
+	VectorCopy (ent->s.angles, ent->move_angles);
 	G_SetMovedir (ent->s.angles, ent->movedir);
+
 	ent->movetype = MOVETYPE_PUSH;
 	ent->solid = SOLID_BSP;
 	gi.setmodel (ent, ent->model);
@@ -321,24 +324,24 @@ void SP_func_door_secret2 (edict_t *ent)
 	}
 
 	if (ent->spawnflags & SEC_MOVE_FORWARD)
-		VectorScale(forward, ent->length, forward);
+		VectorScale (forward, ent->length, forward);
 	else
-		VectorScale(forward, ent->length * -1 , forward);
+		VectorScale (forward, ent->length * -1 , forward);
 
 	if (ent->spawnflags & SEC_MOVE_RIGHT)
-		VectorScale(right, ent->width, right);
+		VectorScale (right, ent->width, right);
 	else
-		VectorScale(right, ent->width * -1, right);
+		VectorScale (right, ent->width * -1, right);
 
 	if (ent->spawnflags & SEC_1ST_DOWN)
 	{
-		VectorAdd(ent->s.origin, forward, ent->pos1); // was ent->moveinfo.start_origin
-		VectorAdd(ent->pos1, right, ent->pos2); // was ent->moveinfo.end_origin
+		VectorAdd (ent->s.origin, forward, ent->pos1); // was ent->moveinfo.start_origin
+		VectorAdd (ent->pos1, right, ent->pos2); // was ent->moveinfo.end_origin
 	}
 	else
 	{
-		VectorAdd(ent->s.origin, right, ent->pos1); // was ent->moveinfo.start_origin
-		VectorAdd(ent->pos1, forward, ent->pos2); // was ent->moveinfo.end_origin
+		VectorAdd (ent->s.origin, right, ent->pos1); // was ent->moveinfo.start_origin
+		VectorAdd (ent->pos1, forward, ent->pos2); // was ent->moveinfo.end_origin
 	}
 
 	ent->touch = secret_touch;
@@ -355,13 +358,13 @@ void SP_func_door_secret2 (edict_t *ent)
 		if (!ent->health) {
 			ent->health = 1;
 		}
-		ent->max_health = ent->health;
+		ent->max_health = ent->health;	// Knightmare- store health value
 		ent->takedamage = DAMAGE_YES;
 		ent->die = fd_secret_killed;
 	}
 	if (!ent->wait)
 		ent->wait = 5;          // 5 seconds before closing
-	ent->postthink = train_move_children; //Knightmare- now supports movewith
+	ent->postthink = train_move_children; // Knightmare- now supports movewith
 
 	gi.linkentity(ent);
 }
@@ -383,7 +386,7 @@ void force_wall_think(edict_t *self)
 	}
 
 	self->think = force_wall_think;
-	self->nextthink = level.time + 0.1;
+	self->nextthink = level.time + FRAMETIME;
 }
 
 void force_wall_use (edict_t *self, edict_t *other, edict_t *activator)
@@ -516,7 +519,9 @@ void SP_func_dm_wall (edict_t *self)
 {
 	qboolean	spawn = false;
 
-	//if it was lower than this something went very wrong.
+	self->class_id = ENTITY_FUNC_DM_WALL;
+
+	// if it was lower than this something went very wrong.
 	if (self->count > 2)
 	{
 		if (self->count > game.maxclients)

@@ -883,7 +883,7 @@ qboolean Makron_blocked (edict_t *self, float dist)
 
 /*QUAKED monster_makron (1 .5 0) (-30 -30 0) (30 30 90) Ambush Trigger_Spawn Sight GoodGuy NoGib
 */
-//Knightmare- direct spawn function, sets nojump flag
+// Knightmare- direct spawn function, sets nojump flag
 void SP_monster_makron (edict_t *self)
 {
 	self->fogclip |= 1;
@@ -932,7 +932,7 @@ void SP_monster_makron_put (edict_t *self)
 	self->monsterinfo.dodge = NULL;
 	self->monsterinfo.attack = makron_attack;
 	self->monsterinfo.melee = NULL;
-	//Knightmare- don't jump flag
+	// Knightmare- don't jump flag
 	if (self->fogclip & 1)
 		self->monsterinfo.sight = NULL;
 	else
@@ -956,16 +956,23 @@ void SP_monster_makron_put (edict_t *self)
 	}
 
 	self->common_name = "Makron";
+	self->class_id = ENTITY_MONSTER_MAKRON;
 
 	gi.linkentity (self);
-	//Knightmare- nojump flag
+	// Knightmare- nojump flag
 	if (self->fogclip & 1)
 		self->monsterinfo.currentmove = &makron_move_stand;
 	else
 		self->monsterinfo.currentmove = &makron_move_sight;
 
+	if (self->health < 0)
+	{
+		mmove_t	*deathmoves[] = {&makron_move_death2,
+			                     &makron_move_death3,
+								 NULL};
+		M_SetDeath(self,(mmove_t **)&deathmoves);
+	}
 	self->monsterinfo.scale = MODEL_SCALE;
-
 	walkmonster_start(self);
 	//PMM
 	//self->monsterinfo.aiflags |= AI_IGNORE_SHOTS;
@@ -983,9 +990,10 @@ void MakronSpawn (edict_t *self)
 {
 	vec3_t		vec;
 	edict_t		*player;
+
 	SP_monster_makron_put (self);
 
-	//Knightmare- gross hack for map6 of COS3- don't jump
+	// Knightmare- gross hack for map6 of COS3- don't jump
 	if (Q_stricmp(level.mapname, "grinsp3f") == 0)
 		return;
 	// jump at player

@@ -461,7 +461,7 @@ void flyer_fire (edict_t *self, int flash_number)
 	vec3_t	dir;
 	int		effect;
 
-	if(!self->enemy || !self->enemy->inuse)		//PGM
+	if (!self->enemy || !self->enemy->inuse)		//PGM
 		return;									//PGM
 
 	if ((self->s.frame == FRAME_attak204) || (self->s.frame == FRAME_attak207) || (self->s.frame == FRAME_attak210))
@@ -475,7 +475,7 @@ void flyer_fire (edict_t *self, int flash_number)
 	end[2] += self->enemy->viewheight;
 
 	// Lazarus fog reduction of accuracy
-	if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+	if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 	{
 		end[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 		end[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -766,7 +766,7 @@ qboolean flyer_blocked (edict_t *self, float dist)
 		return true;
 	}
 	// we're a normal flyer
-	if(blocked_checkshot (self, 0.25 + (0.05 * skill->value) ))
+	if (blocked_checkshot (self, 0.25 + (0.05 * skill->value) ))
 		return true;
 
 	return false;
@@ -789,7 +789,7 @@ void SP_monster_flyer (edict_t *self)
 		self->target = NULL;
 	}
 
-	//Knightmare- random replacement with kamikaze flyers
+	// Knightmare- random replacement with kamikaze flyers
 	if (kamikaze_flyer_replace->value > 0.0)
 	{
 		float r = random();
@@ -828,9 +828,9 @@ void SP_monster_flyer (edict_t *self)
 
 	self->s.sound = gi.soundindex ("flyer/flyidle1.wav");
 
-	if(!self->health)
+	if (!self->health)
 		self->health = 50;
-	if(!self->mass)
+	if (!self->mass)
 		self->mass = 50;
 
 	self->pain = flyer_pain;
@@ -849,7 +849,7 @@ void SP_monster_flyer (edict_t *self)
 		self->blood_type = 3; //sparks and blood
 
 	// Lazarus
-	if(self->powerarmor)
+	if (self->powerarmor)
 	{
 		if (self->powerarmortype == 1)
 			self->monsterinfo.power_armor_type = POWER_ARMOR_SCREEN;
@@ -858,6 +858,7 @@ void SP_monster_flyer (edict_t *self)
 		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
 	self->common_name = "Flyer";
+	self->class_id = ENTITY_MONSTER_FLYER;
 
 	gi.linkentity (self);
 
@@ -904,10 +905,10 @@ void SP_monster_kamikaze (edict_t *self)
 	
 	self->s.effects |= EF_ROCKET;
 
-	if(!self->health)
+	if (!self->health)
 		self->health = 50;
 	// PMM - normal flyer has mass of 50
-	if(!self->mass)
+	if (!self->mass)
 		self->mass = 100;
 
 	self->pain = flyer_pain;
@@ -926,7 +927,7 @@ void SP_monster_kamikaze (edict_t *self)
 		self->blood_type = 3; //sparks and blood
 
 	// Lazarus
-	if(self->powerarmor)
+	if (self->powerarmor)
 	{
 		if (self->powerarmortype == 1)
 			self->monsterinfo.power_armor_type = POWER_ARMOR_SCREEN;
@@ -935,6 +936,7 @@ void SP_monster_kamikaze (edict_t *self)
 		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
 	self->common_name = "Kamikaze Flyer";
+	self->class_id = ENTITY_MONSTER_FLYER_KAMIKAZE;
 
 	gi.linkentity (self);
 

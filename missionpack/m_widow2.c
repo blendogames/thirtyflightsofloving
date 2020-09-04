@@ -1276,11 +1276,12 @@ void SP_monster_widow2 (edict_t *self)
 	self->monsterinfo.checkattack = Widow2_CheckAttack;
 	
 	if (!self->blood_type)
-		self->blood_type = 2; //sparks
+		self->blood_type = 2; // sparks
 	else
-		self->fogclip |= 2; //custom bloodtype flag
+		self->fogclip |= 2; // custom bloodtype flag
 
 	self->common_name = "Black Widow";
+	self->class_id = ENTITY_MONSTER_WIDOW2;
 
 	gi.linkentity (self);
 

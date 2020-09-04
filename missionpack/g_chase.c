@@ -12,7 +12,8 @@ void UpdateChaseCam(edict_t *ent)
 
 	// is our chase target gone?
 	if (!ent->client->chase_target->inuse
-		|| ent->client->chase_target->client->resp.spectator) {
+		|| ent->client->chase_target->client->resp.spectator)
+	{
 		edict_t *old = ent->client->chase_target;
 		ChaseNext(ent);
 		if (ent->client->chase_target == old) {
@@ -79,7 +80,8 @@ void UpdateChaseCam(edict_t *ent)
 		ent->client->ps.viewangles[ROLL] = 40;
 		ent->client->ps.viewangles[PITCH] = -15;
 		ent->client->ps.viewangles[YAW] = targ->client->killer_yaw;
-	} else {
+	}
+	else {
 		VectorCopy(targ->client->v_angle, ent->client->ps.viewangles);
 		VectorCopy(targ->client->v_angle, ent->client->v_angle);
 	}
@@ -153,4 +155,3 @@ void GetChaseTarget(edict_t *ent)
 	}
 	gi.centerprintf(ent, "No other players to chase.");
 }
-

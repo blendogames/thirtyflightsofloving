@@ -428,6 +428,7 @@ void SP_monster_flipper (edict_t *self)
 		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
 	self->common_name = "Barracuda Shark";
+	self->class_id = ENTITY_MONSTER_FLIPPER;
 
 	gi.linkentity (self);
 

@@ -14,6 +14,8 @@ void Use_Target_Tent (edict_t *ent, edict_t *other, edict_t *activator)
 
 void SP_target_temp_entity (edict_t *ent)
 {
+	ent->class_id = ENTITY_TARGET_TEMP_ENTITY;
+
 	ent->use = Use_Target_Tent;
 }
 
@@ -88,6 +90,8 @@ void Use_Target_Speaker (edict_t *ent, edict_t *other, edict_t *activator)
 
 void SP_target_speaker (edict_t *ent)
 {
+	ent->class_id = ENTITY_TARGET_SPEAKER;
+
 	if (!(ent->spawnflags & 8))
 	{
 		if (!st.noise)
@@ -109,7 +113,6 @@ void SP_target_speaker (edict_t *ent)
 			strcpy(ent->message,st.noise);
 		}
 	}
-	ent->class_id = ENTITY_TARGET_SPEAKER;
 
 	ent->noise_index = gi.soundindex (ent->message);
 	ent->spawnflags &= ~8;
@@ -158,7 +161,7 @@ void Use_Target_Help (edict_t *ent, edict_t *other, edict_t *activator)
 /*QUAKED target_help (1 0 1) (-16 -16 -24) (16 16 24) help1
 When fired, the "message" key becomes the current personal computer string, and the message light will be set on all clients status bars.
 */
-void SP_target_help(edict_t *ent)
+void SP_target_help (edict_t *ent)
 {
 	if (deathmatch->value)
 	{	// auto-remove for deathmatch
@@ -172,6 +175,9 @@ void SP_target_help(edict_t *ent)
 		G_FreeEdict (ent);
 		return;
 	}
+
+	ent->class_id = ENTITY_TARGET_HELP;
+
 	ent->use = Use_Target_Help;
 }
 
@@ -198,6 +204,8 @@ void SP_target_secret (edict_t *ent)
 		G_FreeEdict (ent);
 		return;
 	}
+
+	ent->class_id = ENTITY_TARGET_SECRET;
 
 	ent->use = use_target_secret;
 	if (!st.noise)
@@ -237,6 +245,7 @@ void SP_target_goal (edict_t *ent)
 		G_FreeEdict (ent);
 		return;
 	}
+	ent->class_id = ENTITY_TARGET_GOAL;
 
 	ent->use = use_target_goal;
 	if (!st.noise)
@@ -311,6 +320,8 @@ void use_target_explosion (edict_t *self, edict_t *other, edict_t *activator)
 
 void SP_target_explosion (edict_t *ent)
 {
+	ent->class_id = ENTITY_TARGET_EXPLOSION;
+
 	ent->use = use_target_explosion;
 	ent->svflags = SVF_NOCLIENT;
 }
@@ -504,6 +515,8 @@ void SP_target_changelevel (edict_t *ent)
 		return;
 	}
 
+	ent->class_id = ENTITY_TARGET_CHANGELEVEL;
+
 	if ((deathmatch->value || coop->value) && (ent->spawnflags & 2))
 	{
 		gi.dprintf("target_changelevel at %s\nLANDMARK only valid in single-player\n",
@@ -554,6 +567,8 @@ void use_target_splash (edict_t *self, edict_t *other, edict_t *activator)
 
 void SP_target_splash (edict_t *self)
 {
+	self->class_id = ENTITY_TARGET_SPLASH;
+
 	self->use = use_target_splash;
 	G_SetMovedir (self->s.angles, self->movedir);
 
@@ -611,6 +626,8 @@ void use_target_spawner (edict_t *self, edict_t *other, edict_t *activator)
 
 void SP_target_spawner (edict_t *self)
 {
+	self->class_id = ENTITY_TARGET_SPEAKER;
+
 	self->use = use_target_spawner;
 	self->svflags = SVF_NOCLIENT;
 	if (self->speed)
@@ -963,6 +980,8 @@ void SP_target_blaster (edict_t *self)
 		self->use = use_target_blaster;
 	}
 
+	self->class_id = ENTITY_TARGET_BLASTER;
+
 	gi.linkentity(self);
 	self->svflags = SVF_NOCLIENT;
 }
@@ -981,6 +1000,8 @@ void trigger_crosslevel_trigger_use (edict_t *self, edict_t *other, edict_t *act
 
 void SP_target_crosslevel_trigger (edict_t *self)
 {
+	self->class_id = ENTITY_TARGET_CROSSLEVEL_TRIGGER;
+
 	self->svflags = SVF_NOCLIENT;
 	self->use = trigger_crosslevel_trigger_use;
 }
@@ -1002,6 +1023,8 @@ void target_crosslevel_target_think (edict_t *self)
 
 void SP_target_crosslevel_target (edict_t *self)
 {
+	self->class_id = ENTITY_TARGET_CROSSLEVEL_TARGET;
+
 	if (! self->delay)
 		self->delay = 1;
 	self->svflags = SVF_NOCLIENT;
@@ -1858,6 +1881,8 @@ void target_lightramp_use (edict_t *self, edict_t *other, edict_t *activator)
 
 void SP_target_lightramp (edict_t *self)
 {	
+	self->class_id = ENTITY_TARGET_LIGHTRAMP;
+
 	// DWH: CUSTOM spawnflag allows custom light switching, speed is ignored
 	if (self->spawnflags & LIGHTRAMP_CUSTOM)
 	{
@@ -1988,6 +2013,8 @@ void target_earthquake_use (edict_t *self, edict_t *other, edict_t *activator)
 
 void SP_target_earthquake (edict_t *self)
 {
+	self->class_id = ENTITY_TARGET_EARTHQUAKE;
+
 	if (!self->targetname)
 		gi.dprintf("untargeted %s at %s\n", self->classname, vtos(self->s.origin));
 

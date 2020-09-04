@@ -33,7 +33,7 @@ NO_EFFECTS: will not give a teleport effect when touched
 SOUND: play a custom sound when touched
 "noise" (path/file.wav)
 */
-void trigger_teleport_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
+void trigger_teleport_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
 	edict_t *dest;
 	edict_t	*tempent; //for teleport effect
@@ -43,15 +43,15 @@ void trigger_teleport_touch(edict_t *self, edict_t *other, cplane_t *plane, csur
 	tempent = G_Spawn();
 	VectorCopy (other->s.origin, tempent->s.origin);
 
-	if((self->spawnflags & TELEPORT_PLAYER_ONLY) && !(other->client))
+	if ((self->spawnflags & TELEPORT_PLAYER_ONLY) && !(other->client))
 		return;
-	if(!other->client && (!other->svflags & SVF_MONSTER))
+	if (!other->client && (!other->svflags & SVF_MONSTER))
 		return;
-	if(self->delay)
+	if (self->delay)
 		return;
 
 	dest = G_Find (NULL, FOFS(targetname), self->target);
-	if(!dest)
+	if (!dest)
 	{
 		gi.dprintf("Teleport Destination not found!\n");
 		return;
@@ -75,7 +75,7 @@ void trigger_teleport_touch(edict_t *self, edict_t *other, cplane_t *plane, csur
 
 	// clear the velocity and hold them in place briefly
 	VectorClear (other->velocity);
-	if(other->client)
+	if (other->client)
 	{
 		other->client->ps.pmove.pm_time = 160>>3;		// hold time
 		other->client->ps.pmove.pm_flags |= PMF_TIME_TELEPORT;
@@ -107,7 +107,7 @@ void trigger_teleport_touch(edict_t *self, edict_t *other, cplane_t *plane, csur
 
 void trigger_teleport_use (edict_t *self, edict_t *other, edict_t *activator)
 {
-	if(self->solid == SOLID_NOT)
+	if (self->solid == SOLID_NOT)
 		self->solid = SOLID_TRIGGER;
 	else
 		self->solid = SOLID_NOT;
@@ -138,7 +138,7 @@ void SP_trigger_teleport (edict_t *self)
 	if (self->targetname)
 	{
 		self->use = trigger_teleport_use;
-		if(!(self->spawnflags & TELEPORT_START_ON))
+		if (!(self->spawnflags & TELEPORT_START_ON))
 			self->delay = 1;
 	}
 
@@ -152,6 +152,9 @@ void SP_trigger_teleport (edict_t *self)
 		G_SetMovedir (self->s.angles, self->movedir);
 
 	gi.setmodel (self, self->model);
+
+	self->class_id = ENTITY_TRIGGER_TELEPORT;
+
 	gi.linkentity (self);
 }
 
@@ -174,7 +177,7 @@ void trigger_disguise_touch(edict_t *self, edict_t *other, cplane_t *plane, csur
 {
 	if (other->client)
 	{
-		if(self->spawnflags & 4)
+		if (self->spawnflags & 4)
 			other->flags &= ~FL_DISGUISED;
 		else
 			other->flags |= FL_DISGUISED;
@@ -183,7 +186,7 @@ void trigger_disguise_touch(edict_t *self, edict_t *other, cplane_t *plane, csur
 
 void trigger_disguise_use (edict_t *self, edict_t *other, edict_t *activator)
 {
-	if(self->solid == SOLID_NOT)
+	if (self->solid == SOLID_NOT)
 		self->solid = SOLID_TRIGGER;
 	else
 		self->solid = SOLID_NOT;
@@ -193,7 +196,9 @@ void trigger_disguise_use (edict_t *self, edict_t *other, edict_t *activator)
 
 void SP_trigger_disguise (edict_t *self)
 {
-	if(self->spawnflags & 2)
+	self->class_id = ENTITY_TRIGGER_DISGUISE;
+
+	if (self->spawnflags & 2)
 		self->solid = SOLID_TRIGGER;
 	else
 		self->solid = SOLID_NOT;

@@ -93,10 +93,13 @@ void SP_misc_teleporter_dest (edict_t *ent);
 /*QUAKED info_player_start (1 0 0) (-16 -16 -24) (16 16 32)
 The normal starting point for a level.
 */
-void SP_info_player_start(edict_t *self)
+void SP_info_player_start (edict_t *self)
 {
+	self->class_id = ENTITY_INFO_PLAYER_START;
+
 	if (!coop->value)
 		return;
+
 	if (Q_stricmp(level.mapname, "security") == 0)
 	{
 		// invoke one of our gross, ugly, disgusting hacks
@@ -113,7 +116,7 @@ NO_PAD	- don't make a pad
 count		- the number of maxclients must be less than this for it to spawn.
 		  if you don't have a func_dm_wall in your map, don't enter a value.
 */
-void SP_info_player_deathmatch(edict_t *self)
+void SP_info_player_deathmatch (edict_t *self)
 {
 	if (!deathmatch->value)
 	{
@@ -121,7 +124,7 @@ void SP_info_player_deathmatch(edict_t *self)
 		return;
 	}
 
-	//Mappack - this makes sure players don't get spawned in an area sealed by a func_dm_wall
+	// Mappack - this makes sure players don't get spawned in an area sealed by a func_dm_wall
 	if (self->count > 2)
 	{
 		if (self->count <= game.maxclients)
@@ -131,22 +134,26 @@ void SP_info_player_deathmatch(edict_t *self)
 		}
 	}
 
-	//Mappack - this removes the pad if a flag of 1 is set.
+	// Mappack - this removes the pad if a flag of 1 is set.
 	if (!(self->spawnflags & 1))
 		SP_misc_teleporter_dest (self);
+
+	self->class_id = ENTITY_INFO_PLAYER_DEATHMATCH;
 }
 
 /*QUAKED info_player_coop (1 0 1) (-16 -16 -24) (16 16 32)
 potential spawning position for coop games
 */
 
-void SP_info_player_coop(edict_t *self)
+void SP_info_player_coop (edict_t *self)
 {
 	if (!coop->value)
 	{
 		G_FreeEdict (self);
 		return;
 	}
+
+	self->class_id = ENTITY_INFO_PLAYER_COOP;
 
 	if ((Q_stricmp(level.mapname, "jail2") == 0)   ||
 	   (Q_stricmp(level.mapname, "jail4") == 0)   ||
@@ -173,24 +180,28 @@ void SP_info_player_coop(edict_t *self)
 potential spawning position for coop games on rmine2 where lava level
 needs to be checked
 */
-void SP_info_player_coop_lava(edict_t *self)
+void SP_info_player_coop_lava (edict_t *self)
 {
 	if (!coop->value)
 	{
 		G_FreeEdict (self);
 		return;
 	}
+
+	self->class_id = ENTITY_INFO_PLAYER_COOP_LAVA;
 }
 
 /*QUAKED info_player_intermission (1 0 1) (-16 -16 -24) (16 16 32) LETTERBOX
 The deathmatch intermission point will be at one of these
 Use 'angles' instead of 'angle', so you can set pitch or roll as well as yaw.  'pitch yaw roll'
 */
-void SP_info_player_intermission(edict_t *self) //was void
+void SP_info_player_intermission (edict_t *self) //was void
 {
-	//Knightmare- hack for Paradist Lost
+	self->class_id = ENTITY_INFO_PLAYER_INTERMISSION;
+
+	// Knightmare- hack for Paradise Lost
 	if (Q_stricmp(level.mapname, "coconut1") == 0)
-		VectorSet(self->s.angles,0,270,0);
+		VectorSet (self->s.angles, 0, 270, 0);
 }
 
 

@@ -100,6 +100,7 @@ void q1_fire_nail (edict_t *self, vec3_t start, vec3_t dir, int damage, int spee
 		nail->spawnflags = 1;
 
 	nail->common_name = "Nail";
+	nail->class_id = ENTITY_Q1_NAIL;
 
 	gi.linkentity (nail);
 
@@ -197,6 +198,7 @@ void q1_fire_laser (edict_t *self, vec3_t start, vec3_t dir, int damage, int spe
 	laser->classname = "laser";
 
 	laser->common_name = "Laser";
+	laser->class_id = ENTITY_Q1_LASER;
 
 	gi.linkentity (laser);
 
@@ -309,6 +311,7 @@ void q1_fire_flame (edict_t *self, vec3_t start, vec3_t dir, float leftrightoff)
 	bolt->classname = "bolt";
 
 	bolt->common_name = "Hell Knight Flame";
+	bolt->class_id = ENTITY_Q1_HKNIGHT_FLAME;
 
 	gi.linkentity (bolt);
 
@@ -441,6 +444,7 @@ void q1_fire_grenade (edict_t *self, vec3_t start, vec3_t aimdir, int damage, in
 	grenade->classname = "grenade";
 
 	grenade->common_name = "Quake Grenade";
+	grenade->class_id = ENTITY_Q1_GRENADE;
 
 	gi.linkentity (grenade);
 }
@@ -569,6 +573,7 @@ void q1_fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int sp
 	q1rocket_trail (rocket, start, dir);
 	
 	rocket->common_name = "Quake Rocket";
+	rocket->class_id = ENTITY_Q1_ROCKET;
 
 	gi.linkentity (rocket);
 }
@@ -752,6 +757,7 @@ void q1_fire_firepod (edict_t *self, vec3_t dir)
 	pod->owner = self;
 
 	pod->common_name = "Firepod";
+	pod->class_id = ENTITY_Q1_FIREPOD;
 
 	gi.linkentity (pod);
 
@@ -850,6 +856,7 @@ void q1_fire_lavaball (edict_t *self, vec3_t start, vec3_t dir, int damage, int 
 	lavaball->classname = "chthon_lavaball";
 
 	lavaball->common_name = "Chthon Lavaball";
+	lavaball->class_id = ENTITY_Q1_LAVABALL;
 
 	gi.linkentity (lavaball);
 }
@@ -931,6 +938,7 @@ void q1_fire_acidspit (edict_t *self, vec3_t start, vec3_t dir, int damage, int 
 	acidbolt->classname = "acidbolt";
 
 	acidbolt->common_name = "Acid Bolt";
+	acidbolt->class_id = ENTITY_Q1_ACIDBOLT;
 
 	gi.linkentity (acidbolt);
 }
@@ -1004,11 +1012,13 @@ void q1_fire_gib (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int sp
 	gib->owner = self;
 	gib->touch = q1_zombiegib_touch;
 	gib->nextthink = level.time + 2.5;
-	gib->think = G_FreeEdict;
+//	gib->think = G_FreeEdict;
+	gib->think = gib_fade;	// use gib_fade() instead of directly removing
 	gib->dmg = damage;
 	gib->classname = "gib";
 
 	gib->common_name = "Gib Projectile";
+	gib->class_id = ENTITY_Q1_ZOMBIE_GIB;
 
 	gi.linkentity (gib);
 }

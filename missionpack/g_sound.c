@@ -1401,6 +1401,9 @@ void SP_target_playback (edict_t *ent)
 		G_FreeEdict(ent);
 		return;
 	}
+
+	ent->class_id = ENTITY_TARGET_PLAYBACK;
+
 	GameDirRelativePath(st.noise, filename, sizeof(filename));
 	ent->message = gi.TagMalloc(strlen(filename)+1,TAG_LEVEL);
 	strcpy(ent->message, filename);

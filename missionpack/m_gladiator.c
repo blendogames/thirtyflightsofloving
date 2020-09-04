@@ -23,7 +23,7 @@ static int	sound_sight;
 
 void gladiator_idle (edict_t *self)
 {
-	if(!(self->spawnflags & SF_MONSTER_AMBUSH))
+	if (!(self->spawnflags & SF_MONSTER_AMBUSH))
 		gi.sound (self, CHAN_VOICE, sound_idle, 1, ATTN_IDLE, 0);
 }
 
@@ -158,7 +158,7 @@ void GladiatorGun (edict_t *self)
 	// calc direction to where we targted
 
 	// Lazarus fog reduction of accuracy
-	if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+	if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 	{
 		self->pos1[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 		self->pos1[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -269,7 +269,7 @@ void gladiator_dead (edict_t *self)
 	M_FlyCheck (self);
 
 	// Lazarus monster fade
-	if(world->effects & FX_WORLDSPAWN_CORPSEFADE)
+	if (world->effects & FX_WORLDSPAWN_CORPSEFADE)
 	{
 		self->think=FadeDieSink;
 		self->nextthink=level.time+corpse_fadetime->value;
@@ -337,10 +337,10 @@ void gladiator_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int da
 //PGM
 qboolean gladiator_blocked (edict_t *self, float dist)
 {
-	if(blocked_checkshot (self, 0.25 + (0.05 * skill->value) ))
+	if (blocked_checkshot (self, 0.25 + (0.05 * skill->value) ))
 		return true;
 
-	if(blocked_checkplat (self, dist))
+	if (blocked_checkplat (self, dist))
 		return true;
 
 	return false;
@@ -384,11 +384,11 @@ void SP_monster_gladiator (edict_t *self)
 	VectorSet (self->mins, -32, -32, -24);
 	VectorSet (self->maxs, 32, 32, 40);
 
-	if(!self->health)
+	if (!self->health)
 		self->health = 400;
-	if(!self->gib_health)
+	if (!self->gib_health)
 		self->gib_health = -175;
-	if(!self->mass)
+	if (!self->mass)
 		self->mass = 400;
 
 	self->pain = gladiator_pain;
@@ -409,7 +409,7 @@ void SP_monster_gladiator (edict_t *self)
 		self->blood_type = 3; //sparks and blood
 
 	// Lazarus
-	if(self->powerarmor)
+	if (self->powerarmor)
 	{
 		if (self->powerarmortype == 1)
 			self->monsterinfo.power_armor_type = POWER_ARMOR_SCREEN;
@@ -417,9 +417,11 @@ void SP_monster_gladiator (edict_t *self)
 			self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
 		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
-	if(!self->monsterinfo.flies)
+	if (!self->monsterinfo.flies)
 		self->monsterinfo.flies = 0.05;
+
 	self->common_name = "Gladiator";
+	self->class_id = ENTITY_MONSTER_GLADIATOR;
 
 	gi.linkentity (self);
 	self->monsterinfo.currentmove = &gladiator_move_stand;

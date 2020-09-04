@@ -892,7 +892,7 @@ void tracktrain_think (edict_t *self)
 					VectorClear (self->avelocity);
 					self->nextthink = 0;
 				//	if (self->movewith_next && (self->movewith_next->movewith_ent == self))
-				//		set_child_movement(self);
+				//		set_child_movement (self);
 					gi.linkentity(self);
 					return;
 				}
@@ -1015,7 +1015,7 @@ void tracktrain_think (edict_t *self)
 		}
 	}
 	//if (self->movewith_next && (self->movewith_next->movewith_ent == self))
-	//	set_child_movement(self);
+	//	set_child_movement (self);
 
 	if ( (time < 1.5*FRAMETIME) && !(self->spawnflags & SF_TRACKTRAIN_DISABLED))
 		self->think = tracktrain_reach_dest;
@@ -1801,7 +1801,7 @@ void func_tracktrain_find (edict_t *self)
 	ent->enemy = self;
 	ent->nextthink = level.time + FRAMETIME;
 
-	VectorCopy (self->s.origin, daoldorigin); //Knightmare- copy old orgin for reference
+	VectorCopy (self->s.origin, daoldorigin); // Knightmare- copy old orgin for reference
 	VectorCopy (ent->s.origin, self->s.origin);
 	self->s.origin[2] += self->viewheight;
 
@@ -1977,7 +1977,7 @@ void SP_func_tracktrain (edict_t *self)
 	self->turn_rider = 1;
 	VectorClear (self->s.angles);
 
-	self->postthink = train_move_children; //Knightmare- supports movewith
+	self->postthink = train_move_children; // Knightmare- supports movewith
 
 	if (self->target)
 	{

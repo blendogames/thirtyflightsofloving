@@ -723,6 +723,7 @@ void SP_monster_parasite (edict_t *self)
 		self->monsterinfo.flies = 0.30;
 
 	self->common_name = "Parasite";
+	self->class_id = ENTITY_MONSTER_PARASITE;
 
 	gi.linkentity (self);
 

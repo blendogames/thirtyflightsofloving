@@ -590,6 +590,7 @@ void SP_monster_berserk (edict_t *self)
 		self->monsterinfo.flies = 0.20;
 
 	self->common_name = "Berserker";
+	self->class_id = ENTITY_MONSTER_BERSERK;
 
 	gi.linkentity (self);
 

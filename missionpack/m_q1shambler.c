@@ -574,7 +574,9 @@ void SP_monster_q1_shambler (edict_t *self)
 			self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
 		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
+
 	self->common_name = "Shambler";
+	self->class_id = ENTITY_MONSTER_Q1_SHAMBLER;
 
 	gi.linkentity (self);
 

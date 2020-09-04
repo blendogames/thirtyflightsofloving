@@ -1099,6 +1099,8 @@ void SP_hint_path (edict_t *self)
 		return;
 	}
 
+	self->class_id = ENTITY_HINT_PATH;
+
 	// Lazarus: Corrections for mappers that can't follow instructions :-)
 	if (!self->targetname)
 		self->spawnflags |= HINT_ENDPOINT;

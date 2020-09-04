@@ -88,12 +88,13 @@ void SP_trigger_laser (edict_t *self)
 		return;
 	}
 
+	self->class_id = ENTITY_TRIGGER_LASER;
+
 	// if no wait, set default
 	if (!self->wait)
 	{
 		self->wait = 4;
 	}
-
 	G_SetMovedir (self->s.angles, self->movedir);
 	self->s.skinnum = 0xf2f2f0f0;	// colour
 	self->s.frame = 2;				// diameter

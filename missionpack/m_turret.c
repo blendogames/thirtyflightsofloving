@@ -671,6 +671,7 @@ void turret_wall_spawn (edict_t *turret)
 
 	ent = G_Spawn();
 	ent->classname = "turret_wall";
+	ent->class_id = ENTITY_TURRET_WALL;
 	VectorCopy (turret->s.origin, ent->s.origin);
 	VectorCopy (turret->s.angles, turret->deploy_angles);
 	VectorCopy (turret->s.angles, ent->s.angles);
@@ -1179,6 +1180,7 @@ void SP_monster_turret (edict_t *self)
 		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
 	self->common_name = "Sentry Turret";
+	self->class_id = ENTITY_MONSTER_TURRET;
 
 	// PMM  - turrets don't get mad at monsters, and visa versa
 	self->monsterinfo.aiflags |= AI_IGNORE_SHOTS;

@@ -30,6 +30,9 @@ frame="192"
 */
 void SP_misc_q1_zombie_crucified (edict_t *self)
 {
+	// precache
+	gi.soundindex ("q1zombie/idle_w2.wav");
+
 	self->movetype = MOVETYPE_NONE;
 	self->solid = SOLID_NOT;
 	VectorSet (self->mins, -16, -16, -24);
@@ -38,6 +41,7 @@ void SP_misc_q1_zombie_crucified (edict_t *self)
 	self->s.frame = 192;
 
 	self->common_name = "Crucified Zombie";
+	self->class_id = ENTITY_MISC_Q1_ZOMBIE_CRUCIFIED;
 
 	gi.linkentity (self);
 
@@ -157,6 +161,7 @@ void make_bubbles (edict_t *self)
 	bubble->count = 0;
 
 	bubble->common_name = "Bubble";
+	bubble->class_id = ENTITY_Q1_BUBBLE;
 
 	gi.linkentity (bubble);
 
@@ -174,6 +179,9 @@ void SP_misc_q1_air_bubbles (edict_t *self)
 		G_FreeEdict (self);
 		return;
 	}
+
+	self->class_id = ENTITY_MISC_Q1_BUBBLE_SPAWNER;
+
 	gi.modelindex ("sprites/s_bubble.sp2");
 	self->nextthink = level.time + 1;
 	self->think = make_bubbles;
@@ -197,6 +205,7 @@ void SP_misc_q1_globe(edict_t *self)
 	self->s.sound = 0;
 
 	self->common_name = "Globe Light";
+	self->class_id = ENTITY_MISC_Q1_GLOBE;
 
 	gi.linkentity (self);
 }
@@ -230,6 +239,7 @@ void SP_misc_q1_small_flame (edict_t *ent)
 	ent->think = q1_small_flame_think;
 
 	ent->common_name = "Small Flame";
+	ent->class_id = ENTITY_MISC_Q1_FLAME_SMALL;
 
 	gi.linkentity (ent);
 }
@@ -264,6 +274,7 @@ void SP_misc_q1_large_flame (edict_t *ent)
 	ent->s.renderfx = RF_FULLBRIGHT | RF_NOSHADOW;
 
 	ent->common_name = "Large Flame";
+	ent->class_id = ENTITY_MISC_Q1_FLAME_LARGE;
 
 	gi.linkentity (ent);
 }
@@ -297,6 +308,7 @@ void SP_misc_q1_torch (edict_t *ent)
 	ent->think = q1_torch_think;
 
 	ent->common_name = "Torch";
+	ent->class_id = ENTITY_MISC_Q1_TORCH;
 
 	gi.linkentity (ent);
 }
@@ -335,9 +347,12 @@ damage 9 for spike, 15 for superspike, 15 for laser
 */
 void SP_target_q1_trap (edict_t *self)
 {
+	self->class_id = ENTITY_TARGET_Q1_TRAPSHOOTER;
+
 	self->use = q1_use_target_trapshooter;
 	G_SetMovedir (self->s.angles, self->movedir);
-	if (self->spawnflags & 2) {
+	if (self->spawnflags & 2)
+	{
 		self->noise_index = gi.soundindex ("q1enforcer/enfire.wav");
 		gi.soundindex("q1enforcer/enfstop.wav");
 		if (!self->speed)
@@ -488,6 +503,10 @@ model="models/objects/q1explo/big/"
 */
 void SP_misc_q1_explobox (edict_t *self)
 {
+	// precache
+	gi.modelindex ("sprites/s_explod.sp2");
+	gi.soundindex ("q1weap/rocket/r_exp3.wav");
+
 	self->solid = SOLID_BBOX;
 	//self->solid = SOLID_NOT;
 	self->movetype = MOVETYPE_NONE;
@@ -523,6 +542,7 @@ void SP_misc_q1_explobox (edict_t *self)
 	self->nextthink = level.time + 2 * FRAMETIME;
 
 	self->common_name = "Exploding Box";
+	self->class_id = ENTITY_MISC_Q1_EXPLOBOX;
 
 	gi.linkentity (self);
 }
@@ -571,6 +591,7 @@ void q1_fireball_fly (edict_t *self)
 	lavaball->classname = "lavaball";
 
 	lavaball->common_name = "Lavaball";
+	lavaball->class_id = ENTITY_Q1_FIREBALL;
 
 	gi.linkentity (lavaball);
 
@@ -583,12 +604,15 @@ model="models/monsters/q1chthon/lavaball/"
 */
 void SP_misc_q1_fireball (edict_t *self)
 {
+	// precache
 	gi.modelindex ("models/monsters/q1chthon/lavaball/tris.md2");
+
 	self->nextthink = level.time + (4 + (random() * 3.0));
 	self->think = q1_fireball_fly;
 	self->classname = "fireball";
 
 	self->common_name = "Lavaball Spawner";
+	self->class_id = ENTITY_MISC_Q1_FIREBALL_SPAWNER;
 
 	gi.linkentity(self);
 }

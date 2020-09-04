@@ -1413,6 +1413,7 @@ void SP_monster_carrier (edict_t *self)
 		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
 	self->common_name = "Carrier";
+	self->class_id = ENTITY_MONSTER_CARRIER;
 
 	gi.linkentity (self);
 

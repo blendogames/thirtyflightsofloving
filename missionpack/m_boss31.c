@@ -400,7 +400,7 @@ void jorg_pain (edict_t *self, edict_t *other, float kick, int damage)
 	if (self->health < (self->max_health / 2))
 	{
 		self->s.skinnum |= 1;
-		if (!(self->fogclip & 2)) // custom bloodtype flag check
+		if ( !(self->fogclip & 2) ) // custom bloodtype flag check
 			self->blood_type = 3; // sparks and blood
 	}
 
@@ -709,7 +709,7 @@ void jorg_dead (edict_t *self)
 void jorg_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
 	self->s.skinnum |= 1;
-	if (!(self->fogclip & 2)) // custom bloodtype flag check
+	if ( !(self->fogclip & 2) ) // custom bloodtype flag check
 		self->blood_type = 3; // sparks and blood
 	self->s.sound = 0;
 	self->monsterinfo.power_armor_type = POWER_ARMOR_NONE;
@@ -920,6 +920,12 @@ void SP_monster_jorg (edict_t *self)
 	gi.linkentity (self);
 	
 	self->monsterinfo.currentmove = &jorg_move_stand;
+	if (self->health < 0)
+	{
+		mmove_t	*deathmoves[] = {&jorg_move_death,
+								 NULL};
+		M_SetDeath(self,(mmove_t **)&deathmoves);
+	}
 	self->monsterinfo.scale = MODEL_SCALE;
 
 	// Lazarus
@@ -931,7 +937,9 @@ void SP_monster_jorg (edict_t *self)
 			self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
 		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
+
 	self->common_name = "Jorg";
+	self->class_id = ENTITY_MONSTER_JORG;
 
 	walkmonster_start(self);
 	//PMM

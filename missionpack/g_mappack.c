@@ -23,6 +23,8 @@ void torch_think (edict_t *self)
 
 void SP_light_torch (edict_t *self) // New function by Beel.
 {
+	self->class_id = ENTITY_LIGHT_TORCH;
+
 	self->movetype = MOVETYPE_NONE;
 	self->solid = SOLID_NOT;
 	self->s.modelindex = gi.modelindex ("models/torch/tris.md2");
@@ -64,6 +66,8 @@ void bigflame_think (edict_t *self)
 
 void SP_light_flame (edict_t *self) // New function by Beel. (small flame)
 {
+	self->class_id = ENTITY_LIGHT_FLAME;
+
 	self->movetype = MOVETYPE_NONE;
 	self->solid = SOLID_NOT;
 	VectorSet (self->mins, -8, -8, 0);
@@ -336,13 +340,15 @@ void SP_model_spawn (edict_t *ent)
 {
 	char modelname[256];
 
-	//paranoia check
+	// paranoia check
 	if ((!ent->usermodel) && (!ent->spawnflags & NO_MODEL) && !(ent->spawnflags & PLAYER_MODEL))
 	{
 		gi.dprintf("%s without a model and without NO_MODEL spawnflag at %s\n", ent->classname, vtos(ent->s.origin));
 		G_FreeEdict(ent);
 		return;
 	}
+
+	ent->class_id = ENTITY_MODEL_SPAWN;
 
 	switch (ent->solidstate)
 	{

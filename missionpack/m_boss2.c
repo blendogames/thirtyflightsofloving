@@ -927,7 +927,9 @@ void SP_monster_boss2 (edict_t *self)
 			self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
 		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
+
 	self->common_name = "Hornet";
+	self->class_id = ENTITY_MONSTER_BOSS2;
 
 	flymonster_start (self);
 }

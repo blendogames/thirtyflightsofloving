@@ -1448,7 +1448,7 @@ void SP_func_plat2 (edict_t *ent)
 	}
 
 
-	//PMM Added to kill things it's being blocked by 
+	// PMM Added to kill things it's being blocked by 
 	if (!ent->dmg)
 		ent->dmg = 2;
 
@@ -1497,7 +1497,7 @@ void SP_func_plat2 (edict_t *ent)
 		}	
 	}
 
-	ent->postthink = train_move_children; //supports movewith
+	ent->postthink = train_move_children; // supports movewith
 
 	gi.linkentity (ent);
 
@@ -3248,12 +3248,14 @@ void train_move_children (edict_t *self)
 	vec3_t	parent_angle_change, offset;
 	qboolean    is_monster;
 
+	if (!self->inuse)
+		return;
 	if (!self->classname)
 		return;
 	if (!self->targetname)
 		return;
 
-	ent = g_edicts+1; // Skip the worldspawn
+	ent = g_edicts+1;	// Skip the worldspawn
 	for (i = 1; i < globals.num_edicts; i++, ent++)
 	{
 		if (!ent->classname)
@@ -3261,8 +3263,9 @@ void train_move_children (edict_t *self)
 		if (!ent->movewith)
 			continue;
 		if (!ent->inuse)
-			return;
-		if (!strcmp(ent->movewith, self->targetname))
+		//	break;
+			continue;
+		if ( !strcmp(ent->movewith, self->targetname) )
 		{
 			ent->movewith_ent = self;
 			// Backup and set movetype to push
@@ -3281,7 +3284,8 @@ void train_move_children (edict_t *self)
 				VectorCopy (ent->s.angles, ent->child_attach_angles);
 
 				// Knightmare- backup turret's old angle offset
-				if (!strcmp(ent->classname, "monster_turret") && ent->offset)
+			//	if ( !strcmp(ent->classname, "monster_turret") && ent->offset )
+				if ( (ent->class_id == ENTITY_MONSTER_TURRET) && ent->offset )
 					VectorCopy (ent->offset, ent->old_offset); 
 
 				ent->movewith_set = 1;
@@ -3315,12 +3319,16 @@ void train_move_children (edict_t *self)
 			*/
 
 			// For all but buttons, doors, and plats, move origin and match velocities
-			if ( strcmp(ent->classname, "func_door") && strcmp(ent->classname, "func_button")
-			//	&& strcmp(ent->classname, "func_door_secret") && strcmp(ent->classname, "func_door_secret2")
-				&& (ent->class_id != ENTITY_FUNC_DOOR_SECRET) && (ent->class_id != ENTITY_FUNC_DOOR_SECRET2)
+		/*	if ( strcmp(ent->classname, "func_door") && strcmp(ent->classname, "func_button")
+				&& strcmp(ent->classname, "func_door_secret") && strcmp(ent->classname, "func_door_secret2")
 				&& strcmp(ent->classname, "func_plat") && strcmp(ent->classname, "func_plat2")
 				&& strcmp(ent->classname, "func_water") && strcmp(ent->classname, "turret_wall")
-				&& (strcmp(ent->classname, "monster_turret") || !(ent->spawnflags & 128)) )
+				&& (strcmp(ent->classname, "monster_turret") || !(ent->spawnflags & 128)) )*/
+			if ( (ent->class_id != ENTITY_FUNC_DOOR) && (ent->class_id != ENTITY_FUNC_BUTTON)
+				&& (ent->class_id != ENTITY_FUNC_DOOR_SECRET) && (ent->class_id != ENTITY_FUNC_DOOR_SECRET2)
+				&& (ent->class_id != ENTITY_FUNC_PLAT) && (ent->class_id != ENTITY_FUNC_PLAT2)
+				&& (ent->class_id != ENTITY_FUNC_WATER) && (ent->class_id != ENTITY_TURRET_WALL)
+				&& ( (ent->class_id != ENTITY_MONSTER_TURRET) || !(ent->spawnflags & 128) ) )
 			{
 				VectorMA (self->s.origin, ent->movewith_offset[0], forward, ent->s.origin);
 				VectorMA (ent->s.origin, ent->movewith_offset[1], right, ent->s.origin);
@@ -3349,7 +3357,8 @@ void train_move_children (edict_t *self)
 			// Match angular velocities
 			if (self->turn_rider)
 			{
-				if (!strcmp(ent->classname, "func_rotating"))
+			//	if (!strcmp(ent->classname, "func_rotating"))
+				if (ent->class_id == ENTITY_FUNC_ROTATING)
 				{
 				/*	if (ent->movedir[0] > 0)
 						ent->s.angles[1] = self->s.angles[1];
@@ -3387,9 +3396,11 @@ void train_move_children (edict_t *self)
 					// their own.
 					if (!ent->do_not_rotate)
 					{
-						if ( !strcmp(ent->classname, "turret_breach") || !strcmp(ent->classname, "turret_base") )
+					//	if ( !strcmp(ent->classname, "turret_breach") || !strcmp(ent->classname, "turret_base") )
+						if ( (ent->class_id == ENTITY_TURRET_BREACH) || (ent->class_id == ENTITY_TURRET_BASE) )
 							VectorCopy (self->avelocity, ent->avelocity);
-						else if (!strcmp(ent->classname, "func_door_rotating"))
+					//	else if (!strcmp(ent->classname, "func_door_rotating"))
+						else if (ent->class_id == ENTITY_FUNC_DOOR_ROTATING)
 						{
 							VectorCopy (self->avelocity, ent->avelocity);
 						//	VectorCopy (parent_angle_change, ent->pos1);
@@ -3404,7 +3415,7 @@ void train_move_children (edict_t *self)
 							VectorCopy (ent->s.origin, ent->moveinfo.end_origin);
 							VectorCopy (ent->pos2,     ent->moveinfo.end_angles);
 						}
-						//don't move child's angles if not moving self
+						// don't move child's angles if not moving self
 						else if (ent->solid == SOLID_BSP) //&& (VectorLength(self->velocity) || VectorLength(self->avelocity)) )
 						{	// Brush models always start out with angles=0,0,0 (after G_SetMoveDir).
 							// Use more accuracy here.
@@ -3430,7 +3441,8 @@ void train_move_children (edict_t *self)
 				else if (is_monster)
 				{
 					// Knightmare- adjust monster_turret's aiming angles for yaw movement
-					if (!strcmp(ent->classname, "monster_turret") && amove[YAW] != 0)
+				//	if (!strcmp(ent->classname, "monster_turret") && (amove[YAW] != 0) )
+					if ( (ent->class_id == ENTITY_MONSTER_TURRET) && (amove[YAW] != 0) )
 					{
 						if (ent->offset && ent->old_offset && (ent->offset[1] != -1 && ent->offset[1] != -2))
 						{
@@ -3456,17 +3468,22 @@ void train_move_children (edict_t *self)
 			}
 			// Special cases:
 			// Func_door/func_button and trigger fields
-			if ( !strcmp(ent->classname, "func_door") || !strcmp(ent->classname, "func_button")
-			//	|| !strcmp(ent->classname, "func_door_secret") || !strcmp(ent->classname, "func_door_secret2")
-				|| (ent->class_id == ENTITY_FUNC_DOOR_SECRET) || (ent->class_id == ENTITY_FUNC_DOOR_SECRET2)
+		/*	if ( !strcmp(ent->classname, "func_door") || !strcmp(ent->classname, "func_button")
+				|| !strcmp(ent->classname, "func_door_secret") || !strcmp(ent->classname, "func_door_secret2")
 				|| !strcmp(ent->classname, "func_plat") || !strcmp(ent->classname, "func_plat2")
 				|| !strcmp(ent->classname, "func_water") || !strcmp(ent->classname, "turret_wall")
-				|| (!strcmp(ent->classname, "monster_turret") && ent->spawnflags & 128) )
+				|| ( !strcmp(ent->classname, "monster_turret") && (ent->spawnflags & 128) ) )*/
+			if ( (ent->class_id == ENTITY_FUNC_DOOR) || (ent->class_id == ENTITY_FUNC_BUTTON)
+				|| (ent->class_id == ENTITY_FUNC_DOOR_SECRET) || (ent->class_id == ENTITY_FUNC_DOOR_SECRET2)
+				|| (ent->class_id == ENTITY_FUNC_PLAT) || (ent->class_id == ENTITY_FUNC_PLAT2)
+				|| (ent->class_id == ENTITY_FUNC_WATER) || (ent->class_id == ENTITY_TURRET_WALL)
+				|| ( (ent->class_id == ENTITY_MONSTER_TURRET) && (ent->spawnflags & 128) ) )
 			{
 				VectorAdd (ent->s.angles, ent->org_angles, angles);
 				G_SetMovedir (angles, ent->movedir);
 				// Knightmare- these entities need special calculations
-				if (!strcmp(ent->classname, "monster_turret") || !strcmp(ent->classname, "turret_wall")) 
+			//	if (!strcmp(ent->classname, "monster_turret") || !strcmp(ent->classname, "turret_wall")) 
+				if ( (ent->class_id == ENTITY_MONSTER_TURRET) || (ent->class_id == ENTITY_TURRET_WALL) ) 
 				{
 					vec3_t		eforward, tangles;
 
@@ -3520,7 +3537,8 @@ void train_move_children (edict_t *self)
 						VectorAdd (ent->pos1, eforward, ent->pos2);
 					}
 				}
-				else if (!strcmp(ent->classname, "func_plat") || !strcmp(ent->classname, "func_plat2"))
+			//	else if (!strcmp(ent->classname, "func_plat") || !strcmp(ent->classname, "func_plat2"))
+				else if ( (ent->class_id == ENTITY_FUNC_PLAT) || (ent->class_id == ENTITY_FUNC_PLAT2) )
 				{
 					VectorMA (self->s.origin, ent->movewith_offset[0], forward, ent->pos1);
 					VectorMA (ent->pos1, ent->movewith_offset[1], right, ent->pos1);
@@ -3550,7 +3568,8 @@ void train_move_children (edict_t *self)
 					// movement routines
 					VectorCopy (self->velocity, ent->velocity);
 					// Sanity insurance:
-					if (!strcmp(ent->classname, "func_plat") || !strcmp(ent->classname, "func_plat2"))
+				//	if (!strcmp(ent->classname, "func_plat") || !strcmp(ent->classname, "func_plat2"))
+					 if ( (ent->class_id == ENTITY_FUNC_PLAT) || (ent->class_id == ENTITY_FUNC_PLAT2) )
 					{	// top and bottom states are reversed for plats
 						if (ent->moveinfo.state == STATE_BOTTOM)
 							VectorCopy (ent->pos2, ent->s.origin);
@@ -3571,13 +3590,18 @@ void train_move_children (edict_t *self)
 			if (amove[YAW])
 			{
 				// Cross fingers here... move bounding boxes of doors and buttons
-				if ( !strcmp(ent->classname, "func_door") || !strcmp(ent->classname, "func_button")
-				//	|| !strcmp(ent->classname, "func_door_secret") || !strcmp(ent->classname, "func_door_secret2")
-					|| (ent->class_id == ENTITY_FUNC_DOOR_SECRET) || (ent->class_id == ENTITY_FUNC_DOOR_SECRET2)
+			/*	if ( !strcmp(ent->classname, "func_door") || !strcmp(ent->classname, "func_button")
+					|| !strcmp(ent->classname, "func_door_secret") || !strcmp(ent->classname, "func_door_secret2")
 					|| !strcmp(ent->classname, "func_plat") || !strcmp(ent->classname, "func_plat2")
 					|| !strcmp(ent->classname, "func_water") || (ent->solid == SOLID_TRIGGER)
 					|| !strcmp(ent->classname, "turret_wall")
-					|| (!strcmp(ent->classname, "monster_turret") && ent->spawnflags & 128) )
+					|| ( !strcmp(ent->classname, "monster_turret") && (ent->spawnflags & 128) ) )*/
+				if ( (ent->class_id == ENTITY_FUNC_DOOR) || (ent->class_id == ENTITY_FUNC_BUTTON)
+					|| (ent->class_id == ENTITY_FUNC_DOOR_SECRET) || (ent->class_id == ENTITY_FUNC_DOOR_SECRET2)
+					|| (ent->class_id == ENTITY_FUNC_PLAT) || (ent->class_id == ENTITY_FUNC_PLAT2)
+					|| (ent->class_id == ENTITY_FUNC_WATER) || (ent->solid == SOLID_TRIGGER)
+					|| (ent->class_id == ENTITY_TURRET_WALL)
+					|| ( (ent->class_id == ENTITY_MONSTER_TURRET) && (ent->spawnflags & 128) ) )
 				{
 					float       ca, sa, yaw;
 					vec3_t      p00, p01, p10, p11;
@@ -3614,7 +3638,8 @@ void train_move_children (edict_t *self)
 			}
 
 			// FMOD 
-			if (!Q_stricmp(ent->classname, "target_playback"))
+		//	if (!Q_stricmp(ent->classname, "target_playback"))
+			if (ent->class_id == ENTITY_TARGET_PLAYBACK)
 				FMOD_UpdateSpeakerPos(ent);
 
 			// Correct func_door_rotating start/end positions
@@ -4582,10 +4607,10 @@ void func_train_find (edict_t *self)
 
 				VectorAdd (dir, e->s.origin, e->s.origin);
 				VectorCopy (e->s.origin, e->s.old_origin);
-				//This is now the child's original position
+				// This is now the child's original position
 				if ( (e->solid == SOLID_BSP) && strcmp(e->classname, "func_rotating")
 					&& strcmp(e->classname, "func_door_rotating"))
-					ReInitialize_Entity(e);
+					ReInitialize_Entity (e);
 				gi.linkentity (e);
 			}
 		}
@@ -5159,10 +5184,11 @@ void door_secret_done (edict_t *self)
 {
 	if (!(self->targetname) || (self->spawnflags & SECRET_ALWAYS_SHOOT))
 	{
-		self->health = 0;
+	//	self->health = 0;
+		self->health = self->max_health;	// Knightmare- restore max health
 		self->takedamage = DAMAGE_YES;
 	}
-	self->moveinfo.state = STATE_LOWEST;
+	self->moveinfo.state = STATE_LOWEST;	// Knightmare added
 
     // added sound
 	self->s.sound = 0;
@@ -5240,11 +5266,14 @@ void SP_func_door_secret (edict_t *ent)
 	
 	ent->use = door_secret_use;
 	ent->blocked = door_secret_blocked; // Knightmare- this was missing
-	ent->moveinfo.state = STATE_LOWEST;
+	ent->moveinfo.state = STATE_LOWEST;	// Knightmare added
 
 	if (!(ent->targetname) || (ent->spawnflags & SECRET_ALWAYS_SHOOT))
 	{
-		ent->health = 0;
+		if (!ent->health) {
+			ent->health = 1;	// Knightmare- was 0
+		}
+		ent->max_health = ent->health;	// Knightmare- store health value
 		ent->takedamage = DAMAGE_YES;
 		ent->die = door_secret_die;
 	}
@@ -5262,7 +5291,9 @@ void SP_func_door_secret (edict_t *ent)
 	// calculate positions
 	VectorCopy (ent->s.origin, ent->pos0);
 	AngleVectors (ent->s.angles, forward, right, up);
-	VectorClear (ent->s.angles);
+//	VectorClear (ent->s.angles);
+	VectorCopy (ent->s.angles, ent->move_angles);	// Knightmare- backup angles to move_angles
+	G_SetMovedir (ent->s.angles, ent->movedir);		// Knightmare- don't just clear angles, set movedir as well
 //	ent->side = 1.0 - (ent->spawnflags & SECRET_1ST_LEFT);
 
 	if (ent->spawnflags & SECRET_1ST_LEFT)
@@ -6013,7 +6044,7 @@ void SP_func_door_swinging (edict_t *self)
 {
 	int	pivot;
 
-	self->class_id = ENTITY_FUNC_PIVOT;
+	self->class_id = ENTITY_FUNC_DOOR_SWINGING;
 
 	pivot = self->spawnflags & 1;	// 1 means "start open" for normal doors, so turn it
 	self->spawnflags &= ~1;			// off temporarily until normal door initialization
@@ -6106,8 +6137,11 @@ void SP_func_bobbingwater(edict_t *self)
 {
 	vec3_t	abs_movedir;
 
+	self->class_id = ENTITY_FUNC_BOBBINGWATER;
+
 	if (!VectorLength(self->movedir))
 		G_SetMovedir (self->s.angles, self->movedir);
+
 	self->movetype = MOVETYPE_PUSH;
 	self->solid = SOLID_BSP;
 	gi.setmodel (self, self->model);
@@ -6312,6 +6346,8 @@ void pivot_init (edict_t *ent)
 
 void SP_func_pivot (edict_t *ent)
 {
+	ent->class_id = ENTITY_FUNC_PIVOT;
+
 	ent->solid = SOLID_BSP;
 	ent->movetype = MOVETYPE_PUSH;
 

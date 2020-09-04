@@ -805,6 +805,7 @@ void SP_monster_supertank (edict_t *self)
 	}
 
 	self->common_name = "Supertank";
+	self->class_id = ENTITY_MONSTER_SUPERTANK;
 
 	gi.linkentity (self);
 	

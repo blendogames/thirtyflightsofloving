@@ -416,6 +416,7 @@ void fire_blaster (edict_t *self, vec3_t start, vec3_t dir, int damage, int spee
 	if (hyper)
 		bolt->spawnflags = 1;
 	bolt->classname = "bolt";
+	bolt->class_id = ENTITY_BOLT;
 	gi.linkentity (bolt);
 
 	if (self->client)
@@ -460,6 +461,7 @@ void fire_blueblaster (edict_t *self, vec3_t start, vec3_t dir, int damage, int 
 	bolt->think = G_FreeEdict;
 	bolt->dmg = damage;
 	bolt->classname = "bolt";
+	bolt->class_id = ENTITY_BOLT;
 	gi.linkentity (bolt);
 
 	if (self->client)
@@ -609,7 +611,6 @@ void Grenade_Evade (edict_t *monster)
 	}
 }
 
-//static void Grenade_Explode (edict_t *ent)
 void Grenade_Explode (edict_t *ent)
 {
 	vec3_t		origin;
@@ -761,6 +762,7 @@ void fire_grenade (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int s
 	grenade->dmg = damage;
 	grenade->dmg_radius = damage_radius;
 	grenade->classname = "grenade";
+	grenade->class_id = ENTITY_GRENADE;
 
 	gi.linkentity (grenade);
 }
@@ -801,6 +803,7 @@ void fire_grenade2 (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int 
 	grenade->dmg = damage;
 	grenade->dmg_radius = damage_radius;
 	grenade->classname = "hgrenade";
+	grenade->class_id = ENTITY_HANDGRENADE;
 	if (held)
 		grenade->spawnflags = 3;
 	else
@@ -1062,6 +1065,7 @@ void fire_missile (edict_t *self, vec3_t start, vec3_t dir, int damage, int spee
 
 		missile->enemy     = home_target;
 		missile->classname = "homing rocket";
+		missile->class_id = ENTITY_ROCKET;
 		missile->nextthink = level.time + FRAMETIME;
 		missile->think = homing_think;
 		missile->starttime = level.time + 0.3; // play homing sound on 3rd frame
@@ -1076,6 +1080,7 @@ void fire_missile (edict_t *self, vec3_t start, vec3_t dir, int damage, int spee
 	else
 	{
 		missile->classname = "missile";
+		missile->class_id = ENTITY_ROCKET;
 		missile->nextthink = level.time + 8000.0f/speed;
 		missile->think = G_FreeEdict;
 		Rocket_Evade (missile, dir, speed);
@@ -1389,8 +1394,8 @@ void fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed
 		vec3_t	right, up;
 		vec3_t	lateral_speed;
 
-		AngleVectors(self->s.angles,NULL,right,up);
-		VectorCopy(self->velocity,lateral_speed);
+		AngleVectors (self->s.angles, NULL, right, up);
+		VectorCopy (self->velocity, lateral_speed);
 		lateral_speed[0] *= fabs(right[0]);
 		lateral_speed[1] *= fabs(right[1]);
 		lateral_speed[2] *= fabs(up[2]);
@@ -1420,6 +1425,7 @@ void fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed
 	}
 	else
 		rocket->classname = "rocket";
+	rocket->class_id = ENTITY_ROCKET;
 
 	rocket->owner = self;
 	rocket->touch = rocket_touch;
@@ -1983,6 +1989,7 @@ void fire_ionripper (edict_t *self, vec3_t start, vec3_t dir, int damage, int sp
 
 	ion = G_Spawn ();
 	ion->classname = "ion";
+	ion->class_id = ENTITY_ION;
 	VectorCopy (start, ion->s.origin);
 	VectorCopy (start, ion->s.old_origin);
 	vectoangles (dir, ion->s.angles);
@@ -1993,7 +2000,7 @@ void fire_ionripper (edict_t *self, vec3_t start, vec3_t dir, int damage, int sp
 	ion->solid = SOLID_BBOX;
 	ion->s.effects |= effect;
 
-	ion->s.renderfx |= RF_FULLBRIGHT | RF_NOSHADOW; //Knightmare- no shadow
+	ion->s.renderfx |= RF_FULLBRIGHT | RF_NOSHADOW; // Knightmare- no shadow
 
 	VectorClear (ion->mins);
 	VectorClear (ion->maxs);
@@ -2210,6 +2217,8 @@ void fire_rocket_heat (edict_t *self, vec3_t start, vec3_t dir, int damage, int 
 	edict_t *heat;
 
 	heat = G_Spawn();
+	heat->classname = "rocket";
+	heat->class_id = ENTITY_ROCKET;
 	VectorCopy (start, heat->s.origin);
 	VectorCopy (dir, heat->movedir);
 	vectoangles (dir, heat->s.angles);
@@ -2293,6 +2302,7 @@ void fire_plasma (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed
 
 	plasma = G_Spawn();
 	plasma->classname = "plasma";
+	plasma->class_id = ENTITY_PLASMA;
 	VectorCopy (start, plasma->s.origin);
 	VectorCopy (dir, plasma->movedir);
 	vectoangles (dir, plasma->s.angles);
@@ -2651,6 +2661,7 @@ void fire_trap (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int spee
 	trap->dmg = damage;
 	trap->dmg_radius = damage_radius;
 	trap->classname = "htrap";
+	trap->class_id = ENTITY_TRAP;
 	// RAFAEL 16-APR-98
 	trap->s.sound = gi.soundindex ("weapons/traploop.wav");
 	// END 16-APR-98
@@ -3295,6 +3306,7 @@ edict_t *Spawn_Goop (edict_t *ent, vec3_t start)
 	
 	VectorCopy (start, goop->s.origin);
 	goop->classname = "goop";
+	goop->class_id = ENTITY_GOOP;
 
 	goop->s.effects |= EF_BLUEHYPERBLASTER | EF_ANIM_ALLFAST;
 	// bat to get rid of the blue flag effect

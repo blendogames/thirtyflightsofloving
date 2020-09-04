@@ -1791,7 +1791,7 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 			|| !strcmp(ent->classname, "misc_banner") )
 			ent->s.renderfx &= ~RF_IR_VISIBLE;
 
-		//David Hyde's code for the origin offset
+		// David Hyde's code for the origin offset
 		VectorAdd(ent->absmin, ent->absmax, ent->origin_offset);
 		VectorScale(ent->origin_offset, 0.5, ent->origin_offset);
 		VectorSubtract(ent->origin_offset, ent->s.origin, ent->origin_offset);

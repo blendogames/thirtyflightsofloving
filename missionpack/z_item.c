@@ -119,6 +119,9 @@ void SP_misc_securitycamera (edict_t *self)
 	self->takedamage = DAMAGE_IMMORTAL; // health will not be deducted
 	self->pain = camera_pain;
 
+	self->common_name = "Security Camera";
+	self->class_id = ENTITY_MISC_SECURITYCAMERA;
+
 	gi.linkentity(self);
 }
 
@@ -351,6 +354,10 @@ void fire_empnuke (edict_t *ent, vec3_t center, int radius)
 
 //  empnuke->think = G_FreeEdict;
 //  empnuke->nextthink = level.time + 30;
+
+	empnuke->common_name = "EMP Nuke Center";
+	empnuke->class_id = ENTITY_Z_EMPNUKECENTER;
+
 	gi.linkentity (empnuke);
 
 //  gi.sound(empnuke, CHAN_VOICE, gi.soundindex("items/empnuke/emp_exp.wav"), 1, ATTN_NORM, 0);
@@ -466,6 +473,10 @@ void Use_PlasmaShield (edict_t *ent, gitem_t *item)
 	PlasmaShield->think = PlasmaShield_die;
 	PlasmaShield->nextthink = level.time + sk_plasmashield_life->value; // was 10
 
+	PlasmaShield->common_name = "Plasma Shield";
+	PlasmaShield->class_id = ENTITY_Z_PLASMASHIELD;
+
+
 	gi.linkentity (PlasmaShield);
 }
 //#endif	// USE_ZAERO_ITEMS_WEAPONS
@@ -491,6 +502,9 @@ void setupCrate (edict_t *self)
 	self->touch = barrel_touch;
 	self->think = M_droptofloor;
 	self->nextthink = level.time + 2 * FRAMETIME;
+
+	self->common_name = "Pushable Crate";
+	self->class_id = ENTITY_MISC_CRATE;
 
 	gi.linkentity(self);
 }
@@ -544,6 +558,9 @@ void SP_misc_seat (edict_t *self)
 
 	// make this pushable
 	setupCrate(self);
+
+	self->common_name = "Ejection Seat";
+	self->class_id = ENTITY_MISC_SEAT;
 }
 
 /*
@@ -583,6 +600,8 @@ void SP_misc_commdish (edict_t *self)
 		G_FreeEdict (self);
 		return;
 	}
+
+	self->class_id = ENTITY_MISC_COMMDISH;
 
 	self->solid = SOLID_BBOX;
 	self->movetype = MOVETYPE_STEP;
@@ -671,6 +690,8 @@ void barrier_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *
 
 void SP_func_barrier (edict_t *self)
 {
+	self->class_id = ENTITY_FUNC_BARRIER;
+
 	self->solid = SOLID_BBOX;
 	self->movetype = MOVETYPE_NONE;
 	self->s.modelindex = gi.modelindex("models/objects/wall/tris.md2");

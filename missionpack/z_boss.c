@@ -1807,6 +1807,7 @@ void SP_monster_zboss (edict_t *self)
 		self->blood_type = 2; // sparks
 
 	self->common_name = "Titan";
+	self->class_id = ENTITY_MONSTER_ZBOSS;
 
 	gi.linkentity (self);
 

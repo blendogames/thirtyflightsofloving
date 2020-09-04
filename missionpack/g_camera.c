@@ -122,6 +122,7 @@ void camera_on (edict_t *ent)
 	faker->viewheight   = ent->viewheight;
 	faker->inuse        = true;
 	faker->classname    = "camplayer";
+	faker->class_id		= ENTITY_CAMPLAYER;
 	faker->mass         = ent->mass;
 	faker->solid        = SOLID_BBOX;
 	faker->deadflag     = DEAD_NO;
@@ -196,12 +197,14 @@ edict_t *G_FindNextCamera (edict_t *camera, edict_t *monitor)
 
 	next = G_Find(NULL,FOFS(targetname),monitor->target);
 	if (!next) return NULL;
-	if (!next->count) {
+	if (!next->count)
+	{
 		
 		if (camera) {
 			next = camera;
 			next++;
-		} else
+		}
+		else
 			next = g_edicts;
 		
 		for ( ; next < &g_edicts[globals.num_edicts] ; next++)
@@ -238,7 +241,9 @@ edict_t *G_FindNextCamera (edict_t *camera, edict_t *monitor)
 			if (!Q_stricmp (next->targetname, monitor->target))
 				goto found_one;
 		}
-	} else {
+	}
+	else
+	{
 		int		which, start;
 
 		if (camera) {
@@ -249,9 +254,12 @@ edict_t *G_FindNextCamera (edict_t *camera, edict_t *monitor)
 			which = 1;
 		start = which;
 		next = g_edicts+1;
-		while (1) {
-			if (next->targetname) {
-				if (!Q_stricmp(next->targetname,monitor->target)) {
+		while (1)
+		{
+			if (next->targetname)
+			{
+				if (!Q_stricmp(next->targetname,monitor->target))
+				{
 					if (next->count == which) {
 						if (!next->inuse || (next->deadflag == DEAD_DEAD) ||
 							(!Q_stricmp (next->classname,"turret_breach") && (next->spawnflags & 16)) )
@@ -337,10 +345,14 @@ edict_t *G_FindPrevCamera (edict_t *camera, edict_t *monitor)
 			which = monitor->count;
 		start = which;
 		prev = g_edicts+1;
-		while (1) {
-			if (prev->targetname) {
-				if (!Q_stricmp(prev->targetname,monitor->target)) {
-					if (prev->count == which) {
+		while (1)
+		{
+			if (prev->targetname)
+			{
+				if (!Q_stricmp(prev->targetname,monitor->target))
+				{
+					if (prev->count == which)
+					{
 						if (!prev->inuse || (prev->deadflag == DEAD_DEAD) ||
 							(!Q_stricmp (prev->classname,"turret_breach") && (prev->spawnflags & 16)))
 						{

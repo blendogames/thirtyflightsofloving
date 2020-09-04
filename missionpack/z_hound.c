@@ -643,6 +643,7 @@ void SP_monster_hound (edict_t *self)
 	}
 
 	self->common_name = "HellHound";
+	self->class_id = ENTITY_MONSTER_HOUND;
 
 	gi.linkentity (self);
 
@@ -720,6 +721,7 @@ void hound_createHound (edict_t *self, float healthPercent)
 		hound->monsterinfo.flies = 0.60;
 
 	hound->common_name = "HellHound";
+	hound->class_id = ENTITY_MONSTER_HOUND;
 
 //	monster_start(hound);
 

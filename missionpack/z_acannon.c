@@ -923,6 +923,7 @@ void SP_monster_autocannon (edict_t *self)
 
 	// Lazarus
 	self->common_name = "Autocannon";
+	self->class_id = ENTITY_MONSTER_AUTOCANNON;
 
 	gi.linkentity(self);
 }

@@ -500,7 +500,9 @@ void SP_monster_dog (edict_t *self)
 			self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
 		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
+
 	self->common_name = "Rottweiler";
+	self->class_id = ENTITY_MONSTER_DOG;
 
 	gi.linkentity (self);
 	

@@ -4,6 +4,8 @@
 
 void SP_target_lock_digit (edict_t *self)
 {
+	self->class_id = ENTITY_TARGET_LOCK_DIGIT;
+
 	self->movetype = MOVETYPE_PUSH;
 	gi.setmodel (self, self->model);
 	self->solid = SOLID_BSP;
@@ -28,7 +30,7 @@ void target_lock_use (edict_t *self, edict_t *other, edict_t *activator)
 		n = e->count - 1;
 		current[n] = '0' + e->s.frame;
 	}
-	if(strcmp(current,self->key_message)==0)
+	if (strcmp(current,self->key_message)==0)
 	{
 		copy_message  = self->message;
 		self->message = NULL;
@@ -37,10 +39,10 @@ void target_lock_use (edict_t *self, edict_t *other, edict_t *activator)
 	}
 	else
 	{
-		if(self->message) gi.centerprintf(activator,self->message);
-		if(self->pathtarget) {
+		if (self->message) gi.centerprintf(activator,self->message);
+		if (self->pathtarget) {
 			e = G_Find(NULL,FOFS(targetname),self->pathtarget);
-			if(e) e->use(e,other,activator);
+			if (e) e->use(e,other,activator);
 		}
 		else {
 			BeepBeep(activator);
@@ -50,7 +52,7 @@ void target_lock_use (edict_t *self, edict_t *other, edict_t *activator)
 
 void lock_digit_increment (edict_t *digit, edict_t *activator)
 {
-	if(digit->s.frame == 9)
+	if (digit->s.frame == 9)
 		digit->s.frame = 0;
 	else
 		digit->s.frame++;
@@ -110,6 +112,9 @@ void SP_target_lock (edict_t *self)
 		G_FreeEdict(self);
 		return;
 	}
+
+	self->class_id = ENTITY_TARGET_LOCK;
+
 	if (self->spawnflags & 2) game.lock_hud = true;
 	if (!self->key_message)
 		self->key_message = "000000000";
@@ -128,9 +133,9 @@ void lock_code_use (edict_t *self, edict_t *other, edict_t *activator)
 {
 	int		i, L;
 	char	message[64];
-	if(self->spawnflags & 1)
+	if (self->spawnflags & 1)
 	{
-		if(!strlen(game.lock_code))
+		if (!strlen(game.lock_code))
 		{
 			gi.dprintf("Lock has not been properly initialized.\n");
 			return;
@@ -145,7 +150,7 @@ void lock_code_use (edict_t *self, edict_t *other, edict_t *activator)
 	{
 		edict_t *lock;
 		lock = G_Find(NULL,FOFS(targetname),self->target);
-		if(!lock)
+		if (!lock)
 			gi.dprintf("Target of target_lock_code does not exist\n");
 		else
 		{
@@ -160,7 +165,9 @@ void lock_code_use (edict_t *self, edict_t *other, edict_t *activator)
 
 void SP_target_lock_code (edict_t *self)
 {
-	if(!self->target && !(self->spawnflags & 1))
+	self->class_id = ENTITY_TARGET_LOCK_CODE;
+
+	if (!self->target && !(self->spawnflags & 1))
 	{
 		gi.dprintf("non-crosslevel target_lock_code w/o target\n");
 		G_FreeEdict(self);
@@ -171,28 +178,28 @@ void SP_target_lock_code (edict_t *self)
 void lock_clue_use (edict_t *self, edict_t *other, edict_t *activator)
 {
 	int		i, L;
-	if(self->spawnflags & 1)
+	if (self->spawnflags & 1)
 	{
-		if(!strlen(game.lock_code))
+		if (!strlen(game.lock_code))
 		{
 			gi.dprintf("Lock has not been properly initialized.\n");
 			return;
 		}
 		L = (int)strlen(game.lock_code);
 		for(i=0; i<L; i++)
-			if(self->message[i] != '?') game.lock_revealed |= 1<<i;
+			if (self->message[i] != '?') game.lock_revealed |= 1<<i;
 	}
 	else
 	{
 		edict_t *lock;
 		lock = G_Find(NULL,FOFS(targetname),self->target);
-		if(!lock)
+		if (!lock)
 			gi.dprintf("Target of target_lock_clue does not exist\n");
 		else
 		{
 			L = min(8, (int)strlen(lock->key_message));
 			for(i=0; i<L; i++)
-				if(self->message[i] != '?') game.lock_revealed |= 1<<i;
+				if (self->message[i] != '?') game.lock_revealed |= 1<<i;
 		}
 	}
 }
@@ -203,7 +210,7 @@ void lock_clue_think(edict_t *self)
 	int		unrevealed_count;
 	edict_t *e;
 
-	if(!self->team)
+	if (!self->team)
 		return;
 
 	unrevealed_count = 0;
@@ -212,16 +219,16 @@ void lock_clue_think(edict_t *self)
 		if (!e->count)
 			continue;
 		n = e->count - 1;
-		if(game.lock_revealed & 1<<n)
+		if (game.lock_revealed & 1<<n)
 			e->s.frame = game.lock_code[n] - '0';
 		else
 		{
 			e->s.frame++; // spin unknown digits
-			if(e->s.frame > 9) e->s.frame = 0;
+			if (e->s.frame > 9) e->s.frame = 0;
 			unrevealed_count++;
 		}
 	}
-	if(unrevealed_count)
+	if (unrevealed_count)
 	{
 		self->nextthink = level.time + FRAMETIME;
 		gi.linkentity(self);
@@ -233,7 +240,7 @@ void lock_clue_initialize(edict_t *self)
 	// show the same numbers across the board.
 
 	edict_t *e;
-	if(self->team)
+	if (self->team)
 	{
 		for (e = self->teammaster; e; e = e->teamchain)
 		{
@@ -248,7 +255,9 @@ void lock_clue_initialize(edict_t *self)
 }
 void SP_target_lock_clue (edict_t *self)
 {
-	if(!self->target && !(self->spawnflags & 1))
+	self->class_id = ENTITY_TARGET_LOCK_CLUE;
+
+	if (!self->target && !(self->spawnflags & 1))
 	{
 		gi.dprintf("non-crosslevel target_lock_clue w/o target\n");
 		G_FreeEdict(self);

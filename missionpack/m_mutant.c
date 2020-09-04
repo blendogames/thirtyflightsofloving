@@ -754,6 +754,7 @@ void SP_monster_mutant (edict_t *self)
 		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
 	self->common_name = "Mutant";
+	self->class_id = ENTITY_MONSTER_MUTANT;
 
 	gi.linkentity (self);
 	

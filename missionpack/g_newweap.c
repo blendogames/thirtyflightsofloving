@@ -78,6 +78,7 @@ void fire_flechette (edict_t *self, vec3_t start, vec3_t dir, int damage, int sp
 
 	flechette = G_Spawn();
 	flechette->classname = "flechette";
+	flechette->class_id = ENTITY_FLECHETTE;
 	VectorCopy (start, flechette->s.origin);
 	VectorCopy (start, flechette->s.old_origin);
 	vectoangles2 (dir, flechette->s.angles);
@@ -555,7 +556,7 @@ void prox_land (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
 			Prox_Explode(ent);
 			return;
 		}
-		//Knightmare- stick to bmodels
+		// Knightmare- stick to bmodels
 		if (other->solid == SOLID_BSP && other->movetype != MOVETYPE_CONVEYOR
 			&& (other->movetype == MOVETYPE_PUSH || other->movetype == MOVETYPE_PUSHABLE))
 		{
@@ -712,6 +713,7 @@ void fire_prox (edict_t *self, vec3_t start, vec3_t aimdir, int damage_multiplie
 	prox->think = Prox_Explode;
 	prox->dmg = sk_prox_damage->value*damage_multiplier;
 	prox->classname = "prox";
+	prox->class_id = ENTITY_MINE_PROX;
 	prox->svflags |= SVF_DAMAGEABLE;
 	prox->flags |= FL_MECHANICAL;
 
@@ -1622,19 +1624,19 @@ void Nuke_Think(edict_t *ent)
 
 			if ((ent->wait - level.time) <= (sk_nuke_life->value/2.0))
 			{
-//				ent->s.sound = gi.soundindex ("weapons/nukewarn.wav");
-//				gi.sound (ent, CHAN_NO_PHS_ADD+CHAN_VOICE, gi.soundindex ("weapons/nukewarn2.wav"), 1, ATTN_NORM, 0);
+			//	ent->s.sound = gi.soundindex ("weapons/nukewarn.wav");
+			//	gi.sound (ent, CHAN_NO_PHS_ADD+CHAN_VOICE, gi.soundindex ("weapons/nukewarn2.wav"), 1, ATTN_NORM, 0);
 				gi.sound (ent, CHAN_NO_PHS_ADD+CHAN_VOICE, gi.soundindex ("weapons/nukewarn2.wav"), 1, attenuation, 0);
-//				gi.sound (ent, CHAN_VOICE, gi.soundindex ("weapons/nukewarn2.wav"), 1, ATTN_NORM, 0);
-//				gi.dprintf ("time %2.2f\n", ent->wait-level.time);
+			//	gi.sound (ent, CHAN_VOICE, gi.soundindex ("weapons/nukewarn2.wav"), 1, ATTN_NORM, 0);
+			//	gi.dprintf ("time %2.2f\n", ent->wait-level.time);
 				ent->timestamp = level.time + 0.3;
 			}
 			else
 			{
 				gi.sound (ent, CHAN_NO_PHS_ADD+CHAN_VOICE, gi.soundindex ("weapons/nukewarn2.wav"), 1, attenuation, 0);
-//				gi.sound (ent, CHAN_VOICE, gi.soundindex ("weapons/nukewarn2.wav"), 1, ATTN_NORM, 0);
+			//	gi.sound (ent, CHAN_VOICE, gi.soundindex ("weapons/nukewarn2.wav"), 1, ATTN_NORM, 0);
 				ent->timestamp = level.time + 0.5;
-//				gi.dprintf ("time %2.2f\n", ent->wait-level.time);
+			//	gi.dprintf ("time %2.2f\n", ent->wait-level.time);
 			}
 		}
 	}
@@ -1643,8 +1645,8 @@ void Nuke_Think(edict_t *ent)
 		if (ent->timestamp <= level.time)
 		{
 			gi.sound (ent, CHAN_NO_PHS_ADD+CHAN_VOICE, gi.soundindex ("weapons/nukewarn2.wav"), 1, attenuation, 0);
-//			gi.sound (ent, CHAN_VOICE, gi.soundindex ("weapons/nukewarn2.wav"), 1, ATTN_NORM, 0);
-//				gi.dprintf ("time %2.2f\n", ent->wait-level.time);
+		//	gi.sound (ent, CHAN_VOICE, gi.soundindex ("weapons/nukewarn2.wav"), 1, ATTN_NORM, 0);
+		//		gi.dprintf ("time %2.2f\n", ent->wait-level.time);
 			ent->timestamp = level.time + 1.0;
 		}
 		ent->nextthink = level.time + FRAMETIME;
@@ -1711,6 +1713,7 @@ void fire_nuke (edict_t *self, vec3_t start, vec3_t aimdir, int speed)
 //		gi.dprintf ("nuke modifier = %d, damage = %d, radius = %f\n", damage_modifier, nuke->dmg, nuke->dmg_radius);
 
 	nuke->classname = "nuke";
+	nuke->class_id = ENTITY_NUKE;
 	nuke->die = nuke_die;
 
 	gi.linkentity (nuke);
@@ -1954,6 +1957,7 @@ void fire_nbomb (edict_t *self, vec3_t start, vec3_t aimdir, int speed)
 //		gi.dprintf ("nbomb modifier = %d, damage = %d, radius = %f\n", damage_modifier, nbomb->dmg, nbomb->dmg_radius);
 
 	nbomb->classname = "nbomb";
+	nbomb->class_id = ENTITY_NBOMB;
 	nbomb->die = nbomb_die;
 
 	gi.linkentity (nbomb);
@@ -2304,6 +2308,7 @@ void fire_tesla (edict_t *self, vec3_t start, vec3_t aimdir, int damage_multipli
 	tesla->dmg = sk_tesla_damage->value * damage_multiplier;
 //	tesla->dmg = 0;
 	tesla->classname = "tesla";
+	tesla->class_id = ENTITY_MINE_TESLA;
 	tesla->svflags |= SVF_DAMAGEABLE;
 	tesla->clipmask = MASK_SHOT|CONTENTS_SLIME|CONTENTS_LAVA;
 	tesla->flags |= FL_MECHANICAL;
@@ -2645,6 +2650,7 @@ void fire_blaster2 (edict_t *self, vec3_t start, vec3_t dir, int damage, int spe
 	bolt->think = G_FreeEdict;
 	bolt->dmg = damage;
 	bolt->classname = "bolt2";
+	bolt->class_id = ENTITY_BOLT2;
  	gi.linkentity (bolt);
 
 	if (self->client)
@@ -2948,6 +2954,7 @@ void fire_tracker (edict_t *self, vec3_t start, vec3_t dir, int damage, int spee
 	tracker->owner = self;
 	tracker->dmg = damage;
 	tracker->classname = "tracker";
+	tracker->class_id = ENTITY_TRACKER;
 	gi.linkentity (tracker);
 
 	if (enemy)

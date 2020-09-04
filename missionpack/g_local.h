@@ -2352,7 +2352,7 @@ struct edict_s
 	char		*deathtarget;
 	char		*combattarget;
 	edict_t		*target_ent;
-	edict_t		*movewith_ent;  //Knightmare- movewith entity
+	edict_t		*movewith_ent;  // Knightmare- movewith entity
 	edict_t		*movewith_next;
 	edict_t		*from;
 	edict_t		*to;

@@ -361,6 +361,7 @@ void fire_doppleganger (edict_t *ent, vec3_t start, vec3_t aimdir)
 	base->think = doppleganger_timeout;
 
 	base->classname = "doppleganger";
+	base->class_id = ENTITY_DOPPLEGANGER;
 
 	gi.linkentity (base);
 

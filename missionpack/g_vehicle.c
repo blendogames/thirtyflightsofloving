@@ -411,7 +411,7 @@ void vehicle_think (edict_t *self)
 		}
 	}
 //	if(self->movewith_next && (self->movewith_next->movewith_ent == self))
-//		set_child_movement(self);
+//		set_child_movement (self);
 }
 
 void turn_vehicle (edict_t *self)
@@ -422,13 +422,16 @@ void turn_vehicle (edict_t *self)
 }
 void SP_func_vehicle (edict_t *self)
 {
+	self->class_id = ENTITY_FUNC_VEHICLE;
+
 	self->ideal_yaw = self->s.angles[YAW];
 	VectorClear (self->s.angles);
 	self->solid = SOLID_BSP;
 	gi.setmodel (self, self->model);
 
 	// usermodel (for alias model vehicles) goes on modelindex2
-	if (self->usermodel && strlen(self->usermodel)) {
+	if (self->usermodel && strlen(self->usermodel))
+	{
 		char	modelname[256];
 		// check for "models/" already in path
 		if ( !strncmp(self->usermodel, "models/", 7) )
@@ -476,6 +479,7 @@ void SP_func_vehicle (edict_t *self)
 	if (self->health) {
 		self->die = func_vehicle_explode;
 		self->takedamage = DAMAGE_YES;
-	} else
+	}
+	else
 		self->takedamage = DAMAGE_NO;
 }

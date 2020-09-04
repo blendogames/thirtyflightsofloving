@@ -211,6 +211,7 @@ void Tag_DropToken (edict_t *ent, gitem_t *item)
 
 //	tag_token->classname = item->classname;
 	tag_token->classname = "dm_tag_token";	// Knightmare- classname of the tag token item is NULL!
+	tag_token->class_id = ENTITY_TAGTOKEN;
 	tag_token->item = item;
 	tag_token->spawnflags = DROPPED_ITEM;
 	tag_token->s.effects = EF_ROTATE | EF_TAGTRAIL;
@@ -324,6 +325,7 @@ void SP_dm_tag_token (edict_t *self)
 	tag_count = 0;
 
 	self->classname = "dm_tag_token";
+	self->class_id = ENTITY_TAGTOKEN;
 	self->model = "models/items/tagtoken/tris.md2";
 	self->count = 1;
 	SpawnItem (self, FindItem ("Tag Token"));

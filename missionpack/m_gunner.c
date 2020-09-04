@@ -1151,6 +1151,7 @@ void SP_monster_gunner (edict_t *self)
 		self->monsterinfo.flies = 0.30;
 
 	self->common_name = "Gunner";
+	self->class_id = ENTITY_MONSTER_GUNNER;
 
 	gi.linkentity (self);
 

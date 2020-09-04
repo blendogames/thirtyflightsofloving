@@ -497,6 +497,7 @@ void SP_monster_handler (edict_t *self)
 		self->monsterinfo.flies = 0.40;
 
 	self->common_name = "Enforcer with HellHound";
+	self->class_id = ENTITY_MONSTER_HANDLER;
 
 	gi.linkentity (self);
 

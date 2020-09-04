@@ -739,6 +739,7 @@ void SP_monster_floater (edict_t *self)
 		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
 	self->common_name = "Technician";
+	self->class_id = ENTITY_MONSTER_FLOATER;
 
 	gi.linkentity (self);
 

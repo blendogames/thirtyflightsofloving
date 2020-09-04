@@ -95,16 +95,16 @@ qboolean gekk_check_jump_hazard (edict_t *self, qboolean watertoland, qboolean f
 	// Lazarus: Don't intentionally move closer to a grenade,
 	//          but don't perform this check if we're already evading some
 	//          other problem (maybe even this grenade)
-	if(!(self->monsterinfo.aiflags & AI_CHASE_THING))
+	if (!(self->monsterinfo.aiflags & AI_CHASE_THING))
 	{
 		grenade = NULL;
 		while( (grenade = findradius(grenade,neworg,128)) != NULL)
 		{
-			if(!grenade->inuse)
+			if (!grenade->inuse)
 				continue;
-			if(!grenade->classname)
+			if (!grenade->classname)
 				continue;
-			if(!Q_stricmp(grenade->classname,"grenade") || !Q_stricmp(grenade->classname,"hgrenade"))
+			if (!Q_stricmp(grenade->classname,"grenade") || !Q_stricmp(grenade->classname,"hgrenade"))
 			{
 				VectorSubtract(grenade->s.origin, oldorg, dir);
 				g1 = VectorLength(dir);
@@ -786,6 +786,8 @@ void fire_loogie (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed
 	loogie->nextthink = level.time + 2;
 	loogie->think = G_FreeEdict;
 	loogie->dmg = damage;
+	loogie->classname = "loogie";
+	loogie->class_id = ENTITY_LOOGIE;
 	gi.linkentity (loogie);
 
 	tr = gi.trace (self->s.origin, NULL, NULL, loogie->s.origin, loogie, MASK_SHOT);
@@ -801,7 +803,7 @@ void fire_loogie (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed
 
 void gekk_loogie_delayed_start (edict_t *loogie)
 {
-	if(g_edicts[1].linkcount)
+	if (g_edicts[1].linkcount)
 	{
 		VectorScale(loogie->movedir,loogie->moveinfo.speed,loogie->velocity);
 		loogie->nextthink = level.time + 2;
@@ -849,7 +851,7 @@ void loogie (edict_t *self)
 	end[2] += self->enemy->viewheight;
 
 	// Lazarus fog reduction of accuracy
-	if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+	if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 	{
 		end[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 		end[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -1360,7 +1362,7 @@ void gekk_dead (edict_t *self)
 		M_FlyCheck (self);
 	}
 	// Lazarus monster fade
-	if(world->effects & FX_WORLDSPAWN_CORPSEFADE)
+	if (world->effects & FX_WORLDSPAWN_CORPSEFADE)
 	{
 		self->think=FadeDieSink;
 		self->nextthink=level.time+corpse_fadetime->value;
@@ -1787,16 +1789,16 @@ void SP_monster_gekk (edict_t *self)
 	gi.modelindex ("models/objects/gekkgib/leg/tris.md2");
 	gi.modelindex ("models/objects/gekkgib/head/tris.md2");
 	
-	if(!self->health)
+	if (!self->health)
 	{
 		if (skill->value == 0)
 			self->health = 120;
 		else
 			self->health = 150;
 	}
-	if(!self->gib_health)
+	if (!self->gib_health)
 		self->gib_health = -100;
-	if(!self->mass)
+	if (!self->mass)
 		self->mass = 300;
 
 	self->pain = gekk_pain;
@@ -1819,7 +1821,7 @@ void SP_monster_gekk (edict_t *self)
 		self->monsterinfo.flies = 0.70;
 
 	// Lazarus
-	if(self->powerarmor)
+	if (self->powerarmor)
 	{
 		if (self->powerarmortype == 1)
 			self->monsterinfo.power_armor_type = POWER_ARMOR_SCREEN;
@@ -1827,7 +1829,9 @@ void SP_monster_gekk (edict_t *self)
 			self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
 		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
+
 	self->common_name = "Gekk";
+	self->class_id = ENTITY_MONSTER_GEKK;
 
 	if (!self->blood_type)
 		self->blood_type = 1; //Knightmare- set this for blood color

@@ -1074,6 +1074,7 @@ void SP_monster_tank (edict_t *self)
 			self->gib_health = -400;
 		self->common_name = "Tank";
 	}
+	self->class_id = ENTITY_MONSTER_TANK;
 
 	if (!self->mass)
 		self->mass = 500;

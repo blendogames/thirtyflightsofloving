@@ -716,7 +716,9 @@ void SP_monster_boss5 (edict_t *self)
 		self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
 		self->monsterinfo.power_armor_power = 400;
 	}
+
 	self->common_name = "Beta Class Supertank";
+	self->class_id = ENTITY_MONSTER_SUPERTANK_BETA;
 
 	walkmonster_start(self);
 

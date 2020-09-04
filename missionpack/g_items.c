@@ -273,7 +273,7 @@ void DoRespawn (edict_t *ent)
 
 //=====
 //ROGUE
-	if(randomrespawn && randomrespawn->value)
+	if (randomrespawn && randomrespawn->value)
 	{
 		edict_t *newEnt;
 
@@ -281,7 +281,7 @@ void DoRespawn (edict_t *ent)
 		
 		// if we've changed entities, then do some sleight of hand.
 		// otherwise, the old entity will respawn
-		if(newEnt)
+		if (newEnt)
 		{
 			G_FreeEdict (ent);
 			ent = newEnt;
@@ -327,15 +327,15 @@ qboolean Pickup_Powerup (edict_t *ent, edict_t *other)
 		return false;
 
 #ifdef JETPACK_MOD
-	if( !Q_stricmp(ent->classname,"item_jetpack") )
+	if ( !Q_stricmp(ent->classname,"item_jetpack") )
 	{
 		gitem_t *fuel;
 
-		if( quantity >= 1 )
+		if ( quantity >= 1 )
 			return false;
 
 		fuel = FindItem("Fuel");
-		if(ent->count < 0)
+		if (ent->count < 0)
 		{
 			other->client->jetpack_infinite = true;
 			Add_Ammo(other,fuel,100000);
@@ -366,7 +366,7 @@ qboolean Pickup_Powerup (edict_t *ent, edict_t *other)
 
 #ifdef JETPACK_MOD
 		// DON'T Instant-use Jetpack
-		if(ent->item->use == Use_Jet) return true;
+		if (ent->item->use == Use_Jet) return true;
 #endif
 
 		if ( ((int)dmflags->value & DF_INSTANT_ITEMS)
@@ -382,7 +382,7 @@ qboolean Pickup_Powerup (edict_t *ent, edict_t *other)
 			ent->item->use (other, ent->item);
 		}
 //PGM
-	/*	if(ent->item->use)
+	/*	if (ent->item->use)
 			ent->item->use (other, ent->item);
 		else
 			gi.dprintf("Powerup has no use function!\n");*/
@@ -403,14 +403,14 @@ void Drop_General (edict_t *ent, gitem_t *item)
 #ifdef JETPACK_MOD
 void Drop_Jetpack (edict_t *ent, gitem_t *item)
 {
-	if(ent->client->jetpack)
+	if (ent->client->jetpack)
 		gi.cprintf(ent,PRINT_HIGH,"Cannot drop jetpack in use\n");
 	else
 	{
 		edict_t	*dropped;
 
 		dropped = Drop_Item (ent, item);
-		if(ent->client->jetpack_infinite)
+		if (ent->client->jetpack_infinite)
 		{
 			dropped->count = -1;
 			ent->client->pers.inventory[fuel_index] = 0;
@@ -419,7 +419,7 @@ void Drop_Jetpack (edict_t *ent, gitem_t *item)
 		else
 		{
 			dropped->count = ent->client->pers.inventory[fuel_index];
-			if(dropped->count > 500)
+			if (dropped->count > 500)
 				dropped->count = 500;
 			ent->client->pers.inventory[fuel_index] -= dropped->count;
 		}
@@ -836,7 +836,7 @@ void Use_Compass (edict_t *ent, gitem_t *item)
 	int ang;
 
 	ang = (int)(ent->client->v_angle[1]);
-	if(ang<0)
+	if (ang<0)
 		ang += 360;
 
 	gi.cprintf(ent, PRINT_HIGH, "Origin: %0.0f,%0.0f,%0.0f    Dir: %d\n", ent->s.origin[0], ent->s.origin[1],
@@ -885,10 +885,10 @@ void Use_Doppleganger (edict_t *ent, gitem_t *item)
 
 	VectorMA(ent->s.origin, 48, forward, createPt);
 
-	if(!FindSpawnPoint(createPt, ent->mins, ent->maxs, spawnPt, 32))
+	if (!FindSpawnPoint(createPt, ent->mins, ent->maxs, spawnPt, 32))
 		return;
 
-	if(!CheckGroundSpawnPoint(spawnPt, ent->mins, ent->maxs, 64, -1))
+	if (!CheckGroundSpawnPoint(spawnPt, ent->mins, ent->maxs, 64, -1))
 		return;
 
 	ent->client->pers.inventory[ITEM_INDEX(item)]--;
@@ -902,7 +902,7 @@ qboolean Pickup_Doppleganger (edict_t *ent, edict_t *other)
 {
 	int		quantity;
 
-	//if(!(deathmatch->value))		// item is DM only
+	//if (!(deathmatch->value))		// item is DM only
 		//return false;
 
 	quantity = other->client->pers.inventory[ITEM_INDEX(ent->item)];
@@ -922,7 +922,7 @@ qboolean Pickup_Sphere (edict_t *ent, edict_t *other)
 {
 	int		quantity;
 
-	if(other->client && other->client->owned_sphere)
+	if (other->client && other->client->owned_sphere)
 	{
 //		gi.cprintf(other, PRINT_HIGH, "Only one sphere to a customer!\n");
 	//	return false;
@@ -944,7 +944,7 @@ qboolean Pickup_Sphere (edict_t *ent, edict_t *other)
 		if (((int)dmflags->value & DF_INSTANT_ITEMS))
 		{
 //PGM
-			if(ent->item->use)
+			if (ent->item->use)
 				ent->item->use (other, ent->item);
 			else
 				gi.dprintf("Powerup has no use function!\n");
@@ -957,7 +957,7 @@ qboolean Pickup_Sphere (edict_t *ent, edict_t *other)
 
 void Use_Defender (edict_t *ent, gitem_t *item)
 {
-	if(ent->client && ent->client->owned_sphere)
+	if (ent->client && ent->client->owned_sphere)
 	{
 		gi.cprintf(ent, PRINT_HIGH, "Only one sphere at a time!\n");
 		return;
@@ -971,7 +971,7 @@ void Use_Defender (edict_t *ent, gitem_t *item)
 
 void Use_Hunter (edict_t *ent, gitem_t *item)
 {
-	if(ent->client && ent->client->owned_sphere)
+	if (ent->client && ent->client->owned_sphere)
 	{
 		gi.cprintf(ent, PRINT_HIGH, "Only one sphere at a time!\n");
 		return;
@@ -985,7 +985,7 @@ void Use_Hunter (edict_t *ent, gitem_t *item)
 
 void Use_Vengeance (edict_t *ent, gitem_t *item)
 {
-	if(ent->client && ent->client->owned_sphere)
+	if (ent->client && ent->client->owned_sphere)
 	{
 		gi.cprintf(ent, PRINT_HIGH, "Only one sphere at a time!\n");
 		return;
@@ -2144,7 +2144,7 @@ void Item_TriggeredSpawn (edict_t *self, edict_t *other, edict_t *activator)
 void SetTriggeredSpawn (edict_t *ent)
 {
 	// don't do anything on key_power_cubes.
-	if(!strcmp(ent->classname, "key_power_cube"))
+	if (!strcmp(ent->classname, "key_power_cube"))
 		return;
 
 	ent->think = NULL;
@@ -4877,6 +4877,7 @@ void SP_item_health (edict_t *self)
 		G_FreeEdict (self);
 		return;
 	}
+	self->class_id = ENTITY_ITEM_HEALTH;
 
 	self->model = "models/items/healing/medium/tris.md2";
 	self->count = 10;
@@ -4893,6 +4894,7 @@ void SP_item_health_small (edict_t *self)
 		G_FreeEdict (self);
 		return;
 	}
+	self->class_id = ENTITY_ITEM_HEALTH_SMALL;
 
 	self->model = "models/items/healing/stimpack/tris.md2";
 	self->count = sk_health_bonus_value->value; // Knightmare- made this cvar
@@ -4910,6 +4912,7 @@ void SP_item_health_large (edict_t *self)
 		G_FreeEdict (self);
 		return;
 	}
+	self->class_id = ENTITY_ITEM_HEALTH_LARGE;
 
 	self->model = "models/items/healing/large/tris.md2";
 	self->count = 25;
@@ -4926,6 +4929,7 @@ void SP_item_health_mega (edict_t *self)
 		G_FreeEdict (self);
 		return;
 	}
+	self->class_id = ENTITY_ITEM_HEALTH_MEGA;
 
 	self->model = "models/items/mega_h/tris.md2";
 	self->count = 100;
@@ -4942,6 +4946,7 @@ void SP_item_foodcube (edict_t *self)
 		G_FreeEdict (self);
 		return;
 	}
+	self->class_id = ENTITY_ITEM_FOODCUBE;
 
 	self->model = "models/objects/trapfx/tris.md2";
 	SpawnItem (self, FindItem ("Health"));
@@ -4956,7 +4961,6 @@ void InitItems (void)
 {
 	game.num_items = sizeof(itemlist)/sizeof(itemlist[0]) - 1;
 }
-
 
 
 /*
@@ -5020,7 +5024,7 @@ void SetItemNames (void)
 //==============================================================================
 void Use_Jet ( edict_t *ent, gitem_t *item )
 {
-	if(ent->client->jetpack)
+	if (ent->client->jetpack)
 	{
 		// Currently on... turn it off and store remaining time
 		ent->client->jetpack = false;
@@ -5044,7 +5048,7 @@ void Use_Jet ( edict_t *ent, gitem_t *item )
 
 		// Currently off. Turn it on, and add time, if any, remaining
 		// from last jetpack.
-		if( ent->client->pers.inventory[ITEM_INDEX(item)] )
+		if ( ent->client->pers.inventory[ITEM_INDEX(item)] )
 		{
 			ent->client->jetpack = true;
 			// Lazarus: Never remove jetpack from inventory (unless dropped)
@@ -5053,7 +5057,7 @@ void Use_Jet ( edict_t *ent, gitem_t *item )
 			ent->client->jetpack_framenum = level.framenum;
 			ent->client->jetpack_activation = level.framenum;
 		}
-		else if(ent->client->pers.inventory[fuel_index] > 0)
+		else if (ent->client->pers.inventory[fuel_index] > 0)
 		{
 			ent->client->jetpack = true;
 			ent->client->jetpack_framenum = level.framenum;
@@ -5070,7 +5074,7 @@ void Use_Jet ( edict_t *ent, gitem_t *item )
 // Lazarus: Stasis field generator
 void Use_Stasis ( edict_t *ent, gitem_t *item )
 {
-	if(ent->client->jetpack)
+	if (ent->client->jetpack)
 	{
 		gi.dprintf("Cannot use stasis generator while using jetpack\n");
 		return;

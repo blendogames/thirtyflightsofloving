@@ -1030,6 +1030,7 @@ void SP_monster_chick (edict_t *self)
 		self->monsterinfo.flies = 0.40;
 
 	self->common_name = "Iron Maiden";
+	self->class_id = ENTITY_MONSTER_CHICK;
 
 	// PMM
 	// Knightmare- no blindfire with homing rockets in easy or medium skill
@@ -1045,6 +1046,7 @@ void SP_monster_chick (edict_t *self)
 		else
 			self->fogclip |= 2; //custom bloodtype flag
 		self->common_name = "Beta Class Iron Maiden";
+		self->class_id = ENTITY_MONSTER_CHICK_HEAT;
 	}
 }
 

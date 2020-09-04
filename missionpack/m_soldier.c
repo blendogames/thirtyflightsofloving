@@ -573,15 +573,15 @@ void soldier_fire (edict_t *self, int in_flash_number)
 			//gi.dprintf ("Dot Product:  %f", DotProduct (aim_norm, forward));
 			if (angle < 0.9)  // ~25 degree angle
 			{
-//				if (g_showlogic && g_showlogic->value)
-//					gi.dprintf (" not firing due to bad dotprod %f\n", angle);
+			//	if (g_showlogic && g_showlogic->value)
+			//		gi.dprintf (" not firing due to bad dotprod %f\n", angle);
 				return;
 			}
-//			else
-//			{
-//				if (g_showlogic && g_showlogic->value)
-//					gi.dprintf (" firing:  dotprod = %f\n", angle);
-//			}
+		/*	else
+			{
+				if (g_showlogic && g_showlogic->value)
+					gi.dprintf (" firing:  dotprod = %f\n", angle);
+			} */
 		}
 		//-PMM
 #endif
@@ -616,8 +616,8 @@ void soldier_fire (edict_t *self, int in_flash_number)
 		tr = gi.trace (start, NULL, NULL, aim_good, self, MASK_SHOT);
 		if ((tr.ent != self->enemy) && (tr.ent != world))
 		{
-//			if (g_showlogic && g_showlogic->value)
-//				gi.dprintf ("infantry shot aborted due to bad target\n");
+		//	if (g_showlogic && g_showlogic->value)
+		//		gi.dprintf ("infantry shot aborted due to bad target\n");
 			return;
 		}
 	}
@@ -3070,7 +3070,6 @@ void soldierh_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dam
 
 void SP_monster_soldier_x (edict_t *self)
 {
-
 	// Lazarus: special purpose skins
 	if ( self->style )
 		PatchMonsterModel("models/monsters/soldier/tris.md2");
@@ -3158,7 +3157,9 @@ void SP_monster_soldier_light (edict_t *self)
 	gi.modelindex ("models/objects/laser/tris.md2");
 	gi.soundindex ("misc/lasfly.wav");
 	gi.soundindex ("soldier/solatck2.wav");
+
 	self->common_name = "Light Guard";
+	self->class_id = ENTITY_MONSTER_SOLDIER_LIGHT;
 
 //	self->s.skinnum = 0;
 	if (!self->health)
@@ -3168,7 +3169,7 @@ void SP_monster_soldier_light (edict_t *self)
 
 	// PMM - blindfire
 	self->monsterinfo.blindfire = true;
-	//Knightmare- call generic spawn function LAST, because it
+	// Knightmare- call generic spawn function LAST, because it
 	// calls walkmonster_start, which the health and everything else need to be set up for
 	SP_monster_soldier_x (self);
 	// Lazarus: custom skins
@@ -3190,7 +3191,9 @@ void SP_monster_soldier (edict_t *self)
 	sound_pain = gi.soundindex ("soldier/solpain1.wav");
 	sound_death = gi.soundindex ("soldier/soldeth1.wav");
 	gi.soundindex ("soldier/solatck1.wav");
+
 	self->common_name = "Shotgun Guard";
+	self->class_id = ENTITY_MONSTER_SOLDIER;
 
 //	self->s.skinnum = 2;
 	if (!self->health)
@@ -3218,7 +3221,9 @@ void SP_monster_soldier_ss (edict_t *self)
 	sound_pain_ss = gi.soundindex ("soldier/solpain3.wav");
 	sound_death_ss = gi.soundindex ("soldier/soldeth3.wav");
 	gi.soundindex ("soldier/solatck3.wav");
+
 	self->common_name = "Machinegun Guard";
+	self->class_id = ENTITY_MONSTER_SOLDIER_SS;
 
 //	self->s.skinnum = 4;
 	if (!self->health)
@@ -3245,10 +3250,11 @@ void SP_monster_soldier_plasma_re (edict_t *self)
 
 	sound_pain_ss = gi.soundindex ("soldier/solpain3.wav");
 	sound_death_ss = gi.soundindex ("soldier/soldeth3.wav");
-	gi.modelindex ("models/objects/laser/tris.md2");
-	gi.soundindex ("misc/lasfly.wav");
+	gi.modelindex (PLASMA_SPRITE_FLY);
 	gi.soundindex ("soldier/solatck2.wav");
+
 	self->common_name = "Plasma Guard";
+	self->class_id = ENTITY_MONSTER_SOLDIER_PLASMA_BOUNCE;
 
 //	self->s.skinnum = 0;
 	if (!self->health)
@@ -3278,8 +3284,11 @@ void SP_monster_soldier_plasma_sp (edict_t *self)
 
 	sound_pain_ss = gi.soundindex ("soldier/solpain3.wav");
 	sound_death_ss = gi.soundindex ("soldier/soldeth3.wav");
-	gi.soundindex ("soldier/solatck1.wav");
+	gi.modelindex (PLASMA_SPRITE_FLY);
+	gi.soundindex ("soldier/solatck2.wav");
+
 	self->common_name = "Plasma Guard";
+	self->class_id = ENTITY_MONSTER_SOLDIER_PLASMA_SPREAD;
 
 //	self->s.skinnum = 2;
 	if (!self->health)
@@ -3391,9 +3400,11 @@ void SP_monster_soldier_ripper (edict_t *self)
 	gi.modelindex ("models/objects/boomrang/tris.md2");
 	gi.soundindex ("misc/lasfly.wav");
 	gi.soundindex ("soldier/solatck2.wav");
-	self->common_name = "Ripper Guard";
 
-	//self->s.skinnum = 0;
+	self->common_name = "Ripper Guard";
+	self->class_id = ENTITY_MONSTER_SOLDIER_RIPPER;
+
+//	self->s.skinnum = 0;
 	if (!self->health)
 		self->health = 50;
 	if (!self->gib_health)
@@ -3425,7 +3436,9 @@ void SP_monster_soldier_hypergun (edict_t *self)
 	sound_pain = gi.soundindex ("soldier/solpain1.wav");
 	sound_death = gi.soundindex ("soldier/soldeth1.wav");
 	gi.soundindex ("soldier/solatck1.wav");
+
 	self->common_name = "Hyperblaster Guard";
+	self->class_id = ENTITY_MONSTER_SOLDIER_HYPERGUN;
 
 	//self->s.skinnum = 2;
 	if (!self->health)
@@ -3456,7 +3469,9 @@ void SP_monster_soldier_lasergun (edict_t *self)
 	sound_pain_ss = gi.soundindex ("soldier/solpain3.wav");
 	sound_death_ss = gi.soundindex ("soldier/soldeth3.wav");
 	gi.soundindex ("soldier/solatck3.wav");
+
 	self->common_name = "Laser Guard";
+	self->class_id = ENTITY_MONSTER_SOLDIER_LASER;
 
 	//self->s.skinnum = 4;
 	if (!self->health)

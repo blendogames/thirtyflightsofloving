@@ -575,7 +575,9 @@ void SP_monster_q1_ogre (edict_t *self)
 			self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
 		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
+
 	self->common_name = "Ogre";
+	self->class_id = ENTITY_MONSTER_Q1_OGRE;
 
 	gi.linkentity (self);
 
