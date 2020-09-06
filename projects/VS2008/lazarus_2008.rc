@@ -64,7 +64,7 @@ BEGIN
             VALUE "LegalTrademarks", "Lazarus is a registered trademark... oops... no it ain't, but don't use it anyway or we'll come get ya.\0"
             VALUE "OriginalFilename", VER_ORIGINALFILENAME_STR
             VALUE "PrivateBuild", "\0"
-            VALUE "ProductName", "Lazarus Quake II mod with Threewave/3Team CTF and ACE Bot support\0"
+            VALUE "ProductName", "Lazarus Quake II mod with Threewave/3Team CTF and ACE Bot\0"
             VALUE "ProductVersion", "2.230\0"
             VALUE "SpecialBuild", "KMQuake2 v0.20 update 8 compatible version created by Knightmare\0"
         END

@@ -46,7 +46,7 @@ float	shadowalpha_md2;
 R_LerpMD2Verts
 =================
 */
-void R_LerpMD2Verts (int nverts, dtrivertx_t *v, dtrivertx_t *ov, dtrivertx_t *verts, float *lerp, float move[3], float frontv[3], float backv[3], float normalscale)
+void R_LerpMD2Verts (int nverts, dmd2vertex_t *v, dmd2vertex_t *ov, dmd2vertex_t *verts, float *lerp, float move[3], float frontv[3], float backv[3], float normalscale)
 {
 	int i;
 
@@ -66,7 +66,7 @@ void R_LerpMD2Verts (int nverts, dtrivertx_t *v, dtrivertx_t *ov, dtrivertx_t *v
 R_LightAliasMD2Model
 =================
 */
-void R_LightAliasMD2Model (vec3_t baselight, dtrivertx_t *verts, dtrivertx_t *ov, float backlerp, vec3_t lightOut)
+void R_LightAliasMD2Model (vec3_t baselight, dmd2vertex_t *verts, dmd2vertex_t *ov, float backlerp, vec3_t lightOut)
 {
 	int		i;
 	float	l; // tmp;
@@ -109,10 +109,10 @@ void R_LightAliasMD2Model (vec3_t baselight, dtrivertx_t *verts, dtrivertx_t *ov
 R_DrawAliasMD2FrameLerp
 =================
 */
-void R_DrawAliasMD2FrameLerp (dmdl_t *paliashdr, float backlerp)
+void R_DrawAliasMD2FrameLerp (dmd2_t *paliashdr, float backlerp)
 {
-	daliasframe_t	*frame, *oldframe;
-	dtrivertx_t		*v, *ov, *verts;
+	dmd2frame_t		*frame, *oldframe;
+	dmd2vertex_t	*v, *ov, *verts;
 	int				*order; 
 	int				i, count, index_xyz, vertcount, baseindex;
 	float			*lerp;
@@ -126,11 +126,11 @@ void R_DrawAliasMD2FrameLerp (dmdl_t *paliashdr, float backlerp)
 	if (currententity->flags & RF_VIEWERMODEL)
 		return;
 
-	frame = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames 
+	frame = (dmd2frame_t *)((byte *)paliashdr + paliashdr->ofs_frames 
 		+ currententity->frame * paliashdr->framesize);
 	verts = v = frame->verts;
 
-	oldframe = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames 
+	oldframe = (dmd2frame_t *)((byte *)paliashdr + paliashdr->ofs_frames 
 		+ currententity->oldframe * paliashdr->framesize);
 	ov = oldframe->verts;
 
@@ -261,24 +261,24 @@ R_BuildMD2ShadowVolume
 projection shadows from BeefQuake R6
 =============
 */
-void R_BuildMD2ShadowVolume (dmdl_t *hdr, vec3_t light, float projectdistance, qboolean nocap)
+void R_BuildMD2ShadowVolume (dmd2_t *hdr, vec3_t light, float projectdistance, qboolean nocap)
 {
 	int				i, j;
 	BOOL			trianglefacinglight[MAX_TRIANGLES];
 	vec3_t			v0, v1, v2, v3;
 	float			thisAlpha;
-	dtriangle_t		*ot, *tris;
-	daliasframe_t	*frame;
-	dtrivertx_t		*verts;
+	dmd2triangle_t	*ot, *tris;
+	dmd2frame_t		*frame;
+	dmd2vertex_t	*verts;
 
 	if (!currentmodel->edge_tri) // paranoia
 		return;
 
-	frame = (daliasframe_t *)((byte *)hdr + hdr->ofs_frames 
+	frame = (dmd2frame_t *)((byte *)hdr + hdr->ofs_frames 
 		+ currententity->frame * hdr->framesize);
 	verts = frame->verts;
 
-	ot = tris = (dtriangle_t *)((unsigned char*)hdr + hdr->ofs_tris);
+	ot = tris = (dmd2triangle_t *)((unsigned char*)hdr + hdr->ofs_tris);
 
 	thisAlpha = shadowalpha_md2; // was r_shadowalpha->value
 
@@ -456,7 +456,7 @@ R_DrawAliasMD2VolumeShadow
 projection shadows from BeefQuake R6
 =============
 */
-void R_DrawAliasMD2VolumeShadow (dmdl_t *paliashdr, vec3_t bbox[8])
+void R_DrawAliasMD2VolumeShadow (dmd2_t *paliashdr, vec3_t bbox[8])
 {
 	vec3_t		light, temp, vecAdd;//, static_offset;
 	int			i, lnum;
@@ -637,7 +637,7 @@ void R_DrawAliasMD2VolumeShadow (dmdl_t *paliashdr, vec3_t bbox[8])
 R_DrawAliasMD2PlanarShadow
 =============
 */
-void R_DrawAliasMD2PlanarShadow (dmdl_t *paliashdr, qboolean mirrored)
+void R_DrawAliasMD2PlanarShadow (dmd2_t *paliashdr, qboolean mirrored)
 {
 	int		*order;
 	vec3_t	point, shadevector;
@@ -742,13 +742,13 @@ static qboolean R_CullAliasMD2Model (vec3_t bbox[8], entity_t *e)
 {
 	int			i;
 	vec3_t		mins, maxs;
-	dmdl_t		*paliashdr;
+	dmd2_t		*paliashdr;
 	vec3_t		vectors[3];
 	vec3_t		tmp, thismins, oldmins, thismaxs, oldmaxs;//, angles;
-	daliasframe_t *pframe, *poldframe;
+	dmd2frame_t *pframe, *poldframe;
 	int			p, f, mask, aggregatemask = ~0;
 
-	paliashdr = (dmdl_t *)currentmodel->extradata;
+	paliashdr = (dmd2_t *)currentmodel->extradata;
 
 	if ( (e->frame >= paliashdr->num_frames) || (e->frame < 0) )
 	{
@@ -763,11 +763,11 @@ static qboolean R_CullAliasMD2Model (vec3_t bbox[8], entity_t *e)
 		e->oldframe = 0;
 	}
 
-	pframe = (daliasframe_t *) ( (byte *) paliashdr + 
+	pframe = (dmd2frame_t *) ( (byte *) paliashdr + 
 		                              paliashdr->ofs_frames +
 									  e->frame * paliashdr->framesize);
 
-	poldframe = (daliasframe_t *) ( (byte *) paliashdr + 
+	poldframe = (dmd2frame_t *) ( (byte *) paliashdr + 
 		                              paliashdr->ofs_frames +
 									  e->oldframe * paliashdr->framesize);
 
@@ -841,7 +841,7 @@ R_DrawAliasMD2Model
 */
 void R_DrawAliasMD2Model (entity_t *e)
 {
-	dmdl_t		*paliashdr;
+	dmd2_t		*paliashdr;
 	vec3_t		bbox[8];
 	image_t		*skin;
 	qboolean	mirrormodel = false;
@@ -872,7 +872,7 @@ void R_DrawAliasMD2Model (entity_t *e)
 	else if (e->flags & RF_MIRRORMODEL)
 		mirrormodel = true;
 
-	paliashdr = (dmdl_t *)currentmodel->extradata;
+	paliashdr = (dmd2_t *)currentmodel->extradata;
 
 	//
 	// get lighting information
@@ -995,7 +995,7 @@ Just draws the shadow for a model
 */
 void R_DrawAliasMD2ModelShadow (entity_t *e)
 {
-	dmdl_t		*paliashdr;
+	dmd2_t		*paliashdr;
 	vec3_t		bbox[8];
 	qboolean	mirrormodel = false;
 	//float		an;
@@ -1027,7 +1027,7 @@ void R_DrawAliasMD2ModelShadow (entity_t *e)
 	else if (e->flags & RF_MIRRORMODEL)
 		mirrormodel = true;
 
-	paliashdr = (dmdl_t *)currentmodel->extradata;
+	paliashdr = (dmd2_t *)currentmodel->extradata;
 
 //	if (mirrormodel)
 //		R_FlipModel (true, false);

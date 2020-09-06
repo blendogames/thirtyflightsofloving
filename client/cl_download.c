@@ -86,7 +86,7 @@ void CL_RequestNextDownload (void)
 {
 	unsigned	map_checksum;		// for detecting cheater maps
 	char		fn[MAX_OSPATH];
-	dmdl_t		*md2header;
+	dmd2_t		*md2header;
 	dmd3_t		*md3header;
 	dmd3mesh_t	*md3mesh;
 	dsprite_t	*spriteheader;
@@ -203,7 +203,7 @@ void CL_RequestNextDownload (void)
 						precache_check++;
 						continue; // couldn't load it
 					}
-					if (LittleLong(*(unsigned *)precache_model) != IDALIASHEADER)
+					if (LittleLong(*(unsigned *)precache_model) != IDMD2HEADER)
 					{	// is it an md3?
 						if (LittleLong(*(unsigned *)precache_model) != IDMD3HEADER)
 						{	// is it a sprite?
@@ -244,8 +244,8 @@ void CL_RequestNextDownload (void)
 					}
 					else
 					{	// get md2 header
-						md2header = (dmdl_t *)precache_model;
-						if (LittleLong (md2header->version) != ALIAS_VERSION)
+						md2header = (dmd2_t *)precache_model;
+						if (LittleLong (md2header->version) != MD2_ALIAS_VERSION)
 						{	// not a recognized md2
 							FS_FreeFile(precache_model);
 							precache_model = 0;
@@ -256,18 +256,18 @@ void CL_RequestNextDownload (void)
 					}
 				}
 
-				if (LittleLong(*(unsigned *)precache_model) == IDALIASHEADER) // md2
+				if (LittleLong(*(unsigned *)precache_model) == IDMD2HEADER) // md2
 				{
-					md2header = (dmdl_t *)precache_model;
+					md2header = (dmd2_t *)precache_model;
 					while (precache_model_skin - 1 < LittleLong(md2header->num_skins))
 					{
 						skinname = (char *)precache_model + LittleLong(md2header->ofs_skins) + 
-									(precache_model_skin - 1)*MAX_SKINNAME;
+									(precache_model_skin - 1)*MD2_MAX_SKINNAME;
 
 						// r1ch: spam warning for models that are broken
 						if (strchr (skinname, '\\'))
 							Com_Printf ("Warning, model %s with incorrectly linked skin: %s\n", cl.configstrings[precache_check], skinname);
-						else if (strlen(skinname) > MAX_SKINNAME-1)
+						else if (strlen(skinname) > MD2_MAX_SKINNAME-1)
 							Com_Error (ERR_DROP, "Model %s has too long a skin path: %s", cl.configstrings[precache_check], skinname);
 
 						if (!CL_CheckOrDownloadFile(skinname))
@@ -319,7 +319,7 @@ void CL_RequestNextDownload (void)
 						// r1ch: spam warning for models that are broken
 						if (strchr (skinname, '\\'))
 							Com_Printf ("Warning, sprite %s with incorrectly linked skin: %s\n", cl.configstrings[precache_check], skinname);
-						else if (strlen(skinname) > MAX_SKINNAME-1)
+						else if (strlen(skinname) > MD2_MAX_SKINNAME-1)
 							Com_Error (ERR_DROP, "Sprite %s has too long a skin path: %s", cl.configstrings[precache_check], skinname);
 
 						if (!CL_CheckOrDownloadFile(skinname))

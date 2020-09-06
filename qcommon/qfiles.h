@@ -85,32 +85,32 @@ typedef struct
 ========================================================================
 */
 
-#define IDALIASHEADER		(('2'<<24)+('P'<<16)+('D'<<8)+'I')
-#define ALIAS_VERSION	8
+#define IDMD2HEADER		(('2'<<24)+('P'<<16)+('D'<<8)+'I')
+#define MD2_ALIAS_VERSION	8
 
-#define	MAX_TRIANGLES	4096
-#define MAX_VERTS		2048
-#define MAX_FRAMES		512
-#define MAX_MD2SKINS	32
-#define	MAX_SKINNAME	64
+#define	MD2_MAX_TRIANGLES	4096
+#define MD2_MAX_VERTS		2048
+#define MD2_MAX_FRAMES		512
+#define MD2_MAX_SKINS		32
+#define	MD2_MAX_SKINNAME	64
 
 typedef struct
 {
 	short	s;
 	short	t;
-} dstvert_t;
+} dmd2coord_t;
 
 typedef struct 
 {
 	short	index_xyz[3];
 	short	index_st[3];
-} dtriangle_t;
+} dmd2triangle_t;
 
 typedef struct
 {
 	byte	v[3];			// scaled byte to fit in frame mins/maxs
 	byte	lightnormalindex;
-} dtrivertx_t;
+} dmd2vertex_t;
 
 #define DTRIVERTX_V0   0
 #define DTRIVERTX_V1   1
@@ -120,11 +120,11 @@ typedef struct
 
 typedef struct
 {
-	float		scale[3];	// multiply byte verts by this
-	float		translate[3];	// then add this
-	char		name[16];	// frame name from grabbing
-	dtrivertx_t	verts[1];	// variable sized
-} daliasframe_t;
+	float			scale[3];		// multiply byte verts by this
+	float			translate[3];	// then add this
+	char			name[16];		// frame name from grabbing
+	dmd2vertex_t	verts[1];		// variable sized
+} dmd2frame_t;
 
 
 // the glcmd format:
@@ -152,14 +152,14 @@ typedef struct
 	int			num_glcmds;		// dwords in strip/fan command list
 	int			num_frames;
 
-	int			ofs_skins;		// each skin is a MAX_SKINNAME string
+	int			ofs_skins;		// each skin is a MD2_MAX_SKINNAME string
 	int			ofs_st;			// byte offset from start for stverts
 	int			ofs_tris;		// offset for dtriangles
 	int			ofs_frames;		// offset for first frame
 	int			ofs_glcmds;	
 	int			ofs_end;		// end of file
 
-} dmdl_t;
+} dmd2_t;
 
 /*
 ========================================================================
@@ -288,7 +288,7 @@ typedef struct
 {
 	int		width, height;
 	int		origin_x, origin_y;		// raster coordinates inside pic
-	char	name[MAX_SKINNAME];		// name of pcx file
+	char	name[MD2_MAX_SKINNAME];	// name of pcx file
 } dsprframe_t;
 
 typedef struct {

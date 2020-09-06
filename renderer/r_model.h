@@ -284,8 +284,8 @@ typedef struct model_s
 
 	// for alias models and skins
 	// Echon's per-mesh skin support
-	image_t      *skins[MD3_MAX_MESHES][MAX_MD2SKINS];
-	//image_t		*skins[MAX_MD2SKINS];
+	image_t		*skins[MD3_MAX_MESHES][MD2_MAX_SKINS];
+//	image_t		*skins[MD2_MAX_SKINS];
 
 	size_t		extradatasize;
 	void		*extradata;
@@ -293,7 +293,7 @@ typedef struct model_s
 	qboolean	hasAlpha; // if model has scripted transparency
 
 #ifdef PROJECTION_SHADOWS // projection shadows from BeefQuake R6
-	//signed int	edge_tri[MAX_TRIANGLES][3]; // make this dynamically allocated?
+	//signed int	edge_tri[MD2_MAX_TRIANGLES][3]; // make this dynamically allocated?
 	int			*edge_tri;
 #endif // end projection shadows from BeefQuake R6
 } model_t;
