@@ -643,11 +643,18 @@ void CL_ParsePrint (void)
 	i = MSG_ReadByte (&net_message);
 	s = MSG_ReadString (&net_message);
 
+	// Chat Ignore from R1Q2/Q2Pro
+	// Also filter private messages
+	if ( (i == PRINT_CHAT) || (strstr(s, "(private message)") != NULL) ) {
+		if ( CL_CheckForChatIgnore(s) )
+			return;
+	}
+
 	if (i == PRINT_CHAT)
 	{
 		// Chat Ignore from R1Q2/Q2Pro
-		if ( CL_CheckForChatIgnore(s) )
-			return;
+	//	if ( CL_CheckForChatIgnore(s) )
+	//		return;
 
 		S_StartLocalSound ("misc/talk.wav");
 	//	con.ormask = 128;	// made redundant by color code

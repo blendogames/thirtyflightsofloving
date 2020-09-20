@@ -43,15 +43,15 @@ void R_DrawSpriteModel (entity_t *e)
 	float			alpha = 1.0f;
 	vec2_t			texCoord[4];
 	vec3_t			point[4];
-	dsprite_t		*psprite;
-	dsprframe_t		*frame;
+	dspr2_t			*psprite;
+	dspr2frame_t	*frame;
 	float			*up, *right;
 	int				i;
 
 	// don't even bother culling, because it's just a single
 	// polygon without a surface cache
 
-	psprite = (dsprite_t *)currentmodel->extradata;
+	psprite = (dspr2_t *)currentmodel->extradata;
 
 	e->frame %= psprite->numframes;
 

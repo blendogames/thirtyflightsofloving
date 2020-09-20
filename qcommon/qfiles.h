@@ -280,23 +280,23 @@ typedef struct
 ========================================================================
 */
 
-#define IDSPRITEHEADER	(('2'<<24)+('S'<<16)+('D'<<8)+'I')
+#define IDSP2HEADER	(('2'<<24)+('S'<<16)+('D'<<8)+'I')
 		// little-endian "IDS2"
-#define SPRITE_VERSION	2
+#define SP2_VERSION		2
 
 typedef struct
 {
-	int		width, height;
-	int		origin_x, origin_y;		// raster coordinates inside pic
-	char	name[MD2_MAX_SKINNAME];	// name of pcx file
-} dsprframe_t;
+	int				width, height;
+	int				origin_x, origin_y;		// raster coordinates inside pic
+	char			name[MD2_MAX_SKINNAME];	// name of pcx file
+} dspr2frame_t;
 
 typedef struct {
-	int			ident;
-	int			version;
-	int			numframes;
-	dsprframe_t	frames[1];			// variable sized
-} dsprite_t;
+	int				ident;
+	int				version;
+	int				numframes;
+	dspr2frame_t	frames[1];				// variable sized
+} dspr2_t;
 
 /*
 ==============================================================================

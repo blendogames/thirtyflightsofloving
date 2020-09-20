@@ -89,7 +89,7 @@ void CL_RequestNextDownload (void)
 	dmd2_t		*md2header;
 	dmd3_t		*md3header;
 	dmd3mesh_t	*md3mesh;
-	dsprite_t	*spriteheader;
+	dspr2_t		*sp2header;
 	char		*skinname;
 	int			cs_sounds, cs_playerskins, cs_images;
 	int			max_models, max_sounds, max_images;
@@ -207,7 +207,7 @@ void CL_RequestNextDownload (void)
 					{	// is it an md3?
 						if (LittleLong(*(unsigned *)precache_model) != IDMD3HEADER)
 						{	// is it a sprite?
-							if (LittleLong(*(unsigned *)precache_model) != IDSPRITEHEADER)
+							if (LittleLong(*(unsigned *)precache_model) != IDSP2HEADER)
 							{
 								// not a recognized model
 								FS_FreeFile(precache_model);
@@ -218,8 +218,8 @@ void CL_RequestNextDownload (void)
 							}
 							else
 							{	// get sprite header
-								spriteheader = (dsprite_t *)precache_model;
-								if (LittleLong (spriteheader->version) != SPRITE_VERSION)
+								sp2header = (dspr2_t *)precache_model;
+								if (LittleLong (sp2header->version) != SP2_VERSION)
 								{	// not a recognized sprite
 									FS_FreeFile(precache_model);
 									precache_model = 0;
@@ -309,12 +309,12 @@ void CL_RequestNextDownload (void)
 						}
 					}
 				}
-				else // sprite
+				else	// if (LittleLong(*(unsigned *)precache_model) == IDSP2HEADER)	// sp2
 				{
-					spriteheader = (dsprite_t *)precache_model;
-					while (precache_model_skin - 1 < LittleLong(spriteheader->numframes))
+					sp2header = (dspr2_t *)precache_model;
+					while (precache_model_skin - 1 < LittleLong(sp2header->numframes))
 					{
-						skinname = spriteheader->frames[(precache_model_skin - 1)].name;
+						skinname = sp2header->frames[(precache_model_skin - 1)].name;
 
 						// r1ch: spam warning for models that are broken
 						if (strchr (skinname, '\\'))

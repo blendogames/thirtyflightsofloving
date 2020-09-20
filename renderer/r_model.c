@@ -288,7 +288,7 @@ model_t *Mod_ForName (char *name, qboolean crash)
 		loadmodel->extradatasize = ModChunk_End ();
 		break;
 	//Harven-- MD3		
-	case IDSPRITEHEADER:
+	case IDSP2HEADER:
 	//	loadmodel->extradata = Hunk_Begin (0x10000);
 		loadmodel->extradata = ModChunk_Begin (Mod_GetAllocSizeSprite (mod, buf));
 		Mod_LoadSpriteModel (mod, buf);
@@ -2668,10 +2668,10 @@ Mod_LoadSpriteModel
 */
 void Mod_LoadSpriteModel (model_t *mod, void *buffer)
 {
-	dsprite_t	*sprin, *sprout;
+	dspr2_t		*sprin, *sprout;
 	int			i;
 
-	sprin = (dsprite_t *)buffer;
+	sprin = (dspr2_t *)buffer;
 //	sprout = Hunk_Alloc (modfilelen);
 	sprout = ModChunk_Alloc (modfilelen);
 
@@ -2679,16 +2679,16 @@ void Mod_LoadSpriteModel (model_t *mod, void *buffer)
 	sprout->version = LittleLong (sprin->version);
 	sprout->numframes = LittleLong (sprin->numframes);
 
-	if (sprout->version != SPRITE_VERSION)
+	if (sprout->version != SP2_VERSION)
 		VID_Error (ERR_DROP, "%s has wrong version number (%i should be %i)",
-				 mod->name, sprout->version, SPRITE_VERSION);
+				 mod->name, sprout->version, SP2_VERSION);
 
 	if (sprout->numframes > MD2_MAX_SKINS)
 		VID_Error (ERR_DROP, "%s has too many frames (%i > %i)",
 				 mod->name, sprout->numframes, MD2_MAX_SKINS);
 
 	// byte swap everything
-	for (i=0 ; i<sprout->numframes ; i++)
+	for (i=0; i<sprout->numframes; i++)
 	{
 		sprout->frames[i].width = LittleLong (sprin->frames[i].width);
 		sprout->frames[i].height = LittleLong (sprin->frames[i].height);
@@ -2749,9 +2749,9 @@ R_RegisterModel
 */
 struct model_s *R_RegisterModel (char *name)
 {
-	model_t	*mod;
-	int		i;
-	dsprite_t	*sprout;
+	model_t		*mod;
+	int			i;
+	dspr2_t		*sprout;
 #ifndef MD2_AS_MD3	//	Knightmare- no longer used!
 	dmd2_t		*pheader;
 #endif // MD2_AS_MD3
@@ -2781,7 +2781,7 @@ struct model_s *R_RegisterModel (char *name)
 		// register any images used by the models
 		if (mod->type == mod_sprite)
 		{
-			sprout = (dsprite_t *)mod->extradata;
+			sprout = (dspr2_t *)mod->extradata;
 			for (i=0 ; i<sprout->numframes ; i++)
 				mod->skins[0][i] = R_FindImage (sprout->frames[i].name, it_sprite);
 		}
