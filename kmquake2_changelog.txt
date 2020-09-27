@@ -4,7 +4,7 @@ Changes as of v0.20 update 8:
 
 - Added 3840x1600 and 4096x2160 video modes.
 
-- Added 160Hz and 240Hz refresh rates.
+- Added 160Hz, 165Hz, 180Hz, and 240Hz refresh rates.
 
 - Added automatic setting of r_maxfps based on refresh rate set in video menu (r_displayrefresh).
 	This can be disabled by setting the cvar r_maxfps_autoset to 0.

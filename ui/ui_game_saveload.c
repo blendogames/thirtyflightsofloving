@@ -31,7 +31,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#define	MAX_SAVEGAMES	21 // was 15
+#define	MAX_SAVEGAMES	25 // was 15, 21
 
 static menuframework_s	s_loadgame_menu;
 static menuaction_s		s_loadgame_actions[MAX_SAVEGAMES];
@@ -72,8 +72,8 @@ void Load_Savestrings (qboolean update)
 
 	for (i=0; i<MAX_SAVEGAMES; i++)
 	{
-	//	Com_sprintf (name, sizeof(name), "%s/save/kmq2save%i/server.ssv", FS_Savegamedir(), i);	// was FS_Gamedir()
-		Com_sprintf (name, sizeof(name), "%s/"SAVEDIRNAME"/kmq2save%i/server.ssv", FS_Savegamedir(), i);	// was FS_Gamedir()
+	//	Com_sprintf (name, sizeof(name), "%s/save/kmq2save%03i/server.ssv", FS_Savegamedir(), i);	// was FS_Gamedir()
+		Com_sprintf (name, sizeof(name), "%s/"SAVEDIRNAME"/kmq2save%03i/server.ssv", FS_Savegamedir(), i);	// was FS_Gamedir()
 
 		old_timestamp = m_savetimestamps[i];
 		stat(name, &st);
@@ -96,8 +96,8 @@ void Load_Savestrings (qboolean update)
 		else
 		{
 			fclose (fp);
-		//	Com_sprintf (name, sizeof(name), "save/kmq2save%i/server.ssv", i);
-			Com_sprintf (name, sizeof(name), SAVEDIRNAME"/kmq2save%i/server.ssv", i);
+		//	Com_sprintf (name, sizeof(name), "save/kmq2save%03i/server.ssv", i);
+			Com_sprintf (name, sizeof(name), SAVEDIRNAME"/kmq2save%03i/server.ssv", i);
 			FS_FOpenFile (name, &f, FS_READ);
 			if (!f)
 			{
@@ -144,11 +144,11 @@ void ValidateSaveshots (void)
 				Com_sprintf(shotname, sizeof(shotname), "/levelshots/%s.pcx", m_mapname);
 			else
 			{	// free previously loaded shots
-			//	Com_sprintf(shotname, sizeof(shotname), "save/kmq2save%i/shot.jpg", i);
-				Com_sprintf(shotname, sizeof(shotname), SAVEDIRNAME"/kmq2save%i/shot.jpg", i);
+			//	Com_sprintf(shotname, sizeof(shotname), "save/kmq2save%03i/shot.jpg", i);
+				Com_sprintf(shotname, sizeof(shotname), SAVEDIRNAME"/kmq2save%03i/shot.jpg", i);
 				R_FreePic (shotname);
-			//	Com_sprintf(shotname, sizeof(shotname), "/save/kmq2save%i/shot.jpg", i);
-				Com_sprintf(shotname, sizeof(shotname), "/"SAVEDIRNAME"/kmq2save%i/shot.jpg", i);
+			//	Com_sprintf(shotname, sizeof(shotname), "/save/kmq2save%03i/shot.jpg", i);
+				Com_sprintf(shotname, sizeof(shotname), "/"SAVEDIRNAME"/kmq2save%03i/shot.jpg", i);
 			}
 			if (R_DrawFindPic(shotname))
 				m_saveshotvalid[i] = true;
@@ -226,25 +226,25 @@ void DrawSaveshot (qboolean loadmenu)
 			i = s_savegame_actions[s_savegame_menu.cursor].generic.localdata[0];
 	}
 
-	SCR_DrawFill (SCREEN_WIDTH/2+44, SCREEN_HEIGHT/2-60, 244, 184, ALIGN_CENTER, 60,60,60,255);
+	SCR_DrawFill (SCREEN_WIDTH/2+44, SCREEN_HEIGHT/2-70, 244, 184, ALIGN_CENTER, 60,60,60,255);
 
 	if ( loadmenu && (i == 0) && m_savevalid[i] && m_saveshotvalid[i])	// m_mapshotvalid ) // autosave shows mapshot
 	{
 		Com_sprintf(mapshotname, sizeof(mapshotname), "/levelshots/%s.pcx", m_mapname);
 
-		SCR_DrawPic (SCREEN_WIDTH/2+46, SCREEN_HEIGHT/2-58, 240, 180, ALIGN_CENTER, mapshotname, 1.0);
+		SCR_DrawPic (SCREEN_WIDTH/2+46, SCREEN_HEIGHT/2-68, 240, 180, ALIGN_CENTER, mapshotname, 1.0);
 	}
 	else if ( m_savevalid[i] && m_saveshotvalid[i] )
 	{
-	//	Com_sprintf(shotname, sizeof(shotname), "/save/kmq2save%i/shot.jpg", i);
-		Com_sprintf(shotname, sizeof(shotname), "/"SAVEDIRNAME"/kmq2save%i/shot.jpg", i);
+	//	Com_sprintf(shotname, sizeof(shotname), "/save/kmq2save%03i/shot.jpg", i);
+		Com_sprintf(shotname, sizeof(shotname), "/"SAVEDIRNAME"/kmq2save%03i/shot.jpg", i);
 
-		SCR_DrawPic (SCREEN_WIDTH/2+46, SCREEN_HEIGHT/2-58, 240, 180, ALIGN_CENTER, shotname, 1.0);
+		SCR_DrawPic (SCREEN_WIDTH/2+46, SCREEN_HEIGHT/2-68, 240, 180, ALIGN_CENTER, shotname, 1.0);
 	}
 	else if (m_saveshotvalid[MAX_SAVEGAMES])
-		SCR_DrawPic (SCREEN_WIDTH/2+46, SCREEN_HEIGHT/2-58, 240, 180, ALIGN_CENTER, "/gfx/ui/noscreen.pcx", 1.0);
+		SCR_DrawPic (SCREEN_WIDTH/2+46, SCREEN_HEIGHT/2-68, 240, 180, ALIGN_CENTER, "/gfx/ui/noscreen.pcx", 1.0);
 	else
-		SCR_DrawFill (SCREEN_WIDTH/2+46, SCREEN_HEIGHT/2-58, 240, 180, ALIGN_CENTER, 0,0,0,255);
+		SCR_DrawFill (SCREEN_WIDTH/2+46, SCREEN_HEIGHT/2-68, 240, 180, ALIGN_CENTER, 0,0,0,255);
 }
 
 
@@ -266,15 +266,15 @@ void LoadGameCallback (void *self)
 	// set saveshot name here
 	if ( m_saveshotvalid[ a->generic.localdata[0] ] && (a->generic.localdata[0] != 0) )	// autosave has no saveshot, but uses levelshot instead
 	{
-	//	Com_sprintf(loadshotname, sizeof(loadshotname), "/save/kmq2save%i/shot.jpg", a->generic.localdata[0]);
-		Com_sprintf(loadshotname, sizeof(loadshotname), "/"SAVEDIRNAME"/kmq2save%i/shot.jpg", a->generic.localdata[0]);
+	//	Com_sprintf(loadshotname, sizeof(loadshotname), "/save/kmq2save%03i/shot.jpg", a->generic.localdata[0]);
+		Com_sprintf(loadshotname, sizeof(loadshotname), "/"SAVEDIRNAME"/kmq2save%03i/shot.jpg", a->generic.localdata[0]);
 		load_saveshot = loadshotname; }
 	else {
 		load_saveshot = NULL;
 	}
 
 	if ( m_savevalid[ a->generic.localdata[0] ] ) {
-		Cbuf_AddText (va("load kmq2save%i\n",  a->generic.localdata[0] ) );
+		Cbuf_AddText (va("load kmq2save%03i\n",  a->generic.localdata[0] ) );
 		UI_ForceMenuOff ();
 	}
 }
@@ -286,7 +286,7 @@ void LoadGame_MenuInit (void)
 	UI_UpdateSavegameData ();
 
 	s_loadgame_menu.x = SCREEN_WIDTH*0.5 - 240;
-	s_loadgame_menu.y = SCREEN_HEIGHT*0.5 - 58;
+	s_loadgame_menu.y = SCREEN_HEIGHT*0.5 - 68;
 	s_loadgame_menu.nitems = 0;
 
 //	Load_Savestrings ();
@@ -360,7 +360,7 @@ void SaveGameCallback (void *self)
 {
 	menuaction_s *a = ( menuaction_s * ) self;
 
-	Cbuf_AddText (va("save kmq2save%i\n", a->generic.localdata[0] ));
+	Cbuf_AddText (va("save kmq2save%03i\n", a->generic.localdata[0] ));
 	UI_ForceMenuOff ();
 }
 
@@ -379,7 +379,7 @@ void SaveGame_MenuInit (void)
 	UI_UpdateSavegameData ();
 
 	s_savegame_menu.x = SCREEN_WIDTH*0.5 - 240;
-	s_savegame_menu.y = SCREEN_HEIGHT*0.5 - 58;
+	s_savegame_menu.y = SCREEN_HEIGHT*0.5 - 68;
 	s_savegame_menu.nitems = 0;
 
 //	Load_Savestrings ();

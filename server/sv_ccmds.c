@@ -244,7 +244,7 @@ void SV_CopySaveGame (char *src, char *dst)
 	FS_CopyFile (name, name2);
 
 	// Knightmare- copy screenshot
-	if (strcmp(dst, "kmq2save0")) // no screenshot for start of level autosaves
+	if (strcmp(dst, "kmq2save000")) // no screenshot for start of level autosaves
 	{
 	//	Com_sprintf (name, sizeof(name), "%s/save/%s/shot.jpg", FS_Savegamedir(), src);	// was FS_Gamedir()
 	//	Com_sprintf (name2, sizeof(name2), "%s/save/%s/shot.jpg", FS_Savegamedir(), dst);	// was FS_Gamedir()
@@ -720,7 +720,7 @@ void SV_GameMap_f (void)
 		&& Q_strcasecmp (map+l-4, ".pcx"))
 	{
 		SV_WriteServerFile (true, false);
-		SV_CopySaveGame ("current", "kmq2save0");
+		SV_CopySaveGame ("current", "kmq2save000");
 	}
 }
 
