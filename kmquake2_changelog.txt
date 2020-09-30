@@ -66,6 +66,8 @@ Changes as of v0.20 update 8:
 - Added changeable gl_clear color controlled by cvars r_clearcolor_r, r_clearcolor_g, and r_clearcolor_b.
 	Values are normalized (0-1).
 	
+- Added doubled entity lighting to mimic Q2's original entity lighting.  Set the cvar r_entity_doublelight to 1 to enable this.
+	
 - Added ifeq, ifneq, ifgt, ifge, iflt, ifle, ifbit, and ifnbit layout script commands.
 	
 - Added a check to prevent game code from sending unicasts to non-present clients (i.e. bots).  This would

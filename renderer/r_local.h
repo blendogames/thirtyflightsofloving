@@ -241,6 +241,7 @@ extern	cvar_t *r_dlights_normal;
 extern	cvar_t	*r_model_shading;
 extern	cvar_t	*r_model_dlights;
 extern	cvar_t	*r_model_minlight;
+extern	cvar_t	*r_entity_doublelight;
 
 extern	cvar_t	*r_lightlevel;	// FIXME: This is a HACK to get the client's light level
 

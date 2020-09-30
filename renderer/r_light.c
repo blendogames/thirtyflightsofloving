@@ -399,7 +399,7 @@ void R_LightPoint (vec3_t p, vec3_t color, qboolean isEnt)
 	}
 
 	// this catches too bright modulated color
-	for (i=0;i<3;i++)
+	for (i=0; i<3; i++)
 		if (color[i]>1) color[i] = 1;
 
 	//
@@ -422,8 +422,13 @@ void R_LightPoint (vec3_t p, vec3_t color, qboolean isEnt)
 		if (add > 0)
 			VectorMA (color, add, dl->color, color);
 	}
-	//VectorScale (color, r_modulate->value, color); // Knightmare- this makes ents too bright
-	//VectorScale (color, r_modulate->value*1.5f, color); // Knightmare- this makes ents too bright
+
+	// scale up light color by r_modulate if enabled
+	if (r_entity_doublelight->integer) {
+		VectorScale (color, r_modulate->value, color);
+	}
+//	VectorScale (color, r_modulate->value, color); // Knightmare- this makes ents too bright
+//	VectorScale (color, r_modulate->value*1.5f, color); // Knightmare- this makes ents too bright
 }
 
 
@@ -462,7 +467,7 @@ void R_LightPointDynamics (vec3_t p, vec3_t color, m_dlight_t *list, int *amount
 		VectorCopy (pointcolor, color);
 	}
 
-	//this catches too bright modulated color
+	// this catches too bright modulated color
 	for (i=0;i<3;i++)
 		if (color[i]>1) color[i] = 1;
 
@@ -471,7 +476,7 @@ void R_LightPointDynamics (vec3_t p, vec3_t color, m_dlight_t *list, int *amount
 	//
 	m_dl = 0;
 	dl = r_newrefdef.dlights;
-	for (lnum=0 ; lnum<r_newrefdef.num_dlights ; lnum++, dl++)
+	for (lnum=0; lnum<r_newrefdef.num_dlights; lnum++, dl++)
 	{
 		if (dl->spotlight) // spotlights
 			continue;
@@ -485,7 +490,7 @@ void R_LightPointDynamics (vec3_t p, vec3_t color, m_dlight_t *list, int *amount
 			float highest = -1;
 
 			VectorScale(dl->color, add, dlColor);
-			for (i=0;i<3;i++)
+			for (i=0; i<3; i++)
 				if (highest<dlColor[i]) highest = dlColor[i];
 
 			if (m_dl<max)
@@ -500,8 +505,8 @@ void R_LightPointDynamics (vec3_t p, vec3_t color, m_dlight_t *list, int *amount
 				float	least_val = 10;
 				int		least_index = 0;
 
-				for (i=0;i<m_dl;i++)
-					if (list[i].strength<least_val)
+				for (i=0; i<m_dl; i++)
+					if (list[i].strength < least_val)
 					{
 
 
@@ -515,6 +520,11 @@ void R_LightPointDynamics (vec3_t p, vec3_t color, m_dlight_t *list, int *amount
 				VectorCopy(dlColor, list[least_index].color);
 			}
 		}
+	}
+
+	// scale up light color by r_modulate if enabled
+	if (r_entity_doublelight->integer) {
+		VectorScale (color, r_modulate->value, color);
 	}
 
 	*amount = m_dl;

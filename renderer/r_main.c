@@ -104,6 +104,7 @@ cvar_t	*r_dlights_normal; // lerped dlights on models
 cvar_t	*r_model_shading;
 cvar_t	*r_model_dlights;
 cvar_t	*r_model_minlight;
+cvar_t	*r_entity_doublelight;
 
 cvar_t	*r_lightlevel;	// FIXME: This is a HACK to get the client's light level
 
@@ -683,9 +684,9 @@ void R_RenderView (refdef_t *fd)
 	{
 		R_SuspendFog ();
 
-	//	R_DrawAllDecals();
-		R_DrawAllEntities(false);
-		R_DrawAllParticles();
+	//	R_DrawAllDecals ();
+		R_DrawAllEntities( false);
+		R_DrawAllParticles ();
 
 		R_ResumeFog ();
 	}
@@ -696,17 +697,17 @@ void R_RenderView (refdef_t *fd)
 		R_RenderDlights();
 
 		if (r_transrendersort->integer) {
-			//R_BuildParticleList();
-			R_SortParticlesOnList();
-			R_DrawAllDecals();
-			//R_DrawAllEntityShadows();
-			R_DrawSolidEntities();
-			R_DrawEntitiesOnList(ents_trans);
+		//	R_BuildParticleList ();
+			R_SortParticlesOnList ();
+			R_DrawAllDecals ();
+		//	R_DrawAllEntityShadows ();
+			R_DrawSolidEntities ();
+			R_DrawEntitiesOnList (ents_trans);
 		}
 		else {
-			R_DrawAllDecals();
-			//R_DrawAllEntityShadows();
-			R_DrawAllEntities(true);
+			R_DrawAllDecals ();
+		//	R_DrawAllEntityShadows ();
+			R_DrawAllEntities (true);
 		}
 
 		R_DrawAllParticles ();
@@ -964,6 +965,8 @@ void R_Register (void)
 	Cvar_SetDescription ("r_model_dlights", "Sets maximum number of dynamic lights for a model.");
 	r_model_minlight = Cvar_Get ("r_model_minlight", "0.02", CVAR_ARCHIVE );
 	Cvar_SetDescription ("r_model_minlight", "Sets minimum light level for alias model rendering.");
+	r_entity_doublelight  = Cvar_Get ("r_entity_doublelight", "0", CVAR_ARCHIVE );
+	Cvar_SetDescription ("r_entity_doublelight", "Enables original glitchy double-lighting of models.  This is a sort-of-exploit, but is not considered a cheat.");
 
 	r_lightlevel = Cvar_Get ("r_lightlevel", "0", 0);
 	Cvar_SetDescription ("r_lightlevel", "Hack to send player's light level to server.  This is overwritten every render frame.");
