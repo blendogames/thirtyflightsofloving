@@ -52,6 +52,176 @@ int	color8blue (int color8)
 //=================================================
 
 /*
+================
+CL_TextColor
+This sets the actual text color, can be called from anywhere
+================
+*/
+void CL_TextColor (int colornum, int *red, int *green, int *blue)
+{
+	if (!red || !green || !blue) // paranoia
+		return;
+
+	switch (colornum)
+	{
+		case 1:		// red
+			*red =	255;
+			*green=	0;
+			*blue =	0;
+			break;
+		case 2:		// green
+			*red =	0;
+			*green=	255;
+			*blue =	0;
+			break;
+		case 3:		// yellow
+			*red =	255;
+			*green=	255;
+			*blue =	0;
+			break;
+		case 4:		// blue
+			*red =	0;
+			*green=	0;
+			*blue =	255;
+			break;
+		case 5:		// cyan
+			*red =	0;
+			*green=	255;
+			*blue =	255;
+			break;
+		case 6:		//magenta
+			*red =	255;
+			*green=	0;
+			*blue =	255;
+			break;
+		case 7:		// white
+			*red =	255;
+			*green=	255;
+			*blue =	255;
+			break;
+		case 8:		// black
+			*red =	0;
+			*green=	0;
+			*blue =	0;
+			break;
+		case 9:		// orange
+			*red =	255;
+			*green=	135;
+			*blue =	0;
+			break;
+		case 0:		// gray
+			*red =	155;
+			*green=	155;
+			*blue =	155;
+			break;
+		default:	// white
+			*red =	255;
+			*green=	255;
+			*blue =	255;
+			break;
+	}
+}
+
+
+/*
+================
+CL_EffectColor
+This sets railtrail color
+================
+*/
+void CL_EffectColor (int colornum, int *red, int *green, int *blue)
+{
+	if (!red || !green || !blue) // paranoia
+		return;
+
+	switch (colornum)
+	{
+		case 1:		// blue
+			*red =	20;
+			*green=	50;
+			*blue =	175;
+			break;
+		case 2:		// green
+			*red =	20;
+			*green=	255;
+			*blue =	20;
+			break;
+		case 3:		// yellow
+			*red =	255;
+			*green=	255;
+			*blue =	20;
+			break;
+		case 4:		// orange
+			*red =	255;
+			*green=	135;
+			*blue =	20;
+			break;
+		case 5:		// red
+			*red =	255;
+			*green=	20;
+			*blue =	20;
+			break;
+		case 6:		// cyan
+			*red =	20;
+			*green=	255;
+			*blue =	255;
+			break;
+		case 7:		// indigo
+			*red =	80;
+			*green=	20;
+			*blue =	255;
+			break;
+		case 8:		// viridian
+			*red =	80;
+			*green=	255;
+			*blue =	180;
+			break;
+		case 9:		// violet
+			*red =	160;
+			*green=	20;
+			*blue =	255;
+			break;
+		case 10:	// magenta
+			*red =	255;
+			*green=	20;
+			*blue =	255;
+			break;
+		case 11:	// pink
+			*red =	255;
+			*green=	125;
+			*blue =	175;
+			break;
+		case 12:	// white
+			*red =	255;
+			*green=	255;
+			*blue =	255;
+			break;
+		case 13:	// silver
+			*red =	195;
+			*green=	195;
+			*blue =	195;
+			break;
+		case 14:	// gray
+			*red =	155;
+			*green=	155;
+			*blue =	155;
+			break;
+		case 15:	// black
+			*red =	0;
+			*green=	0;
+			*blue =	0;
+			break;
+		case 0:
+		default:	// blue
+			*red =	20;
+			*green=	50;
+			*blue =	255;
+			break;
+	}
+}
+
+
+/*
 ==========================
 ClampCvar
 ==========================

@@ -558,8 +558,6 @@ extern	entity_state_t	cl_parse_entities[MAX_PARSE_ENTITIES];
 extern	netadr_t	net_from;
 extern	sizebuf_t	net_message;
 
-// for use with the alt_text_color cvar
-void CL_TextColor (int colornum, int *red, int *green, int *blue);
 qboolean CL_StringSetParams (char modifier, int *red, int *green, int *blue, int *bold, int *shadow, int *italic, int *reset);
 void Con_DrawString (int x, int y, char *s, int alpha);
 void CL_DrawStringGeneric (int x, int y, const char *string, int alpha, int fontSize, textscaletype_t scaleType, qboolean altBit);
@@ -1070,7 +1068,7 @@ void CL_BlasterParticles (vec3_t org, vec3_t dir, int count, float size,
 		int red, int green, int blue, int reddelta, int greendelta, int bluedelta);
 
 void CL_QuadTrail (vec3_t start, vec3_t end);
-void CL_RailTrail (vec3_t start, vec3_t end, qboolean isRed);
+void CL_RailTrail (vec3_t start, vec3_t end, int red, int green, int blue);
 void CL_BubbleTrail (vec3_t start, vec3_t end);
 void CL_FlagTrail (vec3_t start, vec3_t end, qboolean isred, qboolean isgreen);
 void CL_IonripperTrail (vec3_t start, vec3_t end); // RAFAEL
@@ -1104,6 +1102,8 @@ void CL_WidowSplash (vec3_t org);
 int	color8red (int color8);
 int	color8green (int color8);
 int	color8blue (int color8);
+void CL_TextColor (int colornum, int *red, int *green, int *blue);	// for use with the alt_text_color cvar
+void CL_EffectColor (int colornum, int *red, int *green, int *blue);
 float ClampCvar (float min, float max, float value);
 int stringLen (const char *string);
 int stringLengthExtra (const char *string);

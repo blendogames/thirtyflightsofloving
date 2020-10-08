@@ -986,7 +986,7 @@ CL_ParticleRailDecal
 ===============
 */
 #define RAIL_DECAL_OFFSET 2.0f
-void CL_ParticleRailDecal (vec3_t org, vec3_t dir, float size, qboolean isRed)
+void CL_ParticleRailDecal (vec3_t org, vec3_t dir, float size, int red, int green, int blue)
 {
 	vec3_t		ang, angle, end, origin;
 	trace_t		tr;
@@ -1026,7 +1026,7 @@ void CL_ParticleRailDecal (vec3_t org, vec3_t dir, float size, qboolean isRed)
 		origin[0],	origin[1],	origin[2],
 		0,		0,		0,
 		0,		0,		0,
-		(isRed)?255:cl_railred->value,	(isRed)?20:cl_railgreen->value,	(isRed)?20:cl_railblue->value,
+		red,	green,	blue,
 		0,		0,		0,
 		1,		-0.25,
 		GL_SRC_ALPHA, GL_ONE,
@@ -1950,7 +1950,7 @@ CL_RailSprial
 //this is the length of each piece...
 #define RAILTRAILSPACE 15
 
-void CL_RailSprial (vec3_t start, vec3_t end, qboolean isRed)
+void CL_RailSprial (vec3_t start, vec3_t end, int red, int green, int blue)
 {
 	vec3_t		move;
 	vec3_t		vec;
@@ -1989,7 +1989,7 @@ void CL_RailSprial (vec3_t start, vec3_t end, qboolean isRed)
 			move[0] + dir[0]*3,	move[1] + dir[1]*3,	move[2] + dir[2]*3,
 			dir[0]*6,	dir[1]*6,	dir[2]*6,
 			0,		0,		0,
-			(isRed)?255:cl_railred->value,	(isRed)?20:cl_railgreen->value,	(isRed)?20:cl_railblue->value,
+			red,	green,	blue,
 			0,	0,	0,
 			1,		-1.0,
 			GL_SRC_ALPHA, GL_ONE,
@@ -2037,7 +2037,7 @@ void CL_ParticleDevRailThink (cparticle_t *p, vec3_t org, vec3_t angle, float *a
 CL_DevRailTrail
 ===============
 */
-void CL_DevRailTrail (vec3_t start, vec3_t end, qboolean isRed)
+void CL_DevRailTrail (vec3_t start, vec3_t end, int red, int green, int blue)
 {
 	vec3_t		move;
 	vec3_t		vec, point;
@@ -2074,7 +2074,7 @@ void CL_DevRailTrail (vec3_t start, vec3_t end, qboolean isRed)
 				move[0],	move[1],	move[2],
 				0,		0,		0,
 				0,		0,		0,
-				(isRed)?255:cl_railred->value,	(isRed)?20:cl_railgreen->value,	(isRed)?20:cl_railblue->value,
+				red,	green,	blue,
 				0,		-90,	-30,
 				0.75,		-.75,
 				GL_SRC_ALPHA, GL_ONE,
@@ -2089,7 +2089,7 @@ void CL_DevRailTrail (vec3_t start, vec3_t end, qboolean isRed)
 			move[0],	move[1],	move[2],
 			crand()*10,	crand()*10,	crand()*10+20,
 			0,		0,		0,
-			(isRed)?255:cl_railred->value,	(isRed)?20:cl_railgreen->value,	(isRed)?20:cl_railblue->value,
+			red,	green,	blue,
 			0,	0,	0,
 			1,		-0.75 / (0.5 + frand()*0.3),
 			GL_SRC_ALPHA, GL_ONE,
@@ -2121,23 +2121,23 @@ void CL_DevRailTrail (vec3_t start, vec3_t end, qboolean isRed)
 CL_RailTrail
 ===============
 */
-void CL_RailTrail (vec3_t start, vec3_t end, qboolean isRed)
+void CL_RailTrail (vec3_t start, vec3_t end, int red, int green, int blue)
 {
 	vec3_t		move, last;
 	vec3_t		vec, point;
-	//vec3_t	right, up;
+//	vec3_t		right, up;
 	int			i;
 	int			beamred, beamgreen, beamblue;
-	float		len;//, dec;
-	qboolean	colored = (cl_railtype->integer != 0);
+	float		len;	// dec
+	qboolean	colored = ( (cl_railtype->integer == 1) || (cl_railtype->integer == 2) );
 
 	VectorSubtract (end, start, vec);
 	VectorNormalize(vec);
-	CL_ParticleRailDecal (end, vec, 7, isRed);
+	CL_ParticleRailDecal (end, vec, 7, red, green, blue);
 
 	if (cl_railtype->integer == 2)
 	{
-		CL_DevRailTrail (start, end, isRed);
+		CL_DevRailTrail (start, end, red, green, blue);
 		return;
 	}
 	// Draw from closest point
@@ -2154,18 +2154,12 @@ void CL_RailTrail (vec3_t start, vec3_t end, qboolean isRed)
 		len = min (len, cl_rail_length->value);  // cap length
 	VectorCopy (vec, point);
 	VectorScale (vec, RAILTRAILSPACE, vec);
-	//MakeNormalVectors (vec, right, up);
+//	MakeNormalVectors (vec, right, up);
 
 	if (colored) {
-		if (isRed) {
-			beamred = 255;
-			beamgreen = beamblue = 20;
-		}
-		else {
-			beamred = cl_railred->value;
-			beamgreen = cl_railgreen->value;
-			beamblue = cl_railblue->value;
-		}
+		beamred = red;
+		beamgreen = green;
+		beamblue = blue;
 	}
 	else
 		beamred = beamgreen = beamblue = 255;
@@ -2192,8 +2186,9 @@ void CL_RailTrail (vec3_t start, vec3_t end, qboolean isRed)
 				PART_BEAM,
 				NULL,0);
 	}
-	if (cl_railtype->integer == 0)
-		CL_RailSprial (start, end, isRed);
+	if ( !colored ) {
+		CL_RailSprial (start, end, red, green, blue);
+	}
 }
 
 

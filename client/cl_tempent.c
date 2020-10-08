@@ -889,16 +889,24 @@ void CL_ParseTEnt (void)
 		break;
 
 	case TE_RAILTRAIL:			// railgun effect
+	case TE_RAILTRAIL2:			// 12/23/2001 - red railgun trail
+	case TE_RAILTRAIL_COLORED:	// changeable color railgun trail
 		MSG_ReadPos (&net_message, pos);
 		MSG_ReadPos (&net_message, pos2);
-		CL_RailTrail (pos, pos2, false);
-		S_StartSound (pos2, 0, 0, clMedia.sfx_railg, 1, ATTN_NORM, 0);
-		break;
-	// 12/23/2001 - red railgun trail
-	case TE_RAILTRAIL2:			// red railgun effect
-		MSG_ReadPos (&net_message, pos);
-		MSG_ReadPos (&net_message, pos2);
-		CL_RailTrail (pos, pos2, true);
+		if (type == TE_RAILTRAIL_COLORED)
+		{
+			int		red, green, blue;
+			color = MSG_ReadByte (&net_message);
+			CL_EffectColor (color, &red, &green, &blue);
+			CL_RailTrail (pos, pos2, red, green, blue);
+		//	CL_RailTrail (pos, pos2, color8red(color), color8green(color), color8blue(color));
+		}
+		else if (type == TE_RAILTRAIL2) {
+			CL_RailTrail (pos, pos2, 255, 20, 20);
+		}
+		else {
+			CL_RailTrail (pos, pos2, cl_railred->integer, cl_railgreen->integer, cl_railblue->integer);
+		}
 		S_StartSound (pos2, 0, 0, clMedia.sfx_railg, 1, ATTN_NORM, 0);
 		break;
 
