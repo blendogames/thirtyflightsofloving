@@ -2577,10 +2577,10 @@ void FS_CopyConfigsToSavegameDir (void)
 			continue;
 		}
 		++cfgName;	// move to after the '/'
-		// don't copy configs written by other engines
+		// don't copy default.cfg or configs written by other engines
 		// TODO: keep this up to date!
 		// config.cfg, aprconfig.cfg, bqconfig.cfg, eglcfg.cfg, maxconfig.cfg, q2config.cfg, q2b_config.cfg, q2econfig.cfg, xpconfig.cfg, yq2.cfg
-		if ( (strstr(cfgName, "config.cfg") && stricmp(cfgName, "kmq2config.cfg")) || !stricmp(cfgName, "eglcfg.cfg") || !stricmp(cfgName, "yq2.cfg") ) {
+		if ( (strstr(cfgName, "config.cfg") && stricmp(cfgName, "kmq2config.cfg")) || !stricmp(cfgName, "default.cfg") || !stricmp(cfgName, "eglcfg.cfg") || !stricmp(cfgName, "yq2.cfg") ) {
 			continue;
 		}
 		Com_sprintf (dstCfgPath, sizeof(dstCfgPath), "%s/%s", FS_SaveGameDir(), cfgName);

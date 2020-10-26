@@ -181,7 +181,7 @@ void Options_Effects_MenuInit ( void )
 	static const char *railtrail_names[] =
 	{
 		"colored spiral",
-		"colored beam", //laser
+		"colored beam", // laser
 		"colored devrail",
 		0
 	};
