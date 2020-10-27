@@ -1273,6 +1273,7 @@ void SP_misc_actor (edict_t *self)
 		return;
 	}
 
+	self->class_id = ENTITY_MISC_ACTOR;
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;
 
@@ -1729,6 +1730,7 @@ void SP_target_actor (edict_t *self)
 		G_FreeEdict(self);
 		return;
 	}
+	self->class_id = ENTITY_TARGET_ACTOR;
 
 	if (!self->targetname)
 		gi.dprintf ("%s with no targetname at %s\n", self->classname, vtos(self->s.origin));
