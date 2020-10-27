@@ -763,11 +763,11 @@ void CTFAssignTeam (gclient_t *who)
 	{
 		float	r = random();
 		// find team with the fewest players
-		if (team1count < team2count && team1count < team3count)
+		if ( (team1count < team2count) && (team1count < team3count) )
 			who->resp.ctf_team = CTF_TEAM1;
-		else if (team2count < team1count &&  team2count < team3count) 
+		else if ( (team2count < team1count) && (team2count < team3count) ) 
 			who->resp.ctf_team = CTF_TEAM2;
-		else if (team3count < team1count &&  team3count < team2count) 
+		else if ( (team3count < team1count) && (team3count < team2count) ) 
 			who->resp.ctf_team = CTF_TEAM3;
 		// else select a random team
 		else if (r < 0.33)
@@ -3923,10 +3923,10 @@ struct {
 
 void CTFSay_Team (edict_t *who, char *msg)
 {
-	char outmsg[256];
-	char buf[256];
-	int i;
-	char *p;
+	char	outmsg[256];
+	char	buf[256];
+	int		i;
+	char	*p;
 	edict_t *cl_ent;
 //	size_t	outmsgSize = sizeof(outmsg);
 

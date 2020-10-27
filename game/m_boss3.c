@@ -76,5 +76,8 @@ void SP_monster_boss3_stand (edict_t *self)
 	self->use = Use_Boss3;
 	self->think = Think_Boss3Stand;
 	self->nextthink = level.time + FRAMETIME;
+
+	self->class_id = ENTITY_MONSTER_BOSS3_STAND;
+
 	gi.linkentity (self);
 }

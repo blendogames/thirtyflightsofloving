@@ -46,7 +46,7 @@ static int	sound_cock;
 
 void soldier_idle (edict_t *self)
 {
-	if(!(self->spawnflags & SF_MONSTER_AMBUSH))
+	if (!(self->spawnflags & SF_MONSTER_AMBUSH))
 	{
 		if (random() > 0.8)
 			gi.sound (self, CHAN_VOICE, sound_idle, 1, ATTN_IDLE, 0);
@@ -495,7 +495,7 @@ void soldier_fire (edict_t *self, int flash_number)
 		end[2] += self->enemy->viewheight;
 
 		// Lazarus fog reduction of accuracy
-		if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+		if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 		{
 			end[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 			end[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -504,7 +504,7 @@ void soldier_fire (edict_t *self, int flash_number)
 		
 		VectorSubtract (end, start, aim);
 		// Lazarus: Accuracy is skill level dependent
-		if(skill->value < 3)
+		if (skill->value < 3)
 		{
 			vectoangles (aim, dir);
 			AngleVectors (dir, forward, right, up);
@@ -916,7 +916,7 @@ void soldier_dead (edict_t *self)
 	M_FlyCheck (self);
 
 	// Lazarus monster fade
-	if(world->effects & FX_WORLDSPAWN_CORPSEFADE)
+	if (world->effects & FX_WORLDSPAWN_CORPSEFADE)
 	{
 		self->think=FadeDieSink;
 		self->nextthink=level.time+corpse_fadetime->value;
@@ -1267,7 +1267,7 @@ void SP_monster_soldier_x (edict_t *self)
 	sound_sight2 =	gi.soundindex ("soldier/solsrch1.wav");
 	sound_cock =	gi.soundindex ("infantry/infatck3.wav");
 
-	if(!self->mass)
+	if (!self->mass)
 		self->mass = 100;
 
 	self->pain = soldier_pain;
@@ -1280,7 +1280,7 @@ void SP_monster_soldier_x (edict_t *self)
 	self->monsterinfo.attack = soldier_attack;
 	self->monsterinfo.melee = NULL;
 	self->monsterinfo.sight = soldier_sight;
-	if(monsterjump->value)
+	if (monsterjump->value)
 	{
 		self->monsterinfo.jump = soldier_jump;
 		self->monsterinfo.jumpup = 48;
@@ -1288,7 +1288,7 @@ void SP_monster_soldier_x (edict_t *self)
 	}
 
 	// DWH
-	if(self->powerarmor)
+	if (self->powerarmor)
 	{
 		self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
 		self->monsterinfo.power_armor_power = self->powerarmor;
@@ -1297,10 +1297,10 @@ void SP_monster_soldier_x (edict_t *self)
 
 	gi.linkentity (self);
 
-	if(!self->monsterinfo.flies)
+	if (!self->monsterinfo.flies)
 		self->monsterinfo.flies = 0.40;
 
-	if(self->health < 0)
+	if (self->health < 0)
 	{
 		mmove_t	*deathmoves[] = {&soldier_move_death1,
 			                     &soldier_move_death2,
@@ -1330,12 +1330,14 @@ void SP_monster_soldier_light (edict_t *self)
 	gi.modelindex ("models/objects/laser/tris.md2");
 	gi.soundindex ("misc/lasfly.wav");
 	gi.soundindex ("soldier/solatck2.wav");
+
 	self->common_name = "Light Guard";
+	self->class_id = ENTITY_MONSTER_SOLDIER_LIGHT;
 
 	// Lazarus: mapper-configurable health
-	if(!self->health)
+	if (!self->health)
 		self->health = 20;
-	if(!self->gib_health)
+	if (!self->gib_health)
 		self->gib_health = -30;
 
 	SP_monster_soldier_x (self);
@@ -1357,12 +1359,14 @@ void SP_monster_soldier (edict_t *self)
 	sound_pain = gi.soundindex ("soldier/solpain1.wav");
 	sound_death = gi.soundindex ("soldier/soldeth1.wav");
 	gi.soundindex ("soldier/solatck1.wav");
+
 	self->common_name = "Shotgun Guard";
+	self->class_id = ENTITY_MONSTER_SOLDIER;
 
 	// Lazarus: mapper-configurable health
-	if(!self->health)
+	if (!self->health)
 		self->health = 30;
-	if(!self->gib_health)
+	if (!self->gib_health)
 		self->gib_health = -30;
 
 	SP_monster_soldier_x (self);
@@ -1384,12 +1388,14 @@ void SP_monster_soldier_ss (edict_t *self)
 	sound_pain_ss = gi.soundindex ("soldier/solpain3.wav");
 	sound_death_ss = gi.soundindex ("soldier/soldeth3.wav");
 	gi.soundindex ("soldier/solatck3.wav");
+
 	self->common_name = "Machinegun Guard";
+	self->class_id = ENTITY_MONSTER_SOLDIER_SS;
 
 	// Lazarus: mapper-configurable health
-	if(!self->health)
+	if (!self->health)
 		self->health = 40;
-	if(!self->gib_health)
+	if (!self->gib_health)
 		self->gib_health = -30;
 
 	SP_monster_soldier_x (self);
@@ -1397,4 +1403,3 @@ void SP_monster_soldier_ss (edict_t *self)
 	// Lazarus: custom skins
 	self->s.skinnum = 4 + 6*self->style;
 }
-

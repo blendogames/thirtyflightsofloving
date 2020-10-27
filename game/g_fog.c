@@ -555,7 +555,7 @@ void Fog (edict_t *ent)
 	VectorCopy(ent->s.origin, viewpoint);
 	viewpoint[2] += ent->viewheight;
 
-	if (Q_stricmp(vid_ref->string,"gl"))
+	if (Q_stricmp(vid_ref->string, "gl"))
 	{
 		last_software_frame = level.framenum;
 		level.active_fog = 0;
@@ -676,7 +676,7 @@ void Fog_Off (edict_t *ent)
 
 	if (gl_driver && vid_ref)
 	{
-		if (!strcmp(vid_ref->string,"gl"))
+		if (!strcmp(vid_ref->string, "gl"))
 		{
 			if (hOpenGL)
 				GL_glDisable (GL_FOG);

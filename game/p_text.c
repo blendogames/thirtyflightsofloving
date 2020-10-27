@@ -165,7 +165,7 @@ void Text_Update(edict_t *ent)
 		}
 		if (strlen(t))
 		{
-		//	sprintf (string + strlen(string), "yv %d ", y0 + 24 + i * 8);
+		//	sprintf(string + strlen(string), "yv %d ", y0 + 24 + i * 8);
 			Com_sprintf (string + strlen(string), sizeof(string)-strlen(string), "yv %d ", y0 + 24 + i * 8);
 			if (align == TEXT_CENTER)
 				x = x0 + 20 + (hnd->page_width-1-(int)strlen(t))*4;
@@ -175,16 +175,16 @@ void Text_Update(edict_t *ent)
 				x = x0 + 20;
 			if (x != xlast)
 			{
-			//	sprintf (string + strlen(string), "xv %d ",x);
+			//	sprintf(string + strlen(string), "xv %d ",x);
 				Com_sprintf (string + strlen(string), sizeof(string)-strlen(string), "xv %d ",x);
 				xlast = x;
 			}
 			if (alt) {
-			//	sprintf (string + strlen(string), "string2 \"%s\" ", t);
+			//	sprintf(string + strlen(string), "string2 \"%s\" ", t);
 				Com_sprintf (string + strlen(string), sizeof(string)-strlen(string), "string2 \"%s\" ", t);
 			}
 			else {
-			//	sprintf (string + strlen(string), "string \"%s\" ", t);
+			//	sprintf(string + strlen(string), "string \"%s\" ", t);
 				Com_sprintf (string + strlen(string), sizeof(string)-strlen(string), "string \"%s\" ", t);
 			}
 		}
@@ -323,7 +323,7 @@ void Do_Text_Display(edict_t *activator, int flags, char *message)
 			Com_sprintf(pakfile, sizeof(pakfile), "%s\\pak%d.pak", filename, i);
 			if (NULL != (f = fopen(pakfile, "rb")))
 			{
-				num = fread(&pakheader,1,sizeof(pak_header_t),f);
+				num = (int)fread(&pakheader,1,sizeof(pak_header_t),f);
 				if (num >= sizeof(pak_header_t))
 				{
 					if ( pakheader.id[0] == 'P' &&

@@ -480,7 +480,7 @@ void insane_run (edict_t *self)
 
 void insane_pain (edict_t *self, edict_t *other, float kick, int damage)
 {
-	int	l,r;
+	int	l, r;
 
 	//if (self->health < (self->max_health / 2))
 	//	self->s.skinnum = 1;
@@ -559,11 +559,12 @@ void insane_stand (edict_t *self)
 	// If Hold_Ground and Crawl are set
 	else if ( (self->spawnflags & 4) && (self->spawnflags & 16) )
 		self->monsterinfo.currentmove = &insane_move_down;
-	else
+	else {
 		if (random() < 0.5)
 			self->monsterinfo.currentmove = &insane_move_stand_normal;
 		else
 			self->monsterinfo.currentmove = &insane_move_stand_insane;
+	}
 }
 
 void insane_dead (edict_t *self)
@@ -636,7 +637,7 @@ void insane_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 */
 void SP_misc_insane (edict_t *self)
 {
-	//static int skin = 0;	//@@
+//	static int skin = 0;	//@@
 
 	if (deathmatch->value)
 	{
@@ -682,11 +683,11 @@ void SP_misc_insane (edict_t *self)
 	self->monsterinfo.sight = NULL;
 	self->monsterinfo.aiflags |= AI_GOOD_GUY;
 
-	//@@
-	//self->s.skinnum = skin;
-	//skin++;
-	//if (skin > 12)
-	//	skin = 0;
+//@@
+//	self->s.skinnum = skin;
+//	skin++;
+//	if (skin > 12)
+//		skin = 0;
 
 	gi.linkentity (self);
 
@@ -699,6 +700,7 @@ void SP_misc_insane (edict_t *self)
 		self->monsterinfo.flies = 0.30;
 
 	self->common_name = "Insane Marine";
+	self->class_id = ENTITY_MISC_INSANE;
 
 	self->monsterinfo.scale = MODEL_SCALE;
 

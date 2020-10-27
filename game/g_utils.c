@@ -137,7 +137,7 @@ edict_t *G_PickTarget (char *targetname)
 		return NULL;
 	}
 
-	while(1)
+	while (1)
 	{
 		ent = G_Find (ent, FOFS(targetname), targetname);
 		if (!ent)
@@ -184,6 +184,9 @@ void G_UseTargets (edict_t *ent, edict_t *activator)
 {
 	edict_t		*t;
 
+	if (!ent)	// sanity check
+		return;
+
 //
 // check for a delay
 //
@@ -210,7 +213,7 @@ void G_UseTargets (edict_t *ent, edict_t *activator)
 //
 	if ( (ent->message) && (activator) && !(activator->svflags & SVF_MONSTER) )
 	{
-//		Lazarus - change so that noise_index < 0 means no sound
+	//	Lazarus - change so that noise_index < 0 means no sound
 		safe_centerprintf (activator, "%s", ent->message);
 		if (ent->noise_index > 0)
 			gi.sound (activator, CHAN_AUTO, ent->noise_index, 1, ATTN_NORM, 0);
@@ -227,17 +230,17 @@ void G_UseTargets (edict_t *ent, edict_t *activator)
 		while ((t = G_Find (t, FOFS(targetname), ent->killtarget)))
 		{
 			// Lazarus: remove LIVE killtargeted monsters from total_monsters
-			if((t->svflags & SVF_MONSTER) && (t->deadflag == DEAD_NO))
+			if ((t->svflags & SVF_MONSTER) && (t->deadflag == DEAD_NO))
 			{
-				if(!t->dmgteam || strcmp(t->dmgteam,"player"))
-					if(!(t->monsterinfo.aiflags & AI_GOOD_GUY))
+				if (!t->dmgteam || strcmp(t->dmgteam,"player"))
+					if (!(t->monsterinfo.aiflags & AI_GOOD_GUY))
 						level.total_monsters--;
 			}
 			// and decrement secret count if target_secret is removed
-			else if(!Q_stricmp(t->classname,"target_secret"))
+			else if (!Q_stricmp(t->classname,"target_secret"))
 				level.total_secrets--;
 			// same deal with target_goal, but also turn off CD music if applicable
-			else if(!Q_stricmp(t->classname,"target_goal"))
+			else if (!Q_stricmp(t->classname,"target_goal"))
 			{
 				level.total_goals--;
 				if (level.found_goals >= level.total_goals)
@@ -542,28 +545,31 @@ void G_FreeEdict (edict_t *ed)
 {
 	// Lazarus - if part of a movewith chain, remove from
 	// the chain and repair broken links
-	if(ed->movewith) {
+	if (ed->movewith)
+	{
 		edict_t	*e;
-		edict_t	*parent=NULL;
+		edict_t	*parent = NULL;
 		int		i;
 
-		for(i=1; i<globals.num_edicts && !parent; i++) {
+		for (i=1; i<globals.num_edicts && !parent; i++) {
 			e = g_edicts + i;
-			if(e->movewith_next == ed) parent=e;
+			if (e->movewith_next == ed) parent = e;
 		}
-		if(parent) parent->movewith_next = ed->movewith_next;
+		if (parent) parent->movewith_next = ed->movewith_next;
 	}
 
 	gi.unlinkentity (ed);		// unlink from world
 
 	// Lazarus: In SP we no longer reserve slots for bodyque's
-	if (deathmatch->value || coop->value) {
+	if (deathmatch->value || coop->value)
+	{
 		if ((ed - g_edicts) <= (maxclients->value + BODY_QUEUE_SIZE))
 		{
-//			gi.dprintf("tried to free special edict\n");
+		//	gi.dprintf("tried to free special edict\n");
 			return;
 		}
-	} else {
+	}
+	else {
 		if ((ed - g_edicts) <= maxclients->value)
 		{
 			return;
@@ -697,13 +703,13 @@ qboolean KillBox (edict_t *ent)
 
 void AnglesNormalize(vec3_t vec)
 {
-	while(vec[0] > 180)
+	while (vec[0] > 180)
 		vec[0] -= 360;
-	while(vec[0] < -180)
+	while (vec[0] < -180)
 		vec[0] += 360;
-	while(vec[1] > 360)
+	while (vec[1] > 360)
 		vec[1] -= 360;
-	while(vec[1] < 0)
+	while (vec[1] < 0)
 		vec[1] += 360;
 }
 
@@ -748,7 +754,7 @@ float AtLeast(float x, float dx)
 	float xx;
 
 	xx = (float)(floor(x/dx - 0.5)+1.)*dx;
-	if(xx < x) xx += dx;
+	if (xx < x) xx += dx;
 	return xx;
 }
 
@@ -765,8 +771,8 @@ edict_t	*LookingAt (edict_t *ent, int filter, vec3_t endpos, float *range)
 
 	if (!ent->client)
 	{
-		if(endpos) VectorClear(endpos);
-		if(range) *range = 0;
+		if (endpos) VectorClear(endpos);
+		if (range) *range = 0;
 		return NULL;
 	}
 	VectorClear(end);
@@ -983,9 +989,9 @@ void G_UseTarget (edict_t *ent, edict_t *activator, edict_t *target)
 		while ((t = G_Find (t, FOFS(targetname), ent->killtarget)))
 		{
 			// Lazarus: remove killtargeted monsters from total_monsters
-			if(t->svflags & SVF_MONSTER) {
-				if(!t->dmgteam || strcmp(t->dmgteam,"player"))
-					if(!(t->monsterinfo.aiflags & AI_GOOD_GUY))
+			if (t->svflags & SVF_MONSTER) {
+				if (!t->dmgteam || strcmp(t->dmgteam,"player"))
+					if (!(t->monsterinfo.aiflags & AI_GOOD_GUY))
 						level.total_monsters--;
 			}
 			G_FreeEdict (t);
@@ -1025,15 +1031,16 @@ void G_UseTarget (edict_t *ent, edict_t *activator, edict_t *target)
 	}
 }
 
+
+// Knightmare added
 /*
 ====================
 IsIdMap
+
+Checks if the current map is a stock id map,
+this is used for certain hacks.
 ====================
 */
-
-//Knightmare- IsIdMap checks if the current map is a stock id map,
-//	this is used for certain hacks.
-
 qboolean IsIdMap (void)
 {
 	if (Q_stricmp(level.mapname, "base1") == 0)
@@ -1139,6 +1146,190 @@ qboolean IsIdMap (void)
 
 	return false;
 }
+
+
+// Knightmare added
+/*
+====================
+IsXatrixMap
+
+Checks if the current map is from the Xatrix mission pack.
+This is used for certain hacks.
+====================
+*/
+qboolean IsXatrixMap (void)
+{
+	if (Q_stricmp(level.mapname, "badlands") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "industry") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "outbase") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "refinery") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "w_treat") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "xcompnd1") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "xcompnd2") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "xhangar1") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "xhangar2") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "xintell") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "xmoon1") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "xmoon2") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "xreactor") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "xsewer1") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "xsewer2") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "xship") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "xswamp") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "xware") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "xdm1") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "xdm2") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "xdm3") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "xdm4") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "xdm5") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "xdm6") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "xdm7") == 0)
+		return true;
+
+	return false;
+}
+
+
+// Knightmare added
+/*
+====================
+IsRogueMap
+
+Checks if the current map is from the Rogue mission pack.
+This is used for certain hacks.
+====================
+*/
+qboolean IsRogueMap (void)
+{
+	if (Q_stricmp(level.mapname, "rammo1") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "rammo2") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "rbase1") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "rbase2") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "rboss") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "rhangar1") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "rhangar2") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "rlava1") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "rlava2") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "rmine1") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "rmine2") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "rsewer1") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "rsewer2") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "rware1") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "rware2") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "rdm1") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "rdm2") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "rdm3") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "rdm4") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "rdm5") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "rdm6") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "rdm7") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "rdm8") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "rdm9") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "rdm10") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "rdm11") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "rdm12") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "rdm13") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "rdm14") == 0)
+		return true;
+
+	return false;
+}
+
+
+// Knightmare added
+/*
+====================
+IsZaeroMap
+
+Checks if the current map is from the Zaero mission pack.
+This is used for certain hacks.
+====================
+*/
+qboolean IsZaeroMap (void)
+{
+	if (Q_stricmp(level.mapname, "zbase1") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "zbase2") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "zboss") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "zdef1") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "zdef2") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "zdef3") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "zdef4") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "ztomb1") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "ztomb2") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "ztomb3") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "ztomb4") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "zwaste1") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "zwaste2") == 0)
+		return true;
+	if (Q_stricmp(level.mapname, "zwaste3") == 0)
+		return true;
+	return false;
+}
+
 
 void my_bprintf (int printlevel, char *fmt, ...)
 {

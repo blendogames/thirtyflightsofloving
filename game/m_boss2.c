@@ -64,7 +64,7 @@ void Boss2Rocket (edict_t *self)
 	vec3_t	vec;
 	int		rocketSpeed;
 
-	if((self->spawnflags & SF_MONSTER_SPECIAL))
+	if ((self->spawnflags & SF_MONSTER_SPECIAL))
 		rocketSpeed = 400; // Lazarus: Homing rockets are tougher if slow
 	else
 		rocketSpeed = 500 + (100 * skill->value);
@@ -75,7 +75,7 @@ void Boss2Rocket (edict_t *self)
 	vec[2] += self->enemy->viewheight;
 
 	// Lazarus fog reduction of accuracy
-	if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+	if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 	{
 		vec[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 		vec[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -122,7 +122,7 @@ void boss2_firebullet_right (edict_t *self)
 	target[2] += self->enemy->viewheight;
 
 	// Lazarus fog reduction of accuracy
-	if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+	if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 	{
 		target[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 		target[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -145,7 +145,7 @@ void boss2_firebullet_left (edict_t *self)
 	target[2] += self->enemy->viewheight;
 
 	// Lazarus fog reduction of accuracy
-	if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+	if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 	{
 		target[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 		target[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -697,11 +697,11 @@ void SP_monster_boss2 (edict_t *self)
 	VectorSet (self->maxs, 56, 56, 80);
 
 	// Lazarus: mapper-configurable health
-	if(!self->health)
+	if (!self->health)
 		self->health = 2000;
-	if(!self->gib_health)
+	if (!self->gib_health)
 		self->gib_health = -200;
-	if(!self->mass)
+	if (!self->mass)
 		self->mass = 1000;
 
 	self->flags |= FL_IMMUNE_LASER;
@@ -725,7 +725,7 @@ void SP_monster_boss2 (edict_t *self)
 	gi.linkentity (self);
 
 	self->monsterinfo.currentmove = &boss2_move_stand;	
-	if(self->health < 0)
+	if (self->health < 0)
 	{
 		mmove_t	*deathmoves[] = {&boss2_move_death,
 								 NULL};
@@ -734,11 +734,14 @@ void SP_monster_boss2 (edict_t *self)
 	self->monsterinfo.scale = MODEL_SCALE;
 
 	// Lazarus power armor
-	if(self->powerarmor) {
+	if (self->powerarmor) {
 		self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
 		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
-	self->common_name = "Flying Boss";
+
+//	self->common_name = "Flying Boss";
+	self->common_name = "Hornet";
+	self->class_id = ENTITY_MONSTER_BOSS2;
 
 	flymonster_start (self);
 }

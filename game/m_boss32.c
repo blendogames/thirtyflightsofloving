@@ -41,6 +41,7 @@ void makron_step_left (edict_t *self);
 void makron_step_right (edict_t *self);
 void makronBFG (edict_t *self);
 void makron_dead (edict_t *self);
+void SP_monster_makron_put (edict_t *self);
 
 static int	sound_pain4;
 static int	sound_pain5;
@@ -874,7 +875,14 @@ void MakronPrecache (void)
 
 /*QUAKED monster_makron (1 .5 0) (-30 -30 0) (30 30 90) Ambush Trigger_Spawn Sight
 */
+// Knightmare- direct spawn function, sets nojump flag
 void SP_monster_makron (edict_t *self)
+{
+	self->fogclip |= 1;
+	SP_monster_makron_put (self);
+}
+
+void SP_monster_makron_put (edict_t *self)
 {
 	if (deathmatch->value)
 	{
@@ -891,14 +899,14 @@ void SP_monster_makron (edict_t *self)
 	VectorSet (self->maxs, 30, 30, 90);
 
 	// Lazarus: mapper-configurable health
-	if(!self->health)
+	if (!self->health)
 		self->health = 3000;
 
 	// Lazarus: get around Killed's prevention of health dropping below -999
-//	if(!self->gib_health)
+//	if (!self->gib_health)
 //		self->gib_health = -2000;
 	self->gib_health = -900;
-	if(!self->mass)
+	if (!self->mass)
 		self->mass = 500;
 
 	self->pain = makron_pain;
@@ -914,20 +922,28 @@ void SP_monster_makron (edict_t *self)
 
 	// Knightmare- added sparks and blood type
 	if (!self->blood_type)
-		self->blood_type = 2; //sparks
+		self->blood_type = 2; // sparks
 	else
-		self->fogclip |= 2; //custom bloodtype flag
+		self->fogclip |= 2; // custom bloodtype flag
 
 	// Lazarus
-	if(self->powerarmor) {
+	if (self->powerarmor) {
 		self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
 		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
 
+	self->common_name = "Makron";
+	self->class_id = ENTITY_MONSTER_MAKRON;
+
 	gi.linkentity (self);
 	
-	self->monsterinfo.currentmove = &makron_move_sight;
-	if(self->health < 0)
+	// Knightmare- nojump flag
+	if (self->fogclip & 1)
+		self->monsterinfo.currentmove = &makron_move_stand;
+	else
+		self->monsterinfo.currentmove = &makron_move_sight;
+
+	if (self->health < 0)
 	{
 		mmove_t	*deathmoves[] = {&makron_move_death2,
 			                     &makron_move_death3,
@@ -950,7 +966,11 @@ void MakronSpawn (edict_t *self)
 	vec3_t		vec;
 	edict_t		*player;
 
-	SP_monster_makron (self);
+	SP_monster_makron_put (self);
+
+	// Knightmare- gross hack for map6 of COS3- don't jump
+	if (Q_stricmp(level.mapname, "grinsp3f") == 0)
+		return;
 
 	// jump at player
 	player = level.sight_client;
@@ -980,11 +1000,22 @@ void MakronToss (edict_t *self)
 	ent->nextthink = level.time + 0.8;
 	ent->think = MakronSpawn;
 	ent->target = self->target;
+	// Knightmare- if Jorg was killed by a trigger_hurt, set nojump flag
+	if (self->fogclip & 4)
+		ent->fogclip |= 1;
 
 	ent->health = self->health2;
 	ent->mass   = self->mass2;
-	ent->common_name = "Makron";
+
+//	ent->common_name = "Makron";
+//	self->class_id = ENTITY_MONSTER_MAKRON;
+
+#ifdef KMQUAKE2_ENGINE_MOD
+	// If the Jorg was transparent, make Makron transparent, too.
+	if (self->s.alpha)
+		ent->s.alpha = self->s.alpha;
+#endif
 
 	VectorCopy (self->s.origin, ent->s.origin);
-
+	self->s.modelindex2 = 0; // Knightmare- remove Makron model from dead Jorg
 }

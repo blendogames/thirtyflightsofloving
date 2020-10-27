@@ -113,9 +113,9 @@ void camera_on (edict_t *ent)
 	// "viewer" can control camera aim (2nd player to come along and use
 	// camera cannot)
 	camera = ent->client->spycam;
-	if(camera->monsterinfo.aiflags & AI_ACTOR)
+	if (camera->monsterinfo.aiflags & AI_ACTOR)
 		camera->flags |= FL_ROBOT;
-	if(!camera->viewer)
+	if (!camera->viewer)
 		camera->viewer = ent;
 
 	// save current viewangles and restore them with camera_off

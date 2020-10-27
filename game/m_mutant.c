@@ -181,7 +181,7 @@ mmove_t mutant_move_idle = {FRAME_stand152, FRAME_stand164, mutant_frames_idle, 
 void mutant_idle (edict_t *self)
 {
 	self->monsterinfo.currentmove = &mutant_move_idle;
-	if(!(self->spawnflags & SF_MONSTER_AMBUSH))
+	if (!(self->spawnflags & SF_MONSTER_AMBUSH))
 		gi.sound (self, CHAN_VOICE, sound_idle, 1, ATTN_IDLE, 0);
 }
 
@@ -447,7 +447,7 @@ qboolean mutant_check_jump (edict_t *self)
 		if (random() < 0.9)
 			return false;
 	}
-	if(speed)
+	if (speed)
 		self->velocity[2] = speed;
 	return true;
 }
@@ -569,7 +569,7 @@ void mutant_dead (edict_t *self)
 	M_FlyCheck (self);
 
 	// Lazarus monster fade
-	if(world->effects & FX_WORLDSPAWN_CORPSEFADE)
+	if (world->effects & FX_WORLDSPAWN_CORPSEFADE)
 	{
 		self->think=FadeDieSink;
 		self->nextthink=level.time+corpse_fadetime->value;
@@ -667,8 +667,6 @@ void SP_monster_mutant (edict_t *self)
 		G_FreeEdict (self);
 		return;
 	}
-	self->class_id = ENTITY_MONSTER_MUTANT;
-	self->spawnflags |= SF_MONSTER_KNOWS_MIRRORS;
 
 	sound_swing = gi.soundindex ("mutant/mutatck1.wav");
 	sound_hit = gi.soundindex ("mutant/mutatck2.wav");
@@ -699,11 +697,11 @@ void SP_monster_mutant (edict_t *self)
 	VectorSet (self->maxs, 32, 32, 48);
 
 	// Lazarus: mapper-configurable health
-	if(!self->health)
+	if (!self->health)
 		self->health = 300;
-	if(!self->gib_health)
+	if (!self->gib_health)
 		self->gib_health = -120;
-	if(!self->mass)
+	if (!self->mass)
 		self->mass = 300;
 
 	self->pain = mutant_pain;
@@ -719,7 +717,7 @@ void SP_monster_mutant (edict_t *self)
 	self->monsterinfo.search = mutant_search;
 	self->monsterinfo.idle = mutant_idle;
 	self->monsterinfo.checkattack = mutant_checkattack;
-	if(monsterjump->value)
+	if (monsterjump->value)
 	{
 		self->monsterinfo.jump = mutant_fake_jump;
 		self->monsterinfo.jumpup = 96;
@@ -728,9 +726,9 @@ void SP_monster_mutant (edict_t *self)
 
 	gi.linkentity (self);
 	self->monsterinfo.currentmove = &mutant_move_stand;
-	if(!self->monsterinfo.flies)
+	if (!self->monsterinfo.flies)
 		self->monsterinfo.flies = 0.90;
-	if(self->health < 0)
+	if (self->health < 0)
 	{
 		mmove_t	*deathmoves[] = {&mutant_move_death1,
 			                     &mutant_move_death2,
@@ -738,6 +736,9 @@ void SP_monster_mutant (edict_t *self)
 		M_SetDeath(self,(mmove_t **)&deathmoves);
 	}
 	self->common_name = "Mutant";
+	self->class_id = ENTITY_MONSTER_MUTANT;
+	self->spawnflags |= SF_MONSTER_KNOWS_MIRRORS;
+
 	self->monsterinfo.scale = MODEL_SCALE;
 	walkmonster_start (self);
 }

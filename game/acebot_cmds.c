@@ -244,3 +244,4 @@ void safe_bprintf (int printlevel, char *fmt, ...)
 		gi.cprintf(cl_ent, printlevel, "%s", bigbuffer);
 	}
 }
+

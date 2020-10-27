@@ -394,7 +394,8 @@ void vehicle_think (edict_t *self)
 		VectorAdd(drive,l1,drive);
 		drive[2] += self->move_origin[2];
 		// find a player
-		for (i=1, ent=&g_edicts[1] ; i<=maxclients->value ; i++, ent++) {
+		for (i=1, ent=&g_edicts[1] ; i<=maxclients->value ; i++, ent++)
+		{
 			if (!ent->inuse) continue;
 			if (ent->movetype == MOVETYPE_NOCLIP) continue;
 			if (!ent->client->use) continue;
@@ -433,8 +434,10 @@ void vehicle_think (edict_t *self)
 			}
 		}
 	}
+#ifndef POSTTHINK_CHILD_MOVEMENT
 	if (self->movewith_next && (self->movewith_next->movewith_ent == self))
-		set_child_movement(self);
+		set_child_movement (self);
+#endif	// POSTTHINK_CHILD_MOVEMENT
 }
 
 void turn_vehicle (edict_t *self)
@@ -445,6 +448,8 @@ void turn_vehicle (edict_t *self)
 }
 void SP_func_vehicle (edict_t *self)
 {
+	self->class_id = ENTITY_FUNC_VEHICLE;
+
 	self->ideal_yaw = self->s.angles[YAW];
 	VectorClear (self->s.angles);
 	self->solid = SOLID_BSP;
@@ -491,6 +496,10 @@ void SP_func_vehicle (edict_t *self)
 	self->moveinfo.state = STOP;
 	gi.linkentity (self);
 	VectorCopy(self->size,self->org_size);
+
+#ifdef POSTTHINK_CHILD_MOVEMENT
+	self->postthink = set_child_movement; // Knightmare- supports movewith
+#endif	// POSTTHINK_CHILD_MOVEMENT
 
 	if (self->ideal_yaw != 0)
 		self->prethink = turn_vehicle;

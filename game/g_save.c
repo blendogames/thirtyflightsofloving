@@ -21,6 +21,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 
+
 #include "g_local.h"
 
 #define Function(f) {#f, f}
@@ -111,7 +112,7 @@ field_t fields[] = {
 	{"item", STOFS(item), F_LSTRING, FFL_SPAWNTEMP},
 	{"shift", STOFS(shift), F_FLOAT, FFL_SPAWNTEMP},
 
-//need for item field in edict struct, FFL_SPAWNTEMP item will be skipped on saves
+	// need for item field in edict struct, FFL_SPAWNTEMP item will be skipped on saves
 	{"item", FOFS(item), F_ITEM},
 
 	{"gravity", STOFS(gravity), F_LSTRING, FFL_SPAWNTEMP},
@@ -127,11 +128,15 @@ field_t fields[] = {
 	{"salpha", FOFS(s.alpha), F_FLOAT}, // Knightmare- hack for setting alpha
 #endif
 	{"musictrack", FOFS(musictrack), F_LSTRING},
-	//Knightmare- movetype backup
+	// Knightmare- movetype backup
 	{"oldmovetype", FOFS(oldmovetype), F_INT},
 	{"relative_velocity", FOFS(relative_velocity), F_VECTOR}, 	//relative velocity
 	{"relative_avelocity", FOFS(relative_avelocity), F_VECTOR}, //relative angular velocity
 	{"oldvelocity", FOFS(oldvelocity), F_VECTOR}, //relative angular velocity
+
+	{"width", FOFS(width), F_FLOAT},	// Knightmare- these are needed to update func_door_secret's positions
+	{"length", FOFS(length), F_FLOAT},
+	{"side", FOFS(side), F_FLOAT},
 
 	// Lazarus additions
 	{"actor_current_weapon", FOFS(actor_current_weapon), F_INT},
@@ -208,6 +213,7 @@ field_t fields[] = {
 	{"org_size", FOFS(org_size), F_VECTOR},
 	{"owner_id", FOFS(owner_id), F_INT},
 	{"parent_attach_angles", FOFS(parent_attach_angles), F_VECTOR},
+	{"child_attach_angles", FOFS(child_attach_angles), F_VECTOR},	// Knightmare added
 	{"pitch_speed", FOFS(pitch_speed), F_FLOAT},
 	{"powerarmor", FOFS(powerarmor), F_INT},
 	{"prev_grenade", FOFS(prev_grenade), F_EDICT, FFL_NOSPAWN},
@@ -1094,7 +1100,7 @@ All pointer variables (except function pointers) must be handled specially.
 void ReadEdict (FILE *f, edict_t *ent)
 {
 	field_t		*field;
-	int		i; // Knightmare added
+	int			i; // Knightmare added
 
 	fread (ent, sizeof(*ent), 1, f);
 

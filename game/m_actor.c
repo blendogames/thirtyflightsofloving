@@ -1753,7 +1753,7 @@ void SP_target_actor (edict_t *self)
 	gi.linkentity (self);
 }
 
-qboolean InPak(char *basedir, char *gamedir, char *filename)
+qboolean InPak (char *basedir, char *gamedir, char *filename)
 {
 	char			pakfile[256];
 	int				k, kk;
@@ -1782,10 +1782,10 @@ qboolean InPak(char *basedir, char *gamedir, char *filename)
 		strncpy(pakfile, basedir, sizeof(pakfile));
 		if (strlen(gamedir))
 		{
-			Q_strncatz (pakfile, "/", sizeof(pakfile));
-			Q_strncatz (pakfile, gamedir, sizeof(pakfile));
+			Q_strncatz(pakfile, "/", sizeof(pakfile));
+			Q_strncatz(pakfile, gamedir, sizeof(pakfile));
 		}
-		Q_strncatz (pakfile, va("/pak%d.pak",k), sizeof(pakfile));
+		Q_strncatz(pakfile, va("/pak%d.pak",k), sizeof(pakfile));
 		if (NULL != (f = fopen(pakfile, "rb")))
 		{
 			num = (int)fread(&pakheader,1,sizeof(pak_header_t),f);
@@ -1901,7 +1901,7 @@ void actor_files ()
 				// If it's NOT a custom model, start by looking in game folder
 				if (strlen(gamedir->string))
 				{
-					Com_sprintf(filename, sizeof(filename), "%s/%s/sound/%s%s",basedir->string,gamedir->string,path,wavname[j]);
+					Com_sprintf(filename, sizeof(filename), "%s/%s/sound/%s%s", basedir->string, gamedir->string, path,wavname[j]);
 					f = fopen(filename,"r");
 					if (f) {
 						fclose(f);
@@ -1913,7 +1913,7 @@ void actor_files ()
 					
 					// Search paks in game folder
 					Com_sprintf(filename, sizeof(filename), "sound/%s%s",path,wavname[j]);
-					if (InPak(basedir->string,gamedir->string,filename)) {
+					if (InPak(basedir->string, gamedir->string, filename)) {
 						Q_strncpyz(filename, path, sizeof(filename));
 						Q_strncatz(filename, wavname[j], sizeof(filename));
 						e->actor_sound_index[j] = gi.soundindex(filename);
@@ -1922,7 +1922,7 @@ void actor_files ()
 				}
 				
 				// Search in baseq2 for external file
-				Com_sprintf(filename, sizeof(filename), "%s/baseq2/sound/%s%s",basedir->string,path,wavname[j]);
+				Com_sprintf(filename, sizeof(filename), "%s/baseq2/sound/%s%s", basedir->string, path, wavname[j]);
 				f = fopen(filename,"r");
 				if (f) {
 					fclose(f);
@@ -1934,7 +1934,7 @@ void actor_files ()
 				
 				// Search paks in baseq2
 				Com_sprintf(filename, sizeof(filename), "sound/%s%s",path,wavname[j]);
-				if (InPak(basedir->string,"baseq2",filename)) {
+				if (InPak(basedir->string, "baseq2", filename)) {
 					Q_strncpyz(filename, path, sizeof(filename));
 					Q_strncatz(filename, wavname[j], sizeof(filename));
 					e->actor_sound_index[j] = gi.soundindex(filename);
@@ -1995,7 +1995,7 @@ void actor_files ()
 			switch (e->actor_weapon[k]) {
 			case 2: Q_strncatz(filename, "w_shotgun.md2", sizeof(filename));		break;
 			case 3:	Q_strncatz(filename, "w_sshotgun.md2", sizeof(filename));		break;
-			case 4:	Q_strncatz(filename, "w_machinegun.md2", sizeof(filename));		break;
+			case 4:	Q_strncatz(filename, "w_machinegun.md2", sizeof(filename));	break;
 			case 5:	Q_strncatz(filename, "w_chaingun.md2", sizeof(filename));		break;
 			case 6:	Q_strncatz(filename, "w_glauncher.md2", sizeof(filename));		break;
 			case 7: Q_strncatz(filename, "w_rlauncher.md2", sizeof(filename));		break;
@@ -2008,7 +2008,7 @@ void actor_files ()
 			if (strlen(gamedir->string))
 			{
 				// Start in game folder
-				Com_sprintf(path, sizeof(path), "%s/%s/%s",basedir->string,gamedir->string,filename);
+				Com_sprintf(path, sizeof(path), "%s/%s/%s", basedir->string, gamedir->string, filename);
 				f = fopen(path,"r");
 				if (f) {
 					fclose(f);

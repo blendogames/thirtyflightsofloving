@@ -299,7 +299,7 @@ void	ServerCommand (void)
 		SVCmd_WriteIP_f ();
 
 // ACEBOT_ADD
-	else if(Q_stricmp (cmd, "acedebug") == 0)
+	else if (Q_stricmp (cmd, "acedebug") == 0)
  		if (strcmp(gi.argv(2),"on")==0)
 		{
 			safe_bprintf (PRINT_MEDIUM, "ACE: Debug Mode On\n");
@@ -318,18 +318,18 @@ void	ServerCommand (void)
 			safe_bprintf (PRINT_MEDIUM, "ACE: Can only spawn bots in deathmatch mode.\n");
 			return;
 		}
-		if(ctf->value) // name, skin, team
+		if (ctf->value) // name, skin, team
 			ACESP_SpawnBot (gi.argv(2), gi.argv(3), gi.argv(4), NULL);
 		else // name, skin
 			ACESP_SpawnBot (NULL, gi.argv(2), gi.argv(3), NULL);
 	}	
 
 	// removebot
-    else if(Q_stricmp (cmd, "removebot") == 0)
-    	ACESP_RemoveBot(gi.argv(2));
+    else if (Q_stricmp (cmd, "removebot") == 0)
+    	ACESP_RemoveBot (gi.argv(2));
 	// Node saving
-	else if(Q_stricmp (cmd, "savenodes") == 0)
-    	ACEND_SaveNodes();
+	else if (Q_stricmp (cmd, "savenodes") == 0)
+    	ACEND_SaveNodes ();
 // ACEBOT_END
 	// Knightmare added- DM pause
     else if(Q_stricmp (cmd, "dmpause") == 0)

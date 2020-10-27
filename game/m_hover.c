@@ -455,7 +455,7 @@ void hover_fire_blaster (edict_t *self)
 	end[2] += self->enemy->viewheight;
 
 	// Lazarus fog reduction of accuracy
-	if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+	if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 	{
 		end[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 		end[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -638,11 +638,11 @@ void SP_monster_hover (edict_t *self)
 	VectorSet (self->maxs, 24, 24, 32);
 
 	// Lazarus: mapper-configurable health
-	if(!self->health)
+	if (!self->health)
 		self->health = 240;
-	if(!self->gib_health)
+	if (!self->gib_health)
 		self->gib_health = -100;
-	if(!self->mass)
+	if (!self->mass)
 		self->mass = 150;
 
 	self->pain = hover_pain;
@@ -661,20 +661,22 @@ void SP_monster_hover (edict_t *self)
 		self->blood_type = 3; //sparks and blood
 
 	// Lazarus
-	if(self->powerarmor) {
+	if (self->powerarmor) {
 		self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
 		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
 
 	gi.linkentity (self);
 	self->monsterinfo.currentmove = &hover_move_stand;	
-	if(self->health < 0)
+	if (self->health < 0)
 	{
 		mmove_t	*deathmoves[] = {&hover_move_death1,
 								 NULL};
 		M_SetDeath(self,(mmove_t **)&deathmoves);
 	}
 	self->common_name = "Icarus";
+	self->class_id = ENTITY_MONSTER_HOVER;
+
 	self->monsterinfo.scale = MODEL_SCALE;
 
 	flymonster_start (self);

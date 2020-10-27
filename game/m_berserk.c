@@ -101,7 +101,7 @@ void berserk_fidget (edict_t *self)
 
 	self->monsterinfo.currentmove = &berserk_move_stand_fidget;
 
-	if(!(self->spawnflags & SF_MONSTER_AMBUSH))
+	if (!(self->spawnflags & SF_MONSTER_AMBUSH))
 		gi.sound (self, CHAN_WEAPON, sound_idle, 1, ATTN_IDLE, 0);
 }
 
@@ -350,7 +350,7 @@ void berserk_dead (edict_t *self)
 	M_FlyCheck (self);
 
 	// Lazarus monster fade
-	if(world->effects & FX_WORLDSPAWN_CORPSEFADE)
+	if (world->effects & FX_WORLDSPAWN_CORPSEFADE)
 	{
 		self->think=FadeDieSink;
 		self->nextthink=level.time+corpse_fadetime->value;
@@ -452,8 +452,6 @@ void SP_monster_berserk (edict_t *self)
 		return;
 	}
 
-	self->class_id = ENTITY_MONSTER_BERSERK;
-	self->spawnflags |= SF_MONSTER_KNOWS_MIRRORS;
 	// pre-caches
 	sound_pain  = gi.soundindex ("berserk/berpain2.wav");
 	sound_die   = gi.soundindex ("berserk/berdeth2.wav");
@@ -476,11 +474,11 @@ void SP_monster_berserk (edict_t *self)
 	self->solid = SOLID_BBOX;
 
 	// Lazarus: mapper-configurable health
-	if(!self->health)
+	if (!self->health)
 		self->health = 240;
-	if(!self->gib_health)
+	if (!self->gib_health)
 		self->gib_health = -60;
-	if(!self->mass)
+	if (!self->mass)
 		self->mass = 250;
 
 	self->pain = berserk_pain;
@@ -494,7 +492,7 @@ void SP_monster_berserk (edict_t *self)
 	self->monsterinfo.melee = berserk_melee;
 	self->monsterinfo.sight = berserk_sight;
 	self->monsterinfo.search = berserk_search;
-	if(monsterjump->value) 
+	if (monsterjump->value) 
 	{
 		self->monsterinfo.jump = berserk_jump;
 		self->monsterinfo.jumpup = 48;
@@ -502,7 +500,7 @@ void SP_monster_berserk (edict_t *self)
 	}
 
 	self->monsterinfo.currentmove = &berserk_move_stand;
-	if(self->health < 0)
+	if (self->health < 0)
 	{
 		mmove_t	*deathmoves[] = {&berserk_move_death1,
 			                     &berserk_move_death2,
@@ -516,13 +514,16 @@ void SP_monster_berserk (edict_t *self)
 		self->blood_type = 3; //sparks and blood
 
 	// Lazarus
-	if(self->powerarmor) {
+	if (self->powerarmor) {
 		self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
 		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
-	if(!self->monsterinfo.flies)
+	if (!self->monsterinfo.flies)
 		self->monsterinfo.flies = 0.20;
+
 	self->common_name = "Berserker";
+	self->class_id = ENTITY_MONSTER_BERSERK;
+	self->spawnflags |= SF_MONSTER_KNOWS_MIRRORS;
 
 	gi.linkentity (self);
 

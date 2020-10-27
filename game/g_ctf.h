@@ -39,6 +39,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define STAT_CTF_MATCH				28
 #define STAT_CTF_ID_VIEW_COLOR		29
 #define STAT_CTF_TEAMINFO			30
+
 #define STAT_CTF_TEAM3_PIC			32 // Knightmare added
 #define STAT_CTF_TEAM3_CAPS			33 // Knightmare added
 #define STAT_CTF_JOINED_TEAM3_PIC	34 // Knightmare added

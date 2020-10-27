@@ -114,6 +114,8 @@ The normal starting point for a level.
 */
 void SP_info_player_start(edict_t *self)
 {
+	self->class_id = ENTITY_INFO_PLAYER_START;
+
 	if (!coop->value)
 		return;
 	if (Q_stricmp(level.mapname, "security") == 0)
@@ -135,6 +137,8 @@ void SP_info_player_deathmatch(edict_t *self)
 		return;
 	}
 	SP_misc_teleporter_dest (self);
+
+	self->class_id = ENTITY_INFO_PLAYER_DEATHMATCH;
 }
 
 /*QUAKED info_player_coop (1 0 1) (-16 -16 -24) (16 16 32)
@@ -148,6 +152,8 @@ void SP_info_player_coop(edict_t *self)
 		G_FreeEdict (self);
 		return;
 	}
+
+	self->class_id = ENTITY_INFO_PLAYER_COOP;
 
 	if ((Q_stricmp(level.mapname, "jail2") == 0)   ||
 	   (Q_stricmp(level.mapname, "jail4") == 0)   ||
@@ -175,8 +181,9 @@ void SP_info_player_coop(edict_t *self)
 The deathmatch intermission point will be at one of these
 Use 'angles' instead of 'angle', so you can set pitch or roll as well as yaw.  'pitch yaw roll'
 */
-void SP_info_player_intermission(void)
+void SP_info_player_intermission (edict_t *self) //was void
 {
+	self->class_id = ENTITY_INFO_PLAYER_INTERMISSION;
 }
 
 

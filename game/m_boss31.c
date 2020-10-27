@@ -142,7 +142,7 @@ mmove_t	jorg_move_stand = {FRAME_stand01, FRAME_stand51, jorg_frames_stand, NULL
 
 void jorg_idle (edict_t *self)
 {
-	if(!(self->spawnflags & SF_MONSTER_AMBUSH))
+	if (!(self->spawnflags & SF_MONSTER_AMBUSH))
 		gi.sound (self, CHAN_VOICE, sound_idle, 1, ATTN_NORM,0);
 }
 
@@ -495,7 +495,7 @@ void jorgBFG (edict_t *self)
 	vec[2] += self->enemy->viewheight;
 
 	// Lazarus fog reduction of accuracy
-	if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+	if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 	{
 		vec[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 		vec[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -527,7 +527,7 @@ void jorg_firebullet_right (edict_t *self)
 	target[2] += self->enemy->viewheight;
 
 	// Lazarus fog reduction of accuracy
-	if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+	if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 	{
 		target[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 		target[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -551,7 +551,7 @@ void jorg_firebullet_left (edict_t *self)
 	target[2] += self->enemy->viewheight;
 
 	// Lazarus fog reduction of accuracy
-	if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+	if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 	{
 		target[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 		target[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -630,6 +630,17 @@ void jorg_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
 		self->blood_type = 3; //sparks and blood
 
 	self->monsterinfo.power_armor_type = POWER_ARMOR_NONE;
+
+	// if killed by a trigger_hurt, set gib flag
+	// This is needed because Q2 originally lacked a direct spawn function for Makron.
+	// Hence, mappers who wanted to use Makron without Jorg had to kill Jorg with a trigger_hurt.
+	// The below causes the dead jorg to gib after going through the death animations, as normal.
+	if (!strcmp(inflictor->classname, "trigger_hurt") || !strcmp(inflictor->classname, "trigger_hurt_bbox")
+		|| Q_stricmp(level.mapname, "grinsp3f") == 0)  { // gross hack for map6 of COS3- Jorg isn't killed with trigger_hurt
+		self->fogclip |= 4; // non-jumping makron
+	//	self->fog_index |= 1; // gib flag
+	}
+
 	gi.sound (self, CHAN_VOICE, sound_death, 1, ATTN_NORM, 0);
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_NO;
@@ -768,11 +779,11 @@ void SP_monster_jorg (edict_t *self)
 	VectorSet (self->maxs, 80, 80, 140);
 
 	// Lazarus: mapper-configurable health
-	if(!self->health)
+	if (!self->health)
 		self->health = 3000;
-	if(!self->gib_health)
+	if (!self->gib_health)
 		self->gib_health = -2000;
-	if(!self->mass)
+	if (!self->mass)
 		self->mass = 1000;
 
 	self->pain = jorg_pain;
@@ -796,7 +807,7 @@ void SP_monster_jorg (edict_t *self)
 	gi.linkentity (self);
 	
 	self->monsterinfo.currentmove = &jorg_move_stand;
-	if(self->health < 0)
+	if (self->health < 0)
 	{
 		mmove_t	*deathmoves[] = {&jorg_move_death,
 								 NULL};
@@ -805,11 +816,13 @@ void SP_monster_jorg (edict_t *self)
 	self->monsterinfo.scale = MODEL_SCALE;
 
 	// Lazarus
-	if(self->powerarmor) {
+	if (self->powerarmor) {
 		self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
 		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
+
 	self->common_name = "Jorg";
+	self->class_id = ENTITY_MONSTER_JORG;
 
 	walkmonster_start(self);
 }

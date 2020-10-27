@@ -507,7 +507,7 @@ void supertankRocket (edict_t *self)
 	int		flash_number;
 	int		rocketSpeed;
 
-	if((self->spawnflags & SF_MONSTER_SPECIAL))
+	if ((self->spawnflags & SF_MONSTER_SPECIAL))
 		rocketSpeed = 400; // DWH: Homing rockets are tougher if slow
 	else
 		rocketSpeed = 500 + (100 * skill->value);
@@ -526,7 +526,7 @@ void supertankRocket (edict_t *self)
 	vec[2] += self->enemy->viewheight;
 
 	// Lazarus fog reduction of accuracy
-	if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+	if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 	{
 		vec[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 		vec[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -564,7 +564,7 @@ void supertankMachineGun (edict_t *self)
 		vec[2] += self->enemy->viewheight;
 
 		// Lazarus fog reduction of accuracy
-		if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+		if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 		{
 			vec[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 			vec[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -748,11 +748,11 @@ void SP_monster_supertank (edict_t *self)
 	VectorSet (self->maxs, 64, 64, 112);
 
 	// Lazarus: mapper-configurable health
-	if(!self->health)
+	if (!self->health)
 		self->health = 1500;
-	if(!self->gib_health)
+	if (!self->gib_health)
 		self->gib_health = -500;
-	if(!self->mass)
+	if (!self->mass)
 		self->mass = 800;
 
 	self->pain = supertank_pain;
@@ -773,20 +773,21 @@ void SP_monster_supertank (edict_t *self)
 		self->fogclip |= 2; //custom bloodtype flag
 
 	// Lazarus
-	if(self->powerarmor) {
+	if (self->powerarmor) {
 		self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
 		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
 
 	gi.linkentity (self);
 	self->monsterinfo.currentmove = &supertank_move_stand;
-	if(self->health < 0)
+	if (self->health < 0)
 	{
 		mmove_t	*deathmoves[] = {&supertank_move_death,
 								 NULL};
 		M_SetDeath(self,(mmove_t **)&deathmoves);
 	}
 	self->common_name = "Supertank";
+	self->class_id = ENTITY_MONSTER_SUPERTANK;
 
 	self->monsterinfo.scale = MODEL_SCALE;
 	walkmonster_start(self);

@@ -139,7 +139,7 @@ mmove_t infantry_move_fidget = {FRAME_stand01, FRAME_stand49, infantry_frames_fi
 void infantry_fidget (edict_t *self)
 {
 	self->monsterinfo.currentmove = &infantry_move_fidget;
-	if(!(self->spawnflags & SF_MONSTER_AMBUSH))
+	if (!(self->spawnflags & SF_MONSTER_AMBUSH))
 		gi.sound (self, CHAN_VOICE, sound_idle, 1, ATTN_IDLE, 0);
 }
 
@@ -281,7 +281,7 @@ void InfantryMachineGun (edict_t *self)
 			target[2] += self->enemy->viewheight;
 
 			// Lazarus fog reduction of accuracy
-			if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+			if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 			{
 				target[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 				target[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -331,7 +331,7 @@ void infantry_dead (edict_t *self)
 	M_FlyCheck (self);
 
 	// Lazarus monster fade
-	if(world->effects & FX_WORLDSPAWN_CORPSEFADE)
+	if (world->effects & FX_WORLDSPAWN_CORPSEFADE)
 	{
 		self->think=FadeDieSink;
 		self->nextthink=level.time+corpse_fadetime->value;
@@ -636,11 +636,11 @@ void SP_monster_infantry (edict_t *self)
 	VectorSet (self->maxs, 16, 16, 32);
 
 	// Lazarus: mapper-configurable health
-	if(!self->health)
+	if (!self->health)
 		self->health = 100;
-	if(!self->gib_health)
+	if (!self->gib_health)
 		self->gib_health = -40;
-	if(!self->mass)
+	if (!self->mass)
 		self->mass = 200;
 
 	self->pain = infantry_pain;
@@ -654,7 +654,7 @@ void SP_monster_infantry (edict_t *self)
 	self->monsterinfo.melee = NULL;
 	self->monsterinfo.sight = infantry_sight;
 	self->monsterinfo.idle = infantry_fidget;
-	if(monsterjump->value)
+	if (monsterjump->value)
 	{
 		self->monsterinfo.jump = infantry_jump;
 		self->monsterinfo.jumpup = 48;
@@ -662,16 +662,16 @@ void SP_monster_infantry (edict_t *self)
 	}
 
 	// Lazarus
-	if(self->powerarmor) {
+	if (self->powerarmor) {
 		self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
 		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
-	if(!self->monsterinfo.flies)
+	if (!self->monsterinfo.flies)
 		self->monsterinfo.flies = 0.40;
 
 	gi.linkentity (self);
 	self->monsterinfo.currentmove = &infantry_move_stand;
-	if(self->health < 0)
+	if (self->health < 0)
 	{
 		mmove_t	*deathmoves[] = {&infantry_move_death1,
 			                     &infantry_move_death2,
@@ -680,6 +680,7 @@ void SP_monster_infantry (edict_t *self)
 		M_SetDeath(self,(mmove_t **)&deathmoves);
 	}
 	self->common_name = "Enforcer";
+	self->class_id = ENTITY_MONSTER_INFANTRY;
 
 	self->monsterinfo.scale = MODEL_SCALE;
 

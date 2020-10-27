@@ -77,10 +77,10 @@ static int	quad_drop_timeout_hack;
 //======================================================================
 
 // Lazarus: damageable pickups
-void item_die(edict_t *self,edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+void item_die (edict_t *self,edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
 //ZOID
-	//flags are important
+	// flags are important
 	if (strcmp(self->classname, "item_flag_team1") == 0) {
 		CTFResetFlag(CTF_TEAM1); // this will free self!
 		safe_bprintf(PRINT_HIGH, "The %s flag has returned!\n",
@@ -259,14 +259,16 @@ void DoRespawn (edict_t *ent)
 	}
 
 	ent->svflags &= ~SVF_NOCLIENT;
-	if(ent->spawnflags & SHOOTABLE) {
+	if (ent->spawnflags & SHOOTABLE)
+	{
 		ent->solid = SOLID_BBOX;
 		ent->clipmask |= MASK_MONSTERSOLID;
-		if(!ent->health)
+		if (!ent->health)
 			ent->health = 20;
 		ent->takedamage = DAMAGE_YES;
 		ent->die = item_die;
-	} else
+	}
+	else
 		ent->solid = SOLID_TRIGGER;
 	gi.linkentity (ent);
 
@@ -300,18 +302,18 @@ qboolean Pickup_Powerup (edict_t *ent, edict_t *other)
 
 	// Lazarus: Don't allow more than one of some items
 #ifdef FLASHLIGHT_MOD
-	if( !Q_stricmp(ent->classname,"item_flashlight")   && quantity >= 1 ) return false;
+	if ( !Q_stricmp(ent->classname,"item_flashlight")   && quantity >= 1 ) return false;
 #endif
 #ifdef JETPACK_MOD
-	if( !Q_stricmp(ent->classname,"item_jetpack") )
+	if ( !Q_stricmp(ent->classname,"item_jetpack") )
 	{
 		gitem_t *fuel;
 
-		if( quantity >= 1 )
+		if ( quantity >= 1 )
 			return false;
 
 		fuel = FindItem("fuel");
-		if(ent->count < 0)
+		if (ent->count < 0)
 		{
 			other->client->jetpack_infinite = true;
 			Add_Ammo(other,fuel,10000);
@@ -338,7 +340,7 @@ qboolean Pickup_Powerup (edict_t *ent, edict_t *other)
 
 #ifdef JETPACK_MOD
 		// DON'T Instant-use Jetpack
-		if(ent->item->use == Use_Jet) return true;
+		if (ent->item->use == Use_Jet) return true;
 #endif
 
 		if (((int)dmflags->value & DF_INSTANT_ITEMS) || ((ent->item->use == Use_Quad) && (ent->spawnflags & DROPPED_PLAYER_ITEM))
@@ -363,14 +365,14 @@ void Drop_General (edict_t *ent, gitem_t *item)
 #ifdef JETPACK_MOD
 void Drop_Jetpack (edict_t *ent, gitem_t *item)
 {
-	if(ent->client->jetpack)
+	if (ent->client->jetpack)
 		safe_cprintf(ent,PRINT_HIGH,"Cannot drop jetpack in use\n");
 	else
 	{
 		edict_t	*dropped;
 
 		dropped = Drop_Item (ent, item);
-		if(ent->client->jetpack_infinite)
+		if (ent->client->jetpack_infinite)
 		{
 			dropped->count = -1;
 			ent->client->pers.inventory[fuel_index] = 0;
@@ -379,7 +381,7 @@ void Drop_Jetpack (edict_t *ent, gitem_t *item)
 		else
 		{
 			dropped->count = ent->client->pers.inventory[fuel_index];
-			if(dropped->count > 500)
+			if (dropped->count > 500)
 				dropped->count = 500;
 			ent->client->pers.inventory[fuel_index] -= dropped->count;
 		}
@@ -1173,7 +1175,7 @@ void Touch_Item (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf
 	if (!taken)
 		return;
 
-	DeleteReflection(ent,-1);
+	DeleteReflection (ent, -1);
 
 	if (!((coop->value) &&  (ent->item->flags & IT_STAY_COOP)) || (ent->spawnflags & (DROPPED_ITEM | DROPPED_PLAYER_ITEM)))
 	{
@@ -1295,14 +1297,16 @@ void Use_Item (edict_t *ent, edict_t *other, edict_t *activator)
 	else
 	{
 		// Lazarus:
-		if(ent->spawnflags & SHOOTABLE) {
+		if (ent->spawnflags & SHOOTABLE)
+		{
 			ent->solid = SOLID_BBOX;
 			ent->clipmask |= MASK_MONSTERSOLID;
-			if(!ent->health)
+			if (!ent->health)
 				ent->health = 20;
 			ent->takedamage = DAMAGE_YES;
 			ent->die = item_die;
-		} else
+		}
+		else
 			ent->solid = SOLID_TRIGGER;
 		ent->touch = Touch_Item;
 	}
@@ -1338,27 +1342,30 @@ void droptofloor (edict_t *ent)
 	// Fortunately we KNOW what the "offset" is - nada.
 	VectorClear(ent->origin_offset);
 
-	if(ent->spawnflags & SHOOTABLE) {
+	if (ent->spawnflags & SHOOTABLE)
+	{
 		ent->solid = SOLID_BBOX;
 		ent->clipmask |= MASK_MONSTERSOLID;
-		if(!ent->health)
+		if (!ent->health)
 			ent->health = 20;
 		ent->takedamage = DAMAGE_YES;
 		ent->die = item_die;
-	} else
+	}
+	else
 		ent->solid = SOLID_TRIGGER;
 
 	// Lazarus:
-	if(ent->movewith)
+	if (ent->movewith)
 		ent->movetype = MOVETYPE_PUSH;
-	else if(ent->spawnflags & NO_DROPTOFLOOR)
+	else if (ent->spawnflags & NO_DROPTOFLOOR)
 		ent->movetype = MOVETYPE_NONE;
 	else
 		ent->movetype = MOVETYPE_TOSS;  
 	ent->touch = Touch_Item;
 
 	// Lazarus:
-	if(!(ent->spawnflags & NO_DROPTOFLOOR)) {
+	if (!(ent->spawnflags & NO_DROPTOFLOOR))
+	{
 		v = tv(0,0,-128);
 		VectorAdd (ent->s.origin, v, dest);
 
@@ -1555,7 +1562,7 @@ void SpawnItem (edict_t *ent, gitem_t *item)
 	}
 
 	// Lazarus: flashlight - get level-wide cost for use
-	if(strcmp(ent->classname, "item_flashlight") == 0)
+	if (strcmp(ent->classname, "item_flashlight") == 0)
 		level.flashlight_cost = ent->count;
 
 //ZOID
@@ -3151,6 +3158,7 @@ void SP_item_health (edict_t *self)
 		G_FreeEdict (self);
 		return;
 	}
+	self->class_id = ENTITY_ITEM_HEALTH;
 
 	self->model = "models/items/healing/medium/tris.md2";
 	self->count = 10;
@@ -3168,8 +3176,7 @@ void SP_item_health_small (edict_t *self)
 		G_FreeEdict (self);
 		return;
 	}
-
-	//gi.dprintf("HEY - SP_item_health_small\n");
+	self->class_id = ENTITY_ITEM_HEALTH_SMALL;
 
 	self->model = "models/items/healing/stimpack/tris.md2";
 	self->count = sk_health_bonus_value->value;
@@ -3188,6 +3195,7 @@ void SP_item_health_large (edict_t *self)
 		G_FreeEdict (self);
 		return;
 	}
+	self->class_id = ENTITY_ITEM_HEALTH_LARGE;
 
 	self->model = "models/items/healing/large/tris.md2";
 	self->count = 25;
@@ -3205,6 +3213,7 @@ void SP_item_health_mega (edict_t *self)
 		G_FreeEdict (self);
 		return;
 	}
+	self->class_id = ENTITY_ITEM_HEALTH_MEGA;
 
 	self->model = "models/items/mega_h/tris.md2";
 	self->count = 100;
@@ -3266,9 +3275,9 @@ Use_Flashlight
 */
 void Use_Flashlight ( edict_t *ent, gitem_t *item )
 {
-	if(!ent->client->flashlight)
+	if (!ent->client->flashlight)
 	{
-		if(ent->client->pers.inventory[ITEM_INDEX(FindItem(FLASHLIGHT_ITEM))] < level.flashlight_cost)
+		if (ent->client->pers.inventory[ITEM_INDEX(FindItem(FLASHLIGHT_ITEM))] < level.flashlight_cost)
 		{
 			safe_cprintf(ent,PRINT_HIGH,"Flashlight requires %s\n",FLASHLIGHT_ITEM);
 			return;
@@ -3279,7 +3288,7 @@ void Use_Flashlight ( edict_t *ent, gitem_t *item )
 		ValidateSelectedItem (ent);
 #endif
 	}
-	if(ent->client->flashlight ^= 1)
+	if (ent->client->flashlight ^= 1)
 		ent->client->flashlight_time = level.time + FLASHLIGHT_DRAIN;
 }
 
@@ -3287,7 +3296,7 @@ void Use_Flashlight ( edict_t *ent, gitem_t *item )
 //==============================================================================
 void Use_Jet ( edict_t *ent, gitem_t *item )
 {
-	if(ent->client->jetpack)
+	if (ent->client->jetpack)
 	{
 		// Currently on... turn it off and store remaining time
 		ent->client->jetpack = false;
@@ -3311,7 +3320,7 @@ void Use_Jet ( edict_t *ent, gitem_t *item )
 
 		// Currently off. Turn it on, and add time, if any, remaining
 		// from last jetpack.
-		if( ent->client->pers.inventory[ITEM_INDEX(item)] )
+		if ( ent->client->pers.inventory[ITEM_INDEX(item)] )
 		{
 			ent->client->jetpack = true;
 			// Lazarus: Never remove jetpack from inventory (unless dropped)
@@ -3320,7 +3329,7 @@ void Use_Jet ( edict_t *ent, gitem_t *item )
 			ent->client->jetpack_framenum = level.framenum;
 			ent->client->jetpack_activation = level.framenum;
 		}
-		else if(ent->client->pers.inventory[fuel_index] > 0)
+		else if (ent->client->pers.inventory[fuel_index] > 0)
 		{
 			ent->client->jetpack = true;
 			ent->client->jetpack_framenum = level.framenum;
@@ -3336,7 +3345,7 @@ void Use_Jet ( edict_t *ent, gitem_t *item )
 // Lazarus: Stasis field generator
 void Use_Stasis ( edict_t *ent, gitem_t *item )
 {
-	if(ent->client->jetpack)
+	if (ent->client->jetpack)
 	{
 		gi.dprintf("Cannot use stasis generator while using jetpack\n");
 		return;

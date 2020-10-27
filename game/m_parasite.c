@@ -461,7 +461,7 @@ void parasite_dead (edict_t *self)
 	M_FlyCheck (self);
 
 	// Lazarus monster fade
-	if(world->effects & FX_WORLDSPAWN_CORPSEFADE)
+	if (world->effects & FX_WORLDSPAWN_CORPSEFADE)
 	{
 		self->think=FadeDieSink;
 		self->nextthink=level.time+corpse_fadetime->value;
@@ -577,11 +577,11 @@ void SP_monster_parasite (edict_t *self)
 	self->solid = SOLID_BBOX;
 
 	// Lazarus: mapper-configurable health
-	if(!self->health)
+	if (!self->health)
 		self->health = 175;
-	if(!self->gib_health)
+	if (!self->gib_health)
 		self->gib_health = -50;
-	if(!self->mass)
+	if (!self->mass)
 		self->mass = 250;
 
 	self->pain = parasite_pain;
@@ -623,6 +623,9 @@ void SP_monster_parasite (edict_t *self)
 		M_SetDeath(self,(mmove_t **)&deathmoves);
 	}
 	self->common_name = "Parasite";
+	self->class_id = ENTITY_MONSTER_PARASITE;
+
 	self->monsterinfo.scale = MODEL_SCALE;
+
 	walkmonster_start (self);
 }

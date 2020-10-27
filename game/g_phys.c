@@ -1805,7 +1805,6 @@ void SV_Physics_Step (edict_t *ent)
 		}
 	}
 
-
 	// Lazarus: Floating stuff
 	if ((ent->movetype == MOVETYPE_PUSHABLE) && (ent->flags & FL_SWIM) && (ent->waterlevel))
 	{
@@ -2655,7 +2654,7 @@ G_RunEntity
 */
 void G_RunEntity (edict_t *ent)
 {
-	if (level.freeze && Q_stricmp(ent->classname,"chasecam"))
+	if (level.freeze && Q_stricmp(ent->classname, "chasecam"))
 		return;
 
 	if (ent->prethink)
@@ -2706,6 +2705,6 @@ void G_RunEntity (edict_t *ent)
 		gi.error ("SV_Physics: bad movetype %i", (int)ent->movetype);			
 	}
 
-	if (ent->postthink)	//Knightmare added
+	if (ent->postthink)	// Knightmare added
 		ent->postthink (ent);
 }

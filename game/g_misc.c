@@ -171,7 +171,7 @@ void gib_fade2 (edict_t *self);
 
 void gib_fade (edict_t *self)
 {
-	if (self->s.effects & EF_BLASTER)  //Remove glow from gekk gibs
+	if (self->s.effects & EF_BLASTER)  // Remove glow from gekk gibs
 		self->s.effects &= ~EF_BLASTER;
 	self->s.renderfx = RF_TRANSLUCENT;
 	self->nextthink = level.time + 2;
@@ -290,7 +290,7 @@ void ThrowGib (edict_t *self, char *gibname, int damage, int type)
 		gib->s.effects |= EF_GREENGIB|EF_BLASTER;
 		gib->s.renderfx |= RF_NOSHADOW;
 	}
-	else if(self->blood_type == 2)
+	else if (self->blood_type == 2)
 		gib->s.effects |= EF_GRENADE;
 	else
 		gib->s.effects |= EF_GIB;
@@ -308,7 +308,7 @@ void ThrowGib (edict_t *self, char *gibname, int damage, int type)
 #endif
 	gib->flags |= FL_NO_KNOCKBACK;
 	gib->svflags |= SVF_GIB; // Knightmare- gib flag
-	gib->takedamage = DAMAGE_NO;	//	 was DAMAGE_YES;
+	gib->takedamage = DAMAGE_NO;	// was DAMAGE_YES;
 	gib->die = gib_die;
 
 	if (type == GIB_ORGANIC)
@@ -338,6 +338,8 @@ void ThrowGib (edict_t *self, char *gibname, int damage, int type)
 
 	gib->s.renderfx |= RF_IR_VISIBLE;
 
+	self->class_id = ENTITY_GIB;
+
 	gi.linkentity (gib);
 }
 
@@ -346,9 +348,9 @@ void ThrowGib (edict_t *self, char *gibname, int damage, int type)
 
 void gib_delayed_start (edict_t *gib)
 {
-	if(g_edicts[1].linkcount)
+	if (g_edicts[1].linkcount)
 	{
-		if(gib->count > 0)
+		if (gib->count > 0)
 		{
 			gib->think = gib_fade; // was FadeThink
 			gib->nextthink = level.time + FRAMETIME;
@@ -367,7 +369,7 @@ void gib_delayed_start (edict_t *gib)
 
 void SP_gib (edict_t *gib)
 {
-	if(gib->key_message)
+	if (gib->key_message)
 		gi.setmodel (gib, gib->key_message);
 	else
 		gi.setmodel (gib, "models/objects/gibs/sm_meat/tris.md2");
@@ -391,12 +393,12 @@ void ThrowHead (edict_t *self, char *gibname, int damage, int type)
 	VectorClear (self->mins);
 	VectorClear (self->maxs);
 
-	DeleteReflection(self,-1);
+	DeleteReflection (self, -1);
 
 //	strncpy(modelname, gibname);
 	Q_strncpyz(modelname, gibname, sizeof(modelname));
 	p = strstr(modelname,"models/objects/gibs/");
-	if(p && self->gib_type)
+	if (p && self->gib_type)
 	{
 		p += 18;
 		p[0] = (char)((int)'0' + (self->gib_type % 10));
@@ -422,12 +424,12 @@ void ThrowHead (edict_t *self, char *gibname, int damage, int type)
 		VectorSet (self->maxs, 4, 4, 8);
 	}
 	self->solid = SOLID_TRIGGER;	// Knightmare- was SOLID_NOT
-	if(self->blood_type == 1)
+	if (self->blood_type == 1)
 	{
 		self->s.effects |= EF_GREENGIB|EF_BLASTER;
 		self->s.renderfx |= RF_NOSHADOW;
 	}
-	else if(self->blood_type == 2)
+	else if (self->blood_type == 2)
 		self->s.effects |= EF_GRENADE;
 	else
 		self->s.effects |= EF_GIB;
@@ -472,15 +474,17 @@ void ThrowHead (edict_t *self, char *gibname, int damage, int type)
 		edict_t	*e;
 		edict_t	*parent=NULL;
 		int		i;
-		for(i=1; i<globals.num_edicts && !parent; i++)
+		for (i=1; i<globals.num_edicts && !parent; i++)
 		{
 			e = g_edicts + i;
-			if(e->movewith_next == self) parent=e;
+			if (e->movewith_next == self) parent=e;
 		}
-		if(parent) parent->movewith_next = self->movewith_next;
+		if (parent) parent->movewith_next = self->movewith_next;
 	}
 
 	self->s.renderfx |= RF_IR_VISIBLE;
+
+	self->class_id = ENTITY_GIBHEAD;
 
 	gi.linkentity (self);
 }
@@ -568,7 +572,7 @@ void ThrowDebris (edict_t *self, char *modelname, float speed, vec3_t origin, in
 
 	// Lazarus: Prevent gib showers (generally due to firing BFG in a crowd) from
 	// causing SZ_GetSpace: overflow
-	if(level.framenum > lastgibframe)
+	if (level.framenum > lastgibframe)
 	{
 		gibsthisframe = 0;
 		lastgibframe = level.framenum;
@@ -603,7 +607,7 @@ void ThrowDebris (edict_t *self, char *modelname, float speed, vec3_t origin, in
 	chunk->avelocity[0] = random()*600;
 	chunk->avelocity[1] = random()*600;
 	chunk->avelocity[2] = random()*600;
-	chunk->think = gib_fade; //Knightmare- gib fade, was G_FreeEdict
+	chunk->think = gib_fade; // Knightmare- gib fade, was G_FreeEdict
 	chunk->nextthink = level.time + 8 + random()*10;
 	chunk->s.frame = 0;
 	chunk->flags = 0;
@@ -620,6 +624,8 @@ void ThrowDebris (edict_t *self, char *modelname, float speed, vec3_t origin, in
 	chunk->s.skinnum = skin;
 	chunk->s.effects |= effects;
 
+	chunk->class_id = ENTITY_DEBRIS;
+
 	gi.linkentity (chunk);
 }
 
@@ -628,7 +634,7 @@ void ThrowDebris (edict_t *self, char *modelname, float speed, vec3_t origin, in
 
 void debris_delayed_start (edict_t *debris)
 {
-	if(g_edicts[1].linkcount)
+	if (g_edicts[1].linkcount)
 	{
 		debris->think = gib_fade;
 		debris->nextthink = level.time + 8 + random()*5;
@@ -641,7 +647,7 @@ void debris_delayed_start (edict_t *debris)
 
 void SP_debris (edict_t *debris)
 {
-	if(debris->message)
+	if (debris->message)
 		gi.setmodel (debris, debris->message);
 	else
 		gi.setmodel (debris, "models/objects/debris2/tris.md2");
@@ -797,7 +803,7 @@ void path_corner_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface
 	}
 
 	self->count--;
-	if(!self->count) {
+	if (!self->count) {
 		self->think = G_FreeEdict;
 		self->nextthink = level.time + 1;
 	}
@@ -813,12 +819,14 @@ void SP_path_corner (edict_t *self)
 		return;
 	}
 
+	self->class_id = ENTITY_PATH_CORNER;
+
 	self->solid = SOLID_TRIGGER;
 	self->touch = path_corner_touch;
 	VectorSet (self->mins, -8, -8, -8);
 	VectorSet (self->maxs, 8, 8, 8);
 	self->svflags |= SVF_NOCLIENT;
-	if(!self->count) self->count = -1;
+	if (!self->count) self->count = -1;
 	gi.linkentity (self);
 }
 
@@ -837,7 +845,7 @@ void point_combat_touch (edict_t *self, edict_t *other, cplane_t *plane, csurfac
 		return;
 
 	self->count--;
-	if(!self->count) {
+	if (!self->count) {
 		self->think = G_FreeEdict;
 		self->nextthink = level.time + self->delay + 1;
 	}
@@ -875,7 +883,7 @@ void point_combat_touch (edict_t *self, edict_t *other, cplane_t *plane, csurfac
 		{
 			edict_t	*train;
 			train = G_PickTarget(self->pathtarget);
-			if(train)
+			if (train)
 				tracktrain_drive(train,other);
 		}
 		else
@@ -905,6 +913,9 @@ void SP_point_combat (edict_t *self)
 		G_FreeEdict (self);
 		return;
 	}
+
+	self->class_id = ENTITY_POINT_COMBAT;
+
 	self->solid = SOLID_TRIGGER;
 	self->touch = point_combat_touch;
 	VectorSet (self->mins, -8, -8, -16);
@@ -915,7 +926,7 @@ void SP_point_combat (edict_t *self)
 	// entities. Since the standard Q2 point_combat can only be used once,
 	// the default behavior should be to delete the point_combat after
 	// one use.
-	if(!self->count) self->count = 1;
+	if (!self->count) self->count = 1;
 	gi.linkentity (self);
 };
 
@@ -933,6 +944,7 @@ void SP_viewthing(edict_t *ent)
 {
 	gi.dprintf ("viewthing spawned\n");
 
+	ent->class_id = ENTITY_VIEWTHING;
 	ent->movetype = MOVETYPE_NONE;
 	ent->solid = SOLID_BBOX;
 	ent->s.renderfx = RF_FRAMELERP;
@@ -960,6 +972,8 @@ Used as a positional target for lightning.
 */
 void SP_info_notnull (edict_t *self)
 {
+	self->class_id = ENTITY_INFO_NOTNULL;
+
 	VectorCopy (self->s.origin, self->absmin);
 	VectorCopy (self->s.origin, self->absmax);
 };
@@ -988,7 +1002,7 @@ Default _cone value is 10 (used to set size of light for spotlights)
 		self->spawnflags |= START_OFF;
 
 		self->count--;
-		if(!self->count) {
+		if (!self->count) {
 			self->think = G_FreeEdict;
 			self->nextthink = level.time + 1;
 		}
@@ -1004,6 +1018,8 @@ void SP_light (edict_t *self)
 		G_FreeEdict (self);
 		return;
 	}
+
+	self->class_id = ENTITY_LIGHT;
 
 	if (self->style >= 32)
 	{
@@ -1044,7 +1060,7 @@ void func_wall_use (edict_t *self, edict_t *other, edict_t *activator)
 		self->svflags |= SVF_NOCLIENT;
 
 		self->count--;
-		if(!self->count) {
+		if (!self->count) {
 			self->think = G_FreeEdict;
 			self->nextthink = level.time + 1;
 			return;
@@ -1142,6 +1158,8 @@ void SP_func_object (edict_t *self)
 {
 	gi.setmodel (self, self->model);
 
+	self->class_id = ENTITY_FUNC_OBJECT;
+
 	self->mins[0] += 1;
 	self->mins[1] += 1;
 	self->mins[2] += 1;
@@ -1173,6 +1191,8 @@ void SP_func_object (edict_t *self)
 		self->s.effects |= EF_ANIM_ALLFAST;
 
 	self->clipmask = MASK_MONSTERSOLID;
+
+	self->class_id = ENTITY_FUNC_OBJECT;
 
 	gi.linkentity (self);
 }
@@ -1245,20 +1265,20 @@ void func_explosive_explode (edict_t *self)
 	// Lazarus: Use traditional debris for gib_type=0, but non-zero gib_type gives equal 
 	// weight to all models.
 
-	if( (self->gib_type > 0) && (self->gib_type < 10))
+	if ( (self->gib_type > 0) && (self->gib_type < 10))
 	{
 		int	r;
 
 		count = mass/25;
-		if(count > 16)
-			count = 16;
-		while(count--)
+		if (count > 64)	// Knightmare- was 16
+			count = 64;
+		while (count--)
 		{
 			r = (rand() % 5) + 1;
 			chunkorigin[0] = origin[0] + crandom() * size[0];
 			chunkorigin[1] = origin[1] + crandom() * size[1];
 			chunkorigin[2] = origin[2] + crandom() * size[2];
-			switch(self->gib_type) {
+			switch (self->gib_type) {
 			case GIB_METAL:
 				ThrowDebris (self, va("models/objects/metal_gibs/gib%i.md2",r),   2, chunkorigin, self->s.skinnum, 0); break;
 			case GIB_GLASS:
@@ -1286,9 +1306,9 @@ void func_explosive_explode (edict_t *self)
 		if (mass >= 100)
 		{
 			count = mass / 100;
-			if (count > 8)
-				count = 8;
-			while(count--)
+			if (count > 32)	// Knightmare- was 8
+				count = 32;
+			while (count--)
 			{
 				chunkorigin[0] = origin[0] + crandom() * size[0];
 				chunkorigin[1] = origin[1] + crandom() * size[1];
@@ -1299,9 +1319,9 @@ void func_explosive_explode (edict_t *self)
 		
 		// small chunks
 		count = mass / 25;
-		if (count > 16)
-			count = 16;
-		while(count--)
+		if (count > 64)	// Knightmare- was 16
+			count = 64;
+		while (count--)
 		{
 			chunkorigin[0] = origin[0] + crandom() * size[0];
 			chunkorigin[1] = origin[1] + crandom() * size[1];
@@ -1346,7 +1366,7 @@ void func_explosive_die (edict_t *self, edict_t *inflictor, edict_t *attacker, i
 {
 	self->enemy = inflictor;
 	self->activator = attacker;
-	if(self->delay > 0)
+	if (self->delay > 0)
 	{
 		self->think = func_explosive_explode;
 		self->nextthink = level.time + self->delay;
@@ -1435,6 +1455,8 @@ void SP_func_explosive (edict_t *self)
 		return;
 	}
 
+	self->class_id = ENTITY_FUNC_EXPLOSIVE;
+
 	self->movetype = MOVETYPE_PUSH;
 
 	PrecacheDebris(self->gib_type);
@@ -1448,7 +1470,7 @@ void SP_func_explosive (edict_t *self)
 		self->use = func_explosive_spawn;
 	}
 	// Knightmare- start non-shootable
-	else if(self->spawnflags & 8)
+	else if (self->spawnflags & 8)
 	{
 		self->solid = SOLID_BSP;
 		if (self->targetname)
@@ -1474,7 +1496,7 @@ void SP_func_explosive (edict_t *self)
 		self->takedamage = DAMAGE_YES;
 	}
 
-	if (st.item) //Knightmare- item support
+	if (st.item) // Knightmare- item support
 	{
 		self->item = FindItemByClassname (st.item);
 		if (!self->item)
@@ -1673,7 +1695,7 @@ void func_breakaway_fall (edict_t *self)
 
 	G_UseTargets (self, self->activator);
 
-	if(self->deathtarget)
+	if (self->deathtarget)
 	{
 		self->target = self->deathtarget;
 		G_UseTargets (self, self->activator);
@@ -1695,6 +1717,7 @@ void func_breakaway_die (edict_t *self, edict_t *inflictor, edict_t *attacker, i
 		VectorClear(self->avelocity);
 		self->movewith = "";
 		self->movewith_ent = NULL;
+		self->postthink = NULL;
 		self->think = func_breakaway_fall;
 		self->nextthink = level.time + self->delay;
 	}
@@ -1702,7 +1725,7 @@ void func_breakaway_die (edict_t *self, edict_t *inflictor, edict_t *attacker, i
 		func_breakaway_fall (self);
 }
 
-void func_breakaway_use(edict_t *self, edict_t *other, edict_t *activator)
+void func_breakaway_use (edict_t *self, edict_t *other, edict_t *activator)
 {
 	func_breakaway_die (self, self, other, self->speed, vec3_origin);
 }
@@ -1760,6 +1783,8 @@ void func_breakaway_activate(edict_t *self, edict_t *other, edict_t *activator)
 
 void SP_func_breakaway (edict_t *self)
 {
+	self->class_id = ENTITY_FUNC_BREAKAWAY;
+
 	self->movetype = MOVETYPE_PUSH;
 	gi.setmodel (self, self->model);
 	G_SetMovedir (self->s.angles, self->movedir);
@@ -1803,7 +1828,7 @@ void SP_func_breakaway (edict_t *self)
 	else if (self->spawnflags & BREAKAWAY_INACTIVE)
 	{
 		self->solid = SOLID_BSP;
-		if(self->targetname)
+		if (self->targetname)
 			self->use = func_breakaway_activate;
 	}
 	else
@@ -1826,7 +1851,11 @@ void SP_func_breakaway (edict_t *self)
 		self->takedamage = DAMAGE_YES;
 	}
 
-	//touch function for impact damage
+#ifdef POSTTHINK_CHILD_MOVEMENT
+	self->postthink = set_child_movement; // Knightmare- supports movewith
+#endif	// POSTTHINK_CHILD_MOVEMENT
+
+	// touch function for impact damage
 	self->touch = func_breakaway_touch;
 
 	gi.linkentity (self);
@@ -1860,7 +1889,7 @@ void barrel_explode (edict_t *self)
 	vec3_t	size;
 	int		i;
 
-	/*if(self->gib_type == GIB_BARREL)
+	/*if (self->gib_type == GIB_BARREL)
 	{	//Knightmare- cap mass at 399 to avoid large explosion
 		if (self->mass >= 400)
 			self->mass = 399;
@@ -1994,7 +2023,7 @@ void barrel_explode (edict_t *self)
 	G_UseTargets (self, self->activator);
 
 	// Lazarus: added case for no damage
-	if(self->dmg) {
+	if (self->dmg) {
 		if (self->groundentity) {
 			self->s.origin[2] = self->absmin[2] + 2;
 			BecomeExplosion2 (self);
@@ -2031,7 +2060,7 @@ void SP_misc_explobox (edict_t *self)
 		gi.modelindex(va("models/objects/barrel_gibs/gib%i.md2",i));
 #else
 	// Lazarus: can use actual barrel parts for debris:
-	if((self->spawnflags & 1) || (self->gib_type == GIB_BARREL))
+	if ((self->spawnflags & 1) || (self->gib_type == GIB_BARREL))
 	{
 		self->gib_type = GIB_BARREL;
 		for (i=1; i<=5; i++)
@@ -2075,7 +2104,9 @@ void SP_misc_explobox (edict_t *self)
 	//self->think = M_droptofloor;
 	//self->nextthink = level.time + 2 * FRAMETIME;
 
-	self->common_name = "Exploding Box";
+	self->common_name = "Exploding Barrel";
+	self->class_id = ENTITY_MISC_EXPLOBOX;
+
 	gi.linkentity (self);
 }
 
@@ -2119,6 +2150,8 @@ void misc_blackhole_transparent (edict_t *ent)
 
 void SP_misc_blackhole (edict_t *ent)
 {
+	ent->class_id = ENTITY_MISC_BLACKHOLE;
+
 	ent->movetype = MOVETYPE_NONE;
 	ent->solid = SOLID_NOT;
 	VectorSet (ent->mins, -64, -64, 0);
@@ -2150,9 +2183,11 @@ void misc_eastertank_think (edict_t *self)
 
 void SP_misc_eastertank (edict_t *ent)
 {
+	ent->class_id = ENTITY_MISC_EASTERTANK;
+
 	ent->movetype = MOVETYPE_NONE;
 	// Lazarus - nonsolid
-	if(ent->spawnflags & 1)
+	if (ent->spawnflags & 1)
 		ent->solid = SOLID_NOT;
 	else
 	{
@@ -2162,7 +2197,7 @@ void SP_misc_eastertank (edict_t *ent)
 	}
 	ent->s.modelindex = gi.modelindex ("models/monsters/tank/tris.md2");
 	ent->s.frame = 254;
-	if (ent->spawnflags & 2)	 //Knightmare- commander skin
+	if (ent->spawnflags & 2)	 // Knightmare- commander skin
 		ent->s.skinnum = 2;
 	ent->think = misc_eastertank_think;
 	ent->nextthink = level.time + 2 * FRAMETIME;
@@ -2186,9 +2221,11 @@ void misc_easterchick_think (edict_t *self)
 
 void SP_misc_easterchick (edict_t *ent)
 {
+	ent->class_id = ENTITY_MISC_EASTERCHICK;
+
 	ent->movetype = MOVETYPE_NONE;
 	// Lazarus - nonsolid
-	if(ent->spawnflags & 1)
+	if (ent->spawnflags & 1)
 		ent->solid = SOLID_NOT;
 	else
 	{
@@ -2220,9 +2257,11 @@ void misc_easterchick2_think (edict_t *self)
 
 void SP_misc_easterchick2 (edict_t *ent)
 {
+	ent->class_id = ENTITY_MISC_EASTERCHICK2;
+
 	ent->movetype = MOVETYPE_NONE;
 	// Lazarus - nonsolid
-	if(ent->spawnflags & 1)
+	if (ent->spawnflags & 1)
 		ent->solid = SOLID_NOT;
 	else
 	{
@@ -2276,6 +2315,8 @@ void commander_body_drop (edict_t *self)
 
 void SP_monster_commander_body (edict_t *self)
 {
+	self->class_id = ENTITY_MONSTER_COMMANDER_BODY;
+
 	self->movetype = MOVETYPE_NONE;
 	self->solid = SOLID_BBOX;
 	self->model = "models/monsters/commandr/tris.md2";
@@ -2308,6 +2349,8 @@ void misc_banner_think (edict_t *ent)
 
 void SP_misc_banner (edict_t *ent)
 {
+	ent->class_id = ENTITY_MISC_BANNER;
+
 	ent->movetype = MOVETYPE_NONE;
 	ent->solid = SOLID_NOT;
 	ent->s.modelindex = gi.modelindex ("models/objects/banner/tris.md2");
@@ -2396,6 +2439,8 @@ void SP_misc_deadsoldier (edict_t *ent)
 		ent->s.skinnum = ent->style;
 	}
 	ent->common_name = "Dead Marine";
+	ent->class_id = ENTITY_MISC_DEADSOLDIER;
+
 	gi.linkentity (ent);
 }
 
@@ -2414,19 +2459,21 @@ void viper_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 {
 	edict_t	*e, *next;
 
-	if(self->deathtarget)
+	if (self->deathtarget)
 	{
 		self->target = self->deathtarget;
 		G_UseTargets (self, attacker);
 	}
 
 	e = self->movewith_next;
-	while(e) {
+	while (e)
+	{
 		next = e->movewith_next;
-		if(e->solid == SOLID_NOT) {
+		if (e->solid == SOLID_NOT) {
 			e->nextthink = 0;
 			G_FreeEdict(e);
-		} else
+		}
+		else
 			BecomeExplosion1 (e);
 		e = next;
 	}
@@ -2468,9 +2515,9 @@ void SP_misc_viper (edict_t *ent)
 		VectorSet (ent->maxs,  32,  24,  16);
 		ent->takedamage = DAMAGE_YES;
 		ent->die = viper_die;
-		if(!ent->dmg)
+		if (!ent->dmg)
 			ent->dmg = 200;
-		if(!ent->mass)
+		if (!ent->mass)
 			ent->mass = 800;
 	}
 	else
@@ -2524,6 +2571,8 @@ This is a large stationary viper as seen in Paul's intro
 */
 void SP_misc_bigviper (edict_t *ent)
 {
+	ent->class_id = ENTITY_MISC_BIGVIPER;
+
 	ent->movetype = MOVETYPE_NONE;
 	ent->solid = SOLID_BBOX;
 	VectorSet (ent->mins, -176, -120, -24);
@@ -2546,10 +2595,10 @@ void misc_viper_bomb_touch (edict_t *self, edict_t *other, cplane_t *plane, csur
 	T_RadiusDamage (self, self, self->dmg, NULL, self->dmg+40, MOD_BOMB, -0.5);
 
 	self->count--;
-	if(!self->count)
+	if (!self->count)
 		self->spawnflags &= ~1;
 
-	if(self->spawnflags & 1)
+	if (self->spawnflags & 1)
 	{
 		gi.WriteByte (svc_temp_entity);
 		gi.WriteByte (TE_EXPLOSION2);
@@ -2606,7 +2655,7 @@ void misc_viper_bomb_use (edict_t *self, edict_t *other, edict_t *activator)
 {
 	edict_t	*viper;
 
-	if(self->solid != SOLID_NOT)  // Already in use
+	if (self->solid != SOLID_NOT)  // Already in use
 		return;
 
 	self->solid = SOLID_BBOX;
@@ -2621,9 +2670,9 @@ void misc_viper_bomb_use (edict_t *self, edict_t *other, edict_t *activator)
 	VectorCopy(self->pos1,self->s.origin);
 	VectorCopy(self->pos2,self->s.angles);
 
-	if(self->pathtarget)
+	if (self->pathtarget)
 	{
-		if(!Q_stricmp(self->pathtarget,self->targetname))
+		if (!Q_stricmp(self->pathtarget,self->targetname))
 		{
 			VectorScale(self->movedir,self->speed,self->velocity);
 			VectorCopy(self->movedir,self->moveinfo.dir);
@@ -2631,7 +2680,7 @@ void misc_viper_bomb_use (edict_t *self, edict_t *other, edict_t *activator)
 		else
 		{
 			viper = G_Find(NULL, FOFS(targetname), self->pathtarget);
-			if(!viper)
+			if (!viper)
 				return;
 			VectorScale (viper->moveinfo.dir, viper->moveinfo.speed, self->velocity);
 			VectorCopy (viper->moveinfo.dir, self->moveinfo.dir);
@@ -2640,7 +2689,7 @@ void misc_viper_bomb_use (edict_t *self, edict_t *other, edict_t *activator)
 	else
 	{
 		viper = G_Find (NULL, FOFS(classname), "misc_viper");
-		if(!viper)
+		if (!viper)
 			return;
 		VectorScale (viper->moveinfo.dir, viper->moveinfo.speed, self->velocity);
 		VectorCopy (viper->moveinfo.dir, self->moveinfo.dir);
@@ -2676,6 +2725,7 @@ void SP_misc_viper_bomb (edict_t *self)
 	self->use = misc_viper_bomb_use;
 	self->svflags |= SVF_NOCLIENT;
 	self->common_name = "Bomb";
+	self->class_id = ENTITY_MISC_VIPER_BOMB;
 	gi.linkentity (self);
 }
 
@@ -2709,6 +2759,8 @@ void SP_misc_strogg_ship (edict_t *ent)
 
 	ent->class_id = ENTITY_MISC_STROGG_SHIP;
 
+	ent->class_id = ENTITY_MISC_STROGG_SHIP;
+
 	if (!ent->speed)
 		ent->speed = 300;
 
@@ -2722,9 +2774,9 @@ void SP_misc_strogg_ship (edict_t *ent)
 		VectorSet (ent->maxs,  72,  60,  38);
 		ent->takedamage = DAMAGE_YES;
 		ent->die = viper_die;
-		if(!ent->dmg)
+		if (!ent->dmg)
 			ent->dmg = 200;
-		if(!ent->mass)
+		if (!ent->mass)
 			ent->mass = 1200;
 	}
 	else
@@ -2791,6 +2843,8 @@ void misc_satellite_dish_use (edict_t *self, edict_t *other, edict_t *activator)
 
 void SP_misc_satellite_dish (edict_t *ent)
 {
+	ent->class_id = ENTITY_MISC_SATELLITE_DISH;
+
 	ent->movetype = MOVETYPE_NONE;
 	ent->solid = SOLID_BBOX;
 	VectorSet (ent->mins, -64, -64, 0);
@@ -2806,6 +2860,8 @@ void SP_misc_satellite_dish (edict_t *ent)
 */
 void SP_light_mine1 (edict_t *ent)
 {
+	ent->class_id = ENTITY_LIGHT_MINE1;
+
 	ent->movetype = MOVETYPE_NONE;
 	ent->solid = SOLID_BBOX;
 	ent->s.modelindex = gi.modelindex ("models/objects/minelite/light1/tris.md2");
@@ -2818,6 +2874,8 @@ void SP_light_mine1 (edict_t *ent)
 */
 void SP_light_mine2 (edict_t *ent)
 {
+	ent->class_id = ENTITY_LIGHT_MINE2;
+
 	ent->movetype = MOVETYPE_NONE;
 	ent->solid = SOLID_BBOX;
 	ent->s.modelindex = gi.modelindex ("models/objects/minelite/light2/tris.md2");
@@ -2831,6 +2889,8 @@ Intended for use with the target_spawner
 */
 void SP_misc_gib_arm (edict_t *ent)
 {
+	ent->class_id = ENTITY_MISC_GIB_ARM;
+
 	gi.setmodel (ent, "models/objects/gibs/arm/tris.md2");
 	ent->solid = SOLID_NOT;
 	ent->s.effects |= EF_GIB;
@@ -2852,6 +2912,8 @@ Intended for use with the target_spawner
 */
 void SP_misc_gib_leg (edict_t *ent)
 {
+	ent->class_id = ENTITY_MISC_GIB_LEG;
+
 	gi.setmodel (ent, "models/objects/gibs/leg/tris.md2");
 	ent->solid = SOLID_NOT;
 	ent->s.effects |= EF_GIB;
@@ -2873,6 +2935,8 @@ Intended for use with the target_spawner
 */
 void SP_misc_gib_head (edict_t *ent)
 {
+	ent->class_id = ENTITY_MISC_GIB_HEAD;
+
 	gi.setmodel (ent, "models/objects/gibs/head/tris.md2");
 	ent->solid = SOLID_NOT;
 	ent->s.effects |= EF_GIB;
@@ -2898,6 +2962,8 @@ used with target_string (must be on same "team")
 
 void SP_target_character (edict_t *self)
 {
+	self->class_id = ENTITY_TARGET_CHARACTER;
+
 	self->movetype = MOVETYPE_PUSH;
 	gi.setmodel (self, self->model);
 	self->solid = SOLID_BSP;
@@ -2945,6 +3011,8 @@ void SP_target_string (edict_t *self)
 	if (!self->message)
 		self->message = "";
 	self->use = target_string_use;
+
+	self->class_id = ENTITY_TARGET_STRING;
 }
 
 
@@ -3134,6 +3202,8 @@ void SP_func_clock (edict_t *self)
 		self->use = func_clock_use;
 	else
 		self->nextthink = level.time + 1;
+
+	self->class_id = ENTITY_FUNC_CLOCK;
 }
 /*==================================================================
  Lazarus changes to misc_teleporter:
@@ -3175,32 +3245,32 @@ void teleport_transition_ents (edict_t *transition, edict_t *teleporter, edict_t
 	{
 		ent = &g_edicts[i];
 		ent->id = 0;
-		if(!ent->inuse) continue;
+		if (!ent->inuse) continue;
 		// Pass up owned entities not owned by the player on this pass...
 		// get 'em next pass so we'll know whether owner is in our list
-		if(ent->owner && !ent->owner->client) continue;
-		if(ent->movewith) continue;
-		if(ent->solid == SOLID_BSP) continue;
-		if((ent->solid == SOLID_TRIGGER) && !FindItemByClassname(ent->classname)) continue;
+		if (ent->owner && !ent->owner->client) continue;
+		if (ent->movewith) continue;
+		if (ent->solid == SOLID_BSP) continue;
+		if ((ent->solid == SOLID_TRIGGER) && !FindItemByClassname(ent->classname)) continue;
 		// Do not under any circumstances move these entities:
-		for(p=&DoNotMove, nogo=false; p->name && !nogo; p++)
-			if(!Q_stricmp(ent->classname,p->name))
+		for (p=&DoNotMove, nogo=false; p->name && !nogo; p++)
+			if (!Q_stricmp(ent->classname,p->name))
 				nogo = true;
-		if(nogo) continue;
-		if(!HasSpawnFunction(ent)) continue;
-		if(ent->s.origin[0] > transition->maxs[0]) continue;
-		if(ent->s.origin[1] > transition->maxs[1]) continue;
-		if(ent->s.origin[2] > transition->maxs[2]) continue;
-		if(ent->s.origin[0] < transition->mins[0]) continue;
-		if(ent->s.origin[1] < transition->mins[1]) continue;
-		if(ent->s.origin[2] < transition->mins[2]) continue;
+		if (nogo) continue;
+		if (!HasSpawnFunction(ent)) continue;
+		if (ent->s.origin[0] > transition->maxs[0]) continue;
+		if (ent->s.origin[1] > transition->maxs[1]) continue;
+		if (ent->s.origin[2] > transition->maxs[2]) continue;
+		if (ent->s.origin[0] < transition->mins[0]) continue;
+		if (ent->s.origin[1] < transition->mins[1]) continue;
+		if (ent->s.origin[2] < transition->mins[2]) continue;
 		total++;
 		ent->id = total;
-		if(ent->owner)
+		if (ent->owner)
 			ent->owner_id = -(ent->owner - g_edicts);
 		else
 			ent->owner_id = 0;
-		if(angles[YAW])
+		if (angles[YAW])
 		{
 			vec3_t	spawn_offset;
 		
@@ -3223,34 +3293,34 @@ void teleport_transition_ents (edict_t *transition, edict_t *teleporter, edict_t
 	for (i=game.maxclients+1; i<globals.num_edicts; i++)
 	{
 		ent = &g_edicts[i];
-		if(!ent->inuse) continue;
-		if(!ent->owner) continue;
-		if(ent->owner->client) continue;
-		if(ent->movewith) continue;
-		if(ent->solid == SOLID_BSP) continue;
-		if((ent->solid == SOLID_TRIGGER) && !FindItemByClassname(ent->classname)) continue;
+		if (!ent->inuse) continue;
+		if (!ent->owner) continue;
+		if (ent->owner->client) continue;
+		if (ent->movewith) continue;
+		if (ent->solid == SOLID_BSP) continue;
+		if ((ent->solid == SOLID_TRIGGER) && !FindItemByClassname(ent->classname)) continue;
 		// Do not under any circumstances move these entities:
-		for(p=&DoNotMove, nogo=false; p->name && !nogo; p++)
-			if(!Q_stricmp(ent->classname,p->name))
+		for (p=&DoNotMove, nogo=false; p->name && !nogo; p++)
+			if (!Q_stricmp(ent->classname,p->name))
 				nogo = true;
-		if(nogo) continue;
-		if(!HasSpawnFunction(ent)) continue;
-		if(ent->s.origin[0] > transition->maxs[0]) continue;
-		if(ent->s.origin[1] > transition->maxs[1]) continue;
-		if(ent->s.origin[2] > transition->maxs[2]) continue;
-		if(ent->s.origin[0] < transition->mins[0]) continue;
-		if(ent->s.origin[1] < transition->mins[1]) continue;
-		if(ent->s.origin[2] < transition->mins[2]) continue;
+		if (nogo) continue;
+		if (!HasSpawnFunction(ent)) continue;
+		if (ent->s.origin[0] > transition->maxs[0]) continue;
+		if (ent->s.origin[1] > transition->maxs[1]) continue;
+		if (ent->s.origin[2] > transition->maxs[2]) continue;
+		if (ent->s.origin[0] < transition->mins[0]) continue;
+		if (ent->s.origin[1] < transition->mins[1]) continue;
+		if (ent->s.origin[2] < transition->mins[2]) continue;
 		ent->owner_id = 0;
-		for(j=game.maxclients+1; j<globals.num_edicts && !ent->owner_id; j++)
+		for (j=game.maxclients+1; j<globals.num_edicts && !ent->owner_id; j++)
 		{
-			if(ent->owner == &g_edicts[j])
+			if (ent->owner == &g_edicts[j])
 				ent->owner_id = g_edicts[j].id;
 		}
-		if(!ent->owner_id) continue;
+		if (!ent->owner_id) continue;
 		total++;
 		ent->id = total;
-		if(angles[YAW])
+		if (angles[YAW])
 		{
 			vec3_t	spawn_offset;
 		
@@ -3327,7 +3397,7 @@ void teleporter_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_
 	CTFPlayerResetGrapple(other);
 //ZOID
 
-	if(self->owner)
+	if (self->owner)
 		teleporter = self->owner;
 	else
 		teleporter = self;
@@ -3370,7 +3440,7 @@ void teleporter_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_
 		vec3_t	origin;
 		VectorMA(self->mins,0.5,self->size,origin);
 
-		if(!(self->spawnflags & 16))
+		if (!(self->spawnflags & 16))
 		{
 			gi.WriteByte(svc_temp_entity);
 			gi.WriteByte(TE_TELEPORT_EFFECT);
@@ -3405,7 +3475,7 @@ void teleporter_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_
 		transition = G_Find(NULL,FOFS(classname),"trigger_transition");
 		while (transition)
 		{
-			if(!Q_stricmp(transition->targetname,teleporter->targetname))
+			if (!Q_stricmp(transition->targetname,teleporter->targetname))
 				teleport_transition_ents(transition,teleporter,dest);
 			transition = G_Find(transition,FOFS(classname),"trigger_transition");
 		}
@@ -3428,11 +3498,11 @@ void teleporter_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_
 	// kill anything at the destination
 	KillBox (other);
 
-	if(!self->owner)
+	if (!self->owner)
 	{
 		// this is a trigger_teleporter
 		self->count--;
-		if(!self->count)
+		if (!self->count)
 			G_FreeEdict(self);
 	}
 	gi.linkentity (other);
@@ -3443,7 +3513,7 @@ void use_teleporter (edict_t *self, edict_t *other, edict_t *activator)
 
 	if (!(self->spawnflags & 1))
 	{
-		if(!(self->spawnflags & 2))
+		if (!(self->spawnflags & 2))
 			return;
 		self->spawnflags |= 1;
 		self->s.effects &= ~EF_TELEPORTER;
@@ -3453,7 +3523,7 @@ void use_teleporter (edict_t *self, edict_t *other, edict_t *activator)
 	else
 	{
 		self->spawnflags &= ~1;
-		if(!(self->spawnflags & 4))
+		if (!(self->spawnflags & 4))
 			self->s.effects |= EF_TELEPORTER;
 		self->target_ent->solid = SOLID_TRIGGER;
 		self->s.sound = gi.soundindex ("world/amb10.wav");
@@ -3480,7 +3550,7 @@ void SP_misc_teleporter (edict_t *ent)
 	{
 		gi.setmodel (ent, "models/objects/dmspot/tris.md2");
 		ent->s.skinnum = 1;
-		if(!(ent->spawnflags & 1)) {
+		if (!(ent->spawnflags & 1)) {
 			ent->s.effects = EF_TELEPORTER;
 			ent->s.sound = gi.soundindex ("world/amb10.wav");
 		}
@@ -3498,6 +3568,7 @@ void SP_misc_teleporter (edict_t *ent)
 		VectorSet (ent->maxs, 32, 32, -16);
 	}
 	ent->common_name = "Teleporter";
+	ent->class_id = ENTITY_MISC_TELEPORTER;
 	gi.linkentity (ent);
 
 	trig = G_Spawn ();
@@ -3521,7 +3592,7 @@ void SP_misc_teleporter (edict_t *ent)
 
 void trigger_teleporter_use (edict_t *self, edict_t *other, edict_t *activator)
 {
-	if(self->solid == SOLID_NOT)
+	if (self->solid == SOLID_NOT)
 		self->solid = SOLID_TRIGGER;
 	else
 		self->solid = SOLID_NOT;
@@ -3544,9 +3615,9 @@ void SP_trigger_teleporter (edict_t *self)
 	}
 	if (!(self->spawnflags & 48))
 		self->noise_index = gi.soundindex("misc/tele1.wav");
-	else if(self->spawnflags & 32)
+	else if (self->spawnflags & 32)
 	{
-		if(st.noise)
+		if (st.noise)
 			self->noise_index = gi.soundindex(st.noise);
 		else
 			self->noise_index = 0;
@@ -3557,10 +3628,63 @@ void SP_trigger_teleporter (edict_t *self)
 	gi.setmodel (self, self->model);
 	self->touch   = teleporter_touch;
 	self->svflags = SVF_NOCLIENT;
-	if(self->spawnflags & 2)
+	if (self->spawnflags & 2)
 		self->solid = SOLID_NOT;
 	else
 		self->solid = SOLID_TRIGGER;
+
+	self->class_id = ENTITY_TRIGGER_TELEPORTER;
+
+	gi.linkentity (self);
+}
+
+/*QUAKED trigger_teleporter_bbox (.5 .5 .5) (-8 -8 -8) (8 8 8) x Triggered x Monster NoEffects Sound Landmark
+Teleporter field that can transport monsters or players
+
+Use the 'SOUND' spawnflag and then choose your own custom sound.
+"noise" (path/file.wav)
+"target" destination
+
+bleft Min b-box coords XYZ. Default = -16 -16 -16
+tright Max b-box coords XYZ. Default = 16 16 16
+*/
+void SP_trigger_teleporter_bbox (edict_t *self)
+{
+	if (!self->target)
+	{
+		gi.dprintf ("trigger_teleporter_bbox without a target at %s\n", vtos(self->s.origin));
+		G_FreeEdict (self);
+		return;
+	}
+	if (!(self->spawnflags & 48))
+		self->noise_index = gi.soundindex("misc/tele1.wav");
+	else if (self->spawnflags & 32)
+	{
+		if (st.noise)
+			self->noise_index = gi.soundindex(st.noise);
+		else
+			self->noise_index = 0;
+	}
+	else
+		self->noise_index = 0;
+
+	if ( (!VectorLength(self->bleft)) && (!VectorLength(self->tright)) )
+	{
+		VectorSet(self->bleft, -16, -16, -16);
+		VectorSet(self->tright, 16, 16, 16);
+	}
+	VectorCopy (self->bleft, self->mins);
+	VectorCopy (self->tright, self->maxs);
+	self->touch   = teleporter_touch;
+	self->use = trigger_teleporter_use;
+	self->svflags = SVF_NOCLIENT;
+	if (self->spawnflags & 2)
+		self->solid = SOLID_NOT;
+	else
+		self->solid = SOLID_TRIGGER;
+
+	self->class_id = ENTITY_TRIGGER_TELEPORTER;
+
 	gi.linkentity (self);
 }
 
@@ -3574,7 +3698,10 @@ void SP_misc_teleporter_dest (edict_t *ent)
 	ent->solid = SOLID_BBOX;
 	VectorSet (ent->mins, -32, -32, -24);
 	VectorSet (ent->maxs, 32, 32, -16);
+
 	ent->common_name = "Teleporter Destination";
+	ent->class_id = ENTITY_MISC_TELEPORTER_DEST;
+
 	gi.linkentity (ent);
 }
 
@@ -3582,7 +3709,7 @@ void SP_misc_teleporter_dest (edict_t *ent)
 
 void misc_light_think (edict_t *self)
 {
-	if(self->spawnflags & START_OFF) return;
+	if (self->spawnflags & START_OFF) return;
 	gi.WriteByte (svc_temp_entity);
 	gi.WriteByte (TE_FLASHLIGHT);
 	gi.WritePosition (self->s.origin);
@@ -3602,8 +3729,10 @@ void misc_light_use (edict_t *self, edict_t *other, edict_t *activator)
 
 void SP_misc_light (edict_t *self)
 {
+	self->class_id = ENTITY_MISC_LIGHT;
+
 	self->use = misc_light_use;
-	if(self->movewith)
+	if (self->movewith)
 		self->movetype = MOVETYPE_PUSH;
 	else
 		self->movetype = MOVETYPE_NONE;
@@ -3634,13 +3763,13 @@ void drop_add_to_chain(edict_t *drop)
 	edict_t	*owner = drop->owner;
 	edict_t *parent;
 
-	if(!owner || !owner->inuse || !(owner->spawnflags & SF_WEATHER_STARTON))
+	if (!owner || !owner->inuse || !(owner->spawnflags & SF_WEATHER_STARTON))
 	{
 		G_FreeEdict(drop);
 		return;
 	}
 	parent = owner;
-	while(parent->child)
+	while (parent->child)
 		parent = parent->child;
 	parent->child = drop;
 	drop->child = NULL;
@@ -3689,11 +3818,11 @@ void leaf_fade (edict_t *ent)
 
 void drop_touch(edict_t *drop, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
-	if(drop->owner->spawnflags & SF_WEATHER_START_FADE)
+	if (drop->owner->spawnflags & SF_WEATHER_START_FADE)
 		return;
-	else if(drop->fadeout > 0)
+	else if (drop->fadeout > 0)
 	{
-		if( (drop->spawnflags & SF_WEATHER_GRAVITY_BOUNCE) && (drop->owner->gravity > 0))
+		if ( (drop->spawnflags & SF_WEATHER_GRAVITY_BOUNCE) && (drop->owner->gravity > 0))
 		{
 			drop->movetype = MOVETYPE_DEBRIS;
 			drop->gravity  = drop->owner->gravity;
@@ -3701,7 +3830,7 @@ void drop_touch(edict_t *drop, edict_t *other, cplane_t *plane, csurface_t *surf
 		drop->think     = leaf_fade;
 		drop->nextthink = level.time + drop->fadeout;
 	}
-	else if(drop->spawnflags & SF_WEATHER_SPLASH)
+	else if (drop->spawnflags & SF_WEATHER_SPLASH)
 		drop_splash(drop);
 	else
 		drop_add_to_chain(drop);
@@ -3711,7 +3840,7 @@ void spawn_precipitation(edict_t *self, vec3_t org, vec3_t dir, float speed)
 {
 	edict_t *drop;
 
-	if(self->child)
+	if (self->child)
 	{
 		// Then we already have a currently unused, invisible drop available
 		drop = self->child;
@@ -3723,37 +3852,37 @@ void spawn_precipitation(edict_t *self, vec3_t org, vec3_t dir, float speed)
 	else
 	{
 		drop = G_Spawn();
-		if(self->style == STYLE_WEATHER_BIGRAIN)
+		if (self->style == STYLE_WEATHER_BIGRAIN)
 			drop->s.modelindex = gi.modelindex ("models/objects/drop/heavy.md2");
-		else if(self->style == STYLE_WEATHER_SNOW)
+		else if (self->style == STYLE_WEATHER_SNOW)
 			drop->s.modelindex = gi.modelindex ("models/objects/snow/tris.md2");
-		else if(self->style == STYLE_WEATHER_LEAF)
+		else if (self->style == STYLE_WEATHER_LEAF)
 		{
 			float	r=random();
-			if(r < 0.33)
+			if (r < 0.33)
 				drop->s.modelindex = gi.modelindex ("models/objects/leaf1/tris.md2");
-			else if(r < 0.66)
+			else if (r < 0.66)
 				drop->s.modelindex = gi.modelindex ("models/objects/leaf2/tris.md2");
 			else
 				drop->s.modelindex = gi.modelindex ("models/objects/leaf3/tris.md2");
 			VectorSet(drop->mins,-1,-1,-1);
 			VectorSet(drop->maxs, 1, 1, 1);
 		}
-		else if(self->style == STYLE_WEATHER_USER)
+		else if (self->style == STYLE_WEATHER_USER)
 			drop->s.modelindex = gi.modelindex(self->usermodel);
 		else
 			drop->s.modelindex = gi.modelindex ("models/objects/drop/tris.md2");
 		drop->classname = "rain drop";
 	}
-	if(self->gravity > 0. || self->attenuation > 0 )
+	if (self->gravity > 0. || self->attenuation > 0 )
 		drop->movetype = MOVETYPE_DEBRIS;
 	else
 		drop->movetype = MOVETYPE_RAIN;
 
 	drop->touch    = drop_touch;
-	if(self->style == STYLE_WEATHER_USER)
+	if (self->style == STYLE_WEATHER_USER)
 		drop->clipmask = MASK_MONSTERSOLID;
-	else if((self->fadeout > 0) && (self->gravity == 0.))
+	else if ((self->fadeout > 0) && (self->gravity == 0.))
 		drop->clipmask = MASK_SOLID | CONTENTS_WATER;
 	else
 		drop->clipmask = MASK_MONSTERSOLID | CONTENTS_WATER;
@@ -3762,7 +3891,7 @@ void spawn_precipitation(edict_t *self, vec3_t org, vec3_t dir, float speed)
 	VectorSet(drop->mins,-1,-1,-1);
 	VectorSet(drop->maxs, 1, 1, 1);
 
-	if(self->spawnflags & SF_WEATHER_GRAVITY_BOUNCE)
+	if (self->spawnflags & SF_WEATHER_GRAVITY_BOUNCE)
 		drop->gravity = self->gravity;
 	else
 		drop->gravity = 0.;
@@ -3776,13 +3905,13 @@ void spawn_precipitation(edict_t *self, vec3_t org, vec3_t dir, float speed)
 	vectoangles(dir, drop->s.angles);
 	drop->s.angles[PITCH] -= 90;
 	VectorScale (dir, speed, drop->velocity);
-	if(self->style == STYLE_WEATHER_LEAF)
+	if (self->style == STYLE_WEATHER_LEAF)
 	{
 		drop->avelocity[PITCH] = crandom() * 360;
 		drop->avelocity[YAW] = crandom() * 360;
 		drop->avelocity[ROLL] = crandom() * 360;
 	}
-	else if(self->style == STYLE_WEATHER_USER)
+	else if (self->style == STYLE_WEATHER_USER)
 	{
 		drop->s.effects = self->effects;
 		drop->s.renderfx = self->renderfx;
@@ -3795,7 +3924,7 @@ void spawn_precipitation(edict_t *self, vec3_t org, vec3_t dir, float speed)
 		drop->s.effects |= EF_SPHERETRANS;
 		drop->avelocity[YAW] = self->yaw_speed;
 	}
-	if(self->spawnflags & SF_WEATHER_START_FADE)
+	if (self->spawnflags & SF_WEATHER_START_FADE)
 	{
 		drop->think     = leaf_fade;
 		drop->nextthink = level.time + self->fadeout;
@@ -3817,7 +3946,7 @@ void target_precipitation_think (edict_t *self)
 	// Don't start raining until player is in the game. The following 
 	// takes care of both initial map load conditions and restored saved games.
 	// This is a gross abuse of groundentity_linkcount. Sue me.
-	if(g_edicts[1].linkcount == self->groundentity_linkcount)
+	if (g_edicts[1].linkcount == self->groundentity_linkcount)
 		return;
 	else
 		self->groundentity_linkcount = g_edicts[1].linkcount;
@@ -3828,13 +3957,13 @@ void target_precipitation_think (edict_t *self)
 	// PVS. In any case, this step is necessary to prevent overflows when
 	// player suddenly encounters rain.
 	can_see_me = false;
-	for(i=1; i<=game.maxclients && !can_see_me; i++)
+	for (i=1; i<=game.maxclients && !can_see_me; i++)
 	{
-		if(!g_edicts[i].inuse) continue;
-		if(gi.inPVS(g_edicts[i].s.origin,self->s.origin))
+		if (!g_edicts[i].inuse) continue;
+		if (gi.inPVS(g_edicts[i].s.origin,self->s.origin))
 			can_see_me = true;
 	}
-	if(!can_see_me) return;
+	if (!can_see_me) return;
 
 	// Count is models/second. We accumulate a probability of a model
 	// falling this frame in ->density. Yeah its a misnomer but density isn't 
@@ -3842,16 +3971,16 @@ void target_precipitation_think (edict_t *self)
 
 	temp = 0.1*(self->density + crandom()*self->random);
 	r = (int)(temp);
-	if(r > 0)
+	if (r > 0)
 		self->density = self->count + (temp-(float)r)*10;
 	else
 		self->density += (temp*10);
-	if(r < 1) return;
+	if (r < 1) return;
 
 	VectorAdd(self->bleft,self->tright,center);
 	VectorMA(self->s.origin,0.5,center,center);
 
-	for(i=0; i<r; i++)
+	for (i=0; i<r; i++)
 	{
 		u = crandom() * (self->tright[0] - self->bleft[0])/2;
 		v = crandom() * (self->tright[1] - self->bleft[1])/2;
@@ -3869,17 +3998,17 @@ void target_precipitation_think (edict_t *self)
 
 void target_precipitation_use (edict_t *ent, edict_t *other, edict_t *activator)
 {
-	if(ent->spawnflags & SF_WEATHER_STARTON)
+	if (ent->spawnflags & SF_WEATHER_STARTON)
 	{
 		// already on; turn it off
 		ent->nextthink = 0;
 		ent->spawnflags &= ~SF_WEATHER_STARTON;
-		if(ent->child)
+		if (ent->child)
 		{
 			edict_t	*child, *parent;
 			child = ent->child;
 			ent->child = NULL;
-			while(child)
+			while (child)
 			{
 				parent = child;
 				child = parent->child;
@@ -3901,7 +4030,7 @@ void target_precipitation_delayed_use (edict_t *self)
 	// Since target_precipitation tends to be a processor hog,
 	// for START_ON we wait until the player has spawned into the
 	// game to ease the startup burden somewhat
-	if(g_edicts[1].linkcount)
+	if (g_edicts[1].linkcount)
 	{
 		self->think = target_precipitation_think;
 		self->think(self);
@@ -3912,7 +4041,7 @@ void target_precipitation_delayed_use (edict_t *self)
 
 void SP_target_precipitation (edict_t *ent)
 {
-	if(deathmatch->value || coop->value)
+	if (deathmatch->value || coop->value)
 	{
 		G_FreeEdict(ent);
 		return;
@@ -3923,16 +4052,16 @@ void SP_target_precipitation (edict_t *ent)
 	ent->movetype = MOVETYPE_NONE;
 	ent->solid = SOLID_NOT;
 
-	if(ent->spawnflags & SF_WEATHER_STARTON)
+	if (ent->spawnflags & SF_WEATHER_STARTON)
 	{
 		ent->think = target_precipitation_delayed_use;
 		ent->nextthink = level.time + 1;
 	}
 
-	if(ent->style == STYLE_WEATHER_USER)
+	if (ent->style == STYLE_WEATHER_USER)
 	{
 		char	*buffer;
-		if(!ent->usermodel)
+		if (!ent->usermodel)
 		{
 			gi.dprintf("target_precipitation style=user\nwith no usermodel.\n");
 			G_FreeEdict(ent);
@@ -3963,26 +4092,26 @@ void SP_target_precipitation (edict_t *ent)
 
 	// If not rain or "user", turn off splash. Yeah I know goofy mapper
 	// might WANT splash, but we're enforcing good taste here :)
-	if(ent->style > STYLE_WEATHER_BIGRAIN && ent->style != STYLE_WEATHER_USER)
+	if (ent->style > STYLE_WEATHER_BIGRAIN && ent->style != STYLE_WEATHER_USER)
 		ent->spawnflags &= ~SF_WEATHER_SPLASH;
 
 	ent->use = target_precipitation_use;
 	
-	if(!ent->count)
+	if (!ent->count)
 		ent->count = 1;
 
-	if(!ent->sounds)
+	if (!ent->sounds)
 		ent->sounds = 2;	// blue splash
 
-	if(!ent->mass2)
+	if (!ent->mass2)
 		ent->mass2 = 8;		// 8 particles in splash
 
-	if((ent->style < STYLE_WEATHER_RAIN) || (ent->style > STYLE_WEATHER_USER))
+	if ((ent->style < STYLE_WEATHER_RAIN) || (ent->style > STYLE_WEATHER_USER))
 		ent->style = STYLE_WEATHER_RAIN;		// single rain drop model
 
-	if(ent->speed <= 0)
+	if (ent->speed <= 0)
 	{
-		switch(ent->style)
+		switch (ent->style)
 		{
 		case STYLE_WEATHER_SNOW: ent->speed = 50; break;
 		case STYLE_WEATHER_LEAF: ent->speed = 50; break;
@@ -3990,7 +4119,7 @@ void SP_target_precipitation (edict_t *ent)
 		}
 	}
 
-	if((VectorLength(ent->bleft) == 0.) && (VectorLength(ent->tright) == 0.))
+	if ((VectorLength(ent->bleft) == 0.) && (VectorLength(ent->tright) == 0.))
 	{
 		// Default distribution places raindrops vertically for
 		// full coverage, to help avoid "lumps"
@@ -3998,7 +4127,7 @@ void SP_target_precipitation (edict_t *ent)
 		VectorSet(ent->tright,512, 512,  ent->speed*0.05);
 	}
 
-	if(VectorLength(ent->s.angles) > 0)
+	if (VectorLength(ent->s.angles) > 0)
 		G_SetMovedir(ent->s.angles,ent->movedir);
 	else
 		VectorSet(ent->movedir,0,0,-1);
@@ -4024,13 +4153,13 @@ void target_fountain_think (edict_t *self)
 	float	temp;
 	qboolean	can_see_me;
 
-	if(!(self->spawnflags & SF_WEATHER_FIRE_ONCE))
+	if (!(self->spawnflags & SF_WEATHER_FIRE_ONCE))
 		self->nextthink = level.time + FRAMETIME;
 
 	// Don't start raining until player is in the game. The following 
 	// takes care of both initial map load conditions and restored saved games.
 	// This is a gross abuse of groundentity_linkcount. Sue me.
-	if(g_edicts[1].linkcount == self->groundentity_linkcount)
+	if (g_edicts[1].linkcount == self->groundentity_linkcount)
 		return;
 	else
 		self->groundentity_linkcount = g_edicts[1].linkcount;
@@ -4041,13 +4170,13 @@ void target_fountain_think (edict_t *self)
 	// PVS. In any case, this step is necessary to prevent overflows when
 	// player suddenly encounters rain.
 	can_see_me = false;
-	for(i=1; i<=game.maxclients && !can_see_me; i++)
+	for (i=1; i<=game.maxclients && !can_see_me; i++)
 	{
-		if(!g_edicts[i].inuse) continue;
-		if(gi.inPVS(g_edicts[i].s.origin,self->s.origin))
+		if (!g_edicts[i].inuse) continue;
+		if (gi.inPVS(g_edicts[i].s.origin,self->s.origin))
 			can_see_me = true;
 	}
-	if(!can_see_me) return;
+	if (!can_see_me) return;
 
 	// Count is models/second. We accumulate a probability of a model
 	// falling this frame in ->density. Yeah its a misnomer but density isn't 
@@ -4055,16 +4184,16 @@ void target_fountain_think (edict_t *self)
 
 	temp = 0.1*(self->density + crandom()*self->random);
 	r = (int)(temp);
-	if(r > 0)
+	if (r > 0)
 		self->density = self->count;
 	else
 		self->density += (temp*10);
-	if(r < 1) return;
+	if (r < 1) return;
 
 	VectorAdd(self->bleft,self->tright,center);
 	VectorMA(self->s.origin,0.5,center,center);
 
-	for(i=0; i<r; i++)
+	for (i=0; i<r; i++)
 	{
 		u = crandom() * (self->tright[0] - self->bleft[0])/2;
 		v = crandom() * (self->tright[1] - self->bleft[1])/2;
@@ -4084,17 +4213,17 @@ void target_fountain_think (edict_t *self)
 
 void target_fountain_use (edict_t *ent, edict_t *other, edict_t *activator)
 {
-	if((ent->spawnflags & SF_WEATHER_STARTON) && !(ent->spawnflags & SF_WEATHER_FIRE_ONCE))
+	if ((ent->spawnflags & SF_WEATHER_STARTON) && !(ent->spawnflags & SF_WEATHER_FIRE_ONCE))
 	{
 		// already on; turn it off
 		ent->nextthink = 0;
 		ent->spawnflags &= ~SF_WEATHER_STARTON;
-		if(ent->child)
+		if (ent->child)
 		{
 			edict_t	*child, *parent;
 			child = ent->child;
 			ent->child = NULL;
-			while(child)
+			while (child)
 			{
 				parent = child;
 				child = parent->child;
@@ -4116,7 +4245,7 @@ void target_fountain_delayed_use (edict_t *self)
 	// Since target_fountain tends to be a processor hog,
 	// for START_ON we wait until the player has spawned into the
 	// game to ease the startup burden somewhat
-	if(g_edicts[1].linkcount)
+	if (g_edicts[1].linkcount)
 	{
 		self->think = target_fountain_think;
 		self->think(self);
@@ -4124,11 +4253,12 @@ void target_fountain_delayed_use (edict_t *self)
 	else
 		self->nextthink = level.time + FRAMETIME;
 }
+
 void SP_target_fountain (edict_t *ent)
 {
 	char	*buffer;
 
-	if(deathmatch->value || coop->value)
+	if (deathmatch->value || coop->value)
 	{
 		G_FreeEdict(ent);
 		return;
@@ -4139,14 +4269,14 @@ void SP_target_fountain (edict_t *ent)
 	ent->movetype = MOVETYPE_NONE;
 	ent->solid = SOLID_NOT;
 
-	if(ent->spawnflags & SF_WEATHER_STARTON)
+	if (ent->spawnflags & SF_WEATHER_STARTON)
 	{
 		ent->think = target_fountain_delayed_use;
 		ent->nextthink = level.time + 1;
 	}
 
 	ent->style = STYLE_WEATHER_USER;
-	if(!ent->usermodel)
+	if (!ent->usermodel)
 	{
 		gi.dprintf("target_fountain with no usermodel.\n");
 		G_FreeEdict(ent);
@@ -4171,19 +4301,19 @@ void SP_target_fountain (edict_t *ent)
 
 	ent->use = target_fountain_use;
 	
-	if(!ent->count)
+	if (!ent->count)
 		ent->count = 1;
 
-	if(!ent->sounds)
+	if (!ent->sounds)
 		ent->sounds = 2;	// blue splash
 
-	if(!ent->mass2)
+	if (!ent->mass2)
 		ent->mass2 = 8;		// 8 particles in splash
 
-	if(ent->speed <= 0)
+	if (ent->speed <= 0)
 		ent->speed = 300;
 
-	if((VectorLength(ent->bleft) == 0.) && (VectorLength(ent->tright) == 0.))
+	if ((VectorLength(ent->bleft) == 0.) && (VectorLength(ent->tright) == 0.))
 	{
 		// Default distribution places raindrops vertically for
 		// full coverage, to help avoid "lumps"
@@ -4357,7 +4487,7 @@ int PatchDeadSoldier (void)
 	*p = 0;
 	_mkdir (outfilename);
 	Com_sprintf (outfilename, sizeof(outfilename), "%s/%s", gamedir->string, DEADSOLDIER_MODEL);
-*/
+*/	
 	Com_sprintf (tempname, sizeof(tempname), DEADSOLDIER_MODEL);
 	SavegameDirRelativePath (tempname, outfilename, sizeof(outfilename));
 	CreatePath (outfilename);
@@ -4386,7 +4516,7 @@ void PrecacheDebris(int type)
 {
 	int	i;
 
-	switch(type)
+	switch (type)
 	{
 	case 0:
 		gi.modelindex ("models/objects/debris1/tris.md2");
@@ -4394,39 +4524,39 @@ void PrecacheDebris(int type)
 		gi.modelindex ("models/objects/debris3/tris.md2");
 		break;
 	case GIB_METAL:
-		for(i=1;i<=5;i++)
+		for (i=1;i<=5;i++)
 			gi.modelindex(va("models/objects/metal_gibs/gib%i.md2",i));
 		break;
 	case GIB_GLASS:
-		for(i=1;i<=5;i++)
+		for (i=1;i<=5;i++)
 			gi.modelindex(va("models/objects/glass_gibs/gib%i.md2",i));
 		break;
 	case GIB_BARREL:
-		for(i=1;i<=5;i++)
+		for (i=1;i<=5;i++)
 			gi.modelindex(va("models/objects/barrel_gibs/gib%i.md2",i));
 		break;
 	case GIB_CRATE:
-		for(i=1;i<=5;i++)
+		for (i=1;i<=5;i++)
 			gi.modelindex(va("models/objects/crate_gibs/gib%i.md2",i));
 		break;
 	case GIB_ROCK:
-		for(i=1;i<=5;i++)
+		for (i=1;i<=5;i++)
 			gi.modelindex(va("models/objects/rock_gibs/gib%i.md2",i));
 		break;
 	case GIB_CRYSTAL:
-		for(i=1;i<=5;i++)
+		for (i=1;i<=5;i++)
 			gi.modelindex(va("models/objects/crystal_gibs/gib%i.md2",i));
 		break;
 	case GIB_MECH:
-		for(i=1;i<=5;i++)
+		for (i=1;i<=5;i++)
 			gi.modelindex(va("models/objects/mech_gibs/gib%i.md2",i));
 		break;
 	case GIB_WOOD:
-		for(i=1;i<=5;i++)
+		for (i=1;i<=5;i++)
 			gi.modelindex(va("models/objects/wood_gibs/gib%i.md2",i));
 		break;
 	case GIB_TECH:
-		for(i=1;i<=5;i++)
+		for (i=1;i<=5;i++)
 			gi.modelindex(va("models/objects/tech_gibs/gib%i.md2",i));
 		break;
 	}

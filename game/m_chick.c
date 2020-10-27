@@ -59,7 +59,7 @@ static int	sound_search;
 
 void ChickMoan (edict_t *self)
 {
-	if(!(self->spawnflags & SF_MONSTER_AMBUSH))
+	if (!(self->spawnflags & SF_MONSTER_AMBUSH))
 	{
 		if (random() < 0.5)
 			gi.sound (self, CHAN_VOICE, sound_idle1, 1, ATTN_IDLE, 0);
@@ -312,7 +312,7 @@ void chick_dead (edict_t *self)
 	M_FlyCheck (self);
 
 	// Lazarus monster fade
-	if(world->effects & FX_WORLDSPAWN_CORPSEFADE)
+	if (world->effects & FX_WORLDSPAWN_CORPSEFADE)
 	{
 		self->think=FadeDieSink;
 		self->nextthink=level.time+corpse_fadetime->value;
@@ -480,14 +480,14 @@ void ChickRocket (edict_t *self)
 	AngleVectors (self->s.angles, forward, right, NULL);
 	G_ProjectSource (self->s.origin, monster_flash_offset[MZ2_CHICK_ROCKET_1], forward, right, start);
 
-	if((self->spawnflags & SF_MONSTER_SPECIAL))
+	if ((self->spawnflags & SF_MONSTER_SPECIAL))
 		rocketSpeed = 400; // DWH: Homing rockets are tougher if slow
 	else
 		rocketSpeed = 500 + (100 * skill->value);
 
-	if(visible(self,self->enemy))
+	if (visible(self,self->enemy))
 	{
-		if(random() < 0.66 || (start[2] < self->enemy->absmin[2]))
+		if (random() < 0.66 || (start[2] < self->enemy->absmin[2]))
 		{
 			VectorCopy (self->enemy->s.origin, vec);
 			vec[2] += self->enemy->viewheight;
@@ -501,7 +501,7 @@ void ChickRocket (edict_t *self)
 		}
 
 		// Lazarus fog reduction of accuracy
-		if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+		if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 		{
 			vec[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 			vec[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -512,7 +512,7 @@ void ChickRocket (edict_t *self)
 		// 20, 35, 50, 65 chance of leading
 		// DWH: Switched this around from Rogue code... it led target more often
 		//      for Easy, which seemed backwards
-		if( (random() < (0.2 + skill->value * 0.15) ) && !(self->spawnflags & SF_MONSTER_SPECIAL))
+		if ( (random() < (0.2 + skill->value * 0.15) ) && !(self->spawnflags & SF_MONSTER_SPECIAL))
 		{
 			float	dist;
 			float	time;
@@ -534,12 +534,12 @@ void ChickRocket (edict_t *self)
 	VectorNormalize(dir);
 	// paranoia, make sure we're not shooting a target right next to us
 	trace = gi.trace(start, vec3_origin, vec3_origin, vec, self, MASK_SHOT);
-	if(trace.ent == self->enemy || trace.ent == world)
+	if (trace.ent == self->enemy || trace.ent == world)
 	{
 		VectorSubtract(trace.endpos,start,vec);
-		if(VectorLength(vec) > MELEE_DISTANCE)
+		if (VectorLength(vec) > MELEE_DISTANCE)
 		{
-			if(trace.fraction > 0.5 || (trace.ent && trace.ent->client))
+			if (trace.fraction > 0.5 || (trace.ent && trace.ent->client))
 				monster_fire_rocket (self, start, dir, 50, rocketSpeed, MZ2_CHICK_ROCKET_1,
 					(self->spawnflags & SF_MONSTER_SPECIAL ? self->enemy : NULL) );
 		}
@@ -558,15 +558,15 @@ void ChickReload (edict_t *self)
 
 void chick_skip_frames (edict_t *self)
 {
-	if(skill->value >= 1)
+	if (skill->value >= 1)
 	{
-		if(self->s.frame == FRAME_attak102)
+		if (self->s.frame == FRAME_attak102)
 			self->s.frame = FRAME_attak103;
-		if(self->s.frame == FRAME_attak105)
+		if (self->s.frame == FRAME_attak105)
 			self->s.frame = FRAME_attak106;
 	}
-	if(skill->value > 1)
-		if(self->s.frame == FRAME_attak109)
+	if (skill->value > 1)
+		if (self->s.frame == FRAME_attak109)
 			self->s.frame = FRAME_attak112;
 }
 
@@ -755,11 +755,11 @@ void SP_monster_chick (edict_t *self)
 	VectorSet (self->maxs, 16, 16, 56);
 
 	// DWH: mapper-configurable health
-	if(!self->health)
+	if (!self->health)
 		self->health = 175;
-	if(!self->gib_health)
+	if (!self->gib_health)
 		self->gib_health = -70;
-	if(!self->mass)
+	if (!self->mass)
 		self->mass = 200;
 
 	self->pain = chick_pain;
@@ -774,18 +774,20 @@ void SP_monster_chick (edict_t *self)
 	self->monsterinfo.sight = chick_sight;
 
 	// Lazarus
-	if(self->powerarmor) {
+	if (self->powerarmor) {
 		self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
 		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
-	if(!self->monsterinfo.flies)
+	if (!self->monsterinfo.flies)
 		self->monsterinfo.flies = 0.40;
+
 	self->common_name = "Iron Maiden";
+	self->class_id = ENTITY_MONSTER_CHICK;
 
 	gi.linkentity (self);
 
 	self->monsterinfo.currentmove = &chick_move_stand;
-	if(self->health < 0)
+	if (self->health < 0)
 	{
 		mmove_t	*deathmoves[] = {&chick_move_death1,
 			                     &chick_move_death2,

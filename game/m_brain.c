@@ -154,7 +154,7 @@ mmove_t brain_move_idle = {FRAME_stand31, FRAME_stand60, brain_frames_idle, brai
 
 void brain_idle (edict_t *self)
 {
-	if(!(self->spawnflags & SF_MONSTER_AMBUSH)) //Knightmare- play all 3 idle sounds
+	if (!(self->spawnflags & SF_MONSTER_AMBUSH)) //Knightmare- play all 3 idle sounds
 	{
 		float r = random();
 
@@ -595,7 +595,7 @@ void brain_dead (edict_t *self)
 	M_FlyCheck (self);
 
 	// Lazarus monster fade
-	if(world->effects & FX_WORLDSPAWN_CORPSEFADE)
+	if (world->effects & FX_WORLDSPAWN_CORPSEFADE)
 	{
 		self->think=FadeDieSink;
 		self->nextthink=level.time+corpse_fadetime->value;
@@ -679,11 +679,11 @@ void SP_monster_brain (edict_t *self)
 	VectorSet (self->maxs, 16, 16, 32);
 
 	// Lazarus: mapper-configurable health
-	if(!self->health)
+	if (!self->health)
 		self->health = 300;
-	if(!self->gib_health)
+	if (!self->gib_health)
 		self->gib_health = -150;
-	if(!self->mass)
+	if (!self->mass)
 		self->mass = 400;
 
 	self->pain = brain_pain;
@@ -702,18 +702,21 @@ void SP_monster_brain (edict_t *self)
 	self->monsterinfo.power_armor_type = POWER_ARMOR_SCREEN;
 	self->monsterinfo.power_armor_power = 100;
 
-	if(!self->monsterinfo.flies)
+	if (!self->monsterinfo.flies)
 		self->monsterinfo.flies = 0.10;
-	self->common_name = "Brains";
+
+//	self->common_name = "Brains";
+	self->common_name = "Brain";
+	self->class_id = ENTITY_MONSTER_BRAIN;
 
 	// Knightmare- added sparks and blood type
 	if (!self->blood_type)
-		self->blood_type = 3; //sparks and blood
+		self->blood_type = 3; // sparks and blood
 
 	gi.linkentity (self);
 
 	self->monsterinfo.currentmove = &brain_move_stand;	
-	if(self->health < 0)
+	if (self->health < 0)
 	{
 		mmove_t	*deathmoves[] = {&brain_move_death1,
 			                     &brain_move_death2,

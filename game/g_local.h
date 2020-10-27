@@ -1,24 +1,22 @@
 /*
-===========================================================================
 Copyright (C) 1997-2001 Id Software, Inc.
 Copyright (C) 2000-2002 Mr. Hyde and Mad Dog
 
-This file is part of Lazarus Quake 2 Mod source code.
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
 
-Lazarus Quake 2 Mod source code is free software; you can redistribute it
-and/or modify it under the terms of the GNU General Public License as
-published by the Free Software Foundation; either version 2 of the License,
-or (at your option) any later version.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
 
-Lazarus Quake 2 Mod source code is distributed in the hope that it will be
-useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Lazarus Quake 2 Mod source code; if not, write to the Free Software
-Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-===========================================================================
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+
 */
 
 // g_local.h -- local definitions for game module
@@ -397,6 +395,16 @@ struct fog_s
 };
 typedef struct fog_s fog_t;
 
+// Knightmare- map vendor for pack-specific code changes
+typedef enum
+{
+	MAPTYPE_ID,
+	MAPTYPE_XATRIX,
+	MAPTYPE_ROGUE,
+	MAPTYPE_ZAERO,
+	MAPTYPE_CUSTOM
+} maptype_t;
+
 //
 // this structure is cleared as each map is entered
 // it is read/written to the level.sav file for savegames
@@ -463,6 +471,8 @@ typedef struct
 	int			num_reflectors;
 	qboolean	intermission_letterbox;		// Knightmare- letterboxing
 
+	// Knightmare- for map-specific logic switching
+	maptype_t	maptype;				// map vendor for pack-specific code changes
 } level_locals_t;
 
 
@@ -852,10 +862,10 @@ typedef enum {
 
 typedef struct
 {
-	char	*name;
-	size_t		ofs;	// Knightmare- was int
+	char		*name;
+	size_t	ofs;	// Knightmare- was int
 	fieldtype_t	type;
-	int		flags;
+	int			flags;
 } field_t;
 
 typedef struct
@@ -979,6 +989,10 @@ void Fog_SetFogParms (void);
 //
 // g_func.c
 //
+
+// Knightmare- enable this to call set_child_movement() from postthink function instead of various movement functions
+#define POSTTHINK_CHILD_MOVEMENT	
+
 #define TRAIN_START_ON		   1
 #define TRAIN_TOGGLE		   2
 #define TRAIN_BLOCK_STOPS	   4
@@ -1121,6 +1135,7 @@ void ReflectTrail (int type, vec3_t start, vec3_t end);
 // g_spawn.c
 //
 void ED_CallSpawn (edict_t *ent);
+void ReInitialize_Entity (edict_t *ent);
 void G_FindTeams();
 void Cmd_ToggleHud ();
 void Hud_On();
@@ -1184,6 +1199,9 @@ void SavegameDirRelativePath (const char *filename, char *output, size_t outputS
 void CreatePath (const char *path);
 void G_UseTarget (edict_t *ent, edict_t *activator, edict_t *target);
 qboolean IsIdMap (void); // Knightmare added
+qboolean IsXatrixMap (void); // Knightmare added
+qboolean IsRogueMap (void); // Knightmare added
+qboolean IsZaeroMap (void); // Knightmare added
 void my_bprintf (int printlevel, char *fmt, ...);
 qboolean UseRegularGoodGuyFlag (edict_t *monster); // Knightmare added
 
@@ -1674,6 +1692,7 @@ struct edict_s
 	float		speed, accel, decel;
 	vec3_t		movedir;
 	vec3_t		pos1, pos2;
+	vec3_t		pos0;	// Knightmare- initial position for secret doors
 
 	vec3_t		velocity;
 	vec3_t		avelocity;
@@ -1701,7 +1720,7 @@ struct edict_s
 	float		nextthink;
 	void		(*prethink) (edict_t *ent);
 	void		(*think)(edict_t *self);
-	void		(*postthink) (edict_t *ent); //Knightmare added
+	void		(*postthink) (edict_t *ent); // Knightmare added
 	void		(*blocked)(edict_t *self, edict_t *other);	//move to moveinfo?
 	void		(*touch)(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf);
 	void		(*use)(edict_t *self, edict_t *other, edict_t *activator);
@@ -1825,8 +1844,14 @@ struct edict_s
 	int			bobframe;
 	int			bounce_me;		// 0 for no bounce, 1 to bounce, 2 if velocity should not be clipped
 								// this is solely used by func_pushable for now
+	// Knightmare- added for func_door_secret
+	float		width;			
+	float		length;
+	float		side;
+	// end Knightmare
+
 	vec3_t      origin_offset;  // used to help locate brush models w/o origin brush
-	vec3_t		org_mins,org_maxs;
+	vec3_t		org_mins, org_maxs;
 	vec3_t		org_angles;
 	int			org_movetype;
 	int			axis;
@@ -1868,6 +1893,7 @@ struct edict_s
 	edict_t		*movewith_ent;
 	vec3_t		movewith_offset;
 	vec3_t		parent_attach_angles;
+	vec3_t		child_attach_angles;	// Knightmare added
 	qboolean	do_not_rotate;
 
 	// monster AI

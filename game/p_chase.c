@@ -79,7 +79,7 @@ void ChasecamStart (edict_t *ent)
 	//MakeFakeCrosshair(ent);
 
 	// remove reflection of real player, if any
-	DeleteReflection(ent,-1);
+	DeleteReflection (ent, -1);
 }
 
 /* ent = chasecam */

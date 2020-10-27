@@ -1049,7 +1049,7 @@ void COM_StripExtension (char *in, char *out, size_t outSize)
 /*	while (*in && *in != '.')
 		*out++ = *in++;
 	*out = 0;
-	*/
+*/
 	char	*s, *last;
 
 	s = last = in + strlen(in);
@@ -1134,7 +1134,7 @@ void COM_FilePath (char *in, char *out, size_t outSize)
 	while (s != in && *s != '/')
 		s--;
 
-//	strncpy (out,in, s-in);
+//	strncpy (out, in, s-in);
 //	out[s-in] = 0;
 	Q_strncpyz (out, in, outSize);
 	if (s-in < outSize)

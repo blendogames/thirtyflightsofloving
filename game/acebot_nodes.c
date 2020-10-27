@@ -748,13 +748,13 @@ void ACEND_SaveNodes (void)
 	char	dirname[MAX_OSPATH] = "";
 	char	filename[MAX_OSPATH] = "";
 //	char	filename[60];
-	int		i, j;
+	int		i,j;
 	int		version = 1;
 	
 	// Resolve paths
 	ACEND_ResolveAllPaths();
 
-	safe_bprintf(PRINT_MEDIUM,"Saving node table...");
+	safe_bprintf(PRINT_MEDIUM, "Saving node table...");
 
 	// Knightmare- rewrote this to use fs_savegamedir
 	// create nav dir if needed
@@ -770,15 +770,15 @@ void ACEND_SaveNodes (void)
 	if ((pOut = fopen(filename, "wb" )) == NULL)
 		return; // bail
 	
-	fwrite(&version,sizeof(int), 1, pOut); // write version
-	fwrite(&numnodes,sizeof(int), 1, pOut); // write count
-	fwrite(&num_items,sizeof(int), 1, pOut); // write facts count
+	fwrite(&version, sizeof(int), 1, pOut); // write version
+	fwrite(&numnodes, sizeof(int), 1, pOut); // write count
+	fwrite(&num_items, sizeof(int), 1, pOut); // write facts count
 	
 	fwrite(nodes, sizeof(node_t), numnodes, pOut); // write nodes
 	
 	for (i=0; i<numnodes; i++)
 		for (j=0; j<numnodes; j++)
-			fwrite(&path_table[i][j],sizeof(short int),1,pOut); // write count
+			fwrite(&path_table[i][j] ,sizeof(short int), 1, pOut); // write count
 		
 	fwrite(item_table,sizeof(item_table_t),num_items,pOut); 		// write out the fact table
 
@@ -797,7 +797,7 @@ void ACEND_LoadNodes (void)
 	char	tempname[MAX_QPATH] = "";
 	char	filename[MAX_OSPATH] = "";
 //	char	filename[60];
-	int	version;
+	int		version;
 
 	// Knightmare- rewote this
 	Com_sprintf (tempname, sizeof(tempname), "nav/%s.nod", level.mapname);
@@ -828,14 +828,14 @@ void ACEND_LoadNodes (void)
 	{
 		safe_bprintf(PRINT_MEDIUM,"ACE: Loading node table...");
 
-		fread(&numnodes,sizeof(int),1,pIn); // read count
-		fread(&num_items,sizeof(int),1,pIn); // read facts count
+		fread(&numnodes, sizeof(int), 1, pIn); // read count
+		fread(&num_items, sizeof(int) ,1, pIn); // read facts count
 		
-		fread(nodes,sizeof(node_t),numnodes,pIn);
+		fread(nodes, sizeof(node_t), numnodes, pIn);
 
-		for (i=0;i<numnodes;i++)
-			for (j=0;j<numnodes;j++)
-				fread(&path_table[i][j],sizeof(short int),1,pIn); // write count
+		for (i=0; i<numnodes; i++)
+			for (j=0; j<numnodes; j++)
+				fread(&path_table[i][j], sizeof(short int), 1, pIn); // write count
 	
 		// Knightmare- is this needed?  It's all re-built anyway, and may cause problems.
 		// The item_table array is better left blank.

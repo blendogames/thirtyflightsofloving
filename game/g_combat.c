@@ -420,7 +420,7 @@ void CallMyFriends (edict_t *targ, edict_t *attacker)
 					// they're both monsters but one is AI_GOOD_GUY and the other is not,
 					// or we've turned the game into a free-for-all with a target_monsterbattle
 					teammate = G_Find(NULL,FOFS(dmgteam),targ->dmgteam);
-					while(teammate)
+					while (teammate)
 					{
 						if (teammate != targ)
 						{
@@ -459,7 +459,7 @@ void CallMyFriends (edict_t *targ, edict_t *attacker)
 //		trace_t	tr;
 		edict_t	*teammate = NULL;
 		teammate = G_Find(NULL,FOFS(dmgteam),"player");
-		while(teammate)
+		while (teammate)
 		{
 			if ((teammate->health > 0) && !(teammate->monsterinfo.aiflags & AI_CHASE_THING) && (teammate != attacker))
 			{
@@ -485,11 +485,11 @@ void CallMyFriends (edict_t *targ, edict_t *attacker)
 	if (attacker->client && (targ->svflags & SVF_MONSTER)
 		&& UseRegularGoodGuyFlag(targ) && (targ->spawnflags & SF_MONSTER_GOODGUY))
 	{
-		if (!(targ->monsterinfo.aiflags & AI_ACTOR) || (targ->spawnflags & SF_ACTOR_BAD_GUY))
+		if ( !(targ->monsterinfo.aiflags & AI_ACTOR) || (targ->spawnflags & SF_ACTOR_BAD_GUY) )
 		{
 			targ->spawnflags &= ~SF_MONSTER_GOODGUY;
 			targ->monsterinfo.aiflags &= ~(AI_GOOD_GUY + AI_FOLLOW_LEADER);
-			if (targ->dmgteam && !Q_stricmp(targ->dmgteam,"player"))
+			if (targ->dmgteam && !Q_stricmp(targ->dmgteam, "player"))
 				targ->dmgteam = NULL;
 		}
 	}
@@ -825,7 +825,7 @@ void T_Damage (edict_t *in_targ, edict_t *inflictor, edict_t *in_attacker, vec3_
 
 	// If targ is a fake player for the real player viewing camera, get that player
 	// out of the camera and do the damage to him
-	if (!Q_stricmp(targ->classname,"camplayer"))
+	if (!Q_stricmp(targ->classname, "camplayer"))
 	{
 		if (targ->target_ent && targ->target_ent->client && targ->target_ent->client->spycam)
 		{
@@ -1000,7 +1000,7 @@ void T_Damage (edict_t *in_targ, edict_t *inflictor, edict_t *in_attacker, vec3_
 		psave = asave = 0;
 	}
 //ZOID
-	//Knightmare- falling doesn't damage armor
+	// Knightmare- falling doesn't damage armor
 	else if (mod == MOD_FALLING && !falling_armor_damage->value)
 	{
 		psave = 0;

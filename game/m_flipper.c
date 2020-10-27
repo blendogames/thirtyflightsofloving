@@ -279,7 +279,7 @@ void flipper_dead (edict_t *self)
 	M_FlyCheck (self);
 
 	// Lazarus monster fade
-	if(world->effects & FX_WORLDSPAWN_CORPSEFADE)
+	if (world->effects & FX_WORLDSPAWN_CORPSEFADE)
 	{
 		self->think=FadeDieSink;
 		self->nextthink=level.time+corpse_fadetime->value;
@@ -395,8 +395,6 @@ void SP_monster_flipper (edict_t *self)
 		G_FreeEdict (self);
 		return;
 	}
-	self->class_id = ENTITY_MONSTER_FLIPPER;
-	self->spawnflags |= SF_MONSTER_KNOWS_MIRRORS;
 
 	sound_pain1		= gi.soundindex ("flipper/flppain1.wav");	
 	sound_pain2		= gi.soundindex ("flipper/flppain2.wav");	
@@ -422,11 +420,11 @@ void SP_monster_flipper (edict_t *self)
 	VectorSet (self->maxs, 16, 16, 32);
 
 	// Lazarus: mapper-configurable health
-	if(!self->health)
+	if (!self->health)
 		self->health = 50;
-	if(!self->gib_health)
+	if (!self->gib_health)
 		self->gib_health = -30;
-	if(!self->mass)
+	if (!self->mass)
 		self->mass = 100;
 
 	self->pain = flipper_pain;
@@ -442,15 +440,17 @@ void SP_monster_flipper (edict_t *self)
 	gi.linkentity (self);
 
 	self->monsterinfo.currentmove = &flipper_move_stand;	
-	if(!self->monsterinfo.flies)
+	if (!self->monsterinfo.flies)
 		self->monsterinfo.flies = 0.90;
-	if(self->health < 0)
+	if (self->health < 0)
 	{
 		mmove_t	*deathmoves[] = {&flipper_move_death,
 								 NULL};
 		M_SetDeath(self,(mmove_t **)&deathmoves);
 	}
 	self->common_name = "Barracuda Shark";
+	self->class_id = ENTITY_MONSTER_FLIPPER;
+	self->spawnflags |= SF_MONSTER_KNOWS_MIRRORS;
 
 	self->monsterinfo.scale = MODEL_SCALE;
 

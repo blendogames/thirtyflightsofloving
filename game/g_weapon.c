@@ -74,7 +74,7 @@ qboolean fire_hit (edict_t *self, vec3_t aim, int damage, int kick)
 	vec3_t		dir;
 
 	// Lazarus: Paranoia check
-	if(!self->enemy)
+	if (!self->enemy)
 		return false;
 
 	//see if enemy is in range
@@ -378,9 +378,9 @@ void blaster_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *
 
 		gi.multicast (self->s.origin, MULTICAST_PVS);
 
-		if(level.num_reflectors)
+		if (level.num_reflectors)
 		{
-			if(!plane)
+			if (!plane)
 				ReflectSparks(tempevent,self->s.origin,vec3_origin);
 			else
 				ReflectSparks(tempevent,self->s.origin,plane->normal);
@@ -439,6 +439,7 @@ void fire_blaster (edict_t *self, vec3_t start, vec3_t dir, int damage, int spee
 	bolt->think = G_FreeEdict;
 	bolt->dmg = damage;
 	bolt->classname = "bolt";
+	bolt->class_id = ENTITY_BOLT;
 	if (hyper)
 		bolt->spawnflags = 1;
 	gi.linkentity (bolt);
@@ -641,7 +642,7 @@ void Grenade_Evade (edict_t *monster)
 	gi.WritePosition (origin);
 	gi.multicast (ent->s.origin, MULTICAST_PHS);
 
-	if(level.num_reflectors)
+	if (level.num_reflectors)
 		ReflectExplosion (type,origin);
 
 	G_FreeEdict (ent);
@@ -711,7 +712,7 @@ void fire_grenade (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int s
 	VectorScale (aimdir, speed, grenade->velocity);
 	// Lazarus - keep same vertical boost for players, but monsters do a better job
 	//           of calculating aim direction, so throw that out
-	if(self->client)
+	if (self->client)
 		VectorMA (grenade->velocity, 200 + crandom() * 10.0, up, grenade->velocity);
 	else
 		VectorMA (grenade->velocity, crandom() * 10.0, up, grenade->velocity);
@@ -725,7 +726,7 @@ void fire_grenade (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int s
 	//Knightmare- add player's base velocity to grenade
 	if (add_velocity_throw->value && self->client)
 		VectorAdd (grenade->velocity, self->velocity, grenade->velocity);
-	else if(self->groundentity)
+	else if (self->groundentity)
 		VectorAdd (grenade->velocity, self->groundentity->velocity, grenade->velocity);
 
 
@@ -747,6 +748,7 @@ void fire_grenade (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int s
 	grenade->dmg = damage;
 	grenade->dmg_radius = damage_radius;
 	grenade->classname = "grenade";
+	grenade->class_id = ENTITY_GRENADE;
 
 	Grenade_Add_To_Chain (grenade);
 
@@ -776,7 +778,7 @@ void fire_grenade2 (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int 
 	//Knightmare- add player's base velocity to grenade
 	if (add_velocity_throw->value && self->client)
 		VectorAdd (grenade->velocity, self->velocity, grenade->velocity);
-	else if(self->groundentity)
+	else if (self->groundentity)
 		VectorAdd (grenade->velocity, self->groundentity->velocity, grenade->velocity);
 	
 	VectorSet (grenade->avelocity, 300, 300, 300);
@@ -794,6 +796,7 @@ void fire_grenade2 (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int 
 	grenade->dmg = damage;
 	grenade->dmg_radius = damage_radius;
 	grenade->classname = "hgrenade";
+	grenade->class_id = ENTITY_HANDGRENADE;
 	if (held)
 		grenade->spawnflags = 3;
 	else
@@ -815,7 +818,7 @@ void fire_grenade2 (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int 
 
 void grenade_delayed_start (edict_t *grenade)
 {
-	if(g_edicts[1].linkcount)
+	if (g_edicts[1].linkcount)
 	{
 		VectorScale(grenade->movedir,grenade->moveinfo.speed,grenade->velocity);
 		grenade->movetype  = MOVETYPE_BOUNCE;
@@ -833,7 +836,7 @@ void SP_grenade (edict_t *grenade)
 	grenade->touch = Grenade_Touch;
 
 	// For SP, freeze grenade until player spawns in
-	if(game.maxclients == 1)
+	if (game.maxclients == 1)
 	{
 		grenade->movetype  = MOVETYPE_NONE;
 		VectorCopy(grenade->velocity,grenade->movedir);
@@ -854,13 +857,13 @@ void SP_grenade (edict_t *grenade)
 }
 void handgrenade_delayed_start (edict_t *grenade)
 {
-	if(g_edicts[1].linkcount)
+	if (g_edicts[1].linkcount)
 	{
 		VectorScale(grenade->movedir,grenade->moveinfo.speed,grenade->velocity);
 		grenade->movetype  = MOVETYPE_BOUNCE;
 		grenade->nextthink = level.time + 2.5;
 		grenade->think     = Grenade_Explode;
-		if(grenade->owner)
+		if (grenade->owner)
 			gi.sound (grenade->owner, CHAN_WEAPON, gi.soundindex ("weapons/hgrent1a.wav"), 1, ATTN_NORM, 0);
 		gi.linkentity(grenade);
 	}
@@ -874,7 +877,7 @@ void SP_handgrenade (edict_t *grenade)
 	grenade->touch = Grenade_Touch;
 
 	// For SP, freeze grenade until player spawns in
-	if(game.maxclients == 1)
+	if (game.maxclients == 1)
 	{
 		grenade->movetype  = MOVETYPE_NONE;
 		VectorCopy(grenade->velocity,grenade->movedir);
@@ -901,23 +904,23 @@ void homing_think (edict_t *self)
 	vec3_t	dir, target;
 	vec_t	speed;
 
-	if(level.time > self->endtime)
+	if (level.time > self->endtime)
 	{
 		if (self->owner->client && (self->owner->client->homing_rocket == self))
 			self->owner->client->homing_rocket = NULL;
 		BecomeExplosion1(self);
 		return;
 	}
-	if(self->enemy && self->enemy->inuse)
+	if (self->enemy && self->enemy->inuse)
 	{
 		VectorMA(self->enemy->absmin,0.5,self->enemy->size,target);
 		tr = gi.trace(self->s.origin,vec3_origin,vec3_origin,target,self,MASK_OPAQUE);
-		if(tr.fraction == 1)
+		if (tr.fraction == 1)
 		{
 			// target in view; apply correction
 			VectorSubtract(target, self->s.origin, dir);
 			VectorNormalize(dir);
-			if(self->enemy->client)
+			if (self->enemy->client)
 				VectorScale(dir, 0.8+0.1*skill->value, dir);
 			else
 				VectorScale(dir, 1.0, dir);  // 0=no correction, 1=turn on a dime
@@ -928,13 +931,13 @@ void homing_think (edict_t *self)
 			speed = VectorLength(self->velocity);
 			VectorScale(dir, speed, self->velocity);
 
-			if(level.time >= self->starttime && self->starttime > 0)
+			if (level.time >= self->starttime && self->starttime > 0)
 			{
-				if(level.time > self->owner->fly_sound_debounce_time)
+				if (level.time > self->owner->fly_sound_debounce_time)
 				{
 					// this prevents multiple lockon sounds resulting from
 					// monsters firing multiple rockets in quick succession
-					if(self->enemy->client)
+					if (self->enemy->client)
 						gi.sound (self->enemy, CHAN_AUTO, gi.soundindex ("weapons/homing/lockon.wav"), 1, ATTN_NORM, 0);
 					self->owner->fly_sound_debounce_time = level.time + 2.0;
 				}
@@ -992,34 +995,34 @@ void Rocket_Evade (edict_t *rocket, vec3_t	dir, float speed)
 		rocket_dist = VectorNormalize(rocket_vec);
 
 		// Not much hope in evading if distance is < 1K or so.
-		if(rocket_dist < 1024)
+		if (rocket_dist < 1024)
 			continue;
 
 		// Find best escape route.
 		best_r = 9999;
-		for(i=0; i<8; i++)
+		for (i=0; i<8; i++)
 		{
 			yaw = anglemod( i*45 );
 			forward[0] = cos( DEG2RAD(yaw) );
 			forward[1] = sin( DEG2RAD(yaw) );
 			forward[2] = 0;
 			dot = DotProduct(forward,dir);
-			if((dot > 0.96) || (dot < -0.96))
+			if ((dot > 0.96) || (dot < -0.96))
 				continue;
 			// Estimate of required distance to run. This is conservative.
 			r = rocket->dmg_radius + rocket_dist*DotProduct(forward,rocket_vec) + ent->size[0] + 16;
-			if( r < best_r )
+			if ( r < best_r )
 			{
 				VectorMA(ent->s.origin,r,forward,pos);
 				tr = gi.trace(ent->s.origin,ent->mins,ent->maxs,pos,ent,MASK_MONSTERSOLID);
-				if(tr.fraction < 1.0)
+				if (tr.fraction < 1.0)
 					continue;
 				best_r = r;
 				best_yaw = yaw;
 				VectorCopy(tr.endpos,best_pos);
 			}
 		}
-		if(best_r < 9000)
+		if (best_r < 9000)
 		{
 			edict_t	*thing = SpawnThing();
 			VectorCopy(best_pos,thing->s.origin);
@@ -1072,7 +1075,7 @@ void rocket_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *su
 			if ((surf) && !(surf->flags & (SURF_WARP|SURF_TRANS33|SURF_TRANS66|SURF_FLOWING)))
 			{
 				n = rand() % 5;
-				while(n--)
+				while (n--)
 					ThrowDebris (ent, "models/objects/debris2/tris.md2", 2, ent->s.origin, 0, 0);
 			}
 		}
@@ -1093,7 +1096,7 @@ void rocket_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *su
 	gi.WritePosition (origin);
 	gi.multicast (ent->s.origin, MULTICAST_PHS);
 
-	if(level.num_reflectors)
+	if (level.num_reflectors)
 		ReflectExplosion(type,origin);
 
 	G_FreeEdict (ent);
@@ -1121,7 +1124,7 @@ void rocket_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *su
 	gi.WritePosition (origin);
 	gi.multicast (ent->s.origin, MULTICAST_PVS);
 
-	if(level.num_reflectors)
+	if (level.num_reflectors)
 		ReflectExplosion(type,origin);
 
 	G_FreeEdict (ent);
@@ -1144,7 +1147,7 @@ void fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed
 	vectoangles (dir, rocket->s.angles);
 	VectorScale (dir, speed, rocket->velocity);
 	// Lazarus: add shooter's lateral velocity
-	if(rocket_strafe->value)
+	if (rocket_strafe->value)
 	{
 		vec3_t	right, up;
 		vec3_t	lateral_speed;
@@ -1188,6 +1191,7 @@ void fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed
 
 		rocket->enemy     = home_target;
 		rocket->classname = "homing rocket";
+		rocket->class_id = ENTITY_ROCKET;
 		rocket->nextthink = level.time + FRAMETIME;
 		rocket->think = homing_think;
 		rocket->starttime = level.time + 0.3; // play homing sound on 3rd frame
@@ -1203,6 +1207,7 @@ void fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed
 	else
 	{
 		rocket->classname = "rocket";
+		rocket->class_id = ENTITY_ROCKET;
 		rocket->nextthink = level.time + 8000.0f/speed;
 		rocket->think = G_FreeEdict;
 		Rocket_Evade (rocket, dir, speed);
@@ -1216,7 +1221,7 @@ void fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed
 
 void rocket_delayed_start (edict_t *rocket)
 {
-	if(g_edicts[1].linkcount)
+	if (g_edicts[1].linkcount)
 	{
 		VectorScale(rocket->movedir,rocket->moveinfo.speed,rocket->velocity);
 		rocket->nextthink = level.time + 8000/rocket->moveinfo.speed;
@@ -1237,11 +1242,11 @@ void SP_rocket (edict_t *rocket)
 	AngleVectors(rocket->s.angles,dir,NULL,NULL);
 	VectorCopy (dir, rocket->movedir);
 	rocket->moveinfo.speed = VectorLength(rocket->velocity);
-	if(rocket->moveinfo.speed <= 0)
+	if (rocket->moveinfo.speed <= 0)
 		rocket->moveinfo.speed = 650;
 
 	// For SP, freeze rocket until player spawns in
-	if(game.maxclients == 1)
+	if (game.maxclients == 1)
 	{
 		VectorClear(rocket->velocity);
 		rocket->think = rocket_delayed_start;
@@ -1371,7 +1376,7 @@ void bfg_explode (edict_t *self)
 			gi.WritePosition (ent->s.origin);
 			gi.multicast (ent->s.origin, MULTICAST_PHS);
 
-			if(level.num_reflectors)
+			if (level.num_reflectors)
 				ReflectExplosion(TE_BFG_EXPLOSION,ent->s.origin);
 
 			T_Damage (ent, self, self->owner, self->velocity, ent->s.origin, vec3_origin, (int)points, 0, DAMAGE_ENERGY, MOD_BFG_EFFECT);
@@ -1474,7 +1479,7 @@ void bfg_think (edict_t *self)
 		ignore = self;
 		VectorCopy (self->s.origin, start);
 		VectorMA (start, 2048, dir, end);
-		while(1)
+		while (1)
 		{
 			tr = gi.trace (start, NULL, NULL, end, ignore, CONTENTS_SOLID|CONTENTS_MONSTER|CONTENTS_DEADMONSTER);
 
@@ -1508,7 +1513,7 @@ void bfg_think (edict_t *self)
 		gi.WritePosition (tr.endpos);
 		gi.multicast (self->s.origin, MULTICAST_PHS);
 
-		if(level.num_reflectors)
+		if (level.num_reflectors)
 			ReflectTrail(TE_BFG_LASER,self->s.origin,tr.endpos);
 	}
 
@@ -1574,7 +1579,7 @@ qboolean AimGrenade (edict_t *self, vec3_t start, vec3_t target, vec_t speed, ve
 	VectorSubtract(aim_point,self->s.origin,from_origin);
 	VectorSubtract(aim_point, start, from_muzzle);
 
-	if(self->svflags & SVF_MONSTER)
+	if (self->svflags & SVF_MONSTER)
 	{
 		VectorCopy(from_muzzle,aim);
 		VectorNormalize(aim);
@@ -1593,7 +1598,7 @@ qboolean AimGrenade (edict_t *self, vec3_t start, vec3_t target, vec_t speed, ve
 	// done. Actually now that I write this down and think about it... should
 	// probably check straight up to make sure grenade will actually reach the
 	// target.
-	if( (aim[2] == 1.0) || (aim[2] == -1.0))
+	if ( (aim[2] == 1.0) || (aim[2] == -1.0))
 		return true;
 
 	// horizontal distance to target from muzzle
@@ -1605,7 +1610,7 @@ qboolean AimGrenade (edict_t *self, vec3_t start, vec3_t target, vec_t speed, ve
 	t = x/vx;
 	// if flight time is less than one frame, no way grenade will drop much,
 	// shoot the sucker now.
-	if(t < FRAMETIME)
+	if (t < FRAMETIME)
 		return true;
 	// in that time, grenade will drop this much:
 	drop = 0.5*sv_gravity->value*t*t;
@@ -1614,7 +1619,7 @@ qboolean AimGrenade (edict_t *self, vec3_t start, vec3_t target, vec_t speed, ve
 
 	// if we're fairly close and we'll hit target at current angle,
 	// no need for all this, just shoot it
-	if( (x < 128) && (fabs(v_error) < 16) )
+	if ( (x < 128) && (fabs(v_error) < 16) )
 		return true;
 
 	last_error = 100000.;
@@ -1623,12 +1628,12 @@ qboolean AimGrenade (edict_t *self, vec3_t start, vec3_t target, vec_t speed, ve
 	// Unfortunately there is no closed-form solution for this problem,
 	// so we creep up on an answer and balk if it takes more than 
 	// 10 iterations to converge to the tolerance we'll accept.
-	for(i=0; i<10 && fabs(v_error) > 4 && fabs(v_error) < fabs(last_error); i++)
+	for (i=0; i<10 && fabs(v_error) > 4 && fabs(v_error) < fabs(last_error); i++)
 	{
 		last_error = v_error;
 		aim[2] = cosa * (yo + drop)/xo;
 		VectorNormalize(aim);
-		if(!(self->svflags & SVF_MONSTER))
+		if (!(self->svflags & SVF_MONSTER))
 		{
 			vectoangles(aim,angles);
 			AngleVectors(angles, forward, right, up);
@@ -1642,16 +1647,16 @@ qboolean AimGrenade (edict_t *self, vec3_t start, vec3_t target, vec_t speed, ve
 		drop = 0.5*sv_gravity->value*t*t;
 		y = speed*aim[2]*t - drop;
 		v_error = target[2] - start[2] - y;
-		if(fabs(v_error) < fabs(last_error))
+		if (fabs(v_error) < fabs(last_error))
 			VectorCopy(aim,last_aim);
 	}
 	
-	if(i >= 10 || v_error > 64)
+	if (i >= 10 || v_error > 64)
 		return false;
-	if(fabs(v_error) > fabs(last_error))
+	if (fabs(v_error) > fabs(last_error))
 	{
 		VectorCopy(last_aim,aim);
-		if(!(self->svflags & SVF_MONSTER))
+		if (!(self->svflags & SVF_MONSTER))
 		{
 			vectoangles(aim,angles);
 			AngleVectors(angles, forward, right, up);
@@ -1665,14 +1670,14 @@ qboolean AimGrenade (edict_t *self, vec3_t start, vec3_t target, vec_t speed, ve
 	// top of a doorway or other obstruction. If he WOULD do that, then figure out 
 	// the max elevation angle that will get the grenade through the door, and 
 	// hope we get a good bounce.
-	if( (start[2] - target[2] < 160) &&
+	if ( (start[2] - target[2] < 160) &&
 		(start[2] - target[2] > -16)   )
 	{
 		trace_t	tr;
 		vec3_t	dist;
 		
 		tr = gi.trace(start,vec3_origin,vec3_origin,aim_point,self,MASK_SOLID);
-		if( (tr.fraction < 1.0) && (!self->enemy || (tr.ent != self->enemy) )) {
+		if ( (tr.fraction < 1.0) && (!self->enemy || (tr.ent != self->enemy) )) {
 			// OK... the aim vector hit a solid, but would the grenade actually hit?
 			int		contents;
 			cosa = sqrt(aim[0]*aim[0] + aim[1]*aim[1]);
@@ -1687,12 +1692,12 @@ qboolean AimGrenade (edict_t *self, vec3_t start, vec3_t target, vec_t speed, ve
 			tr.endpos[0] += aim[0];
 			tr.endpos[1] += aim[1];
 			contents = gi.pointcontents(tr.endpos);
-			while((contents & MASK_SOLID) && (aim_point[2] > target[2])) {
+			while ((contents & MASK_SOLID) && (aim_point[2] > target[2])) {
 				aim_point[2] -= 8.0;
 				VectorSubtract(aim_point,self->s.origin,from_origin);
 				VectorCopy(from_origin,aim);
 				VectorNormalize(aim);
-				if(!(self->svflags & SVF_MONSTER))
+				if (!(self->svflags & SVF_MONSTER))
 				{
 					vectoangles(aim,angles);
 					AngleVectors(angles, forward, right, up);
@@ -1700,7 +1705,7 @@ qboolean AimGrenade (edict_t *self, vec3_t start, vec3_t target, vec_t speed, ve
 					VectorSubtract(aim_point,start,from_muzzle);
 				}
 				tr = gi.trace(start,vec3_origin,vec3_origin,aim_point,self,MASK_SOLID);
-				if(tr.fraction < 1.0) {
+				if (tr.fraction < 1.0) {
 					cosa = sqrt(aim[0]*aim[0] + aim[1]*aim[1]);
 					vx = speed * cosa;
 					VectorSubtract(tr.endpos,start,dist);

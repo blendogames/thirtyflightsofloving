@@ -136,6 +136,8 @@ void SP_model_spawn (edict_t *ent)
 		return;
 	}
 
+	ent->class_id = ENTITY_MODEL_SPAWN;
+
 	switch (ent->solidstate)
 	{
 		case 1 : ent->solid = SOLID_NOT; ent->movetype = MOVETYPE_NONE; break;

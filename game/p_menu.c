@@ -188,7 +188,7 @@ void PMenu_Update(edict_t *ent)
 	hnd = ent->client->menu;
 
 //	strncpy(string, "xv 32 yv 8 picn inventory ");
-	Q_strncpyz(string, "xv 32 yv 8 picn inventory ", sizeof(string));
+	Q_strncpyz (string, "xv 32 yv 8 picn inventory ", sizeof(string));
 
 	for (i = 0, p = hnd->entries; i < hnd->num; i++, p++) {
 		if (!p->text || !*(p->text))

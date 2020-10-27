@@ -35,10 +35,12 @@ void SP_info_player_coop (edict_t *ent);
 void SP_info_player_intermission (edict_t *ent);
 
 void SP_func_plat (edict_t *ent);
+void SP_func_plat2 (edict_t *ent);	// Knightmare added
 void SP_func_rotating (edict_t *ent);
 void SP_func_button (edict_t *ent);
 void SP_func_door (edict_t *ent);
 void SP_func_door_secret (edict_t *ent);
+void SP_func_door_secret2 (edict_t *ent);	// Knightmare added
 void SP_func_door_rotating (edict_t *ent);
 void SP_func_water (edict_t *ent);
 void SP_func_train (edict_t *ent);
@@ -56,12 +58,16 @@ void SP_trigger_once (edict_t *ent);
 void SP_trigger_multiple (edict_t *ent);
 void SP_trigger_relay (edict_t *ent);
 void SP_trigger_push (edict_t *ent);
+void SP_trigger_push_bbox (edict_t *ent);
 void SP_trigger_hurt (edict_t *ent);
+void SP_trigger_hurt_bbox (edict_t *ent);
 void SP_trigger_key (edict_t *ent);
 void SP_trigger_counter (edict_t *ent);
 void SP_trigger_elevator (edict_t *ent);
 void SP_trigger_gravity (edict_t *ent);
+void SP_trigger_gravity_bbox (edict_t *ent);
 void SP_trigger_monsterjump (edict_t *ent);
+void SP_trigger_monsterjump_bbox (edict_t *ent);
 
 void SP_target_temp_entity (edict_t *ent);
 void SP_target_speaker (edict_t *ent);
@@ -204,14 +210,20 @@ void SP_tremor_trigger_multiple (edict_t *self);
 void SP_trigger_bbox (edict_t *self);
 void SP_trigger_disguise (edict_t *self);
 void SP_trigger_fog (edict_t *self);
+void SP_trigger_fog_bbox (edict_t *self);
 void SP_trigger_inside (edict_t *self);
+void SP_trigger_inside_bbox (edict_t *self);
 void SP_trigger_look (edict_t *self);
 void SP_trigger_mass (edict_t *self);
+void SP_trigger_mass_bbox (edict_t *self);
 void SP_trigger_scales (edict_t *self);
+void SP_trigger_scales_bbox (edict_t *self);
 void SP_trigger_switch (edict_t *self);
 void SP_trigger_speaker (edict_t *self);
 void SP_trigger_teleporter (edict_t *self);
+void SP_trigger_teleporter_bbox (edict_t *self);
 void SP_trigger_transition (edict_t *self);
+void SP_trigger_transition_bbox (edict_t *self);
 
 // Knightmare- entities that use origin-based train pathing
 void SP_func_train_origin (edict_t *self);
@@ -247,9 +259,11 @@ spawn_t	spawns[] = {
 //ZOID
 
 	{"func_plat", SP_func_plat},
+	{"func_plat2", SP_func_plat2},	// Knightmare added
 	{"func_button", SP_func_button},
 	{"func_door", SP_func_door},
 	{"func_door_secret", SP_func_door_secret},
+	{"func_door_secret2", SP_func_door_secret2},	// Knightmare added
 	{"func_door_rotating", SP_func_door_rotating},
 	{"func_rotating", SP_func_rotating},
 	{"func_train", SP_func_train},
@@ -288,12 +302,16 @@ spawn_t	spawns[] = {
 	{"trigger_counter", SP_trigger_counter},
 	{"trigger_elevator", SP_trigger_elevator},
 	{"trigger_gravity", SP_trigger_gravity},
+	{"trigger_gravity_bbox", SP_trigger_gravity_bbox},
 	{"trigger_hurt", SP_trigger_hurt},
+	{"trigger_hurt_bbox", SP_trigger_hurt_bbox},
 	{"trigger_key", SP_trigger_key},
 	{"trigger_once", SP_trigger_once},
 	{"trigger_monsterjump", SP_trigger_monsterjump},
+	{"trigger_monsterjump_bbox", SP_trigger_monsterjump_bbox},
 	{"trigger_multiple", SP_trigger_multiple},
 	{"trigger_push", SP_trigger_push},
+	{"trigger_push_bbox", SP_trigger_push_bbox},
 	{"trigger_relay", SP_trigger_relay},
 
 	{"viewthing", SP_viewthing},
@@ -427,14 +445,20 @@ spawn_t	spawns[] = {
 	{"trigger_bbox", SP_trigger_bbox},
 	{"trigger_disguise", SP_trigger_disguise},
 	{"trigger_fog", SP_trigger_fog},
+	{"trigger_fog_bbox", SP_trigger_fog_bbox},
 	{"trigger_inside", SP_trigger_inside},
+	{"trigger_inside_bbox", SP_trigger_inside_bbox},
 	{"trigger_look", SP_trigger_look},
 	{"trigger_mass", SP_trigger_mass},
+	{"trigger_mass_bbox", SP_trigger_mass_bbox},
 	{"trigger_scales", SP_trigger_scales},
+	{"trigger_scales_bbox", SP_trigger_scales_bbox},
 	{"trigger_speaker", SP_trigger_speaker},
 	{"trigger_switch", SP_trigger_switch},
 	{"trigger_teleporter", SP_trigger_teleporter},
+	{"trigger_teleporter_bbox", SP_trigger_teleporter_bbox},
 	{"trigger_transition", SP_trigger_transition},
+	{"trigger_transition_bbox", SP_trigger_transition_bbox},
 
 // Knightmare- entities that use origin-based train pathing
 	{"func_train_origin", SP_func_train_origin},
@@ -514,6 +538,21 @@ void ED_CallSpawn (edict_t *ent)
 	}
 	gi.dprintf ("%s doesn't have a spawn function\n", ent->classname);
 	G_FreeEdict(ent);
+}
+
+void ReInitialize_Entity (edict_t *ent)
+{
+	spawn_t	*s;
+
+	// check normal spawn functions
+	for (s=spawns; s->name; s++)
+	{
+		if (!strcmp(s->name, ent->classname))
+		{	// found it
+			s->spawn (ent);
+			return;
+		}
+	}
 }
 
 /*
@@ -665,7 +704,7 @@ disk, and then from a pak file.
 */
 qboolean LoadAliasFile (char *name)
 {
-	char aliasfilename[MAX_QPATH] = "";
+	char aliasfilename[MAX_OSPATH] = "";
 
 	alias_from_pak = false;
 
@@ -1035,7 +1074,7 @@ void LoadTransitionEnts (void)
 		gi.dprintf("==== LoadTransitionEnts ====\n");
 	if (game.transition_ents)
 	{
-		char		t_file[MAX_QPATH];
+		char		t_file[MAX_OSPATH];
 		int			i, j;
 		FILE		*f;
 		vec3_t		v_spawn;
@@ -1059,7 +1098,7 @@ void LoadTransitionEnts (void)
 		trans_ent_filename (t_file, sizeof(t_file));
 		f = fopen(t_file,"rb");
 		if (!f)
-			gi.error("LoadTransitionEnts: Cannot open %s\n",t_file);
+			gi.error("LoadTransitionEnts: Cannot open %s\n", t_file);
 		else
 		{
 			for (i=0; i<game.transition_ents; i++)
@@ -1165,6 +1204,29 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 
 	ent = NULL;
 	inhibit = 0;
+
+	// Knightmare- set maptype for pack-specific changes
+	if ( IsIdMap() ) {
+		level.maptype = MAPTYPE_ID;
+	//	gi.dprintf ("Maptype is Id.\n");
+	}
+	else if ( IsXatrixMap() ) {
+		level.maptype = MAPTYPE_XATRIX;
+	//	gi.dprintf ("Maptype is Xatrix.\n");
+	}
+	else if ( IsRogueMap() ) {
+		level.maptype = MAPTYPE_ROGUE;
+	//	gi.dprintf ("Maptype is Rogue.\n");
+	}
+	else if ( IsZaeroMap() ) {
+		level.maptype = MAPTYPE_ZAERO;
+	//	gi.dprintf ("Maptype is Zaero.\n");
+	}
+	else {
+		level.maptype = MAPTYPE_CUSTOM;
+	//	gi.dprintf ("Maptype is Custom.\n");
+	}
+	// end Knightmare
 
 	// Knightamre- load the entity alias script file
 	LoadAliasData();
@@ -1317,11 +1379,25 @@ removeflags:
 		// allows us to have movewith parent with same targetname as
 		// other entities
 		while (ent->movewith_ent &&
-			(Q_stricmp(ent->movewith_ent->classname,"func_train")     &&
-			 Q_stricmp(ent->movewith_ent->classname,"model_train")    &&
-			 Q_stricmp(ent->movewith_ent->classname,"func_door")      &&
-			 Q_stricmp(ent->movewith_ent->classname,"func_vehicle")   &&
-			 Q_stricmp(ent->movewith_ent->classname,"func_tracktrain")  ))
+			(Q_stricmp(ent->movewith_ent->classname, "func_train")			&&
+			 Q_stricmp(ent->movewith_ent->classname, "model_train")			&&
+			 Q_stricmp(ent->movewith_ent->classname, "func_door")			&&
+		
+			// Knightmare added
+			 Q_stricmp(ent->movewith_ent->classname, "func_door_rotating")	&&
+			 Q_stricmp(ent->movewith_ent->classname, "func_plat")			&&
+			 Q_stricmp(ent->movewith_ent->classname, "func_plat2")			&&
+			 Q_stricmp(ent->movewith_ent->classname, "func_rotating")		&&
+			 Q_stricmp(ent->movewith_ent->classname, "func_button")			&&
+			 Q_stricmp(ent->movewith_ent->classname, "func_door_secret")	&&
+			 Q_stricmp(ent->movewith_ent->classname, "func_door_secret2")	&&
+			 Q_stricmp(ent->movewith_ent->classname, "func_door_swinging")	&&
+			 Q_stricmp(ent->movewith_ent->classname, "func_breakaway")		&&
+			 Q_stricmp(ent->movewith_ent->classname, "func_trackchange")	&&
+			// end Knightmare
+		
+			 Q_stricmp(ent->movewith_ent->classname, "func_vehicle")		&&
+			 Q_stricmp(ent->movewith_ent->classname, "func_tracktrain")  ))
 			 ent->movewith_ent = G_Find (ent->movewith_ent, FOFS(targetname), ent->movewith);
 		if (ent->movewith_ent)
 			movewith_init (ent->movewith_ent);
@@ -1496,18 +1572,18 @@ char *dm_statusbar =
 "	pic	9 "
 "endif "
 
-//  help / weapon icon 
+// help / weapon icon 
 "if 11 "
 "	xv	148 "
 "	pic	11 "
 "endif "
 
-//  frags
+// frags
 "xr	-50 "
 "yt 2 "
 "num 3 14 "
 
-//tech
+// tech
 "yb -129 "
 "if 26 "
   "xr -26 "
@@ -1750,7 +1826,7 @@ void SP_worldspawn (edict_t *ent)
 
 	// Fog clipping - if "fogclip" is non-zero, force gl_clear to a good
 	// value for obscuring HOM with fog... "good" is driver-dependent
-	if(ent->fogclip)
+	if (ent->fogclip)
 	{
 		if(gl_driver && !Q_stricmp(gl_driver->string,"3dfxgl"))
 			gi.cvar_forceset("gl_clear", "0");

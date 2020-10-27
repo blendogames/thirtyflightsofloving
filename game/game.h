@@ -33,7 +33,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define SVF_DAMAGEABLE			0x00000008
 #define SVF_TRIGGER_CAMOWNER    0x00000010
 #define SVF_MUD                 0x00000020
-#define	SVF_GIB					0x00000040	//Knightmare- gib flag
+#define	SVF_GIB					0x00000040	// Knightmare- gib flag
 
 // edict->solid values
 

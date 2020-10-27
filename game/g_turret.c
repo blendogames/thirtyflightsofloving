@@ -896,9 +896,9 @@ void turret_breach_think (edict_t *self)
 			return;
 
 		AngleVectors(self->s.angles, forward, right, up);
-		VectorMA(self->s.origin,self->move_origin[0],forward,start);
-		VectorMA(start,         self->move_origin[1],right,  start);
-		VectorMA(start,         self->move_origin[2],up,     start);
+		VectorMA(self->s.origin, self->move_origin[0], forward, start);
+		VectorMA(start,          self->move_origin[1], right,   start);
+		VectorMA(start,          self->move_origin[2], up,      start);
 
 		self->oldenemy = self->enemy;
 
@@ -1197,6 +1197,10 @@ void turret_breach_finish_init (edict_t *self)
 			return;
 		}
 		VectorSubtract (self->target_ent->s.origin, self->s.origin, self->move_origin);
+		// Knightmare- if we've been moved by a func_train before initializing,
+		// shift firing point by the distance moved
+		if (VectorLength(self->offset))
+			VectorAdd (self->move_origin, self->offset, self->move_origin);
 
 		G_FreeEdict(self->target_ent);
 
@@ -1207,6 +1211,11 @@ void turret_breach_finish_init (edict_t *self)
 		if (self->target_ent)
 		{
 			VectorSubtract(self->target_ent->s.origin, self->s.origin, self->muzzle2);
+			// Knightmare- if we've been moved by a func_train before initializing,
+			// shift firing point by the distance moved
+			if (VectorLength(self->offset))
+				VectorAdd (self->muzzle2, self->offset, self->muzzle2);
+
 			self->moreflags |= FL2_TURRET_DOUBLE;
 			if (self->style > 0)
 				self->moreflags |= FL2_TURRET_DOUBLE_ALT;

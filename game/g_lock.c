@@ -51,7 +51,7 @@ void target_lock_use (edict_t *self, edict_t *other, edict_t *activator)
 		n = e->count - 1;
 		current[n] = '0' + e->s.frame;
 	}
-	if (strcmp(current,self->key_message)==0)
+	if (strcmp(current, self->key_message)==0)
 	{
 		copy_message  = self->message;
 		self->message = NULL;
@@ -175,7 +175,7 @@ void lock_code_use (edict_t *self, edict_t *other, edict_t *activator)
 		{
 			Com_sprintf(message, sizeof(message), "Lock combination is %s",game.lock_code);
 			Do_Text_Display(activator, 0, message);
-			L = min(8,(int)strlen(lock->key_message));
+			L = min(8, (int)strlen(lock->key_message));
 			for (i=0; i<L; i++)
 				game.lock_revealed |= 1<<i;
 		}
@@ -214,7 +214,7 @@ void lock_clue_use (edict_t *self, edict_t *other, edict_t *activator)
 			gi.dprintf("Target of target_lock_clue does not exist\n");
 		else
 		{
-			L = min(8,(int)strlen(lock->key_message));
+			L = min(8, (int)strlen(lock->key_message));
 			for (i=0; i<L; i++)
 				if (self->message[i] != '?') game.lock_revealed |= 1<<i;
 		}

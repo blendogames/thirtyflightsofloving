@@ -96,6 +96,7 @@ void PlayerNoise(edict_t *who, vec3_t where, int type)
 	{
 		noise = G_Spawn();
 		noise->classname = "player_noise";
+		noise->class_id = ENTITY_PLAYER_NOISE;
 		VectorSet (noise->mins, -8, -8, -8);
 		VectorSet (noise->maxs, 8, 8, 8);
 		noise->owner = who;
@@ -104,6 +105,7 @@ void PlayerNoise(edict_t *who, vec3_t where, int type)
 
 		noise = G_Spawn();
 		noise->classname = "player_noise";
+		noise->class_id = ENTITY_PLAYER_NOISE;
 		VectorSet (noise->mins, -8, -8, -8);
 		VectorSet (noise->maxs, 8, 8, 8);
 		noise->owner = who;

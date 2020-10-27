@@ -668,9 +668,9 @@ void G_SetStats (edict_t *ent)
 	// Knightmare- speed bar for CTF
 	if (ctf->value)
 	{
-		if(ent->vehicle && !(ent->vehicle->spawnflags & 16))
+		if (ent->vehicle && !(ent->vehicle->spawnflags & 16))
 		{
-			switch(ent->vehicle->moveinfo.state)
+			switch (ent->vehicle->moveinfo.state)
 			{
 			case -3: ent->client->ps.stats[STAT_SPEED_CTF] = gi.imageindex("speedr3"); break;
 			case -2: ent->client->ps.stats[STAT_SPEED_CTF] = gi.imageindex("speedr2"); break;
@@ -686,9 +686,9 @@ void G_SetStats (edict_t *ent)
 	}
 	else
 	{
-		if(ent->vehicle && !(ent->vehicle->spawnflags & 16))
+		if (ent->vehicle && !(ent->vehicle->spawnflags & 16))
 		{
-			switch(ent->vehicle->moveinfo.state)
+			switch (ent->vehicle->moveinfo.state)
 			{
 			case -3: ent->client->ps.stats[STAT_SPEED] = gi.imageindex("speedr3"); break;
 			case -2: ent->client->ps.stats[STAT_SPEED] = gi.imageindex("speedr2"); break;

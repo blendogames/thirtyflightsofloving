@@ -73,7 +73,7 @@ void tank_windup (edict_t *self)
 
 void tank_idle (edict_t *self)
 {
-	if(!(self->spawnflags & SF_MONSTER_AMBUSH))
+	if (!(self->spawnflags & SF_MONSTER_AMBUSH))
 		gi.sound (self, CHAN_VOICE, sound_idle, 1, ATTN_IDLE, 0);
 }
 
@@ -361,7 +361,7 @@ void TankBlaster (edict_t *self)
 	end[2] += self->enemy->viewheight;
 
 	// Lazarus fog reduction of accuracy
-	if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+	if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 	{
 		end[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 		end[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -402,7 +402,7 @@ void TankRocket (edict_t *self)
 	AngleVectors (self->s.angles, forward, right, NULL);
 	G_ProjectSource (self->s.origin, monster_flash_offset[flash_number], forward, right, start);
 
-	if((self->spawnflags & SF_MONSTER_SPECIAL))
+	if ((self->spawnflags & SF_MONSTER_SPECIAL))
 		rocketSpeed = 400; // Lazarus: Homing rockets are tougher if slow
 	else
 		rocketSpeed = 500 + (100 * skill->value);
@@ -413,7 +413,7 @@ void TankRocket (edict_t *self)
 	VectorNormalize (dir); */
 	// Lazarus: Added homers
 	VectorCopy (self->enemy->s.origin, vec);
-	if(random() < 0.66 || (start[2] < self->enemy->absmin[2]))
+	if (random() < 0.66 || (start[2] < self->enemy->absmin[2]))
 	{
 //		gi.dprintf("normal shot\n");
 		vec[2] += self->enemy->viewheight;
@@ -425,7 +425,7 @@ void TankRocket (edict_t *self)
 	}
 
 	// Lazarus fog reduction of accuracy
-	if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+	if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 	{
 		vec[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 		vec[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -437,7 +437,7 @@ void TankRocket (edict_t *self)
 	// 20, 35, 50, 65 chance of leading
 	// Lazarus: Switched this around from Rogue code... it led target more often
 	//          for Easy, which seemed backwards
-	if( (random() < (0.2 + skill->value * 0.15) ) && !(self->spawnflags & SF_MONSTER_SPECIAL))
+	if ( (random() < (0.2 + skill->value * 0.15) ) && !(self->spawnflags & SF_MONSTER_SPECIAL))
 	{
 		float	dist;
 		float	time;
@@ -451,9 +451,9 @@ void TankRocket (edict_t *self)
 	VectorNormalize(dir);
 	// paranoia, make sure we're not shooting a target right next to us
 	trace = gi.trace(start, vec3_origin, vec3_origin, vec, self, MASK_SHOT);
-	if(trace.ent == self->enemy || trace.ent == world)
+	if (trace.ent == self->enemy || trace.ent == world)
 	{
-		if(trace.fraction > 0.5 || (trace.ent && trace.ent->client))
+		if (trace.fraction > 0.5 || (trace.ent && trace.ent->client))
 			monster_fire_rocket (self, start, dir, 50, rocketSpeed, flash_number,
 				(self->spawnflags & SF_MONSTER_SPECIAL ? self->enemy : NULL) );
 	}
@@ -482,7 +482,7 @@ void TankMachineGun (edict_t *self)
 		vec[2] += self->enemy->viewheight;
 
 		// Lazarus fog reduction of accuracy
-		if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+		if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 		{
 			vec[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 			vec[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -805,7 +805,7 @@ void tank_dead (edict_t *self)
 	M_FlyCheck (self);
 
 	// Lazarus monster fade
-	if(world->effects & FX_WORLDSPAWN_CORPSEFADE)
+	if (world->effects & FX_WORLDSPAWN_CORPSEFADE)
 	{
 		self->think=FadeDieSink;
 		self->nextthink=level.time+corpse_fadetime->value;
@@ -938,23 +938,24 @@ void SP_monster_tank (edict_t *self)
 	if (strcmp(self->classname, "monster_tank_commander") == 0)
 	{
 		// Lazarus: mapper-configurable health
-		if(!self->health)
+		if (!self->health)
 			self->health = 1000;
-		if(!self->gib_health)
+		if (!self->gib_health)
 			self->gib_health = -225;
 		self->common_name = "Tank Commander";
 	}
 	else
 	{
 		// Lazarus: mapper-configurable health
-		if(!self->health)
+		if (!self->health)
 			self->health = 750;
-		if(!self->gib_health)
+		if (!self->gib_health)
 			self->gib_health = -200;
 		self->common_name = "Tank";
 	}
+	self->class_id = ENTITY_MONSTER_TANK;
 
-	if(!self->mass)
+	if (!self->mass)
 		self->mass = 500;
 
 	self->pain = tank_pain;
@@ -975,16 +976,16 @@ void SP_monster_tank (edict_t *self)
 		self->fogclip |= 2; //custom bloodtype flag
 
 	// Lazarus power armor
-	if(self->powerarmor) {
+	if (self->powerarmor) {
 		self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
 		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
-	if(!self->monsterinfo.flies)
+	if (!self->monsterinfo.flies)
 		self->monsterinfo.flies = 0.05;
 
 	gi.linkentity (self);
 	self->monsterinfo.currentmove = &tank_move_stand;
-	if(self->health < 0)
+	if (self->health < 0)
 	{
 		mmove_t	*deathmoves[] = {&tank_move_death,
 								 NULL};
