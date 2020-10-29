@@ -676,6 +676,7 @@ void SP_misc_insane (edict_t *self)
 		self->monsterinfo.flies = 0.30;
 
 	self->common_name = "Insane Marine";
+	self->class_id = ENTITY_MISC_INSANE;
 
 	self->monsterinfo.scale = MODEL_SCALE;
 

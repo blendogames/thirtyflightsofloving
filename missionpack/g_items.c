@@ -1294,7 +1294,7 @@ qboolean Pickup_Ammo (edict_t *ent, edict_t *other)
 	int			count;
 	qboolean	weapon;
 		
-	//Knightmare- override ammo pickup values with cvars
+	// Knightmare- override ammo pickup values with cvars
 	SetAmmoPickupValues ();
 
 	weapon = (ent->item->flags & IT_WEAPON);
@@ -1378,7 +1378,7 @@ qboolean Pickup_Health (edict_t *ent, edict_t *other)
 	if ((ent->style & HEALTH_FOODCUBE) && other->health >= other->client->pers.max_fc_health)
 		return false;
 
-	//backup current health upon getting megahealth
+	// backup current health upon getting megahealth
 /*	if (ent->style & HEALTH_TIMED)
 	{
 		if (other->base_health && other->health > other->base_health)
@@ -1399,7 +1399,7 @@ qboolean Pickup_Health (edict_t *ent, edict_t *other)
 
 	other->health += ent->count;
 
-	//stimpacks shouldn't rot away
+	// stimpacks shouldn't rot away
 /*	if (ent->style & HEALTH_IGNORE_MAX
 		&& other->base_health >= other->max_health && other->health >= other->base_health) 
 		other->base_health += ent->count;
@@ -1790,7 +1790,7 @@ void Touch_Item (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf
 		{
 			if (ent->style & HEALTH_FOODCUBE)
 				gi.sound(other, CHAN_ITEM, gi.soundindex("items/m_health.wav"), 1, ATTN_NORM, 0);
-			//if (ent->count == sk_health_bonus_value->value) // Knightmare
+		//	if (ent->count == sk_health_bonus_value->value) // Knightmare
 			else if (ent->count < 10) // Knightmare
 				gi.sound(other, CHAN_ITEM, gi.soundindex("items/s_health.wav"), 1, ATTN_NORM, 0);
 			else if (ent->count == 10)
@@ -1826,6 +1826,55 @@ void Touch_Item (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf
 			G_FreeEdict (ent);
 	}
 }
+
+// Knightmare added
+/*
+===============
+Touch_Q1Backpack
+===============
+*/
+void Touch_Q1Backpack (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
+{
+	qboolean	taken;
+
+//	if (other == ent->owner)	// can't be touched by the entity that dropped us
+//		return;
+
+	if (!other->client)
+		return;
+	if (other->health < 1)
+		return;		// dead people can't pickup
+	if (!ent->item->pickup)
+		return;		// not a grabbable item?
+
+	taken = ent->item->pickup(ent, other);
+
+	if (taken)
+	{
+		// flash the screen
+		other->client->bonus_alpha = 0.25;	
+
+		// show icon and name on status bar
+		other->client->ps.stats[STAT_PICKUP_ICON] = gi.imageindex(ent->item->icon);
+		other->client->ps.stats[STAT_PICKUP_STRING] = CS_ITEMS+ITEM_INDEX(ent->item);
+		other->client->pickup_msg_time = level.time + 3.0;
+
+	//	gi.sound(other, CHAN_ITEM, gi.soundindex("q1weapons/lock4.wav"), 1, ATTN_NORM, 0);
+	/*	if (ent->noise_index != 0) {
+			gi.sound(other, CHAN_ITEM, ent->noise_index, 1, ATTN_NORM, 0);
+		}*/
+	}
+
+	if (!taken)
+		return;
+
+	// Lazarus reflections
+	DeleteReflection (ent, -1);
+
+	// just delete it, no respawning
+	G_FreeEdict (ent);
+}
+// end Knightmare
 
 //======================================================================
 
@@ -1917,17 +1966,17 @@ edict_t *Drop_Item (edict_t *ent, gitem_t *item)
 		VectorCopy (ent->velocity, dropped->velocity); //if it's moving on a conveyor
 	}
 	else*/
-	if (ent->solid != SOLID_BSP) //Knightmare- hack for items dropped by shootable boxes
+	if (ent->solid != SOLID_BSP) // Knightmare- hack for items dropped by shootable boxes
 		VectorScale (forward, 100, dropped->velocity);
 
-	if (!strcmp(ent->classname, "func_pushable")) //Make items dropped by movable crates destroyable
+	if (!strcmp(ent->classname, "func_pushable")) // Make items dropped by movable crates destroyable
 	{
 		dropped->spawnflags |= ITEM_SHOOTABLE;
 		dropped->solid = SOLID_BBOX;
 		dropped->health = 20;
 		dropped->takedamage = DAMAGE_YES;
-		//dropped->die = BecomeExplosion1;
-		//Knightmare- this compiles cleaner
+	//	dropped->die = BecomeExplosion1;
+		// Knightmare- this compiles cleaner
 		dropped->die = Item_Die;
 
 	}
@@ -1941,6 +1990,81 @@ edict_t *Drop_Item (edict_t *ent, gitem_t *item)
 
 	return dropped;
 }
+
+// Knightmare added
+/*
+============
+Drop_Q1Backpack
+
+Spawns backpack dropped by Q1 monsters.
+Similar to Drop_Item, but the backpack is not an item in the item table.
+It contains an item instead.
+============
+*/
+edict_t *Drop_Q1Backpack (edict_t *ent, gitem_t *item, int count)
+{
+	edict_t	*backpack;
+	vec3_t	forward, right;
+	vec3_t	offset;
+
+	if (!ent)
+		return NULL;
+	if (!item) {
+		gi.dprintf ("Drop_Q1Backpack: invalid item\n");
+		return NULL;
+	}
+
+	backpack = G_Spawn();
+
+	backpack->classname = "misc_q1_backpack";
+	backpack->item = item;
+	backpack->count = count;
+	backpack->touch = Touch_Q1Backpack;
+	backpack->spawnflags = DROPPED_ITEM;
+	backpack->s.skinnum = 0;
+	backpack->s.effects = EF_ROTATE;
+	backpack->s.renderfx = RF_GLOW | RF_IR_VISIBLE;
+	backpack->s.angles[1] = ent->s.angles[1];	// Knightmare- preserve yaw from dropping entity
+	backpack->s.angles[1] += crandom() * 45;
+//	backpack->noise_index = gi.soundindex("q1weapons/lock4.wav");
+
+	VectorSet (backpack->mins, -16, -16, -16);
+	VectorSet (backpack->maxs, 16, 16, 16);
+	gi.setmodel (backpack, "models/items/q1backpack/tris.md2");
+	backpack->solid = SOLID_TRIGGER;
+	backpack->movetype = MOVETYPE_TOSS;  
+	backpack->touch = drop_temp_touch;
+	backpack->owner = ent;
+
+	if (ent->client)
+	{
+		trace_t	trace;
+
+		AngleVectors (ent->client->v_angle, forward, right, NULL);
+		VectorSet(offset, 24, 0, -16);
+		G_ProjectSource (ent->s.origin, offset, forward, right, backpack->s.origin);
+		trace = gi.trace (ent->s.origin, backpack->mins, backpack->maxs,
+			backpack->s.origin, ent, CONTENTS_SOLID);
+		VectorCopy (trace.endpos, backpack->s.origin);
+	}
+	else
+	{
+		AngleVectors (ent->s.angles, forward, right, NULL);
+		VectorCopy (ent->s.origin, backpack->s.origin);
+	}
+
+	VectorScale (forward, 100, backpack->velocity);
+
+	backpack->velocity[2] += 300;
+
+	backpack->think = G_FreeEdict;
+	backpack->nextthink = level.time + 1800;
+
+	gi.linkentity (backpack);
+
+	return backpack;
+}
+// end Knightmare
 
 void Use_Item (edict_t *ent, edict_t *other, edict_t *activator)
 {
@@ -2299,7 +2423,7 @@ void SpawnItem (edict_t *ent, gitem_t *item)
 	ent->item = item;
 	ent->nextthink = level.time + 2 * FRAMETIME;    // items start after other solids
 	ent->think = droptofloor;
-	ent->s.skinnum = item->world_model_skinnum; //Knightmare- skinnum specified in item table
+	ent->s.skinnum = item->world_model_skinnum; // Knightmare- skinnum specified in item table
 	ent->s.effects = item->world_model_flags;
 	ent->s.renderfx = RF_GLOW;
 	if (ent->model)
@@ -4683,7 +4807,7 @@ model="models/items/q1keys/gold/tris.md2"
 		NULL,
 		Drop_General,
 		NULL,
-		"q1items/medkey.wav",
+		"q1misc/medkey.wav",
 		"models/items/q1keys/gold/tris.md2", 0, EF_ROTATE,
 		NULL,
 		"k_med_gold",						
@@ -4709,7 +4833,7 @@ model="models/items/q1keys/silver/tris.md2"
 		NULL,
 		Drop_General,
 		NULL,
-		"q1items/medkey.wav",
+		"q1misc/medkey.wav",
 		"models/items/q1keys/silver/tris.md2", 0, EF_ROTATE,
 		NULL,
 		"k_med_silver",								
@@ -4735,7 +4859,7 @@ model="models/items/q1keys/gold/rune/tris.md2"
 		NULL,
 		Drop_General,
 		NULL,
-		"q1items/runekey.wav",
+		"q1misc/runekey.wav",
 		"models/items/q1keys/gold/rune/tris.md2", 0, EF_ROTATE,
 		NULL,
 		"k_rune_gold",						
@@ -4761,7 +4885,7 @@ model="models/items/q1keys/silver/rune/tris.md2"
 		NULL,
 		Drop_General,
 		NULL,
-		"q1items/runekey.wav",
+		"q1misc/runekey.wav",
 		"models/items/q1keys/silver/rune/tris.md2", 0, EF_ROTATE,
 		NULL,
 		"k_rune_silver",						
@@ -4787,7 +4911,7 @@ model="models/items/q1keys/gold/base/tris.md2"
 		NULL,
 		Drop_General,
 		NULL,
-		"q1items/basekey.wav",
+		"q1misc/basekey.wav",
 		"models/items/q1keys/gold/base/tris.md2", 0, EF_ROTATE,
 		NULL,
 		"k_base_gold",						
@@ -4813,7 +4937,7 @@ model="models/items/q1keys/silver/base/tris.md2"
 		NULL,
 		Drop_General,
 		NULL,
-		"q1items/basekey.wav",
+		"q1misc/basekey.wav",
 		"models/items/q1keys/silver/base/tris.md2", 0, EF_ROTATE,
 		NULL,
 		"k_base_silver",						

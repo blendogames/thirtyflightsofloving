@@ -347,7 +347,7 @@ void SP_func_trackchange (edict_t *self)
 	gi.setmodel (self, self->model);
 	self->use = trackchange_use;
 
-	self->postthink = train_move_children; //Knightmare- supports movewith
+	self->postthink = train_move_children;	// Knightmare- now supports movewith
 
 	// bottom starters:
 	if (self->spawnflags & SF_TRACK_STARTBOTTOM)
@@ -1977,7 +1977,7 @@ void SP_func_tracktrain (edict_t *self)
 	self->turn_rider = 1;
 	VectorClear (self->s.angles);
 
-	self->postthink = train_move_children; // Knightmare- supports movewith
+	self->postthink = train_move_children;	// Knightmare- supports movewith
 
 	if (self->target)
 	{

@@ -1173,6 +1173,7 @@ gitem_t	*FindItem (char *pickup_name);
 gitem_t	*FindItemByClassname (char *classname);
 #define	ITEM_INDEX(x) ((x)-itemlist)
 edict_t *Drop_Item (edict_t *ent, gitem_t *item);
+edict_t *Drop_Q1Backpack (edict_t *ent, gitem_t *item, int count);	// Knightmare added
 void SetRespawn (edict_t *ent, float delay);
 void ChangeWeapon (edict_t *ent);
 void SpawnItem (edict_t *ent, gitem_t *item);
@@ -1308,6 +1309,7 @@ qboolean box_walkmove (edict_t *ent, float yaw, float dist);
 void button_use (edict_t *self, edict_t *other, edict_t *activator);
 void trainbutton_use (edict_t *self, edict_t *other, edict_t *activator);
 void Move_Calc (edict_t *ent, vec3_t dest, void(*func)(edict_t*));
+void movewith_init (edict_t *ent);
 void train_move_children (edict_t *self);
 void train_kill_children (edict_t *self);
 void train_remove_children (edict_t *self);
@@ -1315,6 +1317,8 @@ void fade_children (edict_t *self);
 void fade_children2 (edict_t *self);
 void train_next (edict_t *self);
 void func_train_find (edict_t *self);
+void train_use (edict_t *self, edict_t *other, edict_t *activator);
+void train_blocked (edict_t *self, edict_t *other);
 
 // damage flags
 #define DAMAGE_RADIUS			0x00000001	// damage was indirect

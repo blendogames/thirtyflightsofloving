@@ -591,6 +591,7 @@ void SP_monster_berserk (edict_t *self)
 
 	self->common_name = "Berserker";
 	self->class_id = ENTITY_MONSTER_BERSERK;
+	self->spawnflags |= SF_MONSTER_KNOWS_MIRRORS;
 
 	gi.linkentity (self);
 

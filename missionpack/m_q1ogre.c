@@ -242,14 +242,15 @@ void ogre_pain (edict_t *self, edict_t *other, float kick, int damage)
 
 void ogre_droprockets (edict_t *self)
 {
-/*	edict_t	*backpack;
+	edict_t	*backpack;
 
 	if (self->health <= self->gib_health)
 		return;
 
-	backpack = Drop_Item(self, FindItemByClassname("item_q1_backpack"));
-//	backpack->item = FindItemByClassname("ammo_grenades");
-	backpack->item = FindItemByClassname("ammo_rockets");
+	backpack = Drop_Q1Backpack (self, FindItemByClassname("ammo_grenades"), 2);
+/*	backpack = Drop_Item(self, FindItemByClassname("item_q1_backpack"));
+	backpack->item = FindItemByClassname("ammo_grenades");
+//	backpack->item = FindItemByClassname("ammo_rockets");
 	backpack->count = 2;
 	backpack->touch = Touch_Item;
 	backpack->nextthink = level.time + 1800;
@@ -314,7 +315,7 @@ void ogre_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
 // check for gib
 	if (self->health <= self->gib_health && !(self->spawnflags & SF_MONSTER_NOGIB))
 	{
-		gi.sound (self, CHAN_VOICE|CHAN_RELIABLE, gi.soundindex ("q1monstr/udeath.wav"), 1, ATTN_NORM, 0);
+		gi.sound (self, CHAN_VOICE|CHAN_RELIABLE, gi.soundindex ("q1player/udeath.wav"), 1, ATTN_NORM, 0);
 		
 		// if dead body, don't drop pack when gibbed
 	//	if (self->deadflag != DEAD_DEAD)
@@ -374,7 +375,7 @@ void ogre_grenade_fire(edict_t *self)
 	gi.WriteByte (MZ_MACHINEGUN | 128);
 	gi.multicast (self->s.origin, MULTICAST_PVS);
 
-	gi.sound (self, CHAN_WEAPON|CHAN_RELIABLE, gi.soundindex("q1weap/grenades/grenade.wav"), 1.0, ATTN_NORM, 0);
+	gi.sound (self, CHAN_WEAPON|CHAN_RELIABLE, gi.soundindex("q1weapons/grenade.wav"), 1.0, ATTN_NORM, 0);
 	q1_fire_grenade (self, start,aim,40 , 600, 2.5, 80);
 }
 
@@ -520,13 +521,17 @@ void SP_monster_q1_ogre (edict_t *self)
 		return;
 	}
 
-	sound_pain = gi.soundindex ("q1ogre/ogpain1.wav");	
-	sound_death= gi.soundindex ("q1ogre/ogdth.wav");	
-	sound_idle = gi.soundindex ("q1ogre/ogidle.wav");	
-	sound_idle2= gi.soundindex ("q1ogre/ogidle2.wav");	
-	sound_wake = gi.soundindex ("q1ogre/ogwake.wav");	
-	sound_saw  = gi.soundindex ("q1ogre/ogsawatk.wav");	
-	sound_drag = gi.soundindex ("q1ogre/ogdrag.wav");	
+	sound_pain =	gi.soundindex ("q1ogre/ogpain1.wav");
+	sound_death =	gi.soundindex ("q1ogre/ogdth.wav");
+	sound_idle =	gi.soundindex ("q1ogre/ogidle.wav");
+	sound_idle2 =	gi.soundindex ("q1ogre/ogidle2.wav");
+	sound_wake =	gi.soundindex ("q1ogre/ogwake.wav");
+	sound_saw  =	gi.soundindex ("q1ogre/ogsawatk.wav");
+	sound_drag =	gi.soundindex ("q1ogre/ogdrag.wav");
+
+	// precache backpack
+	gi.modelindex ("models/items/q1backpack/tris.md2");
+//	gi.soundindex ("q1weapons/lock4.wav");
 
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;

@@ -364,7 +364,7 @@ void SP_func_door_secret2 (edict_t *ent)
 	}
 	if (!ent->wait)
 		ent->wait = 5;          // 5 seconds before closing
-	ent->postthink = train_move_children; // Knightmare- now supports movewith
+	ent->postthink = train_move_children;	// Knightmare- now supports movewith
 
 	gi.linkentity(ent);
 }

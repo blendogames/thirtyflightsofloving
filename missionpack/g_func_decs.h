@@ -2499,10 +2499,12 @@ extern void Item_TriggeredSpawn ( edict_t * self , edict_t * other , edict_t * a
 extern void PrecacheItem ( gitem_t * it ) ;
 extern void droptofloor ( edict_t * ent ) ;
 extern void Use_Item ( edict_t * ent , edict_t * other , edict_t * activator ) ;
+extern edict_t * Drop_Q1Backpack ( edict_t * ent , gitem_t * item , int count ) ;
 extern edict_t * Drop_Item ( edict_t * ent , gitem_t * item ) ;
 extern void Item_Die ( edict_t * self , edict_t * inflictor , edict_t * attacker , int damage , vec3_t point ) ;
 extern void drop_make_touchable ( edict_t * ent ) ;
 extern void drop_temp_touch ( edict_t * ent , edict_t * other , cplane_t * plane , csurface_t * surf ) ;
+extern void Touch_Q1Backpack ( edict_t * ent , edict_t * other , cplane_t * plane , csurface_t * surf ) ;
 extern void Touch_Item ( edict_t * ent , edict_t * other , cplane_t * plane , csurface_t * surf ) ;
 extern void Drop_Visor ( edict_t * ent , gitem_t * item ) ;
 extern qboolean Pickup_Visor ( edict_t * ent , edict_t * other ) ;

@@ -241,7 +241,7 @@ void q1shalrath_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int d
 // check for gib
 	if (self->health <= self->gib_health && !(self->spawnflags & SF_MONSTER_NOGIB))
 	{
-		gi.sound (self, CHAN_VOICE|CHAN_RELIABLE, gi.soundindex ("q1monstr/udeath.wav"), 1, ATTN_NORM, 0);
+		gi.sound (self, CHAN_VOICE|CHAN_RELIABLE, gi.soundindex ("q1player/udeath.wav"), 1, ATTN_NORM, 0);
 
 		for (n = 0; n < 2; n++)
 			ThrowGib (self, "models/objects/q1gibs/q1gib1/tris.md2", damage, GIB_ORGANIC);

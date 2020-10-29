@@ -1134,7 +1134,95 @@ target		: Targetname of entity to attach/detach.
 pathtarget	: Targetname of parent entity to attach to.  Not needed to detach.
 count		: Number of times it can be used
 */
-void movewith_init (edict_t *ent);
+
+#if 0
+void movewith_detach (edict_t *child)
+{
+	edict_t	*e;
+	edict_t	*parent = NULL;
+	int		i;
+				
+	for (i=1; i<globals.num_edicts && !parent; i++) {
+		e = g_edicts + i;
+		if (e->movewith_next == child) parent=e;
+	}
+	if (parent) parent->movewith_next = child->movewith_next;
+		
+	child->movewith_next = NULL;
+	child->movewith = NULL;
+	child->movetype = child->oldmovetype;
+	// if monster, give 'em a small vertical boost
+	if (child->svflags & SVF_MONSTER)
+		child->s.origin[2] += 2;
+	gi.linkentity(child);
+}
+
+void target_movewith_use (edict_t *self, edict_t *other, edict_t *activator)
+{
+	edict_t	*target;
+
+	if (!self->target)
+		return;
+	target = G_Find(NULL,FOFS(targetname),self->target);
+
+	if (self->spawnflags & 1)
+	{
+		// Detach
+		while (target)
+		{
+			if (target->movewith_ent)
+				movewith_detach(target);
+			target = G_Find(target,FOFS(targetname),self->target);
+		}
+	}
+	else
+	{
+		// Attach
+		edict_t	*parent;
+		edict_t	*e;
+		edict_t	*previous;
+
+		parent = G_Find(NULL, FOFS(targetname), self->pathtarget);
+		if (!parent || !parent->inuse)
+			return;
+		while (target)
+		{
+			if (!target->movewith_ent || (target->movewith_ent != parent) )
+			{
+				if (target->movewith_ent)
+					movewith_detach(target);
+		
+				target->movewith_ent = parent;
+				VectorCopy (parent->s.angles, target->parent_attach_angles);
+				VectorCopy (target->s.angles, target->child_attach_angles);
+				if (target->oldmovetype < 0)
+					target->oldmovetype = target->movetype;
+				if (target->movetype != MOVETYPE_NONE)
+					target->movetype = MOVETYPE_PUSH;
+				VectorCopy (target->mins, target->org_mins);
+				VectorCopy (target->maxs, target->org_maxs);
+				VectorSubtract (target->s.origin, parent->s.origin, target->movewith_offset);
+				e = parent->movewith_next;
+				previous = parent;
+				while (e)
+				{
+					previous = e;
+					e = previous->movewith_next;
+				}
+				previous->movewith_next = target;
+				gi.linkentity(target);
+			}
+			target = G_Find(target,FOFS(targetname),self->target);
+		}
+	}
+
+	self->count--;
+	if (!self->count) {
+		self->think = G_FreeEdict;
+		self->nextthink = level.time + 1;
+	}
+}
+#endif
 
 void target_movewith_use (edict_t *self, edict_t *activator, edict_t *other)
 {
@@ -1176,7 +1264,8 @@ void SP_target_movewith (edict_t *self)
 	if (!self->target)
 		gi.dprintf("target_movewith without a target at %s\n", vtos(self->s.origin));
 	if (!self->pathtarget && !(self->spawnflags & 1))
-			gi.dprintf("target_movewith without a pathtarget at %s\n", vtos(self->s.origin));
+		gi.dprintf("target_movewith without a pathtarget at %s\n", vtos(self->s.origin));
+
 	self->svflags |= SVF_NOCLIENT;
 	self->use = target_movewith_use;
 
@@ -1314,6 +1403,7 @@ void SP_target_change (edict_t *self)
 		gi.dprintf("target_change without a targetname at %s\n", vtos(self->s.origin));
 	if (!self->target)
 		gi.dprintf("target_change without a target at %s\n", vtos(self->s.origin));
+
 	self->svflags |= SVF_NOCLIENT;
 	self->use = target_change_use;
 	if (st.noise) //David Hyde's code
@@ -1745,7 +1835,7 @@ void target_rocks_use (edict_t *self, edict_t *activator, edict_t *other)
 	VectorSet(source,8,8,8);
 	mass = self->mass;
 
-	//set movedir here- if we're 
+	// set movedir here- if we're 
 	G_SetMovedir2 (self->s.angles, self->movedir);
 //	if (self->sounds == 1)
 //		gi.sound (self, CHAN_AUTO, gi.soundindex("zer/wall01.wav"), 1.0, ATTN_NORM, 0);
@@ -1798,12 +1888,17 @@ void SP_target_rocks (edict_t *self)
 {
 	self->class_id = ENTITY_TARGET_ROCKS;
 
+	// precache
+	gi.modelindex ("models/objects/rock1/tris.md2");
+	gi.modelindex ("models/objects/rock2/tris.md2");
+
 	if (!self->targetname)
 		gi.dprintf("target_rocks without a targetname at %s\n", vtos(self->s.origin));
 	if (!self->mass)
 		self->mass = 500;
 	if (!self->speed)
 		self->speed = 400;
+
 //	G_SetMovedir  (self->s.angles, self->movedir);
 
 	self->svflags |= SVF_NOCLIENT;
@@ -3005,6 +3100,11 @@ void target_animation_use (edict_t *self, edict_t *other, edict_t *activator)
 
 void SP_target_animation (edict_t *self)
 {
+#if 1
+	gi.dprintf("Target_animation is currently not implemented.\n");
+	G_FreeEdict(self);
+	return;
+#else
 	mmove_t	*move;
 
 	self->class_id = ENTITY_TARGET_ANIMATION;
@@ -3053,6 +3153,7 @@ void SP_target_animation (edict_t *self)
 	self->use = target_animation_use;
 	move = gi.TagMalloc(sizeof(mmove_t), TAG_LEVEL);
 	self->monsterinfo.currentmove = move;
+#endif
 }
 
 /*===================================================================================
@@ -3189,6 +3290,7 @@ void SP_target_failure (edict_t *self)
 		G_FreeEdict (self);
 		return;
 	}
+
 	self->class_id = ENTITY_TARGET_FAILURE;
 
 	self->use = use_target_failure;

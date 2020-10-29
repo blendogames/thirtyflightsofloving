@@ -1384,6 +1384,7 @@ removeflags:
 			 Q_stricmp(ent->movewith_ent->classname, "func_door")			&&
 		
 			// Knightmare added
+#ifdef POSTTHINK_CHILD_MOVEMENT
 			 Q_stricmp(ent->movewith_ent->classname, "func_door_rotating")	&&
 			 Q_stricmp(ent->movewith_ent->classname, "func_plat")			&&
 			 Q_stricmp(ent->movewith_ent->classname, "func_plat2")			&&
@@ -1394,6 +1395,7 @@ removeflags:
 			 Q_stricmp(ent->movewith_ent->classname, "func_door_swinging")	&&
 			 Q_stricmp(ent->movewith_ent->classname, "func_breakaway")		&&
 			 Q_stricmp(ent->movewith_ent->classname, "func_trackchange")	&&
+#endif	// POSTTHINK_CHILD_MOVEMENT
 			// end Knightmare
 		
 			 Q_stricmp(ent->movewith_ent->classname, "func_vehicle")		&&

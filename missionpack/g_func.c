@@ -1028,7 +1028,7 @@ void SP_func_plat (edict_t *ent)
 	else
 		ent->pos2[2] -= (ent->maxs[2] - ent->mins[2]) - st.lip;
 
-	ent->postthink = train_move_children; //supports movewith
+	ent->postthink = train_move_children;	// Knightmare- now supports movewith
 
 	ent->use = Use_Plat;
 
@@ -1090,7 +1090,7 @@ void plat2_spawn_danger_area (edict_t *ent)
 	VectorCopy (ent->maxs, maxs);
 	maxs[2] = ent->mins[2] + 64;
 
-	SpawnBadArea(mins, maxs, 0, ent);
+	SpawnBadArea (mins, maxs, 0, ent);
 }
 
 void plat2_kill_danger_area (edict_t *ent)
@@ -1111,8 +1111,9 @@ void plat2_hit_top (edict_t *ent)
 	{
 		if (ent->moveinfo.sound_end)
 			gi.sound (ent, CHAN_NO_PHS_ADD+CHAN_VOICE, ent->moveinfo.sound_end, 1, ent->attenuation, 0); // was ATTN_STATIC
-		ent->s.sound = 0;
+	//	ent->s.sound = 0;
 	}
+	ent->s.sound = 0;	// Knightmare- make sure this is always set to 0, lead mover or not!
 	ent->moveinfo.state = STATE_TOP;
 
 	if (ent->plat2flags & PLAT2_CALLED)
@@ -1123,7 +1124,7 @@ void plat2_hit_top (edict_t *ent)
 			ent->think = plat2_go_down;
 			ent->nextthink = level.time + 5.0;
 		}
-		if (deathmatch->value)
+		if ( (int)deathmatch->value )
 			ent->last_move_time = level.time - 1.0;
 		else
 			ent->last_move_time = level.time - 2.0;
@@ -1150,8 +1151,9 @@ void plat2_hit_bottom (edict_t *ent)
 	{
 		if (ent->moveinfo.sound_end)
 			gi.sound (ent, CHAN_NO_PHS_ADD+CHAN_VOICE, ent->moveinfo.sound_end, 1, ent->attenuation, 0); // was ATTN_STATIC
-		ent->s.sound = 0;
+	//	ent->s.sound = 0;
 	}
+	ent->s.sound = 0;	// Knightmare- make sure this is always set to 0, lead mover or not!
 	ent->moveinfo.state = STATE_BOTTOM;
 	
 	if (ent->plat2flags & PLAT2_CALLED)
@@ -1301,7 +1303,7 @@ void Touch_Plat_Center2 (edict_t *ent, edict_t *other, cplane_t *plane, csurface
 	if ((!(other->svflags & SVF_MONSTER)) && (!other->client))
 		return;
 	
-	plat2_operate(ent, other);
+	plat2_operate (ent, other);
 }
 
 void plat2_blocked (edict_t *self, edict_t *other)
@@ -1319,7 +1321,7 @@ void plat2_blocked (edict_t *self, edict_t *other)
 	// Remove dead Q1 monsters, as they can't be gibbed
 	if ( (other->svflags & SVF_DEADMONSTER) && (other->flags & FL_Q1_MONSTER) )
 	{
-		G_FreeEdict(other);
+		G_FreeEdict (other);
 		return;
 	}
 
@@ -1355,7 +1357,7 @@ void Use_Plat2 (edict_t *ent, edict_t *other, edict_t *activator)
 		{
 			if (trigger->enemy == ent)
 			{
-//				Touch_Plat_Center2 (trigger, activator, NULL, NULL);
+			//	Touch_Plat_Center2 (trigger, activator, NULL, NULL);
 				plat2_operate (trigger, activator);
 				return;
 			}
@@ -1447,7 +1449,6 @@ void SP_func_plat2 (edict_t *ent)
 		ent->decel *= 2;
 	}
 
-
 	// PMM Added to kill things it's being blocked by 
 	if (!ent->dmg)
 		ent->dmg = 2;
@@ -1497,7 +1498,7 @@ void SP_func_plat2 (edict_t *ent)
 		}	
 	}
 
-	ent->postthink = train_move_children; // supports movewith
+	ent->postthink = train_move_children;	// Knightmare- now supports movewith
 
 	gi.linkentity (ent);
 
@@ -1682,7 +1683,7 @@ void SP_func_rotating (edict_t *ent)
 	if (ent->attenuation <= 0)
 		ent->attenuation = ATTN_STATIC;
 
-	ent->postthink = train_move_children; // supports movewith
+	ent->postthink = train_move_children;	// Knightmare- now supports movewith
 
 	ent->use = rotating_use;
 	if (ent->dmg)
@@ -1893,7 +1894,7 @@ void SP_func_button (edict_t *ent)
 	else if (! ent->targetname)
 		ent->touch = button_touch;
 
-	ent->postthink = train_move_children; //supports movewith
+	ent->postthink = train_move_children;	// Knightmare- now supports movewith
 
 	ent->moveinfo.state = STATE_BOTTOM;
 
@@ -1985,34 +1986,6 @@ void trainbutton_killed (edict_t *self, edict_t *inflictor, edict_t *attacker, i
 	self->takedamage = DAMAGE_NO;
 	trainbutton_fire (self);
 }
-
-/*void movewith_init (edict_t *ent)
-{
-	edict_t *e, *child;
-
-	// Unnamed entities can't be movewith parents
-	if (!ent->targetname) return;
-
-	child = G_Find(NULL,FOFS(movewith),ent->targetname);
-	e = ent;
-	while (child)
-	{
-		child->movewith_ent = ent;
-		// Copy parent's current angles to the child. They SHOULD be 0,0,0 at this point
-		// for all currently supported parents, but ya never know.
-		VectorCopy (ent->s.angles,child->parent_attach_angles);
-		if (child->org_movetype < 0)
-			child->org_movetype = child->movetype;
-		if (child->movetype != MOVETYPE_NONE)
-			child->movetype = MOVETYPE_PUSH;
-		VectorCopy (child->mins,child->org_mins);
-		VectorCopy (child->maxs,child->org_maxs);
-		VectorSubtract(child->s.origin,ent->s.origin,child->movewith_offset);
-		e->movewith_next = child;
-		e = child;
-		child = G_Find(child,FOFS(movewith),ent->targetname);
-	}
-}*/
 
 void SP_func_trainbutton (edict_t *ent)
 {
@@ -2570,7 +2543,20 @@ void Think_SpawnDoorTrigger (edict_t *ent)
 		other->movewith = ent->movewith;
 	VectorCopy (other->s.angles, other->org_angles);
 	gi.linkentity (other);
-
+/*
+	// Lazarus movewith
+	if (ent->movewith)
+	{
+		other->movewith = ent->movewith;
+		VectorCopy(ent->s.origin,other->s.origin);
+		VectorSubtract(other->mins,other->s.origin,other->mins);
+		VectorSubtract(other->maxs,other->s.origin,other->maxs);
+		if (ent->movewith_ent) {
+			// Uh-oh... movewith_init was already called.. no harm in calling it again
+			movewith_init (ent->movewith_ent);
+		}
+	}
+*/
 	if (ent->spawnflags & DOOR_START_OPEN)
 		door_use_areaportals (ent, true);
 
@@ -2704,7 +2690,7 @@ void SP_func_door (edict_t *ent)
 	// create a speaker entity at center of bmodel
 	// Removed because this breaks when the center point of
 	// the door moves inside the wall (can't be heard).
-	/*if (ent->moveinfo.sound_middle)// && ent->sounds > 4)
+/*	if (ent->moveinfo.sound_middle)// && ent->sounds > 4)
 	{
 		edict_t *speaker;
 
@@ -2817,7 +2803,7 @@ void SP_func_door (edict_t *ent)
 	}
 	// end Zaero
 
-	ent->postthink = train_move_children; // Knightmare- now supports movewith
+	ent->postthink = train_move_children;	// Knightmare- now supports movewith
 	ent->nextthink = level.time + FRAMETIME;
 
 	// Zaero
@@ -3001,7 +2987,7 @@ void SP_func_door_rotating (edict_t *ent)
 	if (!ent->team)
 		ent->teammaster = ent;
 
-	ent->postthink = train_move_children; //supports movewith
+	ent->postthink = train_move_children;	// Knightmare- now supports movewith
 
 	gi.linkentity (ent);
 
@@ -3236,6 +3222,36 @@ void train_move_prox (edict_t *self)
 	}
 }
 
+/*
+void movewith_init (edict_t *ent)
+{
+	edict_t *e, *child;
+
+	// Unnamed entities can't be movewith parents
+	if (!ent->targetname) return;
+
+	child = G_Find(NULL, FOFS(movewith), ent->targetname);
+	e = ent;
+	while (child)
+	{
+		child->movewith_ent = ent;
+		// Copy parent's current angles to the child. They SHOULD be 0,0,0 at this point
+		// for all currently supported parents, but ya never know.
+		VectorCopy (ent->s.angles, child->parent_attach_angles);
+		if (child->org_movetype < 0)
+			child->org_movetype = child->movetype;
+		if (child->movetype != MOVETYPE_NONE)
+			child->movetype = MOVETYPE_PUSH;
+		VectorCopy (child->mins, child->org_mins);
+		VectorCopy (child->maxs, child->org_maxs);
+		VectorSubtract (child->s.origin, ent->s.origin, child->movewith_offset);
+		e->movewith_next = child;
+		e = child;
+		child = G_Find(child, FOFS(movewith), ent->targetname);
+	}
+}
+*/
+
 // Knightmare- this function moves the movewith children
 // Most of this code is by David Hyde, he got tired of just helping me piecemeal...
 void turret_stand (edict_t *self);
@@ -3284,8 +3300,8 @@ void train_move_children (edict_t *self)
 				VectorCopy (ent->s.angles, ent->child_attach_angles);
 
 				// Knightmare- backup turret's old angle offset
-			//	if ( !strcmp(ent->classname, "monster_turret") && ent->offset )
-				if ( (ent->class_id == ENTITY_MONSTER_TURRET) && ent->offset )
+				if ( !strcmp(ent->classname, "monster_turret") && ent->offset )
+			//	if ( (ent->class_id == ENTITY_MONSTER_TURRET) && ent->offset )
 					VectorCopy (ent->offset, ent->old_offset); 
 
 				ent->movewith_set = 1;
@@ -3319,16 +3335,16 @@ void train_move_children (edict_t *self)
 			*/
 
 			// For all but buttons, doors, and plats, move origin and match velocities
-		/*	if ( strcmp(ent->classname, "func_door") && strcmp(ent->classname, "func_button")
-				&& strcmp(ent->classname, "func_door_secret") && strcmp(ent->classname, "func_door_secret2")
+			if ( strcmp(ent->classname, "func_door") && strcmp(ent->classname, "func_button")
+				&& (ent->class_id != ENTITY_FUNC_DOOR_SECRET) && strcmp(ent->classname, "func_door_secret2")
 				&& strcmp(ent->classname, "func_plat") && strcmp(ent->classname, "func_plat2")
 				&& strcmp(ent->classname, "func_water") && strcmp(ent->classname, "turret_wall")
-				&& (strcmp(ent->classname, "monster_turret") || !(ent->spawnflags & 128)) )*/
-			if ( (ent->class_id != ENTITY_FUNC_DOOR) && (ent->class_id != ENTITY_FUNC_BUTTON)
+				&& (strcmp(ent->classname, "monster_turret") || !(ent->spawnflags & 128)) )
+		/*	if ( (ent->class_id != ENTITY_FUNC_DOOR) && (ent->class_id != ENTITY_FUNC_BUTTON)
 				&& (ent->class_id != ENTITY_FUNC_DOOR_SECRET) && (ent->class_id != ENTITY_FUNC_DOOR_SECRET2)
 				&& (ent->class_id != ENTITY_FUNC_PLAT) && (ent->class_id != ENTITY_FUNC_PLAT2)
 				&& (ent->class_id != ENTITY_FUNC_WATER) && (ent->class_id != ENTITY_TURRET_WALL)
-				&& ( (ent->class_id != ENTITY_MONSTER_TURRET) || !(ent->spawnflags & 128) ) )
+				&& ( (ent->class_id != ENTITY_MONSTER_TURRET) || !(ent->spawnflags & 128) ) )*/
 			{
 				VectorMA (self->s.origin, ent->movewith_offset[0], forward, ent->s.origin);
 				VectorMA (ent->s.origin, ent->movewith_offset[1], right, ent->s.origin);
@@ -3357,8 +3373,8 @@ void train_move_children (edict_t *self)
 			// Match angular velocities
 			if (self->turn_rider)
 			{
-			//	if (!strcmp(ent->classname, "func_rotating"))
-				if (ent->class_id == ENTITY_FUNC_ROTATING)
+				if (!strcmp(ent->classname, "func_rotating"))
+			//	if (ent->class_id == ENTITY_FUNC_ROTATING)
 				{
 				/*	if (ent->movedir[0] > 0)
 						ent->s.angles[1] = self->s.angles[1];
@@ -3396,11 +3412,11 @@ void train_move_children (edict_t *self)
 					// their own.
 					if (!ent->do_not_rotate)
 					{
-					//	if ( !strcmp(ent->classname, "turret_breach") || !strcmp(ent->classname, "turret_base") )
-						if ( (ent->class_id == ENTITY_TURRET_BREACH) || (ent->class_id == ENTITY_TURRET_BASE) )
+						if ( !strcmp(ent->classname, "turret_breach") || !strcmp(ent->classname, "turret_base") )
+					//	if ( (ent->class_id == ENTITY_TURRET_BREACH) || (ent->class_id == ENTITY_TURRET_BASE) )
 							VectorCopy (self->avelocity, ent->avelocity);
-					//	else if (!strcmp(ent->classname, "func_door_rotating"))
-						else if (ent->class_id == ENTITY_FUNC_DOOR_ROTATING)
+						else if (!strcmp(ent->classname, "func_door_rotating"))
+					//	else if (ent->class_id == ENTITY_FUNC_DOOR_ROTATING)
 						{
 							VectorCopy (self->avelocity, ent->avelocity);
 						//	VectorCopy (parent_angle_change, ent->pos1);
@@ -3441,8 +3457,8 @@ void train_move_children (edict_t *self)
 				else if (is_monster)
 				{
 					// Knightmare- adjust monster_turret's aiming angles for yaw movement
-				//	if (!strcmp(ent->classname, "monster_turret") && (amove[YAW] != 0) )
-					if ( (ent->class_id == ENTITY_MONSTER_TURRET) && (amove[YAW] != 0) )
+					if (!strcmp(ent->classname, "monster_turret") && (amove[YAW] != 0) )
+				//	if ( (ent->class_id == ENTITY_MONSTER_TURRET) && (amove[YAW] != 0) )
 					{
 						if (ent->offset && ent->old_offset && (ent->offset[1] != -1 && ent->offset[1] != -2))
 						{
@@ -3468,22 +3484,22 @@ void train_move_children (edict_t *self)
 			}
 			// Special cases:
 			// Func_door/func_button and trigger fields
-		/*	if ( !strcmp(ent->classname, "func_door") || !strcmp(ent->classname, "func_button")
-				|| !strcmp(ent->classname, "func_door_secret") || !strcmp(ent->classname, "func_door_secret2")
+			if ( !strcmp(ent->classname, "func_door") || !strcmp(ent->classname, "func_button")
+				|| (ent->class_id == ENTITY_FUNC_DOOR_SECRET) || !strcmp(ent->classname, "func_door_secret2")
 				|| !strcmp(ent->classname, "func_plat") || !strcmp(ent->classname, "func_plat2")
 				|| !strcmp(ent->classname, "func_water") || !strcmp(ent->classname, "turret_wall")
-				|| ( !strcmp(ent->classname, "monster_turret") && (ent->spawnflags & 128) ) )*/
-			if ( (ent->class_id == ENTITY_FUNC_DOOR) || (ent->class_id == ENTITY_FUNC_BUTTON)
+				|| ( !strcmp(ent->classname, "monster_turret") && (ent->spawnflags & 128) ) )
+		/*	if ( (ent->class_id == ENTITY_FUNC_DOOR) || (ent->class_id == ENTITY_FUNC_BUTTON)
 				|| (ent->class_id == ENTITY_FUNC_DOOR_SECRET) || (ent->class_id == ENTITY_FUNC_DOOR_SECRET2)
 				|| (ent->class_id == ENTITY_FUNC_PLAT) || (ent->class_id == ENTITY_FUNC_PLAT2)
 				|| (ent->class_id == ENTITY_FUNC_WATER) || (ent->class_id == ENTITY_TURRET_WALL)
-				|| ( (ent->class_id == ENTITY_MONSTER_TURRET) && (ent->spawnflags & 128) ) )
+				|| ( (ent->class_id == ENTITY_MONSTER_TURRET) && (ent->spawnflags & 128) ) )*/
 			{
 				VectorAdd (ent->s.angles, ent->org_angles, angles);
 				G_SetMovedir (angles, ent->movedir);
 				// Knightmare- these entities need special calculations
-			//	if (!strcmp(ent->classname, "monster_turret") || !strcmp(ent->classname, "turret_wall")) 
-				if ( (ent->class_id == ENTITY_MONSTER_TURRET) || (ent->class_id == ENTITY_TURRET_WALL) ) 
+				if (!strcmp(ent->classname, "monster_turret") || !strcmp(ent->classname, "turret_wall")) 
+			//	if ( (ent->class_id == ENTITY_MONSTER_TURRET) || (ent->class_id == ENTITY_TURRET_WALL) ) 
 				{
 					vec3_t		eforward, tangles;
 
@@ -3494,7 +3510,6 @@ void train_move_children (edict_t *self)
 					VectorMA (ent->pos1,  ent->movewith_offset[2], up, ent->pos1);
 					VectorMA (ent->pos1, 32, eforward, ent->pos2);
 				}
-			//	else if (!strcmp(ent->classname, "func_door_secret"))
 				if (ent->class_id == ENTITY_FUNC_DOOR_SECRET)
 				{
 					vec3_t	eforward, eright, eup;
@@ -3509,8 +3524,8 @@ void train_move_children (edict_t *self)
 						VectorMA (ent->pos0, ent->side * ent->width, eright, ent->pos1);
 					VectorMA (ent->pos1, ent->length, eforward, ent->pos2);
 				}
-			//	else if (!strcmp(ent->classname, "func_door_secret2"))
-				else if (ent->class_id == ENTITY_FUNC_DOOR_SECRET2)
+				else if (!strcmp(ent->classname, "func_door_secret2"))
+			//	else if (ent->class_id == ENTITY_FUNC_DOOR_SECRET2)
 				{
 					vec3_t	eforward, eright, eup;
 
@@ -3537,8 +3552,8 @@ void train_move_children (edict_t *self)
 						VectorAdd (ent->pos1, eforward, ent->pos2);
 					}
 				}
-			//	else if (!strcmp(ent->classname, "func_plat") || !strcmp(ent->classname, "func_plat2"))
-				else if ( (ent->class_id == ENTITY_FUNC_PLAT) || (ent->class_id == ENTITY_FUNC_PLAT2) )
+				else if (!strcmp(ent->classname, "func_plat") || !strcmp(ent->classname, "func_plat2"))
+			//	else if ( (ent->class_id == ENTITY_FUNC_PLAT) || (ent->class_id == ENTITY_FUNC_PLAT2) )
 				{
 					VectorMA (self->s.origin, ent->movewith_offset[0], forward, ent->pos1);
 					VectorMA (ent->pos1, ent->movewith_offset[1], right, ent->pos1);
@@ -3568,8 +3583,8 @@ void train_move_children (edict_t *self)
 					// movement routines
 					VectorCopy (self->velocity, ent->velocity);
 					// Sanity insurance:
-				//	if (!strcmp(ent->classname, "func_plat") || !strcmp(ent->classname, "func_plat2"))
-					 if ( (ent->class_id == ENTITY_FUNC_PLAT) || (ent->class_id == ENTITY_FUNC_PLAT2) )
+					if (!strcmp(ent->classname, "func_plat") || !strcmp(ent->classname, "func_plat2"))
+				//	if ( (ent->class_id == ENTITY_FUNC_PLAT) || (ent->class_id == ENTITY_FUNC_PLAT2) )
 					{	// top and bottom states are reversed for plats
 						if (ent->moveinfo.state == STATE_BOTTOM)
 							VectorCopy (ent->pos2, ent->s.origin);
@@ -3590,18 +3605,18 @@ void train_move_children (edict_t *self)
 			if (amove[YAW])
 			{
 				// Cross fingers here... move bounding boxes of doors and buttons
-			/*	if ( !strcmp(ent->classname, "func_door") || !strcmp(ent->classname, "func_button")
-					|| !strcmp(ent->classname, "func_door_secret") || !strcmp(ent->classname, "func_door_secret2")
+				if ( !strcmp(ent->classname, "func_door") || !strcmp(ent->classname, "func_button")
+					|| (ent->class_id == ENTITY_FUNC_DOOR_SECRET) || !strcmp(ent->classname, "func_door_secret2")
 					|| !strcmp(ent->classname, "func_plat") || !strcmp(ent->classname, "func_plat2")
 					|| !strcmp(ent->classname, "func_water") || (ent->solid == SOLID_TRIGGER)
 					|| !strcmp(ent->classname, "turret_wall")
-					|| ( !strcmp(ent->classname, "monster_turret") && (ent->spawnflags & 128) ) )*/
-				if ( (ent->class_id == ENTITY_FUNC_DOOR) || (ent->class_id == ENTITY_FUNC_BUTTON)
+					|| ( !strcmp(ent->classname, "monster_turret") && (ent->spawnflags & 128) ) )
+			/*	if ( (ent->class_id == ENTITY_FUNC_DOOR) || (ent->class_id == ENTITY_FUNC_BUTTON)
 					|| (ent->class_id == ENTITY_FUNC_DOOR_SECRET) || (ent->class_id == ENTITY_FUNC_DOOR_SECRET2)
 					|| (ent->class_id == ENTITY_FUNC_PLAT) || (ent->class_id == ENTITY_FUNC_PLAT2)
 					|| (ent->class_id == ENTITY_FUNC_WATER) || (ent->solid == SOLID_TRIGGER)
 					|| (ent->class_id == ENTITY_TURRET_WALL)
-					|| ( (ent->class_id == ENTITY_MONSTER_TURRET) && (ent->spawnflags & 128) ) )
+					|| ( (ent->class_id == ENTITY_MONSTER_TURRET) && (ent->spawnflags & 128) ) )*/
 				{
 					float       ca, sa, yaw;
 					vec3_t      p00, p01, p10, p11;
@@ -3638,8 +3653,8 @@ void train_move_children (edict_t *self)
 			}
 
 			// FMOD 
-		//	if (!Q_stricmp(ent->classname, "target_playback"))
-			if (ent->class_id == ENTITY_TARGET_PLAYBACK)
+			if (!Q_stricmp(ent->classname, "target_playback"))
+		//	if (ent->class_id == ENTITY_TARGET_PLAYBACK)
 				FMOD_UpdateSpeakerPos(ent);
 
 			// Correct func_door_rotating start/end positions
@@ -4034,13 +4049,13 @@ void train_children_think (edict_t *self)
 		return;
 	}
 
-//	if (self->enemy->movewith_next && (self->enemy->movewith_next->movewith_ent == self->enemy))
-//	{
-//		set_child_movement(self->enemy);
-//		self->nextthink = level.time + FRAMETIME;
-//	}
+/*	if (self->enemy->movewith_next && (self->enemy->movewith_next->movewith_ent == self->enemy))
+	{
+		set_child_movement (self->enemy);
+		self->nextthink = level.time + FRAMETIME;
+	}
 	else 
-//	if (level.time < 2)
+	if (level.time < 2)	*/
 		self->nextthink = level.time + FRAMETIME;
 }
 
@@ -4560,7 +4575,7 @@ void func_train_find (edict_t *self)
 		ent->enemy = self;
 		ent->nextthink = level.time + FRAMETIME;
 	}
-	//end Rroff
+	// end Rroff
 	else if (self->spawnflags & TRAIN_SPLINE)
 	{
 		ent->think = Train_Move_Spline;
@@ -4573,7 +4588,7 @@ void func_train_find (edict_t *self)
 		ent->enemy = self;
 		ent->nextthink = level.time + FRAMETIME;
 	}
-	self->postthink = train_move_children; // Knightmare- supports movewith
+	self->postthink = train_move_children;	// Knightmare- supports movewith
 
 	VectorCopy (self->s.origin, daoldorigin); // Knightmare- copy old orgin for reference
 	if (self->spawnflags & TRAIN_ORIGIN)	// Knightmare- func_train_origin support
@@ -5327,7 +5342,7 @@ void SP_func_door_secret (edict_t *ent)
 		ent->touch = door_touch;
 	}
 	ent->classname = "func_door";
-	ent->postthink = train_move_children; // Knightmare- now supports movewith
+	ent->postthink = train_move_children;	// Knightmare- now supports movewith
 
 	gi.linkentity (ent);
 }
@@ -6066,7 +6081,7 @@ void SP_func_door_swinging (edict_t *self)
 	if ( pivot && (self->health > 0) )
 		self->die = swinging_door_killed;
 
-	self->postthink = train_move_children; //supports movewith
+	self->postthink = train_move_children;	// Knightmare- now supports movewith
 
 	self->flags |= FL_REVERSIBLE;
 //	strcpy(self->classname, "func_door_rotating");

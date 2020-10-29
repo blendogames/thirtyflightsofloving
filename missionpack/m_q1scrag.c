@@ -27,9 +27,9 @@ void scrag_sight (edict_t *self, edict_t *other)
 	gi.sound (self, CHAN_VOICE, sound_sight, 1, ATTN_NORM, 0);
 }
 
-void scrag_attack_sound(edict_t *self)
+void scrag_attack_sound (edict_t *self)
 {
-	gi.sound (self, CHAN_VOICE, sound_attack, 1, ATTN_NORM, 0); //WAS ATTN_IDLE
+	gi.sound (self, CHAN_VOICE, sound_attack, 1, ATTN_NORM, 0); // WAS ATTN_IDLE
 }
 
 void scrag_idle (edict_t *self)
@@ -154,12 +154,12 @@ void scrag_pain (edict_t *self, edict_t *other, float kick, int damage)
 	if (skill->value == 3)
 		return;		// no pain anims in nightmare
 
-	if(self->health > 0)
+	if (self->health > 0)
 		gi.sound (self, CHAN_VOICE, sound_pain, 1, ATTN_NORM, 0);
 	self->monsterinfo.currentmove = &scrag_move_pain;
 }
 
-void scrag_dead(edict_t * self)
+void scrag_dead (edict_t * self)
 {
 	VectorSet (self->mins, -16, -16, -24);
 	VectorSet (self->maxs, 16, 16, -8);
@@ -190,14 +190,14 @@ mframe_t scrag_frames_die [] =
 mmove_t scrag_move_die = {FRAME_death1, FRAME_death8, scrag_frames_die, scrag_dead};
 
 
-void scrag_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+void scrag_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
 	int		n;
 // check for gib
 
 	if (self->health <=  self->gib_health && !(self->spawnflags & SF_MONSTER_NOGIB))
 	{
-		gi.sound (self, CHAN_VOICE|CHAN_RELIABLE, gi.soundindex ("q1monstr/udeath.wav"), 1, ATTN_NORM, 0);
+		gi.sound (self, CHAN_VOICE|CHAN_RELIABLE, gi.soundindex ("q1player/udeath.wav"), 1, ATTN_NORM, 0);
 
 		for (n= 0; n < 3; n++)
 			ThrowGib (self, "models/objects/q1gibs/q1gib2/tris.md2", damage, GIB_ORGANIC);
@@ -223,16 +223,16 @@ void scrag_fire (edict_t *self)
 	vec3_t	forward, right, start;
 	vec3_t	end, dir;
 
-	if(!self->enemy)
+	if (!self->enemy)
 		return;
 
 //	gi.sound (self, CHAN_VOICE, sound_attack, 1, ATTN_NORM, 0);
 
-//fire 1	
+// fire 1	
 	AngleVectors (self->s.angles, forward, right, NULL);
 	G_ProjectSource (self->s.origin, monster_flash_offset[MZ2_FLYER_BLASTER_1], forward, right, start);
 
-	start[2] += 48; //was 32
+	start[2] += 48;	// was 32
 
 	VectorCopy (self->enemy->s.origin, end);
 	end[2] += self->enemy->viewheight;
@@ -244,13 +244,13 @@ void scrag_fire (edict_t *self)
 	gi.WriteByte (MZ2_FLYER_BLASTER_1);
 	gi.multicast (start, MULTICAST_PVS);
 */
-	q1_fire_acidspit(self,start, dir, 9, 500);
+	q1_fire_acidspit (self, start, dir, 9, 500);
 
 // fire 2
 /*	AngleVectors (self->s.angles, forward, right, NULL);
 	G_ProjectSource (self->s.origin, monster_flash_offset[MZ2_FLYER_BLASTER_2], forward, right, start);
 
-	start[2]+=32;
+	start[2] += 32;
 	
 	VectorCopy (self->enemy->s.origin, end);
 	end[2] += self->enemy->viewheight;
@@ -263,7 +263,7 @@ void scrag_fire (edict_t *self)
 	gi.WriteByte (MZ2_FLYER_BLASTER_2);
 	gi.multicast (start, MULTICAST_PVS);
 */
-//	q1_fire_acidspit(self,start, dir, 9, 500);
+//	q1_fire_acidspit (self, start, dir, 9, 500);
 }
 
 void scrag_fire2 (edict_t *self)
@@ -271,7 +271,7 @@ void scrag_fire2 (edict_t *self)
 	vec3_t	forward, right, start;
 	vec3_t	end, dir;
 
-	if(!self->enemy)
+	if (!self->enemy)
 		return;
 
 //	gi.sound (self, CHAN_VOICE, sound_attack, 1, ATTN_NORM, 0);
@@ -307,9 +307,9 @@ mframe_t scrag_frames_attack [] =
 		ai_charge, -1,scrag_fire,				
 		ai_charge, -2,NULL,					
 		ai_charge, -3,NULL,					
-		ai_charge, -2,NULL, //scrag_fire			
+		ai_charge, -2,NULL, // scrag_fire			
 		ai_charge, -1,NULL,					
-		ai_charge, 0, scrag_fire2, //scrag_fire
+		ai_charge, 0, scrag_fire2, // scrag_fire
 		ai_charge, 0, NULL,
 		ai_charge, 0, NULL
 };

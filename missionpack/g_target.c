@@ -245,6 +245,7 @@ void SP_target_goal (edict_t *ent)
 		G_FreeEdict (ent);
 		return;
 	}
+
 	ent->class_id = ENTITY_TARGET_GOAL;
 
 	ent->use = use_target_goal;

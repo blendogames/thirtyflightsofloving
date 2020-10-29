@@ -1886,7 +1886,7 @@ edict_t *SelectRandomDeathmatchSpawnPoint (void)
 	float	range, range1, range2;
 
 	spot = NULL;
-	range1 = range2 = 99999;
+	range1 = range2 = 999999;
 	spot1 = spot2 = NULL;
 
 	while ((spot = G_Find (spot, FOFS(classname), "info_player_deathmatch")) != NULL)
@@ -1985,12 +1985,12 @@ edict_t *SelectLavaCoopSpawnPoint (edict_t *ent)
 	edict_t	*lava;
 	edict_t *pointWithLeastLava;
 	float	lowest;
-	edict_t *spawnPoints [64];
+	edict_t *spawnPoints[64];
 	vec3_t	center;
 	int		numPoints;
 	edict_t *highestlava;
 
-	lavatop = -99999;
+	lavatop = -999999;
 	highestlava = NULL;
 
 	// first, find the highest lava

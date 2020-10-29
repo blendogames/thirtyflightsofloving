@@ -746,7 +746,7 @@ void SP_monster_brain (edict_t *self)
 	self->class_id = ENTITY_MONSTER_BRAIN;
 
 	if (!self->blood_type)
-		self->blood_type = 3; //sparks and blood
+		self->blood_type = 3; // sparks and blood
 
 	gi.linkentity (self);
 

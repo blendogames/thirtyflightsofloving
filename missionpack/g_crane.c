@@ -1780,4 +1780,3 @@ void SP_crane_reset (edict_t *self)
 
 	self->use = crane_reset_use;
 }
-

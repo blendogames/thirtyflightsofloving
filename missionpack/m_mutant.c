@@ -755,6 +755,7 @@ void SP_monster_mutant (edict_t *self)
 	}
 	self->common_name = "Mutant";
 	self->class_id = ENTITY_MONSTER_MUTANT;
+	self->spawnflags |= SF_MONSTER_KNOWS_MIRRORS;
 
 	gi.linkentity (self);
 	

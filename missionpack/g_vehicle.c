@@ -472,7 +472,7 @@ void SP_func_vehicle (edict_t *self)
 	gi.linkentity (self);
 	VectorCopy(self->size,self->org_size);
 
-	self->postthink = train_move_children; //Knightmare- supports movewith
+	self->postthink = train_move_children;	// Knightmare- supports movewith
 
 	if (self->ideal_yaw != 0)
 		self->prethink = turn_vehicle;

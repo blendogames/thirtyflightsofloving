@@ -284,7 +284,7 @@ void modelspawn_think (edict_t *self)
 	if (self->s.frame >= self->framenumbers)
 	{
 		self->s.frame = self->startframe;
-		if(self->spawnflags & ANIM_ONCE)
+		if (self->spawnflags & ANIM_ONCE)
 		{
 			model_spawn_use(self,world,world);
 			return;
@@ -302,7 +302,7 @@ void model_spawn_use (edict_t *self, edict_t *other, edict_t *activator)
 	{
 		self->svflags &= ~SVF_NOCLIENT;
 		self->delay = 0;
-		if(self->framenumbers > 1)
+		if (self->framenumbers > 1)
 		{
 			self->think = modelspawn_think;
 			self->nextthink = level.time + FRAMETIME;
@@ -325,7 +325,7 @@ void model_spawn_use (edict_t *self, edict_t *other, edict_t *activator)
 
 void model_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
-	if(self->deathtarget)
+	if (self->deathtarget)
 	{
 		self->target = self->deathtarget;
 		G_UseTargets (self, attacker);
@@ -415,11 +415,11 @@ void SP_model_spawn (edict_t *ent)
 	{
 		if (ent->spawnflags & PLAYER_MODEL)
 		{
-			if(!ent->usermodel || !strlen(ent->usermodel))
+			if (!ent->usermodel || !strlen(ent->usermodel))
 				ent->s.modelindex = MAX_MODELS-1; //was 255
 			else
 			{
-				if(strstr(ent->usermodel,"tris.md2"))
+				if (strstr(ent->usermodel,"tris.md2"))
 					Com_sprintf(modelname, sizeof(modelname), "players/%s", ent->usermodel);
 				else
 					Com_sprintf(modelname, sizeof(modelname), "players/%s/tris.md2", ent->usermodel);
@@ -471,7 +471,7 @@ void SP_model_spawn (edict_t *ent)
 		ent->use = model_spawn_use;
 	}
 
-	if(!(ent->s.effects & ANIM_MASK) && (ent->framenumbers > 1))
+	if (!(ent->s.effects & ANIM_MASK) && (ent->framenumbers > 1))
 	{
 		ent->think = modelspawn_think;
 		ent->nextthink = level.time + 2*FRAMETIME;
@@ -591,27 +591,23 @@ NOTE: All the pieces must be created after the model train entity, otherwise the
 #define	TRAIN_ROT_CONST		16
 #define TRAIN_SPLINE        8192
 
-extern void train_use (edict_t *self, edict_t *other, edict_t *activator);
-extern void func_train_find (edict_t *self);
-void train_blocked (edict_t *self, edict_t *other);
-
 void model_train_animator(edict_t *animator)
 {
 	edict_t	*train;
 
 	train = animator->owner;
-	if(!train || !train->inuse)
+	if (!train || !train->inuse)
 	{
 		G_FreeEdict(animator);
 		return;
 	}
-	if(Q_stricmp(train->classname,"model_train"))
+	if (Q_stricmp(train->classname, "model_train"))
 	{
 		G_FreeEdict(animator);
 		return;
 	}
 	animator->nextthink = level.time + FRAMETIME;
-	if(VectorLength(train->velocity) == 0)
+	if (VectorLength(train->velocity) == 0)
 		return;
 	train->s.frame++;
 	if (train->s.frame >= train->framenumbers)
@@ -629,7 +625,7 @@ void SP_model_train (edict_t *self)
 	self->moveinfo.sound_middle = self->s.sound;
 	self->s.sound = 0;
 
-	if(!self->inuse) return;
+	if (!self->inuse) return;
 
 	// Reset some things from SP_model_spawn
 	self->delay = 0;
@@ -644,7 +640,7 @@ void SP_model_train (edict_t *self)
 		self->takedamage = DAMAGE_YES;
 	}
 
-	if(self->framenumbers > self->startframe+1)
+	if (self->framenumbers > self->startframe+1)
 	{
 		edict_t	*animator;
 		animator = G_Spawn();
@@ -677,9 +673,9 @@ void SP_model_train (edict_t *self)
 		self->spawnflags &= ~TRAIN_ROT_CONST;
 		self->spawnflags |= TRAIN_SPLINE;
 	}
-	if(self->style == 3)
+	if (self->style == 3)
 		self->spawnflags |= TRAIN_ANIM;		// 32
-	if(self->style == 4)
+	if (self->style == 4)
 		self->spawnflags |= TRAIN_ANIM_FAST;	// 64
 
 	// TRAIN_SMOOTH forces trains to go directly to Move_Done from
@@ -702,12 +698,12 @@ void SP_model_train (edict_t *self)
 	if (!self->speed)
 		self->speed = 100;
 
-	//Mappack
-	if(!self->accel)
+	// Mappack
+	if (!self->accel)
 		self->moveinfo.accel = self->speed;
 	else
 		self->moveinfo.accel = self->accel;
-	if(!self->decel)
+	if (!self->decel)
 		self->moveinfo.decel = self->speed;
 	else
 		self->moveinfo.decel = self->decel;

@@ -22,20 +22,31 @@ void SaveEntProps (edict_t *e, FILE *f)
 #endif
 		"   frame       = %d\n"
 		"   skinnum     = %d\n"
+#ifdef KMQUAKE2_ENGINE_MOD
+		"   alpha       = %g\n"
+#endif
 		"   effects     = 0x%08x\n"
 		"   solid       = 0x%08x\n"
 		"   sound       = %d\n"
-		"   event       = %d\n",
-		e->s.number,vtos(e->s.origin),vtos(e->s.angles),
-		vtos(e->s.old_origin),e->s.modelindex,e->s.modelindex2,
-		e->s.modelindex3,e->s.modelindex4,
-#ifdef KMQUAKE2_ENGINE_MOD
-		e->s.modelindex5,e->s.modelindex6,
+#ifdef LOOP_SOUND_ATTENUATION
+		"   attenuation = %g\n"
 #endif
-		e->s.frame,
-		e->s.skinnum,e->s.effects,e->s.solid,e->s.sound,
-		e->s.event);
-	fprintf(f,"inuse       = %d\n"
+		"   event       = %d\n",
+		e->s.number, vtos(e->s.origin), vtos(e->s.angles),
+		vtos(e->s.old_origin), e->s.modelindex, e->s.modelindex2,
+		e->s.modelindex3, e->s.modelindex4,
+#ifdef KMQUAKE2_ENGINE_MOD
+		e->s.modelindex5, e->s.modelindex6,
+#endif
+		e->s.frame, e->s.skinnum,
+#ifdef KMQUAKE2_ENGINE_MOD
+		e->s.alpha,
+#endif
+		e->s.effects, e->s.solid, e->s.sound,
+#ifdef LOOP_SOUND_ATTENUATION
+		e->s.attenuation,
+#endif
+		e->s.event);	fprintf(f,"inuse       = %d\n"
 		"linkcount   = %d\n"
 		"svflags     = 0x%08x\n"
 		"mins        = %s\n"
@@ -45,16 +56,17 @@ void SaveEntProps (edict_t *e, FILE *f)
 		"size        = %s\n"
 		"solid       = 0x%08x\n"
 		"clipmask    = 0x%08x\n",
-		e->inuse,e->linkcount,e->svflags,vtos(e->mins),
-		vtos(e->maxs),vtos(e->absmin),vtos(e->absmax),
-		vtos(e->size),e->solid,e->clipmask);
-	fprintf(f,"movetype    = 0x%08x\n"
+		e->inuse, e->linkcount, e->svflags, vtos(e->mins),
+		vtos(e->maxs), vtos(e->absmin), vtos(e->absmax),
+		vtos(e->size), e->solid, e->clipmask);
+	fprintf(f, "movetype    = 0x%08x\n"
 		"flags       = 0x%08x\n"
 		"freetime    = %g\n"
 		"message     = %s\n"
 		"key_message = %s\n"
 		"classname   = %s\n"
 		"spawnflags  = 0x%08x\n"
+		"moreflags   = 0x%08x\n"
 		"timestamp   = %g\n"
 		"angle       = %g\n"
 		"target      = %s\n"
@@ -65,11 +77,11 @@ void SaveEntProps (edict_t *e, FILE *f)
 		"deathtarget = %s\n"
 		"combattarget= %s\n"
 		"dmgteam     = %s\n",
-		e->movetype,e->flags,e->freetime,e->message,e->key_message,
-		e->classname,e->spawnflags,e->timestamp,e->angle,e->target,
-		e->targetname,e->killtarget,e->team,e->pathtarget,e->deathtarget,
-		e->combattarget,e->dmgteam);
-	fprintf(f,"speed       = %g\n"
+		e->movetype, e->flags, e->freetime, e->message, e->key_message,
+		e->classname, e->spawnflags, e->moreflags, e->timestamp, e->angle, e->target,
+		e->targetname, e->killtarget, e->team, e->pathtarget, e->deathtarget,
+		e->combattarget, e->dmgteam);
+	fprintf(f, "speed       = %g\n"
 		"accel       = %g\n"
 		"decel       = %g\n"
 		"movedir     = %s\n"
@@ -87,21 +99,21 @@ void SaveEntProps (edict_t *e, FILE *f)
 		"ideal_roll  = %g\n"
 		"roll        = %g\n"
 		"groundentity= %s\n",
-		e->speed,e->accel,e->decel,vtos(e->movedir),vtos(e->pos1),
-		vtos(e->pos2),vtos(e->velocity),vtos(e->avelocity),
-		e->mass,e->air_finished,e->gravity,e->yaw_speed,e->ideal_yaw,
-		e->pitch_speed,e->ideal_pitch,e->ideal_roll,e->roll,
+		e->speed, e->accel, e->decel, vtos(e->movedir), vtos(e->pos1),
+		vtos(e->pos2), vtos(e->velocity), vtos(e->avelocity),
+		e->mass, e->air_finished, e->gravity, e->yaw_speed, e->ideal_yaw,
+		e->pitch_speed, e->ideal_pitch, e->ideal_roll, e->roll,
 		(e->groundentity ? e->groundentity->classname : "None") );
-	fprintf(f,"touch_debounce_time  = %g\n"
+	fprintf(f, "touch_debounce_time  = %g\n"
 		"pain_debounce_time   = %g\n"
 		"damage_debounce_time = %g\n"
 		"gravity_debounce_time= %g\n"
 		"fly_debounce_time    = %g\n"
 		"last_move_time       = %g\n",
-		e->touch_debounce_time,e->pain_debounce_time,
-		e->damage_debounce_time,e->gravity_debounce_time,
-		e->fly_sound_debounce_time,e->last_move_time);
-	fprintf(f,"health      = %d\n"
+		e->touch_debounce_time, e->pain_debounce_time,
+		e->damage_debounce_time, e->gravity_debounce_time,
+		e->fly_sound_debounce_time, e->last_move_time);
+	fprintf(f, "health      = %d\n"
 		"max_health  = %d\n"
 		"gib_health  = %d\n"
 		"deadflag    = %d\n"
@@ -109,18 +121,18 @@ void SaveEntProps (edict_t *e, FILE *f)
 		"health2     = %d\n"
 		"mass2       = %d\n"
 		"powerarmor_time=%g\n",
-		e->health,e->max_health,e->gib_health,e->deadflag,e->show_hostile,
-		e->health2,e->mass2,e->powerarmor_time);
-	fprintf(f,"viewheight  = %d\n"
+		e->health, e->max_health, e->gib_health, e->deadflag, e->show_hostile,
+		e->health2, e->mass2, e->powerarmor_time);
+	fprintf(f, "viewheight  = %d\n"
 		"takedamage  = %d\n"
 		"dmg         = %d\n"
 		"radius_dmg  = %d\n"
 		"dmg_radius  = %g\n"
 		"sounds      = %d\n"
 		"count       = %d\n",
-		e->viewheight,e->takedamage,e->dmg,e->radius_dmg,e->dmg_radius,
-		e->sounds,e->count);
-	fprintf(f,"noise_index = %d\n"
+		e->viewheight, e->takedamage, e->dmg, e->radius_dmg, e->dmg_radius,
+		e->sounds, e->count);
+	fprintf(f, "noise_index = %d\n"
 		"noise_index2= %d\n"
 		"volume      = %d\n"
 		"attenuation = %g\n"
@@ -134,15 +146,15 @@ void SaveEntProps (edict_t *e, FILE *f)
 		"waterlevel  = %d\n"
 		"move_origin = %s\n"
 		"move_angles = %s\n",
-		e->noise_index,e->noise_index2,e->volume,e->attenuation,
-		e->wait,e->delay,e->random,e->starttime,e->endtime,e->teleport_time,
-		e->watertype,e->waterlevel,vtos(e->move_origin),vtos(e->move_angles));
-	fprintf(f,"light_level = %d\n"
+		e->noise_index, e->noise_index2, e->volume, e->attenuation,
+		e->wait, e->delay, e->random, e->starttime, e->endtime, e->teleport_time,
+		e->watertype, e->waterlevel, vtos(e->move_origin), vtos(e->move_angles));
+	fprintf(f, "light_level = %d\n"
 		"style       = %d\n",
-		e->light_level,e->style);
-	fprintf(f,"enemy = %s\n",(e->enemy ? e->enemy->classname : "NULL"));
-	fprintf(f,"enemy->inuse? %s\n",(e->enemy && e->enemy->inuse ? "Y" : "N"));
-	fprintf(f,"moveinfo_t\n"
+		e->light_level, e->style);
+	fprintf(f, "enemy = %s\n",(e->enemy ? e->enemy->classname : "NULL"));
+	fprintf(f, "enemy->inuse? %s\n",(e->enemy && e->enemy->inuse ? "Y" : "N"));
+	fprintf(f, "moveinfo_t\n"
 		"   start_origin    = %s\n"
 		"   start_angles    = %s\n"
 		"   end_origin      = %s\n"
@@ -166,13 +178,13 @@ void SaveEntProps (edict_t *e, FILE *f)
 		vtos(e->moveinfo.start_angles),
 		vtos(e->moveinfo.end_origin),
 		vtos(e->moveinfo.end_angles),
-		e->moveinfo.sound_start,e->moveinfo.sound_middle,
-		e->moveinfo.sound_end,e->moveinfo.accel,e->moveinfo.speed,
-		e->moveinfo.decel,e->moveinfo.distance,e->moveinfo.wait,
-		e->moveinfo.state,vtos(e->moveinfo.dir),e->moveinfo.current_speed,
-		e->moveinfo.move_speed,e->moveinfo.next_speed,
-		e->moveinfo.remaining_distance,e->moveinfo.decel_distance);
-	fprintf(f,"monsterinfo\n"
+		e->moveinfo.sound_start, e->moveinfo.sound_middle,
+		e->moveinfo.sound_end, e->moveinfo.accel, e->moveinfo.speed,
+		e->moveinfo.decel, e->moveinfo.distance, e->moveinfo.wait,
+		e->moveinfo.state, vtos(e->moveinfo.dir), e->moveinfo.current_speed,
+		e->moveinfo.move_speed, e->moveinfo.next_speed,
+		e->moveinfo.remaining_distance, e->moveinfo.decel_distance);
+	fprintf(f, "monsterinfo\n"
 		"   aiflags          = 0x%08x\n"
 		"   nextframe        = %d\n"
 		"   scale            = %g\n"
@@ -189,14 +201,14 @@ void SaveEntProps (edict_t *e, FILE *f)
 		"   power_armor_type = %d\n"
 		"   power_armor_power= %d\n"
 		"   min_range        = %g\n",
-		e->monsterinfo.aiflags,e->monsterinfo.nextframe,
-		e->monsterinfo.scale,e->monsterinfo.pausetime,
-		e->monsterinfo.attack_finished,vtos(e->monsterinfo.saved_goal),
-		e->monsterinfo.search_time,e->monsterinfo.trail_time,
-		vtos(e->monsterinfo.last_sighting),e->monsterinfo.attack_state,
-		e->monsterinfo.lefty,e->monsterinfo.idle_time,
-		e->monsterinfo.linkcount,e->monsterinfo.power_armor_type,
-		e->monsterinfo.power_armor_power,e->monsterinfo.min_range);
+		e->monsterinfo.aiflags, e->monsterinfo.nextframe,
+		e->monsterinfo.scale, e->monsterinfo.pausetime,
+		e->monsterinfo.attack_finished, vtos(e->monsterinfo.saved_goal),
+		e->monsterinfo.search_time, e->monsterinfo.trail_time,
+		vtos(e->monsterinfo.last_sighting), e->monsterinfo.attack_state,
+		e->monsterinfo.lefty, e->monsterinfo.idle_time,
+		e->monsterinfo.linkcount, e->monsterinfo.power_armor_type,
+		e->monsterinfo.power_armor_power, e->monsterinfo.min_range);
 }
 
 void ShiftItem (edict_t *ent, int direction)

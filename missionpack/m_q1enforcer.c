@@ -192,9 +192,13 @@ void q1enforcer_dead (edict_t *self)
 
 void q1enforcer_throw_backpack (edict_t *self) 
 {
-/*	edict_t	*backpack;
+	edict_t	*backpack;
 
-	backpack = Drop_Item(self, FindItemByClassname("item_q1_backpack"));
+	if (self->health <= self->gib_health)
+		return;
+
+	backpack = Drop_Q1Backpack (self, FindItemByClassname("ammo_cells"), 5);
+/*	backpack = Drop_Item(self, FindItemByClassname("item_q1_backpack"));
 	backpack->item = FindItemByClassname("ammo_cells");
 	backpack->count = 5;
 	backpack->touch = Touch_Item;
@@ -249,7 +253,7 @@ void q1enforcer_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int d
 // check for gib
 	if (self->health <= self->gib_health && !(self->spawnflags & SF_MONSTER_NOGIB))
 	{
-		gi.sound (self, CHAN_VOICE|CHAN_RELIABLE, gi.soundindex ("q1monstr/udeath.wav"), 1, ATTN_NORM, 0);
+		gi.sound (self, CHAN_VOICE|CHAN_RELIABLE, gi.soundindex ("q1player/udeath.wav"), 1, ATTN_NORM, 0);
 
 		for (n= 0; n < 2; n++)
 			ThrowGib (self, "models/objects/q1gibs/q1gib1/tris.md2", damage, GIB_ORGANIC);
@@ -349,6 +353,10 @@ void SP_monster_q1_enforcer (edict_t *self)
 	sound_sight3	= gi.soundindex ("q1enforcer/sight3.wav");
 	sound_sight4	= gi.soundindex ("q1enforcer/sight4.wav");
 	sound_fire		= gi.soundindex ("q1enforcer/enfire.wav");
+
+	// precache backpack
+	gi.modelindex ("models/items/q1backpack/tris.md2");
+//	gi.soundindex ("q1weapons/lock4.wav");
 
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;

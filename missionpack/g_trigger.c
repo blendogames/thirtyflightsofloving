@@ -22,7 +22,7 @@ void InitTrigger (edict_t *self)
 	self->svflags = SVF_NOCLIENT;
 }
 
-//Knightmare- same as above, but for bbox triggers
+// Knightmare- same as above, but for bbox triggers
 void InitTriggerBbox (edict_t *self)
 {
 	if (!VectorCompare (self->s.angles, vec3_origin))
@@ -212,7 +212,7 @@ sounds
 "message"	string to be displayed when triggered
 */
 
-void SP_trigger_once(edict_t *ent)
+void SP_trigger_once (edict_t *ent)
 {
 	// make old maps work because I messed up on flag assignments here
 	// triggered was on bit 1 when it should have been on bit 4
@@ -252,6 +252,8 @@ count -	how many times it can be used before being auto-killtargeted
 
 void SP_trigger_bbox (edict_t *self)
 {
+	self->class_id = ENTITY_TRIGGER_BBOX;
+
 	if (self->sounds == 1)
 		self->noise_index = gi.soundindex ("misc/secret.wav");
 	else if (self->sounds == 2)
@@ -369,11 +371,11 @@ void trigger_key_use (edict_t *self, edict_t *other, edict_t *activator)
 			if (self->item->flags & IT_Q1)
 			{
 				if (index == key_q1_med_gold_index || index == key_q1_med_silver_index)
-					gi.sound (activator, CHAN_AUTO, gi.soundindex ("q1world/doors/medtry.wav"), 1, ATTN_NORM, 0);
+					gi.sound (activator, CHAN_AUTO, gi.soundindex ("q1doors/medtry.wav"), 1, ATTN_NORM, 0);
 				else if (index == key_q1_rune_gold_index || index == key_q1_rune_silver_index)
-					gi.sound (activator, CHAN_AUTO, gi.soundindex ("q1world/doors/runetry.wav"), 1, ATTN_NORM, 0);
+					gi.sound (activator, CHAN_AUTO, gi.soundindex ("q1doors/runetry.wav"), 1, ATTN_NORM, 0);
 				else if (index == key_q1_base_gold_index || index == key_q1_base_silver_index)
-					gi.sound (activator, CHAN_AUTO, gi.soundindex ("q1world/doors/basetry.wav"), 1, ATTN_NORM, 0);
+					gi.sound (activator, CHAN_AUTO, gi.soundindex ("q1doors/basetry.wav"), 1, ATTN_NORM, 0);
 			}
 			else
 			// end Skid
@@ -388,11 +390,11 @@ void trigger_key_use (edict_t *self, edict_t *other, edict_t *activator)
 		if (self->item->flags & IT_Q1)
 		{
 			if (index == key_q1_med_gold_index || index == key_q1_med_silver_index)
-				gi.sound (activator, CHAN_AUTO, gi.soundindex ("q1world/doors/meduse.wav"), 1, ATTN_NORM, 0);
+				gi.sound (activator, CHAN_AUTO, gi.soundindex ("q1doors/meduse.wav"), 1, ATTN_NORM, 0);
 			else if (index == key_q1_rune_gold_index || index == key_q1_rune_silver_index)
-				gi.sound (activator, CHAN_AUTO, gi.soundindex ("q1world/doors/runeuse.wav"), 1, ATTN_NORM, 0);
+				gi.sound (activator, CHAN_AUTO, gi.soundindex ("q1doors/runeuse.wav"), 1, ATTN_NORM, 0);
 			else if (index == key_q1_base_gold_index || index == key_q1_base_silver_index)
-				gi.sound (activator, CHAN_AUTO, gi.soundindex ("q1world/doors/baseuse.wav"), 1, ATTN_NORM, 0);
+				gi.sound (activator, CHAN_AUTO, gi.soundindex ("q1doors/baseuse.wav"), 1, ATTN_NORM, 0);
 		}
 		else
 		// end Skid	
@@ -493,16 +495,16 @@ void SP_trigger_key (edict_t *self)
 		if (self->item->flags & IT_Q1)
 		{
 			if (index == key_q1_med_gold_index || index == key_q1_med_silver_index) {
-				gi.soundindex ("q1world/doors/medtry.wav");
-				gi.soundindex ("q1world/doors/meduse.wav");
+				gi.soundindex ("q1doors/medtry.wav");
+				gi.soundindex ("q1doors/meduse.wav");
 			}
 			else if (index == key_q1_rune_gold_index || index == key_q1_rune_silver_index) {
-				gi.soundindex ("q1world/doors/runetry.wav");
-				gi.soundindex ("q1world/doors/runeuse.wav");
+				gi.soundindex ("q1doors/runetry.wav");
+				gi.soundindex ("q1doors/runeuse.wav");
 			}
 			else if (index == key_q1_base_gold_index || index == key_q1_base_silver_index) {
-				gi.soundindex ("q1world/doors/basetry.wav");
-				gi.soundindex ("q1world/doors/baseuse.wav");
+				gi.soundindex ("q1doors/basetry.wav");
+				gi.soundindex ("q1doors/baseuse.wav");
 			}
 		}
 		else {
@@ -708,7 +710,7 @@ void SP_trigger_push (edict_t *self)
 			self->solid = SOLID_NOT;
 	}
 	else if (self->spawnflags & PUSH_START_OFF)
-	{   //Knightmare- they must be using the custom sound spawngflag from Lazarus
+	{   // Knightmare- they must be using the custom sound spawngflag from Lazarus
 		gi.dprintf ("trigger_push is START_OFF but not targeted.\n");
 	//	self->svflags = 0;
 	//	self->touch = NULL;
@@ -742,6 +744,8 @@ SILENT - Doesn't make wind noise
 
 void SP_trigger_push_bbox (edict_t *self)
 {
+	self->class_id = ENTITY_TRIGGER_PUSH;
+
 	InitTriggerBbox (self);
 
 	if (self->spawnflags & PUSH_CUSTOM_SND)
@@ -803,6 +807,15 @@ NO_PROTECTION	*nothing* stops the damage
 
 "dmg"			default 5 (whole numbers only)
 */
+
+#define SF_HURT_START_OFF       1
+#define SF_HURT_TOGGLE          2
+#define SF_HURT_SILENT          4  // supresses playing the sound
+#define SF_HURT_NO_PROTECTION   8  // *nothing* stops the damage
+#define SF_HURT_SLOW           16  // changes the damage rate to once per second
+#define SF_HURT_NOGIB          32  // Lazarus: won't gib entity
+#define SF_HURT_ENVIRONMENT    64  // Lazarus: environment suit protects from damage
+
 void hurt_use (edict_t *self, edict_t *other, edict_t *activator)
 {
 	if (self->solid == SOLID_NOT)
@@ -811,7 +824,7 @@ void hurt_use (edict_t *self, edict_t *other, edict_t *activator)
 		self->solid = SOLID_NOT;
 	gi.linkentity (self);
 
-	if (!(self->spawnflags & 2))
+	if (!(self->spawnflags & SF_HURT_TOGGLE))
 		self->use = NULL;
 }
 
@@ -826,22 +839,55 @@ void hurt_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *sur
 	if (self->timestamp > level.time)
 		return;
 
-	if (self->spawnflags & 16)
+	if (self->spawnflags & SF_HURT_SLOW)
 		self->timestamp = level.time + 1;
 	else
 		self->timestamp = level.time + FRAMETIME;
 
-	if (!(self->spawnflags & 4))
+	if ( !(self->spawnflags & SF_HURT_SILENT) )
 	{
-		if ((level.framenum % 10) == 0)
+		// DWH - Original code would fail to play a sound for
+		//       SF=16 unless player just HAPPENED to hit
+		//       trigger_hurt at framenum = an integral number of 
+		//       full seconds.
+	//	if ((level.framenum % 10) == 0)
+		if ( ((level.framenum % 10) == 0 ) || (self->spawnflags & SF_HURT_SLOW) )
 			gi.sound (other, CHAN_AUTO, self->noise_index, 1, ATTN_NORM, 0);
 	}
 
-	if (self->spawnflags & 8)
+	if (self->spawnflags & SF_HURT_NO_PROTECTION)
 		dflags = DAMAGE_NO_PROTECTION;
 	else
 		dflags = 0;
-	T_Damage (other, self, self, vec3_origin, other->s.origin, vec3_origin, self->dmg, self->dmg, dflags, MOD_TRIGGER_HURT);
+//	T_Damage (other, self, self, vec3_origin, other->s.origin, vec3_origin, self->dmg, self->dmg, dflags, MOD_TRIGGER_HURT);
+	// Lazarus: healing, no gib, and environment suit protection
+	if (self->dmg > 0)
+	{
+		int	damage = self->dmg;
+
+		if (self->spawnflags & SF_HURT_NOGIB)
+		{
+			if (skill->value > 0)
+				damage = min(damage, other->health - other->gib_health - 1);
+			else
+				damage = min(damage, 2*(other->health - other->gib_health - 1));
+
+			if (damage < 0)
+				damage = 0;
+		}
+
+		if (other->client && (self->spawnflags & SF_HURT_ENVIRONMENT) && (other->client->enviro_framenum > level.framenum))
+			damage = 0;
+
+		if (damage > 0)
+			T_Damage (other, self, self, vec3_origin, other->s.origin, vec3_origin, damage, self->dmg, dflags, MOD_TRIGGER_HURT);
+	}
+	else
+	{
+		other->health -= self->dmg;
+		if (other->health > other->max_health)
+			other->health = other->max_health;
+	}
 }
 
 void SP_trigger_hurt (edict_t *self)
@@ -850,24 +896,30 @@ void SP_trigger_hurt (edict_t *self)
 
 	InitTrigger (self);
 
-	self->noise_index = gi.soundindex ("world/electro.wav");
+//	self->noise_index = gi.soundindex ("world/electro.wav");
 	self->touch = hurt_touch;
 
 	if (!self->dmg)
 		self->dmg = 5;
 
-	if (self->spawnflags & 1)
+	// DWH - play different sound for healing
+	if (self->dmg > 0)
+		self->noise_index = gi.soundindex ("world/electro.wav");
+	else
+		self->noise_index = gi.soundindex ("items/s_health.wav");
+
+	if (self->spawnflags & SF_HURT_START_OFF)
 		self->solid = SOLID_NOT;
 	else
 		self->solid = SOLID_TRIGGER;
 
-	if (self->spawnflags & 2)
+	if (self->spawnflags & SF_HURT_TOGGLE)
 		self->use = hurt_use;
 
 	gi.linkentity (self);
 }
 
-//Knightmare 
+// Knightmare 
 /*QUAKED trigger_hurt_bbox (.5 .5 .5) (-8 -8 -8) (8 8 8) START_OFF TOGGLE SILENT NO_PROTECTION SLOW
 Any entity that touches this will be hurt.
 Same as trigger_hurt, except it doesn't use a model.
@@ -886,22 +938,28 @@ tright Max b-box coords XYZ. Default = 16 16 16
 
 void SP_trigger_hurt_bbox (edict_t *self)
 {
-	InitTriggerBbox (self);
-
 	self->class_id = ENTITY_TRIGGER_HURT;
 
-	self->noise_index = gi.soundindex ("world/electro.wav");
+	InitTriggerBbox (self);
+
+//	self->noise_index = gi.soundindex ("world/electro.wav");
 	self->touch = hurt_touch;
 
 	if (!self->dmg)
 		self->dmg = 5;
 
-	if (self->spawnflags & 1)
+	// DWH - play different sound for healing
+	if (self->dmg > 0)
+		self->noise_index = gi.soundindex ("world/electro.wav");
+	else
+		self->noise_index = gi.soundindex ("items/s_health.wav");
+
+	if (self->spawnflags & SF_HURT_START_OFF)
 		self->solid = SOLID_NOT;
 	else
 		self->solid = SOLID_TRIGGER;
 
-	if (self->spawnflags & 2)
+	if (self->spawnflags & SF_HURT_TOGGLE)
 		self->use = hurt_use;
 
 	gi.linkentity (self);
@@ -985,7 +1043,7 @@ void SP_trigger_gravity_bbox (edict_t *self)
 {
 	if (st.gravity == 0)
 	{
-		gi.dprintf("trigger_gravity without gravity set at %s\n", vtos(self->s.origin));
+		gi.dprintf("trigger_gravity_bbox without gravity set at %s\n", vtos(self->s.origin));
 		G_FreeEdict  (self);
 		return;
 	}
@@ -1068,6 +1126,17 @@ void SP_trigger_monsterjump (edict_t *self)
 	self->movedir[2] = st.height;
 }
 
+/*QUAKED trigger_monsterjump_bbox (.5 .5 .5) (-8 -8 -8) (8 8 8)
+Walking monsters that touch this will jump in the direction of the trigger's angle.
+Same as trigger_monsterjump, except that it doesn't use a model.
+
+"speed" default to 200, the speed thrown forward
+"height" default to 200, the speed thrown upwards
+
+bleft Min b-box coords XYZ. Default = -16 -16 -16
+tright Max b-box coords XYZ. Default = 16 16 16
+*/
+
 void SP_trigger_monsterjump_bbox (edict_t *self)
 {
 	self->class_id = ENTITY_TRIGGER_MONSTERJUMP;
@@ -1086,16 +1155,7 @@ void SP_trigger_monsterjump_bbox (edict_t *self)
 	self->movedir[2] = st.height;
 }
 
-/*QUAKED trigger_monsterjump_bbox (.5 .5 .5) (-8 -8 -8) (8 8 8)
-Walking monsters that touch this will jump in the direction of the trigger's angle.
-Same as trigger_monsterjump, except that it doesn't use a model.
 
-"speed" default to 200, the speed thrown forward
-"height" default to 200, the speed thrown upwards
-
-bleft Min b-box coords XYZ. Default = -16 -16 -16
-tright Max b-box coords XYZ. Default = 16 16 16
-*/
 
 //=========================================================================================
 // TRIGGER_MASS - triggers its targets when touched by any entity with mass >= mass value
@@ -1146,7 +1206,7 @@ void SP_trigger_mass (edict_t *self)
 	gi.linkentity (self);
 }
 
-//Knightmare 
+// Knightmare added
 /*QUAKED trigger_mass_bbox (.5 .5 .5) (-8 -8 -8) (8 8 8) x x TRIGGERED
 A "weight limit" trigger that fires at its targets when the mass of the activator is equal to or greater than the mass value for the trigger.
 Same as trigger_mass, except that it doesn't use a model.

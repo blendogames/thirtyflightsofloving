@@ -202,10 +202,13 @@ qboolean Pickup_Weapon (edict_t *ent, edict_t *other)
 		}
 	}
 
-	if (other->client->pers.weapon != ent->item && 
+	if ( (other->client->pers.weapon != ent->item) && 
 		(other->client->pers.inventory[index] == 1) &&
-		( !deathmatch->value || other->client->pers.weapon == FindItem("blaster") ||
-		other->client->pers.weapon == FindItem("No weapon") ) )
+		( !deathmatch->value ||
+			other->client->pers.weapon == FindItem("Blaster") ||
+			other->client->pers.weapon == FindItem("Flare Gun") ||	// Zaero
+			other->client->pers.weapon == FindItem("No Weapon")
+		) )
 		other->client->newweapon = ent->item;
 
 	// If rocket launcher, give the HML (but no ammo).
@@ -348,6 +351,14 @@ void NoAmmoWeaponChange (edict_t *ent)
 		return;
 	}
 	// -ROGUE
+	// SKWiD MOD
+	if ( (ent->client->pers.inventory[ITEM_INDEX(FindItem("cells"))] >= PLASMA_CELLS_PER_SHOT)
+		&&  ent->client->pers.inventory[ITEM_INDEX(FindItem(PLASMA_PICKUP_NAME))] )
+	{
+		ent->client->newweapon = FindItem (PLASMA_PICKUP_NAME);
+		return;
+	}
+	// end SKWiD MOD
 	if ( ent->client->pers.inventory[ITEM_INDEX(FindItem("cells"))]
 		&&  ent->client->pers.inventory[ITEM_INDEX(FindItem("hyperblaster"))] )
 	{

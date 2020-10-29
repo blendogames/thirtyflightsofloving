@@ -335,7 +335,7 @@ void q1_use_target_trapshooter (edict_t *self, edict_t *other, edict_t *activato
 	else {
 		q1_fire_nail (self, self->s.origin, self->movedir, self->dmg, self->speed, super);
 #ifndef KMQUAKE2_ENGINE_MOD
-		gi.sound (self, CHAN_AUTO, gi.soundindex("q1weap/nails/s_end.wav"), 1.0, ATTN_NORM, 0);
+		gi.sound (self, CHAN_AUTO, gi.soundindex("q1weapons/s_end.wav"), 1.0, ATTN_NORM, 0);
 #endif
 	}
 }
@@ -360,10 +360,10 @@ void SP_target_q1_trap (edict_t *self)
 	}
 	else {
 #ifdef KMQUAKE2_ENGINE_MOD
-		self->noise_index = gi.soundindex ("q1weap/nails/spike2.wav");
+		self->noise_index = gi.soundindex ("q1weapons/spike2.wav");
 #else
-		self->noise_index = gi.soundindex ("q1weap/nails/spike.wav");
-		gi.soundindex("q1weap/nails/s_end.wav");
+		self->noise_index = gi.soundindex ("q1weapons/spike.wav");
+		gi.soundindex("q1weapons/s_end.wav");
 #endif
 		if (!self->speed)
 			self->speed = 500;
@@ -474,7 +474,7 @@ void q1_barrel_explode (edict_t *self)
 		VectorCopy (save, self->s.origin);
 	}
 	
-	gi.sound (self, CHAN_AUTO, gi.soundindex ("q1weap/rocket/r_exp3.wav"), 1.0, ATTN_NORM, 0);
+	gi.sound (self, CHAN_AUTO, gi.soundindex ("q1weapons/r_exp3.wav"), 1.0, ATTN_NORM, 0);
 	gi.WriteByte (svc_temp_entity);
 	gi.WriteByte (TE_ROCKET_EXPLOSION);
 	gi.WritePosition (self->s.origin);
@@ -505,7 +505,7 @@ void SP_misc_q1_explobox (edict_t *self)
 {
 	// precache
 	gi.modelindex ("sprites/s_explod.sp2");
-	gi.soundindex ("q1weap/rocket/r_exp3.wav");
+	gi.soundindex ("q1weapons/r_exp3.wav");
 
 	self->solid = SOLID_BBOX;
 	//self->solid = SOLID_NOT;

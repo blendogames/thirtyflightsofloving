@@ -1595,8 +1595,6 @@ Creates a server's entity / program execution context by
 parsing textual entity definitions out of an ent file.
 ==============
 */
-void movewith_init (edict_t *ent);
-
 void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 {
 	edict_t		*ent;
@@ -1829,7 +1827,7 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 
 	PlayerTrail_Init ();
 
-//ROGUE
+// ROGUE
 	if (deathmatch->value)
 	{
 		if (randomrespawn && randomrespawn->value)
@@ -1837,9 +1835,9 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 	}
 	else
 	{
-		InitHintPaths();		// if there aren't hintpaths on this map, enable quick aborts
+		InitHintPaths();	// if there aren't hintpaths on this map, enable quick aborts
 	}
-//ROGUE
+// ROGUE
 
 // ROGUE	-- allow dm games to do init stuff right before game starts.
 	if (deathmatch->value && gamerules && gamerules->value)
@@ -1849,7 +1847,51 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 	}
 // ROGUE
 
-	//Knightmare added
+	// Lazarus movewith init
+/*	for (i=1, ent=g_edicts+i; i < globals.num_edicts; i++, ent++)
+	{
+		if (!ent->movewith)
+			continue;
+		if (ent->movewith_ent)
+			continue;
+		ent->movewith_ent = G_Find(NULL, FOFS(targetname), ent->movewith);
+		// Make sure that we can really "movewith" this guy. This check
+		// allows us to have movewith parent with same targetname as
+		// other entities
+		while (ent->movewith_ent &&
+			(Q_stricmp(ent->movewith_ent->classname, "func_train")			&&
+			 Q_stricmp(ent->movewith_ent->classname, "model_train")			&&
+			 Q_stricmp(ent->movewith_ent->classname, "func_door")			&&
+			 Q_stricmp(ent->movewith_ent->classname, "func_door_rotating")	&&
+			 Q_stricmp(ent->movewith_ent->classname, "func_plat")			&&
+			 Q_stricmp(ent->movewith_ent->classname, "func_plat2")			&&
+			 Q_stricmp(ent->movewith_ent->classname, "func_rotating")		&&
+			 Q_stricmp(ent->movewith_ent->classname, "func_button")			&&
+			 Q_stricmp(ent->movewith_ent->classname, "func_door_secret")	&&
+			 Q_stricmp(ent->movewith_ent->classname, "func_door_secret2")	&&
+			 Q_stricmp(ent->movewith_ent->classname, "func_door_swinging")	&&
+			 Q_stricmp(ent->movewith_ent->classname, "func_breakaway")		&&
+			 Q_stricmp(ent->movewith_ent->classname, "func_trackchange")	&&
+			 Q_stricmp(ent->movewith_ent->classname, "func_vehicle")		&&
+			 Q_stricmp(ent->movewith_ent->classname, "func_tracktrain")  ))
+			 ent->movewith_ent = G_Find (ent->movewith_ent, FOFS(targetname), ent->movewith);
+		if (ent->movewith_ent)
+			movewith_init (ent->movewith_ent);
+	}
+*/
+/*	for(i=1, ent=g_edicts+i; i < globals.num_edicts; i++, ent++)
+	{
+		gi.dprintf("%s:%s - movewith=%s, movewith_ent=%s:%s, movewith_next=%s:%s\n====================\n",
+			ent->classname, (ent->targetname ? ent->targetname : "noname"),
+			(ent->movewith ? ent->movewith : "N/A"),
+			(ent->movewith_ent ? ent->movewith_ent->classname : "N/A"),
+			(ent->movewith_ent ? (ent->movewith_ent->targetname ? ent->movewith_ent->targetname : "noname") : "N/A"),
+			(ent->movewith_next ? ent->movewith_next->classname : "N/A"),
+			(ent->movewith_next ? (ent->movewith_next->targetname ? ent->movewith_next->targetname : "noname") : "N/A"));
+
+	} */
+
+	// Knightmare added
 	if (game.transition_ents)
 	{
 		LoadTransitionEnts();

@@ -35,13 +35,13 @@ qboolean blocked_checkshot (edict_t *self, float shotChance)
 {
 	qboolean	playerVisible;
 
-	if(!self->enemy)
+	if (!self->enemy)
 		return false;
 
 	// blocked checkshot is only against players. this will
 	// filter out player sounds and other shit they should
 	// not be firing at.
-	if(!(self->enemy->client))
+	if (!(self->enemy->client))
 		return false;
 
 	if (random() < shotChance)
@@ -74,7 +74,7 @@ qboolean blocked_checkshot (edict_t *self, float shotChance)
 		{
 			self->monsterinfo.aiflags |= AI_BLOCKED;
 			
-			if(self->monsterinfo.attack)
+			if (self->monsterinfo.attack)
 				self->monsterinfo.attack(self);
 			
 			self->monsterinfo.aiflags &= ~AI_BLOCKED;
@@ -84,18 +84,18 @@ qboolean blocked_checkshot (edict_t *self, float shotChance)
 
 	playerVisible = visible (self, self->enemy);
 	// always shoot at teslas
-	if(playerVisible)
+	if (playerVisible)
 	{
 		if (!strcmp(self->enemy->classname, "tesla"))
 		{
-//			if(g_showlogic && g_showlogic->value)
+//			if (g_showlogic && g_showlogic->value)
 //				gi.dprintf("blocked: taking a shot\n");
 
 			// turn on AI_BLOCKED to let the monster know the attack is being called
 			// by the blocked functions...
 			self->monsterinfo.aiflags |= AI_BLOCKED;
 			
-			if(self->monsterinfo.attack)
+			if (self->monsterinfo.attack)
 				self->monsterinfo.attack(self);
 			
 			self->monsterinfo.aiflags &= ~AI_BLOCKED;
@@ -116,32 +116,32 @@ qboolean blocked_checkplat (edict_t *self, float dist)
 	vec3_t		forward;
 	edict_t		*plat;
 
-	if(!self->enemy)
+	if (!self->enemy)
 		return false;
 
 	// check player's relative altitude
-	if(self->enemy->absmin[2] >= self->absmax[2])
+	if (self->enemy->absmin[2] >= self->absmax[2])
 		playerPosition = 1;
-	else if(self->enemy->absmax[2] <= self->absmin[2])
+	else if (self->enemy->absmax[2] <= self->absmin[2])
 		playerPosition = -1;
 	else
 		playerPosition = 0;
 
 	// if we're close to the same position, don't bother trying plats.
-	if(playerPosition == 0)
+	if (playerPosition == 0)
 		return false;
 
 	plat = NULL;
 
 	// see if we're already standing on a plat.
-	if(self->groundentity && self->groundentity != world)
+	if (self->groundentity && self->groundentity != world)
 	{
-		if(!strncmp(self->groundentity->classname, "func_plat", 8))
+		if (!strncmp(self->groundentity->classname, "func_plat", 8))
 			plat = self->groundentity;
 	}
 
 	// if we're not, check to see if we'll step onto one with this move
-	if(!plat)
+	if (!plat)
 	{
 		AngleVectors (self->s.angles, forward, NULL, NULL);
 		VectorMA(self->s.origin, dist, forward, pt1);
@@ -149,9 +149,9 @@ qboolean blocked_checkplat (edict_t *self, float dist)
 		pt2[2] -= 384;
 
 		trace = gi.trace(pt1, vec3_origin, vec3_origin, pt2, self, MASK_MONSTERSOLID);
-		if(trace.fraction < 1 && !trace.allsolid && !trace.startsolid)
+		if (trace.fraction < 1 && !trace.allsolid && !trace.startsolid)
 		{
-			if(!strncmp(trace.ent->classname, "func_plat", 8))
+			if (!strncmp(trace.ent->classname, "func_plat", 8))
 			{
 				plat = trace.ent;
 			}
@@ -159,31 +159,31 @@ qboolean blocked_checkplat (edict_t *self, float dist)
 	}
 
 	// if we've found a plat, trigger it.
-	if(plat && plat->use)
+	if (plat && plat->use)
 	{
 		if (playerPosition == 1)
 		{
-			if((self->groundentity == plat && plat->moveinfo.state == STATE_BOTTOM) ||
+			if ((self->groundentity == plat && plat->moveinfo.state == STATE_BOTTOM) ||
 				(self->groundentity != plat && plat->moveinfo.state == STATE_TOP))
 			{
-//				if(g_showlogic && g_showlogic->value)
+//				if (g_showlogic && g_showlogic->value)
 //					gi.dprintf("player above, and plat will raise. using!\n");
 				plat->use (plat, self, self);
 				return true;			
 			}
 		}
-		else if(playerPosition == -1)
+		else if (playerPosition == -1)
 		{
-			if((self->groundentity == plat && plat->moveinfo.state == STATE_TOP) ||
+			if ((self->groundentity == plat && plat->moveinfo.state == STATE_TOP) ||
 				(self->groundentity != plat && plat->moveinfo.state == STATE_BOTTOM))
 			{
-//				if(g_showlogic && g_showlogic->value)
+//				if (g_showlogic && g_showlogic->value)
 //					gi.dprintf("player below, and plat will lower. using!\n");
 				plat->use (plat, self, self);
 				return true;
 			}
 		}
-//		if(g_showlogic && g_showlogic->value)
+//		if (g_showlogic && g_showlogic->value)
 //			gi.dprintf("hit a plat, not using. ppos: %d   plat: %d\n", playerPosition, plat->moveinfo.state);
 	}
 
@@ -205,13 +205,13 @@ qboolean blocked_checkjump (edict_t *self, float dist, float maxDown, float maxU
 	// Lazarus: Rogue only did this for enemies. We do it for enemies or
 	//          movetargets
 
-	if(!self->monsterinfo.jump)
+	if (!self->monsterinfo.jump)
 		return false;
-	if(!self->enemy)
+	if (!self->enemy)
 		return false;
-	if(self->enemy)
+	if (self->enemy)
 		target = self->enemy;
-	else if(self->movetarget)
+	else if (self->movetarget)
 		target = self->movetarget;
 	else
 		return false;
@@ -222,35 +222,35 @@ qboolean blocked_checkjump (edict_t *self, float dist, float maxDown, float maxU
 	AngleVectors (self->s.angles, forward, NULL, up);
 	VectorMA(self->s.origin, 48, forward, pt1);
 
-	if(target->absmin[2] > (self->absmin[2] + 16))
+	if (target->absmin[2] > (self->absmin[2] + 16))
 		playerPosition = 1;
-	else if(target->absmin[2] < (self->absmin[2] - 16))
+	else if (target->absmin[2] < (self->absmin[2] - 16))
 		playerPosition = -1;
 	else
 		playerPosition = 0;
 
-	if(playerPosition == -1 && maxDown)
+	if (playerPosition == -1 && maxDown)
 	{
 		// check to make sure we can even get to the spot we're going to "fall" from
 		trace = gi.trace(self->s.origin, self->mins, self->maxs, pt1, self, MASK_MONSTERSOLID);
-		if(trace.fraction < 1)
+		if (trace.fraction < 1)
 			return false;
 
 		VectorCopy (pt1, pt2);
 		pt2[2] = self->mins[2] - maxDown - 1;
 
 		trace = gi.trace(pt1, vec3_origin, vec3_origin, pt2, self, MASK_MONSTERSOLID | MASK_WATER);
-		if(trace.fraction < 1 && !trace.allsolid && !trace.startsolid)
+		if (trace.fraction < 1 && !trace.allsolid && !trace.startsolid)
 		{
-			if((self->absmin[2] - trace.endpos[2]) >= 24 && trace.contents & MASK_SOLID)
+			if ((self->absmin[2] - trace.endpos[2]) >= 24 && trace.contents & MASK_SOLID)
 			{
-				if( (target->absmin[2] - trace.endpos[2]) > 32)
+				if ( (target->absmin[2] - trace.endpos[2]) > 32)
 					return false;
-				if(trace.plane.normal[2] < 0.9)
+				if (trace.plane.normal[2] < 0.9)
 					return false;
 				VectorSubtract(target->s.origin,trace.endpos,pt1);
 				d1 = VectorLength(pt1);
-				if(d0 < d1)
+				if (d0 < d1)
 					return false;
 				self->velocity[0] = forward[0]*dist*10;
 				self->velocity[1] = forward[1]*dist*10;
@@ -260,19 +260,19 @@ qboolean blocked_checkjump (edict_t *self, float dist, float maxDown, float maxU
 			}
 		}
 	}
-	else if(playerPosition == 1 && maxUp)
+	else if (playerPosition == 1 && maxUp)
 	{
 		VectorCopy(pt1, pt2);
 		pt1[2] = self->absmax[2] + maxUp;
 
 		trace = gi.trace(pt1, vec3_origin, vec3_origin, pt2, self, MASK_MONSTERSOLID | MASK_WATER);
-		if(trace.fraction < 1 && !trace.allsolid && !trace.startsolid)
+		if (trace.fraction < 1 && !trace.allsolid && !trace.startsolid)
 		{
-			if((trace.endpos[2] - self->absmin[2]) <= maxUp && trace.contents & MASK_SOLID)
+			if ((trace.endpos[2] - self->absmin[2]) <= maxUp && trace.contents & MASK_SOLID)
 			{
 				VectorSubtract(target->s.origin,trace.endpos,pt1);
 				d1 = VectorLength(pt1);
-				if(d0 < d1)
+				if (d0 < d1)
 					return false;
 				face_wall(self);
 				self->monsterinfo.jump(self);
@@ -282,13 +282,13 @@ qboolean blocked_checkjump (edict_t *self, float dist, float maxDown, float maxU
 				gi.linkentity(self);
 				return true;
 			}
-//			else if(g_showlogic && g_showlogic->value)
+//			else if (g_showlogic && g_showlogic->value)
 //				gi.dprintf("Too high to jump %0.1f\n", (trace.endpos[2] - self->absmin[2]));
 		}
-//		else if(g_showlogic && g_showlogic->value)
+//		else if (g_showlogic && g_showlogic->value)
 //				gi.dprintf("Not something I could jump onto\n");
 	}
-//	else if(g_showlogic && g_showlogic->value)
+//	else if (g_showlogic && g_showlogic->value)
 //		gi.dprintf("Player at similar level. No need to jump up?\n");
 
 	return false;
@@ -348,21 +348,21 @@ int	num_hint_paths;
 // =============
 // hintpath_findstart - given any hintpath node, finds the start node
 // =============
-edict_t	*hintpath_findstart(edict_t *ent)
+edict_t	*hintpath_findstart (edict_t *ent)
 {
 	edict_t		*e;
 	edict_t		*last;
 	int			field;
 
-	if(ent->target)		// starting point
+	if (ent->target)		// starting point
 	{
 		last = world;
 		field = FOFS(targetname);
 		e = G_Find(NULL, field, ent->target);
-		while(e)
+		while (e)
 		{
 			last = e;
-			if(!e->target)
+			if (!e->target)
 				break;
 			e = G_Find(NULL, field, e->target);
 		}
@@ -372,22 +372,22 @@ edict_t	*hintpath_findstart(edict_t *ent)
 		last = world;
 		field = FOFS(target);
 		e = G_Find(NULL, field, ent->targetname);
-		while(e)
+		while (e)
 		{
 			last = e;
-			if(!e->targetname)
+			if (!e->targetname)
 				break;
 			e = G_Find(NULL, field, e->targetname);
 		}
 	}
 
-	if(!(last->spawnflags & HINT_ENDPOINT))
+	if (!(last->spawnflags & HINT_ENDPOINT))
 	{
 //		gi.dprintf ("end of chain is not HINT_ENDPOINT\n");
 		return NULL;
 	}
 
-	if(last == world)
+	if (last == world)
 		last = NULL;
 	return last;
 }
@@ -395,21 +395,21 @@ edict_t	*hintpath_findstart(edict_t *ent)
 // =============
 // hintpath_other_end - given one endpoint of a hintpath, returns the other end.
 // =============
-edict_t	*hintpath_other_end(edict_t *ent)
+edict_t	*hintpath_other_end (edict_t *ent)
 {
 	edict_t		*e;
 	edict_t		*last;
 	int			field;
 
-	if(ent->target)		// starting point
+	if (ent->target)		// starting point
 	{
 		last = world;
 		field = FOFS(targetname);
 		e = G_Find(NULL, field, ent->target);
-		while(e)
+		while (e)
 		{
 			last = e;
-			if(!e->target)
+			if (!e->target)
 				break;
 			e = G_Find(NULL, field, e->target);
 		}
@@ -419,22 +419,22 @@ edict_t	*hintpath_other_end(edict_t *ent)
 		last = world;
 		field = FOFS(target);
 		e = G_Find(NULL, field, ent->targetname);
-		while(e)
+		while (e)
 		{
 			last = e;
-			if(!e->targetname)
+			if (!e->targetname)
 				break;
 			e = G_Find(NULL, field, e->targetname);
 		}
 	}
 
-	if(!(last->spawnflags & HINT_ENDPOINT))
+	if (!(last->spawnflags & HINT_ENDPOINT))
 	{
 //		gi.dprintf ("end of chain is not HINT_ENDPOINT\n");
 		return NULL;
 	}
 
-	if(last == world)
+	if (last == world)
 		last = NULL;
 	return last;
 }
@@ -515,10 +515,10 @@ qboolean monsterlost_checkhint (edict_t *self)
 	qboolean	hint_path_represented[MAX_HINT_CHAINS];
 
 	// if there are no hint paths on this map, exit immediately.
-	if(!hint_paths_present)
+	if (!hint_paths_present)
 		return false;
 
-	if(!self->enemy)
+	if (!self->enemy)
 		return false;
 
 	if (self->monsterinfo.aiflags & AI_STAND_GROUND)
@@ -536,7 +536,7 @@ qboolean monsterlost_checkhint (edict_t *self)
 	for (i=0; i < num_hint_paths; i++)
 	{
 		e = hint_path_start[i];
-		while(e)
+		while (e)
 		{
 			count1++;
 			if (e->monster_hint_chain)
@@ -832,10 +832,10 @@ qboolean monsterlost_checkhint2 (edict_t *self)
 	int			playerVisible, selfVisible;
 
 	// if there are no hint paths on this map, exit immediately.
-	if(!hint_paths_present)
+	if (!hint_paths_present)
 		return false;
 
-	if(!self->enemy)
+	if (!self->enemy)
 		return false;
 
 	goPoint = NULL;
@@ -843,10 +843,10 @@ qboolean monsterlost_checkhint2 (edict_t *self)
 	
 	// check all the hint_paths.
 	e = G_Find(NULL, field, "hint_path");
-	while(e)
+	while (e)
 	{
 		// if it's an endpoint, check for "validity"
-		if(e->spawnflags & HINT_ENDPOINT)
+		if (e->spawnflags & HINT_ENDPOINT)
 		{
 			// check visibility from this spot
 			selfVisible = visible(e, self);
@@ -855,31 +855,31 @@ qboolean monsterlost_checkhint2 (edict_t *self)
 
 			// at least one of us is visible from this endpoint.
 			// now check the other one if needed.
-			if(selfVisible || playerVisible)
+			if (selfVisible || playerVisible)
 			{
 				// if endpoint 1 saw me, set my destination to it.
-				if(selfVisible)
+				if (selfVisible)
 					goPoint = e;
 
 				// if both aren't visible, try the other endpoint
-				if(!selfVisible || !playerVisible)
+				if (!selfVisible || !playerVisible)
 				{
 					e2 = hintpath_other_end(e);
-					if(!e2)		// could not connect to the other endpoint
+					if (!e2)		// could not connect to the other endpoint
 					{
 						gi.dprintf("Unlinked hint paths!\n");
 						return false;
 					}
 
 					// if endpoint 1 saw the enemy, see if endpoint 2 sees me
-					if(!selfVisible)
+					if (!selfVisible)
 						selfVisible = visible(e2, self);
 					// if endpoint 1 saw me, see if endpoint 2 sees the enemy
-					else if(!playerVisible)
+					else if (!playerVisible)
 						playerVisible = visible(e2, self->enemy);
 
 					// if endpoint 2 saw me, set my destination to it.
-					if(!goPoint && selfVisible)
+					if (!goPoint && selfVisible)
 						goPoint = e2;
 
 //					gi.dprintf("checking other endpoint at %s %d %d\n", vtos(e2->s.origin),selfVisible,playerVisible);
@@ -887,10 +887,10 @@ qboolean monsterlost_checkhint2 (edict_t *self)
 
 				// if both are visible from at least one endpoint,
 				// go for it.
-				if(selfVisible && playerVisible)
+				if (selfVisible && playerVisible)
 				{
 					// set me to go to goPoint
-					if(g_showlogic && g_showlogic->value)
+					if (g_showlogic && g_showlogic->value)
 						gi.dprintf("found path. proceed to %s\n", vtos(goPoint->s.origin));
 					
 					// since this is a new hint path trip, set last_hint to NULL
@@ -904,7 +904,7 @@ qboolean monsterlost_checkhint2 (edict_t *self)
 	}
 
 	// if we got here, we didn't find a valid path
-	if(g_showlogic && g_showlogic->value)
+	if (g_showlogic && g_showlogic->value)
 		gi.dprintf("blocked_checkhint: found no paths\n");
 	return false;
 }
@@ -922,15 +922,15 @@ void hint_path_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t
 //	int			chain;			 // direction - (-1) = upstream, (1) = downstream, (0) = done
 	qboolean	goalFound = false;
 
-	if(other->monsterinfo.aiflags & AI_MEDIC_PATROL) 
+	if (other->monsterinfo.aiflags & AI_MEDIC_PATROL) 
 	{
-		if(other->movetarget == self)
+		if (other->movetarget == self)
 			medic_NextPatrolPoint(other,self);
 		return;
 	}
 
 	// make sure we're the target of it's obsession
-	if(other->movetarget == self)
+	if (other->movetarget == self)
 	{
 		goal = other->monsterinfo.goal_hint;
 		
@@ -966,7 +966,7 @@ void hint_path_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t
 		}
 
 		// if we couldn't find it, have the monster go back to normal hunting.
-		if(!next)
+		if (!next)
 		{
 			hintpath_stop(other);
 			return;
@@ -978,7 +978,7 @@ void hint_path_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t
 
 		// have the monster freeze if the hint path we just touched has a wait time
 		// on it, for example, when riding a plat.
-		if(self->wait)
+		if (self->wait)
 			other->nextthink = level.time + self->wait;
 	}
 }
@@ -989,16 +989,16 @@ void hint_path_touch2 (edict_t *self, edict_t *other, cplane_t *plane, csurface_
 	int			chain;
 
 	// make sure we're the target of it's obsession
-	if(other->movetarget == self)
+	if (other->movetarget == self)
 	{
 		chain = 0;		// direction the monster is going in the chain
 		next = NULL;	// next hint_path
 
 //		gi.dprintf("hint_path %s\n", vtos(self->s.origin));
 		// is this the first hintpath targeted? if so, we can do this easily.
-		if(other->monsterinfo.last_hint == NULL)
+		if (other->monsterinfo.last_hint == NULL)
 		{
-			if(self->target)		// forward chaining
+			if (self->target)		// forward chaining
 				chain = 1;
 			else					// backward chaining
 				chain = -1;
@@ -1011,7 +1011,7 @@ void hint_path_touch2 (edict_t *self, edict_t *other, cplane_t *plane, csurface_
 			// make sure it's valid...
 			if ( (last < g_edicts) || (last >= &g_edicts[globals.num_edicts]))
 			{
-				if(g_showlogic && g_showlogic->value)
+				if (g_showlogic && g_showlogic->value)
 				{
 					gi.dprintf("bogus last_hint encountered.\n");
 					gi.dprintf("detaching from hint path %d\n", chain);
@@ -1021,18 +1021,18 @@ void hint_path_touch2 (edict_t *self, edict_t *other, cplane_t *plane, csurface_
 			}
 			
 			// if we're an endpoint, then the monster is done moving.
-			if(self->spawnflags & HINT_ENDPOINT)
+			if (self->spawnflags & HINT_ENDPOINT)
 			{
 				chain = 0;
 			}
 			// if last hint's target is our targetname, it's forward chaining.
-			else if(last->target && self->targetname && !strcmp(last->target, self->targetname))
+			else if (last->target && self->targetname && !strcmp(last->target, self->targetname))
 			{
 				chain = 1;
 			}
 			// if last hint's targetname is our target, it's backward chaining.
 			// FIXME - last->targetname was 1, not NULL ????  was a screwed up hintpath
-			else if(self->target && last->targetname && !strcmp(last->targetname, self->target))
+			else if (self->target && last->targetname && !strcmp(last->targetname, self->target))
 			{
 				chain = -1;
 			}
@@ -1044,15 +1044,15 @@ void hint_path_touch2 (edict_t *self, edict_t *other, cplane_t *plane, csurface_
 		}
 
 		// find the "next" hint_path
-		if(chain == 1 && self->target)						// forward chaining
+		if (chain == 1 && self->target)						// forward chaining
 			next = G_Find(NULL, FOFS(targetname), self->target);
-		else if(chain == -1 && self->targetname)			// backward chaining
+		else if (chain == -1 && self->targetname)			// backward chaining
 			next = G_Find(NULL, FOFS(target), self->targetname);
 
 		// if we couldn't find it, have the monster go back to normal hunting.
-		if(!next)
+		if (!next)
 		{
-			if(g_showlogic && g_showlogic->value)
+			if (g_showlogic && g_showlogic->value)
 				gi.dprintf("detaching from hint path %d\n", chain);
 			hintpath_stop(other);
 			return;
@@ -1061,15 +1061,15 @@ void hint_path_touch2 (edict_t *self, edict_t *other, cplane_t *plane, csurface_
 		// set the last_hint entry to this hint_path, and
 		// send him on his way
 		other->monsterinfo.last_hint = self;
-		if(g_showlogic && g_showlogic->value)
+		if (g_showlogic && g_showlogic->value)
 			gi.dprintf("moving to next point, %s\n", vtos(next->s.origin));
 		hintpath_go(other, next);
 
 		// have the monster freeze if the hint path we just touched has a wait time
 		// on it, for example, when riding a plat.
-		if(self->wait)
+		if (self->wait)
 		{
-			if(g_showlogic && g_showlogic->value)
+			if (g_showlogic && g_showlogic->value)
 				gi.dprintf("monster waiting %0.1f\n", self->wait);
 			other->nextthink = level.time + self->wait;
 		}
@@ -1133,16 +1133,16 @@ void InitHintPaths (void)
 	// check all the hint_paths.
 	field = FOFS(classname);
 	e = G_Find(NULL, field, "hint_path");
-	if(e)
+	if (e)
 		hint_paths_present = 1;
 	else
 		return;
 
 	memset (hint_path_start, 0, MAX_HINT_CHAINS*sizeof (edict_t *));
 	num_hint_paths = 0;
-	while(e)
+	while (e)
 	{
-		if(e->spawnflags & HINT_ENDPOINT)
+		if (e->spawnflags & HINT_ENDPOINT)
 		{
 			if (e->target) // start point
 			{
@@ -1255,11 +1255,11 @@ qboolean face_wall (edict_t *self)
 	AngleVectors (self->s.angles, forward, NULL, NULL);
 	VectorMA(self->s.origin, 64, forward, pt);
 	tr = gi.trace(self->s.origin, vec3_origin, vec3_origin, pt, self, MASK_MONSTERSOLID);
-	if(tr.fraction < 1 && !tr.allsolid && !tr.startsolid)
+	if (tr.fraction < 1 && !tr.allsolid && !tr.startsolid)
 	{
 		vectoangles2(tr.plane.normal, ang);
 		self->ideal_yaw = ang[YAW] + 180;
-		if(self->ideal_yaw > 360)
+		if (self->ideal_yaw > 360)
 			self->ideal_yaw -= 360;
 
 		M_ChangeYaw(self);
@@ -1299,12 +1299,12 @@ edict_t *SpawnBadArea(vec3_t mins, vec3_t maxs, float lifespan, edict_t *owner)
 	badarea->classname = "bad_area";
 	gi.linkentity (badarea);
 
-	if(lifespan)
+	if (lifespan)
 	{
 		badarea->think = G_FreeEdict;
 		badarea->nextthink = level.time + lifespan;
 	}
-	if(owner)
+	if (owner)
 	{
 		badarea->owner = owner;
 	}
@@ -1354,7 +1354,7 @@ qboolean MarkTeslaArea(edict_t *self, edict_t *tesla)
 	edict_t *tail;
 	edict_t *area;
 
-	if(!tesla || !self)
+	if (!tesla || !self)
 		return false;
 
 	area = NULL;
@@ -1365,7 +1365,7 @@ qboolean MarkTeslaArea(edict_t *self, edict_t *tesla)
 	while (e)
 	{
 		tail = tail->teamchain;
-		if(!strcmp(e->classname, "bad_area"))
+		if (!strcmp(e->classname, "bad_area"))
 		{
 //			gi.dprintf("tesla already has a bad area marked\n");
 			return false;
@@ -1374,7 +1374,7 @@ qboolean MarkTeslaArea(edict_t *self, edict_t *tesla)
 	}
 
 	// see if we can grab the trigger directly
-	if(tesla->teamchain && tesla->teamchain->inuse)
+	if (tesla->teamchain && tesla->teamchain->inuse)
 	{
 		edict_t *trigger;
 
@@ -1385,7 +1385,7 @@ qboolean MarkTeslaArea(edict_t *self, edict_t *tesla)
 		VectorCopy(trigger->absmin, mins);
 		VectorCopy(trigger->absmax, maxs);
 
-		if(tesla->air_finished)
+		if (tesla->air_finished)
 			area = SpawnBadArea (mins, maxs, tesla->air_finished, tesla);
 		else
 			area = SpawnBadArea (mins, maxs, tesla->nextthink, tesla);
@@ -1401,7 +1401,7 @@ qboolean MarkTeslaArea(edict_t *self, edict_t *tesla)
 	}
 
 	// if we spawned a bad area, then link it to the tesla
-	if(area)
+	if (area)
 	{
 //		gi.dprintf("bad area marker spawned and linked to tesla\n");
 		tail->teamchain = area;
@@ -1724,10 +1724,10 @@ qboolean has_valid_enemy (edict_t *self)
 //		return false;
 	if (self->monsterinfo.aiflags & AI_MEDIC)
 	{
-		if(self->enemy->health > 0)
+		if (self->enemy->health > 0)
 			return false;
 	}
-	else if(self->enemy->health < 1)
+	else if (self->enemy->health < 1)
 		return false;
 
 	return true;
@@ -1747,14 +1747,14 @@ void TargetTesla (edict_t *self, edict_t *tesla)
 	}
 
 	// store the player enemy in case we lose track of him.
-	if(self->enemy && self->enemy->client)
+	if (self->enemy && self->enemy->client)
 		self->monsterinfo.last_player_enemy = self->enemy;
 
-	if(self->enemy != tesla)
+	if (self->enemy != tesla)
 	{
 		self->oldenemy = self->enemy;
 		self->enemy = tesla;
-		if(self->monsterinfo.attack)
+		if (self->monsterinfo.attack)
 		{
 			if (self->health <= 0)
 			{

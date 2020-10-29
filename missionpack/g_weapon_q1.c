@@ -55,14 +55,14 @@ void q1_nail_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *
 			if (sound < 0.3)
 			{
 				if (sound < 0.1)
-					gi.sound (self, CHAN_WEAPON, gi.soundindex ("q1weap/nails/ric3.wav"), 1, ATTN_STATIC, 0);
+					gi.sound (self, CHAN_WEAPON, gi.soundindex ("q1weapons/ric3.wav"), 1, ATTN_STATIC, 0);
 				else if (sound < 0.2)
-					gi.sound (self, CHAN_WEAPON, gi.soundindex ("q1weap/nails/ric2.wav"), 1, ATTN_STATIC, 0);
+					gi.sound (self, CHAN_WEAPON, gi.soundindex ("q1weapons/ric2.wav"), 1, ATTN_STATIC, 0);
 				else 
-					gi.sound (self, CHAN_WEAPON, gi.soundindex ("q1weap/nails/ric1.wav"), 1, ATTN_STATIC, 0);
+					gi.sound (self, CHAN_WEAPON, gi.soundindex ("q1weapons/ric1.wav"), 1, ATTN_STATIC, 0);
 			}
 			else if (sound < 0.5)
-				gi.sound (self, CHAN_WEAPON, gi.soundindex ("q1weap/nails/tink1.wav"), 1, ATTN_STATIC, 0);
+				gi.sound (self, CHAN_WEAPON, gi.soundindex ("q1weapons/tink1.wav"), 1, ATTN_STATIC, 0);
 		}
 
 	}
@@ -367,7 +367,7 @@ void q1_grenade_explode (edict_t *ent)
 	T_RadiusDamage(ent, ent->owner, ent->dmg, ent->enemy, ent->dmg_radius, MOD_Q1_GL_SPLASH);
 
 	VectorMA (ent->s.origin, -0.02, ent->velocity, origin);
-	gi.sound (ent, CHAN_AUTO, gi.soundindex ("q1weap/rocket/r_exp3.wav"), 1.0, ATTN_NORM, 0);	
+	gi.sound (ent, CHAN_AUTO, gi.soundindex ("q1weapons/r_exp3.wav"), 1.0, ATTN_NORM, 0);	
 
 	gi.WriteByte (svc_temp_entity);
 	gi.WriteByte (TE_ROCKET_EXPLOSION);
@@ -405,7 +405,7 @@ void q1_grenade_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t
 	if (!other->takedamage || 
 		(other->solid == SOLID_BSP))
 	{
-		gi.sound (ent, CHAN_RELIABLE|CHAN_WEAPON, gi.soundindex ("q1weap/grenades/bounce.wav"), 1, ATTN_NORM, 0);
+		gi.sound (ent, CHAN_RELIABLE|CHAN_WEAPON, gi.soundindex ("q1weapons/bounce.wav"), 1, ATTN_NORM, 0);
 		return;
 	}
 
@@ -481,7 +481,7 @@ void q1_rocket_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t 
 		T_Damage (other, ent, ent->owner, ent->velocity, ent->s.origin, plane->normal, ent->dmg, 0, 0, MOD_Q1_RL);
 	}
 	T_RadiusDamage(ent, ent->owner, ent->radius_dmg, other, ent->dmg_radius, MOD_Q1_RL_SPLASH);
-	gi.sound (ent,CHAN_AUTO , gi.soundindex ("q1weap/rocket/r_exp3.wav"), 1.0, ATTN_NORM, 0);	
+	gi.sound (ent,CHAN_AUTO , gi.soundindex ("q1weapons/r_exp3.wav"), 1.0, ATTN_NORM, 0);	
 
 	gi.WriteByte (svc_temp_entity);
 	gi.WriteByte (TE_ROCKET_EXPLOSION); 
@@ -656,7 +656,7 @@ void q1_firepod_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_
 		T_Damage (other, self, self->owner, vec3_origin, other->s.origin, vec3_origin, 200, 0, 0, 0);
 	T_RadiusDamage (self, self->owner, 40, NULL, 40, MOD_Q1_FIREPOD);
 
-	gi.sound (self,CHAN_AUTO , gi.soundindex ("q1weap/rocket/r_exp3.wav"), 1.0, ATTN_NORM, 0);	
+	gi.sound (self,CHAN_AUTO , gi.soundindex ("q1weapons/r_exp3.wav"), 1.0, ATTN_NORM, 0);	
 
 	VectorMA (self->s.origin, -0.02, self->velocity, origin);
 
@@ -801,7 +801,7 @@ Fires a lavaball.  Used by Chthon.
 	}
 
 	T_RadiusDamage(ent, ent->owner, ent->radius_dmg, other, ent->dmg_radius, MOD_Q1_RL_SPLASH);
-	gi.sound (ent, CHAN_WEAPON, gi.soundindex ("q1weap/rocket/r_exp3.wav"), 1.0, ATTN_NORM, 0);	
+	gi.sound (ent, CHAN_WEAPON, gi.soundindex ("q1weapons/r_exp3.wav"), 1.0, ATTN_NORM, 0);	
 
 //
 	gi.WriteByte (svc_temp_entity);
@@ -923,18 +923,18 @@ void q1_fire_acidspit (edict_t *self, vec3_t start, vec3_t dir, int damage, int 
 	acidbolt->movetype = MOVETYPE_FLYMISSILE;
 	acidbolt->clipmask = MASK_SHOT;
 	acidbolt->solid = SOLID_BBOX;
-	acidbolt->s.effects |= EF_GREENGIB; //EF_HYPERBLASTER EF_BFG EF_GREENTRAIL
-	acidbolt->s.renderfx |= RF_TRANSLUCENT;//FULLBRIGHT;
+	acidbolt->s.effects |= EF_GREENGIB;		// EF_HYPERBLASTER EF_BFG EF_GREENTRAIL
+	acidbolt->s.renderfx |= RF_TRANSLUCENT;	// FULLBRIGHT
 
 	VectorClear (acidbolt->mins);
 	VectorClear (acidbolt->maxs);
-	acidbolt->s.modelindex = gi.modelindex ("models/monsters/q1scrag/bolt/tris.md2");
+	acidbolt->s.modelindex = gi.modelindex ("models/monsters/q1scrag/w_spike/tris.md2");
 	acidbolt->owner = self;
 	acidbolt->touch = q1_acidbolt_touch;
 	acidbolt->nextthink = level.time + 8000/speed;
 	acidbolt->think = G_FreeEdict;
 	acidbolt->dmg = damage;
-	//acidbolt->s.sound = gi.soundindex ("weapons/rockfly.wav");
+//	acidbolt->s.sound = gi.soundindex ("weapons/rockfly.wav");
 	acidbolt->classname = "acidbolt";
 
 	acidbolt->common_name = "Acid Bolt";

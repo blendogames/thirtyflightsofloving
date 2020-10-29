@@ -1998,7 +1998,7 @@ void SP_func_breakaway (edict_t *self)
 		self->takedamage = DAMAGE_YES;
 	}
 
-	self->postthink = train_move_children; // supports movewith
+	self->postthink = train_move_children;	// supports movewith
 
 	// touch function for impact damage
 	self->touch = func_breakaway_touch;
@@ -4267,6 +4267,8 @@ void SP_trigger_teleporter_bbox (edict_t *self)
 	else
 		self->solid = SOLID_TRIGGER;
 
+	self->class_id = ENTITY_TRIGGER_TELEPORTER;
+
 	gi.linkentity (self);
 }
 
@@ -4283,6 +4285,7 @@ void SP_misc_teleporter_dest (edict_t *ent)
 	VectorSet (ent->mins, -32, -32, -24);
 	VectorSet (ent->maxs, 32, 32, -16);
 
+	ent->common_name = "Teleporter Destination";
 	ent->class_id = ENTITY_MISC_TELEPORTER_DEST;
 
 	gi.linkentity (ent);
@@ -5350,6 +5353,7 @@ void target_fountain_delayed_use (edict_t *self)
 	else
 		self->nextthink = level.time + FRAMETIME;
 }
+
 void SP_target_fountain (edict_t *ent)
 {
 	char	*buffer;

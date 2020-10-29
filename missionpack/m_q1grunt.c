@@ -298,12 +298,13 @@ void q1grunt_sight(edict_t *self, edict_t *other)
 //
 void q1grunt_dropshells (edict_t *self)
 {
-/*	edict_t	*backpack;
+	edict_t	*backpack;
 
 	if (self->health <= self->gib_health)
 		return;
 
-	backpack = Drop_Item(self, FindItemByClassname("item_q1_backpack"));
+	backpack = Drop_Q1Backpack (self, FindItemByClassname("ammo_shells"), 5);
+/*	backpack = Drop_Item(self, FindItemByClassname("item_q1_backpack"));
 	backpack->item = FindItemByClassname("ammo_shells");
 	backpack->count = 5;
 	backpack->touch = Touch_Item;
@@ -360,7 +361,7 @@ void q1grunt_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dama
 // check for gib
 	if (self->health <= self->gib_health && !(self->spawnflags & SF_MONSTER_NOGIB))
 	{
-		gi.sound (self, CHAN_VOICE|CHAN_RELIABLE, gi.soundindex ("q1monstr/udeath.wav"), 1, ATTN_NORM, 0);
+		gi.sound (self, CHAN_VOICE|CHAN_RELIABLE, gi.soundindex ("q1player/udeath.wav"), 1, ATTN_NORM, 0);
 
 		// if dead body, don't drop pack when gibbed
 	//	if (self->deadflag != DEAD_DEAD)
@@ -411,6 +412,10 @@ void SP_monster_q1_grunt (edict_t *self)
 	sound_pain2 =   gi.soundindex ("q1grunt/pain2.wav");
 	sound_death =	gi.soundindex ("q1grunt/death1.wav");
 	sound_attack =  gi.soundindex ("q1grunt/sattck1.wav");
+
+	// precache backpack
+	gi.modelindex ("models/items/q1backpack/tris.md2");
+//	gi.soundindex ("q1weapons/lock4.wav");
 
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;

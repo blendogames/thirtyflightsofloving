@@ -25,7 +25,7 @@ void floater_sight (edict_t *self, edict_t *other)
 
 void floater_idle (edict_t *self)
 {
-	if(!(self->spawnflags & SF_MONSTER_AMBUSH))
+	if (!(self->spawnflags & SF_MONSTER_AMBUSH))
 		gi.sound (self, CHAN_VOICE, sound_idle, 1, ATTN_IDLE, 0);
 }
 
@@ -46,7 +46,7 @@ void floater_fire_blaster (edict_t *self)
 	vec3_t	dir;
 	int		effect;
 
-	if(!self->enemy || !self->enemy->inuse)		//PGM
+	if (!self->enemy || !self->enemy->inuse)		//PGM
 		return;									//PGM
 
 	if ((self->s.frame == FRAME_attak104) || (self->s.frame == FRAME_attak107))
@@ -60,7 +60,7 @@ void floater_fire_blaster (edict_t *self)
 	end[2] += self->enemy->viewheight;
 
 	// Lazarus fog reduction of accuracy
-	if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+	if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 	{
 		end[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 		end[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -658,7 +658,7 @@ void floater_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dama
 //PGM
 qboolean floater_blocked (edict_t *self, float dist)
 {
-	if(blocked_checkshot (self, 0.25 + (0.05 * skill->value) ))
+	if (blocked_checkshot (self, 0.25 + (0.05 * skill->value) ))
 		return true;
 
 	return false;
@@ -703,11 +703,11 @@ void SP_monster_floater (edict_t *self)
 	VectorSet (self->mins, -24, -24, -16);
 	VectorSet (self->maxs, 24, 24, 40);
 
-	if(!self->health)
+	if (!self->health)
 		self->health = 200;
-	if(!self->gib_health)
+	if (!self->gib_health)
 		self->gib_health = -80;
-	if(!self->mass)
+	if (!self->mass)
 		self->mass = 300;
 
 	self->pain = floater_pain;
@@ -730,7 +730,7 @@ void SP_monster_floater (edict_t *self)
 		self->fogclip |= 2; //custom bloodtype flag
 
 		// Lazarus
-	if(self->powerarmor)
+	if (self->powerarmor)
 	{
 		if (self->powerarmortype == 1)
 			self->monsterinfo.power_armor_type = POWER_ARMOR_SCREEN;

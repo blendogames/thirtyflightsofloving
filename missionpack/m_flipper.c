@@ -22,7 +22,7 @@ static int	sound_sight;
 void flipper_stand (edict_t *self);
 
 
-//Knightmare added- these sounds were unused
+// Knightmare added- these sounds were unused
 void flipper_breathe (edict_t *self)
 {
 	if (self->waterlevel > 0) //only make bubble sounds if submerged
@@ -429,6 +429,7 @@ void SP_monster_flipper (edict_t *self)
 	}
 	self->common_name = "Barracuda Shark";
 	self->class_id = ENTITY_MONSTER_FLIPPER;
+	self->spawnflags |= SF_MONSTER_KNOWS_MIRRORS;
 
 	gi.linkentity (self);
 
