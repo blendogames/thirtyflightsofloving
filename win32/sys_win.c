@@ -965,8 +965,12 @@ NoExtFunction:
 				case 5:
 					if (extModel == 0x25)		// Clarkdale / Arrandale
 						Q_strncatz(cpuString, " Core i5/i3 6xx / Core i3 5xx", maxSize);
+					else if (extModel == 0x45)	// Haswell ULT
+						Q_strncatz(cpuString, " Core i7/i5/i3 4xxxU", maxSize);
 					else if (extModel == 0x55)	// Skylake-X, Cascade Lake-X
 						Q_strncatz(cpuString, " Core i9/i7 79xx / 78xx", maxSize);
+					else if (extModel == 0xA5)	// Comet Lake
+						Q_strncatz(cpuString, " Core i9/i7/i5/i3 10xxx", maxSize);
 					break;
 				case 7:		
 					if (extModel == 0x17)	// Wolfdale / Yorkfield (Penryn)
@@ -1002,7 +1006,7 @@ NoExtFunction:
 					else if (extModel == 0x5E)	// Skylake
 						Q_strncatz(cpuString, " Core i7/i5/i3 6xxx", maxSize);
 					else if (extModel == 0x7E)	// Ice lake
-						Q_strncatz(cpuString, " Core i9/i7/i5/i3 10xxx", maxSize);
+						Q_strncatz(cpuString, " Core i7/i5/i3 10xxG7", maxSize);
 					else if (extModel == 0x9E)	// Coffee Lake
 						Q_strncatz(cpuString, " Core i7/i5/i3 8xxx", maxSize);
 					break;
