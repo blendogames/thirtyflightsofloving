@@ -797,6 +797,16 @@ NoExtFunction:
 					break;
 				}
 			}
+			else if (extFamily == 0x19)	// Ryzen Zen3 Family
+			{
+				switch (model)
+				{
+				case 1:
+					if (extModel == 0x21)	// Vermeer (Zen3)
+						Q_strncatz(cpuString, " Ryzen 9/7/5/3 5x00", maxSize);
+					break;
+				}
+			}
 			break;
 		default: // unknown family
 			break;
