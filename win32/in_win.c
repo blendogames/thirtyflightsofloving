@@ -453,23 +453,43 @@ void IN_Init (void)
 	in_joystick				= Cvar_Get ("in_joystick",				"0",		CVAR_ARCHIVE);
 	Cvar_SetDescription ("in_joystick", "Enables joystick input.");
 	joy_name				= Cvar_Get ("joy_name",					"joystick",	0);
+	Cvar_SetDescription ("joy_name", "Sets name of the joystick.");
 	joy_advanced			= Cvar_Get ("joy_advanced",				"0",		0);
+	Cvar_SetDescription ("joy_advanced", "Enables the advanced axis (\"joy_advaxis*\") cvars.  Use the \"joy_advancedupdate\" command after setting this and the \"joy_advaxis*\" cvars.");
+
 	joy_advaxisx			= Cvar_Get ("joy_advaxisx",				"0",		0);
+	Cvar_SetDescription ("joy_advaxisx", "Controls mapping of DirectInput axis X (typically joystick left and right).");
 	joy_advaxisy			= Cvar_Get ("joy_advaxisy",				"0",		0);
+	Cvar_SetDescription ("joy_advaxisy", "Controls mapping of DirectInput axis Y (typically joystick forward and backward).");
 	joy_advaxisz			= Cvar_Get ("joy_advaxisz",				"0",		0);
+	Cvar_SetDescription ("joy_advaxisz", "Controls mapping of DirectInput axis Z (typically joystick throttle).");
 	joy_advaxisr			= Cvar_Get ("joy_advaxisr",				"0",		0);
+	Cvar_SetDescription ("joy_advaxisr", "Controls mapping of DirectInput axis R (typically joystick rudder).");
 	joy_advaxisu			= Cvar_Get ("joy_advaxisu",				"0",		0);
+	Cvar_SetDescription ("joy_advaxisu", "Controls mapping of DirectInput axis U (custom axis - Assassin 3D trackball left and right and SpaceOrb roll).");
 	joy_advaxisv			= Cvar_Get ("joy_advaxisv",				"0",		0);
+	Cvar_SetDescription ("joy_advaxisv", "Controls mapping of DirectInput axis V (custom axis - Assassin 3D trackball forward and backward and SpaceOrb yaw).");
+
 	joy_forwardthreshold	= Cvar_Get ("joy_forwardthreshold",		"0.15",		0);
+	Cvar_SetDescription ("joy_forwardthreshold", "Controls the dead-zone for moving forward and backward.");
 	joy_sidethreshold		= Cvar_Get ("joy_sidethreshold",		"0.15",		0);
+	Cvar_SetDescription ("joy_sidethreshold", "Controls the dead-zone for moving side to side.");
 	joy_upthreshold  		= Cvar_Get ("joy_upthreshold",			"0.15",		0);
+	Cvar_SetDescription ("joy_upthreshold", "Controls the dead-zone for moving up and down.");
 	joy_pitchthreshold		= Cvar_Get ("joy_pitchthreshold",		"0.15",		0);
+	Cvar_SetDescription ("joy_pitchthreshold", "Controls the dead-zone for looking up and down.");
 	joy_yawthreshold		= Cvar_Get ("joy_yawthreshold",			"0.15",		0);
+	Cvar_SetDescription ("joy_yawthreshold", "Controls the dead-zone for looking left and right.");
 	joy_forwardsensitivity	= Cvar_Get ("joy_forwardsensitivity",	"-1",		0);
+	Cvar_SetDescription ("joy_forwardsensitivity", "Controls the ramp-up speed for moving forward and backward.");
 	joy_sidesensitivity		= Cvar_Get ("joy_sidesensitivity",		"-1",		0);
+	Cvar_SetDescription ("joy_sidesensitivity", "Controls the ramp-up speed for moving side to side.");
 	joy_upsensitivity		= Cvar_Get ("joy_upsensitivity",		"-1",		0);
+	Cvar_SetDescription ("joy_upsensitivity", "Controls the ramp-up speed for moving up and down.");
 	joy_pitchsensitivity	= Cvar_Get ("joy_pitchsensitivity",		"1",		0);
+	Cvar_SetDescription ("joy_pitchsensitivity", "Controls the speed that you look up and down.");
 	joy_yawsensitivity		= Cvar_Get ("joy_yawsensitivity",		"-1",		0);
+	Cvar_SetDescription ("joy_yawsensitivity", "Controls the speed that you look left to right.");
 
 	// centering
 	v_centermove			= Cvar_Get ("v_centermove",				"0.15",		0);
