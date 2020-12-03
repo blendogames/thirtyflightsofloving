@@ -654,7 +654,7 @@ void BossExplode (edict_t *self)
 	case 9:
 		self->s.sound = 0;
 
-		//Knightmare- big explosion
+		// Knightmare- big explosion
 		gi.WriteByte (svc_temp_entity);
 		gi.WriteByte (TE_EXPLOSION1_BIG);
 		gi.WritePosition (org);

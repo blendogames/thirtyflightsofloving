@@ -256,7 +256,7 @@ void flipper_dead (edict_t *self)
 	M_FlyCheck (self);
 
 	// Lazarus monster fade
-	if(world->effects & FX_WORLDSPAWN_CORPSEFADE)
+	if (world->effects & FX_WORLDSPAWN_CORPSEFADE)
 	{
 		self->think=FadeDieSink;
 		self->nextthink=level.time+corpse_fadetime->value;
@@ -398,11 +398,11 @@ void SP_monster_flipper (edict_t *self)
 	VectorSet (self->mins, -16, -16, -8);
 	VectorSet (self->maxs, 16, 16, 24);
 
-	if(!self->health)
+	if (!self->health)
 		self->health = 50;
-	if(!self->gib_health)
+	if (!self->gib_health)
 		self->gib_health = -40; //was -30
-	if(!self->mass)
+	if (!self->mass)
 		self->mass = 100;
 
 	self->pain = flipper_pain;

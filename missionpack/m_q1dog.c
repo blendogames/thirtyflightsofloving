@@ -12,6 +12,7 @@ QUAKE DOG
 
 static int	sound_pain;
 static int	sound_death;
+static int	sound_gib;
 static int	sound_attack;
 static int	sound_sight;
 static int	sound_idle;
@@ -397,7 +398,7 @@ void q1dog_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 
 	if (self->health <= self->gib_health && !(self->spawnflags & SF_MONSTER_NOGIB))
 	{
-		gi.sound (self, CHAN_VOICE|CHAN_RELIABLE, gi.soundindex ("q1player/udeath.wav"), 1, ATTN_NORM, 0);
+		gi.sound (self, CHAN_VOICE|CHAN_RELIABLE, sound_gib, 1, ATTN_NORM, 0);
 		
 		ThrowGib (self, "models/objects/q1gibs/q1gib1/tris.md2", damage, GIB_ORGANIC);
 		for (n= 0; n < 2; n++)
@@ -438,10 +439,16 @@ void SP_monster_q1_dog (edict_t *self)
 	}
 	sound_pain = gi.soundindex ("q1dog/dpain1.wav");
 	sound_death = gi.soundindex ("q1dog/ddeath.wav");
+	sound_gib =		gi.soundindex ("q1player/udeath.wav");
 	sound_attack = gi.soundindex ("q1dog/dattack1.wav");
 	sound_sight = gi.soundindex ("q1dog/dsight.wav");
 	sound_idle = gi.soundindex ("q1dog/idle.wav");
-	
+
+	// precache gibs
+	gi.modelindex ("models/monsters/q1dog/head/tris.md2");
+	gi.modelindex ("models/objects/q1gibs/q1gib1/tris.md2");
+	gi.modelindex ("models/objects/q1gibs/q1gib3/tris.md2");
+
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;
 

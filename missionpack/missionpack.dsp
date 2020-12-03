@@ -281,10 +281,6 @@ SOURCE=.\g_weapon_q1.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\grenade.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\km_cvar.c
 # End Source File
 # Begin Source File
@@ -474,6 +470,10 @@ SOURCE=.\m_tank.c
 # Begin Source File
 
 SOURCE=.\m_turret.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\m_vulture.c
 # End Source File
 # Begin Source File
 
@@ -754,6 +754,10 @@ SOURCE=.\m_tank.h
 # Begin Source File
 
 SOURCE=.\m_turret.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\m_vulture.h
 # End Source File
 # Begin Source File
 

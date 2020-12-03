@@ -14,6 +14,7 @@ static int	sound_sight;
 static int	sound_pain1;
 static int	sound_pain2;
 static int	sound_death;
+static int	sound_gib;
 static int	sound_attack;
 
 
@@ -361,7 +362,7 @@ void q1grunt_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dama
 // check for gib
 	if (self->health <= self->gib_health && !(self->spawnflags & SF_MONSTER_NOGIB))
 	{
-		gi.sound (self, CHAN_VOICE|CHAN_RELIABLE, gi.soundindex ("q1player/udeath.wav"), 1, ATTN_NORM, 0);
+		gi.sound (self, CHAN_VOICE|CHAN_RELIABLE, sound_gib, 1, ATTN_NORM, 0);
 
 		// if dead body, don't drop pack when gibbed
 	//	if (self->deadflag != DEAD_DEAD)
@@ -411,11 +412,16 @@ void SP_monster_q1_grunt (edict_t *self)
 	sound_pain1 =	gi.soundindex ("q1grunt/pain1.wav");
 	sound_pain2 =   gi.soundindex ("q1grunt/pain2.wav");
 	sound_death =	gi.soundindex ("q1grunt/death1.wav");
+	sound_gib =		gi.soundindex ("q1player/udeath.wav");
 	sound_attack =  gi.soundindex ("q1grunt/sattck1.wav");
 
 	// precache backpack
 	gi.modelindex ("models/items/q1backpack/tris.md2");
 //	gi.soundindex ("q1weapons/lock4.wav");
+	// precache gibs
+	gi.modelindex ("models/monsters/q1grunt/head/tris.md2");
+	gi.modelindex ("models/objects/q1gibs/q1gib1/tris.md2");
+	gi.modelindex ("models/objects/q1gibs/q1gib2/tris.md2");
 
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;

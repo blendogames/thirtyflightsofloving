@@ -607,11 +607,14 @@ void q1zombie_sight(edict_t *self, edict_t *other)
 
 void q1zombie_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
-//	gi.sound (self, CHAN_VOICE, sound_gib, 1, ATTN_NORM, 0);
-	gi.sound (self, CHAN_VOICE, gi.soundindex ("q1zombie/z_gib.wav"), 1, ATTN_NORM, 0);
-	ThrowGib (self, "models/objects/q1gibs/q1gib1/tris.md2", damage, GIB_ORGANIC);
+	int		n;
+
+	gi.sound (self, CHAN_VOICE, sound_gib, 1, ATTN_NORM, 0);
+	for (n = 0; n < 2; n++)
+		ThrowGib (self, "models/objects/q1gibs/q1gib1/tris.md2", damage, GIB_ORGANIC);
 	ThrowGib (self, "models/objects/q1gibs/q1gib2/tris.md2", damage, GIB_ORGANIC);
-	ThrowGib (self, "models/objects/q1gibs/q1gib3/tris.md2", damage, GIB_ORGANIC);
+	for (n = 0; n < 2; n++)
+		ThrowGib (self, "models/objects/q1gibs/q1gib3/tris.md2", damage, GIB_ORGANIC);
 	ThrowHead (self, "models/monsters/q1zombie/head/tris.md2", damage*2, GIB_ORGANIC);
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_NO;
@@ -652,6 +655,14 @@ void SP_monster_q1_zombie (edict_t *self)
 	sound_fall	= gi.soundindex ("q1zombie/z_fall.wav");
 	sound_gib	= gi.soundindex ("q1zombie/z_gib.wav");
 	sound_shot	= gi.soundindex ("q1zombie/z_shot1.wav");
+
+	// precache gibs
+	gi.modelindex ("models/monsters/q1zombie/head/tris.md2");
+	gi.modelindex ("models/objects/q1gibs/q1gib1/tris.md2");
+	gi.modelindex ("models/objects/q1gibs/q1gib2/tris.md2");
+	gi.modelindex ("models/objects/q1gibs/q1gib3/tris.md2");
+	// precache projectile gib
+	q1_gib_precache ();
 
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;

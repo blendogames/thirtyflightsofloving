@@ -216,7 +216,7 @@ void SP_misc_q1_globe(edict_t *self)
 
 void q1_small_flame_think (edict_t *self)
 {
-	if(self->s.frame >= 5)
+	if (self->s.frame >= 5)
 		self->s.frame = 0;
 	else
 		self->s.frame++;
@@ -285,7 +285,7 @@ void SP_misc_q1_large_flame (edict_t *ent)
 
 void q1_torch_think (edict_t *self)
 {
-	if(self->s.frame >= 5)
+	if (self->s.frame >= 5)
 		self->s.frame = 0;
 	else
 		self->s.frame++;
@@ -354,7 +354,7 @@ void SP_target_q1_trap (edict_t *self)
 	if (self->spawnflags & 2)
 	{
 		self->noise_index = gi.soundindex ("q1enforcer/enfire.wav");
-		gi.soundindex("q1enforcer/enfstop.wav");
+		q1_laser_precache ();
 		if (!self->speed)
 			self->speed = 600;
 	}
@@ -365,11 +365,12 @@ void SP_target_q1_trap (edict_t *self)
 		self->noise_index = gi.soundindex ("q1weapons/spike.wav");
 		gi.soundindex("q1weapons/s_end.wav");
 #endif
+		q1_nail_precache ();
 		if (!self->speed)
 			self->speed = 500;
 	}
 
-	if (self->spawnflags & 1 || self->spawnflags & 2) {
+	if ( (self->spawnflags & 1) || (self->spawnflags & 2) ) {
 		if (!self->dmg)
 			self->dmg = 15;
 	}

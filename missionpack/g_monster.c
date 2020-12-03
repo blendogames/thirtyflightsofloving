@@ -319,7 +319,7 @@ void dabeam_hit (edict_t *self)
 	VectorCopy (self->s.origin, start);
 	VectorMA (start, 2048, self->movedir, end);
 	
-	while(1)
+	while (1)
 	{	//Knightmare- double trace here, needed to make sure clipping works- must be compiler weirdness
 		tr = gi.trace (start, NULL, NULL, end, ignore, (CONTENTS_SOLID|CONTENTS_MONSTER|CONTENTS_DEADMONSTER));
 		tr = gi.trace (start, NULL, NULL, end, ignore, (CONTENTS_SOLID|CONTENTS_MONSTER|CONTENTS_DEADMONSTER));
@@ -1323,7 +1323,7 @@ void monster_start_go (edict_t *self)
 	
 	// Lazarus: move_origin for func_monitor
 	if (!VectorLength(self->move_origin))
-		VectorSet(self->move_origin,0,0,self->viewheight);
+		VectorSet(self->move_origin, 0, 0, self->viewheight);
 
 	// check for target to combat_point and change to combattarget
 	if (self->target)
@@ -1426,6 +1426,9 @@ void walkmonster_start_go (edict_t *self)
 	// PMM - stalkers are too short for this
 	if (!(strcmp(self->classname, "monster_stalker")))
 		self->viewheight = 15;
+	// Knightmare- vultures also too short
+	else if (!(strcmp(self->classname, "monster_vulture")))
+		self->viewheight = 8;
 	else
 		self->viewheight = 25;
 
@@ -1449,7 +1452,11 @@ void flymonster_start_go (edict_t *self)
 
 	if (!self->yaw_speed)
 		self->yaw_speed = 10;
-	self->viewheight = 25;
+	// Knightmare- vultures too short for this
+	if (!(strcmp(self->classname, "monster_vulture")))
+		self->viewheight = 8;
+	else
+		self->viewheight = 25;
 
 	monster_start_go (self);
 
@@ -1636,6 +1643,7 @@ int PatchMonsterModel (char *modelname)
 	qboolean	is_hover = false;
 	qboolean	is_medic = false;
 	qboolean	is_turret = false;
+	qboolean	is_vulture = false;
 	qboolean	is_zboss_mech = false;
 	qboolean	is_zboss_pilot = false;
 
@@ -1660,71 +1668,76 @@ int PatchMonsterModel (char *modelname)
 
 	numskins = 8;
 	// special cases
-	if (!strcmp(modelname,"models/monsters/tank/tris.md2"))
+	if (!strcmp(modelname, "models/monsters/tank/tris.md2"))
 	{
 		is_tank = true;
 		numskins = 16;
 	}
-	else if (!strcmp(modelname,"models/monsters/soldier/tris.md2"))
+	else if (!strcmp(modelname, "models/monsters/soldier/tris.md2"))
 	{
 		is_soldier = true;
 		numskins = 32;	// was 24
 	}
 	// Knightmare added
 #ifdef CITADELMOD_FEATURES
-	else if (!strcmp(modelname,"models/monsters/brain/tris.md2"))
+	else if (!strcmp(modelname, "models/monsters/brain/tris.md2"))
 	{
 		is_brain = true;
 		numskins = 16;
 	}
 #endif
-	else if (!strcmp(modelname,"models/monsters/gekk/tris.md2"))
+	else if (!strcmp(modelname, "models/monsters/gekk/tris.md2"))
 	{
 		is_gekk = true;
 		numskins = 12;
 	}
-	else if (!strcmp(modelname,"models/monsters/fixbot/tris.md2"))
+	else if (!strcmp(modelname, "models/monsters/fixbot/tris.md2"))
 	{
 		is_fixbot = true;
 		numskins = 4;
 	}
-	else if (!strcmp(modelname,"models/monsters/bitch/tris.md2")
-		|| !strcmp(modelname,"models/monsters/bitch2/tris.md2"))
+	else if (!strcmp(modelname, "models/monsters/bitch/tris.md2")
+		|| !strcmp(modelname, "models/monsters/bitch2/tris.md2"))
 	{
 		is_chick = true;
 		numskins = 16;
 	}
-	else if (!strcmp(modelname,"models/monsters/soldierh/tris.md2"))
+	else if (!strcmp(modelname, "models/monsters/soldierh/tris.md2"))
 	{
 		is_soldierh = true;
 		numskins = 24;
 	}
-	else if (!strcmp(modelname,"models/monsters/carrier/tris.md2"))
+	else if (!strcmp(modelname, "models/monsters/carrier/tris.md2"))
 	{
 		is_carrier = true;
 		numskins = 8;
 	}
-	else if (!strcmp(modelname,"models/monsters/hover/tris.md2"))
+	else if (!strcmp(modelname, "models/monsters/hover/tris.md2"))
 	{
 		is_hover = true;
 		numskins = 16;
 	}
-	else if (!strcmp(modelname,"models/monsters/medic/tris.md2"))
+	else if (!strcmp(modelname, "models/monsters/medic/tris.md2"))
 	{
 		is_medic = true;
 		numskins = 16;
 	}
-	else if (!strcmp(modelname,"models/monsters/turret/tris.md2"))
+	else if (!strcmp(modelname, "models/monsters/turret/tris.md2"))
 	{
 		is_turret = true;
 		numskins = 12;
 	}
-	else if (!strcmp(modelname,"models/monsters/bossz/mech/tris.md2"))
+	else if (!strcmp(modelname, "models/monsters/vulture/tris.md2"))
+	{
+		is_vulture = true;
+		numskins = 4;
+	}
+	else if (!strcmp(modelname, "models/monsters/bossz/mech/tris.md2"))
 	{
 		is_zboss_mech = true;
 		numskins = 12;
 	}
-	else if (!strcmp(modelname,"models/monsters/bossz/pilot/tris.md2"))
+	else if (!strcmp(modelname, "models/monsters/bossz/pilot/tris.md2"))
 	{
 		is_zboss_pilot = true;
 		numskins = 12;
@@ -2117,6 +2130,20 @@ int PatchMonsterModel (char *modelname)
 				Com_strcat (skins[j], sizeof(skins[j]), "custom3_2.pcx"); break;
 			case 11:
 				Com_strcat (skins[j], sizeof(skins[j]), "custom3_3.pcx"); break;
+			}
+		}
+		else if (is_vulture)
+		{
+			switch (j)
+			{
+			case 0:
+				Com_strcat (skins[j], sizeof(skins[j]), "vulture.pcx"); break;
+			case 1:
+				Com_strcat (skins[j], sizeof(skins[j]), "custom1.pcx"); break;
+			case 2:
+				Com_strcat (skins[j], sizeof(skins[j]), "custom2.pcx"); break;
+			case 3:
+				Com_strcat (skins[j], sizeof(skins[j]), "custom3.pcx"); break;
 			}
 		}
 		else if (is_zboss_mech || is_zboss_pilot)

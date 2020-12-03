@@ -11,15 +11,17 @@ QUAKE OGRE
 
 static int	sound_pain;
 static int	sound_death;
+static int	sound_gib;
 static int	sound_idle;
 static int	sound_idle2;
 static int	sound_wake;
+static int	sound_shoot;
 static int	sound_saw;
 static int	sound_drag;
 
 
 void ogre_check_refire (edict_t *self);
-void ogre_attack(edict_t *self);
+void ogre_attack (edict_t *self);
 
 void ogre_idle_sound1 (edict_t *self)
 {
@@ -36,12 +38,12 @@ void ogre_idle_sound2 (edict_t *self)
 void ogre_sight (edict_t *self, edict_t *other)
 {
 	gi.sound (self, CHAN_VOICE, sound_wake, 1, ATTN_NORM, 0);
-	ogre_attack(self);
+	ogre_attack (self);
 }
 
 void ogre_drag_sound (edict_t *self)
 {
-	//if(anglemod(self->s.angles[YAW]) != self->ideal_yaw)
+	//if (anglemod(self->s.angles[YAW]) != self->ideal_yaw)
 	if (random() < 0.2)
 		gi.sound (self, CHAN_VOICE, sound_drag, 1, ATTN_IDLE, 0);
 }
@@ -100,15 +102,14 @@ void ogre_walk (edict_t *self)
 mframe_t ogre_frames_run [] =
 {
 	ai_run, 9, NULL,
-	ai_run, 12,NULL,
+	ai_run, 12, NULL,
 	ai_run, 8, NULL,
-	ai_run, 22,NULL,
-	ai_run, 16,NULL,
+	ai_run, 22, NULL,
+	ai_run, 16, NULL,
 	ai_run, 4, NULL,
-	ai_run, 13,ogre_attack,
-	ai_run, 24,NULL
+	ai_run, 13, ogre_attack,
+	ai_run, 24, NULL
 };
-
 mmove_t ogre_move_run = {FRAME_run1, FRAME_run8, ogre_frames_run, NULL};
 
 
@@ -199,11 +200,10 @@ void ogre_pain (edict_t *self, edict_t *other, float kick, int damage)
 {
 	float r;
 
-
 	if (level.time < self->pain_debounce_time)
 		return;
 
-	r=random();
+	r = random();
 
 	if (self->health > 0)
 		gi.sound (self, CHAN_VOICE, sound_pain, 1, ATTN_NORM, 0);	
@@ -313,17 +313,17 @@ void ogre_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
 	int		n;
 
 // check for gib
-	if (self->health <= self->gib_health && !(self->spawnflags & SF_MONSTER_NOGIB))
+	if ( (self->health <= self->gib_health) && !(self->spawnflags & SF_MONSTER_NOGIB) )
 	{
-		gi.sound (self, CHAN_VOICE|CHAN_RELIABLE, gi.soundindex ("q1player/udeath.wav"), 1, ATTN_NORM, 0);
+		gi.sound (self, CHAN_VOICE|CHAN_RELIABLE, sound_gib, 1, ATTN_NORM, 0);
 		
 		// if dead body, don't drop pack when gibbed
 	//	if (self->deadflag != DEAD_DEAD)
 	//		ogre_droprockets(self);
 
-		for (n= 0; n < 2; n++)
+		for (n = 0; n < 2; n++)
 			ThrowGib (self, "models/objects/q1gibs/q1gib1/tris.md2", damage, GIB_ORGANIC);
-		for (n= 0; n < 4; n++)
+		for (n = 0; n < 4; n++)
 			ThrowGib (self, "models/objects/q1gibs/q1gib3/tris.md2", damage, GIB_ORGANIC);
 		ThrowHead (self, "models/monsters/q1ogre/head/tris.md2", damage, GIB_ORGANIC);
 		self->deadflag = DEAD_DEAD;
@@ -338,14 +338,14 @@ void ogre_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_YES;
 
-	if(random() < 0.5)
+	if (random() < 0.5)
 		self->monsterinfo.currentmove = &ogre_move_death1;
 	else
 		self->monsterinfo.currentmove = &ogre_move_death2;
 }
 
 
-void ogre_grenade_fire(edict_t *self)
+void ogre_grenade_fire (edict_t *self)
 {
 
 	vec3_t	start;
@@ -359,10 +359,10 @@ void ogre_grenade_fire(edict_t *self)
 	// project enemy back a bit and target there
 	VectorCopy (self->enemy->s.origin, target);
 	
-	//if(range(self,self->enemy) > RANGE_MID)
+	//if (range(self,self->enemy) > RANGE_MID)
 	VectorMA (target, -0.1, self->enemy->velocity, target);
 	
-	if(range(self,self->enemy) > RANGE_MID)
+	if (range(self,self->enemy) > RANGE_MID)
 		target[2] += self->enemy->viewheight;
 	else
 		target[2] += self->enemy->viewheight*0.8;
@@ -375,7 +375,7 @@ void ogre_grenade_fire(edict_t *self)
 	gi.WriteByte (MZ_MACHINEGUN | 128);
 	gi.multicast (self->s.origin, MULTICAST_PVS);
 
-	gi.sound (self, CHAN_WEAPON|CHAN_RELIABLE, gi.soundindex("q1weapons/grenade.wav"), 1.0, ATTN_NORM, 0);
+	gi.sound (self, CHAN_WEAPON|CHAN_RELIABLE, sound_shoot, 1.0, ATTN_NORM, 0);
 	q1_fire_grenade (self, start,aim,40 , 600, 2.5, 80);
 }
 
@@ -414,9 +414,9 @@ void ogre_check_refire (edict_t *self)
 	if (!self->enemy || !self->enemy->inuse || self->enemy->health <= 0)
 		return;
 
-	if (skill->value == 3|| (range(self, self->enemy) == RANGE_MELEE))
+	if ( (skill->value == 3) || (range(self, self->enemy) == RANGE_MELEE))
 	{
-		if(random() > 0.5)
+		if (random() > 0.5)
 			self->monsterinfo.nextframe = FRAME_swing1;
 		else
 			self->monsterinfo.nextframe = FRAME_smash1;
@@ -426,7 +426,7 @@ void ogre_check_refire (edict_t *self)
 }
 
 
-/*static*/ void ogre_sawswingsound(edict_t *self)
+/*static*/ void ogre_sawswingsound (edict_t *self)
 {
 	gi.sound (self, CHAN_WEAPON, sound_saw, 1, ATTN_NORM, 0);
 }
@@ -478,25 +478,25 @@ mframe_t ogre_frames_attack_grenade [] =
 	ai_charge, 0, NULL,
 	ai_charge, 0, ogre_grenade_fire,
 	ai_charge, 0, NULL,
-	ai_charge, 0, NULL //ogre_attack
+	ai_charge, 0, NULL // ogre_attack
 };
 mmove_t ogre_move_attack_grenade = {FRAME_shoot1, FRAME_shoot6, ogre_frames_attack_grenade, ogre_run};
 
 
-void ogre_attack(edict_t *self)
+void ogre_attack (edict_t *self)
 {
 	int r;
 	
-	if(!self->enemy)
+	if (!self->enemy)
 		return;
 
-	r = range(self,self->enemy);
+	r = range(self, self->enemy);
 
 	if (r == RANGE_MELEE)
 	{
 		self->monsterinfo.currentmove = &ogre_move_swing_attack;
 	}
-	else if(visible(self,self->enemy) && infront(self,self->enemy)
+	else if (visible(self,self->enemy) && infront(self,self->enemy)
 		&& (r < RANGE_FAR) && !(self->monsterinfo.aiflags & AI_SOUND_TARGET))
 	{
 		self->monsterinfo.currentmove = &ogre_move_attack_grenade;
@@ -510,7 +510,7 @@ void ogre_attack(edict_t *self)
 // SPAWN
 //
 
-/*QUAKED monster_q1_ogre (1 .5 0) (-20 -20 -24) (20 20 32) Ambush Trigger_Spawn Sight
+/*QUAKED monster_q1_ogre (1 .5 0) (-20 -20 -24) (20 20 32) Ambush Trigger_Spawn Sight GoodGuy NoGib
 model="models/monsters/q1ogre/tris.md2"
 */
 void SP_monster_q1_ogre (edict_t *self)
@@ -523,15 +523,23 @@ void SP_monster_q1_ogre (edict_t *self)
 
 	sound_pain =	gi.soundindex ("q1ogre/ogpain1.wav");
 	sound_death =	gi.soundindex ("q1ogre/ogdth.wav");
+	sound_gib =		gi.soundindex ("q1player/udeath.wav");
 	sound_idle =	gi.soundindex ("q1ogre/ogidle.wav");
 	sound_idle2 =	gi.soundindex ("q1ogre/ogidle2.wav");
 	sound_wake =	gi.soundindex ("q1ogre/ogwake.wav");
+	sound_shoot =	gi.soundindex ("q1weapons/grenade.wav");
 	sound_saw  =	gi.soundindex ("q1ogre/ogsawatk.wav");
 	sound_drag =	gi.soundindex ("q1ogre/ogdrag.wav");
 
 	// precache backpack
 	gi.modelindex ("models/items/q1backpack/tris.md2");
 //	gi.soundindex ("q1weapons/lock4.wav");
+	// precache gibs
+	gi.modelindex ("models/monsters/q1ogre/head/tris.md2");
+	gi.modelindex ("models/objects/q1gibs/q1gib1/tris.md2");
+	gi.modelindex ("models/objects/q1gibs/q1gib3/tris.md2");
+	// precache grenade
+	q1_grenade_precache ();
 
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;

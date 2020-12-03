@@ -18,6 +18,7 @@ static int	sound_idle1;
 static int	sound_idle2;
 static int  sound_attack;
 static int	sound_die;
+static int	sound_gib;
 static int	sound_pain;
 static int	sound_hit;
 
@@ -197,9 +198,9 @@ void scrag_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 
 	if (self->health <=  self->gib_health && !(self->spawnflags & SF_MONSTER_NOGIB))
 	{
-		gi.sound (self, CHAN_VOICE|CHAN_RELIABLE, gi.soundindex ("q1player/udeath.wav"), 1, ATTN_NORM, 0);
+		gi.sound (self, CHAN_VOICE|CHAN_RELIABLE, sound_gib, 1, ATTN_NORM, 0);
 
-		for (n= 0; n < 3; n++)
+		for (n = 0; n < 3; n++)
 			ThrowGib (self, "models/objects/q1gibs/q1gib2/tris.md2", damage, GIB_ORGANIC);
 		ThrowHead (self, "models/monsters/q1scrag/head/tris.md2", damage, GIB_ORGANIC);
 		self->deadflag = DEAD_DEAD;
@@ -337,14 +338,21 @@ void SP_monster_q1_scrag (edict_t *self)
 		return;
 	}
 
-	sound_sight = gi.soundindex ("q1scrag/wsight.wav");
-	sound_idle1 = gi.soundindex ("q1scrag/widle1.wav");
-	sound_idle2 = gi.soundindex ("q1scrag/widle2.wav");
-	sound_attack = gi.soundindex ("q1scrag/wattack.wav");
-	sound_die = gi.soundindex ("q1scrag/wdeath.wav");
-	sound_pain = gi.soundindex ("q1scrag/wpain.wav");
-	sound_hit = gi.soundindex ("q1scrag/hit.wav");
-	
+	sound_sight =	gi.soundindex ("q1scrag/wsight.wav");
+	sound_idle1 =	gi.soundindex ("q1scrag/widle1.wav");
+	sound_idle2 =	gi.soundindex ("q1scrag/widle2.wav");
+	sound_attack =	gi.soundindex ("q1scrag/wattack.wav");
+	sound_die =		gi.soundindex ("q1scrag/wdeath.wav");
+	sound_gib =		gi.soundindex ("q1player/udeath.wav");
+	sound_pain =	gi.soundindex ("q1scrag/wpain.wav");
+	sound_hit =		gi.soundindex ("q1scrag/hit.wav");
+
+	// precache gibs
+	gi.modelindex ("models/monsters/q1scrag/head/tris.md2");
+	gi.modelindex ("models/objects/q1gibs/q1gib2/tris.md2");
+	// precache acidspit
+	q1_acidspit_precache ();
+
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;
 

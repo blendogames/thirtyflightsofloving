@@ -17,6 +17,7 @@ static int	sound_attack;
 static int  sound_boom;  // ?
 static int	sound_pain;
 static int	sound_death;
+static int	sound_gib;
 static int	sound_idle;
 static int	sound_sight;
 
@@ -202,13 +203,16 @@ mmove_t shambler_move_death = {FRAME_death1, FRAME_death11, shambler_frames_deat
 
 void shambler_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
-	
+	int		n;
+
 	// check for gib
 	if (self->health <= self->gib_health && !(self->spawnflags & SF_MONSTER_NOGIB))
 	{
-		gi.sound (self, CHAN_VOICE|CHAN_RELIABLE, gi.soundindex ("q1player/udeath.wav"), 1, ATTN_NORM, 0);
-		ThrowGib (self, "models/objects/q1gibs/q1gib1/tris.md2", damage, GIB_ORGANIC);
-		ThrowGib (self, "models/objects/q1gibs/q1gib3/tris.md2", damage, GIB_ORGANIC);
+		gi.sound (self, CHAN_VOICE|CHAN_RELIABLE, sound_gib, 1, ATTN_NORM, 0);
+		for (n = 0; n < 2; n++)
+			ThrowGib (self, "models/objects/q1gibs/q1gib1/tris.md2", damage, GIB_ORGANIC);
+		for (n = 0; n < 4; n++)
+			ThrowGib (self, "models/objects/q1gibs/q1gib3/tris.md2", damage, GIB_ORGANIC);
 		ThrowGib (self, "models/objects/q1gibs/q1gib2/tris.md2", damage, GIB_ORGANIC);
 		ThrowHead (self, "models/monsters/q1shambler/head/tris.md2", damage, GIB_ORGANIC);
 		self->deadflag = DEAD_DEAD;
@@ -517,15 +521,22 @@ void SP_monster_q1_shambler (edict_t *self)
 		return;
 	}
 
-	sound_melee1 = gi.soundindex ("q1shambler/melee1.wav");	
-	sound_melee2 = gi.soundindex ("q1shambler/melee1.wav");	
-	sound_melee3 = gi.soundindex ("q1shambler/smack.wav");	
-	sound_attack = gi.soundindex ("q1shambler/sattck1.wav");			
-	sound_boom = gi.soundindex ("q1shambler/sboom.wav");
-	sound_pain = gi.soundindex ("q1shambler/shurt2.wav");	
-	sound_death = gi.soundindex ("q1shambler/sdeath.wav");			
-	sound_idle = gi.soundindex ("q1shambler/sidle.wav");			
-	sound_sight = gi.soundindex ("q1shambler/ssight.wav");			
+	sound_melee1 =	gi.soundindex ("q1shambler/melee1.wav");	
+	sound_melee2 =	gi.soundindex ("q1shambler/melee1.wav");	
+	sound_melee3 =	gi.soundindex ("q1shambler/smack.wav");	
+	sound_attack =	gi.soundindex ("q1shambler/sattck1.wav");			
+	sound_boom =	gi.soundindex ("q1shambler/sboom.wav");
+	sound_pain =	gi.soundindex ("q1shambler/shurt2.wav");	
+	sound_death =	gi.soundindex ("q1shambler/sdeath.wav");			
+	sound_gib =		gi.soundindex ("q1player/udeath.wav");
+	sound_idle =	gi.soundindex ("q1shambler/sidle.wav");			
+	sound_sight =	gi.soundindex ("q1shambler/ssight.wav");
+
+	// precache gibs
+	gi.modelindex ("models/monsters/q1shambler/head/tris.md2");
+	gi.modelindex ("models/objects/q1gibs/q1gib1/tris.md2");
+	gi.modelindex ("models/objects/q1gibs/q1gib2/tris.md2");
+	gi.modelindex ("models/objects/q1gibs/q1gib3/tris.md2");
 
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;

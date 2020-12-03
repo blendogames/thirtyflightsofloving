@@ -1044,6 +1044,9 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 			// Rottweiler
 			else if (!strcmp(attacker->classname, "monster_dog"))
 				message = "was mauled by a";
+			// Vulture
+			else if (!strcmp(attacker->classname, "monster_vulture"))
+				message = "was pecked to death by a";
 		// Quake 1 Monsters
 			// Fiend
 			else if ( !Q_stricmp(attacker->classname, "q1_monster_fiend") || !Q_stricmp(attacker->classname, "monster_q1_demon") )
@@ -1086,6 +1089,10 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 			// Spawn
 			else if ( !Q_stricmp(attacker->classname, "q1_monster_tarbaby") || !Q_stricmp(attacker->classname, "monster_q1_tarbaby") )
 				message = "was slimed by a";
+			// Freddie
+			else if ( !Q_stricmp(attacker->classname, "q1_monster_freddie") || !Q_stricmp(attacker->classname, "monster_q1_freddie") )
+				message = "was exterminated by";
+
 		}
 		if (message)
 		{

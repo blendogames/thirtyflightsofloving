@@ -212,6 +212,7 @@ typedef enum
 //gib types
 #define GIB_ORGANIC				0
 #define GIB_METALLIC			1
+#define GIB_FEATHER				2	// Knightmare- added for vulture
 
 // monster ai flags
 #define AI_STAND_GROUND			0x00000001
@@ -346,6 +347,7 @@ MOVETYPE_PENDULUM,		// same as MOVETYPE_PUSH, but used only for pendulums to gra
 
 MOVETYPE_CONVEYOR,		// conveyor
 MOVETYPE_SHOCKBOUNCE,	// Knightmare- added for shockwave
+MOVETYPE_FEATHER,		// Knightmare- added for vulture, specifies slow falling
 // Zaero
 MOVETYPE_FREEZE,		// player freeze, used for Zaero Camera
 MOVETYPE_FALLFLOAT,		// falls down slopes and floats in water
@@ -1409,7 +1411,9 @@ void gib_fade (edict_t *self);
 void ThrowHead (edict_t *self, char *gibname, int damage, int type);
 void ThrowClientHead (edict_t *self, int damage);
 void ThrowGib (edict_t *self, char *gibname, int damage, int type);
+void ThrowGibFrame (edict_t *self, char *gibname, int frame, int damage, int type);
 void ThrowDebris (edict_t *self, char *modelname, float speed, vec3_t origin, int skin, int effects);
+void ThrowDebrisFrame (edict_t *self, char *modelname, float speed, vec3_t origin, int frame, int skin, int effects);
 void BecomeExplosion1(edict_t *self);
 void BecomeExplosion2(edict_t *self);
 void BecomeExplosion3(edict_t *self);
@@ -1498,17 +1502,25 @@ void Grenade_Evade (edict_t *monster);
 // g_weapon_q1.c
 //
 void q1_fire_nail (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, qboolean sng);
+void q1_nail_precache (void);
 void q1_fire_laser (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed);
+void q1_laser_precache (void);
 void q1_fire_flame (edict_t *self, vec3_t start, vec3_t dir, float leftrightoff);
+void q1_flame_precache (void);
 void q1_explode (edict_t *self);
 void q1_fire_grenade (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, float timer, float damage_radius);
+void q1_grenade_precache (void);
 void q1_fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage);
+void q1_rocket_precahce (void);
 void q1_fire_lightning (edict_t *self, vec3_t start, vec3_t dir, int damage);
 void q1_fire_firepod (edict_t *self, vec3_t dir);
+void q1_firepod_precache (void);
 void q1_fire_lavaball (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage);
+void q1_fire_lavaball_precache (void);
 void q1_fire_acidspit (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed);
+void q1_acidspit_precache (void);
 void q1_fire_gib (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed);
-
+void q1_gib_precache (void);
 
 //
 // m_actor.c
@@ -2237,17 +2249,17 @@ new structure for the backup client data while its in the camera.
 
 typedef struct
 {
-	vec3_t		oldorigin;		//clients world origin
-	vec3_t		moveorigin;		//for client prediction, don't think this is needed as its only an sp modification
-	vec3_t		viewangles;		//which way the client is facing
+	vec3_t		oldorigin;		// clients world origin
+	vec3_t		moveorigin;		// for client prediction, don't think this is needed as its only an sp modification
+	vec3_t		viewangles;		// which way the client is facing
 
-	int			pm_type;		//player movetype I believe. (noclip, fly, etc)
-	int			gunindex;		//gun model
+	int			pm_type;		// player movetype I believe. (noclip, fly, etc)
+	int			gunindex;		// gun model
 
-	vec3_t		blend;		//screen blend value (for bleeding, etc)
-	int			rdflags;		//render flags for the clent
+	vec3_t		blend;			// screen blend value (for bleeding, etc)
+	int			rdflags;		// render flags for the clent
 
-	//how long left before something happens/runs out
+	// how long left before something happens/runs out
 	int			quad_framenum;
 	int			invincible_framenum;
 	int			breather_framenum;
@@ -2255,15 +2267,15 @@ typedef struct
 	int			grenade_blew_up;
 	int			grenade_time;
 
-	int 			viewheight;		//viewheight from the origin
+	int 		viewheight;		// viewheight from the origin
 
-	//various model files the player can be displayed as.
+	// various model files the player can be displayed as.
 	int			modelindex;
 	int			modelindex2;
 	int			modelindex3;
-	unsigned int	effects;		//what effect are we (needs to be unsigned because theres a few
+	unsigned int	effects;	// what effect are we (needs to be unsigned because theres a few
 	int			sound;
-	solid_t		solid;		//current solid state, 90% certain its SOLID_PLAYER ;)
+	solid_t		solid;			// current solid state, 90% certain its SOLID_PLAYER ;)
 
 } backup_t;
 

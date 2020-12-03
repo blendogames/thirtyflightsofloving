@@ -145,7 +145,7 @@ mmove_t	tank_move_stop_walk = {FRAME_walk21, FRAME_walk25, tank_frames_stop_walk
 
 void tank_walk (edict_t *self)
 {
-		self->monsterinfo.currentmove = &tank_move_walk;
+	self->monsterinfo.currentmove = &tank_move_walk;
 }
 
 

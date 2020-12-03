@@ -198,6 +198,8 @@ void SP_misc_seat(edict_t *self);
 
 // Knightmare- the dog from Coconut Monkey 3
 void SP_monster_dog (edict_t *self);
+// Knightmare- the vulture from Coconut Monkey 2
+void SP_monster_vulture (edict_t *self);
 
 void SP_rotating_light (edict_t *self);
 void SP_object_repair (edict_t *self);
@@ -332,6 +334,7 @@ void SP_monster_q1_shalrath (edict_t *self);
 void SP_monster_q1_shambler (edict_t *self);
 void SP_monster_q1_tarbaby (edict_t *self);
 void SP_monster_q1_zombie (edict_t *self);
+void SP_monster_q1_freddie (edict_t *self);
 
 void SP_misc_q1_zombie_crucified (edict_t *self);
 void SP_misc_q1_air_bubbles (edict_t *self);
@@ -585,6 +588,8 @@ spawn_t	spawns[] = {
 
 	// Knightmare- the dog from Coconut Monkey 3
 	{"monster_dog", SP_monster_dog},
+	// Knightmare- the vulture from Coconut Monkey 2
+	{"monster_vulture", SP_monster_vulture},
 
 	{"misc_nuke", SP_misc_nuke},
 
@@ -706,6 +711,7 @@ spawn_t	spawns[] = {
 	{"q1_monster_shalrath", SP_monster_q1_shalrath},
 	{"q1_monster_tarbaby", SP_monster_q1_tarbaby},
 	{"q1_monster_zombie", SP_monster_q1_zombie},
+	{"q1_monster_freddie", SP_monster_q1_freddie},
 
 	// Q2Infighter spawn names
 //	{"monster_q1_chthon", SP_monster_q1_chthon},	
@@ -722,6 +728,7 @@ spawn_t	spawns[] = {
 	{"monster_q1_shalrath", SP_monster_q1_shalrath},
 	{"monster_q1_tarbaby", SP_monster_q1_tarbaby},
 	{"monster_q1_zombie", SP_monster_q1_zombie},
+	{"monster_q1_freddie", SP_monster_q1_freddie},
 
 	// misc Q1 entities
 	{"misc_q1_zombie_crucified", SP_misc_q1_zombie_crucified},

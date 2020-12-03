@@ -157,7 +157,7 @@ mmove_t mutant_move_idle = {FRAME_stand152, FRAME_stand164, mutant_frames_idle, 
 void mutant_idle (edict_t *self)
 {
 	self->monsterinfo.currentmove = &mutant_move_idle;
-	if(!(self->spawnflags & SF_MONSTER_AMBUSH))
+	if (!(self->spawnflags & SF_MONSTER_AMBUSH))
 		gi.sound (self, CHAN_VOICE, sound_idle, 1, ATTN_IDLE, 0);
 }
 
@@ -528,7 +528,7 @@ void mutant_dead (edict_t *self)
 	M_FlyCheck (self);
 
 	// Lazarus monster fade
-	if(world->effects & FX_WORLDSPAWN_CORPSEFADE)
+	if (world->effects & FX_WORLDSPAWN_CORPSEFADE)
 	{
 		self->think=FadeDieSink;
 		self->nextthink=level.time+corpse_fadetime->value;
@@ -619,7 +619,7 @@ void mutant_jump_up (edict_t *self)
 
 void mutant_jump_wait_land (edict_t *self)
 {
-	if(self->groundentity == NULL)
+	if (self->groundentity == NULL)
 		self->monsterinfo.nextframe = self->s.frame;
 	else 
 		self->monsterinfo.nextframe = self->s.frame + 1;
@@ -647,10 +647,10 @@ mmove_t mutant_move_jump_down = { FRAME_jump01, FRAME_jump05, mutant_frames_jump
 
 void mutant_jump_updown (edict_t *self)
 {
-	if(!self->enemy)
+	if (!self->enemy)
 		return;
 
-	if(self->enemy->s.origin[2] > self->s.origin[2])
+	if (self->enemy->s.origin[2] > self->s.origin[2])
 		self->monsterinfo.currentmove = &mutant_move_jump_up;
 	else
 		self->monsterinfo.currentmove = &mutant_move_jump_down;
@@ -663,13 +663,13 @@ Blocked
 */
 qboolean mutant_blocked (edict_t *self, float dist)
 {
-	if(blocked_checkjump (self, dist, 256, 68))
+	if (blocked_checkjump (self, dist, 256, 68))
 	{
 		mutant_jump_updown (self);
 		return true;
 	}
 
-	if(blocked_checkplat (self, dist))
+	if (blocked_checkplat (self, dist))
 		return true;
 
 	return false; //Knightmare- this is to prevent warnings
@@ -719,11 +719,11 @@ void SP_monster_mutant (edict_t *self)
 	VectorSet (self->mins, -32, -32, -24);
 	VectorSet (self->maxs, 32, 32, 48);
 
-	if(!self->health)
+	if (!self->health)
 		self->health = 300;
-	if(!self->gib_health)
+	if (!self->gib_health)
 		self->gib_health = -120;
-	if(!self->mass)
+	if (!self->mass)
 		self->mass = 300;
 
 	self->pain = mutant_pain;
@@ -741,11 +741,11 @@ void SP_monster_mutant (edict_t *self)
 	self->monsterinfo.checkattack = mutant_checkattack;
 	self->monsterinfo.blocked = mutant_blocked;			// PGM
 
-	if(!self->monsterinfo.flies)
+	if (!self->monsterinfo.flies)
 		self->monsterinfo.flies = 0.80;
 
 	// Lazarus
-	if(self->powerarmor)
+	if (self->powerarmor)
 	{
 		if (self->powerarmortype == 1)
 			self->monsterinfo.power_armor_type = POWER_ARMOR_SCREEN;

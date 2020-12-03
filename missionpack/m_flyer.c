@@ -348,12 +348,12 @@ mmove_t flyer_move_stop = {FRAME_stop01, FRAME_stop07, flyer_frames_stop, NULL};
 
 void flyer_stop (edict_t *self)
 {
-		self->monsterinfo.currentmove = &flyer_move_stop;
+	self->monsterinfo.currentmove = &flyer_move_stop;
 }
 
 void flyer_start (edict_t *self)
 {
-		self->monsterinfo.currentmove = &flyer_move_start;
+	self->monsterinfo.currentmove = &flyer_move_start;
 }
 
 
@@ -846,7 +846,7 @@ void SP_monster_flyer (edict_t *self)
 	self->monsterinfo.blocked = flyer_blocked;
 
 	if (!self->blood_type)
-		self->blood_type = 3; //sparks and blood
+		self->blood_type = 3; // sparks and blood
 
 	// Lazarus
 	if (self->powerarmor)

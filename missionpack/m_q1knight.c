@@ -13,6 +13,7 @@ QUAKE KNIGHT
 static int	sound_sword1;
 static int	sound_sword2;
 static int	sound_death;
+static int	sound_gib;
 static int	sound_pain;
 static int	sound_idle;
 static int	sound_sight;
@@ -368,7 +369,7 @@ void knight_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 
 	if (self->health <= self->gib_health && !(self->spawnflags & SF_MONSTER_NOGIB))
 	{
-		gi.sound (self, CHAN_VOICE|CHAN_RELIABLE, gi.soundindex ("q1player/udeath.wav"), 1, ATTN_NORM, 0);
+		gi.sound (self, CHAN_VOICE|CHAN_RELIABLE, sound_gib, 1, ATTN_NORM, 0);
 
 		for (n= 0; n < 2; n++)
 			ThrowGib (self, "models/objects/q1gibs/q1gib3/tris.md2", damage, GIB_ORGANIC);
@@ -408,12 +409,18 @@ void SP_monster_q1_knight (edict_t *self)
 		return;
 	}
 
-	sound_sword1 = gi.soundindex ("q1knight/sword1.wav");
-	sound_sword2 = gi.soundindex ("q1knight/sword2.wav");
-	sound_death = gi.soundindex ("q1knight/kdeath.wav");
-	sound_pain = gi.soundindex ("q1knight/khurt.wav");
-	sound_idle = gi.soundindex ("q1knight/idle.wav");
-	sound_sight = gi.soundindex ("q1knight/ksight.wav");
+	sound_sword1 =	gi.soundindex ("q1knight/sword1.wav");
+	sound_sword2 =	gi.soundindex ("q1knight/sword2.wav");
+	sound_death =	gi.soundindex ("q1knight/kdeath.wav");
+	sound_gib =		gi.soundindex ("q1player/udeath.wav");
+	sound_pain =	gi.soundindex ("q1knight/khurt.wav");
+	sound_idle =	gi.soundindex ("q1knight/idle.wav");
+	sound_sight =	gi.soundindex ("q1knight/ksight.wav");
+
+	// precache gibs
+	gi.modelindex ("models/monsters/q1knight/head/tris.md2");
+	gi.modelindex ("models/objects/q1gibs/q1gib1/tris.md2");
+	gi.modelindex ("models/objects/q1gibs/q1gib3/tris.md2");
 	
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;

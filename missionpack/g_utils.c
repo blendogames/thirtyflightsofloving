@@ -1601,6 +1601,7 @@ qboolean UseSpecialGoodGuyFlag (edict_t *monster)
 
 	if ( !strcmp(monster->classname, "monster_gekk")
 		|| !strcmp(monster->classname, "monster_stalker")
+		|| !strcmp(monster->classname, "monster_vulture")
 		|| !strcmp(monster->classname, "monster_handler") )
 		return true;
 
@@ -1625,6 +1626,7 @@ qboolean UseRegularGoodGuyFlag (edict_t *monster)
 
 	if ( strcmp(monster->classname, "monster_gekk")
 		&& strcmp(monster->classname, "monster_stalker")
+		&& strcmp(monster->classname, "monster_vulture")
 		&& strcmp(monster->classname, "monster_turret")
 		&& strcmp(monster->classname, "monster_fixbot")
 		&& strcmp(monster->classname, "monster_handler")

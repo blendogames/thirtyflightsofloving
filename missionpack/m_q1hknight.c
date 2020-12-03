@@ -12,7 +12,9 @@ QUAKE HELL KNIGHT
 
 static int	sound_sword1;
 static int	sound_sword2;
+static int	sound_flame;
 static int	sound_death;
+static int	sound_gib;
 static int	sound_idle;
 static int	sound_pain;
 static int	sound_sight;
@@ -363,7 +365,7 @@ void hknight_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dama
 
 	if (self->health <= self->gib_health && !(self->spawnflags & SF_MONSTER_NOGIB))
 	{
-		gi.sound (self, CHAN_VOICE|CHAN_RELIABLE, gi.soundindex ("q1player/udeath.wav"), 1, ATTN_NORM, 0);
+		gi.sound (self, CHAN_VOICE|CHAN_RELIABLE, sound_gib, 1, ATTN_NORM, 0);
 		
 		for (n= 0; n < 2; n++)
 			ThrowGib (self, "models/objects/q1gibs/q1gib3/tris.md2", damage, GIB_ORGANIC);
@@ -450,7 +452,7 @@ void hknight_fire_flame (edict_t *self)
 
 	//vec = VectorNormalizeFastf(
 
-	gi.sound (self, CHAN_WEAPON, gi.soundindex ("q1hknight/attack1.wav"), 1, ATTN_NORM, 0);
+	gi.sound (self, CHAN_WEAPON, sound_flame, 1, ATTN_NORM, 0);
 
 	q1_fire_flame (self, start, v_forward, 0);
 }
@@ -492,12 +494,21 @@ void SP_monster_q1_hknight (edict_t *self)
 		return;
 	}
 
-	sound_death = gi.soundindex ("q1hknight/death1.wav");
-	sound_pain = gi.soundindex ("q1hknight/pain1.wav");
-	sound_idle = gi.soundindex ("q1hknight/idle.wav");
-	sound_sight = gi.soundindex ("q1hknight/sight1.wav");
-	sound_sword1 = gi.soundindex ("q1hknight/slash1.wav");
-	sound_sword2 = gi.soundindex ("q1hknight/slash1.wav");
+	sound_death =	gi.soundindex ("q1hknight/death1.wav");
+	sound_gib =		gi.soundindex ("q1player/udeath.wav");
+	sound_pain =	gi.soundindex ("q1hknight/pain1.wav");
+	sound_idle =	gi.soundindex ("q1hknight/idle.wav");
+	sound_sight =	gi.soundindex ("q1hknight/sight1.wav");
+	sound_sword1 =	gi.soundindex ("q1hknight/slash1.wav");
+	sound_sword2 =	gi.soundindex ("q1hknight/slash1.wav");
+	sound_flame =	gi.soundindex ("q1hknight/attack1.wav");
+
+	// precache gibs
+	gi.modelindex ("models/monsters/q1hknight/head/tris.md2");
+	gi.modelindex ("models/objects/q1gibs/q1gib1/tris.md2");
+	gi.modelindex ("models/objects/q1gibs/q1gib3/tris.md2");
+	// precache flame
+	q1_flame_precache ();
 	
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;

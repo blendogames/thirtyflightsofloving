@@ -48,10 +48,10 @@ void q1_nail_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *
 			gi.WriteDir (plane->normal);
 		gi.multicast (self->s.origin, MULTICAST_PVS);	
 
-		//not if online, too laggy
-		if(!deathmatch->value)
+		// not if online, too laggy
+		if (!deathmatch->value)
 		{
-			float sound= random();
+			float sound = random();
 			if (sound < 0.3)
 			{
 				if (sound < 0.1)
@@ -113,6 +113,16 @@ void q1_fire_nail (edict_t *self, vec3_t start, vec3_t dir, int damage, int spee
 		VectorMA (nail->s.origin, -10, dir, nail->s.origin);
 		nail->touch (nail, tr.ent, NULL, NULL);
 	}
+}
+
+
+void q1_nail_precache (void)
+{
+	gi.modelindex ("models/objects/q1nail/tris.md2");
+	gi.soundindex ("q1weapons/tink1.wav");
+	gi.soundindex ("q1weapons/ric1.wav");
+	gi.soundindex ("q1weapons/ric2.wav");
+	gi.soundindex ("q1weapons/ric3.wav");
 }
 
 
@@ -213,6 +223,12 @@ void q1_fire_laser (edict_t *self, vec3_t start, vec3_t dir, int damage, int spe
 	}
 }
 
+void q1_laser_precache (void)
+{
+	gi.modelindex ("models/monsters/q1enforcer/laser/tris.md2");
+	gi.soundindex ("q1enforcer/enfstop.wav");
+}
+
 
 /*
 =================
@@ -272,6 +288,7 @@ void q1_flame_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t 
 	G_FreeEdict (self);
 }
 
+
 void q1_fire_flame (edict_t *self, vec3_t start, vec3_t dir, float leftrightoff)
 {
 	edict_t	*bolt;
@@ -321,6 +338,13 @@ void q1_fire_flame (edict_t *self, vec3_t start, vec3_t dir, float leftrightoff)
 		VectorMA (bolt->s.origin, -10, dir, bolt->s.origin);
 		bolt->touch (bolt, tr.ent, NULL, NULL);
 	}
+}
+
+
+void q1_flame_precache (void)
+{
+	gi.modelindex ("models/monsters/q1hknight/k_spike/tris.md2");
+	gi.soundindex("q1hknight/hit.wav");
 }
 
 
@@ -449,6 +473,14 @@ void q1_fire_grenade (edict_t *self, vec3_t start, vec3_t aimdir, int damage, in
 	gi.linkentity (grenade);
 }
 
+void q1_grenade_precache (void)
+{
+	gi.modelindex ("models/objects/grenade/tris.md2");
+	gi.modelindex ("sprites/s_explod.sp2");
+	gi.soundindex ("q1weapons/bounce.wav");
+	gi.soundindex ("q1weapons/r_exp3.wav");
+}
+
 
 /*
 =================
@@ -481,7 +513,7 @@ void q1_rocket_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t 
 		T_Damage (other, ent, ent->owner, ent->velocity, ent->s.origin, plane->normal, ent->dmg, 0, 0, MOD_Q1_RL);
 	}
 	T_RadiusDamage(ent, ent->owner, ent->radius_dmg, other, ent->dmg_radius, MOD_Q1_RL_SPLASH);
-	gi.sound (ent,CHAN_AUTO , gi.soundindex ("q1weapons/r_exp3.wav"), 1.0, ATTN_NORM, 0);	
+	gi.sound (ent, CHAN_AUTO, gi.soundindex ("q1weapons/r_exp3.wav"), 1.0, ATTN_NORM, 0);	
 
 	gi.WriteByte (svc_temp_entity);
 	gi.WriteByte (TE_ROCKET_EXPLOSION); 
@@ -579,6 +611,15 @@ void q1_fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int sp
 }
 
 
+void q1_rocket_precahce (void)
+{
+	gi.modelindex ("models/objects/rocket/tris.md2");
+	gi.modelindex ("sprites/s_explod.sp2");
+	gi.soundindex ("weapons/rockfly.wav");
+	gi.soundindex ("q1weapons/r_exp3.wav");
+}
+
+
 /*
 =================
 q1_fire_lightning
@@ -599,7 +640,7 @@ void q1_fire_lightning (edict_t *self, vec3_t start, vec3_t dir, int damage)
 	tr = gi.trace (self->s.origin, NULL, NULL, start, self, MASK_SHOT);
 	if (tr.fraction < 1.0)
 	{
-		if(tr.ent && (tr.ent !=self) && (tr.ent->takedamage))
+		if (tr.ent && (tr.ent !=self) && (tr.ent->takedamage))
 		T_Damage (tr.ent, self, self, dir, tr.endpos, tr.plane.normal, damage, 0, DAMAGE_ENERGY, MOD_Q1_LG);
 	    return;
 	}
@@ -656,7 +697,7 @@ void q1_firepod_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_
 		T_Damage (other, self, self->owner, vec3_origin, other->s.origin, vec3_origin, 200, 0, 0, 0);
 	T_RadiusDamage (self, self->owner, 40, NULL, 40, MOD_Q1_FIREPOD);
 
-	gi.sound (self,CHAN_AUTO , gi.soundindex ("q1weapons/r_exp3.wav"), 1.0, ATTN_NORM, 0);	
+	gi.sound (self, CHAN_AUTO, gi.soundindex ("q1weapons/r_exp3.wav"), 1.0, ATTN_NORM, 0);	
 
 	VectorMA (self->s.origin, -0.02, self->velocity, origin);
 
@@ -673,7 +714,7 @@ void q1_firepod_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_
 	VectorCopy (origin, self->s.origin);
 	VectorCopy (origin, self->s.old_origin);
 	VectorClear (self->velocity);
-	self->s.modelindex = gi.modelindex ("sprites/s_explod.sp2"); 
+	self->s.modelindex = gi.modelindex ("sprites/s_explod.sp2");
 	self->s.frame = 0; 
 	self->s.sound = 0;
 	self->s.effects &= ~EF_ANIM_ALLFAST; 
@@ -770,7 +811,16 @@ void q1_fire_firepod (edict_t *self, vec3_t dir)
 		VectorMA (pod->s.origin, -10, dir, pod->s.origin);
 		pod->touch (pod, tr.ent, NULL, NULL);
 	}
-}	
+}
+
+
+void q1_firepod_precache (void)
+{
+	gi.modelindex ("models/monsters/q1shalrath/v_spike/tris.md2");
+	gi.modelindex ("sprites/s_explod.sp2");
+	gi.soundindex ("q1weapons/r_exp3.wav");
+}
+
 
 /*
 =================
@@ -861,6 +911,15 @@ void q1_fire_lavaball (edict_t *self, vec3_t start, vec3_t dir, int damage, int 
 	gi.linkentity (lavaball);
 }
 
+
+void q1_fire_lavaball_precache (void)
+{
+	gi.modelindex ("models/monsters/q1chthon/lavaball/tris.md2");
+	gi.modelindex ("sprites/s_explod.sp2");
+	gi.soundindex ("q1weapons/r_exp3.wav");
+}
+
+
 /*
 =================
 q1_acidbolt_touch
@@ -943,6 +1002,14 @@ void q1_fire_acidspit (edict_t *self, vec3_t start, vec3_t dir, int damage, int 
 	gi.linkentity (acidbolt);
 }
 
+
+void q1_acidspit_precache (void)
+{
+	gi.modelindex ("models/monsters/q1scrag/w_spike/tris.md2");
+	gi.soundindex ("q1scrag/hit.wav");
+}
+
+
 /*
 =================
 q1_fire_gib
@@ -1021,4 +1088,12 @@ void q1_fire_gib (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int sp
 	gib->class_id = ENTITY_Q1_ZOMBIE_GIB;
 
 	gi.linkentity (gib);
+}
+
+
+void q1_gib_precache (void)
+{
+	gi.modelindex ("models/monsters/q1zombie/gib/tris.md2");
+	gi.soundindex ("q1zombie/z_hit.wav");
+	gi.soundindex ("q1zombie/z_miss.wav");
 }

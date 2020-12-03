@@ -28,7 +28,7 @@ static int	sound_sight;
 
 void gunner_idlesound (edict_t *self)
 {
-	if(!(self->spawnflags & SF_MONSTER_AMBUSH))
+	if (!(self->spawnflags & SF_MONSTER_AMBUSH))
 		gi.sound (self, CHAN_VOICE, sound_idle, 1, ATTN_IDLE, 0);
 }
 
@@ -321,7 +321,7 @@ void gunner_dead (edict_t *self)
 	M_FlyCheck (self);
 
 	// Lazarus monster fade
-	if(world->effects & FX_WORLDSPAWN_CORPSEFADE)
+	if (world->effects & FX_WORLDSPAWN_CORPSEFADE)
 	{
 		self->think=FadeDieSink;
 		self->nextthink=level.time+corpse_fadetime->value;
@@ -354,9 +354,9 @@ void gunner_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	if (self->health <= self->gib_health && !(self->spawnflags & SF_MONSTER_NOGIB))
 	{
 		gi.sound (self, CHAN_VOICE, gi.soundindex ("misc/udeath.wav"), 1, ATTN_NORM, 0);
-		for (n= 0; n < 2; n++)
+		for (n = 0; n < 2; n++)
 			ThrowGib (self, "models/objects/gibs/bone/tris.md2", damage, GIB_ORGANIC);
-		for (n= 0; n < 4; n++)
+		for (n = 0; n < 4; n++)
 			ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
 		ThrowGib (self, "models/objects/gibs/chest/tris.md2", damage, GIB_ORGANIC);
 		ThrowHead (self, "models/objects/gibs/head2/tris.md2", damage, GIB_ORGANIC);
@@ -384,12 +384,12 @@ qboolean gunner_grenade_check(edict_t *self)
 	vec3_t		vhorz;
 	float		horz,vertmax;
 
-	if(!self->enemy)
+	if (!self->enemy)
 		return false;
 
 	// if the player is above my head, use machinegun.
 
-//	if(self->absmax[2] <= self->enemy->absmin[2])
+//	if (self->absmax[2] <= self->enemy->absmin[2])
 //		return false;
 
 	// Lazarus: We can do better than that... see below
@@ -411,7 +411,7 @@ qboolean gunner_grenade_check(edict_t *self)
 	horz = VectorLength(vhorz);
 	vertmax = (GRENADE_VELOCITY_SQUARED)/(2*sv_gravity->value) -
 		0.5*sv_gravity->value*horz*horz/GRENADE_VELOCITY_SQUARED;
-	if(dir[2] > vertmax) 
+	if (dir[2] > vertmax) 
 		return false;
 
 	// Lazarus: Make sure there's a more-or-less clear flight path to target
@@ -420,13 +420,13 @@ qboolean gunner_grenade_check(edict_t *self)
 	VectorCopy(self->enemy->s.origin,target);
 	target[2] = self->enemy->absmax[2];
 	tr = gi.trace(start, vec3_origin, vec3_origin, target, self, MASK_SHOT);
-	if(tr.ent == self->enemy || tr.fraction == 1)
+	if (tr.ent == self->enemy || tr.fraction == 1)
 		return true;
 	// Repeat for feet... in case we're looking down at a target standing under,
 	// for example, a short doorway
 	target[2] = self->enemy->absmin[2];
 	tr = gi.trace(start, vec3_origin, vec3_origin, target, self, MASK_SHOT);
-	if(tr.ent == self->enemy || tr.fraction == 1)
+	if (tr.ent == self->enemy || tr.fraction == 1)
 		return true;
 
 	return false;
@@ -484,7 +484,7 @@ void GunnerFire (edict_t *self)
 	vec3_t	aim;
 	int		flash_number;
 
-	if(!self->enemy || !self->enemy->inuse)		//PGM
+	if (!self->enemy || !self->enemy->inuse)		//PGM
 		return;									//PGM
 
 	flash_number = MZ2_GUNNER_MACHINEGUN_1 + (self->s.frame - FRAME_attak216);
@@ -498,7 +498,7 @@ void GunnerFire (edict_t *self)
 	target[2] += self->enemy->viewheight;
 
 	// Lazarus fog reduction of accuracy
-	if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+	if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 	{
 		target[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 		target[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -523,7 +523,7 @@ void GunnerGrenade (edict_t *self)
 	vec3_t	target;	
 	qboolean blindfire;
 
-	if(!self->enemy || !self->enemy->inuse)		//PGM
+	if (!self->enemy || !self->enemy->inuse)		//PGM
 		return;									//PGM
 
 	// pmm
@@ -572,7 +572,7 @@ void GunnerGrenade (edict_t *self)
 	G_ProjectSource (self->s.origin, monster_flash_offset[flash_number], forward, right, start);
 
 //PGM
-	if(self->enemy)
+	if (self->enemy)
 	{
 		float	dist;
 
@@ -582,10 +582,10 @@ void GunnerGrenade (edict_t *self)
 
 		// aim at enemy's feet if he's at same elevation or lower. otherwise aim at origin
 		VectorCopy(self->enemy->s.origin,target);
-		if(self->enemy->absmin[2] <= self->absmax[2]) target[2] = self->enemy->absmin[2];
+		if (self->enemy->absmin[2] <= self->absmax[2]) target[2] = self->enemy->absmin[2];
 
 		// Lazarus fog reduction of accuracy
-		if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+		if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 		{
 			target[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 			target[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -593,7 +593,7 @@ void GunnerGrenade (edict_t *self)
 		}
 
 		// lead target... 20, 35, 50, 65 chance of leading
-		if( random() < (0.2 + skill->value * 0.15) )
+		if ( random() < (0.2 + skill->value * 0.15) )
 		{
 			float	dist;
 			float	time;
@@ -605,14 +605,14 @@ void GunnerGrenade (edict_t *self)
 		}
 
 		// aim up if they're on the same level as me and far away.
-		if((dist > 512) && (aim[2] < 64) && (aim[2] > -64))
+		if ((dist > 512) && (aim[2] < 64) && (aim[2] > -64))
 			aim[2] += (dist - 512);
 
 /*		VectorNormalize (aim);
 		pitch = aim[2];
-		if(pitch > 0.4)
+		if (pitch > 0.4)
 			pitch = 0.4;
-		else if(pitch < -0.5)
+		else if (pitch < -0.5)
 			pitch = -0.5;*/
 	}
 //PGM
@@ -621,7 +621,7 @@ void GunnerGrenade (edict_t *self)
 	// Lazarus - take into account (sort of) feature of adding shooter's velocity to
 	// grenade velocity
 	monster_speed = VectorLength(self->velocity);
-	if(monster_speed > 0)
+	if (monster_speed > 0)
 	{
 		vec3_t	v1;
 		vec_t	delta;
@@ -930,11 +930,11 @@ void gunner_jump2_now (edict_t *self)
 
 void gunner_jump_wait_land (edict_t *self)
 {
-	if(self->groundentity == NULL)
+	if (self->groundentity == NULL)
 	{
 		self->monsterinfo.nextframe = self->s.frame;
 
-		if(monster_jump_finished (self))
+		if (monster_jump_finished (self))
 			self->monsterinfo.nextframe = self->s.frame + 1;
 	}
 	else 
@@ -973,12 +973,12 @@ mmove_t gunner_move_jump2 = { FRAME_jump01, FRAME_jump10, gunner_frames_jump2, g
 
 void gunner_jump (edict_t *self)
 {
-	if(!self->enemy)
+	if (!self->enemy)
 		return;
 
 	monster_done_dodge (self);
 
-	if(self->enemy->s.origin[2] > self->s.origin[2])
+	if (self->enemy->s.origin[2] > self->s.origin[2])
 		self->monsterinfo.currentmove = &gunner_move_jump2;
 	else
 		self->monsterinfo.currentmove = &gunner_move_jump;
@@ -988,13 +988,13 @@ void gunner_jump (edict_t *self)
 //PGM
 qboolean gunner_blocked (edict_t *self, float dist)
 {
-	if(blocked_checkshot (self, 0.25 + (0.05 * skill->value) ))
+	if (blocked_checkshot (self, 0.25 + (0.05 * skill->value) ))
 		return true;
 
-	if(blocked_checkplat (self, dist))
+	if (blocked_checkplat (self, dist))
 		return true;
 
-	if(blocked_checkjump (self, dist, 192, 40))
+	if (blocked_checkjump (self, dist, 192, 40))
 	{
 		gunner_jump(self);
 		return true;

@@ -718,10 +718,24 @@ void SV_AddGravity (edict_t *ent)
 				 ent->velocity);
 	}
 	else if (level.time > ent->gravity_debounce_time)
-		ent->velocity[2] -= ent->gravity * sv_gravity->value * FRAMETIME;
+	{
+		// Knightmare- MOVETYPE_FEATHER specifies slow falling
+		if ( (ent->movetype == MOVETYPE_FEATHER) && (ent->velocity[2] < 0.0f) ) {
+			ent->velocity[2] -= ent->gravity * sv_gravity->value * FRAMETIME * 0.001f;
+		}
+		else
+			ent->velocity[2] -= ent->gravity * sv_gravity->value * FRAMETIME;
+	}
 #else
 	if (level.time > ent->gravity_debounce_time)
-		ent->velocity[2] -= ent->gravity * sv_gravity->value * FRAMETIME;
+	{
+		// Knightmare- MOVETYPE_FEATHER specifies slow falling
+		if ( (ent->movetype == MOVETYPE_FEATHER) && (ent->velocity[2] < 0.0f) ) {
+			ent->velocity[2] -= ent->gravity * sv_gravity->value * FRAMETIME * 0.001f;
+		}
+		else
+			ent->velocity[2] -= ent->gravity * sv_gravity->value * FRAMETIME;
+	}
 #endif
 }
 
@@ -744,6 +758,7 @@ called for MOVETYPE_TOSS
 		   MOVETYPE_FLY
 		   MOVETYPE_FLYMISSILE
 		   MOVETYPE_RAIN
+		   MOVETYPE_FEATHER
 =================================================
 */
 trace_t SV_PushEntity (edict_t *ent, vec3_t push)
@@ -2798,7 +2813,7 @@ void SV_Physics_FallFloat (edict_t *ent)
 	SV_CheckVelocity (ent);
 
 	wasonground = (ent->groundentity == NULL);
-	if (ent->velocity[2] < sv_gravity->value*-0.1)
+	if (ent->velocity[2] < (sv_gravity->value * -0.1f))
 		hitsound = true;
 
 	if (!ent->waterlevel)
@@ -2835,8 +2850,7 @@ void SV_Physics_FallFloat (edict_t *ent)
 			ent->groundentity = NULL;
 		}
 	}
-	else
-	//if (ent->waterlevel)
+	else	// if (ent->waterlevel)
 	{
 		// where's the midpoint? above or below the water?
 		const double WATER_MASS = 500.0;
@@ -3001,6 +3015,7 @@ void G_RunEntity (edict_t *ent)
 		// RAFAEL
 		case MOVETYPE_WALLBOUNCE:
 		case MOVETYPE_RAIN:
+		case MOVETYPE_FEATHER:	// Knightmare added
 			SV_Physics_Toss (ent);
 			break;
 		case MOVETYPE_NEWTOSS:	

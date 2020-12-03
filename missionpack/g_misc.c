@@ -200,7 +200,7 @@ void gib_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, 
 	G_FreeEdict (self);
 }
 
-void ThrowGib (edict_t *self, char *gibname, int damage, int type)
+void ThrowGibFrame (edict_t *self, char *gibname, int frame, int damage, int type)
 {
 	edict_t *gib;
 	vec3_t	vd;
@@ -248,8 +248,9 @@ void ThrowGib (edict_t *self, char *gibname, int damage, int type)
 	gib->s.origin[1] = origin[1] + crandom() * size[1];
 	gib->s.origin[2] = origin[2] + crandom() * size[2];
 
-	//gi.setmodel (gib, gibname);
+//	gi.setmodel (gib, gibname);
 	gib->s.modelindex = gi.modelindex (gibname);
+	gib->s.frame = frame;	// Knightmare added
 	gib->clipmask = MASK_SHOT;
 	VectorSet (gib->mins, -4, -4, -4);
 	VectorSet (gib->maxs, 4, 4, 4);
@@ -288,14 +289,20 @@ void ThrowGib (edict_t *self, char *gibname, int damage, int type)
 		gib->movetype = MOVETYPE_BOUNCE; // was MOVETYPE_TOSS
 		gib->touch = gib_touch;
 		if (self->blood_type == 1)
-			vscale = 3.0;
+			vscale = 3.0f;
 		else
-			vscale = 1.0;
+			vscale = 1.0f;
+	}
+	else if (type == GIB_FEATHER)	// Knightmare- added for vulture
+	{
+		gib->movetype = MOVETYPE_FEATHER;
+		gib->touch = gib_touch;
+		vscale = 2.0f;
 	}
 	else
 	{
 		gib->movetype = MOVETYPE_BOUNCE;
-		vscale = 1.0;
+		vscale = 1.0f;
 	}
 
 	VelocityForDamage (damage, vd);
@@ -314,6 +321,11 @@ void ThrowGib (edict_t *self, char *gibname, int damage, int type)
 	self->class_id = ENTITY_GIB;
 
 	gi.linkentity (gib);
+}
+
+void ThrowGib (edict_t *self, char *gibname, int damage, int type)
+{
+	ThrowGibFrame (self, gibname, 0, damage, type);
 }
 
 // NOTE: SP_gib is ONLY intended to be used for gibs that change maps
@@ -434,7 +446,7 @@ void ThrowHead (edict_t *self, char *gibname, int damage, int type)
 
 	if (type == GIB_ORGANIC)
 	{
-		self->movetype = MOVETYPE_BOUNCE; //was MOVETYPE_TOSS
+		self->movetype = MOVETYPE_BOUNCE; // was MOVETYPE_TOSS
 		self->touch = gib_touch;
 		if (self->blood_type == 1)
 			vscale = 3.0;
@@ -555,7 +567,7 @@ void debris_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	G_FreeEdict (self);
 }
 
-void ThrowDebris (edict_t *self, char *modelname, float speed, vec3_t origin, int skin, int effects)
+void ThrowDebrisFrame (edict_t *self, char *modelname, float speed, vec3_t origin, int frame, int skin, int effects)
 {
 	edict_t	*chunk;
 	vec3_t	v;
@@ -599,7 +611,8 @@ void ThrowDebris (edict_t *self, char *modelname, float speed, vec3_t origin, in
 	chunk->avelocity[2] = random()*600;
 	chunk->think = gib_fade; // Knightmare- gib fade, was G_FreeEdict
 	chunk->nextthink = level.time + 8 + random()*10;
-	chunk->s.frame = 0;
+//	chunk->s.frame = 0;
+	chunk->s.frame = frame;	// Knightmare added
 	chunk->flags = 0;
 	chunk->classname = "debris";
 	chunk->svflags |= SVF_GIB; // Knightmare- gib flag
@@ -613,6 +626,11 @@ void ThrowDebris (edict_t *self, char *modelname, float speed, vec3_t origin, in
 	chunk->class_id = ENTITY_DEBRIS;
 
 	gi.linkentity (chunk);
+}
+
+void ThrowDebris (edict_t *self, char *modelname, float speed, vec3_t origin, int skin, int effects)
+{
+	ThrowDebrisFrame (self, modelname,  speed, origin, 0, skin, effects);
 }
 
 // NOTE: SP_debris is ONLY intended to be used for debris chunks that change maps
@@ -4975,7 +4993,7 @@ void spawn_precipitation(edict_t *self, vec3_t org, vec3_t dir, float speed)
 			drop->s.modelindex = gi.modelindex ("models/objects/drop/tris.md2");
 		drop->classname = "rain drop";
 	}
-	if (self->gravity > 0. || self->attenuation > 0 )
+	if (self->gravity > 0.0f || self->attenuation > 0 )
 		drop->movetype = MOVETYPE_DEBRIS;
 	else
 		drop->movetype = MOVETYPE_RAIN;
@@ -4983,19 +5001,19 @@ void spawn_precipitation(edict_t *self, vec3_t org, vec3_t dir, float speed)
 	drop->touch    = drop_touch;
 	if (self->style == STYLE_WEATHER_USER)
 		drop->clipmask = MASK_MONSTERSOLID;
-	else if ((self->fadeout > 0) && (self->gravity == 0.))
+	else if ((self->fadeout > 0) && (self->gravity == 0.0f))
 		drop->clipmask = MASK_SOLID | CONTENTS_WATER;
 	else
 		drop->clipmask = MASK_MONSTERSOLID | CONTENTS_WATER;
 	drop->solid    = SOLID_BBOX;
 	drop->svflags  = SVF_DEADMONSTER;
-	VectorSet(drop->mins,-1,-1,-1);
+	VectorSet(drop->mins, -1, -1, -1);
 	VectorSet(drop->maxs, 1, 1, 1);
 
 	if (self->spawnflags & SF_WEATHER_GRAVITY_BOUNCE)
 		drop->gravity = self->gravity;
 	else
-		drop->gravity = 0.;
+		drop->gravity = 0.0f;
 	drop->attenuation = self->attenuation;
 	drop->mass        = self->mass;
 	drop->spawnflags  = self->spawnflags;
@@ -5182,12 +5200,12 @@ void SP_target_precipitation (edict_t *ent)
 		if (st.gravity)
 			ent->gravity = atof(st.gravity);
 		else
-			ent->gravity = 0.;
+			ent->gravity = 0.0f;
 	}
 	else
 	{
-		ent->gravity = 0.;
-		ent->attenuation = 0.;
+		ent->gravity = 0.0f;
+		ent->attenuation = 0.0f;
 	}
 
 	// If not rain or "user", turn off splash. Yeah I know goofy mapper
@@ -5397,7 +5415,7 @@ void SP_target_fountain (edict_t *ent)
 	if (st.gravity)
 		ent->gravity = atof(st.gravity);
 	else
-		ent->gravity = 0.;
+		ent->gravity = 0.0f;
 
 	ent->use = target_fountain_use;
 	

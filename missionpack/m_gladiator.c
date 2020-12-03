@@ -140,7 +140,7 @@ mframe_t gladiator_frames_attack_melee [] =
 };
 mmove_t gladiator_move_attack_melee = {FRAME_melee1, FRAME_melee17, gladiator_frames_attack_melee, gladiator_run};
 
-void gladiator_melee(edict_t *self)
+void gladiator_melee (edict_t *self)
 {
 	self->monsterinfo.currentmove = &gladiator_move_attack_melee;
 }

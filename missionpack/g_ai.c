@@ -2146,16 +2146,16 @@ qboolean ai_chicken (edict_t *self, edict_t *badguy)
 			return true;
 	}
 
-	VectorCopy(self->mins,mins);
+	VectorCopy (self->mins, mins);
 	mins[2] += 18;
 	if (mins[2] > 0) mins[2] = 0;
-	VectorCopy(self->maxs,maxs);
+	VectorCopy(self->maxs, maxs);
 
 	// Find a vector that will hide the actor from his enemy
-	VectorCopy(badguy->s.origin,atk);
+	VectorCopy (badguy->s.origin, atk);
 	atk[2] += badguy->viewheight;
 	VectorClear(best_dir);
-	AngleVectors(self->s.angles,forward,NULL,NULL);
+	AngleVectors (self->s.angles, forward, NULL, NULL);
 	dir[2] = 0;
 	for (travel=512; travel>63 && best_dist == 0; travel /= 2)
 	{

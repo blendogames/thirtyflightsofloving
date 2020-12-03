@@ -298,7 +298,7 @@ void modelspawn_think (edict_t *self)
 
 void model_spawn_use (edict_t *self, edict_t *other, edict_t *activator)
 {
-	if (self->delay) //we started off
+	if (self->delay) // we started off
 	{
 		self->svflags &= ~SVF_NOCLIENT;
 		self->delay = 0;
@@ -312,7 +312,7 @@ void model_spawn_use (edict_t *self, edict_t *other, edict_t *activator)
 		self->s.attenuation = self->attenuation;
 #endif
 	}
-	else	//we started active
+	else	// we started active
 	{
 		self->svflags |= SVF_NOCLIENT;
 		self->delay = 1;

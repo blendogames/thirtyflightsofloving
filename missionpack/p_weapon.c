@@ -3636,7 +3636,7 @@ void weapon_plasma_rifle_fire (edict_t *ent, qboolean altfire)
 	}
 
 	// if outa ammo, don't fire
-	if (ent->client->pers.inventory[ent->client->ammo_index] < 1)
+	if (ent->client->pers.inventory[ent->client->ammo_index] < PLASMA_CELLS_PER_SHOT)	// was < 1
 	{
 		ent->client->ps.gunframe++;
 

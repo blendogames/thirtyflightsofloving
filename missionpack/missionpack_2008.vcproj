@@ -4,6 +4,7 @@
 	Version="9.00"
 	Name="missionpack"
 	ProjectGUID="{B2C5294F-5F08-4598-B02C-272370AE8F38}"
+	RootNamespace="missionpack"
 	TargetFrameworkVersion="0"
 	>
 	<Platforms>
@@ -603,10 +604,6 @@
 				>
 			</File>
 			<File
-				RelativePath="grenade.c"
-				>
-			</File>
-			<File
 				RelativePath="km_cvar.c"
 				>
 			</File>
@@ -739,6 +736,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\m_q1freddie.c"
+				>
+			</File>
+			<File
 				RelativePath=".\m_q1grunt.c"
 				>
 			</File>
@@ -796,6 +797,10 @@
 			</File>
 			<File
 				RelativePath="m_turret.c"
+				>
+			</File>
+			<File
+				RelativePath=".\m_vulture.c"
 				>
 			</File>
 			<File
@@ -1016,6 +1021,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\m_q1freddie.h"
+				>
+			</File>
+			<File
 				RelativePath=".\m_q1grunt.h"
 				>
 			</File>
@@ -1080,7 +1089,7 @@
 				>
 			</File>
 			<File
-				RelativePath="m_zombie.h"
+				RelativePath=".\m_vulture.h"
 				>
 			</File>
 			<File

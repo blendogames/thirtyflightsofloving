@@ -12,6 +12,7 @@ QUAKE ENFORCER
 static int	sound_pain1;
 static int	sound_pain2;
 static int	sound_death;
+static int	sound_gib;
 static int	sound_idle;
 static int	sound_sight1;
 static int	sound_sight2;
@@ -253,7 +254,7 @@ void q1enforcer_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int d
 // check for gib
 	if (self->health <= self->gib_health && !(self->spawnflags & SF_MONSTER_NOGIB))
 	{
-		gi.sound (self, CHAN_VOICE|CHAN_RELIABLE, gi.soundindex ("q1player/udeath.wav"), 1, ATTN_NORM, 0);
+		gi.sound (self, CHAN_VOICE|CHAN_RELIABLE, sound_gib, 1, ATTN_NORM, 0);
 
 		for (n= 0; n < 2; n++)
 			ThrowGib (self, "models/objects/q1gibs/q1gib1/tris.md2", damage, GIB_ORGANIC);
@@ -347,6 +348,7 @@ void SP_monster_q1_enforcer (edict_t *self)
 	sound_pain1		= gi.soundindex ("q1enforcer/pain1.wav");
 	sound_pain2		= gi.soundindex ("q1enforcer/pain2.wav");
 	sound_death		= gi.soundindex ("q1enforcer/death1.wav");
+	sound_gib		= gi.soundindex ("q1player/udeath.wav");
 	sound_idle		= gi.soundindex ("q1enforcer/idle1.wav");
 	sound_sight1	= gi.soundindex ("q1enforcer/sight1.wav");
 	sound_sight2	= gi.soundindex ("q1enforcer/sight2.wav");
@@ -357,6 +359,12 @@ void SP_monster_q1_enforcer (edict_t *self)
 	// precache backpack
 	gi.modelindex ("models/items/q1backpack/tris.md2");
 //	gi.soundindex ("q1weapons/lock4.wav");
+	// precache gibs
+	gi.modelindex ("models/monsters/q1enforcer/head/tris.md2");
+	gi.modelindex ("models/objects/q1gibs/q1gib1/tris.md2");
+	gi.modelindex ("models/objects/q1gibs/q1gib3/tris.md2");
+	// precache laser
+	q1_laser_precache ();
 
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;

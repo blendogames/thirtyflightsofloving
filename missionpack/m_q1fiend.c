@@ -13,6 +13,7 @@ QUAKE FIEND
 static int	sound_hit;
 static int	sound_jump;
 static int	sound_death;
+static int	sound_gib;
 static int	sound_idle;
 static int	sound_pain;
 static int	sound_sight;
@@ -413,7 +414,7 @@ void fiend_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 
 	if (self->health <= self->gib_health && !(self->spawnflags & SF_MONSTER_NOGIB))
 	{
-		gi.sound (self, CHAN_VOICE|CHAN_RELIABLE, gi.soundindex ("q1player/udeath.wav"), 1, ATTN_NORM, 0);
+		gi.sound (self, CHAN_VOICE|CHAN_RELIABLE, sound_gib, 1, ATTN_NORM, 0);
 			
 		for (n= 0; n < 2; n++)
 			ThrowGib (self, "models/objects/q1gibs/q1gib1/tris.md2", damage, GIB_ORGANIC);
@@ -452,13 +453,19 @@ void SP_monster_q1_fiend (edict_t *self)
 		return;
 	}
 
-	sound_hit = gi.soundindex ("q1fiend/dhit2.wav");
-	sound_jump = gi.soundindex ("q1fiend/djump.wav");
-	sound_death = gi.soundindex ("q1fiend/ddeath.wav");
-	sound_idle = gi.soundindex ("q1fiend/idle1.wav");
-	sound_pain = gi.soundindex ("q1fiend/dpain1.wav");
-	sound_sight = gi.soundindex ("q1fiend/sight2.wav");
-	sound_land = gi.soundindex ("q1fiend/dland2.wav");
+	sound_hit =		gi.soundindex ("q1fiend/dhit2.wav");
+	sound_jump =	gi.soundindex ("q1fiend/djump.wav");
+	sound_death =	gi.soundindex ("q1fiend/ddeath.wav");
+	sound_gib =		gi.soundindex ("q1player/udeath.wav");
+	sound_idle =	gi.soundindex ("q1fiend/idle1.wav");
+	sound_pain =	gi.soundindex ("q1fiend/dpain1.wav");
+	sound_sight =	gi.soundindex ("q1fiend/sight2.wav");
+	sound_land =	gi.soundindex ("q1fiend/dland2.wav");
+
+	// precache gibs
+	gi.modelindex ("models/monsters/q1fiend/head/tris.md2");
+	gi.modelindex ("models/objects/q1gibs/q1gib1/tris.md2");
+	gi.modelindex ("models/objects/q1gibs/q1gib3/tris.md2");
 	
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;

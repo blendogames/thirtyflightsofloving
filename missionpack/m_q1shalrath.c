@@ -10,9 +10,11 @@ QUAKE SHALRATH
 #include "m_q1shalrath.h"
 
 static int	sound_death;
+static int	sound_gib;
 static int	sound_sight;
 static int	sound_pain1;
 static int	sound_attack;
+static int	sound_attack2;
 static int	sound_idle;
 
 
@@ -161,7 +163,7 @@ void q1shalrath_fire (edict_t *self)
 	VectorSubtract (end, start, aim);
 	VectorNormalize (aim);
 	
-	gi.sound (self, CHAN_WEAPON|CHAN_RELIABLE, gi.soundindex("shalrath/attack2.wav"), 1, ATTN_NORM, 0);
+	gi.sound (self, CHAN_WEAPON|CHAN_RELIABLE, sound_attack2, 1, ATTN_NORM, 0);
 	q1_fire_firepod (self, aim);
 }
 
@@ -238,14 +240,17 @@ mmove_t q1shalrath_move_death = {FRAME_death1, FRAME_death7, q1shalrath_frames_d
 void q1shalrath_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
 	int		n;
+
 // check for gib
 	if (self->health <= self->gib_health && !(self->spawnflags & SF_MONSTER_NOGIB))
 	{
-		gi.sound (self, CHAN_VOICE|CHAN_RELIABLE, gi.soundindex ("q1player/udeath.wav"), 1, ATTN_NORM, 0);
+		gi.sound (self, CHAN_VOICE|CHAN_RELIABLE, sound_gib, 1, ATTN_NORM, 0);
 
 		for (n = 0; n < 2; n++)
 			ThrowGib (self, "models/objects/q1gibs/q1gib1/tris.md2", damage, GIB_ORGANIC);
 		ThrowGib (self, "models/objects/q1gibs/q1gib2/tris.md2", damage, GIB_ORGANIC);
+		for (n = 0; n < 2; n++)
+			ThrowGib (self, "models/objects/q1gibs/q1gib3/tris.md2", damage, GIB_ORGANIC);
 		ThrowHead (self, "models/monsters/q1shalrath/head/tris.md2", damage, GIB_ORGANIC);
 		self->deadflag = DEAD_DEAD;
 		return;
@@ -280,9 +285,19 @@ void SP_monster_q1_shalrath (edict_t *self)
 	
 	sound_sight		= gi.soundindex ("q1shalrath/sight.wav");
 	sound_pain1		= gi.soundindex ("q1shalrath/pain.wav");
+	sound_gib		= gi.soundindex ("q1player/udeath.wav");
 	sound_death		= gi.soundindex ("q1shalrath/death.wav");
 	sound_attack	= gi.soundindex ("q1shalrath/attack.wav");
+	sound_attack2	= gi.soundindex ("shalrath/attack2.wav");
 	sound_idle		= gi.soundindex ("q1shalrath/idle.wav");
+
+	// precache gibs
+	gi.modelindex ("models/monsters/q1shalrath/head/tris.md2");
+	gi.modelindex ("models/objects/q1gibs/q1gib1/tris.md2");
+	gi.modelindex ("models/objects/q1gibs/q1gib2/tris.md2");
+	gi.modelindex ("models/objects/q1gibs/q1gib3/tris.md2");
+	// precache firepod
+	q1_firepod_precache ();
 
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;
