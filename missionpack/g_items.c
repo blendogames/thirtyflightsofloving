@@ -96,6 +96,8 @@ int	key_q1_base_gold_index;
 #define HEALTH_IGNORE_MAX	1
 #define HEALTH_TIMED		2
 #define	HEALTH_FOODCUBE		4
+#define	HEALTH_SMALL		8
+#define	HEALTH_LARGE		16
 
 
 void Use_Quad (edict_t *ent, gitem_t *item);
@@ -1790,15 +1792,14 @@ void Touch_Item (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf
 		{
 			if (ent->style & HEALTH_FOODCUBE)
 				gi.sound(other, CHAN_ITEM, gi.soundindex("items/m_health.wav"), 1, ATTN_NORM, 0);
-		//	if (ent->count == sk_health_bonus_value->value) // Knightmare
-			else if (ent->count < 10) // Knightmare
-				gi.sound(other, CHAN_ITEM, gi.soundindex("items/s_health.wav"), 1, ATTN_NORM, 0);
-			else if (ent->count == 10)
-				gi.sound(other, CHAN_ITEM, gi.soundindex("items/n_health.wav"), 1, ATTN_NORM, 0);
-			else if (ent->count == 25)
-				gi.sound(other, CHAN_ITEM, gi.soundindex("items/l_health.wav"), 1, ATTN_NORM, 0);
-			else // (ent->count == 100)
+			else if (ent->style == (HEALTH_IGNORE_MAX|HEALTH_TIMED))	// if (ent->count == 100)
 				gi.sound(other, CHAN_ITEM, gi.soundindex("items/m_health.wav"), 1, ATTN_NORM, 0);
+			else if	(ent->style & HEALTH_SMALL)		// if (ent->count < 10) // Knightmare
+				gi.sound(other, CHAN_ITEM, gi.soundindex("items/s_health.wav"), 1, ATTN_NORM, 0);
+			else  if (ent->style & HEALTH_LARGE)	// if (ent->count == 25)
+				gi.sound(other, CHAN_ITEM, gi.soundindex("items/l_health.wav"), 1, ATTN_NORM, 0);
+			else									// if (ent->count == 10)
+				gi.sound(other, CHAN_ITEM, gi.soundindex("items/n_health.wav"), 1, ATTN_NORM, 0);
 		}
 		else if (ent->item->pickup_sound) // PGM - paranoia
 		{
@@ -5030,7 +5031,7 @@ void SP_item_health_small (edict_t *self)
 	if (!self->count)							// Knightmare- allow mapper-spcified count
 		self->count = sk_health_bonus_value->value; // Knightmare- made this cvar
 	SpawnItem (self, FindItem ("Health"));
-	self->style = HEALTH_IGNORE_MAX;
+	self->style = HEALTH_IGNORE_MAX|HEALTH_SMALL;
 	gi.soundindex ("items/s_health.wav");
 }
 
@@ -5050,6 +5051,7 @@ void SP_item_health_large (edict_t *self)
 	if (!self->count)							// Knightmare- allow mapper-spcified count
 		self->count = 25;
 	SpawnItem (self, FindItem ("Health"));
+	self->style = HEALTH_LARGE;
 	gi.soundindex ("items/l_health.wav");
 }
 
