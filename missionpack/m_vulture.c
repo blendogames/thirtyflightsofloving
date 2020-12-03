@@ -1,7 +1,9 @@
 /*
 ==============================================================================
 
-flyer
+vulture
+Based on model by Andrew Eglington and sounds by Magnus Jansén
+Reimplemented by Knightmare
 
 ==============================================================================
 */
