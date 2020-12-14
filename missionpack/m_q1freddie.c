@@ -24,7 +24,6 @@ static int	sound_step1;
 static int	sound_step2;
 static int	sound_step3;
 
-#define SF_FREDDIE_LASER	32
 #define FREDDIE_MELEE_DISTANCE 64
 
 void freddie_fireweapon (edict_t *self);
@@ -398,7 +397,7 @@ void freddie_fireweapon (edict_t *self)
 		VectorNormalize (dir);
 	}
 
-	if (self->spawnflags & SF_FREDDIE_LASER) {
+	if (self->sounds == 1) {
 		gi.sound (self, CHAN_WEAPON|CHAN_RELIABLE, sound_atk_laser, 1.0, ATTN_NORM, 0);
 		q1_fire_laser (self, start, dir, 15, speed);
 	}
@@ -821,7 +820,7 @@ void SP_monster_q1_freddie (edict_t *self)
 	gi.modelindex ("models/monsters/q1freddie/gib_metal1/tris.md2");
 	gi.modelindex ("models/monsters/q1freddie/gib_metal3/tris.md2");
 	// precache nail/laser
-	if (self->spawnflags & SF_FREDDIE_LASER)
+	if (self->sounds == 1)
 		q1_laser_precache ();
 	else
 		q1_nail_precache ();
