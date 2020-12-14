@@ -968,50 +968,58 @@ NoExtFunction:
 					else if (extModel == 0x45)	// Haswell ULT
 						Q_strncatz(cpuString, " Core i7/i5/i3 4xxxU", maxSize);
 					else if (extModel == 0x55)	// Skylake-X, Cascade Lake-X
-						Q_strncatz(cpuString, " Core i9/i7 79xx / 78xx", maxSize);
+						Q_strncatz(cpuString, " Core i9/i7 79xx/78xx or Core i9 10xxx", maxSize);
 					else if (extModel == 0xA5)	// Comet Lake
 						Q_strncatz(cpuString, " Core i9/i7/i5/i3 10xxx", maxSize);
 					break;
 				case 7:		
-					if (extModel == 0x17)	// Wolfdale / Yorkfield (Penryn)
+					if (extModel == 0x17)		// Wolfdale / Yorkfield (Penryn)
 						Q_strncatz(cpuString, " Core 2", maxSize);
 					else if (extModel == 0x47)	// Broadwell
 						Q_strncatz(cpuString, " Core i7/i5 5xxx", maxSize);
 					break;
 				case 10:	
-					if (extModel == 0x2A)	// Sandy Bridge
+					if (extModel == 0x2A)		// Sandy Bridge
 						Q_strncatz(cpuString, "  Core i7/i5/i3 2xxx", maxSize);
 					else if (extModel == 0x3A)	// Ivy Bridge
 						Q_strncatz(cpuString, "  Core i7/i5/i3 3xxx", maxSize);
 					else if (extModel == 0x1A)	// Bloomfield
 						Q_strncatz(cpuString, " Core i7 9xx", maxSize);
+					else if (extModel == 0x7A)	// Gemini Lake
+						Q_strncatz(cpuString, " Pentium J4xxx", maxSize);
 					break;
 				case 12:
-					if (extModel == 0x2C)	// Gulftown
+					if (extModel == 0x2C)		// Gulftown
 						Q_strncatz(cpuString, " Core i7 9xx", maxSize);
 					else if (extModel == 0x3C)	// Haswell
 						Q_strncatz(cpuString, "  Core i7/i5/i3 4xxx", maxSize);
-					else	// Silverthorne
+					else if (extModel == 0x8C)	// Tiger Lake
+						Q_strncatz(cpuString, "  Core i7/i5/i3 11xxG7", maxSize);
+					else						// Silverthorne
 						Q_strncatz(cpuString, " Atom", maxSize);
 					break;
 				case 13:	
-					if (extModel == 0x2D)	// Sandy Bridge-E
+					if (extModel == 0x2D)		// Sandy Bridge-E
 						Q_strncatz(cpuString, " Core i7 39xx / 38xx", maxSize);
 					break;
 				case 14:
-					if (extModel == 0x1E)	// Lynnfield
+					if (extModel == 0x1E)		// Lynnfield
 						Q_strncatz(cpuString, " Core i7 8xx / Core i5 7xx", maxSize);
 					else if (extModel == 0x3E)	// Ivy Bridge-E
 						Q_strncatz(cpuString, " Core i7 49xx / 48xx", maxSize);
+					else if (extModel == 0x4E)	// Skylake U/Y
+						Q_strncatz(cpuString, " Core i7/i5/i3 6xxxU", maxSize);
 					else if (extModel == 0x5E)	// Skylake
 						Q_strncatz(cpuString, " Core i7/i5/i3 6xxx", maxSize);
 					else if (extModel == 0x7E)	// Ice lake
 						Q_strncatz(cpuString, " Core i7/i5/i3 10xxG7", maxSize);
+					else if (extModel == 0x8E)	// Kaby Lake U/Y
+						Q_strncatz(cpuString, " Core i7/i5/i3 7xxxU", maxSize);
 					else if (extModel == 0x9E)	// Coffee Lake
 						Q_strncatz(cpuString, " Core i7/i5/i3 8xxx", maxSize);
 					break;
 				case 15:	
-					if (extModel == 0x0F)	// Conroe / Kentsfield (Merom)
+					if (extModel == 0x0F)		// Conroe / Kentsfield (Merom)
 						Q_strncatz(cpuString, " Core 2", maxSize);
 					else if (extModel == 0x3F)	// Haswell-E
 						Q_strncatz(cpuString, " Core i7 59xx / 58xx", maxSize);
