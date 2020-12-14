@@ -1424,6 +1424,11 @@ void func_explosive_die (edict_t *self, edict_t *inflictor, edict_t *attacker, i
 void PrecacheDebris (int style);
 
 //
+// g_mappack.c
+//
+void model_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point);
+
+//
 // g_monster.c
 //
 #define SF_MONSTER_AMBUSH          1

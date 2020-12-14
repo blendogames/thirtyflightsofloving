@@ -26,8 +26,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // mappack stuff by mr. ed, modified extensively for Tremor by dwh
 //
 
-//Spawns a user defined model, you can specify whether its solid, if so how big the box is, and apply nearly
-//any effect to the entity.
+//  Spawns a user defined model, you can specify whether its solid, if so how big the box is, and apply nearly
+//  any effect to the entity.
 //
 //	PLAYER		set this if you want to use a player model
 //
@@ -42,7 +42,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //	NO_MODEL		Don't use a model. Usefull for placeing particle effects and
 //				dynamic lights on their own
 //
-//	"usermodel" = The model to load (models/ is already coded)
+//  "delay"      = Combine with TOGGLE spawnflag to start off
+//	"usermodel"  = The model to load (models/ is already coded)
 //	"startframe" = The starting frame : default 0
 //	"userframes" = The number of frames you want to display after startframe
 //	"solidstate" = 1 : SOLID_NOT - not solid at all
@@ -67,9 +68,9 @@ void modelspawn_think (edict_t *self)
 	if (self->s.frame >= self->framenumbers)
 	{
 		self->s.frame = self->startframe;
-		if(self->spawnflags & ANIM_ONCE)
+		if (self->spawnflags & ANIM_ONCE)
 		{
-			model_spawn_use(self,world,world);
+			model_spawn_use (self, world, world);
 			return;
 		}
 	}
@@ -79,11 +80,11 @@ void modelspawn_think (edict_t *self)
 
 void model_spawn_use (edict_t *self, edict_t *other, edict_t *activator)
 {
-	if (self->delay) //we started off
+	if (self->delay) // we started off
 	{
 		self->svflags &= ~SVF_NOCLIENT;
 		self->delay = 0;
-		if(self->framenumbers > 1)
+		if (self->framenumbers > 1)
 		{
 			self->think = modelspawn_think;
 			self->nextthink = level.time + FRAMETIME;
@@ -93,7 +94,7 @@ void model_spawn_use (edict_t *self, edict_t *other, edict_t *activator)
 		self->s.attenuation = self->attenuation;
 #endif
 	}
-	else             //we started active
+	else             // we started active
 	{
 		self->svflags |= SVF_NOCLIENT;
 		self->delay = 1;
@@ -109,12 +110,14 @@ void model_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 	edict_t	*e, *next;
 
 	e = self->movewith_next;
-	while(e) {
+	while (e)
+	{
 		next = e->movewith_next;
-		if(e->solid == SOLID_NOT) {
+		if (e->solid == SOLID_NOT) {
 			e->nextthink = 0;
 			G_FreeEdict(e);
-		} else
+		}
+		else
 			BecomeExplosion1 (e);
 		e = next;
 	}
@@ -128,7 +131,7 @@ void SP_model_spawn (edict_t *ent)
 {
 	char	modelname[256];
 
-	//paranoia checks
+	// paranoia checks
 	if ((!ent->usermodel) && !(ent->spawnflags & NO_MODEL) && !(ent->spawnflags & PLAYER_MODEL))
 	{
 		gi.dprintf("%s without a model at %s\n", ent->classname, vtos(ent->s.origin));
@@ -200,8 +203,8 @@ void SP_model_spawn (edict_t *ent)
 		}
 	}
 
-//	if(ent->movewith && (ent->solid == SOLID_BBOX))
-	if(ent->movewith)
+//	if (ent->movewith && (ent->solid == SOLID_BBOX))
+	if (ent->movewith)
 		ent->movetype = MOVETYPE_PUSH;
 
 	if (ent->solid != SOLID_NOT)
@@ -215,7 +218,7 @@ void SP_model_spawn (edict_t *ent)
 	else
 	{
 		if (ent->spawnflags & PLAYER_MODEL) {
-			if(!ent->usermodel || !strlen(ent->usermodel))
+			if (!ent->usermodel || !strlen(ent->usermodel))
 				ent->s.modelindex = MAX_MODELS-1;
 			else
 			{
@@ -248,25 +251,32 @@ void SP_model_spawn (edict_t *ent)
 	}
 
 	if (st.noise)
-		ent->noise_index = gi.soundindex  (st.noise);
+		ent->noise_index = gi.soundindex (st.noise);
 	ent->s.sound = ent->noise_index;
 #ifdef LOOP_SOUND_ATTENUATION
 	ent->s.attenuation = ent->attenuation;
 #endif
 
-//	if (ent->skinnum) // Knightmare- selectable skin
-//		ent->s.skinnum = ent->skinnum;
+	if (ent->skinnum) // Knightmare- selectable skin
+		ent->s.skinnum = ent->skinnum;
 
-	if (ent->spawnflags & ANIM_ONCE)
+	if (ent->spawnflags & ANIM_ONCE) {
 		ent->spawnflags |= TOGGLE;
+	}
 
 	if (ent->spawnflags & TOGGLE)
-	{
-		ent->delay = 0;
+	{	// Knightmare- allow starting off (but not for model_train)
+		if ( (strcmp(ent->classname, "model_train") != 0) && (ent->delay != 0) ) {
+			ent->delay = 1;
+			ent->svflags |= SVF_NOCLIENT;
+		}
+		else {
+			ent->delay = 0;
+		}
 		ent->use = model_spawn_use;
 	}
 
-	if(!(ent->s.effects & ANIM_MASK) && (ent->framenumbers > 1))
+	if ( !(ent->s.effects & ANIM_MASK) && (ent->framenumbers > 1) )
 	{
 		ent->think = modelspawn_think;
 		ent->nextthink = level.time + 2*FRAMETIME;

@@ -27,7 +27,7 @@ static int	sound_step3;
 #define SF_FREDDIE_LASER	32
 #define FREDDIE_MELEE_DISTANCE 64
 
-void freddie_fireweapon (edict_t *self, vec3_t offset);
+void freddie_fireweapon (edict_t *self);
 void freddie_attack(edict_t *self);
 void freddie_check_refire (edict_t *self);
 
@@ -166,7 +166,7 @@ void freddie_run (edict_t *self)
 //
 // run + firing
 //
-
+#if 0
 mframe_t freddie_frames_rfire [] =
 {
 	ai_run, 24,	freddie_run_frame,	// freddie_idle_sound,
@@ -186,7 +186,7 @@ mframe_t freddie_frames_rfire [] =
 	ai_run, 5,	freddie_run_frame,
 	ai_run, 5,	freddie_run_frame,
 };
-mmove_t freddie_move_rfire = {FRAME_rfire1, FRAME_rfire16, freddie_frames_rfire, NULL};
+//mmove_t freddie_move_rfire = {FRAME_rfire1, FRAME_rfire16, freddie_frames_rfire, NULL};
 
 void freddie_rfire (edict_t *self)
 {
@@ -195,6 +195,7 @@ void freddie_rfire (edict_t *self)
 	else
 		self->monsterinfo.currentmove = &freddie_move_rfire;
 }
+#endif
 
 void freddie_run_frame (edict_t *self)
 {
@@ -205,12 +206,12 @@ void freddie_run_frame (edict_t *self)
 
 	// If enemy is dead or missing no firing
 //	if ( !self->enemy || (self->enemy->health <= 0) )
-//		self->
+//		self->fog_model = 0;
 
-	if (self->monsterinfo.currentmove == &freddie_move_run)
+//	if (self->monsterinfo.currentmove == &freddie_move_run)
 		startFrame = FRAME_run1;
-	else if (self->monsterinfo.currentmove == &freddie_move_rfire)
-		startFrame = FRAME_rfire1;
+//	else if (self->monsterinfo.currentmove == &freddie_move_rfire)
+//		startFrame = FRAME_rfire1;
 
 	switch (self->s.frame - startFrame)
 	{
@@ -274,7 +275,7 @@ void freddie_run_frame (edict_t *self)
 		if (self->fog_index > 2)
 			self->fog_model = 0;
 		else
-			freddie_fireweapon (self, self->muzzle);
+			freddie_fireweapon (self);
 	}*/
 }
 
@@ -363,7 +364,7 @@ void freddie_attack_prefire (edict_t *self)
 	self->fogclip = 4 + (int)skill->value * 2;
 }
 
-void freddie_fireweapon (edict_t *self, vec3_t offset)
+void freddie_fireweapon (edict_t *self)
 {
 	vec3_t	start, forward, right, dir, vec;	// attack_track
 	float	speed, scale;
@@ -377,18 +378,18 @@ void freddie_fireweapon (edict_t *self, vec3_t offset)
 	speed = 500 + (int)skill->value * 150;
 	// Rotate offset vector
 	AngleVectors (self->s.angles, forward, right, NULL);
-	G_ProjectSource (self->s.origin, offset, forward, right, start);
+	G_ProjectSource (self->s.origin, self->muzzle, forward, right, start);
 
 /*	if ( (self->fog_model != 0) && ((int)skill->value > 1) )	// The mini burst mode (run+fire) can do tracking
 	{
 		if (self->fog_index == 1)
-			Freddie_Tracking (self->enemy->s.origin, offset, self->enemy, speed, attack_track);
+			Freddie_Tracking (self->enemy->s.origin, self->muzzle, self->enemy, speed, attack_track);
 		else
-			Freddie_Tracking (attack_track, offset, self->enemy, speed, attack_track);
+			Freddie_Tracking (attack_track, self->muzzle, self->enemy, speed, attack_track);
 		VectorSubtract (attack_track, start, dir);
 		VectorNormalize (dir);
 	}
-	else*/	// Standard mode spray bullets at player
+	else*/	// Standard mode: spray bullets at player
 	{
 		scale = crandom() * (20 + (random() * 50));
 		VectorScale (right, scale, vec);
@@ -409,63 +410,62 @@ void freddie_fireweapon (edict_t *self, vec3_t offset)
 
 void freddie_stand_fire (edict_t *self)
 {
-	vec3_t		offset;
 	qboolean	quitNext = false;
 
 	// Easy = 7 shots, Normal = 11 shots, Hard/NM = 15 shots
 	switch (self->s.frame)
 	{
 	case FRAME_sfire9:
-		VectorSet (offset, 45, -10, 20);
+		VectorSet (self->muzzle, 45, -10, 20);
 		break;
 	case FRAME_sfire10:
-		VectorSet (offset, 45, -10, 20);
+		VectorSet (self->muzzle, 45, -10, 20);
 		break;
 	case FRAME_sfire11:
-		VectorSet (offset, 45, -10, 22);
+		VectorSet (self->muzzle, 45, -10, 22);
 		break;
 	case FRAME_sfire12:
-		VectorSet (offset, 45, -10, 22);
+		VectorSet (self->muzzle, 45, -10, 22);
 		break;
 	case FRAME_sfire13:
-		VectorSet (offset, 45, -12, 23);
+		VectorSet (self->muzzle, 45, -12, 23);
 		break;
 	case FRAME_sfire14:
-		VectorSet (offset, 42, -12, 25);
+		VectorSet (self->muzzle, 42, -12, 25);
 		break;
 	case FRAME_sfire15:
-		VectorSet (offset, 42, -14, 23);
+		VectorSet (self->muzzle, 42, -14, 23);
 		if ((int)skill->value == 0)
 			quitNext = true;
 		break;
 	case FRAME_sfire16:
-		VectorSet (offset, 38, -14, 27);
+		VectorSet (self->muzzle, 38, -14, 27);
 		break;
 	case FRAME_sfire17:
-		VectorSet (offset, 38, -17, 26);
+		VectorSet (self->muzzle, 38, -17, 26);
 		break;
 	case FRAME_sfire18:
-		VectorSet (offset, 36, -17, 28);
+		VectorSet (self->muzzle, 36, -17, 28);
 		break;
 	case FRAME_sfire19:
-		VectorSet (offset, 36, -17, 26);
+		VectorSet (self->muzzle, 36, -17, 26);
 		if ((int)skill->value == 1)
 			quitNext = true;
 		break;
 	case FRAME_sfire20:
-		VectorSet (offset, 30, -17, 28);
+		VectorSet (self->muzzle, 30, -17, 28);
 		break;
 	case FRAME_sfire21:
-		VectorSet (offset, 30, -18, 25);
+		VectorSet (self->muzzle, 30, -18, 25);
 		break;
 	case FRAME_sfire22:
-		VectorSet (offset, 25, -18, 27);
+		VectorSet (self->muzzle, 25, -18, 27);
 		break;
 	case FRAME_sfire23:
-		VectorSet (offset, 25, -18, 27);
+		VectorSet (self->muzzle, 25, -18, 27);
 		break;
 	default:
-		VectorSet (offset, 0, 0, 0);
+		VectorSet (self->muzzle, 0, 0, 0);
 		break;
 	}
 
@@ -479,7 +479,7 @@ void freddie_stand_fire (edict_t *self)
 	if (self->fog_index > self->fogclip)
 		freddie_attack_spindown (self);
 	else
-		freddie_fireweapon (self, offset);
+		freddie_fireweapon (self);
 
 	if (quitNext)	// this is our last firing frame based on skill level
 		self->fog_index = self->fogclip + 1;

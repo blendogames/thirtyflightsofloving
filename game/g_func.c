@@ -3105,6 +3105,10 @@ void SP_func_water (edict_t *self)
 	if (self->wait == -1)
 		self->spawnflags |= DOOR_TOGGLE;
 
+#ifdef POSTTHINK_CHILD_MOVEMENT
+	self->postthink = set_child_movement; // Knightmare- supports movewith
+#endif	// POSTTHINK_CHILD_MOVEMENT
+
 	self->classname = "func_door";
 
 	gi.linkentity (self);
@@ -4847,6 +4851,7 @@ void SP_func_killbox (edict_t *ent)
 	ent->use = use_killbox;
 	ent->svflags = SVF_NOCLIENT;
 }
+
 //===================================================================
 // LAZARUS additions
 //===================================================================
@@ -5342,7 +5347,8 @@ void SP_func_pushable (edict_t *self)
 		self->movetype = MOVETYPE_NONE;
 		self->use      = func_pushable_spawn;
 		self->svflags |= SVF_NOCLIENT;
-	} else {
+	}
+	else {
 		self->solid     = SOLID_BSP;
 		self->movetype  = MOVETYPE_PUSHABLE;
 		self->use       = box_use;
@@ -5497,6 +5503,11 @@ void SP_func_bobbingwater (edict_t *self)
 
 	if (!self->bob) self->bob = 16;
 	if (!self->duration) self->duration = 8;
+
+#ifdef POSTTHINK_CHILD_MOVEMENT
+	self->postthink = set_child_movement; // Knightmare- supports movewith
+#endif	// POSTTHINK_CHILD_MOVEMENT
+
 	self->think     = bob_init;
 	self->nextthink = level.time + FRAMETIME;
 	gi.linkentity (self);

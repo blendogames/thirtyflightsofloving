@@ -1447,7 +1447,7 @@ void SP_turret_breach (edict_t *self)
 		if (!self->usermodel)
 		{
 			gi.dprintf("%s w/o a model and MD2 spawnflag set at %s\n",
-				self->classname,vtos(self->s.origin));
+				self->classname, vtos(self->s.origin));
 			G_FreeEdict(self);
 			return;
 		}
@@ -1461,11 +1461,11 @@ void SP_turret_breach (edict_t *self)
 		if ( (VectorLength(self->bleft) == 0) &&
 			 (VectorLength(self->tright) == 0)   )
 		{
-			VectorSet(self->bleft,-16,-16,-16);
-			VectorSet(self->tright,16, 16, 16);
+			VectorSet(self->bleft, -16, -16, -16);
+			VectorSet(self->tright, 16, 16, 16);
 		}
-		VectorCopy(self->bleft,self->mins);
-		VectorCopy(self->tright,self->maxs);
+		VectorCopy(self->bleft, self->mins);
+		VectorCopy(self->tright, self->maxs);
 
 		if (self->spawnflags & SF_TURRET_TRIGGER_SPAWN)
 		{

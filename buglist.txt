@@ -47,8 +47,6 @@ Crucified insane in jail4 moving downward when player is shot by blaster guard.
 
 Thirdperson player shadow not drawn correctly at times (start of hangar1)
 
-depthhacked model appearing at player origin in Lazarus model test map
-
 Acebot dead bodies have interpolation glitch on respawn
 	- FIXED by setting oldorigin in ACESP_PutClientInServer()
 

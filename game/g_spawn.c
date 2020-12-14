@@ -1386,12 +1386,14 @@ removeflags:
 			// Knightmare added
 #ifdef POSTTHINK_CHILD_MOVEMENT
 			 Q_stricmp(ent->movewith_ent->classname, "func_door_rotating")	&&
+			 Q_stricmp(ent->movewith_ent->classname, "func_water")	&&
 			 Q_stricmp(ent->movewith_ent->classname, "func_plat")			&&
 			 Q_stricmp(ent->movewith_ent->classname, "func_plat2")			&&
 			 Q_stricmp(ent->movewith_ent->classname, "func_rotating")		&&
 			 Q_stricmp(ent->movewith_ent->classname, "func_button")			&&
 			 Q_stricmp(ent->movewith_ent->classname, "func_door_secret")	&&
 			 Q_stricmp(ent->movewith_ent->classname, "func_door_secret2")	&&
+			 Q_stricmp(ent->movewith_ent->classname, "func_bobbingwater")	&&
 			 Q_stricmp(ent->movewith_ent->classname, "func_door_swinging")	&&
 			 Q_stricmp(ent->movewith_ent->classname, "func_breakaway")		&&
 			 Q_stricmp(ent->movewith_ent->classname, "func_trackchange")	&&

@@ -466,8 +466,14 @@ void SP_model_spawn (edict_t *ent)
 		ent->spawnflags |= TOGGLE;
 
 	if (ent->spawnflags & TOGGLE)
-	{
-		ent->delay = 0;
+	{	// Knightmare- allow starting off (but not for model_train)
+		if ( (strcmp(ent->classname, "model_train") != 0) && (ent->delay != 0) ) {
+			ent->delay = 1;
+			ent->svflags |= SVF_NOCLIENT;
+		}
+		else {
+			ent->delay = 0;
+		}
 		ent->use = model_spawn_use;
 	}
 

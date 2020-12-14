@@ -343,7 +343,7 @@ void vulture_landed (edict_t *self)
 //	if ( !(self->flags & FL_FLY) )
 //		gi.dprintf ("successfully converted monster_vulture to ground\n");
 }
-
+/*
 mframe_t vulture_frames_land [] =
 {
 	ai_move, 5, NULL,
@@ -361,7 +361,7 @@ mframe_t vulture_frames_land [] =
 	ai_move, 5, vulture_landed
 };
 mmove_t	vulture_move_land = {FRAME_land1, FRAME_land13, vulture_frames_land, vulture_walk};
-/*
+
 void vulture_land (edict_t *self)
 {
 	self->monsterinfo.currentmove = &vulture_move_land;
@@ -642,7 +642,7 @@ void SP_monster_vulture (edict_t *self)
 
 	self->s.modelindex = gi.modelindex ("models/monsters/vulture/tris.md2");
 	VectorSet (self->mins, -8, -8, -8);
-	VectorSet (self->maxs, 8, 8, 10);
+	VectorSet (self->maxs, 8, 8, 8);	// was 8, 8, 10
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;
 

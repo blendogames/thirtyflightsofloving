@@ -3169,6 +3169,8 @@ void SP_func_water (edict_t *self)
 	if (self->wait == -1)
 		self->spawnflags |= DOOR_TOGGLE;
 
+	self->postthink = train_move_children;	// Knightmare- now supports movewith
+
 	self->classname = "func_door";
 
 	gi.linkentity (self);
@@ -6226,6 +6228,9 @@ void SP_func_bobbingwater(edict_t *self)
 
 	if (!self->bob) self->bob = 16;
 	if (!self->duration) self->duration = 8;
+
+	self->postthink = train_move_children;	// Knightmare- now supports movewith
+
 	self->think     = bob_init;
 	self->nextthink = level.time + FRAMETIME;
 	gi.linkentity (self);

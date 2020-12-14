@@ -899,7 +899,6 @@
 {"freddie_attack_spinupsound", (byte *)freddie_attack_spinupsound},
 {"freddie_pain", (byte *)freddie_pain},
 {"freddie_run_frame", (byte *)freddie_run_frame},
-{"freddie_rfire", (byte *)freddie_rfire},
 {"freddie_run", (byte *)freddie_run},
 {"freddie_walk", (byte *)freddie_walk},
 {"freddie_stand", (byte *)freddie_stand},

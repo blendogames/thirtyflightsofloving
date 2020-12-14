@@ -145,24 +145,24 @@ typedef enum
 } ammo_t;
 
 
-//deadflag
+// deadflag
 #define DEAD_NO					0
 #define DEAD_DYING				1
 #define DEAD_DEAD				2
 #define DEAD_RESPAWNABLE		3
 #define DEAD_FROZEN             4  // Lazarus: Don't shift angles, just freeze him
 
-//range
+// range
 #define RANGE_MELEE				0
 #define RANGE_NEAR				1
 #define RANGE_MID				2
 #define RANGE_FAR				3
 
-//gib types
+// gib types
 #define GIB_ORGANIC				0
 #define GIB_METALLIC			1
 
-//monster ai flags
+// monster ai flags
 #define AI_STAND_GROUND			0x00000001
 #define AI_TEMP_STAND_GROUND	0x00000002
 #define AI_SOUND_TARGET			0x00000004
@@ -178,7 +178,7 @@ typedef enum
 #define AI_COMBAT_POINT			0x00001000
 #define AI_MEDIC				0x00002000
 #define AI_RESURRECTING			0x00004000
-//Lazarus: Eliminate many inapplicable Rogue AI flags to make room for more
+// Lazarus: Eliminate many inapplicable Rogue AI flags to make room for more
 #define AI_TARGET_ANGER			0x00008000
 #define AI_HINT_PATH			0x00010000
 #define	AI_BLOCKED				0x00020000	// used by blocked_checkattack: set to say I'm attacking while blocked 
@@ -203,7 +203,7 @@ typedef enum
 #define AI_CROUCH               0x20000000
 #define AI_EVADE_GRENADE		0x40000000
 
-//monster attack state
+// monster attack state
 #define AS_STRAIGHT				1
 #define AS_SLIDING				2
 #define	AS_MELEE				3
@@ -320,7 +320,7 @@ typedef struct gitem_s
 	void		(*weaponthink)(struct edict_s *ent);
 	char		*pickup_sound;
 	char		*world_model;
-	int			world_model_skinnum; //Knightmare- added skinnum here so items can share models
+	int			world_model_skinnum; // Knightmare- added skinnum here so items can share models
 	int			world_model_flags;
 	char		*view_model;
 
@@ -1012,6 +1012,7 @@ void button_use (edict_t *self, edict_t *other, edict_t *activator);
 void trainbutton_use (edict_t *self, edict_t *other, edict_t *activator);
 void movewith_init (edict_t *self);
 void set_child_movement(edict_t *self);
+
 //
 // g_items.c
 //
@@ -1045,15 +1046,18 @@ void Jet_ApplyJet( edict_t *ent, usercmd_t *ucmd );
 qboolean Jet_AvoidGround( edict_t *ent );
 void Jet_BecomeExplosion( edict_t *ent, int damage );
 #endif
+
 //
 // g_lights.c
 //
 void Lights();
 void ToggleLights();
+
 //
 // g_lock.c
 //
 void lock_digit_increment (edict_t *digit, edict_t *activator);
+
 //
 // g_main.c
 //
@@ -1071,7 +1075,13 @@ void BecomeExplosion1(edict_t *self);
 void barrel_delay (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point);
 void barrel_explode (edict_t *self);
 void func_explosive_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point);
-void PrecacheDebris (int style);
+	void PrecacheDebris (int style);
+
+//
+// g_model.c
+//
+void model_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point);
+
 //
 // g_monster.c
 //
@@ -1113,15 +1123,18 @@ void M_FliesOn (edict_t *self);
 void M_CheckGround (edict_t *ent);
 qboolean M_SetDeath (edict_t *ent,mmove_t **moves);
 int  PatchMonsterModel (char *model);
+
 //
 // g_patchplayermodels.c
 //
 int PatchPlayerModels (char *modelname);
+
 //
 // g_phys.c
 //
 void SV_AddGravity (edict_t *ent);
 void G_RunEntity (edict_t *ent);
+
 //
 // g_reflect.c
 //
@@ -1142,24 +1155,29 @@ void G_FindTeams();
 void Cmd_ToggleHud ();
 void Hud_On();
 void Hud_Off();
+
 //
 // g_svcmds.c
 //
 void	ServerCommand (void);
 qboolean SV_FilterPacket (char *from);
+
 //
 // g_thing.c
 //
 edict_t *SpawnThing();
+
 //
 // g_tracktrain.c
 //
 void tracktrain_disengage (edict_t *train);
+
 //
 // g_turret.c
 //
 void turret_breach_fire(edict_t *ent);
 void turret_disengage (edict_t *ent);
+
 //
 // g_trigger.c
 //
@@ -1169,6 +1187,7 @@ typedef struct
 } entlist_t;
 qboolean HasSpawnFunction(edict_t *ent);
 int trigger_transition_ents (edict_t *changelevel, edict_t *self);
+
 //
 // g_utils.c
 //
@@ -1231,6 +1250,7 @@ void fire_rail (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick
 void fire_bfg (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius);
 qboolean AimGrenade (edict_t *launcher, vec3_t start, vec3_t target, vec_t speed, vec3_t aim);
 void Grenade_Evade (edict_t *monster);
+
 //
 // m_actor.c
 //
@@ -1254,6 +1274,7 @@ extern mmove_t	actor_move_run_bad;
 extern mmove_t actor_move_stand;
 extern mmove_t actor_move_walk;
 extern mmove_t	actor_move_walk_back;
+
 //
 // m_medic.c
 //
@@ -1265,6 +1286,7 @@ void abortHeal (edict_t *ent,qboolean mark);
 void medic_NextPatrolPoint(edict_t *ent,edict_t *hintpath);
 edict_t *medic_FindDeadMonster (edict_t *ent);
 void medic_StopPatrolling(edict_t *ent);
+
 //
 // m_move.c
 //
@@ -1272,6 +1294,7 @@ qboolean M_CheckBottom (edict_t *ent);
 qboolean M_walkmove (edict_t *ent, float yaw, float dist);
 void M_MoveToGoal (edict_t *ent, float dist);
 void M_ChangeYaw (edict_t *ent);
+
 // tpp
 //
 // p_chase.c
@@ -1283,6 +1306,7 @@ void Cmd_Chasecam_Toggle (edict_t *ent);
 void ChasecamRemove (edict_t *ent, int opt);
 void ChasecamStart (edict_t *ent);
 // end tpp
+
 //
 // p_client.c
 //
@@ -1306,10 +1330,12 @@ void G_SetSpectatorStats (edict_t *ent);
 void G_CheckChaseStats (edict_t *ent);
 void ValidateSelectedItem (edict_t *ent);
 void DeathmatchScoreboardMessage (edict_t *client, edict_t *killer);
+
 //
 // p_text.c
 //
 void Do_Text_Display(edict_t *activator, int flags, char *message);
+
 //
 // p_trail.c
 //
@@ -1319,10 +1345,12 @@ void PlayerTrail_New (vec3_t spot);
 edict_t *PlayerTrail_PickFirst (edict_t *self);
 edict_t *PlayerTrail_PickNext (edict_t *self);
 edict_t	*PlayerTrail_LastSpot (void);
+
 //
 // p_view.c
 //
 void ClientEndServerFrame (edict_t *ent);
+
 //
 // p_weapon.c
 //
@@ -1723,7 +1751,7 @@ struct edict_s
 	void		(*prethink) (edict_t *ent);
 	void		(*think)(edict_t *self);
 	void		(*postthink) (edict_t *ent); // Knightmare added
-	void		(*blocked)(edict_t *self, edict_t *other);	//move to moveinfo?
+	void		(*blocked)(edict_t *self, edict_t *other);	// move to moveinfo?
 	void		(*touch)(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf);
 	void		(*use)(edict_t *self, edict_t *other, edict_t *activator);
 	void		(*pain)(edict_t *self, edict_t *other, float kick, int damage);
@@ -1825,6 +1853,7 @@ struct edict_s
 //	int			rendereffect;
 	int			renderfx;
 	int         effects;
+	int			skinnum;
 	vec3_t		bleft;
 	vec3_t		tright;
 

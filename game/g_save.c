@@ -222,7 +222,7 @@ field_t fields[] = {
 	{"renderfx", FOFS(renderfx), F_INT},
 	{"roll", FOFS(roll), F_FLOAT},
 	{"roll_speed", FOFS(roll_speed), F_FLOAT},
-	{"skinnum", FOFS(s.skinnum), F_INT},
+	{"skinnum", FOFS(skinnum), F_INT},	// was s.skinnum
 	{"speaker", FOFS(speaker), F_EDICT, FFL_NOSPAWN},
 	{"smooth_movement", FOFS(smooth_movement), F_INT},
 	{"solidstate", FOFS(solidstate), F_INT},

@@ -236,7 +236,7 @@ void flyer_walk (edict_t *self)
 
 void flyer_stand (edict_t *self)
 {
-		self->monsterinfo.currentmove = &flyer_move_stand;
+	self->monsterinfo.currentmove = &flyer_move_stand;
 }
 
 mframe_t flyer_frames_start [] =
@@ -264,12 +264,12 @@ mmove_t flyer_move_stop = {FRAME_stop01, FRAME_stop07, flyer_frames_stop, NULL};
 
 void flyer_stop (edict_t *self)
 {
-		self->monsterinfo.currentmove = &flyer_move_stop;
+	self->monsterinfo.currentmove = &flyer_move_stop;
 }
 
 void flyer_start (edict_t *self)
 {
-		self->monsterinfo.currentmove = &flyer_move_start;
+	self->monsterinfo.currentmove = &flyer_move_start;
 }
 
 
@@ -529,7 +529,7 @@ void flyer_melee (edict_t *self)
 	self->monsterinfo.currentmove = &flyer_move_start_melee;
 }
 
-void flyer_check_melee(edict_t *self)
+void flyer_check_melee (edict_t *self)
 {
 	if (range (self, self->enemy) == RANGE_MELEE)
 		if (random() <= 0.8)
@@ -573,7 +573,7 @@ void flyer_pain (edict_t *self, edict_t *other, float kick, int damage)
 }
 
 
-void flyer_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+void flyer_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
 	int n;
 	// Knightmare- gibs!

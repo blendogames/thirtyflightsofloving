@@ -1426,7 +1426,7 @@ void walkmonster_start_go (edict_t *self)
 	// PMM - stalkers are too short for this
 	if (!(strcmp(self->classname, "monster_stalker")))
 		self->viewheight = 15;
-	// Knightmare- vultures also too short
+	// Knightmare- vultures are also too short
 	else if (!(strcmp(self->classname, "monster_vulture")))
 		self->viewheight = 8;
 	else

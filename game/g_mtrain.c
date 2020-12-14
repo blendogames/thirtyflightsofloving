@@ -38,23 +38,23 @@ void train_use (edict_t *self, edict_t *other, edict_t *activator);
 #define MTRAIN_ROTATE_CONSTANT  64
 #define TRAIN_SMOOTH           128
 
-void model_train_animator(edict_t *animator)
+void model_train_animator (edict_t *animator)
 {
 	edict_t	*train;
 
 	train = animator->owner;
-	if(!train || !train->inuse)
+	if (!train || !train->inuse)
 	{
 		G_FreeEdict(animator);
 		return;
 	}
-	if(Q_stricmp(train->classname,"model_train"))
+	if (Q_stricmp(train->classname,"model_train"))
 	{
 		G_FreeEdict(animator);
 		return;
 	}
 	animator->nextthink = level.time + FRAMETIME;
-	if(VectorLength(train->velocity) == 0)
+	if (VectorLength(train->velocity) == 0)
 		return;
 	train->s.frame++;
 	if (train->s.frame >= train->framenumbers)
@@ -72,7 +72,7 @@ void SP_model_train (edict_t *self)
 	self->moveinfo.sound_middle = self->s.sound;
 	self->s.sound = 0;
 
-	if(!self->inuse) return;
+	if (!self->inuse) return;
 
 	// Reset some things from SP_model_spawn
 	self->delay = 0;
@@ -84,7 +84,7 @@ void SP_model_train (edict_t *self)
 		self->takedamage = DAMAGE_YES;
 	}
 
-	if(self->framenumbers > self->startframe+1)
+	if (self->framenumbers > self->startframe+1)
 	{
 		edict_t	*animator;
 		animator = G_Spawn();
@@ -99,24 +99,24 @@ void SP_model_train (edict_t *self)
 	// to func_train spawnflags. PLAYER_MODEL and NO_MODEL have
 	// already been checked in SP_model_spawn and are never re-used,
 	// so it's OK to overwrite those.
-	if(self->spawnflags & MTRAIN_ROTATE)
+	if (self->spawnflags & MTRAIN_ROTATE)
 	{
 		self->spawnflags &= ~MTRAIN_ROTATE;
 		self->spawnflags |= TRAIN_ROTATE;
 	}
-	if(self->spawnflags & MTRAIN_ROTATE_CONSTANT)
+	if (self->spawnflags & MTRAIN_ROTATE_CONSTANT)
 	{
 		self->spawnflags &= ~MTRAIN_ROTATE_CONSTANT;
 		self->spawnflags |= TRAIN_ROTATE_CONSTANT;
 	}
-	if( (self->spawnflags & (TRAIN_ROTATE | TRAIN_ROTATE_CONSTANT)) == (TRAIN_ROTATE | TRAIN_ROTATE_CONSTANT))
+	if ( (self->spawnflags & (TRAIN_ROTATE | TRAIN_ROTATE_CONSTANT)) == (TRAIN_ROTATE | TRAIN_ROTATE_CONSTANT))
 	{
 		self->spawnflags &= ~(TRAIN_ROTATE | TRAIN_ROTATE_CONSTANT);
 		self->spawnflags |= TRAIN_SPLINE;
 	}
-	if(self->style == 3)
+	if (self->style == 3)
 		self->spawnflags |= TRAIN_ANIMATE;		// 32
-	if(self->style == 4)
+	if (self->style == 4)
 		self->spawnflags |= TRAIN_ANIMATE_FAST;	// 64
 
 	// TRAIN_SMOOTH forces trains to go directly to Move_Done from

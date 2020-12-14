@@ -1579,7 +1579,10 @@ void SpawnItem (edict_t *ent, gitem_t *item)
 	ent->item = item;
 	ent->nextthink = level.time + 2 * FRAMETIME;    // items start after other solids
 	ent->think = droptofloor;
-	if (!ent->s.skinnum)								// Knightmare- allow mapper-specified skinnum
+	if (ent->skinnum)								// Knightmare- use mapper-specified skinnum
+		ent->s.skinnum = ent->skinnum;
+	else
+//	if (!ent->s.skinnum)								// Knightmare- allow mapper-specified skinnum
 		ent->s.skinnum = item->world_model_skinnum;	// Knightmare- skinnum specified in item table
 	ent->s.effects = item->world_model_flags;
 	ent->s.renderfx = RF_GLOW;
