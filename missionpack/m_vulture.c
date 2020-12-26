@@ -289,11 +289,11 @@ void vulture_walk (edict_t *self)
 
 mframe_t vulture_frames_fly [] =
 {
-	ai_run, 15, NULL,
-	ai_run, 15, vulture_flap,
-	ai_run, 15, NULL,
-	ai_run, 15, NULL,
-	ai_run, 15, NULL
+	ai_run, 10, NULL,
+	ai_run, 10, vulture_flap,
+	ai_run, 10, NULL,
+	ai_run, 10, NULL,
+	ai_run, 10, NULL
 };
 mmove_t	vulture_move_fly = {FRAME_fly1, FRAME_fly5, vulture_frames_fly, NULL};
 /*
