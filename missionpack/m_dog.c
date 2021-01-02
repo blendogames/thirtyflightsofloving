@@ -17,7 +17,7 @@ static int	sound_sight;
 static int	sound_idle;
 
 
-/*static*/ void dog_idle (edict_t *self)
+void dog_idle (edict_t *self)
 {
 	if (random() < 0.2)
 		gi.sound (self, CHAN_VOICE, sound_idle, 1, ATTN_IDLE, 0);
@@ -155,7 +155,7 @@ void dog_pain (edict_t *self, edict_t *other, float kick, int damage)
 
 // MELEE
 
-/*static*/ void dog_bite (edict_t *self)
+void dog_bite (edict_t *self)
 {
 	vec3_t	aim;
 
@@ -165,7 +165,7 @@ void dog_pain (edict_t *self, edict_t *other, float kick, int damage)
 }
 
 
-/*static*/ void dog_checkrefire (edict_t *self)
+void dog_checkrefire (edict_t *self)
 {
 	if (!self->enemy || !self->enemy->inuse || self->enemy->health <= 0)
 		return;
@@ -196,7 +196,7 @@ void dog_melee (edict_t *self)
 
 // LEAP
 
-/*static*/ void dog_jump_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
+void dog_jump_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
 	if (self->health <= 0)
 	{
@@ -234,7 +234,7 @@ void dog_melee (edict_t *self)
 }
 
 
-/*static*/ void dogtakeoff (edict_t *self)
+void dogtakeoff (edict_t *self)
 {
 	vec3_t	forward;
 
@@ -248,7 +248,7 @@ void dog_melee (edict_t *self)
 	self->touch = dog_jump_touch;
 }
 
-/*static*/ void dogchecklanding (edict_t *self)
+void dogchecklanding (edict_t *self)
 {
 	if (self->groundentity)
 	{

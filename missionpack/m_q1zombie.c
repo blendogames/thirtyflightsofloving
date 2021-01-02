@@ -671,7 +671,7 @@ void SP_monster_q1_zombie (edict_t *self)
 	if ( self->style )
 	{
 		PatchMonsterModel("models/monsters/q1zombie/tris.md2");
-		self->s.skinnum = self->style * 2;
+		self->s.skinnum = self->style;
 	}
 
 	self->s.modelindex = gi.modelindex ("models/monsters/q1zombie/tris.md2");

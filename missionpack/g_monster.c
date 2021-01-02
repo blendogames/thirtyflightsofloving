@@ -1646,6 +1646,7 @@ int PatchMonsterModel (char *modelname)
 	qboolean	is_vulture = false;
 	qboolean	is_zboss_mech = false;
 	qboolean	is_zboss_pilot = false;
+	qboolean	is_q1monster = false;
 
 	qboolean	gamedirpakfile = false;
 
@@ -1741,6 +1742,17 @@ int PatchMonsterModel (char *modelname)
 	{
 		is_zboss_pilot = true;
 		numskins = 12;
+	}
+	else if ( !strcmp(modelname, "models/monsters/q1dog/tris.md2") ||  !strcmp(modelname, "models/monsters/q1enforcer/tris.md2")
+			|| !strcmp(modelname, "models/monsters/q1fiend/tris.md2") || !strcmp(modelname, "models/monsters/q1freddie/tris.md2")
+			|| !strcmp(modelname, "models/monsters/q1grunt/tris.md2") || !strcmp(modelname, "models/monsters/q1hknight/tris.md2")
+			|| !strcmp(modelname, "models/monsters/q1knight/tris.md2") || !strcmp(modelname, "models/monsters/q1ogre/tris.md2")
+			|| !strcmp(modelname, "models/monsters/q1rotfish/tris.md2") || !strcmp(modelname, "models/monsters/q1scrag/tris.md2")
+			|| !strcmp(modelname, "models/monsters/q1shalrath/tris.md2") || !strcmp(modelname, "models/monsters/q1shambler/tris.md2")
+			|| !strcmp(modelname, "models/monsters/q1tarbaby/tris.md2") || !strcmp(modelname, "models/monsters/q1zombie/tris.md2") )
+	{
+		is_q1monster = true;
+		numskins = 4;
 	}
 
 	// end Knightmare
@@ -2174,6 +2186,20 @@ int PatchMonsterModel (char *modelname)
 				Com_strcat (skins[j], sizeof(skins[j]), "custom3_p1.pcx"); break;
 			case 11:
 				Com_strcat (skins[j], sizeof(skins[j]), "custom3_p2.pcx"); break;
+			}
+		}
+		else if (is_q1monster)
+		{
+			switch (j)
+			{
+			case 0:
+				Com_strcat (skins[j], sizeof(skins[j]), "skin0.pcx"); break;
+			case 1:
+				Com_strcat (skins[j], sizeof(skins[j]), "custom1.pcx"); break;
+			case 2:
+				Com_strcat (skins[j], sizeof(skins[j]), "custom2.pcx"); break;
+			case 3:
+				Com_strcat (skins[j], sizeof(skins[j]), "custom3.pcx"); break;
 			}
 		}
 		// end Knightmare

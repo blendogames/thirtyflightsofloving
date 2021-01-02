@@ -474,7 +474,7 @@ void SP_monster_q1_fiend (edict_t *self)
 	if ( self->style )
 	{
 		PatchMonsterModel("models/monsters/q1fiend/tris.md2");
-		self->s.skinnum = self->style * 2;
+		self->s.skinnum = self->style;
 	}
 
 	self->s.modelindex = gi.modelindex ("models/monsters/q1fiend/tris.md2");
