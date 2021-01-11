@@ -136,19 +136,24 @@ void SetFontCursor (void)
 		ui_font = Cvar_Get ("ui_font", "default", CVAR_ARCHIVE);
 
 	if (numfonts > 1)
+	{
 		for (i=0; font_names[i]; i++)
 		{
 			if (!Q_strcasecmp(con_font->string, font_names[i]))
 			{
 				s_options_interface_confont_box.curvalue = i;
-				return;
+				break;
 			}
+		}
+		for (i=0; font_names[i]; i++)
+		{
 			if (!Q_strcasecmp(ui_font->string, font_names[i]))
 			{
 				s_options_interface_uifont_box.curvalue = i;
-				return;
+				break;
 			}
 		}
+	}
 }
 
 
@@ -194,7 +199,7 @@ char **SetFontNames (void)
 
 #if 1
 	fontfiles = FS_GetFileList("fonts/*.*", NULL, &nfonts);
-	for (i=0;i<nfonts && nfontnames<MAX_FONTS;i++)
+	for (i=0; i<nfonts && nfontnames<MAX_FONTS; i++)
 	{
 		int num;
 
@@ -229,7 +234,7 @@ char **SetFontNames (void)
 		Com_sprintf( findname, sizeof(findname), "%s/fonts/*.*", path );
 		fontfiles = FS_ListFiles( findname, &nfonts, 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM );
 
-		for (i=0;i<nfonts && nfontnames<MAX_FONTS;i++)
+		for (i=0; i<nfonts && nfontnames<MAX_FONTS; i++)
 		{
 			int num;
 
@@ -305,7 +310,7 @@ char **SetFontNames (void)
 
 static void InterfaceSetMenuItemValues (void)
 {
-	SetFontCursor();
+	SetFontCursor ();
 
 	s_options_interface_menumouse_slider.curvalue		= ( Cvar_VariableValue("ui_sensitivity") ) * 4;
 	s_options_interface_menualpha_slider.curvalue		= ( Cvar_VariableValue("ui_background_alpha") ) * 20;
@@ -317,8 +322,8 @@ static void InterfaceSetMenuItemValues (void)
 	Cvar_SetValue( "con_alpha", ClampCvar( 0, 1, Cvar_VariableValue("con_alpha") ) );
 	s_options_interface_conalpha_slider.curvalue		= ( Cvar_VariableValue("con_alpha") ) * 20;
 
-	//Cvar_SetValue( "con_height", ClampCvar( 0.25, 0.75, Cvar_VariableValue("con_height") ) );
-	//s_options_interface_conheight_slider.curvalue		= 20 * (Cvar_VariableValue("con_height") - 0.25);
+//	Cvar_SetValue( "con_height", ClampCvar( 0.25, 0.75, Cvar_VariableValue("con_height") ) );
+//	s_options_interface_conheight_slider.curvalue		= 20 * (Cvar_VariableValue("con_height") - 0.25);
 
 	Cvar_SetValue( "scr_simple_loadscreen", ClampCvar( 0, 1, Cvar_VariableValue("scr_simple_loadscreen") ) );
 	s_options_interface_simple_loadscreen_box.curvalue = Cvar_VariableValue("scr_simple_loadscreen");
