@@ -47,7 +47,7 @@ Hud_DrawString
 */
 void Hud_DrawString (int x, int y, const char *string, int alpha, qboolean isStatusBar)
 {
-	CL_DrawStringGeneric (x, y, string, alpha, HUD_FONT_SIZE, (isStatusBar) ? SCALETYPE_HUD : SCALETYPE_MENU, false);
+	CL_DrawStringGeneric (x, y, string, FONT_SCREEN, alpha, HUD_FONT_SIZE, (isStatusBar) ? SCALETYPE_HUD : SCALETYPE_MENU, false);
 }
 
 
@@ -67,7 +67,7 @@ void Hud_DrawStringAlt (int x, int y, const char *string, int alpha, qboolean is
 	for (i=0; i<len; i++) {
 		highString[i] ^= 128;
 	}
-	CL_DrawStringGeneric (x, y, highString, alpha, HUD_FONT_SIZE, (isStatusBar) ? SCALETYPE_HUD : SCALETYPE_MENU, false);
+	CL_DrawStringGeneric (x, y, highString, FONT_SCREEN, alpha, HUD_FONT_SIZE, (isStatusBar) ? SCALETYPE_HUD : SCALETYPE_MENU, false);
 //	CL_DrawStringGeneric (x, y, string, alpha, HUD_FONT_SIZE, (isStatusBar) ? SCALETYPE_HUD : SCALETYPE_MENU, true);
 }
 
@@ -888,9 +888,9 @@ void CL_DrawInventory (void)
 	SCR_DrawPic (x, y, 256, 192, ALIGN_CENTER, "inventory", scr_hudalpha->value);
 	x += 24;
 	y += 20;
-	SCR_DrawString (x, y, 8, ALIGN_CENTER, S_COLOR_WHITE"hotkey ### item", 255);
+	SCR_DrawString (x, y, 8, ALIGN_CENTER, S_COLOR_WHITE"hotkey ### item", FONT_SCREEN, 255);
 	y += 8;
-	SCR_DrawString (x, y, 8, ALIGN_CENTER, S_COLOR_WHITE"------ --- ----", 255);
+	SCR_DrawString (x, y, 8, ALIGN_CENTER, S_COLOR_WHITE"------ --- ----", FONT_SCREEN, 255);
 	x += 16;
 	y += 8;
 
@@ -945,8 +945,7 @@ void CL_DrawInventory (void)
 
 	//	Hud_DrawString (x, y, string);
 	//	y += SCR_ScaledHud(8);
-		SCR_DrawString (x, y, 8, ALIGN_CENTER, string, 255);
+		SCR_DrawString (x, y, 8, ALIGN_CENTER, string, FONT_SCREEN, 255);
 		y += 8;
 	}
-
 }

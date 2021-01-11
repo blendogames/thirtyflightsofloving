@@ -68,6 +68,14 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define SHELL_WHITE_COLOR	0xD7
 
+typedef enum
+{
+	FONT_CONSOLE,
+	FONT_SCREEN,
+	FONT_UI
+} fontslot_t;
+
+
 typedef struct entity_s
 {
 	struct model_s		*model;			// opaque type outside refresh

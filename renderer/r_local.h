@@ -249,8 +249,11 @@ extern	cvar_t	*r_lightlevel;	// FIXME: This is a HACK to get the client's light 
 extern	cvar_t	*r_rgbscale;
 
 // Knightmare- added Psychospaz's console font size option
-extern	cvar_t	*con_font;
 extern	cvar_t	*con_font_size;
+extern	cvar_t	*con_font;
+extern	cvar_t	*scr_font;
+extern	cvar_t	*ui_font;
+extern	cvar_t	*alt_text_color;
 
 //extern	cvar_t	*r_vertex_arrays;	// unused
 
@@ -669,6 +672,8 @@ char	*va(char *format, ...);
 //
 // r_draw.c
 //
+void	R_RefreshFont (fontslot_t font);
+void	R_RefreshAllFonts (void);
 void	R_DrawGetPicSize (int *w, int *h, char *name);
 void	R_DrawPic (int x, int y, char *name);
 // added alpha for Psychospaz's transparent console
@@ -676,9 +681,11 @@ void	R_DrawStretchPic (int x, int y, int w, int h, char *name, float alpha);
 // Psychospaz's scaled crosshair support
 void	R_DrawScaledPic (int x, int y, float scale, float alpha, char *pic);
 void	R_InitChars (void);
-void	R_FlushChars (void);
-void	R_DrawChar (float x, float y, int num, float scale, 
+void	R_FlushChars (fontslot_t font);
+void	R_DrawChar (float x, float y, int num, fontslot_t font, float scale, 
 			int red, int green, int blue, int alpha, qboolean italic, qboolean last);
+void	R_DrawString (float x, float y, const char *string, fontslot_t font, float scale, 
+				int red, int green, int blue, int alpha, qboolean italic, qboolean shadow);
 void	R_DrawTileClear (int x, int y, int w, int h, char *name);
 void	R_DrawFill (int x, int y, int w, int h, int red, int green, int blue, int alpha);
 float	R_CharMapScale (void);

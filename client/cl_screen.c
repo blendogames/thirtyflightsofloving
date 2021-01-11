@@ -642,12 +642,12 @@ SCR_DrawChar
 Coordinates are 640*480 virtual values
 =================
 */
-void SCR_DrawChar (float x, float y, int size, scralign_t align, int num, int red, int green, int blue, int alpha, qboolean italic, qboolean last)
+void SCR_DrawChar (float x, float y, int size, scralign_t align, int num, fontslot_t font, int red, int green, int blue, int alpha, qboolean italic, qboolean last)
 {
 	float	scale = SCR_ScaledScreen((float)size / (float)MENU_FONT_SIZE);	// SCR_GetScreenScale()
 
 	SCR_AdjustFrom640 (&x, &y, NULL, NULL, align);
-	R_DrawChar(x, y, num, scale, red, green, blue, alpha, italic, last);
+	R_DrawChar(x, y, num, font, scale, red, green, blue, alpha, italic, last);
 }
 
 /*
@@ -656,10 +656,10 @@ SCR_DrawString
 Coordinates are 640*480 virtual values
 =================
 */
-void SCR_DrawString (float x, float y, int size, scralign_t align, const char *string, int alpha)
+void SCR_DrawString (float x, float y, int size, scralign_t align, const char *string, fontslot_t font, int alpha)
 {
 	SCR_AdjustFrom640 (&x, &y, NULL, NULL, align);
-	CL_DrawStringGeneric (x, y, string, alpha, size, SCALETYPE_MENU, false);
+	CL_DrawStringGeneric (x, y, string, font, alpha, size, SCALETYPE_MENU, false);
 }
 
 //===============================================================================
@@ -717,8 +717,8 @@ static void SCR_ShowFPS (void)
 //	x = ( viddef.width - strlen(fpsText)*HUD_FONT_SIZE*SCR_GetScreenScale() - max(fragsSize, SCR_ScaledScreen(68)) );
 	x = (scrLeft - stringLen(fpsText)*HUD_FONT_SIZE*SCR_GetScreenScale() - max(fragsSize, SCR_ScaledScreen(68)));
 	y = 0;
-//	CL_DrawStringGeneric (x, y, fpsText, 255, MENU_FONT_SIZE, SCALETYPE_HUD, false); // SCALETYPE_CONSOLE
-	CL_DrawStringGeneric (x, y, fpsText, 255, MENU_FONT_SIZE, SCALETYPE_MENU, false); // SCALETYPE_HUD
+//	CL_DrawStringGeneric (x, y, fpsText, FONT_SCREEN, 255, MENU_FONT_SIZE, SCALETYPE_HUD, false); // SCALETYPE_CONSOLE
+	CL_DrawStringGeneric (x, y, fpsText, FONT_SCREEN, 255, MENU_FONT_SIZE, SCALETYPE_MENU, false); // SCALETYPE_HUD
 }
 
 /*
@@ -858,8 +858,8 @@ void SCR_DrawDebugGraph (void)
 		ping = currentping;
 	}
 
-	CL_DrawStringGeneric (x, y + 5, va(S_COLOR_SHADOW"fps: %3i", fps), 255, FONT_SIZE, SCALETYPE_CONSOLE, false);
-	CL_DrawStringGeneric (x, y + 5 + FONT_SIZE , va(S_COLOR_SHADOW"ping:%3i", ping), 255, FONT_SIZE, SCALETYPE_CONSOLE, false);
+	CL_DrawStringGeneric (x, y + 5, va(S_COLOR_SHADOW"fps: %3i", fps), FONT_SCREEN, 255, FONT_SIZE, SCALETYPE_CONSOLE, false);
+	CL_DrawStringGeneric (x, y + 5 + FONT_SIZE , va(S_COLOR_SHADOW"ping:%3i", ping), FONT_SCREEN, 255, FONT_SIZE, SCALETYPE_CONSOLE, false);
 
 	// draw border
 	R_DrawFill (x,			y,			(w+2),	1,		0, 0, 0, 255);
@@ -988,7 +988,7 @@ void SCR_DrawCenterString (void)
 			if (!remaining--)
 				return;
 		}
-		CL_DrawStringGeneric ( (int)((viddef.width-stringLen(line)*FONT_SIZE)*0.5), y, line, alpha, FONT_SIZE, SCALETYPE_CONSOLE, false);
+		CL_DrawStringGeneric ( (int)((viddef.width-stringLen(line)*FONT_SIZE)*0.5), y, line, FONT_SCREEN, alpha, FONT_SIZE, SCALETYPE_CONSOLE, false);
 		y += FONT_SIZE;
 
 		while (*start && *start != '\n')
@@ -1698,7 +1698,7 @@ void SCR_DrawLoading (void)
 				loadMsg = va("Downloading ["S_COLOR_ALT"%s"S_COLOR_WHITE"]: %3d%%", cls.downloadname, cls.downloadpercent);
 
 			SCR_DrawString (SCREEN_WIDTH*0.5 - MENU_FONT_SIZE*stringLen(loadMsg)*0.5,
-							SCREEN_HEIGHT*0.5 + (plaqueOffset + 48), MENU_FONT_SIZE, ALIGN_CENTER, loadMsg, 255);
+							SCREEN_HEIGHT*0.5 + (plaqueOffset + 48), MENU_FONT_SIZE, ALIGN_CENTER, loadMsg, FONT_SCREEN, 255);
 
 			SCR_DrawLoadingTagProgress ("downloading_bar", plaqueOffset, cls.downloadpercent);
 		}
@@ -1708,7 +1708,7 @@ void SCR_DrawLoading (void)
 			loadMsg = va("Downloading ["S_COLOR_ALT"%s"S_COLOR_WHITE"]", cls.downloadname);
 
 			SCR_DrawString (SCREEN_WIDTH*0.5 - MENU_FONT_SIZE*stringLen(loadMsg)*0.5,
-							SCREEN_HEIGHT*0.5 + MENU_FONT_SIZE*4.5, MENU_FONT_SIZE, ALIGN_CENTER, loadMsg, 255);
+							SCREEN_HEIGHT*0.5 + MENU_FONT_SIZE*4.5, MENU_FONT_SIZE, ALIGN_CENTER, loadMsg, FONT_SCREEN, 255);
 
 			if (cls.downloadrate > 0.0f)
 				loadMsg = va("%3d%% (%4.2fKB/s)", cls.downloadpercent, cls.downloadrate);
@@ -1716,7 +1716,7 @@ void SCR_DrawLoading (void)
 				loadMsg = va("%3d%%", cls.downloadpercent);
 
 			SCR_DrawString (SCREEN_WIDTH*0.5 - MENU_FONT_SIZE*stringLen(loadMsg)*0.5,
-							SCREEN_HEIGHT*0.5 + MENU_FONT_SIZE*6, MENU_FONT_SIZE, ALIGN_CENTER, loadMsg, 255);
+							SCREEN_HEIGHT*0.5 + MENU_FONT_SIZE*6, MENU_FONT_SIZE, ALIGN_CENTER, loadMsg, FONT_SCREEN, 255);
 
 			SCR_DrawLoadingBar (SCREEN_WIDTH*0.5 - 180, SCREEN_HEIGHT*0.5 + 60, 360, 24, cls.downloadpercent, 0.75);
 			SCR_DrawAlertMessagePicture("downloading", false, -plaqueOffset);
@@ -1741,12 +1741,12 @@ void SCR_DrawLoading (void)
 		if (drawMapName) {
 			loadMsg = va(S_COLOR_SHADOW S_COLOR_WHITE"Loading Map ["S_COLOR_ALT"%s"S_COLOR_WHITE"]", cl.configstrings[CS_NAME]);
 			SCR_DrawString (SCREEN_WIDTH*0.5 - MENU_FONT_SIZE*stringLen(loadMsg)*0.5,
-							SCREEN_HEIGHT*0.5 + (plaqueOffset + 48), MENU_FONT_SIZE, ALIGN_CENTER, loadMsg, 255);	// was - MENU_FONT_SIZE*7.5
+							SCREEN_HEIGHT*0.5 + (plaqueOffset + 48), MENU_FONT_SIZE, ALIGN_CENTER, loadMsg, FONT_SCREEN, 255);	// was - MENU_FONT_SIZE*7.5
 		}
 		if (drawLoadingMsg) {
 			loadMsg = va(S_COLOR_SHADOW"%s", loadingMessages);
 			SCR_DrawString (SCREEN_WIDTH*0.5 - MENU_FONT_SIZE*stringLen(loadMsg)*0.5,
-							SCREEN_HEIGHT*0.5 + (plaqueOffset + 72), MENU_FONT_SIZE, ALIGN_CENTER, loadMsg, 255);	// was - MENU_FONT_SIZE*4.5
+							SCREEN_HEIGHT*0.5 + (plaqueOffset + 72), MENU_FONT_SIZE, ALIGN_CENTER, loadMsg, FONT_SCREEN, 255);	// was - MENU_FONT_SIZE*4.5
 		}
 
 		if (simplePlaque)
@@ -2132,9 +2132,9 @@ void DrawDemoMessage (void)
 		char *message = "Running Demo";
 		len = (int)strlen(message);
 
-		SCR_DrawFill (0, SCREEN_HEIGHT-(MENU_FONT_SIZE+3), SCREEN_WIDTH, MENU_FONT_SIZE+4, ALIGN_BOTTOM_STRETCH, 60,60,60,255);	// go 1 pixel past screen bottom to prevent gap from scaling
-		SCR_DrawFill (0, SCREEN_HEIGHT-(MENU_FONT_SIZE+3), SCREEN_WIDTH, 1, ALIGN_BOTTOM_STRETCH, 0,0,0,255);
-		SCR_DrawString (SCREEN_WIDTH/2-(len/2)*MENU_FONT_SIZE, SCREEN_HEIGHT-(MENU_FONT_SIZE+1), MENU_FONT_SIZE, ALIGN_BOTTOM, message, 255);
+		SCR_DrawFill (0, SCREEN_HEIGHT-(MENU_FONT_SIZE+3), SCREEN_WIDTH, MENU_FONT_SIZE+4, ALIGN_BOTTOM_STRETCH, 60, 60, 60, 255);	// go 1 pixel past screen bottom to prevent gap from scaling
+		SCR_DrawFill (0, SCREEN_HEIGHT-(MENU_FONT_SIZE+3), SCREEN_WIDTH, 1, ALIGN_BOTTOM_STRETCH, 0, 0, 0, 255);
+		SCR_DrawString (SCREEN_WIDTH/2-(len/2)*MENU_FONT_SIZE, SCREEN_HEIGHT-(MENU_FONT_SIZE+1), MENU_FONT_SIZE, ALIGN_BOTTOM, message, FONT_SCREEN, 255);
 	}
 }
 

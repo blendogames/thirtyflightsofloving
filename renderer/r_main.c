@@ -79,9 +79,13 @@ cvar_t	*gl_allow_software;
 cvar_t  *gl_driver;
 cvar_t	*gl_clear;
 
-cvar_t	*con_font; // Psychospaz's console font size option
+// Psychospaz's console font size option
 cvar_t	*con_font_size;
+cvar_t	*con_font;
+cvar_t	*scr_font;
+cvar_t	*ui_font;
 cvar_t	*alt_text_color;
+
 cvar_t	*scr_netgraph_pos;
 
 cvar_t	*r_norefresh;
@@ -735,15 +739,63 @@ void R_RenderView (refdef_t *fd)
 }
 
 
+#define SCREEN_WIDTH	640.0f
+#define SCREEN_HEIGHT	480.0f
+/*
+================
+R_ShowSpeeds
+
+Knightmare- draws r_speeds (modified from Echon's tutorial)
+================
+*/
+void R_ShowSpeeds (void)
+{
+	char	buf[128];
+	int		i, /*j,*/ lines, x, y, n = 0;
+	float	textSize, textScale;
+
+	if (!r_speeds->integer || r_newrefdef.rdflags & RDF_NOWORLDMODEL)	// don't do this for options menu
+		return;
+
+	lines = 5; // 7
+
+	textScale = min( ((float)r_newrefdef.width / SCREEN_WIDTH), ((float)r_newrefdef.height / SCREEN_HEIGHT) );
+	textSize = 8.0 * textScale;
+
+	for (i=0; i<lines; i++)
+	{
+		switch (i) {
+			case 0:	n = sprintf (buf, "%5i wcall", c_brush_calls); break;
+			case 1:	n = sprintf (buf, "%5i wsurf", c_brush_surfs); break;
+			case 2:	n = sprintf (buf, "%5i wpoly", c_brush_polys); break;
+			case 3: n = sprintf (buf, "%5i epoly", c_alias_polys); break;
+			case 4: n = sprintf (buf, "%5i ppoly", c_part_polys); break;
+		//	case 5: n = sprintf (buf, "%5i tex  ", c_visible_textures); break;
+		//	case 6: n = sprintf (buf, "%5i lmaps", c_visible_lightmaps); break;
+			default: break;
+		}
+		if (scr_netgraph_pos->integer)
+			x = r_newrefdef.width - (n*textSize + textSize*0.5);
+		else
+			x = textSize*0.5;
+		y = r_newrefdef.height-(lines-i)*(textSize+2);
+
+		R_DrawString (x, y, buf, FONT_SCREEN, textScale, 255, 255, 255, 255, false, true);
+	/*	for (j=0; j<n; j++)
+			R_DrawChar ( (x + j*textSize + textSize*0.25), (y + textSize*0.125), 
+					buf[j], FONT_SCREEN, textScale, 0, 0, 0, 255, false, false );
+		for (j=0; j<n; j++)
+			R_DrawChar ( (x + j*textSize), y,
+					buf[j], FONT_SCREEN, textScale, 255, 255, 255, 255, false, (j==(n-1)) );
+	*/
+	}
+}
+
 /*
 ================
 R_SetGL2D
 ================
 */
-void	Con_DrawString (int x, int y, char *string, int alpha);
-float	SCR_ScaledScreen (float param);
-#define	FONT_SIZE		SCR_ScaledScreen(con_font_size->value)
-
 void R_SetGL2D (void)
 {
 	// set 2D virtual screen size
@@ -759,34 +811,7 @@ void R_SetGL2D (void)
 	GL_Enable (GL_ALPHA_TEST);
 	qglColor4f (1,1,1,1);
 
-	// Knightmare- draw r_speeds (modified from Echon's tutorial)
-	if (r_speeds->integer && !(r_newrefdef.rdflags & RDF_NOWORLDMODEL)) // don't do this for options menu
-	{
-		char	S[128];
-		int		lines, i, x, y, n = 0;
-
-		lines = (glConfig.multitexture)?5:7;
-
-		for (i=0; i<lines; i++)
-		{
-			switch (i) {
-				case 0:	n = sprintf (S, S_COLOR_ALT S_COLOR_SHADOW"%5i wcall", c_brush_calls); break;
-				case 1:	n = sprintf (S, S_COLOR_ALT S_COLOR_SHADOW"%5i wsurf", c_brush_surfs); break;
-				case 2:	n = sprintf (S, S_COLOR_ALT S_COLOR_SHADOW"%5i wpoly", c_brush_polys); break;
-				case 3: n = sprintf (S, S_COLOR_ALT S_COLOR_SHADOW"%5i epoly", c_alias_polys); break;
-				case 4: n = sprintf (S, S_COLOR_ALT S_COLOR_SHADOW"%5i ppoly", c_part_polys); break;
-				case 5: n = sprintf (S, S_COLOR_ALT S_COLOR_SHADOW"%5i tex  ", c_visible_textures); break;
-				case 6: n = sprintf (S, S_COLOR_ALT S_COLOR_SHADOW"%5i lmaps", c_visible_lightmaps); break;
-				default: break;
-			}
-			if (scr_netgraph_pos->integer)
-				x = r_newrefdef.width - (n*FONT_SIZE + FONT_SIZE/2);
-			else
-				x = FONT_SIZE/2;
-			y = r_newrefdef.height-(lines-i)*(FONT_SIZE+2);
-			Con_DrawString (x, y, S, 255);
-		}
-	}
+	R_ShowSpeeds ();
 }
 
 
@@ -917,10 +942,14 @@ void AssertCvarRange (cvar_t *var, float min, float max, qboolean isInteger)
 void R_Register (void)
 {
 	// added Psychospaz's console font size option
-	con_font = Cvar_Get ("con_font", "default", CVAR_ARCHIVE);
-	Cvar_SetDescription ("con_font", "Sets name of font image for console/HUD/menu text.");
 	con_font_size = Cvar_Get ("con_font_size", "8", CVAR_ARCHIVE);
 //	Cvar_SetDescription ("con_font_size", "Sets size of console font.  Values > 8 are larger than default, < 8 are smaller.");
+	con_font = Cvar_Get ("con_font", "default", CVAR_ARCHIVE);
+	Cvar_SetDescription ("con_font", "Sets name of font image for console text.");
+	scr_font = Cvar_Get ("scr_font", "default", CVAR_ARCHIVE);
+	Cvar_SetDescription ("scr_font", "Sets name of font image for HUD text.");
+	ui_font = Cvar_Get ("ui_font", "default", CVAR_ARCHIVE);
+	Cvar_SetDescription ("ui_font", "Sets name of font image for menu text.");
 	alt_text_color = Cvar_Get ("alt_text_color", "2", CVAR_ARCHIVE);
 //	Cvar_SetDescription ("alt_text_color", "Sets color of high-bit highlighted text.");
 
@@ -2130,7 +2159,11 @@ void R_BeginFrame( float camera_separation )
 
 	// Knightmare- added Psychospaz's console font size option
 	if (con_font->modified)
-		RefreshFont ();
+		R_RefreshFont (FONT_CONSOLE);
+	if (scr_font->modified)
+		R_RefreshFont (FONT_SCREEN);
+	if (ui_font->modified)
+		R_RefreshFont (FONT_UI);
 
 	if (con_font_size->modified)
 	{

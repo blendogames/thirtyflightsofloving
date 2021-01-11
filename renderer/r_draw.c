@@ -24,26 +24,104 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "r_local.h"
 
-image_t		*draw_chars;
+image_t		*r_con_draw_chars;
+image_t		*r_scr_draw_chars;
+image_t		*r_ui_draw_chars;
 
 extern	qboolean	scrap_dirty;
 void Scrap_Upload (void);
 
 #define DEFAULT_FONT_SIZE 8.0f
 
-void RefreshFont (void)
+void R_RefreshFont (fontslot_t font)
 {
-	con_font->modified = false;
+	cvar_t	*fontvar;
+	image_t	*fontimage;
 
-	draw_chars = R_FindImage (va("fonts/%s.pcx", con_font->string), it_font);	// was it_pic
-	if (!draw_chars) // fall back on default font
-		draw_chars = R_FindImage ("fonts/default.pcx", it_font);	// was it_pic
-	if (!draw_chars) // fall back on old Q2 conchars
-		draw_chars = R_FindImage ("pics/conchars.pcx", it_font);	// was it_pic
-	if (!draw_chars) // prevent crash caused by missing font
+	switch (font)
+	{
+	case FONT_SCREEN:
+		fontvar = scr_font;
+		break;
+	case FONT_UI:
+		fontvar = ui_font;
+		break;
+	case FONT_CONSOLE:
+	default:
+		fontvar = con_font;
+		break;
+	}
+	fontvar->modified = false;
+
+	fontimage = R_FindImage (va("fonts/%s.pcx", fontvar->string), it_font);	// was it_pic
+	if (!fontimage) // fall back on default font
+		fontimage = R_FindImage ("fonts/default.pcx", it_font);	// was it_pic
+	if (!fontimage) // fall back on old Q2 conchars
+		fontimage = R_FindImage ("pics/conchars.pcx", it_font);	// was it_pic
+	if (!fontimage) // prevent crash caused by missing font
 		VID_Error (ERR_FATAL, "RefreshFont: couldn't load pics/conchars");
 
-	GL_Bind( draw_chars->texnum );
+	GL_Bind (fontimage->texnum);
+
+	switch (font)
+	{
+	case FONT_SCREEN:
+		r_scr_draw_chars = fontimage;
+		break;
+	case FONT_UI:
+		r_ui_draw_chars = fontimage;
+		break;
+	case FONT_CONSOLE:
+	default:
+		r_con_draw_chars = fontimage;
+		break;
+	}
+}
+
+
+/*
+===============
+R_RefreshAllFonts
+===============
+*/
+void R_RefreshAllFonts (void)
+{
+	R_RefreshFont (FONT_CONSOLE);
+	R_RefreshFont (FONT_SCREEN);
+	R_RefreshFont (FONT_UI);
+/*
+	con_font->modified = false;
+
+	r_con_draw_chars = R_FindImage (va("fonts/%s.pcx", con_font->string), it_pic);
+	if (!r_con_draw_chars) // fall back on default font
+		r_con_draw_chars = R_FindImage ("fonts/default.pcx", it_pic);
+	if (!r_con_draw_chars) // fall back on old Q2 conchars
+		r_con_draw_chars = R_FindImage ("pics/conchars.pcx", it_pic);
+	if (!r_con_draw_chars) // prevent crash caused by missing font
+		VID_Error (ERR_FATAL, "R_RefreshFont: couldn't load pics/conchars");
+
+	GL_Bind (r_con_draw_chars->texnum );
+*/
+}
+
+
+/*
+===============
+R_ImageForFont
+===============
+*/
+image_t *R_ImageForFont (fontslot_t font)
+{
+	switch (font)
+	{
+	case FONT_SCREEN:
+		return r_scr_draw_chars;
+	case FONT_UI:
+		return r_ui_draw_chars;
+	case FONT_CONSOLE:
+	default:
+		return r_con_draw_chars;
+	}
 }
 
 
@@ -60,7 +138,7 @@ void R_DrawInitLocal (void)
 	qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
 	// load console characters (don't bilerp characters)
-	RefreshFont();
+	R_RefreshAllFonts ();
 
 	R_InitChars (); // init char indexes
 }
@@ -73,7 +151,7 @@ R_CharMapScale
 */
 float R_CharMapScale (void)
 {
-	return (draw_chars->width/128.0); //current width / original width
+	return (r_con_draw_chars->width/128.0); //current width / original width
 }
 
 
@@ -88,12 +166,13 @@ void R_InitChars (void)
 	char_count = 0;
 }
 
+
 /*
 ================
 R_FlushChars
 ================
 */
-void R_FlushChars (void)
+void R_FlushChars (fontslot_t font)
 {
 	if (rb_vertex == 0 || rb_index == 0) // nothing to flush
 		return;
@@ -102,7 +181,7 @@ void R_FlushChars (void)
 	GL_TexEnv (GL_MODULATE);
 	GL_Enable (GL_BLEND);
 	GL_DepthMask (false);
-	GL_Bind(draw_chars->texnum);
+	GL_Bind((R_ImageForFont(font))->texnum);
 
 	RB_RenderMeshGeneric (false);
 	char_count = 0;
@@ -113,6 +192,7 @@ void R_FlushChars (void)
 	GL_Enable (GL_ALPHA_TEST);
 }
 
+
 /*
 ================
 R_DrawChar
@@ -121,7 +201,7 @@ It can be clipped to the top of the screen to allow the console to be
 smoothly scrolled off.
 ================
 */
-void R_DrawChar (float x, float y, int num, float scale, 
+void R_DrawChar (float x, float y, int num, fontslot_t font, float scale, 
 	 int red, int green, int blue, int alpha, qboolean italic, qboolean last)
 {
 	int			row, col, i;
@@ -167,7 +247,7 @@ void R_DrawChar (float x, float y, int num, float scale,
 		if (char_count == 0)
 			rb_vertex = rb_index = 0;
 		if (rb_vertex + 4 >= MAX_VERTICES || rb_index + 6 >= MAX_INDICES)
-			R_FlushChars ();
+			R_FlushChars (font);
 		indexArray[rb_index++] = rb_vertex+0;
 		indexArray[rb_index++] = rb_vertex+1;
 		indexArray[rb_index++] = rb_vertex+2;
@@ -183,7 +263,35 @@ void R_DrawChar (float x, float y, int num, float scale,
 		char_count++;
 	}
 	if (last)
-		R_FlushChars ();
+		R_FlushChars (font);
+}
+
+
+/*
+================
+R_DrawString
+Draws a string of variable sized graphics characters.
+================
+*/
+void R_DrawString (float x, float y, const char *string, fontslot_t font, float scale, 
+				int red, int green, int blue, int alpha, qboolean italic, qboolean shadow)
+
+{
+	int		i, len;
+	float	size = scale * DEFAULT_FONT_SIZE;
+
+	len = (int)strlen(string);
+	if (len < 1)	// nothing to draw
+		return;
+
+	if (shadow) {
+		for (i=0; i<len; i++)
+			R_DrawChar ( (x + i*size+size*0.25), y+(size*0.125), 
+				string[i], font, scale, 0, 0, 0, alpha, italic, false );
+	}
+	for (i=0; i<len; i++)
+		R_DrawChar ( (x + i*size), y, 
+			string[i], font, scale, red, green, blue, alpha, italic, (i==(len-1)) );
 }
 
 

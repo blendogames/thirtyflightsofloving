@@ -512,10 +512,10 @@ GL_Bind
 */
 void GL_Bind (int texnum)
 {
-	extern	image_t	*draw_chars;
+	extern	image_t	*r_con_draw_chars;
 
-	if (r_nobind->integer && draw_chars)		// performance evaluation option
-		texnum = draw_chars->texnum;
+	if (r_nobind->integer && r_con_draw_chars)		// performance evaluation option
+		texnum = r_con_draw_chars->texnum;
 	if (glState.currenttextures[glState.currenttmu] == texnum)
 		return;
 

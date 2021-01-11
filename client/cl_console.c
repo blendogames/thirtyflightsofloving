@@ -44,9 +44,9 @@ extern	int		key_linepos;
 Con_DrawString
 ================
 */
-void Con_DrawString (int x, int y, char *string, int alpha)
+void Con_DrawString (int x, int y, char *string, fontslot_t font, int alpha)
 {
-	CL_DrawStringGeneric (x, y, string, alpha, FONT_SIZE, SCALETYPE_CONSOLE, false);
+	CL_DrawStringGeneric (x, y, string, font, alpha, FONT_SIZE, SCALETYPE_CONSOLE, false);
 }
 
 
@@ -665,7 +665,7 @@ void Con_DrawInput (void)
 			Q_strncatz (output, addch, sizeof(output));
 		}
 	}
-	Con_DrawString ( (int)conLeft + FONT_SIZE/2, con.vislines - (int)(2.75*FONT_SIZE), output, 255);
+	Con_DrawString ( (int)conLeft + FONT_SIZE/2, con.vislines - (int)(2.75*FONT_SIZE), output, FONT_CONSOLE, 255);
 
 // remove cursor
 	key_lines[edit_line][key_linepos] = 0;
@@ -683,7 +683,7 @@ void Con_DrawNotify (void)
 	int		x;
 	char	*text, output[2048], addch[8];
 	int		i, j;
-	//int		time;
+//	int		time;
 	char	*s;
 	int		alpha, lines;
 	float	v, time, conLeft, conWidth;
@@ -735,7 +735,7 @@ void Con_DrawNotify (void)
 			Q_strncatz (output, addch, sizeof(output));
 		}
 
-		Con_DrawString ((int)conLeft, v, output, 255);
+		Con_DrawString ((int)conLeft, v, output, FONT_SCREEN, 255);
 
 		v += FONT_SIZE*2; // make extra space so we have room
 	}
@@ -783,7 +783,7 @@ void Con_DrawNotify (void)
 				Q_strncatz (output, addch, sizeof(output));
 			}
 
-			Con_DrawString ((int)conLeft + FONT_SIZE/2, v, output, alpha);
+			Con_DrawString ((int)conLeft + FONT_SIZE/2, v, output, FONT_SCREEN, alpha);
 
 			v += FONT_SIZE;
 		}
@@ -853,7 +853,7 @@ void Con_DrawDownloadProgress (float conLeft, float conWidth, float conLineHeigh
 	len = (int)strlen(dlbar);
 	for (i = 0; i < len; i++)
 		if (dlbar[i] != ' ')
-			R_DrawChar((int)conLeft + (i+1)*FONT_SIZE, graph_y, dlbar[i], CON_FONT_SCALE, 255, 255, 255, 255, false, (i==(len-1)) );
+			R_DrawChar((int)conLeft + (i+1)*FONT_SIZE, graph_y, dlbar[i], FONT_CONSOLE, CON_FONT_SCALE, 255, 255, 255, 255, false, (i==(len-1)) );
 
 	// new solid color download bar
 	graph_x--; graph_y--; graph_w+=2; graph_h+=2;
@@ -940,7 +940,7 @@ void Con_DrawConsole (float frac, qboolean trans)
 	Com_sprintf (version, sizeof(version), S_COLOR_BOLD S_COLOR_SHADOW S_COLOR_ALT"KMQuake2 v%4.2f", VERSION);
 #endif // NEW_ENTITY_STATE_MEMBERS
 
-	Con_DrawString ((int)(conLeft+conWidth)-FONT_SIZE*(stringLen((const char *)&version))-3, y-(int)(1.25*FONT_SIZE), version, 255);
+	Con_DrawString ((int)(conLeft+conWidth)-FONT_SIZE*(stringLen((const char *)&version))-3, y-(int)(1.25*FONT_SIZE), version, FONT_CONSOLE, 255);
 
 //	if ( (newconback_found && con_newconback->value) || con_oldconbar->value ) // Q3-style console bottom bar
 	if ( (newconback_found && con_newconback->integer) || con_oldconbar->integer ) // Q3-style console bottom bar
@@ -956,7 +956,7 @@ void Con_DrawConsole (float frac, qboolean trans)
 	{
 	// draw arrows to show the buffer is backscrolled
 		for (x = 0; x < con.linewidth; x+=4)
-			R_DrawChar ((int)conLeft + (x+1)*FONT_SIZE, y, '^', CON_FONT_SCALE, 255, 0, 0, 255, false, ((x+4)>=con.linewidth) );
+			R_DrawChar ((int)conLeft + (x+1)*FONT_SIZE, y, '^', FONT_CONSOLE, CON_FONT_SCALE, 255, 0, 0, 255, false, ((x+4)>=con.linewidth) );
 	
 		y -= FONT_SIZE;
 		rows--;
@@ -979,7 +979,7 @@ void Con_DrawConsole (float frac, qboolean trans)
 			addch[1] = '\0';
 			Q_strncatz (output, addch, sizeof(output));
 		}
-		Con_DrawString ((int)conLeft + 4, y, output, 255);
+		Con_DrawString ((int)conLeft + 4, y, output, FONT_CONSOLE, 255);
 	}
 
 	// ZOID- draw the download bar

@@ -43,8 +43,9 @@ static menuslider_s		s_options_interface_conalpha_slider;
 //static menuslider_s		s_options_interface_conheight_slider;
 static menuslider_s		s_options_interface_menumouse_slider;
 static menuslider_s		s_options_interface_menualpha_slider;
-static menulist_s		s_options_interface_font_box;
+static menulist_s		s_options_interface_confont_box;
 static menuslider_s		s_options_interface_fontsize_slider;
+static menulist_s		s_options_interface_uifont_box;
 static menulist_s		s_options_interface_alt_text_color_box;
 static menulist_s		s_options_interface_simple_loadscreen_box;
 static menulist_s		s_options_interface_newconback_box;
@@ -102,34 +103,49 @@ Font loading
 =======================================================================
 */
 cvar_t *con_font;
+cvar_t *ui_font;
 #define MAX_FONTS 32
 char **font_names = NULL;
 int	numfonts = 0;
 
-static void FontSizeFunc( void *unused )
+static void FontSizeFunc (void *unused)
 {
 	Cvar_SetValue( "con_font_size", s_options_interface_fontsize_slider.curvalue * 2 );
 }
 
-static void FontFunc( void *unused )
+static void ConFontFunc (void *unused)
 {
-	Cvar_Set( "con_font", font_names[s_options_interface_font_box.curvalue] );
+	Cvar_Set( "con_font", font_names[s_options_interface_confont_box.curvalue] );
+}
+
+static void UIFontFunc (void *unused)
+{
+	Cvar_Set( "ui_font", font_names[s_options_interface_uifont_box.curvalue] );
 }
 
 void SetFontCursor (void)
 {
 	int i;
-	s_options_interface_font_box.curvalue = 0;
+
+	s_options_interface_confont_box.curvalue = 0;
+	s_options_interface_uifont_box.curvalue = 0;
 
 	if (!con_font)
 		con_font = Cvar_Get ("con_font", "default", CVAR_ARCHIVE);
+	if (!ui_font)
+		ui_font = Cvar_Get ("ui_font", "default", CVAR_ARCHIVE);
 
 	if (numfonts > 1)
 		for (i=0; font_names[i]; i++)
 		{
 			if (!Q_strcasecmp(con_font->string, font_names[i]))
 			{
-				s_options_interface_font_box.curvalue = i;
+				s_options_interface_confont_box.curvalue = i;
+				return;
+			}
+			if (!Q_strcasecmp(ui_font->string, font_names[i]))
+			{
+				s_options_interface_uifont_box.curvalue = i;
 				return;
 			}
 		}
@@ -287,7 +303,7 @@ char **SetFontNames (void)
 
 //=======================================================================
 
-static void InterfaceSetMenuItemValues( void )
+static void InterfaceSetMenuItemValues (void)
 {
 	SetFontCursor();
 
@@ -313,12 +329,13 @@ static void InterfaceSetMenuItemValues( void )
 	s_options_interface_noalttab_box.curvalue			= Cvar_VariableValue("win_noalttab");
 }
 
-static void InterfaceResetDefaultsFunc ( void *unused )
+static void InterfaceResetDefaultsFunc (void *unused)
 {
 	Cvar_SetToDefault ("ui_sensitivity");	
 	Cvar_SetToDefault ("ui_background_alpha");	
 	Cvar_SetToDefault ("con_font");	
 	Cvar_SetToDefault ("con_font_size");	
+	Cvar_SetToDefault ("ui_font");	
 	Cvar_SetToDefault ("alt_text_color");	
 	Cvar_SetToDefault ("con_alpha");	
 //	Cvar_SetToDefault ("con_height");	
@@ -326,10 +343,10 @@ static void InterfaceResetDefaultsFunc ( void *unused )
 	Cvar_SetToDefault ("con_newconback");
 	Cvar_SetToDefault ("win_noalttab");	
 
-	InterfaceSetMenuItemValues();
+	InterfaceSetMenuItemValues ();
 }
 
-void Options_Interface_MenuInit ( void )
+void Options_Interface_MenuInit (void)
 {
 	static const char *yesno_names[] =
 	{
@@ -392,14 +409,14 @@ void Options_Interface_MenuInit ( void )
 	}
 	numfonts = 0;
 	font_names = SetFontNames ();
-	s_options_interface_font_box.generic.type				= MTYPE_SPINCONTROL;
-	s_options_interface_font_box.generic.textSize			= MENU_FONT_SIZE;
-	s_options_interface_font_box.generic.x					= 0;
-	s_options_interface_font_box.generic.y					= y+=2*MENU_LINE_SIZE;
-	s_options_interface_font_box.generic.name				= "font";
-	s_options_interface_font_box.generic.callback			= FontFunc;
-	s_options_interface_font_box.itemnames					= font_names;
-	s_options_interface_font_box.generic.statusbar			= "changes console and menu text font";
+	s_options_interface_confont_box.generic.type			= MTYPE_SPINCONTROL;
+	s_options_interface_confont_box.generic.textSize		= MENU_FONT_SIZE;
+	s_options_interface_confont_box.generic.x				= 0;
+	s_options_interface_confont_box.generic.y				= y+=2*MENU_LINE_SIZE;
+	s_options_interface_confont_box.generic.name			= "console font";
+	s_options_interface_confont_box.generic.callback		= ConFontFunc;
+	s_options_interface_confont_box.itemnames				= font_names;
+	s_options_interface_confont_box.generic.statusbar		= "changes font of console text";
 
 	s_options_interface_fontsize_slider.generic.type		= MTYPE_SLIDER;
 	s_options_interface_fontsize_slider.generic.textSize	= MENU_FONT_SIZE;
@@ -410,6 +427,15 @@ void Options_Interface_MenuInit ( void )
 	s_options_interface_fontsize_slider.minvalue			= 3;
 	s_options_interface_fontsize_slider.maxvalue			= 8;
 	s_options_interface_fontsize_slider.generic.statusbar	= "changes size of console text";
+
+	s_options_interface_uifont_box.generic.type				= MTYPE_SPINCONTROL;
+	s_options_interface_uifont_box.generic.textSize			= MENU_FONT_SIZE;
+	s_options_interface_uifont_box.generic.x				= 0;
+	s_options_interface_uifont_box.generic.y				= y+=MENU_LINE_SIZE;
+	s_options_interface_uifont_box.generic.name				= "menu font";
+	s_options_interface_uifont_box.generic.callback			= UIFontFunc;
+	s_options_interface_uifont_box.itemnames				= font_names;
+	s_options_interface_uifont_box.generic.statusbar		= "changes font of menu text";
 
 	s_options_interface_alt_text_color_box.generic.type		= MTYPE_SPINCONTROL;
 	s_options_interface_alt_text_color_box.generic.textSize	= MENU_FONT_SIZE;
@@ -486,8 +512,9 @@ void Options_Interface_MenuInit ( void )
 	Menu_AddItem( &s_options_interface_menu, ( void * ) &s_options_interface_header );
 	Menu_AddItem( &s_options_interface_menu, ( void * ) &s_options_interface_menumouse_slider );
 	Menu_AddItem( &s_options_interface_menu, ( void * ) &s_options_interface_menualpha_slider );
-	Menu_AddItem( &s_options_interface_menu, ( void * ) &s_options_interface_font_box );
+	Menu_AddItem( &s_options_interface_menu, ( void * ) &s_options_interface_confont_box );
 	Menu_AddItem( &s_options_interface_menu, ( void * ) &s_options_interface_fontsize_slider );
+	Menu_AddItem( &s_options_interface_menu, ( void * ) &s_options_interface_uifont_box );
 	Menu_AddItem( &s_options_interface_menu, ( void * ) &s_options_interface_alt_text_color_box );
 	Menu_AddItem( &s_options_interface_menu, ( void * ) &s_options_interface_conalpha_slider );
 	//Menu_AddItem( &s_options_interface_menu, ( void * ) &s_options_interface_conheight_slider );
@@ -497,7 +524,7 @@ void Options_Interface_MenuInit ( void )
 	Menu_AddItem( &s_options_interface_menu, ( void * ) &s_options_interface_defaults_action );
 	Menu_AddItem( &s_options_interface_menu, ( void * ) &s_options_interface_back_action );
 
-	InterfaceSetMenuItemValues();
+	InterfaceSetMenuItemValues ();
 }
 
 void Options_Interface_MenuDraw (void)

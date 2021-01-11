@@ -559,8 +559,8 @@ extern	netadr_t	net_from;
 extern	sizebuf_t	net_message;
 
 qboolean CL_StringSetParams (char modifier, int *red, int *green, int *blue, int *bold, int *shadow, int *italic, int *reset);
-void Con_DrawString (int x, int y, char *s, int alpha);
-void CL_DrawStringGeneric (int x, int y, const char *string, int alpha, int fontSize, textscaletype_t scaleType, qboolean altBit);
+void Con_DrawString (int x, int y, char *s, fontslot_t font, int alpha);
+void CL_DrawStringGeneric (int x, int y, const char *string, fontslot_t font, int alpha, int fontSize, textscaletype_t scaleType, qboolean altBit);
 
 // cl_scrn.c
 typedef struct
@@ -769,7 +769,10 @@ void	R_DrawPic (int x, int y, char *name);
 void	R_DrawStretchPic (int x, int y, int w, int h, char *name, float alpha);
 void	R_DrawScaledPic (int x, int y, float scale, float alpha, char *name);
 // added char scaling from Quake2Max
-void	R_DrawChar (float x, float y, int c, float scale, int red, int green, int blue, int alpha, qboolean italic, qboolean last);
+void	R_DrawChar (float x, float y, int c, fontslot_t font, float scale,
+					int red, int green, int blue, int alpha, qboolean italic, qboolean last);
+void	R_DrawString (float x, float y, const char *string, fontslot_t font, float scale, 
+				int red, int green, int blue, int alpha, qboolean italic, qboolean shadow);
 void	R_DrawTileClear (int x, int y, int w, int h, char *name);
 void	R_DrawFill (int x, int y, int w, int h, int red, int green, int blue, int alpha);
 void	R_DrawCameraEffect (void);

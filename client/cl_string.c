@@ -95,7 +95,7 @@ qboolean CL_StringSetParams (char modifier, int *red, int *green, int *blue, int
 CL_DrawStringGeneric
 ================
 */
-void CL_DrawStringGeneric (int x, int y, const char *string, int alpha, int fontSize, textscaletype_t scaleType, qboolean altBit)
+void CL_DrawStringGeneric (int x, int y, const char *string, fontslot_t font, int alpha, int fontSize, textscaletype_t scaleType, qboolean altBit)
 {
 	unsigned	i, j;
 	int			len, red, green, blue, italic, shadow, bold, reset;
@@ -192,8 +192,8 @@ void CL_DrawStringGeneric (int x, int y, const char *string, int alpha, int font
 
 		if (shadow)
 			R_DrawChar( ( x + (j-1)*textSize+textSize/4 ), y+(textSize/8), 
-				character, textScale, 0, 0, 0, alpha, italic, false );
+				character, font, textScale, 0, 0, 0, alpha, italic, false );
 		R_DrawChar( ( x + (j-1)*textSize ), y,
-			character, textScale, red, green, blue, alpha, italic, flushChar );
+			character, font, textScale, red, green, blue, alpha, italic, flushChar );
 	}
 }

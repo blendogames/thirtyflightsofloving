@@ -142,20 +142,20 @@ void Field_Draw (menufield_s *f)
 	}
 
 	SCR_DrawChar (f->generic.x + f->generic.parent->x + RCOLUMN_OFFSET,
-				f->generic.y + f->generic.parent->y - 4, f->generic.textSize, ALIGN_CENTER, 18, 255,255,255,255, false, false);
+				f->generic.y + f->generic.parent->y - 4, f->generic.textSize, ALIGN_CENTER, 18, FONT_UI, 255,255,255,255, false, false);
 	SCR_DrawChar (f->generic.x + f->generic.parent->x + RCOLUMN_OFFSET,
-				f->generic.y + f->generic.parent->y + 4, f->generic.textSize, ALIGN_CENTER, 24, 255,255,255,255, false, false);
+				f->generic.y + f->generic.parent->y + 4, f->generic.textSize, ALIGN_CENTER, 24, FONT_UI, 255,255,255,255, false, false);
 	SCR_DrawChar (f->generic.x + f->generic.parent->x + (1+f->visible_length)*f->generic.textSize + RCOLUMN_OFFSET,
-				f->generic.y + f->generic.parent->y - 4, f->generic.textSize, ALIGN_CENTER, 20,255,255,255,255, false, false);
+				f->generic.y + f->generic.parent->y - 4, f->generic.textSize, ALIGN_CENTER, 20, FONT_UI, 255,255,255,255, false, false);
 	SCR_DrawChar (f->generic.x + f->generic.parent->x + (1+f->visible_length)*f->generic.textSize + RCOLUMN_OFFSET,
-				f->generic.y + f->generic.parent->y + 4, f->generic.textSize, ALIGN_CENTER, 26, 255,255,255,255, false, false);
+				f->generic.y + f->generic.parent->y + 4, f->generic.textSize, ALIGN_CENTER, 26, FONT_UI, 255,255,255,255, false, false);
 
 	for (i = 0; i < f->visible_length; i++)
 	{
 		SCR_DrawChar (f->generic.x + f->generic.parent->x + (1+i)*f->generic.textSize + RCOLUMN_OFFSET,
-					f->generic.y + f->generic.parent->y - 4, f->generic.textSize, ALIGN_CENTER, 19, 255,255,255,255, false, false);
+					f->generic.y + f->generic.parent->y - 4, f->generic.textSize, ALIGN_CENTER, 19, FONT_UI, 255,255,255,255, false, false);
 		SCR_DrawChar (f->generic.x + f->generic.parent->x + (1+i)*f->generic.textSize + RCOLUMN_OFFSET,
-					f->generic.y + f->generic.parent->y + 4, f->generic.textSize, ALIGN_CENTER, 25, 255,255,255,255, false, (i==(f->visible_length-1)));
+					f->generic.y + f->generic.parent->y + 4, f->generic.textSize, ALIGN_CENTER, 25, FONT_UI, 255,255,255,255, false, (i==(f->visible_length-1)));
 	}
 
 	// add cursor thingie
@@ -374,17 +374,17 @@ void Slider_Draw (menuslider_s *s)
 		s->range = 1;
 
 	SCR_DrawChar (s->generic.x + s->generic.parent->x + RCOLUMN_OFFSET,
-				s->generic.y + s->generic.parent->y, s->generic.textSize, ALIGN_CENTER, 128, 255,255,255,255, false, false);
+				s->generic.y + s->generic.parent->y, s->generic.textSize, ALIGN_CENTER, 128, FONT_UI, 255,255,255,255, false, false);
 
 	for (i = 0; i < SLIDER_RANGE; i++)
 		SCR_DrawChar (s->generic.x + s->generic.parent->x + (i+1)*s->generic.textSize + RCOLUMN_OFFSET,
-					s->generic.y + s->generic.parent->y, s->generic.textSize, ALIGN_CENTER, 129, 255,255,255,255, false, false);
+					s->generic.y + s->generic.parent->y, s->generic.textSize, ALIGN_CENTER, 129, FONT_UI, 255,255,255,255, false, false);
 
 	SCR_DrawChar (s->generic.x + s->generic.parent->x + (i+1)*s->generic.textSize + RCOLUMN_OFFSET,
-				s->generic.y + s->generic.parent->y, s->generic.textSize, ALIGN_CENTER, 130, 255,255,255,255, false, false);
+				s->generic.y + s->generic.parent->y, s->generic.textSize, ALIGN_CENTER, 130, FONT_UI, 255,255,255,255, false, false);
 
 	SCR_DrawChar (s->generic.x + s->generic.parent->x + s->generic.textSize*((SLIDER_RANGE-1)*s->range+1) + RCOLUMN_OFFSET,
-				s->generic.y + s->generic.parent->y, s->generic.textSize, ALIGN_CENTER, 131, 255,255,255,255, false, true);
+				s->generic.y + s->generic.parent->y, s->generic.textSize, ALIGN_CENTER, 131, FONT_UI, 255,255,255,255, false, true);
 }
 
 void SpinControl_DoEnter (menulist_s *s)
@@ -787,14 +787,14 @@ void Menu_Draw (menuframework_s *menu)
 			SCR_DrawChar (menu->x+item->x+item->cursor_offset-24, menu->y+item->y,
 			//			MENU_FONT_SIZE, ALIGN_CENTER, 12+((int)(Sys_Milliseconds()/250)&1),
 						item->textSize, ALIGN_CENTER, 12+((int)(Sys_Milliseconds()/250)&1),
-						255,255,255,255, false, true);
+						FONT_UI, 255,255,255,255, false, true);
 		}
 		else
 		{
 			SCR_DrawChar (menu->x+item->cursor_offset, menu->y+item->y,
 			//			MENU_FONT_SIZE, ALIGN_CENTER, 12+((int)(Sys_Milliseconds()/250)&1),
 						item->textSize, ALIGN_CENTER, 12+((int)(Sys_Milliseconds()/250)&1),
-						255,255,255,255, false, true);
+						FONT_UI, 255,255,255,255, false, true);
 		}
 	}
 
@@ -817,17 +817,17 @@ void Menu_DrawStatusBar (const char *string)
 	{
 		int l = (int)strlen( string );
 
-		SCR_DrawFill( 0, SCREEN_HEIGHT-(MENU_FONT_SIZE+3), SCREEN_WIDTH, MENU_FONT_SIZE+4, ALIGN_BOTTOM_STRETCH, 60,60,60,255 );	// go 1 pixel past screen bottom to prevent gap from scaling
-		SCR_DrawFill( 0, SCREEN_HEIGHT-(MENU_FONT_SIZE+3), SCREEN_WIDTH, 1, ALIGN_BOTTOM_STRETCH, 0,0,0,255 );
-		SCR_DrawString( SCREEN_WIDTH/2-(l/2)*MENU_FONT_SIZE, SCREEN_HEIGHT-(MENU_FONT_SIZE+1), MENU_FONT_SIZE, ALIGN_BOTTOM, string, 255 );
+		SCR_DrawFill (0, SCREEN_HEIGHT-(MENU_FONT_SIZE+3), SCREEN_WIDTH, MENU_FONT_SIZE+4, ALIGN_BOTTOM_STRETCH, 60,60,60,255 );	// go 1 pixel past screen bottom to prevent gap from scaling
+		SCR_DrawFill (0, SCREEN_HEIGHT-(MENU_FONT_SIZE+3), SCREEN_WIDTH, 1, ALIGN_BOTTOM_STRETCH, 0,0,0,255 );
+		SCR_DrawString (SCREEN_WIDTH/2-(l/2)*MENU_FONT_SIZE, SCREEN_HEIGHT-(MENU_FONT_SIZE+1), MENU_FONT_SIZE, ALIGN_BOTTOM, string, FONT_UI, 255 );
 	}
 	else
-		SCR_DrawFill( 0, SCREEN_HEIGHT-(MENU_FONT_SIZE+3), SCREEN_WIDTH, MENU_FONT_SIZE+4, ALIGN_BOTTOM_STRETCH, 0,0,0,255 );	// go 1 pixel past screen bottom to prevent gap from scaling
+		SCR_DrawFill (0, SCREEN_HEIGHT-(MENU_FONT_SIZE+3), SCREEN_WIDTH, MENU_FONT_SIZE+4, ALIGN_BOTTOM_STRETCH, 0,0,0,255 );	// go 1 pixel past screen bottom to prevent gap from scaling
 }
 
 void Menu_DrawString (int x, int y, int size, const char *string, int alpha)
 {
-	SCR_DrawString (x, y, size, ALIGN_CENTER, string, alpha);
+	SCR_DrawString (x, y, size, ALIGN_CENTER, string, FONT_UI, alpha);
 }
 
 void Menu_DrawStringDark (int x, int y, int size, const char *string, int alpha)
@@ -835,13 +835,13 @@ void Menu_DrawStringDark (int x, int y, int size, const char *string, int alpha)
 	char	newstring[1024];
 
 	Com_sprintf (newstring, sizeof(newstring), S_COLOR_ALT"%s", string);
-	SCR_DrawString (x, y, size, ALIGN_CENTER, newstring, alpha);
+	SCR_DrawString (x, y, size, ALIGN_CENTER, newstring, FONT_UI, alpha);
 }
 
 void Menu_DrawStringR2L (int x, int y, int size, const char *string, int alpha)
 {
 	x -= stringLen(string)*size;	// MENU_FONT_SIZE
-	SCR_DrawString (x, y, size, ALIGN_CENTER, string, alpha);
+	SCR_DrawString (x, y, size, ALIGN_CENTER, string, FONT_UI, alpha);
 }
 
 void Menu_DrawStringR2LDark (int x, int y, int size, const char *string, int alpha)
@@ -850,7 +850,7 @@ void Menu_DrawStringR2LDark (int x, int y, int size, const char *string, int alp
 
 	Com_sprintf (newstring, sizeof(newstring), S_COLOR_ALT"%s", string);
 	x -= stringLen(string)*size;	// MENU_FONT_SIZE
-	SCR_DrawString (x, y, size, ALIGN_CENTER, newstring, alpha);
+	SCR_DrawString (x, y, size, ALIGN_CENTER, newstring, FONT_UI, alpha);
 }
 
 
@@ -867,36 +867,36 @@ void Menu_DrawTextBox (int x, int y, int width, int lines)
 	// draw left side
 	cx = x;
 	cy = y;
-	SCR_DrawChar (cx, cy, MENU_FONT_SIZE, ALIGN_CENTER, 1, 255,255,255,255, false, false);
+	SCR_DrawChar (cx, cy, MENU_FONT_SIZE, ALIGN_CENTER, 1, FONT_UI, 255,255,255,255, false, false);
 	for (n = 0; n < lines; n++) {
 		cy += MENU_FONT_SIZE;
-		SCR_DrawChar (cx, cy, MENU_FONT_SIZE, ALIGN_CENTER, 4, 255,255,255,255, false, false);
+		SCR_DrawChar (cx, cy, MENU_FONT_SIZE, ALIGN_CENTER, 4, FONT_UI, 255,255,255,255, false, false);
 	}
-	SCR_DrawChar (cx, cy+MENU_FONT_SIZE, MENU_FONT_SIZE, ALIGN_CENTER, 7, 255,255,255,255, false, false);
+	SCR_DrawChar (cx, cy+MENU_FONT_SIZE, MENU_FONT_SIZE, ALIGN_CENTER, 7, FONT_UI, 255,255,255,255, false, false);
 
 	// draw middle
 	cx += MENU_FONT_SIZE;
 	while (width > 0)
 	{
 		cy = y;
-		SCR_DrawChar (cx, cy, MENU_FONT_SIZE, ALIGN_CENTER, 2, 255,255,255,255, false, false);
+		SCR_DrawChar (cx, cy, MENU_FONT_SIZE, ALIGN_CENTER, 2, FONT_UI, 255,255,255,255, false, false);
 		for (n = 0; n < lines; n++) {
 			cy += MENU_FONT_SIZE;
-			SCR_DrawChar (cx, cy, MENU_FONT_SIZE, ALIGN_CENTER, 5, 255,255,255,255, false, false);
+			SCR_DrawChar (cx, cy, MENU_FONT_SIZE, ALIGN_CENTER, 5, FONT_UI, 255,255,255,255, false, false);
 		}
-		SCR_DrawChar (cx, cy+MENU_FONT_SIZE, MENU_FONT_SIZE, ALIGN_CENTER, 8, 255,255,255,255, false, false);
+		SCR_DrawChar (cx, cy+MENU_FONT_SIZE, MENU_FONT_SIZE, ALIGN_CENTER, 8, FONT_UI, 255,255,255,255, false, false);
 		width -= 1;
 		cx += MENU_FONT_SIZE;
 	}
 
 	// draw right side
 	cy = y;
-	SCR_DrawChar (cx, cy, MENU_FONT_SIZE, ALIGN_CENTER, 3, 255,255,255,255, false, false);
+	SCR_DrawChar (cx, cy, MENU_FONT_SIZE, ALIGN_CENTER, 3, FONT_UI, 255,255,255,255, false, false);
 	for (n = 0; n < lines; n++) {
 		cy += MENU_FONT_SIZE;
-		SCR_DrawChar (cx, cy, MENU_FONT_SIZE, ALIGN_CENTER, 6, 255,255,255,255, false, false);
+		SCR_DrawChar (cx, cy, MENU_FONT_SIZE, ALIGN_CENTER, 6, FONT_UI, 255,255,255,255, false, false);
 	}
-	SCR_DrawChar (cx, cy+MENU_FONT_SIZE, MENU_FONT_SIZE, ALIGN_CENTER, 9, 255,255,255,255, false, true);
+	SCR_DrawChar (cx, cy+MENU_FONT_SIZE, MENU_FONT_SIZE, ALIGN_CENTER, 9, FONT_UI, 255,255,255,255, false, true);
 }
 
 
