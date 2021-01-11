@@ -781,6 +781,10 @@ NoExtFunction:
 			{
 				switch (model)
 				{
+				case 0:
+					if (extModel == 0x60)	// Renoir
+						Q_strncatz(cpuString, " Ryzen 7/5/3 4x00G", maxSize);
+					break;
 				case 1:
 					if (extModel == 1)	// Summit Ridge
 						Q_strncatz(cpuString, " Ryzen 7/5/3 1x00", maxSize);
@@ -804,6 +808,10 @@ NoExtFunction:
 			{
 				switch (model)
 				{
+				case 0:
+					if (extModel == 0x50)	// Cezanne
+						Q_strncatz(cpuString, " Ryzen 7/5/3 5x00G", maxSize);
+					break;
 				case 1:
 					if (extModel == 0x21)	// Vermeer (Zen3)
 						Q_strncatz(cpuString, " Ryzen 9/7/5/3 5x00", maxSize);
