@@ -46,6 +46,7 @@ static menuslider_s		s_options_interface_menualpha_slider;
 static menulist_s		s_options_interface_confont_box;
 static menuslider_s		s_options_interface_fontsize_slider;
 static menulist_s		s_options_interface_uifont_box;
+static menulist_s		s_options_interface_scrfont_box;
 static menulist_s		s_options_interface_alt_text_color_box;
 static menulist_s		s_options_interface_simple_loadscreen_box;
 static menulist_s		s_options_interface_newconback_box;
@@ -104,6 +105,7 @@ Font loading
 */
 cvar_t *con_font;
 cvar_t *ui_font;
+cvar_t *scr_font;
 #define MAX_FONTS 32
 char **font_names = NULL;
 int	numfonts = 0;
@@ -123,17 +125,25 @@ static void UIFontFunc (void *unused)
 	Cvar_Set( "ui_font", font_names[s_options_interface_uifont_box.curvalue] );
 }
 
+static void ScrFontFunc (void *unused)
+{
+	Cvar_Set( "scr_font", font_names[s_options_interface_scrfont_box.curvalue] );
+}
+
 void SetFontCursor (void)
 {
 	int i;
 
 	s_options_interface_confont_box.curvalue = 0;
 	s_options_interface_uifont_box.curvalue = 0;
+	s_options_interface_scrfont_box.curvalue = 0;
 
 	if (!con_font)
 		con_font = Cvar_Get ("con_font", "default", CVAR_ARCHIVE);
 	if (!ui_font)
 		ui_font = Cvar_Get ("ui_font", "default", CVAR_ARCHIVE);
+	if (!scr_font)
+		scr_font = Cvar_Get ("scr_font", "default", CVAR_ARCHIVE);
 
 	if (numfonts > 1)
 	{
@@ -150,6 +160,14 @@ void SetFontCursor (void)
 			if (!Q_strcasecmp(ui_font->string, font_names[i]))
 			{
 				s_options_interface_uifont_box.curvalue = i;
+				break;
+			}
+		}
+		for (i=0; font_names[i]; i++)
+		{
+			if (!Q_strcasecmp(scr_font->string, font_names[i]))
+			{
+				s_options_interface_scrfont_box.curvalue = i;
 				break;
 			}
 		}
@@ -341,6 +359,7 @@ static void InterfaceResetDefaultsFunc (void *unused)
 	Cvar_SetToDefault ("con_font");	
 	Cvar_SetToDefault ("con_font_size");	
 	Cvar_SetToDefault ("ui_font");	
+	Cvar_SetToDefault ("scr_font");	
 	Cvar_SetToDefault ("alt_text_color");	
 	Cvar_SetToDefault ("con_alpha");	
 //	Cvar_SetToDefault ("con_height");	
@@ -442,6 +461,15 @@ void Options_Interface_MenuInit (void)
 	s_options_interface_uifont_box.itemnames				= font_names;
 	s_options_interface_uifont_box.generic.statusbar		= "changes font of menu text";
 
+	s_options_interface_scrfont_box.generic.type			= MTYPE_SPINCONTROL;
+	s_options_interface_scrfont_box.generic.textSize		= MENU_FONT_SIZE;
+	s_options_interface_scrfont_box.generic.x				= 0;
+	s_options_interface_scrfont_box.generic.y				= y+=MENU_LINE_SIZE;
+	s_options_interface_scrfont_box.generic.name			= "HUD font";
+	s_options_interface_scrfont_box.generic.callback		= ScrFontFunc;
+	s_options_interface_scrfont_box.itemnames				= font_names;
+	s_options_interface_scrfont_box.generic.statusbar		= "changes font of HUD text";
+
 	s_options_interface_alt_text_color_box.generic.type		= MTYPE_SPINCONTROL;
 	s_options_interface_alt_text_color_box.generic.textSize	= MENU_FONT_SIZE;
 	s_options_interface_alt_text_color_box.generic.x		= 0;
@@ -520,6 +548,7 @@ void Options_Interface_MenuInit (void)
 	Menu_AddItem( &s_options_interface_menu, ( void * ) &s_options_interface_confont_box );
 	Menu_AddItem( &s_options_interface_menu, ( void * ) &s_options_interface_fontsize_slider );
 	Menu_AddItem( &s_options_interface_menu, ( void * ) &s_options_interface_uifont_box );
+	Menu_AddItem( &s_options_interface_menu, ( void * ) &s_options_interface_scrfont_box );
 	Menu_AddItem( &s_options_interface_menu, ( void * ) &s_options_interface_alt_text_color_box );
 	Menu_AddItem( &s_options_interface_menu, ( void * ) &s_options_interface_conalpha_slider );
 	//Menu_AddItem( &s_options_interface_menu, ( void * ) &s_options_interface_conheight_slider );
