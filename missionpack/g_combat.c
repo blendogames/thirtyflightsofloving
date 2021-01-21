@@ -588,7 +588,7 @@ void M_ReactToDamage (edict_t *targ, edict_t *attacker, edict_t *inflictor)
 	if (!(attacker->client) && !(attacker->svflags & SVF_MONSTER) && !is_turret &&
 		!(targ->monsterinfo.aiflags & AI_DUCKED) )
 	{
-		if (!targ->movetarget || Q_stricmp(targ->movetarget->classname,"thing") )
+		if (!targ->movetarget || Q_stricmp(targ->movetarget->classname, "thing") )
 		{
 			int		i;
 			edict_t	*thing;
@@ -746,6 +746,11 @@ void M_ReactToDamage (edict_t *targ, edict_t *attacker, edict_t *inflictor)
 	// end Zaero
 
 	if (attacker == targ || attacker == targ->enemy)
+		return;
+
+	// apanteleev- dead monsters, like misc_deadsoldier, don't have AI
+	// functions, but M_ReactToDamage might still be called on them
+	if (targ->svflags & SVF_DEADMONSTER)
 		return;
 
 	// if we are a good guy monster and our attacker is a player

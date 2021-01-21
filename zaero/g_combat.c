@@ -308,11 +308,17 @@ static int CheckArmor (edict_t *ent, vec3_t point, vec3_t normal, int damage, in
 
 void M_ReactToDamage (edict_t *targ, edict_t *attacker)
 {
-	if (!(attacker->client) && !(attacker->svflags & SVF_MONSTER) &&
-		(strcmp (attacker->classname, "monster_autocannon") != 0))
+//	if (!(attacker->client) && !(attacker->svflags & SVF_MONSTER) &&
+//		(strcmp (attacker->classname, "monster_autocannon") != 0))
+	if ( attacker->classname && !strncmp(attacker->classname, "monster_autocannon", 18) )
 		return;
 
 	if (attacker == targ || attacker == targ->enemy)
+		return;
+
+	// apanteleev- dead monsters, like misc_deadsoldier, don't have AI
+	// functions, but M_ReactToDamage might still be called on them
+	if (targ->svflags & SVF_DEADMONSTER)
 		return;
 
 	// if we are a good guy monster and our attacker is a player
