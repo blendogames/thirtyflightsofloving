@@ -239,8 +239,8 @@ qboolean VID_LoadRefresh( char *name )
 
 //	strncat(fn, "/");
 //	strncat(fn, name);
-	Q_strncatz(fn, "/", sizeof(fn));
-	Q_strncatz(fn, name, sizeof(fn));
+	Q_strncatz(fn, sizeof(fn), "/");
+	Q_strncatz(fn, sizeof(fn), name);
 
 	// permission checking
 	if (strstr(fn, "softx") == NULL) { // softx doesn't require root

@@ -1283,8 +1283,8 @@ void SP_misc_actor (edict_t *self)
 	}
 	else {
 		self->usermodel = gi.TagMalloc(5, TAG_LEVEL);
-	//	strncpy(self->usermodel,"male");
-		Q_strncpyz(self->usermodel,"male", 5);
+	//	strncpy(self->usermodel, "male");
+		Q_strncpyz(self->usermodel, 5, "male");
 	}
 	if ( (!Q_stricmp(self->usermodel,"male")) ||
 		(!Q_stricmp(self->usermodel,"female")) ||
@@ -1784,10 +1784,10 @@ qboolean InPak (char *basedir, char *gamedir, char *filename)
 		strncpy(pakfile, basedir, sizeof(pakfile));
 		if (strlen(gamedir))
 		{
-			Q_strncatz(pakfile, "/", sizeof(pakfile));
-			Q_strncatz(pakfile, gamedir, sizeof(pakfile));
+			Q_strncatz(pakfile, sizeof(pakfile), "/");
+			Q_strncatz(pakfile, sizeof(pakfile), gamedir);
 		}
-		Q_strncatz(pakfile, va("/pak%d.pak",k), sizeof(pakfile));
+		Q_strncatz(pakfile, sizeof(pakfile), va("/pak%d.pak",k));
 		if (NULL != (f = fopen(pakfile, "rb")))
 		{
 			num = (int)fread(&pakheader,1,sizeof(pak_header_t),f);
@@ -1907,8 +1907,8 @@ void actor_files ()
 					f = fopen(filename,"r");
 					if (f) {
 						fclose(f);
-						Q_strncpyz(filename, path, sizeof(filename));
-						Q_strncatz(filename, wavname[j], sizeof(filename));
+						Q_strncpyz(filename, sizeof(filename), path);
+						Q_strncatz(filename, sizeof(filename), wavname[j]);
 						e->actor_sound_index[j] = gi.soundindex(filename);
 						continue;
 					}
@@ -1916,8 +1916,8 @@ void actor_files ()
 					// Search paks in game folder
 					Com_sprintf(filename, sizeof(filename), "sound/%s%s",path,wavname[j]);
 					if (InPak(basedir->string, gamedir->string, filename)) {
-						Q_strncpyz(filename, path, sizeof(filename));
-						Q_strncatz(filename, wavname[j], sizeof(filename));
+						Q_strncpyz(filename, sizeof(filename), path);
+						Q_strncatz(filename, sizeof(filename), wavname[j]);
 						e->actor_sound_index[j] = gi.soundindex(filename);
 						continue;
 					}
@@ -1928,8 +1928,8 @@ void actor_files ()
 				f = fopen(filename,"r");
 				if (f) {
 					fclose(f);
-					Q_strncpyz(filename, path, sizeof(filename));
-					Q_strncatz(filename, wavname[j], sizeof(filename));
+					Q_strncpyz(filename, sizeof(filename), path);
+					Q_strncatz(filename, sizeof(filename), wavname[j]);
 					e->actor_sound_index[j] = gi.soundindex(filename);
 					continue;
 				}
@@ -1937,8 +1937,8 @@ void actor_files ()
 				// Search paks in baseq2
 				Com_sprintf(filename, sizeof(filename), "sound/%s%s",path,wavname[j]);
 				if (InPak(basedir->string, "baseq2", filename)) {
-					Q_strncpyz(filename, path, sizeof(filename));
-					Q_strncatz(filename, wavname[j], sizeof(filename));
+					Q_strncpyz(filename, sizeof(filename), path);
+					Q_strncatz(filename, sizeof(filename), wavname[j]);
 					e->actor_sound_index[j] = gi.soundindex(filename);
 					continue;
 				}
@@ -1950,8 +1950,8 @@ void actor_files ()
 					f = fopen(filename,"r");
 					if (f) {
 						fclose(f);
-						Q_strncpyz(filename, path, sizeof(filename));
-						Q_strncatz(filename, wavname[j], sizeof(filename));
+						Q_strncpyz(filename, sizeof(filename), path);
+						Q_strncatz(filename, sizeof(filename), wavname[j]);
 						e->actor_sound_index[j] = gi.soundindex(filename);
 						continue;
 					}
@@ -1959,8 +1959,8 @@ void actor_files ()
 					// Search paks in baseq2
 					Com_sprintf(filename, sizeof(filename), "sound/%s%s",path,wavname[j]);
 					if (InPak(cddir->string,"baseq2",filename)) {
-						Q_strncpyz(filename, path, sizeof(filename));
-						Q_strncatz(filename, wavname[j], sizeof(filename));
+						Q_strncpyz(filename, sizeof(filename), path);
+						Q_strncatz(filename, sizeof(filename), wavname[j]);
 						e->actor_sound_index[j] = gi.soundindex(filename);
 						continue;
 					}
@@ -1995,16 +1995,16 @@ void actor_files ()
 
 			Com_sprintf(filename, sizeof(filename), "players/%s/",e->usermodel);
 			switch (e->actor_weapon[k]) {
-			case 2: Q_strncatz(filename, "w_shotgun.md2", sizeof(filename));		break;
-			case 3:	Q_strncatz(filename, "w_sshotgun.md2", sizeof(filename));		break;
-			case 4:	Q_strncatz(filename, "w_machinegun.md2", sizeof(filename));	break;
-			case 5:	Q_strncatz(filename, "w_chaingun.md2", sizeof(filename));		break;
-			case 6:	Q_strncatz(filename, "w_glauncher.md2", sizeof(filename));		break;
-			case 7: Q_strncatz(filename, "w_rlauncher.md2", sizeof(filename));		break;
-			case 8: Q_strncatz(filename, "w_hyperblaster.md2", sizeof(filename));	break;
-			case 9: Q_strncatz(filename, "w_railgun.md2", sizeof(filename));		break;
-			case 10:Q_strncatz(filename, "w_bfg.md2", sizeof(filename));			break;
-			default:Q_strncatz(filename, "w_blaster.md2", sizeof(filename));		break;
+			case 2: Q_strncatz(filename, sizeof(filename), "w_shotgun.md2");		break;
+			case 3:	Q_strncatz(filename, sizeof(filename), "w_sshotgun.md2");		break;
+			case 4:	Q_strncatz(filename, sizeof(filename), "w_machinegun.md2");		break;
+			case 5:	Q_strncatz(filename, sizeof(filename), "w_chaingun.md2");		break;
+			case 6:	Q_strncatz(filename, sizeof(filename), "w_glauncher.md2");		break;
+			case 7: Q_strncatz(filename, sizeof(filename), "w_rlauncher.md2");		break;
+			case 8: Q_strncatz(filename, sizeof(filename), "w_hyperblaster.md2");	break;
+			case 9: Q_strncatz(filename, sizeof(filename), "w_railgun.md2");		break;
+			case 10:Q_strncatz(filename, sizeof(filename), "w_bfg.md2");			break;
+			default:Q_strncatz(filename, sizeof(filename), "w_blaster.md2");		break;
 			}
 
 			if (strlen(gamedir->string))

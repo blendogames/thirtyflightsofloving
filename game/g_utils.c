@@ -918,7 +918,7 @@ void CreatePath (const char *path)
 		gi.dprintf("WARNING: refusing to create relative path '%s'\n", path);
 		return;
 	}
-	Q_strncpyz (tmpBuf, path, sizeof(tmpBuf));
+	Q_strncpyz (tmpBuf, sizeof(tmpBuf), path);
 
 	for (ofs = tmpBuf+1 ; *ofs ; ofs++)
 	{

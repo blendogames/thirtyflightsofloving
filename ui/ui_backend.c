@@ -443,12 +443,12 @@ void SpinControl_Draw (menulist_s *s)
 	else
 	{
 	//	strncpy(buffer, s->itemnames[s->curvalue]);
-		Q_strncpyz(buffer, s->itemnames[s->curvalue], sizeof(buffer));
+		Q_strncpyz (buffer, sizeof(buffer), s->itemnames[s->curvalue]);
 		*strchr(buffer, '\n') = 0;
 		Menu_DrawString (s->generic.x + s->generic.parent->x + RCOLUMN_OFFSET,
 						s->generic.y + s->generic.parent->y, s->generic.textSize, buffer, alpha);
 	//	strncpy(buffer, strchr( s->itemnames[s->curvalue], '\n' ) + 1 );
-		Q_strncpyz(buffer, strchr( s->itemnames[s->curvalue], '\n' ) + 1, sizeof(buffer) );
+		Q_strncpyz (buffer, sizeof(buffer), strchr( s->itemnames[s->curvalue], '\n' ) + 1);
 		Menu_DrawString (s->generic.x + s->generic.parent->x + RCOLUMN_OFFSET,
 						s->generic.y + s->generic.parent->y + MENU_LINE_SIZE, s->generic.textSize, buffer, alpha);
 	}

@@ -70,16 +70,17 @@ Q_strncpyz
 Safe strncpy that ensures a trailing zero
 =============
 */
-void Q_strncpyz( char *dest, const char *src, int destsize ) {
+void Q_strncpyz (char *dest, size_t destSize, const char *src)
+{
 	if ( !src ) {
 		Error( "Q_strncpyz: NULL src" );
 	}
-	if ( destsize < 1 ) {
+	if ( destSize < 1 ) {
 		Error( "Q_strncpyz: destsize < 1" );
 	}
 
-	strncpy( dest, src, destsize - 1 );
-	dest[destsize - 1] = 0;
+	strncpy (dest, src, destSize - 1);
+	dest[destSize - 1] = 0;
 }
 
 /*
@@ -105,13 +106,15 @@ void Com_sprintf (char *dest, int size, const char *fmt, ...)
 	{
 		printf( "Com_sprintf: overflow of %i in %i\n", len, size );
 	}
-	Q_strncpyz( dest, bigbuffer, size );
+	Q_strncpyz (dest, size, bigbuffer);
 }
 
-int Q_stricmpn( const char *s1, const char *s2, int n ) {
+int Q_stricmpn( const char *s1, const char *s2, int n )
+{
 	int c1, c2;
 
-	do {
+	do
+	{
 		c1 = *s1++;
 		c2 = *s2++;
 
@@ -119,7 +122,8 @@ int Q_stricmpn( const char *s1, const char *s2, int n ) {
 			return 0;       // strings are equal until end point
 		}
 
-		if ( c1 != c2 ) {
+		if ( c1 != c2 )
+		{
 			if ( c1 >= 'a' && c1 <= 'z' ) {
 				c1 -= ( 'a' - 'A' );
 			}
@@ -130,15 +134,18 @@ int Q_stricmpn( const char *s1, const char *s2, int n ) {
 				return c1 < c2 ? -1 : 1;
 			}
 		}
-	} while ( c1 );
+	}
+	while ( c1 );
 
 	return 0;       // strings are equal
 }
 
-int Q_strncmp( const char *s1, const char *s2, int n ) {
+int Q_strncmp( const char *s1, const char *s2, int n )
+{
 	int c1, c2;
 
-	do {
+	do
+	{
 		c1 = *s1++;
 		c2 = *s2++;
 
@@ -149,17 +156,20 @@ int Q_strncmp( const char *s1, const char *s2, int n ) {
 		if ( c1 != c2 ) {
 			return c1 < c2 ? -1 : 1;
 		}
-	} while ( c1 );
+	}
+	while ( c1 );
 
 	return 0;       // strings are equal
 }
 
-int Q_stricmp( const char *s1, const char *s2 ) {
+int Q_stricmp (const char *s1, const char *s2)
+{
 	return Q_stricmpn( s1, s2, 99999 );
 }
 
 
-char *Q_strlwr( char *s1 ) {
+char *Q_strlwr (char *s1)
+{
 	char    *s;
 
 	s = s1;
@@ -170,7 +180,8 @@ char *Q_strlwr( char *s1 ) {
 	return s1;
 }
 
-char *Q_strupr( char *s1 ) {
+char *Q_strupr (char *s1)
+{
 	char    *s;
 
 	s = s1;
@@ -255,7 +266,8 @@ define_t *globaldefines;
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-void QDECL SourceError( source_t *source, char *str, ... ) {
+void QDECL SourceError( source_t *source, char *str, ... )
+{
 	char text[1024];
 	va_list ap;
 
@@ -279,7 +291,8 @@ void QDECL SourceError( source_t *source, char *str, ... ) {
 // Returns:					-
 // Changes Globals:		-
 //===========================================================================
-void QDECL SourceWarning( source_t *source, char *str, ... ) {
+void QDECL SourceWarning( source_t *source, char *str, ... )
+{
 	char text[1024];
 	va_list ap;
 
@@ -303,7 +316,8 @@ void QDECL SourceWarning( source_t *source, char *str, ... ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-void PC_PushIndent( source_t *source, int type, int skip ) {
+void PC_PushIndent( source_t *source, int type, int skip )
+{
 	indent_t *indent;
 
 	indent = (indent_t *) GetMemory( sizeof( indent_t ) );
@@ -320,7 +334,8 @@ void PC_PushIndent( source_t *source, int type, int skip ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-void PC_PopIndent( source_t *source, int *type, int *skip ) {
+void PC_PopIndent( source_t *source, int *type, int *skip )
+{
 	indent_t *indent;
 
 	*type = 0;
@@ -348,7 +363,8 @@ void PC_PopIndent( source_t *source, int *type, int *skip ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-void PC_PushScript( source_t *source, script_t *script ) {
+void PC_PushScript( source_t *source, script_t *script )
+{
 	script_t *s;
 
 	for ( s = source->scriptstack; s; s = s->next )
@@ -368,7 +384,8 @@ void PC_PushScript( source_t *source, script_t *script ) {
 // Returns:				-
 // Changes Globals:		-
 //============================================================================
-void PC_InitTokenHeap( void ) {
+void PC_InitTokenHeap( void )
+{
 	/*
 	int i;
 
@@ -388,7 +405,8 @@ void PC_InitTokenHeap( void ) {
 // Returns:				-
 // Changes Globals:		-
 //============================================================================
-token_t *PC_CopyToken( token_t *token ) {
+token_t *PC_CopyToken( token_t *token )
+{
 	token_t *t;
 
 //	t = (token_t *) malloc(sizeof(token_t));
@@ -418,7 +436,8 @@ token_t *PC_CopyToken( token_t *token ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-void PC_FreeToken( token_t *token ) {
+void PC_FreeToken( token_t *token )
+{
 	//free(token);
 	FreeMemory( token );
 //	token->next = freetokens;
@@ -431,7 +450,8 @@ void PC_FreeToken( token_t *token ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-int PC_ReadSourceToken( source_t *source, token_t *token ) {
+int PC_ReadSourceToken( source_t *source, token_t *token )
+{
 	token_t *t;
 	script_t *script;
 	int type, skip;
@@ -444,7 +464,8 @@ int PC_ReadSourceToken( source_t *source, token_t *token ) {
 			return qtrue;
 		}
 		//if at the end of the script
-		if ( EndOfScript( source->scriptstack ) ) {
+		if ( EndOfScript( source->scriptstack ) )
+		{
 			//remove all indents of the script
 			while ( source->indentstack &&
 					source->indentstack->script == source->scriptstack )
@@ -476,7 +497,8 @@ int PC_ReadSourceToken( source_t *source, token_t *token ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-int PC_UnreadSourceToken( source_t *source, token_t *token ) {
+int PC_UnreadSourceToken( source_t *source, token_t *token )
+{
 	token_t *t;
 
 	t = PC_CopyToken( token );
@@ -490,7 +512,8 @@ int PC_UnreadSourceToken( source_t *source, token_t *token ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-int PC_ReadDefineParms( source_t *source, define_t *define, token_t **parms, int maxparms ) {
+int PC_ReadDefineParms( source_t *source, define_t *define, token_t **parms, int maxparms )
+{
 	token_t token, *t, *last;
 	int i, done, lastcomma, numparms, indent;
 
@@ -590,7 +613,8 @@ int PC_ReadDefineParms( source_t *source, define_t *define, token_t **parms, int
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-int PC_StringizeTokens( token_t *tokens, token_t *token ) {
+int PC_StringizeTokens( token_t *tokens, token_t *token )
+{
 	token_t *t;
 
 	token->type = TT_STRING;
@@ -611,9 +635,11 @@ int PC_StringizeTokens( token_t *tokens, token_t *token ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-int PC_MergeTokens( token_t *t1, token_t *t2 ) {
+int PC_MergeTokens( token_t *t1, token_t *t2 )
+{
 	//merging of a name with a name or number
-	if ( t1->type == TT_NAME && ( t2->type == TT_NAME || t2->type == TT_NUMBER ) ) {
+	if ( t1->type == TT_NAME && ( t2->type == TT_NAME || t2->type == TT_NUMBER ) )
+	{
 		strcat( t1->string, t2->string );
 		return qtrue;
 	} //end if
@@ -652,7 +678,8 @@ void PC_PrintDefine(define_t *define)
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-void PC_PrintDefineHashTable( define_t **definehash ) {
+void PC_PrintDefineHashTable( define_t **definehash )
+{
 	int i;
 	define_t *d;
 
@@ -674,7 +701,8 @@ void PC_PrintDefineHashTable( define_t **definehash ) {
 //============================================================================
 //char primes[16] = {1, 3, 5, 7, 11, 13, 17, 19, 23, 27, 29, 31, 37, 41, 43, 47};
 
-int PC_NameHash( char *name ) {
+int PC_NameHash( char *name )
+{
 	int register hash, i;
 
 	hash = 0;
@@ -693,7 +721,8 @@ int PC_NameHash( char *name ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-void PC_AddDefineToHash( define_t *define, define_t **definehash ) {
+void PC_AddDefineToHash( define_t *define, define_t **definehash )
+{
 	int hash;
 
 	hash = PC_NameHash( define->name );
@@ -706,7 +735,8 @@ void PC_AddDefineToHash( define_t *define, define_t **definehash ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-define_t *PC_FindHashedDefine( define_t **definehash, char *name ) {
+define_t *PC_FindHashedDefine( define_t **definehash, char *name )
+{
 	define_t *d;
 	int hash;
 
@@ -726,7 +756,8 @@ define_t *PC_FindHashedDefine( define_t **definehash, char *name ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-define_t *PC_FindDefine( define_t *defines, char *name ) {
+define_t *PC_FindDefine( define_t *defines, char *name )
+{
 	define_t *d;
 
 	for ( d = defines; d; d = d->next )
@@ -744,7 +775,8 @@ define_t *PC_FindDefine( define_t *defines, char *name ) {
 //								if no parm found with the given name -1 is returned
 // Changes Globals:		-
 //============================================================================
-int PC_FindDefineParm( define_t *define, char *name ) {
+int PC_FindDefineParm( define_t *define, char *name )
+{
 	token_t *p;
 	int i;
 
@@ -764,7 +796,8 @@ int PC_FindDefineParm( define_t *define, char *name ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-void PC_FreeDefine( define_t *define ) {
+void PC_FreeDefine( define_t *define )
+{
 	token_t *t, *next;
 
 	//free the define parameters
@@ -788,7 +821,8 @@ void PC_FreeDefine( define_t *define ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-void PC_AddBuiltinDefines( source_t *source ) {
+void PC_AddBuiltinDefines( source_t *source )
+{
 	int i;
 	define_t *define;
 	struct builtin
@@ -828,7 +862,8 @@ void PC_AddBuiltinDefines( source_t *source ) {
 // Changes Globals:		-
 //============================================================================
 int PC_ExpandBuiltinDefine( source_t *source, define_t *define,
-							token_t **firsttoken, token_t **lasttoken ) {
+							token_t **firsttoken, token_t **lasttoken )
+{
 	token_t token;
 	time_t t;    // unsigned long prevents LCC warning
 	char *curtime;
@@ -904,7 +939,8 @@ int PC_ExpandBuiltinDefine( source_t *source, define_t *define,
 // Changes Globals:		-
 //============================================================================
 int PC_ExpandDefine( source_t *source, define_t *define,
-					 token_t **firsttoken, token_t **lasttoken ) {
+					 token_t **firsttoken, token_t **lasttoken )
+{
 	token_t *parms[MAX_DEFINEPARMS], *dt, *pt, *t;
 	token_t *t1, *t2, *first, *last, *nextpt, token;
 	int parmnum, i;
@@ -1036,7 +1072,8 @@ int PC_ExpandDefine( source_t *source, define_t *define,
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-int PC_ExpandDefineIntoSource( source_t *source, define_t *define ) {
+int PC_ExpandDefineIntoSource( source_t *source, define_t *define )
+{
 	token_t *firsttoken, *lasttoken;
 
 	if ( !PC_ExpandDefine( source, define, &firsttoken, &lasttoken ) ) {
@@ -1056,7 +1093,8 @@ int PC_ExpandDefineIntoSource( source_t *source, define_t *define ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-void PC_ConvertPath( char *path ) {
+void PC_ConvertPath( char *path )
+{
 	char *ptr;
 
 	//remove double path seperators
@@ -1086,7 +1124,8 @@ void PC_ConvertPath( char *path ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-int PC_Directive_include( source_t *source ) {
+int PC_Directive_include( source_t *source )
+{
 	script_t *script;
 	token_t token;
 	char path[_MAX_PATH];
@@ -1174,7 +1213,8 @@ int PC_Directive_include( source_t *source ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-int PC_ReadLine( source_t *source, token_t *token ) {
+int PC_ReadLine( source_t *source, token_t *token )
+{
 	int crossline;
 
 	crossline = 0;
@@ -1198,7 +1238,8 @@ int PC_ReadLine( source_t *source, token_t *token ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-int PC_WhiteSpaceBeforeToken( token_t *token ) {
+int PC_WhiteSpaceBeforeToken( token_t *token )
+{
 	return token->endwhitespace_p - token->whitespace_p > 0;
 } //end of the function PC_WhiteSpaceBeforeToken
 //============================================================================
@@ -1207,7 +1248,8 @@ int PC_WhiteSpaceBeforeToken( token_t *token ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-void PC_ClearTokenWhiteSpace( token_t *token ) {
+void PC_ClearTokenWhiteSpace( token_t *token )
+{
 	token->whitespace_p = NULL;
 	token->endwhitespace_p = NULL;
 	token->linescrossed = 0;
@@ -1218,7 +1260,8 @@ void PC_ClearTokenWhiteSpace( token_t *token ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-int PC_Directive_undef( source_t *source ) {
+int PC_Directive_undef( source_t *source )
+{
 	token_t token;
 	define_t *define, *lastdefine;
 	int hash;
@@ -1282,7 +1325,8 @@ int PC_Directive_undef( source_t *source ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-int PC_Directive_define( source_t *source ) {
+int PC_Directive_define( source_t *source )
+{
 	token_t token, *t, *last;
 	define_t *define;
 
@@ -1422,7 +1466,8 @@ int PC_Directive_define( source_t *source ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-define_t *PC_DefineFromString( char *string ) {
+define_t *PC_DefineFromString( char *string )
+{
 	script_t *script;
 	source_t src;
 	token_t *t;
@@ -1482,7 +1527,8 @@ define_t *PC_DefineFromString( char *string ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-int PC_AddDefine( source_t *source, char *string ) {
+int PC_AddDefine( source_t *source, char *string )
+{
 	define_t *define;
 
 	define = PC_DefineFromString( string );
@@ -1504,7 +1550,8 @@ int PC_AddDefine( source_t *source, char *string ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-int PC_AddGlobalDefine( char *string ) {
+int PC_AddGlobalDefine( char *string )
+{
 	define_t *define;
 
 	define = PC_DefineFromString( string );
@@ -1522,7 +1569,8 @@ int PC_AddGlobalDefine( char *string ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-int PC_RemoveGlobalDefine( char *name ) {
+int PC_RemoveGlobalDefine( char *name )
+{
 	define_t *define;
 
 	define = PC_FindDefine( globaldefines, name );
@@ -1539,7 +1587,8 @@ int PC_RemoveGlobalDefine( char *name ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-void PC_RemoveAllGlobalDefines( void ) {
+void PC_RemoveAllGlobalDefines( void )
+{
 	define_t *define;
 
 	for ( define = globaldefines; define; define = globaldefines )
@@ -1554,7 +1603,8 @@ void PC_RemoveAllGlobalDefines( void ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-define_t *PC_CopyDefine( source_t *source, define_t *define ) {
+define_t *PC_CopyDefine( source_t *source, define_t *define )
+{
 	define_t *newdefine;
 	token_t *token, *newtoken, *lasttoken;
 
@@ -1598,7 +1648,8 @@ define_t *PC_CopyDefine( source_t *source, define_t *define ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-void PC_AddGlobalDefinesToSource( source_t *source ) {
+void PC_AddGlobalDefinesToSource( source_t *source )
+{
 	define_t *define, *newdefine;
 
 	for ( define = globaldefines; define; define = define->next )
@@ -1618,7 +1669,8 @@ void PC_AddGlobalDefinesToSource( source_t *source ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-int PC_Directive_if_def( source_t *source, int type ) {
+int PC_Directive_if_def( source_t *source, int type )
+{
 	token_t token;
 	define_t *d;
 	int skip;
@@ -1647,7 +1699,8 @@ int PC_Directive_if_def( source_t *source, int type ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-int PC_Directive_ifdef( source_t *source ) {
+int PC_Directive_ifdef( source_t *source )
+{
 	return PC_Directive_if_def( source, INDENT_IFDEF );
 } //end of the function PC_Directive_ifdef
 //============================================================================
@@ -1656,7 +1709,8 @@ int PC_Directive_ifdef( source_t *source ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-int PC_Directive_ifndef( source_t *source ) {
+int PC_Directive_ifndef( source_t *source )
+{
 	return PC_Directive_if_def( source, INDENT_IFNDEF );
 } //end of the function PC_Directive_ifndef
 //============================================================================
@@ -1665,7 +1719,8 @@ int PC_Directive_ifndef( source_t *source ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-int PC_Directive_else( source_t *source ) {
+int PC_Directive_else( source_t *source )
+{
 	int type, skip;
 
 	PC_PopIndent( source, &type, &skip );
@@ -1686,7 +1741,8 @@ int PC_Directive_else( source_t *source ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-int PC_Directive_endif( source_t *source ) {
+int PC_Directive_endif( source_t *source )
+{
 	int type, skip;
 
 	PC_PopIndent( source, &type, &skip );
@@ -1718,7 +1774,8 @@ typedef struct value_s
 	struct value_s *prev, *next;
 } value_t;
 
-int PC_OperatorPriority( int op ) {
+int PC_OperatorPriority( int op )
+{
 	switch ( op )
 	{
 	case P_MUL: return 15;
@@ -1780,7 +1837,8 @@ int PC_OperatorPriority( int op ) {
 #define FreeOperator( op )
 
 int PC_EvaluateTokens( source_t *source, token_t *tokens, signed long int *intvalue,
-					   double *floatvalue, int integer ) {
+					   double *floatvalue, int integer )
+{
 	operator_t *o, *firstoperator, *lastoperator;
 	value_t *v, *firstvalue, *lastvalue, *v1, *v2;
 	token_t *t;
@@ -2160,7 +2218,8 @@ int PC_EvaluateTokens( source_t *source, token_t *tokens, signed long int *intva
 #ifdef DEBUG_EVAL
 		if ( integer ) {
 			Log_Write( "result value = %d", v1->intvalue );
-		} else { Log_Write( "result value = %f", v1->floatvalue );}
+		}
+		else { Log_Write( "result value = %f", v1->floatvalue );}
 #endif //DEBUG_EVAL
 		if ( error ) {
 			break;
@@ -2176,20 +2235,24 @@ int PC_EvaluateTokens( source_t *source, token_t *tokens, signed long int *intva
 			//
 			if ( v->prev ) {
 				v->prev->next = v->next;
-			} else { firstvalue = v->next;}
+			}
+			else { firstvalue = v->next;}
 			if ( v->next ) {
 				v->next->prev = v->prev;
-			} else { lastvalue = v->prev;}
+			}
+			else { lastvalue = v->prev;}
 			//FreeMemory(v);
 			FreeValue( v );
 		} //end if
 		  //remove the operator
 		if ( o->prev ) {
 			o->prev->next = o->next;
-		} else { firstoperator = o->next;}
+		}
+		else { firstoperator = o->next;}
 		if ( o->next ) {
 			o->next->prev = o->prev;
-		} else { lastoperator = o->prev;}
+		}
+		else { lastoperator = o->prev;}
 		//FreeMemory(o);
 		FreeOperator( o );
 	} //end while
@@ -2231,7 +2294,8 @@ int PC_EvaluateTokens( source_t *source, token_t *tokens, signed long int *intva
 // Changes Globals:		-
 //============================================================================
 int PC_Evaluate( source_t *source, signed long int *intvalue,
-				 double *floatvalue, int integer ) {
+				 double *floatvalue, int integer )
+{
 	token_t token, *firsttoken, *lasttoken;
 	token_t *t, *nexttoken;
 	define_t *define;
@@ -2303,7 +2367,8 @@ int PC_Evaluate( source_t *source, signed long int *intvalue,
 			SourceError( source, "can't evaluate %s", token.string );
 			return qfalse;
 		} //end else
-	} while ( PC_ReadLine( source, &token ) );
+	}
+	while ( PC_ReadLine( source, &token ) );
 	//
 	if ( !PC_EvaluateTokens( source, firsttoken, intvalue, floatvalue, integer ) ) {
 		return qfalse;
@@ -2323,7 +2388,8 @@ int PC_Evaluate( source_t *source, signed long int *intvalue,
 #ifdef DEBUG_EVAL
 	if ( integer ) {
 		Log_Write( "eval result: %d", *intvalue );
-	} else { Log_Write( "eval result: %f", *floatvalue );}
+	}
+	else { Log_Write( "eval result: %f", *floatvalue );}
 #endif //DEBUG_EVAL
 	   //
 	return qtrue;
@@ -2335,7 +2401,8 @@ int PC_Evaluate( source_t *source, signed long int *intvalue,
 // Changes Globals:		-
 //============================================================================
 int PC_DollarEvaluate( source_t *source, signed long int *intvalue,
-					   double *floatvalue, int integer ) {
+					   double *floatvalue, int integer )
+{
 	int indent, defined = qfalse;
 	token_t token, *firsttoken, *lasttoken;
 	token_t *t, *nexttoken;
@@ -2369,7 +2436,8 @@ int PC_DollarEvaluate( source_t *source, signed long int *intvalue,
 				t->next = NULL;
 				if ( lasttoken ) {
 					lasttoken->next = t;
-				} else { firsttoken = t;}
+				}
+				else { firsttoken = t;}
 				lasttoken = t;
 			} //end if
 			else if ( !strcmp( token.string, "defined" ) ) {
@@ -2378,7 +2446,8 @@ int PC_DollarEvaluate( source_t *source, signed long int *intvalue,
 				t->next = NULL;
 				if ( lasttoken ) {
 					lasttoken->next = t;
-				} else { firsttoken = t;}
+				}
+				else { firsttoken = t;}
 				lasttoken = t;
 			} //end if
 			else
@@ -2399,7 +2468,8 @@ int PC_DollarEvaluate( source_t *source, signed long int *intvalue,
 			} //end else
 		} //end if
 		  //if the token is a number or a punctuation
-		else if ( token.type == TT_NUMBER || token.type == TT_PUNCTUATION ) {
+		else if ( token.type == TT_NUMBER || token.type == TT_PUNCTUATION )
+		{
 			if ( *token.string == '(' ) {
 				indent++;
 			} else if ( *token.string == ')' ) {
@@ -2412,7 +2482,8 @@ int PC_DollarEvaluate( source_t *source, signed long int *intvalue,
 			t->next = NULL;
 			if ( lasttoken ) {
 				lasttoken->next = t;
-			} else { firsttoken = t;}
+			}
+			else { firsttoken = t;}
 			lasttoken = t;
 		} //end else
 		else //can't evaluate the token
@@ -2420,7 +2491,8 @@ int PC_DollarEvaluate( source_t *source, signed long int *intvalue,
 			SourceError( source, "can't evaluate %s", token.string );
 			return qfalse;
 		} //end else
-	} while ( PC_ReadSourceToken( source, &token ) );
+	}
+	while ( PC_ReadSourceToken( source, &token ) );
 	//
 	if ( !PC_EvaluateTokens( source, firsttoken, intvalue, floatvalue, integer ) ) {
 		return qfalse;
@@ -2451,7 +2523,8 @@ int PC_DollarEvaluate( source_t *source, signed long int *intvalue,
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-int PC_Directive_elif( source_t *source ) {
+int PC_Directive_elif( source_t *source )
+{
 	signed long int value;
 	int type, skip;
 
@@ -2473,7 +2546,8 @@ int PC_Directive_elif( source_t *source ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-int PC_Directive_if( source_t *source ) {
+int PC_Directive_if( source_t *source )
+{
 	signed long int value;
 	int skip;
 
@@ -2490,7 +2564,8 @@ int PC_Directive_if( source_t *source ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-int PC_Directive_line( source_t *source ) {
+int PC_Directive_line( source_t *source )
+{
 	SourceError( source, "#line directive not supported" );
 	return qfalse;
 } //end of the function PC_Directive_line
@@ -2500,7 +2575,8 @@ int PC_Directive_line( source_t *source ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-int PC_Directive_error( source_t *source ) {
+int PC_Directive_error( source_t *source )
+{
 	token_t token;
 
 	strcpy( token.string, "" );
@@ -2514,7 +2590,8 @@ int PC_Directive_error( source_t *source ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-int PC_Directive_pragma( source_t *source ) {
+int PC_Directive_pragma( source_t *source )
+{
 	token_t token;
 	SourceWarning( source, "#pragma directive not supported" );
 	while ( PC_ReadLine( source, &token ) ) ;
@@ -2526,7 +2603,8 @@ int PC_Directive_pragma( source_t *source ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-void UnreadSignToken( source_t *source ) {
+void UnreadSignToken( source_t *source )
+{
 	token_t token;
 
 	token.line = source->scriptstack->line;
@@ -2544,7 +2622,8 @@ void UnreadSignToken( source_t *source ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-int PC_Directive_eval( source_t *source ) {
+int PC_Directive_eval( source_t *source )
+{
 	signed long int value;
 	token_t token;
 
@@ -2571,7 +2650,8 @@ int PC_Directive_eval( source_t *source ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-int PC_Directive_evalfloat( source_t *source ) {
+int PC_Directive_evalfloat( source_t *source )
+{
 	double value;
 	token_t token;
 
@@ -2616,7 +2696,8 @@ directive_t directives[20] =
 	{NULL, NULL}
 };
 
-int PC_ReadDirective( source_t *source ) {
+int PC_ReadDirective( source_t *source )
+{
 	token_t token;
 	int i;
 
@@ -2650,7 +2731,8 @@ int PC_ReadDirective( source_t *source ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-int PC_DollarDirective_evalint( source_t *source ) {
+int PC_DollarDirective_evalint( source_t *source )
+{
 	signed long int value;
 	token_t token;
 
@@ -2681,7 +2763,8 @@ int PC_DollarDirective_evalint( source_t *source ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-int PC_DollarDirective_evalfloat( source_t *source ) {
+int PC_DollarDirective_evalfloat( source_t *source )
+{
 	double value;
 	token_t token;
 
@@ -2718,7 +2801,8 @@ directive_t dollardirectives[20] =
 	{NULL, NULL}
 };
 
-int PC_ReadDollarDirective( source_t *source ) {
+int PC_ReadDollarDirective( source_t *source )
+{
 	token_t token;
 	int i;
 
@@ -2755,7 +2839,8 @@ int PC_ReadDollarDirective( source_t *source ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-int BuiltinFunction( source_t *source ) {
+int BuiltinFunction( source_t *source )
+{
 	token_t token;
 
 	if ( !PC_ReadSourceToken( source, &token ) ) {
@@ -2777,7 +2862,8 @@ int BuiltinFunction( source_t *source ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-int QuakeCMacro( source_t *source ) {
+int QuakeCMacro( source_t *source )
+{
 	int i;
 	token_t token;
 
@@ -2806,7 +2892,8 @@ int QuakeCMacro( source_t *source ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-int PC_ReadToken( source_t *source, token_t *token ) {
+int PC_ReadToken( source_t *source, token_t *token )
+{
 	define_t *define;
 
 	while ( 1 )
@@ -2895,7 +2982,8 @@ int PC_ReadToken( source_t *source, token_t *token ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-int PC_ExpectTokenString( source_t *source, char *string ) {
+int PC_ExpectTokenString( source_t *source, char *string )
+{
 	token_t token;
 
 	if ( !PC_ReadToken( source, &token ) ) {
@@ -2915,7 +3003,8 @@ int PC_ExpectTokenString( source_t *source, char *string ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-int PC_ExpectTokenType( source_t *source, int type, int subtype, token_t *token ) {
+int PC_ExpectTokenType( source_t *source, int type, int subtype, token_t *token )
+{
 	char str[MAX_TOKEN];
 
 	if ( !PC_ReadToken( source, token ) ) {
@@ -2987,7 +3076,8 @@ int PC_ExpectTokenType( source_t *source, int type, int subtype, token_t *token 
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-int PC_ExpectAnyToken( source_t *source, token_t *token ) {
+int PC_ExpectAnyToken( source_t *source, token_t *token )
+{
 	if ( !PC_ReadToken( source, token ) ) {
 		SourceError( source, "couldn't read expected token" );
 		return qfalse;
@@ -3003,7 +3093,8 @@ int PC_ExpectAnyToken( source_t *source, token_t *token ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-int PC_CheckTokenString( source_t *source, char *string ) {
+int PC_CheckTokenString( source_t *source, char *string )
+{
 	token_t tok;
 
 	if ( !PC_ReadToken( source, &tok ) ) {
@@ -3023,7 +3114,8 @@ int PC_CheckTokenString( source_t *source, char *string ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-int PC_CheckTokenType( source_t *source, int type, int subtype, token_t *token ) {
+int PC_CheckTokenType( source_t *source, int type, int subtype, token_t *token )
+{
 	token_t tok;
 
 	if ( !PC_ReadToken( source, &tok ) ) {
@@ -3045,7 +3137,8 @@ int PC_CheckTokenType( source_t *source, int type, int subtype, token_t *token )
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-int PC_SkipUntilString( source_t *source, char *string ) {
+int PC_SkipUntilString( source_t *source, char *string )
+{
 	token_t token;
 
 	while ( PC_ReadToken( source, &token ) )
@@ -3062,7 +3155,8 @@ int PC_SkipUntilString( source_t *source, char *string ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-void PC_UnreadLastToken( source_t *source ) {
+void PC_UnreadLastToken( source_t *source )
+{
 	PC_UnreadSourceToken( source, &source->token );
 } //end of the function PC_UnreadLastToken
 //============================================================================
@@ -3071,7 +3165,8 @@ void PC_UnreadLastToken( source_t *source ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-void PC_UnreadToken( source_t *source, token_t *token ) {
+void PC_UnreadToken( source_t *source, token_t *token )
+{
 	PC_UnreadSourceToken( source, token );
 } //end of the function PC_UnreadToken
 //============================================================================
@@ -3080,7 +3175,8 @@ void PC_UnreadToken( source_t *source, token_t *token ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-void PC_SetIncludePath( source_t *source, char *path ) {
+void PC_SetIncludePath( source_t *source, char *path )
+{
 	strncpy( source->includepath, path, _MAX_PATH );
 	//add trailing path seperator
 	if ( source->includepath[strlen( source->includepath ) - 1] != '\\' &&
@@ -3094,7 +3190,8 @@ void PC_SetIncludePath( source_t *source, char *path ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-void PC_SetPunctuations( source_t *source, punctuation_t *p ) {
+void PC_SetPunctuations( source_t *source, punctuation_t *p )
+{
 	source->punctuations = p;
 } //end of the function PC_SetPunctuations
 //============================================================================
@@ -3103,7 +3200,8 @@ void PC_SetPunctuations( source_t *source, punctuation_t *p ) {
 // Returns:				-
 // Changes Globals:		-
 //============================================================================
-source_t *LoadSourceFile( char *filename ) {
+source_t *LoadSourceFile( char *filename )
+{
 	source_t *source;
 	script_t *script;
 
@@ -3138,7 +3236,8 @@ source_t *LoadSourceFile( char *filename ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-source_t *LoadSourceMemory( char *ptr, int length, char *name ) {
+source_t *LoadSourceMemory( char *ptr, int length, char *name )
+{
 	source_t *source;
 	script_t *script;
 
@@ -3172,7 +3271,8 @@ source_t *LoadSourceMemory( char *ptr, int length, char *name ) {
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-void FreeSource( source_t *source ) {
+void FreeSource( source_t *source )
+{
 	script_t *script;
 	token_t *token;
 	define_t *define;

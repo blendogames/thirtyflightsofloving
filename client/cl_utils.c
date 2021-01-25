@@ -304,7 +304,7 @@ char *unformattedString (const char *string)
 	//	va("%s%c", newstring, character);
 		addchar[0] = character;
 		addchar[1] = '\0';
-		Q_strncatz (newstring, addchar, sizeof(newstring));
+		Q_strncatz (newstring, sizeof(newstring), addchar);
 	}
 
 	return newstring;

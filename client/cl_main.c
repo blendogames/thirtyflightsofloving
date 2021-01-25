@@ -422,7 +422,7 @@ qboolean CL_AddChatIgnore (chatIgnore_t *ignoreList, const char *add)
 	newEntry = Z_Malloc (sizeof(chatIgnore_t));
 	newEntry->numHits = 0;
 	newEntry->text = Z_Malloc (textLen);
-	Q_strncpyz (newEntry->text, Cmd_Argv(1), textLen);
+	Q_strncpyz (newEntry->text, textLen, Cmd_Argv(1));
 	newEntry->next = next;
 	ignoreList->next = newEntry;
 
@@ -677,7 +677,7 @@ qboolean CL_CheckForChatIgnore (const char *string)
 	if (!cl_chatNickIgnores.next && !cl_chatTextIgnores.next)	// nothing in lists to compare
 		return false;
 
-	Q_strncpyz (chatBuf, unformattedString(string), sizeof(chatBuf));
+	Q_strncpyz (chatBuf, sizeof(chatBuf), unformattedString(string));
 //	Com_Printf ("CL_CheckForChatIgnore: scanning chat message \"%s\" for ignore nicks and text\n", chatBuf);
 
 	if (cl_chatNickIgnores.next != NULL)
@@ -754,17 +754,17 @@ void CL_Setenv_f( void )
 		char buffer[1000];
 		int i;
 
-	//	strncpy( buffer, Cmd_Argv(1) );
-	//	strncat( buffer, "=" );
-		Q_strncpyz( buffer, Cmd_Argv(1), sizeof(buffer) );
-		Q_strncatz( buffer, "=", sizeof(buffer) );
+	//	strncpy(buffer, Cmd_Argv(1));
+	//	strncat(buffer, "=");
+		Q_strncpyz (buffer, sizeof(buffer), Cmd_Argv(1));
+		Q_strncatz (buffer, sizeof(buffer), "=");
 
 		for ( i = 2; i < argc; i++ )
 		{
-		//	strncat( buffer, Cmd_Argv( i ) );
-		//	strncat( buffer, " " );
-			Q_strncatz( buffer, Cmd_Argv( i ), sizeof(buffer) );
-			Q_strncatz( buffer, " ", sizeof(buffer) );
+		//	strncat(buffer, Cmd_Argv( i ));
+		//	strncat(buffer, " ");
+			Q_strncatz (buffer, sizeof(buffer), Cmd_Argv( i ));
+			Q_strncatz (buffer, sizeof(buffer), " ");
 		}
 
 		putenv( buffer );
@@ -1043,16 +1043,16 @@ void CL_Rcon_f (void)
 //	strncat (message, "rcon ");
 //	strncat (message, rcon_client_password->string);
 //	strncat (message, " ");
-	Q_strncatz (message, "rcon ", sizeof(message));
-	Q_strncatz (message, rcon_client_password->string, sizeof(message));
-	Q_strncatz (message, " ", sizeof(message));
+	Q_strncatz (message, sizeof(message), "rcon ");
+	Q_strncatz (message, sizeof(message), rcon_client_password->string);
+	Q_strncatz (message, sizeof(message), " ");
 
 	for (i=1 ; i<Cmd_Argc() ; i++)
 	{
 	//	strncat (message, Cmd_Argv(i));
 	//	strncat (message, " ");
-		Q_strncatz (message, Cmd_Argv(i), sizeof(message));
-		Q_strncatz (message, " ", sizeof(message));
+		Q_strncatz (message, sizeof(message), Cmd_Argv(i));
+		Q_strncatz (message, sizeof(message), " ");
 	}
 
 	if (cls.state >= ca_connected)
@@ -1142,7 +1142,7 @@ void CL_Disconnect (void)
 	// send a disconnect message to the server
 	final[0] = clc_stringcmd;
 //	strncpy ((char *)final+1, "disconnect");
-	Q_strncpyz ((char *)final+1, "disconnect", sizeof(final)-1);
+	Q_strncpyz ((char *)final+1, sizeof(final)-1, "disconnect");
 	Netchan_Transmit (&cls.netchan, (int)strlen(final), final);
 	Netchan_Transmit (&cls.netchan, (int)strlen(final), final);
 	Netchan_Transmit (&cls.netchan, (int)strlen(final), final);

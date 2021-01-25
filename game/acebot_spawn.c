@@ -445,14 +445,14 @@ void ACESP_LoadBotInfo()
 		if (!token || !strlen(token)) // catch bad line
 			continue;
 	//	strncpy (botname, token, sizeof(botname)-1);
-		Q_strncpyz (botname, token, sizeof(botname));
+		Q_strncpyz (botname, sizeof(botname), token);
 		token = COM_Parse (&parseline);
 		if (!token || !strlen(token)) // catch bad line
 			continue;
 	//	strncpy (bot_info[num_botinfo].name, botname, sizeof(bot_info[num_botinfo].name)-1);
 	//	strncpy (bot_info[num_botinfo].skin, token, sizeof(bot_info[num_botinfo].skin)-1);
-		Q_strncpyz (bot_info[num_botinfo].name, botname, sizeof(bot_info[num_botinfo].name));
-		Q_strncpyz (bot_info[num_botinfo].skin, token, sizeof(bot_info[num_botinfo].skin));
+		Q_strncpyz (bot_info[num_botinfo].name, sizeof(bot_info[num_botinfo].name), botname);
+		Q_strncpyz (bot_info[num_botinfo].skin, sizeof(bot_info[num_botinfo].skin), token);
 		//gi.dprintf("%s %s\n", bot_info[num_botinfo].name, bot_info[num_botinfo].skin);
 		bot_info[num_botinfo].ingame_count = 0;
 		num_botinfo++;
@@ -558,7 +558,7 @@ void ACESP_SetName(edict_t *bot, char *name, char *skin, char *team)
 	}
 	else
 	//	strncpy(bot_name, name);
-		Q_strncpyz(bot_name, name, sizeof(bot_name));
+		Q_strncpyz(bot_name, sizeof(bot_name), name);
 
 	// skin
 	if (strlen(skin) == 0)
@@ -582,7 +582,7 @@ void ACESP_SetName(edict_t *bot, char *name, char *skin, char *team)
 	}
 	else
 	//	strncpy(bot_skin, skin);
-		Q_strncpyz(bot_skin, skin, sizeof(bot_skin));
+		Q_strncpyz(bot_skin, sizeof(bot_skin), skin);
 	
 	// initialise userinfo
 	memset (userinfo, 0, sizeof(userinfo));

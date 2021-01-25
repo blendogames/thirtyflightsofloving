@@ -2131,7 +2131,7 @@ image_t *R_LoadPic (char *name, byte *pic, int width, int height, imagetype_t ty
 	if (strlen(name) >= sizeof(image->name))
 		VID_Error (ERR_DROP, "Draw_LoadPic: \"%s\" is too long", name);
 //	strncpy (image->name, name);
-	Q_strncpyz (image->name, name, sizeof(image->name));
+	Q_strncpyz (image->name, sizeof(image->name), name);
 	image->hash = Com_HashFileName(name, 0, false);	// Knightmare added
 	image->registration_sequence = registration_sequence;
 
@@ -2147,7 +2147,7 @@ image_t *R_LoadPic (char *name, byte *pic, int width, int height, imagetype_t ty
 	// TODO: replace this with shaders as soon as they are supported
 	nameLen = (int)strlen(name); 
 //	strncpy(s,name);
-	Q_strncpyz(refName, name, sizeof(refName));
+	Q_strncpyz(refName, sizeof(refName), name);
 
 	// Load .pcx for size refereence, check if we have a tga/jpg/png pic
 #ifdef PNG_SUPPORT
@@ -2372,12 +2372,12 @@ image_t	*R_FindImage (char *name, imagetype_t type)
 		{
 #ifdef PNG_SUPPORT
 			// fall back to png
-			Q_strncpyz (s, name, sizeof(s));
+			Q_strncpyz (s, sizeof(s), name);
 			s[len-3]='p'; s[len-2]='n'; s[len-1]='g';
 			return R_FindImage(s,type);	
 #else	// PNG_SUPPORT
 			// fall back to jpg
-			Q_strncpyz(s,name, sizeof(s));
+			Q_strncpyz(s, sizeof(s), name);
 			s[len-3]='j'; s[len-2]='p'; s[len-1]='g';
 			return R_FindImage(s,type);
 #endif	// PNG_SUPPORT
@@ -2385,7 +2385,7 @@ image_t	*R_FindImage (char *name, imagetype_t type)
 #ifdef PNG_SUPPORT
 		else if (!strcmp(name+len-4, ".png"))
 		{	// fall back to jpg
-			Q_strncpyz (s, name, sizeof(s));
+			Q_strncpyz (s, sizeof(s), name);
 			s[len-3]='j'; s[len-2]='p'; s[len-1]='g';
 			return R_FindImage(s,type);
 		}
@@ -2399,7 +2399,7 @@ image_t	*R_FindImage (char *name, imagetype_t type)
 	if (!strcmp(name+len-4, ".pcx") || !strcmp(name+len-4, ".wal"))
 	{
 	//	strncpy(s, name);
-		Q_strncpyz (s, name, sizeof(s));
+		Q_strncpyz (s, sizeof(s), name);
 		s[len-3]='t'; s[len-2]='g'; s[len-1]='a';
 		image = R_FindImage(s,type);
 		if (image)
@@ -2432,14 +2432,14 @@ image_t	*R_FindImage (char *name, imagetype_t type)
 #ifdef PNG_SUPPORT
 		else { // fall back to png
 			R_AddToFailedImgList(name);
-			Q_strncpyz (s, name, sizeof(s));
+			Q_strncpyz (s, sizeof(s), name);
 			s[len-3]='p'; s[len-2]='n'; s[len-1]='g';
 			return R_FindImage(s,type);
 		}
 #else	// PNG_SUPPORT
 		else { // fall back to jpg
 			R_AddToFailedImgList(name);
-			Q_strncpyz(s,name, sizeof(s));
+			Q_strncpyz(s, sizeof(s), name);
 			s[len-3]='j'; s[len-2]='p'; s[len-1]='g';
 			return R_FindImage(s,type);
 		}
@@ -2453,7 +2453,7 @@ image_t	*R_FindImage (char *name, imagetype_t type)
 			image = R_LoadPic(name, pic, width, height, type, 32);
 		else { // fall back to jpg
 			R_AddToFailedImgList(name);
-			Q_strncpyz (s, name, sizeof(s));
+			Q_strncpyz (s, sizeof(s), name);
 			s[len-3]='j'; s[len-2]='p'; s[len-1]='g';
 			return R_FindImage(s,type);
 		}

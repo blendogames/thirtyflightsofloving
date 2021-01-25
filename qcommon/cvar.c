@@ -917,26 +917,26 @@ void DumpCvars_f (void)
 				Com_sprintf (var_line, sizeof(var_line), " ");
 
 			if (var->flags & CVAR_USERINFO)
-				Q_strncatz (var_line, "U", sizeof(var_line));
+				Q_strncatz (var_line, sizeof(var_line), "U");
 			else
-				Q_strncatz (var_line, " ", sizeof(var_line));
+				Q_strncatz (var_line, sizeof(var_line), " ");
 
 			if (var->flags & CVAR_SERVERINFO)
-				Q_strncatz (var_line, "S", sizeof(var_line));
+				Q_strncatz (var_line, sizeof(var_line), "S");
 			else
-				Q_strncatz (var_line, " ", sizeof(var_line));
+				Q_strncatz (var_line, sizeof(var_line), " ");
 
 			if (var->flags & CVAR_NOSET)
-				Q_strncatz (var_line, "-", sizeof(var_line));
+				Q_strncatz (var_line, sizeof(var_line), "-");
 			else if (var->flags & CVAR_LATCH)
-				Q_strncatz (var_line, "L", sizeof(var_line));
+				Q_strncatz (var_line, sizeof(var_line), "L");
 			else
-				Q_strncatz (var_line, " ", sizeof(var_line));
+				Q_strncatz (var_line, sizeof(var_line), " ");
 
 			if (var->flags & CVAR_CHEAT)
-				Q_strncatz (var_line, "C", sizeof(var_line));
+				Q_strncatz (var_line, sizeof(var_line), "C");
 			else
-				Q_strncatz (var_line, " ", sizeof(var_line));
+				Q_strncatz (var_line, sizeof(var_line), " ");
 
 			// show latched value if applicable
 			if ((var->flags & CVAR_LATCH) && var->latched_string) {
@@ -945,7 +945,7 @@ void DumpCvars_f (void)
 			else {
 				Com_sprintf (line2, sizeof(line2), " %s \"%s\" - default: \"%s\"\n", var->name, var->string, var->default_string);
 			}
-			Q_strncatz (var_line, line2, sizeof(var_line));
+			Q_strncatz (var_line, sizeof(var_line), line2);
 			fprintf (cvar_list_file, var_line);
 
 			// Knightmare- added descriptions from From Maraa'kate's cvar code
@@ -983,12 +983,12 @@ char	*Cvar_BitInfo (int bit)
 				if ( strlen(var->name) > (MAX_INFO_KEY - 1) )
 				{
 					Com_Printf("WARNING: Userinfo key \"%s\" longer than %i chars.  Truncating.\n", var->name, MAX_INFO_KEY-1);
-					Q_strncpyz (var->name, var->name, MAX_INFO_KEY);
+					Q_strncpyz (var->name, MAX_INFO_KEY, var->name);
 				}
 				if ( strlen(var->string) > (MAX_INFO_KEY - 1) )
 				{
 					Com_Printf("WARNING: Userinfo value \"%s\" for key \"%s\" longer than %i chars.  Truncating.\n", var->string, var->name, MAX_INFO_KEY-1);
-					Q_strncpyz (var->string, var->string, MAX_INFO_KEY);
+					Q_strncpyz (var->string, MAX_INFO_KEY, var->string);
 				}
 			}
 

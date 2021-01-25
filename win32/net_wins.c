@@ -241,7 +241,7 @@ qboolean	NET_StringToSockaddr (char *s, struct sockaddr *sadr)
 		((struct sockaddr_in *)sadr)->sin_port = 0;
 
 	//	strncpy (copy, s);
-		Q_strncpyz (copy, s, sizeof(copy));
+		Q_strncpyz (copy, sizeof(copy), s);
 		// strip off a trailing :port if present
 		for (colon = copy ; *colon ; colon++)
 			if (*colon == ':')

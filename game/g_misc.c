@@ -261,7 +261,7 @@ void ThrowGib (edict_t *self, char *gibname, int damage, int type)
 
 	// Lazarus: mapper-definable gib class
 //	strncpy(modelname, gibname);
-	Q_strncpyz(modelname, gibname, sizeof(modelname));
+	Q_strncpyz(modelname, sizeof(modelname), gibname);
 	p = strstr(modelname,"models/objects/gibs/");
 	if (p && self->gib_type)
 	{
@@ -396,7 +396,7 @@ void ThrowHead (edict_t *self, char *gibname, int damage, int type)
 	DeleteReflection (self, -1);
 
 //	strncpy(modelname, gibname);
-	Q_strncpyz(modelname, gibname, sizeof(modelname));
+	Q_strncpyz(modelname, sizeof(modelname), gibname);
 	p = strstr(modelname,"models/objects/gibs/");
 	if (p && self->gib_type)
 	{
@@ -4478,9 +4478,9 @@ int PatchDeadSoldier (void)
 	// save new model
 /*	Com_sprintf (outfilename, sizeof(outfilename), "%s/models", gamedir->string);	// make some dirs if needed
 	_mkdir (outfilename);
-	Q_strncatz (outfilename, "/deadbods", sizeof(outfilename));
+	Q_strncatz (outfilename, sizeof(outfilename), "/deadbods");
 	_mkdir (outfilename);
-	Q_strncatz (outfilename, "/dude", sizeof(outfilename));
+	Q_strncatz (outfilename, sizeof(outfilename), "/dude");
 	_mkdir (outfilename);
 	Com_sprintf (outfilename, sizeof(outfilename), "%s/%s", gamedir->string, DEADSOLDIER_MODEL);
 	p = strstr(outfilename,"/tris.md2");

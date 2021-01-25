@@ -938,13 +938,13 @@ void WriteGame (char *filename, qboolean autosave)
 		gi.error ("Couldn't open %s", filename);
 
 	memset (str, 0, sizeof(str));
-	Q_strncpyz (str, __DATE__, sizeof(str));
+	Q_strncpyz (str, sizeof(str), __DATE__);
 	fwrite (str, sizeof(str), 1, f);
 
 #ifdef SAVEGAME_USE_FUNCTION_TABLE
 	// use modname and save version for compatibility instead of build date
 	memset (str2, 0, sizeof(str2));
-	Q_strncpyz (str2, SAVEGAME_DLLNAME, sizeof(str2));
+	Q_strncpyz (str2, sizeof(str2), SAVEGAME_DLLNAME);
 	fwrite (str2, sizeof(str2), 1, f);
 
 	i = SAVEGAME_VERSION;

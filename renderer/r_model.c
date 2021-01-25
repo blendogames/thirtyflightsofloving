@@ -243,7 +243,7 @@ model_t *Mod_ForName (char *name, qboolean crash)
 		mod_numknown++;
 	}
 //	strncpy (mod->name, name);
-	Q_strncpyz (mod->name, name, sizeof(mod->name));
+	Q_strncpyz (mod->name, sizeof(mod->name), name);
 	
 	//
 	// load the file
@@ -1667,7 +1667,7 @@ void Mod_LoadModelScript (model_t *mod, maliasmodel_t *aliasmod)
 
 	COM_StripExtension (mod->name, scriptname, sizeof(scriptname));
 //	strncat (scriptname, ".script");
-	Q_strncatz (scriptname, ".script", sizeof(scriptname));
+	Q_strncatz (scriptname, sizeof(scriptname), ".script");
 	buf_size = FS_LoadFile (scriptname, &buf);
 
 	if (buf_size < 1)
@@ -2765,7 +2765,7 @@ struct model_s *R_RegisterModel (char *name)
 	{
 		char s[128];
 	//	strncpy(s,name);
-		Q_strncpyz(s, name, sizeof(s));
+		Q_strncpyz (s, sizeof(s), name);
 		s[len-1]='3';
 		mod = R_RegisterModel (s);
 		if (mod)

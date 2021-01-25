@@ -166,11 +166,11 @@ static void ApplyChanges( void *unused )
 
 		// update fields in case values were clamped
 		customStr = Cvar_VariableString("r_customwidth");
-		Q_strncpyz( s_customwidth_field.buffer, customStr, sizeof(s_customwidth_field.buffer) );
+		Q_strncpyz (s_customwidth_field.buffer, sizeof(s_customwidth_field.buffer), customStr);
 		s_customwidth_field.cursor = (int)strlen( customStr );
 		
 		customStr = Cvar_VariableString("r_customheight");
-		Q_strncpyz(s_customheight_field.buffer, customStr, sizeof(s_customwidth_field.buffer) );
+		Q_strncpyz (s_customheight_field.buffer, sizeof(s_customwidth_field.buffer), customStr);
 		s_customheight_field.cursor = (int)strlen( customStr );
 	}
 	Cvar_SetValue( "vid_fullscreen", s_fs_box.curvalue );
@@ -472,7 +472,7 @@ void Menu_Video_Init (void)
 	s_customwidth_field.length				= 5;
 	s_customwidth_field.visible_length		= 6;
 	customStr = Cvar_VariableString("r_customwidth");
-	Q_strncpyz( s_customwidth_field.buffer, customStr, sizeof(s_customwidth_field.buffer) );
+	Q_strncpyz (s_customwidth_field.buffer, sizeof(s_customwidth_field.buffer), customStr);
 	s_customwidth_field.cursor				= (int)strlen( customStr );
 
 	s_customheight_title.generic.type		= MTYPE_SEPARATOR;
@@ -492,7 +492,7 @@ void Menu_Video_Init (void)
 	s_customheight_field.length				= 5;
 	s_customheight_field.visible_length		= 6;
 	customStr = Cvar_VariableString("r_customheight");
-	Q_strncpyz(s_customheight_field.buffer, customStr, sizeof(s_customheight_field.buffer) );
+	Q_strncpyz (s_customheight_field.buffer, sizeof(s_customheight_field.buffer), customStr);
 	s_customheight_field.cursor				= (int)strlen( customStr );
 
 	s_fs_box.generic.type			= MTYPE_SPINCONTROL;

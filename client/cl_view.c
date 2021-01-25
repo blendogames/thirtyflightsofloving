@@ -419,7 +419,7 @@ void CL_PrepRefresh (void)
 
 	// let the render dll load the map
 //	strncpy (mapname, cl.configstrings[CS_MODELS+1] + 5);	// skip "maps/"
-	Q_strncpyz (mapname, cl.configstrings[CS_MODELS+1] + 5, sizeof(mapname));	// skip "maps/"
+	Q_strncpyz (mapname, sizeof(mapname), cl.configstrings[CS_MODELS+1] + 5);	// skip "maps/"
 	mapname[strlen(mapname)-4] = 0;		// cut off ".bsp"
 
 	// register models, pics, and skins
@@ -443,7 +443,7 @@ void CL_PrepRefresh (void)
 
 	num_cl_weaponmodels = 1;
 //	strncpy(cl_weaponmodels[0], "weapon.md2");
-	Q_strncpyz(cl_weaponmodels[0], "weapon.md2", sizeof(cl_weaponmodels[0]));
+	Q_strncpyz(cl_weaponmodels[0], sizeof(cl_weaponmodels[0]), "weapon.md2");
 
 	// Knightmare- for Psychospaz's map loading screen
 	for (i=1, max=0 ; i<MAX_MODELS && cl.configstrings[CS_MODELS+i][0] ; i++)
@@ -452,7 +452,7 @@ void CL_PrepRefresh (void)
 	for (i=1; i<MAX_MODELS && cl.configstrings[CS_MODELS+i][0]; i++)
 	{
 	//	strncpy (pname, cl.configstrings[CS_MODELS+i]);
-		Q_strncpyz (pname, cl.configstrings[CS_MODELS+i], sizeof(pname));
+		Q_strncpyz (pname, sizeof(pname), cl.configstrings[CS_MODELS+i]);
 		pname[37] = 0;	// never go beyond one line
 		if (pname[0] != '*')
 		{

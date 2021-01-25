@@ -238,7 +238,7 @@ void CL_LoadClientinfo (clientinfo_t *ci, char *s)
 	{
 		// isolate the model name
 	//	strncpy (model_name, s);
-		Q_strncpyz (model_name, s, sizeof(model_name));
+		Q_strncpyz (model_name, sizeof(model_name), s);
 		t = strstr(model_name, "/");
 		if (!t)
 			t = strstr(model_name, "\\");
@@ -248,7 +248,7 @@ void CL_LoadClientinfo (clientinfo_t *ci, char *s)
 
 		// isolate the skin name
 //		strncpy (skin_name, s + strlen(model_name) + 1);
-		Q_strncpyz (skin_name, s + strlen(model_name) + 1, sizeof(skin_name));
+		Q_strncpyz (skin_name, sizeof(skin_name), s + strlen(model_name) + 1);
 
 		// model file
 		Com_sprintf (model_filename, sizeof(model_filename), "players/%s/tris.md2", model_name);
@@ -256,7 +256,7 @@ void CL_LoadClientinfo (clientinfo_t *ci, char *s)
 		if (!ci->model)
 		{
 		//	strncpy(model_name, "male");
-			Q_strncpyz(model_name, "male", sizeof(model_name));
+			Q_strncpyz(model_name, sizeof(model_name), "male");
 			Com_sprintf (model_filename, sizeof(model_filename), "players/male/tris.md2");
 			ci->model = R_RegisterModel (model_filename);
 		}
@@ -271,7 +271,7 @@ void CL_LoadClientinfo (clientinfo_t *ci, char *s)
 		{
 			// change model to male
 		//	strncpy(model_name, "male");
-			Q_strncpyz(model_name, "male", sizeof(model_name));
+			Q_strncpyz(model_name, sizeof(model_name), "male");
 			Com_sprintf (model_filename, sizeof(model_filename), "players/male/tris.md2");
 			ci->model = R_RegisterModel (model_filename);
 
@@ -484,7 +484,7 @@ void CL_ParseConfigString (void)
 		Com_Error (ERR_DROP, "configstring > MAX_CONFIGSTRINGS");
 	s = MSG_ReadString(&net_message);
 
-	Q_strncpyz (olds, cl.configstrings[i], sizeof(olds));
+	Q_strncpyz (olds, sizeof(olds), cl.configstrings[i]);
 
 	// check length
 	length = strlen(s);
@@ -498,7 +498,7 @@ void CL_ParseConfigString (void)
 	else {
 		if (length >= MAX_QPATH)
 			Com_Printf(S_COLOR_YELLOW"CL_ParseConfigString: string %d of length %d exceeds MAX_QPATH.\n", i, (int)length);
-		Q_strncpyz (cl.configstrings[i], s, sizeof(cl.configstrings[i]));
+		Q_strncpyz (cl.configstrings[i], sizeof(cl.configstrings[i]), s);
 	}
 
 	// do something apropriate 

@@ -220,7 +220,7 @@ void SV_SpawnServer (char *server, char *spawnpoint, server_state_t serverstate,
 
 	// save name for levels that don't set message
 //	strncpy (sv.configstrings[CS_NAME], server);
-	Q_strncpyz (sv.configstrings[CS_NAME], server, sizeof(sv.configstrings[CS_NAME]));
+	Q_strncpyz (sv.configstrings[CS_NAME], sizeof(sv.configstrings[CS_NAME]), server);
 	if (Cvar_VariableValue ("deathmatch"))
 	{
 		Com_sprintf(sv.configstrings[CS_AIRACCEL], sizeof(sv.configstrings[CS_AIRACCEL]), "%g", sv_airaccelerate->value);
@@ -229,14 +229,14 @@ void SV_SpawnServer (char *server, char *spawnpoint, server_state_t serverstate,
 	else
 	{
 	//	strncpy(sv.configstrings[CS_AIRACCEL], "0");
-		Q_strncpyz(sv.configstrings[CS_AIRACCEL], "0", sizeof(sv.configstrings[CS_AIRACCEL]));
+		Q_strncpyz(sv.configstrings[CS_AIRACCEL], sizeof(sv.configstrings[CS_AIRACCEL]), "0");
 		pm_airaccelerate = 0;
 	}
 
 	SZ_Init (&sv.multicast, sv.multicast_buf, sizeof(sv.multicast_buf));
 
 //	strncpy (sv.name, server);
-	Q_strncpyz (sv.name, server, sizeof(sv.name));
+	Q_strncpyz (sv.name, sizeof(sv.name), server);
 
 	// leave slots at start for clients only
 	for (i=0 ; i<maxclients->value ; i++)
@@ -251,8 +251,8 @@ void SV_SpawnServer (char *server, char *spawnpoint, server_state_t serverstate,
 	
 //	strncpy (sv.name, server);
 //	strncpy (sv.configstrings[CS_NAME], server);
-	Q_strncpyz (sv.name, server, sizeof(sv.name));
-	Q_strncpyz (sv.configstrings[CS_NAME], server, sizeof(sv.configstrings[CS_NAME]));
+	Q_strncpyz (sv.name, sizeof(sv.name), server);
+	Q_strncpyz (sv.configstrings[CS_NAME], sizeof(sv.configstrings[CS_NAME]), server);
 
 	if (serverstate != ss_game)
 	{
@@ -268,7 +268,7 @@ void SV_SpawnServer (char *server, char *spawnpoint, server_state_t serverstate,
 		FS_FileExists (sv.configstrings[CS_MODELS + 1]);
 		if (!file_from_protected_pak) {		// protected pak check from Yamagi Q2
 		//	strncpy(sv.configstrings[CS_PAKFILE], (last_pk3_name ? last_pk3_name : ""));
-			Q_strncpyz(sv.configstrings[CS_PAKFILE], ((strlen(last_pk3_name) > 0) ? last_pk3_name : ""), sizeof(sv.configstrings[CS_PAKFILE]));
+			Q_strncpyz(sv.configstrings[CS_PAKFILE], sizeof(sv.configstrings[CS_PAKFILE]), ((strlen(last_pk3_name) > 0) ? last_pk3_name : ""));
 		//	Com_Printf ("SV_SpawnServer: CS_PAKFILE set to %s\n", last_pk3_name);
 	//	FS_FCloseFile(f);
 		}
@@ -443,9 +443,9 @@ void SV_Map (qboolean attractloop, char *levelstring, qboolean loadgame)
 	// r1ch fix: buffer overflow
 //	strncpy (level, levelstring);
 	if (levelstring[0] == '*')
-		Q_strncpyz (level, levelstring+1, sizeof(level));
+		Q_strncpyz (level, sizeof(level), levelstring+1);
 	else
-		Q_strncpyz (level, levelstring, sizeof(level));
+		Q_strncpyz (level, sizeof(level), levelstring);
 
 	// if there is a + in the map, set nextserver to the remainder
 	ch = strstr(level, "+");
@@ -467,7 +467,7 @@ void SV_Map (qboolean attractloop, char *levelstring, qboolean loadgame)
 	{
 		*ch = 0;
 	//	strncpy (spawnpoint, ch+1);
-		Q_strncpyz (spawnpoint, ch+1, sizeof(spawnpoint));
+		Q_strncpyz (spawnpoint, sizeof(spawnpoint), ch+1);
 	}
 	else
 		spawnpoint[0] = 0;

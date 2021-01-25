@@ -1062,7 +1062,7 @@ void COM_StripExtension (char *in, char *out, size_t outSize)
 		s--;
 	}
 
-	Q_strncpyz(out, in, outSize);
+	Q_strncpyz(out, outSize, in);
 	if (last-in < outSize)
 		out[last-in] = 0;
 }
@@ -1112,7 +1112,7 @@ void COM_FileBase (char *in, char *out, size_t outSize)
 		s--;
 	//	strncpy (out,s2+1, s-s2);
 	//	out[s-s2] = 0;
-		Q_strncpyz (out, s2+1, outSize);
+		Q_strncpyz (out, outSize, s2+1);
 		if (s-s2 < outSize)
 			out[s-s2] = 0;
 	}
@@ -1136,7 +1136,7 @@ void COM_FilePath (char *in, char *out, size_t outSize)
 
 //	strncpy (out, in, s-in);
 //	out[s-in] = 0;
-	Q_strncpyz (out, in, outSize);
+	Q_strncpyz (out, outSize, in);
 	if (s-in < outSize)
 		out[s-in] = 0;
 }
@@ -1164,7 +1164,7 @@ void COM_DefaultExtension (char *path, size_t pathSize, char *extension)
 	}
 
 //	strncat (path, extension);
-	Q_strncatz(path, extension, pathSize);
+	Q_strncatz(path, pathSize, extension);
 }
 
 /*
@@ -1998,7 +1998,7 @@ Q_strncpyz
 Safe strncpy that ensures a trailing zero
 =================
 */
-void Q_strncpyz (char *dst, const char *src, size_t dstSize)
+void Q_strncpyz (char *dst, size_t dstSize, const char *src)
 {
 	if (!dst) {
 	//	Com_Error (ERR_FATAL, "Q_strncpyz: NULL dst");
@@ -2028,7 +2028,7 @@ Q_strncatz
 Safe strncat that ensures a trailing zero
 =================
 */
-void Q_strncatz (char *dst, const char *src, size_t dstSize)
+void Q_strncatz (char *dst, size_t dstSize, const char *src)
 {
 	if (!dst) {
 	//	Com_Error (ERR_FATAL, "Q_strncatz: NULL dst");

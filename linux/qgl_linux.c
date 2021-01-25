@@ -3145,8 +3145,8 @@ qboolean QGL_Init( const char *dllname )
 
 	//	strncat(fn, "/");
 	//	strncat(fn, dllname);
-		Q_strncatz(fn, "/", sizeof(fn));
-		Q_strncatz(fn, dllname, sizeof(fn));
+		Q_strncatz(fn, sizeof(fn), "/");
+		Q_strncatz(fn, sizeof(fn), dllname);
 
 		if ( ( glw_state.OpenGLLib = dlopen( fn, RTLD_LAZY ) ) == 0 ) {
 			ri.Con_Printf( PRINT_ALL, "%s\n", dlerror() );

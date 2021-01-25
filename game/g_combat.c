@@ -519,7 +519,7 @@ void M_ReactToDamage (edict_t *targ, edict_t *attacker)
 	if (targ->flags & FL_ROBOT)
 		return;
 
-	is_turret = (attacker->classname && !Q_stricmp(attacker->classname,"turret_breach"));
+	is_turret = (attacker->classname && !Q_stricmp(attacker->classname, "turret_breach"));
 
 	targ->spawnflags &= ~(SF_MONSTER_AMBUSH | SF_MONSTER_SIGHT);	// 1.6.1.3
 
@@ -594,19 +594,22 @@ void M_ReactToDamage (edict_t *targ, edict_t *attacker)
 				if (!VectorLength(attacker->size)) {
 					// point entity
 					VectorCopy(attacker->s.origin,atk);
-				} else {
+				}
+				else {
 					// brush model... can't rely on origin
 					VectorMA(attacker->mins,0.5,attacker->size,atk);
 				}
 				VectorClear(best_dir);
 				AngleVectors(targ->s.angles,forward,NULL,NULL);
-				for (i=0; i<32 && best_dist == 0; i++) {
+				for (i=0; i<32 && best_dist == 0; i++)
+				{
 					// Weight escape route tests in favor of forward-facing direction
 					if (random() > 0.5) {
 						dir[0] = forward[0] + 0.5*crandom();
 						dir[1] = forward[1] + 0.5*crandom();
 						dir[2] = forward[2];
-					} else {
+					}
+					else {
 						dir[0] = crandom();
 						dir[1] = crandom();
 						dir[2] = 0;

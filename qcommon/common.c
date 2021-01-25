@@ -129,7 +129,7 @@ void Com_Printf (char *fmt, ...)
 			*rd_buffer = 0;
 		}
 	//	strncat (rd_buffer, msg);
-		Q_strncatz (rd_buffer, msg, rd_buffersize);
+		Q_strncatz (rd_buffer, rd_buffersize, msg);
 		return;
 	}
 
@@ -1254,10 +1254,12 @@ int	memsearch (byte *start, int count, int search)
 char *CopyString (char *in)
 {
 	char	*out;
+	size_t	outSize;
 	
-	out = Z_Malloc (strlen(in)+1);
+	outSize = strlen(in)+1;
+	out = Z_Malloc (outSize);
 //	strncpy (out, in);
-	Q_strncpyz (out, in, strlen(in)+1);
+	Q_strncpyz (out, outSize, in);
 	return out;
 }
 
@@ -2006,7 +2008,7 @@ const char *MakePrintable (const void *subject, size_t numchars)
 	if (!subject)
 	{
 	//	strncpy (printable, "(null)");
-		Q_strncpyz (printable, "(null)", sizeof(printable));
+		Q_strncpyz (printable, sizeof(printable), "(null)");
 		return printable;
 	}
 

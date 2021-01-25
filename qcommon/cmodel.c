@@ -540,7 +540,7 @@ void CMod_LoadEntityString (lump_t *l, char *name)
 		int		nameLen, bufLen;
 
 		nameLen = (int)strlen(name);
-		Q_strncpyz (s, name, sizeof(s));
+		Q_strncpyz (s, sizeof(s), name);
 		s[nameLen-3] = 'e';	s[nameLen-2] = 'n';	s[nameLen-1] = 't';
 		bufLen = FS_LoadFile (s, (void **)&buffer);
 		if (buffer != NULL && bufLen > 1)
@@ -672,10 +672,10 @@ cmodel_t *CM_LoadMap (char *name, qboolean clientload, unsigned *checksum)
 		qboolean		foundentfile;
 
 	//	strncpy(entfile, name);
-		Q_strncpyz(entfile, name, sizeof(entfile));
+		Q_strncpyz(entfile, sizeof(entfile), name);
 		entfile[strlen(entfile)-4] = 0;
 	//	strncat(entfile, ".ent");
-		Q_strncatz(entfile, ".ent", sizeof(entfile));
+		Q_strncatz(entfile, sizeof(entfile), ".ent");
 		entlength = FS_LoadFile(entfile, (void **)&entbuf);
 		if (entbuf)
 		{
@@ -700,7 +700,7 @@ cmodel_t *CM_LoadMap (char *name, qboolean clientload, unsigned *checksum)
 	FloodAreaConnections ();
 
 //	strncpy (map_name, name);
-	Q_strncpyz (map_name, name, sizeof(map_name));
+	Q_strncpyz (map_name, sizeof(map_name), name);
 
 	return &map_cmodels[0];
 }

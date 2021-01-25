@@ -718,12 +718,12 @@ void Fog_Init (void)
 
 	if (gl_driver_fog && strlen(gl_driver_fog->string))
 	//	strncpy(GL_Lib, gl_driver_fog->string);
-		Q_strncpyz(GL_Lib, gl_driver_fog->string, sizeof(GL_Lib));
+		Q_strncpyz(GL_Lib, sizeof(GL_Lib), gl_driver_fog->string);
 	else
 	//	strncpy(GL_Lib, "opengl32");
-		Q_strncpyz(GL_Lib, "opengl32", sizeof(GL_Lib));
+		Q_strncpyz(GL_Lib, sizeof(GL_Lib), "opengl32");
 //	strncat(GL_Lib,".dll");
-	Q_strncatz(GL_Lib,".dll", sizeof(GL_Lib));
+	Q_strncatz(GL_Lib, sizeof(GL_Lib),".dll");
 	hOpenGL = LoadLibrary(GL_Lib);
 	if (hOpenGL)
 	{

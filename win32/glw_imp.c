@@ -189,8 +189,8 @@ static qboolean VerifyDriver( void )
 {
 	char buffer[1024];
 
-//	strncpy( buffer, qglGetString( GL_RENDERER ) );
-	Q_strncpyz( buffer, qglGetString( GL_RENDERER ), sizeof(buffer) );
+//	strncpy (buffer, qglGetString(GL_RENDERER));
+	Q_strncpyz (buffer, sizeof(buffer), qglGetString(GL_RENDERER));
 	strlwr( buffer );
 	if ( strcmp( buffer, "gdi generic" ) == 0 )
 		if ( !glw_state.mcd_accelerated )
@@ -717,8 +717,8 @@ qboolean GLimp_InitGL (void)
 	{
 		char buffer[1024];
 
-	//	strncpy( buffer, qglGetString( GL_RENDERER ) );
-		Q_strncpyz( buffer, qglGetString( GL_RENDERER ), sizeof(buffer) );
+	//	strncpy (buffer, qglGetString(GL_RENDERER));
+		Q_strncpyz (buffer, sizeof(buffer), qglGetString(GL_RENDERER));
 		strlwr( buffer );
 		if (strstr(buffer, "Voodoo3")) {
 			VID_Printf( PRINT_ALL, "... Voodoo3 has no stencil buffer\n" );

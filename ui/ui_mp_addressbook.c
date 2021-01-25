@@ -89,7 +89,7 @@ void AddressBook_MenuInit( void )
 		s_addressbook_fields[i].length			= 60;
 		s_addressbook_fields[i].visible_length	= 30;
 	//	strncpy(s_addressbook_fields[i].buffer, adr->string);
-		Q_strncpyz(s_addressbook_fields[i].buffer, adr->string, sizeof(s_addressbook_fields[i].buffer));
+		Q_strncpyz (s_addressbook_fields[i].buffer, sizeof(s_addressbook_fields[i].buffer), adr->string);
 		s_addressbook_fields[i].cursor = (int)strlen(adr->string);
 
 		Menu_AddItem(&s_addressbook_menu, &s_addressbook_fields[i]);

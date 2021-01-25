@@ -303,7 +303,7 @@ sfxcache_t *S_LoadSound (sfx_t *s)
 
 	if (name[0] == '#')
 	//	strncpy(namebuffer, &name[1]);
-		Q_strncpyz(namebuffer, &name[1], sizeof(namebuffer));
+		Q_strncpyz (namebuffer, sizeof(namebuffer), &name[1]);
 	else
 		Com_sprintf (namebuffer, sizeof(namebuffer), "sound/%s", name);
 

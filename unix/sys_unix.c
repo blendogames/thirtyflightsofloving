@@ -360,7 +360,7 @@ static void Init_ExeDir (const char* argv0)
 
 		 if (strlen(argv0) < sizeof(buf))
 		 {
-			 Q_strncpyz(buf, argv0, sizeof(buf));
+			 Q_strncpyz(buf, sizeof(buf), argv0);
 		 }
 		 else
 		 {
@@ -398,12 +398,13 @@ static void Sys_InitPrefDir (void)
 	if (strlen(pp) >= sizeof(pref_dir) - 1)
 	{
 		printf("WARNING: $XDG_DATA_HOME contains a too long path, defaulting to installation dir!\n");
-		Q_strncpyz(pref_dir, exe_dir, sizeof(pref_dir));
+		Q_strncpyz(pref_dir, sizeof(pref_dir), exe_dir);
+		Q_strncpyz (download_dir, sizeof(download_dir), exe_dir);
 		return;
 	}
 
-	Q_strncpyz (pref_dir, pp, sizeof(pref_dir));
-	Q_strncpyz (download_dir, pp, sizeof(download_dir));
+	Q_strncpyz (pref_dir, sizeof(pref_dir), pp);
+	Q_strncpyz (download_dir, sizeof(download_dir), pp);
 }
 // end Knightmare
 

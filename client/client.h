@@ -104,18 +104,18 @@ typedef struct
 	int			fly_stoptime;
 } centity_t;
 
-// 12/23/2001- increased this from 20
-#define MAX_CLIENTWEAPONMODELS		64		// PGM -- upped from 16 to fit the chainfist vwep
+// Knightmare 12/23/2001- increased this from 20
+#define MAX_CLIENTWEAPONMODELS		256		// PGM -- upped from 16 to fit the chainfist vwep
 
 typedef struct
 {
 	char	name[MAX_QPATH];
 	char	cinfo[MAX_QPATH];
-	struct image_s	*skin;
-	struct image_s	*icon;
+	struct	image_s	*skin;
+	struct	image_s	*icon;
 	char	iconname[MAX_QPATH];
-	struct model_s	*model;
-	struct model_s	*weaponmodel[MAX_CLIENTWEAPONMODELS];
+	struct	model_s	*model;
+	struct	model_s	*weaponmodel[MAX_CLIENTWEAPONMODELS];
 } clientinfo_t;
 
 extern char cl_weaponmodels[MAX_CLIENTWEAPONMODELS][MAX_QPATH];

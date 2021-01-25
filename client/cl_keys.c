@@ -192,7 +192,7 @@ void CompleteCommand (void)
 	{
 		key_lines[edit_line][1] = '/';
 	//	strncpy (key_lines[edit_line]+2, cmd);
-		Q_strncpyz (key_lines[edit_line]+2, cmd, sizeof(key_lines[edit_line])-2);
+		Q_strncpyz (key_lines[edit_line]+2, sizeof(key_lines[edit_line])-2, cmd);
 		key_linepos = (int)strlen(cmd)+2;
 		if (Cmd_IsComplete(cmd)) {
 			key_lines[edit_line][key_linepos] = ' ';
@@ -283,8 +283,8 @@ void Key_Console (int key)
 			if ( i > 0 )
 			{
 				cbd[i]=0;
-			//	strncat( key_lines[edit_line], cbd );
-				Q_strncatz( key_lines[edit_line], cbd, sizeof(key_lines[edit_line]) );
+			//	strncat(key_lines[edit_line], cbd);
+				Q_strncatz (key_lines[edit_line], sizeof(key_lines[edit_line]), cbd);
 				key_linepos += i;
 			}
 			free( cbd );
@@ -314,7 +314,7 @@ void Key_Console (int key)
 		/*if (edit_line == 31)
 		{
 		//	strncpy(key_lines[1], key_lines[31]);
-			Q_strncpyz(key_lines[1], key_lines[31], sizeof(key_lines[1]));
+			Q_strncpyz (key_lines[1], sizeof(key_lines[1]), key_lines[31]);
 			for (edit_line = 2; edit_line < 32; edit_line++)
 				memset(key_lines[edit_line], 0, sizeof(key_lines[edit_line]));
 			edit_line = 0;
@@ -403,7 +403,7 @@ void Key_Console (int key)
 		if (history_line == edit_line)
 			history_line = (edit_line+1)&31;
 	//	strncpy(key_lines[edit_line], key_lines[history_line]);
-		Q_strncpyz(key_lines[edit_line], key_lines[history_line], sizeof(key_lines[edit_line]));
+		Q_strncpyz (key_lines[edit_line], sizeof(key_lines[edit_line]), key_lines[history_line]);
 		key_linepos = (int)strlen(key_lines[edit_line]);
 		return;
 	}
@@ -426,7 +426,7 @@ void Key_Console (int key)
 		else
 		{
 		//	strncpy(key_lines[edit_line], key_lines[history_line]);
-			Q_strncpyz(key_lines[edit_line], key_lines[history_line], sizeof(key_lines[edit_line]));
+			Q_strncpyz (key_lines[edit_line], sizeof(key_lines[edit_line]), key_lines[history_line]);
 			key_linepos = (int)strlen(key_lines[edit_line]);
 		}
 		return;
@@ -691,7 +691,7 @@ void Key_SetBinding (int keynum, char *binding)
 	l = (int)strlen (binding);	
 	new = Z_Malloc (l+1);
 //	strncpy (new, binding);
-	Q_strncpyz (new, binding, l+1);
+	Q_strncpyz (new, l+1, binding);
 	new[l] = 0;
 	keybindings[keynum] = new;	
 }
@@ -769,10 +769,10 @@ void Key_Bind_f (void)
 	for (i=2 ; i< c ; i++)
 	{
 	//	strncat (cmd, Cmd_Argv(i));
-		Q_strncatz (cmd, Cmd_Argv(i), sizeof(cmd));
+		Q_strncatz (cmd, sizeof(cmd), Cmd_Argv(i));
 		if (i != (c-1))
 		//	strncat (cmd, " ");
-			Q_strncatz (cmd, " ", sizeof(cmd));
+			Q_strncatz (cmd, sizeof(cmd), " ");
 	}
 
 	Key_SetBinding (b, cmd);

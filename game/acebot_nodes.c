@@ -763,9 +763,9 @@ void ACEND_SaveNodes (void)
 	CreatePath (dirname);
 	Com_sprintf (tempname, sizeof(tempname), "nav/%s.nod", level.mapname);
 	SavegameDirRelativePath (tempname, filename, sizeof(filename));
-//	Q_strncpyz(filename, "ace\\nav\\", sizeof(filename));
-//	Q_strncatz(filename, level.mapname, sizeof(filename));
-//	Q_strncatz(filename, ".nod", sizeof(filename));
+//	Q_strncpyz(filename, sizeof(filename), "ace\\nav\\");
+//	Q_strncatz(filename, sizeof(filename), level.mapname);
+//	Q_strncatz(filename, sizeof(filename), ".nod");
 
 	if ((pOut = fopen(filename, "wb" )) == NULL)
 		return; // bail
@@ -807,9 +807,9 @@ void ACEND_LoadNodes (void)
 #endif
 	{
 		GameDirRelativePath (tempname, filename, sizeof(filename));
-	//	Q_strncpyz(filename, "ace\\nav\\", sizeof(filename));
-	//	Q_strncatz(filename, level.mapname, sizeof(filename));
-	//	Q_strncatz(filename, ".nod", sizeof(filename));
+	//	Q_strncpyz(filename, sizeof(filename), "ace\\nav\\");
+	//	Q_strncatz(filename, sizeof(filename), level.mapname);
+	//	Q_strncatz(filename, sizeof(filename), ".nod");
 
 		if ((pIn = fopen(filename, "rb" )) == NULL)
 		{

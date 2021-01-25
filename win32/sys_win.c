@@ -300,7 +300,7 @@ char *Sys_GetClipboardData( void )
 			{
 				data = malloc( GlobalSize( hClipboardData ) + 1 );
 			//	strncpy( data, cliptext );
-				Q_strncpyz( data, cliptext, GlobalSize( hClipboardData ) + 1 );
+				Q_strncpyz (data, GlobalSize( hClipboardData ) + 1, cliptext);
 				GlobalUnlock( hClipboardData );
 			}
 		}
@@ -615,13 +615,13 @@ NoExtFunction:
 
 	if (!Q_stricmp(vendor, "AuthenticAMD"))
 	{
-		strncpy(cpuString, "AMD", maxSize);
+		Q_strncpyz(cpuString, maxSize, "AMD");
 	//	Com_sprintf(cpuString, maxSize, "AMD Family %i ExtFamily %i Model %i ExtModel %i", family, extFamily, model, extModel);
 
 		switch (family)
 		{
 		case 4:
-			Q_strncatz(cpuString, " 5x86", maxSize);
+			Q_strncatz(cpuString, maxSize, " 5x86");
 			break;
 		case 5:
 			switch (model)
@@ -630,14 +630,14 @@ NoExtFunction:
 			case 1:
 			case 2:
 			case 3:
-				Q_strncatz(cpuString, " K5", maxSize);
+				Q_strncatz(cpuString, maxSize, " K5");
 				break;
 			case 6:
 			case 7:
-				Q_strncatz(cpuString, " K6", maxSize);
+				Q_strncatz(cpuString, maxSize, " K6");
 				break;
 			case 8:
-				Q_strncatz(cpuString, " K6-2", maxSize);
+				Q_strncatz(cpuString, maxSize, " K6-2");
 				break;
 			case 9:
 			case 10:
@@ -646,7 +646,7 @@ NoExtFunction:
 			case 13:
 			case 14:
 			case 15:
-				Q_strncatz(cpuString, " K6-III", maxSize);
+				Q_strncatz(cpuString, maxSize, " K6-III");
 				break;
 			}
 			break;
@@ -659,14 +659,14 @@ NoExtFunction:
 			case 6:		// Palomino core
 			case 8:		// Thoroughbred core
 			case 10:	// Barton core
-				Q_strncatz(cpuString, " Athlon", maxSize);
+				Q_strncatz(cpuString, maxSize, " Athlon");
 				break;
 			case 3:		// Spitfire core
 			case 7:		// Morgan core
-				Q_strncatz(cpuString, " Duron", maxSize);
+				Q_strncatz(cpuString, maxSize, " Duron");
 				break;
 			default:
-				Q_strncatz(cpuString, " K7", maxSize);
+				Q_strncatz(cpuString, maxSize, " K7");
 				break;
 			}
 			break;
@@ -681,19 +681,19 @@ NoExtFunction:
 				case 4:		// Clawhammer/Newark
 				case 7:		// San Diego/Newcastle
 				case 12:	// Newcastle/Albany
-					Q_strncatz(cpuString, " Athlon 64", maxSize);
+					Q_strncatz(cpuString, maxSize, " Athlon 64");
 					break;
 				case 3:		// Toledo
 				case 11:	// Manchester/Brisbane
 				case 15:	// Winchester/Venice
-					Q_strncatz(cpuString, " Athlon 64 X2", maxSize);
+					Q_strncatz(cpuString, maxSize, " Athlon 64 X2");
 					break;
 				case 1:
 				case 5:
-					Q_strncatz(cpuString, " Athlon 64 FX / Opteron", maxSize);
+					Q_strncatz(cpuString, maxSize, " Athlon 64 FX / Opteron");
 					break;
 				default:
-					Q_strncatz(cpuString, " K8", maxSize);
+					Q_strncatz(cpuString, maxSize, " K8");
 					break;
 				}
 			}
@@ -703,18 +703,18 @@ NoExtFunction:
 				{
 				case 0: // Barcelona A0-A2
 				case 2: // Barcelona B0-B3
-					Q_strncatz(cpuString, " Phenom / Opteron", maxSize);
+					Q_strncatz(cpuString, maxSize, " Phenom / Opteron");
 					break;
 				case 4: // Deneb / Shanghai
 				case 10: // Thuban
-					Q_strncatz(cpuString, " Phenom II / Opteron", maxSize);
+					Q_strncatz(cpuString, maxSize, " Phenom II / Opteron");
 					break;
 				case 5: // Propus
 				case 6: // Regor
-					Q_strncatz(cpuString, " Athlon II", maxSize);
+					Q_strncatz(cpuString, maxSize, " Athlon II");
 					break;
 				default:
-					Q_strncatz(cpuString, " K10", maxSize);
+					Q_strncatz(cpuString, maxSize, " K10");
 					break;
 				}
 			}
@@ -723,10 +723,10 @@ NoExtFunction:
 				switch (model)
 				{
 				case 1:	// Llano
-					Q_strncatz(cpuString, " A8 APU", maxSize);
+					Q_strncatz(cpuString, maxSize, " A8 APU");
 					break;
 				default:
-					Q_strncatz(cpuString, " A series APU", maxSize);
+					Q_strncatz(cpuString, maxSize, " A series APU");
 					break;
 				}
 			}
@@ -735,10 +735,10 @@ NoExtFunction:
 				switch (model)
 				{
 				case 1:	// Zacate
-					Q_strncatz(cpuString, " E-350 APU", maxSize);
+					Q_strncatz(cpuString, maxSize, " E-350 APU");
 					break;
 				default:
-					Q_strncatz(cpuString, " E series APU", maxSize);
+					Q_strncatz(cpuString, maxSize, " E series APU");
 					break;
 				}
 			}
@@ -748,32 +748,32 @@ NoExtFunction:
 				{
 				case 0:
 					if (extModel == 0x10)	// Trinity
-						Q_strncatz(cpuString, " A series APU", maxSize);
+						Q_strncatz(cpuString, maxSize, " A series APU");
 					else if (extModel == 0x30) // Kaveri
-						Q_strncatz(cpuString, " A series APU", maxSize);
+						Q_strncatz(cpuString, maxSize, " A series APU");
 					else // Zambezi
-						Q_strncatz(cpuString, " FX series", maxSize);
+						Q_strncatz(cpuString, maxSize, " FX series");
 					break;
 				case 1:
 					if (extModel == 1)	// Zambezi
-						Q_strncatz(cpuString, " FX series", maxSize);
+						Q_strncatz(cpuString, maxSize, " FX series");
 					else if (extModel == 0x60)	// Carrizo
-						Q_strncatz(cpuString, " A series APU", maxSize);
+						Q_strncatz(cpuString, maxSize, " A series APU");
 					break;
 				case 2:
 					if (extModel == 2) // Zambezi / Vishera
-						Q_strncatz(cpuString, " FX series", maxSize);
+						Q_strncatz(cpuString, maxSize, " FX series");
 					break;
 				case 3:
 					if (extModel == 0x13)	// Richland
-						Q_strncatz(cpuString, " A series APU", maxSize);
+						Q_strncatz(cpuString, maxSize, " A series APU");
 					break;
 				case 5:
 					if (extModel == 0x65)	// Bristol Ridge
-						Q_strncatz(cpuString, " A series APU", maxSize);
+						Q_strncatz(cpuString, maxSize, " A series APU");
 					break;
 				default:
-					Q_strncatz(cpuString, " FX series", maxSize);
+					Q_strncatz(cpuString, maxSize, " FX series");
 					break;
 				}
 			}
@@ -783,24 +783,24 @@ NoExtFunction:
 				{
 				case 0:
 					if (extModel == 0x60)	// Renoir
-						Q_strncatz(cpuString, " Ryzen 7/5/3 4x00G", maxSize);
+						Q_strncatz(cpuString, maxSize, " Ryzen 7/5/3 4x00G");
 					break;
 				case 1:
 					if (extModel == 1)	// Summit Ridge
-						Q_strncatz(cpuString, " Ryzen 7/5/3 1x00", maxSize);
+						Q_strncatz(cpuString, maxSize, " Ryzen 7/5/3 1x00");
 					else if (extModel == 0x11)	// Raven Ridge
-						Q_strncatz(cpuString, " Ryzen 5/3 2x00G", maxSize);
+						Q_strncatz(cpuString, maxSize, " Ryzen 5/3 2x00G");
 					else if (extModel == 0x71)	// Matisse (Zen 2)
-						Q_strncatz(cpuString, " Ryzen 9/7/5/3 3x00", maxSize);
+						Q_strncatz(cpuString, maxSize, " Ryzen 9/7/5/3 3x00");
 					break;
 				case 8:
 					if (extModel == 8)	// Pinnacle Ridge
-						Q_strncatz(cpuString, " Ryzen 7/5/3 2x00", maxSize);
+						Q_strncatz(cpuString, maxSize, " Ryzen 7/5/3 2x00");
 					else if (extModel == 0x18)	// Picasso
-						Q_strncatz(cpuString, " Ryzen 5/3 3x00G", maxSize);
+						Q_strncatz(cpuString, maxSize, " Ryzen 5/3 3x00G");
 					break;
 				default:
-					Q_strncatz(cpuString, " Zen/Zen+/Zen2", maxSize);
+					Q_strncatz(cpuString, maxSize, " Zen/Zen+/Zen2");
 					break;
 				}
 			}
@@ -810,14 +810,14 @@ NoExtFunction:
 				{
 				case 0:
 					if (extModel == 0x50)	// Cezanne
-						Q_strncatz(cpuString, " Ryzen 7/5/3 5x00G", maxSize);
+						Q_strncatz(cpuString, maxSize, " Ryzen 7/5/3 5x00G");
 					break;
 				case 1:
 					if (extModel == 0x21)	// Vermeer (Zen3)
-						Q_strncatz(cpuString, " Ryzen 9/7/5/3 5x00", maxSize);
+						Q_strncatz(cpuString, maxSize, " Ryzen 9/7/5/3 5x00");
 					break;
 				default:
-					Q_strncatz(cpuString, " Zen3", maxSize);
+					Q_strncatz(cpuString, maxSize, " Zen3");
 					break;
 				}
 			}
@@ -828,29 +828,29 @@ NoExtFunction:
 	}
 	else if (!Q_stricmp(vendor, "CyrixInstead"))
 	{
-		strncpy(cpuString, "Cyrix", maxSize);
+		Q_strncpyz(cpuString, maxSize, "Cyrix");
 
 		switch (family)
 		{
 		case 4:
-			Q_strncatz(cpuString, " 5x86", maxSize);
+			Q_strncatz(cpuString, maxSize, " 5x86");
 			break;
 		case 5:
 			switch (model)
 			{
 			case 2:
-				Q_strncatz(cpuString, " 6x86", maxSize);
+				Q_strncatz(cpuString, maxSize, " 6x86");
 				break;
 			case 4:
-				Q_strncatz(cpuString, " MediaGX", maxSize);
+				Q_strncatz(cpuString, maxSize, " MediaGX");
 				break;
 			default:
-				Q_strncatz(cpuString, " 6x86 / MediaGX", maxSize);
+				Q_strncatz(cpuString, maxSize, " 6x86 / MediaGX");
 				break;
 			}
 			break;
 		case 6:
-			Q_strncatz(cpuString, " 6x86MX", maxSize);
+			Q_strncatz(cpuString, maxSize, " 6x86MX");
 			break;
 		default: // unknown family
 			break;
@@ -858,7 +858,7 @@ NoExtFunction:
 	}
 	else if (!Q_stricmp(vendor, "CentaurHauls"))
 	{
-		strncpy(cpuString, "Centaur", maxSize);
+		Q_strncpyz(cpuString, maxSize, "Centaur");
 
 		switch (family)
 		{
@@ -866,13 +866,13 @@ NoExtFunction:
 			switch (model)
 			{
 			case 4:
-				Q_strncatz(cpuString, " C6", maxSize);
+				Q_strncatz(cpuString, maxSize, " C6");
 				break;
 			case 8:
-				Q_strncatz(cpuString, " C2", maxSize);
+				Q_strncatz(cpuString, maxSize, " C2");
 				break;
 			case 9:
-				Q_strncatz(cpuString, " C3", maxSize);
+				Q_strncatz(cpuString, maxSize, " C3");
 				break;
 			default: // unknown model
 				break;
@@ -884,7 +884,7 @@ NoExtFunction:
 	}
 	else if (!Q_stricmp(vendor, "NexGenDriven"))
 	{
-		strncpy(cpuString, "NexGen", maxSize);
+		Q_strncpyz(cpuString, maxSize, "NexGen");
 
 		switch (family)
 		{
@@ -892,7 +892,7 @@ NoExtFunction:
 			switch (model)
 			{
 			case 0:
-				Q_strncatz(cpuString, " Nx586 / Nx586FPU", maxSize);
+				Q_strncatz(cpuString, maxSize, " Nx586 / Nx586FPU");
 				break;
 			default: // unknown model
 				break;
@@ -904,7 +904,7 @@ NoExtFunction:
 	}
 	else if (!Q_stricmp(vendor, "GenuineIntel"))
 	{
-		strncpy(cpuString, "Intel", maxSize);
+		Q_strncpyz(cpuString, maxSize, "Intel");
 	//	Com_sprintf(cpuString, maxSize, "Intel Family %i ExtFamily %i Model %i ExtModel %i", family, extFamily, model, extModel);
 
 		switch (family)
@@ -920,7 +920,7 @@ NoExtFunction:
 			case 7:
 			case 8:
 			default:
-				Q_strncatz(cpuString, " Pentium", maxSize);
+				Q_strncatz(cpuString, maxSize, " Pentium");
 				break;
 			}
 			break;
@@ -931,38 +931,38 @@ NoExtFunction:
 				{
 				case 0:
 				case 1:
-					Q_strncatz(cpuString, " Pentium Pro", maxSize);
+					Q_strncatz(cpuString, maxSize, " Pentium Pro");
 					break;
 				// Actual differentiation depends on cache settings
 				case 3:		// Klamath
 				case 5:		// Deschutes
-					Q_strncatz(cpuString, " Pentium II", maxSize);
+					Q_strncatz(cpuString, maxSize, " Pentium II");
 					break;
 				case 6:
-					Q_strncatz(cpuString, " Celeron", maxSize);
+					Q_strncatz(cpuString, maxSize, " Celeron");
 					break;
 				// Actual differentiation depends on cache settings
 				case 7:		// Katmai
 				case 8:		// Coppermine
 				case 10:	// Coppermine
 				case 11:	// Tualatin
-					Q_strncatz(cpuString, " Pentium III", maxSize);
+					Q_strncatz(cpuString, maxSize, " Pentium III");
 					break;
 				case 12:	// Silverthorne
-					Q_strncatz(cpuString, " Atom", maxSize);
+					Q_strncatz(cpuString, maxSize, " Atom");
 					break;
 				case 9:		// Banias
 				case 13:	// Dothan
-					Q_strncatz(cpuString, " Pentium M", maxSize);
+					Q_strncatz(cpuString, maxSize, " Pentium M");
 					break;
 				case 14:	// Yonah
-					Q_strncatz(cpuString, " Core", maxSize);
+					Q_strncatz(cpuString, maxSize, " Core");
 					break;
 				case 15:	// Conroe / Kentsfield
-					Q_strncatz(cpuString, " Core 2", maxSize);
+					Q_strncatz(cpuString, maxSize, " Core 2");
 					break;
 				default:
-					Q_strncatz(cpuString, " P6", maxSize);
+					Q_strncatz(cpuString, maxSize, " P6");
 					break;
 				}
 			}
@@ -972,73 +972,73 @@ NoExtFunction:
 				{
 				case 5:
 					if (extModel == 0x25)		// Clarkdale / Arrandale
-						Q_strncatz(cpuString, " Core i5/i3 6xx / Core i3 5xx", maxSize);
+						Q_strncatz(cpuString, maxSize, " Core i5/i3 6xx / Core i3 5xx");
 					else if (extModel == 0x45)	// Haswell ULT
-						Q_strncatz(cpuString, " Core i7/i5/i3 4xxxU", maxSize);
+						Q_strncatz(cpuString, maxSize, " Core i7/i5/i3 4xxxU");
 					else if (extModel == 0x55)	// Skylake-X, Cascade Lake-X
-						Q_strncatz(cpuString, " Core i9/i7 79xx/78xx or Core i9 10xxx", maxSize);
+						Q_strncatz(cpuString, maxSize, " Core i9/i7 79xx/78xx or Core i9 10xxx");
 					else if (extModel == 0xA5)	// Comet Lake
-						Q_strncatz(cpuString, " Core i9/i7/i5/i3 10xxx", maxSize);
+						Q_strncatz(cpuString, maxSize, " Core i9/i7/i5/i3 10xxx");
 					break;
 				case 7:		
 					if (extModel == 0x17)		// Wolfdale / Yorkfield (Penryn)
-						Q_strncatz(cpuString, " Core 2", maxSize);
+						Q_strncatz(cpuString, maxSize, " Core 2");
 					else if (extModel == 0x47)	// Broadwell
-						Q_strncatz(cpuString, " Core i7/i5 5xxx", maxSize);
+						Q_strncatz(cpuString, maxSize, " Core i7/i5 5xxx");
 					else if (extModel == 0xA7)	// Rocket Lake
-						Q_strncatz(cpuString, " Core i9/i7/i5/i3 11xxx", maxSize);
+						Q_strncatz(cpuString, maxSize, " Core i9/i7/i5/i3 11xxx");
 					break;
 				case 10:	
 					if (extModel == 0x2A)		// Sandy Bridge
-						Q_strncatz(cpuString, "  Core i7/i5/i3 2xxx", maxSize);
+						Q_strncatz(cpuString, maxSize, "  Core i7/i5/i3 2xxx");
 					else if (extModel == 0x3A)	// Ivy Bridge
-						Q_strncatz(cpuString, "  Core i7/i5/i3 3xxx", maxSize);
+						Q_strncatz(cpuString, maxSize, "  Core i7/i5/i3 3xxx");
 					else if (extModel == 0x1A)	// Bloomfield
-						Q_strncatz(cpuString, " Core i7 9xx", maxSize);
+						Q_strncatz(cpuString, maxSize, " Core i7 9xx");
 					else if (extModel == 0x7A)	// Gemini Lake
-						Q_strncatz(cpuString, " Pentium J4xxx", maxSize);
+						Q_strncatz(cpuString, maxSize, " Pentium J4xxx");
 					break;
 				case 12:
 					if (extModel == 0x2C)		// Gulftown
-						Q_strncatz(cpuString, " Core i7 9xx", maxSize);
+						Q_strncatz(cpuString, maxSize, " Core i7 9xx");
 					else if (extModel == 0x3C)	// Haswell
-						Q_strncatz(cpuString, "  Core i7/i5/i3 4xxx", maxSize);
+						Q_strncatz(cpuString, maxSize, "  Core i7/i5/i3 4xxx");
 					else if (extModel == 0x8C)	// Tiger Lake
-						Q_strncatz(cpuString, "  Core i7/i5/i3 11xxG7", maxSize);
+						Q_strncatz(cpuString, maxSize, "  Core i7/i5/i3 11xxG7");
 					else						// Silverthorne
-						Q_strncatz(cpuString, " Atom", maxSize);
+						Q_strncatz(cpuString, maxSize, " Atom");
 					break;
 				case 13:	
 					if (extModel == 0x2D)		// Sandy Bridge-E
-						Q_strncatz(cpuString, " Core i7 39xx / 38xx", maxSize);
+						Q_strncatz(cpuString, maxSize, " Core i7 39xx / 38xx");
 					break;
 				case 14:
 					if (extModel == 0x1E)		// Lynnfield
-						Q_strncatz(cpuString, " Core i7 8xx / Core i5 7xx", maxSize);
+						Q_strncatz(cpuString, maxSize, " Core i7 8xx / Core i5 7xx");
 					else if (extModel == 0x3E)	// Ivy Bridge-E
-						Q_strncatz(cpuString, " Core i7 49xx / 48xx", maxSize);
+						Q_strncatz(cpuString, maxSize, " Core i7 49xx / 48xx");
 					else if (extModel == 0x4E)	// Skylake U/Y
-						Q_strncatz(cpuString, " Core i7/i5/i3 6xxxU", maxSize);
+						Q_strncatz(cpuString, maxSize, " Core i7/i5/i3 6xxxU");
 					else if (extModel == 0x5E)	// Skylake
-						Q_strncatz(cpuString, " Core i7/i5/i3 6xxx", maxSize);
+						Q_strncatz(cpuString, maxSize, " Core i7/i5/i3 6xxx");
 					else if (extModel == 0x7E)	// Ice lake
-						Q_strncatz(cpuString, " Core i7/i5/i3 10xxG7", maxSize);
+						Q_strncatz(cpuString, maxSize, " Core i7/i5/i3 10xxG7");
 					else if (extModel == 0x8E)	// Kaby Lake U/Y
-						Q_strncatz(cpuString, " Core i7/i5/i3 7xxxU", maxSize);
+						Q_strncatz(cpuString, maxSize, " Core i7/i5/i3 7xxxU");
 					else if (extModel == 0x9E)	// Coffee Lake
-						Q_strncatz(cpuString, " Core i7/i5/i3 8xxx", maxSize);
+						Q_strncatz(cpuString, maxSize, " Core i7/i5/i3 8xxx");
 					break;
 				case 15:	
 					if (extModel == 0x0F)		// Conroe / Kentsfield (Merom)
-						Q_strncatz(cpuString, " Core 2", maxSize);
+						Q_strncatz(cpuString, maxSize, " Core 2");
 					else if (extModel == 0x3F)	// Haswell-E
-						Q_strncatz(cpuString, " Core i7 59xx / 58xx", maxSize);
+						Q_strncatz(cpuString, maxSize, " Core i7 59xx / 58xx");
 					else if (extModel == 0x4F)	// Broadwell-E
-						Q_strncatz(cpuString, " Core i7 69xx / 68xx", maxSize);
+						Q_strncatz(cpuString, maxSize, " Core i7 69xx / 68xx");
 					else if (extModel == 0x5E)	// Kaby Lake
-						Q_strncatz(cpuString, " Core i7/i5/i3 7xxx", maxSize);
+						Q_strncatz(cpuString, maxSize, " Core i7/i5/i3 7xxx");
 					else if (extModel == 0x9E)	// Kaby Lake-X
-						Q_strncatz(cpuString, " Core i7/i5 7xxx", maxSize);
+						Q_strncatz(cpuString, maxSize, " Core i7/i5 7xxx");
 					break;
 				default:
 					break;
@@ -1049,7 +1049,7 @@ NoExtFunction:
 			switch (model)
 			{
 			default:
-				Q_strncatz(cpuString, " Itanium", maxSize);
+				Q_strncatz(cpuString, maxSize, " Itanium");
 				break;
 			}
 			break;
@@ -1064,14 +1064,14 @@ NoExtFunction:
 				case 3:		// Prescott
 				case 4:		// Smithfield
 				case 6:		// Cedar Mill / Presler
-					Q_strncatz(cpuString, " Pentium 4", maxSize);
+					Q_strncatz(cpuString, maxSize, " Pentium 4");
 					break;
 			//	case 4:		// Smithfield
 			//	case 6:		// Cedar Mill / Presler
 			//		Q_strncatz(cpuString, " Pentium D", maxSize);
 			//		break;
 				default:
-					Q_strncatz(cpuString, " NetBurst", maxSize);
+					Q_strncatz(cpuString, maxSize, " NetBurst");
 					break;
 				}
 			}
@@ -1080,7 +1080,7 @@ NoExtFunction:
 				switch (model)
 				{
 				default:
-					Q_strncatz(cpuString, " Itanium 2", maxSize);
+					Q_strncatz(cpuString, maxSize, " Itanium 2");
 					break;
 				}
 			}
@@ -1128,22 +1128,22 @@ NoExtFunction:
 		speed = (unsigned)((end - start) / 1000000);
 
 		if (speed > 1000)
-			Q_strncatz(cpuString, va(" %4.2f GHz", ((float)speed/1000.0f)), maxSize);
+			Q_strncatz(cpuString, maxSize, va(" %4.2f GHz", ((float)speed/1000.0f)));
 		else
-			Q_strncatz(cpuString, va(" %u MHz", speed), maxSize);
+			Q_strncatz(cpuString, maxSize, va(" %u MHz", speed));
 	}
 
 	// get number of logical processors
 	GetSystemInfo(&sysInfo);
 	if (sysInfo.dwNumberOfProcessors > 1)
-		Q_strncatz(cpuString, va(" (%u logical CPUs)", sysInfo.dwNumberOfProcessors), maxSize);
+		Q_strncatz(cpuString, maxSize, va(" (%u logical CPUs)", sysInfo.dwNumberOfProcessors));
 /*
 	if (numLogicalCores >= 2 || numCores >= 2)
 	{
 		if (numLogicalCores > numCores)	// Hyperthreading or SMT
-			Q_strncatz(cpuString, va(" (%u cores, %u threads)", numCores, numLogicalCores), maxSize);
+			Q_strncatz(cpuString, maxSize, va(" (%u cores, %u threads)", numCores, numLogicalCores));
 		else
-			Q_strncatz(cpuString, va(" (%u cores)", numCores), maxSize);
+			Q_strncatz(cpuString, maxSize, va(" (%u cores)", numCores));
 	}
 */
 
@@ -1162,34 +1162,34 @@ NoExtFunction:
 
 	if (hasMMX || has3DNow || hasSSE)
 	{
-		Q_strncatz(cpuString, " w/", maxSize);
+		Q_strncatz(cpuString, maxSize, " w/");
 
 		if (hasMMX){
-			Q_strncatz(cpuString, " MMX", maxSize);
+			Q_strncatz(cpuString, maxSize, " MMX");
 			if (hasMMXExt)
-				Q_strncatz(cpuString, "+", maxSize);
+				Q_strncatz(cpuString, maxSize, "+");
 		}
 		if (has3DNow){
-			Q_strncatz(cpuString, " 3DNow!", maxSize);
+			Q_strncatz(cpuString, maxSize, " 3DNow!");
 			if (has3DNowExt)
-				Q_strncatz(cpuString, "+", maxSize);
+				Q_strncatz(cpuString, maxSize, "+");
 		}
 		if (hasSSE){
-			Q_strncatz(cpuString, " SSE", maxSize);
+			Q_strncatz(cpuString, maxSize, " SSE");
 			if (hasSSE42)
-				Q_strncatz(cpuString, "4.2", maxSize);
+				Q_strncatz(cpuString, maxSize, "4.2");
 			else if (hasSSE41)
-				Q_strncatz(cpuString, "4.1", maxSize);
+				Q_strncatz(cpuString, maxSize, "4.1");
 			else if (hasSSE3)
-				Q_strncatz(cpuString, "3", maxSize);
+				Q_strncatz(cpuString, maxSize, "3");
 			else if (hasSSE2)
-				Q_strncatz(cpuString, "2", maxSize);
+				Q_strncatz(cpuString, maxSize, "2");
 		}
 		if (hasSSE4a){
-			Q_strncatz(cpuString, " SSE4a", maxSize);
+			Q_strncatz(cpuString, maxSize, " SSE4a");
 		}
 		if (hasAVX){
-			Q_strncatz(cpuString, " AVX", maxSize);
+			Q_strncatz(cpuString, maxSize, " AVX");
 		}
 	}
 
@@ -1197,8 +1197,8 @@ NoExtFunction:
 
 #else
 
-//	Q_strncpyz(cpuString, "Alpha AXP", maxSize);
-	Q_strncpyz(cpuString, CPUSTRING, maxSize); // [Slipyx] mingw support
+//	Q_strncpyz(cpuString, maxSize, "Alpha AXP");
+	Q_strncpyz(cpuString, maxSize, CPUSTRING); // [Slipyx] mingw support
 	return true;
 #endif
 }
@@ -1259,136 +1259,136 @@ void Sys_Init (void)
 // wProductType field not supported in MSVC6
 #if (_MSC_VER < 1300)
 		if (osInfo.dwMajorVersion == 4) {
-			Q_strncpyz (string, "Windows NT", sizeof(string));
+			Q_strncpyz (string, sizeof(string), "Windows NT");
 		}
 		else if (osInfo.dwMajorVersion == 5 && osInfo.dwMinorVersion == 0) {
-			Q_strncpyz (string, "Windows 2000", sizeof(string));
+			Q_strncpyz (string, sizeof(string), "Windows 2000");
 		}
 		else if (osInfo.dwMajorVersion == 5 && osInfo.dwMinorVersion == 1) {
-			Q_strncpyz (string, "Windows XP", sizeof(string));
+			Q_strncpyz (string, sizeof(string), "Windows XP");
 		}
 		else if (osInfo.dwMajorVersion == 5 && osInfo.dwMinorVersion == 2) {
-			Q_strncpyz (string, "Windows XP", sizeof(string));
+			Q_strncpyz (string, sizeof(string), "Windows XP");
 		}
 		else if (osInfo.dwMajorVersion == 6 && osInfo.dwMinorVersion == 0) {
-			Q_strncpyz (string, "Windows Vista", sizeof(string));
+			Q_strncpyz (string, sizeof(string), "Windows Vista");
 		}
 		else if (osInfo.dwMajorVersion == 6 && osInfo.dwMinorVersion == 1) {
-			Q_strncpyz (string, "Windows 7", sizeof(string));
+			Q_strncpyz (string, sizeof(string), "Windows 7");
 		}
 		else if (osInfo.dwMajorVersion == 6 && osInfo.dwMinorVersion == 2) {
-			Q_strncpyz (string, "Windows 8", sizeof(string));
+			Q_strncpyz (string, sizeof(string), "Windows 8");
 		}
 		else if (osInfo.dwMajorVersion == 6 && osInfo.dwMinorVersion == 3) {
-			Q_strncpyz (string, "Windows 8.1", sizeof(string));
+			Q_strncpyz (string, sizeof(string), "Windows 8.1");
 		}
 		else if (osInfo.dwMajorVersion == 10 && osInfo.dwMinorVersion == 0) {
-			Q_strncpyz (string, "Windows 10", sizeof(string));
+			Q_strncpyz (string, sizeof(string), "Windows 10");
 		}
 #else	// (_MSC_VER < 1300)
 		if (osInfo.dwMajorVersion == 4) {
-			Q_strncpyz (string, "Windows NT", sizeof(string));
+			Q_strncpyz (string, sizeof(string), "Windows NT");
 		}
 		else if (osInfo.dwMajorVersion == 5 && osInfo.dwMinorVersion == 0) {
 			if (osInfo.wProductType == VER_NT_WORKSTATION)
-				Q_strncpyz (string, "Windows 2000", sizeof(string));
+				Q_strncpyz (string, sizeof(string), "Windows 2000");
 			else
-				Q_strncpyz (string, "Windows 2000 Server", sizeof(string));
+				Q_strncpyz (string, sizeof(string), "Windows 2000 Server");
 		}
 		else if (osInfo.dwMajorVersion == 5 && osInfo.dwMinorVersion == 1) {
-			Q_strncpyz (string, "Windows XP", sizeof(string));
+			Q_strncpyz (string, sizeof(string), "Windows XP");
 		}
 		else if (osInfo.dwMajorVersion == 5 && osInfo.dwMinorVersion == 2) {
 		//	if ( (osInfo.wProductType == VER_NT_WORKSTATION) && (sysInfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64) )
 		//		Q_strncpyz (string, "Windows XP x64 Edition", sizeof(string));
 			if (osInfo.wProductType == VER_NT_WORKSTATION)
-				Q_strncpyz (string, "Windows XP", sizeof(string));
+				Q_strncpyz (string, sizeof(string), "Windows XP");
 			else
-				Q_strncpyz (string, "Windows Server 2003", sizeof(string));
+				Q_strncpyz (string, sizeof(string), "Windows Server 2003");
 		}
 		else if (osInfo.dwMajorVersion == 6 && osInfo.dwMinorVersion == 0) {
 			if (osInfo.wProductType == VER_NT_WORKSTATION)
-				Q_strncpyz (string, "Windows Vista", sizeof(string));
+				Q_strncpyz (string, sizeof(string), "Windows Vista");
 			else
-				Q_strncpyz (string, "Windows Server 2008", sizeof(string));
+				Q_strncpyz (string, sizeof(string), "Windows Server 2008");
 		}
 		else if (osInfo.dwMajorVersion == 6 && osInfo.dwMinorVersion == 1) {
 			if (osInfo.wProductType == VER_NT_WORKSTATION)
-				Q_strncpyz (string, "Windows 7", sizeof(string));
+				Q_strncpyz (string, sizeof(string), "Windows 7");
 			else
-				Q_strncpyz (string, "Windows Server 2008 R2", sizeof(string));
+				Q_strncpyz (string, sizeof(string), "Windows Server 2008 R2");
 		}
 		else if (osInfo.dwMajorVersion == 6 && osInfo.dwMinorVersion == 2) {
 			if (osInfo.wProductType == VER_NT_WORKSTATION)
-				Q_strncpyz (string, "Windows 8", sizeof(string));
+				Q_strncpyz (string, sizeof(string), "Windows 8");
 			else
-				Q_strncpyz (string, "Windows Server 2012", sizeof(string));
+				Q_strncpyz (string, sizeof(string), "Windows Server 2012");
 		}
 		else if (osInfo.dwMajorVersion == 6 && osInfo.dwMinorVersion == 3) {
 			if (osInfo.wProductType == VER_NT_WORKSTATION)
-				Q_strncpyz (string, "Windows 8.1", sizeof(string));
+				Q_strncpyz (string, sizeof(string), "Windows 8.1");
 			else
-				Q_strncpyz (string, "Windows Server 2012 R2", sizeof(string));
+				Q_strncpyz (string, sizeof(string), "Windows Server 2012 R2");
 		}
 		else if (osInfo.dwMajorVersion == 10 && osInfo.dwMinorVersion == 0) {
 			if (osInfo.wProductType == VER_NT_WORKSTATION)
-				Q_strncpyz (string, "Windows 10", sizeof(string));
+				Q_strncpyz (string, sizeof(string), "Windows 10");
 			else
-				Q_strncpyz (string, "Windows Server 2016", sizeof(string));
+				Q_strncpyz (string, sizeof(string), "Windows Server 2016");
 		}
 #endif	// (_MSC_VER < 1300)
 		else {
-			Q_strncpyz (string, va("Windows %i.%i", osInfo.dwMajorVersion, osInfo.dwMinorVersion), sizeof(string));
+			Q_strncpyz (string, sizeof(string), va("Windows %i.%i", osInfo.dwMajorVersion, osInfo.dwMinorVersion));
 		}
 
 		if (sysInfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64)
-			Q_strncatz (string, " x64", sizeof(string));
+			Q_strncatz (string, sizeof(string), " x64");
 		if (strlen(osInfo.szCSDVersion) > 0)
-			Q_strncatz (string, va(" %s", osInfo.szCSDVersion), sizeof(string));
+			Q_strncatz (string, sizeof(string), va(" %s", osInfo.szCSDVersion));
 	}
 	else if (osInfo.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS)
 	{
 		if (osInfo.dwMajorVersion == 4 && osInfo.dwMinorVersion == 0) {
 			if (osInfo.szCSDVersion[1] == 'C' || osInfo.szCSDVersion[1] == 'B')
-				Q_strncpyz (string, "Windows 95 OSR2", sizeof(string));
+				Q_strncpyz (string, sizeof(string), "Windows 95 OSR2");
 			else
-				Q_strncpyz (string, "Windows 95", sizeof(string));
+				Q_strncpyz (string, sizeof(string), "Windows 95");
 		}
 		else if (osInfo.dwMajorVersion == 4 && osInfo.dwMinorVersion == 10) {
 			if (osInfo.szCSDVersion[1] == 'A')
-				Q_strncpyz (string, "Windows 98 SE", sizeof(string));
+				Q_strncpyz (string, sizeof(string), "Windows 98 SE");
 			else
-				Q_strncpyz (string, "Windows 98", sizeof(string));
+				Q_strncpyz (string, sizeof(string), "Windows 98");
 		}
 		else if (osInfo.dwMajorVersion == 4 && osInfo.dwMinorVersion == 90)
-			Q_strncpyz (string, "Windows ME", sizeof(string));
+			Q_strncpyz (string, sizeof(string), "Windows ME");
 		else
-			Q_strncpyz (string, va("Windows %i.%i", osInfo.dwMajorVersion, osInfo.dwMinorVersion), sizeof(string));
+			Q_strncpyz (string, sizeof(string), va("Windows %i.%i", osInfo.dwMajorVersion, osInfo.dwMinorVersion));
 	}
 	else
-		Q_strncpyz (string, va("Windows %i.%i", osInfo.dwMajorVersion, osInfo.dwMinorVersion), sizeof(string));
+		Q_strncpyz (string, sizeof(string), va("Windows %i.%i", osInfo.dwMajorVersion, osInfo.dwMinorVersion));
 
 	if (osInfo.dwBuildNumber > 0)
-		Q_strncatz (string, va(", build %i", osInfo.dwBuildNumber), sizeof(string));
+		Q_strncatz (string, sizeof(string), va(", build %i", osInfo.dwBuildNumber));
 	Com_Printf ("OS: %s\n", string);
 	Cvar_Get ("sys_osVersion", string, CVAR_NOSET|CVAR_LATCH|CVAR_SAVE_IGNORE);
 
 	// Detect CPU
-	Com_Printf("Detecting CPU... ");
-	if (Sys_DetectCPU(string, sizeof(string))) {
-		Com_Printf("Found %s\n", string);
-		Cvar_Get("sys_cpuString", string, CVAR_NOSET|CVAR_LATCH|CVAR_SAVE_IGNORE);
+	Com_Printf ("Detecting CPU... ");
+	if (Sys_DetectCPU (string, sizeof(string))) {
+		Com_Printf ("Found %s\n", string);
+		Cvar_Get ("sys_cpuString", string, CVAR_NOSET|CVAR_LATCH|CVAR_SAVE_IGNORE);
 	}
 	else {
-		Com_Printf("Unknown CPU found\n");
-		Cvar_Get("sys_cpuString", "Unknown", CVAR_NOSET|CVAR_LATCH|CVAR_SAVE_IGNORE);
+		Com_Printf ("Unknown CPU found\n");
+		Cvar_Get ("sys_cpuString", "Unknown", CVAR_NOSET|CVAR_LATCH|CVAR_SAVE_IGNORE);
 	}
 
 	// Get physical memory
-	GlobalMemoryStatus(&memStatus);
-	strncpy(string, va("%u",memStatus.dwTotalPhys >> 20), sizeof(string));
-	Com_Printf("Memory: %s MB\n", string);
-	Cvar_Get("sys_ramMegs", string, CVAR_NOSET|CVAR_LATCH|CVAR_SAVE_IGNORE);
+	GlobalMemoryStatus (&memStatus);
+	Q_strncpyz (string, sizeof(string), va("%u", (memStatus.dwTotalPhys >> 20)));
+	Com_Printf ("Memory: %s MB\n", string);
+	Cvar_Get ("sys_ramMegs", string, CVAR_NOSET|CVAR_LATCH|CVAR_SAVE_IGNORE);
 // end Q2E detection
 
 #ifndef NEW_DED_CONSOLE

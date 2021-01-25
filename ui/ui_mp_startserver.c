@@ -160,8 +160,8 @@ qboolean UI_ParseArenaFromFile (char *filename, char *shortname, char *longname,
 				Com_Printf ("UI_ParseArenaFromFile: EOF without closing brace\n");
 				break;
 			}
-		//	strncpy( dest, token );
-			Q_strncpyz( dest, token, bufSize );
+		//	strncpy(dest, token);
+			Q_strncpyz (dest, bufSize, token);
 		}
 	}
 	if (!shortname || !strlen(shortname)) {
@@ -226,6 +226,7 @@ void UI_LoadArenas (void)
 	char		gametypes[MAX_TOKEN_CHARS];
 	char		scratch[200];
 	int			i, j, len, narenas = 0, narenanames = 0;
+	size_t		nameSize;
 	qboolean	type_supported[NUM_MAPTYPES];
 
 	//
@@ -287,9 +288,10 @@ void UI_LoadArenas (void)
 
 				for (j=0; j<NUM_MAPTYPES; j++)
 					if (type_supported[j]) {
-						ui_svr_arena_mapnames[j][ui_svr_arena_nummaps[j]] = malloc(strlen(scratch) + 1);
+						nameSize = strlen(scratch) + 1;
+						ui_svr_arena_mapnames[j][ui_svr_arena_nummaps[j]] = malloc(nameSize);
 					//	strncpy(ui_svr_arena_mapnames[j][ui_svr_arena_nummaps[j]], scratch);
-						Q_strncpyz(ui_svr_arena_mapnames[j][ui_svr_arena_nummaps[j]], scratch, strlen(scratch) + 1);
+						Q_strncpyz (ui_svr_arena_mapnames[j][ui_svr_arena_nummaps[j]], nameSize, scratch);
 						ui_svr_arena_nummaps[j]++;
 					}
 
@@ -349,9 +351,10 @@ void UI_LoadArenas (void)
 
 					for (j=0; j<NUM_MAPTYPES; j++)
 						if (type_supported[j]) {
-							ui_svr_arena_mapnames[j][ui_svr_arena_nummaps[j]] = malloc(strlen(scratch) + 1);
+							nameSize = strlen(scratch) + 1;
+							ui_svr_arena_mapnames[j][ui_svr_arena_nummaps[j]] = malloc(nameSize);
 						//	strncpy(ui_svr_arena_mapnames[j][ui_svr_arena_nummaps[j]], scratch);
-							Q_strncpyz(ui_svr_arena_mapnames[j][ui_svr_arena_nummaps[j]], scratch, strlen(scratch) + 1);
+							Q_strncpyz(ui_svr_arena_mapnames[j][ui_svr_arena_nummaps[j]], nameSize, scratch);
 							ui_svr_arena_nummaps[j]++;
 						}
 
@@ -412,9 +415,10 @@ void UI_LoadArenas (void)
 
 					for (j=0; j<NUM_MAPTYPES; j++)
 						if (type_supported[j]) {
-							ui_svr_arena_mapnames[j][ui_svr_arena_nummaps[j]] = malloc(strlen( scratch ) + 1);
+							nameSize = strlen(scratch) + 1;
+							ui_svr_arena_mapnames[j][ui_svr_arena_nummaps[j]] = malloc(nameSize);
 						//	strncpy(ui_svr_arena_mapnames[j][ui_svr_arena_nummaps[j]], scratch);
-							Q_strncpyz(ui_svr_arena_mapnames[j][ui_svr_arena_nummaps[j]], scratch, strlen( scratch ) + 1);
+							Q_strncpyz(ui_svr_arena_mapnames[j][ui_svr_arena_nummaps[j]], nameSize, scratch);
 							ui_svr_arena_nummaps[j]++;
 						}
 
@@ -452,6 +456,7 @@ void UI_LoadMapList (void)
 	char	*buffer, *s;
 	char	mapsname[1024];
 	int		i, length;
+	size_t	nameSize;
 	FILE	*fp;
 
 	//
@@ -512,12 +517,13 @@ void UI_LoadMapList (void)
 
 	//	strncpy( shortname, COM_Parse( &s ) );
 	//	strncpy( longname, COM_Parse( &s ) );
-		Q_strncpyz( shortname, COM_Parse( &s ), sizeof(shortname) );
-		Q_strncpyz( longname, COM_Parse( &s ), sizeof(longname) );
-		Com_sprintf( scratch, sizeof( scratch ), "%s\n%s", longname, shortname );
-		ui_svr_listfile_mapnames[i] = malloc( strlen( scratch ) + 1 );
+		Q_strncpyz (shortname, sizeof(shortname), COM_Parse(&s));
+		Q_strncpyz (longname, sizeof(longname), COM_Parse(&s));
+		Com_sprintf (scratch, sizeof( scratch ), "%s\n%s", longname, shortname);
+		nameSize = strlen(scratch) + 1;
+		ui_svr_listfile_mapnames[i] = malloc( nameSize );
 	//	strncpyz( ui_svr_listfile_mapnames[i], scratch );
-		Q_strncpyz( ui_svr_listfile_mapnames[i], scratch, strlen( scratch ) + 1 );
+		Q_strncpyz (ui_svr_listfile_mapnames[i], nameSize, scratch);
 	}
 	ui_svr_listfile_mapnames[ui_svr_listfile_nummaps] = 0;
 
@@ -617,7 +623,7 @@ void RulesChangeFunc (void *self)
 		s_maxclients_field.generic.statusbar = NULL;
 		if (atoi(s_maxclients_field.buffer) <= 8) // set default of 8
 		//	strncpy( s_maxclients_field.buffer, "8" );
-			Q_strncpyz( s_maxclients_field.buffer, "8", sizeof(s_maxclients_field.buffer) );
+			Q_strncpyz (s_maxclients_field.buffer, sizeof(s_maxclients_field.buffer), "8");
 		s_startserver_dmoptions_action.generic.statusbar = NULL;
 		UI_RefreshMapList (MAP_DM);
 	}
@@ -626,7 +632,7 @@ void RulesChangeFunc (void *self)
 		s_maxclients_field.generic.statusbar = "4 maximum for cooperative";
 		if (atoi(s_maxclients_field.buffer) > 4)
 		//	strncpy( s_maxclients_field.buffer, "4" );
-			Q_strncpyz( s_maxclients_field.buffer, "4", sizeof(s_maxclients_field.buffer) );
+			Q_strncpyz (s_maxclients_field.buffer, sizeof(s_maxclients_field.buffer), "4");
 		s_startserver_dmoptions_action.generic.statusbar = "N/A for cooperative";
 		UI_RefreshMapList (MAP_COOP);
 	}
@@ -635,7 +641,7 @@ void RulesChangeFunc (void *self)
 		s_maxclients_field.generic.statusbar = NULL;
 		if (atoi(s_maxclients_field.buffer) <= 12) // set default of 12
 		//	strncpy( s_maxclients_field.buffer, "12" );
-			Q_strncpyz( s_maxclients_field.buffer, "12", sizeof(s_maxclients_field.buffer) );
+			Q_strncpyz (s_maxclients_field.buffer, sizeof(s_maxclients_field.buffer), "12");
 		s_startserver_dmoptions_action.generic.statusbar = NULL;
 		UI_RefreshMapList (MAP_CTF);
 	}
@@ -644,7 +650,7 @@ void RulesChangeFunc (void *self)
 		s_maxclients_field.generic.statusbar = NULL;
 		if (atoi(s_maxclients_field.buffer) <= 18) // set default of 18
 		//	strncpy( s_maxclients_field.buffer, "18" );
-			Q_strncpyz( s_maxclients_field.buffer, "18", sizeof(s_maxclients_field.buffer) );
+			Q_strncpyz (s_maxclients_field.buffer, sizeof(s_maxclients_field.buffer), "18");
 		s_startserver_dmoptions_action.generic.statusbar = NULL;
 		UI_RefreshMapList (MAP_3TCTF);
 	}
@@ -654,7 +660,7 @@ void RulesChangeFunc (void *self)
 		s_maxclients_field.generic.statusbar = NULL;
 		if (atoi(s_maxclients_field.buffer) <= 8) // set default of 8
 		//	strncpy( s_maxclients_field.buffer, "8" );
-			Q_strncpyz( s_maxclients_field.buffer, "8", sizeof(s_maxclients_field.buffer) );
+			Q_strncpyz (s_maxclients_field.buffer, sizeof(s_maxclients_field.buffer), "8");
 		s_startserver_dmoptions_action.generic.statusbar = NULL;
 		UI_RefreshMapList (MAP_DM);
 	}
@@ -668,8 +674,8 @@ void StartServerActionFunc (void *self)
 	int		maxclients;
 	char	*spot;
 
-//	strncpy( startmap, strchr( ui_svr_mapnames[s_startmap_list.curvalue], '\n' ) + 1 );
-	Q_strncpyz( startmap, strchr( ui_svr_mapnames[s_startmap_list.curvalue], '\n' ) + 1, sizeof(startmap) );
+//	strncpy(startmap, strchr( ui_svr_mapnames[s_startmap_list.curvalue], '\n' ) + 1);
+	Q_strncpyz (startmap, sizeof(startmap), strchr( ui_svr_mapnames[s_startmap_list.curvalue], '\n' ) + 1);
 
 	maxclients  = atoi( s_maxclients_field.buffer );
 	timelimit	= atoi( s_timelimit_field.buffer );
@@ -805,8 +811,8 @@ void StartServer_MenuInit (void)
 	s_timelimit_field.generic.statusbar	= "0 = no limit";
 	s_timelimit_field.length			= 4;
 	s_timelimit_field.visible_length	= 4;
-//	strncpy( s_timelimit_field.buffer, Cvar_VariableString("timelimit") );
-	Q_strncpyz( s_timelimit_field.buffer, Cvar_VariableString("timelimit"), sizeof(s_timelimit_field.buffer) );
+//	strncpy(s_timelimit_field.buffer, Cvar_VariableString("timelimit"));
+	Q_strncpyz (s_timelimit_field.buffer, sizeof(s_timelimit_field.buffer), Cvar_VariableString("timelimit"));
 	s_timelimit_field.cursor			= (int)strlen( s_timelimit_field.buffer );
 
 	s_fraglimit_field.generic.type		= MTYPE_FIELD;
@@ -819,7 +825,7 @@ void StartServer_MenuInit (void)
 	s_fraglimit_field.length			= 4;
 	s_fraglimit_field.visible_length	= 4;
 //	strncpy( s_fraglimit_field.buffer, Cvar_VariableString("fraglimit") );
-	Q_strncpyz( s_fraglimit_field.buffer, Cvar_VariableString("fraglimit"), sizeof(s_fraglimit_field.buffer) );
+	Q_strncpyz (s_fraglimit_field.buffer, sizeof(s_fraglimit_field.buffer), Cvar_VariableString("fraglimit"));
 	s_fraglimit_field.cursor			= (int)strlen( s_fraglimit_field.buffer );
 
 	/*
@@ -838,11 +844,11 @@ void StartServer_MenuInit (void)
 	s_maxclients_field.length				= 3;
 	s_maxclients_field.visible_length		= 3;
 	if ( Cvar_VariableValue( "maxclients" ) == 1 )
-	//	strncpy( s_maxclients_field.buffer, "8" );
-		Q_strncpyz( s_maxclients_field.buffer, "8", sizeof(s_maxclients_field.buffer) );
+	//	strncpy(s_maxclients_field.buffer, "8");
+		Q_strncpyz (s_maxclients_field.buffer, sizeof(s_maxclients_field.buffer), "8");
 	else 
-	//	strncpy( s_maxclients_field.buffer, Cvar_VariableString("maxclients") );
-		Q_strncpyz( s_maxclients_field.buffer, Cvar_VariableString("maxclients"), sizeof(s_maxclients_field.buffer) );
+	//	strncpy(s_maxclients_field.buffer, Cvar_VariableString("maxclients"));
+		Q_strncpyz (s_maxclients_field.buffer, sizeof(s_maxclients_field.buffer), Cvar_VariableString("maxclients"));
 	s_maxclients_field.cursor				= (int)strlen( s_maxclients_field.buffer );
 
 	s_hostname_field.generic.type			= MTYPE_FIELD;
@@ -855,7 +861,7 @@ void StartServer_MenuInit (void)
 	s_hostname_field.length					= 12;
 	s_hostname_field.visible_length			= 12;
 //	strncpy( s_hostname_field.buffer, Cvar_VariableString("hostname") );
-	Q_strncpyz( s_hostname_field.buffer, Cvar_VariableString("hostname"), sizeof(s_hostname_field.buffer) );
+	Q_strncpyz (s_hostname_field.buffer, sizeof(s_hostname_field.buffer), Cvar_VariableString("hostname"));
 	s_hostname_field.cursor					= (int)strlen( s_hostname_field.buffer );
 
 	s_startserver_dmoptions_action.generic.type			= MTYPE_ACTION;
@@ -904,8 +910,8 @@ void DrawStartSeverLevelshot (void)
 	char startmap[MAX_QPATH];
 	char mapshotname [MAX_QPATH];
 	int i = s_startmap_list.curvalue;
-//	strncpy( startmap, strchr( ui_svr_mapnames[i], '\n' ) + 1 );
-	Q_strncpyz( startmap, strchr( ui_svr_mapnames[i], '\n' ) + 1, sizeof(startmap) );
+//	strncpy(startmap, strchr( ui_svr_mapnames[i], '\n' ) + 1);
+	Q_strncpyz (startmap, sizeof(startmap), strchr( ui_svr_mapnames[i], '\n' ) + 1);
 
 	SCR_DrawFill (SCREEN_WIDTH/2+44, SCREEN_HEIGHT/2-70, 244, 184, ALIGN_CENTER, 60,60,60,255);
 

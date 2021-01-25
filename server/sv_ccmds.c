@@ -266,7 +266,7 @@ void SV_CopySaveGame (char *src, char *dst)
 		while (found)
 		{
 		//	strncpy (name+len, found+len);
-			Q_strncpyz (name+len, found+len, sizeof(name)-len);
+			Q_strncpyz (name+len, sizeof(name)-len, found+len);
 		//	Com_sprintf (name2, sizeof(name2), "%s/save/%s/%s", FS_Savegamedir(), dst, found+len);	// was FS_Gamedir()
 			Com_sprintf (name2, sizeof(name2), "%s/"SAVEDIRNAME"/%s/%s", FS_Savegamedir(), dst, found+len);	// was FS_Gamedir()
 			FS_CopyFile (name, name2);
@@ -276,10 +276,10 @@ void SV_CopySaveGame (char *src, char *dst)
 				// change sav to sv2
 				l = (int)strlen(name);
 			//	strncpy (name+l-3, "sv2");
-				Q_strncpyz (name+l-3, "sv2", sizeof(name)-l+3);
+				Q_strncpyz (name+l-3, sizeof(name)-l+3, "sv2");
 				l = (int)strlen(name2);
 			//	strncpy (name2+l-3, "sv2");
-				Q_strncpyz (name2+l-3, "sv2", sizeof(name2)-l+3);
+				Q_strncpyz (name2+l-3, sizeof(name2)-l+3, "sv2");
 				FS_CopyFile (name, name2);
 			}
 			found = Sys_FindNext( 0, 0 );
@@ -534,8 +534,8 @@ void SV_WriteServerFile (qboolean autosave, qboolean quicksave)
 		memset (string, 0, sizeof(string));
 	//	strncpy (varName, var->name);
 	//	strncpy (string, var->string);
-		Q_strncpyz (varName, var->name, sizeof(varName));
-		Q_strncpyz (string, var->string, sizeof(string));
+		Q_strncpyz (varName, sizeof(varName), var->name);
+		Q_strncpyz (string, sizeof(string), var->string);
 		fwrite (varName, 1, sizeof(varName), f);
 		fwrite (string, 1, sizeof(string), f);
 	}
@@ -607,7 +607,7 @@ void SV_ReadServerFile (void)
 	SV_InitGame ();
 
 //	strncpy (svs.mapcmd, mapcmd);
-	Q_strncpyz (svs.mapcmd, mapcmd, sizeof(svs.mapcmd));
+	Q_strncpyz (svs.mapcmd, sizeof(svs.mapcmd), mapcmd);
 
 	// read game state
 //	Com_sprintf (fileName, sizeof(fileName), "%s/save/current/game.ssv", FS_Savegamedir());	// was FS_Gamedir()
@@ -1024,7 +1024,7 @@ void SV_ConSay_f(void)
 		return;
 
 //	strncpy (text, "console: ");
-	Q_strncpyz (text, "console: ", sizeof(text));
+	Q_strncpyz (text, sizeof(text), "console: ");
 	p = Cmd_Args();
 
 	if (*p == '"')
@@ -1034,7 +1034,7 @@ void SV_ConSay_f(void)
 	}
 
 //	strncat(text, p);
-	Q_strncatz(text, p, sizeof(text));
+	Q_strncatz(text, sizeof(text), p);
 
 	for (j = 0, client = svs.clients; j < maxclients->value; j++, client++)
 	{
@@ -1285,7 +1285,7 @@ void SV_DumpEntities_f (void)
 	}
 	else {
 		Com_Printf ("SV_DumpEntities_f: Dumping entstring to %s.\n", name);
-	//	Q_strncpyz(outBuf, CM_EntityString(), sizeof (outBuf));
+	//	Q_strncpyz(outBuf, sizeof (outBuf), CM_EntityString());
 	//	fputs(outBuf, entFile);
 		fputs(CM_EntityString(), entFile);
 		fclose(entFile);

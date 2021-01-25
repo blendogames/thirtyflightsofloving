@@ -304,11 +304,11 @@ void Do_Text_Display(edict_t *activator, int flags, char *message)
 		basedir = gi.cvar("basedir", "", 0);
 		gamedir = gi.cvar("gamedir", "", 0);
 	/*
-		Q_strncpyz(filename, basedir->string, sizeof(filename));
+		Q_strncpyz(filename, sizeof(filename), basedir->string);
 		if (strlen(gamedir->string))
 		{
-			Q_strncatz(filename, "\\", sizeof(filename));
-			Q_strncatz(filename, gamedir->string, sizeof(filename));
+			Q_strncatz(filename, sizeof(filename), "\\");
+			Q_strncatz(filename, sizeof(filename), gamedir->string);
 		}
 	*/
 		if (strlen(gamedir->string))
@@ -365,8 +365,8 @@ void Do_Text_Display(edict_t *activator, int flags, char *message)
 		{
 		//	strncat(filename, "\\maps\\");
 		//	strncat(filename, message);
-			Q_strncatz(filename, "\\maps\\", sizeof(filename));
-			Q_strncatz(filename, message, sizeof(filename));
+			Q_strncatz(filename, sizeof(filename), "\\maps\\");
+			Q_strncatz(filename, sizeof(filename), message);
 			f = fopen(filename,"rb");
 			if (!f)
 			{
@@ -418,7 +418,7 @@ void Do_Text_Display(edict_t *activator, int flags, char *message)
 	hnd->page_length = MAX_LINES-2;
 	hnd->page_width  = MAX_LINE_LENGTH;
 //	strncpy(hnd->background_image,"textdisplay");
-	Q_strncpyz(hnd->background_image,"textdisplay", sizeof(hnd->background_image));
+	Q_strncpyz(hnd->background_image, sizeof(hnd->background_image), "textdisplay");
 	hnd->start_char = 0;
 	do_linebreaks = true;
 
@@ -715,7 +715,7 @@ done_linebreaks:
 				if (*p1 == 'a')
 				{
 				//	strncpy(sound, p1+1);
-					Q_strncpyz(sound, p1+1, sizeof(sound));
+					Q_strncpyz(sound, sizeof(sound), p1+1);
 					p1--;
 					p2=p1;
 					while (*p2 != 0)

@@ -2075,7 +2075,7 @@ void ClientBeginDeathmatch (edict_t *ent)
 		//ACESP_LoadBots(); // Knightmare- removed this
 		ACESP_LoadBotInfo(); // Knightmare- load bot info file
 	//	strncpy(current_map, level.mapname);
-		Q_strncpyz(current_map, level.mapname, sizeof(current_map));
+		Q_strncpyz(current_map, sizeof(current_map), level.mapname);
 	}*/
 // ACEBOT_END
 
@@ -2207,7 +2207,7 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo)
 	if (!Info_Validate(userinfo))
 	{
 	//	strncpy (userinfo, "\\name\\badinfo\\skin\\male/grunt");
-		Q_strncpyz (userinfo, "\\name\\badinfo\\skin\\male/grunt", MAX_INFO_STRING);	// userinfo is always length of MAX_INFO_STRING 
+		Q_strncpyz (userinfo, MAX_INFO_STRING, "\\name\\badinfo\\skin\\male/grunt");	// userinfo is always length of MAX_INFO_STRING 
 	}
 
 	// set name

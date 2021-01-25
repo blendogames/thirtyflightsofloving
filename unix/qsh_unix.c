@@ -228,19 +228,19 @@ char *Sys_FindFirst (char *path, unsigned musthave, unsigned canhave)
 
 //	COM_FilePath (path, findbase, sizeof(filebase));
 //	strncpy(findbase, path);
-	Q_strncpyz(findbase, path, sizeof(findbase));
+	Q_strncpyz(findbase, sizeof(findbase), path);
 
 	if ((p = strrchr(findbase, '/')) != NULL) {
 		*p = 0;
 	//	strncpy(findpattern, p + 1);
-		Q_strncpyz(findpattern, p + 1, sizeof(findpattern));
+		Q_strncpyz(findpattern, sizeof(findpattern), p + 1);
 	} else
 	//	strncpy(findpattern, "*");
-		Q_strncpyz(findpattern, "*", sizeof(findpattern));
+		Q_strncpyz(findpattern, sizeof(findpattern), "*");
 
 	if (strcmp(findpattern, "*.*") == 0)
 	//	strncpy(findpattern, "*");
-		Q_strncpyz(findpattern, "*", sizeof(findpattern));
+		Q_strncpyz(findpattern, sizeof(findpattern), "*");
 	
 	if ((fdir = opendir(findbase)) == NULL)
 		return NULL;

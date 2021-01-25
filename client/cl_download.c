@@ -406,7 +406,7 @@ void CL_RequestNextDownload (void)
 				}
 
 			//	strncpy(model, p);
-				Q_strncpyz(model, p, sizeof(model));
+				Q_strncpyz (model, sizeof(model), p);
 				p = strchr(model, '/');
 				if (!p)
 					p = strchr(model, '\\');
@@ -420,7 +420,7 @@ void CL_RequestNextDownload (void)
 					}
 					else {
 					//	strncpy(skin, p);
-						Q_strncpyz(skin, p, sizeof(skin));
+						Q_strncpyz (skin, sizeof(skin), p);
 					}
 				}
 				else {
@@ -819,7 +819,7 @@ qboolean CL_CheckOrDownloadFile (char *filename)
 	// don't download a .png texture which already has a .tga counterpart
 	len = (int)strlen(filename); 
 //	strncpy(s, filename); 
-	Q_strncpyz(s, filename, sizeof(s)); 
+	Q_strncpyz (s, sizeof(s), filename); 
 	if (strstr(s, "textures/") && !strcmp(s+len-4, ".png")) // look if we have a .png texture 
 	{ 
 		s[len-3]='t'; s[len-2]='g'; s[len-1]='a'; // replace extension 
@@ -831,7 +831,7 @@ qboolean CL_CheckOrDownloadFile (char *filename)
 	// don't download a .jpg texture which already has a .tga or .png counterpart
 	len = (int)strlen(filename); 
 //	strncpy(s, filename); 
-	Q_strncpyz(s, filename, sizeof(s)); 
+	Q_strncpyz (s, sizeof(s), filename); 
 	if (strstr(s, "textures/") && !strcmp(s+len-4, ".jpg")) // look if we have a .jpg texture 
 	{ 
 		s[len-3]='t'; s[len-2]='g'; s[len-1]='a'; // replace extension 
@@ -878,14 +878,14 @@ qboolean CL_CheckOrDownloadFile (char *filename)
 		return true;
 
 //	strncpy (cls.downloadname, filename);
-	Q_strncpyz (cls.downloadname, filename, sizeof(cls.downloadname));
+	Q_strncpyz (cls.downloadname, sizeof(cls.downloadname), filename);
 
 	// download to a temp name, and only rename
 	// to the real name when done, so if interrupted
 	// a runt file wont be left
 	COM_StripExtension (cls.downloadname, cls.downloadtempname, sizeof(cls.downloadtempname));
 //	strncat (cls.downloadtempname, ".tmp");
-	Q_strncatz (cls.downloadtempname, ".tmp", sizeof(cls.downloadtempname));
+	Q_strncatz (cls.downloadtempname, sizeof(cls.downloadtempname), ".tmp");
 
 //ZOID
 	// check to see if we already have a tmp for this file, if so, try to resume
@@ -957,7 +957,7 @@ void CL_Download_f (void)
 	}
 
 //	strncpy (cls.downloadname, filename);
-	Q_strncpyz (cls.downloadname, filename, sizeof(cls.downloadname));
+	Q_strncpyz (cls.downloadname, sizeof(cls.downloadname), filename);
 	Com_Printf ("Downloading %s\n", cls.downloadname);
 
 	// download to a temp name, and only rename
@@ -965,7 +965,7 @@ void CL_Download_f (void)
 	// a runt file wont be left
 	COM_StripExtension (cls.downloadname, cls.downloadtempname, sizeof(cls.downloadtempname));
 //	strncat (cls.downloadtempname, ".tmp");
-	Q_strncatz (cls.downloadtempname, ".tmp", sizeof(cls.downloadtempname));
+	Q_strncatz (cls.downloadtempname, sizeof(cls.downloadtempname), ".tmp");
 
 	MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
 	MSG_WriteString (&cls.netchan.message,

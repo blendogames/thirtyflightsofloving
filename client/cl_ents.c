@@ -1084,7 +1084,7 @@ struct model_s *S_RegisterSexedModel (entity_state_t *ent, char *base)
 		{
 			p += 1;
 		//	strncpy(model, p);
-			Q_strncpyz(model, p, sizeof(model));
+			Q_strncpyz (model, sizeof(model), p);
 			p = strchr(model, '/');
 			if (p)
 				*p = 0;
@@ -1093,7 +1093,7 @@ struct model_s *S_RegisterSexedModel (entity_state_t *ent, char *base)
 	// if we can't figure it out, they're male
 	if (!model[0])
 	//	strncpy(model, "male");
-		Q_strncpyz(model, "male", sizeof(model));
+		Q_strncpyz (model, sizeof(model), "male");
 
 	Com_sprintf (buffer, sizeof(buffer), "players/%s/%s", model, base+1);
 	mdl = R_RegisterModel(buffer);

@@ -666,21 +666,14 @@ void R_ScreenShot_JPG (qboolean silent)
 
 	// Knightmare- changed screenshot filenames, up to 10000 screenies
 	// Find a file name to save it to 
-	//Q_strncpyz(picname, "quake00.jpg", sizeof(picname));
-
 	for (i=0; i<=9999; i++) 
 	{ 
-		//picname[5] = i/10 + '0'; 
-		//picname[6] = i%10 + '0'; 
 		int one, ten, hundred, thousand;
 
 		thousand = i*0.001;
 		hundred = (i - thousand*1000)*0.01;
 		ten = (i - thousand*1000 - hundred*100)*0.1;
 		one = i - thousand*1000 - hundred*100 - ten*10;
-	//	hundred = i*0.01;
-	//	ten = (i - hundred*100)*0.1;
-	//	one = i - hundred*100 - ten*10;
 
 		Com_sprintf (picname, sizeof(picname), "kmquake2_%i%i%i%i.jpg", thousand, hundred, ten, one);
 		Com_sprintf (checkname, sizeof(checkname), "%s/screenshots/%s", FS_Savegamedir(), picname);	// was FS_Gamedir()
@@ -795,21 +788,14 @@ void R_ScreenShot_PNG (qboolean silent)
 // 
 
 	// Knightmare- changed screenshot filenames, up to 10000 screenies
-	//Q_strncpyz(picname, "quake00.png", sizeof(picname));
-
 	for (i=0; i<=9999; i++) 
 	{ 
-		//picname[5] = i/10 + '0'; 
-		//picname[6] = i%10 + '0'; 
 		int one, ten, hundred, thousand;
 
 		thousand = i*0.001;
 		hundred = (i - thousand*1000)*0.01;
 		ten = (i - thousand*1000 - hundred*100)*0.1;
 		one = i - thousand*1000 - hundred*100 - ten*10;
-	//	hundred = i*0.01;
-	//	ten = (i - hundred*100)*0.1;
-	//	one = i - hundred*100 - ten*10;
 
 		Com_sprintf (picname, sizeof(picname), "kmquake2_%i%i%i%i.png", thousand, hundred, ten, one);
 		Com_sprintf (checkname, sizeof(checkname), "%s/screenshots/%s", FS_Savegamedir(), picname);	// was FS_Gamedir()
@@ -930,21 +916,14 @@ void R_ScreenShot_TGA (qboolean silent)
 // 
 
 	// Knightmare- changed screenshot filenames, up to 10000 screenies
-	//Q_strncpyz(picname, "quake00.tga", sizeof(picname));
-
 	for (i=0; i<=9999; i++) 
 	{ 
-		//picname[5] = i/10 + '0'; 
-		//picname[6] = i%10 + '0'; 
 		int one, ten, hundred, thousand;
 
 		thousand = i*0.001;
 		hundred = (i - thousand*1000)*0.01;
 		ten = (i - thousand*1000 - hundred*100)*0.1;
 		one = i - thousand*1000 - hundred*100 - ten*10;
-	//	hundred = i*0.01;
-	//	ten = (i - hundred*100)*0.1;
-	//	one = i - hundred*100 - ten*10;
 
 		Com_sprintf (picname, sizeof(picname), "kmquake2_%i%i%i%i.tga", thousand, hundred, ten, one);
 		Com_sprintf (checkname, sizeof(checkname), "%s/screenshots/%s", FS_Savegamedir(), picname);	// was FS_Gamedir()

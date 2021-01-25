@@ -593,8 +593,8 @@ void Con_CenteredPrint (char *text)
 	memset (buffer, ' ', l);
 //	strncpy (buffer+l, text);
 //	strncat (buffer, "\n");
-	Q_strncpyz (buffer+l, text, sizeof(buffer)-1);
-	Q_strncatz (buffer, "\n", sizeof(buffer));
+	Q_strncpyz (buffer+l, sizeof(buffer)-1, text);
+	Q_strncatz (buffer, sizeof(buffer), "\n");
 	Con_Print (buffer);
 }
 
@@ -656,13 +656,13 @@ void Con_DrawInput (void)
 		//	Com_sprintf (output, sizeof(output), "%s%c", output, 11 );
 			addch[0] = 11;
 			addch[1] = '\0';
-			Q_strncatz (output, addch, sizeof(output));
+			Q_strncatz (output, sizeof(output), addch);
 		}
 		else {
 		//	Com_sprintf (output, sizeof(output), "%s%c", output, text[i]);
 			addch[0] = text[i];
 			addch[1] = '\0';
-			Q_strncatz (output, addch, sizeof(output));
+			Q_strncatz (output, sizeof(output), addch);
 		}
 	}
 	Con_DrawString ( (int)conLeft + FONT_SIZE/2, con.vislines - (int)(2.75*FONT_SIZE), output, FONT_CONSOLE, 255);
@@ -716,13 +716,13 @@ void Con_DrawNotify (void)
 			//	Com_sprintf (output, sizeof(output), "%s%c", output, 11 );
 				addch[0] = 11;
 				addch[1] = '\0';
-				Q_strncatz (output, addch, sizeof(output));
+				Q_strncatz (output, sizeof(output), addch);
 			}
 			else {
 			//	Com_sprintf (output, sizeof(output), "%s%c", output, (char)s[x]);
 				addch[0] = s[x];
 				addch[1] = '\0';
-				Q_strncatz (output, addch, sizeof(output));
+				Q_strncatz (output, sizeof(output), addch);
 			}
 
 			x++;
@@ -732,7 +732,7 @@ void Con_DrawNotify (void)
 		//	Com_sprintf (output, sizeof(output), "%s%c", output, 10+((int)(cls.realtime>>8)&1) );		
 			addch[0] = 10+((int)(cls.realtime>>8)&1);
 			addch[1] = '\0';
-			Q_strncatz (output, addch, sizeof(output));
+			Q_strncatz (output, sizeof(output), addch);
 		}
 
 		Con_DrawString ((int)conLeft, v, output, FONT_SCREEN, 255);
@@ -780,7 +780,7 @@ void Con_DrawNotify (void)
 			//	Com_sprintf (output, sizeof(output), "%s%c", output, (char)text[x]);
 				addch[0] = (char)text[x];
 				addch[1] = '\0';
-				Q_strncatz (output, addch, sizeof(output));
+				Q_strncatz (output, sizeof(output), addch);
 			}
 
 			Con_DrawString ((int)conLeft + FONT_SIZE/2, v, output, FONT_SCREEN, alpha);
@@ -825,13 +825,13 @@ void Con_DrawDownloadProgress (float conLeft, float conWidth, float conLineHeigh
 		strncpy(dlbar, text, i);
 		dlbar[i] = 0;
 	//	strncat(dlbar, "...");
-		Q_strncatz(dlbar, "...", sizeof(dlbar));
+		Q_strncatz(dlbar, sizeof(dlbar), "...");
 	}
 	else
 	//	strncpy(dlbar, text);
-		Q_strncpyz(dlbar, text, sizeof(dlbar));
+		Q_strncpyz(dlbar, sizeof(dlbar), text);
 //	strncat(dlbar, ": ");
-	Q_strncatz(dlbar, ": ", sizeof(dlbar));
+	Q_strncatz(dlbar, sizeof(dlbar), ": ");
 	i = (int)strlen(dlbar);
 	
 	// init solid color download bar
@@ -977,7 +977,7 @@ void Con_DrawConsole (float frac, qboolean trans)
 		//	Com_sprintf (output, sizeof(output), "%s%c", output, text[x]);
 			addch[0] = text[x];
 			addch[1] = '\0';
-			Q_strncatz (output, addch, sizeof(output));
+			Q_strncatz (output, sizeof(output), addch);
 		}
 		Con_DrawString ((int)conLeft + 4, y, output, FONT_CONSOLE, 255);
 	}

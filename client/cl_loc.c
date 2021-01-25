@@ -78,7 +78,7 @@ void CL_LoadLoc (void)
 	memset(locations, 0, sizeof(loc_t) * MAX_LOCATIONS);
 
 	// format map pathname
-	Q_strncpyz(mapname, cl.configstrings[CS_MODELS + 1] + 5, sizeof(mapname));	// skip "maps/"
+	Q_strncpyz (mapname, sizeof(mapname), cl.configstrings[CS_MODELS + 1] + 5);	// skip "maps/"
 	mapname[strlen(mapname) - 4] = 0;	// remove ".bsp"
 	Com_sprintf (filename, sizeof(filename), "locs/%s.loc", mapname);
 	
@@ -172,7 +172,7 @@ void CL_LoadLoc (void)
 				locations[index].origin[1] = atof(token2) * 0.125f;
 				locations[index].origin[2] = atof(token3) * 0.125f;
 			}
-			Q_strncpyz(locations[index].name, token4, sizeof(locations[index].name));
+			Q_strncpyz (locations[index].name, sizeof(locations[index].name), token4);
 			locations[index].used = true;
 
 		//	Com_DPrintf("%.3f %.3f %.3f\n", locations[index].origin[0], locations[index].origin[1], locations[index].origin[2]);
@@ -237,7 +237,7 @@ void CL_LoadLoc (void)
 		locations[index].origin[0] = atof(token1) * 0.125f;
 		locations[index].origin[1] = atof(token2) * 0.125f;
 		locations[index].origin[2] = atof(token3) * 0.125f;
-		Q_strncpyz(locations[index].name, token4, sizeof(locations[index].name));
+		Q_strncpyz (locations[index].name, sizeof(locations[index].name), token4);
 		locations[index].used = true;
 	}
 	fclose(f);
@@ -322,7 +322,7 @@ void CL_LocAdd (char *name)
 	locations[index].origin[0] = cl.frame.playerstate.pmove.origin[0] * 0.125f;
 	locations[index].origin[1] = cl.frame.playerstate.pmove.origin[1] * 0.125f;
 	locations[index].origin[2] = cl.frame.playerstate.pmove.origin[2] * 0.125f;
-	Q_strncpyz(locations[index].name, name, sizeof(locations[index].name));
+	Q_strncpyz (locations[index].name, sizeof(locations[index].name), name);
 	locations[index].used = true;
 
 	Com_Printf("Location '%s' added at (%.3f %.3f %.3f). Loc #%d.\n", locations[index].name, 
@@ -347,7 +347,7 @@ void CL_LocWrite (void)
 
 	// format map pathname
 //	strncpy(mapname, cl.configstrings[CS_MODELS + 1] + 5);   // Xile; lets just keep saving em to one file mmmkay?
-	Q_strncpyz(mapname, cl.configstrings[CS_MODELS + 1] + 5, sizeof(mapname));
+	Q_strncpyz (mapname, sizeof(mapname), cl.configstrings[CS_MODELS + 1] + 5);
 	mapname[strlen(mapname) - 4] = 0;
 	Com_sprintf (filename, sizeof(filename), "%s/locs/%s.loc", FS_Savegamedir(), mapname);	// was FS_Gamedir()
 

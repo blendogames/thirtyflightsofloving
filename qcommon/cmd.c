@@ -304,10 +304,9 @@ will keep the demoloop from immediately starting
 */
 qboolean Cbuf_AddLateCommands (void)
 {
-	int		i, j;
-	int		s;
-	char	*text, *build, c;
-	int		argc;
+	int			i, j, s;
+	char		*text, *build, c;
+	int			argc;
 	qboolean	ret;
 
 // build the combined string to parse from
@@ -325,10 +324,10 @@ qboolean Cbuf_AddLateCommands (void)
 	for (i=1 ; i<argc ; i++)
 	{
 	//	strncat (text,COM_Argv(i));
-		Q_strncatz (text, COM_Argv(i), s+1);
+		Q_strncatz (text, s+1, COM_Argv(i));
 		if (i != argc-1)
 		//	strncat (text, " ");
-			Q_strncatz (text, " ", s+1);
+			Q_strncatz (text, s+1, " ");
 	}
 	
 	// start quake2:// support
@@ -358,8 +357,8 @@ qboolean Cbuf_AddLateCommands (void)
 			
 		//	strncat (build, text+i);
 		//	strncat (build, "\n");
-			Q_strncatz (build, text+i, s+1);
-			Q_strncatz (build, "\n", s+1);
+			Q_strncatz (build, s+1, text+i);
+			Q_strncatz (build, s+1, "\n");
 			text[j] = c;
 			i = j-1;
 		}
@@ -484,7 +483,7 @@ void Cmd_Alias_f (void)
 		cmd_alias = a;
 	}
 //	strncpy (a->name, s);	
-	Q_strncpyz (a->name, s, sizeof(a->name));	
+	Q_strncpyz (a->name, sizeof(a->name), s);	
 
 // copy the rest of the command line
 	cmd[0] = 0;		// start out with a null string
@@ -492,13 +491,13 @@ void Cmd_Alias_f (void)
 	for (i=2 ; i< c ; i++)
 	{
 	//	strncat (cmd, Cmd_Argv(i));
-		Q_strncatz (cmd, Cmd_Argv(i), sizeof(cmd));
+		Q_strncatz (cmd, sizeof(cmd), Cmd_Argv(i));
 		if (i != (c - 1))
 		//	strncat (cmd, " ");
-			Q_strncatz (cmd, " ", sizeof(cmd));
+			Q_strncatz (cmd, sizeof(cmd), " ");
 	}
 //	strncat (cmd, "\n");
-	Q_strncatz (cmd, "\n", sizeof(cmd));
+	Q_strncatz (cmd, sizeof(cmd), "\n");
 	
 	a->value = CopyString (cmd);
 }
@@ -614,11 +613,11 @@ char *Cmd_MacroExpandString (char *text)
 		strncpy (temporary, scan, i);
 	//	strncpy (temporary+i, token);
 	//	strncpy (temporary+i+j, start);
-		Q_strncpyz (temporary+i, token, sizeof(temporary)-i);
-		Q_strncpyz (temporary+i+j, start, sizeof(temporary)-i-j);
+		Q_strncpyz (temporary+i, sizeof(temporary)-i, token);
+		Q_strncpyz (temporary+i+j, sizeof(temporary)-i-j, start);
 
-//		strncpy (expanded, temporary);
-		Q_strncpyz (expanded, temporary, sizeof(expanded));
+	//	strncpy (expanded, temporary);
+		Q_strncpyz (expanded, sizeof(expanded), temporary);
 		scan = expanded;
 		i--;
 
@@ -650,6 +649,7 @@ $Cvars will be expanded unless they are in a quoted token
 void Cmd_TokenizeString (char *text, qboolean macroExpand)
 {
 	int		i;
+	size_t	cmd_argSize;
 	char	*com_token;
 
 // clear the args from the last string
@@ -696,7 +696,7 @@ void Cmd_TokenizeString (char *text, qboolean macroExpand)
 
 			// [SkulleR]'s fix for overflow vulnerability
 			//strncpy (cmd_args, text);
-			Q_strncpyz (cmd_args, text, sizeof(cmd_args));
+			Q_strncpyz (cmd_args, sizeof(cmd_args), text);
 			cmd_args[sizeof(cmd_args)-1] = 0; 
 
 			// strip off any trailing whitespace
@@ -714,9 +714,10 @@ void Cmd_TokenizeString (char *text, qboolean macroExpand)
 
 		if (cmd_argc < MAX_STRING_TOKENS)
 		{
-			cmd_argv[cmd_argc] = Z_Malloc (strlen(com_token)+1);
+			cmd_argSize = strlen(com_token)+1;
+			cmd_argv[cmd_argc] = Z_Malloc (cmd_argSize);
 		//	strncpy (cmd_argv[cmd_argc], com_token);
-			Q_strncpyz (cmd_argv[cmd_argc], com_token, strlen(com_token)+1);
+			Q_strncpyz (cmd_argv[cmd_argc], cmd_argSize, com_token);
 			cmd_argc++;
 		}
 	}
@@ -876,17 +877,20 @@ char *Cmd_CompleteCommand (char *partial)
 
 // check for partial match
 	for (cmd=cmd_functions ; cmd ; cmd=cmd->next)
-		if (!_strnicmp (partial,cmd->name, len)) {
+	//	if (!_strnicmp (partial, cmd->name, len)) {
+		if (!Q_strncasecmp (partial, cmd->name, len)) {
 			pmatch[i]=cmd->name;
 			i++;
 		}
 	for (a=cmd_alias ; a ; a=a->next)
-		if (!_strnicmp (partial, a->name, len)) {
+	//	if (!_strnicmp (partial, a->name, len)) {
+		if (!Q_strncasecmp (partial, a->name, len)) {
 			pmatch[i]=a->name;
 			i++;
 		}
 	for (cvar=cvar_vars ; cvar ; cvar=cvar->next)
-		if (!_strnicmp (partial,cvar->name, len)) {
+	//	if (!_strnicmp (partial, cvar->name, len)) {
+		if (!Q_strncasecmp (partial, cvar->name, len)) {
 			pmatch[i]=cvar->name;
 			i++;
 		}
@@ -900,7 +904,7 @@ char *Cmd_CompleteCommand (char *partial)
 			Com_Printf("  %s\n",pmatch[o]);
 
 	//	strncpy(retval,""); p=0;
-		Q_strncpyz(retval, "", sizeof(retval)); p=0;
+		Q_strncpyz(retval, sizeof(retval), ""); p=0;
 		while (!diff && p < 256) {
 			retval[p]=pmatch[0][p];
 			for (o=0; o<i; o++) {

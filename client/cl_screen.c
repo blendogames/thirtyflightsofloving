@@ -1158,7 +1158,7 @@ void SCR_DumpStatusLayout_f (void)
 	// statusbar layout is in multiple configstrings
 	// starting at CS_STATUSBAR and ending at CS_AIRACCEL
 	Com_sprintf(formatLine, sizeof(formatLine), "\nFormatted Dump\n--------------\n");
-	Q_strncatz (buffer, formatLine, sizeof(buffer));
+	Q_strncatz (buffer, sizeof(buffer), formatLine);
 	bufcount += (int)strlen(formatLine);
 	fwrite(&buffer, 1, bufcount, f);
 	buffer[0] = 0;
@@ -1194,7 +1194,7 @@ void SCR_DumpStatusLayout_f (void)
 
 	// write out the raw dump
 	Com_sprintf(formatLine, sizeof(formatLine), "\nRaw Dump\n--------\n");
-	Q_strncatz (buffer, formatLine, sizeof(buffer));
+	Q_strncatz (buffer, sizeof(buffer), formatLine);
 	bufcount += (int)strlen(formatLine);
 	fwrite(&buffer, 1, bufcount, f);
 	buffer[0] = 0;
@@ -1213,7 +1213,7 @@ void SCR_DumpStatusLayout_f (void)
 
 	// write out the stat values for debugging
 	Com_sprintf(formatLine, sizeof(formatLine), "\nStat Values\n-----------\n");
-	Q_strncatz (buffer, formatLine, sizeof(buffer));
+	Q_strncatz (buffer, sizeof(buffer), formatLine);
 	bufcount += (int)strlen(formatLine);
 	for (i=0; i<MAX_STATS; i++)
 	{
@@ -1224,7 +1224,7 @@ void SCR_DumpStatusLayout_f (void)
 			buffer[0] = 0;
 			bufcount = 0;
 		}
-		Q_strncatz (buffer, statLine, sizeof(buffer));
+		Q_strncatz (buffer, sizeof(buffer), statLine);
 		bufcount += (int)strlen(statLine);
 	}
 	fwrite(&buffer, 1, bufcount, f);
@@ -1233,7 +1233,7 @@ void SCR_DumpStatusLayout_f (void)
 
 	// write out CS_GENERAL for stat_string tokens
 	Com_sprintf(formatLine, sizeof(formatLine), "\nGeneral Configstrings\n---------------------\n");
-	Q_strncatz (buffer, formatLine, sizeof(buffer));
+	Q_strncatz (buffer, sizeof(buffer), formatLine);
 	bufcount += (int)strlen(formatLine);
 	for (i = cs_general; i < (cs_general + MAX_GENERAL); i++)
 	{
@@ -1244,7 +1244,7 @@ void SCR_DumpStatusLayout_f (void)
 			buffer[0] = 0;
 			bufcount = 0;
 		}
-		Q_strncatz (buffer, formatLine, sizeof(buffer));
+		Q_strncatz (buffer, sizeof(buffer), formatLine);
 		bufcount += (int)strlen(formatLine);
 	}
 	fwrite(&buffer, 1, bufcount, f);
@@ -1634,7 +1634,7 @@ void SCR_DrawLoading (void)
 	if (loadingMessage && cl.configstrings[CS_MODELS+1][0])
 	{
 	//	strncpy (mapfile, cl.configstrings[CS_MODELS+1] + 5);	// skip "maps/"
-		Q_strncpyz (mapfile, cl.configstrings[CS_MODELS+1] + 5, sizeof(mapfile));	// skip "maps/"
+		Q_strncpyz (mapfile, sizeof(mapfile), cl.configstrings[CS_MODELS+1] + 5);	// skip "maps/"
 		mapfile[strlen(mapfile)-4] = 0;		// cut off ".bsp"
 
 		// show saveshot here

@@ -122,7 +122,7 @@ void lock_initialize (edict_t *lock)
 	lock->key_message[numdigits] = '\0';
 
 //	strncpy(game.lock_code, lock->key_message);
-	Q_strncpyz(game.lock_code, lock->key_message, sizeof(game.lock_code));
+	Q_strncpyz(game.lock_code, sizeof(game.lock_code), lock->key_message);
 	game.lock_revealed = 0;
 }
 

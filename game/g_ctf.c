@@ -704,7 +704,7 @@ void CTFAssignSkin (edict_t *ent, char *s)
 		p[1] = 0;
 	else
 	//	strncpy(t, "male/");
-		Q_strncpyz(t, "male/", sizeof(t));
+		Q_strncpyz(t, sizeof(t), "male/");
 
 	switch (ent->client->resp.ctf_team) {
 	case CTF_TEAM1:
@@ -1767,7 +1767,7 @@ void SetCTFStats (edict_t *ent)
 	if (ent->client->resp.ghost) {
 		ent->client->resp.ghost->score = ent->client->resp.score;
 	//	strncpy(ent->client->resp.ghost->netname, ent->client->pers.netname);
-		Q_strncpyz(ent->client->resp.ghost->netname, ent->client->pers.netname, sizeof(ent->client->resp.ghost->netname));
+		Q_strncpyz(ent->client->resp.ghost->netname, sizeof(ent->client->resp.ghost->netname), ent->client->pers.netname);
 		ent->client->resp.ghost->number = ent->s.number;
 	}
 
@@ -2564,7 +2564,7 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer)
 					sorted[0][i],
 					cl->resp.score,
 					cl->ping > 999 ? 999 : cl->ping);
-				Q_strncatz (entry, tmp, sizeof(entry));
+				Q_strncatz (entry, sizeof(entry), tmp);
 			}
 			else {
 			//	sprintf(entry+strlen(entry),
@@ -2574,7 +2574,7 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer)
 					sorted[0][i],
 					cl->resp.score,
 					cl->ping > 999 ? 999 : cl->ping);
-				Q_strncatz (entry, tmp, sizeof(entry));
+				Q_strncatz (entry, sizeof(entry), tmp);
 			}
 			
 			if (ttctf->value)
@@ -2585,35 +2585,35 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer)
 				//	sprintf(entry + strlen(entry), "xv -16 yv %d picn sbfctf2 "
 					Com_sprintf(tmp, sizeof(tmp), "xv -16 yv %d picn sbfctf2 "
 												   "xv -8 yv %d picn sbfctf3 ", 42 + i * 8, 42 + i * 8);
-					Q_strncatz (entry, tmp, sizeof(entry));
+					Q_strncatz (entry, sizeof(entry), tmp);
 					/*if (level.framenum & 1)
 						Com_sprintf(tmp, sizeof(tmp), "xv -16 yv %d picn sbfctf2 ", 42 + i * 8);
 					else
 						Com_sprintf(tmp, sizeof(tmp), "xv -16 yv %d picn sbfctf3 ", 42 + i * 8);
-					Q_strncatz (entry, tmp, sizeof(entry));
+					Q_strncatz (entry, sizeof(entry), tmp);
 					*/
 				}
 				else if (cl_ent->client->pers.inventory[ITEM_INDEX(flag2_item)]) {
 				//	sprintf(entry + strlen(entry), "xv -16 yv %d picn sbfctf2 ", 42 + i * 8);
 					Com_sprintf(tmp, sizeof(tmp), "xv -16 yv %d picn sbfctf2 ", 42 + i * 8);
-					Q_strncatz (entry, tmp, sizeof(entry));
+					Q_strncatz (entry, sizeof(entry), tmp);
 				}
 				else if (cl_ent->client->pers.inventory[ITEM_INDEX(flag3_item)]) {
 				//	sprintf(entry + strlen(entry), "xv -16 yv %d picn sbfctf3 ", 42 + i * 8);
 					Com_sprintf(tmp, sizeof(tmp), "xv -16 yv %d picn sbfctf3 ", 42 + i * 8);
-					Q_strncatz (entry, tmp, sizeof(entry));
+					Q_strncatz (entry, sizeof(entry), tmp);
 				}
 			}
 			else
 				if (cl_ent->client->pers.inventory[ITEM_INDEX(flag2_item)]) {
 				//	sprintf(entry + strlen(entry), "xv 56 yv %d picn sbfctf2 ", 42 + i * 8);
 					Com_sprintf (tmp, sizeof(tmp), "xv 56 yv %d picn sbfctf2 ", 42 + i * 8);
-					Q_strncatz (entry, tmp, sizeof(entry));
+					Q_strncatz (entry, sizeof(entry), tmp);
 				}
 
 			if (maxsize - len > strlen(entry)) {
 			//	strncat(string, entry);
-				Q_strncatz(string, entry, sizeof(string));
+				Q_strncatz(string, sizeof(string), entry);
 				len = (int)strlen(string);
 				last[0] = i;
 			}
@@ -2637,7 +2637,7 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer)
 					sorted[1][i],
 					cl->resp.score,
 					cl->ping > 999 ? 999 : cl->ping);
-				Q_strncatz (entry, tmp, sizeof(entry));
+				Q_strncatz (entry, sizeof(entry), tmp);
 			}
 			else {
 			//	sprintf(entry+strlen(entry),
@@ -2647,7 +2647,7 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer)
 					sorted[1][i],
 					cl->resp.score,
 					cl->ping > 999 ? 999 : cl->ping);
-				Q_strncatz (entry, tmp, sizeof(entry));
+				Q_strncatz (entry, sizeof(entry), tmp);
 			}
 				
 			if (ttctf->value)
@@ -2658,7 +2658,7 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer)
 				//	sprintf(entry + strlen(entry), "xv 144 yv %d picn sbfctf1 "
 					Com_sprintf (tmp, sizeof(tmp), "xv 144 yv %d picn sbfctf1 "
 												   "xv 152 yv %d picn sbfctf3 ", 42 + i * 8, 42 + i * 8);
-					Q_strncatz (entry, tmp, sizeof(entry));
+					Q_strncatz (entry, sizeof(entry), tmp);
 					/*if (level.framenum & 1)
 						Com_sprintf (tmp, sizeof(tmp), "xv 144 yv %d picn sbfctf1 ", 42 + i * 8);
 					else
@@ -2669,24 +2669,24 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer)
 				else if (cl_ent->client->pers.inventory[ITEM_INDEX(flag1_item)]) {
 				//	sprintf(entry + strlen(entry), "xv 144 yv %d picn sbfctf1 ", 42 + i * 8);
 					Com_sprintf (tmp, sizeof(tmp), "xv 144 yv %d picn sbfctf1 ", 42 + i * 8);
-					Q_strncatz (entry, tmp, sizeof(entry));
+					Q_strncatz (entry, sizeof(entry), tmp);
 				}
 				else if (cl_ent->client->pers.inventory[ITEM_INDEX(flag3_item)]) {
 				//	sprintf(entry + strlen(entry), "xv 144 yv %d picn sbfctf3 ", 42 + i * 8);
 					Com_sprintf (tmp, sizeof(tmp), "xv 144 yv %d picn sbfctf3 ", 42 + i * 8);
-					Q_strncatz (entry, tmp, sizeof(entry));
+					Q_strncatz (entry, sizeof(entry), tmp);
 				}
 			}
 			else
 				if (cl_ent->client->pers.inventory[ITEM_INDEX(flag1_item)]) {
 				//	sprintf(entry + strlen(entry), "xv 216 yv %d picn sbfctf1 ", 42 + i * 8);
 					Com_sprintf (tmp, sizeof(tmp), "xv 216 yv %d picn sbfctf1 ", 42 + i * 8);
-					Q_strncatz (entry, tmp, sizeof(entry));
+					Q_strncatz (entry, sizeof(entry), tmp);
 				}
 			
 			if (maxsize - len > strlen(entry)) {
 			//	strncat(string, entry);
-				Q_strncatz(string, entry, sizeof(string));
+				Q_strncatz(string, sizeof(string), entry);
 				len = (int)strlen(string);
 				last[1] = i;
 			}
@@ -2709,7 +2709,7 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer)
 				sorted[2][i],
 				cl->resp.score,
 				cl->ping > 999 ? 999 : cl->ping);
-			Q_strncatz (entry, tmp, sizeof(entry));
+			Q_strncatz (entry, sizeof(entry), tmp);
 			
 			if (cl_ent->client->pers.inventory[ITEM_INDEX(flag1_item)]
 				&& cl_ent->client->pers.inventory[ITEM_INDEX(flag2_item)])
@@ -2717,28 +2717,28 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer)
 			//	sprintf(entry + strlen(entry), "xv 304 yv %d picn sbfctf1 "
 				Com_sprintf (tmp, sizeof(tmp), "xv 304 yv %d picn sbfctf1 "
 											   "xv 312 yv %d picn sbfctf2 ", 42 + i * 8, 42 + i * 8);
-				Q_strncatz (entry, tmp, sizeof(entry));
+				Q_strncatz (entry, sizeof(entry), tmp);
 				/*if (level.framenum & 1)
 					Com_sprintf (tmp, sizeof(tmp), "xv 304 yv %d picn sbfctf1 ", 42 + i * 8);
 				else
 					Com_sprintf (tmp, sizeof(tmp), "xv 304 yv %d picn sbfctf2", 42 + i * 8);
-				Q_strncatz (entry, tmp, sizeof(entry));
+				Q_strncatz (entry, sizeof(entry), tmp);
 				*/
 			}
 			else if (cl_ent->client->pers.inventory[ITEM_INDEX(flag1_item)]) {
 			//	sprintf(entry + strlen(entry), "xv 304 yv %d picn sbfctf1 ", 42 + i * 8);
 				Com_sprintf (tmp, sizeof(tmp), "xv 304 yv %d picn sbfctf1 ", 42 + i * 8);
-				Q_strncatz (entry, tmp, sizeof(entry));
+				Q_strncatz (entry, sizeof(entry), tmp);
 			}
 			else if (cl_ent->client->pers.inventory[ITEM_INDEX(flag2_item)]) {
 			//	sprintf(entry + strlen(entry), "xv 304 yv %d picn sbfctf2 ", 42 + i * 8);			
 				Com_sprintf (tmp, sizeof(tmp), "xv 304 yv %d picn sbfctf2 ", 42 + i * 8);			
-				Q_strncatz (entry, tmp, sizeof(entry));
+				Q_strncatz (entry, sizeof(entry), tmp);
 			}
 			
 			if (maxsize - len > strlen(entry)) {
 			//	strncat(string, entry);
-				Q_strncatz(string, entry, sizeof(string));
+				Q_strncatz(string, sizeof(string), entry);
 				len = (int)strlen(string);
 				last[2] = i;
 			}
@@ -2782,7 +2782,7 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer)
 			//	sprintf(entry, "xv 0 yv %d string2 \"Spectators\" ", j);
 				Com_sprintf (entry, sizeof(entry), "xv 0 yv %d string2 \"Spectators\" ", j);
 			//	strncat(string, entry);
-				Q_strncatz(string, entry, sizeof(string));
+				Q_strncatz(string, sizeof(string), entry);
 				len = (int)strlen(string);
 				j += 8;
 			}
@@ -2795,10 +2795,10 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer)
 				i, // playernum
 				cl->resp.score,
 				cl->ping > 999 ? 999 : cl->ping);
-			Q_strncatz (entry, tmp, sizeof(entry));
+			Q_strncatz (entry, sizeof(entry), tmp);
 			if (maxsize - len > strlen(entry)) {
 			//	strncat(string, entry);
-				Q_strncatz(string, entry, sizeof(string));
+				Q_strncatz(string, sizeof(string), entry);
 				len = (int)strlen(string);
 			}
 			
@@ -2814,19 +2814,19 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer)
 		//	sprintf(string + strlen(string), "xv -64 yv %d string \"..and %d more\" ",
 			Com_sprintf (tmp, sizeof(tmp), "xv -64 yv %d string \"..and %d more\" ",
 				42 + (last[0]+1)*8, total[0] - last[0] - 1);
-			Q_strncatz (string, tmp, sizeof(string));
+			Q_strncatz (string, sizeof(string), tmp);
 		}
 		if (total[1] - last[1] > 1) { // couldn't fit everyone
 		//	sprintf(string + strlen(string), "xv 96 yv %d string \"..and %d more\" ",
 			Com_sprintf (tmp, sizeof(tmp), "xv 96 yv %d string \"..and %d more\" ",
 				42 + (last[1]+1)*8, total[1] - last[1] - 1);
-			Q_strncatz (string, tmp, sizeof(string));
+			Q_strncatz (string, sizeof(string), tmp);
 		}
 		if (total[2] - last[2] > 1) { // couldn't fit everyone
 		//	sprintf(string + strlen(string), "xv 256 yv %d string \"..and %d more\" ",
 			Com_sprintf (tmp, sizeof(tmp), "xv 256 yv %d string \"..and %d more\" ",
 				42 + (last[2]+1)*8, total[2] - last[2] - 1);
-			Q_strncatz (string, tmp, sizeof(string));
+			Q_strncatz (string, sizeof(string), tmp);
 		}
 	}
 	else
@@ -2835,13 +2835,13 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer)
 		//	sprintf(string + strlen(string), "xv 8 yv %d string \"..and %d more\" ",
 			Com_sprintf (tmp, sizeof(tmp), "xv 8 yv %d string \"..and %d more\" ",
 				42 + (last[0]+1)*8, total[0] - last[0] - 1);
-			Q_strncatz (string, tmp, sizeof(string));
+			Q_strncatz (string, sizeof(string), tmp);
 		}
 		if (total[1] - last[1] > 1) { // couldn't fit everyone
 		//	sprintf(string + strlen(string), "xv 168 yv %d string \"..and %d more\" ",
 			Com_sprintf (tmp, sizeof(tmp), "xv 168 yv %d string \"..and %d more\" ",
 				42 + (last[1]+1)*8, total[1] - last[1] - 1);
-			Q_strncatz (string, tmp, sizeof(string));
+			Q_strncatz (string, sizeof(string), tmp);
 		}
 	}
 
@@ -3730,7 +3730,7 @@ struct {
 
 	if (!hot) {
 	//	strncpy(buf, "nowhere");
-		Q_strncpyz(buf, "nowhere", bufSize);
+		Q_strncpyz(buf, bufSize, "nowhere");
 		return;
 	}
 
@@ -3759,14 +3759,14 @@ struct {
 
 	if ((item = FindItemByClassname(hot->classname)) == NULL) {
 	//	strncpy(buf, "nowhere");
-		Q_strncpyz(buf, "nowhere", bufSize);
+		Q_strncpyz(buf, bufSize, "nowhere");
 		return;
 	}
 
 	// in water?
 	if (who->waterlevel)
 	//	strncpy(buf, "in the water ");
-		Q_strncpyz(buf, "in the water ", bufSize);
+		Q_strncpyz(buf, bufSize, "in the water ");
 	else
 		*buf = 0;
 
@@ -3775,26 +3775,26 @@ struct {
 	if (fabs(v[2]) > fabs(v[0]) && fabs(v[2]) > fabs(v[1]))
 		if (v[2] > 0)
 		//	strncat(buf, "above ");
-			Q_strncatz(buf, "above ", bufSize);
+			Q_strncatz(buf, bufSize, "above ");
 		else
 		//	strncat(buf, "below ");
-			Q_strncatz(buf, "below ", bufSize);
+			Q_strncatz(buf, bufSize, "below ");
 	else
 	//	strncat(buf, "near ");
-		Q_strncatz(buf, "near ", bufSize);
+		Q_strncatz(buf, bufSize, "near ");
 
 	if (nearteam == CTF_TEAM1)
 	//	strncat(buf, "the red ");
-		Q_strncatz(buf, "the red ", bufSize);
+		Q_strncatz(buf, bufSize, "the red ");
 	else if (nearteam == CTF_TEAM2)
 	//	strncat(buf, "the blue ");
-		Q_strncatz(buf, "the blue ", bufSize);
+		Q_strncatz(buf, bufSize, "the blue ");
 	else
 	//	strncat(buf, "the ");
-		Q_strncatz(buf, "the ", bufSize);
+		Q_strncatz(buf, bufSize, "the ");
 
 //	strncat(buf, item->pickup_name);
-	Q_strncatz(buf, item->pickup_name, bufSize);
+	Q_strncatz(buf, bufSize, item->pickup_name);
 }
 
 /*static*/ void CTFSay_Team_Armor (edict_t *who, char *buf, size_t bufSize)
@@ -3815,7 +3815,7 @@ struct {
 			Com_sprintf (tmp, sizeof(tmp), "%s with %i cells ",
 				(power_armor_type == POWER_ARMOR_SCREEN) ?
 				"Power Screen" : "Power Shield", cells);
-			Q_strncatz (buf, tmp, bufSize);
+			Q_strncatz (buf, bufSize, tmp);
 		}
 	}
 
@@ -3826,24 +3826,24 @@ struct {
 		if (item) {
 			if (*buf)
 			//	strncat(buf, "and ");
-				Q_strncatz(buf, "and ", bufSize);
+				Q_strncatz(buf, bufSize, "and ");
 		//	sprintf(buf+strlen(buf), "%i units of %s",
 			Com_sprintf (tmp, sizeof(tmp), "%i units of %s",
 				who->client->pers.inventory[index], item->pickup_name);
-			Q_strncatz (buf, tmp, bufSize);
+			Q_strncatz (buf, bufSize, tmp);
 		}
 	}
 
 	if (!*buf)
 	//	strncpy(buf, "no armor", bufSize);
-		Q_strncpyz(buf, "no armor", bufSize);
+		Q_strncpyz(buf, bufSize, "no armor");
 }
 
 /*static*/ void CTFSay_Team_Health (edict_t *who, char *buf, size_t bufSize)
 {
 	if (who->health <= 0)
 	//	strncpy(buf, "dead", bufSize);
-		Q_strncpyz(buf, "dead", bufSize);
+		Q_strncpyz(buf, bufSize, "dead");
 	else
 		Com_sprintf(buf, bufSize, "%i health", who->health);
 }
@@ -3864,17 +3864,17 @@ struct {
 		i++;
 	}
 //	strncpy(buf, "no powerup", bufSize);
-	Q_strncpyz(buf, "no powerup", bufSize);
+	Q_strncpyz(buf, bufSize, "no powerup");
 }
 
 /*static*/ void CTFSay_Team_Weapon (edict_t *who, char *buf, size_t bufSize)
 {
 	if (who->client->pers.weapon)
 	//	strncpy(buf, who->client->pers.weapon->pickup_name, bufSize);
-		Q_strncpyz(buf, who->client->pers.weapon->pickup_name, bufSize);
+		Q_strncpyz(buf, bufSize, who->client->pers.weapon->pickup_name);
 	else
 	//	strncpy(buf, "none", bufSize);
-		Q_strncpyz(buf, "none", bufSize);
+		Q_strncpyz(buf, bufSize, "none");
 }
 
 /*static*/ void CTFSay_Team_Sight (edict_t *who, char *buf, size_t bufSize)
@@ -3896,29 +3896,29 @@ struct {
 			if (strlen(s) + strlen(s2) + 3 < sizeof(s)) {
 				if (n)
 				//	strncat(s, ", ");
-					Q_strncatz(s, ", ", sizeof(s));
+					Q_strncatz(s, sizeof(s), ", ");
 			//	strncat(s, s2);
-				Q_strncatz(s, s2, sizeof(s));
+				Q_strncatz(s, sizeof(s), s2);
 				*s2 = 0;
 			}
 			n++;
 		}
 	//	strncpy(s2, targ->client->pers.netname);
-		Q_strncpyz(s2, targ->client->pers.netname, sizeof(s2));
+		Q_strncpyz(s2, sizeof(s2), targ->client->pers.netname);
 	}
 	if (*s2) {
 		if (strlen(s) + strlen(s2) + 6 < sizeof(s)) {
 			if (n)
 			//	strncat(s, " and ");
-				Q_strncatz(s, " and ", sizeof(s));
+				Q_strncatz(s, sizeof(s), " and ");
 		//	strncat(s, s2);
-			Q_strncatz(s, s2, sizeof(s));
+			Q_strncatz(s, sizeof(s), s2);
 		}
 	//	strncpy(buf, s, bufSize);
-		Q_strncpyz(buf, s, bufSize);
+		Q_strncpyz(buf, bufSize, s);
 	} else
 	//	strncpy(buf, "no one", bufSize);
-		Q_strncpyz(buf, "no one", bufSize);
+		Q_strncpyz(buf, bufSize, "no one");
 }
 
 void CTFSay_Team (edict_t *who, char *msg)
@@ -3951,7 +3951,7 @@ void CTFSay_Team (edict_t *who, char *msg)
 					CTFSay_Team_Location(who, buf, sizeof(buf));
 					if (strlen(buf) + (p - outmsg) < sizeof(outmsg) - 2) {
 						strcpy(p, buf);
-					//	Q_strncpyz(p, buf, outmsgSize);
+					//	Q_strncpyz(p, outmsgSize, buf);
 						p += strlen(buf);
 					//	outmsgSize -= strlen(buf);
 					}
@@ -3961,7 +3961,7 @@ void CTFSay_Team (edict_t *who, char *msg)
 					CTFSay_Team_Armor(who, buf, sizeof(buf));
 					if (strlen(buf) + (p - outmsg) < sizeof(outmsg) - 2) {
 						strcpy(p, buf);
-					//	Q_strncpyz(p, buf, outmsgSize);
+					//	Q_strncpyz(p, outmsgSize, buf);
 						p += strlen(buf);
 					//	outmsgSize -= strlen(buf);
 					}
@@ -3971,7 +3971,7 @@ void CTFSay_Team (edict_t *who, char *msg)
 					CTFSay_Team_Health(who, buf, sizeof(buf));
 					if (strlen(buf) + (p - outmsg) < sizeof(outmsg) - 2) {
 						strcpy(p, buf);
-					//	Q_strncpyz(p, buf, outmsgSize);
+					//	Q_strncpyz(p, outmsgSize, buf);
 						p += strlen(buf);
 					//	outmsgSize -= strlen(buf);
 					}
@@ -3981,7 +3981,7 @@ void CTFSay_Team (edict_t *who, char *msg)
 					CTFSay_Team_Tech(who, buf, sizeof(buf));
 					if (strlen(buf) + (p - outmsg) < sizeof(outmsg) - 2) {
 						strcpy(p, buf);
-					//	Q_strncpyz(p, buf, outmsgSize);
+					//	Q_strncpyz(p, outmsgSize, buf);
 						p += strlen(buf);
 					//	outmsgSize -= strlen(buf);
 					}
@@ -3991,7 +3991,7 @@ void CTFSay_Team (edict_t *who, char *msg)
 					CTFSay_Team_Weapon(who, buf, sizeof(buf));
 					if (strlen(buf) + (p - outmsg) < sizeof(outmsg) - 2) {
 						strcpy(p, buf);
-					//	Q_strncpyz(p, buf, outmsgSize);
+					//	Q_strncpyz(p, outmsgSize, buf);
 						p += strlen(buf);
 					//	outmsgSize -= strlen(buf);
 					}
@@ -4002,7 +4002,7 @@ void CTFSay_Team (edict_t *who, char *msg)
 					CTFSay_Team_Sight(who, buf, sizeof(buf));
 					if (strlen(buf) + (p - outmsg) < sizeof(outmsg) - 2) {
 						strcpy(p, buf);
-					//	Q_strncpyz(p, buf, outmsgSize);
+					//	Q_strncpyz(p, outmsgSize, buf);
 						p += strlen(buf);
 					//	outmsgSize -= strlen(buf);
 					}
@@ -4090,10 +4090,10 @@ void SP_misc_ctf_small_banner (edict_t *ent)
 	levelname[0] = '*';
 	if (g_edicts[0].message)
 	//	strncpy(levelname+1, g_edicts[0].message, sizeof(levelname) - 2);
-		Q_strncpyz(levelname+1, g_edicts[0].message, sizeof(levelname) - 1);
+		Q_strncpyz(levelname+1, sizeof(levelname) - 1, g_edicts[0].message);
 	else
 	//	strncpy(levelname+1, level.mapname, sizeof(levelname) - 2);
-		Q_strncpyz(levelname+1, level.mapname, sizeof(levelname) - 1);
+		Q_strncpyz(levelname+1, sizeof(levelname) - 1, level.mapname);
 //	levelname[sizeof(levelname) - 1] = 0;
 	p->text = levelname;
 }
@@ -4141,7 +4141,7 @@ qboolean CTFBeginElection (edict_t *ent, elect_t type, char *msg)
 	ctfgame.needvotes = (count * electpercentage->value) / 100;
 	ctfgame.electtime = level.time + 20; // twenty seconds for election
 //	strncpy(ctfgame.emsg, msg, sizeof(ctfgame.emsg) - 1);
-	Q_strncpyz(ctfgame.emsg, msg, sizeof(ctfgame.emsg));
+	Q_strncpyz(ctfgame.emsg, sizeof(ctfgame.emsg), msg);
 
 	// tell everyone
 	safe_bprintf(PRINT_CHAT, "%s\n", ctfgame.emsg);
@@ -4217,7 +4217,7 @@ void CTFAssignGhost (edict_t *ent)
 	}
 	ctfgame.ghosts[ghost].ent = ent;
 //	strncpy(ctfgame.ghosts[ghost].netname, ent->client->pers.netname);
-	Q_strncpyz(ctfgame.ghosts[ghost].netname, ent->client->pers.netname, sizeof(ctfgame.ghosts[ghost].netname));
+	Q_strncpyz(ctfgame.ghosts[ghost].netname, sizeof(ctfgame.ghosts[ghost].netname), ent->client->pers.netname);
 	ent->client->resp.ghost = ctfgame.ghosts + ghost;
 	safe_cprintf(ent, PRINT_CHAT, "Your ghost code is **** %d ****\n", ctfgame.ghosts[ghost].code);
 	safe_cprintf(ent, PRINT_HIGH, "If you lose connection, you can rejoin with your score "
@@ -4361,7 +4361,7 @@ void CTFWinElection (void)
 		safe_bprintf(PRINT_HIGH, "%s is warping to level %s.\n", 
 			ctfgame.etarget->client->pers.netname, ctfgame.elevel);
 	//	strncpy(level.forcemap, ctfgame.elevel, sizeof(level.forcemap) - 1);
-		Q_strncpyz(level.forcemap, ctfgame.elevel, sizeof(level.forcemap));
+		Q_strncpyz(level.forcemap, sizeof(level.forcemap), ctfgame.elevel);
 		EndDMLevel();
 		break;
 	}
@@ -5800,7 +5800,7 @@ void CTFStats(edict_t *ent)
 				Com_sprintf(st, sizeof(st), "%s is not ready.\n", e2->client->pers.netname);
 				if (strlen(text) + strlen(st) < sizeof(text) - 50)
 				//	strncat(text, st);
-					Q_strncatz(text, st, sizeof(text));
+					Q_strncatz(text, sizeof(text), st);
 			}
 		}
 	}
@@ -5818,7 +5818,7 @@ void CTFStats(edict_t *ent)
 	}
 
 //	strncat(text, "  #|Name            |Score|Kills|Death|BasDf|CarDf|Effcy|\n");
-	Q_strncatz(text, "  #|Name            |Score|Kills|Death|BasDf|CarDf|Effcy|\n", sizeof(text));
+	Q_strncatz(text, sizeof(text), "  #|Name            |Score|Kills|Death|BasDf|CarDf|Effcy|\n");
 
 	for (i = 0, g = ctfgame.ghosts; i < MAX_CLIENTS; i++, g++)
 	{
@@ -5842,12 +5842,12 @@ void CTFStats(edict_t *ent)
 		{
 		//	sprintf(text+strlen(text), "And more...\n");
 			Com_sprintf(tmp, sizeof(tmp), "And more...\n");
-			Q_strncatz (text, tmp, sizeof(text));
+			Q_strncatz (text, sizeof(text), tmp);
 			safe_cprintf(ent, PRINT_HIGH, "%s", text);
 			return;
 		}
 	//	strncat(text, st);
-		Q_strncatz(text, st, sizeof(text));
+		Q_strncatz(text, sizeof(text), st);
 	}
 	safe_cprintf(ent, PRINT_HIGH, "%s", text);
 }
@@ -5873,7 +5873,7 @@ void CTFPlayerList(edict_t *ent)
 				Com_sprintf(st, sizeof(st), "%s is not ready.\n", e2->client->pers.netname);
 				if (strlen(text) + strlen(st) < sizeof(text) - 50)
 				//	strncat(text, st);
-					Q_strncatz(text, st, sizeof(text));
+					Q_strncatz(text, sizeof(text), st);
 			}
 		}
 	}
@@ -5901,12 +5901,12 @@ void CTFPlayerList(edict_t *ent)
 		if (strlen(text) + strlen(st) > sizeof(text) - 50) {
 		//	sprintf(text+strlen(text), "And more...\n");
 			Com_sprintf (tmp, sizeof(tmp), "And more...\n");
-			Q_strncatz (text, tmp, sizeof(text));
+			Q_strncatz (text, sizeof(text), tmp);
 			safe_cprintf(ent, PRINT_HIGH, "%s", text);
 			return;
 		}
 	//	strncat(text, st);
-		Q_strncatz(text, st, sizeof(text));
+		Q_strncatz(text, sizeof(text), st);
 	}
 	safe_cprintf(ent, PRINT_HIGH, "%s", text);
 }
@@ -5947,7 +5947,7 @@ void CTFWarp(edict_t *ent)
 		safe_bprintf(PRINT_HIGH, "%s is warping to level %s.\n", 
 			ent->client->pers.netname, gi.argv(1));
 	//	strncpy(level.forcemap, gi.argv(1), sizeof(level.forcemap) - 1);
-		Q_strncpyz(level.forcemap, gi.argv(1), sizeof(level.forcemap));
+		Q_strncpyz(level.forcemap, sizeof(level.forcemap), gi.argv(1));
 		EndDMLevel();
 		return;
 	}
@@ -5956,7 +5956,7 @@ void CTFWarp(edict_t *ent)
 			ent->client->pers.netname, gi.argv(1));
 	if (CTFBeginElection(ent, ELECT_MAP, text))
 	//	strncpy(ctfgame.elevel, gi.argv(1), sizeof(ctfgame.elevel) - 1);
-		Q_strncpyz(ctfgame.elevel, gi.argv(1), sizeof(ctfgame.elevel));
+		Q_strncpyz(ctfgame.elevel, sizeof(ctfgame.elevel), gi.argv(1));
 }
 
 void CTFBoot(edict_t *ent)

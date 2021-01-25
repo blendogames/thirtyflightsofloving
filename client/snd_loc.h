@@ -160,7 +160,7 @@ void	SNDDMA_Submit(void);
 
 //====================================================================
 
-#define	MAX_CHANNELS	64	//<- CDawg changed, was 32
+#define	MAX_CHANNELS	128	//<- CDawg changed, was 32
 extern	channel_t   channels[MAX_CHANNELS];
 
 extern	int		paintedtime;

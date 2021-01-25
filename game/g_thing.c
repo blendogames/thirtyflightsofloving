@@ -32,7 +32,7 @@ edict_t *SpawnThing()
 	thing = G_Spawn();
 	thing->classname = gi.TagMalloc(6,TAG_LEVEL);
 //	strncpy(thing->classname,"thing");
-	Q_strncpyz(thing->classname,"thing", 6);
+	Q_strncpyz(thing->classname, 6, "thing");
 	return thing;
 }
 

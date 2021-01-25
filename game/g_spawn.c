@@ -729,10 +729,10 @@ qboolean LoadAliasFile (char *name)
 		Com_sprintf(textname, sizeof(textname), name);
 
 		if (strlen(gamedir->string))
-		//	Q_strncpyz(gamepath, gamedir->string, sizeof(gamepath));
+		//	Q_strncpyz(gamepath, sizeof(gamepath), gamedir->string);
 			Com_sprintf(gamepath, sizeof(gamepath), "%s/%s", basedir->string, gamedir->string);
 		else
-		//	Q_strncpyz(gamepath, basedir->string, sizeof(gamepath));
+		//	Q_strncpyz(gamepath, sizeof(gamepath), basedir->string);
 			Com_sprintf(gamepath, sizeof(gamepath), "%s/baseq2", basedir->string);
 
 		// check all pakfiles in current gamedir
@@ -854,7 +854,7 @@ qboolean ED_ParseEntityAlias (char *data, edict_t *ent)
 			gi.error ("ED_ParseEntityAlias: closing brace without entity data");
 		// if we've found the classname, exit loop
 		if (classname_found) {
-			Q_strncpyz (entclassname, search_token, sizeof(entclassname));
+			Q_strncpyz (entclassname, sizeof(entclassname), search_token);
 			break;
 		}
 	}
@@ -906,7 +906,7 @@ qboolean ED_ParseEntityAlias (char *data, edict_t *ent)
 				}
 				if (search_token[0] == '}')
 					break;
-				Q_strncpyz (keyname, search_token, sizeof(keyname));
+				Q_strncpyz (keyname, sizeof(keyname), search_token);
 				
 			// parse value	
 				search_token = COM_Parse (&search_data);
@@ -963,7 +963,7 @@ char *ED_ParseEdict (char *data, edict_t *ent)
 		if (!data)
 			gi.error ("ED_ParseEntity: EOF without closing brace");
 
-		Q_strncpyz (keyname, com_token, sizeof(keyname));
+		Q_strncpyz (keyname, sizeof(keyname), com_token);
 		
 	// parse value	
 		com_token = COM_Parse (&data);
@@ -1195,8 +1195,8 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 	// Lazarus: last frame a gib was spawned in
 	lastgibframe = 0;
 
-	Q_strncpyz (level.mapname, mapname, sizeof(level.mapname));
-	Q_strncpyz (game.spawnpoint, spawnpoint, sizeof(game.spawnpoint));
+	Q_strncpyz (level.mapname, sizeof(level.mapname), mapname);
+	Q_strncpyz (game.spawnpoint, sizeof(game.spawnpoint), spawnpoint);
 
 	// set client fields on player ents
 	for (i=0 ; i<game.maxclients ; i++)
@@ -1652,17 +1652,17 @@ void SP_worldspawn (edict_t *ent)
 	SetItemNames ();
 
 	if (st.nextmap)
-		Q_strncpyz (level.nextmap, st.nextmap, sizeof(level.nextmap));
+		Q_strncpyz (level.nextmap, sizeof(level.nextmap), st.nextmap);
 
 	// make some data visible to the server
 
 	if (ent->message && ent->message[0])
 	{
 		gi.configstring (CS_NAME, ent->message);
-		Q_strncpyz (level.level_name, ent->message, sizeof(level.level_name));
+		Q_strncpyz (level.level_name, sizeof(level.level_name), ent->message);
 	}
 	else
-		Q_strncpyz (level.level_name, level.mapname, sizeof(level.level_name));
+		Q_strncpyz (level.level_name, sizeof(level.level_name), level.mapname);
 
 	if (st.sky && st.sky[0])
 		gi.configstring (CS_SKY, st.sky);
@@ -1718,7 +1718,7 @@ void SP_worldspawn (edict_t *ent)
 		ACEND_LoadNodes();
 		//ACESP_LoadBots(); // Knightmare- removed this
 		ACESP_LoadBotInfo(); // Knightmare- load bot info file
-		Q_strncpyz(current_map, level.mapname, sizeof(current_map));
+		Q_strncpyz(current_map, sizeof(current_map), level.mapname);
 	}
 // ACEBOT_END
 

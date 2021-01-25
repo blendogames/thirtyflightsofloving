@@ -165,7 +165,7 @@ Q_strncat
 Never goes past bounds or leaves without a terminating 0
 =================
 */
-void Q_strncat (char *dst, const char *src, int dstSize)
+void Q_strncat (char *dst, size_t dstSize, const char *src)
 {
 	int	len;
 
@@ -173,7 +173,7 @@ void Q_strncat (char *dst, const char *src, int dstSize)
 	if (len >= dstSize)
 		Com_Error(ERR_FATAL, "Q_strncat: already overflowed");
 
-	Q_strncpyz(dst + len, src, dstSize - len);
+	Q_strncpyz(dst + len, dstSize - len, src);
 }
 #endif
 
@@ -198,7 +198,7 @@ void Com_FileExtension (const char *path, char *dst, int dstSize)
 		s--;
 	}
 
-	Q_strncpyz(dst, last, dstSize);
+	Q_strncpyz (dst, dstSize, last);
 }
 
 /*
@@ -221,7 +221,7 @@ void Com_DefaultExtension (char *path, size_t maxSize, const char *newExtension)
 		s--;
 	}
 
-	Q_strncatz(path, newExtension, maxSize);
+	Q_strncatz (path, maxSize, newExtension);
 }
 
 /*
@@ -244,8 +244,8 @@ void Com_DefaultPath (char *path, int maxSize, const char *newPath)
 		s++;
 	}
 
-	Q_strncpyz(oldPath, path, sizeof(oldPath));
-	Com_sprintf(path, maxSize, "%s/%s", newPath, oldPath);
+	Q_strncpyz (oldPath, sizeof(oldPath), path);
+	Com_sprintf (path, maxSize, "%s/%s", newPath, oldPath);
 }
 
 //=============================================================
@@ -1383,8 +1383,8 @@ void SCR_PlayCinematic (char *name)
 	cl.cinematicframe = 0;
 	if (!Q_stricmp(name + strlen(name)-4, ".pcx"))
 	{
-		Q_strncpyz(filename, name, sizeof(filename));
-		Com_DefaultPath(filename, sizeof(filename), "pics");
+		Q_strncpyz (filename, sizeof(filename), name);
+		Com_DefaultPath (filename, sizeof(filename), "pics");
 		cl.cinematicframe = -1;
 		cl.cinematictime = 1;
 		SCR_EndLoadingPlaque ();
@@ -1392,9 +1392,9 @@ void SCR_PlayCinematic (char *name)
 	}
 	else
 	{
-		Q_strncpyz(filename, name, sizeof(filename));
-		Com_DefaultPath(filename, sizeof(filename), "video");
-		Com_DefaultExtension(filename, sizeof(filename), ".cin");
+		Q_strncpyz (filename, sizeof(filename), name);
+		Com_DefaultPath (filename, sizeof(filename), "video");
+		Com_DefaultExtension (filename, sizeof(filename), ".cin");
 	}
 
 //	cls.cinematicHandle = CIN_PlayCinematic(filename, 0, 0, viddef.width, viddef.height, CIN_SYSTEM);
@@ -1490,7 +1490,7 @@ void CIN_DrawCinematic (cinHandle_t handle){
 		char	picname[MAX_QPATH] = "/";
 		float	x=0, y=0, w=640, h=480;
 	//	strncat(picname, cin->name);
-		Q_strncatz(picname, cin->name, sizeof(picname));
+		Q_strncatz (picname, sizeof(picname), cin->name);
 		SCR_AdjustFrom640 (&x, &y, &w, &h, ALIGN_CENTER);
 		if (w < viddef.width || h < viddef.height)
 			R_DrawFill (0, 0, viddef.width, viddef.height, 0, 0, 0, 255);
@@ -1538,7 +1538,7 @@ cinHandle_t CIN_PlayCinematic (const char *name, int x, int y, int w, int h, int
 		int len;
 		len = (int)strlen(name);
 	//	strncpy (s, name);
-		Q_strncpyz (s, name, sizeof(s));
+		Q_strncpyz (s, sizeof(s), name);
 		s[len-3]='r'; s[len-2]='o'; s[len-1]='q';
 		handle  = CIN_PlayCinematic (s, x, y ,w, h, flags);
 		if (handle)
@@ -1549,7 +1549,7 @@ cinHandle_t CIN_PlayCinematic (const char *name, int x, int y, int w, int h, int
 	cin = CIN_HandleForVideo(&handle);
 
 	// Fill it in
-	Q_strncpyz(cin->name, name, sizeof(cin->name));
+	Q_strncpyz (cin->name, sizeof(cin->name), name);
 	realx = x;	realy = y;	realw = w;	realh = h; 
 	SCR_AdjustFrom640 (&realx, &realy, &realw, &realh, ALIGN_CENTER);
 	cin->x = realx;

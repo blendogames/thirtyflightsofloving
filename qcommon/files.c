@@ -178,7 +178,7 @@ void Com_FilePath (const char *path, char *dst, int dstSize)
 		s--;
 	}
 
-	Q_strncpyz(dst, path, dstSize);
+	Q_strncpyz(dst, dstSize, path);
 	if (last-path < dstSize)
 		dst[last-path] = 0;
 }
@@ -290,7 +290,7 @@ void FS_CreatePath (const char *path)
 		Com_Printf(S_COLOR_YELLOW"WARNING: refusing to create relative path '%s'\n", path);
 		return;
 	}
-	Q_strncpyz (tmpBuf, path, sizeof(tmpBuf));
+	Q_strncpyz (tmpBuf, sizeof(tmpBuf), path);
 
 	for (ofs = tmpBuf+1 ; *ofs ; ofs++)
 	{
@@ -467,7 +467,7 @@ fsHandle_t *FS_HandleForFile (const char *path, fileHandle_t *f)
 		if (!handle->file && !handle->zip && !handle->writeZip)
 		{
 		//	strncpy(handle->name, path);
-			Q_strncpyz(handle->name, path, sizeof(handle->name));
+			Q_strncpyz(handle->name, sizeof(handle->name), path);
 			*f = i + 1;
 			return handle;
 		}
@@ -722,7 +722,7 @@ int FS_FOpenFileRead (fsHandle_t *handle)
 			handle->file = fopen(path, "rb");
 			if (handle->file)
 			{	// Found it!
-				Q_strncpyz(fs_fileInPath, search->path, sizeof(fs_fileInPath));
+				Q_strncpyz(fs_fileInPath, sizeof(fs_fileInPath), search->path);
 				fs_fileInPack = false;
 
 				if (fs_debug->value)
@@ -760,7 +760,7 @@ int FS_FOpenFile (const char *name, fileHandle_t *f, fsMode_t mode)
 
 	handle = FS_HandleForFile(name, f);
 
-	Q_strncpyz(handle->name, name, sizeof(handle->name));
+	Q_strncpyz(handle->name, sizeof(handle->name), name);
 	handle->mode = mode;
 
 	switch (mode)
@@ -860,7 +860,7 @@ int FS_FOpenCompressedFileRead (fsHandle_t *handle, const char *zipName, const c
 				{
 					if (unzOpenCurrentFile(handle->zip) == UNZ_OK)
 					{	// Found it!
-						Q_strncpyz(fs_fileInPath, search->path, sizeof(fs_fileInPath));
+						Q_strncpyz(fs_fileInPath, sizeof(fs_fileInPath), search->path);
 						fs_fileInPack = false;
 						if (fs_debug->value)
 							Com_Printf("FS_FOpenCompressedFileRead: %s (found in %s/%s)\n", fileName, search->path, zipName);
@@ -909,7 +909,7 @@ int FS_FOpenCompressedFile (const char *zipName, const char *fileName, fileHandl
 		return -1;
 	}
 
-	Q_strncpyz(handle->name, name, sizeof(handle->name));
+	Q_strncpyz(handle->name, sizeof(handle->name), name);
 	handle->mode = mode;
 
 	switch (mode)
@@ -1947,7 +1947,7 @@ fsPack_t *FS_LoadPAK (const char *packPath)
 	for (i = 0; i < numFiles; i++)
 	{
 	//	strncpy(files[i].name, info[sortIndices[i]].name);
-		Q_strncpyz(files[i].name, info[sortIndices[i]].name, sizeof(files[i].name));
+		Q_strncpyz(files[i].name, sizeof(files[i].name), info[sortIndices[i]].name);
 		files[i].hash = sortHashes[sortIndices[i]];
 		files[i].offset = LittleLong(info[sortIndices[i]].filepos);
 		files[i].size = LittleLong(info[sortIndices[i]].filelen);
@@ -1964,7 +1964,7 @@ fsPack_t *FS_LoadPAK (const char *packPath)
 	for (i = 0; i < numFiles; i++)
 	{
 	//	strncpy(files[i].name, info[i].name);
-		Q_strncpyz(files[i].name, info[i].name, sizeof(files[i].name));
+		Q_strncpyz(files[i].name, sizeof(files[i].name), info[i].name);
 		files[i].hash = Com_HashFileName(info[i].name, 0, false);	// Added to speed up seaching
 		files[i].offset = LittleLong(info[i].filepos);
 		files[i].size = LittleLong(info[i].filelen);
@@ -1976,7 +1976,7 @@ fsPack_t *FS_LoadPAK (const char *packPath)
 
 	pack = Z_Malloc(sizeof(fsPack_t));
 //	strncpy(pack->name, packPath);
-	Q_strncpyz(pack->name, packPath, sizeof(pack->name));
+	Q_strncpyz(pack->name, sizeof(pack->name), packPath);
 	pack->pak = handle;
 	pack->pk3 = NULL;
 	pack->numFiles = numFiles;
@@ -2067,7 +2067,7 @@ fsPack_t *FS_LoadPK3 (const char *packPath)
 		unzGetCurrentFileInfo(handle, &info, fileName, MAX_QPATH, NULL, 0, NULL, 0);
 		sortIndices[i] = i;
 	//	strncpy(tmpFiles[i].name, fileName);
-		Q_strncpyz(tmpFiles[i].name, fileName, sizeof(tmpFiles[i].name));
+		Q_strncpyz(tmpFiles[i].name, sizeof(tmpFiles[i].name), fileName);
 		tmpFiles[i].hash = sortHashes[i] = Com_HashFileName(fileName, 0, false);	// Added to speed up seaching
 		tmpFiles[i].offset = -1;		// Not used in ZIP files
 		tmpFiles[i].size = info.uncompressed_size;
@@ -2083,7 +2083,7 @@ fsPack_t *FS_LoadPK3 (const char *packPath)
 	for (i=0; i < numFiles; i++)
 	{
 	//	strncpy(files[i].name, tmpFiles[sortIndices[i]].name);
-		Q_strncpyz(files[i].name, tmpFiles[sortIndices[i]].name, sizeof(files[i].name));
+		Q_strncpyz(files[i].name, sizeof(files[i].name), tmpFiles[sortIndices[i]].name);
 		files[i].hash = tmpFiles[sortIndices[i]].hash;
 		files[i].offset = tmpFiles[sortIndices[i]].offset;
 		files[i].size = tmpFiles[sortIndices[i]].size;
@@ -2103,7 +2103,7 @@ fsPack_t *FS_LoadPK3 (const char *packPath)
 		unzGetCurrentFileInfo(handle, &info, fileName, MAX_QPATH, NULL, 0, NULL, 0);
 
 	//	strncpy(files[i].name, fileName);
-		Q_strncpyz(files[i].name, fileName, sizeof(files[i].name);
+		Q_strncpyz(files[i].name, sizeof(files[i].name, fileName);
 		files[i].hash = Com_HashFileName(fileName, 0, false);	// Added to speed up seaching
 		files[i].offset = -1;		// Not used in ZIP files
 		files[i].size = info.uncompressed_size;
@@ -2118,7 +2118,7 @@ fsPack_t *FS_LoadPK3 (const char *packPath)
 
 	pack = Z_Malloc(sizeof(fsPack_t));
 //	strncpy(pack->name, packPath);
-	Q_strncpyz(pack->name, packPath, sizeof(pack->name));
+	Q_strncpyz(pack->name, sizeof(pack->name), packPath);
 	pack->pak = NULL;
 	pack->pk3 = handle;
 	pack->numFiles = numFiles;
@@ -2256,13 +2256,13 @@ void FS_AddGameDirectory (const char *dir)
 {
 	fsSearchPath_t	*search;
 
-	Q_strncpyz(fs_gamedir, dir, sizeof(fs_gamedir));
+	Q_strncpyz(fs_gamedir, sizeof(fs_gamedir), dir);
 
 	//
 	// Add the directory to the search path
 	//
 	search = Z_Malloc(sizeof(fsSearchPath_t));
-	Q_strncpyz(search->path, dir, sizeof(search->path));
+	Q_strncpyz(search->path, sizeof(search->path), dir);
 	search->path[sizeof(search->path)-1] = 0;
 	search->next = fs_searchPaths;
 	fs_searchPaths = search;
@@ -2304,7 +2304,7 @@ void FS_AddSaveGameDirectory (const char *dir)
 	// Add the directory to the search path
 	//
 	search = Z_Malloc(sizeof(fsSearchPath_t));
-	Q_strncpyz(search->path, fs_savegamedir, sizeof(search->path));
+	Q_strncpyz(search->path, sizeof(search->path), fs_savegamedir);
 	search->path[sizeof(search->path)-1] = 0;
 	search->next = fs_searchPaths;
 	fs_searchPaths = search;
@@ -2341,7 +2341,7 @@ void FS_AddDownloadDirectory (const char *dir)
 	// Add the directory to the search path
 	//
 	search = Z_Malloc(sizeof(fsSearchPath_t));
-	Q_strncpyz(search->path, fs_downloaddir, sizeof(search->path));
+	Q_strncpyz(search->path, sizeof(search->path), fs_downloaddir);
 	search->path[sizeof(search->path)-1] = 0;
 	search->next = fs_searchPaths;
 	fs_searchPaths = search;
@@ -2522,7 +2522,7 @@ void FS_Startup (void)
 
 		if (!stricmp(fs_gamedirvar->string, BASEDIRNAME))	// Don't add baseq2 again
 		//	strncpy(fs_gamedir, fs_basedir->string);
-			Q_strncpyz(fs_gamedir, fs_basedir->string, sizeof(fs_gamedir));
+			Q_strncpyz(fs_gamedir, sizeof(fs_gamedir), fs_basedir->string);
 		else
 		{
 			// Add the directories
@@ -2531,7 +2531,7 @@ void FS_Startup (void)
 	}
 
 //	strncpy(fs_currentGame, fs_gamedirvar->string);
-	Q_strncpyz(fs_currentGame, fs_gamedirvar->string, sizeof(fs_currentGame));
+	Q_strncpyz(fs_currentGame, sizeof(fs_currentGame), fs_gamedirvar->string);
 
 	FS_Path_f();
 }
@@ -2632,7 +2632,7 @@ void FS_InitFilesystem (void)
 	fs_baseSearchPaths = fs_searchPaths;
 
 //	strncpy(fs_currentGame, BASEDIRNAME);
-	Q_strncpyz(fs_currentGame, BASEDIRNAME, sizeof(fs_currentGame));
+	Q_strncpyz(fs_currentGame, sizeof(fs_currentGame), BASEDIRNAME);
 
 	// check for game override
 	fs_homepath = Cvar_Get("homepath", Sys_GetCurrentDirectory(), CVAR_NOSET);
@@ -2669,8 +2669,8 @@ void FS_InitFilesystem (void)
 //	Com_sprintf (fs_savegamedir, sizeof(fs_savegamedir), "%s/%s", Sys_PrefDir(), BASEDIRNAME);
 //	Com_sprintf (fs_downloaddir, sizeof(fs_downloaddir), "%s/%s", Sys_DownloadDir(), BASEDIRNAME);
 #else
-	Q_strncpyz(fs_savegamedir, fs_gamedir, sizeof(fs_savegamedir));
-	Q_strncpyz(fs_downloaddir, fs_gamedir, sizeof(fs_downloaddir));
+	Q_strncpyz(fs_savegamedir, sizeof(fs_savegamedir), fs_gamedir);
+	Q_strncpyz(fs_downloaddir, sizeof(fs_downloaddir), fs_gamedir);
 #endif	// USE_SAVEGAMEDIR
 
 	// check and load game directory
@@ -2846,8 +2846,8 @@ void FS_SetGamedir (const char *dir)
 	//	Com_sprintf (fs_savegamedir, sizeof(fs_savegamedir), "%s/%s", Sys_PrefDir(), BASEDIRNAME);
 	//	Com_sprintf (fs_downloaddir, sizeof(fs_downloaddir), "%s/%s", Sys_DownloadDir(), BASEDIRNAME);
 #else
-		Q_strncpyz(fs_savegamedir, fs_gamedir, sizeof(fs_savegamedir));
-		Q_strncpyz(fs_downloaddir, fs_gamedir, sizeof(fs_downloaddir));
+		Q_strncpyz(fs_savegamedir, sizeof(fs_savegamedir), fs_gamedir);
+		Q_strncpyz(fs_downloaddir, sizeof(fs_downloaddir), fs_gamedir);
 #endif	// USE_SAVEGAMEDIR
 	}
 	else
@@ -2893,8 +2893,8 @@ void FS_SetGamedir (const char *dir)
 	//	Com_sprintf (fs_savegamedir, sizeof(fs_savegamedir), "%s/%s", Sys_PrefDir(), dir);
 	//	Com_sprintf (fs_downloaddir, sizeof(fs_downloaddir), "%s/%s", Sys_DownloadDir(), dir);
 #else
-		Q_strncpyz(fs_savegamedir, fs_gamedir, sizeof(fs_savegamedir));
-		Q_strncpyz(fs_downloaddir, fs_gamedir, sizeof(fs_downloaddir));
+		Q_strncpyz(fs_savegamedir, sizeof(fs_savegamedir), fs_gamedir);
+		Q_strncpyz(fs_downloaddir, sizeof(fs_downloaddir), fs_gamedir);
 #endif	// USE_SAVEGAMEDIR
 	}
 }
@@ -3098,8 +3098,8 @@ void FS_Dir_f (void)
 
 	if ( Cmd_Argc() != 1 )
 	{
-//		strncpy( wildcard, Cmd_Argv( 1 ) );
-		Q_strncpyz( wildcard, Cmd_Argv( 1 ), sizeof(wildcard) );
+	//	strncpy(wildcard, Cmd_Argv(1));
+		Q_strncpyz (wildcard, sizeof(wildcard), Cmd_Argv(1));
 	}
 
 	while ( ( path = FS_NextPath( path ) ) != NULL )

@@ -181,7 +181,7 @@ static int /*EXPORT*/ CL_HTTP_Progress (void *clientp, double dltotal, double dl
 	// don't care which download shows as long as something does :)
 	if (!abortDownloads)
 	{
-		Q_strncpyz (cls.downloadname, dl->queueEntry->quakePath, sizeof(cls.downloadname));
+		Q_strncpyz (cls.downloadname, sizeof(cls.downloadname), dl->queueEntry->quakePath);
 		cls.downloadposition = dl->position;
 
 		if (dltotal) {
@@ -220,7 +220,7 @@ static size_t /*EXPORT*/ CL_HTTP_Header (void *ptr, size_t size, size_t nmemb, v
 	else
 		len = sizeof(headerBuff)-1;
 
-	Q_strncpyz (headerBuff, ptr, len);
+	Q_strncpyz (headerBuff, len, ptr);
 
 	if (!Q_strncasecmp (headerBuff, "Content-Length: ", 16))
 	{
@@ -331,9 +331,11 @@ int /*EXPORT*/ CL_CURL_Debug (CURL *c, curl_infotype type, char *data, size_t si
 	if (type == CURLINFO_TEXT)
 	{
 		char	buff[4096];
-		if (size > sizeof(buff)-1)
-			size = sizeof(buff)-1;
-		Q_strncpyz (buff, data, size);
+	//	if (size > sizeof(buff)-1)
+	//		size = sizeof(buff)-1;
+		if (size > sizeof(buff))	// Q_strncpyz takes size, not size-1
+			size = sizeof(buff);
+		Q_strncpyz (buff, size, data);
 		Com_Printf ("[HTTP] DEBUG: %s\n", buff);
 	}
 
@@ -414,7 +416,7 @@ static void CL_StartHTTPDownload (dlqueue_t *entry, dlhandle_t *dl)
 		CL_EscapeHTTPPath (remoteFilePath, escapedFilePath);
 
 	//	strncat (dl->filePath, ".tmp");
-		Q_strncatz (dl->filePath, ".tmp", sizeof(dl->filePath));
+		Q_strncatz (dl->filePath, sizeof(dl->filePath), ".tmp");
 
 		FS_CreatePath (dl->filePath);
 
@@ -549,7 +551,7 @@ void CL_SetHTTPServer (const char *URL)
 		return;
 	}
 
-	Q_strncpyz (cls.downloadServer, fixedURL, sizeof(cls.downloadServer));
+	Q_strncpyz (cls.downloadServer, sizeof(cls.downloadServer), fixedURL);
 	free(fixedURL);
 	fixedURL = NULL;
 
@@ -679,8 +681,8 @@ qboolean CL_QueueHTTPDownload (const char *quakePath, qboolean filelistUseGamedi
 	}
 
 	q->state = DLQ_STATE_NOT_STARTED;
-//	Q_strncpyz (q->quakePath, quakePath, sizeof(q->quakePath)-1);
-	Q_strncpyz (q->quakePath, quakePath, sizeof(q->quakePath));
+//	Q_strncpyz (q->quakePath, sizeof(q->quakePath)-1, quakePath);
+	Q_strncpyz (q->quakePath, sizeof(q->quakePath), quakePath);
 	q->isPak = isPak;	// Knightmare added
 
 	if (needList)
@@ -724,7 +726,7 @@ qboolean CL_QueueHTTPDownload (const char *quakePath, qboolean filelistUseGamedi
 
 		COM_StripExtension (filePath, listPath, sizeof(listPath));
 	//	strncat (listPath, ".filelist");
-		Q_strncatz (listPath, ".filelist", sizeof(listPath));
+		Q_strncatz (listPath, sizeof(listPath), ".filelist");
 		
 		CL_QueueHTTPDownload (listPath, false);
 	}
@@ -1279,7 +1281,7 @@ static void CL_FinishHTTPDownload (void)
 			abortDownloads = HTTPDL_ABORT_NONE;
 		else if (abortDownloads == HTTPDL_ABORT_HARD) {
 			// FS: Added because Whale's Weapons HTTP server rejects you after a lot of 404s.  Then you lose HTTP until a hard reconnect.
-			Q_strncpyz(cls.downloadServerRetry, cls.downloadServer, sizeof(cls.downloadServerRetry)); 
+			Q_strncpyz(cls.downloadServerRetry, sizeof(cls.downloadServerRetry), cls.downloadServer); 
 			cls.downloadServer[0] = 0;
 		}
 	}
@@ -1403,7 +1405,7 @@ to determine the remote file path.
 */
 void CL_HTTP_SetDownloadGamedir (const char *gamedir)
 {
-	Q_strncpyz(remoteGamedir, gamedir, sizeof(remoteGamedir));
+	Q_strncpyz(remoteGamedir, sizeof(remoteGamedir), gamedir);
 }
 
 /*

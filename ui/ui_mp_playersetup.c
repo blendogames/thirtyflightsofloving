@@ -138,10 +138,10 @@ static qboolean IconOfSkinExists (char *skin, char **files, int nfiles, char *su
 	char scratch[1024];
 
 //	strncpy(scratch, skin);
-	Q_strncpyz(scratch, skin, sizeof(scratch));
+	Q_strncpyz (scratch, sizeof(scratch), skin);
 	*strrchr(scratch, '.') = 0;
 //	strncat(scratch, suffix);
-	Q_strncatz(scratch, suffix, sizeof(scratch));
+	Q_strncatz (scratch, sizeof(scratch), suffix);
 	//strncat(scratch, "_i.pcx");
 
 	for (i = 0; i < nfiles; i++)
@@ -253,8 +253,8 @@ static qboolean PlayerConfig_ScanDirectories (void)
 			// verify the existence of tris.md2
 		//	strncpy(scratch, dirnames[i]);
 		//	strncat(scratch, "/tris.md2");
-			Q_strncpyz(scratch, dirnames[i], sizeof(scratch));
-			Q_strncatz(scratch, "/tris.md2", sizeof(scratch));
+			Q_strncpyz(scratch, sizeof(scratch), dirnames[i]);
+			Q_strncatz(scratch, sizeof(scratch), "/tris.md2");
 			if ( !Sys_FindFirst(scratch, 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM) )
 			{
 				free(dirnames[i]);
@@ -266,7 +266,7 @@ static qboolean PlayerConfig_ScanDirectories (void)
 
 			// verify the existence of at least one skin
 		//	strncpy(scratch, va("%s%s", dirnames[i], "/*.*")); // was "/*.pcx"
-			Q_strncpyz(scratch, va("%s%s", dirnames[i], "/*.*"), sizeof(scratch)); // was "/*.pcx"
+			Q_strncpyz(scratch, sizeof(scratch), va("%s%s", dirnames[i], "/*.*")); // was "/*.pcx"
 			imagenames = FS_ListFiles (scratch, &nimagefiles, 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM);
 
 			if (!imagenames)
@@ -300,7 +300,7 @@ static qboolean PlayerConfig_ScanDirectories (void)
 						c = (a > b) ? a : b;
 
 					//	strncpy(scratch, c+1);
-						Q_strncpyz(scratch, c+1, sizeof(scratch));
+						Q_strncpyz(scratch, sizeof(scratch), c+1);
 
 						if ( strrchr(scratch, '.') )
 							*strrchr(scratch, '.') = 0;
@@ -322,7 +322,7 @@ static qboolean PlayerConfig_ScanDirectories (void)
 
 			strncpy(s_pmi[s_numplayermodels].displayname, c+1, MAX_DISPLAYNAME-1);
 		//	strncpy(s_pmi[s_numplayermodels].directory, c+1);
-			Q_strncpyz(s_pmi[s_numplayermodels].directory, c+1, sizeof(s_pmi[s_numplayermodels].directory));
+			Q_strncpyz(s_pmi[s_numplayermodels].directory, sizeof(s_pmi[s_numplayermodels].directory), c+1);
 
 			FS_FreeFileList (imagenames, nimagefiles);
 
@@ -389,27 +389,27 @@ qboolean PlayerConfig_MenuInit (void)
 	if ( hand->integer < 0 || hand->integer > 2 )
 		Cvar_SetValue( "hand", 0 );
 
-//	strncpy( currentdirectory, skin->string );
-	Q_strncpyz( currentdirectory, skin->string, sizeof(currentdirectory) );
+//	strncpy(currentdirectory, skin->string);
+	Q_strncpyz (currentdirectory, sizeof(currentdirectory), skin->string);
 
 	if ( strchr( currentdirectory, '/' ) )
 	{
-	//	strncpy( currentskin, strchr( currentdirectory, '/' ) + 1 );
-		Q_strncpyz( currentskin, strchr( currentdirectory, '/' ) + 1, sizeof(currentskin) );
-		*strchr( currentdirectory, '/' ) = 0;
+	//	strncpy(currentskin, strchr( currentdirectory, '/' ) + 1);
+		Q_strncpyz (currentskin, sizeof(currentskin), strchr( currentdirectory, '/' ) + 1);
+		*strchr(currentdirectory, '/') = 0;
 	}
 	else if ( strchr( currentdirectory, '\\' ) )
 	{
 	//	strncpy( currentskin, strchr( currentdirectory, '\\' ) + 1 );
-		Q_strncpyz( currentskin, strchr( currentdirectory, '\\' ) + 1, sizeof(currentskin) );
-		*strchr( currentdirectory, '\\' ) = 0;
+		Q_strncpyz (currentskin, sizeof(currentskin), strchr( currentdirectory, '\\' ) + 1);
+		*strchr(currentdirectory, '\\') = 0;
 	}
 	else
 	{
 	//	strncpy( currentdirectory, "male" );
 	//	strncpy( currentskin, "grunt" );
-		Q_strncpyz( currentdirectory, "male", sizeof(currentdirectory) );
-		Q_strncpyz( currentskin, "grunt", sizeof(currentskin) );
+		Q_strncpyz (currentdirectory, sizeof(currentdirectory), "male");
+		Q_strncpyz (currentskin, sizeof(currentskin), "grunt");
 	}
 
 	qsort( s_pmi, s_numplayermodels, sizeof( s_pmi[0] ), pmicmpfnc );
@@ -448,7 +448,7 @@ qboolean PlayerConfig_MenuInit (void)
 	s_player_name_field.generic.y		= y;
 	s_player_name_field.length	= 20;
 	s_player_name_field.visible_length = 20;
-	Q_strncpyz( s_player_name_field.buffer, name->string, sizeof(s_player_name_field.buffer) );
+	Q_strncpyz (s_player_name_field.buffer, sizeof(s_player_name_field.buffer), name->string);
 	s_player_name_field.cursor = (int)strlen( name->string );
 	
 	s_player_model_title.generic.type = MTYPE_SEPARATOR;

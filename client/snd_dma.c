@@ -273,7 +273,7 @@ sfx_t *S_FindName (char *name, qboolean create)
 	sfx = &known_sfx[i];
 	memset (sfx, 0, sizeof(*sfx));
 //	strncpy (sfx->name, name);
-	Q_strncpyz (sfx->name, name, sizeof(sfx->name));
+	Q_strncpyz (sfx->name, sizeof(sfx->name), name);
 	sfx->registration_sequence = s_registration_sequence;
 	
 	return sfx;
@@ -294,7 +294,7 @@ sfx_t *S_AliasName (char *aliasname, char *truename)
 
 	s = Z_Malloc (MAX_QPATH);
 //	strncpy (s, truename);
-	Q_strncpyz (s, truename, MAX_QPATH);
+	Q_strncpyz (s, MAX_QPATH, truename);
 
 	// find a free sfx
 	for (i=0 ; i < num_sfx ; i++)
@@ -311,7 +311,7 @@ sfx_t *S_AliasName (char *aliasname, char *truename)
 	sfx = &known_sfx[i];
 	memset (sfx, 0, sizeof(*sfx));
 //	strncpy (sfx->name, aliasname);
-	Q_strncpyz (sfx->name, aliasname, sizeof(sfx->name));
+	Q_strncpyz (sfx->name, sizeof(sfx->name), aliasname);
 	sfx->registration_sequence = s_registration_sequence;
 	sfx->truename = s;
 
@@ -659,7 +659,7 @@ struct sfx_s *S_RegisterSexedSound (entity_state_t *ent, char *base)
 		{
 			p += 1;
 		//	strncpy(model, p);
-			Q_strncpyz(model, p, sizeof(model));
+			Q_strncpyz (model, sizeof(model), p);
 			p = strchr(model, '/');
 			if (p)
 				*p = 0;
@@ -668,7 +668,7 @@ struct sfx_s *S_RegisterSexedSound (entity_state_t *ent, char *base)
 	// if we can't figure it out, they're male
 	if (!model[0])
 	//	strncpy(model, "male");
-		Q_strncpyz(model, "male", sizeof(model));
+		Q_strncpyz (model, sizeof(model), "male");
 
 	// see if we already know of the model specific sound
 	Com_sprintf (sexedFilename, sizeof(sexedFilename), "#players/%s/%s", model, base+1);
@@ -1297,12 +1297,12 @@ void S_Play(void)
 		{
 		//	strncpy(name, Cmd_Argv(i));
 		//	strncat(name, ".wav");
-			Q_strncpyz(name, Cmd_Argv(i), sizeof(name));
-			Q_strncatz(name, ".wav", sizeof(name));
+			Q_strncpyz (name, sizeof(name), Cmd_Argv(i));
+			Q_strncatz (name, sizeof(name), ".wav");
 		}
 		else
 		//	strncpy(name, Cmd_Argv(i));
-			Q_strncpyz(name, Cmd_Argv(i), sizeof(name));
+			Q_strncpyz (name, sizeof(name), Cmd_Argv(i));
 		sfx = S_RegisterSound(name);
 		S_StartSound(NULL, cl.playernum+1, 0, sfx, 1.0, 1.0, 0);
 		i++;

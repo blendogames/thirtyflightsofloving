@@ -475,7 +475,7 @@ char *ClientTeam (edict_t *ent)
 		return value;
 
 //	strncpy(value, Info_ValueForKey (ent->client->pers.userinfo, "skin"));
-	Q_strncpyz(value, Info_ValueForKey (ent->client->pers.userinfo, "skin"), sizeof(value));
+	Q_strncpyz(value, sizeof(value), Info_ValueForKey (ent->client->pers.userinfo, "skin"));
 	p = strchr(value, '/');
 	if (!p)
 		return value;
@@ -506,8 +506,8 @@ qboolean OnSameTeam (edict_t *ent1, edict_t *ent2)
 
 //	strncpy (ent1Team, ClientTeam (ent1));
 //	strncpy (ent2Team, ClientTeam (ent2));
-	Q_strncpyz (ent1Team, ClientTeam (ent1), sizeof(ent1Team));
-	Q_strncpyz (ent2Team, ClientTeam (ent2), sizeof(ent2Team));
+	Q_strncpyz (ent1Team, sizeof(ent1Team), ClientTeam (ent1));
+	Q_strncpyz (ent2Team, sizeof(ent2Team), ClientTeam (ent2));
 
 	if (strcmp(ent1Team, ent2Team) == 0)
 		return true;
@@ -1346,11 +1346,11 @@ void Cmd_Players_f (edict_t *ent)
 		if (strlen (small) + strlen(large) > sizeof(large) - 100 )
 		{	// can't print all of them in one packet
 		//	strncat (large, "...\n");
-			Q_strncatz (large, "...\n", sizeof(large));
+			Q_strncatz (large, sizeof(large), "...\n");
 			break;
 		}
 	//	strncat (large, small);
-		Q_strncatz (large, small, sizeof(large));
+		Q_strncatz (large, sizeof(large), small);
 	}
 
 	safe_cprintf (ent, PRINT_HIGH, "%s\n%i players\n", large, count);
@@ -1467,9 +1467,9 @@ void Cmd_Say_f (edict_t *ent, qboolean team, qboolean arg0)
 	//	strncat (text, gi.argv(0));
 	//	strncat (text, " ");
 	//	strncat (text, gi.args());
-		Q_strncatz (text, gi.argv(0), sizeof(text));
-		Q_strncatz (text, " ", sizeof(text));
-		Q_strncatz (text, gi.args(), sizeof(text));
+		Q_strncatz (text, sizeof(text), gi.argv(0));
+		Q_strncatz (text, sizeof(text), " ");
+		Q_strncatz (text, sizeof(text), gi.args());
 	}
 	else
 	{
@@ -1481,7 +1481,7 @@ void Cmd_Say_f (edict_t *ent, qboolean team, qboolean arg0)
 			p[strlen(p)-1] = 0;
 		}
 	//	strncat(text, p);
-		Q_strncatz(text, p, sizeof(text));
+		Q_strncatz(text, sizeof(text), p);
 	}
 
 	// don't let text be too long for malicious reasons
@@ -1489,7 +1489,7 @@ void Cmd_Say_f (edict_t *ent, qboolean team, qboolean arg0)
 		text[150] = 0;
 
 //	strncat(text, "\n");
-	Q_strncatz(text, "\n", sizeof(text));
+	Q_strncatz(text, sizeof(text), "\n");
 
 	if (flood_msgs->value)
 	{
@@ -1576,7 +1576,7 @@ void Cmd_PlayerList_f (edict_t *ent)
 			return;
 		}
 	//	strncat(text, st);
-		Q_strncatz(text, st, sizeof(text));
+		Q_strncatz(text, sizeof(text), st);
 	}
 	safe_cprintf(ent, PRINT_HIGH, "%s", text);
 }
@@ -2250,7 +2250,7 @@ void ClientCommand (edict_t *ent)
 
 		//	f = fopen(parm, "w");
 			SavegameDirRelativePath(parm, filename, sizeof(filename));
-			Q_strncatz (filename, ".txt", sizeof(filename));
+			Q_strncatz (filename, sizeof(filename), ".txt");
 			gi.dprintf("Writing entity list to %s... ", filename);
 			f = fopen(filename, "w");
 			if (f)
@@ -2346,7 +2346,7 @@ void ClientCommand (edict_t *ent)
 	
 			SavegameDirRelativePath(parm, filename, sizeof(filename));
 		//	strncat(filename, ".txt");
-			Q_strncatz (filename, ".txt", sizeof(filename));
+			Q_strncatz (filename, sizeof(filename), ".txt");
 			gi.dprintf("Writing entity properties to %s... ", filename);
 			f = fopen(filename, "w");
 		//	for (i=0; i<globals.num_edicts; i++)
