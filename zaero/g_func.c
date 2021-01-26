@@ -2042,15 +2042,17 @@ void parseTargets(edict_t *self)
 		char *str = NULL;
 		char *targets[16];
 		int i = 0;
+		size_t	strSize;
 		
 		// do we have a series of targets to choose from randomly?
-		str = Z_MALLOC(strlen(self->target)+1);
-		strcpy(str, self->target);
+		strSize = strlen(self->target)+1;
+		str = Z_MALLOC(strSize);
+		Com_strcpy (str, strSize, self->target);
 
 		// split up the targets
 		targets[0] = strtok(str, ";");
 		numTargets = 1;
-		while(numTargets < 16)
+		while (numTargets < 16)
 		{
 			targets[numTargets] = strtok(NULL, ";");
 			if (targets[numTargets] == NULL)
@@ -2062,7 +2064,7 @@ void parseTargets(edict_t *self)
 		// copy over the strings
 		for (i = 0; i < numTargets; i++)
 		{
-			strcpy(self->targets[i], targets[i]);
+			Com_strcpy (self->targets[i], sizeof(self->targets[i]), targets[i]);
 		}
 		self->target = NULL;
 		Z_FREE(str);

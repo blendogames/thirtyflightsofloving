@@ -1948,9 +1948,9 @@ void SP_func_tracktrain (edict_t *self)
 		char	modelname[256];
 		// check for "models/" already in path
 		if ( !strncmp(self->usermodel, "models/", 7) )
-			Com_sprintf(modelname, sizeof(modelname), "%s", self->usermodel);
+			Com_sprintf (modelname, sizeof(modelname), "%s", self->usermodel);
 		else
-			Com_sprintf(modelname, sizeof(modelname), "models/%s", self->usermodel);
+			Com_sprintf (modelname, sizeof(modelname), "models/%s", self->usermodel);
 		self->s.modelindex2 = gi.modelindex (modelname);
 	}
 
@@ -2011,7 +2011,7 @@ void SP_func_tracktrain (edict_t *self)
 		if (self->sounds > 9)
 			self->sounds = 9;
 		self->source = gi.TagMalloc(10,TAG_LEVEL);
-		Com_sprintf(self->source, 10, "train/%d/",self->sounds);
+		Com_sprintf (self->source, 10, "train/%d/",self->sounds);
 		gi.soundindex(va("%sspeed1.wav",self->source));
 		gi.soundindex(va("%sspeed2.wav",self->source));
 		gi.soundindex(va("%sspeed3.wav",self->source));
@@ -2071,7 +2071,7 @@ void find_tracktrain (edict_t *self)
 	if (train->sounds > 0)
 	{
 		train->source = gi.TagMalloc(10,TAG_LEVEL);
-		Com_sprintf(train->source, 10, "train/%d/",train->sounds);
+		Com_sprintf (train->source, 10, "train/%d/",train->sounds);
 	}
 	if (train->moveinfo.state && (train->sounds > 0)) {
 		train->s.sound = gi.soundindex(va("%sspeed%d.wav",train->source,abs(train->moveinfo.state)));

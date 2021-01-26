@@ -130,7 +130,7 @@ void updateVisorHud(edict_t *ent)
 {
 	static char buf[1024];
 	gi.WriteByte (svc_layout);
-	sprintf(buf, camera_statusbar, ent->client->zCameraTrack->message);
+	Com_sprintf(buf, sizeof(buf), camera_statusbar, ent->client->zCameraTrack->message);
 	gi.WriteString(buf);
 }
 

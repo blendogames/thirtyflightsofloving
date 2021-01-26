@@ -1453,9 +1453,9 @@ void SP_turret_breach (edict_t *self)
 		}
 		// Knightmare- check for "models/" already in path
 		if ( !strncmp(self->usermodel, "models/", 7) )
-			Com_sprintf(modelname, sizeof(modelname), "%s", self->usermodel);
+			Com_sprintf (modelname, sizeof(modelname), "%s", self->usermodel);
 		else
-			Com_sprintf(modelname, sizeof(modelname), "models/%s", self->usermodel);
+			Com_sprintf (modelname, sizeof(modelname), "models/%s", self->usermodel);
 		self->s.modelindex = gi.modelindex (modelname);
 
 		if ( (VectorLength(self->bleft) == 0) &&

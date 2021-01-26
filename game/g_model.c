@@ -223,9 +223,9 @@ void SP_model_spawn (edict_t *ent)
 			else
 			{
 				if (strstr(ent->usermodel,"tris.md2"))
-					Com_sprintf(modelname, sizeof(modelname), "players/%s", ent->usermodel);
+					Com_sprintf (modelname, sizeof(modelname), "players/%s", ent->usermodel);
 				else
-					Com_sprintf(modelname, sizeof(modelname), "players/%s/tris.md2", ent->usermodel);
+					Com_sprintf (modelname, sizeof(modelname), "players/%s/tris.md2", ent->usermodel);
 				ent->s.modelindex = gi.modelindex(modelname);
 			}
 		}
@@ -234,16 +234,16 @@ void SP_model_spawn (edict_t *ent)
 			if (strstr(ent->usermodel,".sp2")) {
 				// Knightmare- check for "sprites/" already in path
 				if ( !strncmp(ent->usermodel, "sprites/", 8) )
-					Com_sprintf(modelname, sizeof(modelname), "%s", ent->usermodel);
+					Com_sprintf (modelname, sizeof(modelname), "%s", ent->usermodel);
 				else
-					Com_sprintf(modelname, sizeof(modelname), "sprites/%s", ent->usermodel);
+					Com_sprintf (modelname, sizeof(modelname), "sprites/%s", ent->usermodel);
 			}
 			else {
 				// Knightmare- check for "models/" already in path
 				if ( !strncmp(ent->usermodel, "models/", 7) )
-					Com_sprintf(modelname, sizeof(modelname), "%s", ent->usermodel);
+					Com_sprintf (modelname, sizeof(modelname), "%s", ent->usermodel);
 				else
-					Com_sprintf(modelname, sizeof(modelname), "models/%s", ent->usermodel);
+					Com_sprintf (modelname, sizeof(modelname), "models/%s", ent->usermodel);
 			}
 			ent->s.modelindex = gi.modelindex (modelname);
 		}

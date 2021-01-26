@@ -1297,7 +1297,7 @@ void SP_misc_actor (edict_t *self)
 	else
 		self->actor_id_model = false;
 
-	Com_sprintf(modelpath, sizeof(modelpath), "players/%s/tris.md2",self->usermodel);
+	Com_sprintf (modelpath, sizeof(modelpath), "players/%s/tris.md2",self->usermodel);
 	self->s.modelindex = gi.modelindex(modelpath);
 
 	for (i=0; i<NUM_ACTORPAK_ACTORS && !ActorID; i++)
@@ -1890,9 +1890,9 @@ void actor_files ()
 			num_actors++;
 			
 			if (!Q_stricmp(e->usermodel,"male") || !Q_stricmp(e->usermodel,"female")) {
-				Com_sprintf(path, sizeof(path), "player/%s/",e->usermodel);
+				Com_sprintf (path, sizeof(path), "player/%s/",e->usermodel);
 			} else {
-				Com_sprintf(path, sizeof(path), "../players/%s/",e->usermodel);
+				Com_sprintf (path, sizeof(path), "../players/%s/",e->usermodel);
 			}
 			
 			for (j=0; j<NUM_ACTOR_SOUNDS; j++) {
@@ -1903,7 +1903,7 @@ void actor_files ()
 				// If it's NOT a custom model, start by looking in game folder
 				if (strlen(gamedir->string))
 				{
-					Com_sprintf(filename, sizeof(filename), "%s/%s/sound/%s%s", basedir->string, gamedir->string, path,wavname[j]);
+					Com_sprintf (filename, sizeof(filename), "%s/%s/sound/%s%s", basedir->string, gamedir->string, path,wavname[j]);
 					f = fopen(filename,"r");
 					if (f) {
 						fclose(f);
@@ -1914,7 +1914,7 @@ void actor_files ()
 					}
 					
 					// Search paks in game folder
-					Com_sprintf(filename, sizeof(filename), "sound/%s%s",path,wavname[j]);
+					Com_sprintf (filename, sizeof(filename), "sound/%s%s",path,wavname[j]);
 					if (InPak(basedir->string, gamedir->string, filename)) {
 						Q_strncpyz(filename, sizeof(filename), path);
 						Q_strncatz(filename, sizeof(filename), wavname[j]);
@@ -1924,7 +1924,7 @@ void actor_files ()
 				}
 				
 				// Search in baseq2 for external file
-				Com_sprintf(filename, sizeof(filename), "%s/baseq2/sound/%s%s", basedir->string, path, wavname[j]);
+				Com_sprintf (filename, sizeof(filename), "%s/baseq2/sound/%s%s", basedir->string, path, wavname[j]);
 				f = fopen(filename,"r");
 				if (f) {
 					fclose(f);
@@ -1935,7 +1935,7 @@ void actor_files ()
 				}
 				
 				// Search paks in baseq2
-				Com_sprintf(filename, sizeof(filename), "sound/%s%s",path,wavname[j]);
+				Com_sprintf (filename, sizeof(filename), "sound/%s%s",path,wavname[j]);
 				if (InPak(basedir->string, "baseq2", filename)) {
 					Q_strncpyz(filename, sizeof(filename), path);
 					Q_strncatz(filename, sizeof(filename), wavname[j]);
@@ -1946,7 +1946,7 @@ void actor_files ()
 				if (strlen(cddir->string))
 				{
 					// Search in cddir (minimal installation)
-					Com_sprintf(filename, sizeof(filename), "%s/baseq2/sound/%s%s",cddir->string,path,wavname[j]);
+					Com_sprintf (filename, sizeof(filename), "%s/baseq2/sound/%s%s",cddir->string,path,wavname[j]);
 					f = fopen(filename,"r");
 					if (f) {
 						fclose(f);
@@ -1957,7 +1957,7 @@ void actor_files ()
 					}
 					
 					// Search paks in baseq2
-					Com_sprintf(filename, sizeof(filename), "sound/%s%s",path,wavname[j]);
+					Com_sprintf (filename, sizeof(filename), "sound/%s%s",path,wavname[j]);
 					if (InPak(cddir->string,"baseq2",filename)) {
 						Q_strncpyz(filename, sizeof(filename), path);
 						Q_strncatz(filename, sizeof(filename), wavname[j]);
@@ -1967,7 +1967,7 @@ void actor_files ()
 				}
 
 				// If sound is STILL not found, use normal male sounds
-				Com_sprintf(filename, sizeof(filename), "player/male/%s",wavname[j]);
+				Com_sprintf (filename, sizeof(filename), "player/male/%s",wavname[j]);
 				e->actor_sound_index[j] = gi.soundindex(filename);
 			}
 		}
@@ -1993,24 +1993,24 @@ void actor_files ()
 				}
 			}
 
-			Com_sprintf(filename, sizeof(filename), "players/%s/",e->usermodel);
+			Com_sprintf (filename, sizeof(filename), "players/%s/",e->usermodel);
 			switch (e->actor_weapon[k]) {
-			case 2: Q_strncatz(filename, sizeof(filename), "w_shotgun.md2");		break;
-			case 3:	Q_strncatz(filename, sizeof(filename), "w_sshotgun.md2");		break;
-			case 4:	Q_strncatz(filename, sizeof(filename), "w_machinegun.md2");		break;
-			case 5:	Q_strncatz(filename, sizeof(filename), "w_chaingun.md2");		break;
-			case 6:	Q_strncatz(filename, sizeof(filename), "w_glauncher.md2");		break;
-			case 7: Q_strncatz(filename, sizeof(filename), "w_rlauncher.md2");		break;
-			case 8: Q_strncatz(filename, sizeof(filename), "w_hyperblaster.md2");	break;
-			case 9: Q_strncatz(filename, sizeof(filename), "w_railgun.md2");		break;
-			case 10:Q_strncatz(filename, sizeof(filename), "w_bfg.md2");			break;
-			default:Q_strncatz(filename, sizeof(filename), "w_blaster.md2");		break;
+			case 2: Q_strncatz (filename, sizeof(filename), "w_shotgun.md2");		break;
+			case 3:	Q_strncatz (filename, sizeof(filename), "w_sshotgun.md2");		break;
+			case 4:	Q_strncatz (filename, sizeof(filename), "w_machinegun.md2");		break;
+			case 5:	Q_strncatz (filename, sizeof(filename), "w_chaingun.md2");		break;
+			case 6:	Q_strncatz (filename, sizeof(filename), "w_glauncher.md2");		break;
+			case 7: Q_strncatz (filename, sizeof(filename), "w_rlauncher.md2");		break;
+			case 8: Q_strncatz (filename, sizeof(filename), "w_hyperblaster.md2");	break;
+			case 9: Q_strncatz (filename, sizeof(filename), "w_railgun.md2");		break;
+			case 10:Q_strncatz (filename, sizeof(filename), "w_bfg.md2");			break;
+			default:Q_strncatz (filename, sizeof(filename), "w_blaster.md2");		break;
 			}
 
 			if (strlen(gamedir->string))
 			{
 				// Start in game folder
-				Com_sprintf(path, sizeof(path), "%s/%s/%s", basedir->string, gamedir->string, filename);
+				Com_sprintf (path, sizeof(path), "%s/%s/%s", basedir->string, gamedir->string, filename);
 				f = fopen(path,"r");
 				if (f) {
 					fclose(f);
@@ -2026,7 +2026,7 @@ void actor_files ()
 			}
 				
 			// Search in baseq2 for external file
-			Com_sprintf(path, sizeof(path), "%s/baseq2/%s",basedir->string,filename);
+			Com_sprintf (path, sizeof(path), "%s/baseq2/%s",basedir->string,filename);
 			f = fopen(path,"r");
 			if (f) {
 				fclose(f);
@@ -2043,7 +2043,7 @@ void actor_files ()
 			if (strlen(cddir->string))
 			{
 				// Search CD for minimal installations
-				Com_sprintf(path, sizeof(path), "%s/baseq2/%s",cddir->string,filename);
+				Com_sprintf (path, sizeof(path), "%s/baseq2/%s",cddir->string,filename);
 				f = fopen(path,"r");
 				if (f) {
 					fclose(f);
@@ -2059,12 +2059,12 @@ void actor_files ()
 			}
 
 			// If sound is STILL not found, start the fuck over and look for weapon.md2
-			Com_sprintf(filename, sizeof(filename), "players/%s/weapon.md2",e->usermodel);
+			Com_sprintf (filename, sizeof(filename), "players/%s/weapon.md2",e->usermodel);
 
 			if (strlen(gamedir->string))
 			{
 				// Start in game folder
-				Com_sprintf(path, sizeof(path), "%s/%s/%s",basedir->string,gamedir->string,filename);
+				Com_sprintf (path, sizeof(path), "%s/%s/%s",basedir->string,gamedir->string,filename);
 				f = fopen(path,"r");
 				if (f) {
 					fclose(f);
@@ -2080,7 +2080,7 @@ void actor_files ()
 			}
 				
 			// Search in baseq2 for external file
-			Com_sprintf(path, sizeof(path), "%s/baseq2/%s",basedir->string,filename);
+			Com_sprintf (path, sizeof(path), "%s/baseq2/%s",basedir->string,filename);
 			f = fopen(path,"r");
 			if (f) {
 				fclose(f);
@@ -2097,7 +2097,7 @@ void actor_files ()
 			if (strlen(cddir->string))
 			{
 				// Search CD for minimal installations
-				Com_sprintf(path, sizeof(path), "%s/baseq2/%s",cddir->string,filename);
+				Com_sprintf (path, sizeof(path), "%s/baseq2/%s",cddir->string,filename);
 				f = fopen(path,"r");
 				if (f) {
 					fclose(f);
@@ -2113,7 +2113,7 @@ void actor_files ()
 			}
 
 			// And if it's STILL not found, use 
-			Com_sprintf(filename,  sizeof(filename), "players/male/weapon.md2");
+			Com_sprintf (filename,  sizeof(filename), "players/male/weapon.md2");
 			e->actor_model_index[k] = gi.modelindex(filename);
 		}
 		if (e->health > 0)

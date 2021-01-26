@@ -1,5 +1,7 @@
 #include "g_local.h"
 
+#define KEY_MESSAGE_SIZE	10
+
 //=====================================================
 
 void SP_target_lock_digit (edict_t *self)
@@ -30,7 +32,7 @@ void target_lock_use (edict_t *self, edict_t *other, edict_t *activator)
 		n = e->count - 1;
 		current[n] = '0' + e->s.frame;
 	}
-	if (strcmp(current,self->key_message)==0)
+	if ( strcmp(current, self->key_message) == 0 )
 	{
 		copy_message  = self->message;
 		self->message = NULL;
@@ -64,20 +66,28 @@ void lock_initialize (edict_t *lock)
 	int		n, l;
 	int		numdigits;
 	char	c;
+	size_t	msgSize;
 
-	if (lock->spawnflags & 1 && strlen(game.lock_code) != 0)
+	if ( (lock->spawnflags & 1) && (strlen(game.lock_code) != 0) )
 	{
-		strcpy(lock->key_message, game.lock_code);
+		// Knightmare- dynamically allocate this to be safe
+		// This will temporarily leak the already allocated key_message
+		// buffer, but that will be freed on the next level change.
+	//	strcpy (lock->key_message, game.lock_code);
+		msgSize = KEY_MESSAGE_SIZE;
+		lock->key_message = gi.TagMalloc(msgSize, TAG_LEVEL);
+		Com_strcpy (lock->key_message, msgSize, game.lock_code);
 		return;
 	}
+
 	// Maximum of 8 digits in combination
-	l = min((int)strlen(lock->key_message),8);
+	l = min((int)strlen(lock->key_message), 8);
 	numdigits = 0;
 	for (e = lock->teammaster; e; e = e->teamchain)
 	{
 		if (!e->count)
 			continue;
-		numdigits = max(numdigits,e->count);
+		numdigits = max(numdigits, e->count);
 		n = e->count - 1;
 		if (n > l)
 		{
@@ -96,11 +106,11 @@ void lock_initialize (edict_t *lock)
 	n = random();
 	n = random();
 	n = random();
-	for(n=0; n<numdigits; n++)
+	for (n=0; n<numdigits; n++)
 		lock->key_message[n] = '0' + (int)(random() * 9.99);
 	lock->key_message[numdigits] = '\0';
 
-	Com_strcpy(game.lock_code, sizeof(game.lock_code), lock->key_message);
+	Com_strcpy (game.lock_code, sizeof(game.lock_code), lock->key_message);
 	game.lock_revealed = 0;
 }
 
@@ -115,9 +125,14 @@ void SP_target_lock (edict_t *self)
 
 	self->class_id = ENTITY_TARGET_LOCK;
 
-	if (self->spawnflags & 2) game.lock_hud = true;
-	if (!self->key_message)
-		self->key_message = "000000000";
+	if (self->spawnflags & 2)
+		game.lock_hud = true;
+	if (!self->key_message) {
+		// Knightmare- dynamically allocate this to be safe
+	//	self->key_message = "000000000";
+		self->key_message = gi.TagMalloc(KEY_MESSAGE_SIZE, TAG_LEVEL);
+		Com_strcpy (self->key_message, KEY_MESSAGE_SIZE, "000000000");
+	}
 	self->use = target_lock_use;
 	self->think = lock_initialize;
 	self->nextthink = level.time + 1.0;
@@ -253,6 +268,7 @@ void lock_clue_initialize(edict_t *self)
 	self->nextthink = level.time + FRAMETIME;
 	gi.linkentity(self);
 }
+
 void SP_target_lock_clue (edict_t *self)
 {
 	self->class_id = ENTITY_TARGET_LOCK_CLUE;

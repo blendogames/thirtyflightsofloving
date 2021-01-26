@@ -1222,7 +1222,7 @@ int PatchMonsterModel (char *modelname)
 				char	pakfile[MAX_OSPATH];
 
 				cddir = gi.cvar("cddir", "", 0);
-				Com_sprintf(pakfile, sizeof(pakfile), "%s/baseq2/pak0.pak",cddir->string);
+				Com_sprintf (pakfile, sizeof(pakfile), "%s/baseq2/pak0.pak",cddir->string);
 				fpak = fopen(pakfile,"rb");
 				if (!fpak)
 				{

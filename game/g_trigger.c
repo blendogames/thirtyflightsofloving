@@ -1752,7 +1752,8 @@ void SP_trigger_speaker (edict_t *self)
 	if (!strstr (st.noise, ".wav"))
 		Com_sprintf (buffer, sizeof(buffer), "%s.wav", st.noise);
 	else
-		strncpy (buffer, st.noise, sizeof(buffer));
+	//	strncpy (buffer, st.noise, sizeof(buffer));
+		Q_strncpyz (buffer, sizeof(buffer), st.noise);
 	self->noise_index = gi.soundindex (buffer);
 
 	if (self->spawnflags & 1) {
@@ -1979,14 +1980,18 @@ int trigger_transition_ents (edict_t *changelevel, edict_t *self)
 		if (!Q_stricmp(ent->classname,"func_tracktrain") && !(ent->spawnflags & 8) && ent->targetname)
 		{
 			edict_t	*e;
+			size_t	classSize, targetnameSize, targetSize;
 
 			e = G_Spawn();
-			e->classname = gi.TagMalloc(17,TAG_LEVEL);
-			strcpy(e->classname,"info_train_start");
-			e->targetname = gi.TagMalloc(strlen(ent->targetname)+1,TAG_LEVEL);
-			strcpy(e->targetname,ent->targetname);
-			e->target = gi.TagMalloc(strlen(ent->target)+1,TAG_LEVEL);
-			strcpy(e->target,ent->target);
+			classSize = 17;
+			e->classname = gi.TagMalloc(classSize, TAG_LEVEL);
+			Q_strncpyz (e->classname, classSize, "info_train_start");
+			targetnameSize = strlen(ent->targetname)+1;
+			e->targetname = gi.TagMalloc(targetnameSize, TAG_LEVEL);
+			Q_strncpyz (e->targetname, targetnameSize, ent->targetname);
+			targetSize = strlen(ent->target)+1;
+			e->target = gi.TagMalloc(targetSize, TAG_LEVEL);
+			Q_strncpyz (e->target, targetSize, ent->target);
 			e->spawnflags = ent->spawnflags;
 			VectorCopy(ent->s.origin,e->s.origin);
 			VectorCopy(ent->s.angles,e->s.angles);

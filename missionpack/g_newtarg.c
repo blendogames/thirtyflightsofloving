@@ -1293,6 +1293,7 @@ void target_change_use (edict_t *self, edict_t *activator, edict_t *other)
 	char	*target;
 	char	*newtarget;
 	int		L;
+	size_t	bufSize;
 	int		newteams=0;
 	edict_t	*target_ent;
 
@@ -1300,8 +1301,9 @@ void target_change_use (edict_t *self, edict_t *activator, edict_t *other)
 		return;
 
 	L = (int)strlen(self->target);
-	buffer = (char *)gi.TagMalloc(L+1, TAG_LEVEL);
-	strcpy(buffer, self->target);
+	bufSize = L+1;
+	buffer = (char *)gi.TagMalloc(bufSize, TAG_LEVEL);
+	Com_strcpy (buffer, bufSize, self->target);
 	newtarget = strstr(buffer,",");
 	if (newtarget)
 	{
@@ -1757,6 +1759,8 @@ void target_sky_use (edict_t *self, edict_t *activator, edict_t *other)
 
 void SP_target_sky (edict_t *self)
 {
+	size_t	pathSize;
+
 	if (!st.sky || !*st.sky)
 	{
 		gi.dprintf("Target_sky with no sky string at %s\n",vtos(self->s.origin));
@@ -1765,8 +1769,9 @@ void SP_target_sky (edict_t *self)
 	}
 	self->class_id = ENTITY_TARGET_SKY;
 
-	self->pathtarget = gi.TagMalloc(strlen(st.sky)+1,TAG_LEVEL);
-	strcpy(self->pathtarget, st.sky);
+	pathSize = strlen(st.sky)+1;
+	self->pathtarget = gi.TagMalloc(pathSize, TAG_LEVEL);
+	Com_strcpy (self->pathtarget, pathSize, st.sky);
 
 	self->svflags |= SVF_NOCLIENT;
 	self->use = target_sky_use;
@@ -2040,6 +2045,7 @@ void clone (edict_t *self)
 {
 	edict_t	*ent;
 	edict_t	*source;
+	size_t	classSize;
 
 	self->nextthink = 0;
 
@@ -2064,7 +2070,7 @@ void clone (edict_t *self)
 		G_FreeEdict(self);
 		return;
 	}
-	//spawn and copy origin and angles
+	// spawn and copy origin and angles
 	ent = G_Spawn();
 	VectorCopy(self->s.origin, ent->s.origin);
 	VectorCopy(self->s.angles, ent->s.angles);
@@ -2076,9 +2082,10 @@ void clone (edict_t *self)
 	ent->model = source->model;
 	ent->s.modelindex = source->s.modelindex;
 	
-	//copy fields from source
-	ent->classname = gi.TagMalloc(strlen(source->classname)+1,TAG_LEVEL);
-	strcpy(ent->classname,source->classname);
+	// copy fields from source
+	classSize = strlen(source->classname)+1;
+	ent->classname = gi.TagMalloc(classSize, TAG_LEVEL);
+	Com_strcpy (ent->classname, classSize, source->classname);
 //	ent->classname = source->classname;
 	ent->spawnflags = source->spawnflags;
 	ent->svflags = source->svflags;
@@ -3064,7 +3071,8 @@ void SP_target_monitor (edict_t *self)
 		if (!strstr (st.noise, ".wav"))
 			Com_sprintf (buffer, sizeof(buffer), "%s.wav", st.noise);
 		else
-			strncpy (buffer, st.noise, sizeof(buffer));
+		//	strncpy (buffer, st.noise, sizeof(buffer));
+			Com_strcpy (buffer, sizeof(buffer), st.noise);
 		self->noise_index = gi.soundindex (buffer);
 	}
 

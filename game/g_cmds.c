@@ -1571,7 +1571,7 @@ void Cmd_PlayerList_f (edict_t *ent)
 			e2->client->pers.netname,
 			e2->client->resp.spectator ? " (spectator)" : "");
 		if (strlen(text) + strlen(st) > sizeof(text) - 50) {
-			sprintf(text+strlen(text), "And more...\n");
+			Com_sprintf(text+strlen(text), sizeof(text)-1-strlen(text), "And more...\n");
 			safe_cprintf(ent, PRINT_HIGH, "%s", text);
 			return;
 		}
@@ -2635,6 +2635,7 @@ void ClientCommand (edict_t *ent)
 		{
 			edict_t	*e;
 			vec3_t	forward;
+			size_t	classSize;
 		
 			if (!parm)
 			{
@@ -2642,8 +2643,10 @@ void ClientCommand (edict_t *ent)
 				return;
 			}
 			e = G_Spawn();
-			e->classname = gi.TagMalloc(strlen(parm)+1,TAG_LEVEL);
-			strcpy(e->classname,parm);
+			classSize = strlen(parm)+1;
+			e->classname = gi.TagMalloc(classSize, TAG_LEVEL);
+		//	strncpy(e->classname, parm);
+			Q_strncpyz (e->classname, classSize, parm);
 			AngleVectors(ent->client->v_angle,forward,NULL,NULL);
 			VectorMA(ent->s.origin,128,forward,e->s.origin);
 			e->s.angles[YAW] = ent->s.angles[YAW];
@@ -2653,6 +2656,7 @@ void ClientCommand (edict_t *ent)
 		{
 			edict_t	*e;
 			vec3_t	forward;
+			size_t	classSize;
 		
 			if (gi.argc() < 3)
 			{
@@ -2660,8 +2664,10 @@ void ClientCommand (edict_t *ent)
 				return;
 			}
 			e = G_Spawn();
-			e->classname = gi.TagMalloc(12,TAG_LEVEL);
-			strcpy(e->classname, "misc_actor");
+			classSize = 12;
+			e->classname = gi.TagMalloc(classSize, TAG_LEVEL);
+		//	strncpy(e->classname, "misc_actor");
+			Q_strncpyz (e->classname, classSize, "misc_actor");
 			e->usermodel = gi.argv(1);
 			e->sounds = atoi(gi.argv(2));
 			e->spawnflags = SF_MONSTER_GOODGUY;

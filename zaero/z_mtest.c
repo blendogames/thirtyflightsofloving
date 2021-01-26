@@ -37,14 +37,14 @@ void Weapon_LineDraw_Fire (edict_t *ent);
 
 void Weapon_LineDraw_Think (edict_t *ent)
 {
-  Weapon_LineDraw_Fire (ent->owner);
+	Weapon_LineDraw_Fire (ent->owner);
 	ent->owner->client->ps.gunframe--;
 }
 
 
 void Weapon_LineDraw_Fire (edict_t *ent)
 {
-  edict_t *beam;
+	edict_t *beam;
 	vec3_t	start;
 	vec3_t	forward, right;
 	vec3_t	offset;
@@ -54,39 +54,39 @@ void Weapon_LineDraw_Fire (edict_t *ent)
 	VectorSet(offset, 0, 7,  ent->viewheight - 8);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 
-  if(!ent->client->lineDraw)
-  {
-    beam = ent->client->lineDraw = G_Spawn();
+	if (!ent->client->lineDraw)
+	{
+		beam = ent->client->lineDraw = G_Spawn();
 
-    beam->classname = "DrawLine";
+		beam->classname = "DrawLine";
 
-    beam->flags |= FL_DONTSETOLDORIGIN;
+		beam->flags |= FL_DONTSETOLDORIGIN;
 
-    beam->owner = ent;
+		beam->owner = ent;
 
-    beam->movetype = MOVETYPE_NONE;
-    beam->solid = SOLID_NOT;
-    beam->s.renderfx |= RF_BEAM|RF_TRANSLUCENT;
-    beam->s.modelindex = 1;			// must be non-zero
+		beam->movetype = MOVETYPE_NONE;
+		beam->solid = SOLID_NOT;
+		beam->s.renderfx |= RF_BEAM|RF_TRANSLUCENT;
+		beam->s.modelindex = 1;			// must be non-zero
 
-    VectorSet (beam->mins, -8, -8, -8);
-    VectorSet (beam->maxs, 8, 8, 8);
+		VectorSet (beam->mins, -8, -8, -8);
+		VectorSet (beam->maxs, 8, 8, 8);
 
-    beam->s.frame = 2;
-	  beam->s.skinnum = 0xf3f3f1f1;
+		beam->s.frame = 2;
+		beam->s.skinnum = 0xf3f3f1f1;
 
-    beam->think = Weapon_LineDraw_Think;
-    beam->nextthink = level.time + (FRAMETIME * 2);
-  }
-  else
-  {
-    beam = ent->client->lineDraw;
-  }
+		beam->think = Weapon_LineDraw_Think;
+		beam->nextthink = level.time + (FRAMETIME * 2);
+	}
+	else
+	{
+		beam = ent->client->lineDraw;
+	}
 
-  VectorCopy (start, beam->s.origin);
+	VectorCopy (start, beam->s.origin);
 	VectorMA (start, lineSize, forward, beam->s.old_origin);
 
-  gi.linkentity (beam);
+	gi.linkentity (beam);
 	ent->client->ps.gunframe++;
 }
 
@@ -123,38 +123,38 @@ gitem_t *testWeapon;
 
 void convertToNumbers(char *frames, int *arrayFrames)
 {
-  int num = 0;
-  char *bp, *sp;
+	int num = 0;
+	char *bp, *sp;
 
-  sp = bp = frames;
+	sp = bp = frames;
 
-  while(1)
-  {
-    while(*bp != ',' && *bp != (char)NULL)
-    {
-      bp++;
-    }
+	while(1)
+	{
+		while(*bp != ',' && *bp != (char)NULL)
+		{
+			bp++;
+		}
 
-    arrayFrames[num] = atoi(sp);
+		arrayFrames[num] = atoi(sp);
 
-    num++;
+		num++;
 
-    if(*bp == (char)NULL)
-    {
-      break;
-    }
+		if (*bp == (char)NULL)
+		{
+			break;
+		}
 
-    sp = bp + 1;
+		sp = bp + 1;
 
-    while(*sp == ' ')
-    {
-      sp++;
-    }
+		while(*sp == ' ')
+		{
+			sp++;
+		}
 
-    bp = sp;
-  }
+		bp = sp;
+	}
 
-  arrayFrames[num] = 0;
+	arrayFrames[num] = 0;
 }
 
 
@@ -162,136 +162,136 @@ void convertToNumbers(char *frames, int *arrayFrames)
 
 void convertToVector(char *vecStr, vec3_t *size)
 {
-  int num = 0;
-  char *bp, *sp;
+	int num = 0;
+	char *bp, *sp;
 
-  sp = bp = vecStr;
+	sp = bp = vecStr;
 
-  while(1)
-  {
-    while(*bp != ',' && *bp != (char)NULL)
-    {
-      bp++;
-    }
+	while(1)
+	{
+		while(*bp != ',' && *bp != (char)NULL)
+		{
+			bp++;
+		}
 
-    (*size)[num] = atof(sp);
+		(*size)[num] = atof(sp);
 
-    num++;
+		num++;
 
-    if(num > 2)
-    {
-      break;
-    }
+		if (num > 2)
+		{
+			break;
+		}
 
-    if(*bp == (char)NULL)
-    {
-      break;
-    }
+		if (*bp == (char)NULL)
+		{
+			break;
+		}
 
-    sp = bp + 1;
+		sp = bp + 1;
 
-    while(*sp == ' ')
-    {
-      sp++;
-    }
+		while(*sp == ' ')
+		{
+			sp++;
+		}
 
-    bp = sp;
-  }
+		bp = sp;
+	}
 }
 
 
 
 void InitTestWeapon(void)
 {
-  FILE *wCfgFile;
-  char fname[256];
+	FILE *wCfgFile;
+	char fname[256];
 
-  testWeapon = FindItemByClassname ("weapon_test");
-  if(!testWeapon)
-  {
-    return;
-  }
+	testWeapon = FindItemByClassname ("weapon_test");
+	if (!testWeapon)
+	{
+		return;
+	}
 
-  strcpy(fname, gamedir->string);
-  strcat(fname, "/testweapon.cfg");
+	Com_strcpy (fname, sizeof(fname), gamedir->string);
+	Com_strcat (fname, sizeof(fname), "/testweapon.cfg");
 
-  wCfgFile = fopen(fname, "rt");
-  if(!wCfgFile)
-  {
-    return;
-  }
+	wCfgFile = fopen(fname, "rt");
+	if (!wCfgFile)
+	{
+		return;
+	}
 
-  if(!fgets(testWeap_className, 256, wCfgFile))
-  {
-    fclose(wCfgFile);
-    return;
-  }
+	if (!fgets(testWeap_className, 256, wCfgFile))
+	{
+		fclose(wCfgFile);
+		return;
+	}
 
-  testWeap_className[strlen(testWeap_className) - 1] = 0;
+	testWeap_className[strlen(testWeap_className) - 1] = 0;
 
-  if(!fgets(testWeap_gModel, 256, wCfgFile))
-  {
-    fclose(wCfgFile);
-    return;
-  }
+	if (!fgets(testWeap_gModel, 256, wCfgFile))
+	{
+		fclose(wCfgFile);
+		return;
+	}
 
-  testWeap_gModel[strlen(testWeap_gModel) - 1] = 0;
+	testWeap_gModel[strlen(testWeap_gModel) - 1] = 0;
 
-  if(!fgets(testWeap_vModel, 256, wCfgFile))
-  {
-    fclose(wCfgFile);
-    return;
-  }
+	if (!fgets(testWeap_vModel, 256, wCfgFile))
+	{
+		fclose(wCfgFile);
+		return;
+	}
 
-  testWeap_vModel[strlen(testWeap_vModel) - 1] = 0;
+	testWeap_vModel[strlen(testWeap_vModel) - 1] = 0;
 
-  if(!fgets(testWeap_icon, 256, wCfgFile))
-  {
-    fclose(wCfgFile);
-    return;
-  }
+	if (!fgets(testWeap_icon, 256, wCfgFile))
+	{
+		fclose(wCfgFile);
+		return;
+	}
 
-  testWeap_icon[strlen(testWeap_icon) - 1] = 0;
+	testWeap_icon[strlen(testWeap_icon) - 1] = 0;
 
-  if(!fgets(testWeap_name, 256, wCfgFile))
-  {
-    fclose(wCfgFile);
-    return;
-  }
+	if (!fgets(testWeap_name, 256, wCfgFile))
+	{
+		fclose(wCfgFile);
+		return;
+	}
 
-  testWeap_name[strlen(testWeap_name) - 1] = 0;
+	testWeap_name[strlen(testWeap_name) - 1] = 0;
 
-  if(!fgets(testWeap_aminationFrames, 512, wCfgFile))
-  {
-    fclose(wCfgFile);
-    return;
-  }
+	if (!fgets(testWeap_aminationFrames, 512, wCfgFile))
+	{
+		fclose(wCfgFile);
+		return;
+	}
 
-  if(!fgets(testWeap_idleFrames, 512, wCfgFile))
-  {
-    fclose(wCfgFile);
-    return;
-  }
+	if (!fgets(testWeap_idleFrames, 512, wCfgFile))
+	{
+		fclose(wCfgFile);
+		return;
+	}
 
-  if(!fgets(testWeap_fireFrames, 512, wCfgFile))
-  {
-    fclose(wCfgFile);
-    return;
-  }
+	if (!fgets(testWeap_fireFrames, 512, wCfgFile))
+	{
+		fclose(wCfgFile);
+		return;
+	}
 
-  fclose(wCfgFile);
+	fclose(wCfgFile);
 
 
-  sscanf(testWeap_aminationFrames, "%d,%d,%d,%d", &testWeap_FRAME_ACTIVATE_LAST, &testWeap_FRAME_FIRE_LAST, &testWeap_FRAME_IDLE_LAST, &testWeap_FRAME_DEACTIVATE_LAST);
+	sscanf(testWeap_aminationFrames, "%d,%d,%d,%d", &testWeap_FRAME_ACTIVATE_LAST, &testWeap_FRAME_FIRE_LAST, &testWeap_FRAME_IDLE_LAST, &testWeap_FRAME_DEACTIVATE_LAST);
 
-  convertToNumbers(testWeap_idleFrames, testWeap_pause_frames);
-  convertToNumbers(testWeap_fireFrames, testWeap_fire_frames);
+	convertToNumbers(testWeap_idleFrames, testWeap_pause_frames);
+	convertToNumbers(testWeap_fireFrames, testWeap_fire_frames);
 
-  testWeapon->classname = testWeap_className;
-  testWeapon->world_model = testWeap_gModel;
-  testWeapon->view_model = testWeap_vModel;
-  testWeapon->icon = testWeap_icon;
-  testWeapon->pickup_name = testWeap_name;
+	testWeapon->classname = testWeap_className;
+	testWeapon->world_model = testWeap_gModel;
+	testWeapon->view_model = testWeap_vModel;
+	testWeapon->icon = testWeap_icon;
+	testWeapon->pickup_name = testWeap_name;
 }
 
 
@@ -314,21 +314,21 @@ void Weapon_Test (edict_t *ent)
 
 /*static*/ void testitem_think (edict_t *ent)
 {
-  if(testItem_aminationFrames[animUpto])
-  {
-    ent->s.frame++;
-    if(ent->s.frame >= testItem_aminationFrames[animUpto])
-    {
-      if(animUpto)
-      {
-        ent->s.frame = testItem_aminationFrames[animUpto - 1];
-      }
-      else
-      {
-        ent->s.frame = 0;
-      }
-    }
-  }
+	if (testItem_aminationFrames[animUpto])
+	{
+		ent->s.frame++;
+		if (ent->s.frame >= testItem_aminationFrames[animUpto])
+		{
+			if (animUpto)
+			{
+				ent->s.frame = testItem_aminationFrames[animUpto - 1];
+			}
+			else
+			{
+				ent->s.frame = 0;
+			}
+		}
+	}
 
 	ent->nextthink = level.time + (FRAMETIME * animSpeed);
 }
@@ -336,161 +336,161 @@ void Weapon_Test (edict_t *ent)
 
 void Cmd_TestItem (edict_t *ent)
 {
-  char *cmd;
+	char *cmd;
 
-  cmd = gi.argv(1);
+	cmd = gi.argv(1);
 
 	if (Q_stricmp (cmd, "animnext") == 0)
-  {
-    if(testItem_aminationFrames[animUpto] && testItem_aminationFrames[animUpto + 1])
-    {
-      animUpto++;
+	{
+		if (testItem_aminationFrames[animUpto] && testItem_aminationFrames[animUpto + 1])
+		{
+			animUpto++;
 
-      gi.cprintf (ent, PRINT_HIGH, "Animation %d set\n", animUpto);
-    }
-  }
+			gi.cprintf (ent, PRINT_HIGH, "Animation %d set\n", animUpto);
+		}
+	}
 	else if (Q_stricmp (cmd, "animprev") == 0)
-  {
-    if(animUpto && testItem_aminationFrames[animUpto - 1])
-    {
-      animUpto--;
+	{
+		if (animUpto && testItem_aminationFrames[animUpto - 1])
+		{
+			animUpto--;
 
-      gi.cprintf (ent, PRINT_HIGH, "Animation %d set\n", animUpto);
-    }
-  }
+			gi.cprintf (ent, PRINT_HIGH, "Animation %d set\n", animUpto);
+		}
+	}
 	else if (Q_stricmp (cmd, "animspeed") == 0)
-  {
-    float as = atof(gi.argv(2));
+	{
+		float as = atof(gi.argv(2));
 
-    if(as < 1.0)
-    {
-      gi.cprintf (ent, PRINT_HIGH, "AnimSpeed must be greater than or equal to 1\n");
-      return;
-    }
+		if (as < 1.0)
+		{
+			gi.cprintf (ent, PRINT_HIGH, "AnimSpeed must be greater than or equal to 1\n");
+			return;
+		}
 
-    animSpeed = as;
-  }
+		animSpeed = as;
+	}
 	else if (Q_stricmp (cmd, "movestart") == 0)
-  {
-    if(testItemDroped)
-    {
-      testitemOriginMove = true;
-      gi.cprintf (ent, PRINT_HIGH, "testitem move start\n");
-    }
-  }
+	{
+		if (testItemDroped)
+		{
+			testitemOriginMove = true;
+			gi.cprintf (ent, PRINT_HIGH, "testitem move start\n");
+		}
+	}
 	else if (Q_stricmp (cmd, "moveend") == 0)
-  {
-    if(testItemDroped)
-    {
-      testitemOriginMove = false;
-      gi.cprintf (ent, PRINT_HIGH, "testitem move end\n");
-    }
-  }
+	{
+		if (testItemDroped)
+		{
+			testitemOriginMove = false;
+			gi.cprintf (ent, PRINT_HIGH, "testitem move end\n");
+		}
+	}
 	else if (Q_stricmp (cmd, "rotatestart") == 0)
-  {
-    if(testItemDroped)
-    {
-      testItemDroped->s.effects = EF_ROTATE;
-      gi.cprintf (ent, PRINT_HIGH, "Rotate On\n");
-    }
-  }
+	{
+		if (testItemDroped)
+		{
+			testItemDroped->s.effects = EF_ROTATE;
+			gi.cprintf (ent, PRINT_HIGH, "Rotate On\n");
+		}
+	}
 	else if (Q_stricmp (cmd, "rotateend") == 0)
-  {
-    if(testItemDroped)
-    {
-      testItemDroped->s.effects = 0;
-      gi.cprintf (ent, PRINT_HIGH, "Rotate Off\n");
-    }
-  }
+	{
+		if (testItemDroped)
+		{
+			testItemDroped->s.effects = 0;
+			gi.cprintf (ent, PRINT_HIGH, "Rotate Off\n");
+		}
+	}
 	else 
-  {
-    gi.cprintf (ent, PRINT_HIGH, "Bad testitem command\n");
-  }
+	{
+		gi.cprintf (ent, PRINT_HIGH, "Bad testitem command\n");
+	}
 }
 
 
 void InitTestItem(void)
 {
-  FILE *wCfgFile;
-  char fname[256];
+	FILE *wCfgFile;
+	char fname[256];
 
-  testItem = FindItemByClassname ("item_test");
-  if(!testItem)
-  {
-    return;
-  }
+	testItem = FindItemByClassname ("item_test");
+	if (!testItem)
+	{
+		return;
+	}
 
-  strcpy(fname, gamedir->string);
-  strcat(fname, "/testitem.cfg");
+	Com_strcpy (fname, sizeof(fname), gamedir->string);
+	Com_strcat (fname, sizeof(fname), "/testitem.cfg");
 
-  wCfgFile = fopen(fname, "rt");
-  if(!wCfgFile)
-  {
-    return;
-  }
+	wCfgFile = fopen(fname, "rt");
+	if (!wCfgFile)
+	{
+		return;
+	}
 
-  if(!fgets(testItem_className, 256, wCfgFile))
-  {
-    fclose(wCfgFile);
-    return;
-  }
+	if (!fgets(testItem_className, 256, wCfgFile))
+	{
+		fclose(wCfgFile);
+		return;
+	}
 
-  testItem_className[strlen(testItem_className) - 1] = 0;
+	testItem_className[strlen(testItem_className) - 1] = 0;
 
-  if(!fgets(testItem_gModel, 256, wCfgFile))
-  {
-    fclose(wCfgFile);
-    return;
-  }
+	if (!fgets(testItem_gModel, 256, wCfgFile))
+	{
+		fclose(wCfgFile);
+		return;
+	}
 
-  testItem_gModel[strlen(testItem_gModel) - 1] = 0;
+	testItem_gModel[strlen(testItem_gModel) - 1] = 0;
 
-  if(!fgets(testItem_icon, 256, wCfgFile))
-  {
-    fclose(wCfgFile);
-    return;
-  }
+	if (!fgets(testItem_icon, 256, wCfgFile))
+	{
+		fclose(wCfgFile);
+		return;
+	}
 
-  testItem_icon[strlen(testItem_icon) - 1] = 0;
+	testItem_icon[strlen(testItem_icon) - 1] = 0;
 
-  if(!fgets(testItem_name, 256, wCfgFile))
-  {
-    fclose(wCfgFile);
-    return;
-  }
+	if (!fgets(testItem_name, 256, wCfgFile))
+	{
+		fclose(wCfgFile);
+		return;
+	}
 
-  testItem_name[strlen(testItem_name) - 1] = 0;
+	testItem_name[strlen(testItem_name) - 1] = 0;
 
-  if(!fgets(testItem_aminationFramesStr, 4096, wCfgFile))
-  {
-    fclose(wCfgFile);
-    return;
-  }
+	if (!fgets(testItem_aminationFramesStr, 4096, wCfgFile))
+	{
+		fclose(wCfgFile);
+		return;
+	}
 
-  convertToNumbers(testItem_aminationFramesStr, testItem_aminationFrames);
+	convertToNumbers(testItem_aminationFramesStr, testItem_aminationFrames);
 
 
-  if(!fgets(testItem_aminationFramesStr, 4096, wCfgFile))
-  {
-    fclose(wCfgFile);
-    return;
-  }
-  
-  convertToVector(testItem_aminationFramesStr, &(testItem_Size[0]));
+	if (!fgets(testItem_aminationFramesStr, 4096, wCfgFile))
+	{
+		fclose(wCfgFile);
+		return;
+	}
 
-  if(!fgets(testItem_aminationFramesStr, 4096, wCfgFile))
-  {
-    fclose(wCfgFile);
-    return;
-  }
-  
-  convertToVector(testItem_aminationFramesStr, &(testItem_Size[1]));
+	convertToVector(testItem_aminationFramesStr, &(testItem_Size[0]));
 
-  testItem->classname = testItem_className;
-  testItem->world_model = testItem_gModel;
-  testItem->view_model = testItem_gModel;
-  testItem->icon = testItem_icon;
-  testItem->pickup_name = testItem_name;
+	if (!fgets(testItem_aminationFramesStr, 4096, wCfgFile))
+	{
+		fclose(wCfgFile);
+		return;
+	}
+
+	convertToVector(testItem_aminationFramesStr, &(testItem_Size[1]));
+
+	testItem->classname = testItem_className;
+	testItem->world_model = testItem_gModel;
+	testItem->view_model = testItem_gModel;
+	testItem->icon = testItem_icon;
+	testItem->pickup_name = testItem_name;
 }
 
 
@@ -510,19 +510,19 @@ void Drop_TestItem (edict_t *ent, gitem_t *item)
 	vec3_t	forward, right;
 	vec3_t	offset;
 
-  testitemOriginMove = false;
+	testitemOriginMove = false;
 
-  testItemDroped = G_Spawn();
+	testItemDroped = G_Spawn();
 
 	testItemDroped->classname = item->classname;
 	testItemDroped->item = item;
 	testItemDroped->spawnflags = DROPPED_ITEM;
 	testItemDroped->s.effects = item->world_model_flags;
 	testItemDroped->s.renderfx = RF_GLOW;
-  VectorCopy(testItem_Size[0], testItemDroped->mins);
-  VectorCopy(testItem_Size[1], testItemDroped->maxs);
+	VectorCopy(testItem_Size[0], testItemDroped->mins);
+	VectorCopy(testItem_Size[1], testItemDroped->maxs);
 	gi.setmodel (testItemDroped, testItemDroped->item->world_model);
-  testItemDroped->s.skinnum = 0;
+	testItemDroped->s.skinnum = 0;
 	testItemDroped->solid = SOLID_TRIGGER;
 	testItemDroped->movetype = MOVETYPE_TOSS;  
 	testItemDroped->touch = drop_temp_touch;

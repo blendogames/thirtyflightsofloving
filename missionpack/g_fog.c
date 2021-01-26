@@ -638,10 +638,10 @@ void Fog_Init (void)
 	char	GL_Lib[64];
 
 	if (gl_driver_fog && strlen(gl_driver_fog->string))
-		Com_strcpy(GL_Lib, sizeof(GL_Lib), gl_driver_fog->string);
+		Com_strcpy (GL_Lib, sizeof(GL_Lib), gl_driver_fog->string);
 	else
-		Com_strcpy(GL_Lib,sizeof(GL_Lib),  "opengl32");
-	Com_strcat(GL_Lib, sizeof(GL_Lib), ".dll");
+		Com_strcpy (GL_Lib,sizeof(GL_Lib),  "opengl32");
+	Com_strcat (GL_Lib, sizeof(GL_Lib), ".dll");
 	hOpenGL = LoadLibrary(GL_Lib);
 	if (hOpenGL)
 	{

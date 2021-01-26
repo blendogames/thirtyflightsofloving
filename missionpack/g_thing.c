@@ -6,9 +6,12 @@ void HuntTarget (edict_t *self);
 edict_t *SpawnThing (void)
 {
 	edict_t	*thing;
+	size_t	classSize;
+
 	thing = G_Spawn();
-	thing->classname = gi.TagMalloc(6,TAG_LEVEL);
-	strcpy(thing->classname, "thing");
+	classSize = 6;
+	thing->classname = gi.TagMalloc(classSize, TAG_LEVEL);
+	Com_strcpy (thing->classname, classSize, "thing");
 	return thing;
 }
 

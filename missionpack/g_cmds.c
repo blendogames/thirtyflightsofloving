@@ -306,7 +306,7 @@ char *ClientTeam (edict_t *ent)
 	if (!ent->client)
 		return value;
 
-	Com_strcpy(value, sizeof(value), Info_ValueForKey (ent->client->pers.userinfo, "skin"));
+	Com_strcpy (value, sizeof(value), Info_ValueForKey (ent->client->pers.userinfo, "skin"));
 	p = strchr(value, '/');
 	if (!p)
 		return value;
@@ -1335,14 +1335,14 @@ void Cmd_Say_f (edict_t *ent, qboolean team, qboolean arg0)
 			p++;
 			p[strlen(p)-1] = 0;
 		}
-		Com_strcat(text, sizeof(text), p);
+		Com_strcat (text, sizeof(text), p);
 	}
 
 	// don't let text be too long for malicious reasons
 	if (strlen(text) > 150)
 		text[150] = 0;
 
-	Com_strcat(text, sizeof(text), "\n");
+	Com_strcat (text, sizeof(text), "\n");
 
 	if (flood_msgs->value) {
 		cl = ent->client;
@@ -1431,7 +1431,7 @@ void Cmd_PlayerList_f(edict_t *ent)
 			gi.cprintf(ent, PRINT_HIGH, "%s", text);
 			return;
 		}
-		Com_strcat(text, sizeof(text), st);
+		Com_strcat (text, sizeof(text), st);
 	}
 	gi.cprintf(ent, PRINT_HIGH, "%s", text);
 }
@@ -2433,6 +2433,7 @@ void ClientCommand (edict_t *ent)
 		{
 			edict_t	*e;
 			vec3_t	forward;
+			size_t	classSize;
 		
 			if (!parm)
 			{
@@ -2440,8 +2441,9 @@ void ClientCommand (edict_t *ent)
 				return;
 			}
 			e = G_Spawn();
-			e->classname = gi.TagMalloc(strlen(parm)+1,TAG_LEVEL);
-			strcpy(e->classname,parm);
+			classSize = strlen(parm)+1;
+			e->classname = gi.TagMalloc(classSize, TAG_LEVEL);
+			Com_strcpy (e->classname, classSize, parm);
 			AngleVectors(ent->client->v_angle,forward,NULL,NULL);
 			VectorMA(ent->s.origin,128,forward,e->s.origin);
 			e->s.angles[YAW] = ent->s.angles[YAW];
@@ -2451,6 +2453,7 @@ void ClientCommand (edict_t *ent)
 		{
 			edict_t	*e;
 			vec3_t	forward;
+			size_t	classSize;
 		
 			if (gi.argc() < 3)
 			{
@@ -2458,8 +2461,9 @@ void ClientCommand (edict_t *ent)
 				return;
 			}
 			e = G_Spawn();
-			e->classname = gi.TagMalloc(12,TAG_LEVEL);
-			strcpy(e->classname, "misc_actor");
+			classSize = 12;
+			e->classname = gi.TagMalloc(classSize, TAG_LEVEL);
+			Com_strcpy (e->classname, classSize, "misc_actor");
 			e->usermodel = gi.argv(1);
 			e->sounds = atoi(gi.argv(2));
 			e->spawnflags = SF_MONSTER_GOODGUY;

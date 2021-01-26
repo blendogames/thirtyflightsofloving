@@ -857,7 +857,7 @@ void COM_FileBase (char *in, char *out)
 	else
 	{
 		s--;
-		strncpy (out,s2+1, s-s2);
+		strncpy (out, s2+1, s-s2);
 		out[s-s2] = 0;
 	}
 }
@@ -878,7 +878,7 @@ void COM_FilePath (char *in, char *out)
 	while (s != in && *s != '/')
 		s--;
 
-	strncpy (out,in, s-in);
+	strncpy (out, in, s-in);
 	out[s-in] = 0;
 }
 
@@ -888,7 +888,7 @@ void COM_FilePath (char *in, char *out)
 COM_DefaultExtension
 ==================
 */
-void COM_DefaultExtension (char *path, char *extension)
+void COM_DefaultExtension (char *path, size_t pathSize, char *extension)
 {
 	char    *src;
 //
@@ -904,7 +904,7 @@ void COM_DefaultExtension (char *path, char *extension)
 		src--;
 	}
 
-	strcat (path, extension);
+	Com_strcat (path, pathSize, extension);
 }
 
 /*
@@ -1237,7 +1237,7 @@ void Com_strcpy (char *dest, size_t destSize, const char *src)
 		return;
 	}
 
-	strncpy(dest, src, destSize-1);
+	strncpy (dest, src, destSize-1);
 	dest[destSize-1] = 0;
 }
 

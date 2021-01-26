@@ -200,7 +200,7 @@ void gib_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, 
 	G_FreeEdict (self);
 }
 
-void ThrowGibFrame (edict_t *self, char *gibname, int frame, int damage, int type)
+void ThrowGib (edict_t *self, char *gibname, int frame, int skinnum, int damage, int type)
 {
 	edict_t *gib;
 	vec3_t	vd;
@@ -209,6 +209,7 @@ void ThrowGibFrame (edict_t *self, char *gibname, int frame, int damage, int typ
 	float	vscale;
 	char	modelname[256];
 	char	*p;
+	size_t	nameSize;	//, msgSize;
 
 	// Lazarus: Prevent gib showers (generally due to firing BFG in a crowd) from
 	// causing SZ_GetSpace: overflow
@@ -223,12 +224,13 @@ void ThrowGibFrame (edict_t *self, char *gibname, int frame, int damage, int typ
 
 	gib = G_Spawn();
 
-	//gib->classname = "gib";
-	gib->classname = gi.TagMalloc (4, TAG_LEVEL);
-	strcpy(gib->classname, "gib");
+//	gib->classname = "gib";
+	nameSize = 4;
+	gib->classname = gi.TagMalloc (nameSize, TAG_LEVEL);
+	Com_strcpy (gib->classname, nameSize, "gib");
 
 	// Lazarus: mapper-definable gib class
-	Com_strcpy(modelname, sizeof(modelname), gibname);
+	Com_strcpy (modelname, sizeof(modelname), gibname);
 	p = strstr(modelname, "models/objects/gibs/");
 	if (p && self->gib_type)
 	{
@@ -238,8 +240,9 @@ void ThrowGibFrame (edict_t *self, char *gibname, int frame, int damage, int typ
 
 	// Knightmare- this causes a crash when saving game
 	// Save gibname and type for level transition gibs
-	//gib->key_message = gi.TagMalloc (strlen(modelname)+1,TAG_LEVEL);
-	//strcpy(gib->key_message, modelname);
+//	msgSize = strlen(modelname)+1;
+//	gib->key_message = gi.TagMalloc (msgSize,TAG_LEVEL);
+//	Com_strcpy (gib->key_message, msgSize, modelname);
 	gib->style = type;
 
 	VectorScale (self->size, 0.5, size);
@@ -251,6 +254,7 @@ void ThrowGibFrame (edict_t *self, char *gibname, int frame, int damage, int typ
 //	gi.setmodel (gib, gibname);
 	gib->s.modelindex = gi.modelindex (gibname);
 	gib->s.frame = frame;	// Knightmare added
+	gib->s.skinnum = skinnum;	// Knightmare added
 	gib->clipmask = MASK_SHOT;
 	VectorSet (gib->mins, -4, -4, -4);
 	VectorSet (gib->maxs, 4, 4, 4);
@@ -323,11 +327,6 @@ void ThrowGibFrame (edict_t *self, char *gibname, int frame, int damage, int typ
 	gi.linkentity (gib);
 }
 
-void ThrowGib (edict_t *self, char *gibname, int damage, int type)
-{
-	ThrowGibFrame (self, gibname, 0, damage, type);
-}
-
 // NOTE: SP_gib is ONLY intended to be used for gibs that change maps
 //       via trigger_transition. It should NOT be used for map entities.
 
@@ -366,15 +365,16 @@ void SP_gib (edict_t *gib)
 	gi.linkentity (gib);
 }
 
-void ThrowHead (edict_t *self, char *gibname, int damage, int type)
+void ThrowHead (edict_t *self, char *gibname, int frame, int skinnum, int damage, int type)
 {
 	vec3_t	vd;
 	float	vscale;
 	char	modelname[256];
 	char	*p;
+//	size_t	msgSize;
 
 	// Lazarus reflections
-	DeleteReflection (self,-1);
+	DeleteReflection (self, -1);
 
 	if (self->movewith) // Knightmare- remove stuff for movewith monsters
 	{
@@ -384,12 +384,12 @@ void ThrowHead (edict_t *self, char *gibname, int damage, int type)
 		VectorClear(self->movewith_offset);
 		self->movewith_set = 0;
 	}
-	self->s.skinnum = 0;
-	self->s.frame = 0;
+	self->s.skinnum = skinnum;	// was 0
+	self->s.frame = frame;	// was 0
 	VectorClear (self->mins);
 	VectorClear (self->maxs);
 
-	Com_strcpy(modelname, sizeof(modelname), gibname);
+	Com_strcpy (modelname, sizeof(modelname), gibname);
 	p = strstr(modelname, "models/objects/gibs/");
 	if (p && self->gib_type)
 	{
@@ -399,8 +399,9 @@ void ThrowHead (edict_t *self, char *gibname, int damage, int type)
 
 	// Knightmare- this causes a crash when saving game
 	// Save gibname and type for level transition gibs
-//	self->key_message = gi.TagMalloc (strlen(modelname)+1,TAG_LEVEL);
-//	strcpy(self->key_message, modelname);
+//	msgSize = strlen(modelname)+1;
+//	self->key_message = gi.TagMalloc (msgSize, TAG_LEVEL);
+//	Com_strcpy (self->key_message, msgSize, modelname);
 	self->style = type;
 
 	self->s.modelindex2 = 0;
@@ -567,7 +568,7 @@ void debris_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	G_FreeEdict (self);
 }
 
-void ThrowDebrisFrame (edict_t *self, char *modelname, float speed, vec3_t origin, int frame, int skin, int effects)
+void ThrowDebris (edict_t *self, char *modelname, float speed, vec3_t origin, int frame, int skin, int effects)
 {
 	edict_t	*chunk;
 	vec3_t	v;
@@ -626,11 +627,6 @@ void ThrowDebrisFrame (edict_t *self, char *modelname, float speed, vec3_t origi
 	chunk->class_id = ENTITY_DEBRIS;
 
 	gi.linkentity (chunk);
-}
-
-void ThrowDebris (edict_t *self, char *modelname, float speed, vec3_t origin, int skin, int effects)
-{
-	ThrowDebrisFrame (self, modelname,  speed, origin, 0, skin, effects);
 }
 
 // NOTE: SP_debris is ONLY intended to be used for debris chunks that change maps
@@ -1318,23 +1314,23 @@ void func_explosive_explode (edict_t *self)
 			chunkorigin[2] = origin[2] + crandom() * size[2];
 			switch (self->gib_type) {
 			case GIB_METAL:
-				ThrowDebris (self, va("models/objects/metal_gibs/gib%i.md2",r),   2, chunkorigin, self->skinnum, 0); break;
+				ThrowDebris (self, va("models/objects/metal_gibs/gib%i.md2",r),   2, chunkorigin, 0, self->skinnum, 0); break;
 			case GIB_GLASS:
-				ThrowDebris (self, va("models/objects/glass_gibs/gib%i.md2",r),   2, chunkorigin, self->skinnum, EF_SPHERETRANS); break;
+				ThrowDebris (self, va("models/objects/glass_gibs/gib%i.md2",r),   2, chunkorigin, 0, self->skinnum, EF_SPHERETRANS); break;
 			case GIB_BARREL:
-				ThrowDebris (self, va("models/objects/barrel_gibs/gib%i.md2",r),  2, chunkorigin, self->skinnum, 0); break;
+				ThrowDebris (self, va("models/objects/barrel_gibs/gib%i.md2",r),  2, chunkorigin, 0, self->skinnum, 0); break;
 			case GIB_CRATE:
-				ThrowDebris (self, va("models/objects/crate_gibs/gib%i.md2",r),   2, chunkorigin, self->skinnum, 0); break;
+				ThrowDebris (self, va("models/objects/crate_gibs/gib%i.md2",r),   2, chunkorigin, 0, self->skinnum, 0); break;
 			case GIB_ROCK:
-				ThrowDebris (self, va("models/objects/rock_gibs/gib%i.md2",r),    2, chunkorigin, self->skinnum, 0); break;
+				ThrowDebris (self, va("models/objects/rock_gibs/gib%i.md2",r),    2, chunkorigin, 0, self->skinnum, 0); break;
 			case GIB_CRYSTAL:
-				ThrowDebris (self, va("models/objects/crystal_gibs/gib%i.md2",r), 2, chunkorigin, self->skinnum, 0); break;
+				ThrowDebris (self, va("models/objects/crystal_gibs/gib%i.md2",r), 2, chunkorigin, 0, self->skinnum, 0); break;
 			case GIB_MECH:
-				ThrowDebris (self, va("models/objects/mech_gibs/gib%i.md2",r),    2, chunkorigin, self->skinnum, 0); break;
+				ThrowDebris (self, va("models/objects/mech_gibs/gib%i.md2",r),    2, chunkorigin, 0, self->skinnum, 0); break;
 			case GIB_WOOD:
-				ThrowDebris (self, va("models/objects/wood_gibs/gib%i.md2",r),    2, chunkorigin, self->skinnum, 0); break;
+				ThrowDebris (self, va("models/objects/wood_gibs/gib%i.md2",r),    2, chunkorigin, 0, self->skinnum, 0); break;
 			case GIB_TECH:
-				ThrowDebris (self, va("models/objects/tech_gibs/gib%i.md2",r),    2, chunkorigin, self->skinnum, 0); break;
+				ThrowDebris (self, va("models/objects/tech_gibs/gib%i.md2",r),    2, chunkorigin, 0, self->skinnum, 0); break;
 			}
 		}
 	}
@@ -1351,7 +1347,7 @@ void func_explosive_explode (edict_t *self)
 				chunkorigin[0] = origin[0] + crandom() * size[0];
 				chunkorigin[1] = origin[1] + crandom() * size[1];
 				chunkorigin[2] = origin[2] + crandom() * size[2];
-				ThrowDebris (self, "models/objects/debris1/tris.md2", 1, chunkorigin, 0, 0);
+				ThrowDebris (self, "models/objects/debris1/tris.md2", 1, chunkorigin, 0, 0, 0);
 			}
 		}
 
@@ -1364,7 +1360,7 @@ void func_explosive_explode (edict_t *self)
 			chunkorigin[0] = origin[0] + crandom() * size[0];
 			chunkorigin[1] = origin[1] + crandom() * size[1];
 			chunkorigin[2] = origin[2] + crandom() * size[2];
-			ThrowDebris (self, "models/objects/debris2/tris.md2", 2, chunkorigin, 0, 0);
+			ThrowDebris (self, "models/objects/debris2/tris.md2", 2, chunkorigin, 0, 0, 0);
 		}
 	}
 	// PMM - if we're part of a train, clean ourselves out of it
@@ -2079,7 +2075,7 @@ void barrel_explode (edict_t *self)
 		spd = 1.5 * (float)self->dmg / 200.0;
 		VectorCopy (self->s.origin, org);
 		org[2] = self->absmax[2];
-		ThrowDebris (self, "models/objects/barrel_gibs/gib2.md2", spd, org, 0, 0);
+		ThrowDebris (self, "models/objects/barrel_gibs/gib2.md2", spd, org, 0, 0, 0);
 		
 		// side pieces
 		for (i = 0; i < 8; i++)
@@ -2087,23 +2083,23 @@ void barrel_explode (edict_t *self)
 			org[0] = self->s.origin[0] + crandom() * size[0];
 			org[1] = self->s.origin[1] + crandom() * size[1];
 			org[2] = self->s.origin[2] + crandom() * size[2];
-			ThrowDebris (self, "models/objects/barrel_gibs/gib4.md2",  spd, org, 0, 0);
+			ThrowDebris (self, "models/objects/barrel_gibs/gib4.md2",  spd, org, 0, 0, 0);
 		}
 
 		// bottom corners
 		spd = 1.75 * (float)self->dmg / 200.0;
 		VectorCopy (self->absmin, org);
 		org[1] += self->size[1];
-		ThrowDebris (self, "models/objects/barrel_gibs/gib1.md2",  spd, org, 0, 0);
+		ThrowDebris (self, "models/objects/barrel_gibs/gib1.md2",  spd, org, 0, 0, 0);
 		org[0] += self->size[0] * 2;
-		ThrowDebris (self, "models/objects/barrel_gibs/gib1.md2",  spd, org, 0, 0);
+		ThrowDebris (self, "models/objects/barrel_gibs/gib1.md2",  spd, org, 0, 0, 0);
 
 		// top corners
 		VectorCopy (self->absmax, org);
 		org[1] += self->size[1];
-		ThrowDebris (self, "models/objects/barrel_gibs/gib3.md2",  spd, org, 0, 0);
+		ThrowDebris (self, "models/objects/barrel_gibs/gib3.md2",  spd, org, 0, 0, 0);
 		org[0] += self->size[0] * 2;
-		ThrowDebris (self, "models/objects/barrel_gibs/gib3.md2",  spd, org, 0, 0);
+		ThrowDebris (self, "models/objects/barrel_gibs/gib3.md2",  spd, org, 0, 0, 0);
 
 		// a bunch of little chunks
 		spd = 2 * self->dmg / 200;
@@ -2112,7 +2108,7 @@ void barrel_explode (edict_t *self)
 			org[0] = self->s.origin[0] + crandom() * size[0];
 			org[1] = self->s.origin[1] + crandom() * size[1];
 			org[2] = self->s.origin[2] + crandom() * size[2];
-			ThrowDebris (self, "models/objects/barrel_gibs/gib5.md2",  spd, org, 0, 0);
+			ThrowDebris (self, "models/objects/barrel_gibs/gib5.md2",  spd, org, 0, 0, 0);
 		}
 	}
 	else
@@ -2124,23 +2120,23 @@ void barrel_explode (edict_t *self)
 			org[0] = self->s.origin[0] + crandom() * size[0];
 			org[1] = self->s.origin[1] + crandom() * size[1];
 			org[2] = self->s.origin[2] + crandom() * size[2];
-			ThrowDebris (self, "models/objects/debris1/tris.md2", spd, org, 0, 0);
+			ThrowDebris (self, "models/objects/debris1/tris.md2", spd, org, 0, 0, 0);
 		}
 
 		// bottom corners
 		spd = 1.75 * (float)self->dmg / 200.0;
 		VectorCopy (self->absmin, org);
-		ThrowDebris (self, "models/objects/debris3/tris.md2", spd, org, 0, 0);
+		ThrowDebris (self, "models/objects/debris3/tris.md2", spd, org, 0, 0, 0);
 		VectorCopy (self->absmin, org);
 		org[0] += self->size[0];
-		ThrowDebris (self, "models/objects/debris3/tris.md2", spd, org, 0, 0);
+		ThrowDebris (self, "models/objects/debris3/tris.md2", spd, org, 0, 0, 0);
 		VectorCopy (self->absmin, org);
 		org[1] += self->size[1];
-		ThrowDebris (self, "models/objects/debris3/tris.md2", spd, org, 0, 0);
+		ThrowDebris (self, "models/objects/debris3/tris.md2", spd, org, 0, 0, 0);
 		VectorCopy (self->absmin, org);
 		org[0] += self->size[0];
 		org[1] += self->size[1];
-		ThrowDebris (self, "models/objects/debris3/tris.md2", spd, org, 0, 0);
+		ThrowDebris (self, "models/objects/debris3/tris.md2", spd, org, 0, 0, 0);
 
 		// a bunch of little chunks
 		spd = 2 * self->dmg / 200;
@@ -2149,7 +2145,7 @@ void barrel_explode (edict_t *self)
 			org[0] = self->s.origin[0] + crandom() * size[0];
 			org[1] = self->s.origin[1] + crandom() * size[1];
 			org[2] = self->s.origin[2] + crandom() * size[2];
-			ThrowDebris (self, "models/objects/debris2/tris.md2", spd, org, 0, 0);
+			ThrowDebris (self, "models/objects/debris2/tris.md2", spd, org, 0, 0, 0);
 		}
 	}
 
@@ -2512,9 +2508,9 @@ void misc_deadsoldier_die (edict_t *self, edict_t *inflictor, edict_t *attacker,
 		return;
 
 	gi.sound (self, CHAN_BODY, gi.soundindex ("misc/udeath.wav"), 1, ATTN_NORM, 0);
-	for (n= 0; n < 4; n++)
-		ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
-	ThrowHead (self, "models/objects/gibs/head2/tris.md2", damage, GIB_ORGANIC);
+	for (n = 0; n < 4; n++)
+		ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", 0, 0, damage, GIB_ORGANIC);
+	ThrowHead (self, "models/objects/gibs/head2/tris.md2", 0, 0, damage, GIB_ORGANIC);
 }
 
 void misc_deadsoldier_flieson(edict_t *self)
@@ -3090,14 +3086,14 @@ void misc_strogg_ship_remove (edict_t *self)
 			case 4:
 				self->s.sound = 0;
 
-				ThrowGib (self, "models/dead/ships/strogg/front.md2", 5000, GIB_METALLIC);
-				ThrowGib (self, "models/dead/ships/strogg/hub.md2", 5000, GIB_METALLIC);
-				ThrowGib (self, "models/dead/ships/strogg/hub.md2", 500, GIB_METALLIC);
-				ThrowGib (self, "models/dead/ships/strogg/l_wing.md2", 500, GIB_METALLIC);
-				ThrowGib (self, "models/dead/ships/strogg/r_wing.md2", 500, GIB_METALLIC);
+				ThrowGib (self, "models/dead/ships/strogg/front.md2", 0, 0, 5000, GIB_METALLIC);
+				ThrowGib (self, "models/dead/ships/strogg/hub.md2", 0, 0, 5000, GIB_METALLIC);
+				ThrowGib (self, "models/dead/ships/strogg/hub.md2", 0, 0, 500, GIB_METALLIC);
+				ThrowGib (self, "models/dead/ships/strogg/l_wing.md2", 0, 0, 500, GIB_METALLIC);
+				ThrowGib (self, "models/dead/ships/strogg/r_wing.md2", 0, 0, 500, GIB_METALLIC);
 
 				for (n= 0; n < 5; n++)
-					ThrowGib (self, "models/objects/gibs/sm_metal/tris.md2", 500, GIB_METALLIC);
+					ThrowGib (self, "models/objects/gibs/sm_metal/tris.md2", 0, 0, 500, GIB_METALLIC);
 
 				G_FreeEdict(self);
 				break;
@@ -3151,7 +3147,7 @@ void misc_strogg_ship_explode (edict_t *self)
 	case 4:
 		self->s.sound = 0;
 		for (n= 0; n < 20; n++)
-			ThrowGib (self, "models/objects/gibs/sm_metal/tris.md2", 500, GIB_METALLIC);
+			ThrowGib (self, "models/objects/gibs/sm_metal/tris.md2", 0, 0, 500, GIB_METALLIC);
 
 		self->think = NULL;
 		self->nextthink = 0;
@@ -4640,14 +4636,14 @@ void misc_gekk_writhe_use (edict_t *self, edict_t *other, edict_t *activator)
 
 	gi.sound (self, CHAN_VOICE, gi.soundindex ("misc/udeath.wav"), 1, ATTN_NORM, 0);
 
-	ThrowGib (self, "models/objects/gekkgib/pelvis/tris.md2", damage, GIB_ORGANIC);
-	ThrowGib (self, "models/objects/gekkgib/arm/tris.md2", damage, GIB_ORGANIC);
-	ThrowGib (self, "models/objects/gekkgib/arm/tris.md2", damage, GIB_ORGANIC);
-	ThrowGib (self, "models/objects/gekkgib/torso/tris.md2", damage, GIB_ORGANIC);
-	ThrowGib (self, "models/objects/gekkgib/claw/tris.md2", damage, GIB_ORGANIC);
-	ThrowGib (self, "models/objects/gekkgib/leg/tris.md2", damage, GIB_ORGANIC);
-	ThrowGib (self, "models/objects/gekkgib/leg/tris.md2", damage, GIB_ORGANIC);
-	ThrowHead (self, "models/objects/gekkgib/head/tris.md2", damage, GIB_ORGANIC);
+	ThrowGib (self, "models/objects/gekkgib/pelvis/tris.md2", 0, 0, damage, GIB_ORGANIC);
+	ThrowGib (self, "models/objects/gekkgib/arm/tris.md2", 0, 0, damage, GIB_ORGANIC);
+	ThrowGib (self, "models/objects/gekkgib/arm/tris.md2", 0, 0, damage, GIB_ORGANIC);
+	ThrowGib (self, "models/objects/gekkgib/torso/tris.md2", 0, 0, damage, GIB_ORGANIC);
+	ThrowGib (self, "models/objects/gekkgib/claw/tris.md2", 0, 0, damage, GIB_ORGANIC);
+	ThrowGib (self, "models/objects/gekkgib/leg/tris.md2", 0, 0, damage, GIB_ORGANIC);
+	ThrowGib (self, "models/objects/gekkgib/leg/tris.md2", 0, 0, damage, GIB_ORGANIC);
+	ThrowHead (self, "models/objects/gekkgib/head/tris.md2", 0, 0, damage, GIB_ORGANIC);
 
 	G_UseTargets (self, activator);
 }
@@ -5179,6 +5175,8 @@ void SP_target_precipitation (edict_t *ent)
 	if (ent->style == STYLE_WEATHER_USER)
 	{
 		char	*buffer;
+		size_t	bufSize;
+
 		if (!ent->usermodel)
 		{
 			gi.dprintf("target_precipitation style=user\nwith no usermodel.\n");
@@ -5189,11 +5187,12 @@ void SP_target_precipitation (edict_t *ent)
 		// Knightmare- check for "models/" or "sprites/" already in path
 		if ( strncmp(ent->usermodel, "models/", 7) && strncmp(ent->usermodel, "sprites/", 8) )
 		{
-			buffer = gi.TagMalloc(strlen(ent->usermodel)+10,TAG_LEVEL);
+			bufSize = strlen(ent->usermodel)+10;
+			buffer = gi.TagMalloc(bufSize, TAG_LEVEL);
 			if (strstr(ent->usermodel,".sp2"))
-				sprintf(buffer, "sprites/%s", ent->usermodel);
+				Com_sprintf(buffer, bufSize, "sprites/%s", ent->usermodel);
 			else
-				sprintf(buffer, "models/%s", ent->usermodel);
+				Com_sprintf(buffer, bufSize, "models/%s", ent->usermodel);
 			ent->usermodel = buffer;
 		}
 
@@ -5375,6 +5374,7 @@ void target_fountain_delayed_use (edict_t *self)
 void SP_target_fountain (edict_t *ent)
 {
 	char	*buffer;
+	size_t	bufSize;
 
 	if (deathmatch->value || coop->value)
 	{
@@ -5404,11 +5404,12 @@ void SP_target_fountain (edict_t *ent)
 	// Knightmare- check for "models/" or "sprites/" already in path
 	if ( strncmp(ent->usermodel, "models/", 7) && strncmp(ent->usermodel, "sprites/", 8) )
 	{
-		buffer = gi.TagMalloc(strlen(ent->usermodel)+10,TAG_LEVEL);
+		bufSize = strlen(ent->usermodel)+10;
+		buffer = gi.TagMalloc(bufSize, TAG_LEVEL);
 		if (strstr(ent->usermodel,".sp2"))
-			sprintf(buffer, "sprites/%s", ent->usermodel);
+			Com_sprintf(buffer, bufSize, "sprites/%s", ent->usermodel);
 		else
-			sprintf(buffer, "models/%s", ent->usermodel);
+			Com_sprintf(buffer, bufSize, "models/%s", ent->usermodel);
 		ent->usermodel = buffer;
 	}
 

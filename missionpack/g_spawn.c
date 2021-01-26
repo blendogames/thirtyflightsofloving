@@ -1127,10 +1127,8 @@ qboolean LoadAliasFile (char *name)
 		Com_sprintf(textname, sizeof(textname), name);
 
 		if (strlen(gamedir->string))
-		//	Com_strcpy(gamepath, sizeof(gamepath), gamedir->string);
 			Com_sprintf(gamepath, sizeof(gamepath), "%s/%s", basedir->string, gamedir->string);
 		else
-		//	Com_strcpy(gamepath, sizeof(gamepath), basedir->string);
 			Com_sprintf(gamepath, sizeof(gamepath), "%s/baseq2", basedir->string);
 
 		// check all pakfiles in current gamedir

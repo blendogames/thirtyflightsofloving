@@ -90,6 +90,8 @@ void Use_Target_Speaker (edict_t *ent, edict_t *other, edict_t *activator)
 
 void SP_target_speaker (edict_t *ent)
 {
+	size_t		msgSize;
+
 	ent->class_id = ENTITY_TARGET_SPEAKER;
 
 	if (!(ent->spawnflags & 8))
@@ -104,13 +106,15 @@ void SP_target_speaker (edict_t *ent)
 		//      via trigger_transition
 		if (!strstr (st.noise, ".wav"))
 		{
-			ent->message = gi.TagMalloc(strlen(st.noise)+5,TAG_LEVEL);
-			sprintf(ent->message, "%s.wav", st.noise);
+			msgSize = strlen(st.noise)+5;
+			ent->message = gi.TagMalloc(msgSize, TAG_LEVEL);
+			Com_sprintf(ent->message, msgSize, "%s.wav", st.noise);
 		}
 		else
 		{
-			ent->message = gi.TagMalloc(strlen(st.noise)+1,TAG_LEVEL);
-			strcpy(ent->message,st.noise);
+			msgSize = strlen(st.noise)+1;
+			ent->message = gi.TagMalloc(msgSize, TAG_LEVEL);
+			Com_strcpy (ent->message, msgSize, st.noise);
 		}
 	}
 
@@ -150,12 +154,23 @@ void SP_target_speaker (edict_t *ent)
 
 void Use_Target_Help (edict_t *ent, edict_t *other, edict_t *activator)
 {
-	if (ent->spawnflags & 1)
-		strncpy (game.helpmessage1, ent->message, sizeof(game.helpmessage2)-1);
-	else
-		strncpy (game.helpmessage2, ent->message, sizeof(game.helpmessage1)-1);
+	if (ent->message)
+	{
+		if (ent->spawnflags & 1)
+		//	strncpy (game.helpmessage1, ent->message, sizeof(game.helpmessage2)-1);
+			Com_strcpy (game.helpmessage1, sizeof(game.helpmessage2), ent->message);
+		else
+		//	strncpy (game.helpmessage2, ent->message, sizeof(game.helpmessage1)-1);
+			Com_strcpy (game.helpmessage2, sizeof(game.helpmessage1), ent->message);
+	}
 
 	game.helpchanged++;
+
+	ent->count--;
+	if (!ent->count) {
+		ent->think = G_FreeEdict;
+		ent->nextthink = level.time + 1;
+	}
 }
 
 /*QUAKED target_help (1 0 1) (-16 -16 -24) (16 16 24) help1

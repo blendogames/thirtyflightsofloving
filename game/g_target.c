@@ -127,6 +127,8 @@ void Use_Target_Speaker (edict_t *ent, edict_t *other, edict_t *activator)
 
 void SP_target_speaker (edict_t *ent)
 {
+	size_t		msgSize;
+
 	ent->class_id = ENTITY_TARGET_SPEAKER;
 
 	if (!(ent->spawnflags & 8))
@@ -141,13 +143,15 @@ void SP_target_speaker (edict_t *ent)
 		//      via trigger_transition
 		if (!strstr (st.noise, ".wav"))
 		{
-			ent->message = gi.TagMalloc(strlen(st.noise)+5,TAG_LEVEL);
-			sprintf(ent->message, "%s.wav", st.noise);
+			msgSize = strlen(st.noise)+5;
+			ent->message = gi.TagMalloc(msgSize, TAG_LEVEL);
+			Com_sprintf (ent->message, msgSize, "%s.wav", st.noise);
 		}
 		else
 		{
-			ent->message = gi.TagMalloc(strlen(st.noise)+1,TAG_LEVEL);
-			strcpy(ent->message, st.noise);
+			msgSize = strlen(st.noise)+1;
+			ent->message = gi.TagMalloc(msgSize, TAG_LEVEL);
+			Q_strncpyz (ent->message, msgSize, st.noise);
 		}
 	}
 
@@ -185,9 +189,11 @@ void Use_Target_Help (edict_t *self, edict_t *other, edict_t *activator)
 	if (self->message)
 	{
 		if (self->spawnflags & 1)
-			strncpy (game.helpmessage1, self->message, sizeof(game.helpmessage2)-1);
+		//	strncpy (game.helpmessage1, self->message, sizeof(game.helpmessage2)-1);
+			Q_strncpyz (game.helpmessage1, sizeof(game.helpmessage2), self->message);
 		else
-			strncpy (game.helpmessage2, self->message, sizeof(game.helpmessage1)-1);
+		//	strncpy (game.helpmessage2, self->message, sizeof(game.helpmessage1)-1);
+			Q_strncpyz (game.helpmessage2, sizeof(game.helpmessage1), self->message);
 	}
 
 	game.helpchanged++;
@@ -202,7 +208,7 @@ void Use_Target_Help (edict_t *self, edict_t *other, edict_t *activator)
 /*QUAKED target_help (1 0 1) (-16 -16 -24) (16 16 24) help1
 When fired, the "message" key becomes the current personal computer string, and the message light will be set on all clients status bars.
 */
-void SP_target_help(edict_t *ent)
+void SP_target_help (edict_t *ent)
 {
 	if (deathmatch->value)
 	{	// auto-remove for deathmatch
@@ -2135,7 +2141,7 @@ void use_target_rocks (edict_t *self, edict_t *other, edict_t *activator)
 	// big chunks
 	if (mass >= 100)
 	{
-		Com_sprintf(modelname, sizeof(modelname), "models/objects/rock%d/tris.md2",self->style*2+1);
+		Com_sprintf (modelname, sizeof(modelname), "models/objects/rock%d/tris.md2",self->style*2+1);
 		count = mass / 100;
 		if (count > 16)
 			count = 16;
@@ -2150,7 +2156,7 @@ void use_target_rocks (edict_t *self, edict_t *other, edict_t *activator)
 	}
 	// small chunks
 	count = mass / 25;
-	Com_sprintf(modelname, sizeof(modelname), "models/objects/rock%d/tris.md2",self->style*2+2);
+	Com_sprintf (modelname, sizeof(modelname), "models/objects/rock%d/tris.md2",self->style*2+2);
 	if (count > 16)
 		count = 16;
 	VectorSet(size,4,4,4);
@@ -3483,7 +3489,8 @@ void SP_target_monitor (edict_t *self)
 		if (!strstr (st.noise, ".wav"))
 			Com_sprintf (buffer, sizeof(buffer), "%s.wav", st.noise);
 		else
-			strncpy (buffer, st.noise, sizeof(buffer));
+		//	strncpy (buffer, st.noise, sizeof(buffer));
+			Q_strncpyz (buffer, sizeof(buffer), st.noise);
 		self->noise_index = gi.soundindex (buffer);
 	}
 
@@ -3825,14 +3832,18 @@ void use_target_change (edict_t *self, edict_t *other, edict_t *activator)
 	char	*target;
 	char	*newtarget;
 	int		L;
+	size_t	bufSize;
 	int		newteams=0;
 	edict_t	*target_ent;
 
 	if (!self->target)
 		return;
+
 	L = (int)strlen(self->target);
-	buffer = (char *)gi.TagMalloc(L+1, TAG_LEVEL);
-	strcpy(buffer, self->target);
+	bufSize = L+1;
+	buffer = (char *)gi.TagMalloc(bufSize, TAG_LEVEL);
+//	strncpy(buffer, self->target);
+	Q_strncpyz (buffer, bufSize, self->target);
 	newtarget = strstr(buffer,",");
 	if (newtarget)
 	{
@@ -3928,16 +3939,16 @@ void use_target_change (edict_t *self, edict_t *other, edict_t *activator)
 				if (strstr(self->usermodel,".sp2")) {
 					// check for "sprites/" already in path
 					if ( !strncmp(self->usermodel, "sprites/", 8) )
-						Com_sprintf(modelname, sizeof(modelname), "%s", self->usermodel);
+						Com_sprintf (modelname, sizeof(modelname), "%s", self->usermodel);
 					else
-						Com_sprintf(modelname, sizeof(modelname), "sprites/%s", self->usermodel);
+						Com_sprintf (modelname, sizeof(modelname), "sprites/%s", self->usermodel);
 				}
 				else {
 					// check for "models/" already in path
 					if ( !strncmp(self->usermodel, "models/", 7) )
-						Com_sprintf(modelname, sizeof(modelname), "%s", self->usermodel);
+						Com_sprintf (modelname, sizeof(modelname), "%s", self->usermodel);
 					else
-						Com_sprintf(modelname, sizeof(modelname), "models/%s", self->usermodel);
+						Com_sprintf (modelname, sizeof(modelname), "models/%s", self->usermodel);
 				}
 				target_ent->s.modelindex = gi.modelindex (modelname);
 			}
@@ -4264,6 +4275,8 @@ void use_target_sky (edict_t *self, edict_t *other, edict_t *activator)
 
 void SP_target_sky (edict_t *self)
 {
+	size_t	pathSize;
+
 	if (!st.sky || !*st.sky)
 	{
 		gi.dprintf("Target_sky with no sky string at %s\n",vtos(self->s.origin));
@@ -4273,8 +4286,10 @@ void SP_target_sky (edict_t *self)
 
 	self->class_id = ENTITY_TARGET_SKY;
 
-	self->pathtarget = gi.TagMalloc(strlen(st.sky)+1,TAG_LEVEL);
-	strcpy(self->pathtarget, st.sky);
+	pathSize = strlen(st.sky)+1;
+	self->pathtarget = gi.TagMalloc(pathSize, TAG_LEVEL);
+//	strncpy(self->pathtarget, st.sky);
+	Q_strncpyz (self->pathtarget, pathSize, st.sky);
 	self->use = use_target_sky;
 }
 
@@ -4343,13 +4358,18 @@ void clone (edict_t *self, edict_t *other, edict_t *activator)
 	edict_t	*parent;
 	edict_t	*child;
 	int		newteams = 0;
+	size_t	classSize;
 
 	parent = G_Find(NULL,FOFS(targetname),self->source);
 	if (!parent)
 		return;
+
 	child = G_Spawn();
-	child->classname = gi.TagMalloc(strlen(parent->classname)+1, TAG_LEVEL);
-	strcpy(child->classname, parent->classname);
+	classSize = strlen(parent->classname)+1;
+	child->classname = gi.TagMalloc(classSize, TAG_LEVEL);
+//	strncpy(child->classname, parent->classname);
+	Q_strncpyz (child->classname, classSize, parent->classname);
+
 	child->s.modelindex = parent->s.modelindex;
 	VectorCopy (self->s.origin, child->s.origin);
 	child->svflags    = parent->svflags;

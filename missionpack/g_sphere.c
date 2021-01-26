@@ -323,9 +323,9 @@ void body_gib (edict_t *self)
 	int		n;
 
 	gi.sound (self, CHAN_BODY, gi.soundindex ("misc/udeath.wav"), 1, ATTN_NORM, 0);
-	for (n= 0; n < 4; n++)
-		ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", 50, GIB_ORGANIC);
-	ThrowGib (self, "models/objects/gibs/skull/tris.md2", 50, GIB_ORGANIC);
+	for (n = 0; n < 4; n++)
+		ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", 0, 0, 50, GIB_ORGANIC);
+	ThrowGib (self, "models/objects/gibs/skull/tris.md2", 0, 0, 50, GIB_ORGANIC);
 }
 
 // =================

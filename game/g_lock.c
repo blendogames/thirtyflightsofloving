@@ -23,10 +23,14 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "g_local.h"
 
+#define KEY_MESSAGE_SIZE	10
+
 //=====================================================
 
 void SP_target_lock_digit (edict_t *self)
 {
+	self->class_id = ENTITY_TARGET_LOCK_DIGIT;
+
 	self->movetype = MOVETYPE_PUSH;
 	gi.setmodel (self, self->model);
 	self->solid = SOLID_BSP;
@@ -85,10 +89,17 @@ void lock_initialize (edict_t *lock)
 	int		n, l;
 	int		numdigits;
 	char	c;
+	size_t	msgSize;
 
 	if (lock->spawnflags & 1 && strlen(game.lock_code) != 0)
 	{
-		strcpy(lock->key_message, game.lock_code);
+		// Knightmare- dynamically allocate this to be safe
+		// This will temporarily leak the already allocated key_message
+		// buffer, but that will be freed on the next level change.
+	//	strncpy(lock->key_message, game.lock_code);
+		msgSize = KEY_MESSAGE_SIZE;
+		lock->key_message = gi.TagMalloc(msgSize, TAG_LEVEL);
+		Q_strncpyz (lock->key_message, msgSize, game.lock_code);
 		return;
 	}
 	// Maximum of 8 digits in combination
@@ -134,9 +145,16 @@ void SP_target_lock (edict_t *self)
 		G_FreeEdict(self);
 		return;
 	}
+
+	self->class_id = ENTITY_TARGET_LOCK;
+
 	if (self->spawnflags & 2) game.lock_hud = true;
-	if (!self->key_message)
-		self->key_message = "000000000";
+	if (!self->key_message) {
+		// Knightmare- dynamically allocate this to be safe
+	//	self->key_message = "000000000";
+		self->key_message = gi.TagMalloc(KEY_MESSAGE_SIZE, TAG_LEVEL);
+		Q_strncpyz (self->key_message, KEY_MESSAGE_SIZE, "000000000");
+	}
 	self->use = target_lock_use;
 	self->think = lock_initialize;
 	self->nextthink = level.time + 1.0;
@@ -184,6 +202,8 @@ void lock_code_use (edict_t *self, edict_t *other, edict_t *activator)
 
 void SP_target_lock_code (edict_t *self)
 {
+	self->class_id = ENTITY_TARGET_LOCK_CODE;
+
 	if (!self->target && !(self->spawnflags & 1))
 	{
 		gi.dprintf("non-crosslevel target_lock_code w/o target\n");
@@ -272,6 +292,8 @@ void lock_clue_initialize(edict_t *self)
 }
 void SP_target_lock_clue (edict_t *self)
 {
+	self->class_id = ENTITY_TARGET_LOCK_CLUE;
+
 	if (!self->target && !(self->spawnflags & 1))
 	{
 		gi.dprintf("non-crosslevel target_lock_clue w/o target\n");

@@ -1497,17 +1497,17 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo)
 	// check for malformed or illegal info strings
 	if (!Info_Validate(userinfo))
 	{
-		strcpy (userinfo, "\\name\\badinfo\\skin\\male/grunt");
+		Com_strcpy (userinfo, MAX_INFO_STRING, "\\name\\badinfo\\skin\\male/grunt");
 	}
 
 	// set name
 	s = Info_ValueForKey (userinfo, "name");
-	strncpy (ent->client->pers.netname, s, sizeof(ent->client->pers.netname)-1);
+	Com_strcpy (ent->client->pers.netname, sizeof(ent->client->pers.netname), s);
 
 	// set skin
 	s = Info_ValueForKey (userinfo, "skin");
 
-  zCam_SetLocalCopy(ent, s);
+	zCam_SetLocalCopy(ent, s);
 
 	playernum = ent-g_edicts-1;
 
@@ -1543,7 +1543,7 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo)
 	}
 
 	// save off the userinfo in case we want to check something later
-	strncpy (ent->client->pers.userinfo, userinfo, sizeof(ent->client->pers.userinfo)-1);
+	Com_strcpy (ent->client->pers.userinfo, sizeof(ent->client->pers.userinfo), userinfo);
 }
 
 

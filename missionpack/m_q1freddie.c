@@ -754,22 +754,22 @@ void freddie_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dama
 		gi.multicast (self->s.origin, MULTICAST_PVS);
 		
 		for (n = 0; n < 6; n++)
-			ThrowGib (self, "models/objects/q1gibs/q1gib1/tris.md2", damage, GIB_ORGANIC);
+			ThrowGib (self, "models/objects/q1gibs/q1gib1/tris.md2", 0, 0, damage, GIB_ORGANIC);
 		for (n = 0; n < 6; n++)
-			ThrowGib (self, "models/objects/q1gibs/q1gib3/tris.md2", damage, GIB_ORGANIC);
+			ThrowGib (self, "models/objects/q1gibs/q1gib3/tris.md2", 0, 0, damage, GIB_ORGANIC);
 
 		// change blood type to mechanical to throw mech gibs
 		bloodTypeBak = self->blood_type;
 		self->blood_type = 2;
 		for (n = 0; n < 3; n++)
-			ThrowGibFrame (self, "models/monsters/q1freddie/gib_junk/tris.md2", (int)(random()*3), damage, GIB_METALLIC);
+			ThrowGib (self, "models/monsters/q1freddie/gib_junk/tris.md2", (int)(random()*3), 0, damage, GIB_METALLIC);
 		for (n = 0; n < 4; n++)
-			ThrowGib (self, "models/monsters/q1freddie/gib_metal1/tris.md2", damage, GIB_METALLIC);
+			ThrowGib (self, "models/monsters/q1freddie/gib_metal1/tris.md2", 0, 0, damage, GIB_METALLIC);
 		for (n = 0; n < 4; n++)
-			ThrowGib (self, "models/monsters/q1freddie/gib_metal3/tris.md2", damage, GIB_METALLIC);
+			ThrowGib (self, "models/monsters/q1freddie/gib_metal3/tris.md2", 0, 0, damage, GIB_METALLIC);
 		self->blood_type = bloodTypeBak;
 
-		ThrowHead (self, "models/monsters/q1ogre/head/tris.md2", damage, GIB_ORGANIC);
+		ThrowHead (self, "models/monsters/q1ogre/head/tris.md2", 0, 0, damage, GIB_ORGANIC);
 		self->deadflag = DEAD_DEAD;
 		return;
 	}

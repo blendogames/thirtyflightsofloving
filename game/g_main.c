@@ -351,7 +351,7 @@ edict_t *CreateTargetChangeLevel(char *map)
 
 	ent = G_Spawn ();
 	ent->classname = "target_changelevel";
-	Com_sprintf(level.nextmap, sizeof(level.nextmap), "%s", map);
+	Com_sprintf (level.nextmap, sizeof(level.nextmap), "%s", map);
 	ent->map = level.nextmap;
 	return ent;
 }

@@ -660,21 +660,21 @@ void BossExplode (edict_t *self)
 		gi.WritePosition (org);
 		gi.multicast (self->s.origin, MULTICAST_PVS);
 
-		for (n= 0; n < 4; n++)
-			ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", 500, GIB_ORGANIC);
-		for (n= 0; n < 4; n++)
-			ThrowGib (self, "models/objects/gibs/bone/tris.md2", 500, GIB_ORGANIC);
-		for (n= 0; n < 8; n++)
-			ThrowGib (self, "models/objects/gibs/gear/tris.md2", 500, GIB_METALLIC);
-		for (n= 0; n < 8; n++)
-			ThrowGib (self, "models/objects/gibs/sm_metal/tris.md2", 500, GIB_METALLIC);
+		for (n = 0; n < 4; n++)
+			ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", 0, 0, 500, GIB_ORGANIC);
+		for (n = 0; n < 4; n++)
+			ThrowGib (self, "models/objects/gibs/bone/tris.md2", 0, 0, 500, GIB_ORGANIC);
+		for (n = 0; n < 8; n++)
+			ThrowGib (self, "models/objects/gibs/gear/tris.md2", 0, 0, 500, GIB_METALLIC);
+		for (n = 0; n < 8; n++)
+			ThrowGib (self, "models/objects/gibs/sm_metal/tris.md2", 0, 0, 500, GIB_METALLIC);
 		if (!strcmp(self->classname, "monster_jorg"))
 		{
-			for (n= 0; n < 4; n++)
-				ThrowGib (self, "models/monsters/blackwidow/gib3/tris.md2", 500, GIB_METALLIC);
+			for (n = 0; n < 4; n++)
+				ThrowGib (self, "models/monsters/blackwidow/gib3/tris.md2", 0, 0, 500, GIB_METALLIC);
 		}
-		ThrowGib (self, "models/objects/gibs/chest/tris.md2", 500, GIB_ORGANIC);
-		ThrowHead (self, "models/objects/gibs/gear/tris.md2", 500, GIB_METALLIC);
+		ThrowGib (self, "models/objects/gibs/chest/tris.md2", 0, 0, 500, GIB_ORGANIC);
+		ThrowHead (self, "models/objects/gibs/gear/tris.md2", 0, 0, 500, GIB_METALLIC);
 		self->deadflag = DEAD_DEAD;
 		return;
 	}

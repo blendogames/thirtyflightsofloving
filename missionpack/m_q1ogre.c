@@ -322,10 +322,10 @@ void ogre_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
 	//		ogre_droprockets(self);
 
 		for (n = 0; n < 2; n++)
-			ThrowGib (self, "models/objects/q1gibs/q1gib1/tris.md2", damage, GIB_ORGANIC);
+			ThrowGib (self, "models/objects/q1gibs/q1gib1/tris.md2", 0, 0, damage, GIB_ORGANIC);
 		for (n = 0; n < 4; n++)
-			ThrowGib (self, "models/objects/q1gibs/q1gib3/tris.md2", damage, GIB_ORGANIC);
-		ThrowHead (self, "models/monsters/q1ogre/head/tris.md2", damage, GIB_ORGANIC);
+			ThrowGib (self, "models/objects/q1gibs/q1gib3/tris.md2", 0, 0, damage, GIB_ORGANIC);
+		ThrowHead (self, "models/monsters/q1ogre/head/tris.md2", 0, 0, damage, GIB_ORGANIC);
 		self->deadflag = DEAD_DEAD;
 		return;
 	}

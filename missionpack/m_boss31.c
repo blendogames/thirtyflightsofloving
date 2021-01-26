@@ -639,12 +639,12 @@ void JorgExplode (edict_t *self)
 		gi.WritePosition (org);
 		gi.multicast (self->s.origin, MULTICAST_PVS);
 
-		for (n= 0; n < 4; n++)
-			ThrowGib (self, "models/objects/gibs/gear/tris.md2", 1500, GIB_METALLIC);
-		for (n= 0; n < 4; n++)
-			ThrowGib (self, "models/monsters/blackwidow/gib3/tris.md2", 1500, GIB_METALLIC);
-		for (n= 0; n < 8; n++)
-			ThrowGib (self, "models/objects/gibs/sm_metal/tris.md2", 1500, GIB_METALLIC);
+		for (n = 0; n < 4; n++)
+			ThrowGib (self, "models/objects/gibs/gear/tris.md2", 0, 0, 1500, GIB_METALLIC);
+		for (n = 0; n < 4; n++)
+			ThrowGib (self, "models/monsters/blackwidow/gib3/tris.md2", 0, 0, 1500, GIB_METALLIC);
+		for (n = 0; n < 8; n++)
+			ThrowGib (self, "models/objects/gibs/sm_metal/tris.md2", 0, 0, 1500, GIB_METALLIC);
 		self->count = 0; //reset counter for gibbing explosion
 		return;
 	}

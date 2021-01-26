@@ -70,7 +70,7 @@ void fd_secret_use (edict_t *self, edict_t *other, edict_t *activator)
 void fd_secret_killed (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
 //	gi.dprintf("fd_secret_killed\n");
-	self->health = self->max_health;
+//	self->health = self->max_health;
 	self->takedamage = DAMAGE_NO;
 
 	if (self->flags & FL_TEAMSLAVE && self->teammaster && self->teammaster->takedamage != DAMAGE_NO)
@@ -181,8 +181,7 @@ void fd_secret_done (edict_t *self)
 //	gi.dprintf("fd_secret_done\n");
 	if (!self->targetname || self->spawnflags & SEC_YES_SHOOT)
 	{
-	//	self->health = 1;
-		self->health = self->max_health;	// Knightmare- restore max health
+		self->health = 1;
 		self->takedamage = DAMAGE_YES;
 		self->die = fd_secret_killed;   
 	}
@@ -355,10 +354,8 @@ void SP_func_door_secret2 (edict_t *ent)
 
 	if (!ent->targetname || ent->spawnflags & SEC_YES_SHOOT)
 	{
-		if (!ent->health) {
-			ent->health = 1;
-		}
-		ent->max_health = ent->health;	// Knightmare- store health value
+		ent->health = 1;
+		ent->max_health = ent->health;
 		ent->takedamage = DAMAGE_YES;
 		ent->die = fd_secret_killed;
 	}

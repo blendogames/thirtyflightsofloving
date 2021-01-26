@@ -658,11 +658,11 @@ void actor_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 	if (self->health <= self->gib_health && !(self->spawnflags & SF_MONSTER_NOGIB))
 	{
 		gi.sound (self, CHAN_BODY, gi.soundindex ("misc/udeath.wav"), 1, ATTN_NORM, 0);
-		for (n= 0; n < 2; n++)
-			ThrowGib (self, "models/objects/gibs/bone/tris.md2", damage, GIB_ORGANIC);
-		for (n= 0; n < 4; n++)
-			ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
-		ThrowHead (self, "models/objects/gibs/head2/tris.md2", damage, GIB_ORGANIC);
+		for (n = 0; n < 2; n++)
+			ThrowGib (self, "models/objects/gibs/bone/tris.md2", 0, 0, damage, GIB_ORGANIC);
+		for (n = 0; n < 4; n++)
+			ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", 0, 0, damage, GIB_ORGANIC);
+		ThrowHead (self, "models/objects/gibs/head2/tris.md2", 0, 0, damage, GIB_ORGANIC);
 		self->deadflag = DEAD_DEAD;
 		return;
 	}
@@ -1367,6 +1367,7 @@ void SP_misc_actor (edict_t *self)
 	char	*p;
 	int		i;
 	int		ActorID = 0;
+	size_t	modelSize;
 
 	if (deathmatch->value)
 	{
@@ -1385,8 +1386,9 @@ void SP_misc_actor (edict_t *self)
 	}
 	else
 	{
-		self->usermodel = gi.TagMalloc(5, TAG_LEVEL);
-		strcpy(self->usermodel, "male");
+		modelSize = 5;
+		self->usermodel = gi.TagMalloc(modelSize, TAG_LEVEL);
+		Com_strcpy (self->usermodel, modelSize, "male");
 	}
 	if( (!Q_stricmp(self->usermodel,"male")) ||
 		(!Q_stricmp(self->usermodel,"female")) ||
@@ -1904,10 +1906,10 @@ qboolean InPak(char *basedir, char *gamedir, char *filename)
 		strncpy(pakfile, basedir, sizeof(pakfile));
 		if(strlen(gamedir))
 		{
-			Com_strcat(pakfile, sizeof(pakfile), "/");
-			Com_strcat(pakfile, sizeof(pakfile), gamedir);
+			Com_strcat (pakfile, sizeof(pakfile), "/");
+			Com_strcat (pakfile, sizeof(pakfile), gamedir);
 		}
-		Com_strcat(pakfile, sizeof(pakfile), va("/pak%d.pak",k));
+		Com_strcat (pakfile, sizeof(pakfile), va("/pak%d.pak",k));
 		if (NULL != (f = fopen(pakfile, "rb")))
 		{
 			num = (int)fread(&pakheader, 1, sizeof(pak_header_t), f);
@@ -2039,8 +2041,8 @@ void actor_files (void)
 					if (f)
 					{
 						fclose(f);
-						Com_strcpy(filename, sizeof(filename), path);
-						Com_strcat(filename, sizeof(filename), wavname[j]);
+						Com_strcpy (filename, sizeof(filename), path);
+						Com_strcat (filename, sizeof(filename), wavname[j]);
 						e->actor_sound_index[j] = gi.soundindex(filename);
 						continue;
 					}
@@ -2048,8 +2050,8 @@ void actor_files (void)
 					Com_sprintf(filename, sizeof(filename), "sound/%s%s",path,wavname[j]);
 					if (InPak(basedir->string,gamedir->string,filename))
 					{
-						Com_strcpy(filename, sizeof(filename), path);
-						Com_strcat(filename, sizeof(filename), wavname[j]);
+						Com_strcpy (filename, sizeof(filename), path);
+						Com_strcat (filename, sizeof(filename), wavname[j]);
 						e->actor_sound_index[j] = gi.soundindex(filename);
 						continue;
 					}
@@ -2061,8 +2063,8 @@ void actor_files (void)
 				if (f)
 				{
 					fclose(f);
-					Com_strcpy(filename, sizeof(filename), path);
-					Com_strcat(filename, sizeof(filename), wavname[j]);
+					Com_strcpy (filename, sizeof(filename), path);
+					Com_strcat (filename, sizeof(filename), wavname[j]);
 					e->actor_sound_index[j] = gi.soundindex(filename);
 					continue;
 				}
@@ -2070,8 +2072,8 @@ void actor_files (void)
 				Com_sprintf(filename, sizeof(filename), "sound/%s%s",path,wavname[j]);
 				if (InPak(basedir->string,"baseq2",filename))
 				{
-					Com_strcpy(filename, sizeof(filename), path);
-					Com_strcat(filename, sizeof(filename), wavname[j]);
+					Com_strcpy (filename, sizeof(filename), path);
+					Com_strcat (filename, sizeof(filename), wavname[j]);
 					e->actor_sound_index[j] = gi.soundindex(filename);
 					continue;
 				}
@@ -2083,8 +2085,8 @@ void actor_files (void)
 					if(f)
 					{
 						fclose(f);
-						Com_strcpy(filename, sizeof(filename), path);
-						Com_strcat(filename, sizeof(filename), wavname[j]);
+						Com_strcpy (filename, sizeof(filename), path);
+						Com_strcat (filename, sizeof(filename), wavname[j]);
 						e->actor_sound_index[j] = gi.soundindex(filename);
 						continue;
 					}
@@ -2092,8 +2094,8 @@ void actor_files (void)
 					Com_sprintf(filename, sizeof(filename), "sound/%s%s",path,wavname[j]);
 					if (InPak(cddir->string,"baseq2",filename))
 					{
-						Com_strcpy(filename, sizeof(filename), path);
-						Com_strcat(filename, sizeof(filename), wavname[j]);
+						Com_strcpy (filename, sizeof(filename), path);
+						Com_strcat (filename, sizeof(filename), wavname[j]);
 						e->actor_sound_index[j] = gi.soundindex(filename);
 						continue;
 					}
@@ -2131,23 +2133,23 @@ void actor_files (void)
 			Com_sprintf(filename, sizeof(filename), "players/%s/",e->usermodel);
 			switch(e->actor_weapon[k])
 			{
-			case 2: Com_strcat(filename, sizeof(filename), "w_shotgun.md2");		break;
-			case 3:	Com_strcat(filename, sizeof(filename), "w_sshotgun.md2");		break;
-			case 4:	Com_strcat(filename, sizeof(filename), "w_machinegun.md2");	break;
-			case 5:	Com_strcat(filename, sizeof(filename), "w_chaingun.md2");		break;
-			case 6:	Com_strcat(filename, sizeof(filename), "w_glauncher.md2");	break;
-			case 7: Com_strcat(filename, sizeof(filename), "w_rlauncher.md2");	break;
-			case 8: Com_strcat(filename, sizeof(filename), "w_hyperblaster.md2");	break;
-			case 9: Com_strcat(filename, sizeof(filename), "w_railgun.md2");		break;
+			case 2: Com_strcat (filename, sizeof(filename), "w_shotgun.md2");		break;
+			case 3:	Com_strcat (filename, sizeof(filename), "w_sshotgun.md2");		break;
+			case 4:	Com_strcat (filename, sizeof(filename), "w_machinegun.md2");	break;
+			case 5:	Com_strcat (filename, sizeof(filename), "w_chaingun.md2");		break;
+			case 6:	Com_strcat (filename, sizeof(filename), "w_glauncher.md2");	break;
+			case 7: Com_strcat (filename, sizeof(filename), "w_rlauncher.md2");	break;
+			case 8: Com_strcat (filename, sizeof(filename), "w_hyperblaster.md2");	break;
+			case 9: Com_strcat (filename, sizeof(filename), "w_railgun.md2");		break;
 			case 10:Com_strcat(filename, sizeof(filename), "w_bfg.md2");			break;
 			// Knightmare- mission pack weapon support
-			case 11:Com_strcat(filename, sizeof(filename), "w_ripper.md2");		break;
-			case 12:Com_strcat(filename, sizeof(filename), "w_phalanx.md2");		break;
-			case 13:Com_strcat(filename, sizeof(filename), "w_etfrifle.md2");		break;
-			case 14:Com_strcat(filename, sizeof(filename), "w_plasma.md2");		break;
-			case 15:Com_strcat(filename, sizeof(filename), "w_disrupt.md2");		break;
+			case 11:Com_strcat (filename, sizeof(filename), "w_ripper.md2");		break;
+			case 12:Com_strcat (filename, sizeof(filename), "w_phalanx.md2");		break;
+			case 13:Com_strcat (filename, sizeof(filename), "w_etfrifle.md2");		break;
+			case 14:Com_strcat (filename, sizeof(filename), "w_plasma.md2");		break;
+			case 15:Com_strcat (filename, sizeof(filename), "w_disrupt.md2");		break;
 			// end Knightmare
-			default:Com_strcat(filename, sizeof(filename), "w_blaster.md2");		break;
+			default:Com_strcat (filename, sizeof(filename), "w_blaster.md2");		break;
 			}
 
 			if(strlen(gamedir->string))

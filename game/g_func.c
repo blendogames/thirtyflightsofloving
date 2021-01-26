@@ -3921,9 +3921,9 @@ void SP_func_train (edict_t *self)
 		char	modelname[256];
 		// check for "models/" already in path
 		if ( !strncmp(self->usermodel, "models/", 7) )
-			Com_sprintf(modelname, sizeof(modelname), "%s", self->usermodel);
+			Com_sprintf (modelname, sizeof(modelname), "%s", self->usermodel);
 		else
-			Com_sprintf(modelname, sizeof(modelname), "models/%s", self->usermodel);
+			Com_sprintf (modelname, sizeof(modelname), "models/%s", self->usermodel);
 		self->s.modelindex2 = gi.modelindex (modelname);
 	}
 
@@ -4340,8 +4340,9 @@ void door_secret_done (edict_t *self)
 {
 	if (!(self->targetname) || (self->spawnflags & SECRET_ALWAYS_SHOOT))
 	{
-	//	self->health = 0;
-		self->health = self->max_health;	// Knightmare- restore max health
+		// Knightmare- setting health to anything other than 0
+		// makes the die function never get called!
+		self->health = 0;
 		self->takedamage = DAMAGE_YES;
 	}
 	self->moveinfo.state = STATE_LOWEST;	// Knightmare added
@@ -4424,10 +4425,9 @@ void SP_func_door_secret (edict_t *ent)
 
 	if (!(ent->targetname) || (ent->spawnflags & SECRET_ALWAYS_SHOOT))
 	{
-		if (!ent->health) {
-			ent->health = 1;	// Knightmare- was 0
-		}
-		ent->max_health = ent->health;	// Knightmare- store health value
+		// Knightmare- setting health to anything other than 0
+		// makes the die function never get called!
+		ent->health = 0;
 		ent->takedamage = DAMAGE_YES;
 		ent->die = door_secret_die;
 	}
@@ -4572,7 +4572,7 @@ void door_secret2_use (edict_t *self, edict_t *other, edict_t *activator)
 
 void door_secret2_killed (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
-	self->health = self->max_health;
+//	self->health = self->max_health;
 	self->takedamage = DAMAGE_NO;
 
 	// if a team slave, call this function for the team master
@@ -4669,7 +4669,7 @@ void door_secret2_done (edict_t *self)
 {
 	if ( !(self->targetname) || (self->spawnflags & SECDR2_ALWAYS_SHOOT) )
 	{
-		self->health = self->max_health;
+		self->health = 1;
 		self->takedamage = DAMAGE_YES;
 		self->die = door_secret2_killed;
 	}
@@ -4806,9 +4806,7 @@ void SP_func_door_secret2 (edict_t *ent)
 
 	if (!(ent->targetname) || (ent->spawnflags & SECDR2_ALWAYS_SHOOT))
 	{
-		if (!ent->health) {
-			ent->health = 1;
-		}
+		ent->health = 1;
 		ent->max_health = ent->health;
 		ent->takedamage = DAMAGE_YES;
 		ent->die = door_secret2_killed;
@@ -5305,9 +5303,9 @@ void SP_func_pushable (edict_t *self)
 		char	modelname[256];
 		// check for "models/" already in path
 		if ( !strncmp(self->usermodel, "models/", 7) )
-			Com_sprintf(modelname, sizeof(modelname), "%s", self->usermodel);
+			Com_sprintf (modelname, sizeof(modelname), "%s", self->usermodel);
 		else
-			Com_sprintf(modelname, sizeof(modelname), "models/%s", self->usermodel);
+			Com_sprintf (modelname, sizeof(modelname), "models/%s", self->usermodel);
 		self->s.modelindex2 = gi.modelindex (modelname);
 	}
 

@@ -1027,8 +1027,8 @@ void widow2_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 			ThrowWidowGibSized (self, "models/monsters/blackwidow/gib3/tris.md2", clipped, GIB_METALLIC, NULL, 
 				0, false);
 		}
-		ThrowGib (self, "models/objects/gibs/chest/tris.md2", clipped, GIB_ORGANIC);
-		ThrowHead (self, "models/objects/gibs/head2/tris.md2", clipped, GIB_ORGANIC);
+		ThrowGib (self, "models/objects/gibs/chest/tris.md2", 0, 0, clipped, GIB_ORGANIC);
+		ThrowHead (self, "models/objects/gibs/head2/tris.md2", 0, 0, clipped, GIB_ORGANIC);
 		self->deadflag = DEAD_DEAD;
 		return;
 	}
@@ -1610,8 +1610,8 @@ void WidowExplode (edict_t *self)
 			ThrowWidowGib (self, "models/objects/gibs/sm_metal/tris.md2", 100, GIB_METALLIC);
 		for (n= 0; n < 2; n++)
 			ThrowWidowGib (self, "models/objects/gibs/sm_metal/tris.md2", 400, GIB_METALLIC);
-//		ThrowGib (self, "models/objects/gibs/chest/tris.md2", 1000, GIB_ORGANIC);
-//		ThrowHead (self, "models/objects/gibs/gear/tris.md2", 1000, GIB_METALLIC);
+	//	ThrowGib (self, "models/objects/gibs/chest/tris.md2", 0, 0, 1000, GIB_ORGANIC);
+	//	ThrowHead (self, "models/objects/gibs/gear/tris.md2", 0, 0, 1000, GIB_METALLIC);
 		self->deadflag = DEAD_DEAD;
 		self->think = monster_think;
 		self->nextthink = level.time + 0.1;

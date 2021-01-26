@@ -1385,6 +1385,7 @@ void target_playback_delayed_restart (edict_t *ent)
 void SP_target_playback (edict_t *ent)
 {
 	char	filename[_MAX_PATH];
+	size_t	msgSize;
 
 	if (!hFMOD)
 		FMOD_Init();
@@ -1405,8 +1406,9 @@ void SP_target_playback (edict_t *ent)
 	ent->class_id = ENTITY_TARGET_PLAYBACK;
 
 	GameDirRelativePath(st.noise, filename, sizeof(filename));
-	ent->message = gi.TagMalloc(strlen(filename)+1,TAG_LEVEL);
-	strcpy(ent->message, filename);
+	msgSize = strlen(filename) + 1;
+	ent->message = gi.TagMalloc(msgSize, TAG_LEVEL);
+	Com_strcpy (ent->message, msgSize, filename);
 
 	if (ent->fadein < 0)
 		ent->fadein = 0;
@@ -1485,13 +1487,13 @@ void ReadTextureSurfaceAssignments ()
 
 	basedir = gi.cvar("basedir", "", 0);
 	gamedir = gi.cvar("gamedir", "", 0);
-	Com_strcpy(filename, sizeof(filename), basedir->string);
+	Com_strcpy (filename, sizeof(filename), basedir->string);
 	if (strlen(gamedir->string))
 	{
-		Com_strcat(filename, sizeof(filename), "\\");
-		Com_strcat(filename, sizeof(filename), gamedir->string);
+		Com_strcat (filename, sizeof(filename), "\\");
+		Com_strcat (filename, sizeof(filename), gamedir->string);
 	}
-	Com_strcat(filename, sizeof(filename), "\\texsurfs.txt");
+	Com_strcat (filename, sizeof(filename), "\\texsurfs.txt");
 	f = fopen(filename,"rt");
 	if (!f)
 		return;

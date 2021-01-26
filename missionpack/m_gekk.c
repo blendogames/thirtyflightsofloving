@@ -1378,14 +1378,14 @@ void gekk_gibfest (edict_t *self)
 
 	gi.sound (self, CHAN_VOICE, gi.soundindex ("misc/udeath.wav"), 1, ATTN_NORM, 0);
 	
-	ThrowGib (self, "models/objects/gekkgib/pelvis/tris.md2", damage, GIB_ORGANIC);
-	ThrowGib (self, "models/objects/gekkgib/arm/tris.md2", damage, GIB_ORGANIC);
-	ThrowGib (self, "models/objects/gekkgib/arm/tris.md2", damage, GIB_ORGANIC);
-	ThrowGib (self, "models/objects/gekkgib/torso/tris.md2", damage, GIB_ORGANIC);
-	ThrowGib (self, "models/objects/gekkgib/claw/tris.md2", damage, GIB_ORGANIC);
-	ThrowGib (self, "models/objects/gekkgib/leg/tris.md2", damage, GIB_ORGANIC);
-	ThrowGib (self, "models/objects/gekkgib/leg/tris.md2", damage, GIB_ORGANIC);
-	ThrowHead (self, "models/objects/gekkgib/head/tris.md2", damage, GIB_ORGANIC);
+	ThrowGib (self, "models/objects/gekkgib/pelvis/tris.md2", 0, 0, damage, GIB_ORGANIC);
+	ThrowGib (self, "models/objects/gekkgib/arm/tris.md2", 0, 0, damage, GIB_ORGANIC);
+	ThrowGib (self, "models/objects/gekkgib/arm/tris.md2", 0, 0, damage, GIB_ORGANIC);
+	ThrowGib (self, "models/objects/gekkgib/torso/tris.md2", 0, 0, damage, GIB_ORGANIC);
+	ThrowGib (self, "models/objects/gekkgib/claw/tris.md2", 0, 0, damage, GIB_ORGANIC);
+	ThrowGib (self, "models/objects/gekkgib/leg/tris.md2", 0, 0, damage, GIB_ORGANIC);
+	ThrowGib (self, "models/objects/gekkgib/leg/tris.md2", 0, 0, damage, GIB_ORGANIC);
+	ThrowHead (self, "models/objects/gekkgib/head/tris.md2", 0, 0, damage, GIB_ORGANIC);
 	
 
 	self->deadflag = DEAD_DEAD;	
@@ -1527,14 +1527,14 @@ void gekk_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
 	{
 		gi.sound (self, CHAN_VOICE, gi.soundindex ("misc/udeath.wav"), 1, ATTN_NORM, 0);
 
-		ThrowGib (self, "models/objects/gekkgib/pelvis/tris.md2", damage, GIB_ORGANIC);
-		ThrowGib (self, "models/objects/gekkgib/arm/tris.md2", damage, GIB_ORGANIC);
-		ThrowGib (self, "models/objects/gekkgib/arm/tris.md2", damage, GIB_ORGANIC);
-		ThrowGib (self, "models/objects/gekkgib/torso/tris.md2", damage, GIB_ORGANIC);
-		ThrowGib (self, "models/objects/gekkgib/claw/tris.md2", damage, GIB_ORGANIC);
-		ThrowGib (self, "models/objects/gekkgib/leg/tris.md2", damage, GIB_ORGANIC);
-		ThrowGib (self, "models/objects/gekkgib/leg/tris.md2", damage, GIB_ORGANIC);
-		ThrowHead (self, "models/objects/gekkgib/head/tris.md2", damage, GIB_ORGANIC);
+		ThrowGib (self, "models/objects/gekkgib/pelvis/tris.md2", 0, 0, damage, GIB_ORGANIC);
+		ThrowGib (self, "models/objects/gekkgib/arm/tris.md2", 0, 0, damage, GIB_ORGANIC);
+		ThrowGib (self, "models/objects/gekkgib/arm/tris.md2", 0, 0, damage, GIB_ORGANIC);
+		ThrowGib (self, "models/objects/gekkgib/torso/tris.md2", 0, 0, damage, GIB_ORGANIC);
+		ThrowGib (self, "models/objects/gekkgib/claw/tris.md2", 0, 0, damage, GIB_ORGANIC);
+		ThrowGib (self, "models/objects/gekkgib/leg/tris.md2", 0, 0, damage, GIB_ORGANIC);
+		ThrowGib (self, "models/objects/gekkgib/leg/tris.md2", 0, 0, damage, GIB_ORGANIC);
+		ThrowHead (self, "models/objects/gekkgib/head/tris.md2", 0, 0, damage, GIB_ORGANIC);
 
 		self->deadflag = DEAD_DEAD;
 		return;

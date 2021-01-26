@@ -1368,19 +1368,20 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 			// gib
 			gi.sound (self, CHAN_BODY, gi.soundindex ("misc/udeath.wav"), 1, ATTN_NORM, 0);
 			// more meaty gibs for your dollar!
-			if ((deathmatch->value) && (self->health < (self->gib_health * 2)))
-				for (n= 0; n < 4; n++)
-					ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
-			for (n= 0; n < 4; n++)
-				ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
+			if ((deathmatch->value) && (self->health < (self->gib_health * 2))) {
+				for (n = 0; n < 4; n++)
+					ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", 0, 0, damage, GIB_ORGANIC);
+			}
+			for (n = 0; n < 4; n++)
+				ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", 0, 0, damage, GIB_ORGANIC);
 			if (mega_gibs->value)
 			{
-				ThrowGib (self, "models/objects/gibs/arm/tris.md2", damage, GIB_ORGANIC);
-				ThrowGib (self, "models/objects/gibs/arm/tris.md2", damage, GIB_ORGANIC);
-				ThrowGib (self, "models/objects/gibs/leg/tris.md2", damage, GIB_ORGANIC);
-				ThrowGib (self, "models/objects/gibs/leg/tris.md2", damage, GIB_ORGANIC);
-				ThrowGib (self, "models/objects/gibs/bone/tris.md2", damage, GIB_ORGANIC);
-				ThrowGib (self, "models/objects/gibs/bone2/tris.md2", damage, GIB_ORGANIC);
+				ThrowGib (self, "models/objects/gibs/arm/tris.md2", 0, 0, damage, GIB_ORGANIC);
+				ThrowGib (self, "models/objects/gibs/arm/tris.md2", 0, 0, damage, GIB_ORGANIC);
+				ThrowGib (self, "models/objects/gibs/leg/tris.md2", 0, 0, damage, GIB_ORGANIC);
+				ThrowGib (self, "models/objects/gibs/leg/tris.md2", 0, 0, damage, GIB_ORGANIC);
+				ThrowGib (self, "models/objects/gibs/bone/tris.md2", 0, 0, damage, GIB_ORGANIC);
+				ThrowGib (self, "models/objects/gibs/bone2/tris.md2", 0, 0, damage, GIB_ORGANIC);
 			}
 		// PMM	
 		}
@@ -2190,16 +2191,16 @@ void body_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
 	if (self->health < self->gib_health)
 	{
 		gi.sound (self, CHAN_BODY, gi.soundindex ("misc/udeath.wav"), 1, ATTN_NORM, 0);
-		for (n= 0; n < 4; n++)
-			ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
+		for (n = 0; n < 4; n++)
+			ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", 0, 0, damage, GIB_ORGANIC);
 		if (mega_gibs->value)
 		{
-			ThrowGib (self, "models/objects/gibs/arm/tris.md2", damage, GIB_ORGANIC);
-			ThrowGib (self, "models/objects/gibs/arm/tris.md2", damage, GIB_ORGANIC);
-			ThrowGib (self, "models/objects/gibs/leg/tris.md2", damage, GIB_ORGANIC);
-			ThrowGib (self, "models/objects/gibs/leg/tris.md2", damage, GIB_ORGANIC);
-			ThrowGib (self, "models/objects/gibs/bone/tris.md2", damage, GIB_ORGANIC);
-			ThrowGib (self, "models/objects/gibs/bone2/tris.md2", damage, GIB_ORGANIC);
+			ThrowGib (self, "models/objects/gibs/arm/tris.md2", 0, 0, damage, GIB_ORGANIC);
+			ThrowGib (self, "models/objects/gibs/arm/tris.md2", 0, 0, damage, GIB_ORGANIC);
+			ThrowGib (self, "models/objects/gibs/leg/tris.md2", 0, 0, damage, GIB_ORGANIC);
+			ThrowGib (self, "models/objects/gibs/leg/tris.md2", 0, 0, damage, GIB_ORGANIC);
+			ThrowGib (self, "models/objects/gibs/bone/tris.md2", 0, 0, damage, GIB_ORGANIC);
+			ThrowGib (self, "models/objects/gibs/bone2/tris.md2", 0, 0, damage, GIB_ORGANIC);
 		}
 		self->s.origin[2] -= 48;
 		ThrowClientHead (self, damage);

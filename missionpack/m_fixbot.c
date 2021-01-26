@@ -1295,15 +1295,15 @@ void fixbot_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 
 	// shards
 #ifdef KMQUAKE2_ENGINE_MOD // use fewer unique models for stock engine
-	for (n= 0; n < 8; n++)
-		ThrowGib (self, "models/objects/mech_gibs/gib2.md2", damage, GIB_METALLIC);
-	for (n= 0; n < 4; n++)
-		ThrowGib (self, "models/objects/mech_gibs/gib5.md2", damage, GIB_METALLIC);
+	for (n = 0; n < 8; n++)
+		ThrowGib (self, "models/objects/mech_gibs/gib2.md2", 0, 0, damage, GIB_METALLIC);
+	for (n = 0; n < 4; n++)
+		ThrowGib (self, "models/objects/mech_gibs/gib5.md2", 0, 0, damage, GIB_METALLIC);
 #else
-	for (n= 0; n < 8; n++)
-		ThrowGib (self, "models/objects/debris1/tris.md2", damage, GIB_METALLIC);
-	for (n= 0; n < 4; n++)
-		ThrowGib (self, "models/objects/debris2/tris.md2", damage, GIB_METALLIC);
+	for (n = 0; n < 8; n++)
+		ThrowGib (self, "models/objects/debris1/tris.md2", 0, 0, damage, GIB_METALLIC);
+	for (n = 0; n < 4; n++)
+		ThrowGib (self, "models/objects/debris2/tris.md2", 0, 0, damage, GIB_METALLIC);
 #endif
 
 	gi.sound (self, CHAN_VOICE, sound_die, 1, ATTN_NORM, 0);

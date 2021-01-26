@@ -270,7 +270,7 @@ void Do_Text_Display(edict_t *activator, int flags, char *message)
 		byte	*readbuffer;
 		
 	//	sprintf(textname,"maps/%s", message);
-		Com_sprintf(textname, sizeof(textname), "maps/%s", message);
+		Com_sprintf (textname, sizeof(textname), "maps/%s", message);
 
 		textsize = gi.LoadFile(textname, (void **)&readbuffer);
 		if (textsize < 2) // file not found
@@ -312,15 +312,15 @@ void Do_Text_Display(edict_t *activator, int flags, char *message)
 		}
 	*/
 		if (strlen(gamedir->string))
-			Com_sprintf(filename, sizeof(filename), "%s\\%s", basedir->string, gamedir->string);
+			Com_sprintf (filename, sizeof(filename), "%s\\%s", basedir->string, gamedir->string);
 		else
-			Com_sprintf(filename, sizeof(filename), "%s\\baseq2", basedir->string);
+			Com_sprintf (filename, sizeof(filename), "%s\\baseq2", basedir->string);
 
 		// First check for existence of text file in pak0.pak -> pak9.pak
 		in_pak = false;
 		for (i=0; i<=9 && !in_pak; i++)
 		{
-			Com_sprintf(pakfile, sizeof(pakfile), "%s\\pak%d.pak", filename, i);
+			Com_sprintf (pakfile, sizeof(pakfile), "%s\\pak%d.pak", filename, i);
 			if (NULL != (f = fopen(pakfile, "rb")))
 			{
 				num = (int)fread(&pakheader,1,sizeof(pak_header_t),f);
@@ -333,7 +333,7 @@ void Do_Text_Display(edict_t *activator, int flags, char *message)
 					{
 						numitems = pakheader.dsize/sizeof(pak_item_t);
 					//	sprintf(textname,"maps/%s",message);
-						Com_sprintf(textname, sizeof(textname), "maps/%s", message);
+						Com_sprintf (textname, sizeof(textname), "maps/%s", message);
 						fseek(f, pakheader.dstart, SEEK_SET);
 						for (k=0; k<numitems && !in_pak; k++)
 						{

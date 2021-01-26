@@ -81,7 +81,8 @@ void zCam_Stop (struct edict_s *player)
 #if 0
 char *getSkinModel (char *s, char *buffer, size_t bufSize)
 {
-	char *cp;
+	char	*cp;
+	int		cpDiff;
 
 
 	Com_strcpy(buffer, bufSize, "players/");
@@ -94,17 +95,17 @@ char *getSkinModel (char *s, char *buffer, size_t bufSize)
 		s++;
 	}
 
-//  strcpy(cp, "/tris.md2");
-	Com_strcpy(cp, bufSize - (cp - buffer), "/tris.md2");
+	cpDiff = cp - buffer;
+	Com_strcpy (cp, bufferSize-cpDiff, "/tris.md2");
 
 	return buffer;
 }
 
 char *getSkinName (char *s, char *buffer, size_t bufSize)
 {
-	Com_strcpy(buffer, bufSize, "players/");
-	Com_strcat(buffer, bufSize, s);
-	Com_strcat(buffer, bufSize, ".pcx");
+	Com_strcpy (buffer, bufSize, "players/");
+	Com_strcat (buffer, bufSize, s);
+	Com_strcat (buffer, bufSize, ".pcx");
 
 	return buffer;
 }

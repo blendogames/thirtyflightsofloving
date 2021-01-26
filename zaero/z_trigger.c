@@ -47,6 +47,7 @@ int internalSoundIndex(char *name)
 	int numSounds = listLength(soundList);
 	modelsound *sound;
 	int i = 0;
+	size_t	snameSize;
 
 	// convert name to lowercase
 	for (i = 0; i < strlen(name); i++) 
@@ -77,8 +78,9 @@ int internalSoundIndex(char *name)
 		return 0;
 
 	sound = gi.TagMalloc (sizeof(modelsound), TAG_LEVEL);
-	sound->name = gi.TagMalloc (strlen(name) + 1, TAG_LEVEL);
-	strcpy(sound->name, name);
+	snameSize = strlen(name) + 1;
+	sound->name = gi.TagMalloc (snameSize, TAG_LEVEL);
+	Com_strcpy (sound->name, snameSize, name);
 	
 	addTail(soundList, sound);
 	//gi.dprintf("numSounds = %i\n", listLength(&soundList));

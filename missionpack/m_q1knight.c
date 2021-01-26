@@ -371,10 +371,10 @@ void knight_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	{
 		gi.sound (self, CHAN_VOICE|CHAN_RELIABLE, sound_gib, 1, ATTN_NORM, 0);
 
-		for (n= 0; n < 2; n++)
-			ThrowGib (self, "models/objects/q1gibs/q1gib3/tris.md2", damage, GIB_ORGANIC);
-		ThrowGib (self, "models/objects/q1gibs/q1gib1/tris.md2", damage, GIB_ORGANIC);
-		ThrowHead(self, "models/monsters/q1knight/head/tris.md2", damage, GIB_ORGANIC);
+		for (n = 0; n < 2; n++)
+			ThrowGib (self, "models/objects/q1gibs/q1gib3/tris.md2", 0, 0, damage, GIB_ORGANIC);
+		ThrowGib (self, "models/objects/q1gibs/q1gib1/tris.md2", 0, 0, damage, GIB_ORGANIC);
+		ThrowHead(self, "models/monsters/q1knight/head/tris.md2", 0, 0, damage, GIB_ORGANIC);
 		
 		self->deadflag = DEAD_DEAD;
 		return;

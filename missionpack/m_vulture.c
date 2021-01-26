@@ -578,11 +578,11 @@ void vulture_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dama
 		gi.sound (self, CHAN_VOICE|CHAN_RELIABLE, gi.soundindex ("misc/udeath.wav"), 1, ATTN_NORM, 0);
 		
 		for (n = 0; n < 4; n++)
-			ThrowGib (self, "models/monsters/vulture/feather1.md2", damage, GIB_FEATHER);
+			ThrowGib (self, "models/monsters/vulture/feather1.md2", 0, 0, damage, GIB_FEATHER);
 		for (n = 0; n < 4; n++)
-			ThrowGib (self, "models/monsters/vulture/feather2.md2", damage, GIB_FEATHER);
-		ThrowGib (self, "models/objects/gibs/bone/tris.md2", damage, GIB_ORGANIC);
-		ThrowHead (self, "models/objects/gibs/bone2/tris.md2", damage, GIB_ORGANIC);
+			ThrowGib (self, "models/monsters/vulture/feather2.md2", 0, 0, damage, GIB_FEATHER);
+		ThrowGib (self, "models/objects/gibs/bone/tris.md2", 0, 0, damage, GIB_ORGANIC);
+		ThrowHead (self, "models/objects/gibs/bone2/tris.md2", 0, 0, damage, GIB_ORGANIC);
 		self->deadflag = DEAD_DEAD;
 		return;
 	}

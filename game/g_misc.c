@@ -241,6 +241,7 @@ void ThrowGib (edict_t *self, char *gibname, int damage, int type)
 	float	vscale;
 	char	modelname[256];
 	char	*p;
+	size_t	nameSize, msgSize;
 
 	// Lazarus: Prevent gib showers (generally due to firing BFG in a crowd) from
 	// causing SZ_GetSpace: overflow
@@ -255,9 +256,11 @@ void ThrowGib (edict_t *self, char *gibname, int damage, int type)
 
 	gib = G_Spawn();
 
-	gib->classname = "gib";
-	//gib->classname = gi.TagMalloc (4,TAG_LEVEL);
-	//strcpy(gib->classname,"gib");
+//	gib->classname = "gib";
+	nameSize = 4;
+	gib->classname = gi.TagMalloc (nameSize, TAG_LEVEL);
+//	strncpy(gib->classname, "gib");
+	Q_strncpyz (gib->classname, nameSize, "gib");
 
 	// Lazarus: mapper-definable gib class
 //	strncpy(modelname, gibname);
@@ -270,8 +273,10 @@ void ThrowGib (edict_t *self, char *gibname, int damage, int type)
 	}
 
 	// Save gibname and type for level transition gibs
-	gib->key_message = gi.TagMalloc (strlen(modelname)+1,TAG_LEVEL);
-	strcpy(gib->key_message, modelname);
+	msgSize = strlen(modelname)+1;
+	gib->key_message = gi.TagMalloc (msgSize, TAG_LEVEL);
+//	strncpy(gib->key_message, modelname);
+	Q_strncpyz (gib->key_message, msgSize, modelname);
 	gib->style = type;
 
 	VectorScale (self->size, 0.5, size);
@@ -387,6 +392,7 @@ void ThrowHead (edict_t *self, char *gibname, int damage, int type)
 	float	vscale;
 	char	modelname[256];
 	char	*p;
+	size_t	msgSize;
 
 	self->s.skinnum = 0;
 	self->s.frame = 0;
@@ -405,8 +411,10 @@ void ThrowHead (edict_t *self, char *gibname, int damage, int type)
 	}
 
 	// Save gibname and type for level transition gibs
-	self->key_message = gi.TagMalloc (strlen(modelname)+1,TAG_LEVEL);
-	strcpy(self->key_message, modelname);
+	msgSize = strlen(modelname)+1;
+	self->key_message = gi.TagMalloc (msgSize, TAG_LEVEL);
+//	strncpy(self->key_message, modelname);
+	Q_strncpyz (self->key_message, msgSize, modelname);
 
 	self->style = type;
 	self->s.modelindex2 = 0;
@@ -569,6 +577,7 @@ void ThrowDebris (edict_t *self, char *modelname, float speed, vec3_t origin, in
 {
 	edict_t	*chunk;
 	vec3_t	v;
+//	size_t	msgSize;
 
 	// Lazarus: Prevent gib showers (generally due to firing BFG in a crowd) from
 	// causing SZ_GetSpace: overflow
@@ -617,8 +626,9 @@ void ThrowDebris (edict_t *self, char *modelname, float speed, vec3_t origin, in
 	chunk->die = debris_die;
 
 	// Lazarus: Preserve model name for level changes:
-	//chunk->message = gi.TagMalloc (strlen(modelname)+1,TAG_LEVEL);
-	//strcpy(chunk->message, modelname);
+//	msgSize = strlen(modelname)+1;
+//	chunk->message = gi.TagMalloc (msgSize, TAG_LEVEL);
+//	Q_strncpyz (chunk->message, msgSize, modelname);
 
 	// Lazarus: skin number and effects
 	chunk->s.skinnum = skin;
@@ -4061,6 +4071,8 @@ void SP_target_precipitation (edict_t *ent)
 	if (ent->style == STYLE_WEATHER_USER)
 	{
 		char	*buffer;
+		size_t	bufSize;
+
 		if (!ent->usermodel)
 		{
 			gi.dprintf("target_precipitation style=user\nwith no usermodel.\n");
@@ -4071,11 +4083,12 @@ void SP_target_precipitation (edict_t *ent)
 		// Knightmare- check for "models/" or "sprites/" already in path
 		if ( strncmp(ent->usermodel, "models/", 7) && strncmp(ent->usermodel, "sprites/", 8) )
 		{
-			buffer = gi.TagMalloc(strlen(ent->usermodel)+10,TAG_LEVEL);
+			bufSize = strlen(ent->usermodel)+10;
+			buffer = gi.TagMalloc(bufSize, TAG_LEVEL);
 			if (strstr(ent->usermodel,".sp2"))
-				sprintf(buffer, "sprites/%s", ent->usermodel);
+				Com_sprintf (buffer, bufSize, "sprites/%s", ent->usermodel);
 			else
-				sprintf(buffer, "models/%s", ent->usermodel);
+				Com_sprintf (buffer, bufSize, "models/%s", ent->usermodel);
 			ent->usermodel = buffer;
 		}
 
@@ -4257,6 +4270,7 @@ void target_fountain_delayed_use (edict_t *self)
 void SP_target_fountain (edict_t *ent)
 {
 	char	*buffer;
+	size_t	bufSize;
 
 	if (deathmatch->value || coop->value)
 	{
@@ -4286,11 +4300,12 @@ void SP_target_fountain (edict_t *ent)
 	// Knightmare- check for "models/" or "sprites/" already in path
 	if ( strncmp(ent->usermodel, "models/", 7) && strncmp(ent->usermodel, "sprites/", 8) )
 	{
-		buffer = gi.TagMalloc(strlen(ent->usermodel)+10,TAG_LEVEL);
+		bufSize = strlen(ent->usermodel)+10;
+		buffer = gi.TagMalloc(bufSize, TAG_LEVEL);
 		if (strstr(ent->usermodel,".sp2"))
-			sprintf(buffer, "sprites/%s", ent->usermodel);
+			Com_sprintf(buffer, bufSize, "sprites/%s", ent->usermodel);
 		else
-			sprintf(buffer, "models/%s", ent->usermodel);
+			Com_sprintf(buffer, bufSize, "models/%s", ent->usermodel);
 		ent->usermodel = buffer;
 	}
 

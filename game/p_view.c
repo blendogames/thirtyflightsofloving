@@ -1311,7 +1311,7 @@ void WhatsIt(edict_t *ent)
 	if(!ent->client->whatsit)
 		return;
 
-	Com_sprintf(string, sizeof(string), "xv 0 yb -68 cstring2 \"%s\" ", ent->client->whatsit);
+	Com_sprintf (string, sizeof(string), "xv 0 yb -68 cstring2 \"%s\" ", ent->client->whatsit);
 	gi.WriteByte (svc_layout);
 	gi.WriteString (string);
 	gi.unicast(ent,true);

@@ -45,7 +45,7 @@ void pendulum_blocked (edict_t *self, edict_t *other)
 	// BUT... trouble is doing this with players ends up giving
 	// goofy direction in some cases. For players/monsters, use old
 	// angles but STILL move 'em out of the way immediately
-	if(other->client || (other->svflags & SVF_MONSTER))
+	if (other->client || (other->svflags & SVF_MONSTER))
 		VectorCopy(self->s.angles,angles);
 	else
 		VectorMA(self->s.angles,FRAMETIME,self->avelocity,angles);
@@ -53,7 +53,7 @@ void pendulum_blocked (edict_t *self, edict_t *other)
 	AngleVectors(angles,forward,left,up);
 
 	speed = fabs(self->avelocity[ROLL]) * M_PI / 180. * self->radius;
-	if( (level.time > self->touch_debounce_time) && (speed > 200) )
+	if ( (level.time > self->touch_debounce_time) && (speed > 200) )
 	{
 		damage = (int)( self->dmg * (speed-200)/100 );
 		self->touch_debounce_time = level.time + 0.5;
@@ -63,7 +63,7 @@ void pendulum_blocked (edict_t *self, edict_t *other)
 
 	VectorAdd(other->s.origin,other->origin_offset,origin);
 	VectorCopy(left,dir);
-	if(self->avelocity[ROLL] > 0)
+	if (self->avelocity[ROLL] > 0)
 		VectorNegate(dir,dir);
 
 	VectorScale(forward,self->move_origin[0],f1);
@@ -75,9 +75,9 @@ void pendulum_blocked (edict_t *self, edict_t *other)
 	VectorSubtract(origin,point,point);
 	VectorNormalize(point);
 
-	if(other->client || (other->svflags & SVF_MONSTER))
+	if (other->client || (other->svflags & SVF_MONSTER))
 	{
-		if((point[2] < -0.7) && other->groundentity)
+		if ((point[2] < -0.7) && other->groundentity)
 		{
 			T_Damage (other, self, self, vec3_origin, other->s.origin, vec3_origin, 100000, 1, DAMAGE_NO_PROTECTION, MOD_CRUSH);
 			return;
@@ -100,7 +100,7 @@ void pendulum_blocked (edict_t *self, edict_t *other)
 		gi.linkentity(other);
 		T_Damage (other, self, self, dir, other->s.origin, vec3_origin, damage, 0, 0, MOD_CRUSH);
 	}
-	else if(other->solid == SOLID_BSP)
+	else if (other->solid == SOLID_BSP)
 	{
 		// Other is most likely a func_pushable, since almost all other bmodels aren't
 		// clipped to MOVETYPE_PUSH
@@ -116,11 +116,11 @@ void pendulum_blocked (edict_t *self, edict_t *other)
 		float		new_rspeed;
 		float		sgor, time, wave;
 
-		if(v11 >= 100)
+		if (v11 >= 100)
 			gi.sound (self, 0, self->noise_index, 1, 1, 0);
 
 		// If other is on the ground, push it UP regardless of dir
-		if(other->groundentity)
+		if (other->groundentity)
 			dir[2] = max(1.0,fabs(dir[2]));
 		VectorNormalize(dir);
 
@@ -128,15 +128,15 @@ void pendulum_blocked (edict_t *self, edict_t *other)
 		// destroy the crate. This may not be realistic, but there's really
 		// no other way since if we stop the pendulum we'd then have to 
 		// continously monitor whether the crate moved away or not.
-		if((point[2] < -0.7) && (other->velocity[2] == 0))
+		if ((point[2] < -0.7) && (other->velocity[2] == 0))
 		{
 			box_die (other, self, self, 100000, point);
 			return;
 		}
-		if(e > 0)
+		if (e > 0)
 		{
 			v21 = VectorLength(other->velocity);
-			if(v21 > 0)
+			if (v21 > 0)
 			{
 				VectorCopy(other->velocity,vn2);
 				VectorNormalize(vn2);
@@ -151,7 +151,7 @@ void pendulum_blocked (edict_t *self, edict_t *other)
 		else
 		{
 			v12 = v11;
-			if(other->mass > self->mass)
+			if (other->mass > self->mass)
 			{
 				block = true;
 				VectorClear(self->avelocity);
@@ -163,11 +163,11 @@ void pendulum_blocked (edict_t *self, edict_t *other)
 		}
 		VectorScale(dir,v22,new_velocity);
 
-		if(v12 < 0)
+		if (v12 < 0)
 		{
 			// Reverse rotation.
 			new_rspeed = fabs(v12) / (M_PI / 180. * self->radius);
-			if(self->avelocity[ROLL] > 0)
+			if (self->avelocity[ROLL] > 0)
 				self->avelocity[ROLL] = -new_rspeed;
 			else
 				self->avelocity[ROLL] = new_rspeed;
@@ -176,7 +176,7 @@ void pendulum_blocked (edict_t *self, edict_t *other)
 		{
 			// Continuing to move in same direction, though slower.
 			new_rspeed = v12 / (M_PI / 180. * self->radius);
-			if(self->avelocity[ROLL] > 0)
+			if (self->avelocity[ROLL] > 0)
 				self->avelocity[ROLL] = new_rspeed;
 			else
 				self->avelocity[ROLL] = -new_rspeed;
@@ -184,14 +184,14 @@ void pendulum_blocked (edict_t *self, edict_t *other)
 		sgor = sqrt( (float)sv_gravity->value / self->radius );
 		wave = fabs( self->avelocity[ROLL] / (angles[ROLL] * sgor) );
 		wave = atan(wave);
-		if(self->avelocity[ROLL] >= 0)
+		if (self->avelocity[ROLL] >= 0)
 		{
-			if(angles[ROLL] > 0)
+			if (angles[ROLL] > 0)
 				wave = M_PI - wave;
 		}
 		else
 		{
-			if(angles[ROLL] > 0)
+			if (angles[ROLL] > 0)
 				wave = M_PI + wave;
 			else
 				wave = 2*M_PI - wave;
@@ -216,7 +216,7 @@ void pendulum_blocked (edict_t *self, edict_t *other)
 		trace = gi.trace (org, mins, maxs, new_origin, self, other->clipmask);
 		// restore solidity of crate
 		other->solid = SOLID_BSP;
-		if(trace.startsolid)
+		if (trace.startsolid)
 		{
 			// Things are completely fouled up. Nuke other and go away.
 			T_Damage (other, self, self, vec3_origin, other->s.origin, vec3_origin, 100000, 1, 0, MOD_CRUSH);
@@ -224,25 +224,25 @@ void pendulum_blocked (edict_t *self, edict_t *other)
 				BecomeExplosion1 (other);
 			return;
 		}
-		else if(trace.fraction < 1.0)
+		else if (trace.fraction < 1.0)
 		{
 			vec3_t	vec;
 			float	dist;
 			VectorSubtract(trace.endpos,org,vec);
 			dist = VectorLength(vec);
 
-			if( (trace.ent->client) || (trace.ent->flags & SVF_MONSTER))
+			if ( (trace.ent->client) || (trace.ent->flags & SVF_MONSTER))
 			{
 				float	delta=FRAMETIME*VectorLength(new_velocity);
 
 				// If a player or monster is in the way of the crate, AND
 				// the pendulum speed is > 100, throw 'em out of the way.
 				// If pendulum tangential speed is < 100, give up.
-				if(speed < 100)
+				if (speed < 100)
 					block = true;
 				else
 				{
-					if(dist < delta)
+					if (dist < delta)
 					{
 						VectorScale(new_velocity,1.25,trace.ent->velocity);
 						VectorMA(trace.ent->s.origin,FRAMETIME,trace.ent->velocity,trace.ent->s.origin);
@@ -253,7 +253,7 @@ void pendulum_blocked (edict_t *self, edict_t *other)
 			}
 			else
 			{
-				if(dist < speed*FRAMETIME)
+				if (dist < speed*FRAMETIME)
 				{
 					block = true;
 					VectorScale(vec,10.,other->velocity);
@@ -266,7 +266,7 @@ void pendulum_blocked (edict_t *self, edict_t *other)
 		else
 			block = false;
 
-		if(!block)
+		if (!block)
 		{
 			VectorCopy(new_velocity,other->velocity);
 			VectorMA(other->s.origin,FRAMETIME,other->velocity,other->s.origin);
@@ -280,26 +280,26 @@ void pendulum_blocked (edict_t *self, edict_t *other)
 		// of crate and pendulum. If they intersect, then most likely pendulum is
 		// moving VERY slowly and we need to reverse direction NOW to prevent
 		// embedment.
-		if(!block)
+		if (!block)
 		{
-			if(fabs(v12) < 100)
+			if (fabs(v12) < 100)
 				block = true;
 			else
 			{
 				VectorAdd(other->s.origin,other->origin_offset,org);
 				trace = gi.trace(org,mins,maxs,org,other,MASK_SOLID);
-				if(trace.startsolid)
+				if (trace.startsolid)
 					block = true;
 			}
 		}
 deadstop:
 		T_Damage (other, self, self, dir, other->s.origin, vec3_origin, damage, 0, 0, MOD_CRUSH);
-		if( block )
+		if ( block )
 		{
 			// Then this sucker will still be in the way. Reverse rotation, slow, or stop
-			if(fabs(angles[ROLL]) > 2)
+			if (fabs(angles[ROLL]) > 2)
 			{
-				if(abs(angles[ROLL]) < 10)
+				if (abs(angles[ROLL]) < 10)
 					self->spawnflags |= SF_PENDULUM_SLOW;
 				self->moveinfo.start_angles[ROLL] = angles[ROLL];
 				VectorClear(self->avelocity);
@@ -314,7 +314,7 @@ deadstop:
 			}
 			gi.linkentity(self);
 		}
-		else if((fabs(self->avelocity[ROLL]) < 10) && (fabs(self->s.angles[ROLL]) < 10))
+		else if ((fabs(self->avelocity[ROLL]) < 10) && (fabs(self->s.angles[ROLL]) < 10))
 		{
 			self->spawnflags |= SF_PENDULUM_SLOW;
 			self->moveinfo.start_angles[ROLL] = angles[ROLL];
@@ -337,12 +337,12 @@ void pendulum_rotate (edict_t *self)
 	float	wave;
 	float	sgor;
 
-	if(!(self->spawnflags & SF_PENDULUM_STARTON))
+	if (!(self->spawnflags & SF_PENDULUM_STARTON))
 		return;
 
-	if(self->spawnflags & SF_PENDULUM_SLOW)
+	if (self->spawnflags & SF_PENDULUM_SLOW)
 	{
-		if(self->startframe == 0)
+		if (self->startframe == 0)
 		{
 			// Then we just started moving again after being blocked
 			self->avelocity[ROLL] = -self->s.angles[ROLL];
@@ -353,7 +353,7 @@ void pendulum_rotate (edict_t *self)
 			float	next_angle;
 
 			next_angle = self->s.angles[ROLL] + self->avelocity[ROLL]*FRAMETIME;
-			if( (next_angle >= 0 && self->s.angles[ROLL] < 0) ||
+			if ( (next_angle >= 0 && self->s.angles[ROLL] < 0) ||
 				(next_angle <= 0 && self->s.angles[ROLL] > 0)   )
 			{
 				VectorClear(self->s.angles);
@@ -368,16 +368,16 @@ void pendulum_rotate (edict_t *self)
 	{
 		float	old_velocity = self->avelocity[ROLL];
 
-		if(!self->startframe)
+		if (!self->startframe)
 			self->startframe = level.framenum;
 
 		sgor = sqrt( (float)sv_gravity->value / self->radius );
 		wave = sgor * (level.framenum - self->startframe) * 0.1;
 		this_angle = self->moveinfo.start_angles[ROLL] * cos(wave);
 		self->avelocity[ROLL] = -self->moveinfo.start_angles[ROLL] * sgor * sin(wave);
-		if( (self->spawnflags & SF_PENDULUM_STOPPING) && (cos(wave) > 0.0))
+		if ( (self->spawnflags & SF_PENDULUM_STOPPING) && (cos(wave) > 0.0))
 		{
-			if( ((old_velocity > 0) && (self->avelocity[ROLL] <= 0)) ||
+			if ( ((old_velocity > 0) && (self->avelocity[ROLL] <= 0)) ||
 				((old_velocity < 0) && (self->avelocity[ROLL] >= 0))    )
 			{
 				self->spawnflags &= ~SF_PENDULUM_STARTON;
@@ -395,9 +395,9 @@ void pendulum_rotate (edict_t *self)
 
 void pendulum_use (edict_t *self, edict_t *other, edict_t *activator)
 {
-	if(self->spawnflags & SF_PENDULUM_STARTON)
+	if (self->spawnflags & SF_PENDULUM_STARTON)
 	{
-		if(self->spawnflags & SF_PENDULUM_STOP_AT_TOP)
+		if (self->spawnflags & SF_PENDULUM_STOP_AT_TOP)
 		{
 			self->spawnflags |= SF_PENDULUM_STOPPING;
 		}
@@ -414,19 +414,19 @@ void pendulum_use (edict_t *self, edict_t *other, edict_t *activator)
 		self->spawnflags &= ~SF_PENDULUM_STOPPING;
 		self->think = pendulum_rotate;
 
-		if(self->delay > 0)
+		if (self->delay > 0)
 		{
 			float	delay;
 			delay = self->delay * 2.0 * M_PI * sqrt(self->radius/(float)sv_gravity->value);
 			delay = 0.1 * (int)(10*delay);
 			self->nextthink  = level.time + delay;
 			self->startframe = level.framenum + delay*10;
-			if(!(self->spawnflags & SF_PENDULUM_STOP_AT_TOP))
+			if (!(self->spawnflags & SF_PENDULUM_STOP_AT_TOP))
 				self->delay = 0;
 		}
 		else
 		{
-			if(self->s.angles[ROLL] == self->moveinfo.start_angles[ROLL])
+			if (self->s.angles[ROLL] == self->moveinfo.start_angles[ROLL])
 				self->startframe = level.framenum;
 			else
 			{
@@ -481,12 +481,12 @@ void pendulum_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dam
 		count = mass / 100;
 		if (count > 8)
 			count = 8;
-		while(count--)
+		while (count--)
 		{
 			chunkorigin[0] = origin[0] + crandom() * size[0];
 			chunkorigin[1] = origin[1] + crandom() * size[1];
 			chunkorigin[2] = origin[2] + crandom() * size[2];
-			ThrowDebris (self, "models/objects/debris1/tris.md2", 1, chunkorigin, 0, 0);
+			ThrowDebris (self, "models/objects/debris1/tris.md2", 1, chunkorigin, 0, 0, 0);
 		}
 	}
 
@@ -494,12 +494,12 @@ void pendulum_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dam
 	count = mass / 25;
 	if (count > 16)
 		count = 16;
-	while(count--)
+	while (count--)
 	{
 		chunkorigin[0] = origin[0] + crandom() * size[0];
 		chunkorigin[1] = origin[1] + crandom() * size[1];
 		chunkorigin[2] = origin[2] + crandom() * size[2];
-		ThrowDebris (self, "models/objects/debris2/tris.md2", 2, chunkorigin, 0, 0);
+		ThrowDebris (self, "models/objects/debris2/tris.md2", 2, chunkorigin, 0, 0, 0);
 	}
 	G_FreeEdict (self);
 }
@@ -514,17 +514,17 @@ void SP_func_pendulum (edict_t *ent)
 	ent->movetype = MOVETYPE_PENDULUM;
 	if (ent->distance)
 		st.distance = ent->distance;
-	if(!st.distance)
+	if (!st.distance)
 		ent->moveinfo.distance = 90;
 	else
 		ent->moveinfo.distance = st.distance;
 
-	if(st.noise)
+	if (st.noise)
 		ent->noise_index = gi.soundindex(st.noise);
 	else
 		ent->noise_index = gi.soundindex("world/land.wav");
 
-	if(ent->moveinfo.distance >= 360)
+	if (ent->moveinfo.distance >= 360)
 	{
 		gi.dprintf("func_pendulum distance must be < 360\n");
 		ent->moveinfo.distance = 359.;
@@ -540,13 +540,13 @@ void SP_func_pendulum (edict_t *ent)
 		ent->delay = st.phase;
 	else
 		ent->delay = 0;
-	if(ent->delay > 1.0)
+	if (ent->delay > 1.0)
 		ent->delay -= (int)(ent->delay);
 
 	// Coefficient of restitution - default = 0.5, must be <= 1.0
-	if(ent->attenuation == 0.0)
+	if (ent->attenuation == 0.0)
 		ent->attenuation = 0.5;
-	else if(ent->attenuation > 1.0)
+	else if (ent->attenuation > 1.0)
 		ent->attenuation = 1.0;
 
 	if (!ent->dmg)
@@ -554,7 +554,7 @@ void SP_func_pendulum (edict_t *ent)
 	// This is the damage delivered by the pendulum at max speed. Convert to
 	// a damage scale used in our damage equation.
 	max_speed = ent->moveinfo.distance/2 * M_PI / 180. * sqrt((float)sv_gravity->value * ent->radius );
-	if(max_speed <= 200.)
+	if (max_speed <= 200.)
 		ent->dmg = 0;
 	else
 	{
@@ -562,7 +562,7 @@ void SP_func_pendulum (edict_t *ent)
 		dmg = (float)(ent->dmg) * 100. / (max_speed - 200.);
 		ent->dmg = (int)(dmg - 0.5) + 1;
 	}
-	if(ent->health > 0)
+	if (ent->health > 0)
 	{
 		ent->die = pendulum_die;
 		ent->takedamage = DAMAGE_YES;
@@ -571,12 +571,12 @@ void SP_func_pendulum (edict_t *ent)
 	ent->blocked = pendulum_blocked;
 //	ent->touch = pendulum_touch;
 
-	if(!ent->accel)
+	if (!ent->accel)
 		ent->accel = 1;
 	else if (ent->accel > ent->speed)
 		ent->accel = ent->speed;
 
-	if(!ent->decel)
+	if (!ent->decel)
 		ent->decel = 1;
 	else if (ent->decel > ent->speed)
 		ent->decel = ent->speed;
@@ -585,7 +585,7 @@ void SP_func_pendulum (edict_t *ent)
 
 	ent->s.angles[ROLL] = ent->moveinfo.distance/2;
 	ent->moveinfo.start_angles[ROLL] = ent->s.angles[ROLL];
-	if(ent->spawnflags & SF_PENDULUM_STARTON)
+	if (ent->spawnflags & SF_PENDULUM_STARTON)
 	{
 		ent->think = pendulum_rotate;
 		ent->nextthink = level.time + FRAMETIME;

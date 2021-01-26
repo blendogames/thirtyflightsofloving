@@ -40,8 +40,8 @@ void Jet_BecomeExplosion( edict_t *ent, int damage )
 // Lazarus: NO! This is taken care of already in player_die
 	/*throw some gib*/
 /*	for ( n=0; n<4; n++ )
-		ThrowGib( ent, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC );
-	ThrowClientHead( ent, damage ); */
+		ThrowGib( ent, "models/objects/gibs/sm_meat/tris.md2", 0, 0, damage, GIB_ORGANIC );
+	ThrowClientHead (ent, damage); */
 	ent->takedamage = DAMAGE_NO;
 }
 

@@ -634,10 +634,10 @@ void turret_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	AngleVectors(self->s.angles, forward, NULL, NULL);
 	VectorMA(self->s.origin, 1, forward, start);
 
-	ThrowDebris (self, "models/objects/debris1/tris.md2", 1, start, 0, 0);
-	ThrowDebris (self, "models/objects/debris1/tris.md2", 2, start, 0, 0);
-	ThrowDebris (self, "models/objects/debris1/tris.md2", 1, start, 0, 0);
-	ThrowDebris (self, "models/objects/debris1/tris.md2", 2, start, 0, 0);
+	ThrowDebris (self, "models/objects/debris1/tris.md2", 1, start, 0, 0, 0);
+	ThrowDebris (self, "models/objects/debris1/tris.md2", 2, start, 0, 0, 0);
+	ThrowDebris (self, "models/objects/debris1/tris.md2", 1, start, 0, 0, 0);
+	ThrowDebris (self, "models/objects/debris1/tris.md2", 2, start, 0, 0, 0);
 
 	if (self->teamchain)
 	{

@@ -456,7 +456,7 @@ char *ED_ParseEdict (char *data, edict_t *ent)
 		if (!data)
 			gi.error ("ED_ParseEntity: EOF without closing brace");
 
-		strncpy (keyname, com_token, sizeof(keyname)-1);
+		Com_strcpy (keyname, sizeof(keyname), com_token);
 		
 	// parse value	
 		com_token = COM_Parse (&data);
@@ -572,8 +572,8 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 	memset (&level, 0, sizeof(level));
 	memset (g_edicts, 0, game.maxentities * sizeof (g_edicts[0]));
 
-	strncpy (level.mapname, mapname, sizeof(level.mapname)-1);
-	strncpy (game.spawnpoint, spawnpoint, sizeof(game.spawnpoint)-1);
+	Com_strcpy (level.mapname, sizeof(level.mapname), mapname);
+	Com_strcpy (game.spawnpoint, sizeof(game.spawnpoint), spawnpoint);
 
 	// set client fields on player ents
 	for (i=0 ; i<game.maxclients ; i++)
@@ -850,17 +850,17 @@ void SP_worldspawn (edict_t *ent)
 	SetItemNames ();
 
 	if (st.nextmap)
-		strcpy (level.nextmap, st.nextmap);
+		Com_strcpy (level.nextmap, sizeof(level.nextmap), st.nextmap);
 
 	// make some data visible to the server
 
 	if (ent->message && ent->message[0])
 	{
 		gi.configstring (CS_NAME, ent->message);
-		strncpy (level.level_name, ent->message, sizeof(level.level_name));
+		Com_strcpy (level.level_name, sizeof(level.level_name), ent->message);
 	}
 	else
-		strncpy (level.level_name, level.mapname, sizeof(level.level_name));
+		Com_strcpy (level.level_name, sizeof(level.level_name), level.mapname);
 
 	if (st.sky && st.sky[0])
 		gi.configstring (CS_SKY, st.sky);

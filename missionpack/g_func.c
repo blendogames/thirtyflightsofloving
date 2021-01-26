@@ -3709,7 +3709,7 @@ void Throw_child_debris (edict_t *self)
 			chunkorigin[0] = origin[0] + crandom() * size[0];
 			chunkorigin[1] = origin[1] + crandom() * size[1];
 			chunkorigin[2] = origin[2] + crandom() * size[2];
-			ThrowDebris (self, "models/objects/debris1/tris.md2", 1, chunkorigin, 0, 0);
+			ThrowDebris (self, "models/objects/debris1/tris.md2", 0, 1, chunkorigin, 0, 0);
 		}
 	}
 	// small chunks
@@ -3721,7 +3721,7 @@ void Throw_child_debris (edict_t *self)
 		chunkorigin[0] = origin[0] + crandom() * size[0];
 		chunkorigin[1] = origin[1] + crandom() * size[1];
 		chunkorigin[2] = origin[2] + crandom() * size[2];
-		ThrowDebris (self, "models/objects/debris2/tris.md2", 2, chunkorigin, 0, 0);
+		ThrowDebris (self, "models/objects/debris2/tris.md2", 0, 2, chunkorigin, 0, 0);
 	}
 }*/
 
@@ -5201,8 +5201,9 @@ void door_secret_done (edict_t *self)
 {
 	if (!(self->targetname) || (self->spawnflags & SECRET_ALWAYS_SHOOT))
 	{
-	//	self->health = 0;
-		self->health = self->max_health;	// Knightmare- restore max health
+		// Knightmare- setting health to anything other than 0
+		// makes the die function never get called!
+		self->health = 0;
 		self->takedamage = DAMAGE_YES;
 	}
 	self->moveinfo.state = STATE_LOWEST;	// Knightmare added
@@ -5245,6 +5246,7 @@ void door_secret_blocked  (edict_t *self, edict_t *other)
 
 void door_secret_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
+//	gi.dprintf("door_secret_die\n");
 	self->takedamage = DAMAGE_NO;
 	door_secret_use (self, attacker, attacker);
 }
@@ -5287,10 +5289,9 @@ void SP_func_door_secret (edict_t *ent)
 
 	if (!(ent->targetname) || (ent->spawnflags & SECRET_ALWAYS_SHOOT))
 	{
-		if (!ent->health) {
-			ent->health = 1;	// Knightmare- was 0
-		}
-		ent->max_health = ent->health;	// Knightmare- store health value
+		// Knightmare- setting health to anything other than 0
+		// makes the die function never get called!
+		ent->health = 0;
 		ent->takedamage = DAMAGE_YES;
 		ent->die = door_secret_die;
 	}
@@ -6059,7 +6060,8 @@ void func_door_swinging_init (edict_t *self)
 }
 void SP_func_door_swinging (edict_t *self)
 {
-	int	pivot;
+	int		pivot;
+//	size_t	nameSize;
 
 	self->class_id = ENTITY_FUNC_DOOR_SWINGING;
 
@@ -6086,7 +6088,9 @@ void SP_func_door_swinging (edict_t *self)
 	self->postthink = train_move_children;	// Knightmare- now supports movewith
 
 	self->flags |= FL_REVERSIBLE;
-//	strcpy(self->classname, "func_door_rotating");
+//	nameSize = 19;
+//	self->classname = gi.TagMalloc(nameSize, TAG_LEVEL);
+//	Com_strcpy (self->classname, nameSize, "func_door_rotating");
 	self->classname = "func_door_rotating";
 
 	// Wait a few frames so that we're sure pathtarget has been parsed.

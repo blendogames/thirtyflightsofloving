@@ -726,19 +726,19 @@ qboolean LoadAliasFile (char *name)
 
 		basedir = gi.cvar("basedir", "", 0);
 		gamedir = gi.cvar("gamedir", "", 0);
-		Com_sprintf(textname, sizeof(textname), name);
+		Com_sprintf (textname, sizeof(textname), name);
 
 		if (strlen(gamedir->string))
 		//	Q_strncpyz(gamepath, sizeof(gamepath), gamedir->string);
-			Com_sprintf(gamepath, sizeof(gamepath), "%s/%s", basedir->string, gamedir->string);
+			Com_sprintf (gamepath, sizeof(gamepath), "%s/%s", basedir->string, gamedir->string);
 		else
 		//	Q_strncpyz(gamepath, sizeof(gamepath), basedir->string);
-			Com_sprintf(gamepath, sizeof(gamepath), "%s/baseq2", basedir->string);
+			Com_sprintf (gamepath, sizeof(gamepath), "%s/baseq2", basedir->string);
 
 		// check all pakfiles in current gamedir
 		for (i=0; i<10; i++)
 		{
-			Com_sprintf(pakfile, sizeof(pakfile), "%s/pak%d.pak", gamepath, i);
+			Com_sprintf (pakfile, sizeof(pakfile), "%s/pak%d.pak", gamepath, i);
 			if (NULL != (fpak = fopen(pakfile, "rb")))
 			{
 				num = fread(&pakheader, 1, sizeof(pak_header_t), fpak);

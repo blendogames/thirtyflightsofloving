@@ -143,7 +143,6 @@ void Text_Update (edict_t *ent)
 		}
 		if (strlen(t))
 		{
-		//	sprintf(string + strlen(string), "yv %d ", y0 + 24 + i * 8);
 			Com_sprintf (string + strlen(string), sizeof(string)-strlen(string), "yv %d ", y0 + 24 + i * 8);
 			if (align == TEXT_CENTER)
 				x = x0 + 20 + (hnd->page_width - 1 - (int)strlen(t))*4;
@@ -153,18 +152,15 @@ void Text_Update (edict_t *ent)
 				x = x0 + 20;
 			if (x != xlast)
 			{
-			//	sprintf(string + strlen(string), "xv %d ",x);
 				Com_sprintf (string + strlen(string), sizeof(string)-strlen(string), "xv %d ",x);
 				xlast = x;
 			}
 			if (alt)
 			{
-			//	sprintf(string + strlen(string), "string2 \"%s\" ", t);
 				Com_sprintf (string + strlen(string), sizeof(string)-strlen(string), "string2 \"%s\" ", t);
 			}
 			else
 			{
-			//	sprintf(string + strlen(string), "string \"%s\" ", t);
 				Com_sprintf (string + strlen(string), sizeof(string)-strlen(string), "string \"%s\" ", t);
 			}
 		}
@@ -285,11 +281,11 @@ void Do_Text_Display (edict_t *activator, int flags, char *message)
 		basedir = gi.cvar("basedir", "", 0);
 		gamedir = gi.cvar("gamedir", "", 0);
 	/*
-		Com_strcpy(filename, sizeof(filename), basedir->string);
+		Com_strcpy (filename, sizeof(filename), basedir->string);
 		if (strlen(gamedir->string))
 		{
-			Com_strcat(filename, sizeof(filename), "\\");
-			Com_strcat(filename, sizeof(filename), gamedir->string);
+			Com_strcat (filename, sizeof(filename), "\\");
+			Com_strcat (filename, sizeof(filename), gamedir->string);
 		}
 	*/
 		if (strlen(gamedir->string))
@@ -343,8 +339,8 @@ void Do_Text_Display (edict_t *activator, int flags, char *message)
 		}
 		if (!in_pak)
 		{
-			Com_strcat(filename, sizeof(filename), "\\maps\\");
-			Com_strcat(filename, sizeof(filename), message);
+			Com_strcat (filename, sizeof(filename), "\\maps\\");
+			Com_strcat (filename, sizeof(filename), message);
 			f = fopen(filename,"rb");
 			if(!f)
 			{ 
@@ -395,7 +391,7 @@ void Do_Text_Display (edict_t *activator, int flags, char *message)
 	// Default page length:
 	hnd->page_length = MAX_LINES-2;
 	hnd->page_width  = MAX_LINE_LENGTH;
-	Com_strcpy(hnd->background_image, sizeof(hnd->background_image), "textdisplay");
+	Com_strcpy (hnd->background_image, sizeof(hnd->background_image), "textdisplay");
 	hnd->start_char = 0;
 	do_linebreaks = true;
 
@@ -713,7 +709,7 @@ done_linebreaks:
 				p1++;
 				if (*p1 == 'a')
 				{
-					Com_strcpy(sound, sizeof(sound), p1+1);
+					Com_strcpy (sound, sizeof(sound), p1+1);
 					p1--;
 					p2=p1;
 					while (*p2 != 0)

@@ -460,9 +460,9 @@ void SP_func_vehicle (edict_t *self)
 		char	modelname[256];
 		// check for "models/" already in path
 		if ( !strncmp(self->usermodel, "models/", 7) )
-			Com_sprintf(modelname, sizeof(modelname), "%s", self->usermodel);
+			Com_sprintf (modelname, sizeof(modelname), "%s", self->usermodel);
 		else
-			Com_sprintf(modelname, sizeof(modelname), "models/%s", self->usermodel);
+			Com_sprintf (modelname, sizeof(modelname), "models/%s", self->usermodel);
 		self->s.modelindex2 = gi.modelindex (modelname);
 	}
 

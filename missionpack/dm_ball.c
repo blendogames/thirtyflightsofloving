@@ -71,7 +71,7 @@ void DBall_ClientBegin (edict_t *ent)
 		if (other == ent)	// don't count the new player
 			continue;
 		
-		Com_strcpy(value, sizeof(value), Info_ValueForKey (other->client->pers.userinfo, "skin"));
+		Com_strcpy (value, sizeof(value), Info_ValueForKey (other->client->pers.userinfo, "skin"));
 		p = strchr(value, '/');
 		if (p)
 		{
@@ -114,7 +114,7 @@ void DBall_SelectSpawnPoint (edict_t *ent, vec3_t origin, vec3_t angles, int *st
 	char	skin[512];
 	int		spawn_style, spawn_health;	// Knightmare added
 
-	Com_strcpy(skin, sizeof(skin), Info_ValueForKey (ent->client->pers.userinfo, "skin"));
+	Com_strcpy (skin, sizeof(skin), Info_ValueForKey (ent->client->pers.userinfo, "skin"));
 	if (!strcmp(dball_team1_skin->string, skin))
 		spottype = "dm_dball_team1_start";
 	else if (!strcmp(dball_team2_skin->string, skin))
@@ -325,7 +325,7 @@ void DBall_GoalTouch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t
 		else
 			scorechange = self->wait;
 
-		Com_strcpy(value, sizeof(value), Info_ValueForKey (ent->client->pers.userinfo, "skin"));
+		Com_strcpy (value, sizeof(value), Info_ValueForKey (ent->client->pers.userinfo, "skin"));
 		p = strchr(value, '/');
 		if (p)
 		{

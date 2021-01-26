@@ -1114,7 +1114,7 @@ void missile_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *s
 			{
 				n = rand() % 5;
 				while (n--)
-					ThrowDebris (ent, "models/objects/debris2/tris.md2", 2, ent->s.origin, 0, 0);
+					ThrowDebris (ent, "models/objects/debris2/tris.md2", 2, ent->s.origin, 0, 0, 0);
 			}
 		}
 	}
@@ -1482,7 +1482,7 @@ void rocket_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *su
 			{
 				n = rand() % 5;
 				while (n--)
-					ThrowDebris (ent, "models/objects/debris2/tris.md2", 2, ent->s.origin, 0, 0);
+					ThrowDebris (ent, "models/objects/debris2/tris.md2", 2, ent->s.origin, 0, 0, 0);
 			}
 		}
 	}
@@ -1716,7 +1716,7 @@ void SP_rocket (edict_t *rocket)
 			{
 				n = rand() % 5;
 				while (n--)
-					ThrowDebris (ent, "models/objects/debris2/tris.md2", 2, ent->s.origin);
+					ThrowDebris (ent, "models/objects/debris2/tris.md2", 2, ent->s.origin, 0, 0, 0);
 			}
 		}
 	}

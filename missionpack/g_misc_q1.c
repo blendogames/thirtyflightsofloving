@@ -416,61 +416,61 @@ void q1_barrel_explode (edict_t *self)
 		org[0] = self->s.origin[0] + crandom() * self->size[0];
 		org[1] = self->s.origin[1] + crandom() * self->size[1];
 		org[2] = self->s.origin[2] + crandom() * self->size[2];
-		ThrowDebris (self, "models/objects/debris1/tris.md2", spd, org, 0, 0);
+		ThrowDebris (self, "models/objects/debris1/tris.md2", spd, org, 0, 0, 0);
 		org[0] = self->s.origin[0] + crandom() * self->size[0];
 		org[1] = self->s.origin[1] + crandom() * self->size[1];
 		org[2] = self->s.origin[2] + crandom() * self->size[2];
-		ThrowDebris (self, "models/objects/debris1/tris.md2", spd, org, 0, 0);
+		ThrowDebris (self, "models/objects/debris1/tris.md2", spd, org, 0, 0, 0);
 
 		// bottom corners
 		spd = 1.75 * (float)self->dmg / 200.0;
 		VectorCopy (self->absmin, org);
-		ThrowDebris (self, "models/objects/debris3/tris.md2", spd, org, 0, 0);
+		ThrowDebris (self, "models/objects/debris3/tris.md2", spd, org, 0, 0, 0);
 		VectorCopy (self->absmin, org);
 		org[0] += self->size[0];
-		ThrowDebris (self, "models/objects/debris3/tris.md2", spd, org, 0, 0);
+		ThrowDebris (self, "models/objects/debris3/tris.md2", spd, org, 0, 0, 0);
 		VectorCopy (self->absmin, org);
 		org[1] += self->size[1];
-		ThrowDebris (self, "models/objects/debris3/tris.md2", spd, org, 0, 0);
+		ThrowDebris (self, "models/objects/debris3/tris.md2", spd, org, 0, 0, 0);
 		VectorCopy (self->absmin, org);
 		org[0] += self->size[0];
 		org[1] += self->size[1];
-		ThrowDebris (self, "models/objects/debris3/tris.md2", spd, org, 0, 0);
+		ThrowDebris (self, "models/objects/debris3/tris.md2", spd, org, 0, 0, 0);
 
 		// a bunch of little chunks
 		spd = 2 * self->dmg / 200;
 		org[0] = self->s.origin[0] + crandom() * self->size[0];
 		org[1] = self->s.origin[1] + crandom() * self->size[1];
 		org[2] = self->s.origin[2] + crandom() * self->size[2];
-		ThrowDebris (self, "models/objects/debris2/tris.md2", spd, org, 0, 0);
+		ThrowDebris (self, "models/objects/debris2/tris.md2", spd, org, 0, 0, 0);
 		org[0] = self->s.origin[0] + crandom() * self->size[0];
 		org[1] = self->s.origin[1] + crandom() * self->size[1];
 		org[2] = self->s.origin[2] + crandom() * self->size[2];
-		ThrowDebris (self, "models/objects/debris2/tris.md2", spd, org, 0, 0);
+		ThrowDebris (self, "models/objects/debris2/tris.md2", spd, org, 0, 0, 0);
 		org[0] = self->s.origin[0] + crandom() * self->size[0];
 		org[1] = self->s.origin[1] + crandom() * self->size[1];
 		org[2] = self->s.origin[2] + crandom() * self->size[2];
-		ThrowDebris (self, "models/objects/debris2/tris.md2", spd, org, 0, 0);
+		ThrowDebris (self, "models/objects/debris2/tris.md2", spd, org, 0, 0, 0);
 		org[0] = self->s.origin[0] + crandom() * self->size[0];
 		org[1] = self->s.origin[1] + crandom() * self->size[1];
 		org[2] = self->s.origin[2] + crandom() * self->size[2];
-		ThrowDebris (self, "models/objects/debris2/tris.md2", spd, org, 0, 0);
+		ThrowDebris (self, "models/objects/debris2/tris.md2", spd, org, 0, 0, 0);
 		org[0] = self->s.origin[0] + crandom() * self->size[0];
 		org[1] = self->s.origin[1] + crandom() * self->size[1];
 		org[2] = self->s.origin[2] + crandom() * self->size[2];
-		ThrowDebris (self, "models/objects/debris2/tris.md2", spd, org, 0, 0);
+		ThrowDebris (self, "models/objects/debris2/tris.md2", spd, org, 0, 0, 0);
 		org[0] = self->s.origin[0] + crandom() * self->size[0];
 		org[1] = self->s.origin[1] + crandom() * self->size[1];
 		org[2] = self->s.origin[2] + crandom() * self->size[2];
-		ThrowDebris (self, "models/objects/debris2/tris.md2", spd, org, 0, 0);
+		ThrowDebris (self, "models/objects/debris2/tris.md2", spd, org, 0, 0, 0);
 		org[0] = self->s.origin[0] + crandom() * self->size[0];
 		org[1] = self->s.origin[1] + crandom() * self->size[1];
 		org[2] = self->s.origin[2] + crandom() * self->size[2];
-		ThrowDebris (self, "models/objects/debris2/tris.md2", spd, org, 0, 0);
+		ThrowDebris (self, "models/objects/debris2/tris.md2", spd, org, 0, 0, 0);
 		org[0] = self->s.origin[0] + crandom() * self->size[0];
 		org[1] = self->s.origin[1] + crandom() * self->size[1];
 		org[2] = self->s.origin[2] + crandom() * self->size[2];
-		ThrowDebris (self, "models/objects/debris2/tris.md2", spd, org, 0, 0);
+		ThrowDebris (self, "models/objects/debris2/tris.md2", spd, org, 0, 0, 0);
 
 		VectorCopy (save, self->s.origin);
 	}

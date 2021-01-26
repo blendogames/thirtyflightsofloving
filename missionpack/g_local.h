@@ -1408,12 +1408,10 @@ int PatchMonsterModel (char *modelname);
 // g_misc.c
 //
 void gib_fade (edict_t *self);
-void ThrowHead (edict_t *self, char *gibname, int damage, int type);
+void ThrowHead (edict_t *self, char *gibname, int frame, int skinnum, int damage, int type);
 void ThrowClientHead (edict_t *self, int damage);
-void ThrowGib (edict_t *self, char *gibname, int damage, int type);
-void ThrowGibFrame (edict_t *self, char *gibname, int frame, int damage, int type);
-void ThrowDebris (edict_t *self, char *modelname, float speed, vec3_t origin, int skin, int effects);
-void ThrowDebrisFrame (edict_t *self, char *modelname, float speed, vec3_t origin, int frame, int skin, int effects);
+void ThrowGib (edict_t *self, char *gibname, int frame, int skinnum, int damage, int type);
+void ThrowDebris (edict_t *self, char *modelname, float speed, vec3_t origin, int frame, int skin, int effects);
 void BecomeExplosion1(edict_t *self);
 void BecomeExplosion2(edict_t *self);
 void BecomeExplosion3(edict_t *self);
