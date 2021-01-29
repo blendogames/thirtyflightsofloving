@@ -1998,26 +1998,40 @@ Q_strncpyz
 Safe strncpy that ensures a trailing zero
 =================
 */
-void Q_strncpyz (char *dst, size_t dstSize, const char *src)
+size_t Q_strncpyz (char *dst, size_t dstSize, const char *src)
 {
+	char		*d = dst;
+	const char	*s = src;
+	size_t		decSize = dstSize;
+
 	if (!dst) {
 	//	Com_Error (ERR_FATAL, "Q_strncpyz: NULL dst");
 	//	Com_Printf ("Q_strncpyz: NULL dst\n");
-		return;
+		return 0;
 	}
 	if (!src) {
 	//	Com_Error (ERR_FATAL, "Q_strncpyz: NULL src");
 	//	Com_Printf ("Q_strncpyz: NULL src\n");
-		return;
+		return 0;
 	}
 	if (dstSize < 1) {
 	//	Com_Error (ERR_FATAL, "Q_strncpyz: dstSize < 1");
 	//	Com_Printf ("Q_strncpyz: dstSize < 1\n");
-		return;
+		return 0;
 	}
 
-	strncpy(dst, src, dstSize-1);
+//	strncpy(dst, src, dstSize-1);
+//	dst[dstSize-1] = 0;
+
+	while (--decSize && *s)
+		*d++ = *s++;
+	*d = 0;
 	dst[dstSize-1] = 0;
+
+	if (decSize == 0)	// Unsufficent room in dst, return count + length of remaining src
+		return (s - src - 1 + strlen(s));
+	else
+		return (s - src - 1);	// returned count excludes NULL terminator
 }
 
 
@@ -2028,25 +2042,30 @@ Q_strncatz
 Safe strncat that ensures a trailing zero
 =================
 */
-void Q_strncatz (char *dst, size_t dstSize, const char *src)
+size_t Q_strncatz (char *dst, size_t dstSize, const char *src)
 {
+	char		*d = dst;
+	const char	*s = src;
+	size_t		decSize = dstSize;
+	size_t		dLen;
+
 	if (!dst) {
 	//	Com_Error (ERR_FATAL, "Q_strncatz: NULL dst");
 	//	Com_Printf ("Q_strncatz: NULL dst\n");
-		return;
+		return 0;
 	}
 	if (!src) {
 	//	Com_Error (ERR_FATAL, "Q_strncatz: NULL src");
 	//	Com_Printf ("Q_strncatz: NULL src\n");
-		return;
+		return 0;
 	}
 	if (dstSize < 1) {
 	//	Com_Error (ERR_FATAL, "Q_strncatz: dstSize < 1");
 	//	Com_Printf ("Q_strncatz: dstSize < 1\n");
-		return;
+		return 0;
 	}
 
-	while (--dstSize && *dst)
+/*	while (--dstSize && *dst)
 		dst++;
 
 	if (dstSize > 0){
@@ -2054,7 +2073,24 @@ void Q_strncatz (char *dst, size_t dstSize, const char *src)
 			*dst++ = *src++;
 
 		*dst = 0;
+	}*/
+
+	while (--decSize && *d)
+		d++;
+	dLen = d - dst;
+
+	if (decSize == 0)
+		return (dLen + strlen(s));
+
+	if (decSize > 0) {
+		while (--decSize && *s)
+			*d++ = *s++;
+
+		*d = 0;
 	}
+	dst[dstSize-1] = 0;
+
+	return (dLen + (s - src));	// returned count excludes NULL terminator
 }
 
 
@@ -2067,7 +2103,7 @@ Safe snprintf that ensures a trailing zero
 */
 void Q_snprintfz (char *dst, size_t dstSize, const char *fmt, ...)
 {
-	va_list	argPtr;
+	va_list		argPtr;
 
 	if (!dst) {
 	//	Com_Error(ERR_FATAL, "Q_snprintfz: NULL dst");

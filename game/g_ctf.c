@@ -1563,7 +1563,8 @@ void CTFFlagSetup (edict_t *ent)
 			ent->item->world_model = "models/ctf/flags/flag1.md2";
 		if (strcmp(ent->classname, "item_flag_team2") == 0)
 			ent->item->world_model = "models/ctf/flags/flag2.md2";
-	} else {
+	}
+	else {
 		if (strcmp(ent->classname, "item_flag_team1") == 0)
 			ent->item->world_model = "players/male/flag1.md2";
 		if (strcmp(ent->classname, "item_flag_team2") == 0)
@@ -3683,17 +3684,17 @@ struct {
 
 /*static*/ void CTFSay_Team_Location (edict_t *who, char *buf, size_t bufSize)
 {
-	edict_t *what = NULL;
-	edict_t *hot = NULL;
-	float hotdist = 999999, newdist;
-	vec3_t v;
-	int hotindex = 999;
-	int i;
-	gitem_t *item;
-	int nearteam = -1;
-	edict_t *flag1, *flag2;
-	qboolean hotsee = false;
-	qboolean cansee;
+	edict_t		*what = NULL;
+	edict_t		*hot = NULL;
+	float		hotdist = 999999, newdist, newdist2;
+	vec3_t		v;
+	int			hotindex = 999;
+	int			i;
+	gitem_t		*item;
+	int			nearteam = -1;
+	edict_t		*flag1, *flag2, *flag3;
+	qboolean	hotsee = false;
+	qboolean	cansee;
 
 	while ((what = loc_findradius(what, who->s.origin, 1024)) != NULL) {
 		// find what in loc_classnames
@@ -3743,16 +3744,40 @@ struct {
 			continue;
 		// if we are here, there is more than one, find out if hot
 		// is closer to red flag or blue flag
-		if ((flag1 = G_Find(NULL, FOFS(classname), "item_flag_team1")) != NULL &&
-			(flag2 = G_Find(NULL, FOFS(classname), "item_flag_team2")) != NULL) {
-			VectorSubtract(hot->s.origin, flag1->s.origin, v);
-			hotdist = VectorLength(v);
-			VectorSubtract(hot->s.origin, flag2->s.origin, v);
-			newdist = VectorLength(v);
-			if (hotdist < newdist)
-				nearteam = CTF_TEAM1;
-			else if (hotdist > newdist)
-				nearteam = CTF_TEAM2;
+		if (ttctf->value)
+		{
+			if ((flag1 = G_Find(NULL, FOFS(classname), "item_flag_team1")) != NULL &&
+				(flag2 = G_Find(NULL, FOFS(classname), "item_flag_team2")) != NULL &&
+				(flag3 = G_Find(NULL, FOFS(classname), "item_flag_team3")) != NULL)
+			{
+				VectorSubtract(hot->s.origin, flag1->s.origin, v);
+				hotdist = VectorLength(v);
+				VectorSubtract(hot->s.origin, flag2->s.origin, v);
+				newdist = VectorLength(v);
+				VectorSubtract(hot->s.origin, flag3->s.origin, v);
+				newdist2 = VectorLength(v);
+				if ( (hotdist < newdist) && (hotdist < newdist2) )
+					nearteam = CTF_TEAM1;
+				else if ( (hotdist > newdist) && (newdist2 > newdist) )
+					nearteam = CTF_TEAM2;
+				else if ( (newdist2 < hotdist) && (newdist2 < newdist) )
+					nearteam = CTF_TEAM3;
+			}
+		}
+		else
+		{
+			if ((flag1 = G_Find(NULL, FOFS(classname), "item_flag_team1")) != NULL &&
+				(flag2 = G_Find(NULL, FOFS(classname), "item_flag_team2")) != NULL)
+			{
+				VectorSubtract(hot->s.origin, flag1->s.origin, v);
+				hotdist = VectorLength(v);
+				VectorSubtract(hot->s.origin, flag2->s.origin, v);
+				newdist = VectorLength(v);
+				if (hotdist < newdist)
+					nearteam = CTF_TEAM1;
+				else if (hotdist > newdist)
+					nearteam = CTF_TEAM2;
+			}
 		}
 		break;
 	}
@@ -3789,6 +3814,9 @@ struct {
 	else if (nearteam == CTF_TEAM2)
 	//	strncat(buf, "the blue ");
 		Q_strncatz(buf, bufSize, "the blue ");
+	else if (nearteam == CTF_TEAM3)
+	//	strncat(buf, "the blue ");
+		Q_strncatz(buf, bufSize, "the green ");
 	else
 	//	strncat(buf, "the ");
 		Q_strncatz(buf, bufSize, "the ");
@@ -3940,7 +3968,7 @@ void CTFSay_Team (edict_t *who, char *msg)
 		msg++;
 	}
 
-	for (p = outmsg; *msg && (p - outmsg) < sizeof(outmsg) - 2; msg++)
+	for (p = outmsg; *msg && (p - outmsg) < sizeof(outmsg) - 1; msg++)	// was -2
 	{
 		if (*msg == '%')
 		{
@@ -3949,9 +3977,9 @@ void CTFSay_Team (edict_t *who, char *msg)
 				case 'l' :
 				case 'L' :
 					CTFSay_Team_Location(who, buf, sizeof(buf));
-					if (strlen(buf) + (p - outmsg) < sizeof(outmsg) - 2) {
-						strcpy(p, buf);
-					//	Q_strncpyz(p, outmsgSize-2, buf);
+					if (strlen(buf) + (p - outmsg) < sizeof(outmsg) - 1) {	// was -2
+					//	strncpy(p, buf);
+						Q_strncpyz(p, sizeof(outmsg) - (p - outmsg) - 1, buf);
 						p += strlen(buf);
 					//	outmsgSize -= strlen(buf);
 					}
@@ -3959,9 +3987,9 @@ void CTFSay_Team (edict_t *who, char *msg)
 				case 'a' :
 				case 'A' :
 					CTFSay_Team_Armor(who, buf, sizeof(buf));
-					if (strlen(buf) + (p - outmsg) < sizeof(outmsg) - 2) {
-						strcpy(p, buf);
-					//	Q_strncpyz(p, outmsgSize-2, buf);
+					if (strlen(buf) + (p - outmsg) < sizeof(outmsg) - 1) {	// was -2
+					//	strncpy(p, buf);
+						Q_strncpyz(p, sizeof(outmsg) - (p - outmsg) - 1, buf);
 						p += strlen(buf);
 					//	outmsgSize -= strlen(buf);
 					}
@@ -3969,9 +3997,9 @@ void CTFSay_Team (edict_t *who, char *msg)
 				case 'h' :
 				case 'H' :
 					CTFSay_Team_Health(who, buf, sizeof(buf));
-					if (strlen(buf) + (p - outmsg) < sizeof(outmsg) - 2) {
-						strcpy(p, buf);
-					//	Q_strncpyz(p, outmsgSize-2, buf);
+					if (strlen(buf) + (p - outmsg) < sizeof(outmsg) - 1) {	// was -2
+					//	strncpy(p, buf);
+						Q_strncpyz(p, sizeof(outmsg) - (p - outmsg) - 1, buf);
 						p += strlen(buf);
 					//	outmsgSize -= strlen(buf);
 					}
@@ -3979,9 +4007,9 @@ void CTFSay_Team (edict_t *who, char *msg)
 				case 't' :
 				case 'T' :
 					CTFSay_Team_Tech(who, buf, sizeof(buf));
-					if (strlen(buf) + (p - outmsg) < sizeof(outmsg) - 2) {
-						strcpy(p, buf);
-					//	Q_strncpyz(p, outmsgSize-2, buf);
+					if (strlen(buf) + (p - outmsg) < sizeof(outmsg) - 1) {	// was -2
+					//	strncpy(p, buf);
+						Q_strncpyz(p, sizeof(outmsg) - (p - outmsg) - 1, buf);
 						p += strlen(buf);
 					//	outmsgSize -= strlen(buf);
 					}
@@ -3989,9 +4017,9 @@ void CTFSay_Team (edict_t *who, char *msg)
 				case 'w' :
 				case 'W' :
 					CTFSay_Team_Weapon(who, buf, sizeof(buf));
-					if (strlen(buf) + (p - outmsg) < sizeof(outmsg) - 2) {
-						strcpy(p, buf);
-					//	Q_strncpyz(p, outmsgSize-2, buf);
+					if (strlen(buf) + (p - outmsg) < sizeof(outmsg) - 1) {	// was -2
+					//	strncpy(p, buf);
+						Q_strncpyz(p, sizeof(outmsg) - (p - outmsg) - 1, buf);
 						p += strlen(buf);
 					//	outmsgSize -= strlen(buf);
 					}
@@ -4000,9 +4028,9 @@ void CTFSay_Team (edict_t *who, char *msg)
 				case 'n' :
 				case 'N' :
 					CTFSay_Team_Sight(who, buf, sizeof(buf));
-					if (strlen(buf) + (p - outmsg) < sizeof(outmsg) - 2) {
-						strcpy(p, buf);
-					//	Q_strncpyz(p, outmsgSize-2, buf);
+					if (strlen(buf) + (p - outmsg) < sizeof(outmsg) - 1) {	// was -2
+					//	strncpy(p, buf);
+						Q_strncpyz(p, sizeof(outmsg) - (p - outmsg) - 1, buf);
 						p += strlen(buf);
 					//	outmsgSize -= strlen(buf);
 					}

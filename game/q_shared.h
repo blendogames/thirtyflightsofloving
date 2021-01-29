@@ -467,8 +467,8 @@ int Q_stricmp (char *s1, char *s2);
 int Q_strcasecmp (char *s1, char *s2);
 int Q_strncasecmp (char *s1, char *s2, size_t n);
 
-void Q_strncpyz (char *dst, size_t dstSize, const char *src);
-void Q_strncatz (char *dst, size_t dstSize, const char *src);
+size_t Q_strncpyz (char *dst, size_t dstSize, const char *src);
+size_t Q_strncatz (char *dst, size_t dstSize, const char *src);
 void Q_snprintfz (char *dst, size_t dstSize, const char *fmt, ...);
 char *Q_strlwr (char *string);
 char *Q_strupr (char *string);
