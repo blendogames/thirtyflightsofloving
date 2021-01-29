@@ -2028,7 +2028,7 @@ size_t Q_strncpyz (char *dst, size_t dstSize, const char *src)
 	*d = 0;
 	dst[dstSize-1] = 0;
 
-	if (decSize == 0)	// Unsufficent room in dst, return count + length of remaining src
+	if (decSize == 0)	// Insufficent room in dst, return count + length of remaining src
 		return (s - src - 1 + strlen(s));
 	else
 		return (s - src - 1);	// returned count excludes NULL terminator

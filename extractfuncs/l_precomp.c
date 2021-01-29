@@ -72,6 +72,9 @@ Safe strncpy that ensures a trailing zero
 */
 void Q_strncpyz (char *dest, size_t destSize, const char *src)
 {
+	if (!dest) {
+		Error ("Q_strncatz: NULL dest");
+	}
 	if ( !src ) {
 		Error( "Q_strncpyz: NULL src" );
 	}
@@ -85,14 +88,49 @@ void Q_strncpyz (char *dest, size_t destSize, const char *src)
 
 /*
 =================
+Q_strncatz
+
+Safe strncat that ensures a trailing zero
+=================
+*/
+void Q_strncatz (char *dest, size_t destSize, const char *src)
+{
+	char		*d = dest;
+	const char	*s = src;
+	size_t		decSize = destSize;
+
+	if (!dest) {
+		Error ("Q_strncatz: NULL dest");
+	}
+	if (!src) {
+		Error ("Q_strncatz: NULL src");
+	}
+	if (destSize < 1) {
+		Error ("Q_strncatz: dstSize < 1");
+	}
+
+	while (--decSize && *d)
+		d++;
+
+	if (decSize > 0){
+		while (--decSize && *s)
+			*d++ = *s++;
+
+		*d = 0;
+	}
+	dest[destSize - 1] = 0;
+}
+
+/*
+=================
 Com_sprintf
 =================
 */
-void Com_sprintf (char *dest, int size, const char *fmt, ...)
+void Com_sprintf (char *dest, size_t size, const char *fmt, ...)
 {
-	int len;
-	va_list argptr;
-	char bigbuffer[32000];      // big, but small enough to fit in PPC stack
+	size_t	len;
+	va_list	argptr;
+	char	bigbuffer[32000];      // big, but small enough to fit in PPC stack
 
 	va_start( argptr,fmt );
 //	len = vsprintf( bigbuffer, fmt, argptr );
@@ -109,7 +147,7 @@ void Com_sprintf (char *dest, int size, const char *fmt, ...)
 	Q_strncpyz (dest, size, bigbuffer);
 }
 
-int Q_stricmpn( const char *s1, const char *s2, int n )
+int Q_stricmpn (const char *s1, const char *s2, int n)
 {
 	int c1, c2;
 
@@ -140,7 +178,7 @@ int Q_stricmpn( const char *s1, const char *s2, int n )
 	return 0;       // strings are equal
 }
 
-int Q_strncmp( const char *s1, const char *s2, int n )
+int Q_strncmp (const char *s1, const char *s2, int n)
 {
 	int c1, c2;
 
@@ -621,7 +659,8 @@ int PC_StringizeTokens( token_t *tokens, token_t *token )
 	token->whitespace_p = NULL;
 	token->endwhitespace_p = NULL;
 	token->string[0] = '\0';
-	strcat( token->string, "\"" );
+//	strncat (token->string, "\"");
+	Q_strncatz (token->string, sizeof(token->string), "\"");
 	for ( t = tokens; t; t = t->next )
 	{
 		strncat( token->string, t->string, MAX_TOKEN - strlen( token->string ) );
@@ -640,7 +679,8 @@ int PC_MergeTokens( token_t *t1, token_t *t2 )
 	//merging of a name with a name or number
 	if ( t1->type == TT_NAME && ( t2->type == TT_NAME || t2->type == TT_NUMBER ) )
 	{
-		strcat( t1->string, t2->string );
+	//	strncat (t1->string, t2->string);
+		Q_strncatz (t1->string, sizeof(t1->string), t2->string);
 		return qtrue;
 	} //end if
 	  //merging of two strings
@@ -648,7 +688,8 @@ int PC_MergeTokens( token_t *t1, token_t *t2 )
 		//remove trailing double quote
 		t1->string[strlen( t1->string ) - 1] = '\0';
 		//concat without leading double quote
-		strcat( t1->string, &t2->string[1] );
+	//	strncat (t1->string, &t2->string[1]);
+		Q_strncatz (t1->string, sizeof(t1->string), &t2->string[1]);
 		return qtrue;
 	} //end if
 	  //FIXME: merging of two number of the same sub type
@@ -840,10 +881,11 @@ void PC_AddBuiltinDefines( source_t *source )
 
 	for ( i = 0; builtin[i].string; i++ )
 	{
-		define = (define_t *) GetMemory( sizeof( define_t ) + (int)strlen( builtin[i].string ) + 1 );
-		memset( define, 0, sizeof( define_t ) );
-		define->name = (char *) define + sizeof( define_t );
-		strcpy( define->name, builtin[i].string );
+		define = (define_t *) GetMemory(sizeof(define_t) + (int)strlen(builtin[i].string) + 1);
+		memset( define, 0, sizeof(define_t) );
+		define->name = (char *)define + sizeof(define_t);
+	//	strncpy (define->name, builtin[i].string);
+		Q_strncpyz (define->name, strlen(builtin[i].string) + 1, builtin[i].string);
 		define->flags |= DEFINE_FIXED;
 		define->builtin = builtin[i].builtin;
 		//add the define to the source
@@ -873,7 +915,7 @@ int PC_ExpandBuiltinDefine( source_t *source, define_t *define,
 	{
 	case BUILTIN_LINE:
 	{
-		sprintf( token.string, "%d", source->token.line );
+		Com_sprintf (token.string, sizeof(token.string), "%d", source->token.line);
 #ifdef NUMBERVALUE
 		token.intvalue = source->token.line;
 		token.floatvalue = source->token.line;
@@ -886,7 +928,8 @@ int PC_ExpandBuiltinDefine( source_t *source, define_t *define,
 	}     //end case
 	case BUILTIN_FILE:
 	{
-		strcpy( token.string, source->scriptstack->filename );
+	//	strncpy (token.string, source->scriptstack->filename);
+		Q_strncpyz (token.string, sizeof(token.string), source->scriptstack->filename);
 		token.type = TT_NAME;
 		token.subtype = (int)strlen( token.string );
 		*firsttoken = &token;
@@ -897,10 +940,12 @@ int PC_ExpandBuiltinDefine( source_t *source, define_t *define,
 	{
 		t = time( NULL );
 		curtime = ctime( &t );
-		strcpy( token.string, "\"" );
-		strncat( token.string, curtime + 4, 7 );
-		strncat( token.string + 7, curtime + 20, 4 );
-		strcat( token.string, "\"" );
+	//	strncpy (token.string, "\"");
+		Q_strncpyz (token.string, sizeof(token.string), "\"");
+		strncat (token.string, curtime + 4, 7);
+		strncat (token.string + 7, curtime + 20, 4);
+	//	strncat (token.string, sizeof(token.string), "\"");
+		Q_strncatz (token.string, sizeof(token.string), "\"");
 		free( curtime );
 		token.type = TT_NAME;
 		token.subtype = (int)strlen( token.string );
@@ -912,9 +957,11 @@ int PC_ExpandBuiltinDefine( source_t *source, define_t *define,
 	{
 		t = time( NULL );
 		curtime = ctime( &t );
-		strcpy( token.string, "\"" );
-		strncat( token.string, curtime + 11, 8 );
-		strcat( token.string, "\"" );
+	//	strncpy (token.string, "\"");
+		Q_strncpyz (token.string, sizeof(token.string), "\"");
+		strncat (token.string, curtime + 11, 8);
+	//	strncat (token.string, "\"");
+		Q_strncatz (token.string, sizeof(token.string), "\"");
 		free( curtime );
 		token.type = TT_NAME;
 		token.subtype = (int)strlen( token.string );
@@ -1084,40 +1131,41 @@ int PC_ExpandDefineIntoSource( source_t *source, define_t *define )
 		lasttoken->next = source->tokens;
 		source->tokens = firsttoken;
 		return qtrue;
-	} //end if
+	} // end if
 	return qfalse;
-} //end of the function PC_ExpandDefineIntoSource
+} // end of the function PC_ExpandDefineIntoSource
 //============================================================================
 //
 // Parameter:				-
 // Returns:					-
 // Changes Globals:		-
 //============================================================================
-void PC_ConvertPath( char *path )
+void PC_ConvertPath (char *path, size_t pathSize)
 {
 	char *ptr;
 
-	//remove double path seperators
+	// remove double path seperators
 	for ( ptr = path; *ptr; )
 	{
 		if ( ( *ptr == '\\' || *ptr == '/' ) &&
 			 ( *( ptr + 1 ) == '\\' || *( ptr + 1 ) == '/' ) ) {
-			strcpy( ptr, ptr + 1 );
-		} //end if
+		//	strncpy (ptr, ptr + 1);
+			Q_strncpyz (ptr, pathSize - (ptr - path), ptr + 1);
+		} // end if
 		else
 		{
 			ptr++;
-		} //end else
-	} //end while
-	  //set OS dependent path seperators
+		} // end else
+	} // end while
+	  // set OS dependent path seperators
 	for ( ptr = path; *ptr; )
 	{
 		if ( *ptr == '/' || *ptr == '\\' ) {
 			*ptr = PATHSEPERATOR_CHAR;
 		}
 		ptr++;
-	} //end while
-} //end of the function PC_ConvertPath
+	} // end while
+} // end of the function PC_ConvertPath
 //============================================================================
 //
 // Parameter:				-
@@ -1146,18 +1194,23 @@ int PC_Directive_include( source_t *source )
 		return qfalse;
 	} //end if
 
-	if ( token.type == TT_STRING ) {
-		StripDoubleQuotes( token.string );
-		PC_ConvertPath( token.string );
+	if ( token.type == TT_STRING )
+	{
+		StripDoubleQuotes (token.string, sizeof(token.string));
+		PC_ConvertPath (token.string, sizeof(token.string));
 		script = LoadScriptFile( token.string );
 		if ( !script ) {
-			strcpy( path, source->includepath );
-			strcat( path, token.string );
+		//	strncpy (path, source->includepath);
+		//	strncat (path, token.string);
+			Q_strncpyz (path, sizeof(path), source->includepath);
+			Q_strncatz (path, sizeof(path), token.string);
 			script = LoadScriptFile( path );
 		} //end if
 	} //end if
-	else if ( token.type == TT_PUNCTUATION && *token.string == '<' ) {
-		strcpy( path, source->includepath );
+	else if ( token.type == TT_PUNCTUATION && *token.string == '<' )
+	{
+	//	strncpy (path, source->includepath);
+		Q_strncpyz (path, sizeof(path), source->includepath);
 		while ( PC_ReadSourceToken( source, &token ) )
 		{
 			if ( token.linescrossed > 0 ) {
@@ -1176,7 +1229,7 @@ int PC_Directive_include( source_t *source )
 			SourceError( source, "#include without file name between < >" );
 			return qfalse;
 		} //end if
-		PC_ConvertPath( path );
+		PC_ConvertPath (path, sizeof(path));
 		script = LoadScriptFile( path );
 	} //end if
 	else
@@ -1368,10 +1421,11 @@ int PC_Directive_define( source_t *source )
 #endif //DEFINEHASHING
 	} //end if
 	  //allocate define
-	define = (define_t *) GetMemory( sizeof( define_t ) + (int)strlen( token.string ) + 1 );
-	memset( define, 0, sizeof( define_t ) );
-	define->name = (char *) define + sizeof( define_t );
-	strcpy( define->name, token.string );
+	define = (define_t *)GetMemory(sizeof(define_t) + (int)strlen(token.string) + 1);
+	memset( define, 0, sizeof(define_t) );
+	define->name = (char *)define + sizeof(define_t);
+//	strncpy (define->name, token.string);
+	Q_strncpyz (define->name, strlen(token.string) + 1, token.string);
 	//add the define to the source
 #if DEFINEHASHING
 	PC_AddDefineToHash( define, source->definehash );
@@ -1608,17 +1662,18 @@ define_t *PC_CopyDefine( source_t *source, define_t *define )
 	define_t *newdefine;
 	token_t *token, *newtoken, *lasttoken;
 
-	newdefine = (define_t *) GetMemory( sizeof( define_t ) + (int)strlen( define->name ) + 1 );
-	//copy the define name
-	newdefine->name = (char *) newdefine + sizeof( define_t );
-	strcpy( newdefine->name, define->name );
+	newdefine = (define_t *)GetMemory( sizeof(define_t) + (int)strlen(define->name) + 1);
+	// copy the define name
+	newdefine->name = (char *)newdefine + sizeof(define_t);
+//	strncpy (newdefine->name, define->name);
+	Q_strncpyz (newdefine->name, strlen(define->name) + 1, define->name);
 	newdefine->flags = define->flags;
 	newdefine->builtin = define->builtin;
 	newdefine->numparms = define->numparms;
-	//the define is not linked
+	// the define is not linked
 	newdefine->next = NULL;
 	newdefine->hashnext = NULL;
-	//copy the define tokens
+	// copy the define tokens
 	newdefine->tokens = NULL;
 	for ( lasttoken = NULL, token = define->tokens; token; token = token->next )
 	{
@@ -1626,10 +1681,13 @@ define_t *PC_CopyDefine( source_t *source, define_t *define )
 		newtoken->next = NULL;
 		if ( lasttoken ) {
 			lasttoken->next = newtoken;
-		} else { newdefine->tokens = newtoken;}
+		}
+		else {
+			newdefine->tokens = newtoken;
+		}
 		lasttoken = newtoken;
-	} //end for
-	  //copy the define parameters
+	} // end for
+	  // copy the define parameters
 	newdefine->parms = NULL;
 	for ( lasttoken = NULL, token = define->parms; token; token = token->next )
 	{
@@ -2579,7 +2637,8 @@ int PC_Directive_error( source_t *source )
 {
 	token_t token;
 
-	strcpy( token.string, "" );
+//	strncpy (token.string, "");
+	Q_strncpyz (token.string, sizeof(token.string), "");
 	PC_ReadSourceToken( source, &token );
 	SourceError( source, "#error directive: %s", token.string );
 	return qfalse;
@@ -2611,7 +2670,8 @@ void UnreadSignToken( source_t *source )
 	token.whitespace_p = source->scriptstack->script_p;
 	token.endwhitespace_p = source->scriptstack->script_p;
 	token.linescrossed = 0;
-	strcpy( token.string, "-" );
+//	strncpy (token.string, "-");
+	Q_strncpyz (token.string, sizeof(token.string), "-");
 	token.type = TT_PUNCTUATION;
 	token.subtype = P_SUB;
 	PC_UnreadSourceToken( source, &token );
@@ -2624,8 +2684,8 @@ void UnreadSignToken( source_t *source )
 //============================================================================
 int PC_Directive_eval( source_t *source )
 {
-	signed long int value;
-	token_t token;
+	signed long int	value;
+	token_t			token;
 
 	if ( !PC_Evaluate( source, &value, NULL, qtrue ) ) {
 		return qfalse;
@@ -2635,7 +2695,7 @@ int PC_Directive_eval( source_t *source )
 	token.whitespace_p = source->scriptstack->script_p;
 	token.endwhitespace_p = source->scriptstack->script_p;
 	token.linescrossed = 0;
-	sprintf( token.string, "%d", abs( value ) );
+	Com_sprintf (token.string, sizeof(token.string), "%d", abs(value));
 	token.type = TT_NUMBER;
 	token.subtype = TT_INTEGER | TT_LONG | TT_DECIMAL;
 	PC_UnreadSourceToken( source, &token );
@@ -2652,8 +2712,8 @@ int PC_Directive_eval( source_t *source )
 //============================================================================
 int PC_Directive_evalfloat( source_t *source )
 {
-	double value;
-	token_t token;
+	double	value;
+	token_t	token;
 
 	if ( !PC_Evaluate( source, NULL, &value, qfalse ) ) {
 		return qfalse;
@@ -2662,7 +2722,7 @@ int PC_Directive_evalfloat( source_t *source )
 	token.whitespace_p = source->scriptstack->script_p;
 	token.endwhitespace_p = source->scriptstack->script_p;
 	token.linescrossed = 0;
-	sprintf( token.string, "%1.2f", fabs( value ) );
+	Com_sprintf (token.string, sizeof(token.string), "%1.2f", fabs(value));
 	token.type = TT_NUMBER;
 	token.subtype = TT_FLOAT | TT_LONG | TT_DECIMAL;
 	PC_UnreadSourceToken( source, &token );
@@ -2733,8 +2793,8 @@ int PC_ReadDirective( source_t *source )
 //============================================================================
 int PC_DollarDirective_evalint( source_t *source )
 {
-	signed long int value;
-	token_t token;
+	signed long int	value;
+	token_t			token;
 
 	if ( !PC_DollarEvaluate( source, &value, NULL, qtrue ) ) {
 		return qfalse;
@@ -2744,7 +2804,7 @@ int PC_DollarDirective_evalint( source_t *source )
 	token.whitespace_p = source->scriptstack->script_p;
 	token.endwhitespace_p = source->scriptstack->script_p;
 	token.linescrossed = 0;
-	sprintf( token.string, "%d", abs( value ) );
+	Com_sprintf (token.string, sizeof(token.string), "%d", abs(value));
 	token.type = TT_NUMBER;
 	token.subtype = TT_INTEGER | TT_LONG | TT_DECIMAL;
 #ifdef NUMBERVALUE
@@ -2765,8 +2825,8 @@ int PC_DollarDirective_evalint( source_t *source )
 //============================================================================
 int PC_DollarDirective_evalfloat( source_t *source )
 {
-	double value;
-	token_t token;
+	double	value;
+	token_t	token;
 
 	if ( !PC_DollarEvaluate( source, NULL, &value, qfalse ) ) {
 		return qfalse;
@@ -2775,7 +2835,7 @@ int PC_DollarDirective_evalfloat( source_t *source )
 	token.whitespace_p = source->scriptstack->script_p;
 	token.endwhitespace_p = source->scriptstack->script_p;
 	token.linescrossed = 0;
-	sprintf( token.string, "%1.2f", fabs( value ) );
+	Com_sprintf (token.string, sizeof(token.string), "%1.2f", fabs(value));
 	token.type = TT_NUMBER;
 	token.subtype = TT_FLOAT | TT_LONG | TT_DECIMAL;
 #ifdef NUMBERVALUE
@@ -3012,51 +3072,68 @@ int PC_ExpectTokenType( source_t *source, int type, int subtype, token_t *token 
 		return qfalse;
 	} //end if
 
-	if ( token->type != type ) {
-		strcpy( str, "" );
+	if ( token->type != type )
+	{
+	//	strncpy (str, "");
+		Q_strncpyz (str, sizeof(str), "");
 		if ( type == TT_STRING ) {
-			strcpy( str, "string" );
+		//	strncpy (str, "string");
+			Q_strncpyz (str, sizeof(str), "string");
 		}
 		if ( type == TT_LITERAL ) {
-			strcpy( str, "literal" );
+		//	strncpy (str, "literal");
+			Q_strncpyz (str, sizeof(str), "literal");
 		}
 		if ( type == TT_NUMBER ) {
-			strcpy( str, "number" );
+		//	strncpy (str, "number");
+			Q_strncpyz (str, sizeof(str), "number");
 		}
 		if ( type == TT_NAME ) {
-			strcpy( str, "name" );
+		//	strncpy (str, "name");
+			Q_strncpyz (str, sizeof(str), "name");
 		}
 		if ( type == TT_PUNCTUATION ) {
-			strcpy( str, "punctuation" );
+		//	strncpy (str, "punctuation");
+			Q_strncpyz (str, sizeof(str), "punctuation");
 		}
 		SourceError( source, "expected a %s, found %s", str, token->string );
 		return qfalse;
 	} //end if
-	if ( token->type == TT_NUMBER ) {
-		if ( ( token->subtype & subtype ) != subtype ) {
+	if ( token->type == TT_NUMBER )
+	{
+		if ( ( token->subtype & subtype ) != subtype )
+		{
 			if ( subtype & TT_DECIMAL ) {
-				strcpy( str, "decimal" );
+			//	strncpy ( str, "decimal");
+				Q_strncpyz ( str, sizeof(str), "decimal");
 			}
 			if ( subtype & TT_HEX ) {
-				strcpy( str, "hex" );
+			//	strncpy (str, "hex");
+				Q_strncpyz (str, sizeof(str), "hex");
 			}
 			if ( subtype & TT_OCTAL ) {
-				strcpy( str, "octal" );
+			//	strncpy (str, "octal");
+				Q_strncpyz (str, sizeof(str), "octal");
 			}
 			if ( subtype & TT_BINARY ) {
-				strcpy( str, "binary" );
+			//	strncpy (str, "binary");
+				Q_strncpyz (str, sizeof(str), "binary");
 			}
 			if ( subtype & TT_LONG ) {
-				strcat( str, " long" );
+			//	strncat (str, " long");
+				Q_strncatz (str, sizeof(str), " long");
 			}
 			if ( subtype & TT_UNSIGNED ) {
-				strcat( str, " unsigned" );
+			//	strncat (str, " unsigned");
+				Q_strncatz (str, sizeof(str), " unsigned");
 			}
 			if ( subtype & TT_FLOAT ) {
-				strcat( str, " float" );
+			//	strncat (str, " float");
+				Q_strncatz (str, sizeof(str), " float");
 			}
 			if ( subtype & TT_INTEGER ) {
-				strcat( str, " integer" );
+			//	strncat (str, " integer");
+				Q_strncatz (str, sizeof(str), " integer");
 			}
 			SourceError( source, "expected %s, found %s", str, token->string );
 			return qfalse;
@@ -3181,7 +3258,8 @@ void PC_SetIncludePath( source_t *source, char *path )
 	//add trailing path seperator
 	if ( source->includepath[strlen( source->includepath ) - 1] != '\\' &&
 		 source->includepath[strlen( source->includepath ) - 1] != '/' ) {
-		strcat( source->includepath, PATHSEPERATOR_STR );
+	//	strncat (source->includepath, PATHSEPERATOR_STR);
+		Q_strncatz (source->includepath, sizeof(source->includepath), PATHSEPERATOR_STR);
 	} //end if
 } //end of the function PC_SetIncludePath
 //============================================================================

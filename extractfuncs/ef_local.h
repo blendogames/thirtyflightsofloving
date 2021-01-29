@@ -66,6 +66,8 @@ typedef struct tokenList_s
 extern int Q_stricmp (const char *s1, const char *s2);
 replacefunc_t *FindFunctionName (char *funcname);
 void Error (char *error, ...);
-void Com_sprintf (char *dest, int size, const char *fmt, ...);
+void Com_sprintf (char *dest, size_t size, const char *fmt, ...);
+void Q_strncpyz (char *dest, size_t destSize, const char *src);
+void Q_strncatz (char *dest, size_t destSize, const char *src);
 
 extern int verbose;

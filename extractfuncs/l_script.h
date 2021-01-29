@@ -250,9 +250,9 @@ void PS_UnreadToken( script_t *script, token_t *token );
 //returns the next character of the read white space, returns NULL if none
 char PS_NextWhiteSpaceChar( script_t *script );
 //remove any leading and trailing double quotes from the token
-void StripDoubleQuotes( char *string );
+void StripDoubleQuotes (char *string, size_t strSize);
 //remove any leading and trailing single quotes from the token
-void StripSingleQuotes( char *string );
+void StripSingleQuotes (char *string, size_t strSize);
 //read a possible signed integer
 signed long int ReadSignedInt( script_t *script );
 //read a possible signed floating point number
@@ -280,4 +280,6 @@ void QDECL ScriptError( script_t *script, char *str, ... );
 //print a script warning with filename and line number
 void QDECL ScriptWarning( script_t *script, char *str, ... );
 
-
+// Knightmare added
+void Q_strncpyz (char *dest, size_t destSize, const char *src);
+void Q_strncatz (char *dest, size_t destSize, const char *src);

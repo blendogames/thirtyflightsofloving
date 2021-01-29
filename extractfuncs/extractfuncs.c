@@ -170,9 +170,12 @@ void DumpReplaceFunctions (char *typeName)
 	updated = 0;
 
 	// dump the function header
-	strcpy( path, "." );
-	strcat( path, PATHSEPERATOR_STR );
-	strcat( path, TEMP_LIST_NAME );
+//	strncpy (path, ".");
+//	strncat (path, PATHSEPERATOR_STR);
+//	strncat (path, TEMP_LIST_NAME);
+	Q_strncpyz (path, sizeof(path), ".");
+	Q_strncatz (path, sizeof(path), PATHSEPERATOR_STR);
+	Q_strncatz (path, sizeof(path), TEMP_LIST_NAME);
 	Log_Open( path );
 	for ( rf = replacefuncs; rf; rf = rf->next )
 	{
@@ -185,7 +188,8 @@ void DumpReplaceFunctions (char *typeName)
 	Log_Close();
 
 	// if it's different, rename the file over the real header
-	strcpy( path, TEMP_LIST_NAME );
+//	strncpy (path, TEMP_LIST_NAME);
+	Q_strncpyz (path, sizeof(path), TEMP_LIST_NAME);
 	f = fopen( path, "rb" );
 	fseek( f, 0, SEEK_END );
 	len = ftell( f );
@@ -195,7 +199,8 @@ void DumpReplaceFunctions (char *typeName)
 	buf[len] = 0;
 	fclose( f );
 
-	strcpy( path, func_listfile );
+//	strncpy (path, func_listfile);
+	Q_strncpyz (path, sizeof(path), func_listfile);
 	if ( f = fopen( path, "rb" ) )
 	{
 		fseek( f, 0, SEEK_END );
@@ -211,10 +216,12 @@ void DumpReplaceFunctions (char *typeName)
 			char newpath[_MAX_PATH];
 
 			// delete the old file, rename the new one
-			strcpy( path, func_listfile );
+		//	strncpy (path, func_listfile);
+			Q_strncpyz (path, sizeof(path), func_listfile);
 			remove( path );
 
-			strcpy( newpath, TEMP_LIST_NAME );
+		//	strncpy (newpath, TEMP_LIST_NAME);
+			Q_strncpyz (newpath, sizeof(newpath), TEMP_LIST_NAME);
 			rename( newpath, path );
 
 #ifdef _WIN32
@@ -229,7 +236,8 @@ void DumpReplaceFunctions (char *typeName)
 		}
 		else {
 			// delete the old file
-			strcpy( path, TEMP_LIST_NAME );
+		//	strncpy (path, TEMP_LIST_NAME);
+			Q_strncpyz (path, sizeof(path), TEMP_LIST_NAME);
 			remove( path );
 		}
 	}
@@ -241,7 +249,8 @@ void DumpReplaceFunctions (char *typeName)
 	free( newbuf );
 
 	// dump the function declarations
-	strcpy( path, TEMP_DECS_NAME );
+//	strncpy (path, TEMP_DECS_NAME);
+	Q_strncpyz (path, sizeof(path), TEMP_DECS_NAME);
 	Log_Open( path );
 	for ( rf = replacefuncs; rf; rf = rf->next )
 	{
@@ -253,7 +262,8 @@ void DumpReplaceFunctions (char *typeName)
 	Log_Close();
 
 	// if it's different, rename the file over the real header
-	strcpy( path, TEMP_DECS_NAME );
+//	strncpy (path, TEMP_DECS_NAME);
+	Q_strncpyz (path, sizeof(path), TEMP_DECS_NAME);
 	f = fopen( path, "rb" );
 	fseek( f, 0, SEEK_END );
 	len = ftell( f );
@@ -263,7 +273,8 @@ void DumpReplaceFunctions (char *typeName)
 	buf[len] = 0;
 	fclose( f );
 
-	strcpy( path, func_decsfile );
+//	strncpy (path, func_decsfile);
+	Q_strncpyz (path, sizeof(path), func_decsfile);
 	if ( f = fopen( path, "rb" ) )
 	{
 		fseek( f, 0, SEEK_END );
@@ -279,10 +290,12 @@ void DumpReplaceFunctions (char *typeName)
 			char newpath[_MAX_PATH];
 
 			// delete the old file, rename the new one
-			strcpy( path, func_decsfile );
+		//	strncpy (path, func_decsfile);
+			Q_strncpyz (path, sizeof(path), func_decsfile);
 			remove( path );
 
-			strcpy( newpath, TEMP_DECS_NAME );
+		//	strncpy (newpath, TEMP_DECS_NAME);
+			Q_strncpyz (newpath, sizeof(newpath), TEMP_DECS_NAME);
 			rename( newpath, path );
 
 #ifdef _WIN32
@@ -298,7 +311,8 @@ void DumpReplaceFunctions (char *typeName)
 		}
 		else {
 			// delete the old file
-			strcpy( path, TEMP_DECS_NAME );
+		//	strncpy (path, TEMP_DECS_NAME);
+			Q_strncpyz (path, sizeof(path), TEMP_DECS_NAME);
 			remove( path );
 		}
 	}
@@ -362,22 +376,26 @@ int MayScrewUp (char *funcname)
 ConcatDec
 =================
 */
-void ConcatDec (tokenList_t *list, char *str, int inc)
+void ConcatDec (tokenList_t *list, char *str, size_t strSize, int inc)
 {
-/*	if (!((list->token.type == TT_NAME) || (list->token.string[0] == '*'))) {
+/*	if (!((list->token.type == TT_NAME) || (list->token.string[0] == '*')))
+	{
 		if (list->token.string[0] == ')' || list->token.string[0] == '(') {
 			if (inc++ >= 2)
 				return;
-		} else {
+		}
+		else {
 			return;
 		}
 	}*/
 	if (list->next)
 	{
-		ConcatDec (list->next, str, inc);
+		ConcatDec (list->next, str, strSize, inc);
 	}
-	strcat(str, list->token.string);
-	strcat(str, " " );
+//	strncat (str, list->token.string);
+//	strncat (str, " " );
+	Q_strncatz (str, strSize, list->token.string);
+	Q_strncatz (str, strSize, " " );
 }
 
 /*
@@ -387,7 +405,7 @@ AddFunctionName
 */
 void AddFunctionName (char *funcname, char *filename, tokenList_t *head)
 {
-	replacefunc_t *f;
+	replacefunc_t	*f;
 	tokenList_t     *list;
 
 	if ( FindFunctionName(funcname) )
@@ -415,20 +433,23 @@ void AddFunctionName (char *funcname, char *filename, tokenList_t *head)
 #endif
 	// -NERVE - SMF
 
-	f = (replacefunc_t *) GetMemory( sizeof( replacefunc_t ) + (int)strlen( funcname ) + 1 + 6 + (int)strlen( filename ) + 1 );
-	f->name = (char *) f + sizeof( replacefunc_t );
-	strcpy( f->name, funcname );
-	f->newname = (char *) f + sizeof( replacefunc_t ) + strlen( funcname ) + 1;
-	sprintf( f->newname, "F%d", numfuncs++ );
-	f->filename = (char *) f + sizeof( replacefunc_t ) + strlen( funcname ) + 1 + strlen( f->newname ) + 1;
-	strcpy( f->filename, filename );
+	f = (replacefunc_t *) GetMemory(sizeof(replacefunc_t) + (int)strlen(funcname) + 1 + 6 + (int)strlen(filename) + 1);
+	f->name = (char *)f + sizeof(replacefunc_t);
+//	strncpy (f->name, funcname);
+	Q_strncpyz (f->name, strlen(funcname) + 1, funcname);
+	f->newname = (char *)f + sizeof(replacefunc_t) + strlen(funcname) + 1;
+//	sprintf (f->newname, "F%d", numfuncs++);
+	Com_sprintf (f->newname, 6, "F%d", numfuncs++);
+	f->filename = (char *)f + sizeof(replacefunc_t) + strlen(funcname) + 1 + strlen(f->newname) + 1;
+//	strncpy (f->filename, filename);
+	Q_strncpyz (f->filename, strlen(filename) + 1, filename);
 	f->next = replacefuncs;
 	replacefuncs = f;
 
 	// construct the declaration
 	list = head;
 	f->dec[0] = '\0';
-	ConcatDec( list, f->dec, 0 );
+	ConcatDec (list, f->dec, sizeof(f->dec), 0);
 
 } //end of the function AddFunctionName
 
