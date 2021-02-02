@@ -1922,6 +1922,12 @@ struct edict_s
 	vec3_t		movedir;
 	vec3_t		pos1;
 	vec3_t		pos2;
+	vec3_t		pos0;	// Knightmare- initial position for secret doors
+
+	// Knightmare added
+	float		width;
+	float		length;
+	float		side;
 
 	vec3_t		velocity;
 	vec3_t		avelocity;

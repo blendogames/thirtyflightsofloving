@@ -78,6 +78,10 @@ field_t fields[] = {
 	{"smooth_movement", FOFS(smooth_movement), F_INT},
 	{"turn_rider", FOFS(turn_rider), F_INT},
 	{"origin_offset", FOFS(origin_offset), F_VECTOR},
+	// Knightmare- these are needed to update func_door_secret's positions
+	{"width", FOFS(width), F_FLOAT},	
+	{"length", FOFS(length), F_FLOAT},
+	{"side", FOFS(side), F_FLOAT},
 	// end Knightmare
 
 	// temp spawn vars -- only valid when the spawn function is called

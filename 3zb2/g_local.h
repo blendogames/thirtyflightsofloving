@@ -1197,6 +1197,12 @@ struct edict_s
 	float		speed, accel, decel;
 	vec3_t		movedir;
 	vec3_t		pos1, pos2;
+	vec3_t		pos0;	// Knightmare- initial position for secret doors
+
+	// Knightmare added
+	float		width;
+	float		length;
+	float		side;
 
 	vec3_t		velocity;
 	vec3_t		avelocity;

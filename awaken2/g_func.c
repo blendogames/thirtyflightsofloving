@@ -166,6 +166,7 @@ void train_spline (edict_t *self)
 #define	STATE_BOTTOM		1
 #define STATE_UP			2
 #define STATE_DOWN			3
+#define STATE_LOWEST		4
 
 #define DOOR_START_OPEN		1
 #define DOOR_REVERSE		2
@@ -3044,88 +3045,175 @@ void door_secret_move5(edict_t *self);
 void door_secret_move6(edict_t *self);
 void door_secret_done(edict_t *self);
 
-void door_secret_use(edict_t *self, edict_t *other, edict_t *activator)
+void door_secret_use (edict_t *self, edict_t *other, edict_t *activator)
 {
 	// make sure we're not already moving
-	if (!VectorCompare(self->s.origin, vec3_origin))
+//	if (!VectorCompare(self->s.origin, vec3_origin))
+	if ((self->moveinfo.state != STATE_LOWEST) && (self->moveinfo.state != STATE_TOP))
 		return;
 
-	Move_Calc(self, self->pos1, door_secret_move1);
-	door_use_areaportals(self, true);
+	// Knightmare- added sound
+	if (self->moveinfo.sound_start)
+		gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_start, 1, self->attenuation, 0); // was ATTN_STATIC
+	if (self->moveinfo.sound_middle)
+	{
+		self->s.sound = self->moveinfo.sound_middle;
+#ifdef LOOP_SOUND_ATTENUATION
+		self->s.attenuation = self->attenuation;
+#endif
+	}
+
+//	Move_Calc (self, self->pos1, door_secret_move1);
+//	door_use_areaportals (self, true);
+	if (self->moveinfo.state == STATE_LOWEST)
+	{
+		self->moveinfo.state = STATE_DOWN;
+		Move_Calc (self, self->pos1, door_secret_move1);
+		door_use_areaportals (self, true);
+	}
+	else	// Knightmare added
+	{
+		self->moveinfo.state = STATE_UP;
+		Move_Calc (self, self->pos1, door_secret_move5);
+	}
 }
 
-void door_secret_move1(edict_t *self)
+void door_secret_move1 (edict_t *self)
 {
 	self->nextthink = level.time + 1.0;
 	self->think = door_secret_move2;
+	self->moveinfo.state = STATE_BOTTOM;
+
+	// Knightmare- added sound
+	self->s.sound = 0;
+	if (self->moveinfo.sound_end)
+		gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_end, 1, self->attenuation, 0); // was ATTN_STATIC
+
 }
 
-void door_secret_move2(edict_t *self)
+void door_secret_move2 (edict_t *self)
 {
-	Move_Calc(self, self->pos2, door_secret_move3);
+	// Knightmare- added sound
+	if (self->moveinfo.sound_start)
+		gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_start, 1, self->attenuation, 0); // was ATTN_STATIC
+	if (self->moveinfo.sound_middle) {
+		self->s.sound = self->moveinfo.sound_middle;
+#ifdef LOOP_SOUND_ATTENUATION
+		self->s.attenuation = self->attenuation;
+#endif
+	}
+
+	self->moveinfo.state = STATE_UP;
+	Move_Calc (self, self->pos2, door_secret_move3);
 }
 
-void door_secret_move3(edict_t *self)
+void door_secret_move3 (edict_t *self)
 {
-	if (self->wait == -1.0)
+	self->moveinfo.state = STATE_TOP;
+
+	// Knightmare- added sound
+	self->s.sound = 0;
+	if (self->moveinfo.sound_end)
+		gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_end, 1, self->attenuation, 0); // was ATTN_STATIC
+
+	if (self->wait == -1)
 		return;
 
 	self->nextthink = level.time + self->wait;
 	self->think = door_secret_move4;
 }
 
-void door_secret_move4(edict_t *self)
+void door_secret_move4 (edict_t *self)
 {
-	Move_Calc(self, self->pos1, door_secret_move5);
+	// Knightmare- added sound
+	if (self->moveinfo.sound_start)
+		gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_start, 1, self->attenuation, 0); // was ATTN_STATIC
+	if (self->moveinfo.sound_middle) {
+		self->s.sound = self->moveinfo.sound_middle;
+#ifdef LOOP_SOUND_ATTENUATION
+		self->s.attenuation = self->attenuation;
+#endif
+	}
+	self->moveinfo.state = STATE_UP;
+	Move_Calc (self, self->pos1, door_secret_move5);
 }
 
-void door_secret_move5(edict_t *self)
+void door_secret_move5 (edict_t *self)
 {
 	self->nextthink = level.time + 1.0;
 	self->think = door_secret_move6;
+	self->moveinfo.state = STATE_BOTTOM;
+
+	// Knightmare- added sound
+	self->s.sound = 0;
+	if (self->moveinfo.sound_end)
+		gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_end, 1, self->attenuation, 0); // was ATTN_STATIC
 }
 
 void door_secret_move6 (edict_t *self)
 {
-	Move_Calc(self, vec3_origin, door_secret_done);
+	// Knightmare- added sound
+	if (self->moveinfo.sound_start)
+		gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_start, 1, self->attenuation, 0); // was ATTN_STATIC
+	if (self->moveinfo.sound_middle) {
+		self->s.sound = self->moveinfo.sound_middle;
+#ifdef LOOP_SOUND_ATTENUATION
+		self->s.attenuation = self->attenuation;
+#endif
+	}
+
+	self->moveinfo.state = STATE_DOWN;
+	Move_Calc (self, self->pos0, door_secret_done);	// was vec3_origin
 }
 
-void door_secret_done(edict_t *self)
+void door_secret_done (edict_t *self)
 {
-	if (!self->targetname || (self->spawnflags & SECRET_ALWAYS_SHOOT))
+	if (!(self->targetname) || (self->spawnflags & SECRET_ALWAYS_SHOOT))
 	{
 		self->health = 0;
 		self->takedamage = DAMAGE_YES;
 	}
-	door_use_areaportals(self, false);
+	self->moveinfo.state = STATE_LOWEST;	// Knightmare added
+
+    // Knightmare- added sound
+	self->s.sound = 0;
+	if (self->moveinfo.sound_end)
+		gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_end, 1, self->attenuation, 0); // was ATTN_STATIC
+
+	door_use_areaportals (self, false);
 }
 
-void door_secret_blocked(edict_t *self, edict_t *other)
+void door_secret_blocked  (edict_t *self, edict_t *other)
 {
-	if (!(other->svflags & SVF_MONSTER) && !other->client)
+	if (!(other->svflags & SVF_MONSTER) && (!other->client) || !Q_stricmp(other->classname,"bodyque"))
 	{
 		// give it a chance to go away on it's own terms (like gibs)
-		T_Damage(other, self, self, vec3_origin, other->s.origin, vec3_origin, 100000, 1, 0, MOD_CRUSH);
+		T_Damage (other, self, self, vec3_origin, other->s.origin, vec3_origin, 100000, 1, 0, MOD_CRUSH);
 		// if it's still there, nuke it
 		if (other)
-			BecomeExplosion1(other);
+			BecomeExplosion1 (other);
 		return;
 	}
 
 	if (level.time < self->touch_debounce_time)
 		return;
-
 	self->touch_debounce_time = level.time + 0.5;
-	T_Damage(other, self, self, vec3_origin, other->s.origin, vec3_origin, self->dmg, 1, 0, MOD_CRUSH);
+
+	if (other->deadflag)
+		T_Damage (other, self, self, vec3_origin, other->s.origin, vec3_origin, 100000, 1, 0, MOD_CRUSH);
+	else
+		T_Damage (other, self, self, vec3_origin, other->s.origin, vec3_origin, self->dmg, 1, 0, MOD_CRUSH);
+
+//	T_Damage (other, self, self, vec3_origin, other->s.origin, vec3_origin, self->dmg, 1, 0, MOD_CRUSH);
 }
 
-void door_secret_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+void door_secret_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
 	self->takedamage = DAMAGE_NO;
-	door_secret_use(self, attacker, attacker);
+	door_secret_use (self, attacker, attacker);
 }
 
-void SP_func_door_secret(edict_t *ent)
+void SP_func_door_secret (edict_t *ent)
 {
 	vec3_t	forward;
 	vec3_t	right;
@@ -3159,8 +3247,10 @@ void SP_func_door_secret(edict_t *ent)
 		ent->wait = 5.0;
 
 	ent->moveinfo.accel = ent->moveinfo.decel =	ent->moveinfo.speed = 50.0;
+	ent->moveinfo.state = STATE_LOWEST;	// Knightmare added
 
 	// calculate positions
+	VectorCopy (ent->s.origin, ent->pos0);
 	AngleVectors(ent->s.angles, forward, right, up);
 	VectorClear(ent->s.angles);
 	side = 1.0 - (ent->spawnflags & SECRET_1ST_LEFT);

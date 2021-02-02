@@ -135,6 +135,7 @@ void ThrowGib(edict_t *self, char *gibname, int damage, int type, float livetime
 	gib->solid = SOLID_NOT;
 	gib->s.effects |= EF_GIB;
 	gib->flags |= FL_NO_KNOCKBACK;
+	gib->svflags |= SVF_GIB; // Knightmare- added gib flag
 	gib->takedamage = DAMAGE_YES;
 	gib->die = gib_die;
 
@@ -189,6 +190,7 @@ void ThrowHead(edict_t *self, char *gibname, int damage, int type)
 	self->s.effects &= ~EF_FLIES;
 	self->s.sound = 0;
 	self->flags |= FL_NO_KNOCKBACK;
+	self->svflags |= SVF_GIB; // Knightmare- added gib flag
 	self->svflags &= ~SVF_MONSTER;
 	self->takedamage = DAMAGE_YES;
 	self->die = gib_die;
@@ -251,6 +253,7 @@ void ThrowClientHead(edict_t *self, int damage)
 	self->s.effects = EF_GIB;
 	self->s.sound = 0;
 	self->flags |= FL_NO_KNOCKBACK;
+	self->svflags |= SVF_GIB; // Knightmare- added gib flag
 
 //CW++
 	if (self->disintegrated)
@@ -309,6 +312,7 @@ void ThrowDebris(edict_t *self, char *modelname, float speed, vec3_t origin)
 	chunk->s.frame = 0;
 	chunk->flags = 0;
 	chunk->classname = "debris";
+	chunk->svflags |= SVF_GIB; // Knightmare- gib flag
 	chunk->takedamage = DAMAGE_YES;
 	chunk->die = debris_die;
 	gi.linkentity(chunk);
