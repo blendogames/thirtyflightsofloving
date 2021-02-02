@@ -540,15 +540,15 @@ void hover_deadthink (edict_t *self)
 	}
 	// Knightmare- gibs!
 	gi.sound (self, CHAN_VOICE, gi.soundindex ("misc/udeath.wav"), 1, ATTN_NORM, 0);
-	for (n= 0; n < 8; n++)
-		ThrowGib (self, "models/objects/gibs/sm_metal/tris.md2", 200, GIB_METALLIC);
-	for (n= 0; n < 2; n++)
-		ThrowGib (self, "models/objects/gibs/gear/tris.md2", 200, GIB_METALLIC);
-	for (n= 0; n < 2; n++)
-		ThrowGib (self, "models/objects/gibs/bone/tris.md2", 200, GIB_ORGANIC);
-	for (n= 0; n < 6; n++)
-		ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", 200, GIB_ORGANIC);
-	ThrowGib (self, "models/objects/gibs/head2/tris.md2", 200, GIB_ORGANIC);
+	for (n = 0; n < 8; n++)
+		ThrowGib (self, "models/objects/gibs/sm_metal/tris.md2", 0, 0, 200, GIB_METALLIC);
+	for (n = 0; n < 2; n++)
+		ThrowGib (self, "models/objects/gibs/gear/tris.md2", 0, 0, 200, GIB_METALLIC);
+	for (n = 0; n < 2; n++)
+		ThrowGib (self, "models/objects/gibs/bone/tris.md2", 0, 0, 200, GIB_ORGANIC);
+	for (n = 0; n < 6; n++)
+		ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", 0, 0, 200, GIB_ORGANIC);
+	ThrowGib (self, "models/objects/gibs/head2/tris.md2", 0, 0, 200, GIB_ORGANIC);
 	BecomeExplosion1(self);
 }
 
@@ -573,15 +573,15 @@ void hover_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 	if (self->health <= self->gib_health && !(self->spawnflags & SF_MONSTER_NOGIB))
 	{	// Knightmare- more gibs!
 		gi.sound (self, CHAN_VOICE, gi.soundindex ("misc/udeath.wav"), 1, ATTN_NORM, 0);
-		for (n= 0; n < 8; n++)
-			ThrowGib (self, "models/objects/gibs/sm_metal/tris.md2", damage, GIB_METALLIC);
-		for (n= 0; n < 2; n++)
-			ThrowGib (self, "models/objects/gibs/gear/tris.md2", damage, GIB_METALLIC);
-		for (n= 0; n < 2; n++)
-			ThrowGib (self, "models/objects/gibs/bone/tris.md2", damage, GIB_ORGANIC);
-		for (n= 0; n < 6; n++)
-			ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
-		ThrowGib (self, "models/objects/gibs/head2/tris.md2", damage, GIB_ORGANIC);
+		for (n = 0; n < 8; n++)
+			ThrowGib (self, "models/objects/gibs/sm_metal/tris.md2", 0, 0, damage, GIB_METALLIC);
+		for (n = 0; n < 2; n++)
+			ThrowGib (self, "models/objects/gibs/gear/tris.md2", 0, 0, damage, GIB_METALLIC);
+		for (n = 0; n < 2; n++)
+			ThrowGib (self, "models/objects/gibs/bone/tris.md2", 0, 0, damage, GIB_ORGANIC);
+		for (n = 0; n < 6; n++)
+			ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", 0, 0, damage, GIB_ORGANIC);
+		ThrowGib (self, "models/objects/gibs/head2/tris.md2", 0, 0, damage, GIB_ORGANIC);
 		BecomeExplosion1(self);
 		//ThrowHead (self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
 		//self->deadflag = DEAD_DEAD;

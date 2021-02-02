@@ -1068,14 +1068,15 @@ void EndDMLevel (void);
 //
 // g_misc.c
 //
-void ThrowHead (edict_t *self, char *gibname, int damage, int type);
+void ThrowHead (edict_t *self, char *gibname, int frame, int skinnum, int damage, int type);
 void ThrowClientHead (edict_t *self, int damage);
-void ThrowGib (edict_t *self, char *gibname, int damage, int type);
+void ThrowGib (edict_t *self, char *gibname, int frame, int skinnum, int damage, int type);
+void ThrowDebris (edict_t *self, char *modelname, float speed, vec3_t origin, int frame, int skin, int effects);
 void BecomeExplosion1(edict_t *self);
 void barrel_delay (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point);
 void barrel_explode (edict_t *self);
 void func_explosive_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point);
-	void PrecacheDebris (int style);
+void PrecacheDebris (int style);
 
 //
 // g_model.c
@@ -1238,7 +1239,6 @@ edict_t *findradius2 (edict_t *from, vec3_t org, float rad);
 #define BLASTER_GREEN	2
 #define BLASTER_BLUE	3
 #define BLASTER_RED		4
-void ThrowDebris (edict_t *self, char *modelname, float speed, vec3_t origin, int skin, int effects);
 qboolean fire_hit (edict_t *self, vec3_t aim, int damage, int kick);
 void fire_bullet (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, int hspread, int vspread, int mod);
 void fire_shotgun (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, int hspread, int vspread, int count, int mod);

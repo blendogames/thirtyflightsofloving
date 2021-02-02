@@ -621,12 +621,12 @@ void floater_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dama
 {
 	int	n;
 	// Knightmare- gibs!
-	for (n= 0; n < 4; n++)
-		ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
-	for (n= 0; n < 10; n++)
-		ThrowGib (self, "models/objects/gibs/sm_metal/tris.md2", damage, GIB_METALLIC);
-	for (n= 0; n < 2; n++)
-		ThrowGib (self, "models/objects/gibs/gear/tris.md2", damage, GIB_METALLIC);
+	for (n = 0; n < 4; n++)
+		ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", 0, 0, damage, GIB_ORGANIC);
+	for (n = 0; n < 10; n++)
+		ThrowGib (self, "models/objects/gibs/sm_metal/tris.md2", 0, 0, damage, GIB_METALLIC);
+	for (n = 0; n < 2; n++)
+		ThrowGib (self, "models/objects/gibs/gear/tris.md2", 0, 0, damage, GIB_METALLIC);
 	gi.sound (self, CHAN_VOICE, sound_death1, 1, ATTN_NORM, 0);
 	BecomeExplosion1(self);
 }

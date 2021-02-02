@@ -949,7 +949,7 @@ ROCKET
 
 ======================================================================
 */
-edict_t	*rocket_target(edict_t *self, vec3_t start, vec3_t forward)
+edict_t	*rocket_target (edict_t *self, vec3_t start, vec3_t forward)
 {
 	float       bd, d;
 	int			i;
