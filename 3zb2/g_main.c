@@ -189,7 +189,7 @@ void ClientEndServerFrames (void)
 		ent = g_edicts + 1 + i;
 		if (!ent->inuse || !ent->client)
 			continue;
-		if(!(ent->svflags & SVF_MONSTER))  
+		if (!(ent->svflags & SVF_MONSTER))  
 			ClientEndServerFrame (ent);
 	}
 
@@ -212,95 +212,95 @@ void Get_NextMap()
 	char	nextmap[MAX_QPATH];
 	int		i;
 	
-	if(!maplist->string) return;
+	if (!maplist->string) return;
 
-	sprintf(Buff,".\\%s\\3ZBMAPS.LST",gamepath->string);
+	Com_sprintf (Buff, sizeof(Buff), ".\\%s\\3ZBMAPS.LST",gamepath->string);
 	fp = fopen(Buff,"r");
-	if(fp == NULL) return;
+	if (fp == NULL) return;
 	
 	//search section
 	while(1)
 	{
-		if(fgets( Buff, sizeof(Buff), fp ) == NULL) goto NONEXTMAP;
+		if (fgets( Buff, sizeof(Buff), fp ) == NULL) goto NONEXTMAP;
 
-		if(Buff[0] != '[') continue;
+		if (Buff[0] != '[') continue;
 
 		i = 0;
 		while(1)
 		{
-			if(Buff[i] == ']') Buff[i] = 0;
+			if (Buff[i] == ']') Buff[i] = 0;
 
-			if(Buff[i] == 0) break;
+			if (Buff[i] == 0) break;
 
-			if(++i >= sizeof(Buff))
+			if (++i >= sizeof(Buff))
 			{
 				Buff[i - 1] = 0;
 				break;
 			}
 		}
 		//compare map section name
-		if(Q_stricmp (&Buff[1], maplist->string) == 0) break;
+		if (Q_stricmp (&Buff[1], maplist->string) == 0) break;
 	}
 
 	//search current mapname
 	while(1)
 	{
-		if(fgets( Buff, sizeof(Buff), fp ) == NULL) goto NONEXTMAP;
+		if (fgets( Buff, sizeof(Buff), fp ) == NULL) goto NONEXTMAP;
 
-		if(Buff[0] == '[')
+		if (Buff[0] == '[')
 		{
-			if( firstflag )
+			if ( firstflag )
 			{
-				strcpy(nextmap,top);
+				Com_strcpy (nextmap, sizeof(nextmap),top);
 				goto SETNEXTMAP;
 			}
 			else goto NONEXTMAP;
 		}
 
-		if(Buff[0] == '\n') continue;
+		if (Buff[0] == '\n') continue;
 
 		sscanf(Buff,"%s",nextmap);
 
-		if(!firstflag)
+		if (!firstflag)
 		{
 			firstflag = true;
-			strcpy(top,nextmap);
+			Com_strcpy (top, sizeof(top), nextmap);
 		}
 
-		if(Q_stricmp (level.mapname, nextmap) == 0) break;
+		if (Q_stricmp (level.mapname, nextmap) == 0) break;
 	}
 
 	//search nextmap
 	while(1)
 	{
-		if(fgets( Buff, sizeof(Buff), fp ) == NULL)
+		if (fgets( Buff, sizeof(Buff), fp ) == NULL)
 		{
-			if( firstflag )
+			if ( firstflag )
 			{
-				strcpy(nextmap,top);
+				Com_strcpy (nextmap, sizeof(nextmap) ,top);
 				goto SETNEXTMAP;
 			}
 			else goto NONEXTMAP;
 		}
 
-		if(Buff[0] == '[')
+		if (Buff[0] == '[')
 		{
-			if( firstflag )
+			if ( firstflag )
 			{
-				strcpy(nextmap,top);
+				Com_strcpy (nextmap, sizeof(nextmap), top);
 				goto SETNEXTMAP;
 			}
 			else goto NONEXTMAP;
 		}
 
-		if(Buff[0] == '\n') continue;
+		if (Buff[0] == '\n') continue;
 
 		sscanf(Buff,"%s",nextmap);
 		break;
 	}
 SETNEXTMAP:
 
-	strcpy(level.nextmap,nextmap);
+	Com_strcpy (level.nextmap, sizeof(level.nextmap), nextmap);
 
 NONEXTMAP:
 	fclose(fp);
@@ -510,9 +510,9 @@ void G_RunFrame (void)
 //
 // Bot Spawning
 //
-	if(SpawnWaitingBots && !level.intermissiontime)
+	if (SpawnWaitingBots && !level.intermissiontime)
 	{
-		if(spawncycle < level.time)
+		if (spawncycle < level.time)
 		{
 			Bot_SpawnCall();
 			spawncycle = level.time + FRAMETIME * 10 + 0.01 * SpawnWaitingBots;
@@ -520,7 +520,7 @@ void G_RunFrame (void)
 	}
 	else
 	{
-		if(spawncycle < level.time) spawncycle = level.time + FRAMETIME * 10;
+		if (spawncycle < level.time) spawncycle = level.time + FRAMETIME * 10;
 	}
 	//
 	// treat each object in turn
@@ -548,9 +548,9 @@ void G_RunFrame (void)
 		}
 
 		//ctf job assign
-		if(ctf->value)
+		if (ctf->value)
 		{
-			if(ctfjob_update < level.time)
+			if (ctfjob_update < level.time)
 			{
 //gi.bprintf(PRINT_HIGH,"Assigned!!!\n");
 				CTFJobAssign();
@@ -558,13 +558,13 @@ void G_RunFrame (void)
 			}
 		}
 //////////旗のスコアチェック
-		if(zigmode->value == 1)
+		if (zigmode->value == 1)
 		{
-			if(next_fragadd < level.time)
+			if (next_fragadd < level.time)
 			{
-				if(i > 0 && i <= maxclients->value && g_edicts[i].client)
+				if (i > 0 && i <= maxclients->value && g_edicts[i].client)
 				{
-					if(g_edicts[i].client->pers.inventory[ITEM_INDEX(zflag_item)])
+					if (g_edicts[i].client->pers.inventory[ITEM_INDEX(zflag_item)])
 					{
 						zflag_ent = NULL;
 						haveflag = true;
@@ -576,23 +576,23 @@ void G_RunFrame (void)
 							//旗を持ってるとフラッグを足す
 							for ( j = 1 ; j <= maxclients->value ; j++)
 							{
-								if(g_edicts[j].inuse)
+								if (g_edicts[j].inuse)
 								{
-									if(OnSameTeam(&g_edicts[i],&g_edicts[j]))
+									if (OnSameTeam(&g_edicts[i],&g_edicts[j]))
 										g_edicts[j].client->resp.score += 1;
 								}
 							}
 						}	
 					}
 				}
-				if(zflag_ent != NULL)
+				if (zflag_ent != NULL)
 				{
-					if(!zflag_ent->inuse)
+					if (!zflag_ent->inuse)
 					{
 	//				item = FindItem("Zig Flag");
 						SelectSpawnPoint (ent, v, vv);
 			//			VectorCopy (v, ent->s.origin);
-						if(ZIGDrop_Flag(ent,zflag_item))
+						if (ZIGDrop_Flag(ent,zflag_item))
 						{
 							VectorCopy (v, zflag_ent->s.origin);
 						}			
@@ -610,14 +610,14 @@ void G_RunFrame (void)
 		G_RunEntity (ent);
 	}
 
-	if(next_fragadd < level.time)
+	if (next_fragadd < level.time)
 	{
-		if(zflag_ent == NULL && !haveflag && !ctf->value 
+		if (zflag_ent == NULL && !haveflag && !ctf->value 
 			&& zigmode->value == 1 && zigflag_spawn == 2)
 		{
 			SelectSpawnPoint (ent, v, vv);
 			//VectorCopy (v, ent->s.origin);
-			if(ZIGDrop_Flag(ent,zflag_item))
+			if (ZIGDrop_Flag(ent,zflag_item))
 			{
 				VectorCopy (v, zflag_ent->s.origin);
 			}

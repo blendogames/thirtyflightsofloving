@@ -365,7 +365,7 @@ void ThrowClientHead (edict_t *self, int damage)
 
 	if (self->client)	// bodies in the queue don't have a client anymore
 	{
-		if(!(self->svflags & SVF_MONSTER))
+		if (!(self->svflags & SVF_MONSTER))
 		{
 			self->client->anim_priority = ANIM_DEATH;
 			self->client->anim_end = self->s.frame;
@@ -1443,7 +1443,7 @@ void viper_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 /*	e = self->movewith_next;
 	while(e) {
 		next = e->movewith_next;
-		if(e->solid == SOLID_NOT) {
+		if (e->solid == SOLID_NOT) {
 			e->nextthink = 0;
 			G_FreeEdict(e);
 		} else
@@ -1489,9 +1489,9 @@ void SP_misc_viper (edict_t *ent)
 		VectorSet (ent->maxs,  32,  24,  16);
 		ent->takedamage = DAMAGE_YES;
 		ent->die = viper_die;
-		if(!ent->dmg)
+		if (!ent->dmg)
 			ent->dmg = 200;
-		if(!ent->mass)
+		if (!ent->mass)
 			ent->mass = 800;
 	}
 	else
@@ -1668,9 +1668,9 @@ void SP_misc_strogg_ship (edict_t *ent)
 		VectorSet (ent->maxs,  72,  60,  38);
 		ent->takedamage = DAMAGE_YES;
 		ent->die = viper_die;
-		if(!ent->dmg)
+		if (!ent->dmg)
 			ent->dmg = 200;
-		if(!ent->mass)
+		if (!ent->mass)
 			ent->mass = 1200;
 	}
 	else
@@ -2122,24 +2122,24 @@ void teleporter_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_
 
 
 	//route update
-	if(chedit->value && CurrentIndex < MAXNODES && other == &g_edicts[1])
+	if (chedit->value && CurrentIndex < MAXNODES && other == &g_edicts[1])
 	{
 		gi.bprintf(PRINT_HIGH,"teleport!\n");
 		VectorCopy(self->s.origin,Route[CurrentIndex].Pt);
 		Route[CurrentIndex].ent = NULL;
 		Route[CurrentIndex].state = GRS_TELEPORT;
-		if(++CurrentIndex < MAXNODES)
+		if (++CurrentIndex < MAXNODES)
 		{
 			memset(&Route[CurrentIndex],0,sizeof(route_t));
 			Route[CurrentIndex].index = Route[CurrentIndex - 1].index +1;
 		}
 	}
 
-	if(other->svflags & SVF_MONSTER)
+	if (other->svflags & SVF_MONSTER)
 	{
-		if(other->client->zc.route_trace && other->client->zc.routeindex < CurrentIndex )
+		if (other->client->zc.route_trace && other->client->zc.routeindex < CurrentIndex )
 		{
-			if(Route[other->client->zc.routeindex].state == GRS_TELEPORT
+			if (Route[other->client->zc.routeindex].state == GRS_TELEPORT
 				/*&& Route[other->client->zc.routeindex].ent == self*/)
 			{
 				other->client->zc.routeindex++;
@@ -2147,9 +2147,9 @@ void teleporter_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_
 
 			}
 
-			if(other->client->zc.routeindex < CurrentIndex)
+			if (other->client->zc.routeindex < CurrentIndex)
 			{
-				if(Route[other->client->zc.routeindex].state == GRS_GRAPRELEASE)
+				if (Route[other->client->zc.routeindex].state == GRS_GRAPRELEASE)
 				{
 					other->client->zc.routeindex++;
 //gi.bprintf(PRINT_HIGH,"Groff!\n");

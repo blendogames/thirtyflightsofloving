@@ -153,6 +153,10 @@ SOURCE=.\g_mtrain.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\g_newfnc.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\g_phys.c
 # End Source File
 # Begin Source File

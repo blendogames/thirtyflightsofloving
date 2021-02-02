@@ -107,9 +107,25 @@ typedef enum {false, true}	qboolean;
 #define	OLD_MAX_IMAGES		256
 // end Knightmare
 
+// Knightmare- hacked offsets for old demos
+#define	OLD_MAX_MODELS		256
+#define	OLD_MAX_SOUNDS		256
+#define	OLD_MAX_IMAGES		256
+// end Knightmare
+
 #define	MAX_ITEMS			256
 #define MAX_GENERAL			(MAX_CLIENTS*2)	// general config strings
 
+// Knightmare- world size
+#ifdef KMQUAKE2_ENGINE_MOD
+#define MAX_WORLD_COORD		(16384)
+#define MIN_WORLD_COORD		(-16384)
+#else
+#define MAX_WORLD_COORD		(4096)
+#define MIN_WORLD_COORD		(-4096)
+#endif
+#define WORLD_SIZE			(MAX_WORLD_COORD - MIN_WORLD_COORD)
+// end Knightmare
 
 // game print flags
 #define	PRINT_LOW			0		// pickup messages
@@ -245,8 +261,9 @@ char *COM_Parse (char **data_p);
 // data is an in/out parm, returns a parsed out token
 
 void Com_sprintf (char *dest, size_t size, char *fmt, ...);
-void Com_strcpy (char *dest, size_t destSize, const char *src);
-void Com_strcat (char *dest, size_t destSize, const char *src);
+// Knightmare added
+size_t Com_strcpy (char *dest, size_t destSize, const char *src);
+size_t Com_strcat (char *dest, size_t destSize, const char *src);
 
 void Com_PageInMemory (byte *buffer, int size);
 
@@ -572,6 +589,8 @@ typedef struct
 //
 #define	BUTTON_ATTACK		1
 #define	BUTTON_USE			2
+#define BUTTON_ATTACK2      4
+#define BUTTONS_ATTACK (BUTTON_ATTACK | BUTTON_ATTACK2)
 #define	BUTTON_ANY			128			// any key whatsoever
 
 

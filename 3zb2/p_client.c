@@ -55,7 +55,7 @@ static void SP_CreateCoopSpots (edict_t *self)
 {
 	edict_t	*spot;
 
-	if(Q_stricmp(level.mapname, "security") == 0)
+	if (Q_stricmp(level.mapname, "security") == 0)
 	{
 		spot = G_Spawn();
 		spot->classname = "info_player_coop";
@@ -93,7 +93,7 @@ void SP_info_player_start(edict_t *self)
 {
 	if (!coop->value)
 		return;
-	if(Q_stricmp(level.mapname, "security") == 0)
+	if (Q_stricmp(level.mapname, "security") == 0)
 	{
 		// invoke one of our gross, ugly, disgusting hacks
 		self->think = SP_CreateCoopSpots;
@@ -126,7 +126,7 @@ void SP_info_player_coop(edict_t *self)
 		return;
 	}
 
-	if((Q_stricmp(level.mapname, "jail2") == 0)   ||
+	if ((Q_stricmp(level.mapname, "jail2") == 0)   ||
 	   (Q_stricmp(level.mapname, "jail4") == 0)   ||
 	   (Q_stricmp(level.mapname, "mine1") == 0)   ||
 	   (Q_stricmp(level.mapname, "mine2") == 0)   ||
@@ -418,14 +418,14 @@ void TossClientWeapon (edict_t *self)
 	edict_t		*enemy = NULL;
 	float		spread;
 
-	if(self->enemy && self->enemy != self)
+	if (self->enemy && self->enemy != self)
 	{
-		if(self->enemy->classname[0] == 'p')
+		if (self->enemy->classname[0] == 'p')
 		{
 			
 			VectorSubtract(self->s.origin,self->enemy->s.origin,v);
 			dist = VectorLength(v);
-			if(dist < 200) enemy = self->enemy;
+			if (dist < 200) enemy = self->enemy;
 		}
 	}
 
@@ -463,7 +463,7 @@ void TossClientWeapon (edict_t *self)
 		drop = Drop_Item (self, item);
 		self->client->v_angle[YAW] += spread;
 		drop->spawnflags = DROPPED_PLAYER_ITEM;
-		if(enemy) enemy->client->zc.second_target = drop;
+		if (enemy) enemy->client->zc.second_target = drop;
 	}
 
 	if (quad)
@@ -476,7 +476,7 @@ void TossClientWeapon (edict_t *self)
 		drop->touch = Touch_Item;
 		drop->nextthink = level.time + (self->client->quad_framenum - level.framenum) * FRAMETIME;
 		drop->think = G_FreeEdict;
-		if(enemy) enemy->client->zc.second_target = drop;
+		if (enemy) enemy->client->zc.second_target = drop;
 	}
 	// RAFAEL
 	if (quadfire)
@@ -489,7 +489,7 @@ void TossClientWeapon (edict_t *self)
 		drop->touch = Touch_Item;
 		drop->nextthink = level.time + (self->client->quadfire_framenum - level.framenum) * FRAMETIME;
 		drop->think = G_FreeEdict;
-		if(enemy) enemy->client->zc.second_target = drop;
+		if (enemy) enemy->client->zc.second_target = drop;
 	}
 }
 
@@ -552,7 +552,7 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 
 	if (!self->deadflag)
 	{
-		if(self->svflags & SVF_MONSTER)
+		if (self->svflags & SVF_MONSTER)
 		{
 			LookAtKiller (self, inflictor, attacker);
 			self->nextthink = level.time + FRAMETIME;
@@ -568,16 +568,16 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 		self->client->ps.pmove.pm_type = PM_DEAD;
 		ClientObituary (self, inflictor, attacker);
 //ZOID
-		if(ctf->value) CTFFragBonuses(self, inflictor, attacker);
+		if (ctf->value) CTFFragBonuses(self, inflictor, attacker);
 //ZOID
 
 		//旗持ってる場合は落とす
-		if(self->client->pers.inventory[ITEM_INDEX(zflag_item)])
+		if (self->client->pers.inventory[ITEM_INDEX(zflag_item)])
 			zflag_item->drop(self,zflag_item);
 
 		TossClientWeapon (self);
 //ZOID
-		if(ctf->value)
+		if (ctf->value)
 		{
 			CTFPlayerResetGrapple(self);
 			CTFDeadDropFlag(self);
@@ -713,7 +713,7 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	self->deadflag = DEAD_DEAD;
 
 	//routing last index move
-	if(chedit->value && self == &g_edicts[1]) Move_LastRouteIndex();
+	if (chedit->value && self == &g_edicts[1]) Move_LastRouteIndex();
 
 	gi.linkentity (self);
 }
@@ -753,7 +753,7 @@ void InitClientPersistant (gclient_t *client)
 
 //ZOID
 	item = FindItem("Grapple");
-	if(ctf->value)	client->pers.inventory[ITEM_INDEX(item)] = 1; //ponpoko
+	if (ctf->value)	client->pers.inventory[ITEM_INDEX(item)] = 1; //ponpoko
 //ZOID
 
 	client->pers.health			= 100;
@@ -1075,7 +1075,7 @@ void	SelectSpawnPoint (edict_t *ent, vec3_t origin, vec3_t angles)
 	}
 
 	VectorCopy (spot->s.origin, origin);
-	if(ent->svflags & SVF_MONSTER) origin[2] += 32;
+	if (ent->svflags & SVF_MONSTER) origin[2] += 32;
 	else origin[2] += 9;
 	VectorCopy (spot->s.angles, angles);
 }
@@ -1131,7 +1131,7 @@ void CopyToBodyQue (edict_t *ent)
 	body->s.number = body - g_edicts;
 
 	//強引にフレームセット
-	if(body->s.modelindex == skullindex || body->s.modelindex == headindex) body->s.frame = 0;
+	if (body->s.modelindex == skullindex || body->s.modelindex == headindex) body->s.frame = 0;
 
 	body->svflags = ent->svflags;
 	VectorCopy (ent->mins, body->mins);
@@ -1145,7 +1145,7 @@ void CopyToBodyQue (edict_t *ent)
 	body->movetype = MOVETYPE_TOSS;//ent->movetype;
 
 	body->die = body_die;
-	if(ent->health < -40)
+	if (ent->health < -40)
 	{
 		body->takedamage = DAMAGE_NO;//DAMAGE_YES;
 		body->solid = SOLID_NOT;
@@ -1438,16 +1438,16 @@ void PutClientInServer (edict_t *ent)
 		client->resp.spectator = false;
 
 //ZOID
-	if(ctf->value)
+	if (ctf->value)
 	{
 		if (CTFStartClient(ent))
 			return;
 	}
 //ZOID
 //ponpoko
-/*	if(hokuto->value)
+/*	if (hokuto->value)
 	{
-		if(ZigockStartClient(ent))
+		if (ZigockStartClient(ent))
 			return;
 	}*/
 //ponpoko
@@ -1582,7 +1582,7 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo)
 	// check for malformed or illegal info strings
 	if (!Info_Validate(userinfo))
 	{
-		strcpy (userinfo, "\\name\\badinfo\\skin\\male/grunt");
+		Com_strcpy (userinfo, MAX_INFO_STRING, "\\name\\badinfo\\skin\\male/grunt");	// userinfo is always length of MAX_INFO_STRING 
 	}
 
 	// set name
@@ -1823,7 +1823,7 @@ void Get_Position ( edict_t *ent, vec3_t position )
 
 void ChainPodThink (edict_t *ent)
 {
-	if(ent->owner == NULL )return;
+	if (ent->owner == NULL )return;
 	
 	gi.WriteByte (svc_temp_entity);
 	gi.WriteByte (TE_BFG_LASER);
@@ -1831,9 +1831,9 @@ void ChainPodThink (edict_t *ent)
 	gi.WritePosition (ent->owner->s.origin);
 	gi.multicast (ent->s.origin, MULTICAST_PHS);
 
-	if(ent->target_ent != NULL)
+	if (ent->target_ent != NULL)
 	{
-		if(Q_stricmp (ent->target_ent->classname, "item_flag_team2") == 0)
+		if (Q_stricmp (ent->target_ent->classname, "item_flag_team2") == 0)
 		{
 			gi.WriteByte (svc_temp_entity);
 			gi.WriteByte (TE_BFG_LASER);
@@ -1858,9 +1858,9 @@ qboolean TraceX (edict_t *ent,vec3_t p2)
 
 	contents = CONTENTS_SOLID | CONTENTS_WINDOW;
 
-	if(!(ent->svflags & SVF_MONSTER))
+	if (!(ent->svflags & SVF_MONSTER))
 	{
-		if(ent->client->zc.waterstate)
+		if (ent->client->zc.waterstate)
 		{
 			VectorCopy(ent->mins,v1);
 			VectorCopy(ent->maxs,v2);
@@ -1870,7 +1870,7 @@ qboolean TraceX (edict_t *ent,vec3_t p2)
 			v2[0] += 4;
 			v2[1] += 4;*/
 		}
-		else if(!(ent->client->ps.pmove.pm_flags & PMF_DUCKED))
+		else if (!(ent->client->ps.pmove.pm_flags & PMF_DUCKED))
 		{
 			VectorSet(v1,-16,-16,-4);
 			VectorSet(v2,16,16,32);			
@@ -1891,17 +1891,17 @@ qboolean TraceX (edict_t *ent,vec3_t p2)
 	}
 
 	rs_trace = gi.trace (ent->s.origin, v1, v2, p2 ,ent, contents );
-	if(rs_trace.fraction == 1.0 && !rs_trace.allsolid && !rs_trace.startsolid ) return true;
+	if (rs_trace.fraction == 1.0 && !rs_trace.allsolid && !rs_trace.startsolid ) return true;
 
-	if(ent->client->zc.route_trace && rs_trace.ent && (ent->svflags & SVF_MONSTER)) 
+	if (ent->client->zc.route_trace && rs_trace.ent && (ent->svflags & SVF_MONSTER)) 
 	{
-		//if(!rs_trace.ent->targetname)
-		if(!Q_stricmp(rs_trace.ent->classname, "func_door"))
+		//if (!rs_trace.ent->targetname)
+		if (!Q_stricmp(rs_trace.ent->classname, "func_door"))
 		{
-			if(rs_trace.ent->moveinfo.state == PSTATE_UP) return true;
+			if (rs_trace.ent->moveinfo.state == PSTATE_UP) return true;
 			else return false;
 		}
-//		if(!Q_stricmp(rs_trace.ent->classname, "func_train")) return true;
+//		if (!Q_stricmp(rs_trace.ent->classname, "func_train")) return true;
 	}
 	
 	return false;
@@ -1932,7 +1932,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	else
 		ground_speed = 0;
 
-	if( (ent->client->ctf_grapplestate == CTF_GRAPPLE_STATE_PULL) ||
+	if ( (ent->client->ctf_grapplestate == CTF_GRAPPLE_STATE_PULL) ||
 		(ent->client->chase_target != NULL) ||
 		(ground_speed > 0) )
 		ent->client->ps.pmove.pm_flags |= PMF_NO_PREDICTION;
@@ -1943,19 +1943,19 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	impulse = ucmd->impulse;
 
 	
-	if(impulse == 1) gi.bprintf(PRINT_HIGH,"%f\n",ent->s.origin[2]);
+	if (impulse == 1) gi.bprintf(PRINT_HIGH,"%f\n",ent->s.origin[2]);
 
 	//--------------------------------------------------------------------------------------
 	//Target check
-	if(ent->client->zc.first_target)
+	if (ent->client->zc.first_target)
 	{
-		if(!ent->client->zc.first_target->inuse) ent->client->zc.first_target = NULL;
-		else if(!ent->client->zc.first_target->deadflag) ent->client->zc.first_target = NULL;
+		if (!ent->client->zc.first_target->inuse) ent->client->zc.first_target = NULL;
+		else if (!ent->client->zc.first_target->deadflag) ent->client->zc.first_target = NULL;
 	}
 
 	//--------------------------------------------------------------------------------------
 	//get JumpMax
-	if(JumpMax == 0)
+	if (JumpMax == 0)
 	{
 		x = VEL_BOT_JUMP - ent->gravity * sv_gravity->value * FRAMETIME;
 		JumpMax = 0;
@@ -1963,33 +1963,33 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		{
 			JumpMax += x * FRAMETIME; 
 			x -= ent->gravity * sv_gravity->value * FRAMETIME;
-			if( x < 0 ) break;
+			if ( x < 0 ) break;
 		}
 	}
 
 	//route nodeput
 	j = 0;
-	if(ent->client->ctf_grapple && ent->client->ctf_grapplestate > CTF_GRAPPLE_STATE_FLY) j = 1;
+	if (ent->client->ctf_grapple && ent->client->ctf_grapplestate > CTF_GRAPPLE_STATE_FLY) j = 1;
 
-	if(!j && chedit->value && CurrentIndex < MAXNODES && !ent->deadflag && ent == &g_edicts[1])
+	if (!j && chedit->value && CurrentIndex < MAXNODES && !ent->deadflag && ent == &g_edicts[1])
 	{
-		if(targetindex > 0) 
+		if (targetindex > 0) 
 		{
-			if(ent->target_ent == NULL) return;
+			if (ent->target_ent == NULL) return;
 			other = ent->target_ent;
 
-			if(!TraceX(ent,other->s.origin))
+			if (!TraceX(ent,other->s.origin))
 			{
 				k = 0;
 				i = other->client->zc.routeindex;
 				while(1)
 				{
-					if(i + 1 >= CurrentIndex)
+					if (i + 1 >= CurrentIndex)
 					{
 						j = Route[i + 1].state;
-						if(j == GRS_ONTRAIN) if(Route[i + 1].ent->trainteam) break;
+						if (j == GRS_ONTRAIN) if (Route[i + 1].ent->trainteam) break;
 						Get_RouteOrigin(i + 1,v);
-						if(!TraceX(ent,other->s.origin))
+						if (!TraceX(ent,other->s.origin))
 						{
 							break;
 						}
@@ -2020,45 +2020,46 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		Get_WaterState(ent);
 		i = false;
 		l = GRS_NORMAL;
-		if(CurrentIndex > 0) Get_RouteOrigin(CurrentIndex - 1,v);
-		if(!Route[CurrentIndex].index)
+		if (CurrentIndex > 0) Get_RouteOrigin(CurrentIndex - 1,v);
+		if (!Route[CurrentIndex].index)
 		{
 			VectorCopy(ent->s.origin,v);
 			old_ground = ent->groundentity;
 //gi.bprintf(PRINT_HIGH,"1\n");
-			if(ent->groundentity)
+			if (ent->groundentity)
 			i = true;
 		}
-		else if(!TraceX(ent,v) /*&& ent->groundentity*/)
+		else if (!TraceX(ent,v) /*&& ent->groundentity*/)
 		{
 			VectorCopy(ent->s.old_origin,v);
 //gi.bprintf(PRINT_HIGH,"2\n");
 			i = 3;
-			if(0/*ent->groundentity*/)
+			if (0/*ent->groundentity*/)
 			{
-				if(ent->groundentity->classname[0] == 'f') i = false;
+				if (ent->groundentity->classname[0] == 'f') i = false;
 			}
 		}
-		else if(ent->client->zc.waterstate != oldwaterstate)
+		else if (ent->client->zc.waterstate != oldwaterstate)
 		{
 			i = true;
-			if(ent->groundentity )
+			if (ent->groundentity )
 			{
-				if(!Q_stricmp(ent->groundentity->classname, "func_train")
+				if (!Q_stricmp(ent->groundentity->classname, "func_train")
 					|| !Q_stricmp(ent->groundentity->classname, "func_plat")
+					|| !Q_stricmp(ent->groundentity->classname, "func_plat2")
 					|| !Q_stricmp(ent->groundentity->classname, "func_door")) i = false;
 			}
 
-			if(ent->client->zc.waterstate > oldwaterstate) VectorCopy(ent->s.origin,v);
+			if (ent->client->zc.waterstate > oldwaterstate) VectorCopy(ent->s.origin,v);
 			else VectorCopy(ent->s.old_origin,v);
 //gi.bprintf(PRINT_HIGH,"5\n");
 		}
-		else if(fabs(v[2] - ent->s.origin[2]) > 20)
+		else if (fabs(v[2] - ent->s.origin[2]) > 20)
 		{
-			if(ent->groundentity && ent->waterlevel < 2)
+			if (ent->groundentity && ent->waterlevel < 2)
 			{
 				k = true;
-				if(k)
+				if (k)
 				{
 					VectorCopy(ent->s.origin,v);
 //gi.bprintf(PRINT_HIGH,"3\n");
@@ -2067,7 +2068,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 			}
 
 		}
-		else if(((/*ent->velocity[2] > 10 &&*/ !ent->groundentity && wasground == true)
+		else if (((/*ent->velocity[2] > 10 &&*/ !ent->groundentity && wasground == true)
 			|| (/*ent->velocity[2] < -0.5 &&*/ ent->groundentity && wasground == false))
 			&& Route[CurrentIndex - 1].state <= GRS_ITEMS)
 		{
@@ -2076,21 +2077,22 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 			VectorCopy(ent->s.old_origin,v);
 			v[2] -= 2;
 			rs_trace = gi.trace(ent->s.old_origin,ent->mins ,ent->maxs, v ,ent,MASK_PLAYERSOLID);
-			if(rs_trace.fraction != 1.0) j = true;
+			if (rs_trace.fraction != 1.0) j = true;
 
-			if(old_ground)
+			if (old_ground)
 			{
-				if(!Q_stricmp(old_ground->classname, "func_train")
+				if (!Q_stricmp(old_ground->classname, "func_train")
 					|| !Q_stricmp(old_ground->classname, "func_plat")
+					|| !Q_stricmp(old_ground->classname, "func_plat2")
 					|| !Q_stricmp(old_ground->classname, "func_door")) k = false;
 			}
-			if(!ent->groundentity /*&& j*/&& wasground == true && k)
+			if (!ent->groundentity /*&& j*/&& wasground == true && k)
 			{
 				VectorCopy(ent->s.old_origin,v);
 //gi.bprintf(PRINT_HIGH,"6\n");
 				i = true;				
 			}			
-			else if(ent->groundentity /*&& !j*/&& wasground == false && k)
+			else if (ent->groundentity /*&& !j*/&& wasground == false && k)
 			{
 //				VectorSubtract(ent->s.origin)
 
@@ -2100,13 +2102,14 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 			}
 
 		}
-		else if(Route[CurrentIndex-1].index > 1)
+		else if (Route[CurrentIndex-1].index > 1)
 		{
 			k = true;
-			if(0/*old_ground*/)
+			if (0/*old_ground*/)
 			{
-				if(!Q_stricmp(old_ground->classname, "func_train")
+				if (!Q_stricmp(old_ground->classname, "func_train")
 					|| !Q_stricmp(old_ground->classname, "func_plat")
+					|| !Q_stricmp(old_ground->classname, "func_plat2")
 					|| !Q_stricmp(old_ground->classname, "func_door")) k = false;
 			}
 			Get_RouteOrigin(CurrentIndex - 1,min);
@@ -2114,7 +2117,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 			VectorSubtract(min,max,v);
 			x = Get_yaw(v);
 			VectorSubtract(ent->s.origin,/*Route[CurrentIndex-1].Pt*/ent->s.old_origin,v);
-			if(VectorLength(v) > 0 && Get_vec_yaw(v,x) > 45 && k )
+			if (VectorLength(v) > 0 && Get_vec_yaw(v,x) > 45 && k )
 			{
 				VectorCopy(ent->s.old_origin,v);
 //gi.bprintf(PRINT_HIGH,"8\n");
@@ -2122,17 +2125,17 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 			}		
 		}
 		
-		if(ent->groundentity)
+		if (ent->groundentity)
 		{
-			if(ent->groundentity != old_ground)
+			if (ent->groundentity != old_ground)
 			{
 				other = old_ground;
 				old_ground = ent->groundentity;
-				if(!Q_stricmp(old_ground->classname, "func_plat"))
+				if ( !Q_stricmp(old_ground->classname, "func_plat") || !Q_stricmp(old_ground->classname, "func_plat2") )
 				{
-					if(old_ground->union_ent)
+					if (old_ground->union_ent)
 					{
-						if(old_ground->union_ent->inuse && old_ground->union_ent->classname[0] == 'R')
+						if (old_ground->union_ent->inuse && old_ground->union_ent->classname[0] == 'R')
 						{
 //gi.bprintf(PRINT_HIGH,"plat put\n");
 							VectorCopy(old_ground->monsterinfo.last_sighting,v);
@@ -2141,11 +2144,11 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 						}
 					}
 				}
-				else if(!Q_stricmp(old_ground->classname, "func_train"))
+				else if (!Q_stricmp(old_ground->classname, "func_train"))
 				{
-					if(old_ground->union_ent)
+					if (old_ground->union_ent)
 					{
-						if(old_ground->union_ent->inuse && old_ground->union_ent->classname[0] == 'R')
+						if (old_ground->union_ent->inuse && old_ground->union_ent->classname[0] == 'R')
 						{
 							VectorCopy(old_ground->monsterinfo.last_sighting,v);
 							l = GRS_ONTRAIN;
@@ -2153,12 +2156,12 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 						}
 					}
 				}
-				else if(!Q_stricmp(old_ground->classname, "func_door"))
+				else if (!Q_stricmp(old_ground->classname, "func_door"))
 				{
 					k = false;
-					if(old_ground->targetname && old_ground->union_ent)
+					if (old_ground->targetname && old_ground->union_ent)
 					{
-						if(TraceX(ent,old_ground->union_ent->s.origin)
+						if (TraceX(ent,old_ground->union_ent->s.origin)
 							&& fabs(ent->s.origin[2] - old_ground->union_ent->s.origin[2]) < JumpMax)
 						{
 							VectorCopy(old_ground->monsterinfo.last_sighting,v);
@@ -2168,7 +2171,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 						else k = true;
 					}
 					else k = true;
-					if(k && i)
+					if (k && i)
 					{
 						i = 2;
 						old_ground = other;
@@ -2176,33 +2179,34 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 				}
 			}
 		}
-		if(old_ground)
+		if (old_ground)
 		{
-			if(old_ground->classname[0] == 'f' && i != 2)
+			if (old_ground->classname[0] == 'f' && i != 2)
 			{
-				if(!Q_stricmp(old_ground->classname, "func_train")
+				if (!Q_stricmp(old_ground->classname, "func_train")
 					|| !Q_stricmp(old_ground->classname, "func_plat")
+					|| !Q_stricmp(old_ground->classname, "func_plat2")
 					|| !Q_stricmp(old_ground->classname, "func_door")) i = false;
 			}
 		}
 
-		if(Route[CurrentIndex-1].index > 0 && i == true)
+		if (Route[CurrentIndex-1].index > 0 && i == true)
 		{
 			Get_RouteOrigin(CurrentIndex - 1,max);
 			VectorSubtract(max,v,vv);
-			if(VectorLength(vv) <= 32 ) i = false;
+			if (VectorLength(vv) <= 32 ) i = false;
 		}
 
-		if(l == GRS_ONTRAIN || l == GRS_ONPLAT || l == GRS_ONDOOR)
+		if (l == GRS_ONTRAIN || l == GRS_ONPLAT || l == GRS_ONDOOR)
 		{
-			if(Route[CurrentIndex - 1].ent == old_ground) i = false;
+			if (Route[CurrentIndex - 1].ent == old_ground) i = false;
 		}
 
-		if(i)
+		if (i)
 		{
-			if(l == GRS_NORMAL && ent->groundentity)
+			if (l == GRS_NORMAL && ent->groundentity)
 			{
-				if(!Q_stricmp(old_ground->classname, "func_rotating"))
+				if (!Q_stricmp(old_ground->classname, "func_rotating"))
 				{
 					l = GRS_ONROTATE;
 //					gi.bprintf(PRINT_HIGH,"On Rotate\n");
@@ -2211,18 +2215,18 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 
 			VectorCopy(v,Route[CurrentIndex].Pt);
 			Route[CurrentIndex].state = l;
-			if(l > GRS_ITEMS && l <= GRS_ONTRAIN) Route[CurrentIndex].ent = old_ground;
-			else if(l == GRS_ONDOOR) Route[CurrentIndex].ent = old_ground;
+			if (l > GRS_ITEMS && l <= GRS_ONTRAIN) Route[CurrentIndex].ent = old_ground;
+			else if (l == GRS_ONDOOR) Route[CurrentIndex].ent = old_ground;
 
-			if(l == GRS_ONTRAIN && old_ground->trainteam && old_ground->target_ent)
+			if (l == GRS_ONTRAIN && old_ground->trainteam && old_ground->target_ent)
 			{
-				if(!Q_stricmp(old_ground->target_ent->classname,"path_corner"))
+				if (!Q_stricmp(old_ground->target_ent->classname,"path_corner"))
 					VectorCopy(old_ground->target_ent->s.origin,Route[CurrentIndex].Tcourner);
 
 //gi.bprintf(PRINT_HIGH,"get chain\n");			
 			}
 			//when normal or items
-			if(++CurrentIndex < MAXNODES)
+			if (++CurrentIndex < MAXNODES)
 			{
 				gi.bprintf(PRINT_HIGH,"Last %i pod(s).\n",MAXNODES - CurrentIndex);
 				memset(&Route[CurrentIndex],0,sizeof(route_t)); //initialize
@@ -2230,7 +2234,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 			}
 		}
 //		VectorCopy(ent->s.origin,old_origin);
-		if(ent->groundentity != NULL) wasground = true;
+		if (ent->groundentity != NULL) wasground = true;
 		else wasground = false;
 	}
 

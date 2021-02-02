@@ -1222,50 +1222,81 @@ void Com_sprintf (char *dest, size_t size, char *fmt, ...)
 }
 
 
-void Com_strcpy (char *dest, size_t destSize, const char *src)
+// Knightmare added
+size_t Com_strcpy (char *dest, size_t destSize, const char *src)
 {
+	char		*d = dest;
+	const char	*s = src;
+	size_t		decSize = destSize;
+
 	if (!dest) {
-		Com_Printf ("Com_strcpy: NULL dst\n");
-		return;
+		return 0;
 	}
 	if (!src) {
-		Com_Printf ("Com_strcpy: NULL src\n");
-		return;
+		return 0;
 	}
 	if (destSize < 1) {
-		Com_Printf ("Com_strcpy: dstSize < 1\n");
-		return;
+		return 0;
 	}
 
-	strncpy(dest, src, destSize-1);
+//	strncpy(dest, src, destSize-1);
+//	dest[destSize-1] = 0;
+
+	while (--decSize && *s)
+		*d++ = *s++;
+	*d = 0;
 	dest[destSize-1] = 0;
+
+	if (decSize == 0)	// Insufficent room in dst, return count + length of remaining src
+		return (s - src - 1 + strlen(s));
+	else
+		return (s - src - 1);	// returned count excludes NULL terminator
 }
 
-
-void Com_strcat (char *dest, size_t destSize, const char *src)
+// Knightmare added
+size_t Com_strcat (char *dest, size_t destSize, const char *src)
 {
+	char		*d = dest;
+	const char	*s = src;
+	size_t		decSize = destSize;
+	size_t		dLen;
+
 	if (!dest) {
-		Com_Printf ("Com_strcat: NULL dst\n");
-		return;
+		return 0;
 	}
 	if (!src) {
-		Com_Printf ("Com_strcat: NULL src\n");
-		return;
+		return 0;
 	}
 	if (destSize < 1) {
-		Com_Printf ("Com_strcat: dstSize < 1\n");
-		return;
+		return 0;
 	}
 
-	while (--destSize && *dest)
+/*	while (--destSize && *dest)
 		dest++;
 
-	if (destSize > 0) {
+	if (destSize > 0){
 		while (--destSize && *src)
 			*dest++ = *src++;
 
 		*dest = 0;
+	}*/
+
+	while (--decSize && *d)
+		d++;
+	dLen = d - dest;
+
+	if (decSize == 0)
+		return (dLen + strlen(s));
+
+	if (decSize > 0) {
+		while (--decSize && *s)
+			*d++ = *s++;
+
+		*d = 0;
 	}
+	dest[destSize-1] = 0;
+
+	return (dLen + (s - src));	// returned count excludes NULL terminator
 }
 
 /*

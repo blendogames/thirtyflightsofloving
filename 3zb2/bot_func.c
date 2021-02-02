@@ -10,18 +10,18 @@ qboolean Get_YenPos(char *Buff,int *curr)
 
 	while(1)
 	{
-//		if(i >= strlen(Buff)) return false;
-		if(Buff[i] == 0 || Buff[i] == 10 || Buff[i] == 13)
+//		if (i >= strlen(Buff)) return false;
+		if (Buff[i] == 0 || Buff[i] == 10 || Buff[i] == 13)
 		{
 			*curr = i;
 			return true;
 		}
-		if(Buff[i] == '\\')
+		if (Buff[i] == '\\')
 		{
 			*curr = i;
 			return true;
 		}
-		if(Buff[i] == '\t') Buff[i] = 0;
+		if (Buff[i] == '\t') Buff[i] = 0;
 		i++;
 	}
 }
@@ -45,10 +45,14 @@ void Load_BotInfo()
 	//init message
 	memset(ClientMessage,0,sizeof(ClientMessage));
 	//set message section
-	if(!ctf->value && chedit->value) strcpy(MessageSection,MESS_CHAIN_DM);
-	else if(ctf->value && !chedit->value) strcpy(MessageSection,MESS_CTF);
-	else if(ctf->value && chedit->value) strcpy(MessageSection,MESS_CHAIN_CTF);
-	else strcpy(MessageSection,MESS_DEATHMATCH);
+	if (!ctf->value && chedit->value)
+		Com_strcpy (MessageSection, sizeof(MessageSection), MESS_CHAIN_DM);
+	else if (ctf->value && !chedit->value)
+		Com_strcpy (MessageSection, sizeof(MessageSection), MESS_CTF);
+	else if (ctf->value && chedit->value)
+		Com_strcpy (MessageSection, sizeof(MessageSection), MESS_CHAIN_CTF);
+	else
+		Com_strcpy (MessageSection, sizeof(MessageSection), MESS_DEATHMATCH);
 
 	//init botlist
 	ListedBots = 0;
@@ -56,12 +60,12 @@ void Load_BotInfo()
 	for(i = 0;i < MAXBOTS;i++)
 	{
 		//netname
-		sprintf(Buff,"Zigock[%i]",i);
-		strcpy(Bot[i].netname,Buff);
+		Com_sprintf (Buff, sizeof(Buff), "Zigock[%i]",i);
+		Com_strcpy (Bot[i].netname, sizeof(Bot[i].netname), Buff);
 		//model
-		strcpy(Bot[i].model,"male");
+		Com_strcpy (Bot[i].model, sizeof(Bot[i].model), "male");
 		//skin
-		strcpy(Bot[i].model,"grunt");
+		Com_strcpy (Bot[i].model, sizeof(Bot[i].model), "grunt");
 	
 		//param
 		Bot[i].param[BOP_WALK] = 0;
@@ -77,7 +81,7 @@ void Load_BotInfo()
 		Bot[i].spflg = 0;
 		//team
 		Bot[i].team = j;
-		if(++j > 2) j = 1;
+		if (++j > 2) j = 1;
 	}
 
 	//botlist value
@@ -85,9 +89,9 @@ void Load_BotInfo()
 	gamepath = gi.cvar ("game", "0", CVAR_NOSET);
 
 	//load info
-	sprintf(Buff,".\\%s\\3ZBconfig.cfg",gamepath->string);
-	fp = fopen(Buff,"rt");
-	if(fp == NULL)
+	Com_sprintf (Buff, sizeof(Buff), ".\\%s\\3ZBconfig.cfg",gamepath->string);
+	fp = fopen(Buff, "rt");
+	if (fp == NULL)
 	{
 		gi.dprintf("3ZB CFG: file not found.\n");
 		return;
@@ -97,75 +101,79 @@ void Load_BotInfo()
 		fseek( fp, 0, SEEK_SET);	//先頭へ移動
 		while(1)
 		{
-			if(fgets( Buff, sizeof(Buff), fp ) == NULL) goto MESS_NOTFOUND;
-			if(!Q_strncasecmp(MessageSection,Buff,strlen(MessageSection))) break;	// Knightmare- was _strnicmp()
+			if (fgets( Buff, sizeof(Buff), fp ) == NULL) goto MESS_NOTFOUND;
+			if (!Q_strncasecmp(MessageSection,Buff,strlen(MessageSection))) break;	// Knightmare- was _strnicmp()
 		}
 
 		while(1)
 		{
-			if(fgets( Buff, sizeof(Buff), fp ) == NULL) goto MESS_NOTFOUND;
-			if(Buff[0] == '.' || Buff[0] == '[' || Buff[0] == '#') break;
+			if (fgets( Buff, sizeof(Buff), fp ) == NULL) goto MESS_NOTFOUND;
+			if (Buff[0] == '.' || Buff[0] == '[' || Buff[0] == '#') break;
 			k = (int)strlen(Buff);
-			if((strlen(Buff) + strlen(ClientMessage)) > MAX_STRING_CHARS - 1) break;
-			strcat(ClientMessage,Buff);
+			if ((strlen(Buff) + strlen(ClientMessage)) > MAX_STRING_CHARS - 1) break;
+			Com_strcat (ClientMessage, sizeof(ClientMessage), Buff);
 		}
 MESS_NOTFOUND:
-		//if(botlist->string == NULL) strcpy(MessageSection,BOTLIST_SECTION_DM);
-		//else 
-		sprintf(MessageSection,"[%s]",botlist->string);
+	//	if (botlist->string == NULL)
+	//		Com_strcpy (MessageSection, sizeof(MessageSection), BOTLIST_SECTION_DM);
+	//	else 
+		Com_sprintf (MessageSection, sizeof(MessageSection), "[%s]",botlist->string);
 		fseek( fp, 0, SEEK_SET);	//先頭へ移動
 		while(1)
 		{
-			if(fgets( Buff, sizeof(Buff), fp ) == NULL)
+			if (fgets( Buff, sizeof(Buff), fp ) == NULL)
 			{
 				MessageSection[0] = 0;
 				break;
 			}
-			if(!Q_strncasecmp(MessageSection,Buff,strlen(MessageSection))) break;	// Knightmare- was _strnicmp()
+			if (!Q_strncasecmp(MessageSection, Buff,strlen(MessageSection))) break;	// Knightmare- was _strnicmp()
 		}
 		//when not found
-		if(MessageSection[0] == 0)
+		if (MessageSection[0] == 0)
 		{
-			strcpy(MessageSection,BOTLIST_SECTION_DM);
+			Com_strcpy (MessageSection, sizeof(MessageSection), BOTLIST_SECTION_DM);
 			fseek( fp, 0, SEEK_SET);	//先頭へ移動
 			while(1)
 			{
-				if(fgets( Buff, sizeof(Buff), fp ) == NULL) goto BOTLIST_NOTFOUND;
-				if(!Q_strncasecmp(MessageSection,Buff,strlen(MessageSection))) break;	// Knightmare- was _strnicmp()
+				if (fgets( Buff, sizeof(Buff), fp ) == NULL) goto BOTLIST_NOTFOUND;
+				if (!Q_strncasecmp(MessageSection, Buff, strlen(MessageSection))) break;	// Knightmare- was _strnicmp()
 			}
 		}
 
 		i = 0;
 		for(i = 0;i < MAXBOTS;i++)
 		{
-			if(fgets( Buff, sizeof(Buff), fp ) == NULL) break;
-			if(Buff[0] == '[') break;
-			if(Buff[0] == '\n' || Buff[0] == '#') {i--;continue;}
+			if (fgets( Buff, sizeof(Buff), fp ) == NULL) break;
+			if (Buff[0] == '[') break;
+			if (Buff[0] == '\n' || Buff[0] == '#') {i--;continue;}
 			j = 2,k = 1;
-			if(!strncmp(Buff,"\\\\",2))
+			if (!strncmp(Buff,"\\\\",2))
 			{
 				//netname
-				if(Get_YenPos(Buff,&k))
+				if (Get_YenPos(Buff,&k))
 				{
 					Buff[k] = 0;
-					if(strlen(&Buff[j]) < 21) strcpy(Bot[i].netname,&Buff[j]);
+					if (strlen(&Buff[j]) < 21)
+						Com_strcpy (Bot[i].netname, sizeof(Bot[i].netname), &Buff[j]);
 					j = k + 1;
 				}
 				else break;
 				//model name
-				if(Get_YenPos(Buff,&k))
+				if (Get_YenPos(Buff,&k))
 				{
 					Buff[k] = 0;
-					if(strlen(&Buff[j]) < 21) strcpy(Bot[i].model,&Buff[j]);
+					if (strlen(&Buff[j]) < 21)
+						Com_strcpy (Bot[i].model, sizeof(Bot[i].model), &Buff[j]);
 					j = k + 1;
 					k++;
 				}
 				else break;
 				//skin name
-				if(Get_YenPos(Buff,&k))
+				if (Get_YenPos(Buff,&k))
 				{
 					Buff[k] = 0;
-					if(strlen(&Buff[j]) < 21) strcpy(Bot[i].skin,&Buff[j]);
+					if (strlen(&Buff[j]) < 21)
+						Com_strcpy (Bot[i].skin, sizeof(Bot[i].skin), &Buff[j]);
 					j = k + 1;
 					k++;
 				}
@@ -173,7 +181,7 @@ MESS_NOTFOUND:
 				for(l = 0;l < MAXBOP;l++)
 				{
 					//param0-7
-					if(Get_YenPos(Buff,&k))
+					if (Get_YenPos(Buff,&k))
 					{
 						Buff[k] = 0;
 						Bot[i].param[l] = (unsigned char)atoi(&Buff[j]);
@@ -182,25 +190,25 @@ MESS_NOTFOUND:
 					}
 					else break;
 				}
-				if(l < MAXBOP) break;
+				if (l < MAXBOP) break;
 				//team
-				if(Get_YenPos(Buff,&k))
+				if (Get_YenPos(Buff,&k))
 				{
 					Buff[k] = 0;
-					if(Buff[j] == 'R') Bot[i].team = 1;
-					else if(Buff[j] == 'B') Bot[i].team = 2;
+					if (Buff[j] == 'R') Bot[i].team = 1;
+					else if (Buff[j] == 'B') Bot[i].team = 2;
 					else Bot[i].team = 1;
 					j = k + 1;
 					k++;
 				}
 				else break;
 				//auto spawn
-				if(Get_YenPos(Buff,&k))
+				if (Get_YenPos(Buff,&k))
 				{
 					Buff[k] = 0;
 					Bot[i].spflg = atoi(&Buff[j]);
 //gi.dprintf("%i %s\n",Bot[i].spflg,&Buff[j]);
-					if(Bot[i].spflg == BOT_SPRESERVED && autospawn->value && !chedit->value) SpawnWaitingBots++; 
+					if (Bot[i].spflg == BOT_SPRESERVED && autospawn->value && !chedit->value) SpawnWaitingBots++; 
 					else Bot[i].spflg = BOT_SPAWNNOT;
 				}
 				else break;
@@ -282,21 +290,21 @@ void Bot_Think (edict_t *self)
 		M_CheckGround (self);
 	}
 
-	if(self->deadflag)
+	if (self->deadflag)
 	{
-		if(self->client->ctf_grapple) CTFPlayerResetGrapple(self);
+		if (self->client->ctf_grapple) CTFPlayerResetGrapple(self);
 
-		if(self->s.modelindex == skullindex || self->s.modelindex == headindex) self->s.frame = 0;
-		else if(self->s.frame < FRAME_crdeath1 && self->s.frame != 0) self->s.frame = FRAME_death308;
+		if (self->s.modelindex == skullindex || self->s.modelindex == headindex) self->s.frame = 0;
+		else if (self->s.frame < FRAME_crdeath1 && self->s.frame != 0) self->s.frame = FRAME_death308;
 		self->s.modelindex2 = 0;	// remove linked weapon model
 //ZOID
 		self->s.modelindex3 = 0;	// remove linked ctf flag
 //ZOID
 
 		self->client->zc.route_trace = false;
-		if(self->client->respawn_time <= level.time)
+		if (self->client->respawn_time <= level.time)
 		{
-			if(self->svflags & SVF_MONSTER)
+			if (self->svflags & SVF_MONSTER)
 			{
 				self->client->respawn_time = level.time;
 				CopyToBodyQue (self);
@@ -307,7 +315,7 @@ void Bot_Think (edict_t *self)
 	else
 	{
 		Bots_Move_NORM (self);
-		if(!self->inuse) return;			//removed botself
+		if (!self->inuse) return;			//removed botself
 
 		client = self->client;
 
@@ -353,7 +361,7 @@ void InitializeBot (edict_t *ent,int botindex )
 	client->resp.enterframe = level.framenum;
 
 	//set netname model skil and CTF team
-	sprintf(pinfo,"\\rate\\25000\\msg\\1\\fov\\90\\skin\\%s/%s\\name\\%s\\hand\\0",Bot[botindex].model,Bot[botindex].skin,Bot[botindex].netname);
+	Com_sprintf (pinfo, sizeof(pinfo), "\\rate\\25000\\msg\\1\\fov\\90\\skin\\%s/%s\\name\\%s\\hand\\0",Bot[botindex].model,Bot[botindex].skin,Bot[botindex].netname);
 	ent->client->resp.ctf_team = Bot[botindex].team; //CTF_TEAM1,CTF_TEAM2
 
 	ClientUserinfoChanged (ent, pinfo);
@@ -376,7 +384,7 @@ void InitializeBot (edict_t *ent,int botindex )
 	gi.dprintf ("%s connected\n", ent->client->pers.netname);
 //	gi.bprintf (PRINT_HIGH, "%s entered the game\n", ent->client->pers.netname);
 
-	if(ctf->value)	gi.bprintf(PRINT_HIGH, "%s joined the %s team.\n",
+	if (ctf->value)	gi.bprintf(PRINT_HIGH, "%s joined the %s team.\n",
 			client->pers.netname, CTFTeamName(ent->client->resp.ctf_team));
 	else 	gi.bprintf (PRINT_HIGH, "%s entered the game\n",
 			client->pers.netname);
@@ -429,7 +437,7 @@ void PutBotInServer (edict_t *ent)
 	client->ctf_grapple = NULL;
 
 	item = FindItem("Grapple");
-	if(ctf->value)	client->pers.inventory[ITEM_INDEX(item)] = 1; //ponpoko
+	if (ctf->value)	client->pers.inventory[ITEM_INDEX(item)] = 1; //ponpoko
 //ZOID
 
 	// clear entity values
@@ -480,7 +488,7 @@ void PutBotInServer (edict_t *ent)
 	VectorCopy (spawn_angles, ent->s.angles);
 	spawn_origin[2] -= 300;
 	rs_trace = gi.trace(ent->s.origin,ent->mins,ent->maxs,spawn_origin,ent,MASK_SOLID);
-	if(!rs_trace.allsolid) VectorCopy (rs_trace.endpos, ent->s.origin);
+	if (!rs_trace.allsolid) VectorCopy (rs_trace.endpos, ent->s.origin);
 	VectorSet(ent->velocity,0,0,0);
 	ent->moveinfo.speed = 0;
 	ent->groundentity = rs_trace.ent;
@@ -512,14 +520,14 @@ void PutBotInServer (edict_t *ent)
 	zc->first_target = NULL;
 	zc->zcstate = STS_IDLE;
 
-	if(ent->client->resp.enterframe == level.framenum && !chedit->value)
+	if (ent->client->resp.enterframe == level.framenum && !chedit->value)
 	{
 		gi.WriteByte (svc_muzzleflash);
 		gi.WriteShort (ent-g_edicts);
 		gi.WriteByte (MZ_LOGIN);
 		gi.multicast (ent->s.origin, MULTICAST_PVS);
 	}
-	else if(!chedit->value)
+	else if (!chedit->value)
 	{
 		gi.WriteByte (svc_muzzleflash);
 		gi.WriteShort (ent-g_edicts);
@@ -532,12 +540,12 @@ void PutBotInServer (edict_t *ent)
 	entcount = gi.BoxEdicts ( ent->absmin ,ent->absmax,touch,MAX_EDICTS,AREA_SOLID);
 	while (entcount-- > 0)
 	{
-		if(Q_stricmp (touch[entcount]->classname, "player") == 0)
-			if(touch[entcount] != ent)
+		if (Q_stricmp (touch[entcount]->classname, "player") == 0)
+			if (touch[entcount] != ent)
 				T_Damage (touch[entcount], ent, ent, vec3_origin, touch[entcount]->s.origin, vec3_origin, 100000, 0, DAMAGE_NO_PROTECTION, MOD_TELEFRAG);
 	}
 
-	if(ctf->value)
+	if (ctf->value)
 	{
 		CTFPlayerResetGrapple(ent);
 		client->zc.ctfstate = CTFS_OFFENCER;
@@ -566,28 +574,28 @@ qboolean SpawnBot(int i)
 //gi.cprintf (NULL,PRINT_HIGH,"Called %s %s %s\n",Bot[i].netname,Bot[i].model,Bot[i].skin);
 //return false;	
 
-	if(	Get_NumOfPlayer () >= game.maxclients )
+	if (	Get_NumOfPlayer () >= game.maxclients )
 	{
 		gi.cprintf (NULL,PRINT_HIGH,"Can't add bots\n");
 		return false;
 	}
 
 	bot = Get_NewClient();
-	if(bot == NULL) return false;
+	if (bot == NULL) return false;
 
 	InitializeBot( bot , i);
 	PutBotInServer ( bot );
 
 	j = targetindex;
-	if(chedit->value)
+	if (chedit->value)
 	{
 		for(k = CurrentIndex - 1;k > 0 ;k--)
 		{
-			if(Route[k].index == 0) break;
+			if (Route[k].index == 0) break;
 
-			if(Route[k].state == GRS_NORMAL)
+			if (Route[k].state == GRS_NORMAL)
 			{
-				if(--j <= 0) break;
+				if (--j <= 0) break;
 			}  
 		}
 
@@ -607,7 +615,7 @@ qboolean SpawnBot(int i)
 		gi.multicast (bot->s.origin, MULTICAST_PVS);
 
 		ent = &g_edicts[1];
-		if(ent->inuse && ent->client && !(ent->svflags & SVF_MONSTER))
+		if (ent->inuse && ent->client && !(ent->svflags & SVF_MONSTER))
 		{
 			ent->takedamage = DAMAGE_NO;
 			ent->movetype = MOVETYPE_NOCLIP;
@@ -636,9 +644,9 @@ void Bot_SpawnCall()
 
 	for(i = 0;i < MAXBOTS;i++)
 	{
-		if(Bot[i].spflg == BOT_SPRESERVED)
+		if (Bot[i].spflg == BOT_SPRESERVED)
 		{
-			if(SpawnBot(i)) Bot[i].spflg = BOT_SPAWNED;
+			if (SpawnBot(i)) Bot[i].spflg = BOT_SPAWNED;
 			else 
 			{
 				Bot[i].spflg = BOT_SPAWNNOT;
@@ -661,7 +669,7 @@ void SpawnBotReserving()
 
 	for(i = 0;i < MAXBOTS; i++)
 	{
-		if(Bot[i].spflg == BOT_SPAWNNOT)
+		if (Bot[i].spflg == BOT_SPAWNNOT)
 		{
 			Bot[i].spflg = BOT_SPRESERVED;
 			SpawnWaitingBots++;
@@ -684,16 +692,16 @@ void SpawnBotReserving2(int *red,int *blue)
 
 	for(i = 0;i < ListedBots; i++,j++)
 	{
-		if(j >= ListedBots) j = 0;
-		if(Bot[j].spflg == BOT_SPAWNNOT)
+		if (j >= ListedBots) j = 0;
+		if (Bot[j].spflg == BOT_SPAWNNOT)
 		{
 			Bot[j].spflg = BOT_SPRESERVED;
 			SpawnWaitingBots++;
-			if(*red > *blue) Bot[j].team = 2;
+			if (*red > *blue) Bot[j].team = 2;
 			else Bot[j].team = 1;
 			
-			if(Bot[j].team == 1) *red = *red + 1;
-			else if(Bot[j].team == 2) *blue = *blue + 1;
+			if (Bot[j].team == 1) *red = *red + 1;
+			else if (Bot[j].team == 2) *blue = *blue + 1;
 //gi.cprintf(NULL,PRINT_HIGH,"team %i\n",Bot[j].team);
 			return;
 		}
@@ -718,13 +726,13 @@ void RemoveBot()
 
 	for(i = MAXBOTS - 1;i >= 0;i--)
 	{
-		if(Bot[i].spflg == BOT_SPAWNED || Bot[i].spflg == BOT_NEXTLEVEL)
+		if (Bot[i].spflg == BOT_SPAWNED || Bot[i].spflg == BOT_NEXTLEVEL)
 		{
 			break;
 		}
 	}
 
-	if(i < 0)
+	if (i < 0)
 	{
 		gi.cprintf (NULL, PRINT_HIGH, "No Bots in server.");
 		return;
@@ -735,16 +743,16 @@ void RemoveBot()
 	e = &g_edicts[(int)maxclients->value];
 	for ( i = maxclients->value ; i >= 1  ; i--, e--)
 	{
-		if(!e->inuse) continue;
+		if (!e->inuse) continue;
 		client = /*e->client;*/&game.clients[i - 1];
-		if(client == NULL) continue;
+		if (client == NULL) continue;
 		// the first couple seconds of server time can involve a lot of
 		// freeing and allocating, so relax the replacement policy
 		if (!client->pers.connected && (e->svflags & SVF_MONSTER))
 		{
-			if(client->zc.botindex == botindex)
+			if (client->zc.botindex == botindex)
 			{
-				if(Bot[botindex].spflg != BOT_NEXTLEVEL) Bot[botindex].spflg = BOT_SPAWNNOT;
+				if (Bot[botindex].spflg != BOT_NEXTLEVEL) Bot[botindex].spflg = BOT_SPAWNNOT;
 				else Bot[botindex].spflg = BOT_SPRESERVED;
 
 				gi.bprintf (PRINT_HIGH, "%s disconnected\n", e->client->pers.netname);
@@ -771,11 +779,11 @@ void RemoveBot()
 				e->inuse = false;
 				G_FreeEdict (e);
 
-				if(targetindex)
+				if (targetindex)
 				{
 					ent = &g_edicts[1];
 
-					if(ent->inuse)
+					if (ent->inuse)
 					{
 						ent->health = 100;
 						ent->movetype = MOVETYPE_WALK;
@@ -810,9 +818,9 @@ void Bot_LevelChange()
 
 	for(i = 0;i < MAXBOTS;i++)
 	{
-		if(Bot[i].spflg)
+		if (Bot[i].spflg)
 		{
-			if(Bot[i].spflg == BOT_SPAWNED)
+			if (Bot[i].spflg == BOT_SPAWNED)
 			{
 				k++;
 				Bot[i].spflg = BOT_NEXTLEVEL;
@@ -845,7 +853,7 @@ void ZigockClientJoin(edict_t  *ent,int zclass)
 	ent->client->ps.pmove.pm_flags = PMF_TIME_TELEPORT;
 	ent->client->ps.pmove.pm_time = 14;
 
-	if(ctf->value)
+	if (ctf->value)
 	{
 		gi.bprintf(PRINT_HIGH, "%s joined the %s team.\n",
 			ent->client->pers.netname, CTFTeamName(ent->client->resp.ctf_team/*desired_team*/));
@@ -944,7 +952,7 @@ void AirSight_Think(edict_t *ent)
 	ent->s.modelindex = gi.modelindex ("sprites/airsight.sp2");
 	VectorCopy(ent->target_ent->s.origin,ent->s.origin);
 
-	if( ent->owner->client->resp.ctf_team == CTF_TEAM2 && ctf->value)
+	if ( ent->owner->client->resp.ctf_team == CTF_TEAM2 && ctf->value)
 	{ 
 		ent->s.frame = 1;
 	}
@@ -973,16 +981,16 @@ void AirStrike_Think(edict_t *ent)
 	for ( i = 1 ; i <= maxclients->value; i++)
 	{
 		target =  &g_edicts[i];
-		if(!target->inuse || target->deadflag || target == ent->owner) continue;
+		if (!target->inuse || target->deadflag || target == ent->owner) continue;
 
-		if( target->classname[0] == 'p')
+		if ( target->classname[0] == 'p')
 		{
 			//ctf ならチームメイト無視
-			if(!ctf->value || (ctf->value && ent->owner->client->resp.ctf_team != target->client->resp.ctf_team))
+			if (!ctf->value || (ctf->value && ent->owner->client->resp.ctf_team != target->client->resp.ctf_team))
 			{
 				rs_trace = gi.trace (point,NULL,NULL,target->s.origin,ent, CONTENTS_SOLID | CONTENTS_WINDOW | CONTENTS_LAVA | CONTENTS_SLIME);
 
-				if(rs_trace.fraction == 1.0)
+				if (rs_trace.fraction == 1.0)
 				{
 					sight = G_Spawn();
 
@@ -1015,12 +1023,12 @@ void Cmd_AirStrike(edict_t *ent)
 	
 	rs_trace = gi.trace (ent->s.origin,NULL,NULL,strpoint,ent, MASK_SHOT);
 
-	if(!(rs_trace.surface && (rs_trace.surface->flags & SURF_SKY)))
+	if (!(rs_trace.surface && (rs_trace.surface->flags & SURF_SKY)))
 	{
 		gi.cprintf(ent,PRINT_HIGH,"can't call Viper.\n");
 		return;
 	}
-/*	if((rs_trace.endpos[2] - ent->s.origin[2]) < 300)
+/*	if ((rs_trace.endpos[2] - ent->s.origin[2]) < 300)
 	{
 		gi.cprintf(ent,PRINT_HIGH,"can't call Viper.\n");	
 	}*/

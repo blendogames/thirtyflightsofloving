@@ -147,7 +147,7 @@ static char *tnames[] = {
 
 void stuffcmd(edict_t *ent, char *s) 	
 {
-	if(ent->svflags & SVF_MONSTER) return;
+	if (ent->svflags & SVF_MONSTER) return;
 
    	gi.WriteByte (11);	        
 	gi.WriteString (s);
@@ -302,12 +302,12 @@ void CTFAssignSkin(edict_t *ent, char *s)
 	char *p;
 	char t[64];
 
-	Com_sprintf(t, sizeof(t), "%s", s);
+	Com_sprintf (t, sizeof(t), "%s", s);
 
 	if ((p = strrchr(t, '/')) != NULL)
 		p[1] = 0;
 	else
-		strcpy(t, "male/");
+		Com_strcpy (t, sizeof(t), "male/");
 
 	switch (ent->client->resp.ctf_team) {
 	case CTF_TEAM1:
@@ -436,7 +436,7 @@ edict_t *SelectCTFSpawnPoint (edict_t *ent)
 		spot = G_Find (spot, FOFS(classname), cname);
 		if (spot == spot1 || spot == spot2)
 			selection++;
-	} while(selection--);
+	} while (selection--);
 
 	return spot;
 }
@@ -480,7 +480,7 @@ void CTFFragBonuses(edict_t *targ, edict_t *inflictor, edict_t *attacker)
 	if (targ->client->pers.inventory[ITEM_INDEX(enemy_flag_item)]) {
 		attacker->client->resp.ctf_lastfraggedcarrier = level.time;
 		attacker->client->resp.score += CTF_FRAG_CARRIER_BONUS;
-		if(!(attacker->svflags & SVF_MONSTER))
+		if (!(attacker->svflags & SVF_MONSTER))
 			gi.cprintf(attacker, PRINT_MEDIUM, "BONUS: %d points for fragging enemy flag carrier.\n",
 			CTF_FRAG_CARRIER_BONUS);
 
@@ -532,10 +532,10 @@ void CTFFragBonuses(edict_t *targ, edict_t *inflictor, edict_t *attacker)
 		return; // can't find attacker's flag
 
 //PONKO
-	if(attacker)
+	if (attacker)
 	{	
 		VectorSubtract(targ->s.origin,attacker->s.origin,v1);
-		if(VectorLength(v1) < 300
+		if (VectorLength(v1) < 300
 			&& attacker->client && !(attacker->deadflag) && (attacker->svflags & SVF_MONSTER))
 		{
 			attacker->client->zc.second_target = flag;
@@ -652,7 +652,7 @@ qboolean CTFPickup_Flag(edict_t *ent, edict_t *other)
 	gitem_t *flag_item, *enemy_flag_item;
 
 	
-	if(chedit->value) {SetRespawn (ent, 30); return true;};
+	if (chedit->value) {SetRespawn (ent, 30); return true;};
 
 
 	// figure out what team this flag is
@@ -661,7 +661,7 @@ qboolean CTFPickup_Flag(edict_t *ent, edict_t *other)
 	else if (strcmp(ent->classname, "item_flag_team2") == 0)
 		ctf_team = CTF_TEAM2;
 	else {
-		if(!(ent->svflags & SVF_MONSTER))
+		if (!(ent->svflags & SVF_MONSTER))
 		gi.cprintf(ent, PRINT_HIGH, "Don't know what team the flag is on.\n");
 		return false;
 	}
@@ -812,12 +812,12 @@ qboolean CTFDrop_Flag(edict_t *ent, gitem_t *item)
 {
 	if (rand() & 1) 
 	{
-		if(!(ent->svflags & SVF_MONSTER))
+		if (!(ent->svflags & SVF_MONSTER))
 		gi.cprintf(ent, PRINT_HIGH, "Only lusers drop flags.\n");
 	}
 	else
 	{
-		if(!(ent->svflags & SVF_MONSTER))
+		if (!(ent->svflags & SVF_MONSTER))
 		gi.cprintf(ent, PRINT_HIGH, "Winners don't drop flags.\n");
 	}
 	return false;
@@ -852,7 +852,7 @@ void CTFFlagSetup (edict_t *ent)
 
 	if (ent->model)
 		gi.setmodel (ent, ent->model);
-	else if(ent->item->world_model)		//PONKO
+	else if (ent->item->world_model)		//PONKO
 		gi.setmodel (ent, ent->item->world_model);
 	else ent->s.modelindex = 0;			//PONKO
 	ent->solid = SOLID_TRIGGER;
@@ -928,11 +928,11 @@ void CTFCalcScores(void)
 void CTFID_f (edict_t *ent)
 {
 	if (ent->client->resp.id_state) {
-		if(!(ent->svflags & SVF_MONSTER))
+		if (!(ent->svflags & SVF_MONSTER))
 		gi.cprintf(ent, PRINT_HIGH, "Disabling player identication display.\n");
 		ent->client->resp.id_state = false;
 	} else {
-		if(!(ent->svflags & SVF_MONSTER))
+		if (!(ent->svflags & SVF_MONSTER))
 		gi.cprintf(ent, PRINT_HIGH, "Activating player identication display.\n");
 		ent->client->resp.id_state = true;
 	}
@@ -1133,17 +1133,17 @@ void CTFPlayerResetGrapple(edict_t *ent)
 	vec3_t v,vv;
 
 //PON-CTF
-	if(chedit->value && ent == &g_edicts[1] && ent->client->ctf_grapple)
+	if (chedit->value && ent == &g_edicts[1] && ent->client->ctf_grapple)
 	{
 		e = (edict_t*)ent->client->ctf_grapple;
 		VectorCopy(e->s.origin,vv);
 
-		for(i = 1;(CurrentIndex - i) > 0;i++)
+		for (i = 1;(CurrentIndex - i) > 0;i++)
 		{
-			if(Route[CurrentIndex - i].state == GRS_GRAPHOOK) break;
-			else if(Route[CurrentIndex - i].state == GRS_GRAPSHOT) break;
+			if (Route[CurrentIndex - i].state == GRS_GRAPHOOK) break;
+			else if (Route[CurrentIndex - i].state == GRS_GRAPSHOT) break;
 		}
-		if(Route[CurrentIndex - i].state == GRS_GRAPHOOK)
+		if (Route[CurrentIndex - i].state == GRS_GRAPHOOK)
 		{
 			Route[CurrentIndex].state = GRS_GRAPRELEASE;
 			VectorCopy(ent->s.origin,Route[CurrentIndex].Pt);
@@ -1151,15 +1151,15 @@ void CTFPlayerResetGrapple(edict_t *ent)
 			Route[CurrentIndex].Tcourner[0] = VectorLength(v);
 //gi.bprintf(PRINT_HIGH,"length %f\n",VectorLength(v));
 		}
-		else if(Route[CurrentIndex - i].state == GRS_GRAPSHOT)
+		else if (Route[CurrentIndex - i].state == GRS_GRAPSHOT)
 		{
 			CurrentIndex = CurrentIndex - i -1;
 		}
 //gi.bprintf(PRINT_HIGH,"length %f\n",VectorLength(v));
 
-		if((CurrentIndex - i) > 0)
+		if ((CurrentIndex - i) > 0)
 		{
-			if(++CurrentIndex < MAXNODES)
+			if (++CurrentIndex < MAXNODES)
 			{
 				gi.bprintf(PRINT_HIGH,"Grapple has been released.Last %i pod(s).\n",MAXNODES - CurrentIndex);
 				memset(&Route[CurrentIndex],0,sizeof(route_t)); //initialize
@@ -1179,7 +1179,7 @@ void CTFResetGrapple(edict_t *self)
 {
 	self->s.sound = 0;
 
-	if(self->owner == NULL)
+	if (self->owner == NULL)
 	{
 		G_FreeEdict(self);
 		return;		
@@ -1233,12 +1233,12 @@ void CTFGrappleTouch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t
 	self->enemy = other;
 
 //PON-CTF
-	if(chedit->value && self->owner == &g_edicts[1])
+	if (chedit->value && self->owner == &g_edicts[1])
 	{
 		i = CurrentIndex;
-		while(--i > 0)
+		while (--i > 0)
 		{
-			if(Route[i].state == GRS_GRAPSHOT)
+			if (Route[i].state == GRS_GRAPSHOT)
 			{
 				VectorCopy(self->s.origin,Route[i].Tcourner);
 				break;
@@ -1247,7 +1247,7 @@ void CTFGrappleTouch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t
 		Route[CurrentIndex].state = GRS_GRAPHOOK;
 		VectorCopy(self->owner->s.origin,Route[CurrentIndex].Pt);
 
-		if(++CurrentIndex < MAXNODES)
+		if (++CurrentIndex < MAXNODES)
 		{
 			gi.bprintf(PRINT_HIGH,"Grapple has been hook.Last %i pod(s).\n",MAXNODES - CurrentIndex);
 			memset(&Route[CurrentIndex],0,sizeof(route_t)); //initialize
@@ -1282,7 +1282,7 @@ void CTFGrappleDrawCable(edict_t *self)
 	float	distance;
 	float	x;
 
-	if(1/*!(self->owner->svflags & SVF_MONSTER)*/)
+	if (1/*!(self->owner->svflags & SVF_MONSTER)*/)
 	{
 		AngleVectors (self->owner->client->v_angle, f, r, NULL);
 		VectorSet(offset, 16, 16, self->owner->viewheight-8);
@@ -1294,7 +1294,7 @@ void CTFGrappleDrawCable(edict_t *self)
 		x = x * M_PI * 2 / 360;
 		start[0] = self->owner->s.origin[0] + cos(x) * 16;
 		start[1] = self->owner->s.origin[1] + sin(x) * 16;
-		if(self->owner->maxs[2] >=32) start[2] = self->owner->s.origin[2]+16;
+		if (self->owner->maxs[2] >=32) start[2] = self->owner->s.origin[2]+16;
 		else start[2] = self->owner->s.origin[2]-12;	
 	}
 
@@ -1357,13 +1357,13 @@ void CTFGrapplePull(edict_t *self)
 	vec3_t hookdir, v;
 	float vlen;
 
-	if(self->owner == NULL)
+	if (self->owner == NULL)
 	{
 		CTFResetGrapple(self);
 		return;		
 	}
 
-/*	if(!(self->owner->svflags & SVF_MONSTER))
+/*	if (!(self->owner->svflags & SVF_MONSTER))
 	{
 		if (strcmp(self->owner->client->pers.weapon->classname, "weapon_grapple") == 0 &&
 			!self->owner->client->newweapon &&
@@ -1413,7 +1413,7 @@ void CTFGrapplePull(edict_t *self)
 		// that velociy in the direction of the point
 		vec3_t forward, up;
 
-		if(1/*!(self->owner->svflags & SVF_MONSTER)*/)
+		if (1/*!(self->owner->svflags & SVF_MONSTER)*/)
 		{
 			AngleVectors (self->owner->client->v_angle, forward, NULL, up);
 			VectorCopy(self->owner->s.origin, v);
@@ -1423,7 +1423,7 @@ void CTFGrapplePull(edict_t *self)
 		else
 		{
 			VectorCopy(self->owner->s.origin, v);
-			if(self->owner->maxs[2] >=32) v[2] += 16;
+			if (self->owner->maxs[2] >=32) v[2] += 16;
 			else v[2] -= 12;
 			VectorSubtract (self->s.origin, v, hookdir);
 		}
@@ -1485,12 +1485,12 @@ void CTFFireGrapple (edict_t *self, vec3_t start, vec3_t dir, int damage, int sp
 		grapple->touch (grapple, tr.ent, NULL, NULL);
 	}
 //PON-CTF
-	if(chedit->value && self == &g_edicts[1])
+	if (chedit->value && self == &g_edicts[1])
 	{
 		Route[CurrentIndex].state = GRS_GRAPSHOT;
 		VectorCopy(self->s.origin,Route[CurrentIndex].Pt);
 
-		if(++CurrentIndex < MAXNODES)
+		if (++CurrentIndex < MAXNODES)
 		{
 			gi.bprintf(PRINT_HIGH,"Grapple has been shoot.Last %i pod(s).\n",MAXNODES - CurrentIndex);
 			memset(&Route[CurrentIndex],0,sizeof(route_t)); //initialize
@@ -1538,7 +1538,7 @@ void CTFGrappleFire (edict_t *ent, vec3_t g_offset, int damage, int effect)
 }
 
 
-void CTFWeapon_Grapple_Fire (edict_t *ent)
+void CTFWeapon_Grapple_Fire (edict_t *ent, qboolean altfire)
 {
 	int		damage;
 
@@ -1571,12 +1571,12 @@ void CTFWeapon_Grapple (edict_t *ent)
 		if (ent->client->weaponstate == WEAPON_FIRING)
 			ent->client->weaponstate = WEAPON_READY;
 
-		if(ent->svflags & SVF_MONSTER) 
+		if (ent->svflags & SVF_MONSTER) 
 		{
-			if(ent->waterlevel
+			if (ent->waterlevel
 				|| i == CTF_GRAPPLE_STATE_HANG ) VectorClear(ent->velocity);
 			//fix the moving speed
-			if(i == CTF_GRAPPLE_STATE_PULL)
+			if (i == CTF_GRAPPLE_STATE_PULL)
 			{
 				v[0] = ent->velocity[0];
 				v[1] = ent->velocity[1];
@@ -1587,7 +1587,7 @@ void CTFWeapon_Grapple (edict_t *ent)
 				ent->velocity[0] = 0;
 				ent->velocity[1] = 0;
 			}
-			else if(i == CTF_GRAPPLE_STATE_HANG )
+			else if (i == CTF_GRAPPLE_STATE_HANG )
 			{
 				ent->moveinfo.speed = 0;
 				ent->velocity[0] = 0;
@@ -1595,14 +1595,14 @@ void CTFWeapon_Grapple (edict_t *ent)
 			}
 		}
 //PON-CTF
-		if(chedit->value && ent == &g_edicts[1])
+		if (chedit->value && ent == &g_edicts[1])
 		{
-			for(i = 0;(CurrentIndex - i) > 0;i++)
+			for (i = 0;(CurrentIndex - i) > 0;i++)
 			{
-				if(Route[CurrentIndex - i].state == GRS_GRAPHOOK) break;
-				else if(Route[CurrentIndex - i].state == GRS_GRAPSHOT) break;
+				if (Route[CurrentIndex - i].state == GRS_GRAPHOOK) break;
+				else if (Route[CurrentIndex - i].state == GRS_GRAPSHOT) break;
 			}
-			if(Route[CurrentIndex - i].state == GRS_GRAPHOOK)
+			if (Route[CurrentIndex - i].state == GRS_GRAPHOOK)
 			{
 				Route[CurrentIndex].state = GRS_GRAPRELEASE;
 				VectorCopy(ent->s.origin,Route[CurrentIndex].Pt);
@@ -1610,15 +1610,15 @@ void CTFWeapon_Grapple (edict_t *ent)
 				Route[CurrentIndex].Tcourner[0] = VectorLength(v);
 //gi.bprintf(PRINT_HIGH,"length %f\n",VectorLength(v));
 			}
-			else if(Route[CurrentIndex - i].state == GRS_GRAPSHOT)
+			else if (Route[CurrentIndex - i].state == GRS_GRAPSHOT)
 			{
 				CurrentIndex = CurrentIndex - i -1;
 			}
 //gi.bprintf(PRINT_HIGH,"length %f\n",VectorLength(v));
 
-			if((CurrentIndex - i) > 0)
+			if ((CurrentIndex - i) > 0)
 			{
-				if(++CurrentIndex < MAXNODES)
+				if (++CurrentIndex < MAXNODES)
 				{
 					gi.bprintf(PRINT_HIGH,"Grapple has been released.Last %i pod(s).\n",MAXNODES - CurrentIndex);
 					memset(&Route[CurrentIndex],0,sizeof(route_t)); //initialize
@@ -1644,7 +1644,7 @@ void CTFWeapon_Grapple (edict_t *ent)
 		CTFWeapon_Grapple_Fire);
 
 
-	if(ent->svflags & SVF_MONSTER)
+	if (ent->svflags & SVF_MONSTER)
 	{
 		return;
 	}
@@ -1668,7 +1668,7 @@ void CTFTeam_f (edict_t *ent)
 
 	t = gi.args();
 	if (!*t) {
-		if(!(ent->svflags & SVF_MONSTER))
+		if (!(ent->svflags & SVF_MONSTER))
 		gi.cprintf(ent, PRINT_HIGH, "You are on the %s team.\n",
 			CTFTeamName(ent->client->resp.ctf_team));
 		return;
@@ -1678,13 +1678,13 @@ void CTFTeam_f (edict_t *ent)
 	else if (Q_stricmp(t, "blue") == 0)
 		desired_team = CTF_TEAM2;
 	else {
-		if(!(ent->svflags & SVF_MONSTER))
+		if (!(ent->svflags & SVF_MONSTER))
 		gi.cprintf(ent, PRINT_HIGH, "Unknown team %s.\n", t);
 		return;
 	}
 
 	if (ent->client->resp.ctf_team == desired_team) {
-		if(!(ent->svflags & SVF_MONSTER))
+		if (!(ent->svflags & SVF_MONSTER))
 		gi.cprintf(ent, PRINT_HIGH, "You are already on the %s team.\n",
 			CTFTeamName(ent->client->resp.ctf_team));
 		return;
@@ -1781,7 +1781,7 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer)
 	len = 0;
 
 	// team one
-	sprintf(string, "if 24 xv 8 yv 8 pic 24 endif "
+	Com_sprintf (string, sizeof(string), "if 24 xv 8 yv 8 pic 24 endif "
 		"xv 40 yv 28 string \"%4d/%-3d\" "
 		"xv 98 yv 12 num 2 18 "
 		"if 25 xv 168 yv 8 pic 25 endif "
@@ -1798,9 +1798,9 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer)
 
 #if 0 //ndef NEW_SCORE
 		// set up y
-		sprintf(entry, "yv %d ", 42 + i * 8);
+		Com_sprintf (entry, sizeof(entry), "yv %d ", 42 + i * 8);
 		if (maxsize - len > strlen(entry)) {
-			strcat(string, entry);
+			Com_strcat (string, sizeof(string), entry);
 			len = strlen(string);
 		}
 #else
@@ -1813,17 +1813,17 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer)
 			cl_ent = g_edicts + 1 + sorted[0][i];
 
 #if 0 //ndef NEW_SCORE
-			sprintf(entry+strlen(entry),
-			"xv 0 %s \"%3d %3d %-12.12s\" ",
-			(cl_ent == ent) ? "string2" : "string",
-			cl->resp.score, 
-			(cl->ping > 999) ? 999 : cl->ping, 
-			cl->pers.netname);
+			Com_sprintf (entry+strlen(entry), sizeof(entry)-strlen(entry),
+				"xv 0 %s \"%3d %3d %-12.12s\" ",
+				(cl_ent == ent) ? "string2" : "string",
+				cl->resp.score, 
+				(cl->ping > 999) ? 999 : cl->ping, 
+				cl->pers.netname);
 
 			if (cl_ent->client->pers.inventory[ITEM_INDEX(flag2_item)])
-				strcat(entry, "xv 56 picn sbfctf2 ");
+				Com_strcat (entry, sizeof(entry), "xv 56 picn sbfctf2 ");
 #else
-			sprintf(entry+strlen(entry),
+			Com_sprintf (entry+strlen(entry), sizeof(entry)-strlen(entry),
 				"ctf 0 %d %d %d %d ",
 				42 + i * 8,
 				sorted[0][i],
@@ -1831,12 +1831,11 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer)
 				cl->ping > 999 ? 999 : cl->ping);
 
 			if (cl_ent->client->pers.inventory[ITEM_INDEX(flag2_item)])
-				sprintf(entry + strlen(entry), "xv 56 yv %d picn sbfctf2 ",
-					42 + i * 8);
+				Com_sprintf(entry + strlen(entry), sizeof(entry)-strlen(entry), "xv 56 yv %d picn sbfctf2 ", 42 + i * 8);
 #endif
 
 			if (maxsize - len > strlen(entry)) {
-				strcat(string, entry);
+				Com_strcat (string, sizeof(string), entry);
 				len = (int)strlen(string);
 				last[0] = i;
 			}
@@ -1848,19 +1847,18 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer)
 			cl_ent = g_edicts + 1 + sorted[1][i];
 
 #if 0 //ndef NEW_SCORE
-			sprintf(entry+strlen(entry),
-			"xv 160 %s \"%3d %3d %-12.12s\" ",
-			(cl_ent == ent) ? "string2" : "string",
-			cl->resp.score, 
-			(cl->ping > 999) ? 999 : cl->ping, 
-			cl->pers.netname);
+			Com_sprintf (entry+strlen(entry), sizeof(entry)-strlen(entry),
+				"xv 160 %s \"%3d %3d %-12.12s\" ",
+				(cl_ent == ent) ? "string2" : "string",
+				cl->resp.score, 
+				(cl->ping > 999) ? 999 : cl->ping, 
+				cl->pers.netname);
 
 			if (cl_ent->client->pers.inventory[ITEM_INDEX(flag1_item)])
-				strcat(entry, "xv 216 picn sbfctf1 ");
-
+				Com_strcat (entry, sizeof(entry), "xv 216 picn sbfctf1 ");
 #else
 
-			sprintf(entry+strlen(entry),
+			Com_sprintf (entry+strlen(entry), sizeof(entry)-strlen(entry),
 				"ctf 160 %d %d %d %d ",
 				42 + i * 8,
 				sorted[1][i],
@@ -1868,11 +1866,10 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer)
 				cl->ping > 999 ? 999 : cl->ping);
 
 			if (cl_ent->client->pers.inventory[ITEM_INDEX(flag1_item)])
-				sprintf(entry + strlen(entry), "xv 216 yv %d picn sbfctf1 ",
-					42 + i * 8);
+				Com_sprintf(entry + strlen(entry), sizeof(entry)-strlen(entry), "xv 216 yv %d picn sbfctf1 ", 42 + i * 8);
 #endif
 			if (maxsize - len > strlen(entry)) {
-				strcat(string, entry);
+				Com_strcat (string, sizeof(string), entry);
 				len = (int)strlen(string);
 				last[1] = i;
 			}
@@ -1887,8 +1884,10 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer)
 	j = (j + 2) * 8 + 42;
 
 	k = n = 0;
-	if (maxsize - len > 50) {
-		for (i = 0; i < maxclients->value; i++) {
+	if (maxsize - len > 50)
+	{
+		for (i = 0; i < maxclients->value; i++)
+		{
 			cl_ent = g_edicts + 1 + i;
 			cl = &game.clients[i];
 			if (!cl_ent->inuse ||
@@ -1896,15 +1895,16 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer)
 				cl_ent->client->resp.ctf_team != CTF_NOTEAM)
 				continue;
 
-			if (!k) {
+			if (!k)
+			{
 				k = 1;
-				sprintf(entry, "xv 0 yv %d string2 \"Spectators\" ", j);
-				strcat(string, entry);
+				Com_sprintf (entry, sizeof(entry), "xv 0 yv %d string2 \"Spectators\" ", j);
+				Com_strcat (string, sizeof(string), entry);
 				len = (int)strlen(string);
 				j += 8;
 			}
 
-			sprintf(entry+strlen(entry),
+			Com_sprintf (entry+strlen(entry), sizeof(entry)-strlen(entry),
 				"ctf %d %d %d %d %d ",
 				(n & 1) ? 160 : 0, // x
 				j, // y
@@ -1912,7 +1912,7 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer)
 				cl->resp.score,
 				cl->ping > 999 ? 999 : cl->ping);
 			if (maxsize - len > strlen(entry)) {
-				strcat(string, entry);
+				Com_strcat (string, sizeof(string), entry);
 				len = (int)strlen(string);
 			}
 			
@@ -1923,10 +1923,10 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer)
 	}
 
 	if (total[0] - last[0] > 1) // couldn't fit everyone
-		sprintf(string + strlen(string), "xv 8 yv %d string \"..and %d more\" ",
+		Com_sprintf (string + strlen(string), sizeof(string)-strlen(string), "xv 8 yv %d string \"..and %d more\" ",
 			42 + (last[0]+1)*8, total[0] - last[0] - 1);
 	if (total[1] - last[1] > 1) // couldn't fit everyone
-		sprintf(string + strlen(string), "xv 168 yv %d string \"..and %d more\" ",
+		Com_sprintf (string + strlen(string), sizeof(string)-strlen(string), "xv 168 yv %d string \"..and %d more\" ",
 			42 + (last[1]+1)*8, total[1] - last[1] - 1);
 
 	gi.WriteByte (svc_layout);
@@ -1939,7 +1939,7 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer)
 
 void CTFHasTech(edict_t *who)
 {
-	if(who->svflags & SVF_MONSTER) return ;
+	if (who->svflags & SVF_MONSTER) return ;
 	if (level.time - who->client->ctf_lasttechmsg > 2) {
 		gi.centerprintf(who, "You already have a TECH powerup.");
 		who->client->ctf_lasttechmsg = level.time;
@@ -2305,7 +2305,7 @@ struct {
 };
 
 
-static void CTFSay_Team_Location(edict_t *who, char *buf)
+static void CTFSay_Team_Location (edict_t *who, char *buf, size_t bufSize)
 {
 	edict_t *what = NULL;
 	edict_t *hot = NULL;
@@ -2319,7 +2319,8 @@ static void CTFSay_Team_Location(edict_t *who, char *buf)
 	qboolean hotsee = false;
 	qboolean cansee;
 
-	while ((what = loc_findradius(what, who->s.origin, 1024)) != NULL) {
+	while ((what = loc_findradius(what, who->s.origin, 1024)) != NULL)
+	{
 		// find what in loc_classnames
 		for (i = 0; loc_names[i].classname; i++)
 			if (strcmp(what->classname, loc_names[i].classname) == 0)
@@ -2328,7 +2329,8 @@ static void CTFSay_Team_Location(edict_t *who, char *buf)
 			continue;
 		// something we can see get priority over something we can't
 		cansee = loc_CanSee(what, who);
-		if (cansee && !hotsee) {
+		if (cansee && !hotsee)
+		{
 			hotsee = true;
 			hotindex = loc_names[i].priority;
 			hot = what;
@@ -2343,8 +2345,7 @@ static void CTFSay_Team_Location(edict_t *who, char *buf)
 			continue;
 		VectorSubtract(what->s.origin, who->s.origin, v);
 		newdist = VectorLength(v);
-		if (newdist < hotdist || 
-			(cansee && loc_names[i].priority < hotindex)) {
+		if ( (newdist < hotdist) || (cansee && loc_names[i].priority < hotindex) ) {
 			hot = what;
 			hotdist = newdist;
 			hotindex = i;
@@ -2353,7 +2354,7 @@ static void CTFSay_Team_Location(edict_t *who, char *buf)
 	}
 
 	if (!hot) {
-		strcpy(buf, "nowhere");
+		Com_strcpy (buf, bufSize, "nowhere");
 		return;
 	}
 
@@ -2381,13 +2382,13 @@ static void CTFSay_Team_Location(edict_t *who, char *buf)
 	}
 
 	if ((item = FindItemByClassname(hot->classname)) == NULL) {
-		strcpy(buf, "nowhere");
+		Com_strcpy (buf, bufSize, "nowhere");
 		return;
 	}
 
 	// in water?
 	if (who->waterlevel)
-		strcpy(buf, "in the water ");
+		Com_strcpy (buf, bufSize, "in the water ");
 	else
 		*buf = 0;
 
@@ -2395,23 +2396,23 @@ static void CTFSay_Team_Location(edict_t *who, char *buf)
 	VectorSubtract(who->s.origin, hot->s.origin, v);
 	if (fabs(v[2]) > fabs(v[0]) && fabs(v[2]) > fabs(v[1]))
 		if (v[2] > 0)
-			strcat(buf, "above ");
+			Com_strcat (buf, bufSize, "above ");
 		else
-			strcat(buf, "below ");
+			Com_strcat (buf, bufSize, "below ");
 	else
-		strcat(buf, "near ");
+		Com_strcat (buf, bufSize, "near ");
 
 	if (nearteam == CTF_TEAM1)
-		strcat(buf, "the red ");
+		Com_strcat (buf, bufSize, "the red ");
 	else if (nearteam == CTF_TEAM2)
-		strcat(buf, "the blue ");
+		Com_strcat (buf, bufSize, "the blue ");
 	else
-		strcat(buf, "the ");
+		Com_strcat (buf, bufSize, "the ");
 
-	strcat(buf, item->pickup_name);
+	Com_strcat (buf, bufSize, item->pickup_name);
 }
 
-static void CTFSay_Team_Armor(edict_t *who, char *buf)
+static void CTFSay_Team_Armor (edict_t *who, char *buf, size_t bufSize)
 {
 	gitem_t		*item;
 	int			index, cells;
@@ -2424,7 +2425,8 @@ static void CTFSay_Team_Armor(edict_t *who, char *buf)
 	{
 		cells = who->client->pers.inventory[ITEM_INDEX(Fdi_CELLS/*FindItem ("cells")*/)];
 		if (cells)
-			sprintf(buf+strlen(buf), "%s with %i cells ",
+		//	sprintf (buf+strlen(buf), "%s with %i cells ",
+			Com_sprintf (buf+strlen(buf), bufSize - strlen(buf), "%s with %i cells ",
 				(power_armor_type == POWER_ARMOR_SCREEN) ?
 				"Power Screen" : "Power Shield", cells);
 	}
@@ -2433,53 +2435,57 @@ static void CTFSay_Team_Armor(edict_t *who, char *buf)
 	if (index)
 	{
 		item = GetItemByIndex (index);
-		if (item) {
-			if (*buf)
-				strcat(buf, "and ");
-			sprintf(buf+strlen(buf), "%i units of %s",
+		if (item)
+		{
+			if (*buf) {
+				Com_strcat (buf, bufSize, "and ");
+			}
+		//	sprintf(buf+strlen(buf), "%i units of %s",
+			Com_sprintf (buf+strlen(buf), bufSize - strlen(buf), "%i units of %s",
 				who->client->pers.inventory[index], item->pickup_name);
 		}
 	}
 
 	if (!*buf)
-		strcpy(buf, "no armor");
+		Com_strcpy (buf, bufSize, "no armor");
 }
 
-static void CTFSay_Team_Health(edict_t *who, char *buf)
+static void CTFSay_Team_Health (edict_t *who, char *buf, size_t bufSize)
 {
 	if (who->health <= 0)
-		strcpy(buf, "dead");
+		Com_strcpy (buf, bufSize, "dead");
 	else
-		sprintf(buf, "%i health", who->health);
+		Com_sprintf (buf, bufSize, "%i health", who->health);
 }
 
-static void CTFSay_Team_Tech(edict_t *who, char *buf)
+static void CTFSay_Team_Tech (edict_t *who, char *buf, size_t bufSize)
 {
 	gitem_t *tech;
 	int i;
 
 	// see if the player has a tech powerup
 	i = 0;
-	while (tnames[i]) {
+	while (tnames[i])
+	{
 		if ((tech = FindItemByClassname(tnames[i])) != NULL &&
 			who->client->pers.inventory[ITEM_INDEX(tech)]) {
-			sprintf(buf, "the %s", tech->pickup_name);
+			Com_sprintf (buf, bufSize, "the %s", tech->pickup_name);
 			return;
 		}
 		i++;
 	}
-	strcpy(buf, "no powerup");
+	Com_strcpy (buf, bufSize, "no powerup");
 }
 
-static void CTFSay_Team_Weapon(edict_t *who, char *buf)
+static void CTFSay_Team_Weapon(edict_t *who, char *buf, size_t bufSize)
 {
 	if (who->client->pers.weapon)
-		strcpy(buf, who->client->pers.weapon->pickup_name);
+		Com_strcpy (buf, bufSize, who->client->pers.weapon->pickup_name);
 	else
-		strcpy(buf, "none");
+		Com_strcpy (buf, bufSize, "none");
 }
 
-static void CTFSay_Team_Sight(edict_t *who, char *buf)
+static void CTFSay_Team_Sight (edict_t *who, char *buf, size_t bufSize)
 {
 	int i;
 	edict_t *targ;
@@ -2488,35 +2494,40 @@ static void CTFSay_Team_Sight(edict_t *who, char *buf)
 	char s2[1024];
 
 	*s = *s2 = 0;
-	for (i = 1; i <= maxclients->value; i++) {
+	for (i = 1; i <= maxclients->value; i++)
+	{
 		targ = g_edicts + i;
 		if (!targ->inuse || 
 			targ == who ||
 			!loc_CanSee(targ, who))
 			continue;
-		if (*s2) {
-			if (strlen(s) + strlen(s2) + 3 < sizeof(s)) {
+		if (*s2)
+		{
+			if (strlen(s) + strlen(s2) + 3 < sizeof(s))
+			{
 				if (n)
-					strcat(s, ", ");
-				strcat(s, s2);
+					Com_strcat (s, sizeof(s), ", ");
+				Com_strcat(s, sizeof(s), s2);
 				*s2 = 0;
 			}
 			n++;
 		}
-		strcpy(s2, targ->client->pers.netname);
+		Com_strcpy (s2, sizeof(s2), targ->client->pers.netname);
 	}
-	if (*s2) {
+	if (*s2)
+	{
 		if (strlen(s) + strlen(s2) + 6 < sizeof(s)) {
 			if (n)
-				strcat(s, " and ");
-			strcat(s, s2);
+				Com_strcat (s, sizeof(s), " and ");
+			Com_strcat (s, sizeof(s), s2);
 		}
-		strcpy(buf, s);
-	} else
-		strcpy(buf, "no one");
+		Com_strcpy (buf, bufSize, s);
+	}
+	else
+		Com_strcpy (buf, bufSize, "no one");
 }
 
-void CTFSay_Team(edict_t *who, char *msg)
+void CTFSay_Team (edict_t *who, char *msg)
 {
 	char outmsg[1024];
 	char buf[1024];
@@ -2536,39 +2547,45 @@ void CTFSay_Team(edict_t *who, char *msg)
 			switch (*++msg) {
 				case 'l' :
 				case 'L' :
-					CTFSay_Team_Location(who, buf);
-					strcpy(p, buf);
+					CTFSay_Team_Location(who, buf, sizeof(buf));
+				//	strcpy(p, buf);
+					Com_strcpy(p, sizeof(outmsg) - (p - outmsg) - 1, buf);
 					p += strlen(buf);
 					break;
 				case 'a' :
 				case 'A' :
-					CTFSay_Team_Armor(who, buf);
-					strcpy(p, buf);
+					CTFSay_Team_Armor(who, buf, sizeof(buf));
+				//	strcpy(p, buf);
+					Com_strcpy(p, sizeof(outmsg) - (p - outmsg) - 1, buf);
 					p += strlen(buf);
 					break;
 				case 'h' :
 				case 'H' :
-					CTFSay_Team_Health(who, buf);
-					strcpy(p, buf);
+					CTFSay_Team_Health(who, buf, sizeof(buf));
+				//	strcpy(p, buf);
+					Com_strcpy(p, sizeof(outmsg) - (p - outmsg) - 1, buf);
 					p += strlen(buf);
 					break;
 				case 't' :
 				case 'T' :
-					CTFSay_Team_Tech(who, buf);
-					strcpy(p, buf);
+					CTFSay_Team_Tech(who, buf, sizeof(buf));
+				//	strcpy(p, buf);
+					Com_strcpy(p, sizeof(outmsg) - (p - outmsg) - 1, buf);
 					p += strlen(buf);
 					break;
 				case 'w' :
 				case 'W' :
-					CTFSay_Team_Weapon(who, buf);
-					strcpy(p, buf);
+					CTFSay_Team_Weapon(who, buf, sizeof(buf));
+				//	strcpy(p, buf);
+					Com_strcpy(p, sizeof(outmsg) - (p - outmsg) - 1, buf);
 					p += strlen(buf);
 					break;
 
 				case 'n' :
 				case 'N' :
-					CTFSay_Team_Sight(who, buf);
-					strcpy(p, buf);
+					CTFSay_Team_Sight(who, buf, sizeof(buf));
+				//	strcpy(p, buf);
+					Com_strcpy(p, sizeof(outmsg) - (p - outmsg) - 1, buf);
 					p += strlen(buf);
 					break;
 
@@ -2586,7 +2603,7 @@ void CTFSay_Team(edict_t *who, char *msg)
 			continue;
 		if (cl_ent->client->resp.ctf_team == who->client->resp.ctf_team)
 		{
-			if(!(cl_ent->svflags & SVF_MONSTER))
+			if (!(cl_ent->svflags & SVF_MONSTER))
 			gi.cprintf(cl_ent, PRINT_CHAT, "(%s): %s\n", 
 				who->client->pers.netname, outmsg);
 		}
@@ -2653,7 +2670,7 @@ void CTFJoinTeam(edict_t *ent, int desired_team)
 	s = Info_ValueForKey (ent->client->pers.userinfo, "skin");
 	CTFAssignSkin(ent, s);
 
-/*	if(!hokuto->value)
+/*	if (!hokuto->value)
 	{*/ 
 		PutClientInServer (ent);
 		// add a teleportation effect
@@ -2804,8 +2821,8 @@ int CTFUpdateJoinMenu(edict_t *ent)
 			num2++;
 	}
 
-	sprintf(team1players, "  (%d players)", num1);
-	sprintf(team2players, "  (%d players)", num2);
+	Com_sprintf (team1players, sizeof(team1players), "  (%d players)", num1);
+	Com_sprintf (team2players, sizeof(team2players), "  (%d players)", num2);
 
 	joinmenu[2].text = levelname;
 	if (joinmenu[4].text)
@@ -2954,7 +2971,7 @@ void SP_trigger_teleport (edict_t *ent)
 	ent->svflags |= SVF_NOCLIENT;
 	ent->solid = SOLID_TRIGGER;
 	ent->touch = old_teleporter_touch;
-	if(ent->model)
+	if (ent->model)
 	gi.setmodel (ent, ent->model);
 	gi.linkentity (ent);
 
@@ -3007,23 +3024,25 @@ void CTFSetupNavSpawn()
 	memset(Route,0,sizeof(Route));
 	memset(code,0,8);
 
-	if(!ctf->value) sprintf(name,".\\%s\\chdtm\\%s.chn",gamepath->string,level.mapname);
-	else sprintf(name,".\\%s\\chctf\\%s.chf",gamepath->string,level.mapname);
+	if (!ctf->value)
+		Com_sprintf (name, sizeof(name), ".\\%s\\chdtm\\%s.chn",gamepath->string,level.mapname);
+	else
+		Com_sprintf (name, sizeof(name), ".\\%s\\chctf\\%s.chf",gamepath->string,level.mapname);
 
 	fpout = fopen(name,"rb");
-	if(fpout == NULL)
+	if (fpout == NULL)
 	{
-		if(!ctf->value) gi.dprintf("Chaining: file %s.chn not found.\n",level.mapname);
+		if (!ctf->value) gi.dprintf("Chaining: file %s.chn not found.\n",level.mapname);
 		else gi.dprintf("Chaining: file %s.chf not found.\n",level.mapname);
 	}
 	else
 	{
 		fread(code,sizeof(char),8,fpout);
 
-		if(!ctf->value) strncpy(SRCcode,"3ZBRGDTM",8);
+		if (!ctf->value) strncpy(SRCcode,"3ZBRGDTM",8);
 		else strncpy(SRCcode,"3ZBRGCTF",8);
 
-		if(strncmp(code,SRCcode,8))
+		if (strncmp(code,SRCcode,8))
 		{
 			CurrentIndex = 0;
 			gi.dprintf("Chaining: %s.chn is not a chaining file.\n",level.mapname);
@@ -3036,11 +3055,11 @@ void CTFSetupNavSpawn()
 		size = (unsigned int)CurrentIndex * sizeof(route_t);
 		fread(Route,size,1,fpout);
 	
-		for(i = 0;i < CurrentIndex;i++)
+		for (i = 0;i < CurrentIndex;i++)
 		{
-if(Route[i].state == GRS_TELEPORT)
+if (Route[i].state == GRS_TELEPORT)
 gi.dprintf("GRS_TELEPORT\n");
-			if((Route[i].state > GRS_TELEPORT/*GRS_ONROTATE*/ && Route[i].state <= GRS_PUSHBUTTON)
+			if ((Route[i].state > GRS_TELEPORT/*GRS_ONROTATE*/ && Route[i].state <= GRS_PUSHBUTTON)
 				|| Route[i].state == GRS_REDFLAG || Route[i].state == GRS_BLUEFLAG)
 			{
 				other = &g_edicts[(int)maxclients->value+1];
@@ -3048,24 +3067,24 @@ gi.dprintf("GRS_TELEPORT\n");
 				{
 					if (other->inuse)
 					{
-						if(Route[i].state == GRS_ONPLAT 
+						if (Route[i].state == GRS_ONPLAT 
 							|| Route[i].state == GRS_ONTRAIN
 							|| Route[i].state == GRS_PUSHBUTTON
 							|| Route[i].state == GRS_ONDOOR)
 						{
 							VectorAdd(other->s.origin,other->mins,v);
-							if(VectorCompare (Route[i].Pt,v/*other->monsterinfo.last_sighting*/))
+							if (VectorCompare (Route[i].Pt,v/*other->monsterinfo.last_sighting*/))
 							{
 								//onplat
-								if(Route[i].state == GRS_ONPLAT 
-									&& !Q_stricmp(other->classname, "func_plat"))
+								if (Route[i].state == GRS_ONPLAT 
+									&& (!Q_stricmp(other->classname, "func_plat") || !Q_stricmp(other->classname, "func_plat2")) )
 								{
 //gi.dprintf("assingned %s\n",other->classname);
 									Route[i].ent = other;
 									break;
 								}
 								//train
-								else if(Route[i].state == GRS_ONTRAIN 
+								else if (Route[i].state == GRS_ONTRAIN 
 									&& !Q_stricmp(other->classname, "func_train"))
 								{
 //gi.dprintf("assingned %s\n",other->classname);
@@ -3073,7 +3092,7 @@ gi.dprintf("GRS_TELEPORT\n");
 									break;
 								}
 								//button
-								else if(Route[i].state == GRS_PUSHBUTTON
+								else if (Route[i].state == GRS_PUSHBUTTON
 									&& !Q_stricmp(other->classname, "func_button"))
 								{
 //gi.dprintf("assingned %s\n",other->classname);
@@ -3081,7 +3100,7 @@ gi.dprintf("GRS_TELEPORT\n");
 									break;
 								}
 								//door
-								else if(Route[i].state == GRS_ONDOOR
+								else if (Route[i].state == GRS_ONDOOR
 									&& !Q_stricmp(other->classname, "func_door"))
 								{
 //gi.dprintf("assingned %s\n",other->classname);
@@ -3090,16 +3109,16 @@ gi.dprintf("GRS_TELEPORT\n");
 								}
 							}
 						}
-						else if(Route[i].state == GRS_ITEMS
+						else if (Route[i].state == GRS_ITEMS
 							|| Route[i].state == GRS_REDFLAG || Route[i].state == GRS_BLUEFLAG)
 						{
 //else gi.dprintf("CYAU!!!!!!!\n");
-							if(VectorCompare (Route[i].Pt,other->monsterinfo.last_sighting/*->s.origin*/))
+							if (VectorCompare (Route[i].Pt,other->monsterinfo.last_sighting/*->s.origin*/))
 							{
 								//onplat
-								if(1/*other->classname[0] == 'w' || other->classname[0] == 'i'*/)
+								if (1/*other->classname[0] == 'w' || other->classname[0] == 'i'*/)
 								{
-//if(Route[i].state == GRS_REDFLAG || Route[i].state == GRS_BLUEFLAG)
+//if (Route[i].state == GRS_REDFLAG || Route[i].state == GRS_BLUEFLAG)
 //gi.dprintf("HATA ATTA!!!!!!!\n");
 //gi.dprintf("assingned %s\n",other->classname);
 									Route[i].ent = other;
@@ -3108,14 +3127,14 @@ gi.dprintf("GRS_TELEPORT\n");
 							}
 							else
 							{
-//if(Route[i].state == GRS_REDFLAG || Route[i].state == GRS_BLUEFLAG)
+//if (Route[i].state == GRS_REDFLAG || Route[i].state == GRS_BLUEFLAG)
 //gi.dprintf("HATA Dame!!!!!!!\n");
 							}
 						}
 					}
 				}
-				if(j >= globals.num_edicts && (Route[i].state == GRS_ITEMS || Route[i].state == GRS_REDFLAG || Route[i].state == GRS_BLUEFLAG)) gi.dprintf("kicked item\n");
-				if(j >= globals.num_edicts) Route[i].state = GRS_NORMAL;
+				if (j >= globals.num_edicts && (Route[i].state == GRS_ITEMS || Route[i].state == GRS_REDFLAG || Route[i].state == GRS_BLUEFLAG)) gi.dprintf("kicked item\n");
+				if (j >= globals.num_edicts) Route[i].state = GRS_NORMAL;
 			}
 		}
 		gi.dprintf("Chaining: Total %i chaining pod assigned.\n",CurrentIndex);
@@ -3134,7 +3153,7 @@ void SpawnExtra(vec3_t position,char *classname)
 	VectorCopy(position,it_ent->s.origin);
 	ED_CallSpawn(it_ent);
 
-	if(ctf->value && chedit->value)
+	if (ctf->value && chedit->value)
 	{
 		it_ent->moveinfo.speed = -1;
 		it_ent->s.effects |= EF_QUAD;
@@ -3166,64 +3185,64 @@ void CTFJobAssign (void)
 		if (e->inuse)
 		{
 			client = e->client;
-			if(client->zc.ctfstate == CTFS_NONE) client->zc.ctfstate = CTFS_DEFENDER;
-//if(client->zc.ctfstate == CTFS_CARRIER)
+			if (client->zc.ctfstate == CTFS_NONE) client->zc.ctfstate = CTFS_DEFENDER;
+//if (client->zc.ctfstate == CTFS_CARRIER)
 //gi.bprintf(PRINT_HIGH,"I am carrierY!!\n");
-			if(e->client->resp.ctf_team == CTF_TEAM1)
+			if (e->client->resp.ctf_team == CTF_TEAM1)
 			{
 				mate1++;
-				if( e->client->pers.inventory[ITEM_INDEX(FindItem("Blue Flag"))])
+				if ( e->client->pers.inventory[ITEM_INDEX(FindItem("Blue Flag"))])
 				{
 					client->zc.ctfstate = CTFS_CARRIER;
 				}
-				if(1/*e->svflags & SVF_MONSTER*/)
+				if (1/*e->svflags & SVF_MONSTER*/)
 				{
 
-					if( client->zc.ctfstate == CTFS_OFFENCER && random()>0.7) defei1 = e;
-					else if( client->zc.ctfstate == CTFS_DEFENDER)
+					if ( client->zc.ctfstate == CTFS_OFFENCER && random()>0.7) defei1 = e;
+					else if ( client->zc.ctfstate == CTFS_DEFENDER)
 					{
-						if(random()>0.7) geti1 = e;
+						if (random()>0.7) geti1 = e;
 						defend1++;
 					}
-					else if( client->zc.ctfstate == CTFS_CARRIER ) defend1++;
+					else if ( client->zc.ctfstate == CTFS_CARRIER ) defend1++;
 				}
 			}
-			else if(e->client->resp.ctf_team == CTF_TEAM2)
+			else if (e->client->resp.ctf_team == CTF_TEAM2)
 			{
 				mate2++;
-				if( e->client->pers.inventory[ITEM_INDEX(FindItem("Red Flag"))])
+				if ( e->client->pers.inventory[ITEM_INDEX(FindItem("Red Flag"))])
 				{
 					client->zc.ctfstate = CTFS_CARRIER;
 				}
-				if(1/*e->svflags & SVF_MONSTER*/)
+				if (1/*e->svflags & SVF_MONSTER*/)
 				{
-					if( client->zc.ctfstate == CTFS_OFFENCER && random()>0.8) defei2 = e;
-					else if( client->zc.ctfstate == CTFS_DEFENDER)
+					if ( client->zc.ctfstate == CTFS_OFFENCER && random()>0.8) defei2 = e;
+					else if ( client->zc.ctfstate == CTFS_DEFENDER)
 					{
-						if(random()>0.7) geti2 = e;
+						if (random()>0.7) geti2 = e;
 						defend2++;
 					}
-					else if( client->zc.ctfstate == CTFS_CARRIER ) defend2++;
+					else if ( client->zc.ctfstate == CTFS_CARRIER ) defend2++;
 				}
 			}
 		}
 	}
 
-	if(defend1 < mate1 / 3 && mate1 >= 2)
+	if (defend1 < mate1 / 3 && mate1 >= 2)
 	{
-		if(defei1 != NULL) defei1->client->zc.ctfstate = CTFS_DEFENDER;
+		if (defei1 != NULL) defei1->client->zc.ctfstate = CTFS_DEFENDER;
 	}
-	else if(defend1 > mate1 / 3  )
+	else if (defend1 > mate1 / 3  )
 	{
-		if(geti1 != NULL) geti1->client->zc.ctfstate = CTFS_OFFENCER;
+		if (geti1 != NULL) geti1->client->zc.ctfstate = CTFS_OFFENCER;
 	}
-	if(defend2 < mate2 / 3 && mate2 >= 2)
+	if (defend2 < mate2 / 3 && mate2 >= 2)
 	{
-		if(defei2 != NULL) defei2->client->zc.ctfstate = CTFS_DEFENDER;
+		if (defei2 != NULL) defei2->client->zc.ctfstate = CTFS_DEFENDER;
 	}
-	else if(defend2 > mate2 / 3 )
+	else if (defend2 > mate2 / 3 )
 	{
-		if(geti2 != NULL) geti2->client->zc.ctfstate = CTFS_OFFENCER;
+		if (geti2 != NULL) geti2->client->zc.ctfstate = CTFS_OFFENCER;
 	}
 ///	gi.bprintf(PRINT_HIGH,"Called!!!!\n");
 }

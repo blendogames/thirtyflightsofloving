@@ -303,8 +303,9 @@ char *COM_Parse (char **data_p);
 // data is an in/out parm, returns a parsed out token
 
 void Com_sprintf (char *dest, size_t size, char *fmt, ...);
-void Com_strcpy (char *dest, size_t destSize, const char *src);
-void Com_strcat (char *dest, size_t destSize, const char *src);
+// Knightmare added
+size_t Com_strcpy (char *dest, size_t destSize, const char *src);
+size_t Com_strcat (char *dest, size_t destSize, const char *src);
 
 void Com_PageInMemory (byte *buffer, int size);
 

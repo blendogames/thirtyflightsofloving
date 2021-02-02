@@ -224,9 +224,9 @@ void SVCmd_WriteIP_f (void)
 	game = gi.cvar("game", "", 0);
 
 	if (!*game->string)
-		sprintf (name, "%s/listip.cfg", GAMEVERSION);
+		Com_sprintf (name, sizeof(name), "%s/listip.cfg", GAMEVERSION);
 	else
-		sprintf (name, "%s/listip.cfg", game->string);
+		Com_sprintf (name, sizeof(name), "%s/listip.cfg", game->string);
 
 	gi.cprintf (NULL, PRINT_HIGH, "Writing %s.\n", name);
 
@@ -297,7 +297,7 @@ void	Svcmd_Test_f (void)
 }
 
 //chainファイルのセーブ
-void SaveChain()
+void SaveChain (void)
 {
 	char name[256];
 	FILE *fpout;
@@ -310,10 +310,12 @@ void SaveChain()
 	}
 
 	//とりあえずCTFだめ
-	if(ctf->value) 	sprintf(name,".\\%s\\chctf\\%s.chf",gamepath->string,level.mapname);
-	else 	sprintf(name,".\\%s\\chdtm\\%s.chn",gamepath->string,level.mapname);
+	if (ctf->value) 
+		Com_sprintf (name, sizeof(name), ".\\%s\\chctf\\%s.chf",gamepath->string,level.mapname);
+	else
+		Com_sprintf (name, sizeof(name), ".\\%s\\chdtm\\%s.chn",gamepath->string,level.mapname);
 
-	fpout = fopen(name,"wb");
+	fpout = fopen(name, "wb");
 	if(fpout == NULL) gi.cprintf(NULL,PRINT_HIGH,"Can't open %s\n",name);
 	else
 	{

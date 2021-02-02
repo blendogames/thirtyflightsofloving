@@ -1,0 +1,41 @@
+-------------------------------------
+BUGS:
+-------------------------------------
+
+
+-------------------------------------
+TO DO - GENERAL:
+-------------------------------------
+
+
+-------------------------------------
+TO DO - BOTS:
+-------------------------------------
+- CTF capability (check G_CTF refs).
+- Use secondary mode of Gauss Pistol.
+- Use Traps properly (eg. lay around power-items if no one around).
+- Rocket-jumping ability.
+- Shoot/avoid enemy C4 as well as traps, if touchbang or proximity set.
+
+-------------------------------------
+POTENTIAL CHANGES - GENERAL:
+-------------------------------------
+- Partial invisibility powerup -> Mystery Box.
+- Jetpack powerup.
+- New RL mode: nosecam (controllable rockets).
+- Player stats for weapons (eg. accuracy, usage, etc).
+- Location markers for maps.
+- Top scores list for each map.
+- Min/max player numbers in map file.
+- Dynamically reduce 'max_traps_active' as player numbers increase.
+- Banning list should be rechecked after server restart.
+- Ability to go back to previous map in vote selection list.
+
+-------------------------------------
+POTENTIAL CHANGES - BOTS:
+-------------------------------------
+- Chasecam can be used on bots.
+- Bots visible as clients in server info.
+- If there are no players present in a game, spawn 'n' bots after 't' seconds (use cvars).
+- Better camping algorithm.
+- Better bot insults.

@@ -3815,7 +3815,7 @@ struct {
 	//	strncat(buf, "the blue ");
 		Q_strncatz(buf, bufSize, "the blue ");
 	else if (nearteam == CTF_TEAM3)
-	//	strncat(buf, "the blue ");
+	//	strncat(buf, "the green ");
 		Q_strncatz(buf, bufSize, "the green ");
 	else
 	//	strncat(buf, "the ");

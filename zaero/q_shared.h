@@ -65,7 +65,7 @@ __inline int Q_vsnprintf (char *Dest, size_t Count, const char *Format, va_list 
 #define Q_vsnprintf vsnprintf
 #endif
 
-//Knightmare- whether to include new engine enhancements
+// Knightmare- whether to include new engine enhancements
 #define	KMQUAKE2_ENGINE_MOD
 
 #ifdef KMQUAKE2_ENGINE_MOD
@@ -261,8 +261,9 @@ char *COM_Parse (char **data_p);
 // data is an in/out parm, returns a parsed out token
 
 void Com_sprintf (char *dest, size_t size, char *fmt, ...);
-void Com_strcpy (char *dest, size_t destSize, const char *src);
-void Com_strcat (char *dest, size_t destSize, const char *src);
+// Knightmare added
+size_t Com_strcpy (char *dest, size_t destSize, const char *src);
+size_t Com_strcat (char *dest, size_t destSize, const char *src);
 
 void Com_PageInMemory (byte *buffer, int size);
 

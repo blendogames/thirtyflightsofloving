@@ -246,23 +246,23 @@ int SV_FlyMove (edict_t *ent, float time, int mask)
 //numplanes = 0;
 //PON-CTF
 		i = false;
-		if(ctf->value)
+		if (ctf->value)
 		{
-			if(ent->client->ctf_grapple != NULL
+			if (ent->client->ctf_grapple != NULL
 				&& ent->client->ctf_grapplestate != CTF_GRAPPLE_STATE_FLY
 				/*&& ent->waterlevel <= 1*/) i = true;
 		}
-		if(!i){if(!ent->groundentity) i = true;}
+		if (!i){if (!ent->groundentity) i = true;}
 //PON-CTF
-		if(!i/*ent->client*/)
+		if (!i/*ent->client*/)
 		{
-			if(!ent->client->zc.trapped
+			if (!ent->client->zc.trapped
 				&& !i)
 			{
 				numplanes = 0;
-				if(ent->waterlevel || (!ent->groundentity && ent->velocity[2] > 10 )) goto VELCX;
+				if (ent->waterlevel || (!ent->groundentity && ent->velocity[2] > 10 )) goto VELCX;
 				i =0;
-				if(/*ent->groundentity ||*/ ent->velocity[2] > 10) goto VELC;
+				if (/*ent->groundentity ||*/ ent->velocity[2] > 10) goto VELC;
 			}
 		}
 
@@ -391,21 +391,22 @@ typedef struct
 	vec3_t	angles;
 	float	deltayaw;
 } pushed_t;
-pushed_t	pushed[MAX_EDICTS], *pushed_p;
 
+pushed_t	pushed[MAX_EDICTS], *pushed_p;
 edict_t	*obstacle;
 
 // Knightmare- added from Lazarus
-void MoveRiders(edict_t *platform, edict_t *ignore, vec3_t move, vec3_t amove, qboolean turn)
+void MoveRiders (edict_t *platform, edict_t *ignore, vec3_t move, vec3_t amove, qboolean turn)
 {
 	int	i;
 	edict_t	*rider;
 
-	for(i=1, rider=g_edicts+i; i<=globals.num_edicts; i++, rider++) {
-		if((rider->groundentity == platform) && (rider != ignore)) {
+	for (i=1, rider=g_edicts+i; i<=globals.num_edicts; i++, rider++)
+	{
+		if ((rider->groundentity == platform) && (rider != ignore)) {
 			VectorAdd(rider->s.origin,move,rider->s.origin);
 			if (turn && (amove[YAW] != 0.)) {
-				if(!rider->client)
+				if (!rider->client)
 					rider->s.angles[YAW] += amove[YAW];
 				else
 				{
@@ -416,13 +417,13 @@ void MoveRiders(edict_t *platform, edict_t *ignore, vec3_t move, vec3_t amove, q
 				}
 			}
 			gi.linkentity(rider);
-			if(SV_TestEntityPosition(rider)) {
+			if (SV_TestEntityPosition(rider)) {
 				// Move is blocked. Since this is for riders, not pushees,
 				// it should be ok to just back the move for this rider off
 				VectorSubtract(rider->s.origin,move,rider->s.origin);
-				if(turn && (amove[YAW] != 0.)) {
+				if (turn && (amove[YAW] != 0.)) {
 					rider->s.angles[YAW] -= amove[YAW];
-					if(rider->client)
+					if (rider->client)
 					{
 						rider->client->ps.pmove.delta_angles[YAW] -= ANGLE2SHORT(amove[YAW]);
 						rider->client->ps.viewangles[YAW] -= amove[YAW];
@@ -431,11 +432,12 @@ void MoveRiders(edict_t *platform, edict_t *ignore, vec3_t move, vec3_t amove, q
 				gi.linkentity(rider);
 			} else {
 				// move this rider's riders
-				MoveRiders(rider,ignore,move,amove,turn);
+				MoveRiders (rider,ignore,move,amove,turn);
 			}
 		}
 	}
 }
+
 /*
 ============
 RealBoundingBox
@@ -454,27 +456,27 @@ void RealBoundingBox(edict_t *ent, vec3_t mins, vec3_t maxs)
 	vec3_t	p[8];
 	int		i, j, k, j2, k4;
 
-	for(k=0; k<2; k++)
+	for (k=0; k<2; k++)
 	{
 		k4 = k*4;
-		if(k)
+		if (k)
 			p[k4][2] = ent->maxs[2];
 		else
 			p[k4][2] = ent->mins[2];
 		p[k4+1][2] = p[k4][2];
 		p[k4+2][2] = p[k4][2];
 		p[k4+3][2] = p[k4][2];
-		for(j=0; j<2; j++)
+		for (j=0; j<2; j++)
 		{
 			j2 = j*2;
-			if(j)
+			if (j)
 				p[j2+k4][1] = ent->maxs[1];
 			else
 				p[j2+k4][1] = ent->mins[1];
 			p[j2+k4+1][1] = p[j2+k4][1];
-			for(i=0; i<2; i++)
+			for (i=0; i<2; i++)
 			{
-				if(i)
+				if (i)
 					p[i+j2+k4][0] = ent->maxs[0];
 				else
 					p[i+j2+k4][0] = ent->mins[0];
@@ -482,7 +484,7 @@ void RealBoundingBox(edict_t *ent, vec3_t mins, vec3_t maxs)
 		}
 	}
 	AngleVectors(ent->s.angles,forward,left,up);
-	for(i=0; i<8; i++)
+	for (i=0; i<8; i++)
 	{
 		VectorScale(forward,p[i][0],f1);
 		VectorScale(left,-p[i][1],l1);
@@ -493,7 +495,7 @@ void RealBoundingBox(edict_t *ent, vec3_t mins, vec3_t maxs)
 	}
 	VectorCopy(p[0],mins);
 	VectorCopy(p[0],maxs);
-	for(i=1; i<8; i++)
+	for (i=1; i<8; i++)
 	{
 		mins[0] = min(mins[0],p[i][0]);
 		mins[1] = min(mins[1],p[i][1]);
@@ -606,7 +608,7 @@ qboolean SV_Push (edict_t *pusher, vec3_t move, vec3_t amove)
 		|| check->movetype == MOVETYPE_NOCLIP)
 			continue;
 
-//		if(check->movetype == MOVETYPE_STEP) M_CheckGround(check);
+//		if (check->movetype == MOVETYPE_STEP) M_CheckGround(check);
 		if (!check->area.prev)
 			continue;		// not linked in anywhere
 
@@ -652,13 +654,13 @@ qboolean SV_Push (edict_t *pusher, vec3_t move, vec3_t amove)
 			// Lazarus: if turn_rider is set, do it. We don't do this by default
 			//          'cause it can be a fairly drastic change in gameplay
 			if (turn && (check->groundentity == pusher)) {
-				if(!check->client)
+				if (!check->client)
 				{
 					check->s.angles[YAW] += amove[YAW];
 				}
 				else
 				{
-					if(amove[YAW] != 0.)
+					if (amove[YAW] != 0.)
 					{
 						check->client->ps.pmove.delta_angles[YAW] += ANGLE2SHORT(amove[YAW]);
 						check->client->ps.viewangles[YAW] += amove[YAW];
@@ -673,7 +675,7 @@ qboolean SV_Push (edict_t *pusher, vec3_t move, vec3_t amove)
 						// player is riding a MOVETYPE_PUSH
 						check->client->ps.pmove.pm_flags |= PMF_NO_PREDICTION;
 					}
-					if(amove[PITCH] != 0.)
+					if (amove[PITCH] != 0.)
 					{
 						float	delta_yaw;
 						float	pitch = amove[PITCH];
@@ -691,7 +693,7 @@ qboolean SV_Push (edict_t *pusher, vec3_t move, vec3_t amove)
 
 			// Lazarus: This is where we attempt to move check due to a rotation, WITHOUT embedding
 			//          check in pusher (or anything else)
-			if((amove[PITCH] != 0) || (amove[YAW] != 0) || (amove[ROLL] != 0))
+			if ((amove[PITCH] != 0) || (amove[YAW] != 0) || (amove[ROLL] != 0))
 			{
 				// Argh! - always need to do this, except for pendulums
 			//	if (pusher->movetype != MOVETYPE_PENDULUM)
@@ -714,7 +716,7 @@ qboolean SV_Push (edict_t *pusher, vec3_t move, vec3_t amove)
 						VectorCopy(check->s.origin,org);
 						org[2] += 2*check->mins[2];
 						//tr = gi.trace(check->s.origin,vec3_origin,vec3_origin,org,check,MASK_SOLID);
-						//if(!tr.startsolid && tr.fraction < 1)
+						//if (!tr.startsolid && tr.fraction < 1)
 						//	check->s.origin[2] = tr.endpos[2] - check->mins[2]
 						//		+ fabs(tr.plane.normal[0])*check->size[0]/2
 						//		+ fabs(tr.plane.normal[1])*check->size[1]/2;
@@ -723,7 +725,7 @@ qboolean SV_Push (edict_t *pusher, vec3_t move, vec3_t amove)
 						//         rotating pushers, trains still seem okay too but
 						//         I haven't tested them thoroughly
 						tr = gi.trace(check->s.origin, check->mins, check->maxs, org, check, MASK_SOLID);
-						if(!tr.startsolid && tr.fraction < 1)
+						if (!tr.startsolid && tr.fraction < 1)
 							check->s.origin[2] = tr.endpos[2];
 					}
 				}
@@ -756,7 +758,7 @@ qboolean SV_Push (edict_t *pusher, vec3_t move, vec3_t amove)
 				// Knightmare added
 				// Lazarus: Move check riders, and riders of riders, and... well, you get the pic
 				VectorAdd(move,move2,move3);
-				MoveRiders(check,NULL,move3,amove,turn);
+				MoveRiders (check,NULL,move3,amove,turn);
 				// end Knightmare
 				// impact?
 				continue;
@@ -998,7 +1000,7 @@ void SV_Physics_Toss (edict_t *ent)
 	VectorScale (ent->velocity, FRAMETIME, move);
 
 
-	if(ent->classname[0] == 'R' && (ent->classname[6] == 'X' || ent->classname[6] == '3'))
+	if (ent->classname[0] == 'R' && (ent->classname[6] == 'X' || ent->classname[6] == '3'))
 	{
 		ent->groundentity = ent->union_ent;
 		ent->groundentity_linkcount = ent->union_ent->linkcount;
@@ -1189,7 +1191,7 @@ void SV_Physics_Step (edict_t *ent)
 		ent->velocity[2] *= newspeed;
 	}
 
-//	if(ent->client){if(ent->client->ctf_grapple) if(ent->client->ctf_grapplestate == CTF_GRAPPLE_STATE_FLY) ent->velocity[2] = 0;}
+//	if (ent->client){if (ent->client->ctf_grapple) if (ent->client->ctf_grapplestate == CTF_GRAPPLE_STATE_FLY) ent->velocity[2] = 0;}
 
 	if (ent->velocity[2] || ent->velocity[1] || ent->velocity[0])
 	{
@@ -1218,7 +1220,7 @@ void SV_Physics_Step (edict_t *ent)
 
 		if (ent->svflags & SVF_MONSTER)
 		{
-			if(!deathmatch->value) mask = MASK_MONSTERSOLID;
+			if (!deathmatch->value) mask = MASK_MONSTERSOLID;
 			else mask = MASK_BOTSOLIDX;//MASK_PLAYERSOLID;
 		}
 		else
@@ -1238,13 +1240,13 @@ void SV_Physics_Step (edict_t *ent)
 				if (hitsound && !ent->waterlevel && speed > 0)
 				{
 
-					if( speed < 5 ) gi.sound (ent, 0, gi.soundindex("player/land1.wav"), 1, 1, 0);
-					else if( speed < 40 || ent->client == NULL)
+					if ( speed < 5 ) gi.sound (ent, 0, gi.soundindex("player/land1.wav"), 1, 1, 0);
+					else if ( speed < 40 || ent->client == NULL)
 					{
 						gi.sound (ent, 0, gi.soundindex("player/step3.wav"), 1, 1, 0);
 //						gi.bprintf(PRINT_HIGH,"level 1\n");
 					}
-					else if( speed < 60 )
+					else if ( speed < 60 )
 					{
 						gi.sound (ent, 0, gi.soundindex("*fall2.wav"), 1, 1, 0);
 						ent->pain_debounce_time = level.time + FRAMETIME * 10;

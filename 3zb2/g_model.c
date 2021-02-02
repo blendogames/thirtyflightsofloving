@@ -65,7 +65,7 @@ void modelspawn_think (edict_t *self)
 	if (self->s.frame >= self->framenumbers)
 	{
 		self->s.frame = self->startframe;
-		if(self->spawnflags & ANIM_ONCE)
+		if (self->spawnflags & ANIM_ONCE)
 		{
 			model_spawn_use(self,world,world);
 			return;
@@ -81,7 +81,7 @@ void model_spawn_use (edict_t *self, edict_t *other, edict_t *activator)
 	{
 		self->svflags &= ~SVF_NOCLIENT;
 		self->delay = 0;
-		if(self->framenumbers > 1)
+		if (self->framenumbers > 1)
 		{
 			self->think = modelspawn_think;
 			self->nextthink = level.time + FRAMETIME;
@@ -109,7 +109,7 @@ void model_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 	e = self->movewith_next;
 	while(e) {
 		next = e->movewith_next;
-		if(e->solid == SOLID_NOT) {
+		if (e->solid == SOLID_NOT) {
 			e->nextthink = 0;
 			G_FreeEdict(e);
 		} else
@@ -196,8 +196,8 @@ void SP_model_spawn (edict_t *ent)
 		}
 	}
 
-//	if(ent->movewith && (ent->solid == SOLID_BBOX))
-//	if(ent->movewith)
+//	if (ent->movewith && (ent->solid == SOLID_BBOX))
+//	if (ent->movewith)
 //		ent->movetype = MOVETYPE_PUSH;
 
 	if (ent->solid != SOLID_NOT)
@@ -211,7 +211,7 @@ void SP_model_spawn (edict_t *ent)
 	else
 	{
 		if (ent->spawnflags & PLAYER_MODEL) {
-			if(!ent->usermodel || !strlen(ent->usermodel))
+			if (!ent->usermodel || !strlen(ent->usermodel))
 				ent->s.modelindex = MAX_MODELS-1;
 			else
 			{
@@ -262,7 +262,7 @@ void SP_model_spawn (edict_t *ent)
 		ent->use = model_spawn_use;
 	}
 
-	if(!(ent->s.effects & ANIM_MASK) && (ent->framenumbers > 1))
+	if (!(ent->s.effects & ANIM_MASK) && (ent->framenumbers > 1))
 	{
 		ent->think = modelspawn_think;
 		ent->nextthink = level.time + 2*FRAMETIME;

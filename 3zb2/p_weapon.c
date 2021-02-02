@@ -139,17 +139,17 @@ qboolean Pickup_Weapon (edict_t *ent, edict_t *other)
 		}
 	}
 
-	if((other->svflags & SVF_MONSTER) && ctf->value && other->client->zc.route_trace)
+	if ((other->svflags & SVF_MONSTER) && ctf->value && other->client->zc.route_trace)
 	{
-		if(!other->client->zc.first_target)
+		if (!other->client->zc.first_target)
 		{
-			for(i = 0;i < (5 * 2);i++)
+			for (i = 0;i < (5 * 2);i++)
 			{
-				if((other->client->zc.routeindex + i) >= CurrentIndex) break;
-				if(Route[other->client->zc.routeindex + i].state == GRS_GRAPSHOT)
+				if ((other->client->zc.routeindex + i) >= CurrentIndex) break;
+				if (Route[other->client->zc.routeindex + i].state == GRS_GRAPSHOT)
 				{
 					item = Fdi_GRAPPLE;//FindItem("Grapple");
-					if(	other->client->pers.inventory[ITEM_INDEX(item)]) item->use(other,item);
+					if (	other->client->pers.inventory[ITEM_INDEX(item)]) item->use(other,item);
 					return true;
 				}
 			}
@@ -160,11 +160,11 @@ qboolean Pickup_Weapon (edict_t *ent, edict_t *other)
 		(other->client->pers.inventory[index] == 1) &&
 		( !deathmatch->value || other->client->pers.weapon == Fdi_BLASTER/*FindItem("blaster")*/ ) )
 	{
-		if(other->svflags & SVF_MONSTER) ent->item->use(other,ent->item);
+		if (other->svflags & SVF_MONSTER) ent->item->use(other,ent->item);
 		else other->client->newweapon = ent->item;
 	}
 
-	if(other->svflags & SVF_MONSTER 
+	if (other->svflags & SVF_MONSTER 
 		&& (other->client->pers.weapon == Fdi_BLASTER/*FindItem("blaster") */
 		|| other->client->pers.weapon == Fdi_GRENADES/*FindItem("Grenades")*/))
 	{
@@ -188,19 +188,19 @@ void ShowGun(edict_t *ent)
 {
 	int i,j;
 
-	if(!ent->client->pers.weapon)
+	if (!ent->client->pers.weapon)
 	{
 		ent->s.modelindex2 = 0;
 		return;
 	}
-	if(!vwep->value)
+	if (!vwep->value)
 	{
 		ent->s.modelindex2 = MAX_MODELS-1;
 		return;
 	}
 
 	j = Get_KindWeapon(ent->client->pers.weapon);
-	if(j == WEAP_GRAPPLE) j = WEAP_BLASTER;
+	if (j == WEAP_GRAPPLE) j = WEAP_BLASTER;
 
 	ent->s.modelindex2 = MAX_MODELS-1;
 	if (ent->client->pers.weapon)
@@ -245,9 +245,9 @@ void ChangeWeapon (edict_t *ent)
 	ent->client->ps.gunframe = 0;
 //lm ctf
 	mdl = ent->client->pers.weapon->view_model;
-	if(ctf->value == 2)
+	if (ctf->value == 2)
 	{
-		if(Q_stricmp (ent->client->pers.weapon->classname, "weapon_grapple") == 0)
+		if (Q_stricmp (ent->client->pers.weapon->classname, "weapon_grapple") == 0)
 		{
 			mdl = "models/weapons/v_hook/tris.md2";
 		}
@@ -258,7 +258,7 @@ void ChangeWeapon (edict_t *ent)
 
 	// ### Hentai ### BEGIN
 	ent->client->anim_priority = ANIM_PAIN;
-	if(ent->client->ps.pmove.pm_flags & PMF_DUCKED)
+	if (ent->client->ps.pmove.pm_flags & PMF_DUCKED)
 	{
 			ent->s.frame = FRAME_crpain1;
 			ent->client->anim_end = FRAME_crpain4;
@@ -333,9 +333,9 @@ void NoAmmoWeaponChange (edict_t *ent)
 		item = Fdi_SHOTGUN;//FindItem ("shotgun");
 //		return;
 	}
-	if(item == NULL) item = Fdi_BLASTER;//FindItem ("blaster");
+	if (item == NULL) item = Fdi_BLASTER;//FindItem ("blaster");
 
-	if(ent->svflags & SVF_MONSTER) item->use(ent,item);
+	if (ent->svflags & SVF_MONSTER) item->use(ent,item);
 	else ent->client->newweapon = item;
 
 }
@@ -417,10 +417,10 @@ void Use_Weapon (edict_t *ent, gitem_t *item)
 	if (item == ent->client->pers.weapon)
 		return;
 
-	if(ent->svflags & SVF_MONSTER) 
+	if (ent->svflags & SVF_MONSTER) 
 	{
-		if(ent->client->newweapon != NULL) return;
-		if(!Q_stricmp (item->pickup_name, "Blaster"))
+		if (ent->client->newweapon != NULL) return;
+		if (!Q_stricmp (item->pickup_name, "Blaster"))
 		{
 			ent->client->newweapon = item;
 			return;
@@ -434,13 +434,13 @@ void Use_Weapon (edict_t *ent, gitem_t *item)
 
 		if (!ent->client->pers.inventory[ammo_index])
 		{
-			if(!(ent->svflags & SVF_MONSTER)) gi.cprintf (ent, PRINT_HIGH, "No %s for %s.\n", ammo_item->pickup_name, item->pickup_name);
+			if (!(ent->svflags & SVF_MONSTER)) gi.cprintf (ent, PRINT_HIGH, "No %s for %s.\n", ammo_item->pickup_name, item->pickup_name);
 			return;
 		}
 
 		if (ent->client->pers.inventory[ammo_index] < item->quantity)
 		{
-			if(!(ent->svflags & SVF_MONSTER)) gi.cprintf (ent, PRINT_HIGH, "Not enough %s for %s.\n", ammo_item->pickup_name, item->pickup_name);
+			if (!(ent->svflags & SVF_MONSTER)) gi.cprintf (ent, PRINT_HIGH, "Not enough %s for %s.\n", ammo_item->pickup_name, item->pickup_name);
 			return;
 		}
 	}
@@ -457,7 +457,7 @@ void Use_Weapon2 (edict_t *ent, gitem_t *item)
 	gitem_t		*nextitem;
 	int			index;
 
-	if(ent->svflags & SVF_MONSTER) 
+	if (ent->svflags & SVF_MONSTER) 
 	{
 		Use_Weapon(ent,item);
 		return;	
@@ -544,7 +544,7 @@ void Drop_Weapon (edict_t *ent, gitem_t *item)
 	// see if we're already using it
 	if ( ((item == ent->client->pers.weapon) || (item == ent->client->newweapon))&& (ent->client->pers.inventory[index] == 1) )
 	{
-		if(!(ent->svflags & SVF_MONSTER)) gi.cprintf (ent, PRINT_HIGH, "Can't drop current weapon\n");
+		if (!(ent->svflags & SVF_MONSTER)) gi.cprintf (ent, PRINT_HIGH, "Can't drop current weapon\n");
 		return;
 	}
 
@@ -564,9 +564,10 @@ A generic function to handle the basics of weapon thinking
 #define FRAME_IDLE_FIRST		(FRAME_FIRE_LAST + 1)
 #define FRAME_DEACTIVATE_FIRST	(FRAME_IDLE_LAST + 1)
 
-void Weapon_Generic2 (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST, int FRAME_IDLE_LAST, int FRAME_DEACTIVATE_LAST, int *pause_frames, int *fire_frames, void (*fire)(edict_t *ent))
+void Weapon_Generic2 (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST, int FRAME_IDLE_LAST, int FRAME_DEACTIVATE_LAST, int *pause_frames, int *fire_frames, void (*fire)(edict_t *ent, qboolean altfire))
 {
 	int		n;
+	int		current_weapon_index = ITEM_INDEX(ent->client->pers.weapon);
 
 	if (ent->client->weaponstate == WEAPON_DROPPING)
 	{
@@ -575,10 +576,10 @@ void Weapon_Generic2 (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST
 			ChangeWeapon (ent);
 			return;
 		}// ### Hentai ### BEGIN
-		else if((FRAME_DEACTIVATE_LAST - ent->client->ps.gunframe) == 4)
+		else if ((FRAME_DEACTIVATE_LAST - ent->client->ps.gunframe) == 4)
 		{
 			ent->client->anim_priority = ANIM_REVERSE;
-			if(ent->client->ps.pmove.pm_flags & PMF_DUCKED)
+			if (ent->client->ps.pmove.pm_flags & PMF_DUCKED)
 			{
 				ent->s.frame = FRAME_crpain4+1;
 				ent->client->anim_end = FRAME_crpain1;
@@ -614,10 +615,10 @@ void Weapon_Generic2 (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST
 		ent->client->weaponstate = WEAPON_DROPPING;
 		ent->client->ps.gunframe = FRAME_DEACTIVATE_FIRST;
 		// ### Hentai ### BEGIN
-		if((FRAME_DEACTIVATE_LAST - FRAME_DEACTIVATE_FIRST) < 4)
+		if ((FRAME_DEACTIVATE_LAST - FRAME_DEACTIVATE_FIRST) < 4)
 		{
 			ent->client->anim_priority = ANIM_REVERSE;
-			if(ent->client->ps.pmove.pm_flags & PMF_DUCKED)
+			if (ent->client->ps.pmove.pm_flags & PMF_DUCKED)
 			{
 				ent->s.frame = FRAME_crpain4+1;
 				ent->client->anim_end = FRAME_crpain1;
@@ -636,9 +637,33 @@ void Weapon_Generic2 (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST
 
 	if (ent->client->weaponstate == WEAPON_READY)
 	{
-		if ( ((ent->client->latched_buttons|ent->client->buttons) & BUTTON_ATTACK) )
+
+		// Knightmare- catch alt fire commands
+		if ((ent->client->latched_buttons|ent->client->buttons) & BUTTON_ATTACK2)
 		{
-			ent->client->latched_buttons &= ~BUTTON_ATTACK;
+			// Add weapon alt attack handlers here
+			// Examples:
+		/*	if (current_weapon_index == rl_index) // homing rocket switch
+			{
+				if (ent->client->pers.inventory[homing_index] > 0)
+					Use_Weapon (ent, FindItem("homing rocket launcher"));
+				ent->client->latched_buttons &= ~BUTTONS_ATTACK;
+				ent->client->buttons &= ~BUTTONS_ATTACK;
+				return;
+			}
+			else if (current_weapon_index == hml_index)
+			{
+				if (ent->client->pers.inventory[rockets_index] > 0)
+					Use_Weapon (ent, FindItem("rocket launcher"));
+				ent->client->latched_buttons &= ~BUTTONS_ATTACK;
+				ent->client->buttons &= ~BUTTONS_ATTACK;
+				return;
+			}*/
+		}
+
+		if ( ((ent->client->latched_buttons|ent->client->buttons) & BUTTONS_ATTACK) )
+		{
+			ent->client->latched_buttons &= ~BUTTONS_ATTACK;
 			if ((!ent->client->ammo_index) || 
 				( ent->client->pers.inventory[ent->client->ammo_index] >= ent->client->pers.weapon->quantity))
 			{
@@ -665,7 +690,7 @@ void Weapon_Generic2 (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST
 					gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
 					ent->pain_debounce_time = level.time + 1;
 				}
-/*if(ent->client->pers.weapon) gi.bprintf(PRINT_HIGH,"weapon %s %i\n"
+/*if (ent->client->pers.weapon) gi.bprintf(PRINT_HIGH,"weapon %s %i\n"
 	,ent->client->pers.weapon->pickup_name
 	,ent->client->ammo_index);*/
 //	,ent->client->pers.inventory[ITEM_INDEX(FindItem(ent->client->pers.weapon->ammo))]
@@ -715,7 +740,7 @@ void Weapon_Generic2 (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST
 //ZOID
 				CTFApplyHasteSound(ent);
 //ZOID
-				fire (ent);
+				fire (ent, ((ent->client->latched_buttons|ent->client->buttons) & BUTTON_ATTACK2));
 				break;
 			}
 		}
@@ -729,7 +754,7 @@ void Weapon_Generic2 (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST
 }
 
 //ZOID
-void Weapon_Generic (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST, int FRAME_IDLE_LAST, int FRAME_DEACTIVATE_LAST, int *pause_frames, int *fire_frames, void (*fire)(edict_t *ent))
+void Weapon_Generic (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST, int FRAME_IDLE_LAST, int FRAME_DEACTIVATE_LAST, int *pause_frames, int *fire_frames, void (*fire)(edict_t *ent, qboolean altfire))
 {
 	int oldstate = ent->client->weaponstate;
 
@@ -810,7 +835,7 @@ void weapon_grenade_fire (edict_t *ent, qboolean held)
 
 	ent->client->grenade_time = level.time + 1.0;
 
-	if(ent->deadflag || ent->s.modelindex != MAX_MODELS-1) // VWep animations screw up corpses
+	if (ent->deadflag || ent->s.modelindex != MAX_MODELS-1) // VWep animations screw up corpses
 	{
 		return;
 	}
@@ -849,9 +874,9 @@ void Weapon_Grenade (edict_t *ent)
 
 	if (ent->client->weaponstate == WEAPON_READY)
 	{
-		if ( ((ent->client->latched_buttons|ent->client->buttons) & BUTTON_ATTACK) )
+		if ( ((ent->client->latched_buttons|ent->client->buttons) & BUTTONS_ATTACK) )
 		{
-			ent->client->latched_buttons &= ~BUTTON_ATTACK;
+			ent->client->latched_buttons &= ~BUTTONS_ATTACK;
 			if (ent->client->pers.inventory[ent->client->ammo_index])
 			{
 				ent->client->ps.gunframe = 1;
@@ -902,7 +927,7 @@ void Weapon_Grenade (edict_t *ent)
 				ent->client->grenade_blew_up = true;
 			}
 
-			if (ent->client->buttons & BUTTON_ATTACK)
+			if (ent->client->buttons & BUTTONS_ATTACK)
 				return;
 
 			if (ent->client->grenade_blew_up)
@@ -946,7 +971,7 @@ GRENADE LAUNCHER
 ======================================================================
 */
 
-void weapon_grenadelauncher_fire (edict_t *ent)
+void weapon_grenadelauncher_fire (edict_t *ent, qboolean altfire)
 {
 	vec3_t	offset;
 	vec3_t	forward, right;
@@ -966,7 +991,7 @@ void weapon_grenadelauncher_fire (edict_t *ent)
 	VectorScale (forward, -2, ent->client->kick_origin);
 	ent->client->kick_angles[0] = -1;
 
-	fire_grenade (ent, start, forward, damage, 600, 2.5, radius);
+	fire_grenade (ent, start, forward, damage, 600, 2.5, radius, altfire);
 
 	gi.WriteByte (svc_muzzleflash);
 	gi.WriteShort (ent-g_edicts);
@@ -1003,7 +1028,7 @@ ROCKET
 void fire_lockon_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage);
 
 
-void Weapon_RocketLauncher_Fire (edict_t *ent)
+void Weapon_RocketLauncher_Fire (edict_t *ent, qboolean altfire)
 {
 	vec3_t	offset, start;
 	vec3_t	forward, right;
@@ -1029,7 +1054,7 @@ void Weapon_RocketLauncher_Fire (edict_t *ent)
 
 	VectorSet(offset, 8, 8, ent->viewheight-8);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
-	if(ent->client->zc.aiming != 4) fire_rocket (ent, start, forward, damage, 650, damage_radius, radius_damage);
+	if (ent->client->zc.aiming != 4) fire_rocket (ent, start, forward, damage, 650, damage_radius, radius_damage);
 	else 
 	{
 		damage -= 20;//ロックオンは20ダメージ減り
@@ -1054,20 +1079,20 @@ void Weapon_RocketLauncher_Fire (edict_t *ent)
 }
 
 //ロックオンロケットランチャー
-void Weapon_LockonRocketLauncher_Fire (edict_t *ent)
+void Weapon_LockonRocketLauncher_Fire (edict_t *ent, qboolean altfire)
 {
 	vec3_t	tmp,out,aim,min,max;
 	vec_t		f;
 	trace_t		rs_trace;
 
-	if (ent->client->buttons & BUTTON_ATTACK)
+	if (ent->client->buttons & BUTTONS_ATTACK)
 	{
 		ent->client->zc.lockon = false;		//スナイパーにロックオン機能なし
-		if(ent->client->zc.aiming == 0)
+		if (ent->client->zc.aiming == 0)
 		{
 			gi.sound (ent, CHAN_WEAPON, gi.soundindex("weapons/sshotr1b.wav"), 1, ATTN_NONE, 0);
 			ent->client->zc.aiming = 3;
-			if(ent->client->zc.distance <10 || ent->client->zc.distance > 90) ent->client->zc.distance = 90;
+			if (ent->client->zc.distance <10 || ent->client->zc.distance > 90) ent->client->zc.distance = 90;
 			ent->client->ps.fov = ent->client->zc.distance;//ズーム開始
 		}
 
@@ -1077,20 +1102,20 @@ void Weapon_LockonRocketLauncher_Fire (edict_t *ent)
 		VectorNormalize(aim);
 		VectorScale (aim, 8193, out);
 		VectorCopy(ent->s.origin,tmp);
-		if(ent->maxs[2] >= 32) tmp[2] += 22;
+		if (ent->maxs[2] >= 32) tmp[2] += 22;
 		else tmp[2] -= 2;
 		VectorAdd(tmp,out,aim);
 		rs_trace = gi.trace (tmp, min, max, aim,ent,  MASK_PLAYERSOLID);	
-		if(rs_trace.ent != NULL)
+		if (rs_trace.ent != NULL)
 		{
-			if(Q_stricmp (rs_trace.ent->classname, "player") == 0)
+			if (Q_stricmp (rs_trace.ent->classname, "player") == 0)
 			{
-				if(ctf->value)
+				if (ctf->value)
 				{
-					if(ent->client->resp.ctf_team != rs_trace.ent->client->resp.ctf_team)				
+					if (ent->client->resp.ctf_team != rs_trace.ent->client->resp.ctf_team)				
 					{
 						ent->client->zc.lockon = true;
-					if(ent->client->zc.first_target != rs_trace.ent)
+					if (ent->client->zc.first_target != rs_trace.ent)
 						gi.sound (ent, CHAN_AUTO, gi.soundindex("3zb/locrloc.wav"), 1, ATTN_NORM, 0);
 						ent->client->zc.first_target = rs_trace.ent;
 					}
@@ -1099,7 +1124,7 @@ void Weapon_LockonRocketLauncher_Fire (edict_t *ent)
 				else
 				{
 					ent->client->zc.lockon = true;
-					if(ent->client->zc.first_target != rs_trace.ent)
+					if (ent->client->zc.first_target != rs_trace.ent)
 						gi.sound (ent, CHAN_AUTO, gi.soundindex("3zb/locrloc.wav"), 1, ATTN_NORM, 0);
 					ent->client->zc.first_target = rs_trace.ent;
 				}
@@ -1109,25 +1134,25 @@ void Weapon_LockonRocketLauncher_Fire (edict_t *ent)
 		}
 		else ent->client->zc.first_target = NULL;
 
-		if(ent->client->zc.autozoom )
+		if (ent->client->zc.autozoom )
 		{
 			VectorSubtract(ent->s.origin,rs_trace.endpos,tmp);
 			f = VectorLength(tmp);
 	
-			if(f < 200)	ent->client->zc.distance = 90;
-//			else if(f < 300) ent->client->zc.distance = 75;
-//			else if(f < 500) ent->client->zc.distance = 60;
-//			else if(f < 800) ent->client->zc.distance = 45;
-			else if(f < 1300)
+			if (f < 200)	ent->client->zc.distance = 90;
+//			else if (f < 300) ent->client->zc.distance = 75;
+//			else if (f < 500) ent->client->zc.distance = 60;
+//			else if (f < 800) ent->client->zc.distance = 45;
+			else if (f < 1300)
 			{
 				ent->client->zc.distance = 90 - (f - 200) / 14.6;//30;
 			}
 			else ent->client->zc.distance = 14;
 	
-			if(ent->client->ps.fov != ent->client->zc.distance)
+			if (ent->client->ps.fov != ent->client->zc.distance)
 			{
 				f = ent->client->ps.fov - ent->client->zc.distance;
-				if(f > 15 || f < -15 )
+				if (f > 15 || f < -15 )
 					gi.sound (ent, CHAN_AUTO, gi.soundindex("3zb/zoom.wav"), 1, ATTN_NORM, 0);
 				
 				ent->client->ps.fov = ent->client->zc.distance;
@@ -1136,7 +1161,7 @@ void Weapon_LockonRocketLauncher_Fire (edict_t *ent)
 		return;
 	}
 	ent->client->zc.aiming = 4;
-	Weapon_RocketLauncher_Fire(ent);
+	Weapon_RocketLauncher_Fire (ent, altfire);
 }
 
 
@@ -1145,9 +1170,9 @@ void Weapon_RocketLauncher (edict_t *ent)
 	static int	pause_frames[]	= {25, 33, 42, 50, 0};
 	static int	fire_frames[]	= {5, 0};
 
-	if(!(ent->client->buttons & BUTTON_ATTACK)) ent->client->zc.aiming = 0;	//アクティベート0
+	if (!(ent->client->buttons & BUTTONS_ATTACK)) ent->client->zc.aiming = 0;	//アクティベート0
 
-	if(0/*1*/)
+	if (0/*1*/)
 	{
 		Weapon_Generic (ent, 4, 12, 50, 54, pause_frames, fire_frames, Weapon_LockonRocketLauncher_Fire);
 	}
@@ -1183,7 +1208,7 @@ void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, in
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
 	VectorSet(offset, 24, 8, ent->viewheight-8);
 
-	if(!(ent->svflags & SVF_MONSTER))
+	if (!(ent->svflags & SVF_MONSTER))
 	{
 		VectorAdd (offset, g_offset, offset);
 		P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
@@ -1214,7 +1239,7 @@ void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, in
 }
 
 
-void Weapon_Blaster_Fire (edict_t *ent)
+void Weapon_Blaster_Fire (edict_t *ent, qboolean altfire)
 {
 	int		damage;
 
@@ -1238,7 +1263,7 @@ void Weapon_Blaster (edict_t *ent)
 }
 
 
-void Weapon_HyperBlaster_Fire (edict_t *ent)
+void Weapon_HyperBlaster_Fire (edict_t *ent, qboolean altfire)
 {
 	float	rotation;
 	vec3_t	offset;
@@ -1247,7 +1272,7 @@ void Weapon_HyperBlaster_Fire (edict_t *ent)
 
 	ent->client->weapon_sound = gi.soundindex("weapons/hyprbl1a.wav");
 
-	if (!(ent->client->buttons & BUTTON_ATTACK))
+	if (!(ent->client->buttons & BUTTONS_ATTACK))
 	{
 		ent->client->ps.gunframe++;
 	}
@@ -1332,7 +1357,7 @@ MACHINEGUN / CHAINGUN
 ======================================================================
 */
 
-void Machinegun_Fire (edict_t *ent)
+void Machinegun_Fire (edict_t *ent, qboolean altfire)
 {
 	int	i;
 	vec3_t		start;
@@ -1342,7 +1367,7 @@ void Machinegun_Fire (edict_t *ent)
 	int			kick = 2;
 	vec3_t		offset;
 
-	if (!(ent->client->buttons & BUTTON_ATTACK))
+	if (!(ent->client->buttons & BUTTONS_ATTACK))
 	{
 		ent->client->machinegun_shots = 0;
 		ent->client->ps.gunframe++;
@@ -1433,7 +1458,7 @@ void Weapon_Machinegun (edict_t *ent)
 		Weapon_Generic (ent, 3, 5, 45, 49, pause_frames, fire_frames, Machinegun_Fire);
 }
 
-void Chaingun_Fire (edict_t *ent)
+void Chaingun_Fire (edict_t *ent, qboolean altfire)
 {
 	int			i;
 	int			shots;
@@ -1452,13 +1477,13 @@ void Chaingun_Fire (edict_t *ent)
 	if (ent->client->ps.gunframe == 5)
 		gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/chngnu1a.wav"), 1, ATTN_IDLE, 0);
 
-	if ((ent->client->ps.gunframe == 14) && !(ent->client->buttons & BUTTON_ATTACK))
+	if ((ent->client->ps.gunframe == 14) && !(ent->client->buttons & BUTTONS_ATTACK))
 	{
 		ent->client->ps.gunframe = 32;
 		ent->client->weapon_sound = 0;
 		return;
 	}
-	else if ((ent->client->ps.gunframe == 21) && (ent->client->buttons & BUTTON_ATTACK)
+	else if ((ent->client->ps.gunframe == 21) && (ent->client->buttons & BUTTONS_ATTACK)
 		&& ent->client->pers.inventory[ent->client->ammo_index])
 	{
 		ent->client->ps.gunframe = 15;
@@ -1482,7 +1507,7 @@ void Chaingun_Fire (edict_t *ent)
 		shots = 1;
 	else if (ent->client->ps.gunframe <= 14)
 	{
-		if (ent->client->buttons & BUTTON_ATTACK)
+		if (ent->client->buttons & BUTTONS_ATTACK)
 			shots = 2;
 		else
 			shots = 1;
@@ -1559,7 +1584,7 @@ void Chaingun_Fire (edict_t *ent)
 		ent->client->pers.inventory[ent->client->ammo_index] -= shots;
 }
 
-void Gatringgun_Fire (edict_t *ent)
+void Gatringgun_Fire (edict_t *ent, qboolean altfire)
 {
 	int			i;
 	int			shots;
@@ -1578,13 +1603,13 @@ void Gatringgun_Fire (edict_t *ent)
 	if (ent->client->ps.gunframe == 5)
 		gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/chngnu1a.wav"), 1, ATTN_IDLE, 0);
 
-	if ((ent->client->ps.gunframe == 14) && !(ent->client->buttons & BUTTON_ATTACK))
+	if ((ent->client->ps.gunframe == 14) && !(ent->client->buttons & BUTTONS_ATTACK))
 	{
 		ent->client->ps.gunframe = 32;
 		ent->client->weapon_sound = 0;
 		return;
 	}
-	else if ((ent->client->ps.gunframe == 21) && (ent->client->buttons & BUTTON_ATTACK)
+	else if ((ent->client->ps.gunframe == 21) && (ent->client->buttons & BUTTONS_ATTACK)
 		&& ent->client->pers.inventory[ent->client->ammo_index])
 	{
 		ent->client->ps.gunframe = 15;
@@ -1608,7 +1633,7 @@ void Gatringgun_Fire (edict_t *ent)
 		shots = 10;//1;
 	else if (ent->client->ps.gunframe <= 14)
 	{
-		if (ent->client->buttons & BUTTON_ATTACK)
+		if (ent->client->buttons & BUTTONS_ATTACK)
 			shots = 10;//2;
 		else
 			shots = 10;//1;
@@ -1658,7 +1683,7 @@ void Gatringgun_Fire (edict_t *ent)
 		fire_bullet (ent, start, forward, damage, kick, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, MOD_CHAINGUN);
 	}
 
-	if(is_silenced) u = 0.5;
+	if (is_silenced) u = 0.5;
 	else u = 1.0;
 
 	gi.sound (ent, CHAN_AUTO, gi.soundindex("3zb/gatgf.wav"), u, ATTN_NORM, 0);
@@ -1697,7 +1722,7 @@ void Weapon_Chaingun (edict_t *ent)
 	static int	pause_frames[]	= {38, 43, 51, 61, 0};
 	static int	fire_frames[]	= {5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 0};
 
-	if(0) Weapon_Generic (ent, 4, 31, 61, 64, pause_frames, fire_frames, Gatringgun_Fire);
+	if (0) Weapon_Generic (ent, 4, 31, 61, 64, pause_frames, fire_frames, Gatringgun_Fire);
 	else 
 	{
 		Weapon_Generic (ent, 4, 31, 61, 64, pause_frames, fire_frames, Chaingun_Fire);
@@ -1717,7 +1742,7 @@ SHOTGUN / SUPERSHOTGUN
 ======================================================================
 */
 
-void weapon_shotgun_fire (edict_t *ent)
+void weapon_shotgun_fire (edict_t *ent, qboolean altfire)
 {
 	vec3_t		start;
 	vec3_t		forward, right;
@@ -1777,7 +1802,7 @@ void Weapon_Shotgun (edict_t *ent)
 }
 
 
-void weapon_supershotgun_fire (edict_t *ent)
+void weapon_supershotgun_fire (edict_t *ent, qboolean altfire)
 {
 	vec3_t		start;
 	vec3_t		forward, right;
@@ -1846,7 +1871,7 @@ RAILGUN
 */
 void fire_sniperail (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick);
 
-void RSight_think(edict_t *ent)
+void RSight_think (edict_t *ent)
 {
 	trace_t		rs_trace;	
 	vec3_t		aim,out,tmp;
@@ -1854,7 +1879,7 @@ void RSight_think(edict_t *ent)
 
 	vec_t		f;
 
-	if(ent->owner->client->ps.gunframe != 4 || ent->owner->deadflag)
+	if (ent->owner->client->ps.gunframe != 4 || ent->owner->deadflag)
 	{
 		G_FreeEdict(ent);
 		return;
@@ -1865,37 +1890,37 @@ void RSight_think(edict_t *ent)
 	VectorNormalize(aim);
 	VectorScale (aim, 8193, out);
 	VectorCopy(ent->owner->s.origin,tmp);
-	if(ent->owner->maxs[2] >= 32) tmp[2] += 22;
+	if (ent->owner->maxs[2] >= 32) tmp[2] += 22;
 	else tmp[2] -= 2;
 	VectorAdd(tmp,out,aim);
 	rs_trace = gi.trace (tmp, min, max, aim,ent->owner,  MASK_PLAYERSOLID);	
 	VectorCopy(rs_trace.endpos,ent->s.origin);
 	ent->nextthink = level.time + FRAMETIME;
 
-	if(rs_trace.ent != NULL)
+	if (rs_trace.ent != NULL)
 	{
-		if(Q_stricmp (rs_trace.ent->classname, "player") == 0) return;//オートズーム反応せず
+		if (Q_stricmp (rs_trace.ent->classname, "player") == 0) return;//オートズーム反応せず
 	}
 
-	if(ent->owner->client->zc.autozoom )
+	if (ent->owner->client->zc.autozoom )
 	{
 		VectorSubtract(ent->s.origin,ent->owner->s.origin,tmp);
 		f = VectorLength(tmp);
 
-		if(f < 100)	ent->owner->client->zc.distance = 90;
-//		else if(f < 300) ent->owner->client->zc.distance = 75;
-//		else if(f < 500) ent->owner->client->zc.distance = 60;
-//		else if(f < 800) ent->owner->client->zc.distance = 45;
-		else if(f < 1000)
+		if (f < 100)	ent->owner->client->zc.distance = 90;
+//		else if (f < 300) ent->owner->client->zc.distance = 75;
+//		else if (f < 500) ent->owner->client->zc.distance = 60;
+//		else if (f < 800) ent->owner->client->zc.distance = 45;
+		else if (f < 1000)
 		{
 			ent->owner->client->zc.distance = 90 - (f - 100) / 12;//30;
 		}
 		else ent->owner->client->zc.distance = 15;
 
-		if(ent->owner->client->ps.fov != ent->owner->client->zc.distance)
+		if (ent->owner->client->ps.fov != ent->owner->client->zc.distance)
 		{
 			f = ent->owner->client->ps.fov - ent->owner->client->zc.distance;
-			if( f > 15 || f < -15)
+			if ( f > 15 || f < -15)
 				gi.sound (ent->owner, CHAN_AUTO, gi.soundindex("3zb/zoom.wav"), 1, ATTN_NORM, 0);
 
 			ent->owner->client->ps.fov = ent->owner->client->zc.distance;
@@ -1904,7 +1929,7 @@ void RSight_think(edict_t *ent)
 }
 
 
-void weapon_railgun_fire (edict_t *ent)
+void weapon_railgun_fire (edict_t *ent, qboolean altfire)
 {
 	vec3_t		start;
 	vec3_t		forward, right;
@@ -1940,7 +1965,7 @@ void weapon_railgun_fire (edict_t *ent)
 
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 
-	if(ent->client->zc.aiming == 0) fire_rail (ent, start, forward, damage, kick);
+	if (ent->client->zc.aiming == 0) fire_rail (ent, start, forward, damage, kick);
 	else
 	{
 		damage += 20;
@@ -1965,14 +1990,14 @@ void weapon_railgun_fire (edict_t *ent)
 	ent->client->zc.aiming = 0;					//ズーム不可
 }
 //スナイパー用railガン
-void Weapon_SnipeRailgun (edict_t *ent)
+void Weapon_SnipeRailgun (edict_t *ent, qboolean altfire)
 {
 	edict_t	*sight;
 
-	if (ent->client->buttons & BUTTON_ATTACK)
+	if (ent->client->buttons & BUTTONS_ATTACK)
 	{
 		ent->client->zc.lockon = false;		//スナイパーにロックオン機能なし
-		if( ent->client->zc.aiming == 0)
+		if ( ent->client->zc.aiming == 0)
 		{
 			//サイトの作成
 			sight = G_Spawn();
@@ -1987,7 +2012,7 @@ void Weapon_SnipeRailgun (edict_t *ent)
 			sight->think = RSight_think;
 			sight->nextthink = level.time + FRAMETIME;
 			sight->classname = "rail sight";		
-			if( ent->client->resp.ctf_team == CTF_TEAM2 && ctf->value)
+			if ( ent->client->resp.ctf_team == CTF_TEAM2 && ctf->value)
 			{ 
 				sight->s.frame = 1;
 			}
@@ -1995,15 +2020,15 @@ void Weapon_SnipeRailgun (edict_t *ent)
 
 			gi.sound (ent, CHAN_WEAPON, gi.soundindex("weapons/sshotr1b.wav"), 1, ATTN_NONE, 0);
 			ent->client->zc.aiming = 1;
-			if(ent->client->zc.distance <10 || ent->client->zc.distance > 90) ent->client->zc.distance = 90;
+			if (ent->client->zc.distance <10 || ent->client->zc.distance > 90) ent->client->zc.distance = 90;
 			ent->client->ps.fov = ent->client->zc.distance;//ズーム開始
 		}
 		return;
 	}
 	
-//	if (ent->client->buttons & BUTTON_ATTACK) return;
+//	if (ent->client->buttons & BUTTONS_ATTACK) return;
 	ent->client->zc.aiming = 2;
-	weapon_railgun_fire(ent);
+	weapon_railgun_fire (ent, altfire);
 }
 
 void Weapon_Railgun (edict_t *ent)
@@ -2011,9 +2036,9 @@ void Weapon_Railgun (edict_t *ent)
 	static int	pause_frames[]	= {56, 0};
 	static int	fire_frames[]	= {4, 0};
 
-	if(!(ent->client->buttons & BUTTON_ATTACK)) ent->client->zc.aiming = 0;	//アクティベート0
+	if (!(ent->client->buttons & BUTTONS_ATTACK)) ent->client->zc.aiming = 0;	//アクティベート0
 
-	if(0)
+	if (0)
 	{
 		Weapon_Generic (ent, 3, 18, 56, 61, pause_frames, fire_frames, Weapon_SnipeRailgun/*weapon_railgun_fire*/);
 	}
@@ -2035,7 +2060,7 @@ BFG10K
 ======================================================================
 */
 
-void weapon_bfg_fire (edict_t *ent)
+void weapon_bfg_fire (edict_t *ent, qboolean altfire)
 {
 	vec3_t	offset, start;
 	vec3_t	forward, right;
@@ -2112,7 +2137,7 @@ void Weapon_BFG (edict_t *ent)
 	RipperGun
 */
 
-void weapon_ionripper_fire (edict_t *ent)
+void weapon_ionripper_fire (edict_t *ent, qboolean altfire)
 {
 	vec3_t	start;
 	vec3_t	forward, right;
@@ -2189,7 +2214,7 @@ void Weapon_Ionripper (edict_t *ent)
 //	Phalanx
 //
 
-void weapon_phalanx_fire (edict_t *ent)
+void weapon_phalanx_fire (edict_t *ent, qboolean altfire)
 {
 	vec3_t		start;
 	vec3_t		forward, right, up;
@@ -2329,9 +2354,9 @@ void Weapon_Trap (edict_t *ent)
 
 	if (ent->client->weaponstate == WEAPON_READY)
 	{
-		if ( ((ent->client->latched_buttons|ent->client->buttons) & BUTTON_ATTACK) )
+		if ( ((ent->client->latched_buttons|ent->client->buttons) & BUTTONS_ATTACK) )
 		{
-			ent->client->latched_buttons &= ~BUTTON_ATTACK;
+			ent->client->latched_buttons &= ~BUTTONS_ATTACK;
 			if (ent->client->pers.inventory[ent->client->ammo_index])
 			{
 				ent->client->ps.gunframe = 1;
@@ -2387,7 +2412,7 @@ void Weapon_Trap (edict_t *ent)
 				ent->client->grenade_blew_up = true;
 			}
 
-			if (ent->client->buttons & BUTTON_ATTACK)
+			if (ent->client->buttons & BUTTONS_ATTACK)
 				return;
 
 			if (ent->client->grenade_blew_up)

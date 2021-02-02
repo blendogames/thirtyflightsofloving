@@ -218,7 +218,8 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer)
 			j = (int)strlen(entry);
 			if (stringlength + j > 1024)
 				break;
-			strcpy (string + stringlength, entry);
+		//	strcpy (string + stringlength, entry);
+			Com_strcpy (string + stringlength, sizeof(string) - stringlength, entry);
 			stringlength += j;
 		}
 
@@ -229,7 +230,8 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer)
 		j = (int)strlen(entry);
 		if (stringlength + j > 1024)
 			break;
-		strcpy (string + stringlength, entry);
+	//	strcpy (string + stringlength, entry);
+		Com_strcpy (string + stringlength, sizeof(string) - stringlength, entry);
 		stringlength += j;
 	}
 

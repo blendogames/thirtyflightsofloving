@@ -100,13 +100,13 @@ void train_spline (edict_t *self)
 		VectorScale(train->velocity, 10 ,train->velocity);
 		VectorSubtract(a, train->s.angles, train->avelocity);
 		VectorScale(train->avelocity, 10, train->avelocity);
-		if(train->pitch_speed < 0)
+		if (train->pitch_speed < 0)
 			train->avelocity[PITCH] = 0;
 		if (train->yaw_speed < 0)
 			train->avelocity[YAW] = 0;
 		gi.linkentity(train);
 		train->moveinfo.ratio += train->moveinfo.speed * FRAMETIME / train->moveinfo.distance;
-	//	if(train->movewith_next && (train->movewith_next->movewith_ent == train))
+	//	if (train->movewith_next && (train->movewith_next->movewith_ent == train))
 	//		set_child_movement(train);
 		if (train->moveinfo.ratio >= 1.0)
 		{
@@ -154,6 +154,14 @@ void train_spline (edict_t *self)
 */
 
 #define PLAT_LOW_TRIGGER	1
+
+//====
+//PGM
+#define PLAT2_TOGGLE			2
+#define PLAT2_TOP				4
+#define PLAT2_TRIGGER_TOP		8
+#define PLAT2_TRIGGER_BOTTOM	16
+#define PLAT2_BOX_LIFT			32
 
 #define	STATE_TOP			0
 #define	STATE_BOTTOM		1
@@ -466,6 +474,9 @@ void plat_hit_top (edict_t *ent)
 	//	ent->s.sound = 0;
 	}
 	ent->s.sound = 0;	// Knightmare- make sure this is always set to 0, lead mover or not!
+#ifdef LOOP_SOUND_ATTENUATION	// Knightmare added
+	ent->s.attenuation = ent->attenuation;
+#endif
 
 	ent->moveinfo.state = STATE_TOP;
 
@@ -482,6 +493,9 @@ void plat_hit_bottom (edict_t *ent)
 	//	ent->s.sound = 0;
 	}
 	ent->s.sound = 0;	// Knightmare- make sure this is always set to 0, lead mover or not!
+#ifdef LOOP_SOUND_ATTENUATION	// Knightmare added
+	ent->s.attenuation = ent->attenuation;
+#endif
 
 	ent->moveinfo.state = STATE_BOTTOM;
 }
@@ -528,7 +542,7 @@ void plat_blocked (edict_t *self, edict_t *other)
 		return;
 	}
 
-	if(other->deadflag) T_Damage (other, self, self, vec3_origin, other->s.origin, vec3_origin, 100000, 1, 0, MOD_CRUSH);
+	if (other->deadflag) T_Damage (other, self, self, vec3_origin, other->s.origin, vec3_origin, 100000, 1, 0, MOD_CRUSH);
 	else T_Damage (other, self, self, vec3_origin, other->s.origin, vec3_origin, self->dmg, 1, 0, MOD_CRUSH);
 
 	if (self->moveinfo.state == STATE_UP)
@@ -561,7 +575,9 @@ void Touch_Plat_Center (edict_t *ent, edict_t *other, cplane_t *plane, csurface_
 		ent->nextthink = level.time + 1;	// the player is still on the plat, so delay going down
 }
 
-void plat_spawn_inside_trigger (edict_t *ent)
+// PGM - plat2's change the trigger field
+//void plat_spawn_inside_trigger (edict_t *ent)
+edict_t *plat_spawn_inside_trigger (edict_t *ent)
 {
 	edict_t	*trigger;
 	vec3_t	tmin, tmax;
@@ -608,6 +624,8 @@ void plat_spawn_inside_trigger (edict_t *ent)
 	VectorCopy (tmax, trigger->maxs);
 
 	gi.linkentity (trigger);
+
+	return trigger;			// PGM 11/17/97
 }
 
 
@@ -720,6 +738,432 @@ void SP_func_plat (edict_t *ent)
 	SpawnItem3 (it_ent, it);
 }
 
+// ==========================================
+// PLAT 2
+// ==========================================
+#define PLAT2_CALLED		1
+#define PLAT2_MOVING		2
+#define PLAT2_WAITING		4
+
+void plat2_go_down (edict_t *ent);
+void plat2_go_up (edict_t *ent);
+
+void plat2_spawn_danger_area (edict_t *ent)
+{
+	vec3_t	mins, maxs;
+
+	VectorCopy(ent->mins, mins);
+	VectorCopy(ent->maxs, maxs);
+	maxs[2] = ent->mins[2] + 64;
+
+//	SpawnBadArea(mins, maxs, 0, ent);
+}
+
+void plat2_kill_danger_area (edict_t *ent)
+{
+	edict_t *t;
+
+	t = NULL;
+	while ((t = G_Find (t, FOFS(classname), "bad_area")))
+	{
+		if (t->owner == ent)
+			G_FreeEdict(t);
+	}
+}
+
+void plat2_hit_top (edict_t *ent)
+{
+	if (!(ent->flags & FL_TEAMSLAVE))
+	{
+		if (ent->moveinfo.sound_end)
+			gi.sound (ent, CHAN_NO_PHS_ADD+CHAN_VOICE, ent->moveinfo.sound_end, 1, ent->attenuation, 0);
+		ent->s.sound = 0;
+	}
+	ent->moveinfo.state = STATE_TOP;
+
+	if (ent->plat2flags & PLAT2_CALLED)
+	{
+		ent->plat2flags = PLAT2_WAITING;
+		if (!(ent->spawnflags & PLAT2_TOGGLE))
+		{
+			ent->think = plat2_go_down;
+			ent->nextthink = level.time + 5.0;
+		}
+		if (deathmatch->value)
+			ent->last_move_time = level.time - 1.0;
+		else
+			ent->last_move_time = level.time - 2.0;
+	}
+	else if (!(ent->spawnflags & PLAT2_TOP) && !(ent->spawnflags & PLAT2_TOGGLE))
+	{
+		ent->plat2flags = 0;
+		ent->think = plat2_go_down;
+		ent->nextthink = level.time + 2.0;
+		ent->last_move_time = level.time;
+	}
+	else
+	{
+		ent->plat2flags = 0;
+		ent->last_move_time = level.time;
+	}
+
+	G_UseTargets (ent, ent);
+}
+
+void plat2_hit_bottom (edict_t *ent)
+{
+	if (!(ent->flags & FL_TEAMSLAVE))
+	{
+		if (ent->moveinfo.sound_end)
+			gi.sound (ent, CHAN_NO_PHS_ADD+CHAN_VOICE, ent->moveinfo.sound_end, 1, ent->attenuation, 0);
+		ent->s.sound = 0;
+	}
+	ent->moveinfo.state = STATE_BOTTOM;
+	
+	if (ent->plat2flags & PLAT2_CALLED)
+	{
+		ent->plat2flags = PLAT2_WAITING;
+		if (!(ent->spawnflags & PLAT2_TOGGLE))
+		{
+			ent->think = plat2_go_up;
+			ent->nextthink = level.time + 5.0;
+		}
+		if (deathmatch->value)
+			ent->last_move_time = level.time - 1.0;
+		else
+			ent->last_move_time = level.time - 2.0;
+	}
+	else if ((ent->spawnflags & PLAT2_TOP) && !(ent->spawnflags & PLAT2_TOGGLE))
+	{
+		ent->plat2flags = 0;
+		ent->think = plat2_go_up;
+		ent->nextthink = level.time + 2.0;
+		ent->last_move_time = level.time;
+	}
+	else
+	{
+		ent->plat2flags = 0;
+		ent->last_move_time = level.time;
+	}
+
+	plat2_kill_danger_area (ent);
+	G_UseTargets (ent, ent);
+}
+
+void plat2_go_down (edict_t *ent)
+{
+	if (!(ent->flags & FL_TEAMSLAVE))
+	{
+		if (ent->moveinfo.sound_start)
+			gi.sound (ent, CHAN_NO_PHS_ADD+CHAN_VOICE, ent->moveinfo.sound_start, 1, ent->attenuation, 0);
+		ent->s.sound = ent->moveinfo.sound_middle;
+	}
+	ent->moveinfo.state = STATE_DOWN;
+	ent->plat2flags |= PLAT2_MOVING;
+
+	Move_Calc (ent, ent->moveinfo.end_origin, plat2_hit_bottom);
+}
+
+void plat2_go_up (edict_t *ent)
+{
+	if (!(ent->flags & FL_TEAMSLAVE))
+	{
+		if (ent->moveinfo.sound_start)
+			gi.sound (ent, CHAN_NO_PHS_ADD+CHAN_VOICE, ent->moveinfo.sound_start, 1, ent->attenuation, 0);
+		ent->s.sound = ent->moveinfo.sound_middle;
+	}
+	ent->moveinfo.state = STATE_UP;
+	ent->plat2flags |= PLAT2_MOVING;
+
+	plat2_spawn_danger_area(ent);
+
+	Move_Calc (ent, ent->moveinfo.start_origin, plat2_hit_top);
+}
+
+void plat2_operate (edict_t *ent, edict_t *other)
+{
+	int		otherState;
+	float	pauseTime;
+	float	platCenter;
+	edict_t *trigger;
+
+	trigger = ent;
+	ent = ent->enemy;	// now point at the plat, not the trigger
+
+	if (ent->plat2flags & PLAT2_MOVING)
+		return;
+
+	if ((ent->last_move_time + 2) > level.time)
+		return;
+
+	platCenter = (trigger->absmin[2] + trigger->absmax[2]) / 2;
+
+	if (ent->moveinfo.state == STATE_TOP)
+	{
+		otherState = STATE_TOP;
+		if (ent->spawnflags & PLAT2_BOX_LIFT)
+		{
+			if (platCenter > other->s.origin[2])
+				otherState = STATE_BOTTOM;
+		}
+		else
+		{
+			if (trigger->absmax[2] > other->s.origin[2])
+				otherState = STATE_BOTTOM;
+		}
+	}
+	else
+	{
+		otherState = STATE_BOTTOM;
+		if (other->s.origin[2] > platCenter)
+			otherState = STATE_TOP;
+	}
+
+	ent->plat2flags = PLAT2_MOVING;
+
+	if (deathmatch->value)
+		pauseTime = 0.3;
+	else
+		pauseTime = 0.5;
+
+	if (ent->moveinfo.state != otherState)
+	{
+		ent->plat2flags |= PLAT2_CALLED;
+		pauseTime = 0.1;
+	}
+
+	ent->last_move_time = level.time;
+	
+	if (ent->moveinfo.state == STATE_BOTTOM)
+	{
+		ent->think = plat2_go_up;
+		ent->nextthink = level.time + pauseTime;
+	}
+	else
+	{
+		ent->think = plat2_go_down;
+		ent->nextthink = level.time + pauseTime;
+	}
+}
+
+void Touch_Plat_Center2 (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
+{
+	// this requires monsters to actively trigger plats, not just step on them.
+
+	//FIXME - commented out for E3
+	//if (!other->client)
+	//	return;
+		
+	if (other->health <= 0)
+		return;
+
+	// PMM - don't let non-monsters activate plat2s
+	if ((!(other->svflags & SVF_MONSTER)) && (!other->client))
+		return;
+	
+	plat2_operate (ent, other);
+}
+
+void plat2_blocked (edict_t *self, edict_t *other)
+{
+	if (!(other->svflags & SVF_MONSTER) && (!other->client))
+	{
+		// give it a chance to go away on it's own terms (like gibs)
+		T_Damage (other, self, self, vec3_origin, other->s.origin, vec3_origin, 100000, 1, 0, MOD_CRUSH);
+		// if it's still there, nuke it
+		if (other && other->inuse)
+			BecomeExplosion1 (other);
+		return;
+	}
+
+	// gib dead things
+	if (other->health < 1)
+	{
+		T_Damage(other, self, self, vec3_origin, other->s.origin, vec3_origin, 100, 1, 0, MOD_CRUSH);
+	}
+
+	T_Damage (other, self, self, vec3_origin, other->s.origin, vec3_origin, self->dmg, 1, 0, MOD_CRUSH);
+
+	if (self->moveinfo.state == STATE_UP)
+		plat2_go_down (self);
+	else if (self->moveinfo.state == STATE_DOWN)
+		plat2_go_up (self);
+}
+
+void Use_Plat2 (edict_t *ent, edict_t *other, edict_t *activator)
+{ 
+	edict_t		*trigger;
+	int			i;
+
+	if (ent->moveinfo.state > STATE_BOTTOM)
+		return;
+	if ((ent->last_move_time + 2) > level.time)
+		return;
+
+	for (i = 1, trigger = g_edicts + 1; i < globals.num_edicts; i++, trigger++)
+	{
+		if (!trigger->inuse)
+			continue;
+		if (trigger->touch == Touch_Plat_Center2)
+		{
+			if (trigger->enemy == ent)
+			{
+//				Touch_Plat_Center2 (trigger, activator, NULL, NULL);
+				plat2_operate (trigger, activator);
+				return;
+			}
+		} 
+	}
+}
+
+void plat2_activate (edict_t *ent, edict_t *other, edict_t *activator)
+{
+	edict_t *trigger;
+
+//	if (ent->targetname)
+//		ent->targetname[0] = 0;
+
+	ent->use = Use_Plat2;
+
+	trigger = plat_spawn_inside_trigger (ent);	// the "start moving" trigger	
+
+	trigger->maxs[0]+=10;
+	trigger->maxs[1]+=10;
+	trigger->mins[0]-=10;
+	trigger->mins[1]-=10;
+
+	gi.linkentity (trigger);
+	
+	trigger->touch = Touch_Plat_Center2;		// Override trigger touch function
+
+	plat2_go_down(ent);
+}
+
+/*QUAKED func_plat2 (0 .5 .8) ? PLAT_LOW_TRIGGER PLAT2_TOGGLE PLAT2_TOP PLAT2_TRIGGER_TOP PLAT2_TRIGGER_BOTTOM BOX_LIFT
+speed	default 150
+
+PLAT_LOW_TRIGGER - creates a short trigger field at the bottom
+PLAT2_TOGGLE - plat will not return to default position.
+PLAT2_TOP - plat's default position will the the top.
+PLAT2_TRIGGER_TOP - plat will trigger it's targets each time it hits top
+PLAT2_TRIGGER_BOTTOM - plat will trigger it's targets each time it hits bottom
+BOX_LIFT - this indicates that the lift is a box, rather than just a platform
+
+Plats are always drawn in the extended position, so they will light correctly.
+
+If the plat is the target of another trigger or button, it will start out disabled in the extended position until it is trigger, when it will lower and become a normal plat.
+
+"speed"	overrides default 200.
+"accel" overrides default 500
+"lip"	no default
+
+If the "height" key is set, that will determine the amount the plat moves, instead of being implicitly determoveinfoned by the model's height.
+
+*/
+void SP_func_plat2 (edict_t *ent)
+{
+	edict_t *trigger;
+
+	VectorClear (ent->s.angles);
+	ent->solid = SOLID_BSP;
+	ent->movetype = MOVETYPE_PUSH;
+
+	gi.setmodel (ent, ent->model);
+
+	ent->blocked = plat2_blocked;
+
+	if (!ent->speed)
+		ent->speed = 20;
+	else
+		ent->speed *= 0.1;
+
+	if (!ent->accel)
+		ent->accel = 5;
+	else
+		ent->accel *= 0.1;
+
+	if (!ent->decel)
+		ent->decel = 5;
+	else
+		ent->decel *= 0.1;
+
+	if (deathmatch->value)
+	{
+		ent->speed *= 2;
+		ent->accel *= 2;
+		ent->decel *= 2;
+	}
+
+
+	//PMM Added to kill things it's being blocked by 
+	if (!ent->dmg)
+		ent->dmg = 2;
+
+//	if (!st.lip)
+//		st.lip = 8;
+
+	// pos1 is the top position, pos2 is the bottom
+	VectorCopy (ent->s.origin, ent->pos1);
+	VectorCopy (ent->s.origin, ent->pos2);
+
+	if (st.height)
+		ent->pos2[2] -= (st.height - st.lip);
+	else
+		ent->pos2[2] -= (ent->maxs[2] - ent->mins[2]) - st.lip;
+
+	ent->moveinfo.state = STATE_TOP;
+
+	if (ent->targetname)
+	{
+		ent->use = plat2_activate;
+	}
+	else
+	{
+		ent->use = Use_Plat2;
+
+		trigger = plat_spawn_inside_trigger (ent);	// the "start moving" trigger	
+
+		// PGM - debugging??
+		trigger->maxs[0]+=10;
+		trigger->maxs[1]+=10;
+		trigger->mins[0]-=10;
+		trigger->mins[1]-=10;
+
+		gi.linkentity (trigger);
+
+		trigger->touch = Touch_Plat_Center2;		// Override trigger touch function
+
+		if (!(ent->spawnflags & PLAT2_TOP))
+		{
+			VectorCopy (ent->pos2, ent->s.origin);
+			ent->moveinfo.state = STATE_BOTTOM;
+		}	
+	}
+
+	gi.linkentity (ent);
+
+	ent->moveinfo.speed = ent->speed;
+	ent->moveinfo.accel = ent->accel;
+	ent->moveinfo.decel = ent->decel;
+	ent->moveinfo.wait = ent->wait;
+	VectorCopy (ent->pos1, ent->moveinfo.start_origin);
+	VectorCopy (ent->s.angles, ent->moveinfo.start_angles);
+	VectorCopy (ent->pos2, ent->moveinfo.end_origin);
+	VectorCopy (ent->s.angles, ent->moveinfo.end_angles);
+
+	ent->moveinfo.sound_start = gi.soundindex ("plats/pt1_strt.wav");
+	ent->moveinfo.sound_middle = gi.soundindex ("plats/pt1_mid.wav");
+	ent->moveinfo.sound_end = gi.soundindex ("plats/pt1_end.wav");
+
+	if (ent->attenuation <= 0)	// Knightmare added
+		ent->attenuation = ATTN_STATIC;
+
+//Maj++
+//	bFuncPlat(ent);
+//Maj--
+
+}
+
 //====================================================================
 
 /*QUAKED func_rotating (0 .5 .8) ? START_ON REVERSE X_AXIS Y_AXIS TOUCH_PAIN STOP ANIMATED ANIMATED_FAST
@@ -742,7 +1186,7 @@ void rotating_blocked (edict_t *self, edict_t *other)
 void rotating_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
 	//ponko
-	if(other->svflags & SVF_MONSTER) return;
+	if (other->svflags & SVF_MONSTER) return;
 
 	if (self->avelocity[0] || self->avelocity[1] || self->avelocity[2])
 		T_Damage (other, self, self, vec3_origin, other->s.origin, vec3_origin, self->dmg, 1, 0, MOD_CRUSH);
@@ -880,14 +1324,14 @@ void button_fire (edict_t *self)
 		return;
 
 
-	if(self->activator)
+	if (self->activator)
 	{
-		if(chedit->value && CurrentIndex < MAXNODES && !self->activator->deadflag && self->activator == &g_edicts[1])
+		if (chedit->value && CurrentIndex < MAXNODES && !self->activator->deadflag && self->activator == &g_edicts[1])
 		{
 			VectorCopy(self->monsterinfo.last_sighting,Route[CurrentIndex].Pt);
 			Route[CurrentIndex].ent = self;
 			Route[CurrentIndex].state = GRS_PUSHBUTTON;
-			if(++CurrentIndex < MAXNODES)
+			if (++CurrentIndex < MAXNODES)
 			{
 				gi.bprintf(PRINT_HIGH,"Last %i pod(s).\n",MAXNODES - CurrentIndex);
 				memset(&Route[CurrentIndex],0,sizeof(route_t));
@@ -924,7 +1368,7 @@ void button_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *s
 
 void button_killed (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
-//	if(self->takedamage) self->monsterinfo.attack_finished = level.time + FRAMETIME * 40; 
+//	if (self->takedamage) self->monsterinfo.attack_finished = level.time + FRAMETIME * 40; 
 		
 	self->activator = attacker;
 	self->health = self->max_health;
@@ -998,7 +1442,7 @@ void SP_func_button (edict_t *ent)
 	VectorAdd(ent->s.origin,ent->mins,ent->monsterinfo.last_sighting);
 //	VectorCopy(ent->s.origin,ent->monsterinfo.last_sighting);
 
-	if(1/*!ent->health*/)
+	if (1/*!ent->health*/)
 	{
 		//sp roam navi
 		it = FindItem("Roam Navi2");
@@ -1020,7 +1464,7 @@ void SP_func_button (edict_t *ent)
 			VectorScale (abs_movedir, dist, tdir);
 			VectorAdd(it_ent->s.origin,tdir,tdir2);
 			i = gi.pointcontents(tdir2);
-			if(!(i & CONTENTS_SOLID) ) break;
+			if (!(i & CONTENTS_SOLID) ) break;
 			dist++;
 		}
 		VectorScale (abs_movedir, (dist + 20), tdir);
@@ -1107,7 +1551,7 @@ void door_hit_top (edict_t *self)
 	self->moveinfo.state = STATE_TOP;
 	if (self->spawnflags & DOOR_TOGGLE)
 	{
-		if(self->union_ent)
+		if (self->union_ent)
 		{
 			self->union_ent->solid = SOLID_NOT;
 		}
@@ -1130,7 +1574,7 @@ void door_hit_bottom (edict_t *self)
 	}
 	self->s.sound = 0;	// Knightmare- make sure this is always set to 0, lead mover or not!
 
-	if(self->union_ent)
+	if (self->union_ent)
 	{
 		self->union_ent->solid = SOLID_NOT;
 	}
@@ -1335,7 +1779,7 @@ void door_blocked  (edict_t *self, edict_t *other)
 			BecomeExplosion1 (other);
 		return;
 	}
-	if(other->deadflag) T_Damage (other, self, self, vec3_origin, other->s.origin, vec3_origin, 100000, 1, 0, MOD_CRUSH);
+	if (other->deadflag) T_Damage (other, self, self, vec3_origin, other->s.origin, vec3_origin, 100000, 1, 0, MOD_CRUSH);
 	else T_Damage (other, self, self, vec3_origin, other->s.origin, vec3_origin, self->dmg, 1, 0, MOD_CRUSH);
 
 	//bot's state change
@@ -1343,9 +1787,9 @@ void door_blocked  (edict_t *self, edict_t *other)
 	{
 		ent = &g_edicts[i];
 
-		if(ent->inuse && (ent->svflags & SVF_MONSTER) && ent->client)
+		if (ent->inuse && (ent->svflags & SVF_MONSTER) && ent->client)
 		{
-			if(ent->client->zc.waitin_obj == self && ent->client->zc.zcstate )
+			if (ent->client->zc.waitin_obj == self && ent->client->zc.zcstate )
 			{
 				ent->client->zc.zcstate |= STS_W_DONT;
 			}
@@ -1397,7 +1841,7 @@ void door_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *sur
 		return;
 	self->touch_debounce_time = level.time + 5.0;
 
-	if(!(other->svflags & SVF_MONSTER))
+	if (!(other->svflags & SVF_MONSTER))
 	{
 		gi.centerprintf (other, "%s", self->message);
 		gi.sound (other, CHAN_AUTO, gi.soundindex ("misc/talk1.wav"), 1, ATTN_NORM, 0);
@@ -1506,7 +1950,7 @@ void SP_func_door (edict_t *ent)
 //	VectorCopy(ent->s.origin,ent->monsterinfo.last_sighting);
 
 /////////
-	if(fabs(ent->moveinfo.start_origin[2] - ent->moveinfo.end_origin[2]) >20)
+	if (fabs(ent->moveinfo.start_origin[2] - ent->moveinfo.end_origin[2]) >20)
 	{
 		it = FindItem("Roam Navi3");
 		it_ent = G_Spawn();
@@ -1753,12 +2197,13 @@ dmg		default	2
 noise	looping sound to play when the train is in motion
 
 */
+
 // Lazarus: Added health key to func_train
 void train_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
 //	edict_t	*e, *next;
 
-	if(self->deathtarget)
+	if (self->deathtarget)
 	{
 		self->target = self->deathtarget;
 		G_UseTargets (self, attacker);
@@ -1768,11 +2213,11 @@ void train_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 	while(e) {
 		next = e->movewith_next;
 		e->nextthink = 0;
-		if(e->takedamage)
+		if (e->takedamage)
 			T_Damage (e, self, self, vec3_origin, e->s.origin, vec3_origin, 100000, 1, DAMAGE_NO_PROTECTION, MOD_CRUSH);
-		else if(e->die)
+		else if (e->die)
 			e->die(e,self,self,100000,e->s.origin);
-		else if(e->solid == SOLID_NOT)
+		else if (e->solid == SOLID_NOT)
 			G_FreeEdict(e);
 		else
 			BecomeExplosion1 (e);
@@ -1860,7 +2305,7 @@ void train_wait (edict_t *self)
 		{
 			VectorClear(self->avelocity);
 			VectorClear(self->velocity);
-		//	if(self->movewith_next && (self->movewith_next->movewith_ent == self))
+		//	if (self->movewith_next && (self->movewith_next->movewith_ent == self))
 		//		set_child_movement(self);
 		}
 
@@ -1879,7 +2324,7 @@ void train_wait (edict_t *self)
 			VectorClear (self->velocity);
 			// Knightmare added
 			if (!self->spawnflags & TRAIN_ROTATE_CONSTANT)
-				VectorClear (self->avelocity); //Knightmare added
+				VectorClear (self->avelocity);
 			// Lazarus: turn off animation for stationary trains
 			if (!strcmp(self->classname, "func_train"))
 				self->s.effects &= ~(EF_ANIM_ALL | EF_ANIM_ALLFAST);
@@ -1970,7 +2415,7 @@ void train_yaw (edict_t *self)
 	if ((cur_yaw == idl_yaw) && (cur_pitch == idl_pitch) && (cur_roll == idl_roll) )
 	{
 		self->nextthink = level.time + FRAMETIME;
-//		if(self->enemy->movewith_next && (self->enemy->movewith_next->movewith_ent == self->enemy))
+//		if (self->enemy->movewith_next && (self->enemy->movewith_next->movewith_ent == self->enemy))
 //			set_child_movement(self->enemy);
 		return;
 	} 
@@ -2170,7 +2615,7 @@ void train_next (edict_t *self)
 again:
 	if (!self->target)
 	{
-//		gi.dprintf ("train_next: no next target\n");
+	//	gi.dprintf ("train_next: no next target\n");
 		self->s.sound = 0;	// Knightmare added
 		return;
 	}
@@ -2225,7 +2670,7 @@ again:
 	VectorCopy (dest, self->moveinfo.end_origin);
 
 	// Knightmare added
-	if(self->spawnflags & TRAIN_SPLINE)
+	if (self->spawnflags & TRAIN_SPLINE)
 	{
 		float	speed;
 		int		frames;
@@ -2237,14 +2682,14 @@ again:
 		VectorSubtract(dest,self->s.origin,v);
 		self->moveinfo.distance = VectorLength(v);
 		frames = (int)(10 * self->moveinfo.distance/self->speed);
-		if(frames < 1) frames = 1;
+		if (frames < 1) frames = 1;
 		speed = (10*self->moveinfo.distance)/(float)frames;
 		self->moveinfo.speed = speed;
 		self->moveinfo.accel = self->moveinfo.decel = self->moveinfo.speed;
 	}
 
 	// Rroff rotating
-	if (self->spawnflags & TRAIN_ROTATE && !(ent->spawnflags & 2))
+	if ( (self->spawnflags & TRAIN_ROTATE) && !(ent->spawnflags & 2))
 	{
 		// Lazarus: No no no :-). This is measuring from the center
 		//          of the func_train to the path_corner. Should
@@ -2260,12 +2705,11 @@ again:
 		vectoangles2(v,angles);
 		self->ideal_yaw = angles[YAW];
 		self->ideal_pitch = angles[PITCH];
-		if(self->ideal_pitch < 0) self->ideal_pitch += 360;
+		if (self->ideal_pitch < 0) self->ideal_pitch += 360;
 		self->ideal_roll = ent->roll;
 
 		VectorClear(self->movedir);
 		self->movedir[1] = 1.0;
-
 	}
 	/* Lazarus: We don't want to do this... this would give an
 	//          instantaneous change in pitch and roll and look
@@ -2283,7 +2727,7 @@ again:
 	// end Rroff
 
 	// Lazarus:
-	if(self->spawnflags & TRAIN_ROTATE_CONSTANT)
+	if (self->spawnflags & TRAIN_ROTATE_CONSTANT)
 	{
 		self->avelocity[PITCH] = self->pitch_speed;
 		self->avelocity[YAW]   = self->yaw_speed;
@@ -2313,8 +2757,8 @@ void train_resume (edict_t *self)
 	Move_Calc (self, dest, train_wait);
 	self->spawnflags |= TRAIN_START_ON;
 
-	// Knighmare added from Lazarus
-	if(self->spawnflags & TRAIN_ROTATE_CONSTANT)
+	// Knightmare- added from Lazarus
+	if (self->spawnflags & TRAIN_ROTATE_CONSTANT)
 	{
 		self->avelocity[PITCH] = self->pitch_speed;
 		self->avelocity[YAW]   = self->yaw_speed;
@@ -2341,16 +2785,16 @@ void func_train_find (edict_t *self)
 
 	// Knightmare added
 	// Lazarus: trains can change speed at path_corners
-	if(ent->speed) {
+	if (ent->speed) {
 		self->speed = ent->speed;
 		self->moveinfo.speed = self->speed;
 		self->moveinfo.accel = self->moveinfo.decel = self->moveinfo.speed;
 	}
-	if(ent->pitch_speed)
+	if (ent->pitch_speed)
 		self->pitch_speed = ent->pitch_speed;
-	if(ent->yaw_speed)
+	if (ent->yaw_speed)
 		self->yaw_speed   = ent->yaw_speed;
-	if(ent->roll_speed)
+	if (ent->roll_speed)
 		self->roll_speed  = ent->roll_speed;
 
 	// Lazarus: spline stuff
@@ -2376,6 +2820,7 @@ void func_train_find (edict_t *self)
 		VectorCopy (ent->s.origin, self->s.origin);
 	else
 		VectorSubtract (ent->s.origin, self->mins, self->s.origin);
+
 	VectorCopy (self->s.origin, self->s.old_origin);
 	gi.linkentity (self);
 
@@ -2433,7 +2878,7 @@ void train_use (edict_t *self, edict_t *other, edict_t *activator)
 		{
 			// Back up a step
 			self->moveinfo.ratio -= self->moveinfo.speed * FRAMETIME / self->moveinfo.distance;
-			if(self->moveinfo.ratio < 0.)
+			if (self->moveinfo.ratio < 0.)
 				self->moveinfo.ratio = 0.;
 		}
 		// end Knightmare
@@ -2528,8 +2973,8 @@ void SP_func_train (edict_t *self)
 
 
 ///////////
-	VectorAdd(self->s.origin,self->mins,self->monsterinfo.last_sighting);
-//	VectorCopy(self->s.origin,self->monsterinfo.last_sighting);
+	VectorAdd(self->s.origin, self->mins, self->monsterinfo.last_sighting);
+//	VectorCopy(self->s.origin, self->monsterinfo.last_sighting);
 
 
 	it = FindItem("Roam Navi");
@@ -2814,7 +3259,7 @@ void door_secret_blocked  (edict_t *self, edict_t *other)
 		return;
 	self->touch_debounce_time = level.time + 0.5;
 
-	if(other->deadflag) T_Damage (other, self, self, vec3_origin, other->s.origin, vec3_origin, 100000, 1, 0, MOD_CRUSH);
+	if (other->deadflag) T_Damage (other, self, self, vec3_origin, other->s.origin, vec3_origin, 100000, 1, 0, MOD_CRUSH);
 	else T_Damage (other, self, self, vec3_origin, other->s.origin, vec3_origin, self->dmg, 1, 0, MOD_CRUSH);
 
 //	T_Damage (other, self, self, vec3_origin, other->s.origin, vec3_origin, self->dmg, 1, 0, MOD_CRUSH);

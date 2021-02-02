@@ -48,7 +48,7 @@ static void check_dodge (edict_t *self, vec3_t start, vec3_t dir, int speed)
 	VectorSet(vn,-8,-8,-8);
 	VectorSet(vx, 8, 8, 8);
 
-	VectorMA (start, 8192, dir, end);
+	VectorMA (start, WORLD_SIZE, dir, end);	// was 8192
 	tr = gi.trace (start, vn, vx, end, self, MASK_SHOT);
 	if ((tr.ent) && tr.ent->client && Q_stricmp (tr.ent->classname, "player") == 0 && (tr.ent->health > 0))
 	{
@@ -158,7 +158,12 @@ static void fire_lead (edict_t *self, vec3_t start, vec3_t aimdir, int damage, i
 
 		r = crandom()*hspread;
 		u = crandom()*vspread;
-		VectorMA (start, 8192, forward, end);
+		// Knightmare- adjust spread for expanded world size
+#ifdef KMQUAKE2_ENGINE_MOD
+		r *= (WORLD_SIZE / 8192);
+		u *= (WORLD_SIZE / 8192);
+#endif
+		VectorMA (start, WORLD_SIZE, forward, end);	// was 8192
 		VectorMA (end, r, right, end);
 		VectorMA (end, u, up, end);
 
@@ -212,7 +217,12 @@ static void fire_lead (edict_t *self, vec3_t start, vec3_t aimdir, int damage, i
 				AngleVectors (dir, forward, right, up);
 				r = crandom()*hspread*2;
 				u = crandom()*vspread*2;
-				VectorMA (water_start, 8192, forward, end);
+				// Knightmare- adjust spread for expanded world size
+#ifdef KMQUAKE2_ENGINE_MOD
+				r *= (WORLD_SIZE / 8192);
+				u *= (WORLD_SIZE / 8192);
+#endif
+				VectorMA (water_start, WORLD_SIZE, forward, end);	// was 8192
 				VectorMA (end, r, right, end);
 				VectorMA (end, u, up, end);
 			}
@@ -453,7 +463,7 @@ static void Grenade_Explode (edict_t *ent)
 	gi.multicast (ent->s.origin, MULTICAST_PHS);
 
 	G_FreeEdict (ent);
-UpdateExplIndex(NULL);
+	UpdateExplIndex (NULL);
 }
 
 static void Grenade_Touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
@@ -466,7 +476,7 @@ static void Grenade_Touch (edict_t *ent, edict_t *other, cplane_t *plane, csurfa
 	if (surf && (surf->flags & SURF_SKY))
 	{
 		G_FreeEdict (ent);
-UpdateExplIndex(NULL);
+		UpdateExplIndex (NULL);
 		return;
 	}
 
@@ -490,7 +500,27 @@ UpdateExplIndex(NULL);
 	Grenade_Explode (ent);
 }
 
-void fire_grenade (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, float timer, float damage_radius)
+// Knightmare added
+void ContactGrenade_Touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
+{
+	if (other == ent->owner)
+		return;
+
+	if (surf && (surf->flags & SURF_SKY))
+	{
+		G_FreeEdict (ent);
+		UpdateExplIndex (NULL);
+		return;
+	}
+
+	if (other->takedamage)
+		ent->enemy = other;
+
+	Grenade_Explode (ent);
+}
+// end Knightmare
+
+void fire_grenade (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, float timer, float damage_radius, qboolean contact)
 {
 	edict_t	*grenade;
 	vec3_t	dir;
@@ -513,14 +543,18 @@ void fire_grenade (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int s
 	VectorClear (grenade->maxs);
 	grenade->s.modelindex = gi.modelindex ("models/objects/grenade/tris.md2");
 	grenade->owner = self;
-	grenade->touch = Grenade_Touch;
+	// Knightmare- added contact explode
+	if (contact)
+		grenade->touch = ContactGrenade_Touch;
+	else
+		grenade->touch = Grenade_Touch;
 	grenade->nextthink = level.time + timer;
 	grenade->think = Grenade_Explode;
 	grenade->dmg = damage;
 	grenade->dmg_radius = damage_radius;
 	grenade->classname = "grenade";
 
-UpdateExplIndex(grenade);
+	UpdateExplIndex (grenade);
 
 	gi.linkentity (grenade);
 }
@@ -585,7 +619,7 @@ void rocket_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *su
 	if (surf && (surf->flags & SURF_SKY))
 	{
 		G_FreeEdict (ent);
-UpdateExplIndex(NULL);
+		UpdateExplIndex (NULL);
 		return;
 	}
 
@@ -627,7 +661,7 @@ UpdateExplIndex(NULL);
 	gi.multicast (ent->s.origin, MULTICAST_PHS);
 
 	G_FreeEdict (ent);
-UpdateExplIndex(NULL);
+	UpdateExplIndex (NULL);
 }
 
 void fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage)
@@ -656,7 +690,7 @@ void fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed
 	rocket->s.sound = gi.soundindex ("weapons/rockfly.wav");
 	rocket->classname = "rocket";
 
-UpdateExplIndex(rocket);
+	UpdateExplIndex (rocket);
 
 	if (self->client)
 		check_dodge (self, rocket->s.origin, dir, speed);
@@ -787,7 +821,7 @@ void fire_rail (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick
 	int			mask, i=0;
 	qboolean	water;
 
-	VectorMA (start, 8192, aimdir, end);
+	VectorMA (start, WORLD_SIZE, aimdir, end);	// was 8192
 	VectorCopy (start, from);
 	ignore = self;
 	water = false;
@@ -845,7 +879,7 @@ void fire_sniperail (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int
 	int			mask;
 	qboolean	water;
 
-	VectorMA (start, 8192, aimdir, end);
+	VectorMA (start, WORLD_SIZE, aimdir, end);	// was 8192
 	VectorCopy (start, from);
 	ignore = self;
 	water = false;

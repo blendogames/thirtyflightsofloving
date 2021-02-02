@@ -156,6 +156,11 @@ void SP_model_train_origin (edict_t *self);
 void SP_misc_viper_origin (edict_t *ent);
 void SP_misc_strogg_ship_origin (edict_t *ent);
 void SP_misc_transport_origin (edict_t *ent);
+
+// Knightmare- these are from Rogue
+void SP_func_plat2 (edict_t *ent);
+void SP_func_door_secret2 (edict_t *ent);
+void SP_func_force_wall (edict_t *ent);
 // end Knightmare
 
 spawn_t	spawns[] = {
@@ -294,6 +299,10 @@ spawn_t	spawns[] = {
 	{"misc_viper_origin", SP_misc_viper_origin},
 	{"misc_strogg_ship_origin", SP_misc_strogg_ship_origin},
 	{"misc_transport_origin", SP_misc_transport_origin},
+	// Knightmare- these are from Rogue
+	{"func_plat2", SP_func_plat2},
+	{"func_door_secret2", SP_func_door_secret2},
+	{"func_force_wall", SP_func_force_wall},
 	// end Knightmare
 
 #if 0 // remove monster code
@@ -1580,7 +1589,7 @@ void SP_worldspawn (edict_t *ent)
 	SetItemNames ();
 
 	if (st.nextmap)
-		strcpy (level.nextmap, st.nextmap);
+		Com_strcpy (level.nextmap, sizeof(level.nextmap), st.nextmap);
 
 	// make some data visible to the server
 
