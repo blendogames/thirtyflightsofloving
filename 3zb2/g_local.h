@@ -667,6 +667,8 @@ void Cmd_Score_f (edict_t *ent);
 #define TRAIN_ORIGIN        16384
 // end Knightmare
 
+void door_use_areaportals (edict_t *self, qboolean open);
+
 //
 // g_items.c
 //

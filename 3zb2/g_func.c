@@ -3232,7 +3232,6 @@ void door_secret_move1 (edict_t *self)
 	self->s.sound = 0;
 	if (self->moveinfo.sound_end)
 		gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_end, 1, self->attenuation, 0); // was ATTN_STATIC
-
 }
 
 void door_secret_move2 (edict_t *self)

@@ -162,7 +162,6 @@ void fd_secret_move5 (edict_t *self)
 	self->s.sound = 0;
 	if (self->moveinfo.sound_end)
 		gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_end, 1, self->attenuation, 0); // was ATTN_STATIC
-
 }
 
 void fd_secret_move6 (edict_t *self)
@@ -262,11 +261,14 @@ dmg  = damage to inflict when blocked (2 default)
 void SP_func_door_secret2 (edict_t *ent)
 {
 	vec3_t	forward, right, up;
-	float	lrSize, fbSize;
+//	float	lrSize, fbSize;
 
 	ent->moveinfo.sound_start = gi.soundindex  ("doors/dr1_strt.wav");
 	ent->moveinfo.sound_middle = gi.soundindex  ("doors/dr1_mid.wav");
 	ent->moveinfo.sound_end = gi.soundindex  ("doors/dr1_end.wav");
+
+	if (ent->attenuation <= 0)
+		ent->attenuation = ATTN_STATIC;
 
 	if (!ent->dmg)
 		ent->dmg = 2;

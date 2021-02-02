@@ -1487,6 +1487,7 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 // end Knightmare
 
 void plat_blocked(edict_t *self, edict_t *other);
+void door_use_areaportals (edict_t *self, qboolean open);
 void door_blocked(edict_t *self, edict_t *other);
 void train_blocked(edict_t *self, edict_t *other);
 void rotating_blocked(edict_t *self, edict_t *other);
