@@ -233,6 +233,7 @@ QUAKE2_OBJS = \
 	$(BUILDDIR)/client/ui_options_sound.o \
 	$(BUILDDIR)/client/ui_quit.o \
 	$(BUILDDIR)/client/ui_subsystem.o \
+	$(BUILDDIR)/client/ui_utils.o \
 	$(BUILDDIR)/client/ui_video.o \
 	$(BUILDDIR)/client/ui_video_advanced.o \
 	\
@@ -460,6 +461,9 @@ $(BUILDDIR)/client/ui_quit.o :    	$(UI_DIR)/ui_quit.c
 	$(DO_CC)
 	
 $(BUILDDIR)/client/ui_subsystem.o :    	$(UI_DIR)/ui_subsystem.c
+	$(DO_CC)
+	
+$(BUILDDIR)/client/ui_utils.o :    	$(UI_DIR)/ui_utils.c
 	$(DO_CC)
 	
 $(BUILDDIR)/client/ui_video.o :    	$(UI_DIR)/ui_video.c

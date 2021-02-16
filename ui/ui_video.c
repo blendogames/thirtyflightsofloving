@@ -72,7 +72,8 @@ static void VidModeCallback ( void *unused )
 static void BrightnessCallback ( void *s )
 {
 	// invert sense so greater = brighter, and scale to a range of 0.3 to 1.3
-	Cvar_SetValue( "vid_gamma", (1.3 - (s_brightness_slider.curvalue/20.0)) );
+//	Cvar_SetValue( "vid_gamma", (1.3 - (s_brightness_slider.curvalue/20.0f)) );
+	Cvar_SetValue( "vid_gamma", MenuSlider_GetValue(&s_brightness_slider) );
 }
 
 static void VsyncCallback ( void *unused )
@@ -175,7 +176,8 @@ static void ApplyChanges( void *unused )
 	}
 	Cvar_SetValue( "vid_fullscreen", s_fs_box.curvalue );
 	// invert sense so greater = brighter, and scale to a range of 0.3 to 1.3
-	Cvar_SetValue( "vid_gamma", (1.3 - (s_brightness_slider.curvalue/20.0)) );
+//	Cvar_SetValue( "vid_gamma", (1.3 - (s_brightness_slider.curvalue/20.0)) );
+	Cvar_SetValue( "vid_gamma", MenuSlider_GetValue(&s_brightness_slider) );
 	Cvar_SetValue( "r_picmip", 4-s_texqual_box.curvalue );
 
 	// Knightmare- refesh rate option
@@ -510,9 +512,13 @@ void Menu_Video_Init (void)
 	s_brightness_slider.generic.y			= y += MENU_LINE_SIZE;
 	s_brightness_slider.generic.name		= "brightness";
 	s_brightness_slider.generic.callback	= BrightnessCallback;
-	s_brightness_slider.minvalue			= 0;
-	s_brightness_slider.maxvalue			= 20;
-	s_brightness_slider.curvalue			= (1.3 - Cvar_VariableValue("vid_gamma")) * 20;
+//	s_brightness_slider.minvalue			= 0;
+//	s_brightness_slider.maxvalue			= 20;
+//	s_brightness_slider.curvalue			= (1.3 - Cvar_VariableValue("vid_gamma")) * 20;
+	s_brightness_slider.maxPos				= 20;
+	s_brightness_slider.baseValue			= 1.3f;
+	s_brightness_slider.increment			= -0.05f;
+	MenuSlider_SetValue (&s_brightness_slider, Cvar_VariableValue("vid_gamma"));
 	s_brightness_slider.generic.statusbar	= "changes display brightness";
 
 	s_texfilter_box.generic.type		= MTYPE_SPINCONTROL;

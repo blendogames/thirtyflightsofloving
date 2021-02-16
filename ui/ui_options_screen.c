@@ -54,29 +54,34 @@ static menuaction_s		s_options_screen_back_action;
 // Psychospaz's changeable size crosshair
 static void CrosshairSizeFunc( void *unused )
 {
-	Cvar_SetValue( "crosshair_scale", s_options_screen_crosshairscale_slider.curvalue*0.25);
+//	Cvar_SetValue( "crosshair_scale", s_options_screen_crosshairscale_slider.curvalue*0.25);
+	Cvar_SetValue( "crosshair_scale", MenuSlider_GetValue(&s_options_screen_crosshairscale_slider) );
 }
 
 static void CrosshairAlphaFunc( void *unused )
 {
-	Cvar_SetValue( "crosshair_alpha", s_options_screen_crosshairalpha_slider.curvalue*0.05);
+//	Cvar_SetValue( "crosshair_alpha", s_options_screen_crosshairalpha_slider.curvalue*0.05);
+	Cvar_SetValue( "crosshair_alpha",  MenuSlider_GetValue(&s_options_screen_crosshairalpha_slider) );
 }
 
 static void CrosshairPulseFunc( void *unused )
 {
-	Cvar_SetValue( "crosshair_pulse", s_options_screen_crosshairpulse_slider.curvalue*0.05);
+//	Cvar_SetValue( "crosshair_pulse", s_options_screen_crosshairpulse_slider.curvalue*0.05);
+	Cvar_SetValue( "crosshair_pulse",  MenuSlider_GetValue(&s_options_screen_crosshairpulse_slider) );
 }
 
 // hud scaling option
 static void HudScaleFunc( void *unused )
 {
-	Cvar_SetValue( "scr_hudsize", s_options_screen_hudscale_slider.curvalue);
+//	Cvar_SetValue( "scr_hudsize", s_options_screen_hudscale_slider.curvalue);
+	Cvar_SetValue( "scr_hudsize",  MenuSlider_GetValue(&s_options_screen_hudscale_slider) );
 }
 
 // hud trans option
 static void HudAlphaFunc( void *unused )
 {
-	Cvar_SetValue( "scr_hudalpha", (s_options_screen_hudalpha_slider.curvalue-1)/10);
+//	Cvar_SetValue( "scr_hudalpha", (s_options_screen_hudalpha_slider.curvalue-1)/10);
+	Cvar_SetValue( "scr_hudalpha",  MenuSlider_GetValue(&s_options_screen_hudalpha_slider) );
 }
 
 // hud squeeze digits option
@@ -332,22 +337,27 @@ static void ScreenSetMenuItemValues( void )
 {
 	Cvar_SetValue( "crosshair", ClampCvar( 0, 100, Cvar_VariableValue("crosshair") ) );
 	//s_options_crosshair_box.curvalue			= Cvar_VariableValue("crosshair");
-	SetCrosshairCursor();
+	SetCrosshairCursor ();
 
 	Cvar_SetValue( "crosshair_scale", ClampCvar( 0.25, 5, Cvar_VariableValue("crosshair_scale") ) );
-	s_options_screen_crosshairscale_slider.curvalue	= Cvar_VariableValue("crosshair_scale")*4;
+//	s_options_screen_crosshairscale_slider.curvalue	= Cvar_VariableValue("crosshair_scale")*4;
+	MenuSlider_SetValue (&s_options_screen_crosshairscale_slider, Cvar_VariableValue("crosshair_scale"));
 
 	Cvar_SetValue( "crosshair_alpha", ClampCvar( 0.05, 1, Cvar_VariableValue("crosshair_alpha") ) );
-	s_options_screen_crosshairalpha_slider.curvalue	= Cvar_VariableValue("crosshair_alpha")*20;
+//	s_options_screen_crosshairalpha_slider.curvalue	= Cvar_VariableValue("crosshair_alpha")*20;
+	MenuSlider_SetValue (&s_options_screen_crosshairalpha_slider, Cvar_VariableValue("crosshair_alpha"));
 
 	Cvar_SetValue( "crosshair_pulse", ClampCvar( 0, 0.5, Cvar_VariableValue("crosshair_pulse") ) );
-	s_options_screen_crosshairpulse_slider.curvalue	= Cvar_VariableValue("crosshair_pulse")*20;
+//	s_options_screen_crosshairpulse_slider.curvalue	= Cvar_VariableValue("crosshair_pulse")*20;
+	MenuSlider_SetValue (&s_options_screen_crosshairpulse_slider, Cvar_VariableValue("crosshair_pulse"));
 
 	Cvar_SetValue( "scr_hudsize", ClampCvar( 0, 8, Cvar_VariableValue("scr_hudsize") ) );
-	s_options_screen_hudscale_slider.curvalue		= Cvar_VariableValue("scr_hudsize");
+//	s_options_screen_hudscale_slider.curvalue		= Cvar_VariableValue("scr_hudsize");
+	MenuSlider_SetValue (&s_options_screen_hudscale_slider, Cvar_VariableValue("scr_hudsize"));
 
 	Cvar_SetValue( "scr_hudalpha", ClampCvar( 0, 1, Cvar_VariableValue("scr_hudalpha") ) );
-	s_options_screen_hudalpha_slider.curvalue		= Cvar_VariableValue("scr_hudalpha")*10 + 1;
+//	s_options_screen_hudalpha_slider.curvalue		= Cvar_VariableValue("scr_hudalpha")*10 + 1;
+	MenuSlider_SetValue (&s_options_screen_hudalpha_slider, Cvar_VariableValue("scr_hudalpha"));
 
 	Cvar_SetValue( "scr_hudsqueezedigits", ClampCvar( 0, 1, Cvar_VariableValue("scr_hudsqueezedigits") ) );
 	s_options_screen_hudsqueezedigits_box.curvalue	= Cvar_VariableValue("scr_hudsqueezedigits");
@@ -413,8 +423,11 @@ void Options_Screen_MenuInit ( void )
 	s_options_screen_crosshairscale_slider.generic.y			= y += 5*MENU_LINE_SIZE;
 	s_options_screen_crosshairscale_slider.generic.name			= "crosshair scale";
 	s_options_screen_crosshairscale_slider.generic.callback		= CrosshairSizeFunc;
-	s_options_screen_crosshairscale_slider.minvalue				= 1;
-	s_options_screen_crosshairscale_slider.maxvalue				= 20;
+//	s_options_screen_crosshairscale_slider.minvalue				= 1;
+//	s_options_screen_crosshairscale_slider.maxvalue				= 20;
+	s_options_screen_crosshairscale_slider.maxPos				= 19;
+	s_options_screen_crosshairscale_slider.baseValue			= 0.25f;
+	s_options_screen_crosshairscale_slider.increment			= 0.25f;
 	s_options_screen_crosshairscale_slider.generic.statusbar	= "changes size of crosshair";
 
 	s_options_screen_crosshairalpha_slider.generic.type			= MTYPE_SLIDER;
@@ -423,8 +436,11 @@ void Options_Screen_MenuInit ( void )
 	s_options_screen_crosshairalpha_slider.generic.y			= y += MENU_LINE_SIZE;
 	s_options_screen_crosshairalpha_slider.generic.name			= "crosshair alpha";
 	s_options_screen_crosshairalpha_slider.generic.callback		= CrosshairAlphaFunc;
-	s_options_screen_crosshairalpha_slider.minvalue				= 1;
-	s_options_screen_crosshairalpha_slider.maxvalue				= 20;
+//	s_options_screen_crosshairalpha_slider.minvalue				= 1;
+//	s_options_screen_crosshairalpha_slider.maxvalue				= 20;
+	s_options_screen_crosshairalpha_slider.maxPos				= 19;
+	s_options_screen_crosshairalpha_slider.baseValue			= 0.05f;
+	s_options_screen_crosshairalpha_slider.increment			= 0.05f;
 	s_options_screen_crosshairalpha_slider.generic.statusbar	= "changes opacity of crosshair";
 
 	s_options_screen_crosshairpulse_slider.generic.type			= MTYPE_SLIDER;
@@ -433,8 +449,11 @@ void Options_Screen_MenuInit ( void )
 	s_options_screen_crosshairpulse_slider.generic.y			= y += MENU_LINE_SIZE;
 	s_options_screen_crosshairpulse_slider.generic.name			= "crosshair pulse";
 	s_options_screen_crosshairpulse_slider.generic.callback		= CrosshairPulseFunc;
-	s_options_screen_crosshairpulse_slider.minvalue				= 0;
-	s_options_screen_crosshairpulse_slider.maxvalue				= 10;
+//	s_options_screen_crosshairpulse_slider.minvalue				= 0;
+//	s_options_screen_crosshairpulse_slider.maxvalue				= 10;
+	s_options_screen_crosshairpulse_slider.maxPos				= 10;
+	s_options_screen_crosshairpulse_slider.baseValue			= 0.0f;
+	s_options_screen_crosshairpulse_slider.increment			= 0.05f;
 	s_options_screen_crosshairpulse_slider.generic.statusbar	= "changes pulse amplitude of crosshair";
 
 	// hud scaling option
@@ -444,8 +463,11 @@ void Options_Screen_MenuInit ( void )
 	s_options_screen_hudscale_slider.generic.y				= y += 2*MENU_LINE_SIZE;
 	s_options_screen_hudscale_slider.generic.name			= "status bar scale";
 	s_options_screen_hudscale_slider.generic.callback		= HudScaleFunc;
-	s_options_screen_hudscale_slider.minvalue				= 0;
-	s_options_screen_hudscale_slider.maxvalue				= 8;
+//	s_options_screen_hudscale_slider.minvalue				= 0;
+//	s_options_screen_hudscale_slider.maxvalue				= 8;
+	s_options_screen_hudscale_slider.maxPos					= 8;
+	s_options_screen_hudscale_slider.baseValue				= 0.0f;
+	s_options_screen_hudscale_slider.increment				= 1.0f;
 	s_options_screen_hudscale_slider.generic.statusbar		= "changes size of HUD elements";
 
 	// hud trans option
@@ -455,8 +477,11 @@ void Options_Screen_MenuInit ( void )
 	s_options_screen_hudalpha_slider.generic.y				= y += MENU_LINE_SIZE;
 	s_options_screen_hudalpha_slider.generic.name			= "status bar transparency";
 	s_options_screen_hudalpha_slider.generic.callback		= HudAlphaFunc;
-	s_options_screen_hudalpha_slider.minvalue				= 1;
-	s_options_screen_hudalpha_slider.maxvalue				= 11;
+//	s_options_screen_hudalpha_slider.minvalue				= 1;
+//	s_options_screen_hudalpha_slider.maxvalue				= 11;
+	s_options_screen_hudalpha_slider.maxPos					= 10;
+	s_options_screen_hudalpha_slider.baseValue				= 0.0f;
+	s_options_screen_hudalpha_slider.increment				= 0.1f;
 	s_options_screen_hudalpha_slider.generic.statusbar		= "changes opacity of HUD elements";
 
 	// hud squeeze digits option
@@ -505,7 +530,7 @@ void Options_Screen_MenuInit ( void )
 	Menu_AddItem( &s_options_screen_menu, ( void * ) &s_options_screen_defaults_action );
 	Menu_AddItem( &s_options_screen_menu, ( void * ) &s_options_screen_back_action );
 
-	ScreenSetMenuItemValues();
+	ScreenSetMenuItemValues ();
 }
 
 void MenuCrosshair_MouseClick ( void )

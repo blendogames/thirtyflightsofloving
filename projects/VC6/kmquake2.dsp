@@ -533,6 +533,10 @@ SOURCE=..\..\ui\ui_subsystem.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\ui\ui_utils.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\ui\ui_video.c
 # End Source File
 # Begin Source File

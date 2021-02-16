@@ -56,7 +56,7 @@ Other code by:
 	Yamagi
 	And anyone else I forgot...
 
-Menu dogtags, HUD numbers, and F1 coomputer icon by Pieter Verhoeven
+Menu dogtags, HUD numbers, and F1 computer icon by Pieter Verhoeven
 
 Menu screen by MDK
 

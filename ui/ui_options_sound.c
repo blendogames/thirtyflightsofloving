@@ -51,12 +51,14 @@ static menuaction_s		s_options_sound_back_action;
 
 static void UpdateVolumeFunc ( void *unused )
 {
-	Cvar_SetValue( "s_volume", s_options_sound_sfxvolume_slider.curvalue / 10 );
+//	Cvar_SetValue( "s_volume", s_options_sound_sfxvolume_slider.curvalue / 10 );
+	Cvar_SetValue( "s_volume", MenuSlider_GetValue(&s_options_sound_sfxvolume_slider) );
 }
 
 static void UpdateMusicVolumeFunc ( void *unused )
 {
-	Cvar_SetValue( "s_musicvolume", s_options_sound_musicvolume_slider.curvalue / 10 );
+//	Cvar_SetValue( "s_musicvolume", s_options_sound_musicvolume_slider.curvalue / 10 );
+	Cvar_SetValue( "s_musicvolume", MenuSlider_GetValue(&s_options_sound_musicvolume_slider) );
 }
 
 static void UpdateOggMusicFunc ( void *unused )
@@ -109,9 +111,12 @@ static void UpdateSoundQualityFunc ( void *unused )
 
 static void SoundSetMenuItemValues( void )
 {
-	s_options_sound_sfxvolume_slider.curvalue		= Cvar_VariableValue( "s_volume" ) * 10;
-	s_options_sound_musicvolume_slider.curvalue	= Cvar_VariableValue( "s_musicvolume" ) * 10;
-	s_options_sound_oggmusic_box.curvalue			= (Cvar_VariableValue("cl_ogg_music") > 0);
+//	s_options_sound_sfxvolume_slider.curvalue	= Cvar_VariableValue("s_volume") * 10;
+//	s_options_sound_musicvolume_slider.curvalue	= Cvar_VariableValue("s_musicvolume") * 10;
+	MenuSlider_SetValue (&s_options_sound_sfxvolume_slider, Cvar_VariableValue("s_volume"));
+	MenuSlider_SetValue (&s_options_sound_musicvolume_slider, Cvar_VariableValue("s_musicvolume"));
+
+	s_options_sound_oggmusic_box.curvalue		= (Cvar_VariableValue("cl_ogg_music") > 0);
 	s_options_sound_cdvolume_box.curvalue 		= !Cvar_VariableValue("cd_nocd");
 	//s_options_sound_quality_list.curvalue			= !Cvar_VariableValue( "s_loadas8bit" );
 	//**  DMP convert setting into index for option display text
@@ -189,9 +194,13 @@ void Options_Sound_MenuInit ( void )
 	s_options_sound_sfxvolume_slider.generic.y			= y;
 	s_options_sound_sfxvolume_slider.generic.name		= "effects volume";
 	s_options_sound_sfxvolume_slider.generic.callback	= UpdateVolumeFunc;
-	s_options_sound_sfxvolume_slider.minvalue			= 0;
-	s_options_sound_sfxvolume_slider.maxvalue			= 10;
-	s_options_sound_sfxvolume_slider.curvalue			= Cvar_VariableValue( "s_volume" ) * 10;
+//	s_options_sound_sfxvolume_slider.minvalue			= 0;
+//	s_options_sound_sfxvolume_slider.maxvalue			= 10;
+//	s_options_sound_sfxvolume_slider.curvalue			= Cvar_VariableValue( "s_volume" ) * 10;
+	s_options_sound_sfxvolume_slider.maxPos				= 10;
+	s_options_sound_sfxvolume_slider.baseValue			= 0.0f;
+	s_options_sound_sfxvolume_slider.increment			= 0.1f;
+	MenuSlider_SetValue (&s_options_sound_sfxvolume_slider, Cvar_VariableValue("s_volume"));
 	s_options_sound_sfxvolume_slider.generic.statusbar	= "volume of sound effects";
 
 	s_options_sound_musicvolume_slider.generic.type			= MTYPE_SLIDER;
@@ -200,9 +209,13 @@ void Options_Sound_MenuInit ( void )
 	s_options_sound_musicvolume_slider.generic.y			= y+=MENU_LINE_SIZE;
 	s_options_sound_musicvolume_slider.generic.name			= "music volume";
 	s_options_sound_musicvolume_slider.generic.callback		= UpdateMusicVolumeFunc;
-	s_options_sound_musicvolume_slider.minvalue				= 0;
-	s_options_sound_musicvolume_slider.maxvalue				= 10;
-	s_options_sound_musicvolume_slider.curvalue				= Cvar_VariableValue( "s_musicvolume" ) * 10;
+//	s_options_sound_musicvolume_slider.minvalue				= 0;
+//	s_options_sound_musicvolume_slider.maxvalue				= 10;
+//	s_options_sound_musicvolume_slider.curvalue				= Cvar_VariableValue( "s_musicvolume" ) * 10;
+	s_options_sound_musicvolume_slider.maxPos				= 10;
+	s_options_sound_musicvolume_slider.baseValue			= 0.0f;
+	s_options_sound_musicvolume_slider.increment			= 0.1f;
+	MenuSlider_SetValue (&s_options_sound_musicvolume_slider, Cvar_VariableValue("s_musicvolume"));
 	s_options_sound_musicvolume_slider.generic.statusbar	= "volume of ogg vorbis music";
 
 	s_options_sound_oggmusic_box.generic.type		= MTYPE_SPINCONTROL;

@@ -111,11 +111,18 @@ typedef struct
 {
 	menucommon_s generic;
 
-	float minvalue;
-	float maxvalue;
-	float curvalue;
+//	float		minvalue;
+//	float		maxvalue;
+//	float		curvalue;
 
-	float range;
+	// Knightmare added
+	int			maxPos;
+	int			curValue;
+	float		baseValue;
+	float		increment;
+	// end Knightmare
+
+	float		range;
 } menuslider_s;
 
 typedef struct
@@ -180,7 +187,10 @@ typedef struct
 	void (*OpenMenu)(void);
 } mainmenuobject_t;
 
-qboolean Field_Key( menufield_s *field, int key );
+// ui_backend.c
+qboolean MenuField_Key (menufield_s *field, int key);
+void	MenuSlider_SetValue (menuslider_s *s, float value);
+float	MenuSlider_GetValue (menuslider_s *s);
 
 void	Menu_AddItem (menuframework_s *menu, void *item);
 void	Menu_AdjustCursor (menuframework_s *menu, int dir);
@@ -206,7 +216,7 @@ void	UI_Draw_Cursor (void);
 
 //=======================================================
 
-// menu_main.c
+// ui_main.c
 
 #define NUM_MAINMENU_CURSOR_FRAMES 15
 
@@ -273,9 +283,10 @@ static char *creditsBuffer;
 
 void ActionStartMod (char *mod);
 
-// ui_subsystem.c
+// ui_utils.c
 qboolean IsValidImageFilename (char *name);
 
+// ui_subsystem.c
 void UI_AddButton (buttonmenuobject_t *thisObj, int index, float x, float y, float w, float h);
 void UI_AddMainButton (mainmenuobject_t *thisObj, int index, int x, int y, char *name);
 void UI_RefreshCursorMenu (void);

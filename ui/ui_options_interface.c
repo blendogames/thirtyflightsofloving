@@ -57,13 +57,15 @@ static menuaction_s		s_options_interface_back_action;
 
 static void MouseMenuFunc( void *unused )
 {
-	Cvar_SetValue( "ui_sensitivity", s_options_interface_menumouse_slider.curvalue / 4.0F );
+//	Cvar_SetValue( "ui_sensitivity", s_options_interface_menumouse_slider.curvalue / 4.0f );
+	Cvar_SetValue( "ui_sensitivity", MenuSlider_GetValue(&s_options_interface_menumouse_slider) );
 }
 
 // menu alpha option
 static void MenuAlphaFunc( void *unused )
 {
-	Cvar_SetValue( "ui_background_alpha", s_options_interface_menualpha_slider.curvalue / 20.0F);
+//	Cvar_SetValue( "ui_background_alpha", s_options_interface_menualpha_slider.curvalue / 20.0f);
+	Cvar_SetValue( "ui_background_alpha", MenuSlider_GetValue(&s_options_interface_menualpha_slider) );
 }
 
 static void AltTextColorFunc( void *unused )
@@ -74,7 +76,8 @@ static void AltTextColorFunc( void *unused )
 // Psychospaz's transparent console
 static void ConAlphaFunc( void *unused )
 {
-	Cvar_SetValue( "con_alpha", s_options_interface_conalpha_slider.curvalue * 0.05 );
+//	Cvar_SetValue( "con_alpha", s_options_interface_conalpha_slider.curvalue * 0.05 );
+	Cvar_SetValue( "con_alpha", MenuSlider_GetValue(&s_options_interface_conalpha_slider) );
 }
 
 // variable console height
@@ -112,7 +115,8 @@ int	numfonts = 0;
 
 static void FontSizeFunc (void *unused)
 {
-	Cvar_SetValue( "con_font_size", s_options_interface_fontsize_slider.curvalue * 2 );
+//	Cvar_SetValue( "con_font_size", s_options_interface_fontsize_slider.curvalue * 2 );
+	Cvar_SetValue( "con_font_size", MenuSlider_GetValue(&s_options_interface_fontsize_slider) );
 }
 
 static void ConFontFunc (void *unused)
@@ -330,18 +334,23 @@ static void InterfaceSetMenuItemValues (void)
 {
 	SetFontCursor ();
 
-	s_options_interface_menumouse_slider.curvalue		= ( Cvar_VariableValue("ui_sensitivity") ) * 4;
-	s_options_interface_menualpha_slider.curvalue		= ( Cvar_VariableValue("ui_background_alpha") ) * 20;
-	s_options_interface_fontsize_slider.curvalue		= ( Cvar_VariableValue("con_font_size") ) * 0.5;
+//	s_options_interface_menumouse_slider.curvalue		= ( Cvar_VariableValue("ui_sensitivity") ) * 4;
+//	s_options_interface_menualpha_slider.curvalue		= ( Cvar_VariableValue("ui_background_alpha") ) * 20;
+//	s_options_interface_fontsize_slider.curvalue		= ( Cvar_VariableValue("con_font_size") ) * 0.5;
+	MenuSlider_SetValue (&s_options_interface_menumouse_slider, Cvar_VariableValue("ui_sensitivity"));
+	MenuSlider_SetValue (&s_options_interface_menualpha_slider, Cvar_VariableValue("ui_background_alpha"));
+	MenuSlider_SetValue (&s_options_interface_fontsize_slider, Cvar_VariableValue("con_font_size"));
 
 	Cvar_SetValue( "alt_text_color", ClampCvar( 0, 9, Cvar_VariableValue("alt_text_color") ) );
 	s_options_interface_alt_text_color_box.curvalue	= Cvar_VariableValue("alt_text_color");
 
 	Cvar_SetValue( "con_alpha", ClampCvar( 0, 1, Cvar_VariableValue("con_alpha") ) );
-	s_options_interface_conalpha_slider.curvalue		= ( Cvar_VariableValue("con_alpha") ) * 20;
+//	s_options_interface_conalpha_slider.curvalue		= ( Cvar_VariableValue("con_alpha") ) * 20;
+	MenuSlider_SetValue (&s_options_interface_conalpha_slider, Cvar_VariableValue("con_alpha"));
 
 //	Cvar_SetValue( "con_height", ClampCvar( 0.25, 0.75, Cvar_VariableValue("con_height") ) );
 //	s_options_interface_conheight_slider.curvalue		= 20 * (Cvar_VariableValue("con_height") - 0.25);
+//	MenuSlider_SetValue (&s_options_interface_conheight_slider, Cvar_VariableValue("con_height"));
 
 	Cvar_SetValue( "scr_simple_loadscreen", ClampCvar( 0, 1, Cvar_VariableValue("scr_simple_loadscreen") ) );
 	s_options_interface_simple_loadscreen_box.curvalue = Cvar_VariableValue("scr_simple_loadscreen");
@@ -413,8 +422,11 @@ void Options_Interface_MenuInit (void)
 	s_options_interface_menumouse_slider.generic.y			= y;
 	s_options_interface_menumouse_slider.generic.name		= "mouse speed";
 	s_options_interface_menumouse_slider.generic.callback	= MouseMenuFunc;
-	s_options_interface_menumouse_slider.minvalue			= 1;
-	s_options_interface_menumouse_slider.maxvalue			= 8;
+//	s_options_interface_menumouse_slider.minvalue			= 1;
+//	s_options_interface_menumouse_slider.maxvalue			= 8;
+	s_options_interface_menumouse_slider.maxPos				= 7;
+	s_options_interface_menumouse_slider.baseValue			= 0.25f;
+	s_options_interface_menumouse_slider.increment			= 0.25f;
 	s_options_interface_menumouse_slider.generic.statusbar	= "changes sensitivity of mouse in menus";
 
 	s_options_interface_menualpha_slider.generic.type		= MTYPE_SLIDER;
@@ -423,8 +435,11 @@ void Options_Interface_MenuInit (void)
 	s_options_interface_menualpha_slider.generic.y			= y+=MENU_LINE_SIZE;
 	s_options_interface_menualpha_slider.generic.name		= "ingame menu transparency";
 	s_options_interface_menualpha_slider.generic.callback	= MenuAlphaFunc;
-	s_options_interface_menualpha_slider.minvalue			= 0;
-	s_options_interface_menualpha_slider.maxvalue			= 20;
+//	s_options_interface_menualpha_slider.minvalue			= 0;
+//	s_options_interface_menualpha_slider.maxvalue			= 20;
+	s_options_interface_menualpha_slider.maxPos				= 20;
+	s_options_interface_menualpha_slider.baseValue			= 0.0f;
+	s_options_interface_menualpha_slider.increment			= 0.05f;
 	s_options_interface_menualpha_slider.generic.statusbar	= "changes opacity of menu background";
 
 	// free any loaded fonts to prevent memory leak
@@ -448,8 +463,11 @@ void Options_Interface_MenuInit (void)
 	s_options_interface_fontsize_slider.generic.y			= y+=MENU_LINE_SIZE;
 	s_options_interface_fontsize_slider.generic.name		= "console font size";
 	s_options_interface_fontsize_slider.generic.callback	= FontSizeFunc;
-	s_options_interface_fontsize_slider.minvalue			= 3;
-	s_options_interface_fontsize_slider.maxvalue			= 8;
+//	s_options_interface_fontsize_slider.minvalue			= 3;
+//	s_options_interface_fontsize_slider.maxvalue			= 8;
+	s_options_interface_fontsize_slider.maxPos				= 5;
+	s_options_interface_fontsize_slider.baseValue			= 6.0f;
+	s_options_interface_fontsize_slider.increment			= 2.0f;
 	s_options_interface_fontsize_slider.generic.statusbar	= "changes size of console text";
 
 	s_options_interface_uifont_box.generic.type				= MTYPE_SPINCONTROL;
@@ -485,8 +503,11 @@ void Options_Interface_MenuInit (void)
 	s_options_interface_conalpha_slider.generic.y			= y+=2*MENU_LINE_SIZE;
 	s_options_interface_conalpha_slider.generic.name		= "console transparency";
 	s_options_interface_conalpha_slider.generic.callback	= ConAlphaFunc;
-	s_options_interface_conalpha_slider.minvalue			= 0;
-	s_options_interface_conalpha_slider.maxvalue			= 20;
+//	s_options_interface_conalpha_slider.minvalue			= 0;
+//	s_options_interface_conalpha_slider.maxvalue			= 20;
+	s_options_interface_conalpha_slider.maxPos				= 20;
+	s_options_interface_conalpha_slider.baseValue			= 0.0f;
+	s_options_interface_conalpha_slider.increment			= 0.05f;
 	s_options_interface_conalpha_slider.generic.statusbar	= "changes opacity of console";
 
 	/*
@@ -496,8 +517,12 @@ void Options_Interface_MenuInit (void)
 	s_options_interface_conheight_slider.generic.y			= y+=MENU_LINE_SIZE;
 	s_options_interface_conheight_slider.generic.name		= "console height";
 	s_options_interface_conheight_slider.generic.callback	= ConHeightFunc;
-	s_options_interface_conheight_slider.minvalue			= 0;
-	s_options_interface_conheight_slider.maxvalue			= 10;
+//	s_options_interface_conheight_slider.minvalue			= 0;
+//	s_options_interface_conheight_slider.maxvalue			= 10;
+	s_options_interface_conheight_slider.maxPos				= 10;
+	s_options_interface_conheight_slider.baseValue			= 0.25f;
+	s_options_interface_conheight_slider.increment			= 0.05f;
+	s_options_interface_conheight_slider.generic.statusbar	= "changes drop height of console";
 	*/
 
 	s_options_interface_simple_loadscreen_box.generic.type		= MTYPE_SPINCONTROL;

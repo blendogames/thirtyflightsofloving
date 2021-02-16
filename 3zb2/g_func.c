@@ -3313,7 +3313,10 @@ void door_secret_done (edict_t *self)
 {
 	if (!(self->targetname) || (self->spawnflags & SECRET_ALWAYS_SHOOT))
 	{
-		self->health = 0;
+		// Knightmare- restore user-set health here
+		// now that the correct die function is set
+	//	self->health = 0;
+		self->health = self->max_health;
 		self->takedamage = DAMAGE_YES;
 	}
 	self->moveinfo.state = STATE_LOWEST;	// Knightmare added
@@ -3363,9 +3366,9 @@ void SP_func_door_secret (edict_t *ent)
 	float	width;
 	float	length;
 
-	ent->moveinfo.sound_start = gi.soundindex  ("doors/dr1_strt.wav");
-	ent->moveinfo.sound_middle = gi.soundindex  ("doors/dr1_mid.wav");
-	ent->moveinfo.sound_end = gi.soundindex  ("doors/dr1_end.wav");
+	ent->moveinfo.sound_start = gi.soundindex("doors/dr1_strt.wav");
+	ent->moveinfo.sound_middle = gi.soundindex("doors/dr1_mid.wav");
+	ent->moveinfo.sound_end = gi.soundindex("doors/dr1_end.wav");
 
 	ent->movetype = MOVETYPE_PUSH;
 	ent->solid = SOLID_BSP;
@@ -3376,7 +3379,12 @@ void SP_func_door_secret (edict_t *ent)
 
 	if (!(ent->targetname) || (ent->spawnflags & SECRET_ALWAYS_SHOOT))
 	{
-		ent->health = 0;
+		// Knightmare- we can allow user-set health here
+		// now that the correct die function is set
+	//	ent->health = 0;
+	//	if (!ent->health)
+			ent->health = 1;
+		ent->max_health = ent->health;
 		ent->takedamage = DAMAGE_YES;
 		ent->die = door_secret_die;
 	}
@@ -3411,7 +3419,8 @@ void SP_func_door_secret (edict_t *ent)
 	if (ent->health)
 	{
 		ent->takedamage = DAMAGE_YES;
-		ent->die = door_killed;
+	//	ent->die = door_killed;
+		ent->die = door_secret_die;	// Knightmare- this had the wrong die function set!
 		ent->max_health = ent->health;
 	}
 	else if (ent->targetname && ent->message)

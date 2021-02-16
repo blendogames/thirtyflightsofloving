@@ -868,6 +868,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\ui\ui_utils.c"
+					>
+				</File>
+				<File
 					RelativePath="..\..\ui\ui_video.c"
 					>
 				</File>
@@ -882,11 +886,11 @@
 			Filter="h;hpp;hxx;hm;inl;fi;fd"
 			>
 			<File
-				RelativePath="..\..\renderer\anorms.h"
+				RelativePath="..\..\client\anorms.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\client\anorms.h"
+				RelativePath="..\..\renderer\anorms.h"
 				>
 			</File>
 			<File

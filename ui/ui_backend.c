@@ -29,17 +29,17 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "../client/client.h"
 #include "ui_local.h"
 
-static	void	Action_DoEnter( menuaction_s *a );
-static	void	Action_Draw( menuaction_s *a );
-static	void	Menu_DrawStatusBar( const char *string );
-static	void	Menulist_DoEnter( menulist_s *l );
-static	void	MenuList_Draw( menulist_s *l );
-static	void	Separator_Draw( menuseparator_s *s );
-static	void	Slider_DoSlide( menuslider_s *s, int dir );
-static	void	Slider_Draw( menuslider_s *s );
-static	void	SpinControl_DoEnter( menulist_s *s );
-static	void	SpinControl_Draw( menulist_s *s );
-static	void	SpinControl_DoSlide( menulist_s *s, int dir );
+static	void	MenuAction_DoEnter (menuaction_s *a);
+static	void	MenuAction_Draw (menuaction_s *a);
+static	void	Menu_DrawStatusBar (const char *string);
+static	void	Menulist_DoEnter (menulist_s *l);
+static	void	MenuList_Draw (menulist_s *l);
+static	void	MenuSeparator_Draw (menuseparator_s *s);
+static	void	MenuSlider_DoSlide (menuslider_s *s, int dir);
+static	void	MenuSlider_Draw (menuslider_s *s);
+static	void	MenuSpinControl_DoEnter (menulist_s *s);
+static	void	MenuSpinControl_Draw (menulist_s *s);
+static	void	MenuSpinControl_DoSlide (menulist_s *s, int dir);
 
 #define RCOLUMN_OFFSET  MENU_FONT_SIZE*2	// was 16
 #define LCOLUMN_OFFSET -MENU_FONT_SIZE*2	// was -16
@@ -71,13 +71,13 @@ int mouseOverAlpha (menucommon_s *m)
 //======================================================
 
 
-void Action_DoEnter (menuaction_s *a)
+void MenuAction_DoEnter (menuaction_s *a)
 {
 	if (a->generic.callback)
 		a->generic.callback(a);
 }
 
-void Action_Draw (menuaction_s *a)
+void MenuAction_Draw (menuaction_s *a)
 {
 	int alpha = mouseOverAlpha(&a->generic);
 
@@ -103,7 +103,7 @@ void Action_Draw (menuaction_s *a)
 		a->generic.ownerdraw(a);
 }
 
-qboolean Field_DoEnter (menufield_s *f)
+qboolean MenuField_DoEnter (menufield_s *f)
 {
 	if (f->generic.callback)
 	{
@@ -113,7 +113,7 @@ qboolean Field_DoEnter (menufield_s *f)
 	return false;
 }
 
-void Field_Draw (menufield_s *f)
+void MenuField_Draw (menufield_s *f)
 {
 	int i, alpha = mouseOverAlpha(&f->generic), xtra;
 	char tempbuffer[128]="";
@@ -166,7 +166,7 @@ void Field_Draw (menufield_s *f)
 					f->generic.y + f->generic.parent->y, f->generic.textSize, tempbuffer, alpha);
 }
 
-qboolean Field_Key (menufield_s *f, int key)
+qboolean MenuField_Key (menufield_s *f, int key)
 {
 	extern int keydown[];
 
@@ -335,7 +335,7 @@ void MenuList_Draw (menulist_s *l)
 	}
 }
 
-void Separator_Draw (menuseparator_s *s)
+void MenuSeparator_Draw (menuseparator_s *s)
 {
 	int alpha = mouseOverAlpha(&s->generic);
 
@@ -344,14 +344,35 @@ void Separator_Draw (menuseparator_s *s)
 								s->generic.y + s->generic.parent->y, s->generic.textSize, s->generic.name, alpha);
 }
 
-void Slider_DoSlide (menuslider_s *s, int dir)
+void MenuSlider_SetValue (menuslider_s *s, float value)
 {
-	s->curvalue += dir;
+	if (!s->increment)
+		s->increment = 1.0f;
+
+	s->curValue	= (int)ceil((value - s->baseValue) / s->increment);
+	s->curValue = min(max(s->curValue, 0), s->maxPos);
+}
+
+float MenuSlider_GetValue (menuslider_s *s)
+{
+	if (!s->increment)
+		s->increment = 1.0f;
+
+	return ((float)s->curValue * s->increment) + s->baseValue;
+}
+
+void MenuSlider_DoSlide (menuslider_s *s, int dir)
+{
+/*	s->curvalue += dir;
 
 	if (s->curvalue > s->maxvalue)
 		s->curvalue = s->maxvalue;
 	else if (s->curvalue < s->minvalue)
 		s->curvalue = s->minvalue;
+*/
+	s->curValue += dir;
+
+	s->curValue = min(max(s->curValue, 0), s->maxPos);
 
 	if (s->generic.callback)
 		s->generic.callback(s);
@@ -359,14 +380,17 @@ void Slider_DoSlide (menuslider_s *s, int dir)
 
 #define SLIDER_RANGE 10
 
-void Slider_Draw (menuslider_s *s)
+void MenuSlider_Draw (menuslider_s *s)
 {
-	int	i, alpha = mouseOverAlpha(&s->generic);
+	int		i, alpha = mouseOverAlpha(&s->generic);
+	float	tmpValue;
+	char	valueText[8];
 
 	Menu_DrawStringR2LDark (s->generic.x + s->generic.parent->x + LCOLUMN_OFFSET,
 							s->generic.y + s->generic.parent->y, s->generic.textSize, s->generic.name, alpha);
 
-	s->range = (s->curvalue - s->minvalue) / (float)(s->maxvalue - s->minvalue);
+//	s->range = (s->curvalue - s->minvalue) / (float)(s->maxvalue - s->minvalue);
+	s->range = (float)s->curValue / (float)s->maxPos;
 
 	if (s->range < 0)
 		s->range = 0;
@@ -385,9 +409,18 @@ void Slider_Draw (menuslider_s *s)
 
 	SCR_DrawChar (s->generic.x + s->generic.parent->x + s->generic.textSize*((SLIDER_RANGE-1)*s->range+1) + RCOLUMN_OFFSET,
 				s->generic.y + s->generic.parent->y, s->generic.textSize, ALIGN_CENTER, 131, FONT_UI, 255,255,255,255, false, true);
+
+	// draw value
+	tmpValue = s->curValue * s->increment + s->baseValue;
+	if (fabs((int)tmpValue - tmpValue) < 0.01f)
+		Com_sprintf (valueText, sizeof(valueText), "%i", (int)tmpValue);
+	else
+		Com_sprintf (valueText, sizeof(valueText), "%4.2f", tmpValue);
+	Menu_DrawString (s->generic.x + s->generic.parent->x + s->generic.textSize*SLIDER_RANGE + RCOLUMN_OFFSET + 2.5*MENU_FONT_SIZE,
+					s->generic.y + s->generic.parent->y + 1, MENU_FONT_SIZE-2, valueText, alpha);
 }
 
-void SpinControl_DoEnter (menulist_s *s)
+void MenuSpinControl_DoEnter (menulist_s *s)
 {
 	if (!s->itemnames || !s->numitemnames)
 		return;
@@ -400,7 +433,7 @@ void SpinControl_DoEnter (menulist_s *s)
 		s->generic.callback(s);
 }
 
-void SpinControl_DoSlide (menulist_s *s, int dir)
+void MenuSpinControl_DoSlide (menulist_s *s, int dir)
 {
 	if (!s->itemnames || !s->numitemnames)
 		return;
@@ -425,7 +458,7 @@ void SpinControl_DoSlide (menulist_s *s, int dir)
 		s->generic.callback(s);
 }
  
-void SpinControl_Draw (menulist_s *s)
+void MenuSpinControl_Draw (menulist_s *s)
 {
 	int alpha = mouseOverAlpha (&s->generic);
 	char buffer[100];
@@ -618,22 +651,22 @@ void Menu_Draw (menuframework_s *menu)
 		switch ( ((menucommon_s *)menu->items[i])->type )
 		{
 		case MTYPE_FIELD:
-			Field_Draw( ( menufield_s * )menu->items[i] );
+			MenuField_Draw ((menufield_s *)menu->items[i]);
 			break;
 		case MTYPE_SLIDER:
-			Slider_Draw( (menuslider_s *)menu->items[i] );
+			MenuSlider_Draw ((menuslider_s *)menu->items[i]);
 			break;
 		case MTYPE_LIST:
-			MenuList_Draw( (menulist_s *)menu->items[i] );
+			MenuList_Draw ((menulist_s *)menu->items[i]);
 			break;
 		case MTYPE_SPINCONTROL:
-			SpinControl_Draw( (menulist_s *)menu->items[i] );
+			MenuSpinControl_Draw ((menulist_s *)menu->items[i]);
 			break;
 		case MTYPE_ACTION:
-			Action_Draw( (menuaction_s *)menu->items[i] );
+			MenuAction_Draw ((menuaction_s *)menu->items[i]);
 			break;
 		case MTYPE_SEPARATOR:
-			Separator_Draw( (menuseparator_s *)menu->items[i] );
+			MenuSeparator_Draw ((menuseparator_s *)menu->items[i]);
 			break;
 		}
 	}
@@ -931,9 +964,9 @@ qboolean Menu_SelectItem (menuframework_s *s)
 		switch (item->type)
 		{
 		case MTYPE_FIELD:
-			return Field_DoEnter ( (menufield_s *)item ) ;
+			return MenuField_DoEnter ( (menufield_s *)item ) ;
 		case MTYPE_ACTION:
-			Action_DoEnter ( (menuaction_s *)item );
+			MenuAction_DoEnter ( (menuaction_s *)item );
 			return true;
 		case MTYPE_LIST:
 		//	Menulist_DoEnter ( (menulist_s *)item );
@@ -953,9 +986,9 @@ qboolean Menu_MouseSelectItem (menucommon_s *item)
 		switch (item->type)
 		{
 		case MTYPE_FIELD:
-			return Field_DoEnter ( (menufield_s *)item ) ;
+			return MenuField_DoEnter ( (menufield_s *)item ) ;
 		case MTYPE_ACTION:
-			Action_DoEnter ( (menuaction_s *)item );
+			MenuAction_DoEnter ( (menuaction_s *)item );
 			return true;
 		case MTYPE_LIST:
 		case MTYPE_SPINCONTROL:
@@ -979,10 +1012,10 @@ void Menu_SlideItem (menuframework_s *s, int dir)
 		switch (item->type)
 		{
 		case MTYPE_SLIDER:
-			Slider_DoSlide ((menuslider_s *) item, dir);
+			MenuSlider_DoSlide ((menuslider_s *) item, dir);
 			break;
 		case MTYPE_SPINCONTROL:
-			SpinControl_DoSlide ((menulist_s *) item, dir);
+			MenuSpinControl_DoSlide ((menulist_s *) item, dir);
 			break;
 		}
 	}
@@ -1190,7 +1223,7 @@ void UI_Think_MouseCursor (void)
 			if (cursor.menuitemtype == MENUITEM_SLIDER && !cursor.buttonused[MOUSEBUTTON1])
 			{
 			//	Menu_DragSlideItem(m, cursor.menuitem);
-				Menu_SlideItem(m, 1);
+				Menu_SlideItem (m, 1);
 				sound = menu_move_sound;
 				cursor.buttonused[MOUSEBUTTON1] = true;
 			}
@@ -1200,9 +1233,9 @@ void UI_Think_MouseCursor (void)
 				{
 				//	if (ui_item_rotate->value)					
 					if (ui_item_rotate->integer)					
-						Menu_SlideItem( m, -1 );
+						Menu_SlideItem (m, -1);
 					else			
-						Menu_SlideItem( m, 1 );
+						Menu_SlideItem (m, 1);
 
 					sound = menu_move_sound;
 					cursor.buttonused[MOUSEBUTTON1] = true;
@@ -1221,7 +1254,7 @@ void UI_Think_MouseCursor (void)
 			if (cursor.menuitemtype == MENUITEM_SLIDER && !cursor.buttonused[MOUSEBUTTON2])
 			{
 			//	Menu_ClickSlideItem(m, cursor.menuitem);
-				Menu_SlideItem(m, -1);
+				Menu_SlideItem (m, -1);
 				sound = menu_move_sound;
 				cursor.buttonused[MOUSEBUTTON2] = true;
 			}
@@ -1231,9 +1264,9 @@ void UI_Think_MouseCursor (void)
 				{
 				//	if (ui_item_rotate->value)					
 					if (ui_item_rotate->integer)					
-						Menu_SlideItem( m, 1 );
+						Menu_SlideItem (m, 1);
 					else			
-						Menu_SlideItem( m, -1 );
+						Menu_SlideItem (m, -1);
 
 					sound = menu_move_sound;
 					cursor.buttonused[MOUSEBUTTON2] = true;

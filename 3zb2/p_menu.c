@@ -14,7 +14,8 @@ void PMenu_Open(edict_t *ent, pmenu_t *entries, int cur, int num)
 		PMenu_Close(ent);
 	}
 
-	hnd = malloc(sizeof(*hnd));
+//	hnd = malloc(sizeof(*hnd));
+	hnd = gi.TagMalloc(sizeof(*hnd), TAG_LEVEL);	// Knightmare- use gi.TagMalloc for this!
 
 	hnd->entries = entries;
 	hnd->num = num;
@@ -47,7 +48,8 @@ void PMenu_Close(edict_t *ent)
 	if (!ent->client->menu)
 		return;
 
-	free(ent->client->menu);
+//	free(ent->client->menu);
+	gi.TagFree(ent->client->menu);	// Knightmare- use gi.TagFree for this!
 	ent->client->menu = NULL;
 	ent->client->showscores = false;
 }

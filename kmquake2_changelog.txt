@@ -54,6 +54,8 @@ Changes as of v0.20 update 8:
 
 - Added ignorenick/unignorenick and ignoretext/unignoretext client commands from Q2Pro.
 
+- Added display of numerical cvar value to sliders, making them more useable.
+
 - Screenshots now go up to 9999.
 
 - Removed size limit of 512x256 for .wal textures.  This fixes the "GL_Upload8: too large" error with 512x512 or larger .wal textures.

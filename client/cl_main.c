@@ -2006,9 +2006,9 @@ void CL_InitLocal (void)
 	// Psychospaz's changeable rail code
 	cl_railred = Cvar_Get ("cl_railred", "20", CVAR_ARCHIVE);
 	Cvar_SetDescription ("cl_railred", "Sets red color component of railgun trail.  Values range 0-255.");
-	cl_railgreen = Cvar_Get ("cl_railgreen", "50", CVAR_ARCHIVE);
+	cl_railgreen = Cvar_Get ("cl_railgreen", "48", CVAR_ARCHIVE);
 	Cvar_SetDescription ("cl_railgreen", "Sets green color component of railgun trail.  Values range 0-255.");
-	cl_railblue = Cvar_Get ("cl_railblue", "175", CVAR_ARCHIVE);
+	cl_railblue = Cvar_Get ("cl_railblue", "176", CVAR_ARCHIVE);
 	Cvar_SetDescription ("cl_railblue", "Sets blue color component of railgun trail.  Values range 0-255.");
 	cl_railtype = Cvar_Get ("cl_railtype", "0", CVAR_ARCHIVE);
 	Cvar_SetDescription ("cl_railtype", "Sets type of railgun trail.  0 = original spiral, 1 = solid beam, 2 = devrail.");

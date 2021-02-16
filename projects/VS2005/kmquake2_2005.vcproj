@@ -660,6 +660,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\ui\ui_utils.c"
+					>
+				</File>
+				<File
 					RelativePath="..\..\ui\ui_video.c"
 					>
 				</File>

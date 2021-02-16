@@ -20,7 +20,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 
-// ui_subsystem.c -- menu support/handling functions
+// ui_subsystem.c -- menu handling functions
 
 #include <ctype.h>
 #ifdef _WIN32
@@ -39,92 +39,6 @@ qboolean	m_entersound;		// play after drawing a frame, so caching
 
 void	(*m_drawfunc) (void);
 const char *(*m_keyfunc) (int key);
-
-/*
-=======================================================================
-
-SUPPORT ROUTINES
-
-=======================================================================
-*/
-
-#if 0
-/*
-=================
-FreeFileList
-=================
-*/
-void FreeFileList (char **list, int n)
-{
-	int i;
-
-	for (i = 0; i < n; i++)
-	{
-		if (list && list[i])
-		{
-			free(list[i]);
-			list[i] = 0;
-		}
-	}
-	free(list);
-}
-
-/*
-=================
-ItemInList
-=================
-*/
-qboolean ItemInList (char *check, int num, char **list)
-{
-	int i;
-	for (i=0;i<num;i++)
-		if (!Q_strcasecmp(check, list[i]))
-			return true;
-	return false;
-}
-
-/*
-=================
-InsertInList
-=================
-*/
-void InsertInList (char **list, char *insert, int len, int start)
-{
-	int i;
-	if (!list) return;
-
-	for (i=start; i<len; i++)
-	{
-		if (!list[i])
-		{
-			list[i] = strdup(insert);
-			return;
-		}
-	}
-	list[len] = strdup(insert);
-}
-#endif
-
-/*
-==========================
-IsValidImageFilename
-==========================
-*/
-qboolean IsValidImageFilename (char *name)
-{
-	int		len = (int)strlen(name);
-
-	if (	!strcmp(name+max(len-4,0), ".pcx")
-		||	!strcmp(name+max(len-4,0), ".tga")
-#ifdef PNG_SUPPORT
-		||	!strcmp(name+max(len-4,0), ".png")
-#endif	// PNG_SUPPORT
-		||  !strcmp(name+max(len-4,0), ".jpg")
-		 )
-		return true;
-
-	return false;
-}
 
 /*
 =======================================================================
@@ -336,7 +250,7 @@ const char *Default_MenuKey ( menuframework_s *m, int key )
 		{
 			if ( item->type == MTYPE_FIELD )
 			{
-				if ( Field_Key( ( menufield_s * ) item, key ) )
+				if ( MenuField_Key( ( menufield_s * ) item, key ) )
 					return NULL;
 			}
 		}
