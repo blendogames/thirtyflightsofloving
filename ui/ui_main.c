@@ -280,31 +280,31 @@ void UI_CheckMainMenuMouse (void)
 		UI_AddMainButton (&buttons[i], i, xoffset, ystart+(i*40+3), main_names[i]);
 
 	// Exit with double click 2nd mouse button
-	if (!cursor.buttonused[MOUSEBUTTON2] && cursor.buttonclicks[MOUSEBUTTON2]==2)
+	if (!ui_mousecursor.buttonused[MOUSEBUTTON2] && ui_mousecursor.buttonclicks[MOUSEBUTTON2]==2)
 	{
 		UI_PopMenu();
 		sound = menu_out_sound;
-		cursor.buttonused[MOUSEBUTTON2] = true;
-		cursor.buttonclicks[MOUSEBUTTON2] = 0;
+		ui_mousecursor.buttonused[MOUSEBUTTON2] = true;
+		ui_mousecursor.buttonclicks[MOUSEBUTTON2] = 0;
 	}
 
 	for (i=MAIN_ITEMS-1; i>=0; i--)
 	{
-		if (cursor.x>=buttons[i].min[0] && cursor.x<=buttons[i].max[0] &&
-			cursor.y>=buttons[i].min[1] && cursor.y<=buttons[i].max[1])
+		if ( (ui_mousecursor.x >= buttons[i].min[0]) && (ui_mousecursor.x <= buttons[i].max[0]) &&
+			(ui_mousecursor.y >= buttons[i].min[1]) && (ui_mousecursor.y <= buttons[i].max[1]) )
 		{
-			if (cursor.mouseaction)
+			if (ui_mousecursor.mouseaction)
 				m_main_cursor = i;
 
 			MainMenuMouseHover = 1 + i;
 
 			if (oldhover == MainMenuMouseHover && MainMenuMouseHover-1 == m_main_cursor &&
-				!cursor.buttonused[MOUSEBUTTON1] && cursor.buttonclicks[MOUSEBUTTON1]==1)
+				!ui_mousecursor.buttonused[MOUSEBUTTON1] && ui_mousecursor.buttonclicks[MOUSEBUTTON1]==1)
 			{
 				OpenMenuFromMain();
 				sound = menu_move_sound;
-				cursor.buttonused[MOUSEBUTTON1] = true;
-				cursor.buttonclicks[MOUSEBUTTON1] = 0;
+				ui_mousecursor.buttonused[MOUSEBUTTON1] = true;
+				ui_mousecursor.buttonclicks[MOUSEBUTTON1] = 0;
 			}
 			break;
 		}
@@ -312,12 +312,12 @@ void UI_CheckMainMenuMouse (void)
 
 	if (!MainMenuMouseHover)
 	{
-		cursor.buttonused[MOUSEBUTTON1] = false;
-		cursor.buttonclicks[MOUSEBUTTON1] = 0;
-		cursor.buttontime[MOUSEBUTTON1] = 0;
+		ui_mousecursor.buttonused[MOUSEBUTTON1] = false;
+		ui_mousecursor.buttonclicks[MOUSEBUTTON1] = 0;
+		ui_mousecursor.buttontime[MOUSEBUTTON1] = 0;
 	}
 
-	cursor.mouseaction = false;
+	ui_mousecursor.mouseaction = false;
 
 	if (sound)
 		S_StartLocalSound(sound);
@@ -363,7 +363,7 @@ const char *M_Main_Key (int key)
 
 	case K_KP_ENTER:
 	case K_ENTER:
-		m_entersound = true;
+		ui_entersound = true;
 
 		switch (m_main_cursor)
 		{

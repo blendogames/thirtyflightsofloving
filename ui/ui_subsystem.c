@@ -34,8 +34,9 @@ cvar_t	*ui_background_alpha;
 cvar_t	*ui_item_rotate;
 cvar_t	*ui_cursor_scale;
 
-qboolean	m_entersound;		// play after drawing a frame, so caching
+qboolean	ui_entersound;		// play after drawing a frame, so caching
 								// won't disrupt the sound
+qboolean	ui_initialized = false;	// whether UI subsystem has been initialized
 
 void	(*m_drawfunc) (void);
 const char *(*m_keyfunc) (int key);
@@ -127,12 +128,12 @@ From Q2max
 */
 void UI_RefreshCursorButtons (void)
 {
-	cursor.buttonused[MOUSEBUTTON1] = true;
-	cursor.buttondown[MOUSEBUTTON1] = false;
-	cursor.buttonclicks[MOUSEBUTTON1] = 0;
-	cursor.buttonused[MOUSEBUTTON2] = true;
-	cursor.buttondown[MOUSEBUTTON2] = false;
-	cursor.buttonclicks[MOUSEBUTTON2] = 0;
+	ui_mousecursor.buttonused[MOUSEBUTTON1] = true;
+	ui_mousecursor.buttondown[MOUSEBUTTON1] = false;
+	ui_mousecursor.buttonclicks[MOUSEBUTTON1] = 0;
+	ui_mousecursor.buttonused[MOUSEBUTTON2] = true;
+	ui_mousecursor.buttondown[MOUSEBUTTON2] = false;
+	ui_mousecursor.buttonclicks[MOUSEBUTTON2] = 0;
 }
 
 /*
@@ -174,7 +175,7 @@ void UI_PushMenu ( void (*draw) (void), const char *(*key) (int k) )
 	m_drawfunc = draw;
 	m_keyfunc = key;
 
-	m_entersound = true;
+	ui_entersound = true;
 
 	// Knightmare- added Psychospaz's mouse support
 	UI_RefreshCursorLink();
@@ -231,7 +232,11 @@ UI_BackMenu
 */
 void UI_BackMenu (void *unused)
 {
-	UI_PopMenu();
+	// We need to manually save changes for playerconfig menu here
+	if (m_drawfunc == PlayerConfig_MenuDraw)
+		M_PConfigSaveChanges ();
+
+	UI_PopMenu ();
 }
 
 /*
@@ -457,7 +462,12 @@ void UI_Init (void)
 	ui_cursor_scale = Cvar_Get ("ui_cursor_scale", "0.4", 0);
 	Cvar_SetDescription ("ui_cursor_scale", "Sets scale for drawing the menu mouse cursor.");
 
-	UI_LoadMapList();	// load map list
+	UI_LoadFontNames ();	// load font list
+//	UI_LoadHudNames ();		// load hud list
+	UI_LoadCrosshairs ();	// load crosshairs
+	UI_InitServerList ();	// init join server list
+	UI_LoadMapList();		// load map list
+	UI_LoadPlayerModels (); // load player models
 	UI_InitSavegameData ();	// load savegame data
 
 	UI_Precache ();		// precache images
@@ -484,6 +494,53 @@ void UI_Init (void)
 		Cmd_AddCommand ("menu_effects", M_Menu_Options_Effects_f);
 		Cmd_AddCommand ("menu_interface", M_Menu_Options_Interface_f);
 	Cmd_AddCommand ("menu_quit", M_Menu_Quit_f);
+
+	ui_initialized = true;
+}
+
+
+/*
+=================
+UI_Shutdown
+=================
+*/
+void UI_Shutdown (void)
+{
+	// Don't shutdown if not initialized
+	// Fixes errors in dedicated console
+	if (!ui_initialized)
+		return;
+
+	UI_FreeFontNames ();
+//	UI_FreeHudNames ();
+	UI_FreeCrosshairs ();
+	UI_FreeMapList ();
+	UI_FreePlayerModels ();
+
+	Cmd_RemoveCommand ("menu_main");
+	Cmd_RemoveCommand ("menu_game");
+	Cmd_RemoveCommand ("menu_loadgame");
+	Cmd_RemoveCommand ("menu_savegame");
+	Cmd_RemoveCommand ("menu_credits");
+	Cmd_RemoveCommand ("menu_multiplayer");
+	Cmd_RemoveCommand ("menu_joinserver");
+	Cmd_RemoveCommand ("menu_addressbook");
+	Cmd_RemoveCommand ("menu_startserver");
+	Cmd_RemoveCommand ("menu_dmoptions");
+	Cmd_RemoveCommand ("menu_playerconfig");
+	Cmd_RemoveCommand ("menu_downloadoptions");
+	Cmd_RemoveCommand ("menu_video");
+	Cmd_RemoveCommand ("menu_video_advanced");
+	Cmd_RemoveCommand ("menu_options");
+	Cmd_RemoveCommand ("menu_sound");
+	Cmd_RemoveCommand ("menu_controls");
+	Cmd_RemoveCommand ("menu_keys");
+	Cmd_RemoveCommand ("menu_screen");
+	Cmd_RemoveCommand ("menu_effects");
+	Cmd_RemoveCommand ("menu_interface");
+	Cmd_RemoveCommand ("menu_quit");
+
+	ui_initialized = false;
 }
 
 
@@ -524,10 +581,10 @@ void UI_Draw (void)
 	// delay playing the enter sound until after the
 	// menu has been drawn, to avoid delay while
 	// caching images
-	if (m_entersound)
+	if (ui_entersound)
 	{
 		S_StartLocalSound( menu_in_sound );
-		m_entersound = false;
+		ui_entersound = false;
 	}
 
 	// Knigthmare- added Psychospaz's mouse support

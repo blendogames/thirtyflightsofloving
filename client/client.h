@@ -1141,6 +1141,7 @@ void CL_LocHelp_f (void);
 // menus
 //
 void UI_Init (void);
+void UI_Shutdown (void);
 void UI_Keydown (int key);
 void UI_Draw (void);
 void UI_ForceMenuOff (void);

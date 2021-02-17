@@ -251,7 +251,7 @@ static const char *Keys_MenuKey (int key)
 	menuaction_s *item = ( menuaction_s * ) Menu_ItemAtCursor( &s_keys_menu );
 
 	//pressing mouse1 to pick a new bind wont force bind/unbind itself - spaz
-	if ( bind_grab && !(cursor.buttonused[MOUSEBUTTON1]&&key==K_MOUSE1))
+	if ( bind_grab && !(ui_mousecursor.buttonused[MOUSEBUTTON1]&&key==K_MOUSE1))
 	{	
 		if ( key != K_ESCAPE && key != '`' )
 		{
@@ -264,10 +264,10 @@ static const char *Keys_MenuKey (int key)
 		//  Knightmare- added Psychospaz's mouse support
 		//dont let selecting with mouse buttons screw everything up
 		UI_RefreshCursorButtons();
-		if (key==K_MOUSE1)
-			cursor.buttonclicks[MOUSEBUTTON1] = -1;
+		if (key == K_MOUSE1)
+			ui_mousecursor.buttonclicks[MOUSEBUTTON1] = -1;
 
-		Menu_SetStatusBar( &s_keys_menu, "enter to change, backspace to clear" );
+		Menu_SetStatusBar (&s_keys_menu, "enter to change, backspace to clear");
 		bind_grab = false;
 		return menu_out_sound;
 	}

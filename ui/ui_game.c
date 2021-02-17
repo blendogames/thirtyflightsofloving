@@ -50,44 +50,28 @@ static menuaction_s		s_credits_action;
 static menuseparator_s	s_blankline;
 static menuaction_s		s_game_back_action;
 
-static void StartGame( void )
-{
-	// disable updates and start the cinematic going
-	cl.servercount = -1;
-	UI_ForceMenuOff ();
-	Cvar_SetValue( "deathmatch", 0 );
-	Cvar_SetValue( "coop", 0 );
-	Cvar_SetValue( "gamerules", 0 );		//PGM
-
-//	Cbuf_AddText ("loading ; killserver ; wait ; newgame\n");
-	if (cls.state != ca_disconnected) // don't force loadscreen if disconnected
-		Cbuf_AddText ("loading ; killserver ; wait\n");
-	Cbuf_AddText ("newgame\n");
-	cls.key_dest = key_game;
-}
-
 static void EasyGameFunc( void *data )
 {
 	Cvar_ForceSet( "skill", "0" );
-	StartGame();
+	UIStartSPGame ();
 }
 
 static void MediumGameFunc( void *data )
 {
 	Cvar_ForceSet( "skill", "1" );
-	StartGame();
+	UIStartSPGame ();
 }
 
 static void HardGameFunc( void *data )
 {
 	Cvar_ForceSet( "skill", "2" );
-	StartGame();
+	UIStartSPGame ();
 }
 
 static void NitemareGameFunc( void *data )
 {
 	Cvar_ForceSet( "skill", "3" );
-	StartGame();
+	UIStartSPGame ();
 }
 
 static void LoadGameFunc( void *unused )

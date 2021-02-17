@@ -54,7 +54,7 @@ extern viddef_t viddef;
 
 int mouseOverAlpha (menucommon_s *m)
 {
-	if (cursor.menuitem == m)
+	if (ui_mousecursor.menuitem == m)
 	{
 		int alpha;
 
@@ -349,8 +349,8 @@ void MenuSlider_SetValue (menuslider_s *s, float value)
 	if (!s->increment)
 		s->increment = 1.0f;
 
-	s->curValue	= (int)ceil((value - s->baseValue) / s->increment);
-	s->curValue = min(max(s->curValue, 0), s->maxPos);
+	s->curPos	= (int)ceil((value - s->baseValue) / s->increment);
+	s->curPos = min(max(s->curPos, 0), s->maxPos);
 }
 
 float MenuSlider_GetValue (menuslider_s *s)
@@ -358,7 +358,7 @@ float MenuSlider_GetValue (menuslider_s *s)
 	if (!s->increment)
 		s->increment = 1.0f;
 
-	return ((float)s->curValue * s->increment) + s->baseValue;
+	return ((float)s->curPos * s->increment) + s->baseValue;
 }
 
 void MenuSlider_DoSlide (menuslider_s *s, int dir)
@@ -370,9 +370,9 @@ void MenuSlider_DoSlide (menuslider_s *s, int dir)
 	else if (s->curvalue < s->minvalue)
 		s->curvalue = s->minvalue;
 */
-	s->curValue += dir;
+	s->curPos += dir;
 
-	s->curValue = min(max(s->curValue, 0), s->maxPos);
+	s->curPos = min(max(s->curPos, 0), s->maxPos);
 
 	if (s->generic.callback)
 		s->generic.callback(s);
@@ -389,8 +389,13 @@ void MenuSlider_Draw (menuslider_s *s)
 	Menu_DrawStringR2LDark (s->generic.x + s->generic.parent->x + LCOLUMN_OFFSET,
 							s->generic.y + s->generic.parent->y, s->generic.textSize, s->generic.name, alpha);
 
+	if (!s->maxPos)
+		s->maxPos = 1;
+	if (!s->increment)
+		s->increment = 1.0f;
+
 //	s->range = (s->curvalue - s->minvalue) / (float)(s->maxvalue - s->minvalue);
-	s->range = (float)s->curValue / (float)s->maxPos;
+	s->range = (float)s->curPos / (float)s->maxPos;
 
 	if (s->range < 0)
 		s->range = 0;
@@ -411,7 +416,7 @@ void MenuSlider_Draw (menuslider_s *s)
 				s->generic.y + s->generic.parent->y, s->generic.textSize, ALIGN_CENTER, 131, FONT_UI, 255,255,255,255, false, true);
 
 	// draw value
-	tmpValue = s->curValue * s->increment + s->baseValue;
+	tmpValue = s->curPos * s->increment + s->baseValue;
 	if (fabs((int)tmpValue - tmpValue) < 0.01f)
 		Com_sprintf (valueText, sizeof(valueText), "%i", (int)tmpValue);
 	else
@@ -675,11 +680,11 @@ void Menu_Draw (menuframework_s *menu)
 	//
 	// now check mouseovers - psychospaz
 	//
-	cursor.menu = menu;
+	ui_mousecursor.menu = menu;
 
-	if (cursor.mouseaction)
+	if (ui_mousecursor.mouseaction)
 	{
-		menucommon_s *lastitem = cursor.menuitem;
+		menucommon_s *lastitem = ui_mousecursor.menuitem;
 		UI_RefreshCursorLink();
 
 		for (i = menu->nitems; i >= 0 ; i--)
@@ -773,10 +778,10 @@ void Menu_Draw (menuframework_s *menu)
 					continue;
 			}
 
-			if (cursor.x>=min[0] && 
-				cursor.x<=max[0] &&
-				cursor.y>=min[1] && 
-				cursor.y<=max[1])
+			if (ui_mousecursor.x >= min[0] && 
+				ui_mousecursor.x <= max[0] &&
+				ui_mousecursor.y >= min[1] && 
+				ui_mousecursor.y <= max[1])
 			{
 				// new item
 				if (lastitem!=item)
@@ -785,13 +790,13 @@ void Menu_Draw (menuframework_s *menu)
 
 					for (j=0; j<MENU_CURSOR_BUTTON_MAX; j++)
 					{
-						cursor.buttonclicks[j] = 0;
-						cursor.buttontime[j] = 0;
+						ui_mousecursor.buttonclicks[j] = 0;
+						ui_mousecursor.buttontime[j] = 0;
 					}
 				}
 
-				cursor.menuitem = item;
-				cursor.menuitemtype = type;
+				ui_mousecursor.menuitem = item;
+				ui_mousecursor.menuitemtype = type;
 				
 				menu->cursor = i;
 
@@ -800,7 +805,7 @@ void Menu_Draw (menuframework_s *menu)
 		}
 	}
 
-	cursor.mouseaction = false;
+	ui_mousecursor.mouseaction = false;
 	// end mouseover code
 
 	item = Menu_ItemAtCursor(menu);
@@ -1063,7 +1068,7 @@ UI_RefreshCursorMenu
 */
 void UI_RefreshCursorMenu (void)
 {
-	cursor.menu = NULL;
+	ui_mousecursor.menu = NULL;
 }
 
 /*
@@ -1073,7 +1078,7 @@ UI_RefreshCursorLink
 */
 void UI_RefreshCursorLink (void)
 {
-	cursor.menuitem = NULL;
+	ui_mousecursor.menuitem = NULL;
 }
 
 #if 0
@@ -1180,7 +1185,7 @@ UI_Think_MouseCursor
 void UI_Think_MouseCursor (void)
 {
 	char * sound = NULL;
-	menuframework_s *m = (menuframework_s *)cursor.menu;
+	menuframework_s *m = (menuframework_s *)ui_mousecursor.menu;
 
 	if (m_drawfunc == M_Main_Draw) // have to hack for main menu :p
 	{
@@ -1189,12 +1194,12 @@ void UI_Think_MouseCursor (void)
 	}
 	if (m_drawfunc == M_Credits_MenuDraw) // have to hack for credits :p
 	{
-		if (cursor.buttonclicks[MOUSEBUTTON2])
+		if (ui_mousecursor.buttonclicks[MOUSEBUTTON2])
 		{
-			cursor.buttonused[MOUSEBUTTON2] = true;
-			cursor.buttonclicks[MOUSEBUTTON2] = 0;
-			cursor.buttonused[MOUSEBUTTON1] = true;
-			cursor.buttonclicks[MOUSEBUTTON1] = 0;
+			ui_mousecursor.buttonused[MOUSEBUTTON2] = true;
+			ui_mousecursor.buttonclicks[MOUSEBUTTON2] = 0;
+			ui_mousecursor.buttonused[MOUSEBUTTON1] = true;
+			ui_mousecursor.buttonclicks[MOUSEBUTTON1] = 0;
 			S_StartLocalSound( menu_out_sound );
 			if (creditsBuffer)
 				FS_FreeFile (creditsBuffer);
@@ -1215,21 +1220,21 @@ void UI_Think_MouseCursor (void)
 
 	// Exit with double click 2nd mouse button
 
-	if (cursor.menuitem)
+	if (ui_mousecursor.menuitem)
 	{
 		// MOUSE1
-		if (cursor.buttondown[MOUSEBUTTON1])
+		if (ui_mousecursor.buttondown[MOUSEBUTTON1])
 		{
-			if (cursor.menuitemtype == MENUITEM_SLIDER && !cursor.buttonused[MOUSEBUTTON1])
+			if (ui_mousecursor.menuitemtype == MENUITEM_SLIDER && !ui_mousecursor.buttonused[MOUSEBUTTON1])
 			{
-			//	Menu_DragSlideItem(m, cursor.menuitem);
+			//	Menu_DragSlideItem(m, ui_mousecursor.menuitem);
 				Menu_SlideItem (m, 1);
 				sound = menu_move_sound;
-				cursor.buttonused[MOUSEBUTTON1] = true;
+				ui_mousecursor.buttonused[MOUSEBUTTON1] = true;
 			}
-			else if (!cursor.buttonused[MOUSEBUTTON1] && cursor.buttonclicks[MOUSEBUTTON1])
+			else if (!ui_mousecursor.buttonused[MOUSEBUTTON1] && ui_mousecursor.buttonclicks[MOUSEBUTTON1])
 			{
-				if (cursor.menuitemtype == MENUITEM_ROTATE)
+				if (ui_mousecursor.menuitemtype == MENUITEM_ROTATE)
 				{
 				//	if (ui_item_rotate->value)					
 					if (ui_item_rotate->integer)					
@@ -1238,29 +1243,29 @@ void UI_Think_MouseCursor (void)
 						Menu_SlideItem (m, 1);
 
 					sound = menu_move_sound;
-					cursor.buttonused[MOUSEBUTTON1] = true;
+					ui_mousecursor.buttonused[MOUSEBUTTON1] = true;
 				}
 				else
 				{
-					cursor.buttonused[MOUSEBUTTON1] = true;
-					Menu_MouseSelectItem( cursor.menuitem );
+					ui_mousecursor.buttonused[MOUSEBUTTON1] = true;
+					Menu_MouseSelectItem( ui_mousecursor.menuitem );
 					sound = menu_move_sound;
 				}
 			}
 		}
 		// MOUSE2
-		if (cursor.buttondown[MOUSEBUTTON2] && cursor.buttonclicks[MOUSEBUTTON2])
+		if (ui_mousecursor.buttondown[MOUSEBUTTON2] && ui_mousecursor.buttonclicks[MOUSEBUTTON2])
 		{
-			if (cursor.menuitemtype == MENUITEM_SLIDER && !cursor.buttonused[MOUSEBUTTON2])
+			if (ui_mousecursor.menuitemtype == MENUITEM_SLIDER && !ui_mousecursor.buttonused[MOUSEBUTTON2])
 			{
-			//	Menu_ClickSlideItem(m, cursor.menuitem);
+			//	Menu_ClickSlideItem(m, ui_mousecursor.menuitem);
 				Menu_SlideItem (m, -1);
 				sound = menu_move_sound;
-				cursor.buttonused[MOUSEBUTTON2] = true;
+				ui_mousecursor.buttonused[MOUSEBUTTON2] = true;
 			}
-			else if (!cursor.buttonused[MOUSEBUTTON2])
+			else if (!ui_mousecursor.buttonused[MOUSEBUTTON2])
 			{
-				if (cursor.menuitemtype == MENUITEM_ROTATE)
+				if (ui_mousecursor.menuitemtype == MENUITEM_ROTATE)
 				{
 				//	if (ui_item_rotate->value)					
 					if (ui_item_rotate->integer)					
@@ -1269,24 +1274,25 @@ void UI_Think_MouseCursor (void)
 						Menu_SlideItem (m, -1);
 
 					sound = menu_move_sound;
-					cursor.buttonused[MOUSEBUTTON2] = true;
+					ui_mousecursor.buttonused[MOUSEBUTTON2] = true;
 				}
 			}
 		}
 	}
-	else if (!cursor.buttonused[MOUSEBUTTON2] && (cursor.buttonclicks[MOUSEBUTTON2] == 2)
-		&& cursor.buttondown[MOUSEBUTTON2])
+	else if (!ui_mousecursor.buttonused[MOUSEBUTTON2] && (ui_mousecursor.buttonclicks[MOUSEBUTTON2] == 2)
+		&& ui_mousecursor.buttondown[MOUSEBUTTON2])
 	{
-		if (m_drawfunc==PlayerConfig_MenuDraw)
-			PConfigAccept();
+		// We need to manually save changes for playerconfig menu here
+		if (m_drawfunc == PlayerConfig_MenuDraw)
+			M_PConfigSaveChanges ();
 
-		UI_PopMenu();
+		UI_PopMenu ();
 
 		sound = menu_out_sound;
-		cursor.buttonused[MOUSEBUTTON2] = true;
-		cursor.buttonclicks[MOUSEBUTTON2] = 0;
-		cursor.buttonused[MOUSEBUTTON1] = true;
-		cursor.buttonclicks[MOUSEBUTTON1] = 0;
+		ui_mousecursor.buttonused[MOUSEBUTTON2] = true;
+		ui_mousecursor.buttonclicks[MOUSEBUTTON2] = 0;
+		ui_mousecursor.buttonused[MOUSEBUTTON1] = true;
+		ui_mousecursor.buttonclicks[MOUSEBUTTON1] = 0;
 	}
 
 	// clicking on the player model menu...
@@ -1319,7 +1325,7 @@ void UI_Draw_Cursor (void)
 	ofs_x = SCR_ScaledScreen(w) * ui_cursor_scale->value * 0.5;
 	ofs_y = SCR_ScaledScreen(h) * ui_cursor_scale->value * 0.5;
 	
-	R_DrawScaledPic (cursor.x - ofs_x, cursor.y - ofs_y, scale, 1.0f, cur_img);
+	R_DrawScaledPic (ui_mousecursor.x - ofs_x, ui_mousecursor.y - ofs_y, scale, 1.0f, cur_img);
 }
 #else
 void UI_Draw_Cursor (void)

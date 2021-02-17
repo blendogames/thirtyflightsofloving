@@ -105,7 +105,7 @@ qboolean vidmode_ext = false;
 
 static Time myxtime;
 
-extern cursor_t cursor;
+extern cursor_t ui_mousecursor;
 
 qboolean have_stencil = false; //Knightmare 12/24/2001- stencil shadows
 
@@ -397,20 +397,21 @@ void HandleEvents(void)
 
 			case ButtonPress:
 				myxtime = event.xbutton.time;	
-				if (event.xbutton.button) {
-					if (Sys_Milliseconds()-cursor.buttontime[mouse_button] < multiclicktime)
-						cursor.buttonclicks[mouse_button] += 1;
+				if (event.xbutton.button)
+				{
+					if (Sys_Milliseconds() - ui_mousecursor.buttontime[mouse_button] < multiclicktime)
+						ui_mousecursor.buttonclicks[mouse_button] += 1;
 					else
-						cursor.buttonclicks[mouse_button] = 1;
+						ui_mousecursor.buttonclicks[mouse_button] = 1;
 
-				if (cursor.buttonclicks[mouse_button]>3)
-					cursor.buttonclicks[mouse_button] = 3;
+					if (ui_mousecursor.buttonclicks[mouse_button] > 3)
+						ui_mousecursor.buttonclicks[mouse_button] = 3;
 
-				cursor.buttontime[mouse_button] = Sys_Milliseconds();
+					ui_mousecursor.buttontime[mouse_button] = Sys_Milliseconds();
 
-				cursor.buttondown[mouse_button] = true;
-				cursor.buttonused[mouse_button] = false;
-				cursor.mouseaction = true;
+					ui_mousecursor.buttondown[mouse_button] = true;
+					ui_mousecursor.buttonused[mouse_button] = false;
+					ui_mousecursor.mouseaction = true;
 				}
 				if (event.xbutton.button == 1) Key_Event(K_MOUSE1, 1, Sys_Milliseconds());
 				else if (event.xbutton.button == 2) Key_Event(K_MOUSE3, 1, Sys_Milliseconds());
@@ -422,9 +423,9 @@ void HandleEvents(void)
 
 			case ButtonRelease:
 				if (event.xbutton.button) {
-					cursor.buttondown[mouse_button] = false;
-					cursor.buttonused[mouse_button] = false;
-					cursor.mouseaction = true;
+					ui_mousecursor.buttondown[mouse_button] = false;
+					ui_mousecursor.buttonused[mouse_button] = false;
+					ui_mousecursor.mouseaction = true;
 				}
 				if (event.xbutton.button == 1) Key_Event(K_MOUSE1, 0, Sys_Milliseconds());
 				else if (event.xbutton.button == 2) Key_Event(K_MOUSE3, 0, Sys_Milliseconds());

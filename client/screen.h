@@ -102,6 +102,7 @@ extern	int			crosshair_width, crosshair_height;
 // cl_screen.c
 //
 void	SCR_Init (void);
+void	SCR_Shutdown (void);
 void	SCR_UpdateScreen (void);
 
 void	SCR_SizeUp (void);

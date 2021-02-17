@@ -103,21 +103,19 @@ Crosshair loading
 =======================================================================
 */
 
-#define MAX_CROSSHAIRS 100
-char **crosshair_names = NULL;
-int	numcrosshairs = 0;
-
 /*static void OldCrosshairFunc( void *unused )
 {
 	Cvar_SetValue( "crosshair", s_options_crosshair_box.curvalue );
 }*/
 
-static void CrosshairFunc( void *unused )
+static void CrosshairFunc (void *unused)
 {
 	if (s_options_screen_crosshair_box.curvalue == 0) {
-		Cvar_SetValue( "crosshair", 0); return; }
+		Cvar_SetValue( "crosshair", 0);
+		return;
+	}
 	else
-		Cvar_SetValue( "crosshair", atoi(strdup(crosshair_names[s_options_screen_crosshair_box.curvalue]+2)) );
+		Cvar_SetValue( "crosshair", atoi(strdup(ui_crosshair_names[s_options_screen_crosshair_box.curvalue]+2)) );
 }
 
 void SetCrosshairCursor (void)
@@ -125,210 +123,15 @@ void SetCrosshairCursor (void)
 	int i;
 	s_options_screen_crosshair_box.curvalue = 0;
 
-	if (numcrosshairs > 1)
-		for (i=0; crosshair_names[i]; i++)
+	if (ui_numcrosshairs > 1)
+		for (i=0; ui_crosshair_names[i]; i++)
 		{
-			if (!Q_strcasecmp(va("ch%i", (int)Cvar_VariableValue("crosshair")), crosshair_names[i]))
+			if (!Q_strcasecmp(va("ch%i", (int)Cvar_VariableValue("crosshair")), ui_crosshair_names[i]))
 			{
 				s_options_screen_crosshair_box.curvalue = i;
 				return;
 			}
 		}
-}
-
-void sortCrosshairs (char **list, int len)
-{
-	int			i, j;
-	char		*temp;
-	qboolean	moved;
-
-	if (!list || len < 2)
-		return;
-
-	for (i=(len-1); i>0; i--)
-	{
-		moved = false;
-		for (j=0; j<i; j++)
-		{
-			if (!list[j]) break;
-			if ( atoi(strdup(list[j]+2)) > atoi(strdup(list[j+1]+2)) )
-			{
-				temp = list[j];
-				list[j] = list[j+1];
-				list[j+1] = temp;
-				moved = true;
-			}
-		}
-		if (!moved) break; // done sorting
-	}
-}
-
-char **SetCrosshairNames (void)
-{
-	char *curCrosshair;
-	char **list = 0, *p;
-//	char findname[1024];
-	int ncrosshairs = 0, ncrosshairnames;
-	char **crosshairfiles;
-	char *path = NULL;
-	int i;
-
-	list = malloc( sizeof( char * ) * MAX_CROSSHAIRS+1 );
-	memset( list, 0, sizeof( char * ) * MAX_CROSSHAIRS+1 );
-
-	list[0] = strdup("none"); // was default
-	ncrosshairnames = 1;
-
-#if 1
-	crosshairfiles = FS_GetFileList("pics/ch*.*", NULL,  &ncrosshairs);
-	for (i=0; i<ncrosshairs && ncrosshairnames < MAX_CROSSHAIRS; i++)
-	{
-		int	num, namelen;
-
-		if ( !crosshairfiles || !crosshairfiles[i] )
-			continue;
-
-		if ( !IsValidImageFilename(crosshairfiles[i]) )
-			continue;
-
-		p = strrchr(crosshairfiles[i], '/'); p++;
-
-		// filename must be chxxx
-		if (strncmp(p, "ch", 2))
-			continue;
-		namelen = (int)strlen(strdup(p));
-		if (namelen < 7 || namelen > 9)
-			continue;
-		if (!isNumeric(p[2]))
-			continue;
-		if (namelen >= 8 && !isNumeric(p[3]))
-			continue;
-		// ch100 is only valid 5-char name
-		if (namelen == 9 && (p[2] != '1' || p[3] != '0' || p[4] != '0'))
-			continue;
-
-		num = (int)strlen(p)-4;
-		p[num] = 0; //NULL;
-
-		curCrosshair = p;
-
-		if (!FS_ItemInList(curCrosshair, ncrosshairnames, list))
-		{
-			FS_InsertInList(list, strdup(curCrosshair), ncrosshairnames, 1);	// i=1 so none stays first!
-			ncrosshairnames++;
-		}
-		
-		//set back so whole string get deleted.
-		p[num] = '.';
-	}
-#else
-	path = FS_NextPath( path );
-	while (path) 
-	{
-		Com_sprintf( findname, sizeof(findname), "%s/pics/ch*.*", path );
-		crosshairfiles = FS_ListFiles( findname, &ncrosshairs, 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM );
-
-		for (i=0; i < ncrosshairs && ncrosshairnames < MAX_CROSSHAIRS; i++)
-		{
-			int num, namelen;
-
-			if (!crosshairfiles || !crosshairfiles[i])
-				continue;
-
-			if ( !IsValidImageFilename(crosshairfiles[i]) )
-				continue;
-
-			p = strrchr(crosshairfiles[i], '/'); p++;
-
-			// filename must be chxxx
-			if (strncmp(p, "ch", 2)) 
-				continue;
-			namelen = (int)strlen(strdup(p));
-			if (namelen < 7 || namelen > 9)
-				continue;
-			if (!isNumeric(p[2]))
-				continue;
-			if (namelen >= 8 && !isNumeric(p[3]))
-				continue;
-			// ch100 is only valid 5-char name
-			if (namelen == 9 && (p[2] != '1' || p[3] != '0' || p[4] != '0'))
-				continue;
-
-			num = (int)strlen(p)-4;
-			p[num] = 0; //NULL;
-
-			curCrosshair = p;
-
-			if (!FS_ItemInList(curCrosshair, ncrosshairnames, list))
-			{
-				FS_InsertInList(list, strdup(curCrosshair), ncrosshairnames, 1);	//i=1 so none stays first!
-				ncrosshairnames++;
-			}
-			
-			//set back so whole string get deleted.
-			p[num] = '.';
-		}
-		if (ncrosshairs)
-			FS_FreeFileList( crosshairfiles, ncrosshairs );
-		
-		path = FS_NextPath( path );
-	}
-
-	// check pak after
-	if (crosshairfiles = FS_ListPak("pics/", &ncrosshairs))
-	{
-		for (i=0; i<ncrosshairs && ncrosshairnames < MAX_CROSSHAIRS; i++)
-		{
-			int num, namelen;
-
-			if (!crosshairfiles || !crosshairfiles[i])
-				continue;
-
-			if ( !IsValidImageFilename(crosshairfiles[i]) )
-				continue;
-
-			p = strrchr(crosshairfiles[i], '/'); p++;
-
-			// filename must be chxxx
-			if (strncmp(p, "ch", 2))
-				continue;
-			namelen = (int)strlen(strdup(p));
-			if (namelen < 7 || namelen > 9)
-				continue;
-			if (!isNumeric(p[2]))
-				continue;
-			if (namelen >= 8 && !isNumeric(p[3]))
-				continue;
-			// ch100 is only valid 5-char name
-			if (namelen == 9 && (p[2] != '1' || p[3] != '0' || p[4] != '0'))
-				continue;
-
-			num = (int)strlen(p)-4;
-			p[num] = 0; //NULL;
-
-			curCrosshair = p;
-
-			if (!FS_ItemInList(curCrosshair, ncrosshairnames, list))
-			{
-				FS_InsertInList(list, strdup(curCrosshair), ncrosshairnames, 1);	//i=1 so none stays first!
-				ncrosshairnames++;
-			}
-			
-			//set back so whole string get deleted.
-			p[num] = '.';
-		}
-	}
-#endif
-
-	// sort the list
-	sortCrosshairs (list, ncrosshairnames);
-
-	if (ncrosshairs)
-		FS_FreeFileList( crosshairfiles, ncrosshairs );
-
-	numcrosshairs = ncrosshairnames;
-
-	return list;		
 }
 
 //=======================================================================
@@ -401,19 +204,22 @@ void Options_Screen_MenuInit ( void )
 	s_options_screen_header.generic.x			= MENU_HEADER_FONT_SIZE/2 * (int)strlen(s_options_screen_header.generic.name);
 	s_options_screen_header.generic.y			= -2*MENU_LINE_SIZE;	// 0
 
+#if 0
 	// free any loaded crosshairs to prevent memory leak
-	if (numcrosshairs > 0) {
-		FS_FreeFileList (crosshair_names, numcrosshairs);
+	if (ui_numcrosshairs > 0) {
+		FS_FreeFileList (ui_crosshair_names, ui_numcrosshairs);
 	}
-	numcrosshairs = 0;
-	crosshair_names = SetCrosshairNames ();
+	ui_numcrosshairs = 0;
+	ui_crosshair_names = UI_SetCrosshairNames ();
+#endif
+
 	s_options_screen_crosshair_box.generic.type				= MTYPE_SPINCONTROL;
 	s_options_screen_crosshair_box.generic.textSize			= MENU_FONT_SIZE;
 	s_options_screen_crosshair_box.generic.x				= 0;
 	s_options_screen_crosshair_box.generic.y				= y;
 	s_options_screen_crosshair_box.generic.name				= "crosshair";
 	s_options_screen_crosshair_box.generic.callback			= CrosshairFunc;
-	s_options_screen_crosshair_box.itemnames				= crosshair_names;
+	s_options_screen_crosshair_box.itemnames				= ui_crosshair_names;
 	s_options_screen_crosshair_box.generic.statusbar		= "changes crosshair";
 
 	// Psychospaz's changeable size crosshair
@@ -547,31 +353,31 @@ void MenuCrosshair_MouseClick ( void )
 
 	UI_AddButton (&crosshairbutton, 0, button_x, button_y, button_size, button_size);
 
-	if (cursor.x>=crosshairbutton.min[0] && cursor.x<=crosshairbutton.max[0] &&
-		cursor.y>=crosshairbutton.min[1] && cursor.y<=crosshairbutton.max[1])
+	if ( (ui_mousecursor.x >= crosshairbutton.min[0]) && (ui_mousecursor.x <= crosshairbutton.max[0]) &&
+		(ui_mousecursor.y >= crosshairbutton.min[1]) && (ui_mousecursor.y <= crosshairbutton.max[1]) )
 	{
-		if (!cursor.buttonused[MOUSEBUTTON1] && (cursor.buttonclicks[MOUSEBUTTON1] == 1) )
+		if (!ui_mousecursor.buttonused[MOUSEBUTTON1] && (ui_mousecursor.buttonclicks[MOUSEBUTTON1] == 1) )
 		{
 			s_options_screen_crosshair_box.curvalue++;
-			if (s_options_screen_crosshair_box.curvalue > numcrosshairs-1)
+			if (s_options_screen_crosshair_box.curvalue > ui_numcrosshairs-1)
 				s_options_screen_crosshair_box.curvalue = 0; // wrap around
 			CrosshairFunc (NULL);
 
-			cursor.buttonused[MOUSEBUTTON1] = true;
-			cursor.buttonclicks[MOUSEBUTTON1] = 0;
+			ui_mousecursor.buttonused[MOUSEBUTTON1] = true;
+			ui_mousecursor.buttonclicks[MOUSEBUTTON1] = 0;
 			sound = menu_move_sound;
 			if ( sound )
 				S_StartLocalSound( sound );
 		}
-		if (!cursor.buttonused[MOUSEBUTTON2] && (cursor.buttonclicks[MOUSEBUTTON2] == 1) )
+		if (!ui_mousecursor.buttonused[MOUSEBUTTON2] && (ui_mousecursor.buttonclicks[MOUSEBUTTON2] == 1) )
 		{
 			s_options_screen_crosshair_box.curvalue--;
 			if (s_options_screen_crosshair_box.curvalue < 0)
-				s_options_screen_crosshair_box.curvalue = numcrosshairs-1; // wrap around
+				s_options_screen_crosshair_box.curvalue = ui_numcrosshairs-1; // wrap around
 			CrosshairFunc (NULL);
 
-			cursor.buttonused[MOUSEBUTTON2] = true;
-			cursor.buttonclicks[MOUSEBUTTON2] = 0;
+			ui_mousecursor.buttonused[MOUSEBUTTON2] = true;
+			ui_mousecursor.buttonclicks[MOUSEBUTTON2] = 0;
 			sound = menu_move_sound;
 			if ( sound )
 				S_StartLocalSound( sound );
@@ -590,7 +396,7 @@ void DrawMenuCrosshair (void)
 		return;
 
 	SCR_DrawPic (SCREEN_WIDTH*0.5-16, s_options_screen_menu.y + 44,
-					32, 32, ALIGN_CENTER, crosshair_names[s_options_screen_crosshair_box.curvalue], 1.0);
+					32, 32, ALIGN_CENTER, ui_crosshair_names[s_options_screen_crosshair_box.curvalue], 1.0);
 }
 
 void Options_Screen_MenuDraw (void)

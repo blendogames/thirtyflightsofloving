@@ -37,7 +37,7 @@ cvar_t	*in_dgamouse;
 cvar_t	*autosensitivity;
 cvar_t	*in_menumouse; /// FIXME Menu Mouse on windowed mode 
 
-extern cursor_t cursor;
+extern cursor_t ui_mousecursor;
 
 void UI_RefreshCursorMenu (void);
 void UI_RefreshCursorLink (void);
@@ -126,19 +126,19 @@ void IN_Move (usercmd_t *cmd)
 	// now to set the menu cursor
 	if (cls.key_dest == key_menu)
 	{
-		cursor.oldx = cursor.x;
-		cursor.oldy = cursor.y;
+		ui_mousecursor.oldx = ui_mousecursor.x;
+		ui_mousecursor.oldy = ui_mousecursor.y;
 
-		cursor.x += mx *  ui_sensitivity->value;
-		cursor.y += my *  ui_sensitivity->value;
+		ui_mousecursor.x += mx *  ui_sensitivity->value;
+		ui_mousecursor.y += my *  ui_sensitivity->value;
 
-		if (cursor.x!=cursor.oldx || cursor.y!=cursor.oldy)
-			cursor.mouseaction = true;
+		if ( (ui_mousecursor.x != ui_mousecursor.oldx) || (ui_mousecursor.y != ui_mousecursor.oldy) )
+			ui_mousecursor.mouseaction = true;
 
-		if (cursor.x < 0) cursor.x = 0;
-		if (cursor.x > viddef.width) cursor.x = viddef.width;
-		if (cursor.y < 0) cursor.y = 0;
-		if (cursor.y > viddef.height) cursor.y = viddef.height;
+		if (ui_mousecursor.x < 0) ui_mousecursor.x = 0;
+		if (ui_mousecursor.x > viddef.width) ui_mousecursor.x = viddef.width;
+		if (ui_mousecursor.y < 0) ui_mousecursor.y = 0;
+		if (ui_mousecursor.y > viddef.height) ui_mousecursor.y = viddef.height;
 		M_Think_MouseCursor();
 	}
 

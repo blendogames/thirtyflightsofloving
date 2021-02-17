@@ -1108,7 +1108,7 @@ Sends a disconnect message to the server
 This is also called on Com_Error, so it shouldn't cause any errors
 =====================
 */
-extern	char	*currentweaponmodel;
+extern	char	*ui_currentweaponmodel;
 void CL_Disconnect (void)
 {
 	byte	final[32];
@@ -1165,7 +1165,7 @@ void CL_Disconnect (void)
 	cls.state = ca_disconnected;
 
 	// reset current weapon model
-	currentweaponmodel = NULL;
+	ui_currentweaponmodel = NULL;
 }
 
 void CL_Disconnect_f (void)
@@ -2898,4 +2898,8 @@ void CL_Shutdown (void)
 
 	IN_Shutdown ();
 	VID_Shutdown();
+
+	SCR_Shutdown ();		// added SCR shutdown
+	UI_Shutdown ();			// added UI shutdown
+	Con_Shutdown ();		// added Con shutdown
 }

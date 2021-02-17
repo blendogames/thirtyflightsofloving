@@ -54,6 +54,9 @@ static menulist_s		s_options_interface_noalttab_box;
 static menuaction_s		s_options_interface_defaults_action;
 static menuaction_s		s_options_interface_back_action;
 
+cvar_t *con_font;
+cvar_t *ui_font;
+cvar_t *scr_font;
 
 static void MouseMenuFunc( void *unused )
 {
@@ -101,18 +104,6 @@ static void NoAltTabFunc( void *unused )
 	Cvar_SetValue( "win_noalttab", s_options_interface_noalttab_box.curvalue );
 }
 
-/*
-=======================================================================
-Font loading
-=======================================================================
-*/
-cvar_t *con_font;
-cvar_t *ui_font;
-cvar_t *scr_font;
-#define MAX_FONTS 32
-char **font_names = NULL;
-int	numfonts = 0;
-
 static void FontSizeFunc (void *unused)
 {
 //	Cvar_SetValue( "con_font_size", s_options_interface_fontsize_slider.curvalue * 2 );
@@ -121,17 +112,17 @@ static void FontSizeFunc (void *unused)
 
 static void ConFontFunc (void *unused)
 {
-	Cvar_Set( "con_font", font_names[s_options_interface_confont_box.curvalue] );
+	Cvar_Set( "con_font", ui_font_names[s_options_interface_confont_box.curvalue] );
 }
 
 static void UIFontFunc (void *unused)
 {
-	Cvar_Set( "ui_font", font_names[s_options_interface_uifont_box.curvalue] );
+	Cvar_Set( "ui_font", ui_font_names[s_options_interface_uifont_box.curvalue] );
 }
 
 static void ScrFontFunc (void *unused)
 {
-	Cvar_Set( "scr_font", font_names[s_options_interface_scrfont_box.curvalue] );
+	Cvar_Set( "scr_font", ui_font_names[s_options_interface_scrfont_box.curvalue] );
 }
 
 void SetFontCursor (void)
@@ -149,183 +140,33 @@ void SetFontCursor (void)
 	if (!scr_font)
 		scr_font = Cvar_Get ("scr_font", "default", CVAR_ARCHIVE);
 
-	if (numfonts > 1)
+	if (ui_numfonts > 1)
 	{
-		for (i=0; font_names[i]; i++)
+		for (i=0; ui_font_names[i]; i++)
 		{
-			if (!Q_strcasecmp(con_font->string, font_names[i]))
+			if (!Q_strcasecmp(con_font->string, ui_font_names[i]))
 			{
 				s_options_interface_confont_box.curvalue = i;
 				break;
 			}
 		}
-		for (i=0; font_names[i]; i++)
+		for (i=0; ui_font_names[i]; i++)
 		{
-			if (!Q_strcasecmp(ui_font->string, font_names[i]))
+			if (!Q_strcasecmp(ui_font->string, ui_font_names[i]))
 			{
 				s_options_interface_uifont_box.curvalue = i;
 				break;
 			}
 		}
-		for (i=0; font_names[i]; i++)
+		for (i=0; ui_font_names[i]; i++)
 		{
-			if (!Q_strcasecmp(scr_font->string, font_names[i]))
+			if (!Q_strcasecmp(scr_font->string, ui_font_names[i]))
 			{
 				s_options_interface_scrfont_box.curvalue = i;
 				break;
 			}
 		}
 	}
-}
-
-
-void insertFont (char **list, char *insert, int len )
-{
-	int i, j;
-	if (!list) return;
-
-	// i=1 so default stays first!
-	for (i=1; i<len; i++)
-	{
-		if (!list[i])
-			break;
-
-		if (strcmp( list[i], insert ))
-		{
-			for (j=len; j>i ;j--)
-				list[j] = list[j-1];
-
-			list[i] = strdup(insert);
-			return;
-		}
-	}
-	list[len] = strdup(insert);
-}
-
-char **SetFontNames (void)
-{
-	char *curFont;
-	char **list = 0, *p;//, *s;
-//	char findname[1024];
-	int nfonts = 0, nfontnames;
-	char **fontfiles;
-	char *path = NULL;
-	int i;//, j;
-
-	list = malloc( sizeof( char * ) * MAX_FONTS );
-	memset( list, 0, sizeof( char * ) * MAX_FONTS );
-
-	list[0] = strdup("default");
-
-	nfontnames = 1;
-
-#if 1
-	fontfiles = FS_GetFileList("fonts/*.*", NULL, &nfonts);
-	for (i=0; i<nfonts && nfontnames<MAX_FONTS; i++)
-	{
-		int num;
-
-		if (!fontfiles || !fontfiles[i])	// Knightmare added array base check
-			continue;
-
-		if ( !IsValidImageFilename(fontfiles[i]) )
-			continue;
-
-		p = strrchr(fontfiles[i], '/'); p++;
-
-		num = (int)strlen(p)-4;
-		p[num] = 0; // NULL
-
-		curFont = p;
-
-		if (!FS_ItemInList(curFont, nfontnames, list))
-		{
-			// insertFont not needed due to sorting in FS_GetFileList()
-		//	insertFont (list, strdup(curFont), nfontnames);
-			FS_InsertInList(list, strdup(curFont), nfontnames, 1);	// start=1 so default stays first!
-			nfontnames++;
-		}
-		
-		// set back so whole string get deleted.
-		p[num] = '.';
-	}
-#else
-	path = FS_NextPath( path );
-	while (path) 
-	{
-		Com_sprintf( findname, sizeof(findname), "%s/fonts/*.*", path );
-		fontfiles = FS_ListFiles( findname, &nfonts, 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM );
-
-		for (i=0; i<nfonts && nfontnames<MAX_FONTS; i++)
-		{
-			int num;
-
-			if (!fontfiles || !fontfiles[i])	// Knightmare added array base check
-				continue;
-
-			if ( !IsValidImageFilename(fontfiles[i]) )
-				continue;
-
-			p = strrchr(fontfiles[i], '/'); p++;
-
-			num = (int)strlen(p)-4;
-			p[num] = 0;//NULL;
-
-			curFont = p;
-
-			if (!FS_ItemInList(curFont, nfontnames, list))
-			{
-				insertFont (list, strdup(curFont), nfontnames);
-				nfontnames++;
-			}
-			
-			// set back so whole string get deleted.
-			p[num] = '.';
-		}
-		if (nfonts)
-			FS_FreeFileList( fontfiles, nfonts );
-		
-		path = FS_NextPath( path );
-	}
-
-	// check pak after
-	if (fontfiles = FS_ListPak("fonts/", &nfonts))
-	{
-		for (i=0;i<nfonts && nfontnames<MAX_FONTS;i++)
-		{
-			int num;
-
-			if (!fontfiles || !fontfiles[i])	// Knightmare added array base check
-				continue;
-
-			if ( !IsValidImageFilename(fontfiles[i]) )
-				continue;
-
-			p = strrchr(fontfiles[i], '/'); p++;
-
-			num = (int)strlen(p)-4;
-			p[num] = 0; // NULL
-
-			curFont = p;
-
-			if (!FS_ItemInList(curFont, nfontnames, list))
-			{
-				insertFont(list, strdup(curFont), nfontnames);
-				nfontnames++;
-			}
-			
-			// set back so whole string get deleted.
-			p[num] = '.';
-		}
-	}
-#endif
-
-	if (nfonts)
-		FS_FreeFileList( fontfiles, nfonts );
-
-	numfonts = nfontnames;
-
-	return list;		
 }
 
 //=======================================================================
@@ -442,19 +283,22 @@ void Options_Interface_MenuInit (void)
 	s_options_interface_menualpha_slider.increment			= 0.05f;
 	s_options_interface_menualpha_slider.generic.statusbar	= "changes opacity of menu background";
 
+#if 0
 	// free any loaded fonts to prevent memory leak
-	if (numfonts > 0) {
-		FS_FreeFileList (font_names, numfonts);
+	if (ui_numfonts > 0) {
+		FS_FreeFileList (ui_font_names, ui_numfonts);
 	}
-	numfonts = 0;
-	font_names = SetFontNames ();
+	ui_numfonts = 0;
+	ui_font_names = UI_SetFontNames ();
+#endif
+
 	s_options_interface_confont_box.generic.type			= MTYPE_SPINCONTROL;
 	s_options_interface_confont_box.generic.textSize		= MENU_FONT_SIZE;
 	s_options_interface_confont_box.generic.x				= 0;
 	s_options_interface_confont_box.generic.y				= y+=2*MENU_LINE_SIZE;
 	s_options_interface_confont_box.generic.name			= "console font";
 	s_options_interface_confont_box.generic.callback		= ConFontFunc;
-	s_options_interface_confont_box.itemnames				= font_names;
+	s_options_interface_confont_box.itemnames				= ui_font_names;
 	s_options_interface_confont_box.generic.statusbar		= "changes font of console text";
 
 	s_options_interface_fontsize_slider.generic.type		= MTYPE_SLIDER;
@@ -476,7 +320,7 @@ void Options_Interface_MenuInit (void)
 	s_options_interface_uifont_box.generic.y				= y+=MENU_LINE_SIZE;
 	s_options_interface_uifont_box.generic.name				= "menu font";
 	s_options_interface_uifont_box.generic.callback			= UIFontFunc;
-	s_options_interface_uifont_box.itemnames				= font_names;
+	s_options_interface_uifont_box.itemnames				= ui_font_names;
 	s_options_interface_uifont_box.generic.statusbar		= "changes font of menu text";
 
 	s_options_interface_scrfont_box.generic.type			= MTYPE_SPINCONTROL;
@@ -485,7 +329,7 @@ void Options_Interface_MenuInit (void)
 	s_options_interface_scrfont_box.generic.y				= y+=MENU_LINE_SIZE;
 	s_options_interface_scrfont_box.generic.name			= "HUD font";
 	s_options_interface_scrfont_box.generic.callback		= ScrFontFunc;
-	s_options_interface_scrfont_box.itemnames				= font_names;
+	s_options_interface_scrfont_box.itemnames				= ui_font_names;
 	s_options_interface_scrfont_box.generic.statusbar		= "changes font of HUD text";
 
 	s_options_interface_alt_text_color_box.generic.type		= MTYPE_SPINCONTROL;

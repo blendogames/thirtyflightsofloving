@@ -40,357 +40,124 @@ PLAYER CONFIG MENU
 extern menuframework_s	s_multiplayer_menu;
 
 static menuframework_s	s_player_config_menu;
-static menufield_s		s_player_name_field;
-static menulist_s		s_player_model_box;
-static menulist_s		s_player_skin_box;
-static menulist_s		s_player_handedness_box;
-static menulist_s		s_player_rate_box;
-static menuseparator_s	s_player_skin_title;
-static menuseparator_s	s_player_model_title;
-static menuseparator_s	s_player_hand_title;
-static menuseparator_s	s_player_rate_title;
-//static menuaction_s		s_player_download_action;
-static menuaction_s		s_player_back_action;
+static menufield_s		s_playerconfig_name_field;
+static menulist_s		s_playerconfig_model_box;
+static menulist_s		s_playerconfig_skin_box;
+static menulist_s		s_playerconfig_handedness_box;
+static menulist_s		s_playerconfig_rate_box;
+static menuseparator_s	s_playerconfig_skin_title;
+static menuseparator_s	s_playerconfig_model_title;
+static menuseparator_s	s_playerconfig_hand_title;
+static menuseparator_s	s_playerconfig_rate_title;
+static menuaction_s		s_playerconfig_back_action;
 
-// save skins and models here so as to not have to re-register every frame
-struct model_s *playermodel;
-struct model_s *weaponmodel;
-struct image_s *playerskin;
-char *currentweaponmodel;
+//=======================================================================
 
-#define MAX_DISPLAYNAME 16
-#define MAX_PLAYERMODELS 1024
 #define	NUM_SKINBOX_ITEMS 7
-
-typedef struct
-{
-	int		nskins;
-	char	**skindisplaynames;
-	char	displayname[MAX_DISPLAYNAME];
-	char	directory[MAX_QPATH];
-} playermodelinfo_s;
-
-static playermodelinfo_s s_pmi[MAX_PLAYERMODELS];
-static char *s_pmnames[MAX_PLAYERMODELS];
-static int s_numplayermodels;
 
 static int rate_tbl[] = { 2500, 3200, 5000, 10000, 15000, 25000, 0 };
 static const char *rate_names[] = { "28.8 Modem", "33.6 Modem", "56K/Single ISDN",
 	"Dual ISDN", "Cable/DSL", "T1/LAN", "User defined", 0 };
 
-
 static void HandednessCallback (void *unused)
 {
-	Cvar_SetValue ("hand", s_player_handedness_box.curvalue);
+	Cvar_SetValue ("hand", s_playerconfig_handedness_box.curvalue);
 }
 
 
 static void RateCallback (void *unused)
 {
-	if (s_player_rate_box.curvalue != sizeof(rate_tbl) / sizeof(*rate_tbl) - 1)
-		Cvar_SetValue ("rate", rate_tbl[s_player_rate_box.curvalue]);
+	if (s_playerconfig_rate_box.curvalue != sizeof(rate_tbl) / sizeof(*rate_tbl) - 1)
+		Cvar_SetValue ("rate", rate_tbl[s_playerconfig_rate_box.curvalue]);
 }
 
 
-static void ModelCallback (void *unused)
+static void M_PlayerModelCallback (void *unused)
 {
-	char scratch[MAX_QPATH];
+	int		mNum, sNum;
+//	char	scratch[MAX_QPATH];
 
-	s_player_skin_box.itemnames = s_pmi[s_player_model_box.curvalue].skindisplaynames;
-	s_player_skin_box.curvalue = 0;
+	mNum = s_playerconfig_model_box.curvalue;
+	s_playerconfig_skin_box.itemnames = ui_pmi[mNum].skinDisplayNames;
+	s_playerconfig_skin_box.curvalue = 0;
+	sNum = s_playerconfig_skin_box.curvalue;
 
+#if 1
+	UI_UpdatePlayerModelInfo (mNum, sNum);
+#else
 	// only register model and skin on starup or when changed
-	Com_sprintf( scratch, sizeof(scratch), "players/%s/tris.md2", s_pmi[s_player_model_box.curvalue].directory );
-	playermodel = R_RegisterModel (scratch);
+	Com_sprintf( scratch, sizeof(scratch), "players/%s/tris.md2", ui_pmi[mNum].directory );
+	ui_playermodel = R_RegisterModel (scratch);
 
-	Com_sprintf( scratch, sizeof(scratch), "players/%s/%s.pcx", s_pmi[s_player_model_box.curvalue].directory, s_pmi[s_player_model_box.curvalue].skindisplaynames[s_player_skin_box.curvalue] );
-	playerskin = R_RegisterSkin (scratch);
+	Com_sprintf( scratch, sizeof(scratch), "players/%s/%s.pcx", ui_pmi[mNum].directory, ui_pmi[mNum].skinDisplayNames[sNum] );
+	ui_playerskin = R_RegisterSkin (scratch);
 
 	// show current weapon model (if any)
-	if (currentweaponmodel && strlen(currentweaponmodel)) {
-		Com_sprintf (scratch, sizeof(scratch), "players/%s/%s", s_pmi[s_player_model_box.curvalue].directory, currentweaponmodel);
-		weaponmodel = R_RegisterModel(scratch);
-		if (!weaponmodel) {
-			Com_sprintf (scratch, sizeof(scratch), "players/%s/weapon.md2", s_pmi[s_player_model_box.curvalue].directory);
-			weaponmodel = R_RegisterModel (scratch);
+	if (ui_currentweaponmodel && strlen(ui_currentweaponmodel)) {
+		Com_sprintf (scratch, sizeof(scratch), "players/%s/%s", ui_pmi[mNum].directory, ui_currentweaponmodel);
+		ui_weaponmodel = R_RegisterModel(scratch);
+		if (!ui_weaponmodel) {
+			Com_sprintf (scratch, sizeof(scratch), "players/%s/weapon.md2", ui_pmi[mNum].directory);
+			ui_weaponmodel = R_RegisterModel (scratch);
 		}
 	}
 	else {
-		Com_sprintf (scratch, sizeof(scratch), "players/%s/weapon.md2", s_pmi[s_player_model_box.curvalue].directory);
-		weaponmodel = R_RegisterModel (scratch);
+		Com_sprintf (scratch, sizeof(scratch), "players/%s/weapon.md2", ui_pmi[mNum].directory);
+		ui_weaponmodel = R_RegisterModel (scratch);
 	}
+#endif
 }
 
 
-// only register skin on starup and when changed
-static void SkinCallback (void *unused)
+static void M_PlayerSkinCallback (void *unused)
 {
+#if 1
+	int		mNum, sNum;
+
+	mNum = s_playerconfig_model_box.curvalue;
+	sNum = s_playerconfig_skin_box.curvalue;
+	UI_UpdatePlayerSkinInfo (mNum, sNum);
+#else
 	char scratch[MAX_QPATH];
 
-	Com_sprintf(scratch, sizeof(scratch), "players/%s/%s.pcx", s_pmi[s_player_model_box.curvalue].directory, s_pmi[s_player_model_box.curvalue].skindisplaynames[s_player_skin_box.curvalue]);
-	playerskin = R_RegisterSkin(scratch);
+	// only register skin on starup and when changed
+	Com_sprintf(scratch, sizeof(scratch), "players/%s/%s.pcx", ui_pmi[s_player_model_box.curvalue].directory, ui_pmi[s_player_model_box.curvalue].skinDisplayNames[s_player_skin_box.curvalue]);
+	ui_playerskin = R_RegisterSkin(scratch);
+#endif
 }
 
-
-static qboolean IconOfSkinExists (char *skin, char **files, int nfiles, char *suffix)
-{
-	int i;
-	char scratch[1024];
-
-//	strncpy(scratch, skin);
-	Q_strncpyz (scratch, sizeof(scratch), skin);
-	*strrchr(scratch, '.') = 0;
-//	strncat(scratch, suffix);
-	Q_strncatz (scratch, sizeof(scratch), suffix);
-	//strncat(scratch, "_i.pcx");
-
-	for (i = 0; i < nfiles; i++)
-	{
-		if ( strcmp(files[i], scratch) == 0 )
-			return true;
-	}
-
-	return false;
-}
+//=======================================================================
 
 
-// adds menu support for TGA and JPG skins
-static qboolean IsValidSkin (char **filelist, int numFiles, int index)
-{
-	int		len = (int)strlen(filelist[index]);
-
-	if (	!strcmp (filelist[index]+max(len-4,0), ".pcx")
-		||  !strcmp (filelist[index]+max(len-4,0), ".tga")
-#ifdef PNG_SUPPORT
-		||  !strcmp (filelist[index]+max(len-4,0), ".png")
-#endif // PNG_SUPPORT
-		||	!strcmp (filelist[index]+max(len-4,0), ".jpg") )
-	{
-		if (	strcmp (filelist[index]+max(len-6,0), "_i.pcx")
-			&&  strcmp (filelist[index]+max(len-6,0), "_i.tga")
-#ifdef PNG_SUPPORT
-			&&  strcmp (filelist[index]+max(len-6,0), "_i.png")
-#endif // PNG_SUPPORT
-			&&  strcmp (filelist[index]+max(len-6,0), "_i.jpg") )
-
-			if (	IconOfSkinExists (filelist[index], filelist, numFiles-1 , "_i.pcx")
-				||	IconOfSkinExists (filelist[index], filelist, numFiles-1 , "_i.tga")
-#ifdef PNG_SUPPORT
-				||	IconOfSkinExists (filelist[index], filelist, numFiles-1 , "_i.png")
-#endif // PNG_SUPPORT
-				||	IconOfSkinExists (filelist[index], filelist, numFiles-1 , "_i.jpg"))
-				return true;
-	}
-	return false;
-}
-
-
-static qboolean PlayerConfig_ScanDirectories (void)
-{
-	char findname[1024];
-	char scratch[1024];
-	int ndirs = 0, npms = 0;
-	char **dirnames;
-	char *path = NULL;
-	int i;
-
-	//extern char **FS_ListFiles (char *, int *, unsigned, unsigned);
-
-	s_numplayermodels = 0;
-
-	// loop back to here if there were no valid player models found in the selected path
-	do
-	{
-		//
-		// get a list of directories
-		//
-		do 
-		{
-			path = FS_NextPath(path);
-			Com_sprintf( findname, sizeof(findname), "%s/players/*.*", path );
-
-			if ( (dirnames = FS_ListFiles(findname, &ndirs, SFF_SUBDIR, 0)) != 0 )
-				break;
-		} while (path);
-
-		if (!dirnames)
-			return false;
-
-		//
-		// go through the subdirectories
-		//
-		npms = ndirs;
-		if (npms > MAX_PLAYERMODELS)
-			npms = MAX_PLAYERMODELS;
-		if ( (s_numplayermodels + npms) > MAX_PLAYERMODELS )
-			npms = MAX_PLAYERMODELS - s_numplayermodels;
-
-		for (i = 0; i < npms; i++)
-		{
-			int			k, s;
-			char		*a, *b, *c;
-			char		**skinnames;
-			char		**imagenames;
-			int			nimagefiles;
-			int			nskins = 0;
-			qboolean	already_added = false;	
-
-			if (dirnames[i] == 0)
-				continue;
-
-			// check if dirnames[i] is already added to the s_pmi[i].directory list
-			a = strrchr(dirnames[i], '/');
-			b = strrchr(dirnames[i], '\\');
-			c = (a > b) ? a : b;
-			for (k=0; k < s_numplayermodels; k++)
-				if (!strcmp(s_pmi[k].directory, c+1))
-				{	already_added = true;	break;	}
-			if (already_added)
-			{	// todo: add any skins for this model not already listed to skindisplaynames
-				continue;
-			}
-
-			// verify the existence of tris.md2
-		//	strncpy(scratch, dirnames[i]);
-		//	strncat(scratch, "/tris.md2");
-			Q_strncpyz(scratch, sizeof(scratch), dirnames[i]);
-			Q_strncatz(scratch, sizeof(scratch), "/tris.md2");
-			if ( !Sys_FindFirst(scratch, 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM) )
-			{
-				free(dirnames[i]);
-				dirnames[i] = 0;
-				Sys_FindClose();
-				continue;
-			}
-			Sys_FindClose();
-
-			// verify the existence of at least one skin
-		//	strncpy(scratch, va("%s%s", dirnames[i], "/*.*")); // was "/*.pcx"
-			Q_strncpyz(scratch, sizeof(scratch), va("%s%s", dirnames[i], "/*.*")); // was "/*.pcx"
-			imagenames = FS_ListFiles (scratch, &nimagefiles, 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM);
-
-			if (!imagenames)
-			{
-				free(dirnames[i]);
-				dirnames[i] = 0;
-				continue;
-			}
-
-			// count valid skins, which consist of a skin with a matching "_i" icon
-			for (k = 0; k < nimagefiles-1; k++)
-				if ( IsValidSkin(imagenames, nimagefiles, k) )
-					nskins++;
-
-			if (!nskins)
-				continue;
-
-			skinnames = malloc(sizeof(char *) * (nskins+1));
-			memset(skinnames, 0, sizeof(char *) * (nskins+1));
-
-			// copy the valid skins
-			if (nimagefiles)
-				for (s = 0, k = 0; k < nimagefiles-1; k++)
-				{
-					char *a, *b, *c;
-					if ( IsValidSkin(imagenames, nimagefiles, k) )
-					{
-						a = strrchr(imagenames[k], '/');
-						b = strrchr(imagenames[k], '\\');
-
-						c = (a > b) ? a : b;
-
-					//	strncpy(scratch, c+1);
-						Q_strncpyz(scratch, sizeof(scratch), c+1);
-
-						if ( strrchr(scratch, '.') )
-							*strrchr(scratch, '.') = 0;
-
-						skinnames[s] = strdup(scratch);
-						s++;
-					}
-				}
-
-			// at this point we have a valid player model
-			s_pmi[s_numplayermodels].nskins = nskins;
-			s_pmi[s_numplayermodels].skindisplaynames = skinnames;
-
-			// make short name for the model
-			a = strrchr(dirnames[i], '/');
-			b = strrchr(dirnames[i], '\\');
-
-			c = (a > b) ? a : b;
-
-			strncpy(s_pmi[s_numplayermodels].displayname, c+1, MAX_DISPLAYNAME-1);
-		//	strncpy(s_pmi[s_numplayermodels].directory, c+1);
-			Q_strncpyz(s_pmi[s_numplayermodels].directory, sizeof(s_pmi[s_numplayermodels].directory), c+1);
-
-			FS_FreeFileList (imagenames, nimagefiles);
-
-			s_numplayermodels++;
-		}
-		
-		if (dirnames)
-			FS_FreeFileList (dirnames, ndirs);
-
-	// if no valid player models found in path,
-	// try next path, if there is one
-	} while (path);	// (s_numplayermodels == 0 && path);
-
-	return true;	//** DMP warning fix
-}
-
-
-static int pmicmpfnc (const void *_a, const void *_b)
-{
-	const playermodelinfo_s *a = (const playermodelinfo_s *) _a;
-	const playermodelinfo_s *b = (const playermodelinfo_s *) _b;
-
-	//
-	// sort by male, female, then alphabetical
-	//
-	if ( strcmp(a->directory, "male") == 0 )
-		return -1;
-	else if (strcmp( b->directory, "male") == 0 )
-		return 1;
-
-	if ( strcmp(a->directory, "female") == 0 )
-		return -1;
-	else if (strcmp( b->directory, "female") == 0 )
-		return 1;
-
-	return strcmp(a->directory, b->directory);
-}
-
+//=======================================================================
 
 qboolean PlayerConfig_MenuInit (void)
 {
-	extern cvar_t *name;
-	extern cvar_t *team;
-	extern cvar_t *skin;
-	char currentdirectory[1024];
-	char currentskin[1024];
-	char scratch[MAX_QPATH];
-	int i = 0;
-	int y = 0;
+//	char currentdirectory[1024];
+//	char currentskin[1024];
+//	char scratch[MAX_QPATH];
+	int i, y;
+	int mNum = 0, sNum = 0;
 
-	int currentdirectoryindex = 0;
-	int currentskinindex = 0;
+	cvar_t *hand = Cvar_Get("hand", "0", CVAR_USERINFO | CVAR_ARCHIVE);
 
-	cvar_t *hand = Cvar_Get( "hand", "0", CVAR_USERINFO | CVAR_ARCHIVE );
+	static const char *handedness_names[] = { "right", "left", "center", 0 };
 
-	static const char *handedness[] = { "right", "left", "center", 0 };
+	if ( (hand->integer < 0) || (hand->integer > 2) )
+		Cvar_SetValue ("hand", 0);
 
-	PlayerConfig_ScanDirectories ();
+//	UI_PlayerConfig_ScanDirectories ();	// Replaced by UI_LoadPlayerModels() called from UI_Init()
 
-	if (s_numplayermodels == 0)
+//	if (ui_numplayermodels == 0)
+	if ( !UI_HaveValidPlayerModels(NULL) )
 		return false;
 
-//	if ( hand->value < 0 || hand->value > 2 )
-	if ( hand->integer < 0 || hand->integer > 2 )
-		Cvar_SetValue( "hand", 0 );
-
-//	strncpy(currentdirectory, skin->string);
-	Q_strncpyz (currentdirectory, sizeof(currentdirectory), skin->string);
+#if 1
+	// get model and skin index and precache them
+	UI_InitPlayerModelInfo (&mNum, &sNum);
+#else
+//	strncpy(currentdirectory, Cvar_VariableString("skin"));
+	Q_strncpyz (currentdirectory, sizeof(currentdirectory), Cvar_VariableString("skin"));
 
 	if ( strchr( currentdirectory, '/' ) )
 	{
@@ -412,161 +179,166 @@ qboolean PlayerConfig_MenuInit (void)
 		Q_strncpyz (currentskin, sizeof(currentskin), "grunt");
 	}
 
-	qsort( s_pmi, s_numplayermodels, sizeof( s_pmi[0] ), pmicmpfnc );
+	qsort( ui_pmi, ui_numplayermodels, sizeof( ui_pmi[0] ), UI_PlayerModelCmpFunc );
 
-	memset( s_pmnames, 0, sizeof( s_pmnames ) );
-	for ( i = 0; i < s_numplayermodels; i++ )
+	memset( ui_pmnames, 0, sizeof( ui_pmnames ) );
+	for ( i = 0; i < ui_numplayermodels; i++ )
 	{
-		s_pmnames[i] = s_pmi[i].displayname;
-		if ( Q_stricmp( s_pmi[i].directory, currentdirectory ) == 0 )
+		ui_pmnames[i] = ui_pmi[i].displayname;
+		if ( Q_stricmp( ui_pmi[i].directory, currentdirectory ) == 0 )
 		{
 			int j;
 
-			currentdirectoryindex = i;
+			mNum = i;
 
-			for ( j = 0; j < s_pmi[i].nskins; j++ )
+			for ( j = 0; j < ui_pmi[i].nskins; j++ )
 			{
-				if ( Q_stricmp( s_pmi[i].skindisplaynames[j], currentskin ) == 0 )
+				if ( Q_stricmp( ui_pmi[i].skinDisplayNames[j], currentskin ) == 0 )
 				{
-					currentskinindex = j;
+					sNum = j;
 					break;
 				}
 			}
 		}
 	}
-	
+#endif
+
+	y = 0;
+
 	s_player_config_menu.x = SCREEN_WIDTH*0.5 - 210;
 	s_player_config_menu.y = SCREEN_HEIGHT*0.5 - 70;
 	s_player_config_menu.nitems = 0;
 	
-	s_player_name_field.generic.type = MTYPE_FIELD;
-	s_player_name_field.generic.textSize = MENU_FONT_SIZE;
-	s_player_name_field.generic.flags = QMF_LEFT_JUSTIFY;
-	s_player_name_field.generic.name = "name";
-	s_player_name_field.generic.callback = 0;
-	s_player_name_field.generic.x		= -MENU_FONT_SIZE;
-	s_player_name_field.generic.y		= y;
-	s_player_name_field.length	= 20;
-	s_player_name_field.visible_length = 20;
-	Q_strncpyz (s_player_name_field.buffer, sizeof(s_player_name_field.buffer), name->string);
-	s_player_name_field.cursor = (int)strlen( name->string );
+	s_playerconfig_name_field.generic.type		= MTYPE_FIELD;
+	s_playerconfig_name_field.generic.textSize	= MENU_FONT_SIZE;
+	s_playerconfig_name_field.generic.flags		= QMF_LEFT_JUSTIFY;
+	s_playerconfig_name_field.generic.name		= "name";
+	s_playerconfig_name_field.generic.callback	= 0;
+	s_playerconfig_name_field.generic.x			= -MENU_FONT_SIZE;
+	s_playerconfig_name_field.generic.y			= y;
+	s_playerconfig_name_field.length			= 20;
+	s_playerconfig_name_field.visible_length	= 20;
+	Q_strncpyz (s_playerconfig_name_field.buffer, sizeof(s_playerconfig_name_field.buffer), Cvar_VariableString("name"));
+	s_playerconfig_name_field.cursor = (int)strlen( s_playerconfig_name_field.buffer );
+
+	s_playerconfig_model_title.generic.type		= MTYPE_SEPARATOR;
+	s_playerconfig_model_title.generic.textSize	= MENU_FONT_SIZE;
+	s_playerconfig_model_title.generic.flags	= QMF_LEFT_JUSTIFY;
+	s_playerconfig_model_title.generic.name		= "model";
+	s_playerconfig_model_title.generic.x		= -MENU_FONT_SIZE;
+	s_playerconfig_model_title.generic.y		= y += 3*MENU_LINE_SIZE;
 	
-	s_player_model_title.generic.type = MTYPE_SEPARATOR;
-	s_player_model_title.generic.textSize = MENU_FONT_SIZE;
-	s_player_model_title.generic.flags = QMF_LEFT_JUSTIFY;
-	s_player_model_title.generic.name = "model";
-	s_player_model_title.generic.x    = -MENU_FONT_SIZE;
-	s_player_model_title.generic.y	 = y += 3*MENU_LINE_SIZE;
+	s_playerconfig_model_box.generic.type			= MTYPE_SPINCONTROL;
+	s_playerconfig_model_box.generic.textSize		= MENU_FONT_SIZE;
+	s_playerconfig_model_box.generic.x				= -7*MENU_FONT_SIZE;
+	s_playerconfig_model_box.generic.y				= y += MENU_LINE_SIZE;
+	s_playerconfig_model_box.generic.callback		= M_PlayerModelCallback;
+	s_playerconfig_model_box.generic.cursor_offset	= -6*MENU_FONT_SIZE;
+	s_playerconfig_model_box.curvalue = mNum;
+	s_playerconfig_model_box.itemnames = ui_pmnames;
 	
-	s_player_model_box.generic.type = MTYPE_SPINCONTROL;
-	s_player_model_box.generic.textSize = MENU_FONT_SIZE;
-	s_player_model_box.generic.x	= -7*MENU_FONT_SIZE;
-	s_player_model_box.generic.y	= y += MENU_LINE_SIZE;
-	s_player_model_box.generic.callback = ModelCallback;
-	s_player_model_box.generic.cursor_offset = -6*MENU_FONT_SIZE;
-	s_player_model_box.curvalue = currentdirectoryindex;
-	s_player_model_box.itemnames = s_pmnames;
+	s_playerconfig_skin_title.generic.type		= MTYPE_SEPARATOR;
+	s_playerconfig_skin_title.generic.textSize	= MENU_FONT_SIZE;
+	s_playerconfig_skin_title.generic.flags		= QMF_LEFT_JUSTIFY;
+	s_playerconfig_skin_title.generic.name		= "skin";
+	s_playerconfig_skin_title.generic.x			= -2*MENU_FONT_SIZE;
+	s_playerconfig_skin_title.generic.y			= y += 2*MENU_LINE_SIZE;
 	
-	s_player_skin_title.generic.type = MTYPE_SEPARATOR;
-	s_player_skin_title.generic.textSize = MENU_FONT_SIZE;
-	s_player_skin_title.generic.flags = QMF_LEFT_JUSTIFY;
-	s_player_skin_title.generic.name = "skin";
-	s_player_skin_title.generic.x    = -2*MENU_FONT_SIZE;
-	s_player_skin_title.generic.y	 = y += 2*MENU_LINE_SIZE;
+	s_playerconfig_skin_box.generic.type			= MTYPE_SPINCONTROL;
+	s_playerconfig_skin_box.generic.textSize		= MENU_FONT_SIZE;
+	s_playerconfig_skin_box.generic.x				= -7*MENU_FONT_SIZE;
+	s_playerconfig_skin_box.generic.y				= y += MENU_LINE_SIZE;
+	s_playerconfig_skin_box.generic.name			= 0;
+	s_playerconfig_skin_box.generic.callback		= M_PlayerSkinCallback; // Knightmare added, was 0
+	s_playerconfig_skin_box.generic.cursor_offset	= -6*MENU_FONT_SIZE;
+	s_playerconfig_skin_box.curvalue				= sNum;
+	s_playerconfig_skin_box.itemnames				= ui_pmi[mNum].skinDisplayNames;
+	s_playerconfig_skin_box.generic.flags			|= QMF_SKINLIST;
 	
-	s_player_skin_box.generic.type = MTYPE_SPINCONTROL;
-	s_player_skin_box.generic.textSize = MENU_FONT_SIZE;
-	s_player_skin_box.generic.x	= -7*MENU_FONT_SIZE;
-	s_player_skin_box.generic.y	= y += MENU_LINE_SIZE;
-	s_player_skin_box.generic.name	= 0;
-	s_player_skin_box.generic.callback = SkinCallback; // Knightmare added, was 0
-	s_player_skin_box.generic.cursor_offset = -6*MENU_FONT_SIZE;
-	s_player_skin_box.curvalue = currentskinindex;
-	s_player_skin_box.itemnames = s_pmi[currentdirectoryindex].skindisplaynames;
-	s_player_skin_box.generic.flags |= QMF_SKINLIST;
+	s_playerconfig_hand_title.generic.type		= MTYPE_SEPARATOR;
+	s_playerconfig_hand_title.generic.textSize	= MENU_FONT_SIZE;
+	s_playerconfig_hand_title.generic.flags		= QMF_LEFT_JUSTIFY;
+	s_playerconfig_hand_title.generic.name		= "handedness";
+	s_playerconfig_hand_title.generic.x			= 4*MENU_FONT_SIZE;
+	s_playerconfig_hand_title.generic.y			= y += 2*MENU_LINE_SIZE;
 	
-	s_player_hand_title.generic.type = MTYPE_SEPARATOR;
-	s_player_hand_title.generic.textSize = MENU_FONT_SIZE;
-	s_player_hand_title.generic.flags = QMF_LEFT_JUSTIFY;
-	s_player_hand_title.generic.name = "handedness";
-	s_player_hand_title.generic.x    = 4*MENU_FONT_SIZE;
-	s_player_hand_title.generic.y	 = y += 2*MENU_LINE_SIZE;
-	
-	s_player_handedness_box.generic.type = MTYPE_SPINCONTROL;
-	s_player_handedness_box.generic.textSize = MENU_FONT_SIZE;
-	s_player_handedness_box.generic.x	= -7*MENU_FONT_SIZE;
-	s_player_handedness_box.generic.y	= y += MENU_LINE_SIZE;
-	s_player_handedness_box.generic.name	= 0;
-	s_player_handedness_box.generic.cursor_offset = -6*MENU_FONT_SIZE;
-	s_player_handedness_box.generic.callback = HandednessCallback;
-	s_player_handedness_box.curvalue = Cvar_VariableValue( "hand" );
-	s_player_handedness_box.itemnames = handedness;
+	s_playerconfig_handedness_box.generic.type			= MTYPE_SPINCONTROL;
+	s_playerconfig_handedness_box.generic.textSize		= MENU_FONT_SIZE;
+	s_playerconfig_handedness_box.generic.x				= -7*MENU_FONT_SIZE;
+	s_playerconfig_handedness_box.generic.y				= y += MENU_LINE_SIZE;
+	s_playerconfig_handedness_box.generic.name			= 0;
+	s_playerconfig_handedness_box.generic.cursor_offset	= -6*MENU_FONT_SIZE;
+	s_playerconfig_handedness_box.generic.callback		= HandednessCallback;
+	s_playerconfig_handedness_box.curvalue				= Cvar_VariableValue( "hand" );
+	s_playerconfig_handedness_box.itemnames				= handedness_names;
 	
 	for (i = 0; i < sizeof(rate_tbl) / sizeof(*rate_tbl) - 1; i++)
 		if (Cvar_VariableValue("rate") == rate_tbl[i])
 			break;
 		
-	s_player_rate_title.generic.type = MTYPE_SEPARATOR;
-	s_player_rate_title.generic.textSize = MENU_FONT_SIZE;
-	s_player_rate_title.generic.flags = QMF_LEFT_JUSTIFY;
-	s_player_rate_title.generic.name = "connect speed";
-	s_player_rate_title.generic.x    = 7*MENU_FONT_SIZE;
-	s_player_rate_title.generic.y	 = y += 2*MENU_LINE_SIZE;
+	s_playerconfig_rate_title.generic.type		= MTYPE_SEPARATOR;
+	s_playerconfig_rate_title.generic.textSize	= MENU_FONT_SIZE;
+	s_playerconfig_rate_title.generic.flags		= QMF_LEFT_JUSTIFY;
+	s_playerconfig_rate_title.generic.name		= "connect speed";
+	s_playerconfig_rate_title.generic.x			= 7*MENU_FONT_SIZE;
+	s_playerconfig_rate_title.generic.y			= y += 2*MENU_LINE_SIZE;
 		
-	s_player_rate_box.generic.type = MTYPE_SPINCONTROL;
-	s_player_rate_box.generic.textSize = MENU_FONT_SIZE;
-	s_player_rate_box.generic.x	= -7*MENU_FONT_SIZE;
-	s_player_rate_box.generic.y	= y += MENU_LINE_SIZE;
-	s_player_rate_box.generic.name	= 0;
-	s_player_rate_box.generic.cursor_offset = -6*MENU_FONT_SIZE;
-	s_player_rate_box.generic.callback = RateCallback;
-	s_player_rate_box.curvalue = i;
-	s_player_rate_box.itemnames = rate_names;
+	s_playerconfig_rate_box.generic.type			= MTYPE_SPINCONTROL;
+	s_playerconfig_rate_box.generic.textSize		= MENU_FONT_SIZE;
+	s_playerconfig_rate_box.generic.x				= -7*MENU_FONT_SIZE;
+	s_playerconfig_rate_box.generic.y				= y += MENU_LINE_SIZE;
+	s_playerconfig_rate_box.generic.name			= 0;
+	s_playerconfig_rate_box.generic.cursor_offset	= -6*MENU_FONT_SIZE;
+	s_playerconfig_rate_box.generic.callback		= RateCallback;
+	s_playerconfig_rate_box.curvalue				= i;
+	s_playerconfig_rate_box.itemnames				= rate_names;
 	
-	s_player_back_action.generic.type = MTYPE_ACTION;
-	s_player_back_action.generic.textSize = MENU_FONT_SIZE;
-	s_player_back_action.generic.name	= "back to multiplayer";
-	s_player_back_action.generic.flags = QMF_LEFT_JUSTIFY;
-	s_player_back_action.generic.x	= -5*MENU_FONT_SIZE;
-	s_player_back_action.generic.y	= y += 2*MENU_LINE_SIZE;
-	s_player_back_action.generic.statusbar = NULL;
-	s_player_back_action.generic.callback = UI_BackMenu;
+	s_playerconfig_back_action.generic.type			= MTYPE_ACTION;
+	s_playerconfig_back_action.generic.textSize		= MENU_FONT_SIZE;
+	s_playerconfig_back_action.generic.name			= "back to multiplayer";
+	s_playerconfig_back_action.generic.flags		= QMF_LEFT_JUSTIFY;
+	s_playerconfig_back_action.generic.x			= -5*MENU_FONT_SIZE;
+	s_playerconfig_back_action.generic.y			= y += 2*MENU_LINE_SIZE;
+	s_playerconfig_back_action.generic.statusbar	= NULL;
+	s_playerconfig_back_action.generic.callback		= UI_BackMenu;
 
-	// only register model and skin on starup or when changed
-	Com_sprintf( scratch, sizeof( scratch ), "players/%s/tris.md2", s_pmi[s_player_model_box.curvalue].directory );
-	playermodel = R_RegisterModel( scratch );
+#if 0	// Replaced by UI_UpdatePlayerModelInfo(), called from UI_InitPlayerModelInfo()
+	// only register model and skin on startup or when changed
+	Com_sprintf( scratch, sizeof( scratch ), "players/%s/tris.md2", ui_pmi[mNum].directory );
+	ui_playermodel = R_RegisterModel( scratch );
 
-	Com_sprintf( scratch, sizeof( scratch ), "players/%s/%s.pcx", s_pmi[s_player_model_box.curvalue].directory, s_pmi[s_player_model_box.curvalue].skindisplaynames[s_player_skin_box.curvalue] );
-	playerskin = R_RegisterSkin( scratch );
+	Com_sprintf( scratch, sizeof( scratch ), "players/%s/%s.pcx", ui_pmi[mNum].directory, ui_pmi[mNum].skinDisplayNames[sNum] );
+	ui_playerskin = R_RegisterSkin( scratch );
 
 	// show current weapon model (if any)
-	if (currentweaponmodel && strlen(currentweaponmodel)) {
-		Com_sprintf( scratch, sizeof( scratch ), "players/%s/%s", s_pmi[s_player_model_box.curvalue].directory, currentweaponmodel );
-		weaponmodel = R_RegisterModel( scratch );
-		if (!weaponmodel) {
-			Com_sprintf( scratch, sizeof( scratch ), "players/%s/weapon.md2", s_pmi[s_player_model_box.curvalue].directory );
-			weaponmodel = R_RegisterModel( scratch );
+	if (ui_currentweaponmodel && strlen(ui_currentweaponmodel)) {
+		Com_sprintf( scratch, sizeof( scratch ), "players/%s/%s", ui_pmi[mNum].directory, ui_currentweaponmodel );
+		ui_weaponmodel = R_RegisterModel( scratch );
+		if (!ui_weaponmodel) {
+			Com_sprintf( scratch, sizeof( scratch ), "players/%s/weapon.md2", ui_pmi[mNum].directory );
+			ui_weaponmodel = R_RegisterModel( scratch );
 		}
 	}
 	else
 	{
-		Com_sprintf( scratch, sizeof( scratch ), "players/%s/weapon.md2", s_pmi[s_player_model_box.curvalue].directory );
-		weaponmodel = R_RegisterModel( scratch );
+		Com_sprintf( scratch, sizeof( scratch ), "players/%s/weapon.md2", ui_pmi[mNum].directory );
+		ui_weaponmodel = R_RegisterModel( scratch );
 	}
+#endif
 
-	Menu_AddItem( &s_player_config_menu, &s_player_name_field );
-	Menu_AddItem( &s_player_config_menu, &s_player_model_title );
-	Menu_AddItem( &s_player_config_menu, &s_player_model_box );
-	if ( s_player_skin_box.itemnames )
+	Menu_AddItem( &s_player_config_menu, &s_playerconfig_name_field );
+	Menu_AddItem( &s_player_config_menu, &s_playerconfig_model_title );
+	Menu_AddItem( &s_player_config_menu, &s_playerconfig_model_box );
+	if ( s_playerconfig_skin_box.itemnames )
 	{
-		Menu_AddItem( &s_player_config_menu, &s_player_skin_title );
-		Menu_AddItem( &s_player_config_menu, &s_player_skin_box );
+		Menu_AddItem( &s_player_config_menu, &s_playerconfig_skin_title );
+		Menu_AddItem( &s_player_config_menu, &s_playerconfig_skin_box );
 	}
-	Menu_AddItem( &s_player_config_menu, &s_player_hand_title );
-	Menu_AddItem( &s_player_config_menu, &s_player_handedness_box );
-	Menu_AddItem( &s_player_config_menu, &s_player_rate_title );
-	Menu_AddItem( &s_player_config_menu, &s_player_rate_box );
-	Menu_AddItem( &s_player_config_menu, &s_player_back_action );
+	Menu_AddItem( &s_player_config_menu, &s_playerconfig_hand_title );
+	Menu_AddItem( &s_player_config_menu, &s_playerconfig_handedness_box );
+	Menu_AddItem( &s_player_config_menu, &s_playerconfig_rate_title );
+	Menu_AddItem( &s_player_config_menu, &s_playerconfig_rate_box );
+	Menu_AddItem( &s_player_config_menu, &s_playerconfig_back_action );
 
 	return true;
 }
@@ -582,29 +354,29 @@ qboolean PlayerConfig_CheckIncerement (int dir, float x, float y, float w, float
 	min[0] = x1;	max[0] = x1 + w1;
 	min[1] = y1;	max[1] = y1 + h1;
 
-	if (cursor.x>=min[0] && cursor.x<=max[0] &&
-		cursor.y>=min[1] && cursor.y<=max[1] &&
-		!cursor.buttonused[MOUSEBUTTON1] &&
-		cursor.buttonclicks[MOUSEBUTTON1]==1)
+	if ( (ui_mousecursor.x >= min[0]) && (ui_mousecursor.x <= max[0]) &&
+		(ui_mousecursor.y >= min[1]) && (ui_mousecursor.y <= max[1]) &&
+		!ui_mousecursor.buttonused[MOUSEBUTTON1] &&
+		ui_mousecursor.buttonclicks[MOUSEBUTTON1]==1)
 	{
-		if (dir) // dir==1 is left
+		if (dir) // dir == 1 is left
 		{
-			if (s_player_skin_box.curvalue>0)
-				s_player_skin_box.curvalue--;
+			if (s_playerconfig_skin_box.curvalue > 0)
+				s_playerconfig_skin_box.curvalue--;
 		}
 		else
 		{
-			if (s_player_skin_box.curvalue<s_pmi[s_player_model_box.curvalue].nskins)
-				s_player_skin_box.curvalue++;
+			if (s_playerconfig_skin_box.curvalue < ui_pmi[s_playerconfig_model_box.curvalue].nskins)
+				s_playerconfig_skin_box.curvalue++;
 		}
 
 		sound = menu_move_sound;
-		cursor.buttonused[MOUSEBUTTON1] = true;
-		cursor.buttonclicks[MOUSEBUTTON1] = 0;
+		ui_mousecursor.buttonused[MOUSEBUTTON1] = true;
+		ui_mousecursor.buttonclicks[MOUSEBUTTON1] = 0;
 
 		if ( sound )
 			S_StartLocalSound( sound );
-		SkinCallback (NULL);
+		M_PlayerSkinCallback (NULL);
 
 		return true;
 	}
@@ -614,7 +386,7 @@ qboolean PlayerConfig_CheckIncerement (int dir, float x, float y, float w, float
 
 void PlayerConfig_MouseClick (void)
 {
-	float	icon_x = SCREEN_WIDTH*0.5 - 5, //width - 325
+	float	icon_x = SCREEN_WIDTH*0.5 - 5, // width - 325
 			icon_y = SCREEN_HEIGHT - 108,
 			icon_offset = 0;
 	int		i, count;
@@ -624,12 +396,12 @@ void PlayerConfig_MouseClick (void)
 	for (i=0; i<NUM_SKINBOX_ITEMS; i++)
 		buttons[i].index =- 1;
 
-	if (s_pmi[s_player_model_box.curvalue].nskins < NUM_SKINBOX_ITEMS || s_player_skin_box.curvalue < 4)
-		i=0;
-	else if (s_player_skin_box.curvalue > s_pmi[s_player_model_box.curvalue].nskins-4)
-		i=s_pmi[s_player_model_box.curvalue].nskins-NUM_SKINBOX_ITEMS;
+	if ( (ui_pmi[s_playerconfig_model_box.curvalue].nskins < NUM_SKINBOX_ITEMS) || (s_playerconfig_skin_box.curvalue < 4) )
+		i = 0;
+	else if (s_playerconfig_skin_box.curvalue > ui_pmi[s_playerconfig_model_box.curvalue].nskins-4)
+		i = ui_pmi[s_playerconfig_model_box.curvalue].nskins-NUM_SKINBOX_ITEMS;
 	else
-		i=s_player_skin_box.curvalue-3;
+		i = s_playerconfig_skin_box.curvalue-3;
 
 	if (i > 0)
 		if (PlayerConfig_CheckIncerement (1, icon_x-39, icon_y, 32, 32))
@@ -637,7 +409,7 @@ void PlayerConfig_MouseClick (void)
 
 	for (count=0; count<NUM_SKINBOX_ITEMS; i++,count++)
 	{
-		if (i<0 || i>=s_pmi[s_player_model_box.curvalue].nskins)
+		if ( (i < 0) || (i >= ui_pmi[s_playerconfig_model_box.curvalue].nskins) )
 			continue;
 
 		UI_AddButton (&buttons[count], i, icon_x+icon_offset, icon_y, 32, 32);
@@ -645,7 +417,7 @@ void PlayerConfig_MouseClick (void)
 	}
 
 	icon_offset = NUM_SKINBOX_ITEMS*34;
-	if (s_pmi[s_player_model_box.curvalue].nskins-i > 0)
+	if (ui_pmi[s_playerconfig_model_box.curvalue].nskins-i > 0)
 		if (PlayerConfig_CheckIncerement (0, icon_x+icon_offset+5, icon_y, 32, 32))
 			return;
 
@@ -654,20 +426,20 @@ void PlayerConfig_MouseClick (void)
 		if (buttons[i].index == -1)
 			continue;
 
-		if (cursor.x>=buttons[i].min[0] && cursor.x<=buttons[i].max[0] &&
-			cursor.y>=buttons[i].min[1] && cursor.y<=buttons[i].max[1])
+		if ( (ui_mousecursor.x >= buttons[i].min[0]) && (ui_mousecursor.x <= buttons[i].max[0]) &&
+			(ui_mousecursor.y >= buttons[i].min[1]) && (ui_mousecursor.y <= buttons[i].max[1]) )
 		{
-			if (!cursor.buttonused[MOUSEBUTTON1] && cursor.buttonclicks[MOUSEBUTTON1]==1)
+			if (!ui_mousecursor.buttonused[MOUSEBUTTON1] && ui_mousecursor.buttonclicks[MOUSEBUTTON1]==1)
 			{
-				s_player_skin_box.curvalue = buttons[i].index;
+				s_playerconfig_skin_box.curvalue = buttons[i].index;
 
 				sound = menu_move_sound;
-				cursor.buttonused[MOUSEBUTTON1] = true;
-				cursor.buttonclicks[MOUSEBUTTON1] = 0;
+				ui_mousecursor.buttonused[MOUSEBUTTON1] = true;
+				ui_mousecursor.buttonclicks[MOUSEBUTTON1] = 0;
 
 				if (sound)
 					S_StartLocalSound (sound);
-				SkinCallback (NULL);
+				M_PlayerSkinCallback (NULL);
 
 				return;
 			}
@@ -680,7 +452,7 @@ void PlayerConfig_MouseClick (void)
 void PlayerConfig_DrawSkinSelection (void)
 {
 	char	scratch[MAX_QPATH];
-	float	icon_x = SCREEN_WIDTH*0.5 - 5; //width - 325
+	float	icon_x = SCREEN_WIDTH*0.5 - 5; // width - 325
 	float	icon_y = SCREEN_HEIGHT - 108;
 	float	icon_offset = 0;
 	float	x, y, w, h;
@@ -688,15 +460,15 @@ void PlayerConfig_DrawSkinSelection (void)
 
 	CL_TextColor ((int)Cvar_VariableValue("alt_text_color"), &color[0], &color[1], &color[2]);
 
-	if (s_pmi[s_player_model_box.curvalue].nskins<NUM_SKINBOX_ITEMS || s_player_skin_box.curvalue<4)
-		i=0;
-	else if (s_player_skin_box.curvalue > s_pmi[s_player_model_box.curvalue].nskins-4)
-		i=s_pmi[s_player_model_box.curvalue].nskins-NUM_SKINBOX_ITEMS;
+	if ( (ui_pmi[s_playerconfig_model_box.curvalue].nskins < NUM_SKINBOX_ITEMS) || (s_playerconfig_skin_box.curvalue < 4) )
+		i = 0;
+	else if ( s_playerconfig_skin_box.curvalue > (ui_pmi[s_playerconfig_model_box.curvalue].nskins - 4) )
+		i = ui_pmi[s_playerconfig_model_box.curvalue].nskins-NUM_SKINBOX_ITEMS;
 	else
-		i=s_player_skin_box.curvalue-3;
+		i = s_playerconfig_skin_box.curvalue-3;
 
 	// left arrow
-	if (i>0)
+	if (i > 0)
 		Com_sprintf (scratch, sizeof(scratch), "/gfx/ui/arrows/arrow_left.pcx");
 	else
 		Com_sprintf (scratch, sizeof(scratch), "/gfx/ui/arrows/arrow_left_d.pcx");
@@ -714,14 +486,14 @@ void PlayerConfig_DrawSkinSelection (void)
 		
 	for (count=0; count<NUM_SKINBOX_ITEMS; i++,count++)
 	{
-		if (i<0 || i>=s_pmi[s_player_model_box.curvalue].nskins)
+		if ( (i < 0) || (i >= ui_pmi[s_playerconfig_model_box.curvalue].nskins) )
 			continue;
 
 		Com_sprintf (scratch, sizeof(scratch), "/players/%s/%s_i.pcx", 
-			s_pmi[s_player_model_box.curvalue].directory,
-			s_pmi[s_player_model_box.curvalue].skindisplaynames[i] );
+			ui_pmi[s_playerconfig_model_box.curvalue].directory,
+			ui_pmi[s_playerconfig_model_box.curvalue].skinDisplayNames[i] );
 
-		if (i==s_player_skin_box.curvalue)
+		if (i == s_playerconfig_skin_box.curvalue)
 			SCR_DrawFill (icon_x + icon_offset-1, icon_y-1, 34, 34, ALIGN_CENTER, color[0],color[1],color[2],255);
 		SCR_DrawPic (icon_x + icon_offset, icon_y, 32, 32,  ALIGN_CENTER, scratch, 1.0);
 		icon_offset += 34;
@@ -729,7 +501,7 @@ void PlayerConfig_DrawSkinSelection (void)
 
 	// right arrow
 	icon_offset = NUM_SKINBOX_ITEMS*34;
-	if (s_pmi[s_player_model_box.curvalue].nskins-i>0)
+	if (ui_pmi[s_playerconfig_model_box.curvalue].nskins-i>0)
 		Com_sprintf (scratch, sizeof(scratch), "/gfx/ui/arrows/arrow_right.pcx");
 	else
 		Com_sprintf (scratch, sizeof(scratch), "/gfx/ui/arrows/arrow_right_d.pcx"); 
@@ -741,6 +513,7 @@ void PlayerConfig_MenuDraw (void)
 {
 	refdef_t	refdef;
 	float		rx, ry, rw, rh;
+	qboolean	lefthand = (Cvar_VariableInteger("hand") == 1);
 
 	Menu_DrawBanner ("m_banner_plauer_setup"); // typo for image name is id's fault
 
@@ -755,7 +528,7 @@ void PlayerConfig_MenuDraw (void)
 	refdef.fov_y = CalcFov (refdef.fov_x, refdef.width, refdef.height);
 	refdef.time = cls.realtime*0.001;
  
-	if ( s_pmi[s_player_model_box.curvalue].skindisplaynames )
+	if ( ui_pmi[s_playerconfig_model_box.curvalue].skinDisplayNames )
 	{
 		int			yaw;
 		int			maxframe = 29;
@@ -768,20 +541,20 @@ void PlayerConfig_MenuDraw (void)
 
 		yaw = anglemod(cl.time/10);
 
-	//	VectorSet (modelOrg, 150, (hand->value==1)?25:-25, 0); // was 80, 0, 0
-		VectorSet (modelOrg, 150, (hand->integer == 1)?25:-25, 0); // was 80, 0, 0
+		// RF_MIRRORMODEL now eliminates the need to change origin based on handeness
+	//	VectorSet (modelOrg, 150, (lefthand)?25:-25, 0); // was 80, 0, 0
+		VectorSet (modelOrg, 150, -25, 0); // was 80, 0, 0
 
 		// Setup player model
 		ent = &entity[0];
 		memset (&entity[0], 0, sizeof(entity[0]));
 
 		// moved registration code to init and change only
-		ent->model = playermodel;
-		ent->skin = playerskin;
+		ent->model = ui_playermodel;
+		ent->skin = ui_playerskin;
 
 		ent->flags = RF_FULLBRIGHT|RF_NOSHADOW|RF_DEPTHHACK;
-	//	if (hand->value == 1)
-		if (hand->integer == 1)
+		if (lefthand)
 			ent->flags |= RF_MIRRORMODEL;
 
 		ent->origin[0] = modelOrg[0];
@@ -793,12 +566,12 @@ void PlayerConfig_MenuDraw (void)
 		ent->oldframe = 0;
 		ent->backlerp = 0.0;
 		ent->angles[1] = yaw;
-		//if ( ++yaw > 360 )
-		//	yaw -= 360;
+	//	if ( ++yaw > 360 )
+	//		yaw -= 360;
 		
-	//	if (hand->value == 1)
-		if (hand->integer == 1)
-			ent->angles[1] = 360 - ent->angles[1];
+		// RF_MIRRORMODEL now eliminates the need to reverse rotation
+	//	if (lefthand)
+	//		ent->angles[1] = 360 - ent->angles[1];
 
 		refdef.num_entities++;
 
@@ -808,15 +581,14 @@ void PlayerConfig_MenuDraw (void)
 		memset (&entity[1], 0, sizeof(entity[1]));
 
 		// moved registration code to init and change only
-		ent->model = weaponmodel;
+		ent->model = ui_weaponmodel;
 
 		if (ent->model)
 		{
 			ent->skinnum = 0;
 
 			ent->flags = RF_FULLBRIGHT|RF_NOSHADOW|RF_DEPTHHACK;
-		//	if (hand->value == 1)
-			if (hand->integer == 1)
+			if (lefthand)
 				ent->flags |= RF_MIRRORMODEL;
 
 			ent->origin[0] = modelOrg[0];
@@ -829,9 +601,9 @@ void PlayerConfig_MenuDraw (void)
 			ent->backlerp = 0.0;
 			ent->angles[1] = yaw;
 			
-		//	if (hand->value == 1)
-			if (hand->integer == 1)
-				ent->angles[1] = 360 - ent->angles[1];
+		// RF_MIRRORMODEL now eliminates the need to reverse rotation
+		//	if (lefthand)
+		//		ent->angles[1] = 360 - ent->angles[1];
 
 			refdef.num_entities++;
 		}
@@ -851,39 +623,42 @@ void PlayerConfig_MenuDraw (void)
 }
 
 
-void PConfigAccept (void)
+void M_PConfigSaveChanges (void)
 {
-	int i;
-	char scratch[1024];
+//	int		i;
+	int		mNum, sNum;
+	char	scratch[1024];
 
-	Cvar_Set( "name", s_player_name_field.buffer );
+	Cvar_Set( "name", s_playerconfig_name_field.buffer );
 
+	mNum = s_playerconfig_model_box.curvalue;
+	sNum = s_playerconfig_skin_box.curvalue;
 	Com_sprintf( scratch, sizeof( scratch ), "%s/%s", 
-		s_pmi[s_player_model_box.curvalue].directory, 
-		s_pmi[s_player_model_box.curvalue].skindisplaynames[s_player_skin_box.curvalue] );
-
+		ui_pmi[mNum].directory, ui_pmi[mNum].skinDisplayNames[sNum] );
 	Cvar_Set( "skin", scratch );
 
-	for ( i = 0; i < s_numplayermodels; i++ )
+#if 0	// This is now freed when menu subsystem shuts down
+	for ( i = 0; i < ui_numplayermodels; i++ )
 	{
 		int j;
 
-		for ( j = 0; j < s_pmi[i].nskins; j++ )
+		for ( j = 0; j < ui_pmi[i].nskins; j++ )
 		{
-			if ( s_pmi[i].skindisplaynames[j] )
-				free( s_pmi[i].skindisplaynames[j] );
-			s_pmi[i].skindisplaynames[j] = 0;
+			if ( ui_pmi[i].skinDisplayNames[j] )
+				free( ui_pmi[i].skinDisplayNames[j] );
+			ui_pmi[i].skinDisplayNames[j] = 0;
 		}
-		free( s_pmi[i].skindisplaynames );
-		s_pmi[i].skindisplaynames = 0;
-		s_pmi[i].nskins = 0;
+		free( ui_pmi[i].skinDisplayNames );
+		ui_pmi[i].skinDisplayNames = 0;
+		ui_pmi[i].nskins = 0;
 	}
+#endif
 }
 
 const char *PlayerConfig_MenuKey (int key)
 {
 	if ( key == K_ESCAPE )
-		PConfigAccept();
+		M_PConfigSaveChanges ();
 
 	return Default_MenuKey( &s_player_config_menu, key );
 }

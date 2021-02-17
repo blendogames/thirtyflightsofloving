@@ -95,7 +95,7 @@ DWORD		joy_numbuttons;
 
 static JOYINFOEX	ji;
 
-extern cursor_t cursor;
+extern cursor_t ui_mousecursorcursor;
 
 qboolean	in_appactive;
 
@@ -249,7 +249,7 @@ void IN_StartupMouse (void)
 	UI_RefreshCursorMenu();
 	UI_RefreshCursorLink();
 
-	cursor.mouseaction = false;
+	ui_mousecursor.mouseaction = false;
 
 	mouseinitialized = true;
 	mouseparmsvalid = SystemParametersInfo (SPI_GETMOUSE, 0, originalmouseparms, 0);
@@ -286,7 +286,7 @@ void IN_MouseEvent (int mstate)
 		}
 	}	
 
-	//set menu cursor buttons
+	// set menu cursor buttons
 	if (cls.key_dest == key_menu)
 	{
 		int multiclicktime = 750;
@@ -296,26 +296,26 @@ void IN_MouseEvent (int mstate)
 		for (i=0 ; i<max ; i++)
 		{
 			if ( (mstate & (1<<i)) && !(mouse_oldbuttonstate & (1<<i)))
-			{	//mouse press down
-				if (sys_msg_time-cursor.buttontime[i] < multiclicktime)
-					cursor.buttonclicks[i] += 1;
+			{	// mouse press down
+				if (sys_msg_time - ui_mousecursor.buttontime[i] < multiclicktime)
+					ui_mousecursor.buttonclicks[i] += 1;
 				else
-					cursor.buttonclicks[i] = 1;
+					ui_mousecursor.buttonclicks[i] = 1;
 
-				if (cursor.buttonclicks[i]>max)
-					cursor.buttonclicks[i] = max;
+				if (ui_mousecursor.buttonclicks[i]>max)
+					ui_mousecursor.buttonclicks[i] = max;
 
-				cursor.buttontime[i] = sys_msg_time;
+				ui_mousecursor.buttontime[i] = sys_msg_time;
 
-				cursor.buttondown[i] = true;
-				cursor.buttonused[i] = false;
-				cursor.mouseaction = true;
+				ui_mousecursor.buttondown[i] = true;
+				ui_mousecursor.buttonused[i] = false;
+				ui_mousecursor.mouseaction = true;
 			}
 			else if ( !(mstate & (1<<i)) &&	(mouse_oldbuttonstate & (1<<i)) )
-			{	//mouse let go
-				cursor.buttondown[i] = false;
-				cursor.buttonused[i] = false;
-				cursor.mouseaction = true;
+			{	// mouse let go
+				ui_mousecursor.buttondown[i] = false;
+				ui_mousecursor.buttonused[i] = false;
+				ui_mousecursor.mouseaction = true;
 			}
 		}			
 	}	
@@ -368,24 +368,24 @@ void IN_MouseMove (usercmd_t *cmd)
 	//now to set the menu cursor
 	if (cls.key_dest == key_menu)
 	{
-		cursor.oldx = cursor.x;
-		cursor.oldy = cursor.y;
+		ui_mousecursor.oldx = ui_mousecursor.x;
+		ui_mousecursor.oldy = ui_mousecursor.y;
 
-		cursor.x += mouse_x * ui_sensitivity->value;
-		cursor.y += mouse_y * ui_sensitivity->value;
+		ui_mousecursor.x += mouse_x * ui_sensitivity->value;
+		ui_mousecursor.y += mouse_y * ui_sensitivity->value;
 
-		if (cursor.x!=cursor.oldx || cursor.y!=cursor.oldy)
-			cursor.mouseaction = true;
+		if ( (ui_mousecursor.x != ui_mousecursor.oldx) || (ui_mousecursor.y != ui_mousecursor.oldy) )
+			ui_mousecursor.mouseaction = true;
 
-		if (cursor.x < 0) cursor.x = 0;
-		if (cursor.x > viddef.width) cursor.x = viddef.width;
-		if (cursor.y < 0) cursor.y = 0;
-		if (cursor.y > viddef.height) cursor.y = viddef.height;
+		if (ui_mousecursor.x < 0) ui_mousecursor.x = 0;
+		if (ui_mousecursor.x > viddef.width) ui_mousecursor.x = viddef.width;
+		if (ui_mousecursor.y < 0) ui_mousecursor.y = 0;
+		if (ui_mousecursor.y > viddef.height) ui_mousecursor.y = viddef.height;
 	}
 	else
 	{
-		cursor.oldx = 0;
-		cursor.oldy = 0;
+		ui_mousecursor.oldx = 0;
+		ui_mousecursor.oldy = 0;
 
 		//psychospaz - zooming in preserves sensitivity
 		if (in_autosensitivity->value && cl.base_fov < 90)

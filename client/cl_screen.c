@@ -1409,6 +1409,31 @@ void SCR_Init (void)
 
 
 /*
+==================
+SCR_Shutdown
+==================
+*/
+void SCR_Shutdown (void)
+{
+	if (!scr_initialized)
+		return;
+
+	Cmd_RemoveCommand ("timerefresh");
+	Cmd_RemoveCommand ("loading");
+	Cmd_RemoveCommand ("sizeup");
+	Cmd_RemoveCommand ("sizedown");
+	Cmd_RemoveCommand ("sky");
+	Cmd_RemoveCommand ("sethud");
+	Cmd_RemoveCommand ("dumpstatuslayout");
+	Cmd_RemoveCommand ("dumpgenerallayout");
+
+	// TODO: Free HUD script here
+
+	scr_initialized = false;
+}
+
+
+/*
 =================
 SCR_DrawCrosshair
 Moved from cl_view.c, what the hell was it doing there?

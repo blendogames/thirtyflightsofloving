@@ -1117,7 +1117,7 @@ struct model_s *S_RegisterSexedModel (entity_state_t *ent, char *base)
 }
 
 // Knightmare- save off current player weapon model for player config menu
-extern	char	*currentweaponmodel;
+extern	char	*ui_currentweaponmodel;
 extern	char	cl_weaponmodels[MAX_CLIENTWEAPONMODELS][MAX_QPATH];
 
 /*
@@ -1158,7 +1158,7 @@ void CL_AddPacketEntities (frame_t *frame)
 	VectorCopy( vec3_origin, clientOrg);
 
 	// Knightmare- reset current weapon model
-	currentweaponmodel = NULL;
+	ui_currentweaponmodel = NULL;
 
 	for (pnum = 0 ; pnum<frame->num_entities ; pnum++)
 	{
@@ -1420,7 +1420,7 @@ void CL_AddPacketEntities (frame_t *frame)
 			//	if (!cl_vwep->value || i > MAX_CLIENTWEAPONMODELS - 1)
 				if (!cl_vwep->integer || i > MAX_CLIENTWEAPONMODELS - 1)
 					i = 0;
-				currentweaponmodel = cl_weaponmodels[i];
+				ui_currentweaponmodel = cl_weaponmodels[i];
 			}
 
 			// fix for third-person in demos
