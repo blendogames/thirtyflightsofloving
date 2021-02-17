@@ -79,6 +79,10 @@ Changes as of v0.20 update 8:
 	previously cause a fatal server error.
 	
 - Fixed Shift-Ins to paste text not working in menus.
+
+- Fixed misaligment of left-handed player model in player config menu.
+
+- Fixed player model/skin changes not being saved when exiting player config menu via the back action.
 	
 - Fixed crash when a map has too many submodels.  Increased renderer model limit to 2 x MAX_MODELS.
 

@@ -225,8 +225,8 @@ extern int	ui_numfonts;
 //extern int	ui_numhuds;
 
 extern char **ui_crosshair_names;
-extern char **ui_crosshair_display_names;
-extern char **ui_crosshair_values;
+//extern char **ui_crosshair_display_names;
+//extern char **ui_crosshair_values;
 extern int	ui_numcrosshairs;
 
 //=======================================================
@@ -302,9 +302,9 @@ extern struct model_s *ui_playermodel;
 extern struct model_s *ui_weaponmodel;
 extern struct image_s *ui_playerskin;
 
-extern char	ui_playerconfig_playermodelname[MAX_QPATH];
-extern char	ui_playerconfig_playerskinname[MAX_QPATH];
-extern char	ui_playerconfig_weaponmodelname[MAX_QPATH];
+//extern char	ui_playerconfig_playermodelname[MAX_QPATH];
+//extern char	ui_playerconfig_playerskinname[MAX_QPATH];
+//extern char	ui_playerconfig_weaponmodelname[MAX_QPATH];
 
 //=======================================================
 

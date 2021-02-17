@@ -575,8 +575,8 @@ void UI_FreeHudNames (void)
 
 #define UI_MAX_CROSSHAIRS 101	// none + ch1-ch100
 char **ui_crosshair_names = NULL;
-char **ui_crosshair_display_names = NULL;
-char **ui_crosshair_values = NULL;
+//char **ui_crosshair_display_names = NULL;
+//char **ui_crosshair_values = NULL;
 int	ui_numcrosshairs = 0;
 
 /*
@@ -729,12 +729,12 @@ UI_LoadCrosshairs
 */
 void UI_LoadCrosshairs (void)
 {
-	int		i;
+//	int		i;
 
 	ui_crosshair_names = UI_LoadAssetList ("pics", "ch*.*", "none", &ui_numcrosshairs, UI_MAX_CROSSHAIRS, true, false, UI_IsValidCrosshairName);
 	UI_SortCrosshairs (ui_crosshair_names, ui_numcrosshairs);
 
-	ui_crosshair_display_names = malloc( sizeof(char *) * (UI_MAX_CROSSHAIRS+1) );
+/*	ui_crosshair_display_names = malloc( sizeof(char *) * (UI_MAX_CROSSHAIRS+1) );
 	memcpy(ui_crosshair_display_names, ui_crosshair_names, sizeof(char *) * (UI_MAX_CROSSHAIRS+1));
 	ui_crosshair_display_names[0] = strdup("chnone");
 
@@ -742,7 +742,7 @@ void UI_LoadCrosshairs (void)
 	memset(ui_crosshair_values, 0, sizeof(char *) * (UI_MAX_CROSSHAIRS+1) );
 
 	for (i=0; i<ui_numcrosshairs; i++)
-		ui_crosshair_values[i] = (i == 0) ? strdup("0") : strdup(strtok(ui_crosshair_names[i], "ch"));
+		ui_crosshair_values[i] = (i == 0) ? strdup("0") : strdup(strtok(ui_crosshair_names[i], "ch")); */
 }
 
 
@@ -756,16 +756,18 @@ void UI_FreeCrosshairs (void)
 	if (ui_numcrosshairs > 0)
 	{
 		FS_FreeFileList (ui_crosshair_names, ui_numcrosshairs);
-		if (ui_crosshair_display_names)
+	/*	if (ui_crosshair_display_names)
 		{
 			if (ui_crosshair_display_names[0]) {
 				free (ui_crosshair_display_names[0]);
 			}
 			free (ui_crosshair_display_names);
 		}
-		FS_FreeFileList (ui_crosshair_values, ui_numcrosshairs);
+		FS_FreeFileList (ui_crosshair_values, ui_numcrosshairs); */
 	}
-	ui_crosshair_values = NULL;
+	ui_crosshair_names = NULL;
+//	ui_crosshair_display_names = NULL;
+//	ui_crosshair_values = NULL;
 	ui_numcrosshairs = 0;
 }
 
@@ -1919,9 +1921,9 @@ struct model_s *ui_weaponmodel;
 struct image_s *ui_playerskin;
 char *ui_currentweaponmodel;
 
-char	ui_playerconfig_playermodelname[MAX_QPATH];
-char	ui_playerconfig_playerskinname[MAX_QPATH];
-char	ui_playerconfig_weaponmodelname[MAX_QPATH];
+//char	ui_playerconfig_playermodelname[MAX_QPATH];
+//char	ui_playerconfig_playerskinname[MAX_QPATH];
+//char	ui_playerconfig_weaponmodelname[MAX_QPATH];
 
 /*
 ==========================
@@ -1978,22 +1980,6 @@ Adds menu support for TGA and JPG skins
 */
 static qboolean UI_IsValidSkin (char **filelist, int numFiles, int index)
 {
-/*	int		len = (int)strlen(filelist[index]);
-
-	if (	!strcmp (filelist[index]+max(len-4,0), ".pcx")
-		||  !strcmp (filelist[index]+max(len-4,0), ".tga")
-#ifdef PNG_SUPPORT
-		||  !strcmp (filelist[index]+max(len-4,0), ".png")
-#endif // PNG_SUPPORT
-		||	!strcmp (filelist[index]+max(len-4,0), ".jpg") )
-	{
-		if (	strcmp (filelist[index]+max(len-6,0), "_i.pcx")
-			&&  strcmp (filelist[index]+max(len-6,0), "_i.tga")
-#ifdef PNG_SUPPORT
-			&&  strcmp (filelist[index]+max(len-6,0), "_i.png")
-#endif // PNG_SUPPORT
-			&&  strcmp (filelist[index]+max(len-6,0), "_i.jpg") ) */
-
 	if ( UI_IsValidImageFilename(filelist[index]) && !UI_IsSkinIcon(filelist[index]) )
 	{
 		if (	UI_IconOfSkinExists (filelist[index], filelist, numFiles-1 , "_i.pcx")
@@ -2328,11 +2314,11 @@ void UI_UpdatePlayerModelInfo (int mNum, int sNum)
 
 	Com_sprintf( scratch, sizeof(scratch), "players/%s/tris.md2", ui_pmi[mNum].directory );
 	ui_playermodel = R_RegisterModel (scratch);
-	Q_strncpyz (ui_playerconfig_playermodelname, sizeof(ui_playerconfig_playermodelname), scratch);
+//	Q_strncpyz (ui_playerconfig_playermodelname, sizeof(ui_playerconfig_playermodelname), scratch);
 
 	Com_sprintf( scratch, sizeof(scratch), "players/%s/%s.pcx", ui_pmi[mNum].directory, ui_pmi[mNum].skinDisplayNames[sNum] );
 	ui_playerskin = R_RegisterSkin (scratch);
-	Q_strncpyz (ui_playerconfig_playerskinname, sizeof(ui_playerconfig_playerskinname), scratch);
+//	Q_strncpyz (ui_playerconfig_playerskinname, sizeof(ui_playerconfig_playerskinname), scratch);
 
 	// show current weapon model (if any)
 	if (ui_currentweaponmodel && strlen(ui_currentweaponmodel))
@@ -2348,7 +2334,7 @@ void UI_UpdatePlayerModelInfo (int mNum, int sNum)
 		Com_sprintf (scratch, sizeof(scratch), "players/%s/weapon.md2", ui_pmi[mNum].directory);
 		ui_weaponmodel = R_RegisterModel (scratch);
 	}
-	Q_strncpyz (ui_playerconfig_weaponmodelname, sizeof(ui_playerconfig_weaponmodelname), scratch);
+//	Q_strncpyz (ui_playerconfig_weaponmodelname, sizeof(ui_playerconfig_weaponmodelname), scratch);
 }
 
 
@@ -2363,7 +2349,7 @@ void UI_UpdatePlayerSkinInfo (int mNum, int sNum)
 
 	Com_sprintf(scratch, sizeof(scratch), "players/%s/%s.pcx", ui_pmi[mNum].directory, ui_pmi[mNum].skinDisplayNames[sNum]);
 	ui_playerskin = R_RegisterSkin(scratch);
-	Q_strncpyz (ui_playerconfig_playerskinname, sizeof(ui_playerconfig_playerskinname), scratch);
+//	Q_strncpyz (ui_playerconfig_playerskinname, sizeof(ui_playerconfig_playerskinname), scratch);
 }
 
 
