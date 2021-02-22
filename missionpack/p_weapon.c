@@ -923,7 +923,7 @@ void Weapon_Generic (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
 				// Knightmare- the missing quadfire sounds
 				if (ent->client->quadfire_framenum > level.framenum)
 					gi.sound(ent, CHAN_ITEM, gi.soundindex("items/quadfire3.wav"), 1, ATTN_NORM, 0);
-				fire (ent, ((ent->client->latched_buttons|ent->client->buttons) & BUTTON_ATTACK2) );
+				fire (ent, ((ent->client->latched_buttons|ent->client->buttons) & BUTTON_ATTACK2));
 				break;
 			}
 		}
@@ -1438,7 +1438,7 @@ ROCKET
 ======================================================================
 */
 
-edict_t	*rocket_target(edict_t *self, vec3_t start, vec3_t forward)
+edict_t	*rocket_target (edict_t *self, vec3_t start, vec3_t forward)
 {
 	float       bd, d;
 	int			i;

@@ -492,7 +492,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\g_misc_laz.c"
+				>
+			</File>
+			<File
+				RelativePath=".\g_misc_nm.c"
+				>
+			</File>
+			<File
 				RelativePath=".\g_misc_q1.c"
+				>
+			</File>
+			<File
+				RelativePath=".\g_model.c"
 				>
 			</File>
 			<File
@@ -565,6 +577,10 @@
 			</File>
 			<File
 				RelativePath="g_target.c"
+				>
+			</File>
+			<File
+				RelativePath=".\g_target_laz.c"
 				>
 			</File>
 			<File

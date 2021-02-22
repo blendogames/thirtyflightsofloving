@@ -363,7 +363,7 @@ void dog_dead (edict_t *self)
 	M_FlyCheck (self);
 
 	// Lazarus monster fade
-	if(world->effects & FX_WORLDSPAWN_CORPSEFADE)
+	if (world->effects & FX_WORLDSPAWN_CORPSEFADE)
 	{
 		self->think = FadeDieSink;
 		self->nextthink = level.time+corpse_fadetime->value;
@@ -425,7 +425,7 @@ void dog_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, 
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_YES;
 
-	if(random() < 0.5)
+	if (random() < 0.5)
 		self->monsterinfo.currentmove = &dog_move_death1;
 	else
 		self->monsterinfo.currentmove = &dog_move_death2;
@@ -452,6 +452,9 @@ void SP_monster_dog (edict_t *self)
 	sound_attack = gi.soundindex ("dog/dattack1.wav");
 	sound_sight = gi.soundindex ("dog/dsight.wav");
 	sound_idle = gi.soundindex ("dog/idle.wav");
+
+	// precache gibs
+	gi.modelindex ("mmodels/monsters/dog/h_dog.md2");
 	
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;
@@ -467,11 +470,11 @@ void SP_monster_dog (edict_t *self)
 	VectorSet (self->mins, -16, -16, -24);
 	VectorSet (self->maxs, 16, 16, 8);
 
-	if(!self->health)
+	if (!self->health)
 		self->health = 50;
-	if(!self->gib_health)
+	if (!self->gib_health)
 		self->gib_health = -100;
-	if(!self->mass)
+	if (!self->mass)
 		self->mass = 80;
 
 	self->pain = dog_pain;

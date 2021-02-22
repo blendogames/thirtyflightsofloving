@@ -3499,6 +3499,7 @@ void train_move_children (edict_t *self)
 			{
 				VectorAdd (ent->s.angles, ent->org_angles, angles);
 				G_SetMovedir (angles, ent->movedir);
+
 				// Knightmare- these entities need special calculations
 				if (!strcmp(ent->classname, "monster_turret") || !strcmp(ent->classname, "turret_wall")) 
 			//	if ( (ent->class_id == ENTITY_MONSTER_TURRET) || (ent->class_id == ENTITY_TURRET_WALL) ) 
@@ -3776,7 +3777,7 @@ void train_remove_children (edict_t *self)
 		if (!ent->inuse)
 			return;
 		if (!strcmp(ent->movewith, self->targetname))
-		{	//recursively remove each child's children
+		{	// recursively remove each child's children
 			train_remove_children (ent);
 			G_FreeEdict(ent);
 		}
@@ -4263,7 +4264,7 @@ void train_rotate (edict_t *self)
 	//gi.bprintf (PRINT_HIGH, "train cy: %i iy: %i ys: %i\n", cur_yaw, idl_yaw, ys);
 
 	train_speed = VectorLength (self->enemy->velocity);
-	if (train_speed == 0) //Don't rotate if we're stopped
+	if (train_speed == 0) // Don't rotate if we're stopped
 		VectorClear (self->enemy->avelocity);
 
 	self->nextthink = level.time + FRAMETIME;
@@ -4362,7 +4363,7 @@ again:
 //      Set speed before train_next is called
 // Knightmare- this is only used for Rogue maps
 // train speed changes are handled differently
-	if ( (ent->speed) && (level.maptype == MAPTYPE_ROGUE))
+	if ( (ent->speed) && (level.maptype == MAPTYPE_ROGUE) )
 	{
 		self->speed = ent->speed;
 		self->moveinfo.speed = ent->speed;
@@ -4422,9 +4423,9 @@ again:
 	// Rroff rotating
 	if (self->spawnflags & TRAIN_ROTATE && !(ent->spawnflags & 2))
 	{
-//		VectorSubtract (ent->s.origin, self->s.origin, v);
-//		self->ideal_yaw = vectoyaw(v);
-//		self->ideal_pitch = vectopitch(v);			
+	//	VectorSubtract (ent->s.origin, self->s.origin, v);
+	//	self->ideal_yaw = vectoyaw(v);
+	//	self->ideal_pitch = vectopitch(v);			
 		if (self->spawnflags & TRAIN_ORIGIN) {	// Knightmare- func_train_origin support
 			VectorSubtract(ent->s.origin, self->s.origin, v);
 		}
@@ -4512,8 +4513,8 @@ void train_resume (edict_t *self)
 	if (self->spawnflags & TRAIN_ROT_CONST)
 	{
 		self->avelocity[0] = self->pitch_speed;
-		self->avelocity[1]   = self->yaw_speed;
-		self->avelocity[2]  = self->roll_speed;
+		self->avelocity[1] = self->yaw_speed;
+		self->avelocity[2] = self->roll_speed;
 	}
 }
 
@@ -5201,9 +5202,10 @@ void door_secret_done (edict_t *self)
 {
 	if (!(self->targetname) || (self->spawnflags & SECRET_ALWAYS_SHOOT))
 	{
-		// Knightmare- setting health to anything other than 0
-		// makes the die function never get called!
-		self->health = 0;
+		// Knightmare- restore user-set health here
+		// now that the correct die function is set
+	//	self->health = 0;
+		self->health = self->max_health;
 		self->takedamage = DAMAGE_YES;
 	}
 	self->moveinfo.state = STATE_LOWEST;	// Knightmare added
@@ -5246,7 +5248,6 @@ void door_secret_blocked  (edict_t *self, edict_t *other)
 
 void door_secret_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
-//	gi.dprintf("door_secret_die\n");
 	self->takedamage = DAMAGE_NO;
 	door_secret_use (self, attacker, attacker);
 }
@@ -5259,15 +5260,15 @@ void SP_func_door_secret (edict_t *ent)
 
 	if ( (level.maptype == MAPTYPE_CUSTOM) && (ent->sounds > 4) && (ent->sounds < 100) ) // custom sounds
 	{
-		ent->moveinfo.sound_start = gi.soundindex  (va("doors/dr%02i_strt.wav", ent->sounds));
-		ent->moveinfo.sound_middle = gi.soundindex  (va("doors/dr%02i_mid.wav", ent->sounds));
-		ent->moveinfo.sound_end = gi.soundindex  (va("doors/dr%02i_end.wav", ent->sounds));
+		ent->moveinfo.sound_start = gi.soundindex (va("doors/dr%02i_strt.wav", ent->sounds));
+		ent->moveinfo.sound_middle = gi.soundindex (va("doors/dr%02i_mid.wav", ent->sounds));
+		ent->moveinfo.sound_end = gi.soundindex (va("doors/dr%02i_end.wav", ent->sounds));
 	}
 	else if (ent->sounds != 1)
 	{
-		ent->moveinfo.sound_start = gi.soundindex  ("doors/dr1_strt.wav");
-		ent->moveinfo.sound_middle = gi.soundindex  ("doors/dr1_mid.wav");
-		ent->moveinfo.sound_end = gi.soundindex  ("doors/dr1_end.wav");
+		ent->moveinfo.sound_start = gi.soundindex ("doors/dr1_strt.wav");
+		ent->moveinfo.sound_middle = gi.soundindex ("doors/dr1_mid.wav");
+		ent->moveinfo.sound_end = gi.soundindex ("doors/dr1_end.wav");
 	}
 	else
 	{
@@ -5289,9 +5290,12 @@ void SP_func_door_secret (edict_t *ent)
 
 	if (!(ent->targetname) || (ent->spawnflags & SECRET_ALWAYS_SHOOT))
 	{
-		// Knightmare- setting health to anything other than 0
-		// makes the die function never get called!
-		ent->health = 0;
+		// Knightmare- we can allow user-set health here
+		// now that the correct die function is set
+	//	ent->health = 0;
+		if (!ent->health)
+			ent->health = 1;
+		ent->max_health = ent->health;
 		ent->takedamage = DAMAGE_YES;
 		ent->die = door_secret_die;
 	}
@@ -5336,7 +5340,8 @@ void SP_func_door_secret (edict_t *ent)
 	if (ent->health)
 	{
 		ent->takedamage = DAMAGE_YES;
-		ent->die = door_killed;
+	//	ent->die = door_killed;
+		ent->die = door_secret_die;	// Knightmare- this had the wrong die function set!
 		ent->max_health = ent->health;
 	}
 	else if (ent->targetname && ent->message)
@@ -6009,7 +6014,7 @@ void swinging_door_killed (edict_t *self, edict_t *inflictor, edict_t *attacker,
 				ent->nextthink = level.time + ent->moveinfo.wait;
 			return;
 		}
-		check_reverse_rotation(ent,point);
+		check_reverse_rotation (ent, point);
 		if (!(ent->flags & FL_TEAMSLAVE))
 		{
 			if (ent->moveinfo.sound_start)

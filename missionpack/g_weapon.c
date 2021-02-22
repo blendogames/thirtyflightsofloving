@@ -737,7 +737,7 @@ void fire_grenade (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int s
 	VectorScale (aimdir, speed, grenade->velocity);
 	VectorMA (grenade->velocity, 200 + crandom() * 10.0, up, grenade->velocity);
 	VectorMA (grenade->velocity, crandom() * 10.0, right, grenade->velocity);
-	//Knightmare- add player's base velocity to grenade
+	// Knightmare- add player's base velocity to grenade
 	if (add_velocity_throw->value && self->client)
 		VectorAdd (grenade->velocity, self->velocity, grenade->velocity);
 	else if (self->groundentity)

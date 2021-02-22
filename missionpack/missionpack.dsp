@@ -169,7 +169,19 @@ SOURCE=.\g_misc.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\g_misc_laz.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\g_misc_nm.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\g_misc_q1.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\g_model.c
 # End Source File
 # Begin Source File
 
@@ -242,6 +254,10 @@ SOURCE=.\g_svcmds.c
 # Begin Source File
 
 SOURCE=.\g_target.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\g_target_laz.c
 # End Source File
 # Begin Source File
 

@@ -2236,6 +2236,90 @@ void CL_InitLocal (void)
 }
 
 
+/*
+=================
+CL_ShutdownLocal
+=================
+*/
+void CL_ShutdownLocal (void)
+{
+	if (!local_initialized)
+		return;
+
+	Cmd_RemoveCommand ("cmd");
+	Cmd_RemoveCommand ("pause");
+	Cmd_RemoveCommand ("pingservers");
+	Cmd_RemoveCommand ("skins");
+
+	Cmd_RemoveCommand ("userinfo");
+	Cmd_RemoveCommand ("snd_restart");
+
+	Cmd_RemoveCommand ("changing");
+	Cmd_RemoveCommand ("disconnect");
+	Cmd_RemoveCommand ("record");
+	Cmd_RemoveCommand ("stop");
+
+	Cmd_RemoveCommand ("quit");
+
+	Cmd_RemoveCommand ("connect");
+	Cmd_RemoveCommand ("reconnect");
+
+	Cmd_RemoveCommand ("rcon");
+
+// 	Cmd_RemoveCommand ("packet"); // this is dangerous to leave in
+
+	Cmd_RemoveCommand ("setenv");
+
+	Cmd_RemoveCommand ("precache");
+
+	Cmd_RemoveCommand ("download");
+
+	Cmd_RemoveCommand ("writeconfig");
+
+	Cmd_RemoveCommand ("aacskey");
+
+	// Chat Ignore from R1Q2/Q2Pro
+	Cmd_RemoveCommand ("ignorenick");
+	Cmd_RemoveCommand ("unignorenick");
+	Cmd_RemoveCommand ("ignoretext");
+	Cmd_RemoveCommand ("unignoretext");
+	// end R1Q2/Q2Pro Chat Ignore
+
+#ifdef LOC_SUPPORT	// Xile/NiceAss LOC
+	Cmd_RemoveCommand ("loc_add");
+	Cmd_RemoveCommand ("loc_del");
+	Cmd_RemoveCommand ("loc_save");
+	Cmd_RemoveCommand ("loc_help");
+#endif	// LOC_SUPPORT
+
+	Cmd_RemoveCommand ("wave");
+	Cmd_RemoveCommand ("inven");
+	Cmd_RemoveCommand ("kill");
+	Cmd_RemoveCommand ("use");
+	Cmd_RemoveCommand ("drop");
+	Cmd_RemoveCommand ("say");
+	Cmd_RemoveCommand ("say_team");
+	Cmd_RemoveCommand ("info");
+	Cmd_RemoveCommand ("prog");
+	Cmd_RemoveCommand ("give");
+	Cmd_RemoveCommand ("god");
+	Cmd_RemoveCommand ("notarget");
+	Cmd_RemoveCommand ("noclip");
+	Cmd_RemoveCommand ("invuse");
+	Cmd_RemoveCommand ("invprev");
+	Cmd_RemoveCommand ("invnext");
+	Cmd_RemoveCommand ("invdrop");
+	Cmd_RemoveCommand ("weapnext");
+	Cmd_RemoveCommand ("weapprev");
+
+	// Chat Ignore from R1Q2/Q2Pro
+	CL_RemoveAllChatIgnores (&cl_chatNickIgnores);
+	CL_RemoveAllChatIgnores (&cl_chatTextIgnores);
+	// end R1Q2/Q2Pro Chat Ignore
+
+	local_initialized = false;
+}
+
 
 /*
 ===============
@@ -2896,6 +2980,7 @@ void CL_Shutdown (void)
 		sec = Sys_Milliseconds();
 	// end delay
 
+	CL_ShutdownLocal ();	// added Local shutdown
 	IN_Shutdown ();
 	VID_Shutdown();
 

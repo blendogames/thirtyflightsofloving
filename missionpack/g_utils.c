@@ -711,7 +711,7 @@ void G_FreeEdict (edict_t *ed)
 	}*/
 
 	if (ed->speaker) // recursively remove train's speaker entity
-		G_FreeEdict(ed->speaker);
+		G_FreeEdict (ed->speaker);
 
 	// Knightmare- stop target_playback
 	if (ed->classname && (strlen(ed->classname) > 0) && !strcmp(ed->classname, "target_playback"))
