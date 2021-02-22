@@ -20,7 +20,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 
-// ui_startserver.c -- the start server menu 
+// ui_mp_startserver.c -- the start server menu 
 
 #include <ctype.h>
 #ifdef _WIN32
@@ -47,6 +47,8 @@ static menufield_s	s_maxclients_field;
 static menufield_s	s_hostname_field;
 static menulist_s	s_startmap_list;
 menulist_s			s_rules_box;
+static menulist_s	s_dedicated_box;
+
 static menuaction_s	s_startserver_back_action;
 
 #if 0
@@ -237,7 +239,7 @@ void M_StartServerActionFunc (void *self)
 	Cvar_SetValue ("gamerules", FS_RoguePath() ? ((s_rules_box.curvalue == 4) ? 2 : 0) : 0);
 
 #if 1
-	UI_StartServer (startmap, false);
+	UI_StartServer (startmap, (s_dedicated_box.curvalue != 0));
 #else
 	spot = NULL;
 	if (s_rules_box.curvalue == 1)		// PGM
@@ -277,6 +279,12 @@ void M_StartServerActionFunc (void *self)
 
 void StartServer_MenuInit (void)
 {
+	static const char *yesno_names[] =
+	{
+		"no",
+		"yes",
+		0
+	};
 	static const char *dm_coop_names[] =
 	{
 		"deathmatch",
@@ -285,7 +293,6 @@ void StartServer_MenuInit (void)
 		"3Team CTF",
 		0
 	};
-
 	static const char *dm_coop_names_rogue[] =
 	{
 		"deathmatch",
@@ -413,12 +420,21 @@ void StartServer_MenuInit (void)
 	Q_strncpyz (s_hostname_field.buffer, sizeof(s_hostname_field.buffer), Cvar_VariableString("hostname"));
 	s_hostname_field.cursor					= (int)strlen( s_hostname_field.buffer );
 
+	s_dedicated_box.generic.type			= MTYPE_SPINCONTROL;
+	s_dedicated_box.generic.textSize		= MENU_FONT_SIZE;
+	s_dedicated_box.generic.name			= "dedicated server";;
+	s_dedicated_box.generic.x				= 0;
+	s_dedicated_box.generic.y				= y += 2*MENU_FONT_SIZE;
+	s_dedicated_box.curvalue				= 0;	// always start off
+	s_dedicated_box.generic.statusbar		= "makes the server faster, but you can't play on this computer";
+	s_dedicated_box.itemnames				= yesno_names;
+
 	s_startserver_dmoptions_action.generic.type			= MTYPE_ACTION;
 	s_startserver_dmoptions_action.generic.textSize		= MENU_FONT_SIZE;
 	s_startserver_dmoptions_action.generic.name			= " deathmatch flags";
 	s_startserver_dmoptions_action.generic.flags		= QMF_LEFT_JUSTIFY;
 	s_startserver_dmoptions_action.generic.x			= 24;
-	s_startserver_dmoptions_action.generic.y			= y += 2.25*MENU_FONT_SIZE;
+	s_startserver_dmoptions_action.generic.y			= y += 2*MENU_FONT_SIZE;
 	s_startserver_dmoptions_action.generic.statusbar	= NULL;
 	s_startserver_dmoptions_action.generic.callback		= DMOptionsFunc;
 
@@ -444,6 +460,7 @@ void StartServer_MenuInit (void)
 	Menu_AddItem( &s_startserver_menu, &s_fraglimit_field );
 	Menu_AddItem( &s_startserver_menu, &s_maxclients_field );
 	Menu_AddItem( &s_startserver_menu, &s_hostname_field );
+	Menu_AddItem( &s_startserver_menu, &s_dedicated_box );
 	Menu_AddItem( &s_startserver_menu, &s_startserver_dmoptions_action );
 	Menu_AddItem( &s_startserver_menu, &s_startserver_start_action );
 	Menu_AddItem( &s_startserver_menu, &s_startserver_back_action );

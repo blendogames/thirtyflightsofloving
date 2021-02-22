@@ -1716,6 +1716,8 @@ void Qcommon_Init (int argc, char **argv)
 	if (dedicated->value)
 		Cmd_AddCommand ("quit", Com_Quit);
 
+	dedicated->modified = false;	// make sure this starts false
+
 	Sys_Init ();
 
 	NET_Init ();
@@ -1811,8 +1813,10 @@ void Qcommon_Frame (int msec)
 		}
 	}
 
-	if (fixedtime->value)
-		msec = fixedtime->value;
+//	if (fixedtime->value)
+//		msec = fixedtime->value;
+	if (fixedtime->integer)
+		msec = abs(fixedtime->integer);
 	else if (timescale->value)
 	{
 		msec *= timescale->value;
@@ -1820,7 +1824,8 @@ void Qcommon_Frame (int msec)
 			msec = 1;
 	}
 
-	if (showtrace->value)
+//	if (showtrace->value)
+	if (showtrace->integer)
 	{
 		extern	int c_traces, c_brush_traces;
 		extern	int	c_pointcontents;
@@ -1840,21 +1845,49 @@ void Qcommon_Frame (int msec)
 
 	Cbuf_Execute ();
 
-	if (host_speeds->value)
+//	if (host_speeds->value)
+	if (host_speeds->integer)
 		time_before = Sys_Milliseconds ();
 
 	SV_Frame (msec);
 
-	if (host_speeds->value)
+	// switch to/from dedicated here
+	if (dedicated->modified)
+	{
+	//	Com_Printf ("dedicated is %f\n", dedicated->value);
+		dedicated->modified = false;
+		if (!dedicated->integer)
+		{
+			// remove server quit command, to be replaced with client quit command
+			Cmd_RemoveCommand ("quit");
+
+			CL_Init ();
+			Sys_ShowConsole (false);
+		}
+		else
+		{
+			CL_Shutdown ();
+
+			// the above function call removes client quit command, replace it with server quit command
+			Cmd_AddCommand ("quit", Com_Quit);
+
+			Sys_ShowConsole (true);
+		}
+	}
+
+//	if (host_speeds->value)
+	if (host_speeds->integer)
 		time_between = Sys_Milliseconds ();		
 
 	CL_Frame (msec);
 
-	if (host_speeds->value)
+//	if (host_speeds->value)
+	if (host_speeds->integer)
 		time_after = Sys_Milliseconds ();		
 
 
-	if (host_speeds->value)
+//	if (host_speeds->value)
+	if (host_speeds->integer)
 	{
 		int			all, sv, gm, cl, rf;
 

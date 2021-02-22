@@ -20,7 +20,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 
-// ui_download.c -- the autodownload options menu 
+// ui_mp_download.c -- the autodownload options menu 
 
 #include <ctype.h>
 #ifdef _WIN32

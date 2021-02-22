@@ -44,8 +44,10 @@ Changes as of v0.20 update 8:
 
 - Now compresses .sav and .sv2 savegame files into .savz files.  It will still read savegames from earlier
 	KMQ2 versions (with the same game DLL).  This should improve load and save times in multi-level units.
-	
+
 - Renamed cvars hud_scale, hud_alpha, and hud_squeezedigits to scr_hudsize, scr_hudalpha, and scr_hudsqueezedigits.
+
+- Added dedicated server option to start server menu.
 
 - Added descriptions for most cvars.
 
