@@ -414,8 +414,8 @@ void StartServer_MenuInit (void)
 	s_hostname_field.generic.x				= 0;
 	s_hostname_field.generic.y				= y += 2.25*MENU_FONT_SIZE;
 	s_hostname_field.generic.statusbar		= NULL;
-	s_hostname_field.length					= 12;
-	s_hostname_field.visible_length			= 12;
+	s_hostname_field.length					= 16;
+	s_hostname_field.visible_length			= 16;
 //	strncpy( s_hostname_field.buffer, Cvar_VariableString("hostname") );
 	Q_strncpyz (s_hostname_field.buffer, sizeof(s_hostname_field.buffer), Cvar_VariableString("hostname"));
 	s_hostname_field.cursor					= (int)strlen( s_hostname_field.buffer );
