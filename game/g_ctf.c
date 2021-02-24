@@ -325,6 +325,7 @@ char *ttctf_statusbar =
   "xr -28 "
   "pic 17 "
 "endif "
+"yb -102 "	// added for alignment
 "xr -62 "
 "num 2 18 "
 // joined overlay
@@ -340,6 +341,7 @@ char *ttctf_statusbar =
   "xr -28 "
   "pic 19 "
 "endif "
+"yb -75 "	// added for alignment
 "xr -62 "
 "num 2 20 "
 // joined overlay
@@ -355,6 +357,7 @@ char *ttctf_statusbar =
   "xr -28 "
   "pic 32 "
 "endif "
+"yb -48 "	// added for alignment
 "xr -62 "
 "num 2 33 "
 // joined overlay
@@ -1124,7 +1127,7 @@ qboolean CTFPickup_Flag (edict_t *ent, edict_t *other)
 	int ctf_team;
 	int i, captures = 0;
 	edict_t *player;
-	gitem_t *flag_item, *enemy_flag_item1, *enemy_flag_item2, *captured_flag_item;
+	gitem_t *flag_item, *enemy_flag_item1, *enemy_flag_item2, *captured_flag_item = NULL;
 
 	// figure out what team this flag is
 	if (strcmp(ent->classname, "item_flag_team1") == 0)
@@ -1166,9 +1169,8 @@ qboolean CTFPickup_Flag (edict_t *ent, edict_t *other)
 			{
 				if (other->client->pers.inventory[ITEM_INDEX(enemy_flag_item1)])
 				{
-					if (!ttctf->value)
-						safe_bprintf(PRINT_HIGH, "%s captured the %s flag!\n",
-								other->client->pers.netname, CTFTeamName(CTFFlagTeam(enemy_flag_item1)) );
+				//	safe_bprintf(PRINT_HIGH, "%s captured the %s flag!\n",
+				//			other->client->pers.netname, CTFTeamName(CTFFlagTeam(enemy_flag_item1)) );
 					other->client->pers.inventory[ITEM_INDEX(enemy_flag_item1)] = 0;
 
 					captured_flag_item = enemy_flag_item1;
@@ -1188,8 +1190,8 @@ qboolean CTFPickup_Flag (edict_t *ent, edict_t *other)
 				}
 				if (ttctf->value && other->client->pers.inventory[ITEM_INDEX(enemy_flag_item2)])
 				{
-					//safe_bprintf(PRINT_HIGH, "%s captured the %s flag!\n",
-					//		other->client->pers.netname, CTFTeamName(CTFFlagTeam(enemy_flag_item2)) );
+				//	safe_bprintf(PRINT_HIGH, "%s captured the %s flag!\n",
+				//			other->client->pers.netname, CTFTeamName(CTFFlagTeam(enemy_flag_item2)) );
 					other->client->pers.inventory[ITEM_INDEX(enemy_flag_item2)] = 0;
 
 					captured_flag_item = enemy_flag_item2;
@@ -1210,30 +1212,35 @@ qboolean CTFPickup_Flag (edict_t *ent, edict_t *other)
 
 				gi.sound (ent, CHAN_RELIABLE+CHAN_NO_PHS_ADD+CHAN_VOICE, gi.soundindex("ctf/flagcap.wav"), 1, ATTN_NONE, 0);
 
-				//ScarFace- double capture detection
+				// ScarFace- double capture detection
 				if (captures == 2) { // other gets 40 frag bonus
 					other->client->resp.score += CTF_DOUBLE_CAPTURE_BONUS;
 					safe_bprintf(PRINT_HIGH, "%s captured the %s and %s flags for a double capture!\n",
 							other->client->pers.netname, CTFTeamName(CTFFlagTeam(enemy_flag_item1)),
 							CTFTeamName(CTFFlagTeam(enemy_flag_item2)) );
 				}
-				else // other gets 15 frag bonus
+				else { // other gets 15 frag bonus
 					other->client->resp.score += CTF_CAPTURE_BONUS;
+					if (captured_flag_item != NULL)
+						safe_bprintf(PRINT_HIGH, "%s captured the %s flag!\n",
+							other->client->pers.netname, CTFTeamName(CTFFlagTeam(captured_flag_item)) );
+				}
 
-				//ScarFace- support for 2-carrier double capture in 3Team CTF mode
-				//2 captures must be made within 20 seconds of each other
-				//Each carrier gets 30 points
-				//Carrier 1: CTF_CAPTURE_BONUS 15pts + CTF_TEAM_BONUS 10pts + 5pts = 30pts total
-				//Carrier 2: CTF_TEAM_BONUS 10pts + CTF_CAPTURE_BONUS 15pts + 5pts = 30pts total
-				//FIXME- how to check if the same flag has been captured twice?
-				if (ttctf->value && ctf_team == CTF_TEAM1 && captures == 1)
+				// ScarFace- support for 2-carrier double capture in 3Team CTF mode
+				// 2 captures must be made within 20 seconds of each other
+				// Each carrier gets 30 points
+				// Carrier 1: CTF_CAPTURE_BONUS 15pts + CTF_TEAM_BONUS 10pts + 5pts = 30pts total
+				// Carrier 2: CTF_TEAM_BONUS 10pts + CTF_CAPTURE_BONUS 15pts + 5pts = 30pts total
+				// FIXME- how to check if the same flag has been captured twice?
+				if ( ttctf->value && (ctf_team == CTF_TEAM1) && (captures == 1) )
 				{
 					if (ctfgame.team1_doublecapture_time
 						&& ctfgame.team1_doublecapture_time > level.time
 						&& other != ctfgame.team1_last_flag_capturer)
 					{
-						safe_bprintf(PRINT_HIGH, "%s captured the %s flag for a double capture!\n",
-							other->client->pers.netname, CTFTeamName(CTFFlagTeam(captured_flag_item)) );
+						if (captured_flag_item != NULL)
+							safe_bprintf(PRINT_HIGH, "%s captured the %s flag for a double capture!\n",
+								other->client->pers.netname, CTFTeamName(CTFFlagTeam(captured_flag_item)) );
 						other->client->resp.score += 5;
 						if (ctfgame.team1_last_flag_capturer && ctfgame.team1_last_flag_capturer->client)
 							ctfgame.team1_last_flag_capturer->client->resp.score += 5;
@@ -1242,21 +1249,20 @@ qboolean CTFPickup_Flag (edict_t *ent, edict_t *other)
 					}
 					else
 					{
-					//	my_bprintf(PRINT_HIGH, "%s started the double capture timer!\n", other->client->pers.netname);
-						safe_bprintf(PRINT_HIGH, "%s captured the %s flag!\n",
-							other->client->pers.netname, CTFTeamName(CTFFlagTeam(captured_flag_item)) );
+					//	safe_bprintf(PRINT_HIGH, "%s started the double capture timer!\n", other->client->pers.netname);
 						ctfgame.team1_doublecapture_time = level.time + CTF_DOUBLE_CAPTURE_TIMEOUT;
 						ctfgame.team1_last_flag_capturer = other;
 					}
 				}
-				else if (ttctf->value && ctf_team == CTF_TEAM2 && captures == 1)
+				else if ( ttctf->value && (ctf_team == CTF_TEAM2) && (captures == 1) )
 				{
 					if (ctfgame.team2_doublecapture_time
 						&& ctfgame.team2_doublecapture_time > level.time
 						&& other != ctfgame.team2_last_flag_capturer)
 					{
-						safe_bprintf(PRINT_HIGH, "%s captured the %s flag for a double capture!\n",
-							other->client->pers.netname, CTFTeamName(CTFFlagTeam(captured_flag_item)) );
+						if (captured_flag_item != NULL)
+							safe_bprintf(PRINT_HIGH, "%s captured the %s flag for a double capture!\n",
+								other->client->pers.netname, CTFTeamName(CTFFlagTeam(captured_flag_item)) );
 						other->client->resp.score += 5;
 						if (ctfgame.team2_last_flag_capturer && ctfgame.team2_last_flag_capturer->client)
 							ctfgame.team2_last_flag_capturer->client->resp.score += 5;
@@ -1265,21 +1271,20 @@ qboolean CTFPickup_Flag (edict_t *ent, edict_t *other)
 					}
 					else
 					{
-					//	my_bprintf(PRINT_HIGH, "%s started the double capture timer!\n", other->client->pers.netname);
-						safe_bprintf(PRINT_HIGH, "%s captured the %s flag!\n",
-							other->client->pers.netname, CTFTeamName(CTFFlagTeam(captured_flag_item)) );
+					//	safe_bprintf(PRINT_HIGH, "%s started the double capture timer!\n", other->client->pers.netname);
 						ctfgame.team2_doublecapture_time = level.time + CTF_DOUBLE_CAPTURE_TIMEOUT;
 						ctfgame.team2_last_flag_capturer = other;
 					}
 				}
-				else if (ttctf->value && ctf_team == CTF_TEAM3 && captures == 1)
+				else if ( ttctf->value && (ctf_team == CTF_TEAM3) && (captures == 1) )
 				{
 					if (ctfgame.team3_doublecapture_time
 						&& ctfgame.team3_doublecapture_time > level.time
 						&& other != ctfgame.team3_last_flag_capturer)
 					{
-						safe_bprintf(PRINT_HIGH, "%s captured the %s flag for a double capture!\n",
-							other->client->pers.netname, CTFTeamName(CTFFlagTeam(captured_flag_item)) );
+						if (captured_flag_item != NULL)
+							safe_bprintf(PRINT_HIGH, "%s captured the %s flag for a double capture!\n",
+								other->client->pers.netname, CTFTeamName(CTFFlagTeam(captured_flag_item)) );
 						other->client->resp.score += 5;
 						if (ctfgame.team3_last_flag_capturer && ctfgame.team3_last_flag_capturer->client)
 							ctfgame.team3_last_flag_capturer->client->resp.score += 5;
@@ -1288,9 +1293,7 @@ qboolean CTFPickup_Flag (edict_t *ent, edict_t *other)
 					}
 					else
 					{
-					//	my_bprintf(PRINT_HIGH, "%s started the double capture timer!\n", other->client->pers.netname);
-						safe_bprintf(PRINT_HIGH, "%s captured the %s flag!\n",
-							other->client->pers.netname, CTFTeamName(CTFFlagTeam(captured_flag_item)) );
+					//	safe_bprintf(PRINT_HIGH, "%s started the double capture timer!\n", other->client->pers.netname);
 						ctfgame.team3_doublecapture_time = level.time + CTF_DOUBLE_CAPTURE_TIMEOUT;
 						ctfgame.team3_last_flag_capturer = other;
 					}
@@ -1563,6 +1566,8 @@ void CTFFlagSetup (edict_t *ent)
 			ent->item->world_model = "models/ctf/flags/flag1.md2";
 		if (strcmp(ent->classname, "item_flag_team2") == 0)
 			ent->item->world_model = "models/ctf/flags/flag2.md2";
+		if (strcmp(ent->classname, "item_flag_team3") == 0)
+			ent->item->world_model = "models/ctf/flags/flag3.md2";
 	}
 	else {
 		if (strcmp(ent->classname, "item_flag_team1") == 0)
@@ -1909,7 +1914,7 @@ void SetCTFStats (edict_t *ent)
 	if (ttctf->value) // Knightmare added
 		ent->client->ps.stats[STAT_CTF_TEAM3_PIC] = p3;
 
-	if (ctfgame.last_flag_capture && level.time - ctfgame.last_flag_capture < 5)
+	if ( (ctfgame.last_flag_capture) && (level.time - ctfgame.last_flag_capture < 5) )
 	{
 		if (ctfgame.last_capture_team == CTF_TEAM1)
 			if (level.framenum & 8)
@@ -1939,9 +1944,9 @@ void SetCTFStats (edict_t *ent)
 	// Knightmare changed
 	if (ent->client->resp.ctf_team == CTF_TEAM1)
 	{
-		if (ttctf->value && ent->client->pers.inventory[ITEM_INDEX(flag2_item)]
+		if ( ttctf->value && ent->client->pers.inventory[ITEM_INDEX(flag2_item)]
 			&& ent->client->pers.inventory[ITEM_INDEX(flag3_item)]
-			&& (level.framenum & 8))
+			&& (level.framenum & 8) )
 		{
 			ent->client->ps.stats[STAT_CTF_FLAG_PIC] = imageindex_i_ctf2;
 			ent->client->ps.stats[STAT_CTF_FLAG_PIC2] = imageindex_i_ctf3;
@@ -1955,9 +1960,9 @@ void SetCTFStats (edict_t *ent)
 	}
 	else if (ent->client->resp.ctf_team == CTF_TEAM2)
 	{
-		if (ttctf->value && ent->client->pers.inventory[ITEM_INDEX(flag1_item)]
+		if ( ttctf->value && ent->client->pers.inventory[ITEM_INDEX(flag1_item)]
 			&& ent->client->pers.inventory[ITEM_INDEX(flag3_item)]
-			&& (level.framenum & 8))
+			&& (level.framenum & 8) )
 		{
 			ent->client->ps.stats[STAT_CTF_FLAG_PIC] = imageindex_i_ctf1;
 			ent->client->ps.stats[STAT_CTF_FLAG_PIC2] = imageindex_i_ctf3;
@@ -2475,8 +2480,8 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer)
 	int maxsize = 1000;
 
 	// sort the clients by team and score
-	total[0] = total[1] = total[2]= 0;
-	last[0] = last[1] = last[2]= 0;
+	total[0] = total[1] = total[2] = 0;
+	last[0] = last[1] = last[2] = 0;
 	totalscore[0] = totalscore[1] = totalscore[2] = 0;
 	for (i=0; i<game.maxclients; i++)
 	{
@@ -2542,7 +2547,7 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer)
 
 	for (i=0; i<16; i++)
 	{
-		if (i >= total[0] && i >= total[1] && i > total[2])
+		if ( (i >= total[0]) && (i >= total[1]) && (i > total[2]) )
 			break; // we're done
 		
 		*entry = 0;
@@ -2694,7 +2699,7 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer)
 		}
 
 		// 3Team CTF right side
-		if (ttctf->value && i < total[2])
+		if ( ttctf->value && (i < total[2]) )
 		{
 			cl = &game.clients[sorted[2][i]];
 			cl_ent = g_edicts + 1 + sorted[2][i];
@@ -3907,14 +3912,15 @@ struct {
 
 /*static*/ void CTFSay_Team_Sight (edict_t *who, char *buf, size_t bufSize)
 {
-	int i;
+	int		i;
 	edict_t *targ;
-	int n = 0;
-	char s[1024];
-	char s2[1024];
+	int		n = 0;
+	char	s[1024];
+	char	s2[1024];
 
 	*s = *s2 = 0;
-	for (i = 1; i <= maxclients->value; i++) {
+	for (i = 1; i <= maxclients->value; i++)
+	{
 		targ = g_edicts + i;
 		if (!targ->inuse || 
 			targ == who ||
@@ -4974,7 +4980,8 @@ int TTCTFUpdateJoinMenu (edict_t *ent)
 			ttctf_joinmenu[ttctf_jmenu_blue].SelectFunc = NULL;
 			ttctf_joinmenu[ttctf_jmenu_green].text = NULL;
 			ttctf_joinmenu[ttctf_jmenu_green].SelectFunc = NULL;
-		} else if (Q_stricmp(ctf_forcejoin->string, "blue") == 0) {
+		}
+		else if (Q_stricmp(ctf_forcejoin->string, "blue") == 0) {
 			ttctf_joinmenu[ttctf_jmenu_red].text = NULL;
 			ttctf_joinmenu[ttctf_jmenu_red].SelectFunc = NULL;
 			ttctf_joinmenu[ttctf_jmenu_green].text = NULL;
@@ -5702,7 +5709,8 @@ void CTFAdmin_MatchSet(edict_t *ent, pmenuhnd_t *p)
 		ctfgame.matchtime = level.time + matchstarttime->value;
 		gi.positioned_sound (world->s.origin, world, CHAN_AUTO | CHAN_RELIABLE, gi.soundindex("misc/talk1.wav"), 1, ATTN_NONE, 0);
 		ctfgame.countdown = false;
-	} else if (ctfgame.match == MATCH_GAME) {
+	}
+	else if (ctfgame.match == MATCH_GAME) {
 		safe_bprintf(PRINT_CHAT, "Match has been forced to terminate.\n");
 		ctfgame.match = MATCH_SETUP;
 		ctfgame.matchtime = level.time + matchsetuptime->value * 60;
