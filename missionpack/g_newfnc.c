@@ -166,11 +166,12 @@ void fd_secret_move6 (edict_t *self)
     // added sound
 	if (self->moveinfo.sound_start)
 		gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_start, 1, self->attenuation, 0); // was ATTN_STATIC
-	if (self->moveinfo.sound_middle)
+	if (self->moveinfo.sound_middle) {
 		self->s.sound = self->moveinfo.sound_middle;
 #ifdef LOOP_SOUND_ATTENUATION
 		self->s.attenuation = self->attenuation;
 #endif
+	}
 
 	self->moveinfo.state = STATE_DOWN;
 	Move_Calc (self, self->pos0, fd_secret_done);

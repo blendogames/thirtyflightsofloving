@@ -2972,13 +2972,15 @@ void CL_Shutdown (void)
 		sec = Sys_Milliseconds();
 	// end delay
 
-	S_Shutdown();
+	S_Shutdown ();
 
 	// added delay
 	sec = base = Sys_Milliseconds();
 	while ((sec - base) < 200)
 		sec = Sys_Milliseconds();
 	// end delay
+
+	V_Shutdown ();
 
 	CL_ShutdownLocal ();	// added Local shutdown
 	IN_Shutdown ();

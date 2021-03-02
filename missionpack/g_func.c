@@ -3784,7 +3784,7 @@ void train_remove_children (edict_t *self)
 	}
 }
 
-//Knightmare- these functions fade away the movewith children of func_breakaway
+// Knightmare- these functions fade away the movewith children of func_breakaway
 #ifdef KMQUAKE2_ENGINE_MOD
 void fade_child (edict_t *ent);
 
@@ -3890,6 +3890,11 @@ void fade_children2 (edict_t *self)
 			ent->think = G_FreeEdict;
 		}
 	}
+}
+
+// Gotta have this for extractfuncs...
+void fade_child (edict_t *ent)
+{
 }
 #endif
 

@@ -44,7 +44,7 @@ float		scr_letterbox_lines;		// 0.0 to 1.0 lines of letterbox to display
 qboolean	scr_letterbox_active;
 qboolean	scr_hidehud;
 
-qboolean	scr_initialized;		// ready to draw
+qboolean	scr_initialized = false;		// ready to draw
 
 int			scr_draw_loading;
 

@@ -62,6 +62,8 @@ foginfo_t	r_foginfo;	// Knightmare added
 char		cl_weaponmodels[MAX_CLIENTWEAPONMODELS][MAX_QPATH];
 int			num_cl_weaponmodels;
 
+qboolean	v_initialized = false;		// ready to draw
+
 /*
 ====================
 V_ClearScene
@@ -973,4 +975,33 @@ void V_Init (void)
 
 	// Knightmare- init fog info
 	V_ClearFogInfo ();
+
+	v_initialized = true;
+}
+
+
+/*
+=============
+V_Shutdown
+=============
+*/
+void V_Shutdown (void)
+{
+	if (!v_initialized)
+		return;
+
+	Cmd_RemoveCommand ("gun_next");
+	Cmd_RemoveCommand ("gun_prev");
+	Cmd_RemoveCommand ("gun_model");
+
+	Cmd_RemoveCommand ("viewpos");
+
+	// Knightmare- diagnostic commands from Lazarus
+	Cmd_RemoveCommand ("texture");
+	Cmd_RemoveCommand ("surf");
+//	Cmd_RemoveCommand ("bbox");
+
+	V_ClearFogInfo ();
+
+	v_initialized = false;
 }

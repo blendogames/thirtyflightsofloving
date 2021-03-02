@@ -1387,8 +1387,8 @@ void G_SetClientSound (edict_t *ent)
 	// RAFAEL
 	else if (strcmp (weap, "weapon_phalanx") == 0)
 		ent->s.sound = gi.soundindex ("weapons/phaloop.wav");
-	//Knightmare - ambient sounds for ION Ripper and Shockwave
-	else if (strcmp (weap, "weapon_boomer") == 0)
+	// Knightmare - ambient sounds for ION Ripper and Shockwave
+	else if ( (strcmp (weap, "weapon_boomer") == 0) && ion_ripper_extra_sounds->value)
 		ent->s.sound = gi.soundindex ("weapons/ion_hum.wav");
 	else if (strcmp (weap, "weapon_shockwave") == 0)
 		ent->s.sound = gi.soundindex ("weapons/shock_hum.wav");

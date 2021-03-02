@@ -910,6 +910,7 @@ void V_ClipCam (vec3_t start, vec3_t end, vec3_t newpos);
 void V_CalcViewerCamTrans (float dist);
 void V_AddEntity (entity_t *ent);
 void V_Init (void);
+void V_Shutdown (void);
 
 // Psychospaz's enhanced particle code
 void V_AddParticle (vec3_t org, vec3_t angle, vec3_t color, float alpha,

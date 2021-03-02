@@ -387,8 +387,10 @@ void CL_ExecuteLayoutString (char *s, qboolean isStatusBar)
 
 			token = COM_Parse (&s);
 			value = atoi(token);
-			if (value >= MAX_CLIENTS || value < 0)
-				Com_Error (ERR_DROP, "client >= MAX_CLIENTS");
+			if (value >= MAX_CLIENTS)
+				Com_Error (ERR_DROP, "client (%d) >= MAX_CLIENTS", value);
+			else if (value < 0)
+				Com_Error (ERR_DROP, "client (%d) < 0", value);
 			ci = &cl.clientinfo[value];
 
 			token = COM_Parse (&s);
@@ -424,8 +426,10 @@ void CL_ExecuteLayoutString (char *s, qboolean isStatusBar)
 
 			token = COM_Parse (&s);
 			value = atoi(token);
-			if (value >= MAX_CLIENTS || value < 0)
-				Com_Error (ERR_DROP, "client >= MAX_CLIENTS");
+			if (value >= MAX_CLIENTS)
+				Com_Error (ERR_DROP, "client (%d) >= MAX_CLIENTS", value);
+			else if (value < 0)
+				Com_Error (ERR_DROP, "client (%d) < 0", value);
 			ci = &cl.clientinfo[value];
 
 			token = COM_Parse (&s);
@@ -457,8 +461,10 @@ void CL_ExecuteLayoutString (char *s, qboolean isStatusBar)
 
 			token = COM_Parse (&s);
 			value = atoi(token);
-			if (value >= MAX_CLIENTS || value < 0)
-				Com_Error (ERR_DROP, "client >= MAX_CLIENTS");
+			if (value >= MAX_CLIENTS)
+				Com_Error (ERR_DROP, "client (%d) >= MAX_CLIENTS", value);
+			else if (value < 0)
+				Com_Error (ERR_DROP, "client (%d) < 0", value);
 			ci = &cl.clientinfo[value];
 
 			token = COM_Parse (&s);

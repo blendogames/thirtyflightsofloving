@@ -350,7 +350,7 @@ void InitLithiumVars (void)
 	turn_rider = gi.cvar("turn_rider", "1", CVAR_ARCHIVE);
 	adjust_train_corners = gi.cvar("adjust_train_corners", "0", CVAR_ARCHIVE);
 
-	ion_ripper_extra_sounds = gi.cvar("ion_ripper_extra_sounds", "1", CVAR_ARCHIVE);
+	ion_ripper_extra_sounds = gi.cvar("ion_ripper_extra_sounds", "0", CVAR_ARCHIVE);
 	add_velocity_throw = gi.cvar("add_velocity_throw", "0", CVAR_ARCHIVE);
 	falling_armor_damage = gi.cvar("falling_armor_damage", "0", CVAR_ARCHIVE);
 	player_jump_sounds = gi.cvar("player_jump_sounds", "1", CVAR_ARCHIVE);
