@@ -29,6 +29,7 @@ void CL_LocPlace (void);
 #endif	// LOC_SUPPORT
 
 void Cmd_ForwardToServer (void);
+void CL_ForcePacket (void);
 
 #define	MAX_ALIAS_NAME	32
 
@@ -249,6 +250,9 @@ void Cbuf_Execute (void)
 		{
 			// skip out while text still remains in buffer, leaving it
 			// for next frame
+		//	if (!dedicated->value)
+			if (!dedicated->integer)
+				CL_ForcePacket ();
 			cmd_wait = false;
 			break;
 		}

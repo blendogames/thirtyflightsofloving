@@ -128,24 +128,28 @@ SV_SetMaxBaselinesSize
 int SV_SetMaxBaselinesSize (void)
 {
 	//	bounds check sv_baselines_maxlen
-	if (sv_baselines_maxlen->value < 400)
+//	if (sv_baselines_maxlen->value < 400)
+	if (sv_baselines_maxlen->integer < 400)
 	{
 		Com_Printf (S_COLOR_YELLOW"WARNING: sv_baselines_maxlen is less than 400!  Setting to default value of 1200.\n");
 		Cvar_Set ("sv_baselines_maxlen", "1200");
 	}
-	if (sv_baselines_maxlen->value > MAX_MSGLEN)
+//	if (sv_baselines_maxlen->value > MAX_MSGLEN)
+	if (sv_baselines_maxlen->integer > MAX_MSGLEN)
 	{
 		Com_Printf (S_COLOR_YELLOW"WARNING: sv_baselines_maxlen is larger than MAX_MSGLEN of %i!  Setting to default value of 1200.\n", MAX_MSGLEN);
 		Cvar_Set ("sv_baselines_maxlen", "1200");
 	}
-	if (sv_baselines_maxlen->value > 1400)
+//	if (sv_baselines_maxlen->value > 1400)
+	if (sv_baselines_maxlen->integer > 1400)
 	{
 		Com_Printf (S_COLOR_YELLOW"WARNING: sv_baselines_maxlen is larger than 1400!  Setting to default value of 1200.\n");
 		Cvar_Set ("sv_baselines_maxlen", "1200");
 	}
 
 	// use MAX_MSGLEN/2 for SP and local clients
-	if ( (sv_client->netchan.remote_address.type == NA_LOOPBACK) || (maxclients->value == 1) )
+//	if ( (sv_client->netchan.remote_address.type == NA_LOOPBACK) || (maxclients->value == 1) )
+	if ( (sv_client->netchan.remote_address.type == NA_LOOPBACK) || (maxclients->integer == 1) )
 		return MAX_MSGLEN/2;
 	else
 		return sv_baselines_maxlen->integer;
@@ -464,13 +468,20 @@ void SV_BeginDownload_f(void)
 
 	valid = true;
 
-	if ( !allow_download->value
+/*	if ( !allow_download->value
 		|| (strncmp(name, "players/", 8) == 0 && !allow_download_players->value)
 		|| (strncmp(name, "models/", 7) == 0 && !allow_download_models->value)
 		|| (strncmp(name, "sound/", 6) == 0 && !allow_download_sounds->value)
 		|| (strncmp(name, "maps/", 5) == 0 && !allow_download_maps->value)
 		|| (strncmp(name, "pics/", 5) == 0 && !allow_download_pics->value)
-		|| ( ((strncmp(name, "env/", 4) == 0 || strncmp(name, "textures/", 9) == 0)) && !allow_download_textures->value ) )
+		|| ( ((strncmp(name, "env/", 4) == 0 || strncmp(name, "textures/", 9) == 0)) && !allow_download_textures->value ) )*/
+	if ( !allow_download->integer
+		|| (strncmp(name, "players/", 8) == 0 && !allow_download_players->integer)
+		|| (strncmp(name, "models/", 7) == 0 && !allow_download_models->integer)
+		|| (strncmp(name, "sound/", 6) == 0 && !allow_download_sounds->integer)
+		|| (strncmp(name, "maps/", 5) == 0 && !allow_download_maps->integer)
+		|| (strncmp(name, "pics/", 5) == 0 && !allow_download_pics->integer)
+		|| ( ((strncmp(name, "env/", 4) == 0 || strncmp(name, "textures/", 9) == 0)) && !allow_download_textures->integer ) )
 		valid = false;
 
 	if (!valid)
@@ -694,7 +705,8 @@ void SV_ClientThink (client_t *cl, usercmd_t *cmd)
 {
 	cl->commandMsec -= cmd->msec;
 
-	if (cl->commandMsec < 0 && sv_enforcetime->value )
+//	if (cl->commandMsec < 0 && sv_enforcetime->value )
+	if (cl->commandMsec < 0 && sv_enforcetime->integer )
 	{
 		Com_DPrintf ("commandMsec underflow from %s\n", cl->name);
 		return;
@@ -803,7 +815,8 @@ void SV_ExecuteClientMessage (client_t *cl)
 				return;
 			}
 
-			if (!sv_paused->value)
+		//	if (!sv_paused->value)
+			if (!sv_paused->integer)
 			{
 				net_drop = cl->netchan.dropped;
 				if (net_drop < 20)

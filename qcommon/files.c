@@ -322,7 +322,8 @@ qboolean FS_ModType (const char *name)
 // This enables Rogue menu options for Q2MP4
 qboolean FS_RoguePath (void)
 {
-	if (FS_ModType("rogue") || fs_roguegame->value)
+//	if (FS_ModType("rogue") || fs_roguegame->value)
+	if (FS_ModType("rogue") || fs_roguegame->integer)
 		return true;
 	return false;
 }
@@ -338,7 +339,8 @@ void FS_DPrintf (const char *format, ...)
 	char		msg[1024];
 	va_list		argPtr;
 
-	if (!fs_debug->value)
+//	if (!fs_debug->value)
+	if (!fs_debug->integer)
 		return;
 
 	va_start(argPtr, format);
@@ -568,13 +570,15 @@ int FS_FOpenFileAppend (fsHandle_t *handle)
 	handle->file = fopen(path, "ab");
 	if (handle->file)
 	{
-		if (fs_debug->value)
+	//	if (fs_debug->value)
+		if (fs_debug->integer)
 			Com_Printf("FS_FOpenFileAppend: %s\n", path);
 
 		return FS_FileLength(handle->file);
 	}
 
-	if (fs_debug->value)
+//	if (fs_debug->value)
+	if (fs_debug->integer)
 		Com_Printf("FS_FOpenFileAppend: couldn't open %s\n", path);
 
 	return -1;
@@ -604,12 +608,14 @@ int FS_FOpenFileWrite (fsHandle_t *handle)
 	handle->file = fopen(path, "wb");
 	if (handle->file)
 	{
-		if (fs_debug->value)
+	//	if (fs_debug->value)
+		if (fs_debug->integer)
 			Com_Printf("FS_FOpenFileWrite: %s\n", path);
 		return 0;
 	}
 
-	if (fs_debug->value)
+//	if (fs_debug->value)
+	if (fs_debug->integer)
 		Com_Printf("FS_FOpenFileWrite: couldn't open %s\n", path);
 
 	return -1;
@@ -675,7 +681,8 @@ int FS_FOpenFileRead (fsHandle_t *handle)
 					Com_FilePath(pack->name, fs_fileInPath, sizeof(fs_fileInPath));
 					fs_fileInPack = true;
 
-					if (fs_debug->value)
+				//	if (fs_debug->value)
+					if (fs_debug->integer)
 						Com_Printf("FS_FOpenFileRead: %s (found in %s)\n", handle->name, pack->name);
 
 					if (pack->pak)
@@ -725,7 +732,8 @@ int FS_FOpenFileRead (fsHandle_t *handle)
 				Q_strncpyz(fs_fileInPath, sizeof(fs_fileInPath), search->path);
 				fs_fileInPack = false;
 
-				if (fs_debug->value)
+			//	if (fs_debug->value)
+				if (fs_debug->integer)
 					Com_Printf("FS_FOpenFileRead: %s (found in %s)\n", handle->name, search->path);
 
 				return FS_FileLength(handle->file);
@@ -737,7 +745,8 @@ int FS_FOpenFileRead (fsHandle_t *handle)
 	fs_fileInPath[0] = 0;
 	fs_fileInPack = false;
 
-	if (fs_debug->value)
+//	if (fs_debug->value)
+	if (fs_debug->integer)
 		Com_Printf("FS_FOpenFileRead: couldn't find %s\n", handle->name);
 
 	return -1;
@@ -818,14 +827,16 @@ int FS_FOpenCompressedFileWrite (fsHandle_t *handle, const char *zipName, const 
 	{
 		if (zipOpenNewFileInZip(handle->writeZip, fileName, NULL, NULL, 0, NULL, 0, NULL, Z_DEFLATED, Z_DEFAULT_COMPRESSION) == ZIP_OK)
 		{
-			if (fs_debug->value)
+		//	if (fs_debug->value)
+			if (fs_debug->integer)
 				Com_Printf("FS_FOpenCompressedFileWrite: %s/%s\n", path, fileName);
 			return 0;
 		}
 		zipClose(handle->writeZip, NULL);
 	}
 
-	if (fs_debug->value)
+//	if (fs_debug->value)
+	if (fs_debug->integer)
 		Com_Printf("FS_FOpenCompressedFileWrite: couldn't open %s/%s\n", path, fileName);
 
 	return -1;
@@ -862,7 +873,8 @@ int FS_FOpenCompressedFileRead (fsHandle_t *handle, const char *zipName, const c
 					{	// Found it!
 						Q_strncpyz(fs_fileInPath, sizeof(fs_fileInPath), search->path);
 						fs_fileInPack = false;
-						if (fs_debug->value)
+					//	if (fs_debug->value)
+						if (fs_debug->integer)
 							Com_Printf("FS_FOpenCompressedFileRead: %s (found in %s/%s)\n", fileName, search->path, zipName);
 
 						unzGetCurrentFileInfo(handle->zip, &info, NULL, 0, NULL, 0, NULL, 0);
@@ -878,7 +890,8 @@ int FS_FOpenCompressedFileRead (fsHandle_t *handle, const char *zipName, const c
 	fs_fileInPath[0] = 0;
 	fs_fileInPack = false;
 
-	if (fs_debug->value)
+//	if (fs_debug->value)
+	if (fs_debug->integer)
 		Com_Printf("FS_FOpenCompressedFileRead: couldn't find %s\n", handle->name);
 
 	return -1;
@@ -2827,7 +2840,8 @@ void FS_SetGamedir (const char *dir)
 	//
 	// flush all data, so it will be forced to reload
 	//
-	if (dedicated && !dedicated->value)
+//	if (dedicated && !dedicated->value)
+	if (dedicated && !dedicated->integer)
 		Cbuf_AddText ("vid_restart\nsnd_restart\n");
 
 	if (*dir == 0)	// Knightmare- set to basedir if a blank dir is passed

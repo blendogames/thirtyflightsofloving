@@ -140,21 +140,24 @@ void Com_Printf (char *fmt, ...)
 		Sys_ConsoleOutput (msg);
 
 	// logfile
-	if (logfile_active && logfile_active->value)
+//	if (logfile_active && logfile_active->value)
+	if (logfile_active && logfile_active->integer)
 	{
 		char	name[MAX_QPATH];
 		
 		if (!logfile)
 		{
 			Com_sprintf (name, sizeof(name), "%s/qconsole.log", FS_Savegamedir ());	// was FS_Gamedir()
-			if (logfile_active->value > 2)
+		//	if (logfile_active->value > 2)
+			if (logfile_active->integer > 2)
 				logfile = fopen (name, "a");
 			else
 				logfile = fopen (name, "w");
 		}
 		if (logfile)
 			fprintf (logfile, "%s", msg);
-		if (logfile_active->value > 1)
+	//	if (logfile_active->value > 1)
+		if (logfile_active->integer > 1)
 			fflush (logfile);		// force it to save every time
 	}
 }
@@ -172,7 +175,8 @@ void Com_DPrintf (char *fmt, ...)
 	va_list		argptr;
 	char		msg[MAXPRINTMSG];
 		
-	if (!developer || !developer->value)
+//	if (!developer || !developer->value)
+	if (!developer || !developer->integer)
 		return;			// don't confuse non-developers with techie stuff...
 
 	va_start (argptr, fmt);
@@ -1713,7 +1717,8 @@ void Qcommon_Init (int argc, char **argv)
 	s = va("KMQ2 %4.2f %s %s %s %s", VERSION, CPUSTRING, OS_STRING, COMPILETYPE_STRING, __DATE__);
 	Cvar_Get ("version", s, CVAR_SERVERINFO|CVAR_NOSET);
 
-	if (dedicated->value)
+//	if (dedicated->value)
+	if (dedicated->integer)
 		Cmd_AddCommand ("quit", Com_Quit);
 
 	dedicated->modified = false;	// make sure this starts false
@@ -1727,18 +1732,16 @@ void Qcommon_Init (int argc, char **argv)
 	CL_Init ();
 
 #ifdef _WIN32  // Knightmare- remove startup logo, code from TomazQuake
-#ifdef NEW_DED_CONSOLE // Hide console
-	if (!dedicated->value)
-		Sys_ShowConsole(false);
-#else	
-	DestroyWindow (hwnd_dialog);
-#endif
+//	if (!dedicated->value)
+	if (!dedicated->integer)
+		Sys_ShowConsole (false);
 #endif
 
 	// add + commands from command line
 	if (!Cbuf_AddLateCommands ())
 	{	// if the user didn't give any commands, run default action
-		if (!dedicated->value)
+//		if (!dedicated->value)
+		if (!dedicated->integer)
 			Cbuf_AddText ("d1\n");
 		else
 			Cbuf_AddText ("dedicated_start\n");
@@ -1787,7 +1790,8 @@ void Qcommon_Frame (int msec)
 	if ( log_stats->modified )
 	{
 		log_stats->modified = false;
-		if ( log_stats->value )
+	//	if ( log_stats->value )
+		if ( log_stats->integer )
 		{
 			char	name[MAX_QPATH];
 

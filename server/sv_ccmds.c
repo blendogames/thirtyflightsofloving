@@ -45,7 +45,8 @@ void SV_SetMaster_f (void)
 	int		i, slot;
 
 	// only dedicated servers send heartbeats
-	if (!dedicated->value)
+//	if (!dedicated->value)
+	if (!dedicated->integer)
 	{
 		Com_Printf ("Only dedicated servers use masters.\n");
 		return;
@@ -108,7 +109,8 @@ qboolean SV_SetPlayer (void)
 	if (s[0] >= '0' && s[0] <= '9')
 	{
 		idnum = atoi(Cmd_Argv(1));
-		if (idnum < 0 || idnum >= maxclients->value)
+	//	if (idnum < 0 || idnum >= maxclients->value)
+		if (idnum < 0 || idnum >= maxclients->integer)
 		{
 			Com_Printf ("Bad client slot: %i\n", idnum);
 			return false;
@@ -125,7 +127,8 @@ qboolean SV_SetPlayer (void)
 	}
 
 	// check for a name match
-	for (i=0,cl=svs.clients ; i<maxclients->value; i++,cl++)
+//	for (i=0,cl=svs.clients ; i<maxclients->value; i++,cl++)
+	for (i=0,cl=svs.clients ; i<maxclients->integer; i++,cl++)
 	{
 		if (!cl->state)
 			continue;
@@ -427,7 +430,8 @@ void SV_WriteScreenshot (void)
 {
 	char	name[MAX_OSPATH];
 
-	if (dedicated->value) // can't do this in dedicated mode
+//	if (dedicated->value) // can't do this in dedicated mode
+	if (dedicated->integer) // can't do this in dedicated mode
 		return;
 
 	Com_DPrintf("SV_WriteScreenshot()\n");
@@ -689,8 +693,10 @@ void SV_GameMap_f (void)
 			// clear all the client inuse flags before saving so that
 			// when the level is re-entered, the clients will spawn
 			// at spawn points instead of occupying body shells
-			savedInuse = malloc(maxclients->value * sizeof(qboolean));
-			for (i=0,cl=svs.clients ; i<maxclients->value; i++,cl++)
+		//	savedInuse = malloc(maxclients->value * sizeof(qboolean));
+			savedInuse = malloc(maxclients->integer * sizeof(qboolean));
+		//	for (i=0,cl=svs.clients ; i<maxclients->value; i++,cl++)
+			for (i=0,cl=svs.clients ; i<maxclients->integer; i++,cl++)
 			{
 				savedInuse[i] = cl->edict->inuse;
 				cl->edict->inuse = false;
@@ -699,7 +705,8 @@ void SV_GameMap_f (void)
 			SV_WriteLevelFile ();
 
 			// we must restore these for clients to transfer over correctly
-			for (i=0,cl=svs.clients ; i<maxclients->value; i++,cl++)
+		//	for (i=0,cl=svs.clients ; i<maxclients->value; i++,cl++)
+			for (i=0,cl=svs.clients ; i<maxclients->integer; i++,cl++)
 				cl->edict->inuse = savedInuse[i];
 			free (savedInuse);
 		}
@@ -715,7 +722,8 @@ void SV_GameMap_f (void)
 	// Knightmare- don't do this in deathmatch or for cinematics
 	l = (int)strlen(map);
 	//l = strcspn(map, "+");
-	if (!dedicated->value && !Cvar_VariableValue("deathmatch")
+//	if (!dedicated->value && !Cvar_VariableValue("deathmatch")
+	if (!dedicated->integer && !Cvar_VariableValue("deathmatch")
 		&& Q_strcasecmp (map+l-4, ".cin") && Q_strcasecmp (map+l-4, ".roq")
 		&& Q_strcasecmp (map+l-4, ".pcx"))
 	{
@@ -752,8 +760,8 @@ void SV_Map_f (void)
 		if (FS_LoadFile (expanded, NULL) == -1)
 		{
 			Com_Printf ("Can't find %s\n", expanded);
-			//if (!dedicated->value && cls.state != ca_connected) // Knightmare added
-			//	CL_Drop ();
+		//	if (!dedicated->integer && cls.state != ca_connected) // Knightmare added
+		//		CL_Drop ();
 			return;
 		}
 	}
@@ -784,6 +792,7 @@ void SV_Loadgame_f (void)
 	char	name[MAX_OSPATH];
 	FILE	*f;
 	char	*dir;
+	qboolean	quicksave = false;
 
 	if (Cmd_Argc() != 2)
 	{
@@ -799,6 +808,9 @@ void SV_Loadgame_f (void)
 		Com_Printf ("Bad savedir.\n");
 	}
 
+//	quicksave = ( !dedicated->value && (!strcmp(Cmd_Argv(1), "quick") || !strcmp(Cmd_Argv(1), "quik")) );
+	quicksave = ( !dedicated->integer && (!strcmp(Cmd_Argv(1), "quick") || !strcmp(Cmd_Argv(1), "quik")) );
+
 	// make sure the server.ssv file exists
 //	Com_sprintf (name, sizeof(name), "%s/save/%s/server.ssv", FS_Savegamedir(), Cmd_Argv(1));	// was FS_Gamedir()
 	Com_sprintf (name, sizeof(name), "%s/"SAVEDIRNAME"/%s/server.ssv", FS_Savegamedir(), Cmd_Argv(1));	// was FS_Gamedir()
@@ -811,7 +823,7 @@ void SV_Loadgame_f (void)
 	fclose (f);
 
 	// Knightmare- set saveshot name
-	if ( !dedicated->value && (!strcmp(Cmd_Argv(1), "quick") || !strcmp(Cmd_Argv(1), "quik")) )
+	if (quicksave)
 	{
 	//	Com_sprintf(sv_loadshotname, sizeof(sv_loadshotname), "save/%s/shot.jpg", Cmd_Argv(1));
 		Com_sprintf(sv_loadshotname, sizeof(sv_loadshotname), SAVEDIRNAME"/%s/shot.jpg", Cmd_Argv(1));
@@ -842,7 +854,7 @@ SV_Savegame_f
 
 void SV_Savegame_f (void)
 {
-	char	*dir;
+	char		*dir;
 	qboolean	quicksave = false;
 
 	if (sv.state != ss_game)
@@ -879,13 +891,15 @@ void SV_Savegame_f (void)
 		return;
 	}
 
-	quicksave = ( !dedicated->value && (!strcmp(Cmd_Argv(1), "quick") || !strcmp(Cmd_Argv(1), "quik")) );
+//	quicksave = ( !dedicated->value && (!strcmp(Cmd_Argv(1), "quick") || !strcmp(Cmd_Argv(1), "quik")) );
+	quicksave = ( !dedicated->integer && (!strcmp(Cmd_Argv(1), "quick") || !strcmp(Cmd_Argv(1), "quik")) );
 
 	// Knightmare- grab screen for quicksave
-	if ( !dedicated->value && (!strcmp(Cmd_Argv(1), "quick") || !strcmp(Cmd_Argv(1), "quik")) )
+	if (quicksave)
 		R_GrabScreen();
 
-	if (maxclients->value == 1 && svs.clients[0].edict->client->ps.stats[STAT_HEALTH] <= 0)
+//	if (maxclients->value == 1 && svs.clients[0].edict->client->ps.stats[STAT_HEALTH] <= 0)
+	if (maxclients->integer == 1 && svs.clients[0].edict->client->ps.stats[STAT_HEALTH] <= 0)
 	{
 		Com_Printf ("\nCan't savegame while dead!\n");
 		return;
@@ -971,7 +985,8 @@ void SV_Status_f (void)
 
 	Com_Printf ("num score ping name            lastmsg address               qport \n");
 	Com_Printf ("--- ----- ---- --------------- ------- --------------------- ------\n");
-	for (i=0,cl=svs.clients ; i<maxclients->value; i++,cl++)
+//	for (i=0,cl=svs.clients ; i<maxclients->value; i++,cl++)
+	for (i=0,cl=svs.clients ; i<maxclients->integer; i++,cl++)
 	{
 		if (!cl->state)
 			continue;
@@ -1036,7 +1051,8 @@ void SV_ConSay_f(void)
 //	strncat(text, p);
 	Q_strncatz(text, sizeof(text), p);
 
-	for (j = 0, client = svs.clients; j < maxclients->value; j++, client++)
+//	for (j = 0, client = svs.clients; j < maxclients->value; j++, client++)
+	for (j = 0, client = svs.clients; j < maxclients->integer; j++, client++)
 	{
 		if (client->state != cs_spawned)
 			continue;
@@ -1333,7 +1349,8 @@ void SV_InitOperatorCommands (void)
 	Cmd_AddCommand ("gamemap", SV_GameMap_f);
 	Cmd_AddCommand ("setmaster", SV_SetMaster_f);
 
-	if ( dedicated->value )
+//	if ( dedicated->value )
+	if ( dedicated->integer )
 		Cmd_AddCommand ("say", SV_ConSay_f);
 
 	Cmd_AddCommand ("serverrecord", SV_ServerRecord_f);

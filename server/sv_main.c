@@ -125,7 +125,8 @@ client_t *GetClientFromAdr (netadr_t address)
 	int			i;
 	qboolean	found = false;
 
-	for (i = 0; i < maxclients->value; i++)
+//	for (i = 0; i < maxclients->value; i++)
+	for (i = 0; i < maxclients->integer; i++)
 	{
 		cl = &svs.clients[i];
 		if (NET_CompareBaseAdr(cl->netchan.remote_address, address)) {
@@ -224,7 +225,8 @@ char	*SV_StatusString (void)
 	Q_strncatz (status, sizeof(status), "\n");
 	statusLength = (int)strlen(status);
 
-	for (i=0 ; i<maxclients->value ; i++)
+//	for (i=0 ; i<maxclients->value ; i++)
+	for (i=0 ; i<maxclients->integer ; i++)
 	{
 		cl = &svs.clients[i];
 		if (cl->state == cs_connected || cl->state == cs_spawned )
@@ -285,7 +287,8 @@ void SVC_Info (void)
 	int		i, count;
 	int		version;
 
-	if (maxclients->value == 1)
+//	if (maxclients->value == 1)
+	if (maxclients->integer == 1)
 		return;		// ignore in single player
 
 	version = atoi (Cmd_Argv(1));
@@ -298,11 +301,13 @@ void SVC_Info (void)
 	else
 	{
 		count = 0;
-		for (i=0 ; i<maxclients->value ; i++)
+	//	for (i=0 ; i<maxclients->value ; i++)
+		for (i=0 ; i<maxclients->integer ; i++)
 			if (svs.clients[i].state >= cs_connected)
 				count++;
 
-		Com_sprintf (string, sizeof(string), "%16s %8s %2i/%2i\n", hostname->string, sv.name, count, (int)maxclients->value);
+	//	Com_sprintf (string, sizeof(string), "%16s %8s %2i/%2i\n", hostname->string, sv.name, count, (int)maxclients->value);
+		Com_sprintf (string, sizeof(string), "%16s %8s %2i/%2i\n", hostname->string, sv.name, count, maxclients->integer);
 	}
 
 	Netchan_OutOfBandPrint (NS_SERVER, net_from, "info\n%s", string);
@@ -405,7 +410,8 @@ void SVC_DirectConnect (void)
 
 	// r1ch: limit connections from a single IP
 	previousclients = 0;
-	for (i=0,cl=svs.clients; i<(int)maxclients->value; i++,cl++)
+//	for (i=0,cl=svs.clients; i<(int)maxclients->value; i++,cl++)
+	for (i=0,cl=svs.clients; i<maxclients->integer; i++,cl++)
 	{
 		if (cl->state == cs_free)
 			continue;
@@ -467,7 +473,8 @@ void SVC_DirectConnect (void)
 	memset (newcl, 0, sizeof(client_t));
 
 	// if there is already a slot for this ip, reuse it
-	for (i=0,cl=svs.clients ; i<maxclients->value ; i++,cl++)
+//	for (i=0,cl=svs.clients ; i<maxclients->value ; i++,cl++)
+	for (i=0,cl=svs.clients; i<maxclients->integer; i++,cl++)
 	{
 		if (cl->state == cs_free)
 			continue;
@@ -475,7 +482,8 @@ void SVC_DirectConnect (void)
 			&& ( cl->netchan.qport == qport 
 			|| adr.port == cl->netchan.remote_address.port ) )
 		{
-			if (!NET_IsLocalAddress (adr) && (svs.realtime - cl->lastconnect) < ((int)sv_reconnect_limit->value * 1000))
+		//	if (!NET_IsLocalAddress (adr) && (svs.realtime - cl->lastconnect) < ((int)sv_reconnect_limit->value * 1000))
+			if (!NET_IsLocalAddress (adr) && (svs.realtime - cl->lastconnect) < (sv_reconnect_limit->integer * 1000))
 			{
 				Com_DPrintf ("%s:reconnect rejected : too soon\n", NET_AdrToString (adr));
 				return;
@@ -503,7 +511,8 @@ void SVC_DirectConnect (void)
 
 	// find a client slot
 	newcl = NULL;
-	for (i=0,cl=svs.clients ; i<maxclients->value ; i++,cl++)
+//	for (i=0,cl=svs.clients ; i<maxclients->value ; i++,cl++)
+	for (i=0,cl=svs.clients ; i<maxclients->integer ; i++,cl++)
 	{
 		if (cl->state == cs_free)
 		{
@@ -686,7 +695,8 @@ void SV_CalcPings (void)
 	client_t	*cl;
 	int			total, count;
 
-	for (i=0 ; i<maxclients->value ; i++)
+//	for (i=0 ; i<maxclients->value ; i++)
+	for (i=0 ; i<maxclients->integer ; i++)
 	{
 		cl = &svs.clients[i];
 		if (cl->state != cs_spawned )
@@ -740,7 +750,8 @@ void SV_GiveMsec (void)
 	if (sv.framenum & 15)
 		return;
 
-	for (i=0 ; i<maxclients->value ; i++)
+//	for (i=0 ; i<maxclients->value ; i++)
+	for (i=0 ; i<maxclients->integer ; i++)
 	{
 		cl = &svs.clients[i];
 		if (cl->state == cs_free )
@@ -779,7 +790,8 @@ void SV_ReadPackets (void)
 		qport = MSG_ReadShort (&net_message) & 0xffff;
 
 		// check for packets from connected clients
-		for (i=0, cl=svs.clients ; i<maxclients->value ; i++,cl++)
+	//	for (i=0, cl=svs.clients ; i<maxclients->value ; i++,cl++)
+		for (i=0, cl=svs.clients ; i<maxclients->integer ; i++,cl++)
 		{
 			if (cl->state == cs_free)
 				continue;
@@ -804,7 +816,8 @@ void SV_ReadPackets (void)
 			break;
 		}
 		
-		if (i != maxclients->value)
+	//	if (i != maxclients->value)
+		if (i != maxclients->integer)
 			continue;
 	}
 }
@@ -832,7 +845,8 @@ void SV_CheckTimeouts (void)
 	droppoint = svs.realtime - 1000*timeout->value;
 	zombiepoint = svs.realtime - 1000*zombietime->value;
 
-	for (i=0,cl=svs.clients ; i<maxclients->value ; i++,cl++)
+//	for (i=0,cl=svs.clients ; i<maxclients->value ; i++,cl++)
+	for (i=0,cl=svs.clients ; i<maxclients->integer ; i++,cl++)
 	{
 		// message times may be wrong across a changelevel
 		if (cl->lastmessage > svs.realtime)
@@ -887,7 +901,8 @@ SV_RunGameFrame
 */
 void SV_RunGameFrame (void)
 {
-	if (host_speeds->value)
+//	if (host_speeds->value)
+	if (host_speeds->integer)
 		time_before_game = Sys_Milliseconds ();
 
 	// we always need to bump framenum, even if we
@@ -898,20 +913,23 @@ void SV_RunGameFrame (void)
 	sv.time = sv.framenum*100;
 
 	// don't run if paused
-	if (!sv_paused->value || maxclients->value > 1)
+//	if (!sv_paused->value || maxclients->value > 1)
+	if (!sv_paused->integer || maxclients->integer > 1)
 	{
 		ge->RunFrame ();
 
 		// never get more than one tic behind
 		if (sv.time < svs.realtime)
 		{
-			if (sv_showclamp->value)
+		//	if (sv_showclamp->value)
+			if (sv_showclamp->integer)
 				Com_Printf ("sv highclamp\n");
 			svs.realtime = sv.time;
 		}
 	}
 
-	if (host_speeds->value)
+//	if (host_speeds->value)
+	if (host_speeds->integer)
 		time_after_game = Sys_Milliseconds ();
 
 }
@@ -942,12 +960,14 @@ void SV_Frame (int msec)
 	SV_ReadPackets ();
 
 	// move autonomous things around if enough time has passed
-	if (!sv_timedemo->value && svs.realtime < sv.time)
+//	if (!sv_timedemo->value && svs.realtime < sv.time)
+	if (!sv_timedemo->integer && svs.realtime < sv.time)
 	{
 		// never let the time get too far off
 		if (sv.time - svs.realtime > 100)
 		{
-			if (sv_showclamp->value)
+		//	if (sv_showclamp->value)
+			if (sv_showclamp->integer)
 				Com_Printf ("sv lowclamp\n");
 			svs.realtime = sv.time - 100;
 		}
@@ -995,11 +1015,13 @@ void Master_Heartbeat (void)
 	int			i;
 
 	// pgm post 3.19 change, cvar pointer not validated before dereferencing
-	if (!dedicated || !dedicated->value)
+//	if (!dedicated || !dedicated->value)
+	if (!dedicated || !dedicated->integer)
 		return;		// only dedicated servers send heartbeats
 
 	// pgm post 3.19 change, cvar pointer not validated before dereferencing
-	if (!public_server || !public_server->value)
+//	if (!public_server || !public_server->value)
+	if (!public_server || !public_server->integer)
 		return;		// a private dedicated game
 
 	// check for time wraparound
@@ -1035,11 +1057,13 @@ void Master_Shutdown (void)
 	int			i;
 
 	// pgm post3.19 change, cvar pointer not validated before dereferencing
-	if (!dedicated || !dedicated->value)
+//	if (!dedicated || !dedicated->value)
+	if (!dedicated || !dedicated->integer)
 		return;		// only dedicated servers send heartbeats
 
 	// pgm post3.19 change, cvar pointer not validated before dereferencing
-	if (!public_server || !public_server->value)
+//	if (!public_server || !public_server->value)
+	if (!public_server || !public_server->integer)
 		return;		// a private dedicated game
 
 	// send to group master
@@ -1223,12 +1247,14 @@ void SV_FinalMessage (char *message, qboolean reconnect)
 	// send it twice
 	// stagger the packets to crutch operating system limited buffers
 
-	for (i=0, cl = svs.clients ; i<maxclients->value ; i++, cl++)
+//	for (i=0, cl = svs.clients ; i<maxclients->value ; i++, cl++)
+	for (i=0, cl = svs.clients ; i<maxclients->integer ; i++, cl++)
 		if (cl->state >= cs_connected)
 			Netchan_Transmit (&cl->netchan, net_message.cursize
 			, net_message.data);
 
-	for (i=0, cl = svs.clients ; i<maxclients->value ; i++, cl++)
+//	for (i=0, cl = svs.clients ; i<maxclients->value ; i++, cl++)
+	for (i=0, cl = svs.clients ; i<maxclients->integer ; i++, cl++)
 		if (cl->state >= cs_connected)
 			Netchan_Transmit (&cl->netchan, net_message.cursize
 			, net_message.data);

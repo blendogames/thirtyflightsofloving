@@ -533,7 +533,8 @@ CMod_LoadEntityString
 void CMod_LoadEntityString (lump_t *l, char *name)
 {
 	// Knightmare- .ent file support
-	if (sv_entfile->value)
+//	if (sv_entfile->value)
+	if (sv_entfile->integer)
 	{
 		char	s[MAX_QPATH];
 		char	*buffer = NULL;
@@ -662,36 +663,6 @@ cmodel_t *CM_LoadMap (char *name, qboolean clientload, unsigned *checksum)
 	CMod_LoadVisibility (&header.lumps[LUMP_VISIBILITY]);
 	CMod_LoadEntityString (&header.lumps[LUMP_ENTITIES], name);
 
-	// Knightmare- replaced this with better implementation
-/*	// Barnes- try to load entity replacement file
-	if (sv_entfile->value)
-	{
-		unsigned		*entbuf;
-		int				entlength;
-		char			entfile[MAX_QPATH];
-		qboolean		foundentfile;
-
-	//	strncpy(entfile, name);
-		Q_strncpyz(entfile, sizeof(entfile), name);
-		entfile[strlen(entfile)-4] = 0;
-	//	strncat(entfile, ".ent");
-		Q_strncatz(entfile, sizeof(entfile), ".ent");
-		entlength = FS_LoadFile(entfile, (void **)&entbuf);
-		if (entbuf)
-		{
-			map_entitystring[0] = 0;
-			numentitychars = entlength;
-			Com_Printf ("Parsing entities from %s\n", entfile);
-			if (entlength > MAX_MAP_ENTSTRING)
-				Com_Error (ERR_DROP, ".ent file has too large entity lump - %i", entlength);
-			memcpy(map_entitystring, entbuf, numentitychars);
-			FS_FreeFile (entbuf);
-			foundentfile = true;
-		}
-		//if (!entbuf)
-		//	Com_Printf ("External entities not found. Using bsp entities\n");
-	}
-*/
 	FS_FreeFile (buf);
 
 	CM_InitBoxHull ();
@@ -1737,7 +1708,8 @@ void	CM_SetAreaPortalState (int portalnum, qboolean open)
 
 qboolean	CM_AreasConnected (int area1, int area2)
 {
-	if (map_noareas->value)
+//	if (map_noareas->value)
+	if (map_noareas->integer)
 		return true;
 
 	if (area1 > numareas || area2 > numareas)
@@ -1767,7 +1739,8 @@ int CM_WriteAreaBits (byte *buffer, int area)
 
 	bytes = (numareas+7)>>3;
 
-	if (map_noareas->value)
+//	if (map_noareas->value)
+	if (map_noareas->integer)
 	{	// for debugging, send everything
 		memset (buffer, 255, bytes);
 	}

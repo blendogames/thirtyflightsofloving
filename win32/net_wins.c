@@ -353,7 +353,7 @@ void NET_SendLoopPacket (netsrc_t sock, int length, void *data, netadr_t to)
 //=============================================================================
 void SV_DropClientFromAdr (netadr_t address);
 
-qboolean	NET_GetPacket (netsrc_t sock, netadr_t *net_from, sizebuf_t *net_message)
+qboolean NET_GetPacket (netsrc_t sock, netadr_t *net_from, sizebuf_t *net_message)
 {
 	int 	ret;
 	struct	sockaddr from;
@@ -402,7 +402,7 @@ qboolean	NET_GetPacket (netsrc_t sock, netadr_t *net_from, sizebuf_t *net_messag
 				SV_DropClientFromAdr (*net_from);
 				continue;
 			}
-			//if (dedicated->value)	// let dedicated servers continue after errors
+			//if (dedicated->integer)	// let dedicated servers continue after errors
 			// let servers continue after errors
 				Com_Printf ("NET_GetPacket: %s from %s\n", NET_ErrorString(),
 					NET_AdrToString(*net_from));
@@ -485,7 +485,8 @@ void NET_SendPacket (netsrc_t sock, int length, void *data, netadr_t to)
 			&& ((to.type == NA_BROADCAST) || (to.type == NA_BROADCAST_IPX)))
 			return;
 
-		if (dedicated->value)	// let dedicated servers continue after errors
+	//	if (dedicated->value)	// let dedicated servers continue after errors
+		if (dedicated->integer)	// let dedicated servers continue after errors
 		{
 			Com_Printf ("NET_SendPacket ERROR: %s to %s\n", NET_ErrorString(),
 				NET_AdrToString (to));
@@ -755,22 +756,25 @@ void	NET_Config (qboolean multiplayer)
 	}
 	else
 	{	// open sockets
-		if (! noudp->value)
+	//	if (! noudp->value)
+		if (! noudp->integer)
 			NET_OpenIP ();
-		if (! noipx->value)
+	//	if (! noipx->value)
+		if (! noipx->integer)
 			NET_OpenIPX ();
 	}
 }
 
 // sleeps msec or until net socket is ready
-void NET_Sleep(int msec)
+void NET_Sleep (int msec)
 {
     struct timeval timeout;
 	fd_set	fdset;
 	extern cvar_t *dedicated;
 	int i;
 
-	if (!dedicated || !dedicated->value)
+//	if (!dedicated || !dedicated->value)
+	if (!dedicated || !dedicated->integer)
 		return; // we're not a server, just run full speed
 
 	FD_ZERO(&fdset);

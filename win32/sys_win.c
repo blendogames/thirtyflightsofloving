@@ -114,7 +114,8 @@ Sys_InitConsole
 */
 void Sys_InitConsole (void)
 {
-	if (!dedicated->value)
+//	if (!dedicated->value)
+	if (!dedicated->integer)
 		return;
 
 	if (!AllocConsole ())
@@ -138,7 +139,8 @@ char *Sys_ConsoleInput (void)
 	int		dummy;
 	int		ch, numread, numevents;
 
-	if (!dedicated || !dedicated->value)
+//	if (!dedicated || !dedicated->value)
+	if (!dedicated || !dedicated->integer)
 		return NULL;
 
 	for ( ;; )
@@ -213,7 +215,8 @@ void Sys_ConsoleOutput (char *string)
 	int		dummy;
 	char	text[256];
 
-	if (!dedicated || !dedicated->value)
+//	if (!dedicated || !dedicated->value)
+	if (!dedicated || !dedicated->integer)
 		return;
 
 	if (console_textlen)
@@ -229,6 +232,12 @@ void Sys_ConsoleOutput (char *string)
 
 	if (console_textlen)
 		WriteFile(houtput, console_text, console_textlen, &dummy, NULL);
+}
+
+void Sys_ShowConsole (qboolean show)
+{
+	if (!show)
+		Sys_RemoveStartupLogo ();
 }
 
 //================================================================
@@ -352,7 +361,8 @@ void Sys_Quit (void)
 	CL_Shutdown();
 	Qcommon_Shutdown ();
 	CloseHandle (qwclsemaphore);
-	if (dedicated && dedicated->value)
+//	if (dedicated && dedicated->value)
+	if (dedicated && dedicated->integer)
 		FreeConsole ();
 
 #ifdef NEW_DED_CONSOLE
@@ -1571,6 +1581,45 @@ void ParseCommandLine (LPSTR lpCmdLine)
 	}
 }
 
+// Knightmare- startup logo, code from TomazQuake
+#ifndef NEW_DED_CONSOLE
+HWND		hwnd_dialog; // Knightmare added
+qboolean	logoRemoved = false;
+
+void Sys_CreateStartupLogo (void)
+{
+//	if (!(dedicated && dedicated->integer))
+	{
+		hwnd_dialog = CreateDialog(hInstance, MAKEINTRESOURCE(IDD_DIALOG1), NULL, NULL);
+		RECT			rect; // Knightmare added
+
+		if (hwnd_dialog)
+		{
+			if (GetWindowRect (hwnd_dialog, &rect))
+			{
+				if (rect.left > (rect.top * 2))
+				{
+					SetWindowPos (hwnd_dialog, 0, (rect.left/2) - ((rect.right - rect.left)/2), rect.top, 0, 0, SWP_NOZORDER | SWP_NOSIZE);
+				}
+			}
+
+			ShowWindow (hwnd_dialog, SW_SHOWDEFAULT);
+			UpdateWindow (hwnd_dialog);
+			SetForegroundWindow (hwnd_dialog);
+		}
+	}
+	// end Knightmare
+}
+
+void Sys_RemoveStartupLogo (void)
+{
+	if (!logoRemoved) {
+		DestroyWindow (hwnd_dialog);
+		logoRemoved = true;
+	}
+}
+#endif	// NEW_DED_CONSOLE
+
 
 /*
 ==================
@@ -2005,7 +2054,6 @@ WinMain
 ==================
 */
 HINSTANCE	global_hInstance;
-HWND		hwnd_dialog; // Knightmare added
 
 int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
@@ -2030,35 +2078,12 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 
 	Init_ExeDir ();	// Knightmare added
 
-#ifndef NEW_DED_CONSOLE
-	// Knightmare- startup logo, code from TomazQuake
-	//if (!(dedicated && dedicated->value))
-	{
-		hwnd_dialog = CreateDialog(hInstance, MAKEINTRESOURCE(IDD_DIALOG1), NULL, NULL);
-		RECT			rect; // Knightmare added
-
-		if (hwnd_dialog)
-		{
-			if (GetWindowRect (hwnd_dialog, &rect))
-			{
-				if (rect.left > (rect.top * 2))
-				{
-					SetWindowPos (hwnd_dialog, 0, (rect.left/2) - ((rect.right - rect.left)/2), rect.top, 0, 0, SWP_NOZORDER | SWP_NOSIZE);
-				}
-			}
-
-			ShowWindow (hwnd_dialog, SW_SHOWDEFAULT);
-			UpdateWindow (hwnd_dialog);
-			SetForegroundWindow (hwnd_dialog);
-		}
-	}
-	// end Knightmare
-#endif
-
 #ifdef NEW_DED_CONSOLE // init debug console
 	Sys_InitDedConsole ();
 	Com_Printf("KMQ2 %4.2f %s %s %s %s\n", VERSION, CPUSTRING, OS_STRING, COMPILETYPE_STRING, __DATE__);
-#endif
+#else
+	Sys_CreateStartupLogo ();
+#endif	// NEW_DED_CONSOLE
 
 	// Knightmare- scan for cd command line option
 	for (i=0; i<argc; i++)
@@ -2095,7 +2120,8 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 	while (1)
 	{
 		// if at a full screen console, don't update unless needed
-		if (Minimized || (dedicated && dedicated->value) )
+	//	if (Minimized || (dedicated && dedicated->value) )
+		if (Minimized || (dedicated && dedicated->integer) )
 		{
 			Sleep (1);
 		}

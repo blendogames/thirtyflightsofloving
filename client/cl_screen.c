@@ -1117,6 +1117,24 @@ void SCR_Sky_f (void)
 	R_SetSky (Cmd_Argv(1), rotate, axis);
 }
 
+#if 0
+/*
+================
+SCR_SetHud_f
+================
+*/
+void SCR_SetHud_f (void)
+{
+	if (Cmd_Argc() < 2)
+	{
+		Com_Printf ("Usage: sethud <hudname>\n");
+		return;
+	}
+
+	Cvar_ForceSet ("cl_hud", Cmd_Argv(1));
+	CL_LoadHud (false);
+}
+#endif
 
 /*
 ================
@@ -1398,6 +1416,7 @@ void SCR_Init (void)
 	Cmd_AddCommand ("sizeup",SCR_SizeUp_f);
 	Cmd_AddCommand ("sizedown",SCR_SizeDown_f);
 	Cmd_AddCommand ("sky",SCR_Sky_f);
+//	Cmd_AddCommand ("sethud", SCR_SetHud_f);
 	Cmd_AddCommand ("dumpstatuslayout", SCR_DumpStatusLayout_f);
 	Cmd_AddCommand ("dumpgenerallayout", SCR_DumpGeneralLayout_f);
 
@@ -1423,7 +1442,7 @@ void SCR_Shutdown (void)
 	Cmd_RemoveCommand ("sizeup");
 	Cmd_RemoveCommand ("sizedown");
 	Cmd_RemoveCommand ("sky");
-	Cmd_RemoveCommand ("sethud");
+//	Cmd_RemoveCommand ("sethud");
 	Cmd_RemoveCommand ("dumpstatuslayout");
 	Cmd_RemoveCommand ("dumpgenerallayout");
 

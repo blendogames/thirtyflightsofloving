@@ -54,7 +54,7 @@ WORD gamma_ramp[3][256];
 
 void InitGammaRamp (void)
 {
-	if (!r_ignorehwgamma->value)
+	if (!r_ignorehwgamma->integer)
 	{
 		if (qwglGetDeviceGammaRamp3DFX)
 	/*	{
@@ -83,7 +83,7 @@ void InitGammaRamp (void)
 
 void ShutdownGammaRamp (void)
 {
-//	if (r_ignorehwgamma->value)
+//	if (r_ignorehwgamma->integer)
 	if (!glState.gammaRamp)
 		return;
 
@@ -274,8 +274,8 @@ qboolean VID_CreateWindow( int width, int height, qboolean fullscreen )
 	{
 		vid_xpos = Cvar_Get ("vid_xpos", "0", 0);
 		vid_ypos = Cvar_Get ("vid_ypos", "0", 0);
-		x = vid_xpos->value;
-		y = vid_ypos->value;
+		x = vid_xpos->integer;
+		y = vid_ypos->integer;
 	}
 
 	glw_state.hWnd = CreateWindowEx (
@@ -341,31 +341,31 @@ rserr_t GLimp_SetMode ( int *pwidth, int *pheight, int mode, qboolean fullscreen
 	// do a CDS if needed
 	if ( fullscreen )
 	{
-		DEVMODE dm;
+		DEVMODE fullscreenMode;
 
 		VID_Printf( PRINT_ALL, "...attempting fullscreen\n" );
 
-		memset( &dm, 0, sizeof( dm ) );
+		memset( &fullscreenMode, 0, sizeof( fullscreenMode ) );
 
-		dm.dmSize = sizeof( dm );
+		fullscreenMode.dmSize = sizeof( fullscreenMode );
 
-		dm.dmPelsWidth  = width;
-		dm.dmPelsHeight = height;
-		dm.dmFields     = DM_PELSWIDTH | DM_PELSHEIGHT;
+		fullscreenMode.dmPelsWidth  = width;
+		fullscreenMode.dmPelsHeight = height;
+		fullscreenMode.dmFields     = DM_PELSWIDTH | DM_PELSHEIGHT;
 
 		// Added refresh rate control
-		if ( r_displayrefresh->value != 0 )
+		if ( r_displayrefresh->integer != 0 )
 		{
-			dm.dmDisplayFrequency = r_displayrefresh->integer;
-			dm.dmFields |= DM_DISPLAYFREQUENCY;
-			VID_Printf( PRINT_ALL, "...using r_displayrefresh of %d\n", (int)r_displayrefresh->value );
+			fullscreenMode.dmDisplayFrequency = r_displayrefresh->integer;
+			fullscreenMode.dmFields |= DM_DISPLAYFREQUENCY;
+			VID_Printf( PRINT_ALL, "...using r_displayrefresh of %d\n", r_displayrefresh->integer );
 		}
 
-		if ( r_bitdepth->value != 0 )
+		if ( r_bitdepth->integer != 0 )
 		{
-			dm.dmBitsPerPel = r_bitdepth->value;
-			dm.dmFields |= DM_BITSPERPEL;
-			VID_Printf( PRINT_ALL, "...using r_bitdepth of %d\n", ( int ) r_bitdepth->value );
+			fullscreenMode.dmBitsPerPel = r_bitdepth->integer;
+			fullscreenMode.dmFields |= DM_BITSPERPEL;
+			VID_Printf( PRINT_ALL, "...using r_bitdepth of %d\n", r_bitdepth->integer );
 		}
 		else
 		{
@@ -378,7 +378,7 @@ rserr_t GLimp_SetMode ( int *pwidth, int *pheight, int mode, qboolean fullscreen
 		}
 
 		VID_Printf( PRINT_ALL, "...calling CDS: " );
-		if ( ChangeDisplaySettings( &dm, CDS_FULLSCREEN ) == DISP_CHANGE_SUCCESSFUL )
+		if ( ChangeDisplaySettings( &fullscreenMode, CDS_FULLSCREEN ) == DISP_CHANGE_SUCCESSFUL )
 		{
 			*pwidth = width;
 			*pheight = height;
@@ -401,21 +401,21 @@ rserr_t GLimp_SetMode ( int *pwidth, int *pheight, int mode, qboolean fullscreen
 
 			VID_Printf( PRINT_ALL, "...calling CDS assuming dual monitors:" );
 
-			dm.dmPelsWidth = width * 2;
-			dm.dmPelsHeight = height;
-			dm.dmFields = DM_PELSWIDTH | DM_PELSHEIGHT;
+			fullscreenMode.dmPelsWidth = width * 2;
+			fullscreenMode.dmPelsHeight = height;
+			fullscreenMode.dmFields = DM_PELSWIDTH | DM_PELSHEIGHT;
 
-			if ( r_bitdepth->value != 0 )
+			if ( r_bitdepth->integer != 0 )
 			{
-				dm.dmBitsPerPel = r_bitdepth->value;
-				dm.dmFields |= DM_BITSPERPEL;
+				fullscreenMode.dmBitsPerPel = r_bitdepth->integer;
+				fullscreenMode.dmFields |= DM_BITSPERPEL;
 			}
 
 			/*
 			** our first CDS failed, so maybe we're running on some weird dual monitor
 			** system 
 			*/
-			if ( ChangeDisplaySettings( &dm, CDS_FULLSCREEN ) != DISP_CHANGE_SUCCESSFUL )
+			if ( ChangeDisplaySettings( &fullscreenMode, CDS_FULLSCREEN ) != DISP_CHANGE_SUCCESSFUL )
 			{
 				VID_Printf( PRINT_ALL, " failed\n" );
 
@@ -592,7 +592,7 @@ qboolean GLimp_InitGL (void)
 	/*
 	** set PFD_STEREO if necessary
 	*/
-	if ( stereo->value != 0 )
+	if ( stereo->integer != 0 )
 	{
 		VID_Printf( PRINT_ALL, "...attempting to use stereo\n" );
 		pfd.dwFlags |= PFD_STEREO;
@@ -655,7 +655,7 @@ qboolean GLimp_InitGL (void)
 		{
 			extern cvar_t *gl_allow_software;
 
-			if ( gl_allow_software->value )
+			if ( gl_allow_software->integer )
 				glw_state.mcd_accelerated = true;
 			else
 				glw_state.mcd_accelerated = false;
@@ -669,7 +669,7 @@ qboolean GLimp_InitGL (void)
 	/*
 	** report if stereo is desired but unavailable
 	*/
-	if ( !( pfd.dwFlags & PFD_STEREO ) && ( stereo->value != 0 ) ) 
+	if ( !( pfd.dwFlags & PFD_STEREO ) && ( stereo->integer != 0 ) ) 
 	{
 		VID_Printf( PRINT_ALL, "...failed to select stereo pixel format\n" );
 		Cvar_SetValue( "cl_stereo", 0 );
@@ -772,7 +772,7 @@ void GLimp_BeginFrame( float camera_separation )
 {
 	if ( r_bitdepth->modified )
 	{
-		if ( r_bitdepth->value != 0 && !glw_state.allowdisplaydepthchange )
+		if ( r_bitdepth->integer != 0 && !glw_state.allowdisplaydepthchange )
 		{
 			Cvar_SetValue( "r_bitdepth", 0 );
 			VID_Printf( PRINT_ALL, "r_bitdepth requires Win95 OSR2.x or WinNT 4.x\n" );
@@ -832,35 +832,35 @@ void GLimp_AppActivate( qboolean active )
 		ShowWindow( glw_state.hWnd, SW_RESTORE );
 
 		// Knightmare- restore desktop settings on alt-tabbing from fullscreen
-		if ( vid_fullscreen->value && desktop_restored && glw_state.hGLRC != NULL )
+		if ( vid_fullscreen->integer && desktop_restored && glw_state.hGLRC != NULL )
 		{
 			int		width, height;
-			DEVMODE	dm;
+			DEVMODE	fullscreenMode;
 
-			if ( !VID_GetModeInfo (&width, &height, (int)(r_mode->value)) )
+			if ( !VID_GetModeInfo (&width, &height, r_mode->integer) )
 			{
 				VID_Printf( PRINT_ALL, "invalid mode\n" );
 				return;
 			}
 			
-			memset( &dm, 0, sizeof( dm ) );
-			dm.dmSize = sizeof( dm );
-			dm.dmPelsWidth  = width;
-			dm.dmPelsHeight = height;
-			dm.dmFields     = DM_PELSWIDTH | DM_PELSHEIGHT;
+			memset( &fullscreenMode, 0, sizeof( fullscreenMode ) );
+			fullscreenMode.dmSize = sizeof( fullscreenMode );
+			fullscreenMode.dmPelsWidth  = width;
+			fullscreenMode.dmPelsHeight = height;
+			fullscreenMode.dmFields     = DM_PELSWIDTH | DM_PELSHEIGHT;
 
-			if ( r_displayrefresh->value != 0 )
+			if ( r_displayrefresh->integer != 0 )
 			{
-				dm.dmDisplayFrequency = r_displayrefresh->integer;
-				dm.dmFields |= DM_DISPLAYFREQUENCY;
-			//	VID_Printf( PRINT_ALL, "...using r_displayrefresh of %d\n", (int)r_displayrefresh->value );
+				fullscreenMode.dmDisplayFrequency = r_displayrefresh->integer;
+				fullscreenMode.dmFields |= DM_DISPLAYFREQUENCY;
+			//	VID_Printf( PRINT_ALL, "...using r_displayrefresh of %d\n", (int)r_displayrefresh->integer );
 			}
 
-			if ( r_bitdepth->value != 0 )
+			if ( r_bitdepth->integer != 0 )
 			{
-				dm.dmBitsPerPel = r_bitdepth->value;
-				dm.dmFields |= DM_BITSPERPEL;
-			//	VID_Printf( PRINT_ALL, "...using r_bitdepth of %d\n", (int)r_bitdepth->value );
+				fullscreenMode.dmBitsPerPel = r_bitdepth->integer;
+				fullscreenMode.dmFields |= DM_BITSPERPEL;
+			//	VID_Printf( PRINT_ALL, "...using r_bitdepth of %d\n", (int)r_bitdepth->integer );
 			}
 			else
 			{
@@ -871,7 +871,7 @@ void GLimp_AppActivate( qboolean active )
 			}
 
 			VID_Printf( PRINT_ALL, "...calling CDS: " );
-			if ( ChangeDisplaySettings( &dm, CDS_FULLSCREEN ) == DISP_CHANGE_SUCCESSFUL )
+			if ( ChangeDisplaySettings( &fullscreenMode, CDS_FULLSCREEN ) == DISP_CHANGE_SUCCESSFUL )
 			{
 				VID_Printf( PRINT_ALL, "ok\n" );
 			}
@@ -880,17 +880,17 @@ void GLimp_AppActivate( qboolean active )
 				VID_Printf( PRINT_ALL, "failed\n" );
 				VID_Printf( PRINT_ALL, "...calling CDS assuming dual monitors: " );
 
-				dm.dmPelsWidth = width * 2;
-				dm.dmPelsHeight = height;
-				dm.dmFields = DM_PELSWIDTH | DM_PELSHEIGHT;
+				fullscreenMode.dmPelsWidth = width * 2;
+				fullscreenMode.dmPelsHeight = height;
+				fullscreenMode.dmFields = DM_PELSWIDTH | DM_PELSHEIGHT;
 
-				if ( r_bitdepth->value != 0 )
+				if ( r_bitdepth->integer != 0 )
 				{
-					dm.dmBitsPerPel = r_bitdepth->value;
-					dm.dmFields |= DM_BITSPERPEL;
+					fullscreenMode.dmBitsPerPel = r_bitdepth->integer;
+					fullscreenMode.dmFields |= DM_BITSPERPEL;
 				}
 
-				if ( ChangeDisplaySettings( &dm, CDS_FULLSCREEN ) == DISP_CHANGE_SUCCESSFUL )
+				if ( ChangeDisplaySettings( &fullscreenMode, CDS_FULLSCREEN ) == DISP_CHANGE_SUCCESSFUL )
 				{
 					VID_Printf( PRINT_ALL, "ok\n" );
 				}
@@ -902,12 +902,12 @@ void GLimp_AppActivate( qboolean active )
 	{
 		ToggleGammaRamp (false);
 
-		if ( vid_fullscreen->value )
+		if ( vid_fullscreen->integer )
 		{
 			ShowWindow( glw_state.hWnd, SW_MINIMIZE );
 
 			// Knightmare- restore desktop settings on alt-tabbing from fullscreen
-			if (restore_desktop->value) {
+			if (restore_desktop->integer) {
 				ChangeDisplaySettings (0, 0);
 				desktop_restored = true;
 			}

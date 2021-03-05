@@ -44,7 +44,8 @@ qboolean SV_AddProjectileUpdate (edict_t *ent)
 	if (!sv_projectiles)
 		sv_projectiles = Cvar_Get("sv_projectiles", "1", 0);
 
-	if (!sv_projectiles->value)
+//	if (!sv_projectiles->value)
+	if (!sv_projectiles->integer)
 		return false;
 
 	if (!(ent->svflags & SVF_PROJECTILE))
@@ -170,7 +171,8 @@ void SV_EmitPacketEntities (client_frame_t *from, client_frame_t *to, sizebuf_t 
 			// in any bytes being emited if the entity has not changed at all
 			// note that players are always 'newentities', this updates their oldorigin always
 			// and prevents warping
-			MSG_WriteDeltaEntity (oldent, newent, msg, false, newent->number <= maxclients->value);
+		//	MSG_WriteDeltaEntity (oldent, newent, msg, false, newent->number <= maxclients->value);
+			MSG_WriteDeltaEntity (oldent, newent, msg, false, newent->number <= maxclients->integer);
 			oldindex++;
 			newindex++;
 			continue;

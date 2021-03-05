@@ -103,7 +103,8 @@ void SV_BroadcastPrintf (int level, char *fmt, ...)
 	va_end (argptr);
 	
 	// echo to console
-	if (dedicated->value)
+//	if (dedicated->value)
+	if (dedicated->integer)
 	{
 		char	copy[1024];
 		int		i;
@@ -115,7 +116,8 @@ void SV_BroadcastPrintf (int level, char *fmt, ...)
 		Com_Printf ("%s", copy);
 	}
 
-	for (i=0, cl = svs.clients ; i<maxclients->value; i++, cl++)
+//	for (i=0, cl = svs.clients ; i<maxclients->value; i++, cl++)
+	for (i=0, cl = svs.clients; i<maxclients->integer; i++, cl++)
 	{
 		if (level < cl->messagelevel)
 			continue;
@@ -221,7 +223,8 @@ void SV_Multicast (vec3_t origin, multicast_t to)
 	}
 
 	// send the data to all relevent clients
-	for (j = 0, client = svs.clients; j < maxclients->value; j++, client++)
+//	for (j = 0, client = svs.clients; j < maxclients->value; j++, client++)
+	for (j = 0, client = svs.clients; j < maxclients->integer; j++, client++)
 	{
 		if (client->state == cs_free || client->state == cs_zombie)
 			continue;
@@ -410,7 +413,8 @@ qboolean SV_SendClientDatagram (client_t *client)
 	SZ_Init (&msg, msg_buf, sizeof(msg_buf));
 
 	// Knightmare- limit message size to 2800 for non-local clients in multiplayer
-	if (maxclients->value > 1 && client->netchan.remote_address.type != NA_LOOPBACK && sv_limit_msglen->integer != 0)
+//	if (maxclients->value > 1 && client->netchan.remote_address.type != NA_LOOPBACK && sv_limit_msglen->integer != 0)
+	if (maxclients->integer > 1 && client->netchan.remote_address.type != NA_LOOPBACK && sv_limit_msglen->integer != 0)
 		msg.maxsize = MAX_MSGLEN_MP;
 
 	msg.allowoverflow = true;
@@ -513,7 +517,8 @@ void SV_SendClientMessages (void)
 	// read the next demo message if needed
 	if (sv.state == ss_demo && sv.demofile)
 	{
-		if (sv_paused->value)
+	//	if (sv_paused->value)
+		if (sv_paused->integer)
 			msglen = 0;
 		else
 		{
@@ -542,7 +547,8 @@ void SV_SendClientMessages (void)
 	}
 
 	// send a message to each connected client
-	for (i=0, c = svs.clients ; i<maxclients->value; i++, c++)
+//	for (i=0, c = svs.clients ; i<maxclients->value; i++, c++)
+	for (i=0, c = svs.clients ; i<maxclients->integer; i++, c++)
 	{
 		if (!c->state)
 			continue;

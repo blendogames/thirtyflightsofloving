@@ -135,7 +135,8 @@ void SV_CheckForSavegame (void)
 	FILE		*f;
 	int			i;
 
-	if (sv_noreload->value)
+//	if (sv_noreload->value)
+	if (sv_noreload->integer)
 		return;
 
 	if (Cvar_VariableValue ("deathmatch"))
@@ -239,7 +240,8 @@ void SV_SpawnServer (char *server, char *spawnpoint, server_state_t serverstate,
 	Q_strncpyz (sv.name, sizeof(sv.name), server);
 
 	// leave slots at start for clients only
-	for (i=0 ; i<maxclients->value ; i++)
+//	for (i=0 ; i<maxclients->value ; i++)
+	for (i=0 ; i<maxclients->integer ; i++)
 	{
 		// needs to reconnect
 		if (svs.clients[i].state > cs_connected)
@@ -362,7 +364,8 @@ void SV_InitGame (void)
 
 	// dedicated servers can't be single player and are usually DM
 	// so unless they explicity set coop, force it to deathmatch
-	if (dedicated->value)
+//	if (dedicated->value)
+	if (dedicated->integer)
 	{
 		if (!Cvar_VariableValue ("coop"))
 			Cvar_FullSet ("deathmatch", "1",  CVAR_SERVERINFO | CVAR_LATCH);
@@ -371,14 +374,17 @@ void SV_InitGame (void)
 	// init clients
 	if (Cvar_VariableValue ("deathmatch"))
 	{
-		if (maxclients->value <= 1)
+	//	if (maxclients->value <= 1)
+		if (maxclients->integer <= 1)
 			Cvar_FullSet ("maxclients", "8", CVAR_SERVERINFO | CVAR_LATCH);
-		else if (maxclients->value > MAX_CLIENTS)
+	//	else if (maxclients->value > MAX_CLIENTS)
+		else if (maxclients->integer > MAX_CLIENTS)
 			Cvar_FullSet ("maxclients", va("%i", MAX_CLIENTS), CVAR_SERVERINFO | CVAR_LATCH);
 	}
 	else if (Cvar_VariableValue ("coop"))
 	{
-		if (maxclients->value <= 1 || maxclients->value > 4)
+	//	if (maxclients->value <= 1 || maxclients->value > 4)
+		if (maxclients->integer <= 1 || maxclients->integer > 4)
 			Cvar_FullSet ("maxclients", "4", CVAR_SERVERINFO | CVAR_LATCH);
 	}
 	else	// non-deathmatch, non-coop is one player
@@ -387,12 +393,15 @@ void SV_InitGame (void)
 	}
 
 	svs.spawncount = rand();
-	svs.clients = Z_Malloc (sizeof(client_t)*maxclients->value);
-	svs.num_client_entities = maxclients->value*UPDATE_BACKUP*64;
+//	svs.clients = Z_Malloc (sizeof(client_t)*maxclients->value);
+	svs.clients = Z_Malloc (sizeof(client_t) * maxclients->integer);
+//	svs.num_client_entities = maxclients->value*UPDATE_BACKUP*64;
+	svs.num_client_entities = maxclients->integer * UPDATE_BACKUP * 64;
 	svs.client_entities = Z_Malloc (sizeof(entity_state_t)*svs.num_client_entities);
 
 	// init network stuff
-	NET_Config ( (maxclients->value > 1) );
+//	NET_Config ( (maxclients->value > 1) );
+	NET_Config ( (maxclients->integer > 1) );
 
 	// heartbeats will always be sent to the id master
 	svs.last_heartbeat = -99999;		// send immediately
@@ -401,7 +410,8 @@ void SV_InitGame (void)
 
 	// init game
 	SV_InitGameProgs ();
-	for (i = 0; i < maxclients->value; i++)
+//	for (i = 0; i < maxclients->value; i++)
+	for (i = 0; i < maxclients->integer; i++)
 	{
 		ent = EDICT_NUM(i+1);
 		ent->s.number = i+1;
@@ -483,28 +493,32 @@ void SV_Map (qboolean attractloop, char *levelstring, qboolean loadgame)
 	if (l > 4 && !strcmp (level+l-4, ".cin") )
 #endif // ROQ_SUPPORT
 	{
-		if (!dedicated->value)
+	//	if (!dedicated->value)
+		if (!dedicated->integer)
 			SCR_BeginLoadingPlaque ();			// for local system
 		SV_BroadcastCommand ("changing\n");
 		SV_SpawnServer (level, spawnpoint, ss_cinematic, attractloop, loadgame);
 	}
 	else if (l > 4 && !strcmp (level+l-4, ".dm2") )
 	{
-		if (!dedicated->value)
+	//	if (!dedicated->value)
+		if (!dedicated->integer)
 			SCR_BeginLoadingPlaque ();			// for local system
 		SV_BroadcastCommand ("changing\n");
 		SV_SpawnServer (level, spawnpoint, ss_demo, attractloop, loadgame);
 	}
 	else if (l > 4 && !strcmp (level+l-4, ".pcx"))
 	{
-		if (!dedicated->value)
+	//	if (!dedicated->value)
+		if (!dedicated->integer)
 			SCR_BeginLoadingPlaque ();			// for local system
 		SV_BroadcastCommand ("changing\n");
 		SV_SpawnServer (level, spawnpoint, ss_pic, attractloop, loadgame);
 	}
 	else
 	{
-		if (!dedicated->value)
+	//	if (!dedicated->value)
+		if (!dedicated->integer)
 			SCR_BeginLoadingPlaque ();			// for local system
 		SV_BroadcastCommand ("changing\n");
 		SV_SendClientMessages ();

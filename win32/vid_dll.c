@@ -267,7 +267,7 @@ int MapKey (int key)
 	}
 }
 
-void AppActivate(BOOL fActive, BOOL minimize)
+void AppActivate (BOOL fActive, BOOL minimize)
 {
 	Minimized = minimize;
 
@@ -286,7 +286,8 @@ void AppActivate(BOOL fActive, BOOL minimize)
 		CDAudio_Activate (false);
 		S_Activate (false);
 
-		if ( win_noalttab->value )
+	//	if ( win_noalttab->value )
+		if ( win_noalttab->integer )
 		{
 			WIN_EnableAltTab();
 		}
@@ -296,7 +297,8 @@ void AppActivate(BOOL fActive, BOOL minimize)
 		IN_Activate (true);
 		CDAudio_Activate (true);
 		S_Activate (true);
-		if ( win_noalttab->value )
+	//	if ( win_noalttab->value )
+		if ( win_noalttab->integer )
 		{
 			WIN_DisableAltTab();
 		}
@@ -390,7 +392,8 @@ LONG WINAPI MainWndProc (
 			RECT r;
 			int		style;
 
-			if (!vid_fullscreen->value)
+		//	if (!vid_fullscreen->value)
+			if (!vid_fullscreen->integer)
 			{
 				xPos = (short) LOWORD(lParam);    // horizontal position 
 				yPos = (short) HIWORD(lParam);    // vertical position 
@@ -479,7 +482,8 @@ LONG WINAPI MainWndProc (
 		{
 			if ( vid_fullscreen )
 			{
-				Cvar_SetValue( "vid_fullscreen", !vid_fullscreen->value );
+			//	Cvar_SetValue( "vid_fullscreen", !vid_fullscreen->value );
+				Cvar_SetValue( "vid_fullscreen", !vid_fullscreen->integer );
 			}
 			return 0;
 		}
@@ -548,8 +552,10 @@ qboolean VID_GetModeInfo (int *width, int *height, int mode)
 {
 	if (mode == -1) // custom mode
 	{
-		*width  = r_customwidth->value;
-		*height = r_customheight->value;
+	//	*width  = r_customwidth->value;
+	//	*height = r_customheight->value;
+		*width  = r_customwidth->integer;
+		*height = r_customheight->integer;
 		return true;
 	}
 
@@ -585,7 +591,8 @@ void VID_UpdateWindowPosAndSize ( int x, int y )
 	w = r.right - r.left;
 	h = r.bottom - r.top;
 
-	MoveWindow( cl_hwnd, vid_xpos->value, vid_ypos->value, w, h, TRUE );
+//	MoveWindow( cl_hwnd, vid_xpos->value, vid_ypos->value, w, h, TRUE );
+	MoveWindow (cl_hwnd, vid_xpos->integer, vid_ypos->integer, w, h, TRUE);
 }
 
 /*
@@ -702,7 +709,8 @@ void VID_CheckChanges (void)
 {
 	if ( win_noalttab->modified )
 	{
-		if ( win_noalttab->value )
+	//	if ( win_noalttab->value )
+		if ( win_noalttab->integer )
 			WIN_DisableAltTab();
 		else
 			WIN_EnableAltTab();
@@ -715,8 +723,10 @@ void VID_CheckChanges (void)
 	// update our window position
 	if ( vid_xpos->modified || vid_ypos->modified )
 	{
-		if (!vid_fullscreen->value)
-			VID_UpdateWindowPosAndSize( vid_xpos->value, vid_ypos->value );
+	//	if (!vid_fullscreen->value)
+	//		VID_UpdateWindowPosAndSize( vid_xpos->value, vid_ypos->value );
+		if (!vid_fullscreen->integer)
+			VID_UpdateWindowPosAndSize( vid_xpos->integer, vid_ypos->integer );
 
 		vid_xpos->modified = false;
 		vid_ypos->modified = false;
