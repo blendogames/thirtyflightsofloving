@@ -163,10 +163,14 @@ How To Run
 			MOD SUPPORT INSTRUCTIONS
 
 =====================================================================================
-To compile your mod for this modified engine, use the included game/q_shared.h
-and game/game.h from the source release (Or you can just search for all my changes,
-which are marked with my name, if you don't want to use GPLed headers.  Just don't
-forget to include the #ifdef compiler directives around my changes).
+
+To compile your mod for KMQuake2, substitute the included game/q_shared.c, game/q_shared.h,
+and game/game.h from the source code into the mode after backing up the originals.
+Or you can just search for all my changes, which are marked with my name, if you don't want to use
+GPLed headers.  Just don't forget to include the #ifdef compiler directives around my changes.
+Some mods may make additions or changes to these 3 files, so in that case you will need to use
+a diff utility like Windiff to find said changes and hand-merge them into the files from
+KMQ2's source.
 
 Next, in g_save.c, change the assignment of the "maxentities" cvar from this:
 
