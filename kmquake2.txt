@@ -164,8 +164,8 @@ How To Run
 
 =====================================================================================
 
-To compile your mod for KMQuake2, substitute the included game/q_shared.c, game/q_shared.h,
-and game/game.h from the source code into the mode after backing up the originals.
+To compile your mod for KMQuake2, substitute the files game/q_shared.c, game/q_shared.h,
+and game/game.h from the engine's source code into the mod's source after backing up the mod's originals.
 Or you can just search for all my changes, which are marked with my name, if you don't want to use
 GPLed headers.  Just don't forget to include the #ifdef compiler directives around my changes.
 Some mods may make additions or changes to these 3 files, so in that case you will need to use
