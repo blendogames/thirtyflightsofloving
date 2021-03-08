@@ -234,6 +234,7 @@ void Options_Screen_MenuInit ( void )
 	s_options_screen_crosshairscale_slider.maxPos				= 19;
 	s_options_screen_crosshairscale_slider.baseValue			= 0.25f;
 	s_options_screen_crosshairscale_slider.increment			= 0.25f;
+	s_options_screen_crosshairscale_slider.displayAsPercent		= false;
 	s_options_screen_crosshairscale_slider.generic.statusbar	= "changes size of crosshair";
 
 	s_options_screen_crosshairalpha_slider.generic.type			= MTYPE_SLIDER;
@@ -247,6 +248,7 @@ void Options_Screen_MenuInit ( void )
 	s_options_screen_crosshairalpha_slider.maxPos				= 19;
 	s_options_screen_crosshairalpha_slider.baseValue			= 0.05f;
 	s_options_screen_crosshairalpha_slider.increment			= 0.05f;
+	s_options_screen_crosshairalpha_slider.displayAsPercent		= true;
 	s_options_screen_crosshairalpha_slider.generic.statusbar	= "changes opacity of crosshair";
 
 	s_options_screen_crosshairpulse_slider.generic.type			= MTYPE_SLIDER;
@@ -260,6 +262,7 @@ void Options_Screen_MenuInit ( void )
 	s_options_screen_crosshairpulse_slider.maxPos				= 10;
 	s_options_screen_crosshairpulse_slider.baseValue			= 0.0f;
 	s_options_screen_crosshairpulse_slider.increment			= 0.05f;
+	s_options_screen_crosshairpulse_slider.displayAsPercent		= true;
 	s_options_screen_crosshairpulse_slider.generic.statusbar	= "changes pulse amplitude of crosshair";
 
 	// hud scaling option
@@ -274,6 +277,7 @@ void Options_Screen_MenuInit ( void )
 	s_options_screen_hudscale_slider.maxPos					= 8;
 	s_options_screen_hudscale_slider.baseValue				= 0.0f;
 	s_options_screen_hudscale_slider.increment				= 1.0f;
+	s_options_screen_hudscale_slider.displayAsPercent		= false;
 	s_options_screen_hudscale_slider.generic.statusbar		= "changes size of HUD elements";
 
 	// hud trans option
@@ -285,9 +289,10 @@ void Options_Screen_MenuInit ( void )
 	s_options_screen_hudalpha_slider.generic.callback		= HudAlphaFunc;
 //	s_options_screen_hudalpha_slider.minvalue				= 1;
 //	s_options_screen_hudalpha_slider.maxvalue				= 11;
-	s_options_screen_hudalpha_slider.maxPos					= 10;
+	s_options_screen_hudalpha_slider.maxPos					= 20;
 	s_options_screen_hudalpha_slider.baseValue				= 0.0f;
-	s_options_screen_hudalpha_slider.increment				= 0.1f;
+	s_options_screen_hudalpha_slider.increment				= 0.05f;
+	s_options_screen_hudalpha_slider.displayAsPercent		= true;
 	s_options_screen_hudalpha_slider.generic.statusbar		= "changes opacity of HUD elements";
 
 	// hud squeeze digits option

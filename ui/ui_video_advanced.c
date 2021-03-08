@@ -405,6 +405,7 @@ void Menu_Video_Advanced_Init (void)
 	s_lightmapscale_slider.maxPos				= 10;
 	s_lightmapscale_slider.baseValue			= 1.0f;
 	s_lightmapscale_slider.increment			= 0.1f;
+	s_lightmapscale_slider.displayAsPercent		= false;
 	s_lightmapscale_slider.generic.statusbar	= "leave at minimum, washes out textures";
 
 	s_textureintensity_slider.generic.type		= MTYPE_SLIDER;
@@ -418,6 +419,7 @@ void Menu_Video_Advanced_Init (void)
 	s_textureintensity_slider.maxPos			= 10;
 	s_textureintensity_slider.baseValue			= 1.0f;
 	s_textureintensity_slider.increment			= 0.1f;
+	s_textureintensity_slider.displayAsPercent	= false;
 	s_textureintensity_slider.generic.statusbar	= "leave at minimum, washes out textures";
 
 	s_rgbscale_box.generic.type				= MTYPE_SPINCONTROL;
@@ -458,6 +460,7 @@ void Menu_Video_Advanced_Init (void)
 	s_lightcutoff_slider.maxPos				= 8;
 	s_lightcutoff_slider.baseValue			= 0.0f;
 	s_lightcutoff_slider.increment			= 8.0f;
+	s_lightcutoff_slider.displayAsPercent	= false;
 	s_lightcutoff_slider.generic.statusbar	= "lower = smoother blend, higher = faster";
 
 	s_glass_envmap_box.generic.type			= MTYPE_SPINCONTROL;
@@ -498,6 +501,7 @@ void Menu_Video_Advanced_Init (void)
 	s_waterwave_slider.maxPos				= 24;
 	s_waterwave_slider.baseValue			= 0.0f;
 	s_waterwave_slider.increment			= 1.0f;
+	s_waterwave_slider.displayAsPercent		= false;
 	s_waterwave_slider.generic.statusbar	= "size of waves on flat water surfaces";
 
 	s_caustics_box.generic.type				= MTYPE_SPINCONTROL;
@@ -583,6 +587,7 @@ void Menu_Video_Advanced_Init (void)
 	s_celshading_width_slider.maxPos			= 11;
 	s_celshading_width_slider.baseValue			= 1.0f;
 	s_celshading_width_slider.increment			= 1.0f;
+	s_celshading_width_slider.displayAsPercent	= false;
 	s_celshading_width_slider.generic.statusbar	= "width of cel shading outlines";
 
 /*
@@ -616,6 +621,7 @@ void Menu_Video_Advanced_Init (void)
 	s_screenshotjpegquality_slider.maxPos				= 10;
 	s_screenshotjpegquality_slider.baseValue			= 50.0f;
 	s_screenshotjpegquality_slider.increment			= 5.0f;
+	s_screenshotjpegquality_slider.displayAsPercent		= false;
 	s_screenshotjpegquality_slider.generic.statusbar	= "quality of JPG screenshots, 50-100%";
 
 	s_saveshotsize_box.generic.type				= MTYPE_SPINCONTROL;

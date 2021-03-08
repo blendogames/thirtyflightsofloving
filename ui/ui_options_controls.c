@@ -215,6 +215,7 @@ void Options_Controls_MenuInit ( void )
 	s_options_controls_sensitivity_slider.maxPos			= 20;
 	s_options_controls_sensitivity_slider.baseValue			= 1.0f;
 	s_options_controls_sensitivity_slider.increment			= 0.5f;
+	s_options_controls_sensitivity_slider.displayAsPercent	= false;
 	s_options_controls_sensitivity_slider.generic.statusbar	= "changes sensitivity of mouse for head movement";
 
 	s_options_controls_invertmouse_box.generic.type			= MTYPE_SPINCONTROL;
@@ -255,6 +256,7 @@ void Options_Controls_MenuInit ( void )
 	s_options_controls_thirdperson_distance_slider.maxPos				= 10;
 	s_options_controls_thirdperson_distance_slider.baseValue			= 25.0f;
 	s_options_controls_thirdperson_distance_slider.increment			= 5.0f;
+	s_options_controls_thirdperson_distance_slider.displayAsPercent		= false;
 	s_options_controls_thirdperson_distance_slider.generic.statusbar	= "changes camera distance in third-person mode";
 
 	s_options_controls_thirdperson_offset_slider.generic.type		= MTYPE_SLIDER;
@@ -268,6 +270,7 @@ void Options_Controls_MenuInit ( void )
 	s_options_controls_thirdperson_offset_slider.maxPos				= 8;
 	s_options_controls_thirdperson_offset_slider.baseValue			= 0.0f;
 	s_options_controls_thirdperson_offset_slider.increment			= 4.0f;
+	s_options_controls_thirdperson_offset_slider.displayAsPercent	= false;
 	s_options_controls_thirdperson_offset_slider.generic.statusbar	= "changes horizontal camera offset in third-person mode";
 
 	s_options_controls_thirdperson_angle_slider.generic.type		= MTYPE_SLIDER;
@@ -281,6 +284,7 @@ void Options_Controls_MenuInit ( void )
 	s_options_controls_thirdperson_angle_slider.maxPos				= 6;
 	s_options_controls_thirdperson_angle_slider.baseValue			= 0.0f;
 	s_options_controls_thirdperson_angle_slider.increment			= 5.0f;
+	s_options_controls_thirdperson_angle_slider.displayAsPercent	= false;
 	s_options_controls_thirdperson_angle_slider.generic.statusbar	= "changes camera angle in third-person mode";
 
 	s_options_controls_alwaysrun_box.generic.type		= MTYPE_SPINCONTROL;

@@ -123,6 +123,7 @@ typedef struct
 	// end Knightmare
 
 	float			range;
+	qboolean		displayAsPercent;
 } menuslider_s;
 
 typedef struct

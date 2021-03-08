@@ -268,6 +268,7 @@ void Options_Interface_MenuInit (void)
 	s_options_interface_menumouse_slider.maxPos				= 7;
 	s_options_interface_menumouse_slider.baseValue			= 0.25f;
 	s_options_interface_menumouse_slider.increment			= 0.25f;
+	s_options_interface_menumouse_slider.displayAsPercent	= false;
 	s_options_interface_menumouse_slider.generic.statusbar	= "changes sensitivity of mouse in menus";
 
 	s_options_interface_menualpha_slider.generic.type		= MTYPE_SLIDER;
@@ -281,6 +282,7 @@ void Options_Interface_MenuInit (void)
 	s_options_interface_menualpha_slider.maxPos				= 20;
 	s_options_interface_menualpha_slider.baseValue			= 0.0f;
 	s_options_interface_menualpha_slider.increment			= 0.05f;
+	s_options_interface_menualpha_slider.displayAsPercent	= true;
 	s_options_interface_menualpha_slider.generic.statusbar	= "changes opacity of menu background";
 
 #if 0
@@ -312,6 +314,7 @@ void Options_Interface_MenuInit (void)
 	s_options_interface_fontsize_slider.maxPos				= 5;
 	s_options_interface_fontsize_slider.baseValue			= 6.0f;
 	s_options_interface_fontsize_slider.increment			= 2.0f;
+	s_options_interface_fontsize_slider.displayAsPercent	= false;
 	s_options_interface_fontsize_slider.generic.statusbar	= "changes size of console text";
 
 	s_options_interface_uifont_box.generic.type				= MTYPE_SPINCONTROL;
@@ -352,6 +355,7 @@ void Options_Interface_MenuInit (void)
 	s_options_interface_conalpha_slider.maxPos				= 20;
 	s_options_interface_conalpha_slider.baseValue			= 0.0f;
 	s_options_interface_conalpha_slider.increment			= 0.05f;
+	s_options_interface_conalpha_slider.displayAsPercent	= true;
 	s_options_interface_conalpha_slider.generic.statusbar	= "changes opacity of console";
 
 	/*
@@ -366,6 +370,7 @@ void Options_Interface_MenuInit (void)
 	s_options_interface_conheight_slider.maxPos				= 10;
 	s_options_interface_conheight_slider.baseValue			= 0.25f;
 	s_options_interface_conheight_slider.increment			= 0.05f;
+	s_options_interface_conheight_slider.displayAsPercent	= false;
 	s_options_interface_conheight_slider.generic.statusbar	= "changes drop height of console";
 	*/
 

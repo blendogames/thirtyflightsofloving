@@ -417,10 +417,16 @@ void MenuSlider_Draw (menuslider_s *s)
 
 	// draw value
 	tmpValue = s->curPos * s->increment + s->baseValue;
-	if (fabs((int)tmpValue - tmpValue) < 0.01f)
-		Com_sprintf (valueText, sizeof(valueText), "%i", (int)tmpValue);
-	else
-		Com_sprintf (valueText, sizeof(valueText), "%4.2f", tmpValue);
+	if (s->displayAsPercent) {
+		tmpValue *= 100.0f;
+		Com_sprintf (valueText, sizeof(valueText), "%.0f%%", tmpValue);
+	}
+	else {
+		if (fabs((int)tmpValue - tmpValue) < 0.01f)
+			Com_sprintf (valueText, sizeof(valueText), "%i", (int)tmpValue);
+		else
+			Com_sprintf (valueText, sizeof(valueText), "%4.2f", tmpValue);
+	}
 	Menu_DrawString (s->generic.x + s->generic.parent->x + s->generic.textSize*SLIDER_RANGE + RCOLUMN_OFFSET + 2.5*MENU_FONT_SIZE,
 					s->generic.y + s->generic.parent->y + 1, MENU_FONT_SIZE-2, valueText, alpha);
 }

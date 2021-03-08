@@ -518,6 +518,7 @@ void Menu_Video_Init (void)
 	s_brightness_slider.maxPos				= 20;
 	s_brightness_slider.baseValue			= 1.3f;
 	s_brightness_slider.increment			= -0.05f;
+	s_brightness_slider.displayAsPercent	= false;
 	MenuSlider_SetValue (&s_brightness_slider, Cvar_VariableValue("vid_gamma"));
 	s_brightness_slider.generic.statusbar	= "changes display brightness";
 

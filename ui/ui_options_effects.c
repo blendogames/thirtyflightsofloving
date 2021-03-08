@@ -256,6 +256,7 @@ void Options_Effects_MenuInit ( void )
 	s_options_effects_decal_slider.maxPos						= 20;
 	s_options_effects_decal_slider.baseValue					= 0.0f;
 	s_options_effects_decal_slider.increment					= 50.0f;
+	s_options_effects_decal_slider.displayAsPercent				= false;
 	s_options_effects_decal_slider.generic.statusbar			= "how many decals to display at once (max = 1000)";
 
 	s_options_effects_particle_comp_slider.generic.type			= MTYPE_SLIDER;
@@ -269,6 +270,7 @@ void Options_Effects_MenuInit ( void )
 	s_options_effects_particle_comp_slider.maxPos				= 4;
 	s_options_effects_particle_comp_slider.baseValue			= 5.0f;
 	s_options_effects_particle_comp_slider.increment			= -1.0f;
+	s_options_effects_particle_comp_slider.displayAsPercent		= false;
 	s_options_effects_particle_comp_slider.generic.statusbar	= "lower = faster performance";
 
 	// Psychospaz's changeable rail trail
@@ -292,6 +294,7 @@ void Options_Effects_MenuInit ( void )
 	s_options_effects_railcolor_slider[0].maxPos			= 64;
 	s_options_effects_railcolor_slider[0].baseValue			= 0.0f;
 	s_options_effects_railcolor_slider[0].increment			= 4.0f;
+	s_options_effects_railcolor_slider[0].displayAsPercent	= false;
 	s_options_effects_railcolor_slider[0].generic.statusbar	= "changes railtrail red component";
 
 	s_options_effects_railcolor_slider[1].generic.type		= MTYPE_SLIDER;
@@ -305,6 +308,7 @@ void Options_Effects_MenuInit ( void )
 	s_options_effects_railcolor_slider[1].maxPos			= 64;
 	s_options_effects_railcolor_slider[1].baseValue			= 0.0f;
 	s_options_effects_railcolor_slider[1].increment			= 4.0f;
+	s_options_effects_railcolor_slider[1].displayAsPercent	= false;
 	s_options_effects_railcolor_slider[1].generic.statusbar	= "changes railtrail green component";
 
 	s_options_effects_railcolor_slider[2].generic.type		= MTYPE_SLIDER;
@@ -318,6 +322,7 @@ void Options_Effects_MenuInit ( void )
 	s_options_effects_railcolor_slider[2].maxPos			= 64;
 	s_options_effects_railcolor_slider[2].baseValue			= 0.0f;
 	s_options_effects_railcolor_slider[2].increment			= 4.0f;
+	s_options_effects_railcolor_slider[2].displayAsPercent	= false;
 	s_options_effects_railcolor_slider[2].generic.statusbar	= "changes railtrail blue component";
 
 	// foostep override option
