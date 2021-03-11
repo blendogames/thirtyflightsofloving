@@ -171,11 +171,12 @@ void fd_secret_move6 (edict_t *self)
     // Knightmare- added sound
 	if (self->moveinfo.sound_start)
 		gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_start, 1, self->attenuation, 0); // was ATTN_STATIC
-	if (self->moveinfo.sound_middle)
+	if (self->moveinfo.sound_middle) {
 		self->s.sound = self->moveinfo.sound_middle;
 #ifdef LOOP_SOUND_ATTENUATION
 		self->s.attenuation = self->attenuation;
 #endif
+	}
 
 	self->moveinfo.state = STATE_DOWN;
 	Move_Calc (self, self->pos0, fd_secret_done);	// was self->move_origin
@@ -263,11 +264,20 @@ void SP_func_door_secret2 (edict_t *ent)
 	vec3_t	forward, right, up;
 //	float	lrSize, fbSize;
 
-	ent->moveinfo.sound_start = gi.soundindex  ("doors/dr1_strt.wav");
-	ent->moveinfo.sound_middle = gi.soundindex  ("doors/dr1_mid.wav");
-	ent->moveinfo.sound_end = gi.soundindex  ("doors/dr1_end.wav");
+	if (ent->sounds != 1)
+	{
+		ent->moveinfo.sound_start = gi.soundindex  ("doors/dr1_strt.wav");
+		ent->moveinfo.sound_middle = gi.soundindex  ("doors/dr1_mid.wav");
+		ent->moveinfo.sound_end = gi.soundindex  ("doors/dr1_end.wav");
+	}
+	else
+	{
+		ent->moveinfo.sound_start = 0;
+		ent->moveinfo.sound_middle = 0;
+		ent->moveinfo.sound_end = 0;
+	}
 
-	if (ent->attenuation <= 0)
+	if (ent->attenuation <= 0)	// Knightmare added
 		ent->attenuation = ATTN_STATIC;
 
 	if (!ent->dmg)

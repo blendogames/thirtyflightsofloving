@@ -462,7 +462,7 @@ void plat_hit_top (edict_t *ent)
 	if (!(ent->flags & FL_TEAMSLAVE))
 	{
 		if (ent->moveinfo.sound_end)
-			gi.sound(ent, CHAN_NO_PHS_ADD+CHAN_VOICE, ent->moveinfo.sound_end, 1, ATTN_STATIC, 0);
+			gi.sound(ent, CHAN_NO_PHS_ADD+CHAN_VOICE, ent->moveinfo.sound_end, 1, ent->attenuation, 0); // Knightmare- was ATTN_STATIC
 	//	ent->s.sound = 0;
 	}
 	ent->s.sound = 0;	// Knightmare- make sure this is always set to 0, lead mover or not!
@@ -480,7 +480,7 @@ void plat_hit_bottom (edict_t *ent)
 	if (!(ent->flags & FL_TEAMSLAVE))
 	{
 		if (ent->moveinfo.sound_end)
-			gi.sound(ent, CHAN_NO_PHS_ADD+CHAN_VOICE, ent->moveinfo.sound_end, 1, ATTN_STATIC, 0);
+			gi.sound(ent, CHAN_NO_PHS_ADD+CHAN_VOICE, ent->moveinfo.sound_end, 1, ent->attenuation, 0); // Knightmare- was ATTN_STATIC
 	//	ent->s.sound = 0;
 	}
 	ent->s.sound = 0;	// Knightmare- make sure this is always set to 0, lead mover or not!
@@ -496,7 +496,7 @@ void plat_go_down (edict_t *ent)
 	if (!(ent->flags & FL_TEAMSLAVE))
 	{
 		if (ent->moveinfo.sound_start)
-			gi.sound (ent, CHAN_NO_PHS_ADD+CHAN_VOICE, ent->moveinfo.sound_start, 1, ATTN_STATIC, 0);
+			gi.sound (ent, CHAN_NO_PHS_ADD+CHAN_VOICE, ent->moveinfo.sound_start, 1, ent->attenuation, 0); // Knightmare- was ATTN_STATIC
 		ent->s.sound = ent->moveinfo.sound_middle;
 #ifdef LOOP_SOUND_ATTENUATION	// Knightmare added
 		ent->s.attenuation = ent->attenuation;
@@ -512,7 +512,7 @@ void plat_go_up (edict_t *ent)
 	if (!(ent->flags & FL_TEAMSLAVE))
 	{
 		if (ent->moveinfo.sound_start)
-			gi.sound(ent, CHAN_NO_PHS_ADD+CHAN_VOICE, ent->moveinfo.sound_start, 1, ATTN_STATIC, 0);
+			gi.sound(ent, CHAN_NO_PHS_ADD+CHAN_VOICE, ent->moveinfo.sound_start, 1, ent->attenuation, 0); // Knightmare- was ATTN_STATIC
 		ent->s.sound = ent->moveinfo.sound_middle;
 #ifdef LOOP_SOUND_ATTENUATION	// Knightmare added
 		ent->s.attenuation = ent->attenuation;
@@ -706,6 +706,9 @@ void SP_func_plat(edict_t *ent)
 	ent->moveinfo.sound_middle = gi.soundindex("plats/pt1_mid.wav");
 	ent->moveinfo.sound_end = gi.soundindex("plats/pt1_end.wav");
 
+	if (ent->attenuation <= 0)	// Knightmare added
+		ent->attenuation = ATTN_STATIC;
+
 //Maj++
 	bFuncPlat(ent);
 //Maj--
@@ -749,9 +752,10 @@ void plat2_hit_top (edict_t *ent)
 	if (!(ent->flags & FL_TEAMSLAVE))
 	{
 		if (ent->moveinfo.sound_end)
-			gi.sound (ent, CHAN_NO_PHS_ADD+CHAN_VOICE, ent->moveinfo.sound_end, 1, ATTN_STATIC, 0);
-		ent->s.sound = 0;
+			gi.sound (ent, CHAN_NO_PHS_ADD+CHAN_VOICE, ent->moveinfo.sound_end, 1, ent->attenuation, 0);	// Knightmare- was ATTN_STATIC
+	//	ent->s.sound = 0;
 	}
+	ent->s.sound = 0;	// Knightmare- make sure this is always set to 0, lead mover or not!
 	ent->moveinfo.state = STATE_TOP;
 
 	if (ent->plat2flags & PLAT2_CALLED)
@@ -788,9 +792,10 @@ void plat2_hit_bottom (edict_t *ent)
 	if (!(ent->flags & FL_TEAMSLAVE))
 	{
 		if (ent->moveinfo.sound_end)
-			gi.sound (ent, CHAN_NO_PHS_ADD+CHAN_VOICE, ent->moveinfo.sound_end, 1, ATTN_STATIC, 0);
-		ent->s.sound = 0;
+			gi.sound (ent, CHAN_NO_PHS_ADD+CHAN_VOICE, ent->moveinfo.sound_end, 1, ent->attenuation, 0);	// Knightmare- was ATTN_STATIC
+	//	ent->s.sound = 0;
 	}
+	ent->s.sound = 0;	// Knightmare- make sure this is always set to 0, lead mover or not!
 	ent->moveinfo.state = STATE_BOTTOM;
 	
 	if (ent->plat2flags & PLAT2_CALLED)
@@ -828,8 +833,11 @@ void plat2_go_down (edict_t *ent)
 	if (!(ent->flags & FL_TEAMSLAVE))
 	{
 		if (ent->moveinfo.sound_start)
-			gi.sound (ent, CHAN_NO_PHS_ADD+CHAN_VOICE, ent->moveinfo.sound_start, 1, ATTN_STATIC, 0);
+			gi.sound (ent, CHAN_NO_PHS_ADD+CHAN_VOICE, ent->moveinfo.sound_start, 1, ent->attenuation, 0);	// Knightmare- was ATTN_STATIC
 		ent->s.sound = ent->moveinfo.sound_middle;
+#ifdef LOOP_SOUND_ATTENUATION	// Knightmare added
+		ent->s.attenuation = ent->attenuation;
+#endif
 	}
 	ent->moveinfo.state = STATE_DOWN;
 	ent->plat2flags |= PLAT2_MOVING;
@@ -842,8 +850,11 @@ void plat2_go_up (edict_t *ent)
 	if (!(ent->flags & FL_TEAMSLAVE))
 	{
 		if (ent->moveinfo.sound_start)
-			gi.sound (ent, CHAN_NO_PHS_ADD+CHAN_VOICE, ent->moveinfo.sound_start, 1, ATTN_STATIC, 0);
+			gi.sound (ent, CHAN_NO_PHS_ADD+CHAN_VOICE, ent->moveinfo.sound_start, 1, ent->attenuation, 0);	// Knightmare- was ATTN_STATIC
 		ent->s.sound = ent->moveinfo.sound_middle;
+#ifdef LOOP_SOUND_ATTENUATION	// Knightmare added
+		ent->s.attenuation = ent->attenuation;
+#endif
 	}
 	ent->moveinfo.state = STATE_UP;
 	ent->plat2flags |= PLAT2_MOVING;
@@ -1128,6 +1139,9 @@ void SP_func_plat2 (edict_t *ent)
 	ent->moveinfo.sound_middle = gi.soundindex ("plats/pt1_mid.wav");
 	ent->moveinfo.sound_end = gi.soundindex ("plats/pt1_end.wav");
 
+	if (ent->attenuation <= 0)	// Knightmare added
+		ent->attenuation = ATTN_STATIC;
+
 //Maj++
 	bFuncPlat(ent);
 //Maj--
@@ -1216,6 +1230,11 @@ void SP_func_rotating(edict_t *ent)
 		ent->speed = 100;
 	if (!ent->dmg)
 		ent->dmg = 2;
+
+//	ent->moveinfo.sound_middle = "doors/hydro1.wav";
+
+	if (ent->attenuation <= 0)	// Knightmare added
+		ent->attenuation = ATTN_STATIC;
 
 	ent->use = rotating_use;
 	if (ent->dmg)
@@ -1315,7 +1334,7 @@ void button_fire(edict_t *self)
 
 	self->moveinfo.state = STATE_UP;
 	if (self->moveinfo.sound_start && !(self->flags & FL_TEAMSLAVE))
-		gi.sound(self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_start, 1, ATTN_STATIC, 0);
+		gi.sound(self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_start, 1, self->attenuation, 0); // Knightmare- was ATTN_STATIC
 
 	Move_Calc(self, self->moveinfo.end_origin, button_wait);
 }
@@ -1358,6 +1377,9 @@ void SP_func_button(edict_t *ent)
 
 	if (ent->sounds != 1)
 		ent->moveinfo.sound_start = gi.soundindex("switches/butn2.wav");
+
+	if (ent->attenuation <= 0)	// Knightmare added
+		ent->attenuation = ATTN_STATIC;
 	
 	if (!ent->speed)
 		ent->speed = 40.0;
@@ -1460,7 +1482,7 @@ void door_hit_top(edict_t *self)
 	if (!(self->flags & FL_TEAMSLAVE))
 	{
 		if (self->moveinfo.sound_end)
-			gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_end, 1, ATTN_STATIC, 0);
+			gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_end, 1, self->attenuation, 0); // Knightmare- was ATTN_STATIC
 	//	self->s.sound = 0;
 	}
 	self->s.sound = 0;	// Knightmare- make sure this is always set to 0, lead mover or not!
@@ -1481,7 +1503,7 @@ void door_hit_bottom(edict_t *self)
 	if (!(self->flags & FL_TEAMSLAVE))
 	{
 		if (self->moveinfo.sound_end)
-			gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_end, 1, ATTN_STATIC, 0);
+			gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_end, 1, self->attenuation, 0); // Knightmare- was ATTN_STATIC
 	//	self->s.sound = 0;
 	}
 	self->s.sound = 0;	// Knightmare- make sure this is always set to 0, lead mover or not!
@@ -1495,7 +1517,7 @@ void door_go_down(edict_t *self)
 	if (!(self->flags & FL_TEAMSLAVE))
 	{
 		if (self->moveinfo.sound_start)
-			gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_start, 1, ATTN_STATIC, 0);
+			gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_start, 1, self->attenuation, 0); // Knightmare- was ATTN_STATIC
 		self->s.sound = self->moveinfo.sound_middle;
 #ifdef LOOP_SOUND_ATTENUATION	// Knightmare added
 		self->s.attenuation = self->attenuation;
@@ -1530,7 +1552,7 @@ void door_go_up(edict_t *self, edict_t *activator)
 	if (!(self->flags & FL_TEAMSLAVE))
 	{
 		if (self->moveinfo.sound_start)
-			gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_start, 1, ATTN_STATIC, 0);
+			gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_start, 1, self->attenuation, 0); // Knightmare- was ATTN_STATIC
 		self->s.sound = self->moveinfo.sound_middle;
 #ifdef LOOP_SOUND_ATTENUATION	// Knightmare added
 		self->s.attenuation = self->attenuation;
@@ -1754,6 +1776,9 @@ void SP_func_door(edict_t *ent)
 		ent->moveinfo.sound_end = gi.soundindex("doors/dr1_end.wav");
 	}
 
+	if (ent->attenuation <= 0)	// Knightmare added
+		ent->attenuation = ATTN_STATIC;
+
 	G_SetMovedir(ent->s.angles, ent->movedir);
 	ent->movetype = MOVETYPE_PUSH;
 	ent->solid = SOLID_BSP;
@@ -1924,6 +1949,9 @@ void SP_func_door_rotating(edict_t *ent)
 		ent->moveinfo.sound_middle = gi.soundindex("doors/dr1_mid.wav");
 		ent->moveinfo.sound_end = gi.soundindex("doors/dr1_end.wav");
 	}
+
+	if (ent->attenuation <= 0)	// Knightmare added
+		ent->attenuation = ATTN_STATIC;
 
 	// if it starts open, switch the positions
 	if (ent->spawnflags & DOOR_START_OPEN)
@@ -2217,7 +2245,7 @@ void train_wait(edict_t *self)
 		if (!(self->flags & FL_TEAMSLAVE))
 		{
 			if (self->moveinfo.sound_end)
-				gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_end, 1, ATTN_STATIC, 0);
+				gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_end, 1, self->attenuation, 0);	// Knightmare- was ATTN_STATIC
 			self->s.sound = 0;
 		}
 	}
@@ -2533,7 +2561,7 @@ again:
 	if (!(self->flags & FL_TEAMSLAVE))
 	{
 		if (self->moveinfo.sound_start)
-			gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_start, 1, ATTN_STATIC, 0);
+			gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_start, 1, self->attenuation, 0); // was ATTN_STATIC
 		self->s.sound = self->moveinfo.sound_middle;
 #ifdef LOOP_SOUND_ATTENUATION
 		self->s.attenuation = self->attenuation;
@@ -2758,8 +2786,8 @@ void train_use (edict_t *self, edict_t *other, edict_t *activator)
 		{
 			// Back up a step
 			self->moveinfo.ratio -= self->moveinfo.speed * FRAMETIME / self->moveinfo.distance;
-			if (self->moveinfo.ratio < 0.)
-				self->moveinfo.ratio = 0.;
+			if (self->moveinfo.ratio < 0.0f)
+				self->moveinfo.ratio = 0.0f;
 		}
 		// end Knightmare
 
@@ -3223,9 +3251,21 @@ void SP_func_door_secret (edict_t *ent)
 	float	width;
 	float	length;
 
-	ent->moveinfo.sound_start = gi.soundindex("doors/dr1_strt.wav");
-	ent->moveinfo.sound_middle = gi.soundindex("doors/dr1_mid.wav");
-	ent->moveinfo.sound_end = gi.soundindex("doors/dr1_end.wav");
+	if (ent->sounds != 1)
+	{
+		ent->moveinfo.sound_start = gi.soundindex("doors/dr1_strt.wav");
+		ent->moveinfo.sound_middle = gi.soundindex("doors/dr1_mid.wav");
+		ent->moveinfo.sound_end = gi.soundindex("doors/dr1_end.wav");
+	}
+	else
+	{
+		ent->moveinfo.sound_start = 0;
+		ent->moveinfo.sound_middle = 0;
+		ent->moveinfo.sound_end = 0;
+	}
+
+	if (ent->attenuation <= 0)	// Knightmare added
+		ent->attenuation = ATTN_STATIC;
 
 	ent->movetype = MOVETYPE_PUSH;
 	ent->solid = SOLID_BSP;

@@ -54,6 +54,7 @@ field_t fields[] = {
 	{"solidstate", FOFS(solidstate), F_INT},
 	{"renderfx", FOFS(renderfx), F_INT},
 	{"effects", FOFS(effects), F_INT},
+	{"skinnum", FOFS(skinnum), F_INT},
 	{"bleft", FOFS(bleft), F_VECTOR},
 	{"tright", FOFS(tright), F_VECTOR},
 	// rotating train stuff

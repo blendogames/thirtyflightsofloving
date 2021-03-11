@@ -28,6 +28,7 @@ field_t fields[] = {
 	{"bleft", FOFS(bleft), F_VECTOR},
 	{"tright", FOFS(tright), F_VECTOR},
 	{"effects", FOFS(effects), F_INT},
+	{"skinnum", FOFS(skinnum), F_INT},
 	{"renderfx", FOFS(renderfx), F_INT},
 	{"gib_health", FOFS(gib_health), F_INT},
 	{"viewmessage", FOFS(viewmessage), F_LSTRING},

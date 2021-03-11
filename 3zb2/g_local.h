@@ -1321,6 +1321,7 @@ struct edict_s
 	int			solidstate;
 	int			renderfx;
 	int         effects;
+	int			skinnum;
 	vec3_t		bleft;
 	vec3_t		tright;
 

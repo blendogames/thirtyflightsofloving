@@ -238,8 +238,8 @@ void SP_model_spawn (edict_t *ent)
 	ent->s.attenuation = ent->attenuation;
 #endif
 
-//	if (ent->skinnum) // Knightmare- selectable skin
-//		ent->s.skinnum = ent->skinnum;
+	if (ent->skinnum) // Knightmare- selectable skin
+		ent->s.skinnum = ent->skinnum;
 
 	if (ent->spawnflags & ANIM_ONCE)
 		ent->spawnflags |= TOGGLE;

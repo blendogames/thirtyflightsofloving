@@ -2048,6 +2048,7 @@ struct edict_s
 	vec3_t		tright;					// bounding box data
 	int			renderfx;
 	int         effects;
+	int			skinnum;
 
 	// Lazarus: for rotating brush models:
 	float		pitch_speed;
