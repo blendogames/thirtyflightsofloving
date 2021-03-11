@@ -83,6 +83,8 @@ field_t fields[] = {
 	{"width", FOFS(width), F_FLOAT},	
 	{"length", FOFS(length), F_FLOAT},
 	{"side", FOFS(side), F_FLOAT},
+	// Knightmare- new function pointers
+	{"play", FOFS(play), F_FUNCTION, FFL_NOSPAWN},
 	// end Knightmare
 
 	// temp spawn vars -- only valid when the spawn function is called

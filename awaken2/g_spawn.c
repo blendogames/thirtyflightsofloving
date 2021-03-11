@@ -121,10 +121,11 @@ void SP_target_victory(edict_t *self);
 //CW--
 
 //DH++
-void SP_func_monitor (edict_t *self);
-void SP_model_turret (edict_t *self);
 void SP_model_spawn (edict_t *self);
 void SP_model_train (edict_t *self);
+void SP_model_turret (edict_t *self);
+void SP_target_effect (edict_t *self);
+void SP_func_monitor (edict_t *self);
 //DH--
 
 spawn_t	spawns[] = {
@@ -253,6 +254,7 @@ spawn_t	spawns[] = {
 	{"model_spawn",  SP_model_spawn},
 	{"model_train",  SP_model_train},
 	{"model_turret", SP_model_turret},
+	{"target_effect", SP_target_effect},
 	{"func_monitor", SP_func_monitor},
 //DH--
 	{NULL, NULL}

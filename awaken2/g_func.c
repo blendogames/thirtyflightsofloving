@@ -82,7 +82,7 @@ void train_spline (edict_t *self)
 
 	if ( (train->from != train->to) && !train->moveinfo.is_blocked && (train->spawnflags & TRAIN_START_ON))
 	{
-		if (train->moveinfo.ratio >= 1.0) //Knightmare- don't keep moving at end of curve
+		if (train->moveinfo.ratio >= 1.0f) //Knightmare- don't keep moving at end of curve
 		{
 			VectorClear(self->avelocity);
 			VectorClear(self->velocity);
@@ -107,7 +107,7 @@ void train_spline (edict_t *self)
 		train->moveinfo.ratio += train->moveinfo.speed * FRAMETIME / train->moveinfo.distance;
 	//	if(train->movewith_next && (train->movewith_next->movewith_ent == train))
 	//		set_child_movement(train);
-		if (train->moveinfo.ratio >= 1.0)
+		if (train->moveinfo.ratio >= 1.0f)
 		{
 			train->moveinfo.endfunc = NULL;
 			train->think = train_wait;
@@ -2584,7 +2584,7 @@ again:
 
 		self->from = self->to;
 		self->to   = ent;
-		self->moveinfo.ratio = 0.0;
+		self->moveinfo.ratio = 0.0f;
 
 		VectorSubtract(dest,self->s.origin,v);
 		self->moveinfo.distance = VectorLength(v);

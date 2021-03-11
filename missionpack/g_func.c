@@ -438,7 +438,7 @@ void Train_Move_Spline (edict_t *self)
 
 	if ( (train->from != train->to) && !train->moveinfo.is_blocked && (train->spawnflags & TRAIN_START_ON))
 	{
-		if (train->moveinfo.bezier_ratio >= 1.0) // Knightmare- don't keep moving at end of curve
+		if (train->moveinfo.bezier_ratio >= 1.0f) // Knightmare- don't keep moving at end of curve
 		{
 			VectorClear (self->avelocity);
 			VectorClear (self->velocity);
@@ -463,7 +463,7 @@ void Train_Move_Spline (edict_t *self)
 		gi.linkentity(train);
 		train->moveinfo.bezier_ratio += train->moveinfo.speed * FRAMETIME / train->moveinfo.distance;
 		train_move_children(self);
-		if (train->moveinfo.bezier_ratio >= 1.0)
+		if (train->moveinfo.bezier_ratio >= 1.0f)
 		{
 			train->moveinfo.endfunc = NULL;
 			train->think = train_wait;
@@ -4413,7 +4413,7 @@ again:
 
 		self->from = self->to;
 		self->to   = ent;
-		self->moveinfo.bezier_ratio = 0.0;
+		self->moveinfo.bezier_ratio = 0.0f;
 
 		VectorSubtract(dest,self->s.origin,v);
 		self->moveinfo.distance = VectorLength(v);
@@ -4692,8 +4692,8 @@ void train_use (edict_t *self, edict_t *other, edict_t *activator)
 		{
 			// Back up a step
 			self->moveinfo.bezier_ratio -= self->moveinfo.speed * FRAMETIME / self->moveinfo.distance;
-			if (self->moveinfo.bezier_ratio < 0.)
-				self->moveinfo.bezier_ratio = 0.;
+			if (self->moveinfo.bezier_ratio < 0.0f)
+				self->moveinfo.bezier_ratio = 0.0f;
 		}
 
 		if (self->target_ent)

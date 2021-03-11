@@ -1202,6 +1202,7 @@ extern	cvar_t	*turn_rider;	// Knightmare added
 // and saving / loading games
 //
 #define FFL_SPAWNTEMP		1
+#define FFL_NOSPAWN			2
 
 typedef enum {
 	F_INT, 
@@ -1213,6 +1214,8 @@ typedef enum {
 	F_EDICT,			// index on disk, pointer in memory
 	F_ITEM,				// index on disk, pointer in memory
 	F_CLIENT,			// index on disk, pointer in memory
+	F_FUNCTION,
+	F_MMOVE,
 	F_IGNORE
 } fieldtype_t;
 
@@ -1949,6 +1952,7 @@ struct edict_s
 	void		(*use)(edict_t *self, edict_t *other, edict_t *activator);
 	void		(*pain)(edict_t *self, edict_t *other, float kick, int damage);
 	void		(*die)(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point);
+	void		(*play)(edict_t *self, edict_t *activator);	// Knightmare added
 
 	float		touch_debounce_time;
 	float		pain_debounce_time;

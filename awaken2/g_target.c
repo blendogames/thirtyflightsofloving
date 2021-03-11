@@ -575,3 +575,403 @@ void SP_target_victory(edict_t *self)
 	self->use = target_victory_use;
 }
 //CW--
+
+/*====================================================================================
+   TARGET_EFFECT
+======================================================================================*/
+
+/* Unknowns or not supported
+TE_FLAME,              32  Rogue flamethrower, never implemented
+TE_FORCEWALL,          37  ??
+*/
+
+//=========================================================================
+/* Spawns an effect at the entity origin
+  TE_FLASHLIGHT         36
+*/
+void target_effect_at (edict_t *self, edict_t *activator)
+{
+	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (self->style);
+	gi.WritePosition (self->s.origin);
+	gi.WriteShort (self - g_edicts);
+	gi.multicast (self->s.origin, MULTICAST_PVS);
+}
+/* Poor man's target_steam
+  TE_STEAM           40
+*/
+void target_effect_steam (edict_t *self, edict_t *activator)
+{
+	static int nextid;
+	int	wait;
+
+	if (self->wait)
+		wait = self->wait*1000;
+	else
+		wait = 0;
+
+	if (nextid > 20000)
+		nextid = nextid %20000;
+	nextid++;
+
+	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (self->style);
+	gi.WriteShort (nextid);
+	gi.WriteByte (self->count);
+	gi.WritePosition (self->s.origin);
+	gi.WriteDir (self->movedir);
+	gi.WriteByte (self->sounds&0xff);
+	gi.WriteShort ( (int)(self->speed) );
+	gi.WriteLong ( (int)(wait) );
+	gi.multicast (self->s.origin, MULTICAST_PVS);
+
+//	if(level.num_reflectors)
+//		ReflectSteam (self->s.origin,self->movedir,self->count,self->sounds,(int)(self->speed),wait,nextid);
+}
+
+//=========================================================================
+/*
+Spawns (style) Splash with (count) particles of (sounds) color at (origin)
+moving in (movedir) direction.
+
+  TE_SPLASH             10 Randomly shaded shower of particles
+  TE_LASER_SPARKS       15 Splash particles obey gravity
+  TE_WELDING_SPARKS     25 Splash particles with flash of light at {origin}
+*/
+//=========================================================================
+void target_effect_splash (edict_t *self, edict_t *activator)
+{
+	gi.WriteByte(svc_temp_entity);
+	gi.WriteByte(self->style);
+	gi.WriteByte(self->count);
+	gi.WritePosition(self->s.origin);
+	gi.WriteDir(self->movedir);
+	gi.WriteByte(self->sounds);
+	gi.multicast(self->s.origin, MULTICAST_PVS);
+}
+
+//======================================================
+/*
+Spawns a trail of (type) from (start) to (end) and Broadcasts to all
+in Potentially Visible Set from vector (origin)
+
+  TE_RAILTRAIL             3 Spawns a blue spiral trail filled with white smoke
+  TE_BUBBLETRAIL          11 Spawns a trail of bubbles
+  TE_PARASITE_ATTACK      16
+  TE_MEDIC_CABLE_ATTACK   19
+  TE_BFG_LASER            23 Spawns a green laser
+  TE_GRAPPLE_CABLE        24
+  TE_RAILTRAIL2           31 NOT IMPLEMENTED IN ENGINE
+  TE_DEBUGTRAIL           34
+  TE_HEATBEAM,            38 Requires Rogue model
+  TE_MONSTER_HEATBEAM,    39 Requires Rogue model
+  TE_BUBBLETRAIL2         41
+*/
+//======================================================
+void target_effect_trail (edict_t *self, edict_t *activator)
+{
+	edict_t	*target;
+
+	if (!self->target) return;
+	target = G_Find(NULL,FOFS(targetname),self->target);
+	if (!target) return;
+
+	gi.WriteByte(svc_temp_entity);
+	gi.WriteByte(self->style);
+	if ((self->style == TE_PARASITE_ATTACK) || (self->style==TE_MEDIC_CABLE_ATTACK) ||
+	   (self->style == TE_HEATBEAM)        || (self->style==TE_MONSTER_HEATBEAM)   ||
+	   (self->style == TE_GRAPPLE_CABLE)                                             )
+		gi.WriteShort(self-g_edicts);
+	gi.WritePosition(self->s.origin);
+	gi.WritePosition(target->s.origin);
+	if (self->style == TE_GRAPPLE_CABLE) {
+		gi.WritePosition(vec3_origin);
+	}
+	gi.multicast(self->s.origin, MULTICAST_PVS);
+
+/*	if(level.num_reflectors)
+	{
+		if((self->style == TE_RAILTRAIL) || (self->style == TE_BUBBLETRAIL) ||
+		   (self->style == TE_BFG_LASER) || (self->style == TE_DEBUGTRAIL)  ||
+		   (self->style == TE_BUBBLETRAIL2))
+		   ReflectTrail(self->style,self->s.origin,target->s.origin);
+	}	*/
+}
+//===========================================================================
+/* TE_LIGHTNING   33 Lightning bolt
+
+  Similar but slightly different syntax to trail stuff */
+void target_effect_lightning (edict_t *self, edict_t *activator)
+{
+	edict_t	*target;
+
+	if (!self->target) return;
+	target = G_Find(NULL,FOFS(targetname),self->target);
+	if (!target) return;
+
+	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (self->style);
+	gi.WriteShort (target - g_edicts);		// destination entity
+	gi.WriteShort (self - g_edicts);		// source entity
+	gi.WritePosition (target->s.origin);
+	gi.WritePosition (self->s.origin);
+	gi.multicast (self->s.origin, MULTICAST_PVS);
+}
+//===========================================================================
+/*
+Spawns sparks of (type) from (start) in direction of (movdir) and
+Broadcasts to all in Potentially Visible Set from vector (origin)
+
+  TE_GUNSHOT           0 Spawns a grey splash of particles, with a bullet puff
+  TE_BLOOD             1 Spawns a spurt of red blood
+  TE_BLASTER           2 Spawns a blaster sparks
+  TE_SHOTGUN           4 Spawns a small grey splash of spark particles, with a bullet puff
+  TE_SPARKS            9 Spawns a red/gold splash of spark particles
+  TE_SCREEN_SPARKS    12 Spawns a large green/white splash of sparks
+  TE_SHIELD_SPARKS    13 Spawns a large blue/violet splash of sparks
+  TE_BULLET_SPARKS    14 Same as TE_SPARKS, with a bullet puff and richochet sound
+  TE_GREENBLOOD       26 Spurt of green (actually kinda yellow) blood
+  TE_BLUEHYPERBLASTER 27 NOT IMPLEMENTED
+  TE_BLASTER2         30 Green/white sparks with a yellow/white flash
+  TE_MOREBLOOD        42 
+  TE_HEATBEAM_SPARKS  43
+  TE_HEATBEAM_STEAM   44
+  TE_CHAINFIST_SMOKE  45 
+  TE_ELECTRIC_SPARKS  46
+  TE_FLECHETTE        55
+*/
+//======================================================
+void target_effect_sparks (edict_t *self, edict_t *activator)
+{
+	gi.WriteByte(svc_temp_entity);
+	gi.WriteByte(self->style);
+	gi.WritePosition(self->s.origin);
+	if (self->style != TE_CHAINFIST_SMOKE) 
+		gi.WriteDir(self->movedir);
+	gi.multicast(self->s.origin, MULTICAST_PVS);
+
+//	if (level.num_reflectors)
+//		ReflectSparks(self->style,self->s.origin,self->movedir);
+}
+
+//======================================================
+/*
+Spawns a (type) effect at (start} and Broadcasts to all in the
+Potentially Hearable set from vector (origin)
+
+  TE_EXPLOSION1               5 airburst
+  TE_EXPLOSION2               6 ground burst
+  TE_ROCKET_EXPLOSION         7 rocket explosion
+  TE_GRENADE_EXPLOSION        8 grenade explosion
+  TE_ROCKET_EXPLOSION_WATER  17 underwater rocket explosion
+  TE_GRENADE_EXPLOSION_WATER 18 underwater grenade explosion
+  TE_BFG_EXPLOSION           20 BFG explosion sprite
+  TE_BFG_BIGEXPLOSION        21 BFG particle explosion
+  TE_BOSSTPORT               22 
+  TE_PLASMA_EXPLOSION        28
+  TE_PLAIN_EXPLOSION         35
+  TE_TRACKER_EXPLOSION       47
+  TE_TELEPORT_EFFECT	     48
+  TE_DBALL_GOAL              49 Identical to TE_TELEPORT_EFFECT?
+  TE_NUKEBLAST               51 
+  TE_WIDOWSPLASH             52
+  TE_EXPLOSION1_BIG          53  Works, but requires Rogue models/objects/r_explode2
+  TE_EXPLOSION1_NP           54
+*/
+//==============================================================================
+void target_effect_explosion (edict_t *self, edict_t *activator)
+{
+	gi.WriteByte(svc_temp_entity);
+	gi.WriteByte(self->style);
+	gi.WritePosition(self->s.origin);
+	gi.multicast(self->s.origin, MULTICAST_PHS);
+
+//	if (level.num_reflectors)
+//		ReflectExplosion (self->style, self->s.origin);
+}
+//===============================================================================
+/*  TE_TUNNEL_SPARKS    29 
+    Similar to other splash effects, but Xatrix does some funky things with
+	the origin so we'll do the same */
+
+void target_effect_tunnel_sparks (edict_t *self, edict_t *activator)
+{
+	vec3_t	origin;
+	int		i;
+
+	VectorCopy(self->s.origin,origin);
+	for (i=0; i<self->count; i++)
+	{
+		origin[2] += (self->speed * 0.01) * (i + random());
+		gi.WriteByte (svc_temp_entity);
+		gi.WriteByte (self->style);
+		gi.WriteByte (1);
+		gi.WritePosition (origin);
+		gi.WriteDir (vec3_origin);
+		gi.WriteByte (self->sounds + (rand()&7));  // color
+		gi.multicast (self->s.origin, MULTICAST_PVS);
+	}
+}
+//===============================================================================
+/*  TE_WIDOWBEAMOUT     50
+*/
+void target_effect_widowbeam (edict_t *self, edict_t *activator)
+{
+	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (TE_WIDOWBEAMOUT);
+	gi.WriteShort (20001);
+	gi.WritePosition (self->s.origin);
+	gi.multicast (self->s.origin, MULTICAST_PVS);
+}
+//===============================================================================
+
+void target_effect_use (edict_t *self, edict_t *other, edict_t *activator)
+{
+	if (self->spawnflags & 1)
+	{
+		// currently looped on - turn it off
+		self->spawnflags &= ~1;
+		self->spawnflags |= 2;
+		self->nextthink = 0;
+		return;
+	}
+	if (self->spawnflags & 2)
+	{
+		// currently looped off - turn it on
+		self->spawnflags &= ~2;
+		self->spawnflags |= 1;
+		self->nextthink = level.time + self->wait;
+	}
+/*	if (self->spawnflags & 4)
+	{
+		// "if_moving" set. If movewith target isn't moving,
+		// don't play
+		edict_t	*mover;
+		if (!self->movewith) return;
+		mover = G_Find(NULL,FOFS(targetname), self->movewith);
+		if (!mover) return;
+		if (!VectorLength(mover->velocity)) return;
+	}*/
+	self->play(self,activator);
+}
+
+void target_effect_think (edict_t *self)
+{
+	self->play(self,NULL);
+	self->nextthink = level.time + self->wait;
+}
+
+//===============================================================================
+void SP_target_effect (edict_t *self)
+{
+//	self->class_id = ENTITY_TARGET_EFFECT;
+
+/*	if (self->movewith)
+		self->movetype = MOVETYPE_PUSH;
+	else*/
+		self->movetype = MOVETYPE_NONE;
+
+	switch (self->style )
+	{
+	case TE_FLASHLIGHT:
+		self->play = target_effect_at;
+		break;
+	case TE_STEAM:
+		self->play = target_effect_steam;
+		G_SetMovedir (self->s.angles, self->movedir);
+		if (!self->count)
+			self->count = 32;
+		if (!self->sounds)
+			self->sounds = 8;
+		if (!self->speed)
+			self->speed = 75;
+		break;
+	case TE_SPLASH:
+	case TE_LASER_SPARKS:
+	case TE_WELDING_SPARKS:
+		self->play = target_effect_splash;
+		G_SetMovedir (self->s.angles, self->movedir);
+		if(!self->count)
+			self->count = 32;
+		break;
+	case TE_RAILTRAIL:
+	case TE_BUBBLETRAIL:
+	case TE_PARASITE_ATTACK:
+	case TE_MEDIC_CABLE_ATTACK:
+	case TE_BFG_LASER:
+	case TE_GRAPPLE_CABLE:
+	case TE_DEBUGTRAIL:
+	case TE_HEATBEAM:
+	case TE_MONSTER_HEATBEAM:
+	case TE_BUBBLETRAIL2:
+		if (!self->target) {
+			gi.dprintf("%s at %s with style=%d needs a target\n",self->classname,vtos(self->s.origin),self->style);
+			G_FreeEdict(self);
+		} else
+			self->play = target_effect_trail;
+		break;
+	case TE_LIGHTNING:
+		if (!self->target) {
+			gi.dprintf("%s at %s with style=%d needs a target\n",self->classname,vtos(self->s.origin),self->style);
+			G_FreeEdict(self);
+		} else
+			self->play = target_effect_lightning;
+		break;
+	case TE_GUNSHOT:
+	case TE_BLOOD:
+	case TE_BLASTER:
+	case TE_SHOTGUN:
+	case TE_SPARKS:
+	case TE_SCREEN_SPARKS:
+	case TE_SHIELD_SPARKS:
+	case TE_BULLET_SPARKS:
+	case TE_GREENBLOOD:
+	case TE_BLASTER2:
+	case TE_MOREBLOOD:
+	case TE_HEATBEAM_SPARKS:
+	case TE_HEATBEAM_STEAM:
+	case TE_CHAINFIST_SMOKE:
+	case TE_ELECTRIC_SPARKS:
+	case TE_FLECHETTE:
+		self->play = target_effect_sparks;
+		G_SetMovedir (self->s.angles, self->movedir);
+		break;
+	case TE_EXPLOSION1:
+	case TE_EXPLOSION2:
+	case TE_ROCKET_EXPLOSION:
+	case TE_GRENADE_EXPLOSION:
+	case TE_ROCKET_EXPLOSION_WATER:
+	case TE_GRENADE_EXPLOSION_WATER:
+	case TE_BFG_EXPLOSION:
+	case TE_BFG_BIGEXPLOSION:
+	case TE_BOSSTPORT:
+	case TE_PLASMA_EXPLOSION:
+	case TE_PLAIN_EXPLOSION:
+	case TE_TRACKER_EXPLOSION:
+	case TE_TELEPORT_EFFECT:
+	case TE_DBALL_GOAL:
+	case TE_NUKEBLAST:
+	case TE_WIDOWSPLASH:
+	case TE_EXPLOSION1_BIG:
+	case TE_EXPLOSION1_NP:
+		self->play = target_effect_explosion;
+		break;
+	case TE_TUNNEL_SPARKS:
+		if (!self->count)
+			self->count = 32;
+		if (!self->sounds)
+			self->sounds = 116; // Light blue, same color used by Xatrix
+		self->play = target_effect_tunnel_sparks;
+		break;
+	case TE_WIDOWBEAMOUT:
+		self->play = target_effect_widowbeam;
+		G_SetMovedir (self->s.angles, self->movedir);
+		break;
+	default:
+		gi.dprintf ("%s at %s: bad style %d\n",self->classname,vtos(self->s.origin),self->style);
+	}
+	self->use = target_effect_use;
+	self->think = target_effect_think;
+	if (self->spawnflags & 1)
+		self->nextthink = level.time + 1;
+}
