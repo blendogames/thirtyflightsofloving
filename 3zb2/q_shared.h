@@ -51,8 +51,13 @@ typedef enum {false, true}	qboolean;
 #endif
 
 // from Quake3 source
-#ifdef WIN32
-#define Q_vsnprintf _vsnprintf
+#ifdef _MSC_VER	// _WIN32
+//#define Q_vsnprintf _vsnprintf
+__inline int Q_vsnprintf (char *Dest, size_t Count, const char *Format, va_list Args) {
+	int ret = _vsnprintf(Dest, Count, Format, Args);
+	Dest[Count-1] = 0;	// null terminate
+	return ret;
+}
 #else
 // TODO: do we need Mac define?
 #define Q_vsnprintf vsnprintf
