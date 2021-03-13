@@ -56,7 +56,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //#define CURL_ERROR(x)	va("%i",(x))
 //#else
 #define CURL_STATICLIB
+#if defined (_MSC_VER) && (_MSC_VER <= 1200)	// use older version of libcurl for MSVC6
+#include "../include/curl_vc6/curl.h"
+#else
 #include "../include/curl/curl.h"
+#endif
 #define CURL_ERROR(x)	curl_easy_strerror(x)
 //#endif
 
