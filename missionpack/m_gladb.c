@@ -169,7 +169,7 @@ void gladbGun (edict_t *self)
 	VectorSubtract (self->pos1, start, dir);
 	VectorNormalize (dir);
 
-	fire_plasma (self, start, dir, 100, 725, 60, 60);
+	monster_fire_phalanx (self, start, dir, 100, 725, 60, 60, MZ2_GLADIATOR_RAILGUN_1);
 }
 
 void gladbGun_check (edict_t *self)

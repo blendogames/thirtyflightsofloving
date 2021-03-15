@@ -354,7 +354,7 @@ void SP_gekk_loogie (edict_t *self);
 void SP_flechette (edict_t *self);
 void SP_tracker (edict_t *self);
 void SP_ion (edict_t *self);
-void SP_plasma (edict_t *self);
+void SP_phalanx_plasma (edict_t *self);
 void SP_debris (edict_t *self);
 void SP_gib (edict_t *self);
 void SP_gibhead (edict_t *self);
@@ -749,7 +749,7 @@ spawn_t	spawns[] = {
 	{"flechette", SP_flechette},
 	{"tracker", SP_tracker},
 	{"ion", SP_ion},
-	{"plasma", SP_plasma},
+	{"phalanx_plasma", SP_phalanx_plasma},
 	{"debris", SP_debris},
 	{"gib", SP_gib},
 	{"gibhead", SP_gibhead},
@@ -1332,7 +1332,6 @@ qboolean ED_ParseEntityAlias (char *data, edict_t *ent)
 	return alias_loaded;
 }
 
-
 /*
 ==============================================================================
 END ALIAS SCRIPT LOADING
@@ -1352,7 +1351,7 @@ char *ED_ParseEdict (char *data, edict_t *ent)
 	qboolean	init;
 	char		keyname[256];
 	char		*com_token;
-	//Knightmare added
+	// Knightmare added
 	qboolean	alias_loaded = false;
 
 	init = false;
@@ -1805,10 +1804,10 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 #ifdef KMQUAKE2_ENGINE_MOD // use new engine function instead
 		gi.FreeFile(alias_data);
 #else
-//		if (alias_from_pak)
+	//	if (alias_from_pak)
 			gi.TagFree(alias_data);
-//		else
-//			free(&alias_data);
+	//	else
+	//		free(&alias_data);
 #endif
 	}
 

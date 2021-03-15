@@ -880,14 +880,14 @@ void actorPhalanx (edict_t *self)
 			forward[YAW] -= 1.5;
 			VectorNormalize (forward);
 
-			fire_plasma (self, start, forward, damage, 725, damage_radius, radius_damage);
+			fire_phalanx_plasma (self, start, forward, damage, 725, damage_radius, radius_damage);
 		}
 		else
 		{
 			forward[YAW] += 1.5;
 			VectorNormalize (forward);
 
-			fire_plasma (self, start, forward, damage, 725, damage_radius, radius_damage);
+			fire_phalanx_plasma (self, start, forward, damage, 725, damage_radius, radius_damage);
 
 			gi.positioned_sound(start,self,CHAN_WEAPON,gi.soundindex("weapons/plasshot.wav"),1,ATTN_NORM,0);
 

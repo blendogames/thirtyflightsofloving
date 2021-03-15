@@ -452,7 +452,7 @@ void ThrowHead (edict_t *self, char *gibname, int frame, int skinnum, int damage
 		if (self->blood_type == 1)
 			vscale = 3.0;
 		else
-			vscale = 1.0; //was 0.5
+			vscale = 1.0; // was 0.5
 	}
 	else
 	{

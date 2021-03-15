@@ -950,7 +950,7 @@ void fixbot_fire_laser (edict_t *self)
 	ent->enemy = self->enemy;
 	ent->owner = self;
 	ent->dmg = -1;
-	monster_dabeam (ent);
+	monster_fire_dabeam (ent);
 
 	if (self->enemy->health > (self->enemy->mass/10))
 	{

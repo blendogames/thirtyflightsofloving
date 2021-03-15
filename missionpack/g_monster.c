@@ -368,7 +368,7 @@ void dabeam_hit (edict_t *self)
 }
 
 // RAFAEL
-void monster_dabeam (edict_t *self)
+void monster_fire_dabeam (edict_t *self)
 {
 	vec3_t last_movedir;
 	vec3_t point;
@@ -407,6 +407,26 @@ void monster_dabeam (edict_t *self)
  
 	self->spawnflags |= 0x80000001;
 	self->svflags &= ~SVF_NOCLIENT;
+}
+
+// Knightmare- this should have been added by Xatrix!
+void monster_fire_phalanx (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage, int flashtype)
+{
+	// Zaero add
+	if (EMPNukeCheck(self, start))
+	{
+		gi.sound (self, CHAN_AUTO, gi.soundindex("items/empnuke/emp_missfire.wav"), 1, ATTN_NORM, 0);
+		return;
+	}
+	// end Zaero
+
+	fire_phalanx_plasma (self, start, dir, damage, speed, damage_radius, radius_damage);
+
+	// Don't actually send a muzzleflash here because Xatrix forgot to add one!
+/*	gi.WriteByte (svc_muzzleflash2);
+	gi.WriteShort (self - g_edicts);
+	gi.WriteByte (flashtype);
+	gi.multicast (start, MULTICAST_PVS); */
 }
 
 // ROGUE
@@ -1070,7 +1090,7 @@ void monster_triggered_spawn (edict_t *self)
 		self->s.event = EV_PLAYER_TELEPORT2;
 #else
 		self->s.event = EV_PLAYER_TELEPORT;
-		Q1TeleportSounds(self);
+		Q1TeleportSounds (self);
 #endif
 	}
 	// end Knightmare

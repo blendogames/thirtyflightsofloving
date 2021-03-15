@@ -2078,8 +2078,7 @@ void soldierh_laserbeam (edict_t *self, int flash_index)
 	
 	ent->dmg = 2;
 
-	monster_dabeam (ent);
-	
+	monster_fire_dabeam (ent);
 }
 
 

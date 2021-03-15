@@ -2225,88 +2225,10 @@ void SP_ion (edict_t *ion)
 	gi.linkentity(ion);
 }
 
-// ROGUE
-/*
-fire_heat
-*/
-
-void heat_think (edict_t *self)
-{
-	edict_t		*target = NULL;
-	edict_t		*aquire = NULL;
-	vec3_t		vec;
-	vec3_t		oldang;
-	int			len;
-	int			oldlen = 0;
-
-	VectorClear (vec);
-
-	// aquire new target
-	while (( target = findradius (target, self->s.origin, 1024)) != NULL)
-	{
-		
-		if (self->owner == target)
-			continue;
-		if (!target->svflags & SVF_MONSTER)
-			continue;
-		if (!target->client)
-			continue;
-		if (target->health <= 0)
-			continue;
-		if (!visible (self, target))
-			continue;
-		
-		// if we need to reduce the tracking cone
-		/*
-		{
-			vec3_t	vec;
-			float	dot;
-			vec3_t	forward;
-	
-			AngleVectors (self->s.angles, forward, NULL, NULL);
-			VectorSubtract (target->s.origin, self->s.origin, vec);
-			VectorNormalize (vec);
-			dot = DotProduct (vec, forward);
-	
-			if (dot > 0.6)
-				continue;
-		}
-		*/
-
-		if (!infront (self, target))
-			continue;
-
-		VectorSubtract (self->s.origin, target->s.origin, vec);
-		len = VectorLength (vec);
-
-		if (aquire == NULL || len < oldlen)
-		{
-			aquire = target;
-			self->target_ent = aquire;
-			oldlen = len;
-		}
-	}
-
-	if (aquire != NULL)
-	{
-		VectorCopy (self->s.angles, oldang);
-		VectorSubtract (aquire->s.origin, self->s.origin, vec);
-		
-		vectoangles (vec, self->s.angles);
-		
-		VectorNormalize (vec);
-		VectorCopy (vec, self->movedir);
-		VectorScale (vec, 500, self->velocity);
-	}
-
-	self->nextthink = level.time + 0.1;
-}
-
 // NOTE: the new Rogue fire_heat is in g_newweap.c
 /*
 fire_rocket_heat
 */
-
 void rocket_heat_think (edict_t *self)
 {
 	edict_t		*target = NULL;
@@ -2399,7 +2321,7 @@ void fire_rocket_heat (edict_t *self, vec3_t start, vec3_t dir, int damage, int 
 	heat->s.renderfx |= RF_NOSHADOW; //Knightmare- no shadow
 	VectorClear (heat->mins);
 	VectorClear (heat->maxs);
-	//heat->s.modelindex = gi.modelindex ("models/objects/hrocket/tris.md2");
+//	heat->s.modelindex = gi.modelindex ("models/objects/hrocket/tris.md2");
 	heat->s.modelindex = gi.modelindex ("models/objects/rocket/tris.md2");
 	heat->s.skinnum = 1;
 	heat->owner = self;
@@ -2420,12 +2342,10 @@ void fire_rocket_heat (edict_t *self, vec3_t start, vec3_t dir, int damage, int 
 }
 
 // RAFAEL
-
 /*
-	fire_plasma
+fire_phalanx_plasma
 */
-
-void plasma_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
+void phalanx_plasma_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
 	vec3_t		origin;
 
@@ -2463,88 +2383,93 @@ void plasma_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *su
 	G_FreeEdict (ent);
 }
 
-
-// RAFAEL
-void fire_plasma (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage)
+// Knightmare- remove this after the next savegame version increment!
+void plasma_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
-	edict_t *plasma;
-
-	plasma = G_Spawn();
-	plasma->classname = "plasma";
-	plasma->class_id = ENTITY_PLASMA;
-	VectorCopy (start, plasma->s.origin);
-	VectorCopy (dir, plasma->movedir);
-	vectoangles (dir, plasma->s.angles);
-	VectorScale (dir, speed, plasma->velocity);
-	plasma->movetype = MOVETYPE_FLYMISSILE;
-	plasma->clipmask = MASK_SHOT;
-	plasma->solid = SOLID_BBOX;
-
-	VectorClear (plasma->mins);
-	VectorClear (plasma->maxs);
-	
-	plasma->owner = self;
-	plasma->touch = plasma_touch;
-	plasma->nextthink = level.time + 8000.0f/speed;
-	plasma->think = G_FreeEdict;
-	plasma->dmg = damage;
-	plasma->radius_dmg = radius_damage;
-	plasma->dmg_radius = damage_radius;
-	plasma->s.sound = gi.soundindex ("weapons/rockfly.wav");
-	
-	plasma->s.modelindex = gi.modelindex ("sprites/s_photon.sp2");
-	plasma->s.effects |= EF_PLASMA | EF_ANIM_ALLFAST;
-	plasma->s.renderfx |= RF_FULLBRIGHT;
-
-	if (self->client)
-		check_dodge (self, plasma->s.origin, dir, speed);
-
-	gi.linkentity (plasma);
+	phalanx_plasma_touch (ent, other, plane, surf);
 }
 
-// NOTE: SP_plasma should ONLY be used to spawn phalanx magslugs that change maps
+// RAFAEL
+void fire_phalanx_plasma (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage)
+{
+	edict_t *ph_plasma;
+
+	ph_plasma = G_Spawn();
+	ph_plasma->classname = "phalanx_plasma";
+	ph_plasma->class_id = ENTITY_PLASMA;
+	VectorCopy (start, ph_plasma->s.origin);
+	VectorCopy (dir, ph_plasma->movedir);
+	vectoangles (dir, ph_plasma->s.angles);
+	VectorScale (dir, speed, ph_plasma->velocity);
+	ph_plasma->movetype = MOVETYPE_FLYMISSILE;
+	ph_plasma->clipmask = MASK_SHOT;
+	ph_plasma->solid = SOLID_BBOX;
+
+	VectorClear (ph_plasma->mins);
+	VectorClear (ph_plasma->maxs);
+	
+	ph_plasma->owner = self;
+	ph_plasma->touch = phalanx_plasma_touch;
+	ph_plasma->nextthink = level.time + 8000.0f/speed;
+	ph_plasma->think = G_FreeEdict;
+	ph_plasma->dmg = damage;
+	ph_plasma->radius_dmg = radius_damage;
+	ph_plasma->dmg_radius = damage_radius;
+	ph_plasma->s.sound = gi.soundindex ("weapons/rockfly.wav");
+	
+	ph_plasma->s.modelindex = gi.modelindex ("sprites/s_photon.sp2");
+	ph_plasma->s.effects |= EF_PLASMA | EF_ANIM_ALLFAST;
+	ph_plasma->s.renderfx |= RF_FULLBRIGHT;
+
+	if (self->client)
+		check_dodge (self, ph_plasma->s.origin, dir, speed);
+
+	gi.linkentity (ph_plasma);
+}
+
+// NOTE: SP_phalanx_plasma should ONLY be used to spawn phalanx magslugs that change maps
 //       via a trigger_transition. It should NOT be used for map entities.
 
-void plasma_delayed_start (edict_t *plasma)
+void phalanx_plasma_delayed_start (edict_t *ph_plasma)
 {
 	if (g_edicts[1].linkcount)
 	{
-		VectorScale(plasma->movedir, plasma->moveinfo.speed, plasma->velocity);
-		plasma->nextthink = level.time + 8000/plasma->moveinfo.speed;
-		plasma->think = G_FreeEdict;
-		gi.linkentity(plasma);
+		VectorScale(ph_plasma->movedir, ph_plasma->moveinfo.speed, ph_plasma->velocity);
+		ph_plasma->nextthink = level.time + 8000.0f / ph_plasma->moveinfo.speed;
+		ph_plasma->think = G_FreeEdict;
+		gi.linkentity(ph_plasma);
 	}
 	else
-		plasma->nextthink = level.time + FRAMETIME;
+		ph_plasma->nextthink = level.time + FRAMETIME;
 }
 
-void SP_plasma (edict_t *plasma)
+void SP_phalanx_plasma (edict_t *ph_plasma)
 {
 	vec3_t	dir;
 
-	plasma->s.modelindex = gi.modelindex ("sprites/s_photon.sp2");
-	plasma->s.effects |= EF_PLASMA | EF_ANIM_ALLFAST;
-	plasma->s.sound      = gi.soundindex ("weapons/rockfly.wav");
-	plasma->touch = plasma_touch;
-	AngleVectors(plasma->s.angles, dir, NULL, NULL);
-	VectorCopy (dir, plasma->movedir);
-	plasma->moveinfo.speed = VectorLength(plasma->velocity);
-	if (plasma->moveinfo.speed <= 0)
-		plasma->moveinfo.speed = 650;
+	ph_plasma->s.modelindex = gi.modelindex ("sprites/s_photon.sp2");
+	ph_plasma->s.effects |= EF_PLASMA | EF_ANIM_ALLFAST;
+	ph_plasma->s.sound      = gi.soundindex ("weapons/rockfly.wav");
+	ph_plasma->touch = phalanx_plasma_touch;
+	AngleVectors(ph_plasma->s.angles, dir, NULL, NULL);
+	VectorCopy (dir, ph_plasma->movedir);
+	ph_plasma->moveinfo.speed = VectorLength(ph_plasma->velocity);
+	if (ph_plasma->moveinfo.speed <= 0)
+		ph_plasma->moveinfo.speed = 650;
 
 	// For SP, freeze plasma until player spawns in
 	if (game.maxclients == 1)
 	{
-		VectorClear(plasma->velocity);
-		plasma->think = plasma_delayed_start;
-		plasma->nextthink = level.time + FRAMETIME;
+		VectorClear(ph_plasma->velocity);
+		ph_plasma->think = phalanx_plasma_delayed_start;
+		ph_plasma->nextthink = level.time + FRAMETIME;
 	}
 	else
 	{
-		plasma->think = G_FreeEdict;
-		plasma->nextthink = level.time + 8000/plasma->moveinfo.speed;
+		ph_plasma->think = G_FreeEdict;
+		ph_plasma->nextthink = level.time + 8000.0f / ph_plasma->moveinfo.speed;
 	}
-	gi.linkentity (plasma);
+	gi.linkentity (ph_plasma);
 }
 
 // RAFAEL
@@ -2593,7 +2518,7 @@ extern int lastgibframe;
 				
 				// Knightmare- forget this, enough gibs are spawned already
 				// Lazarus: Prevent gib showers from causing SZ_GetSpace: overflow
-				/*if (level.framenum > lastgibframe)
+			/*	if (level.framenum > lastgibframe)
 				{
 					gibsthisframe = 0;
 					lastgibframe = level.framenum;
@@ -2660,7 +2585,7 @@ extern int lastgibframe;
 					//best->think = G_FreeEdict;
 					best->think = gib_fade;
 					gi.linkentity (best);
-				}*/
+				} */
 
 				best = G_Spawn ();
 				VectorCopy (ent->s.origin, best->s.origin);

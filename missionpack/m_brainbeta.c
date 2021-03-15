@@ -669,7 +669,7 @@ void brainbeta_laserbeam (edict_t *self)
 	ent->enemy = self->enemy;
 	ent->owner = self;
 	ent->dmg = 1;
-	monster_dabeam (ent);
+	monster_fire_dabeam (ent);
    
 	// dis is me left eye
 	ent = G_Spawn ();  
@@ -685,7 +685,7 @@ void brainbeta_laserbeam (edict_t *self)
 	ent->enemy = self->enemy;
 	ent->owner = self;
 	ent->dmg = 1;
-	monster_dabeam (ent);
+	monster_fire_dabeam (ent);
 }
 
 void brainbeta_laserbeam_reattack (edict_t *self)

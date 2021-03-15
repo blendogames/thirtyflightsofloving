@@ -2661,7 +2661,7 @@ void weapon_phalanx_fire (edict_t *ent, qboolean altfire)
 		v[ROLL]  = ent->client->v_angle[ROLL];
 		AngleVectors (v, forward, right, up);
 			
-		fire_plasma (ent, start, forward, damage, sk_phalanx_speed->value, damage_radius, radius_damage);
+		fire_phalanx_plasma (ent, start, forward, damage, sk_phalanx_speed->value, damage_radius, radius_damage);
 
 		if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
 			ent->client->pers.inventory[ent->client->ammo_index]--;
@@ -2672,7 +2672,7 @@ void weapon_phalanx_fire (edict_t *ent, qboolean altfire)
 		v[YAW]   = ent->client->v_angle[YAW] + 1.5;
 		v[ROLL]  = ent->client->v_angle[ROLL];
 		AngleVectors (v, forward, right, up);
-		fire_plasma (ent, start, forward, damage, sk_phalanx_speed->value, damage_radius, radius_damage);
+		fire_phalanx_plasma (ent, start, forward, damage, sk_phalanx_speed->value, damage_radius, radius_damage);
 
 		// send muzzle flash
 		// Knightmare- Gen cam code

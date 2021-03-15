@@ -125,7 +125,7 @@ field_t fields[] = {
 
 	{"prethink", FOFS(prethink), F_FUNCTION, FFL_NOSPAWN},
 	{"think", FOFS(think), F_FUNCTION, FFL_NOSPAWN},
-	{"postthink", FOFS(postthink), F_FUNCTION, FFL_NOSPAWN}, //Knightmare added
+	{"postthink", FOFS(postthink), F_FUNCTION, FFL_NOSPAWN}, // Knightmare added
 	{"blocked", FOFS(blocked), F_FUNCTION, FFL_NOSPAWN},
 	{"touch", FOFS(touch), F_FUNCTION, FFL_NOSPAWN},
 	{"use", FOFS(use), F_FUNCTION, FFL_NOSPAWN},

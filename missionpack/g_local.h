@@ -1249,7 +1249,6 @@ edict_t *findradius2 (edict_t *from, vec3_t org, float rad);
 //
 float PointDist (vec3_t x, vec3_t y);
 void Q1TeleportSounds (edict_t *ent);
-void Q1TeleportSounds2 (edict_t *ent1, edict_t *ent2);
 
 //
 // g_combat.c
@@ -1371,7 +1370,9 @@ void monster_fire_bfg (edict_t *self, vec3_t start, vec3_t aimdir, int damage, i
 void monster_fire_blueblaster (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int flashtype, int effect);
 void monster_fire_ionripper (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int flashtype, int effect);
 void monster_fire_rocket_heat (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int flashtype);
-void monster_dabeam (edict_t *self);
+void monster_fire_dabeam (edict_t *self);
+// Knightmare added
+void monster_fire_phalanx (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage, int flashtype);
 
 // ROGUE
 void monster_fire_blaster2 (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int flashtype, int effect);
@@ -1491,7 +1492,7 @@ void fire_plasma_rifle (edict_t *ent, vec3_t start, vec3_t dir, int damage, int 
 void fire_ionripper (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, int effect);
 void fire_rocket_heat (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage);
 void fire_blueblaster (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, int effect);
-void fire_plasma (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage);
+void fire_phalanx_plasma (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage);	// Knightmare- renamed this, was fire_plasma
 void fire_trap (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, float timer, float damage_radius, qboolean held);
 void Trap_Die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point);
 void Cmd_KillTrap_f (edict_t *ent);
@@ -2463,9 +2464,9 @@ struct edict_s
 	float		roll_speed;
 	float		ideal_yaw;
 	float		ideal_pitch;
-	float		ideal_roll; //roll value for a path_corner
-	float		roll; //roll value for a path_corner
-	int			turn_rider; //whether to turn rider
+	float		ideal_roll; // roll value for a path_corner
+	float		roll;		// roll value for a path_corner
+	int			turn_rider;	// whether to turn rider
 
 	char		*common_name;
 

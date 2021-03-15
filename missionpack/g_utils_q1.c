@@ -28,33 +28,3 @@ void Q1TeleportSounds (edict_t *ent)
 		gi.sound (ent, CHAN_NO_PHS_ADD+CHAN_VOICE, gi.soundindex("q1world/teleport/r_tele5.wav"), 1, ATTN_NORM, 0);
 }
 
-void Q1TeleportSounds2 (edict_t *ent1, edict_t *ent2)
-{
-	float sound = random();
-
-	if(sound < 0.2)
-	{
-		gi.sound (ent1, CHAN_NO_PHS_ADD+CHAN_VOICE, gi.soundindex("q1world/teleport/r_tele1.wav"), 1, ATTN_NORM, 0);
-		gi.sound (ent2, CHAN_NO_PHS_ADD+CHAN_VOICE, gi.soundindex("q1world/teleport/r_tele1.wav"), 1, ATTN_NORM, 0);
-	}
-	else if (sound < 0.4)
-	{
-		gi.sound (ent1, CHAN_NO_PHS_ADD+CHAN_VOICE, gi.soundindex("q1world/teleport/r_tele2.wav"), 1, ATTN_NORM, 0);
-		gi.sound (ent2, CHAN_NO_PHS_ADD+CHAN_VOICE, gi.soundindex("q1world/teleport/r_tele2.wav"), 1, ATTN_NORM, 0);
-	}
-	else if (sound < 0.6)
-	{
-		gi.sound (ent1, CHAN_NO_PHS_ADD+CHAN_VOICE, gi.soundindex("q1world/teleport/r_tele3.wav"), 1, ATTN_NORM, 0);
-		gi.sound (ent2, CHAN_NO_PHS_ADD+CHAN_VOICE, gi.soundindex("q1world/teleport/r_tele3.wav"), 1, ATTN_NORM, 0);
-	}
-	else if (sound < 0.8)
-	{
-		gi.sound (ent1, CHAN_NO_PHS_ADD+CHAN_VOICE, gi.soundindex("q1world/teleport/r_tele4.wav"), 1, ATTN_NORM, 0);
-		gi.sound (ent2, CHAN_NO_PHS_ADD+CHAN_VOICE, gi.soundindex("q1world/teleport/r_tele4.wav"), 1, ATTN_NORM, 0);
-	}
-	else
-	{
-		gi.sound (ent1, CHAN_NO_PHS_ADD+CHAN_VOICE, gi.soundindex("q1world/teleport/r_tele5.wav"), 1, ATTN_NORM, 0);
-		gi.sound (ent2, CHAN_NO_PHS_ADD+CHAN_VOICE, gi.soundindex("q1world/teleport/r_tele5.wav"), 1, ATTN_NORM, 0);
-	}
-}
