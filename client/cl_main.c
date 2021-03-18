@@ -1569,11 +1569,38 @@ void CL_ConnectionlessPacket (void)
 		Cbuf_AddText ("\n");
 		return;
 	}
+
 	// print command from somewhere
 	if (!strcmp(c, "print"))
 	{
+		char	thisVersionRejMsg[64];
+
 		s = MSG_ReadString (&net_message);
 		Com_Printf ("%s", s);
+
+		// catch wrong version reply from server here
+		Com_sprintf (thisVersionRejMsg, sizeof(thisVersionRejMsg), "You need KMQuake2 version %4.2f to play on this server.", VERSION);
+		if ( strstr(s, "Server is version 3.19") || strstr(s, "Server is version 3.2")	// stock Q2 3.19 / 3.2x rejection messages
+			|| strstr(s, "You need Quake II 3.19 or higher to play on this server.")	// R1Q2
+			|| strstr(s, "Unsupported protocol version") || strstr(s, "You need Quake 2 version 3.19 or higher.") )	// Q2Pro
+		{
+			Cvar_SetInteger ("cl_servertrick", 1);
+			Com_Printf ("Wrong version reply received from server.  Reconnecting as protocol version %i.\n", OLD_PROTOCOL_VERSION);
+			CL_Reconnect_f ();
+		}
+		else if ( strstr(s, thisVersionRejMsg) )	// Same version of KMQ2
+		{
+			Cvar_SetInteger ("cl_servertrick", 0);
+			Com_Printf ("Wrong version reply received from server.  Reconnecting as protocol version %i.\n", PROTOCOL_VERSION);
+			CL_Reconnect_f ();
+		}
+		else if ( strstr(s, "Server is version") )	// don't keep going if unknown version
+		{
+			Com_Printf ("Unknown wrong version reply received from server.  Disconnecting.\n");
+			SCR_EndLoadingPlaque ();
+			CL_Disconnect ();
+		}
+
 		return;
 	}
 

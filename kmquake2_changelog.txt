@@ -21,6 +21,8 @@ Changes as of v0.20 update 8:
 
 - Added support for quake2:// URLs.
 
+- Added client auto-reconnect with cl_servertrick set correspondingly when a known "wrong version" rejection message is received.
+
 - Added cel shading support.  Uses cvars r_celshading to enable, and r_celshading_width for line width (1-10).
 
 - Added horizontal offset to third-person mode.  Offset distance is controlled by cvar cg_thirdperson_offset.
