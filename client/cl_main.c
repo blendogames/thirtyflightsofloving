@@ -872,7 +872,7 @@ connect.
 void CL_SendConnectPacket (void)
 {
 	netadr_t	adr;
-	int		port;
+	int			port, sendProtocolVersion;
 
 	if (!NET_StringToAdr (cls.servername, &adr))
 	{
@@ -888,13 +888,9 @@ void CL_SendConnectPacket (void)
 
 	// if in compatibility mode, lie to server about this
 	// client's protocol, but exclude localhost for this.
-//	if (cl_servertrick->value && strcmp(cls.servername, "localhost"))
-	if (cl_servertrick->integer && strcmp(cls.servername, "localhost"))
-		Netchan_OutOfBandPrint (NS_CLIENT, adr, "connect %i %i %i \"%s\"\n",
-			OLD_PROTOCOL_VERSION, port, cls.challenge, Cvar_Userinfo() );
-	else
-		Netchan_OutOfBandPrint (NS_CLIENT, adr, "connect %i %i %i \"%s\"\n",
-			PROTOCOL_VERSION, port, cls.challenge, Cvar_Userinfo() );
+	sendProtocolVersion = ((cl_servertrick->integer != 0) && strcmp(cls.servername, "localhost")) ? OLD_PROTOCOL_VERSION : PROTOCOL_VERSION;
+
+	Netchan_OutOfBandPrint (NS_CLIENT, adr, "connect %i %i %i \"%s\"\n", sendProtocolVersion, port, cls.challenge, Cvar_Userinfo() );
 }
 
 
@@ -1327,7 +1323,7 @@ extern netadr_t global_adr_server_netadr[16];
 
 void CL_PingServers_f (void)
 {
-	int			i;
+	int			i, sendProtocolVersion;
 	netadr_t	adr;
 	char		name[32];
 	char		*adrstring;
@@ -1335,6 +1331,10 @@ void CL_PingServers_f (void)
 	cvar_t		*noipx;
 
 	NET_Config (true);		// allow remote
+
+	// if the server is using the old protocol,
+	// lie to it about this client's protocol
+	sendProtocolVersion = (cl_servertrick->integer != 0) ? OLD_PROTOCOL_VERSION : PROTOCOL_VERSION;
 
 	// send a broadcast packet
 	Com_Printf ("pinging broadcast...\n");
@@ -1361,53 +1361,32 @@ void CL_PingServers_f (void)
         
         memcpy(&global_adr_server_netadr[i], &adr, sizeof(global_adr_server_netadr));
 
-		// if the server is using the old protocol,
-		// lie to it about this client's protocol
-	//	if (cl_servertrick->value)
-		if (cl_servertrick->integer)
-			Netchan_OutOfBandPrint (NS_CLIENT, adr, va("info %i", OLD_PROTOCOL_VERSION));
-		else
-	        Netchan_OutOfBandPrint (NS_CLIENT, adr, va("info %i", PROTOCOL_VERSION));
+		Netchan_OutOfBandPrint (NS_CLIENT, adr, va("info %i", sendProtocolVersion));
 	}
 
 	noudp = Cvar_Get ("noudp", "0", CVAR_NOSET);
-//	if (!noudp->value)
 	if (!noudp->integer)
 	{
         global_udp_server_time = Sys_Milliseconds() ;
 		adr.type = NA_BROADCAST;
 		adr.port = BigShort(PORT_SERVER);
-
-		// if the server is using the old protocol,
-		// lie to it about this client's protocol
-	//	if (cl_servertrick->value)
-		if (cl_servertrick->integer)
-			Netchan_OutOfBandPrint (NS_CLIENT, adr, va("info %i", OLD_PROTOCOL_VERSION));
-		else
-			Netchan_OutOfBandPrint (NS_CLIENT, adr, va("info %i", PROTOCOL_VERSION));
+		Netchan_OutOfBandPrint (NS_CLIENT, adr, va("info %i", sendProtocolVersion));
 	}
 
 	noipx = Cvar_Get ("noipx", "0", CVAR_NOSET);
-//	if (!noipx->value)
 	if (!noipx->integer)
 	{
         global_ipx_server_time = Sys_Milliseconds() ;
 		adr.type = NA_BROADCAST_IPX;
 		adr.port = BigShort(PORT_SERVER);
-		// if the server is using the old protocol,
-		// lie to it about this client's protocol
-	//	if (cl_servertrick->value)
-		if (cl_servertrick->integer)
-			Netchan_OutOfBandPrint (NS_CLIENT, adr, va("info %i", OLD_PROTOCOL_VERSION));
-		else
-			Netchan_OutOfBandPrint (NS_CLIENT, adr, va("info %i", PROTOCOL_VERSION));
+		Netchan_OutOfBandPrint (NS_CLIENT, adr, va("info %i", sendProtocolVersion));
 	}
 }
 //</<serverping>>
 #else
 void CL_PingServers_f (void)
 {
-	int			i;
+	int			i, sendProtocolVersion;
 	netadr_t	adr;
 	char		name[32];
 	char		*adrstring;
@@ -1419,17 +1398,16 @@ void CL_PingServers_f (void)
 	// send a broadcast packet
 	Com_Printf ("pinging broadcast...\n");
 
+	// if the server is using the old protocol,
+	// lie to it about this client's protocol
+	sendProtocolVersion = (cl_servertrick->integer != 0) ? OLD_PROTOCOL_VERSION : PROTOCOL_VERSION;
+
 	noudp = Cvar_Get ("noudp", "0", CVAR_NOSET);
 	if (!noudp->integer)
 	{
 		adr.type = NA_BROADCAST;
 		adr.port = BigShort(PORT_SERVER);
-		// if the server is using the old protocol,
-		// lie to it about this client's protocol
-		if (cl_servertrick->integer)
-			Netchan_OutOfBandPrint (NS_CLIENT, adr, va("info %i", OLD_PROTOCOL_VERSION));
-		else
-			Netchan_OutOfBandPrint (NS_CLIENT, adr, va("info %i", PROTOCOL_VERSION));
+		Netchan_OutOfBandPrint (NS_CLIENT, adr, va("info %i", sendProtocolVersion));
 	}
 
 	noipx = Cvar_Get ("noipx", "0", CVAR_NOSET);
@@ -1437,12 +1415,7 @@ void CL_PingServers_f (void)
 	{
 		adr.type = NA_BROADCAST_IPX;
 		adr.port = BigShort(PORT_SERVER);
-		// if the server is using the old protocol,
-		// lie to it about this client's protocol
-		if (cl_servertrick->integer)
-			Netchan_OutOfBandPrint (NS_CLIENT, adr, va("info %i", OLD_PROTOCOL_VERSION));
-		else
-			Netchan_OutOfBandPrint (NS_CLIENT, adr, va("info %i", PROTOCOL_VERSION));
+		Netchan_OutOfBandPrint (NS_CLIENT, adr, va("info %i", sendProtocolVersion));
 	}
 
 	// send a packet to each address book entry
@@ -1461,12 +1434,8 @@ void CL_PingServers_f (void)
 		}
 		if (!adr.port)
 			adr.port = BigShort(PORT_SERVER);
-		// if the server is using the old protocol,
-		// lie to it about this client's protocol
-		if (cl_servertrick->integer)
-			Netchan_OutOfBandPrint (NS_CLIENT, adr, va("info %i", OLD_PROTOCOL_VERSION));
-		else
-			Netchan_OutOfBandPrint (NS_CLIENT, adr, va("info %i", PROTOCOL_VERSION));
+
+		Netchan_OutOfBandPrint (NS_CLIENT, adr, va("info %i", sendProtocolVersion));
 	}
 }
 #endif
