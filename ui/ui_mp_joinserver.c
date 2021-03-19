@@ -129,7 +129,7 @@ void JoinServer_MenuInit (void)
 	s_joinserver_compatibility_box.generic.y	= y += MENU_LINE_SIZE;
 	s_joinserver_compatibility_box.generic.cursor_offset = -24;
 	s_joinserver_compatibility_box.generic.callback = ClientCompatibilityFunc;
-	s_joinserver_compatibility_box.generic.statusbar = "set to version 34 to ping non-KMQuake2 servers";
+	s_joinserver_compatibility_box.generic.statusbar = "set to version 34 to join non-KMQuake2 servers";
 	s_joinserver_compatibility_box.itemnames = compatibility_names;
 
 	s_joinserver_address_book_action.generic.type	= MTYPE_ACTION;
