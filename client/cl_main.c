@@ -888,7 +888,7 @@ void CL_SendConnectPacket (void)
 
 	// if in compatibility mode, lie to server about this
 	// client's protocol, but exclude localhost for this.
-	sendProtocolVersion = ((cl_servertrick->integer != 0) && strcmp(cls.servername, "localhost")) ? OLD_PROTOCOL_VERSION : PROTOCOL_VERSION;
+	sendProtocolVersion = ((cl_servertrick->integer != 0) && (strcmp(cls.servername, "localhost") != 0)) ? OLD_PROTOCOL_VERSION : PROTOCOL_VERSION;
 
 	Netchan_OutOfBandPrint (NS_CLIENT, adr, "connect %i %i %i \"%s\"\n", sendProtocolVersion, port, cls.challenge, Cvar_Userinfo() );
 }
@@ -1304,6 +1304,14 @@ void CL_ParseStatusMessage (void)
 
 	s = MSG_ReadString(&net_message);
 
+	// Catch wrong version reply from server
+	if (s && strstr(s, "wrong version")) {
+		// The "wrong version" reply has been removed from most Q2 servers
+		// due to exploitability.  So we can just ignore it if we get one,
+		// as we're sending both stock Q2 and KMQ2 protocol versions at once.
+		return;
+	} 
+
 	Com_Printf ("%s\n", s);
 	UI_AddToServerList (net_from, s);
 }
@@ -1323,7 +1331,7 @@ extern netadr_t global_adr_server_netadr[16];
 
 void CL_PingServers_f (void)
 {
-	int			i, sendProtocolVersion;
+	int			i;
 	netadr_t	adr;
 	char		name[32];
 	char		*adrstring;
@@ -1331,10 +1339,6 @@ void CL_PingServers_f (void)
 	cvar_t		*noipx;
 
 	NET_Config (true);		// allow remote
-
-	// if the server is using the old protocol,
-	// lie to it about this client's protocol
-	sendProtocolVersion = (cl_servertrick->integer != 0) ? OLD_PROTOCOL_VERSION : PROTOCOL_VERSION;
 
 	// send a broadcast packet
 	Com_Printf ("pinging broadcast...\n");
@@ -1361,7 +1365,9 @@ void CL_PingServers_f (void)
         
         memcpy(&global_adr_server_netadr[i], &adr, sizeof(global_adr_server_netadr));
 
-		Netchan_OutOfBandPrint (NS_CLIENT, adr, va("info %i", sendProtocolVersion));
+		// Send both protocol versions, we'll get a reply from one or the other
+		Netchan_OutOfBandPrint (NS_CLIENT, adr, va("info %i", OLD_PROTOCOL_VERSION));
+		Netchan_OutOfBandPrint (NS_CLIENT, adr, va("info %i", PROTOCOL_VERSION));
 	}
 
 	noudp = Cvar_Get ("noudp", "0", CVAR_NOSET);
@@ -1370,7 +1376,9 @@ void CL_PingServers_f (void)
         global_udp_server_time = Sys_Milliseconds() ;
 		adr.type = NA_BROADCAST;
 		adr.port = BigShort(PORT_SERVER);
-		Netchan_OutOfBandPrint (NS_CLIENT, adr, va("info %i", sendProtocolVersion));
+		// Send both protocol versions, we'll get a reply from one or the other
+		Netchan_OutOfBandPrint (NS_CLIENT, adr, va("info %i", OLD_PROTOCOL_VERSION));
+		Netchan_OutOfBandPrint (NS_CLIENT, adr, va("info %i", PROTOCOL_VERSION));
 	}
 
 	noipx = Cvar_Get ("noipx", "0", CVAR_NOSET);
@@ -1379,14 +1387,16 @@ void CL_PingServers_f (void)
         global_ipx_server_time = Sys_Milliseconds() ;
 		adr.type = NA_BROADCAST_IPX;
 		adr.port = BigShort(PORT_SERVER);
-		Netchan_OutOfBandPrint (NS_CLIENT, adr, va("info %i", sendProtocolVersion));
+		// Send both protocol versions, we'll get a reply from one or the other
+		Netchan_OutOfBandPrint (NS_CLIENT, adr, va("info %i", OLD_PROTOCOL_VERSION));
+		Netchan_OutOfBandPrint (NS_CLIENT, adr, va("info %i", PROTOCOL_VERSION));
 	}
 }
 //</<serverping>>
 #else
 void CL_PingServers_f (void)
 {
-	int			i, sendProtocolVersion;
+	int			i;
 	netadr_t	adr;
 	char		name[32];
 	char		*adrstring;
@@ -1398,16 +1408,14 @@ void CL_PingServers_f (void)
 	// send a broadcast packet
 	Com_Printf ("pinging broadcast...\n");
 
-	// if the server is using the old protocol,
-	// lie to it about this client's protocol
-	sendProtocolVersion = (cl_servertrick->integer != 0) ? OLD_PROTOCOL_VERSION : PROTOCOL_VERSION;
-
 	noudp = Cvar_Get ("noudp", "0", CVAR_NOSET);
 	if (!noudp->integer)
 	{
 		adr.type = NA_BROADCAST;
 		adr.port = BigShort(PORT_SERVER);
-		Netchan_OutOfBandPrint (NS_CLIENT, adr, va("info %i", sendProtocolVersion));
+		// Send both protocol versions, we'll get a reply from one or the other
+		Netchan_OutOfBandPrint (NS_CLIENT, adr, va("info %i", OLD_PROTOCOL_VERSION));
+		Netchan_OutOfBandPrint (NS_CLIENT, adr, va("info %i", PROTOCOL_VERSION));
 	}
 
 	noipx = Cvar_Get ("noipx", "0", CVAR_NOSET);
@@ -1415,7 +1423,9 @@ void CL_PingServers_f (void)
 	{
 		adr.type = NA_BROADCAST_IPX;
 		adr.port = BigShort(PORT_SERVER);
-		Netchan_OutOfBandPrint (NS_CLIENT, adr, va("info %i", sendProtocolVersion));
+		// Send both protocol versions, we'll get a reply from one or the other
+		Netchan_OutOfBandPrint (NS_CLIENT, adr, va("info %i", OLD_PROTOCOL_VERSION));
+		Netchan_OutOfBandPrint (NS_CLIENT, adr, va("info %i", PROTOCOL_VERSION));
 	}
 
 	// send a packet to each address book entry
@@ -1435,7 +1445,9 @@ void CL_PingServers_f (void)
 		if (!adr.port)
 			adr.port = BigShort(PORT_SERVER);
 
-		Netchan_OutOfBandPrint (NS_CLIENT, adr, va("info %i", sendProtocolVersion));
+		// Send both protocol versions, we'll get a reply from one or the other
+		Netchan_OutOfBandPrint (NS_CLIENT, adr, va("info %i", OLD_PROTOCOL_VERSION));
+		Netchan_OutOfBandPrint (NS_CLIENT, adr, va("info %i", PROTOCOL_VERSION));
 	}
 }
 #endif
@@ -1512,7 +1524,7 @@ void CL_ConnectionlessPacket (void)
 	Com_Printf ("%s: %s\n", NET_AdrToString (net_from), c);
 
 	// server connection
-	if (!strcmp(c, "client_connect"))
+	if ( !strcmp(c, "client_connect") )
 	{
 		if (cls.state == ca_connected)
 		{
@@ -1549,14 +1561,14 @@ void CL_ConnectionlessPacket (void)
 	}
 
 	// server responding to a status broadcast
-	if (!strcmp(c, "info"))
+	if ( !strcmp(c, "info") )
 	{
 		CL_ParseStatusMessage ();
 		return;
 	}
 
 	// remote command from gui front end
-	if (!strcmp(c, "cmd"))
+	if ( !strcmp(c, "cmd") )
 	{
 		if (!NET_IsLocalAddress(net_from))
 		{
@@ -1571,32 +1583,39 @@ void CL_ConnectionlessPacket (void)
 	}
 
 	// print command from somewhere
-	if (!strcmp(c, "print"))
+	if ( !strcmp(c, "print") )
 	{
-		char	thisVersionRejMsg[64];
+		char	thisVersionRejMsg[128], thisVersionRejMsg2[128];
 
 		s = MSG_ReadString (&net_message);
 		Com_Printf ("%s", s);
 
 		// catch wrong version reply from server here
 		Com_sprintf (thisVersionRejMsg, sizeof(thisVersionRejMsg), "You need KMQuake2 version %4.2f to play on this server.", VERSION);
-		if ( strstr(s, "Server is version 3.19") || strstr(s, "Server is version 3.2")	// stock Q2 3.19 / 3.2x rejection messages
+		Com_sprintf (thisVersionRejMsg2, sizeof(thisVersionRejMsg2), "Server is version %4.2f.", VERSION);
+		if ( strstr(s, thisVersionRejMsg) || strstr(s, thisVersionRejMsg2) )	// Same version of KMQ2
+		{
+			Com_DPrintf ("Wrong version reply received from KMQ2 server.  Reconnecting as protocol version %i.\n", PROTOCOL_VERSION);
+			Cvar_SetInteger ("cl_servertrick", 0);
+			CL_Reconnect_f ();
+		}
+		else if ( strstr(s, "Server is version 3.19") || strstr(s, "Server is version 3.2")	// stock Q2 3.19 / 3.2x rejection messages
 			|| strstr(s, "You need Quake II 3.19 or higher to play on this server.")	// R1Q2
 			|| strstr(s, "Unsupported protocol version") || strstr(s, "You need Quake 2 version 3.19 or higher.") )	// Q2Pro
 		{
+			Com_DPrintf ("Known wrong version reply received from server.  Reconnecting as protocol version %i.\n", OLD_PROTOCOL_VERSION);
 			Cvar_SetInteger ("cl_servertrick", 1);
-			Com_Printf ("Wrong version reply received from server.  Reconnecting as protocol version %i.\n", OLD_PROTOCOL_VERSION);
 			CL_Reconnect_f ();
 		}
-		else if ( strstr(s, thisVersionRejMsg) )	// Same version of KMQ2
+		else if ( strstr(s, "Server is version") )
 		{
-			Cvar_SetInteger ("cl_servertrick", 0);
-			Com_Printf ("Wrong version reply received from server.  Reconnecting as protocol version %i.\n", PROTOCOL_VERSION);
+			Com_DPrintf ("Unknown wrong version reply received from server.  Reconnecting as protocol version %i.\n", OLD_PROTOCOL_VERSION);
+			Cvar_SetInteger ("cl_servertrick", 1);
 			CL_Reconnect_f ();
 		}
-		else if ( strstr(s, "Server is version") )	// don't keep going if unknown version
+		else if ( strstr(s, "You need KMQuake2 version") )
 		{
-			Com_Printf ("Unknown wrong version reply received from server.  Disconnecting.\n");
+			Com_DPrintf ("Wrong version reply received from different-protocol KMQ2 server.  Disconnecting.\n");
 			SCR_EndLoadingPlaque ();
 			CL_Disconnect ();
 		}
@@ -1605,22 +1624,71 @@ void CL_ConnectionlessPacket (void)
 	}
 
 	// ping from somewhere
-	if (!strcmp(c, "ping"))
+	if ( !strcmp(c, "ping") )
 	{
 		Netchan_OutOfBandPrint (NS_CLIENT, net_from, "ack");
 		return;
 	}
 
 	// challenge from the server we are connecting to
-	if (!strcmp(c, "challenge"))
+	if ( !strcmp(c, "challenge") )
 	{
+		int			j, v;
+		char		*sc;
+		qboolean	hasCurProtcol = false, hasLegacyProtocol = false;
+
 		cls.challenge = atoi(Cmd_Argv(1));
+
+		// R1Q2 and Q2Pro put supported protocol versions in challenge.
+		// Parse for those here, and change cl_servertrick if needed.
+		if ( strcmp(cls.servername, "localhost") != 0 )
+		{
+			for (j = 2; j < Cmd_Argc(); j++)
+			{
+				sc = Cmd_Argv(j);
+				if ( !strncmp(sc, "p=", 2) )
+				{
+					sc += 2;
+					if (!sc[0]) {
+						continue;
+					}
+					for (;;)
+					{
+						v = atoi(sc);
+						if (v == PROTOCOL_VERSION) {
+							hasCurProtcol = true;
+						}
+						else if (v == OLD_PROTOCOL_VERSION) {
+							hasLegacyProtocol = true;
+						}
+						sc = strchr(sc, ',');
+						if (!sc) {
+							break;
+						}
+						sc++;
+						if (!sc[0]) {
+							break;
+						}
+					}
+					if (hasCurProtcol) {
+						Com_DPrintf ("Setting current protocol (%i) from server challenge.\n", PROTOCOL_VERSION);
+						Cvar_SetInteger ("cl_servertrick", 0);
+					}
+					else if (hasLegacyProtocol) {
+						Com_DPrintf ("Setting legacy protocol (%i) from server challenge.\n", OLD_PROTOCOL_VERSION);
+						Cvar_SetInteger ("cl_servertrick", 1);
+					}
+					break;
+				}
+			}
+		}
+
 		CL_SendConnectPacket ();
 		return;
 	}
 
 	// echo request from server
-	if (!strcmp(c, "echo"))
+	if ( !strcmp(c, "echo") )
 	{
 		Netchan_OutOfBandPrint (NS_CLIENT, net_from, "%s", Cmd_Argv(1) );
 		return;

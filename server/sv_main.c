@@ -368,7 +368,8 @@ void SVC_GetChallenge (void)
 	}
 
 	// send it back
-	Netchan_OutOfBandPrint (NS_SERVER, net_from, "challenge %i", svs.challenges[i].challenge);
+//	Netchan_OutOfBandPrint (NS_SERVER, net_from, "challenge %i", svs.challenges[i].challenge);
+	Netchan_OutOfBandPrint (NS_SERVER, net_from, "challenge %i p=%i", svs.challenges[i].challenge, PROTOCOL_VERSION);
 }
 
 /*

@@ -113,7 +113,7 @@ How To Run
 	mod's code to run, it must be compiled into a kmq2gamex86.dll (see end of file for
 	instructions).
 
-	To ping info from and connect to standard Quake2 (protocol 34) servers, add
+	To ensure connection to all standard Quake2 protocol (34) servers, add
 	
 	+set cl_servertrick 1
 	
