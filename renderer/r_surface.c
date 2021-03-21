@@ -252,14 +252,17 @@ void R_SetLightingMode (int renderflags)
 
 /*
 ================
-SurfAlphaCalc
+R_SurfAlphaCalc
 ================
 */
-float SurfAlphaCalc (int flags)
+float R_SurfAlphaCalc (int flags)
 {
-	if ((flags & SURF_TRANS33) && (flags & SURF_TRANS66) && r_solidalpha->integer)
-//		return DIV254BY255;
-		return 1.0;
+	if ( (flags & SURF_TRANS33) && (flags & SURF_TRANS66) ) {
+		if (r_solidalpha->integer)
+			return 1.0f;
+		else
+			return 0.5f;
+	}
 	else if (flags & SURF_TRANS33)
 		return 0.33333;
 	else if (flags & SURF_TRANS66)
@@ -424,7 +427,7 @@ void R_DrawGLPoly (msurface_t *surf, qboolean render)
 	float		*v, scroll, alpha;
 	qboolean	light;
 
-	alpha = SurfAlphaCalc (surf->texinfo->flags);
+	alpha = R_SurfAlphaCalc (surf->texinfo->flags);
 	light = R_SurfIsLit (surf);
 
 	c_brush_surfs++;
@@ -946,7 +949,7 @@ void R_DrawAlphaSurfaces (void)
 	//	envMap = ( (s->flags & SURF_ENVMAP) && r_glass_envmaps->integer && !solidAlpha);
 
 		if (s->flags & SURF_DRAWTURB)		
-			R_DrawWarpSurface (s, SurfAlphaCalc(s->texinfo->flags), !R_SurfsAreBatchable (s, s->texturechain));
+			R_DrawWarpSurface (s, R_SurfAlphaCalc(s->texinfo->flags), !R_SurfsAreBatchable (s, s->texturechain));
 		else if (r_trans_lighting->integer == 2 && glConfig.multitexture && light && s->lightmaptexturenum)
 		{
 			GL_EnableMultitexture (true);
@@ -1453,7 +1456,7 @@ void R_DrawLightmappedSurface (msurface_t *surf, qboolean render)
 		alpha = (surf->entity && (surf->entity->flags & RF_TRANSLUCENT)) ? surf->entity->alpha : 1.0;
 	else
 		alpha = (currententity && (currententity->flags & RF_TRANSLUCENT)) ? currententity->alpha : 1.0;
-	alpha *= SurfAlphaCalc (surf->texinfo->flags);
+	alpha *= R_SurfAlphaCalc (surf->texinfo->flags);
 
 	if (surf->texinfo->flags & SURF_FLOWING) {
 		scroll = -64 * ((r_newrefdef.time / 40.0) - (int)(r_newrefdef.time / 40.0));
