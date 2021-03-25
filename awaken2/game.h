@@ -35,6 +35,12 @@ typedef enum {
 	FS_WRITE,
 	FS_APPEND
 } fsMode_t;
+
+typedef enum {
+	FS_SEEK_CUR,
+	FS_SEEK_SET,
+	FS_SEEK_END
+} fsOrigin_t;
 #endif // GAME_INCLUDE
 
 //===============================================================
@@ -195,6 +201,8 @@ typedef struct
 	char	*(*SaveGameDir) (void);
 	void	(*CreatePath) (const char *path);
 	char	**(*GetFileList) (const char *path, const char *extension, int *num);
+	void	(*FSeek) (fileHandle_t f, int offset, fsOrigin_t origin);
+	int		(*FTell) (fileHandle_t f);
 #endif
 
 } game_import_t;
