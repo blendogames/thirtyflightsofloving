@@ -245,7 +245,7 @@ SOURCE=..\..\qcommon\cvar.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\qcommon\files.c
+SOURCE=..\..\qcommon\filesystem.c
 # End Source File
 # Begin Source File
 
@@ -583,6 +583,10 @@ SOURCE=..\..\win32\conproc.h
 # Begin Source File
 
 SOURCE=..\..\client\console.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\qcommon\filesystem.h
 # End Source File
 # Begin Source File
 

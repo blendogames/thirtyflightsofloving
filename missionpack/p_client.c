@@ -1145,7 +1145,7 @@ void TossClientWeapon (edict_t *self)
 {
 	gitem_t		*item;
 	edict_t		*drop;
-	qboolean	quad;
+	qboolean	quad, doubled, quadfire;
 	float		spread;
 
 	if (!deathmatch->value)
@@ -1162,10 +1162,16 @@ void TossClientWeapon (edict_t *self)
 	if (item && (strcmp (item->pickup_name, "Homing Rocket Launcher") == 0))
 		item = FindItem("Rocket Launcher");
 
-	if (!((int)(dmflags->value) & DF_QUAD_DROP))
+	if (!((int)(dmflags->value) & DF_QUAD_DROP)) {
 		quad = false;
-	else
+		doubled = false;
+		quadfire = false;
+	}
+	else {
 		quad = (self->client->quad_framenum > (level.framenum + 10));
+		doubled = (self->client->double_framenum > (level.framenum + 10));
+		quadfire = (self->client->quadfire_framenum > (level.framenum + 10));
+	}
 
 	if (item && quad)
 		spread = 22.5;
@@ -1189,6 +1195,30 @@ void TossClientWeapon (edict_t *self)
 
 		drop->touch = Touch_Item;
 		drop->nextthink = level.time + (self->client->quad_framenum - level.framenum) * FRAMETIME;
+		drop->think = G_FreeEdict;
+	}
+
+	if (doubled)
+	{
+		self->client->v_angle[YAW] += spread;
+		drop = Drop_Item (self, FindItemByClassname ("item_double"));
+		self->client->v_angle[YAW] -= spread;
+		drop->spawnflags |= DROPPED_PLAYER_ITEM;
+
+		drop->touch = Touch_Item;
+		drop->nextthink = level.time + (self->client->double_framenum - level.framenum) * FRAMETIME;
+		drop->think = G_FreeEdict;
+	}
+
+	if (quadfire)
+	{
+		self->client->v_angle[YAW] += spread;
+		drop = Drop_Item (self, FindItemByClassname ("item_quadfire"));
+		self->client->v_angle[YAW] -= spread;
+		drop->spawnflags |= DROPPED_PLAYER_ITEM;
+
+		drop->touch = Touch_Item;
+		drop->nextthink = level.time + (self->client->quadfire_framenum - level.framenum) * FRAMETIME;
 		drop->think = G_FreeEdict;
 	}
 }

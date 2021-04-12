@@ -242,7 +242,7 @@ QUAKE2_OBJS = \
 	$(BUILDDIR)/client/common.o \
 	$(BUILDDIR)/client/crc.o \
 	$(BUILDDIR)/client/cvar.o \
-	$(BUILDDIR)/client/files.o \
+	$(BUILDDIR)/client/filesystem.o \
 	$(BUILDDIR)/client/md4.o \
 	$(BUILDDIR)/client/net_chan.o \
 	$(BUILDDIR)/client/wildcard.o \
@@ -487,7 +487,7 @@ $(BUILDDIR)/client/crc.o :        	$(COMMON_DIR)/crc.c
 $(BUILDDIR)/client/cvar.o :       	$(COMMON_DIR)/cvar.c
 	$(DO_CC)
 
-$(BUILDDIR)/client/files.o :      	$(COMMON_DIR)/files.c
+$(BUILDDIR)/client/filesystem.o :      	$(COMMON_DIR)/filesystem.c
 	$(DO_CC)
 
 $(BUILDDIR)/client/md4.o :        	$(COMMON_DIR)/md4.c
@@ -657,7 +657,7 @@ Q2DED_OBJS = \
 	$(BUILDDIR)/ded/common.o \
 	$(BUILDDIR)/ded/crc.o \
 	$(BUILDDIR)/ded/cvar.o \
-	$(BUILDDIR)/ded/files.o \
+	$(BUILDDIR)/ded/filesystem.o \
 	$(BUILDDIR)/ded/md4.o \
 	$(BUILDDIR)/ded/net_chan.o \
 	$(BUILDDIR)/ded/wildcard.o \
@@ -702,7 +702,7 @@ $(BUILDDIR)/ded/crc.o :        $(COMMON_DIR)/crc.c
 $(BUILDDIR)/ded/cvar.o :       $(COMMON_DIR)/cvar.c
 	$(DO_DED_CC)
 
-$(BUILDDIR)/ded/files.o :      $(COMMON_DIR)/files.c
+$(BUILDDIR)/ded/filesystem.o :      $(COMMON_DIR)/filesystem.c
 	$(DO_DED_CC)
 
 $(BUILDDIR)/ded/md4.o :        $(COMMON_DIR)/md4.c

@@ -324,7 +324,7 @@ qboolean Pickup_Powerup (edict_t *ent, edict_t *other)
 	if ((coop->value) && (ent->item->flags & IT_STAY_COOP) && (quantity > 0))
 		return false;
 
-	//Can only pickup one flashlight
+	// Can only pickup one flashlight
 	if (!strcmp(ent->classname, "item_flashlight") && quantity >= 1)
 		return false;
 
@@ -352,7 +352,7 @@ qboolean Pickup_Powerup (edict_t *ent, edict_t *other)
 
 	other->client->pers.inventory[ITEM_INDEX(ent->item)]++;
 
-	//Knightmare- set cell usage for flashlight
+	// Knightmare- set cell usage for flashlight
 	if (!strcmp(ent->classname, "item_flashlight"))
 	{
 		if (ent->count)

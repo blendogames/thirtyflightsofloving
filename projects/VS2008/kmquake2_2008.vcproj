@@ -580,7 +580,7 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\qcommon\files.c"
+					RelativePath="..\..\qcommon\filesystem.c"
 					>
 				</File>
 				<File
@@ -886,11 +886,11 @@
 			Filter="h;hpp;hxx;hm;inl;fi;fd"
 			>
 			<File
-				RelativePath="..\..\client\anorms.h"
+				RelativePath="..\..\renderer\anorms.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\renderer\anorms.h"
+				RelativePath="..\..\client\anorms.h"
 				>
 			</File>
 			<File
@@ -919,6 +919,10 @@
 			</File>
 			<File
 				RelativePath="..\..\client\console.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\qcommon\filesystem.h"
 				>
 			</File>
 			<File

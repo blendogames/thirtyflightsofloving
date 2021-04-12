@@ -26,7 +26,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "../game/q_shared.h"
 
-#define	VERSION		0.20 // was 3.21
+#define	VERSION			0.20 // was 3.21
+#define VERSION_UPDATE	8
 
 #define	BASEDIRNAME	"baseq2"
 
