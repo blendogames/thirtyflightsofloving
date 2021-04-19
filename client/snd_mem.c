@@ -273,19 +273,46 @@ void ResampleSfx (sfx_t *sfx, int inrate, int inwidth, byte *data)
 
 /*
 ==============
+S_CreateDefaultSound
+==============
+*/
+void S_CreateDefaultSound (byte **wav, wavinfo_t *info)
+{
+	byte	*out;
+	int		i;
+
+	if (!info || !wav)	// catch null pointers
+		return;
+	
+	info->rate = 22050;
+	info->width = 2;
+	info->channels = 1;
+	info->samples = 11025;
+	info->loopstart = -1;
+	info->dataofs = 0;
+
+	*wav = out = Z_Malloc(info->samples * info->width);
+
+	for (i = 0; i < info->samples; i++)
+		((short *)out)[i] = sin(i * 0.1) * 20000;
+}
+
+
+/*
+==============
 S_LoadSound
 ==============
 */
 sfxcache_t *S_LoadSound (sfx_t *s)
 {
-    char	namebuffer[MAX_QPATH];
-	byte	*data;
+    char		namebuffer[MAX_QPATH];
+	byte		*data;
 	wavinfo_t	info;
-	int		len;
-	float	stepscale;
+	int			len;
+	float		stepscale;
 	sfxcache_t	*sc;
-	int		size;
-	char	*name;
+	int			size;
+	char		*name;
 
 	if (s->name[0] == '*')
 		return NULL;
@@ -313,8 +340,19 @@ sfxcache_t *S_LoadSound (sfx_t *s)
 
 	if (!data)
 	{
-		Com_DPrintf ("Couldn't load %s\n", namebuffer);
-		return NULL;
+		if (s_usedefaultsound->integer)
+		{
+			Com_Printf (S_COLOR_YELLOW"S_LoadSound: Couldn't load %s, generating default sound.\n", namebuffer);
+			S_CreateDefaultSound (&data, &info);
+			if (!data) {
+				Com_Printf ("S_LoadSound: Couldn't generate default sound for %s, returning NULL.\n", namebuffer);
+				return NULL;
+			}
+		}
+		else {
+			Com_DPrintf ("Couldn't load %s\n", namebuffer);
+			return NULL;
+		}
 	}
 
 	info = GetWavinfo (s->name, data, size);

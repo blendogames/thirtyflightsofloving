@@ -699,7 +699,7 @@ void CL_RequestNextDownload (void)
 CL_DownloadFileName
 ===============
 */
-void CL_DownloadFileName (char *dest, int destlen, char *fn)
+void CL_DownloadFileName (char *dest, int destlen, const char *fn)
 {
 	if ( !stricmp(FS_Downloaddir(), FS_Gamedir()) )	// use basedir/gamedir if fs_downloaddir is the same as fs_gamedir
 	{
@@ -739,7 +739,7 @@ void CL_InitFailedDownloadList (void)
 CL_CheckDownloadFailed
 ===============
 */
-qboolean CL_CheckDownloadFailed (char *name)
+qboolean CL_CheckDownloadFailed (const char *name)
 {
 	int		i;
 
@@ -758,7 +758,7 @@ qboolean CL_CheckDownloadFailed (char *name)
 CL_AddToFailedDownloadList
 ===============
 */
-void CL_AddToFailedDownloadList (char *name)
+void CL_AddToFailedDownloadList (const char *name)
 {
 	int			i;
 	qboolean	found = false;
@@ -792,7 +792,7 @@ Returns true if the file exists, otherwise it attempts
 to start a download from the server.
 ===============
 */
-qboolean CL_CheckOrDownloadFile (char *filename)
+qboolean CL_CheckOrDownloadFile (const char *filename)
 {
 	FILE	*fp;
 	char	name[MAX_OSPATH];

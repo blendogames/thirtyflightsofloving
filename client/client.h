@@ -887,7 +887,7 @@ void CL_ParseClientinfo (int player);
 //
 void CL_ResetPrecacheCheck (void);
 void CL_RequestNextDownload (void);
-qboolean CL_CheckOrDownloadFile (char *filename);
+qboolean CL_CheckOrDownloadFile (const char *filename);
 void CL_Download_f (void);
 void CL_ParseDownload (void);
 void CL_Download_Reset_KBps_counter (void);

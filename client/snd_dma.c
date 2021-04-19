@@ -81,6 +81,7 @@ cvar_t		*s_khz;
 cvar_t		*s_show;
 cvar_t		*s_mixahead;
 cvar_t		*s_primary;
+cvar_t		*s_usedefaultsound;	// Knightmare added
 #ifdef OGG_SUPPORT
 cvar_t		*s_musicvolume;
 #endif
@@ -145,6 +146,8 @@ void S_Init (void)
 		Cvar_SetDescription ("s_testsound", "Enables generated test sound.");
 		s_primary = Cvar_Get ("s_primary", "0", CVAR_ARCHIVE);	// win32 specific
 		Cvar_SetDescription ("s_primary", "Enables primary sound buffer.  Set to 1 for better performance, or 0 for improved compatibility.");
+		s_usedefaultsound = Cvar_Get ("s_usedefaultsound", "0", CVAR_ARCHIVE);	// Knightmare added
+		Cvar_SetDescription ("s_usedefaultsound", "Enables use of a default generated tone when a sound file can't be loaded.");
 	#ifdef OGG_SUPPORT
 		s_musicvolume = Cvar_Get ("s_musicvolume", "1.0", CVAR_ARCHIVE); // Q2E
 		Cvar_SetDescription ("s_musicvolume", "Sets the music volume (normalized).  0 = mute, 1.0 = max.");

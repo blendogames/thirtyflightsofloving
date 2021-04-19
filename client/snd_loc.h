@@ -183,6 +183,7 @@ extern cvar_t	*s_show;
 extern cvar_t	*s_mixahead;
 extern cvar_t	*s_testsound;
 extern cvar_t	*s_primary;
+extern cvar_t	*s_usedefaultsound;	// Knightmare added
 #ifdef OGG_SUPPORT
 extern cvar_t	*s_musicvolume; // Q2E
 #endif
