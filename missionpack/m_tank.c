@@ -1028,7 +1028,10 @@ void SP_monster_tank (edict_t *self)
 
 	// Lazarus: special purpose skins
 	if (strcmp(self->classname, "monster_tank_commander") == 0)
+	{
 		self->s.skinnum = 2;
+		self->moreflags |= FL2_COMMANDER;
+	}
 	if ( self->style )
 	{
 		PatchMonsterModel("models/monsters/tank/tris.md2");
@@ -1058,7 +1061,8 @@ void SP_monster_tank (edict_t *self)
 	gi.soundindex ("tank/tnkatk2e.wav");
 	gi.soundindex ("tank/tnkatck3.wav");
 
-	if (strcmp(self->classname, "monster_tank_commander") == 0)
+//	if (strcmp(self->classname, "monster_tank_commander") == 0)
+	if (self->moreflags & FL2_COMMANDER)
 	{
 		if (!self->health)
 			self->health = 1000;

@@ -999,7 +999,7 @@ void weapon_grenade_fire (edict_t *ent, qboolean held)
 			fire_tesla (ent, start, forward, damage_multiplier, speed);
 			break;
 		default:
-			fire_prox (ent, start, forward, damage_multiplier, speed);
+			fire_prox (ent, start, forward, (int)sk_prox_damage->value, damage_multiplier, speed, (int)sk_prox_health->value, sk_prox_life->value, sk_prox_radius->value);
 			break;
 	}
 // PGM
@@ -1370,18 +1370,18 @@ void weapon_grenadelauncher_fire (edict_t *ent, qboolean altfire)
 //	fire_grenade (ent, start, forward, damage, 600, 2.5, radius);
 // =====
 // PGM
-	switch(ent->client->pers.weapon->tag)
+	switch (ent->client->pers.weapon->tag)
 	{
 		case AMMO_PROX:
-			fire_prox (ent, start, forward, multiplier, sk_prox_speed->value); //was damage_multiplier
+			fire_prox (ent, start, forward, damage, multiplier, (int)sk_prox_speed->value, (int)sk_prox_health->value, sk_prox_life->value, sk_prox_radius->value);
 			break;
 		default:
-			fire_grenade (ent, start, forward, damage, sk_grenade_speed->value, 2.5, radius, altfire);
+			fire_grenade (ent, start, forward, damage, (int)sk_grenade_speed->value, 2.5, radius, altfire);
 			break;
 	}
 // PGM
 // =====
-	//Knightmare- Gen cam code
+	// Knightmare- Gen cam code
 //	if (ent->client && ent->client->chasetoggle)
 	if (ent->client && ent->client->chaseactive)
 	{

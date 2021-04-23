@@ -2149,7 +2149,7 @@ extern void fire_player_melee ( edict_t * self , vec3_t start , vec3_t aim , int
 extern void SP_prox ( edict_t * prox ) ;
 extern void prox_delayed_start ( edict_t * prox ) ;
 extern void Cmd_DetProx_f ( edict_t * ent ) ;
-extern void fire_prox ( edict_t * self , vec3_t start , vec3_t aimdir , int damage_multiplier , int speed ) ;
+extern void fire_prox ( edict_t * self , vec3_t start , vec3_t aimdir , int damage , int damage_multiplier , int speed , int health , float timer , float damage_radius ) ;
 extern void prox_land ( edict_t * ent , edict_t * other , cplane_t * plane , csurface_t * surf ) ;
 extern void prox_open ( edict_t * ent ) ;
 extern void prox_seek ( edict_t * ent ) ;
@@ -2272,6 +2272,8 @@ extern void M_FlyCheck ( edict_t * self ) ;
 extern void M_FliesOn ( edict_t * self ) ;
 extern void M_FliesOff ( edict_t * self ) ;
 extern void monster_fire_plasma_rifle ( edict_t * self , vec3_t start , vec3_t dir , int damage , int speed , int flashtype , qboolean spread ) ;
+extern void monster_fire_prox ( edict_t * self , vec3_t start , vec3_t aimdir , int damage , int damage_multiplier , int speed , int health , float timer , float damage_radius , int flashtype ) ;
+extern void monster_fire_flechette ( edict_t * self , vec3_t start , vec3_t dir , int damage , int speed , float damage_radius , int radius_damage , int flashtype ) ;
 extern void monster_fire_heat ( edict_t * self , vec3_t start , vec3_t dir , vec3_t offset , int damage , int kick , int flashtype ) ;
 extern void monster_fire_tracker ( edict_t * self , vec3_t start , vec3_t dir , int damage , int speed , edict_t * enemy , int flashtype ) ;
 extern void monster_fire_blaster2 ( edict_t * self , vec3_t start , vec3_t dir , int damage , int speed , int flashtype , int effect ) ;

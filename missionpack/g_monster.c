@@ -486,6 +486,28 @@ void monster_fire_heat (edict_t *self, vec3_t start, vec3_t dir, vec3_t offset, 
 }
 // ROGUE
 
+// Knightmare added
+void monster_fire_flechette (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage, int flashtype)
+{
+	fire_flechette (self, start, dir, damage, speed, damage_radius, radius_damage);
+
+	gi.WriteByte (svc_muzzleflash2);
+	gi.WriteShort (self - g_edicts);
+	gi.WriteByte (flashtype);
+	gi.multicast (start, MULTICAST_PVS);
+}
+
+void monster_fire_prox (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int damage_multiplier, int speed, int health, float timer, float damage_radius, int flashtype)
+{
+	fire_prox (self, start, aimdir, damage, damage_multiplier, speed, health, timer, damage_radius);
+
+	gi.WriteByte (svc_muzzleflash2);
+	gi.WriteShort (self - g_edicts);
+	gi.WriteByte (flashtype);
+	gi.multicast (start, MULTICAST_PVS);
+}
+// end Knightmare
+
 // SKWiD MOD
 void monster_fire_plasma_rifle (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int flashtype, qboolean spread)
 {
@@ -939,9 +961,9 @@ void M_MoveFrame (edict_t *self)
 	mmove_t	*move;
 	int		index;
 
-	// Lazarus: For live monsters weaker than gladiator who aren't already running from
+	// Lazarus: For live monsters weaker than the tank who aren't already running from
 	//          something, evade live grenades on the ground.
-	if ((self->health > 0) && (self->max_health < 400) && !(self->monsterinfo.aiflags & AI_CHASE_THING) && self->monsterinfo.run)
+	if ((self->health > 0) && (self->max_health < 750) && !(self->monsterinfo.aiflags & AI_CHASE_THING) && self->monsterinfo.run)	// was self->max_health < 400
 		Grenade_Evade (self);
 
 	move = self->monsterinfo.currentmove;
@@ -1659,6 +1681,7 @@ int PatchMonsterModel (char *modelname)
 	qboolean	is_gekk = false;
 	qboolean	is_fixbot = false;
 	qboolean	is_chick = false;
+	qboolean	is_gunner = false;
 	qboolean	is_soldierh = false;
 	qboolean	is_carrier = false;
 	qboolean	is_hover = false;
@@ -1722,6 +1745,11 @@ int PatchMonsterModel (char *modelname)
 		|| !strcmp(modelname, "models/monsters/bitch2/tris.md2"))
 	{
 		is_chick = true;
+		numskins = 16;
+	}
+	else if (!strcmp(modelname, "models/monsters/gunner/tris.md2"))
+	{
+		is_gunner = true;
 		numskins = 16;
 	}
 	else if (!strcmp(modelname, "models/monsters/soldierh/tris.md2"))
@@ -1995,6 +2023,44 @@ int PatchMonsterModel (char *modelname)
 				Com_strcpy (skins[j], sizeof(skins[j]), "models/monsters/bitch/bi_sk3.pcx"); break;
 			case 3:
 				Com_strcpy (skins[j], sizeof(skins[j]), "models/monsters/bitch/bi_pain.pcx"); break;
+			case 4:
+				Com_strcat (skins[j], sizeof(skins[j]), "custom1.pcx"); break;
+			case 5:
+				Com_strcat (skins[j], sizeof(skins[j]), "custompain1.pcx"); break;
+			case 6:
+				Com_strcat (skins[j], sizeof(skins[j]), "custombeta1.pcx"); break;
+			case 7:
+				Com_strcat (skins[j], sizeof(skins[j]), "custombeta_p1.pcx"); break;
+			case 8:
+				Com_strcat (skins[j], sizeof(skins[j]), "custom2.pcx"); break;
+			case 9:
+				Com_strcat (skins[j], sizeof(skins[j]), "custompain2.pcx"); break;
+			case 10:
+				Com_strcat (skins[j], sizeof(skins[j]), "custombeta2.pcx"); break;
+			case 11:
+				Com_strcat (skins[j], sizeof(skins[j]), "custombeta_p2.pcx"); break;
+			case 12:
+				Com_strcat (skins[j], sizeof(skins[j]), "custom3.pcx"); break;
+			case 13:
+				Com_strcat (skins[j], sizeof(skins[j]), "custompain3.pcx"); break;
+			case 14:
+				Com_strcat (skins[j], sizeof(skins[j]), "custombeta3.pcx"); break;
+			case 15:
+				Com_strcat (skins[j], sizeof(skins[j]), "custombeta_p3.pcx"); break;
+			}
+		}
+		else if (is_gunner)
+		{
+			switch (j)
+			{
+			case 0:
+				Com_strcat (skins[j], sizeof(skins[j]), "skin.pcx"); break;
+			case 1:
+				Com_strcat (skins[j], sizeof(skins[j]), "pain.pcx"); break;
+			case 2:
+				Com_strcpy (skins[j], sizeof(skins[j]), "comm_skin.pcx"); break;
+			case 3:
+				Com_strcpy (skins[j], sizeof(skins[j]), "comm_pain.pcx"); break;
 			case 4:
 				Com_strcat (skins[j], sizeof(skins[j]), "custom1.pcx"); break;
 			case 5:

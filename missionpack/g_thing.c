@@ -146,15 +146,15 @@ void thing_think_pause (edict_t *self)
 		vec3_t	dir;
 		vec3_t	angles;
 
-		if (visible(monster->enemy,monster))
+		if (visible(monster->enemy, monster))
 		{
 			self->touch_debounce_time = 0;
 			thing_think(self);
 			return;
 		}
-		VectorSubtract(monster->enemy->s.origin,monster->s.origin,dir);
-		VectorNormalize(dir);
-		vectoangles(dir,angles);
+		VectorSubtract (monster->enemy->s.origin, monster->s.origin, dir);
+		VectorNormalize (dir);
+		vectoangles (dir, angles);
 		monster->ideal_yaw = angles[YAW];
 		M_ChangeYaw(monster);
 	}
@@ -212,7 +212,8 @@ void thing_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *su
 			// make sure this is still a grenade
 			if (grenade->inuse)
 			{
-				if (Q_stricmp(grenade->classname,"grenade") && Q_stricmp(grenade->classname,"hgrenade"))
+				if (Q_stricmp(grenade->classname, "grenade") && Q_stricmp(grenade->classname, "hgrenade")
+					&& Q_stricmp(grenade->classname, "prox"))	// Knightmare- added prox
 					other->next_grenade = grenade = NULL;
 			}
 			else

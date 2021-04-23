@@ -487,14 +487,22 @@ void GunnerFire (edict_t *self)
 	if (!self->enemy || !self->enemy->inuse)		//PGM
 		return;									//PGM
 
-	flash_number = MZ2_GUNNER_MACHINEGUN_1 + (self->s.frame - FRAME_attak216);
+#ifdef KMQUAKE2_ENGINE_MOD	// Knightmare- unique muzzle flash for gunner commander's flechettes
+	if (self->moreflags & FL2_COMMANDER)
+		flash_number = MZ2_GUNNER_ETF_RIFLE_1 + (self->s.frame - FRAME_attak216);
+	else
+#endif	// KMQUAKE2_ENGINE_MOD
+		flash_number = MZ2_GUNNER_MACHINEGUN_1 + (self->s.frame - FRAME_attak216);
 
 	AngleVectors (self->s.angles, forward, right, NULL);
 	G_ProjectSource (self->s.origin, monster_flash_offset[flash_number], forward, right, start);
 
 	// project enemy back a bit and target there
 	VectorCopy (self->enemy->s.origin, target);
-	VectorMA (target, -0.2, self->enemy->velocity, target);
+	if ( !(self->moreflags & FL2_COMMANDER) )
+	{	// Commander fires projectiles, so no backward projection
+		VectorMA (target, -0.2, self->enemy->velocity, target);
+	}
 	target[2] += self->enemy->viewheight;
 
 	// Lazarus fog reduction of accuracy
@@ -507,24 +515,30 @@ void GunnerFire (edict_t *self)
 
 	VectorSubtract (target, start, aim);
 	VectorNormalize (aim);
-	monster_fire_bullet (self, start, aim, 3, 4, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, flash_number);
+
+	// Knightmare- gunner commander fires flechettes
+	if (self->moreflags & FL2_COMMANDER)
+		monster_fire_flechette (self, start, aim, 5, 850, 75, 10, flash_number); 
+	else
+		monster_fire_bullet (self, start, aim, 3, 4, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, flash_number);
 }
 
 void GunnerGrenade (edict_t *self)
 {
-	vec3_t	start;
-	vec3_t	forward, right, up;
-	vec3_t	aim;
-	vec_t	monster_speed;
-	int		flash_number;
-	float	spread;
-//	float	pitch;
+	vec3_t		start;
+	vec3_t		forward, right, up;
+	vec3_t		aim;
+	vec_t		monster_speed;
+	int			flash_number;
+	float		spread;
+//	float		pitch;
 	// PMM
-	vec3_t	target;	
-	qboolean blindfire;
+	vec3_t		target;	
+	qboolean	blindfire = false;
 
-	if (!self->enemy || !self->enemy->inuse)		//PGM
-		return;									//PGM
+	//PGM
+	if (!self->enemy || !self->enemy->inuse)
+		return;
 
 	// pmm
 	if (self->monsterinfo.aiflags & AI_MANUAL_STEERING)
@@ -554,21 +568,21 @@ void GunnerGrenade (edict_t *self)
 
 	//	pmm
 	// if we're shooting blind and we still can't see our enemy
-	if ((blindfire) && (!visible(self, self->enemy)))
+	if ( (blindfire) && (!visible(self, self->enemy)) )
 	{
 		// and we have a valid blind_fire_target
 		if (VectorCompare (self->monsterinfo.blind_fire_target, vec3_origin))
 			return;
 		
-//		gi.dprintf ("blind_fire_target = %s\n", vtos (self->monsterinfo.blind_fire_target));
-//		gi.dprintf ("GunnerGrenade: ideal yaw is %f\n", self->ideal_yaw);
+	//	gi.dprintf ("blind_fire_target = %s\n", vtos (self->monsterinfo.blind_fire_target));
+	//	gi.dprintf ("GunnerGrenade: ideal yaw is %f\n", self->ideal_yaw);
 		VectorCopy (self->monsterinfo.blind_fire_target, target);
 	}
 	else
 		VectorCopy (self->s.origin, target);
 	// pmm
 
-	AngleVectors (self->s.angles, forward, right, up);	//PGM
+	AngleVectors (self->s.angles, forward, right, up);	// PGM
 	G_ProjectSource (self->s.origin, monster_flash_offset[flash_number], forward, right, start);
 
 //PGM
@@ -576,16 +590,33 @@ void GunnerGrenade (edict_t *self)
 	{
 		float	dist;
 
-//		VectorSubtract(self->enemy->s.origin, self->s.origin, aim);
+	//	VectorSubtract(self->enemy->s.origin, self->s.origin, aim);
 		VectorSubtract(target, self->s.origin, aim);
 		dist = VectorLength(aim);
 
-		// aim at enemy's feet if he's at same elevation or lower. otherwise aim at origin
-		VectorCopy(self->enemy->s.origin,target);
-		if (self->enemy->absmin[2] <= self->absmax[2]) target[2] = self->enemy->absmin[2];
+		// aim at enemy's feet if he's at same elevation or lower, otherwise aim at origin
+		VectorCopy (self->enemy->s.origin, target);
+		if (self->enemy->absmin[2] <= self->absmax[2])
+			target[2] = self->enemy->absmin[2];
+
+		// Knightmare- spread out Commander's prox mines so they don't collide
+		if (self->moreflags & FL2_COMMANDER)
+		{
+			if ( blindfire )
+			{
+				target[0] += crandom() * 192;
+				target[1] += crandom() * 192;
+				target[2] += crandom() * 192;
+			}
+			else
+			{
+				target[0] += crandom() * 32;
+				target[1] += crandom() * 32;
+			}
+		}
 
 		// Lazarus fog reduction of accuracy
-		if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
+		if ( self->monsterinfo.visibility < FOG_CANSEEGOOD )
 		{
 			target[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 			target[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -598,22 +629,22 @@ void GunnerGrenade (edict_t *self)
 			float	dist;
 			float	time;
 
-			VectorSubtract(target, start, aim);
+			VectorSubtract (target, start, aim);
 			dist = VectorLength (aim);
 			time = dist/GRENADE_VELOCITY;  // Not correct, but better than nothin'
-			VectorMA(target, time, self->enemy->velocity, target);
+			VectorMA (target, time, self->enemy->velocity, target);
 		}
 
 		// aim up if they're on the same level as me and far away.
 		if ((dist > 512) && (aim[2] < 64) && (aim[2] > -64))
 			aim[2] += (dist - 512);
 
-/*		VectorNormalize (aim);
+	/*	VectorNormalize (aim);
 		pitch = aim[2];
 		if (pitch > 0.4)
 			pitch = 0.4;
 		else if (pitch < -0.5)
-			pitch = -0.5;*/
+			pitch = -0.5; */
 	}
 //PGM
 
@@ -626,18 +657,25 @@ void GunnerGrenade (edict_t *self)
 		vec3_t	v1;
 		vec_t	delta;
 
-		VectorCopy(self->velocity,v1);
-		VectorNormalize(v1);
-		delta = -monster_speed/GRENADE_VELOCITY;
-		VectorMA(aim,delta,v1,aim);
-		VectorNormalize(aim);
+		VectorCopy (self->velocity,v1);
+		VectorNormalize (v1);
+		delta = -monster_speed / GRENADE_VELOCITY;
+		VectorMA (aim,delta,v1,aim);
+		VectorNormalize (aim);
 	}
-	//FIXME : do a spread -225 -75 75 225 degrees around forward
+	// FIXME : do a spread -225 -75 75 225 degrees around forward
 //	VectorCopy (forward, aim);
 //	VectorMA (forward, spread, right, aim);
 //	VectorMA (aim, pitch, up, aim);
 
-	monster_fire_grenade (self, start, aim, 50, 600, flash_number);
+	// Knightmare- Gunner Commander fires prox mines
+	if (self->moreflags & FL2_COMMANDER)
+	{
+		float	prox_timer = (blindfire) ? 60.0f : 2.5f;
+		monster_fire_prox (self, start, aim, 65, 1, 600, 20, prox_timer, 192, flash_number);
+	}
+	else
+		monster_fire_grenade (self, start, aim, 50, 600, flash_number);
 }
 
 mframe_t gunner_frames_attack_chain [] =
@@ -696,8 +734,8 @@ void gunner_blind_check (edict_t *self)
 		VectorSubtract(self->monsterinfo.blind_fire_target, self->s.origin, aim);
 		self->ideal_yaw = vectoyaw(aim);
 		
-//		gi.dprintf ("blind_fire_target = %s\n", vtos (self->monsterinfo.blind_fire_target));
-//		gi.dprintf ("gunner_attack: ideal yaw is %f\n", self->ideal_yaw);
+	//	gi.dprintf ("blind_fire_target = %s\n", vtos (self->monsterinfo.blind_fire_target));
+	//	gi.dprintf ("gunner_attack: ideal yaw is %f\n", self->ideal_yaw);
 	}
 }
 
@@ -756,13 +794,13 @@ void gunner_attack(edict_t *self)
 		// don't shoot if the dice say not to
 		if (r > chance)
 		{
-//			if ((g_showlogic) && (g_showlogic->value))
-//				gi.dprintf ("blindfire - NO SHOT\n");
+		//	if ((g_showlogic) && (g_showlogic->value))
+		//		gi.dprintf ("blindfire - NO SHOT\n");
 			return;
 		}
 
 		// turn on manual steering to signal both manual steering and blindfire
-		//self->monsterinfo.aiflags |= AI_MANUAL_STEERING;
+	//	self->monsterinfo.aiflags |= AI_MANUAL_STEERING;
 		self->monsterinfo.monsterflags |= AI_MANUAL_STEERING;
 		if (gunner_grenade_check(self))
 		{
@@ -771,10 +809,10 @@ void gunner_attack(edict_t *self)
 			self->monsterinfo.attack_finished = level.time + 2*random();
 		}
 		// pmm - should this be active?
-//		else
-//			self->monsterinfo.currentmove = &gunner_move_attack_chain;
-//		if ((g_showlogic) && (g_showlogic->value))
-//			gi.dprintf ("blind grenade check failed, doing nothing\n");
+	//	else
+	//		self->monsterinfo.currentmove = &gunner_move_attack_chain;
+	//	if ((g_showlogic) && (g_showlogic->value))
+	//		gi.dprintf ("blind grenade check failed, doing nothing\n");
 
 		// turn off blindfire flag
 		self->monsterinfo.aiflags &= ~AI_MANUAL_STEERING;
@@ -1069,6 +1107,8 @@ void gunner_sidestep (edict_t *self)
 
 /*QUAKED monster_gunner (1 .5 0) (-16 -16 -24) (16 16 32) Ambush Trigger_Spawn Sight GoodGuy NoGib
 */
+/*QUAKED monster_gunner_commander (1 .5 0) (-16 -16 -24) (16 16 32) Ambush Trigger_Spawn Sight GoodGuy NoGib
+*/
 void SP_monster_gunner (edict_t *self)
 {
 	if (deathmatch->value)
@@ -1085,17 +1125,22 @@ void SP_monster_gunner (edict_t *self)
 	sound_search = gi.soundindex ("gunner/gunsrch1.wav");	
 	sound_sight = gi.soundindex ("gunner/sight1.wav");	
 
-	gi.soundindex ("gunner/gunatck2.wav");
+//	gi.soundindex ("gunner/gunatck2.wav");	// not used by Gunner Commander
 	gi.soundindex ("gunner/gunatck3.wav");
 
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;
 
 	// Lazarus: special purpose skins
+	if (strcmp(self->classname, "monster_gunner_commander") == 0)
+	{
+		self->s.skinnum = 2;
+		self->moreflags |= FL2_COMMANDER;
+	}
 	if ( self->style )
 	{
 		PatchMonsterModel("models/monsters/gunner/tris.md2");
-		self->s.skinnum = self->style * 2;
+		self->s.skinnum += self->style * 4;
 	}
 
 	self->s.modelindex = gi.modelindex ("models/monsters/gunner/tris.md2");
@@ -1109,12 +1154,40 @@ void SP_monster_gunner (edict_t *self)
 	VectorSet (self->mins, -16, -16, -24);
 	VectorSet (self->maxs, 16, 16, 32);
 
-	if (!self->health)
-		self->health = 175;
-	if (!self->gib_health)
-		self->gib_health = -150;
-	if (!self->mass)
-		self->mass = 200;
+	if (strcmp(self->classname, "monster_gunner_commander") == 0)
+	{	// precache
+		gi.modelindex ("models/weapons/g_prox/tris.md2");
+		gi.modelindex ("models/proj/flechette/tris.md2");
+		gi.soundindex ("weapons/nail1.wav");
+
+		if (!self->health)
+			self->health = 400;
+		if (!self->gib_health)
+			self->gib_health = -150;
+		if (!self->mass)
+			self->mass = 300;
+
+		self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
+		self->monsterinfo.power_armor_power = 200;
+
+		self->common_name = "Gunner Commander";
+		self->class_id = ENTITY_MONSTER_GUNNER_COMMANDER;
+	}
+	else
+	{	// precache
+		gi.modelindex ("models/objects/grenade/tris.md2");
+		gi.soundindex ("gunner/gunatck2.wav");
+
+		if (!self->health)
+			self->health = 175;
+		if (!self->gib_health)
+			self->gib_health = -150;
+		if (!self->mass)
+			self->mass = 200;
+
+		self->common_name = "Gunner";
+		self->class_id = ENTITY_MONSTER_GUNNER;
+	}
 
 	self->pain = gunner_pain;
 	self->die = gunner_die;
@@ -1147,11 +1220,11 @@ void SP_monster_gunner (edict_t *self)
 			self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
 		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
-	if (!self->monsterinfo.flies)
-		self->monsterinfo.flies = 0.30;
 
-	self->common_name = "Gunner";
-	self->class_id = ENTITY_MONSTER_GUNNER;
+	if ( !self->monsterinfo.flies && strcmp(self->classname, "monster_gunner_commander") == 0 )
+		self->monsterinfo.flies = 0.20;
+	else if (!self->monsterinfo.flies)
+		self->monsterinfo.flies = 0.30;
 
 	gi.linkentity (self);
 

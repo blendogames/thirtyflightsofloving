@@ -2272,6 +2272,8 @@
 {"M_FliesOn", (byte *)M_FliesOn},
 {"M_FliesOff", (byte *)M_FliesOff},
 {"monster_fire_plasma_rifle", (byte *)monster_fire_plasma_rifle},
+{"monster_fire_prox", (byte *)monster_fire_prox},
+{"monster_fire_flechette", (byte *)monster_fire_flechette},
 {"monster_fire_heat", (byte *)monster_fire_heat},
 {"monster_fire_tracker", (byte *)monster_fire_tracker},
 {"monster_fire_blaster2", (byte *)monster_fire_blaster2},

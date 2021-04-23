@@ -404,7 +404,8 @@ void medic_idle (edict_t *self)
 	if (!(self->spawnflags & SF_MONSTER_AMBUSH))
 	{
 		// PMM - commander sounds
-		if (strcmp(self->classname, "monster_medic_commander"))
+	//	if (strcmp(self->classname, "monster_medic_commander"))
+		if ( !(self->moreflags & FL2_COMMANDER) )
 			gi.sound (self, CHAN_VOICE, sound_idle1, 1, ATTN_IDLE, 0);
 		else
 			gi.sound (self, CHAN_VOICE, commander_sound_idle1, 1, ATTN_IDLE, 0);
@@ -490,7 +491,8 @@ void medic_search (edict_t *self)
 	edict_t	*ent;
 
 	// PMM - commander sounds
-	if (strcmp(self->classname, "monster_medic_commander"))
+//	if (strcmp(self->classname, "monster_medic_commander"))
+	if ( !(self->moreflags & FL2_COMMANDER) )
 		gi.sound (self, CHAN_VOICE, sound_search, 1, ATTN_IDLE, 0);
 	else
 		gi.sound (self, CHAN_VOICE, commander_sound_search, 1, ATTN_IDLE, 0);
@@ -512,7 +514,8 @@ void medic_search (edict_t *self)
 void medic_sight (edict_t *self, edict_t *other)
 {
 	// PMM - commander sounds
-	if (strcmp(self->classname, "monster_medic_commander"))
+//	if (strcmp(self->classname, "monster_medic_commander"))
+	if ( !(self->moreflags & FL2_COMMANDER) )
 		gi.sound (self, CHAN_VOICE, sound_sight, 1, ATTN_NORM, 0);
 	else
 		gi.sound (self, CHAN_VOICE, commander_sound_sight, 1, ATTN_NORM, 0);
@@ -743,7 +746,8 @@ void medic_pain (edict_t *self, edict_t *other, float kick, int damage)
 	if (self->monsterinfo.aiflags & AI_MEDIC)
 		return;
 
-	if (strcmp(self->classname, "monster_medic_commander") == 0)
+//	if (strcmp(self->classname, "monster_medic_commander") == 0)
+	if (self->moreflags & FL2_COMMANDER)
 	{
 		if (damage < 35)
 		{
@@ -815,7 +819,8 @@ void medic_fire_blaster (edict_t *self)
 		damage = 3;
 
 	// medic commander shoots blaster2
-	if (strcmp(self->classname, "monster_medic_commander") == 0)
+//	if (strcmp(self->classname, "monster_medic_commander") == 0)
+	if (self->moreflags & FL2_COMMANDER)
 	//	monster_fire_blaster (self, start, dir, damage, 1000, MZ2_MEDIC_BLASTER_2, (effect!=0)?(effect|EF_TRACKER):0, BLASTER_GREEN);
 		monster_fire_blaster2 (self, start, dir, damage, 1000, MZ2_MEDIC_BLASTER_2, effect);
 	else
@@ -905,7 +910,8 @@ void medic_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 
 // regular death
 	//	PMM
-	if (strcmp(self->classname, "monster_medic_commander"))
+//	if (strcmp(self->classname, "monster_medic_commander"))
+	if ( !(self->moreflags & FL2_COMMANDER) )
 		gi.sound (self, CHAN_VOICE, sound_die, 1, ATTN_NORM, 0);
 	else
 		gi.sound (self, CHAN_VOICE, commander_sound_die, 1, ATTN_NORM, 0);
@@ -992,7 +998,8 @@ mmove_t medic_move_attackBlaster = {FRAME_attack1, FRAME_attack14, medic_frames_
 void medic_hook_launch (edict_t *self)
 {
 	// PMM - commander sounds
-	if (strcmp(self->classname, "monster_medic_commander"))
+//	if (strcmp(self->classname, "monster_medic_commander"))
+	if ( !(self->moreflags & FL2_COMMANDER) )
 		gi.sound (self, CHAN_WEAPON, sound_hook_launch, 1, ATTN_NORM, 0);
 	else
 		gi.sound (self, CHAN_WEAPON, commander_sound_hook_launch, 1, ATTN_NORM, 0);
@@ -1122,7 +1129,8 @@ void medic_cable_attack (edict_t *self)
 	if (self->s.frame == FRAME_attack43)
 	{
 		// PMM - commander sounds
-		if (strcmp(self->classname, "monster_medic_commander"))
+	//	if (strcmp(self->classname, "monster_medic_commander"))
+		if ( !(self->moreflags & FL2_COMMANDER) )
 			gi.sound (self->enemy, CHAN_AUTO, sound_hook_hit, 1, ATTN_NORM, 0);
 		else
 			gi.sound (self->enemy, CHAN_AUTO, commander_sound_hook_hit, 1, ATTN_NORM, 0);
@@ -1265,7 +1273,8 @@ void medic_cable_attack (edict_t *self)
 	{
 		if (self->s.frame == FRAME_attack44)
 			// PMM - medic commander sounds
-			if (strcmp(self->classname, "monster_medic_commander"))
+		//	if (strcmp(self->classname, "monster_medic_commander"))
+			if ( !(self->moreflags & FL2_COMMANDER) )
 				gi.sound (self, CHAN_WEAPON, sound_hook_heal, 1, ATTN_NORM, 0);
 			else
 				gi.sound (self, CHAN_WEAPON, commander_sound_hook_heal, 1, ATTN_NORM, 0);
@@ -1291,7 +1300,8 @@ void medic_cable_attack (edict_t *self)
 
 void medic_hook_retract (edict_t *self)
 {
-	if (strcmp(self->classname, "monster_medic_commander"))
+//	if (strcmp(self->classname, "monster_medic_commander"))
+	if ( !(self->moreflags & FL2_COMMANDER) )
 		gi.sound (self, CHAN_WEAPON, sound_hook_retract, 1, ATTN_NORM, 0);
 	else
 		gi.sound (self, CHAN_WEAPON, sound_hook_retract, 1, ATTN_NORM, 0);
@@ -1619,23 +1629,23 @@ void medic_finish_spawn (edict_t *self)
 				ent = CreateGroundMonster (spawnpoint, self->s.angles,
 					reinforcement_mins[summonStr-inc], reinforcement_maxs[summonStr-inc],
 					reinforcements[summonStr-inc], 256);
-//			else if ((g_showlogic) && (g_showlogic->value))
-//				gi.dprintf ("CheckSpawnPoint failed volume check!\n");
+		//	else if ((g_showlogic) && (g_showlogic->value))
+		//		gi.dprintf ("CheckSpawnPoint failed volume check!\n");
 		}
 		else
 		{
-//			if ((g_showlogic) && (g_showlogic->value))
-//				gi.dprintf ("FindSpawnPoint failed to find a point!\n");
+		//	if ((g_showlogic) && (g_showlogic->value))
+		//		gi.dprintf ("FindSpawnPoint failed to find a point!\n");
 		}
 
 		if (!ent)
 		{
-//			if ((g_showlogic) && (g_showlogic->value))
-//				gi.dprintf ("Spawn point obstructed for %s, aborting!\n", reinforcements[summonStr-inc]);
+		//	if ((g_showlogic) && (g_showlogic->value))
+		//		gi.dprintf ("Spawn point obstructed for %s, aborting!\n", reinforcements[summonStr-inc]);
 			continue;
 		}
 
-//		gi.sound (self, CHAN_WEAPON, commander_sound_spawn, 1, ATTN_NORM, 0);
+	//	gi.sound (self, CHAN_WEAPON, commander_sound_spawn, 1, ATTN_NORM, 0);
 
 		if (ent->think)
 		{
@@ -1648,8 +1658,8 @@ void medic_finish_spawn (edict_t *self)
 		ent->monsterinfo.monsterflags |= MFL_DO_NOT_COUNT|MFL_SPAWNED_MEDIC_C;
 		ent->monsterinfo.commander = self;
 		self->monsterinfo.monster_slots--;
-//		if ((g_showlogic) && (g_showlogic->value))
-//			gi.dprintf ("medic_commander: %d slots remaining\n", self->monsterinfo.monster_slots);
+	//	if ((g_showlogic) && (g_showlogic->value))
+	//		gi.dprintf ("medic_commander: %d slots remaining\n", self->monsterinfo.monster_slots);
 
 		if (self->monsterinfo.aiflags & AI_MEDIC)
 			designated_enemy = self->oldenemy;
@@ -1667,27 +1677,27 @@ void medic_finish_spawn (edict_t *self)
 					designated_enemy = PickCoopTarget(ent);
 					if (designated_enemy)
 					{
-//						if ((g_showlogic) && (g_showlogic->value))
-//						{
-//							gi.dprintf ("PickCoopTarget returned a %s - ", designated_enemy->classname);
-//							if (designated_enemy->client)
-//								gi.dprintf ("with name %s\n", designated_enemy->client->pers.netname);
-//							else
-//								gi.dprintf ("NOT A CLIENT\n");
-//						}
+					/*	if ((g_showlogic) && (g_showlogic->value))
+						{
+							gi.dprintf ("PickCoopTarget returned a %s - ", designated_enemy->classname);
+							if (designated_enemy->client)
+								gi.dprintf ("with name %s\n", designated_enemy->client->pers.netname);
+							else
+								gi.dprintf ("NOT A CLIENT\n");
+						} */
 					}
 					else
 					{
-//						if ((g_showlogic) && (g_showlogic->value))
-//							gi.dprintf ("pick coop failed, using my current enemy\n");
+					//	if ((g_showlogic) && (g_showlogic->value))
+					//		gi.dprintf ("pick coop failed, using my current enemy\n");
 						designated_enemy = self->enemy;
 					}
 				}
 			}
 			else
 			{
-//				if ((g_showlogic) && (g_showlogic->value))
-//					gi.dprintf ("pick coop failed, using my current enemy\n");
+			//	if ((g_showlogic) && (g_showlogic->value))
+			//		gi.dprintf ("pick coop failed, using my current enemy\n");
 				designated_enemy = self->enemy;
 			}
 		}
@@ -1695,8 +1705,8 @@ void medic_finish_spawn (edict_t *self)
 		if ((designated_enemy) && (designated_enemy->inuse) && (designated_enemy->health > 0))
 		{
 			// fixme
-//			if ((g_showlogic) && (g_showlogic -> value))
-//				gi.dprintf  ("setting enemy to %s\n", designated_enemy->classname);
+		//	if ((g_showlogic) && (g_showlogic -> value))
+		//		gi.dprintf  ("setting enemy to %s\n", designated_enemy->classname);
 			ent->enemy = designated_enemy;
 			FoundTarget (ent);
 		}
@@ -1705,16 +1715,16 @@ void medic_finish_spawn (edict_t *self)
 			ent->enemy = NULL;
 			ent->monsterinfo.stand (ent);
 		}
-//		ent->s.event = EV_PLAYER_TELEPORT;
+	//	ent->s.event = EV_PLAYER_TELEPORT;
 	}
 }
 
 mframe_t medic_frames_callReinforcements [] =
 {
 	// ROGUE - 33-36 now ai_charge
-	ai_charge, 2,		NULL,					//33
-	ai_charge, 3,		NULL,
-	ai_charge, 5,		NULL,
+	ai_charge, 2,	NULL,					//33
+	ai_charge, 3,	NULL,
+	ai_charge, 5,	NULL,
 	ai_charge, 4.4,	NULL,					//36
 	ai_charge, 4.7,	NULL,
 	ai_charge, 5,	NULL,
@@ -1728,7 +1738,7 @@ mframe_t medic_frames_callReinforcements [] =
 	ai_move, 0,		NULL,
 	ai_move, 0,		NULL,
 	ai_move, 0,		medic_determine_spawn,		//48
-	ai_charge, 0,		medic_spawngrows,			//49
+	ai_charge, 0,	medic_spawngrows,			//49
 	ai_move, 0,		NULL,		//50
 	ai_move, 0,		NULL,		//51
 	ai_move, -15,	medic_finish_spawn,		//52
@@ -1743,7 +1753,7 @@ mframe_t medic_frames_callReinforcements [] =
 };
 mmove_t medic_move_callReinforcements = {FRAME_attack33, FRAME_attack60, medic_frames_callReinforcements, medic_run};
 
-void medic_attack(edict_t *self)
+void medic_attack (edict_t *self)
 {
 	int		enemy_range;
 	float	r;
@@ -1762,7 +1772,8 @@ void medic_attack(edict_t *self)
 	r = random();
 	if (self->monsterinfo.aiflags & AI_MEDIC)
 	{
-		if ((strcmp(self->classname, "monster_medic_commander") == 0) && (r > 0.8) && (self->monsterinfo.monster_slots > 2))
+	//	if ((strcmp(self->classname, "monster_medic_commander") == 0) && (r > 0.8) && (self->monsterinfo.monster_slots > 2))
+		if ((self->moreflags & FL2_COMMANDER) && (r > 0.8) && (self->monsterinfo.monster_slots > 2))
 			self->monsterinfo.currentmove = &medic_move_callReinforcements;
 		else	
 			self->monsterinfo.currentmove = &medic_move_attackCable;
@@ -1774,7 +1785,8 @@ void medic_attack(edict_t *self)
 			self->monsterinfo.currentmove = &medic_move_callReinforcements;
 			return;
 		}
-		if ((strcmp(self->classname, "monster_medic_commander") == 0) && (r > 0.2) && (enemy_range != RANGE_MELEE) && (self->monsterinfo.monster_slots > 2))
+	//	if ((strcmp(self->classname, "monster_medic_commander") == 0) && (r > 0.2) && (enemy_range != RANGE_MELEE) && (self->monsterinfo.monster_slots > 2))
+		if ((self->moreflags & FL2_COMMANDER) && (r > 0.2) && (enemy_range != RANGE_MELEE) && (self->monsterinfo.monster_slots > 2))
 			self->monsterinfo.currentmove = &medic_move_callReinforcements;
 		else
 			self->monsterinfo.currentmove = &medic_move_attackBlaster;
@@ -2050,7 +2062,10 @@ void SP_monster_medic (edict_t *self)
 
 	// Lazarus: special purpose skins
 	if (strcmp(self->classname, "monster_medic_commander") == 0)
+	{
 		self->s.skinnum = 2;
+		self->moreflags |= FL2_COMMANDER;
+	}
 	if ( self->style )
 	{
 		PatchMonsterModel("models/monsters/medic/tris.md2");
@@ -2061,7 +2076,7 @@ void SP_monster_medic (edict_t *self)
 	VectorSet (self->mins, -24, -24, -24);
 	VectorSet (self->maxs, 24, 24, 32);
 
-//PMM
+	//PMM
 	if (strcmp(self->classname, "monster_medic_commander") == 0)
 	{
 		if (!self->health)
@@ -2070,16 +2085,16 @@ void SP_monster_medic (edict_t *self)
 			self->gib_health = -150;
 		if (!self->mass)
 			self->mass = 600;
-		//PMM
+		// PMM
 		self->monsterinfo.aiflags |= AI_IGNORE_SHOTS;
 		self->yaw_speed = 40; // default is 20
-		MedicCommanderCache();
+		MedicCommanderCache ();
 		// Knightmare- precache blaster bolt
 		gi.modelindex ("models/proj/laser2/tris.md2");
 	}
 	else
 	{
-//PMM
+	//PMM
 		if (!self->health)
 			self->health = 300;
 		if (!self->gib_health)
@@ -2121,7 +2136,8 @@ void SP_monster_medic (edict_t *self)
 			self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
 		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
-	if (!self->monsterinfo.flies && strcmp(self->classname, "monster_medic_commander") == 0)
+	
+	if ( !self->monsterinfo.flies && strcmp(self->classname, "monster_medic_commander") == 0 )
 		self->monsterinfo.flies = 0.10;
 	else if (!self->monsterinfo.flies)
 		self->monsterinfo.flies = 0.15;

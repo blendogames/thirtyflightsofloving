@@ -42,7 +42,7 @@ void flechette_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t
 
 	if (other->takedamage)
 	{
-//gi.dprintf("t_damage %s\n", other->classname);
+	//	gi.dprintf("t_damage %s\n", other->classname);
 		T_Damage (other, self, self->owner, self->velocity, self->s.origin, plane->normal,
 			self->dmg, self->dmg_radius, DAMAGE_NO_REG_ARMOR, MOD_ETF_RIFLE);
 	}
@@ -64,7 +64,7 @@ void flechette_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t
 
 	//	T_RadiusDamage(self, self->owner, 24, self, 48, MOD_ETF_RIFLE);
 	}
-	//Knightmare- added splash damage
+	// Knightmare- added splash damage
 	T_RadiusDamage(self, self->owner, self->radius_dmg, self, self->dmg_radius, MOD_ETF_SPLASH);
 
 	G_FreeEdict (self);
@@ -279,9 +279,11 @@ void Prox_Explode (edict_t *ent)
 	edict_t		*owner;
 	int			type;
 
+	Grenade_Remove_From_Chain (ent);
+
 // free the trigger field
 
-	//PMM - changed teammaster to "mover" .. owner of the field is the prox
+	// PMM - changed teammaster to "mover" .. owner of the field is the prox
 	if (ent->teamchain && ent->teamchain->owner == ent)
 		G_FreeEdict(ent->teamchain);
 
@@ -293,16 +295,19 @@ void Prox_Explode (edict_t *ent)
 	}
 
 	// play quad sound if appopriate
-	if (ent->dmg > sk_prox_damage->value)
+//	if (ent->dmg > sk_prox_damage->value)
+	if (ent->count > 1)	// Knightmare- use stored multiplier
 	{
-		if (ent->dmg < (4 * sk_prox_damage->value)) //double sound
+	//	if (ent->dmg < (4 * sk_prox_damage->value))	// double sound
+		if (ent->count < 4)	// double sound
 			gi.sound(ent, CHAN_ITEM, gi.soundindex("misc/ddamage3.wav"), 1, ATTN_NORM, 0);
-		else //quad sound
+		else // quad sound
 			gi.sound(ent, CHAN_ITEM, gi.soundindex("items/damage3.wav"), 1, ATTN_NORM, 0);
 	}
 
 	ent->takedamage = DAMAGE_NO;
-	T_RadiusDamage(ent, owner, ent->dmg, ent, sk_prox_radius->value, MOD_PROX);
+//	T_RadiusDamage(ent, owner, ent->dmg, ent, sk_prox_radius->value, MOD_PROX);
+	T_RadiusDamage(ent, owner, ent->dmg, ent, ent->dmg_radius, MOD_PROX);
 
 	VectorMA (ent->s.origin, -0.02, ent->velocity, origin);
 	if (ent->groundentity)
@@ -326,7 +331,7 @@ void Prox_Explode (edict_t *ent)
 //===============
 void prox_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
-	//gi.dprintf("prox_die\n");
+//	gi.dprintf("prox_die\n");
 	// if set off by another prox, delay a little (chained explosions)
 	if (strcmp(inflictor->classname, "prox"))
 	{
@@ -347,9 +352,8 @@ void Prox_Field_Touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t
 {
 	edict_t *prox;
 
-	if (!(other->svflags & SVF_MONSTER) && !other->client)
+	if ( !(other->svflags & SVF_MONSTER) && !other->client )
 		return;
-
 
 	// trigger the prox mine if it's still there, and still mine.
 	prox = ent->owner;
@@ -359,8 +363,8 @@ void Prox_Field_Touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t
 
 	if (prox->think == Prox_Explode) // we're set to blow!
 	{
-//		if ((g_showlogic) && (g_showlogic->value))
-//			gi.dprintf ("%f - prox already gone off!\n", level.time);
+	//	if ((g_showlogic) && (g_showlogic->value))
+	//		gi.dprintf ("%f - prox already gone off!\n", level.time);
 		return;
 	}
 
@@ -415,16 +419,17 @@ void prox_open (edict_t *ent)
 		// doesn't get stuck on it while it's opening if fired at point blank wall
 		ent->s.sound = 0;
 		// Knightmare- the above never happens, and the owner pointer is needed for remote detonation
-		//ent->owner = NULL;
+	//	ent->owner = NULL;
 		if (ent->teamchain)
 			ent->teamchain->touch = Prox_Field_Touch;
-		while ((search = findradius(search, ent->s.origin, sk_prox_radius->value + 10)) != NULL)
+	//	while ((search = findradius(search, ent->s.origin, sk_prox_radius->value + 10)) != NULL)
+		while ((search = findradius(search, ent->s.origin, ent->dmg_radius + 10)) != NULL)
 		{
 			if (!search->classname)			// tag token and other weird shit
 				continue;
 
-//			if (!search->takedamage)
-//				continue;
+		//	if (!search->takedamage)
+		//		continue;
 			// if it's a monster or player with health > 0
 			// or it's a player start point
 			// and we can see it
@@ -452,27 +457,28 @@ void prox_open (edict_t *ent)
 		}
 
 		if (strong_mines && (strong_mines->value))
-			ent->wait = level.time + sk_prox_life->value;
+			ent->wait = level.time + ent->delay;	// sk_prox_life->value	// Knightmare- use stored timer
 		else
 		{
-			switch (ent->dmg / (int)sk_prox_damage->value)
+		//	switch (ent->dmg / (int)sk_prox_damage->value)
+			switch (ent->count)	// Knightmare- use stored multiplier
 			{
 				case 1:
-					ent->wait = level.time + sk_prox_life->value;
+					ent->wait = level.time + ent->delay;	// sk_prox_life->value	// Knightmare- use stored timer
 					break;
 				case 2:
-					ent->wait = level.time + sk_prox_life->value / 2;
+					ent->wait = level.time + ent->delay / 2;	// sk_prox_life->value	// Knightmare- use stored timer
 					break;
 				case 4:
-					ent->wait = level.time + sk_prox_life->value / 4;
+					ent->wait = level.time + ent->delay / 4;	// sk_prox_life->value	// Knightmare- use stored timer
 					break;
 				case 8:
-					ent->wait = level.time + sk_prox_life->value / 8;
+					ent->wait = level.time + ent->delay / 8;	// sk_prox_life->value	// Knightmare- use stored timer
 					break;
 				default:
-//					if ((g_showlogic) && (g_showlogic->value))
-//						gi.dprintf ("prox with unknown multiplier %d!\n", ent->dmg/PROX_DAMAGE);
-					ent->wait = level.time + sk_prox_life->value;
+				//	if ((g_showlogic) && (g_showlogic->value))
+				//		gi.dprintf ("prox with unknown multiplier %d!\n", ent->count);
+					ent->wait = level.time + ent->delay;	// sk_prox_life->value	// Knightmare- use stored timer
 					break;
 			}
 		}
@@ -515,6 +521,7 @@ void prox_land (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
 	
 	if (surf && (surf->flags & SURF_SKY))
 	{
+		Grenade_Remove_From_Chain (ent);
 		G_FreeEdict(ent);
 		return;
 	}
@@ -550,8 +557,8 @@ void prox_land (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
 		if (!plane || !plane->normal) // this happens if you hit a point object, maybe other cases
 		{
 			// Since we can't tell what's going to happen, just blow up
-//			if ((g_showlogic) && (g_showlogic->value))
-//				gi.dprintf ("bad normal for surface, exploding!\n");
+		//	if ((g_showlogic) && (g_showlogic->value))
+		//		gi.dprintf ("bad normal for surface, exploding!\n");
 
 			Prox_Explode(ent);
 			return;
@@ -605,8 +612,8 @@ void prox_land (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
 		{
 			if (plane->normal[2] > 0.7)
 			{
-//				if ((g_showlogic) && (g_showlogic->value))
-//					gi.dprintf ("stuck on entity, blowing up!\n");
+			//	if ((g_showlogic) && (g_showlogic->value))
+			//		gi.dprintf ("stuck on entity, blowing up!\n");
 
 				Prox_Explode(ent);
 				return;
@@ -655,7 +662,8 @@ void prox_land (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
 	ent->movetype = movetype;		// either bounce or none, depending on whether we stuck to something
 	ent->die = prox_die;
 	ent->teamchain = field;
-	ent->health = sk_prox_health->value;
+//	ent->health = sk_prox_health->value;
+	ent->health = ent->max_health;	// Knightmare- health is stored in max_health
 	ent->nextthink = level.time + 0.05;
 	ent->think = prox_open;
 	ent->touch = NULL;
@@ -672,7 +680,7 @@ void prox_land (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
 
 //===============
 //===============
-void fire_prox (edict_t *self, vec3_t start, vec3_t aimdir, int damage_multiplier, int speed)
+void fire_prox (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int damage_multiplier, int speed, int health, float timer, float damage_radius)
 {
 	edict_t	*prox;
 	vec3_t	dir;
@@ -688,20 +696,20 @@ void fire_prox (edict_t *self, vec3_t start, vec3_t aimdir, int damage_multiplie
 	VectorScale (aimdir, speed, prox->velocity);
 	VectorMA (prox->velocity, 200 + crandom() * 10.0, up, prox->velocity);
 	VectorMA (prox->velocity, crandom() * 10.0, right, prox->velocity);
-	//Knightmare- add player's base velocity to prox
+	// Knightmare- add player's base velocity to prox
 	if (add_velocity_throw->value && self->client)
 		VectorAdd (prox->velocity, self->velocity, prox->velocity);
 	else if (self->groundentity)
 		VectorAdd (prox->velocity, self->groundentity->velocity, prox->velocity);
 
 	VectorCopy (dir, prox->s.angles);
-	prox->s.angles[PITCH]-=90;
+	prox->s.angles[PITCH] -= 90;
 	prox->movetype = MOVETYPE_BOUNCE;
 	prox->solid = SOLID_BBOX;
 	prox->s.effects |= EF_GRENADE;
 	prox->clipmask = MASK_SHOT|CONTENTS_LAVA|CONTENTS_SLIME;
 	prox->s.renderfx |= RF_IR_VISIBLE;
-	//FIXME - this needs to be bigger.  Has other effects, though.  Maybe have to change origin to compensate
+	// FIXME - this needs to be bigger.  Has other effects, though.  Maybe have to change origin to compensate
 	// so it sinks in correctly.  Also in lavacheck, might have to up the distance
 	VectorSet (prox->mins, -6, -6, -6);
 	VectorSet (prox->maxs, 6, 6, 6);
@@ -709,34 +717,22 @@ void fire_prox (edict_t *self, vec3_t start, vec3_t aimdir, int damage_multiplie
 	prox->owner = self;
 	prox->teammaster = self;
 	prox->touch = prox_land;
-//	prox->nextthink = level.time + sk_prox_life->value;
+	prox->nextthink = level.time + timer;
 	prox->think = Prox_Explode;
-	prox->dmg = sk_prox_damage->value*damage_multiplier;
+//	prox->dmg = sk_prox_damage->value * damage_multiplier;
+	prox->dmg = damage * damage_multiplier;	// Knightmare- use damage param
+	prox->count = damage_multiplier;		// Knightmare- store damage_multiplier param
+	prox->dmg_radius = damage_radius;		// Knightmare- use damage_radius param
+	prox->max_health = health;				// Knightmare- use health param
+	prox->delay = timer;					// Knightmare- store timer param
 	prox->classname = "prox";
 	prox->class_id = ENTITY_MINE_PROX;
 	prox->svflags |= SVF_DAMAGEABLE;
 	prox->flags |= FL_MECHANICAL;
 
-	switch (damage_multiplier)
-	{
-	case 1:
-		prox->nextthink = level.time + sk_prox_life->value;
-		break;
-	case 2:
-		prox->nextthink = level.time + sk_prox_life->value;
-		break;
-	case 4:
-		prox->nextthink = level.time + sk_prox_life->value;
-		break;
-	case 8:
-		prox->nextthink = level.time + sk_prox_life->value;
-		break;
-	default:
-//		if ((g_showlogic) && (g_showlogic->value))
-//			gi.dprintf ("prox with unknown multiplier %d!\n", damage_multiplier);
-		prox->nextthink = level.time + sk_prox_life->value;
-		break;
-	}
+	// Knightmare- mark monster-fired prox mines for avoidance
+	if (self->svflags & SVF_MONSTER)
+		Grenade_Add_To_Chain (prox);
 
 	gi.linkentity (prox);
 }
@@ -764,7 +760,7 @@ void prox_delayed_start (edict_t *prox)
 	{
 		VectorScale(prox->movedir,prox->moveinfo.speed,prox->velocity);
 		prox->movetype  = MOVETYPE_BOUNCE;
-		prox->nextthink = level.time + sk_prox_life->value;
+		prox->nextthink = level.time + prox->delay;	// sk_prox_life->value	// Knightmare- use stored timer
 		prox->think = Prox_Explode;
 		gi.linkentity(prox);
 	}
@@ -794,7 +790,7 @@ void SP_prox (edict_t *prox)
 	else
 	{
 		prox->movetype  = MOVETYPE_BOUNCE;
-		prox->nextthink = level.time + sk_prox_life->value;
+		prox->nextthink = level.time + prox->delay;	// sk_prox_life->value	// Knightmare- use stored timer
 		prox->think = Prox_Explode;
 	}
 	gi.linkentity (prox);
@@ -2269,7 +2265,7 @@ void fire_tesla (edict_t *self, vec3_t start, vec3_t aimdir, int damage_multipli
 	VectorScale (aimdir, speed, tesla->velocity);
 	VectorMA (tesla->velocity, 200 + crandom() * 10.0, up, tesla->velocity);
 	VectorMA (tesla->velocity, crandom() * 10.0, right, tesla->velocity);
-	//Knightmare- add player's base velocity to thrown tesla
+	// Knightmare- add player's base velocity to thrown tesla
 	if (add_velocity_throw->value && self->client)
 		VectorAdd (tesla->velocity, self->velocity, tesla->velocity);
 	else if (self->groundentity)

@@ -1347,7 +1347,7 @@ edict_t *CheckForBadArea(edict_t *ent)
 
 #define TESLA_DAMAGE_RADIUS		128
 
-qboolean MarkTeslaArea(edict_t *self, edict_t *tesla)
+qboolean MarkTeslaArea (edict_t *self, edict_t *tesla)
 {
 	vec3_t	mins, maxs;
 	edict_t *e;
@@ -1367,7 +1367,7 @@ qboolean MarkTeslaArea(edict_t *self, edict_t *tesla)
 		tail = tail->teamchain;
 		if (!strcmp(e->classname, "bad_area"))
 		{
-//			gi.dprintf("tesla already has a bad area marked\n");
+		//	gi.dprintf("tesla already has a bad area marked\n");
 			return false;
 		}
 		e = e->teamchain;
@@ -1380,8 +1380,8 @@ qboolean MarkTeslaArea(edict_t *self, edict_t *tesla)
 
 		trigger = tesla->teamchain;
 
-//		VectorAdd (trigger->s.origin, trigger->mins, mins);
-//		VectorAdd (trigger->s.origin, trigger->maxs, maxs);
+	//	VectorAdd (trigger->s.origin, trigger->mins, mins);
+	//	VectorAdd (trigger->s.origin, trigger->maxs, maxs);
 		VectorCopy(trigger->absmin, mins);
 		VectorCopy(trigger->absmax, maxs);
 
@@ -1397,17 +1397,18 @@ qboolean MarkTeslaArea(edict_t *self, edict_t *tesla)
 		VectorSet (mins, -TESLA_DAMAGE_RADIUS, -TESLA_DAMAGE_RADIUS, tesla->mins[2]);
 		VectorSet (maxs, TESLA_DAMAGE_RADIUS, TESLA_DAMAGE_RADIUS, TESLA_DAMAGE_RADIUS);
 
-		area = SpawnBadArea(mins, maxs, 30, tesla);
+		area = SpawnBadArea (mins, maxs, 30, tesla);
 	}
 
 	// if we spawned a bad area, then link it to the tesla
 	if (area)
 	{
-//		gi.dprintf("bad area marker spawned and linked to tesla\n");
+	//	gi.dprintf("bad area marker spawned and linked to tesla\n");
 		tail->teamchain = area;
 	}
 	return true;
 }
+
 
 // predictive calculator
 // target is who you want to shoot

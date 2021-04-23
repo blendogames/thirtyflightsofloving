@@ -33,7 +33,8 @@ static int	daed_sound_search2;
 void hover_sight (edict_t *self, edict_t *other)
 {
 	// PMM - daedalus sounds
-	if (strcmp(self->classname, "monster_daedalus"))
+//	if (strcmp(self->classname, "monster_daedalus"))
+	if ( !(self->moreflags & FL2_COMMANDER) )
 		gi.sound (self, CHAN_VOICE, sound_sight, 1, ATTN_NORM, 0);
 	else
 		gi.sound (self, CHAN_VOICE, daed_sound_sight, 1, ATTN_NORM, 0);
@@ -42,7 +43,8 @@ void hover_sight (edict_t *self, edict_t *other)
 void hover_search (edict_t *self)
 {
 	// PMM - daedalus sounds
-	if (strcmp(self->classname, "monster_daedalus"))
+//	if (strcmp(self->classname, "monster_daedalus"))
+	if ( !(self->moreflags & FL2_COMMANDER) )
 	{
 		if (random() < 0.5)
 			gi.sound (self, CHAN_VOICE, sound_search1, 1, ATTN_NORM, 0);
@@ -486,7 +488,7 @@ void hover_fire_blaster (edict_t *self)
 	vec3_t	dir;
 	int		effect;
 
-	if(!self->enemy || !self->enemy->inuse)		//PGM
+	if (!self->enemy || !self->enemy->inuse)		//PGM
 		return;									//PGM
 
 	if (self->s.frame == FRAME_attak104)
@@ -501,7 +503,7 @@ void hover_fire_blaster (edict_t *self)
 	end[2] += self->enemy->viewheight;
 
 	// Lazarus fog reduction of accuracy
-	if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+	if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 	{
 		end[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 		end[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -510,7 +512,8 @@ void hover_fire_blaster (edict_t *self)
 
 	VectorSubtract (end, start, dir);
 //PGM	- daedalus fires blaster2
-	if (strcmp(self->classname, "monster_daedalus") == 0)
+//	if (strcmp(self->classname, "monster_daedalus") == 0)
+	if (self->moreflags & FL2_COMMANDER)
 	//	monster_fire_blaster (self, start, dir, self->dmg, 1000, MZ2_DAEDALUS_BLASTER, EF_BLASTER|EF_TRACKER, BLASTER_GREEN);
 		monster_fire_blaster2 (self, start, dir, self->dmg, 1000, MZ2_DAEDALUS_BLASTER, EF_BLASTER);
 		// fixme - different muzzle flash
@@ -558,7 +561,8 @@ void hover_attack(edict_t *self)
 	else
 		chance = 1.0 - (0.5/(float)(skill->value));
 
-	if (strcmp(self->classname, "monster_daedalus") == 0)
+//	if (strcmp(self->classname, "monster_daedalus") == 0)
+	if (self->moreflags & FL2_COMMANDER)
 		chance += 0.1;
 
 	if (random() > chance)
@@ -600,7 +604,8 @@ void hover_pain (edict_t *self, edict_t *other, float kick, int damage)
 		if (random() < 0.5)
 		{
 			// PMM - daedalus sounds
-			if (strcmp(self->classname, "monster_daedalus"))
+		//	if (strcmp(self->classname, "monster_daedalus"))
+			if ( !(self->moreflags & FL2_COMMANDER) )
 				gi.sound (self, CHAN_VOICE, sound_pain1, 1, ATTN_NORM, 0);
 			else
 				gi.sound (self, CHAN_VOICE, daed_sound_pain1, 1, ATTN_NORM, 0);
@@ -609,7 +614,8 @@ void hover_pain (edict_t *self, edict_t *other, float kick, int damage)
 		else
 		{
 			// PMM - daedalus sounds
-			if (strcmp(self->classname, "monster_daedalus"))
+		//	if (strcmp(self->classname, "monster_daedalus"))
+			if ( !(self->moreflags & FL2_COMMANDER) )
 				gi.sound (self, CHAN_VOICE, sound_pain2, 1, ATTN_NORM, 0);
 			else
 				gi.sound (self, CHAN_VOICE, daed_sound_pain2, 1, ATTN_NORM, 0);
@@ -623,7 +629,8 @@ void hover_pain (edict_t *self, edict_t *other, float kick, int damage)
 		if (random() < (0.45 - (0.1 * skill->value)))
 		{
 			// PMM - daedalus sounds
-			if (strcmp(self->classname, "monster_daedalus"))
+		//	if (strcmp(self->classname, "monster_daedalus"))
+			if ( !(self->moreflags & FL2_COMMANDER) )
 				gi.sound (self, CHAN_VOICE, sound_pain1, 1, ATTN_NORM, 0);
 			else
 				gi.sound (self, CHAN_VOICE, daed_sound_pain1, 1, ATTN_NORM, 0);
@@ -632,7 +639,8 @@ void hover_pain (edict_t *self, edict_t *other, float kick, int damage)
 		else
 		{
 			// PMM - daedalus sounds
-			if (strcmp(self->classname, "monster_daedalus"))
+		//	if (strcmp(self->classname, "monster_daedalus"))
+			if ( !(self->moreflags & FL2_COMMANDER) )
 				gi.sound (self, CHAN_VOICE, sound_pain2, 1, ATTN_NORM, 0);
 			else
 				gi.sound (self, CHAN_VOICE, daed_sound_pain2, 1, ATTN_NORM, 0);
@@ -714,7 +722,8 @@ void hover_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 
 // regular death
 	// PMM - daedalus sounds
-	if (strcmp(self->classname, "monster_daedalus"))
+//	if (strcmp(self->classname, "monster_daedalus"))
+	if ( !(self->moreflags & FL2_COMMANDER) )
 	{
 		if (random() < 0.5)
 			gi.sound (self, CHAN_VOICE, sound_death1, 1, ATTN_NORM, 0);
@@ -737,7 +746,7 @@ void hover_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 //PGM
 qboolean hover_blocked (edict_t *self, float dist)
 {
-	if(blocked_checkshot (self, 0.25 + (0.05 * skill->value) ))
+	if (blocked_checkshot (self, 0.25 + (0.05 * skill->value) ))
 		return true;
 
 	return false;
@@ -763,7 +772,10 @@ void SP_monster_hover (edict_t *self)
 
 	// Lazarus: special purpose skins
 	if (strcmp(self->classname, "monster_daedalus") == 0)
+	{
 		self->s.skinnum = 2;
+		self->moreflags |= FL2_COMMANDER;
+	}
 	if ( self->style )
 	{
 		PatchMonsterModel("models/monsters/hover/tris.md2");
@@ -772,7 +784,7 @@ void SP_monster_hover (edict_t *self)
 
 	self->s.modelindex = gi.modelindex("models/monsters/hover/tris.md2");
 
-	//Knightmare- smaller bounding box for Pierre replacement in Coconut Monkey level 3
+	// Knightmare- smaller bounding box for Pierre replacement in Coconut Monkey level 3
 	if (Q_stricmp(level.mapname, "cm3pt3") == 0
 		&& !strcmp(self->combattarget, "showdown"))
 	{
@@ -785,7 +797,7 @@ void SP_monster_hover (edict_t *self)
 		VectorSet (self->maxs, 24, 24, 32);
 	}
 
-	if(!self->gib_health)
+	if (!self->gib_health)
 		self->gib_health = -100;
 
 	self->pain = hover_pain;
@@ -806,15 +818,18 @@ void SP_monster_hover (edict_t *self)
 //PGM
 	if (strcmp(self->classname, "monster_daedalus") == 0)
 	{
-		if(!self->health)
+	//	self->s.skinnum = 2;
+		if (!self->health)
 			self->health = 450;
-		if(!self->mass)
+		if (!self->mass)
 			self->mass = 225;
 		self->yaw_speed = 25;
 		if (!self->dmg)
 			self->dmg = 2;
+
 		self->monsterinfo.power_armor_type = POWER_ARMOR_SCREEN;
 		self->monsterinfo.power_armor_power = 100;
+
 		// PMM - daedalus sounds
 		self->s.sound = gi.soundindex ("daedalus/daedidle1.wav");
 		daed_sound_pain1 = gi.soundindex ("daedalus/daedpain1.wav");	
@@ -828,14 +843,14 @@ void SP_monster_hover (edict_t *self)
 		// Knightmare- precache blaster bolt
 		gi.modelindex ("models/proj/laser2/tris.md2");
 		// pmm
-		self->common_name = "Daedalus"; // Knightmare
+		self->common_name = "Daedalus"; // Knightmare added
 		self->class_id = ENTITY_MONSTER_DAEDALUS;
 	}
 	else
 	{
-		if(!self->health)
+		if (!self->health)
 			self->health = 240;
-		if(!self->mass)
+		if (!self->mass)
 			self->mass = 150;
 		if (!self->dmg)
 			self->dmg = 1;
@@ -849,13 +864,13 @@ void SP_monster_hover (edict_t *self)
 		gi.soundindex ("hover/hovatck1.wav");	
 
 		self->s.sound = gi.soundindex ("hover/hovidle1.wav");
-		self->common_name = "Icarus"; // Knightmare
+		self->common_name = "Icarus"; // Knightmare added
 		self->class_id = ENTITY_MONSTER_HOVER;
 	}
 //PGM
 
 	// Lazarus
-	if(self->powerarmor)
+	if (self->powerarmor)
 	{
 		if (self->powerarmortype == 1)
 			self->monsterinfo.power_armor_type = POWER_ARMOR_SCREEN;
@@ -870,9 +885,4 @@ void SP_monster_hover (edict_t *self)
 	self->monsterinfo.scale = MODEL_SCALE;
 
 	flymonster_start (self);
-
-//PGM
-//	if (strcmp(self->classname, "monster_daedalus") == 0)
-//		self->s.skinnum = 2;
-//PGM
 }

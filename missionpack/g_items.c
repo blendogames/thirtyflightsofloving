@@ -2825,7 +2825,7 @@ gitem_t	itemlist[] =
 		WEAP_GRENADES,
 		NULL,
 		AMMO_GRENADES,
-		"weapons/hgrent1a.wav weapons/hgrena1b.wav weapons/hgrenc1b.wav weapons/hgrenb1a.wav weapons/hgrenb2a.wav" // precache
+		"models/objects/grenade2/tris.md2 weapons/hgrent1a.wav weapons/hgrena1b.wav weapons/hgrenc1b.wav weapons/hgrenb1a.wav weapons/hgrenb2a.wav" // precache
 	},
 
 // 16

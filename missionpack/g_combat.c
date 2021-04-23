@@ -560,7 +560,7 @@ void M_ReactToDamage (edict_t *targ, edict_t *attacker, edict_t *inflictor)
 	// also, target the tesla if it's a "new" tesla
 	if ((inflictor) && (!strcmp(inflictor->classname, "tesla")))
 	{
-		new_tesla = MarkTeslaArea(targ, inflictor);
+		new_tesla = MarkTeslaArea (targ, inflictor);
 		if (new_tesla)
 			TargetTesla (targ, inflictor);
 		return;
@@ -978,7 +978,7 @@ void T_Damage (edict_t *in_targ, edict_t *inflictor, edict_t *in_attacker, vec3_
 	}
 	// If targ is a remote turret_driver and attacker is a player, replace turret_driver
 	// with normal infantry dude and turn TRACK off on corresponding turret_breach
-	if ( targ->classname && !Q_stricmp(targ->classname,"turret_driver") && 
+	if ( targ->classname && !Q_stricmp(targ->classname, "turret_driver") && 
 		(targ->spawnflags & 1) && (attacker->client) )
 	{
 		edict_t	*monster;
@@ -1076,9 +1076,9 @@ void T_Damage (edict_t *in_targ, edict_t *inflictor, edict_t *in_attacker, vec3_
 	// Shamblers take half damage from explosives
 	if ( (targ->svflags & SVF_MONSTER) &&
 		( (Q_stricmp(targ->classname,"q1_monster_shambler") == 0) || (Q_stricmp(targ->classname,"monster_q1_shambler") == 0) ) &&
-		( (Q_stricmp(inflictor->classname, "grenade") == 0) || (Q_stricmp(inflictor->classname, "prox") == 0) ||
-		(Q_stricmp(inflictor->classname, "plasma") == 0) ||
-		(Q_stricmp(inflictor->classname, "rocket") == 0) || (Q_stricmp(inflictor->classname, "homing rocket") == 0) ) )
+		( (Q_stricmp(inflictor->classname, "grenade") == 0) || (Q_stricmp(inflictor->classname, "hgrenade") == 0)
+		|| (Q_stricmp(inflictor->classname, "prox") == 0) || (Q_stricmp(inflictor->classname, "plasma") == 0)
+		|| (Q_stricmp(inflictor->classname, "rocket") == 0) || (Q_stricmp(inflictor->classname, "homing rocket") == 0) ) )
 		damage = (int)((float)damage * 0.5f);
 
 	// Skid - q1 monsters don't go flying

@@ -135,6 +135,7 @@
 #define	FL2_TURRET_DOUBLE_ALT	0x00000002	// this turret alternates firing its barrels (style is set)
 #define	FL2_TURRET_DOUBLE_ALT_FIRING	0x00000004	// secondary barrel in use for alternate firing
 #define FL2_CRUCIFIED			0x00000008	// insane is crucified 
+#define FL2_COMMANDER			0x00000008	// Gunner Commander internal flag
 #define FL2_WEAPON_ALT			0x00000010	// plasma guard has spread mode
 #define FL2_DO_NOT_REFLECT		0x00000020	// do not reflect this entity
 
@@ -1380,7 +1381,11 @@ void monster_fire_tracker (edict_t *self, vec3_t start, vec3_t dir, int damage, 
 void monster_fire_heat (edict_t *self, vec3_t start, vec3_t dir, vec3_t offset, int damage, int kick, int flashtype);
 // ROGUE
 
-void monster_fire_plasma_rifle (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int flashtype, qboolean spread);	// SKWiD MOD
+// Knightmare added
+void monster_fire_flechette (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage, int flashtype);
+void monster_fire_prox (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int damage_multiplier, int speed, int health, float timer, float damage_radius, int flashtype);
+// SKWiD MOD
+void monster_fire_plasma_rifle (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int flashtype, qboolean spread);
 
 void M_droptofloor (edict_t *ent);
 void monster_think (edict_t *self);
@@ -1501,6 +1506,8 @@ void Trap_Explode (edict_t *ent);
 // Lazarus
 qboolean AimGrenade (edict_t *launcher, vec3_t start, vec3_t target, vec_t speed, vec3_t aim);
 void Grenade_Evade (edict_t *monster);
+void Grenade_Add_To_Chain (edict_t *grenade);
+void Grenade_Remove_From_Chain (edict_t *grenade);
 
 //
 // g_weapon_q1.c
@@ -1732,7 +1739,8 @@ void kick_attack (edict_t *ent);
 //
 //extern float nuke_framenum;
 void fire_flechette (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage);
-void fire_prox (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed);		
+//void fire_prox (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed);		
+void fire_prox (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int damage_multiplier, int speed, int health, float timer, float damage_radius);
 void fire_nuke (edict_t *self, vec3_t start, vec3_t aimdir, int speed);		
 void fire_nbomb (edict_t *self, vec3_t start, vec3_t aimdir, int speed);		
 void fire_flame (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed);

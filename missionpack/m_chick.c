@@ -1054,6 +1054,6 @@ void SP_monster_chick (edict_t *self)
 */
 void SP_monster_chick_heat (edict_t *self)
 {
-	self->spawnflags |= SF_MONSTER_SPECIAL; //Knightmare- homing rockets flag
+	self->spawnflags |= SF_MONSTER_SPECIAL; // Knightmare- homing rockets flag
 	SP_monster_chick (self);
 }

@@ -586,6 +586,9 @@ spawn_t	spawns[] = {
 	{"misc_seat", SP_misc_seat},
 	// end Zaero
 
+	// Knightmare- added Gunner Commander
+	{"monster_gunner_commander", SP_monster_gunner},
+
 	// Knightmare- the dog from Coconut Monkey 3
 	{"monster_dog", SP_monster_dog},
 	// Knightmare- the vulture from Coconut Monkey 2
@@ -881,6 +884,9 @@ void ED_CallSpawn (edict_t *ent)
 			// don't spawn another medic commander from medic commander
 			&& !(ent->monsterinfo.monsterflags & MFL_DO_NOT_COUNT))
 			ent->classname = "monster_medic_commander";
+		// gunner
+		if ( !strcmp(ent->classname, "monster_gunner") && (random() < ((skill->value + 1.0f) * 0.15f)) )
+			ent->classname = "monster_gunner_commander";
 	}
 
 	// LM Escape monster replacement

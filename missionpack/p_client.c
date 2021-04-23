@@ -695,7 +695,8 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 					message = "was pumped full of lead by an";
 			}
 			// Gunner
-			else if (!strcmp(attacker->classname, "monster_gunner"))
+			else if (!strcmp(attacker->classname, "monster_gunner")
+				|| !strcmp(attacker->classname, "monster_gunner_commander") )
 			{
 				if (mod == MOD_GRENADE) {
 					message = "was popped by a";
@@ -704,6 +705,17 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 				else if (mod == MOD_G_SPLASH) {
 					message = "was shredded by a";
 					message2 = "'s shrapnel";
+				}
+				else if (mod == MOD_PROX) {
+					message = "got too close to a";
+					message2 = "'s proximity mine";
+				}
+				else if (mod == MOD_ETF_RIFLE) {
+					message = "was perforated by a";
+				}
+				else if (mod == MOD_ETF_SPLASH) {
+					message = "was torn up by a";
+					message2 = "'s explosive flechettes";
 				}
 				else
 					message = "was machinegunned by a";

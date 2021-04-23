@@ -524,7 +524,7 @@ qboolean Pickup_AmmogenPack (edict_t *ent, edict_t *other)
 	if (!ent || !other)
 		return false;
 
-	//Knightmare- override ammo pickup values with cvars
+	// Knightmare- override ammo pickup values with cvars
 	SetAmmoPickupValues ();
 
 	item = FindItem("Bullets");
@@ -1986,7 +1986,7 @@ always owned, never in the world
 		WEAP_GRENADES,
 		NULL,
 		AMMO_GRENADES,
-/* precache */ "weapons/hgrent1a.wav weapons/hgrena1b.wav weapons/hgrenc1b.wav weapons/hgrenb1a.wav weapons/hgrenb2a.wav "
+/* precache */ "models/objects/grenade2/tris.md2 weapons/hgrent1a.wav weapons/hgrena1b.wav weapons/hgrenc1b.wav weapons/hgrenb1a.wav weapons/hgrenb2a.wav "
 	},
 
 /*QUAKED weapon_grenadelauncher (.3 .3 1) (-16 -16 -16) (16 16 16)
@@ -2974,7 +2974,7 @@ tank commander's head
 		"item_flag_team3",
 		CTFPickup_Flag,
 		NULL,
-		CTFDrop_Flag, //Should this be null if we don't want players to drop it manually?
+		CTFDrop_Flag, // Should this be null if we don't want players to drop it manually?
 		NULL,
 		"ctf/flagtk.wav",
 #ifdef KMQUAKE2_ENGINE_MOD
@@ -3000,7 +3000,7 @@ tank commander's head
 		"item_tech1",
 		CTFPickup_Tech,
 		NULL,
-		CTFDrop_Tech, //Should this be null if we don't want players to drop it manually?
+		CTFDrop_Tech, // Should this be null if we don't want players to drop it manually?
 		NULL,
 		"items/pkup.wav",
 		"models/ctf/resistance/tris.md2", 0, EF_ROTATE,
@@ -3022,7 +3022,7 @@ tank commander's head
 		"item_tech2",
 		CTFPickup_Tech,
 		NULL,
-		CTFDrop_Tech, //Should this be null if we don't want players to drop it manually?
+		CTFDrop_Tech, // Should this be null if we don't want players to drop it manually?
 		NULL,
 		"items/pkup.wav",
 		"models/ctf/strength/tris.md2", 0, EF_ROTATE,
@@ -3044,7 +3044,7 @@ tank commander's head
 		"item_tech3",
 		CTFPickup_Tech,
 		NULL,
-		CTFDrop_Tech, //Should this be null if we don't want players to drop it manually?
+		CTFDrop_Tech, // Should this be null if we don't want players to drop it manually?
 		NULL,
 		"items/pkup.wav",
 		"models/ctf/haste/tris.md2", 0, EF_ROTATE,
@@ -3066,7 +3066,7 @@ tank commander's head
 		"item_tech4",
 		CTFPickup_Tech,
 		NULL,
-		CTFDrop_Tech, //Should this be null if we don't want players to drop it manually?
+		CTFDrop_Tech, // Should this be null if we don't want players to drop it manually?
 		NULL,
 		"items/pkup.wav",
 		"models/ctf/regeneration/tris.md2", 0, EF_ROTATE,
@@ -3088,7 +3088,7 @@ tank commander's head
 		"item_tech5",
 		CTFPickup_Tech,
 		NULL,
-		CTFDrop_Tech, //Should this be null if we don't want players to drop it manually?
+		CTFDrop_Tech, // Should this be null if we don't want players to drop it manually?
 		NULL,
 		"items/pkup.wav",
 		"models/ctf/vampire/tris.md2", 0, EF_ROTATE,
@@ -3110,7 +3110,7 @@ tank commander's head
 		"item_tech6",
 		CTFPickup_Tech,
 		NULL,
-		CTFDrop_Tech, //Should this be null if we don't want players to drop it manually?
+		CTFDrop_Tech, // Should this be null if we don't want players to drop it manually?
 		NULL,
 		"items/pkup.wav",
 		"models/ctf/ammogen/tris.md2", 0, EF_ROTATE,
@@ -3127,7 +3127,7 @@ tank commander's head
 /* precache */ "ctf/tech6.wav"
 	},
 
-/* Ammogen-spawned Backpack*/
+/* Ammogen-spawned Backpack */
 	{
 		"item_ammogen_pack",
 		Pickup_AmmogenPack,
