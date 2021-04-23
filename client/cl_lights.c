@@ -278,6 +278,14 @@ void CL_ParseMuzzleFlash (void)
 		Com_Error (ERR_DROP, "CL_ParseMuzzleFlash: bad entity");
 
 	weapon = MSG_ReadByte (&net_message);
+
+	// TODO: Use index 127 as a flag to read a short for the extended index
+/*	if ( (weapon & MZ_SEND_SHORT) ==  MZ_SEND_SHORT) {
+		weapon = (unsigned short)MSG_ReadShort (&net_message);
+		silenced = weapon & MZ_SILENCED_HI;
+		weapon &= ~MZ_SILENCED_HI;
+	} 
+	else { */
 	silenced = weapon & MZ_SILENCED;
 	weapon &= ~MZ_SILENCED;
 
@@ -492,6 +500,10 @@ void CL_ParseMuzzleFlash2 (void)
 		Com_Error (ERR_DROP, "CL_ParseMuzzleFlash2: bad entity");
 
 	flash_number = MSG_ReadByte (&net_message);
+
+	// TODO: Use index 255 as a flag to read a short for the real extended index
+/*	if (flash_number == MZ2_SEND_SHORT)
+		flash_number = (unsigned short)MSG_ReadShort (&net_message); */
 
 	// locate the origin
 	AngleVectors (cl_entities[ent].current.angles, forward, right, NULL);
@@ -750,6 +762,7 @@ void CL_ParseMuzzleFlash2 (void)
 	case MZ2_JORG_BFG_1:
 		dl->color[0] = 0.5;dl->color[1] = 1 ;dl->color[2] = 0.5;
 		break;
+// --- Xian's shit ends ---
 
 	case MZ2_BOSS2_MACHINEGUN_R1:
 	case MZ2_BOSS2_MACHINEGUN_R2:
@@ -837,7 +850,39 @@ void CL_ParseMuzzleFlash2 (void)
 // ROGUE
 // ======
 
-// --- Xian's shit ends ---
+// Knightmare added
+	case MZ2_SOLDIER_HYPERBLASTER_1:
+	case MZ2_SOLDIER_HYPERBLASTER_2:
+	case MZ2_SOLDIER_HYPERBLASTER_3:
+	case MZ2_SOLDIER_HYPERBLASTER_4:
+	case MZ2_SOLDIER_HYPERBLASTER_5:
+	case MZ2_SOLDIER_HYPERBLASTER_6:
+	case MZ2_SOLDIER_HYPERBLASTER_7:
+	case MZ2_SOLDIER_HYPERBLASTER_8:
+		dl->color[0] = 0.15;dl->color[1] = 0.15;dl->color[2] = 1;
+		S_StartSound (NULL, ent, CHAN_WEAPON, S_RegisterSound("weapons/hyprbf1a.wav"), 1, ATTN_NORM, 0);
+		break;
+
+	case MZ2_GLADBETA_PHALANX_1:
+		dl->color[0] = 1;dl->color[1] = 0.5; dl->color[2] = 0.5;
+		break;
+
+	case MZ2_TURRET_RAILGUN_1:
+		dl->color[0] = 0.5;dl->color[1] = 0.5;dl->color[2] = 1.0;
+		break;
+
+	case MZ2_GUNNER_ETF_RIFLE_1:
+	case MZ2_GUNNER_ETF_RIFLE_2:
+	case MZ2_GUNNER_ETF_RIFLE_3:
+	case MZ2_GUNNER_ETF_RIFLE_4:
+	case MZ2_GUNNER_ETF_RIFLE_5:
+	case MZ2_GUNNER_ETF_RIFLE_6:
+	case MZ2_GUNNER_ETF_RIFLE_7:
+	case MZ2_GUNNER_ETF_RIFLE_8:
+		dl->color[0] = 0.9;dl->color[1] = 0.7;dl->color[2] = 0;
+		S_StartSound (NULL, ent, CHAN_WEAPON, S_RegisterSound("weapons/nail1.wav"), 1, ATTN_NORM, 0);
+		break;
+// end Knightmare
 
 	}
 }

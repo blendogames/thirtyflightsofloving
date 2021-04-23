@@ -532,13 +532,16 @@ CMod_LoadEntityString
 */
 void CMod_LoadEntityString (lump_t *l, char *name)
 {
+	int		nameLen;
+
+	nameLen = (int)strlen(name);
+
 	// Knightmare- .ent file support
-//	if (sv_entfile->value)
-	if (sv_entfile->integer)
+	if ( (nameLen >= 5) && sv_entfile->integer )
 	{
 		char	s[MAX_QPATH];
 		char	*buffer = NULL;
-		int		nameLen, bufLen;
+		int		bufLen;
 
 		nameLen = (int)strlen(name);
 		Q_strncpyz (s, sizeof(s), name);

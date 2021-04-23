@@ -338,7 +338,11 @@ void Turret_Railgun_Fire (edict_t *self)
 	VectorSubtract (self->aim_point, start, dir);
 	VectorNormalize(dir);
 
+#ifdef KMQUAKE2_ENGINE_MOD
+	monster_fire_railgun (self, start, dir, 50, 0, MZ2_TURRET_RAILGUN_1);	// new muzzleflash for KMQ2
+#else
 	monster_fire_railgun (self, start, dir, 50, 0, MZ2_GLADIATOR_RAILGUN_1);
+#endif	// KMQUAKE2_ENGINE_MOD
 
 	self->think = monster_think;
 	self->nextthink = level.time + FRAMETIME;
@@ -470,10 +474,10 @@ void TurretFire (edict_t *self)
 		if (trace.ent == self->enemy || trace.ent == world || (self->monsterinfo.visibility < FOG_CANSEEGOOD))
 		{
 			if (self->spawnflags & SPAWN_BLASTER)
-				monster_fire_blaster(self, start, dir, 20, rocketSpeed, MZ2_TURRET_BLASTER, EF_BLASTER, BLASTER_ORANGE);
-			else if (self->spawnflags & SPAWN_RAILGUN && self->last_fire_time <= level.time) //was SPAWN_MACHINEGUN
+				monster_fire_blaster (self, start, dir, 20, rocketSpeed, MZ2_TURRET_BLASTER, EF_BLASTER, BLASTER_ORANGE);
+			else if (self->spawnflags & SPAWN_RAILGUN && self->last_fire_time <= level.time)	// was SPAWN_MACHINEGUN
 			{
-				//monster_fire_bullet (self, start, dir, TURRET_BULLET_DAMAGE, 0, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, MZ2_TURRET_MACHINEGUN);
+			//	monster_fire_bullet (self, start, dir, TURRET_BULLET_DAMAGE, 0, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, MZ2_TURRET_MACHINEGUN);
 				gi.sound (self, CHAN_WEAPON, gi.soundindex ("gladiator/railgun.wav"), 1, ATTN_NORM, 0);
 				self->think = Turret_Railgun_Aim;
 				self->nextthink = level.time + 2 * FRAMETIME;

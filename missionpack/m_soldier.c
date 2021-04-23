@@ -494,6 +494,9 @@ void soldier_pain (edict_t *self, edict_t *other, float kick, int damage)
 static int blaster_flash [] = {MZ2_SOLDIER_BLASTER_1, MZ2_SOLDIER_BLASTER_2, MZ2_SOLDIER_BLASTER_3, MZ2_SOLDIER_BLASTER_4, MZ2_SOLDIER_BLASTER_5, MZ2_SOLDIER_BLASTER_6, MZ2_SOLDIER_BLASTER_7, MZ2_SOLDIER_BLASTER_8};
 static int shotgun_flash [] = {MZ2_SOLDIER_SHOTGUN_1, MZ2_SOLDIER_SHOTGUN_2, MZ2_SOLDIER_SHOTGUN_3, MZ2_SOLDIER_SHOTGUN_4, MZ2_SOLDIER_SHOTGUN_5, MZ2_SOLDIER_SHOTGUN_6, MZ2_SOLDIER_SHOTGUN_7, MZ2_SOLDIER_SHOTGUN_8};
 static int machinegun_flash [] = {MZ2_SOLDIER_MACHINEGUN_1, MZ2_SOLDIER_MACHINEGUN_2, MZ2_SOLDIER_MACHINEGUN_3, MZ2_SOLDIER_MACHINEGUN_4, MZ2_SOLDIER_MACHINEGUN_5, MZ2_SOLDIER_MACHINEGUN_6, MZ2_SOLDIER_MACHINEGUN_7, MZ2_SOLDIER_MACHINEGUN_8};
+#ifdef KMQUAKE2_ENGINE_MOD
+static int hyperblaster_flash [] = {MZ2_SOLDIER_HYPERBLASTER_1, MZ2_SOLDIER_HYPERBLASTER_2, MZ2_SOLDIER_HYPERBLASTER_3, MZ2_SOLDIER_HYPERBLASTER_4, MZ2_SOLDIER_HYPERBLASTER_5, MZ2_SOLDIER_HYPERBLASTER_6, MZ2_SOLDIER_HYPERBLASTER_7, MZ2_SOLDIER_HYPERBLASTER_8};
+#endif	// KMQUAKE2_ENGINE_MOD
 
 //void soldier_fire (edict_t *self, int flash_number)  PMM
 void soldier_fire (edict_t *self, int in_flash_number)
@@ -2098,8 +2101,12 @@ void soldierh_fire (edict_t *self, int flash_number)
 		flash_index = blaster_flash[flash_number]; // ripper
 //	else if ((self->s.skinnum % 6) < 4)
 	else if (self->skinnum < 4)
+#ifdef KMQUAKE2_ENGINE_MOD
+		flash_index = hyperblaster_flash[flash_number]; // hyperblaster
+#else
 		flash_index = blaster_flash[flash_number]; // hyperblaster
-	else
+#endif	// KMQUAKE2_ENGINE_MOD
+	else // if (self->skinnum < 6)
 		flash_index = machinegun_flash[flash_number]; // laserbeam
 
 	AngleVectors (self->s.angles, forward, right, NULL);
@@ -2151,10 +2158,11 @@ void soldierh_fire (edict_t *self, int flash_number)
 //	else if ((self->s.skinnum % 6) <= 3)
 	else if (self->skinnum <= 3)
 	{
-	//	monster_fire_blaster (self, start, aim, 4, 600, MZ_BLUEHYPERBLASTER, EF_BLUEHYPERBLASTER, BLASTER_BLUE);
-		monster_fire_blueblaster (self, start, aim, 4, 600, MZ_BLUEHYPERBLASTER, EF_BLUEHYPERBLASTER);
+	//	monster_fire_blaster (self, start, aim, 4, 600, flash_index, EF_BLUEHYPERBLASTER, BLASTER_BLUE);
+	//	monster_fire_blueblaster (self, start, aim, 4, 600, MZ_BLUEHYPERBLASTER, EF_BLUEHYPERBLASTER);
+		monster_fire_blueblaster (self, start, aim, 4, 600, flash_index, EF_BLUEHYPERBLASTER);	// Knightmare- use an actual monster muzzleflash here!
 	}
-	else
+	else // if (self->skinnum <= 5)
 	{
 		if (!(self->monsterinfo.aiflags & AI_HOLD_FRAME))
 			self->monsterinfo.pausetime = level.time + (3 + rand() % 8) * FRAMETIME;
@@ -3434,7 +3442,13 @@ void SP_monster_soldier_hypergun (edict_t *self)
 	gi.modelindex ("models/objects/blaser/tris.md2");
 	sound_pain = gi.soundindex ("soldier/solpain1.wav");
 	sound_death = gi.soundindex ("soldier/soldeth1.wav");
-	gi.soundindex ("soldier/solatck1.wav");
+	gi.soundindex ("weapons/hyprbl1a.wav");	// Knightmare- missing precache
+	gi.soundindex ("weapons/hyprbd1a.wav");	// Knightmare- missing precache
+#ifdef KMQUAKE2_ENGINE_MOD
+	gi.soundindex ("weapons/hyprbf1a.wav");	// Knightmare- used by new muzzleflash
+#else
+	gi.soundindex ("soldier/solatck2.wav");	// Knightmare- used by monster muzzle flash
+#endif
 
 	self->common_name = "Hyperblaster Guard";
 	self->class_id = ENTITY_MONSTER_SOLDIER_HYPERGUN;
@@ -3447,6 +3461,7 @@ void SP_monster_soldier_hypergun (edict_t *self)
 
 	// PMM - blindfire
 	self->monsterinfo.blindfire = true;
+
 	// Knightmare- call generic spawn function LAST, because it
 	// calls walkmonster_start, which the health and everything else need to be set up for
 	SP_monster_soldier_h (self);
@@ -3467,7 +3482,7 @@ void SP_monster_soldier_lasergun (edict_t *self)
 
 	sound_pain_ss = gi.soundindex ("soldier/solpain3.wav");
 	sound_death_ss = gi.soundindex ("soldier/soldeth3.wav");
-	gi.soundindex ("soldier/solatck3.wav");
+//	gi.soundindex ("soldier/solatck3.wav");	// Knightmare- not used
 
 	self->common_name = "Laser Guard";
 	self->class_id = ENTITY_MONSTER_SOLDIER_LASER;

@@ -800,13 +800,17 @@ typedef struct
 #define	MZ_NUKE2			37
 #define	MZ_NUKE4			38
 #define	MZ_NUKE8			39
+//ROGUE
 // Knightmare 1/3/2002- blue blaster and green hyperblaster
 #define	MZ_BLUEBLASTER		40
 #define	MZ_GREENHYPERBLASTER	41
 #define	MZ_REDBLASTER		42
 #define	MZ_REDHYPERBLASTER	43
+
+#define MZ_SEND_SHORT		127		// send this value as a flag to read real index as a short
+
+#define MZ_SILENCED_HI		0x8000	// bit flag ORed with one of the above numbers for short index
 // end Knightmare
-//ROGUE
 
 //
 // monster muzzle flashes
@@ -1038,12 +1042,30 @@ typedef struct
 #define	MZ2_WIDOW2_BEAM_SWEEP_9			208
 #define	MZ2_WIDOW2_BEAM_SWEEP_10		209
 #define	MZ2_WIDOW2_BEAM_SWEEP_11		210
-
 // ROGUE
 
-//Mappack - new monster firing vectors
-#define	MZ2_SUPERTANK_GRENADE_1			211
-#define	MZ2_SUPERTANK_GRENADE_2			212
+// Knightmare added
+#define	MZ2_SOLDIER_HYPERBLASTER_1		211
+#define	MZ2_SOLDIER_HYPERBLASTER_2		212
+#define	MZ2_SOLDIER_HYPERBLASTER_3		213
+#define	MZ2_SOLDIER_HYPERBLASTER_4		214
+#define	MZ2_SOLDIER_HYPERBLASTER_5		215
+#define	MZ2_SOLDIER_HYPERBLASTER_6		216
+#define	MZ2_SOLDIER_HYPERBLASTER_7		217
+#define	MZ2_SOLDIER_HYPERBLASTER_8		218
+#define	MZ2_GLADBETA_PHALANX_1			219
+#define	MZ2_TURRET_RAILGUN_1			220
+#define	MZ2_GUNNER_ETF_RIFLE_1			221
+#define	MZ2_GUNNER_ETF_RIFLE_2			222
+#define	MZ2_GUNNER_ETF_RIFLE_3			223
+#define	MZ2_GUNNER_ETF_RIFLE_4			224
+#define	MZ2_GUNNER_ETF_RIFLE_5			225
+#define	MZ2_GUNNER_ETF_RIFLE_6			226
+#define	MZ2_GUNNER_ETF_RIFLE_7			227
+#define	MZ2_GUNNER_ETF_RIFLE_8			228
+
+#define MZ2_SEND_SHORT					255		// send this value as a flag to read real index as a short
+// end Knightmare
 
 extern	vec3_t monster_flash_offset [];
 

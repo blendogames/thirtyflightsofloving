@@ -257,7 +257,7 @@ void monster_fire_blueblaster (edict_t *self, vec3_t start, vec3_t dir, int dama
 
 	gi.WriteByte (svc_muzzleflash2);
 	gi.WriteShort (self - g_edicts);
-	gi.WriteByte (MZ_BLUEHYPERBLASTER);
+	gi.WriteByte (flashtype);
 	gi.multicast (start, MULTICAST_PVS);
 }	
 
@@ -422,11 +422,11 @@ void monster_fire_phalanx (edict_t *self, vec3_t start, vec3_t dir, int damage, 
 
 	fire_phalanx_plasma (self, start, dir, damage, speed, damage_radius, radius_damage);
 
-	// Don't actually send a muzzleflash here because Xatrix forgot to add one!
-/*	gi.WriteByte (svc_muzzleflash2);
+	// Sends new MZ2_GLADBETA_PHALANX_1 for KMQ2 builds, or MZ2_GLADIATOR_RAILGUN_1 for non-KMQ2
+	gi.WriteByte (svc_muzzleflash2);
 	gi.WriteShort (self - g_edicts);
 	gi.WriteByte (flashtype);
-	gi.multicast (start, MULTICAST_PVS); */
+	gi.multicast (start, MULTICAST_PVS);
 }
 
 // ROGUE

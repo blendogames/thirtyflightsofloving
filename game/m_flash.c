@@ -487,6 +487,45 @@ vec3_t monster_flash_offset [] =
 // MZ2_WIDOW2_BEAM_SWEEP_11			210
 	58.29, 27.11, 92.00,
 
+// Knightmare added
+// MZ2_SOLDIER_HYPERBLASTER_1		211
+	10.6 * 1.2, 7.7 * 1.2, 7.8 * 1.2,
+// MZ2_SOLDIER_HYPERBLASTER_2		212
+	21.1 * 1.2, 3.6 * 1.2, 19.0 * 1.2,
+// MZ2_SOLDIER_HYPERBLASTER_3		213
+	20.8 * 1.2, 10.1 * 1.2, -2.7 * 1.2,
+// MZ2_SOLDIER_HYPERBLASTER_4		214
+	7.6 * 1.2, 9.3 * 1.2, 0.8 * 1.2,
+// MZ2_SOLDIER_HYPERBLASTER_5		215
+	30.5 * 1.2, 9.9 * 1.2, -18.7 * 1.2,
+// MZ2_SOLDIER_HYPERBLASTER_6		216
+	27.6 * 1.2, 3.4 * 1.2, -10.4 * 1.2,
+// MZ2_SOLDIER_HYPERBLASTER_7		217
+	28.9 * 1.2, 4.6 * 1.2, -8.1 * 1.2,
+// MZ2_SOLDIER_HYPERBLASTER_8		218
+	31.5 * 1.2, 9.6 * 1.2, 10.1 * 1.2,
+// MZ2_GLADBETA_PHALANX_1			219
+	30.0, 18.0, 28.0,
+// MZ2_TURRET_RAILGUN_1				220
+	16, 0, 0,
+// MZ2_GUNNER_ETF_RIFLE_1			221
+	30.1 * 1.15, 3.9 * 1.15, 19.6 * 1.15,
+// MZ2_GUNNER_ETF_RIFLE_2			222
+	29.1 * 1.15, 2.5 * 1.15, 20.7 * 1.15,
+// MZ2_GUNNER_ETF_RIFLE_3			223
+	28.2 * 1.15, 2.5 * 1.15, 22.2 * 1.15,
+// MZ2_GUNNER_ETF_RIFLE_4			224
+	28.2 * 1.15, 3.6 * 1.15, 22.0 * 1.15,
+// MZ2_GUNNER_ETF_RIFLE_5			225
+	26.9 * 1.15, 2.0 * 1.15, 23.4 * 1.15,
+// MZ2_GUNNER_ETF_RIFLE_6			226
+	26.5 * 1.15, 0.6 * 1.15, 20.8 * 1.15,
+// MZ2_GUNNER_ETF_RIFLE_7			227
+	26.9 * 1.15, 0.5 * 1.15, 21.5 * 1.15,
+// MZ2_GUNNER_ETF_RIFLE_8			228
+	29.0 * 1.15, 2.4 * 1.15, 19.5 * 1.15,
+// end Knightmare
+
 // end of table
 	0.0, 0.0, 0.0
 };

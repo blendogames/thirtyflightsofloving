@@ -169,7 +169,11 @@ void gladbGun (edict_t *self)
 	VectorSubtract (self->pos1, start, dir);
 	VectorNormalize (dir);
 
+#ifdef KMQUAKE2_ENGINE_MOD
+	monster_fire_phalanx (self, start, dir, 100, 725, 60, 60, MZ2_GLADBETA_PHALANX_1);	// new muzzleflash for KMQ2
+#else
 	monster_fire_phalanx (self, start, dir, 100, 725, 60, 60, MZ2_GLADIATOR_RAILGUN_1);
+#endif	// KMQUAKE2_ENGINE_MOD
 }
 
 void gladbGun_check (edict_t *self)
@@ -192,7 +196,7 @@ mframe_t gladb_frames_attack_gun [] =
 };
 mmove_t gladb_move_attack_gun = {FRAME_attack1, FRAME_attack9, gladb_frames_attack_gun, gladb_run};
 
-void gladb_attack(edict_t *self)
+void gladb_attack (edict_t *self)
 {
 	float	range;
 	vec3_t	v;
@@ -205,7 +209,7 @@ void gladb_attack(edict_t *self)
 
 	// charge up the railgun
 	gi.sound (self, CHAN_WEAPON, sound_gun, 1, ATTN_NORM, 0);
-	VectorCopy (self->enemy->s.origin, self->pos1);	//save for aiming the shot
+	VectorCopy (self->enemy->s.origin, self->pos1);	// save for aiming the shot
 	self->pos1[2] += self->enemy->viewheight;
 	self->monsterinfo.currentmove = &gladb_move_attack_gun;
 }

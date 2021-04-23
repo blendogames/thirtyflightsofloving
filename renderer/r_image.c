@@ -2151,9 +2151,9 @@ image_t *R_LoadPic (char *name, byte *pic, int width, int height, imagetype_t ty
 
 	// Load .pcx for size refereence, check if we have a tga/jpg/png pic
 #ifdef PNG_SUPPORT
-	if ( ((type == it_pic) || (type == it_font)) && (!strcmp(refName+nameLen-4, ".tga") || !strcmp(refName+nameLen-4, ".png") || !strcmp(refName+nameLen-4, ".jpg")) )
+	if ( (nameLen >= 5) && ((type == it_pic) || (type == it_font)) && (!strcmp(refName+nameLen-4, ".tga") || !strcmp(refName+nameLen-4, ".png") || !strcmp(refName+nameLen-4, ".jpg")) )
 #else	// PNG_SUPPORT
-	if ( ((type == it_pic) || (type == it_font)) && (!strcmp(refName+nameLen-4, ".tga") || !strcmp(refName+nameLen-4, ".jpg")) )
+	if ( (nameLen >= 5) && ((type == it_pic) || (type == it_font)) && (!strcmp(refName+nameLen-4, ".tga") || !strcmp(refName+nameLen-4, ".jpg")) )
 #endif	// PNG_SUPPORT
 	{ 
 		byte	*pic, *palette;

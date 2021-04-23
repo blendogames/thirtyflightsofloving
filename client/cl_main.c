@@ -2482,8 +2482,8 @@ void CL_AdvertiseVersion (void)
 {
 	char adBuf[128];
 
-	Com_sprintf (adBuf, sizeof(adBuf), "say \"KMQuake2 %4.2f %s %s %s %s [www.markshan.com/knightmare]\"\n",
-										VERSION, CPUSTRING, OS_STRING, COMPILETYPE_STRING, __DATE__);
+	Com_sprintf (adBuf, sizeof(adBuf), "say \"KMQuake2 %4.2fu%d %s %s %s %s [www.markshan.com/knightmare]\"\n",
+										VERSION, VERSION_UPDATE, CPUSTRING, OS_STRING, COMPILETYPE_STRING, __DATE__);
 	Cbuf_AddText (adBuf);
 	cls.lastAdvertiseTime = cls.realtime;
 	cls.advertiseTime = 0;

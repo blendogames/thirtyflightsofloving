@@ -794,6 +794,10 @@ void CL_ParseTEnt (void)
 
 	type = MSG_ReadByte (&net_message);
 
+	// TODO: have index 255 as a flag to read a short for the real extended index
+/*	if (type == 255)
+		type = (unsigned short)MSG_ReadShort (&net_message); */
+
 	switch (type)
 	{
 	case TE_BLOOD:			// bullet hitting flesh
@@ -904,7 +908,7 @@ void CL_ParseTEnt (void)
 		else if (type == TE_RAILTRAIL2) {
 			CL_RailTrail (pos, pos2, 255, 20, 20);
 		}
-		else {
+		else {	// 20, 48, 176 default
 			CL_RailTrail (pos, pos2, cl_railred->integer, cl_railgreen->integer, cl_railblue->integer);
 		}
 		S_StartSound (pos2, 0, 0, clMedia.sfx_railg, 1, ATTN_NORM, 0);

@@ -2750,7 +2750,7 @@ R_RegisterModel
 struct model_s *R_RegisterModel (char *name)
 {
 	model_t		*mod;
-	int			i;
+	int			i, nameLen;
 	dspr2_t		*sprout;
 #ifndef MD2_AS_MD3	//	Knightmare- no longer used!
 	dmd2_t		*pheader;
@@ -2760,13 +2760,13 @@ struct model_s *R_RegisterModel (char *name)
 // Harven-- MD3
 
 	// Knightmare- MD3 autoreplace code
-	int len = (int)strlen(name);
-	if (!strcmp(name+len-4, ".md2")) // look if we have a .md2 file
+	nameLen = (int)strlen(name);
+	if ( (nameLen >= 5) && !strcmp(name+nameLen-4, ".md2") ) // look if we have a .md2 file
 	{
 		char s[128];
 	//	strncpy(s,name);
 		Q_strncpyz (s, sizeof(s), name);
-		s[len-1]='3';
+		s[nameLen-1]='3';
 		mod = R_RegisterModel (s);
 		if (mod)
 			return mod;
