@@ -693,9 +693,9 @@ void SP_monster_boss5 (edict_t *self)
 	self->monsterinfo.blocked = boss5_blocked;		//PGM
 
 	if (!self->blood_type)
-		self->blood_type = 2; //sparks
+		self->blood_type = 2; // sparks
 	else
-		self->fogclip |= 2; //custom bloodtype flag
+		self->fogclip |= 2; // custom bloodtype flag
 
 	gi.linkentity (self);
 	
@@ -717,12 +717,12 @@ void SP_monster_boss5 (edict_t *self)
 		self->monsterinfo.power_armor_power = 400;
 	}
 
-	self->common_name = "Beta Class Supertank";
+	self->common_name = "Beta-Class Supertank";
 	self->class_id = ENTITY_MONSTER_SUPERTANK_BETA;
 
 	walkmonster_start(self);
 
-	//PMM
-	//self->monsterinfo.aiflags |= AI_IGNORE_SHOTS;
-	//PMM
+	// PMM
+//	self->monsterinfo.aiflags |= AI_IGNORE_SHOTS;
+	// PMM
 }

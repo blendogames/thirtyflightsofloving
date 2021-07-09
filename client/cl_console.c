@@ -642,7 +642,7 @@ void Con_DrawInput (void)
 	if (!cls.consoleActive && cls.state == ca_active)
 		return;		// don't draw anything (always draw if not active)
 
-	SCR_AdjustFrom640 (&conLeft, NULL, NULL, NULL, ALIGN_STRETCH);
+	SCR_ScaleCoords (&conLeft, NULL, NULL, NULL, ALIGN_STRETCH);
 
 	/*if (cls.key_dest == key_menu)
 		return;
@@ -712,7 +712,7 @@ void Con_DrawNotify (void)
 
 	conLeft = 0;
 	conWidth = SCREEN_WIDTH;
-	SCR_AdjustFrom640 (&conLeft, NULL, &conWidth, NULL, ALIGN_STRETCH);
+	SCR_ScaleCoords (&conLeft, NULL, &conWidth, NULL, ALIGN_STRETCH);
 
 	Com_sprintf (output, sizeof(output), "");
 
@@ -909,16 +909,16 @@ void Con_DrawConsole (float frac, qboolean trans)
 	conLeft = picLeft = 0;
 	conWidth = picWidth = SCREEN_WIDTH;
 	picHeight = SCREEN_HEIGHT;
-	SCR_AdjustFrom640 (&picLeft, NULL, &picWidth, &picHeight, ALIGN_CENTER);
+	SCR_ScaleCoords (&picLeft, NULL, &picWidth, &picHeight, ALIGN_CENTER);
 
 //	if ( (newconback_found && con_newconback->value) || con_oldconbar->value ) {
 	if ( (newconback_found && con_newconback->integer) || con_oldconbar->integer ) {
 		barheight = 2;
-		SCR_AdjustFrom640 (&conLeft, NULL, &conWidth, &barheight, ALIGN_STRETCH);
+		SCR_ScaleCoords (&conLeft, NULL, &conWidth, &barheight, ALIGN_STRETCH);
 	}
 	else {
 		barheight = 0;
-		SCR_AdjustFrom640 (&conLeft, NULL, &conWidth, NULL, ALIGN_STRETCH);
+		SCR_ScaleCoords (&conLeft, NULL, &conWidth, NULL, ALIGN_STRETCH);
 	}
 
 	lines =  viddef.height * frac;

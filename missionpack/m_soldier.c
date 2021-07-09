@@ -3438,7 +3438,6 @@ void SP_monster_soldier_hypergun (edict_t *self)
 		return;
 	}
 
-
 	gi.modelindex ("models/objects/blaser/tris.md2");
 	sound_pain = gi.soundindex ("soldier/solpain1.wav");
 	sound_death = gi.soundindex ("soldier/soldeth1.wav");

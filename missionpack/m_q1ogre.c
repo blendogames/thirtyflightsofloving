@@ -376,7 +376,7 @@ void ogre_grenade_fire (edict_t *self)
 	gi.multicast (self->s.origin, MULTICAST_PVS);
 
 	gi.sound (self, CHAN_WEAPON|CHAN_RELIABLE, sound_shoot, 1.0, ATTN_NORM, 0);
-	q1_fire_grenade (self, start,aim,40 , 600, 2.5, 80);
+	q1_fire_grenade (self, start, aim, 40, 600, 2.5, 80);
 }
 
 

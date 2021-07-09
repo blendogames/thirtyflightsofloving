@@ -1359,7 +1359,7 @@ void CIN_SetExtents (cinHandle_t handle, int x, int y, int w, int h)
 		return;			// Not running
 
 	realx = x;	realy = y;	realw = w;	realh = h; 
-	SCR_AdjustFrom640 (&realx, &realy, &realw, &realh, ALIGN_CENTER);
+	SCR_ScaleCoords (&realx, &realy, &realw, &realh, ALIGN_CENTER);
 	cin->x = realx;
 	cin->y = realy;
 	cin->w = realw;
@@ -1491,7 +1491,7 @@ void CIN_DrawCinematic (cinHandle_t handle){
 		float	x=0, y=0, w=640, h=480;
 	//	strncat(picname, cin->name);
 		Q_strncatz (picname, sizeof(picname), cin->name);
-		SCR_AdjustFrom640 (&x, &y, &w, &h, ALIGN_CENTER);
+		SCR_ScaleCoords (&x, &y, &w, &h, ALIGN_CENTER);
 		if (w < viddef.width || h < viddef.height)
 			R_DrawFill (0, 0, viddef.width, viddef.height, 0, 0, 0, 255);
 	//	R_DrawStretchPic (x, y, viddef.width, viddef.height, picname, 1.0);
@@ -1551,7 +1551,7 @@ cinHandle_t CIN_PlayCinematic (const char *name, int x, int y, int w, int h, int
 	// Fill it in
 	Q_strncpyz (cin->name, sizeof(cin->name), name);
 	realx = x;	realy = y;	realw = w;	realh = h; 
-	SCR_AdjustFrom640 (&realx, &realy, &realw, &realh, ALIGN_CENTER);
+	SCR_ScaleCoords (&realx, &realy, &realw, &realh, ALIGN_CENTER);
 	cin->x = realx;
 	cin->y = realy;
 	cin->w = realw;

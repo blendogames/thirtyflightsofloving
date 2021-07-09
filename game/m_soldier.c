@@ -1338,7 +1338,7 @@ void SP_monster_soldier_light (edict_t *self)
 	if (!self->health)
 		self->health = 20;
 	if (!self->gib_health)
-		self->gib_health = -30;
+		self->gib_health = -40;	// Knightmare- was -30
 
 	SP_monster_soldier_x (self);
 
@@ -1367,7 +1367,7 @@ void SP_monster_soldier (edict_t *self)
 	if (!self->health)
 		self->health = 30;
 	if (!self->gib_health)
-		self->gib_health = -30;
+		self->gib_health = -40;	// Knightmare- was -30
 
 	SP_monster_soldier_x (self);
 
@@ -1396,7 +1396,7 @@ void SP_monster_soldier_ss (edict_t *self)
 	if (!self->health)
 		self->health = 40;
 	if (!self->gib_health)
-		self->gib_health = -30;
+		self->gib_health = -40;	// Knightmare- was -30
 
 	SP_monster_soldier_x (self);
 

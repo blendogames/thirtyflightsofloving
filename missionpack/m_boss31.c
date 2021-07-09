@@ -882,10 +882,10 @@ void SP_monster_jorg (edict_t *self)
 	self->s.modelindex2 = gi.modelindex ("models/monsters/boss3/rider/tris.md2");
 	VectorSet (self->mins, -80, -80, 0);
 	VectorSet (self->maxs, 80, 80, 140);
-	//Knightmare- hack for starting in floor
+	// Knightmare- hack for starting in floor
 	self->s.origin[2] += 8;
 
-	//Knightmare- gross hack for map6 of COS3- 3000 health
+	// Knightmare- gross hack for map6 of COS3- 3000 health
 	if (Q_stricmp(level.mapname, "grinsp3f") == 0)
 		self->health = 3000;
 	else

@@ -2080,7 +2080,7 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 
 #ifdef NEW_DED_CONSOLE // init debug console
 	Sys_InitDedConsole ();
-	Com_Printf("KMQ2 %4.2f %s %s %s %s\n", VERSION, CPUSTRING, OS_STRING, COMPILETYPE_STRING, __DATE__);
+	Com_Printf("KMQ2 %4.2fu%d %s %s %s %s\n", VERSION, VERSION_UPDATE, CPUSTRING, OS_STRING, COMPILETYPE_STRING, __DATE__);
 #else
 	Sys_CreateStartupLogo ();
 #endif	// NEW_DED_CONSOLE

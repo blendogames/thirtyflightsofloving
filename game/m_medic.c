@@ -1274,7 +1274,7 @@ void SP_monster_medic (edict_t *self)
 	if (!self->health)
 		self->health = 300;
 	if (!self->gib_health)
-		self->gib_health = -130;
+		self->gib_health = -150;	// Knightamre- was -130
 	if (!self->mass)
 		self->mass = 400;
 

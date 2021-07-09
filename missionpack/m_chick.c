@@ -1045,7 +1045,7 @@ void SP_monster_chick (edict_t *self)
 			self->blood_type = 3; //sparks and blood
 		else
 			self->fogclip |= 2; //custom bloodtype flag
-		self->common_name = "Beta Class Iron Maiden";
+		self->common_name = "Beta-Class Iron Maiden";
 		self->class_id = ENTITY_MONSTER_CHICK_HEAT;
 	}
 }

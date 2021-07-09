@@ -422,13 +422,14 @@ void fire_blaster (edict_t *self, vec3_t start, vec3_t dir, int damage, int spee
 	VectorClear (bolt->maxs);
 
 	if (color == BLASTER_GREEN) // green
-		bolt->s.modelindex = gi.modelindex ("models/objects/laser2/tris.md2");
+		bolt->s.skinnum = 1;
 	else if (color == BLASTER_BLUE) // blue
-		bolt->s.modelindex = gi.modelindex ("models/objects/blaser/tris.md2");
+		bolt->s.skinnum = 2;
 	else if (color == BLASTER_RED) // red
-		bolt->s.modelindex = gi.modelindex ("models/objects/rlaser/tris.md2");
+		bolt->s.skinnum = 3;
 	else // standard orange
-		bolt->s.modelindex = gi.modelindex ("models/objects/laser/tris.md2");
+		bolt->s.skinnum = 0;
+	bolt->s.modelindex = gi.modelindex ("models/objects/laser/tris.md2");
 	bolt->style = color;
 
 	bolt->s.sound = gi.soundindex ("misc/lasfly.wav");
@@ -470,8 +471,17 @@ void bolt_delayed_start (edict_t *bolt)
 	else
 		bolt->nextthink = level.time + FRAMETIME;
 }
+
 void SP_bolt (edict_t *bolt)
 {
+	if (bolt->style == BLASTER_GREEN) // green bolt
+		bolt->s.skinnum = 1;
+	else if (bolt->style == BLASTER_BLUE) // blue bolt
+		bolt->s.skinnum = 2;
+	else if (bolt->style == BLASTER_RED) // red bolt
+		bolt->s.skinnum = 3;
+	else // orange bolt
+		bolt->s.skinnum = 0;
 	bolt->s.modelindex = gi.modelindex ("models/objects/laser/tris.md2");
 	bolt->s.sound = gi.soundindex ("misc/lasfly.wav");
 	bolt->touch = blaster_touch;
@@ -512,9 +522,9 @@ void Grenade_Evade (edict_t *monster)
 		if (grenade->inuse && grenade->groundentity)
 		{
 			// if it ain't in the PVS, it can't hurt us (I think?)
-			if (gi.inPVS(grenade->s.origin,monster->s.origin))
+			if (gi.inPVS(grenade->s.origin, monster->s.origin))
 			{
-				VectorSubtract(grenade->s.origin,monster->s.origin,grenade_vec);
+				VectorSubtract (grenade->s.origin, monster->s.origin, grenade_vec);
 				grenade_dist = VectorNormalize(grenade_vec);
 				if (grenade_dist <= grenade->dmg_radius)
 					break;
@@ -533,22 +543,22 @@ void Grenade_Evade (edict_t *monster)
 		forward[1] = sin( DEG2RAD(yaw) );
 		forward[2] = 0;
 		// Estimate of required distance to run. This is conservative.
-		r = grenade->dmg_radius + grenade_dist*DotProduct(forward,grenade_vec) + monster->size[0] + 16;
+		r = grenade->dmg_radius + grenade_dist*DotProduct(forward, grenade_vec) + monster->size[0] + 16;
 		if ( r < best_r )
 		{
-			VectorMA(monster->s.origin,r,forward,pos);
-			tr = gi.trace(monster->s.origin,monster->mins,monster->maxs,pos,monster,MASK_MONSTERSOLID);
+			VectorMA (monster->s.origin, r, forward, pos);
+			tr = gi.trace(monster->s.origin, monster->mins, monster->maxs, pos, monster,MASK_MONSTERSOLID);
 			if (tr.fraction < 1.0)
 				continue;
 			best_r = r;
 			best_yaw = yaw;
-			VectorCopy(tr.endpos,best_pos);
+			VectorCopy (tr.endpos, best_pos);
 		}
 	}
 	if (best_r < 9000)
 	{
 		edict_t	*thing = SpawnThing();
-		VectorCopy(best_pos,thing->s.origin);
+		VectorCopy (best_pos, thing->s.origin);
 		thing->touch_debounce_time = grenade->nextthink;
 		thing->target_ent = monster;
 		ED_CallSpawn(thing);
@@ -561,7 +571,7 @@ void Grenade_Evade (edict_t *monster)
 	}
 }
 
-/*static*/ void Grenade_Add_To_Chain (edict_t *grenade)
+void Grenade_Add_To_Chain (edict_t *grenade)
 {
 	edict_t	*ancestor;
 
@@ -572,7 +582,7 @@ void Grenade_Evade (edict_t *monster)
 	grenade->prev_grenade = ancestor;
 }
 
-/*static*/ void Grenade_Remove_From_Chain (edict_t *grenade)
+void Grenade_Remove_From_Chain (edict_t *grenade)
 {
 	if (grenade->prev_grenade)
 	{
@@ -584,13 +594,13 @@ void Grenade_Evade (edict_t *monster)
 	}
 }
 
-/*static*/ void Grenade_Explode (edict_t *ent)
+void Grenade_Explode (edict_t *ent)
 {
 	vec3_t		origin;
 	int			mod;
 	int			type;
 
-	Grenade_Remove_From_Chain(ent);
+	Grenade_Remove_From_Chain (ent);
 
 	if (ent->owner && ent->owner->client)
 		PlayerNoise(ent->owner, ent->s.origin, PNOISE_IMPACT);
@@ -648,7 +658,7 @@ void Grenade_Evade (edict_t *monster)
 	G_FreeEdict (ent);
 }
 
-/*static*/ void Grenade_Touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
+void Grenade_Touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
 	if (other == ent->owner)
 		return;
@@ -680,7 +690,7 @@ void Grenade_Evade (edict_t *monster)
 	Grenade_Explode (ent);
 }
 
-/*static*/ void ContactGrenade_Touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
+void ContactGrenade_Touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
 	if (other == ent->owner)
 		return;
@@ -723,7 +733,7 @@ void fire_grenade (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int s
 	// NO. This is too unrealistic. Instead, if owner is riding a moving entity,
 	//     add velocity of the thing he's riding
 
-	//Knightmare- add player's base velocity to grenade
+	// Knightmare- add player's base velocity to grenade
 	if (add_velocity_throw->value && self->client)
 		VectorAdd (grenade->velocity, self->velocity, grenade->velocity);
 	else if (self->groundentity)

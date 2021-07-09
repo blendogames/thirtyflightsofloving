@@ -1061,8 +1061,7 @@ void SP_monster_tank (edict_t *self)
 	gi.soundindex ("tank/tnkatk2e.wav");
 	gi.soundindex ("tank/tnkatck3.wav");
 
-//	if (strcmp(self->classname, "monster_tank_commander") == 0)
-	if (self->moreflags & FL2_COMMANDER)
+	if (strcmp(self->classname, "monster_tank_commander") == 0)
 	{
 		if (!self->health)
 			self->health = 1000;

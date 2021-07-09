@@ -782,7 +782,7 @@ void SP_monster_jorg (edict_t *self)
 	if (!self->health)
 		self->health = 3000;
 	if (!self->gib_health)
-		self->gib_health = -2000;
+		self->gib_health = -999;	// Knightmare- was -2000
 	if (!self->mass)
 		self->mass = 1000;
 

@@ -115,7 +115,7 @@ mmove_t infantry_move_fidget = {FRAME_stand01, FRAME_stand49, infantry_frames_fi
 void infantry_fidget (edict_t *self)
 {
 	self->monsterinfo.currentmove = &infantry_move_fidget;
-	if(!(self->spawnflags & SF_MONSTER_AMBUSH))
+	if (!(self->spawnflags & SF_MONSTER_AMBUSH))
 		gi.sound (self, CHAN_VOICE, sound_idle, 1, ATTN_IDLE, 0);
 }
 
@@ -260,7 +260,7 @@ void InfantryMachineGun (edict_t *self)
 	vec3_t	vec;
 	int		flash_number;
 
-	if(!self->enemy || !self->enemy->inuse)		//PGM
+	if (!self->enemy || !self->enemy->inuse)		//PGM
 		return;									//PGM
 
 	// pmm - new attack start frame
@@ -276,7 +276,7 @@ void InfantryMachineGun (edict_t *self)
 			target[2] += self->enemy->viewheight;
 
 			// Lazarus fog reduction of accuracy
-			if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+			if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 			{
 				target[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 				target[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -578,11 +578,11 @@ void infantry_jump2_now (edict_t *self)
 
 void infantry_jump_wait_land (edict_t *self)
 {
-	if(self->groundentity == NULL)
+	if (self->groundentity == NULL)
 	{
 		self->monsterinfo.nextframe = self->s.frame;
 
-		if(monster_jump_finished (self))
+		if (monster_jump_finished (self))
 			self->monsterinfo.nextframe = self->s.frame + 1;
 	}
 	else 
@@ -621,12 +621,12 @@ mmove_t infantry_move_jump2 = { FRAME_jump01, FRAME_jump10, infantry_frames_jump
 
 void infantry_jump (edict_t *self)
 {
-	if(!self->enemy)
+	if (!self->enemy)
 		return;
 
 	monster_done_dodge(self);
 
-	if(self->enemy->s.origin[2] > self->s.origin[2])
+	if (self->enemy->s.origin[2] > self->s.origin[2])
 		self->monsterinfo.currentmove = &infantry_move_jump2;
 	else
 		self->monsterinfo.currentmove = &infantry_move_jump;
@@ -634,16 +634,16 @@ void infantry_jump (edict_t *self)
 
 qboolean infantry_blocked (edict_t *self, float dist)
 {
-	if(blocked_checkshot (self, 0.25 + (0.05 * skill->value) ))
+	if (blocked_checkshot (self, 0.25 + (0.05 * skill->value) ))
 		return true;
 
-	if(blocked_checkjump (self, dist, 192, 40))
+	if (blocked_checkjump (self, dist, 192, 40))
 	{
 		infantry_jump(self);
 		return true;
 	}
 
-	if(blocked_checkplat (self, dist))
+	if (blocked_checkplat (self, dist))
 		return true;
 
 	return false;

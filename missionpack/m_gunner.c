@@ -16,6 +16,9 @@ static int	sound_idle;
 static int	sound_open;
 static int	sound_search;
 static int	sound_sight;
+#ifndef KMQUAKE2_ENGINE_MOD
+static int	sound_fire_flechette;
+#endif	// KMQUAKE2_ENGINE_MOD
 
 // NOTE: Original gunner grenade velocity was 600 units/sec, but then 
 //       fire_grenade added 200 units/sec in a direction perpendicular
@@ -487,7 +490,7 @@ void GunnerFire (edict_t *self)
 	if (!self->enemy || !self->enemy->inuse)		//PGM
 		return;									//PGM
 
-#ifdef KMQUAKE2_ENGINE_MOD	// Knightmare- unique muzzle flash for gunner commander's flechettes
+#ifdef KMQUAKE2_ENGINE_MOD	// Knightmare- unique muzzle flash for Tactician Gunner's flechettes
 	if (self->moreflags & FL2_COMMANDER)
 		flash_number = MZ2_GUNNER_ETF_RIFLE_1 + (self->s.frame - FRAME_attak216);
 	else
@@ -500,7 +503,7 @@ void GunnerFire (edict_t *self)
 	// project enemy back a bit and target there
 	VectorCopy (self->enemy->s.origin, target);
 	if ( !(self->moreflags & FL2_COMMANDER) )
-	{	// Commander fires projectiles, so no backward projection
+	{	// Tactician Gunner fires projectiles, so no backward projection
 		VectorMA (target, -0.2, self->enemy->velocity, target);
 	}
 	target[2] += self->enemy->viewheight;
@@ -516,9 +519,18 @@ void GunnerFire (edict_t *self)
 	VectorSubtract (target, start, aim);
 	VectorNormalize (aim);
 
-	// Knightmare- gunner commander fires flechettes
-	if (self->moreflags & FL2_COMMANDER)
-		monster_fire_flechette (self, start, aim, 5, 850, 75, 10, flash_number); 
+	// Knightmare- Tactician Gunner fires flechettes
+	if (self->moreflags & FL2_COMMANDER) {
+#ifndef KMQUAKE2_ENGINE_MOD	// Knightmare- silent muzzleflash and play fire sound directly for vanilla Q2
+		gi.WriteByte (svc_muzzleflash);
+		gi.WriteShort (self-g_edicts);
+		gi.WriteByte (MZ_MACHINEGUN | 128);
+		gi.multicast (self->s.origin, MULTICAST_PVS);
+
+		gi.sound (self, CHAN_WEAPON|CHAN_RELIABLE, sound_fire_flechette, 1.0, ATTN_NORM, 0);
+#endif	// KMQUAKE2_ENGINE_MOD
+		monster_fire_flechette (self, start, aim, 4, 850, 75, 8, flash_number); 
+	}
 	else
 		monster_fire_bullet (self, start, aim, 3, 4, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, flash_number);
 }
@@ -599,7 +611,7 @@ void GunnerGrenade (edict_t *self)
 		if (self->enemy->absmin[2] <= self->absmax[2])
 			target[2] = self->enemy->absmin[2];
 
-		// Knightmare- spread out Commander's prox mines so they don't collide
+		// Knightmare- spread out Tactician Gunner's prox mines so they don't collide
 		if (self->moreflags & FL2_COMMANDER)
 		{
 			if ( blindfire )
@@ -668,14 +680,14 @@ void GunnerGrenade (edict_t *self)
 //	VectorMA (forward, spread, right, aim);
 //	VectorMA (aim, pitch, up, aim);
 
-	// Knightmare- Gunner Commander fires prox mines
+	// Knightmare- Tactician Gunner fires prox mines
 	if (self->moreflags & FL2_COMMANDER)
 	{
 		float	prox_timer = (blindfire) ? 60.0f : 2.5f;
-		monster_fire_prox (self, start, aim, 65, 1, 600, 20, prox_timer, 192, flash_number);
+		monster_fire_prox (self, start, aim, 80, 1, 600, 20, prox_timer, 192, flash_number);
 	}
 	else
-		monster_fire_grenade (self, start, aim, 50, 600, flash_number);
+		monster_fire_grenade (self, start, aim, 50, 600, flash_number, false);
 }
 
 mframe_t gunner_frames_attack_chain [] =
@@ -1107,7 +1119,7 @@ void gunner_sidestep (edict_t *self)
 
 /*QUAKED monster_gunner (1 .5 0) (-16 -16 -24) (16 16 32) Ambush Trigger_Spawn Sight GoodGuy NoGib
 */
-/*QUAKED monster_gunner_commander (1 .5 0) (-16 -16 -24) (16 16 32) Ambush Trigger_Spawn Sight GoodGuy NoGib
+/*QUAKED monster_gunner_tactician (1 .5 0) (-16 -16 -24) (16 16 32) Ambush Trigger_Spawn Sight GoodGuy NoGib
 */
 void SP_monster_gunner (edict_t *self)
 {
@@ -1125,14 +1137,14 @@ void SP_monster_gunner (edict_t *self)
 	sound_search = gi.soundindex ("gunner/gunsrch1.wav");	
 	sound_sight = gi.soundindex ("gunner/sight1.wav");	
 
-//	gi.soundindex ("gunner/gunatck2.wav");	// not used by Gunner Commander
+//	gi.soundindex ("gunner/gunatck2.wav");	// not used by Tactician Gunner
 	gi.soundindex ("gunner/gunatck3.wav");
 
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;
 
 	// Lazarus: special purpose skins
-	if (strcmp(self->classname, "monster_gunner_commander") == 0)
+	if (strcmp(self->classname, "monster_gunner_tactician") == 0)
 	{
 		self->s.skinnum = 2;
 		self->moreflags |= FL2_COMMANDER;
@@ -1154,11 +1166,15 @@ void SP_monster_gunner (edict_t *self)
 	VectorSet (self->mins, -16, -16, -24);
 	VectorSet (self->maxs, 16, 16, 32);
 
-	if (strcmp(self->classname, "monster_gunner_commander") == 0)
+	if (strcmp(self->classname, "monster_gunner_tactician") == 0)
 	{	// precache
 		gi.modelindex ("models/weapons/g_prox/tris.md2");
 		gi.modelindex ("models/proj/flechette/tris.md2");
+#ifdef KMQUAKE2_ENGINE_MOD
 		gi.soundindex ("weapons/nail1.wav");
+#else
+		sound_fire_flechette = gi.soundindex ("weapons/nail1.wav");	
+#endif	// KMQUAKE2_ENGINE_MOD
 
 		if (!self->health)
 			self->health = 400;
@@ -1170,8 +1186,8 @@ void SP_monster_gunner (edict_t *self)
 		self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
 		self->monsterinfo.power_armor_power = 200;
 
-		self->common_name = "Gunner Commander";
-		self->class_id = ENTITY_MONSTER_GUNNER_COMMANDER;
+		self->common_name = "Tactician Gunner";
+		self->class_id = ENTITY_MONSTER_GUNNER_TACTICIAN;
 	}
 	else
 	{	// precache
@@ -1221,7 +1237,7 @@ void SP_monster_gunner (edict_t *self)
 		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
 
-	if ( !self->monsterinfo.flies && strcmp(self->classname, "monster_gunner_commander") == 0 )
+	if ( !self->monsterinfo.flies && strcmp(self->classname, "monster_gunner_tactician") == 0 )
 		self->monsterinfo.flies = 0.20;
 	else if (!self->monsterinfo.flies)
 		self->monsterinfo.flies = 0.30;

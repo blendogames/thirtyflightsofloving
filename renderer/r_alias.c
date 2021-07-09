@@ -262,27 +262,7 @@ void RB_RenderAliasMesh (maliasmodel_t *paliashdr, unsigned meshnum, unsigned sk
 	// draw
 	RB_DrawArrays ();
 
-	// glow pass
-	if (mesh->skins[skinnum].glowimage && !shellModel)
-	{
-		float	glowcolor;
-		if (skinParms->glow.type > -1)
-			glowcolor = RB_CalcGlowColor (skinParms);
-		else
-			glowcolor = 1.0;
-		qglDisableClientState (GL_COLOR_ARRAY);
-		qglColor4f(glowcolor, glowcolor, glowcolor, 1.0);
-
-		GL_Enable (GL_BLEND);
-		GL_BlendFunc (GL_ONE, GL_ONE);
-
-		GL_Bind(mesh->skins[skinnum].glowimage->texnum);
-
-		RB_DrawArrays ();
-
-		qglColor4f(1.0, 1.0, 1.0, 1.0);
-		qglEnableClientState (GL_COLOR_ARRAY);
-	}
+	// glow pass was originally here
 
 	// envmap pass
 	if (skinParms->envmap > 0.0f && !shellModel)
@@ -356,6 +336,28 @@ void RB_RenderAliasMesh (maliasmodel_t *paliashdr, unsigned meshnum, unsigned sk
 			GL_CullFace(GL_FRONT);
 		qglEnableClientState (GL_COLOR_ARRAY);
 		qglPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	}
+
+	// glow pass
+	if (mesh->skins[skinnum].glowimage && !shellModel)
+	{
+		float	glowcolor;
+		if (skinParms->glow.type > -1)
+			glowcolor = RB_CalcGlowColor (skinParms);
+		else
+			glowcolor = 1.0;
+		qglDisableClientState (GL_COLOR_ARRAY);
+		qglColor4f(glowcolor, glowcolor, glowcolor, 1.0);
+
+		GL_Enable (GL_BLEND);
+		GL_BlendFunc (GL_ONE, GL_ONE);
+
+		GL_Bind(mesh->skins[skinnum].glowimage->texnum);
+
+		RB_DrawArrays ();
+
+		qglColor4f(1.0, 1.0, 1.0, 1.0);
+		qglEnableClientState (GL_COLOR_ARRAY);
 	}
 
 	RB_DrawMeshTris ();

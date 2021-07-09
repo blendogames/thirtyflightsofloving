@@ -61,7 +61,7 @@ qboolean buf_gets (char *dest, int destsize, char **f)
 	return true;
 }
 
-void ReadTextureSurfaceAssignments()
+void ReadTextureSurfaceAssignments (void)
 {
 	char	filename[MAX_OSPATH];
 	char	*footstep_data;
@@ -76,14 +76,14 @@ void ReadTextureSurfaceAssignments()
 	if (!footstep_data) return;
 	while (buf_gets(line, sizeof(line), &parsedata) && num_texsurfs < MAX_TEX_SURF)
 	{
-		sscanf(line,"%d %s",&tex_surf[num_texsurfs].step_id,tex_surf[num_texsurfs].tex);
-		//Com_Printf("%d %s\n",tex_surf[num_texsurfs].step_id,tex_surf[num_texsurfs].tex);
+		sscanf(line, "%d %s", &tex_surf[num_texsurfs].step_id, tex_surf[num_texsurfs].tex);
+	//	Com_Printf("%d %s\n", tex_surf[num_texsurfs].step_id, tex_surf[num_texsurfs].tex);
 		num_texsurfs++;
 	}
 	FS_FreeFile (footstep_data);
 }
 #else
-void ReadTextureSurfaceAssignments()
+void ReadTextureSurfaceAssignments (void)
 {
 	char	filename[MAX_OSPATH];
 	FILE	*f;
@@ -96,8 +96,8 @@ void ReadTextureSurfaceAssignments()
 	if (!f) return;
 	while (fgets(line, sizeof(line), f) && num_texsurfs < MAX_TEX_SURF)
 	{
-		sscanf(line,"%d %s",&tex_surf[num_texsurfs].step_id,tex_surf[num_texsurfs].tex);
-		//Com_Printf("%d %s\n",tex_surf[num_texsurfs].step_id,tex_surf[num_texsurfs].tex);
+		sscanf(line, "%d %s", &tex_surf[num_texsurfs].step_id, tex_surf[num_texsurfs].tex);
+	//	Com_Printf("%d %s\n", tex_surf[num_texsurfs].step_id, tex_surf[num_texsurfs].tex);
 		num_texsurfs++;
 	}
 	fclose(f);

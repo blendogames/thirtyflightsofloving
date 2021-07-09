@@ -157,9 +157,9 @@ void monster_fire_blaster (edict_t *self, vec3_t start, vec3_t dir, int damage, 
 	gi.multicast (start, MULTICAST_PVS);
 }
 
-void monster_fire_grenade (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, int flashtype)
+void monster_fire_grenade (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, int flashtype, qboolean contact)
 {
-	fire_grenade (self, start, aimdir, damage, speed, 2.5, damage+40, false);
+	fire_grenade (self, start, aimdir, damage, speed, 2.5, damage+40, contact);
 
 	gi.WriteByte (svc_muzzleflash2);
 	gi.WriteShort (self - g_edicts);
@@ -491,10 +491,12 @@ void monster_fire_flechette (edict_t *self, vec3_t start, vec3_t dir, int damage
 {
 	fire_flechette (self, start, dir, damage, speed, damage_radius, radius_damage);
 
+#ifdef KMQUAKE2_ENGINE_MOD	// Knightmare- client muzzle flash for monster ETF Rifle is only in KMQ2
 	gi.WriteByte (svc_muzzleflash2);
 	gi.WriteShort (self - g_edicts);
 	gi.WriteByte (flashtype);
 	gi.multicast (start, MULTICAST_PVS);
+#endif	// KMQUAKE2_ENGINE_MOD
 }
 
 void monster_fire_prox (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int damage_multiplier, int speed, int health, float timer, float damage_radius, int flashtype)
@@ -2058,9 +2060,9 @@ int PatchMonsterModel (char *modelname)
 			case 1:
 				Com_strcat (skins[j], sizeof(skins[j]), "pain.pcx"); break;
 			case 2:
-				Com_strcpy (skins[j], sizeof(skins[j]), "comm_skin.pcx"); break;
+				Com_strcpy (skins[j], sizeof(skins[j]), "tact_skin.pcx"); break;
 			case 3:
-				Com_strcpy (skins[j], sizeof(skins[j]), "comm_pain.pcx"); break;
+				Com_strcpy (skins[j], sizeof(skins[j]), "tact_pain.pcx"); break;
 			case 4:
 				Com_strcat (skins[j], sizeof(skins[j]), "custom1.pcx"); break;
 			case 5:

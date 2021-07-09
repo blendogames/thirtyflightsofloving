@@ -280,7 +280,7 @@ void CL_ParseMuzzleFlash (void)
 	weapon = MSG_ReadByte (&net_message);
 
 	// TODO: Use index 127 as a flag to read a short for the extended index
-/*	if ( (weapon & MZ_SEND_SHORT) ==  MZ_SEND_SHORT) {
+/*	if ( !LegacyProtocol() && ((weapon & MZ_SEND_SHORT) ==  MZ_SEND_SHORT) ) {
 		weapon = (unsigned short)MSG_ReadShort (&net_message);
 		silenced = weapon & MZ_SILENCED_HI;
 		weapon &= ~MZ_SILENCED_HI;
@@ -459,7 +459,7 @@ void CL_ParseMuzzleFlash (void)
 		break;
 // PGM
 // ======================
-//Knightmare 1/3/2002- blue blaster and green hyperblaster and red blaster and hyperblaster
+// Knightmare 1/3/2002- blue blaster and green hyperblaster and red blaster and hyperblaster
 	case MZ_BLUEBLASTER:
 		dl->color[0] = 0.15;dl->color[1] = 0.15;dl->color[2] = 1;
 		S_StartSound (NULL, i, CHAN_WEAPON, S_RegisterSound("weapons/blastf1a.wav"), volume, ATTN_NORM, 0);
@@ -476,7 +476,15 @@ void CL_ParseMuzzleFlash (void)
 		dl->color[0] = 1;dl->color[1] = 0.15;dl->color[2] = 0.15;
 		S_StartSound (NULL, i, CHAN_WEAPON, S_RegisterSound("weapons/hyprbf1a.wav"), volume, ATTN_NORM, 0);
 		break;
-//end Knightmare
+	case MZ_PLASMA_RIFLE_BOUNCE:
+		dl->color[0] = 0.15;dl->color[1] = 0.15;dl->color[2] = 1;
+		S_StartSound (NULL, i, CHAN_WEAPON, S_RegisterSound("weapons/plasma/fire1.wav"), volume, ATTN_NORM, 0);
+		break;
+	case MZ_PLASMA_RIFLE_SPREAD:
+		dl->color[0] = 0.15;dl->color[1] = 0.15;dl->color[2] = 1;
+		S_StartSound (NULL, i, CHAN_WEAPON, S_RegisterSound("weapons/plasma/fire2.wav"), volume, ATTN_NORM, 0);
+		break;
+// end Knightmare
 	}
 }
 
@@ -490,7 +498,7 @@ void CL_ParseMuzzleFlash2 (void)
 {
 	int			ent;
 	vec3_t		origin;
-	int			flash_number;
+	int			flash_number, modifier = -1;
 	cdlight_t	*dl;
 	vec3_t		forward, right;
 	char		soundname[64];
@@ -501,9 +509,11 @@ void CL_ParseMuzzleFlash2 (void)
 
 	flash_number = MSG_ReadByte (&net_message);
 
-	// TODO: Use index 255 as a flag to read a short for the real extended index
-/*	if (flash_number == MZ2_SEND_SHORT)
-		flash_number = (unsigned short)MSG_ReadShort (&net_message); */
+	// Use index 255 as a flag to read a short for the real extended index
+	if ( !LegacyProtocol() && (flash_number == MZ2_SEND_SHORT) ) {
+		flash_number = (unsigned short)MSG_ReadShort (&net_message);
+		modifier = MSG_ReadByte (&net_message);
+	}
 
 	// locate the origin
 	AngleVectors (cl_entities[ent].current.angles, forward, right, NULL);
@@ -597,28 +607,78 @@ void CL_ParseMuzzleFlash2 (void)
 	case MZ2_SOLDIER_BLASTER_7:
 	case MZ2_SOLDIER_BLASTER_8:
 	case MZ2_TURRET_BLASTER:			// PGM
-		dl->color[0] = 1;dl->color[1] = 1;dl->color[2] = 0;
+	//	dl->color[0] = 1;dl->color[1] = 1;dl->color[2] = 0;
+		if (modifier < 0)	// default
+		{	dl->color[0] = 1;dl->color[1] = 1;dl->color[2] = 0; }	
+		else if (modifier == 1)	// green
+		{	dl->color[0] = 0.15;dl->color[1] = 1;dl->color[2] = 0.15; }
+		else if (modifier == 2)	// blue
+		{	dl->color[0] = 0.15;dl->color[1] = 0.15;dl->color[2] = 1; }
+		else if (modifier == 3)	// red
+		{	dl->color[0] = 1;dl->color[1] = 0.15;dl->color[2] = 0.15; }
+		else	// orange
+		{	dl->color[0] = 1;dl->color[1] = 1;dl->color[2] = 0; }
 		S_StartSound (NULL, ent, CHAN_WEAPON, S_RegisterSound("soldier/solatck2.wav"), 1, ATTN_NORM, 0);
 		break;
 
 	case MZ2_FLYER_BLASTER_1:
 	case MZ2_FLYER_BLASTER_2:
-		dl->color[0] = 1;dl->color[1] = 1;dl->color[2] = 0;
+	//	dl->color[0] = 1;dl->color[1] = 1;dl->color[2] = 0;
+		if (modifier < 0)	// default
+		{	dl->color[0] = 1;dl->color[1] = 1;dl->color[2] = 0; }	
+		else if (modifier == 1)	// green
+		{	dl->color[0] = 0.15;dl->color[1] = 1;dl->color[2] = 0.15; }
+		else if (modifier == 2)	// blue
+		{	dl->color[0] = 0.15;dl->color[1] = 0.15;dl->color[2] = 1; }
+		else if (modifier == 3)	// red
+		{	dl->color[0] = 1;dl->color[1] = 0.15;dl->color[2] = 0.15; }
+		else	// orange
+		{	dl->color[0] = 1;dl->color[1] = 1;dl->color[2] = 0; }
 		S_StartSound (NULL, ent, CHAN_WEAPON, S_RegisterSound("flyer/flyatck3.wav"), 1, ATTN_NORM, 0);
 		break;
 
 	case MZ2_MEDIC_BLASTER_1:
-		dl->color[0] = 1;dl->color[1] = 1;dl->color[2] = 0;
+	//	dl->color[0] = 1;dl->color[1] = 1;dl->color[2] = 0;
+		if (modifier < 0)	// default
+		{	dl->color[0] = 1;dl->color[1] = 1;dl->color[2] = 0; }	
+		else if (modifier == 1)	// green
+		{	dl->color[0] = 0.15;dl->color[1] = 1;dl->color[2] = 0.15; }
+		else if (modifier == 2)	// blue
+		{	dl->color[0] = 0.15;dl->color[1] = 0.15;dl->color[2] = 1; }
+		else if (modifier == 3)	// red
+		{	dl->color[0] = 1;dl->color[1] = 0.15;dl->color[2] = 0.15; }
+		else	// orange
+		{	dl->color[0] = 1;dl->color[1] = 1;dl->color[2] = 0; }
 		S_StartSound (NULL, ent, CHAN_WEAPON, S_RegisterSound("medic/medatck1.wav"), 1, ATTN_NORM, 0);
 		break;
 
 	case MZ2_HOVER_BLASTER_1:
-		dl->color[0] = 1;dl->color[1] = 1;dl->color[2] = 0;
+	//	dl->color[0] = 1;dl->color[1] = 1;dl->color[2] = 0;
+		if (modifier < 0)	// default
+		{	dl->color[0] = 1;dl->color[1] = 1;dl->color[2] = 0; }	
+		else if (modifier == 1)	// green
+		{	dl->color[0] = 0.15;dl->color[1] = 1;dl->color[2] = 0.15; }
+		else if (modifier == 2)	// blue
+		{	dl->color[0] = 0.15;dl->color[1] = 0.15;dl->color[2] = 1; }
+		else if (modifier == 3)	// red
+		{	dl->color[0] = 1;dl->color[1] = 0.15;dl->color[2] = 0.15; }
+		else	// orange
+		{	dl->color[0] = 1;dl->color[1] = 1;dl->color[2] = 0; }
 		S_StartSound (NULL, ent, CHAN_WEAPON, S_RegisterSound("hover/hovatck1.wav"), 1, ATTN_NORM, 0);
 		break;
 
 	case MZ2_FLOAT_BLASTER_1:
-		dl->color[0] = 1;dl->color[1] = 1;dl->color[2] = 0;
+	//	dl->color[0] = 1;dl->color[1] = 1;dl->color[2] = 0;
+		if (modifier < 0)	// default
+		{	dl->color[0] = 1;dl->color[1] = 1;dl->color[2] = 0; }	
+		else if (modifier == 1)	// green
+		{	dl->color[0] = 0.15;dl->color[1] = 1;dl->color[2] = 0.15; }
+		else if (modifier == 2)	// blue
+		{	dl->color[0] = 0.15;dl->color[1] = 0.15;dl->color[2] = 1; }
+		else if (modifier == 3)	// red
+		{	dl->color[0] = 1;dl->color[1] = 0.15;dl->color[2] = 0.15; }
+		else	// orange
+		{	dl->color[0] = 1;dl->color[1] = 1;dl->color[2] = 0; }
 		S_StartSound (NULL, ent, CHAN_WEAPON, S_RegisterSound("floater/fltatck1.wav"), 1, ATTN_NORM, 0);
 		break;
 
@@ -638,7 +698,17 @@ void CL_ParseMuzzleFlash2 (void)
 	case MZ2_TANK_BLASTER_1:
 	case MZ2_TANK_BLASTER_2:
 	case MZ2_TANK_BLASTER_3:
-		dl->color[0] = 1;dl->color[1] = 1;dl->color[2] = 0;
+	//	dl->color[0] = 1;dl->color[1] = 1;dl->color[2] = 0;
+		if (modifier < 0)	// default
+		{	dl->color[0] = 1;dl->color[1] = 1;dl->color[2] = 0; }	
+		else if (modifier == 1)	// green
+		{	dl->color[0] = 0.15;dl->color[1] = 1;dl->color[2] = 0.15; }
+		else if (modifier == 2)	// blue
+		{	dl->color[0] = 0.15;dl->color[1] = 0.15;dl->color[2] = 1; }
+		else if (modifier == 3)	// red
+		{	dl->color[0] = 1;dl->color[1] = 0.15;dl->color[2] = 0.15; }
+		else	// orange
+		{	dl->color[0] = 1;dl->color[1] = 1;dl->color[2] = 0; }
 		S_StartSound (NULL, ent, CHAN_WEAPON, S_RegisterSound("tank/tnkatck3.wav"), 1, ATTN_NORM, 0);
 		break;
 
@@ -734,7 +804,17 @@ void CL_ParseMuzzleFlash2 (void)
 	case MZ2_MAKRON_BLASTER_15:
 	case MZ2_MAKRON_BLASTER_16:
 	case MZ2_MAKRON_BLASTER_17:
-		dl->color[0] = 1;dl->color[1] = 1;dl->color[2] = 0;
+	//	dl->color[0] = 1;dl->color[1] = 1;dl->color[2] = 0;
+		if (modifier < 0)	// default
+		{	dl->color[0] = 1;dl->color[1] = 1;dl->color[2] = 0; }	
+		else if (modifier == 1)	// green
+		{	dl->color[0] = 0.15;dl->color[1] = 1;dl->color[2] = 0.15; }
+		else if (modifier == 2)	// blue
+		{	dl->color[0] = 0.15;dl->color[1] = 0.15;dl->color[2] = 1; }
+		else if (modifier == 3)	// red
+		{	dl->color[0] = 1;dl->color[1] = 0.15;dl->color[2] = 0.15; }
+		else	// orange
+		{	dl->color[0] = 1;dl->color[1] = 1;dl->color[2] = 0; }
 		S_StartSound (NULL, ent, CHAN_WEAPON, S_RegisterSound("makron/blaster.wav"), 1, ATTN_NORM, 0);
 		break;
 	
@@ -760,7 +840,7 @@ void CL_ParseMuzzleFlash2 (void)
 		break;
 
 	case MZ2_JORG_BFG_1:
-		dl->color[0] = 0.5;dl->color[1] = 1 ;dl->color[2] = 0.5;
+		dl->color[0] = 0.5;dl->color[1] = 1;dl->color[2] = 0.5;
 		break;
 // --- Xian's shit ends ---
 
@@ -817,7 +897,17 @@ void CL_ParseMuzzleFlash2 (void)
 	case MZ2_WIDOW_RUN_6:
 	case MZ2_WIDOW_RUN_7:
 	case MZ2_WIDOW_RUN_8:
-		dl->color[0] = 0;dl->color[1] = 1;dl->color[2] = 0;
+	//	dl->color[0] = 0.15;dl->color[1] = 1;dl->color[2] = 0.15;
+		if (modifier < 0)	// default
+		{	dl->color[0] = 0.15;dl->color[1] = 1;dl->color[2] = 0.15; }	
+		else if (modifier == 1)	// green
+		{	dl->color[0] = 0.15;dl->color[1] = 1;dl->color[2] = 0.15; }
+		else if (modifier == 2)	// blue
+		{	dl->color[0] = 0.15;dl->color[1] = 0.15;dl->color[2] = 1; }
+		else if (modifier == 3)	// red
+		{	dl->color[0] = 1;dl->color[1] = 0.15;dl->color[2] = 0.15; }
+		else	// orange
+		{	dl->color[0] = 1;dl->color[1] = 1;dl->color[2] = 0; }
 		S_StartSound (NULL, ent, CHAN_WEAPON, S_RegisterSound("tank/tnkatck3.wav"), 1, ATTN_NORM, 0);
 		break;
 
@@ -851,6 +941,18 @@ void CL_ParseMuzzleFlash2 (void)
 // ======
 
 // Knightmare added
+	case MZ2_SOLDIER_IONRIPPER_1:
+	case MZ2_SOLDIER_IONRIPPER_2:
+	case MZ2_SOLDIER_IONRIPPER_3:
+	case MZ2_SOLDIER_IONRIPPER_4:
+	case MZ2_SOLDIER_IONRIPPER_5:
+	case MZ2_SOLDIER_IONRIPPER_6:
+	case MZ2_SOLDIER_IONRIPPER_7:
+	case MZ2_SOLDIER_IONRIPPER_8:
+		dl->color[0] = 1;dl->color[1] = 0.5; dl->color[2] = 0.5;
+		S_StartSound (NULL, ent, CHAN_WEAPON, S_RegisterSound("weapons/rippfire.wav"), 1, ATTN_NORM, 0);
+		break;
+
 	case MZ2_SOLDIER_HYPERBLASTER_1:
 	case MZ2_SOLDIER_HYPERBLASTER_2:
 	case MZ2_SOLDIER_HYPERBLASTER_3:
@@ -859,7 +961,16 @@ void CL_ParseMuzzleFlash2 (void)
 	case MZ2_SOLDIER_HYPERBLASTER_6:
 	case MZ2_SOLDIER_HYPERBLASTER_7:
 	case MZ2_SOLDIER_HYPERBLASTER_8:
-		dl->color[0] = 0.15;dl->color[1] = 0.15;dl->color[2] = 1;
+		if (modifier < 0)	// default
+		{	dl->color[0] = 0.15;dl->color[1] = 0.15;dl->color[2] = 1; }	
+		else if (modifier == 1)	// green
+		{	dl->color[0] = 0.15;dl->color[1] = 1;dl->color[2] = 0.15; }
+		else if (modifier == 2)	// blue
+		{	dl->color[0] = 0.15;dl->color[1] = 0.15;dl->color[2] = 1; }
+		else if (modifier == 3)	// red
+		{	dl->color[0] = 1;dl->color[1] = 0.15;dl->color[2] = 0.15; }
+		else	// orange
+		{	dl->color[0] = 1;dl->color[1] = 1;dl->color[2] = 0; }
 		S_StartSound (NULL, ent, CHAN_WEAPON, S_RegisterSound("weapons/hyprbf1a.wav"), 1, ATTN_NORM, 0);
 		break;
 
@@ -882,6 +993,22 @@ void CL_ParseMuzzleFlash2 (void)
 		dl->color[0] = 0.9;dl->color[1] = 0.7;dl->color[2] = 0;
 		S_StartSound (NULL, ent, CHAN_WEAPON, S_RegisterSound("weapons/nail1.wav"), 1, ATTN_NORM, 0);
 		break;
+	
+	case MZ2_SOLDIER_PLASMA_RIFLE_1:
+	case MZ2_SOLDIER_PLASMA_RIFLE_2:
+	case MZ2_SOLDIER_PLASMA_RIFLE_3:
+	case MZ2_SOLDIER_PLASMA_RIFLE_4:
+	case MZ2_SOLDIER_PLASMA_RIFLE_5:
+	case MZ2_SOLDIER_PLASMA_RIFLE_6:
+	case MZ2_SOLDIER_PLASMA_RIFLE_7:
+	case MZ2_SOLDIER_PLASMA_RIFLE_8:
+		dl->color[0] = 0.15;dl->color[1] = 0.15;dl->color[2] = 1;
+		if (modifier == 1)
+			S_StartSound (NULL, ent, CHAN_WEAPON, S_RegisterSound("weapons/plasma/fire2.wav"), 1, ATTN_NORM, 0);
+		else
+			S_StartSound (NULL, ent, CHAN_WEAPON, S_RegisterSound("weapons/plasma/fire1.wav"), 1, ATTN_NORM, 0);
+		break;
+
 // end Knightmare
 
 	}

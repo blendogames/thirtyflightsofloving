@@ -222,7 +222,7 @@ void CarrierGrenade (edict_t *self)
 		aim[2] = -0.5;
 
 	flash_number = MZ2_GUNNER_GRENADE_1;
-	monster_fire_grenade (self, start, aim, 50, 600, flash_number);
+	monster_fire_grenade (self, start, aim, 50, 600, flash_number, false);
 }
 
 void CarrierPredictiveRocket  (edict_t *self)

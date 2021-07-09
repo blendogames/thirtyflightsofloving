@@ -401,7 +401,7 @@ void SP_monster_flipper (edict_t *self)
 	if (!self->health)
 		self->health = 50;
 	if (!self->gib_health)
-		self->gib_health = -40; //was -30
+		self->gib_health = -40; // was -30
 	if (!self->mass)
 		self->mass = 100;
 

@@ -2287,7 +2287,7 @@ extern void monster_fire_bfg ( edict_t * self , vec3_t start , vec3_t aimdir , i
 extern void monster_fire_railgun ( edict_t * self , vec3_t start , vec3_t aimdir , int damage , int kick , int flashtype ) ;
 extern void monster_fire_missile ( edict_t * self , vec3_t start , vec3_t dir , int damage , int speed , int flashtype , edict_t * homing_target ) ;
 extern void monster_fire_rocket ( edict_t * self , vec3_t start , vec3_t dir , int damage , int speed , int flashtype , edict_t * homing_target ) ;
-extern void monster_fire_grenade ( edict_t * self , vec3_t start , vec3_t aimdir , int damage , int speed , int flashtype ) ;
+extern void monster_fire_grenade ( edict_t * self , vec3_t start , vec3_t aimdir , int damage , int speed , int flashtype , qboolean contact ) ;
 extern void monster_fire_blaster ( edict_t * self , vec3_t start , vec3_t dir , int damage , int speed , int flashtype , int effect , int color ) ;
 extern void monster_fire_shotgun ( edict_t * self , vec3_t start , vec3_t aimdir , int damage , int kick , int hspread , int vspread , int count , int flashtype ) ;
 extern void monster_fire_bullet ( edict_t * self , vec3_t start , vec3_t dir , int damage , int kick , int hspread , int vspread , int flashtype ) ;

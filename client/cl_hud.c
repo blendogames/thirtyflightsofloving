@@ -311,7 +311,7 @@ void CL_ExecuteLayoutString (char *s, qboolean isStatusBar)
 
 	scrLeft = 0;
 	scrWidth = SCREEN_WIDTH;
-	SCR_AdjustFrom640 (&scrLeft, NULL, &scrWidth, NULL, ALIGN_STRETCH);
+	SCR_ScaleCoords (&scrLeft, NULL, &scrWidth, NULL, ALIGN_STRETCH);
 
 	while (s)
 	{

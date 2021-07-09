@@ -905,7 +905,8 @@ void SP_monster_makron_put (edict_t *self)
 	// Lazarus: get around Killed's prevention of health dropping below -999
 //	if (!self->gib_health)
 //		self->gib_health = -2000;
-	self->gib_health = -900;
+	if (!self->gib_health)
+		self->gib_health = -800;
 	if (!self->mass)
 		self->mass = 500;
 

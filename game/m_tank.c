@@ -941,7 +941,7 @@ void SP_monster_tank (edict_t *self)
 		if (!self->health)
 			self->health = 1000;
 		if (!self->gib_health)
-			self->gib_health = -225;
+			self->gib_health = -400;	// Knightmare- was -225
 		self->common_name = "Tank Commander";
 	}
 	else
@@ -950,7 +950,7 @@ void SP_monster_tank (edict_t *self)
 		if (!self->health)
 			self->health = 750;
 		if (!self->gib_health)
-			self->gib_health = -200;
+			self->gib_health = -400;	// Knightmare- was -200
 		self->common_name = "Tank";
 	}
 	self->class_id = ENTITY_MONSTER_TANK;

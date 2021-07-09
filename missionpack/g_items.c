@@ -2675,11 +2675,7 @@ gitem_t	itemlist[] =
 		WEAP_BLASTER,
 		NULL,
 		0,
-#ifdef KMQUAKE2_ENGINE_MOD // Knightmare- precache alternate blaster bolts
-		"models/objects/laser2/tris.md2 models/objects/blaser/tris.md2 weapons/blastf1a.wav misc/lasfly.wav" // precache
-#else
 		"weapons/blastf1a.wav misc/lasfly.wav" // precache
-#endif
 	},
 
 // 10
@@ -2949,11 +2945,7 @@ gitem_t	itemlist[] =
 		WEAP_HYPERBLASTER,
 		NULL,
 		0,
-#ifdef KMQUAKE2_ENGINE_MOD // Knightmare- precache alternate blaster bolts
-		"models/objects/laser2/tris.md2 models/objects/blaser/tris.md2 weapons/hyprbl1a.wav weapons/hyprbf1a.wav weapons/hyprbd1a.wav misc/lasfly.wav" //removed weapons/hyprbu1a.wav
-#else
-		"weapons/hyprbl1a.wav weapons/hyprbf1a.wav weapons/hyprbd1a.wav misc/lasfly.wav" //removed weapons/hyprbu1a.wav
-#endif
+		"weapons/hyprbl1a.wav weapons/hyprbf1a.wav weapons/hyprbd1a.wav misc/lasfly.wav" // removed weapons/hyprbu1a.wav
 	},
 
 // 21

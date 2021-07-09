@@ -279,7 +279,7 @@ void Prox_Explode (edict_t *ent)
 	edict_t		*owner;
 	int			type;
 
-	Grenade_Remove_From_Chain (ent);
+//	Grenade_Remove_From_Chain (ent);
 
 // free the trigger field
 
@@ -521,7 +521,7 @@ void prox_land (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
 	
 	if (surf && (surf->flags & SURF_SKY))
 	{
-		Grenade_Remove_From_Chain (ent);
+	//	Grenade_Remove_From_Chain (ent);
 		G_FreeEdict(ent);
 		return;
 	}
@@ -731,8 +731,8 @@ void fire_prox (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int dama
 	prox->flags |= FL_MECHANICAL;
 
 	// Knightmare- mark monster-fired prox mines for avoidance
-	if (self->svflags & SVF_MONSTER)
-		Grenade_Add_To_Chain (prox);
+/*	if (self->svflags & SVF_MONSTER)
+		Grenade_Add_To_Chain (prox); */
 
 	gi.linkentity (prox);
 }

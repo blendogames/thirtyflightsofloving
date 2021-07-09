@@ -28,7 +28,9 @@ Changes as of v0.20 update 8:
 
 - Added horizontal offset to third-person mode.  Offset distance is controlled by cvar cg_thirdperson_offset.
 
-- Added unique muzzleflashes for Hyperblaster Soldier and Beta-class Gladiator in The Reckoning and Railgun Turret in Ground Zero.
+- Added unique muzzleflashes for the Ripper Guard, Hyperblaster Guard and Beta-class Gladiator in The Reckoning and Railgun Turret in Ground Zero.
+
+- Added unique muzzleflashes for the LMCTF/LMSP plasma rifle and Plasma Guard (bounce and spread).
 
 - Added separate cvars ui_font and scr_font for menu and screen fonts, respectively.  Con_font now only
 	changes the font in the console.

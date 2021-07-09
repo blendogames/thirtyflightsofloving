@@ -795,7 +795,7 @@ void CL_ParseTEnt (void)
 	type = MSG_ReadByte (&net_message);
 
 	// TODO: have index 255 as a flag to read a short for the real extended index
-/*	if (type == 255)
+/*	if ( !LegacyProtocol() && (type == 255) )
 		type = (unsigned short)MSG_ReadShort (&net_message); */
 
 	switch (type)
@@ -1176,7 +1176,7 @@ void CL_ParseTEnt (void)
 		MSG_ReadPos (&net_message, pos);
 		MSG_ReadDir (&net_message, dir);
 	//	if (cl_old_explosions->value)
-		if (cl_old_explosions->integer)
+		if ( cl_old_explosions->integer || !(cl_add_particles->integer) )
 		{
 			ex = CL_AllocExplosion ();
 			VectorCopy (pos, ex->ent.origin);
@@ -1206,29 +1206,29 @@ void CL_ParseTEnt (void)
 			ex->light = 150;
 
 			if (type == TE_BLASTER2) {
-				ex->lightcolor[0] = 0.15;
-				ex->lightcolor[1] = 1;
-				ex->lightcolor[2] = 0.15;
+				ex->lightcolor[0] = 0.15f;
+				ex->lightcolor[1] = 1.0f;
+				ex->lightcolor[2] = 0.15f;
 			}
 			else if (type == TE_BLUEHYPERBLASTER) {
-				ex->lightcolor[0] = 0.19;
-				ex->lightcolor[1] = 0.41;
-				ex->lightcolor[2] = 0.75;
+				ex->lightcolor[0] = 0.19f;
+				ex->lightcolor[1] = 0.41f;
+				ex->lightcolor[2] = 0.75f;
 			}
 			else if (type == TE_REDBLASTER) {
-				ex->lightcolor[0] = 0.75;
-				ex->lightcolor[1] = 0.41;
-				ex->lightcolor[2] = 0.19;
+				ex->lightcolor[0] = 0.75f;
+				ex->lightcolor[1] = 0.19f;	// was 0.41f
+				ex->lightcolor[2] = 0.19f;
 			}
 			else if (type == TE_FLECHETTE) {
-				ex->lightcolor[0] = 0.39;
-				ex->lightcolor[1] = 0.61;
-				ex->lightcolor[2] = 0.75;
+				ex->lightcolor[0] = 0.39f;
+				ex->lightcolor[1] = 0.61f;
+				ex->lightcolor[2] = 0.75f;
 			}
 			else { // TE_BLASTER	
-				ex->lightcolor[0] = 1;
-				ex->lightcolor[1] = 1;
-				ex->lightcolor[2] = 0;
+				ex->lightcolor[0] = 1.0f;
+				ex->lightcolor[1] = 1.0f;
+				ex->lightcolor[2] = 0.0f;
 			}
 
 			ex->ent.model = clMedia.mod_explode;

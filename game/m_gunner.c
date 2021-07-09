@@ -795,7 +795,7 @@ void SP_monster_gunner (edict_t *self)
 	if (!self->health)
 		self->health = 175;
 	if (!self->gib_health)
-		self->gib_health = -70;
+		self->gib_health = -150;	// Knightmare- was -70
 	if (!self->mass)
 		self->mass = 200;
 

@@ -462,11 +462,11 @@ void parasite_jump_up (edict_t *self)
 
 void parasite_jump_wait_land (edict_t *self)
 {
-	if(self->groundentity == NULL)
+	if (self->groundentity == NULL)
 	{
 		self->monsterinfo.nextframe = self->s.frame;
 
-		if(monster_jump_finished (self))
+		if (monster_jump_finished (self))
 			self->monsterinfo.nextframe = self->s.frame + 1;
 	}
 	else 
@@ -501,10 +501,10 @@ mmove_t parasite_move_jump_down = { FRAME_jump01, FRAME_jump08, parasite_frames_
 
 void parasite_jump (edict_t *self)
 {
-	if(!self->enemy)
+	if (!self->enemy)
 		return;
 
-	if(self->enemy->s.origin[2] > self->s.origin[2])
+	if (self->enemy->s.origin[2] > self->s.origin[2])
 		self->monsterinfo.currentmove = &parasite_move_jump_up;
 	else
 		self->monsterinfo.currentmove = &parasite_move_jump_down;
@@ -517,16 +517,16 @@ Blocked
 */
 qboolean parasite_blocked (edict_t *self, float dist)
 {
-	if(blocked_checkshot (self, 0.25 + (0.05 * skill->value) ))
+	if (blocked_checkshot (self, 0.25 + (0.05 * skill->value) ))
 		return true;
 
-	if(blocked_checkjump (self, dist, 256, 68))
+	if (blocked_checkjump (self, dist, 256, 68))
 	{
 		parasite_jump (self);
 		return true;
 	}
 
-	if(blocked_checkplat (self, dist))
+	if (blocked_checkplat (self, dist))
 		return true;
 
 	return false; //Knightmare- default return to prevent warnings
@@ -570,7 +570,7 @@ qboolean parasite_checkattack (edict_t *self)
 	{
 		self->monsterinfo.aiflags |= AI_BLOCKED;
 		
-		if(self->monsterinfo.attack)
+		if (self->monsterinfo.attack)
 			self->monsterinfo.attack(self);
 		
 		self->monsterinfo.aiflags &= ~AI_BLOCKED;
@@ -598,7 +598,7 @@ void parasite_dead (edict_t *self)
 	M_FlyCheck (self);
 
 	// Lazarus monster fade
-	if(world->effects & FX_WORLDSPAWN_CORPSEFADE)
+	if (world->effects & FX_WORLDSPAWN_CORPSEFADE)
 	{
 		self->think=FadeDieSink;
 		self->nextthink=level.time+corpse_fadetime->value;
@@ -687,11 +687,11 @@ void SP_monster_parasite (edict_t *self)
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;
 
-	if(!self->health)
+	if (!self->health)
 		self->health = 175;
-	if(!self->gib_health)
-		self->gib_health = -150;
-	if(!self->mass)
+	if (!self->gib_health)
+		self->gib_health = -100;
+	if (!self->mass)
 		self->mass = 250;
 
 	self->pain = parasite_pain;
@@ -711,7 +711,7 @@ void SP_monster_parasite (edict_t *self)
 		self->blood_type = 3; //sparks and blood
 
 	// Lazarus
-	if(self->powerarmor)
+	if (self->powerarmor)
 	{
 		if (self->powerarmortype == 1)
 			self->monsterinfo.power_armor_type = POWER_ARMOR_SCREEN;
@@ -719,7 +719,7 @@ void SP_monster_parasite (edict_t *self)
 			self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
 		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
-	if(!self->monsterinfo.flies)
+	if (!self->monsterinfo.flies)
 		self->monsterinfo.flies = 0.30;
 
 	self->common_name = "Parasite";

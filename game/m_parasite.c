@@ -580,7 +580,7 @@ void SP_monster_parasite (edict_t *self)
 	if (!self->health)
 		self->health = 175;
 	if (!self->gib_health)
-		self->gib_health = -50;
+		self->gib_health = -100;	// Knightmare- was -50
 	if (!self->mass)
 		self->mass = 250;
 

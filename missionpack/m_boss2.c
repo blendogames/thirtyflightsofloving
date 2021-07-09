@@ -55,7 +55,7 @@ void Boss2PredictiveRocket  (edict_t *self)
 		VectorMA(self->enemy->s.origin, time-0.3, self->enemy->velocity, vec);
 
 	// Lazarus fog reduction of accuracy
-	if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+	if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 	{
 		vec[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 		vec[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -79,7 +79,7 @@ void Boss2PredictiveRocket  (edict_t *self)
 		VectorMA(self->enemy->s.origin, time-0.15, self->enemy->velocity, vec);
 
 	// Lazarus fog reduction of accuracy
-	if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+	if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 	{
 		vec[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 		vec[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -103,7 +103,7 @@ void Boss2PredictiveRocket  (edict_t *self)
 		VectorMA(self->enemy->s.origin, time, self->enemy->velocity, vec);
 
 	// Lazarus fog reduction of accuracy
-	if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+	if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 	{
 		vec[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 		vec[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -127,7 +127,7 @@ void Boss2PredictiveRocket  (edict_t *self)
 		VectorMA(self->enemy->s.origin, time+0.15, self->enemy->velocity, vec);
 
 	// Lazarus fog reduction of accuracy
-	if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+	if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 	{
 		vec[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 		vec[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -150,9 +150,9 @@ void Boss2Rocket (edict_t *self)
 	vec3_t	dir;
 	vec3_t	vec;
 
-	if(self->enemy)
+	if (self->enemy)
 	{
-		if(self->enemy->client && random() < 0.9)
+		if (self->enemy->client && random() < 0.9)
 		{
 			Boss2PredictiveRocket(self);
 			return;
@@ -167,7 +167,7 @@ void Boss2Rocket (edict_t *self)
 //	vec[2] += self->enemy->viewheight;
 	vec[2] -= 15;
 	// Lazarus fog reduction of accuracy
-	if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+	if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 	{
 		vec[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 		vec[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -186,7 +186,7 @@ void Boss2Rocket (edict_t *self)
 	VectorCopy (self->enemy->s.origin, vec);
 //	vec[2] += self->enemy->viewheight;
 	// Lazarus fog reduction of accuracy
-	if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+	if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 	{
 		vec[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 		vec[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -205,7 +205,7 @@ void Boss2Rocket (edict_t *self)
 	VectorCopy (self->enemy->s.origin, vec);
 //	vec[2] += self->enemy->viewheight;
 	// Lazarus fog reduction of accuracy
-	if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+	if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 	{
 		vec[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 		vec[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -225,7 +225,7 @@ void Boss2Rocket (edict_t *self)
 //	vec[2] += self->enemy->viewheight;
 	vec[2] -= 15;
 	// Lazarus fog reduction of accuracy
-	if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+	if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 	{
 		vec[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 		vec[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -261,7 +261,7 @@ void boss2_firebullet_right (edict_t *self)
 	target[2] += self->enemy->viewheight;
 
 	// Lazarus fog reduction of accuracy
-	if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+	if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 	{
 		target[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 		target[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -296,7 +296,7 @@ void boss2_firebullet_left (edict_t *self)
 	target[2] += self->enemy->viewheight;
 
 	// Lazarus fog reduction of accuracy
-	if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+	if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 	{
 		target[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 		target[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -777,7 +777,7 @@ qboolean Boss2_CheckAttack (edict_t *self)
 		if (tr.ent != self->enemy)
 		{	
 			// PGM - we want them to go ahead and shoot at info_notnulls if they can.
-			if(self->enemy->solid != SOLID_NOT || tr.fraction < 1.0)		//PGM
+			if (self->enemy->solid != SOLID_NOT || tr.fraction < 1.0)		//PGM
 				return false;
 		}
 	}
@@ -887,11 +887,11 @@ void SP_monster_boss2 (edict_t *self)
 	VectorSet (self->mins, -56, -56, 0);
 	VectorSet (self->maxs, 56, 56, 80);
 
-	if(!self->health)
+	if (!self->health)
 		self->health = 2000;
-	if(!self->gib_health)
+	if (!self->gib_health)
 		self->gib_health = -999;
-	if(!self->mass)
+	if (!self->mass)
 		self->mass = 1000;
 
 	self->yaw_speed = 50;
@@ -919,7 +919,7 @@ void SP_monster_boss2 (edict_t *self)
 	self->monsterinfo.scale = MODEL_SCALE;
 
 	// Lazarus
-	if(self->powerarmor)
+	if (self->powerarmor)
 	{
 		if (self->powerarmortype == 1)
 			self->monsterinfo.power_armor_type = POWER_ARMOR_SCREEN;

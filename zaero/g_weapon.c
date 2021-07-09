@@ -400,18 +400,19 @@ void fire_blaster (edict_t *self, vec3_t start, vec3_t dir, int damage, int spee
 	bolt->clipmask = MASK_SHOT;
 	bolt->solid = SOLID_BBOX;
 	bolt->s.effects |= effect;
-	bolt->s.renderfx |= RF_NOSHADOW; //Knightmare- no shadow
+	bolt->s.renderfx |= RF_NOSHADOW; // Knightmare- no shadow
 	VectorClear (bolt->mins);
 	VectorClear (bolt->maxs);
 
-	if (color == BLASTER_GREEN) //green
-		bolt->s.modelindex = gi.modelindex ("models/objects/laser2/tris.md2");
-	else if (color == BLASTER_BLUE) //blue
-		bolt->s.modelindex = gi.modelindex ("models/objects/blaser/tris.md2");
-	else if (color == BLASTER_RED) //red
-		bolt->s.modelindex = gi.modelindex ("models/objects/rlaser/tris.md2");
-	else //standard orange
-		bolt->s.modelindex = gi.modelindex ("models/objects/laser/tris.md2");
+	if (color == BLASTER_GREEN) // green
+		bolt->s.skinnum = 1;
+	else if (color == BLASTER_BLUE) // blue
+		bolt->s.skinnum = 2;
+	else if (color == BLASTER_RED) // red
+		bolt->s.skinnum = 3;
+	else // standard orange
+		bolt->s.skinnum = 0;
+	bolt->s.modelindex = gi.modelindex ("models/objects/laser/tris.md2");
 	bolt->style = color;
 
 	bolt->s.sound = gi.soundindex ("misc/lasfly.wav");

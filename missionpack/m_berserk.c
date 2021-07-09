@@ -77,7 +77,7 @@ void berserk_fidget (edict_t *self)
 
 	self->monsterinfo.currentmove = &berserk_move_stand_fidget;
 
-	if(!(self->spawnflags & SF_MONSTER_AMBUSH))
+	if (!(self->spawnflags & SF_MONSTER_AMBUSH))
 		gi.sound (self, CHAN_WEAPON, sound_idle, 1, ATTN_IDLE, 0);
 }
 
@@ -332,7 +332,7 @@ void berserk_dead (edict_t *self)
 	M_FlyCheck (self);
 
 	// Lazarus monster fade
-	if(world->effects & FX_WORLDSPAWN_CORPSEFADE)
+	if (world->effects & FX_WORLDSPAWN_CORPSEFADE)
 	{
 		self->think = FadeDieSink;
 		self->nextthink = level.time+corpse_fadetime->value;
@@ -431,11 +431,11 @@ void berserk_jump2_now (edict_t *self)
 
 void berserk_jump_wait_land (edict_t *self)
 {
-	if(self->groundentity == NULL)
+	if (self->groundentity == NULL)
 	{
 		self->monsterinfo.nextframe = self->s.frame;
 
-		if(monster_jump_finished (self))
+		if (monster_jump_finished (self))
 			self->monsterinfo.nextframe = self->s.frame + 1;
 	}
 	else 
@@ -472,12 +472,12 @@ mmove_t berserk_move_jump2 = { FRAME_jump1, FRAME_jump9, berserk_frames_jump2, b
 
 void berserk_jump (edict_t *self)
 {
-	if(!self->enemy)
+	if (!self->enemy)
 		return;
 
 	monster_done_dodge (self);
 
-	if(self->enemy->s.origin[2] > self->s.origin[2])
+	if (self->enemy->s.origin[2] > self->s.origin[2])
 		self->monsterinfo.currentmove = &berserk_move_jump2;
 	else
 		self->monsterinfo.currentmove = &berserk_move_jump;
@@ -485,13 +485,13 @@ void berserk_jump (edict_t *self)
 
 qboolean berserk_blocked (edict_t *self, float dist)
 {
-	if(blocked_checkjump (self, dist, 256, 40))
+	if (blocked_checkjump (self, dist, 256, 40))
 	{
 		berserk_jump(self);
 		return true;
 	}
 
-	if(blocked_checkplat (self, dist))
+	if (blocked_checkplat (self, dist))
 		return true;
 
 	return false;
@@ -546,11 +546,11 @@ void SP_monster_berserk (edict_t *self)
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;
 
-	if(!self->health)
+	if (!self->health)
 		self->health = 240;
-	if(!self->gib_health)
+	if (!self->gib_health)
 		self->gib_health = -150;
-	if(!self->mass)
+	if (!self->mass)
 		self->mass = 250;
 
 	self->pain = berserk_pain;

@@ -73,6 +73,7 @@ cvar_t		*scr_simple_loadscreen;	// whether to use reduced load screen
 cvar_t		*scr_surroundlayout;	// whether to keep HUD/menu elements on center screen in triple-wide video modes
 cvar_t		*scr_surroundleft;		// left placement of HUD/menu elements on center screen in triple-wide video modes
 cvar_t		*scr_surroundright;		// right placement of HUD/menu elements on center screen in triple-wide video modes
+cvar_t		*scr_surroundthreshold;	// minimum aspect ratio to trigger surround layout
 
 cvar_t		*scr_hudsize;
 cvar_t		*scr_hudalpha;
@@ -216,12 +217,13 @@ float SCR_GetScreenScale (void)
 
 /*
 ================
-SCR_AdjustFrom640
-Adjusted for resolution and screen aspect ratio
+SCR_ScaleCoords
+
+Scales virtual 640x480 coords to screen resolution
 ================
 */
 #if 1
-void SCR_AdjustFrom640 (float *x, float *y, float *w, float *h, scralign_t align)
+void SCR_ScaleCoords (float *x, float *y, float *w, float *h, scralign_t align)
 {
 	float	xscale, lb_xscale, yscale, minscale, vertscale;
 	float	tmp_x, tmp_y, tmp_w, tmp_h;
@@ -229,7 +231,7 @@ void SCR_AdjustFrom640 (float *x, float *y, float *w, float *h, scralign_t align
 
 
 	// for eyefinity/surround setups, keep everything on the center monitor
-	if (scr_surroundlayout && scr_surroundlayout->integer && scr_screenAspect >= 3.6f)
+	if ( scr_surroundlayout && scr_surroundlayout->integer && (scr_screenAspect >= scr_surroundthreshold->value) ) // 3.6f
 	{
 		if (scr_surroundleft && scr_surroundleft->value > 0.0f && scr_surroundleft->value < 1.0f)
 			xleft = (float)viddef.width * scr_surroundleft->value;
@@ -620,7 +622,7 @@ Coordinates are 640*480 virtual values
 */
 void SCR_DrawFill (float x, float y, float width, float height, scralign_t align, int red, int green, int blue, int alpha)
 {
-	SCR_AdjustFrom640 (&x, &y, &width, &height, align);
+	SCR_ScaleCoords (&x, &y, &width, &height, align);
 	R_DrawFill (x, y, width, height, red, green, blue, alpha);
 }
 
@@ -632,7 +634,7 @@ Coordinates are 640*480 virtual values
 */
 void SCR_DrawPic (float x, float y, float width, float height, scralign_t align, char *pic, float alpha)
 {
-	SCR_AdjustFrom640 (&x, &y, &width, &height, align);
+	SCR_ScaleCoords (&x, &y, &width, &height, align);
 	R_DrawStretchPic (x, y, width, height, pic, alpha);
 }
 
@@ -646,7 +648,7 @@ void SCR_DrawChar (float x, float y, int size, scralign_t align, int num, fontsl
 {
 	float	scale = SCR_ScaledScreen((float)size / (float)MENU_FONT_SIZE);	// SCR_GetScreenScale()
 
-	SCR_AdjustFrom640 (&x, &y, NULL, NULL, align);
+	SCR_ScaleCoords (&x, &y, NULL, NULL, align);
 	R_DrawChar(x, y, num, font, scale, red, green, blue, alpha, italic, last);
 }
 
@@ -658,7 +660,7 @@ Coordinates are 640*480 virtual values
 */
 void SCR_DrawString (float x, float y, int size, scralign_t align, const char *string, fontslot_t font, int alpha)
 {
-	SCR_AdjustFrom640 (&x, &y, NULL, NULL, align);
+	SCR_ScaleCoords (&x, &y, NULL, NULL, align);
 	CL_DrawStringGeneric (x, y, string, font, alpha, size, SCALETYPE_MENU, false);
 }
 
@@ -712,7 +714,7 @@ static void SCR_ShowFPS (void)
 //	x = (viddef.width - strlen(fpsText)*FONT_SIZE - 3*SCR_GetHudScale()*(CHAR_WIDTH+2));
 //	x = (viddef.width - strlen(fpsText)*HUD_FONT_SIZE*SCR_GetHudScale() - 3*SCR_GetHudScale()*(CHAR_WIDTH+2));
 	scrLeft = SCREEN_WIDTH;
-	SCR_AdjustFrom640 (&scrLeft, NULL, NULL, NULL, ALIGN_STRETCH);
+	SCR_ScaleCoords (&scrLeft, NULL, NULL, NULL, ALIGN_STRETCH);
 	fragsSize = SCR_GetHudScale() * 3 * (CHAR_WIDTH+2);
 //	x = ( viddef.width - strlen(fpsText)*HUD_FONT_SIZE*SCR_GetScreenScale() - max(fragsSize, SCR_ScaledScreen(68)) );
 	x = (scrLeft - stringLen(fpsText)*HUD_FONT_SIZE*SCR_GetScreenScale() - max(fragsSize, SCR_ScaledScreen(68)));
@@ -809,7 +811,7 @@ void SCR_DrawDebugGraph (void)
 
 	scrLeft = 0;
 	scrWidth = SCREEN_WIDTH;
-	SCR_AdjustFrom640 (&scrLeft, NULL, &scrWidth, NULL, ALIGN_STRETCH);
+	SCR_ScaleCoords (&scrLeft, NULL, &scrWidth, NULL, ALIGN_STRETCH);
 	scrRight = scrLeft + scrWidth;
 
 //	if (scr_netgraph_pos->value == 0) // bottom right
@@ -1400,6 +1402,8 @@ void SCR_Init (void)
 	Cvar_SetDescription ("scr_surroundleft", "Changes left boundary for center monitor in triple-monitor surround layout.  Only change if you have a surround setup with different size monitors.");
 	scr_surroundright = Cvar_Get ("scr_surroundright", "0.666666666667", CVAR_ARCHIVE);		// right placement of HUD/menu elements on center screen in triple-wide video modes
 	Cvar_SetDescription ("scr_surroundright", "Changes right boundary for center monitor in triple-monitor surround layout.  Only change if you have a surround setup with different size monitors.");
+	scr_surroundthreshold = Cvar_Get ("scr_surroundthreshold", "3.6", CVAR_ARCHIVE);		// minimum aspect ratio to trigger surround layout
+	Cvar_SetDescription ("scr_surroundthreshold", "Sets minimum aspect ratio to trigger triple-monitor surround layout scaling.");
 
 	scr_hudsize = Cvar_Get ("scr_hudsize", "5", CVAR_ARCHIVE);
 	Cvar_SetDescription ("scr_hudsize", "Sets scale for HUD.");

@@ -104,7 +104,15 @@ void monster_fire_bullet (edict_t *self, vec3_t start, vec3_t dir, int damage, i
 
 	gi.WriteByte (svc_muzzleflash2);
 	gi.WriteShort (self - g_edicts);
-	gi.WriteByte (flashtype);
+#ifdef KMQUAKE2_ENGINE_MOD
+	if (flashtype >= MZ2_SEND_SHORT) {
+		gi.WriteByte (MZ2_SEND_SHORT);
+		gi.WriteShort (flashtype);
+		gi.WriteByte (0);
+	}
+	else
+#endif
+		gi.WriteByte (flashtype);
 	gi.multicast (start, MULTICAST_PVS);
 }
 
@@ -114,7 +122,15 @@ void monster_fire_shotgun (edict_t *self, vec3_t start, vec3_t aimdir, int damag
 
 	gi.WriteByte (svc_muzzleflash2);
 	gi.WriteShort (self - g_edicts);
-	gi.WriteByte (flashtype);
+#ifdef KMQUAKE2_ENGINE_MOD
+	if (flashtype >= MZ2_SEND_SHORT) {
+		gi.WriteByte (MZ2_SEND_SHORT);
+		gi.WriteShort (flashtype);
+		gi.WriteByte (0);
+	}
+	else
+#endif
+		gi.WriteByte (flashtype);
 	gi.multicast (start, MULTICAST_PVS);
 }
 
@@ -124,7 +140,15 @@ void monster_fire_blaster (edict_t *self, vec3_t start, vec3_t dir, int damage, 
 
 	gi.WriteByte (svc_muzzleflash2);
 	gi.WriteShort (self - g_edicts);
-	gi.WriteByte (flashtype);
+#ifdef KMQUAKE2_ENGINE_MOD
+	if (flashtype >= MZ2_SEND_SHORT) {
+		gi.WriteByte (MZ2_SEND_SHORT);
+		gi.WriteShort (flashtype);
+		gi.WriteByte (color - 1);	// orange = 0, green = 1, blue = 2, red = 3
+	}
+	else
+#endif
+		gi.WriteByte (flashtype);
 	gi.multicast (start, MULTICAST_PVS);
 }	
 
@@ -134,7 +158,15 @@ void monster_fire_grenade (edict_t *self, vec3_t start, vec3_t aimdir, int damag
 
 	gi.WriteByte (svc_muzzleflash2);
 	gi.WriteShort (self - g_edicts);
-	gi.WriteByte (flashtype);
+#ifdef KMQUAKE2_ENGINE_MOD
+	if (flashtype >= MZ2_SEND_SHORT) {
+		gi.WriteByte (MZ2_SEND_SHORT);
+		gi.WriteShort (flashtype);
+		gi.WriteByte (0);
+	}
+	else
+#endif
+		gi.WriteByte (flashtype);
 	gi.multicast (start, MULTICAST_PVS);
 }
 
@@ -144,7 +176,15 @@ void monster_fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, i
 
 	gi.WriteByte (svc_muzzleflash2);
 	gi.WriteShort (self - g_edicts);
-	gi.WriteByte (flashtype);
+#ifdef KMQUAKE2_ENGINE_MOD
+	if (flashtype >= MZ2_SEND_SHORT) {
+		gi.WriteByte (MZ2_SEND_SHORT);
+		gi.WriteShort (flashtype);
+		gi.WriteByte (0);
+	}
+	else
+#endif
+		gi.WriteByte (flashtype);
 	gi.multicast (start, MULTICAST_PVS);
 }	
 
@@ -154,7 +194,15 @@ void monster_fire_railgun (edict_t *self, vec3_t start, vec3_t aimdir, int damag
 
 	gi.WriteByte (svc_muzzleflash2);
 	gi.WriteShort (self - g_edicts);
-	gi.WriteByte (flashtype);
+#ifdef KMQUAKE2_ENGINE_MOD
+	if (flashtype >= MZ2_SEND_SHORT) {
+		gi.WriteByte (MZ2_SEND_SHORT);
+		gi.WriteShort (flashtype);
+		gi.WriteByte (0);
+	}
+	else
+#endif
+		gi.WriteByte (flashtype);
 	gi.multicast (start, MULTICAST_PVS);
 }
 
@@ -164,7 +212,15 @@ void monster_fire_bfg (edict_t *self, vec3_t start, vec3_t aimdir, int damage, i
 
 	gi.WriteByte (svc_muzzleflash2);
 	gi.WriteShort (self - g_edicts);
-	gi.WriteByte (flashtype);
+#ifdef KMQUAKE2_ENGINE_MOD
+	if (flashtype >= MZ2_SEND_SHORT) {
+		gi.WriteByte (MZ2_SEND_SHORT);
+		gi.WriteShort (flashtype);
+		gi.WriteByte (0);
+	}
+	else
+#endif
+		gi.WriteByte (flashtype);
 	gi.multicast (start, MULTICAST_PVS);
 }
 

@@ -407,20 +407,20 @@ void Do_Text_Display (edict_t *activator, int flags, char *message)
 		if (p2 && (p2 < p3))
 		{
 			p2 += 2;
-			sscanf(p2,"%d",&hnd->page_length);
+			sscanf(p2, "%d", &hnd->page_length);
 			hnd->page_length += 1;
 		}
 		p2 = strstr(p1,"W=");
 		if (p2 && (p2 < p3))
 		{
 			p2 += 2;
-			sscanf(p2,"%d",&hnd->page_width);
+			sscanf(p2, "%d", &hnd->page_width);
 		}
 		p2 = strstr(p1,"I=");
 		if (p2 && (p2 < p3))
 		{
 			p2 += 2;
-			sscanf(p2,"%s",hnd->background_image);
+			sscanf(p2, "%s", hnd->background_image);
 		}
 		p3++;
 		if (*p3 == 10) p3++;

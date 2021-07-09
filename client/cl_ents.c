@@ -1306,8 +1306,8 @@ void CL_AddPacketEntities (frame_t *frame)
 		//**** MODEL / EFFECT SWAPPING ETC *** - per gametype...
 		if (ent.model)
 		{
-			if (!Q_strcasecmp((char *)ent.model, "models/objects/laser/tris.md2")
-				&& !(effects & EF_BLASTER))
+			if (!Q_strcasecmp((char *)ent.model, "models/objects/laser/tris.md2") && (ent.skinnum == 0)	// skinnum is always 0 for stock blaster bolt
+				&& !(effects & EF_BLASTER) && cl_add_particles->integer)
 			{	// replace the bolt with a particle glow
 				CL_HyperBlasterEffect (cent->lerp_origin, ent.origin, s1->angles,
 					255, 150, 50, 0, -90, -30, 10, 3);
@@ -1316,21 +1316,24 @@ void CL_AddPacketEntities (frame_t *frame)
 			if ( (!Q_strcasecmp((char *)ent.model, "models/proj/laser2/tris.md2")
 				|| !Q_strcasecmp((char *)ent.model, "models/objects/laser2/tris.md2")
 				|| !Q_strcasecmp((char *)ent.model, "models/objects/glaser/tris.md2") )
-				&& !(effects & EF_BLASTER))
+				|| ( !Q_strcasecmp((char *)ent.model, "models/objects/laser/tris.md2") && (ent.skinnum == 1) )	// skinnum 1 is green blaster bolt
+				&& !(effects & EF_BLASTER) && cl_add_particles->integer)
 			{	// give the bolt a green particle glow
 				CL_HyperBlasterEffect (cent->lerp_origin, ent.origin, s1->angles,
 					50, 235, 50, -10, 0, -10, 10, 3);
 				drawEnt = false;
 			}
 			if (!Q_strcasecmp((char *)ent.model, "models/objects/blaser/tris.md2")
-				&& !(effects & EF_BLASTER))
+				|| ( !Q_strcasecmp((char *)ent.model, "models/objects/laser/tris.md2") && (ent.skinnum == 2) )	// skinnum 1 is blue blaster bolt
+				&& !(effects & EF_BLASTER) && cl_add_particles->integer)
 			{	// give the bolt a blue particle glow
 				CL_HyperBlasterEffect (cent->lerp_origin, ent.origin, s1->angles,
 					50, 50, 235, 0, -10, 0, -10, 3);
 				drawEnt = false;
 			}
 			if (!Q_strcasecmp((char *)ent.model, "models/objects/rlaser/tris.md2")
-				&& !(effects & EF_BLASTER))
+				|| ( !Q_strcasecmp((char *)ent.model, "models/objects/laser/tris.md2") && (ent.skinnum == 3) )	// skinnum 1 is red blaster bolt
+				&& !(effects & EF_BLASTER) && cl_add_particles->integer)
 			{	// give the bolt a red particle glow
 				CL_HyperBlasterEffect (cent->lerp_origin, ent.origin, s1->angles,
 					235, 50, 50, 0, -90, -30, -10, 3);
@@ -1657,13 +1660,13 @@ void CL_AddPacketEntities (frame_t *frame)
 					CL_BlasterTrail (cent->lerp_origin, ent.origin, 50, 235, 50, -10, 0, -10);
 					V_AddLight (ent.origin, 200, 0.15, 1, 0.15);		
 				}
-				//Knightmare- behold, the power of cheese!!
+				// Knightmare- behold, the power of cheese!!
 				else if (effects & EF_BLUEHYPERBLASTER) // EF_BLUEBLASTER
 				{
 					CL_BlasterTrail (cent->lerp_origin, ent.origin, 50, 50, 235, -10, 0, -10);
 					V_AddLight (ent.origin, 200, 0.15, 0.15, 1);		
 				}
-				//Knightmare- behold, the power of cheese!!
+				// Knightmare- behold, the power of cheese!!
 				else if (effects & EF_IONRIPPER) // EF_REDBLASTER
 				{
 					CL_BlasterTrail (cent->lerp_origin, ent.origin, 235, 50, 50, 0, -90, -30);
@@ -1742,14 +1745,14 @@ void CL_AddPacketEntities (frame_t *frame)
 					V_AddLight (ent.origin, 255, 0.1, 1, 0.1);
 				}
 				else
-				{	//Knightmare- Psychospaz's enhanced particle code
+				{	// Knightmare- Psychospaz's enhanced particle code
 					CL_FlagTrail (cent->lerp_origin, ent.origin, true, false);
 					V_AddLight (ent.origin, 225, 1, 0.1, 0.1);
 				}
-				//end Knightmare
+				// end Knightmare
 			}
 			else if (effects & EF_FLAG2)
-			{	//Knightmare- Psychospaz's enhanced particle code
+			{	// Knightmare- Psychospaz's enhanced particle code
 				CL_FlagTrail (cent->lerp_origin, ent.origin, false, false);
 				V_AddLight (ent.origin, 225, 0.1, 0.1, 1);
 			}
@@ -1776,7 +1779,7 @@ void CL_AddPacketEntities (frame_t *frame)
 				}
 			}
 			else if (effects & EF_TRACKER)
-			{	//Knightmare- this is replaced for Psychospaz's enhanced particle code
+			{	// Knightmare- this is replaced for Psychospaz's enhanced particle code
 				CL_TrackerTrail (cent->lerp_origin, ent.origin);
 				V_AddLight (ent.origin, 200, -1, -1, -1);
 			}
@@ -1798,7 +1801,7 @@ void CL_AddPacketEntities (frame_t *frame)
 			// RAFAEL
 			else if (effects & EF_BLUEHYPERBLASTER)
 			{
-				V_AddLight (ent.origin, 200, 0, 0, 1);
+				V_AddLight (ent.origin, 200, 0.15, 0.15, 1);
 			}
 			// RAFAEL
 			else if (effects & EF_PLASMA)

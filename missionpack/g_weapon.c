@@ -397,13 +397,14 @@ void fire_blaster (edict_t *self, vec3_t start, vec3_t dir, int damage, int spee
 	VectorClear (bolt->maxs);
 
 	if (color == BLASTER_GREEN) // green
-		bolt->s.modelindex = gi.modelindex ("models/objects/laser2/tris.md2");
+		bolt->s.skinnum = 1;
 	else if (color == BLASTER_BLUE) // blue
-		bolt->s.modelindex = gi.modelindex ("models/objects/blaser/tris.md2");
+		bolt->s.skinnum = 2;
 	else if (color == BLASTER_RED) // red
-		bolt->s.modelindex = gi.modelindex ("models/objects/rlaser/tris.md2");
+		bolt->s.skinnum = 3;
 	else // standard orange
-		bolt->s.modelindex = gi.modelindex ("models/objects/laser/tris.md2");
+		bolt->s.skinnum = 0;
+	bolt->s.modelindex = gi.modelindex ("models/objects/laser/tris.md2");
 	bolt->style = color;
 
 	bolt->s.sound = gi.soundindex ("misc/lasfly.wav");
@@ -494,12 +495,15 @@ void bolt_delayed_start (edict_t *bolt)
 
 void SP_bolt (edict_t *bolt)
 {
-	if (bolt->count == 2) // green bolt
-		bolt->s.modelindex = gi.modelindex ("models/objects/laser2/tris.md2");
-	else if (bolt->count == 3) // blue bolt
-		bolt->s.modelindex = gi.modelindex ("models/objects/blaser/tris.md2");
-	else //orange bolt
-		bolt->s.modelindex = gi.modelindex ("models/objects/laser/tris.md2");
+	if (bolt->style == BLASTER_GREEN) // green bolt
+		bolt->s.skinnum = 1;
+	else if (bolt->style == BLASTER_BLUE) // blue bolt
+		bolt->s.skinnum = 2;
+	else if (bolt->style == BLASTER_RED) // red bolt
+		bolt->s.skinnum = 3;
+	else // orange bolt
+		bolt->s.skinnum = 0;
+	bolt->s.modelindex = gi.modelindex ("models/objects/laser/tris.md2");
 	bolt->s.sound = gi.soundindex ("misc/lasfly.wav");
 	bolt->touch = blaster_touch;
 	VectorCopy(bolt->velocity,bolt->movedir);
@@ -617,7 +621,7 @@ void Grenade_Explode (edict_t *ent)
 	int			mod;
 	int			type;	// Knightmare added
 
-	Grenade_Remove_From_Chain (ent);
+//	Grenade_Remove_From_Chain (ent);
 
 	if (ent->owner->client)
 		PlayerNoise(ent->owner, ent->s.origin, PNOISE_IMPACT);
@@ -683,7 +687,7 @@ void Grenade_Touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *s
 
 	if (surf && (surf->flags & SURF_SKY))
 	{
-		Grenade_Remove_From_Chain (ent);
+	//	Grenade_Remove_From_Chain (ent);
 		G_FreeEdict (ent);
 		return;
 	}
@@ -715,7 +719,7 @@ void ContactGrenade_Touch (edict_t *ent, edict_t *other, cplane_t *plane, csurfa
 
 	if (surf && (surf->flags & SURF_SKY))
 	{
-		Grenade_Remove_From_Chain (ent);
+	//	Grenade_Remove_From_Chain (ent);
 		G_FreeEdict (ent);
 		return;
 	}
@@ -767,7 +771,7 @@ void fire_grenade (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int s
 	grenade->classname = "grenade";
 	grenade->class_id = ENTITY_GRENADE;
 
-	Grenade_Add_To_Chain (grenade);
+//	Grenade_Add_To_Chain (grenade);
 
 	gi.linkentity (grenade);
 }
@@ -820,7 +824,7 @@ void fire_grenade2 (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int 
 	else
 	{
 		gi.sound (self, CHAN_WEAPON, gi.soundindex ("weapons/hgrent1a.wav"), 1, ATTN_NORM, 0);
-		Grenade_Add_To_Chain (grenade);
+	//	Grenade_Add_To_Chain (grenade);
 		gi.linkentity (grenade);
 	}
 }

@@ -119,11 +119,10 @@ void	SCR_RunLetterbox (void);
 void	SCR_RunConsole (void);
 
 void	SCR_InitScreenScale (void);
-void	SCR_AdjustFrom640 (float *x, float *y, float *w, float *h, scralign_t align);
+void	SCR_ScaleCoords (float *x, float *y, float *w, float *h, scralign_t align);
 float	SCR_ScaledScreen (float param);
 float	SCR_GetScreenScale (void);
 
-void	SCR_AdjustFrom640 (float *x, float *y, float *w, float *h, scralign_t align);
 void	SCR_DrawFill (float x, float y, float width, float height, scralign_t align, int red, int green, int blue, int alpha);
 void	SCR_DrawPic (float x, float y, float width, float height, scralign_t align, char *pic, float alpha);
 void	SCR_DrawChar (float x, float y, int size, scralign_t align, int num, fontslot_t font, int red, int green, int blue, int alpha, qboolean italic, qboolean last);

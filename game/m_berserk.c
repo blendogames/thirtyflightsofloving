@@ -477,7 +477,7 @@ void SP_monster_berserk (edict_t *self)
 	if (!self->health)
 		self->health = 240;
 	if (!self->gib_health)
-		self->gib_health = -60;
+		self->gib_health = -150;	// Knightmare- was -60
 	if (!self->mass)
 		self->mass = 250;
 

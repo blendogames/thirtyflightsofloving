@@ -696,7 +696,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 			}
 			// Gunner
 			else if (!strcmp(attacker->classname, "monster_gunner")
-				|| !strcmp(attacker->classname, "monster_gunner_commander") )
+				|| !strcmp(attacker->classname, "monster_gunner_tactician") )
 			{
 				if (mod == MOD_GRENADE) {
 					message = "was popped by a";

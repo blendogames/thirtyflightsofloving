@@ -639,7 +639,7 @@ void SP_monster_infantry (edict_t *self)
 	if (!self->health)
 		self->health = 100;
 	if (!self->gib_health)
-		self->gib_health = -40;
+		self->gib_health = -50;	// Knightmare- was -40
 	if (!self->mass)
 		self->mass = 200;
 

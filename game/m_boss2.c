@@ -700,7 +700,7 @@ void SP_monster_boss2 (edict_t *self)
 	if (!self->health)
 		self->health = 2000;
 	if (!self->gib_health)
-		self->gib_health = -200;
+		self->gib_health = -400;	// Knightmare- was -200
 	if (!self->mass)
 		self->mass = 1000;
 

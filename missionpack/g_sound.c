@@ -1501,7 +1501,7 @@ void ReadTextureSurfaceAssignments ()
 	while (fgets(line, sizeof(line), f) && num_texsurfs < MAX_TEX_SURF)
 	{
 		sscanf(line,"%d %s",&tex_surf[num_texsurfs].step_id,tex_surf[num_texsurfs].tex);
-//		gi.dprintf("%d %s\n",tex_surf[num_texsurfs].step_id,tex_surf[num_texsurfs].tex);
+	//	gi.dprintf("%d %s\n",tex_surf[num_texsurfs].step_id,tex_surf[num_texsurfs].tex);
 		num_texsurfs++;
 	}
 	fclose(f);

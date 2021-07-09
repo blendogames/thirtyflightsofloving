@@ -446,7 +446,7 @@ void SP_monster_gladb (edict_t *self)
 	if (!self->monsterinfo.flies)
 		self->monsterinfo.flies = 0.025;
 
-	self->common_name = "Beta Class Gladiator";
+	self->common_name = "Beta-Class Gladiator";
 	self->class_id = ENTITY_MONSTER_GLADIATOR_BETA;
 
 	walkmonster_start (self);
