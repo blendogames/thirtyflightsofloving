@@ -495,6 +495,8 @@ static int blaster_flash [] = {MZ2_SOLDIER_BLASTER_1, MZ2_SOLDIER_BLASTER_2, MZ2
 static int shotgun_flash [] = {MZ2_SOLDIER_SHOTGUN_1, MZ2_SOLDIER_SHOTGUN_2, MZ2_SOLDIER_SHOTGUN_3, MZ2_SOLDIER_SHOTGUN_4, MZ2_SOLDIER_SHOTGUN_5, MZ2_SOLDIER_SHOTGUN_6, MZ2_SOLDIER_SHOTGUN_7, MZ2_SOLDIER_SHOTGUN_8};
 static int machinegun_flash [] = {MZ2_SOLDIER_MACHINEGUN_1, MZ2_SOLDIER_MACHINEGUN_2, MZ2_SOLDIER_MACHINEGUN_3, MZ2_SOLDIER_MACHINEGUN_4, MZ2_SOLDIER_MACHINEGUN_5, MZ2_SOLDIER_MACHINEGUN_6, MZ2_SOLDIER_MACHINEGUN_7, MZ2_SOLDIER_MACHINEGUN_8};
 #ifdef KMQUAKE2_ENGINE_MOD
+static int plasma_rifle_flash [] = {MZ2_SOLDIER_PLASMA_RIFLE_1, MZ2_SOLDIER_PLASMA_RIFLE_2, MZ2_SOLDIER_PLASMA_RIFLE_3, MZ2_SOLDIER_PLASMA_RIFLE_4, MZ2_SOLDIER_PLASMA_RIFLE_5, MZ2_SOLDIER_PLASMA_RIFLE_6, MZ2_SOLDIER_PLASMA_RIFLE_7, MZ2_SOLDIER_PLASMA_RIFLE_8};
+static int ionripper_flash [] = {MZ2_SOLDIER_IONRIPPER_1, MZ2_SOLDIER_IONRIPPER_2, MZ2_SOLDIER_IONRIPPER_3, MZ2_SOLDIER_IONRIPPER_4, MZ2_SOLDIER_IONRIPPER_5, MZ2_SOLDIER_IONRIPPER_6, MZ2_SOLDIER_IONRIPPER_7, MZ2_SOLDIER_IONRIPPER_8};
 static int hyperblaster_flash [] = {MZ2_SOLDIER_HYPERBLASTER_1, MZ2_SOLDIER_HYPERBLASTER_2, MZ2_SOLDIER_HYPERBLASTER_3, MZ2_SOLDIER_HYPERBLASTER_4, MZ2_SOLDIER_HYPERBLASTER_5, MZ2_SOLDIER_HYPERBLASTER_6, MZ2_SOLDIER_HYPERBLASTER_7, MZ2_SOLDIER_HYPERBLASTER_8};
 #endif	// KMQUAKE2_ENGINE_MOD
 
@@ -540,7 +542,11 @@ void soldier_fire (edict_t *self, int in_flash_number)
 	else if (self->skinnum < 6)
 		flash_index = machinegun_flash[flash_number];
 	else // if (self->skinnum < 8)
+#ifdef KMQUAKE2_ENGINE_MOD
+		flash_index = plasma_rifle_flash[flash_number];
+#else
 		flash_index = blaster_flash[flash_number];
+#endif	// KMQUAKE2_ENGINE_MOD
 
 	AngleVectors (self->s.angles, forward, right, NULL);
 	G_ProjectSource (self->s.origin, monster_flash_offset[flash_index], forward, right, start);
@@ -2098,7 +2104,11 @@ void soldierh_fire (edict_t *self, int flash_number)
 
 //	if ((self->s.skinnum % 6) < 2)
 	if (self->skinnum < 2)
+#ifdef KMQUAKE2_ENGINE_MOD
+		flash_index = ionripper_flash[flash_number]; // ripper
+#else
 		flash_index = blaster_flash[flash_number]; // ripper
+#endif	// KMQUAKE2_ENGINE_MOD
 //	else if ((self->s.skinnum % 6) < 4)
 	else if (self->skinnum < 4)
 #ifdef KMQUAKE2_ENGINE_MOD
@@ -2158,9 +2168,9 @@ void soldierh_fire (edict_t *self, int flash_number)
 //	else if ((self->s.skinnum % 6) <= 3)
 	else if (self->skinnum <= 3)
 	{
-	//	monster_fire_blaster (self, start, aim, 4, 600, flash_index, EF_BLUEHYPERBLASTER, BLASTER_BLUE);
+		monster_fire_blaster (self, start, aim, 4, 600, flash_index, EF_BLUEHYPERBLASTER, BLASTER_BLUE);
 	//	monster_fire_blueblaster (self, start, aim, 4, 600, MZ_BLUEHYPERBLASTER, EF_BLUEHYPERBLASTER);
-		monster_fire_blueblaster (self, start, aim, 4, 600, flash_index, EF_BLUEHYPERBLASTER);	// Knightmare- use an actual monster muzzleflash here!
+	//	monster_fire_blueblaster (self, start, aim, 4, 600, flash_index, EF_BLUEHYPERBLASTER);	// Knightmare- use an actual monster muzzleflash here!
 	}
 	else // if (self->skinnum <= 5)
 	{
@@ -3258,7 +3268,11 @@ void SP_monster_soldier_plasma_re (edict_t *self)
 	sound_pain_ss = gi.soundindex ("soldier/solpain3.wav");
 	sound_death_ss = gi.soundindex ("soldier/soldeth3.wav");
 	gi.modelindex (PLASMA_SPRITE_FLY);
+#ifdef KMQUAKE2_ENGINE_MOD
+	gi.soundindex ("weapons/plasma/fire1.wav");
+#else
 	gi.soundindex ("soldier/solatck2.wav");
+#endif	// KMQUAKE2_ENGINE_MOD
 
 	self->common_name = "Plasma Guard";
 	self->class_id = ENTITY_MONSTER_SOLDIER_PLASMA_BOUNCE;
@@ -3292,7 +3306,11 @@ void SP_monster_soldier_plasma_sp (edict_t *self)
 	sound_pain_ss = gi.soundindex ("soldier/solpain3.wav");
 	sound_death_ss = gi.soundindex ("soldier/soldeth3.wav");
 	gi.modelindex (PLASMA_SPRITE_FLY);
+#ifdef KMQUAKE2_ENGINE_MOD
+	gi.soundindex ("weapons/plasma/fire2.wav");
+#else
 	gi.soundindex ("soldier/solatck2.wav");
+#endif	// KMQUAKE2_ENGINE_MOD
 
 	self->common_name = "Plasma Guard";
 	self->class_id = ENTITY_MONSTER_SOLDIER_PLASMA_SPREAD;
@@ -3406,7 +3424,11 @@ void SP_monster_soldier_ripper (edict_t *self)
 	
 	gi.modelindex ("models/objects/boomrang/tris.md2");
 	gi.soundindex ("misc/lasfly.wav");
+#ifdef KMQUAKE2_ENGINE_MOD
+	gi.soundindex ("weapons/rippfire.wav");
+#else
 	gi.soundindex ("soldier/solatck2.wav");
+#endif	// KMQUAKE2_ENGINE_MOD
 
 	self->common_name = "Ripper Guard";
 	self->class_id = ENTITY_MONSTER_SOLDIER_RIPPER;

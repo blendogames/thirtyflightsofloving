@@ -3613,7 +3613,7 @@ void weapon_plasma_rifle_fire (edict_t *ent, qboolean altfire)
 {
 	vec3_t	offset, start;
 	vec3_t	forward, right;
-	int		damage;
+	int		damage, muzzleflash;
 
 	if ( ent->client->pers.plasma_mode ) {
 		if (deathmatch->value)	// tone down for deathmatch
@@ -3669,11 +3669,17 @@ void weapon_plasma_rifle_fire (edict_t *ent, qboolean altfire)
 		// end Zaero
 
 		if ( ent->client->pers.plasma_mode ) {
+			muzzleflash = MZ_PLASMA_RIFLE_SPREAD;
+#ifndef KMQUAKE2_ENGINE_MOD
 			gi.sound( ent, CHAN_WEAPON, gi.soundindex(PLASMA_SOUND_FIRE2), 1, ATTN_NORM,0 );
+#endif	// KMQUAKE2_ENGINE_MOD
 			fire_plasma_rifle (ent, start, forward, damage, (int)sk_plasma_rifle_speed_spread->value, true);
 		}
 		else {
+			muzzleflash = MZ_PLASMA_RIFLE_BOUNCE;
+#ifndef KMQUAKE2_ENGINE_MOD
 			gi.sound( ent, CHAN_WEAPON, gi.soundindex(PLASMA_SOUND_FIRE1), 1, ATTN_NORM,0 );
+#endif	// KMQUAKE2_ENGINE_MOD
 			fire_plasma_rifle (ent, start, forward, damage, (int)sk_plasma_rifle_speed_bounce->value, false);
 		}
 
@@ -3684,14 +3690,16 @@ void weapon_plasma_rifle_fire (edict_t *ent, qboolean altfire)
 		ent->client->v_dmg_pitch = -2;
 		ent->client->v_dmg_roll = crandom()*2;
 		ent->client->v_dmg_time = level.time + DAMAGE_TIME;
-	}
 
-	//-bat Silence??
-	// send muzzle flash
-	//gi.WriteByte (svc_muzzleflash);
-	//gi.WriteShort (ent-g_edicts);
-	//gi.WriteByte (MZ_ROCKET | is_silenced);
-	//gi.multicast (ent->s.origin, MULTICAST_PVS);
+		//-bat Silence??
+		// send muzzle flash
+#ifdef KMQUAKE2_ENGINE_MOD
+		gi.WriteByte (svc_muzzleflash);
+		gi.WriteShort (ent-g_edicts);
+		gi.WriteByte (muzzleflash | is_silenced);
+		gi.multicast (ent->s.origin, MULTICAST_PVS);
+#endif	// KMQUAKE2_ENGINE_MOD
+	}
 
 	ent->client->ps.gunframe++;
 

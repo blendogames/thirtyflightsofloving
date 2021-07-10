@@ -493,7 +493,7 @@ void boss5Rocket (edict_t *self)
 	vec[2] += self->enemy->viewheight;
 
 	// Lazarus fog reduction of accuracy
-	if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+	if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 	{
 		vec[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 		vec[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -533,7 +533,7 @@ void boss5MachineGun (edict_t *self)
 		vec[2] += self->enemy->viewheight;
 
 		// Lazarus fog reduction of accuracy
-		if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+		if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 		{
 			vec[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 			vec[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -623,10 +623,10 @@ void boss5_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 //PGM
 qboolean boss5_blocked (edict_t *self, float dist)
 {
-	if(blocked_checkshot (self, 0.25 + (0.05 * skill->value) ))
+	if (blocked_checkshot (self, 0.25 + (0.05 * skill->value) ))
 		return true;
 
-	if(blocked_checkplat (self, dist))
+	if (blocked_checkplat (self, dist))
 		return true;
 
 	return false;
@@ -673,11 +673,11 @@ void SP_monster_boss5 (edict_t *self)
 	VectorSet (self->mins, -64, -64, 0);
 	VectorSet (self->maxs, 64, 64, 112);
 
-	if(!self->health)
+	if (!self->health)
 		self->health = 1500;
-	if(!self->gib_health)
+	if (!self->gib_health)
 		self->gib_health = -999;
-	if(!self->mass)
+	if (!self->mass)
 		self->mass = 800;
 
 	self->pain = boss5_pain;
@@ -703,7 +703,7 @@ void SP_monster_boss5 (edict_t *self)
 	self->monsterinfo.scale = MODEL_SCALE;
 
 	// Lazarus
-	if(self->powerarmor)
+	if (self->powerarmor)
 	{
 		if (self->powerarmortype == 1)
 			self->monsterinfo.power_armor_type = POWER_ARMOR_SCREEN;
