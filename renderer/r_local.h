@@ -868,7 +868,6 @@ typedef struct
 	qboolean	arbTextureNonPowerOfTwo;
 
 	qboolean	vertexBufferObject;
-//	qboolean	multitexture;
 	qboolean	mtexcombine;	// added Vic's RGB brightening
 
 	qboolean	have_stencil;
