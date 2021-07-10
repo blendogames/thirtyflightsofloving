@@ -26,7 +26,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 int	r_dlightframecount;
 
-void vectoangles (vec3_t value1, vec3_t angles);
+gllightmapstate_t gl_lms;
+
+static void		LM_InitBlock (void);
+static void		LM_UploadBlock (qboolean dynamic);
+static qboolean	LM_AllocBlock (int w, int h, int *x, int *y);
 
 //#define	DLIGHT_CUTOFF	64	// Knightmare- no longer hard-coded
 
@@ -566,7 +570,6 @@ void R_SurfLightPoint (msurface_t *surf, vec3_t p, vec3_t color, qboolean baseli
 
 	if (baselight)
 	{
-#if 1
 		VectorCopy (vec3_origin, bestColor);
 		for (i=0; i<9; i++) // test multiple offset points to avoid dark corners, select brightest
 		{
@@ -583,31 +586,18 @@ void R_SurfLightPoint (msurface_t *surf, vec3_t p, vec3_t color, qboolean baseli
 			if ( (r != -1) && (VectorLength(pointcolor) > VectorLength(bestColor)) )
 				VectorCopy (pointcolor, bestColor);
 		}
-#else
-		for (i=0; i<4; i++) // test multiple points to avoid dark corners
-		{
-			VectorCopy (p, start);
-			VectorAdd (start, startOffset[i], start);
-			end[0] = start[0];
-			end[1] = start[1];
-			end[2] = start[2] - 2048;
-
-			r = RecursiveLightPoint (r_worldmodel->nodes, start, end);
-
-			if (r != -1)	break;
-		}
-#endif
 		/*
 		end[0] = p[0];
 		end[1] = p[1];
 		end[2] = p[2] - 2048;
 		
 		r = RecursiveLightPoint (r_worldmodel->nodes, p, end);
-		*/
+		
 		if (r == -1)
 			VectorCopy (vec3_origin, color);
 		else
-			VectorCopy (pointcolor, color);
+			VectorCopy (pointcolor, color);*/
+			VectorCopy (bestColor, color);
 
 		// this catches too bright modulated color
 		for (i=0; i<3; i++)
@@ -641,7 +631,7 @@ void R_SurfLightPoint (msurface_t *surf, vec3_t p, vec3_t color, qboolean baseli
 			}
 			VectorSubtract (p, dlorigin, dist);
 			// end Knightmare
-			//VectorSubtract (p, dl->origin, dist);
+		//	VectorSubtract (p, dl->origin, dist);
 
 			add = dl->intensity - VectorLength(dist);
 			add *= (DIV256);
@@ -734,7 +724,7 @@ void R_ShadowLight (vec3_t pos, vec3_t lightAdd)
 
 //===================================================================
 
-static float s_blocklights[128*128*4]; //Knightmare-  was [34*34*3], supports max chop size of 2048?
+static float s_blocklights[136*136*3]; //Knightmare-  was [34*34*3], supports max chop size of 2048?
 /*
 ===============
 R_AddDynamicLights
@@ -776,11 +766,9 @@ void R_AddDynamicLights (msurface_t *surf)
 		VectorCopy (currententity->angles, entAngles);
 	}
 
-//	if (currententity->angles[0] || currententity->angles[1] || currententity->angles[2])
 	if (entAngles[0] || entAngles[1] || entAngles[2])
 	{
 		rotated = true;
-	//	AngleVectors (currententity->angles, forward, right, up);
 		AngleVectors (entAngles, forward, right, up);
 	}
 
@@ -798,7 +786,6 @@ void R_AddDynamicLights (msurface_t *surf)
 		frad = dl->intensity;
 
 		VectorCopy (dl->origin, dlorigin);
-	//	VectorSubtract (dlorigin, currententity->origin, dlorigin);
 		VectorSubtract (dlorigin, entOrigin, dlorigin);
 
 		if (rotated)
@@ -856,6 +843,137 @@ void R_AddDynamicLights (msurface_t *surf)
 			}
 		}
 	}
+}
+
+/*
+=============================================================================
+
+  LIGHTMAP ALLOCATION
+
+=============================================================================
+*/
+
+/*
+================
+LM_InitBlock
+================
+*/
+static void LM_InitBlock (void)
+{
+	memset( gl_lms.allocated, 0, sizeof( gl_lms.allocated ) );
+
+#ifdef BATCH_LM_UPDATES
+	// alloc lightmap update buffer if needed
+	if (!gl_lms.lightmap_update[gl_lms.current_lightmap_texture]) {
+		gl_lms.lightmap_update[gl_lms.current_lightmap_texture] = Z_Malloc (LM_BLOCK_WIDTH*LM_BLOCK_HEIGHT*LIGHTMAP_BYTES);
+	}
+#endif	// BATCH_LM_UPDATES
+}
+
+
+/*
+================
+LM_UploadBlock
+================
+*/
+static void LM_UploadBlock (qboolean dynamic)
+{
+	int texture;
+	int height = 0;
+
+	if ( dynamic )
+	{
+		texture = 0;
+	}
+	else
+	{
+		texture = gl_lms.current_lightmap_texture;
+	}
+
+	GL_Bind( glState.lightmap_textures + texture );
+	qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	if ( dynamic )
+	{
+		int i;
+
+		for ( i = 0; i < LM_BLOCK_WIDTH; i++ )
+		{
+			if ( gl_lms.allocated[i] > height )
+				height = gl_lms.allocated[i];
+		}
+
+		qglTexSubImage2D( GL_TEXTURE_2D, 
+						  0,
+						  0, 0,
+						  LM_BLOCK_WIDTH, height,
+						  gl_lms.format,
+						  gl_lms.type,
+	//					  GL_LIGHTMAP_FORMAT,
+	//					  GL_UNSIGNED_BYTE,
+						  gl_lms.lightmap_buffer );
+	}
+	else
+	{
+		qglTexImage2D( GL_TEXTURE_2D, 
+					   0, 
+					   gl_lms.internal_format,
+					   LM_BLOCK_WIDTH, LM_BLOCK_HEIGHT, 
+					   0, 
+					   gl_lms.format,
+					   gl_lms.type,
+	//				   GL_LIGHTMAP_FORMAT, 
+	//				   GL_UNSIGNED_BYTE, 
+#ifdef BATCH_LM_UPDATES
+					   gl_lms.lightmap_update[gl_lms.current_lightmap_texture] );
+#else
+					   gl_lms.lightmap_buffer );
+#endif	// BATCH_LM_UPDATES
+		if ( ++gl_lms.current_lightmap_texture == MAX_LIGHTMAPS )
+			VID_Error( ERR_DROP, "LM_UploadBlock() - MAX_LIGHTMAPS exceeded\n" );
+	}
+}
+
+
+/*
+================
+LM_AllocBlock
+returns a texture number and the position inside it
+================
+*/
+static qboolean LM_AllocBlock (int w, int h, int *x, int *y)
+{
+	int		i, j;
+	int		best, best2;
+
+	best = LM_BLOCK_HEIGHT;
+
+	for (i=0 ; i<LM_BLOCK_WIDTH-w ; i++)
+	{
+		best2 = 0;
+
+		for (j=0 ; j<w ; j++)
+		{
+			if (gl_lms.allocated[i+j] >= best)
+				break;
+			if (gl_lms.allocated[i+j] > best2)
+				best2 = gl_lms.allocated[i+j];
+		}
+		if (j == w)
+		{	// this is a valid spot
+			*x = i;
+			*y = best = best2;
+		}
+	}
+
+	if (best + h > LM_BLOCK_HEIGHT)
+		return false;
+
+	for (i=0 ; i<w ; i++)
+		gl_lms.allocated[*x + i] = best + h;
+
+	return true;
 }
 
 
@@ -1189,4 +1307,200 @@ store:
 			}
 		}
 	}
+}
+
+
+/*
+========================
+R_CreateSurfaceLightmap
+========================
+*/
+void R_CreateSurfaceLightmap (msurface_t *surf)
+{
+	int			smax, tmax;
+	unsigned	*base;
+
+	if (surf->flags & (SURF_DRAWSKY|SURF_DRAWTURB))
+		return;
+
+	//if (surf->texinfo->flags & (SURF_SKY|SURF_TRANS33|SURF_TRANS66|SURF_WARP))
+	if (surf->texinfo->flags & (SURF_SKY|SURF_WARP))
+		return;
+
+	smax = (surf->extents[0]>>4)+1;
+	tmax = (surf->extents[1]>>4)+1;
+
+	if ( !LM_AllocBlock (smax, tmax, &surf->light_s, &surf->light_t) )
+	{
+		LM_UploadBlock (false);
+		LM_InitBlock();
+		if ( !LM_AllocBlock (smax, tmax, &surf->light_s, &surf->light_t) )
+		{
+			VID_Error (ERR_FATAL, "Consecutive calls to LM_AllocBlock(%d,%d) failed\n", smax, tmax);
+		}
+	}
+
+	surf->lightmaptexturenum = gl_lms.current_lightmap_texture;
+
+	// copy extents
+	surf->light_smax = smax;
+	surf->light_tmax = tmax;
+
+#ifdef BATCH_LM_UPDATES
+	base = gl_lms.lightmap_update[surf->lightmaptexturenum];
+#else
+	base = gl_lms.lightmap_buffer;
+#endif	// BATCH_LM_UPDATES
+
+	base += (surf->light_t * LM_BLOCK_WIDTH + surf->light_s);	// * LIGHTMAP_BYTES
+
+	R_SetCacheState (surf);
+	R_BuildLightMap (surf, (void *)base, LM_BLOCK_WIDTH*LIGHTMAP_BYTES);
+}
+
+
+#define gl_tex_solid_format		3
+#define gl_tex_alpha_format		4
+/*
+==================
+R_BeginBuildingLightmaps
+==================
+*/
+void R_BeginBuildingLightmaps (model_t *m)
+{
+	static lightstyle_t	lightstyles[MAX_LIGHTSTYLES];
+	int				i;
+	unsigned		dummy[LM_BLOCK_WIDTH*LM_BLOCK_HEIGHT];	// 128*128
+
+	memset( gl_lms.allocated, 0, sizeof(gl_lms.allocated) );
+
+#ifdef BATCH_LM_UPDATES
+	// free lightmap update buffers
+	for (i=0; i<MAX_LIGHTMAPS; i++)
+	{
+		if (gl_lms.lightmap_update[i])
+			Z_Free(gl_lms.lightmap_update[i]);
+		gl_lms.lightmap_update[i] = NULL;
+		gl_lms.modified[i] = false;
+		gl_lms.lightrect[i].left = LM_BLOCK_WIDTH;
+		gl_lms.lightrect[i].right = 0;
+		gl_lms.lightrect[i].top = LM_BLOCK_HEIGHT;
+		gl_lms.lightrect[i].bottom = 0;
+	}
+#endif	// BATCH_LM_UPDATES
+
+	r_framecount = 1;		// no dlightcache
+
+	GL_EnableMultitexture (true);
+	GL_SelectTexture(1);
+
+	// setup the base lightstyles so the lightmaps won't have to be regenerated
+	// the first time they're seen
+	for (i=0 ; i<MAX_LIGHTSTYLES ; i++)
+	{
+		lightstyles[i].rgb[0] = 1;
+		lightstyles[i].rgb[1] = 1;
+		lightstyles[i].rgb[2] = 1;
+		lightstyles[i].white = 3;
+	}
+	r_newrefdef.lightstyles = lightstyles;
+
+	if (!glState.lightmap_textures)
+	{
+		glState.lightmap_textures	= TEXNUM_LIGHTMAPS;
+	//	glState.lightmap_textures	= glState.texture_extension_number;
+	//	glState.texture_extension_number = glState.lightmap_textures + MAX_LIGHTMAPS;
+	}
+
+	gl_lms.current_lightmap_texture = 1;
+
+#ifdef BATCH_LM_UPDATES
+	// alloc lightmap update buffer if needed
+	if (!gl_lms.lightmap_update[gl_lms.current_lightmap_texture]) {
+		gl_lms.lightmap_update[gl_lms.current_lightmap_texture] = Z_Malloc (LM_BLOCK_WIDTH*LM_BLOCK_HEIGHT*LIGHTMAP_BYTES);
+	}
+#endif	// BATCH_LM_UPDATES
+
+
+	/*
+	** if mono lightmaps are enabled and we want to use alpha
+	** blending (a,1-a) then we're likely running on a 3DLabs
+	** Permedia2.  In a perfect world we'd use a GL_ALPHA lightmap
+	** in order to conserve space and maximize bandwidth, however 
+	** this isn't a perfect world.
+	**
+	** So we have to use alpha lightmaps, but stored in GL_RGBA format,
+	** which means we only get 1/16th the color resolution we should when
+	** using alpha lightmaps.  If we find another board that supports
+	** only alpha lightmaps but that can at least support the GL_ALPHA
+	** format then we should change this code to use real alpha maps.
+	*/
+
+	// Knightmare- old internal formats for compatibility with older GPUs/drivers
+	if ( !glConfig.newLMFormat )
+	{
+		if ( toupper( r_monolightmap->string[0] ) == 'A' )
+		{
+			gl_lms.internal_format = gl_tex_alpha_format;
+		}
+		// try to do hacked colored lighting with a blended texture
+		else if ( toupper( r_monolightmap->string[0] ) == 'C' )
+		{
+			gl_lms.internal_format = gl_tex_alpha_format;
+		}
+		else if ( toupper( r_monolightmap->string[0] ) == 'I' )
+		{
+			gl_lms.internal_format = GL_INTENSITY8;
+		}
+		else if ( toupper( r_monolightmap->string[0] ) == 'L' ) 
+		{
+			gl_lms.internal_format = GL_LUMINANCE8;
+		}
+		else
+		{
+			gl_lms.internal_format = gl_tex_solid_format;
+		}
+
+		gl_lms.format = GL_RGBA;
+		gl_lms.type = GL_UNSIGNED_BYTE;
+	}
+	else
+	{
+		if ( toupper( r_monolightmap->string[0] ) == 'I' )
+			gl_lms.internal_format = GL_INTENSITY8;
+		else if ( toupper( r_monolightmap->string[0] ) == 'L' ) 
+			gl_lms.internal_format = GL_LUMINANCE8;
+		else
+			gl_lms.internal_format = GL_RGBA8;
+
+		gl_lms.format = GL_BGRA;
+		gl_lms.type = GL_UNSIGNED_INT_8_8_8_8_REV;
+	}
+
+	// initialize the dynamic lightmap texture
+	GL_Bind( glState.lightmap_textures + 0 );
+	qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	qglTexImage2D( GL_TEXTURE_2D, 
+				   0, 
+				   gl_lms.internal_format,
+				   LM_BLOCK_WIDTH, LM_BLOCK_HEIGHT, 
+				   0, 
+				   gl_lms.format,
+				   gl_lms.type,
+	//			   GL_LIGHTMAP_FORMAT, 
+	//			   GL_UNSIGNED_BYTE, 
+				   dummy );
+}
+
+
+/*
+=======================
+R_EndBuildingLightmaps
+=======================
+*/
+void R_EndBuildingLightmaps (void)
+{
+	LM_UploadBlock (false);
+	GL_EnableMultitexture (false);
 }

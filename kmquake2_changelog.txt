@@ -41,6 +41,8 @@ Changes as of v0.20 update 8:
 - Added upscaling of the scrap image (with optional blending by Skuller from Q2Pro) used to atlas 8-bit HUD pics.
 	Use cvar r_scrap_upscale to enable, value of 1 is pixel copy, value of 2 enables blending.
 	Requires vid_restart for changes to take effect.
+	
+- Removed the old, decrepit single-texturing surface rendering mode.  GL_ARB_multitexture support is now required.
 
 - Now reads/writes savegames, config files, demos, etc. to <userprofile>/Saved Games/KMQuake2 on Windows Vista
 	and later, and to My Documents/My Games/KMQuake2 on Windows 2000/XP/2003.

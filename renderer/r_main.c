@@ -118,7 +118,6 @@ cvar_t	*r_rgbscale; // Vic's RGB brightening
 //cvar_t	*r_vertex_arrays;	// unused
 
 //cvar_t	*r_ext_swapinterval;	// unused
-cvar_t	*r_ext_multitexture;
 cvar_t	*r_ext_draw_range_elements;
 cvar_t	*r_ext_compiled_vertex_array;
 cvar_t	*r_arb_texturenonpoweroftwo;	// Knightmare- non-power-of-two texture support
@@ -719,7 +718,7 @@ void R_RenderView (refdef_t *fd)
 		R_DrawEntitiesOnList(ents_viewweaps);
 
 		R_ParticleStencil (1);
-		R_DrawAlphaSurfaces ();
+		R_DrawAllAlphaSurfaces ();
 		R_ParticleStencil (2);
 
 		R_ParticleStencil (3);
@@ -1106,8 +1105,6 @@ void R_Register (void)
 //	gl_ext_palettedtexture = Cvar_Get( "gl_ext_palettedtexture", "0", CVAR_ARCHIVE );
 //	gl_ext_pointparameters = Cvar_Get( "gl_ext_pointparameters", "1", CVAR_ARCHIVE );
 //	r_ext_swapinterval = Cvar_Get( "r_ext_swapinterval", "1", CVAR_ARCHIVE );	// unused
-	r_ext_multitexture = Cvar_Get( "r_ext_multitexture", "1", CVAR_ARCHIVE );
-	Cvar_SetDescription ("r_ext_multitexture", "Enables multitexture rendering of lightmapped surfaces.");
 	r_ext_draw_range_elements = Cvar_Get("r_ext_draw_range_elements", "1", CVAR_ARCHIVE /*| CVAR_LATCH*/);
 	Cvar_SetDescription ("r_ext_draw_range_elements", "Enables use of glDrawRangeElements().");
 	r_ext_compiled_vertex_array = Cvar_Get( "r_ext_compiled_vertex_array", "1", CVAR_ARCHIVE );
@@ -1354,47 +1351,52 @@ Grabs GL extensions
 */
 qboolean R_CheckGLExtensions (char *reason)
 {
+	qboolean multitexture_found = false;
+
 	// OpenGL multitexture on GL 1.2.1 or later or GL_ARB_multitexture
-	glConfig.multitexture = false;
-	glConfig.max_texunits = 1;
+	// This is checked first, is required
+	glConfig.max_texunits = 2; // must have at least 2
 	if ( (glConfig.version_major >= 2) || (glConfig.version_major == 1 && glConfig.version_minor > 2)
 		|| (glConfig.version_major == 1 && glConfig.version_minor == 2 && glConfig.version_release >= 1) )
 	{
 		qglMultiTexCoord2fARB = (void *) qwglGetProcAddress( "glMultiTexCoord2f" );
 		qglActiveTextureARB = (void *) qwglGetProcAddress( "glActiveTexture" );
 		qglClientActiveTextureARB = (void *) qwglGetProcAddress( "glClientActiveTexture" );
-		if (!qglMultiTexCoord2fARB || !qglActiveTextureARB || !qglClientActiveTextureARB)
-		{
+		if (!qglMultiTexCoord2fARB || !qglActiveTextureARB || !qglClientActiveTextureARB) {
 			VID_Printf (PRINT_ALL, "...OpenGL multitexture not found, checking for GL_ARB_multitexture\n" );
 		}
 		else {
 			VID_Printf (PRINT_ALL, "...using OpenGL multitexture\n" );
 			qglGetIntegerv(GL_MAX_TEXTURE_UNITS, &glConfig.max_texunits);
 			VID_Printf (PRINT_ALL, "...GL_MAX_TEXTURE_UNITS: %i\n", glConfig.max_texunits);
-			glConfig.multitexture = true;
+			multitexture_found = true;
 		}
 	}
-	if ( (!glConfig.multitexture) && Q_StrScanToken( glConfig.extensions_string, "GL_ARB_multitexture", false ) )
+	if ( (!multitexture_found) && Q_StrScanToken( glConfig.extensions_string, "GL_ARB_multitexture", false ) )
 	{
-		if (r_ext_multitexture->integer)
-		{
-			qglMultiTexCoord2fARB = (void *) qwglGetProcAddress( "glMultiTexCoord2fARB" );
-			qglActiveTextureARB = (void *) qwglGetProcAddress( "glActiveTextureARB" );
-			qglClientActiveTextureARB = (void *) qwglGetProcAddress( "glClientActiveTextureARB" );
-			if (!qglMultiTexCoord2fARB || !qglActiveTextureARB || !qglClientActiveTextureARB)
-				VID_Printf (PRINT_ALL, "..." S_COLOR_RED "GL_ARB_multitexture not properly supported!\n"S_COLOR_YELLOW"WARNING: glow/caustic texture effects not enabled\n");
-			else {
-				VID_Printf (PRINT_ALL, "...using GL_ARB_multitexture\n" );
-				qglGetIntegerv(GL_MAX_TEXTURE_UNITS_ARB, &glConfig.max_texunits);
-				VID_Printf (PRINT_ALL, "...GL_MAX_TEXTURE_UNITS_ARB: %i\n", glConfig.max_texunits);
-				glConfig.multitexture = true;
-			}
+		qglMultiTexCoord2fARB = (void *) qwglGetProcAddress( "glMultiTexCoord2fARB" );
+		qglActiveTextureARB = (void *) qwglGetProcAddress( "glActiveTextureARB" );
+		qglClientActiveTextureARB = (void *) qwglGetProcAddress( "glClientActiveTextureARB" );
+		if (!qglMultiTexCoord2fARB || !qglActiveTextureARB || !qglClientActiveTextureARB) {
+			QGL_Shutdown();
+			VID_Printf (PRINT_ALL, "R_Init() - GL_ARB_multitexture functions not implemented in driver!\n" );
+			memcpy (reason, "GL_ARB_multitexture not properly implemented in driver!\0", 55);
+			return false;
 		}
-		else
-			VID_Printf (PRINT_ALL, "...ignoring GL_ARB_multitexture\n"S_COLOR_YELLOW"WARNING: glow/caustic texture effects not enabled\n" );
+		else {
+			VID_Printf (PRINT_ALL, "...using GL_ARB_multitexture\n" );
+			qglGetIntegerv(GL_MAX_TEXTURE_UNITS_ARB, &glConfig.max_texunits);
+			VID_Printf (PRINT_ALL, "...GL_MAX_TEXTURE_UNITS_ARB: %i\n", glConfig.max_texunits);
+			multitexture_found = true;
+		}
 	}
-	if (!glConfig.multitexture)
-		VID_Printf (PRINT_ALL, "...GL_ARB_multitexture not found\n"S_COLOR_YELLOW"WARNING: glow/caustic texture effects not supported\n" );
+	if (!multitexture_found)
+	{
+		QGL_Shutdown();
+        VID_Printf (PRINT_ALL, "R_Init() - GL_ARB_multitexture not found\n" );
+		memcpy (reason, "GL_ARB_multitexture not supported by driver!\0", 44);
+		return false;
+	}
 
 	// GL_EXT_compiled_vertex_array
 	// GL_SGI_compiled_vertex_array

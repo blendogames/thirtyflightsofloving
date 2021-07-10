@@ -97,7 +97,7 @@ typedef struct
 	vec2_t		texture_st;
 	vec2_t		lightmap_st;
 	byte		basecolor[4];
-	byte		color[4];
+	byte		lightcolor[4];
 } mpolyvertex_t;
 */
 
@@ -161,12 +161,13 @@ typedef struct msurface_s
 } msurface_t;
 
 
-typedef struct malphasurface_s
+typedef struct surfaceHandle_s
 {
-	msurface_t	*surf;
-	entity_t	*entity;		// entity pointer
-	struct	malphasurface_s	*surfacechain;
-} malphasurface_t;
+	msurface_t				*surf;
+	entity_t				*entity;		// entity pointer
+	int						flags;			// entity-specific surface flags
+	struct	surfaceHandle_s	*surfacechain;	// next surface
+} surfaceHandle_t;
 
 
 typedef struct mnode_s

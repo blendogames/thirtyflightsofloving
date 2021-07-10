@@ -260,7 +260,6 @@ extern	cvar_t	*alt_text_color;
 //extern	cvar_t	*gl_ext_palettedtexture;
 //extern	cvar_t	*gl_ext_pointparameters;
 //extern	cvar_t	*r_ext_swapinterval;	// unused
-extern	cvar_t	*r_ext_multitexture;
 extern	cvar_t	*r_ext_draw_range_elements;
 extern	cvar_t	*r_ext_compiled_vertex_array;
 extern	cvar_t	*r_arb_texturenonpoweroftwo;
@@ -470,9 +469,17 @@ extern gllightmapstate_t gl_lms;
 //void R_LightPoint (vec3_t p, vec3_t color);
 void R_LightPoint (vec3_t p, vec3_t color, qboolean isEnt);
 void R_LightPointDynamics (vec3_t p, vec3_t color, m_dlight_t *list, int *amount, int max);
+void R_SurfLightPoint (msurface_t *surf, vec3_t p, vec3_t color, qboolean baselight);
 void R_PushDlights (void);
 void R_ShadowLight (vec3_t pos, vec3_t lightAdd);
 void R_MarkLights (dlight_t *light, int bit, mnode_t *node);
+void R_RenderDlights (void);
+void R_AddDynamicLights (msurface_t *surf);
+void R_SetCacheState (msurface_t *surf);
+void R_BuildLightMap (msurface_t *surf, byte *dest, int stride);
+void R_CreateSurfaceLightmap (msurface_t *surf);
+void R_EndBuildingLightmaps (void);
+void R_BeginBuildingLightmaps (model_t *m);
 
 //====================================================================
 
@@ -483,6 +490,11 @@ extern	float		d_8to24tablef[256][3]; //Knightmare added
 
 extern	int		registration_sequence;
 
+
+//
+// cl_utils.c
+//
+void vectoangles (vec3_t value1, vec3_t angles);
 
 void V_AddBlend (float r, float g, float b, float a, float *v_blend);
 
@@ -524,7 +536,7 @@ void R_DrawSpriteModel (entity_t *e);
 void R_DrawBeam( entity_t *e );
 void R_DrawWorld (void);
 void R_RenderDlights (void);
-void R_DrawAlphaSurfaces (void);
+void R_DrawAllAlphaSurfaces (void);
 void R_RenderBrushPoly (msurface_t *fa);
 void R_InitMedia (void);
 void R_DrawInitLocal (void);
@@ -645,8 +657,23 @@ void R_DrawSkyBox (void);
 
 
 //
-// r_surf.c
+// r_surface.c
 //
+//extern	surfaceHandle_t	r_surfaceHandles[MAX_SURFACE_HANDLES];
+
+void R_DrawWorld (void);
+void R_DrawAllAlphaSurfaces (void);
+void R_RenderBrushPoly (msurface_t *fa);
+void R_DrawBrushModel (entity_t *e);
+void R_MarkLeaves (void);
+qboolean R_CullBox (vec3_t mins, vec3_t maxs);
+void R_BuildPolygonFromSurface (msurface_t *surf);
+void R_ResetVertextLights_f (void);
+void R_BuildVertexLight (msurface_t *surf);
+#ifdef BATCH_LM_UPDATES
+void R_UpdateSurfaceLightmap (msurface_t *surf);
+void R_RebuildLightmaps (void);
+#endif
 
 
 // 
@@ -841,7 +868,7 @@ typedef struct
 	qboolean	arbTextureNonPowerOfTwo;
 
 	qboolean	vertexBufferObject;
-	qboolean	multitexture;
+//	qboolean	multitexture;
 	qboolean	mtexcombine;	// added Vic's RGB brightening
 
 	qboolean	have_stencil;

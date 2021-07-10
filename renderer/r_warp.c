@@ -311,8 +311,8 @@ void RB_RenderWarpSurface (msurface_t *fa)
 	float		alpha = colorArray[0][3];
 	image_t		*image = R_TextureAnimation (fa);
 	qboolean	light = r_warp_lighting->integer && !(fa->texinfo->flags & SURF_NOLIGHTENV);
-	qboolean	texShaderWarpNV = glConfig.NV_texshaders && glConfig.multitexture && r_pixel_shader_warp->integer;
-	qboolean	texShaderWarpARB = glConfig.arb_fragment_program && glConfig.multitexture && r_pixel_shader_warp->integer;
+	qboolean	texShaderWarpNV = glConfig.NV_texshaders && r_pixel_shader_warp->integer;
+	qboolean	texShaderWarpARB = glConfig.arb_fragment_program && r_pixel_shader_warp->integer;
 	qboolean	texShaderWarp = (texShaderWarpNV || texShaderWarpARB);
 	if (texShaderWarpNV && texShaderWarpARB)
 		texShaderWarpARB = (r_pixel_shader_warp->integer == 1);
@@ -418,7 +418,7 @@ void R_DrawWarpSurface (msurface_t *fa, float alpha, qboolean render)
 	vec3_t		point;
 	int			i;
 	qboolean	light = r_warp_lighting->integer && !r_fullbright->integer && !(fa->texinfo->flags & SURF_NOLIGHTENV);
-	qboolean	texShaderNV = glConfig.NV_texshaders && glConfig.multitexture
+	qboolean	texShaderNV = glConfig.NV_texshaders
 								&& ( (!glConfig.arb_fragment_program && r_pixel_shader_warp->integer)
 									|| (glConfig.arb_fragment_program && r_pixel_shader_warp->integer > 1) );
 
