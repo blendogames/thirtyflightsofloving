@@ -284,8 +284,18 @@ int RecursiveLightPoint (mnode_t *node, vec3_t start, vec3_t end)
 	surf = r_worldmodel->surfaces + node->firstsurface;
 	for (i=0 ; i<node->numsurfaces ; i++, surf++)
 	{
+	// Knightmare- allow warp surfaces with light samples
+#ifdef WARP_LIGHTMAPS
+		if ( (surf->flags & SURF_DRAWSKY) || ((surf->flags & SURF_DRAWTURB) && !surf->isLightmapped) )
+			continue;	// no lightmaps
+		if ( (surf->texinfo->flags & SURF_SKY) || ((surf->texinfo->flags & SURF_WARP) && !surf->isLightmapped) )
+			continue;	// no lightmaps
+#else	// WARP_LIGHTMAPS
 		if (surf->flags & (SURF_DRAWTURB|SURF_DRAWSKY)) 
 			continue;	// no lightmaps
+		if (surf->texinfo->flags & (SURF_SKY|SURF_WARP))
+			continue;	// no lightmaps
+#endif	// WARP_LIGHTMAPS
 
 		tex = surf->texinfo;
 		
@@ -1017,8 +1027,12 @@ void R_BuildLightMap (msurface_t *surf, byte *dest, int stride)
 	lightstyle_t	*style;
 	int			monolightmap;
 
-	// if ( surf->texinfo->flags & (SURF_SKY|SURF_TRANS33|SURF_TRANS66|SURF_WARP) )
+#ifdef WARP_LIGHTMAPS
+	// Knightmare- allow warp surfaces with light samples
+	if ( (surf->texinfo->flags & SURF_SKY) || ((surf->texinfo->flags & SURF_WARP) && !surf->isLightmapped) )
+#else	// WARP_LIGHTMAPS
 	if ( surf->texinfo->flags & (SURF_SKY|SURF_WARP) )
+#endif	// WARP_LIGHTMAPS
 		VID_Error (ERR_DROP, "R_BuildLightMap called for non-lit surface");
 
 	smax = (surf->extents[0]>>4)+1;
@@ -1320,12 +1334,19 @@ void R_CreateSurfaceLightmap (msurface_t *surf)
 	int			smax, tmax;
 	unsigned	*base;
 
+#ifdef WARP_LIGHTMAPS
+	// Knightmare- allow warp surfaces with light samples
+	if ( (surf->flags & SURF_DRAWSKY) || ((surf->flags & SURF_DRAWTURB) && !surf->isLightmapped) )
+		return;
+	if ( (surf->texinfo->flags & SURF_SKY) || ((surf->texinfo->flags & SURF_WARP) && !surf->isLightmapped) )
+		return;
+#else	// WARP_LIGHTMAPS
 	if (surf->flags & (SURF_DRAWSKY|SURF_DRAWTURB))
 		return;
-
-	//if (surf->texinfo->flags & (SURF_SKY|SURF_TRANS33|SURF_TRANS66|SURF_WARP))
 	if (surf->texinfo->flags & (SURF_SKY|SURF_WARP))
 		return;
+#endif	// WARP_LIGHTMAPS
+
 
 	smax = (surf->extents[0]>>4)+1;
 	tmax = (surf->extents[1]>>4)+1;

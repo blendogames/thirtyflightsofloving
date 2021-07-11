@@ -359,6 +359,18 @@ qboolean R_SurfsAreBatchable (msurface_t *s1, msurface_t *s2)
 	{
 		if (R_SurfIsLit(s1) != R_SurfIsLit(s2))
 			return false;
+
+#ifdef WARP_LIGHTMAPS
+		if (r_worldmodel->bspFeatures & BSPF_WARPLIGHTMAPS)
+		{
+			// lightmapped surfaces can't be batched with non-lightmapped ones
+			if ( s1->isLightmapped != s2->isLightmapped )
+				return false;
+			// lightmap image must be same
+			if ( (s1->isLightmapped && s2->isLightmapped) && (s1->lightmaptexturenum != s2->lightmaptexturenum) )
+				return false;
+		}
+#endif	// WARP_LIGHTMAPS
 		return true;
 	}
 	else if ( (s1->texinfo->flags & (SURF_TRANS33|SURF_TRANS66))
@@ -476,10 +488,11 @@ modified to handle scrolling textures
 */
 void R_DrawGLPoly (msurface_t *surf, qboolean render)
 {
-	glpoly_t	*p;
-	int			nv, i;
-	float		*v, scroll, alpha;
-	qboolean	light;
+	glpoly_t		*p;
+	int				nv, i;
+	float			scroll, alpha;	// *v
+	qboolean		light;
+	mpolyvertex_t	*v;
 
 	alpha = R_SurfAlphaCalc (surf->texinfo->flags);
 	light = R_SurfIsLit (surf);
@@ -498,7 +511,7 @@ void R_DrawGLPoly (msurface_t *surf, qboolean render)
 	{
 		nv = p->numverts;
 		c_brush_polys += (nv-2);
-		v = p->verts[0];
+	//	v = p->verts[0];
 		if (RB_CheckArrayOverflow (nv, (nv-2)*3))
 			RB_RenderGLPoly (surf, light);
 		for (i=0; i < nv-2; i++) {
@@ -506,18 +519,25 @@ void R_DrawGLPoly (msurface_t *surf, qboolean render)
 			indexArray[rb_index++] = rb_vertex+i+1;
 			indexArray[rb_index++] = rb_vertex+i+2;
 		}
-		for (i=0; i < nv; i++, v+= VERTEXSIZE)
+	//	for (i=0; i < nv; i++, v+= VERTEXSIZE)
+		for (i=0, v=&p->verts[0]; i < nv; i++, v++)
 		{
-			if (light && p->vertexlight && p->vertexlightset)
+		//	if (light && p->vertexlight && p->vertexlightset)
+			if (light && p->vertexlightset)
 				VA_SetElem4(colorArray[rb_vertex],
-					(float)(p->vertexlight[i*3+0]*DIV255),
-					(float)(p->vertexlight[i*3+1]*DIV255),
-					(float)(p->vertexlight[i*3+2]*DIV255), alpha);
+				//	(float)(p->vertexlight[i*3+0]*DIV255),
+				//	(float)(p->vertexlight[i*3+1]*DIV255),
+				//	(float)(p->vertexlight[i*3+2]*DIV255), alpha);
+					(float)(v->lightcolor[0]*DIV255),
+					(float)(v->lightcolor[1]*DIV255),
+					(float)(v->lightcolor[2]*DIV255), alpha);
 			else
 				VA_SetElem4(colorArray[rb_vertex], glState.inverse_intensity, glState.inverse_intensity, glState.inverse_intensity, alpha);
 
-			VA_SetElem2(texCoordArray[0][rb_vertex], v[3]+scroll, v[4]);
-			VA_SetElem3(vertexArray[rb_vertex], v[0], v[1], v[2]);
+		//	VA_SetElem2(texCoordArray[0][rb_vertex], v[3]+scroll, v[4]);
+		//	VA_SetElem3(vertexArray[rb_vertex], v[0], v[1], v[2]);
+			VA_SetElem2(texCoordArray[0][rb_vertex], v->texture_st[0]+scroll, v->texture_st[1]);
+			VA_SetElem3v(vertexArray[rb_vertex], v->xyz);
 			rb_vertex++;
 		}
 	}
@@ -561,8 +581,18 @@ void R_DrawAlphaSurface (msurface_t *s, entity_t *e)
 //	solidAlpha = ( (s->texinfo->flags & SURF_TRANS33|SURF_TRANS66) == SURF_TRANS33|SURF_TRANS66 );
 //	envMap = ( (s->flags & SURF_ENVMAP) && r_glass_envmaps->integer && !solidAlpha);
 
-	if (s->flags & SURF_DRAWTURB) {	
-		R_DrawWarpSurface (s, R_SurfAlphaCalc(s->texinfo->flags), !R_SurfsAreBatchable (s, s->texturechain));
+	if (s->flags & SURF_DRAWTURB)
+	{	
+#ifdef WARP_LIGHTMAPS
+		if (s->isLightmapped && (r_worldmodel->bspFeatures & BSPF_WARPLIGHTMAPS)) {
+			GL_EnableMultitexture (true);
+			R_SetLightingMode (RF_TRANSLUCENT);
+			R_DrawWarpSurface (s, R_SurfAlphaCalc(s->texinfo->flags), !R_SurfsAreBatchable (s, s->texturechain));
+			GL_EnableMultitexture (false);
+		}
+		else
+#endif	// WARP_LIGHTMAPS
+			R_DrawWarpSurface (s, R_SurfAlphaCalc(s->texinfo->flags), !R_SurfsAreBatchable (s, s->texturechain));
 	}
 	else if ( (r_trans_lighting->integer == 2) && light && s->lightmaptexturenum )
 	{
@@ -633,6 +663,13 @@ Based on code from MH's experimental Q2 engine
 void R_UpdateSurfaceLightmap (msurface_t *surf)
 {
 	int			map;
+
+#ifdef WARP_LIGHTMAPS
+	if ( (surf->texinfo->flags & SURF_SKY) || ((surf->texinfo->flags & SURF_WARP) && !surf->isLightmapped) )
+#else	// WARP_LIGHTMAPS
+	if (surf->texinfo->flags & (SURF_SKY|SURF_WARP))
+#endif	// WARP_LIGHTMAPS
+		return;
 
 	if (R_SurfIsDynamic (surf, &map))
 	{
@@ -746,6 +783,24 @@ void R_DrawTextureChains (int renderflags)
 		}
 		image->texturechain = NULL;
 	}
+
+#ifdef WARP_LIGHTMAPS
+	// lightmapped warp textures
+	for (i=0, image=gltextures; i<numgltextures; i++, image++)
+	{
+		if (!image->registration_sequence)
+			continue;
+		if (!image->warp_lm_texturechain)
+			continue;
+
+		rb_vertex = rb_index = 0;
+		for (s = image->warp_lm_texturechain; s; s=s->texturechain) {
+			R_DrawWarpSurface (s, 1.0, !R_SurfsAreBatchable(s, s->texturechain)); 
+		}
+		image->warp_lm_texturechain = NULL;
+	}
+#endif	// WARP_LIGHTMAPS
+
 	GL_EnableMultitexture (false);
 
 	GL_TexEnv(GL_MODULATE); // warp textures, no lightmaps
@@ -841,15 +896,16 @@ RB_DrawCaustics
 Underwater caustic effect based on code by Kirk Barnes
 ===========================================
 */
-extern unsigned int dst_texture_ARB;
+//extern unsigned int dst_texture_ARB;
 static void RB_DrawCaustics (msurface_t *surf)
 {
-	int			i, vert=0;	// nv
-	float		scrollh, scrollv, scaleh, scalev, dstscroll;	// *v,
-	image_t		*causticpic = RB_CausticForSurface (surf);
-	qboolean	previousBlend = false;
-	qboolean	fragmentWarp = glConfig.arb_fragment_program && (r_caustics->integer > 1.0);
-//	glpoly_t	*p;
+	int				i;	// nv, vert=0
+	float			scrollh, scrollv, scaleh, scalev, dstscroll;	// *v,
+	image_t			*causticpic = RB_CausticForSurface (surf);
+	qboolean		previousBlend = false;
+	qboolean		fragmentWarp = glConfig.arb_fragment_program && (r_caustics->integer > 1.0);
+//	glpoly_t		*p;
+//	mpolyvertex_t	*v;
 	
 	// adjustment for texture size and caustic image
 	scaleh = surf->texinfo->texWidth / (causticpic->width*0.5);
@@ -864,7 +920,8 @@ static void RB_DrawCaustics (msurface_t *surf)
 	if (fragmentWarp)
 	{
 		GL_EnableTexture(1);
-		GL_MBind (1, dst_texture_ARB);
+	//	GL_MBind (1, dst_texture_ARB);
+		GL_MBind (1, glMedia.distTextureARB->texnum);
 		GL_Enable (GL_FRAGMENT_PROGRAM_ARB);
 		qglBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, fragment_programs[F_PROG_WARP]);
 		qglProgramLocalParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 0, 1.0, 1.0, 1.0, 1.0);
@@ -883,9 +940,12 @@ static void RB_DrawCaustics (msurface_t *surf)
 	{
 		v = p->verts[0];
 		nv = p->numverts;
-		for (i=0; i<nv; i++, v+= VERTEXSIZE) {
-			VA_SetElem2(texCoordArray[0][vert], (v[3]*scaleh)+scrollh, (v[4]*scalev)+scrollv);
-			VA_SetElem2(texCoordArray[1][vert], (v[3]*scaleh)+dstscroll, (v[4]*scalev));
+	//	for (i=0; i<nv; i++, v+= VERTEXSIZE) {
+		for (i=0, v=&p->verts[0]; i<nv; i++, v++) {
+		//	VA_SetElem2(texCoordArray[0][vert], (v[3]*scaleh)+scrollh, (v[4]*scalev)+scrollv);
+		//	VA_SetElem2(texCoordArray[1][vert], (v[3]*scaleh)+dstscroll, (v[4]*scalev));
+			VA_SetElem2(texCoordArray[0][vert], (v->texture_st[0]*scaleh)+scrollh, (v->texture_st[1]*scalev)+scrollv);
+			VA_SetElem2(texCoordArray[1][vert], (v->texture_st[0]*scaleh)+dstscroll, (v->texture_st[1]*scalev));
 			vert++;
 		}
 	}*/
@@ -1046,7 +1106,8 @@ void R_DrawLightmappedSurface (msurface_t *surf, qboolean render)
 {
 	glpoly_t	*p;
 	int			nv, i;
-	float		*v, scroll, alpha;
+	float		scroll, alpha;	// *v
+	mpolyvertex_t	*v;
 
 	c_brush_surfs++;
 
@@ -1068,7 +1129,7 @@ void R_DrawLightmappedSurface (msurface_t *surf, qboolean render)
 	{
 		nv = p->numverts;
 		c_brush_polys += (nv-2);
-		v = p->verts[0];
+	//	v = p->verts[0];
 		if (RB_CheckArrayOverflow (nv, (nv-2)*3))
 			RB_RenderLightmappedSurface (surf);
 		for (i=0; i < nv-2; i++) {
@@ -1076,12 +1137,17 @@ void R_DrawLightmappedSurface (msurface_t *surf, qboolean render)
 			indexArray[rb_index++] = rb_vertex+i+1;
 			indexArray[rb_index++] = rb_vertex+i+2;
 		}
-		for (i=0; i < nv; i++, v+= VERTEXSIZE)
+	//	for (i=0; i < nv; i++, v+= VERTEXSIZE)
+		for (i=0, v=&p->verts[0]; i < nv; i++, v++)
 		{
-			VA_SetElem2(inTexCoordArray[rb_vertex], v[3], v[4]);
-			VA_SetElem2(texCoordArray[0][rb_vertex], (v[3]+scroll), v[4]);
-			VA_SetElem2(texCoordArray[1][rb_vertex], v[5], v[6]);
-			VA_SetElem3(vertexArray[rb_vertex], v[0], v[1], v[2]);
+		//	VA_SetElem2(inTexCoordArray[rb_vertex], v[3], v[4]);
+		//	VA_SetElem2(texCoordArray[0][rb_vertex], (v[3]+scroll), v[4]);
+		//	VA_SetElem2(texCoordArray[1][rb_vertex], v[5], v[6]);
+		//	VA_SetElem3(vertexArray[rb_vertex], v[0], v[1], v[2]);
+			VA_SetElem2(inTexCoordArray[rb_vertex], v->texture_st[0], v->texture_st[1]);
+			VA_SetElem2(texCoordArray[0][rb_vertex], (v->texture_st[0]+scroll), v->texture_st[1]);
+			VA_SetElem2(texCoordArray[1][rb_vertex], v->lightmap_st[0], v->lightmap_st[1]);
+			VA_SetElem3v(vertexArray[rb_vertex], v->xyz);
 			VA_SetElem4(colorArray[rb_vertex], 1, 1, 1, alpha);
 			rb_vertex++;
 		}
@@ -1213,9 +1279,13 @@ void R_DrawInlineBModel (entity_t *e, int causticflag)
 			(!(psurf->flags & SURF_PLANEBACK) && (dot > BACKFACE_EPSILON)))
 		{
 #ifdef BATCH_LM_UPDATES
+#ifdef WARP_LIGHTMAPS
+			if ( !( (psurf->texinfo->flags & SURF_SKY) || ((psurf->texinfo->flags & SURF_WARP) && !psurf->isLightmapped) ) )
+#else	// WARP_LIGHTMAPS
 			if ( !(psurf->texinfo->flags & (SURF_SKY|SURF_WARP)) )
+#endif	// WARP_LIGHTMAPS
 				R_UpdateSurfaceLightmap (psurf);
-#endif
+#endif	// BATCH_LM_UPDATES
 			psurf->entity = NULL;
 			psurf->flags &= ~SURF_MASK_CAUSTIC; // clear old caustics
 			if ( psurf->texinfo->flags & (SURF_TRANS33|SURF_TRANS66) )
@@ -1277,8 +1347,18 @@ void R_DrawInlineBModel (entity_t *e, int causticflag)
 				}
 				else	// warp surface
 				{ 
-					psurf->texturechain = image->warp_texturechain;
-					image->warp_texturechain = psurf;
+#ifdef WARP_LIGHTMAPS
+					if (psurf->isLightmapped && (r_worldmodel->bspFeatures & BSPF_WARPLIGHTMAPS))
+					{
+						psurf->texturechain = image->warp_lm_texturechain;
+						image->warp_lm_texturechain = psurf;
+					}
+					else
+#endif	// WARP_LIGHTMAPS
+					{
+						psurf->texturechain = image->warp_texturechain;
+						image->warp_texturechain = psurf;
+					}
 				}
 			}
 
@@ -1432,9 +1512,13 @@ void R_AddWorldSurface (msurface_t *surf)
 	surf->entity = NULL;
 
 #ifdef BATCH_LM_UPDATES
+#ifdef WARP_LIGHTMAPS
+	if ( !( (surf->texinfo->flags & SURF_SKY) || ((surf->texinfo->flags & SURF_WARP) && !surf->isLightmapped) ) )
+#else	// WARP_LIGHTMAPS
 	if ( !(surf->texinfo->flags & (SURF_SKY|SURF_WARP)) )
+#endif	// WARP_LIGHTMAPS
 		R_UpdateSurfaceLightmap (surf);
-#endif
+#endif	// BATCH_LM_UPDATES
 
 	if (surf->texinfo->flags & SURF_SKY)
 	{	// just adds to visible sky bounds
@@ -1456,8 +1540,18 @@ void R_AddWorldSurface (msurface_t *surf)
 		}
 		else	// warp surface
 		{
-			surf->texturechain = image->warp_texturechain;
-			image->warp_texturechain = surf;
+#ifdef WARP_LIGHTMAPS
+			if (surf->isLightmapped && (r_worldmodel->bspFeatures & BSPF_WARPLIGHTMAPS))
+			{
+				surf->texturechain = image->warp_lm_texturechain;
+				image->warp_lm_texturechain = surf;
+			}
+			else
+#endif	// WARP_LIGHTMAPS
+			{
+				surf->texturechain = image->warp_texturechain;
+				image->warp_texturechain = surf;
+			}
 		}
 	}
 }
@@ -1706,7 +1800,7 @@ void R_MarkLeaves (void)
 R_BuildPolygonFromSurface
 ================
 */
-void R_BuildPolygonFromSurface (msurface_t *fa)
+void R_BuildPolygonFromSurface (msurface_t *surf)
 {
 	int			i, lindex, lnumverts;
 	medge_t		*pedges, *r_pedge;
@@ -1718,7 +1812,7 @@ void R_BuildPolygonFromSurface (msurface_t *fa)
 
 // reconstruct the polygon
 	pedges = currentmodel->edges;
-	lnumverts = fa->numedges;
+	lnumverts = surf->numedges;
 	vertpage = 0;
 
 	VectorClear (total);
@@ -1726,25 +1820,27 @@ void R_BuildPolygonFromSurface (msurface_t *fa)
 	//
 	// draw texture
 	//
-	poly = Hunk_Alloc (sizeof(glpoly_t) + (lnumverts-4) * VERTEXSIZE*sizeof(float));
-	poly->next = fa->polys;
-	poly->flags = fa->flags;
-	fa->polys = poly;
+//	poly = Hunk_Alloc (sizeof(glpoly_t) + (lnumverts-4) * VERTEXSIZE*sizeof(float));
+	poly = Hunk_Alloc (sizeof(glpoly_t) + (lnumverts-4) * sizeof(mpolyvertex_t));
+	poly->next = surf->polys;
+	poly->flags = surf->flags;
+	surf->polys = poly;
 	poly->numverts = lnumverts;
+	poly->vertexlightset = false;
 
 	// alloc vertex light fields
-	if (fa->texinfo->flags & (SURF_TRANS33|SURF_TRANS66)) {
+/*	if (surf->texinfo->flags & (SURF_TRANS33|SURF_TRANS66)) {
 		int size = lnumverts*3*sizeof(byte);
 		poly->vertexlight = Hunk_Alloc(size);
 		poly->vertexlightbase = Hunk_Alloc(size);
 		memset(poly->vertexlight, 0, size);
 		memset(poly->vertexlightbase, 0, size);
 		poly->vertexlightset = false;
-	}
+	} */
 
 	for (i=0; i<lnumverts; i++)
 	{
-		lindex = currentmodel->surfedges[fa->firstedge + i];
+		lindex = currentmodel->surfedges[surf->firstedge + i];
 
 		if (lindex > 0)
 		{
@@ -1759,34 +1855,39 @@ void R_BuildPolygonFromSurface (msurface_t *fa)
 		//
 		// texture coordinates
 		//
-		s = DotProduct (vec, fa->texinfo->vecs[0]) + fa->texinfo->vecs[0][3];
-		s /= fa->texinfo->texWidth; //fa->texinfo->image->width; changed to Q2E hack
+		s = DotProduct (vec, surf->texinfo->vecs[0]) + surf->texinfo->vecs[0][3];
+		s /= surf->texinfo->texWidth; //surf->texinfo->image->width; changed to Q2E hack
 
-		t = DotProduct (vec, fa->texinfo->vecs[1]) + fa->texinfo->vecs[1][3];
-		t /= fa->texinfo->texHeight; //fa->texinfo->image->height; changed to Q2E hack
+		t = DotProduct (vec, surf->texinfo->vecs[1]) + surf->texinfo->vecs[1][3];
+		t /= surf->texinfo->texHeight; //surf->texinfo->image->height; changed to Q2E hack
 		
 		VectorAdd (total, vec, total);
-		VectorCopy (vec, poly->verts[i]);
-		poly->verts[i][3] = s;
-		poly->verts[i][4] = t;
+	//	VectorCopy (vec, poly->verts[i]);
+	//	poly->verts[i][3] = s;
+	//	poly->verts[i][4] = t;
+		VectorCopy (vec, poly->verts[i].xyz);
+		poly->verts[i].texture_st[0] = s;
+		poly->verts[i].texture_st[1] = t;
 
 		//
 		// lightmap texture coordinates
 		//
-		s = DotProduct (vec, fa->texinfo->vecs[0]) + fa->texinfo->vecs[0][3];
-		s -= fa->texturemins[0];
-		s += fa->light_s*16;
+		s = DotProduct (vec, surf->texinfo->vecs[0]) + surf->texinfo->vecs[0][3];
+		s -= surf->texturemins[0];
+		s += surf->light_s*16;
 		s += 8;
-		s /= LM_BLOCK_WIDTH*16; //fa->texinfo->texture->width;
+		s /= LM_BLOCK_WIDTH*16; //surf->texinfo->texture->width;
 
-		t = DotProduct (vec, fa->texinfo->vecs[1]) + fa->texinfo->vecs[1][3];
-		t -= fa->texturemins[1];
-		t += fa->light_t*16;
+		t = DotProduct (vec, surf->texinfo->vecs[1]) + surf->texinfo->vecs[1][3];
+		t -= surf->texturemins[1];
+		t += surf->light_t*16;
 		t += 8;
-		t /= LM_BLOCK_HEIGHT*16; //fa->texinfo->texture->height;
+		t /= LM_BLOCK_HEIGHT*16; //surf->texinfo->texture->height;
 
-		poly->verts[i][5] = s;
-		poly->verts[i][6] = t;
+	//	poly->verts[i][5] = s;
+	//	poly->verts[i][6] = t;
+		poly->verts[i].lightmap_st[0] = s;
+		poly->verts[i].lightmap_st[1] = t;
 	}
 	VectorScale(total, 1.0/(float)lnumverts, poly->center); // for vertex lighting
 
@@ -1801,48 +1902,13 @@ void R_BuildPolygonFromSurface (msurface_t *fa)
 =======================================================================
 */
 
+#if 0
 /*
 =================
-R_BuildVertexLightBase
+R_ResetVertexLight
 =================
 */
-void R_SurfLightPoint (msurface_t *surf, vec3_t p, vec3_t color, qboolean baselight);
-qboolean R_BuildVertexLightBase (msurface_t *surf, glpoly_t *poly)
-{
-	vec3_t		color, point;
-	int			i, j;
-	float		*v;
-	qboolean	lit = false;
-
-	for (i=0, v=poly->verts[0]; i<poly->numverts; i++, v+=VERTEXSIZE)
-	{
-		VectorCopy(v, point); // lerp outward away from plane to avoid dark spots?
-		// lerp between each vertex and origin - use check for too dark?
-		// this messes up curved glass surfaces
-		//VectorSubtract (poly->center, v, point);
-		//VectorMA(v, 0.01, point, point);
-
-		R_SurfLightPoint (surf, point, color, true);
-			
-		R_MaxColorVec (color);
-		for (j=0; j<3; j++)
-			if (color[j] > 0.0f)
-				lit = true;
-
-		poly->vertexlightbase[i*3+0] = (byte)(color[0]*255.0);
-		poly->vertexlightbase[i*3+1] = (byte)(color[1]*255.0);
-		poly->vertexlightbase[i*3+2] = (byte)(color[2]*255.0);
-	}
-	return lit;
-}
-
-
-/*
-=================
-R_ResetVertextLight
-=================
-*/
-void R_ResetVertextLight (msurface_t *surf)
+void R_ResetVertexLight (msurface_t *surf)
 {
 	glpoly_t	*poly;
 
@@ -1856,15 +1922,68 @@ void R_ResetVertextLight (msurface_t *surf)
 
 /*
 =================
+R_ResetVertextLights_f
+=================
+*/
+void R_ResetVertextLights_f (void)
+{
+	glState.resetVertexLights = true;
+}
+#endif
+
+/*
+=================
+R_BuildVertexLightBase
+=================
+*/
+qboolean R_BuildVertexLightBase (msurface_t *surf, glpoly_t *poly)
+{
+	vec3_t		color, point;
+	int			i, j;
+//	float		*v;
+	qboolean	lit = false;
+	mpolyvertex_t		*v;
+
+//	for (i=0, v=poly->verts[0]; i<poly->numverts; i++, v+=VERTEXSIZE)
+	for (i=0, v=&poly->verts[0]; i<poly->numverts; i++, v++)
+	{
+	//	VectorCopy(v, point); // lerp outward away from plane to avoid dark spots?
+		VectorCopy(v->xyz, point); // lerp outward away from plane to avoid dark spots?
+		// lerp between each vertex and origin - use check for too dark?
+		// this messes up curved glass surfaces
+		//VectorSubtract (poly->center, v->xyz, point);
+		//VectorMA(v->xyz, 0.01, point, point);
+
+		R_SurfLightPoint (surf, point, color, true);
+			
+		R_MaxColorVec (color);
+		for (j=0; j<3; j++)
+			if (color[j] > 0.0f)
+				lit = true;
+
+	//	poly->vertexlightbase[i*3+0] = (byte)(color[0]*255.0);
+	//	poly->vertexlightbase[i*3+1] = (byte)(color[1]*255.0);
+	//	poly->vertexlightbase[i*3+2] = (byte)(color[2]*255.0);
+		v->basecolor[0] = (byte)(color[0]*255.0);
+		v->basecolor[1] = (byte)(color[1]*255.0);
+		v->basecolor[2] = (byte)(color[2]*255.0);
+	}
+	return lit;
+}
+
+
+/*
+=================
 R_BuildVertexLight
 =================
 */
 void R_BuildVertexLight (msurface_t *surf)
 {
-	vec3_t		color, point;
-	int			i;
-	float		*v;
-	glpoly_t	*poly;
+	vec3_t			color, point;
+	int				i;
+//	float			*v;
+	glpoly_t		*poly;
+	mpolyvertex_t	*v;
 
 	if (surf->flags & SURF_DRAWTURB)
 	{	if (!r_warp_lighting->integer)	return;	}
@@ -1876,10 +1995,10 @@ void R_BuildVertexLight (msurface_t *surf)
 
 	for (poly=surf->polys; poly; poly=poly->next)
 	{
-		if (!poly->vertexlight || !poly->vertexlightbase)
-			continue;
+	//	if (!poly->vertexlight || !poly->vertexlightbase)
+	//		continue;
 
-		if (!poly->vertexlightset)
+		if (/*glState.resetVertexLights ||*/ !poly->vertexlightset)
 		{	
 			R_BuildVertexLightBase(surf, poly);
 			poly->vertexlightset = true;
@@ -1889,26 +2008,34 @@ void R_BuildVertexLight (msurface_t *surf)
 		//		return; // don't bother if lightbase is all black
 		}
 
-		for (i=0, v=poly->verts[0]; i<poly->numverts; i++, v+=VERTEXSIZE)
+	//	for (i=0, v=poly->verts[0]; i<poly->numverts; i++, v+=VERTEXSIZE)
+		for (i=0, v=&poly->verts[0]; i<poly->numverts; i++, v++)
 		{
-			VectorCopy(v, point); // lerp outward away from plane to avoid dark spots?
+		//	VectorCopy(v, point); // lerp outward away from plane to avoid dark spots?
+			VectorCopy(v->xyz, point); // lerp outward away from plane to avoid dark spots?
 			// lerp between each vertex and origin - use check for too dark?
 			// this messes up curved glass surfaces
-			//VectorSubtract (poly->center, v, point);
-			//VectorMA(v, 0.01, point, point);
+			//VectorSubtract (poly->center, v->xyz, point);
+			//VectorMA(v->xyz, 0.01, point, point);
 
 			R_SurfLightPoint (surf, point, color, false);
 
 			VectorSet(color,
-				(float)poly->vertexlightbase[i*3+0]/255.0 + color[0],
-				(float)poly->vertexlightbase[i*3+1]/255.0 + color[1],
-				(float)poly->vertexlightbase[i*3+2]/255.0 + color[2]);
+			//	(float)poly->vertexlightbase[i*3+0]/255.0 + color[0],
+			//	(float)poly->vertexlightbase[i*3+1]/255.0 + color[1],
+			//	(float)poly->vertexlightbase[i*3+2]/255.0 + color[2]);
+				(float)v->basecolor[0]/255.0 + color[0],
+				(float)v->basecolor[1]/255.0 + color[1],
+				(float)v->basecolor[2]/255.0 + color[2]);
 				
 			R_MaxColorVec (color);
 
-			poly->vertexlight[i*3+0] = (byte)(color[0]*255.0);
-			poly->vertexlight[i*3+1] = (byte)(color[1]*255.0);
-			poly->vertexlight[i*3+2] = (byte)(color[2]*255.0);
+		//	poly->vertexlight[i*3+0] = (byte)(color[0]*255.0);
+		//	poly->vertexlight[i*3+1] = (byte)(color[1]*255.0);
+		//	poly->vertexlight[i*3+2] = (byte)(color[2]*255.0);
+			v->lightcolor[0] = (byte)(color[0]*255.0);
+			v->lightcolor[1] = (byte)(color[1]*255.0);
+			v->lightcolor[2] = (byte)(color[2]*255.0);
 		}
 	}
 }

@@ -90,18 +90,16 @@ typedef struct mtexinfo_s
 	image_t		*glow;		// glow overlay
 } mtexinfo_t;
 
-/*
 typedef struct
 {
 	vec3_t		xyz;
 	vec2_t		texture_st;
 	vec2_t		lightmap_st;
-	byte		basecolor[4];
-	byte		lightcolor[4];
+	byte		basecolor[3];
+	byte		lightcolor[3];
 } mpolyvertex_t;
-*/
 
-#define	VERTEXSIZE	7
+//#define	VERTEXSIZE	7
 
 typedef struct glpoly_s
 {
@@ -110,13 +108,13 @@ typedef struct glpoly_s
 	int		numverts;
 
 	qboolean	vertexlightset;
-	byte		*vertexlightbase;
-	byte		*vertexlight;
+//	byte		*vertexlightbase;
+//	byte		*vertexlight;
 	vec3_t		center;
 
 	int			flags;			// for SURF_UNDERWATER (not needed anymore?)
-	float		verts[4][VERTEXSIZE];	// variable sized (xyz s1t1 s2t2)
-//	mpolyvertex_t	verts[4];			// variable sized (xyz s1t1 s2t2 rgb rgba)
+//	float		verts[4][VERTEXSIZE];	// variable sized (xyz s1t1 s2t2)
+	mpolyvertex_t	verts[4];			// variable sized (xyz s1t1 s2t2 rgb rgb)
 } glpoly_t;
 
 typedef struct msurface_s
@@ -146,12 +144,13 @@ typedef struct msurface_s
 	int			dlightframe;
 	int			dlightbits[(MAX_DLIGHTS+31)>>5];	// derived from MAX_DLIGHTS
 	qboolean	cached_dlight;
+	qboolean	isLightmapped;	// Knightmare- for whether a warp surface is lightmapped
 
 	int			lightmaptexturenum;
 	byte		styles[MAXLIGHTMAPS];
 	float		cached_light[MAXLIGHTMAPS];	// values currently used in lightmap
 	byte		*samples;		// [numstyles*surfsize]
-	byte		*stains;		// Knightmare- added stainmaps
+//	byte		*stains;		// added stainmaps
 
 	void		*chain_part;
 	void		*chain_ent;
@@ -291,13 +290,18 @@ typedef struct model_s
 	size_t		extradatasize;
 	void		*extradata;
 
-	qboolean	hasAlpha; // if model has scripted transparency
+	qboolean	hasAlpha;		// if model has scripted transparency
+	int			bspVersion;		// For checking BSP version for compatibility
+	int			bspFeatures;	// flags for BSP features
 
 #ifdef PROJECTION_SHADOWS // projection shadows from BeefQuake R6
 	//signed int	edge_tri[MD2_MAX_TRIANGLES][3]; // make this dynamically allocated?
 	int			*edge_tri;
 #endif // end projection shadows from BeefQuake R6
 } model_t;
+
+// Knightmare- BSP features flags
+#define	BSPF_WARPLIGHTMAPS		0x00000001
 
 //============================================================================
 

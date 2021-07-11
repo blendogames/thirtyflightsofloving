@@ -257,7 +257,8 @@ void R_AddSkySurface (msurface_t *fa)
 	{
 		for (i=0 ; i<p->numverts ; i++)
 		{
-			VectorSubtract (p->verts[i], r_origin, verts[i]);
+		//	VectorSubtract (p->verts[i], r_origin, verts[i]);
+			VectorSubtract (p->verts[i].xyz, r_origin, verts[i]);
 		}
 		ClipSkyPolygon (p->numverts, verts[0], 0);
 	}

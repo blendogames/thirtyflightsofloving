@@ -1714,7 +1714,7 @@ void Qcommon_Init (int argc, char **argv)
 	Cvar_SetDescription ("sv_engine_version", "Identifies the server engine version.");
 	// end Knightmare
 	
-	s = va("KMQ2 %4.2f %s %s %s %s", VERSION, CPUSTRING, OS_STRING, COMPILETYPE_STRING, __DATE__);
+	s = va("KMQ2 %4.2fu%d %s %s %s %s", VERSION, VERSION_UPDATE, CPUSTRING, OS_STRING, COMPILETYPE_STRING, __DATE__);
 	Cvar_Get ("version", s, CVAR_SERVERINFO|CVAR_NOSET);
 
 //	if (dedicated->value)

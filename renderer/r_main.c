@@ -217,6 +217,7 @@ cvar_t  *r_celshading_width;
 
 cvar_t	*r_skydistance;		// variable sky range
 cvar_t	*r_fog_skyratio;	// variable sky fog ratio
+cvar_t	*r_subdivide_size;	// chop size for warp surfaces
 //cvar_t	*r_saturation;		//** DMP
 
 
@@ -467,6 +468,10 @@ void R_SetupGL (void)
 
         r_modulate->modified = 0; 
 	} 
+
+	// Knightmare- clamp r_subdivide_size to a reasonable range
+	if ((r_subdivide_size->integer < 64) || (r_subdivide_size->integer > 512))
+		Cvar_SetValue( "r_subdivide_size", 64);
 
 	//
 	// set up viewport
@@ -897,6 +902,8 @@ void R_SetLightLevel (void)
 		}
 	}
 
+	// clear this once frame is rendered
+//	glState.resetVertexLights = false;
 }
 
 
@@ -1222,6 +1229,8 @@ void R_Register (void)
 	Cvar_SetDescription ("r_skydistance", "Sets render distance of skybox.  Larger values mean a longer visible distance areas with the skybox visible.");
 	r_fog_skyratio = Cvar_Get("r_fog_skyratio", "10", CVAR_ARCHIVE);	// variable sky fog ratio
 	Cvar_SetDescription ("r_fog_skyratio", "Sets ratio of fog far distance for skyboxes versus standard world surfaces.");
+	r_subdivide_size = Cvar_Get("r_subdivide_size", "64", CVAR_ARCHIVE);	// chop size for warp surfaces
+	Cvar_SetDescription ("r_subdivide_size", "Sets subdivision size of warp surfaces.  Requires vid_restart for changes to take effect.");
 
 //	r_saturation = Cvar_Get( "r_saturation", "1.0", CVAR_ARCHIVE );	//** DMP saturation setting (.89 good for nvidia)
 	r_lightcutoff = Cvar_Get( "r_lightcutoff", "0", CVAR_ARCHIVE );	//** DMP dynamic light cutoffnow variable
@@ -1711,7 +1720,7 @@ qboolean R_CheckGLExtensions (char *reason)
 	R_Compile_ARB_Programs ();
 
 	// GL_NV_texture_shader - MrG
-	if ( Q_StrScanToken( glConfig.extensions_string, "GL_NV_texture_shader", false ) )
+/*	if ( Q_StrScanToken( glConfig.extensions_string, "GL_NV_texture_shader", false ) )
 	{
 		VID_Printf (PRINT_ALL, "...using GL_NV_texture_shader\n" );
 		glConfig.NV_texshaders = true;
@@ -1720,7 +1729,7 @@ qboolean R_CheckGLExtensions (char *reason)
 	{
 		VID_Printf (PRINT_ALL, "...GL_NV_texture_shader not found\n" );
 		glConfig.NV_texshaders = false;
-	}
+	}*/
 
 	// GL_EXT_texture_filter_anisotropic - NeVo
 	glConfig.anisotropic = false;
@@ -2044,7 +2053,7 @@ qboolean R_Init ( void *hinstance, void *hWnd, char *reason )
 	R_InitMedia ();
 	R_DrawInitLocal ();
 
-	R_InitDSTTex (); // init shader warp texture
+//	R_InitDSTTex (); // init shader warp texture
 	R_InitFogVars (); // reset fog variables
 	VLight_Init (); // Vic's bmodel lights
 

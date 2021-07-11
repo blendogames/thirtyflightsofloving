@@ -93,6 +93,9 @@ typedef struct image_s
 	int			registration_sequence;		// 0 = free
 	struct		msurface_s	*texturechain;	// for sort-by-texture world drawing
 	struct		msurface_s	*warp_texturechain;	// same as above, for warp surfaces
+#ifdef WARP_LIGHTMAPS
+	struct		msurface_s	*warp_lm_texturechain;	// same as above, for lightmapped warp surfaces
+#endif
 	int			texnum;						// gl texture binding
 	float		sl, tl, sh, th;				// 0,0 - 1,1 unless part of the scrap
 	qboolean	scrap;
@@ -341,6 +344,7 @@ extern	cvar_t	*r_intensity;
 
 extern	cvar_t	*r_skydistance;		// variable sky range
 extern	cvar_t	*r_fog_skyratio;	// variable sky fog ratio
+extern	cvar_t	*r_subdivide_size;	// chop size for warp surfaces
 //extern	cvar_t	*r_saturation;		//** DMP
 
 // Changable color for r_clearcolor (enabled by gl_clar)
@@ -881,7 +885,7 @@ typedef struct
 	// texture shader support
 	qboolean	arb_fragment_program;
 	qboolean	arb_vertex_program;
-	qboolean	NV_texshaders;
+//	qboolean	NV_texshaders;
 
 	// anisotropic filtering
 	qboolean	anisotropic;
@@ -928,7 +932,7 @@ typedef struct
 
 	qboolean		cullFace;
 	qboolean		polygonOffsetFill; // Knightmare added
-	qboolean		TexShaderNV;
+//	qboolean		TexShaderNV;
 	qboolean		vertexProgram;
 	qboolean		fragmentProgram;
 	qboolean		alphaTest;
@@ -956,6 +960,7 @@ typedef struct
 	GLboolean		depthMask;
 
 	qboolean		texture_compression; // Heffo - ARB Texture Compression
+//	qboolean		resetVertexLights;
 
 	unsigned char	originalRedGammaTable[256];
 	unsigned char	originalGreenGammaTable[256];

@@ -332,7 +332,7 @@ typedef struct miptex_s
 #define IDBSPHEADER	(('P'<<24)+('S'<<16)+('B'<<8)+'I')
 		// little-endian "IBSP"
 
-#define BSPVERSION	38
+#define Q2_BSPVERSION	38
 
 // upper design bounds
 // leaffaces, leafbrushes, planes, and verts are bounded by

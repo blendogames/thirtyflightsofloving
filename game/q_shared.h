@@ -165,6 +165,8 @@ __inline int Q_vsnprintf (char *Dest, size_t Count, const char *Format, va_list 
 
 #define CLIENT_SPLIT_NETFRAME // whether to use split net and render frames in the client
 
+//#define	WARP_LIGHTMAPS	// whether to support lightmaps on warp surfaces
+
 #define CLIENT_THIRDPERSON_CVAR "cg_thirdperson"
 //#define CLIENT_THIRDPERSON_CVAR "cl_3dcam"
 

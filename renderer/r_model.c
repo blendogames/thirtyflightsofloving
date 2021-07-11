@@ -33,7 +33,7 @@ size_t ModChunk_End (void);
 void ModChunk_Free (void *base);
 size_t Mod_GetAllocSizeSprite (model_t *mod, void *buffer);
 void Mod_LoadSpriteModel (model_t *mod, void *buffer);
-void Mod_LoadBrushModel (model_t *mod, void *buffer);
+void Mod_Load_Q2_BrushModel (model_t *mod, void *buffer);
 
 #ifdef MD2_AS_MD3
 size_t Mod_GetAllocSizeMD2New (model_t *mod, void *buffer);
@@ -297,7 +297,8 @@ model_t *Mod_ForName (char *name, qboolean crash)
 	
 	case IDBSPHEADER:
 		loadmodel->extradata = Hunk_Begin (0x2000000); // was 0x1000000
-		Mod_LoadBrushModel (mod, buf);
+		Mod_Load_Q2_BrushModel (mod, buf);
+		mod->bspVersion = Q2_BSPVERSION;
 		loadmodel->extradatasize = Hunk_End ();
 		break;
 
@@ -872,11 +873,27 @@ void Mod_LoadFaces (lump_t *l)
 		if (out->texinfo->flags & SURF_WARP)
 		{
 			out->flags |= SURF_DRAWTURB;
-			for (i=0; i<2; i++)
+#ifdef WARP_LIGHTMAPS
+			// Knightmare- create lightmaps if surface has light data and has properly subdivided size
+			if ( (loadmodel->bspFeatures & BSPF_WARPLIGHTMAPS) && (out->samples != NULL)
+				&& ((out->extents[0]>>4)+1 <= LM_BLOCK_WIDTH)
+				&& ((out->extents[1]>>4)+1 <= LM_BLOCK_HEIGHT) )
 			{
-				out->extents[i] = (WORLD_SIZE*2);	// was 16384
-				out->texturemins[i] = -WORLD_SIZE;	// was -8192
+				out->isLightmapped = true;
+				R_CreateSurfaceLightmap (out);
 			}
+			else	// Knightmare- only do this for unlit warp faces!
+#endif	// WARP_LIGHTMAPS
+			{
+				for (i=0; i<2; i++)
+				{
+					out->extents[i] = (WORLD_SIZE*2);	// was 16384
+					out->texturemins[i] = -WORLD_SIZE;	// was -8192
+				}
+				out->samples = NULL;
+				out->isLightmapped = false;
+			}
+
 			R_SubdivideSurface (out);	// cut up polygon for warps
 		}
 		// Knightmare- Psychospaz's envmapping
@@ -892,7 +909,10 @@ void Mod_LoadFaces (lump_t *l)
 		// create lightmaps and polygons
 		//if ( !(out->texinfo->flags & (SURF_SKY|SURF_TRANS33|SURF_TRANS66|SURF_WARP) ) )
 		if ( !(out->texinfo->flags & (SURF_SKY|SURF_WARP) ) )
+		{
+			out->isLightmapped = true;
 			R_CreateSurfaceLightmap (out);
+		}
 
 		if (! (out->texinfo->flags & SURF_WARP) ) 
 			R_BuildPolygonFromSurface (out);
@@ -1123,10 +1143,10 @@ void Mod_LoadPlanes (lump_t *l)
 
 /*
 =================
-Mod_LoadBrushModel
+Mod_Load_Q2_BrushModel
 =================
 */
-void Mod_LoadBrushModel (model_t *mod, void *buffer)
+void Mod_Load_Q2_BrushModel (model_t *mod, void *buffer)
 {
 	int			i;
 	dheader_t	*header;
@@ -1139,8 +1159,11 @@ void Mod_LoadBrushModel (model_t *mod, void *buffer)
 	header = (dheader_t *)buffer;
 
 	i = LittleLong (header->version);
-	if (i != BSPVERSION)
-		VID_Error (ERR_DROP, "Mod_LoadBrushModel: %s has wrong version number (%i should be %i)", mod->name, i, BSPVERSION);
+	if (i != Q2_BSPVERSION) {
+		VID_Error (ERR_DROP, "Mod_Load_Q2_BrushModel: %s has wrong version number (%i should be %i)", mod->name, i, Q2_BSPVERSION);
+	}
+
+	loadmodel->bspFeatures = 0;	// set BSP features flags
 
 	// swap all the lumps
 	mod_base = (byte *)header;
