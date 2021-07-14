@@ -203,7 +203,7 @@ GetNextMap
 get next map's file name
 =================
 */
-void Get_NextMap()
+void Get_NextMap (void)
 {
 	FILE	*fp;
 	qboolean	firstflag = false;
@@ -214,7 +214,7 @@ void Get_NextMap()
 	
 	if (!maplist->string) return;
 
-	Com_sprintf (Buff, sizeof(Buff), ".\\%s\\3ZBMAPS.LST",gamepath->string);
+	Com_sprintf (Buff, sizeof(Buff), ".\\%s\\3ZBMAPS.LST", gamepath->string);
 	fp = fopen(Buff,"r");
 	if (fp == NULL) return;
 	
@@ -242,8 +242,8 @@ void Get_NextMap()
 		if (Q_stricmp (&Buff[1], maplist->string) == 0) break;
 	}
 
-	//search current mapname
-	while(1)
+	// search current mapname
+	while (1)
 	{
 		if (fgets( Buff, sizeof(Buff), fp ) == NULL) goto NONEXTMAP;
 
@@ -259,7 +259,10 @@ void Get_NextMap()
 
 		if (Buff[0] == '\n') continue;
 
-		sscanf(Buff,"%s",nextmap);
+	//	sscanf(Buff, "%s", nextmap);
+		if (sscanf(Buff, "%s", nextmap) ==  EOF) {
+			gi.dprintf ("Get_NextMap: invalid mapname '%s'.\n", Buff);
+		}
 
 		if (!firstflag)
 		{
@@ -270,8 +273,8 @@ void Get_NextMap()
 		if (Q_stricmp (level.mapname, nextmap) == 0) break;
 	}
 
-	//search nextmap
-	while(1)
+	// search nextmap
+	while (1)
 	{
 		if (fgets( Buff, sizeof(Buff), fp ) == NULL)
 		{
@@ -295,7 +298,10 @@ void Get_NextMap()
 
 		if (Buff[0] == '\n') continue;
 
-		sscanf(Buff,"%s",nextmap);
+	//	sscanf(Buff, "%s", nextmap);
+		if (sscanf(Buff, "%s" ,nextmap) == EOF) {
+			gi.dprintf ("Get_NextMap: invalid nextmap '%s'.\n", Buff);
+		}
 		break;
 	}
 SETNEXTMAP:

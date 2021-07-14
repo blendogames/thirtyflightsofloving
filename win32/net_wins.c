@@ -231,7 +231,10 @@ qboolean	NET_StringToSockaddr (char *s, struct sockaddr *sadr)
 		DO(15, sa_nodenum[3]);
 		DO(17, sa_nodenum[4]);
 		DO(19, sa_nodenum[5]);
-		sscanf (&s[22], "%u", &val);
+	//	sscanf (&s[22], "%u", &val);
+		if (sscanf (&s[22], "%u", &val) == EOF) {
+			Com_Printf ("NET_StringToSockaddr: invalid IPX address '%s'.\n", s);
+		}
 		((struct sockaddr_ipx *)sadr)->sa_socket = htons((unsigned short)val);
 	}
 	else

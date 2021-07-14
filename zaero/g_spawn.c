@@ -403,7 +403,10 @@ void ED_ParseField (char *key, char *value, edict_t *ent)
 				*(char **)(b+f->ofs) = ED_NewString (value);
 				break;
 			case F_VECTOR:
-				sscanf (value, "%f %f %f", &vec[0], &vec[1], &vec[2]);
+			//	sscanf (value, "%f %f %f", &vec[0], &vec[1], &vec[2]);
+				if (sscanf (value, "%f %f %f", &vec[0], &vec[1], &vec[2]) == EOF) {
+					gi.error ("ED_ParseField: invalid vector '%s' for key '%s'.\n", value, key);
+				}
 				((float *)(b+f->ofs))[0] = vec[0];
 				((float *)(b+f->ofs))[1] = vec[1];
 				((float *)(b+f->ofs))[2] = vec[2];

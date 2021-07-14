@@ -407,20 +407,29 @@ void Do_Text_Display (edict_t *activator, int flags, char *message)
 		if (p2 && (p2 < p3))
 		{
 			p2 += 2;
-			sscanf(p2, "%d", &hnd->page_length);
+		//	sscanf(p2, "%d", &hnd->page_length);
+			if (sscanf(p2, "%d", &hnd->page_length) == EOF) {
+				gi.dprintf ("Do_Text_Display: invalid value '%s' for page length.\n", p2);
+			}
 			hnd->page_length += 1;
 		}
 		p2 = strstr(p1,"W=");
 		if (p2 && (p2 < p3))
 		{
 			p2 += 2;
-			sscanf(p2, "%d", &hnd->page_width);
+		//	sscanf(p2, "%d", &hnd->page_width);
+			if (sscanf(p2, "%d", &hnd->page_width) == EOF) {
+				gi.dprintf ("Do_Text_Display: invalid value '%s' for page width.\n", p2);
+			}
 		}
 		p2 = strstr(p1,"I=");
 		if (p2 && (p2 < p3))
 		{
 			p2 += 2;
-			sscanf(p2, "%s", hnd->background_image);
+		//	sscanf(p2, "%s", hnd->background_image);
+			if (sscanf(p2, "%s", hnd->background_image) == EOF) {
+				gi.dprintf ("Do_Text_Display: invalid string '%s' for background image.\n", p2);
+			}
 		}
 		p3++;
 		if (*p3 == 10) p3++;

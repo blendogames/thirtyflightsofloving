@@ -76,7 +76,10 @@ void ReadTextureSurfaceAssignments (void)
 	if (!footstep_data) return;
 	while (buf_gets(line, sizeof(line), &parsedata) && num_texsurfs < MAX_TEX_SURF)
 	{
-		sscanf(line, "%d %s", &tex_surf[num_texsurfs].step_id, tex_surf[num_texsurfs].tex);
+	//	sscanf(line, "%d %s", &tex_surf[num_texsurfs].step_id, tex_surf[num_texsurfs].tex);
+		if (sscanf(line, "%d %s", &tex_surf[num_texsurfs].step_id, tex_surf[num_texsurfs].tex) == EOF) {
+			Com_Printf ("ReadTextureSurfaceAssignments: invalid footstep assignment '%s'.\n", line);
+		}
 	//	Com_Printf("%d %s\n", tex_surf[num_texsurfs].step_id, tex_surf[num_texsurfs].tex);
 		num_texsurfs++;
 	}
@@ -96,7 +99,10 @@ void ReadTextureSurfaceAssignments (void)
 	if (!f) return;
 	while (fgets(line, sizeof(line), f) && num_texsurfs < MAX_TEX_SURF)
 	{
-		sscanf(line, "%d %s", &tex_surf[num_texsurfs].step_id, tex_surf[num_texsurfs].tex);
+	//	sscanf(line, "%d %s", &tex_surf[num_texsurfs].step_id, tex_surf[num_texsurfs].tex);
+		if (sscanf(line, "%d %s", &tex_surf[num_texsurfs].step_id, tex_surf[num_texsurfs].tex) == EOF) {
+			Com_Printf ("ReadTextureSurfaceAssignments: invalid footstep assignment '%s'.\n", line);
+		}
 	//	Com_Printf("%d %s\n", tex_surf[num_texsurfs].step_id, tex_surf[num_texsurfs].tex);
 		num_texsurfs++;
 	}

@@ -201,7 +201,7 @@ void convertToVector(char *vecStr, vec3_t *size)
 
 
 
-void InitTestWeapon(void)
+void InitTestWeapon (void)
 {
 	FILE *wCfgFile;
 	char fname[256];
@@ -282,7 +282,10 @@ void InitTestWeapon(void)
 	fclose(wCfgFile);
 
 
-	sscanf(testWeap_aminationFrames, "%d,%d,%d,%d", &testWeap_FRAME_ACTIVATE_LAST, &testWeap_FRAME_FIRE_LAST, &testWeap_FRAME_IDLE_LAST, &testWeap_FRAME_DEACTIVATE_LAST);
+//	sscanf(testWeap_aminationFrames, "%d,%d,%d,%d", &testWeap_FRAME_ACTIVATE_LAST, &testWeap_FRAME_FIRE_LAST, &testWeap_FRAME_IDLE_LAST, &testWeap_FRAME_DEACTIVATE_LAST);
+	if (sscanf(testWeap_aminationFrames, "%d,%d,%d,%d", &testWeap_FRAME_ACTIVATE_LAST, &testWeap_FRAME_FIRE_LAST, &testWeap_FRAME_IDLE_LAST, &testWeap_FRAME_DEACTIVATE_LAST) == EOF) {
+		gi.dprintf ("InitTestWeapon: invalid animation frames '%s'.\n", testWeap_aminationFrames);
+	}
 
 	convertToNumbers(testWeap_idleFrames, testWeap_pause_frames);
 	convertToNumbers(testWeap_fireFrames, testWeap_fire_frames);

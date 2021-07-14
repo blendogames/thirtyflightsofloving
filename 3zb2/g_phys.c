@@ -586,7 +586,7 @@ qboolean SV_Push (edict_t *pusher, vec3_t move, vec3_t amove)
 	//          rotating brush models in the same area.
 	//          RealBoundingBox gives us the actual
 	//          bounding box at the current angles.
-	RealBoundingBox(pusher,realmins,realmaxs);
+	RealBoundingBox (pusher, realmins, realmaxs);
 
 // see if any solid entities are inside the final position
 	check = g_edicts+1;
@@ -653,7 +653,8 @@ qboolean SV_Push (edict_t *pusher, vec3_t move, vec3_t amove)
 			// Knightmare added
 			// Lazarus: if turn_rider is set, do it. We don't do this by default
 			//          'cause it can be a fairly drastic change in gameplay
-			if (turn && (check->groundentity == pusher)) {
+			if (turn && (check->groundentity == pusher))
+			{
 				if (!check->client)
 				{
 					check->s.angles[YAW] += amove[YAW];
@@ -757,8 +758,8 @@ qboolean SV_Push (edict_t *pusher, vec3_t move, vec3_t amove)
 				gi.linkentity (check);
 				// Knightmare added
 				// Lazarus: Move check riders, and riders of riders, and... well, you get the pic
-				VectorAdd(move,move2,move3);
-				MoveRiders (check,NULL,move3,amove,turn);
+				VectorAdd (move, move2, move3);
+				MoveRiders (check, NULL, move3, amove, turn);
 				// end Knightmare
 				// impact?
 				continue;
@@ -767,6 +768,7 @@ qboolean SV_Push (edict_t *pusher, vec3_t move, vec3_t amove)
 			// if it is ok to leave in the old position, do it
 			// this is only relevent for riding entities, not pushed
 			VectorSubtract (check->s.origin, move, check->s.origin);
+
 			// Knightmare added
 			VectorSubtract (check->s.origin, move2, check->s.origin);	
 			if (turn)

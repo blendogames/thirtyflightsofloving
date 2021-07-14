@@ -579,8 +579,10 @@ void CL_PrepRefresh (void)
 	Com_Printf ("sky\r", i); 
 	SCR_UpdateScreen ();
 	rotate = atof (cl.configstrings[CS_SKYROTATE]);
-	sscanf (cl.configstrings[CS_SKYAXIS], "%f %f %f", 
-		&axis[0], &axis[1], &axis[2]);
+//	sscanf (cl.configstrings[CS_SKYAXIS], "%f %f %f", &axis[0], &axis[1], &axis[2]);
+	if (sscanf (cl.configstrings[CS_SKYAXIS], "%f %f %f", &axis[0], &axis[1], &axis[2]) == EOF) {
+		Com_Error (ERR_DROP, "CL_PrepRefresh: invalid string '%s' for CS_SKYAXIS.\n", cl.configstrings[CS_SKYAXIS]);
+	}
 	R_SetSky (cl.configstrings[CS_SKY], rotate, axis);
 	Com_Printf ("                                     \r");
 

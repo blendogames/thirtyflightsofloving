@@ -193,7 +193,7 @@ void ThrowGib (edict_t *self, char *gibname, int damage, int type)
 #endif
 	gib->flags |= FL_NO_KNOCKBACK;
 	gib->svflags |= SVF_GIB; // Knightmare- added gib flag
-	gib->takedamage = DAMAGE_NO;	// was DAMAGE_YES;
+	gib->takedamage = DAMAGE_NO;	// was DAMAGE_YES
 	gib->die = gib_die;
 
 	if (type == GIB_ORGANIC)
@@ -215,7 +215,7 @@ void ThrowGib (edict_t *self, char *gibname, int damage, int type)
 	gib->avelocity[1] = random()*600;
 	gib->avelocity[2] = random()*600;
 
-#ifdef KMQUAKE2_ENGINE_MOD		//Knightmare changed
+#ifdef KMQUAKE2_ENGINE_MOD		// Knightmare changed
 	gib->think = gib_fade;
 #else
 	gib->think = G_FreeEdict;
@@ -268,7 +268,7 @@ void ThrowHead (edict_t *self, char *gibname, int damage, int type)
 
 	self->avelocity[YAW] = crandom()*600;
 
-#ifdef KMQUAKE2_ENGINE_MOD		//Knightmare changed
+#ifdef KMQUAKE2_ENGINE_MOD		// Knightmare changed
 	self->think = gib_fade;
 #else
 	self->think = G_FreeEdict;

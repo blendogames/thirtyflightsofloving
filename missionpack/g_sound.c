@@ -1476,7 +1476,7 @@ void SP_target_playback (edict_t *ent)
 }
 
 #ifdef FMOD_FOOTSTEPS
-void ReadTextureSurfaceAssignments ()
+void ReadTextureSurfaceAssignments (void)
 {
 	cvar_t	*basedir, *gamedir;
 	char	filename[256];
@@ -1500,7 +1500,10 @@ void ReadTextureSurfaceAssignments ()
 
 	while (fgets(line, sizeof(line), f) && num_texsurfs < MAX_TEX_SURF)
 	{
-		sscanf(line,"%d %s",&tex_surf[num_texsurfs].step_id,tex_surf[num_texsurfs].tex);
+	//	sscanf(line,"%d %s",&tex_surf[num_texsurfs].step_id,tex_surf[num_texsurfs].tex);
+		if (sscanf(line,"%d %s",&tex_surf[num_texsurfs].step_id,tex_surf[num_texsurfs].tex) == EOF) {
+			Com_Printf ("ReadTextureSurfaceAssignments: invalid footstep assignment '%s'.\n", line);
+		}
 	//	gi.dprintf("%d %s\n",tex_surf[num_texsurfs].step_id,tex_surf[num_texsurfs].tex);
 		num_texsurfs++;
 	}
