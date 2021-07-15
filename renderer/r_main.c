@@ -1909,7 +1909,7 @@ qboolean R_Init ( void *hinstance, void *hWnd, char *reason )
 	glConfig.version_string = qglGetString (GL_VERSION);
 //	sscanf(glConfig.version_string, "%d.%d.%d", &glConfig.version_major, &glConfig.version_minor, &glConfig.version_release);
 	if (sscanf(glConfig.version_string, "%d.%d.%d", &glConfig.version_major, &glConfig.version_minor, &glConfig.version_release) == EOF) {
-		VID_Printf (PRINT_ALL, "R_Init: invalid GL_VERSION string reported by driver!\n");
+		VID_Printf (PRINT_ALL, S_COLOR_YELLOW"R_Init: invalid GL_VERSION string reported by driver!\n");
 	}
 	VID_Printf (PRINT_ALL, "GL_VERSION: %s\n", glConfig.version_string );
 

@@ -78,7 +78,7 @@ void ReadTextureSurfaceAssignments (void)
 	{
 	//	sscanf(line, "%d %s", &tex_surf[num_texsurfs].step_id, tex_surf[num_texsurfs].tex);
 		if (sscanf(line, "%d %s", &tex_surf[num_texsurfs].step_id, tex_surf[num_texsurfs].tex) == EOF) {
-			Com_Printf ("ReadTextureSurfaceAssignments: invalid footstep assignment '%s'.\n", line);
+			Com_Printf (S_COLOR_YELLOW"ReadTextureSurfaceAssignments: invalid footstep assignment '%s'.\n", line);
 		}
 	//	Com_Printf("%d %s\n", tex_surf[num_texsurfs].step_id, tex_surf[num_texsurfs].tex);
 		num_texsurfs++;
