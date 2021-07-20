@@ -67,7 +67,7 @@ CL_LightningBeam
 					size,		0,			
 					particle_beam,
 					PART_BEAM,
-					NULL,0);
+					NULL, false);
 				
 			}
 			break;
@@ -87,7 +87,7 @@ CL_LightningBeam
 		size,		0,			
 		particle_lightning,
 		PART_LIGHTNING,
-		NULL,0);
+		NULL, false);
 
 	p->src_ent=srcEnt;
 	p->dst_ent=dstEnt;
@@ -103,7 +103,7 @@ CL_LightningBeam
 		size,		0,			
 		particle_beam,
 		PART_BEAM,
-		NULL,0);
+		NULL, false);
 }*/
 void CL_LightningBeam (vec3_t start, vec3_t end, int srcEnt, int dstEnt, float size)
 {
@@ -331,7 +331,7 @@ void CL_Explosion_FlashParticle (vec3_t org, float size, qboolean large)
 			//100-(!rocket)?50:0,	-10,			
 			particle_rflash,
 			PART_DEPTHHACK_SHORT,
-			NULL,0);
+			NULL, false);
 	}
 	else
 	{
@@ -348,7 +348,7 @@ void CL_Explosion_FlashParticle (vec3_t org, float size, qboolean large)
 			//100-(!rocket)?50:0,	-10,			
 			particle_blaster,
 			0,
-			NULL,0);
+			NULL, false);
 	}
 }
 
@@ -580,7 +580,7 @@ void CL_BloodSmack (vec3_t org, vec3_t dir)
 		10,			0,			
 		particle_redblood,
 		PART_SHADED|PART_OVERBRIGHT,
-		CL_ParticleRotateThink,true);
+		CL_ParticleRotateThink, true);
 
 	CL_BloodPuff(org, dir, 1);
 }
@@ -618,7 +618,7 @@ void CL_BloodBleed (vec3_t org, vec3_t dir, int count)
 			MAXBLEEDSIZE*0.5,		0,			
 			particle_blooddrip,
 			PART_SHADED|PART_DIRECTION|PART_GRAVITY|PART_OVERBRIGHT,
-			CL_ParticleBloodDropThink,true);
+			CL_ParticleBloodDropThink, true);
 
 		if (p && i == 0 && random() < BLOOD_DECAL_CHANCE)
 			p->flags |= PART_LEAVEMARK;
@@ -652,7 +652,7 @@ void CL_BloodPuff (vec3_t org, vec3_t dir, int count)
 			10,			0,
 			particle_blood,
 			PART_SHADED,
-			CL_ParticleBloodPuffThink,true);
+			CL_ParticleBloodPuffThink, true);
 
 		if (p && i == 0 && random() < BLOOD_DECAL_CHANCE)
 			p->flags |= PART_LEAVEMARK;
@@ -709,7 +709,7 @@ void CL_GreenBloodHit (vec3_t org, vec3_t dir)
 				10,			0,			
 				particle_blood,
 				PART_SHADED|PART_OVERBRIGHT,
-				CL_ParticleBloodPuffThink,true);
+				CL_ParticleBloodPuffThink, true);
 
 		if (p && i == 0 && random() < BLOOD_DECAL_CHANCE)
 			p->flags |= PART_LEAVEMARK;
@@ -745,7 +745,7 @@ void CL_ParticleEffect (vec3_t org, vec3_t dir, int color8, int count)
 			1,			0,			
 			particle_generic,
 			PART_GRAVITY,
-			NULL,0);
+			NULL, false);
 	}
 }
 
@@ -777,7 +777,7 @@ void CL_ParticleEffect2 (vec3_t org, vec3_t dir, int color8, int count)
 			1,			0,			
 			particle_generic,
 			PART_GRAVITY,
-			NULL,0);
+			NULL, false);
 	}
 }
 
@@ -873,7 +873,7 @@ void CL_ParticleEffectSplash (vec3_t org, vec3_t dir, int color8, int count)
 			5,			-7,			
 			particle_smoke,
 			PART_GRAVITY|PART_DIRECTION   /*|PART_TRANS|PART_SHADED*/,
-			CL_ParticleSplashThink,true);
+			CL_ParticleSplashThink, true);
 	}
 }
 
@@ -928,7 +928,7 @@ void CL_ParticleEffectSparks (vec3_t org, vec3_t dir, vec3_t color, int count)
 			4,			0, //Knightmare- increase size
 			particle_solid,
 			PART_GRAVITY|PART_SPARK,
-			CL_ParticleSparksThink,true);
+			CL_ParticleSparksThink, true);
 	}
 	if (p) // added light effect
 		CL_AddParticleLight (p, (count>8)?130:65, 0, color[0]/255, color[1]/255, color[2]/255);
@@ -1188,7 +1188,7 @@ void CL_TeleporterParticles (entity_state_t *ent)
 			2,		0,			
 			particle_generic,
 			PART_GRAVITY,
-			NULL,0);
+			NULL, false);
 	}
 }
 
@@ -1236,7 +1236,7 @@ void CL_LogoutEffect (vec3_t org, int type)
 			1,			0,			
 			particle_generic,
 			PART_GRAVITY,
-			NULL,0);
+			NULL, false);
 	}
 }
 
@@ -1264,7 +1264,7 @@ void CL_ItemRespawnParticles (vec3_t org)
 			1,			0,			
 			particle_generic,
 			PART_GRAVITY,
-			NULL,0);
+			NULL, false);
 	}
 }
 
@@ -1300,7 +1300,7 @@ void CL_BigTeleportParticles (vec3_t org)
 			5,		0.15 / (0.5 + frand()*0.3),	 // was 2, 0.05	
 			particle_generic,
 			0,
-			NULL,0);
+			NULL, false);
 	}
 }
 
@@ -1385,7 +1385,7 @@ void CL_BlasterParticles (vec3_t org, vec3_t dir, int count, float size,
 			size,	size*-0.125,		// was 4, -0.5
 			particle_generic,
 			PART_GRAVITY,
-			CL_ParticleBlasterThink,true);
+			CL_ParticleBlasterThink, true);
 	
 	/*	d = rand()&5;
 		p = CL_SetupParticle (
@@ -1400,7 +1400,7 @@ void CL_BlasterParticles (vec3_t org, vec3_t dir, int count, float size,
 			4,		-1.0,
 			particle_generic,
 			PART_GRAVITY,
-			CL_ParticleBlasterThink,true);*/
+			CL_ParticleBlasterThink, true);*/
 	}
 	if (p) // added light effect
 		CL_AddParticleLight (p, 150, 0, ((float)red)/255, ((float)green)/255, ((float)blue)/255);
@@ -1446,7 +1446,7 @@ void CL_BlasterTrail (vec3_t start, vec3_t end, int red, int green, int blue,
 			3,			-7,	// was 4, -6;
 			particle_generic,
 			0,
-			NULL,0);
+			NULL, false);
 
 		VectorAdd (move, vec, move);
 	}
@@ -1492,7 +1492,7 @@ void CL_HyperBlasterGlow (vec3_t start, vec3_t end, int red, int green, int blue
 			size,			0, // was 3, -36; 5, -60
 			particle_generic,
 			0,
-			NULL,0);
+			NULL, false);
 
 		VectorAdd (move, vec, move);
 	}
@@ -1531,7 +1531,7 @@ void CL_HyperBlasterTrail (vec3_t start, vec3_t end, int red, int green, int blu
 			5,			-60, // was 3, -36			
 			particle_generic,
 			0,
-			NULL,0);
+			NULL, false);
 
 		VectorAdd (move, vec, move);
 	}
@@ -1564,7 +1564,7 @@ void CL_BlasterTracer (vec3_t origin, vec3_t angle, int red, int green, int blue
 		size,		0,			
 		particle_blasterblob, // was particle_generic
 		PART_DIRECTION|PART_INSTANT|PART_OVERBRIGHT,
-		NULL,0);
+		NULL, false);
 }
 
 void CL_HyperBlasterEffect (vec3_t start, vec3_t end, vec3_t angle, int red, int green, int blue,
@@ -1612,7 +1612,7 @@ void CL_QuadTrail (vec3_t start, vec3_t end)
 			1,			0,			
 			particle_generic,
 			0,
-			NULL,0);
+			NULL, false);
 
 		VectorAdd (move, vec, move);
 	}
@@ -1654,7 +1654,7 @@ void CL_FlagTrail (vec3_t start, vec3_t end, qboolean isred, qboolean isgreen)
 			1,			0,			
 			particle_generic,
 			0,
-			NULL,0);
+			NULL, false);
 
 		VectorAdd (move, vec, move);
 	}
@@ -1758,8 +1758,7 @@ void CL_DiminishingTrail (vec3_t start, vec3_t end, centity_t *old, int flags)
 							3 + random()*2,			0,			
 							particle_blooddrop,
 							PART_OVERBRIGHT|PART_GRAVITY|PART_SHADED,
-							CL_ParticleBloodThink,true);
-							//NULL,0);
+							CL_ParticleBloodThink, true);
 					else
 						p = CL_SetupParticle (
 							0,	0,	0,
@@ -1773,8 +1772,7 @@ void CL_DiminishingTrail (vec3_t start, vec3_t end, centity_t *old, int flags)
 							5,			-1,			
 							particle_blood,
 							PART_GRAVITY|PART_SHADED,
-							CL_ParticleBloodThink,true);
-							//NULL,0);
+							CL_ParticleBloodThink, true);
 					if ( p && (crand() < (double)0.0001F) )
 						p->flags |= PART_LEAVEMARK;
 				}
@@ -1792,8 +1790,7 @@ void CL_DiminishingTrail (vec3_t start, vec3_t end, centity_t *old, int flags)
 						5,			-1,			
 						particle_blood,
 						PART_OVERBRIGHT|PART_GRAVITY|PART_SHADED,
-						CL_ParticleBloodThink,true);
-						//NULL,0);
+						CL_ParticleBloodThink, true);
 					if ( p && (crand() < (double)0.0001F) ) 
 						p->flags |= PART_LEAVEMARK;
 
@@ -1813,7 +1810,7 @@ void CL_DiminishingTrail (vec3_t start, vec3_t end, centity_t *old, int flags)
 							1+random()*3,	1,			
 							particle_bubble,
 							PART_TRANS|PART_SHADED,
-							CL_ExplosionBubbleThink,true);
+							CL_ExplosionBubbleThink, true);
 					else
 						CL_SetupParticle (
 							crand()*180, crand()*50, 0,
@@ -1827,7 +1824,7 @@ void CL_DiminishingTrail (vec3_t start, vec3_t end, centity_t *old, int flags)
 							5,			5,			
 							particle_smoke,
 							PART_TRANS|PART_SHADED,
-							CL_ParticleRotateThink,true);
+							CL_ParticleRotateThink, true);
 				}
 				else
 				{
@@ -1843,7 +1840,7 @@ void CL_DiminishingTrail (vec3_t start, vec3_t end, centity_t *old, int flags)
 						5,			5,			
 						particle_smoke,
 						PART_OVERBRIGHT|PART_TRANS|PART_SHADED,
-						CL_ParticleRotateThink,true);
+						CL_ParticleRotateThink, true);
 				}
 			}
 
@@ -1902,7 +1899,7 @@ void CL_RocketTrail (vec3_t start, vec3_t end, centity_t *old)
 				2,			-2,			
 				particle_blaster,
 				PART_GRAVITY,
-				NULL,0);
+				NULL, false);
 		}
 		VectorAdd (move, vec, move);
 	}
@@ -1996,7 +1993,7 @@ void CL_RailSprial (vec3_t start, vec3_t end, int red, int green, int blue)
 			3,	0,			
 			particle_generic,
 			0,
-			NULL,0);
+			NULL, false);
 
 		VectorAdd (move, vec, move);
 	}
@@ -2081,7 +2078,7 @@ void CL_DevRailTrail (vec3_t start, vec3_t end, int red, int green, int blue)
 				dec*DEVRAILSTEPS*TWOTHIRDS,	0,			
 				particle_beam2,
 				PART_DIRECTION,
-				NULL,0);
+				NULL, false);
 		}
 
 		CL_SetupParticle (
@@ -2096,7 +2093,7 @@ void CL_DevRailTrail (vec3_t start, vec3_t end, int red, int green, int blue)
 			2,			-0.25,			
 			particle_solid,
 			PART_GRAVITY|PART_SPARK,
-			CL_ParticleDevRailThink,true);
+			CL_ParticleDevRailThink, true);
 		
 		CL_SetupParticle (
 			crand()*180, crand()*100, 0,
@@ -2184,7 +2181,7 @@ void CL_RailTrail (vec3_t start, vec3_t end, int red, int green, int blue)
 				RAILTRAILSPACE*TWOTHIRDS,	(colored)?0:-5,			
 				particle_beam2,
 				PART_BEAM,
-				NULL,0);
+				NULL, false);
 	}
 	if ( !colored ) {
 		CL_RailSprial (start, end, red, green, blue);
@@ -2232,7 +2229,7 @@ void CL_IonripperTrail (vec3_t start, vec3_t ent)
 			3,			0,			// was dec
 			particle_generic,
 			0,
-			NULL,0);
+			NULL, false);
 
 		VectorAdd (move, vec, move);
 	}
@@ -2276,7 +2273,7 @@ void CL_BubbleTrail (vec3_t start, vec3_t end)
 			size,	1,			
 			particle_bubble,
 			PART_TRANS|PART_SHADED,
-			NULL,0);
+			NULL, false);
 
 		VectorAdd (move, vec, move);
 	}
@@ -2343,7 +2340,7 @@ void CL_FlyParticles (vec3_t origin, int count)
 			1+sin(i+ltime),	1,			
 			particle_generic,
 			PART_TRANS,
-			NULL,0);
+			NULL, false);
 	}
 }
 
@@ -2509,7 +2506,7 @@ void CL_TrapParticles (entity_t *ent)
 			3,			-3,			
 			particle_generic,
 			0,
-			NULL,0);
+			NULL, false);
 
 		VectorAdd (move, vec, move);
 	}
@@ -2549,7 +2546,7 @@ void CL_TrapParticles (entity_t *ent)
 					1,			1,			
 					particle_generic,
 					PART_GRAVITY,
-					NULL,0);
+					NULL, false);
 
 			}
 	}
@@ -2580,7 +2577,7 @@ void CL_BFGExplosionParticles (vec3_t org)
 			10,			-10,			
 			particle_generic,
 			PART_GRAVITY,
-			NULL,0);
+			NULL, false);
 	}
 }
 
@@ -2619,7 +2616,7 @@ void CL_TeleportParticles (vec3_t org)
 					1,			3,			
 					particle_generic,
 					PART_GRAVITY,
-					NULL,0);
+					NULL, false);
 			}
 }
 
@@ -2703,7 +2700,7 @@ void CL_DebugTrail (vec3_t start, vec3_t end)
 			7.5,			0,			
 			particle_generic,
 			0,
-			NULL,0);
+			NULL, false);
 
 		VectorAdd (move, vec, move);
 	}
@@ -2746,7 +2743,7 @@ void CL_ForceWall (vec3_t start, vec3_t end, int color8)
 				5,			0,			
 				particle_generic,
 				0,
-				NULL,0);
+				NULL, false);
 
 		VectorAdd (move, vec, move);
 	}
@@ -2788,7 +2785,7 @@ void CL_BubbleTrail2 (vec3_t start, vec3_t end, int dist)
 			size,		1,			
 			particle_bubble,
 			PART_TRANS|PART_SHADED,
-			NULL,0);
+			NULL, false);
 
 		VectorAdd (move, vec, move);
 	}
@@ -2891,7 +2888,7 @@ void CL_HeatbeamParticles (vec3_t start, vec3_t forward)
 				size,		1,		// shrunk size
 				particle_blaster,
 				0,
-				NULL,0);
+				NULL, false);
 		}
 		VectorAdd (move, vec, move);
 	}
@@ -2933,7 +2930,7 @@ void CL_ParticleSteamEffect (vec3_t org, vec3_t dir, int red, int green, int blu
 			4,			-2,			
 			particle_smoke,
 			0,
-			NULL,0);
+			NULL, false);
 
 		if (!p)
 			return;
@@ -2985,7 +2982,7 @@ void CL_ParticleSteamEffect2 (cl_sustain_t *self)
 			4,			0,			
 			particle_smoke,
 			PART_GRAVITY,
-			NULL,0);
+			NULL, false);
 
 		if (!p)
 			return;
@@ -3043,7 +3040,7 @@ void CL_TrackerTrail (vec3_t start, vec3_t end)
 			2,		0,			
 			particle_generic,
 			PART_TRANS,
-			NULL,0);
+			NULL, false);
 
 		if (!p)
 			return;
@@ -3081,7 +3078,7 @@ void CL_Tracker_Shell (vec3_t origin)
 			1,		0,	//Knightmare- changed size		
 			particle_generic,
 			PART_TRANS,
-			NULL,0);
+			NULL, false);
 
 		if (!p)
 			return;
@@ -3120,7 +3117,7 @@ void CL_MonsterPlasma_Shell(vec3_t origin)
 			2,		0,			
 			particle_generic,
 			PART_TRANS|PART_INSTANT,
-			NULL,0);
+			NULL, false);
 
 		if (!p)
 			return;
@@ -3168,7 +3165,7 @@ void CL_Widowbeamout (cl_sustain_t *self)
 			2,		0,			
 			particle_generic,
 			PART_TRANS|PART_INSTANT,
-			NULL,0);
+			NULL, false);
 
 		if (!p)
 			return;
@@ -3217,7 +3214,7 @@ void CL_Nukeblast (cl_sustain_t *self)
 			10*(0.5+ratio*0.5),	-1,			
 			particle_generic,
 			PART_INSTANT,
-			NULL,0);
+			NULL, false);
 
 		if (!p)
 			return;
@@ -3261,7 +3258,7 @@ void CL_WidowSplash (vec3_t org)
 			3,			0,			
 			particle_generic,
 			0,
-			NULL,0);
+			NULL, false);
 
 		if (!p)
 			return;
@@ -3301,7 +3298,7 @@ void CL_Tracker_Explode (vec3_t	origin)
 			2,		0,			
 			particle_generic,
 			PART_TRANS,
-			NULL,0);
+			NULL, false);
 
 		if (!p)
 			return;
@@ -3356,7 +3353,7 @@ void CL_TagTrail (vec3_t start, vec3_t end, int color8)
 			1.5,			0,			
 			particle_generic,
 			0,
-			NULL,0);
+			NULL, false);
 
 		VectorAdd (move, vec, move);
 	}
@@ -3387,7 +3384,7 @@ void CL_ColorExplosionParticles (vec3_t org, int color8, int run)
 			2,			1,			
 			particle_generic,
 			0,
-			NULL,0);
+			NULL, false);
 	}
 }
 
@@ -3414,7 +3411,7 @@ void CL_ParticleSmokeEffect (vec3_t org, vec3_t dir, float size)
 		size,			5,			
 		particle_smoke,
 		PART_TRANS|PART_SHADED|PART_OVERBRIGHT,
-		CL_ParticleRotateThink,true);
+		CL_ParticleRotateThink, true);
 }
 
 

@@ -129,10 +129,20 @@ typedef enum
 	rserr_ok,
 
 	rserr_invalid_fullscreen,
+	rserr_invalid_borderless,	// borderless support
 	rserr_invalid_mode,
 
 	rserr_unknown
 } rserr_t;
+
+// borderless support
+typedef enum
+{
+	dt_windowed = 0,
+	dt_fullscreen = 1,
+	dt_borderless = 2
+} dispType_t;
+
 
 #include "r_model.h"
 
@@ -1049,12 +1059,12 @@ IMPLEMENTATION SPECIFIC FUNCTIONS
 ====================================================================
 */
 
-void		GLimp_BeginFrame( float camera_separation );
-void		GLimp_EndFrame( void );
-int 		GLimp_Init( void *hinstance, void *hWnd );
-void		GLimp_Shutdown( void );
-int     	GLimp_SetMode( int *pwidth, int *pheight, int mode, qboolean fullscreen );
-void		GLimp_AppActivate( qboolean active );
-void		GLimp_EnableLogging( qboolean enable );
-void		GLimp_LogNewFrame( void );
-
+void		GLimp_BeginFrame (float camera_separation);
+void		GLimp_EndFrame (void);
+int 		GLimp_Init (void *hinstance, void *hWnd);
+void		GLimp_Shutdown (void);
+//int     	GLimp_SetMode (int *pwidth, int *pheight, int mode, qboolean fullscreen);
+int     	GLimp_SetMode (int *pwidth, int *pheight, int mode, dispType_t fullscreen);	// borderless support
+void		GLimp_AppActivate (qboolean active);
+void		GLimp_EnableLogging (qboolean enable);
+void		GLimp_LogNewFrame (void);

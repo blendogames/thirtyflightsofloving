@@ -707,7 +707,7 @@ void Menu_Draw (menuframework_s *menu)
 			x1 = menu->x + item->x + RCOLUMN_OFFSET; // + 2 chars for space + cursor
 			y1 = menu->y + item->y;
 			w1 = 0;			h1 = item->textSize;	// MENU_FONT_SIZE
-			SCR_AdjustFrom640 (&x1, &y1, &w1, &h1, ALIGN_CENTER);
+			SCR_ScaleCoords (&x1, &y1, &w1, &h1, ALIGN_CENTER);
 			min[0] = x1;	max[0] = x1+w1;
 			min[1] = y1;	max[1] = y1+h1;
 		//	max[0] = min[0] = SCR_ScaledScreen(menu->x + item->x + RCOLUMN_OFFSET); //+ 2 chars for space + cursor
@@ -1119,7 +1119,7 @@ int NewSliderValueForX (int x, menuslider_s *s)
 	int		pos;
 	
 	sliderbase = s->generic.x + s->generic.parent->x + MENU_FONT_SIZE + RCOLUMN_OFFSET;
-	SCR_AdjustFrom640 (&sliderbase, NULL, NULL, NULL, ALIGN_CENTER);
+	SCR_ScaleCoords (&sliderbase, NULL, NULL, NULL, ALIGN_CENTER);
 	pos = x - sliderbase;
 //	pos = x - SCR_ScaledScreen(s->generic.x + s->generic.parent->x + MENU_FONT_SIZE + RCOLUMN_OFFSET);
 
@@ -1173,7 +1173,7 @@ void Menu_ClickSlideItem (menuframework_s *menu, void *menuitem)
 
 	x = menu->x + item->x + Slider_CursorPositionX(slider) - 4;
 	w = 8;
-	SCR_AdjustFrom640 (&x, NULL, &w, NULL, ALIGN_CENTER);
+	SCR_ScaleCoords (&x, NULL, &w, NULL, ALIGN_CENTER);
 	min = x;	max = x + w;
 
 	if (cursor.x < min)

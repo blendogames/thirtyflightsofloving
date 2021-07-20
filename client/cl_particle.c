@@ -318,52 +318,52 @@ cparticle_t *CL_SetupParticle (
 
 	p->time = cl.time;
 
-	p->angle[0]=angle0;
-	p->angle[1]=angle1;
-	p->angle[2]=angle2;
+	p->angle[0] = angle0;
+	p->angle[1] = angle1;
+	p->angle[2] = angle2;
 
-	p->org[0]=org0;
-	p->org[1]=org1;
-	p->org[2]=org2;
-	p->oldorg[0]=org0;
-	p->oldorg[1]=org1;
-	p->oldorg[2]=org2;
+	p->org[0] = org0;
+	p->org[1] = org1;
+	p->org[2] = org2;
+	p->oldorg[0] = org0;
+	p->oldorg[1] = org1;
+	p->oldorg[2] = org2;
 
-	p->vel[0]=vel0;
-	p->vel[1]=vel1;
-	p->vel[2]=vel2;
+	p->vel[0] = vel0;
+	p->vel[1] = vel1;
+	p->vel[2] = vel2;
 
-	p->accel[0]=accel0;
-	p->accel[1]=accel1;
-	p->accel[2]=accel2;
+	p->accel[0] = accel0;
+	p->accel[1] = accel1;
+	p->accel[2] = accel2;
 
-	p->color[0]=color0;
-	p->color[1]=color1;
-	p->color[2]=color2;
+	p->color[0] = color0;
+	p->color[1] = color1;
+	p->color[2] = color2;
 
-	p->colorvel[0]=colorvel0;
-	p->colorvel[1]=colorvel1;
-	p->colorvel[2]=colorvel2;
+	p->colorvel[0] = colorvel0;
+	p->colorvel[1] = colorvel1;
+	p->colorvel[2] = colorvel2;
 
 	p->blendfunc_src = blendfunc_src;
 	p->blendfunc_dst = blendfunc_dst;
 
-	p->alpha=alpha;
-	p->alphavel=alphavel;
-	p->size=size;
-	p->sizevel=sizevel;
+	p->alpha = alpha;
+	p->alphavel = alphavel;
+	p->size = size;
+	p->sizevel = sizevel;
 
-	p->image=image;
-	p->flags=flags;
+	p->image = image;
+	p->flags = flags;
 
-	p->src_ent=0;
-	p->dst_ent=0;
+	p->src_ent = 0;
+	p->dst_ent = 0;
 
 	if (think)
 		p->think = think;
 	else
 		p->think = NULL;
-	p->thinknext=thinknext;
+	p->thinknext = thinknext;
 
 	for (j=0;j<P_LIGHTS_MAX;j++)
 	{

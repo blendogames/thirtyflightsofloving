@@ -802,7 +802,7 @@ void CL_DrawLayout (void)
 		return;
 
 	// Special hack for visor HUD addition in Zaero
-	if ( strstr(cl.layout, "xv 26 yb -75 string \"Tracking ") )
+	if ( strncmp(cl.layout, "xv 26 yb -75 string \"Tracking ", 30) == 0 )
 		isStatusBar = true;
 
 	CL_ExecuteLayoutString (cl.layout, isStatusBar);

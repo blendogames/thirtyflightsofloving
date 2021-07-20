@@ -74,7 +74,7 @@ void UI_AddButton (buttonmenuobject_t *thisObj, int index, float x, float y, flo
 	float x1, y1, w1, h1;
 
 	x1 = x;	y1 = y;	w1 = w;	h1 = h;
-	SCR_AdjustFrom640 (&x1, &y1, &w1, &h1, ALIGN_CENTER);
+	SCR_ScaleCoords (&x1, &y1, &w1, &h1, ALIGN_CENTER);
 	thisObj->min[0] = x1;	thisObj->max[0] = x1 + w1;
 	thisObj->min[1] = y1;	thisObj->max[1] = y1 + h1;
 	thisObj->index = index;
@@ -95,7 +95,7 @@ void UI_AddMainButton (mainmenuobject_t *thisObj, int index, int x, int y, char 
 	R_DrawGetPicSize (&w, &h, name);
 	
 	x1 = x; y1 = y; w1 = w; h1 = h;
-	SCR_AdjustFrom640 (&x1, &y1, &w1, &h1, ALIGN_CENTER);
+	SCR_ScaleCoords (&x1, &y1, &w1, &h1, ALIGN_CENTER);
 	thisObj->min[0] = x1;	thisObj->max[0] = x1 + w1;
 	thisObj->min[1] = y1;	thisObj->max[1] = y1 + h1;
 

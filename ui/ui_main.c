@@ -136,7 +136,7 @@ void UI_DrawMainCursor3D (int x, int y)
 	// size 24x34
 	rx = x;				ry = y;
 	rw = 24;			rh = 34;
-	SCR_AdjustFrom640 (&rx, &ry, &rw, &rh, ALIGN_CENTER);
+	SCR_ScaleCoords (&rx, &ry, &rw, &rh, ALIGN_CENTER);
 	refdef.x = rx;		refdef.y = ry;
 	refdef.width = rw;	refdef.height = rh;
 	refdef.fov_x = 40;

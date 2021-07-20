@@ -1203,7 +1203,8 @@ void R_Register (void)
 	Cvar_SetDescription ("r_3dlabs_broken", "Enables CDS hack for broken 3DLabs drivers.");
 
 	vid_fullscreen = Cvar_Get( "vid_fullscreen", "1", CVAR_ARCHIVE );
-	Cvar_SetDescription ("vid_fullscreen", "Enables fullscreen video mode.");
+//	Cvar_SetDescription ("vid_fullscreen", "Enables fullscreen video mode.");
+	Cvar_SetDescription ("vid_fullscreen", "Sets fullscreen or borderless video mode.  0 = windowed, 1 = fullscreen, 2 = borderless");	// borderless support
 	vid_gamma = Cvar_Get( "vid_gamma", "0.8", CVAR_ARCHIVE ); // was 1.0
 	Cvar_SetDescription ("vid_gamma", "Screen brightness value.  Uses inverse scale.");
 	vid_ref = Cvar_Get( "vid_ref", "gl", CVAR_ARCHIVE );
@@ -1258,7 +1259,8 @@ R_SetMode
 qboolean R_SetMode (void)
 {
 	rserr_t err;
-	qboolean fullscreen;
+//	qboolean fullscreen;
+	dispType_t	fullscreen;	// borderless support
 
 	if ( vid_fullscreen->modified && !glConfig.allowCDS )
 	{
@@ -1288,7 +1290,16 @@ qboolean R_SetMode (void)
 			Cvar_SetValue( "vid_fullscreen", 0);
 			vid_fullscreen->modified = false;
 			VID_Printf (PRINT_ALL, "ref_gl::R_SetMode() - fullscreen unavailable in this mode\n" );
-			if ( ( err = GLimp_SetMode( &vid.width, &vid.height, r_mode->integer, false ) ) == rserr_ok )
+		//	if ( ( err = GLimp_SetMode( &vid.width, &vid.height, r_mode->integer, false ) ) == rserr_ok )
+			if ( ( err = GLimp_SetMode( &vid.width, &vid.height, r_mode->integer, dt_windowed ) ) == rserr_ok )
+				return true;
+		}
+		else if ( err == rserr_invalid_borderless )	// borderless support
+		{
+			Cvar_SetValue( "vid_fullscreen", 0);
+			vid_fullscreen->modified = false;
+			VID_Printf (PRINT_ALL, "R_SetMode() - borderless window unavailable in this mode\n" );
+			if ( ( err = GLimp_SetMode( &vid.width, &vid.height, r_mode->integer, dt_windowed ) ) == rserr_ok )
 				return true;
 		}
 		else if ( err == rserr_invalid_mode )
@@ -1299,7 +1310,8 @@ qboolean R_SetMode (void)
 		}
 
 		// try setting it back to something safe
-		if ( ( err = GLimp_SetMode( &vid.width, &vid.height, glState.prev_mode, false ) ) != rserr_ok )
+	//	if ( ( err = GLimp_SetMode( &vid.width, &vid.height, glState.prev_mode, false ) ) != rserr_ok )
+		if ( ( err = GLimp_SetMode( &vid.width, &vid.height, glState.prev_mode, dt_windowed ) ) != rserr_ok )
 		{
 			VID_Printf (PRINT_ALL, "ref_gl::R_SetMode() - could not revert to safe mode\n" );
 			return false;

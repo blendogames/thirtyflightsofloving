@@ -389,10 +389,16 @@ Menu_Video_Init
 */
 void Menu_Video_Init (void)
 {
-	// Knightmare- added 1280x1024, 1400x1050, 856x480, 1024x480 modes, removed 320x240, 400x300, 512x384 modes
 	static const char *resolutions[] = 
 	{
 #include "../qcommon/vid_resolutions.h"
+	};
+	static const char *fullscreen_names[] =
+	{
+		"windowed",
+		"fullscreen",
+		"borderless",
+		0
 	};
 	static const char *refreshrate_names[] = 
 	{
@@ -501,10 +507,11 @@ void Menu_Video_Init (void)
 	s_fs_box.generic.textSize		= MENU_FONT_SIZE;
 	s_fs_box.generic.x				= 0;
 	s_fs_box.generic.y				= y += 3.5*MENU_LINE_SIZE;
-	s_fs_box.generic.name			= "fullscreen";
-	s_fs_box.itemnames				= yesno_names;
+	s_fs_box.generic.name			= "display type";	// "fullscreen"
+	s_fs_box.itemnames				= fullscreen_names;	// yesno_names
 	s_fs_box.curvalue				= Cvar_VariableValue("vid_fullscreen");
-	s_fs_box.generic.statusbar		= "changes bettween fullscreen and windowed display";
+//	s_fs_box.generic.statusbar		= "changes bettween fullscreen and windowed display";
+	s_fs_box.generic.statusbar		= "changes bettween fullscreen, borderless window, and windowed display";
 
 	s_brightness_slider.generic.type		= MTYPE_SLIDER;
 	s_brightness_slider.generic.textSize	= MENU_FONT_SIZE;

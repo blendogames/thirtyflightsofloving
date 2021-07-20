@@ -350,7 +350,7 @@ qboolean PlayerConfig_CheckIncerement (int dir, float x, float y, float w, float
 	char *sound = NULL;
 
 	x1 = x;	y1 = y;	w1 = w;	h1 = h;
-	SCR_AdjustFrom640 (&x1, &y1, &w1, &h1, ALIGN_CENTER);
+	SCR_ScaleCoords (&x1, &y1, &w1, &h1, ALIGN_CENTER);
 	min[0] = x1;	max[0] = x1 + w1;
 	min[1] = y1;	max[1] = y1 + h1;
 
@@ -478,7 +478,7 @@ void PlayerConfig_DrawSkinSelection (void)
 	SCR_DrawFill (icon_x-3, icon_y-3, NUM_SKINBOX_ITEMS*34+4, 38, ALIGN_CENTER, 0,0,0,255);
 	if (R_DrawFindPic("/gfx/ui/listbox_background.pcx")) {
 		x = icon_x-2;	y = icon_y-2;	w = NUM_SKINBOX_ITEMS*34+2;	h = 36;
-		SCR_AdjustFrom640 (&x, &y, &w, &h, ALIGN_CENTER);
+		SCR_ScaleCoords (&x, &y, &w, &h, ALIGN_CENTER);
 		R_DrawTileClear ((int)x, (int)y, (int)w, (int)h, "/gfx/ui/listbox_background.pcx");
 	}
 	else
@@ -521,7 +521,7 @@ void PlayerConfig_MenuDraw (void)
 
 	rx = 0;							ry = 0;
 	rw = SCREEN_WIDTH;				rh = SCREEN_HEIGHT;
-	SCR_AdjustFrom640 (&rx, &ry, &rw, &rh, ALIGN_CENTER);
+	SCR_ScaleCoords (&rx, &ry, &rw, &rh, ALIGN_CENTER);
 	refdef.x = rx;		refdef.y = ry;
 	refdef.width = rw;	refdef.height = rh;
 	refdef.fov_x = 50;

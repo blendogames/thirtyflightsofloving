@@ -206,7 +206,8 @@ static qboolean VerifyDriver( void )
 #define	WINDOW_CLASS_NAME2	"KMQuake2 - The Reckoning" // changed
 #define	WINDOW_CLASS_NAME3	"KMQuake2 - Ground Zero" // changed
 
-qboolean VID_CreateWindow( int width, int height, qboolean fullscreen )
+//qboolean VID_CreateWindow (int width, int height, qboolean fullscreen)
+qboolean VID_CreateWindow (int width, int height, dispType_t fullscreen)
 {
 	WNDCLASS		wc;
 	RECT			r;
@@ -222,13 +223,13 @@ qboolean VID_CreateWindow( int width, int height, qboolean fullscreen )
     wc.cbWndExtra    = 0;
     wc.hInstance     = glw_state.hInstance;
 
-	if (FS_ModType("xatrix")) { // q2mp1
+	if (FS_ModType("xatrix")) { // The Reckoning
 		wc.hIcon         = LoadIcon(glw_state.hInstance, MAKEINTRESOURCE(IDI_ICON2));
-		//wc.lpszClassName = WINDOW_CLASS_NAME2;
+	//	wc.lpszClassName = WINDOW_CLASS_NAME2;
 	}
-	else if (FS_ModType("rogue"))  { // q2mp2
+	else if (FS_ModType("rogue"))  { // Ground Zero
 		wc.hIcon         = LoadIcon(glw_state.hInstance, MAKEINTRESOURCE(IDI_ICON3));
-		//wc.lpszClassName = WINDOW_CLASS_NAME3;
+	//	wc.lpszClassName = WINDOW_CLASS_NAME3;
 	}
 	else {
 		wc.hIcon         = LoadIcon(glw_state.hInstance, MAKEINTRESOURCE(IDI_ICON1));
@@ -242,16 +243,22 @@ qboolean VID_CreateWindow( int width, int height, qboolean fullscreen )
     if (!RegisterClass (&wc) )
 		VID_Error (ERR_FATAL, "Couldn't register window class");
 
-	if (fullscreen)
+//	if (fullscreen)
+	if ( fullscreen == dt_fullscreen )	// borderless support
 	{
 		exstyle = WS_EX_TOPMOST;
-		//stylebits = WS_POPUP|WS_VISIBLE;
+	//	stylebits = WS_POPUP|WS_VISIBLE;
 		stylebits = WS_POPUP|WS_SYSMENU|WS_VISIBLE;
 	}
-	else
+	else if ( fullscreen == dt_borderless )	// borderless support
 	{
 		exstyle = 0;
-		//stylebits = WS_OVERLAPPED|WS_BORDER|WS_CAPTION|WS_VISIBLE;
+		stylebits = WS_POPUP|WS_VISIBLE;
+	}
+	else // if ( fullscreen == dt_windowed )
+	{
+		exstyle = 0;
+	//	stylebits = WS_OVERLAPPED|WS_BORDER|WS_CAPTION|WS_VISIBLE;
 		stylebits = WS_OVERLAPPED|WS_BORDER|WS_CAPTION|WS_SYSMENU|WS_VISIBLE;
 	}
 
@@ -265,12 +272,33 @@ qboolean VID_CreateWindow( int width, int height, qboolean fullscreen )
 	w = r.right - r.left;
 	h = r.bottom - r.top;
 
-	if (fullscreen)
+//	if (fullscreen)
+	if ( fullscreen == dt_fullscreen )	// borderless support
 	{
 		x = 0;
 		y = 0;
 	}
-	else
+	else if ( fullscreen == dt_borderless )	// borderless support
+	{
+		HDC		hDC;
+		int		hRes, vRes;
+
+		hDC = GetDC (NULL);
+		hRes = GetDeviceCaps (hDC, HORZRES);
+		vRes = GetDeviceCaps (hDC, VERTRES);
+		ReleaseDC (0, hDC);
+
+		if (hRes <= vid.width)
+			x = 0;
+		else
+			x = (hRes - vid.width) / 2;
+
+		if (vRes <= vid.height)
+			y = 0;
+		else
+			y = (vRes - vid.height) / 2;
+	}
+	else // if ( fullscreen == dt_windowed )
 	{
 		vid_xpos = Cvar_Get ("vid_xpos", "0", 0);
 		vid_ypos = Cvar_Get ("vid_ypos", "0", 0);
@@ -315,10 +343,12 @@ qboolean VID_CreateWindow( int width, int height, qboolean fullscreen )
 /*
 ** GLimp_SetMode
 */
-rserr_t GLimp_SetMode ( int *pwidth, int *pheight, int mode, qboolean fullscreen )
+//rserr_t GLimp_SetMode (int *pwidth, int *pheight, int mode, qboolean fullscreen)
+rserr_t GLimp_SetMode (int *pwidth, int *pheight, int mode, dispType_t fullscreen)
 {
 	int width, height;
-	const char *win_fs[] = { "W", "FS" };
+//	const char *win_fs[] = { "W", "FS" };
+	const char	*win_fs[] = { "W", "FS", "BL" };	// borderless support
 
 	VID_Printf( PRINT_ALL, "Initializing OpenGL display\n");
 
@@ -339,7 +369,8 @@ rserr_t GLimp_SetMode ( int *pwidth, int *pheight, int mode, qboolean fullscreen
 	}
 
 	// do a CDS if needed
-	if ( fullscreen )
+//	if ( fullscreen )
+	if ( fullscreen == dt_fullscreen )	// borderless support
 	{
 		DEVMODE fullscreenMode;
 
@@ -426,14 +457,16 @@ rserr_t GLimp_SetMode ( int *pwidth, int *pheight, int mode, qboolean fullscreen
 				*pwidth = width;
 				*pheight = height;
 				glState.fullscreen = false;
-				if ( !VID_CreateWindow (width, height, false) )
+			//	if ( !VID_CreateWindow (width, height, false) )
+				if ( !VID_CreateWindow (width, height, dt_windowed) )
 					return rserr_invalid_mode;
 				return rserr_invalid_fullscreen;
 			}
 			else
 			{
 				VID_Printf( PRINT_ALL, " ok\n" );
-				if ( !VID_CreateWindow (width, height, true) )
+			//	if ( !VID_CreateWindow (width, height, true) )
+				if ( !VID_CreateWindow (width, height, dt_fullscreen) )
 					return rserr_invalid_mode;
 
 				glState.fullscreen = true;
@@ -441,7 +474,19 @@ rserr_t GLimp_SetMode ( int *pwidth, int *pheight, int mode, qboolean fullscreen
 			}
 		}
 	}
-	else
+	else if ( fullscreen == dt_borderless )	// borderless support
+	{
+		VID_Printf( PRINT_ALL, "...setting borderless window mode\n" );
+
+		ChangeDisplaySettings( 0, 0 );
+
+		*pwidth = width;
+		*pheight = height;
+		glState.fullscreen = false;
+		if ( !VID_CreateWindow (width, height, dt_borderless) )
+			return rserr_invalid_borderless;
+	}
+	else // if ( fullscreen == dt_windowed )
 	{
 		VID_Printf( PRINT_ALL, "...setting windowed mode\n" );
 
@@ -450,7 +495,8 @@ rserr_t GLimp_SetMode ( int *pwidth, int *pheight, int mode, qboolean fullscreen
 		*pwidth = width;
 		*pheight = height;
 		glState.fullscreen = false;
-		if ( !VID_CreateWindow (width, height, false) )
+	//	if ( !VID_CreateWindow (width, height, false) )
+		if ( !VID_CreateWindow (width, height, dt_windowed) )
 			return rserr_invalid_mode;
 	}
 
@@ -466,7 +512,7 @@ rserr_t GLimp_SetMode ( int *pwidth, int *pheight, int mode, qboolean fullscreen
 ** for the window.  The state structure is also nulled out.
 **
 */
-void GLimp_Shutdown( void )
+void GLimp_Shutdown (void)
 {
 	// Knightmare- added Vic's hardware gamma ramp
 	ShutdownGammaRamp ();
@@ -516,7 +562,7 @@ void GLimp_Shutdown( void )
 ** of OpenGL.  Under Win32 this means dealing with the pixelformats and
 ** doing the wgl interface stuff.
 */
-qboolean GLimp_Init( void *hinstance, void *wndproc )
+qboolean GLimp_Init (void *hinstance, void *wndproc)
 {
 #define OSR2_BUILD_NUMBER 1111
 
@@ -768,7 +814,7 @@ fail:
 /*
 ** GLimp_BeginFrame
 */
-void GLimp_BeginFrame( float camera_separation )
+void GLimp_BeginFrame (float camera_separation)
 {
 	if ( r_bitdepth->modified )
 	{
@@ -820,7 +866,7 @@ void GLimp_EndFrame (void)
 /*
 ** GLimp_AppActivate
 */
-void GLimp_AppActivate( qboolean active )
+void GLimp_AppActivate (qboolean active)
 {
 	static qboolean	desktop_restored;
 	cvar_t			*restore_desktop = Cvar_Get( "win_alttab_restore_desktop", "1", CVAR_ARCHIVE );
@@ -832,7 +878,8 @@ void GLimp_AppActivate( qboolean active )
 		ShowWindow( glw_state.hWnd, SW_RESTORE );
 
 		// Knightmare- restore desktop settings on alt-tabbing from fullscreen
-		if ( vid_fullscreen->integer && desktop_restored && glw_state.hGLRC != NULL )
+	//	if ( vid_fullscreen->integer && desktop_restored && glw_state.hGLRC != NULL )
+		if ( (vid_fullscreen->integer == 1) && desktop_restored && glw_state.hGLRC != NULL )	// borderless support
 		{
 			int		width, height;
 			DEVMODE	fullscreenMode;
