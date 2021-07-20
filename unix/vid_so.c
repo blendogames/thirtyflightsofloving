@@ -59,15 +59,14 @@ DLL GLUE
 ==========================================================================
 */
 
-#define	MAXPRINTMSG	8192 // was 4096
+#define	MAXPRINTMSG	16384 // was 4096
 void VID_Printf (int print_level, char *fmt, ...)
 {
 	va_list		argptr;
 	char		msg[MAXPRINTMSG];
 //	static qboolean	inupdate;
-
+	
 	va_start (argptr, fmt);
-//	vsprintf (msg, fmt, argptr);
 	Q_vsnprintf (msg, sizeof(msg), fmt, argptr);
 	va_end (argptr);
 
@@ -84,7 +83,6 @@ void VID_Error (int err_level, char *fmt, ...)
 //	static qboolean	inupdate;
 	
 	va_start (argptr, fmt);
-//	vsprintf (msg, fmt, argptr);
 	Q_vsnprintf (msg, sizeof(msg), fmt, argptr);
 	va_end (argptr);
 
@@ -117,7 +115,6 @@ typedef struct vidmode_s
 	int         mode;
 } vidmode_t;
 
-// Knightmare- added 1280x1024, 1400x1050, 856x480, 1024x480 modes
 vidmode_t vid_modes[] =
 {
 #include "../qcommon/vid_modes.h"
@@ -125,6 +122,13 @@ vidmode_t vid_modes[] =
 
 qboolean VID_GetModeInfo( int *width, int *height, int mode )
 {
+	if (mode == -1) // custom mode
+	{
+		*width  = r_customwidth->value;
+		*height = r_customheight->value;
+		return true;
+	}
+
 	if ( mode < 0 || mode >= VID_NUM_MODES )
 		return false;
 
@@ -282,7 +286,8 @@ void VID_Init (void)
 	vid_ypos = Cvar_Get ("vid_ypos", "22", CVAR_ARCHIVE);
 	Cvar_SetDescription ("vid_ypos", "Sets vertical desktop position of window in windowed mode.");
 	vid_fullscreen = Cvar_Get ("vid_fullscreen", "0", CVAR_ARCHIVE);
-	Cvar_SetDescription ("vid_fullscreen", "Enables fullscreen video mode.");
+//	Cvar_SetDescription ("vid_fullscreen", "Enables fullscreen video mode.");
+	Cvar_SetDescription ("vid_fullscreen", "Sets fullscreen or borderless video mode.  0 = windowed, 1 = fullscreen, 2 = borderless");	// borderless support
 	vid_gamma = Cvar_Get( "vid_gamma", "0.8", CVAR_ARCHIVE );
 	Cvar_SetDescription ("vid_gamma", "Screen brightness value.  Uses inverse scale.");
 	r_customwidth = Cvar_Get( "r_customwidth", "1600", CVAR_ARCHIVE );

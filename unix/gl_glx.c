@@ -21,7 +21,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
 /*
-** gl_glx.c
+** GL_GLX.C
 **
 ** This file contains ALL Linux specific stuff having to do with the
 ** OpenGL refresh.  When a port is being made the following functions
@@ -47,6 +47,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <dlfcn.h>
 
 #include "../renderer/r_local.h"
+
+#include "../ui/ui_local.h"
 
 #include "../client/keys.h"
 
@@ -105,11 +107,11 @@ qboolean vidmode_ext = false;
 
 static Time myxtime;
 
-extern cursor_t ui_mousecursor;
+//extern cursor_t cursor;
 
-qboolean have_stencil = false; //Knightmare 12/24/2001- stencil shadows
+qboolean have_stencil = false; // Knightmare 12/24/2001- stencil shadows
 
-static Cursor CreateNullCursor(Display *display, Window root)
+static Cursor CreateNullCursor (Display *display, Window root)
 {
     Pixmap cursormask; 
     XGCValues xgc;
@@ -131,7 +133,7 @@ static Cursor CreateNullCursor(Display *display, Window root)
     return cursor;
 }
 
-void install_grabs(void)
+void install_grabs (void)
 {
 
 // inviso cursor
@@ -177,7 +179,7 @@ void install_grabs(void)
 	mouse_active = true;
 }
 
-void uninstall_grabs(void)
+void uninstall_grabs (void)
 {
 	if (!dpy || !win)
 		return;
@@ -196,7 +198,7 @@ void uninstall_grabs(void)
 	mouse_active = false;
 }
 
-void IN_DeactivateMouse( void ) 
+void IN_DeactivateMouse (void) 
 {
 	if (!dpy || !win)
 		return;
@@ -207,7 +209,7 @@ void IN_DeactivateMouse( void )
 	}
 }
 
-static void IN_ActivateMouse( void ) 
+static void IN_ActivateMouse (void) 
 {
 	if (!dpy || !win)
 		return;
@@ -232,7 +234,7 @@ void IN_Activate (qboolean active)
 /* KEYBOARD                                                                  */
 /*****************************************************************************/
 
-static int XLateKey(XKeyEvent *ev)
+static int XLateKey (XKeyEvent *ev)
 {
 
 	int key;
@@ -324,7 +326,7 @@ static int XLateKey(XKeyEvent *ev)
 		case XK_Insert:key = K_INS; break;
 		case XK_KP_Insert: key = K_KP_INS; break;
 
-		case XK_KP_Multiply: key = '*'; break;
+		case XK_KP_Multiply: key = K_KP_MULT; break; // was '*'
 		case XK_KP_Add:  key = K_KP_PLUS; break;
 		case XK_KP_Subtract: key = K_KP_MINUS; break;
 		case XK_KP_Divide: key = K_KP_SLASH; break;
@@ -341,7 +343,7 @@ static int XLateKey(XKeyEvent *ev)
 	return key;
 }
 
-void HandleEvents(void)
+void HandleEvents (void)
 {
 	XEvent event;
 	qboolean dowarp = false;
@@ -397,21 +399,20 @@ void HandleEvents(void)
 
 			case ButtonPress:
 				myxtime = event.xbutton.time;	
-				if (event.xbutton.button)
-				{
-					if (Sys_Milliseconds() - ui_mousecursor.buttontime[mouse_button] < multiclicktime)
+				if (event.xbutton.button) {
+					if (Sys_Milliseconds()-ui_mousecursor.buttontime[mouse_button] < multiclicktime)
 						ui_mousecursor.buttonclicks[mouse_button] += 1;
 					else
 						ui_mousecursor.buttonclicks[mouse_button] = 1;
 
-					if (ui_mousecursor.buttonclicks[mouse_button] > 3)
-						ui_mousecursor.buttonclicks[mouse_button] = 3;
+				if (ui_mousecursor.buttonclicks[mouse_button]>3)
+					ui_mousecursor.buttonclicks[mouse_button] = 3;
 
-					ui_mousecursor.buttontime[mouse_button] = Sys_Milliseconds();
+				ui_mousecursor.buttontime[mouse_button] = Sys_Milliseconds();
 
-					ui_mousecursor.buttondown[mouse_button] = true;
-					ui_mousecursor.buttonused[mouse_button] = false;
-					ui_mousecursor.mouseaction = true;
+				ui_mousecursor.buttondown[mouse_button] = true;
+				ui_mousecursor.buttonused[mouse_button] = false;
+				ui_mousecursor.mouseaction = true;
 				}
 				if (event.xbutton.button == 1) Key_Event(K_MOUSE1, 1, Sys_Milliseconds());
 				else if (event.xbutton.button == 2) Key_Event(K_MOUSE3, 1, Sys_Milliseconds());
@@ -465,14 +466,14 @@ void HandleEvents(void)
 
 qboolean GLimp_InitGL (void);
 
-static void signal_handler(int sig)
+static void signal_handler (int sig)
 {
 	printf("Received signal %d, exiting...\n", sig);
 	GLimp_Shutdown();
 	_exit(0);
 }
 
-static void InitSig(void)
+static void InitSig (void)
 {
 	signal(SIGHUP, signal_handler);
 	signal(SIGQUIT, signal_handler);
@@ -488,10 +489,11 @@ static void InitSig(void)
 /*
 ** GLimp_SetMode
 */
-int GLimp_SetMode( int *pwidth, int *pheight, int mode, qboolean fullscreen )
+//int GLimp_SetMode (int *pwidth, int *pheight, int mode, qboolean fullscreen)
+rserr_t GLimp_SetMode (int *pwidth, int *pheight, int mode, dispType_t fullscreen)
 {
-	int width, height;
-	int attrib[] = {
+	int			width, height;
+	int			attrib[] = {
 		GLX_RGBA,
 		GLX_RED_SIZE, 1,
 		GLX_GREEN_SIZE, 1,
@@ -501,23 +503,26 @@ int GLimp_SetMode( int *pwidth, int *pheight, int mode, qboolean fullscreen )
 		GLX_STENCIL_SIZE, 1,
 		None
 	};
-	Window root;
-	XVisualInfo *visinfo;
-	XSetWindowAttributes attr;
-	unsigned int mask;
-	int MajorVersion, MinorVersion;
-	int actualWidth, actualHeight;
-	XSizeHints *sizehints;
-	XWMHints *wmhints;
-	int i;
+	Window		root;
+	XVisualInfo	*visinfo;
+	XSetWindowAttributes	attr;
+	unsigned int	mask;
+	int				MajorVersion, MinorVersion;
+	int				actualWidth, actualHeight;
+	XSizeHints		*sizehints;
+	XWMHints		*wmhints;
+	int				i;
+	char			titleBuf[32];
 
 	r_fakeFullscreen = Cvar_Get( "r_fakeFullscreen", "0", CVAR_ARCHIVE);
 
 	Com_Printf( "Initializing OpenGL display\n");
 
-	if (fullscreen)
+	if ( fullscreen == dt_fullscreen )	// borderless support
 		Com_Printf ( "...setting fullscreen mode %d:", mode );
-	else
+	else if ( fullscreen == dt_borderless )	// borderless support
+		Com_Printf ( "...setting borderless window mode %d:", mode );
+	else // if ( fullscreen == dt_windowed )
 		Com_Printf ( "...setting mode %d:", mode );
 
 	if ( !VID_GetModeInfo( &width, &height, mode ) )
@@ -543,7 +548,8 @@ int GLimp_SetMode( int *pwidth, int *pheight, int mode, qboolean fullscreen )
 	MajorVersion = MinorVersion = 0;
 	if (!XF86VidModeQueryVersion(dpy, &MajorVersion, &MinorVersion)) { 
 		vidmode_ext = false;
-	} else {
+	}
+	else {
 		Com_Printf( "Using XFree86-VidModeExtension Version %d.%d\n",
 			MajorVersion, MinorVersion);
 		vidmode_ext = true;
@@ -557,17 +563,21 @@ int GLimp_SetMode( int *pwidth, int *pheight, int mode, qboolean fullscreen )
 	
 	gl_state.gammaramp = false;
 
-	if (vidmode_ext) {
+	if (vidmode_ext)
+	{
 		int best_fit, best_dist, dist, x, y;
 		
 		XF86VidModeGetAllModeLines(dpy, scrnum, &num_vidmodes, &vidmodes);
 
 		// Are we going fullscreen?  If so, let's change video mode
-		if (fullscreen && !r_fakeFullscreen->value) {
+	//	if (fullscreen && !r_fakeFullscreen->value)
+		if ( (fullscreen == dt_fullscreen) && !r_fakeFullscreen->value )	// borderless support
+		{
 			best_dist = 9999999;
 			best_fit = -1;
 
-			for (i = 0; i < num_vidmodes; i++) {
+			for (i = 0; i < num_vidmodes; i++)
+			{
 				if (width > vidmodes[i]->hdisplay ||
 					height > vidmodes[i]->vdisplay)
 					continue;
@@ -581,7 +591,8 @@ int GLimp_SetMode( int *pwidth, int *pheight, int mode, qboolean fullscreen )
 				}
 			}
 
-			if (best_fit != -1) {
+			if (best_fit != -1)
+			{
 				actualWidth = vidmodes[best_fit]->hdisplay;
 				actualHeight = vidmodes[best_fit]->vdisplay;
 
@@ -589,7 +600,8 @@ int GLimp_SetMode( int *pwidth, int *pheight, int mode, qboolean fullscreen )
 				XF86VidModeSwitchToMode(dpy, scrnum, vidmodes[best_fit]);
 				vidmode_active = true;
 				
-				if (XF86VidModeGetGamma(dpy, scrnum, &oldgamma)) {
+				if (XF86VidModeGetGamma(dpy, scrnum, &oldgamma))
+				{
 					gl_state.gammaramp = true;
 					/* We can no reliably detect hardware gamma
 					changes across software gamma calls, which
@@ -600,7 +612,8 @@ int GLimp_SetMode( int *pwidth, int *pheight, int mode, qboolean fullscreen )
 
 				// Move the viewport to top left
 				XF86VidModeSetViewPort(dpy, scrnum, 0, 0);
-			} else
+			}
+			else
 				fullscreen = 0;
 		}
 	}
@@ -610,23 +623,28 @@ int GLimp_SetMode( int *pwidth, int *pheight, int mode, qboolean fullscreen )
 	attr.border_pixel = 0;
 	attr.colormap = XCreateColormap(dpy, root, visinfo->visual, AllocNone);
 	attr.event_mask = X_MASK;
-	if (vidmode_active) {
+	if (vidmode_active)
+	{
 		mask = CWBackPixel | CWColormap | CWSaveUnder | CWBackingStore | 
 			CWEventMask | CWOverrideRedirect;
 		attr.override_redirect = True;
 		attr.backing_store = NotUseful;
 		attr.save_under = False;
-	} else
+	}
+	else
 		mask = CWBackPixel | CWBorderPixel | CWColormap | CWEventMask;
 
 	win = XCreateWindow(dpy, root, 0, 0, width, height,
 						0, visinfo->depth, InputOutput,
 						visinfo->visual, mask, &attr);
-		
-	XStoreName(dpy, win, "KMQuake2 0.19");
+	
+//	XStoreName(dpy, win, "KMQuake2 0.20");
+	Com_sprintf (titleBuf, sizeof(titleBuf), "KMQuake2 v%4.2fu%d", VERSION, VERSION_UPDATE);
+	XStoreName(dpy, win, titleBuf);
 	
 	sizehints = XAllocSizeHints();
-	if (sizehints) {
+	if (sizehints)
+	{
 		sizehints->min_width = width;
 		sizehints->min_height = height;
 		sizehints->max_width = width;
@@ -638,7 +656,8 @@ int GLimp_SetMode( int *pwidth, int *pheight, int mode, qboolean fullscreen )
 	}
 	
 	wmhints = XAllocWMHints();
-	if (wmhints) {
+	if (wmhints)
+	{
 		#include "q2icon.xbm"
 
 		Pixmap icon_pixmap, icon_mask;
@@ -668,7 +687,8 @@ int GLimp_SetMode( int *pwidth, int *pheight, int mode, qboolean fullscreen )
 	XSetWMProtocols(dpy, win, &wmDeleteWindow, 1);
 	XMapWindow(dpy, win);
 
-	if (vidmode_active) {
+	if (vidmode_active)
+	{
 		XMoveWindow(dpy, win, 0, 0);
 		XRaiseWindow(dpy, win);
 		XWarpPointer(dpy, None, win, 0, 0, 0, 0, 0, 0);
@@ -702,7 +722,6 @@ int GLimp_SetMode( int *pwidth, int *pheight, int mode, qboolean fullscreen )
 */
 
 	return rserr_ok;
-	
 }
 
 /*
@@ -714,7 +733,7 @@ int GLimp_SetMode( int *pwidth, int *pheight, int mode, qboolean fullscreen )
 ** for the window.  The state structure is also nulled out.
 **
 */
-void GLimp_Shutdown( void )
+void GLimp_Shutdown (void)
 {
 	uninstall_grabs();
 	mouse_active = false;
@@ -747,7 +766,7 @@ void GLimp_Shutdown( void )
 ** This routine is responsible for initializing the OS specific portions
 ** of OpenGL.  
 */
-int GLimp_Init( void *hinstance, void *wndproc )
+int GLimp_Init (void *hinstance, void *wndproc)
 {
 	InitSig();
 	
@@ -760,8 +779,8 @@ int GLimp_Init( void *hinstance, void *wndproc )
 /*
 ** GLimp_BeginFrame
 */
-void CIN_ProcessCins(void);
-void GLimp_BeginFrame( float camera_seperation )
+void CIN_ProcessCins (void);
+void GLimp_BeginFrame (float camera_seperation)
 {
 	//Heffo - CIN Texture Update
 	CIN_ProcessCins();
@@ -783,13 +802,13 @@ void GLimp_EndFrame (void)
 /*
 ** GLimp_AppActivate
 */
-void GLimp_AppActivate( qboolean active )
+void GLimp_AppActivate (qboolean active)
 {
 }
 
-void Fake_glColorTableEXT( GLenum target, GLenum internalformat,
+void Fake_glColorTableEXT (GLenum target, GLenum internalformat,
                              GLsizei width, GLenum format, GLenum type,
-                             const GLvoid *table )
+                             const GLvoid *table)
 {
 	byte temptable[256][4];
 	byte *intbl;
@@ -826,7 +845,7 @@ void UpdateGammaRamp (void)
 	XF86VidModeSetGamma(dpy, scrnum, &gamma);
 }
 
-char *Sys_GetClipboardData()
+char *Sys_GetClipboardData (void)
 {
 	Window sowner;
 	Atom type, property;

@@ -435,11 +435,18 @@ void VID_Init (void)
 	else
 		vid_ref = Cvar_Get ("vid_ref", "soft", CVAR_ARCHIVE);
 	vid_xpos = Cvar_Get ("vid_xpos", "3", CVAR_ARCHIVE);
+	Cvar_SetDescription ("vid_ref", "Video renderer module in use.  This is always set to \"gl\" in KMQuake2.");
 	vid_ypos = Cvar_Get ("vid_ypos", "22", CVAR_ARCHIVE);
+	Cvar_SetDescription ("vid_xpos", "Sets horizontal desktop position of window in windowed mode.");
 	vid_fullscreen = Cvar_Get ("vid_fullscreen", "0", CVAR_ARCHIVE);
+//	Cvar_SetDescription ("vid_fullscreen", "Enables fullscreen video mode.");
+	Cvar_SetDescription ("vid_fullscreen", "Sets fullscreen or borderless video mode.  0 = windowed, 1 = fullscreen, 2 = borderless");	// borderless support
 	vid_gamma = Cvar_Get( "vid_gamma", "1", CVAR_ARCHIVE );
+	Cvar_SetDescription ("vid_gamma", "Screen brightness value.  Uses inverse scale.");
 	r_customwidth = Cvar_Get( "r_customwidth", "1600", CVAR_ARCHIVE );
+	Cvar_SetDescription ("r_customwidth", "Sets resolution width when using custom video mode (-1).");
 	r_customheight = Cvar_Get( "r_customheight", "1024", CVAR_ARCHIVE );
+	Cvar_SetDescription ("r_customheight", "Sets resolution height when using custom video mode (-1).");
 
 	/* Add some console commands that we want to handle */
 	Cmd_AddCommand ("vid_restart", VID_Restart_f);

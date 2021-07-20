@@ -58,6 +58,7 @@ static char exe_dir[MAX_OSPATH];
 static char pref_dir[MAX_OSPATH];
 static char	download_dir[MAX_OSPATH];
 
+
 // =======================================================================
 // General routines
 // =======================================================================
@@ -88,7 +89,6 @@ void Sys_Printf (char *fmt, ...)
 	unsigned char		*p;
 
 	va_start (argptr, fmt);
-//	vsprintf (text, fmt, argptr);
 	Q_vsnprintf (text, sizeof(text), fmt, argptr);
 	va_end (argptr);
 
@@ -122,19 +122,18 @@ void Sys_Init(void)
 #endif
 }
 
-void Sys_Error (char *error, ...)
+void Sys_Error (const char *error, ...)
 { 
 	va_list     argptr;
 	char        string[1024];
 
-// change stdin to non blocking
+	// change stdin to non blocking
 	fcntl (0, F_SETFL, fcntl (0, F_GETFL, 0) & ~FNDELAY);
 
 	CL_Shutdown ();
 	Qcommon_Shutdown ();
 
 	va_start (argptr, error);
-//	vsprintf (string, error, argptr);
 	Q_vsnprintf (string, sizeof(string), error, argptr);
 	va_end (argptr);
 	fprintf(stderr, "Error: %s\n", string);
@@ -148,7 +147,6 @@ void Sys_Warn (char *warning, ...)
 	char        string[1024];
 
 	va_start (argptr, warning);
-//	vsprintf (string, warning, argptr);
 	Q_vsnprintf (string, sizeof(string), warning, argptr);
 	va_end (argptr);
 	fprintf(stderr, "Warning: %s", string);
@@ -275,10 +273,11 @@ void *Sys_GetGameAPI (void *parms)
 	path = NULL;
 	while (1)
 	{
-		path = FS_NextPath (path);
+	//	path = FS_NextPath (path);
+		path = FS_NextGamePath (path);
 		if (!path)
 			return NULL;		// couldn't find one anywhere
-		sprintf (name, "%s/%s/%s", curpath, path, gamename);
+		Com_sprintf (name, sizeof(name), "%s/%s/%s", curpath, path, gamename);
 		game_library = dlopen (name, RTLD_LAZY );
 		if (game_library)
 		{
@@ -471,21 +470,21 @@ void Sys_CopyProtect(void)
 		if (strcmp(ent->mnt_type, "iso9660") == 0) {
 			// found a cd file system
 			found_cd = true;
-			sprintf(path, "%s/%s", ent->mnt_dir, "install/data/quake2.exe");
+			Com_sprintf(path, sizeof(path), "%s/%s", ent->mnt_dir, "install/data/quake2.exe");
 			if (stat(path, &st) == 0) {
 				// found it
 				checked = true;
 				endmntent(mnt);
 				return;
 			}
-			sprintf(path, "%s/%s", ent->mnt_dir, "Install/Data/quake2.exe");
+			Com_sprintf(path, sizeof(path), "%s/%s", ent->mnt_dir, "Install/Data/quake2.exe");
 			if (stat(path, &st) == 0) {
 				// found it
 				checked = true;
 				endmntent(mnt);
 				return;
 			}
-			sprintf(path, "%s/%s", ent->mnt_dir, "quake2.exe");
+			Com_sprintf(path, sizeof(path), "%s/%s", ent->mnt_dir, "quake2.exe");
 			if (stat(path, &st) == 0) {
 				// found it
 				checked = true;

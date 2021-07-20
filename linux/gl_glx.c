@@ -21,7 +21,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
 /*
-** gl_glx.c
+** GL_GLX.C
 **
 ** This file contains ALL Linux specific stuff having to do with the
 ** OpenGL refresh.  When a port is being made the following functions
@@ -109,7 +109,7 @@ static cvar_t *m_pitch;
 static cvar_t *m_forward;
 static cvar_t *freelook;
 
-static Cursor CreateNullCursor(Display *display, Window root)
+static Cursor CreateNullCursor (Display *display, Window root)
 {
     Pixmap cursormask; 
     XGCValues xgc;
@@ -131,7 +131,7 @@ static Cursor CreateNullCursor(Display *display, Window root)
     return cursor;
 }
 
-static void install_grabs(void)
+static void install_grabs (void)
 {
 
 // inviso cursor
@@ -173,7 +173,7 @@ static void install_grabs(void)
 //	XSync(dpy, True);
 }
 
-static void uninstall_grabs(void)
+static void uninstall_grabs (void)
 {
 	if (!dpy || !win)
 		return;
@@ -208,7 +208,7 @@ static void RW_IN_MLookUp (void)
 	in_state->IN_CenterView_fp ();
 }
 
-void RW_IN_Init(in_state_t *in_state_p)
+void RW_IN_Init (in_state_t *in_state_p)
 {
 	int mtype;
 	int i;
@@ -236,7 +236,7 @@ void RW_IN_Init(in_state_t *in_state_p)
 	mouse_avail = true;
 }
 
-void RW_IN_Shutdown(void)
+void RW_IN_Shutdown (void)
 {
 	mouse_avail = false;
 }
@@ -292,7 +292,7 @@ void RW_IN_Move (usercmd_t *cmd)
 	mx = my = 0;
 }
 
-static void IN_DeactivateMouse( void ) 
+static void IN_DeactivateMouse (void) 
 {
 	if (!mouse_avail || !dpy || !win)
 		return;
@@ -303,7 +303,7 @@ static void IN_DeactivateMouse( void )
 	}
 }
 
-static void IN_ActivateMouse( void ) 
+static void IN_ActivateMouse (void) 
 {
 	if (!mouse_avail || !dpy || !win)
 		return;
@@ -319,7 +319,7 @@ void RW_IN_Frame (void)
 {
 }
 
-void RW_IN_Activate(qboolean active)
+void RW_IN_Activate (qboolean active)
 {
 	if (active || vidmode_active)
 		IN_ActivateMouse();
@@ -331,7 +331,7 @@ void RW_IN_Activate(qboolean active)
 /* KEYBOARD                                                                  */
 /*****************************************************************************/
 
-static int XLateKey(XKeyEvent *ev)
+static int XLateKey (XKeyEvent *ev)
 {
 
 	int key;
@@ -423,7 +423,7 @@ static int XLateKey(XKeyEvent *ev)
 		case XK_Insert:key = K_INS; break;
 		case XK_KP_Insert: key = K_KP_INS; break;
 
-		case XK_KP_Multiply: key = '*'; break;
+		case XK_KP_Multiply: key = K_KP_MULT; break; // was '*'
 		case XK_KP_Add:  key = K_KP_PLUS; break;
 		case XK_KP_Subtract: key = K_KP_MINUS; break;
 		case XK_KP_Divide: key = K_KP_SLASH; break;
@@ -462,7 +462,7 @@ static int XLateKey(XKeyEvent *ev)
 }
 
 
-static void HandleEvents(void)
+static void HandleEvents (void)
 {
 	XEvent event;
 	int b;
@@ -548,34 +548,34 @@ static void HandleEvents(void)
 
 Key_Event_fp_t Key_Event_fp;
 
-void KBD_Init(Key_Event_fp_t fp)
+void KBD_Init (Key_Event_fp_t fp)
 {
 	Key_Event_fp = fp;
 }
 
-void KBD_Update(void)
+void KBD_Update (void)
 {
 // get events from x server
 	HandleEvents();
 }
 
-void KBD_Close(void)
+void KBD_Close (void)
 {
 }
 
 /*****************************************************************************/
 
-static qboolean GLimp_SwitchFullscreen( int width, int height );
+static qboolean GLimp_SwitchFullscreen (int width, int height);
 qboolean GLimp_InitGL (void);
 
-static void signal_handler(int sig)
+static void signal_handler (int sig)
 {
 	printf("Received signal %d, exiting...\n", sig);
 	GLimp_Shutdown();
 	_exit(0);
 }
 
-static void InitSig(void)
+static void InitSig (void)
 {
 	signal(SIGHUP, signal_handler);
 	signal(SIGQUIT, signal_handler);
@@ -591,7 +591,8 @@ static void InitSig(void)
 /*
 ** GLimp_SetMode
 */
-int GLimp_SetMode( int *pwidth, int *pheight, int mode, qboolean fullscreen )
+//int GLimp_SetMode (int *pwidth, int *pheight, int mode, qboolean fullscreen)
+int GLimp_SetMode (int *pwidth, int *pheight, int mode, dispType_t fullscreen)
 {
 	int width, height;
 	int attrib[] = {
@@ -615,9 +616,12 @@ int GLimp_SetMode( int *pwidth, int *pheight, int mode, qboolean fullscreen )
 
 	ri.Con_Printf( PRINT_ALL, "Initializing OpenGL display\n");
 
-	if (fullscreen)
+//	if (fullscreen)
+	if ( fullscreen == dt_fullscreen )	// borderless support
 		ri.Con_Printf (PRINT_ALL, "...setting fullscreen mode %d:", mode );
-	else
+	else if ( fullscreen == dt_borderless )	// borderless support
+		Com_Printf ( "...setting borderless window mode %d:", mode );
+	else // if ( fullscreen == dt_windowed )
 		ri.Con_Printf (PRINT_ALL, "...setting mode %d:", mode );
 
 	if ( !ri.Vid_GetModeInfo( &width, &height, mode ) )
@@ -649,7 +653,8 @@ int GLimp_SetMode( int *pwidth, int *pheight, int mode, qboolean fullscreen )
 	MajorVersion = MinorVersion = 0;
 	if (!XF86VidModeQueryVersion(dpy, &MajorVersion, &MinorVersion)) { 
 		vidmode_ext = false;
-	} else {
+	}
+	else {
 		ri.Con_Printf(PRINT_ALL, "Using XFree86-VidModeExtension Version %d.%d\n",
 			MajorVersion, MinorVersion);
 		vidmode_ext = true;
@@ -661,17 +666,21 @@ int GLimp_SetMode( int *pwidth, int *pheight, int mode, qboolean fullscreen )
 		return rserr_invalid_mode;
 	}
 
-	if (vidmode_ext) {
+	if (vidmode_ext)
+	{
 		int best_fit, best_dist, dist, x, y;
 		
 		XF86VidModeGetAllModeLines(dpy, scrnum, &num_vidmodes, &vidmodes);
 
 		// Are we going fullscreen?  If so, let's change video mode
-		if (fullscreen && !r_fakeFullscreen->value) {
+	//	if (fullscreen && !r_fakeFullscreen->value)
+		if ( (fullscreen == dt_fullscreen) && !r_fakeFullscreen->value )	// borderless support
+		{
 			best_dist = 9999999;
 			best_fit = -1;
 
-			for (i = 0; i < num_vidmodes; i++) {
+			for (i = 0; i < num_vidmodes; i++)
+			{
 				if (width > vidmodes[i]->hdisplay ||
 					height > vidmodes[i]->vdisplay)
 					continue;
@@ -685,7 +694,8 @@ int GLimp_SetMode( int *pwidth, int *pheight, int mode, qboolean fullscreen )
 				}
 			}
 
-			if (best_fit != -1) {
+			if (best_fit != -1)
+			{
 				actualWidth = vidmodes[best_fit]->hdisplay;
 				actualHeight = vidmodes[best_fit]->vdisplay;
 
@@ -695,7 +705,8 @@ int GLimp_SetMode( int *pwidth, int *pheight, int mode, qboolean fullscreen )
 
 				// Move the viewport to top left
 				XF86VidModeSetViewPort(dpy, scrnum, 0, 0);
-			} else
+			}
+			else
 				fullscreen = 0;
 		}
 	}
@@ -705,13 +716,15 @@ int GLimp_SetMode( int *pwidth, int *pheight, int mode, qboolean fullscreen )
 	attr.border_pixel = 0;
 	attr.colormap = XCreateColormap(dpy, root, visinfo->visual, AllocNone);
 	attr.event_mask = X_MASK;
-	if (vidmode_active) {
+	if (vidmode_active)
+	{
 		mask = CWBackPixel | CWColormap | CWSaveUnder | CWBackingStore | 
 			CWEventMask | CWOverrideRedirect;
 		attr.override_redirect = True;
 		attr.backing_store = NotUseful;
 		attr.save_under = False;
-	} else
+	}
+	else
 		mask = CWBackPixel | CWBorderPixel | CWColormap | CWEventMask;
 
 	win = XCreateWindow(dpy, root, 0, 0, width, height,
@@ -719,7 +732,8 @@ int GLimp_SetMode( int *pwidth, int *pheight, int mode, qboolean fullscreen )
 						visinfo->visual, mask, &attr);
 	XMapWindow(dpy, win);
 
-	if (vidmode_active) {
+	if (vidmode_active)
+	{
 		XMoveWindow(dpy, win, 0, 0);
 		XRaiseWindow(dpy, win);
 		XWarpPointer(dpy, None, win, 0, 0, 0, 0, 0, 0);
@@ -754,7 +768,7 @@ int GLimp_SetMode( int *pwidth, int *pheight, int mode, qboolean fullscreen )
 ** for the window.  The state structure is also nulled out.
 **
 */
-void GLimp_Shutdown( void )
+void GLimp_Shutdown (void)
 {
 	uninstall_grabs();
 	mouse_active = false;
@@ -781,9 +795,9 @@ void GLimp_Shutdown( void )
 ** This routine is responsible for initializing the OS specific portions
 ** of OpenGL.  
 */
-int GLimp_Init( void *hinstance, void *wndproc )
+int GLimp_Init (void *hinstance, void *wndproc)
 {
-	InitSig();
+	InitSig ();
 
 	return true;
 }
@@ -791,7 +805,7 @@ int GLimp_Init( void *hinstance, void *wndproc )
 /*
 ** GLimp_BeginFrame
 */
-void GLimp_BeginFrame( float camera_seperation )
+void GLimp_BeginFrame (float camera_seperation)
 {
 }
 
@@ -804,20 +818,20 @@ void GLimp_BeginFrame( float camera_seperation )
 */
 void GLimp_EndFrame (void)
 {
-	qglFlush();
+	qglFlush ();
 	qglXSwapBuffers(dpy, win);
 }
 
 /*
 ** GLimp_AppActivate
 */
-void GLimp_AppActivate( qboolean active )
+void GLimp_AppActivate (qboolean active)
 {
 }
 
-void Fake_glColorTableEXT( GLenum target, GLenum internalformat,
+void Fake_glColorTableEXT (GLenum target, GLenum internalformat,
                              GLsizei width, GLenum format, GLenum type,
-                             const GLvoid *table )
+                             const GLvoid *table)
 {
 	byte temptable[256][4];
 	byte *intbl;
