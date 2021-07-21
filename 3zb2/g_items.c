@@ -2041,7 +2041,11 @@ gitem_t	itemlist[] =
 		"misc/ar2_pkup.wav",
 		"models/items/armor/shard/tris.md2", EF_ROTATE,
 		NULL,
+#ifdef KMQUAKE2_ENGINE_MOD
+/* icon */		"i_shard",
+#else
 /* icon */		"i_jacketarmor",
+#endif
 /* pickup */	"Armor Shard",
 /* width */		3,
 		0,

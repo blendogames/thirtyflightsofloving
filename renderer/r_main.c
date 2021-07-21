@@ -1269,7 +1269,7 @@ qboolean R_SetMode (void)
 		vid_fullscreen->modified = false;
 	}
 
-	fullscreen = vid_fullscreen->integer;
+	fullscreen = min(max(vid_fullscreen->integer, 0), 2);	// clamp vid_fullscreen value to 0,1,2
 	r_skydistance->modified = true; // skybox size variable
 
 	// don't allow modes 0, 1, or 2

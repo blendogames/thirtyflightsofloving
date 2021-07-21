@@ -428,16 +428,15 @@ void Fire_Rail (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick
 	vec3_t		end;
 	trace_t		tr;
 	edict_t		*ignore;
-	int			mask;
+	int			mask, i=0;
 	qboolean	water;
 
-	VectorMA(start, WORLD_SIZE, aimdir, end);	// was 8192.0
-	VectorCopy(start, from);
+	VectorMA (start, WORLD_SIZE, aimdir, end);	// was 8192.0
+	VectorCopy (start, from);
 	ignore = self;
 	water = false;
 	mask = MASK_SHOT | CONTENTS_SLIME | CONTENTS_LAVA;
-
-	while (ignore)
+	while (ignore && i<256)
 	{
 		tr = gi.trace(from, NULL, NULL, end, ignore, mask);
 		if (tr.contents & (CONTENTS_SLIME | CONTENTS_LAVA))
@@ -458,6 +457,7 @@ void Fire_Rail (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick
 		}
 
 		VectorCopy(tr.endpos, from);
+		i++;
 	}
 
 //CW++

@@ -2127,7 +2127,11 @@ gitem_t	itemlist[] =
 		"misc/ar2_pkup.wav",
 		"models/items/armor/shard/tris.md2", EF_ROTATE,
 		NULL,
+#ifdef KMQUAKE2_ENGINE_MOD
+		"i_shard",
+#else
 		"i_jacketarmor",
+#endif
 		"Armor Shard",
 		3,
 		0,

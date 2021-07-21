@@ -3,7 +3,7 @@ Changes as of v0.20 update 8:
 ------------------------------------
 - Added 3840x1600 and 4096x2160 video modes.
 
-- Added 160Hz, 165Hz, 180Hz, and 240Hz refresh rates.
+- Added 160Hz, 165Hz, 180Hz, and 240Hz refresh rates to the video menu (uses cvar r_displayrefresh, up to 240 Hz).
 
 - Added automatic setting of r_maxfps based on refresh rate set in video menu (r_displayrefresh).
 	This can be disabled by setting the cvar r_maxfps_autoset to 0.
@@ -13,42 +13,12 @@ Changes as of v0.20 update 8:
 - Added borderless window support.  Set vid_fullscreen to 2 to select borderless window.
 
 - Added support for triple-monitor surround modes via custom resolutions.  Monitors must be bound as a single logical display.
-	Keeps all menu/HUD elements on the center screen, set the cvar scr_surroundlayout to 0 to disable this.
+	Keeps all menu/HUD elements on the center screen in triple-monitor configs (when aspect ratio >= scr_surroundthreshold (default 3.6)).
+	Set the cvar scr_surroundlayout to 0 to disable this.
 	Cvars scr_surroundleft and scr_surroundright set placement of left and right of center screen.
 	Default values are 0.333333333333 and 0.666666666667, respectively.
 	
 - Added Windows DPI scaling detection from Yamagi Quake2.
-
-- Added UDP fallback from HTTP downloads and support for Q2Pro-style HTTP URLs.  This can be disabled by
-	setting the cvar cl_http_fallback to 0 or disabling "HTTP fallback" in the download options menu.
-
-- Added support for quake2:// URLs.
-
-- Added client detection of server protocol from challenge message.  Client also auto-reconnects with cl_servertrick
-	set correspondingly when a "wrong version" rejection message is received.
-
-- Added cel shading support.  Uses cvars r_celshading to enable, and r_celshading_width for line width (1-10).
-
-- Added horizontal offset to third-person mode.  Offset distance is controlled by cvar cg_thirdperson_offset.
-
-- Added unique muzzleflashes for the Ripper Guard, Hyperblaster Guard and Beta-class Gladiator in The Reckoning and Railgun Turret in Ground Zero.
-
-- Added unique muzzleflashes for the LMCTF/LMSP plasma rifle and Plasma Guard (bounce and spread).
-
-- Added separate cvars ui_font and scr_font for menu and screen fonts, respectively.  Con_font now only
-	changes the font in the console.
-	
-- Added r_subdivide_size cvar, which controls the chop size of warp surfaces; its default value is 64.
-	A vid_restart is necessary after altering this cvar to properly set warp texture turbulence.
-
-- Added font upscaling (with optional blending by Skuller from Q2Pro) for old 128x128 fonts.  Use cvar r_font_upscale to enable,
-	value of 1 is pixel copy, value of 2 enables blending.  Requires vid_restart for changes to take effect.
-	
-- Added upscaling of the scrap image (with optional blending by Skuller from Q2Pro) used to atlas 8-bit HUD pics.
-	Use cvar r_scrap_upscale to enable, value of 1 is pixel copy, value of 2 enables blending.
-	Requires vid_restart for changes to take effect.
-	
-- Removed the old, decrepit single-texturing surface rendering mode.  GL_ARB_multitexture support is now required.
 
 - Now reads/writes savegames, config files, demos, etc. to <userprofile>/Saved Games/KMQuake2 on Windows Vista
 	and later, and to My Documents/My Games/KMQuake2 on Windows 2000/XP/2003.
@@ -60,6 +30,45 @@ Changes as of v0.20 update 8:
 - Now compresses .sav and .sv2 savegame files into .savz files.  It will still read savegames from earlier
 	KMQ2 versions (with the same game DLL).  This should improve load and save times in multi-level units.
 
+- Added UDP fallback from HTTP downloads and support for Q2Pro-style HTTP URLs.  This can be disabled by
+	setting the cvar cl_http_fallback to 0 or disabling "HTTP fallback" in the download options menu.
+
+- Added support for quake2:// URLs.
+
+- Added client detection of server protocol from challenge message.  Client also auto-reconnects with cl_servertrick
+	set correspondingly when a "wrong version" rejection message is received.
+
+- Added cel shading support.  Uses cvars r_celshading to enable, and r_celshading_width for line width (1-10).
+
+- Added Z-Pass shadow mode due to patent issues w/ commercial games.  Set the cvar r_shadow_zfail to 0 to enable this.
+
+- Added non-self-shadowing option.  Set the cvar r_shadow_self to 0 to enable this.
+
+- Shadow volumes will now be drawn even if the model isn't in view.
+
+- Added horizontal offset to third-person mode.  Offset distance is controlled by cvar cg_thirdperson_offset.
+
+- Added unique muzzleflashes for the Ripper Guard, Hyperblaster Guard and Beta-class Gladiator in The Reckoning and Railgun Turret in Ground Zero.
+
+- Added unique muzzleflashes for the LMCTF/LMSP plasma rifle and Plasma Guard (bounce and spread).
+
+- Added separate cvars ui_font and scr_font for menu and screen fonts, respectively.  Con_font now only
+	changes the font in the console.
+	
+- Now allows changing of anisotropic filter settings without a video restart.
+	
+- Added r_subdivide_size cvar, which controls the chop size of warp surfaces; its default value is 64.
+	A vid_restart is necessary after altering this cvar to properly set warp texture turbulence.
+
+- Added font upscaling (with optional blending by Skuller from Q2Pro) for old 128x128 fonts.  Use cvar r_font_upscale to enable,
+	value of 1 is pixel copy, value of 2 enables blending.  Requires vid_restart for changes to take effect.
+	
+- Added upscaling of the scrap image (with optional blending by Skuller from Q2Pro) used to atlas 8-bit HUD pics.
+	Use cvar r_scrap_upscale to enable, value of 1 is pixel copy, value of 2 enables blending.
+	Requires vid_restart for changes to take effect.
+	
+- Can now stream Ogg Vorbis soundtracks from inside .pak files.  Streaming from inside .pk3s was previously supported.
+		
 - Renamed cvars hud_scale, hud_alpha, and hud_squeezedigits to scr_hudsize, scr_hudalpha, and scr_hudsqueezedigits.
 
 - Added dedicated server option to start server menu.
@@ -73,7 +82,7 @@ Changes as of v0.20 update 8:
 
 - Added display of numerical cvar value to sliders, making them more useable.
 
-- Screenshots now go up to 9999.
+- Changed screenshot filenames to kmquake2_####, now supporting up to 10,000 screenshots.
 
 - Removed size limit of 512x256 for .wal textures.  This fixes the "GL_Upload8: too large" error with 512x512 or larger .wal textures.
 
@@ -101,7 +110,7 @@ Changes as of v0.20 update 8:
 
 - Fixed player model/skin changes not being saved when exiting player config menu via the back action.
 	
-- Fixed crash when a map has too many submodels.  Increased renderer model limit to 2 x MAX_MODELS.
+- Fixed crash when loading a map with too many submodels.  Increased renderer model limit to 2 x MAX_MODELS.
 
 - Fixed crash when rapidly pressing the Esc key during a map load.
 
@@ -122,15 +131,13 @@ Changes as of v0.20 update 8:
 
 - Fixed fog disappearing after a vid_restart.
 
-- Shadow volumes will now be drawn even if the model isn't in view.
-
 - Fixed text scale not changing after changing video modes.
 
 - Fixed handling of high-bit alt color strings.
 
 - Fixed alignment issue with colored text on help computer and centerprints.
 
-- Fixed  text color and formatting disappearing after word wrap in console.
+- Fixed text color and formatting disappearing after word wrap in console.
 
 - Fixed oversized 404 message from aborting all HTTP downloads.
 
@@ -152,11 +159,15 @@ Changes as of v0.20 update 8:
 
 - Removed target_animation from Lazarus DLL, as it breaks when loading/saving game and there's no good way
 	to implement it properly.
+	
+- Cleaned up memory allocation and fixed railgun infinite loop (hang) bug in all included game DLLs.
+
+- Added the CTF tech models and sounds to kmquake2_extras.pk3 so the techs can be readily used in deathmatch.
+	This includes the two new techs from 3 Team CTF.
 
 ------------------------------------
 Changes as of v0.20 update 7:
 ------------------------------------
-
 - Added HTTP download support from R1Q2.  Uses cvars cl_http_proxy, cl_http_filelists, cl_http_downloads,
 	and cl_http_max_connections.
 
@@ -216,10 +227,11 @@ Changes as of v0.20 update 7:
 - Changed savegame format for included Lazarus DLL.  Savegames will now work cross-version as long as
 	no changes to data structures (edict_t, etc) are made.
 
+- Cleaned up memory allocation in in default Lazarus DLL.
+
 ------------------------------------
 Changes as of v0.20 update 6:
 ------------------------------------
-
 - Added writeconfig command.  Usage:
 	writeconfig <configname>
 	Using no parameter will write kmq2config.cfg.
@@ -261,7 +273,6 @@ Changes as of v0.20 update 6:
 ------------------------------------
 Changes as of v0.20 update 5:
 ------------------------------------
-
 - Added an option to the video menu to enable or disable non-power-of-2 mipmapped textures.  Some video drivers
   don't properly support NPOT textures and will screw up the mipmaps for these textures.
 
@@ -270,6 +281,8 @@ Changes as of v0.20 update 5:
 
 - Added better error handling for model scripts.
 
+- Added optimization to R_Clear by bitshifter.
+
 - Now prevents certain files that shouldn't be in paks/pk3s from loading
 	(.cfg files, saves, screenshots, etc).
   
@@ -277,9 +290,11 @@ Changes as of v0.20 update 5:
 
 - Fixed graphical corruption that could occur from certain errors during map loads.
 
-- Improved the performance of dynamic lights in multitexture mode by batching lightmap updates and using
-  a more efficent format for lightmaps.   Requires OpenGL 1.2 for the new lightmap format to enable.
-  Set the cvar r_newlightmapformat to 0 if you happen to get fullbright lightmaps from this change.
+- Optimized surface rendering with batching surfaces and lightmap updates, and also using a more efficent
+	format for lightmaps.   Requires OpenGL 1.2 for the new lightmap format to enable.
+	Set the cvar r_newlightmapformat to 0 if you happen to get fullbright lightmaps from this change.
+	
+- Fixed railgun infinite loop (hang) bug in default Lazarus DLL.
 
 ------------------------------------
 Changes as of v0.20 update 4:
@@ -289,6 +304,8 @@ Changes as of v0.20 update 4:
 - Fixed texture names with backslashes not loading from inside pak files.
 
 - Fixed memory leak in JPEG loading code.
+
+- Fixed long startup times on Windows 7.
 
 - Added multitexture rendering optimizations.
 
