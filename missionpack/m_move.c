@@ -214,9 +214,10 @@ qboolean SV_movestep (edict_t *ent, vec3_t move, qboolean relink)
 		{
 			ent->bad_area = current_bad;
 
-			if (ent->enemy && !strcmp(ent->enemy->classname, "tesla"))
+		//	if ( ent->enemy && !strcmp(ent->enemy->classname, "tesla") )
+			if ( ent->enemy && (!strcmp(ent->enemy->classname, "tesla") || !strcmp(ent->enemy->classname, "prox")) )
 			{
-				// if the tesla is in front of us, back up...
+				// if the tesla or prox is in front of us, back up...
 				if (IsBadAhead (ent, current_bad, move))
 					VectorScale(move, -1, move);
 			}
@@ -663,21 +664,23 @@ qboolean SV_movestep (edict_t *ent, vec3_t move, qboolean relink)
 			{
 			//	if ((g_showlogic) && (g_showlogic->value))
 			//		gi.dprintf("Blocked -");
-				if (!strcmp(new_bad->owner->classname, "tesla"))
+			//	if (!strcmp(new_bad->owner->classname, "tesla"))
+				if ( !strcmp(new_bad->owner->classname, "tesla") || !strcmp(new_bad->owner->classname, "prox") )
 				{
 				//	if ((g_showlogic) && (g_showlogic->value))
-				//		gi.dprintf ("it's a tesla -");
+				//		gi.dprintf ("it's a tesla/prox -");
 					if ((!(ent->enemy)) || (!(ent->enemy->inuse)))
 					{
 					//	if ((g_showlogic) && (g_showlogic->value))
-					//		gi.dprintf ("I don't have a valid enemy, attacking tesla!\n");
+					//		gi.dprintf ("I don't have a valid enemy, attacking tesla/prox!\n");
 						TargetTesla (ent, new_bad->owner);
 						ent->monsterinfo.aiflags |= AI_BLOCKED;
 					}
-					else if (!strcmp(ent->enemy->classname, "telsa"))
+				//	else if (!strcmp(ent->enemy->classname, "telsa"))
+					else if ( !strcmp(ent->enemy->classname, "telsa") || !strcmp(ent->enemy->classname, "prox") )
 					{
 					//	if ((g_showlogic) && (g_showlogic->value))
-					//		gi.dprintf ("but we're already mad at a tesla\n");
+					//		gi.dprintf ("but we're already mad at a tesla/prox -");
 					}
 					else if ((ent->enemy) && (ent->enemy->client))
 					{
@@ -691,7 +694,7 @@ qboolean SV_movestep (edict_t *ent, vec3_t move, qboolean relink)
 						else
 						{
 						//	if ((g_showlogic) && (g_showlogic->value))
-						//		gi.dprintf ("can't see him, kill the tesla! -");
+						//		gi.dprintf ("can't see him, kill the tesla/prox! -");
 							TargetTesla (ent, new_bad->owner);
 							ent->monsterinfo.aiflags |= AI_BLOCKED;
 						}
@@ -699,17 +702,17 @@ qboolean SV_movestep (edict_t *ent, vec3_t move, qboolean relink)
 					else
 					{
 					//	if ((g_showlogic) && (g_showlogic->value))
-					//		gi.dprintf ("the enemy isn't a player, killing tesla -");
+					//		gi.dprintf ("the enemy isn't a player, killing tesla/prox -");
 						TargetTesla (ent, new_bad->owner);
 						ent->monsterinfo.aiflags |= AI_BLOCKED;
 					}
 				}
-			/*	else if ((g_showlogic) && (g_showlogic->value))
-				{
-					gi.dprintf(" by non-tesla bad area!");
-				}*/
+			/*	else if ((g_showlogic) && (g_showlogic->value)) {
+					gi.dprintf(" by non-tesla, non-prox bad area!");
+				} */
 			}
-		//	gi.dprintf ("\n");
+		//	if ((g_showlogic) && (g_showlogic->value))
+		//		gi.dprintf ("\n");
 
 			VectorCopy (oldorg, ent->s.origin);
 			return false;
@@ -1043,8 +1046,8 @@ void M_MoveToGoal (edict_t *ent, float dist)
 	{
 		if (ent->monsterinfo.aiflags & AI_BLOCKED)
 		{
-//			if ((g_showlogic) && (g_showlogic->value))
-//				gi.dprintf ("tesla attack detected, not changing direction!\n");
+		//	if ((g_showlogic) && (g_showlogic->value))
+		//		gi.dprintf ("tesla attack detected, not changing direction!\n");
 			ent->monsterinfo.aiflags &= ~AI_BLOCKED;
 			return;
 		}

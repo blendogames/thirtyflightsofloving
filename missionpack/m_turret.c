@@ -388,7 +388,7 @@ void TurretFire (edict_t *self)
 	chance = DotProduct(dir, forward);
 	if (chance < 0.98)
 	{
-//		gi.dprintf("off-angle\n");
+	//	gi.dprintf("off-angle\n");
 		return;
 	}
 
@@ -430,9 +430,9 @@ void TurretFire (edict_t *self)
 		
 		// aim for the head.
 		if ((self->enemy) && (self->enemy->client))
-			end[2]+=self->enemy->viewheight;
+			end[2] += self->enemy->viewheight;
 		else
-			end[2]+=22;
+			end[2] += 22;
 
 		// Lazarus fog reduction of accuracy
 		if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
@@ -449,7 +449,7 @@ void TurretFire (edict_t *self)
 		if (!(self->spawnflags & SPAWN_INSTANT_WEAPON) && (dist<512))
 		{
 			chance = random();
-			// ramp chance. easy - 50%, avg - 60%, hard - 70%, nightmare - 80%
+			// ramp chance easy - 50%, med - 60%, hard - 70%, nightmare - 80%
 			chance += (3 - skill->value) * 0.1;
 			if (chance < 0.8)
 			{

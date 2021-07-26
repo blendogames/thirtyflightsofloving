@@ -2219,6 +2219,7 @@
 {"drawbbox", (byte *)drawbbox},
 {"below", (byte *)below},
 {"PredictAim", (byte *)PredictAim},
+{"MarkProxArea", (byte *)MarkProxArea},
 {"MarkTeslaArea", (byte *)MarkTeslaArea},
 {"CheckForBadArea", (byte *)CheckForBadArea},
 {"SpawnBadArea", (byte *)SpawnBadArea},

@@ -77,6 +77,7 @@ void fire_flechette (edict_t *self, vec3_t start, vec3_t dir, int damage, int sp
 	VectorNormalize (dir);
 
 	flechette = G_Spawn();
+	flechette->svflags |= SVF_DEADMONSTER;	// Knightmare- don't clip players against these projectiles!
 	flechette->classname = "flechette";
 	flechette->class_id = ENTITY_FLECHETTE;
 	VectorCopy (start, flechette->s.origin);
@@ -88,7 +89,7 @@ void fire_flechette (edict_t *self, vec3_t start, vec3_t dir, int damage, int sp
 	flechette->clipmask = MASK_SHOT;
 	flechette->solid = SOLID_BBOX;
 	flechette->s.renderfx = RF_FULLBRIGHT;
-	flechette->s.renderfx |= RF_NOSHADOW; //Knightmare- no shadow
+	flechette->s.renderfx |= RF_NOSHADOW; // Knightmare- no shadow
 	VectorClear (flechette->mins);
 	VectorClear (flechette->maxs);
 
@@ -157,10 +158,10 @@ void Prox_Explode (edict_t *ent);
 // Knightmare- move prox and trigger field with host
 void prox_movewith_host (edict_t *self)
 {	
-	edict_t *host;
-	vec3_t forward, right, up, offset;
-	vec3_t host_angle_change, amove;
-	int count = 0;
+	edict_t	*host, *field, *area;
+	vec3_t	forward, right, up, offset;
+	vec3_t	host_angle_change, amove;
+	int		iteration = 0;
 
 	// explode if parent has been destroyed
 	if (!self->movewith_ent || !self->movewith_ent->inuse) 
@@ -178,8 +179,21 @@ void prox_movewith_host (edict_t *self)
 		self->movetype = MOVETYPE_TOSS;
 		self->movewith_ent = NULL;
 		self->movewith_set = 0;
-		self->teamchain->movewith_ent = NULL;
-		self->teamchain->movewith_set = 0;
+		// delink field
+	//	self->teamchain->movewith_ent = NULL;
+	//	self->teamchain->movewith_set = 0;
+		if ( self->teamchain && (self->teamchain->owner == self) )
+		{
+			field = self->teamchain;
+			field->movewith_ent = NULL;
+			field->movewith_set = 0;
+			// now delink badarea
+			if (field->teamchain) {
+				area = field->teamchain;
+				area->movewith_ent = NULL;
+				area->movewith_set = 0;
+			}
+		}
 		self->postthink = NULL;
 		return;
 	}
@@ -187,6 +201,10 @@ void prox_movewith_host (edict_t *self)
 movefield:
 	if (!self) // more paranoia
 		return;
+
+//	if (!strcmp(self->classname, "bad_area") && (g_showlogic) && (g_showlogic->value))
+//		gi.dprintf ("prox_movewith_host: Moving badarea for tesla\n");
+
 	self->movetype = MOVETYPE_PUSH;
 	if (!self->movewith_set)
 	{
@@ -265,10 +283,11 @@ movefield:
 	}
 	self->s.event = host->s.event;
 	gi.linkentity (self);
-	if (count < 1 && self->teamchain) // now move the trigger field
+//	if (iteration < 1 && self->teamchain) // now move the trigger field
+	if (iteration < 2 && self->teamchain) // now move the trigger field and badarea
 	{
 		self = self->teamchain;
-		count++;
+		iteration++;
 		goto movefield;
 	}
 }
@@ -276,7 +295,7 @@ movefield:
 void Prox_Explode (edict_t *ent)
 {
 	vec3_t		origin;
-	edict_t		*owner;
+	edict_t		*owner, *cur, *next;
 	int			type;
 
 //	Grenade_Remove_From_Chain (ent);
@@ -284,8 +303,20 @@ void Prox_Explode (edict_t *ent)
 // free the trigger field
 
 	// PMM - changed teammaster to "mover" .. owner of the field is the prox
-	if (ent->teamchain && ent->teamchain->owner == ent)
-		G_FreeEdict(ent->teamchain);
+	// Knightmare- also free badarea
+	if ( ent->teamchain && (ent->teamchain->owner == ent) )
+	//	G_FreeEdict(ent->teamchain);
+	{
+		cur = ent->teamchain;
+		while (cur)
+		{
+		//	if (!strcmp(cur->classname, "bad_area") && (g_showlogic) && (g_showlogic->value))
+		//		gi.dprintf ("Freeing badarea for tesla\n");
+			next = cur->teamchain;
+			G_FreeEdict (cur);
+			cur = next;
+		}
+	}
 
 	owner = ent;
 	if (ent->teammaster)
@@ -333,7 +364,7 @@ void prox_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
 {
 //	gi.dprintf("prox_die\n");
 	// if set off by another prox, delay a little (chained explosions)
-	if (strcmp(inflictor->classname, "prox"))
+	if (strcmp(inflictor->classname, "prox") != 0)
 	{
 		self->takedamage = DAMAGE_NO;
 		Prox_Explode(self);
@@ -539,7 +570,7 @@ void prox_land (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
 	if ((other->svflags & SVF_MONSTER) || other->client || (other->svflags & SVF_DAMAGEABLE))
 	{
 		if (other != ent->teammaster)
-			Prox_Explode(ent);
+			Prox_Explode (ent);
 
 		return;
 	}
@@ -560,7 +591,7 @@ void prox_land (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
 		//	if ((g_showlogic) && (g_showlogic->value))
 		//		gi.dprintf ("bad normal for surface, exploding!\n");
 
-			Prox_Explode(ent);
+			Prox_Explode (ent);
 			return;
 		}
 		// Knightmare- stick to bmodels
@@ -615,7 +646,7 @@ void prox_land (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
 			//	if ((g_showlogic) && (g_showlogic->value))
 			//		gi.dprintf ("stuck on entity, blowing up!\n");
 
-				Prox_Explode(ent);
+				Prox_Explode (ent);
 				return;
 			}
 			return;
@@ -676,6 +707,11 @@ void prox_land (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
 //	if (other->movetype == MOVETYPE_PUSHABLE)
 //		gi.dprintf("prox successfully attached to func_pushable\n");
 	gi.linkentity(ent);
+
+	// Knightmare- mark monster-fired prox mines for AI avoidance
+	if ( ent->owner && (ent->owner->svflags & SVF_MONSTER) ) {
+		MarkProxArea (ent);
+	}
 }
 
 //===============
@@ -1986,7 +2022,7 @@ void tesla_remove (edict_t *self)
 		while (cur)
 		{
 			next = cur->teamchain;
-			G_FreeEdict ( cur );
+			G_FreeEdict (cur);
 			cur = next;
 		}
 	}

@@ -135,7 +135,7 @@
 #define	FL2_TURRET_DOUBLE_ALT	0x00000002	// this turret alternates firing its barrels (style is set)
 #define	FL2_TURRET_DOUBLE_ALT_FIRING	0x00000004	// secondary barrel in use for alternate firing
 #define FL2_CRUCIFIED			0x00000008	// insane is crucified 
-#define FL2_COMMANDER			0x00000008	// Gunner Commander internal flag
+#define FL2_COMMANDER			0x00000008	// Medic Commander / Daedalus internal flag
 #define FL2_WEAPON_ALT			0x00000010	// plasma guard has spread mode
 #define FL2_DO_NOT_REFLECT		0x00000020	// do not reflect this entity
 
@@ -255,7 +255,7 @@ typedef enum
 #define AI_EVADE_GRENADE		0x80000000
 
 // Knightmare- thes are for aiflags2
-#define AI2_FREEFORALL           0x00000001  // Set by target_monsterbattle, lets dmgteam monsters
+#define AI2_FREEFORALL           0x00000001	// Set by target_monsterbattle, lets dmgteam monsters
                                             // attack monsters on opposion dmgteam
 #define AI2_RANGE_PAUSE          0x00000002
 #define AI2_HINT_TEST            0x00000004
@@ -266,6 +266,8 @@ typedef enum
 #define AI2_MONREDUCEDDAMAGE	 0x00000040
 #define AI2_ONESHOTTARGET		 0x00000080
 // end Zaero
+#define AI2_LEAD_TARGET          0x00000100
+
 
 // Knightmare- monster flags
 #define MFL_WALK_WALLS			1
@@ -309,7 +311,7 @@ typedef enum
 #define SFL_CROSS_TRIGGER_6		0x00000020
 #define SFL_CROSS_TRIGGER_7		0x00000040
 #define SFL_CROSS_TRIGGER_8		0x00000080
-#define SFL_CROSS_TRIGGER_MASK	0x000000ff
+#define SFL_CROSS_TRIGGER_MASK	0x000000ff	// 0xffffe0ff would allow 27 trigger bits
 
 
 // noise types for PlayerNoise
@@ -1772,6 +1774,7 @@ float realrange (edict_t *self, edict_t *other);
 edict_t *SpawnBadArea(vec3_t mins, vec3_t maxs, float lifespan, edict_t *owner);
 edict_t *CheckForBadArea(edict_t *ent);
 qboolean MarkTeslaArea(edict_t *self, edict_t *tesla);
+qboolean MarkProxArea (edict_t *prox);	// Knightmare added
 void InitHintPaths (void);
 void PredictAim (edict_t *target, vec3_t start, float bolt_speed, qboolean eye_height, float offset, vec3_t aimdir, vec3_t aimpoint);
 qboolean below (edict_t *self, edict_t *other);

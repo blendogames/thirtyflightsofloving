@@ -206,7 +206,6 @@ static qboolean VerifyDriver( void )
 #define	WINDOW_CLASS_NAME2	"KMQuake2 - The Reckoning" // changed
 #define	WINDOW_CLASS_NAME3	"KMQuake2 - Ground Zero" // changed
 
-//qboolean VID_CreateWindow (int width, int height, qboolean fullscreen)
 qboolean VID_CreateWindow (int width, int height, dispType_t fullscreen)
 {
 	WNDCLASS		wc;
@@ -243,7 +242,6 @@ qboolean VID_CreateWindow (int width, int height, dispType_t fullscreen)
     if (!RegisterClass (&wc) )
 		VID_Error (ERR_FATAL, "Couldn't register window class");
 
-//	if (fullscreen)
 	if ( fullscreen == dt_fullscreen )	// borderless support
 	{
 		exstyle = WS_EX_TOPMOST;
@@ -272,7 +270,6 @@ qboolean VID_CreateWindow (int width, int height, dispType_t fullscreen)
 	w = r.right - r.left;
 	h = r.bottom - r.top;
 
-//	if (fullscreen)
 	if ( fullscreen == dt_fullscreen )	// borderless support
 	{
 		x = 0;
@@ -343,11 +340,9 @@ qboolean VID_CreateWindow (int width, int height, dispType_t fullscreen)
 /*
 ** GLimp_SetMode
 */
-//rserr_t GLimp_SetMode (int *pwidth, int *pheight, int mode, qboolean fullscreen)
 rserr_t GLimp_SetMode (int *pwidth, int *pheight, int mode, dispType_t fullscreen)
 {
 	int width, height;
-//	const char *win_fs[] = { "W", "FS" };
 	const char	*win_fs[] = { "W", "FS", "BL" };	// borderless support
 
 	VID_Printf( PRINT_ALL, "Initializing OpenGL display\n");
@@ -360,7 +355,7 @@ rserr_t GLimp_SetMode (int *pwidth, int *pheight, int mode, dispType_t fullscree
 		return rserr_invalid_mode;
 	}
 
-	VID_Printf( PRINT_ALL, " %dx%d %s\n", width, height, win_fs[fullscreen] );
+	VID_Printf( PRINT_ALL, " %dx%d %s\n", width, height, win_fs[min(max(fullscreen, 0), 2)] );	// clamp index
 
 	// destroy the existing window
 	if (glw_state.hWnd)
@@ -369,7 +364,6 @@ rserr_t GLimp_SetMode (int *pwidth, int *pheight, int mode, dispType_t fullscree
 	}
 
 	// do a CDS if needed
-//	if ( fullscreen )
 	if ( fullscreen == dt_fullscreen )	// borderless support
 	{
 		DEVMODE fullscreenMode;
@@ -457,7 +451,6 @@ rserr_t GLimp_SetMode (int *pwidth, int *pheight, int mode, dispType_t fullscree
 				*pwidth = width;
 				*pheight = height;
 				glState.fullscreen = false;
-			//	if ( !VID_CreateWindow (width, height, false) )
 				if ( !VID_CreateWindow (width, height, dt_windowed) )
 					return rserr_invalid_mode;
 				return rserr_invalid_fullscreen;
@@ -465,7 +458,6 @@ rserr_t GLimp_SetMode (int *pwidth, int *pheight, int mode, dispType_t fullscree
 			else
 			{
 				VID_Printf( PRINT_ALL, " ok\n" );
-			//	if ( !VID_CreateWindow (width, height, true) )
 				if ( !VID_CreateWindow (width, height, dt_fullscreen) )
 					return rserr_invalid_mode;
 
@@ -495,7 +487,6 @@ rserr_t GLimp_SetMode (int *pwidth, int *pheight, int mode, dispType_t fullscree
 		*pwidth = width;
 		*pheight = height;
 		glState.fullscreen = false;
-	//	if ( !VID_CreateWindow (width, height, false) )
 		if ( !VID_CreateWindow (width, height, dt_windowed) )
 			return rserr_invalid_mode;
 	}

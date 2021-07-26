@@ -16,9 +16,21 @@ static int	sound_idle;
 static int	sound_open;
 static int	sound_search;
 static int	sound_sight;
+
+// Knightmare- Tactician Gunner sounds
 #ifndef KMQUAKE2_ENGINE_MOD
-static int	sound_fire_flechette;
+static int	tactician_sound_fire_flechette;
 #endif	// KMQUAKE2_ENGINE_MOD
+/*
+static int	tactician_sound_pain;
+static int	tactician_sound_pain2;
+static int	tactician_sound_death;
+static int	tactician_sound_idle;
+static int	tactician_sound_open;
+static int	tactician_sound_search;
+static int	tactician_sound_sight;
+*/
+// end Knightmare
 
 // NOTE: Original gunner grenade velocity was 600 units/sec, but then 
 //       fire_grenade added 200 units/sec in a direction perpendicular
@@ -31,18 +43,28 @@ static int	sound_fire_flechette;
 
 void gunner_idlesound (edict_t *self)
 {
-	if (!(self->spawnflags & SF_MONSTER_AMBUSH))
-		gi.sound (self, CHAN_VOICE, sound_idle, 1, ATTN_IDLE, 0);
+	if ( !(self->spawnflags & SF_MONSTER_AMBUSH) ) {
+	/*	if (self->moreflags & FL2_COMMANDER)
+			gi.sound (self, CHAN_VOICE, tactician_sound_idle, 1, ATTN_IDLE, 0);
+		else */
+			gi.sound (self, CHAN_VOICE, sound_idle, 1, ATTN_IDLE, 0);
+	}
 }
 
 void gunner_sight (edict_t *self, edict_t *other)
 {
-	gi.sound (self, CHAN_VOICE, sound_sight, 1, ATTN_NORM, 0);
+/*	if (self->moreflags & FL2_COMMANDER)
+		gi.sound (self, CHAN_VOICE, tactician_sound_sight, 1, ATTN_NORM, 0);
+	else */
+		gi.sound (self, CHAN_VOICE, sound_sight, 1, ATTN_NORM, 0);
 }
 
 void gunner_search (edict_t *self)
 {
-	gi.sound (self, CHAN_VOICE, sound_search, 1, ATTN_NORM, 0);
+/*	if (self->moreflags & FL2_COMMANDER)
+		gi.sound (self, CHAN_VOICE, tactician_sound_search, 1, ATTN_NORM, 0);
+	else */
+		gi.sound (self, CHAN_VOICE, sound_search, 1, ATTN_NORM, 0);
 }
 
 
@@ -291,10 +313,18 @@ void gunner_pain (edict_t *self, edict_t *other, float kick, int damage)
 
 	self->pain_debounce_time = level.time + 3;
 
-	if (rand()&1)
-		gi.sound (self, CHAN_VOICE, sound_pain, 1, ATTN_NORM, 0);
-	else
-		gi.sound (self, CHAN_VOICE, sound_pain2, 1, ATTN_NORM, 0);
+	if (rand() & 1) {
+	/*	if (self->moreflags & FL2_COMMANDER)
+			gi.sound (self, CHAN_VOICE, tactician_sound_pain, 1, ATTN_NORM, 0);
+		else */
+			gi.sound (self, CHAN_VOICE, sound_pain, 1, ATTN_NORM, 0);
+	}
+	else {
+	/*	if (self->moreflags & FL2_COMMANDER)
+			gi.sound (self, CHAN_VOICE, tactician_sound_pain2, 1, ATTN_NORM, 0);
+		else */
+			gi.sound (self, CHAN_VOICE, sound_pain2, 1, ATTN_NORM, 0);
+	}
 
 	if (skill->value == 3)
 		return;		// no pain anims in nightmare
@@ -371,13 +401,16 @@ void gunner_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 		return;
 
 // regular death
-	gi.sound (self, CHAN_VOICE, sound_death, 1, ATTN_NORM, 0);
+/*	if (self->moreflags & FL2_COMMANDER)
+		gi.sound (self, CHAN_VOICE, tactician_sound_death, 1, ATTN_NORM, 0);
+	else */
+		gi.sound (self, CHAN_VOICE, sound_death, 1, ATTN_NORM, 0);
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_YES;
 	self->monsterinfo.currentmove = &gunner_move_death;
 }
 
-qboolean gunner_grenade_check(edict_t *self)
+qboolean gunner_grenade_check (edict_t *self)
 {
 	vec3_t		start;
 	vec3_t		forward, right;
@@ -385,7 +418,7 @@ qboolean gunner_grenade_check(edict_t *self)
 	trace_t		tr;
 	vec3_t		dir;
 	vec3_t		vhorz;
-	float		horz,vertmax;
+	float		horz, vertmax, dangerClose;
 
 	if (!self->enemy)
 		return false;
@@ -397,15 +430,19 @@ qboolean gunner_grenade_check(edict_t *self)
 
 	// Lazarus: We can do better than that... see below
 
-
 	// check to see that we can trace to the player before we start
 	// tossing grenades around.
 	AngleVectors (self->s.angles, forward, right, NULL);
 	G_ProjectSource (self->s.origin, monster_flash_offset[MZ2_GUNNER_GRENADE_1], forward, right, start);
 
 	// see if we're too close
+	// Knightmare- Tactician Gunner's prox mines stick around, so only use at longer range
+	if (self->moreflags & FL2_COMMANDER)
+		dangerClose = 320.0f;
+	else
+		dangerClose = 100.0f;
 	VectorSubtract (self->enemy->s.origin, self->s.origin, dir);
-	if (VectorLength(dir) < 100)
+	if (VectorLength(dir) < dangerClose)
 		return false;
 
 	// Lazarus: Max vertical distance - this is approximate and conservative
@@ -476,7 +513,10 @@ mmove_t	gunner_move_duck = {FRAME_duck01, FRAME_duck08, gunner_frames_duck, gunn
 
 void gunner_opengun (edict_t *self)
 {
-	gi.sound (self, CHAN_VOICE, sound_open, 1, ATTN_IDLE, 0);
+/*	if (self->moreflags & FL2_COMMANDER)
+		gi.sound (self, CHAN_VOICE, tactician_sound_open, 1, ATTN_IDLE, 0);
+	else */
+		gi.sound (self, CHAN_VOICE, sound_open, 1, ATTN_IDLE, 0);
 }
 
 void GunnerFire (edict_t *self)
@@ -485,7 +525,9 @@ void GunnerFire (edict_t *self)
 	vec3_t	forward, right;
 	vec3_t	target;
 	vec3_t	aim;
+	vec3_t	targ_vel;
 	int		flash_number;
+	float	dist, time, chance, flechetteSpeed = 850.0f;
 
 	if (!self->enemy || !self->enemy->inuse)		//PGM
 		return;									//PGM
@@ -516,6 +558,17 @@ void GunnerFire (edict_t *self)
 		target[2] += crandom() * 320 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 	}
 
+	// Knightmare- Tactician Gunner leads the target
+	if ( (self->moreflags & FL2_COMMANDER) && (self->monsterinfo.aiflags2 & AI2_LEAD_TARGET) )
+	{
+		VectorSubtract (target, start, aim);
+		dist = VectorLength(aim);
+		time = dist / flechetteSpeed;	// was 1000.0f
+		VectorCopy (self->enemy->velocity, targ_vel);
+		targ_vel[2] = min(targ_vel[2], 0.0f);	// ignore z-velocity of player jumping
+		VectorMA (target, time, targ_vel, target);
+	}
+
 	VectorSubtract (target, start, aim);
 	VectorNormalize (aim);
 
@@ -527,9 +580,9 @@ void GunnerFire (edict_t *self)
 		gi.WriteByte (MZ_MACHINEGUN | 128);
 		gi.multicast (self->s.origin, MULTICAST_PVS);
 
-		gi.sound (self, CHAN_WEAPON|CHAN_RELIABLE, sound_fire_flechette, 1.0, ATTN_NORM, 0);
+		gi.sound (self, CHAN_WEAPON|CHAN_RELIABLE, tactician_sound_fire_flechette, 1.0, ATTN_NORM, 0);
 #endif	// KMQUAKE2_ENGINE_MOD
-		monster_fire_flechette (self, start, aim, 4, 850, 75, 8, flash_number); 
+		monster_fire_flechette (self, start, aim, 4, flechetteSpeed, 75, 8, flash_number); 
 	}
 	else
 		monster_fire_bullet (self, start, aim, 3, 4, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, flash_number);
@@ -683,8 +736,8 @@ void GunnerGrenade (edict_t *self)
 	// Knightmare- Tactician Gunner fires prox mines
 	if (self->moreflags & FL2_COMMANDER)
 	{
-		float	prox_timer = (blindfire) ? 60.0f : 2.5f;
-		monster_fire_prox (self, start, aim, 80, 1, 600, 20, prox_timer, 192, flash_number);
+		float	prox_timer = (blindfire) ? 60.0f : 30.0f;
+		monster_fire_prox (self, start, aim, 90, 1, 600, 20, prox_timer, 192, flash_number);
 	}
 	else
 		monster_fire_grenade (self, start, aim, 50, 600, flash_number, false);
@@ -777,7 +830,7 @@ mframe_t gunner_frames_attack_grenade [] =
 };
 mmove_t gunner_move_attack_grenade = {FRAME_attak101, FRAME_attak121, gunner_frames_attack_grenade, gunner_run};
 
-void gunner_attack(edict_t *self)
+void gunner_attack (edict_t *self)
 {
 	float chance, r;
 
@@ -814,7 +867,7 @@ void gunner_attack(edict_t *self)
 		// turn on manual steering to signal both manual steering and blindfire
 	//	self->monsterinfo.aiflags |= AI_MANUAL_STEERING;
 		self->monsterinfo.monsterflags |= AI_MANUAL_STEERING;
-		if (gunner_grenade_check(self))
+		if ( gunner_grenade_check(self) )
 		{
 			// if the check passes, go for the attack
 			self->monsterinfo.currentmove = &gunner_move_attack_grenade;
@@ -832,6 +885,8 @@ void gunner_attack(edict_t *self)
 	}
 	// pmm
 
+	self->monsterinfo.aiflags2 &= ~AI2_LEAD_TARGET;	// Knightmare- reset Tactican Gunner leading target flag
+
 	// PGM - gunner needs to use his chaingun if he's being attacked by a tesla.
 	if ((range (self, self->enemy) == RANGE_MELEE) || self->bad_area)
 	{
@@ -839,19 +894,60 @@ void gunner_attack(edict_t *self)
 	}
 	else
 	{
-		if (random() <= 0.5 && gunner_grenade_check(self))
+		if (random() <= 0.5 && gunner_grenade_check(self)) {
 			self->monsterinfo.currentmove = &gunner_move_attack_grenade;
+		}
 		else
+		{
+			// Knightmare- Tactician Gunner leads the target
+			if (self->moreflags & FL2_COMMANDER)
+			{
+				vec3_t	forward, right, start, target, aim;
+				float	dist, chance;
+
+				AngleVectors (self->s.angles, forward, right, NULL);
+				G_ProjectSource (self->s.origin, monster_flash_offset[MZ2_GUNNER_MACHINEGUN_1], forward, right, start);
+				VectorCopy (self->enemy->s.origin, target);
+				target[2] += self->enemy->viewheight;
+
+				// Lazarus fog reduction of accuracy
+				if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
+				{
+					target[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
+					target[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
+					target[2] += crandom() * 320 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
+				}
+
+				VectorSubtract (target, start, aim);
+				dist = VectorLength(aim);
+				if (dist < 640.0f)	// chance for leading fire if distance is less than 640
+				{
+				//	if ((g_showlogic) && (g_showlogic->value))
+				//		gi.dprintf ("Tactician Gunner: target in range, rolling for chance to lead- ");
+					chance = random();	// chance = 50% easy, 60% medium, 70% hard, 80% hard+
+					chance += (3.0f - skill->value) * 0.1f;
+					if (chance < 0.8f)
+					{
+					//	if ((g_showlogic) && (g_showlogic->value))
+					//		gi.dprintf ("chance passed, leading target\n");
+						self->monsterinfo.aiflags2 |= AI2_LEAD_TARGET;
+					}
+				//	else if ((g_showlogic) && (g_showlogic->value))
+				//		gi.dprintf ("chance failed, not leading target\n");
+				}
+			}
+			// end Knightmare
 			self->monsterinfo.currentmove = &gunner_move_attack_chain;
+		}
 	}
 }
 
-void gunner_fire_chain(edict_t *self)
+void gunner_fire_chain (edict_t *self)
 {
 	self->monsterinfo.currentmove = &gunner_move_fire_chain;
 }
 
-void gunner_refire_chain(edict_t *self)
+void gunner_refire_chain (edict_t *self)
 {
 	if (self->enemy->health > 0)
 		if ( visible (self, self->enemy) )
@@ -1170,11 +1266,22 @@ void SP_monster_gunner (edict_t *self)
 	{	// precache
 		gi.modelindex ("models/weapons/g_prox/tris.md2");
 		gi.modelindex ("models/proj/flechette/tris.md2");
+		gi.soundindex ("weapons/proxopen.wav");
+		gi.soundindex ("weapons/proxwarn.wav");
 #ifdef KMQUAKE2_ENGINE_MOD
 		gi.soundindex ("weapons/nail1.wav");
 #else
-		sound_fire_flechette = gi.soundindex ("weapons/nail1.wav");	
+		tactician_sound_fire_flechette = gi.soundindex ("weapons/nail1.wav");	
 #endif	// KMQUAKE2_ENGINE_MOD
+	/*
+		tactician_sound_death = gi.soundindex ("tactician_gunner/death1.wav");	
+		tactician_sound_pain = gi.soundindex ("tactician_gunner/gunpain2.wav");	
+		tactician_sound_pain2 = gi.soundindex ("tactician_gunner/gunpain1.wav");	
+		tactician_sound_idle = gi.soundindex ("tactician_gunner/gunidle1.wav");	
+		tactician_sound_open = gi.soundindex ("tactician_gunner/gunatck1.wav");	
+		tactician_sound_search = gi.soundindex ("tactician_gunner/gunsrch1.wav");	
+		tactician_sound_sight = gi.soundindex ("tactician_gunner/sight1.wav");	
+	*/
 
 		if (!self->health)
 			self->health = 400;
@@ -1183,8 +1290,20 @@ void SP_monster_gunner (edict_t *self)
 		if (!self->mass)
 			self->mass = 300;
 
-		self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
-		self->monsterinfo.power_armor_power = 200;
+		// Lazarus
+		if (self->powerarmor)
+		{
+			if (self->powerarmortype == 1)
+				self->monsterinfo.power_armor_type = POWER_ARMOR_SCREEN;
+			else
+				self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
+			self->monsterinfo.power_armor_power = self->powerarmor;
+		}
+		else
+		{
+			self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
+			self->monsterinfo.power_armor_power = 300;
+		}
 
 		self->common_name = "Tactician Gunner";
 		self->class_id = ENTITY_MONSTER_GUNNER_TACTICIAN;
@@ -1200,6 +1319,16 @@ void SP_monster_gunner (edict_t *self)
 			self->gib_health = -150;
 		if (!self->mass)
 			self->mass = 200;
+
+		// Lazarus
+		if (self->powerarmor)
+		{
+			if (self->powerarmortype == 1)
+				self->monsterinfo.power_armor_type = POWER_ARMOR_SCREEN;
+			else
+				self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
+			self->monsterinfo.power_armor_power = self->powerarmor;
+		}
 
 		self->common_name = "Gunner";
 		self->class_id = ENTITY_MONSTER_GUNNER;
@@ -1226,16 +1355,6 @@ void SP_monster_gunner (edict_t *self)
 	
 	if (!self->blood_type)
 		self->blood_type = 3; //sparks and blood
-
-	// Lazarus
-	if (self->powerarmor)
-	{
-		if (self->powerarmortype == 1)
-			self->monsterinfo.power_armor_type = POWER_ARMOR_SCREEN;
-		else
-			self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
-		self->monsterinfo.power_armor_power = self->powerarmor;
-	}
 
 	if ( !self->monsterinfo.flies && strcmp(self->classname, "monster_gunner_tactician") == 0 )
 		self->monsterinfo.flies = 0.20;

@@ -2219,6 +2219,7 @@ extern void M_MonsterDodge ( edict_t * self , edict_t * attacker , float eta , t
 extern void drawbbox ( edict_t * self ) ;
 extern qboolean below ( edict_t * self , edict_t * other ) ;
 extern void PredictAim ( edict_t * target , vec3_t start , float bolt_speed , qboolean eye_height , float offset , vec3_t aimdir , vec3_t aimpoint ) ;
+extern qboolean MarkProxArea ( edict_t * prox ) ;
 extern qboolean MarkTeslaArea ( edict_t * self , edict_t * tesla ) ;
 extern edict_t * CheckForBadArea ( edict_t * ent ) ;
 extern edict_t * SpawnBadArea ( vec3_t mins , vec3_t maxs , float lifespan , edict_t * owner ) ;

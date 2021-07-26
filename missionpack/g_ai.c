@@ -320,8 +320,9 @@ void ai_charge (edict_t *self, float dist)
 		// circle strafe support
 		if (self->monsterinfo.attack_state == AS_SLIDING)
 		{
-			// if we're fighting a tesla, NEVER circle strafe
-			if ((self->enemy) && (self->enemy->classname) && (!strcmp(self->enemy->classname, "tesla")))
+			// if we're fighting a tesla or prox, NEVER circle strafe
+		//	if ( (self->enemy) && (self->enemy->classname) && (!strcmp(self->enemy->classname, "tesla")) )
+			if ( (self->enemy) && (self->enemy->classname) && (!strcmp(self->enemy->classname, "tesla")) && (!strcmp(self->enemy->classname, "prox")) )
 				ofs = 0;
 			else if (self->monsterinfo.lefty)
 				ofs = 90;
@@ -1228,8 +1229,9 @@ qboolean M_CheckAttack (edict_t *self)
 		else
 			strafe_chance = 0.6;
 
-		// if enemy is tesla, never strafe
-		if ((self->enemy) && (self->enemy->classname) && (!strcmp(self->enemy->classname, "tesla")))
+		// if enemy is tesla or prox, never strafe
+	//	if ( (self->enemy) && (self->enemy->classname) && (!strcmp(self->enemy->classname, "tesla")) )
+		if ( (self->enemy) && (self->enemy->classname) && (!strcmp(self->enemy->classname, "tesla")) && (!strcmp(self->enemy->classname, "prox")) )
 			strafe_chance = 0;
 
 		if (random() < strafe_chance)

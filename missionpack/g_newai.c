@@ -6,13 +6,13 @@
 //===============================
 
 /*
-		gi.WriteByte (svc_temp_entity);
-		gi.WriteByte (TE_DEBUGTRAIL);
-		gi.WritePosition (pt1);
-		gi.WritePosition (pt2);
-		gi.multicast (pt1, MULTICAST_PVS);	
+	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (TE_DEBUGTRAIL);
+	gi.WritePosition (pt1);
+	gi.WritePosition (pt2);
+	gi.multicast (pt1, MULTICAST_PVS);	
 
-		self->nextthink = level.time + 10;
+	self->nextthink = level.time + 10;
 */
 
 // plat states, copied from g_func.c
@@ -83,20 +83,21 @@ qboolean blocked_checkshot (edict_t *self, float shotChance)
 	}
 
 	playerVisible = visible (self, self->enemy);
-	// always shoot at teslas
+	// always shoot at teslas and prox
 	if (playerVisible)
 	{
-		if (!strcmp(self->enemy->classname, "tesla"))
+	//	if (!strcmp(self->enemy->classname, "tesla"))
+		if ( !strcmp(self->enemy->classname, "tesla") || !strcmp(self->enemy->classname, "prox") )
 		{
-//			if (g_showlogic && g_showlogic->value)
-//				gi.dprintf("blocked: taking a shot\n");
+		//	if (g_showlogic && g_showlogic->value)
+		//		gi.dprintf("blocked: taking a shot\n");
 
 			// turn on AI_BLOCKED to let the monster know the attack is being called
 			// by the blocked functions...
 			self->monsterinfo.aiflags |= AI_BLOCKED;
 			
 			if (self->monsterinfo.attack)
-				self->monsterinfo.attack(self);
+				self->monsterinfo.attack (self);
 			
 			self->monsterinfo.aiflags &= ~AI_BLOCKED;
 			return true;
@@ -1278,21 +1279,21 @@ void badarea_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *s
 //	drawbbox(ent);
 }
 
-edict_t *SpawnBadArea(vec3_t mins, vec3_t maxs, float lifespan, edict_t *owner)
+edict_t *SpawnBadArea (vec3_t mins, vec3_t maxs, float lifespan, edict_t *owner)
 {
 	edict_t *badarea;
 	vec3_t	origin;
 	
-	VectorAdd(mins, maxs, origin);
-	VectorScale(origin, 0.5, origin);
+	VectorAdd (mins, maxs, origin);
+	VectorScale (origin, 0.5, origin);
 
-	VectorSubtract(maxs, origin, maxs);
-	VectorSubtract(mins, origin, mins);
+	VectorSubtract (maxs, origin, maxs);
+	VectorSubtract (mins, origin, mins);
 
 	badarea = G_Spawn();
-	VectorCopy(origin, badarea->s.origin);
-	VectorCopy(maxs, badarea->maxs);
-	VectorCopy(mins, badarea->mins);
+	VectorCopy (origin, badarea->s.origin);
+	VectorCopy (maxs, badarea->maxs);
+	VectorCopy (mins, badarea->mins);
 	badarea->touch = badarea_touch;
 	badarea->movetype = MOVETYPE_NONE;
 	badarea->solid = SOLID_TRIGGER;
@@ -1316,7 +1317,7 @@ edict_t *SpawnBadArea(vec3_t mins, vec3_t maxs, float lifespan, edict_t *owner)
 // CheckForBadArea
 //		This is a customized version of G_TouchTriggers that will check
 //		for bad area triggers and return them if they're touched.
-edict_t *CheckForBadArea(edict_t *ent)
+edict_t *CheckForBadArea (edict_t *ent)
 {
 	int			i, num;
 	edict_t		*touch[MAX_EDICTS], *hit;
@@ -1350,9 +1351,7 @@ edict_t *CheckForBadArea(edict_t *ent)
 qboolean MarkTeslaArea (edict_t *self, edict_t *tesla)
 {
 	vec3_t	mins, maxs;
-	edict_t *e;
-	edict_t *tail;
-	edict_t *area;
+	edict_t *e, *tail, *area;
 
 	if (!tesla || !self)
 		return false;
@@ -1397,18 +1396,78 @@ qboolean MarkTeslaArea (edict_t *self, edict_t *tesla)
 		VectorSet (mins, -TESLA_DAMAGE_RADIUS, -TESLA_DAMAGE_RADIUS, tesla->mins[2]);
 		VectorSet (maxs, TESLA_DAMAGE_RADIUS, TESLA_DAMAGE_RADIUS, TESLA_DAMAGE_RADIUS);
 
-		area = SpawnBadArea (mins, maxs, 30, tesla);
+	//	area = SpawnBadArea (mins, maxs, 30.0f, tesla);
+		if (tesla->air_finished)
+			area = SpawnBadArea (mins, maxs, tesla->air_finished, tesla);
+		else
+			area = SpawnBadArea (mins, maxs, tesla->nextthink, tesla);
 	}
 
 	// if we spawned a bad area, then link it to the tesla
 	if (area)
 	{
-	//	gi.dprintf("bad area marker spawned and linked to tesla\n");
+	//	if ((g_showlogic) && (g_showlogic->value))
+	//		gi.dprintf("Bad area marker spawned and linked to tesla\n");
 		tail->teamchain = area;
 	}
 	return true;
 }
 
+// Knightmare added
+#define PROX_DAMAGE_RADIUS	192
+
+qboolean MarkProxArea (edict_t *prox)
+{
+	vec3_t	mins, maxs;
+	edict_t	*e, *tail, *area;
+
+	if (!prox)
+		return false;
+
+	area = NULL;
+
+	// make sure this prox doesn't have a bad area around it already...
+	e = prox->teamchain;
+	tail = prox;
+	while (e)
+	{
+		tail = tail->teamchain;
+		if (!strcmp(e->classname, "bad_area"))
+		{
+		//	gi.dprintf("prox already has a bad area marked\n");
+			return false;
+		}
+		e = e->teamchain;
+	}
+	
+	// see if we can grab the dmg_radius, else use macro'd default
+	if (prox->dmg_radius > 0) {
+		VectorSet (mins, -prox->dmg_radius, -prox->dmg_radius, -prox->dmg_radius);
+		VectorSet (maxs, prox->dmg_radius, prox->dmg_radius, prox->dmg_radius);
+	}
+	else {
+		VectorSet (mins, -PROX_DAMAGE_RADIUS, -PROX_DAMAGE_RADIUS, -PROX_DAMAGE_RADIUS);
+		VectorSet (maxs, PROX_DAMAGE_RADIUS, PROX_DAMAGE_RADIUS, PROX_DAMAGE_RADIUS);
+	}
+
+	// use the prox timer if available
+	if (prox->delay > 0)
+		area = SpawnBadArea (mins, maxs, prox->delay, prox);
+	else if (prox->nextthink > 0)
+		area = SpawnBadArea (mins, maxs, prox->nextthink, prox);
+	else
+		area = SpawnBadArea (mins, maxs, 30, prox);
+
+	// if we spawned a bad area, then link it to the prox
+	if (area)
+	{
+	//	if ((g_showlogic) && (g_showlogic->value))
+	//		gi.dprintf("Bad area marker spawned and linked to prox\n");
+		tail->teamchain = area;
+	}
+	return true;
+}
+// end Knightmare
 
 // predictive calculator
 // target is who you want to shoot
@@ -1759,15 +1818,15 @@ void TargetTesla (edict_t *self, edict_t *tesla)
 		{
 			if (self->health <= 0)
 			{
-//				if ((g_showlogic) && (g_showlogic->value))
-//					gi.dprintf ("bad tesla attack avoided!\n");
+			//	if ((g_showlogic) && (g_showlogic->value))
+			//		gi.dprintf ("bad tesla attack avoided!\n");
 				return;
 			}
-			self->monsterinfo.attack(self);
+			self->monsterinfo.attack (self);
 		}
 		else
 		{
-			FoundTarget(self);
+			FoundTarget (self);
 		}
 	}
 }
