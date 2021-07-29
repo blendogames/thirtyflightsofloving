@@ -793,7 +793,7 @@ void fire_rail (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick
 	int			mask, tempevent, i=0;
 	qboolean	water;
 
-	//Knightmare- changeable trail color
+	// Knightmare- changeable trail color
 #ifdef KMQUAKE2_ENGINE_MOD
 	if (self->client && sk_rail_color->value == 2)
 		tempevent = TE_RAILTRAIL2;

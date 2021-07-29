@@ -1224,12 +1224,11 @@ void SP_monster_soldier_x (edict_t *self)
 }
 
 
-
 void SP_monster_soldier_light_precache(void)
 {
-  SP_monster_soldier_x_precache();
+	SP_monster_soldier_x_precache();
 
-  sound_pain_light = gi.soundindex ("soldier/solpain2.wav");
+	sound_pain_light = gi.soundindex ("soldier/solpain2.wav");
 	sound_death_light =	gi.soundindex ("soldier/soldeth2.wav");
 }
 
@@ -1244,23 +1243,25 @@ void SP_monster_soldier_light (edict_t *self)
 		return;
 	}
 
-  SP_monster_soldier_light_precache();
-	SP_monster_soldier_x (self);
+	SP_monster_soldier_light_precache();
 
 	gi.modelindex ("models/objects/laser/tris.md2");
 	gi.soundindex ("misc/lasfly.wav");
 	gi.soundindex ("soldier/solatck2.wav");
 
-	self->s.skinnum = 0;
 	self->health = 20;
-	self->gib_health = -30;
-}
+	self->gib_health = -40;	// Knightmare- was -30
 
+	// Knightmare- moved these here to allow pain skins to show at half health
+	SP_monster_soldier_x (self);
+
+	self->s.skinnum = 0;
+}
 
 
 void SP_monster_soldier_precache(void)
 {
-  SP_monster_soldier_x_precache();
+	SP_monster_soldier_x_precache();
 
 	sound_pain = gi.soundindex ("soldier/solpain1.wav");
 	sound_death = gi.soundindex ("soldier/soldeth1.wav");
@@ -1277,21 +1278,23 @@ void SP_monster_soldier (edict_t *self)
 		return;
 	}
 
-  SP_monster_soldier_precache();
-	SP_monster_soldier_x (self);
+	SP_monster_soldier_precache();
 
 	gi.soundindex ("soldier/solatck1.wav");
 
-	self->s.skinnum = 2;
 	self->health = 30;
-	self->gib_health = -30;
-}
+	self->gib_health = -40;	// Knightmare- was -30
 
+	// Knightmare- moved these here to allow pain skins to show at half health
+	SP_monster_soldier_x (self);
+
+	self->s.skinnum = 2;
+}
 
 
 void SP_monster_soldier_ss_precache(void)
 {
-  SP_monster_soldier_x_precache();
+	SP_monster_soldier_x_precache();
 
 	sound_pain_ss = gi.soundindex ("soldier/solpain3.wav");
 	sound_death_ss = gi.soundindex ("soldier/soldeth3.wav");
@@ -1308,12 +1311,15 @@ void SP_monster_soldier_ss (edict_t *self)
 		return;
 	}
 
-  SP_monster_soldier_ss_precache();
-	SP_monster_soldier_x (self);
+	SP_monster_soldier_ss_precache();
 
 	gi.soundindex ("soldier/solatck3.wav");
 
-	self->s.skinnum = 4;
 	self->health = 40;
-	self->gib_health = -30;
+	self->gib_health = -40;	// Knightmare- was -30
+
+	// Knightmare- moved these here to allow pain skins to show at half health
+	SP_monster_soldier_x (self);
+
+	self->s.skinnum = 4;
 }
