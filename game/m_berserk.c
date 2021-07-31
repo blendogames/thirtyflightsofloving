@@ -396,8 +396,9 @@ void berserk_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dama
 {
 	int		n;
 
-	self->s.skinnum |= 1;
 	self->monsterinfo.power_armor_type = POWER_ARMOR_NONE;
+
+	// check for gib
 	if (self->health <= self->gib_health && !(self->spawnflags & SF_MONSTER_NOGIB))
 	{
 		gi.sound (self, CHAN_VOICE, gi.soundindex ("misc/udeath.wav"), 1, ATTN_NORM, 0);
@@ -413,6 +414,8 @@ void berserk_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dama
 	if (self->deadflag == DEAD_DEAD)
 		return;
 
+	// regular death
+	self->s.skinnum |= 1;
 	gi.sound (self, CHAN_VOICE, sound_die, 1, ATTN_NORM, 0);
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_YES;
@@ -492,6 +495,7 @@ void SP_monster_berserk (edict_t *self)
 	self->monsterinfo.melee = berserk_melee;
 	self->monsterinfo.sight = berserk_sight;
 	self->monsterinfo.search = berserk_search;
+
 	if (monsterjump->value) 
 	{
 		self->monsterinfo.jump = berserk_jump;
@@ -505,7 +509,7 @@ void SP_monster_berserk (edict_t *self)
 		mmove_t	*deathmoves[] = {&berserk_move_death1,
 			                     &berserk_move_death2,
 								 NULL};
-		M_SetDeath(self,(mmove_t **)&deathmoves);
+		M_SetDeath (self, (mmove_t **)&deathmoves);
 	}
 	self->monsterinfo.scale = MODEL_SCALE;
 
@@ -514,10 +518,15 @@ void SP_monster_berserk (edict_t *self)
 		self->blood_type = 3; //sparks and blood
 
 	// Lazarus
-	if (self->powerarmor) {
-		self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
+	if (self->powerarmor)
+	{
+		if (self->powerarmortype == 1)
+			self->monsterinfo.power_armor_type = POWER_ARMOR_SCREEN;
+		else
+			self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
 		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
+
 	if (!self->monsterinfo.flies)
 		self->monsterinfo.flies = 0.20;
 

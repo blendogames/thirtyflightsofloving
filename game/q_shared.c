@@ -2260,7 +2260,7 @@ void Info_RemoveKey (char *s, char *key)
 
 	if (strstr (key, "\\"))
 	{
-//		Com_Printf ("Can't use a key with a \\\n");
+	//	Com_Printf ("Can't use a key with a \\\n");
 		return;
 	}
 

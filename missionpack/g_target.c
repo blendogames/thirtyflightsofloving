@@ -702,7 +702,7 @@ void use_target_blaster (edict_t *self, edict_t *other, edict_t *activator)
 		}
 		if (self->sounds == 6)
 		{
-			if (!AimGrenade (self, start, self->enemy->s.origin, self->speed, movedir))
+			if (!AimGrenade (self, start, self->enemy->s.origin, self->speed, movedir, false))
 				return;
 		}
 		else

@@ -446,16 +446,24 @@ void q1_fire_grenade (edict_t *self, vec3_t start, vec3_t aimdir, int damage, in
 
 	vectoangles (aimdir, dir);
 	AngleVectors (dir, forward, right, up);
+
 	grenade = G_Spawn();
 	VectorCopy (start, grenade->s.origin);
 	VectorScale (aimdir, speed, grenade->velocity);
-	VectorMA (grenade->velocity, 200 + (random() - 0.5) * 20.0, up, grenade->velocity);
+	// Lazarus - keep same vertical boost for players, but monsters do a better job
+	//           of calculating aim direction, so throw that out
+	if (self->client)
+		VectorMA (grenade->velocity, 200 + (random() - 0.5) * 20.0, up, grenade->velocity);
+	else
+		VectorMA (grenade->velocity, (random() - 0.5) * 20.0, up, grenade->velocity);
+
 	VectorMA (grenade->velocity, (random() - 0.5) * 20.0, right, grenade->velocity);
 	VectorSet (grenade->avelocity, 300, 300, 300);
 	grenade->movetype = MOVETYPE_BOUNCE;
 	grenade->clipmask = MASK_SHOT;
 	grenade->solid = SOLID_BBOX;
 	grenade->s.effects |= EF_GRENADE;
+	grenade->s.renderfx |= RF_IR_VISIBLE;
 	VectorClear (grenade->mins);
 	VectorClear (grenade->maxs);
 	grenade->s.modelindex = gi.modelindex ("models/objects/grenade/tris.md2"); 
@@ -469,6 +477,8 @@ void q1_fire_grenade (edict_t *self, vec3_t start, vec3_t aimdir, int damage, in
 
 	grenade->common_name = "Quake Grenade";
 	grenade->class_id = ENTITY_Q1_GRENADE;
+
+//	Grenade_Add_To_Chain (grenade);
 
 	gi.linkentity (grenade);
 }

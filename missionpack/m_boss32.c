@@ -706,9 +706,8 @@ void makron_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	int		n;
 
 	self->s.sound = 0;
-	self->s.skinnum |= 1;
-	if (!(self->fogclip & 2)) //custom bloodtype flag check
-		self->blood_type = 3; //sparks and blood
+	if (!(self->fogclip & 2)) // custom bloodtype flag check
+		self->blood_type = 3; // sparks and blood
 	self->monsterinfo.power_armor_type = POWER_ARMOR_NONE;
 
 	// check for gib
@@ -727,8 +726,9 @@ void makron_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	if (self->deadflag == DEAD_DEAD)
 		return;
 
-//	regular death
+	//	regular death
 	gi.sound (self, CHAN_VOICE, sound_death, 1, ATTN_NONE, 0);
+	self->s.skinnum |= 1;
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_YES;
 
@@ -941,9 +941,9 @@ void SP_monster_makron_put (edict_t *self)
 	self->monsterinfo.blocked = Makron_blocked;		//PGM
 
 	if (!self->blood_type)
-		self->blood_type = 2; //sparks
+		self->blood_type = 2; // sparks
 	else
-		self->fogclip |= 2; //custom bloodtype flag
+		self->fogclip |= 2; // custom bloodtype flag
 
 	// Lazarus
 	if (self->powerarmor)
@@ -959,6 +959,7 @@ void SP_monster_makron_put (edict_t *self)
 	self->class_id = ENTITY_MONSTER_MAKRON;
 
 	gi.linkentity (self);
+
 	// Knightmare- nojump flag
 	if (self->fogclip & 1)
 		self->monsterinfo.currentmove = &makron_move_stand;
@@ -970,7 +971,7 @@ void SP_monster_makron_put (edict_t *self)
 		mmove_t	*deathmoves[] = {&makron_move_death2,
 			                     &makron_move_death3,
 								 NULL};
-		M_SetDeath(self,(mmove_t **)&deathmoves);
+		M_SetDeath (self, (mmove_t **)&deathmoves);
 	}
 	self->monsterinfo.scale = MODEL_SCALE;
 	walkmonster_start(self);

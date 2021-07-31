@@ -1738,7 +1738,8 @@ qboolean R_CheckGLExtensions (char *reason)
 	{
 		VID_Printf (PRINT_ALL, "...GL_NV_texture_shader not found\n" );
 		glConfig.NV_texshaders = false;
-	}*/
+	}
+*/
 
 	// GL_EXT_texture_filter_anisotropic - NeVo
 	glConfig.anisotropic = false;

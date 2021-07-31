@@ -884,7 +884,6 @@ void medic_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 {
 	int		n;
 
-	self->s.skinnum |= 1;
 	/*if (strcmp(self->classname, "monster_medic_commander") == 0)
 		self->s.skinnum = 3;
 	else
@@ -892,7 +891,7 @@ void medic_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 	self->monsterinfo.power_armor_type = POWER_ARMOR_NONE;
 	// if we had a pending patient, he was already freed up in Killed
 
-// check for gib
+	// check for gib
 	if (self->health <= self->gib_health && !(self->spawnflags & SF_MONSTER_NOGIB))
 	{
 		gi.sound (self, CHAN_VOICE, gi.soundindex ("misc/udeath.wav"), 1, ATTN_NORM, 0);
@@ -908,17 +907,17 @@ void medic_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 	if (self->deadflag == DEAD_DEAD)
 		return;
 
-// regular death
+	// regular death
 	//	PMM
 //	if (strcmp(self->classname, "monster_medic_commander"))
 	if ( !(self->moreflags & FL2_COMMANDER) )
 		gi.sound (self, CHAN_VOICE, sound_die, 1, ATTN_NORM, 0);
 	else
 		gi.sound (self, CHAN_VOICE, commander_sound_die, 1, ATTN_NORM, 0);
-	//
+
+	self->s.skinnum |= 1;
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_YES;
-
 	self->monsterinfo.currentmove = &medic_move_death;
 }
 
@@ -2060,12 +2059,16 @@ void SP_monster_medic (edict_t *self)
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;
 
-	// Lazarus: special purpose skins
 	if (strcmp(self->classname, "monster_medic_commander") == 0)
 	{
 		self->s.skinnum = 2;
 		self->moreflags |= FL2_COMMANDER;
 	}
+	else {
+		self->s.skinnum = 0;
+	}
+
+	// Lazarus: special purpose skins
 	if ( self->style )
 	{
 		PatchMonsterModel("models/monsters/medic/tris.md2");
@@ -2079,22 +2082,55 @@ void SP_monster_medic (edict_t *self)
 	//PMM
 	if (strcmp(self->classname, "monster_medic_commander") == 0)
 	{
+		if (skill->value == 0)
+			self->monsterinfo.monster_slots = 3;
+		else if (skill->value == 1)
+			self->monsterinfo.monster_slots = 4;
+		else if (skill->value == 2)
+			self->monsterinfo.monster_slots = 6;
+		else if (skill->value == 3)
+			self->monsterinfo.monster_slots = 8;
+
+		// commander sounds
+		commander_sound_idle1 = gi.soundindex ("medic_commander/medidle.wav");
+		commander_sound_pain1 = gi.soundindex ("medic_commander/medpain1.wav");
+		commander_sound_pain2 = gi.soundindex ("medic_commander/medpain2.wav");
+		commander_sound_die = gi.soundindex ("medic_commander/meddeth.wav");
+		commander_sound_sight = gi.soundindex ("medic_commander/medsght.wav");
+		commander_sound_search = gi.soundindex ("medic_commander/medsrch.wav");
+		commander_sound_hook_launch = gi.soundindex ("medic_commander/medatck2c.wav");
+		commander_sound_hook_hit = gi.soundindex ("medic_commander/medatck3a.wav");
+		commander_sound_hook_heal = gi.soundindex ("medic_commander/medatck4a.wav");
+		commander_sound_hook_retract = gi.soundindex ("medic_commander/medatck5a.wav");
+		commander_sound_spawn = gi.soundindex ("medic_commander/monsterspawn1.wav");
+		gi.soundindex ("tank/tnkatck3.wav");
+		MedicCommanderCache ();
+		// Knightmare- precache blaster bolt
+		gi.modelindex ("models/proj/laser2/tris.md2");
+
 		if (!self->health)
-			self->health = 600;			//	fixme
+			self->health = 600;	
 		if (!self->gib_health)
 			self->gib_health = -150;
 		if (!self->mass)
 			self->mass = 600;
-		// PMM
-		self->monsterinfo.aiflags |= AI_IGNORE_SHOTS;
+
 		self->yaw_speed = 40; // default is 20
-		MedicCommanderCache ();
-		// Knightmare- precache blaster bolt
-		gi.modelindex ("models/proj/laser2/tris.md2");
 	}
 	else
 	{
-	//PMM
+		sound_idle1 = gi.soundindex ("medic/idle.wav");
+		sound_pain1 = gi.soundindex ("medic/medpain1.wav");
+		sound_pain2 = gi.soundindex ("medic/medpain2.wav");
+		sound_die = gi.soundindex ("medic/meddeth1.wav");
+		sound_sight = gi.soundindex ("medic/medsght1.wav");
+		sound_search = gi.soundindex ("medic/medsrch1.wav");
+		sound_hook_launch = gi.soundindex ("medic/medatck2.wav");
+		sound_hook_hit = gi.soundindex ("medic/medatck3.wav");
+		sound_hook_heal = gi.soundindex ("medic/medatck4.wav");
+		sound_hook_retract = gi.soundindex ("medic/medatck5.wav");
+		gi.soundindex ("medic/medatck1.wav");
+
 		if (!self->health)
 			self->health = 300;
 		if (!self->gib_health)
@@ -2124,8 +2160,9 @@ void SP_monster_medic (edict_t *self)
 	self->monsterinfo.checkattack = medic_checkattack;
 	self->monsterinfo.blocked = medic_blocked;
 
+	// Knightmare- added sparks and blood type
 	if (!self->blood_type)
-		self->blood_type = 3; //sparks and blood
+		self->blood_type = 3; // sparks and blood
 
 	// Lazarus
 	if (self->powerarmor)
@@ -2145,59 +2182,25 @@ void SP_monster_medic (edict_t *self)
 	gi.linkentity (self);
 
 	self->monsterinfo.currentmove = &medic_move_stand;
+	if (self->health < 0)
+	{
+		mmove_t	*deathmoves[] = {&medic_move_death,
+								 NULL};
+		M_SetDeath (self, (mmove_t **)&deathmoves);
+	}
 	self->monsterinfo.scale = MODEL_SCALE;
+
+	if (strcmp(self->classname, "monster_medic_commander") == 0) {
+		self->common_name = "Medic Commander";
+		self->class_id = ENTITY_MONSTER_MEDIC_COMMANDER;
+	}
+	else {
+		self->common_name = "Medic";
+		self->class_id = ENTITY_MONSTER_MEDIC;
+	}
 
 	walkmonster_start (self);
 
-	//PMM
+	// PMM
 	self->monsterinfo.aiflags |= AI_IGNORE_SHOTS;
-
-
-	if (strcmp(self->classname, "monster_medic_commander") == 0)
-	{
-	//	self->s.skinnum = 2;
-		if (skill->value == 0)
-			self->monsterinfo.monster_slots = 3;
-		else if (skill->value == 1)
-			self->monsterinfo.monster_slots = 4;
-		else if (skill->value == 2)
-			self->monsterinfo.monster_slots = 6;
-		else if (skill->value == 3)
-			self->monsterinfo.monster_slots = 8;
-		// commander sounds
-		commander_sound_idle1 = gi.soundindex ("medic_commander/medidle.wav");
-		commander_sound_pain1 = gi.soundindex ("medic_commander/medpain1.wav");
-		commander_sound_pain2 = gi.soundindex ("medic_commander/medpain2.wav");
-		commander_sound_die = gi.soundindex ("medic_commander/meddeth.wav");
-		commander_sound_sight = gi.soundindex ("medic_commander/medsght.wav");
-		commander_sound_search = gi.soundindex ("medic_commander/medsrch.wav");
-		commander_sound_hook_launch = gi.soundindex ("medic_commander/medatck2c.wav");
-		commander_sound_hook_hit = gi.soundindex ("medic_commander/medatck3a.wav");
-		commander_sound_hook_heal = gi.soundindex ("medic_commander/medatck4a.wav");
-		commander_sound_hook_retract = gi.soundindex ("medic_commander/medatck5a.wav");
-		commander_sound_spawn = gi.soundindex ("medic_commander/monsterspawn1.wav");
-		gi.soundindex ("tank/tnkatck3.wav");
-
-		self->common_name = "Medic Commander"; // Knightmare
-		self->class_id = ENTITY_MONSTER_MEDIC_COMMANDER;
-	}
-	else
-	{
-		sound_idle1 = gi.soundindex ("medic/idle.wav");
-		sound_pain1 = gi.soundindex ("medic/medpain1.wav");
-		sound_pain2 = gi.soundindex ("medic/medpain2.wav");
-		sound_die = gi.soundindex ("medic/meddeth1.wav");
-		sound_sight = gi.soundindex ("medic/medsght1.wav");
-		sound_search = gi.soundindex ("medic/medsrch1.wav");
-		sound_hook_launch = gi.soundindex ("medic/medatck2.wav");
-		sound_hook_hit = gi.soundindex ("medic/medatck3.wav");
-		sound_hook_heal = gi.soundindex ("medic/medatck4.wav");
-		sound_hook_retract = gi.soundindex ("medic/medatck5.wav");
-		gi.soundindex ("medic/medatck1.wav");
-
-	//	self->s.skinnum = 0;
-		self->common_name = "Medic"; // Knightmare
-		self->class_id = ENTITY_MONSTER_MEDIC;
-	}
-	//pmm
 }

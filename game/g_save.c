@@ -216,6 +216,7 @@ field_t fields[] = {
 	{"child_attach_angles", FOFS(child_attach_angles), F_VECTOR},	// Knightmare added
 	{"pitch_speed", FOFS(pitch_speed), F_FLOAT},
 	{"powerarmor", FOFS(powerarmor), F_INT},
+	{"powerarmortype", FOFS(powerarmortype), F_INT},
 	{"prev_grenade", FOFS(prev_grenade), F_EDICT, FFL_NOSPAWN},
 	{"prevpath", FOFS(prevpath), F_EDICT},
 	{"radius", FOFS(radius), F_FLOAT},

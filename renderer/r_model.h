@@ -99,8 +99,6 @@ typedef struct
 	byte		lightcolor[3];
 } mpolyvertex_t;
 
-//#define	VERTEXSIZE	7
-
 typedef struct glpoly_s
 {
 	struct	glpoly_s	*next;
@@ -108,12 +106,9 @@ typedef struct glpoly_s
 	int		numverts;
 
 	qboolean	vertexlightset;
-//	byte		*vertexlightbase;
-//	byte		*vertexlight;
 	vec3_t		center;
 
 	int			flags;			// for SURF_UNDERWATER (not needed anymore?)
-//	float		verts[4][VERTEXSIZE];	// variable sized (xyz s1t1 s2t2)
 	mpolyvertex_t	verts[4];			// variable sized (xyz s1t1 s2t2 rgb rgb)
 } glpoly_t;
 

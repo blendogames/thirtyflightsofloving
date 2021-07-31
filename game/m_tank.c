@@ -853,12 +853,12 @@ void tank_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
 {
 	int		n;
 
-	self->s.skinnum |= 1;
 	if (!(self->fogclip & 2)) //custom bloodtype flag check
 		self->blood_type = 3; //sparks and blood
 
 	self->monsterinfo.power_armor_type = POWER_ARMOR_NONE;
-// check for gib
+
+	// check for gib
 	if (self->health <= self->gib_health && !(self->spawnflags & SF_MONSTER_NOGIB))
 	{	// Knightmare- more gibs
 		gi.sound (self, CHAN_VOICE, gi.soundindex ("misc/udeath.wav"), 1, ATTN_NORM, 0);
@@ -877,13 +877,12 @@ void tank_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
 	if (self->deadflag == DEAD_DEAD)
 		return;
 
-// regular death
+	// regular death
 	gi.sound (self, CHAN_VOICE, sound_die, 1, ATTN_NORM, 0);
+	self->s.skinnum |= 1;
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_YES;
-
 	self->monsterinfo.currentmove = &tank_move_death;
-	
 }
 
 
@@ -976,21 +975,28 @@ void SP_monster_tank (edict_t *self)
 		self->fogclip |= 2; //custom bloodtype flag
 
 	// Lazarus power armor
-	if (self->powerarmor) {
-		self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
+	if (self->powerarmor)
+	{
+		if (self->powerarmortype == 1)
+			self->monsterinfo.power_armor_type = POWER_ARMOR_SCREEN;
+		else
+			self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
 		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
+
 	if (!self->monsterinfo.flies)
 		self->monsterinfo.flies = 0.05;
 
 	gi.linkentity (self);
+
 	self->monsterinfo.currentmove = &tank_move_stand;
 	if (self->health < 0)
 	{
 		mmove_t	*deathmoves[] = {&tank_move_death,
 								 NULL};
-		M_SetDeath(self,(mmove_t **)&deathmoves);
+		M_SetDeath (self, (mmove_t **)&deathmoves);
 	}
 	self->monsterinfo.scale = MODEL_SCALE;
+
 	walkmonster_start(self);
 }

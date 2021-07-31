@@ -38,23 +38,23 @@ void knight_sight_sound (edict_t *self)
 
 void knight_sight (edict_t *self, edict_t *other)
 {
-	if(self->style <= 1)
+	if (self->style <= 1)
 		knight_sight_sound(self);
 	knight_check_dist(self);
 }
 
 void knight_idle_sound (edict_t *self)
 {
-	if(random() < 0.1)
+	if (random() < 0.1)
 		gi.sound (self, CHAN_VOICE, sound_idle, 1, ATTN_IDLE, 0); // WAS ATTN_STATIC
 }
 
 void knight_sword_sound (edict_t *self)
 {
-	//if(self->style)
+	//if (self->style)
 	//	return;
 
-	if(random() < 0.5)
+	if (random() < 0.5)
 		gi.sound (self, CHAN_VOICE, sound_sword1, 1, ATTN_NORM, 0); // WAS ATTN_IDLE
 	else
 		gi.sound (self, CHAN_VOICE, sound_sword2, 1, ATTN_NORM, 0); // WAS ATTN_IDLE
@@ -73,7 +73,7 @@ mmove_t knight_move_kneel = {FRAME_kneel1, FRAME_kneel5, knight_frames_kneel, kn
 
 void knight_kneel (edict_t *self)
 {
-	if(random() < 0.1)
+	if (random() < 0.1)
 	self->monsterinfo.currentmove = &knight_move_kneel;
 }
 
@@ -90,7 +90,7 @@ mmove_t knight_move_standing = {FRAME_standing2, FRAME_standing5, knight_frames_
 
 void knight_standing (edict_t *self)
 {
-	if(random() < 0.2)
+	if (random() < 0.2)
 	self->monsterinfo.currentmove = &knight_move_standing;
 }
 
@@ -165,7 +165,7 @@ void knight_check_dist (edict_t *self)
 	}
 	else
 	{
-		if(random() > 0.6)
+		if (random() > 0.6)
 			self->monsterinfo.nextframe = FRAME_runattack1;
 		else
 			self->monsterinfo.nextframe = FRAME_runb1;
@@ -303,7 +303,7 @@ void knight_pain (edict_t *self, edict_t *other, float kick, int damage)
 
 	self->pain_debounce_time = level.time + 1.1;
 
-	if(random() <0.85)
+	if (random() <0.85)
 		self->monsterinfo.currentmove = &knight_move_pain1;
 	else
 		self->monsterinfo.currentmove = &knight_move_pain2;
@@ -367,6 +367,7 @@ void knight_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 {
 	int		n;
 
+	// check for gib
 	if (self->health <= self->gib_health && !(self->spawnflags & SF_MONSTER_NOGIB))
 	{
 		gi.sound (self, CHAN_VOICE|CHAN_RELIABLE, sound_gib, 1, ATTN_NORM, 0);
@@ -383,11 +384,12 @@ void knight_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	if (self->deadflag == DEAD_DEAD)
 		return;
 
+	// regular death
 	gi.sound (self, CHAN_VOICE, sound_death, 1, ATTN_NORM, 0);
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_YES;
 
-	if(random() < 0.5)
+	if (random() < 0.5)
 		self->monsterinfo.currentmove = &knight_move_death1;
 	else
 		self->monsterinfo.currentmove = &knight_move_death2;
@@ -477,7 +479,14 @@ void SP_monster_q1_knight (edict_t *self)
 	gi.linkentity (self);
 	
 	self->monsterinfo.currentmove = &knight_move_stand;
-
+	if (self->health < 0)
+	{
+		mmove_t	*deathmoves[] = {&knight_move_death1,
+			                     &knight_move_death2,
+								 NULL};
+		M_SetDeath (self, (mmove_t **)&deathmoves);
+	}
 	self->monsterinfo.scale = MODEL_SCALE;
+
 	walkmonster_start (self);
 }

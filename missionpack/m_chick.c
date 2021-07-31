@@ -259,7 +259,7 @@ void chick_pain (edict_t *self, edict_t *other, float kick, int damage)
 
 	if (self->health < (self->max_health / 2))
 	{
-		//Knightmare- fixed this invalid classname check
+		// Knightmare- fixed this invalid classname check
 		if (self->spawnflags & SF_MONSTER_SPECIAL)
 		{
 			if (!(self->fogclip & 2)) // custom bloodtype flag check
@@ -367,16 +367,15 @@ void chick_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 {
 	int		n;
 
-//	if (!strcmp(self->classname, "monster_chick_heat"))
 	if (self->spawnflags & SF_MONSTER_SPECIAL)
 	{
-		if (!(self->fogclip & 2)) //custom bloodtype flag check
-			self->blood_type = 0; //ordinary blood
+		if (!(self->fogclip & 2)) // custom bloodtype flag check
+			self->blood_type = 0; // ordinary blood
 	}
-	self->s.skinnum |= 1;
+
 	self->monsterinfo.power_armor_type = POWER_ARMOR_NONE;
 
-// check for gib
+	// check for gib
 	if (self->health <= self->gib_health && !(self->spawnflags & SF_MONSTER_NOGIB))
 	{
 		gi.sound (self, CHAN_VOICE, gi.soundindex ("misc/udeath.wav"), 1, ATTN_NORM, 0);
@@ -396,7 +395,8 @@ void chick_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 	if (self->deadflag == DEAD_DEAD)
 		return;
 
-// regular death
+	// regular death
+	self->s.skinnum |= 1;
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_YES;
 
@@ -1013,6 +1013,13 @@ void SP_monster_chick (edict_t *self)
 	gi.linkentity (self);
 
 	self->monsterinfo.currentmove = &chick_move_stand;
+	if (self->health < 0)
+	{
+		mmove_t	*deathmoves[] = {&chick_move_death1,
+			                     &chick_move_death2,
+								 NULL};
+		M_SetDeath (self, (mmove_t **)&deathmoves);
+	}
 	self->monsterinfo.scale = MODEL_SCALE;
 
 	// Lazarus
@@ -1038,13 +1045,13 @@ void SP_monster_chick (edict_t *self)
 		self->monsterinfo.blindfire = true;
 	walkmonster_start (self);
 
-	if (self->spawnflags & SF_MONSTER_SPECIAL) //Knightmare- homing rockets
+	if (self->spawnflags & SF_MONSTER_SPECIAL) // Knightmare- homing rockets
 	{
 		self->classname = "monster_chick_heat";
 		if (!self->blood_type)
-			self->blood_type = 3; //sparks and blood
+			self->blood_type = 3; // sparks and blood
 		else
-			self->fogclip |= 2; //custom bloodtype flag
+			self->fogclip |= 2; // custom bloodtype flag
 		self->common_name = "Beta-Class Iron Maiden";
 		self->class_id = ENTITY_MONSTER_CHICK_HEAT;
 	}

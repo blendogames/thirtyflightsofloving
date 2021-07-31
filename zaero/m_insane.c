@@ -460,7 +460,7 @@ void insane_pain (edict_t *self, edict_t *other, float kick, int damage)
 	int	l,r;
 
 //	if (self->health < (self->max_health / 2))
-//		self->s.skinnum = 1;
+//		self->s.skinnum |= 1;
 
 	if (level.time < self->pain_debounce_time)
 		return;

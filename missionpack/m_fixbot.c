@@ -1188,7 +1188,7 @@ void fixbot_fire_blaster (edict_t *self)
 	end[2] += self->enemy->viewheight;
 
 	// Lazarus fog reduction of accuracy
-	if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+	if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 	{
 		end[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 		end[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -1291,7 +1291,7 @@ void fixbot_dead (edict_t *self)
 
 void fixbot_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
-	int		n; //Knightmare added
+	int		n; // Knightmare added
 
 	// shards
 #ifdef KMQUAKE2_ENGINE_MOD // use fewer unique models for stock engine
@@ -1353,9 +1353,9 @@ void SP_monster_fixbot (edict_t *self)
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;
 
-	if(!self->health)
+	if (!self->health)
 		self->health = 150;
-	if(!self->mass)
+	if (!self->mass)
 		self->mass = 150;
 
 	self->pain = fixbot_pain;
@@ -1366,12 +1366,12 @@ void SP_monster_fixbot (edict_t *self)
 	self->monsterinfo.run = fixbot_run;
 	self->monsterinfo.attack = fixbot_attack;
 
-	//Knightmare - sparks, not blood, on damage
+	// Knightmare - sparks, not blood, on damage
 	if (!self->blood_type)
-		self->blood_type = 2; //smoking, not bloody gibs
+		self->blood_type = 2; // smoking, not bloody gibs
 
 	// Lazarus
-	if(self->powerarmor)
+	if (self->powerarmor)
 	{
 		if (self->powerarmortype == 1)
 			self->monsterinfo.power_armor_type = POWER_ARMOR_SCREEN;

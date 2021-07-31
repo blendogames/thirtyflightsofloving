@@ -372,6 +372,22 @@ void mutant_jump (edict_t *self)
 	self->monsterinfo.currentmove = &mutant_move_jump;
 }
 
+mframe_t mutant_frames_fake_jump [] =
+{
+	ai_move,	 0,	NULL,
+	ai_move,	 0,	NULL,
+	ai_move,	 0,	NULL,
+	ai_move,	 0,	NULL,
+	ai_move,	 0,	NULL,
+	ai_move,	 0,	NULL
+};
+mmove_t mutant_move_fake_jump = {FRAME_run03, FRAME_run08, mutant_frames_fake_jump, mutant_run};
+
+void mutant_fake_jump (edict_t *self)
+{
+	self->monsterinfo.currentmove = &mutant_move_fake_jump;
+}
+
 
 //
 // CHECKATTACK
@@ -388,12 +404,28 @@ qboolean mutant_check_jump (edict_t *self)
 {
 	vec3_t	v;
 	float	distance;
+	vec_t	speed=0;
 
-	if (self->absmin[2] > (self->enemy->absmin[2] + 0.75 * self->enemy->size[2]))
-		return false;
+	if (monsterjump->value)
+	{
+		if (self->absmin[2] > (self->enemy->absmin[2] + 0.75 * self->enemy->size[2]) +
+			self->monsterinfo.jumpdn )
+			return false;
 
-	if (self->absmax[2] < (self->enemy->absmin[2] + 0.25 * self->enemy->size[2]))
-		return false;
+		if (self->absmax[2] < (self->enemy->absmin[2] + 0.25 * self->enemy->size[2]) -
+			self->monsterinfo.jumpup )
+			return false;
+		if (self->absmax[2] < (self->enemy->absmin[2] + 0.25 * self->enemy->size[2]))
+			speed = max(self->velocity[2],200);
+	}
+	else
+	{
+		if (self->absmin[2] > (self->enemy->absmin[2] + 0.75 * self->enemy->size[2]))
+			return false;
+
+		if (self->absmax[2] < (self->enemy->absmin[2] + 0.25 * self->enemy->size[2]))
+			return false;
+	}
 
 	v[0] = self->s.origin[0] - self->enemy->s.origin[0];
 	v[1] = self->s.origin[1] - self->enemy->s.origin[1];
@@ -568,7 +600,7 @@ void mutant_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 {
 	int		n;
 
-	self->s.skinnum |= 1;
+	// check for gib
 	if (self->health <= self->gib_health && !(self->spawnflags & SF_MONSTER_NOGIB))
 	{
 		gi.sound (self, CHAN_VOICE, gi.soundindex ("misc/udeath.wav"), 1, ATTN_NORM, 0);
@@ -584,7 +616,9 @@ void mutant_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	if (self->deadflag == DEAD_DEAD)
 		return;
 
+	// regular death
 	gi.sound (self, CHAN_VOICE, sound_death, 1, ATTN_NORM, 0);
+	self->s.skinnum |= 1;
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_YES;
 	self->s.skinnum = 1;
@@ -744,6 +778,13 @@ void SP_monster_mutant (edict_t *self)
 	if (!self->monsterinfo.flies)
 		self->monsterinfo.flies = 0.80;
 
+	if (monsterjump->value)
+	{
+		self->monsterinfo.jump = mutant_fake_jump;
+		self->monsterinfo.jumpup = 96;
+		self->monsterinfo.jumpdn = 160;
+	}
+
 	// Lazarus
 	if (self->powerarmor)
 	{
@@ -753,6 +794,7 @@ void SP_monster_mutant (edict_t *self)
 			self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
 		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
+
 	self->common_name = "Mutant";
 	self->class_id = ENTITY_MONSTER_MUTANT;
 	self->spawnflags |= SF_MONSTER_KNOWS_MIRRORS;
@@ -760,7 +802,14 @@ void SP_monster_mutant (edict_t *self)
 	gi.linkentity (self);
 	
 	self->monsterinfo.currentmove = &mutant_move_stand;
-
+	if (self->health < 0)
+	{
+		mmove_t	*deathmoves[] = {&mutant_move_death1,
+			                     &mutant_move_death2,
+								 NULL};
+		M_SetDeath (self, (mmove_t **)&deathmoves);
+	}
 	self->monsterinfo.scale = MODEL_SCALE;
+
 	walkmonster_start (self);
 }

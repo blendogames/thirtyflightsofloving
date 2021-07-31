@@ -550,8 +550,8 @@ void floater_pain (edict_t *self, edict_t *other, float kick, int damage)
 
 	if (self->health < (self->max_health / 2))
 	{
-		self->s.skinnum = 1;
-		self->blood_type = 3; //sparks and blood
+		self->s.skinnum |= 1;
+		self->blood_type = 3; // sparks and blood
 	}
 
 	if (level.time < self->pain_debounce_time)

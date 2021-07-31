@@ -1191,32 +1191,36 @@ void T_Damage (edict_t *in_targ, edict_t *inflictor, edict_t *in_attacker, vec3_
 		if ( (mod != MOD_SHOCK_SPLASH) && ((damage > 0) || ((mod != MOD_TRIGGER_HURT) && (mod != MOD_TARGET_LASER))) )
 		{
 		//PGM-	need more blood for chainfist.
-			if (targ->flags & FL_MECHANICAL)
-			{
+			if (targ->flags & FL_MECHANICAL) {
 				SpawnDamage (TE_ELECTRIC_SPARKS, point, normal, take);
 			}
 			else if ((targ->svflags & SVF_MONSTER) || (client))
 			{
-				if (targ->blood_type == 1)
+				if (targ->blood_type == 1) {
 					SpawnDamage (TE_GREENBLOOD, point, normal, take);
-				else if (targ->blood_type == 2)
-				{
+				}
+				else if (targ->blood_type == 2) {
 					SpawnDamage (TE_SPARKS, point, normal, take);
 					SpawnDamage (TE_SPARKS, point, normal, take);
 				}
-				else if (targ->blood_type == 3)
-				{
+				else if (targ->blood_type == 3) {
 					SpawnDamage (TE_SPARKS, point, normal, take);
 					SpawnDamage (TE_SPARKS, point, normal, take);
 					SpawnDamage (TE_BLOOD, point, normal, take);
 				}			
-				else if (mod == MOD_CHAINFIST)
+				else if (targ->blood_type == 4) {
+					SpawnDamage (TE_ELECTRIC_SPARKS, point, normal, take);
+				}			
+				else if (mod == MOD_CHAINFIST) {
 					SpawnDamage (TE_MOREBLOOD, point, normal, 255);
-				else
+				}
+				else {
 					SpawnDamage (TE_BLOOD, point, normal, take);
+				}
 			}
-			else
+			else {
 				SpawnDamage (TE_SPARKS, point, normal, take);
+			}
 		//PGM
 		}
 

@@ -289,9 +289,11 @@ mmove_t tarbaby_move_explode = {FRAME_exp, FRAME_exp, tarbaby_frames_explode, ta
 
 void tarbaby_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
+
 	if (self->deadflag == DEAD_DEAD)
 		return;
 
+	// regular death
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_YES;
 	self->gib_health = -10000;
@@ -371,6 +373,12 @@ void SP_monster_q1_tarbaby (edict_t *self)
 	gi.linkentity (self);
 
 	self->monsterinfo.currentmove = &tarbaby_move_stand;	
+	if (self->health < 0)
+	{	// Knightmare- this just goes thru a single-frame animation and explodes
+		mmove_t	*deathmoves[] = {&tarbaby_move_explode,
+								 NULL};
+		M_SetDeath (self, (mmove_t **)&deathmoves);
+	}
 	self->monsterinfo.scale = MODEL_SCALE;
 
 	walkmonster_start (self);

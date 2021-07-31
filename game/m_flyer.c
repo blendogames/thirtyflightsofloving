@@ -576,13 +576,14 @@ void flyer_pain (edict_t *self, edict_t *other, float kick, int damage)
 void flyer_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
 	int n;
+
 	// Knightmare- gibs!
 	for (n = 0; n < 4; n++)
 		ThrowGib (self, "models/objects/gibs/sm_metal/tris.md2", 0, 0, damage, GIB_METALLIC);
 	for (n = 0; n < 2; n++)
 		ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", 0, 0, damage, GIB_ORGANIC);
 	gi.sound (self, CHAN_VOICE, sound_die, 1, ATTN_NORM, 0);
-	BecomeExplosion1(self);
+	BecomeExplosion1 (self);
 }
 	
 
@@ -650,10 +651,15 @@ void SP_monster_flyer (edict_t *self)
 		self->blood_type = 3; //sparks and blood
 
 	// Lazarus
-	if (self->powerarmor) {
-		self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
+	if (self->powerarmor)
+	{
+		if (self->powerarmortype == 1)
+			self->monsterinfo.power_armor_type = POWER_ARMOR_SCREEN;
+		else
+			self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
 		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
+
 	self->common_name = "Flyer";
 	self->class_id = ENTITY_MONSTER_FLYER;
 

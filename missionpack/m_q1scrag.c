@@ -194,8 +194,8 @@ mmove_t scrag_move_die = {FRAME_death1, FRAME_death8, scrag_frames_die, scrag_de
 void scrag_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
 	int		n;
-// check for gib
 
+	// check for gib
 	if (self->health <=  self->gib_health && !(self->spawnflags & SF_MONSTER_NOGIB))
 	{
 		gi.sound (self, CHAN_VOICE|CHAN_RELIABLE, sound_gib, 1, ATTN_NORM, 0);
@@ -210,11 +210,11 @@ void scrag_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 	if (self->deadflag == DEAD_DEAD)
 		return;
 
-// regular death
+	// regular death
+	gi.sound (self, CHAN_VOICE, sound_die, 1, ATTN_NORM, 0);
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_YES;
 
-	gi.sound (self, CHAN_VOICE, sound_die, 1, ATTN_NORM, 0);
 	self->monsterinfo.currentmove = &scrag_move_die;
 }
 
@@ -406,6 +406,12 @@ void SP_monster_q1_scrag (edict_t *self)
 	gi.linkentity (self);
 
 	self->monsterinfo.currentmove = &scrag_move_stand;	
+	if (self->health < 0)
+	{
+		mmove_t	*deathmoves[] = {&scrag_move_die,
+								 NULL};
+		M_SetDeath (self, (mmove_t **)&deathmoves);
+	}
 	self->monsterinfo.scale = MODEL_SCALE;
 	
 	

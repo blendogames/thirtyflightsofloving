@@ -49,7 +49,7 @@ void floater_sight (edict_t *self, edict_t *other)
 
 void floater_idle (edict_t *self)
 {
-	if(!(self->spawnflags & SF_MONSTER_AMBUSH))
+	if (!(self->spawnflags & SF_MONSTER_AMBUSH))
 		gi.sound (self, CHAN_VOICE, sound_idle, 1, ATTN_IDLE, 0);
 }
 
@@ -81,7 +81,7 @@ void floater_fire_blaster (edict_t *self)
 	end[2] += self->enemy->viewheight;
 
 	// Lazarus fog reduction of accuracy
-	if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+	if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 	{
 		end[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 		end[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -620,6 +620,7 @@ void floater_dead (edict_t *self)
 void floater_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
 	int	n;
+
 	// Knightmare- gibs!
 	for (n = 0; n < 4; n++)
 		ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", 0, 0, damage, GIB_ORGANIC);
@@ -628,7 +629,7 @@ void floater_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dama
 	for (n = 0; n < 2; n++)
 		ThrowGib (self, "models/objects/gibs/gear/tris.md2", 0, 0, damage, GIB_METALLIC);
 	gi.sound (self, CHAN_VOICE, sound_death1, 1, ATTN_NORM, 0);
-	BecomeExplosion1(self);
+	BecomeExplosion1 (self);
 }
 
 /*QUAKED monster_floater (1 .5 0) (-16 -16 -24) (16 16 32) Ambush Trigger_Spawn Sight
@@ -668,11 +669,11 @@ void SP_monster_floater (edict_t *self)
 	VectorSet (self->maxs, 24, 24, 32);
 
 	// Lazarus: mapper-configurable health
-	if(!self->health)
+	if (!self->health)
 		self->health = 200;
-	if(!self->gib_health)
+	if (!self->gib_health)
 		self->gib_health = -80;
-	if(!self->mass)
+	if (!self->mass)
 		self->mass = 300;
 
 	self->pain = floater_pain;
@@ -694,20 +695,25 @@ void SP_monster_floater (edict_t *self)
 		self->fogclip |= 2; //custom bloodtype flag
 
 	// Lazarus
-	if(self->powerarmor) {
-		self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
+	if (self->powerarmor)
+	{
+		if (self->powerarmortype == 1)
+			self->monsterinfo.power_armor_type = POWER_ARMOR_SCREEN;
+		else
+			self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
 		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
+
 	self->common_name = "Technician";
 	self->class_id = ENTITY_MONSTER_FLOATER;
 
 	gi.linkentity (self);
 
-	if(self->health < 0)
+	if (self->health < 0)
 	{
 		mmove_t	*deathmoves[] = {&floater_move_death,
 								 NULL};
-		if(!M_SetDeath(self,(mmove_t **)&deathmoves))
+		if (!M_SetDeath(self, (mmove_t **)&deathmoves))
 			self->monsterinfo.currentmove = &floater_move_stand1;
 	}
 	else

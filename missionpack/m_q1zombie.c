@@ -609,6 +609,7 @@ void q1zombie_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dam
 {
 	int		n;
 
+	// always gib
 	gi.sound (self, CHAN_VOICE, sound_gib, 1, ATTN_NORM, 0);
 	for (n = 0; n < 2; n++)
 		ThrowGib (self, "models/objects/q1gibs/q1gib1/tris.md2", 0, 0, damage, GIB_ORGANIC);
@@ -616,6 +617,8 @@ void q1zombie_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dam
 	for (n = 0; n < 2; n++)
 		ThrowGib (self, "models/objects/q1gibs/q1gib3/tris.md2", 0, 0, damage, GIB_ORGANIC);
 	ThrowHead (self, "models/monsters/q1zombie/head/tris.md2", 0, 0, damage*2, GIB_ORGANIC);
+
+	// no regular death
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_NO;
 	return;

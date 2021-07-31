@@ -227,7 +227,7 @@ void WidowBlaster (edict_t *self)
 		VectorCopy(self->enemy->s.origin, end);
 
 		// Lazarus fog reduction of accuracy
-		if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+		if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 		{
 			end[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 			end[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -362,7 +362,7 @@ void WidowBlaster (edict_t *self)
 		VectorCopy(self->enemy->s.origin, end);
 
 		// Lazarus fog reduction of accuracy
-		if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+		if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 		{
 			end[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 			end[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -698,7 +698,7 @@ void WidowRail (edict_t *self)
 	// calc direction to where we targeted
 
 	// Lazarus fog reduction of accuracy
-	if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+	if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 	{
 		self->pos1[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 		self->pos1[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -1516,7 +1516,7 @@ qboolean Widow_CheckAttack (edict_t *self)
 			}
 
 			// PGM - we want them to go ahead and shoot at info_notnulls if they can.
-			if(self->enemy->solid != SOLID_NOT || tr.fraction < 1.0)		//PGM
+			if (self->enemy->solid != SOLID_NOT || tr.fraction < 1.0)		//PGM
 				return false;
 		}
 	}
@@ -1599,17 +1599,17 @@ qboolean widow_blocked (edict_t *self, float dist)
 		return true;
 	}
 
-	if(blocked_checkshot (self, 0.25 + (0.05 * skill->value) ))
+	if (blocked_checkshot (self, 0.25 + (0.05 * skill->value) ))
 		return true;
 
 /*
-	if(blocked_checkjump (self, dist, 192, 40))
+	if (blocked_checkjump (self, dist, 192, 40))
 	{
 		infantry_jump(self);
 		return true;
 	}
 
-	if(blocked_checkplat (self, dist))
+	if (blocked_checkplat (self, dist))
 		return true;
 */
 	return false;
@@ -1714,14 +1714,14 @@ void SP_monster_widow (edict_t *self)
 	VectorSet (self->mins, -40, -40, 0);
 	VectorSet (self->maxs, 40, 40, 144);
 
-	if(!self->health)
+	if (!self->health)
 		self->health = 2000 + 1000*(skill->value);
 	if (coop->value)
 		self->health += 500*(skill->value);
 //	self->health = 1;
-	if(!self->gib_health)
+	if (!self->gib_health)
 		self->gib_health = -5000;
-	if(!self->mass)
+	if (!self->mass)
 		self->mass = 1500;
 /*
 	if (skill->value == 2)
@@ -1757,7 +1757,7 @@ void SP_monster_widow (edict_t *self)
 		self->blood_type = 3; //sparks and blood
 
 	// Lazarus
-	if(self->powerarmor)
+	if (self->powerarmor)
 	{
 		if (self->powerarmortype == 1)
 			self->monsterinfo.power_armor_type = POWER_ARMOR_SCREEN;
@@ -1765,12 +1765,19 @@ void SP_monster_widow (edict_t *self)
 			self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
 		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
+
 	self->common_name = "Black Widow";
 	self->class_id = ENTITY_MONSTER_WIDOW;
 
 	gi.linkentity (self);
 
 	self->monsterinfo.currentmove = &widow_move_stand;
+	if (self->health < 0)
+	{
+		mmove_t	*deathmoves[] = {&widow_move_death,
+								 NULL};
+		M_SetDeath (self, (mmove_t **)&deathmoves);
+	}
 	self->monsterinfo.scale = MODEL_SCALE;
 
 	WidowPrecache();

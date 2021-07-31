@@ -82,7 +82,7 @@ void FadeDieSink (edict_t *ent)
 //          bounding box, and a few other parameters for dead
 //          monsters that change levels with a trigger_transition
 
-qboolean M_SetDeath(edict_t *self, mmove_t **deathmoves)
+qboolean M_SetDeath (edict_t *self, mmove_t **deathmoves)
 {
 	mmove_t	*move=NULL;
 	mmove_t *dmove;
@@ -90,7 +90,7 @@ qboolean M_SetDeath(edict_t *self, mmove_t **deathmoves)
 	if (self->health > 0)
 		return false;
 
-	while(*deathmoves && !move)
+	while (*deathmoves && !move)
 	{
 		dmove = *deathmoves;
 		if ( (self->s.frame >= dmove->firstframe) &&
@@ -105,7 +105,20 @@ qboolean M_SetDeath(edict_t *self, mmove_t **deathmoves)
 		if (self->monsterinfo.currentmove->endfunc)
 			self->monsterinfo.currentmove->endfunc(self);
 		self->s.frame = move->lastframe;
-		self->s.skinnum |= 1;
+		// Gekk has 2 pain skins, requires special handling
+		if ( strcmp(self->classname, "monster_gekk") == 0 )	
+		{
+			if (self->style)
+				self->s.skinnum = self->style * 3 + 2;
+			else
+				self->s.skinnum = 2;
+		}
+		// Exclude fixbot, vulture, and Q1 monsters, as they have no pain skins
+		else if ( (strcmp(self->classname, "monster_fixbot") != 0) && (strcmp(self->classname, "monster_vulture") != 0)
+				&& !(self->flags & FL_Q1_MONSTER) )
+		{
+			self->s.skinnum |= 1;
+		}
 		return true;
 	}
 	return false;
@@ -408,7 +421,7 @@ void dabeam_hit (edict_t *self)
 	VectorMA (start, 2048, self->movedir, end);
 	
 	while (1)
-	{	//Knightmare- double trace here, needed to make sure clipping works- must be compiler weirdness
+	{	// Knightmare- double trace here, needed to make sure clipping works- must be compiler weirdness
 		tr = gi.trace (start, NULL, NULL, end, ignore, (CONTENTS_SOLID|CONTENTS_MONSTER|CONTENTS_DEADMONSTER));
 		tr = gi.trace (start, NULL, NULL, end, ignore, (CONTENTS_SOLID|CONTENTS_MONSTER|CONTENTS_DEADMONSTER));
 		if (!tr.ent)
@@ -1421,17 +1434,51 @@ qboolean monster_start (edict_t *self)
 	self->takedamage = DAMAGE_AIM;
 	self->air_finished = level.time + 12;
 	self->use = monster_use;
+
 	// Lazarus - don't reset max_health unnecessarily
 	if (!self->max_health)
 		self->max_health = self->health;
-/*	if (self->health < (self->max_health / 2))
-		self->s.skinnum |= 1;
-	else
-		self->s.skinnum &= ~1;*/
-	self->clipmask = MASK_MONSTERSOLID;
 
+	// Reset skinnum for revived monsters
+	// Gekk has 2 pain skins, requires special handling
+	if ( strcmp(self->classname, "monster_gekk") == 0 )
+	{
+		if (self->health < (self->max_health /4))
+		{
+			if (self->style)
+				self->s.skinnum = self->style * 3 + 2;
+			else
+				self->s.skinnum = 2;
+		}
+		else if (self->health < (self->max_health / 2))
+		{
+			if (self->style)
+				self->s.skinnum = self->style * 3 + 1;
+			else
+				self->s.skinnum = 1;
+		}
+		else
+		{
+			if (self->style)
+				self->s.skinnum = self->style * 3;
+			else
+				self->s.skinnum = 0;
+		}
+	}
+	// Exclude fixbot, vulture, and Q1 monsters, as they have no pain skins
+	else if ( (strcmp(self->classname, "monster_fixbot") != 0) && (strcmp(self->classname, "monster_vulture") != 0)
+			&& !(self->flags & FL_Q1_MONSTER) )
+	{
+		if (self->health < (self->max_health / 2))
+			self->s.skinnum |= 1;
+		else
+			self->s.skinnum &= ~1;
+	}
+	// catch negative skinnum
 	if (self->s.skinnum < 1)
 		self->s.skinnum = 0;
+
+	self->clipmask = MASK_MONSTERSOLID;
 	self->deadflag = DEAD_NO;
 	self->svflags &= ~SVF_DEADMONSTER;
 
@@ -1611,10 +1658,10 @@ void walkmonster_start_go (edict_t *self)
 	if (!self->yaw_speed)
 		self->yaw_speed = 20;
 	// PMM - stalkers are too short for this
-	if (!(strcmp(self->classname, "monster_stalker")))
+	if (strcmp(self->classname, "monster_stalker") == 0)
 		self->viewheight = 15;
 	// Knightmare- vultures are also too short
-	else if (!(strcmp(self->classname, "monster_vulture")))
+	else if (strcmp(self->classname, "monster_vulture") == 0)
 		self->viewheight = 8;
 	else
 		self->viewheight = 25;
@@ -1639,8 +1686,8 @@ void flymonster_start_go (edict_t *self)
 
 	if (!self->yaw_speed)
 		self->yaw_speed = 10;
-	// Knightmare- vultures too short for this
-	if (!(strcmp(self->classname, "monster_vulture")))
+	// Knightmare- vultures are too short for this
+	if (strcmp(self->classname, "monster_vulture") == 0)
 		self->viewheight = 8;
 	else
 		self->viewheight = 25;

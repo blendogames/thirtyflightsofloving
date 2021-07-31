@@ -1650,15 +1650,13 @@ void zboss_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 {
 	int		n;
 
-	self->s.skinnum = (self->style * 3) + 2;
-
 	if (self->laser)
 	{
 		G_FreeEdict (self->laser);
 		self->laser = NULL;
 	}
 
-// check for gib
+	// check for gib
 	if (self->health <= self->gib_health)
 	{
 		self->s.modelindex2 = 0;
@@ -1681,7 +1679,8 @@ void zboss_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 	if (self->deadflag == DEAD_DEAD)
 		return;
 
-// regular death
+	// regular death
+	self->s.skinnum = (self->style * 3) + 2;
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_YES;
 
@@ -1812,6 +1811,13 @@ void SP_monster_zboss (edict_t *self)
 	gi.linkentity (self);
 
 	self->monsterinfo.currentmove = &zboss_stand1;	
+	if (self->health < 0)
+	{
+		mmove_t	*deathmoves[] = {&zboss_move_death1,
+			                     &zboss_move_death2,
+								 NULL};
+		M_SetDeath (self, (mmove_t **)&deathmoves);
+	}
 	self->monsterinfo.scale = MODEL_SCALE;
 
 	walkmonster_start (self);

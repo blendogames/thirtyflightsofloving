@@ -357,10 +357,9 @@ void gunner_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 {
 	int		n;
 
-	self->s.skinnum |= 1;
 	self->monsterinfo.power_armor_type = POWER_ARMOR_NONE;
 
-// check for gib
+	// check for gib
 	if (self->health <= self->gib_health && !(self->spawnflags & SF_MONSTER_NOGIB))
 	{
 		gi.sound (self, CHAN_VOICE, gi.soundindex ("misc/udeath.wav"), 1, ATTN_NORM, 0);
@@ -377,8 +376,9 @@ void gunner_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	if (self->deadflag == DEAD_DEAD)
 		return;
 
-// regular death
+	// regular death
 	gi.sound (self, CHAN_VOICE, sound_death, 1, ATTN_NORM, 0);
+	self->s.skinnum |= 1;
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_YES;
 	self->monsterinfo.currentmove = &gunner_move_death;
@@ -572,7 +572,7 @@ void GunnerGrenade (edict_t *self)
 //	VectorCopy (forward, aim);
 
 	// aim at enemy's feet if he's at same elevation or lower. otherwise aim at origin
-	VectorCopy(self->enemy->s.origin,target);
+	VectorCopy (self->enemy->s.origin, target);
 	if (self->enemy->absmin[2] <= self->absmax[2]) target[2] = self->enemy->absmin[2];
 
 	// Lazarus fog reduction of accuracy
@@ -601,25 +601,26 @@ void GunnerGrenade (edict_t *self)
 		float	dist;
 		float	time;
 
-		VectorSubtract(target, start, aim);
+		VectorSubtract (target, start, aim);
 		dist = VectorLength (aim);
-		time = dist/GRENADE_VELOCITY;  // Not correct, but better than nothin'
-		VectorMA(target, time, self->enemy->velocity, target);
+		time = dist / GRENADE_VELOCITY;  // Not correct, but better than nothin'
+		VectorMA (target, time, self->enemy->velocity, target);
 	}
 
 	AimGrenade (self, start, target, GRENADE_VELOCITY, aim);
 	// Lazarus - take into account (sort of) feature of adding shooter's velocity to
 	// grenade velocity
 	monster_speed = VectorLength(self->velocity);
-	if (monster_speed > 0) {
+	if (monster_speed > 0)
+	{
 		vec3_t	v1;
 		vec_t	delta;
 
-		VectorCopy(self->velocity,v1);
-		VectorNormalize(v1);
-		delta = -monster_speed/GRENADE_VELOCITY;
-		VectorMA(aim,delta,v1,aim);
-		VectorNormalize(aim);
+		VectorCopy (self->velocity ,v1);
+		VectorNormalize (v1);
+		delta = -monster_speed / GRENADE_VELOCITY;
+		VectorMA (aim, delta, v1, aim);
+		VectorNormalize (aim);
 	}
 
 	monster_fire_grenade (self, start, aim, 50, GRENADE_VELOCITY, flash_number);
@@ -767,13 +768,6 @@ void SP_monster_gunner (edict_t *self)
 	sound_open = gi.soundindex ("gunner/gunatck1.wav");	
 	sound_search = gi.soundindex ("gunner/gunsrch1.wav");	
 	sound_sight = gi.soundindex ("gunner/sight1.wav");	
-	if (monsterjump->value)
-	{
-		self->monsterinfo.jump = gunner_jump;
-		self->monsterinfo.jumpup = 48;
-		self->monsterinfo.jumpdn = 64;
-	}
-
 	gi.soundindex ("gunner/gunatck2.wav");
 	gi.soundindex ("gunner/gunatck3.wav");
 
@@ -816,12 +810,24 @@ void SP_monster_gunner (edict_t *self)
 		self->blood_type = 3; //sparks and blood
 
 	// Lazarus
-	if (self->powerarmor) {
-		self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
+	if (self->powerarmor)
+	{
+		if (self->powerarmortype == 1)
+			self->monsterinfo.power_armor_type = POWER_ARMOR_SCREEN;
+		else
+			self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
 		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
+
 	if (!self->monsterinfo.flies)
 		self->monsterinfo.flies = 0.30;
+
+	if (monsterjump->value)
+	{
+		self->monsterinfo.jump = gunner_jump;
+		self->monsterinfo.jumpup = 48;
+		self->monsterinfo.jumpdn = 64;
+	}
 
 	// Lazarus - use move_origin for grenade aiming
 	VectorCopy(monster_flash_offset[MZ2_GUNNER_GRENADE_1],self->move_origin);
@@ -832,7 +838,7 @@ void SP_monster_gunner (edict_t *self)
 	{
 		mmove_t	*deathmoves[] = {&gunner_move_death,
 								 NULL};
-		M_SetDeath(self,(mmove_t **)&deathmoves);
+		M_SetDeath (self, (mmove_t **)&deathmoves);
 	}
 	self->common_name = "Gunner";
 	self->class_id = ENTITY_MONSTER_GUNNER;

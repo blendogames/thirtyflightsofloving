@@ -403,8 +403,7 @@ void dog_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, 
 {
 	int		n;
 
-	self->s.skinnum |= 1;
-
+	// check for gib
 	if (self->health <= self->gib_health && !(self->spawnflags & SF_MONSTER_NOGIB))
 	{
 		gi.sound (self, CHAN_VOICE, gi.soundindex ("misc/udeath.wav"), 1, ATTN_NORM, 0);
@@ -421,7 +420,9 @@ void dog_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, 
 	if (self->deadflag == DEAD_DEAD)
 		return;
 
+	// regular death
 	gi.sound (self, CHAN_VOICE, sound_death, 1, ATTN_NORM, 0);
+	self->s.skinnum |= 1;
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_YES;
 
@@ -510,7 +511,14 @@ void SP_monster_dog (edict_t *self)
 	gi.linkentity (self);
 	
 	self->monsterinfo.currentmove = &dog_move_stand;
-
+	if (self->health < 0)
+	{
+		mmove_t	*deathmoves[] = {&dog_move_death1,
+			                     &dog_move_death2,
+								 NULL};
+		M_SetDeath (self, (mmove_t **)&deathmoves);
+	}
 	self->monsterinfo.scale = MODEL_SCALE;
+
 	walkmonster_start (self);
 }

@@ -192,7 +192,7 @@ mmove_t hound_move_pain2 = {FRAME_pain2Start, FRAME_pain2End, hound_frames_pain2
 void hound_pain (edict_t *self, edict_t *other, float kick, int damage)
 {
 	if (self->health < (self->max_health / 2))
-		self->s.skinnum = 1;
+		self->s.skinnum |= 1;
 
 	if (random() < 0.5)
 		gi.sound (self, CHAN_VOICE, sound_pain1, 1, ATTN_NORM, 0);
@@ -525,7 +525,6 @@ void hound_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 {
 	int		n;
 
-	self->s.skinnum = 1;
 	// check for gib
 	if (self->health <= self->gib_health && !(self->spawnflags & SF_MONSTER_NOGIB))
 	{
@@ -544,6 +543,7 @@ void hound_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 
 	// regular death
 	gi.sound (self, CHAN_VOICE, sound_die, 1, ATTN_NORM, 0);
+	self->s.skinnum |= 1;
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_YES;
 	self->monsterinfo.currentmove = &hound_move_death;

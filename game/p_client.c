@@ -844,7 +844,7 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	//ZOID
 		// Knightmare added- drop ammogen backpack
 		if (!OnSameTeam(self, attacker))
-			CTFApplyAmmogen(attacker, self);
+			CTFApplyAmmogen (attacker, self);
 
 		if (deathmatch->value)
 			Cmd_Help_f (self);		// show scores

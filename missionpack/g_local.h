@@ -1506,7 +1506,7 @@ void Cmd_KillTrap_f (edict_t *ent);
 void Trap_Explode (edict_t *ent);
 
 // Lazarus
-qboolean AimGrenade (edict_t *launcher, vec3_t start, vec3_t target, vec_t speed, vec3_t aim);
+qboolean AimGrenade (edict_t *launcher, vec3_t start, vec3_t target, vec_t speed, vec3_t aim, qboolean isProx);
 void Grenade_Evade (edict_t *monster);
 void Grenade_Add_To_Chain (edict_t *grenade);
 void Grenade_Remove_From_Chain (edict_t *grenade);
@@ -1740,6 +1740,8 @@ void kick_attack (edict_t *ent);
 // g_newweap.c
 //
 //extern float nuke_framenum;
+extern	vec3_t proxMins;
+extern	vec3_t proxMaxs;
 void fire_flechette (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage);
 //void fire_prox (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed);		
 void fire_prox (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int damage_multiplier, int speed, int health, float timer, float damage_radius);

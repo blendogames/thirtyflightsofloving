@@ -350,6 +350,29 @@ void soldier_run (edict_t *self)
 
 
 //
+// JUMP
+//
+
+mframe_t soldier_frames_jump [] =
+{
+	ai_move, 0, NULL,
+	ai_move, 0, NULL,
+	ai_move, 0, NULL,
+	ai_move, 0, NULL,
+	ai_move, 0, NULL,
+	ai_move, 0, NULL,
+	ai_move, 0, NULL,
+	ai_move, 0, NULL
+};
+mmove_t soldier_move_jump = { FRAME_run01, FRAME_run08, soldier_frames_jump, soldier_run };
+
+void soldier_jump (edict_t *self)
+{
+	self->monsterinfo.currentmove = &soldier_move_jump;
+}
+
+
+//
 // PAIN
 //
 
@@ -1568,7 +1591,7 @@ void soldier_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dama
 {
 	int		n;
 
-// check for gib
+	// check for gib
 	if (self->health <= self->gib_health && !(self->spawnflags & SF_MONSTER_NOGIB))
 	{
 		gi.sound (self, CHAN_VOICE, gi.soundindex ("misc/udeath.wav"), 1, ATTN_NORM, 0);
@@ -1583,10 +1606,10 @@ void soldier_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dama
 	if (self->deadflag == DEAD_DEAD)
 		return;
 
-// regular death
+	// regular death
+	self->s.skinnum |= 1;
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_YES;
-	self->s.skinnum |= 1;
 	self->monsterinfo.power_armor_type = POWER_ARMOR_NONE;
 
 //	if ((self->s.skinnum % 6) == 1)
@@ -1903,6 +1926,29 @@ void soldierh_run (edict_t *self)
 	{
 		self->monsterinfo.currentmove = &soldierh_move_start_run;
 	}
+}
+
+
+//
+// JUMP
+//
+
+mframe_t soldierh_frames_jump [] =
+{
+	ai_move, 0, NULL,
+	ai_move, 0, NULL,
+	ai_move, 0, NULL,
+	ai_move, 0, NULL,
+	ai_move, 0, NULL,
+	ai_move, 0, NULL,
+	ai_move, 0, NULL,
+	ai_move, 0, NULL
+};
+mmove_t soldierh_move_jump = { FRAME_run01, FRAME_run08, soldierh_frames_jump, soldierh_run };
+
+void soldierh_jump (edict_t *self)
+{
+	self->monsterinfo.currentmove = &soldierh_move_jump;
 }
 
 
@@ -3030,7 +3076,7 @@ void soldierh_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dam
 {
 	int		n;
 
-// check for gib
+	// check for gib
 	if (self->health <= self->gib_health && !(self->spawnflags & SF_MONSTER_NOGIB))
 	{
 		gi.sound (self, CHAN_VOICE, gi.soundindex ("misc/udeath.wav"), 1, ATTN_NORM, 0);
@@ -3046,10 +3092,10 @@ void soldierh_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dam
 	if (self->deadflag == DEAD_DEAD)
 		return;
 
-// regular death
+	// regular death
+	self->s.skinnum |= 1;
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_YES;
-	self->s.skinnum |= 1;
 	self->monsterinfo.power_armor_type = POWER_ARMOR_NONE;
 
 //	if ((self->s.skinnum % 6) == 1)
@@ -3129,6 +3175,13 @@ void SP_monster_soldier_x (edict_t *self)
 //ROGUE
 //=====
 
+	if (monsterjump->value)
+	{
+		self->monsterinfo.jump = soldier_jump;
+		self->monsterinfo.jumpup = 48;
+		self->monsterinfo.jumpdn = 160;
+	}
+
 	// Lazarus
 	if (self->powerarmor)
 	{
@@ -3138,6 +3191,7 @@ void SP_monster_soldier_x (edict_t *self)
 			self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
 		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
+
 	if (!self->monsterinfo.flies)
 		self->monsterinfo.flies = 0.40;
 
@@ -3153,7 +3207,7 @@ void SP_monster_soldier_x (edict_t *self)
 								 &soldier_move_death5,
 								 &soldier_move_death6,
 								 NULL};
-		M_SetDeath(self,(mmove_t **)&deathmoves);
+		M_SetDeath (self, (mmove_t **)&deathmoves);
 	}
 	walkmonster_start (self);
 }
@@ -3377,6 +3431,13 @@ void SP_monster_soldier_h (edict_t *self)
 //ROGUE
 //=====
 
+	if (monsterjump->value)
+	{
+		self->monsterinfo.jump = soldierh_jump;
+		self->monsterinfo.jumpup = 48;
+		self->monsterinfo.jumpdn = 160;
+	}
+
 	// Lazarus
 	if (self->powerarmor)
 	{
@@ -3386,12 +3447,13 @@ void SP_monster_soldier_h (edict_t *self)
 			self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
 		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
+
 	if (!self->monsterinfo.flies)
 		self->monsterinfo.flies = 0.40;
 
 	gi.linkentity (self);
 
-	// self->monsterinfo.stand (self);
+//	self->monsterinfo.stand (self);
 	self->monsterinfo.currentmove = &soldierh_move_stand3;	
 	if (self->health < 0)
 	{
@@ -3402,7 +3464,7 @@ void SP_monster_soldier_h (edict_t *self)
 								 &soldierh_move_death5,
 								 &soldierh_move_death6,
 								 NULL};
-		M_SetDeath(self,(mmove_t **)&deathmoves);
+		M_SetDeath (self, (mmove_t **)&deathmoves);
 	}
 	walkmonster_start (self);
 }

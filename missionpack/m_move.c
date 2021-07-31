@@ -219,7 +219,7 @@ qboolean SV_movestep (edict_t *ent, vec3_t move, qboolean relink)
 			{
 				// if the tesla or prox is in front of us, back up...
 				if (IsBadAhead (ent, current_bad, move))
-					VectorScale(move, -1, move);
+					VectorScale (move, -1, move);
 			}
 		}
 		else if (ent->bad_area)
@@ -228,10 +228,10 @@ qboolean SV_movestep (edict_t *ent, vec3_t move, qboolean relink)
 			ent->bad_area = NULL;
 			if (ent->oldenemy)	// && ent->bad_area->owner == ent->enemy)
 			{
-	//			gi.dprintf("resuming being pissed at %s\n", ent->oldenemy->classname);
+			//	gi.dprintf("resuming being pissed at %s\n", ent->oldenemy->classname);
 				ent->enemy = ent->oldenemy;
 				ent->goalentity = ent->oldenemy;
-				FoundTarget(ent);
+				FoundTarget (ent);
 
 				// Knightmare- added missing relink
 				if (relink)

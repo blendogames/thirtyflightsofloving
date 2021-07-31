@@ -642,7 +642,7 @@ void floater_dead (edict_t *self)
 
 void floater_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
-	int	n;  //Knightmare added
+	int	n;  // Knightmare added
 
 	for (n = 0; n < 4; n++)
 		ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", 0, 0, damage, GIB_ORGANIC);
@@ -650,8 +650,9 @@ void floater_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dama
 		ThrowGib (self, "models/objects/gibs/sm_metal/tris.md2", 0, 0, damage, GIB_METALLIC);
 	for (n = 0; n < 2; n++)
 		ThrowGib (self, "models/objects/gibs/gear/tris.md2", 0, 0, damage, GIB_METALLIC);
+
 	gi.sound (self, CHAN_VOICE, sound_death1, 1, ATTN_NORM, 0);
-	BecomeExplosion1(self);
+	BecomeExplosion1 (self);
 }
 
 //===========
@@ -743,10 +744,20 @@ void SP_monster_floater (edict_t *self)
 
 	gi.linkentity (self);
 
-	if (random() <= 0.5)		
-		self->monsterinfo.currentmove = &floater_move_stand1;	
+	if (self->health < 0)
+	{
+		mmove_t	*deathmoves[] = {&floater_move_death,
+								 NULL};
+		if (!M_SetDeath(self, (mmove_t **)&deathmoves))
+			self->monsterinfo.currentmove = &floater_move_stand1;
+	}
 	else
-		self->monsterinfo.currentmove = &floater_move_stand2;	
+	{
+		if (random() <= 0.5)		
+			self->monsterinfo.currentmove = &floater_move_stand1;	
+		else
+			self->monsterinfo.currentmove = &floater_move_stand2;
+	}
 	
 	self->monsterinfo.scale = MODEL_SCALE;
 

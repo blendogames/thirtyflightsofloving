@@ -56,7 +56,6 @@ R_DrawTriangleOutlines
 void R_DrawTriangleOutlines (void)
 {
 	int				i, j, nv;
-//	float			*v;
 	msurface_t		*surf;
 	glpoly_t		*p;
 	mpolyvertex_t	*v;
@@ -80,7 +79,6 @@ void R_DrawTriangleOutlines (void)
 		{
 			for (p = surf->polys; p; p = p->chain)
 			{
-			//	v = p->verts[0];
 				nv = p->numverts;
 				if (RB_CheckArrayOverflow (nv, (nv-2)*3))
 					RB_RenderMeshGeneric (false);
@@ -89,10 +87,8 @@ void R_DrawTriangleOutlines (void)
 					indexArray[rb_index++] = rb_vertex+j+1;
 					indexArray[rb_index++] = rb_vertex+j+2;
 				}
-			//	for (j=0; j < nv; j++, v+= VERTEXSIZE)
 				for (j=0, v=&p->verts[0]; j < nv; j++, v++)
 				{
-				//	VA_SetElem3v(vertexArray[rb_vertex], v[0], v[1], v[2]);
 					VA_SetElem3v(vertexArray[rb_vertex], v->xyz);
 					VA_SetElem4(colorArray[rb_vertex], 1, 1, 1, 1);
 					rb_vertex++;
@@ -100,7 +96,6 @@ void R_DrawTriangleOutlines (void)
 			}
 		}
 	}
-//	RB_DrawArrays ();
 	RB_RenderMeshGeneric (false);
 
 	qglPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
@@ -118,14 +113,12 @@ R_DrawGLPolyChain
 */
 void R_DrawGLPolyChain (glpoly_t *p, float soffset, float toffset)
 {
-//	float			*v;
 	int				j, nv;
 	mpolyvertex_t	*v;
 
 	rb_vertex = rb_index = 0;
 	for ( ; p != 0; p = p->chain)
 	{
-	//	v = p->verts[0];
 		nv = p->numverts;
 		if (RB_CheckArrayOverflow (nv, (nv-2)*3))
 			RB_RenderMeshGeneric (false);
@@ -134,18 +127,14 @@ void R_DrawGLPolyChain (glpoly_t *p, float soffset, float toffset)
 			indexArray[rb_index++] = rb_vertex+j+1;
 			indexArray[rb_index++] = rb_vertex+j+2;
 		}
-	//	for (j=0; j < nv; j++, v+= VERTEXSIZE)
 		for (j=0, v=&p->verts[0]; j < nv; j++, v++)
 		{
-		//	VA_SetElem2(texCoordArray[0][rb_vertex], v[5] - soffset, v[6] - toffset);
-		//	VA_SetElem3(vertexArray[rb_vertex], v[0], v[1], v[2]);
 			VA_SetElem2(texCoordArray[0][rb_vertex], v->lightmap_st[0] - soffset, v->lightmap_st[1] - toffset);
 			VA_SetElem3v(vertexArray[rb_vertex], v->xyz);
 			VA_SetElem4(colorArray[rb_vertex], 1, 1, 1, 1);
 			rb_vertex++;
 		}
 	}
-//	RB_DrawArrays ();
 	RB_RenderMeshGeneric (false);
 }
 

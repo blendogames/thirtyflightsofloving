@@ -958,8 +958,8 @@ void sentien_pain (edict_t *self, edict_t *other, float kick, int damage)
 	if (self->health < (self->max_health / 2))
 	{
 		self->s.skinnum |= 1;
-		if (!(self->fogclip & 2)) //custom bloodtype flag check
-			self->blood_type = 3; //sparks and blood
+		if (!(self->fogclip & 2)) // custom bloodtype flag check
+			self->blood_type = 3; // sparks and blood
 	}
 
 	// less than this we don't flinch
@@ -1132,7 +1132,7 @@ void sentien_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dama
 	}
 	// end Knightmare
 
-	// gib code to go here
+	// check for gib
 	if (self->health <= self->gib_health && !(self->spawnflags & SF_MONSTER_NOGIB))
 	{
 		gi.sound (self, CHAN_VOICE, gi.soundindex ("misc/udeath.wav"), 1, ATTN_NORM, 0);
@@ -1151,9 +1151,12 @@ void sentien_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dama
 	if (self->deadflag == DEAD_DEAD)
 		return;
 
+	// regular death
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_YES;
 	self->s.skinnum |= 1;
+	if (!(self->fogclip & 2)) // custom bloodtype flag check
+		self->blood_type = 3; // sparks and blood
 
 	if (random() < 0.80)
 		self->monsterinfo.currentmove = &sentien_move_death1;

@@ -261,7 +261,7 @@ void gekk_search (edict_t *self)
 	if (self->health > self->max_health)
 		self->health = self->max_health;
 
-	//Knightmare- special skins
+	// Knightmare- special skins
 	if (self->health < (self->max_health /4))
 	{
 		if (self->style)
@@ -283,7 +283,7 @@ void gekk_search (edict_t *self)
 		else
 			self->s.skinnum = 0;
 	}
-	//end Knightmare
+	// end Knightmare
 }
 
 void gekk_swing (edict_t *self)
@@ -1294,7 +1294,7 @@ void gekk_pain (edict_t *self, edict_t *other, float kick, int damage)
 		return;
 	}
 	
-	//Knightmare- special skins
+	// Knightmare- special skins
 	if (self->health < (self->max_health /4))
 	{
 		if (self->style)
@@ -1309,7 +1309,7 @@ void gekk_pain (edict_t *self, edict_t *other, float kick, int damage)
 		else
 			self->s.skinnum = 1;
 	}
-	//end Knightmare
+	// end Knightmare
 
 	if (level.time < self->pain_debounce_time)
 		return;
@@ -1523,6 +1523,7 @@ void gekk_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
 	if (!self)
 		return;
 
+	// check for gib
 	if (self->health <= self->gib_health && !(self->spawnflags & 32)) //Knightmare- nogib flag
 	{
 		gi.sound (self, CHAN_VOICE, gi.soundindex ("misc/udeath.wav"), 1, ATTN_NORM, 0);
@@ -1543,15 +1544,16 @@ void gekk_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
 	if (self->deadflag == DEAD_DEAD)
 		return;
 
+	// regular death
 	gi.sound (self, CHAN_VOICE, sound_death, 1, ATTN_NORM, 0);
-	self->deadflag = DEAD_DEAD;
-	self->takedamage = DAMAGE_YES;
-	//Knightmare- special skins
+	// Knightmare- special skins
 	if (self->style)
 		self->s.skinnum = self->style * 3 + 2;
 	else
 		self->s.skinnum = 2;
-	//end Knightmare
+	// end Knightmare
+	self->deadflag = DEAD_DEAD;
+	self->takedamage = DAMAGE_YES;
 
 	if (self->waterlevel)
 		self->monsterinfo.currentmove = &gekk_move_wdeath;
@@ -1566,7 +1568,6 @@ void gekk_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
 			self->monsterinfo.currentmove = &gekk_move_death4;
 
 	}
-	
 }
 
 
@@ -1834,13 +1835,21 @@ void SP_monster_gekk (edict_t *self)
 	self->class_id = ENTITY_MONSTER_GEKK;
 
 	if (!self->blood_type)
-		self->blood_type = 1; //Knightmare- set this for blood color
+		self->blood_type = 1; // Knightmare- set this for blood color
 
 	gi.linkentity (self);
 	
 	self->monsterinfo.currentmove = &gekk_move_stand;
-
+	if (self->health < 0)
+	{
+		mmove_t	*deathmoves[] = {&gekk_move_death1,
+			                     &gekk_move_death3,
+			                     &gekk_move_death4,
+								 NULL};
+		M_SetDeath (self, (mmove_t **)&deathmoves);
+	}
 	self->monsterinfo.scale = MODEL_SCALE;
+
 	walkmonster_start (self);
 
 	if (self->spawnflags & 8)

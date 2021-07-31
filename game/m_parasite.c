@@ -484,9 +484,9 @@ void parasite_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dam
 {
 	int		n;
 
-	self->s.skinnum |= 1;
 	self->monsterinfo.power_armor_type = POWER_ARMOR_NONE;
-// check for gib
+
+	// check for gib
 	if (self->health <= self->gib_health && !(self->spawnflags & SF_MONSTER_NOGIB))
 	{
 		gi.sound (self, CHAN_VOICE, gi.soundindex ("misc/udeath.wav"), 1, ATTN_NORM, 0);
@@ -502,8 +502,9 @@ void parasite_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dam
 	if (self->deadflag == DEAD_DEAD)
 		return;
 
-// regular death
+	// regular death
 	gi.sound (self, CHAN_VOICE, sound_die, 1, ATTN_NORM, 0);
+	self->s.skinnum |= 1;
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_YES;
 	self->monsterinfo.currentmove = &parasite_move_death;
@@ -600,10 +601,15 @@ void SP_monster_parasite (edict_t *self)
 		self->blood_type = 3; //sparks and blood
 
 	// Lazarus
-	if (self->powerarmor) {
-		self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
+	if (self->powerarmor)
+	{
+		if (self->powerarmortype == 1)
+			self->monsterinfo.power_armor_type = POWER_ARMOR_SCREEN;
+		else
+			self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
 		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
+
 	if (!self->monsterinfo.flies)
 		self->monsterinfo.flies = 0.35;
 
@@ -614,17 +620,18 @@ void SP_monster_parasite (edict_t *self)
 		self->monsterinfo.jumpdn = 160;
 	}
 
+	self->common_name = "Parasite";
+	self->class_id = ENTITY_MONSTER_PARASITE;
+
 	gi.linkentity (self);
+
 	self->monsterinfo.currentmove = &parasite_move_stand;	
 	if (self->health < 0)
 	{
 		mmove_t	*deathmoves[] = {&parasite_move_death,
 								 NULL};
-		M_SetDeath(self,(mmove_t **)&deathmoves);
+		M_SetDeath (self, (mmove_t **)&deathmoves);
 	}
-	self->common_name = "Parasite";
-	self->class_id = ENTITY_MONSTER_PARASITE;
-
 	self->monsterinfo.scale = MODEL_SCALE;
 
 	walkmonster_start (self);

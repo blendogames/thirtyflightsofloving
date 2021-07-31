@@ -1659,7 +1659,7 @@ void SP_misc_actor (edict_t *self)
 		mmove_t	*deathmoves[] = {&actor_move_death1,
 			                     &actor_move_death2,
 								 NULL};
-		M_SetDeath(self,(mmove_t **)&deathmoves);
+		M_SetDeath (self,(mmove_t **)&deathmoves);
 	}
 	self->monsterinfo.scale = 0.8;
 	walkmonster_start (self);

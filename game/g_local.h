@@ -237,7 +237,7 @@ typedef enum
 #define SFL_CROSS_TRIGGER_6		0x00000020
 #define SFL_CROSS_TRIGGER_7		0x00000040
 #define SFL_CROSS_TRIGGER_8		0x00000080
-#define SFL_CROSS_TRIGGER_MASK	0x000000ff
+#define SFL_CROSS_TRIGGER_MASK	0x000000ff	// 0xffffe0ff would allow 27 trigger bits
 
 
 // noise types for PlayerNoise
@@ -865,7 +865,7 @@ typedef enum {
 typedef struct
 {
 	char		*name;
-	size_t	ofs;	// Knightmare- was int
+	size_t		ofs;	// Knightmare- was int
 	fieldtype_t	type;
 	int			flags;
 } field_t;
@@ -1940,6 +1940,7 @@ struct edict_s
 
 	// monster power armor
 	int			powerarmor;
+	int			powerarmortype;
 
 	// MOVETYPE_PUSH rider angles
 	int			turn_rider;

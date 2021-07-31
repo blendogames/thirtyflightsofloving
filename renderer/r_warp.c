@@ -140,7 +140,6 @@ void SubdividePolygon (int numverts, float *verts)
 	lightmap_total_s = lightmap_total_t = 0;	// added for lightmaps
 	for (i=0; i<numverts; i++, verts+=3)
 	{
-	//	VectorCopy (verts, poly->verts[i+1]);
 		VectorCopy (verts, poly->verts[i+1].xyz);
 		s = DotProduct (verts, warpface->texinfo->vecs[0]);
 		t = DotProduct (verts, warpface->texinfo->vecs[1]);
@@ -149,8 +148,6 @@ void SubdividePolygon (int numverts, float *verts)
 		total_t += t;
 		VectorAdd (total, verts, total);
 
-	//	poly->verts[i+1][3] = s;
-	//	poly->verts[i+1][4] = t;
 		poly->verts[i+1].texture_st[0] = s;
 		poly->verts[i+1].texture_st[1] = t;
 
@@ -177,10 +174,6 @@ void SubdividePolygon (int numverts, float *verts)
 		}
 	}
 
-//	VectorScale (total, (1.0/(float)numverts), poly->verts[0]);
-//	VectorCopy(poly->verts[0], poly->center); // for vertex lighting
-//	poly->verts[0][3] = total_s/numverts;
-//	poly->verts[0][4] = total_t/numverts;
 	VectorScale (total, (1.0/(float)numverts), poly->verts[0].xyz);
 	VectorCopy(poly->verts[0].xyz, poly->center); // for vertex lighting
 	poly->verts[0].texture_st[0] = total_s/numverts;
@@ -193,7 +186,6 @@ void SubdividePolygon (int numverts, float *verts)
 	}
 
 	// copy first vertex to last
-//	memcpy (poly->verts[i+1], poly->verts[1], sizeof(poly->verts[0]));
 	memcpy (&poly->verts[i+1], &poly->verts[1], sizeof(mpolyvertex_t));
 }
 
@@ -257,36 +249,8 @@ float	r_turbsin[] =
 #if 0
 // MrG - texture shader stuffs
 #define DST_SIZE 16
-unsigned int dst_texture_NV, dst_texture_ARB;
+unsigned int dst_texture_ARB;
 
-/*
-===============
-CreateDSTTex_NV
-
-Create the texture which warps texture shaders
-===============
-*/
-void CreateDSTTex_NV (void)
-{
-	char	data[DST_SIZE][DST_SIZE][2];
-	int		x,y;
-
-	for (x=0; x<DST_SIZE; x++)
-		for (y=0; y<DST_SIZE; y++) {
-			data[x][y][0]=rand()%255-128;
-			data[x][y][1]=rand()%255-128;
-		}
-
-	qglGenTextures(1,&dst_texture_NV);
-	qglBindTexture(GL_TEXTURE_2D, dst_texture_NV);
-	qglTexImage2D(GL_TEXTURE_2D, 0, GL_DSDT8_NV, DST_SIZE, DST_SIZE, 0, GL_DSDT_NV,
-				GL_BYTE, data);
-	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	qglTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-}
 
 /*
 ===============
@@ -331,12 +295,9 @@ Needed after a vid_restart.
 */
 void R_InitDSTTex (void)
 {
-//	qglDeleteTextures(1, &dst_texture_NV);
-//	qglDeleteTextures(1, &dst_texture_ARB);
-	dst_texture_NV = 0;
-//	dst_texture_ARB = 0;
-	CreateDSTTex_NV ();
-//	CreateDSTTex_ARB ();
+	qglDeleteTextures(1, &dst_texture_ARB);
+	dst_texture_ARB = 0;
+	CreateDSTTex_ARB ();
 }
 //end MrG
 #endif
@@ -358,11 +319,8 @@ void RB_RenderWarpSurface (msurface_t *surf)
 	image_t		*image = R_TextureAnimation (surf);
 	qboolean	lightmapped = surf->isLightmapped && (r_worldmodel->bspFeatures & BSPF_WARPLIGHTMAPS);
 	qboolean	vertexLight = r_warp_lighting->integer && !lightmapped && !(surf->texinfo->flags & SURF_NOLIGHTENV);
-//	qboolean	texShaderWarpNV = glConfig.NV_texshaders && r_pixel_shader_warp->integer;
 	qboolean	texShaderWarpARB = glConfig.arb_fragment_program && r_pixel_shader_warp->integer;
-	qboolean	texShaderWarp = /*texShaderWarpNV ||*/ texShaderWarpARB;
-//	if (texShaderWarpNV && texShaderWarpARB)
-//		texShaderWarpARB = (r_pixel_shader_warp->integer == 1);
+	qboolean	texShaderWarp = texShaderWarpARB;
 
 	if (rb_vertex == 0 || rb_index == 0) // nothing to render
 		return;
@@ -414,28 +372,6 @@ void RB_RenderWarpSurface (msurface_t *surf)
 			qglProgramLocalParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 0, r_rgbscale->value, r_rgbscale->value, r_rgbscale->value, 1.0);
 		}
 	}
-/*	else if (texShaderWarpNV)
-	{
-		GL_SelectTexture(0);
-		GL_MBind(0, dst_texture_NV);
-		qglTexEnvi(GL_TEXTURE_SHADER_NV, GL_SHADER_OPERATION_NV, GL_TEXTURE_2D);
-
-		GL_EnableTexture(1);
-		GL_MBind(1, image->texnum);
-		qglTexEnvi(GL_TEXTURE_SHADER_NV, GL_SHADER_OPERATION_NV, GL_TEXTURE_2D);
-		qglTexEnvi(GL_TEXTURE_SHADER_NV, GL_SHADER_OPERATION_NV, GL_OFFSET_TEXTURE_2D_NV);
-		qglTexEnvi(GL_TEXTURE_SHADER_NV, GL_PREVIOUS_TEXTURE_INPUT_NV, GL_TEXTURE0_ARB);
-		qglTexEnvfv(GL_TEXTURE_SHADER_NV, GL_OFFSET_TEXTURE_MATRIX_NV, &args[1]);
-
-		// Psychospaz's lighting
-		// use this so that the new water isnt so bright anymore
-		// We won't bother check for the extensions availabiliy, as the hardware required
-		// to make it this far definately supports this as well
-		if (light)
-			qglTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_ARB);
-
-		GL_Enable (GL_TEXTURE_SHADER_NV);
-	} */
 	else
 	{
 		if (lightmapped)
@@ -469,15 +405,6 @@ void RB_RenderWarpSurface (msurface_t *surf)
 			GL_SelectTexture(0);
 		}
 	}
-/*	else if (texShaderWarpNV)
-	{ 
-		GL_DisableTexture(1);
-		if (light)
-			qglTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE); // Psychospaz's lighting
-
-		GL_SelectTexture(0);
-		GL_Disable (GL_TEXTURE_SHADER_NV);
-	} */
 
 	// Psychospaz's vertex lighting
 	if (vertexLight) {
@@ -508,9 +435,6 @@ void R_DrawWarpSurface (msurface_t *surf, float alpha, qboolean render)
 	int			i, texWidth, texHeight;
 	qboolean	lightmapped = surf->isLightmapped && (r_worldmodel->bspFeatures & BSPF_WARPLIGHTMAPS);
 	qboolean	vertexLight = r_warp_lighting->integer && !lightmapped && !r_fullbright->integer && !(surf->texinfo->flags & SURF_NOLIGHTENV);
-/*	qboolean	texShaderNV = glConfig.NV_texshaders
-								&& ( (!glConfig.arb_fragment_program && r_pixel_shader_warp->integer)
-									|| (glConfig.arb_fragment_program && r_pixel_shader_warp->integer > 1) ); */
 
 	c_brush_surfs++;
 
@@ -538,41 +462,27 @@ void R_DrawWarpSurface (msurface_t *surf, float alpha, qboolean render)
 			indexArray[rb_index++] = rb_vertex+i+1;
 			indexArray[rb_index++] = rb_vertex+i+2;
 		}
-	//	for (i=0, v=p->verts[0]; i<p->numverts; i++, v+=VERTEXSIZE)
 		for (i=0, v=&p->verts[0]; i<p->numverts; i++, v++)
 		{
 		#if !id386
-		//	s = v[3] + r_turbsin[(int)((v[4]*0.125+rdt) * TURBSCALE) & 255];
-		//	t = v[4] + r_turbsin[(int)((v[3]*0.125+rdt) * TURBSCALE) & 255];
 			s = v->texture_st[0] + r_turbsin[(int)((v->texture_st[1]*0.125+rdt) * TURBSCALE) & 255];
 			t = v->texture_st[1] + r_turbsin[(int)((v->texture_st[0]*0.125+rdt) * TURBSCALE) & 255];
 		#else
-		//	s = v[3] + r_turbsin[Q_ftol( ((v[4]*0.125+rdt) * TURBSCALE) ) & 255];
-		//	t = v[4] + r_turbsin[Q_ftol( ((v[3]*0.125+rdt) * TURBSCALE) ) & 255];
 			s = v->texture_st[0] + r_turbsin[Q_ftol( ((v->texture_st[1]*0.125+rdt) * TURBSCALE) ) & 255];
 			t = v->texture_st[1] + r_turbsin[Q_ftol( ((v->texture_st[0]*0.125+rdt) * TURBSCALE) ) & 255];
 		#endif
 			s += scroll;
-		//	s *= DIV64;
-		//	t *= DIV64;
 			s /= (float)texWidth;
 			t /= (float)texHeight;
 //=============== Water waves ========================
-		//	VectorCopy(v, point);
 			VectorCopy(v->xyz, point);
 			if ( r_waterwave->value > 0 && !(surf->texinfo->flags & SURF_FLOWING)
 				&& surf->plane->normal[2] > 0
 				&& surf->plane->normal[2] > surf->plane->normal[0]
 				&& surf->plane->normal[2] > surf->plane->normal[1] )
-			//	point[2] = v[2] + r_waterwave->value * sin(v[0]*0.025+rdt) * sin(v[2]*0.05+rdt);
 				point[2] = v->xyz[2] + r_waterwave->value * sin(v->xyz[0]*0.025+rdt) * sin(v->xyz[2]*0.05+rdt);
 //=============== End water waves ====================
 			// MrG - texture shader waterwarp
-		/*	if (texShaderNV) {
-			//	VA_SetElem2(texCoordArray[0][rb_vertex], (v[3]+dstscroll)*DIV64, v[4]*DIV64);
-				VA_SetElem2(texCoordArray[0][rb_vertex], (v>texture_st[0]+dstscroll)*DIV64, v>texture_st[1]*DIV64);
-				VA_SetElem2(texCoordArray[1][rb_vertex], s, t);
-			} */
 			if (lightmapped) {
 				VA_SetElem2(texCoordArray[0][rb_vertex], s, t);
 				VA_SetElem2(texCoordArray[1][rb_vertex], v->lightmap_st[0], v->lightmap_st[1]);
@@ -581,18 +491,13 @@ void R_DrawWarpSurface (msurface_t *surf, float alpha, qboolean render)
 			}
 			else { 
 				VA_SetElem2(texCoordArray[0][rb_vertex], s, t);
-			//	VA_SetElem2(texCoordArray[1][rb_vertex], (v[3]+dstscroll)*DIV64, v[4]*DIV64);
 				VA_SetElem2(texCoordArray[1][rb_vertex], (v->texture_st[0]+dstscroll) / (float)texWidth, v->texture_st[1] / (float)texHeight);
 			}
 
-		//	if (vertexLight && p->vertexlight && p->vertexlightset)
 			if (lightmapped)
 				VA_SetElem4(colorArray[rb_vertex], 1, 1, 1, alpha);
 			else if (vertexLight && p->vertexlightset)
 				VA_SetElem4(colorArray[rb_vertex],
-				//	(float)(p->vertexlight[i*3+0]*DIV255),
-				//	(float)(p->vertexlight[i*3+1]*DIV255),
-				//	(float)(p->vertexlight[i*3+2]*DIV255), alpha);
 					(float)(v->lightcolor[0]*DIV255),
 					(float)(v->lightcolor[1]*DIV255),
 					(float)(v->lightcolor[2]*DIV255), alpha);

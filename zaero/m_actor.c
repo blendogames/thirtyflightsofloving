@@ -213,7 +213,7 @@ void actor_pain (edict_t *self, edict_t *other, float kick, int damage)
 	int		n;
 
 	if (self->health < (self->max_health / 2))
-		self->s.skinnum = 1;
+		self->s.skinnum |= 1;
 
 	if (level.time < self->pain_debounce_time)
 		return;
@@ -341,6 +341,7 @@ void actor_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 //	gi.sound (self, CHAN_VOICE, actor.sound_die, 1, ATTN_NORM, 0);
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_YES;
+	self->s.skinnum |= 1;
 
 	n = rand() % 2;
 	if (n == 0)

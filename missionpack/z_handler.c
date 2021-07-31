@@ -508,7 +508,7 @@ void SP_monster_handler (edict_t *self)
 			                     &infantry_move_death2,
 								 &infantry_move_death3,
 								 NULL};
-		M_SetDeath(self,(mmove_t **)&deathmoves);
+		M_SetDeath (self,(mmove_t **)&deathmoves);
 	}*/
 	self->monsterinfo.scale = MODEL_SCALE;
 

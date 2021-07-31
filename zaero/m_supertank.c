@@ -435,7 +435,7 @@ void supertank_pain (edict_t *self, edict_t *other, float kick, int damage)
 
 	if (self->health < (self->max_health / 2))
 	{
-		self->s.skinnum = 1;
+		self->s.skinnum |= 1;
 		self->blood_type = 3; //sparks and blood
 	}
 
@@ -625,9 +625,9 @@ void BossExplode (edict_t *self)
 		break;
 	case 8:
 		self->s.sound = 0;
-		for (n= 0; n < 4; n++)
+		for (n = 0; n < 4; n++)
 			ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", 500, GIB_ORGANIC);
-		for (n= 0; n < 8; n++)
+		for (n = 0; n < 8; n++)
 			ThrowGib (self, "models/objects/gibs/sm_metal/tris.md2", 500, GIB_METALLIC);
 		ThrowGib (self, "models/objects/gibs/chest/tris.md2", 500, GIB_ORGANIC);
 		ThrowHead (self, "models/objects/gibs/gear/tris.md2", 500, GIB_METALLIC);

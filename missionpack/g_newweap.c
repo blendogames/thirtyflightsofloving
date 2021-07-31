@@ -151,6 +151,10 @@ void SP_flechette (edict_t *flechette)
 #define PROX_HEALTH			20
 #define PROX_DAMAGE			90
 
+// Knightmare- these are used for aiming traces to avoid collision
+vec3_t		proxMins = {-8, -8, -8};
+vec3_t		proxMaxs = {8, 8, 8};
+
 void Prox_Explode (edict_t *ent);
 //===============
 //===============
@@ -521,10 +525,10 @@ void prox_open (edict_t *ent)
 	{
 		if (ent->s.frame == 0)
 			gi.sound (ent, CHAN_VOICE, gi.soundindex ("weapons/proxopen.wav"), 1, ATTN_NORM, 0);
-		//ent->s.sound = gi.soundindex ("weapons/proxopen.wav");
+	//	ent->s.sound = gi.soundindex ("weapons/proxopen.wav");
 		ent->s.frame++;
 		ent->think = prox_open;
-		ent->nextthink = level.time + 0.10; //was 0.05
+		ent->nextthink = level.time + 0.10;	// was 0.05
 	}
 }
 
@@ -667,10 +671,10 @@ void prox_land (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
 	field = G_Spawn();
 
 	VectorCopy (ent->s.origin, field->s.origin);
-	VectorClear(field->velocity);
-	VectorClear(field->avelocity);
-	VectorSet(field->mins, -PROX_BOUND_SIZE, -PROX_BOUND_SIZE, -PROX_BOUND_SIZE);
-	VectorSet(field->maxs, PROX_BOUND_SIZE, PROX_BOUND_SIZE, PROX_BOUND_SIZE);
+	VectorClear (field->velocity);
+	VectorClear (field->avelocity);
+	VectorSet (field->mins, -PROX_BOUND_SIZE, -PROX_BOUND_SIZE, -PROX_BOUND_SIZE);
+	VectorSet (field->maxs, PROX_BOUND_SIZE, PROX_BOUND_SIZE, PROX_BOUND_SIZE);
 	field->movetype = MOVETYPE_NONE;
 	field->solid = SOLID_TRIGGER;
 	field->owner = ent;

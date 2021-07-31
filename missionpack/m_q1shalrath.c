@@ -241,7 +241,7 @@ void q1shalrath_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int d
 {
 	int		n;
 
-// check for gib
+	// check for gib
 	if (self->health <= self->gib_health && !(self->spawnflags & SF_MONSTER_NOGIB))
 	{
 		gi.sound (self, CHAN_VOICE|CHAN_RELIABLE, sound_gib, 1, ATTN_NORM, 0);
@@ -259,11 +259,11 @@ void q1shalrath_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int d
 	if (self->deadflag == DEAD_DEAD)
 		return;
 
-// regular death
+	// regular death
+	gi.sound (self, CHAN_VOICE, sound_death, 1, ATTN_NORM, 0);
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_YES;
 
-	gi.sound (self, CHAN_VOICE, sound_death, 1, ATTN_NORM, 0);
 	self->monsterinfo.currentmove = &q1shalrath_move_death;
 }
 
@@ -351,7 +351,13 @@ void SP_monster_q1_shalrath (edict_t *self)
 	gi.linkentity (self);
 
 	self->monsterinfo.currentmove = &q1shalrath_move_stand;
-	self->monsterinfo.scale = 1.000000;
+	if (self->health < 0)
+	{
+		mmove_t	*deathmoves[] = {&q1shalrath_move_death,
+								 NULL};
+		M_SetDeath (self, (mmove_t **)&deathmoves);
+	}
+	self->monsterinfo.scale = MODEL_SCALE;
 
 	walkmonster_start (self);
 }

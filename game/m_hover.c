@@ -538,6 +538,7 @@ void hover_deadthink (edict_t *self)
 		self->nextthink = level.time + FRAMETIME;
 		return;
 	}
+
 	// Knightmare- gibs!
 	gi.sound (self, CHAN_VOICE, gi.soundindex ("misc/udeath.wav"), 1, ATTN_NORM, 0);
 	for (n = 0; n < 8; n++)
@@ -549,7 +550,7 @@ void hover_deadthink (edict_t *self)
 	for (n = 0; n < 6; n++)
 		ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", 0, 0, 200, GIB_ORGANIC);
 	ThrowGib (self, "models/objects/gibs/head2/tris.md2", 0, 0, 200, GIB_ORGANIC);
-	BecomeExplosion1(self);
+	BecomeExplosion1 (self);
 }
 
 void hover_dead (edict_t *self)
@@ -567,9 +568,8 @@ void hover_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 {
 	int		n;
 
-	self->s.skinnum |= 1;
 
-// check for gib
+	// check for gib
 	if (self->health <= self->gib_health && !(self->spawnflags & SF_MONSTER_NOGIB))
 	{	// Knightmare- more gibs!
 		gi.sound (self, CHAN_VOICE, gi.soundindex ("misc/udeath.wav"), 1, ATTN_NORM, 0);
@@ -582,7 +582,7 @@ void hover_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 		for (n = 0; n < 6; n++)
 			ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", 0, 0, damage, GIB_ORGANIC);
 		ThrowGib (self, "models/objects/gibs/head2/tris.md2", 0, 0, damage, GIB_ORGANIC);
-		BecomeExplosion1(self);
+		BecomeExplosion1 (self);
 		//ThrowHead (self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
 		//self->deadflag = DEAD_DEAD;
 		return;
@@ -591,11 +591,12 @@ void hover_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 	if (self->deadflag == DEAD_DEAD)
 		return;
 
-// regular death
+	// regular death
 	if (random() < 0.5)
 		gi.sound (self, CHAN_VOICE, sound_death1, 1, ATTN_NORM, 0);
 	else
 		gi.sound (self, CHAN_VOICE, sound_death2, 1, ATTN_NORM, 0);
+	self->s.skinnum |= 1;
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_YES;
 	self->monsterinfo.currentmove = &hover_move_death1;
@@ -661,8 +662,12 @@ void SP_monster_hover (edict_t *self)
 		self->blood_type = 3; //sparks and blood
 
 	// Lazarus
-	if (self->powerarmor) {
-		self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
+	if (self->powerarmor)
+	{
+		if (self->powerarmortype == 1)
+			self->monsterinfo.power_armor_type = POWER_ARMOR_SCREEN;
+		else
+			self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
 		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
 
@@ -672,7 +677,7 @@ void SP_monster_hover (edict_t *self)
 	{
 		mmove_t	*deathmoves[] = {&hover_move_death1,
 								 NULL};
-		M_SetDeath(self,(mmove_t **)&deathmoves);
+		M_SetDeath (self, (mmove_t **)&deathmoves);
 	}
 	self->common_name = "Icarus";
 	self->class_id = ENTITY_MONSTER_HOVER;

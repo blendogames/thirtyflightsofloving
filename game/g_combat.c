@@ -1042,31 +1042,37 @@ void T_Damage (edict_t *in_targ, edict_t *inflictor, edict_t *in_attacker, vec3_
 		CallMyFriends(targ,attacker);
 
 		// Lazarus: Sparks rather than blood for NOGIB dead monsters
-		if ((targ->svflags & SVF_MONSTER) && (targ->spawnflags & SF_MONSTER_NOGIB) && (targ->health <= 0))
+		if ((targ->svflags & SVF_MONSTER) && (targ->spawnflags & SF_MONSTER_NOGIB) && (targ->health <= 0)) {
 			SpawnDamage (TE_SPARKS, point, normal);
-		else {
+		}
+		else
+		{
 			if ((targ->svflags & SVF_MONSTER) || (client))
 			{
 				// Knightmare- added support for sparks and blood
 				//	SpawnDamage ( BloodType(targ->blood_type), point, normal );
-				if (targ->blood_type == 1)
+				if (targ->blood_type == 1) {
 					SpawnDamage (TE_GREENBLOOD, point, normal);
-				else if (targ->blood_type == 2)
-				{
+				}
+				else if (targ->blood_type == 2) {
 					SpawnDamage (TE_SPARKS, point, normal);
 					SpawnDamage (TE_SPARKS, point, normal);
 				}
-				else if (targ->blood_type == 3)
-				{
+				else if (targ->blood_type == 3) {
 					SpawnDamage (TE_SPARKS, point, normal);
 					SpawnDamage (TE_SPARKS, point, normal);
 					SpawnDamage (TE_BLOOD, point, normal);
 				}			
-				else
+				else if (targ->blood_type == 4) {
+					SpawnDamage (TE_ELECTRIC_SPARKS, point, normal);
+				}			
+				else {
 					SpawnDamage (TE_BLOOD, point, normal);
+				}
 			}
-			else
+			else {
 				SpawnDamage (te_sparks, point, normal);
+			}
 		}
 
 		if (targ->client)

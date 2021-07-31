@@ -572,7 +572,7 @@ void vulture_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dama
 {
 	int		n;
 
-// check for gib
+	// check for gib
 	if ( (self->health <= self->gib_health) && !(self->spawnflags & 32) )
 	{
 		gi.sound (self, CHAN_VOICE|CHAN_RELIABLE, gi.soundindex ("misc/udeath.wav"), 1, ATTN_NORM, 0);
@@ -590,7 +590,7 @@ void vulture_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dama
 	if (self->deadflag == DEAD_DEAD)
 		return;
 
-// regular death
+	// regular death
 	gi.sound (self, CHAN_VOICE, sound_death, 1, ATTN_NORM, 0);
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_YES;
@@ -598,7 +598,7 @@ void vulture_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dama
 	if (self->flags & FL_FLY)
 		self->monsterinfo.currentmove = &vulture_move_soardeath;
 	else
-		self->monsterinfo.currentmove = &vulture_move_death;;
+		self->monsterinfo.currentmove = &vulture_move_death;
 }
 
 
@@ -690,8 +690,7 @@ void SP_monster_vulture (edict_t *self)
 
 	gi.linkentity (self);
 
-//	self->monsterinfo.currentmove = &vulture_move_perch;	
-	self->monsterinfo.scale = MODEL_SCALE;
+//	self->monsterinfo.currentmove = &vulture_move_perch;
 
 	if (self->spawnflags & SF_VULTURE_IN_AIR) {
 		self->monsterinfo.currentmove = &vulture_move_soar;	
@@ -701,4 +700,12 @@ void SP_monster_vulture (edict_t *self)
 		self->monsterinfo.currentmove = &vulture_move_perch;	
 		walkmonster_start (self);
 	}
+	if (self->health < 0)
+	{
+		mmove_t	*deathmoves[] = {&vulture_move_death,
+								 NULL};
+		M_SetDeath (self, (mmove_t **)&deathmoves);
+	}
+	self->monsterinfo.scale = MODEL_SCALE;
+
 }

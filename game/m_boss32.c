@@ -719,7 +719,6 @@ void makron_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 
 	int		n;
 
-	self->s.skinnum |= 1;
 	if (!(self->fogclip & 2)) //custom bloodtype flag check
 		self->blood_type = 3; //sparks and blood
 
@@ -741,8 +740,9 @@ void makron_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	if (self->deadflag == DEAD_DEAD)
 		return;
 
-// regular death
+	// regular death
 	gi.sound (self, CHAN_VOICE, sound_death, 1, ATTN_NONE, 0);
+	self->s.skinnum |= 1;
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_YES;
 
@@ -753,7 +753,6 @@ void makron_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	makron_torso (tempent);
 
 	self->monsterinfo.currentmove = &makron_move_death2;
-	
 }
 
 qboolean Makron_CheckAttack (edict_t *self)
@@ -928,8 +927,12 @@ void SP_monster_makron_put (edict_t *self)
 		self->fogclip |= 2; // custom bloodtype flag
 
 	// Lazarus
-	if (self->powerarmor) {
-		self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
+	if (self->powerarmor)
+	{
+		if (self->powerarmortype == 1)
+			self->monsterinfo.power_armor_type = POWER_ARMOR_SCREEN;
+		else
+			self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
 		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
 
@@ -949,7 +952,7 @@ void SP_monster_makron_put (edict_t *self)
 		mmove_t	*deathmoves[] = {&makron_move_death2,
 			                     &makron_move_death3,
 								 NULL};
-		M_SetDeath(self,(mmove_t **)&deathmoves);
+		M_SetDeath(self, (mmove_t **)&deathmoves);
 	}
 	self->monsterinfo.scale = MODEL_SCALE;
 	walkmonster_start(self);

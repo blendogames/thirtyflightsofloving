@@ -561,6 +561,9 @@ void G_FreeEdict (edict_t *ed)
 		if (parent) parent->movewith_next = ed->movewith_next;
 	}
 
+	if (ed->speaker) // recursively remove train's speaker entity
+		G_FreeEdict (ed->speaker);
+
 	gi.unlinkentity (ed);		// unlink from world
 
 	// Lazarus: In SP we no longer reserve slots for bodyque's

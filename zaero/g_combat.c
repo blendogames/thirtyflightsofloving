@@ -539,24 +539,28 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 		{
 			// Knightmare- added support for sparks and blood
 			//	SpawnDamage ( BloodType(targ->blood_type), point, normal );
-			if (targ->blood_type == 1)
+			if (targ->blood_type == 1) {
 				SpawnDamage (TE_GREENBLOOD, point, normal, take);
-			else if (targ->blood_type == 2)
-			{
+			}
+			else if (targ->blood_type == 2) {
 				SpawnDamage (TE_SPARKS, point, normal, take);
 				SpawnDamage (TE_SPARKS, point, normal, take);
 			}
-			else if (targ->blood_type == 3)
-			{
+			else if (targ->blood_type == 3) {
 				SpawnDamage (TE_SPARKS, point, normal, take);
 				SpawnDamage (TE_SPARKS, point, normal, take);
 				SpawnDamage (TE_BLOOD, point, normal, take);
 			}			
-			else
+			else if (targ->blood_type == 4) {
+				SpawnDamage (TE_ELECTRIC_SPARKS, point, normal, take);
+			}			
+			else {
 				SpawnDamage (TE_BLOOD, point, normal, take);
+			}
 		}
-		else
+		else {
 			SpawnDamage (te_sparks, point, normal, take);
+		}
 
 
 		if (targ->takedamage != DAMAGE_IMMORTAL)

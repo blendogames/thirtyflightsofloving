@@ -599,19 +599,20 @@ void boss5_dead (edict_t *self)
 
 void boss5_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {	
-	self->s.skinnum |= 1;
 	if (!(self->fogclip & 2)) //custom bloodtype flag check
 		self->blood_type = 3; //sparks and blood
 	self->monsterinfo.power_armor_type = POWER_ARMOR_NONE;
 
-	//Knightmare-  check for gib
+	// check for gib
 	if (self->health <= self->gib_health && !(self->spawnflags & SF_MONSTER_NOGIB))
 		BossExplode (self);
 
 	if (self->deadflag == DEAD_DEAD)
 		return;
 
+	// regular death
 	gi.sound (self, CHAN_VOICE, sound_death, 1, ATTN_NORM, 0);
+	self->s.skinnum |= 1;
 	self->deadflag = DEAD_DEAD;
 //	self->takedamage = DAMAGE_NO;
 	self->takedamage = DAMAGE_YES;
@@ -700,6 +701,12 @@ void SP_monster_boss5 (edict_t *self)
 	gi.linkentity (self);
 	
 	self->monsterinfo.currentmove = &boss5_move_stand;
+	if (self->health < 0)
+	{
+		mmove_t	*deathmoves[] = {&boss5_move_death,
+								 NULL};
+		M_SetDeath (self, (mmove_t **)&deathmoves);
+	}
 	self->monsterinfo.scale = MODEL_SCALE;
 
 	// Lazarus

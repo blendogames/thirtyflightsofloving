@@ -742,8 +742,19 @@ void fire_grenade (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int s
 	grenade = G_Spawn();
 	VectorCopy (start, grenade->s.origin);
 	VectorScale (aimdir, speed, grenade->velocity);
-	VectorMA (grenade->velocity, 200 + crandom() * 10.0, up, grenade->velocity);
+	// Lazarus - keep same vertical boost for players, but monsters do a better job
+	//           of calculating aim direction, so throw that out
+	if (self->client)
+		VectorMA (grenade->velocity, 200 + crandom() * 10.0, up, grenade->velocity);
+	else
+		VectorMA (grenade->velocity, crandom() * 10.0, up, grenade->velocity);
+
 	VectorMA (grenade->velocity, crandom() * 10.0, right, grenade->velocity);
+	// Lazarus: Add owner velocity
+//	VectorAdd (grenade->velocity, self->velocity, grenade->velocity);
+	// NO. This is too unrealistic. Instead, if owner is riding a moving entity,
+	//     add velocity of the thing he's riding
+
 	// Knightmare- add player's base velocity to grenade
 	if (add_velocity_throw->value && self->client)
 		VectorAdd (grenade->velocity, self->velocity, grenade->velocity);
@@ -919,7 +930,7 @@ void SP_handgrenade (edict_t *grenade)
 // velocity = speed. Returns false if grenade can't make it to target.
 //
 //==========================================================================================
-qboolean AimGrenade (edict_t *self, vec3_t start, vec3_t target, vec_t speed, vec3_t aim)
+qboolean AimGrenade (edict_t *self, vec3_t start, vec3_t target, vec_t speed, vec3_t aim, qboolean isProx)
 {
 	vec3_t		angles, forward, right, up;
 	vec3_t		from_origin, from_muzzle;
@@ -933,7 +944,7 @@ qboolean AimGrenade (edict_t *self, vec3_t start, vec3_t target, vec_t speed, ve
 	vec3_t		last_aim;
 
 	VectorCopy (target, aim_point);
-	VectorSubtract (aim_point, self->s.origin,from_origin);
+	VectorSubtract (aim_point, self->s.origin, from_origin);
 	VectorSubtract (aim_point, start, from_muzzle);
 
 	if (self->svflags & SVF_MONSTER)
@@ -971,7 +982,7 @@ qboolean AimGrenade (edict_t *self, vec3_t start, vec3_t target, vec_t speed, ve
 		return true;
 	// in that time, grenade will drop this much:
 	drop = 0.5 * sv_gravity->value * t * t;
-	y = speed*aim[2]*t - drop;
+	y = speed * aim[2] * t - drop;
 	v_error = target[2] - start[2] - y;
 
 	// if we're fairly close and we'll hit target at current angle,
@@ -988,24 +999,24 @@ qboolean AimGrenade (edict_t *self, vec3_t start, vec3_t target, vec_t speed, ve
 	for (i=0; i<10 && fabs(v_error) > 4 && fabs(v_error) < fabs(last_error); i++)
 	{
 		last_error = v_error;
-		aim[2] = cosa * (yo + drop)/xo;
+		aim[2] = cosa * (yo + drop) / xo;
 		VectorNormalize (aim);
 		if (!(self->svflags & SVF_MONSTER))
 		{
-			vectoangles (aim ,angles);
+			vectoangles (aim, angles);
 			AngleVectors (angles, forward, right, up);
 			G_ProjectSource2 (self->s.origin, self->move_origin, forward, right, up, start);
 			VectorSubtract (aim_point, start, from_muzzle);
 			x = sqrt(from_muzzle[0] * from_muzzle[0] + from_muzzle[1] * from_muzzle[1]);
 		}
-		cosa = sqrt(aim[0]*aim[0] + aim[1]*aim[1]);
+		cosa = sqrt(aim[0] * aim[0] + aim[1] * aim[1]);
 		vx = speed * cosa;
-		t = x/vx;
-		drop = 0.5*sv_gravity->value*t*t;
-		y = speed*aim[2]*t - drop;
+		t = x / vx;
+		drop = 0.5 * sv_gravity->value * t * t;
+		y = speed * aim[2] * t - drop;
 		v_error = target[2] - start[2] - y;
 		if (fabs(v_error) < fabs(last_error))
-			VectorCopy(aim,last_aim);
+			VectorCopy (aim, last_aim);
 	}
 	
 	if (i >= 10 || v_error > 64)
@@ -1013,12 +1024,12 @@ qboolean AimGrenade (edict_t *self, vec3_t start, vec3_t target, vec_t speed, ve
 
 	if (fabs(v_error) > fabs(last_error))
 	{
-		VectorCopy(last_aim,aim);
+		VectorCopy (last_aim, aim);
 		if (!(self->svflags & SVF_MONSTER))
 		{
 			vectoangles (aim, angles);
 			AngleVectors (angles, forward, right, up);
-			G_ProjectSource2 (self->s.origin, self->move_origin, forward,right, up, start);
+			G_ProjectSource2 (self->s.origin, self->move_origin, forward, right, up, start);
 			VectorSubtract (aim_point, start, from_muzzle);
 		}
 	}
@@ -1034,7 +1045,10 @@ qboolean AimGrenade (edict_t *self, vec3_t start, vec3_t target, vec_t speed, ve
 		trace_t	tr;
 		vec3_t	dist;
 		
-		tr = gi.trace(start, vec3_origin, vec3_origin, aim_point, self, MASK_SOLID);
+		if (isProx)
+			tr = gi.trace(start, proxMins, proxMaxs, aim_point, self, MASK_SOLID);
+		else
+			tr = gi.trace(start, vec3_origin, vec3_origin, aim_point, self, MASK_SOLID);
 		if ( (tr.fraction < 1.0) && (!self->enemy || (tr.ent != self->enemy) ))
 		{
 			// OK... the aim vector hit a solid, but would the grenade actually hit?
@@ -1044,7 +1058,7 @@ qboolean AimGrenade (edict_t *self, vec3_t start, vec3_t target, vec_t speed, ve
 			VectorSubtract (tr.endpos, start, dist);
 			dist[2] = 0;
 			x = VectorLength (dist);
-			t = x/vx;
+			t = x / vx;
 			drop = 0.5 * sv_gravity->value * t * (t + FRAMETIME);
 			tr.endpos[2] -= drop;
 			// move just a bit in the aim direction
@@ -1064,7 +1078,10 @@ qboolean AimGrenade (edict_t *self, vec3_t start, vec3_t target, vec_t speed, ve
 					G_ProjectSource2 (self->s.origin, self->move_origin, forward, right, up, start);
 					VectorSubtract (aim_point, start, from_muzzle);
 				}
-				tr = gi.trace(start, vec3_origin, vec3_origin, aim_point, self,MASK_SOLID);
+				if (isProx)
+					tr = gi.trace(start, proxMins, proxMaxs, aim_point, self, MASK_SOLID);
+				else
+					tr = gi.trace(start, vec3_origin, vec3_origin, aim_point, self, MASK_SOLID);
 				if (tr.fraction < 1.0)
 				{
 					cosa = sqrt(aim[0] * aim[0] + aim[1] * aim[1]);
@@ -1072,7 +1089,7 @@ qboolean AimGrenade (edict_t *self, vec3_t start, vec3_t target, vec_t speed, ve
 					VectorSubtract (tr.endpos, start, dist);
 					dist[2] = 0;
 					x = VectorLength(dist);
-					t = x/vx;
+					t = x / vx;
 					drop = 0.5 * sv_gravity->value * t * (t + FRAMETIME);
 					tr.endpos[2] -= drop;
 					tr.endpos[0] += aim[0];
@@ -1331,28 +1348,28 @@ void homing_think (edict_t *self)
 	{
 		if (self->owner->client && (self->owner->client->homing_rocket == self))
 			self->owner->client->homing_rocket = NULL;
-		BecomeExplosion1(self);
+		BecomeExplosion1 (self);
 		return;
 	}
 	if (self->enemy && self->enemy->inuse)
 	{
-		VectorMA(self->enemy->absmin,0.5,self->enemy->size,target);
-		tr = gi.trace(self->s.origin,vec3_origin,vec3_origin,target,self,MASK_OPAQUE);
+		VectorMA (self->enemy->absmin, 0.5, self->enemy->size, target);
+		tr = gi.trace(self->s.origin, vec3_origin, vec3_origin, target, self, MASK_OPAQUE);
 		if (tr.fraction == 1)
 		{
 			// target in view; apply correction
-			VectorSubtract(target, self->s.origin, dir);
-			VectorNormalize(dir);
+			VectorSubtract (target, self->s.origin, dir);
+			VectorNormalize (dir);
 			if (self->enemy->client)
-				VectorScale(dir, 0.8+0.1*skill->value, dir);
+				VectorScale (dir, 0.8+0.1*skill->value, dir);
 			else
-				VectorScale(dir, 1.0, dir);  // 0=no correction, 1=turn on a dime
-			VectorAdd(dir, self->movedir, dir);
-			VectorNormalize(dir);
-			VectorCopy(dir, self->movedir);
-			vectoangles(dir, self->s.angles);
+				VectorScale (dir, 1.0, dir);  // 0=no correction, 1=turn on a dime
+			VectorAdd (dir, self->movedir, dir);
+			VectorNormalize (dir);
+			VectorCopy (dir, self->movedir);
+			vectoangles (dir, self->s.angles);
 			speed = VectorLength(self->velocity);
-			VectorScale(dir, speed, self->velocity);
+			VectorScale (dir, speed, self->velocity);
 
 			if (level.time >= self->starttime && self->starttime > 0)
 			{
@@ -1389,11 +1406,11 @@ void Rocket_Evade (edict_t *rocket, vec3_t	dir, float speed)
 	vec3_t	rocket_vec, vec;
 
 	// Find out what rocket will hit, assuming everything remains static
-	VectorMA(rocket->s.origin, WORLD_SIZE, dir, rocket_vec);	// was 8192
-	tr = gi.trace(rocket->s.origin,rocket->mins,rocket->maxs,rocket_vec,rocket,MASK_SHOT);
-	VectorCopy(tr.endpos,hitpoint);
-	VectorSubtract(hitpoint,rocket->s.origin,vec);
-	dist = VectorLength(vec);
+	VectorMA (rocket->s.origin, WORLD_SIZE, dir, rocket_vec);	// was 8192
+	tr = gi.trace(rocket->s.origin, rocket->mins, rocket->maxs, rocket_vec, rocket,MASK_SHOT);
+	VectorCopy (tr.endpos, hitpoint);
+	VectorSubtract (hitpoint, rocket->s.origin, vec);
+	dist = VectorLength (vec);
 	time = dist / speed;
 
 	while ((ent = findradius(ent, hitpoint, rocket->dmg_radius)) != NULL)
@@ -1411,7 +1428,7 @@ void Rocket_Evade (edict_t *rocket, vec3_t	dir, float speed)
 		if (rocket->owner == ent)
 			continue;
 
-		VectorSubtract(hitpoint,ent->s.origin,rocket_vec);
+		VectorSubtract (hitpoint, ent->s.origin, rocket_vec);
 		rocket_dist = VectorNormalize(rocket_vec);
 
 		// Not much hope in evading if distance is < 1K or so.
@@ -1430,25 +1447,25 @@ void Rocket_Evade (edict_t *rocket, vec3_t	dir, float speed)
 			if ((dot > 0.96) || (dot < -0.96))
 				continue;
 			// Estimate of required distance to run. This is conservative.
-			r = rocket->dmg_radius + rocket_dist*DotProduct(forward,rocket_vec) + ent->size[0] + 16;
+			r = rocket->dmg_radius + rocket_dist*DotProduct(forward, rocket_vec) + ent->size[0] + 16;
 			if ( r < best_r )
 			{
-				VectorMA(ent->s.origin,r,forward,pos);
-				tr = gi.trace(ent->s.origin,ent->mins,ent->maxs,pos,ent,MASK_MONSTERSOLID);
+				VectorMA (ent->s.origin, r, forward ,pos);
+				tr = gi.trace(ent->s.origin, ent->mins, ent->maxs, pos, ent, MASK_MONSTERSOLID);
 				if (tr.fraction < 1.0)
 					continue;
 				best_r = r;
 				best_yaw = yaw;
-				VectorCopy(tr.endpos,best_pos);
+				VectorCopy (tr.endpos, best_pos);
 			}
 		}
 		if (best_r < 9000)
 		{
 			edict_t	*thing = SpawnThing();
-			VectorCopy(best_pos,thing->s.origin);
+			VectorCopy (best_pos, thing->s.origin);
 			thing->touch_debounce_time = level.time + time;
 			thing->target_ent = ent;
-			ED_CallSpawn(thing);
+			ED_CallSpawn (thing);
 			ent->ideal_yaw  = best_yaw;
 			ent->movetarget = ent->goalentity = thing;
 			ent->monsterinfo.aiflags &= ~AI_SOUND_TARGET;
@@ -1478,7 +1495,7 @@ void rocket_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *su
 	}
 
 	if (ent->owner && ent->owner->client)
-		PlayerNoise(ent->owner, ent->s.origin, PNOISE_IMPACT);
+		PlayerNoise (ent->owner, ent->s.origin, PNOISE_IMPACT);
 
 	// calculate position for the explosion entity
 	VectorMA (ent->s.origin, -0.02, ent->velocity, origin);

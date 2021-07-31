@@ -381,9 +381,9 @@ void gunner_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 {
 	int		n;
 
-	self->s.skinnum |= 1;
 	self->monsterinfo.power_armor_type = POWER_ARMOR_NONE;
-// check for gib
+
+	// check for gib
 	if (self->health <= self->gib_health && !(self->spawnflags & SF_MONSTER_NOGIB))
 	{
 		gi.sound (self, CHAN_VOICE, gi.soundindex ("misc/udeath.wav"), 1, ATTN_NORM, 0);
@@ -400,11 +400,13 @@ void gunner_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	if (self->deadflag == DEAD_DEAD)
 		return;
 
-// regular death
+	// regular death
 /*	if (self->moreflags & FL2_COMMANDER)
 		gi.sound (self, CHAN_VOICE, tactician_sound_death, 1, ATTN_NORM, 0);
 	else */
 		gi.sound (self, CHAN_VOICE, sound_death, 1, ATTN_NORM, 0);
+
+	self->s.skinnum |= 1;
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_YES;
 	self->monsterinfo.currentmove = &gunner_move_death;
@@ -419,6 +421,7 @@ qboolean gunner_grenade_check (edict_t *self)
 	vec3_t		dir;
 	vec3_t		vhorz;
 	float		horz, vertmax, dangerClose;
+	qboolean	isProx = (self->moreflags & FL2_COMMANDER);
 
 	if (!self->enemy)
 		return false;
@@ -437,7 +440,7 @@ qboolean gunner_grenade_check (edict_t *self)
 
 	// see if we're too close
 	// Knightmare- Tactician Gunner's prox mines stick around, so only use at longer range
-	if (self->moreflags & FL2_COMMANDER)
+	if (isProx)
 		dangerClose = 320.0f;
 	else
 		dangerClose = 100.0f;
@@ -446,26 +449,32 @@ qboolean gunner_grenade_check (edict_t *self)
 		return false;
 
 	// Lazarus: Max vertical distance - this is approximate and conservative
-	VectorCopy(dir,vhorz);
+	VectorCopy (dir, vhorz);
 	vhorz[2] = 0;
-	horz = VectorLength(vhorz);
-	vertmax = (GRENADE_VELOCITY_SQUARED)/(2*sv_gravity->value) -
-		0.5*sv_gravity->value*horz*horz/GRENADE_VELOCITY_SQUARED;
+	horz = VectorLength (vhorz);
+	vertmax = (GRENADE_VELOCITY_SQUARED) / (2 * sv_gravity->value) -
+		0.5 * sv_gravity->value * horz * horz / GRENADE_VELOCITY_SQUARED;
 	if (dir[2] > vertmax) 
 		return false;
 
 	// Lazarus: Make sure there's a more-or-less clear flight path to target
 	// Rogue checked target origin, but if target is above gunner then the trace
 	// would almost always hit the platform the target was standing on
-	VectorCopy(self->enemy->s.origin,target);
+	VectorCopy (self->enemy->s.origin, target);
 	target[2] = self->enemy->absmax[2];
-	tr = gi.trace(start, vec3_origin, vec3_origin, target, self, MASK_SHOT);
+	if (isProx)
+		tr = gi.trace(start, proxMins, proxMaxs, target, self, MASK_SHOT);
+	else
+		tr = gi.trace(start, vec3_origin, vec3_origin, target, self, MASK_SHOT);
 	if (tr.ent == self->enemy || tr.fraction == 1)
 		return true;
 	// Repeat for feet... in case we're looking down at a target standing under,
 	// for example, a short doorway
 	target[2] = self->enemy->absmin[2];
-	tr = gi.trace(start, vec3_origin, vec3_origin, target, self, MASK_SHOT);
+	if (isProx)
+		tr = gi.trace(start, proxMins, proxMaxs, target, self, MASK_SHOT);
+	else
+		tr = gi.trace(start, vec3_origin, vec3_origin, target, self, MASK_SHOT);
 	if (tr.ent == self->enemy || tr.fraction == 1)
 		return true;
 
@@ -527,7 +536,7 @@ void GunnerFire (edict_t *self)
 	vec3_t	aim;
 	vec3_t	targ_vel;
 	int		flash_number;
-	float	dist, time, chance, flechetteSpeed = 850.0f;
+	float	dist, time, flechetteSpeed = 850.0f;
 
 	if (!self->enemy || !self->enemy->inuse)		//PGM
 		return;									//PGM
@@ -582,7 +591,7 @@ void GunnerFire (edict_t *self)
 
 		gi.sound (self, CHAN_WEAPON|CHAN_RELIABLE, tactician_sound_fire_flechette, 1.0, ATTN_NORM, 0);
 #endif	// KMQUAKE2_ENGINE_MOD
-		monster_fire_flechette (self, start, aim, 4, flechetteSpeed, 75, 8, flash_number); 
+		monster_fire_flechette (self, start, aim, 4, flechetteSpeed, 30, 8, flash_number);	// was damage_radius 75, reduced to limit self-damage
 	}
 	else
 		monster_fire_bullet (self, start, aim, 3, 4, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, flash_number);
@@ -653,11 +662,10 @@ void GunnerGrenade (edict_t *self)
 //PGM
 	if (self->enemy)
 	{
-		float	dist;
+		float	range;
 
-	//	VectorSubtract(self->enemy->s.origin, self->s.origin, aim);
-		VectorSubtract(target, self->s.origin, aim);
-		dist = VectorLength(aim);
+		VectorSubtract (target, self->s.origin, aim);
+		range = VectorLength (aim);
 
 		// aim at enemy's feet if he's at same elevation or lower, otherwise aim at origin
 		VectorCopy (self->enemy->s.origin, target);
@@ -691,18 +699,17 @@ void GunnerGrenade (edict_t *self)
 		// lead target... 20, 35, 50, 65 chance of leading
 		if ( random() < (0.2 + skill->value * 0.15) )
 		{
-			float	dist;
-			float	time;
+			float	dist, time;
 
 			VectorSubtract (target, start, aim);
 			dist = VectorLength (aim);
-			time = dist/GRENADE_VELOCITY;  // Not correct, but better than nothin'
+			time = dist / GRENADE_VELOCITY;  // Not correct, but better than nothin'
 			VectorMA (target, time, self->enemy->velocity, target);
 		}
 
 		// aim up if they're on the same level as me and far away.
-		if ((dist > 512) && (aim[2] < 64) && (aim[2] > -64))
-			aim[2] += (dist - 512);
+	//	if ((range > 512) && (aim[2] < 64) && (aim[2] > -64))
+	//		aim[2] += (range - 512);
 
 	/*	VectorNormalize (aim);
 		pitch = aim[2];
@@ -713,7 +720,7 @@ void GunnerGrenade (edict_t *self)
 	}
 //PGM
 
-	AimGrenade (self, start, target, GRENADE_VELOCITY, aim);
+	AimGrenade (self, start, target, GRENADE_VELOCITY, aim, (self->moreflags & FL2_COMMANDER));
 	// Lazarus - take into account (sort of) feature of adding shooter's velocity to
 	// grenade velocity
 	monster_speed = VectorLength(self->velocity);
@@ -722,12 +729,13 @@ void GunnerGrenade (edict_t *self)
 		vec3_t	v1;
 		vec_t	delta;
 
-		VectorCopy (self->velocity,v1);
+		VectorCopy (self->velocity, v1);
 		VectorNormalize (v1);
 		delta = -monster_speed / GRENADE_VELOCITY;
-		VectorMA (aim,delta,v1,aim);
+		VectorMA (aim, delta, v1, aim);
 		VectorNormalize (aim);
 	}
+
 	// FIXME : do a spread -225 -75 75 225 degrees around forward
 //	VectorCopy (forward, aim);
 //	VectorMA (forward, spread, right, aim);
@@ -740,7 +748,7 @@ void GunnerGrenade (edict_t *self)
 		monster_fire_prox (self, start, aim, 90, 1, 600, 20, prox_timer, 192, flash_number);
 	}
 	else
-		monster_fire_grenade (self, start, aim, 50, 600, flash_number, false);
+		monster_fire_grenade (self, start, aim, 50, GRENADE_VELOCITY, flash_number, false);
 }
 
 mframe_t gunner_frames_attack_chain [] =
@@ -1354,16 +1362,29 @@ void SP_monster_gunner (edict_t *self)
 	self->monsterinfo.blocked = gunner_blocked;		//PGM
 	
 	if (!self->blood_type)
-		self->blood_type = 3; //sparks and blood
+		self->blood_type = 3; // sparks and blood
 
 	if ( !self->monsterinfo.flies && strcmp(self->classname, "monster_gunner_tactician") == 0 )
 		self->monsterinfo.flies = 0.20;
 	else if (!self->monsterinfo.flies)
 		self->monsterinfo.flies = 0.30;
 
+	if (monsterjump->value)
+	{
+		self->monsterinfo.jump = gunner_jump;
+		self->monsterinfo.jumpup = 48;
+		self->monsterinfo.jumpdn = 64;
+	}
+
 	gi.linkentity (self);
 
 	self->monsterinfo.currentmove = &gunner_move_stand;	
+	if (self->health < 0)
+	{
+		mmove_t	*deathmoves[] = {&gunner_move_death,
+								 NULL};
+		M_SetDeath (self, (mmove_t **)&deathmoves);
+	}
 	self->monsterinfo.scale = MODEL_SCALE;
 
 	// PMM

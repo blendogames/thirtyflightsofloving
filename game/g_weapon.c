@@ -739,7 +739,6 @@ void fire_grenade (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int s
 	else if (self->groundentity)
 		VectorAdd (grenade->velocity, self->groundentity->velocity, grenade->velocity);
 
-
 	VectorSet (grenade->avelocity, 300, 300, 300);
 	grenade->movetype = MOVETYPE_BOUNCE;
 	grenade->clipmask = MASK_SHOT;
@@ -1587,23 +1586,23 @@ qboolean AimGrenade (edict_t *self, vec3_t start, vec3_t target, vec_t speed, ve
 	int			i;
 	vec3_t		last_aim;
 
-	VectorCopy(target,aim_point);
-	VectorSubtract(aim_point,self->s.origin,from_origin);
-	VectorSubtract(aim_point, start, from_muzzle);
+	VectorCopy (target, aim_point);
+	VectorSubtract (aim_point, self->s.origin, from_origin);
+	VectorSubtract (aim_point, start, from_muzzle);
 
 	if (self->svflags & SVF_MONSTER)
 	{
-		VectorCopy(from_muzzle,aim);
-		VectorNormalize(aim);
+		VectorCopy (from_muzzle, aim);
+		VectorNormalize (aim);
 		yo = from_muzzle[2];
-		xo = sqrt(from_muzzle[0]*from_muzzle[0] + from_muzzle[1]*from_muzzle[1]);
+		xo = sqrt(from_muzzle[0] * from_muzzle[0] + from_muzzle[1] * from_muzzle[1]);
 	}
 	else
 	{
-		VectorCopy(from_origin,aim);
-		VectorNormalize(aim);
+		VectorCopy (from_origin, aim);
+		VectorNormalize (aim);
 		yo = from_origin[2];
-		xo = sqrt(from_origin[0]*from_origin[0] + from_origin[1]*from_origin[1]);
+		xo = sqrt(from_origin[0] * from_origin[0] + from_origin[1] * from_origin[1]);
 	}
 
 	// If resulting aim vector is looking straight up or straight down, we're 
@@ -1614,19 +1613,19 @@ qboolean AimGrenade (edict_t *self, vec3_t start, vec3_t target, vec_t speed, ve
 		return true;
 
 	// horizontal distance to target from muzzle
-	x = sqrt( from_muzzle[0]*from_muzzle[0] + from_muzzle[1]*from_muzzle[1]);
-	cosa = sqrt(aim[0]*aim[0] + aim[1]*aim[1]);
+	x = sqrt( from_muzzle[0] * from_muzzle[0] + from_muzzle[1] * from_muzzle[1]);
+	cosa = sqrt(aim[0] * aim[0] + aim[1] * aim[1]);
 	// constant horizontal velocity (since grenades don't have drag)
 	vx = speed * cosa;
 	// time to reach target x
-	t = x/vx;
+	t = x / vx;
 	// if flight time is less than one frame, no way grenade will drop much,
 	// shoot the sucker now.
 	if (t < FRAMETIME)
 		return true;
 	// in that time, grenade will drop this much:
-	drop = 0.5*sv_gravity->value*t*t;
-	y = speed*aim[2]*t - drop;
+	drop = 0.5 * sv_gravity->value * t * t;
+	y = speed * aim[2] * t - drop;
 	v_error = target[2] - start[2] - y;
 
 	// if we're fairly close and we'll hit target at current angle,
@@ -1635,7 +1634,7 @@ qboolean AimGrenade (edict_t *self, vec3_t start, vec3_t target, vec_t speed, ve
 		return true;
 
 	last_error = 100000.;
-	VectorCopy(aim,last_aim);
+	VectorCopy (aim, last_aim);
 
 	// Unfortunately there is no closed-form solution for this problem,
 	// so we creep up on an answer and balk if it takes more than 
@@ -1643,37 +1642,37 @@ qboolean AimGrenade (edict_t *self, vec3_t start, vec3_t target, vec_t speed, ve
 	for (i=0; i<10 && fabs(v_error) > 4 && fabs(v_error) < fabs(last_error); i++)
 	{
 		last_error = v_error;
-		aim[2] = cosa * (yo + drop)/xo;
+		aim[2] = cosa * (yo + drop) / xo;
 		VectorNormalize(aim);
 		if (!(self->svflags & SVF_MONSTER))
 		{
-			vectoangles(aim,angles);
-			AngleVectors(angles, forward, right, up);
-			G_ProjectSource2(self->s.origin,self->move_origin,forward,right,up,start);
-			VectorSubtract(aim_point,start,from_muzzle);
-			x = sqrt(from_muzzle[0]*from_muzzle[0] + from_muzzle[1]*from_muzzle[1]);
+			vectoangles (aim, angles);
+			AngleVectors (angles, forward, right, up);
+			G_ProjectSource2 (self->s.origin, self->move_origin, forward, right, up, start);
+			VectorSubtract (aim_point, start, from_muzzle);
+			x = sqrt(from_muzzle[0] * from_muzzle[0] + from_muzzle[1] * from_muzzle[1]);
 		}
-		cosa = sqrt(aim[0]*aim[0] + aim[1]*aim[1]);
+		cosa = sqrt(aim[0] * aim[0] + aim[1] * aim[1]);
 		vx = speed * cosa;
-		t = x/vx;
-		drop = 0.5*sv_gravity->value*t*t;
-		y = speed*aim[2]*t - drop;
+		t = x / vx;
+		drop = 0.5 * sv_gravity->value * t * t;
+		y = speed * aim[2] * t - drop;
 		v_error = target[2] - start[2] - y;
 		if (fabs(v_error) < fabs(last_error))
-			VectorCopy(aim,last_aim);
+			VectorCopy (aim, last_aim);
 	}
 	
 	if (i >= 10 || v_error > 64)
 		return false;
 	if (fabs(v_error) > fabs(last_error))
 	{
-		VectorCopy(last_aim,aim);
+		VectorCopy (last_aim, aim);
 		if (!(self->svflags & SVF_MONSTER))
 		{
-			vectoangles(aim,angles);
-			AngleVectors(angles, forward, right, up);
-			G_ProjectSource2(self->s.origin,self->move_origin,forward,right,up,start);
-			VectorSubtract(aim_point,start,from_muzzle);
+			vectoangles (aim, angles);
+			AngleVectors (angles, forward, right, up);
+			G_ProjectSource2 (self->s.origin, self->move_origin, forward, right, up, start);
+			VectorSubtract (aim_point, start, from_muzzle);
 		}
 	}
 	
@@ -1688,43 +1687,46 @@ qboolean AimGrenade (edict_t *self, vec3_t start, vec3_t target, vec_t speed, ve
 		trace_t	tr;
 		vec3_t	dist;
 		
-		tr = gi.trace(start,vec3_origin,vec3_origin,aim_point,self,MASK_SOLID);
-		if ( (tr.fraction < 1.0) && (!self->enemy || (tr.ent != self->enemy) )) {
+		tr = gi.trace(start, vec3_origin, vec3_origin, aim_point, self, MASK_SOLID);
+		if ( (tr.fraction < 1.0) && (!self->enemy || (tr.ent != self->enemy) ))
+		{
 			// OK... the aim vector hit a solid, but would the grenade actually hit?
 			int		contents;
-			cosa = sqrt(aim[0]*aim[0] + aim[1]*aim[1]);
+			cosa = sqrt(aim[0] * aim[0] + aim[1] * aim[1]);
 			vx = speed * cosa;
-			VectorSubtract(tr.endpos,start,dist);
+			VectorSubtract (tr.endpos, start, dist);
 			dist[2] = 0;
-			x = VectorLength(dist);
-			t = x/vx;
-			drop = 0.5*sv_gravity->value*t*(t+FRAMETIME);
+			x = VectorLength (dist);
+			t = x / vx;
+			drop = 0.5 * sv_gravity->value * t * (t + FRAMETIME);
 			tr.endpos[2] -= drop;
 			// move just a bit in the aim direction
 			tr.endpos[0] += aim[0];
 			tr.endpos[1] += aim[1];
 			contents = gi.pointcontents(tr.endpos);
-			while ((contents & MASK_SOLID) && (aim_point[2] > target[2])) {
+			while ((contents & MASK_SOLID) && (aim_point[2] > target[2]))
+			{
 				aim_point[2] -= 8.0;
-				VectorSubtract(aim_point,self->s.origin,from_origin);
-				VectorCopy(from_origin,aim);
-				VectorNormalize(aim);
+				VectorSubtract (aim_point, self->s.origin, from_origin);
+				VectorCopy (from_origin, aim);
+				VectorNormalize (aim);
 				if (!(self->svflags & SVF_MONSTER))
 				{
-					vectoangles(aim,angles);
-					AngleVectors(angles, forward, right, up);
-					G_ProjectSource2(self->s.origin,self->move_origin,forward,right,up,start);
-					VectorSubtract(aim_point,start,from_muzzle);
+					vectoangles (aim, angles);
+					AngleVectors (angles, forward, right, up);
+					G_ProjectSource2 (self->s.origin, self->move_origin, forward, right, up, start);
+					VectorSubtract (aim_point, start, from_muzzle);
 				}
-				tr = gi.trace(start,vec3_origin,vec3_origin,aim_point,self,MASK_SOLID);
-				if (tr.fraction < 1.0) {
-					cosa = sqrt(aim[0]*aim[0] + aim[1]*aim[1]);
+				tr = gi.trace(start, vec3_origin, vec3_origin, aim_point, self, MASK_SOLID);
+				if (tr.fraction < 1.0)
+				{
+					cosa = sqrt(aim[0] * aim[0] + aim[1] * aim[1]);
 					vx = speed * cosa;
-					VectorSubtract(tr.endpos,start,dist);
+					VectorSubtract (tr.endpos, start, dist);
 					dist[2] = 0;
-					x = VectorLength(dist);
-					t = x/vx;
-					drop = 0.5*sv_gravity->value*t*(t+FRAMETIME);
+					x = VectorLength (dist);
+					t = x / vx;
+					drop = 0.5 * sv_gravity->value * t * (t + FRAMETIME);
 					tr.endpos[2] -= drop;
 					tr.endpos[0] += aim[0];
 					tr.endpos[1] += aim[1];

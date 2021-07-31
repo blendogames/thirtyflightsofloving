@@ -751,11 +751,11 @@ void tank_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
 	if (self->health <= self->gib_health)
 	{	// Knightmare- more gibs
 		gi.sound (self, CHAN_VOICE, gi.soundindex ("misc/udeath.wav"), 1, ATTN_NORM, 0);
-		for (n= 0; n < 8; n++)
+		for (n = 0; n < 8; n++)
 			ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
-		for (n= 0; n < 8; n++)
+		for (n = 0; n < 8; n++)
 			ThrowGib (self, "models/objects/gibs/sm_metal/tris.md2", damage, GIB_METALLIC);
-		for (n= 0; n < 8; n++)
+		for (n = 0; n < 8; n++)
 			ThrowGib (self, "models/objects/gibs/gear/tris.md2", damage, GIB_METALLIC);
 		ThrowGib (self, "models/objects/gibs/chest/tris.md2", damage, GIB_ORGANIC);
 		ThrowHead (self, "models/objects/gibs/gear/tris.md2", damage, GIB_METALLIC);

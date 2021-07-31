@@ -414,9 +414,9 @@ void infantry_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dam
 {
 	int		n;
 
-	self->s.skinnum |= 1;
 	self->monsterinfo.power_armor_type = POWER_ARMOR_NONE;
-// check for gib
+
+	// check for gib
 	if (self->health <= self->gib_health&& !(self->spawnflags & SF_MONSTER_NOGIB))
 	{
 		gi.sound (self, CHAN_VOICE, gi.soundindex ("misc/udeath.wav"), 1, ATTN_NORM, 0);
@@ -432,7 +432,8 @@ void infantry_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dam
 	if (self->deadflag == DEAD_DEAD)
 		return;
 
-// regular death
+	// regular death
+	self->s.skinnum |= 1;
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_YES;
 
@@ -873,6 +874,13 @@ void SP_monster_infantry (edict_t *self)
 	self->monsterinfo.idle = infantry_fidget;
 	self->monsterinfo.blocked = infantry_blocked;
 
+	if (monsterjump->value)
+	{
+		self->monsterinfo.jump = infantry_jump;
+		self->monsterinfo.jumpup = 48;
+		self->monsterinfo.jumpdn = 160;
+	}
+
 	// Lazarus
 	if (self->powerarmor)
 	{
@@ -898,7 +906,7 @@ void SP_monster_infantry (edict_t *self)
 			                     &infantry_move_death2,
 								 &infantry_move_death3,
 								 NULL};
-		M_SetDeath(self,(mmove_t **)&deathmoves);
+		M_SetDeath (self, (mmove_t **)&deathmoves);
 	}
 	self->monsterinfo.scale = MODEL_SCALE;
 

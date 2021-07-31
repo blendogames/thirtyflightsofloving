@@ -611,9 +611,7 @@ void brain_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 	self->s.effects = 0;
 	self->monsterinfo.power_armor_type = POWER_ARMOR_NONE;
 
-	self->s.skinnum |= 1;
-
-// check for gib
+	// check for gib
 	if (self->health <= self->gib_health && !(self->spawnflags & SF_MONSTER_NOGIB))
 	{
 		gi.sound (self, CHAN_VOICE, gi.soundindex ("misc/udeath.wav"), 1, ATTN_NORM, 0);
@@ -629,8 +627,9 @@ void brain_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 	if (self->deadflag == DEAD_DEAD)
 		return;
 
-// regular death
+	// regular death
 	gi.sound (self, CHAN_VOICE, sound_death, 1, ATTN_NORM, 0);
+	self->s.skinnum |= 1;
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_YES;
 	if (random() <= 0.5)
@@ -699,8 +698,19 @@ void SP_monster_brain (edict_t *self)
 	self->monsterinfo.search = brain_search;
 	self->monsterinfo.idle = brain_idle;
 
-	self->monsterinfo.power_armor_type = POWER_ARMOR_SCREEN;
-	self->monsterinfo.power_armor_power = 100;
+	if (self->powerarmor)
+	{
+		if (self->powerarmortype == 1)
+			self->monsterinfo.power_armor_type = POWER_ARMOR_SCREEN;
+		else
+			self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
+		self->monsterinfo.power_armor_power = self->powerarmor;
+	}
+	else
+	{
+		self->monsterinfo.power_armor_type = POWER_ARMOR_SCREEN;
+		self->monsterinfo.power_armor_power = 100;
+	}
 
 	if (!self->monsterinfo.flies)
 		self->monsterinfo.flies = 0.10;
@@ -721,7 +731,7 @@ void SP_monster_brain (edict_t *self)
 		mmove_t	*deathmoves[] = {&brain_move_death1,
 			                     &brain_move_death2,
 								 NULL};
-		M_SetDeath(self,(mmove_t **)&deathmoves);
+		M_SetDeath (self, (mmove_t **)&deathmoves);
 	}
 	self->monsterinfo.scale = MODEL_SCALE;
 

@@ -1156,14 +1156,14 @@ void stalker_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dama
 
 //	gi.dprintf("stalker_die: %d\n", self->health);
 
-// dude bit it, make him fall!
+	// dude bit it, make him fall!
 	self->movetype = MOVETYPE_TOSS;
 	self->s.angles[2] = 0;
 	VectorSet(self->gravityVector, 0, 0, -1);
 
-	self->s.skinnum |= 1;
 	self->monsterinfo.power_armor_type = POWER_ARMOR_NONE;
-// check for gib
+
+	// check for gib
 	if (self->health <= self->gib_health && !(self->spawnflags & 32))	// nogib
 	{
 		gi.sound (self, CHAN_VOICE, gi.soundindex ("misc/udeath.wav"), 1, ATTN_NORM, 0);
@@ -1179,8 +1179,9 @@ void stalker_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dama
 	if (self->deadflag == DEAD_DEAD)
 		return;
 
-// regular death
+	// regular death
 	gi.sound (self, CHAN_VOICE, sound_die, 1, ATTN_NORM, 0);
+	self->s.skinnum |= 1;
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_YES;
 	self->monsterinfo.currentmove = &stalker_move_death;
@@ -1267,10 +1268,16 @@ void SP_monster_stalker (edict_t *self)
 
 	gi.linkentity (self);
 
-	self->monsterinfo.currentmove = &stalker_move_stand;	
+	self->monsterinfo.currentmove = &stalker_move_stand;
+	if (self->health < 0)
+	{
+		mmove_t	*deathmoves[] = {&stalker_move_death,
+								 NULL};
+		M_SetDeath (self, (mmove_t **)&deathmoves);
+	}
 	self->monsterinfo.scale = MODEL_SCALE;
 
-	//self->monsterinfo.aiflags |= AI_WALK_WALLS;
+//	self->monsterinfo.aiflags |= AI_WALK_WALLS;
 	self->monsterinfo.monsterflags |= MFL_WALK_WALLS;
 
 	if (self->spawnflags & 8)

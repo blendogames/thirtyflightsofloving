@@ -378,8 +378,9 @@ void berserk_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dama
 {
 	int		n;
 
-	self->s.skinnum |= 1;
 	self->monsterinfo.power_armor_type = POWER_ARMOR_NONE;
+
+	// check for gib
 	if (self->health <= self->gib_health)
 	{
 		gi.sound (self, CHAN_VOICE, gi.soundindex ("misc/udeath.wav"), 1, ATTN_NORM, 0);
@@ -395,7 +396,9 @@ void berserk_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dama
 	if (self->deadflag == DEAD_DEAD)
 		return;
 
+	// regular death
 	gi.sound (self, CHAN_VOICE, sound_die, 1, ATTN_NORM, 0);
+	self->s.skinnum |= 1;
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_YES;
 
@@ -570,7 +573,21 @@ void SP_monster_berserk (edict_t *self)
 	self->monsterinfo.search = berserk_search;
 	self->monsterinfo.blocked = berserk_blocked;		//PGM
 
+	if (monsterjump->value) 
+	{
+		self->monsterinfo.jump = berserk_jump;
+		self->monsterinfo.jumpup = 48;
+		self->monsterinfo.jumpdn = 160;
+	}
+
 	self->monsterinfo.currentmove = &berserk_move_stand;
+	if (self->health < 0)
+	{
+		mmove_t	*deathmoves[] = {&berserk_move_death1,
+			                     &berserk_move_death2,
+								 NULL};
+		M_SetDeath (self, (mmove_t **)&deathmoves);
+	}
 	self->monsterinfo.scale = MODEL_SCALE;
 
 	if (!self->blood_type)

@@ -708,7 +708,6 @@ void jorg_dead (edict_t *self)
 
 void jorg_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
-	self->s.skinnum |= 1;
 	if ( !(self->fogclip & 2) ) // custom bloodtype flag check
 		self->blood_type = 3; // sparks and blood
 	self->s.sound = 0;
@@ -736,9 +735,11 @@ void jorg_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
 	if (self->deadflag == DEAD_DEAD)
 		return;
 
+	// regular death
 	gi.sound (self, CHAN_VOICE, sound_death, 1, ATTN_NORM, 0);
+	self->s.skinnum |= 1;
 	self->deadflag = DEAD_DEAD;
-	self->takedamage = DAMAGE_YES; //was DAMAGE_NO
+	self->takedamage = DAMAGE_YES; // was DAMAGE_NO
 	self->count = 0;
 	self->monsterinfo.currentmove = &jorg_move_death;
 }
@@ -924,7 +925,7 @@ void SP_monster_jorg (edict_t *self)
 	{
 		mmove_t	*deathmoves[] = {&jorg_move_death,
 								 NULL};
-		M_SetDeath(self,(mmove_t **)&deathmoves);
+		M_SetDeath (self, (mmove_t **)&deathmoves);
 	}
 	self->monsterinfo.scale = MODEL_SCALE;
 

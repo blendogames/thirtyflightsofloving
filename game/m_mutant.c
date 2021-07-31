@@ -396,6 +396,22 @@ void mutant_jump (edict_t *self)
 	self->monsterinfo.currentmove = &mutant_move_jump;
 }
 
+mframe_t mutant_frames_fake_jump [] =
+{
+	ai_move,	 0,	NULL,
+	ai_move,	 0,	NULL,
+	ai_move,	 0,	NULL,
+	ai_move,	 0,	NULL,
+	ai_move,	 0,	NULL,
+	ai_move,	 0,	NULL
+};
+mmove_t mutant_move_fake_jump = {FRAME_run03, FRAME_run08, mutant_frames_fake_jump, mutant_run};
+
+void mutant_fake_jump (edict_t *self)
+{
+	self->monsterinfo.currentmove = &mutant_move_fake_jump;
+}
+
 
 //
 // CHECKATTACK
@@ -610,7 +626,7 @@ void mutant_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 {
 	int		n;
 
-	self->s.skinnum |= 1;
+	// check for gib
 	if (self->health <= self->gib_health && !(self->spawnflags & SF_MONSTER_NOGIB))
 	{
 		gi.sound (self, CHAN_VOICE, gi.soundindex ("misc/udeath.wav"), 1, ATTN_NORM, 0);
@@ -626,7 +642,9 @@ void mutant_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	if (self->deadflag == DEAD_DEAD)
 		return;
 
+	// regular death
 	gi.sound (self, CHAN_VOICE, sound_death, 1, ATTN_NORM, 0);
+	self->s.skinnum |= 1;
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_YES;
 	self->s.skinnum = 1;
@@ -635,22 +653,6 @@ void mutant_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 		self->monsterinfo.currentmove = &mutant_move_death1;
 	else
 		self->monsterinfo.currentmove = &mutant_move_death2;
-}
-
-mframe_t mutant_frames_fake_jump [] =
-{
-	ai_move,	 0,	NULL,
-	ai_move,	 0,	NULL,
-	ai_move,	 0,	NULL,
-	ai_move,	 0,	NULL,
-	ai_move,	 0,	NULL,
-	ai_move,	 0,	NULL
-};
-mmove_t mutant_move_fake_jump = {FRAME_run03, FRAME_run08, mutant_frames_fake_jump, mutant_run};
-
-void mutant_fake_jump (edict_t *self)
-{
-	self->monsterinfo.currentmove = &mutant_move_fake_jump;
 }
 
 
@@ -717,6 +719,10 @@ void SP_monster_mutant (edict_t *self)
 	self->monsterinfo.search = mutant_search;
 	self->monsterinfo.idle = mutant_idle;
 	self->monsterinfo.checkattack = mutant_checkattack;
+
+	if (!self->monsterinfo.flies)
+		self->monsterinfo.flies = 0.90;
+
 	if (monsterjump->value)
 	{
 		self->monsterinfo.jump = mutant_fake_jump;
@@ -724,21 +730,31 @@ void SP_monster_mutant (edict_t *self)
 		self->monsterinfo.jumpdn = 160;
 	}
 
+	// Lazarus
+	if (self->powerarmor)
+	{
+		if (self->powerarmortype == 1)
+			self->monsterinfo.power_armor_type = POWER_ARMOR_SCREEN;
+		else
+			self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
+		self->monsterinfo.power_armor_power = self->powerarmor;
+	}
+
+	self->common_name = "Mutant";
+	self->class_id = ENTITY_MONSTER_MUTANT;
+	self->spawnflags |= SF_MONSTER_KNOWS_MIRRORS;
+
 	gi.linkentity (self);
+
 	self->monsterinfo.currentmove = &mutant_move_stand;
-	if (!self->monsterinfo.flies)
-		self->monsterinfo.flies = 0.90;
 	if (self->health < 0)
 	{
 		mmove_t	*deathmoves[] = {&mutant_move_death1,
 			                     &mutant_move_death2,
 								 NULL};
-		M_SetDeath(self,(mmove_t **)&deathmoves);
+		M_SetDeath (self, (mmove_t **)&deathmoves);
 	}
-	self->common_name = "Mutant";
-	self->class_id = ENTITY_MONSTER_MUTANT;
-	self->spawnflags |= SF_MONSTER_KNOWS_MIRRORS;
-
 	self->monsterinfo.scale = MODEL_SCALE;
+
 	walkmonster_start (self);
 }

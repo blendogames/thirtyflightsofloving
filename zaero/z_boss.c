@@ -1746,9 +1746,10 @@ void zboss_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 	if (self->deadflag == DEAD_DEAD)
 		return;
 
-// regular death
+	// regular death
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_YES;
+	self->s.skinnum = 2;	// Knightmare- make sure pain skin is set if we got one-shotted
 
 	// todo
 	if (random() < 0.5)

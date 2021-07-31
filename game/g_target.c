@@ -461,7 +461,9 @@ void use_target_changelevel (edict_t *self, edict_t *other, edict_t *activator)
 	// if going to a new unit, clear cross triggers
 	if (strstr(self->map, "*"))
 	{
-		game.serverflags &= ~(SFL_CROSS_TRIGGER_MASK);
+		// Knightmare- game.serverflags is ONLY used for cross-level trigger bits, so we can just zero it.
+	//	game.serverflags &= ~(SFL_CROSS_TRIGGER_MASK);
+		game.serverflags = 0;
 		game.lock_code[0] = 0;
 		game.lock_revealed = 0;
 		game.lock_hud = 0;
@@ -1043,7 +1045,14 @@ Once this trigger is touched/used, any trigger_crosslevel_target with the same t
 */
 void trigger_crosslevel_trigger_use (edict_t *self, edict_t *other, edict_t *activator)
 {
-	game.serverflags |= self->spawnflags;
+	// Knightmare- use moreflags to override spawnflags, allows use of 32 trigger bits
+	if (self->moreflags != 0) {
+		game.serverflags |= self->moreflags;
+	}
+	else {
+		game.serverflags |= self->spawnflags;
+	}
+
 	// DWH: By most editors, the trigger should be able to fire targets. Added
 	//      the following line:
 	G_UseTargets (self, activator);
@@ -1066,8 +1075,22 @@ killtarget also work.
 */
 void target_crosslevel_target_think (edict_t *self)
 {
-	if (self->spawnflags == (game.serverflags & SFL_CROSS_TRIGGER_MASK & self->spawnflags))
+/*	if (self->spawnflags == (game.serverflags & SFL_CROSS_TRIGGER_MASK & self->spawnflags))
 	{
+		G_UseTargets (self, self);
+		G_FreeEdict (self);
+	}*/
+	// Knightmare- use moreflags to override spawnflags, allows use of 32 trigger bits
+	qboolean triggered = false;
+
+	if (self->moreflags != 0) {
+		triggered = (self->moreflags == (game.serverflags & self->moreflags));
+	}
+	else {
+		triggered = (self->spawnflags == (game.serverflags & SFL_CROSS_TRIGGER_MASK & self->spawnflags));
+	}
+
+	if (triggered) {
 		G_UseTargets (self, self);
 		G_FreeEdict (self);
 	}
@@ -4066,16 +4089,29 @@ void movewith_detach (edict_t *child)
 				
 	for (i=1; i<globals.num_edicts && !parent; i++) {
 		e = g_edicts + i;
-		if (e->movewith_next == child) parent=e;
+		if (e->movewith_next == child) parent = e;
 	}
 	if (parent) parent->movewith_next = child->movewith_next;
 		
 	child->movewith_next = NULL;
 	child->movewith = NULL;
-	child->movetype = child->org_movetype;
+
+	// Knightmare added
+	child->movewith_ent = NULL;		
+	VectorClear (child->movewith_offset);
+	VectorClear (child->parent_attach_angles);
+	VectorClear (child->child_attach_angles);
+	VectorCopy (child->s.origin, child->s.old_origin);
+//	child->s.event = EV_OTHER_TELEPORT;
+	// end Knightmare
+
+	if (child->org_movetype)
+		child->movetype = child->org_movetype;
 	// if monster, give 'em a small vertical boost
-	if (child->svflags & SVF_MONSTER)
+	if (child->svflags & SVF_MONSTER) {
 		child->s.origin[2] += 2;
+	//	VectorClear (child->velocity);	// Knightmare added
+	}
 	gi.linkentity (child);
 }
 
@@ -4093,7 +4129,7 @@ void use_target_movewith (edict_t *self, edict_t *other, edict_t *activator)
 		while (target)
 		{
 			if (target->movewith_ent)
-				movewith_detach(target);
+				movewith_detach (target);
 			target = G_Find(target, FOFS(targetname), self->target);
 		}
 	}

@@ -118,7 +118,7 @@ void Widow2Beam (edict_t *self)
 		target[2] += self->enemy->viewheight-10;
 
 		// Lazarus fog reduction of accuracy
-		if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+		if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 		{
 			target[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 			target[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -137,7 +137,7 @@ void Widow2Beam (edict_t *self)
 		VectorCopy(self->enemy->s.origin, end);
 
 		// Lazarus fog reduction of accuracy
-		if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+		if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 		{
 			end[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 			end[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -182,7 +182,7 @@ void Widow2Beam (edict_t *self)
 		target[2] += self->enemy->viewheight-10;
 		
 		// Lazarus fog reduction of accuracy
-		if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+		if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 		{
 			target[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 			target[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -392,7 +392,7 @@ void WidowDisrupt (edict_t *self)
 		// calc direction to where we targeted
 
 		// Lazarus fog reduction of accuracy
-		if(self->monsterinfo.visibility < FOG_CANSEEGOOD)
+		if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
 		{
 			self->pos1[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 			self->pos1[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
@@ -985,7 +985,7 @@ void KillChildren (edict_t *self)
 	while (1)
 	{
 		ent = G_Find (ent, field, "monster_stalker");
-		if(!ent)
+		if (!ent)
 			return;
 		
 		// FIXME - may need to stagger
@@ -999,11 +999,11 @@ void widow2_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	int n;
 	int	clipped;
 
-	self->s.skinnum |= 1;
-	if (!(self->fogclip & 2)) //custom bloodtype flag check
-		self->blood_type = 3; //sparks and blood
+	if (!(self->fogclip & 2)) // custom bloodtype flag check
+		self->blood_type = 3; // sparks and blood
 	self->monsterinfo.power_armor_type = POWER_ARMOR_NONE;
-// check for gib
+
+	// check for gib
 	if (self->health <= self->gib_health && !(self->spawnflags & SF_MONSTER_NOGIB))
 	{
 		clipped = min (damage, 100);
@@ -1037,6 +1037,7 @@ void widow2_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 		return;
 
 	gi.sound (self, CHAN_VOICE, sound_death, 1, ATTN_NONE, 0);
+	self->s.skinnum |= 1;
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_NO;
 	self->count = 0;
@@ -1092,7 +1093,7 @@ qboolean Widow2_CheckAttack (edict_t *self)
 			}
 				
 			// PGM - we want them to go ahead and shoot at info_notnulls if they can.
-			if(self->enemy->solid != SOLID_NOT || tr.fraction < 1.0)		//PGM
+			if (self->enemy->solid != SOLID_NOT || tr.fraction < 1.0)		//PGM
 				return false;
 		}
 	}
@@ -1230,17 +1231,17 @@ void SP_monster_widow2 (edict_t *self)
 	VectorSet (self->mins, -70, -70, 0);
 	VectorSet (self->maxs, 70, 70, 144);
 
-	if(!self->health)
+	if (!self->health)
 		self->health = 2000 + 800 + 1000 * (skill->value);
 	if (coop->value)
 		self->health += 500 * (skill->value);
-	if(!self->gib_health)
+	if (!self->gib_health)
 		self->gib_health = -999;
-	if(!self->mass)
+	if (!self->mass)
 		self->mass = 2500;
 
 	// Lazarus
-	if(self->powerarmor)
+	if (self->powerarmor)
 	{
 		if (self->powerarmortype == 1)
 			self->monsterinfo.power_armor_type = POWER_ARMOR_SCREEN;
@@ -1285,7 +1286,13 @@ void SP_monster_widow2 (edict_t *self)
 
 	gi.linkentity (self);
 
-	self->monsterinfo.currentmove = &widow2_move_stand;	
+	self->monsterinfo.currentmove = &widow2_move_stand;
+	if (self->health < 0)
+	{
+		mmove_t	*deathmoves[] = {&widow2_move_death,
+								 NULL};
+		M_SetDeath (self, (mmove_t **)&deathmoves);
+	}
 	self->monsterinfo.scale = MODEL_SCALE;
 
 	Widow2Precache();

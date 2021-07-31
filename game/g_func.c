@@ -73,7 +73,7 @@ or any other entity that supports movewith.
 void set_child_movement (edict_t *self)
 {
 	edict_t *e;
-	edict_t	*parent;
+	edict_t	*prev;
 	vec3_t	forward, right, up;
 	vec3_t	angles, amove;
 	vec3_t	offset;
@@ -88,23 +88,25 @@ void set_child_movement (edict_t *self)
 		return;
 
 	e = self->movewith_next;
-	parent = self;
+	prev = self;
 	while (e != NULL)
+//	for (e = self->movewith_next; e != NULL; e = e->movewith_next)
 	{
 restart:
 		if (!e->inuse) break;
+	//	if (!e->inuse) continue;
 
 		// Get change in parent's angles from when child was attached, this tells us how far we need to rotate
-		VectorSubtract(self->s.angles, e->parent_attach_angles, delta_angles);
-		AngleVectors(delta_angles, forward, right, up);
-		VectorNegate(right, right);
+		VectorSubtract (self->s.angles, e->parent_attach_angles, delta_angles);
+		AngleVectors (delta_angles, forward, right, up);
+		VectorNegate (right, right);
 
 		// remove gibbed monsters from the chain
 		if (e->svflags & SVF_MONSTER)
 		{
 			if (e->health <= e->gib_health)
 			{
-				parent->movewith_next = e->movewith_next;
+				prev->movewith_next = e->movewith_next;
 				e = e->movewith_next;
 				if (e)
 					goto restart;
@@ -117,10 +119,10 @@ restart:
 			is_monster = false;
 
 		// For all but func_button and func_door, move origin and match velocities
-//		if (Q_stricmp(e->classname, "func_door") && Q_stricmp(e->classname, "func_button"))
+	//	if (Q_stricmp(e->classname, "func_door") && Q_stricmp(e->classname, "func_button"))
 		if ( strcmp(e->classname, "func_door") && strcmp(e->classname, "func_button")
 		//	&& strcmp(e->classname, "func_door_secret") && strcmp(e->classname, "func_door_secret2")
-			&& (e->class_id != ENTITY_FUNC_DOOR_SECRET) && (e->class_id != ENTITY_FUNC_DOOR_SECRET2)
+			&& (e->class_id != ENTITY_FUNC_DOOR_SECRET) && strcmp(e->classname, "func_door_secret2")
 			&& strcmp(e->classname, "func_plat") && strcmp(e->classname, "func_plat2")
 			&& strcmp(e->classname, "func_water") )
 		{
@@ -216,6 +218,11 @@ restart:
 					}
 				}
 			}
+			// Knightmare- monsters that need special rotation
+			// manipulation would be handled here
+		/*	else if (is_monster)
+			{
+			}*/
 		}
 
 		// Special cases:
@@ -223,7 +230,7 @@ restart:
 	//	if ( (!Q_stricmp(e->classname, "func_door"  )) || (!Q_stricmp(e->classname, "func_button")) )
 			if ( !strcmp(e->classname, "func_door") || !strcmp(e->classname, "func_button")
 			//	|| !strcmp(e->classname, "func_door_secret") || !strcmp(e->classname, "func_door_secret2")
-				|| (e->class_id == ENTITY_FUNC_DOOR_SECRET) || (e->class_id == ENTITY_FUNC_DOOR_SECRET2)
+				|| (e->class_id == ENTITY_FUNC_DOOR_SECRET) || !strcmp(e->classname, "func_door_secret2")
 				|| !strcmp(e->classname, "func_plat") || !strcmp(e->classname, "func_plat2")
 				|| !strcmp(e->classname, "func_water") )
 		{
@@ -246,8 +253,7 @@ restart:
 					VectorMA (e->pos0, e->side * e->width, eright, e->pos1);
 				VectorMA (e->pos1, e->length, eforward, e->pos2);
 			}
-		//	else if (!strcmp(e->classname, "func_door_secret2"))
-			else if (e->class_id == ENTITY_FUNC_DOOR_SECRET2)
+			else if (!strcmp(e->classname, "func_door_secret2"))
 			{
 				vec3_t	eforward, eright, eup;
 
@@ -330,8 +336,7 @@ restart:
 		//	if ( (!Q_stricmp(e->classname, "func_door"  )) || (!Q_stricmp(e->classname, "func_button")) ||
 		//		(e->solid == SOLID_TRIGGER) )
 			if ( !strcmp(e->classname, "func_door") || !strcmp(e->classname, "func_button")
-			//	|| !strcmp(e->classname, "func_door_secret") || !strcmp(e->classname, "func_door_secret2")
-				|| (e->class_id == ENTITY_FUNC_DOOR_SECRET) || (e->class_id == ENTITY_FUNC_DOOR_SECRET2)
+				|| (e->class_id == ENTITY_FUNC_DOOR_SECRET) || !strcmp(e->classname, "func_door_secret2")
 				|| !strcmp(e->classname, "func_plat") || !strcmp(e->classname, "func_plat2")
 				|| !strcmp(e->classname, "func_water") || (e->solid == SOLID_TRIGGER) )
 			{
@@ -371,7 +376,7 @@ restart:
 
 		e->s.event = self->s.event;
 		gi.linkentity(e);
-		parent = e;
+		prev = e;
 		e = e->movewith_next;
 	}
 }
@@ -468,7 +473,7 @@ void train_spline (edict_t *self)
 
 	if ( (train->from != train->to) && !train->moveinfo.is_blocked && (train->spawnflags & TRAIN_START_ON))
 	{
-		if (train->moveinfo.ratio >= 1.0) //Knightmare- don't keep moving at end of curve
+		if (train->moveinfo.ratio >= 1.0f) //Knightmare- don't keep moving at end of curve
 		{
 			VectorClear(self->avelocity);
 			VectorClear(self->velocity);
@@ -497,7 +502,7 @@ void train_spline (edict_t *self)
 			set_child_movement (train);
 #endif	// POSTTHINK_CHILD_MOVEMENT
 
-		if (train->moveinfo.ratio >= 1.0)
+		if (train->moveinfo.ratio >= 1.0f)
 		{
 			train->moveinfo.endfunc = NULL;
 			train->think = train_wait;
@@ -599,10 +604,40 @@ void check_reverse_rotation (edict_t *self, vec3_t point)
 // These constantly check the updated destination point
 //
 
+/*void Move_AdjustForParentVelocity (edict_t *ent)
+{
+	vec3_t	org_offset;
+
+	if (!ent || !ent->movewith_ent)
+		return;
+
+	VectorAdd (ent->movewith_ent->velocity, ent->velocity, ent->velocity);
+
+	// If parent is spinning, add appropriate velocities
+	VectorSubtract(ent->s.origin, ent->movewith_ent->s.origin, org_offset);
+	if (ent->movewith_ent->avelocity[PITCH] != 0)
+	{
+		ent->velocity[2] -= org_offset[0] * ent->movewith_ent->avelocity[PITCH] * M_PI / 180;
+		ent->velocity[0] += org_offset[2] * ent->movewith_ent->avelocity[PITCH] * M_PI / 180;
+	}
+	if (ent->movewith_ent->avelocity[YAW] != 0)
+	{
+		ent->velocity[0] -= org_offset[1] * ent->movewith_ent->avelocity[YAW] * M_PI / 180.;
+		ent->velocity[1] += org_offset[0] * ent->movewith_ent->avelocity[YAW] * M_PI / 180.;
+	}
+	if (ent->movewith_ent->avelocity[ROLL] != 0)
+	{
+		ent->velocity[1] -= org_offset[2] * ent->movewith_ent->avelocity[ROLL] * M_PI / 180;
+		ent->velocity[2] += org_offset[1] * ent->movewith_ent->avelocity[ROLL] * M_PI / 180;
+	}
+}*/
+
 void Move_pos0_Final (edict_t *ent)
 {
 	if (!ent->movewith_ent)
 		return;
+
+//	gi.dprintf ("Move_pos0_Final\n");
 
 	VectorSubtract (ent->pos0, ent->s.origin, ent->moveinfo.dir);
 	ent->moveinfo.remaining_distance = VectorNormalize (ent->moveinfo.dir);
@@ -613,6 +648,8 @@ void Move_pos0_Final (edict_t *ent)
 	}
 	VectorScale (ent->moveinfo.dir, ent->moveinfo.remaining_distance / FRAMETIME, ent->velocity);
 	VectorAdd (ent->movewith_ent->velocity, ent->velocity, ent->velocity);
+//	Move_AdjustForParentVelocity (ent);
+
 	ent->think = Move_Done;
 	ent->nextthink = level.time + FRAMETIME;
 }
@@ -621,6 +658,8 @@ void Move_pos0_Think (edict_t *ent)
 {
 	if (!ent->movewith_ent)
 		return;
+
+//	gi.dprintf ("Move_pos0_Think\n");
 
 	VectorSubtract (ent->pos0, ent->s.origin, ent->moveinfo.dir);
 	ent->moveinfo.remaining_distance = VectorNormalize (ent->moveinfo.dir);
@@ -631,6 +670,8 @@ void Move_pos0_Think (edict_t *ent)
 	}
 	VectorScale (ent->moveinfo.dir, ent->moveinfo.speed, ent->velocity);
 	VectorAdd (ent->movewith_ent->velocity, ent->velocity, ent->velocity);
+//	Move_AdjustForParentVelocity (ent);
+
 	ent->nextthink = level.time + FRAMETIME;
 	ent->think = Move_pos0_Think;
 }
@@ -639,6 +680,8 @@ void Move_pos1_Final (edict_t *ent)
 {
 	if (!ent->movewith_ent)
 		return;
+
+//	gi.dprintf ("Move_pos1_Final\n");
 
 	VectorSubtract (ent->pos1, ent->s.origin, ent->moveinfo.dir);
 	ent->moveinfo.remaining_distance = VectorNormalize (ent->moveinfo.dir);
@@ -649,6 +692,8 @@ void Move_pos1_Final (edict_t *ent)
 	}
 	VectorScale (ent->moveinfo.dir, ent->moveinfo.remaining_distance / FRAMETIME, ent->velocity);
 	VectorAdd (ent->movewith_ent->velocity, ent->velocity, ent->velocity);
+//	Move_AdjustForParentVelocity (ent);
+
 	ent->think = Move_Done;
 	ent->nextthink = level.time + FRAMETIME;
 }
@@ -657,6 +702,8 @@ void Move_pos1_Think (edict_t *ent)
 {
 	if (!ent->movewith_ent)
 		return;
+
+//	gi.dprintf ("Move_pos1_Think\n");
 
 	VectorSubtract (ent->pos1, ent->s.origin, ent->moveinfo.dir);
 	ent->moveinfo.remaining_distance = VectorNormalize (ent->moveinfo.dir);
@@ -667,6 +714,8 @@ void Move_pos1_Think (edict_t *ent)
 	}
 	VectorScale (ent->moveinfo.dir, ent->moveinfo.speed, ent->velocity);
 	VectorAdd (ent->movewith_ent->velocity, ent->velocity, ent->velocity);
+//	Move_AdjustForParentVelocity (ent);
+
 	ent->nextthink = level.time + FRAMETIME;
 	ent->think = Move_pos1_Think;
 }
@@ -675,6 +724,8 @@ void Move_pos2_Final (edict_t *ent)
 {
 	if (!ent->movewith_ent)
 		return;
+
+//	gi.dprintf ("Move_pos2_Final\n");
 
 	VectorSubtract (ent->pos2, ent->s.origin, ent->moveinfo.dir);
 	ent->moveinfo.remaining_distance = VectorNormalize (ent->moveinfo.dir);
@@ -685,6 +736,8 @@ void Move_pos2_Final (edict_t *ent)
 	}
 	VectorScale (ent->moveinfo.dir, ent->moveinfo.remaining_distance / FRAMETIME, ent->velocity);
 	VectorAdd (ent->movewith_ent->velocity, ent->velocity, ent->velocity);
+//	Move_AdjustForParentVelocity (ent);
+
 	ent->think = Move_Done;
 	ent->nextthink = level.time + FRAMETIME;
 }
@@ -693,6 +746,8 @@ void Move_pos2_Think (edict_t *ent)
 {
 	if (!ent->movewith_ent)
 		return;
+
+//	gi.dprintf ("Move_pos2_Think\n");
 
 	VectorSubtract (ent->pos2, ent->s.origin, ent->moveinfo.dir);
 	ent->moveinfo.remaining_distance = VectorNormalize (ent->moveinfo.dir);
@@ -703,6 +758,8 @@ void Move_pos2_Think (edict_t *ent)
 	}
 	VectorScale (ent->moveinfo.dir, ent->moveinfo.speed, ent->velocity);
 	VectorAdd (ent->movewith_ent->velocity, ent->velocity, ent->velocity);
+//	Move_AdjustForParentVelocity (ent);
+
 	ent->nextthink = level.time + FRAMETIME;
 	ent->think = Move_pos2_Think;
 }
@@ -711,7 +768,7 @@ void Move_Done (edict_t *ent)
 {
 	VectorClear (ent->velocity);
 	if (ent->movewith && ent->movewith_ent) {
-		VectorCopy(ent->movewith_ent->velocity, ent->velocity);
+		VectorCopy (ent->movewith_ent->velocity, ent->velocity);
 	}
 	if (ent->moveinfo.endfunc)
 		ent->moveinfo.endfunc (ent);
@@ -2213,6 +2270,7 @@ void trainbutton_killed (edict_t *self, edict_t *inflictor, edict_t *attacker, i
 	self->takedamage = DAMAGE_NO;
 	trainbutton_fire (self);
 }
+
 void movewith_init (edict_t *ent)
 {
 	edict_t *e, *child;
@@ -2451,7 +2509,7 @@ void door_go_up (edict_t *self, edict_t *activator)
 	}
 
 	if ((self->flags & FL_REVERSIBLE) && activator)
-		check_reverse_rotation(self,activator->s.origin);
+		check_reverse_rotation (self, activator->s.origin);
 
 	if (!(self->flags & FL_TEAMSLAVE))
 	{
@@ -3272,6 +3330,8 @@ void train_wait (edict_t *self)
 	}
 	else
 	{
+		if (self->spawnflags & TRAIN_SPLINE)
+			set_child_movement (self);
 		train_next (self);
 	}
 	
@@ -3542,6 +3602,7 @@ void train_next (edict_t *self)
 	edict_t		*ent;
 	vec3_t		dest;
 	qboolean	first;
+	vec3_t		daoldorigin;
 	vec3_t		angles, v;
 	vec3_t		adjusted_pathpoint;
 	vec3_t		corner_offset = {1,1,1};
@@ -3591,6 +3652,7 @@ again:
 			return;
 		}
 		first = false;
+		VectorCopy (self->s.origin, daoldorigin); // Knightmare- copy old orgin for reference
 		if (self->spawnflags & TRAIN_ORIGIN)	// Knightmare- func_train_origin support
 			VectorCopy (ent->s.origin, self->s.origin);
 		else
@@ -3602,6 +3664,29 @@ again:
 #ifndef POSTTHINK_CHILD_MOVEMENT
 		if (self->movewith_next && (self->movewith_next->movewith_ent == self))
 			set_child_movement (self);
+#else	// POSTTHINK_CHILD_MOVEMENT
+		// Knightmare- move movewith children
+		if (self->movewith_next && (self->movewith_next->movewith_ent == self))
+		{
+			edict_t	*e = NULL;
+			vec3_t	dir;
+
+			VectorSubtract (self->s.origin, daoldorigin, dir);
+
+			e = self->movewith_next;
+			// cycle through all ents to find ones to move with
+			while (e != NULL)
+			{
+				if (!e->inuse) break;
+
+				VectorAdd (dir, e->s.origin, e->s.origin);
+				VectorCopy (e->s.origin, e->s.old_origin);
+				e->s.event = EV_OTHER_TELEPORT;
+				gi.linkentity (e);
+
+				e = e->movewith_next;
+			}
+		}
 #endif	// POSTTHINK_CHILD_MOVEMENT
 
 		goto again;
@@ -3635,7 +3720,7 @@ again:
 
 		self->from = self->to;
 		self->to   = ent;
-		self->moveinfo.ratio = 0.0;
+		self->moveinfo.ratio = 0.0f;
 
 		VectorSubtract(dest,self->s.origin,v);
 		self->moveinfo.distance = VectorLength(v);
@@ -3644,6 +3729,10 @@ again:
 		speed = (10*self->moveinfo.distance)/(float)frames;
 		self->moveinfo.speed = speed;
 		self->moveinfo.accel = self->moveinfo.decel = self->moveinfo.speed;
+#ifndef POSTTHINK_CHILD_MOVEMENT
+		if (self->movewith_next && (self->movewith_next->movewith_ent == self))
+			set_child_movement (self);
+#endif	// POSTTHINK_CHILD_MOVEMENT
 	}
 
 	// Rroff rotating
@@ -3776,9 +3865,9 @@ void func_train_find (edict_t *self)
 	else
 		VectorCopy(ent->s.origin, adjusted_pathpoint);
 
-	if ( self->spawnflags & TRAIN_ROTATE )
+	if (self->spawnflags & TRAIN_ROTATE)
 		ent->think = train_yaw;
-	else if (self->spawnflags & TRAIN_SPLINE )
+	else if (self->spawnflags & TRAIN_SPLINE)
 		ent->think = train_spline;
 	else
 		ent->think = train_children_think;
@@ -3877,8 +3966,8 @@ void train_use (edict_t *self, edict_t *other, edict_t *activator)
 		{
 			// Back up a step
 			self->moveinfo.ratio -= self->moveinfo.speed * FRAMETIME / self->moveinfo.distance;
-			if (self->moveinfo.ratio < 0.)
-				self->moveinfo.ratio = 0.;
+			if (self->moveinfo.ratio < 0.0f)
+				self->moveinfo.ratio = 0.0f;
 		}
 
 		if (self->target_ent)
@@ -4326,11 +4415,13 @@ void door_secret_move6 (edict_t *self)
     // added sound
 	if (self->moveinfo.sound_start)
 		gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_start, 1, self->attenuation, 0); // was ATTN_STATIC
-	if (self->moveinfo.sound_middle)
+	if (self->moveinfo.sound_middle) {
 		self->s.sound = self->moveinfo.sound_middle;
 #ifdef LOOP_SOUND_ATTENUATION
 		self->s.attenuation = self->attenuation;
 #endif
+	}
+
 	self->moveinfo.state = STATE_DOWN;	// Knightmare added
 //	Move_Calc (self, vec3_origin, door_secret_done);
 	Move_Calc (self, self->pos0, door_secret_done);
@@ -4340,9 +4431,10 @@ void door_secret_done (edict_t *self)
 {
 	if (!(self->targetname) || (self->spawnflags & SECRET_ALWAYS_SHOOT))
 	{
-		// Knightmare- setting health to anything other than 0
-		// makes the die function never get called!
-		self->health = 0;
+		// Knightmare- restore user-set health here
+		// now that the correct die function is set
+	//	self->health = 0;
+		self->health = self->max_health;
 		self->takedamage = DAMAGE_YES;
 	}
 	self->moveinfo.state = STATE_LOWEST;	// Knightmare added
@@ -4425,9 +4517,12 @@ void SP_func_door_secret (edict_t *ent)
 
 	if (!(ent->targetname) || (ent->spawnflags & SECRET_ALWAYS_SHOOT))
 	{
-		// Knightmare- setting health to anything other than 0
-		// makes the die function never get called!
-		ent->health = 0;
+		// Knightmare- we can allow user-set health here
+		// now that the correct die function is set
+	//	ent->health = 0;
+		if (!ent->health)
+			ent->health = 1;
+		ent->max_health = ent->health;
 		ent->takedamage = DAMAGE_YES;
 		ent->die = door_secret_die;
 	}
@@ -4474,7 +4569,8 @@ void SP_func_door_secret (edict_t *ent)
 	if (ent->health)
 	{
 		ent->takedamage = DAMAGE_YES;
-		ent->die = door_killed;
+	//	ent->die = door_killed;
+		ent->die = door_secret_die;	// Knightmare- this had the wrong die function set!
 		ent->max_health = ent->health;
 	}
 	else if (ent->targetname && ent->message)
@@ -5828,7 +5924,7 @@ void swinging_door_killed (edict_t *self, edict_t *inflictor, edict_t *attacker,
 				ent->nextthink = level.time + ent->moveinfo.wait;
 			return;
 		}
-		check_reverse_rotation(ent,point);
+		check_reverse_rotation (ent, point);
 		if (!(ent->flags & FL_TEAMSLAVE))
 		{
 			if (ent->moveinfo.sound_start)

@@ -1197,7 +1197,7 @@ good_enemy:
 			}
 			if (self->sounds == 7)
 			{
-				if (!AimGrenade (self, start, target, self->fog_far, dir))
+				if (!AimGrenade (self, start, target, self->fog_far, dir, false))
 				{
 					// Can't get a grenade to target. Correct yaw but
 					// not pitch

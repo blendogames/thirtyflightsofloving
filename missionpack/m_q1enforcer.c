@@ -251,7 +251,7 @@ void q1enforcer_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int d
 {
 	int		n;
 
-// check for gib
+	// check for gib
 	if (self->health <= self->gib_health && !(self->spawnflags & SF_MONSTER_NOGIB))
 	{
 		gi.sound (self, CHAN_VOICE|CHAN_RELIABLE, sound_gib, 1, ATTN_NORM, 0);
@@ -267,7 +267,7 @@ void q1enforcer_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int d
 	if (self->deadflag == DEAD_DEAD)
 		return;
 
-// regular death
+	// regular death
 	gi.sound (self, CHAN_VOICE, sound_death, 1, ATTN_NORM, 0);
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_YES;
@@ -423,7 +423,14 @@ void SP_monster_q1_enforcer (edict_t *self)
 	gi.linkentity (self);
 
 	self->monsterinfo.currentmove = &q1enforcer_move_stand;	
-	self->monsterinfo.scale = 1.000000;
+	if (self->health < 0)
+	{
+		mmove_t	*deathmoves[] = {&q1enforcer_move_death1,
+			                     &q1enforcer_move_death2,
+								 NULL};
+		M_SetDeath (self, (mmove_t **)&deathmoves);
+	}
+	self->monsterinfo.scale = MODEL_SCALE;
 	
 	self->radius_dmg = 0;
 

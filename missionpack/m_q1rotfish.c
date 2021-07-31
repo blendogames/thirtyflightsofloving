@@ -215,7 +215,7 @@ void q1rotfish_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int da
 	if (self->deadflag == DEAD_DEAD)
 		return;
 
-// regular death
+	// regular death
 	gi.sound (self, CHAN_VOICE, sound_death, 1, ATTN_NORM, 0);
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_YES;
@@ -295,7 +295,13 @@ void SP_monster_q1_rotfish (edict_t *self)
 	gi.linkentity (self);
 
 	self->monsterinfo.currentmove = &q1rotfish_move_stand;	
-	self->monsterinfo.scale = 1.000000;
+	if (self->health < 0)
+	{
+		mmove_t	*deathmoves[] = {&q1rotfish_move_death,
+								 NULL};
+		M_SetDeath (self, (mmove_t **)&deathmoves);
+	}
+	self->monsterinfo.scale = MODEL_SCALE;
 
 	swimmonster_start (self);
 }

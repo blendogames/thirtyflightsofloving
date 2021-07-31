@@ -592,6 +592,12 @@ void SP_monster_q1_shambler (edict_t *self)
 	gi.linkentity (self);
 
 	self->monsterinfo.currentmove = &shambler_move_stand;	
+	if (self->health < 0)
+	{
+		mmove_t	*deathmoves[] = {&shambler_move_death,
+								 NULL};
+		M_SetDeath (self, (mmove_t **)&deathmoves);
+	}
 	self->monsterinfo.scale = MODEL_SCALE;
 
 	walkmonster_start (self);

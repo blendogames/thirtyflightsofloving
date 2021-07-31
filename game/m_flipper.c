@@ -361,9 +361,7 @@ void flipper_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dama
 {
 	int		n;
 
-	self->s.skinnum |= 1;
-
-// check for gib
+	// check for gib
 	if (self->health <= self->gib_health && !(self->spawnflags & SF_MONSTER_NOGIB))
 	{
 		gi.sound (self, CHAN_VOICE, gi.soundindex ("misc/udeath.wav"), 1, ATTN_NORM, 0);
@@ -379,8 +377,12 @@ void flipper_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dama
 	if (self->deadflag == DEAD_DEAD)
 		return;
 
-// regular death
+	// Knightmare- hack to prevent falling through floor
+	self->s.origin[2] += 1;
+
+	// regular death
 	gi.sound (self, CHAN_VOICE, sound_death, 1, ATTN_NORM, 0);
+	self->s.skinnum |= 1;
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_YES;
 	self->monsterinfo.currentmove = &flipper_move_death;
@@ -435,23 +437,34 @@ void SP_monster_flipper (edict_t *self)
 	self->monsterinfo.run = flipper_start_run;
 	self->monsterinfo.melee = flipper_melee;
 	self->monsterinfo.sight = flipper_sight;
-	self->monsterinfo.search = flipper_search;	//Knightmare added
+	self->monsterinfo.search = flipper_search;	// Knightmare added
 
-	gi.linkentity (self);
-
-	self->monsterinfo.currentmove = &flipper_move_stand;	
 	if (!self->monsterinfo.flies)
 		self->monsterinfo.flies = 0.90;
-	if (self->health < 0)
+
+	// Lazarus
+	if (self->powerarmor)
 	{
-		mmove_t	*deathmoves[] = {&flipper_move_death,
-								 NULL};
-		M_SetDeath(self,(mmove_t **)&deathmoves);
+		if (self->powerarmortype == 1)
+			self->monsterinfo.power_armor_type = POWER_ARMOR_SCREEN;
+		else
+			self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
+		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
+
 	self->common_name = "Barracuda Shark";
 	self->class_id = ENTITY_MONSTER_FLIPPER;
 	self->spawnflags |= SF_MONSTER_KNOWS_MIRRORS;
 
+	gi.linkentity (self);
+
+	self->monsterinfo.currentmove = &flipper_move_stand;	
+	if (self->health < 0)
+	{
+		mmove_t	*deathmoves[] = {&flipper_move_death,
+								 NULL};
+		M_SetDeath (self, (mmove_t **)&deathmoves);
+	}
 	self->monsterinfo.scale = MODEL_SCALE;
 
 	swimmonster_start (self);

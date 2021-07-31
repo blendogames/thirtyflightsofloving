@@ -1323,12 +1323,12 @@ edict_t *CheckForBadArea (edict_t *ent)
 	edict_t		*touch[MAX_EDICTS], *hit;
 	vec3_t		mins, maxs;
 
-	VectorAdd(ent->s.origin, ent->mins, mins);
-	VectorAdd(ent->s.origin, ent->maxs, maxs);
+	VectorAdd (ent->s.origin, ent->mins, mins);
+	VectorAdd (ent->s.origin, ent->maxs, maxs);
 
 	num = gi.BoxEdicts (mins, maxs, touch, MAX_EDICTS, AREA_TRIGGERS);
 
-//	drawbbox(ent);
+//	drawbbox (ent);
 
 	// be careful, it is possible to have an entity in this
 	// list removed before we get to it (killtriggered)
@@ -1395,6 +1395,9 @@ qboolean MarkTeslaArea (edict_t *self, edict_t *tesla)
 	
 		VectorSet (mins, -TESLA_DAMAGE_RADIUS, -TESLA_DAMAGE_RADIUS, tesla->mins[2]);
 		VectorSet (maxs, TESLA_DAMAGE_RADIUS, TESLA_DAMAGE_RADIUS, TESLA_DAMAGE_RADIUS);
+		// Knightmare- these mins/maxs are absolute, NOT bbox coords
+		VectorAdd (tesla->s.origin, mins, mins);
+		VectorAdd (tesla->s.origin, maxs, maxs);
 
 	//	area = SpawnBadArea (mins, maxs, 30.0f, tesla);
 		if (tesla->air_finished)
@@ -1444,10 +1447,16 @@ qboolean MarkProxArea (edict_t *prox)
 	if (prox->dmg_radius > 0) {
 		VectorSet (mins, -prox->dmg_radius, -prox->dmg_radius, -prox->dmg_radius);
 		VectorSet (maxs, prox->dmg_radius, prox->dmg_radius, prox->dmg_radius);
+		// These mins/maxs are absolute, NOT bbox coords
+		VectorAdd (prox->s.origin, mins, mins);
+		VectorAdd (prox->s.origin, maxs, maxs);
 	}
 	else {
 		VectorSet (mins, -PROX_DAMAGE_RADIUS, -PROX_DAMAGE_RADIUS, -PROX_DAMAGE_RADIUS);
 		VectorSet (maxs, PROX_DAMAGE_RADIUS, PROX_DAMAGE_RADIUS, PROX_DAMAGE_RADIUS);
+		// These mins/maxs are absolute, NOT bbox coords
+		VectorAdd (prox->s.origin, mins, mins);
+		VectorAdd (prox->s.origin, maxs, maxs);
 	}
 
 	// use the prox timer if available

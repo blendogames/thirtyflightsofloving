@@ -19,6 +19,7 @@ static int	sound_shoot;
 static int	sound_saw;
 static int	sound_drag;
 
+#define GRENADE_VELOCITY 632.4555320337
 
 void ogre_check_refire (edict_t *self);
 void ogre_attack (edict_t *self);
@@ -312,7 +313,7 @@ void ogre_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
 {
 	int		n;
 
-// check for gib
+	// check for gib
 	if ( (self->health <= self->gib_health) && !(self->spawnflags & SF_MONSTER_NOGIB) )
 	{
 		gi.sound (self, CHAN_VOICE|CHAN_RELIABLE, sound_gib, 1, ATTN_NORM, 0);
@@ -333,7 +334,7 @@ void ogre_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
 	if (self->deadflag == DEAD_DEAD)
 		return;
 
-// regular death
+	// regular death
 	gi.sound (self, CHAN_VOICE, sound_death, 1, ATTN_NORM, 0);
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_YES;
@@ -348,18 +349,17 @@ void ogre_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
 void ogre_grenade_fire (edict_t *self)
 {
 
-	vec3_t	start;
-	vec3_t	forward, right;
-	vec3_t	target;
-	vec3_t	aim;
-	
+	vec3_t		start, target;
+	vec3_t		forward, right, aim;
+	vec_t		monster_speed;
+
 	AngleVectors (self->s.angles, forward, right, NULL);
 	G_ProjectSource (self->s.origin, monster_flash_offset[MZ2_GUNNER_GRENADE_1], forward, right, start);
 
 	// project enemy back a bit and target there
 	VectorCopy (self->enemy->s.origin, target);
 	
-	//if (range(self,self->enemy) > RANGE_MID)
+//	if (range(self,self->enemy) > RANGE_MID)
 	VectorMA (target, -0.1, self->enemy->velocity, target);
 	
 	if (range(self,self->enemy) > RANGE_MID)
@@ -367,16 +367,65 @@ void ogre_grenade_fire (edict_t *self)
 	else
 		target[2] += self->enemy->viewheight*0.8;
 	
-	VectorSubtract (target, start, aim);
-	VectorNormalize (aim);
-	
+//	VectorSubtract (target, start, aim);
+//	VectorNormalize (aim);
+
+	if (self->enemy)
+	{
+		float	range;
+
+		VectorSubtract (target, self->s.origin, aim);
+		range = VectorLength (aim);
+
+		// aim at enemy's feet if he's at same elevation or lower, otherwise aim at origin
+		VectorCopy (self->enemy->s.origin, target);
+		if (self->enemy->absmin[2] <= self->absmax[2])
+			target[2] = self->enemy->absmin[2];
+
+		// Lazarus fog reduction of accuracy
+		if ( self->monsterinfo.visibility < FOG_CANSEEGOOD )
+		{
+			target[0] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
+			target[1] += crandom() * 640 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
+			target[2] += crandom() * 320 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
+		}
+
+		// lead target... 20, 35, 50, 65 chance of leading
+		if ( random() < (0.2 + skill->value * 0.15) )
+		{
+			float	dist, time;
+
+			VectorSubtract (target, start, aim);
+			dist = VectorLength (aim);
+			time = dist / GRENADE_VELOCITY;  // Not correct, but better than nothin'
+			VectorMA (target, time, self->enemy->velocity, target);
+		}
+	}
+
+	AimGrenade (self, start, target, GRENADE_VELOCITY, aim, false);
+	// Lazarus - take into account (sort of) feature of adding shooter's velocity to
+	// grenade velocity
+	monster_speed = VectorLength(self->velocity);
+	if (monster_speed > 0)
+	{
+		vec3_t	v1;
+		vec_t	delta;
+
+		VectorCopy (self->velocity, v1);
+		VectorNormalize (v1);
+		delta = -monster_speed / GRENADE_VELOCITY;
+		VectorMA (aim, delta, v1, aim);
+		VectorNormalize (aim);
+	}
+
 	gi.WriteByte (svc_muzzleflash);
 	gi.WriteShort (self-g_edicts);
 	gi.WriteByte (MZ_MACHINEGUN | 128);
 	gi.multicast (self->s.origin, MULTICAST_PVS);
 
 	gi.sound (self, CHAN_WEAPON|CHAN_RELIABLE, sound_shoot, 1.0, ATTN_NORM, 0);
-	q1_fire_grenade (self, start, aim, 40, 600, 2.5, 80);
+//	q1_fire_grenade (self, start, aim, 40, 600, 2.5, 80);
+	q1_fire_grenade (self, start, aim, 40, GRENADE_VELOCITY, 2.5, 80);
 }
 
 
@@ -496,7 +545,7 @@ void ogre_attack (edict_t *self)
 	{
 		self->monsterinfo.currentmove = &ogre_move_swing_attack;
 	}
-	else if (visible(self,self->enemy) && infront(self,self->enemy)
+	else if (visible(self,self->enemy) && infront(self, self->enemy)
 		&& (r < RANGE_FAR) && !(self->monsterinfo.aiflags & AI_SOUND_TARGET))
 	{
 		self->monsterinfo.currentmove = &ogre_move_attack_grenade;
@@ -595,6 +644,13 @@ void SP_monster_q1_ogre (edict_t *self)
 	gi.linkentity (self);
 
 	self->monsterinfo.currentmove = &ogre_move_stand;	
+	if (self->health < 0)
+	{
+		mmove_t	*deathmoves[] = {&ogre_move_death1,
+			                     &ogre_move_death2,
+								 NULL};
+		M_SetDeath (self, (mmove_t **)&deathmoves);
+	}
 	self->monsterinfo.scale = MODEL_SCALE;
 
 	walkmonster_start (self);

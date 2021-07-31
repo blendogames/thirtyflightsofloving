@@ -524,12 +524,13 @@ void boss2_dead (edict_t *self)
 
 void boss2_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
-	self->s.skinnum |= 1;
 	if (!(self->fogclip & 2)) //custom bloodtype flag check
 		self->blood_type = 3; //sparks and blood
 
 	self->monsterinfo.power_armor_type = POWER_ARMOR_NONE;
+
 	gi.sound (self, CHAN_VOICE, sound_death, 1, ATTN_NORM, 0); // was ATTN_NONE
+	self->s.skinnum |= 1;
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_NO;
 	self->count = 0;
@@ -729,17 +730,20 @@ void SP_monster_boss2 (edict_t *self)
 	{
 		mmove_t	*deathmoves[] = {&boss2_move_death,
 								 NULL};
-		M_SetDeath(self,(mmove_t **)&deathmoves);
+		M_SetDeath (self, (mmove_t **)&deathmoves);
 	}
 	self->monsterinfo.scale = MODEL_SCALE;
 
 	// Lazarus power armor
-	if (self->powerarmor) {
-		self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
+	if (self->powerarmor)
+	{
+		if (self->powerarmortype == 1)
+			self->monsterinfo.power_armor_type = POWER_ARMOR_SCREEN;
+		else
+			self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
 		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
 
-//	self->common_name = "Flying Boss";
 	self->common_name = "Hornet";
 	self->class_id = ENTITY_MONSTER_BOSS2;
 

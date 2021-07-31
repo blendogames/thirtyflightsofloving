@@ -341,6 +341,29 @@ void soldier_run (edict_t *self)
 
 
 //
+// JUMP
+//
+
+mframe_t soldier_frames_jump [] =
+{
+	ai_move, 0, NULL,
+	ai_move, 0, NULL,
+	ai_move, 0, NULL,
+	ai_move, 0, NULL,
+	ai_move, 0, NULL,
+	ai_move, 0, NULL,
+	ai_move, 0, NULL,
+	ai_move, 0, NULL
+};
+mmove_t soldier_move_jump = { FRAME_run01, FRAME_run08, soldier_frames_jump, soldier_run };
+
+void soldier_jump (edict_t *self)
+{
+	self->monsterinfo.currentmove = &soldier_move_jump;
+}
+
+
+//
 // PAIN
 //
 
@@ -1177,9 +1200,9 @@ void soldier_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dama
 {
 	int		n;
 
-	self->s.skinnum |= 1;
 	self->monsterinfo.power_armor_type = POWER_ARMOR_NONE;
-// check for gib
+
+	// check for gib
 	if (self->health <= self->gib_health && !(self->spawnflags & SF_MONSTER_NOGIB) )
 	{
 		gi.sound (self, CHAN_VOICE, gi.soundindex ("misc/udeath.wav"), 1, ATTN_NORM, 0);
@@ -1194,7 +1217,8 @@ void soldier_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dama
 	if (self->deadflag == DEAD_DEAD)
 		return;
 
-// regular death
+	// regular death
+	self->s.skinnum |= 1;
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_YES;
 	self->s.skinnum |= 1;
@@ -1226,24 +1250,6 @@ void soldier_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dama
 		self->monsterinfo.currentmove = &soldier_move_death6;
 }
 
-
-mframe_t soldier_frames_jump [] =
-{
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL
-};
-mmove_t soldier_move_jump = { FRAME_run01, FRAME_run08, soldier_frames_jump, soldier_run };
-
-void soldier_jump (edict_t *self)
-{
-	self->monsterinfo.currentmove = &soldier_move_jump;
-}
 
 //
 // SPAWN
@@ -1280,6 +1286,7 @@ void SP_monster_soldier_x (edict_t *self)
 	self->monsterinfo.attack = soldier_attack;
 	self->monsterinfo.melee = NULL;
 	self->monsterinfo.sight = soldier_sight;
+
 	if (monsterjump->value)
 	{
 		self->monsterinfo.jump = soldier_jump;
@@ -1290,7 +1297,10 @@ void SP_monster_soldier_x (edict_t *self)
 	// DWH
 	if (self->powerarmor)
 	{
-		self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
+		if (self->powerarmortype == 1)
+			self->monsterinfo.power_armor_type = POWER_ARMOR_SCREEN;
+		else
+			self->monsterinfo.power_armor_type = POWER_ARMOR_SHIELD;
 		self->monsterinfo.power_armor_power = self->powerarmor;
 	}
 	// end DWH
@@ -1309,7 +1319,7 @@ void SP_monster_soldier_x (edict_t *self)
 								 &soldier_move_death5,
 								 &soldier_move_death6,
 								 NULL};
-		M_SetDeath(self,(mmove_t **)&deathmoves);
+		M_SetDeath(self, (mmove_t **)&deathmoves);
 	}
 	walkmonster_start (self);
 }

@@ -172,7 +172,7 @@ __inline int Q_vsnprintf (char *Dest, size_t Count, const char *Format, va_list 
 
 #define SAVEGAME_USE_FUNCTION_TABLE
 #define SAVEGAME_DLLNAME "Lazarus Quake II mod with CTF"
-#define SAVEGAME_VERSION 2
+#define SAVEGAME_VERSION 4
 
 // angle indexes
 #define	PITCH				0		// up / down

@@ -689,17 +689,12 @@ void hover_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 {
 	int		n;
 
-	self->s.skinnum |= 1;
-	/*if (strcmp(self->classname, "monster_daedalus") == 0)
-		self->s.skinnum = 3;
-	else
-		self->s.skinnum = 1;*/
 	self->s.effects = 0;
 	self->monsterinfo.power_armor_type = POWER_ARMOR_NONE;
 
 	self->activator = attacker; //Knightmare- save for explosion
 
-// check for gib
+	// check for gib
 	if (self->health <= self->gib_health)
 	{
 		gi.sound (self, CHAN_VOICE, gi.soundindex ("misc/udeath.wav"), 1, ATTN_NORM, 0);
@@ -712,7 +707,7 @@ void hover_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 		for (n = 0; n < 6; n++)
 			ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", 0, 0, damage, GIB_ORGANIC);
 		ThrowGib (self, "models/objects/gibs/head2/tris.md2", 0, 0, damage, GIB_ORGANIC);
-		BecomeExplosion1(self);
+		BecomeExplosion1 (self);
 	//	self->deadflag = DEAD_DEAD;
 		return;
 	}
@@ -720,7 +715,7 @@ void hover_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 	if (self->deadflag == DEAD_DEAD)
 		return;
 
-// regular death
+	// regular death
 	// PMM - daedalus sounds
 //	if (strcmp(self->classname, "monster_daedalus"))
 	if ( !(self->moreflags & FL2_COMMANDER) )
@@ -737,6 +732,11 @@ void hover_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 		else
 			gi.sound (self, CHAN_VOICE, daed_sound_death2, 1, ATTN_NORM, 0);
 	}
+	/*if (strcmp(self->classname, "monster_daedalus") == 0)
+		self->s.skinnum = 3;
+	else
+		self->s.skinnum = 1;*/
+	self->s.skinnum |= 1;
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_YES;
 	self->monsterinfo.currentmove = &hover_move_death1;
@@ -881,7 +881,13 @@ void SP_monster_hover (edict_t *self)
 
 	gi.linkentity (self);
 
-	self->monsterinfo.currentmove = &hover_move_stand;	
+	self->monsterinfo.currentmove = &hover_move_stand;
+	if (self->health < 0)
+	{
+		mmove_t	*deathmoves[] = {&hover_move_death1,
+								 NULL};
+		M_SetDeath (self, (mmove_t **)&deathmoves);
+	}
 	self->monsterinfo.scale = MODEL_SCALE;
 
 	flymonster_start (self);

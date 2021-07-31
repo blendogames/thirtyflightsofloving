@@ -359,7 +359,8 @@ mmove_t q1grunt_move_death2 = {FRAME_deathc1, FRAME_deathc11, q1grunt_frames_dea
 void q1grunt_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
 	int		n;
-// check for gib
+
+	// check for gib
 	if (self->health <= self->gib_health && !(self->spawnflags & SF_MONSTER_NOGIB))
 	{
 		gi.sound (self, CHAN_VOICE|CHAN_RELIABLE, sound_gib, 1, ATTN_NORM, 0);
@@ -379,7 +380,7 @@ void q1grunt_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dama
 	if (self->deadflag == DEAD_DEAD)
 		return;
 
-// regular death
+	// regular death
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_YES;
 
@@ -475,6 +476,13 @@ void SP_monster_q1_grunt (edict_t *self)
 	gi.linkentity (self);
 
 	self->monsterinfo.currentmove = &q1grunt_move_stand;
+	if (self->health < 0)
+	{
+		mmove_t	*deathmoves[] = {&q1grunt_move_death1,
+			                     &q1grunt_move_death1,
+								 NULL};
+		M_SetDeath (self, (mmove_t **)&deathmoves);
+	}
 	self->monsterinfo.scale = MODEL_SCALE;
 
 	walkmonster_start (self);

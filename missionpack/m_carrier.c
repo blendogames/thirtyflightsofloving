@@ -1180,12 +1180,12 @@ void carrier_dead (edict_t *self)
 
 void carrier_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
-	self->s.skinnum |= 1;
-	if (!(self->fogclip& 2)) //custom bloodtype flag check
-		self->blood_type = 3; //sparks and blood
+	if (!(self->fogclip& 2)) // custom bloodtype flag check
+		self->blood_type = 3; // sparks and blood
 	self->monsterinfo.power_armor_type = POWER_ARMOR_NONE;
 
 	gi.sound (self, CHAN_VOICE, sound_death, 1, ATTN_NONE, 0);
+	self->s.skinnum |= 1;
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_NO;
 	self->count = 0;
@@ -1399,9 +1399,9 @@ void SP_monster_carrier (edict_t *self)
 	self->monsterinfo.checkattack = Carrier_CheckAttack;
 
 	if (!self->blood_type)
-		self->blood_type = 2; //sparks
+		self->blood_type = 2; // sparks
 	else
-		self->fogclip |= 2; //custom bloodtype flag
+		self->fogclip |= 2; // custom bloodtype flag
 
 	// Lazarus
 	if (self->powerarmor)
@@ -1417,7 +1417,13 @@ void SP_monster_carrier (edict_t *self)
 
 	gi.linkentity (self);
 
-	self->monsterinfo.currentmove = &carrier_move_stand;	
+	self->monsterinfo.currentmove = &carrier_move_stand;
+	if (self->health < 0)
+	{
+		mmove_t	*deathmoves[] = {&carrier_move_death,
+								 NULL};
+		M_SetDeath (self, (mmove_t **)&deathmoves);
+	}
 	self->monsterinfo.scale = MODEL_SCALE;
 
 	CarrierPrecache();

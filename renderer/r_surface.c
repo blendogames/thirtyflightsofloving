@@ -490,7 +490,7 @@ void R_DrawGLPoly (msurface_t *surf, qboolean render)
 {
 	glpoly_t		*p;
 	int				nv, i;
-	float			scroll, alpha;	// *v
+	float			scroll, alpha;
 	qboolean		light;
 	mpolyvertex_t	*v;
 
@@ -511,7 +511,6 @@ void R_DrawGLPoly (msurface_t *surf, qboolean render)
 	{
 		nv = p->numverts;
 		c_brush_polys += (nv-2);
-	//	v = p->verts[0];
 		if (RB_CheckArrayOverflow (nv, (nv-2)*3))
 			RB_RenderGLPoly (surf, light);
 		for (i=0; i < nv-2; i++) {
@@ -519,23 +518,16 @@ void R_DrawGLPoly (msurface_t *surf, qboolean render)
 			indexArray[rb_index++] = rb_vertex+i+1;
 			indexArray[rb_index++] = rb_vertex+i+2;
 		}
-	//	for (i=0; i < nv; i++, v+= VERTEXSIZE)
 		for (i=0, v=&p->verts[0]; i < nv; i++, v++)
 		{
-		//	if (light && p->vertexlight && p->vertexlightset)
 			if (light && p->vertexlightset)
 				VA_SetElem4(colorArray[rb_vertex],
-				//	(float)(p->vertexlight[i*3+0]*DIV255),
-				//	(float)(p->vertexlight[i*3+1]*DIV255),
-				//	(float)(p->vertexlight[i*3+2]*DIV255), alpha);
 					(float)(v->lightcolor[0]*DIV255),
 					(float)(v->lightcolor[1]*DIV255),
 					(float)(v->lightcolor[2]*DIV255), alpha);
 			else
 				VA_SetElem4(colorArray[rb_vertex], glState.inverse_intensity, glState.inverse_intensity, glState.inverse_intensity, alpha);
 
-		//	VA_SetElem2(texCoordArray[0][rb_vertex], v[3]+scroll, v[4]);
-		//	VA_SetElem3(vertexArray[rb_vertex], v[0], v[1], v[2]);
 			VA_SetElem2(texCoordArray[0][rb_vertex], v->texture_st[0]+scroll, v->texture_st[1]);
 			VA_SetElem3v(vertexArray[rb_vertex], v->xyz);
 			rb_vertex++;
@@ -1106,7 +1098,7 @@ void R_DrawLightmappedSurface (msurface_t *surf, qboolean render)
 {
 	glpoly_t	*p;
 	int			nv, i;
-	float		scroll, alpha;	// *v
+	float		scroll, alpha;
 	mpolyvertex_t	*v;
 
 	c_brush_surfs++;
@@ -1129,7 +1121,6 @@ void R_DrawLightmappedSurface (msurface_t *surf, qboolean render)
 	{
 		nv = p->numverts;
 		c_brush_polys += (nv-2);
-	//	v = p->verts[0];
 		if (RB_CheckArrayOverflow (nv, (nv-2)*3))
 			RB_RenderLightmappedSurface (surf);
 		for (i=0; i < nv-2; i++) {
@@ -1137,13 +1128,8 @@ void R_DrawLightmappedSurface (msurface_t *surf, qboolean render)
 			indexArray[rb_index++] = rb_vertex+i+1;
 			indexArray[rb_index++] = rb_vertex+i+2;
 		}
-	//	for (i=0; i < nv; i++, v+= VERTEXSIZE)
 		for (i=0, v=&p->verts[0]; i < nv; i++, v++)
 		{
-		//	VA_SetElem2(inTexCoordArray[rb_vertex], v[3], v[4]);
-		//	VA_SetElem2(texCoordArray[0][rb_vertex], (v[3]+scroll), v[4]);
-		//	VA_SetElem2(texCoordArray[1][rb_vertex], v[5], v[6]);
-		//	VA_SetElem3(vertexArray[rb_vertex], v[0], v[1], v[2]);
 			VA_SetElem2(inTexCoordArray[rb_vertex], v->texture_st[0], v->texture_st[1]);
 			VA_SetElem2(texCoordArray[0][rb_vertex], (v->texture_st[0]+scroll), v->texture_st[1]);
 			VA_SetElem2(texCoordArray[1][rb_vertex], v->lightmap_st[0], v->lightmap_st[1]);
@@ -1820,23 +1806,12 @@ void R_BuildPolygonFromSurface (msurface_t *surf)
 	//
 	// draw texture
 	//
-//	poly = Hunk_Alloc (sizeof(glpoly_t) + (lnumverts-4) * VERTEXSIZE*sizeof(float));
 	poly = Hunk_Alloc (sizeof(glpoly_t) + (lnumverts-4) * sizeof(mpolyvertex_t));
 	poly->next = surf->polys;
 	poly->flags = surf->flags;
 	surf->polys = poly;
 	poly->numverts = lnumverts;
 	poly->vertexlightset = false;
-
-	// alloc vertex light fields
-/*	if (surf->texinfo->flags & (SURF_TRANS33|SURF_TRANS66)) {
-		int size = lnumverts*3*sizeof(byte);
-		poly->vertexlight = Hunk_Alloc(size);
-		poly->vertexlightbase = Hunk_Alloc(size);
-		memset(poly->vertexlight, 0, size);
-		memset(poly->vertexlightbase, 0, size);
-		poly->vertexlightset = false;
-	} */
 
 	for (i=0; i<lnumverts; i++)
 	{
@@ -1862,9 +1837,6 @@ void R_BuildPolygonFromSurface (msurface_t *surf)
 		t /= surf->texinfo->texHeight; //surf->texinfo->image->height; changed to Q2E hack
 		
 		VectorAdd (total, vec, total);
-	//	VectorCopy (vec, poly->verts[i]);
-	//	poly->verts[i][3] = s;
-	//	poly->verts[i][4] = t;
 		VectorCopy (vec, poly->verts[i].xyz);
 		poly->verts[i].texture_st[0] = s;
 		poly->verts[i].texture_st[1] = t;
@@ -1876,16 +1848,14 @@ void R_BuildPolygonFromSurface (msurface_t *surf)
 		s -= surf->texturemins[0];
 		s += surf->light_s*16;
 		s += 8;
-		s /= LM_BLOCK_WIDTH*16; //surf->texinfo->texture->width;
+		s /= LM_BLOCK_WIDTH*16; // surf->texinfo->texture->width;
 
 		t = DotProduct (vec, surf->texinfo->vecs[1]) + surf->texinfo->vecs[1][3];
 		t -= surf->texturemins[1];
 		t += surf->light_t*16;
 		t += 8;
-		t /= LM_BLOCK_HEIGHT*16; //surf->texinfo->texture->height;
+		t /= LM_BLOCK_HEIGHT*16; // surf->texinfo->texture->height;
 
-	//	poly->verts[i][5] = s;
-	//	poly->verts[i][6] = t;
 		poly->verts[i].lightmap_st[0] = s;
 		poly->verts[i].lightmap_st[1] = t;
 	}
@@ -1940,14 +1910,11 @@ qboolean R_BuildVertexLightBase (msurface_t *surf, glpoly_t *poly)
 {
 	vec3_t		color, point;
 	int			i, j;
-//	float		*v;
 	qboolean	lit = false;
 	mpolyvertex_t		*v;
 
-//	for (i=0, v=poly->verts[0]; i<poly->numverts; i++, v+=VERTEXSIZE)
 	for (i=0, v=&poly->verts[0]; i<poly->numverts; i++, v++)
 	{
-	//	VectorCopy(v, point); // lerp outward away from plane to avoid dark spots?
 		VectorCopy(v->xyz, point); // lerp outward away from plane to avoid dark spots?
 		// lerp between each vertex and origin - use check for too dark?
 		// this messes up curved glass surfaces
@@ -1961,9 +1928,6 @@ qboolean R_BuildVertexLightBase (msurface_t *surf, glpoly_t *poly)
 			if (color[j] > 0.0f)
 				lit = true;
 
-	//	poly->vertexlightbase[i*3+0] = (byte)(color[0]*255.0);
-	//	poly->vertexlightbase[i*3+1] = (byte)(color[1]*255.0);
-	//	poly->vertexlightbase[i*3+2] = (byte)(color[2]*255.0);
 		v->basecolor[0] = (byte)(color[0]*255.0);
 		v->basecolor[1] = (byte)(color[1]*255.0);
 		v->basecolor[2] = (byte)(color[2]*255.0);
@@ -1981,7 +1945,6 @@ void R_BuildVertexLight (msurface_t *surf)
 {
 	vec3_t			color, point;
 	int				i;
-//	float			*v;
 	glpoly_t		*poly;
 	mpolyvertex_t	*v;
 
@@ -1995,9 +1958,6 @@ void R_BuildVertexLight (msurface_t *surf)
 
 	for (poly=surf->polys; poly; poly=poly->next)
 	{
-	//	if (!poly->vertexlight || !poly->vertexlightbase)
-	//		continue;
-
 		if (/*glState.resetVertexLights ||*/ !poly->vertexlightset)
 		{	
 			R_BuildVertexLightBase(surf, poly);
@@ -2008,10 +1968,8 @@ void R_BuildVertexLight (msurface_t *surf)
 		//		return; // don't bother if lightbase is all black
 		}
 
-	//	for (i=0, v=poly->verts[0]; i<poly->numverts; i++, v+=VERTEXSIZE)
 		for (i=0, v=&poly->verts[0]; i<poly->numverts; i++, v++)
 		{
-		//	VectorCopy(v, point); // lerp outward away from plane to avoid dark spots?
 			VectorCopy(v->xyz, point); // lerp outward away from plane to avoid dark spots?
 			// lerp between each vertex and origin - use check for too dark?
 			// this messes up curved glass surfaces
@@ -2021,18 +1979,12 @@ void R_BuildVertexLight (msurface_t *surf)
 			R_SurfLightPoint (surf, point, color, false);
 
 			VectorSet(color,
-			//	(float)poly->vertexlightbase[i*3+0]/255.0 + color[0],
-			//	(float)poly->vertexlightbase[i*3+1]/255.0 + color[1],
-			//	(float)poly->vertexlightbase[i*3+2]/255.0 + color[2]);
 				(float)v->basecolor[0]/255.0 + color[0],
 				(float)v->basecolor[1]/255.0 + color[1],
 				(float)v->basecolor[2]/255.0 + color[2]);
 				
 			R_MaxColorVec (color);
 
-		//	poly->vertexlight[i*3+0] = (byte)(color[0]*255.0);
-		//	poly->vertexlight[i*3+1] = (byte)(color[1]*255.0);
-		//	poly->vertexlight[i*3+2] = (byte)(color[2]*255.0);
 			v->lightcolor[0] = (byte)(color[0]*255.0);
 			v->lightcolor[1] = (byte)(color[1]*255.0);
 			v->lightcolor[2] = (byte)(color[2]*255.0);
