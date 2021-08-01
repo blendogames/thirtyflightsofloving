@@ -276,7 +276,7 @@ void tank_pain (edict_t *self, edict_t *other, float kick, int damage)
 		return;
 
 	if (level.time < self->pain_debounce_time)
-			return;
+		return;
 
 	if (damage <= 30)
 		if (random() > 0.2)

@@ -551,32 +551,32 @@ void q1zombie_pain (edict_t *self, edict_t *other, float kick, int damage)
 	}
 
 	if (self->pain_debounce_time > level.time)
-	return;
+		return;
 	
 	r = random();
 
 	if (r < 0.25)
 	{
-		self->monsterinfo.currentmove = &q1zombie_move_pain1;
-		gi.sound (self, CHAN_VOICE, sound_pain, 1, ATTN_NORM, 0);
 		self->pain_debounce_time = level.time + 1.0;
+		gi.sound (self, CHAN_VOICE, sound_pain, 1, ATTN_NORM, 0);
+		self->monsterinfo.currentmove = &q1zombie_move_pain1;
 	}
 	else if (r < 0.5)
 	{
-		self->monsterinfo.currentmove = &q1zombie_move_pain2;
-		gi.sound (self, CHAN_VOICE, sound_pain2, 1, ATTN_NORM, 0);
 		self->pain_debounce_time = level.time + 1.5;
+		gi.sound (self, CHAN_VOICE, sound_pain2, 1, ATTN_NORM, 0);
+		self->monsterinfo.currentmove = &q1zombie_move_pain2;
 	}
 	else if (r < 0.75)
 	{
-		self->monsterinfo.currentmove = &q1zombie_move_pain3;
-		gi.sound (self, CHAN_VOICE, sound_pain2, 1, ATTN_NORM, 0);
 		self->pain_debounce_time = level.time + 1.1;
+		gi.sound (self, CHAN_VOICE, sound_pain2, 1, ATTN_NORM, 0);
+		self->monsterinfo.currentmove = &q1zombie_move_pain3;
 	}
 	else
 	{
-		self->monsterinfo.currentmove = &q1zombie_move_pain4;
 		self->pain_debounce_time = level.time + 1.0;
+		self->monsterinfo.currentmove = &q1zombie_move_pain4;
 	}
 }
 

@@ -152,11 +152,10 @@ void scrag_pain (edict_t *self, edict_t *other, float kick, int damage)
 		return;
 
 	self->pain_debounce_time = level.time + 2;
-	if (skill->value == 3)
-		return;		// no pain anims in nightmare
 
 	if (self->health > 0)
 		gi.sound (self, CHAN_VOICE, sound_pain, 1, ATTN_NORM, 0);
+
 	self->monsterinfo.currentmove = &scrag_move_pain;
 }
 

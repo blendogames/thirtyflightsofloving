@@ -258,6 +258,9 @@ void gladb_pain (edict_t *self, edict_t *other, float kick, int damage)
 	else
 		gi.sound (self, CHAN_VOICE, sound_pain2, 1, ATTN_NORM, 0);
 
+	if (skill->value == 3)
+		return;		// no pain anims in nightmare
+
 	if (self->velocity[2] > 100)
 		self->monsterinfo.currentmove = &gladb_move_pain_air;
 	else

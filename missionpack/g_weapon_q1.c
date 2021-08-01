@@ -452,10 +452,10 @@ void q1_fire_grenade (edict_t *self, vec3_t start, vec3_t aimdir, int damage, in
 	VectorScale (aimdir, speed, grenade->velocity);
 	// Lazarus - keep same vertical boost for players, but monsters do a better job
 	//           of calculating aim direction, so throw that out
-	if (self->client)
+//	if (self->client)
 		VectorMA (grenade->velocity, 200 + (random() - 0.5) * 20.0, up, grenade->velocity);
-	else
-		VectorMA (grenade->velocity, (random() - 0.5) * 20.0, up, grenade->velocity);
+//	else
+//		VectorMA (grenade->velocity, (random() - 0.5) * 20.0, up, grenade->velocity);
 
 	VectorMA (grenade->velocity, (random() - 0.5) * 20.0, right, grenade->velocity);
 	VectorSet (grenade->avelocity, 300, 300, 300);

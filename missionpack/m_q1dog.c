@@ -20,7 +20,7 @@ static int	sound_idle;
 
 void q1dog_idle (edict_t *self)
 {
-	if(random() < 0.2)
+	if (random() < 0.2)
 	gi.sound (self, CHAN_VOICE, sound_idle, 1, ATTN_IDLE, 0);
 }
 
@@ -134,18 +134,14 @@ mmove_t q1dog_move_pain2 = {FRAME_painb1, FRAME_painb16, q1dog_frames_pain2, q1d
 void q1dog_pain (edict_t *self, edict_t *other, float kick, int damage)
 {
 	if (level.time < self->pain_debounce_time)
-	return;
+		return;
 
 	self->pain_debounce_time = level.time + 1;
 	
-	if (skill->value == 3)
-		return;
-
 	if (self->health > 0)
 		gi.sound (self, CHAN_VOICE, sound_pain, 1, ATTN_NORM, 0); //WAS ATTN_IDLE
 	
-
-	if(random() < 0.5)
+	if (random() < 0.5)
 		self->monsterinfo.currentmove = &q1dog_move_pain1;
 	else
 		self->monsterinfo.currentmove = &q1dog_move_pain2;
@@ -418,7 +414,7 @@ void q1dog_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_YES;
 
-	if(random() < 0.5)
+	if (random() < 0.5)
 		self->monsterinfo.currentmove = &q1dog_move_death1;
 	else
 		self->monsterinfo.currentmove = &q1dog_move_death2;

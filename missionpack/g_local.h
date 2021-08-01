@@ -1740,8 +1740,6 @@ void kick_attack (edict_t *ent);
 // g_newweap.c
 //
 //extern float nuke_framenum;
-extern	vec3_t proxMins;
-extern	vec3_t proxMaxs;
 void fire_flechette (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage);
 //void fire_prox (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed);		
 void fire_prox (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int damage_multiplier, int speed, int health, float timer, float damage_radius);

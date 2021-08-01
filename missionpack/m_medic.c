@@ -767,13 +767,15 @@ void medic_pain (edict_t *self, edict_t *other, float kick, int damage)
 	}
 	else if (random() < 0.5)
 	{
-		self->monsterinfo.currentmove = &medic_move_pain1;
 		gi.sound (self, CHAN_VOICE, sound_pain1, 1, ATTN_NORM, 0);
+
+		self->monsterinfo.currentmove = &medic_move_pain1;
 	}
 	else
 	{
-		self->monsterinfo.currentmove = &medic_move_pain2;
 		gi.sound (self, CHAN_VOICE, sound_pain2, 1, ATTN_NORM, 0);
+
+		self->monsterinfo.currentmove = &medic_move_pain2;
 	}
 	// PMM - clear duck flag
 	if (self->monsterinfo.aiflags & AI_DUCKED)

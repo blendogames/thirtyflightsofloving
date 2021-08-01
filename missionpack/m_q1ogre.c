@@ -211,33 +211,28 @@ void ogre_pain (edict_t *self, edict_t *other, float kick, int damage)
 
 	if (r < 0.25)
 	{
-		self->monsterinfo.currentmove = &ogre_move_pain1;
 		self->pain_debounce_time = level.time + 1;
-		
+		self->monsterinfo.currentmove = &ogre_move_pain1;
 	}
 	else if (r < 0.5)
 	{
-		self->monsterinfo.currentmove = &ogre_move_pain2;
 		self->pain_debounce_time = level.time + 1;
-		
+		self->monsterinfo.currentmove = &ogre_move_pain2;
 	}
 	else if (r < 0.75)
 	{
-		self->monsterinfo.currentmove = &ogre_move_pain3;
 		self->pain_debounce_time = level.time + 1;
-		
+		self->monsterinfo.currentmove = &ogre_move_pain3;
 	}
 	else if (r < 0.88)
 	{
-		self->monsterinfo.currentmove = &ogre_move_pain4;
 		self->pain_debounce_time = level.time + 2;
-		
+		self->monsterinfo.currentmove = &ogre_move_pain4;
 	}
 	else
 	{
-		self->monsterinfo.currentmove =  &ogre_move_pain5;
 		self->pain_debounce_time = level.time + 2;
-		
+		self->monsterinfo.currentmove =  &ogre_move_pain5;
 	}
 }
 
@@ -351,7 +346,7 @@ void ogre_grenade_fire (edict_t *self)
 
 	vec3_t		start, target;
 	vec3_t		forward, right, aim;
-	vec_t		monster_speed;
+//	vec_t		monster_speed;
 
 	AngleVectors (self->s.angles, forward, right, NULL);
 	G_ProjectSource (self->s.origin, monster_flash_offset[MZ2_GUNNER_GRENADE_1], forward, right, start);
@@ -367,9 +362,7 @@ void ogre_grenade_fire (edict_t *self)
 	else
 		target[2] += self->enemy->viewheight*0.8;
 	
-//	VectorSubtract (target, start, aim);
-//	VectorNormalize (aim);
-
+#if 0
 	if (self->enemy)
 	{
 		float	range;
@@ -417,6 +410,10 @@ void ogre_grenade_fire (edict_t *self)
 		VectorMA (aim, delta, v1, aim);
 		VectorNormalize (aim);
 	}
+#else
+	VectorSubtract (target, start, aim);
+	VectorNormalize (aim);
+#endif
 
 	gi.WriteByte (svc_muzzleflash);
 	gi.WriteShort (self-g_edicts);
@@ -424,8 +421,8 @@ void ogre_grenade_fire (edict_t *self)
 	gi.multicast (self->s.origin, MULTICAST_PVS);
 
 	gi.sound (self, CHAN_WEAPON|CHAN_RELIABLE, sound_shoot, 1.0, ATTN_NORM, 0);
-//	q1_fire_grenade (self, start, aim, 40, 600, 2.5, 80);
-	q1_fire_grenade (self, start, aim, 40, GRENADE_VELOCITY, 2.5, 80);
+	q1_fire_grenade (self, start, aim, 40, 600, 2.5, 80);
+//	q1_fire_grenade (self, start, aim, 40, GRENADE_VELOCITY, 2.5, 80);
 }
 
 

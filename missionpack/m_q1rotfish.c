@@ -134,6 +134,7 @@ void q1rotfish_bite (edict_t *self)
 	VectorSet (aim, Q1_FISH_MELEE_DISTANCE, 0, 0);
 
 	gi.sound (self, CHAN_WEAPON, sound_chomp, 1, ATTN_NORM, 0);
+
 	fire_hit (self, aim, (random() + random()) * 3, 0);
 }
 
@@ -167,6 +168,11 @@ void q1rotfish_melee(edict_t *self)
 
 void q1rotfish_pain (edict_t *self, edict_t *other, float kick, int damage)
 {
+	if (level.time < self->pain_debounce_time)
+		return;
+
+	self->pain_debounce_time = level.time + 1.1;
+
 	self->monsterinfo.currentmove = &q1rotfish_move_pain1;
 }
 

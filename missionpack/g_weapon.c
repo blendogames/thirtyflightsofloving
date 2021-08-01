@@ -942,6 +942,9 @@ qboolean AimGrenade (edict_t *self, vec3_t start, vec3_t target, vec_t speed, ve
 	float		last_error, v_error;
 	int			i;
 	vec3_t		last_aim;
+	// Knightmare- wider bounds to avoid prox collision
+	vec3_t		proxMins = {-8, -8, -8};
+	vec3_t		proxMaxs = {8, 8, 8};
 
 	VectorCopy (target, aim_point);
 	VectorSubtract (aim_point, self->s.origin, from_origin);

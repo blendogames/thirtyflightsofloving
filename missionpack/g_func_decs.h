@@ -1133,6 +1133,7 @@ extern void GunnerFire ( edict_t * self ) ;
 extern void gunner_opengun ( edict_t * self ) ;
 extern void gunner_duck_down ( edict_t * self ) ;
 extern qboolean gunner_grenade_check ( edict_t * self ) ;
+extern qboolean gunner_prox_safety_check ( edict_t * self , vec3_t start , vec3_t target ) ;
 extern void gunner_die ( edict_t * self , edict_t * inflictor , edict_t * attacker , int damage , vec3_t point ) ;
 extern void gunner_dead ( edict_t * self ) ;
 extern void gunner_pain ( edict_t * self , edict_t * other , float kick , int damage ) ;

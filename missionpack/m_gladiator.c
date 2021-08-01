@@ -229,7 +229,6 @@ mmove_t gladiator_move_pain_air = {FRAME_painup1, FRAME_painup7, gladiator_frame
 
 void gladiator_pain (edict_t *self, edict_t *other, float kick, int damage)
 {
-
 	if (self->health < (self->max_health / 2))
 		self->s.skinnum |= 1;
 
@@ -254,7 +253,6 @@ void gladiator_pain (edict_t *self, edict_t *other, float kick, int damage)
 		self->monsterinfo.currentmove = &gladiator_move_pain_air;
 	else
 		self->monsterinfo.currentmove = &gladiator_move_pain;
-	
 }
 
 

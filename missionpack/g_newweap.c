@@ -151,10 +151,6 @@ void SP_flechette (edict_t *flechette)
 #define PROX_HEALTH			20
 #define PROX_DAMAGE			90
 
-// Knightmare- these are used for aiming traces to avoid collision
-vec3_t		proxMins = {-8, -8, -8};
-vec3_t		proxMaxs = {8, 8, 8};
-
 void Prox_Explode (edict_t *ent);
 //===============
 //===============
@@ -734,7 +730,12 @@ void fire_prox (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int dama
 	prox = G_Spawn();
 	VectorCopy (start, prox->s.origin);
 	VectorScale (aimdir, speed, prox->velocity);
-	VectorMA (prox->velocity, 200 + crandom() * 10.0, up, prox->velocity);
+	// Lazarus - keep same vertical boost for players, but monsters do a better job
+	//           of calculating aim direction, so throw that out
+	if (self->client)
+		VectorMA (prox->velocity, 200 + crandom() * 10.0, up, prox->velocity);
+	else
+		VectorMA (prox->velocity, crandom() * 10.0, up, prox->velocity);
 	VectorMA (prox->velocity, crandom() * 10.0, right, prox->velocity);
 	// Knightmare- add player's base velocity to prox
 	if (add_velocity_throw->value && self->client)

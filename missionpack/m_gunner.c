@@ -38,8 +38,11 @@ static int	tactician_sound_sight;
 //       (for the gunner, not for players) since the gunner now shoots 
 //       smarter, and adjusted things so that the initial velocity out 
 //       of the barrel is the same.
-#define GRENADE_VELOCITY 632.4555320337
-#define GRENADE_VELOCITY_SQUARED 400000
+#define GRENADE_VELOCITY			632.4555320337f
+#define GRENADE_VELOCITY_SQUARED	400000.0f
+// Knightmare- placement spread for Tactician Gunner prox mines
+#define	GUNNER_PROX_SPREAD			40.0f
+#define	HALF_GUNNER_PROX_SPREAD		(GUNNER_PROX_SPREAD * 0.5f)
 
 void gunner_idlesound (edict_t *self)
 {
@@ -296,6 +299,8 @@ mmove_t gunner_move_pain1 = {FRAME_pain101, FRAME_pain118, gunner_frames_pain1, 
 
 void gunner_pain (edict_t *self, edict_t *other, float kick, int damage)
 {
+	int		smallDamage, bigDamage;
+
 	if (self->health < (self->max_health / 2))
 		self->s.skinnum |= 1;
 
@@ -303,8 +308,8 @@ void gunner_pain (edict_t *self, edict_t *other, float kick, int damage)
 
 	if (!self->groundentity)
 	{
-//		if ((g_showlogic) && (g_showlogic->value))
-//			gi.dprintf ("gunner: pain avoided due to no ground\n");
+	//	if ((g_showlogic) && (g_showlogic->value))
+	//		gi.dprintf ("gunner: pain avoided due to no ground\n");
 		return;
 	}
 
@@ -329,9 +334,20 @@ void gunner_pain (edict_t *self, edict_t *other, float kick, int damage)
 	if (skill->value == 3)
 		return;		// no pain anims in nightmare
 
-	if (damage <= 10)
+	if (self->moreflags & FL2_COMMANDER) {
+		smallDamage = 20;
+		bigDamage = 50;
+	}
+	else {
+		smallDamage = 10;
+		bigDamage = 25;
+	}
+
+//	if (damage <= 10)
+	if (damage <= smallDamage)
 		self->monsterinfo.currentmove = &gunner_move_pain3;
-	else if (damage <= 25)
+//	else if (damage <= 25)
+	else if (damage <= bigDamage)
 		self->monsterinfo.currentmove = &gunner_move_pain2;
 	else
 		self->monsterinfo.currentmove = &gunner_move_pain1;
@@ -340,7 +356,7 @@ void gunner_pain (edict_t *self, edict_t *other, float kick, int damage)
 
 	// PMM - clear duck flag
 	if (self->monsterinfo.aiflags & AI_DUCKED)
-		monster_duck_up(self);
+		monster_duck_up (self);
 }
 
 void gunner_dead (edict_t *self)
@@ -412,6 +428,44 @@ void gunner_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	self->monsterinfo.currentmove = &gunner_move_death;
 }
 
+// Knightmare added
+// This calcs horizontal spread of prox mines based on distance.
+// Then it does a short-range trace at blast radius, to ensure we won't clip a wall.
+qboolean gunner_prox_safety_check (edict_t *self, vec3_t start, vec3_t target)
+{
+	trace_t		tr;
+	vec3_t		closeCheckMins, closeCheckMaxs, dir, dangerOffset, dangerTarget;
+	float		dist, dangerSpread, dangerRange = 256.0f;
+
+	// get dist to target
+	VectorSubtract (target, start, dir);
+	dist = VectorLength (dir);
+
+	// get spread at damger range
+	dangerSpread = (HALF_GUNNER_PROX_SPREAD / dist) * dangerRange;
+	dangerSpread += 8.0f;	// add bounds of prox mine + 2
+	VectorSet (closeCheckMins, -dangerSpread, -dangerSpread, -12.0f);
+	VectorSet (closeCheckMaxs, dangerSpread, dangerSpread, 12.0f);
+
+//	if ((g_showlogic) && (g_showlogic->value))
+//		gi.dprintf ("Tactician Gunner: perfoming close-range safety check with radius of %5.2f- ", dangerSpread);
+
+	// extrapolate point on path to target at danger range
+	VectorNormalize (dir);
+	VectorScale (dir, dangerRange, dangerOffset);
+	VectorAdd (start, dangerOffset, dangerTarget);
+
+	tr = gi.trace(start, closeCheckMins, closeCheckMaxs, dangerTarget, self, MASK_SHOT);
+	if (tr.fraction < 1.0) {
+	//	if (g_showlogic && g_showlogic->value)
+	//		gi.dprintf ("failed!\n");
+		return false;
+	}
+//	if (g_showlogic && g_showlogic->value)
+//		gi.dprintf ("succeeded!\n");
+	return true;
+}
+
 qboolean gunner_grenade_check (edict_t *self)
 {
 	vec3_t		start;
@@ -422,6 +476,11 @@ qboolean gunner_grenade_check (edict_t *self)
 	vec3_t		vhorz;
 	float		horz, vertmax, dangerClose;
 	qboolean	isProx = (self->moreflags & FL2_COMMANDER);
+	// Knightmare- Tactician Gunner fires prox mines in a spread, 
+	// so we need a wider safety bounds check
+	vec3_t		checkMins, checkMaxs;
+	vec3_t		proxMins = {-8, -8, -8};
+	vec3_t		proxMaxs = {8, 8, 8};
 
 	if (!self->enemy)
 		return false;
@@ -432,6 +491,16 @@ qboolean gunner_grenade_check (edict_t *self)
 //		return false;
 
 	// Lazarus: We can do better than that... see below
+
+	// Knightmare- use appropriate trace mins/maxs based on projectile
+	if (isProx) {
+		VectorCopy (proxMins, checkMins);
+		VectorCopy (proxMaxs, checkMaxs);
+	}
+	else {
+		VectorCopy (vec3_origin, checkMins);
+		VectorCopy (vec3_origin, checkMaxs);
+	}
 
 	// check to see that we can trace to the player before we start
 	// tossing grenades around.
@@ -462,21 +531,29 @@ qboolean gunner_grenade_check (edict_t *self)
 	// would almost always hit the platform the target was standing on
 	VectorCopy (self->enemy->s.origin, target);
 	target[2] = self->enemy->absmax[2];
-	if (isProx)
-		tr = gi.trace(start, proxMins, proxMaxs, target, self, MASK_SHOT);
-	else
-		tr = gi.trace(start, vec3_origin, vec3_origin, target, self, MASK_SHOT);
+	tr = gi.trace(start, checkMins, checkMaxs, target, self, MASK_SHOT);
 	if (tr.ent == self->enemy || tr.fraction == 1)
-		return true;
+	{	// Knightmare- added close-range prox safety check
+		if (isProx) {
+			if (gunner_prox_safety_check(self, start, target))
+				return true;
+		}
+		else
+			return true;
+	}
 	// Repeat for feet... in case we're looking down at a target standing under,
 	// for example, a short doorway
 	target[2] = self->enemy->absmin[2];
-	if (isProx)
-		tr = gi.trace(start, proxMins, proxMaxs, target, self, MASK_SHOT);
-	else
-		tr = gi.trace(start, vec3_origin, vec3_origin, target, self, MASK_SHOT);
+	tr = gi.trace(start, checkMins, checkMaxs, target, self, MASK_SHOT);
 	if (tr.ent == self->enemy || tr.fraction == 1)
-		return true;
+	{	// Knightmare- added close-range prox safety check
+		if (isProx) {
+			if (gunner_prox_safety_check(self, start, target))
+				return true;
+		}
+		else
+			return true;
+	}
 
 	return false;
 }
@@ -493,7 +570,8 @@ void gunner_duck_down (edict_t *self)
 	self->monsterinfo.aiflags |= AI_DUCKED;
 	if (skill->value >= 2)
 	{
-		if (random() > 0.5)
+		// Lazarus: Added check for goodness of grenade firing
+		if (random() > 0.5 && gunner_grenade_check(self))
 			GunnerGrenade (self);
 	}
 
@@ -675,17 +753,8 @@ void GunnerGrenade (edict_t *self)
 		// Knightmare- spread out Tactician Gunner's prox mines so they don't collide
 		if (self->moreflags & FL2_COMMANDER)
 		{
-			if ( blindfire )
-			{
-				target[0] += crandom() * 192;
-				target[1] += crandom() * 192;
-				target[2] += crandom() * 192;
-			}
-			else
-			{
-				target[0] += crandom() * 32;
-				target[1] += crandom() * 32;
-			}
+			target[0] += crandom() * GUNNER_PROX_SPREAD;
+			target[1] += crandom() * GUNNER_PROX_SPREAD;
 		}
 
 		// Lazarus fog reduction of accuracy
@@ -745,7 +814,7 @@ void GunnerGrenade (edict_t *self)
 	if (self->moreflags & FL2_COMMANDER)
 	{
 		float	prox_timer = (blindfire) ? 60.0f : 30.0f;
-		monster_fire_prox (self, start, aim, 90, 1, 600, 20, prox_timer, 192, flash_number);
+		monster_fire_prox (self, start, aim, 90, 1, GRENADE_VELOCITY, 20, prox_timer, 192, flash_number);
 	}
 	else
 		monster_fire_grenade (self, start, aim, 50, GRENADE_VELOCITY, flash_number, false);
@@ -879,7 +948,7 @@ void gunner_attack (edict_t *self)
 		{
 			// if the check passes, go for the attack
 			self->monsterinfo.currentmove = &gunner_move_attack_grenade;
-			self->monsterinfo.attack_finished = level.time + 2*random();
+			self->monsterinfo.attack_finished = level.time + 2 * random();
 		}
 		// pmm - should this be active?
 	//	else
@@ -1294,7 +1363,7 @@ void SP_monster_gunner (edict_t *self)
 		if (!self->health)
 			self->health = 400;
 		if (!self->gib_health)
-			self->gib_health = -150;
+			self->gib_health = -250;
 		if (!self->mass)
 			self->mass = 300;
 

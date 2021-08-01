@@ -289,21 +289,16 @@ mframe_t knight_frames_pain2 [] =
 mmove_t knight_move_pain2 = {FRAME_painb1, FRAME_painb11, knight_frames_pain2, knight_run};
 
 void knight_pain (edict_t *self, edict_t *other, float kick, int damage)
-{
-		
+{	
 	if (level.time < self->pain_debounce_time)
 		return;
 
-	if (skill->value == 3)
-		return;		// no pain anims in nightmare
+	self->pain_debounce_time = level.time + 1.1;
 
 	if (self->health > 0)
 		gi.sound (self, CHAN_VOICE, sound_pain, 1, ATTN_NORM, 0);
 
-
-	self->pain_debounce_time = level.time + 1.1;
-
-	if (random() <0.85)
+	if (random() < 0.85)
 		self->monsterinfo.currentmove = &knight_move_pain1;
 	else
 		self->monsterinfo.currentmove = &knight_move_pain2;

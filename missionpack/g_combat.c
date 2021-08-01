@@ -1315,7 +1315,7 @@ void T_Damage (edict_t *in_targ, edict_t *inflictor, edict_t *in_attacker, vec3_
 //PGM
 
 	if ((targ->svflags & SVF_MONSTER)
-		//Knightmare- no damage reaction from negative damage lasers and triggers
+		// Knightmare- no damage reaction from negative damage lasers and triggers
 		&& ( (damage > 0) || ((mod != MOD_TRIGGER_HURT) && (mod != MOD_TARGET_LASER)) ))
 	{
 		M_ReactToDamage (targ, attacker, inflictor);
@@ -1331,7 +1331,7 @@ void T_Damage (edict_t *in_targ, edict_t *inflictor, edict_t *in_attacker, vec3_
 		}
 	}
 	else if ((client)
-		//Knightmare- no damage reaction from negative damage lasers and triggers
+		// Knightmare- no damage reaction from negative damage lasers and triggers
 		&& ( (damage > 0) || ((mod != MOD_TRIGGER_HURT) && (mod != MOD_TARGET_LASER)) ))
 	{
 		if (!(targ->flags & FL_GODMODE) && (take)) {
@@ -1340,7 +1340,7 @@ void T_Damage (edict_t *in_targ, edict_t *inflictor, edict_t *in_attacker, vec3_
 		}
 	}
 	else if ((take)
-		//Knightmare- no damage reaction from negative damage lasers and triggers
+		// Knightmare- no damage reaction from negative damage lasers and triggers
 		&& ( (damage > 0) || ((mod != MOD_TRIGGER_HURT) && (mod != MOD_TARGET_LASER)) ))
 	{
 		if (targ->pain)

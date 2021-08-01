@@ -31,7 +31,7 @@ void shambler_sight (edict_t *self, edict_t *other)
 
 /*static*/ void shambler_idle_sound (edict_t *self)
 {
-	if(!self->enemy && random() > 0.8)
+	if (!self->enemy && random() > 0.8)
 	gi.sound (self, CHAN_VOICE, sound_idle, 0.8, ATTN_IDLE, 0);
 }
 
@@ -154,13 +154,10 @@ void shambler_pain (edict_t *self, edict_t *other, float kick, int damage)
 	if (self->health <= 0)
 		return;
 
-	if (skill->value == 3)
-		return;		// no pain anims in nightmare
-
 	if (self->health > 0)
 		gi.sound (self, CHAN_VOICE, sound_pain, 1, ATTN_NORM, 0);	
 
-	if(random() * 400 > damage)
+	if (random() * 400 > damage)
 		return;
 
 	self->monsterinfo.currentmove = &shambler_move_pain;
@@ -266,7 +263,7 @@ void shambler_swing_right (edict_t *self)
 {
 	vec3_t	aim;
 
-	if(!self->enemy)
+	if (!self->enemy)
 		return;
 
 	VectorSet (aim, MELEE_DISTANCE*1.2, self->maxs[0], 8);
@@ -293,7 +290,7 @@ void shambler_smash (edict_t *self)
 {
 	vec3_t	aim;
 
-	if(!self->enemy)
+	if (!self->enemy)
 		return;
 
 	VectorSet (aim, MELEE_DISTANCE*1.2, self->maxs[0], self->maxs[2]);
@@ -472,7 +469,7 @@ void shambler_attack (edict_t *self)
 				self->monsterinfo.currentmove = &shambler_move_swingR_attack;
 		}
 	}
-	else if((len > 196 && len < 1024) && infront(self,self->enemy))
+	else if ((len > 196 && len < 1024) && infront(self,self->enemy))
 	{
 		self->monsterinfo.currentmove = &shambler_move_magic_attack;
 	}
@@ -486,7 +483,7 @@ void shambler_melee(edict_t *self)
 {
 	if (!self->enemy || !self->enemy->inuse || self->enemy->health <= 0)
 	{
-	//	if(random() > 0.5)
+	//	if (random() > 0.5)
 	//		self->monsterinfo.currentmove = &shambler_move_walk;
 		return;
 	}
@@ -497,7 +494,7 @@ void shambler_melee(edict_t *self)
 			self->monsterinfo.currentmove = &shambler_move_smash_attack;
 		else
 		{
-			if(random() > 0.5)
+			if (random() > 0.5)
 				self->monsterinfo.currentmove = &shambler_move_swingL_attack;
 			else
 				self->monsterinfo.currentmove = &shambler_move_swingR_attack;

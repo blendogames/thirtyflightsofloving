@@ -170,9 +170,6 @@ void q1enforcer_pain (edict_t *self, edict_t *other, float kick, int damage)
 	else
 		gi.sound (self, CHAN_VOICE, sound_pain2, 1, ATTN_NORM, 0);
 
-	if (skill->value == 3)
-		return;		// no pain anims in nightmare
-
 	if (damage <= 10)
 		self->monsterinfo.currentmove = &q1enforcer_move_pain3;
 	else if (damage <= 25)

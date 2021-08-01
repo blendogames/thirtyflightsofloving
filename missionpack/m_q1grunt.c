@@ -20,7 +20,7 @@ static int	sound_attack;
 
 void q1grunt_idle (edict_t *self)
 {
-	if(!self->enemy)
+	if (!self->enemy)
 	if (random() > 0.8)
 	{
 		gi.sound (self, CHAN_VOICE, sound_idle, 0.8, ATTN_STATIC, 0);
@@ -181,28 +181,28 @@ void q1grunt_pain (edict_t *self, edict_t *other, float kick, int damage)
 	if (level.time < self->pain_debounce_time)
 		return;
 	
-	if(self->health <= 0)
+	if (self->health <= 0)
 		return;
 
 	r = random();
 
 	if (r < 0.2)
 	{
-		self->monsterinfo.currentmove = &q1grunt_move_pain1;
-		gi.sound (self, CHAN_VOICE, sound_pain1, 1, ATTN_NORM, 0);
 		self->pain_debounce_time = level.time + 0.6;
+		gi.sound (self, CHAN_VOICE, sound_pain1, 1, ATTN_NORM, 0);
+		self->monsterinfo.currentmove = &q1grunt_move_pain1;
 	}
 	else if (r < 0.6)
 	{
-		self->monsterinfo.currentmove = &q1grunt_move_pain2;
-		gi.sound (self, CHAN_VOICE, sound_pain2, 1, ATTN_NORM, 0);
 		self->pain_debounce_time = level.time + 1.1;
+		gi.sound (self, CHAN_VOICE, sound_pain2, 1, ATTN_NORM, 0);
+		self->monsterinfo.currentmove = &q1grunt_move_pain2;
 	}
 	else
 	{
-		self->monsterinfo.currentmove = &q1grunt_move_pain3;
-		gi.sound (self, CHAN_VOICE, sound_pain2, 1, ATTN_NORM, 0);
 		self->pain_debounce_time = level.time + 1.1;
+		gi.sound (self, CHAN_VOICE, sound_pain2, 1, ATTN_NORM, 0);
+		self->monsterinfo.currentmove = &q1grunt_move_pain3;
 	}
 }
 
@@ -220,7 +220,7 @@ void q1grunt_fire (edict_t *self)
 	vec3_t	end;
 	float	r, u;
 		
-	if(!self->enemy)
+	if (!self->enemy)
 		return;
 	
 	AngleVectors (self->s.angles, forward, right, NULL);

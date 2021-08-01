@@ -367,11 +367,7 @@ void fiend_pain (edict_t *self, edict_t *other, float kick, int damage)
 	if (self->health > 0)
 		gi.sound (self, CHAN_VOICE, sound_pain, 1, ATTN_NORM, 0);
 
-	if (skill->value == 3)
-		return;		// no pain anims in nightmare
-
 	self->monsterinfo.currentmove = &fiend_move_pain;
-
 }
 
 

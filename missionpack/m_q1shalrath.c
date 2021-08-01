@@ -116,16 +116,18 @@ mmove_t q1shalrath_move_pain1 = {FRAME_pain1, FRAME_pain5, q1shalrath_frames_pai
 
 void q1shalrath_pain (edict_t *self, edict_t *other, float kick, int damage)
 {
-	float	r;
+//	float	r;
 	
 	if (level.time < self->pain_debounce_time)
 		return;
 	
-	r = random();
+//	r = random();
+
+	self->pain_debounce_time = level.time + 3;
+
+	gi.sound (self, CHAN_VOICE, sound_pain1, 1, ATTN_NORM, 0);
 
 	self->monsterinfo.currentmove = &q1shalrath_move_pain1;
-	gi.sound (self, CHAN_VOICE, sound_pain1, 1, ATTN_NORM, 0);
-	self->pain_debounce_time = level.time + 3;
 }
 
 
