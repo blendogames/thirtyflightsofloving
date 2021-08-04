@@ -2629,7 +2629,7 @@ struct edict_s
 	char		*datafile;
 
 	// Mappack- for the camera to backup the players position, ammo, powerups, etc
-	backup_t	backup;	//this holds the client data
+	backup_t	backup;	// this holds the client data
 
 	vec3_t		fog_color;
 	int			fog_model;

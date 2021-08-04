@@ -239,7 +239,7 @@ PROTOCOL
 
 // protocol.h -- communications protocols
 
-#define	PROTOCOL_VERSION		56 // changed from 0.19, was 35
+#define	PROTOCOL_VERSION		57 // changed from 0.19, was 35
 #define	R1Q2_PROTOCOL_VERSION	35
 #define	OLD_PROTOCOL_VERSION	34
 

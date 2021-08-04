@@ -630,8 +630,9 @@ void CL_ParsePlayerstate (frame_t *oldframe, frame_t *newframe)
 {
 	int			flags;
 	player_state_t	*state;
-	int			i;
-	int			statbits;
+	int			i, j;
+	int			statbits;							// still used by legacy protocol
+	int			statbitarray[(MAX_STATS+31)>>5];	// derived from MAX_STATS
 
 
 	state = &newframe->playerstate;
@@ -747,7 +748,7 @@ void CL_ParsePlayerstate (frame_t *oldframe, frame_t *newframe)
 			if (statbits & (1<<i) )
 				state->stats[i] = MSG_ReadShort(&net_message);
 	}	// end old CL_ParsePlayerstate code
-	else //new CL_ParsePlayerstate code
+	else // new CL_ParsePlayerstate code
 	{
 		// Knightmare 4/5/2002- read as long
 		flags = MSG_ReadLong (&net_message);
@@ -897,9 +898,15 @@ void CL_ParsePlayerstate (frame_t *oldframe, frame_t *newframe)
 			state->rdflags = MSG_ReadByte (&net_message);
 
 		// parse stats
-		statbits = MSG_ReadLong (&net_message);
+	/*	statbits = MSG_ReadLong (&net_message);
 		for (i = 0; i < MAX_STATS; i++)
 			if (statbits & (1<<i) )
+				state->stats[i] = MSG_ReadShort(&net_message);
+	*/
+		for (j = 0; j < (MAX_STATS+31)>>5; j++)
+			statbitarray[j] = MSG_ReadLong (&net_message);
+		for (i = 0; i < MAX_STATS; i++)
+			if ( statbitarray[i>>5] & (1<<(i&31)) )
 				state->stats[i] = MSG_ReadShort(&net_message);
 	} // end new CL_ParsePlayerstate code
 }

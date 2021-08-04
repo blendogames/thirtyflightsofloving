@@ -126,15 +126,10 @@ void CL_ParseServerData (void)
 
 	// BIG HACK to let demos from release work with the 3.0x patch!!!
 	// Knightmare- also allow connectivity with servers using the old protocol
-//	if (Com_ServerState() && (i < PROTOCOL_VERSION) /*== 35*/)
-	if ( LegacyProtocol() ) {} // do nothing
-/*	else if (i == OLD_PROTOCOL_VERSION)
-		Cvar_ForceSet ("cl_servertrick", "1");
-	else if (i == PROTOCOL_VERSION)
-		Cvar_ForceSet ("cl_servertrick", "0");	// force this off for local games
-	else if (i != PROTOCOL_VERSION)	*/
-	else if ( (i != PROTOCOL_VERSION) && (i != OLD_PROTOCOL_VERSION) )
+	if ( LegacyProtocol() ) { } // do nothing
+	else if ( (i != PROTOCOL_VERSION) && (i != OLD_PROTOCOL_VERSION) ) {
 		Com_Error (ERR_DROP, "Server returned version %i, not %i or %i", i, PROTOCOL_VERSION, OLD_PROTOCOL_VERSION);
+	}
 
 	cl.servercount = MSG_ReadLong (&net_message);
 	cl.attractloop = MSG_ReadByte (&net_message);
@@ -582,7 +577,7 @@ void CL_ParseStartSoundPacket(void)
 		sound_num = MSG_ReadByte (&net_message);
 	else
 		sound_num = MSG_ReadShort (&net_message);
-	//end Knightmare
+	// end Knightmare
 
     if (flags & SND_VOLUME)
 		volume = MSG_ReadByte (&net_message) / 255.0;
@@ -599,14 +594,24 @@ void CL_ParseStartSoundPacket(void)
 	else
 		ofs = 0;
 
-	if (flags & SND_ENT)
-	{	// entity reletive
-		channel = MSG_ReadShort(&net_message); 
-		ent = channel>>3;
+	if (flags & SND_ENT)	// entity relative
+	{
+		// Knightmare 8/2/21- read channel and ent as a combined short only if playing old demos or
+		// connected to server using old protocol; otherwise, read as a byte and a short
+		if ( LegacyProtocol() )
+		{
+			channel = MSG_ReadShort(&net_message); 
+			ent = channel >> 3;
+			channel &= 7;
+		}
+		else
+		{
+			channel = MSG_ReadByte(&net_message); 
+			ent = (unsigned short)MSG_ReadShort(&net_message); 	// make sure this doesn't turn negative!
+		}
 		if (ent > MAX_EDICTS)
 			Com_Error (ERR_DROP,"CL_ParseStartSoundPacket: ent = %i", ent);
-
-		channel &= 7;
+		// end Knightmare
 	}
 	else
 	{

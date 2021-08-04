@@ -41,7 +41,7 @@ static int	tactician_sound_sight;
 #define GRENADE_VELOCITY			632.4555320337f
 #define GRENADE_VELOCITY_SQUARED	400000.0f
 // Knightmare- placement spread for Tactician Gunner prox mines
-#define	GUNNER_PROX_SPREAD			40.0f
+#define	GUNNER_PROX_SPREAD			48.0f
 #define	HALF_GUNNER_PROX_SPREAD		(GUNNER_PROX_SPREAD * 0.5f)
 
 void gunner_idlesound (edict_t *self)
@@ -535,6 +535,7 @@ qboolean gunner_grenade_check (edict_t *self)
 	if (tr.ent == self->enemy || tr.fraction == 1)
 	{	// Knightmare- added close-range prox safety check
 		if (isProx) {
+			VectorCopy (target, self->aim_point);	// save this aim location in case later safety check fails
 			if (gunner_prox_safety_check(self, start, target))
 				return true;
 		}
@@ -548,6 +549,7 @@ qboolean gunner_grenade_check (edict_t *self)
 	if (tr.ent == self->enemy || tr.fraction == 1)
 	{	// Knightmare- added close-range prox safety check
 		if (isProx) {
+			VectorCopy (target, self->aim_point);	// save this aim location in case later safety check fails
 			if (gunner_prox_safety_check(self, start, target))
 				return true;
 		}
@@ -685,8 +687,12 @@ void GunnerGrenade (edict_t *self)
 	float		spread;
 //	float		pitch;
 	// PMM
-	vec3_t		target;	
+	vec3_t		target, leadTarget;	
 	qboolean	blindfire = false;
+	qboolean	leadingTarget = false;
+	qboolean	targetSafe = false;
+	qboolean	leadSafe = false;
+	qboolean	isProx = (self->moreflags & FL2_COMMANDER);
 
 	//PGM
 	if (!self->enemy || !self->enemy->inuse)
@@ -750,8 +756,52 @@ void GunnerGrenade (edict_t *self)
 		if (self->enemy->absmin[2] <= self->absmax[2])
 			target[2] = self->enemy->absmin[2];
 
+		// lead target... 20, 35, 50, 65 chance of leading
+		if ( random() < (0.2 + skill->value * 0.15) )
+		{
+			float	dist, time;
+
+			VectorSubtract (target, start, aim);
+			dist = VectorLength (aim);
+			time = dist / GRENADE_VELOCITY;  // Not correct, but better than nothin'
+			VectorMA (target, time, self->enemy->velocity, leadTarget);
+			if (!isProx)	// delay copying for prox safety check
+				VectorCopy (leadTarget, target);
+			leadingTarget = true;
+		}
+
+		if (isProx)	// Knightmare- run another safety check before firing, so players can't trick us into self-damage
+		{
+			if ( gunner_prox_safety_check(self, start, target) ) {
+				VectorCopy (target, self->aim_point);	// save this target point
+				targetSafe = true;
+			}
+			if ( leadingTarget && gunner_prox_safety_check(self, start, leadTarget) ) {
+				VectorCopy (leadTarget, target);	// copy lead point over target
+				leadSafe = true;
+			}
+			if ( !targetSafe && !leadSafe ) {
+				VectorCopy (self->aim_point, target);	// revert to prev target point
+			}
+		/*	if ((g_showlogic) && (g_showlogic->value))
+			{
+				if ( targetSafe && leadSafe )
+					gi.dprintf ("GunnerGrenade: safe to fire at and lead target, saving target point.\n");
+				else if ( targetSafe && leadingTarget && !leadSafe )
+					gi.dprintf ("GunnerGrenade: safe to fire at but not lead target, saving target point.\n");
+				else if ( targetSafe && !leadingTarget )
+					gi.dprintf ("GunnerGrenade: safe to fire at target, saving target point.\n");
+				else if ( !targetSafe && leadSafe )
+					gi.dprintf ("GunnerGrenade: safe to lead target only, not saving target point.\n");
+				else if ( !targetSafe && !leadSafe && leadingTarget )
+					gi.dprintf ("GunnerGrenade: NOT safe to fire at or lead target, reverting to prev target point.\n");
+				else if ( !targetSafe && !leadSafe && !leadingTarget )
+					gi.dprintf ("GunnerGrenade: NOT safe to fire at target, reverting to prev target point.\n");
+			} */
+		}
+
 		// Knightmare- spread out Tactician Gunner's prox mines so they don't collide
-		if (self->moreflags & FL2_COMMANDER)
+		if (isProx)
 		{
 			target[0] += crandom() * GUNNER_PROX_SPREAD;
 			target[1] += crandom() * GUNNER_PROX_SPREAD;
@@ -765,16 +815,7 @@ void GunnerGrenade (edict_t *self)
 			target[2] += crandom() * 320 * (FOG_CANSEEGOOD - self->monsterinfo.visibility);
 		}
 
-		// lead target... 20, 35, 50, 65 chance of leading
-		if ( random() < (0.2 + skill->value * 0.15) )
-		{
-			float	dist, time;
-
-			VectorSubtract (target, start, aim);
-			dist = VectorLength (aim);
-			time = dist / GRENADE_VELOCITY;  // Not correct, but better than nothin'
-			VectorMA (target, time, self->enemy->velocity, target);
-		}
+		// Leading code was here
 
 		// aim up if they're on the same level as me and far away.
 	//	if ((range > 512) && (aim[2] < 64) && (aim[2] > -64))
@@ -810,8 +851,7 @@ void GunnerGrenade (edict_t *self)
 //	VectorMA (forward, spread, right, aim);
 //	VectorMA (aim, pitch, up, aim);
 
-	// Knightmare- Tactician Gunner fires prox mines
-	if (self->moreflags & FL2_COMMANDER)
+	if (isProx)	// Knightmare- Tactician Gunner fires prox mines
 	{
 		float	prox_timer = (blindfire) ? 60.0f : 30.0f;
 		monster_fire_prox (self, start, aim, 90, 1, GRENADE_VELOCITY, 20, prox_timer, 192, flash_number);

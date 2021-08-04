@@ -165,12 +165,12 @@ SV_CheckVelocity
 */
 void SV_CheckVelocity (edict_t *ent)
 {
-	int		i;
+//	int		i;
 
 //
 // bound velocity
 //
-	for (i=0 ; i<3 ; i++)
+/*	for (i=0 ; i<3 ; i++)
 	{
 		if (ent->velocity[i] > sv_maxvelocity->value)
 			ent->velocity[i] = sv_maxvelocity->value;
@@ -181,6 +181,16 @@ void SV_CheckVelocity (edict_t *ent)
 			ent->relative_velocity[i] = sv_maxvelocity->value;
 		else if (ent->relative_velocity[i] < -sv_maxvelocity->value)
 			ent->relative_velocity[i] = -sv_maxvelocity->value;
+	} */
+	if (VectorLength(ent->velocity) > sv_maxvelocity->value)
+	{
+		VectorNormalize (ent->velocity);
+		VectorScale (ent->velocity, sv_maxvelocity->value, ent->velocity);
+	}
+	if (VectorLength(ent->relative_velocity) > sv_maxvelocity->value)
+	{
+		VectorNormalize (ent->relative_velocity);
+		VectorScale (ent->relative_velocity, sv_maxvelocity->value, ent->relative_velocity);
 	}
 }
 

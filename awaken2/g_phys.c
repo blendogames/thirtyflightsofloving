@@ -55,8 +55,8 @@ void SV_CheckVelocity(edict_t *ent)
 
 	if (VectorLength(ent->velocity) > sv_maxvelocity->value)
 	{
-		VectorNormalize(ent->velocity);
-		VectorScale(ent->velocity, sv_maxvelocity->value, ent->velocity);
+		VectorNormalize (ent->velocity);
+		VectorScale (ent->velocity, sv_maxvelocity->value, ent->velocity);
 	}
 //DH--
 }

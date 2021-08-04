@@ -311,7 +311,9 @@ void SV_StartSound (vec3_t origin, edict_t *entity, int channel,
 	else
 		use_phs = true;
 
-	sendchan = (ent<<3) | (channel&7);
+	// Knightmare 8/2/21- changed to a full byte instead of 3 bits
+//	sendchan = (ent<<3) | (channel&7);
+	sendchan = (channel & 255);
 
 	flags = 0;
 	if (volume != DEFAULT_SOUND_PACKET_VOLUME)
@@ -350,7 +352,7 @@ void SV_StartSound (vec3_t origin, edict_t *entity, int channel,
 	MSG_WriteByte (&sv.multicast, svc_sound);
 	MSG_WriteByte (&sv.multicast, flags);
 
-	//Knightmare- 12/23/2001- changed to short
+	// Knightmare- 12/23/2001- changed to short
 	MSG_WriteShort (&sv.multicast, soundindex);
 		
 	if (flags & SND_VOLUME)
@@ -361,12 +363,17 @@ void SV_StartSound (vec3_t origin, edict_t *entity, int channel,
 		MSG_WriteByte (&sv.multicast, timeofs*1000);
 
 	if (flags & SND_ENT)
-		MSG_WriteShort (&sv.multicast, sendchan);
+	{
+	// Knightmare 8/2/21- changed ent and channel to byte and a short
+	//	MSG_WriteShort (&sv.multicast, sendchan);
+		MSG_WriteByte (&sv.multicast, sendchan);
+		MSG_WriteShort (&sv.multicast, ent);
+	}
 
 	if (flags & SND_POS)
 		MSG_WritePos (&sv.multicast, origin);
 
-	// if the sound doesn't attenuate,send it to everyone
+	// if the sound doesn't attenuate, send it to everyone
 	// (global radio chatter, voiceovers, etc)
 	if (attenuation == ATTN_NONE)
 		use_phs = false;

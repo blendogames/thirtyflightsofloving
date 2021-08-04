@@ -223,11 +223,12 @@ SV_WritePlayerstateToClient
 */
 void SV_WritePlayerstateToClient (client_frame_t *from, client_frame_t *to, sizebuf_t *msg)
 {
-	int				i;
+	int				i, j;
 	int				pflags;
 	player_state_t	*ps, *ops;
 	player_state_t	dummy;
-	int				statbits;
+//	int				statbits;
+	int				statbitarray[(MAX_STATS+31)>>5];	// derived from MAX_STATS
 
 	ps = &to->ps;
 	if (!from)
@@ -432,7 +433,7 @@ void SV_WritePlayerstateToClient (client_frame_t *from, client_frame_t *to, size
 		MSG_WriteChar (msg, ps->gunangles[2]*4);
 	}
 
-#ifdef NEW_PLAYER_STATE_MEMBERS //Knightmare added
+#ifdef NEW_PLAYER_STATE_MEMBERS // Knightmare added
 	if (pflags & PS_WEAPONSKIN)
 		MSG_WriteShort (msg, ps->gunskin);
 
@@ -454,7 +455,7 @@ void SV_WritePlayerstateToClient (client_frame_t *from, client_frame_t *to, size
 
 	if (pflags & PS_STOPSPEED)
 		MSG_WriteShort (msg, ps->stopspeed);
-#endif	//end Knightmare
+#endif	// end Knightmare
 
 	if (pflags & PS_BLEND)
 	{
@@ -469,13 +470,24 @@ void SV_WritePlayerstateToClient (client_frame_t *from, client_frame_t *to, size
 		MSG_WriteByte (msg, ps->rdflags);
 
 	// send stats
-	statbits = 0;
+/*	statbits = 0;
 	for (i=0 ; i<MAX_STATS ; i++)
 		if (ps->stats[i] != ops->stats[i])
 			statbits |= 1<<i;
 	MSG_WriteLong (msg, statbits);
 	for (i=0 ; i<MAX_STATS ; i++)
 		if (statbits & (1<<i) )
+			MSG_WriteShort (msg, ps->stats[i]);
+*/
+	for (j = 0; j < (MAX_STATS+31)>>5; j++)
+		statbitarray[j] = 0;
+	for (i=0; i<MAX_STATS; i++)
+		if (ps->stats[i] != ops->stats[i])
+			statbitarray[i>>5] |= 1<<(i&31);
+	for (j = 0; j < (MAX_STATS+31)>>5; j++)
+		MSG_WriteLong (msg, statbitarray[j]);
+	for (i=0; i<MAX_STATS; i++)
+		if ( statbitarray[i>>5] & (1<<(i&31)) )
 			MSG_WriteShort (msg, ps->stats[i]);
 }
 

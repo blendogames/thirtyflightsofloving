@@ -38,6 +38,9 @@ Changes as of v0.20 update 8:
 - Added client detection of server protocol from challenge message.  Client also auto-reconnects with cl_servertrick
 	set correspondingly when a "wrong version" rejection message is received.
 
+- Changed protocol version to 57.  This was necessitated by fixing an old protocol bug in how extended HUD stats were sent to the client.
+	Also changed protocol for svc_sound servercommand to separate channel and entity values from a merged short to a byte and a short.
+
 - Added cel shading support.  Uses cvars r_celshading to enable, and r_celshading_width for line width (1-10).
 
 - Added Z-Pass shadow mode due to patent issues w/ commercial games.  Set the cvar r_shadow_zfail to 0 to enable this.

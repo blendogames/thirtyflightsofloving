@@ -363,7 +363,7 @@ void Turret_Railgun_Aim (edict_t *self)
 		end[2]+=self->enemy->viewheight;
 	else
 		end[2]+=22;
-	VectorCopy (end, self->aim_point);	//save for aiming the shot
+	VectorCopy (end, self->aim_point);	// save for aiming the shot
 
 	self->think = Turret_Railgun_Fire;
 	self->nextthink = level.time + 2 * FRAMETIME;
