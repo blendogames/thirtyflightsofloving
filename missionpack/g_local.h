@@ -1388,6 +1388,8 @@ void monster_fire_flechette (edict_t *self, vec3_t start, vec3_t dir, int damage
 void monster_fire_prox (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int damage_multiplier, int speed, int health, float timer, float damage_radius, int flashtype);
 // SKWiD MOD
 void monster_fire_plasma_rifle (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int flashtype, qboolean spread);
+void HintTestNext (edict_t *self, edict_t *hint);
+int  HintTestStart (edict_t *self);
 
 void M_droptofloor (edict_t *ent);
 void monster_think (edict_t *self);
@@ -1739,6 +1741,7 @@ void kick_attack (edict_t *ent);
 //
 // g_newweap.c
 //
+#define PROX_TEST_SIZE 7.0f
 //extern float nuke_framenum;
 void fire_flechette (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage);
 //void fire_prox (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed);		

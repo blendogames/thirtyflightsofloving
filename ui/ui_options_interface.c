@@ -79,14 +79,14 @@ static void AltTextColorFunc( void *unused )
 // Psychospaz's transparent console
 static void ConAlphaFunc( void *unused )
 {
-//	Cvar_SetValue( "con_alpha", s_options_interface_conalpha_slider.curvalue * 0.05 );
-	Cvar_SetValue( "con_alpha", MenuSlider_GetValue(&s_options_interface_conalpha_slider) );
+//	Cvar_SetValue( "scr_conalpha", s_options_interface_conalpha_slider.curvalue * 0.05 );
+	Cvar_SetValue( "scr_conalpha", MenuSlider_GetValue(&s_options_interface_conalpha_slider) );
 }
 
 // variable console height
 /*static void ConHeightFunc( void *unused )
 {
-	Cvar_SetValue( "con_height", 0.25 + (s_options_interface_conheight_slider.curvalue * 0.05) );
+	Cvar_SetValue( "scr_conheight", 0.25 + (s_options_interface_conheight_slider.curvalue * 0.05) );
 }*/
 
 static void SimpleLoadscreenFunc( void *unused )
@@ -96,7 +96,7 @@ static void SimpleLoadscreenFunc( void *unused )
 
 static void NewConbackFunc( void *unused )
 {
-	Cvar_SetValue( "con_newconback", s_options_interface_newconback_box.curvalue );
+	Cvar_SetValue( "scr_newconback", s_options_interface_newconback_box.curvalue );
 }
 
 static void NoAltTabFunc( void *unused )
@@ -185,19 +185,19 @@ static void InterfaceSetMenuItemValues (void)
 	Cvar_SetValue( "alt_text_color", ClampCvar( 0, 9, Cvar_VariableValue("alt_text_color") ) );
 	s_options_interface_alt_text_color_box.curvalue	= Cvar_VariableValue("alt_text_color");
 
-	Cvar_SetValue( "con_alpha", ClampCvar( 0, 1, Cvar_VariableValue("con_alpha") ) );
-//	s_options_interface_conalpha_slider.curvalue		= ( Cvar_VariableValue("con_alpha") ) * 20;
-	MenuSlider_SetValue (&s_options_interface_conalpha_slider, Cvar_VariableValue("con_alpha"));
+	Cvar_SetValue( "scr_conalpha", ClampCvar( 0, 1, Cvar_VariableValue("scr_conalpha") ) );
+//	s_options_interface_conalpha_slider.curvalue		= ( Cvar_VariableValue("scr_conalpha") ) * 20;
+	MenuSlider_SetValue (&s_options_interface_conalpha_slider, Cvar_VariableValue("scr_conalpha"));
 
-//	Cvar_SetValue( "con_height", ClampCvar( 0.25, 0.75, Cvar_VariableValue("con_height") ) );
-//	s_options_interface_conheight_slider.curvalue		= 20 * (Cvar_VariableValue("con_height") - 0.25);
-//	MenuSlider_SetValue (&s_options_interface_conheight_slider, Cvar_VariableValue("con_height"));
+//	Cvar_SetValue( "scr_conheight", ClampCvar( 0.25, 0.75, Cvar_VariableValue("scr_conheight") ) );
+//	s_options_interface_conheight_slider.curvalue		= 20 * (Cvar_VariableValue("scr_conheight") - 0.25);
+//	MenuSlider_SetValue (&s_options_interface_conheight_slider, Cvar_VariableValue("scr_conheight"));
 
 	Cvar_SetValue( "scr_simple_loadscreen", ClampCvar( 0, 1, Cvar_VariableValue("scr_simple_loadscreen") ) );
 	s_options_interface_simple_loadscreen_box.curvalue = Cvar_VariableValue("scr_simple_loadscreen");
 
-	Cvar_SetValue( "con_newconback", ClampCvar( 0, 1, Cvar_VariableValue("con_newconback") ) );
-	s_options_interface_newconback_box.curvalue = Cvar_VariableValue("con_newconback");
+	Cvar_SetValue( "scr_newconback", ClampCvar( 0, 1, Cvar_VariableValue("scr_newconback") ) );
+	s_options_interface_newconback_box.curvalue = Cvar_VariableValue("scr_newconback");
 
 	s_options_interface_noalttab_box.curvalue			= Cvar_VariableValue("win_noalttab");
 }
@@ -211,10 +211,10 @@ static void InterfaceResetDefaultsFunc (void *unused)
 	Cvar_SetToDefault ("ui_font");	
 	Cvar_SetToDefault ("scr_font");	
 	Cvar_SetToDefault ("alt_text_color");	
-	Cvar_SetToDefault ("con_alpha");	
-//	Cvar_SetToDefault ("con_height");	
+	Cvar_SetToDefault ("scr_alpha");	
+//	Cvar_SetToDefault ("scr_height");	
 	Cvar_SetToDefault ("scr_simple_loadscreen");
-	Cvar_SetToDefault ("con_newconback");
+	Cvar_SetToDefault ("scr_newconback");
 	Cvar_SetToDefault ("win_noalttab");	
 
 	InterfaceSetMenuItemValues ();

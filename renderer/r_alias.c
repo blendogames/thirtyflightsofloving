@@ -553,7 +553,7 @@ void R_DrawAliasMeshes (maliasmodel_t *paliashdr, entity_t *e, qboolean mirrored
 		}
 
 		if (!shellModel)
-			RB_ModifyTextureCoords (&texCoordArray[0][baseindex][0], &vertexArray[baseindex][0], mesh.num_verts, &skinParms);
+			RB_ModifyTextureCoords (&texCoordArray[0][baseindex][0], &vertexArray[baseindex][0], mesh.num_verts, &skinParms.tcmod);
 
 		// compare renderparms for next mesh and check for overflow
 		if ( k < (paliashdr->num_meshes-1) ) {

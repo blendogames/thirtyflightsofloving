@@ -167,8 +167,8 @@ qboolean blocked_checkplat (edict_t *self, float dist)
 			if ((self->groundentity == plat && plat->moveinfo.state == STATE_BOTTOM) ||
 				(self->groundentity != plat && plat->moveinfo.state == STATE_TOP))
 			{
-//				if (g_showlogic && g_showlogic->value)
-//					gi.dprintf("player above, and plat will raise. using!\n");
+			//	if (g_showlogic && g_showlogic->value)
+			//		gi.dprintf("player above, and plat will raise. using!\n");
 				plat->use (plat, self, self);
 				return true;			
 			}
@@ -178,14 +178,14 @@ qboolean blocked_checkplat (edict_t *self, float dist)
 			if ((self->groundentity == plat && plat->moveinfo.state == STATE_TOP) ||
 				(self->groundentity != plat && plat->moveinfo.state == STATE_BOTTOM))
 			{
-//				if (g_showlogic && g_showlogic->value)
-//					gi.dprintf("player below, and plat will lower. using!\n");
+			//	if (g_showlogic && g_showlogic->value)
+			//		gi.dprintf("player below, and plat will lower. using!\n");
 				plat->use (plat, self, self);
 				return true;
 			}
 		}
-//		if (g_showlogic && g_showlogic->value)
-//			gi.dprintf("hit a plat, not using. ppos: %d   plat: %d\n", playerPosition, plat->moveinfo.state);
+	//	if (g_showlogic && g_showlogic->value)
+	//		gi.dprintf("hit a plat, not using. ppos: %d   plat: %d\n", playerPosition, plat->moveinfo.state);
 	}
 
 	return false;
@@ -283,11 +283,11 @@ qboolean blocked_checkjump (edict_t *self, float dist, float maxDown, float maxU
 				gi.linkentity(self);
 				return true;
 			}
-//			else if (g_showlogic && g_showlogic->value)
-//				gi.dprintf("Too high to jump %0.1f\n", (trace.endpos[2] - self->absmin[2]));
+		//	else if (g_showlogic && g_showlogic->value)
+		//		gi.dprintf("Too high to jump %0.1f\n", (trace.endpos[2] - self->absmin[2]));
 		}
-//		else if (g_showlogic && g_showlogic->value)
-//				gi.dprintf("Not something I could jump onto\n");
+	//	else if (g_showlogic && g_showlogic->value)
+	//			gi.dprintf("Not something I could jump onto\n");
 	}
 //	else if (g_showlogic && g_showlogic->value)
 //		gi.dprintf("Player at similar level. No need to jump up?\n");
@@ -353,7 +353,7 @@ edict_t	*hintpath_findstart (edict_t *ent)
 {
 	edict_t		*e;
 	edict_t		*last;
-	int			field;
+	size_t		field;
 
 	if (ent->target)		// starting point
 	{
@@ -384,7 +384,7 @@ edict_t	*hintpath_findstart (edict_t *ent)
 
 	if (!(last->spawnflags & HINT_ENDPOINT))
 	{
-//		gi.dprintf ("end of chain is not HINT_ENDPOINT\n");
+	//	gi.dprintf ("end of chain is not HINT_ENDPOINT\n");
 		return NULL;
 	}
 
@@ -400,7 +400,7 @@ edict_t	*hintpath_other_end (edict_t *ent)
 {
 	edict_t		*e;
 	edict_t		*last;
-	int			field;
+	size_t		field;
 
 	if (ent->target)		// starting point
 	{
@@ -431,7 +431,7 @@ edict_t	*hintpath_other_end (edict_t *ent)
 
 	if (!(last->spawnflags & HINT_ENDPOINT))
 	{
-//		gi.dprintf ("end of chain is not HINT_ENDPOINT\n");
+	//	gi.dprintf ("end of chain is not HINT_ENDPOINT\n");
 		return NULL;
 	}
 
@@ -449,8 +449,8 @@ void hintpath_go (edict_t *self, edict_t *point)
 	vec3_t	dir;
 	vec3_t	angles;
 
-	VectorSubtract(point->s.origin, self->s.origin, dir);
-	vectoangles2(dir, angles);
+	VectorSubtract (point->s.origin, self->s.origin, dir);
+	vectoangles2 (dir, angles);
 
 	self->ideal_yaw = angles[YAW];
 	self->goalentity = self->movetarget = point;
@@ -509,7 +509,7 @@ qboolean monsterlost_checkhint (edict_t *self)
 	edict_t		*closest;
 	float		closest_range = 1000000;
 	edict_t		*start, *destination;
-	int			field;
+	size_t		field;
 	int			count1=0, count2=0, count3=0, count4=0, count5=0;
 	float		r;
 	int			i;
@@ -563,8 +563,8 @@ qboolean monsterlost_checkhint (edict_t *self)
 	{
 		r = realrange (self, e);
 
-//		if (r > 512)
-//			count3++;
+	//	if (r > 512)
+	//		count3++;
 
 		if (r > 512)
 		{
@@ -821,7 +821,7 @@ qboolean monsterlost_checkhint (edict_t *self)
 
 	self->monsterinfo.goal_hint = destination;
 //	self->monsterinfo.last_hint = NULL;
-	hintpath_go(self, start);
+	hintpath_go (self, start);
 
 	return true;
 }
@@ -829,7 +829,7 @@ qboolean monsterlost_checkhint (edict_t *self)
 qboolean monsterlost_checkhint2 (edict_t *self)
 {
 	edict_t		*e, *e2, *goPoint;
-	int			field;
+	size_t		field;
 	int			playerVisible, selfVisible;
 
 	// if there are no hint paths on this map, exit immediately.
@@ -926,7 +926,14 @@ void hint_path_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t
 	if (other->monsterinfo.aiflags & AI_MEDIC_PATROL) 
 	{
 		if (other->movetarget == self)
-			medic_NextPatrolPoint(other,self);
+			medic_NextPatrolPoint(other, self);
+		return;
+	}
+
+	if (other->monsterinfo.aiflags2 & AI2_HINT_TEST)
+	{
+		if (other->movetarget == self)
+			HintTestNext (other, self);
 		return;
 	}
 
@@ -975,7 +982,7 @@ void hint_path_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t
 
 		// set the last_hint entry to this hint_path, and
 		// send him on his way
-		hintpath_go(other, next);
+		hintpath_go (other, next);
 
 		// have the monster freeze if the hint path we just touched has a wait time
 		// on it, for example, when riding a plat.
@@ -1126,7 +1133,8 @@ void SP_hint_path (edict_t *self)
 void InitHintPaths (void)
 {
 	edict_t		*e, *current;
-	int			field, i, count2;
+	int			i, count2;
+	size_t		field;
 	qboolean	errors = false;
 
 	hint_paths_present = 0;

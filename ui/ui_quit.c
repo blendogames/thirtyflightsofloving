@@ -127,7 +127,7 @@ void M_Quit_Draw (void)
 	int		w, h;
 
 	R_DrawGetPicSize (&w, &h, "quit");
-	SCR_DrawPic (SCREEN_WIDTH/2-w/2, SCREEN_HEIGHT/2-h/2, w, h, ALIGN_CENTER, "quit", 1.0);
+	SCR_DrawPic (SCREEN_WIDTH/2-w/2, SCREEN_HEIGHT/2-h/2, w, h, ALIGN_CENTER, false, "quit", 1.0);
 #endif // QUITMENU_NOKEY
 }
 

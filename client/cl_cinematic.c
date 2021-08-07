@@ -1479,6 +1479,7 @@ CIN_DrawCinematic
 void CIN_DrawCinematic (cinHandle_t handle){
 
 	cinematic_t	*cin;
+	drawStruct_t	ds;
 
 	cin = CIN_GetVideoByHandle(handle);
 
@@ -1488,14 +1489,22 @@ void CIN_DrawCinematic (cinHandle_t handle){
 	if (cin->frameCount == -1) // Knightmare- HACK to show JPG endscreens
 	{
 		char	picname[MAX_QPATH] = "/";
-		float	x=0, y=0, w=640, h=480;
+		float	x=0, y=0, w=SCREEN_WIDTH, h=SCREEN_HEIGHT;
+
 	//	strncat(picname, cin->name);
 		Q_strncatz (picname, sizeof(picname), cin->name);
 		SCR_ScaleCoords (&x, &y, &w, &h, ALIGN_CENTER);
 		if (w < viddef.width || h < viddef.height)
 			R_DrawFill (0, 0, viddef.width, viddef.height, 0, 0, 0, 255);
-	//	R_DrawStretchPic (x, y, viddef.width, viddef.height, picname, 1.0);
-		R_DrawStretchPic (x, y, w, h, picname, 1.0);
+
+		memset (&ds, 0, sizeof(drawStruct_t));
+		ds.pic = &picname[0];
+		ds.x = x;	ds.y = y;	ds.w = w;	ds.h = h;
+		Vector2Copy (vec2_origin, ds.offset);
+		Vector4Copy (vec4_identity, ds.color);
+
+		R_DrawPic (ds);
+	//	R_DrawStretchPic (x, y, w, h, picname, 1.0);
 		return;
 	} // end JPG hack
 

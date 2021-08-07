@@ -27,12 +27,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 console_t	con;
 
 cvar_t		*con_notifytime;
-cvar_t		*con_alpha;		// Knightare- Psychospaz's transparent console
-//cvar_t		*con_height;	// Knightmare- how far the console drops down
-cvar_t		*con_newconback;	// whether to use new console background
-cvar_t		*con_oldconbar;		// whether to draw bottom bar on old console
 qboolean	newconback_found = false;	// whether to draw Q3-style console
-
 
 extern	char	key_lines[32][MAXCMDLINE];
 extern	int		edit_line;
@@ -333,15 +328,12 @@ void Con_Init (void)
 	con_notifytime = Cvar_Get ("con_notifytime", "4", 0); // Knightmare- increased for fade
 	Cvar_SetDescription ("con_notifytime", "Time in seconds for console notify messages to fade away.");
 
-	// Knightmare- Psychospaz's transparent console
-	con_alpha = Cvar_Get ("con_alpha", "0.5", CVAR_ARCHIVE);
-	Cvar_SetDescription ("con_alpha", "Opacity of console background.");
-	// Knightmare- how far the console drops down
-	//con_height = Cvar_Get ("con_height", "0.5", CVAR_ARCHIVE);
-	con_newconback = Cvar_Get ("con_newconback", "0", CVAR_ARCHIVE);	// whether to use new console background
-	Cvar_SetDescription ("con_newconback", "Toggles use of new console background.");
-	con_oldconbar = Cvar_Get ("con_oldconbar", "1", CVAR_ARCHIVE);		// whether to draw bottom bar on old console
-	Cvar_SetDescription ("con_oldconbar", "Toggles drawing of solid color bottom bar on console with standard conback image.");
+	Cmd_AddCommand ("toggleconsole", Con_ToggleConsole_f);
+	Cmd_AddCommand ("togglechat", Con_ToggleChat_f);
+	Cmd_AddCommand ("messagemode", Con_MessageMode_f);
+	Cmd_AddCommand ("messagemode2", Con_MessageMode2_f);
+	Cmd_AddCommand ("clear", Con_Clear_f);
+	Cmd_AddCommand ("condump", Con_Dump_f);
 
 	// whether to use new-style console background
 	newconback_found = false;
@@ -351,13 +343,6 @@ void Con_Init (void)
 #endif	// PNG_SUPPORT
 		|| (FS_LoadFile("gfx/ui/newconback.jpg", NULL) != -1) )
 		newconback_found = true;
-
-	Cmd_AddCommand ("toggleconsole", Con_ToggleConsole_f);
-	Cmd_AddCommand ("togglechat", Con_ToggleChat_f);
-	Cmd_AddCommand ("messagemode", Con_MessageMode_f);
-	Cmd_AddCommand ("messagemode2", Con_MessageMode2_f);
-	Cmd_AddCommand ("clear", Con_Clear_f);
-	Cmd_AddCommand ("condump", Con_Dump_f);
 
 	con.initialized = true;
 }
@@ -901,6 +886,8 @@ void Con_DrawConsole (float frac, qboolean trans)
 	float			alpha, barheight, conLeft, conWidth, picLeft, picWidth, picHeight, pboxWidth;
 	// changeable download bar color
 	int				red, green, blue;
+	vec4_t			picColor;
+	drawStruct_t	ds;
 
 //	CL_TextColor ((int)alt_text_color->value, &red, &green, &blue);
 	CL_TextColor (alt_text_color->integer, &red, &green, &blue);
@@ -911,8 +898,8 @@ void Con_DrawConsole (float frac, qboolean trans)
 	picHeight = SCREEN_HEIGHT;
 	SCR_ScaleCoords (&picLeft, NULL, &picWidth, &picHeight, ALIGN_CENTER);
 
-//	if ( (newconback_found && con_newconback->value) || con_oldconbar->value ) {
-	if ( (newconback_found && con_newconback->integer) || con_oldconbar->integer ) {
+//	if ( (newconback_found && scr_newconback->value) || scr_oldconbar->value ) {
+	if ( (newconback_found && scr_newconback->integer) || scr_oldconbar->integer ) {
 		barheight = 2;
 		SCR_ScaleCoords (&conLeft, NULL, &conWidth, &barheight, ALIGN_STRETCH);
 	}
@@ -929,20 +916,40 @@ void Con_DrawConsole (float frac, qboolean trans)
 		lines = viddef.height;
 
 	// Psychospaz's transparent console
-	//alpha = (trans) ? ((frac/ (newconback_found?0.5:con_height->value) )*con_alpha->value) : 1;
-//	alpha = trans ? ((newconback_found && con_newconback->value) ? con_alpha->value : 2*frac*con_alpha->value) : 1;
-	alpha = trans ? ((newconback_found && con_newconback->integer) ? con_alpha->value : 2*frac*con_alpha->value) : 1;
+	//alpha = (trans) ? ((frac/ (newconback_found?0.5:scr_conheight->value) )*scr_conalpha->value) : 1;
+//	alpha = trans ? ((newconback_found && scr_newconback->value) ? scr_conalpha->value : 2*frac*scr_conalpha->value) : 1;
+	alpha = trans ? ((newconback_found && scr_newconback->integer) ? scr_conalpha->value : 2*frac*scr_conalpha->value) : 1;
+	Vector4Set (picColor, 1.0f, 1.0f, 1.0f, alpha);
 
 	// draw the background
-	//i = newconback_found ? lines - barheight : lines*(1/con_height->value);
-	//j = newconback_found ? 0 : (con_height->value-1)*i - barheight;
+	//i = newconback_found ? lines - barheight : lines*(1/scr_conheight->value);
+	//j = newconback_found ? 0 : (scr_conheight->value-1)*i - barheight;
 	y = lines - barheight;
+
+	memset (&ds, 0, sizeof(drawStruct_t));
+	Vector2Copy (vec2_origin, ds.offset);
+	Vector4Copy (picColor, ds.color);
+
 	if (y < 1)	y = 0;
-//	else if (newconback_found && con_newconback->value)	// Q3-style console
-	else if (newconback_found && con_newconback->integer)	// Q3-style console
+/*	else if (newconback_found && scr_newconback->integer)	// Q3-style console
 		R_DrawStretchPic ((int)picLeft, 0, picWidth, lines-barheight, "/gfx/ui/newconback.pcx", alpha);
 	else
 		R_DrawStretchPic ((int)picLeft, (lines-(int)picHeight-(int)barheight), picWidth, (int)picHeight, "conback", alpha);
+*/
+	else if (newconback_found && scr_newconback->integer)	{ // Q3-style console
+		ds.pic = "/gfx/ui/newconback.pcx";
+	//	ds.x = (int)conLeft;	ds.w = conWidth;
+		ds.x = (int)picLeft;	ds.w = picWidth;
+		ds.y = 0;	ds.h = lines-(int)barheight;
+		R_DrawPic (ds);
+	}
+	else {
+		ds.pic = "conback";
+	//	ds.x = (int)conLeft;	ds.w = conWidth;
+		ds.x = (int)picLeft;	ds.w = picWidth;
+		ds.y = (lines-(int)picHeight-(int)barheight);	ds.h = (int)picHeight;
+		R_DrawPic (ds);
+	}
 
 	// pillarbox sides if console is wider than scaled pic
 	if (conWidth > picWidth)
@@ -961,8 +968,8 @@ void Con_DrawConsole (float frac, qboolean trans)
 
 	Con_DrawString ((int)(conLeft+conWidth)-FONT_SIZE*(stringLen((const char *)&version))-3, y-(int)(1.25*FONT_SIZE), version, FONT_CONSOLE, 255);
 
-//	if ( (newconback_found && con_newconback->value) || con_oldconbar->value ) // Q3-style console bottom bar
-	if ( (newconback_found && con_newconback->integer) || con_oldconbar->integer ) // Q3-style console bottom bar
+//	if ( (newconback_found && scr_newconback->value) || scr_oldconbar->value ) // Q3-style console bottom bar
+	if ( (newconback_found && scr_newconback->integer) || scr_oldconbar->integer ) // Q3-style console bottom bar
 		R_DrawFill ((int)conLeft, y, conWidth, barheight, red, green, blue, 255);
 
 	// draw the text
@@ -973,7 +980,7 @@ void Con_DrawConsole (float frac, qboolean trans)
 	// draw from the bottom up
 	if (con.display != con.current)
 	{
-	// draw arrows to show the buffer is backscrolled
+		// draw arrows to show the buffer is backscrolled
 		for (x = 0; x < con.linewidth; x+=4)
 			R_DrawChar ((int)conLeft + (x+1)*FONT_SIZE, y, '^', FONT_CONSOLE, CON_FONT_SCALE, 255, 0, 0, 255, false, ((x+4)>=con.linewidth) );
 	
@@ -1015,5 +1022,3 @@ void Con_DrawConsole (float frac, qboolean trans)
 	// draw the input prompt, user text, and cursor if desired
 	Con_DrawInput ();
 }
-
-

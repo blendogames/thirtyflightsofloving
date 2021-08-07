@@ -528,7 +528,8 @@ void M_MoveFrame (edict_t *self)
 
 	// Lazarus: For live monsters weaker than gladiator who aren't already running from
 	//          something, evade live grenades on the ground.
-	if ((self->health > 0) && (self->max_health < 400) && !(self->monsterinfo.aiflags & AI_CHASE_THING) && self->monsterinfo.run)
+	if ( (self->health > 0) && (self->max_health < 400) && !(self->monsterinfo.aiflags & AI_CHASE_THING) && self->monsterinfo.run
+		&& !((Q_stricmp(self->classname, "misc_insane") == 0) && (self->moreflags & FL2_CRUCIFIED)) )	// Knightmare- crucified insanes don't evade
 		Grenade_Evade (self);
 
 	move = self->monsterinfo.currentmove;
@@ -1416,6 +1417,7 @@ int PatchMonsterModel (char *modelname)
 	return 1;
 }
 
+
 void HintTestNext (edict_t *self, edict_t *hint)
 {
 	edict_t		*next=NULL;
@@ -1455,7 +1457,7 @@ void HintTestNext (edict_t *self, edict_t *hint)
 	if (next)
 	{
 		self->hint_chain_id = next->hint_chain_id;
-		VectorSubtract(next->s.origin, self->s.origin, dir);
+		VectorSubtract (next->s.origin, self->s.origin, dir);
 		self->ideal_yaw = vectoyaw(dir);
 		self->goalentity = self->movetarget = next;
 		self->monsterinfo.pausetime = 0;
@@ -1497,11 +1499,11 @@ int HintTestStart (edict_t *self)
 			e = &g_edicts[i];
 			if (!e->inuse)
 				continue;
-			if (Q_stricmp(e->classname,"hint_path"))
+			if (Q_stricmp(e->classname, "hint_path"))
 				continue;
-			if (!visible(self,e))
+			if (!visible(self, e))
 				continue;
-			if (!canReach(self,e))
+			if (!canReach(self, e))
 				continue;
 			VectorSubtract(e->s.origin,self->s.origin,dir);
 			dist = VectorLength(dir);

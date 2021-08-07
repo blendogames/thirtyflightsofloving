@@ -2304,24 +2304,79 @@ void ClientCommand (edict_t *ent)
 		else
 			gi.dprintf("syntax: whereis <classname>\n");
 	}
-	else if (!Q_stricmp(cmd, "bbox"))
-		Cmd_Bbox_f (ent);
 	else if (developer->value)
 	{
-		if (!Q_stricmp(cmd, "forcewall"))
+		if (!Q_stricmp(cmd, "lightswitch"))
+		{
+			ToggleLights ();
+		}
+		else if (!Q_stricmp(cmd, "bbox"))
+		{
+			Cmd_Bbox_f (ent);
+		}
+		else if (!Q_stricmp(cmd, "forcewall"))
+		{
 			SpawnForcewall (ent);
+		}
 		else if (!Q_stricmp(cmd, "forcewall_off"))
+		{
 			ForcewallOff (ent);
+		}
 		else if (!Q_stricmp(cmd, "freeze"))
 		{
-			if (level.freeze)
+			if (level.freeze) {
+				gi.dprintf ("Unfreezing time.\n", (int)sk_stasis_time->value);
 				level.freeze = false;
+			}
 			else
 			{
 				if (ent->client->jetpack)
 					gi.dprintf("Cannot use freeze while using jetpack\n");
-				else
+				else {
+					gi.dprintf ("Freezing time for %d seconds.\n", (int)sk_stasis_time->value);
 					level.freeze = true;
+					level.freezeframes = 0;
+				}
+			}
+		}
+		else if (!Q_stricmp(cmd, "hint_test"))
+		{
+			edict_t *viewing;
+			int		result;
+			viewing = LookingAt(ent, LOOKAT_MD2, NULL, NULL);
+			if (!viewing)
+			{
+				gi.dprintf("Not looking at an entity.\n");
+				return;
+			}
+			if (viewing->monsterinfo.aiflags2 & AI2_HINT_TEST)
+			{
+				viewing->monsterinfo.aiflags2 &= ~AI2_HINT_TEST;
+				gi.dprintf("%s (%s): Back to my normal self now.\n",
+					viewing->classname, viewing->targetname);
+				return;
+			}
+			if (!(viewing->svflags & SVF_MONSTER))
+				gi.dprintf("hint_test is only valid for monsters and actors.\n");
+			result = HintTestStart(viewing);
+			switch (result)
+			{
+			case -1:
+				gi.dprintf("%s (%s): I cannot see any hint_paths from here.\n");
+				break;
+			case  0:
+				gi.dprintf("This map does not contain hint_paths.\n");
+				break;
+			case  1:
+				gi.dprintf("%s (%s) searching for hint_path %s at %s. %s\n",
+			 			viewing->classname, (viewing->targetname ? viewing->targetname : "<noname>"),
+						(viewing->movetarget->targetname ? viewing->movetarget->targetname : "<noname>"),
+						vtos(viewing->movetarget->s.origin),
+						visible(viewing, viewing->movetarget) ? "I see it." : "I don't see it.");
+				break;
+			default:
+				gi.dprintf("Unknown error\n");
+				break;
 			}
 		}
 		else if (!Q_stricmp(cmd, "entid"))
@@ -2444,8 +2499,8 @@ void ClientCommand (edict_t *ent)
 			classSize = strlen(parm)+1;
 			e->classname = gi.TagMalloc(classSize, TAG_LEVEL);
 			Com_strcpy (e->classname, classSize, parm);
-			AngleVectors(ent->client->v_angle,forward,NULL,NULL);
-			VectorMA(ent->s.origin,128,forward,e->s.origin);
+			AngleVectors (ent->client->v_angle, forward, NULL, NULL);
+			VectorMA (ent->s.origin, 128, forward, e->s.origin);
 			e->s.angles[YAW] = ent->s.angles[YAW];
 			ED_CallSpawn(e);
 		}
@@ -2467,9 +2522,9 @@ void ClientCommand (edict_t *ent)
 			e->usermodel = gi.argv(1);
 			e->sounds = atoi(gi.argv(2));
 			e->spawnflags = SF_MONSTER_GOODGUY;
-			AngleVectors(ent->client->v_angle,forward,NULL,NULL);
-			VectorMA(ent->s.origin,128,forward,e->s.origin);
-			e->s.origin[2] = max(e->s.origin[2],ent->s.origin[2] + 8);
+			AngleVectors (ent->client->v_angle, forward, NULL, NULL);
+			VectorMA (ent->s.origin, 128, forward, e->s.origin);
+			e->s.origin[2] = max(e->s.origin[2], ent->s.origin[2] + 8);
 			e->s.angles[YAW] = ent->s.angles[YAW];
 			ED_CallSpawn(e);
 			actor_files();
@@ -2484,8 +2539,8 @@ void ClientCommand (edict_t *ent)
 			memcpy(&decoy->s,&ent->s,sizeof(entity_state_t));
 			decoy->s.number     = decoy-g_edicts;
 			decoy->s.frame      = ent->s.frame; 
-			AngleVectors(ent->client->v_angle,forward,NULL,NULL);
-			VectorMA(ent->s.origin,64,forward,decoy->s.origin);
+			AngleVectors (ent->client->v_angle, forward, NULL, NULL);
+			VectorMA (ent->s.origin, 64, forward, decoy->s.origin);
 			decoy->s.angles[YAW] = ent->s.angles[YAW]; 
 			decoy->takedamage   = DAMAGE_AIM;
 			decoy->flags        = (ent->flags & FL_NOTARGET);
@@ -2501,8 +2556,8 @@ void ClientCommand (edict_t *ent)
 			decoy->monsterinfo.aiflags = AI_GOOD_GUY;
 			decoy->die          = decoy_die;
 			decoy->nextthink    = level.time + FRAMETIME;
-			VectorCopy(ent->mins,decoy->mins);
-			VectorCopy(ent->maxs,decoy->maxs);
+			VectorCopy (ent->mins, decoy->mins);
+			VectorCopy (ent->maxs, decoy->maxs);
 			gi.linkentity (decoy); 
 		}
 		else if (!Q_stricmp(cmd, "switch"))
@@ -2510,7 +2565,7 @@ void ClientCommand (edict_t *ent)
 			extern mmove_t	actor_move_switch;
 			edict_t *viewing;
 
-			viewing = LookingAt(ent,0,NULL,NULL);
+			viewing = LookingAt(ent, 0, NULL, NULL);
 			if (!viewing)
 				return;
 			if (!(viewing->monsterinfo.aiflags & AI_ACTOR))
@@ -2520,8 +2575,29 @@ void ClientCommand (edict_t *ent)
 			}
 			viewing->monsterinfo.currentmove = &actor_move_switch;
 		}
-	//	else if (!Q_stricmp(cmd,"lightswitch"))
-	//		ToggleLights();
+		else if (!Q_stricmp(cmd, "resettargets"))
+		{
+			edict_t	*e;
+			int		i;
+			int		count;
+
+			gi.dprintf("Resetting all monsters' enemies...\n");
+			count = 0;
+			for (i=0, e=&g_edicts[0]; i<globals.num_edicts; i++, e++)
+			{
+				if (!e->inuse)
+					continue;
+				if ( !(e->svflags & SVF_MONSTER) )
+					continue;
+				if (e->health <= 0)
+					continue;
+				e->enemy = e->oldenemy = NULL;
+				e->monsterinfo.pausetime = 0;
+				e->monsterinfo.stand (e);
+				count++;
+			}
+			gi.dprintf("reset %d monsters' enemies, done.\n", count);
+		}
 		else	// anything that doesn't match a command will be a chat
 			Cmd_Say_f (ent, false, true);
 	}

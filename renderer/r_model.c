@@ -1492,41 +1492,41 @@ void Mod_ParseModelScript (maliasskin_t *skin, char **data, char *dataStart, int
 				break;
 			}
 			if (!Q_strcasecmp(token, "translate")) {
-				if (!Mod_ParseFloat(data, &skinParms->translate_x, false)) {
+				if (!Mod_ParseFloat(data, &skinParms->tcmod.translate_x, false)) {
 					VID_Printf (PRINT_ALL, S_COLOR_YELLOW"Mod_ParseModelScript: missing parameters for 'tcmod translate' in %s.%i in %s\n", meshname, skinnum, scriptname);
 					break;
 				}
-				if (!Mod_ParseFloat(data, &skinParms->translate_y, false)) {
+				if (!Mod_ParseFloat(data, &skinParms->tcmod.translate_y, false)) {
 					VID_Printf (PRINT_ALL, S_COLOR_YELLOW"Mod_ParseModelScript: missing parameter for 'tcmod translate' in %s.%i in %s\n", meshname, skinnum, scriptname);
-					skinParms->translate_x = 0.0f;
+					skinParms->tcmod.translate_x = 0.0f;
 					break;
 				}
 			}
 			else if (!Q_strcasecmp(token, "rotate")) {
-				if (!Mod_ParseFloat(data, &skinParms->rotate, false)) {
+				if (!Mod_ParseFloat(data, &skinParms->tcmod.rotate, false)) {
 					VID_Printf (PRINT_ALL, S_COLOR_YELLOW"Mod_ParseModelScript: missing parameter for 'tcmod rotate' in %s.%i in %s\n", meshname, skinnum, scriptname);
 					break;
 				}
 			}
 			else if (!Q_strcasecmp(token, "scale")) {
-				if (!Mod_ParseFloat(data, &skinParms->scale_x, false)) {
+				if (!Mod_ParseFloat(data, &skinParms->tcmod.scale_x, false)) {
 					VID_Printf (PRINT_ALL, S_COLOR_YELLOW"Mod_ParseModelScript: missing parameters for 'tcmod scale' in %s.%i in %s\n", meshname, skinnum, scriptname);
 					break;
 				}
-				if (!Mod_ParseFloat(data, &skinParms->scale_y, false)) {
+				if (!Mod_ParseFloat(data, &skinParms->tcmod.scale_y, false)) {
 					VID_Printf (PRINT_ALL, S_COLOR_YELLOW"Mod_ParseModelScript: missing parameter for 'tcmod scale' in %s.%i in %s\n", meshname, skinnum, scriptname);
-					skinParms->scale_x = 1.0f;
+					skinParms->tcmod.scale_x = 1.0f;
 					break;
 				}
 			}
 			else if (!Q_strcasecmp(token, "stretch"))
 			{
-				if (!Mod_ParseWaveFunc(data, &skinParms->stretch.type)) {
+				if (!Mod_ParseWaveFunc(data, &skinParms->tcmod.stretch.type)) {
 					VID_Printf (PRINT_ALL, S_COLOR_YELLOW"Mod_ParseModelScript: missing or invalid waveform for 'tcmod stretch' in %s.%i in %s\n", meshname, skinnum, scriptname);
 					break;
 				}
 				for (i=0; i<4; i++)
-					if (!Mod_ParseFloat(data, &skinParms->stretch.params[i], false)) {
+					if (!Mod_ParseFloat(data, &skinParms->tcmod.stretch.params[i], false)) {
 						VID_Printf (PRINT_ALL, S_COLOR_YELLOW"Mod_ParseModelScript: missing parameters for 'tcmod stretch' in %s.%i in %s\n", meshname, skinnum, scriptname);
 						break;
 					}
@@ -1534,21 +1534,21 @@ void Mod_ParseModelScript (maliasskin_t *skin, char **data, char *dataStart, int
 			else if (!Q_strcasecmp(token, "turb"))
 			{	// first parm (base) is unused, so just read twice
 				for (i=0; i<4; i++)
-					if (!Mod_ParseFloat(data, &skinParms->turb.params[i], false)) {
+					if (!Mod_ParseFloat(data, &skinParms->tcmod.turb.params[i], false)) {
 						VID_Printf (PRINT_ALL, S_COLOR_YELLOW"Mod_ParseModelScript: missing parameters for 'tcmod turb' in %s.%i in %s\n", meshname, skinnum, scriptname);
 						break;
 					}
-				skinParms->turb.type = WAVEFORM_SIN;
+				skinParms->tcmod.turb.type = WAVEFORM_SIN;
 			}
 			else if (!Q_strcasecmp(token, "scroll"))
 			{
-				if (!Mod_ParseFloat(data, &skinParms->scroll_x, false)) {
+				if (!Mod_ParseFloat(data, &skinParms->tcmod.scroll_x, false)) {
 					VID_Printf (PRINT_ALL, S_COLOR_YELLOW"Mod_ParseModelScript: missing parameters for 'tcmod scroll' in %s.%i in %s\n", meshname, skinnum, scriptname);
 					break;
 				}
-				if (!Mod_ParseFloat(data, &skinParms->scroll_y, false)) {
+				if (!Mod_ParseFloat(data, &skinParms->tcmod.scroll_y, false)) {
 					VID_Printf (PRINT_ALL, S_COLOR_YELLOW"Mod_ParseModelScript: missing parameter for 'tcmod scroll' in %s.%i in %s\n", meshname, skinnum, scriptname);
-					skinParms->scroll_x = 0.0f;
+					skinParms->tcmod.scroll_x = 0.0f;
 					break;
 				}
 			}
@@ -1638,6 +1638,27 @@ void Mod_ParseModelScript (maliasskin_t *skin, char **data, char *dataStart, int
 
 /*
 =================
+Mod_SetTCModParmsDefaults
+md3 skin protoshaders
+=================
+*/
+void Mod_SetTCModParmsDefaults (tcmodParms_t *tcmod)
+{
+	if (!tcmod)	return;
+
+	tcmod->translate_x = 0.0f;
+	tcmod->translate_y = 0.0f;
+	tcmod->rotate = 0.0f;
+	tcmod->scale_x = 1.0f;
+	tcmod->scale_y = 1.0f;
+	tcmod->stretch.type = -1;
+	tcmod->turb.type = -1;
+	tcmod->scroll_x = 0.0f;
+	tcmod->scroll_y = 0.0f;
+}
+
+/*
+=================
 Mod_SetRenderParmsDefaults
 md3 skin protoshaders
 =================
@@ -1656,15 +1677,15 @@ void Mod_SetRenderParmsDefaults (renderparms_t *parms)
 	parms->blendfunc_src = -1;
 	parms->blendfunc_dst = -1;
 	parms->glow.type = -1;
-	parms->translate_x = 0.0f;
-	parms->translate_y = 0.0f;
-	parms->rotate = 0.0f;
-	parms->scale_x = 1.0f;
-	parms->scale_y = 1.0f;
-	parms->stretch.type = -1;
-	parms->turb.type = -1;
-	parms->scroll_x = 0.0f;
-	parms->scroll_y = 0.0f;
+	parms->tcmod.translate_x = 0.0f;
+	parms->tcmod.translate_y = 0.0f;
+	parms->tcmod.rotate = 0.0f;
+	parms->tcmod.scale_x = 1.0f;
+	parms->tcmod.scale_y = 1.0f;
+	parms->tcmod.stretch.type = -1;
+	parms->tcmod.turb.type = -1;
+	parms->tcmod.scroll_x = 0.0f;
+	parms->tcmod.scroll_y = 0.0f;
 }
 
 /*

@@ -53,6 +53,10 @@ vrect_t		scr_vrect;		// position of render window on screen
 
 cvar_t		*scr_viewsize;
 cvar_t		*scr_conspeed;
+cvar_t		*scr_conalpha;		// Psychospaz's transparent console
+cvar_t		*scr_newconback;	// whether to use new console background
+cvar_t		*scr_oldconbar;		// whether to draw bottom bar on old console
+//cvar_t		*scr_conheight;	// how far the console drops down
 cvar_t		*scr_letterbox;
 cvar_t		*scr_centertime;
 //cvar_t		*scr_showturtle;	// unused
@@ -91,6 +95,11 @@ cvar_t		*cl_demomessage;
 //cvar_t		*cl_loadpercent;	// unused
 cvar_t		*cl_hud;				// placeholder cvar
 cvar_t		*cl_hud_variant;		// placeholder cvar
+
+color_t		color_identity = {255, 255, 255, 255};
+vec4_t		vec4_identity = {1.0f, 1.0f, 1.0f, 1.0f};
+vec4_t		stCoord_default = {-1.0f, -1.0f, -1.0f, -1.0f};
+vec4_t		stCoord_tile = {-2.0f, -2.0f, -2.0f, -2.0f};
 
 float		scr_screenScale;
 float		scr_hudScale;
@@ -620,12 +629,41 @@ SCR_DrawFill
 Coordinates are 640*480 virtual values
 =================
 */
-void SCR_DrawFill (float x, float y, float width, float height, scralign_t align, int red, int green, int blue, int alpha)
+void SCR_DrawFill (float x, float y, float width, float height, scralign_t align, qboolean roundOut, int red, int green, int blue, int alpha)
 {
 	SCR_ScaleCoords (&x, &y, &width, &height, align);
+	if (roundOut) {
+		x = floor(x);	y = floor(y);	width = ceil(width);	height = ceil(height);
+	}
 	R_DrawFill (x, y, width, height, red, green, blue, alpha);
 }
 
+/*
+================
+SCR_DrawBorder
+Draws a solid color border
+Coordinates are 640*480 virtual values
+=================
+*/
+void SCR_DrawBorder (float x, float y, float width, float height, float borderSize, scralign_t align, qboolean roundOut, int red, int green, int blue, int alpha)
+{
+	float	bSize = floor(SCR_ScaledScreen(borderSize));
+	SCR_ScaleCoords (&x, &y, &width, &height, align);
+	if (roundOut) {
+		x = floor(x);	y = floor(y);	width = ceil(width);	height = ceil(height);
+	}
+
+	// top
+	R_DrawFill (x-bSize, y-bSize, width+bSize*2, bSize, red, green, blue, alpha);
+	// bottom
+	R_DrawFill (x-bSize, y+height, width+bSize*2, bSize, red, green, blue, alpha);
+	// left
+	R_DrawFill (x-bSize, y, bSize, height, red, green, blue, alpha);
+	// right
+	R_DrawFill (x+width, y, bSize, height, red, green, blue, alpha);
+}
+
+#if 0
 /*
 ================
 SCR_DrawPic
@@ -637,6 +675,270 @@ void SCR_DrawPic (float x, float y, float width, float height, scralign_t align,
 	SCR_ScaleCoords (&x, &y, &width, &height, align);
 	R_DrawStretchPic (x, y, width, height, pic, alpha);
 }
+#else
+/*
+================
+SCR_DrawPic
+Coordinates are 640*480 virtual values
+=================
+*/
+void SCR_DrawPic (float x, float y, float width, float height, scralign_t align, qboolean roundOut, char *pic, float alpha)
+{
+	vec4_t			outColor;
+	drawStruct_t	ds;
+
+	SCR_ScaleCoords (&x, &y, &width, &height, align);
+	Vector4Set (outColor, 1.0f, 1.0f, 1.0f, alpha);
+	if (roundOut) {
+		x = floor(x);	y = floor(y);	width = ceil(width);	height = ceil(height);
+	}
+
+	memset (&ds, 0, sizeof(drawStruct_t));
+	ds.pic = pic;
+	ds.x = x;	ds.y = y;	ds.w = width;	ds.h = height;
+	Vector2Copy (vec2_origin, ds.offset);
+	Vector4Copy (outColor, ds.color);
+	R_DrawPic (ds);
+}
+#endif
+
+
+/*
+================
+SCR_ScaledPic
+Coordinates are actual values
+=================
+*/
+void SCR_DrawScaledPic (float x, float y, float scale, qboolean centerCoords, qboolean roundOut, char *pic, float alpha)
+{
+	int				w, h;
+	float			width, height;
+	vec4_t			outColor;
+	drawStruct_t	ds;
+
+	Vector4Set (outColor, 1.0f, 1.0f, 1.0f, alpha);
+	R_DrawGetPicSize (&w, &h, pic);
+	width = (float)w * scale;
+	height = (float)h * scale;
+	if (centerCoords) {
+		x -= (width * 0.5f);
+		y -= (height * 0.5f);
+	}
+	if (roundOut) {
+		x = floor(x);	y = floor(y);	width = ceil(width);	height = ceil(height);
+	}
+
+	memset (&ds, 0, sizeof(drawStruct_t));
+	ds.pic = pic;
+	ds.x = x;	ds.y = y;	ds.w = width;	ds.h = height;
+	Vector2Copy (vec2_origin, ds.offset);
+	Vector4Copy (outColor, ds.color);
+	R_DrawPic (ds);
+}
+
+
+/*
+================
+SCR_DrawLegacyPic
+=================
+*/
+void SCR_DrawLegacyPic (float x, float y, float scale, char *pic, float alpha)
+{
+	vec4_t			outColor;
+	vec4_t			stCoords;
+	drawStruct_t	ds;
+
+	Vector4Set (outColor, 1.0f, 1.0f, 1.0f, alpha);
+	Vector4Set (stCoords, -3.0f, scale, 0, 0);
+
+	memset (&ds, 0, sizeof(drawStruct_t));
+	ds.pic = pic;
+	ds.x = x;	ds.y = y;	ds.w = 24;	ds.h = 24;
+	ds.scale[0] = ds.scale[1] = scale;
+	ds.flags |= DSFLAG_SCALED;
+	Vector2Copy (vec2_origin, ds.offset);
+	Vector4Copy (outColor, ds.color);
+	R_DrawPic (ds);
+}
+
+
+/*
+================
+SCR_DrawColoredPic
+Coordinates are 640*480 virtual values
+=================
+*/
+void SCR_DrawColoredPic (float x, float y, float width, float height, scralign_t align, qboolean roundOut, color_t color, char *pic)
+{
+	vec4_t			outColor;
+	drawStruct_t	ds;
+
+	SCR_ScaleCoords (&x, &y, &width, &height, align);
+	Vector4Set (outColor, (float)color[0]*DIV255, (float)color[1]*DIV255, (float)color[2]*DIV255, (float)color[3]*DIV255);
+	if (roundOut) {
+		x = floor(x);	y = floor(y);	width = ceil(width);	height = ceil(height);
+	}
+
+	memset (&ds, 0, sizeof(drawStruct_t));
+	ds.pic = pic;
+	ds.x = x;	ds.y = y;	ds.w = width;	ds.h = height;
+	Vector2Copy (vec2_origin, ds.offset);
+	Vector4Copy (outColor, ds.color);
+	R_DrawPic (ds);
+}
+
+
+/*
+================
+SCR_DrawOffsetPic
+Coordinates are 640*480 virtual values
+=================
+*/
+void SCR_DrawOffsetPic (float x, float y, float width, float height, vec2_t offset, scralign_t align, qboolean roundOut, color_t color, char *pic)
+{
+	vec4_t			outColor;
+	vec2_t			scaledOffset;
+	drawStruct_t	ds;
+
+	Vector2Copy (offset, scaledOffset);
+	SCR_ScaleCoords (&x, &y, &width, &height, align);
+	SCR_ScaleCoords (NULL, NULL, &scaledOffset[0], &scaledOffset[1], align);
+	Vector4Set (outColor, (float)color[0]*DIV255, (float)color[1]*DIV255, (float)color[2]*DIV255, (float)color[3]*DIV255);
+	if (roundOut) {
+		x = floor(x);	y = floor(y);	width = ceil(width);	height = ceil(height);
+	}
+
+	memset (&ds, 0, sizeof(drawStruct_t));
+	ds.pic = pic;
+	ds.x = x;	ds.y = y;	ds.w = width;	ds.h = height;
+	Vector2Copy (scaledOffset, ds.offset);
+	Vector4Copy (outColor, ds.color);
+	R_DrawPic (ds);
+}
+
+
+/*
+================
+SCR_DrawOffsetPicST
+Coordinates are 640*480 virtual values
+=================
+*/
+void SCR_DrawOffsetPicST (float x, float y, float width, float height, vec2_t offset, vec4_t texCorners, scralign_t align, qboolean roundOut, color_t color, char *pic)
+{
+	vec4_t			outColor;
+	vec2_t			scaledOffset;
+	drawStruct_t	ds;
+
+	Vector2Copy (offset, scaledOffset);
+	SCR_ScaleCoords (&x, &y, &width, &height, align);
+	SCR_ScaleCoords (NULL, NULL, &scaledOffset[0], &scaledOffset[1], align);
+	Vector4Set (outColor, (float)color[0]*DIV255, (float)color[1]*DIV255, (float)color[2]*DIV255, (float)color[3]*DIV255);
+	if (roundOut) {
+		x = floor(x);	y = floor(y);	width = ceil(width);	height = ceil(height);
+	}
+
+	memset (&ds, 0, sizeof(drawStruct_t));
+	ds.pic = pic;
+	ds.x = x;	ds.y = y;	ds.w = width;	ds.h = height;
+	ds.flags |= DSFLAG_USESTCOORDS;
+	Vector2Copy (scaledOffset, ds.offset);
+	Vector4Copy (texCorners, ds.stCoords);
+	Vector4Copy (outColor, ds.color);
+	R_DrawPic (ds);
+}
+
+
+/*
+================
+SCR_DrawScrollPic
+Coordinates are 640*480 virtual values
+=================
+*/
+void SCR_DrawScrollPic (float x, float y, float width, float height, vec2_t offset, vec4_t texCorners, vec2_t scroll, scralign_t align, qboolean roundOut, color_t color, char *pic)
+{
+	vec4_t			outColor;
+	vec2_t			scaledOffset;
+	drawStruct_t	ds;
+
+	Vector2Copy (offset, scaledOffset);
+	SCR_ScaleCoords (&x, &y, &width, &height, align);
+	SCR_ScaleCoords (NULL, NULL, &scaledOffset[0], &scaledOffset[1], align);
+	Vector4Set (outColor, (float)color[0]*DIV255, (float)color[1]*DIV255, (float)color[2]*DIV255, (float)color[3]*DIV255);
+	if (roundOut) {
+		x = floor(x);	y = floor(y);	width = ceil(width);	height = ceil(height);
+	}
+
+	memset (&ds, 0, sizeof(drawStruct_t));
+	ds.pic = pic;
+	ds.x = x;	ds.y = y;	ds.w = width;	ds.h = height;
+	ds.flags |= DSFLAG_USESTCOORDS;
+	Vector2Copy (scroll, ds.scroll);
+	Vector2Copy (scaledOffset, ds.offset);
+	Vector4Copy (texCorners, ds.stCoords);
+	Vector4Copy (outColor, ds.color);
+	R_DrawPic (ds);
+}
+
+
+/*
+================
+SCR_DrawMaskedPic
+Coordinates are 640*480 virtual values
+=================
+*/
+void SCR_DrawMaskedPic (float x, float y, float width, float height, vec2_t offset, vec4_t texCorners, vec2_t scroll, scralign_t align, qboolean roundOut, color_t color, char *pic, char *maskPic)
+{
+	vec4_t			outColor;
+	vec2_t			scaledOffset;
+	drawStruct_t	ds;
+
+	Vector2Copy (offset, scaledOffset);
+	SCR_ScaleCoords (&x, &y, &width, &height, align);
+	SCR_ScaleCoords (NULL, NULL, &scaledOffset[0], &scaledOffset[1], align);
+	Vector4Set (outColor, (float)color[0]*DIV255, (float)color[1]*DIV255, (float)color[2]*DIV255, (float)color[3]*DIV255);
+	if (roundOut) {
+		x = floor(x);	y = floor(y);	width = ceil(width);	height = ceil(height);
+	}
+
+	memset (&ds, 0, sizeof(drawStruct_t));
+	ds.pic = pic;
+	ds.maskPic = maskPic;
+	ds.x = x;	ds.y = y;	ds.w = width;	ds.h = height;
+	ds.flags |= DSFLAG_USESTCOORDS|DSFLAG_MASKED;
+	Vector2Copy (scroll, ds.scroll);
+	Vector2Copy (scaledOffset, ds.offset);
+	Vector4Copy (texCorners, ds.stCoords);
+	Vector4Copy (outColor, ds.color);
+	R_DrawPic (ds);
+}
+
+
+/*
+================
+SCR_DrawTiledPic
+Coordinates are 640*480 virtual values
+=================
+*/
+void SCR_DrawTiledPic (float x, float y, float width, float height, scralign_t align, qboolean roundOut, char *pic, float alpha)
+{
+	vec4_t			outColor;
+	drawStruct_t	ds;
+
+	SCR_ScaleCoords (&x, &y, &width, &height, align);
+	Vector4Set (outColor, 1.0f, 1.0f, 1.0f, alpha);
+	if (roundOut) {
+		x = floor(x);	y = floor(y);	width = ceil(width);	height = ceil(height);
+	}
+
+	memset (&ds, 0, sizeof(drawStruct_t));
+	ds.pic = pic;
+	ds.x = x;	ds.y = y;	ds.w = width;	ds.h = height;
+	ds.flags |= DSFLAG_TILED;
+	Vector2Copy (vec2_origin, ds.offset);
+	Vector4Copy (outColor, ds.color);
+	R_DrawPic (ds);
+}
+
 
 /*
 ================
@@ -651,6 +953,7 @@ void SCR_DrawChar (float x, float y, int size, scralign_t align, int num, fontsl
 	SCR_ScaleCoords (&x, &y, NULL, NULL, align);
 	R_DrawChar(x, y, num, font, scale, red, green, blue, alpha, italic, last);
 }
+
 
 /*
 ================
@@ -1360,6 +1663,13 @@ void SCR_Init (void)
 	Cvar_SetDescription ("viewsize", "Draw size of screen in percent, from 40 to 100.");
 	scr_conspeed = Cvar_Get ("scr_conspeed", "3", 0);
 	Cvar_SetDescription ("scr_conspeed", "Scrolling speed of the console.");
+	scr_conalpha = Cvar_Get ("scr_conalpha", "0.5", CVAR_ARCHIVE);		// Psychospaz's transparent console
+	Cvar_SetDescription ("scr_conalpha", "Opacity of console background.");
+	scr_newconback = Cvar_Get ("scr_newconback", "0", CVAR_ARCHIVE);	// whether to use new console background
+	Cvar_SetDescription ("scr_newconback", "Toggles use of new console background.");
+	scr_oldconbar = Cvar_Get ("scr_oldconbar", "1", CVAR_ARCHIVE);		// whether to draw bottom bar on old console
+	Cvar_SetDescription ("scr_oldconbar", "Toggles drawing of solid color bottom bar on console with standard conback image.");
+//	scr_conheight = Cvar_Get ("scr_conheight", "0.5", CVAR_ARCHIVE);	// how far the console drops down
 	scr_letterbox = Cvar_Get ("scr_letterbox", "1", CVAR_ARCHIVE);
 	Cvar_SetDescription ("scr_letterbox", "Enables letterbox effect for cameras and cutscenes.");
 //	scr_showturtle = Cvar_Get ("scr_showturtle", "0", 0);	// unused
@@ -1505,7 +1815,7 @@ void SCR_DrawCrosshair (void)
 //					scr_vrect.y + (int)(((float)scr_vrect.height - scale*(float)crosshair_height)*0.5),	// y
 //					scale, alpha, crosshair_pic);
 	SCR_DrawPic ( ((float)SCREEN_WIDTH - scaledSize)*0.5, ((float)SCREEN_HEIGHT - scaledSize)*0.5,
-					scaledSize, scaledSize, ALIGN_CENTER, crosshair_pic, alpha);
+					scaledSize, scaledSize, ALIGN_CENTER, false, crosshair_pic, alpha);
 }
 
 
@@ -1520,7 +1830,8 @@ void SCR_DrawNet (void)
 		< CMD_BACKUP-1)
 		return;
 
-	R_DrawPic (scr_vrect.x + SCR_ScaledHud(64), scr_vrect.y, "net");
+//	R_DrawPic (scr_vrect.x + SCR_ScaledHud(64), scr_vrect.y, "net");
+	SCR_DrawPic (scr_vrect.x+64, scr_vrect.y, 32, 32, ALIGN_TOPLEFT, false, "net", 1.0f);
 }
 
 
@@ -1548,10 +1859,10 @@ void SCR_DrawAlertMessagePicture (char *name, qboolean center, int yOffset)
 
 	if (center)
 		SCR_DrawPic((SCREEN_WIDTH - w)*0.5, (SCREEN_HEIGHT - h)*0.5,
-				w, h, ALIGN_CENTER, name, 1.0);
+				w, h, ALIGN_CENTER, false, name, 1.0);
 	else
 		SCR_DrawPic((SCREEN_WIDTH - w)*0.5, SCREEN_HEIGHT*0.5 + yOffset,
-				w, h, ALIGN_CENTER, name, 1.0);
+				w, h, ALIGN_CENTER, false, name, 1.0);
 }
 
 
@@ -1562,13 +1873,16 @@ SCR_DrawPause
 */
 void SCR_DrawPause (void)
 {
-	int		w, h;
+	int		w, h, x, y;
 
-//	if (!scr_showpause->value)		// turn off for screenshots
+	w = 129;	// size of original pause.pcx = 101x25
+	h = 32;
+	x = (SCREEN_WIDTH - w)*0.5;
+	y = (SCREEN_HEIGHT - h)*0.5;
+
 	if (!scr_showpause->integer)		// turn off for screenshots
 		return;
 
-//	if (!cl_paused->value)
 	if (!cl_paused->integer)
 		return;
 
@@ -1576,8 +1890,9 @@ void SCR_DrawPause (void)
 	if (cls.key_dest == key_menu)
 		return;
 
-	R_DrawGetPicSize (&w, &h, "pause");
-	SCR_DrawPic ((SCREEN_WIDTH-w)*0.5, (SCREEN_HEIGHT-h)*0.5, w, h, ALIGN_CENTER, "pause", 1.0);
+//	R_DrawGetPicSize (&w, &h, "pause");
+//	SCR_DrawPic ((SCREEN_WIDTH-w)*0.5, (SCREEN_HEIGHT-h)*0.5, w, h, ALIGN_CENTER, "pause", 1.0);
+	SCR_DrawPic (x, y, w, h, ALIGN_CENTER, false, "pause", 1.0);
 }
 
 
@@ -1598,11 +1913,11 @@ void SCR_DrawLoadingTagProgress (char *picName, int yOffset, int percent)
 	y = (SCREEN_HEIGHT - h)*0.5;
 	barPos = min(max(percent, 0), 100) / 4;
 
-	SCR_DrawPic (x, y + yOffset, w, h, ALIGN_CENTER, picName, 1.0);
+	SCR_DrawPic (x, y + yOffset, w, h, ALIGN_CENTER, false, picName, 1.0);
 
 	for (i=0; i<barPos; i++)
 		SCR_DrawPic (x + 33 + (i * LOADBAR_TIC_SIZE_X), y + 28 + yOffset, LOADBAR_TIC_SIZE_X, LOADBAR_TIC_SIZE_Y,
-					ALIGN_CENTER, "loading_led1", 1.0);
+					ALIGN_CENTER, false, "loading_led1", 1.0);
 }
 
 
@@ -1622,11 +1937,11 @@ void SCR_DrawLoadingBar (float x, float y, float w, float h, int percent, float 
 	iRatio = 1 - fabs(sizeRatio);
 	hiRatio = iRatio * 0.5;
 
-	SCR_DrawFill (x, y, w, h, ALIGN_STRETCH, 255, 255, 255, 90);
+	SCR_DrawFill (x, y, w, h, ALIGN_STRETCH, false, 255, 255, 255, 90);
 
 	if (percent != 0)
 		SCR_DrawFill (x+(h*hiRatio), y+(h*hiRatio), (w-(h*iRatio))*percent*0.01, h*sizeRatio,
-						ALIGN_STRETCH, red, green, blue, 255);
+						ALIGN_STRETCH, false, red, green, blue, 255);
 }
 
 
@@ -1687,48 +2002,48 @@ void SCR_DrawLoading (void)
 
 		// show saveshot here
 		if (load_saveshot && (strlen(load_saveshot) > 8) && R_DrawFindPic(load_saveshot)) {
-			SCR_DrawPic (0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, ALIGN_STRETCH, load_saveshot, 1.0);
+			SCR_DrawPic (0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, ALIGN_STRETCH, false, load_saveshot, 1.0);
 			haveMapPic = true;
 		}
 		// else try levelshot
 		else if (/*widescreen &&*/ R_DrawFindPic(va("/levelshots/%s_widescreen.pcx", mapfile)))
 		{
 			// Draw at 16:10 aspect, don't stretch to 16:9 or wider
-			SCR_DrawFill (0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, ALIGN_STRETCH_ALL, 0, 0, 0, 255);
+			SCR_DrawFill (0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, ALIGN_STRETCH_ALL, false, 0, 0, 0, 255);
 		//	SCR_DrawPic (-64, 0, SCREEN_WIDTH+128, SCREEN_HEIGHT, ALIGN_CENTER, va("/levelshots/%s_widescreen.pcx", mapfile), 1.0);
 			// Draw at native aspect
 			Com_sprintf(picName, sizeof(picName), "/levelshots/%s_widescreen.pcx", mapfile);
 			SCR_GetPicPosWidth (picName, &picX, &picW);
-			SCR_DrawPic (picX, 0, picW, SCREEN_HEIGHT, ALIGN_CENTER, picName, 1.0);
+			SCR_DrawPic (picX, 0, picW, SCREEN_HEIGHT, ALIGN_CENTER, false, picName, 1.0);
 			haveMapPic = true;
 		}
 		else if (R_DrawFindPic(va("/levelshots/%s.pcx", mapfile))) {
 			// Draw at 4:3 aspect, don't stretch to 16:9 or wider
-			SCR_DrawFill (0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, ALIGN_STRETCH_ALL, 0, 0, 0, 255);
-			SCR_DrawPic (0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, ALIGN_CENTER, va("/levelshots/%s.pcx", mapfile), 1.0); // was ALIGN_STRETCH
+			SCR_DrawFill (0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, ALIGN_STRETCH_ALL, false, 0, 0, 0, 255);
+			SCR_DrawPic (0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, ALIGN_CENTER, false, va("/levelshots/%s.pcx", mapfile), 1.0); // was ALIGN_STRETCH
 			haveMapPic = true;
 		}
 		// else fall back on loadscreen
 		else if (R_DrawFindPic(LOADSCREEN_NAME)) {
-			SCR_DrawFill (0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, ALIGN_STRETCH_ALL, 0, 0, 0, 255);
+			SCR_DrawFill (0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, ALIGN_STRETCH_ALL, false, 0, 0, 0, 255);
 		//	SCR_DrawPic (0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, ALIGN_STRETCH, LOADSCREEN_NAME, 1.0);
 			SCR_GetPicPosWidth (LOADSCREEN_NAME, &picX, &picW);
-			SCR_DrawPic (picX, 0, picW, SCREEN_HEIGHT, ALIGN_CENTER, LOADSCREEN_NAME, 1.0);
+			SCR_DrawPic (picX, 0, picW, SCREEN_HEIGHT, ALIGN_CENTER, false, LOADSCREEN_NAME, 1.0);
 		}
 		// else draw black screen
 		else
-			SCR_DrawFill (0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, ALIGN_STRETCH_ALL, 0, 0, 0, 255);
+			SCR_DrawFill (0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, ALIGN_STRETCH_ALL, false, 0, 0, 0, 255);
 
 		isMap = true;
 	}
 	else if (R_DrawFindPic(LOADSCREEN_NAME)) {
-		SCR_DrawFill (0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, ALIGN_STRETCH_ALL, 0, 0, 0, 255);
+		SCR_DrawFill (0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, ALIGN_STRETCH_ALL, false, 0, 0, 0, 255);
 	//	SCR_DrawPic (0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, ALIGN_STRETCH, LOADSCREEN_NAME, 1.0);
 		SCR_GetPicPosWidth (LOADSCREEN_NAME, &picX, &picW);
-		SCR_DrawPic (picX, 0, picW, SCREEN_HEIGHT, ALIGN_CENTER, LOADSCREEN_NAME, 1.0);
+		SCR_DrawPic (picX, 0, picW, SCREEN_HEIGHT, ALIGN_CENTER, false, LOADSCREEN_NAME, 1.0);
 	}
 	else
-		SCR_DrawFill (0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, ALIGN_STRETCH_ALL, 0, 0, 0, 255);
+		SCR_DrawFill (0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, ALIGN_STRETCH_ALL, false, 0, 0, 0, 255);
 
 	// Add Download info stuff...
 #ifdef USE_CURL	// HTTP downloading from R1Q2
@@ -1901,12 +2216,12 @@ Scroll it up or down
 void SCR_RunConsole (void)
 {
 	// Knightmare- clamp console height
-	//if (con_height->value < 0.1f || con_height->value > 1.0f)
-	//	Cvar_SetValue( "con_height", ClampCvar( 0.1, 1, con_height->value ) );
+	//if (scr_conheight->value < 0.1f || con_height->value > 1.0f)
+	//	Cvar_SetValue( "scr_conheight", ClampCvar( 0.1, 1, scr_conheight->value ) );
 
 	// decide on the height of the console
 	if (cls.consoleActive) // (cls.key_dest == key_console)
-		//scr_conlines = halfconback?0.5:con_height->value; // variable height console
+		//scr_conlines = halfconback ? 0.5 : scr_conheight->value; // variable height console
 		scr_conlines = 0.5;
 	else
 		scr_conlines = 0;				// none visible
@@ -2106,10 +2421,10 @@ void SCR_TileClear (void)
 {
 	int		top, bottom, left, right;
 	int		w, h;
+	drawStruct_t	ds;
 
 	if (scr_con_current == 1.0)
 		return;		// full screen console
-//	if (scr_viewsize->value == 100)
 	if (scr_viewsize->integer == 100)
 		return;		// full screen rendering
 	if (cl.cinematictime > 0)
@@ -2123,17 +2438,31 @@ void SCR_TileClear (void)
 	left = cl.refdef.x;
 	right = left + cl.refdef.width-1;
 
+	memset (&ds, 0, sizeof(drawStruct_t));
+	ds.pic = "backtile";
+	ds.flags |= DSFLAG_TILED;
+	Vector2Copy (vec2_origin, ds.offset);
+	Vector4Copy (vec4_identity, ds.color);
+
 	// clear above view screen
-	R_DrawTileClear (0, 0, w, top, "backtile");
+	ds.x = 0;	ds.y = 0;		ds.w = w;		ds.h = top;
+	R_DrawPic (ds);
+//	R_DrawTileClear (0, 0, w, top, "backtile");
 
 	// clear below view screen
-	R_DrawTileClear (0, bottom, w, h - bottom, "backtile");
+	ds.x = 0;	ds.y = bottom;	ds.w = w;		ds.h = h - bottom;
+	R_DrawPic (ds);
+//	R_DrawTileClear (0, bottom, w, h - bottom, "backtile");
 
 	// clear left of view screen
-	R_DrawTileClear (0, top, left, bottom - top + 1, "backtile");
+	ds.x = 0;	ds.y = top;		ds.w = left;	ds.h = bottom - top + 1;
+	R_DrawPic (ds);
+//	R_DrawTileClear (0, top, left, bottom - top + 1, "backtile");
 
 	// clear right of view screen
-	R_DrawTileClear (right, top, w - right, bottom - top + 1, "backtile");
+	ds.x = right;	ds.y = top;	ds.w = w - right;	ds.h = bottom - top + 1;
+	R_DrawPic (ds);
+//	R_DrawTileClear (right, top, w - right, bottom - top + 1, "backtile");
 }
 
 
@@ -2180,8 +2509,8 @@ void DrawDemoMessage (void)
 		char *message = "Running Demo";
 		len = (int)strlen(message);
 
-		SCR_DrawFill (0, SCREEN_HEIGHT-(MENU_FONT_SIZE+3), SCREEN_WIDTH, MENU_FONT_SIZE+4, ALIGN_BOTTOM_STRETCH, 60, 60, 60, 255);	// go 1 pixel past screen bottom to prevent gap from scaling
-		SCR_DrawFill (0, SCREEN_HEIGHT-(MENU_FONT_SIZE+3), SCREEN_WIDTH, 1, ALIGN_BOTTOM_STRETCH, 0, 0, 0, 255);
+		SCR_DrawFill (0, SCREEN_HEIGHT-(MENU_FONT_SIZE+3), SCREEN_WIDTH, MENU_FONT_SIZE+4, ALIGN_BOTTOM_STRETCH, false, 60, 60, 60, 255);	// go 1 pixel past screen bottom to prevent gap from scaling
+		SCR_DrawFill (0, SCREEN_HEIGHT-(MENU_FONT_SIZE+3), SCREEN_WIDTH, 1, ALIGN_BOTTOM_STRETCH, false, 0, 0, 0, 255);
 		SCR_DrawString (SCREEN_WIDTH/2-(len/2)*MENU_FONT_SIZE, SCREEN_HEIGHT-(MENU_FONT_SIZE+1), MENU_FONT_SIZE, ALIGN_BOTTOM, message, FONT_SCREEN, 255);
 	}
 }

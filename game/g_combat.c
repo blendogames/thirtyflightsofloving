@@ -406,10 +406,10 @@ void CallMyFriends (edict_t *targ, edict_t *attacker)
 					{
 						targ->enemy = targ->movetarget = targ->goalentity = attacker;
 						targ->monsterinfo.aiflags &= ~AI_FOLLOW_LEADER;
-						if (visible(targ,targ->enemy))
-							FoundTarget(targ);
+						if (visible(targ, targ->enemy))
+							FoundTarget (targ);
 						else
-							HuntTarget(targ);
+							HuntTarget (targ);
 					}
 				}
 				else if ( !(targ->svflags & SVF_MONSTER) || !(attacker->svflags & SVF_MONSTER) ||
@@ -419,7 +419,7 @@ void CallMyFriends (edict_t *targ, edict_t *attacker)
 					// Either target is not a monster, or attacker is not a monster, or
 					// they're both monsters but one is AI_GOOD_GUY and the other is not,
 					// or we've turned the game into a free-for-all with a target_monsterbattle
-					teammate = G_Find(NULL,FOFS(dmgteam),targ->dmgteam);
+					teammate = G_Find(NULL, FOFS(dmgteam), targ->dmgteam);
 					while (teammate)
 					{
 						if (teammate != targ)
@@ -436,18 +436,18 @@ void CallMyFriends (edict_t *targ, edict_t *attacker)
 										// then set the attacker as the enemy of this teammate
 										DefendMyFriend(teammate,attacker);
 									}
-									else if (strcmp(teammate->enemy->dmgteam,attacker->dmgteam))
+									else if (strcmp(teammate->enemy->dmgteam, attacker->dmgteam))
 									{
 										// attacker is a member of a team different than the
 										// current enemy
-										DefendMyFriend(teammate,attacker);
+										DefendMyFriend (teammate, attacker);
 									}
 								}
 							}
 							else if (!(teammate->svflags & SVF_DEADMONSTER))
-								G_UseTargets(teammate,attacker);
+								G_UseTargets (teammate, attacker);
 						}
-						teammate = G_Find(teammate,FOFS(dmgteam),targ->dmgteam);
+						teammate = G_Find(teammate, FOFS(dmgteam), targ->dmgteam);
 					}
 				}
 			}
@@ -458,14 +458,14 @@ void CallMyFriends (edict_t *targ, edict_t *attacker)
 		// target is player; attacker is monster... alert "good guys", if any
 //		trace_t	tr;
 		edict_t	*teammate = NULL;
-		teammate = G_Find(NULL,FOFS(dmgteam),"player");
+		teammate = G_Find(NULL, FOFS(dmgteam), "player");
 		while (teammate)
 		{
 			if ((teammate->health > 0) && !(teammate->monsterinfo.aiflags & AI_CHASE_THING) && (teammate != attacker))
 			{
 				// Can teammate see player?
-//				tr = gi.trace(teammate->s.origin,vec3_origin,vec3_origin,targ->s.origin,teammate,MASK_OPAQUE);
-//				if (tr.fraction == 1.0)
+			//	tr = gi.trace(teammate->s.origin,vec3_origin,vec3_origin,targ->s.origin,teammate,MASK_OPAQUE);
+			//	if (tr.fraction == 1.0)
 				if (gi.inPVS(teammate->s.origin,targ->s.origin))
 				{
 					teammate->enemy = attacker;
@@ -478,7 +478,7 @@ void CallMyFriends (edict_t *targ, edict_t *attacker)
 					}
 				}
 			}
-			teammate = G_Find(teammate,FOFS(dmgteam),"player");
+			teammate = G_Find(teammate, FOFS(dmgteam), "player");
 		}
 	}
 	// If player attacks a GOODGUY, turn GOODGUY stuff off

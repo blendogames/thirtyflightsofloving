@@ -868,7 +868,6 @@ void CL_ParseFog (void)
 	green = MSG_ReadByte (&net_message);
 	blue = MSG_ReadByte (&net_message);
 
-//	R_SetFogVars (fogenable, model, density, start, end, red, green, blue);
 	V_SetFogInfo (fogenable, model, density, start, end, red, green, blue);
 }
 

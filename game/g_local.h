@@ -104,6 +104,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define	FL2_TURRET_DOUBLE		0x00000001	// this is a double-barreled turret
 #define	FL2_TURRET_DOUBLE_ALT	0x00000002	// this turret alternates firing its barrels (style is set)
 #define	FL2_TURRET_DOUBLE_ALT_FIRING	0x00000004		// secondary barrel in use for alternate firing
+#define FL2_CRUCIFIED			0x00000008	// insane is crucified 
 
 
 #define	FRAMETIME		0.1

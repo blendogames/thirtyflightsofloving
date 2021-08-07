@@ -527,15 +527,15 @@ void SV_CalcBlend (edict_t *ent)
 	if (level.freeze && (level.freezeframes % 30 == 0))
 	{
 		if (level.freezeframes == (sk_stasis_time->value*10 - 30)) // was 270
-			gi.sound(ent,CHAN_ITEM,gi.soundindex("items/stasis_stop.wav"), 1, ATTN_NORM, 0);
+			gi.sound(ent, CHAN_ITEM, gi.soundindex("items/stasis_stop.wav"), 1, ATTN_NORM, 0);
 		else
-			gi.sound(ent,CHAN_ITEM,gi.soundindex("items/stasis.wav"), 1, ATTN_NORM, 0);
+			gi.sound(ent, CHAN_ITEM, gi.soundindex("items/stasis.wav"), 1, ATTN_NORM, 0);
 	}
 
 	// add for damage
 	if (ent->client->damage_alpha > 0)
-		SV_AddBlend (ent->client->damage_blend[0],ent->client->damage_blend[1]
-		,ent->client->damage_blend[2], ent->client->damage_alpha, ent->client->ps.blend);
+		SV_AddBlend (ent->client->damage_blend[0], ent->client->damage_blend[1],
+		ent->client->damage_blend[2], ent->client->damage_alpha, ent->client->ps.blend);
 
 	if (ent->client->bonus_alpha > 0)
 		SV_AddBlend (0.85, 0.7, 0.3, ent->client->bonus_alpha, ent->client->ps.blend);

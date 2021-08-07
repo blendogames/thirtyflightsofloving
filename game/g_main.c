@@ -158,7 +158,7 @@ void G_RunFrame (void);
 void ShutdownGame (void)
 {
 	gi.dprintf ("==== ShutdownGame ====\n");
-	if(!deathmatch->value && !coop->value) {
+	if (!deathmatch->value && !coop->value) {
 #ifndef KMQUAKE2_ENGINE_MOD // engine has zoom autosensitivity
 		gi.cvar_forceset("m_pitch", va("%f",lazarus_pitch->value));
 #endif
@@ -185,7 +185,7 @@ int Debug_Modelindex (char *name)
 {
 	int	modelnum;
 	modelnum = RealFunc.modelindex(name);
-	if(modelnum > max_modelindex)
+	if (modelnum > max_modelindex)
 	{
 		gi.dprintf("Model %03d %s\n",modelnum,name);
 		max_modelindex = modelnum;
@@ -197,7 +197,7 @@ int Debug_Soundindex (char *name)
 {
 	int soundnum;
 	soundnum = RealFunc.soundindex(name);
-	if(soundnum > max_soundindex)
+	if (soundnum > max_soundindex)
 	{
 		gi.dprintf("Sound %03d %s\n",soundnum,name);
 		max_soundindex = soundnum;
@@ -540,12 +540,13 @@ void G_RunFrame (void)
 	if (paused && deathmatch->value)
 		return;
 
-	if(level.freeze)
+	if (level.freeze)
 	{
 		level.freezeframes++;
-		if(level.freezeframes >= sk_stasis_time->value*10)
+		if (level.freezeframes >= sk_stasis_time->value*10)
 			level.freeze = false;
-	} else
+	}
+	else
 		level.framenum++;
 
 	level.time = level.framenum*FRAMETIME;

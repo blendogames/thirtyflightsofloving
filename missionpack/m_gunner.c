@@ -431,19 +431,20 @@ void gunner_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 // Knightmare added
 // This calcs horizontal spread of prox mines based on distance.
 // Then it does a short-range trace at blast radius, to ensure we won't clip a wall.
+#define GUNNER_PROX_DANGER_RANGE	256.0f
 qboolean gunner_prox_safety_check (edict_t *self, vec3_t start, vec3_t target)
 {
 	trace_t		tr;
 	vec3_t		closeCheckMins, closeCheckMaxs, dir, dangerOffset, dangerTarget;
-	float		dist, dangerSpread, dangerRange = 256.0f;
+	float		dist, dangerSpread;
 
 	// get dist to target
 	VectorSubtract (target, start, dir);
 	dist = VectorLength (dir);
 
 	// get spread at damger range
-	dangerSpread = (HALF_GUNNER_PROX_SPREAD / dist) * dangerRange;
-	dangerSpread += 8.0f;	// add bounds of prox mine + 2
+	dangerSpread = (HALF_GUNNER_PROX_SPREAD / dist) * GUNNER_PROX_DANGER_RANGE;
+	dangerSpread += PROX_TEST_SIZE;	// add bounds of prox mine + 1
 	VectorSet (closeCheckMins, -dangerSpread, -dangerSpread, -12.0f);
 	VectorSet (closeCheckMaxs, dangerSpread, dangerSpread, 12.0f);
 
@@ -452,7 +453,7 @@ qboolean gunner_prox_safety_check (edict_t *self, vec3_t start, vec3_t target)
 
 	// extrapolate point on path to target at danger range
 	VectorNormalize (dir);
-	VectorScale (dir, dangerRange, dangerOffset);
+	VectorScale (dir, GUNNER_PROX_DANGER_RANGE, dangerOffset);
 	VectorAdd (start, dangerOffset, dangerTarget);
 
 	tr = gi.trace(start, closeCheckMins, closeCheckMaxs, dangerTarget, self, MASK_SHOT);
@@ -479,8 +480,8 @@ qboolean gunner_grenade_check (edict_t *self)
 	// Knightmare- Tactician Gunner fires prox mines in a spread, 
 	// so we need a wider safety bounds check
 	vec3_t		checkMins, checkMaxs;
-	vec3_t		proxMins = {-8, -8, -8};
-	vec3_t		proxMaxs = {8, 8, 8};
+	vec3_t		proxMins = {-PROX_TEST_SIZE, -PROX_TEST_SIZE, -PROX_TEST_SIZE};
+	vec3_t		proxMaxs = {PROX_TEST_SIZE, PROX_TEST_SIZE, PROX_TEST_SIZE};
 
 	if (!self->enemy)
 		return false;

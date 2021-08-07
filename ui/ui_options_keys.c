@@ -127,18 +127,33 @@ static void M_FindKeysForCommand (char *command, int *twokeys)
 
 static void KeysBackCursorDrawFunc (menuaction_s *self) // back action
 {
-	SCR_DrawChar (SCREEN_WIDTH*0.5 - 24, s_keys_menu.y + self->generic.y, MENU_FONT_SIZE, ALIGN_CENTER,
+	char	*cursor;
+
+	cursor = ((int)(Sys_Milliseconds()/250)&1) ? UI_ITEMCURSOR_DEFAULT_PIC : UI_ITEMCURSOR_BLINK_PIC;
+
+	SCR_DrawPic (SCREEN_WIDTH*0.5 - 24, s_keys_menu.y + self->generic.y, MENU_FONT_SIZE, MENU_FONT_SIZE, ALIGN_CENTER, false, cursor, 255);
+/*	SCR_DrawChar (SCREEN_WIDTH*0.5 - 24, s_keys_menu.y + self->generic.y, MENU_FONT_SIZE, ALIGN_CENTER,
 					12+((int)(Sys_Milliseconds()/250)&1), FONT_UI, 255,255,255,255, false, true);
+*/
 }
 
 static void KeyCursorDrawFunc (menuframework_s *menu)
 {
+	char	*cursor;
+
 	if (bind_grab)
+		cursor = UI_ITEMCURSOR_KEYBIND_PIC;
+	else
+		cursor = ((int)(Sys_Milliseconds()/250)&1) ? UI_ITEMCURSOR_DEFAULT_PIC : UI_ITEMCURSOR_BLINK_PIC;
+
+	SCR_DrawPic (menu->x, menu->y + menu->cursor * MENU_LINE_SIZE, MENU_FONT_SIZE, MENU_FONT_SIZE, ALIGN_CENTER, false, cursor, 255);
+/*	if (bind_grab)
 		SCR_DrawChar (menu->x, menu->y + menu->cursor * MENU_LINE_SIZE, MENU_FONT_SIZE, ALIGN_CENTER,
 						'=', FONT_UI, 255,255,255,255, false, true);
 	else
 		SCR_DrawChar (menu->x, menu->y + menu->cursor * MENU_LINE_SIZE, MENU_FONT_SIZE, ALIGN_CENTER,
 						12+((int)(Sys_Milliseconds()/250)&1), FONT_UI, 255,255,255,255, false, true);
+*/
 }
 
 static void DrawKeyBindingFunc (void *self)

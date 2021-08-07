@@ -110,7 +110,7 @@ void UI_DrawMainCursor (int x, int y, int f)
 
 	Com_sprintf (cursorname, sizeof(cursorname), "m_cursor%d", f);
 	R_DrawGetPicSize (&w, &h, cursorname);
-	SCR_DrawPic (x, y, w, h, ALIGN_CENTER, cursorname, 1.0);
+	SCR_DrawPic (x, y, w, h, ALIGN_CENTER, false, cursorname, 1.0);
 }
 
 
@@ -200,7 +200,7 @@ void M_Main_Draw (void)
 	for (i = 0; main_names[i] != 0; i++)
 		if (i != m_main_cursor) {
 			R_DrawGetPicSize (&w, &h, main_names[i]);
-			SCR_DrawPic (xoffset, (ystart + i*40+3), w, h, ALIGN_CENTER, main_names[i], 1.0);
+			SCR_DrawPic (xoffset, (ystart + i*40+3), w, h, ALIGN_CENTER, false, main_names[i], 1.0);
 		}
 
 //	strncpy (litname, main_names[m_main_cursor]);
@@ -208,7 +208,7 @@ void M_Main_Draw (void)
 	Q_strncpyz (litname, sizeof(litname), main_names[m_main_cursor]);
 	Q_strncatz (litname, sizeof(litname), "_sel");
 	R_DrawGetPicSize (&w, &h, litname);
-	SCR_DrawPic (xoffset-1, (ystart + m_main_cursor*40+2), w+2, h+2, ALIGN_CENTER, litname, 1.0);
+	SCR_DrawPic (xoffset-1, (ystart + m_main_cursor*40+2), w+2, h+2, ALIGN_CENTER, false, litname, 1.0);
 
 	// Draw our nifty quad damage model as a cursor if it's loaded.
 	if (quadModel_loaded)
@@ -217,11 +217,11 @@ void M_Main_Draw (void)
 		UI_DrawMainCursor (xoffset-25, ystart+(m_main_cursor*40+1), (int)(cls.realtime/100)%NUM_MAINMENU_CURSOR_FRAMES);
 
 	R_DrawGetPicSize (&w, &h, "m_main_plaque");
-	SCR_DrawPic (xoffset-(w/2+50), ystart, w, h, ALIGN_CENTER, "m_main_plaque", 1.0);
+	SCR_DrawPic (xoffset-(w/2+50), ystart, w, h, ALIGN_CENTER, false, "m_main_plaque", 1.0);
 	last_h = h;
 
 	R_DrawGetPicSize (&w, &h, "m_main_logo");
-	SCR_DrawPic (xoffset-(w/2+50), ystart+last_h+20, w, h, ALIGN_CENTER, "m_main_logo", 1.0);
+	SCR_DrawPic (xoffset-(w/2+50), ystart+last_h+20, w, h, ALIGN_CENTER, false, "m_main_logo", 1.0);
 }
 
 

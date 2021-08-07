@@ -320,6 +320,7 @@ image_t	*R_DrawFindPic (char *name)
 	return gl;
 }
 
+
 /*
 =============
 R_DrawGetPicSize
@@ -343,27 +344,22 @@ void R_DrawGetPicSize (int *w, int *h, char *pic)
 
 /*
 =============
-R_DrawStretchPic
+R_DrawPic_Standard
+Actual pic drawing code.
+Not to be called from other sections.
 =============
 */
-void R_DrawStretchPic (int x, int y, int w, int h, char *pic, float alpha)
+void R_DrawPic_Standard (int x, int y, int w, int h, vec2_t offset, vec4_t stCoords, vec4_t color, int texnum, renderparms_t *parms, qboolean texClamp)
 {
-	image_t		*gl;
 	int			i;
 	vec2_t		texCoord[4], verts[4];
 
-	gl = R_DrawFindPic (pic);
-	if (!gl)
-	{
-		VID_Printf (PRINT_ALL, "Can't find pic: %s\n", pic);
-		return;
-	}
+	if (!parms)	return;
 
 	if (scrap_dirty)
 		Scrap_Upload ();
 
-	// Psychospaz's transparent console support
-	if (gl->has_alpha || alpha < 1.0)
+	if (parms->blend)
 	{
 		GL_Disable (GL_ALPHA_TEST);
 		GL_TexEnv (GL_MODULATE);
@@ -371,17 +367,24 @@ void R_DrawStretchPic (int x, int y, int w, int h, char *pic, float alpha)
 		GL_DepthMask (false);
 	}
 
-	GL_Bind (gl->texnum);
+	GL_Bind (texnum);
 
-	Vector2Set(texCoord[0], gl->sl, gl->tl);
-	Vector2Set(texCoord[1], gl->sh, gl->tl);
-	Vector2Set(texCoord[2], gl->sh, gl->th);
-	Vector2Set(texCoord[3], gl->sl, gl->th);
+	if (texClamp) {
+		qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+		qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+	}
 
-	Vector2Set(verts[0], x, y);
-	Vector2Set(verts[1], x+w, y);
-	Vector2Set(verts[2], x+w, y+h);
-	Vector2Set(verts[3], x, y+h);
+	Vector2Set(texCoord[0], stCoords[0], stCoords[1]);
+	Vector2Set(texCoord[1], stCoords[2], stCoords[1]);
+	Vector2Set(texCoord[2], stCoords[2], stCoords[3]);
+	Vector2Set(texCoord[3], stCoords[0], stCoords[3]);
+
+	Vector2Set(verts[0], x+offset[0], y+offset[1]);
+	Vector2Set(verts[1], x+w+offset[0], y-offset[1]);
+	Vector2Set(verts[2], x+w-offset[0], y+h-offset[1]);
+	Vector2Set(verts[3], x-offset[0], y+h+offset[1]);
+
+	RB_ModifyTextureCoords (&texCoord[0][0], &verts[0][0], 4, &parms->tcmod);
 
 	rb_vertex = rb_index = 0;
 	indexArray[rb_index++] = rb_vertex+0;
@@ -391,15 +394,19 @@ void R_DrawStretchPic (int x, int y, int w, int h, char *pic, float alpha)
 	indexArray[rb_index++] = rb_vertex+2;
 	indexArray[rb_index++] = rb_vertex+3;
 	for (i=0; i<4; i++) {
-		VA_SetElem2(texCoordArray[0][rb_vertex], texCoord[i][0], texCoord[i][1]);
+		VA_SetElem2v(texCoordArray[0][rb_vertex], texCoord[i]);
 		VA_SetElem3(vertexArray[rb_vertex], verts[i][0], verts[i][1], 0);
-		VA_SetElem4(colorArray[rb_vertex], 1.0, 1.0, 1.0, alpha);
+		VA_SetElem4v(colorArray[rb_vertex], color);
 		rb_vertex++;
 	}
 	RB_RenderMeshGeneric (false);
 
-	// Psychospaz's transparent console support
-	if (gl->has_alpha || alpha < 1.0)
+	if (texClamp) {
+		qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	}
+
+	if (parms->blend)
 	{
 		GL_DepthMask (true);
 		GL_TexEnv (GL_REPLACE);
@@ -411,55 +418,75 @@ void R_DrawStretchPic (int x, int y, int w, int h, char *pic, float alpha)
 
 /*
 =============
-R_DrawScaledPic
-Psychospaz's code for drawing stretched crosshairs
+R_DrawPic_Masked
 =============
 */
-void R_DrawScaledPic (int x, int y, float scale, float alpha, char *pic)
+void R_DrawPic_Masked (int x, int y, int w, int h, vec2_t offset, vec4_t stCoords, vec4_t color, int texnum, int maskTexnum, renderparms_t *parms, qboolean texClamp)
 {
-	float	xoff, yoff;
-	float	scale_x, scale_y;
-	image_t *gl;
-	int		i;
-	vec2_t	texCoord[4], verts[4];
+	int			i;
+	vec2_t		texCoord[4], scrollTexCoord[4], verts[4];
 
-	gl = R_DrawFindPic (pic);
-
-	if (!gl) {
-		VID_Printf (PRINT_ALL, "Can't find pic: %s\n", pic);
-		return;
-	}
+	if (!parms)	return;
 
 	if (scrap_dirty)
 		Scrap_Upload ();
 
-	// add alpha support
-	if (gl->has_alpha || alpha < 1.0)
+	if (parms->blend)
 	{
 		GL_Disable (GL_ALPHA_TEST);
-		GL_TexEnv (GL_MODULATE);
 		GL_Enable (GL_BLEND);
+	//	GL_BlendFunc (GL_SRC_ALPHA, additive ? GL_ONE : GL_ONE_MINUS_SRC_ALPHA);	// GL_DST_ALPHA, GL_ONE
+		GL_BlendFunc (parms->blendfunc_src, parms->blendfunc_dst);
 		GL_DepthMask (false);
 	}
 
-	GL_Bind (gl->texnum);
+	GL_SelectTexture (0);
+	GL_Bind (maskTexnum);
+	GL_TexEnv (GL_COMBINE_ARB);
 
-	scale_x = scale_y = scale;
-	scale_x *= gl->replace_scale_w; // scale down if replacing a pcx image
-	scale_y *= gl->replace_scale_h; // scale down if replacing a pcx image
+	// Do nothing with this stage, it's just for alpha
+	qglTexEnvi (GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB, GL_INTERPOLATE);
+	qglTexEnvi (GL_TEXTURE_ENV, GL_SOURCE0_RGB_ARB, GL_PREVIOUS_ARB);
+	qglTexEnvi (GL_TEXTURE_ENV, GL_SOURCE1_RGB_ARB, GL_PREVIOUS_ARB);
+	qglTexEnvi (GL_TEXTURE_ENV, GL_COMBINE_ALPHA_ARB, GL_INTERPOLATE);
+	qglTexEnvi (GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_ARB, GL_TEXTURE);
+	qglTexEnvi (GL_TEXTURE_ENV, GL_SOURCE1_ALPHA_ARB, GL_TEXTURE);
 
-	Vector2Set(texCoord[0], gl->sl, gl->tl);
-	Vector2Set(texCoord[1], gl->sh, gl->tl);
-	Vector2Set(texCoord[2], gl->sh, gl->th);
-	Vector2Set(texCoord[3], gl->sl, gl->th);
+	GL_EnableTexture (1);
+	GL_Bind (texnum);
+	GL_TexEnv (GL_COMBINE_ARB);
 
-	xoff = gl->width*scale_x-gl->width;
-	yoff = gl->height*scale_y-gl->height;
+	if (texClamp) {
+		qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+		qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+	}
 
-	Vector2Set(verts[0], x, y);
-	Vector2Set(verts[1], x+gl->width+xoff, y);
-	Vector2Set(verts[2], x+gl->width+xoff, y+gl->height+yoff);
-	Vector2Set(verts[3], x, y+gl->height+yoff);
+	// This stage uses the previous one's alpha value
+	if (parms->blend) {
+		qglTexEnvi (GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB, GL_MODULATE);
+		qglTexEnvi (GL_TEXTURE_ENV, GL_COMBINE_ALPHA_ARB, GL_MODULATE);
+	}
+	else {
+		qglTexEnvi (GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB, GL_REPLACE);
+		qglTexEnvi (GL_TEXTURE_ENV, GL_COMBINE_ALPHA_ARB, GL_REPLACE);
+	}
+	qglTexEnvi (GL_TEXTURE_ENV, GL_SOURCE0_RGB_ARB, GL_TEXTURE);
+	qglTexEnvi (GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_ARB, GL_TEXTURE0);	// GL_PREVIOUS_ARB
+
+	Vector2Set(texCoord[0], stCoords[0], stCoords[1]);
+	Vector2Set(texCoord[1], stCoords[2], stCoords[1]);
+	Vector2Set(texCoord[2], stCoords[2], stCoords[3]);
+	Vector2Set(texCoord[3], stCoords[0], stCoords[3]);
+
+	for (i=0; i<4; i++)
+		Vector2Copy(texCoord[i], scrollTexCoord[i]);
+
+	Vector2Set(verts[0], x+offset[0], y+offset[1]);
+	Vector2Set(verts[1], x+w+offset[0], y-offset[1]);
+	Vector2Set(verts[2], x+w-offset[0], y+h-offset[1]);
+	Vector2Set(verts[3], x-offset[0], y+h+offset[1]);
+
+	RB_ModifyTextureCoords (&scrollTexCoord[0][0], &verts[0][0], 4, &parms->tcmod);
 
 	rb_vertex = rb_index = 0;
 	indexArray[rb_index++] = rb_vertex+0;
@@ -469,19 +496,36 @@ void R_DrawScaledPic (int x, int y, float scale, float alpha, char *pic)
 	indexArray[rb_index++] = rb_vertex+2;
 	indexArray[rb_index++] = rb_vertex+3;
 	for (i=0; i<4; i++) {
-		VA_SetElem2(texCoordArray[0][rb_vertex], texCoord[i][0], texCoord[i][1]);
+		VA_SetElem2v(texCoordArray[0][rb_vertex], texCoord[i]);
+		VA_SetElem2v(texCoordArray[1][rb_vertex], scrollTexCoord[i]);
 		VA_SetElem3(vertexArray[rb_vertex], verts[i][0], verts[i][1], 0);
-		VA_SetElem4(colorArray[rb_vertex], 1.0, 1.0, 1.0, alpha);
+		VA_SetElem4v(colorArray[rb_vertex], color);
 		rb_vertex++;
 	}
 	RB_RenderMeshGeneric (false);
 
-	if (gl->has_alpha || alpha < 1.0)
+	if (texClamp) {
+		qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	}
+
+	// Reset parms
+	GL_DisableTexture (1);
+	GL_SelectTexture (0);
+	qglTexEnvi (GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB, GL_REPLACE);
+	qglTexEnvi (GL_TEXTURE_ENV, GL_SOURCE0_RGB_ARB, GL_TEXTURE);
+	qglTexEnvi (GL_TEXTURE_ENV, GL_SOURCE1_RGB_ARB, GL_PREVIOUS_ARB);
+	qglTexEnvi (GL_TEXTURE_ENV, GL_COMBINE_ALPHA_ARB, GL_REPLACE);
+	qglTexEnvi (GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_ARB, GL_TEXTURE);
+	qglTexEnvi (GL_TEXTURE_ENV, GL_SOURCE1_ALPHA_ARB, GL_PREVIOUS_ARB);
+	GL_TexEnv (GL_REPLACE);
+
+	if (parms->blend)
 	{
 		GL_DepthMask (true);
-		GL_TexEnv (GL_REPLACE);
+		GL_BlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		GL_Disable (GL_BLEND);
-		GL_Enable (GL_ALPHA_TEST); // add alpha support
+		GL_Enable (GL_ALPHA_TEST);
 	}
 }
 
@@ -491,102 +535,62 @@ void R_DrawScaledPic (int x, int y, float scale, float alpha, char *pic)
 R_DrawPic
 =============
 */
-void R_DrawPic (int x, int y, char *pic)
+void R_DrawPic (drawStruct_t ds)	
 {
-	image_t	*gl;
-	int		i;
-	vec2_t	texCoord[4], verts[4];
+	int				w, h;
+	float			scale_x, scale_y;
+	vec4_t			texCoords;
+	image_t			*image;
+	renderparms_t	drawParms;
 
-	gl = R_DrawFindPic (pic);
-
-	if (!gl) {
-		VID_Printf (PRINT_ALL, "Can't find pic: %s\n", pic);
-		return;
-	}
-
-	if (scrap_dirty)
-		Scrap_Upload ();
-
-	GL_Bind (gl->texnum);
-
-	Vector2Set(texCoord[0], gl->sl, gl->tl);
-	Vector2Set(texCoord[1], gl->sh, gl->tl);
-	Vector2Set(texCoord[2], gl->sh, gl->th);
-	Vector2Set(texCoord[3], gl->sl, gl->th);
-
-	Vector2Set(verts[0], x, y);
-	Vector2Set(verts[1], x+gl->width, y);
-	Vector2Set(verts[2], x+gl->width, y+gl->height);
-	Vector2Set(verts[3], x, y+gl->height);
-
-	rb_vertex = rb_index = 0;
-	indexArray[rb_index++] = rb_vertex+0;
-	indexArray[rb_index++] = rb_vertex+1;
-	indexArray[rb_index++] = rb_vertex+2;
-	indexArray[rb_index++] = rb_vertex+0;
-	indexArray[rb_index++] = rb_vertex+2;
-	indexArray[rb_index++] = rb_vertex+3;
-	for (i=0; i<4; i++) {
-		VA_SetElem2(texCoordArray[0][rb_vertex], texCoord[i][0], texCoord[i][1]);
-		VA_SetElem3(vertexArray[rb_vertex], verts[i][0], verts[i][1], 0);
-		VA_SetElem4(colorArray[rb_vertex], 1.0, 1.0, 1.0, 1.0);
-		rb_vertex++;
-	}
-	RB_RenderMeshGeneric (false);
-}
-
-/*
-=============
-R_DrawTileClear
-
-This repeats a 64*64 tile graphic to fill the screen around a sized down
-refresh window.
-=============
-*/
-void R_DrawTileClear (int x, int y, int w, int h, char *pic)
-{
-	image_t	*image;
-	int		i;
-	vec2_t	texCoord[4], verts[4];
-
-	image = R_DrawFindPic (pic);
-
+	image = R_DrawFindPic (ds.pic);
 	if (!image) {
-		VID_Printf (PRINT_ALL, "Can't find pic: %s\n", pic);
+		VID_Printf (PRINT_ALL, "Can't find pic: %s\n", ds.pic);
 		return;
 	}
 
-	GL_Bind (image->texnum);
-/*
-	Vector2Set(texCoord[0], x/64.0, y/64.0);
-	Vector2Set(texCoord[1], (x+w)/64.0, y/64.0);
-	Vector2Set(texCoord[2], (x+w)/64.0, (y+h)/64.0);
-	Vector2Set(texCoord[3], x/64.0, (y+h)/64.0);
-*/
-	Vector2Set(texCoord[0], (float)x/(float)image->width, (float)y/(float)image->height);
-	Vector2Set(texCoord[1], (float)(x+w)/(float)image->width, (float)y/(float)image->height);
-	Vector2Set(texCoord[2], (float)(x+w)/(float)image->width, (float)(y+h)/(float)image->height);
-	Vector2Set(texCoord[3], (float)x/(float)image->width, (float)(y+h)/(float)image->height);
+	w = ds.w;	h = ds.h;
+	if (ds.flags & DSFLAG_USESTCOORDS)	// use passed coords
+		Vector4Copy (ds.stCoords, texCoords);
+	else if (ds.flags & DSFLAG_TILED)	// use tiled coords
+		Vector4Set (texCoords, (float)ds.x/(float)image->width, (float)ds.y/(float)image->height,
+					(float)(ds.x+ds.w)/(float)image->width, (float)(ds.y+ds.h)/(float)image->height);
+	else if (ds.flags & DSFLAG_SCALED)	// use scaled size
+	{
+		Vector4Set (texCoords, image->sl, image->tl, image->sh, image->th);
 
-	Vector2Set(verts[0], x, y);
-	Vector2Set(verts[1], x+w, y);
-	Vector2Set(verts[2], x+w, y+h);
-	Vector2Set(verts[3], x, y+h);
-
-	rb_vertex = rb_index = 0;
-	indexArray[rb_index++] = rb_vertex+0;
-	indexArray[rb_index++] = rb_vertex+1;
-	indexArray[rb_index++] = rb_vertex+2;
-	indexArray[rb_index++] = rb_vertex+0;
-	indexArray[rb_index++] = rb_vertex+2;
-	indexArray[rb_index++] = rb_vertex+3;
-	for (i=0; i<4; i++) {
-		VA_SetElem2(texCoordArray[0][rb_vertex], texCoord[i][0], texCoord[i][1]);
-		VA_SetElem3(vertexArray[rb_vertex], verts[i][0], verts[i][1], 0);
-		VA_SetElem4(colorArray[rb_vertex], 1.0, 1.0, 1.0, 1.0);
-		rb_vertex++;
+		scale_x = ds.scale[0];
+		scale_y = ds.scale[1];
+		scale_x *= image->replace_scale_w;	// scale down if replacing a pcx image
+		scale_y *= image->replace_scale_h;	// scale down if replacing a pcx image
+		w = image->width*scale_x;
+		h = image->height*scale_y;
 	}
-	RB_RenderMeshGeneric (false);
+	else	// use internal coords
+		Vector4Set (texCoords, image->sl, image->tl, image->sh, image->th);
+
+	Mod_SetRenderParmsDefaults (&drawParms);
+	drawParms.tcmod.scroll_x = ds.scroll[0];
+	drawParms.tcmod.scroll_y = ds.scroll[1];
+
+	// masked image option
+	if ( (ds.flags & DSFLAG_MASKED) && (ds.maskPic != NULL) && glConfig.mtexcombine )
+	{
+		image_t		*maskImage = R_DrawFindPic (ds.maskPic);
+
+		if (maskImage != NULL)
+		{
+		//	VID_Printf (PRINT_ALL, "Drawing pic with mask: %s\n", pic);
+			drawParms.blend = true;
+			drawParms.blendfunc_src = GL_SRC_ALPHA;
+			drawParms.blendfunc_dst = GL_ONE;
+			R_DrawPic_Masked (ds.x, ds.y, w, h, ds.offset, ds.stCoords, ds.color, image->texnum, maskImage->texnum, &drawParms, (ds.flags & DSFLAG_CLAMP));
+			return;
+		}
+	}
+
+	drawParms.blend = (image->has_alpha || ds.color[3] < 1.0f);
+	R_DrawPic_Standard (ds.x, ds.y, w, h, ds.offset, texCoords, ds.color, image->texnum, &drawParms, (ds.flags & DSFLAG_CLAMP));
 }
 
 
@@ -608,7 +612,6 @@ void R_DrawFill (int x, int y, int w, int h, int red, int green, int blue, int a
 	blue = min(blue, 255);
 	alpha = max(min(alpha, 255), 1);
 
-//	GL_DisableTexture (0);
 	GL_Disable (GL_ALPHA_TEST);
 	GL_TexEnv (GL_MODULATE);
 	GL_Enable (GL_BLEND);
@@ -651,8 +654,6 @@ R_DrawCameraEffect
 Video camera effect
 =============
 */
-void Mod_SetRenderParmsDefaults (renderparms_t *parms);
-
 void R_DrawCameraEffect (void)
 {
 	image_t			*image[2];
@@ -660,7 +661,7 @@ void R_DrawCameraEffect (void)
 	float			texparms[2][4];
 	vec2_t			texCoord[4];
 	vec3_t			verts[4];
-	renderparms_t	cameraParms;
+	tcmodParms_t	cameraParms;
 
 	image[0] = R_DrawFindPic ("/gfx/2d/screenstatic.tga");
 	image[1] = R_DrawFindPic ("/gfx/2d/scanlines.tga");
@@ -699,7 +700,7 @@ void R_DrawCameraEffect (void)
 		Vector2Set(texCoord[1], (x+w)/image[i]->width, y/image[i]->height);
 		Vector2Set(texCoord[2], (x+w)/image[i]->width, (y+h)/image[i]->height);
 		Vector2Set(texCoord[3], x/image[i]->width, (y+h)/image[i]->height);
-		Mod_SetRenderParmsDefaults (&cameraParms);
+		Mod_SetTCModParmsDefaults (&cameraParms);
 		cameraParms.scale_x = texparms[i][0];
 		cameraParms.scale_y = texparms[i][1];
 		cameraParms.scroll_x = texparms[i][2];

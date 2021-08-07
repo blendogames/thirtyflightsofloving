@@ -1308,6 +1308,13 @@ void SP_monster_sentien (edict_t *self)
 	}
 
 	self->monsterinfo.currentmove = &sentien_move_stand1;
+	if (self->health < 0)
+	{
+		mmove_t	*deathmoves[] = {&sentien_move_death1,
+			                     &sentien_move_death2,
+								 NULL};
+		M_SetDeath (self, (mmove_t **)&deathmoves);
+	}
 	self->monsterinfo.scale = MODEL_SCALE;
 
 	walkmonster_start(self);

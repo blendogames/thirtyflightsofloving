@@ -75,6 +75,27 @@ typedef enum
 	FONT_UI
 } fontslot_t;
 
+#define DSFLAG_USESTCOORDS		0x0001		// use passed st coords instead of texture's st coords
+#define DSFLAG_TILED			0x0002		// tile image instead of stretching
+#define DSFLAG_SCALED			0x0004		// scale up using scale values, instead of width and height
+#define DSFLAG_CLAMP			0x0004		// texture edge clamping
+#define DSFLAG_MASKED			0x0008		// use mask image
+
+typedef struct
+{
+	int			x;
+	int			y;
+	int			w;
+	int			h;
+	vec2_t		scroll;
+	vec2_t		scale;
+	vec2_t		offset;
+	vec4_t		stCoords;
+	vec4_t		color;
+	char		*pic;
+	char		*maskPic;
+	unsigned	flags;
+} drawStruct_t;
 
 typedef struct entity_s
 {

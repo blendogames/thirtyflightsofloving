@@ -412,11 +412,10 @@ extern	cvar_t	*cl_particle_scale;
 // whether to adjust fov for wide aspect rattio
 extern	cvar_t	*cl_widescreen_fov;
 
-
-extern	cvar_t	*con_alpha; // Psychospaz's transparent console
-//extern	cvar_t	*con_height; // how far the console drops down
-extern	cvar_t	*con_newconback;	// whether to use new console background
-extern	cvar_t	*con_oldconbar;		// whether to draw bottom bar on old console
+extern	cvar_t	*scr_conalpha;		// Psychospaz's transparent console
+extern	cvar_t	*scr_newconback;	// whether to use new console background
+extern	cvar_t	*scr_oldconbar;		// whether to draw bottom bar on old console
+//extern	cvar_t	*scr_conheight; // how far the console drops down
 
 // Psychospaz's chasecam
 extern	cvar_t	*cg_thirdperson;
@@ -565,6 +564,7 @@ extern	sizebuf_t	net_message;
 qboolean CL_StringSetParams (char modifier, int *red, int *green, int *blue, int *bold, int *shadow, int *italic, int *reset);
 void Con_DrawString (int x, int y, char *s, fontslot_t font, int alpha);
 void CL_DrawStringGeneric (int x, int y, const char *string, fontslot_t font, int alpha, int fontSize, textscaletype_t scaleType, qboolean altBit);
+void CL_DrawStringFromCharsPic (float x, float y, float w, float h, vec2_t offset, float width, char *string, color_t color, char *pic, int flags);
 
 // cl_scrn.c
 typedef struct
@@ -767,26 +767,29 @@ void	R_RenderFrame (refdef_t *fd);
 
 void	R_SetParticlePicture (int num, char *name); // Knightmare added
 
-void	R_DrawGetPicSize (int *w, int *h, char *name);	// will return 0 0 if not found
-void	R_DrawPic (int x, int y, char *name);
-// added alpha for Psychospaz's transparent console
-void	R_DrawStretchPic (int x, int y, int w, int h, char *name, float alpha);
-void	R_DrawScaledPic (int x, int y, float scale, float alpha, char *name);
-// added char scaling from Quake2Max
 void	R_DrawChar (float x, float y, int c, fontslot_t font, float scale,
 					int red, int green, int blue, int alpha, qboolean italic, qboolean last);
 void	R_DrawString (float x, float y, const char *string, fontslot_t font, float scale, 
-				int red, int green, int blue, int alpha, qboolean italic, qboolean shadow);
-void	R_DrawTileClear (int x, int y, int w, int h, char *name);
+					int red, int green, int blue, int alpha, qboolean italic, qboolean shadow);
+
+void	R_DrawGetPicSize (int *w, int *h, char *name);	// will return 0 0 if not found
+
+void	R_DrawPic (drawStruct_t ds);
+
+//void	R_DrawPic (int x, int y, char *name);
+// added alpha for Psychospaz's transparent console
+//void	R_DrawStretchPic (int x, int y, int w, int h, char *name, float alpha);
+//void	R_DrawScaledPic (int x, int y, float scale, float alpha, char *name);
+//void	R_DrawTileClear (int x, int y, int w, int h, char *name);
+
 void	R_DrawFill (int x, int y, int w, int h, int red, int green, int blue, int alpha);
+
 void	R_DrawCameraEffect (void);
 
 void	R_GrabScreen (void); // screenshots for savegames
 void	R_ScaledScreenshot (char *name); //  screenshots for savegames
 
 int		R_MarkFragments (const vec3_t origin, const vec3_t axis[3], float radius, int maxPoints, vec3_t *points, int maxFragments, markFragment_t *fragments);
-
-//void	R_SetFogVars (qboolean enable, int model, int density, int start, int end, int red, int green, int blue);
 
 float	R_CharMapScale (void); // Knightmare added char scaling from Quake2Max
 

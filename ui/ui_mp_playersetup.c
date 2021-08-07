@@ -451,38 +451,50 @@ void PlayerConfig_MouseClick (void)
 
 void PlayerConfig_DrawSkinSelection (void)
 {
-	char	scratch[MAX_QPATH];
-	float	icon_x = SCREEN_WIDTH*0.5 - 5; // width - 325
-	float	icon_y = SCREEN_HEIGHT - 108;
-	float	icon_offset = 0;
-	float	x, y, w, h;
-	int		i, count, color[3];
+	char		scratch[MAX_QPATH];
+	float		icon_x = SCREEN_WIDTH*0.5 - 5; // width - 325
+	float		icon_y = SCREEN_HEIGHT - 108;
+	float		icon_offset = 0;
+	float		x, y, w, h;
+	int			i, count, color[3];
+	color_t		arrowColor;
+	vec4_t		arrowTemp[2];
 
 	CL_TextColor ((int)Cvar_VariableValue("alt_text_color"), &color[0], &color[1], &color[2]);
+	Vector4Copy (stCoord_arrow_left, arrowTemp[0]);
+	Vector4Copy (stCoord_arrow_right, arrowTemp[1]);
 
 	if ( (ui_pmi[s_playerconfig_model_box.curvalue].nskins < NUM_SKINBOX_ITEMS) || (s_playerconfig_skin_box.curvalue < 4) )
 		i = 0;
 	else if ( s_playerconfig_skin_box.curvalue > (ui_pmi[s_playerconfig_model_box.curvalue].nskins - 4) )
 		i = ui_pmi[s_playerconfig_model_box.curvalue].nskins-NUM_SKINBOX_ITEMS;
 	else
-		i = s_playerconfig_skin_box.curvalue-3;
+		i = s_playerconfig_skin_box.curvalue - 3;
 
 	// left arrow
-	if (i > 0)
-		Com_sprintf (scratch, sizeof(scratch), "/gfx/ui/arrows/arrow_left.pcx");
-	else
-		Com_sprintf (scratch, sizeof(scratch), "/gfx/ui/arrows/arrow_left_d.pcx");
-	SCR_DrawPic (icon_x-39, icon_y+2, 32, 32,  ALIGN_CENTER, scratch, 1.0);
+	if (i > 0) {
+		Vector4Set (arrowColor, color[0], color[1], color[2], 255);
+	//	Com_sprintf (scratch, sizeof(scratch), "/gfx/ui/arrows/arrow_left.pcx");
+	}
+	else {
+		Vector4Set (arrowColor, 150, 150, 150, 255);
+		arrowTemp[0][1] += 0.25;
+		arrowTemp[0][3] += 0.25;
+	//	Com_sprintf (scratch, sizeof(scratch), "/gfx/ui/arrows/arrow_left_d.pcx");
+	}
+	SCR_DrawOffsetPicST (icon_x-39, icon_y+2, 32, 32, vec2_origin, arrowTemp[0], ALIGN_CENTER, false, arrowColor, UI_ARROWS_PIC);
+//	SCR_DrawPic (icon_x-39, icon_y+2, 32, 32,  ALIGN_CENTER, false, scratch, 1.0);
 
 	// background
-	SCR_DrawFill (icon_x-3, icon_y-3, NUM_SKINBOX_ITEMS*34+4, 38, ALIGN_CENTER, 0,0,0,255);
-	if (R_DrawFindPic("/gfx/ui/listbox_background.pcx")) {
-		x = icon_x-2;	y = icon_y-2;	w = NUM_SKINBOX_ITEMS*34+2;	h = 36;
-		SCR_ScaleCoords (&x, &y, &w, &h, ALIGN_CENTER);
-		R_DrawTileClear ((int)x, (int)y, (int)w, (int)h, "/gfx/ui/listbox_background.pcx");
+	SCR_DrawFill (icon_x-3, icon_y-3, NUM_SKINBOX_ITEMS*34+4, 38, ALIGN_CENTER, false, 0, 0, 0, 255);
+	if (R_DrawFindPic("/gfx/ui/widgets/listbox_background.pcx")) {
+		x = icon_x-2;	y = icon_y-2;	w = NUM_SKINBOX_ITEMS * 34 + 2;	h = 36;
+		SCR_DrawTiledPic (x, y, w, h, ALIGN_CENTER, true, "/gfx/ui/widgets/listbox_background.pcx", 255);
+	//	SCR_ScaleCoords (&x, &y, &w, &h, ALIGN_CENTER);
+	//	R_DrawTileClear ((int)x, (int)y, (int)w, (int)h, "/gfx/ui/widgets/listbox_background.pcx");
 	}
 	else
-		SCR_DrawFill (icon_x-2, icon_y-2, NUM_SKINBOX_ITEMS*34+2, 36, ALIGN_CENTER, 60,60,60,255);
+		SCR_DrawFill (icon_x-2, icon_y-2, NUM_SKINBOX_ITEMS*34+2, 36, ALIGN_CENTER, false, 60, 60, 60, 255);
 		
 	for (count=0; count<NUM_SKINBOX_ITEMS; i++,count++)
 	{
@@ -494,18 +506,25 @@ void PlayerConfig_DrawSkinSelection (void)
 			ui_pmi[s_playerconfig_model_box.curvalue].skinDisplayNames[i] );
 
 		if (i == s_playerconfig_skin_box.curvalue)
-			SCR_DrawFill (icon_x + icon_offset-1, icon_y-1, 34, 34, ALIGN_CENTER, color[0],color[1],color[2],255);
-		SCR_DrawPic (icon_x + icon_offset, icon_y, 32, 32,  ALIGN_CENTER, scratch, 1.0);
+			SCR_DrawFill (icon_x + icon_offset-1, icon_y-1, 34, 34, ALIGN_CENTER, false, color[0], color[1] ,color[2], 255);
+		SCR_DrawPic (icon_x + icon_offset, icon_y, 32, 32,  ALIGN_CENTER, false, scratch, 1.0);
 		icon_offset += 34;
 	}
 
 	// right arrow
 	icon_offset = NUM_SKINBOX_ITEMS*34;
-	if (ui_pmi[s_playerconfig_model_box.curvalue].nskins-i>0)
-		Com_sprintf (scratch, sizeof(scratch), "/gfx/ui/arrows/arrow_right.pcx");
-	else
-		Com_sprintf (scratch, sizeof(scratch), "/gfx/ui/arrows/arrow_right_d.pcx"); 
-	SCR_DrawPic (icon_x+icon_offset+5, icon_y+2, 32, 32,  ALIGN_CENTER, scratch, 1.0);
+	if ( ui_pmi[s_playerconfig_model_box.curvalue].nskins-i > 0 ) {
+		Vector4Set (arrowColor, color[0], color[1], color[2], 255);
+	//	Com_sprintf (scratch, sizeof(scratch), "/gfx/ui/arrows/arrow_right.pcx");
+	}
+	else {
+		Vector4Set (arrowColor, 150, 150, 150, 255);
+		arrowTemp[1][1] += 0.25;
+		arrowTemp[1][3] += 0.25;
+	//	Com_sprintf (scratch, sizeof(scratch), "/gfx/ui/arrows/arrow_right_d.pcx");
+	}
+	SCR_DrawOffsetPicST (icon_x+icon_offset+5, icon_y+2, 32, 32, vec2_origin, arrowTemp[1], ALIGN_CENTER, false, arrowColor, UI_ARROWS_PIC);
+//	SCR_DrawPic (icon_x+icon_offset+5, icon_y+2, 32, 32,  ALIGN_CENTER, false, scratch, 1.0);
 }
 
 

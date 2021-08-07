@@ -384,7 +384,7 @@ void gunner_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	self->monsterinfo.currentmove = &gunner_move_death;
 }
 
-qboolean gunner_grenade_check(edict_t *self)
+qboolean gunner_grenade_check (edict_t *self)
 {
 	vec3_t		start;
 	vec3_t		forward, right;
@@ -416,18 +416,18 @@ qboolean gunner_grenade_check(edict_t *self)
 		return false;
 
 	// Lazarus: Max vertical distance - this is approximate and conservative
-	VectorCopy(dir,vhorz);
+	VectorCopy (dir, vhorz);
 	vhorz[2] = 0;
-	horz = VectorLength(vhorz);
-	vertmax = (GRENADE_VELOCITY_SQUARED)/(2*sv_gravity->value) -
-		0.5*sv_gravity->value*horz*horz/GRENADE_VELOCITY_SQUARED;
+	horz = VectorLength (vhorz);
+	vertmax = (GRENADE_VELOCITY_SQUARED) / (2 * sv_gravity->value) -
+		0.5 * sv_gravity->value * horz * horz / GRENADE_VELOCITY_SQUARED;
 	if (dir[2] > vertmax) 
 		return false;
 
 	// Lazarus: Make sure there's a more-or-less clear flight path to target
 	// Rogue checked target origin, but if target is above gunner then the trace
 	// would almost always hit the platform the target was standing on
-	VectorCopy(self->enemy->s.origin,target);
+	VectorCopy (self->enemy->s.origin, target);
 	target[2] = self->enemy->absmax[2];
 	tr = gi.trace(start, vec3_origin, vec3_origin, target, self, MASK_SHOT);
 	if (tr.ent == self->enemy || tr.fraction == 1)

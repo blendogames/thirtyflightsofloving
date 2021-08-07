@@ -47,7 +47,8 @@ Initializes all hint_path chains in a map.
 */
 void SetupHintPaths (void)
 {
-	int		i, keyofs;
+	int		i;
+	size_t	keyofs;
 	edict_t	*thisPath, *ent;
 
 	// check if there are any hint_paths in this map first
@@ -418,14 +419,14 @@ void touch_hint_path (edict_t *hintpath, edict_t *monster, cplane_t *plane, csur
 	if (monster->monsterinfo.aiflags & AI_MEDIC_PATROL) 
 	{
 		if (monster->movetarget == hintpath)
-			medic_NextPatrolPoint(monster, hintpath);
+			medic_NextPatrolPoint (monster, hintpath);
 		return;
 	}
 
 	if (monster->monsterinfo.aiflags & AI_HINT_TEST)
 	{
 		if (monster->movetarget == hintpath)
-			HintTestNext(monster, hintpath);
+			HintTestNext (monster, hintpath);
 		return;
 	}
 

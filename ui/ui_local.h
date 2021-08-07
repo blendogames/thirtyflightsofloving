@@ -59,6 +59,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LCOLUMN_OFFSET -MENU_FONT_SIZE*2	// was -16
 
 #define SLIDER_RANGE 10
+#define SLIDER_HEIGHT 8
+#define SLIDER_ENDCAP_WIDTH 5 // was 8
+#define SLIDER_SECTION_WIDTH 10 // was 8
+#define SLIDER_KNOB_WIDTH 5 // was 8
+#define SLIDER_V_OFFSET (SLIDER_HEIGHT-MENU_FONT_SIZE)/2
 //
 
 
@@ -190,7 +195,14 @@ typedef struct
 
 cursor_t ui_mousecursor;
 
+//
 // ui_backend.c
+//
+extern	vec4_t stCoord_arrow_left;
+extern	vec4_t stCoord_arrow_right;
+extern	vec4_t stCoord_arrow_up;
+extern	vec4_t stCoord_arrow_down;
+
 qboolean MenuField_Key (menufield_s *field, int key);
 void	MenuSlider_SetValue (menuslider_s *s, float value);
 float	MenuSlider_GetValue (menuslider_s *s);
@@ -392,15 +404,28 @@ void UI_Shutdown (void);
 #define UI_MOUSECURSOR_TEXT_PIC		"/gfx/ui/cursors/m_cur_text.pcx"
 
 #define UI_MOUSECURSOR_PIC			"/gfx/ui/cursors/m_mouse_cursor.pcx"
+#define UI_ITEMCURSOR_DEFAULT_PIC	"/gfx/ui/cursors/cursor_menuitem_default.pcx"
+#define UI_ITEMCURSOR_KEYBIND_PIC	"/gfx/ui/cursors/cursor_menuitem_keybind.pcx"
+#define UI_ITEMCURSOR_BLINK_PIC		"/gfx/ui/cursors/cursor_menuitem_blink.pcx"
+
+#define UI_CHECKBOX_ON_PIC			"/gfx/ui/widgets/checkbox_on.pcx"
+#define UI_CHECKBOX_OFF_PIC			"/gfx/ui/widgets/checkbox_off.pcx"
+#define UI_FIELD_PIC				"/gfx/ui/widgets/field.pcx"
+#define UI_TEXTBOX_PIC				"/gfx/ui/widgets/textbox.pcx"
+#define UI_SLIDER_PIC				"/gfx/ui/widgets/slider.pcx"
+#define UI_ARROWS_PIC				"/gfx/ui/widgets/arrows.pcx"
 
 extern	cvar_t	*ui_sensitivity;
 extern	cvar_t	*ui_background_alpha;
 extern	cvar_t	*ui_item_rotate;
 extern	cvar_t	*ui_cursor_scale;
 
-static char *menu_in_sound		= "misc/menu1.wav";
-static char *menu_move_sound	= "misc/menu2.wav";
-static char *menu_out_sound		= "misc/menu3.wav";
+// moved these declarations to ui_subsystem.c to avoid redundancy
+extern	char *menu_null_sound;
+extern	char *menu_in_sound;
+extern	char *menu_move_sound;
+extern	char *menu_out_sound;
+extern	char *menu_drag_sound;
 
 extern qboolean	ui_entersound;		// play after drawing a frame, so caching
 									// won't disrupt the sound

@@ -930,7 +930,7 @@ void Cmd_Use_f (edict_t *ent)
 	}
 	index = ITEM_INDEX(it);
 #ifdef JETPACK_MOD
-	if (!Q_stricmp(s,"jetpack"))
+	if (!Q_stricmp(s, "jetpack"))
 	{
 		// Special case - turns on/off
 		if (!ent->client->jetpack)
@@ -952,7 +952,7 @@ void Cmd_Use_f (edict_t *ent)
 		return;
 	}
 #endif
-	if (!Q_stricmp(s,"stasis generator"))
+	if (!Q_stricmp(s, "stasis generator"))
 	{
 		// Special case - turn freeze off if already on
 		if (level.freeze)
@@ -2456,42 +2456,54 @@ void ClientCommand (edict_t *ent)
 	// debugging/developer stuff
 	else if (developer->value)
 	{
-		if (!Q_stricmp(cmd,"lightswitch"))
-			ToggleLights();
-		else if (!Q_stricmp(cmd,"bbox"))
+		if (!Q_stricmp(cmd, "lightswitch"))
+		{
+			ToggleLights ();
+		}
+		else if (!Q_stricmp(cmd, "bbox"))
+		{
 			Cmd_Bbox_f (ent);
-		else if (!Q_stricmp(cmd,"forcewall"))
+		}
+		else if (!Q_stricmp(cmd, "forcewall"))
 		{
 			SpawnForcewall(ent);
 		}
-		else if (!Q_stricmp(cmd,"forcewall_off"))
+		else if (!Q_stricmp(cmd, "forcewall_off"))
 		{
 			ForcewallOff(ent);
 		}
-		else if (!Q_stricmp(cmd,"freeze"))
+		else if (!Q_stricmp(cmd, "freeze"))
 		{
-			if (level.freeze)
+			if (level.freeze) {
+				gi.dprintf ("Unfreezing time.\n", (int)sk_stasis_time->value);
 				level.freeze = false;
+			}
 			else
 			{
 				if (ent->client->jetpack)
 					gi.dprintf("Cannot use freeze while using jetpack\n");
-				else
+				else {
+					gi.dprintf ("Freezing time for %d seconds.\n", (int)sk_stasis_time->value);
 					level.freeze = true;
+					level.freezeframes = 0;
+				}
 			}
 		}
-		else if (!Q_stricmp(cmd,"hint_test"))
+		else if (!Q_stricmp(cmd, "hint_test"))
 		{
 			edict_t *viewing;
 			int		result;
-			viewing = LookingAt(ent,LOOKAT_MD2,NULL,NULL);
+			viewing = LookingAt(ent, LOOKAT_MD2, NULL, NULL);
 			if (!viewing)
+			{
+				gi.dprintf("Not looking at an entity.\n");
 				return;
+			}
 			if (viewing->monsterinfo.aiflags & AI_HINT_TEST)
 			{
 				viewing->monsterinfo.aiflags &= ~AI_HINT_TEST;
 				gi.dprintf("%s (%s): Back to my normal self now.\n",
-					viewing->classname,viewing->targetname);
+					viewing->classname, viewing->targetname);
 				return;
 			}
 			if (!(viewing->svflags & SVF_MONSTER))
@@ -2510,12 +2522,14 @@ void ClientCommand (edict_t *ent)
 			 			viewing->classname, (viewing->targetname ? viewing->targetname : "<noname>"),
 						(viewing->movetarget->targetname ? viewing->movetarget->targetname : "<noname>"),
 						vtos(viewing->movetarget->s.origin),
-						visible(viewing,viewing->movetarget) ? "I see it." : "I don't see it.");
+						visible(viewing, viewing->movetarget) ? "I see it." : "I don't see it.");
 				break;
-			default: gi.dprintf("Unknown error\n");
+			default:
+				gi.dprintf("Unknown error\n");
+				break;
 			}
 		}
-		else if (!Q_stricmp(cmd,"entid"))
+		else if (!Q_stricmp(cmd, "entid"))
 		{
 			edict_t *viewing;
 			vec3_t	origin;
@@ -2566,7 +2580,7 @@ void ClientCommand (edict_t *ent)
 		else if (strstr(cmd, "muzzle"))
 		{
 			edict_t	*viewing;
-			viewing = LookingAt(ent,0,NULL,NULL);
+			viewing = LookingAt(ent, 0, NULL, NULL);
 			if (!viewing)
 				return;
 			if (!viewing->classname)
@@ -2597,11 +2611,11 @@ void ClientCommand (edict_t *ent)
 			VectorCopy(ent->s.origin,start);
 
 			start[2] += ent->viewheight;
-			AngleVectors(ent->client->v_angle,forward,NULL,NULL);
-			VectorMA(start, WORLD_SIZE, forward, point);	// was 8192
-			tr = gi.trace(start,NULL,NULL,point,ent,MASK_SOLID);
-			VectorSubtract(tr.endpos,start,point);
-			gi.dprintf("range=%g\n",VectorLength(point));
+			AngleVectors (ent->client->v_angle, forward, NULL, NULL);
+			VectorMA (start, WORLD_SIZE, forward, point);	// was 8192
+			tr = gi.trace(start, NULL, NULL, point, ent, MASK_SOLID);
+			VectorSubtract (tr.endpos, start, point);
+			gi.dprintf ("range=%g\n", VectorLength(point));
 		}
 		else if (!Q_stricmp(cmd, "setskill"))
 		{
@@ -2618,17 +2632,17 @@ void ClientCommand (edict_t *ent)
 			edict_t *viewing;
 			int		skinnum;
 
-			viewing = LookingAt(ent,0,NULL,NULL);
+			viewing = LookingAt(ent ,0, NULL, NULL);
 			if (!viewing) 
 				return;
 
 			if (parm) {
 				skinnum = atoi(parm);
 				viewing->s.skinnum = skinnum;
-				gi.linkentity(viewing);
+				gi.linkentity (viewing);
 			}
 			else
-				gi.dprintf("Currently using skin #%i\n",viewing->s.skinnum);
+				gi.dprintf("Currently using skin #%i\n", viewing->s.skinnum);
 
 		}
 		else if (!Q_stricmp(cmd, "spawn"))
@@ -2647,8 +2661,8 @@ void ClientCommand (edict_t *ent)
 			e->classname = gi.TagMalloc(classSize, TAG_LEVEL);
 		//	strncpy(e->classname, parm);
 			Q_strncpyz (e->classname, classSize, parm);
-			AngleVectors(ent->client->v_angle,forward,NULL,NULL);
-			VectorMA(ent->s.origin,128,forward,e->s.origin);
+			AngleVectors (ent->client->v_angle, forward, NULL, NULL);
+			VectorMA (ent->s.origin, 128, forward, e->s.origin);
 			e->s.angles[YAW] = ent->s.angles[YAW];
 			ED_CallSpawn(e);
 		}
@@ -2671,12 +2685,12 @@ void ClientCommand (edict_t *ent)
 			e->usermodel = gi.argv(1);
 			e->sounds = atoi(gi.argv(2));
 			e->spawnflags = SF_MONSTER_GOODGUY;
-			AngleVectors(ent->client->v_angle,forward,NULL,NULL);
-			VectorMA(ent->s.origin,128,forward,e->s.origin);
+			AngleVectors (ent->client->v_angle, forward, NULL, NULL);
+			VectorMA (ent->s.origin, 128, forward, e->s.origin);
 			e->s.origin[2] = max(e->s.origin[2],ent->s.origin[2] + 8);
 			e->s.angles[YAW] = ent->s.angles[YAW];
-			ED_CallSpawn(e);
-			actor_files();
+			ED_CallSpawn (e);
+			actor_files ();
 		}
 		else if (!Q_stricmp(cmd, "spawnself"))
 		{
@@ -2688,8 +2702,8 @@ void ClientCommand (edict_t *ent)
 			memcpy(&decoy->s,&ent->s,sizeof(entity_state_t));
 			decoy->s.number     = decoy-g_edicts;
 			decoy->s.frame      = ent->s.frame; 
-			AngleVectors(ent->client->v_angle,forward,NULL,NULL);
-			VectorMA(ent->s.origin,64,forward,decoy->s.origin);
+			AngleVectors (ent->client->v_angle, forward, NULL, NULL);
+			VectorMA (ent->s.origin, 64, forward, decoy->s.origin);
 			decoy->s.angles[YAW] = ent->s.angles[YAW]; 
 			decoy->takedamage   = DAMAGE_AIM;
 			decoy->flags        = (ent->flags & FL_NOTARGET);
@@ -2705,8 +2719,8 @@ void ClientCommand (edict_t *ent)
 			decoy->monsterinfo.aiflags = AI_GOOD_GUY;
 			decoy->die          = decoy_die;
 			decoy->nextthink    = level.time + FRAMETIME;
-			VectorCopy(ent->mins,decoy->mins);
-			VectorCopy(ent->maxs,decoy->maxs);
+			VectorCopy (ent->mins, decoy->mins);
+			VectorCopy (ent->maxs, decoy->maxs);
 			gi.linkentity (decoy); 
 		}
 		else if (!Q_stricmp(cmd, "switch"))
@@ -2714,7 +2728,7 @@ void ClientCommand (edict_t *ent)
 			extern mmove_t	actor_move_switch;
 			edict_t *viewing;
 
-			viewing = LookingAt(ent,0,NULL,NULL);
+			viewing = LookingAt(ent, 0, NULL, NULL);
 			if (!viewing)
 				return;
 			if (!(viewing->monsterinfo.aiflags & AI_ACTOR))
@@ -2723,6 +2737,29 @@ void ClientCommand (edict_t *ent)
 				return;
 			}
 			viewing->monsterinfo.currentmove = &actor_move_switch;
+		}
+		else if (!Q_stricmp(cmd, "resettargets"))
+		{
+			edict_t	*e;
+			int		i;
+			int		count;
+
+			gi.dprintf("Resetting all monsters' enemies...\n");
+			count = 0;
+			for (i=0, e=&g_edicts[0]; i<globals.num_edicts; i++, e++)
+			{
+				if (!e->inuse)
+					continue;
+				if ( !(e->svflags & SVF_MONSTER) )
+					continue;
+				if (e->health <= 0)
+					continue;
+				e->enemy = e->oldenemy = NULL;
+				e->monsterinfo.pausetime = 0;
+				e->monsterinfo.stand (e);
+				count++;
+			}
+			gi.dprintf("reset %d monsters' enemies, done.\n", count);
 		}
 #ifndef KMQUAKE2_ENGINE_MOD // these functions moved clientside in engine
 		else if (!Q_stricmp(cmd, "texture"))
@@ -2736,8 +2773,8 @@ void ClientCommand (edict_t *ent)
 				VectorCopy(ent->s.origin, start);
 				start[2] += ent->viewheight;
 			}
-			AngleVectors(ent->client->v_angle, forward, NULL, NULL);
-			VectorMA(start, WORLD_SIZE, forward, end);	// was 8192
+			AngleVectors (ent->client->v_angle, forward, NULL, NULL);
+			VectorMA (start, WORLD_SIZE, forward, end);	// was 8192
 			tr = gi.trace(start, NULL, NULL, end, ent, MASK_ALL);
 			if (!tr.ent)
 				gi.dprintf("Nothing hit?\n");
@@ -2768,8 +2805,8 @@ void ClientCommand (edict_t *ent)
 				VectorCopy(ent->s.origin, start);
 				start[2] += ent->viewheight;
 			}
-			AngleVectors(ent->client->v_angle, forward, NULL, NULL);
-			VectorMA(start, WORLD_SIZE, forward, end);	// was 8192
+			AngleVectors (ent->client->v_angle, forward, NULL, NULL);
+			VectorMA (start, WORLD_SIZE, forward, end);	// was 8192
 			tr = gi.trace(start, NULL, NULL, end, ent, MASK_ALL);
 			if (!tr.ent)
 				gi.dprintf("Nothing hit?\n");

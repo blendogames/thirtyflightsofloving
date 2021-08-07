@@ -121,18 +121,11 @@ void SubdividePolygon (int numverts, float *verts)
 	}
 
 	// add a point in the center to help keep warp valid
-//	poly = Hunk_Alloc (sizeof(glpoly_t) + ((numverts-4)+2) * VERTEXSIZE*sizeof(float));
 	poly = Hunk_Alloc (sizeof(glpoly_t) + ((numverts-4)+2) * sizeof(mpolyvertex_t));
 	poly->next = warpface->polys;
 	warpface->polys = poly;
 	poly->numverts = numverts+2;
 
-	// alloc vertex light fields
-/*	size = poly->numverts*3*sizeof(byte);
-	poly->vertexlight = Hunk_Alloc(size);
-	poly->vertexlightbase = Hunk_Alloc(size);
-	memset(poly->vertexlight, 0, size);
-	memset(poly->vertexlightbase, 0, size); */
 	poly->vertexlightset = false;
 	
 	VectorClear (total);
@@ -141,8 +134,10 @@ void SubdividePolygon (int numverts, float *verts)
 	for (i=0; i<numverts; i++, verts+=3)
 	{
 		VectorCopy (verts, poly->verts[i+1].xyz);
-		s = DotProduct (verts, warpface->texinfo->vecs[0]);
-		t = DotProduct (verts, warpface->texinfo->vecs[1]);
+	//	s = DotProduct (verts, warpface->texinfo->vecs[0]);
+	//	t = DotProduct (verts, warpface->texinfo->vecs[1]);
+		s = DotProduct (verts, warpface->texinfo->vecs[0]) + warpface->texinfo->vecs[0][3];
+		t = DotProduct (verts, warpface->texinfo->vecs[1]) + warpface->texinfo->vecs[1][3];
 
 		total_s += s;
 		total_t += t;

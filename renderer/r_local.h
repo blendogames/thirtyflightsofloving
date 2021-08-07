@@ -622,7 +622,7 @@ extern unsigned rb_vertex, rb_index;
 
 void RB_InitBackend (void);
 float RB_CalcGlowColor (renderparms_t *parms);
-void RB_ModifyTextureCoords (float *inArray, float *inVerts, int numVerts, renderparms_t *parms);
+void RB_ModifyTextureCoords (float *inArray, float *inVerts, int numVerts, tcmodParms_t *parms);
 qboolean RB_CheckArrayOverflow (int numVerts, int numIndex);
 void RB_RenderMeshGeneric (qboolean drawTris);
 void RB_DrawArrays (void);
@@ -716,11 +716,14 @@ char	*va(char *format, ...);
 void	R_RefreshFont (fontslot_t font);
 void	R_RefreshAllFonts (void);
 void	R_DrawGetPicSize (int *w, int *h, char *name);
-void	R_DrawPic (int x, int y, char *name);
+void	R_DrawPic (drawStruct_t ds)	;
+
+//void	R_DrawPic (int x, int y, char *name);
 // added alpha for Psychospaz's transparent console
-void	R_DrawStretchPic (int x, int y, int w, int h, char *name, float alpha);
+//void	R_DrawStretchPic (int x, int y, int w, int h, char *name, float alpha);
 // Psychospaz's scaled crosshair support
-void	R_DrawScaledPic (int x, int y, float scale, float alpha, char *pic);
+//void	R_DrawScaledPic (int x, int y, float scale, float alpha, char *pic);
+
 void	R_InitChars (void);
 void	R_FlushChars (fontslot_t font);
 void	R_DrawChar (float x, float y, int num, fontslot_t font, float scale, 

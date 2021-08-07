@@ -593,7 +593,7 @@ void FoundTarget (edict_t *self)
 		level.sight_entity->light_level = 128;
 
 		goodguy = NULL;
-		goodguy = G_Find(NULL,FOFS(dmgteam), "player");
+		goodguy = G_Find(NULL, FOFS(dmgteam), "player");
 		while (goodguy)
 		{
 			if (goodguy->health > 0)
@@ -614,7 +614,7 @@ void FoundTarget (edict_t *self)
 					}
 				}
 			}
-			goodguy = G_Find(goodguy,FOFS(dmgteam),"player");
+			goodguy = G_Find(goodguy, FOFS(dmgteam), "player");
 		}
 	}
 
@@ -689,8 +689,8 @@ qboolean FindTarget (edict_t *self)
 	edict_t		*reflection = NULL;		
 	edict_t		*self_reflection = NULL;
 
-//	if  ((self->monsterinfo.aiflags & AI_CHASE_THING) || (self->monsterinfo.aiflags2 & AI2_HINT_TEST) )
-//		return false;
+	if  ((self->monsterinfo.aiflags & AI_CHASE_THING) || (self->monsterinfo.aiflags2 & AI2_HINT_TEST) )
+		return false;
 
 	if (self->monsterinfo.aiflags & AI_GOOD_GUY) 
 	{
@@ -1328,13 +1328,14 @@ void ai_run_slide(edict_t *self, float distance)
 		ofs = angle;
 	else
 		ofs = -angle;
-//
-//	if (!(self->flags & FL_FLY))
-//	{
-//		// non fliers should actually turn towards the direction their trying to run
-//		self->ideal_yaw += ofs;
-//	}
-//
+
+/*	if (!(self->flags & FL_FLY))
+	{
+		// non fliers should actually turn towards the direction their trying to run
+		self->ideal_yaw += ofs;
+	}
+*/
+
 	if (!(self->monsterinfo.aiflags & AI_MANUAL_STEERING))
 		M_ChangeYaw (self);
 
@@ -1661,11 +1662,13 @@ void ai_run (edict_t *self, float dist)
 	// end Zaero
 
 	// if we're going to a combat point, just proceed
-	if (self->monsterinfo.aiflags & (AI_COMBAT_POINT | AI_CHASE_THING))
+	if ( (self->monsterinfo.aiflags & (AI_COMBAT_POINT | AI_CHASE_THING))
+		|| (self->monsterinfo.aiflags2 & AI2_HINT_TEST) )
 	{
 		M_MoveToGoal (self, dist);
 		return;
 	}
+
 	if ( self->monsterinfo.aiflags & AI_MEDIC_PATROL )
 	{
 		if (!FindTarget(self))
@@ -1816,13 +1819,13 @@ void ai_run (edict_t *self, float dist)
 		// if we see the player, stop following hintpaths.
 		if (gotcha)
 		{
-//			if (g_showlogic && g_showlogic->value)
-//				gi.dprintf("stopped following hint paths in ai_run\n");
+		//	if (g_showlogic && g_showlogic->value)
+		//		gi.dprintf("stopped following hint paths in ai_run\n");
 
 			// disconnect from hintpaths and start looking normally for players.
 			hintpath_stop (self);
 			// pmm - no longer needed, since hintpath_stop does it
-//			HuntTarget(self);
+		//	HuntTarget(self);
 		}
 		return;
 	}
@@ -1913,20 +1916,20 @@ void ai_run (edict_t *self, float dist)
 		return;
 	}
 	//PMM
-//	if (ai_checkattack (self, dist))
-//		return;
+/*	if (ai_checkattack (self, dist))
+		return;
 
-//	if (self->monsterinfo.attack_state == AS_SLIDING)
-//	{
-//		ai_run_slide (self, dist);
-//		return;
-//	}
-
+	if (self->monsterinfo.attack_state == AS_SLIDING)
+	{
+		ai_run_slide (self, dist);
+		return;
+	}
+*/
 	// PGM - added a little paranoia checking here... 9/22/98
 	if ((self->enemy) && (self->enemy->inuse) && (enemy_vis))
 	{
-//		if (self->monsterinfo.aiflags & AI_LOST_SIGHT)
-//			gi.dprintf("regained sight\n");
+	//	if (self->monsterinfo.aiflags & AI_LOST_SIGHT)
+	//		gi.dprintf("regained sight\n");
 		// PMM - check for alreadyMoved
 		if (!alreadyMoved)
 			M_MoveToGoal (self, dist);
@@ -1976,7 +1979,7 @@ void ai_run (edict_t *self, float dist)
 		if (!alreadyMoved)
 			M_MoveToGoal (self, dist);
 		self->monsterinfo.search_time = 0;
-//		gi.dprintf("search timeout\n");
+	//	gi.dprintf("search timeout\n");
 		return;
 	}
 
@@ -1989,7 +1992,7 @@ void ai_run (edict_t *self, float dist)
 	if (!(self->monsterinfo.aiflags & AI_LOST_SIGHT))
 	{
 		// just lost sight of the player, decide where to go first
-//		gi.dprintf("lost sight of player, last seen at %s\n", vtos(self->monsterinfo.last_sighting));
+	//	gi.dprintf("lost sight of player, last seen at %s\n", vtos(self->monsterinfo.last_sighting));
 		self->monsterinfo.aiflags |= (AI_LOST_SIGHT | AI_PURSUIT_LAST_SEEN);
 		self->monsterinfo.aiflags &= ~(AI_PURSUE_NEXT | AI_PURSUE_TEMP);
 		new = true;
@@ -1997,18 +2000,18 @@ void ai_run (edict_t *self, float dist)
 
 	if (self->monsterinfo.aiflags & AI_PURSUE_NEXT)
 	{
-//		vec3_t	debug_vec;
+	//	vec3_t	debug_vec;
 
 		self->monsterinfo.aiflags &= ~AI_PURSUE_NEXT;
-//		VectorSubtract(self->monsterinfo.last_sighting, self->s.origin, debug_vec);
-//		gi.dprintf("reached current goal: %s %s %f", vtos(self->s.origin), vtos(self->monsterinfo.last_sighting), VectorLength(debug_vec));
+	//	VectorSubtract(self->monsterinfo.last_sighting, self->s.origin, debug_vec);
+	//	gi.dprintf("reached current goal: %s %s %f", vtos(self->s.origin), vtos(self->monsterinfo.last_sighting), VectorLength(debug_vec));
 
 		// give ourself more time since we got this far
 		self->monsterinfo.search_time = level.time + 5;
 
 		if (self->monsterinfo.aiflags & AI_PURSUE_TEMP)
 		{
-//			gi.dprintf("was temp goal; retrying original\n");
+		//	gi.dprintf("was temp goal; retrying original\n");
 			self->monsterinfo.aiflags &= ~AI_PURSUE_TEMP;
 			marker = NULL;
 			VectorCopy (self->monsterinfo.saved_goal, self->monsterinfo.last_sighting);

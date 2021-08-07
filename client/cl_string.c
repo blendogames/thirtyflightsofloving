@@ -197,3 +197,127 @@ void CL_DrawStringGeneric (int x, int y, const char *string, fontslot_t font, in
 			character, font, textScale, red, green, blue, alpha, italic, flushChar );
 	}
 }
+
+
+/*
+================
+CL_DrawStringFromCharsPic
+================
+*/
+void CL_DrawStringFromCharsPic (float x, float y, float w, float h, vec2_t offset, float width, char *string, color_t color, char *pic, int flags)
+{
+	vec4_t			modulate, shadowModulate, texCorners;
+	char			line[1024], *l;
+	int				len, ch;
+	float			xx, yy, ofsX, ofsY, col, row;
+	char			modifier;
+	int				red, green, blue, italic, shadow, bold, reset;
+	qboolean		modified;
+	drawStruct_t	ds;
+
+	memset (&ds, 0, sizeof(drawStruct_t));
+	Vector4Set (modulate, (float)color[0] * DIV255, (float)color[1] * DIV255, (float)color[2] * DIV255, (float)color[3] * DIV255);
+	Vector4Set (shadowModulate, 0, 0, 0, modulate[3]);
+	ofsX = w * 0.125;
+	ofsY = h * 0.125;
+
+	yy = y;
+	while (*string)
+	{
+		// Get a line of text
+		len = 0;
+		while (*string)
+		{
+			if (*string == '\n') {
+				string++;
+				break;
+			}
+			line[len++] = *string++;
+
+			if (len == sizeof(line)-1)
+				break;
+		}
+		line[len] = 0;
+
+		// Align the text as appropriate
+		if (flags & DSF_LEFT)
+			xx = x;
+		else if (flags & DSF_CENTER)
+			xx = x + ((width - (stringLen(line) * w)) / 2);
+		else if (flags & DSF_RIGHT)
+			xx = x + (width - (stringLen(line) * w));
+		else	// default
+			xx = x;
+
+		// Convert to lower/upper case if needed
+		if (flags & DSF_LOWERCASE)
+			Q_strlwr(line);
+		if (flags & DSF_UPPERCASE)
+			Q_strupr(line);
+
+		// Draw it
+		l = line;
+		while (*l)
+		{
+		/*	if (Q_IsColorString(l))
+			{
+				if (!(flags & DSF_FORCECOLOR)) {
+				//	*(unsigned *)modulate = *(unsigned *)colorTable[Q_ColorIndex(*(l+1))];
+					modulate[3] = (float)color[3] * DIV255;
+				}
+				l += 2;
+				continue;
+			}*/
+			modifier = l[0];
+			if (modifier & 128) modifier &= ~128;
+			if (modifier == '^' && *(l+1) != 0)
+			{
+				reset = 0;
+				modifier = l[1];
+				if (modifier & 128) modifier &= ~128;
+				if (modifier != '^')
+				{
+					modified = CL_StringSetParams(modifier, &red, &green, &blue, &bold, &shadow, &italic, &reset);
+					if (reset)
+						red = green = blue = 255;
+					if (modified) {
+						Vector4Set (modulate, (float)red*DIV255, (float)green*DIV255, (float)blue*DIV255, modulate[3]);
+						l += 2;
+						continue;
+					}
+				}
+			}
+
+			ch = *l++;
+			ch &= 255;
+			ch &= ~128;
+			if (ch != ' ')
+			{
+				col = (ch & 15) * 0.0625;
+				row = (ch >> 4) * 0.0625;
+				Vector4Set (texCorners, col, row, col + 0.0625, row + 0.0625);
+
+				ds.pic = pic;
+				ds.w = w;	ds.h = h;
+				ds.flags |= DSFLAG_USESTCOORDS;
+				Vector2Copy (offset, ds.offset);
+				Vector4Copy (texCorners, ds.stCoords);
+
+				if (flags & DSF_DROPSHADOW || shadow)
+				{
+					ds.x = xx + ofsX;	ds.y = yy + ofsY;
+					Vector4Copy (shadowModulate, ds.color);
+					R_DrawPic (ds);
+				//	R_DrawPic (xx + ofsX, yy + ofsY, w, h, offset, texCorners, shadowModulate, pic);
+				}
+
+				ds.x = xx;	ds.y = yy;
+				Vector4Copy (modulate, ds.color);
+				R_DrawPic (ds);
+			//	R_DrawPic (xx, yy, w, h, offset, texCorners, modulate, pic);
+			}
+			xx += w;
+		}
+		yy += h;
+	}
+}

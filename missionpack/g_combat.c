@@ -429,7 +429,7 @@ void CallMyFriends (edict_t *targ, edict_t *attacker)
 					// Either target is not a monster, or attacker is not a monster, or
 					// they're both monsters but one is AI_GOOD_GUY and the other is not,
 					// or we've turned the game into a free-for-all with a target_monsterbattle
-					teammate = G_Find(NULL,FOFS(dmgteam),targ->dmgteam);
+					teammate = G_Find(NULL, FOFS(dmgteam), targ->dmgteam);
 					while (teammate)
 					{
 						if (teammate != targ)
@@ -457,7 +457,7 @@ void CallMyFriends (edict_t *targ, edict_t *attacker)
 							else if (!(teammate->svflags & SVF_DEADMONSTER))
 								G_UseTargets(teammate,attacker);
 						}
-						teammate = G_Find(teammate,FOFS(dmgteam),targ->dmgteam);
+						teammate = G_Find(teammate, FOFS(dmgteam), targ->dmgteam);
 					}
 				}
 			}
@@ -468,7 +468,7 @@ void CallMyFriends (edict_t *targ, edict_t *attacker)
 		// target is player; attacker is monster... alert "good guys", if any
 //		trace_t	tr;
 		edict_t	*teammate = NULL;
-		teammate = G_Find(NULL,FOFS(dmgteam),"player");
+		teammate = G_Find(NULL, FOFS(dmgteam), "player");
 		while (teammate)
 		{
 			if ((teammate->health > 0) && !(teammate->monsterinfo.aiflags & AI_CHASE_THING) && (teammate != attacker))
@@ -488,7 +488,7 @@ void CallMyFriends (edict_t *targ, edict_t *attacker)
 					}
 				}
 			}
-			teammate = G_Find(teammate,FOFS(dmgteam),"player");
+			teammate = G_Find(teammate, FOFS(dmgteam), "player");
 		}
 	}
 	// If player attacks a GOODGUY, turn GOODGUY stuff off
@@ -544,7 +544,7 @@ void M_ReactToDamage (edict_t *targ, edict_t *attacker, edict_t *inflictor)
 
 	// If targ is currently chasing a "thing" or we're running a hint_path test, he 
 	// doesn't really care what else is happening
-	if (targ->monsterinfo.aiflags & AI_CHASE_THING)
+	if ( (targ->monsterinfo.aiflags & AI_CHASE_THING) || (targ->monsterinfo.aiflags2 & AI2_HINT_TEST) )
 		return;
 
 	// If targ is a robot camera, ignore damage

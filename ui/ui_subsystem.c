@@ -34,6 +34,13 @@ cvar_t	*ui_background_alpha;
 cvar_t	*ui_item_rotate;
 cvar_t	*ui_cursor_scale;
 
+// moved these here to avoid redundancy
+char *menu_null_sound		= "null";
+char *menu_in_sound			= "misc/menu1.wav";
+char *menu_move_sound		= "misc/menu2.wav";
+char *menu_out_sound		= "misc/menu3.wav";
+char *menu_drag_sound		= "drag";
+
 qboolean	ui_entersound;		// play after drawing a frame, so caching
 								// won't disrupt the sound
 qboolean	ui_initialized = false;	// whether UI subsystem has been initialized
@@ -393,6 +400,9 @@ void UI_Precache (void)
 //	R_DrawFindPic (UI_MOUSECURSOR_OVER_PIC);
 //	R_DrawFindPic (UI_MOUSECURSOR_TEXT_PIC);
 	R_DrawFindPic (UI_MOUSECURSOR_PIC);
+	R_DrawFindPic (UI_ITEMCURSOR_DEFAULT_PIC);
+	R_DrawFindPic (UI_ITEMCURSOR_KEYBIND_PIC);
+	R_DrawFindPic (UI_ITEMCURSOR_BLINK_PIC);
 
 	for (i = 0; i < NUM_MAINMENU_CURSOR_FRAMES; i++) {
 		Com_sprintf (scratch, sizeof(scratch), "/pics/m_cursor%d.pcx", i);
@@ -434,11 +444,19 @@ void UI_Precache (void)
 //	R_DrawFindPic ("/pics/yn.pcx");
 
 	// GUI elements
-	R_DrawFindPic ("/gfx/ui/listbox_background.pcx");
-	R_DrawFindPic ("/gfx/ui/arrows/arrow_left.pcx");
-	R_DrawFindPic ("/gfx/ui/arrows/arrow_left_d.pcx");
-	R_DrawFindPic ("/gfx/ui/arrows/arrow_right.pcx");
-	R_DrawFindPic ("/gfx/ui/arrows/arrow_right_d.pcx"); 
+	R_DrawFindPic ("/gfx/ui/widgets/listbox_background.pcx");
+//	R_DrawFindPic (UI_CHECKBOX_ON_PIC);
+//	R_DrawFindPic (UI_CHECKBOX_OFF_PIC);
+	R_DrawFindPic (UI_FIELD_PIC);
+	R_DrawFindPic (UI_TEXTBOX_PIC);
+	R_DrawFindPic (UI_SLIDER_PIC);
+	R_DrawFindPic (UI_ARROWS_PIC);
+
+//	R_DrawFindPic ("/gfx/ui/listbox_background.pcx");
+//	R_DrawFindPic ("/gfx/ui/arrows/arrow_left.pcx");
+//	R_DrawFindPic ("/gfx/ui/arrows/arrow_left_d.pcx");
+//	R_DrawFindPic ("/gfx/ui/arrows/arrow_right.pcx");
+//	R_DrawFindPic ("/gfx/ui/arrows/arrow_right_d.pcx"); 
 }
 
 
@@ -561,7 +579,7 @@ void UI_Draw (void)
 		{
 		//	R_DrawStretchPic (0, 0, viddef.width, viddef.height, UI_BACKGROUND_NAME, 1.0f);
 			R_DrawFill (0,0,viddef.width, viddef.height, 0 ,0, 0, 255);
-			SCR_DrawPic(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, ALIGN_CENTER, UI_BACKGROUND_NAME, 1.0f);
+			SCR_DrawPic(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, ALIGN_CENTER, false, UI_BACKGROUND_NAME, 1.0f);
 		}
 		else
 			R_DrawFill (0,0,viddef.width, viddef.height, 0, 0, 0, 255);
@@ -569,7 +587,7 @@ void UI_Draw (void)
 	// ingame menu uses alpha
 	else if (R_DrawFindPic(UI_BACKGROUND_NAME))
 	//	R_DrawStretchPic (0, 0, viddef.width, viddef.height, UI_BACKGROUND_NAME, ui_background_alpha->value);
-		SCR_DrawPic(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, ALIGN_CENTER, UI_BACKGROUND_NAME, ui_background_alpha->value);
+		SCR_DrawPic(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, ALIGN_CENTER, false, UI_BACKGROUND_NAME, ui_background_alpha->value);
 	else
 		R_DrawFill (0,0,viddef.width, viddef.height, 0, 0, 0, (int)(ui_background_alpha->value*255.0f));
 

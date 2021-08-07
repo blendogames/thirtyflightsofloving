@@ -146,7 +146,7 @@ RB_ModifyTextureCoords
 borrowed from EGL & Q2E
 =================
 */
-void RB_ModifyTextureCoords (float *inArray, float *inVerts, int numVerts, renderparms_t *parms)
+void RB_ModifyTextureCoords (float *inArray, float *inVerts, int numVerts, tcmodParms_t *parms)
 {
 	int		i;
 	float	t1, t2, sint, cost, rad;

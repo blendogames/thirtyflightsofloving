@@ -68,16 +68,8 @@ typedef struct
 	float			params[4];
 } waveFunc_t;
 
-typedef struct 
+typedef struct
 {
-	qboolean		twosided;
-	qboolean		alphatest;
-	qboolean		fullbright;
-	qboolean		nodraw;
-	qboolean		noshadow;
-	qboolean		nodiffuse;
-	float			envmap;
-	float			basealpha;
 	float			translate_x;
 	float			translate_y;
 	float			rotate;
@@ -87,7 +79,20 @@ typedef struct
 	waveFunc_t		turb;
 	float			scroll_x;
 	float			scroll_y;
+} tcmodParms_t;
+
+typedef struct 
+{
+	qboolean		twosided;
+	qboolean		alphatest;
+	qboolean		fullbright;
+	qboolean		nodraw;
+	qboolean		noshadow;
+	qboolean		nodiffuse;
 	qboolean		blend;
+	tcmodParms_t	tcmod;
+	float			envmap;
+	float			basealpha;
 	GLenum			blendfunc_src;
 	GLenum			blendfunc_dst;
 	waveFunc_t		glow;

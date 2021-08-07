@@ -393,15 +393,15 @@ void MenuCrosshair_MouseClick ( void )
 void DrawMenuCrosshair (void)
 {
 	SCR_DrawFill (SCREEN_WIDTH*0.5 - 18, s_options_screen_menu.y + 42,
-					36, 36, ALIGN_CENTER, 60,60,60,255);
+					36, 36, ALIGN_CENTER, false, 60,60,60,255);
 	SCR_DrawFill (SCREEN_WIDTH*0.5 - 17, s_options_screen_menu.y + 43,
-					34, 34, ALIGN_CENTER,  0,0,0,255);
+					34, 34, ALIGN_CENTER,  false, 0,0,0,255);
 
 	if (s_options_screen_crosshair_box.curvalue < 1)
 		return;
 
 	SCR_DrawPic (SCREEN_WIDTH*0.5-16, s_options_screen_menu.y + 44,
-					32, 32, ALIGN_CENTER, ui_crosshair_names[s_options_screen_crosshair_box.curvalue], 1.0);
+					32, 32, ALIGN_CENTER, false, ui_crosshair_names[s_options_screen_crosshair_box.curvalue], 1.0);
 }
 
 void Options_Screen_MenuDraw (void)

@@ -44,6 +44,20 @@ static	void	MenuSpinControl_DoSlide (menulist_s *s, int dir);
 #define RCOLUMN_OFFSET  MENU_FONT_SIZE*2	// was 16
 #define LCOLUMN_OFFSET -MENU_FONT_SIZE*2	// was -16
 
+vec4_t		stCoord_arrow_left = {0.0, 0.0, 0.25, 0.25};
+vec4_t		stCoord_arrow_right = {0.25, 0.0, 0.5, 0.25};
+vec4_t		stCoord_arrow_up = {0.5, 0.0, 0.75, 0.25};
+vec4_t		stCoord_arrow_down = {0.75, 0.0, 1, 0.25};
+vec4_t		stCoord_scrollKnob_h = {0.0, 0.75, 0.25, 1.0};
+vec4_t		stCoord_scrollKnob_v = {0.25, 0.75, 0.5, 1.0};
+vec4_t		stCoord_field_left = {0.0, 0.0, 0.25, 1.0};
+vec4_t		stCoord_field_center = {0.25, 0.0, 0.5, 1.0};
+vec4_t		stCoord_field_right = {0.5, 0.0, 0.75, 1.0};
+vec4_t		stCoord_slider_left = {0.0, 0.0, 0.125, 1.0};
+vec4_t		stCoord_slider_center = {0.125, 0.0, 0.375, 1.0};
+vec4_t		stCoord_slider_right = {0.375, 0.0, 0.5, 1.0};
+vec4_t		stCoord_slider_knob = {0.5, 0.0, 0.625, 1.0};
+
 extern viddef_t viddef;
 
 #define VID_WIDTH viddef.width
@@ -141,7 +155,14 @@ void MenuField_Draw (menufield_s *f)
 		offset = (int)strlen(tempbuffer);
 	}
 
-	SCR_DrawChar (f->generic.x + f->generic.parent->x + RCOLUMN_OFFSET,
+	SCR_DrawOffsetPicST (f->generic.x + f->generic.parent->x + RCOLUMN_OFFSET,
+						f->generic.y + f->generic.parent->y - 4, f->generic.textSize, f->generic.textSize*2, vec2_origin, stCoord_field_left,
+						ALIGN_CENTER, true, color_identity, UI_FIELD_PIC);
+	SCR_DrawOffsetPicST (f->generic.x + f->generic.parent->x + (1+f->visible_length)*f->generic.textSize + RCOLUMN_OFFSET,
+						f->generic.y + f->generic.parent->y - 4, f->generic.textSize, f->generic.textSize*2, vec2_origin, stCoord_field_right,
+						ALIGN_CENTER, true, color_identity, UI_FIELD_PIC);
+
+/*	SCR_DrawChar (f->generic.x + f->generic.parent->x + RCOLUMN_OFFSET,
 				f->generic.y + f->generic.parent->y - 4, f->generic.textSize, ALIGN_CENTER, 18, FONT_UI, 255,255,255,255, false, false);
 	SCR_DrawChar (f->generic.x + f->generic.parent->x + RCOLUMN_OFFSET,
 				f->generic.y + f->generic.parent->y + 4, f->generic.textSize, ALIGN_CENTER, 24, FONT_UI, 255,255,255,255, false, false);
@@ -149,18 +170,23 @@ void MenuField_Draw (menufield_s *f)
 				f->generic.y + f->generic.parent->y - 4, f->generic.textSize, ALIGN_CENTER, 20, FONT_UI, 255,255,255,255, false, false);
 	SCR_DrawChar (f->generic.x + f->generic.parent->x + (1+f->visible_length)*f->generic.textSize + RCOLUMN_OFFSET,
 				f->generic.y + f->generic.parent->y + 4, f->generic.textSize, ALIGN_CENTER, 26, FONT_UI, 255,255,255,255, false, false);
-
+*/
 	for (i = 0; i < f->visible_length; i++)
 	{
-		SCR_DrawChar (f->generic.x + f->generic.parent->x + (1+i)*f->generic.textSize + RCOLUMN_OFFSET,
+		SCR_DrawOffsetPicST (f->generic.x + f->generic.parent->x + (1+i)*f->generic.textSize + RCOLUMN_OFFSET,
+							f->generic.y + f->generic.parent->y - 4, f->generic.textSize, f->generic.textSize*2, vec2_origin, stCoord_field_center,
+							ALIGN_CENTER, true, color_identity, UI_FIELD_PIC);
+
+	/*	SCR_DrawChar (f->generic.x + f->generic.parent->x + (1+i)*f->generic.textSize + RCOLUMN_OFFSET,
 					f->generic.y + f->generic.parent->y - 4, f->generic.textSize, ALIGN_CENTER, 19, FONT_UI, 255,255,255,255, false, false);
 		SCR_DrawChar (f->generic.x + f->generic.parent->x + (1+i)*f->generic.textSize + RCOLUMN_OFFSET,
 					f->generic.y + f->generic.parent->y + 4, f->generic.textSize, ALIGN_CENTER, 25, FONT_UI, 255,255,255,255, false, (i==(f->visible_length-1)));
+	*/
 	}
 
 	// add cursor thingie
 	if ( (Menu_ItemAtCursor(f->generic.parent) == f)  && ((int)(Sys_Milliseconds()/250))&1 )
-		Com_sprintf(tempbuffer, sizeof(tempbuffer),	"%s%c", tempbuffer, 11);
+		Com_sprintf (tempbuffer, sizeof(tempbuffer),	"%s%c", tempbuffer, 11);
 
 	Menu_DrawString (f->generic.x + f->generic.parent->x + f->generic.textSize*3,
 					f->generic.y + f->generic.parent->y, f->generic.textSize, tempbuffer, alpha);
@@ -322,9 +348,9 @@ void MenuList_Draw (menulist_s *l)
 	n = l->itemnames;
 
 //	SCR_DrawFill (l->generic.parent->x + l->generic.x - 112, l->generic.parent->y + l->generic.y + (l->curvalue+1)*MENU_LINE_SIZE,
-//				128, MENU_LINE_SIZE, ALIGN_CENTER, 16);
+//				128, MENU_LINE_SIZE, ALIGN_CENTER, false, 16);
 	SCR_DrawFill (l->generic.parent->x + l->generic.x - 112, l->generic.parent->y + l->generic.y + (l->curvalue+1)*MENU_LINE_SIZE,
-				128, MENU_LINE_SIZE, ALIGN_CENTER, color8red(16), color8green(16), color8blue(16), 255);
+				128, MENU_LINE_SIZE, ALIGN_CENTER, false, color8red(16), color8green(16), color8blue(16), 255);
 
 	while (*n)
 	{
@@ -382,7 +408,7 @@ void MenuSlider_DoSlide (menuslider_s *s, int dir)
 
 void MenuSlider_Draw (menuslider_s *s)
 {
-	int		i, alpha = mouseOverAlpha(&s->generic);
+	int		i, x, y, alpha = mouseOverAlpha(&s->generic);
 	float	tmpValue;
 	char	valueText[8];
 
@@ -402,18 +428,35 @@ void MenuSlider_Draw (menuslider_s *s)
 	if (s->range > 1)
 		s->range = 1;
 
-	SCR_DrawChar (s->generic.x + s->generic.parent->x + RCOLUMN_OFFSET,
-				s->generic.y + s->generic.parent->y, s->generic.textSize, ALIGN_CENTER, 128, FONT_UI, 255,255,255,255, false, false);
+	x = s->generic.x + s->generic.parent->x + RCOLUMN_OFFSET;
+	y = s->generic.y + s->generic.parent->y;
 
-	for (i = 0; i < SLIDER_RANGE; i++)
-		SCR_DrawChar (s->generic.x + s->generic.parent->x + (i+1)*s->generic.textSize + RCOLUMN_OFFSET,
-					s->generic.y + s->generic.parent->y, s->generic.textSize, ALIGN_CENTER, 129, FONT_UI, 255,255,255,255, false, false);
+	// draw left
+	SCR_DrawOffsetPicST (x, y, SLIDER_ENDCAP_WIDTH, SLIDER_HEIGHT,
+						vec2_origin, stCoord_slider_left, ALIGN_CENTER, true, color_identity, UI_SLIDER_PIC);
+//	SCR_DrawChar (s->generic.x + s->generic.parent->x + RCOLUMN_OFFSET,
+//				s->generic.y + s->generic.parent->y, s->generic.textSize, ALIGN_CENTER, 128, FONT_UI, 255,255,255,255, false, false);
 
-	SCR_DrawChar (s->generic.x + s->generic.parent->x + (i+1)*s->generic.textSize + RCOLUMN_OFFSET,
-				s->generic.y + s->generic.parent->y, s->generic.textSize, ALIGN_CENTER, 130, FONT_UI, 255,255,255,255, false, false);
+	// draw center
+	x += SLIDER_ENDCAP_WIDTH;
+	for (i = 0; i < SLIDER_RANGE; i++) {
+		SCR_DrawOffsetPicST (x + i*SLIDER_SECTION_WIDTH, y, SLIDER_SECTION_WIDTH, SLIDER_HEIGHT,
+							vec2_origin, stCoord_slider_center, ALIGN_CENTER, true, color_identity, UI_SLIDER_PIC);
+	//	SCR_DrawChar (s->generic.x + s->generic.parent->x + (i+1)*s->generic.textSize + RCOLUMN_OFFSET,
+	//				s->generic.y + s->generic.parent->y, s->generic.textSize, ALIGN_CENTER, 129, FONT_UI, 255,255,255,255, false, false);
+	}
 
-	SCR_DrawChar (s->generic.x + s->generic.parent->x + s->generic.textSize*((SLIDER_RANGE-1)*s->range+1) + RCOLUMN_OFFSET,
-				s->generic.y + s->generic.parent->y, s->generic.textSize, ALIGN_CENTER, 131, FONT_UI, 255,255,255,255, false, true);
+	// draw right
+	SCR_DrawOffsetPicST (x + i*SLIDER_SECTION_WIDTH, y, SLIDER_ENDCAP_WIDTH, SLIDER_HEIGHT,
+						vec2_origin, stCoord_slider_right, ALIGN_CENTER, true, color_identity, UI_SLIDER_PIC);
+//	SCR_DrawChar (s->generic.x + s->generic.parent->x + (i+1)*s->generic.textSize + RCOLUMN_OFFSET,
+//				s->generic.y + s->generic.parent->y, s->generic.textSize, ALIGN_CENTER, 130, FONT_UI, 255,255,255,255, false, false);
+
+	// draw knob
+	SCR_DrawOffsetPicST (x + SLIDER_RANGE*SLIDER_SECTION_WIDTH*s->range - (SLIDER_KNOB_WIDTH/2), y, SLIDER_KNOB_WIDTH, SLIDER_HEIGHT,
+						vec2_origin, stCoord_slider_knob, ALIGN_CENTER, true, color_identity, UI_SLIDER_PIC);
+//	SCR_DrawChar (s->generic.x + s->generic.parent->x + s->generic.textSize*((SLIDER_RANGE-1)*s->range+1) + RCOLUMN_OFFSET,
+//				s->generic.y + s->generic.parent->y, s->generic.textSize, ALIGN_CENTER, 131, FONT_UI, 255,255,255,255, false, true);
 
 	// draw value
 	tmpValue = s->curPos * s->increment + s->baseValue;
@@ -427,8 +470,10 @@ void MenuSlider_Draw (menuslider_s *s)
 		else
 			Com_sprintf (valueText, sizeof(valueText), "%4.2f", tmpValue);
 	}
-	Menu_DrawString (s->generic.x + s->generic.parent->x + s->generic.textSize*SLIDER_RANGE + RCOLUMN_OFFSET + 2.5*MENU_FONT_SIZE,
+	Menu_DrawString (s->generic.x + s->generic.parent->x + RCOLUMN_OFFSET + 2*SLIDER_ENDCAP_WIDTH + i*SLIDER_SECTION_WIDTH + MENU_FONT_SIZE/2,
 					s->generic.y + s->generic.parent->y + 1, MENU_FONT_SIZE-2, valueText, alpha);
+//	Menu_DrawString (s->generic.x + s->generic.parent->x + s->generic.textSize*SLIDER_RANGE + RCOLUMN_OFFSET + 2.5*MENU_FONT_SIZE,
+//					s->generic.y + s->generic.parent->y + 1, MENU_FONT_SIZE-2, valueText, alpha);
 }
 
 void MenuSpinControl_DoEnter (menulist_s *s)
@@ -826,20 +871,30 @@ void Menu_Draw (menuframework_s *menu)
 	}
 	else if (item && item->type != MTYPE_FIELD)
 	{
+		char	*cursor;
+		int		cursorX;
+
+		cursor = ((int)(Sys_Milliseconds()/250)&1) ? UI_ITEMCURSOR_DEFAULT_PIC : UI_ITEMCURSOR_BLINK_PIC;
+
 		if (item->flags & QMF_LEFT_JUSTIFY)
+			cursorX = menu->x + item->x + item->cursor_offset - 24;
+		else
+			cursorX = menu->x + item->cursor_offset;
+
+		SCR_DrawPic (cursorX, menu->y+item->y, item->textSize, item->textSize, ALIGN_CENTER, false, cursor, 255);
+
+	/*	if (item->flags & QMF_LEFT_JUSTIFY)
 		{
 			SCR_DrawChar (menu->x+item->x+item->cursor_offset-24, menu->y+item->y,
-			//			MENU_FONT_SIZE, ALIGN_CENTER, 12+((int)(Sys_Milliseconds()/250)&1),
 						item->textSize, ALIGN_CENTER, 12+((int)(Sys_Milliseconds()/250)&1),
 						FONT_UI, 255,255,255,255, false, true);
 		}
 		else
 		{
 			SCR_DrawChar (menu->x+item->cursor_offset, menu->y+item->y,
-			//			MENU_FONT_SIZE, ALIGN_CENTER, 12+((int)(Sys_Milliseconds()/250)&1),
 						item->textSize, ALIGN_CENTER, 12+((int)(Sys_Milliseconds()/250)&1),
 						FONT_UI, 255,255,255,255, false, true);
-		}
+		} */
 	}
 
 	if (item)
@@ -861,12 +916,12 @@ void Menu_DrawStatusBar (const char *string)
 	{
 		int l = (int)strlen( string );
 
-		SCR_DrawFill (0, SCREEN_HEIGHT-(MENU_FONT_SIZE+3), SCREEN_WIDTH, MENU_FONT_SIZE+4, ALIGN_BOTTOM_STRETCH, 60,60,60,255 );	// go 1 pixel past screen bottom to prevent gap from scaling
-		SCR_DrawFill (0, SCREEN_HEIGHT-(MENU_FONT_SIZE+3), SCREEN_WIDTH, 1, ALIGN_BOTTOM_STRETCH, 0,0,0,255 );
+		SCR_DrawFill (0, SCREEN_HEIGHT-(MENU_FONT_SIZE+3), SCREEN_WIDTH, MENU_FONT_SIZE+4, ALIGN_BOTTOM_STRETCH, false, 60,60,60,255 );	// go 1 pixel past screen bottom to prevent gap from scaling
+		SCR_DrawFill (0, SCREEN_HEIGHT-(MENU_FONT_SIZE+3), SCREEN_WIDTH, 1, ALIGN_BOTTOM_STRETCH, false, 0,0,0,255 );
 		SCR_DrawString (SCREEN_WIDTH/2-(l/2)*MENU_FONT_SIZE, SCREEN_HEIGHT-(MENU_FONT_SIZE+1), MENU_FONT_SIZE, ALIGN_BOTTOM, string, FONT_UI, 255 );
 	}
 	else
-		SCR_DrawFill (0, SCREEN_HEIGHT-(MENU_FONT_SIZE+3), SCREEN_WIDTH, MENU_FONT_SIZE+4, ALIGN_BOTTOM_STRETCH, 0,0,0,255 );	// go 1 pixel past screen bottom to prevent gap from scaling
+		SCR_DrawFill (0, SCREEN_HEIGHT-(MENU_FONT_SIZE+3), SCREEN_WIDTH, MENU_FONT_SIZE+4, ALIGN_BOTTOM_STRETCH, false, 0,0,0,255 );	// go 1 pixel past screen bottom to prevent gap from scaling
 }
 
 void Menu_DrawString (int x, int y, int size, const char *string, int alpha)
@@ -907,15 +962,29 @@ void Menu_DrawTextBox (int x, int y, int width, int lines)
 {
 	int		cx, cy;
 	int		n;
+/*	vec4_t	stCoord_textBox[9];
 
+	Vector4Set (stCoord_textBox[0], 0.0, 0.0, 0.25, 0.25);
+	Vector4Set (stCoord_textBox[1], 0.0, 0.25, 0.25, 0.5);
+	Vector4Set (stCoord_textBox[2], 0.0, 0.5, 0.25, 0.75);
+	Vector4Set (stCoord_textBox[3], 0.25, 0.0, 0.5, 0.25);
+	Vector4Set (stCoord_textBox[4], 0.25, 0.25, 0.5, 0.5);
+	Vector4Set (stCoord_textBox[5], 0.25, 0.5, 0.5, 0.75);
+	Vector4Set (stCoord_textBox[6], 0.5, 0.0, 0.75, 0.25);
+	Vector4Set (stCoord_textBox[7], 0.5, 0.25, 0.75, 0.5);
+	Vector4Set (stCoord_textBox[8], 0.5, 0.5, 0.75, 0.75);
+*/
 	// draw left side
 	cx = x;
 	cy = y;
+//	SCR_DrawOffsetPicST (cx, cy, MENU_FONT_SIZE, MENU_FONT_SIZE, vec2_origin, stCoord_textBox[0], ALIGN_CENTER, true, color_identity, UI_TEXTBOX_PIC);
 	SCR_DrawChar (cx, cy, MENU_FONT_SIZE, ALIGN_CENTER, 1, FONT_UI, 255,255,255,255, false, false);
 	for (n = 0; n < lines; n++) {
 		cy += MENU_FONT_SIZE;
+	//	SCR_DrawOffsetPicST (cx, cy, MENU_FONT_SIZE, MENU_FONT_SIZE, vec2_origin, stCoord_textBox[1], ALIGN_CENTER, true, color_identity, UI_TEXTBOX_PIC);
 		SCR_DrawChar (cx, cy, MENU_FONT_SIZE, ALIGN_CENTER, 4, FONT_UI, 255,255,255,255, false, false);
 	}
+//	SCR_DrawOffsetPicST (cx, cy, MENU_FONT_SIZE, MENU_FONT_SIZE, vec2_origin, stCoord_textBox[2], ALIGN_CENTER, true, color_identity, UI_TEXTBOX_PIC);
 	SCR_DrawChar (cx, cy+MENU_FONT_SIZE, MENU_FONT_SIZE, ALIGN_CENTER, 7, FONT_UI, 255,255,255,255, false, false);
 
 	// draw middle
@@ -923,11 +992,14 @@ void Menu_DrawTextBox (int x, int y, int width, int lines)
 	while (width > 0)
 	{
 		cy = y;
+	//	SCR_DrawOffsetPicST (cx, cy, MENU_FONT_SIZE, MENU_FONT_SIZE, vec2_origin, stCoord_textBox[3], ALIGN_CENTER, true, color_identity, UI_TEXTBOX_PIC);
 		SCR_DrawChar (cx, cy, MENU_FONT_SIZE, ALIGN_CENTER, 2, FONT_UI, 255,255,255,255, false, false);
 		for (n = 0; n < lines; n++) {
 			cy += MENU_FONT_SIZE;
+		//	SCR_DrawOffsetPicST (cx, cy, MENU_FONT_SIZE, MENU_FONT_SIZE, vec2_origin, stCoord_textBox[4], ALIGN_CENTER, true, color_identity, UI_TEXTBOX_PIC);
 			SCR_DrawChar (cx, cy, MENU_FONT_SIZE, ALIGN_CENTER, 5, FONT_UI, 255,255,255,255, false, false);
 		}
+	//	SCR_DrawOffsetPicST (cx, cy, MENU_FONT_SIZE, MENU_FONT_SIZE, vec2_origin, stCoord_textBox[5], ALIGN_CENTER, true, color_identity, UI_TEXTBOX_PIC);
 		SCR_DrawChar (cx, cy+MENU_FONT_SIZE, MENU_FONT_SIZE, ALIGN_CENTER, 8, FONT_UI, 255,255,255,255, false, false);
 		width -= 1;
 		cx += MENU_FONT_SIZE;
@@ -935,11 +1007,14 @@ void Menu_DrawTextBox (int x, int y, int width, int lines)
 
 	// draw right side
 	cy = y;
+//	SCR_DrawOffsetPicST (cx, cy, MENU_FONT_SIZE, MENU_FONT_SIZE, vec2_origin, stCoord_textBox[6], ALIGN_CENTER, true, color_identity, UI_TEXTBOX_PIC);
 	SCR_DrawChar (cx, cy, MENU_FONT_SIZE, ALIGN_CENTER, 3, FONT_UI, 255,255,255,255, false, false);
 	for (n = 0; n < lines; n++) {
 		cy += MENU_FONT_SIZE;
+	//	SCR_DrawOffsetPicST (cx, cy, MENU_FONT_SIZE, MENU_FONT_SIZE, vec2_origin, stCoord_textBox[7], ALIGN_CENTER, true, color_identity, UI_TEXTBOX_PIC);
 		SCR_DrawChar (cx, cy, MENU_FONT_SIZE, ALIGN_CENTER, 6, FONT_UI, 255,255,255,255, false, false);
 	}
+//	SCR_DrawOffsetPicST (cx, cy, MENU_FONT_SIZE, MENU_FONT_SIZE, vec2_origin, stCoord_textBox[8], ALIGN_CENTER, true, color_identity, UI_TEXTBOX_PIC);
 	SCR_DrawChar (cx, cy+MENU_FONT_SIZE, MENU_FONT_SIZE, ALIGN_CENTER, 9, FONT_UI, 255,255,255,255, false, true);
 }
 
@@ -954,7 +1029,7 @@ void Menu_DrawBanner (char *name)
 	int w, h;
 
 	R_DrawGetPicSize (&w, &h, name );
-	SCR_DrawPic (SCREEN_WIDTH/2-w/2, SCREEN_HEIGHT/2-150, w, h, ALIGN_CENTER, name, 1.0);
+	SCR_DrawPic (SCREEN_WIDTH/2-w/2, SCREEN_HEIGHT/2-150, w, h, ALIGN_CENTER, false, name, 1.0);
 }
 
 
@@ -1087,7 +1162,7 @@ void UI_RefreshCursorLink (void)
 	ui_mousecursor.menuitem = NULL;
 }
 
-#if 0
+#if 1
 /*
 =================
 Slider_CursorPositionX
@@ -1097,14 +1172,19 @@ int Slider_CursorPositionX (menuslider_s *s)
 {
 	float range;
 
-	range = (s->curvalue - s->minvalue) / (float)(s->maxvalue - s->minvalue);
+	if (!s)
+		return 0;
+
+//	range = (s->curvalue - s->minvalue) / (float)(s->maxvalue - s->minvalue);
+	range = (float)s->curPos / (float)s->maxPos;
 
 	if (range < 0)
 		range = 0;
 	if (range > 1)
 		range = 1;
 
-	return (int)(SCR_ScaledScreen(MENU_FONT_SIZE) + RCOLUMN_OFFSET + (SLIDER_RANGE)*SCR_ScaledScreen(MENU_FONT_SIZE) * range);
+//	return (int)(s->generic.x + s->generic.parent->x + RCOLUMN_OFFSET + MENU_FONT_SIZE + SLIDER_RANGE*MENU_FONT_SIZE*range);
+	return (int)(s->generic.x + s->generic.parent->x + RCOLUMN_OFFSET + SLIDER_ENDCAP_WIDTH + SLIDER_RANGE*SLIDER_SECTION_WIDTH*range);
 }
 
 /*
@@ -1112,19 +1192,26 @@ int Slider_CursorPositionX (menuslider_s *s)
 NewSliderValueForX
 =================
 */
-int NewSliderValueForX (int x, menuslider_s *s)
+int NewSliderValueForX (menuslider_s *s, int x)
 {
 	float	newValue, sliderbase;
 	int		newValueInt;
 	int		pos;
-	
-	sliderbase = s->generic.x + s->generic.parent->x + MENU_FONT_SIZE + RCOLUMN_OFFSET;
+
+	if (!s)
+		return 0;
+
+//	sliderbase = s->generic.x + s->generic.parent->x + MENU_FONT_SIZE + RCOLUMN_OFFSET;
+	sliderbase = s->generic.x + s->generic.parent->x + RCOLUMN_OFFSET + SLIDER_ENDCAP_WIDTH;
 	SCR_ScaleCoords (&sliderbase, NULL, NULL, NULL, ALIGN_CENTER);
 	pos = x - sliderbase;
 //	pos = x - SCR_ScaledScreen(s->generic.x + s->generic.parent->x + MENU_FONT_SIZE + RCOLUMN_OFFSET);
 
-	newValue = ((float)pos)/((SLIDER_RANGE-1)*SCR_ScaledScreen(MENU_FONT_SIZE));
-	newValueInt = s->minvalue + newValue * (float)(s->maxvalue - s->minvalue);
+//	newValue = ((float)pos) / ((SLIDER_RANGE-1) * SCR_ScaledScreen(MENU_FONT_SIZE));
+//	newValueInt = s->minvalue + newValue * (float)(s->maxvalue - s->minvalue);
+	newValue = ((float)pos) / (SCR_ScaledScreen(SLIDER_RANGE*SLIDER_SECTION_WIDTH));
+	newValue = min(newValue, 1.0f);
+	newValueInt = newValue * (float)(s->maxPos);
 
 	return newValueInt;
 }
@@ -1136,10 +1223,14 @@ Slider_CheckSlide
 */
 void Slider_CheckSlide (menuslider_s *s)
 {
-	if (s->curvalue > s->maxvalue)
-		s->curvalue = s->maxvalue;
-	else if (s->curvalue < s->minvalue)
-		s->curvalue = s->minvalue;
+	if (!s)
+		return;
+
+//	if (s->curvalue > s->maxvalue)
+//		s->curvalue = s->maxvalue;
+//	else if (s->curvalue < s->minvalue)
+//		s->curvalue = s->minvalue;
+	s->curPos = min(max(s->curPos, 0), s->maxPos);
 
 	if (s->generic.callback)
 		s->generic.callback (s);
@@ -1152,11 +1243,16 @@ Menu_DragSlideItem
 */
 void Menu_DragSlideItem (menuframework_s *menu, void *menuitem)
 {
-//	menucommon_s *item = (menucommon_s *) menuitem;
-	menuslider_s *slider = (menuslider_s *) menuitem;
+	menuslider_s *slider;
 
-	slider->curvalue = NewSliderValueForX(cursor.x, slider);
-	Slider_CheckSlide( slider );
+	if (!menu || !menuitem)
+		return;
+
+	slider = (menuslider_s *) menuitem;
+
+//	slider->curvalue = NewSliderValueForX(slider, ui_mousecursor.x);
+	slider->curPos = NewSliderValueForX(slider, ui_mousecursor.x);
+	Slider_CheckSlide (slider);
 }
 
 /*
@@ -1168,18 +1264,58 @@ void Menu_ClickSlideItem (menuframework_s *menu, void *menuitem)
 {
 	int				min, max;
 	float			x, w;
-	menucommon_s	*item = (menucommon_s *) menuitem;
-	menuslider_s	*slider = (menuslider_s *) menuitem;
+	menuslider_s	*slider;
+	
+	if (!menu || !menuitem)
+		return;
 
-	x = menu->x + item->x + Slider_CursorPositionX(slider) - 4;
-	w = 8;
+	slider = (menuslider_s *)menuitem;
+
+//	x = menu->x + item->x + Slider_CursorPositionX(slider) - 4;
+//	w = 8;
+	x = Slider_CursorPositionX(slider) - (SLIDER_KNOB_WIDTH/2);
+	w = SLIDER_KNOB_WIDTH;
 	SCR_ScaleCoords (&x, NULL, &w, NULL, ALIGN_CENTER);
 	min = x;	max = x + w;
 
-	if (cursor.x < min)
-		Menu_SlideItem( menu, -1 );
-	if (cursor.x > max)
-		Menu_SlideItem( menu, 1 );
+	if (ui_mousecursor.x < min)
+		Menu_SlideItem (menu, -1);
+	if (ui_mousecursor.x > max)
+		Menu_SlideItem (menu, 1);
+}
+
+/*
+=================
+Menu_CheckSlider_Mouseover
+=================
+*/
+qboolean Menu_CheckSlider_Mouseover (menuframework_s *menu, void *menuitem)
+{
+	int				min[2], max[2];
+	float			x1, y1, x2, y2;
+	menuslider_s	*s;
+
+	if (!menu || !menuitem)
+		return false;
+
+	s = (menuslider_s *)menuitem;
+
+	x1 = s->generic.x + s->generic.parent->x + RCOLUMN_OFFSET + SLIDER_ENDCAP_WIDTH;
+	y1 = s->generic.y + s->generic.parent->y;
+	x2 = x1 + SLIDER_RANGE*SLIDER_SECTION_WIDTH + SLIDER_ENDCAP_WIDTH;
+	y2 = y1 + SLIDER_HEIGHT;
+
+	SCR_ScaleCoords (&x1, &y1, NULL, NULL, ALIGN_CENTER);
+	SCR_ScaleCoords (&x2, &y2, NULL, NULL, ALIGN_CENTER);
+	min[0] = x1;	max[0] = x2;
+	min[1] = y1;	max[1] = y2;
+
+	if ( ui_mousecursor.x >= min[0] && ui_mousecursor.x <= max[0] 
+		&& ui_mousecursor.y >= min[1] &&  ui_mousecursor.y <= max[1] )
+		return true;
+	else
+		return false;
+
 }
 #endif
 
@@ -1195,7 +1331,7 @@ void UI_Think_MouseCursor (void)
 
 	if (m_drawfunc == M_Main_Draw) // have to hack for main menu :p
 	{
-		UI_CheckMainMenuMouse();
+		UI_CheckMainMenuMouse ();
 		return;
 	}
 	if (m_drawfunc == M_Credits_MenuDraw) // have to hack for credits :p
@@ -1206,7 +1342,7 @@ void UI_Think_MouseCursor (void)
 			ui_mousecursor.buttonclicks[MOUSEBUTTON2] = 0;
 			ui_mousecursor.buttonused[MOUSEBUTTON1] = true;
 			ui_mousecursor.buttonclicks[MOUSEBUTTON1] = 0;
-			S_StartLocalSound( menu_out_sound );
+			S_StartLocalSound (menu_out_sound);
 			if (creditsBuffer)
 				FS_FreeFile (creditsBuffer);
 			UI_PopMenu();
@@ -1233,16 +1369,20 @@ void UI_Think_MouseCursor (void)
 		{
 			if (ui_mousecursor.menuitemtype == MENUITEM_SLIDER && !ui_mousecursor.buttonused[MOUSEBUTTON1])
 			{
-			//	Menu_DragSlideItem(m, ui_mousecursor.menuitem);
-				Menu_SlideItem (m, 1);
-				sound = menu_move_sound;
-				ui_mousecursor.buttonused[MOUSEBUTTON1] = true;
+				if ( Menu_CheckSlider_Mouseover(m, ui_mousecursor.menuitem) ) {
+					Menu_DragSlideItem (m, ui_mousecursor.menuitem);
+					sound = menu_drag_sound;
+				}
+				else {
+					Menu_SlideItem (m, 1);
+					sound = menu_move_sound;
+					ui_mousecursor.buttonused[MOUSEBUTTON1] = true;
+				}
 			}
 			else if (!ui_mousecursor.buttonused[MOUSEBUTTON1] && ui_mousecursor.buttonclicks[MOUSEBUTTON1])
 			{
 				if (ui_mousecursor.menuitemtype == MENUITEM_ROTATE)
 				{
-				//	if (ui_item_rotate->value)					
 					if (ui_item_rotate->integer)					
 						Menu_SlideItem (m, -1);
 					else			
@@ -1264,8 +1404,12 @@ void UI_Think_MouseCursor (void)
 		{
 			if (ui_mousecursor.menuitemtype == MENUITEM_SLIDER && !ui_mousecursor.buttonused[MOUSEBUTTON2])
 			{
-			//	Menu_ClickSlideItem(m, ui_mousecursor.menuitem);
-				Menu_SlideItem (m, -1);
+				if ( Menu_CheckSlider_Mouseover(m, ui_mousecursor.menuitem) ) {
+					Menu_ClickSlideItem (m, ui_mousecursor.menuitem);
+				}
+				else {
+					Menu_SlideItem (m, -1);
+				}
 				sound = menu_move_sound;
 				ui_mousecursor.buttonused[MOUSEBUTTON2] = true;
 			}
@@ -1273,7 +1417,6 @@ void UI_Think_MouseCursor (void)
 			{
 				if (ui_mousecursor.menuitemtype == MENUITEM_ROTATE)
 				{
-				//	if (ui_item_rotate->value)					
 					if (ui_item_rotate->integer)					
 						Menu_SlideItem (m, 1);
 					else			
@@ -1321,17 +1464,19 @@ UI_Draw_Cursor
 #if 1
 void UI_Draw_Cursor (void)
 {
-	int		w, h;
-	float	ofs_x, ofs_y;
+//	int		w, h;
+//	float	ofs_x, ofs_y;
 	float	scale = SCR_ScaledScreen(ui_cursor_scale->value); // 0.4
 	char	*cur_img = UI_MOUSECURSOR_PIC;
 
-	//get sizing vars
-	R_DrawGetPicSize( &w, &h, UI_MOUSECURSOR_PIC );
+	// get sizing vars
+/*	R_DrawGetPicSize (&w, &h, UI_MOUSECURSOR_PIC);
 	ofs_x = SCR_ScaledScreen(w) * ui_cursor_scale->value * 0.5;
 	ofs_y = SCR_ScaledScreen(h) * ui_cursor_scale->value * 0.5;
 	
 	R_DrawScaledPic (ui_mousecursor.x - ofs_x, ui_mousecursor.y - ofs_y, scale, 1.0f, cur_img);
+*/
+	SCR_DrawScaledPic (ui_mousecursor.x, ui_mousecursor.y, scale, true, false, cur_img, 1.0f);
 }
 #else
 void UI_Draw_Cursor (void)

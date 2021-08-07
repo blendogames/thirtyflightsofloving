@@ -2243,6 +2243,8 @@
 {"blocked_checkjump", (byte *)blocked_checkjump},
 {"blocked_checkplat", (byte *)blocked_checkplat},
 {"blocked_checkshot", (byte *)blocked_checkshot},
+{"HintTestStart", (byte *)HintTestStart},
+{"HintTestNext", (byte *)HintTestNext},
 {"PatchMonsterModel", (byte *)PatchMonsterModel},
 {"InitiallyDead", (byte *)InitiallyDead},
 {"monster_done_dodge", (byte *)monster_done_dodge},

@@ -892,6 +892,7 @@ void S_AddLoopSounds (void)
 	sfxcache_t	*sc;
 	int			num;
 	float		dist_mult;
+	vec3_t		origin_v;	// Knightmare added
 	entity_state_t	*ent;
 
 	if (cl_paused->value)
@@ -941,56 +942,42 @@ void S_AddLoopSounds (void)
 		if (ent->solid == 31) // special value for bmodels
 		{
 			cmodel_t	*cmodel;
-			vec3_t		origin_v;
+			qboolean	outofbounds = false;
 			int			k;
 
 			cmodel = cl.model_clip[ent->modelindex];
 			if (cmodel) {
 				for (k=0; k<3; k++)
-					origin_v[k] = ent->origin[k]+0.5*(cmodel->mins[k]+cmodel->maxs[k]);
+					if (ent->origin[k] < cmodel->mins[k] || ent->origin[k] > cmodel->maxs[k])
+						outofbounds = true;
+			}
+			if (cmodel && outofbounds) {
+				for (k=0; k<3; k++)
+					origin_v[k] = ent->origin[k] + 0.5 * (cmodel->mins[k] + cmodel->maxs[k]);
 			}
 			else
 				VectorCopy (ent->origin, origin_v);
-
-			// find the total contribution of all sounds of this type
-			S_SpatializeOrigin (origin_v, 255.0, dist_mult, //SOUND_LOOPATTENUATE, // was ent->origin
-				&left_total, &right_total);
-			for (j=i+1 ; j<cl.frame.num_entities ; j++)
-			{
-				if (sounds[j] != sounds[i])
-					continue;
-				sounds[j] = 0;	// don't check this again later
-
-				num = (cl.frame.parse_entities + j)&(MAX_PARSE_ENTITIES-1);
-				ent = &cl_parse_entities[num];
-
-				S_SpatializeOrigin (origin_v, 255.0, dist_mult, //SOUND_LOOPATTENUATE, // was ent->origin
-					&left, &right);
-				left_total += left;
-				right_total += right;
-			}
 		}
-		else // somebody please tell me why this has to stay unchanged to work (pointer to ent->origin won't work)
+		else
+			VectorCopy (ent->origin, origin_v);
+
+		// find the total contribution of all sounds of this type
+		S_SpatializeOrigin (origin_v, 255.0, dist_mult, // SOUND_LOOPATTENUATE // was ent->origin
+			&left_total, &right_total);
+		for (j=i+1; j<cl.frame.num_entities; j++)
 		{
-			// find the total contribution of all sounds of this type
-			S_SpatializeOrigin (ent->origin, 255.0, dist_mult, //SOUND_LOOPATTENUATE, // was ent->origin
-				&left_total, &right_total);
-			for (j=i+1 ; j<cl.frame.num_entities ; j++)
-			{
-				if (sounds[j] != sounds[i])
-					continue;
-				sounds[j] = 0;	// don't check this again later
+			if (sounds[j] != sounds[i])
+				continue;
+			sounds[j] = 0;	// don't check this again later
 
-				num = (cl.frame.parse_entities + j)&(MAX_PARSE_ENTITIES-1);
-				ent = &cl_parse_entities[num];
+			num = (cl.frame.parse_entities + j)&(MAX_PARSE_ENTITIES-1);
+			ent = &cl_parse_entities[num];
 
-				S_SpatializeOrigin (ent->origin, 255.0, dist_mult, //SOUND_LOOPATTENUATE, // was ent->origin
-					&left, &right);
-				left_total += left;
-				right_total += right;
-			}
+			S_SpatializeOrigin (origin_v, 255.0, dist_mult, // SOUND_LOOPATTENUATE // was ent->origin
+				&left, &right);
+			left_total += left;
+			right_total += right;
 		}
-		// end Knightmare
 
 		if (left_total == 0 && right_total == 0)
 			continue;		// not audible

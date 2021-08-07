@@ -24,7 +24,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "g_local.h"
 //==========================================================
 
-void Lights()
+void Lights (void)
 {
 	if (lights->value)
 	{
@@ -82,16 +82,16 @@ void Lights()
 	}
 }
 
-void ToggleLights()
+void ToggleLights (void)
 {
 	gi.cvar_set ("lights", va("%i", !lights->value));
 //	lights->value = !lights->value;
-	Lights();
+	Lights ();
 }
 
 void target_lightswitch_toggle (edict_t *self)
 {
-	ToggleLights();
+	ToggleLights ();
 
 	self->count--;
 	if(!self->count) {

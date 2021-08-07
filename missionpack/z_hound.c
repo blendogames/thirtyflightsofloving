@@ -648,6 +648,12 @@ void SP_monster_hound (edict_t *self)
 	gi.linkentity (self);
 
 	self->monsterinfo.currentmove = &hound_stand1;	
+	if (self->health < 0)
+	{
+		mmove_t	*deathmoves[] = {&hound_move_death,
+								 NULL};
+		M_SetDeath (self, (mmove_t **)&deathmoves);
+	}
 	self->monsterinfo.scale = MODEL_SCALE;
 
 	walkmonster_start (self);

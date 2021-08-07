@@ -1,7 +1,7 @@
 #include "g_local.h"
 //==========================================================
 
-void Lights()
+void Lights (void)
 {
 	if (lights->value)
 	{
@@ -59,11 +59,11 @@ void Lights()
 	}
 }
 
-void ToggleLights()
+void ToggleLights (void)
 {
 	gi.cvar_set ("lights", va("%i", !lights->value));
 //	lights->value = !lights->value;
-	Lights();
+	Lights ();
 }
 
 void target_lightswitch_toggle (edict_t *self)

@@ -73,7 +73,7 @@ static void UpdateCDVolumeFunc ( void *unused )
 
 static void UpdateSoundQualityFunc ( void *unused )
 {
-	//Knightmare- added DMP's 44/48 KHz sound support
+	// Knightmare- added DMP's 44/48 KHz sound support
 	//** DMP check the newly added sound quality menu options
 	switch (s_options_sound_quality_list.curvalue)
 	{

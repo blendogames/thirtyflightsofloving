@@ -361,7 +361,7 @@ void HelpComputer (edict_t *ent)
 		sk = "hard+";
 
 	// send the layout
-	if(world->effects & FX_WORLDSPAWN_NOHELP)
+	if (world->effects & FX_WORLDSPAWN_NOHELP)
 	{
 		Com_sprintf (string, sizeof(string),
 			"xv %d yv %d picn help ",(int)(world->bleft[0]),(int)(world->bleft[1]));
@@ -708,13 +708,13 @@ void G_SetStats (edict_t *ent)
 	{
 		if (ent->client->showscores || ent->client->showhelp || ent->client->showinventory)
 			ent->client->whatsit = NULL;
-		else if(!(level.framenum % 5))    // only update every 1/2 second
+		else if (!(level.framenum % 5))    // only update every 1/2 second
 		{
 			char *temp = ent->client->whatsit;
 
 			ent->client->whatsit = NULL;
 			WhatIsIt(ent);
-			if(ent->client->whatsit && !temp)
+			if (ent->client->whatsit && !temp)
 				WhatsIt(ent);
 		}
 	}
@@ -741,7 +741,7 @@ void G_SetStats (edict_t *ent)
 		if (ent->client->showinventory && ent->client->pers.health > 0)
 			ent->client->ps.stats[STAT_LAYOUTS] |= 2;
 	}
-	if(!ent->client->ps.stats[STAT_LAYOUTS] && ent->client->whatsit)
+	if (!ent->client->ps.stats[STAT_LAYOUTS] && ent->client->whatsit)
 		ent->client->ps.stats[STAT_LAYOUTS] |= 1;
 
 	//

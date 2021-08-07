@@ -71,6 +71,26 @@ void Hud_DrawStringAlt (int x, int y, const char *string, int alpha, qboolean is
 //	CL_DrawStringGeneric (x, y, string, alpha, HUD_FONT_SIZE, (isStatusBar) ? SCALETYPE_HUD : SCALETYPE_MENU, true);
 }
 
+
+/*
+================
+Hud_DrawStringFromCharsPic
+================
+*/
+void Hud_DrawStringFromCharsPic (float x, float y, float w, float h, vec2_t offset, float width, scralign_t align, char *string, color_t color, char *pic, int flags)
+{
+	vec2_t	scaledOffset;
+
+	Vector2Copy (offset, scaledOffset);
+	SCR_ScaleCoords (&x, &y, &w, &h, align);
+//	SCR_ScaleCoords (NULL, NULL, &offsetX, NULL, align);
+//	SCR_ScaleCoords (NULL, NULL, NULL, &offsetY, align);
+	SCR_ScaleCoords (NULL, NULL, &scaledOffset[0], &scaledOffset[1], align);
+	SCR_ScaleCoords (NULL, NULL, &width, NULL, align);
+
+	CL_DrawStringFromCharsPic (x, y, w, h, scaledOffset, width, string, color, pic, flags);
+}
+
 /*
 ===============================================================
 
@@ -194,12 +214,14 @@ Draws HUD number displays
 */
 void CL_DrawLayoutField (int x, int y, int color, int width, int value, qboolean flash, qboolean isStatusBar)
 {
-	char		num[16], *ptr;
-	int			l, frame;
-	float		digitWidth, digitOffset, fieldScale;
-	float		flash_x, flashWidth;
-	float		(*scaleForScreen)(float in);
-	float		(*getScreenScale)(void);
+	char			num[16], *ptr;
+	int				l, frame;
+	float			digitWidth, digitOffset, fieldScale;
+	float			flash_x, flashWidth;
+	vec4_t			picColor;
+	drawStruct_t	ds;
+	float			(*scaleForScreen)(float in);
+	float			(*getScreenScale)(void);
 
 	if (width < 1)
 		return;
@@ -233,14 +255,23 @@ void CL_DrawLayoutField (int x, int y, int color, int width, int value, qboolean
 	}
 	digitWidth = fieldScale*(float)CHAR_WIDTH;
 	digitOffset = width*scaleForScreen(CHAR_WIDTH) - l*digitWidth;
-//	x += 2 + scaledHud(CHAR_WIDTH)*(width - l);
 //	x += 2 + scaleForScreen(CHAR_WIDTH)*(width - l);
 	x += 2 + digitOffset;
-	flashWidth = l*digitWidth;
+	flashWidth = l * digitWidth;
 	flash_x = x;
+	Vector4Set (picColor, 1.0f, 1.0f, 1.0f, scr_hudalpha->value);
 
-	if (flash)
-		R_DrawStretchPic (flash_x, y, flashWidth, scaleForScreen(ICON_HEIGHT), "field_3", scr_hudalpha->value);
+	memset (&ds, 0, sizeof(drawStruct_t));
+	ds.y = y;	ds.h = scaleForScreen(ICON_HEIGHT);
+	Vector2Copy (vec2_origin, ds.offset);
+	Vector4Copy (picColor, ds.color);
+
+	if (flash){
+		ds.pic = "field_3";
+		ds.x = flash_x;	ds.w = flashWidth;	
+		R_DrawPic (ds);
+	//	R_DrawStretchPic (flash_x, y, flashWidth, scaleForScreen(ICON_HEIGHT), "field_3", scr_hudalpha->value);
+	}
 
 	ptr = num;
 	while (*ptr && l)
@@ -250,11 +281,10 @@ void CL_DrawLayoutField (int x, int y, int color, int width, int value, qboolean
 		else
 			frame = *ptr -'0';
 
-//		R_DrawScaledPic (x, y, HudScale(), scr_hudalpha->value,sb_nums[color][frame]);
-//		x += scaledHud(CHAR_WIDTH);
-//		R_DrawScaledPic (x, y, getScreenScale(), scr_hudalpha->value, sb_nums[color][frame]);
-//		x += scaleForScreen(CHAR_WIDTH);
-		R_DrawStretchPic (x, y, digitWidth, scaleForScreen(ICON_HEIGHT), sb_nums[color][frame], scr_hudalpha->value);
+		ds.pic = sb_nums[color][frame];
+		ds.x = x;	ds.w = digitWidth;	
+		R_DrawPic (ds);
+	//	R_DrawStretchPic (x, y, digitWidth, scaleForScreen(ICON_HEIGHT), sb_nums[color][frame], scr_hudalpha->value);
 		x += digitWidth;
 		ptr++;
 		l--;
@@ -371,7 +401,8 @@ void CL_ExecuteLayoutString (char *s, qboolean isStatusBar)
 			}
 			if (cl.configstrings[cs_images+value])
 			{
-				R_DrawScaledPic (x, y, getScreenScale(), scr_hudalpha->value, cl.configstrings[cs_images+value]);
+			//	R_DrawScaledPic (x, y, getScreenScale(), scr_hudalpha->value, cl.configstrings[cs_images+value]);
+				SCR_DrawLegacyPic (x, y, getScreenScale(), cl.configstrings[cs_images+value], scr_hudalpha->value);
 			}
 			continue;
 		}
@@ -410,7 +441,8 @@ void CL_ExecuteLayoutString (char *s, qboolean isStatusBar)
 
 			if (!ci->icon)
 				ci = &cl.baseclientinfo;
-			R_DrawScaledPic(x, y, getScreenScale(), scr_hudalpha->value,  ci->iconname);
+		//	R_DrawScaledPic (x, y, getScreenScale(), scr_hudalpha->value,  ci->iconname);
+			SCR_DrawLegacyPic (x, y, getScreenScale(), ci->iconname, scr_hudalpha->value);
 			continue;
 		}
 
@@ -487,7 +519,8 @@ void CL_ExecuteLayoutString (char *s, qboolean isStatusBar)
 		if (!strcmp(token, "picn"))
 		{	// draw a pic from a name
 			token = COM_Parse (&s);
-			R_DrawScaledPic (x, y, getScreenScale(), scr_hudalpha->value, token);
+		//	R_DrawScaledPic (x, y, getScreenScale(), scr_hudalpha->value, token);
+			SCR_DrawLegacyPic (x, y, getScreenScale(), token, scr_hudalpha->value);
 			continue;
 		}
 
@@ -878,8 +911,6 @@ void CL_DrawInventory (void)
 	if (top < 0)
 		top = 0;
 
-	//x = (viddef.width-256)/2;
-	//y = (viddef.height-240)/2;
 //	x = viddef.width/2 - SCR_ScaledHud(128);
 //	y = viddef.height/2 - SCR_ScaledHud(120);
 	x = SCREEN_WIDTH/2 - 128;
@@ -891,7 +922,7 @@ void CL_DrawInventory (void)
 //	Hud_DrawString (x, y, S_COLOR_BOLD"hotkey ### item");
 //	Hud_DrawString (x, y+SCR_ScaledHud(8), S_COLOR_BOLD"------ --- ----");
 //	y += SCR_ScaledHud(16);
-	SCR_DrawPic (x, y, 256, 192, ALIGN_CENTER, "inventory", scr_hudalpha->value);
+	SCR_DrawPic (x, y, 256, 192, ALIGN_CENTER, false, "inventory", scr_hudalpha->value);
 	x += 24;
 	y += 20;
 	SCR_DrawString (x, y, 8, ALIGN_CENTER, S_COLOR_WHITE"hotkey ### item", FONT_SCREEN, 255);

@@ -1120,9 +1120,10 @@ void M_MoveFrame (edict_t *self)
 
 	// Lazarus: For live monsters weaker than the tank who aren't already running from
 	//          something, evade live grenades on the ground.
-	if ((self->health > 0) && (self->max_health < 750) && !(self->monsterinfo.aiflags & AI_CHASE_THING) && self->monsterinfo.run)	// was self->max_health < 400
+/*	if ((self->health > 0) && (self->max_health < 750) && !(self->monsterinfo.aiflags & AI_CHASE_THING) && self->monsterinfo.run	// was self->max_health < 400
+		&& !((Q_stricmp(self->classname, "misc_insane") == 0) && (self->moreflags & FL2_CRUCIFIED)) )	// Knightmare- crucified insanes don't evade
 		Grenade_Evade (self);
-
+*/
 	move = self->monsterinfo.currentmove;
 	self->nextthink = level.time + FRAMETIME;
 
@@ -2675,4 +2676,122 @@ int PatchMonsterModel (char *modelname)
 	gi.dprintf ("PatchMonsterModel: Saved %s\n", outfilename);
 	free (data);
 	return 1;
+}
+
+
+void HintTestNext (edict_t *self, edict_t *hint)
+{
+	edict_t		*next=NULL;
+	edict_t		*e;
+	vec3_t		dir;
+
+	self->monsterinfo.aiflags2 &= ~AI2_HINT_TEST;
+	if (self->goalentity == hint)
+		self->goalentity = NULL;
+	if (self->movetarget == hint)
+		self->movetarget = NULL;
+	if (self->monsterinfo.pathdir == 1)
+	{
+		if (hint->hint_chain)
+			next = hint->hint_chain;
+		else
+			self->monsterinfo.pathdir = -1;
+	}
+	if (self->monsterinfo.pathdir == -1)
+	{
+	//	e = hint_chain_starts[hint->hint_chain_id];
+		e = hint_path_start[hint->hint_chain_id];
+		while (e)
+		{
+			if (e->hint_chain == hint)
+			{
+				next = e;
+				break;
+			}
+			e = e->hint_chain;
+		}
+	}
+	if (!next)
+	{
+		self->monsterinfo.pathdir = 1;
+		next = hint->hint_chain;
+	}
+	if (next)
+	{
+		self->hint_chain_id = next->hint_chain_id;
+		VectorSubtract(next->s.origin, self->s.origin, dir);
+		self->ideal_yaw = vectoyaw(dir);
+		self->goalentity = self->movetarget = next;
+		self->monsterinfo.pausetime = 0;
+		self->monsterinfo.aiflags2 |= AI2_HINT_TEST;
+		// run for it
+		self->monsterinfo.run (self);
+		gi.dprintf("%s (%s): Reached hint_path %s,\nsearching for hint_path %s at %s. %s\n",
+			self->classname, (self->targetname ? self->targetname : "<noname>"),
+			(hint->targetname ? hint->targetname : "<noname>"),
+			(next->targetname ? next->targetname : "<noname>"),
+			vtos(next->s.origin),
+			(visible(self,next) ? "I see it." : "I don't see it."));
+	}
+	else
+	{
+		self->monsterinfo.pausetime = level.time + 100000000;
+		self->monsterinfo.stand (self);
+		gi.dprintf("%s (%s): Error finding next/previous hint_path from %s at %s.\n",
+			self->classname, (self->targetname ? self->targetname : "<noname>"),
+			(hint->targetname ? hint->targetname : "<noname>"),
+			vtos(hint->s.origin));
+	}
+}
+
+
+int HintTestStart (edict_t *self)
+{
+	edict_t	*e;
+	edict_t	*hint=NULL;
+	float	dist;
+	vec3_t	dir;
+	int		i;
+	float	bestdistance=99999;
+
+//	if (!hint_chains_exist)
+	if (!hint_paths_present)
+		return 0;
+
+	for (i=game.maxclients+1; i<globals.num_edicts; i++)
+	{
+			e = &g_edicts[i];
+			if (!e->inuse)
+				continue;
+			if (Q_stricmp(e->classname, "hint_path"))
+				continue;
+			if (!visible(self, e))
+				continue;
+			if (!canReach(self, e))
+				continue;
+			VectorSubtract (e->s.origin, self->s.origin, dir);
+			dist = VectorLength(dir);
+			if (dist < bestdistance)
+			{
+				hint = e;
+				bestdistance = dist;
+			}
+	}
+	if (hint)
+	{
+		self->hint_chain_id = hint->hint_chain_id;
+		if (!self->monsterinfo.pathdir)
+			self->monsterinfo.pathdir = 1;
+		VectorSubtract(hint->s.origin, self->s.origin, dir);
+		self->ideal_yaw = vectoyaw(dir);
+		self->enemy = self->oldenemy = NULL;
+		self->goalentity = self->movetarget = hint;
+		self->monsterinfo.pausetime = 0;
+		self->monsterinfo.aiflags2 = AI2_HINT_TEST;
+		// run for it
+		self->monsterinfo.run (self);
+		return 1;
+	}
+	else
+		return -1;
 }

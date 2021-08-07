@@ -415,7 +415,7 @@ void medic_idle (edict_t *self)
 	{
 		// Then we must have reached this point after losing sight
 		// of our patient.
-		abortHeal(self,false,false,false);
+		abortHeal (self, false, false, false);
 	}
 
 /*	if (!self->oldenemy)
