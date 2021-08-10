@@ -1027,9 +1027,9 @@ varargs versions of all text functions.
 FIXME: make this buffer size safe someday
 ============
 */
-char	*va(char *format, ...)
+char *va (char *format, ...)
 {
-	va_list		argptr;
+	va_list			argptr;
 	static char		string[1024];
 	
 	va_start (argptr, format);
@@ -1202,9 +1202,10 @@ int Q_strcasecmp (char *s1, char *s2)
 }
 
 
+static char		bigbuffer[0x10000];	// Knightmare- moved here to avoid any potential stack issues
 void Com_sprintf (char *dest, size_t size, char *fmt, ...)
 {
-	char		bigbuffer[0x10000];
+//	char		bigbuffer[0x10000];
 	int			len;
 	va_list		argptr;
 

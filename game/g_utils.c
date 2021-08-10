@@ -607,10 +607,11 @@ G_TouchTriggers
 
 ============
 */
-void	G_TouchTriggers (edict_t *ent)
+void G_TouchTriggers (edict_t *ent)
 {
-	int			i, num;
-	edict_t		*touch[MAX_EDICTS], *hit;
+	int				i, num;
+	static edict_t	*touch[MAX_EDICTS];	// Knightmare- made static due to stack size
+	edict_t			*hit;
 
 	// Lazarus: nothing touches anything if game is frozen
 	if (level.freeze)
@@ -620,8 +621,7 @@ void	G_TouchTriggers (edict_t *ent)
 	if ((ent->client || (ent->svflags & SVF_MONSTER)) && (ent->health <= 0))
 		return;
 
-	num = gi.BoxEdicts (ent->absmin, ent->absmax, touch
-		, MAX_EDICTS, AREA_TRIGGERS);
+	num = gi.BoxEdicts (ent->absmin, ent->absmax, touch, MAX_EDICTS, AREA_TRIGGERS);
 
 	// be careful, it is possible to have an entity in this
 	// list removed before we get to it (killtriggered)
@@ -646,13 +646,13 @@ Call after linking a new trigger in during gameplay
 to force all entities it covers to immediately touch it
 ============
 */
-void	G_TouchSolids (edict_t *ent)
+void G_TouchSolids (edict_t *ent)
 {
-	int			i, num;
-	edict_t		*touch[MAX_EDICTS], *hit;
+	int				i, num;
+	static edict_t	*touch[MAX_EDICTS];	// Knightmare- made static due to stack size
+	edict_t			*hit;
 
-	num = gi.BoxEdicts (ent->absmin, ent->absmax, touch
-		, MAX_EDICTS, AREA_SOLID);
+	num = gi.BoxEdicts (ent->absmin, ent->absmax, touch, MAX_EDICTS, AREA_SOLID);
 
 	// be careful, it is possible to have an entity in this
 	// list removed before we get to it (killtriggered)
@@ -732,7 +732,7 @@ float SnapToEights(float x)
 
 /* Lazarus - added functions */
 
-void stuffcmd(edict_t *pent, char *pszCommand)
+void stuffcmd (edict_t *pent, char *pszCommand)
 {
 	gi.WriteByte(svc_stufftext);
 	gi.WriteString(pszCommand);
@@ -755,7 +755,7 @@ qboolean point_infront (edict_t *self, vec3_t point)
 	return false;
 }
 
-float AtLeast(float x, float dx)
+float AtLeast (float x, float dx)
 {
 	float xx;
 
@@ -766,14 +766,14 @@ float AtLeast(float x, float dx)
 
 edict_t	*LookingAt (edict_t *ent, int filter, vec3_t endpos, float *range)
 {
-	edict_t		*who;
-	edict_t		*trigger[MAX_EDICTS];
-	edict_t		*ignore;
-	trace_t		tr;
-	vec_t		r;
-	vec3_t      end, forward, start;
-	vec3_t		dir, entp, mins, maxs;
-	int			i, num;
+	edict_t			*who;
+	static edict_t	*trigger[MAX_EDICTS];	// Knightmare- made static due to stack size
+	edict_t			*ignore;
+	trace_t			tr;
+	vec_t			r;
+	vec3_t			end, forward, start;
+	vec3_t			dir, entp, mins, maxs;
+	int				i, num;
 
 	if (!ent->client)
 	{

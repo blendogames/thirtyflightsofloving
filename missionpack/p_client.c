@@ -3199,7 +3199,7 @@ void ClientPushPushable(edict_t *ent)
 		RemovePush(ent);
 }
 
-void ClientSpycam(edict_t *ent)
+void ClientSpycam (edict_t *ent)
 {
 	gclient_t	*client = ent->client;
 	edict_t		*camera = ent->client->spycam;
@@ -3212,7 +3212,7 @@ void ClientSpycam(edict_t *ent)
 	int			i;
 
 	memset (&pm, 0, sizeof(pm));
-	if (client->ucmd.sidemove && level.time > ent->last_move_time + 1)
+	if ( client->ucmd.sidemove && (level.time > ent->last_move_time + 1) )
 	{
 		camera->flags &= ~FL_ROBOT;
 		if (camera->viewer == ent)
@@ -3227,7 +3227,7 @@ void ClientSpycam(edict_t *ent)
 			if (!camera->viewer)
 				camera->viewer = ent;
 			client->spycam = camera;
-			VectorAdd(camera->s.origin,camera->move_origin,ent->s.origin);
+			VectorAdd (camera->s.origin, camera->move_origin, ent->s.origin);
 			if (camera->viewmessage)
 				gi.centerprintf(ent,camera->viewmessage);
 			ent->last_move_time = level.time;
@@ -3253,7 +3253,7 @@ void ClientSpycam(edict_t *ent)
 		is_actor = false;
 	if (camera->enemy && (camera->enemy->deadflag || !camera->enemy->inuse))
 		camera->enemy = NULL;
-	AngleVectors(camera->s.angles,forward,left,up);
+	AngleVectors (camera->s.angles ,forward, left, up);
 
 	if (is_actor && !camera->enemy)
 	{
@@ -3267,21 +3267,21 @@ void ClientSpycam(edict_t *ent)
 			thing  = camera->vehicle;
 			
 			VectorMA(camera->s.origin, WORLD_SIZE, forward, end);	// was 8192
-			tr = gi.trace(camera->s.origin,camera->mins,camera->maxs,end,camera,MASK_SOLID);
+			tr = gi.trace(camera->s.origin, camera->mins, camera->maxs, end, camera, MASK_SOLID);
 			if (client->ucmd.forwardmove < 0)
 			{
 				trace_t	back;
 				VectorMA(camera->s.origin, -WORLD_SIZE, forward, end);	// was -8192
-				back = gi.trace(camera->s.origin,camera->mins,camera->maxs,end,camera,MASK_SOLID);
+				back = gi.trace(camera->s.origin, camera->mins, camera->maxs, end, camera, MASK_SOLID);
 				VectorSubtract(back.endpos,camera->s.origin,end);
 				dist = VectorLength(end);
-				VectorCopy(tr.endpos,end);
+				VectorCopy (tr.endpos ,end);
 			}
 			else
 			{
-				VectorSubtract(tr.endpos,camera->s.origin,end);
+				VectorSubtract (tr.endpos, camera->s.origin, end);
 				dist = VectorLength(end) - 8;
-				VectorMA(camera->s.origin,dist,forward,end);
+				VectorMA (camera->s.origin, dist, forward, end);
 			}
 			if (dist > 8)
 			{
@@ -3337,13 +3337,13 @@ void ClientSpycam(edict_t *ent)
 			{
 				// jump
 				if (client->ucmd.forwardmove > 300)
-					VectorScale(forward,400,camera->velocity);
+					VectorScale (forward, 400, camera->velocity);
 				else if (client->ucmd.forwardmove > 199)
-					VectorScale(forward,200,camera->velocity);
+					VectorScale (forward, 200, camera->velocity);
 				else if (client->ucmd.forwardmove < -300)
-					VectorScale(forward,-400,camera->velocity);
+					VectorScale (forward, -400, camera->velocity);
 				else if (client->ucmd.forwardmove < -199)
-					VectorScale(forward,-200,camera->velocity);
+					VectorScale (forward, -200, camera->velocity);
 				camera->velocity[2] = 250;
 				camera->monsterinfo.savemove = camera->monsterinfo.currentmove;
 				actor_jump(camera);
@@ -3424,15 +3424,15 @@ void ClientSpycam(edict_t *ent)
 					{
 						vec3_t	angles;
 						vec3_t	end, f;
-						VectorSet(angles,0,camera->ideal_yaw,0);
-						AngleVectors(angles,f,NULL,NULL);
-						VectorMA(camera->s.origin, WORLD_SIZE, f, end);	// was 8192
-						tr = gi.trace(camera->s.origin,camera->mins,camera->maxs,end,camera,MASK_SOLID);
-						VectorCopy(tr.endpos,camera->vehicle->s.origin);
-						camera->vehicle->touch_debounce_time = level.time + 5.0;
+						VectorSet (angles, 0, camera->ideal_yaw, 0);
+						AngleVectors (angles, f, NULL, NULL);
+						VectorMA (camera->s.origin, WORLD_SIZE, f, end);	// was 8192
+						tr = gi.trace(camera->s.origin, camera->mins, camera->maxs, end, camera, MASK_SOLID);
+						VectorCopy (tr.endpos, camera->vehicle->s.origin);
+						camera->vehicle->touch_debounce_time = level.time + 5.0f;
 						gi.linkentity(camera->vehicle);
 					}
-					ai_turn(camera,0.);
+					ai_turn (camera, 0.0f);
 					diff = SHORT2ANGLE(client->ucmd.angles[0]-client->old_owner_angles[0]);
 					if (diff < -180)
 						diff += 360;
@@ -3444,18 +3444,21 @@ void ClientSpycam(edict_t *ent)
 				}
 			}
 		}
-		if ( client->ucmd.buttons & BUTTON_ATTACK && camera->sounds >= 0 )
+		if ( (client->ucmd.buttons & BUTTON_ATTACK) && (camera->sounds >= 0) )
 		{
+			// Knightmare- stop firing weapon when switching to turret
+			client->latched_buttons &= ~BUTTONS_ATTACK;
+			client->buttons &= ~BUTTONS_ATTACK;
 			if (level.time >= camera->monsterinfo.attack_finished)
 			{
-				client->latched_buttons &= ~BUTTON_ATTACK;
-				if (!Q_stricmp(camera->classname,"turret_breach") || !Q_stricmp(camera->classname,"model_turret"))
+			//	client->latched_buttons &= ~BUTTONS_ATTACK;
+				if ( !Q_stricmp(camera->classname, "turret_breach") || !Q_stricmp(camera->classname, "model_turret") )
 				{
 					if ( (camera->sounds == 5) || (camera->sounds == 6) )
 						camera->monsterinfo.attack_finished = level.time;
 					else
 						camera->monsterinfo.attack_finished = level.time + 1.0;
-					turret_breach_fire(camera);
+					turret_breach_fire (camera);
 				}
 				else if (is_actor)
 				{
@@ -3471,11 +3474,11 @@ void ClientSpycam(edict_t *ent)
 								// Currently following "thing" - turn that off
 								camera->monsterinfo.aiflags &= ~AI_CHASE_THING;
 								camera->movetarget = camera->goalentity = NULL;
-								G_FreeEdict(camera->vehicle);
+								G_FreeEdict (camera->vehicle);
 								camera->vehicle = NULL;
 							}
 							camera->enemy = target;
-							actor_fire(camera);
+							actor_fire (camera);
 							camera->enemy = NULL;
 							if (camera->monsterinfo.aiflags & AI_HOLD_FRAME)
 								camera->monsterinfo.attack_finished = level.time + FRAMETIME;
@@ -3486,16 +3489,20 @@ void ClientSpycam(edict_t *ent)
 				}
 			}
 		}
-		if (client->zoomed)
-		{
-			camera->touch_debounce_time = 
-				max(camera->touch_debounce_time, level.time + 1.0);
+		// Knightmare- stop firing weapon when switching to spycam
+		else if ( (client->ucmd.buttons & BUTTON_ATTACK) && (camera->sounds < 0) ) {
+			client->latched_buttons &= ~BUTTONS_ATTACK;
+			client->buttons &= ~BUTTONS_ATTACK;
+		}
+
+		if (client->zoomed) {
+			camera->touch_debounce_time = max(camera->touch_debounce_time, level.time + 1.0);
 		}
 	}
 
-	VectorMA(camera->s.origin, camera->move_origin[0],forward,start);
-	VectorMA(start,           -camera->move_origin[1],left,   start);
-	VectorMA(start,            camera->move_origin[2],up,     start);
+	VectorMA (camera->s.origin, camera->move_origin[0], forward, start);
+	VectorMA (start,           -camera->move_origin[1], left,    start);
+	VectorMA (start,            camera->move_origin[2], up,      start);
 	
 	tr = gi.trace(camera->s.origin, NULL, NULL, start, camera, MASK_SOLID);
 	if (tr.fraction < 1.0)
@@ -3505,8 +3512,8 @@ void ClientSpycam(edict_t *ent)
 		if (dist < 0) dist = 0.;
 		VectorMA(camera->s.origin,dist,dir,start);
 	}
-	VectorCopy(start,ent->s.origin);
-	VectorCopy(camera->velocity,ent->velocity);
+	VectorCopy (start, ent->s.origin);
+	VectorCopy (camera->velocity, ent->velocity);
 	
 	client->resp.cmd_angles[0] = SHORT2ANGLE(client->ucmd.angles[0]);
 	client->resp.cmd_angles[1] = SHORT2ANGLE(client->ucmd.angles[1]);

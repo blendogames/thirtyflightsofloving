@@ -406,12 +406,12 @@ void Cmd_Help_f (edict_t *ent)
 
 void WhatIsIt (edict_t *ent)
 {
-	float       range;
-	int			i, num;
-	edict_t		*touch[MAX_EDICTS];
-	edict_t	    *who, *best;
-	trace_t     tr;
-	vec3_t      dir, end, entp, forward, mins, maxs, start, viewp;
+	float			range;
+	int				i, num;
+	static edict_t	*touch[MAX_EDICTS];	// Knightmare- made static due to stack size
+	edict_t			*who, *best;
+	trace_t			tr;
+	vec3_t			dir, end, entp, forward, mins, maxs, start, viewp;
 
 	/* Check for looking directly at a player or other non-trigger entity */
 	VectorCopy(ent->s.origin, start);

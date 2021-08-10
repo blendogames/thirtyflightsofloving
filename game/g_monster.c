@@ -152,9 +152,9 @@ void monster_fire_blaster (edict_t *self, vec3_t start, vec3_t dir, int damage, 
 	gi.multicast (start, MULTICAST_PVS);
 }	
 
-void monster_fire_grenade (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, int flashtype)
+void monster_fire_grenade (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, int flashtype, qboolean contact)
 {
-	fire_grenade (self, start, aimdir, damage, speed, 2.5, damage+40, false);
+	fire_grenade (self, start, aimdir, damage, speed, 2.5, damage+40, contact);
 
 	gi.WriteByte (svc_muzzleflash2);
 	gi.WriteShort (self - g_edicts);

@@ -623,7 +623,7 @@ void GunnerGrenade (edict_t *self)
 		VectorNormalize (aim);
 	}
 
-	monster_fire_grenade (self, start, aim, 50, GRENADE_VELOCITY, flash_number);
+	monster_fire_grenade (self, start, aim, 50, GRENADE_VELOCITY, flash_number, (self->spawnflags & SF_MONSTER_SPECIAL));
 }
 
 mframe_t gunner_frames_attack_chain [] =
@@ -751,7 +751,7 @@ void gunner_jump (edict_t *self)
 	self->monsterinfo.currentmove = &gunner_move_jump;
 }
 
-/*QUAKED monster_gunner (1 .5 0) (-16 -16 -24) (16 16 32) Ambush Trigger_Spawn Sight
+/*QUAKED monster_gunner (1 .5 0) (-16 -16 -24) (16 16 32) Ambush Trigger_Spawn Sight GoodGuy NoGib ContactGrenades
 */
 void SP_monster_gunner (edict_t *self)
 {

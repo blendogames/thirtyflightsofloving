@@ -501,17 +501,17 @@ void hintpath_stop (edict_t *self)
 //		and the monster's enemy. if only one person is visible from the endpoints,
 //		it will not go for it.
 // =============
-qboolean monsterlost_checkhint2 (edict_t *self);
+//qboolean monsterlost_checkhint2 (edict_t *self);
 
 qboolean monsterlost_checkhint (edict_t *self)
 {
-	edict_t		*e, *monster_pathchain, *target_pathchain, *checkpoint;
-	edict_t		*closest;
+	edict_t		*e=NULL;
+	edict_t		*monster_pathchain=NULL, *target_pathchain=NULL, *checkpoint=NULL;
+	edict_t		*closest=NULL, *start=NULL, *destination=NULL;
 	float		closest_range = 1000000;
-	edict_t		*start, *destination;
-	size_t		field;
-	int			count1=0, count2=0, count3=0, count4=0, count5=0;
 	float		r;
+//	size_t		field;
+	int			count1=0, count2=0, count3=0, count4=0, count5=0;
 	int			i;
 	qboolean	hint_path_represented[MAX_HINT_CHAINS];
 
@@ -529,8 +529,7 @@ qboolean monsterlost_checkhint (edict_t *self)
 		return false;
 
 	monster_pathchain = NULL;
-
-	field = FOFS(classname);
+//	field = FOFS(classname);
 
 	// find all the hint_paths.
 	// FIXME - can we not do this every time?
@@ -547,7 +546,7 @@ qboolean monsterlost_checkhint (edict_t *self)
 				checkpoint->monster_hint_chain = e;
 				checkpoint = e;
 			}
-			else
+			else	// add first node
 			{
 				monster_pathchain = e;
 				checkpoint = e;
@@ -825,6 +824,7 @@ qboolean monsterlost_checkhint (edict_t *self)
 
 	return true;
 }
+
 /*
 qboolean monsterlost_checkhint2 (edict_t *self)
 {
@@ -852,7 +852,7 @@ qboolean monsterlost_checkhint2 (edict_t *self)
 			// check visibility from this spot
 			selfVisible = visible(e, self);
 			playerVisible = visible(e, self->enemy);
-//			gi.dprintf("checking endpoint at %s %d %d\n", vtos(e->s.origin),selfVisible,playerVisible);
+		//	gi.dprintf("checking endpoint at %s %d %d\n", vtos(e->s.origin),selfVisible,playerVisible);
 
 			// at least one of us is visible from this endpoint.
 			// now check the other one if needed.
@@ -883,7 +883,7 @@ qboolean monsterlost_checkhint2 (edict_t *self)
 					if (!goPoint && selfVisible)
 						goPoint = e2;
 
-//					gi.dprintf("checking other endpoint at %s %d %d\n", vtos(e2->s.origin),selfVisible,playerVisible);
+				//	gi.dprintf("checking other endpoint at %s %d %d\n", vtos(e2->s.origin),selfVisible,playerVisible);
 				}
 
 				// if both are visible from at least one endpoint,
@@ -910,6 +910,7 @@ qboolean monsterlost_checkhint2 (edict_t *self)
 	return false;
 }
 */
+
 //
 // Path code
 //
@@ -919,7 +920,7 @@ qboolean monsterlost_checkhint2 (edict_t *self)
 // =============
 void hint_path_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
-	edict_t		*e, *goal, *next;
+	edict_t		*e=NULL, *goal=NULL, *next=NULL;
 //	int			chain;			 // direction - (-1) = upstream, (1) = downstream, (0) = done
 	qboolean	goalFound = false;
 
@@ -1327,9 +1328,10 @@ edict_t *SpawnBadArea (vec3_t mins, vec3_t maxs, float lifespan, edict_t *owner)
 //		for bad area triggers and return them if they're touched.
 edict_t *CheckForBadArea (edict_t *ent)
 {
-	int			i, num;
-	edict_t		*touch[MAX_EDICTS], *hit;
-	vec3_t		mins, maxs;
+	int				i, num;
+	static edict_t	*touch[MAX_EDICTS];	// Knightmare- made static due to stack size
+	edict_t			*hit;
+	vec3_t			mins, maxs;
 
 	VectorAdd (ent->s.origin, ent->mins, mins);
 	VectorAdd (ent->s.origin, ent->maxs, maxs);

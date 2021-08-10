@@ -1226,7 +1226,7 @@ good_enemy:
 				if (self->enemy->client)
 					victim = self->enemy;
 			}
-			if (victim && self->sounds >= 0 && DotProduct(forward,dir) > 0.99)
+			if ( victim && self->sounds >= 0 && DotProduct(forward,dir) > 0.99f )
 			{
 				// never automatically fire a turret remotely controlled by 
 				// a player
@@ -1248,7 +1248,7 @@ good_enemy:
 							turret_turn(self);
 						return;
 					}
-					if (self->sounds == 5 || self->sounds == 6)
+					if ( (self->sounds == 5) || (self->sounds == 6) )
 						reaction_time = 0;
 					else
 						reaction_time = max(0., 0.5*(2-skill->value));
@@ -1259,7 +1259,7 @@ good_enemy:
 						return;
 					}
 					self->monsterinfo.attack_finished = level.time + reaction_time;
-					if (self->sounds != 5 && self->sounds != 6)
+					if ( (self->sounds != 5) && (self->sounds != 6) )
 						self->monsterinfo.attack_finished += self->wait;
 					turret_breach_fire (self);
 					if (skill->value > 0)
@@ -1668,7 +1668,7 @@ void SP_turret_breach (edict_t *self)
 		st.maxpitch = 30;
 	if (!st.maxyaw)
 		st.maxyaw = 360;
-	if (!self->wait && self->sounds != 5 && self->sounds != 6)
+	if (!self->wait && (self->sounds != 5) && (self->sounds != 6) )
 		self->wait = 1;
 	if (self->health > 0)
 	{

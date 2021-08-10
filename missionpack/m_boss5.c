@@ -667,7 +667,7 @@ void SP_monster_boss5 (edict_t *self)
 	{
 		PatchMonsterModel("models/monsters/boss5/tris.md2");
 		self->s.skinnum = self->style * 2;
-	//	self->style = 0; //clear for custom bloodtype flag
+	//	self->style = 0; // clear for custom bloodtype flag
 	}
 
 	self->s.modelindex = gi.modelindex ("models/monsters/boss5/tris.md2");

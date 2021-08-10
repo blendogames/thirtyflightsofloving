@@ -1113,7 +1113,7 @@ good_enemy:
 				if (self->enemy->client)
 					victim = self->enemy;
 			}
-			if (victim && self->sounds >= 0 && DotProduct(forward,dir) > 0.99)
+			if ( victim && (self->sounds >= 0) && (DotProduct(forward, dir) > 0.99f) )
 			{
 				// never automatically fire a turret remotely controlled by 
 				// a player
@@ -1135,7 +1135,7 @@ good_enemy:
 							turret_turn(self);
 						return;
 					}
-					if (self->sounds == 5 || self->sounds == 6)
+					if ( (self->sounds == 5) || (self->sounds == 6) )
 						reaction_time = 0;
 					else
 						reaction_time = max(0., 0.5*(2-skill->value));
@@ -1146,7 +1146,7 @@ good_enemy:
 						return;
 					}
 					self->monsterinfo.attack_finished = level.time + reaction_time;
-					if (self->sounds != 5 && self->sounds != 6)
+					if ( (self->sounds != 5) && (self->sounds != 6) )
 						self->monsterinfo.attack_finished += self->wait;
 					turret_breach_fire(self);
 					if (skill->value > 0)
@@ -1709,14 +1709,14 @@ void turret_driver_think (edict_t *self)
 	if (level.time < self->monsterinfo.attack_finished)
 		return;
 
-	if (self->target_ent->sounds==5 || self->target_ent->sounds==6)
-		reaction_time = 0.;
+	if ( (self->target_ent->sounds == 5) || (self->target_ent->sounds == 6) )
+		reaction_time = 0.0f;
 	else
-		reaction_time = max(0., (2-skill->value));
+		reaction_time = max(0.0f, (2-skill->value));
 	if ((level.time - self->monsterinfo.trail_time) < reaction_time)
 		return;
 
-	if (self->target_ent->sounds==5 || self->target_ent->sounds==6)
+	if ( (self->target_ent->sounds == 5) || (self->target_ent->sounds == 6) )
 		self->monsterinfo.attack_finished = level.time + FRAMETIME;
 	else
 		self->monsterinfo.attack_finished = level.time + reaction_time + 1.0;

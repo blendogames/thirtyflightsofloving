@@ -73,6 +73,7 @@ void flechette_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t
 void fire_flechette (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage)
 {
 	edict_t *flechette;
+	trace_t	tr;		// Knightmare added
 
 	VectorNormalize (dir);
 
@@ -107,6 +108,14 @@ void fire_flechette (edict_t *self, vec3_t start, vec3_t dir, int damage, int sp
 
 	if (self->client)
 		check_dodge (self, flechette->s.origin, dir, speed);
+
+	// Knightmare- added missing point-blank collision check
+	tr = gi.trace (self->s.origin, NULL, NULL, flechette->s.origin, flechette, MASK_SHOT);
+	if (tr.fraction < 1.0 && !(self->flags & FL_TURRET_OWNER))
+	{
+		VectorMA (flechette->s.origin, -10, dir, flechette->s.origin);
+		flechette->touch (flechette, tr.ent, NULL, NULL);
+	}
 }
 
 // SP_flechette should ONLY be used for flechettes that have changed
@@ -2070,10 +2079,11 @@ void tesla_zap (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf
 
 void tesla_think_active (edict_t *self)
 {
-	int		i,num;
-	edict_t	*touch[MAX_EDICTS], *hit;
-	vec3_t	dir, start;
-	trace_t	tr;
+	int				i, num;
+	static edict_t	*touch[MAX_EDICTS];	// Knightmare- made static due to stack size
+	edict_t			*hit;
+	vec3_t			dir, start;
+	trace_t			tr;
 
 	if (level.time > self->air_finished)
 	{

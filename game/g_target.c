@@ -3233,8 +3233,8 @@ void target_monitor_off (edict_t *self)
 			self->target_ent->svflags &= ~SVF_NOCLIENT;
 	}
 	faker = player->client->camplayer;
-	VectorCopy(faker->s.origin,player->s.origin);
-	gi.TagFree(faker->client); 
+	VectorCopy (faker->s.origin, player->s.origin);
+	gi.TagFree (faker->client); 
 	G_FreeEdict (faker); 
 	player->client->ps.pmove.origin[0] = player->s.origin[0]*8;
 	player->client->ps.pmove.origin[1] = player->s.origin[1]*8;
@@ -3242,10 +3242,10 @@ void target_monitor_off (edict_t *self)
 	for (i=0 ; i<3 ; i++)
 		player->client->ps.pmove.delta_angles[i] = 
 			ANGLE2SHORT(player->client->org_viewangles[i] - player->client->resp.cmd_angles[i]);
-	VectorCopy(player->client->org_viewangles, player->client->resp.cmd_angles);
-	VectorCopy(player->client->org_viewangles, player->s.angles);
-	VectorCopy(player->client->org_viewangles, player->client->ps.viewangles);
-	VectorCopy(player->client->org_viewangles, player->client->v_angle);
+	VectorCopy (player->client->org_viewangles, player->client->resp.cmd_angles);
+	VectorCopy (player->client->org_viewangles, player->s.angles);
+	VectorCopy (player->client->org_viewangles, player->client->ps.viewangles);
+	VectorCopy (player->client->org_viewangles, player->client->v_angle);
 	
 	player->client->ps.gunindex        = gi.modelindex(player->client->pers.weapon->view_model);
 	player->client->ps.pmove.pm_flags &= ~PMF_NO_PREDICTION;
@@ -3305,17 +3305,17 @@ void target_monitor_move (edict_t *self)
 		return;
 	}
 
-	AngleVectors(self->target_ent->s.angles,forward,NULL,NULL);
-	VectorMA(self->target_ent->s.origin, -self->moveinfo.distance, forward, o);
+	AngleVectors (self->target_ent->s.angles, forward, NULL, NULL);
+	VectorMA (self->target_ent->s.origin, -self->moveinfo.distance, forward, o);
 
 	o[2] += self->viewheight;
 
-	VectorSubtract(o,self->s.origin,o);
-	VectorMA(self->s.origin,0.2,o,o);
+	VectorSubtract (o, self->s.origin, o);
+	VectorMA (self->s.origin, 0.2, o, o);
 
 	trace = gi.trace(self->target_ent->s.origin, NULL, NULL, o, self, MASK_SOLID);
-	VectorCopy(trace.endpos, goal);
-	VectorMA(goal, 2, forward, goal);
+	VectorCopy (trace.endpos, goal);
+	VectorMA (goal, 2, forward, goal);
 
 	// pad for floors and ceilings
 	VectorCopy(goal, o);
@@ -3353,12 +3353,12 @@ void use_target_monitor (edict_t *self, edict_t *other, edict_t *activator)
 	if (self->child)
 	{
 		if (self->wait < 0)
-			target_monitor_off(self);
+			target_monitor_off (self);
 		return;
 	}
 
 	if (self->target)
-		self->target_ent = G_Find(NULL,FOFS(targetname),self->target);
+		self->target_ent = G_Find(NULL, FOFS(targetname), self->target);
 
 	// if this is a CHASE_CAM target_monitor and the target no longer
 	// exists, remove this target_monitor and exit
@@ -3371,7 +3371,7 @@ void use_target_monitor (edict_t *self, edict_t *other, edict_t *activator)
 		}
 	}
 	// save current viewangles
-	VectorCopy(activator->client->v_angle,activator->client->org_viewangles);
+	VectorCopy (activator->client->v_angle, activator->client->org_viewangles);
 
 	// create a fake player to stand in real player's position
 	faker = activator->client->camplayer = G_Spawn();
@@ -3396,10 +3396,10 @@ void use_target_monitor (edict_t *self, edict_t *other, edict_t *activator)
 	faker->light_level  = activator->light_level;
 	faker->think        = faker_animate;
 	faker->nextthink    = level.time + FRAMETIME;
-	VectorCopy(activator->mins,faker->mins);
-	VectorCopy(activator->maxs,faker->maxs);
+	VectorCopy (activator->mins, faker->mins);
+	VectorCopy (activator->maxs, faker->maxs);
     // create a client so you can pick up items/be shot/etc while in camera
-	cl = (gclient_t *) gi.TagMalloc(sizeof(gclient_t), TAG_LEVEL); 
+	cl = (gclient_t *)gi.TagMalloc(sizeof(gclient_t), TAG_LEVEL); 
 	faker->client = cl; 
 	faker->target_ent = activator;
 	gi.linkentity (faker); 
@@ -3407,12 +3407,12 @@ void use_target_monitor (edict_t *self, edict_t *other, edict_t *activator)
 	if (self->target_ent && self->target_ent->inuse)
 	{
 		if (self->spawnflags & SF_MONITOR_EYEBALL)
-			VectorCopy(self->target_ent->s.angles,activator->client->ps.viewangles);
+			VectorCopy (self->target_ent->s.angles, activator->client->ps.viewangles);
 		else
 		{
 			vec3_t	dir;
-			VectorSubtract(self->target_ent->s.origin,self->s.origin,dir);
-			vectoangles(dir,activator->client->ps.viewangles);
+			VectorSubtract (self->target_ent->s.origin, self->s.origin, dir);
+			vectoangles (dir, activator->client->ps.viewangles);
 		}
 	}
 	else
@@ -3441,17 +3441,18 @@ void use_target_monitor (edict_t *self, edict_t *other, edict_t *activator)
 	else
 		activator->client->pers.chasetoggle = 0;
 	activator->clipmask = 0;
-	VectorClear(activator->velocity);
-	activator->client->ps.gunindex = 0; 
+	VectorClear (activator->velocity);
+	activator->client->ps.gunindex = 0;
 	activator->client->ps.pmove.pm_flags |= PMF_NO_PREDICTION;
 	gi.linkentity(activator);
 
 	gi.unlinkentity(faker);
-	KillBox(faker);
+	KillBox (faker);
 	gi.linkentity(faker);
 
 	// check to see if player is the enemy of any monster.
-	for (i=maxclients->value+1, monster=g_edicts+i; i<globals.num_edicts; i++, monster++) {
+	for (i=maxclients->value+1, monster=g_edicts+i; i<globals.num_edicts; i++, monster++)
+	{
 		if (!monster->inuse) continue;
 		if (!(monster->svflags & SVF_MONSTER)) continue;
 		if (monster->enemy == activator)
@@ -3463,7 +3464,7 @@ void use_target_monitor (edict_t *self, edict_t *other, edict_t *activator)
 			if (monster->movetarget == activator)
 				monster->movetarget = NULL;
 			monster->monsterinfo.attack_finished = level.time + 1;
-			FindTarget(monster);
+			FindTarget (monster);
 		}
 	}
 
@@ -3485,7 +3486,7 @@ void use_target_monitor (edict_t *self, edict_t *other, edict_t *activator)
 			self->viewheight = self->target_ent->viewheight;
 			self->target_ent->svflags |= SVF_NOCLIENT;
 		}
-		VectorCopy(self->target_ent->s.origin,self->s.origin);
+		VectorCopy (self->target_ent->s.origin, self->s.origin);
 		self->think = target_monitor_move;
 		self->think(self);
 	}

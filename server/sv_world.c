@@ -435,11 +435,12 @@ SV_PointContents
 */
 int SV_PointContents (vec3_t p)
 {
-	edict_t		*touch[MAX_EDICTS], *hit;
-	int			i, num;
-	int			contents, c2;
-	int			headnode;
-	float		*angles;
+	static edict_t	*touch[MAX_EDICTS];	// Knightmare- made static due to stack size
+	edict_t			*hit;
+	int				i, num;
+	int				contents, c2;
+	int				headnode;
+	float			*angles;
 
 	// get base contents from world
 	contents = CM_PointContents (p, sv.models[1]->headnode);
@@ -521,14 +522,14 @@ SV_ClipMoveToEntities
 */
 void SV_ClipMoveToEntities ( moveclip_t *clip )
 {
-	int			i, num;
-	edict_t		*touchlist[MAX_EDICTS], *touch;
-	trace_t		trace;
-	int			headnode;
-	float		*angles;
+	int				i, num;
+	static edict_t	*touchlist[MAX_EDICTS];	// Knightmare- made static due to stack size
+	edict_t			*touch;
+	trace_t			trace;
+	int				headnode;
+	float			*angles;
 
-	num = SV_AreaEdicts (clip->boxmins, clip->boxmaxs, touchlist
-		, MAX_EDICTS, AREA_SOLID);
+	num = SV_AreaEdicts (clip->boxmins, clip->boxmaxs, touchlist, MAX_EDICTS, AREA_SOLID);
 
 	// be careful, it is possible to have an entity in this
 	// list removed before we get to it (killtriggered)

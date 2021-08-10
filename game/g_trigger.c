@@ -664,11 +664,12 @@ void hurt_use (edict_t *self, edict_t *other, edict_t *activator)
 {
 	if (self->solid == SOLID_NOT)
 	{
-		int		i, num;
-		edict_t	*touch[MAX_EDICTS], *hurtme;
+		int				i, num;
+		static edict_t	*touch[MAX_EDICTS];	// Knightmare- made static due to stack size
+		edict_t			*hurtme;
 
 		self->solid = SOLID_TRIGGER;
-		// Lazaurs: Add check for non-moving (i.e. idle monsters) within trigger_hurt
+		// Lazarus: Add check for non-moving (i.e. idle monsters) within trigger_hurt
 		//          at first activation
 		num = gi.BoxEdicts (self->absmin, self->absmax, touch, MAX_EDICTS, AREA_SOLID);
 		for (i=0 ; i<num ; i++)
@@ -1164,8 +1165,9 @@ void SP_trigger_mass_bbox (edict_t *self)
 
 void trigger_inside_think (edict_t *self)
 {
-	int		i, num;
-	edict_t	*touch[MAX_EDICTS], *hit;
+	int				i, num;
+	static edict_t	*touch[MAX_EDICTS];	// Knightmare- made static due to stack size
+	edict_t			*hit;
 
 	num = gi.BoxEdicts (self->absmin, self->absmax, touch, MAX_EDICTS, AREA_SOLID);
 	for (i=0 ; i<num ; i++)
@@ -1283,10 +1285,11 @@ float weight_on_top(edict_t *ent)
 
 void trigger_scales_think (edict_t *self)
 {
-	float	f, fx, fy;
-	int		i, num;
-	int		weight;
-	edict_t	*e, *touch[MAX_EDICTS], *hit;
+	float			f, fx, fy;
+	int				i, num;
+	int				weight;
+	static edict_t	*touch[MAX_EDICTS];	// Knightmare- made static due to stack size
+	edict_t			*e, *hit;
 
 	num = gi.BoxEdicts (self->absmin, self->absmax, touch, MAX_EDICTS, AREA_SOLID);
 	weight = 0;

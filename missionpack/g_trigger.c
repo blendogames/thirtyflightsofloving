@@ -1260,8 +1260,9 @@ void SP_trigger_mass_bbox (edict_t *self)
 //=======================================================================================
 void trigger_inside_think (edict_t *self)
 {
-	int		i, num;
-	edict_t	*touch[MAX_EDICTS], *hit;
+	int				i, num;
+	static edict_t	*touch[MAX_EDICTS];	// Knightmare- made static due to stack size
+	edict_t			*hit;
 
 	num = gi.BoxEdicts (self->absmin, self->absmax, touch, MAX_EDICTS, AREA_SOLID);
 	for (i=0 ; i<num ; i++)
@@ -1390,10 +1391,11 @@ float weight_on_top (edict_t *ent)
 
 void trigger_scales_think (edict_t *self)
 {
-	float	f, fx, fy;
-	int		i, num;
-	int		weight;
-	edict_t	*e, *touch[MAX_EDICTS], *hit;
+	float			f, fx, fy;
+	int				i, num;
+	int				weight;
+	static edict_t	*touch[MAX_EDICTS];	// Knightmare- made static due to stack size
+	edict_t			*e, *hit;
 
 	num = gi.BoxEdicts (self->absmin, self->absmax, touch, MAX_EDICTS, AREA_SOLID);
 	weight = 0;

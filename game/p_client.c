@@ -2528,7 +2528,7 @@ void ClientPushPushable(edict_t *ent)
 		RemovePush(ent);
 }
 
-void ClientSpycam(edict_t *ent)
+void ClientSpycam (edict_t *ent)
 {
 	gclient_t	*client = ent->client;
 	edict_t		*camera = ent->client->spycam;
@@ -2541,22 +2541,22 @@ void ClientSpycam(edict_t *ent)
 	int			i;
 
 	memset (&pm, 0, sizeof(pm));
-	if (client->ucmd.sidemove && level.time > ent->last_move_time + 1)
+	if ( client->ucmd.sidemove && (level.time > ent->last_move_time + 1) )
 	{
 		camera->flags &= ~FL_ROBOT;
 		if (camera->viewer == ent)
 			camera->viewer = NULL;
 		if (client->ucmd.sidemove > 0)
-			camera = G_FindNextCamera(camera,client->monitor);
+			camera = G_FindNextCamera(camera, client->monitor);
 		else
-			camera = G_FindPrevCamera(camera,client->monitor);
+			camera = G_FindPrevCamera(camera, client->monitor);
 		
 		if (camera)
 		{
 			if (!camera->viewer)
 				camera->viewer = ent;
 			client->spycam = camera;
-			VectorAdd(camera->s.origin,camera->move_origin,ent->s.origin);
+			VectorAdd (camera->s.origin, camera->move_origin, ent->s.origin);
 			if (camera->viewmessage)
 				safe_centerprintf(ent,camera->viewmessage);
 			ent->last_move_time = level.time;
@@ -2576,17 +2576,17 @@ void ClientSpycam(edict_t *ent)
 			}
 		}
 	}
-	if ((camera->svflags & SVF_MONSTER) && (camera->monsterinfo.aiflags & AI_ACTOR))
+	if ( (camera->svflags & SVF_MONSTER) && (camera->monsterinfo.aiflags & AI_ACTOR) )
 		is_actor = true;
 	else
 		is_actor = false;
 	if (camera->enemy && (camera->enemy->deadflag || !camera->enemy->inuse))
 		camera->enemy = NULL;
-	AngleVectors(camera->s.angles,forward,left,up);
+	AngleVectors (camera->s.angles, forward, left, up);
 
 	if (is_actor && !camera->enemy)
 	{
-		if ((abs(client->ucmd.forwardmove) > 199) && (camera->groundentity))
+		if ( (abs(client->ucmd.forwardmove) > 199) && (camera->groundentity) )
 		{
 			// walk/run
 			
@@ -2597,21 +2597,21 @@ void ClientSpycam(edict_t *ent)
 			thing  = camera->vehicle;
 			
 			VectorMA(camera->s.origin,WORLD_SIZE,forward,end);	// was 8192
-			tr = gi.trace(camera->s.origin,camera->mins,camera->maxs,end,camera,MASK_SOLID);
+			tr = gi.trace(camera->s.origin, camera->mins, camera->maxs, end, camera, MASK_SOLID);
 			if (client->ucmd.forwardmove < 0)
 			{
 				trace_t	back;
 				VectorMA(camera->s.origin,-WORLD_SIZE,forward,end);	// was -8192
-				back = gi.trace(camera->s.origin,camera->mins,camera->maxs,end,camera,MASK_SOLID);
-				VectorSubtract(back.endpos,camera->s.origin,end);
+				back = gi.trace(camera->s.origin, camera->mins, camera->maxs, end, camera, MASK_SOLID);
+				VectorSubtract (back.endpos, camera->s.origin, end);
 				dist = VectorLength(end);
-				VectorCopy(tr.endpos,end);
+				VectorCopy (tr.endpos, end);
 			}
 			else
 			{
-				VectorSubtract(tr.endpos,camera->s.origin,end);
+				VectorSubtract (tr.endpos, camera->s.origin, end);
 				dist = VectorLength(end) - 8;
-				VectorMA(camera->s.origin,dist,forward,end);
+				VectorMA (camera->s.origin, dist, forward, end);
 			}
 			if (dist > 8)
 			{
@@ -2620,7 +2620,7 @@ void ClientSpycam(edict_t *ent)
 				thing->touch_debounce_time = level.time + 5.0;
 				thing->target_ent = camera;
 				VectorCopy(end,thing->s.origin);
-				ED_CallSpawn(thing);
+				ED_CallSpawn (thing);
 				camera->monsterinfo.aiflags |= AI_CHASE_THING;
 				camera->monsterinfo.aiflags &= ~(AI_CHICKEN | AI_STAND_GROUND);
 				camera->monsterinfo.pausetime = 0;
@@ -2642,7 +2642,7 @@ void ClientSpycam(edict_t *ent)
 			{
 				camera->monsterinfo.aiflags &= ~AI_CHASE_THING;
 				camera->movetarget = camera->goalentity = NULL;
-				G_FreeEdict(thing);
+				G_FreeEdict (thing);
 				camera->vehicle = NULL;
 				actor_stand(camera);
 			}
@@ -2655,7 +2655,7 @@ void ClientSpycam(edict_t *ent)
 			{
 				camera->monsterinfo.aiflags &= ~AI_CHASE_THING;
 				camera->movetarget = camera->goalentity = NULL;
-				G_FreeEdict(thing);
+				G_FreeEdict (thing);
 				camera->vehicle = NULL;
 				actor_stand(camera);
 			}
@@ -2667,13 +2667,13 @@ void ClientSpycam(edict_t *ent)
 			{
 				// jump
 				if (client->ucmd.forwardmove > 300)
-					VectorScale(forward,400,camera->velocity);
+					VectorScale (forward, 400, camera->velocity);
 				else if (client->ucmd.forwardmove > 199)
-					VectorScale(forward,200,camera->velocity);
+					VectorScale (forward, 200, camera->velocity);
 				else if (client->ucmd.forwardmove < -300)
-					VectorScale(forward,-400,camera->velocity);
+					VectorScale (forward, -400, camera->velocity);
 				else if (client->ucmd.forwardmove < -199)
-					VectorScale(forward,-200,camera->velocity);
+					VectorScale (forward, -200, camera->velocity);
 				camera->velocity[2] = 250;
 				camera->monsterinfo.savemove = camera->monsterinfo.currentmove;
 				actor_jump(camera);
@@ -2728,7 +2728,8 @@ void ClientSpycam(edict_t *ent)
 	}
 
 	client->ps.pmove.pm_type = PM_FREEZE;
-	if (camera->viewer == ent) {
+	if (camera->viewer == ent)
+	{
 		if ( (client->old_owner_angles[0] != client->ucmd.angles[0]) ||
 			(client->old_owner_angles[1] != client->ucmd.angles[1])   )
 		{
@@ -2753,16 +2754,16 @@ void ClientSpycam(edict_t *ent)
 					{
 						vec3_t	angles;
 						vec3_t	end, f;
-						VectorSet(angles,0,camera->ideal_yaw,0);
-						AngleVectors(angles,f,NULL,NULL);
-						VectorMA(camera->s.origin,WORLD_SIZE,f,end);	// was 8192
-						tr = gi.trace(camera->s.origin,camera->mins,camera->maxs,end,camera,MASK_SOLID);
-						VectorCopy(tr.endpos,camera->vehicle->s.origin);
-						camera->vehicle->touch_debounce_time = level.time + 5.0;
+						VectorSet (angles, 0, camera->ideal_yaw, 0);
+						AngleVectors (angles, f, NULL, NULL);
+						VectorMA (camera->s.origin, WORLD_SIZE, f, end);	// was 8192
+						tr = gi.trace(camera->s.origin, camera->mins, camera->maxs, end, camera, MASK_SOLID);
+						VectorCopy (tr.endpos, camera->vehicle->s.origin);
+						camera->vehicle->touch_debounce_time = level.time + 5.0f;
 						gi.linkentity(camera->vehicle);
 					}
-					ai_turn(camera,0.);
-					diff = SHORT2ANGLE(client->ucmd.angles[0]-client->old_owner_angles[0]);
+					ai_turn (camera, 0.0f);
+					diff = SHORT2ANGLE(client->ucmd.angles[0] - client->old_owner_angles[0]);
 					if (diff < -180)
 						diff += 360;
 					if (diff > 180)
@@ -2773,12 +2774,17 @@ void ClientSpycam(edict_t *ent)
 				}
 			}
 		}
-		if ( client->ucmd.buttons & BUTTON_ATTACK && camera->sounds >= 0 ) {
-			if (level.time >= camera->monsterinfo.attack_finished) {
-				client->latched_buttons &= ~BUTTON_ATTACK;
-				if (!Q_stricmp(camera->classname, "turret_breach"))
+		if ( (client->ucmd.buttons & BUTTON_ATTACK) && (camera->sounds >= 0) )
+		{
+			// Knightmare- stop firing weapon when switching to turret
+			client->latched_buttons &= ~BUTTONS_ATTACK;
+			client->buttons &= ~BUTTONS_ATTACK;
+			if (level.time >= camera->monsterinfo.attack_finished)
+			{
+			//	client->latched_buttons &= ~BUTTONS_ATTACK;
+				if ( !Q_stricmp(camera->classname, "turret_breach") || !Q_stricmp(camera->classname, "model_turret") )
 				{
-					if (camera->sounds==5 || camera->sounds==6)
+					if ( (camera->sounds == 5) || (camera->sounds == 6) )
 						camera->monsterinfo.attack_finished = level.time;
 					else
 						camera->monsterinfo.attack_finished = level.time + 1.0;
@@ -2790,15 +2796,15 @@ void ClientSpycam(edict_t *ent)
 					if (!camera->enemy)
 					{
 						edict_t	*target;
-						target = LookingAt(ent,0,NULL,NULL);
-						if (target && target->takedamage && (target != client->camplayer))
+						target = LookingAt(ent, 0, NULL, NULL);
+						if ( target && target->takedamage && (target != client->camplayer) )
 						{
 							if (camera->vehicle)
 							{
 								// Currently following "thing" - turn that off
 								camera->monsterinfo.aiflags &= ~AI_CHASE_THING;
 								camera->movetarget = camera->goalentity = NULL;
-								G_FreeEdict(camera->vehicle);
+								G_FreeEdict (camera->vehicle);
 								camera->vehicle = NULL;
 							}
 							camera->enemy = target;
@@ -2813,15 +2819,20 @@ void ClientSpycam(edict_t *ent)
 				}
 			}
 		}
+		// Knightmare- stop firing weapon when switching to spycam
+		else if ( (client->ucmd.buttons & BUTTON_ATTACK) && (camera->sounds < 0) ) {
+			client->latched_buttons &= ~BUTTONS_ATTACK;
+			client->buttons &= ~BUTTONS_ATTACK;
+		}
+
 		if (client->zoomed) {
-			camera->touch_debounce_time = 
-				max(camera->touch_debounce_time, level.time + 1.0);
+			camera->touch_debounce_time = max(camera->touch_debounce_time, level.time + 1.0);
 		}
 	}
 
-	VectorMA(camera->s.origin, camera->move_origin[0],forward,start);
-	VectorMA(start,           -camera->move_origin[1],left,   start);
-	VectorMA(start,            camera->move_origin[2],up,     start);
+	VectorMA (camera->s.origin, camera->move_origin[0], forward, start);
+	VectorMA (start,           -camera->move_origin[1], left,    start);
+	VectorMA (start,            camera->move_origin[2], up,      start);
 	
 	tr = gi.trace(camera->s.origin, NULL, NULL, start, camera, MASK_SOLID);
 	if (tr.fraction < 1.0)
@@ -2831,8 +2842,8 @@ void ClientSpycam(edict_t *ent)
 		if (dist < 0) dist = 0.;
 		VectorMA(camera->s.origin,dist,dir,start);
 	}
-	VectorCopy(start,ent->s.origin);
-	VectorCopy(camera->velocity,ent->velocity);
+	VectorCopy (start, ent->s.origin);
+	VectorCopy (camera->velocity, ent->velocity);
 	
 	client->resp.cmd_angles[0] = SHORT2ANGLE(client->ucmd.angles[0]);
 	client->resp.cmd_angles[1] = SHORT2ANGLE(client->ucmd.angles[1]);
@@ -2977,14 +2988,14 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 			viewing = LookingAt(ent,0,intersect,&range);
 			if (viewing && viewing->classname)
 			{
-				if (!Q_stricmp(viewing->classname,"crane_control") && range <= 100)
+				if (!Q_stricmp(viewing->classname, "crane_control") && range <= 100)
 					crane_control_action(viewing,ent,intersect);
-				if (!Q_stricmp(viewing->classname,"target_lock_digit") && range <= 100)
+				if (!Q_stricmp(viewing->classname, "target_lock_digit") && range <= 100)
 					lock_digit_increment(viewing,ent);
-				if (!Q_stricmp(viewing->classname,"func_trainbutton") && (viewing->spawnflags & 1) && range <= 64)
+				if (!Q_stricmp(viewing->classname, "func_trainbutton") && (viewing->spawnflags & 1) && range <= 64)
 					trainbutton_use(viewing,ent,ent);
 				// Knightmare- different range for chasecam
-				if (!Q_stricmp(viewing->classname,"func_monitor") && ((range <= 100) || (client->chasetoggle && range <= client->zoom + 160.00)) )
+				if (!Q_stricmp(viewing->classname, "func_monitor") && ((range <= 100) || (client->chasetoggle && range <= client->zoom + 160.00)) )
 				{
 					use_camera(viewing,ent,ent);
 					if (client->spycam && client->spycam->viewer == ent)
@@ -3071,23 +3082,23 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		return;
 	}
 
-	if (ent->target_ent && !Q_stricmp(ent->target_ent->classname,"target_monitor"))
+	if (ent->target_ent && !Q_stricmp(ent->target_ent->classname, "target_monitor"))
 	{
 		edict_t	*monitor = ent->target_ent;
 		if (monitor->target_ent && monitor->target_ent->inuse)
 		{
 			if (monitor->spawnflags & 2)
-				VectorCopy(monitor->target_ent->s.angles,client->ps.viewangles);
+				VectorCopy (monitor->target_ent->s.angles, client->ps.viewangles);
 			else
 			{
 				vec3_t	dir;
-				VectorSubtract(monitor->target_ent->s.origin,monitor->s.origin,dir);
-				vectoangles(dir,client->ps.viewangles);
+				VectorSubtract (monitor->target_ent->s.origin, monitor->s.origin, dir);
+				vectoangles (dir, client->ps.viewangles);
 			}
 		}
 		else
 			VectorCopy (monitor->s.angles, client->ps.viewangles);
-		VectorCopy(monitor->s.origin,ent->s.origin);
+		VectorCopy (monitor->s.origin, ent->s.origin);
 		client->ps.pmove.pm_type = PM_FREEZE;
 		return;
 	}
@@ -3134,26 +3145,34 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	}
 
 // ZOOM
-	if (client->zooming) {
+	if (client->zooming)
+	{
 		client->pers.hand = 2;
-		if (client->zooming > 0) {
+		if (client->zooming > 0)
+		{
 			if (client->ps.fov > 5) {
 				client->ps.fov -= client->frame_zoomrate;
 				if (client->ps.fov < 5)
 					client->ps.fov = 5;
-			} else {
+			}
+			else {
 				client->ps.fov = 5;
 			}
 			client->zoomed = true;
-		} else {
-			if (client->ps.fov < client->original_fov) {
+		}
+		else
+		{
+			if (client->ps.fov < client->original_fov)
+			{
 				client->ps.fov += client->frame_zoomrate;
 				if (client->ps.fov > client->original_fov) {
 					client->ps.fov = client->original_fov;
 					client->zoomed = false;
-				} else
+				}
+				else
 					client->zoomed = true;
-			} else {
+			}
+			else {
 				client->ps.fov = client->original_fov;
 				client->zoomed = false;
 			}
@@ -3173,12 +3192,12 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		ShiftItem(ent, client->shift_dir);
 
 	if (client->chase_target) {
-
 		client->resp.cmd_angles[0] = SHORT2ANGLE(ucmd->angles[0]);
 		client->resp.cmd_angles[1] = SHORT2ANGLE(ucmd->angles[1]);
 		client->resp.cmd_angles[2] = SHORT2ANGLE(ucmd->angles[2]);
-
-	} else {
+	}
+	else
+	{
 
 		// set up for pmove
 		memset (&pm, 0, sizeof(pm));
