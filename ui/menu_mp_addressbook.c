@@ -20,7 +20,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 
-// ui_addressbook.c -- the address book menu 
+// menu_mp_addressbook.c -- the address book menu 
 
 #include <ctype.h>
 #ifdef _WIN32
@@ -62,7 +62,7 @@ static void AddressBookBack (void *unused)
 	UI_BackMenu (unused);
 }
 
-void AddressBook_MenuInit( void )
+void Menu_AddressBook_Init (void)
 {
 	int i;
 
@@ -92,7 +92,7 @@ void AddressBook_MenuInit( void )
 		Q_strncpyz (s_addressbook_fields[i].buffer, sizeof(s_addressbook_fields[i].buffer), adr->string);
 		s_addressbook_fields[i].cursor = (int)strlen(adr->string);
 
-		Menu_AddItem(&s_addressbook_menu, &s_addressbook_fields[i]);
+		UI_AddMenuItem (&s_addressbook_menu, &s_addressbook_fields[i]);
 	}
 
 	s_addressbook_back_action.generic.type = MTYPE_ACTION;
@@ -103,26 +103,26 @@ void AddressBook_MenuInit( void )
 	s_addressbook_back_action.generic.name	= " back";
 	s_addressbook_back_action.generic.callback = AddressBookBack; // UI_BackMenu;
 
-	Menu_AddItem(&s_addressbook_menu, &s_addressbook_back_action);
+	UI_AddMenuItem (&s_addressbook_menu, &s_addressbook_back_action);
 }
 
 
-const char *AddressBook_MenuKey (int key)
+const char *Menu_AddressBook_Key (int key)
 {
 	if (key == K_ESCAPE)
 		AddressBook_SaveEntries ();
 
-	return Default_MenuKey (&s_addressbook_menu, key);
+	return UI_DefaultMenuKey (&s_addressbook_menu, key);
 }
 
-void AddressBook_MenuDraw (void)
+void Menu_AddressBook_Draw (void)
 {
-	Menu_DrawBanner ("m_banner_addressbook");
-	Menu_Draw (&s_addressbook_menu);
+	UI_DrawBanner ("m_banner_addressbook");
+	UI_DrawMenu (&s_addressbook_menu);
 }
 
-void M_Menu_AddressBook_f(void)
+void Menu_AddressBook_f(void)
 {
-	AddressBook_MenuInit();
-	UI_PushMenu( AddressBook_MenuDraw, AddressBook_MenuKey );
+	Menu_AddressBook_Init ();
+	UI_PushMenu (Menu_AddressBook_Draw, Menu_AddressBook_Key);
 }

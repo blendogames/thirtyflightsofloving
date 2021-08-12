@@ -269,7 +269,6 @@ typedef struct node_s
 {
 	vec3_t origin; // Using Id's representation
 	int type;   // type of node
-
 } node_t;
 
 typedef struct item_table_s
@@ -278,7 +277,6 @@ typedef struct item_table_s
 	float weight;
 	edict_t *ent;
 	int node;
-
 } item_table_t;
 
 extern int num_players;

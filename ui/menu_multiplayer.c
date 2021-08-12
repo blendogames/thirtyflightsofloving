@@ -20,7 +20,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 
-// ui_multiplayer.c -- the multiplayer menu 
+// menu_multiplayer.c -- the multiplayer menu 
 
 #include <ctype.h>
 #ifdef _WIN32
@@ -47,35 +47,29 @@ static menuaction_s		s_player_setup_action;
 static menuaction_s		s_download_options_action;
 static menuaction_s		s_backmain_action;
 
-static void Multiplayer_MenuDraw (void)
+static void PlayerSetupFunc (void *unused)
 {
-	Menu_DrawBanner( "m_banner_multiplayer" );
-
-	Menu_AdjustCursor( &s_multiplayer_menu, 1 );
-	Menu_Draw( &s_multiplayer_menu );
+	Menu_PlayerConfig_f ();
 }
 
-static void PlayerSetupFunc( void *unused )
+static void JoinNetworkServerFunc (void *unused)
 {
-	M_Menu_PlayerConfig_f();
+	Menu_JoinServer_f ();
 }
 
-static void JoinNetworkServerFunc( void *unused )
+static void StartNetworkServerFunc (void *unused)
 {
-	M_Menu_JoinServer_f();
+	Menu_StartServer_f ();
 }
 
-static void StartNetworkServerFunc( void *unused )
+void DownloadOptionsFunc (void *unused)
 {
-	M_Menu_StartServer_f ();
+	Menu_DownloadOptions_f ();
 }
 
-void DownloadOptionsFunc( void *unused )
-{
-	M_Menu_DownloadOptions_f();
-}
+//=======================================================================
 
-void Multiplayer_MenuInit( void )
+void Menu_Multiplayer_Init (void)
 {
 	s_multiplayer_menu.x = SCREEN_WIDTH*0.5 - 64;
 //	s_multiplayer_menu.y = 0;
@@ -121,26 +115,32 @@ void Multiplayer_MenuInit( void )
 	s_backmain_action.generic.name		= " back to main";
 	s_backmain_action.generic.callback	= UI_BackMenu;
 
-	Menu_AddItem( &s_multiplayer_menu, ( void * ) &s_join_network_server_action );
-	Menu_AddItem( &s_multiplayer_menu, ( void * ) &s_start_network_server_action );
-	Menu_AddItem( &s_multiplayer_menu, ( void * ) &s_player_setup_action );
-	Menu_AddItem( &s_multiplayer_menu, ( void * ) &s_download_options_action );
-	Menu_AddItem( &s_multiplayer_menu, ( void * ) &s_backmain_action );
+	UI_AddMenuItem (&s_multiplayer_menu, (void *) &s_join_network_server_action);
+	UI_AddMenuItem (&s_multiplayer_menu, (void *) &s_start_network_server_action);
+	UI_AddMenuItem (&s_multiplayer_menu, (void *) &s_player_setup_action);
+	UI_AddMenuItem (&s_multiplayer_menu, (void *) &s_download_options_action);
+	UI_AddMenuItem (&s_multiplayer_menu, (void *) &s_backmain_action);
 
-	Menu_SetStatusBar( &s_multiplayer_menu, NULL );
+	UI_SetMenuStatusBar (&s_multiplayer_menu, NULL);
 
-	Menu_Center( &s_multiplayer_menu );
+	UI_CenterMenu (&s_multiplayer_menu);
 }
 
-const char *Multiplayer_MenuKey( int key )
+static void Menu_Multiplayer_Draw (void)
 {
-	return Default_MenuKey( &s_multiplayer_menu, key );
+	UI_DrawBanner ("m_banner_multiplayer");
+
+	UI_AdjustMenuCursor (&s_multiplayer_menu, 1);
+	UI_DrawMenu (&s_multiplayer_menu);
 }
 
-void M_Menu_Multiplayer_f( void )
+const char *Menu_Multiplayer_Key (int key)
 {
-	Multiplayer_MenuInit();
-	UI_PushMenu( Multiplayer_MenuDraw, Multiplayer_MenuKey );
+	return UI_DefaultMenuKey (&s_multiplayer_menu, key);
 }
 
-
+void Menu_Multiplayer_f (void)
+{
+	Menu_Multiplayer_Init ();
+	UI_PushMenu (Menu_Multiplayer_Draw, Menu_Multiplayer_Key);
+}

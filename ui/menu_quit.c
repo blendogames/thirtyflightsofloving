@@ -20,7 +20,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 
-// ui_quit.c -- the quit menu
+// menu_quit.c -- the quit menu
 
 #include <ctype.h>
 #ifdef _WIN32
@@ -46,14 +46,13 @@ static menuseparator_s	s_quit_header;
 static menuaction_s		s_quit_yes_action;
 static menuaction_s		s_quit_no_action;
 
-static void QuitYesFunc( void *unused )
+static void QuitYesFunc (void *unused)
 {
 	cls.key_dest = key_console;
 	CL_Quit_f ();
 }
 
-
-void Quit_MenuInit ( void )
+void Menu_Quit_Init (void)
 {
 	s_quit_menu.x = SCREEN_WIDTH*0.5 - 24;
 	s_quit_menu.y = SCREEN_HEIGHT*0.5 - 58;
@@ -83,18 +82,18 @@ void Quit_MenuInit ( void )
 	s_quit_no_action.generic.callback		= UI_BackMenu;
 	s_quit_no_action.generic.cursor_offset	= -MENU_FONT_SIZE;
 
-	Menu_AddItem( &s_quit_menu, ( void * ) &s_quit_header );
-	Menu_AddItem( &s_quit_menu, ( void * ) &s_quit_yes_action );
-	Menu_AddItem( &s_quit_menu, ( void * ) &s_quit_no_action );
+	UI_AddMenuItem (&s_quit_menu, (void *) &s_quit_header);
+	UI_AddMenuItem (&s_quit_menu, (void *) &s_quit_yes_action);
+	UI_AddMenuItem (&s_quit_menu, (void *) &s_quit_no_action);
 }
 
 #endif // QUITMENU_NOKEY
 
 
-const char *M_Quit_Key (int key)
+const char *Menu_Quit_Key (int key)
 {
 #ifdef QUITMENU_NOKEY
-	return Default_MenuKey( &s_quit_menu, key );
+	return UI_DefaultMenuKey (&s_quit_menu, key);
 #else // QUITMENU_NOKEY
 	switch (key)
 	{
@@ -118,24 +117,24 @@ const char *M_Quit_Key (int key)
 }
 
 
-void M_Quit_Draw (void)
+void Menu_Quit_Draw (void)
 {
 #ifdef QUITMENU_NOKEY
-	Menu_AdjustCursor( &s_quit_menu, 1 );
-	Menu_Draw( &s_quit_menu );
+	UI_AdjustMenuCursor (&s_quit_menu, 1);
+	UI_DrawMenu (&s_quit_menu);
 #else // QUITMENU_NOKEY
 	int		w, h;
 
 	R_DrawGetPicSize (&w, &h, "quit");
-	SCR_DrawPic (SCREEN_WIDTH/2-w/2, SCREEN_HEIGHT/2-h/2, w, h, ALIGN_CENTER, false, "quit", 1.0);
+	UI_DrawPic (SCREEN_WIDTH/2-w/2, SCREEN_HEIGHT/2-h/2, w, h, ALIGN_CENTER, false, "quit", 1.0);
 #endif // QUITMENU_NOKEY
 }
 
 
-void M_Menu_Quit_f (void)
+void Menu_Quit_f (void)
 {
 #ifdef QUITMENU_NOKEY
-	Quit_MenuInit();
+	Menu_Quit_Init();
 #endif
-	UI_PushMenu (M_Quit_Draw, M_Quit_Key);
+	UI_PushMenu (Menu_Quit_Draw, Menu_Quit_Key);
 }

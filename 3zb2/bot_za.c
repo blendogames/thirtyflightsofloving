@@ -2279,36 +2279,37 @@ int Get_KindWeapon(gitem_t	*it)
 
 void Bots_Move_NORM (edict_t *ent)
 {
-	float		dist;		//moving distance
-	zgcl_t		*zc;		//zc's address
+	float			dist;		//moving distance
+	zgcl_t			*zc;		//zc's address
 	
-	int			foundedenemy;
+	int				foundedenemy;
 
-	gitem_t		*item;
+	gitem_t			*item;
 
-	float		x,yaw,iyaw,f1,f2,f3,bottom;
-	qboolean	tempflag;//,buttonuse;
-	vec3_t		temppos;
+	float			x, yaw, iyaw, f1, f2, f3, bottom;
+	qboolean		tempflag;//,buttonuse;
+	vec3_t			temppos;
 
-	trace_t		rs_trace;
-	edict_t		*touch[MAX_EDICTS],*trent;
-	vec3_t		touchmin,touchmax,v,vv;
-	vec3_t		trmin,trmax;
-	int			i,j,k;
-	qboolean	canrocj,waterjumped;
-	edict_t		*it_ent;
-	gitem_t		*it;
+	trace_t			rs_trace;
+	static edict_t	*touch[MAX_EDICTS];	// Knightmare- made static due to stack size
+	edict_t			*trent;
+	vec3_t			touchmin, touchmax, v, vv;
+	vec3_t			trmin,trmax;
+	int				i, j, k;
+	qboolean		canrocj, waterjumped;
+	edict_t			*it_ent;
+	gitem_t			*it;
 
-	edict_t		*front,*left,*right,*e;
+	edict_t			*front, *left, *right, *e;
 
-	char		*string;
+	char			*string;
 
-	cplane_t	plane;
+	cplane_t		plane;
 
-	vec3_t		Origin,Velocity;//original param
-	float		OYaw;			//
+	vec3_t			Origin,Velocity;//original param
+	float			OYaw;			//
 
-	qboolean	ladderdrop;		
+	qboolean		ladderdrop;		
 
 
 	trace_priority = TRP_NORMAL;	//trace on
@@ -5375,7 +5376,7 @@ GOMOVE:
 	touchmin[2] -= 5;
 	touchmax[0] += 48;//32;
 	touchmax[1] += 48;//32;
-	i = gi.BoxEdicts ( touchmin ,touchmax,touch,MAX_EDICTS,AREA_SOLID);
+	i = gi.BoxEdicts ( touchmin, touchmax, touch, MAX_EDICTS, AREA_SOLID);
 
 	if (i)
 	{

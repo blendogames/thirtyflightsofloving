@@ -20,7 +20,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 
-// ui_mp_download.c -- the autodownload options menu 
+// menu_mp_download.c -- the autodownload options menu 
 
 #include <ctype.h>
 #ifdef _WIN32
@@ -55,9 +55,9 @@ static menulist_s	s_allow_download_sounds_box;
 
 static menuaction_s	s_download_back_action;
 
-static void DownloadCallback( void *self )
+static void DownloadCallback (void *self)
 {
-	menulist_s *f = ( menulist_s * ) self;
+	menulist_s *f = (menulist_s *) self;
 
 	if (f == &s_allow_download_box)
 	{
@@ -102,7 +102,7 @@ static void DownloadCallback( void *self )
 	}
 }
 
-void DownloadOptions_MenuInit( void )
+void Menu_DownloadOptions_Init (void)
 {
 	static const char *yes_no_names[] =
 	{
@@ -218,42 +218,42 @@ void DownloadOptions_MenuInit( void )
 	s_download_back_action.generic.name			= " back";
 	s_download_back_action.generic.callback		= UI_BackMenu;
 
-	Menu_AddItem( &s_downloadoptions_menu, &s_download_title );
-	Menu_AddItem( &s_downloadoptions_menu, &s_allow_download_box );
+	UI_AddMenuItem (&s_downloadoptions_menu, &s_download_title);
+	UI_AddMenuItem (&s_downloadoptions_menu, &s_allow_download_box);
 
 #ifdef USE_CURL	// HTTP downloading from R1Q2
-	Menu_AddItem( &s_downloadoptions_menu, &s_allow_http_download_box );
-	Menu_AddItem( &s_downloadoptions_menu, &s_allow_http_fallback_box );
+	UI_AddMenuItem (&s_downloadoptions_menu, &s_allow_http_download_box);
+	UI_AddMenuItem (&s_downloadoptions_menu, &s_allow_http_fallback_box);
 #endif	// USE_CURL
 
-	Menu_AddItem( &s_downloadoptions_menu, &s_allow_download_maps_box );
-	Menu_AddItem( &s_downloadoptions_menu, &s_allow_download_textures_24bit_box );	// option to allow downloading 24-bit textures
-	Menu_AddItem( &s_downloadoptions_menu, &s_allow_download_players_box );
-	Menu_AddItem( &s_downloadoptions_menu, &s_allow_download_models_box );
-	Menu_AddItem( &s_downloadoptions_menu, &s_allow_download_sounds_box );
+	UI_AddMenuItem (&s_downloadoptions_menu, &s_allow_download_maps_box);
+	UI_AddMenuItem (&s_downloadoptions_menu, &s_allow_download_textures_24bit_box);	// option to allow downloading 24-bit textures
+	UI_AddMenuItem (&s_downloadoptions_menu, &s_allow_download_players_box);
+	UI_AddMenuItem (&s_downloadoptions_menu, &s_allow_download_models_box);
+	UI_AddMenuItem (&s_downloadoptions_menu, &s_allow_download_sounds_box);
 
-	Menu_AddItem( &s_downloadoptions_menu, &s_download_back_action );
+	UI_AddMenuItem (&s_downloadoptions_menu, &s_download_back_action );
 
-	Menu_Center( &s_downloadoptions_menu );
+	UI_CenterMenu (&s_downloadoptions_menu);
 
 	// skip over title
 	if (s_downloadoptions_menu.cursor == 0)
 		s_downloadoptions_menu.cursor = 1;
 }
 
-void DownloadOptions_MenuDraw(void)
+void Menu_DownloadOptions_Draw(void)
 {
-	Menu_DrawBanner( "m_banner_multiplayer" );
-	Menu_Draw( &s_downloadoptions_menu );
+	UI_DrawBanner ("m_banner_multiplayer");
+	UI_DrawMenu (&s_downloadoptions_menu);
 }
 
-const char *DownloadOptions_MenuKey( int key )
+const char *Menu_DownloadOptions_Key (int key)
 {
-	return Default_MenuKey( &s_downloadoptions_menu, key );
+	return UI_DefaultMenuKey (&s_downloadoptions_menu, key);
 }
 
-void M_Menu_DownloadOptions_f (void)
+void Menu_DownloadOptions_f (void)
 {
-	DownloadOptions_MenuInit();
-	UI_PushMenu( DownloadOptions_MenuDraw, DownloadOptions_MenuKey );
+	Menu_DownloadOptions_Init ();
+	UI_PushMenu (Menu_DownloadOptions_Draw, Menu_DownloadOptions_Key);
 }

@@ -20,7 +20,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 
-// ui_options_effects.c -- the effects options menu
+// menu_options_effects.c -- the effects options menu
 
 #include <ctype.h>
 #ifdef _WIN32
@@ -52,64 +52,64 @@ static menuaction_s		s_options_effects_defaults_action;
 static menuaction_s		s_options_effects_back_action;
 
 
-static void BloodFunc( void *unused )
+static void BloodFunc (void *unused)
 {
 	Cvar_SetValue( "cl_blood", s_options_effects_blood_box.curvalue );
 }
 
-static void OldExplosionFunc( void *unused )
+static void OldExplosionFunc (void *unused)
 {
 	Cvar_SetValue( "cl_old_explosions", s_options_effects_oldexplosions_box.curvalue );
 }
 
-static void PlasmaExploSoundFunc( void *unused )
+static void PlasmaExploSoundFunc (void *unused)
 {
 	Cvar_SetValue( "cl_plasma_explo_sound", s_options_effects_plasmaexplosound_box.curvalue );
 }
 
-static void ItemBobFunc( void *unused )
+static void ItemBobFunc (void *unused)
 {
 	Cvar_SetValue( "cl_item_bobbing", s_options_effects_itembob_box.curvalue );
 }
 
-static void ParticleCompFunc( void *unused )
+static void ParticleCompFunc (void *unused)
 {
 //	Cvar_SetValue( "cl_particle_scale", (s_options_effects_particle_comp_slider.curvalue-3)*-1+3);
-	Cvar_SetValue( "cl_particle_scale", MenuSlider_GetValue(&s_options_effects_particle_comp_slider) );
+	Cvar_SetValue( "cl_particle_scale", UI_MenuSlider_GetValue(&s_options_effects_particle_comp_slider) );
 }
 
-static void DecalCallback( void *unused )
+static void DecalCallback (void *unused)
 {
 //	Cvar_SetValue( "r_decals", s_options_effects_decal_slider.curvalue * 50);
-	Cvar_SetValue( "r_decals", MenuSlider_GetValue(&s_options_effects_decal_slider) );
+	Cvar_SetValue( "r_decals", UI_MenuSlider_GetValue(&s_options_effects_decal_slider) );
 }
 
 // Psychospaz's changeable rail trail
-static void RailTrailFunc( void *unused )
+static void RailTrailFunc (void *unused)
 {
 	Cvar_SetValue( "cl_railtype", s_options_effects_railtrail_box.curvalue );
 }
 
-static void RailColorRedFunc( void *unused )
+static void RailColorRedFunc (void *unused)
 {
 //	Cvar_SetValue( "cl_railred", s_options_effects_railcolor_slider[0].curvalue*16 );
-	Cvar_SetValue( "cl_railred", MenuSlider_GetValue(&s_options_effects_railcolor_slider[0]) );
+	Cvar_SetValue( "cl_railred", UI_MenuSlider_GetValue(&s_options_effects_railcolor_slider[0]) );
 }
 
-static void RailColorGreenFunc( void *unused )
+static void RailColorGreenFunc (void *unused)
 {
 //	Cvar_SetValue( "cl_railgreen", s_options_effects_railcolor_slider[1].curvalue*16 );
-	Cvar_SetValue( "cl_railgreen", MenuSlider_GetValue(&s_options_effects_railcolor_slider[1]) );
+	Cvar_SetValue( "cl_railgreen", UI_MenuSlider_GetValue(&s_options_effects_railcolor_slider[1]) );
 }
 
-static void RailColorBlueFunc( void *unused )
+static void RailColorBlueFunc (void *unused)
 {
 //	Cvar_SetValue( "cl_railblue", s_options_effects_railcolor_slider[2].curvalue*16 );
-	Cvar_SetValue( "cl_railblue", MenuSlider_GetValue(&s_options_effects_railcolor_slider[2]) );
+	Cvar_SetValue( "cl_railblue", UI_MenuSlider_GetValue(&s_options_effects_railcolor_slider[2]) );
 }
 
 // foostep override option
-static void FootStepFunc( void *unused )
+static void FootStepFunc (void *unused)
 {
 	Cvar_SetValue( "cl_footstep_override", s_options_effects_footstep_box.curvalue );
 }
@@ -117,7 +117,7 @@ static void FootStepFunc( void *unused )
 
 //=======================================================================
 
-static void EffectsSetMenuItemValues( void )
+static void EffectsSetMenuItemValues (void)
 {
 	Cvar_SetValue( "cl_blood", ClampCvar( 0, 4, Cvar_VariableValue("cl_blood") ) );
 	s_options_effects_blood_box.curvalue			= Cvar_VariableValue("cl_blood");
@@ -133,26 +133,26 @@ static void EffectsSetMenuItemValues( void )
 
 	Cvar_SetValue( "r_decals", ClampCvar (0, 1000, Cvar_VariableValue("r_decals")) );
 //	s_options_effects_decal_slider.curvalue = Cvar_VariableValue("r_decals") / 50;
-	MenuSlider_SetValue (&s_options_effects_decal_slider, Cvar_VariableValue("r_decals"));
+	UI_MenuSlider_SetValue (&s_options_effects_decal_slider, Cvar_VariableValue("r_decals"));
 
 	Cvar_SetValue( "cl_particle_scale", ClampCvar( 0, 5, Cvar_VariableValue("cl_particle_scale") ) );
 //	s_options_effects_particle_comp_slider.curvalue	= (Cvar_VariableValue("cl_particle_scale") -3)*-1+3;
-	MenuSlider_SetValue (&s_options_effects_particle_comp_slider, Cvar_VariableValue("cl_particle_scale"));
+	UI_MenuSlider_SetValue (&s_options_effects_particle_comp_slider, Cvar_VariableValue("cl_particle_scale"));
 
 	Cvar_SetValue( "cl_railtype", ClampCvar( 0, 2, Cvar_VariableValue("cl_railtype") ) );
 	s_options_effects_railtrail_box.curvalue		= Cvar_VariableValue("cl_railtype");
 //	s_options_effects_railcolor_slider[0].curvalue		= Cvar_VariableValue("cl_railred")/16;
 //	s_options_effects_railcolor_slider[1].curvalue		= Cvar_VariableValue("cl_railgreen")/16;
 //	s_options_effects_railcolor_slider[2].curvalue		= Cvar_VariableValue("cl_railblue")/16;
-	MenuSlider_SetValue (&s_options_effects_railcolor_slider[0], Cvar_VariableValue("cl_railred"));
-	MenuSlider_SetValue (&s_options_effects_railcolor_slider[1], Cvar_VariableValue("cl_railgreen"));
-	MenuSlider_SetValue (&s_options_effects_railcolor_slider[2], Cvar_VariableValue("cl_railblue"));
+	UI_MenuSlider_SetValue (&s_options_effects_railcolor_slider[0], Cvar_VariableValue("cl_railred"));
+	UI_MenuSlider_SetValue (&s_options_effects_railcolor_slider[1], Cvar_VariableValue("cl_railgreen"));
+	UI_MenuSlider_SetValue (&s_options_effects_railcolor_slider[2], Cvar_VariableValue("cl_railblue"));
 
 	Cvar_SetValue( "cl_footstep_override", ClampCvar( 0, 1, Cvar_VariableValue("cl_footstep_override") ) );
 	s_options_effects_footstep_box.curvalue			= Cvar_VariableValue("cl_footstep_override");
 }
 
-static void EffectsResetDefaultsFunc ( void *unused )
+static void EffectsResetDefaultsFunc (void *unused)
 {
 	Cvar_SetToDefault ("cl_blood");
 	Cvar_SetToDefault ("cl_old_explosions");
@@ -166,10 +166,10 @@ static void EffectsResetDefaultsFunc ( void *unused )
 	Cvar_SetToDefault ("cl_railblue");	
 	Cvar_SetToDefault ("cl_footstep_override");
 
-	EffectsSetMenuItemValues();
+	EffectsSetMenuItemValues ();
 }
 
-void Options_Effects_MenuInit ( void )
+void Options_Effects_MenuInit (void)
 {
 	static const char *yesno_names[] =
 	{
@@ -350,39 +350,39 @@ void Options_Effects_MenuInit ( void )
 	s_options_effects_back_action.generic.name			= "back to options";
 	s_options_effects_back_action.generic.callback		= UI_BackMenu;
 
-	Menu_AddItem( &s_options_effects_menu, ( void * ) &s_options_effects_header );
-	Menu_AddItem( &s_options_effects_menu, ( void * ) &s_options_effects_blood_box );
-	Menu_AddItem( &s_options_effects_menu, ( void * ) &s_options_effects_oldexplosions_box );
-	Menu_AddItem( &s_options_effects_menu, ( void * ) &s_options_effects_plasmaexplosound_box );
-	Menu_AddItem( &s_options_effects_menu, ( void * ) &s_options_effects_itembob_box );
-	Menu_AddItem( &s_options_effects_menu, ( void * ) &s_options_effects_decal_slider );
-	Menu_AddItem( &s_options_effects_menu, ( void * ) &s_options_effects_particle_comp_slider );
-	Menu_AddItem( &s_options_effects_menu, ( void * ) &s_options_effects_railtrail_box );
-	Menu_AddItem( &s_options_effects_menu, ( void * ) &s_options_effects_railcolor_slider[0] );
-	Menu_AddItem( &s_options_effects_menu, ( void * ) &s_options_effects_railcolor_slider[1] );
-	Menu_AddItem( &s_options_effects_menu, ( void * ) &s_options_effects_railcolor_slider[2] );
-	Menu_AddItem( &s_options_effects_menu, ( void * ) &s_options_effects_footstep_box );
-	Menu_AddItem( &s_options_effects_menu, ( void * ) &s_options_effects_defaults_action );
-	Menu_AddItem( &s_options_effects_menu, ( void * ) &s_options_effects_back_action );
+	UI_AddMenuItem (&s_options_effects_menu, (void *) &s_options_effects_header);
+	UI_AddMenuItem (&s_options_effects_menu, (void *) &s_options_effects_blood_box);
+	UI_AddMenuItem (&s_options_effects_menu, (void *) &s_options_effects_oldexplosions_box);
+	UI_AddMenuItem (&s_options_effects_menu, (void *) &s_options_effects_plasmaexplosound_box);
+	UI_AddMenuItem (&s_options_effects_menu, (void *) &s_options_effects_itembob_box);
+	UI_AddMenuItem (&s_options_effects_menu, (void *) &s_options_effects_decal_slider);
+	UI_AddMenuItem (&s_options_effects_menu, (void *) &s_options_effects_particle_comp_slider);
+	UI_AddMenuItem (&s_options_effects_menu, (void *) &s_options_effects_railtrail_box);
+	UI_AddMenuItem (&s_options_effects_menu, (void *) &s_options_effects_railcolor_slider[0]);
+	UI_AddMenuItem (&s_options_effects_menu, (void *) &s_options_effects_railcolor_slider[1]);
+	UI_AddMenuItem (&s_options_effects_menu, (void *) &s_options_effects_railcolor_slider[2]);
+	UI_AddMenuItem (&s_options_effects_menu, (void *) &s_options_effects_footstep_box);
+	UI_AddMenuItem (&s_options_effects_menu, (void *) &s_options_effects_defaults_action);
+	UI_AddMenuItem (&s_options_effects_menu, (void *) &s_options_effects_back_action);
 
-	EffectsSetMenuItemValues();
+	EffectsSetMenuItemValues ();
 }
 
-void Options_Effects_MenuDraw (void)
+void Menu_Options_Effects_Draw (void)
 {
-	Menu_DrawBanner( "m_banner_options" );
+	UI_DrawBanner ("m_banner_options");
 
-	Menu_AdjustCursor( &s_options_effects_menu, 1 );
-	Menu_Draw( &s_options_effects_menu );
+	UI_AdjustMenuCursor (&s_options_effects_menu, 1);
+	UI_DrawMenu (&s_options_effects_menu);
 }
 
-const char *Options_Effects_MenuKey( int key )
+const char *Menu_Options_Effects_Key (int key)
 {
-	return Default_MenuKey( &s_options_effects_menu, key );
+	return UI_DefaultMenuKey (&s_options_effects_menu, key);
 }
 
-void M_Menu_Options_Effects_f (void)
+void Menu_Options_Effects_f (void)
 {
-	Options_Effects_MenuInit();
-	UI_PushMenu ( Options_Effects_MenuDraw, Options_Effects_MenuKey );
+	Options_Effects_MenuInit ();
+	UI_PushMenu (Menu_Options_Effects_Draw, Menu_Options_Effects_Key);
 }

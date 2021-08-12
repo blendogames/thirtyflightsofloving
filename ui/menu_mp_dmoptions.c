@@ -86,7 +86,7 @@ qboolean CTF_menumode (void)
 	return false;
 }
 
-static void DMFlagCallback ( void *self )
+static void DMFlagCallback (void *self)
 {
 	menulist_s *f = ( menulist_s * ) self;
 	int flags;
@@ -250,7 +250,7 @@ setvalue:
 	Com_sprintf( dmoptions_statusbar, sizeof( dmoptions_statusbar ), "dmflags = %d", flags );
 }
 
-void DMOptions_MenuInit( void )
+void Menu_DMOptions_Init (void)
 {
 	static const char *yes_no_names[] =
 	{
@@ -404,7 +404,7 @@ void DMOptions_MenuInit( void )
 	s_friendlyfire_box.curvalue = ( dmflags & DF_NO_FRIENDLY_FIRE ) == 0;
 
 	// Knightmare added
-	if (FS_ModType("xatrix"))
+	if ( FS_ModType("xatrix") )
 	{
 		s_quadfire_drop_box.generic.type = MTYPE_SPINCONTROL;
 		s_quadfire_drop_box.generic.textSize = MENU_FONT_SIZE;
@@ -418,7 +418,7 @@ void DMOptions_MenuInit( void )
 //============
 //ROGUE
 	// Knightmare 12/23/2001
-	else if (FS_RoguePath())
+	else if ( FS_RoguePath() )
 	{
 		s_no_mines_box.generic.type = MTYPE_SPINCONTROL;
 		s_no_mines_box.generic.textSize = MENU_FONT_SIZE;
@@ -460,7 +460,7 @@ void DMOptions_MenuInit( void )
 //ROGUE
 //============
 	// Knightmare added
-	else if (CTF_menumode())
+	else if ( CTF_menumode() )
 	{
 		s_ctf_forceteam_box.generic.type = MTYPE_SPINCONTROL;
 		s_ctf_forceteam_box.generic.textSize = MENU_FONT_SIZE;
@@ -498,64 +498,66 @@ void DMOptions_MenuInit( void )
 	s_dmoptions_back_action.generic.name	= " back";
 	s_dmoptions_back_action.generic.callback = UI_BackMenu;
 
-	Menu_AddItem( &s_dmoptions_menu, &s_falls_box );
-	Menu_AddItem( &s_dmoptions_menu, &s_weapons_stay_box );
-	Menu_AddItem( &s_dmoptions_menu, &s_instant_powerups_box );
-	Menu_AddItem( &s_dmoptions_menu, &s_powerups_box );
-	Menu_AddItem( &s_dmoptions_menu, &s_health_box );
-	Menu_AddItem( &s_dmoptions_menu, &s_armor_box );
-	Menu_AddItem( &s_dmoptions_menu, &s_spawn_farthest_box );
-	Menu_AddItem( &s_dmoptions_menu, &s_samelevel_box );
-	Menu_AddItem( &s_dmoptions_menu, &s_force_respawn_box );
-	Menu_AddItem( &s_dmoptions_menu, &s_teamplay_box );
-	Menu_AddItem( &s_dmoptions_menu, &s_allow_exit_box );
-	Menu_AddItem( &s_dmoptions_menu, &s_infinite_ammo_box );
-	Menu_AddItem( &s_dmoptions_menu, &s_fixed_fov_box );
-	Menu_AddItem( &s_dmoptions_menu, &s_quad_drop_box );
-	Menu_AddItem( &s_dmoptions_menu, &s_friendlyfire_box );
+	UI_AddMenuItem (&s_dmoptions_menu, &s_falls_box);
+	UI_AddMenuItem (&s_dmoptions_menu, &s_weapons_stay_box);
+	UI_AddMenuItem (&s_dmoptions_menu, &s_instant_powerups_box);
+	UI_AddMenuItem (&s_dmoptions_menu, &s_powerups_box);
+	UI_AddMenuItem (&s_dmoptions_menu, &s_health_box);
+	UI_AddMenuItem (&s_dmoptions_menu, &s_armor_box);
+	UI_AddMenuItem (&s_dmoptions_menu, &s_spawn_farthest_box);
+	UI_AddMenuItem (&s_dmoptions_menu, &s_samelevel_box);
+	UI_AddMenuItem (&s_dmoptions_menu, &s_force_respawn_box);
+	UI_AddMenuItem (&s_dmoptions_menu, &s_teamplay_box);
+	UI_AddMenuItem (&s_dmoptions_menu, &s_allow_exit_box);
+	UI_AddMenuItem (&s_dmoptions_menu, &s_infinite_ammo_box);
+	UI_AddMenuItem (&s_dmoptions_menu, &s_fixed_fov_box);
+	UI_AddMenuItem (&s_dmoptions_menu, &s_quad_drop_box);
+	UI_AddMenuItem (&s_dmoptions_menu, &s_friendlyfire_box);
 
 	// Xatrix
-	if (FS_ModType("xatrix"))
-		Menu_AddItem( &s_dmoptions_menu, &s_quadfire_drop_box );
+	if ( FS_ModType("xatrix") )
+	{
+		UI_AddMenuItem (&s_dmoptions_menu, &s_quadfire_drop_box);
+	}
 
 	// Rogue
-	else if (FS_RoguePath())
+	else if ( FS_RoguePath() )
 	{
-		Menu_AddItem( &s_dmoptions_menu, &s_no_mines_box );
-		Menu_AddItem( &s_dmoptions_menu, &s_no_nukes_box );
-		Menu_AddItem( &s_dmoptions_menu, &s_stack_double_box );
-		Menu_AddItem( &s_dmoptions_menu, &s_no_spheres_box );
+		UI_AddMenuItem (&s_dmoptions_menu, &s_no_mines_box);
+		UI_AddMenuItem (&s_dmoptions_menu, &s_no_nukes_box);
+		UI_AddMenuItem (&s_dmoptions_menu, &s_stack_double_box);
+		UI_AddMenuItem (&s_dmoptions_menu, &s_no_spheres_box);
 	}
 
 	// CTF
-	else if (CTF_menumode())
+	else if ( CTF_menumode() )
 	{
-		Menu_AddItem( &s_dmoptions_menu, &s_ctf_forceteam_box );
-		Menu_AddItem( &s_dmoptions_menu, &s_ctf_armor_protect_box );
-		Menu_AddItem( &s_dmoptions_menu, &s_ctf_notechs_box );
+		UI_AddMenuItem (&s_dmoptions_menu, &s_ctf_forceteam_box);
+		UI_AddMenuItem (&s_dmoptions_menu, &s_ctf_armor_protect_box);
+		UI_AddMenuItem (&s_dmoptions_menu, &s_ctf_notechs_box);
 	}
-	Menu_AddItem( &s_dmoptions_menu, &s_dmoptions_back_action );
+	UI_AddMenuItem (&s_dmoptions_menu, &s_dmoptions_back_action);
 
-//	Menu_Center( &s_dmoptions_menu );
+//	UI_CenterMenu (&s_dmoptions_menu);
 
 	// set the original dmflags statusbar
-	DMFlagCallback( 0 );
-	Menu_SetStatusBar( &s_dmoptions_menu, dmoptions_statusbar );
+	DMFlagCallback (0);
+	UI_SetMenuStatusBar (&s_dmoptions_menu, dmoptions_statusbar);
 }
 
-void DMOptions_MenuDraw(void)
+void Menu_DMOptions_Draw (void)
 {
-	Menu_DrawBanner( "m_banner_start_server" ); // added
-	Menu_Draw( &s_dmoptions_menu );
+	UI_DrawBanner ("m_banner_start_server"); // added
+	UI_DrawMenu (&s_dmoptions_menu);
 }
 
-const char *DMOptions_MenuKey( int key )
+const char *Menu_DMOptions_Key (int key)
 {
-	return Default_MenuKey( &s_dmoptions_menu, key );
+	return UI_DefaultMenuKey (&s_dmoptions_menu, key);
 }
 
-void M_Menu_DMOptions_f (void)
+void Menu_DMOptions_f (void)
 {
-	DMOptions_MenuInit();
-	UI_PushMenu( DMOptions_MenuDraw, DMOptions_MenuKey );
+	Menu_DMOptions_Init ();
+	UI_PushMenu (Menu_DMOptions_Draw, Menu_DMOptions_Key);
 }

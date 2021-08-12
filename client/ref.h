@@ -236,38 +236,6 @@ typedef struct
 } lightstyle_t;
 
 
-// Knightmare- added Psychospaz's menu cursor
-//cursor - psychospaz
-#define MENU_CURSOR_BUTTON_MAX 2
-
-#define MENUITEM_ACTION		1
-#define MENUITEM_ROTATE		2
-#define MENUITEM_SLIDER		3
-#define MENUITEM_TEXT		4
-
-typedef struct
-{
-	//only 2 buttons for menus
-	float		buttontime[MENU_CURSOR_BUTTON_MAX];
-	int			buttonclicks[MENU_CURSOR_BUTTON_MAX];
-	int			buttonused[MENU_CURSOR_BUTTON_MAX];
-	qboolean	buttondown[MENU_CURSOR_BUTTON_MAX];
-
-	qboolean	mouseaction;
-
-	//this is the active item that cursor is on.
-	int			menuitemtype;
-	void		*menuitem;
-	void		*menu;
-
-	//coords
-	int		x;
-	int		y;
-
-	int		oldx;
-	int		oldy;
-} cursor_t;
-
 typedef struct
 {
 	int			x, y, width, height;// in virtual screen coordinates

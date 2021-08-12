@@ -480,17 +480,17 @@ G_TouchTriggers
 
 ============
 */
-void	G_TouchTriggers (edict_t *ent)
+void G_TouchTriggers (edict_t *ent)
 {
-	int			i, num;
-	edict_t		*touch[MAX_EDICTS], *hit;
+	int				i, num;
+	static edict_t	*touch[MAX_EDICTS];	// Knightmare- made static due to stack size
+	edict_t			*hit;
 
 	// dead things don't activate triggers!
 	if ((ent->client || (ent->svflags & SVF_MONSTER)) && (ent->health <= 0))
 		return;
 
-	num = gi.BoxEdicts (ent->absmin, ent->absmax, touch
-		, MAX_EDICTS, AREA_TRIGGERS);
+	num = gi.BoxEdicts (ent->absmin, ent->absmax, touch, MAX_EDICTS, AREA_TRIGGERS);
 
 	// be careful, it is possible to have an entity in this
 	// list removed before we get to it (killtriggered)
@@ -502,21 +502,21 @@ void	G_TouchTriggers (edict_t *ent)
 		if (!hit->touch)
 			continue;
 		hit->touch (hit, ent, NULL, NULL);
-		if(ent->client) if(ent->client->zc.second_target == hit)
+		if (ent->client) if (ent->client->zc.second_target == hit)
 						ent->client->zc.second_target = NULL;
 
 	}
 }
 
 /*
-void	G_TouchTriggers (edict_t *ent)
+void G_TouchTriggers (edict_t *ent)
 {
-	int			i, num;
-//pon	edict_t		*touch[MAX_EDICTS], *hit;
+	int				i, num;
+//	static edict_t	*touch[MAX_EDICTS];
+//	edict_t			*hit;
+	edict_t			*e;
 
-	edict_t		*e;
-
-	if(ent->classname[0] != 'p') return;
+	if (ent->classname[0] != 'p') return;
 
 	// dead things don't activate triggers!
 	if ((ent->client || (ent->svflags & SVF_MONSTER)) && (ent->health <= 0))
@@ -525,27 +525,26 @@ void	G_TouchTriggers (edict_t *ent)
 	e = &g_edicts[(int)maxclients->value+1];
 	for ( i=maxclients->value+1 ; i<globals.num_edicts ; i++, e++)
 	{
-		if(!e->inuse) continue;
-		if(!e->touch) continue;
-		if(e->solid != SOLID_TRIGGER) continue;
+		if (!e->inuse) continue;
+		if (!e->touch) continue;
+		if (e->solid != SOLID_TRIGGER) continue;
 			
-		if(e->absmax[0]	< ent->absmin[0]) continue;
-		if(ent->absmax[0]	< e->absmin[0])	continue;
-		if(e->absmax[1]	< ent->absmin[1]) continue;
-		if(ent->absmax[1]	< e->absmin[1])	continue;
-		if(e->absmax[2]	< ent->absmin[2]) continue;
-		if(ent->absmax[2]	< e->absmin[2])	continue;
+		if (e->absmax[0]	< ent->absmin[0]) continue;
+		if (ent->absmax[0]	< e->absmin[0])	continue;
+		if (e->absmax[1]	< ent->absmin[1]) continue;
+		if (ent->absmax[1]	< e->absmin[1])	continue;
+		if (e->absmax[2]	< ent->absmin[2]) continue;
+		if (ent->absmax[2]	< e->absmin[2])	continue;
 
 		e->touch (e, ent, NULL, NULL);
 
-		if(ent->client) if(ent->client->zc.second_target == e)
+		if (ent->client) if (ent->client->zc.second_target == e)
 						ent->client->zc.second_target = NULL;
 	}
 	return;
 //pon
 
-//	num = gi.BoxEdicts (ent->absmin, ent->absmax, touch
-//		, MAX_EDICTS, AREA_TRIGGERS);
+//	num = gi.BoxEdicts (ent->absmin, ent->absmax, touch, MAX_EDICTS, AREA_TRIGGERS);
 
 	// be careful, it is possible to have an entity in this
 	// list removed before we get to it (killtriggered)
@@ -570,11 +569,11 @@ to force all entities it covers to immediately touch it
 */
 void	G_TouchSolids (edict_t *ent)
 {
-	int			i, num;
-	edict_t		*touch[MAX_EDICTS], *hit;
+	int				i, num;
+	static edict_t	*touch[MAX_EDICTS];	// Knightmare- made static due to stack size
+	edict_t			*hit;
 
-	num = gi.BoxEdicts (ent->absmin, ent->absmax, touch
-		, MAX_EDICTS, AREA_SOLID);
+	num = gi.BoxEdicts (ent->absmin, ent->absmax, touch, MAX_EDICTS, AREA_SOLID);
 
 	// be careful, it is possible to have an entity in this
 	// list removed before we get to it (killtriggered)

@@ -655,10 +655,10 @@ G_TouchTriggers
 */
 void G_TouchTriggers(edict_t *ent)
 {
-	edict_t	*touch[MAX_EDICTS];
-	edict_t	*hit;
-	int		num;
-	int		i;
+	static edict_t	*touch[MAX_EDICTS];	// Knightmare- made static due to stack size
+	edict_t			*hit;
+	int				num;
+	int				i;
 
 	// dead things don't activate triggers!
 	if ((ent->client || (ent->svflags & SVF_MONSTER)) && (ent->health <= 0))
@@ -697,10 +697,10 @@ to force all entities it covers to immediately touch it
 */
 void G_TouchSolids(edict_t *ent)
 {
-	edict_t	*touch[MAX_EDICTS];
-	edict_t	*hit;
-	int		num;
-	int		i;
+	static edict_t	*touch[MAX_EDICTS];	// Knightmare- made static due to stack size
+	edict_t			*hit;
+	int				num;
+	int				i;
 
 	num = gi.BoxEdicts(ent->absmin, ent->absmax, touch, MAX_EDICTS, AREA_SOLID);
 
@@ -1359,20 +1359,20 @@ FILE* OpenBotConfigFile(qboolean report, qboolean readonly)
 
 edict_t	*LookingAt(edict_t *ent, int filter, vec3_t endpos, float *range)
 {
-	edict_t	*who;
-	edict_t	*trigger[MAX_EDICTS];
-	edict_t	*ignore;
-	trace_t	tr;
-	vec_t	r;
-	vec3_t	end;
-	vec3_t	forward;
-	vec3_t	start;
-	vec3_t	dir;
-	vec3_t	entp;
-	vec3_t	mins;
-	vec3_t	maxs;
-	int		i;
-	int		num;
+	edict_t			*who;
+	static edict_t	*trigger[MAX_EDICTS];	// Knightmare- made static due to stack size
+	edict_t			*ignore;
+	trace_t			tr;
+	vec_t			r;
+	vec3_t			end;
+	vec3_t			forward;
+	vec3_t			start;
+	vec3_t			dir;
+	vec3_t			entp;
+	vec3_t			mins;
+	vec3_t			maxs;
+	int				i;
+	int				num;
 
 	if (!ent->client)
 	{

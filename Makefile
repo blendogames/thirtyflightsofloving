@@ -212,30 +212,33 @@ QUAKE2_OBJS = \
 	$(BUILDDIR)/client/snd_stream.o \
 	$(BUILDDIR)/client/m_flash.o \
 	\
-	$(BUILDDIR)/client/ui_backend.o \
-	$(BUILDDIR)/client/ui_game.o \
-	$(BUILDDIR)/client/ui_game_credits.o \
-	$(BUILDDIR)/client/ui_game_saveload.o \
+	$(BUILDDIR)/client/menu_game.o \
+	$(BUILDDIR)/client/menu_game_credits.o \
+	$(BUILDDIR)/client/menu_game_saveload.o \
+	$(BUILDDIR)/client/menu_main.o \
+	$(BUILDDIR)/client/menu_mp_addressbook.o \
+	$(BUILDDIR)/client/menu_mp_dmoptions.o \
+	$(BUILDDIR)/client/menu_mp_download.o \
+	$(BUILDDIR)/client/menu_mp_joinserver.o \
+	$(BUILDDIR)/client/menu_mp_playersetup.o \
+	$(BUILDDIR)/client/menu_mp_startserver.o \
+	$(BUILDDIR)/client/menu_multiplayer.o \
+	$(BUILDDIR)/client/menu_options.o \
+	$(BUILDDIR)/client/menu_options_controls.o \
+	$(BUILDDIR)/client/menu_options_effects.o \
+	$(BUILDDIR)/client/menu_options_interface.o \
+	$(BUILDDIR)/client/menu_options_keys.o \
+	$(BUILDDIR)/client/menu_options_screen.o \
+	$(BUILDDIR)/client/menu_options_sound.o \
+	$(BUILDDIR)/client/menu_quit.o \
+	$(BUILDDIR)/client/menu_video.o \
+	$(BUILDDIR)/client/menu_video_advanced.o \
+	$(BUILDDIR)/client/ui_draw.o \
 	$(BUILDDIR)/client/ui_main.o \
-	$(BUILDDIR)/client/ui_mp_addressbook.o \
-	$(BUILDDIR)/client/ui_mp_dmoptions.o \
-	$(BUILDDIR)/client/ui_mp_download.o \
-	$(BUILDDIR)/client/ui_mp_joinserver.o \
-	$(BUILDDIR)/client/ui_mp_playersetup.o \
-	$(BUILDDIR)/client/ui_mp_startserver.o \
-	$(BUILDDIR)/client/ui_multiplayer.o \
-	$(BUILDDIR)/client/ui_options.o \
-	$(BUILDDIR)/client/ui_options_controls.o \
-	$(BUILDDIR)/client/ui_options_effects.o \
-	$(BUILDDIR)/client/ui_options_interface.o \
-	$(BUILDDIR)/client/ui_options_keys.o \
-	$(BUILDDIR)/client/ui_options_screen.o \
-	$(BUILDDIR)/client/ui_options_sound.o \
-	$(BUILDDIR)/client/ui_quit.o \
-	$(BUILDDIR)/client/ui_subsystem.o \
+	$(BUILDDIR)/client/ui_menu.o \
+	$(BUILDDIR)/client/ui_mouse.o \
 	$(BUILDDIR)/client/ui_utils.o \
-	$(BUILDDIR)/client/ui_video.o \
-	$(BUILDDIR)/client/ui_video_advanced.o \
+	$(BUILDDIR)/client/ui_widgets.o \
 	\
 	$(BUILDDIR)/client/cmd.o \
 	$(BUILDDIR)/client/cmodel.o \
@@ -400,76 +403,85 @@ $(BUILDDIR)/client/snd_stream.o :    	$(CLIENT_DIR)/snd_stream.c
 $(BUILDDIR)/client/m_flash.o :    	$(GAME_DIR)/m_flash.c
 	$(DO_CC)
 	
-$(BUILDDIR)/client/ui_backend.o :    	$(UI_DIR)/ui_backend.c
+$(BUILDDIR)/client/menu_game.o :    	$(UI_DIR)/menu_game.c
 	$(DO_CC)
 	
-$(BUILDDIR)/client/ui_game.o :    	$(UI_DIR)/ui_game.c
+$(BUILDDIR)/client/menu_game_credits.o :    	$(UI_DIR)/menu_game_credits.c
 	$(DO_CC)
 	
-$(BUILDDIR)/client/ui_game_credits.o :    	$(UI_DIR)/ui_game_credits.c
+$(BUILDDIR)/client/menu_game_saveload.o :    	$(UI_DIR)/menu_game_saveload.c
 	$(DO_CC)
 	
-$(BUILDDIR)/client/ui_game_saveload.o :    	$(UI_DIR)/ui_game_saveload.c
+$(BUILDDIR)/client/menu_main.o :    	$(UI_DIR)/menu_main.c
+	$(DO_CC)
+	
+$(BUILDDIR)/client/menu_mp_addressbook.o :    	$(UI_DIR)/menu_mp_addressbook.c
+	$(DO_CC)
+	
+$(BUILDDIR)/client/menu_mp_dmoptions.o :    	$(UI_DIR)/menu_mp_dmoptions.c
+	$(DO_CC)
+	
+$(BUILDDIR)/client/menu_mp_download.o :    	$(UI_DIR)/menu_mp_download.c
+	$(DO_CC)
+	
+$(BUILDDIR)/client/menu_mp_joinserver.o :    	$(UI_DIR)/menu_mp_joinserver.c
+	$(DO_CC)
+	
+$(BUILDDIR)/client/menu_mp_playersetup.o :    	$(UI_DIR)/menu_mp_playersetup.c
+	$(DO_CC)
+	
+$(BUILDDIR)/client/menu_mp_startserver.o :    	$(UI_DIR)/menu_mp_startserver.c
+	$(DO_CC)
+	
+$(BUILDDIR)/client/menu_multiplayer.o :    	$(UI_DIR)/menu_multiplayer.c
+	$(DO_CC)
+	
+$(BUILDDIR)/client/menu_options.o :    	$(UI_DIR)/menu_options.c
+	$(DO_CC)
+	
+$(BUILDDIR)/client/menu_options_controls.o :    	$(UI_DIR)/menu_options_controls.c
+	$(DO_CC)
+	
+$(BUILDDIR)/client/menu_options_effects.o :    	$(UI_DIR)/menu_options_effects.c
+	$(DO_CC)
+	
+$(BUILDDIR)/client/menu_options_interface.o :    	$(UI_DIR)/menu_options_interface.c
+	$(DO_CC)
+	
+$(BUILDDIR)/client/menu_options_keys.o :    	$(UI_DIR)/menu_options_keys.c
+	$(DO_CC)
+	
+$(BUILDDIR)/client/menu_options_screen.o :    	$(UI_DIR)/menu_options_screen.c
+	$(DO_CC)
+	
+$(BUILDDIR)/client/menu_options_sound.o :    	$(UI_DIR)/menu_options_sound.c
+	$(DO_CC)
+	
+$(BUILDDIR)/client/menu_quit.o :    	$(UI_DIR)/menu_quit.c
+	$(DO_CC)
+	
+$(BUILDDIR)/client/menu_video.o :    	$(UI_DIR)/menu_video.c
+	$(DO_CC)
+	
+$(BUILDDIR)/client/menu_video_advanced.o :    	$(UI_DIR)/menu_video_advanced.c
+	$(DO_CC)
+	
+$(BUILDDIR)/client/ui_draw.o :    	$(UI_DIR)/ui_draw.c
 	$(DO_CC)
 	
 $(BUILDDIR)/client/ui_main.o :    	$(UI_DIR)/ui_main.c
 	$(DO_CC)
 	
-$(BUILDDIR)/client/ui_mp_addressbook.o :    	$(UI_DIR)/ui_mp_addressbook.c
+$(BUILDDIR)/client/ui_menu.o :    	$(UI_DIR)/ui_menu.c
 	$(DO_CC)
 	
-$(BUILDDIR)/client/ui_mp_dmoptions.o :    	$(UI_DIR)/ui_mp_dmoptions.c
-	$(DO_CC)
-	
-$(BUILDDIR)/client/ui_mp_download.o :    	$(UI_DIR)/ui_mp_download.c
-	$(DO_CC)
-	
-$(BUILDDIR)/client/ui_mp_joinserver.o :    	$(UI_DIR)/ui_mp_joinserver.c
-	$(DO_CC)
-	
-$(BUILDDIR)/client/ui_mp_playersetup.o :    	$(UI_DIR)/ui_mp_playersetup.c
-	$(DO_CC)
-	
-$(BUILDDIR)/client/ui_mp_startserver.o :    	$(UI_DIR)/ui_mp_startserver.c
-	$(DO_CC)
-	
-$(BUILDDIR)/client/ui_multiplayer.o :    	$(UI_DIR)/ui_multiplayer.c
-	$(DO_CC)
-	
-$(BUILDDIR)/client/ui_options.o :    	$(UI_DIR)/ui_options.c
-	$(DO_CC)
-	
-$(BUILDDIR)/client/ui_options_controls.o :    	$(UI_DIR)/ui_options_controls.c
-	$(DO_CC)
-	
-$(BUILDDIR)/client/ui_options_effects.o :    	$(UI_DIR)/ui_options_effects.c
-	$(DO_CC)
-	
-$(BUILDDIR)/client/ui_options_interface.o :    	$(UI_DIR)/ui_options_interface.c
-	$(DO_CC)
-	
-$(BUILDDIR)/client/ui_options_keys.o :    	$(UI_DIR)/ui_options_keys.c
-	$(DO_CC)
-	
-$(BUILDDIR)/client/ui_options_screen.o :    	$(UI_DIR)/ui_options_screen.c
-	$(DO_CC)
-	
-$(BUILDDIR)/client/ui_options_sound.o :    	$(UI_DIR)/ui_options_sound.c
-	$(DO_CC)
-	
-$(BUILDDIR)/client/ui_quit.o :    	$(UI_DIR)/ui_quit.c
-	$(DO_CC)
-	
-$(BUILDDIR)/client/ui_subsystem.o :    	$(UI_DIR)/ui_subsystem.c
+$(BUILDDIR)/client/ui_mouse.o :    	$(UI_DIR)/ui_mouse.c
 	$(DO_CC)
 	
 $(BUILDDIR)/client/ui_utils.o :    	$(UI_DIR)/ui_utils.c
 	$(DO_CC)
 	
-$(BUILDDIR)/client/ui_video.o :    	$(UI_DIR)/ui_video.c
-	$(DO_CC)
-	
-$(BUILDDIR)/client/ui_video_advanced.o :    	$(UI_DIR)/ui_video_advanced.c
+$(BUILDDIR)/client/ui_widgets.o :    	$(UI_DIR)/ui_widgets.c
 	$(DO_CC)
 	
 $(BUILDDIR)/client/cmd.o :        	$(COMMON_DIR)/cmd.c

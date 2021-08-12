@@ -20,7 +20,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 
-// ui_mp_startserver.c -- the start server menu 
+// menu_mp_startserver.c -- the start server menu 
 
 #include <ctype.h>
 #ifdef _WIN32
@@ -120,10 +120,10 @@ void UI_RefreshMapList (maptype_t maptype)
 
 /*
 ===============
-M_RefreshMapList
+Menu_RefreshMapList
 ===============
 */
-void M_RefreshMapList (maptype_t maptype)
+void Menu_RefreshMapList (maptype_t maptype)
 {
 	int		i;
 
@@ -149,7 +149,7 @@ void DMOptionsFunc (void *self)
 {
 	if (s_rules_box.curvalue == 1)
 		return;
-	M_Menu_DMOptions_f();
+	Menu_DMOptions_f ();
 }
 
 void RulesChangeFunc (void *self)
@@ -209,10 +209,10 @@ void RulesChangeFunc (void *self)
 	}
 
 //	UI_RefreshMapList (maptype);
-	M_RefreshMapList (maptype);
+	Menu_RefreshMapList (maptype);
 }
 
-void M_StartServerActionFunc (void *self)
+void Menu_StartServerActionFunc (void *self)
 {
 	char	startmap[1024];
 	int		timelimit;
@@ -277,7 +277,7 @@ void M_StartServerActionFunc (void *self)
 #endif
 }
 
-void StartServer_MenuInit (void)
+void Menu_StartServer_Init (void)
 {
 	static const char *yesno_names[] =
 	{
@@ -444,7 +444,7 @@ void StartServer_MenuInit (void)
 	s_startserver_start_action.generic.flags	= QMF_LEFT_JUSTIFY;
 	s_startserver_start_action.generic.x		= 24;
 	s_startserver_start_action.generic.y		= y += 2*MENU_LINE_SIZE;
-	s_startserver_start_action.generic.callback	= M_StartServerActionFunc;
+	s_startserver_start_action.generic.callback	= Menu_StartServerActionFunc;
 
 	s_startserver_back_action.generic.type		= MTYPE_ACTION;
 	s_startserver_back_action.generic.textSize	= MENU_FONT_SIZE;
@@ -454,21 +454,21 @@ void StartServer_MenuInit (void)
 	s_startserver_back_action.generic.y			= y += 3*MENU_LINE_SIZE;
 	s_startserver_back_action.generic.callback	= UI_BackMenu;
 
-	Menu_AddItem( &s_startserver_menu, &s_startmap_list );
-	Menu_AddItem( &s_startserver_menu, &s_rules_box );
-	Menu_AddItem( &s_startserver_menu, &s_timelimit_field );
-	Menu_AddItem( &s_startserver_menu, &s_fraglimit_field );
-	Menu_AddItem( &s_startserver_menu, &s_maxclients_field );
-	Menu_AddItem( &s_startserver_menu, &s_hostname_field );
-	Menu_AddItem( &s_startserver_menu, &s_dedicated_box );
-	Menu_AddItem( &s_startserver_menu, &s_startserver_dmoptions_action );
-	Menu_AddItem( &s_startserver_menu, &s_startserver_start_action );
-	Menu_AddItem( &s_startserver_menu, &s_startserver_back_action );
+	UI_AddMenuItem (&s_startserver_menu, &s_startmap_list);
+	UI_AddMenuItem (&s_startserver_menu, &s_rules_box);
+	UI_AddMenuItem (&s_startserver_menu, &s_timelimit_field);
+	UI_AddMenuItem (&s_startserver_menu, &s_fraglimit_field);
+	UI_AddMenuItem (&s_startserver_menu, &s_maxclients_field);
+	UI_AddMenuItem (&s_startserver_menu, &s_hostname_field);
+	UI_AddMenuItem (&s_startserver_menu, &s_dedicated_box);
+	UI_AddMenuItem (&s_startserver_menu, &s_startserver_dmoptions_action);
+	UI_AddMenuItem (&s_startserver_menu, &s_startserver_start_action);
+	UI_AddMenuItem (&s_startserver_menu, &s_startserver_back_action);
 
-	Menu_Center( &s_startserver_menu );
+	UI_CenterMenu (&s_startserver_menu);
 
 	// call this now to set proper inital state
-	RulesChangeFunc ( NULL );
+	RulesChangeFunc (NULL);
 }
 
 #if 1
@@ -476,12 +476,12 @@ void DrawStartSeverLevelshot (void)
 {
 	char *mapshotname = UI_UpdateStartSeverLevelshot (s_startmap_list.curvalue);
 
-	SCR_DrawFill (SCREEN_WIDTH/2+44, SCREEN_HEIGHT/2-70, 244, 184, ALIGN_CENTER, false, 60,60,60,255);
+	UI_DrawFill (SCREEN_WIDTH/2+44, SCREEN_HEIGHT/2-70, 244, 184, ALIGN_CENTER, false, 60,60,60,255);
 
 	if (mapshotname)
-		SCR_DrawPic (SCREEN_WIDTH/2+46, SCREEN_HEIGHT/2-68, 240, 180, ALIGN_CENTER, false, mapshotname, 1.0);
+		UI_DrawPic (SCREEN_WIDTH/2+46, SCREEN_HEIGHT/2-68, 240, 180, ALIGN_CENTER, false, mapshotname, 1.0);
 	else
-		SCR_DrawFill (SCREEN_WIDTH/2+46, SCREEN_HEIGHT/2-68, 240, 180, ALIGN_CENTER, false, 0,0,0,255);
+		UI_DrawFill (SCREEN_WIDTH/2+46, SCREEN_HEIGHT/2-68, 240, 180, ALIGN_CENTER, false, 0,0,0,255);
 }
 #else
 void DrawStartSeverLevelshot (void)
@@ -491,7 +491,7 @@ void DrawStartSeverLevelshot (void)
 	int i = s_startmap_list.curvalue;
 	Q_strncpyz (startmap, sizeof(startmap), strchr( ui_svr_mapnames[i], '\n' ) + 1);
 
-	SCR_DrawFill (SCREEN_WIDTH/2+44, SCREEN_HEIGHT/2-70, 244, 184, ALIGN_CENTER, false, 60,60,60,255);
+	UI_DrawFill (SCREEN_WIDTH/2+44, SCREEN_HEIGHT/2-70, 244, 184, ALIGN_CENTER, false, 60,60,60,255);
 
 	if ( ui_svr_mapshotvalid[i] == M_UNSET) { // init levelshot
 		Com_sprintf(mapshotname, sizeof(mapshotname), "/levelshots/%s.pcx", startmap);
@@ -504,29 +504,29 @@ void DrawStartSeverLevelshot (void)
 	if ( ui_svr_mapshotvalid[i] == M_FOUND) {
 		Com_sprintf(mapshotname, sizeof(mapshotname), "/levelshots/%s.pcx", startmap);
 
-		SCR_DrawPic (SCREEN_WIDTH/2+46, SCREEN_HEIGHT/2-68, 240, 180, ALIGN_CENTER, false, mapshotname, 1.0);
+		UI_DrawPic (SCREEN_WIDTH/2+46, SCREEN_HEIGHT/2-68, 240, 180, ALIGN_CENTER, false, mapshotname, 1.0);
 	}
 	else if (ui_svr_mapshotvalid[ui_svr_nummaps] == M_FOUND)
-		SCR_DrawPic (SCREEN_WIDTH/2+46, SCREEN_HEIGHT/2-68, 240, 180, ALIGN_CENTER, false, "/gfx/ui/noscreen.pcx", 1.0);
+		UI_DrawPic (SCREEN_WIDTH/2+46, SCREEN_HEIGHT/2-68, 240, 180, ALIGN_CENTER, false, "/gfx/ui/noscreen.pcx", 1.0);
 	else
-		SCR_DrawFill (SCREEN_WIDTH/2+46, SCREEN_HEIGHT/2-68, 240, 180, ALIGN_CENTER, false, 0,0,0,255);
+		UI_DrawFill (SCREEN_WIDTH/2+46, SCREEN_HEIGHT/2-68, 240, 180, ALIGN_CENTER, false, 0,0,0,255);
 }
 #endif
 
-void StartServer_MenuDraw (void)
+void Menu_StartServer_Draw (void)
 {
-	Menu_DrawBanner( "m_banner_start_server" ); // Knightmare added
-	Menu_Draw( &s_startserver_menu );
+	UI_DrawBanner ("m_banner_start_server"); // Knightmare added
+	UI_DrawMenu (&s_startserver_menu);
 	DrawStartSeverLevelshot (); // added levelshots
 }
 
-const char *StartServer_MenuKey (int key)
+const char *Menu_StartServer_Key (int key)
 {
-	return Default_MenuKey( &s_startserver_menu, key );
+	return UI_DefaultMenuKey (&s_startserver_menu, key);
 }
 
-void M_Menu_StartServer_f (void)
+void Menu_StartServer_f (void)
 {
-	StartServer_MenuInit();
-	UI_PushMenu( StartServer_MenuDraw, StartServer_MenuKey );
+	Menu_StartServer_Init ();
+	UI_PushMenu (Menu_StartServer_Draw, Menu_StartServer_Key);
 }

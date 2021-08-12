@@ -96,6 +96,7 @@ void InsertInList (char **list, char *insert, int len, int start)
 }
 #endif
 
+
 /*
 ==========================
 UI_IsValidImageFilename
@@ -115,6 +116,85 @@ qboolean UI_IsValidImageFilename (char *name)
 		return true;
 
 	return false;
+}
+
+/*
+==========================
+UI_MouseOverAlpha
+==========================
+*/
+int UI_MouseOverAlpha (menucommon_s *m)
+{
+	if (ui_mousecursor.menuitem == m)
+	{
+		int alpha;
+
+		alpha = 125 + 25 * cos(anglemod(cl.time*0.005));
+
+		if (alpha>255) alpha = 255;
+		if (alpha<0) alpha = 0;
+
+		return alpha;
+	}
+	else 
+		return 255;
+}
+
+
+/*
+=================
+UI_ItemAtMenuCursor
+=================
+*/
+void *UI_ItemAtMenuCursor (menuframework_s *m)
+{
+	if (m->cursor < 0 || m->cursor >= m->nitems)
+		return 0;
+
+	return m->items[m->cursor];
+}
+
+
+/*
+=================
+UI_SetMenuStatusBar
+=================
+*/
+void UI_SetMenuStatusBar (menuframework_s *m, const char *string)
+{
+	if (!m)	return;
+
+	m->statusbar = string;
+}
+
+
+/*
+=================
+UI_TallyMenuSlots
+=================
+*/
+int UI_TallyMenuSlots (menuframework_s *menu)
+{
+	int i;
+	int total = 0;
+
+	for (i = 0; i < menu->nitems; i++)
+	{
+		if ( ((menucommon_s *)menu->items[i])->type == MTYPE_LIST )
+		{
+			int nitems = 0;
+			const char **n = ((menulist_s *)menu->items[i])->itemnames;
+
+			while (*n)
+				nitems++, n++;
+
+			total += nitems;
+		}
+		else
+			total++;
+	}
+
+	return total;
 }
 
 /*
@@ -1148,10 +1228,10 @@ void UI_SearchLocalGames (void)
 	//	strncpy (ui_local_server_names[i], NO_SERVER_STRING);
 		Q_strncpyz (ui_local_server_names[i], sizeof(ui_local_server_names[i]), NO_SERVER_STRING);
 
-	Menu_DrawTextBox (168, 192, 36, 3);
-	SCR_DrawString (188, 192+MENU_FONT_SIZE, MENU_FONT_SIZE, ALIGN_CENTER, S_COLOR_ALT"Searching for local servers, this", FONT_UI, 255);
-	SCR_DrawString (188, 192+MENU_FONT_SIZE*2, MENU_FONT_SIZE, ALIGN_CENTER, S_COLOR_ALT"could take up to a minute, so", FONT_UI, 255);
-	SCR_DrawString (188, 192+MENU_FONT_SIZE*3, MENU_FONT_SIZE, ALIGN_CENTER, S_COLOR_ALT"please be patient.", FONT_UI, 255);
+	UI_DrawTextBox (168, 192, 36, 3);
+	UI_DrawString (188, 192+MENU_FONT_SIZE, MENU_FONT_SIZE, S_COLOR_ALT"Searching for local servers, this", 255);
+	UI_DrawString (188, 192+MENU_FONT_SIZE*2, MENU_FONT_SIZE, S_COLOR_ALT"could take up to a minute, so", 255);
+	UI_DrawString (188, 192+MENU_FONT_SIZE*3, MENU_FONT_SIZE, S_COLOR_ALT"please be patient.", 255);
 
 	// the text box won't show up unless we do a buffer swap
 	GLimp_EndFrame();

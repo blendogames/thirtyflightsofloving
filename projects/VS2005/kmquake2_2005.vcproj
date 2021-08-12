@@ -576,19 +576,91 @@
 				Name="ui"
 				>
 				<File
-					RelativePath="..\..\ui\ui_backend.c"
+					RelativePath="..\..\ui\menu_game.c"
 					>
 				</File>
 				<File
-					RelativePath="..\..\ui\ui_game.c"
+					RelativePath="..\..\ui\menu_game_credits.c"
 					>
 				</File>
 				<File
-					RelativePath="..\..\ui\ui_game_credits.c"
+					RelativePath="..\..\ui\menu_game_saveload.c"
 					>
 				</File>
 				<File
-					RelativePath="..\..\ui\ui_game_saveload.c"
+					RelativePath="..\..\ui\menu_main.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\ui\menu_mp_addressbook.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\ui\menu_mp_dmoptions.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\ui\menu_mp_download.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\ui\menu_mp_joinserver.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\ui\menu_mp_playersetup.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\ui\menu_mp_startserver.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\ui\menu_multiplayer.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\ui\menu_options.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\ui\menu_options_controls.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\ui\menu_options_effects.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\ui\menu_options_interface.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\ui\menu_options_keys.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\ui\menu_options_screen.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\ui\menu_options_sound.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\ui\menu_quit.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\ui\menu_video.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\ui\menu_video_advanced.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\ui\ui_draw.c"
 					>
 				</File>
 				<File
@@ -596,67 +668,11 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\ui\ui_mp_addressbook.c"
+					RelativePath="..\..\ui\ui_menu.c"
 					>
 				</File>
 				<File
-					RelativePath="..\..\ui\ui_mp_dmoptions.c"
-					>
-				</File>
-				<File
-					RelativePath="..\..\ui\ui_mp_download.c"
-					>
-				</File>
-				<File
-					RelativePath="..\..\ui\ui_mp_joinserver.c"
-					>
-				</File>
-				<File
-					RelativePath="..\..\ui\ui_mp_playersetup.c"
-					>
-				</File>
-				<File
-					RelativePath="..\..\ui\ui_mp_startserver.c"
-					>
-				</File>
-				<File
-					RelativePath="..\..\ui\ui_multiplayer.c"
-					>
-				</File>
-				<File
-					RelativePath="..\..\ui\ui_options.c"
-					>
-				</File>
-				<File
-					RelativePath="..\..\ui\ui_options_controls.c"
-					>
-				</File>
-				<File
-					RelativePath="..\..\ui\ui_options_effects.c"
-					>
-				</File>
-				<File
-					RelativePath="..\..\ui\ui_options_interface.c"
-					>
-				</File>
-				<File
-					RelativePath="..\..\ui\ui_options_keys.c"
-					>
-				</File>
-				<File
-					RelativePath="..\..\ui\ui_options_screen.c"
-					>
-				</File>
-				<File
-					RelativePath="..\..\ui\ui_options_sound.c"
-					>
-				</File>
-				<File
-					RelativePath="..\..\ui\ui_quit.c"
-					>
-				</File>
-				<File
-					RelativePath="..\..\ui\ui_subsystem.c"
+					RelativePath="..\..\ui\ui_mouse.c"
 					>
 				</File>
 				<File
@@ -664,11 +680,7 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\ui\ui_video.c"
-					>
-				</File>
-				<File
-					RelativePath="..\..\ui\ui_video_advanced.c"
+					RelativePath="..\..\ui\ui_widgets.c"
 					>
 				</File>
 			</Filter>

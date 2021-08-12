@@ -20,7 +20,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 
-// ui_options.c -- the options menu
+// menu_options.c -- the options menu
 
 #include <ctype.h>
 #ifdef _WIN32
@@ -45,34 +45,34 @@ static menuaction_s		s_options_effects_section;
 static menuaction_s		s_options_interface_section;
 static menuaction_s		s_options_back_action;
 
-static void MenuSoundFunc ( void *unused )
+static void MenuSoundFunc (void *unused)
 {
-	M_Menu_Options_Sound_f();
+	Menu_Options_Sound_f ();
 }
 
-static void MenuControlsFunc ( void *unused )
+static void MenuControlsFunc (void *unused)
 {
-	M_Menu_Options_Controls_f();
+	Menu_Options_Controls_f ();
 }
 
-static void MenuScreenFunc ( void *unused )
+static void MenuScreenFunc (void *unused)
 {
-	M_Menu_Options_Screen_f();
+	Menu_Options_Screen_f ();
 }
 
-static void MenuEffectsFunc ( void *unused )
+static void MenuEffectsFunc (void *unused)
 {
-	M_Menu_Options_Effects_f();
+	Menu_Options_Effects_f ();
 }
 
-static void MenuInterfaceFunc ( void *unused )
+static void MenuInterfaceFunc (void *unused)
 {
-	M_Menu_Options_Interface_f();
+	Menu_Options_Interface_f ();
 }
 
 //=======================================================================
 
-void Options_MenuInit ( void )
+void Menu_Options_Init (void)
 {
 	s_options_menu.x = SCREEN_WIDTH*0.5 - 24;
 	s_options_menu.y = SCREEN_HEIGHT*0.5 - 58;
@@ -137,29 +137,29 @@ void Options_MenuInit ( void )
 	s_options_back_action.generic.callback	= UI_BackMenu;
 //	s_options_back_action.generic.cursor_offset = -(MENU_FONT_SIZE*10);
 
-	Menu_AddItem( &s_options_menu,	( void * ) &s_options_sound_section );
-	Menu_AddItem( &s_options_menu,	( void * ) &s_options_controls_section );
-	Menu_AddItem( &s_options_menu,	( void * ) &s_options_screen_section );
-	Menu_AddItem( &s_options_menu,	( void * ) &s_options_effects_section );
-	Menu_AddItem( &s_options_menu,	( void * ) &s_options_interface_section );
-	Menu_AddItem( &s_options_menu,	( void * ) &s_options_back_action );
+	UI_AddMenuItem (&s_options_menu,	(void *) &s_options_sound_section);
+	UI_AddMenuItem (&s_options_menu,	(void *) &s_options_controls_section);
+	UI_AddMenuItem (&s_options_menu,	(void *) &s_options_screen_section);
+	UI_AddMenuItem (&s_options_menu,	(void *) &s_options_effects_section);
+	UI_AddMenuItem (&s_options_menu,	(void *) &s_options_interface_section);
+	UI_AddMenuItem (&s_options_menu,	(void *) &s_options_back_action);
 }
 
-void Options_MenuDraw (void)
+void Menu_Options_Draw (void)
 {
-	Menu_DrawBanner( "m_banner_options" );
+	UI_DrawBanner ("m_banner_options");
 
-	Menu_AdjustCursor( &s_options_menu, 1 );
-	Menu_Draw( &s_options_menu );
+	UI_AdjustMenuCursor (&s_options_menu, 1);
+	UI_DrawMenu (&s_options_menu);
 }
 
-const char *Options_MenuKey( int key )
+const char *Menu_Options_Key (int key)
 {
-	return Default_MenuKey( &s_options_menu, key );
+	return UI_DefaultMenuKey (&s_options_menu, key);
 }
 
-void M_Menu_Options_f (void)
+void Menu_Options_f (void)
 {
-	Options_MenuInit();
-	UI_PushMenu ( Options_MenuDraw, Options_MenuKey );
+	Menu_Options_Init ();
+	UI_PushMenu (Menu_Options_Draw, Menu_Options_Key);
 }

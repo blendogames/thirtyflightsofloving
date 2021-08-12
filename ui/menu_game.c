@@ -20,7 +20,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 
-// ui_game.c -- the single player menu and credits
+// menu_game.c -- the single player menu and credits
 
 #include <ctype.h>
 #ifdef _WIN32
@@ -50,46 +50,46 @@ static menuaction_s		s_credits_action;
 static menuseparator_s	s_blankline;
 static menuaction_s		s_game_back_action;
 
-static void EasyGameFunc( void *data )
+static void EasyGameFunc (void *data)
 {
-	Cvar_ForceSet( "skill", "0" );
+	Cvar_ForceSet ("skill", "0");
 	UIStartSPGame ();
 }
 
-static void MediumGameFunc( void *data )
+static void MediumGameFunc (void *data)
 {
-	Cvar_ForceSet( "skill", "1" );
+	Cvar_ForceSet ("skill", "1");
 	UIStartSPGame ();
 }
 
-static void HardGameFunc( void *data )
+static void HardGameFunc (void *data)
 {
-	Cvar_ForceSet( "skill", "2" );
+	Cvar_ForceSet ("skill", "2");
 	UIStartSPGame ();
 }
 
-static void NitemareGameFunc( void *data )
+static void NitemareGameFunc (void *data)
 {
-	Cvar_ForceSet( "skill", "3" );
+	Cvar_ForceSet ("skill", "3");
 	UIStartSPGame ();
 }
 
-static void LoadGameFunc( void *unused )
+static void LoadGameFunc (void *unused)
 {
-	M_Menu_LoadGame_f ();
+	Menu_LoadGame_f ();
 }
 
-static void SaveGameFunc( void *unused )
+static void SaveGameFunc (void *unused)
 {
-	M_Menu_SaveGame_f();
+	Menu_SaveGame_f ();
 }
 
-static void CreditsFunc( void *unused )
+static void CreditsFunc (void *unused)
 {
-	M_Menu_Credits_f();
+	Menu_Credits_f ();
 }
 
-void Game_MenuInit( void )
+void Menu_Game_Init (void)
 {
 	static const char *difficulty_names[] =
 	{
@@ -172,39 +172,39 @@ void Game_MenuInit( void )
 	s_game_back_action.generic.name		= " back to main";
 	s_game_back_action.generic.callback	= UI_BackMenu;
 
-	Menu_AddItem( &s_game_menu, ( void * ) &s_easy_game_action );
-	Menu_AddItem( &s_game_menu, ( void * ) &s_medium_game_action );
-	Menu_AddItem( &s_game_menu, ( void * ) &s_hard_game_action );
-	Menu_AddItem( &s_game_menu, ( void * ) &s_nitemare_game_action );
+	UI_AddMenuItem (&s_game_menu, (void *) &s_easy_game_action);
+	UI_AddMenuItem (&s_game_menu, (void *) &s_medium_game_action);
+	UI_AddMenuItem (&s_game_menu, (void *) &s_hard_game_action);
+	UI_AddMenuItem (&s_game_menu, (void *) &s_nitemare_game_action);
 
-	Menu_AddItem( &s_game_menu, ( void * ) &s_blankline );
+	UI_AddMenuItem (&s_game_menu, (void *) &s_blankline);
 
-	Menu_AddItem( &s_game_menu, ( void * ) &s_load_game_action );
-	Menu_AddItem( &s_game_menu, ( void * ) &s_save_game_action );
+	UI_AddMenuItem (&s_game_menu, (void *) &s_load_game_action);
+	UI_AddMenuItem (&s_game_menu, (void *) &s_save_game_action);
 
-	Menu_AddItem( &s_game_menu, ( void * ) &s_blankline );
-	Menu_AddItem( &s_game_menu, ( void * ) &s_credits_action );
+	UI_AddMenuItem (&s_game_menu, (void *) &s_blankline);
+	UI_AddMenuItem (&s_game_menu, (void *) &s_credits_action);
 
-	Menu_AddItem( &s_game_menu, ( void * ) &s_game_back_action );
+	UI_AddMenuItem (&s_game_menu, (void *) &s_game_back_action);
 
-	Menu_Center( &s_game_menu );
+	UI_CenterMenu (&s_game_menu);
 }
 
-void Game_MenuDraw( void )
+void Menu_Game_Draw (void)
 {
-	Menu_DrawBanner( "m_banner_game" );
-	Menu_AdjustCursor( &s_game_menu, 1 );
-	Menu_Draw( &s_game_menu );
+	UI_DrawBanner ("m_banner_game");
+	UI_AdjustMenuCursor (&s_game_menu, 1);
+	UI_DrawMenu (&s_game_menu);
 }
 
-const char *Game_MenuKey( int key )
+const char *Menu_Game_Key (int key)
 {
-	return Default_MenuKey( &s_game_menu, key );
+	return UI_DefaultMenuKey (&s_game_menu, key);
 }
 
-void M_Menu_Game_f (void)
+void Menu_Game_f (void)
 {
-	Game_MenuInit();
-	UI_PushMenu( Game_MenuDraw, Game_MenuKey );
+	Menu_Game_Init ();
+	UI_PushMenu (Menu_Game_Draw, Menu_Game_Key);
 	m_game_cursor = 1;
 }

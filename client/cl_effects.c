@@ -35,13 +35,14 @@ static vec3_t avelocities [NUMVERTEXNORMALS];
 CL_LightningBeam
 ===============
 */
-/*void CL_LightningBeam(vec3_t start, vec3_t end, int srcEnt, int dstEnt, float size)
+/*
+void CL_LightningBeam (vec3_t start, vec3_t end, int srcEnt, int dstEnt, float size)
 {
 	cparticle_t *list;
 	cparticle_t *p=NULL;
 	
 	for (list=active_particles; list; list=list->next)
-		if (list->src_ent == srcEnt && list->dst_ent == dstEnt )
+		if ( (list->src_ent == srcEnt) && (list->dst_ent == dstEnt) )
 		{
 			p=list;
 			p->time = cl.time;
@@ -89,8 +90,8 @@ CL_LightningBeam
 		PART_LIGHTNING,
 		NULL, false);
 
-	p->src_ent=srcEnt;
-	p->dst_ent=dstEnt;
+	p->src_ent = srcEnt;
+	p->dst_ent = dstEnt;
 
 	p->link = CL_SetupParticle (
 		start[0],	start[1],	start[2],
@@ -104,14 +105,15 @@ CL_LightningBeam
 		particle_beam,
 		PART_BEAM,
 		NULL, false);
-}*/
+}
+*/
 void CL_LightningBeam (vec3_t start, vec3_t end, int srcEnt, int dstEnt, float size)
 {
 	cparticle_t *list;
 	cparticle_t *p=NULL;
 
 	for (list=active_particles; list; list=list->next)
-		if (list->src_ent == srcEnt && list->dst_ent == dstEnt && list->image == particle_lightning)
+		if ( (list->src_ent == srcEnt) && (list->dst_ent == dstEnt) && (list->image == particle_lightning) )
 		{
 			p=list;
 			/*p->start =*/ p->time = cl.time;
@@ -138,8 +140,8 @@ void CL_LightningBeam (vec3_t start, vec3_t end, int srcEnt, int dstEnt, float s
 	if (!p)
 		return;
 
-	p->src_ent=srcEnt;
-	p->dst_ent=dstEnt;
+	p->src_ent = srcEnt;
+	p->dst_ent = dstEnt;
 }
 
 

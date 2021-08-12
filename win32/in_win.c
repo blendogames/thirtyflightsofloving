@@ -266,7 +266,6 @@ void IN_StartupMouse (void)
 IN_MouseEvent
 ===========
 */
-void UI_Think_MouseCursor (void);
 void IN_MouseEvent (int mstate)
 {
 	int		i;
@@ -589,7 +588,7 @@ void IN_Move (usercmd_t *cmd)
 
 	// Knightmare- added Psychospaz's mouse support
 	if (cls.key_dest == key_menu && !cls.consoleActive) // Knightmare added
-		UI_Think_MouseCursor();
+		UI_MouseCursor_Think ();
 
 	//if (ActiveApp)
 		IN_JoyMove (cmd);

@@ -20,7 +20,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 
-// ui_video.c -- the video options menu
+// menu_video.c -- the video options menu
 
 #include "../client/client.h"
 #include "ui_local.h"
@@ -61,7 +61,7 @@ static menuaction_s		s_defaults_action;
 static menuaction_s		s_apply_action;
 static menuaction_s		s_backmain_action;
 
-static void VidModeCallback ( void *unused )
+static void VidModeCallback (void *unused)
 {
 	s_customwidth_title.generic.flags	= (s_mode_list.curvalue != 0) ? QMF_HIDDEN : 0;
 	s_customwidth_field.generic.flags	= (s_mode_list.curvalue != 0) ? (QMF_NUMBERSONLY|QMF_HIDDEN) : QMF_NUMBERSONLY;
@@ -69,34 +69,34 @@ static void VidModeCallback ( void *unused )
 	s_customheight_field.generic.flags	= (s_mode_list.curvalue != 0) ? (QMF_NUMBERSONLY|QMF_HIDDEN) : QMF_NUMBERSONLY;
 }
 
-static void BrightnessCallback ( void *s )
+static void BrightnessCallback (void *s)
 {
 	// invert sense so greater = brighter, and scale to a range of 0.3 to 1.3
 //	Cvar_SetValue( "vid_gamma", (1.3 - (s_brightness_slider.curvalue/20.0f)) );
-	Cvar_SetValue( "vid_gamma", MenuSlider_GetValue(&s_brightness_slider) );
+	Cvar_SetValue( "vid_gamma", UI_MenuSlider_GetValue(&s_brightness_slider) );
 }
 
-static void VsyncCallback ( void *unused )
+static void VsyncCallback (void *unused)
 {
 	Cvar_SetValue( "r_swapinterval", s_vsync_box.curvalue);
 }
 
-static void AdjustFOVCallback ( void *unused )
+static void AdjustFOVCallback (void *unused)
 {
 	Cvar_SetValue( "cl_widescreen_fov", s_adjust_fov_box.curvalue);
 }
 
-static void AsyncCallback ( void *unused )
+static void AsyncCallback (void *unused)
 {
 	Cvar_SetValue( "cl_async", s_async_box.curvalue);
 }
 
-static void AdvancedOptions( void *s )
+static void AdvancedOptions (void *s)
 {
-	M_Menu_Video_Advanced_f ();
+	Menu_Video_Advanced_f ();
 }
 
-static void ResetVideoDefaults ( void *unused )
+static void ResetVideoDefaults (void *unused)
 {
 	Cvar_SetToDefault ("vid_fullscreen");
 	Cvar_SetToDefault ("vid_gamma");
@@ -140,7 +140,7 @@ static void ResetVideoDefaults ( void *unused )
 	Menu_Video_Init();
 }
 
-static void prepareVideoRefresh( void )
+static void prepareVideoRefresh (void)
 {
 	// set the right mode for refresh
 	Cvar_Set( "vid_ref", "gl" );
@@ -151,7 +151,7 @@ static void prepareVideoRefresh( void )
 }
 
 
-static void ApplyChanges( void *unused )
+static void ApplyChanges (void *unused)
 {
 	int		temp, customW, customH;
 	char	*customStr;
@@ -177,7 +177,7 @@ static void ApplyChanges( void *unused )
 	Cvar_SetValue( "vid_fullscreen", s_fs_box.curvalue );
 	// invert sense so greater = brighter, and scale to a range of 0.3 to 1.3
 //	Cvar_SetValue( "vid_gamma", (1.3 - (s_brightness_slider.curvalue/20.0)) );
-	Cvar_SetValue( "vid_gamma", MenuSlider_GetValue(&s_brightness_slider) );
+	Cvar_SetValue( "vid_gamma", UI_MenuSlider_GetValue(&s_brightness_slider) );
 	Cvar_SetValue( "r_picmip", 4-s_texqual_box.curvalue );
 
 	// Knightmare- refesh rate option
@@ -347,7 +347,7 @@ static const char *aniso16_names[] =
 	0
 };
 
-static const char **GetAnisoNames ()
+static const char **GetAnisoNames (void)
 {
 	float aniso_avail = Cvar_VariableValue("r_anisotropic_avail");
 	if (aniso_avail < 2.0)
@@ -363,7 +363,7 @@ static const char **GetAnisoNames ()
 }
 
 
-float GetAnisoCurValue ()
+float GetAnisoCurValue (void)
 {
 	float aniso_avail = Cvar_VariableValue("r_anisotropic_avail");
 	float anisoValue = ClampCvar (0, aniso_avail, Cvar_VariableValue("r_anisotropic"));
@@ -526,7 +526,7 @@ void Menu_Video_Init (void)
 	s_brightness_slider.baseValue			= 1.3f;
 	s_brightness_slider.increment			= -0.05f;
 	s_brightness_slider.displayAsPercent	= false;
-	MenuSlider_SetValue (&s_brightness_slider, Cvar_VariableValue("vid_gamma"));
+	UI_MenuSlider_SetValue (&s_brightness_slider, Cvar_VariableValue("vid_gamma"));
 	s_brightness_slider.generic.statusbar	= "changes display brightness";
 
 	s_texfilter_box.generic.type		= MTYPE_SPINCONTROL;
@@ -653,32 +653,32 @@ void Menu_Video_Init (void)
 	s_backmain_action.generic.y			= y += 2*MENU_LINE_SIZE;
 	s_backmain_action.generic.callback	= UI_BackMenu;
 
-	Menu_AddItem( &s_video_menu, ( void * ) &s_mode_list );
+	UI_AddMenuItem (&s_video_menu, (void *) &s_mode_list);
 
-	Menu_AddItem( &s_video_menu, ( void * ) &s_customwidth_title );
-	Menu_AddItem( &s_video_menu, ( void * ) &s_customwidth_field );
-	Menu_AddItem( &s_video_menu, ( void * ) &s_customheight_title );
-	Menu_AddItem( &s_video_menu, ( void * ) &s_customheight_field );
+	UI_AddMenuItem (&s_video_menu, (void *) &s_customwidth_title);
+	UI_AddMenuItem (&s_video_menu, (void *) &s_customwidth_field);
+	UI_AddMenuItem (&s_video_menu, (void *) &s_customheight_title);
+	UI_AddMenuItem (&s_video_menu, (void *) &s_customheight_field);
 
-	Menu_AddItem( &s_video_menu, ( void * ) &s_fs_box );
-	Menu_AddItem( &s_video_menu, ( void * ) &s_brightness_slider );
-	Menu_AddItem( &s_video_menu, ( void * ) &s_texfilter_box );
-	Menu_AddItem( &s_video_menu, ( void * ) &s_aniso_box );
-	Menu_AddItem( &s_video_menu, ( void * ) &s_texqual_box );
-	Menu_AddItem( &s_video_menu, ( void * ) &s_npot_mipmap_box );
-	Menu_AddItem( &s_video_menu, ( void * ) &s_sgis_mipmap_box );
-//	Menu_AddItem( &s_video_menu, ( void * ) &s_texcompress_box );
-	Menu_AddItem( &s_video_menu, ( void * ) &s_vsync_box );
-	Menu_AddItem( &s_video_menu, ( void * ) &s_refresh_box );
-	Menu_AddItem( &s_video_menu, ( void * ) &s_adjust_fov_box );
-	Menu_AddItem( &s_video_menu, ( void * ) &s_async_box );
+	UI_AddMenuItem (&s_video_menu, (void *) &s_fs_box);
+	UI_AddMenuItem (&s_video_menu, (void *) &s_brightness_slider);
+	UI_AddMenuItem (&s_video_menu, (void *) &s_texfilter_box);
+	UI_AddMenuItem (&s_video_menu, (void *) &s_aniso_box);
+	UI_AddMenuItem (&s_video_menu, (void *) &s_texqual_box);
+	UI_AddMenuItem (&s_video_menu, (void *) &s_npot_mipmap_box);
+	UI_AddMenuItem (&s_video_menu, (void *) &s_sgis_mipmap_box);
+//	UI_AddMenuItem (&s_video_menu, (void *) &s_texcompress_box);
+	UI_AddMenuItem (&s_video_menu, (void *) &s_vsync_box);
+	UI_AddMenuItem (&s_video_menu, (void *) &s_refresh_box);
+	UI_AddMenuItem (&s_video_menu, (void *) &s_adjust_fov_box);
+	UI_AddMenuItem (&s_video_menu, (void *) &s_async_box);
 
-	Menu_AddItem( &s_video_menu, ( void * ) &s_advanced_action );
-	Menu_AddItem( &s_video_menu, ( void * ) &s_defaults_action );
-	Menu_AddItem( &s_video_menu, ( void * ) &s_apply_action );
-	Menu_AddItem( &s_video_menu, ( void * ) &s_backmain_action );
+	UI_AddMenuItem (&s_video_menu, (void *) &s_advanced_action);
+	UI_AddMenuItem (&s_video_menu, (void *) &s_defaults_action);
+	UI_AddMenuItem (&s_video_menu, (void *) &s_apply_action);
+	UI_AddMenuItem (&s_video_menu, (void *) &s_backmain_action);
 
-//	Menu_Center( &s_video_menu );
+//	UI_CenterMenu (&s_video_menu);
 //	s_video_menu.x -= MENU_FONT_SIZE;
 }
 
@@ -692,13 +692,13 @@ void Menu_Video_Draw (void)
 	//int w, h;
 
 	// draw the banner
-	Menu_DrawBanner("m_banner_video");
+	UI_DrawBanner ("m_banner_video");
 
 	// move cursor to a reasonable starting position
-	Menu_AdjustCursor( &s_video_menu, 1 );
+	UI_AdjustMenuCursor (&s_video_menu, 1);
 
 	// draw the menu
-	Menu_Draw( &s_video_menu );
+	UI_DrawMenu (&s_video_menu);
 }
 
 /*
@@ -706,13 +706,13 @@ void Menu_Video_Draw (void)
 Video_MenuKey
 ================
 */
-const char *Video_MenuKey( int key )
+const char *Menu_Video_Key (int key)
 {
-	return Default_MenuKey( &s_video_menu, key );
+	return UI_DefaultMenuKey (&s_video_menu, key);
 }
 
-void M_Menu_Video_f (void)
+void Menu_Video_f (void)
 {
-	Menu_Video_Init();
-	UI_PushMenu( Menu_Video_Draw, Video_MenuKey );
+	Menu_Video_Init ();
+	UI_PushMenu (Menu_Video_Draw, Menu_Video_Key);
 }

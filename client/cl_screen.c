@@ -2617,7 +2617,7 @@ void SCR_UpdateScreen (void)
 			{
 				SCR_EndLoadingPlaque ();	// get rid of loading plaque
 				cls.consoleActive = true; // show error in console
-				M_Menu_Main_f();
+				UI_RootMenu ();
 			}
 
 			// make sure the game palette is active

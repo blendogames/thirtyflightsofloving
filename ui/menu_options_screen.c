@@ -20,7 +20,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 
-// ui_options_screen.c -- the screen options menu
+// menu_options_screen.c -- the screen options menu
 
 #include <ctype.h>
 #ifdef _WIN32
@@ -52,46 +52,46 @@ static menuaction_s		s_options_screen_back_action;
 
 
 // Psychospaz's changeable size crosshair
-static void CrosshairSizeFunc( void *unused )
+static void CrosshairSizeFunc (void *unused)
 {
 //	Cvar_SetValue( "crosshair_scale", s_options_screen_crosshairscale_slider.curvalue*0.25);
-	Cvar_SetValue( "crosshair_scale", MenuSlider_GetValue(&s_options_screen_crosshairscale_slider) );
+	Cvar_SetValue( "crosshair_scale", UI_MenuSlider_GetValue(&s_options_screen_crosshairscale_slider) );
 }
 
-static void CrosshairAlphaFunc( void *unused )
+static void CrosshairAlphaFunc (void *unused)
 {
 //	Cvar_SetValue( "crosshair_alpha", s_options_screen_crosshairalpha_slider.curvalue*0.05);
-	Cvar_SetValue( "crosshair_alpha",  MenuSlider_GetValue(&s_options_screen_crosshairalpha_slider) );
+	Cvar_SetValue( "crosshair_alpha",  UI_MenuSlider_GetValue(&s_options_screen_crosshairalpha_slider) );
 }
 
-static void CrosshairPulseFunc( void *unused )
+static void CrosshairPulseFunc (void *unused)
 {
 //	Cvar_SetValue( "crosshair_pulse", s_options_screen_crosshairpulse_slider.curvalue*0.05);
-	Cvar_SetValue( "crosshair_pulse",  MenuSlider_GetValue(&s_options_screen_crosshairpulse_slider) );
+	Cvar_SetValue( "crosshair_pulse",  UI_MenuSlider_GetValue(&s_options_screen_crosshairpulse_slider) );
 }
 
 // hud scaling option
-static void HudScaleFunc( void *unused )
+static void HudScaleFunc (void *unused)
 {
 //	Cvar_SetValue( "scr_hudsize", s_options_screen_hudscale_slider.curvalue);
-	Cvar_SetValue( "scr_hudsize",  MenuSlider_GetValue(&s_options_screen_hudscale_slider) );
+	Cvar_SetValue( "scr_hudsize",  UI_MenuSlider_GetValue(&s_options_screen_hudscale_slider) );
 }
 
 // hud trans option
-static void HudAlphaFunc( void *unused )
+static void HudAlphaFunc (void *unused)
 {
 //	Cvar_SetValue( "scr_hudalpha", (s_options_screen_hudalpha_slider.curvalue-1)/10);
-	Cvar_SetValue( "scr_hudalpha",  MenuSlider_GetValue(&s_options_screen_hudalpha_slider) );
+	Cvar_SetValue( "scr_hudalpha",  UI_MenuSlider_GetValue(&s_options_screen_hudalpha_slider) );
 }
 
 // hud squeeze digits option
-static void HudSqueezeDigitsFunc( void *unused )
+static void HudSqueezeDigitsFunc (void *unused)
 {
 	Cvar_SetValue( "scr_hudsqueezedigits", s_options_screen_hudsqueezedigits_box.curvalue);
 }
 
 // FPS counter option
-static void FPSFunc( void *unused )
+static void FPSFunc (void *unused)
 {
 	Cvar_SetValue( "cl_drawfps", s_options_screen_fps_box.curvalue);
 }
@@ -103,7 +103,7 @@ Crosshair loading
 =======================================================================
 */
 
-/*static void OldCrosshairFunc( void *unused )
+/*static void OldCrosshairFunc (void *unused)
 {
 	Cvar_SetValue( "crosshair", s_options_crosshair_box.curvalue );
 }*/
@@ -136,7 +136,7 @@ void SetCrosshairCursor (void)
 
 //=======================================================================
 
-static void ScreenSetMenuItemValues( void )
+static void ScreenSetMenuItemValues (void)
 {
 	Cvar_SetValue( "crosshair", ClampCvar( 0, 100, Cvar_VariableValue("crosshair") ) );
 	//s_options_crosshair_box.curvalue			= Cvar_VariableValue("crosshair");
@@ -144,23 +144,23 @@ static void ScreenSetMenuItemValues( void )
 
 	Cvar_SetValue( "crosshair_scale", ClampCvar( 0.25, 5, Cvar_VariableValue("crosshair_scale") ) );
 //	s_options_screen_crosshairscale_slider.curvalue	= Cvar_VariableValue("crosshair_scale")*4;
-	MenuSlider_SetValue (&s_options_screen_crosshairscale_slider, Cvar_VariableValue("crosshair_scale"));
+	UI_MenuSlider_SetValue (&s_options_screen_crosshairscale_slider, Cvar_VariableValue("crosshair_scale"));
 
 	Cvar_SetValue( "crosshair_alpha", ClampCvar( 0.05, 1, Cvar_VariableValue("crosshair_alpha") ) );
 //	s_options_screen_crosshairalpha_slider.curvalue	= Cvar_VariableValue("crosshair_alpha")*20;
-	MenuSlider_SetValue (&s_options_screen_crosshairalpha_slider, Cvar_VariableValue("crosshair_alpha"));
+	UI_MenuSlider_SetValue (&s_options_screen_crosshairalpha_slider, Cvar_VariableValue("crosshair_alpha"));
 
 	Cvar_SetValue( "crosshair_pulse", ClampCvar( 0, 0.5, Cvar_VariableValue("crosshair_pulse") ) );
 //	s_options_screen_crosshairpulse_slider.curvalue	= Cvar_VariableValue("crosshair_pulse")*20;
-	MenuSlider_SetValue (&s_options_screen_crosshairpulse_slider, Cvar_VariableValue("crosshair_pulse"));
+	UI_MenuSlider_SetValue (&s_options_screen_crosshairpulse_slider, Cvar_VariableValue("crosshair_pulse"));
 
 	Cvar_SetValue( "scr_hudsize", ClampCvar( 0, 8, Cvar_VariableValue("scr_hudsize") ) );
 //	s_options_screen_hudscale_slider.curvalue		= Cvar_VariableValue("scr_hudsize");
-	MenuSlider_SetValue (&s_options_screen_hudscale_slider, Cvar_VariableValue("scr_hudsize"));
+	UI_MenuSlider_SetValue (&s_options_screen_hudscale_slider, Cvar_VariableValue("scr_hudsize"));
 
 	Cvar_SetValue( "scr_hudalpha", ClampCvar( 0, 1, Cvar_VariableValue("scr_hudalpha") ) );
 //	s_options_screen_hudalpha_slider.curvalue		= Cvar_VariableValue("scr_hudalpha")*10 + 1;
-	MenuSlider_SetValue (&s_options_screen_hudalpha_slider, Cvar_VariableValue("scr_hudalpha"));
+	UI_MenuSlider_SetValue (&s_options_screen_hudalpha_slider, Cvar_VariableValue("scr_hudalpha"));
 
 	Cvar_SetValue( "scr_hudsqueezedigits", ClampCvar( 0, 1, Cvar_VariableValue("scr_hudsqueezedigits") ) );
 	s_options_screen_hudsqueezedigits_box.curvalue	= Cvar_VariableValue("scr_hudsqueezedigits");
@@ -169,7 +169,7 @@ static void ScreenSetMenuItemValues( void )
 	s_options_screen_fps_box.curvalue				= Cvar_VariableValue("cl_drawfps");
 }
 
-static void ScreenResetDefaultsFunc ( void *unused )
+static void ScreenResetDefaultsFunc (void *unused)
 {
 	Cvar_SetToDefault ("crosshair");
 	Cvar_SetToDefault ("crosshair_scale");
@@ -183,7 +183,7 @@ static void ScreenResetDefaultsFunc ( void *unused )
 	ScreenSetMenuItemValues();
 }
 
-void Options_Screen_MenuInit ( void )
+void Menu_Options_Screen_Init (void)
 {
 	static const char *yesno_names[] =
 	{
@@ -329,22 +329,22 @@ void Options_Screen_MenuInit ( void )
 	s_options_screen_back_action.generic.name			= "back to options";
 	s_options_screen_back_action.generic.callback		= UI_BackMenu;
 
-	Menu_AddItem( &s_options_screen_menu, ( void * ) &s_options_screen_header );
-	Menu_AddItem( &s_options_screen_menu, ( void * ) &s_options_screen_crosshair_box );
-	Menu_AddItem( &s_options_screen_menu, ( void * ) &s_options_screen_crosshairscale_slider );
-	Menu_AddItem( &s_options_screen_menu, ( void * ) &s_options_screen_crosshairalpha_slider );
-	Menu_AddItem( &s_options_screen_menu, ( void * ) &s_options_screen_crosshairpulse_slider );
-	Menu_AddItem( &s_options_screen_menu, ( void * ) &s_options_screen_hudscale_slider );
-	Menu_AddItem( &s_options_screen_menu, ( void * ) &s_options_screen_hudalpha_slider );
-	Menu_AddItem( &s_options_screen_menu, ( void * ) &s_options_screen_hudsqueezedigits_box );
-	Menu_AddItem( &s_options_screen_menu, ( void * ) &s_options_screen_fps_box );
-	Menu_AddItem( &s_options_screen_menu, ( void * ) &s_options_screen_defaults_action );
-	Menu_AddItem( &s_options_screen_menu, ( void * ) &s_options_screen_back_action );
+	UI_AddMenuItem (&s_options_screen_menu, (void *) &s_options_screen_header);
+	UI_AddMenuItem (&s_options_screen_menu, (void *) &s_options_screen_crosshair_box);
+	UI_AddMenuItem (&s_options_screen_menu, (void *) &s_options_screen_crosshairscale_slider);
+	UI_AddMenuItem (&s_options_screen_menu, (void *) &s_options_screen_crosshairalpha_slider);
+	UI_AddMenuItem (&s_options_screen_menu, (void *) &s_options_screen_crosshairpulse_slider);
+	UI_AddMenuItem (&s_options_screen_menu, (void *) &s_options_screen_hudscale_slider);
+	UI_AddMenuItem (&s_options_screen_menu, (void *) &s_options_screen_hudalpha_slider);
+	UI_AddMenuItem (&s_options_screen_menu, (void *) &s_options_screen_hudsqueezedigits_box);
+	UI_AddMenuItem (&s_options_screen_menu, (void *) &s_options_screen_fps_box);
+	UI_AddMenuItem (&s_options_screen_menu, (void *) &s_options_screen_defaults_action);
+	UI_AddMenuItem (&s_options_screen_menu, (void *) &s_options_screen_back_action);
 
 	ScreenSetMenuItemValues ();
 }
 
-void MenuCrosshair_MouseClick ( void )
+void Menu_Options_Screen_Crosshair_MouseClick (void)
 {
 	char *sound = NULL;
 	buttonmenuobject_t crosshairbutton;
@@ -390,36 +390,36 @@ void MenuCrosshair_MouseClick ( void )
 	}
 }
 
-void DrawMenuCrosshair (void)
+void Menu_Options_Screen_DrawCrosshair (void)
 {
-	SCR_DrawFill (SCREEN_WIDTH*0.5 - 18, s_options_screen_menu.y + 42,
+	UI_DrawFill (SCREEN_WIDTH*0.5 - 18, s_options_screen_menu.y + 42,
 					36, 36, ALIGN_CENTER, false, 60,60,60,255);
-	SCR_DrawFill (SCREEN_WIDTH*0.5 - 17, s_options_screen_menu.y + 43,
+	UI_DrawFill (SCREEN_WIDTH*0.5 - 17, s_options_screen_menu.y + 43,
 					34, 34, ALIGN_CENTER,  false, 0,0,0,255);
 
 	if (s_options_screen_crosshair_box.curvalue < 1)
 		return;
 
-	SCR_DrawPic (SCREEN_WIDTH*0.5-16, s_options_screen_menu.y + 44,
+	UI_DrawPic (SCREEN_WIDTH*0.5-16, s_options_screen_menu.y + 44,
 					32, 32, ALIGN_CENTER, false, ui_crosshair_names[s_options_screen_crosshair_box.curvalue], 1.0);
 }
 
-void Options_Screen_MenuDraw (void)
+void Menu_Options_Screen_Draw (void)
 {
-	Menu_DrawBanner( "m_banner_options" );
+	UI_DrawBanner ("m_banner_options");
 
-	Menu_AdjustCursor( &s_options_screen_menu, 1 );
-	Menu_Draw( &s_options_screen_menu );
-	DrawMenuCrosshair();
+	UI_AdjustMenuCursor (&s_options_screen_menu, 1);
+	UI_DrawMenu (&s_options_screen_menu);
+	Menu_Options_Screen_DrawCrosshair ();
 }
 
-const char *Options_Screen_MenuKey( int key )
+const char *Menu_Options_Screen_Key (int key)
 {
-	return Default_MenuKey( &s_options_screen_menu, key );
+	return UI_DefaultMenuKey (&s_options_screen_menu, key);
 }
 
-void M_Menu_Options_Screen_f (void)
+void Menu_Options_Screen_f (void)
 {
-	Options_Screen_MenuInit();
-	UI_PushMenu ( Options_Screen_MenuDraw, Options_Screen_MenuKey );
+	Menu_Options_Screen_Init ();
+	UI_PushMenu (Menu_Options_Screen_Draw, Menu_Options_Screen_Key);
 }

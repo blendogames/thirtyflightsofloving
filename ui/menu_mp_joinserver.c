@@ -20,7 +20,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 
-// ui_mp_joinserver.c -- the join server menu 
+// menu_mp_joinserver.c -- the join server menu 
 
 #include <ctype.h>
 #ifdef _WIN32
@@ -78,9 +78,9 @@ void JoinServerFunc (void *self)
 #endif
 }
 
-void AddressBookFunc( void *self )
+void AddressBookFunc (void *self)
 {
-	M_Menu_AddressBook_f();
+	Menu_AddressBook_f ();
 }
 
 // Knightmare- init client compatibility menu option
@@ -97,7 +97,7 @@ void SearchLocalGamesFunc (void *self)
 
 //=========================================================
 
-void JoinServer_MenuInit (void)
+void Menu_JoinServer_Init (void)
 {
 	int i;
 	int y = 0;
@@ -177,19 +177,19 @@ void JoinServer_MenuInit (void)
 	s_joinserver_back_action.generic.y	= y += (UI_MAX_LOCAL_SERVERS+2)*MENU_LINE_SIZE;
 	s_joinserver_back_action.generic.callback = UI_BackMenu;
 
-	Menu_AddItem( &s_joinserver_menu, &s_joinserver_compat_title );
-	Menu_AddItem( &s_joinserver_menu, &s_joinserver_compatibility_box );
+	UI_AddMenuItem (&s_joinserver_menu, &s_joinserver_compat_title);
+	UI_AddMenuItem (&s_joinserver_menu, &s_joinserver_compatibility_box);
 
-	Menu_AddItem( &s_joinserver_menu, &s_joinserver_address_book_action );
-	Menu_AddItem( &s_joinserver_menu, &s_joinserver_server_title );
-	Menu_AddItem( &s_joinserver_menu, &s_joinserver_search_action );
+	UI_AddMenuItem (&s_joinserver_menu, &s_joinserver_address_book_action);
+	UI_AddMenuItem (&s_joinserver_menu, &s_joinserver_server_title);
+	UI_AddMenuItem (&s_joinserver_menu, &s_joinserver_search_action);
 
 	for ( i = 0; i < UI_MAX_LOCAL_SERVERS; i++ )
-		Menu_AddItem( &s_joinserver_menu, &s_joinserver_server_actions[i] );
+		UI_AddMenuItem (&s_joinserver_menu, &s_joinserver_server_actions[i] );
 
-	Menu_AddItem( &s_joinserver_menu, &s_joinserver_back_action );
+	UI_AddMenuItem (&s_joinserver_menu, &s_joinserver_back_action );
 
-//	Menu_Center( &s_joinserver_menu );
+//	UI_CenterMenu (&s_joinserver_menu);
 
 	// skip over compatibility title
 	if (s_joinserver_menu.cursor == 0)
@@ -198,20 +198,20 @@ void JoinServer_MenuInit (void)
 	UI_SearchLocalGames ();
 }
 
-void JoinServer_MenuDraw (void)
+void Menu_JoinServer_Draw (void)
 {
-	Menu_DrawBanner( "m_banner_join_server" );
-	Menu_Draw( &s_joinserver_menu );
+	UI_DrawBanner ("m_banner_join_server");
+	UI_DrawMenu (&s_joinserver_menu);
 }
 
 
-const char *JoinServer_MenuKey (int key)
+const char *Menu_JoinServer_Key (int key)
 {
-	return Default_MenuKey( &s_joinserver_menu, key );
+	return UI_DefaultMenuKey (&s_joinserver_menu, key);
 }
 
-void M_Menu_JoinServer_f (void)
+void Menu_JoinServer_f (void)
 {
-	JoinServer_MenuInit ();
-	UI_PushMenu( JoinServer_MenuDraw, JoinServer_MenuKey );
+	Menu_JoinServer_Init ();
+	UI_PushMenu (Menu_JoinServer_Draw, Menu_JoinServer_Key);
 }

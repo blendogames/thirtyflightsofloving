@@ -1321,7 +1321,7 @@ varargs versions of all text functions.
 */
 char *va (char *format, ...)
 {
-	va_list		argptr;
+	va_list			argptr;
 	static char		string[1024];
 	
 	va_start (argptr, format);
@@ -2157,6 +2157,8 @@ void Com_sprintf (char *dest, size_t size, char *fmt, ...)
 	va_start (argptr, fmt);
 	len = Q_vsnprintf (bigbuffer, sizeof(bigbuffer), fmt, argptr);
 	va_end (argptr);
+//	if (len >= size)
+//		Com_Printf ("Com_sprintf: overflow of %i in %i\n", len, size);
 	if (len < 0)
 		Com_Printf ("Com_sprintf: overflow in temp buffer of size %i\n", sizeof(bigbuffer));
 	else if (len >= size)

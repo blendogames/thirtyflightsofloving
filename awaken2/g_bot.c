@@ -404,7 +404,7 @@ void SetBotThink(edict_t *ent)
 }
 
 //==========================================
-void ForceRouteReset(edict_t *other)
+void ForceRouteReset (edict_t *other)
 {
 	if (!other->isabot)
 		return;
@@ -426,21 +426,21 @@ void ForceRouteReset(edict_t *other)
 }
 
 //==========================================
-void G_FindTrainTeam(void)																			//CW (various bugfixes)
+void G_FindTrainTeam (void)																			//CW (various bugfixes)
 {
-	edict_t		*teamlist[MAX_EDICTS + 1];
-	edict_t		*e;
-	edict_t		*t;
-	edict_t		*p;
-	char		*targethist[MAX_EDICTS];
-	char		*currtarget;
-	char		*currtargetname;
-	qboolean	findteam = false;
-	int			loopindex;
-	int			lc;
-	int			i;
-	int			j;
-	int			k;
+	static edict_t	*teamlist[MAX_EDICTS + 1];	// Knightmare- made static due to stack size
+	edict_t			*e;
+	edict_t			*t;
+	edict_t			*p;
+	static char		*targethist[MAX_EDICTS];	// Knightmare- made static due to stack size
+	char			*currtarget;
+	char			*currtargetname;
+	qboolean		findteam = false;
+	int				loopindex;
+	int				lc;
+	int				i;
+	int				j;
+	int				k;
 
 	e = &g_edicts[(int)maxclients->value+1];
 	for (i = (int)maxclients->value + 1; i < globals.num_edicts; i++, e++)

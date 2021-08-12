@@ -377,20 +377,20 @@ void ED_CallSpawn (edict_t *ent)
 			SpawnItem (ent, item);
 //ponko
 			if     (!strcmp(ent->classname,"weapon_shotgun"))		mpindex[WEAP_SHOTGUN] = i;
-			else if(!strcmp(ent->classname,"weapon_supershotgun"))	mpindex[WEAP_SUPERSHOTGUN] = i;
-			else if(!strcmp(ent->classname,"weapon_machinegun"))	mpindex[WEAP_MACHINEGUN] = i;
-			else if(!strcmp(ent->classname,"weapon_chaingun"))		mpindex[WEAP_CHAINGUN] = i;
-			else if(!strcmp(ent->classname,"ammo_grenades"))		mpindex[WEAP_GRENADES] = i;
-			else if(!strcmp(ent->classname,"weapon_grenadelauncher"))	mpindex[WEAP_GRENADELAUNCHER] = i;
-			else if(!strcmp(ent->classname,"weapon_rocketlauncher"))	mpindex[WEAP_ROCKETLAUNCHER] = i;
-			else if(!strcmp(ent->classname,"weapon_hyperblaster"))	mpindex[WEAP_HYPERBLASTER] = i;
-			else if(!strcmp(ent->classname,"weapon_boomer"))		mpindex[WEAP_BOOMER] = i;
-			else if(!strcmp(ent->classname,"weapon_railgun"))		mpindex[WEAP_RAILGUN] = i;
-			else if(!strcmp(ent->classname,"weapon_phalanx"))		mpindex[WEAP_PHALANX] = i;			
-			else if(!strcmp(ent->classname,"weapon_bfg"))			mpindex[WEAP_BFG] = i;
-			else if(!strcmp(ent->classname,"item_quad"))			mpindex[MPI_QUAD] = i;
-			else if(!strcmp(ent->classname,"item_invulnerability"))	mpindex[MPI_PENTA] = i;
-			else if(!strcmp(ent->classname,"item_quadfire"))		mpindex[MPI_QUADF] = i;
+			else if (!strcmp(ent->classname,"weapon_supershotgun"))	mpindex[WEAP_SUPERSHOTGUN] = i;
+			else if (!strcmp(ent->classname,"weapon_machinegun"))	mpindex[WEAP_MACHINEGUN] = i;
+			else if (!strcmp(ent->classname,"weapon_chaingun"))		mpindex[WEAP_CHAINGUN] = i;
+			else if (!strcmp(ent->classname,"ammo_grenades"))		mpindex[WEAP_GRENADES] = i;
+			else if (!strcmp(ent->classname,"weapon_grenadelauncher"))	mpindex[WEAP_GRENADELAUNCHER] = i;
+			else if (!strcmp(ent->classname,"weapon_rocketlauncher"))	mpindex[WEAP_ROCKETLAUNCHER] = i;
+			else if (!strcmp(ent->classname,"weapon_hyperblaster"))	mpindex[WEAP_HYPERBLASTER] = i;
+			else if (!strcmp(ent->classname,"weapon_boomer"))		mpindex[WEAP_BOOMER] = i;
+			else if (!strcmp(ent->classname,"weapon_railgun"))		mpindex[WEAP_RAILGUN] = i;
+			else if (!strcmp(ent->classname,"weapon_phalanx"))		mpindex[WEAP_PHALANX] = i;			
+			else if (!strcmp(ent->classname,"weapon_bfg"))			mpindex[WEAP_BFG] = i;
+			else if (!strcmp(ent->classname,"item_quad"))			mpindex[MPI_QUAD] = i;
+			else if (!strcmp(ent->classname,"item_invulnerability"))	mpindex[MPI_PENTA] = i;
+			else if (!strcmp(ent->classname,"item_quadfire"))		mpindex[MPI_QUADF] = i;
 //ponko
 			return;
 		}
@@ -915,21 +915,20 @@ All but the last will have the teamchain field set to the next one
 */
 void G_FindTrainTeam()
 {
-	edict_t	*teamlist[MAX_EDICTS + 1];	
-	edict_t	*e,*t,*p;
-
-	qboolean	findteam;
-	char	*currtarget,*currtargetname;
-	char	*targethist[MAX_EDICTS];
-	int		lc,i,j,k;
-	int		loopindex;
+	static edict_t	*teamlist[MAX_EDICTS + 1];	// Knightmare- made static due to stack size
+	edict_t			*e, *t, *p;
+	qboolean		findteam;
+	char			*currtarget,*currtargetname;
+	static char		*targethist[MAX_EDICTS];	// Knightmare- made static due to stack size
+	int				lc,i,j,k;
+	int				loopindex;
 
 	e = &g_edicts[(int)maxclients->value+1];
 	for ( i=maxclients->value+1 ; i<globals.num_edicts ; i++, e++)
 	{
-		if(e->inuse && e->classname)
+		if (e->inuse && e->classname)
 		{
-			if(!Q_stricmp(e->classname,"path_corner") && e->targetname && e->target)
+			if (!Q_stricmp(e->classname,"path_corner") && e->targetname && e->target)
 			{
 //		orgtarget = e->target;		//terminal
 //		orgtargetname = e->targetname;
@@ -944,22 +943,22 @@ void G_FindTrainTeam()
 				loopindex = 0;
 				targethist[0] = e->targetname;
 
-				while(lc < MAX_EDICTS)
+				while (lc < MAX_EDICTS)
 				{
 					t = &g_edicts[(int)maxclients->value+1];
 					for ( j=maxclients->value+1 ; j<globals.num_edicts ; j++, t++)
 					{
-						if(t->inuse && t->classname)
+						if (t->inuse && t->classname)
 						{
-							if(!Q_stricmp(t->classname,"func_train") 
+							if (!Q_stricmp(t->classname,"func_train") 
 								&& !Q_stricmp(t->target,currtargetname)
 								&& t->trainteam == NULL)
 							{
 								for(k = 0;k < lc; k++)
 								{
-									if(teamlist[k] == t) break;
+									if (teamlist[k] == t) break;
 								}
-								if(k == lc )
+								if (k == lc )
 								{
 									teamlist[lc] = t;
 									lc++;
@@ -968,33 +967,33 @@ void G_FindTrainTeam()
 						}
 					}
 					p = G_PickTarget(currtarget);
-					if(!p) break;
+					if (!p) break;
 					currtarget = p->target;
 					currtargetname = p->targetname;
-					if(!p->target) break;
+					if (!p->target) break;
 					for(k = 0;k < loopindex;k++)
 					{
-						if(!Q_stricmp(targethist[k],currtargetname)) break;
+						if (!Q_stricmp(targethist[k],currtargetname)) break;
 					}
-					if(k < loopindex)
+					if (k < loopindex)
 					{
 						findteam = true;
 						break;
 					}
 					targethist[loopindex] = currtargetname;
 					loopindex++;
-					/*if(!Q_stricmp(currtarget,orgtargetname))
+					/*if (!Q_stricmp(currtarget,orgtargetname))
 					{
 						findteam = true;
 						break;
 					}*/
 				}
-				if(findteam && lc > 0)
+				if (findteam && lc > 0)
 				{
 					gi.dprintf("%i train chaining founded.\n",lc);
 					for(k = 0;k < lc; k++)
 					{
-						if(teamlist[k + 1] == NULL)
+						if (teamlist[k + 1] == NULL)
 						{
 							teamlist[k]->trainteam = teamlist[0];
 							break;
@@ -1021,22 +1020,22 @@ void G_FindItemLink()
 { 
 	int i,j,k;
 
-	if(CurrentIndex <= 0) return;
+	if (CurrentIndex <= 0) return;
 
 	//search
 	for(i = 0;i < CurrentIndex;i++)
 	{
-		if(Route[i].state == GRS_ITEMS)
+		if (Route[i].state == GRS_ITEMS)
 		{
 			for(j = 0;j < CurrentIndex;j++)
 			{
 				//found!!
-				if(j != i && Route[i].ent == Route[j].ent)
+				if (j != i && Route[i].ent == Route[j].ent)
 				{
 					for(k = 0;k < (MAXLINKPOD - (ctf->value != 0));k++)
 					{
 						//search blanked index
-						if(!Route[i].linkpod[k])
+						if (!Route[i].linkpod[k])
 						{
 							Route[i].linkpod[k] = j;
 							break;
@@ -1074,23 +1073,23 @@ qboolean RTJump_Chk(vec3_t apos,vec3_t tpos)
 		vel -= grav;
 		yori += vel * FRAMETIME; 
 
-		if(vel > 0)
+		if (vel > 0)
 		{
-			if(mf == false)
+			if (mf == false)
 			{
-				if(ypos < yori) mf = 2;
+				if (ypos < yori) mf = 2;
 			}
 		}
-		else if(x > 1)
+		else if (x > 1)
 		{
-			if(mf == false)
+			if (mf == false)
 			{
-				if(ypos < yori) mf = 2;
+				if (ypos < yori) mf = 2;
 			}
 
-			else if(mf == 2)
+			else if (mf == 2)
 			{
-				if(ypos >= yori)
+				if (ypos >= yori)
 				{
 						mf = true;
 						break;
@@ -1103,8 +1102,8 @@ qboolean RTJump_Chk(vec3_t apos,vec3_t tpos)
 
 	l = VectorLength(vv);
 	
-	if(x > 1) l = l / (x - 1);
-	if(l < MOVE_SPD_RUN && mf == true)
+	if (x > 1) l = l / (x - 1);
+	if (l < MOVE_SPD_RUN && mf == true)
 	{
 		return true;							
 	}
@@ -1129,12 +1128,12 @@ void G_FindRouteLink(edict_t *ent)
 
 
 	//旗を発生させる
-	if(!ctf->value && zigmode->value == 1)
+	if (!ctf->value && zigmode->value == 1)
 	{
 		item = FindItem("Zig Flag");
 		SelectSpawnPoint (ent, v, vv);
 	//	VectorCopy (v, ent->s.origin);
-		if(ZIGDrop_Flag(ent,zflag_item))
+		if (ZIGDrop_Flag(ent,zflag_item))
 		{
 			VectorCopy (v, zflag_ent->s.origin);
 		}
@@ -1144,7 +1143,7 @@ void G_FindRouteLink(edict_t *ent)
 gi.dprintf("Linking routes...\n");
 
 	//get JumpMax
-	if(JumpMax == 0)
+	if (JumpMax == 0)
 	{
 		x = VEL_BOT_JUMP - ent->gravity * sv_gravity->value * FRAMETIME;
 		JumpMax = 0;
@@ -1152,58 +1151,58 @@ gi.dprintf("Linking routes...\n");
 		{
 			JumpMax += x * FRAMETIME; 
 			x -= ent->gravity * sv_gravity->value * FRAMETIME;
-			if( x < 0 ) break;
+			if ( x < 0 ) break;
 		}
 	}
 
 	//search
 	for(i = 0;i < CurrentIndex;i++)
 	{
-		if(Route[i].state == GRS_NORMAL)
+		if (Route[i].state == GRS_NORMAL)
 		{
 			for(j = 0;j < CurrentIndex;j++)
 			{
-				if(abs(i - j) <= 50 || j == i || Route[j].state != GRS_NORMAL) continue;
+				if (abs(i - j) <= 50 || j == i || Route[j].state != GRS_NORMAL) continue;
 
 				VectorSubtract(Route[j].Pt,Route[i].Pt,v);
-				if(v[2] > JumpMax || v[2] < -500) continue;
+				if (v[2] > JumpMax || v[2] < -500) continue;
 				v[2] = 0;
-				if(VectorLength(v) > 200) continue;
+				if (VectorLength(v) > 200) continue;
 
-				if(fabs(v[2]) > 20 || VectorLength(v) > 64)
+				if (fabs(v[2]) > 20 || VectorLength(v) > 64)
 				{
-					if(!RTJump_Chk(Route[i].Pt,Route[j].Pt))
+					if (!RTJump_Chk(Route[i].Pt,Route[j].Pt))
 									continue;
 				}
 
 				tpbool = false;
 				for(l = -5;l < 6;l++)
 				{
-					if( (i + l) < 0 || (i + l) >= CurrentIndex) continue;
+					if ( (i + l) < 0 || (i + l) >= CurrentIndex) continue;
 					for(k = 0;k < (MAXLINKPOD - (ctf->value != 0));k++)
 					{
 						//search blanked index
-						if(!Route[i + l].linkpod[k]) break;
-						if(abs(Route[i + l].linkpod[k] - j) < 50)
+						if (!Route[i + l].linkpod[k]) break;
+						if (abs(Route[i + l].linkpod[k] - j) < 50)
 						{
 							tpbool = true;
 							break;
 						}
 					}
-					if(tpbool) break;
+					if (tpbool) break;
 				}
-				if(tpbool) continue;
+				if (tpbool) continue;
 
 //				VectorSubtract(Route[j].Pt,Route[i].Pt,v);
 
 				rs_trace = gi.trace(Route[j].Pt,NULL,NULL,Route[i].Pt,ent,MASK_SOLID); 
 				//found!!
-				if(!rs_trace.startsolid && !rs_trace.allsolid && rs_trace.fraction == 1.0)
+				if (!rs_trace.startsolid && !rs_trace.allsolid && rs_trace.fraction == 1.0)
 				{
 					for(k = 0;k < (MAXLINKPOD - (ctf->value != 0));k++)
 					{
 						//search blanked index
-						if(!Route[i].linkpod[k])
+						if (!Route[i].linkpod[k])
 						{
 							Route[i].linkpod[k] = j;
 							total++;
@@ -1215,23 +1214,23 @@ gi.dprintf("Linking routes...\n");
 		}
 	}
 //gi.dprintf("yare!!!!!!!\n");
-	if(ctf->value && bot_team_flag1 && bot_team_flag2)
+	if (ctf->value && bot_team_flag1 && bot_team_flag2)
 	{
 		j = 0;
 		k = 0;
 		//search
 		for(i = (CurrentIndex - 1);i >= 0 ;i--)
 		{
-			if(Route[i].state < GRS_ITEMS)
+			if (Route[i].state < GRS_ITEMS)
 			{
-				if(Route[i].state == GRS_REDFLAG || Route[i].state == GRS_BLUEFLAG)
+				if (Route[i].state == GRS_REDFLAG || Route[i].state == GRS_BLUEFLAG)
 				{
-					if(Route[i].ent == bot_team_flag1){ j = FOR_FLAG1; k = i;}
-					else if(Route[i].ent == bot_team_flag2) {j = FOR_FLAG2;k = i;}
+					if (Route[i].ent == bot_team_flag1){ j = FOR_FLAG1; k = i;}
+					else if (Route[i].ent == bot_team_flag2) {j = FOR_FLAG2;k = i;}
 				}
 
-				if(j == FOR_FLAG1)		Route[i].linkpod[MAXLINKPOD - 1] = (CTF_FLAG1_FLAG | k);
-				else if(j == FOR_FLAG2)	Route[i].linkpod[MAXLINKPOD - 1] = (CTF_FLAG2_FLAG | k);
+				if (j == FOR_FLAG1)		Route[i].linkpod[MAXLINKPOD - 1] = (CTF_FLAG1_FLAG | k);
+				else if (j == FOR_FLAG2)	Route[i].linkpod[MAXLINKPOD - 1] = (CTF_FLAG2_FLAG | k);
 				else Route[i].linkpod[MAXLINKPOD - 1] = 0;
 			}
 		}
@@ -1250,7 +1249,7 @@ void G_SpawnRouteLink()
 {
 	edict_t *e;
 
-	if(CurrentIndex <= 0) return;
+	if (CurrentIndex <= 0) return;
 
 	e = G_Spawn();
 
@@ -1362,10 +1361,10 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 //laser index
 		if (Q_stricmp(ent->classname, "target_laser") == 0)
 		{
-			if(laser < MAX_LASERINDEX) LaserIndex[laser++] = ent;
+			if (laser < MAX_LASERINDEX) LaserIndex[laser++] = ent;
 		}
 //PON-CTF
-	if(ent->solid == SOLID_TRIGGER && ctf->value && chedit->value) ent->moveinfo.speed = 0;
+	if (ent->solid == SOLID_TRIGGER && ctf->value && chedit->value) ent->moveinfo.speed = 0;
 	if (Q_stricmp(ent->classname, "item_flag_team1") == 0) bot_team_flag1 = ent;
 	else if (Q_stricmp(ent->classname, "item_flag_team2") == 0) bot_team_flag2 = ent;
 //PON-CTF
@@ -1396,7 +1395,7 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 
 //ponko	
 	CTFSetupNavSpawn();	//ナビの設置
-	if(!chedit->value) G_FindItemLink();	//アイテムのリンク(通常時のみ)
+	if (!chedit->value) G_FindItemLink();	//アイテムのリンク(通常時のみ)
 
 	G_SpawnRouteLink();
 
@@ -1405,7 +1404,7 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 	// 旗のアイテムアドレス取得
 	zflag_item =  FindItem("Zig Flag");
 	zflag_ent = NULL;		//初期化
-//	if(CurrentIndex > 0)
+//	if (CurrentIndex > 0)
 //ponko
 
 	ctfjob_update = level.time;
@@ -1640,7 +1639,7 @@ void SP_worldspawn (edict_t *ent)
 			gi.imageindex("i_ctf2t");
 			gi.imageindex("i_ctfj");
 
-/*			if(ctf->value == 2)
+/*			if (ctf->value == 2)
 			{
 				gi.modelindex("models/weapons/v_hook/tris.md2");
 				gi.soundindex("weapons/grapple/grhit.wav");

@@ -1154,7 +1154,7 @@ void UI_Keydown (int key);
 void UI_Draw (void);
 void UI_ForceMenuOff (void);
 void UI_AddToServerList (netadr_t adr, char *info);
-void M_Menu_Main_f (void);
+void UI_RootMenu (void);
 
 //
 // cl_hud.c

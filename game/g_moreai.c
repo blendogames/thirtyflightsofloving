@@ -185,9 +185,9 @@ One endpoint of a valid path must be visible to the monster, and the other to th
 #define HINT_NODE_RANGE 512
 qboolean hintcheck_monsterlost (edict_t *monster)
 {
-	edict_t		*ent;
-	edict_t		*monster_node_list, *target_node_list, *prev_node;
-	edict_t		*closest_node, *start_node, *dest_node;
+	edict_t		*ent=NULL;
+	edict_t		*monster_node_list=NULL, *target_node_list=NULL, *prev_node=NULL;
+	edict_t		*closest_node=NULL, *start_node=NULL, *dest_node=NULL;
 	int			i;
 	float		node_dist, closest_dist;
 	qboolean	monster_pathchains_listed[MAX_HINT_CHAINS], target_pathchains_listed[MAX_HINT_CHAINS];
@@ -208,7 +208,7 @@ qboolean hintcheck_monsterlost (edict_t *monster)
 		{	// Clean up previous monster_hint_chain pointers
 			if (ent->monster_hint_chain)
 				ent->monster_hint_chain = NULL;
-			if (!monster_node_list)  // add first node
+			if (!monster_node_list)	// add first node
 			{
 				monster_node_list = ent;
 				prev_node = ent;
@@ -372,7 +372,8 @@ qboolean hintcheck_monsterlost (edict_t *monster)
 	}
 
 	// If there are no nodes close enough that take us to our enemy, get outta here.
-	if (!closest_node) return false;
+	if (!closest_node)
+		return false;
 	start_node = closest_node;
 
 	// Finally we go through target_node_list linked list to find the node closest to
@@ -413,8 +414,8 @@ A monster has touched a hint_path node
 */
 void touch_hint_path (edict_t *hintpath, edict_t *monster, cplane_t *plane, csurface_t *surf)
 {
+	edict_t		*ent=NULL, *goalPath=NULL, *nextPath=NULL;
 	qboolean	parsedGoal = false;
-	edict_t		*ent, *goalPath, *nextPath;
 
 	if (monster->monsterinfo.aiflags & AI_MEDIC_PATROL) 
 	{
@@ -431,7 +432,8 @@ void touch_hint_path (edict_t *hintpath, edict_t *monster, cplane_t *plane, csur
 	}
 
 	// check that this hint path is monster's movetarget
-	if (hintpath != monster->movetarget) return;
+	if (hintpath != monster->movetarget)
+		return;
 
 	goalPath = monster->monsterinfo.goal_hint;
 		
@@ -441,7 +443,7 @@ void touch_hint_path (edict_t *hintpath, edict_t *monster, cplane_t *plane, csur
 		return;
 	}
 
-	// get next hint_path for monster to travel to
+	// Get next hint_path for monster to travel to
 	ent = hint_chain_starts[hintpath->hint_chain_id];
 	while (ent)
 	{
@@ -454,7 +456,8 @@ void touch_hint_path (edict_t *hintpath, edict_t *monster, cplane_t *plane, csur
 		}
 
 		// If we encounter the destination node first, raise flag.
-		if (goalPath == ent) parsedGoal = true;
+		if (goalPath == ent)
+			parsedGoal = true;
 
 		// If we found the destination node before the current node,
 		// then we are going in the opposite direction of the chain.
@@ -468,7 +471,7 @@ void touch_hint_path (edict_t *hintpath, edict_t *monster, cplane_t *plane, csur
 	}
 
 	// If for some reason we couldn't find the next node, get outta here.
-	if(!nextPath)
+	if (!nextPath)
 	{
 		hintpath_stop(monster);
 		return;
@@ -612,7 +615,7 @@ qboolean check_plat_blocked (edict_t *monster, float moveDist)
 	if (!enemy_relHeight) return false;
 
 	// check if monster is already on a plat
-	if(monster->groundentity && monster->groundentity != world
+	if (monster->groundentity && monster->groundentity != world
 		&& strcmp(monster->groundentity->classname, "func_plat") == 0)
 		platform = monster->groundentity;
 

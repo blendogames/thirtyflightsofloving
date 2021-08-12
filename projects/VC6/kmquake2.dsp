@@ -449,63 +449,59 @@ SOURCE=..\..\renderer\r_warp.c
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\ui\ui_backend.c
+SOURCE=..\..\ui\menu_game.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\ui\ui_game.c
+SOURCE=..\..\ui\menu_game_credits.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\ui\ui_game_credits.c
+SOURCE=..\..\ui\menu_game_saveload.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\ui\ui_game_saveload.c
+SOURCE=..\..\ui\menu_main.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\ui\ui_main.c
+SOURCE=..\..\ui\menu_mp_addressbook.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\ui\ui_mp_addressbook.c
+SOURCE=..\..\ui\menu_mp_dmoptions.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\ui\ui_mp_dmoptions.c
+SOURCE=..\..\ui\menu_mp_download.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\ui\ui_mp_download.c
+SOURCE=..\..\ui\menu_mp_joinserver.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\ui\ui_mp_joinserver.c
+SOURCE=..\..\ui\menu_mp_playersetup.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\ui\ui_mp_playersetup.c
+SOURCE=..\..\ui\menu_mp_startserver.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\ui\ui_mp_startserver.c
+SOURCE=..\..\ui\menu_multiplayer.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\ui\ui_multiplayer.c
+SOURCE=..\..\ui\menu_options.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\ui\ui_options.c
+SOURCE=..\..\ui\menu_options_controls.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\ui\ui_options_controls.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\ui\ui_options_effects.c
+SOURCE=..\..\ui\menu_options_effects.c
 # End Source File
 # Begin Source File
 
@@ -513,23 +509,43 @@ SOURCE=..\..\ui\ui_options_interface.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\ui\ui_options_keys.c
+SOURCE=..\..\ui\menu_options_keys.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\ui\ui_options_screen.c
+SOURCE=..\..\ui\menu_options_screen.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\ui\ui_options_sound.c
+SOURCE=..\..\ui\menu_options_sound.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\ui\ui_quit.c
+SOURCE=..\..\ui\menu_quit.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\ui\ui_subsystem.c
+SOURCE=..\..\ui\menu_video.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\ui\menu_video_advanced.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\ui\ui_draw.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\ui\ui_main.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\ui\ui_menu.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\ui\ui_mouse.c
 # End Source File
 # Begin Source File
 
@@ -537,11 +553,7 @@ SOURCE=..\..\ui\ui_utils.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\ui\ui_video.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\ui\ui_video_advanced.c
+SOURCE=..\..\ui\ui_widgets.c
 # End Source File
 # End Group
 # End Group

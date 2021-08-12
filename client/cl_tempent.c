@@ -25,7 +25,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "client.h"
 #include "particles.h"
 
-void CL_LightningBeam(vec3_t start, vec3_t end, int srcEnt, int dstEnt, float size);
+void CL_LightningBeam (vec3_t start, vec3_t end, int srcEnt, int dstEnt, float size);
 
 typedef enum
 {
@@ -554,11 +554,11 @@ CL_ParseLightning
 =================
 */
 // Psychspaz's enhanced particles
-int CL_ParseLightning ()
+int CL_ParseLightning (void)
 {
 
-	vec3_t start,end; // ,move,vec;
-	int		srcEnt, dstEnt; // , len, dec;
+	vec3_t	start, end; // move,vec
+	int		srcEnt, dstEnt; // len, dec
 	
 	srcEnt = MSG_ReadShort (&net_message);
 	dstEnt = MSG_ReadShort (&net_message);
@@ -566,7 +566,7 @@ int CL_ParseLightning ()
 	MSG_ReadPos (&net_message, start);
 	MSG_ReadPos (&net_message, end);
 
-	CL_LightningBeam(start, end, srcEnt, dstEnt, 5);
+	CL_LightningBeam (start, end, srcEnt, dstEnt, 5);
 		
 	return srcEnt;
 }
@@ -900,8 +900,11 @@ void CL_ParseTEnt (void)
 		if (type == TE_RAILTRAIL_COLORED)
 		{
 			int		red, green, blue;
-			color = MSG_ReadByte (&net_message);
-			CL_EffectColor (color, &red, &green, &blue);
+		//	color = MSG_ReadByte (&net_message);
+		//	CL_EffectColor (color, &red, &green, &blue);
+			red = MSG_ReadByte (&net_message);
+			green = MSG_ReadByte (&net_message);
+			blue = MSG_ReadByte (&net_message);
 			CL_RailTrail (pos, pos2, red, green, blue);
 		//	CL_RailTrail (pos, pos2, color8red(color), color8green(color), color8blue(color));
 		}

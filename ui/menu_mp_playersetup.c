@@ -20,7 +20,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 
-// ui_mp_playersetup.c -- the player setup menu 
+// menu_mp_playersetup.c -- the player setup menu 
 
 #include <ctype.h>
 #ifdef _WIN32
@@ -72,7 +72,7 @@ static void RateCallback (void *unused)
 }
 
 
-static void M_PlayerModelCallback (void *unused)
+static void Menu_PlayerModelCallback (void *unused)
 {
 	int		mNum, sNum;
 //	char	scratch[MAX_QPATH];
@@ -109,7 +109,7 @@ static void M_PlayerModelCallback (void *unused)
 }
 
 
-static void M_PlayerSkinCallback (void *unused)
+static void Menu_PlayerSkinCallback (void *unused)
 {
 #if 1
 	int		mNum, sNum;
@@ -131,7 +131,7 @@ static void M_PlayerSkinCallback (void *unused)
 
 //=======================================================================
 
-qboolean PlayerConfig_MenuInit (void)
+qboolean Menu_PlayerConfig_Init (void)
 {
 //	char currentdirectory[1024];
 //	char currentskin[1024];
@@ -232,7 +232,7 @@ qboolean PlayerConfig_MenuInit (void)
 	s_playerconfig_model_box.generic.textSize		= MENU_FONT_SIZE;
 	s_playerconfig_model_box.generic.x				= -7*MENU_FONT_SIZE;
 	s_playerconfig_model_box.generic.y				= y += MENU_LINE_SIZE;
-	s_playerconfig_model_box.generic.callback		= M_PlayerModelCallback;
+	s_playerconfig_model_box.generic.callback		= Menu_PlayerModelCallback;
 	s_playerconfig_model_box.generic.cursor_offset	= -6*MENU_FONT_SIZE;
 	s_playerconfig_model_box.curvalue = mNum;
 	s_playerconfig_model_box.itemnames = ui_pmnames;
@@ -249,7 +249,7 @@ qboolean PlayerConfig_MenuInit (void)
 	s_playerconfig_skin_box.generic.x				= -7*MENU_FONT_SIZE;
 	s_playerconfig_skin_box.generic.y				= y += MENU_LINE_SIZE;
 	s_playerconfig_skin_box.generic.name			= 0;
-	s_playerconfig_skin_box.generic.callback		= M_PlayerSkinCallback; // Knightmare added, was 0
+	s_playerconfig_skin_box.generic.callback		= Menu_PlayerSkinCallback; // Knightmare added, was 0
 	s_playerconfig_skin_box.generic.cursor_offset	= -6*MENU_FONT_SIZE;
 	s_playerconfig_skin_box.curvalue				= sNum;
 	s_playerconfig_skin_box.itemnames				= ui_pmi[mNum].skinDisplayNames;
@@ -326,25 +326,25 @@ qboolean PlayerConfig_MenuInit (void)
 	}
 #endif
 
-	Menu_AddItem( &s_player_config_menu, &s_playerconfig_name_field );
-	Menu_AddItem( &s_player_config_menu, &s_playerconfig_model_title );
-	Menu_AddItem( &s_player_config_menu, &s_playerconfig_model_box );
+	UI_AddMenuItem (&s_player_config_menu, &s_playerconfig_name_field);
+	UI_AddMenuItem (&s_player_config_menu, &s_playerconfig_model_title);
+	UI_AddMenuItem (&s_player_config_menu, &s_playerconfig_model_box);
 	if ( s_playerconfig_skin_box.itemnames )
 	{
-		Menu_AddItem( &s_player_config_menu, &s_playerconfig_skin_title );
-		Menu_AddItem( &s_player_config_menu, &s_playerconfig_skin_box );
+		UI_AddMenuItem (&s_player_config_menu, &s_playerconfig_skin_title);
+		UI_AddMenuItem (&s_player_config_menu, &s_playerconfig_skin_box);
 	}
-	Menu_AddItem( &s_player_config_menu, &s_playerconfig_hand_title );
-	Menu_AddItem( &s_player_config_menu, &s_playerconfig_handedness_box );
-	Menu_AddItem( &s_player_config_menu, &s_playerconfig_rate_title );
-	Menu_AddItem( &s_player_config_menu, &s_playerconfig_rate_box );
-	Menu_AddItem( &s_player_config_menu, &s_playerconfig_back_action );
+	UI_AddMenuItem (&s_player_config_menu, &s_playerconfig_hand_title);
+	UI_AddMenuItem (&s_player_config_menu, &s_playerconfig_handedness_box);
+	UI_AddMenuItem (&s_player_config_menu, &s_playerconfig_rate_title);
+	UI_AddMenuItem (&s_player_config_menu, &s_playerconfig_rate_box);
+	UI_AddMenuItem (&s_player_config_menu, &s_playerconfig_back_action);
 
 	return true;
 }
 
 
-qboolean PlayerConfig_CheckIncerement (int dir, float x, float y, float w, float h)
+qboolean Menu_PlayerConfig_CheckIncrement (int dir, float x, float y, float w, float h)
 {
 	float min[2], max[2], x1, y1, w1, h1;
 	char *sound = NULL;
@@ -376,7 +376,7 @@ qboolean PlayerConfig_CheckIncerement (int dir, float x, float y, float w, float
 
 		if ( sound )
 			S_StartLocalSound( sound );
-		M_PlayerSkinCallback (NULL);
+		Menu_PlayerSkinCallback (NULL);
 
 		return true;
 	}
@@ -384,7 +384,7 @@ qboolean PlayerConfig_CheckIncerement (int dir, float x, float y, float w, float
 }
 
 
-void PlayerConfig_MouseClick (void)
+void Menu_PlayerConfig_MouseClick (void)
 {
 	float	icon_x = SCREEN_WIDTH*0.5 - 5, // width - 325
 			icon_y = SCREEN_HEIGHT - 108,
@@ -404,7 +404,7 @@ void PlayerConfig_MouseClick (void)
 		i = s_playerconfig_skin_box.curvalue-3;
 
 	if (i > 0)
-		if (PlayerConfig_CheckIncerement (1, icon_x-39, icon_y, 32, 32))
+		if (Menu_PlayerConfig_CheckIncrement (1, icon_x-39, icon_y, 32, 32))
 			return;
 
 	for (count=0; count<NUM_SKINBOX_ITEMS; i++,count++)
@@ -418,7 +418,7 @@ void PlayerConfig_MouseClick (void)
 
 	icon_offset = NUM_SKINBOX_ITEMS*34;
 	if (ui_pmi[s_playerconfig_model_box.curvalue].nskins-i > 0)
-		if (PlayerConfig_CheckIncerement (0, icon_x+icon_offset+5, icon_y, 32, 32))
+		if (Menu_PlayerConfig_CheckIncrement (0, icon_x+icon_offset+5, icon_y, 32, 32))
 			return;
 
 	for (i=0; i<NUM_SKINBOX_ITEMS; i++)
@@ -439,7 +439,7 @@ void PlayerConfig_MouseClick (void)
 
 				if (sound)
 					S_StartLocalSound (sound);
-				M_PlayerSkinCallback (NULL);
+				Menu_PlayerSkinCallback (NULL);
 
 				return;
 			}
@@ -449,7 +449,7 @@ void PlayerConfig_MouseClick (void)
 }
 
 
-void PlayerConfig_DrawSkinSelection (void)
+void Menu_PlayerConfig_DrawSkinSelection (void)
 {
 	char		scratch[MAX_QPATH];
 	float		icon_x = SCREEN_WIDTH*0.5 - 5; // width - 325
@@ -482,19 +482,19 @@ void PlayerConfig_DrawSkinSelection (void)
 		arrowTemp[0][3] += 0.25;
 	//	Com_sprintf (scratch, sizeof(scratch), "/gfx/ui/arrows/arrow_left_d.pcx");
 	}
-	SCR_DrawOffsetPicST (icon_x-39, icon_y+2, 32, 32, vec2_origin, arrowTemp[0], ALIGN_CENTER, false, arrowColor, UI_ARROWS_PIC);
-//	SCR_DrawPic (icon_x-39, icon_y+2, 32, 32,  ALIGN_CENTER, false, scratch, 1.0);
+	UI_DrawPicST (icon_x-39, icon_y+2, 32, 32, arrowTemp[0], ALIGN_CENTER, false, arrowColor, UI_ARROWS_PIC);
+//	UI_DrawPic (icon_x-39, icon_y+2, 32, 32,  ALIGN_CENTER, false, scratch, 1.0);
 
 	// background
-	SCR_DrawFill (icon_x-3, icon_y-3, NUM_SKINBOX_ITEMS*34+4, 38, ALIGN_CENTER, false, 0, 0, 0, 255);
+	UI_DrawFill (icon_x-3, icon_y-3, NUM_SKINBOX_ITEMS*34+4, 38, ALIGN_CENTER, false, 0, 0, 0, 255);
 	if (R_DrawFindPic("/gfx/ui/widgets/listbox_background.pcx")) {
 		x = icon_x-2;	y = icon_y-2;	w = NUM_SKINBOX_ITEMS * 34 + 2;	h = 36;
-		SCR_DrawTiledPic (x, y, w, h, ALIGN_CENTER, true, "/gfx/ui/widgets/listbox_background.pcx", 255);
+		UI_DrawTiledPic (x, y, w, h, ALIGN_CENTER, true, "/gfx/ui/widgets/listbox_background.pcx", 255);
 	//	SCR_ScaleCoords (&x, &y, &w, &h, ALIGN_CENTER);
 	//	R_DrawTileClear ((int)x, (int)y, (int)w, (int)h, "/gfx/ui/widgets/listbox_background.pcx");
 	}
 	else
-		SCR_DrawFill (icon_x-2, icon_y-2, NUM_SKINBOX_ITEMS*34+2, 36, ALIGN_CENTER, false, 60, 60, 60, 255);
+		UI_DrawFill (icon_x-2, icon_y-2, NUM_SKINBOX_ITEMS*34+2, 36, ALIGN_CENTER, false, 60, 60, 60, 255);
 		
 	for (count=0; count<NUM_SKINBOX_ITEMS; i++,count++)
 	{
@@ -506,8 +506,8 @@ void PlayerConfig_DrawSkinSelection (void)
 			ui_pmi[s_playerconfig_model_box.curvalue].skinDisplayNames[i] );
 
 		if (i == s_playerconfig_skin_box.curvalue)
-			SCR_DrawFill (icon_x + icon_offset-1, icon_y-1, 34, 34, ALIGN_CENTER, false, color[0], color[1] ,color[2], 255);
-		SCR_DrawPic (icon_x + icon_offset, icon_y, 32, 32,  ALIGN_CENTER, false, scratch, 1.0);
+			UI_DrawFill (icon_x + icon_offset-1, icon_y-1, 34, 34, ALIGN_CENTER, false, color[0], color[1] ,color[2], 255);
+		UI_DrawPic (icon_x + icon_offset, icon_y, 32, 32,  ALIGN_CENTER, false, scratch, 1.0);
 		icon_offset += 34;
 	}
 
@@ -523,18 +523,18 @@ void PlayerConfig_DrawSkinSelection (void)
 		arrowTemp[1][3] += 0.25;
 	//	Com_sprintf (scratch, sizeof(scratch), "/gfx/ui/arrows/arrow_right_d.pcx");
 	}
-	SCR_DrawOffsetPicST (icon_x+icon_offset+5, icon_y+2, 32, 32, vec2_origin, arrowTemp[1], ALIGN_CENTER, false, arrowColor, UI_ARROWS_PIC);
-//	SCR_DrawPic (icon_x+icon_offset+5, icon_y+2, 32, 32,  ALIGN_CENTER, false, scratch, 1.0);
+	UI_DrawPicST (icon_x+icon_offset+5, icon_y+2, 32, 32, arrowTemp[1], ALIGN_CENTER, false, arrowColor, UI_ARROWS_PIC);
+//	UI_DrawPic (icon_x+icon_offset+5, icon_y+2, 32, 32,  ALIGN_CENTER, false, scratch, 1.0);
 }
 
 
-void PlayerConfig_MenuDraw (void)
+void Menu_PlayerConfig_Draw (void)
 {
 	refdef_t	refdef;
 	float		rx, ry, rw, rh;
 	qboolean	lefthand = (Cvar_VariableInteger("hand") == 1);
 
-	Menu_DrawBanner ("m_banner_plauer_setup"); // typo for image name is id's fault
+	UI_DrawBanner ("m_banner_plauer_setup"); // typo for image name is id's fault
 
 	memset(&refdef, 0, sizeof(refdef));
 
@@ -632,17 +632,17 @@ void PlayerConfig_MenuDraw (void)
 		refdef.lightstyles = 0;
 		refdef.rdflags = RDF_NOWORLDMODEL;
 
-		Menu_Draw( &s_player_config_menu );
+		UI_DrawMenu (&s_player_config_menu);
 
 		// skin selection preview
-		PlayerConfig_DrawSkinSelection ();
+		Menu_PlayerConfig_DrawSkinSelection ();
 
-		R_RenderFrame( &refdef );
+		R_RenderFrame (&refdef);
 	}
 }
 
 
-void M_PConfigSaveChanges (void)
+void Menu_PConfigSaveChanges (void)
 {
 //	int		i;
 	int		mNum, sNum;
@@ -674,22 +674,22 @@ void M_PConfigSaveChanges (void)
 #endif
 }
 
-const char *PlayerConfig_MenuKey (int key)
+const char *Menu_PlayerConfig_Key (int key)
 {
 	if ( key == K_ESCAPE )
-		M_PConfigSaveChanges ();
+		Menu_PConfigSaveChanges ();
 
-	return Default_MenuKey( &s_player_config_menu, key );
+	return UI_DefaultMenuKey (&s_player_config_menu, key);
 }
 
 
-void M_Menu_PlayerConfig_f (void)
+void Menu_PlayerConfig_f (void)
 {
-	if (!PlayerConfig_MenuInit())
+	if (!Menu_PlayerConfig_Init())
 	{
-		Menu_SetStatusBar( &s_multiplayer_menu, "No valid player models found" );
+		UI_SetMenuStatusBar (&s_multiplayer_menu, "No valid player models found");
 		return;
 	}
-	Menu_SetStatusBar( &s_multiplayer_menu, NULL );
-	UI_PushMenu( PlayerConfig_MenuDraw, PlayerConfig_MenuKey );
+	UI_SetMenuStatusBar (&s_multiplayer_menu, NULL);
+	UI_PushMenu (Menu_PlayerConfig_Draw, Menu_PlayerConfig_Key);
 }

@@ -1821,15 +1821,15 @@ typedef struct
 
 void actor_files ()
 {
-	char			path[256];
-	char			filename[256];
-	int				s_match, w_match[2];
-	int				i, j, k;
-	int				num_actors = 0;
-	actorlist		actors[MAX_EDICTS];
-	cvar_t			*basedir, *cddir, *gamedir;
-	edict_t			*e, *e0;
-	FILE			*f;
+	char				path[256];
+	char				filename[256];
+	int					s_match, w_match[2];
+	int					i, j, k;
+	int					num_actors = 0;
+	static actorlist	actors[MAX_EDICTS];	// Knightmare- made static due to stack size
+	cvar_t				*basedir, *cddir, *gamedir;
+	edict_t				*e, *e0;
+	FILE				*f;
 
 	if (deathmatch->value)
 		return;
@@ -1838,7 +1838,7 @@ void actor_files ()
 	cddir   = gi.cvar("cddir",   "", 0);
 	gamedir = gi.cvar("gamedir", "", 0);
 
-	memset(&actors,0,MAX_EDICTS*sizeof(actorlist));
+	memset (&actors, 0, MAX_EDICTS*sizeof(actorlist));
 
 	for (i=game.maxclients+1; i<globals.num_edicts; i++) {
 		e = &g_edicts[i];

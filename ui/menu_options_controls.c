@@ -20,7 +20,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 
-// ui_options_controls.c -- the controls options menu
+// menu_options_controls.c -- the controls options menu
 
 #include <ctype.h>
 #ifdef _WIN32
@@ -56,80 +56,80 @@ static menuaction_s		s_options_controls_defaults_action;
 static menuaction_s		s_options_controls_back_action;
 
 
-static void MouseSpeedFunc( void *unused )
+static void MouseSpeedFunc (void *unused)
 {
 //	Cvar_SetValue( "sensitivity", s_options_controls_sensitivity_slider.curvalue / 2.0f );
-	Cvar_SetValue( "sensitivity", MenuSlider_GetValue(&s_options_controls_sensitivity_slider) );
+	Cvar_SetValue( "sensitivity", UI_MenuSlider_GetValue(&s_options_controls_sensitivity_slider) );
 }
 
-static void AlwaysRunFunc( void *unused )
+static void AlwaysRunFunc (void *unused)
 {
 	Cvar_SetValue( "cl_run", s_options_controls_alwaysrun_box.curvalue );
 }
 
 // Psychospaz's chaseam
-static void ThirdPersonFunc( void *unused )
+static void ThirdPersonFunc (void *unused)
 {
 	Cvar_SetValue( "cg_thirdperson", s_options_controls_thirdperson_box.curvalue );
 }
 
-static void ThirdPersonDistFunc( void *unused )
+static void ThirdPersonDistFunc (void *unused)
 {
 //	Cvar_SetValue( "cg_thirdperson_dist", (int)(s_options_controls_thirdperson_distance_slider.curvalue * 25) );
-	Cvar_SetValue( "cg_thirdperson_dist", MenuSlider_GetValue(&s_options_controls_thirdperson_distance_slider) );
+	Cvar_SetValue( "cg_thirdperson_dist", UI_MenuSlider_GetValue(&s_options_controls_thirdperson_distance_slider) );
 }
 
-static void ThirdPersonOffsetFunc( void *unused )
+static void ThirdPersonOffsetFunc (void *unused)
 {
 //	Cvar_SetValue( "cg_thirdperson_offset", (int)(s_options_controls_thirdperson_offset_slider.curvalue * 4) );
-	Cvar_SetValue( "cg_thirdperson_offset", MenuSlider_GetValue(&s_options_controls_thirdperson_offset_slider) );
+	Cvar_SetValue( "cg_thirdperson_offset", UI_MenuSlider_GetValue(&s_options_controls_thirdperson_offset_slider) );
 }
 
-static void ThirdPersonAngleFunc( void *unused )
+static void ThirdPersonAngleFunc (void *unused)
 {
 //	Cvar_SetValue( "cg_thirdperson_angle", (int)(s_options_controls_thirdperson_angle_slider.curvalue * 10) );
-	Cvar_SetValue( "cg_thirdperson_angle", MenuSlider_GetValue(&s_options_controls_thirdperson_angle_slider) );
+	Cvar_SetValue( "cg_thirdperson_angle", UI_MenuSlider_GetValue(&s_options_controls_thirdperson_angle_slider) );
 }
 
-static void FreeLookFunc( void *unused )
+static void FreeLookFunc (void *unused)
 {
 	Cvar_SetValue( "freelook", s_options_controls_freelook_box.curvalue );
 }
 
-static void InvertMouseFunc( void *unused )
+static void InvertMouseFunc (void *unused)
 {
 	Cvar_SetValue( "m_pitch", -m_pitch->value );
 }
 
-static void AutosensitivityFunc( void *unused )
+static void AutosensitivityFunc (void *unused)
 {
 	Cvar_SetValue( "autosensitivity", s_options_controls_autosensitivity_box.curvalue );
 }
 
-static void LookspringFunc( void *unused )
+static void LookspringFunc (void *unused)
 {
 	Cvar_SetValue( "lookspring", !lookspring->value );
 }
 
-static void LookstrafeFunc( void *unused )
+static void LookstrafeFunc (void *unused)
 {
 	Cvar_SetValue( "lookstrafe", !lookstrafe->value );
 }
 
-static void JoystickFunc( void *unused )
+static void JoystickFunc (void *unused)
 {
 	Cvar_SetValue( "in_joystick", s_options_controls_joystick_box.curvalue );
 }
 
-static void CustomizeControlsFunc( void *unused )
+static void CustomizeControlsFunc(void *unused)
 {
-	M_Menu_Keys_f();
+	Menu_Keys_f ();
 }
 
-static void ControlsSetMenuItemValues( void )
+static void ControlsSetMenuItemValues (void)
 {
 //	s_options_controls_sensitivity_slider.curvalue	= ( Cvar_VariableValue("sensitivity") ) * 2;
-	MenuSlider_SetValue (&s_options_controls_sensitivity_slider, Cvar_VariableValue("sensitivity"));
+	UI_MenuSlider_SetValue (&s_options_controls_sensitivity_slider, Cvar_VariableValue("sensitivity"));
 
 	s_options_controls_invertmouse_box.curvalue		= Cvar_VariableValue("m_pitch") < 0;
 
@@ -141,9 +141,9 @@ static void ControlsSetMenuItemValues( void )
 //	s_options_controls_thirdperson_distance_slider.curvalue	= Cvar_VariableValue("cg_thirdperson_dist") / 25;
 //	s_options_controls_thirdperson_offset_slider.curvalue	= Cvar_VariableValue("cg_thirdperson_offset") / 4;
 //	s_options_controls_thirdperson_angle_slider.curvalue	= Cvar_VariableValue("cg_thirdperson_angle") / 10;
-	MenuSlider_SetValue (&s_options_controls_thirdperson_distance_slider, Cvar_VariableValue("cg_thirdperson_dist"));
-	MenuSlider_SetValue (&s_options_controls_thirdperson_offset_slider, Cvar_VariableValue("cg_thirdperson_offset"));
-	MenuSlider_SetValue (&s_options_controls_thirdperson_angle_slider, Cvar_VariableValue("cg_thirdperson_angle"));
+	UI_MenuSlider_SetValue (&s_options_controls_thirdperson_distance_slider, Cvar_VariableValue("cg_thirdperson_dist"));
+	UI_MenuSlider_SetValue (&s_options_controls_thirdperson_offset_slider, Cvar_VariableValue("cg_thirdperson_offset"));
+	UI_MenuSlider_SetValue (&s_options_controls_thirdperson_angle_slider, Cvar_VariableValue("cg_thirdperson_angle"));
 
 	Cvar_SetValue( "cl_run", ClampCvar( 0, 1, Cvar_VariableValue("cl_run") ) );
 	s_options_controls_alwaysrun_box.curvalue		= Cvar_VariableValue("cl_run");
@@ -161,7 +161,7 @@ static void ControlsSetMenuItemValues( void )
 	s_options_controls_joystick_box.curvalue		= Cvar_VariableValue("in_joystick");
 }
 
-static void ControlsResetDefaultsFunc ( void *unused )
+static void ControlsResetDefaultsFunc (void *unused)
 {
 	//Cvar_SetToDefault ("sensitivity");
 	//Cvar_SetToDefault ("m_pitch");
@@ -180,10 +180,10 @@ static void ControlsResetDefaultsFunc ( void *unused )
 	Cbuf_AddText ("exec defaultbinds.cfg\n"); // reset default binds
 	Cbuf_Execute();
 
-	ControlsSetMenuItemValues();
+	ControlsSetMenuItemValues ();
 }
 
-void Options_Controls_MenuInit ( void )
+void Menu_Options_Controls_Init (void)
 {
 	static const char *yesno_names[] =
 	{
@@ -352,41 +352,41 @@ void Options_Controls_MenuInit ( void )
 	s_options_controls_back_action.generic.name			= "back to options";
 	s_options_controls_back_action.generic.callback		= UI_BackMenu;
 
-	Menu_AddItem( &s_options_controls_menu, ( void * ) &s_options_controls_header );
-	Menu_AddItem( &s_options_controls_menu, ( void * ) &s_options_controls_sensitivity_slider );
-	Menu_AddItem( &s_options_controls_menu, ( void * ) &s_options_controls_invertmouse_box );
-	Menu_AddItem( &s_options_controls_menu, ( void * ) &s_options_controls_autosensitivity_box );
-	Menu_AddItem( &s_options_controls_menu, ( void * ) &s_options_controls_thirdperson_box );
-	Menu_AddItem( &s_options_controls_menu, ( void * ) &s_options_controls_thirdperson_distance_slider );
-	Menu_AddItem( &s_options_controls_menu, ( void * ) &s_options_controls_thirdperson_offset_slider );
-	Menu_AddItem( &s_options_controls_menu, ( void * ) &s_options_controls_thirdperson_angle_slider );
-	Menu_AddItem( &s_options_controls_menu, ( void * ) &s_options_controls_alwaysrun_box );
-	Menu_AddItem( &s_options_controls_menu, ( void * ) &s_options_controls_lookspring_box );
-	Menu_AddItem( &s_options_controls_menu, ( void * ) &s_options_controls_lookstrafe_box );
-	Menu_AddItem( &s_options_controls_menu, ( void * ) &s_options_controls_freelook_box );
-	Menu_AddItem( &s_options_controls_menu, ( void * ) &s_options_controls_joystick_box );
-	Menu_AddItem( &s_options_controls_menu, ( void * ) &s_options_controls_customize_keys_action );
-	Menu_AddItem( &s_options_controls_menu, ( void * ) &s_options_controls_defaults_action );
-	Menu_AddItem( &s_options_controls_menu, ( void * ) &s_options_controls_back_action );
+	UI_AddMenuItem (&s_options_controls_menu, (void *) &s_options_controls_header);
+	UI_AddMenuItem (&s_options_controls_menu, (void *) &s_options_controls_sensitivity_slider);
+	UI_AddMenuItem (&s_options_controls_menu, (void *) &s_options_controls_invertmouse_box);
+	UI_AddMenuItem (&s_options_controls_menu, (void *) &s_options_controls_autosensitivity_box);
+	UI_AddMenuItem (&s_options_controls_menu, (void *) &s_options_controls_thirdperson_box);
+	UI_AddMenuItem (&s_options_controls_menu, (void *) &s_options_controls_thirdperson_distance_slider);
+	UI_AddMenuItem (&s_options_controls_menu, (void *) &s_options_controls_thirdperson_offset_slider);
+	UI_AddMenuItem (&s_options_controls_menu, (void *) &s_options_controls_thirdperson_angle_slider);
+	UI_AddMenuItem (&s_options_controls_menu, (void *) &s_options_controls_alwaysrun_box);
+	UI_AddMenuItem (&s_options_controls_menu, (void *) &s_options_controls_lookspring_box);
+	UI_AddMenuItem (&s_options_controls_menu, (void *) &s_options_controls_lookstrafe_box);
+	UI_AddMenuItem (&s_options_controls_menu, (void *) &s_options_controls_freelook_box);
+	UI_AddMenuItem (&s_options_controls_menu, (void *) &s_options_controls_joystick_box);
+	UI_AddMenuItem (&s_options_controls_menu, (void *) &s_options_controls_customize_keys_action);
+	UI_AddMenuItem (&s_options_controls_menu, (void *) &s_options_controls_defaults_action);
+	UI_AddMenuItem (&s_options_controls_menu, (void *) &s_options_controls_back_action);
 
-	ControlsSetMenuItemValues();
+	ControlsSetMenuItemValues ();
 }
 
-void Options_Controls_MenuDraw (void)
+void Menu_Options_Controls_Draw (void)
 {
-	Menu_DrawBanner( "m_banner_options" );
+	UI_DrawBanner ("m_banner_options");
 
-	Menu_AdjustCursor( &s_options_controls_menu, 1 );
-	Menu_Draw( &s_options_controls_menu );
+	UI_AdjustMenuCursor (&s_options_controls_menu, 1);
+	UI_DrawMenu (&s_options_controls_menu);
 }
 
-const char *Options_Controls_MenuKey( int key )
+const char *Menu_Options_Controls_Key (int key)
 {
-	return Default_MenuKey( &s_options_controls_menu, key );
+	return UI_DefaultMenuKey (&s_options_controls_menu, key);
 }
 
-void M_Menu_Options_Controls_f (void)
+void Menu_Options_Controls_f (void)
 {
-	Options_Controls_MenuInit();
-	UI_PushMenu ( Options_Controls_MenuDraw, Options_Controls_MenuKey );
+	Menu_Options_Controls_Init ();
+	UI_PushMenu (Menu_Options_Controls_Draw, Menu_Options_Controls_Key);
 }

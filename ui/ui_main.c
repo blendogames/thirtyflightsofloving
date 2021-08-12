@@ -20,8 +20,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 
-// ui_main.c -- the main menu & support functions
- 
+// ui_main.c -- menu subsystem functions
+
 #include <ctype.h>
 #ifdef _WIN32
 #include <io.h>
@@ -29,376 +29,292 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "../client/client.h"
 #include "ui_local.h"
 
-static int	m_main_cursor;
+cvar_t	*ui_sensitivity;
+cvar_t	*ui_background_alpha;
+cvar_t	*ui_item_rotate;
+cvar_t	*ui_cursor_scale;
 
-// for checking if quad cursor model is available
-#define QUAD_CURSOR_MODEL	"models/ui/quad_cursor.md2"
-qboolean	quadModel_loaded;
+// moved these here to avoid redundancy
+char *menu_null_sound		= "null";
+char *menu_in_sound			= "misc/menu1.wav";
+char *menu_move_sound		= "misc/menu2.wav";
+char *menu_out_sound		= "misc/menu3.wav";
+char *menu_drag_sound		= "drag";
+
+qboolean	ui_entersound;		// play after drawing a frame, so caching
+								// won't disrupt the sound
+qboolean	ui_initialized = false;	// whether UI subsystem has been initialized
 
 
 /*
 =======================================================================
 
-MAIN MENU
+MENU SUBSYSTEM
 
 =======================================================================
 */
 
-#define	MAIN_ITEMS	5
-
-char *main_names[] =
-{
-	"m_main_game",
-	"m_main_multiplayer",
-	"m_main_options",
-	"m_main_video",
-	"m_main_quit",
-	0
-};
-
-
 /*
-=============
-FindMenuCoords
-=============
+=================
+UI_Draw
+=================
 */
-void FindMenuCoords (int *xoffset, int *ystart, int *totalheight, int *widest)
+void UI_Draw (void)
 {
-	int w, h, i;
+	if (cls.key_dest != key_menu)
+		return;
 
-	*totalheight = 0;
-	*widest = -1;
-
-	for (i = 0; main_names[i] != 0; i++)
+	// dim everything behind it down
+	if (cl.cinematictime > 0 || cls.state == ca_disconnected)
 	{
-		R_DrawGetPicSize (&w, &h, main_names[i]);
-		if (w > *widest)
-			*widest = w;
-		*totalheight += (h + 12);
-	}
-
-	*xoffset = (SCREEN_WIDTH - *widest + 70) * 0.5;
-	*ystart = SCREEN_HEIGHT*0.5 - 100;
-}
-
-
-/*
-=============
-UI_DrawMainCursor
-
-Draws an animating cursor with the point at
-x,y.  The pic will extend to the left of x,
-and both above and below y.
-=============
-*/
-void UI_DrawMainCursor (int x, int y, int f)
-{
-	char	cursorname[80];
-	static	qboolean cached;
-	int		w,h;
-
-	if (!cached)
-	{
-		int i;
-
-		for (i = 0; i < NUM_MAINMENU_CURSOR_FRAMES; i++) {
-			Com_sprintf (cursorname, sizeof(cursorname), "m_cursor%d", i);
-			R_DrawFindPic (cursorname);
-		}
-		cached = true;
-	}
-
-	Com_sprintf (cursorname, sizeof(cursorname), "m_cursor%d", f);
-	R_DrawGetPicSize (&w, &h, cursorname);
-	SCR_DrawPic (x, y, w, h, ALIGN_CENTER, false, cursorname, 1.0);
-}
-
-
-/*
-=============
-UI_DrawMainCursor3D
-
-Draws a rotating quad damage model.
-=============
-*/
-void UI_DrawMainCursor3D (int x, int y)
-{
-	refdef_t	refdef;
-	entity_t	quadEnt, *ent;
-	float		rx, ry, rw, rh;
-	int			yaw;
-
-	yaw = anglemod(cl.time/10);
-
-	memset(&refdef, 0, sizeof(refdef));
-	memset (&quadEnt, 0, sizeof(quadEnt));
-
-	// size 24x34
-	rx = x;				ry = y;
-	rw = 24;			rh = 34;
-	SCR_ScaleCoords (&rx, &ry, &rw, &rh, ALIGN_CENTER);
-	refdef.x = rx;		refdef.y = ry;
-	refdef.width = rw;	refdef.height = rh;
-	refdef.fov_x = 40;
-	refdef.fov_y = CalcFov (refdef.fov_x, refdef.width, refdef.height);
-	refdef.time = cls.realtime*0.001;
-	refdef.areabits = 0;
-	refdef.lightstyles = 0;
-	refdef.rdflags = RDF_NOWORLDMODEL;
-	refdef.num_entities = 0;
-	refdef.entities = &quadEnt;
-
-	ent = &quadEnt;
-	ent->model = R_RegisterModel (QUAD_CURSOR_MODEL);
-	ent->flags = RF_FULLBRIGHT|RF_NOSHADOW|RF_DEPTHHACK;
-	VectorSet (ent->origin, 40, 0, -18);
-	VectorCopy( ent->origin, ent->oldorigin );
-	ent->frame = 0;
-	ent->oldframe = 0;
-	ent->backlerp = 0.0;
-	ent->angles[1] = yaw;
-	refdef.num_entities++;
-
-	R_RenderFrame( &refdef );
-}
-
-
-/*
-=============
-UI_CheckQuadModel
-
-Checks for quad damage model.
-=============
-*/
-void UI_CheckQuadModel (void)
-{
-	struct model_s *quadModel;
-
-	quadModel = R_RegisterModel (QUAD_CURSOR_MODEL);
-	
-	quadModel_loaded = (quadModel != NULL);
-}
-
-
-/*
-=============
-M_Main_Draw
-=============
-*/
-void M_Main_Draw (void)
-{
-	int i;
-	int w, h, last_h;
-	int ystart;
-	int	xoffset;
-	int widest = -1;
-	int totalheight = 0;
-	char litname[80];
-
-	FindMenuCoords (&xoffset, &ystart, &totalheight, &widest);
-
-	for (i = 0; main_names[i] != 0; i++)
-		if (i != m_main_cursor) {
-			R_DrawGetPicSize (&w, &h, main_names[i]);
-			SCR_DrawPic (xoffset, (ystart + i*40+3), w, h, ALIGN_CENTER, false, main_names[i], 1.0);
-		}
-
-//	strncpy (litname, main_names[m_main_cursor]);
-//	strncat (litname, "_sel");
-	Q_strncpyz (litname, sizeof(litname), main_names[m_main_cursor]);
-	Q_strncatz (litname, sizeof(litname), "_sel");
-	R_DrawGetPicSize (&w, &h, litname);
-	SCR_DrawPic (xoffset-1, (ystart + m_main_cursor*40+2), w+2, h+2, ALIGN_CENTER, false, litname, 1.0);
-
-	// Draw our nifty quad damage model as a cursor if it's loaded.
-	if (quadModel_loaded)
-		UI_DrawMainCursor3D (xoffset-27, ystart+(m_main_cursor*40+1));
-	else
-		UI_DrawMainCursor (xoffset-25, ystart+(m_main_cursor*40+1), (int)(cls.realtime/100)%NUM_MAINMENU_CURSOR_FRAMES);
-
-	R_DrawGetPicSize (&w, &h, "m_main_plaque");
-	SCR_DrawPic (xoffset-(w/2+50), ystart, w, h, ALIGN_CENTER, false, "m_main_plaque", 1.0);
-	last_h = h;
-
-	R_DrawGetPicSize (&w, &h, "m_main_logo");
-	SCR_DrawPic (xoffset-(w/2+50), ystart+last_h+20, w, h, ALIGN_CENTER, false, "m_main_logo", 1.0);
-}
-
-
-/*
-=============
-OpenMenuFromMain
-=============
-*/
-void OpenMenuFromMain (void)
-{
-	switch (m_main_cursor)
-	{
-		case 0:
-			M_Menu_Game_f ();
-			break;
-
-		case 1:
-			M_Menu_Multiplayer_f();
-			break;
-
-		case 2:
-			M_Menu_Options_f ();
-			break;
-
-		case 3:
-			M_Menu_Video_f ();
-			break;
-
-		case 4:
-			M_Menu_Quit_f ();
-			break;
-	}
-}
-
-
-/*
-=============
-UI_CheckMainMenuMouse
-=============
-*/
-void UI_CheckMainMenuMouse (void)
-{
-	int ystart;
-	int	xoffset;
-	int widest;
-	int totalheight;
-	int i, oldhover;
-	char *sound = NULL;
-	mainmenuobject_t buttons[MAIN_ITEMS];
-
-	oldhover = MainMenuMouseHover;
-	MainMenuMouseHover = 0;
-
-	FindMenuCoords(&xoffset, &ystart, &totalheight, &widest);
-	for (i = 0; main_names[i] != 0; i++)
-		UI_AddMainButton (&buttons[i], i, xoffset, ystart+(i*40+3), main_names[i]);
-
-	// Exit with double click 2nd mouse button
-	if (!ui_mousecursor.buttonused[MOUSEBUTTON2] && ui_mousecursor.buttonclicks[MOUSEBUTTON2]==2)
-	{
-		UI_PopMenu();
-		sound = menu_out_sound;
-		ui_mousecursor.buttonused[MOUSEBUTTON2] = true;
-		ui_mousecursor.buttonclicks[MOUSEBUTTON2] = 0;
-	}
-
-	for (i=MAIN_ITEMS-1; i>=0; i--)
-	{
-		if ( (ui_mousecursor.x >= buttons[i].min[0]) && (ui_mousecursor.x <= buttons[i].max[0]) &&
-			(ui_mousecursor.y >= buttons[i].min[1]) && (ui_mousecursor.y <= buttons[i].max[1]) )
+		if (R_DrawFindPic(UI_BACKGROUND_NAME))
 		{
-			if (ui_mousecursor.mouseaction)
-				m_main_cursor = i;
-
-			MainMenuMouseHover = 1 + i;
-
-			if (oldhover == MainMenuMouseHover && MainMenuMouseHover-1 == m_main_cursor &&
-				!ui_mousecursor.buttonused[MOUSEBUTTON1] && ui_mousecursor.buttonclicks[MOUSEBUTTON1]==1)
-			{
-				OpenMenuFromMain();
-				sound = menu_move_sound;
-				ui_mousecursor.buttonused[MOUSEBUTTON1] = true;
-				ui_mousecursor.buttonclicks[MOUSEBUTTON1] = 0;
-			}
-			break;
+		//	R_DrawStretchPic (0, 0, viddef.width, viddef.height, UI_BACKGROUND_NAME, 1.0f);
+			R_DrawFill (0, 0, viddef.width, viddef.height, 0, 0, 0, 255);
+			UI_DrawPic(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, ALIGN_CENTER, false, UI_BACKGROUND_NAME, 1.0f);
 		}
-	}
-
-	if (!MainMenuMouseHover)
-	{
-		ui_mousecursor.buttonused[MOUSEBUTTON1] = false;
-		ui_mousecursor.buttonclicks[MOUSEBUTTON1] = 0;
-		ui_mousecursor.buttontime[MOUSEBUTTON1] = 0;
-	}
-
-	ui_mousecursor.mouseaction = false;
-
-	if (sound)
-		S_StartLocalSound(sound);
-}
-
-
-/*
-=============
-M_Main_Key
-=============
-*/
-const char *M_Main_Key (int key)
-{
-	const char *sound = menu_move_sound;
-
-	switch (key)
-	{
-	case K_ESCAPE:
-#ifdef ERASER_COMPAT_BUILD // special hack for Eraser build
-		if (cls.state == ca_disconnected)
-			M_Menu_Quit_f ();
 		else
-			UI_PopMenu ();
-#else	// can't exit menu if disconnected,
-		// so restart demo loop
-		if (cls.state == ca_disconnected)
-			Cbuf_AddText ("d1\n");
-		UI_PopMenu ();
-#endif
-		break;
-
-	case K_KP_DOWNARROW:
-	case K_DOWNARROW:
-		if (++m_main_cursor >= MAIN_ITEMS)
-			m_main_cursor = 0;
-		return sound;
-
-	case K_KP_UPARROW:
-	case K_UPARROW:
-		if (--m_main_cursor < 0)
-			m_main_cursor = MAIN_ITEMS - 1;
-		return sound;
-
-	case K_KP_ENTER:
-	case K_ENTER:
-		ui_entersound = true;
-
-		switch (m_main_cursor)
-		{
-		case 0:
-			M_Menu_Game_f ();
-			break;
-
-		case 1:
-			M_Menu_Multiplayer_f();
-			break;
-
-		case 2:
-			M_Menu_Options_f ();
-			break;
-
-		case 3:
-			M_Menu_Video_f ();
-			break;
-
-		case 4:
-			M_Menu_Quit_f ();
-			break;
-		}
+			R_DrawFill (0,0,viddef.width, viddef.height, 0, 0, 0, 255);
 	}
-	return NULL;
+	// ingame menu uses alpha
+	else if (R_DrawFindPic(UI_BACKGROUND_NAME))
+	//	R_DrawStretchPic (0, 0, viddef.width, viddef.height, UI_BACKGROUND_NAME, ui_background_alpha->value);
+		UI_DrawPic(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, ALIGN_CENTER, false, UI_BACKGROUND_NAME, ui_background_alpha->value);
+	else
+		R_DrawFill (0, 0, viddef.width, viddef.height, 0, 0, 0, (int)(ui_background_alpha->value*255.0f));
+
+	// Knigthmare- added Psychospaz's mouse support
+	UI_RefreshCursorMenu();
+
+	m_drawfunc ();
+
+	// delay playing the enter sound until after the
+	// menu has been drawn, to avoid delay while
+	// caching images
+	if (ui_entersound)
+	{
+		S_StartLocalSound( menu_in_sound );
+		ui_entersound = false;
+	}
+
+	// Knigthmare- added Psychospaz's mouse support
+	//menu cursor for mouse usage :)
+	UI_Draw_Cursor();
 }
 
 
 /*
-=============
-M_Menu_Main_f
-=============
+=================
+UI_Keydown
+=================
 */
-void M_Menu_Main_f (void)
+void UI_Keydown (int key)
 {
-	UI_CheckQuadModel ();
-	UI_PushMenu (M_Main_Draw, M_Main_Key);
+	const char *s;
+
+	if (m_keyfunc)
+		if ( ( s = m_keyfunc( key ) ) != 0 )
+			S_StartLocalSound( ( char * ) s );
+}
+
+
+/*
+=================
+UI_RootMenu
+=================
+*/
+void UI_RootMenu (void)
+{
+	Menu_Main_f ();
+}
+
+
+/*
+=================
+UI_Precache
+=================
+*/
+void UI_Precache (void)
+{
+	int		i;
+	char	scratch[80];
+
+	// general images
+	R_DrawFindPic (LOADSCREEN_NAME); 
+	R_DrawFindPic (UI_BACKGROUND_NAME); 
+	R_DrawFindPic (UI_NOSCREEN_NAME); 
+
+	// loadscreen images
+	R_DrawFindPic ("/pics/loading.pcx");
+	R_DrawFindPic ("/pics/loading_bar.pcx");
+	R_DrawFindPic ("/pics/downloading.pcx");
+	R_DrawFindPic ("/pics/downloading_bar.pcx");
+	R_DrawFindPic ("/pics/loading_led1.pcx");
+
+	// cursors
+//	R_DrawFindPic (UI_MOUSECURSOR_MAIN_PIC);
+//	R_DrawFindPic (UI_MOUSECURSOR_HOVER_PIC);
+//	R_DrawFindPic (UI_MOUSECURSOR_CLICK_PIC);
+//	R_DrawFindPic (UI_MOUSECURSOR_OVER_PIC);
+//	R_DrawFindPic (UI_MOUSECURSOR_TEXT_PIC);
+	R_DrawFindPic (UI_MOUSECURSOR_PIC);
+	R_DrawFindPic (UI_ITEMCURSOR_DEFAULT_PIC);
+	R_DrawFindPic (UI_ITEMCURSOR_KEYBIND_PIC);
+	R_DrawFindPic (UI_ITEMCURSOR_BLINK_PIC);
+
+	for (i = 0; i < NUM_MAINMENU_CURSOR_FRAMES; i++) {
+		Com_sprintf (scratch, sizeof(scratch), "/pics/m_cursor%d.pcx", i);
+		R_DrawFindPic (scratch);
+	}
+
+	// main menu items
+	R_DrawFindPic ("/pics/m_main_game.pcx");
+	R_DrawFindPic ("/pics/m_main_game_sel.pcx");
+	R_DrawFindPic ("/pics/m_main_multiplayer.pcx");
+	R_DrawFindPic ("/pics/m_main_multiplayer_sel.pcx");
+	R_DrawFindPic ("/pics/m_main_options.pcx");
+	R_DrawFindPic ("/pics/m_main_options_sel.pcx");
+	R_DrawFindPic ("/pics/m_main_video.pcx");
+	R_DrawFindPic ("/pics/m_main_video_sel.pcx");
+//	R_DrawFindPic ("/pics/m_main_mods.pcx");
+//	R_DrawFindPic ("/pics/m_main_mods_sel.pcx");
+	R_DrawFindPic ("/pics/m_main_quit.pcx");
+	R_DrawFindPic ("/pics/m_main_quit_sel.pcx");
+	R_DrawFindPic ("/pics/m_main_plaque.pcx");
+	R_DrawFindPic ("/pics/m_main_logo.pcx");
+	R_RegisterModel ("models/ui/quad_cursor.md2");
+
+	// menu banners
+	R_DrawFindPic ("/pics/m_banner_game.pcx");
+	R_DrawFindPic ("/pics/m_banner_load_game.pcx");
+	R_DrawFindPic ("/pics/m_banner_save_game.pcx");
+	R_DrawFindPic ("/pics/m_banner_multiplayer.pcx");
+	R_DrawFindPic ("/pics/m_banner_join_server.pcx");
+	R_DrawFindPic ("/pics/m_banner_addressbook.pcx");
+	R_DrawFindPic ("/pics/m_banner_start_server.pcx");
+	R_DrawFindPic ("/pics/m_banner_plauer_setup.pcx"); // typo for image name is id's fault
+	R_DrawFindPic ("/pics/m_banner_options.pcx");
+	R_DrawFindPic ("/pics/m_banner_customize.pcx");
+	R_DrawFindPic ("/pics/m_banner_video.pcx");
+//	R_DrawFindPic ("/pics/m_banner_mods.pcx");
+	R_DrawFindPic ("/pics/quit.pcx");
+//	R_DrawFindPic ("/pics/areyousure.pcx");
+//	R_DrawFindPic ("/pics/yn.pcx");
+
+	// GUI elements
+	R_DrawFindPic ("/gfx/ui/widgets/listbox_background.pcx");
+//	R_DrawFindPic (UI_CHECKBOX_ON_PIC);
+//	R_DrawFindPic (UI_CHECKBOX_OFF_PIC);
+	R_DrawFindPic (UI_FIELD_PIC);
+	R_DrawFindPic (UI_TEXTBOX_PIC);
+	R_DrawFindPic (UI_SLIDER_PIC);
+	R_DrawFindPic (UI_ARROWS_PIC);
+
+//	R_DrawFindPic ("/gfx/ui/listbox_background.pcx");
+//	R_DrawFindPic ("/gfx/ui/arrows/arrow_left.pcx");
+//	R_DrawFindPic ("/gfx/ui/arrows/arrow_left_d.pcx");
+//	R_DrawFindPic ("/gfx/ui/arrows/arrow_right.pcx");
+//	R_DrawFindPic ("/gfx/ui/arrows/arrow_right_d.pcx"); 
+}
+
+
+/*
+=================
+UI_Init
+=================
+*/
+void UI_Init (void)
+{
+	// init this cvar here so M_Print can use it
+	if (!alt_text_color)
+		alt_text_color = Cvar_Get ("alt_text_color", "2", CVAR_ARCHIVE);
+
+	ui_sensitivity = Cvar_Get ("ui_sensitivity", "1", CVAR_ARCHIVE);
+	Cvar_SetDescription ("ui_sensitivity", "Sets sensitvity of mouse in menus.");
+	ui_background_alpha = Cvar_Get ("ui_background_alpha", "0.6", CVAR_ARCHIVE);
+	Cvar_SetDescription ("ui_background_alpha", "Sets opacity of background menu image when ingame.");
+	ui_item_rotate = Cvar_Get ("ui_item_rotate", "0", CVAR_ARCHIVE);
+	Cvar_SetDescription ("ui_item_rotate", "Reverses direction of mouse click rotation for menu lists.");
+	ui_cursor_scale = Cvar_Get ("ui_cursor_scale", "0.4", 0);
+	Cvar_SetDescription ("ui_cursor_scale", "Sets scale for drawing the menu mouse cursor.");
+
+	UI_LoadFontNames ();	// load font list
+//	UI_LoadHudNames ();		// load hud list
+	UI_LoadCrosshairs ();	// load crosshairs
+	UI_InitServerList ();	// init join server list
+	UI_LoadMapList();		// load map list
+	UI_LoadPlayerModels (); // load player models
+	UI_InitSavegameData ();	// load savegame data
+
+	UI_Precache ();		// precache images
+
+	Cmd_AddCommand ("menu_main", Menu_Main_f);
+	Cmd_AddCommand ("menu_game", Menu_Game_f);
+		Cmd_AddCommand ("menu_loadgame", Menu_LoadGame_f);
+		Cmd_AddCommand ("menu_savegame", Menu_SaveGame_f);
+		Cmd_AddCommand ("menu_credits", Menu_Credits_f );
+	Cmd_AddCommand ("menu_multiplayer", Menu_Multiplayer_f );
+		Cmd_AddCommand ("menu_joinserver", Menu_JoinServer_f);
+			Cmd_AddCommand ("menu_addressbook", Menu_AddressBook_f);
+		Cmd_AddCommand ("menu_startserver", Menu_StartServer_f);
+			Cmd_AddCommand ("menu_dmoptions", Menu_DMOptions_f);
+		Cmd_AddCommand ("menu_playerconfig", Menu_PlayerConfig_f);
+		Cmd_AddCommand ("menu_downloadoptions", Menu_DownloadOptions_f);
+	Cmd_AddCommand ("menu_video", Menu_Video_f);
+		Cmd_AddCommand ("menu_video_advanced", Menu_Video_Advanced_f);
+	Cmd_AddCommand ("menu_options", Menu_Options_f);
+		Cmd_AddCommand ("menu_sound", Menu_Options_Sound_f);
+		Cmd_AddCommand ("menu_controls", Menu_Options_Controls_f);
+			Cmd_AddCommand ("menu_keys", Menu_Keys_f);
+		Cmd_AddCommand ("menu_screen", Menu_Options_Screen_f);
+		Cmd_AddCommand ("menu_effects", Menu_Options_Effects_f);
+		Cmd_AddCommand ("menu_interface", Menu_Options_Interface_f);
+	Cmd_AddCommand ("menu_quit", Menu_Quit_f);
+
+	ui_initialized = true;
+}
+
+
+/*
+=================
+UI_Shutdown
+=================
+*/
+void UI_Shutdown (void)
+{
+	// Don't shutdown if not initialized
+	// Fixes errors in dedicated console
+	if (!ui_initialized)
+		return;
+
+	UI_FreeFontNames ();
+//	UI_FreeHudNames ();
+	UI_FreeCrosshairs ();
+	UI_FreeMapList ();
+	UI_FreePlayerModels ();
+
+	Cmd_RemoveCommand ("menu_main");
+	Cmd_RemoveCommand ("menu_game");
+	Cmd_RemoveCommand ("menu_loadgame");
+	Cmd_RemoveCommand ("menu_savegame");
+	Cmd_RemoveCommand ("menu_credits");
+	Cmd_RemoveCommand ("menu_multiplayer");
+	Cmd_RemoveCommand ("menu_joinserver");
+	Cmd_RemoveCommand ("menu_addressbook");
+	Cmd_RemoveCommand ("menu_startserver");
+	Cmd_RemoveCommand ("menu_dmoptions");
+	Cmd_RemoveCommand ("menu_playerconfig");
+	Cmd_RemoveCommand ("menu_downloadoptions");
+	Cmd_RemoveCommand ("menu_video");
+	Cmd_RemoveCommand ("menu_video_advanced");
+	Cmd_RemoveCommand ("menu_options");
+	Cmd_RemoveCommand ("menu_sound");
+	Cmd_RemoveCommand ("menu_controls");
+	Cmd_RemoveCommand ("menu_keys");
+	Cmd_RemoveCommand ("menu_screen");
+	Cmd_RemoveCommand ("menu_effects");
+	Cmd_RemoveCommand ("menu_interface");
+	Cmd_RemoveCommand ("menu_quit");
+
+	ui_initialized = false;
 }

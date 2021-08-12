@@ -20,7 +20,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 
-// ui_options_keys.c -- the key binding menu
+// menu_options_keys.c -- the key binding menu
 
 #include <ctype.h>
 #ifdef _WIN32
@@ -72,7 +72,7 @@ int				keys_cursor;
 static int		bind_grab;
 
 static menuframework_s	s_keys_menu;
-static menuaction_s s_keys_binds[64];
+static menuaction_s		s_keys_binds[64];
 static menuaction_s		s_keys_back_action;
 
 static void M_UnbindCommand (char *command)
@@ -131,9 +131,9 @@ static void KeysBackCursorDrawFunc (menuaction_s *self) // back action
 
 	cursor = ((int)(Sys_Milliseconds()/250)&1) ? UI_ITEMCURSOR_DEFAULT_PIC : UI_ITEMCURSOR_BLINK_PIC;
 
-	SCR_DrawPic (SCREEN_WIDTH*0.5 - 24, s_keys_menu.y + self->generic.y, MENU_FONT_SIZE, MENU_FONT_SIZE, ALIGN_CENTER, false, cursor, 255);
-/*	SCR_DrawChar (SCREEN_WIDTH*0.5 - 24, s_keys_menu.y + self->generic.y, MENU_FONT_SIZE, ALIGN_CENTER,
-					12+((int)(Sys_Milliseconds()/250)&1), FONT_UI, 255,255,255,255, false, true);
+	UI_DrawPic (SCREEN_WIDTH*0.5 - 24, s_keys_menu.y + self->generic.y, MENU_FONT_SIZE, MENU_FONT_SIZE, ALIGN_CENTER, false, cursor, 255);
+/*	UI_DrawChar (SCREEN_WIDTH*0.5 - 24, s_keys_menu.y + self->generic.y, MENU_FONT_SIZE, ALIGN_CENTER,
+					12+((int)(Sys_Milliseconds()/250)&1), 255, 255, 255, 255, false, true);
 */
 }
 
@@ -146,26 +146,26 @@ static void KeyCursorDrawFunc (menuframework_s *menu)
 	else
 		cursor = ((int)(Sys_Milliseconds()/250)&1) ? UI_ITEMCURSOR_DEFAULT_PIC : UI_ITEMCURSOR_BLINK_PIC;
 
-	SCR_DrawPic (menu->x, menu->y + menu->cursor * MENU_LINE_SIZE, MENU_FONT_SIZE, MENU_FONT_SIZE, ALIGN_CENTER, false, cursor, 255);
+	UI_DrawPic (menu->x, menu->y + menu->cursor * MENU_LINE_SIZE, MENU_FONT_SIZE, MENU_FONT_SIZE, ALIGN_CENTER, false, cursor, 255);
 /*	if (bind_grab)
-		SCR_DrawChar (menu->x, menu->y + menu->cursor * MENU_LINE_SIZE, MENU_FONT_SIZE, ALIGN_CENTER,
-						'=', FONT_UI, 255,255,255,255, false, true);
+		UI_DrawChar (menu->x, menu->y + menu->cursor * MENU_LINE_SIZE, MENU_FONT_SIZE, ALIGN_CENTER,
+						'=', 255, 255, 255, 255, false, true);
 	else
-		SCR_DrawChar (menu->x, menu->y + menu->cursor * MENU_LINE_SIZE, MENU_FONT_SIZE, ALIGN_CENTER,
-						12+((int)(Sys_Milliseconds()/250)&1), FONT_UI, 255,255,255,255, false, true);
+		UI_DrawChar (menu->x, menu->y + menu->cursor * MENU_LINE_SIZE, MENU_FONT_SIZE, ALIGN_CENTER,
+						12+((int)(Sys_Milliseconds()/250)&1), 255, 255, 255, 255, false, true);
 */
 }
 
 static void DrawKeyBindingFunc (void *self)
 {
 	int keys[2];
-	menuaction_s *a = ( menuaction_s * ) self;
+	menuaction_s *a = (menuaction_s *) self;
 
 	M_FindKeysForCommand( bindnames[a->generic.localdata[0]][0], keys);
 		
 	if (keys[0] == -1)
 	{
-		Menu_DrawString (a->generic.x + a->generic.parent->x + 16,
+		UI_DrawString (a->generic.x + a->generic.parent->x + 16,
 						a->generic.y + a->generic.parent->y, a->generic.textSize, "???", 255);
 	}
 	else
@@ -175,16 +175,16 @@ static void DrawKeyBindingFunc (void *self)
 
 		name = Key_KeynumToString (keys[0]);
 
-		Menu_DrawString (a->generic.x + a->generic.parent->x + 16,
+		UI_DrawString (a->generic.x + a->generic.parent->x + 16,
 						a->generic.y + a->generic.parent->y, a->generic.textSize, name , 255);
 
 		x = (int)strlen(name) * MENU_FONT_SIZE;
 
 		if (keys[1] != -1)
 		{
-			Menu_DrawString (a->generic.x + a->generic.parent->x + MENU_FONT_SIZE*3 + x,
+			UI_DrawString (a->generic.x + a->generic.parent->x + MENU_FONT_SIZE*3 + x,
 							a->generic.y + a->generic.parent->y, a->generic.textSize, "or", 255);
-			Menu_DrawString (a->generic.x + a->generic.parent->x + MENU_FONT_SIZE*6 + x,
+			UI_DrawString (a->generic.x + a->generic.parent->x + MENU_FONT_SIZE*6 + x,
 							a->generic.y + a->generic.parent->y, a->generic.textSize, Key_KeynumToString(keys[1]), 255);
 		}
 	}
@@ -202,10 +202,10 @@ static void KeyBindingFunc (void *self)
 
 	bind_grab = true;
 
-	Menu_SetStatusBar( &s_keys_menu, "press a key or button for this action" );
+	UI_SetMenuStatusBar (&s_keys_menu, "press a key or button for this action");
 }
 
-void addBindOption (int i, char* list[][2])
+void addBindOption (int i, char *list[][2])
 {		
 	s_keys_binds[i].generic.type	= MTYPE_ACTION;
 	s_keys_binds[i].generic.textSize = MENU_FONT_SIZE;
@@ -221,7 +221,7 @@ void addBindOption (int i, char* list[][2])
 		s_keys_binds[i].generic.type	= MTYPE_SEPARATOR;
 }
 
-static void Keys_MenuInit (void)
+static void Menu_Keys_Init (void)
 {
 	int BINDS_MAX;
 	int i = 0;
@@ -233,7 +233,7 @@ static void Keys_MenuInit (void)
 
 	BINDS_MAX = listSize(bindnames);
 	for (i=0;i<BINDS_MAX;i++)
-		addBindOption(i, bindnames);
+		addBindOption (i, bindnames);
 
 	s_keys_back_action.generic.type = MTYPE_ACTION;
 	s_keys_back_action.generic.textSize = MENU_FONT_SIZE;
@@ -245,25 +245,25 @@ static void Keys_MenuInit (void)
 	s_keys_back_action.generic.cursordraw = KeysBackCursorDrawFunc;
 
 	for (i=0;i<BINDS_MAX;i++)
-		Menu_AddItem( &s_keys_menu, ( void * ) &s_keys_binds[i] );
+		UI_AddMenuItem (&s_keys_menu, (void *) &s_keys_binds[i]);
 
-	Menu_AddItem( &s_keys_menu, ( void * ) &s_keys_back_action );
+	UI_AddMenuItem (&s_keys_menu, (void *) &s_keys_back_action);
 
-	Menu_SetStatusBar( &s_keys_menu, "enter or mouse1 to change, backspace to clear" );
+	UI_SetMenuStatusBar (&s_keys_menu, "enter or mouse1 to change, backspace to clear");
 	// Don't center it- it's too large
-	//Menu_Center( &s_keys_menu );
+//	UI_CenterMenu (&s_keys_menu);
 }
 
-static void Keys_MenuDraw (void)
+static void Menu_Keys_Draw (void)
 {
-	Menu_DrawBanner( "m_banner_customize" ); // Knightmare added
-	Menu_AdjustCursor( &s_keys_menu, 1 );
-	Menu_Draw( &s_keys_menu );
+	UI_DrawBanner ("m_banner_customize"); // Knightmare added
+	UI_AdjustMenuCursor (&s_keys_menu, 1);
+	UI_DrawMenu (&s_keys_menu);
 }
 
-static const char *Keys_MenuKey (int key)
+static const char *Menu_Keys_Key (int key)
 {
-	menuaction_s *item = ( menuaction_s * ) Menu_ItemAtCursor( &s_keys_menu );
+	menuaction_s *item = (menuaction_s *) UI_ItemAtMenuCursor( &s_keys_menu );
 
 	//pressing mouse1 to pick a new bind wont force bind/unbind itself - spaz
 	if ( bind_grab && !(ui_mousecursor.buttonused[MOUSEBUTTON1]&&key==K_MOUSE1))
@@ -282,31 +282,31 @@ static const char *Keys_MenuKey (int key)
 		if (key == K_MOUSE1)
 			ui_mousecursor.buttonclicks[MOUSEBUTTON1] = -1;
 
-		Menu_SetStatusBar (&s_keys_menu, "enter to change, backspace to clear");
+		UI_SetMenuStatusBar (&s_keys_menu, "enter to change, backspace to clear");
 		bind_grab = false;
 		return menu_out_sound;
 	}
 
-	switch ( key )
+	switch (key)
 	{
 	case K_KP_ENTER:
 	case K_ENTER:
 		if (item == &s_keys_back_action) { // back action hack
 			UI_BackMenu(item); return NULL; }
-		KeyBindingFunc( item );
+		KeyBindingFunc (item);
 		return menu_in_sound;
 	case K_BACKSPACE:		// delete bindings
 	case K_DEL:				// delete bindings
 	case K_KP_DEL:
-		M_UnbindCommand( bindnames[item->generic.localdata[0]][0] );
+		M_UnbindCommand (bindnames[item->generic.localdata[0]][0]);
 		return menu_out_sound;
 	default:
-		return Default_MenuKey( &s_keys_menu, key );
+		return UI_DefaultMenuKey (&s_keys_menu, key);
 	}
 }
 
-void M_Menu_Keys_f (void)
+void Menu_Keys_f (void)
 {
-	Keys_MenuInit();
-	UI_PushMenu( Keys_MenuDraw, Keys_MenuKey );
+	Menu_Keys_Init ();
+	UI_PushMenu (Menu_Keys_Draw, Menu_Keys_Key);
 }

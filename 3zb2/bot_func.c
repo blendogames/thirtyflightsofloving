@@ -392,15 +392,13 @@ void InitializeBot (edict_t *ent,int botindex )
 
 void PutBotInServer (edict_t *ent)
 {
-	edict_t		*touch[MAX_EDICTS];
-	int			i,j,entcount;
-	gitem_t		*item;
-	gclient_t	*client;
-	vec3_t	spawn_origin, spawn_angles;
-	trace_t		rs_trace;
-
-
-	zgcl_t		*zc;		
+	static edict_t	*touch[MAX_EDICTS];	// Knightmare- made static due to stack size
+	int				i, j, entcount;
+	gitem_t			*item;
+	gclient_t		*client;
+	vec3_t			spawn_origin, spawn_angles;
+	trace_t			rs_trace;
+	zgcl_t			*zc;		
 	
 	zc = &ent->client->zc;
 
@@ -411,7 +409,7 @@ void PutBotInServer (edict_t *ent)
 
 	//current weapon
 	client = ent->client;
-	item = Fdi_BLASTER;//FindItem("Blaster");
+	item = Fdi_BLASTER;	// FindItem("Blaster");
 	client->pers.selected_item = ITEM_INDEX(item);
 	client->pers.inventory[client->pers.selected_item] = 1;
 	client->pers.weapon = item;
@@ -537,7 +535,7 @@ void PutBotInServer (edict_t *ent)
 	gi.linkentity (ent);
 	VectorAdd (spawn_origin, ent->mins, ent->absmin);
 	VectorAdd (spawn_origin, ent->maxs, ent->absmax);
-	entcount = gi.BoxEdicts ( ent->absmin ,ent->absmax,touch,MAX_EDICTS,AREA_SOLID);
+	entcount = gi.BoxEdicts ( ent->absmin, ent->absmax, touch, MAX_EDICTS, AREA_SOLID);
 	while (entcount-- > 0)
 	{
 		if (Q_stricmp (touch[entcount]->classname, "player") == 0)
