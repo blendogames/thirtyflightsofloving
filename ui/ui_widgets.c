@@ -134,33 +134,40 @@ void MenuField_Draw (menufield_s *f)
 		offset = (int)strlen(tempbuffer);
 	}
 
-	UI_DrawPicST (f->generic.x + f->generic.parent->x + RCOLUMN_OFFSET,
+	if (ui_new_textfield->integer)
+	{
+		UI_DrawPicST (f->generic.x + f->generic.parent->x + RCOLUMN_OFFSET,
 						f->generic.y + f->generic.parent->y - 4, f->generic.textSize, f->generic.textSize*2, stCoord_field_left,
 						ALIGN_CENTER, true, color_identity, UI_FIELD_PIC);
-	UI_DrawPicST (f->generic.x + f->generic.parent->x + (1+f->visible_length)*f->generic.textSize + RCOLUMN_OFFSET,
+		UI_DrawPicST (f->generic.x + f->generic.parent->x + (1+f->visible_length)*f->generic.textSize + RCOLUMN_OFFSET,
 						f->generic.y + f->generic.parent->y - 4, f->generic.textSize, f->generic.textSize*2, stCoord_field_right,
 						ALIGN_CENTER, true, color_identity, UI_FIELD_PIC);
+	}
+	else
+	{
+		UI_DrawChar (f->generic.x + f->generic.parent->x + RCOLUMN_OFFSET,
+					f->generic.y + f->generic.parent->y - 4, f->generic.textSize, ALIGN_CENTER, 18, 255, 255, 255, 255, false, false);
+		UI_DrawChar (f->generic.x + f->generic.parent->x + RCOLUMN_OFFSET,
+					f->generic.y + f->generic.parent->y + 4, f->generic.textSize, ALIGN_CENTER, 24, 255, 255, 255, 255, false, false);
+		UI_DrawChar (f->generic.x + f->generic.parent->x + (1+f->visible_length)*f->generic.textSize + RCOLUMN_OFFSET,
+					f->generic.y + f->generic.parent->y - 4, f->generic.textSize, ALIGN_CENTER, 20, 255, 255, 255, 255, false, false);
+		UI_DrawChar (f->generic.x + f->generic.parent->x + (1+f->visible_length)*f->generic.textSize + RCOLUMN_OFFSET,
+					f->generic.y + f->generic.parent->y + 4, f->generic.textSize, ALIGN_CENTER, 26, 255, 255, 255, 255, false, false);
+	}
 
-/*	UI_DrawChar (f->generic.x + f->generic.parent->x + RCOLUMN_OFFSET,
-				f->generic.y + f->generic.parent->y - 4, f->generic.textSize, ALIGN_CENTER, 18, 255,255,255,255, false, false);
-	UI_DrawChar (f->generic.x + f->generic.parent->x + RCOLUMN_OFFSET,
-				f->generic.y + f->generic.parent->y + 4, f->generic.textSize, ALIGN_CENTER, 24, 255,255,255,255, false, false);
-	UI_DrawChar (f->generic.x + f->generic.parent->x + (1+f->visible_length)*f->generic.textSize + RCOLUMN_OFFSET,
-				f->generic.y + f->generic.parent->y - 4, f->generic.textSize, ALIGN_CENTER, 20, 255,255,255,255, false, false);
-	UI_DrawChar (f->generic.x + f->generic.parent->x + (1+f->visible_length)*f->generic.textSize + RCOLUMN_OFFSET,
-				f->generic.y + f->generic.parent->y + 4, f->generic.textSize, ALIGN_CENTER, 26, 255,255,255,255, false, false);
-*/
 	for (i = 0; i < f->visible_length; i++)
 	{
-		UI_DrawPicST (f->generic.x + f->generic.parent->x + (1+i)*f->generic.textSize + RCOLUMN_OFFSET,
+		if (ui_new_textfield->integer) {
+			UI_DrawPicST (f->generic.x + f->generic.parent->x + (1+i)*f->generic.textSize + RCOLUMN_OFFSET,
 							f->generic.y + f->generic.parent->y - 4, f->generic.textSize, f->generic.textSize*2, stCoord_field_center,
 							ALIGN_CENTER, true, color_identity, UI_FIELD_PIC);
-
-	/*	UI_DrawChar (f->generic.x + f->generic.parent->x + (1+i)*f->generic.textSize + RCOLUMN_OFFSET,
-					f->generic.y + f->generic.parent->y - 4, f->generic.textSize, ALIGN_CENTER, 19, 255,255,255,255, false, false);
-		UI_DrawChar (f->generic.x + f->generic.parent->x + (1+i)*f->generic.textSize + RCOLUMN_OFFSET,
-					f->generic.y + f->generic.parent->y + 4, f->generic.textSize, ALIGN_CENTER, 25, 255,255,255,255, false, (i==(f->visible_length-1)));
-	*/
+		}
+		else {
+			UI_DrawChar (f->generic.x + f->generic.parent->x + (1+i)*f->generic.textSize + RCOLUMN_OFFSET,
+						f->generic.y + f->generic.parent->y - 4, f->generic.textSize, ALIGN_CENTER, 19, 255, 255, 255, 255, false, false);
+			UI_DrawChar (f->generic.x + f->generic.parent->x + (1+i)*f->generic.textSize + RCOLUMN_OFFSET,
+						f->generic.y + f->generic.parent->y + 4, f->generic.textSize, ALIGN_CENTER, 25, 255, 255, 255, 255, false, (i==(f->visible_length-1)));
+		}
 	}
 
 	// add cursor thingie

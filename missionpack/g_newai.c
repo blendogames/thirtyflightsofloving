@@ -1285,7 +1285,7 @@ qboolean face_wall (edict_t *self)
 
 void badarea_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
-//	drawbbox(ent);
+//	drawbbox (ent);
 }
 
 edict_t *SpawnBadArea (vec3_t mins, vec3_t maxs, float lifespan, edict_t *owner)
@@ -1330,8 +1330,15 @@ edict_t *CheckForBadArea (edict_t *ent)
 {
 	int				i, num;
 	static edict_t	*touch[MAX_EDICTS];	// Knightmare- made static due to stack size
-	edict_t			*hit;
+	edict_t			*hit=NULL;
 	vec3_t			mins, maxs;
+
+	// Knightmare- check for prox fields first
+	if (ent->monsterinfo.monsterflags & MFL_KNOWS_PROX_MINES) {
+		hit = CheckForProxField(ent);
+		if (hit)
+			return hit;
+	}
 
 	VectorAdd (ent->s.origin, ent->mins, mins);
 	VectorAdd (ent->s.origin, ent->maxs, maxs);
@@ -1427,8 +1434,8 @@ qboolean MarkTeslaArea (edict_t *self, edict_t *tesla)
 }
 
 // Knightmare added
+#if 0
 #define PROX_DAMAGE_RADIUS	192
-
 qboolean MarkProxArea (edict_t *prox)
 {
 	vec3_t	mins, maxs;
@@ -1486,6 +1493,7 @@ qboolean MarkProxArea (edict_t *prox)
 	}
 	return true;
 }
+#endif
 // end Knightmare
 
 // predictive calculator

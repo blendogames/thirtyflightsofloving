@@ -33,6 +33,8 @@ cvar_t	*ui_sensitivity;
 cvar_t	*ui_background_alpha;
 cvar_t	*ui_item_rotate;
 cvar_t	*ui_cursor_scale;
+cvar_t	*ui_new_textbox;
+cvar_t	*ui_new_textfield;
 
 // moved these here to avoid redundancy
 char *menu_null_sound		= "null";
@@ -237,6 +239,10 @@ void UI_Init (void)
 	Cvar_SetDescription ("ui_item_rotate", "Reverses direction of mouse click rotation for menu lists.");
 	ui_cursor_scale = Cvar_Get ("ui_cursor_scale", "0.4", 0);
 	Cvar_SetDescription ("ui_cursor_scale", "Sets scale for drawing the menu mouse cursor.");
+	ui_new_textbox = Cvar_Get ("ui_new_textbox", "1", 0);
+	Cvar_SetDescription ("ui_new_textbox", "Toggles use of new text box image.  Setting this to 0 uses old font-based tiles.");
+	ui_new_textfield = Cvar_Get ("ui_new_textfield", "1", 0);
+	Cvar_SetDescription ("ui_new_textfield", "Toggles use of new text field image.  Setting this to 0 uses old font-based tiles.");
 
 	UI_LoadFontNames ();	// load font list
 //	UI_LoadHudNames ();		// load hud list

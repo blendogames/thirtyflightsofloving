@@ -2121,7 +2121,7 @@ void ionripper_sparks (edict_t *self)
 	color = 0xe4 + (rand()&3);
 
 	// Knightmare- explode sound
-	if (ion_ripper_extra_sounds->value)
+	if (sk_ionripper_extra_sounds->value)
 		gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, gi.soundindex ("weapons/ionexp.wav"), 1, ATTN_NONE, 0);
 
 	gi.WriteByte (svc_temp_entity);
@@ -2156,8 +2156,8 @@ void ionripper_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t
 
 	if (other->takedamage)
 	{
-	//Knightmare- hit sound
-		if (ion_ripper_extra_sounds->value)
+	// Knightmare- hit sound
+		if (sk_ionripper_extra_sounds->value)
 #ifdef KMQUAKE2_ENGINE_MOD
 		{
 			float r = random();

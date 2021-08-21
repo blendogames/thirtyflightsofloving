@@ -1260,7 +1260,7 @@ qboolean gunner_blocked (edict_t *self, float dist)
 
 	if (blocked_checkjump (self, dist, 192, 40))
 	{
-		gunner_jump(self);
+		gunner_jump (self);
 		return true;
 	}
 
@@ -1425,6 +1425,8 @@ void SP_monster_gunner (edict_t *self)
 
 		self->common_name = "Tactician Gunner";
 		self->class_id = ENTITY_MONSTER_GUNNER_TACTICIAN;
+
+		self->monsterinfo.monsterflags |= MFL_KNOWS_PROX_MINES;	// Tactician Gunner avoids prox mines
 	}
 	else
 	{	// precache

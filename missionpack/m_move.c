@@ -340,7 +340,7 @@ qboolean SV_movestep (edict_t *ent, vec3_t move, qboolean relink)
 				}
 			}
 
-//			if (trace.fraction == 1)
+		//	if (trace.fraction == 1)
 
 			// PMM - changed above to this
 			if ((trace.fraction == 1) && (!trace.allsolid) && (!trace.startsolid))
@@ -350,7 +350,7 @@ qboolean SV_movestep (edict_t *ent, vec3_t move, qboolean relink)
 //PGM
 				if (!current_bad && CheckForBadArea(ent))
 				{
-//					gi.dprintf("Oooh! Bad Area!\n");
+				//	gi.dprintf("Oooh! Bad Area!\n");
 					VectorCopy (oldorg, ent->s.origin);
 				}
 				else
@@ -509,7 +509,8 @@ qboolean SV_movestep (edict_t *ent, vec3_t move, qboolean relink)
 #endif //PGM
 		contents = gi.pointcontents(test);
 
-		if (contents & MASK_WATER)
+	//	if (contents & MASK_WATER)
+		if ( (contents & MASK_WATER) && (ent->movetype != MOVETYPE_FALLFLOAT) )	// Zaero
 			return false;
 	}
 
@@ -645,6 +646,20 @@ qboolean SV_movestep (edict_t *ent, vec3_t move, qboolean relink)
 			// FIXME
 			return true;
 		}
+		// Zaero
+		else if (ent->movetype == MOVETYPE_FALLFLOAT)
+		{
+			// can fall over the edge
+			VectorAdd (ent->s.origin, move, ent->s.origin);
+			if (relink)
+			{
+				gi.linkentity (ent);
+				G_TouchTriggers (ent);
+			}
+			ent->groundentity = NULL;
+			return true;
+		}
+		// end Zaero
 
 		return false;		// walked off an edge
 	}
@@ -738,6 +753,18 @@ qboolean SV_movestep (edict_t *ent, vec3_t move, qboolean relink)
 			// FIXME
 			return true;
 		}
+		// Zaero
+		else if (ent->movetype == MOVETYPE_FALLFLOAT)
+		{
+			// can fall over the edge
+			if (relink)
+			{
+				gi.linkentity (ent);
+				G_TouchTriggers (ent);
+			}
+			return true;
+		}
+		// end Zaero
 		VectorCopy (oldorg, ent->s.origin);
 		return false;
 	}

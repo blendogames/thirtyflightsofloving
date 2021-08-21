@@ -436,6 +436,8 @@ void ED_ParseField(char *key, char *value, edict_t *ent)
 	vec3_t	vec;
 	float	v;
 
+	VectorClear (vec);	// zero this vector first
+
 	for (f = fields; f->name; ++f)
 	{
 		if (!Q_stricmp(f->name, key))
@@ -453,8 +455,8 @@ void ED_ParseField(char *key, char *value, edict_t *ent)
 
 				case F_VECTOR:
 				//	sscanf (value, "%f %f %f", &vec[0], &vec[1], &vec[2]);
-					if (sscanf (value, "%f %f %f", &vec[0], &vec[1], &vec[2]) == EOF) {
-						gi.error ("ED_ParseField: invalid vector '%s' for key '%s'.\n", value, key);
+					if (sscanf (value, "%f %f %f", &vec[0], &vec[1], &vec[2]) != 3) {
+						gi.dprintf ("ED_ParseField: map '%s' has invalid vector '%s' for key '%s'.\n", level.mapname, value, key);
 					}
 					((float *)(b+f->ofs))[0] = vec[0];
 					((float *)(b+f->ofs))[1] = vec[1];
@@ -647,8 +649,10 @@ void SpawnEntities(char *mapname, char *entities, char *spawnpoint)
 	memset(&level, 0, sizeof(level));
 	memset(g_edicts, 0, game.maxentities * sizeof(g_edicts[0]));
 
-	strncpy(level.mapname, mapname, sizeof(level.mapname)-1);
-	strncpy(game.spawnpoint, spawnpoint, sizeof(game.spawnpoint)-1);
+//	strncpy (level.mapname, mapname, sizeof(level.mapname)-1);
+//	strncpy (game.spawnpoint, spawnpoint, sizeof(game.spawnpoint)-1);
+	Com_strcpy (level.mapname, sizeof(level.mapname), mapname);
+	Com_strcpy (game.spawnpoint, sizeof(game.spawnpoint), spawnpoint);
 
 //CW++
 	switch ((int)sv_gametype->value)

@@ -8,7 +8,6 @@ extern	cvar_t	*allow_player_use_abandoned_turret;	// whether to allow player to 
 extern	cvar_t	*turn_rider;				// whether to turn player on rotating object
 extern	cvar_t	*adjust_train_corners;		// whether to subtract (1,1,1) from train path corners to fix misalignments
 
-extern	cvar_t	*ion_ripper_extra_sounds;
 extern	cvar_t	*add_velocity_throw;		// whether to add player's velocity to thrown objects
 extern	cvar_t	*falling_armor_damage;		// whether player's armor absorbs damage from falling
 extern	cvar_t	*player_jump_sounds;		// whether to play that STUPID grunting sound when the player jumps
@@ -83,6 +82,7 @@ extern	cvar_t	*sk_ionripper_damage_dm;
 extern	cvar_t	*sk_ionripper_kick;
 extern	cvar_t	*sk_ionripper_kick_dm;
 extern	cvar_t	*sk_ionripper_speed;
+extern	cvar_t	*sk_ionripper_extra_sounds;
 
 extern	cvar_t	*sk_phalanx_damage;
 extern	cvar_t	*sk_phalanx_damage2;

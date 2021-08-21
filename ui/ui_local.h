@@ -495,6 +495,8 @@ extern	cvar_t	*ui_sensitivity;
 extern	cvar_t	*ui_background_alpha;
 extern	cvar_t	*ui_item_rotate;
 extern	cvar_t	*ui_cursor_scale;
+extern	cvar_t	*ui_new_textbox;
+extern	cvar_t	*ui_new_textfield;
 
 // moved these declarations to ui_subsystem.c to avoid redundancy
 extern	char *menu_null_sound;

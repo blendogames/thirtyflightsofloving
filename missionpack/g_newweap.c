@@ -157,12 +157,61 @@ void SP_flechette (edict_t *flechette)
 #define PROX_TIME_DELAY		0.5
 #define PROX_BOUND_SIZE		96
 #define PROX_DAMAGE_RADIUS	192
+#define	PROX_RADIUS_CHECK	(PROX_DAMAGE_RADIUS - PROX_BOUND_SIZE)
 #define PROX_HEALTH			20
 #define PROX_DAMAGE			90
 
 void Prox_Explode (edict_t *ent);
 //===============
 //===============
+
+// Knightmare added
+/*
+========================================================
+CheckForProxField
+
+This is a customized version of G_TouchTriggers that will check
+for prox field triggers and return them if they're close by.
+========================================================
+*/
+edict_t *CheckForProxField (edict_t *ent)
+{
+	int				i, num;
+	static edict_t	*touch[MAX_EDICTS];	// Knightmare- made static due to stack size
+	edict_t			*hit;
+	vec3_t			ofs_mins, ofs_maxs, mins, maxs;
+	
+	if ( !ent || !ent->inuse || !(ent->svflags & SVF_MONSTER) )
+		return NULL;
+	// Only certain monsters know to check for these
+	if ( !(ent->monsterinfo.monsterflags & MFL_KNOWS_PROX_MINES) )
+		return NULL;
+
+	VectorAdd (ent->s.origin, ent->mins, mins);
+	VectorAdd (ent->s.origin, ent->maxs, maxs);
+	// Add size difference between prox field and prox damage radius to expand bounds check
+	VectorSet (ofs_mins, -PROX_RADIUS_CHECK, -PROX_RADIUS_CHECK, -PROX_RADIUS_CHECK);
+	VectorSet (ofs_maxs, PROX_RADIUS_CHECK, PROX_RADIUS_CHECK, PROX_RADIUS_CHECK);
+	VectorAdd (mins, ofs_mins, mins);
+	VectorAdd (maxs, ofs_maxs, maxs);
+
+	num = gi.BoxEdicts (mins, maxs, touch, MAX_EDICTS, AREA_TRIGGERS);
+
+	// be careful, it is possible to have an entity in this
+	// list removed before we get to it (killtriggered)
+	for (i=0 ; i<num ; i++)
+	{
+		hit = touch[i];
+		if (!hit->inuse)
+			continue;
+		if (hit->class_id == ENTITY_PROX_FIELD)
+		{
+			return hit;
+		}
+	}
+	
+	return NULL;
+}
 
 // Knightmare- move prox and trigger field with host
 void prox_movewith_host (edict_t *self)
@@ -211,16 +260,13 @@ movefield:
 	if (!self) // more paranoia
 		return;
 
-//	if (!strcmp(self->classname, "bad_area") && (g_showlogic) && (g_showlogic->value))
-//		gi.dprintf ("prox_movewith_host: Moving badarea for tesla\n");
-
 	self->movetype = MOVETYPE_PUSH;
 	if (!self->movewith_set)
 	{
 		VectorCopy(self->mins, self->org_mins);
 		VectorCopy(self->maxs, self->org_maxs);
 		VectorSubtract (self->s.origin, host->s.origin, self->movewith_offset);
-		// Remeber child's and parent's angles when child was attached
+		// Remember child's and parent's angles when child was attached
 		VectorCopy(host->s.angles, self->parent_attach_angles);
 		VectorCopy(self->s.angles, self->child_attach_angles);
 		self->movewith_set = 1;
@@ -254,7 +300,7 @@ movefield:
 	}
 	VectorScale (host->avelocity, FRAMETIME, amove);
 	VectorAdd(self->child_attach_angles, host_angle_change, self->s.angles); // add rotation to angles
-//	VectorAdd(self->s.angles, amove, self->s.angles); //add rotation to angles
+//	VectorAdd(self->s.angles, amove, self->s.angles); // add rotation to angles
 
 	if (amove[YAW]) // Cross fingers here... move bounding box
 	{
@@ -292,19 +338,20 @@ movefield:
 	}
 	self->s.event = host->s.event;
 	gi.linkentity (self);
-//	if (iteration < 1 && self->teamchain) // now move the trigger field
-	if (iteration < 2 && self->teamchain) // now move the trigger field and badarea
+	if (iteration < 1 && self->teamchain) // now move the trigger field
+//	if (iteration < 2 && self->teamchain) // now move the trigger field and badarea
 	{
 		self = self->teamchain;
 		iteration++;
 		goto movefield;
 	}
 }
+// end Knightmare
 
 void Prox_Explode (edict_t *ent)
 {
 	vec3_t		origin;
-	edict_t		*owner, *cur, *next;
+	edict_t		*owner;
 	int			type;
 
 //	Grenade_Remove_From_Chain (ent);
@@ -314,8 +361,9 @@ void Prox_Explode (edict_t *ent)
 	// PMM - changed teammaster to "mover" .. owner of the field is the prox
 	// Knightmare- also free badarea
 	if ( ent->teamchain && (ent->teamchain->owner == ent) )
-	//	G_FreeEdict(ent->teamchain);
-	{
+		G_FreeEdict(ent->teamchain);
+/*	{
+		edict_t		*cur, *next;
 		cur = ent->teamchain;
 		while (cur)
 		{
@@ -325,7 +373,7 @@ void Prox_Explode (edict_t *ent)
 			G_FreeEdict (cur);
 			cur = next;
 		}
-	}
+	} */
 
 	owner = ent;
 	if (ent->teammaster)
@@ -684,6 +732,7 @@ void prox_land (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
 	field->solid = SOLID_TRIGGER;
 	field->owner = ent;
 	field->classname = "prox_field";
+	field->class_id = ENTITY_PROX_FIELD;	// Knightmare added
 	field->teammaster = ent;
 	if (havehost) // Knightmare- set up field to move with host
 		field->movewith_ent = other;
@@ -718,9 +767,9 @@ void prox_land (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
 	gi.linkentity(ent);
 
 	// Knightmare- mark monster-fired prox mines for AI avoidance
-	if ( ent->owner && (ent->owner->svflags & SVF_MONSTER) ) {
+/*	if ( ent->owner && (ent->owner->svflags & SVF_MONSTER) ) {
 		MarkProxArea (ent);
-	}
+	} */
 }
 
 //===============

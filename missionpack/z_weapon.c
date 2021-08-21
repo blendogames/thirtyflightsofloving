@@ -176,7 +176,7 @@ void tripbomb_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dam
 {
 //	gi.dprintf("tripbomb_die\n");
 	// if set off by another TripBomb, delay a little (chained explosions)
-	if ( strcmp(inflictor->classname, "ired") )
+	if ( Q_stricmp(inflictor->classname, "ired") != 0 )
 	{
 		self->takedamage = DAMAGE_NO;
 		if (self->chain) {

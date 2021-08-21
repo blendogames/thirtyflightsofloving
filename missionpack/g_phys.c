@@ -133,9 +133,9 @@ edict_t	*SV_TestEntityPosition (edict_t *ent)
 	if (ent->solid == SOLID_BSP)
 	{
 		vec3_t	org, mins, maxs;
-		VectorAdd(ent->s.origin,ent->origin_offset,org);
-		VectorSubtract(ent->mins,ent->origin_offset,mins);
-		VectorSubtract(ent->maxs,ent->origin_offset,maxs);
+		VectorAdd (ent->s.origin, ent->origin_offset, org);
+		VectorSubtract (ent->mins, ent->origin_offset, mins);
+		VectorSubtract (ent->maxs, ent->origin_offset, maxs);
 		trace = gi.trace (org, mins, maxs, org, ent, mask);
 	}
 	else
@@ -308,6 +308,9 @@ int SV_FlyMove (edict_t *ent, float time, int mask)
 	int			blocked;
 	int			num_retries = 0;
 
+	if (!ent)
+		return 0;
+
 retry:
 	numbumps = 4;
 
@@ -352,13 +355,13 @@ retry:
 			{
 				vec3_t	above;
 
-				VectorCopy(end,above);
+				VectorCopy (end, above);
 				above[2] += 32;
 				trace = gi.trace (above, ent->mins, ent->maxs, end, ent, mask);
 				VectorCopy (trace.endpos,end);
 				end[2] += 1;
-				VectorSubtract (end,ent->s.origin,ent->velocity);
-				VectorScale (ent->velocity,1.0/time_left,ent->velocity);
+				VectorSubtract (end, ent->s.origin, ent->velocity);
+				VectorScale (ent->velocity, 1.0/time_left, ent->velocity);
 				num_retries++;
 				goto retry;
 			}
@@ -372,12 +375,12 @@ retry:
 
 			if (ent->mass > hit->mass)
 			{
-				VectorMA (hit->s.origin,time_left,ent->velocity,player_dest);
-				ptrace = gi.trace(hit->s.origin,hit->mins,hit->maxs,player_dest,hit,hit->clipmask);
+				VectorMA (hit->s.origin, time_left, ent->velocity, player_dest);
+				ptrace = gi.trace(hit->s.origin, hit->mins, hit->maxs, player_dest, hit, hit->clipmask);
 				if (ptrace.fraction == 1.0)
 				{
-					VectorCopy(player_dest,hit->s.origin);
-					gi.linkentity(hit);
+					VectorCopy (player_dest, hit->s.origin);
+					gi.linkentity (hit);
 					goto retry;
 				}
 			}
@@ -882,7 +885,7 @@ in Lazarus is a very possible scenario. This routine recurses to move
 *all* riders of a pusher.
 ==============
 */
-void MoveRiders(edict_t *platform, edict_t *ignore, vec3_t move, vec3_t amove, qboolean turn)
+void MoveRiders (edict_t *platform, edict_t *ignore, vec3_t move, vec3_t amove, qboolean turn)
 {
 	int	i;
 	edict_t	*rider;
@@ -891,7 +894,7 @@ void MoveRiders(edict_t *platform, edict_t *ignore, vec3_t move, vec3_t amove, q
 	{
 		if ((rider->groundentity == platform) && (rider != ignore))
 		{
-			VectorAdd(rider->s.origin, move, rider->s.origin);
+			VectorAdd (rider->s.origin, move, rider->s.origin);
 			if (turn && (amove[YAW] != 0.0f))
 			{
 				if (!rider->client)
@@ -904,20 +907,20 @@ void MoveRiders(edict_t *platform, edict_t *ignore, vec3_t move, vec3_t amove, q
 					rider->client->ps.pmove.pm_flags |= PMF_NO_PREDICTION;
 				}
 			}
-			gi.linkentity(rider);
+			gi.linkentity (rider);
 			if (SV_TestEntityPosition(rider))
 			{
 				// Move is blocked. Since this is for riders, not pushees,
 				// it should be ok to just back the move for this rider off
-				VectorSubtract(rider->s.origin, move, rider->s.origin);
+				VectorSubtract (rider->s.origin, move, rider->s.origin);
 				if (turn && (amove[YAW] != 0.0f))
 					rider->s.angles[YAW] -= amove[YAW];
-				gi.linkentity(rider);
+				gi.linkentity (rider);
 			}
 			else
 			{
 				// move this rider's riders
-				MoveRiders(rider,ignore,move,amove,turn);
+				MoveRiders (rider, ignore, move, amove, turn);
 			}
 		}
 	}
@@ -935,7 +938,7 @@ false block tests in SV_Push.
 ============
 */
 
-void RealBoundingBox(edict_t *ent, vec3_t mins, vec3_t maxs)
+void RealBoundingBox (edict_t *ent, vec3_t mins, vec3_t maxs)
 {
 	vec3_t	forward, left, up, f1, l1, u1;
 	vec3_t	p[8];
@@ -971,15 +974,15 @@ void RealBoundingBox(edict_t *ent, vec3_t mins, vec3_t maxs)
 	AngleVectors(ent->s.angles,forward,left,up);
 	for (i=0; i<8; i++)
 	{
-		VectorScale(forward,p[i][0],f1);
-		VectorScale(left,-p[i][1],l1);
-		VectorScale(up,p[i][2],u1);
-		VectorAdd(ent->s.origin,f1,p[i]);
-		VectorAdd(p[i],l1,p[i]);
-		VectorAdd(p[i],u1,p[i]);
+		VectorScale (forward, p[i][0], f1);
+		VectorScale (left, -p[i][1], l1);
+		VectorScale (up, p[i][2], u1);
+		VectorAdd (ent->s.origin, f1, p[i]);
+		VectorAdd (p[i], l1, p[i]);
+		VectorAdd (p[i], u1, p[i]);
 	}
-	VectorCopy(p[0],mins);
-	VectorCopy(p[0],maxs);
+	VectorCopy (p[0], mins);
+	VectorCopy (p[0], maxs);
 	for (i=1; i<8; i++)
 	{
 		mins[0] = min(mins[0],p[i][0]);
@@ -1023,6 +1026,9 @@ qboolean SV_Push (edict_t *pusher, vec3_t move, vec3_t amove)
 	vec3_t		realmins, realmaxs;
 	qboolean	turn;
 	trace_t		tr;
+
+	if (!pusher)
+		return false;
 
 	// clamp the move to 1/8 units, so the position will
 	// be accurate for client side prediction
@@ -1230,24 +1236,24 @@ qboolean SV_Push (edict_t *pusher, vec3_t move, vec3_t amove)
 						//          somewhere between move_origin and the proposed new location.
 						if ((pusher->flags & FL_TRACKTRAIN) && (check->client || (check->svflags & SVF_MONSTER)))
 						{
-							vec3_t	f,l,u;
+							vec3_t	f, l, u;
 							
-							AngleVectors(pusher->s.angles, f, l, u);
-							VectorScale(f,pusher->move_origin[0],f);
-							VectorScale(l,-pusher->move_origin[1],l);
-							VectorAdd(pusher->s.origin,f,org);
-							VectorAdd(org,l,org);
+							AngleVectors (pusher->s.angles, f, l, u);
+							VectorScale (f, pusher->move_origin[0], f);
+							VectorScale (l, -pusher->move_origin[1], l);
+							VectorAdd (pusher->s.origin, f, org);
+							VectorAdd (org, l, org);
 							org[2] += pusher->move_origin[2] + 1;
 							org[2] += 16 * ( fabs(u[0]) + fabs(u[1]) );
-							tr = gi.trace(org,check->mins,check->maxs,check->s.origin,check,MASK_SOLID);
+							tr = gi.trace(org, check->mins, check->maxs, check->s.origin, check, MASK_SOLID);
 							if (!tr.startsolid)
 							{
-								VectorCopy(tr.endpos,check->s.origin);
-								VectorCopy(check->s.origin,org);
+								VectorCopy (tr.endpos, check->s.origin);
+								VectorCopy (check->s.origin, org);
 								org[2] -= 128;
-								tr = gi.trace(check->s.origin,check->mins,check->maxs,org,check,MASK_SOLID);
+								tr = gi.trace(check->s.origin, check->mins, check->maxs, org, check, MASK_SOLID);
 								if (tr.fraction > 0)
-									VectorCopy(tr.endpos,check->s.origin);
+									VectorCopy (tr.endpos, check->s.origin);
 							}
 						}
 					}
@@ -1273,24 +1279,24 @@ qboolean SV_Push (edict_t *pusher, vec3_t move, vec3_t amove)
 			{
 				// Lazarus: Last hope. If this doesn't get rider out of the way he's
 				//          gonna be stuck.
-				vec3_t	f,l,u;
+				vec3_t	f, l, u;
 
-				AngleVectors(pusher->s.angles, f, l, u);
-				VectorScale(f,pusher->move_origin[0],f);
-				VectorScale(l,-pusher->move_origin[1],l);
-				VectorAdd(pusher->s.origin,f,org);
-				VectorAdd(org,l,org);
+				AngleVectors (pusher->s.angles, f, l, u);
+				VectorScale (f, pusher->move_origin[0], f);
+				VectorScale (l, -pusher->move_origin[1], l);
+				VectorAdd (pusher->s.origin, f, org);
+				VectorAdd (org, l, org);
 				org[2] += pusher->move_origin[2] + 1;
 				org[2] += 16 * ( fabs(u[0]) + fabs(u[1]) );
-				tr = gi.trace(org,check->mins,check->maxs,check->s.origin,check,MASK_SOLID);
+				tr = gi.trace(org, check->mins, check->maxs, check->s.origin, check, MASK_SOLID);
 				if (!tr.startsolid)
 				{
-					VectorCopy(tr.endpos,check->s.origin);
-					VectorCopy(check->s.origin,org);
+					VectorCopy (tr.endpos, check->s.origin);
+					VectorCopy (check->s.origin, org);
 					org[2] -= 128;
-					tr = gi.trace(check->s.origin,check->mins,check->maxs,org,check,MASK_SOLID);
+					tr = gi.trace(check->s.origin, check->mins, check->maxs, org, check, MASK_SOLID);
 					if (tr.fraction > 0)
-						VectorCopy(tr.endpos,check->s.origin);
+						VectorCopy (tr.endpos, check->s.origin);
 					block = SV_TestEntityPosition (check);
 				}
 			}
@@ -1299,8 +1305,8 @@ qboolean SV_Push (edict_t *pusher, vec3_t move, vec3_t amove)
 			{	// pushed ok
 				gi.linkentity (check);
 				// Lazarus: Move check riders, and riders of riders, and... well, you get the pic
-				VectorAdd(move,move2,move3);
-				MoveRiders(check,NULL,move3,amove,turn);
+				VectorAdd (move, move2, move3);
+				MoveRiders (check, NULL, move3, amove, turn);
 				// impact?
 				continue;
 			}
@@ -1379,6 +1385,9 @@ void SV_Physics_Pusher (edict_t *ent)
 {
 	vec3_t		move, amove;
 	edict_t		*part, *mv;
+
+	if (!ent)
+		return;
 
 	// if not a team captain, so movement will be handled elsewhere
 	if (ent->flags & FL_TEAMSLAVE)
@@ -1500,6 +1509,9 @@ Non moving objects can only think
 */
 void SV_Physics_None (edict_t *ent)
 {
+	if (!ent)
+		return;
+
 // regular thinking
 	SV_RunThink (ent);
 }
@@ -1513,6 +1525,9 @@ A moving object that doesn't obey physics
 */
 void SV_Physics_Noclip (edict_t *ent)
 {
+	if (!ent)
+		return;
+
 // regular thinking
 	if (!SV_RunThink (ent))
 		return;
@@ -1547,6 +1562,9 @@ void SV_Physics_Toss (edict_t *ent)
 	qboolean	wasinwater;
 	qboolean	isinwater;
 	vec3_t		old_origin;
+
+	if (!ent)
+		return;
 
 	// regular thinking
 	SV_RunThink (ent);
@@ -1808,13 +1826,16 @@ void SV_Physics_Step (edict_t *ent)
 	vec3_t      point, end;
 	vec3_t		old_origin, move;
 
+	if (!ent)
+		return;
+
 	// airborn monsters should always check for ground
 	if (!ent->groundentity)
 		M_CheckGround (ent);
 
 	oldwaterlevel = ent->waterlevel;
 
-	VectorCopy(ent->s.origin,old_origin);
+	VectorCopy (ent->s.origin, old_origin);
 
 	// Lazarus: If density hasn't been calculated yet, do so now
 	if (ent->mass > 0 && ent->density == 0.)
@@ -1827,8 +1848,8 @@ void SV_Physics_Step (edict_t *ent)
 			// This stuff doesn't apply to anything else, and... heh...
 			// caused monster_flipper to sink
 
-			ent->bob      = min(2.0,300.0/ent->mass);
-			ent->duration = max(2.0,1.0 + ent->mass/100.0f);
+			ent->bob      = min(2.0, 300.0/ent->mass);
+			ent->duration = max(2.0, 1.0 + ent->mass/100.0f);
 			
 			// Figure out neutral bouyancy line for this entity
 			// This isn't entirely realistic, but helps gameplay:
@@ -1888,8 +1909,8 @@ void SV_Physics_Step (edict_t *ent)
 		wasonground = true;
 		if (ent->client
 			&& (!strcmp(groundentity->classname, "func_train") || !strcmp(groundentity->classname, "func_tracktrain")) )
-			VectorAdd(ent->velocity, groundentity->velocity, ent->velocity);
-		//Knightmare- move if on conveyor
+			VectorAdd (ent->velocity, groundentity->velocity, ent->velocity);
+		// Knightmare- move if on conveyor
 		else if (groundentity->movetype == MOVETYPE_CONVEYOR)
 		{
 			//gi.dprintf ("Moving on conveyor\n");
@@ -2067,7 +2088,7 @@ void SV_Physics_Step (edict_t *ent)
 				ent->velocity[2] = groundentity->speed *
 					sqrt(1.0 - tr.plane.normal[2]*tr.plane.normal[2]) /
 					tr.plane.normal[2];
-				if (DotProduct(groundentity->movedir,tr.plane.normal) > 0)
+				if (DotProduct(groundentity->movedir, tr.plane.normal) > 0)
 				{
 					// Then we're moving down.
 					ent->velocity[2] = -ent->velocity[2] + 2;
@@ -2122,9 +2143,9 @@ void SV_Physics_Step (edict_t *ent)
 			if (block && !(block & 8) && onconveyor)
 			{
 				if (blocker && (blocker->takedamage == DAMAGE_YES))
-					T_Damage(blocker,world,world,vec3_origin,ent->s.origin,vec3_origin,100000,1,0,MOD_CRUSH);
+					T_Damage(blocker, world, world, vec3_origin, ent->s.origin, vec3_origin, 100000, 1, 0, MOD_CRUSH);
 				else
-					T_Damage(ent,world,world,vec3_origin,ent->s.origin,vec3_origin,100000,1,0,MOD_CRUSH);
+					T_Damage(ent, world, world, vec3_origin, ent->s.origin, vec3_origin, 100000, 1, 0, MOD_CRUSH);
 				if (!ent->inuse)
 					return;
 			}
@@ -2135,9 +2156,9 @@ void SV_Physics_Step (edict_t *ent)
 			if (block && !(block & 8) && onconveyor)
 			{
 				if (blocker && (blocker->takedamage == DAMAGE_YES))
-					T_Damage(blocker,world,world,vec3_origin,ent->s.origin,vec3_origin,100000,1,0,MOD_CRUSH);
+					T_Damage(blocker, world, world, vec3_origin, ent->s.origin, vec3_origin, 100000, 1, 0, MOD_CRUSH);
 				else
-					T_Damage(ent,world,world,vec3_origin,ent->s.origin,vec3_origin,100000,1,0,MOD_CRUSH);
+					T_Damage(ent, world, world, vec3_origin, ent->s.origin, vec3_origin, 100000, 1, 0, MOD_CRUSH);
 				if (!ent->inuse)
 					return;
 			}
@@ -2175,16 +2196,16 @@ void SV_Physics_Step (edict_t *ent)
 		{
 			trace_t	tr;
 			if (ent->bounce_me == 2)
-				VectorMA(old_origin,FRAMETIME,ent->velocity,ent->s.origin);
-			VectorSubtract(ent->s.origin,old_origin,move);
+				VectorMA (old_origin, FRAMETIME, ent->velocity, ent->s.origin);
+			VectorSubtract (ent->s.origin, old_origin, move);
 			for (i=1, e=g_edicts+i; i<globals.num_edicts; i++, e++)
 			{
 				if (e==ent) continue;
 				if (e->groundentity == ent)
 				{
-					VectorAdd(e->s.origin,move,end);
-					tr = gi.trace(e->s.origin,e->mins,e->maxs,end,ent,MASK_SOLID);
-					VectorCopy(tr.endpos,e->s.origin);
+					VectorAdd (e->s.origin, move, end);
+					tr = gi.trace(e->s.origin, e->mins, e->maxs, end, ent, MASK_SOLID);
+					VectorCopy (tr.endpos, e->s.origin);
 					gi.linkentity(e);
 				}
 			}
@@ -2197,14 +2218,14 @@ void SV_Physics_Step (edict_t *ent)
 	{
 		// We run touch function for non-moving func_pushables every frame
 		// to see if they are touching, for example, a trigger_mass
-		G_TouchTriggers(ent);
+		G_TouchTriggers (ent);
 		if (!ent->inuse) return;
 	}
 
 	// Lazarus: Add falling damage for entities that can be damaged
 	if (ent->takedamage == DAMAGE_YES)
 	{
-		other_FallingDamage(ent);
+		other_FallingDamage (ent);
 		VectorCopy(ent->velocity,ent->oldvelocity);
 	}
 
@@ -2507,6 +2528,9 @@ void SV_Physics_Vehicle (edict_t *ent)
 	edict_t		*ground;
 	int			mask;
 
+	if (!ent)
+		return;
+
 //  see if we're on the ground
 	if (!ent->groundentity)
 		M_CheckGround (ent);
@@ -2692,6 +2716,9 @@ void SV_Physics_Debris (edict_t *ent)
 	qboolean	isinwater;
 	vec3_t		old_origin;
 
+	if (!ent)
+		return;
+
 // regular thinking
 	SV_RunThink (ent);
 
@@ -2764,10 +2791,9 @@ SV_Physics_Conveyor
 REAL simple - all we do is check for player riders and adjust their position.
 Only gotcha here is we have to make sure we don't end up embedding player in
 *another* object that's being moved by the conveyor.
-
 ====================
 */
-void SV_Physics_Conveyor(edict_t *ent)
+void SV_Physics_Conveyor (edict_t *ent)
 {
 	edict_t	*player;
 	int		i;
@@ -2775,8 +2801,11 @@ void SV_Physics_Conveyor(edict_t *ent)
 	vec3_t	v, move;
 	vec3_t	point, end;
 
-	VectorScale(ent->movedir,ent->speed,v);
-	VectorScale(v,FRAMETIME,move);
+	if (!ent)
+		return;
+
+	VectorScale (ent->movedir, ent->speed, v);
+	VectorScale (v, FRAMETIME, move);
 	for (i=0; i<game.maxclients; i++)
 	{
 		player = g_edicts + 1 + i;
@@ -2787,9 +2816,9 @@ void SV_Physics_Conveyor(edict_t *ent)
 		if (player->groundentity != ent)
 			continue;
 		// Look below player; make sure he's on a conveyor
-		VectorCopy(player->s.origin,point);
+		VectorCopy (player->s.origin, point);
 		point[2] += 1;
-		VectorCopy(point,end);
+		VectorCopy (point, end);
 		end[2] -= 256;
 		tr = gi.trace (point, player->mins, player->maxs, end, player, MASK_SOLID);
 		// tr.ent HAS to be conveyor, but just in case we screwed something up:
@@ -2798,27 +2827,36 @@ void SV_Physics_Conveyor(edict_t *ent)
 			if (tr.plane.normal[2] > 0) {
 				v[2] = ent->speed * sqrt(1.0 - tr.plane.normal[2]*tr.plane.normal[2]) /
 					tr.plane.normal[2];
-				if (DotProduct(ent->movedir,tr.plane.normal) > 0) {
+				if (DotProduct(ent->movedir, tr.plane.normal) > 0) {
 					// then we're moving down
 					v[2] = -v[2];
 				}
 				move[2] = v[2]*FRAMETIME;
 			}
-			VectorAdd(player->s.origin,move,end);
-			tr = gi.trace(player->s.origin,player->mins,player->maxs,end,player,player->clipmask);
-			VectorCopy(tr.endpos,player->s.origin);
-			gi.linkentity(player);
+			VectorAdd (player->s.origin, move, end);
+			tr = gi.trace (player->s.origin, player->mins, player->maxs, end, player, player->clipmask);
+			VectorCopy (tr.endpos, player->s.origin);
+			gi.linkentity (player);
 		}
 	}
 }
 
 
+/*
+====================
+SV_Physics_FallFloat
+
+====================
+*/
 void SV_Physics_FallFloat (edict_t *ent)
 {
 	float gravVal = ent->gravity * sv_gravity->value * FRAMETIME;
 	qboolean wasonground = false;
 	qboolean hitsound = false;
 	
+	if (!ent)
+		return;
+
 	// check velocity
 	SV_CheckVelocity (ent);
 
@@ -2834,24 +2872,24 @@ void SV_Physics_FallFloat (edict_t *ent)
 		vec3_t normal;
 		vec3_t gravity;
 
-		VectorCopy(ent->mins, min);
-		VectorCopy(ent->maxs, max);
+		VectorCopy (ent->mins, min);
+		VectorCopy (ent->maxs, max);
 		
-		VectorCopy(ent->s.origin, end);
+		VectorCopy (ent->s.origin, end);
 		end[2] -= 0.25; // down 4
 
 		tr = gi.trace(ent->s.origin, min, max, end, ent, MASK_SHOT);
 		if (tr.plane.normal[2] > 0.7) // on solid ground
 		{
 			ent->groundentity = tr.ent;
-			VectorCopy(tr.endpos, ent->s.origin);
-			VectorSet(ent->velocity, 0, 0, 0);
+			VectorCopy (tr.endpos, ent->s.origin);
+			VectorSet (ent->velocity, 0, 0, 0);
 		}
 		else if (tr.fraction < 1.0 && tr.plane.normal[2] <= 0.7) // on steep slope
 		{
-			VectorCopy(tr.plane.normal, normal);
-			VectorSet(gravity, 0, 0, -gravVal);
-			VectorMA(gravity, gravVal, normal, ent->velocity);
+			VectorCopy (tr.plane.normal, normal);
+			VectorSet (gravity, 0, 0, -gravVal);
+			VectorMA (gravity, gravVal, normal, ent->velocity);
 			ent->groundentity = NULL;
 		}
 		else // in freefall
@@ -2863,20 +2901,20 @@ void SV_Physics_FallFloat (edict_t *ent)
 	else	// if (ent->waterlevel)
 	{
 		// where's the midpoint? above or below the water?
-		const double WATER_MASS = 500.0;
-		vec3_t accel;
-		double percentBelow = 0.0;
-		double massOfObject = 0.0;
-		double massOfVolumeWater = 0.0;
-		double massOfWater = 0.0;
-		double massDiff = 0.0;
-		double i = 0.0;
-		vec3_t volume;
+		const double	WATER_MASS = 500.0;
+		vec3_t			accel;
+		double			percentBelow = 0.0;
+		double			massOfObject = 0.0;
+		double			massOfVolumeWater = 0.0;
+		double			massOfWater = 0.0;
+		double			massDiff = 0.0;
+		double			i = 0.0;
+		vec3_t			volume;
 
 		// TODO if we're not grounded on the bottom of the lake...
 
 		// calculate massPerCubicMetre
-		VectorScale(ent->size, 1.0/32.0, volume);
+		VectorScale (ent->size, 1.0/32.0, volume);
 		massOfObject = ent->mass;
 		massOfVolumeWater = WATER_MASS * (volume[0] * volume[1] * volume[2]);
 
@@ -2887,8 +2925,8 @@ void SV_Physics_FallFloat (edict_t *ent)
 			vec3_t midpoint;
 			int watertype;
 		
-			VectorAdd(ent->s.origin, ent->mins, midpoint);
-			VectorMA(midpoint, i, ent->maxs, midpoint);
+			VectorAdd (ent->s.origin, ent->mins, midpoint);
+			VectorMA (midpoint, i, ent->maxs, midpoint);
 			watertype = gi.pointcontents (midpoint);
 
 			if (!(watertype & MASK_WATER))
@@ -2901,11 +2939,11 @@ void SV_Physics_FallFloat (edict_t *ent)
 			percentBelow = 0.0;
 		massOfWater = percentBelow * massOfVolumeWater;
 		massDiff = massOfWater - massOfObject; // difference between
-		VectorClear(accel);
-		VectorSet(accel, 0, 0, gravVal * (massDiff / massOfVolumeWater));
-		VectorScale(ent->velocity, 0.7, ent->velocity);
+		VectorClear (accel);
+		VectorSet (accel, 0, 0, gravVal * (massDiff / massOfVolumeWater));
+		VectorScale (ent->velocity, 0.7, ent->velocity);
 		if (VectorLength(accel) > 4)
-			VectorAdd(ent->velocity, accel, ent->velocity);
+			VectorAdd (ent->velocity, accel, ent->velocity);
 	}
 
 	if (ent->velocity[0] || ent->velocity[1] || ent->velocity[2])
@@ -2913,8 +2951,8 @@ void SV_Physics_FallFloat (edict_t *ent)
 		qboolean isinwater = false;
 		qboolean wasinwater = false;
 		vec3_t old_origin;
+
 		VectorCopy (ent->s.origin, old_origin);
-	
 		SV_FlyMove (ent, FRAMETIME, MASK_SHOT);
 
 		gi.linkentity (ent);
@@ -2965,10 +3003,13 @@ void adjustRiders(edict_t *ent)
 
 void SV_Physics_Ride (edict_t *ent)
 {
-	// base ourself on the step
-	SV_Physics_Step(ent);
+	if (!ent)
+		return;
 
-	adjustRiders(ent);
+	// base ourself on the step
+	SV_Physics_Step (ent);
+
+	adjustRiders (ent);
 }
 
 
@@ -2986,7 +3027,7 @@ void G_RunEntity (edict_t *ent)
 	vec3_t	previous_origin;
 
 	// added stasis generator support
-	if (level.freeze && Q_stricmp(ent->classname,"chasecam"))
+	if ( level.freeze && (Q_stricmp(ent->classname, "chasecam") != 0) )
 		return;
 
 	if (ent->movetype == MOVETYPE_STEP)
@@ -3097,6 +3138,9 @@ void SV_Physics_NewToss (edict_t *ent)
 //	float		firstmove;
 //	int			mask;
 
+	if (!ent)
+		return;
+
 	// regular thinking
 	SV_RunThink (ent);
 
@@ -3120,7 +3164,7 @@ void SV_Physics_NewToss (edict_t *ent)
 	else
 		ent->groundentity = NULL;
 
-	//Knightmare- move if on conveyor	
+	// Knightmare- move if on conveyor	
 	if (ent->groundentity && ent->groundentity->movetype == MOVETYPE_CONVEYOR)
 	{
 	//	gi.dprintf ("Moving on conveyor\n");
@@ -3177,7 +3221,7 @@ void SV_Physics_NewToss (edict_t *ent)
 
 	G_TouchTriggers (ent);
 
-// check for water transition
+	// check for water transition
 	wasinwater = (ent->watertype & MASK_WATER);
 	ent->watertype = gi.pointcontents (ent->s.origin);
 	isinwater = ent->watertype & MASK_WATER;
@@ -3192,7 +3236,7 @@ void SV_Physics_NewToss (edict_t *ent)
 	else if (wasinwater && !isinwater)
 		gi.positioned_sound (ent->s.origin, g_edicts, CHAN_AUTO, gi.soundindex("misc/h2ohit1.wav"), 1, 1, 0);
 
-// move teamslaves
+	// move teamslaves
 	for (slave = ent->teamchain; slave; slave = slave->teamchain)
 	{
 		VectorCopy (ent->s.origin, slave->s.origin);

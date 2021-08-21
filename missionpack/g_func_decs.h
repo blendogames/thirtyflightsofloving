@@ -2161,6 +2161,7 @@ extern void Prox_Field_Touch ( edict_t * ent , edict_t * other , cplane_t * plan
 extern void prox_die ( edict_t * self , edict_t * inflictor , edict_t * attacker , int damage , vec3_t point ) ;
 extern void Prox_Explode ( edict_t * ent ) ;
 extern void prox_movewith_host ( edict_t * self ) ;
+extern edict_t * CheckForProxField ( edict_t * ent ) ;
 extern void SP_flechette ( edict_t * flechette ) ;
 extern void flechette_delayed_start ( edict_t * flechette ) ;
 extern void fire_flechette ( edict_t * self , vec3_t start , vec3_t dir , int damage , int speed , float damage_radius , int radius_damage ) ;
@@ -2223,7 +2224,6 @@ extern void M_MonsterDodge ( edict_t * self , edict_t * attacker , float eta , t
 extern void drawbbox ( edict_t * self ) ;
 extern qboolean below ( edict_t * self , edict_t * other ) ;
 extern void PredictAim ( edict_t * target , vec3_t start , float bolt_speed , qboolean eye_height , float offset , vec3_t aimdir , vec3_t aimpoint ) ;
-extern qboolean MarkProxArea ( edict_t * prox ) ;
 extern qboolean MarkTeslaArea ( edict_t * self , edict_t * tesla ) ;
 extern edict_t * CheckForBadArea ( edict_t * ent ) ;
 extern edict_t * SpawnBadArea ( vec3_t mins , vec3_t maxs , float lifespan , edict_t * owner ) ;

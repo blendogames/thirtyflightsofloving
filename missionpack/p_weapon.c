@@ -703,7 +703,7 @@ void Weapon_Generic (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
 	}
 
 	// Knightmare- activate and putaway sounds for ION Ripper and Shockwave
-	if (!strcmp (ent->client->pers.weapon->pickup_name, "ION Ripper") && ion_ripper_extra_sounds->value)
+	if (!strcmp (ent->client->pers.weapon->pickup_name, "ION Ripper") && sk_ionripper_extra_sounds->value)
 	{
 		if (ent->client->ps.gunframe == 0)
 			gi.sound (ent, CHAN_AUTO, gi.soundindex("weapons/ionactive.wav"), 1.0, ATTN_NORM, 0);

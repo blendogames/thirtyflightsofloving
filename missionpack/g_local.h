@@ -275,7 +275,8 @@ typedef enum
 #define	MFL_SPAWNED_CARRIER		4	// both do_not_count and spawned are set for spawned monsters
 #define	MFL_SPAWNED_MEDIC_C		8	// both do_not_count and spawned are set for spawned monsters
 #define	MFL_SPAWNED_WIDOW		16	// both do_not_count and spawned are set for spawned monsters
-#define	MFL_SPAWNED_MASK		32	// mask to catch all three flavors of spawned
+#define	MFL_SPAWNED_MASK		28	// mask to catch all three flavors of spawned
+#define	MFL_KNOWS_PROX_MINES	32	// this monster know prox mines
 
 // monster attack state
 #define AS_STRAIGHT				1
@@ -1668,6 +1669,7 @@ void medic_StopPatrolling(edict_t *ent);
 // m_move.c
 //
 qboolean M_CheckBottom (edict_t *ent);
+qboolean SV_movestep (edict_t *ent, vec3_t move, qboolean relink);
 qboolean M_walkmove (edict_t *ent, float yaw, float dist);
 void M_MoveToGoal (edict_t *ent, float dist);
 void M_ChangeYaw (edict_t *ent);
@@ -1744,7 +1746,8 @@ void kick_attack (edict_t *ent);
 #define PROX_TEST_SIZE 7.0f
 //extern float nuke_framenum;
 void fire_flechette (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage);
-//void fire_prox (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed);		
+edict_t *CheckForProxField (edict_t *ent);
+//void fire_prox (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed);	
 void fire_prox (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int damage_multiplier, int speed, int health, float timer, float damage_radius);
 void fire_nuke (edict_t *self, vec3_t start, vec3_t aimdir, int speed);		
 void fire_nbomb (edict_t *self, vec3_t start, vec3_t aimdir, int speed);		
@@ -1774,10 +1777,10 @@ qboolean blocked_checknewenemy (edict_t *self);
 qboolean monsterlost_checkhint (edict_t *self);
 qboolean inback (edict_t *self, edict_t *other);
 float realrange (edict_t *self, edict_t *other);
-edict_t *SpawnBadArea(vec3_t mins, vec3_t maxs, float lifespan, edict_t *owner);
-edict_t *CheckForBadArea(edict_t *ent);
-qboolean MarkTeslaArea(edict_t *self, edict_t *tesla);
-qboolean MarkProxArea (edict_t *prox);	// Knightmare added
+edict_t *SpawnBadArea (vec3_t mins, vec3_t maxs, float lifespan, edict_t *owner);
+edict_t *CheckForBadArea (edict_t *ent);
+qboolean MarkTeslaArea (edict_t *self, edict_t *tesla);
+//qboolean MarkProxArea (edict_t *prox);	// Knightmare added
 void InitHintPaths (void);
 void PredictAim (edict_t *target, vec3_t start, float bolt_speed, qboolean eye_height, float offset, vec3_t aimdir, vec3_t aimpoint);
 qboolean below (edict_t *self, edict_t *other);

@@ -11,7 +11,6 @@ cvar_t	*allow_player_use_abandoned_turret;	// whether to allow player to use tur
 cvar_t	*turn_rider;				// whether to turn player on rotating object
 cvar_t	*adjust_train_corners;		// whether to subtract (1,1,1) from train path corners to fix misalignments
 
-cvar_t	*ion_ripper_extra_sounds;
 cvar_t	*add_velocity_throw;		// whether to add player's velocity to thrown objects
 cvar_t	*falling_armor_damage;		// whether player's armor absorbs damage from falling
 cvar_t	*player_jump_sounds;		// whether to play that STUPID grunting sound when the player jumps
@@ -87,6 +86,7 @@ cvar_t	*sk_ionripper_damage_dm;
 cvar_t	*sk_ionripper_kick;
 cvar_t	*sk_ionripper_kick_dm;
 cvar_t	*sk_ionripper_speed;
+cvar_t	*sk_ionripper_extra_sounds;
 
 cvar_t	*sk_phalanx_damage;
 cvar_t	*sk_phalanx_damage2;
@@ -350,7 +350,6 @@ void InitLithiumVars (void)
 	turn_rider = gi.cvar("turn_rider", "1", CVAR_ARCHIVE);
 	adjust_train_corners = gi.cvar("adjust_train_corners", "0", CVAR_ARCHIVE);
 
-	ion_ripper_extra_sounds = gi.cvar("ion_ripper_extra_sounds", "0", CVAR_ARCHIVE);
 	add_velocity_throw = gi.cvar("add_velocity_throw", "0", CVAR_ARCHIVE);
 	falling_armor_damage = gi.cvar("falling_armor_damage", "0", CVAR_ARCHIVE);
 	player_jump_sounds = gi.cvar("player_jump_sounds", "1", CVAR_ARCHIVE);
@@ -424,6 +423,7 @@ void InitLithiumVars (void)
 	sk_ionripper_kick = gi.cvar("sk_ionripper_kick", "60", 0);
 	sk_ionripper_kick_dm = gi.cvar("sk_ionripper_kick_dm", "40", 0);
 	sk_ionripper_speed = gi.cvar("sk_ionripper_speed", "500", 0);
+	sk_ionripper_extra_sounds = gi.cvar("sk_ionripper_extra_sounds", "0", CVAR_ARCHIVE);
 
 	sk_phalanx_damage = gi.cvar("sk_phalanx_damage", "70", 0);
 	sk_phalanx_damage2 = gi.cvar("sk_phalanx_damage2", "10", 0);

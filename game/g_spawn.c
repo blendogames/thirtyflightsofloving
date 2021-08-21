@@ -606,6 +606,8 @@ void ED_ParseField (char *key, char *value, edict_t *ent)
 	float	v;
 	vec3_t	vec;
 
+	VectorClear (vec);	// zero this vector first
+
 	for (f=fields ; f->name ; f++)
 	{
 		if (!(f->flags & FFL_NOSPAWN) && !Q_stricmp(f->name, key))
@@ -622,8 +624,8 @@ void ED_ParseField (char *key, char *value, edict_t *ent)
 				break;
 			case F_VECTOR:
 			//	sscanf (value, "%f %f %f", &vec[0], &vec[1], &vec[2]);
-				if (sscanf (value, "%f %f %f", &vec[0], &vec[1], &vec[2]) == EOF) {
-					gi.error ("ED_ParseField: invalid vector '%s' for key '%s'.\n", value, key);
+				if (sscanf (value, "%f %f %f", &vec[0], &vec[1], &vec[2]) != 3) {
+					gi.dprintf ("ED_ParseField: map '%s' has invalid vector '%s' for key '%s'.\n", level.mapname, value, key);
 				}
 				((float *)(b+f->ofs))[0] = vec[0];
 				((float *)(b+f->ofs))[1] = vec[1];
@@ -1084,18 +1086,18 @@ void LoadTransitionEnts (void)
 		edict_t		*ent;
 		edict_t		*spawn;
 		
-		VectorClear(v_spawn);
+		VectorClear (v_spawn);
 		if (strlen(game.spawnpoint))
 		{
-			spawn = G_Find(NULL,FOFS(targetname),game.spawnpoint);
+			spawn = G_Find(NULL, FOFS(targetname), game.spawnpoint);
 			while (spawn)
 			{
-				if (!Q_stricmp(spawn->classname,"info_player_start"))
+				if (!Q_stricmp (spawn->classname, "info_player_start"))
 				{
-					VectorCopy(spawn->s.origin,v_spawn);
+					VectorCopy (spawn->s.origin, v_spawn);
 					break;
 				}
-				spawn = G_Find(spawn,FOFS(targetname),game.spawnpoint);
+				spawn = G_Find(spawn, FOFS(targetname), game.spawnpoint);
 			}
 		}
 		trans_ent_filename (t_file, sizeof(t_file));
@@ -1123,8 +1125,8 @@ void LoadTransitionEnts (void)
 						ent->health = min(ent->health,-1);
 					}
 				}
-				VectorAdd(ent->s.origin,v_spawn,ent->s.origin);
-				VectorCopy(ent->s.origin,ent->s.old_origin);
+				VectorAdd (ent->s.origin, v_spawn, ent->s.origin);
+				VectorCopy( ent->s.origin, ent->s.old_origin);
 				ED_CallSpawn (ent);
 				if (ent->owner_id)
 				{

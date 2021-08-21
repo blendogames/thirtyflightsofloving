@@ -262,8 +262,8 @@ void UI_Mouseover_Check (menuframework_s *menu)
 			y1 = menu->y + item->y;
 			w1 = 0;			h1 = item->textSize;	// MENU_FONT_SIZE
 			SCR_ScaleCoords (&x1, &y1, &w1, &h1, ALIGN_CENTER);
-			min[0] = x1;	max[0] = x1+w1;
-			min[1] = y1;	max[1] = y1+h1;
+			min[0] = x1;	max[0] = x1 + w1;
+			min[1] = y1;	max[1] = y1 + h1;
 		//	max[0] = min[0] = SCR_ScaledScreen(menu->x + item->x + RCOLUMN_OFFSET); //+ 2 chars for space + cursor
 		//	max[1] = min[1] = SCR_ScaledScreen(menu->y + item->y);
 		//	max[1] += SCR_ScaledScreen(MENU_FONT_SIZE);

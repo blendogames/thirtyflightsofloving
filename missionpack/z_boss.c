@@ -688,7 +688,7 @@ void zboss_reelInGraaple2 (edict_t *self)
 	VectorSubtract (vec, self->laser->s.origin, dir);
 	length = VectorLength (dir);
 
-	if (length <= 80 || (self->laser->think == HookDragThink && self->laser->powerarmor_time < level.time))
+	if ( (length <= 80) || ((self->laser->think == HookDragThink) && (self->laser->powerarmor_time < level.time)) )
 	{
 		G_FreeEdict (self->laser);
 		self->laser = NULL;
@@ -697,17 +697,17 @@ void zboss_reelInGraaple2 (edict_t *self)
 
 		if (enemy)
 		{
-			VectorClear(enemy->velocity);
-			zboss_melee2(self);
+			VectorClear (enemy->velocity);
+			zboss_melee2 (self);
 		}
 		else
 		{
-			zboss_chooseNextAttack(self);
+			zboss_chooseNextAttack (self);
 		}
 	}
 	else
 	{
-		zboss_reelInGraaple(self);
+		zboss_reelInGraaple (self);
 	}
 }
 
@@ -793,7 +793,7 @@ void HookTouch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
 		T_Damage (other, ent, ent->owner, ent->velocity, ent->s.origin, plane->normal, 10, 0, 0, MOD_HIT);
 	}
 
-	if (other->client && other->health > 0)
+	if ( other->client && (other->health > 0) )
 	{ // alive... Let's drag the bastard back...
 		ent->enemy = other;
 	}
@@ -863,7 +863,7 @@ void FireHook (edict_t *self)
 	VectorSubtract (vec, start, dir);
 	VectorNormalize (dir);
 	
-	ANIM_AIM(self, dir);
+	ANIM_AIM (self, dir);
 
 	self->s.modelindex3 = 0;
 	
@@ -935,7 +935,7 @@ void zboss_posthook (edict_t *self)
 
 void zboss_chooseHookRocket (edict_t *self)
 {
-	if (random() < 0.2 && !(self->monsterinfo.aiflags2 & AI2_ONESHOTTARGET))
+	if ( (random() < 0.2) && !(self->monsterinfo.aiflags2 & AI2_ONESHOTTARGET) )
 	{
 		self->monsterinfo.currentmove = &zboss_move_attack2a;
 	}

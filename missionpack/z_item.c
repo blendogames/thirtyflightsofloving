@@ -516,7 +516,7 @@ void SP_misc_crate (edict_t *self)
 	VectorSet (self->maxs, 32, 32, 64);
 
 	// generic crate setup
-	setupCrate(self);
+	setupCrate (self);
 }
 
 void SP_misc_crate_medium (edict_t *self)
@@ -527,7 +527,7 @@ void SP_misc_crate_medium (edict_t *self)
 	VectorSet (self->maxs, 24, 24, 48);
 
 	// generic crate setup
-	setupCrate(self);
+	setupCrate (self);
 }
 
 void SP_misc_crate_small (edict_t *self)
@@ -538,7 +538,7 @@ void SP_misc_crate_small (edict_t *self)
 	VectorSet (self->maxs, 16, 16, 32);
 
 	// generic crate setup
-	setupCrate(self);
+	setupCrate (self);
 }
 
 /*
@@ -556,7 +556,7 @@ void SP_misc_seat (edict_t *self)
 	VectorSet(self->maxs, 16, 16, 40);
 
 	// make this pushable
-	setupCrate(self);
+	setupCrate (self);
 
 	self->common_name = "Ejection Seat";
 	self->class_id = ENTITY_MISC_SEAT;

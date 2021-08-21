@@ -459,6 +459,8 @@ void ED_ParseField (char *key, char *value, edict_t *ent)
 	float	v;
 	vec3_t	vec;
 
+	VectorClear (vec);	// zero this vector first
+
 	for (f=fields ; f->name ; f++)
 	{
 		if (!Q_stricmp(f->name, key))
@@ -475,8 +477,8 @@ void ED_ParseField (char *key, char *value, edict_t *ent)
 				break;
 			case F_VECTOR:
 			//	sscanf (value, "%f %f %f", &vec[0], &vec[1], &vec[2]);
-				if (sscanf (value, "%f %f %f", &vec[0], &vec[1], &vec[2]) == EOF) {
-					gi.error ("ED_ParseField: invalid vector '%s' for key '%s'.\n", value, key);
+				if (sscanf (value, "%f %f %f", &vec[0], &vec[1], &vec[2]) != 3) {
+					gi.dprintf ("ED_ParseField: map '%s' has invalid vector '%s' for key '%s'.\n", level.mapname, value, key);
 				}
 				((float *)(b+f->ofs))[0] = vec[0];
 				((float *)(b+f->ofs))[1] = vec[1];

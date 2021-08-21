@@ -85,7 +85,8 @@ Changes as of v0.20 update 8:
 
 - Added display of numerical cvar value to sliders and improved mouse interaction, making them more useable.
 
-- Added new graphics for text fields, text boxes, and sliders.
+- Added new graphics for text fields, text boxes, and sliders.  Use cvars ui_new_textfield and ui_new_textbox to toggle the
+	new text fields and boxes, respectively.
 
 - Changed screenshot filenames to kmquake2_####, now supporting up to 10,000 screenshots.
 

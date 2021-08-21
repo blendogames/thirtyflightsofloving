@@ -952,8 +952,8 @@ UI_ValidateSaveshots
 void UI_ValidateSaveshots (void)
 {
 	int i;
-	char shotname [MAX_QPATH];
-//	char mapshotname [MAX_QPATH];
+	char shotname[MAX_QPATH];
+//	char mapshotname[MAX_QPATH];
 
 	for ( i = 0; i < UI_MAX_SAVEGAMES; i++ )
 	{

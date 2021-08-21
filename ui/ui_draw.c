@@ -133,45 +133,66 @@ void UI_DrawTextBox (int x, int y, int width, int lines)
 	// draw left side
 	cx = x;
 	cy = y;
-	UI_DrawPicST (cx, cy, MENU_FONT_SIZE, MENU_FONT_SIZE, stCoord_textBox[0], ALIGN_CENTER, true, color_identity, UI_TEXTBOX_PIC);
-//	UI_DrawChar (cx, cy, MENU_FONT_SIZE, ALIGN_CENTER, 1, 255, 255, 255, 255, false, false);
-	for (n = 0; n < lines; n++) {
+	if (ui_new_textbox->integer)
+		UI_DrawPicST (cx, cy, MENU_FONT_SIZE, MENU_FONT_SIZE, stCoord_textBox[0], ALIGN_CENTER, true, color_identity, UI_TEXTBOX_PIC);
+	else
+		UI_DrawChar (cx, cy, MENU_FONT_SIZE, ALIGN_CENTER, 1, 255, 255, 255, 255, false, false);
+	for (n = 0; n < lines; n++)
+	{
 		cy += MENU_FONT_SIZE;
-		UI_DrawPicST (cx, cy, MENU_FONT_SIZE, MENU_FONT_SIZE, stCoord_textBox[1], ALIGN_CENTER, true, color_identity, UI_TEXTBOX_PIC);
-	//	UI_DrawChar (cx, cy, MENU_FONT_SIZE, ALIGN_CENTER, 4, 255, 255, 255, 255, false, false);
+		if (ui_new_textbox->integer)
+			UI_DrawPicST (cx, cy, MENU_FONT_SIZE, MENU_FONT_SIZE, stCoord_textBox[1], ALIGN_CENTER, true, color_identity, UI_TEXTBOX_PIC);
+		else
+			UI_DrawChar (cx, cy, MENU_FONT_SIZE, ALIGN_CENTER, 4, 255, 255, 255, 255, false, false);
 	}
-	UI_DrawPicST (cx, cy+MENU_FONT_SIZE, MENU_FONT_SIZE, MENU_FONT_SIZE, stCoord_textBox[2], ALIGN_CENTER, true, color_identity, UI_TEXTBOX_PIC);
-//	UI_DrawChar (cx, cy+MENU_FONT_SIZE, MENU_FONT_SIZE, ALIGN_CENTER, 7, 255, 255, 255, 255, false, false);
+	if (ui_new_textbox->integer)
+		UI_DrawPicST (cx, cy+MENU_FONT_SIZE, MENU_FONT_SIZE, MENU_FONT_SIZE, stCoord_textBox[2], ALIGN_CENTER, true, color_identity, UI_TEXTBOX_PIC);
+	else
+		UI_DrawChar (cx, cy+MENU_FONT_SIZE, MENU_FONT_SIZE, ALIGN_CENTER, 7, 255, 255, 255, 255, false, false);
 
 	// draw middle
 	cx += MENU_FONT_SIZE;
 	while (width > 0)
 	{
 		cy = y;
-		UI_DrawPicST (cx, cy, MENU_FONT_SIZE, MENU_FONT_SIZE, stCoord_textBox[3], ALIGN_CENTER, true, color_identity, UI_TEXTBOX_PIC);
-	//	UI_DrawChar (cx, cy, MENU_FONT_SIZE, ALIGN_CENTER, 2, FONT_UI, 255, 255, 255, 255, false, false);
-		for (n = 0; n < lines; n++) {
+		if (ui_new_textbox->integer)
+			UI_DrawPicST (cx, cy, MENU_FONT_SIZE, MENU_FONT_SIZE, stCoord_textBox[3], ALIGN_CENTER, true, color_identity, UI_TEXTBOX_PIC);
+		else
+			UI_DrawChar (cx, cy, MENU_FONT_SIZE, ALIGN_CENTER, 2, 255, 255, 255, 255, false, false);
+		for (n = 0; n < lines; n++)
+		{
 			cy += MENU_FONT_SIZE;
-			UI_DrawPicST (cx, cy, MENU_FONT_SIZE, MENU_FONT_SIZE, stCoord_textBox[4], ALIGN_CENTER, true, color_identity, UI_TEXTBOX_PIC);
-		//	UI_DrawChar (cx, cy, MENU_FONT_SIZE, ALIGN_CENTER, 5, FONT_UI, 255, 255, 255, 255, false, false);
+			if (ui_new_textbox->integer)
+				UI_DrawPicST (cx, cy, MENU_FONT_SIZE, MENU_FONT_SIZE, stCoord_textBox[4], ALIGN_CENTER, true, color_identity, UI_TEXTBOX_PIC);
+			else
+				UI_DrawChar (cx, cy, MENU_FONT_SIZE, ALIGN_CENTER, 5, 255, 255, 255, 255, false, false);
 		}
-		UI_DrawPicST (cx, cy+MENU_FONT_SIZE, MENU_FONT_SIZE, MENU_FONT_SIZE, stCoord_textBox[5], ALIGN_CENTER, true, color_identity, UI_TEXTBOX_PIC);
-	//	UI_DrawChar (cx, cy+MENU_FONT_SIZE, MENU_FONT_SIZE, ALIGN_CENTER, 8, FONT_UI, 255, 255, 255, 255, false, false);
+		if (ui_new_textbox->integer)
+			UI_DrawPicST (cx, cy+MENU_FONT_SIZE, MENU_FONT_SIZE, MENU_FONT_SIZE, stCoord_textBox[5], ALIGN_CENTER, true, color_identity, UI_TEXTBOX_PIC);
+		else
+			UI_DrawChar (cx, cy+MENU_FONT_SIZE, MENU_FONT_SIZE, ALIGN_CENTER, 8, 255, 255, 255, 255, false, false);
 		width -= 1;
 		cx += MENU_FONT_SIZE;
 	}
 
 	// draw right side
 	cy = y;
-	UI_DrawPicST (cx, cy, MENU_FONT_SIZE, MENU_FONT_SIZE, stCoord_textBox[6], ALIGN_CENTER, true, color_identity, UI_TEXTBOX_PIC);
-//	UI_DrawChar (cx, cy, MENU_FONT_SIZE, ALIGN_CENTER, 3, FONT_UI, 255, 255, 255, 255, false, false);
-	for (n = 0; n < lines; n++) {
+	if (ui_new_textbox->integer)
+		UI_DrawPicST (cx, cy, MENU_FONT_SIZE, MENU_FONT_SIZE, stCoord_textBox[6], ALIGN_CENTER, true, color_identity, UI_TEXTBOX_PIC);
+	else
+		UI_DrawChar (cx, cy, MENU_FONT_SIZE, ALIGN_CENTER, 3, 255, 255, 255, 255, false, false);
+	for (n = 0; n < lines; n++)
+	{
 		cy += MENU_FONT_SIZE;
-		UI_DrawPicST (cx, cy, MENU_FONT_SIZE, MENU_FONT_SIZE, stCoord_textBox[7], ALIGN_CENTER, true, color_identity, UI_TEXTBOX_PIC);
-	//	UI_DrawChar (cx, cy, MENU_FONT_SIZE, ALIGN_CENTER, 6, FONT_UI, 255, 255, 255, 255, false, false);
+		if (ui_new_textbox->integer)
+			UI_DrawPicST (cx, cy, MENU_FONT_SIZE, MENU_FONT_SIZE, stCoord_textBox[7], ALIGN_CENTER, true, color_identity, UI_TEXTBOX_PIC);
+		else
+			UI_DrawChar (cx, cy, MENU_FONT_SIZE, ALIGN_CENTER, 6, 255, 255, 255, 255, false, false);
 	}
-	UI_DrawPicST (cx, cy+MENU_FONT_SIZE, MENU_FONT_SIZE, MENU_FONT_SIZE, stCoord_textBox[8], ALIGN_CENTER, true, color_identity, UI_TEXTBOX_PIC);
-//	UI_DrawChar (cx, cy+MENU_FONT_SIZE, MENU_FONT_SIZE, ALIGN_CENTER, 9, FONT_UI, 255, 255, 255, 255, false, true);
+	if (ui_new_textbox->integer)
+		UI_DrawPicST (cx, cy+MENU_FONT_SIZE, MENU_FONT_SIZE, MENU_FONT_SIZE, stCoord_textBox[8], ALIGN_CENTER, true, color_identity, UI_TEXTBOX_PIC);
+	else
+		UI_DrawChar (cx, cy+MENU_FONT_SIZE, MENU_FONT_SIZE, ALIGN_CENTER, 9, 255, 255, 255, 255, false, true);
 }
 
 
