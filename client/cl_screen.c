@@ -685,7 +685,7 @@ Coordinates are 640*480 virtual values
 void SCR_DrawPic (float x, float y, float width, float height, scralign_t align, qboolean roundOut, char *pic, float alpha)
 {
 	vec4_t			outColor;
-	drawStruct_t	ds;
+	drawStruct_t	ds = { 0 };
 
 	SCR_ScaleCoords (&x, &y, &width, &height, align);
 	Vector4Set (outColor, 1.0f, 1.0f, 1.0f, alpha);
@@ -693,7 +693,6 @@ void SCR_DrawPic (float x, float y, float width, float height, scralign_t align,
 		x = floor(x);	y = floor(y);	width = ceil(width);	height = ceil(height);
 	}
 
-	memset (&ds, 0, sizeof(drawStruct_t));
 	ds.pic = pic;
 	ds.x = x;	ds.y = y;	ds.w = width;	ds.h = height;
 	Vector2Copy (vec2_origin, ds.offset);
@@ -714,7 +713,7 @@ void SCR_DrawScaledPic (float x, float y, float scale, qboolean centerCoords, qb
 	int				w, h;
 	float			width, height;
 	vec4_t			outColor;
-	drawStruct_t	ds;
+	drawStruct_t	ds = { 0 };
 
 	Vector4Set (outColor, 1.0f, 1.0f, 1.0f, alpha);
 	R_DrawGetPicSize (&w, &h, pic);
@@ -728,7 +727,6 @@ void SCR_DrawScaledPic (float x, float y, float scale, qboolean centerCoords, qb
 		x = floor(x);	y = floor(y);	width = ceil(width);	height = ceil(height);
 	}
 
-	memset (&ds, 0, sizeof(drawStruct_t));
 	ds.pic = pic;
 	ds.x = x;	ds.y = y;	ds.w = width;	ds.h = height;
 	Vector2Copy (vec2_origin, ds.offset);
@@ -746,12 +744,11 @@ void SCR_DrawLegacyPic (float x, float y, float scale, char *pic, float alpha)
 {
 	vec4_t			outColor;
 	vec4_t			stCoords;
-	drawStruct_t	ds;
+	drawStruct_t	ds = { 0 };
 
 	Vector4Set (outColor, 1.0f, 1.0f, 1.0f, alpha);
 	Vector4Set (stCoords, -3.0f, scale, 0, 0);
 
-	memset (&ds, 0, sizeof(drawStruct_t));
 	ds.pic = pic;
 	ds.x = x;	ds.y = y;	ds.w = 24;	ds.h = 24;
 	ds.scale[0] = ds.scale[1] = scale;
@@ -771,7 +768,7 @@ Coordinates are 640*480 virtual values
 void SCR_DrawColoredPic (float x, float y, float width, float height, scralign_t align, qboolean roundOut, color_t color, char *pic)
 {
 	vec4_t			outColor;
-	drawStruct_t	ds;
+	drawStruct_t	ds = { 0 };
 
 	SCR_ScaleCoords (&x, &y, &width, &height, align);
 	Vector4Set (outColor, (float)color[0]*DIV255, (float)color[1]*DIV255, (float)color[2]*DIV255, (float)color[3]*DIV255);
@@ -779,7 +776,6 @@ void SCR_DrawColoredPic (float x, float y, float width, float height, scralign_t
 		x = floor(x);	y = floor(y);	width = ceil(width);	height = ceil(height);
 	}
 
-	memset (&ds, 0, sizeof(drawStruct_t));
 	ds.pic = pic;
 	ds.x = x;	ds.y = y;	ds.w = width;	ds.h = height;
 	Vector2Copy (vec2_origin, ds.offset);
@@ -798,7 +794,7 @@ void SCR_DrawOffsetPic (float x, float y, float width, float height, vec2_t offs
 {
 	vec4_t			outColor;
 	vec2_t			scaledOffset;
-	drawStruct_t	ds;
+	drawStruct_t	ds = { 0 };
 
 	Vector2Copy (offset, scaledOffset);
 	SCR_ScaleCoords (&x, &y, &width, &height, align);
@@ -808,7 +804,6 @@ void SCR_DrawOffsetPic (float x, float y, float width, float height, vec2_t offs
 		x = floor(x);	y = floor(y);	width = ceil(width);	height = ceil(height);
 	}
 
-	memset (&ds, 0, sizeof(drawStruct_t));
 	ds.pic = pic;
 	ds.x = x;	ds.y = y;	ds.w = width;	ds.h = height;
 	Vector2Copy (scaledOffset, ds.offset);
@@ -827,7 +822,7 @@ void SCR_DrawOffsetPicST (float x, float y, float width, float height, vec2_t of
 {
 	vec4_t			outColor;
 	vec2_t			scaledOffset;
-	drawStruct_t	ds;
+	drawStruct_t	ds = { 0 };
 
 	Vector2Copy (offset, scaledOffset);
 	SCR_ScaleCoords (&x, &y, &width, &height, align);
@@ -837,7 +832,6 @@ void SCR_DrawOffsetPicST (float x, float y, float width, float height, vec2_t of
 		x = floor(x);	y = floor(y);	width = ceil(width);	height = ceil(height);
 	}
 
-	memset (&ds, 0, sizeof(drawStruct_t));
 	ds.pic = pic;
 	ds.x = x;	ds.y = y;	ds.w = width;	ds.h = height;
 	ds.flags |= DSFLAG_USESTCOORDS;
@@ -858,7 +852,7 @@ void SCR_DrawScrollPic (float x, float y, float width, float height, vec2_t offs
 {
 	vec4_t			outColor;
 	vec2_t			scaledOffset;
-	drawStruct_t	ds;
+	drawStruct_t	ds = { 0 };
 
 	Vector2Copy (offset, scaledOffset);
 	SCR_ScaleCoords (&x, &y, &width, &height, align);
@@ -868,7 +862,6 @@ void SCR_DrawScrollPic (float x, float y, float width, float height, vec2_t offs
 		x = floor(x);	y = floor(y);	width = ceil(width);	height = ceil(height);
 	}
 
-	memset (&ds, 0, sizeof(drawStruct_t));
 	ds.pic = pic;
 	ds.x = x;	ds.y = y;	ds.w = width;	ds.h = height;
 	ds.flags |= DSFLAG_USESTCOORDS;
@@ -890,7 +883,7 @@ void SCR_DrawMaskedPic (float x, float y, float width, float height, vec2_t offs
 {
 	vec4_t			outColor;
 	vec2_t			scaledOffset;
-	drawStruct_t	ds;
+	drawStruct_t	ds = { 0 };
 
 	Vector2Copy (offset, scaledOffset);
 	SCR_ScaleCoords (&x, &y, &width, &height, align);
@@ -900,7 +893,6 @@ void SCR_DrawMaskedPic (float x, float y, float width, float height, vec2_t offs
 		x = floor(x);	y = floor(y);	width = ceil(width);	height = ceil(height);
 	}
 
-	memset (&ds, 0, sizeof(drawStruct_t));
 	ds.pic = pic;
 	ds.maskPic = maskPic;
 	ds.x = x;	ds.y = y;	ds.w = width;	ds.h = height;
@@ -922,7 +914,7 @@ Coordinates are 640*480 virtual values
 void SCR_DrawTiledPic (float x, float y, float width, float height, scralign_t align, qboolean roundOut, char *pic, float alpha)
 {
 	vec4_t			outColor;
-	drawStruct_t	ds;
+	drawStruct_t	ds = { 0 };
 
 	SCR_ScaleCoords (&x, &y, &width, &height, align);
 	Vector4Set (outColor, 1.0f, 1.0f, 1.0f, alpha);
@@ -930,7 +922,6 @@ void SCR_DrawTiledPic (float x, float y, float width, float height, scralign_t a
 		x = floor(x);	y = floor(y);	width = ceil(width);	height = ceil(height);
 	}
 
-	memset (&ds, 0, sizeof(drawStruct_t));
 	ds.pic = pic;
 	ds.x = x;	ds.y = y;	ds.w = width;	ds.h = height;
 	ds.flags |= DSFLAG_TILED;
@@ -2419,9 +2410,9 @@ Clear around a sized down screen
 */
 void SCR_TileClear (void)
 {
-	int		top, bottom, left, right;
-	int		w, h;
-	drawStruct_t	ds;
+	int				top, bottom, left, right;
+	int				w, h;
+	drawStruct_t	ds = { 0 };
 
 	if (scr_con_current == 1.0)
 		return;		// full screen console
@@ -2438,7 +2429,6 @@ void SCR_TileClear (void)
 	left = cl.refdef.x;
 	right = left + cl.refdef.width-1;
 
-	memset (&ds, 0, sizeof(drawStruct_t));
 	ds.pic = "backtile";
 	ds.flags |= DSFLAG_TILED;
 	Vector2Copy (vec2_origin, ds.offset);

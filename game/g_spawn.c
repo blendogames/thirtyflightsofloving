@@ -604,9 +604,7 @@ void ED_ParseField (char *key, char *value, edict_t *ent)
 	field_t	*f;
 	byte	*b;
 	float	v;
-	vec3_t	vec;
-
-	VectorClear (vec);	// zero this vector first
+	vec3_t	vec = { 0.0f, 0.0f, 0.0f };
 
 	for (f=fields ; f->name ; f++)
 	{
