@@ -1478,8 +1478,8 @@ CIN_DrawCinematic
 */
 void CIN_DrawCinematic (cinHandle_t handle){
 
-	cinematic_t	*cin;
-	drawStruct_t	ds;
+	cinematic_t		*cin;
+	drawStruct_t	ds = { 0 };
 
 	cin = CIN_GetVideoByHandle(handle);
 
@@ -1497,7 +1497,6 @@ void CIN_DrawCinematic (cinHandle_t handle){
 		if (w < viddef.width || h < viddef.height)
 			R_DrawFill (0, 0, viddef.width, viddef.height, 0, 0, 0, 255);
 
-		memset (&ds, 0, sizeof(drawStruct_t));
 		ds.pic = &picname[0];
 		ds.x = x;	ds.y = y;	ds.w = w;	ds.h = h;
 		Vector2Copy (vec2_origin, ds.offset);

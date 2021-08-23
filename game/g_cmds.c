@@ -2249,7 +2249,7 @@ void ClientCommand (edict_t *ent)
 			int		count;
 
 		//	f = fopen(parm, "w");
-			SavegameDirRelativePath(parm, filename, sizeof(filename));
+			SavegameDirRelativePath (parm, filename, sizeof(filename));
 			Q_strncatz (filename, sizeof(filename), ".txt");
 			gi.dprintf("Writing entity list to %s... ", filename);
 			f = fopen(filename, "w");
@@ -2270,12 +2270,12 @@ void ClientCommand (edict_t *ent)
 						  "11 MOVETYPE_PUSHABLE   (Lazarus func_pushable)\n"
 						  "12 MOVETYPE_DEBRIS     (Lazarus target_rocks)\n"
 						  "13 MOVETYPE_RAIN       (Lazarus precipitation)\n\n");
-				fprintf(f,"Solid codes\n"
+				fprintf(f, "Solid codes\n"
 					      " 0 SOLID_NOT       no interaction with other objects\n"
 						  " 1 SOLID_TRIGGER   trigger fields, pickups\n"
 						  " 2 SOLID_BBOX      solid point entities\n"
 						  " 3 SOLID_BSP       brush models\n\n");
-				fprintf(f,"CONTENT_ codes (clipmask)\n"
+				fprintf(f, "CONTENT_ codes (clipmask)\n"
 					      " 0x00000001 SOLID\n"
 						  " 0x00000002 WINDOW\n"
 						  " 0x00000004 AUX\n"
@@ -2298,34 +2298,41 @@ void ClientCommand (edict_t *ent)
 						  " 0x08000000 DETAIL\n"
 						  " 0x10000000 TRANSLUCENT\n"
 						  " 0x20000000 LADDER\n\n");
-				fprintf(f,"NOTE: \"freed\" indicates an empty slot in the edicts array.\n\n");
+				fprintf(f, "NOTE: \"freed\" indicates an empty slot in the edicts array.\n\n");
 
-				fprintf(f,"============================================================\n");
+				fprintf(f, "============================================================\n");
 				count = 0;
 				for (i=0, e=&g_edicts[0]; i<globals.num_edicts; i++, e++)
 				{
 					VectorAdd(e->s.origin,e->origin_offset,origin);
-					fprintf(f,"entity #%d, classname = %s at %s, velocity = %s\n",i,e->classname,vtos(origin),vtos(e->velocity));
-					fprintf(f,"health=%d, mass=%d, dmg=%d, wait=%g, angles=%s\n",e->health, e->mass, e->dmg, e->wait, vtos(e->s.angles));
-					fprintf(f,"targetname=%s, target=%s, spawnflags=0x%04x\n",e->targetname,e->target,e->spawnflags);
-					fprintf(f,"absmin,absmax,size=%s, %s, %s\n",vtos(e->absmin),vtos(e->absmax),vtos(e->size));
-					fprintf(f,"groundentity=%s\n",(e->groundentity ? e->groundentity->classname : "NULL"));
+					fprintf(f, "entity #%d, classname = %s at %s, velocity = %s\n", i,
+						( (e->classname && (e->classname[0] != 0)) ? e->classname : "<noclass>"),
+						vtos(origin), vtos(e->velocity));
+					fprintf(f, "health=%d, mass=%d, dmg=%d, wait=%g, angles=%s\n", e->health, e->mass, e->dmg, e->wait, vtos(e->s.angles));
+					fprintf(f, "targetname=%s, target=%s, spawnflags=0x%04x\n",
+						( (e->targetname && (e->targetname[0] != 0)) ? e->targetname : "<noname>"),
+						( (e->target && (e->target[0] != 0)) ? e->target : "<noname>"),
+						e->spawnflags);
+					fprintf(f, "absmin, absmax, size=%s, %s, %s\n", vtos(e->absmin), vtos(e->absmax), vtos(e->size));
+					fprintf(f, "groundentity=%s\n",
+					//	(e->groundentity ? e->groundentity->classname : "NULL"));
+						(e->groundentity ? ( (e->groundentity->classname && (e->groundentity->classname[0] != 0)) ? e->groundentity->classname : "<noclass>" ) : "NULL"));
 					if (e->classname)
 					{
 						// class-specific output
-						if (!Q_stricmp(e->classname,"target_changelevel"))
-							fprintf(f,"map=%s\n",e->map);
+						if (!Q_stricmp(e->classname, "target_changelevel"))
+							fprintf(f, "map=%s\n", (e->map && (e->map[0] != 0)) ? e->map : "<nomap>");
 					}
-					fprintf(f,"movetype=%d, solid=%d, clipmask=0x%08x\n",e->movetype,e->solid,e->clipmask);
-					fprintf(f,"================================================================================\n");
+					fprintf(f, "movetype=%d, solid=%d, clipmask=0x%08x\n", e->movetype, e->solid, e->clipmask);
+					fprintf(f, "================================================================================\n");
 					if (e->inuse) count++;
 				}
-				fprintf(f,"Total number of entities = %d\n",count);
+				fprintf(f, "Total number of entities = %d\n", count);
 				fclose(f);
 				gi.dprintf("done!\n");
 			}
 			else {
-				gi.dprintf("Error opening %s\n",parm);
+				gi.dprintf("Error opening %s\n", filename);	// was parm
 			}
 		}
 		else {
@@ -2441,10 +2448,10 @@ void ClientCommand (edict_t *ent)
 			for (i=1; i<globals.num_edicts; i++)
 			{
 				e = &g_edicts[i];
-				if (e->classname && !Q_stricmp(parm,e->classname))
+				if (e->classname && !Q_stricmp(parm, e->classname))
 				{
 					count++;
-					gi.dprintf("%d. %s\n",count,vtos(e->s.origin));
+					gi.dprintf("%d. %s\n", count, vtos(e->s.origin));
 				}
 			}
 			if (!count)
@@ -2499,30 +2506,44 @@ void ClientCommand (edict_t *ent)
 				gi.dprintf("Not looking at an entity.\n");
 				return;
 			}
+			if (!(viewing->svflags & SVF_MONSTER) || (viewing->svflags & SVF_DEADMONSTER))
+			{
+				gi.dprintf("hint_test is only valid for live monsters and actors.\n");
+				return;
+			}
 			if (viewing->monsterinfo.aiflags & AI_HINT_TEST)
 			{
 				viewing->monsterinfo.aiflags &= ~AI_HINT_TEST;
 				gi.dprintf("%s (%s): Back to my normal self now.\n",
-					viewing->classname, viewing->targetname);
+						( (viewing->classname && (viewing->classname[0] != 0)) ? viewing->classname : "<noclass>"),
+						( (viewing->targetname && (viewing->targetname[0] != 0)) ? viewing->targetname : "<noname>"));
 				return;
 			}
-			if (!(viewing->svflags & SVF_MONSTER))
-				gi.dprintf("hint_test is only valid for monsters and actors.\n");
 			result = HintTestStart(viewing);
 			switch (result)
 			{
 			case -1:
-				gi.dprintf("%s (%s): I cannot see any hint_paths from here.\n");
+				gi.dprintf("%s (%s): I cannot see any hint_paths from here.\n",
+						( (viewing->classname && (viewing->classname[0] != 0)) ? viewing->classname : "<noclass>"),
+						( (viewing->targetname && (viewing->targetname[0] != 0)) ? viewing->targetname : "<noname>"));
 				break;
 			case  0:
 				gi.dprintf("This map does not contain hint_paths.\n");
 				break;
 			case  1:
-				gi.dprintf("%s (%s) searching for hint_path %s at %s. %s\n",
-			 			viewing->classname, (viewing->targetname ? viewing->targetname : "<noname>"),
-						(viewing->movetarget->targetname ? viewing->movetarget->targetname : "<noname>"),
-						vtos(viewing->movetarget->s.origin),
-						visible(viewing, viewing->movetarget) ? "I see it." : "I don't see it.");
+				if (viewing->movetarget != NULL) {
+					gi.dprintf("%s (%s) searching for hint_path %s at %s. %s\n",
+			 				( (viewing->classname && (viewing->classname[0] != 0)) ? viewing->classname : "<noclass>"),
+							( (viewing->targetname && (viewing->targetname[0] != 0)) ? viewing->targetname : "<noname>"),
+							( (viewing->movetarget->targetname && (viewing->movetarget->targetname[0] != 0)) ? viewing->movetarget->targetname : "<noname>"),
+							vtos(viewing->movetarget->s.origin),
+							visible(viewing, viewing->movetarget) ? "I see it." : "I don't see it.");
+				}
+				else {
+					gi.dprintf("%s (%s) searching for unknown hint_path.\n",
+							( (viewing->classname && (viewing->classname[0] != 0)) ? viewing->classname : "<noclass>"),
+							( (viewing->targetname && (viewing->targetname[0] != 0)) ? viewing->targetname : "<noname>"));
+				}
 				break;
 			default:
 				gi.dprintf("Unknown error\n");
@@ -2531,39 +2552,44 @@ void ClientCommand (edict_t *ent)
 		}
 		else if (!Q_stricmp(cmd, "entid"))
 		{
-			edict_t *viewing;
-			vec3_t	origin;
-			float	range;
-			viewing = LookingAt(ent,0,NULL,&range);
+			edict_t		*viewing;
+			vec3_t		origin;
+			float		range;
+			viewing = LookingAt(ent, 0, NULL, &range);
 			if (!viewing) 
 				return;
-			VectorAdd(viewing->s.origin,viewing->origin_offset,origin);
-			gi.dprintf("classname = %s at %s, velocity = %s\n",viewing->classname,vtos(origin),vtos(viewing->velocity));
-			gi.dprintf("health=%d, mass=%d, dmg=%d, wait=%g, sounds=%d, angles=%s, movetype=%d\n",viewing->health, viewing->mass, viewing->dmg, viewing->wait, viewing->sounds, vtos(viewing->s.angles), viewing->movetype);
-			gi.dprintf("targetname=%s, target=%s, spawnflags=0x%04x\n",viewing->targetname,viewing->target,viewing->spawnflags);
-			gi.dprintf("absmin,absmax,size=%s, %s, %s, range=%g\n",vtos(viewing->absmin),vtos(viewing->absmax),vtos(viewing->size),range);
-			gi.dprintf("groundentity=%s\n",(viewing->groundentity ? viewing->groundentity->classname : "NULL"));
+			VectorAdd (viewing->s.origin, viewing->origin_offset, origin);
+			gi.dprintf("classname = %s at %s, velocity = %s\n",
+				( (viewing->classname && (viewing->classname[0] != 0)) ? viewing->classname : "<noclass>"),
+				vtos(origin), vtos(viewing->velocity));
+			gi.dprintf("health=%d, mass=%d, dmg=%d, wait=%g, sounds=%d, angles=%s, movetype=%d\n", viewing->health, viewing->mass, viewing->dmg, viewing->wait, viewing->sounds, vtos(viewing->s.angles), viewing->movetype);
+			gi.dprintf("targetname=%s, target=%s, spawnflags=0x%04x\n",
+				( (viewing->targetname && (viewing->targetname[0] != 0)) ? viewing->targetname : "<noname>"),
+				( (viewing->target && (viewing->target[0] != 0)) ? viewing->target : "<noname>"),
+				viewing->spawnflags);
+			gi.dprintf("absmin, absmax, size=%s, %s, %s, range=%g\n", vtos(viewing->absmin), vtos(viewing->absmax), vtos(viewing->size), range);
+			gi.dprintf("groundentity=%s\n", (viewing->groundentity ? viewing->groundentity->classname : "NULL"));
 		}
 		else if (!Q_stricmp(cmd, "item_left"))
-			ShiftItem(ent,1);
+			ShiftItem (ent, 1);
 		else if (!Q_stricmp(cmd, "item_right"))
-			ShiftItem(ent,2);
+			ShiftItem (ent, 2);
 		else if (!Q_stricmp(cmd, "item_forward"))
-			ShiftItem(ent,4);
+			ShiftItem (ent, 4);
 		else if (!Q_stricmp(cmd, "item_back"))
-			ShiftItem(ent,8);
+			ShiftItem (ent, 8);
 		else if (!Q_stricmp(cmd, "item_up"))
-			ShiftItem(ent,16);
+			ShiftItem (ent, 16);
 		else if (!Q_stricmp(cmd, "item_down"))
-			ShiftItem(ent,32);
+			ShiftItem (ent, 32);
 		else if (!Q_stricmp(cmd, "item_drop"))
-			ShiftItem(ent,64);
+			ShiftItem (ent, 64);
 		else if (!Q_stricmp(cmd, "item_pitch"))
-			ShiftItem(ent,128);
+			ShiftItem (ent, 128);
 		else if (!Q_stricmp(cmd, "item_yaw"))
-			ShiftItem(ent,256);
+			ShiftItem (ent, 256);
 		else if (!Q_stricmp(cmd, "item_roll"))
-			ShiftItem(ent,512);
+			ShiftItem (ent, 512);
 		else if (!Q_stricmp(cmd, "item_release"))
 			ent->client->shift_dir = 0;
 		else if (!Q_stricmp(cmd, "medic_test"))
@@ -2590,7 +2616,7 @@ void ClientCommand (edict_t *ent)
 			if (gi.argc() < 2)
 			{
 				gi.dprintf("Muzzle offset=%g, %g, %g\n",
-					viewing->muzzle[0],viewing->muzzle[1],viewing->muzzle[2]);
+					viewing->muzzle[0], viewing->muzzle[1], viewing->muzzle[2]);
 			}
 			else
 			{

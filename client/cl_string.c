@@ -213,9 +213,8 @@ void CL_DrawStringFromCharsPic (float x, float y, float w, float h, vec2_t offse
 	char			modifier;
 	int				red, green, blue, italic, shadow, bold, reset;
 	qboolean		modified;
-	drawStruct_t	ds;
+	drawStruct_t	ds = { 0 };
 
-	memset (&ds, 0, sizeof(drawStruct_t));
 	Vector4Set (modulate, (float)color[0] * DIV255, (float)color[1] * DIV255, (float)color[2] * DIV255, (float)color[3] * DIV255);
 	Vector4Set (shadowModulate, 0, 0, 0, modulate[3]);
 	ofsX = w * 0.125;

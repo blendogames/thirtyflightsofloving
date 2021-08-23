@@ -2025,32 +2025,6 @@ Large exploding box.  You can override its mass (100),
 health (80), and dmg (150).
 gib_type- Set to 3 for barrel-specific gibs.
 */
-/*
-void barrel_touch_zaero (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
-{
-	float	ratio;
-	vec3_t	v, move;
-	float	yaw, dist;
-
-	if (!self || !other)
-		return;
-
-	if (other->groundentity == self || !other->client)
-		return;
-
-	ratio = (float)other->mass / (float)self->mass;
-	VectorSubtract (self->s.origin, other->s.origin, v);
-	yaw = vectoyaw(v);
-	dist = 20 * ratio * FRAMETIME;
-	yaw = yaw*M_PI*2 / 360;
-	
-	move[0] = cos(yaw)*dist;
-	move[1] = sin(yaw)*dist;
-	move[2] = 0;
-
-	SV_movestep (self, move, true);
-}
-*/
 
 void barrel_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
 {

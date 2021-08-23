@@ -887,7 +887,7 @@ void Con_DrawConsole (float frac, qboolean trans)
 	// changeable download bar color
 	int				red, green, blue;
 	vec4_t			picColor;
-	drawStruct_t	ds;
+	drawStruct_t	ds = { 0 };
 
 //	CL_TextColor ((int)alt_text_color->value, &red, &green, &blue);
 	CL_TextColor (alt_text_color->integer, &red, &green, &blue);
@@ -926,7 +926,6 @@ void Con_DrawConsole (float frac, qboolean trans)
 	//j = newconback_found ? 0 : (scr_conheight->value-1)*i - barheight;
 	y = lines - barheight;
 
-	memset (&ds, 0, sizeof(drawStruct_t));
 	Vector2Copy (vec2_origin, ds.offset);
 	Vector4Copy (picColor, ds.color);
 

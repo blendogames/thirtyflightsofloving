@@ -219,7 +219,7 @@ void CL_DrawLayoutField (int x, int y, int color, int width, int value, qboolean
 	float			digitWidth, digitOffset, fieldScale;
 	float			flash_x, flashWidth;
 	vec4_t			picColor;
-	drawStruct_t	ds;
+	drawStruct_t	ds = { 0 };
 	float			(*scaleForScreen)(float in);
 	float			(*getScreenScale)(void);
 
@@ -261,7 +261,6 @@ void CL_DrawLayoutField (int x, int y, int color, int width, int value, qboolean
 	flash_x = x;
 	Vector4Set (picColor, 1.0f, 1.0f, 1.0f, scr_hudalpha->value);
 
-	memset (&ds, 0, sizeof(drawStruct_t));
 	ds.y = y;	ds.h = scaleForScreen(ICON_HEIGHT);
 	Vector2Copy (vec2_origin, ds.offset);
 	Vector4Copy (picColor, ds.color);
