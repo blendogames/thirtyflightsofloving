@@ -476,7 +476,7 @@ void InitGame (void)
 	crossh = gi.cvar ("crossh", "1", 0);
 	allow_download = gi.cvar("allow_download", "0", 0);
 
-	blaster_color = gi.cvar("blaster_color", "1", 0); // Knightmare added
+	g_showlogic = gi.cvar("g_showlogic", "0", 0); // Knightmare added
 
 	// If this is an SP game and "readout" is not set, force allow_download off
 	// so we don't get the annoying "Refusing to download path with .." messages

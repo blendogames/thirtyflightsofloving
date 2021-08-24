@@ -204,8 +204,7 @@ edict_t *CheckForProxField (edict_t *ent)
 		hit = touch[i];
 		if (!hit->inuse)
 			continue;
-		if (hit->class_id == ENTITY_PROX_FIELD)
-		{
+		if (hit->class_id == ENTITY_PROX_FIELD) {
 			return hit;
 		}
 	}

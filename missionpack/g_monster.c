@@ -2787,7 +2787,7 @@ int HintTestStart (edict_t *self)
 		self->enemy = self->oldenemy = NULL;
 		self->goalentity = self->movetarget = hint;
 		self->monsterinfo.pausetime = 0;
-		self->monsterinfo.aiflags2 = AI2_HINT_TEST;
+		self->monsterinfo.aiflags2 |= AI2_HINT_TEST;
 		// run for it
 		self->monsterinfo.run (self);
 		return 1;

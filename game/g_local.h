@@ -824,7 +824,7 @@ extern	cvar_t	*vid_ref;
 extern	cvar_t	*zoomrate;
 extern	cvar_t	*zoomsnap;
 
-extern	cvar_t	*blaster_color; // Knightmare added
+extern	cvar_t	*g_showlogic; // Knightmare added
 
 extern	int		max_modelindex;
 extern	int		max_soundindex;

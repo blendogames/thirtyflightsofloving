@@ -384,6 +384,38 @@ void gunner_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	self->monsterinfo.currentmove = &gunner_move_death;
 }
 
+// Knightmare added
+// This does a short-range trace at blast radius, to ensure we won't clip a wall.
+#define GUNNER_CTGRENADE_DANGER_RANGE	128.0f
+qboolean gunner_ctgrenade_safety_check (edict_t *self, vec3_t start, vec3_t target)
+{
+	trace_t		tr;
+	vec3_t		dir, dangerOffset, dangerTarget;
+	float		dist;
+
+	// get dist to target
+	VectorSubtract (target, start, dir);
+	dist = VectorLength (dir);
+
+//	if ((g_showlogic) && (g_showlogic->value))
+//		gi.dprintf ("Gunner: perfoming close-range contactgrenade safety check- ");
+
+	// extrapolate point on path to target at danger range
+	VectorNormalize (dir);
+	VectorScale (dir, GUNNER_CTGRENADE_DANGER_RANGE, dangerOffset);
+	VectorAdd (start, dangerOffset, dangerTarget);
+
+	tr = gi.trace(start, vec3_origin, vec3_origin, dangerTarget, self, MASK_SHOT);
+	if (tr.fraction < 1.0) {
+	//	if (g_showlogic && g_showlogic->value)
+	//		gi.dprintf ("failed!\n");
+		return false;
+	}
+//	if (g_showlogic && g_showlogic->value)
+//		gi.dprintf ("succeeded!\n");
+	return true;
+}
+
 qboolean gunner_grenade_check (edict_t *self)
 {
 	vec3_t		start;
@@ -392,7 +424,8 @@ qboolean gunner_grenade_check (edict_t *self)
 	trace_t		tr;
 	vec3_t		dir;
 	vec3_t		vhorz;
-	float		horz,vertmax;
+	float		horz, vertmax, dangerClose;
+	qboolean	isContact = (self->spawnflags & SF_MONSTER_SPECIAL);
 
 	if (!self->enemy)
 		return false;
@@ -411,8 +444,13 @@ qboolean gunner_grenade_check (edict_t *self)
 	G_ProjectSource (self->s.origin, monster_flash_offset[MZ2_GUNNER_GRENADE_1], forward, right, start);
 
 	// see if we're too close
+	// Knightmare- use longer range for contact grenades
+	if (isContact)
+		dangerClose = 128.0f;
+	else
+		dangerClose = 100.0f;
 	VectorSubtract (self->enemy->s.origin, self->s.origin, dir);
-	if (VectorLength(dir) < 100)
+	if (VectorLength(dir) < dangerClose)
 		return false;
 
 	// Lazarus: Max vertical distance - this is approximate and conservative
@@ -431,13 +469,31 @@ qboolean gunner_grenade_check (edict_t *self)
 	target[2] = self->enemy->absmax[2];
 	tr = gi.trace(start, vec3_origin, vec3_origin, target, self, MASK_SHOT);
 	if (tr.ent == self->enemy || tr.fraction == 1)
-		return true;
+	{
+		VectorCopy (target, self->pos0);	// save this aim location in case later safety check fails
+		// Knightmare- added close-range contact grenade safety checks
+		if (isContact) {
+			if ( gunner_ctgrenade_safety_check(self, start, target) )
+				return true;
+		}
+		else
+			return true;
+	}
 	// Repeat for feet... in case we're looking down at a target standing under,
 	// for example, a short doorway
 	target[2] = self->enemy->absmin[2];
 	tr = gi.trace(start, vec3_origin, vec3_origin, target, self, MASK_SHOT);
 	if (tr.ent == self->enemy || tr.fraction == 1)
-		return true;
+	{
+		VectorCopy (target, self->pos0);	// save this aim location in case later safety check fails
+		// Knightmare- added close-range contact grenade safety checks
+		if (isContact) {
+			if ( gunner_ctgrenade_safety_check(self, start, target) )
+				return true;
+		}
+		else
+			return true;
+	}
 
 	return false;
 }
@@ -538,11 +594,15 @@ void GunnerFire (edict_t *self)
 
 void GunnerGrenade (edict_t *self)
 {
-	vec3_t	start,target;
-	vec3_t	forward, right, up;
-	vec3_t	aim;
-	vec_t	monster_speed;
-	int		flash_number;
+	vec3_t		start, target, leadTarget;
+	vec3_t		forward, right, up;
+	vec3_t		aim;
+	vec_t		monster_speed;
+	int			flash_number;
+	qboolean	leadingTarget = false;
+	qboolean	targetSafe = false;
+	qboolean	leadSafe = false;
+	qboolean	isContact = (self->spawnflags & SF_MONSTER_SPECIAL);
 
 	if (!self->enemy || !self->enemy->inuse)
 		return;
@@ -573,7 +633,54 @@ void GunnerGrenade (edict_t *self)
 
 	// aim at enemy's feet if he's at same elevation or lower. otherwise aim at origin
 	VectorCopy (self->enemy->s.origin, target);
-	if (self->enemy->absmin[2] <= self->absmax[2]) target[2] = self->enemy->absmin[2];
+	if (self->enemy->absmin[2] <= self->absmax[2])
+		target[2] = self->enemy->absmin[2];
+
+
+	// lead target... 20, 35, 50, 65 chance of leading
+	if ( random() < (0.2 + skill->value * 0.15) )
+	{
+		float	dist;
+		float	time;
+
+		VectorSubtract (target, start, aim);
+		dist = VectorLength (aim);
+		time = dist / GRENADE_VELOCITY;  // Not correct, but better than nothin'
+		VectorMA (target, time, self->enemy->velocity, leadTarget);
+		if (!isContact)	// delay copying for ctgrenade safety check
+			VectorCopy (leadTarget, target);
+		leadingTarget = true;
+	}
+
+	if (isContact)
+	{
+		if ( gunner_ctgrenade_safety_check(self, start, target) ) {
+			VectorCopy (target, self->pos0);	// save this target point
+			targetSafe = true;
+		}
+		if ( leadingTarget && gunner_ctgrenade_safety_check(self, start, leadTarget) ) {
+			VectorCopy (leadTarget, target);	// copy lead point over target
+			leadSafe = true;
+		}
+		if ( !targetSafe && !leadSafe ) {
+			VectorCopy (self->pos0, target);	// revert to prev target point
+		}
+	/*	if ( (g_showlogic) && (g_showlogic->value) )
+		{
+			if ( targetSafe && leadSafe )
+				gi.dprintf ("GunnerGrenade: safe to fire at and lead target, saving target point.\n");
+			else if ( targetSafe && leadingTarget && !leadSafe )
+				gi.dprintf ("GunnerGrenade: safe to fire at but not lead target, saving target point.\n");
+			else if ( targetSafe && !leadingTarget )
+				gi.dprintf ("GunnerGrenade: safe to fire at target, saving target point.\n");
+			else if ( !targetSafe && leadSafe )
+				gi.dprintf ("GunnerGrenade: safe to lead target only, not saving target point.\n");
+			else if ( !targetSafe && !leadSafe && leadingTarget )
+				gi.dprintf ("GunnerGrenade: NOT safe to fire at or lead target, reverting to prev target point.\n");
+			else if ( !targetSafe && !leadSafe && !leadingTarget )
+				gi.dprintf ("GunnerGrenade: NOT safe to fire at target, reverting to prev target point.\n");
+		} */
+	}
 
 	// Lazarus fog reduction of accuracy
 	if (self->monsterinfo.visibility < FOG_CANSEEGOOD)
@@ -595,18 +702,6 @@ void GunnerGrenade (edict_t *self)
 		target[1] += crandom() * dist/8 * (2 - skill->value);
 	} */
 
-	// lead target... 20, 35, 50, 65 chance of leading
-	if ( random() < (0.2 + skill->value * 0.15) )
-	{
-		float	dist;
-		float	time;
-
-		VectorSubtract (target, start, aim);
-		dist = VectorLength (aim);
-		time = dist / GRENADE_VELOCITY;  // Not correct, but better than nothin'
-		VectorMA (target, time, self->enemy->velocity, target);
-	}
-
 	AimGrenade (self, start, target, GRENADE_VELOCITY, aim);
 	// Lazarus - take into account (sort of) feature of adding shooter's velocity to
 	// grenade velocity
@@ -623,7 +718,7 @@ void GunnerGrenade (edict_t *self)
 		VectorNormalize (aim);
 	}
 
-	monster_fire_grenade (self, start, aim, 50, GRENADE_VELOCITY, flash_number, (self->spawnflags & SF_MONSTER_SPECIAL));
+	monster_fire_grenade (self, start, aim, 50, GRENADE_VELOCITY, flash_number, isContact);
 }
 
 mframe_t gunner_frames_attack_chain [] =

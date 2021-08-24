@@ -467,6 +467,39 @@ qboolean gunner_prox_safety_check (edict_t *self, vec3_t start, vec3_t target)
 	return true;
 }
 
+// Knightmare added
+// This does a short-range trace at blast radius, to ensure we won't clip a wall.
+#define GUNNER_CTGRENADE_DANGER_RANGE	128.0f
+qboolean gunner_ctgrenade_safety_check (edict_t *self, vec3_t start, vec3_t target)
+{
+	trace_t		tr;
+	vec3_t		dir, dangerOffset, dangerTarget;
+	float		dist;
+
+	// get dist to target
+	VectorSubtract (target, start, dir);
+	dist = VectorLength (dir);
+
+//	if ((g_showlogic) && (g_showlogic->value))
+//		gi.dprintf ("Gunner: perfoming close-range contactgrenade safety check- ");
+
+	// extrapolate point on path to target at danger range
+	VectorNormalize (dir);
+	VectorScale (dir, GUNNER_CTGRENADE_DANGER_RANGE, dangerOffset);
+	VectorAdd (start, dangerOffset, dangerTarget);
+
+	tr = gi.trace(start, vec3_origin, vec3_origin, dangerTarget, self, MASK_SHOT);
+	if (tr.fraction < 1.0) {
+	//	if (g_showlogic && g_showlogic->value)
+	//		gi.dprintf ("failed!\n");
+		return false;
+	}
+//	if (g_showlogic && g_showlogic->value)
+//		gi.dprintf ("succeeded!\n");
+	return true;
+}
+
+
 qboolean gunner_grenade_check (edict_t *self)
 {
 	vec3_t		start;
@@ -477,6 +510,7 @@ qboolean gunner_grenade_check (edict_t *self)
 	vec3_t		vhorz;
 	float		horz, vertmax, dangerClose;
 	qboolean	isProx = (self->moreflags & FL2_COMMANDER);
+	qboolean	isContact = (self->spawnflags & SF_MONSTER_SPECIAL);
 	// Knightmare- Tactician Gunner fires prox mines in a spread, 
 	// so we need a wider safety bounds check
 	vec3_t		checkMins, checkMaxs;
@@ -510,8 +544,11 @@ qboolean gunner_grenade_check (edict_t *self)
 
 	// see if we're too close
 	// Knightmare- Tactician Gunner's prox mines stick around, so only use at longer range
+	// Also use longer range for contact grenades
 	if (isProx)
 		dangerClose = 320.0f;
+	else if (isContact)
+		dangerClose = 128.0f;
 	else
 		dangerClose = 100.0f;
 	VectorSubtract (self->enemy->s.origin, self->s.origin, dir);
@@ -534,10 +571,15 @@ qboolean gunner_grenade_check (edict_t *self)
 	target[2] = self->enemy->absmax[2];
 	tr = gi.trace(start, checkMins, checkMaxs, target, self, MASK_SHOT);
 	if (tr.ent == self->enemy || tr.fraction == 1)
-	{	// Knightmare- added close-range prox safety check
+	{	
+		VectorCopy (target, self->aim_point);	// save this aim location in case later safety check fails
+		// Knightmare- added close-range prox and contact grenade safety checks
 		if (isProx) {
-			VectorCopy (target, self->aim_point);	// save this aim location in case later safety check fails
-			if (gunner_prox_safety_check(self, start, target))
+			if ( gunner_prox_safety_check(self, start, target) )
+				return true;
+		}
+		else if (isContact) {
+			if ( gunner_ctgrenade_safety_check(self, start, target) )
 				return true;
 		}
 		else
@@ -548,10 +590,15 @@ qboolean gunner_grenade_check (edict_t *self)
 	target[2] = self->enemy->absmin[2];
 	tr = gi.trace(start, checkMins, checkMaxs, target, self, MASK_SHOT);
 	if (tr.ent == self->enemy || tr.fraction == 1)
-	{	// Knightmare- added close-range prox safety check
+	{
+		VectorCopy (target, self->aim_point);	// save this aim location in case later safety check fails
+		// Knightmare- added close-range prox and contact grenade safety checks
 		if (isProx) {
-			VectorCopy (target, self->aim_point);	// save this aim location in case later safety check fails
-			if (gunner_prox_safety_check(self, start, target))
+			if ( gunner_prox_safety_check(self, start, target) )
+				return true;
+		}
+		else if (isContact) {
+			if ( gunner_ctgrenade_safety_check(self, start, target) )
 				return true;
 		}
 		else
@@ -694,6 +741,7 @@ void GunnerGrenade (edict_t *self)
 	qboolean	targetSafe = false;
 	qboolean	leadSafe = false;
 	qboolean	isProx = (self->moreflags & FL2_COMMANDER);
+	qboolean	isContact = (self->spawnflags & SF_MONSTER_SPECIAL);
 
 	//PGM
 	if (!self->enemy || !self->enemy->inuse)
@@ -766,12 +814,13 @@ void GunnerGrenade (edict_t *self)
 			dist = VectorLength (aim);
 			time = dist / GRENADE_VELOCITY;  // Not correct, but better than nothin'
 			VectorMA (target, time, self->enemy->velocity, leadTarget);
-			if (!isProx)	// delay copying for prox safety check
+			if (!isProx && !isContact)	// delay copying for prox/ctgrenade safety check
 				VectorCopy (leadTarget, target);
 			leadingTarget = true;
 		}
 
-		if (isProx)	// Knightmare- run another safety check before firing, so players can't trick us into self-damage
+		// Knightmare- run another safety check before firing, so players can't trick us into self-damage
+		if (isProx)
 		{
 			if ( gunner_prox_safety_check(self, start, target) ) {
 				VectorCopy (target, self->aim_point);	// save this target point
@@ -784,22 +833,36 @@ void GunnerGrenade (edict_t *self)
 			if ( !targetSafe && !leadSafe ) {
 				VectorCopy (self->aim_point, target);	// revert to prev target point
 			}
-		/*	if ((g_showlogic) && (g_showlogic->value))
-			{
-				if ( targetSafe && leadSafe )
-					gi.dprintf ("GunnerGrenade: safe to fire at and lead target, saving target point.\n");
-				else if ( targetSafe && leadingTarget && !leadSafe )
-					gi.dprintf ("GunnerGrenade: safe to fire at but not lead target, saving target point.\n");
-				else if ( targetSafe && !leadingTarget )
-					gi.dprintf ("GunnerGrenade: safe to fire at target, saving target point.\n");
-				else if ( !targetSafe && leadSafe )
-					gi.dprintf ("GunnerGrenade: safe to lead target only, not saving target point.\n");
-				else if ( !targetSafe && !leadSafe && leadingTarget )
-					gi.dprintf ("GunnerGrenade: NOT safe to fire at or lead target, reverting to prev target point.\n");
-				else if ( !targetSafe && !leadSafe && !leadingTarget )
-					gi.dprintf ("GunnerGrenade: NOT safe to fire at target, reverting to prev target point.\n");
-			} */
 		}
+		else if (isContact)
+		{
+			if ( gunner_ctgrenade_safety_check(self, start, target) ) {
+				VectorCopy (target, self->aim_point);	// save this target point
+				targetSafe = true;
+			}
+			if ( leadingTarget && gunner_ctgrenade_safety_check(self, start, leadTarget) ) {
+				VectorCopy (leadTarget, target);	// copy lead point over target
+				leadSafe = true;
+			}
+			if ( !targetSafe && !leadSafe ) {
+				VectorCopy (self->aim_point, target);	// revert to prev target point
+			}
+		}
+	/*	if ( (isProx || isContact) && (g_showlogic) && (g_showlogic->value) )
+		{
+			if ( targetSafe && leadSafe )
+				gi.dprintf ("GunnerGrenade: safe to fire at and lead target, saving target point.\n");
+			else if ( targetSafe && leadingTarget && !leadSafe )
+				gi.dprintf ("GunnerGrenade: safe to fire at but not lead target, saving target point.\n");
+			else if ( targetSafe && !leadingTarget )
+				gi.dprintf ("GunnerGrenade: safe to fire at target, saving target point.\n");
+			else if ( !targetSafe && leadSafe )
+				gi.dprintf ("GunnerGrenade: safe to lead target only, not saving target point.\n");
+			else if ( !targetSafe && !leadSafe && leadingTarget )
+				gi.dprintf ("GunnerGrenade: NOT safe to fire at or lead target, reverting to prev target point.\n");
+			else if ( !targetSafe && !leadSafe && !leadingTarget )
+				gi.dprintf ("GunnerGrenade: NOT safe to fire at target, reverting to prev target point.\n");
+		} */
 
 		// Knightmare- spread out Tactician Gunner's prox mines so they don't collide
 		if (isProx)
@@ -858,7 +921,7 @@ void GunnerGrenade (edict_t *self)
 		monster_fire_prox (self, start, aim, 90, 1, GRENADE_VELOCITY, 20, prox_timer, 192, flash_number);
 	}
 	else
-		monster_fire_grenade (self, start, aim, 50, GRENADE_VELOCITY, flash_number, (self->spawnflags & SF_MONSTER_SPECIAL));
+		monster_fire_grenade (self, start, aim, 50, GRENADE_VELOCITY, flash_number, isContact);
 }
 
 mframe_t gunner_frames_attack_chain [] =

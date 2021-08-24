@@ -1461,7 +1461,7 @@ void HintTestNext (edict_t *self, edict_t *hint)
 		self->ideal_yaw = vectoyaw(dir);
 		self->goalentity = self->movetarget = next;
 		self->monsterinfo.pausetime = 0;
-		self->monsterinfo.aiflags = AI_HINT_TEST;
+		self->monsterinfo.aiflags |= AI_HINT_TEST;
 		// run for it
 		self->monsterinfo.run (self);
 		gi.dprintf("%s (%s): Reached hint_path %s,\nsearching for hint_path %s at %s. %s\n",
@@ -1523,7 +1523,7 @@ int HintTestStart (edict_t *self)
 		self->enemy = self->oldenemy = NULL;
 		self->goalentity = self->movetarget = hint;
 		self->monsterinfo.pausetime = 0;
-		self->monsterinfo.aiflags = AI_HINT_TEST;
+		self->monsterinfo.aiflags |= AI_HINT_TEST;
 		// run for it
 		self->monsterinfo.run (self);
 		return 1;

@@ -2356,7 +2356,7 @@ void ClientCommand (edict_t *ent)
 				gi.dprintf("Not looking at an entity.\n");
 				return;
 			}
-			if (!(viewing->svflags & SVF_MONSTER) || (viewing->svflags & SVF_DEADMONSTER))
+			if ( !(viewing->svflags & SVF_MONSTER) || (viewing->svflags & SVF_DEADMONSTER) || (viewing->deadflag != DEAD_NO) )
 			{
 				gi.dprintf("hint_test is only valid for live monsters and actors.\n");
 				return;

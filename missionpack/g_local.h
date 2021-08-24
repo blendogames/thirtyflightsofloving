@@ -2487,12 +2487,12 @@ struct edict_s
 
 	char		*common_name;
 
-	char		*newtargetname; //used with target_change
-	char		*followtarget;	//used with func_door_swinging
+	char		*newtargetname; // used with target_change
+	char		*followtarget;	// used with func_door_swinging
 	char		*destroytarget;
 	char		*viewmessage;
-	char		*source;		//used with target_bmodel_spawner
-	char		*newteam;		//used with target_bmodel_spawner
+	char		*source;		// used with target_bmodel_spawner
+	char		*newteam;		// used with target_bmodel_spawner
 
 	char		*musictrack;	// Knightmare- for specifying OGG or CD track
 
@@ -2500,7 +2500,7 @@ struct edict_s
 	// the origin of this entity:
 	char		*move_to;
 
-	float		distance;	//target_playback stuff
+	float		distance;	// target_playback stuff
 	float		duration;
 	float		bob;
 	int			lip;
@@ -2511,7 +2511,7 @@ struct edict_s
 
 	vec3_t		color;
 	float		alpha;
-	float		holdtime;	//target_fade stuff
+	float		holdtime;	// target_fade stuff
 	float		fadein;
 	float		fadeout;
 

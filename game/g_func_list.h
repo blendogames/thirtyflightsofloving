@@ -443,6 +443,7 @@
 {"gunner_duck_hold", (byte *)gunner_duck_hold},
 {"gunner_duck_down", (byte *)gunner_duck_down},
 {"gunner_grenade_check", (byte *)gunner_grenade_check},
+{"gunner_ctgrenade_safety_check", (byte *)gunner_ctgrenade_safety_check},
 {"gunner_die", (byte *)gunner_die},
 {"gunner_dead", (byte *)gunner_dead},
 {"gunner_pain", (byte *)gunner_pain},

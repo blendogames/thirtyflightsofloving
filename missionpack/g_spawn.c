@@ -885,8 +885,12 @@ void ED_CallSpawn (edict_t *ent)
 			&& !(ent->monsterinfo.monsterflags & MFL_DO_NOT_COUNT))
 			ent->classname = "monster_medic_commander";
 		// gunner
-		if ( !strcmp(ent->classname, "monster_gunner") && (random() < ((skill->value + 1.0f) * 0.15f)) )
-			ent->classname = "monster_gunner_tactician";
+		if ( !strcmp(ent->classname, "monster_gunner") ) {
+			if (random() < ((skill->value + 1.0f) * 0.15f))
+				ent->classname = "monster_gunner_tactician";
+			else
+				ent->spawnflags |= SF_MONSTER_SPECIAL;
+		}
 	}
 
 	// LM Escape monster replacement

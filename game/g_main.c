@@ -136,7 +136,7 @@ cvar_t	*zoomsnap;
 cvar_t	*sv_stopspeed;	//PGM	 (this was a define in g_phys.c)
 cvar_t	*sv_step_fraction;	// Knightmare- this was a define in p_view.c
 
-cvar_t	*blaster_color; // Knightmare added
+cvar_t	*g_showlogic; // Knightmare added
 
 void SpawnEntities (char *mapname, char *entities, char *spawnpoint);
 void ClientThink (edict_t *ent, usercmd_t *cmd);
