@@ -115,7 +115,7 @@ How To Run
 
 	To mount assets from the mission packs for use with any mod, add
 	
-	+set basegame xatrix
+	+set basegame missionpackdir
 	
 	You can have up to 3 basegames set:
 	
