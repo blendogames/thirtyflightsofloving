@@ -70,6 +70,7 @@ cvar_t		*vid_ypos;			// Y coordinate of window position
 cvar_t		*vid_fullscreen;
 cvar_t		*r_customwidth;
 cvar_t		*r_customheight;
+cvar_t		*r_mode_desktop;	// desktop-resolution display mode
 
 // Global variables used internally by this module
 viddef_t	viddef;				// global video state; used by other modules
@@ -526,15 +527,18 @@ void VID_Restart_f (void)
 	vid_ref->modified = true;
 }
 
+/*
+==============
+VID_Front_f
+==============
+*/
 void VID_Front_f( void )
 {
 	SetWindowLongPtr( cl_hwnd, GWL_EXSTYLE, WS_EX_TOPMOST );
 	SetForegroundWindow( cl_hwnd );
 }
 
-/*
-** VID_GetModeInfo
-*/
+
 typedef struct vidmode_s
 {
 	const char *description;
@@ -548,8 +552,23 @@ vidmode_t vid_modes[] =
 #include "../qcommon/vid_modes.h"
 };
 
+/*
+==============
+VID_GetModeInfo
+==============
+*/
 qboolean VID_GetModeInfo (int *width, int *height, int mode)
 {
+	// desktop-resolution display mode
+	if ( r_mode_desktop->integer && (vid_fullscreen->integer >= 2) )
+	{
+		*width = GetSystemMetrics(SM_CXVIRTUALSCREEN);
+		*height = GetSystemMetrics(SM_CYVIRTUALSCREEN);
+		if ( (width == 0) || (height == 0) )
+			return false;
+		return true;
+	}
+
 	if (mode == -1) // custom mode
 	{
 	//	*width  = r_customwidth->value;
@@ -561,7 +580,6 @@ qboolean VID_GetModeInfo (int *width, int *height, int mode)
 
 	if ( mode < 0 || mode >= VID_NUM_MODES )
 		return false;
-
 
 	*width  = vid_modes[mode].width;
 	*height = vid_modes[mode].height;
@@ -756,12 +774,14 @@ void VID_Init (void)
 	Cvar_SetDescription ("win_noalttab", "Disables alt-tab out of game when set to 1.");
 	win_alttab_restore_desktop = Cvar_Get( "win_alttab_restore_desktop", "1", CVAR_ARCHIVE );	// Knightmare- whether to restore desktop resolution on alt-tab
 	Cvar_SetDescription ("win_alttab_restore_desktop", "Enables restoration of desktop resolution when alt-tabbing.");
-	r_customwidth = Cvar_Get( "r_customwidth", "1600", CVAR_ARCHIVE );
+	r_customwidth = Cvar_Get ("r_customwidth", "1600", CVAR_ARCHIVE);
 	Cvar_SetDescription ("r_customwidth", "Sets resolution width when using custom video mode (-1).");
-	r_customheight = Cvar_Get( "r_customheight", "1024", CVAR_ARCHIVE );
+	r_customheight = Cvar_Get ("r_customheight", "1024", CVAR_ARCHIVE);
 	Cvar_SetDescription ("r_customheight", "Sets resolution height when using custom video mode (-1).");
+	r_mode_desktop = Cvar_Get ("r_mode_desktop", "0", CVAR_ARCHIVE);	// desktop-resolution display mode
+
 	// Knightmare- just here to enable command line option without error
-	scanforcd = Cvar_Get( "scanforcd", "0", 0 );
+	scanforcd = Cvar_Get ("scanforcd", "0", 0);
 
 	// force vid_ref to gl
 	// older versions of Lazarus code check only vid_ref=gl for fadein effects

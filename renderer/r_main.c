@@ -169,6 +169,9 @@ cvar_t	*r_particledistance;
 cvar_t	*r_particle_overdraw;
 
 cvar_t	*r_mode;
+#ifdef _WIN32
+cvar_t	*r_mode_desktop;	// desktop-resolution display mode
+#endif
 cvar_t	*r_dynamic;
 cvar_t  *r_monolightmap;
 
@@ -1040,6 +1043,10 @@ void R_Register (void)
 	Cvar_SetDescription ("r_bitdepth", "Sets color bit depth.  0 = desktop setting.");
 	r_mode = Cvar_Get( "r_mode", "4", CVAR_ARCHIVE );
 	Cvar_SetDescription ("r_mode", "Sets enumerated video mode for renderer.  -1 = custom mode.");
+#ifdef _WIN32	// desktop-resolution display mode
+	r_mode_desktop = Cvar_Get( "r_mode_desktop", "0", CVAR_ARCHIVE );
+	Cvar_SetDescription ("r_mode_desktop", "Enables setting borderless window mode to current desktop size (including multiple monitors).  Experimental.");
+#endif
 	r_lightmap = Cvar_Get ("r_lightmap", "0", 0);
 	Cvar_SetDescription ("r_lightmap", "Enables lightmap-only world rendering.");
 	r_shadows = Cvar_Get ("r_shadows", "0", CVAR_ARCHIVE );
@@ -1277,6 +1284,9 @@ qboolean R_SetMode (void)
 
 	vid_fullscreen->modified = false;
 	r_mode->modified = false;
+#ifdef _WIN32
+	r_mode_desktop->modified = false;	// desktop-resolution display mode
+#endif
 
 	if ( ( err = GLimp_SetMode( &vid.width, &vid.height, r_mode->integer, fullscreen ) ) == rserr_ok )
 	{
@@ -2203,7 +2213,13 @@ void R_BeginFrame( float camera_separation )
 	//
 	// change modes if necessary
 	//
-	if ( r_mode->modified || vid_fullscreen->modified )
+//	if ( r_mode->modified || vid_fullscreen->modified )
+	if ( r_mode->modified || vid_fullscreen->modified
+#ifdef _WIN32
+		|| (r_mode_desktop->modified && (vid_fullscreen->integer >= 2)) )	// desktop-resolution display mode
+#else
+		)
+#endif	// _WIN32
 	{	// FIXME: only restart if CDS is required
 		cvar_t	*ref;
 

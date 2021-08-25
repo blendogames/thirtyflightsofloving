@@ -305,6 +305,9 @@ extern	cvar_t	*r_screenshot_gamma_correct;	// gamma correction for screenshots
 //extern	cvar_t	*r_nosubimage;	// unused
 extern	cvar_t	*r_bitdepth;
 extern	cvar_t	*r_mode;
+#ifdef _WIN32
+extern	cvar_t	*r_mode_desktop;	// desktop-resolution display mode
+#endif
 extern	cvar_t	*r_log;
 extern	cvar_t	*r_lightmap;
 extern	cvar_t	*r_shadows;
