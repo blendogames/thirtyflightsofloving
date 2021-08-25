@@ -113,6 +113,14 @@ How To Run
 	mod's code to run, it must be compiled into a kmq2gamex86.dll (see end of file for
 	instructions).
 
+	To mount assets from the mission packs for use with any mod, add
+	
+	+set basegame xatrix
+	
+	You can have up to 3 basegames set:
+	
+	+set basegame xatrix +set basegame2 rogue +set basegame3 zaero
+
 	To ensure connection to all standard Quake2 protocol (34) servers, add
 	
 	+set cl_servertrick 1
