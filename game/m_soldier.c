@@ -452,7 +452,7 @@ void soldier_pain (edict_t *self, edict_t *other, float kick, int damage)
 
 	self->pain_debounce_time = level.time + 3;
 
-	n = self->s.skinnum | 1;
+	n = (self->s.skinnum % 6) | 1;
 	if (n == 1)
 		gi.sound (self, CHAN_VOICE, sound_pain_light, 1, ATTN_NORM, 0);
 	else if (n == 3)

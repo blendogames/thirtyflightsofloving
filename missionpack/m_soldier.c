@@ -17,17 +17,27 @@ SOLDIER
 static int	sound_idle;
 static int	sound_sight1;
 static int	sound_sight2;
+static int	sound_cock;
 static int	sound_pain_light;
 static int	sound_pain;
 static int	sound_pain_ss;
 static int	sound_death_light;
 static int	sound_death;
 static int	sound_death_ss;
-static int	sound_cock;
-// Knightmare- added sounds for hyperblaster and laser soldier
-static int	sound_hyper_loop = 0;
-static int	sound_hyper_spindown = 0;
-static int	sound_laser = 0;
+// Knightmare- added separate sounds for ripper, hyperblaster and laser soldiers
+static int	h_sound_idle;
+static int	h_sound_sight1;
+static int	h_sound_sight2;
+static int	h_sound_cock;
+static int	h_sound_pain_ripper;
+static int	h_sound_pain_hypergun;
+static int	h_sound_pain_lasergun;
+static int	h_sound_death_ripper;
+static int	h_sound_death_hypergun;
+static int	h_sound_death_lasergun;
+static int	h_sound_hypergun_loop = 0;
+static int	h_sound_hypergun_spindown = 0;
+static int	h_sound_lasergun_fire = 0;
 
 void soldier_duck_up (edict_t *self);
 
@@ -476,7 +486,8 @@ void soldier_pain (edict_t *self, edict_t *other, float kick, int damage)
 
 	self->pain_debounce_time = level.time + 3;
 
-	n = self->s.skinnum | 1;
+//	n = self->s.skinnum | 1;
+	n = self->skinnum | 1;
 	if (n == 1)
 		gi.sound (self, CHAN_VOICE, sound_pain_light, 1, ATTN_NORM, 0);
 	else if (n == 3)
@@ -1705,16 +1716,16 @@ void soldierh_idle (edict_t *self)
 	if (!(self->spawnflags & SF_MONSTER_AMBUSH))
 	{  
 		if (random() > 0.8)
-			gi.sound (self, CHAN_VOICE, sound_idle, 1, ATTN_IDLE, 0);
+			gi.sound (self, CHAN_VOICE, h_sound_idle, 1, ATTN_IDLE, 0);
 	}
 }
 
 void soldierh_cock (edict_t *self)
 {
 	if (self->s.frame == FRAME_stand322)
-		gi.sound (self, CHAN_WEAPON, sound_cock, 1, ATTN_IDLE, 0);
+		gi.sound (self, CHAN_WEAPON, h_sound_cock, 1, ATTN_IDLE, 0);
 	else
-		gi.sound (self, CHAN_WEAPON, sound_cock, 1, ATTN_NORM, 0);
+		gi.sound (self, CHAN_WEAPON, h_sound_cock, 1, ATTN_NORM, 0);
 }
 
 
@@ -2044,13 +2055,14 @@ void soldierh_pain (edict_t *self, edict_t *other, float kick, int damage)
 
 	self->pain_debounce_time = level.time + 3;
 
-	n = self->s.skinnum | 1;
+//	n = self->s.skinnum | 1;
+	n = self->skinnum | 1;
 	if (n == 1)
-		gi.sound (self, CHAN_VOICE, sound_pain_light, 1, ATTN_NORM, 0);
+		gi.sound (self, CHAN_VOICE, h_sound_pain_ripper, 1, ATTN_NORM, 0);
 	else if (n == 3)
-		gi.sound (self, CHAN_VOICE, sound_pain, 1, ATTN_NORM, 0);
+		gi.sound (self, CHAN_VOICE, h_sound_pain_hypergun, 1, ATTN_NORM, 0);
 	else
-		gi.sound (self, CHAN_VOICE, sound_pain_ss, 1, ATTN_NORM, 0);
+		gi.sound (self, CHAN_VOICE, h_sound_pain_lasergun, 1, ATTN_NORM, 0);
 
 	if (self->velocity[2] > 100)
 	{
@@ -2090,7 +2102,7 @@ void soldierh_laserbeam (edict_t *self, int flash_index)
 	// RAFAEL
 	// this sound can't be called this frequent
 //	if (random() > 0.8)
-//		gi.sound (self, CHAN_AUTO, sound_laser, 1, ATTN_STATIC, 0);
+//		gi.sound (self, CHAN_AUTO, h_sound_lasergun_fire, 1, ATTN_STATIC, 0);
 
 	VectorCopy (self->s.origin, start);
 	VectorCopy (self->enemy->s.origin, end);
@@ -2109,7 +2121,7 @@ void soldierh_laserbeam (edict_t *self, int flash_index)
 	// RAFAEL
 	// this sound can't be called this frequent
 	if (random() > 0.8)
-		gi.sound (self, CHAN_AUTO, sound_laser, 1, ATTN_STATIC, 0);
+		gi.sound (self, CHAN_AUTO, h_sound_lasergun_fire, 1, ATTN_STATIC, 0);
 
 	ent = G_Spawn ();
 	VectorCopy (self->s.origin, ent->s.origin);
@@ -2249,7 +2261,7 @@ void soldierh_hyper_refire1 (edict_t *self)
 		if (random() < 0.7)
 			self->s.frame = FRAME_attak103;
 		else
-			gi.sound (self, CHAN_AUTO, sound_hyper_spindown, 1, ATTN_NORM, 0);	// Knightmare- use stored index
+			gi.sound (self, CHAN_AUTO, h_sound_hypergun_spindown, 1, ATTN_NORM, 0);	// Knightmare- use stored index
 	}
 }
 
@@ -2304,7 +2316,7 @@ void soldierh_hyper_sound (edict_t *self)
 		return;
 //	else if ((self->s.skinnum % 6) < 4)
 	else if (self->skinnum < 4)
-		gi.sound (self, CHAN_AUTO, sound_hyper_loop, 1, ATTN_NORM, 0);	// Knightmare- use stored index
+		gi.sound (self, CHAN_AUTO, h_sound_hypergun_loop, 1, ATTN_NORM, 0);	// Knightmare- use stored index
 	else
 		return;
 }
@@ -2339,7 +2351,7 @@ void soldierh_hyper_refire2 (edict_t *self)
 		if (random() < 0.7)
 			self->s.frame = FRAME_attak205;
 		else
-			gi.sound (self, CHAN_AUTO, sound_hyper_spindown, 1, ATTN_NORM, 0);	// Knightmare- use stored index
+			gi.sound (self, CHAN_AUTO, h_sound_hypergun_spindown, 1, ATTN_NORM, 0);	// Knightmare- use stored index
 	}
 }
 
@@ -2635,9 +2647,9 @@ void soldierh_attack (edict_t *self)
 void soldierh_sight (edict_t *self, edict_t *other)
 {
 	if (random() < 0.5)
-		gi.sound (self, CHAN_VOICE, sound_sight1, 1, ATTN_NORM, 0);
+		gi.sound (self, CHAN_VOICE, h_sound_sight1, 1, ATTN_NORM, 0);
 	else
-		gi.sound (self, CHAN_VOICE, sound_sight2, 1, ATTN_NORM, 0);
+		gi.sound (self, CHAN_VOICE, h_sound_sight2, 1, ATTN_NORM, 0);
 
 	if ((skill->value > 0) && (range(self, self->enemy) >= RANGE_MID))
 	{
@@ -3104,12 +3116,12 @@ void soldierh_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dam
 
 //	if ((self->s.skinnum % 6) == 1)
 	if (self->skinnum <= 1)
-		gi.sound (self, CHAN_VOICE, sound_death_light, 1, ATTN_NORM, 0);
+		gi.sound (self, CHAN_VOICE, h_sound_death_ripper, 1, ATTN_NORM, 0);
 //	else if ((self->s.skinnum % 6) == 3)
 	else if (self->skinnum <= 3)
-		gi.sound (self, CHAN_VOICE, sound_death, 1, ATTN_NORM, 0);
+		gi.sound (self, CHAN_VOICE, h_sound_death_hypergun, 1, ATTN_NORM, 0);
 	else // ((self->s.skinnum % 6) == 5)
-		gi.sound (self, CHAN_VOICE, sound_death_ss, 1, ATTN_NORM, 0);
+		gi.sound (self, CHAN_VOICE, h_sound_death_lasergun, 1, ATTN_NORM, 0);
 
 	if (fabs((self->s.origin[2] + self->viewheight) - point[2]) <= 4)
 	{
@@ -3408,10 +3420,10 @@ void SP_monster_soldier_h (edict_t *self)
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;
 
-	sound_idle =	gi.soundindex ("soldier/solidle1.wav");
-	sound_sight1 =	gi.soundindex ("soldier/solsght1.wav");
-	sound_sight2 =	gi.soundindex ("soldier/solsrch1.wav");
-	sound_cock =	gi.soundindex ("infantry/infatck3.wav");
+	h_sound_idle =	gi.soundindex ("soldier/solidle1.wav");
+	h_sound_sight1 =	gi.soundindex ("soldier/solsght1.wav");
+	h_sound_sight2 =	gi.soundindex ("soldier/solsrch1.wav");
+	h_sound_cock =	gi.soundindex ("infantry/infatck3.wav");
 
 	if (!self->mass)
 		self->mass = 100;
@@ -3485,8 +3497,8 @@ void SP_monster_soldier_ripper (edict_t *self)
 		return;
 	}
 
-	sound_pain_light = gi.soundindex ("soldier/solpain2.wav");
-	sound_death_light =	gi.soundindex ("soldier/soldeth2.wav");
+	h_sound_pain_ripper = gi.soundindex ("soldier/solpain2.wav");
+	h_sound_death_ripper =	gi.soundindex ("soldier/soldeth2.wav");
 	gi.modelindex ("models/objects/boomrang/tris.md2");
 	gi.soundindex ("misc/lasfly.wav");
 #ifdef KMQUAKE2_ENGINE_MOD
@@ -3524,10 +3536,10 @@ void SP_monster_soldier_hypergun (edict_t *self)
 		return;
 	}
 
-	sound_pain = gi.soundindex ("soldier/solpain1.wav");
-	sound_death = gi.soundindex ("soldier/soldeth1.wav");
-	sound_hyper_loop = gi.soundindex ("weapons/hyprbl1a.wav");	// Knightmare- missing precache
-	sound_hyper_spindown = gi.soundindex ("weapons/hyprbd1a.wav");	// Knightmare- missing precache
+	h_sound_pain_hypergun = gi.soundindex ("soldier/solpain1.wav");
+	h_sound_death_hypergun = gi.soundindex ("soldier/soldeth1.wav");
+	h_sound_hypergun_loop = gi.soundindex ("weapons/hyprbl1a.wav");	// Knightmare- missing precache
+	h_sound_hypergun_spindown = gi.soundindex ("weapons/hyprbd1a.wav");	// Knightmare- missing precache
 //	gi.modelindex ("models/objects/blaser/tris.md2");
 	gi.modelindex ("models/objects/laser/tris.md2");	// Knightmare- precache shared laser model instead
 	gi.soundindex ("misc/lasfly.wav");	// Knightmare added
@@ -3566,9 +3578,9 @@ void SP_monster_soldier_lasergun (edict_t *self)
 		return;
 	}
 
-	sound_pain_ss = gi.soundindex ("soldier/solpain3.wav");
-	sound_death_ss = gi.soundindex ("soldier/soldeth3.wav");
-	sound_laser = gi.soundindex ("misc/lasfly.wav");	// Knightmare- missing precache
+	h_sound_pain_lasergun = gi.soundindex ("soldier/solpain3.wav");
+	h_sound_death_lasergun = gi.soundindex ("soldier/soldeth3.wav");
+	h_sound_lasergun_fire = gi.soundindex ("misc/lasfly.wav");	// Knightmare- missing precache
 //	gi.soundindex ("soldier/solatck3.wav");				// Knightmare- not used
 
 	self->common_name = "Laser Guard";
