@@ -343,7 +343,7 @@ cvar_t	*sk_visor_time;
 void InitLithiumVars (void)
 {
 	mega_gibs = gi.cvar("mega_gibs", "0", CVAR_ARCHIVE);
-	mp_monster_replace = gi.cvar("mp_monster_replace", "0", CVAR_ARCHIVE);
+	mp_monster_replace = gi.cvar("mp_monster_replace", "0", CVAR_LATCH);
 	mp_monster_ammo_replace = gi.cvar("mp_monster_ammo_replace", "0", CVAR_ARCHIVE);
 	kamikaze_flyer_replace = gi.cvar("kamikaze_flyer_replace", "0", CVAR_ARCHIVE);
 	allow_player_use_abandoned_turret = gi.cvar("allow_player_use_abandoned_turret", "0", CVAR_ARCHIVE);

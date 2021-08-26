@@ -80,7 +80,7 @@ qboolean gekk_check_jump_hazard (edict_t *self, qboolean watertoland, qboolean f
 	if (!self->enemy || (self->enemy->health <= 0)) // paranoia
 		return false;
 
-	//gi.dprintf ("Gekk: checking jump for hazards...\n");
+//	gi.dprintf ("Gekk: checking jump for hazards...\n");
 
 	VectorSubtract(self->s.origin, self->enemy->s.origin, v);
 	distance = VectorLength(v);
@@ -104,7 +104,7 @@ qboolean gekk_check_jump_hazard (edict_t *self, qboolean watertoland, qboolean f
 				continue;
 			if (!grenade->classname)
 				continue;
-			if (!Q_stricmp(grenade->classname,"grenade") || !Q_stricmp(grenade->classname,"hgrenade"))
+			if (!Q_stricmp(grenade->classname, "grenade") || !Q_stricmp(grenade->classname, "hgrenade"))
 			{
 				VectorSubtract(grenade->s.origin, oldorg, dir);
 				g1 = VectorLength(dir);
@@ -458,9 +458,9 @@ void gekk_swim (edict_t *self)
 	if (!self->enemy || (self->enemy->health <= 0)) // paranoia
 		return;
 	
-	if (gekk_checkattack(self))	// Knightmare- check for grenades and lasers
-		if (!self->enemy->waterlevel && random() > 0.7 && gekk_check_jump_hazard(self, true, gekk_check_jump(self)))
-			water_to_land (self);
+	// Knightmare- check for grenades and lasers
+	if ( !self->enemy->waterlevel && (random() > 0.7) && gekk_check_jump_hazard(self, true, gekk_check_jump(self)) )
+		water_to_land (self);
 	else
 		self->monsterinfo.currentmove = &gekk_move_swim_start;
 }
@@ -1213,16 +1213,16 @@ void gekk_jump (edict_t *self)
 	}
 	else
 	{
-		//if (random() > 0.8 && self->health < self->max_health)
-		//	self->monsterinfo.currentmove = &gekk_move_idle2;
-		//else
+	//	if (random() > 0.8 && self->health < self->max_health)
+	//		self->monsterinfo.currentmove = &gekk_move_idle2;
+	//	else
 		{
-			if (random() > 0.5 && (range (self, self->enemy) >= RANGE_NEAR))
+			if ( (random() > 0.5) && (range (self, self->enemy) >= RANGE_NEAR) )
 				self->monsterinfo.currentmove = &gekk_move_spit;
 			else if (random() > 0.8)
 				self->monsterinfo.currentmove = &gekk_move_spit;
 			// Knightmare- check for grenades and lasers
-			else if (gekk_check_jump_hazard(self, false, gekk_check_jump(self)))
+			else if ( gekk_check_jump_hazard(self, false, gekk_check_jump(self)) )
 				self->monsterinfo.currentmove = &gekk_move_leapatk;	
 			else
 				self->monsterinfo.currentmove = &gekk_move_spit;

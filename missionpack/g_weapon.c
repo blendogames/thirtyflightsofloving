@@ -448,7 +448,7 @@ void fire_blueblaster (edict_t *self, vec3_t start, vec3_t dir, int damage, int 
 	bolt->clipmask = MASK_SHOT;
 	bolt->solid = SOLID_BBOX;
 	bolt->s.effects |= effect;
-	bolt->s.renderfx |= RF_NOSHADOW; //Knightmare- no shadow
+	bolt->s.renderfx |= RF_NOSHADOW; // Knightmare- no shadow
 	VectorClear (bolt->mins);
 	VectorClear (bolt->maxs);
 
