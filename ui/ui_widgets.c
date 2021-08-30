@@ -375,13 +375,6 @@ float UI_MenuSlider_GetValue (menuslider_s *s)
 
 void MenuSlider_DoSlide (menuslider_s *s, int dir)
 {
-/*	s->curvalue += dir;
-
-	if (s->curvalue > s->maxvalue)
-		s->curvalue = s->maxvalue;
-	else if (s->curvalue < s->minvalue)
-		s->curvalue = s->minvalue;
-*/
 	s->curPos += dir;
 
 	s->curPos = min(max(s->curPos, 0), s->maxPos);
@@ -406,7 +399,6 @@ void MenuSlider_Draw (menuslider_s *s)
 	if (!s->increment)
 		s->increment = 1.0f;
 
-//	s->range = (s->curvalue - s->minvalue) / (float)(s->maxvalue - s->minvalue);
 	s->range = (float)s->curPos / (float)s->maxPos;
 
 	if (s->range < 0)

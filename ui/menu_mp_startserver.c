@@ -51,71 +51,6 @@ static menulist_s	s_dedicated_box;
 
 static menuaction_s	s_startserver_back_action;
 
-#if 0
-/*
-===============
-UI_BuildMapList
-===============
-*/
-void UI_BuildMapList (maptype_t maptype)
-{
-	int		i;
-
-	if (ui_svr_mapnames)	free (ui_svr_mapnames);
-	ui_svr_nummaps = ui_svr_listfile_nummaps + ui_svr_arena_nummaps[maptype];
-	ui_svr_mapnames = malloc( sizeof( char * ) * ( ui_svr_nummaps + 1 ) );
-	memset( ui_svr_mapnames, 0, sizeof( char * ) * ( ui_svr_nummaps + 1 ) );
-
-	for (i = 0; i < ui_svr_nummaps; i++)
-	{
-		if (i < ui_svr_listfile_nummaps)
-			ui_svr_mapnames[i] = ui_svr_listfile_mapnames[i];
-		else
-			ui_svr_mapnames[i] = ui_svr_arena_mapnames[maptype][i-ui_svr_listfile_nummaps];
-	}
-	ui_svr_mapnames[ui_svr_nummaps] = 0;
-	ui_svr_maptype = maptype;
-
-	if (s_startmap_list.curvalue >= ui_svr_nummaps) // paranoia
-		s_startmap_list.curvalue = 0;
-}	
-
-
-/*
-===============
-UI_RefreshMapList
-===============
-*/
-void UI_RefreshMapList (maptype_t maptype)
-{
-	int		i;
-
-	if (maptype == ui_svr_maptype) // no change
-		return;
-
-	// reset startmap if it's in the part of the list that changed
-	if (s_startmap_list.curvalue >= ui_svr_listfile_nummaps)
-		s_startmap_list.curvalue = 0;
-
-	UI_BuildMapList (maptype);
-	s_startmap_list.itemnames = ui_svr_mapnames;
-	for (i=0; s_startmap_list.itemnames[i]; i++);
-	s_startmap_list.numitemnames = i;
-
-	// levelshot found table
-	if (ui_svr_mapshotvalid)	free(ui_svr_mapshotvalid);
-	ui_svr_mapshotvalid = malloc( sizeof( byte ) * ( ui_svr_nummaps + 1 ) );
-	memset( ui_svr_mapshotvalid, 0, sizeof( byte ) * ( ui_svr_nummaps + 1 ) );
-	// register null levelshot
-	if (ui_svr_mapshotvalid[ui_svr_nummaps] == M_UNSET) {	
-		if (R_DrawFindPic("/gfx/ui/noscreen.pcx"))
-			ui_svr_mapshotvalid[ui_svr_nummaps] = M_FOUND;
-		else
-			ui_svr_mapshotvalid[ui_svr_nummaps] = M_MISSING;
-	}
-}
-#endif
-
 //=============================================================================
 
 /*
@@ -208,7 +143,6 @@ void RulesChangeFunc (void *self)
 		maptype = MAP_DM;
 	}
 
-//	UI_RefreshMapList (maptype);
 	Menu_RefreshMapList (maptype);
 }
 
@@ -218,9 +152,7 @@ void Menu_StartServerActionFunc (void *self)
 	int		timelimit;
 	int		fraglimit;
 	int		maxclients;
-//	char	*spot;
 
-//	strncpy (startmap, strchr( ui_svr_mapnames[s_startmap_list.curvalue], '\n' ) + 1);
 	Q_strncpyz (startmap, sizeof(startmap), strchr( ui_svr_mapnames[s_startmap_list.curvalue], '\n' ) + 1);
 
 	maxclients  = atoi( s_maxclients_field.buffer );
@@ -238,43 +170,7 @@ void Menu_StartServerActionFunc (void *self)
 	Cvar_SetValue ("ttctf", s_rules_box.curvalue == 3);
 	Cvar_SetValue ("gamerules", FS_RoguePath() ? ((s_rules_box.curvalue == 4) ? 2 : 0) : 0);
 
-#if 1
 	UI_StartServer (startmap, (s_dedicated_box.curvalue != 0));
-#else
-	spot = NULL;
-	if (s_rules_box.curvalue == 1)		// PGM
-	{
- 		if(Q_stricmp(startmap, "bunk1") == 0)
-  			spot = "start";
- 		else if(Q_stricmp(startmap, "mintro") == 0)
-  			spot = "start";
- 		else if(Q_stricmp(startmap, "fact1") == 0)
-  			spot = "start";
- 		else if(Q_stricmp(startmap, "power1") == 0)
-  			spot = "pstart";
- 		else if(Q_stricmp(startmap, "biggun") == 0)
-  			spot = "bstart";
- 		else if(Q_stricmp(startmap, "hangar1") == 0)
-  			spot = "unitstart";
- 		else if(Q_stricmp(startmap, "city1") == 0)
-  			spot = "unitstart";
- 		else if(Q_stricmp(startmap, "boss1") == 0)
-			spot = "bosstart";
-	}
-
-	if (spot)
-	{
-		if (Com_ServerState())
-			Cbuf_AddText ("disconnect\n");
-		Cbuf_AddText (va("gamemap \"*%s$%s\"\n", startmap, spot));
-	}
-	else
-	{
-		Cbuf_AddText (va("map %s\n", startmap));
-	}
-
-	UI_ForceMenuOff ();
-#endif
 }
 
 void Menu_StartServer_Init (void)
@@ -305,22 +201,6 @@ void Menu_StartServer_Init (void)
 
 	int y = 0;
 	
-#if 0
-	UI_BuildMapList (ui_svr_maptype); // was MAP_DM
-
-	// levelshot found table
-	if (ui_svr_mapshotvalid)	free(ui_svr_mapshotvalid);
-	ui_svr_mapshotvalid = malloc( sizeof( byte ) * ( ui_svr_nummaps + 1 ) );
-	memset( ui_svr_mapshotvalid, 0, sizeof( byte ) * ( ui_svr_nummaps + 1 ) );
-	// register null levelshot
-	if (ui_svr_mapshotvalid[ui_svr_nummaps] == M_UNSET) {	
-		if (R_DrawFindPic("/gfx/ui/noscreen.pcx"))
-			ui_svr_mapshotvalid[ui_svr_nummaps] = M_FOUND;
-		else
-			ui_svr_mapshotvalid[ui_svr_nummaps] = M_MISSING;
-	}
-#endif
-
 	//
 	// initialize the menu stuff
 	//
@@ -341,7 +221,7 @@ void Menu_StartServer_Init (void)
 	s_rules_box.generic.y			= y += 2*MENU_LINE_SIZE;
 	s_rules_box.generic.name		= "rules";
 //PGM - rogue games only available with rogue DLL.
-	if (FS_RoguePath())
+	if ( FS_RoguePath() )
 		s_rules_box.itemnames		= dm_coop_names_rogue;
 	else
 		s_rules_box.itemnames		= dm_coop_names;
@@ -367,7 +247,6 @@ void Menu_StartServer_Init (void)
 	s_timelimit_field.generic.statusbar	= "0 = no limit";
 	s_timelimit_field.length			= 4;
 	s_timelimit_field.visible_length	= 4;
-//	strncpy(s_timelimit_field.buffer, Cvar_VariableString("timelimit"));
 	Q_strncpyz (s_timelimit_field.buffer, sizeof(s_timelimit_field.buffer), Cvar_VariableString("timelimit"));
 	s_timelimit_field.cursor			= (int)strlen( s_timelimit_field.buffer );
 
@@ -380,7 +259,6 @@ void Menu_StartServer_Init (void)
 	s_fraglimit_field.generic.statusbar	= "0 = no limit";
 	s_fraglimit_field.length			= 4;
 	s_fraglimit_field.visible_length	= 4;
-//	strncpy( s_fraglimit_field.buffer, Cvar_VariableString("fraglimit") );
 	Q_strncpyz (s_fraglimit_field.buffer, sizeof(s_fraglimit_field.buffer), Cvar_VariableString("fraglimit"));
 	s_fraglimit_field.cursor			= (int)strlen( s_fraglimit_field.buffer );
 
@@ -400,10 +278,8 @@ void Menu_StartServer_Init (void)
 	s_maxclients_field.length				= 3;
 	s_maxclients_field.visible_length		= 3;
 	if ( Cvar_VariableValue( "maxclients" ) == 1 )
-	//	strncpy(s_maxclients_field.buffer, "8");
 		Q_strncpyz (s_maxclients_field.buffer, sizeof(s_maxclients_field.buffer), "8");
 	else 
-	//	strncpy(s_maxclients_field.buffer, Cvar_VariableString("maxclients"));
 		Q_strncpyz (s_maxclients_field.buffer, sizeof(s_maxclients_field.buffer), Cvar_VariableString("maxclients"));
 	s_maxclients_field.cursor				= (int)strlen( s_maxclients_field.buffer );
 
@@ -416,7 +292,6 @@ void Menu_StartServer_Init (void)
 	s_hostname_field.generic.statusbar		= NULL;
 	s_hostname_field.length					= 16;
 	s_hostname_field.visible_length			= 16;
-//	strncpy( s_hostname_field.buffer, Cvar_VariableString("hostname") );
 	Q_strncpyz (s_hostname_field.buffer, sizeof(s_hostname_field.buffer), Cvar_VariableString("hostname"));
 	s_hostname_field.cursor					= (int)strlen( s_hostname_field.buffer );
 
@@ -471,8 +346,7 @@ void Menu_StartServer_Init (void)
 	RulesChangeFunc (NULL);
 }
 
-#if 1
-void DrawStartSeverLevelshot (void)
+void Menu_DrawStartSeverLevelshot (void)
 {
 	char *mapshotname = UI_UpdateStartSeverLevelshot (s_startmap_list.curvalue);
 
@@ -483,41 +357,12 @@ void DrawStartSeverLevelshot (void)
 	else
 		UI_DrawFill (SCREEN_WIDTH/2+46, SCREEN_HEIGHT/2-68, 240, 180, ALIGN_CENTER, false, 0,0,0,255);
 }
-#else
-void DrawStartSeverLevelshot (void)
-{
-	char startmap[MAX_QPATH];
-	char mapshotname [MAX_QPATH];
-	int i = s_startmap_list.curvalue;
-	Q_strncpyz (startmap, sizeof(startmap), strchr( ui_svr_mapnames[i], '\n' ) + 1);
-
-	UI_DrawFill (SCREEN_WIDTH/2+44, SCREEN_HEIGHT/2-70, 244, 184, ALIGN_CENTER, false, 60,60,60,255);
-
-	if ( ui_svr_mapshotvalid[i] == M_UNSET) { // init levelshot
-		Com_sprintf(mapshotname, sizeof(mapshotname), "/levelshots/%s.pcx", startmap);
-		if (R_DrawFindPic(mapshotname))
-			ui_svr_mapshotvalid[i] = M_FOUND;
-		else
-			ui_svr_mapshotvalid[i] = M_MISSING;
-	}
-
-	if ( ui_svr_mapshotvalid[i] == M_FOUND) {
-		Com_sprintf(mapshotname, sizeof(mapshotname), "/levelshots/%s.pcx", startmap);
-
-		UI_DrawPic (SCREEN_WIDTH/2+46, SCREEN_HEIGHT/2-68, 240, 180, ALIGN_CENTER, false, mapshotname, 1.0);
-	}
-	else if (ui_svr_mapshotvalid[ui_svr_nummaps] == M_FOUND)
-		UI_DrawPic (SCREEN_WIDTH/2+46, SCREEN_HEIGHT/2-68, 240, 180, ALIGN_CENTER, false, "/gfx/ui/noscreen.pcx", 1.0);
-	else
-		UI_DrawFill (SCREEN_WIDTH/2+46, SCREEN_HEIGHT/2-68, 240, 180, ALIGN_CENTER, false, 0,0,0,255);
-}
-#endif
 
 void Menu_StartServer_Draw (void)
 {
 	UI_DrawBanner ("m_banner_start_server"); // Knightmare added
 	UI_DrawMenu (&s_startserver_menu);
-	DrawStartSeverLevelshot (); // added levelshots
+	Menu_DrawStartSeverLevelshot (); // added levelshots
 }
 
 const char *Menu_StartServer_Key (int key)

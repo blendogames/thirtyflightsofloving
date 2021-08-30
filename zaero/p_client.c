@@ -216,6 +216,7 @@ struct monsterObit {
 	"monster_supertank", "%s was stomped by a Super Tank.\n",
 	"monster_boss2", "%s was killed by some flying boss thingy.\n",
 	"monster_jorg", "%s was assassinated by a Jorg.\n",
+	"monster_makron", "%s was laid low by the Makron.\n",
 	NULL, NULL
 };
 

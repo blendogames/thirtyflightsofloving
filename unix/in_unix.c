@@ -34,7 +34,7 @@ static int old_mouse_x, old_mouse_y;
 static qboolean	mlooking;
 cvar_t	*m_filter;
 cvar_t	*in_dgamouse;
-cvar_t	*autosensitivity;
+cvar_t	*in_autosensitivity;
 cvar_t	*in_menumouse; /// FIXME Menu Mouse on windowed mode 
 
 extern cursor_t ui_mousecursor;
@@ -68,7 +68,7 @@ void IN_Init (void)
 	in_dgamouse = Cvar_Get ("in_dgamouse", "1", CVAR_ARCHIVE);
 	in_menumouse = Cvar_Get ("in_menumouse", "0", CVAR_ARCHIVE);
 	// Knightmare added
-	autosensitivity = Cvar_Get ("autosensitivity", "1", CVAR_ARCHIVE);
+	in_autosensitivity = Cvar_Get ("in_autosensitivity", "1", CVAR_ARCHIVE);
 	Cvar_SetDescription ("autosensitivity", "Enables scaling of mouse and joystick sensitivty when zoomed in.");
 
 	Cmd_AddCommand ("+mlook", IN_MLookDown);
@@ -111,8 +111,8 @@ void IN_Move (usercmd_t *cmd)
 	if (!mouse_avail)
 		return;
 
-	if (!autosensitivity)
-		autosensitivity = Cvar_Get ("autosensitivity", "1", CVAR_ARCHIVE);
+	if (!in_autosensitivity)
+		in_autosensitivity = Cvar_Get ("in_autosensitivity", "1", CVAR_ARCHIVE);
 
 	if (m_filter->value)
 	{

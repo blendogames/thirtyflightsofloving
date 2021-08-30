@@ -63,16 +63,17 @@ static menuaction_s		s_backmain_action;
 
 static void VidModeCallback (void *unused)
 {
-	s_customwidth_title.generic.flags	= (s_mode_list.curvalue != 0) ? QMF_HIDDEN : 0;
-	s_customwidth_field.generic.flags	= (s_mode_list.curvalue != 0) ? (QMF_NUMBERSONLY|QMF_HIDDEN) : QMF_NUMBERSONLY;
-	s_customheight_title.generic.flags	= (s_mode_list.curvalue != 0) ? QMF_HIDDEN : 0;
-	s_customheight_field.generic.flags	= (s_mode_list.curvalue != 0) ? (QMF_NUMBERSONLY|QMF_HIDDEN) : QMF_NUMBERSONLY;
+	qboolean	customHidden = (strcmp(ui_video_modes[s_mode_list.curvalue], "-1") != 0);
+
+	s_customwidth_title.generic.flags	= customHidden ? QMF_HIDDEN : 0;
+	s_customwidth_field.generic.flags	= customHidden ? (QMF_NUMBERSONLY|QMF_HIDDEN) : QMF_NUMBERSONLY;
+	s_customheight_title.generic.flags	= customHidden ? QMF_HIDDEN : 0;
+	s_customheight_field.generic.flags	= customHidden ? (QMF_NUMBERSONLY|QMF_HIDDEN) : QMF_NUMBERSONLY;
 }
 
 static void BrightnessCallback (void *s)
 {
 	// invert sense so greater = brighter, and scale to a range of 0.3 to 1.3
-//	Cvar_SetValue( "vid_gamma", (1.3 - (s_brightness_slider.curvalue/20.0f)) );
 	Cvar_SetValue( "vid_gamma", UI_MenuSlider_GetValue(&s_brightness_slider) );
 }
 
@@ -131,7 +132,6 @@ static void ResetVideoDefaults (void *unused)
 	Cvar_SetToDefault ("r_shelltype");
 	Cvar_SetToDefault ("r_celshading");
 	Cvar_SetToDefault ("r_celshading_width");
-//	Cvar_SetToDefault ("r_screenshot_jpeg");
 	Cvar_SetToDefault ("r_screenshot_format");
 	Cvar_SetToDefault ("r_screenshot_jpeg_quality");
 	Cvar_SetToDefault ("r_saveshotsize");
@@ -140,7 +140,7 @@ static void ResetVideoDefaults (void *unused)
 	Menu_Video_Init();
 }
 
-static void prepareVideoRefresh (void)
+static void Menu_PrepareVideoRefresh (void)
 {
 	// set the right mode for refresh
 	Cvar_Set( "vid_ref", "gl" );
@@ -151,32 +151,29 @@ static void prepareVideoRefresh (void)
 }
 
 
-static void ApplyChanges (void *unused)
+static void Menu_ApplyVideoChanges (void *unused)
 {
-	int		temp, customW, customH;
+	int		customW, customH;
 	char	*customStr;
 
-	temp = s_mode_list.curvalue;
-	Cvar_SetValue( "r_mode", (temp == 0) ? -1 : temp + 2 ); // offset for eliminating < 640x480 modes
-	if (temp == 0)	// Knightmare- use custom mode fields
+	Cvar_Set ("r_mode", ui_video_modes[s_mode_list.curvalue]);
+	if (strcmp(ui_video_modes[s_mode_list.curvalue], "-1") == 0)	// use custom mode fields
 	{
 		customW  = atoi( s_customwidth_field.buffer );
 		customH	= atoi( s_customheight_field.buffer );
-		Cvar_SetValue( "r_customwidth", ClampCvar( 640, 99999, customW ) );
-		Cvar_SetValue ("r_customheight", ClampCvar( 480, 99999, customH ) );
+		Cvar_SetValue ("r_customwidth", ClampCvar( 640, 99999, customW ));
+		Cvar_SetValue ("r_customheight", ClampCvar( 480, 99999, customH ));
 
 		// update fields in case values were clamped
 		customStr = Cvar_VariableString("r_customwidth");
 		Q_strncpyz (s_customwidth_field.buffer, sizeof(s_customwidth_field.buffer), customStr);
-		s_customwidth_field.cursor = (int)strlen( customStr );
+		s_customwidth_field.cursor = (int)strlen(customStr);
 		
 		customStr = Cvar_VariableString("r_customheight");
 		Q_strncpyz (s_customheight_field.buffer, sizeof(s_customwidth_field.buffer), customStr);
-		s_customheight_field.cursor = (int)strlen( customStr );
+		s_customheight_field.cursor = (int)strlen(customStr);
 	}
 	Cvar_SetValue( "vid_fullscreen", s_fs_box.curvalue );
-	// invert sense so greater = brighter, and scale to a range of 0.3 to 1.3
-//	Cvar_SetValue( "vid_gamma", (1.3 - (s_brightness_slider.curvalue/20.0)) );
 	Cvar_SetValue( "vid_gamma", UI_MenuSlider_GetValue(&s_brightness_slider) );
 	Cvar_SetValue( "r_picmip", 4-s_texqual_box.curvalue );
 
@@ -254,14 +251,14 @@ static void ApplyChanges (void *unused)
 	Cvar_SetValue( "cl_widescreen_fov", s_adjust_fov_box.curvalue );
 	Cvar_SetValue( "cl_async", s_async_box.curvalue );
 
-	prepareVideoRefresh ();
+	Menu_PrepareVideoRefresh ();
 
-	//UI_ForceMenuOff();
+//	UI_ForceMenuOff();
 }
 
 
 // Knightmare added
-int texfilter_box_setval (void)
+int Menu_GetTexfilterCurValue (void)
 {
 	char *texmode = Cvar_VariableString("r_texturemode");
 	if (!Q_strcasecmp(texmode, "GL_LINEAR_MIPMAP_NEAREST"))
@@ -270,10 +267,11 @@ int texfilter_box_setval (void)
 		return 1;
 }
 
+
 // Knightmare- refresh rate option
-int refresh_box_setval (void)
+int Menu_GetRefreshCurValue (void)
 {
-	int refreshVar = (int)Cvar_VariableValue ("r_displayrefresh");
+	int refreshVar = Cvar_VariableInteger ("r_displayrefresh");
 
 	if (refreshVar == 240)
 		return 14;
@@ -307,66 +305,13 @@ int refresh_box_setval (void)
 		return 0;
 }
 
-static const char *aniso0_names[] =
-{
-	"not supported",
-	0
-};
 
-static const char *aniso2_names[] =
-{
-	"off",
-	"2x",
-	0
-};
-
-static const char *aniso4_names[] =
-{
-	"off",
-	"2x",
-	"4x",
-	0
-};
-
-static const char *aniso8_names[] =
-{
-	"off",
-	"2x",
-	"4x",
-	"8x",
-	0
-};
-
-static const char *aniso16_names[] =
-{
-	"off",
-	"2x",
-	"4x",
-	"8x",
-	"16x",
-	0
-};
-
-static const char **GetAnisoNames (void)
-{
-	float aniso_avail = Cvar_VariableValue("r_anisotropic_avail");
-	if (aniso_avail < 2.0)
-		return aniso0_names;
-	else if (aniso_avail < 4.0)
-		return aniso2_names;
-	else if (aniso_avail < 8.0)
-		return aniso4_names;
-	else if (aniso_avail < 16.0)
-		return aniso8_names;
-	else // >= 16.0
-		return aniso16_names;
-}
-
-
-float GetAnisoCurValue (void)
+// Knightmare- anisotropic option
+float Menu_GetAnisoCurValue (void)
 {
 	float aniso_avail = Cvar_VariableValue("r_anisotropic_avail");
 	float anisoValue = ClampCvar (0, aniso_avail, Cvar_VariableValue("r_anisotropic"));
+
 	if (aniso_avail == 0) // not available
 		return 0;
 	if (anisoValue < 2.0)
@@ -389,10 +334,6 @@ Menu_Video_Init
 */
 void Menu_Video_Init (void)
 {
-	static const char *resolutions[] = 
-	{
-#include "../qcommon/vid_resolutions.h"
-	};
 	static const char *fullscreen_names[] =
 	{
 		"windowed",
@@ -440,9 +381,9 @@ void Menu_Video_Init (void)
 		"highest",
 		0
 	};
-	int		y = 0;
-	float	temp;
-	char	*customStr;
+	int			y = 0;
+	char		*customStr;
+	qboolean	customHidden;
 
 	if ( !con_font_size )
 		con_font_size = Cvar_Get ("con_font_size", "8", CVAR_ARCHIVE);
@@ -457,22 +398,22 @@ void Menu_Video_Init (void)
 	s_mode_list.generic.name		= "video mode";
 	s_mode_list.generic.x			= 0;
 	s_mode_list.generic.y			= y;
-	s_mode_list.itemnames			= resolutions;
+	s_mode_list.itemnames			= ui_resolution_names;
 	s_mode_list.generic.callback	= VidModeCallback;
-	temp = Cvar_VariableValue("r_mode");
-	s_mode_list.curvalue			= (temp == -1) ? 0 : max(temp - 2, 1); // offset for getting rid of < 640x480 resolutions
+	s_mode_list.curvalue			=  UI_GetIndexForStringValue(ui_video_modes, Cvar_VariableString("r_mode"));
 	s_mode_list.generic.statusbar	= "changes screen resolution";
 
+	customHidden = (strcmp(ui_video_modes[s_mode_list.curvalue], "-1") != 0);
 	s_customwidth_title.generic.type		= MTYPE_SEPARATOR;
 	s_customwidth_title.generic.textSize	= MENU_FONT_SIZE;
-	s_customwidth_title.generic.flags		= (s_mode_list.curvalue != 0) ? QMF_HIDDEN : 0;
+	s_customwidth_title.generic.flags		= customHidden ? QMF_HIDDEN : 0;
 	s_customwidth_title.generic.name		= "custom width";
 	s_customwidth_title.generic.x			= -2*MENU_FONT_SIZE;
 	s_customwidth_title.generic.y			= y += 1.5*MENU_LINE_SIZE;
 
 	s_customwidth_field.generic.type		= MTYPE_FIELD;
 	s_customwidth_field.generic.textSize	= MENU_FONT_SIZE;
-	s_customwidth_field.generic.flags		= (s_mode_list.curvalue != 0) ? (QMF_NUMBERSONLY|QMF_HIDDEN) : QMF_NUMBERSONLY;
+	s_customwidth_field.generic.flags		= customHidden ? (QMF_NUMBERSONLY|QMF_HIDDEN) : QMF_NUMBERSONLY;
 //	s_customwidth_field.generic.name		= "custom width";
 	s_customwidth_field.generic.callback	= 0;
 	s_customwidth_field.generic.x			= -14*MENU_FONT_SIZE;
@@ -485,14 +426,14 @@ void Menu_Video_Init (void)
 
 	s_customheight_title.generic.type		= MTYPE_SEPARATOR;
 	s_customheight_title.generic.textSize	= MENU_FONT_SIZE;
-	s_customheight_title.generic.flags		= (s_mode_list.curvalue != 0) ? QMF_HIDDEN : 0;
+	s_customheight_title.generic.flags		= customHidden ? QMF_HIDDEN : 0;
 	s_customheight_title.generic.name		= "custom height";
 	s_customheight_title.generic.x			= 14.5*MENU_FONT_SIZE;
 	s_customheight_title.generic.y			= y;
 
 	s_customheight_field.generic.type		= MTYPE_FIELD;
 	s_customheight_field.generic.textSize	= MENU_FONT_SIZE;
-	s_customheight_field.generic.flags		= (s_mode_list.curvalue != 0) ? (QMF_NUMBERSONLY|QMF_HIDDEN) : QMF_NUMBERSONLY;
+	s_customheight_field.generic.flags		= customHidden ? (QMF_NUMBERSONLY|QMF_HIDDEN) : QMF_NUMBERSONLY;
 //	s_customheight_field.generic.name		= "custom height";
 	s_customheight_field.generic.callback	= 0;
 	s_customheight_field.generic.x			= 2*MENU_FONT_SIZE;
@@ -519,9 +460,6 @@ void Menu_Video_Init (void)
 	s_brightness_slider.generic.y			= y += MENU_LINE_SIZE;
 	s_brightness_slider.generic.name		= "brightness";
 	s_brightness_slider.generic.callback	= BrightnessCallback;
-//	s_brightness_slider.minvalue			= 0;
-//	s_brightness_slider.maxvalue			= 20;
-//	s_brightness_slider.curvalue			= (1.3 - Cvar_VariableValue("vid_gamma")) * 20;
 	s_brightness_slider.maxPos				= 20;
 	s_brightness_slider.baseValue			= 1.3f;
 	s_brightness_slider.increment			= -0.05f;
@@ -534,7 +472,7 @@ void Menu_Video_Init (void)
 	s_texfilter_box.generic.x			= 0;
 	s_texfilter_box.generic.y			= y += 2*MENU_LINE_SIZE;
 	s_texfilter_box.generic.name		= "texture filter";
-	s_texfilter_box.curvalue			= texfilter_box_setval();
+	s_texfilter_box.curvalue			= Menu_GetTexfilterCurValue();
 	s_texfilter_box.itemnames			= mip_names;
 	s_texfilter_box.generic.statusbar	= "changes texture filtering mode";
 
@@ -543,8 +481,8 @@ void Menu_Video_Init (void)
 	s_aniso_box.generic.x			= 0;
 	s_aniso_box.generic.y			= y += MENU_LINE_SIZE;
 	s_aniso_box.generic.name		= "anisotropic filter";
-	s_aniso_box.curvalue			= GetAnisoCurValue();
-	s_aniso_box.itemnames			= GetAnisoNames();
+	s_aniso_box.curvalue			= Menu_GetAnisoCurValue();
+	s_aniso_box.itemnames			= ui_aniso_names;
 	s_aniso_box.generic.statusbar	= "changes level of anisotropic mipmap filtering";
 
 	s_texqual_box.generic.type		= MTYPE_SPINCONTROL;
@@ -599,7 +537,7 @@ void Menu_Video_Init (void)
 	s_refresh_box.generic.x				= 0;
 	s_refresh_box.generic.y				= y += MENU_LINE_SIZE;
 	s_refresh_box.generic.name			= "refresh rate";
-	s_refresh_box.curvalue				= refresh_box_setval();
+	s_refresh_box.curvalue				= Menu_GetRefreshCurValue();
 	s_refresh_box.itemnames				= refreshrate_names;
 	s_refresh_box.generic.statusbar		= "sets refresh rate for fullscreen modes";
 
@@ -644,7 +582,7 @@ void Menu_Video_Init (void)
 	s_apply_action.generic.name			= "apply changes";
 	s_apply_action.generic.x			= 0;
 	s_apply_action.generic.y			= y += 2*MENU_LINE_SIZE;
-	s_apply_action.generic.callback		= ApplyChanges;
+	s_apply_action.generic.callback		= Menu_ApplyVideoChanges;
 
 	s_backmain_action.generic.type		= MTYPE_ACTION;
 	s_backmain_action.generic.textSize	= MENU_FONT_SIZE;

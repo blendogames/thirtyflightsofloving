@@ -118,6 +118,30 @@ qboolean UI_IsValidImageFilename (char *name)
 	return false;
 }
 
+
+/*
+==========================
+UI_GetIndexForStringValue
+==========================
+*/
+int	UI_GetIndexForStringValue (const char **item_values, char *value)
+{
+	int		i, index = 0;
+
+	// catch null array
+	if (!item_values) {
+		Com_Printf ("UI_GetIndexForStringValue: null itemValues!\n");
+		return 0;
+	}
+
+	for (i=0; item_values[i]; i++)
+		if ( !Q_strcasecmp(va("%s",item_values[i]), value) )
+		{	index = i; break;	}
+
+	return index;
+}
+
+
 /*
 ==========================
 UI_MouseOverAlpha
@@ -268,6 +292,210 @@ void UI_StartServer (char *startmap, qboolean dedicated)
 		Cbuf_AddText (va("map %s\n", startmap));
 	}
 //	UI_ForceMenuOff ();
+}
+
+/*
+=======================================================================
+
+	VIDEO INFO LOADING
+
+=======================================================================
+*/
+
+#define UI_MAX_VIDMODES 128
+
+char	**ui_resolution_names = NULL;
+char	**ui_video_modes = NULL;
+int		ui_num_video_modes = 0;
+
+/*
+==========================
+UI_GetVideoModes
+==========================
+*/
+void UI_GetVideoModes (void)
+{
+	int			i, j=0, w=0, h=0, firstMode=0, numModes=0;
+	float		aspect;
+	char		*tok, resBuf[12], aspectBuf[8], nameBuf[20];
+	qboolean	surround = false;
+
+	// count video modes >= 640x480
+	for (i=0; i<UI_MAX_VIDMODES; i++)
+	{
+		if ( !VID_GetModeInfo(&w, &h, i) )
+			break;
+
+		if (w >= 640 && h >= 480) {
+			numModes++;
+			if (numModes == 1)
+				firstMode = i;
+		}
+	}
+	// allocate lists
+	ui_resolution_names = malloc ((numModes+2) * sizeof(char *));
+	memset (ui_resolution_names, 0, (numModes+2) * sizeof(char *));
+	ui_video_modes = malloc ((numModes+2) * sizeof(char *));
+	memset (ui_video_modes, 0, (numModes+2) * sizeof(char *));
+
+	// add custom resolution item
+//	ui_resolution_names[0] = strdup ("custom      ???");
+	ui_resolution_names[0] = strdup ("[custom   ] [ ??? ]");
+	ui_video_modes[0] = strdup ("-1");	
+
+	// add to lists
+	for (i=firstMode, j=1; i<(firstMode+numModes); i++, j++)
+	{
+		if ( !VID_GetModeInfo(&w, &h, i) )
+			break;
+
+		if (w >= 640 && h >= 480)
+		{
+			aspect = (float)w / (float)h;
+			memset (resBuf, 0, sizeof(resBuf));
+			memset (aspectBuf, 0, sizeof(aspectBuf));
+			memset (nameBuf, 0, sizeof(nameBuf));
+			Com_sprintf (resBuf, sizeof(resBuf), "%dx%d", w, h);
+
+			// catch surround modes
+			if (aspect > 3.6f) {
+				aspect /= 3.0f;
+				surround = true;
+			}
+			if (aspect > 2.39f)
+				tok = "24:10";
+			else if (aspect > 2.3f)
+				tok = "21:9";
+			else if (aspect > 1.9f)
+				tok = "16:8";
+			else if (aspect > 1.85f)
+				tok = "17:10";
+			else if (aspect > 1.65f)
+				tok = "16:9";
+			else if (aspect > 1.6f)
+				tok = "15:9";
+			else if (aspect > 1.55f)
+				tok = "16:10";
+			else if (aspect > 1.3f)
+				tok = "4:3";
+			else if (aspect > 1.2f)
+				tok = "5:4";
+			else
+				tok = va("%3.1f:1", aspect);
+
+			if (surround)
+				Com_sprintf (aspectBuf, sizeof(aspectBuf), "3x%s", tok);
+			else
+				Com_sprintf (aspectBuf, sizeof(aspectBuf), "%s", tok);
+
+		//	Com_sprintf (nameBuf, sizeof(nameBuf), "%-12s%s", resBuf, aspectBuf);
+			Com_sprintf (nameBuf, sizeof(nameBuf), "[%-9s] [%-5s]", resBuf, aspectBuf);
+
+			ui_resolution_names[j] = strdup (nameBuf);
+			ui_video_modes[j] = strdup (va("%i", i));	
+		}
+	}
+
+	ui_num_video_modes = numModes;
+}
+
+
+/*
+==========================
+UI_FreeVideoModes
+==========================
+*/
+void UI_FreeVideoModes (void)
+{
+	if (ui_num_video_modes > 0) {
+		FS_FreeFileList (ui_resolution_names, ui_num_video_modes);
+		FS_FreeFileList (ui_video_modes, ui_num_video_modes);
+	}
+	ui_resolution_names = NULL;
+	ui_video_modes = NULL;
+}
+
+
+char	**ui_aniso_names = NULL;
+//char	**ui_aniso_values = NULL;
+int		ui_num_aniso_values = 0;
+
+/*
+==========================
+UI_GetAnisoValues
+==========================
+*/
+void UI_GetAnisoValues (void)
+{
+	int		i, numValues;
+	float	aniso_avail = Cvar_VariableValue("r_anisotropic_avail");
+
+	if (aniso_avail < 2.0)
+		numValues = 1;
+	else if (aniso_avail < 4.0)
+		numValues = 2;
+	else if (aniso_avail < 8.0)
+		numValues = 3;
+	else if (aniso_avail < 16.0)
+		numValues = 4;
+	else // >= 16.0
+		numValues = 5;
+
+	// allocate lists
+	ui_aniso_names = malloc ((numValues+1) * sizeof(char *));
+	memset (ui_aniso_names, 0, (numValues+1) * sizeof(char *));
+//	ui_aniso_values = malloc ((numValues+1) * sizeof(char *));
+//	memset (ui_aniso_values, 0, (numValues+1) * sizeof(char *));
+
+	// set names and values
+	for (i=0; i<numValues; i++)
+	{
+		if (i == 0)
+			ui_aniso_names[i] = (numValues == 1) ? strdup("not supported") : strdup("off");
+		else
+			ui_aniso_names[i] = strdup(va("%ix", 1<<i));
+	//	ui_aniso_values[i] = strdup(va("%i", 1<<i));
+	}
+
+	ui_num_aniso_values = numValues;
+}
+
+
+/*
+==========================
+UI_FreeAnisoValues
+==========================
+*/
+void UI_FreeAnisoValues (void)
+{
+	if (ui_num_aniso_values > 0) {
+		FS_FreeFileList (ui_aniso_names, ui_num_aniso_values);
+	//	FS_FreeFileList (ui_aniso_values, ui_num_aniso_values);
+	}
+	ui_aniso_names = NULL;
+//	ui_aniso_values = NULL;
+}
+
+/*
+==========================
+UI_GetVideoInfo
+==========================
+*/
+void UI_GetVideoInfo (void)
+{
+	UI_GetVideoModes ();
+	UI_GetAnisoValues ();
+}
+
+/*
+==========================
+UI_FreeVideoInfo
+==========================
+*/
+void UI_FreeVideoInfo (void)
+{
+	UI_FreeVideoModes ();
+	UI_FreeAnisoValues ();
 }
 
 /*
@@ -473,86 +701,6 @@ char **UI_LoadAssetList (char *dir, char *nameMask, char *firstItem, int *return
 char **ui_font_names = NULL;
 int	ui_numfonts = 0;
 
-#if 0
-void UI_InsertFont (char **list, char *insert, int len)
-{
-	int i, j;
-	if (!list) return;
-
-	// i=1 so default stays first!
-	for (i=1; i<len; i++)
-	{
-		if (!list[i])
-			break;
-
-		if (strcmp( list[i], insert ))
-		{
-			for (j=len; j>i ;j--)
-				list[j] = list[j-1];
-
-			list[i] = strdup(insert);
-			return;
-		}
-	}
-	list[len] = strdup(insert);
-}
-
-char **UI_SetFontNames (void)
-{
-	char *curFont;
-	char **list = 0, *p;//, *s;
-	int nfonts = 0, nfontnames;
-	char **fontfiles;
-	char *path = NULL;
-	int i;//, j;
-
-	list = malloc( sizeof( char * ) * UI_MAX_FONTS );
-	memset( list, 0, sizeof( char * ) * UI_MAX_FONTS );
-
-	list[0] = strdup("default");
-
-	nfontnames = 1;
-
-	fontfiles = FS_GetFileList("fonts/*.*", NULL, &nfonts);
-	for (i=0; i<nfonts && nfontnames < UI_MAX_FONTS; i++)
-	{
-		int num;
-
-		if (!fontfiles || !fontfiles[i])	// Knightmare added array base check
-			continue;
-
-		if ( !UI_IsValidImageFilename(fontfiles[i]) )
-			continue;
-
-		p = strrchr(fontfiles[i], '/'); p++;
-
-		num = (int)strlen(p)-4;
-		p[num] = 0; // NULL
-
-		curFont = p;
-
-		if (!FS_ItemInList(curFont, nfontnames, list))
-		{
-			// UI_InsertFont not needed due to sorting in FS_GetFileList()
-		//	UI_InsertFont (list, strdup(curFont), nfontnames);
-			FS_InsertInList(list, strdup(curFont), nfontnames, 1);	// start=1 so default stays first!
-			nfontnames++;
-		}
-		
-		// set back so whole string get deleted.
-		p[num] = '.';
-	}
-
-	if (nfonts)
-		FS_FreeFileList( fontfiles, nfonts );
-
-	ui_numfonts = nfontnames;
-
-	return list;		
-}
-#endif
-
-
 /*
 ==========================
 UI_IsValidFontName
@@ -693,76 +841,6 @@ void UI_SortCrosshairs (char **list, int len)
 }
 
 
-#if 0
-char **UI_SetCrosshairNames (void)
-{
-	char *curCrosshair;
-	char **list = 0, *p;
-	int ncrosshairs = 0, ncrosshairnames;
-	char **crosshairfiles;
-	char *path = NULL;
-	int i;
-
-	list = malloc( sizeof( char * ) * UI_MAX_CROSSHAIRS+1 );
-	memset( list, 0, sizeof( char * ) * UI_MAX_CROSSHAIRS+1 );
-
-	list[0] = strdup("none"); // was default
-	ncrosshairnames = 1;
-
-	crosshairfiles = FS_GetFileList("pics/ch*.*", NULL,  &ncrosshairs);
-	for (i=0; i<ncrosshairs && ncrosshairnames < UI_MAX_CROSSHAIRS; i++)
-	{
-		int	num, namelen;
-
-		if ( !crosshairfiles || !crosshairfiles[i] )
-			continue;
-
-		if ( !UI_IsValidImageFilename(crosshairfiles[i]) )
-			continue;
-
-		p = strrchr(crosshairfiles[i], '/'); p++;
-
-		// filename must be chxxx
-		if (strncmp(p, "ch", 2))
-			continue;
-		namelen = (int)strlen(strdup(p));
-		if (namelen < 7 || namelen > 9)
-			continue;
-		if (!isNumeric(p[2]))
-			continue;
-		if (namelen >= 8 && !isNumeric(p[3]))
-			continue;
-		// ch100 is only valid 5-char name
-		if (namelen == 9 && (p[2] != '1' || p[3] != '0' || p[4] != '0'))
-			continue;
-
-		num = (int)strlen(p)-4;
-		p[num] = 0; //NULL;
-
-		curCrosshair = p;
-
-		if (!FS_ItemInList(curCrosshair, ncrosshairnames, list))
-		{
-			FS_InsertInList(list, strdup(curCrosshair), ncrosshairnames, 1);	// i=1 so none stays first!
-			ncrosshairnames++;
-		}
-		
-		//set back so whole string get deleted.
-		p[num] = '.';
-	}
-
-	// sort the list
-	UI_SortCrosshairs (list, ncrosshairnames);
-
-	if (ncrosshairs)
-		FS_FreeFileList( crosshairfiles, ncrosshairs );
-
-	ui_numcrosshairs = ncrosshairnames;
-
-	return list;		
-}
-#endif
-
 /*
 ==========================
 UI_IsValidCrosshairName
@@ -866,7 +944,6 @@ qboolean	ui_savechanged[UI_MAX_SAVEGAMES];
 qboolean	ui_saveshotvalid[UI_MAX_SAVEGAMES+1];
 
 char		ui_mapname[MAX_QPATH];
-//qboolean	ui_mapshotvalid;
 char		ui_saveload_shotname[MAX_QPATH];
 
 /*
@@ -903,7 +980,6 @@ void UI_Load_Savestrings (qboolean update)
 		fp = fopen (name, "rb");
 		if (!fp) {
 		//	Com_Printf("Save file %s not found.\n", name);
-		//	strncpy (ui_savestrings[i], EMPTY_GAME_STRING);
 			Q_strncpyz (ui_savestrings[i], sizeof(ui_savestrings[i]), EMPTY_GAME_STRING);
 			ui_savevalid[i] = false;
 			ui_savetimestamps[i] = 0;
@@ -917,7 +993,6 @@ void UI_Load_Savestrings (qboolean update)
 			if (!f)
 			{
 				//Com_Printf("Save file %s not found.\n", name);
-			//	strncpy (m_savestrings[i], EMPTY_GAME_STRING);
 				Q_strncpyz (ui_savestrings[i], sizeof(ui_savestrings[i]), EMPTY_GAME_STRING);
 				ui_savevalid[i] = false;
 				ui_savetimestamps[i] = 0;
@@ -953,7 +1028,6 @@ void UI_ValidateSaveshots (void)
 {
 	int i;
 	char shotname[MAX_QPATH];
-//	char mapshotname[MAX_QPATH];
 
 	for ( i = 0; i < UI_MAX_SAVEGAMES; i++ )
 	{
@@ -979,25 +1053,6 @@ void UI_ValidateSaveshots (void)
 		else
 			ui_saveshotvalid[i] = false;
 	}
-/*	if (loadmenu)
-	{	// register mapshot for autosave
-		if (ui_savevalid[0]) {
-			Com_sprintf(mapshotname, sizeof(mapshotname), "/levelshots/%s.pcx", ui_mapname);
-			if (R_DrawFindPic(mapshotname))
-				ui_mapshotvalid = true;
-			else
-				ui_mapshotvalid = false;
-		}
-		else
-			ui_mapshotvalid = false;
-	}
-
-	// register null saveshot, this is only done once
-	if (R_DrawFindPic("/gfx/ui/noscreen.pcx"))
-		ui_saveshotvalid[UI_MAX_SAVEGAMES] = true;
-	else
-		ui_saveshotvalid[UI_MAX_SAVEGAMES] = false;
-*/
 }
 
 
@@ -1473,7 +1528,6 @@ void UI_LoadArenas (void)
 
 #if 1
 	arenafiles = FS_GetFileList ("scripts", "arena", &narenas);
-//	arenafiles = FS_GetFileList ("scripts/*.arena", NULL, &narenas);
 	for (i = 0; i < narenas && narenanames < MAX_ARENAS; i++)
 	{
 		if (!arenafiles || !arenafiles[i])
@@ -2015,7 +2069,6 @@ static qboolean UI_IsSkinIcon (char *name)
 	int		len;
 	char	*s, scratch[1024];
 
-//	strncpy(scratch, name);
 	Q_strncpyz(scratch, sizeof(scratch), name);
 	*strrchr(scratch, '.') = 0;
 	s = scratch;
@@ -2031,13 +2084,11 @@ UI_IconOfSkinExists
 */
 static qboolean UI_IconOfSkinExists (char *skin, char **files, int nfiles, char *suffix)
 {
-	int i;
-	char scratch[1024];
+	int		i;
+	char	scratch[1024];
 
-//	strncpy(scratch, skin);
 	Q_strncpyz (scratch, sizeof(scratch), skin);
 	*strrchr(scratch, '.') = 0;
-//	strncat(scratch, suffix);
 	Q_strncatz (scratch, sizeof(scratch), suffix);
 //	strncat(scratch, "_i.pcx");
 
@@ -2263,7 +2314,7 @@ UI_FreePlayerModels
 */
 void UI_FreePlayerModels (void)
 {
-	int i;
+	int		i;
 
 	for (i = 0; i < ui_numplayermodels; i++)
 	{
@@ -2327,25 +2378,20 @@ void UI_InitPlayerModelInfo (int *modelNum, int *skinNum)
 		return;
 	}
 		
-//	strncpy( currentdirectory, Cvar_VariableString ("skin") );
 	Q_strncpyz(currentdirectory, sizeof(currentdirectory), Cvar_VariableString ("skin"));
 
 	if ( strchr( currentdirectory, '/' ) )
 	{
-	//	strncpy( currentskin, strchr( currentdirectory, '/' ) + 1 );
 		Q_strncpyz(currentskin, sizeof(currentskin), strchr( currentdirectory, '/' ) + 1);
 		*strchr( currentdirectory, '/' ) = 0;
 	}
 	else if ( strchr( currentdirectory, '\\' ) )
 	{
-	//	strncpy( currentskin, strchr( currentdirectory, '\\' ) + 1 );
 		Q_strncpyz(currentskin, sizeof(currentskin), strchr( currentdirectory, '\\' ) + 1);
 		*strchr( currentdirectory, '\\' ) = 0;
 	}
 	else
 	{
-	//	strncpy( currentdirectory, "male" );
-	//	strncpy( currentskin, "grunt" );
 		Q_strncpyz(currentdirectory, sizeof(currentdirectory), "male");
 		Q_strncpyz(currentskin, sizeof(currentskin), "grunt");
 	}

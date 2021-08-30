@@ -876,6 +876,8 @@ void MakronSpawn (edict_t *self)
 	vec3_t		vec;
 	edict_t		*player;
 
+	self->classname = "monster_makron";	// Knightmare- set the right classname
+
 	SP_monster_makron (self);
 
 	// jump at player

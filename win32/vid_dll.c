@@ -571,8 +571,6 @@ qboolean VID_GetModeInfo (int *width, int *height, int mode)
 
 	if (mode == -1) // custom mode
 	{
-	//	*width  = r_customwidth->value;
-	//	*height = r_customheight->value;
 		*width  = r_customwidth->integer;
 		*height = r_customheight->integer;
 		return true;

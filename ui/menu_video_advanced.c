@@ -76,11 +76,9 @@ static void Video_Advanced_MenuSetValues (void)
 	char	*sshotformat;
 
 	Cvar_SetValue ("r_modulate", ClampCvar( 1, 2, Cvar_VariableValue("r_modulate") ));
-//	s_lightmapscale_slider.curvalue = (Cvar_VariableValue("r_modulate") - 1) * 10;
 	UI_MenuSlider_SetValue (&s_lightmapscale_slider, Cvar_VariableValue("r_modulate"));
 
 	Cvar_SetValue ("r_intensity", ClampCvar( 1, 2, Cvar_VariableValue("r_intensity") ));
-//	s_textureintensity_slider.curvalue = (Cvar_VariableValue("r_intensity") - 1) * 10;
 	UI_MenuSlider_SetValue (&s_textureintensity_slider, Cvar_VariableValue("r_intensity"));
 
 	Cvar_SetValue ("r_rgbscale", ClampCvar( 1, 2, Cvar_VariableValue("r_rgbscale") ));
@@ -96,7 +94,6 @@ static void Video_Advanced_MenuSetValues (void)
 	s_warp_lighting_box.curvalue = Cvar_VariableValue("r_warp_lighting");
 
 	Cvar_SetValue ("r_lightcutoff", ClampCvar( 0, 64, Cvar_VariableValue("r_lightcutoff") ));
-//	s_lightcutoff_slider.curvalue = Cvar_VariableValue("r_lightcutoff") / 8.0f;
 	UI_MenuSlider_SetValue (&s_lightcutoff_slider, Cvar_VariableValue("r_lightcutoff"));
 
 	Cvar_SetValue ("r_glass_envmaps", ClampCvar( 0, 1, Cvar_VariableValue("r_glass_envmaps") ));
@@ -109,7 +106,6 @@ static void Video_Advanced_MenuSetValues (void)
 	s_texshader_warp_box.curvalue = Cvar_VariableValue("r_pixel_shader_warp");
 
 	Cvar_SetValue ("r_waterwave", ClampCvar( 0, 24, Cvar_VariableValue("r_waterwave") ));
-//	s_waterwave_slider.curvalue = Cvar_VariableValue("r_waterwave");
 	UI_MenuSlider_SetValue (&s_waterwave_slider, Cvar_VariableValue("r_waterwave"));
 
 	Cvar_SetValue ("r_caustics", ClampCvar( 0, 2, Cvar_VariableValue("r_caustics") ));
@@ -137,7 +133,6 @@ static void Video_Advanced_MenuSetValues (void)
 	s_celshading_box.curvalue = Cvar_VariableValue("r_celshading");
 
 	Cvar_SetValue ("r_celshading_width", ClampCvar( 1, 12, Cvar_VariableValue("r_celshading_width") ));
-//	s_celshading_width_slider.curvalue = Cvar_VariableValue("r_celshading_width") - 1;
 	UI_MenuSlider_SetValue (&s_celshading_width_slider, Cvar_VariableValue("r_celshading_width"));
 
 	sshotformat = Cvar_VariableString("r_screenshot_format");
@@ -149,7 +144,6 @@ static void Video_Advanced_MenuSetValues (void)
 		s_screenshotformat_box.curvalue = 2;
 
 	Cvar_SetValue ("r_screenshot_jpeg_quality", ClampCvar( 50, 100, Cvar_VariableValue("r_screenshot_jpeg_quality") ));
-//	s_screenshotjpegquality_slider.curvalue	= (Cvar_VariableValue("r_screenshot_jpeg_quality") - 50) / 5;
 	UI_MenuSlider_SetValue (&s_screenshotjpegquality_slider, Cvar_VariableValue("r_screenshot_jpeg_quality"));
 
 	Cvar_SetValue ("r_saveshotsize", ClampCvar( 0, 1, Cvar_VariableValue("r_saveshotsize") ));
@@ -161,13 +155,11 @@ static void Video_Advanced_MenuSetValues (void)
 
 static void LightMapScaleCallback (void *unused)
 {
-//	Cvar_SetValue ("r_modulate", s_lightmapscale_slider.curvalue / 10 + 1);
 	Cvar_SetValue ("r_modulate", UI_MenuSlider_GetValue(&s_lightmapscale_slider) );
 }
 
 static void TextureIntensCallback (void *unused)
 {
-//	Cvar_SetValue ("r_intensity", s_textureintensity_slider.curvalue / 10 + 1);
 	Cvar_SetValue ("r_intensity", UI_MenuSlider_GetValue(&s_textureintensity_slider));
 }
 
@@ -188,7 +180,6 @@ static void WarpLightingCallback (void *unused)
 
 static void LightCutoffCallback(void *unused)
 {
-//	Cvar_SetValue ("r_lightcutoff", s_lightcutoff_slider.curvalue * 8.0f);
 	Cvar_SetValue ("r_lightcutoff", UI_MenuSlider_GetValue(&s_lightcutoff_slider));
 }
 
@@ -209,7 +200,6 @@ static void TexShaderWarpCallback (void *unused)
 
 static void WaterWaveCallback (void *unused)
 {
-//	Cvar_SetValue ("r_waterwave", s_waterwave_slider.curvalue);
 	Cvar_SetValue ("r_waterwave", UI_MenuSlider_GetValue(&s_waterwave_slider));
 }
 
@@ -255,7 +245,6 @@ static void CelShadingCallback (void *unused)
 
 static void CelShadingWidthCallback (void *unused)
 {
-//	Cvar_SetValue ("r_celshading_width", s_celshading_width_slider.curvalue + 1);
 	Cvar_SetValue ("r_celshading_width", UI_MenuSlider_GetValue(&s_celshading_width_slider));
 }
 
@@ -390,8 +379,6 @@ void Menu_Video_Advanced_Init (void)
 	s_lightmapscale_slider.generic.y			= y += 2*MENU_LINE_SIZE;
 	s_lightmapscale_slider.generic.name			= "lightmap scale";
 	s_lightmapscale_slider.generic.callback		= LightMapScaleCallback;
-//	s_lightmapscale_slider.minvalue				= 0;
-//	s_lightmapscale_slider.maxvalue				= 10;
 	s_lightmapscale_slider.maxPos				= 10;
 	s_lightmapscale_slider.baseValue			= 1.0f;
 	s_lightmapscale_slider.increment			= 0.1f;
@@ -404,8 +391,6 @@ void Menu_Video_Advanced_Init (void)
 	s_textureintensity_slider.generic.y			= y += MENU_LINE_SIZE;
 	s_textureintensity_slider.generic.name		= "texture intensity";
 	s_textureintensity_slider.generic.callback	= TextureIntensCallback;
-//	s_textureintensity_slider.minvalue			= 0;
-//	s_textureintensity_slider.maxvalue			= 10;
 	s_textureintensity_slider.maxPos			= 10;
 	s_textureintensity_slider.baseValue			= 1.0f;
 	s_textureintensity_slider.increment			= 0.1f;
@@ -445,8 +430,6 @@ void Menu_Video_Advanced_Init (void)
 	s_lightcutoff_slider.generic.y			= y += MENU_LINE_SIZE;
 	s_lightcutoff_slider.generic.name		= "dynamic light cutoff";
 	s_lightcutoff_slider.generic.callback	= LightCutoffCallback;
-//	s_lightcutoff_slider.minvalue			= 0;
-//	s_lightcutoff_slider.maxvalue			= 8;
 	s_lightcutoff_slider.maxPos				= 8;
 	s_lightcutoff_slider.baseValue			= 0.0f;
 	s_lightcutoff_slider.increment			= 8.0f;
@@ -486,8 +469,6 @@ void Menu_Video_Advanced_Init (void)
 	s_waterwave_slider.generic.y			= y += MENU_LINE_SIZE;
 	s_waterwave_slider.generic.name			= "water wave size";
 	s_waterwave_slider.generic.callback		= WaterWaveCallback;
-//	s_waterwave_slider.minvalue				= 0;
-//	s_waterwave_slider.maxvalue				= 24;
 	s_waterwave_slider.maxPos				= 24;
 	s_waterwave_slider.baseValue			= 0.0f;
 	s_waterwave_slider.increment			= 1.0f;
@@ -572,8 +553,6 @@ void Menu_Video_Advanced_Init (void)
 	s_celshading_width_slider.generic.y			= y += MENU_LINE_SIZE;
 	s_celshading_width_slider.generic.name		= "cel shading width";
 	s_celshading_width_slider.generic.callback	= CelShadingWidthCallback;
-//	s_celshading_width_slider.minvalue			= 0;
-//	s_celshading_width_slider.maxvalue			= 11;
 	s_celshading_width_slider.maxPos			= 11;
 	s_celshading_width_slider.baseValue			= 1.0f;
 	s_celshading_width_slider.increment			= 1.0f;
@@ -595,8 +574,6 @@ void Menu_Video_Advanced_Init (void)
 	s_screenshotjpegquality_slider.generic.y			= y += MENU_LINE_SIZE;
 	s_screenshotjpegquality_slider.generic.name			= "JPEG screenshot quality";
 	s_screenshotjpegquality_slider.generic.callback		= JPEGScreenshotQualityCallback;
-//	s_screenshotjpegquality_slider.minvalue				= 0;
-//	s_screenshotjpegquality_slider.maxvalue				= 10;
 	s_screenshotjpegquality_slider.maxPos				= 10;
 	s_screenshotjpegquality_slider.baseValue			= 50.0f;
 	s_screenshotjpegquality_slider.increment			= 5.0f;

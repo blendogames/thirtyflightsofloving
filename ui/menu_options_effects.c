@@ -74,13 +74,11 @@ static void ItemBobFunc (void *unused)
 
 static void ParticleCompFunc (void *unused)
 {
-//	Cvar_SetValue( "cl_particle_scale", (s_options_effects_particle_comp_slider.curvalue-3)*-1+3);
 	Cvar_SetValue( "cl_particle_scale", UI_MenuSlider_GetValue(&s_options_effects_particle_comp_slider) );
 }
 
 static void DecalCallback (void *unused)
 {
-//	Cvar_SetValue( "r_decals", s_options_effects_decal_slider.curvalue * 50);
 	Cvar_SetValue( "r_decals", UI_MenuSlider_GetValue(&s_options_effects_decal_slider) );
 }
 
@@ -92,19 +90,16 @@ static void RailTrailFunc (void *unused)
 
 static void RailColorRedFunc (void *unused)
 {
-//	Cvar_SetValue( "cl_railred", s_options_effects_railcolor_slider[0].curvalue*16 );
 	Cvar_SetValue( "cl_railred", UI_MenuSlider_GetValue(&s_options_effects_railcolor_slider[0]) );
 }
 
 static void RailColorGreenFunc (void *unused)
 {
-//	Cvar_SetValue( "cl_railgreen", s_options_effects_railcolor_slider[1].curvalue*16 );
 	Cvar_SetValue( "cl_railgreen", UI_MenuSlider_GetValue(&s_options_effects_railcolor_slider[1]) );
 }
 
 static void RailColorBlueFunc (void *unused)
 {
-//	Cvar_SetValue( "cl_railblue", s_options_effects_railcolor_slider[2].curvalue*16 );
 	Cvar_SetValue( "cl_railblue", UI_MenuSlider_GetValue(&s_options_effects_railcolor_slider[2]) );
 }
 
@@ -132,18 +127,13 @@ static void EffectsSetMenuItemValues (void)
 	s_options_effects_itembob_box.curvalue = Cvar_VariableValue("cl_item_bobbing");
 
 	Cvar_SetValue( "r_decals", ClampCvar (0, 1000, Cvar_VariableValue("r_decals")) );
-//	s_options_effects_decal_slider.curvalue = Cvar_VariableValue("r_decals") / 50;
 	UI_MenuSlider_SetValue (&s_options_effects_decal_slider, Cvar_VariableValue("r_decals"));
 
 	Cvar_SetValue( "cl_particle_scale", ClampCvar( 0, 5, Cvar_VariableValue("cl_particle_scale") ) );
-//	s_options_effects_particle_comp_slider.curvalue	= (Cvar_VariableValue("cl_particle_scale") -3)*-1+3;
 	UI_MenuSlider_SetValue (&s_options_effects_particle_comp_slider, Cvar_VariableValue("cl_particle_scale"));
 
 	Cvar_SetValue( "cl_railtype", ClampCvar( 0, 2, Cvar_VariableValue("cl_railtype") ) );
 	s_options_effects_railtrail_box.curvalue		= Cvar_VariableValue("cl_railtype");
-//	s_options_effects_railcolor_slider[0].curvalue		= Cvar_VariableValue("cl_railred")/16;
-//	s_options_effects_railcolor_slider[1].curvalue		= Cvar_VariableValue("cl_railgreen")/16;
-//	s_options_effects_railcolor_slider[2].curvalue		= Cvar_VariableValue("cl_railblue")/16;
 	UI_MenuSlider_SetValue (&s_options_effects_railcolor_slider[0], Cvar_VariableValue("cl_railred"));
 	UI_MenuSlider_SetValue (&s_options_effects_railcolor_slider[1], Cvar_VariableValue("cl_railgreen"));
 	UI_MenuSlider_SetValue (&s_options_effects_railcolor_slider[2], Cvar_VariableValue("cl_railblue"));
@@ -251,8 +241,6 @@ void Options_Effects_MenuInit (void)
 	s_options_effects_decal_slider.generic.y					= y += 2*MENU_LINE_SIZE;
 	s_options_effects_decal_slider.generic.name					= "decal quantity";
 	s_options_effects_decal_slider.generic.callback				= DecalCallback;
-//	s_options_effects_decal_slider.minvalue						= 0;
-//	s_options_effects_decal_slider.maxvalue						= 20;
 	s_options_effects_decal_slider.maxPos						= 20;
 	s_options_effects_decal_slider.baseValue					= 0.0f;
 	s_options_effects_decal_slider.increment					= 50.0f;
@@ -265,8 +253,6 @@ void Options_Effects_MenuInit (void)
 	s_options_effects_particle_comp_slider.generic.y			= y += MENU_LINE_SIZE;
 	s_options_effects_particle_comp_slider.generic.name			= "particle effect complexity";
 	s_options_effects_particle_comp_slider.generic.callback		= ParticleCompFunc;
-//	s_options_effects_particle_comp_slider.minvalue				= 1;
-//	s_options_effects_particle_comp_slider.maxvalue				= 5;
 	s_options_effects_particle_comp_slider.maxPos				= 4;
 	s_options_effects_particle_comp_slider.baseValue			= 5.0f;
 	s_options_effects_particle_comp_slider.increment			= -1.0f;
@@ -289,8 +275,6 @@ void Options_Effects_MenuInit (void)
 	s_options_effects_railcolor_slider[0].generic.y			= y += MENU_LINE_SIZE;
 	s_options_effects_railcolor_slider[0].generic.name		= "railtrail - red";
 	s_options_effects_railcolor_slider[0].generic.callback	= RailColorRedFunc;
-//	s_options_effects_railcolor_slider[0].minvalue			= 0;
-//	s_options_effects_railcolor_slider[0].maxvalue			= 16;
 	s_options_effects_railcolor_slider[0].maxPos			= 64;
 	s_options_effects_railcolor_slider[0].baseValue			= 0.0f;
 	s_options_effects_railcolor_slider[0].increment			= 4.0f;
@@ -303,8 +287,6 @@ void Options_Effects_MenuInit (void)
 	s_options_effects_railcolor_slider[1].generic.y			= y += MENU_LINE_SIZE;
 	s_options_effects_railcolor_slider[1].generic.name		= "railtrail - green";
 	s_options_effects_railcolor_slider[1].generic.callback	= RailColorGreenFunc;
-//	s_options_effects_railcolor_slider[1].minvalue			= 0;
-//	s_options_effects_railcolor_slider[1].maxvalue			= 16;
 	s_options_effects_railcolor_slider[1].maxPos			= 64;
 	s_options_effects_railcolor_slider[1].baseValue			= 0.0f;
 	s_options_effects_railcolor_slider[1].increment			= 4.0f;
@@ -317,8 +299,6 @@ void Options_Effects_MenuInit (void)
 	s_options_effects_railcolor_slider[2].generic.y			= y += MENU_LINE_SIZE;
 	s_options_effects_railcolor_slider[2].generic.name		= "railtrail - blue";
 	s_options_effects_railcolor_slider[2].generic.callback	= RailColorBlueFunc;
-//	s_options_effects_railcolor_slider[2].minvalue			= 0;
-//	s_options_effects_railcolor_slider[2].maxvalue			= 16;
 	s_options_effects_railcolor_slider[2].maxPos			= 64;
 	s_options_effects_railcolor_slider[2].baseValue			= 0.0f;
 	s_options_effects_railcolor_slider[2].increment			= 4.0f;

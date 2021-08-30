@@ -239,11 +239,12 @@ void UI_Init (void)
 	Cvar_SetDescription ("ui_item_rotate", "Reverses direction of mouse click rotation for menu lists.");
 	ui_cursor_scale = Cvar_Get ("ui_cursor_scale", "0.4", 0);
 	Cvar_SetDescription ("ui_cursor_scale", "Sets scale for drawing the menu mouse cursor.");
-	ui_new_textbox = Cvar_Get ("ui_new_textbox", "1", 0);
+	ui_new_textbox = Cvar_Get ("ui_new_textbox", "1", CVAR_ARCHIVE);
 	Cvar_SetDescription ("ui_new_textbox", "Toggles use of new text box image.  Setting this to 0 uses old font-based tiles.");
-	ui_new_textfield = Cvar_Get ("ui_new_textfield", "1", 0);
+	ui_new_textfield = Cvar_Get ("ui_new_textfield", "1", CVAR_ARCHIVE);
 	Cvar_SetDescription ("ui_new_textfield", "Toggles use of new text field image.  Setting this to 0 uses old font-based tiles.");
 
+	UI_GetVideoInfo ();		// build video mode list
 	UI_LoadFontNames ();	// load font list
 //	UI_LoadHudNames ();		// load hud list
 	UI_LoadCrosshairs ();	// load crosshairs
@@ -293,6 +294,7 @@ void UI_Shutdown (void)
 	if (!ui_initialized)
 		return;
 
+	UI_FreeVideoInfo ();
 	UI_FreeFontNames ();
 //	UI_FreeHudNames ();
 	UI_FreeCrosshairs ();

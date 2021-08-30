@@ -57,25 +57,11 @@ static void ClientCompatibilityFunc (void *unused)
 
 void JoinServerFunc (void *self)
 {
-//	char	buffer[128];
 	int		index;
 
-	index = ( menuaction_s * ) self - s_joinserver_server_actions;
+	index = (menuaction_s *) self - s_joinserver_server_actions;
 
-#if 1
 	UI_JoinServer (index);
-#else
-	if ( Q_stricmp( ui_local_server_names[index], NO_SERVER_STRING ) == 0 )
-		return;
-
-	if (index >= ui_num_servers)
-		return;
-
-	Com_sprintf (buffer, sizeof(buffer), "connect %s\n", NET_AdrToString (ui_local_server_netadr[index]));
-	Cbuf_AddText (buffer);
-	UI_ForceMenuOff ();
-	cls.disable_screen = 1; // Knightmare- show loading screen
-#endif
 }
 
 void AddressBookFunc (void *self)

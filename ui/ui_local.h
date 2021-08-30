@@ -116,10 +116,6 @@ typedef struct
 {
 	menucommon_s	generic;
 
-//	float			minvalue;
-//	float			maxvalue;
-//	float			curvalue;
-
 	// Knightmare added
 	unsigned int	maxPos;
 	int				curPos;
@@ -232,6 +228,12 @@ extern cursor_t ui_mousecursor;
 //
 // ui_utils.c
 //
+extern char	**ui_resolution_names;
+extern char	**ui_video_modes;
+
+extern char	**ui_aniso_names;
+//extern char	**ui_aniso_values;
+
 extern char **ui_font_names;
 extern int	ui_numfonts;
 
@@ -323,6 +325,7 @@ extern struct image_s *ui_playerskin;
 //=======================================================
 
 qboolean UI_IsValidImageFilename (char *name);
+int	UI_GetIndexForStringValue (const char **item_values, char *value);
 int UI_MouseOverAlpha (menucommon_s *m);
 void *UI_ItemAtMenuCursor (menuframework_s *m);
 void UI_SetMenuStatusBar (menuframework_s *s, const char *string);
@@ -331,7 +334,9 @@ int	 UI_TallyMenuSlots (menuframework_s *menu);
 void UIStartSPGame (void);
 void UI_StartServer (char *startmap, qboolean dedicated);
 
-//char **UI_SetFontNames (void);
+void UI_GetVideoInfo (void);
+void UI_FreeVideoInfo (void);
+
 void UI_LoadFontNames (void);
 void UI_FreeFontNames (void);
 
@@ -339,7 +344,6 @@ void UI_FreeFontNames (void);
 //void UI_FreeHudNames (void);
 
 void UI_SortCrosshairs (char **list, int len);
-//char **UI_SetCrosshairNames (void);
 void UI_LoadCrosshairs (void);
 void UI_FreeCrosshairs (void);
 

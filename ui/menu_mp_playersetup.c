@@ -75,55 +75,23 @@ static void RateCallback (void *unused)
 static void Menu_PlayerModelCallback (void *unused)
 {
 	int		mNum, sNum;
-//	char	scratch[MAX_QPATH];
 
 	mNum = s_playerconfig_model_box.curvalue;
 	s_playerconfig_skin_box.itemnames = ui_pmi[mNum].skinDisplayNames;
 	s_playerconfig_skin_box.curvalue = 0;
 	sNum = s_playerconfig_skin_box.curvalue;
 
-#if 1
 	UI_UpdatePlayerModelInfo (mNum, sNum);
-#else
-	// only register model and skin on starup or when changed
-	Com_sprintf( scratch, sizeof(scratch), "players/%s/tris.md2", ui_pmi[mNum].directory );
-	ui_playermodel = R_RegisterModel (scratch);
-
-	Com_sprintf( scratch, sizeof(scratch), "players/%s/%s.pcx", ui_pmi[mNum].directory, ui_pmi[mNum].skinDisplayNames[sNum] );
-	ui_playerskin = R_RegisterSkin (scratch);
-
-	// show current weapon model (if any)
-	if (ui_currentweaponmodel && strlen(ui_currentweaponmodel)) {
-		Com_sprintf (scratch, sizeof(scratch), "players/%s/%s", ui_pmi[mNum].directory, ui_currentweaponmodel);
-		ui_weaponmodel = R_RegisterModel(scratch);
-		if (!ui_weaponmodel) {
-			Com_sprintf (scratch, sizeof(scratch), "players/%s/weapon.md2", ui_pmi[mNum].directory);
-			ui_weaponmodel = R_RegisterModel (scratch);
-		}
-	}
-	else {
-		Com_sprintf (scratch, sizeof(scratch), "players/%s/weapon.md2", ui_pmi[mNum].directory);
-		ui_weaponmodel = R_RegisterModel (scratch);
-	}
-#endif
 }
 
 
 static void Menu_PlayerSkinCallback (void *unused)
 {
-#if 1
 	int		mNum, sNum;
 
 	mNum = s_playerconfig_model_box.curvalue;
 	sNum = s_playerconfig_skin_box.curvalue;
 	UI_UpdatePlayerSkinInfo (mNum, sNum);
-#else
-	char scratch[MAX_QPATH];
-
-	// only register skin on starup and when changed
-	Com_sprintf(scratch, sizeof(scratch), "players/%s/%s.pcx", ui_pmi[s_player_model_box.curvalue].directory, ui_pmi[s_player_model_box.curvalue].skinDisplayNames[s_player_skin_box.curvalue]);
-	ui_playerskin = R_RegisterSkin(scratch);
-#endif
 }
 
 //=======================================================================
@@ -133,11 +101,8 @@ static void Menu_PlayerSkinCallback (void *unused)
 
 qboolean Menu_PlayerConfig_Init (void)
 {
-//	char currentdirectory[1024];
-//	char currentskin[1024];
-//	char scratch[MAX_QPATH];
-	int i, y;
-	int mNum = 0, sNum = 0;
+	int		i, y;
+	int		mNum = 0, sNum = 0;
 
 	cvar_t *hand = Cvar_Get("hand", "0", CVAR_USERINFO | CVAR_ARCHIVE);
 
@@ -146,62 +111,12 @@ qboolean Menu_PlayerConfig_Init (void)
 	if ( (hand->integer < 0) || (hand->integer > 2) )
 		Cvar_SetValue ("hand", 0);
 
-//	UI_PlayerConfig_ScanDirectories ();	// Replaced by UI_LoadPlayerModels() called from UI_Init()
-
 //	if (ui_numplayermodels == 0)
 	if ( !UI_HaveValidPlayerModels(NULL) )
 		return false;
 
-#if 1
 	// get model and skin index and precache them
 	UI_InitPlayerModelInfo (&mNum, &sNum);
-#else
-//	strncpy(currentdirectory, Cvar_VariableString("skin"));
-	Q_strncpyz (currentdirectory, sizeof(currentdirectory), Cvar_VariableString("skin"));
-
-	if ( strchr( currentdirectory, '/' ) )
-	{
-	//	strncpy(currentskin, strchr( currentdirectory, '/' ) + 1);
-		Q_strncpyz (currentskin, sizeof(currentskin), strchr( currentdirectory, '/' ) + 1);
-		*strchr(currentdirectory, '/') = 0;
-	}
-	else if ( strchr( currentdirectory, '\\' ) )
-	{
-	//	strncpy( currentskin, strchr( currentdirectory, '\\' ) + 1 );
-		Q_strncpyz (currentskin, sizeof(currentskin), strchr( currentdirectory, '\\' ) + 1);
-		*strchr(currentdirectory, '\\') = 0;
-	}
-	else
-	{
-	//	strncpy( currentdirectory, "male" );
-	//	strncpy( currentskin, "grunt" );
-		Q_strncpyz (currentdirectory, sizeof(currentdirectory), "male");
-		Q_strncpyz (currentskin, sizeof(currentskin), "grunt");
-	}
-
-	qsort( ui_pmi, ui_numplayermodels, sizeof( ui_pmi[0] ), UI_PlayerModelCmpFunc );
-
-	memset( ui_pmnames, 0, sizeof( ui_pmnames ) );
-	for ( i = 0; i < ui_numplayermodels; i++ )
-	{
-		ui_pmnames[i] = ui_pmi[i].displayname;
-		if ( Q_stricmp( ui_pmi[i].directory, currentdirectory ) == 0 )
-		{
-			int j;
-
-			mNum = i;
-
-			for ( j = 0; j < ui_pmi[i].nskins; j++ )
-			{
-				if ( Q_stricmp( ui_pmi[i].skinDisplayNames[j], currentskin ) == 0 )
-				{
-					sNum = j;
-					break;
-				}
-			}
-		}
-	}
-#endif
 
 	y = 0;
 
@@ -301,30 +216,6 @@ qboolean Menu_PlayerConfig_Init (void)
 	s_playerconfig_back_action.generic.y			= y += 2*MENU_LINE_SIZE;
 	s_playerconfig_back_action.generic.statusbar	= NULL;
 	s_playerconfig_back_action.generic.callback		= UI_BackMenu;
-
-#if 0	// Replaced by UI_UpdatePlayerModelInfo(), called from UI_InitPlayerModelInfo()
-	// only register model and skin on startup or when changed
-	Com_sprintf( scratch, sizeof( scratch ), "players/%s/tris.md2", ui_pmi[mNum].directory );
-	ui_playermodel = R_RegisterModel( scratch );
-
-	Com_sprintf( scratch, sizeof( scratch ), "players/%s/%s.pcx", ui_pmi[mNum].directory, ui_pmi[mNum].skinDisplayNames[sNum] );
-	ui_playerskin = R_RegisterSkin( scratch );
-
-	// show current weapon model (if any)
-	if (ui_currentweaponmodel && strlen(ui_currentweaponmodel)) {
-		Com_sprintf( scratch, sizeof( scratch ), "players/%s/%s", ui_pmi[mNum].directory, ui_currentweaponmodel );
-		ui_weaponmodel = R_RegisterModel( scratch );
-		if (!ui_weaponmodel) {
-			Com_sprintf( scratch, sizeof( scratch ), "players/%s/weapon.md2", ui_pmi[mNum].directory );
-			ui_weaponmodel = R_RegisterModel( scratch );
-		}
-	}
-	else
-	{
-		Com_sprintf( scratch, sizeof( scratch ), "players/%s/weapon.md2", ui_pmi[mNum].directory );
-		ui_weaponmodel = R_RegisterModel( scratch );
-	}
-#endif
 
 	UI_AddMenuItem (&s_player_config_menu, &s_playerconfig_name_field);
 	UI_AddMenuItem (&s_player_config_menu, &s_playerconfig_model_title);
@@ -560,8 +451,6 @@ void Menu_PlayerConfig_Draw (void)
 
 		yaw = anglemod(cl.time/10);
 
-		// RF_MIRRORMODEL now eliminates the need to change origin based on handeness
-	//	VectorSet (modelOrg, 150, (lefthand)?25:-25, 0); // was 80, 0, 0
 		VectorSet (modelOrg, 150, -25, 0); // was 80, 0, 0
 
 		// Setup player model
@@ -585,15 +474,8 @@ void Menu_PlayerConfig_Draw (void)
 		ent->oldframe = 0;
 		ent->backlerp = 0.0;
 		ent->angles[1] = yaw;
-	//	if ( ++yaw > 360 )
-	//		yaw -= 360;
 		
-		// RF_MIRRORMODEL now eliminates the need to reverse rotation
-	//	if (lefthand)
-	//		ent->angles[1] = 360 - ent->angles[1];
-
 		refdef.num_entities++;
-
 
 		// Setup weapon model
 		ent = &entity[1];
@@ -620,10 +502,6 @@ void Menu_PlayerConfig_Draw (void)
 			ent->backlerp = 0.0;
 			ent->angles[1] = yaw;
 			
-		// RF_MIRRORMODEL now eliminates the need to reverse rotation
-		//	if (lefthand)
-		//		ent->angles[1] = 360 - ent->angles[1];
-
 			refdef.num_entities++;
 		}
 
@@ -644,34 +522,16 @@ void Menu_PlayerConfig_Draw (void)
 
 void Menu_PConfigSaveChanges (void)
 {
-//	int		i;
 	int		mNum, sNum;
 	char	scratch[1024];
 
-	Cvar_Set( "name", s_playerconfig_name_field.buffer );
+	Cvar_Set ("name", s_playerconfig_name_field.buffer);
 
 	mNum = s_playerconfig_model_box.curvalue;
 	sNum = s_playerconfig_skin_box.curvalue;
-	Com_sprintf( scratch, sizeof( scratch ), "%s/%s", 
-		ui_pmi[mNum].directory, ui_pmi[mNum].skinDisplayNames[sNum] );
-	Cvar_Set( "skin", scratch );
-
-#if 0	// This is now freed when menu subsystem shuts down
-	for ( i = 0; i < ui_numplayermodels; i++ )
-	{
-		int j;
-
-		for ( j = 0; j < ui_pmi[i].nskins; j++ )
-		{
-			if ( ui_pmi[i].skinDisplayNames[j] )
-				free( ui_pmi[i].skinDisplayNames[j] );
-			ui_pmi[i].skinDisplayNames[j] = 0;
-		}
-		free( ui_pmi[i].skinDisplayNames );
-		ui_pmi[i].skinDisplayNames = 0;
-		ui_pmi[i].nskins = 0;
-	}
-#endif
+	Com_sprintf (scratch, sizeof( scratch ), "%s/%s", 
+		ui_pmi[mNum].directory, ui_pmi[mNum].skinDisplayNames[sNum]);
+	Cvar_Set ("skin", scratch);
 }
 
 const char *Menu_PlayerConfig_Key (int key)
@@ -685,7 +545,7 @@ const char *Menu_PlayerConfig_Key (int key)
 
 void Menu_PlayerConfig_f (void)
 {
-	if (!Menu_PlayerConfig_Init())
+	if ( !Menu_PlayerConfig_Init() )
 	{
 		UI_SetMenuStatusBar (&s_multiplayer_menu, "No valid player models found");
 		return;
