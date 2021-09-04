@@ -210,7 +210,7 @@ UI_AddMenuItem
 */
 void UI_AddMenuItem (menuframework_s *menu, void *item)
 {
-	int			i;
+	int			i, j;
 	menulist_s	*list;
 	menucommon_s *baseItem;
 
@@ -230,8 +230,16 @@ void UI_AddMenuItem (menuframework_s *menu, void *item)
 
 	switch (list->generic.type) {
 	case MTYPE_SPINCONTROL:
-		for (i=0; list->itemnames[i]; i++);
-		list->numitemnames = i;
+		for (i=0; list->itemNames[i]; i++);
+		list->numItems = i;
+		if (list->itemValues)	// Check if itemvalues count matches itemnames
+		{
+			for (j=0; list->itemValues[j]; j++);
+			if (j != i) {
+				Com_Printf (S_COLOR_YELLOW"UI_AddMenuItem: itemvalues size mismatch for %s!\n",
+							(list->generic.name && (list->generic.name[0] != 0)) ? list->generic.name : "<noname>");
+			}
+		}
 		break;
 	}
 
@@ -383,10 +391,13 @@ void UI_DrawMenu (menuframework_s *menu)
 
 		cursor = ((int)(Sys_Milliseconds()/250)&1) ? UI_ITEMCURSOR_DEFAULT_PIC : UI_ITEMCURSOR_BLINK_PIC;
 
-		if (item->flags & QMF_LEFT_JUSTIFY)
-			cursorX = menu->x + item->x + item->cursor_offset - 24;
-		else
-			cursorX = menu->x + item->cursor_offset;
+	//	if (item->flags & QMF_LEFT_JUSTIFY)
+	//		cursorX = menu->x + item->x + item->cursor_offset - 24;
+	//	else
+	//		cursorX = menu->x + item->cursor_offset;
+		cursorX = menu->x + item->x + item->cursor_offset;
+		if ( (item->flags & QMF_LEFT_JUSTIFY) && (item->type == MTYPE_ACTION) )
+			cursorX -= 4*MENU_FONT_SIZE;
 
 		UI_DrawPic (cursorX, menu->y+item->y, item->textSize, item->textSize, ALIGN_CENTER, false, cursor, 255);
 

@@ -1841,8 +1841,7 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 	if ( IsThirdPerson() )
 		return;
 	// allow the gun to be completely removed
-//	if (!cl_gun->value)
-	if (!cl_gun->integer)
+	if ( !cl_gun->integer || cl_zoommode->integer )
 		return;
 
 	// don't draw gun if in wide angle view

@@ -412,10 +412,13 @@ extern	cvar_t	*cl_particle_scale;
 // whether to adjust fov for wide aspect rattio
 extern	cvar_t	*cl_widescreen_fov;
 
-extern	cvar_t	*scr_conalpha;		// Psychospaz's transparent console
-extern	cvar_t	*scr_newconback;	// whether to use new console background
-extern	cvar_t	*scr_oldconbar;		// whether to draw bottom bar on old console
-//extern	cvar_t	*scr_conheight; // how far the console drops down
+// hook to simplify Lazarus zoom feature
+extern	cvar_t	*cl_zoommode;
+
+extern	cvar_t	*scr_conalpha;			// Psychospaz's transparent console
+extern	cvar_t	*scr_newconback;		// whether to use new console background
+extern	cvar_t	*scr_oldconbar;			// whether to draw bottom bar on old console
+//extern	cvar_t	*scr_conheight;		// how far the console drops down
 
 // Psychospaz's chasecam
 extern	cvar_t	*cg_thirdperson;

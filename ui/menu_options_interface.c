@@ -60,140 +60,91 @@ cvar_t *scr_font;
 
 static void MouseMenuFunc (void *unused)
 {
-	Cvar_SetValue( "ui_sensitivity", UI_MenuSlider_GetValue(&s_options_interface_menumouse_slider) );
+	UI_MenuSlider_SaveValue (&s_options_interface_menumouse_slider, "ui_sensitivity");
 }
 
 // menu alpha option
 static void MenuAlphaFunc (void *unused)
 {
-	Cvar_SetValue( "ui_background_alpha", UI_MenuSlider_GetValue(&s_options_interface_menualpha_slider) );
+	UI_MenuSlider_SaveValue (&s_options_interface_menualpha_slider, "ui_background_alpha");
+}
+
+static void ConFontFunc (void *unused)
+{
+	UI_MenuSpinControl_SaveValue (&s_options_interface_confont_box, "con_font");
+}
+
+static void FontSizeFunc (void *unused)
+{
+	UI_MenuSlider_SaveValue (&s_options_interface_fontsize_slider, "con_font_size");
+}
+
+static void UIFontFunc (void *unused)
+{
+	UI_MenuSpinControl_SaveValue (&s_options_interface_uifont_box, "ui_font");
+}
+
+static void ScrFontFunc (void *unused)
+{
+	UI_MenuSpinControl_SaveValue (&s_options_interface_scrfont_box, "scr_font");
 }
 
 static void AltTextColorFunc (void *unused)
 {
-	Cvar_SetValue( "alt_text_color", s_options_interface_alt_text_color_box.curvalue);
+	UI_MenuSpinControl_SaveValue (&s_options_interface_alt_text_color_box, "alt_text_color");
 }
 
 // Psychospaz's transparent console
 static void ConAlphaFunc (void *unused)
 {
-	Cvar_SetValue( "scr_conalpha", UI_MenuSlider_GetValue(&s_options_interface_conalpha_slider) );
+	UI_MenuSlider_SaveValue (&s_options_interface_conalpha_slider, "scr_conalpha");
 }
 
+#if 0
 // variable console height
-/*static void ConHeightFunc (void *unused)
+static void ConHeightFunc (void *unused)
 {
-	Cvar_SetValue( "scr_conheight", UI_MenuSlider_GetValue(&s_options_interface_conheight_slider) );
-}*/
+	UI_MenuSlider_SaveValue (&s_options_interface_conheight_slider, "scr_conheight");
+}
+#endif
 
 static void SimpleLoadscreenFunc (void *unused)
 {
-	Cvar_SetValue( "scr_simple_loadscreen", s_options_interface_simple_loadscreen_box.curvalue );
+	UI_MenuSpinControl_SaveValue (&s_options_interface_simple_loadscreen_box, "scr_simple_loadscreen");
 }
 
 static void NewConbackFunc (void *unused)
 {
-	Cvar_SetValue( "scr_newconback", s_options_interface_newconback_box.curvalue );
+	UI_MenuSpinControl_SaveValue (&s_options_interface_newconback_box, "scr_newconback");
 }
 
 static void NoAltTabFunc (void *unused)
 {
-	Cvar_SetValue( "win_noalttab", s_options_interface_noalttab_box.curvalue );
-}
-
-static void FontSizeFunc (void *unused)
-{
-	Cvar_SetValue( "con_font_size", UI_MenuSlider_GetValue(&s_options_interface_fontsize_slider) );
-}
-
-static void ConFontFunc (void *unused)
-{
-	Cvar_Set( "con_font", ui_font_names[s_options_interface_confont_box.curvalue] );
-}
-
-static void UIFontFunc (void *unused)
-{
-	Cvar_Set( "ui_font", ui_font_names[s_options_interface_uifont_box.curvalue] );
-}
-
-static void ScrFontFunc (void *unused)
-{
-	Cvar_Set( "scr_font", ui_font_names[s_options_interface_scrfont_box.curvalue] );
-}
-
-void SetFontCursor (void)
-{
-	int i;
-
-	s_options_interface_confont_box.curvalue = 0;
-	s_options_interface_uifont_box.curvalue = 0;
-	s_options_interface_scrfont_box.curvalue = 0;
-
-	if (!con_font)
-		con_font = Cvar_Get ("con_font", "default", CVAR_ARCHIVE);
-	if (!ui_font)
-		ui_font = Cvar_Get ("ui_font", "default", CVAR_ARCHIVE);
-	if (!scr_font)
-		scr_font = Cvar_Get ("scr_font", "default", CVAR_ARCHIVE);
-
-	if (ui_numfonts > 1)
-	{
-		for (i=0; ui_font_names[i]; i++)
-		{
-			if (!Q_strcasecmp(con_font->string, ui_font_names[i]))
-			{
-				s_options_interface_confont_box.curvalue = i;
-				break;
-			}
-		}
-		for (i=0; ui_font_names[i]; i++)
-		{
-			if (!Q_strcasecmp(ui_font->string, ui_font_names[i]))
-			{
-				s_options_interface_uifont_box.curvalue = i;
-				break;
-			}
-		}
-		for (i=0; ui_font_names[i]; i++)
-		{
-			if (!Q_strcasecmp(scr_font->string, ui_font_names[i]))
-			{
-				s_options_interface_scrfont_box.curvalue = i;
-				break;
-			}
-		}
-	}
+	UI_MenuSpinControl_SaveValue (&s_options_interface_noalttab_box, "win_noalttab");
 }
 
 //=======================================================================
 
-static void InterfaceSetMenuItemValues (void)
+static void M_InterfaceSetMenuItemValues (void)
 {
-	SetFontCursor ();
+	UI_MenuSlider_SetValue (&s_options_interface_menumouse_slider, "ui_sensitivity", 0.25f, 2.0f, true);
+	UI_MenuSlider_SetValue (&s_options_interface_menualpha_slider, "ui_background_alpha", 0.0f, 1.0f, true );
 
-	UI_MenuSlider_SetValue (&s_options_interface_menumouse_slider, Cvar_VariableValue("ui_sensitivity"));
-	UI_MenuSlider_SetValue (&s_options_interface_menualpha_slider, Cvar_VariableValue("ui_background_alpha"));
-	UI_MenuSlider_SetValue (&s_options_interface_fontsize_slider, Cvar_VariableValue("con_font_size"));
+	UI_MenuSpinControl_SetValue (&s_options_interface_confont_box, "con_font", 0, 0, false);
+	UI_MenuSlider_SetValue (&s_options_interface_fontsize_slider, "con_font_size", 6.0f, 16.0f, true);
+	UI_MenuSpinControl_SetValue (&s_options_interface_uifont_box, "ui_font", 0, 0, false);
+	UI_MenuSpinControl_SetValue (&s_options_interface_scrfont_box, "scr_font", 0, 0, false);
+	UI_MenuSpinControl_SetValue (&s_options_interface_alt_text_color_box, "alt_text_color", 0, 9, true);
 
-	Cvar_SetValue( "alt_text_color", ClampCvar( 0, 9, Cvar_VariableValue("alt_text_color") ) );
-	s_options_interface_alt_text_color_box.curvalue	= Cvar_VariableValue("alt_text_color");
+	UI_MenuSlider_SetValue (&s_options_interface_conalpha_slider, "scr_conalpha", 0.0f, 1.0f, true);
+//	UI_MenuSlider_SetValue (&s_options_interface_conheight_slider, "scr_conheight", 0.10f, 1.0f, true);
+	UI_MenuSpinControl_SetValue (&s_options_interface_simple_loadscreen_box, "scr_simple_loadscreen", 0, 1, true);
+	UI_MenuSpinControl_SetValue (&s_options_interface_newconback_box, "scr_newconback", 0, 1, true);
 
-	Cvar_SetValue( "scr_conalpha", ClampCvar( 0, 1, Cvar_VariableValue("scr_conalpha") ) );
-	UI_MenuSlider_SetValue (&s_options_interface_conalpha_slider, Cvar_VariableValue("scr_conalpha"));
-
-//	Cvar_SetValue( "scr_conheight", ClampCvar( 0.25, 0.75, Cvar_VariableValue("scr_conheight") ) );
-//	UI_MenuSlider_SetValue (&s_options_interface_conheight_slider, Cvar_VariableValue("scr_conheight"));
-
-	Cvar_SetValue( "scr_simple_loadscreen", ClampCvar( 0, 1, Cvar_VariableValue("scr_simple_loadscreen") ) );
-	s_options_interface_simple_loadscreen_box.curvalue = Cvar_VariableValue("scr_simple_loadscreen");
-
-	Cvar_SetValue( "scr_newconback", ClampCvar( 0, 1, Cvar_VariableValue("scr_newconback") ) );
-	s_options_interface_newconback_box.curvalue = Cvar_VariableValue("scr_newconback");
-
-	s_options_interface_noalttab_box.curvalue			= Cvar_VariableValue("win_noalttab");
+	UI_MenuSpinControl_SetValue (&s_options_interface_noalttab_box, "win_noalttab", 0, 1, true);
 }
 
-static void InterfaceResetDefaultsFunc (void *unused)
+static void M_InterfaceResetDefaultsFunc (void *unused)
 {
 	Cvar_SetToDefault ("ui_sensitivity");	
 	Cvar_SetToDefault ("ui_background_alpha");	
@@ -208,7 +159,7 @@ static void InterfaceResetDefaultsFunc (void *unused)
 	Cvar_SetToDefault ("scr_newconback");
 	Cvar_SetToDefault ("win_noalttab");	
 
-	InterfaceSetMenuItemValues ();
+	M_InterfaceSetMenuItemValues ();
 }
 
 void Options_Interface_MenuInit (void)
@@ -219,7 +170,6 @@ void Options_Interface_MenuInit (void)
 		"yes",
 		0
 	};
-
 	static const char *textcolor_names[] =
 	{
 		"gray",
@@ -234,7 +184,6 @@ void Options_Interface_MenuInit (void)
 		"orange",
 		0
 	};
-
 	int y = 3*MENU_LINE_SIZE;
 
 	s_options_interface_menu.x = SCREEN_WIDTH*0.5;
@@ -278,7 +227,8 @@ void Options_Interface_MenuInit (void)
 	s_options_interface_confont_box.generic.y				= y+=2*MENU_LINE_SIZE;
 	s_options_interface_confont_box.generic.name			= "console font";
 	s_options_interface_confont_box.generic.callback		= ConFontFunc;
-	s_options_interface_confont_box.itemnames				= ui_font_names;
+	s_options_interface_confont_box.itemNames				= ui_font_names;
+	s_options_interface_confont_box.itemValues				= ui_font_names;
 	s_options_interface_confont_box.generic.statusbar		= "changes font of console text";
 
 	s_options_interface_fontsize_slider.generic.type		= MTYPE_SLIDER;
@@ -299,7 +249,8 @@ void Options_Interface_MenuInit (void)
 	s_options_interface_uifont_box.generic.y				= y+=MENU_LINE_SIZE;
 	s_options_interface_uifont_box.generic.name				= "menu font";
 	s_options_interface_uifont_box.generic.callback			= UIFontFunc;
-	s_options_interface_uifont_box.itemnames				= ui_font_names;
+	s_options_interface_uifont_box.itemNames				= ui_font_names;
+	s_options_interface_uifont_box.itemValues				= ui_font_names;
 	s_options_interface_uifont_box.generic.statusbar		= "changes font of menu text";
 
 	s_options_interface_scrfont_box.generic.type			= MTYPE_SPINCONTROL;
@@ -308,16 +259,17 @@ void Options_Interface_MenuInit (void)
 	s_options_interface_scrfont_box.generic.y				= y+=MENU_LINE_SIZE;
 	s_options_interface_scrfont_box.generic.name			= "HUD font";
 	s_options_interface_scrfont_box.generic.callback		= ScrFontFunc;
-	s_options_interface_scrfont_box.itemnames				= ui_font_names;
+	s_options_interface_scrfont_box.itemNames				= ui_font_names;
+	s_options_interface_scrfont_box.itemValues				= ui_font_names;
 	s_options_interface_scrfont_box.generic.statusbar		= "changes font of HUD text";
 
-	s_options_interface_alt_text_color_box.generic.type		= MTYPE_SPINCONTROL;
-	s_options_interface_alt_text_color_box.generic.textSize	= MENU_FONT_SIZE;
-	s_options_interface_alt_text_color_box.generic.x		= 0;
-	s_options_interface_alt_text_color_box.generic.y		= y+=MENU_LINE_SIZE;
-	s_options_interface_alt_text_color_box.generic.name		= "alt text color";
-	s_options_interface_alt_text_color_box.generic.callback	= AltTextColorFunc;
-	s_options_interface_alt_text_color_box.itemnames		= textcolor_names;
+	s_options_interface_alt_text_color_box.generic.type			= MTYPE_SPINCONTROL;
+	s_options_interface_alt_text_color_box.generic.textSize		= MENU_FONT_SIZE;
+	s_options_interface_alt_text_color_box.generic.x			= 0;
+	s_options_interface_alt_text_color_box.generic.y			= y+=MENU_LINE_SIZE;
+	s_options_interface_alt_text_color_box.generic.name			= "alt text color";
+	s_options_interface_alt_text_color_box.generic.callback		= AltTextColorFunc;
+	s_options_interface_alt_text_color_box.itemNames			= textcolor_names;
 	s_options_interface_alt_text_color_box.generic.statusbar	= "changes color of highlighted text";
 
 	s_options_interface_conalpha_slider.generic.type		= MTYPE_SLIDER;
@@ -352,7 +304,7 @@ void Options_Interface_MenuInit (void)
 	s_options_interface_simple_loadscreen_box.generic.y			= y+=2*MENU_LINE_SIZE;
 	s_options_interface_simple_loadscreen_box.generic.name		= "simple load screens";
 	s_options_interface_simple_loadscreen_box.generic.callback	= SimpleLoadscreenFunc;
-	s_options_interface_simple_loadscreen_box.itemnames			= yesno_names;
+	s_options_interface_simple_loadscreen_box.itemNames			= yesno_names;
 	s_options_interface_simple_loadscreen_box.generic.statusbar	= "toggles simple map load screen";
 
 	s_options_interface_newconback_box.generic.type			= MTYPE_SPINCONTROL;
@@ -361,7 +313,7 @@ void Options_Interface_MenuInit (void)
 	s_options_interface_newconback_box.generic.y			= y+=MENU_LINE_SIZE;
 	s_options_interface_newconback_box.generic.name			= "new console background";
 	s_options_interface_newconback_box.generic.callback		= NewConbackFunc;
-	s_options_interface_newconback_box.itemnames			= yesno_names;
+	s_options_interface_newconback_box.itemNames			= yesno_names;
 	s_options_interface_newconback_box.generic.statusbar	= "enables Q3-style console background";
 
 	s_options_interface_noalttab_box.generic.type		= MTYPE_SPINCONTROL;
@@ -370,7 +322,7 @@ void Options_Interface_MenuInit (void)
 	s_options_interface_noalttab_box.generic.y			= y+=2*MENU_LINE_SIZE;
 	s_options_interface_noalttab_box.generic.name		= "disable alt-tab";
 	s_options_interface_noalttab_box.generic.callback	= NoAltTabFunc;
-	s_options_interface_noalttab_box.itemnames			= yesno_names;
+	s_options_interface_noalttab_box.itemNames			= yesno_names;
 	s_options_interface_noalttab_box.generic.statusbar	= "disables alt-tabbing to desktop";
 
 	s_options_interface_defaults_action.generic.type		= MTYPE_ACTION;
@@ -378,7 +330,7 @@ void Options_Interface_MenuInit (void)
 	s_options_interface_defaults_action.generic.x			= MENU_FONT_SIZE;
 	s_options_interface_defaults_action.generic.y			= 18*MENU_LINE_SIZE;
 	s_options_interface_defaults_action.generic.name		= "reset defaults";
-	s_options_interface_defaults_action.generic.callback	= InterfaceResetDefaultsFunc;
+	s_options_interface_defaults_action.generic.callback	= M_InterfaceResetDefaultsFunc;
 	s_options_interface_defaults_action.generic.statusbar	= "resets all interface settings to internal defaults";
 
 	s_options_interface_back_action.generic.type		= MTYPE_ACTION;
@@ -404,7 +356,7 @@ void Options_Interface_MenuInit (void)
 	UI_AddMenuItem (&s_options_interface_menu, (void *) &s_options_interface_defaults_action);
 	UI_AddMenuItem (&s_options_interface_menu, (void *) &s_options_interface_back_action);
 
-	InterfaceSetMenuItemValues ();
+	M_InterfaceSetMenuItemValues ();
 }
 
 void Menu_Options_Interface_Draw (void)

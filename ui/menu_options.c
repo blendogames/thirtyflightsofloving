@@ -45,27 +45,27 @@ static menuaction_s		s_options_effects_section;
 static menuaction_s		s_options_interface_section;
 static menuaction_s		s_options_back_action;
 
-static void MenuSoundFunc (void *unused)
+static void M_MenuSoundFunc (void *unused)
 {
 	Menu_Options_Sound_f ();
 }
 
-static void MenuControlsFunc (void *unused)
+static void M_MenuControlsFunc (void *unused)
 {
 	Menu_Options_Controls_f ();
 }
 
-static void MenuScreenFunc (void *unused)
+static void M_MenuScreenFunc (void *unused)
 {
 	Menu_Options_Screen_f ();
 }
 
-static void MenuEffectsFunc (void *unused)
+static void M_MenuEffectsFunc (void *unused)
 {
 	Menu_Options_Effects_f ();
 }
 
-static void MenuInterfaceFunc (void *unused)
+static void M_MenuInterfaceFunc (void *unused)
 {
 	Menu_Options_Interface_f ();
 }
@@ -74,68 +74,64 @@ static void MenuInterfaceFunc (void *unused)
 
 void Menu_Options_Init (void)
 {
-	s_options_menu.x = SCREEN_WIDTH*0.5 - 24;
-	s_options_menu.y = SCREEN_HEIGHT*0.5 - 58;
+	int		x = 0, y = 0;
+
+	s_options_menu.x = SCREEN_WIDTH*0.5 - 3*MENU_FONT_SIZE;
+	s_options_menu.y = SCREEN_HEIGHT*0.5 - 5*MENU_LINE_SIZE;
 	s_options_menu.nitems = 0;
 
 	s_options_sound_section.generic.type		= MTYPE_ACTION;
-	s_options_sound_section.generic.textSize	= MENU_FONT_SIZE;
+	s_options_sound_section.generic.textSize	= MENU_HEADER_FONT_SIZE;
 	s_options_sound_section.generic.flags		= QMF_LEFT_JUSTIFY;
-	s_options_sound_section.generic.name		= " sound";
-	s_options_sound_section.generic.x			= 0;
-	s_options_sound_section.generic.y			= MENU_FONT_SIZE * 2;
-	s_options_sound_section.generic.callback	= MenuSoundFunc;
-	s_options_sound_section.generic.statusbar		= "change sound settings";
-//	s_options_sound_section.generic.cursor_offset = -(MENU_FONT_SIZE*10);
+	s_options_sound_section.generic.name		= "Sound";
+	s_options_sound_section.generic.x			= x;
+	s_options_sound_section.generic.y			= y;	// MENU_FONT_SIZE * 2
+	s_options_sound_section.generic.callback	= M_MenuSoundFunc;
+	s_options_sound_section.generic.statusbar	= "change sound settings";
 	
-	s_options_controls_section.generic.type		= MTYPE_ACTION;
-	s_options_controls_section.generic.textSize	= MENU_FONT_SIZE;
-	s_options_controls_section.generic.flags	= QMF_LEFT_JUSTIFY;
-	s_options_controls_section.generic.name		= " controls";
-	s_options_controls_section.generic.x		= 0;
-	s_options_controls_section.generic.y		= MENU_FONT_SIZE * 4;
-	s_options_controls_section.generic.callback = MenuControlsFunc;
+	s_options_controls_section.generic.type			= MTYPE_ACTION;
+	s_options_controls_section.generic.textSize		= MENU_HEADER_FONT_SIZE;
+	s_options_controls_section.generic.flags		= QMF_LEFT_JUSTIFY;
+	s_options_controls_section.generic.name			= "Controls";
+	s_options_controls_section.generic.x			= x;
+	s_options_controls_section.generic.y			= y += 2*MENU_LINE_SIZE;	// MENU_FONT_SIZE * 4
+	s_options_controls_section.generic.callback		= M_MenuControlsFunc;
 	s_options_controls_section.generic.statusbar	= "change control settings and bind keys";
-//	s_options_controls_section.generic.cursor_offset = -(MENU_FONT_SIZE*10);
 	
 	s_options_screen_section.generic.type		= MTYPE_ACTION;
-	s_options_screen_section.generic.textSize	= MENU_FONT_SIZE;
+	s_options_screen_section.generic.textSize	= MENU_HEADER_FONT_SIZE;
 	s_options_screen_section.generic.flags		= QMF_LEFT_JUSTIFY;
-	s_options_screen_section.generic.name		= " screen";
-	s_options_screen_section.generic.x			= 0;
-	s_options_screen_section.generic.y			= MENU_FONT_SIZE * 6;
-	s_options_screen_section.generic.callback	= MenuScreenFunc;
-	s_options_screen_section.generic.statusbar		= "change HUD/crosshair settings";
-//	s_options_screen_section.generic.cursor_offset = -(MENU_FONT_SIZE*10);
+	s_options_screen_section.generic.name		= "Screen";
+	s_options_screen_section.generic.x			= x;
+	s_options_screen_section.generic.y			= y += 2*MENU_LINE_SIZE;	// MENU_FONT_SIZE * 6s
+	s_options_screen_section.generic.callback	= M_MenuScreenFunc;
+	s_options_screen_section.generic.statusbar	= "change HUD/crosshair settings";
 
 	s_options_effects_section.generic.type		= MTYPE_ACTION;
-	s_options_effects_section.generic.textSize	= MENU_FONT_SIZE;
+	s_options_effects_section.generic.textSize	= MENU_HEADER_FONT_SIZE;
 	s_options_effects_section.generic.flags		= QMF_LEFT_JUSTIFY;
-	s_options_effects_section.generic.name		= " effects";
-	s_options_effects_section.generic.x			= 0;
-	s_options_effects_section.generic.y			= MENU_FONT_SIZE * 8;
-	s_options_effects_section.generic.callback	= MenuEffectsFunc;
-	s_options_effects_section.generic.statusbar		= "change ingame effects settings";
-//	s_options_effects_section.generic.cursor_offset = -(MENU_FONT_SIZE*10);
+	s_options_effects_section.generic.name		= "Effects";
+	s_options_effects_section.generic.x			= x;
+	s_options_effects_section.generic.y			= y += 2*MENU_LINE_SIZE;	// MENU_FONT_SIZE * 8
+	s_options_effects_section.generic.callback	= M_MenuEffectsFunc;
+	s_options_effects_section.generic.statusbar	= "change ingame effects settings";
 
 	s_options_interface_section.generic.type		= MTYPE_ACTION;
-	s_options_interface_section.generic.textSize	= MENU_FONT_SIZE;
+	s_options_interface_section.generic.textSize	= MENU_HEADER_FONT_SIZE;
 	s_options_interface_section.generic.flags		= QMF_LEFT_JUSTIFY;
-	s_options_interface_section.generic.name		= " interface";
-	s_options_interface_section.generic.x			= 0;
-	s_options_interface_section.generic.y			= MENU_FONT_SIZE * 10;
-	s_options_interface_section.generic.callback	= MenuInterfaceFunc;
+	s_options_interface_section.generic.name		= "Interface";
+	s_options_interface_section.generic.x			= x;
+	s_options_interface_section.generic.y			= y += 2*MENU_LINE_SIZE;	// MENU_FONT_SIZE * 10
+	s_options_interface_section.generic.callback	= M_MenuInterfaceFunc;
 	s_options_interface_section.generic.statusbar	= "change menu/console settings";
-//	s_options_interface_section.generic.cursor_offset = -(MENU_FONT_SIZE*10);
 
 	s_options_back_action.generic.type		= MTYPE_ACTION;
-	s_options_back_action.generic.textSize	= MENU_FONT_SIZE;
+	s_options_back_action.generic.textSize	= MENU_HEADER_FONT_SIZE;
 	s_options_back_action.generic.flags		= QMF_LEFT_JUSTIFY;
-	s_options_back_action.generic.name		= " back to main";
-	s_options_back_action.generic.x			= 0;
-	s_options_back_action.generic.y			= MENU_FONT_SIZE * 13;
+	s_options_back_action.generic.name		= "Back to Main";
+	s_options_back_action.generic.x			= x;
+	s_options_back_action.generic.y			= y += 3*MENU_HEADER_LINE_SIZE;	// MENU_FONT_SIZE * 13
 	s_options_back_action.generic.callback	= UI_BackMenu;
-//	s_options_back_action.generic.cursor_offset = -(MENU_FONT_SIZE*10);
 
 	UI_AddMenuItem (&s_options_menu,	(void *) &s_options_sound_section);
 	UI_AddMenuItem (&s_options_menu,	(void *) &s_options_controls_section);

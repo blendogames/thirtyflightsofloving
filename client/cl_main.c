@@ -80,6 +80,9 @@ cvar_t	*cl_particle_scale;
 // whether to adjust fov for wide aspect rattio
 cvar_t	*cl_widescreen_fov;
 
+// hook to simplify Lazarus zoom feature
+cvar_t	*cl_zoommode;
+
 // Psychospaz's chasecam
 cvar_t	*cg_thirdperson;
 cvar_t	*cg_thirdperson_angle;
@@ -2005,6 +2008,10 @@ void CL_InitLocal (void)
 	// whether to adjust fov for wide aspect rattio
 	cl_widescreen_fov = Cvar_Get ("cl_widescreen_fov", "1", CVAR_ARCHIVE);
 	Cvar_SetDescription ("cl_widescreen_fov", "Enables automatic scaling of FOV for widescreen video modes.");
+
+	// hook to simplify Lazarus zoom feature
+	cl_zoommode = Cvar_Get ("cl_zoommode", "0", 0);
+	Cvar_SetDescription ("cl_zoommode", "Disables gun model and crosshair for Lazarus zoom feature.");
 
 	cl_noskins = Cvar_Get ("cl_noskins", "0", 0);
 	Cvar_SetDescription ("cl_noskins", "Forces all skins to male/grunt when enabled.");

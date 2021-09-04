@@ -1769,10 +1769,9 @@ Moved from cl_view.c, what the hell was it doing there?
 // Psychospaz's new crosshair code
 void SCR_DrawCrosshair (void)
 {	
-	float	/*scale,*/ scaledSize, alpha, pulsealpha;
+	float	scaledSize, alpha, pulsealpha;
 
-//	if (!crosshair->value || scr_hidehud)
-	if (!crosshair->integer || scr_hidehud)
+	if ( !crosshair->integer || cl_zoommode->integer || scr_hidehud )
 		return;
 
 	if (crosshair->modified)
@@ -1780,13 +1779,13 @@ void SCR_DrawCrosshair (void)
 		crosshair->modified = false;
 		SCR_TouchPics ();
 
-		if ( FS_ModType("dday") ) //dday has no crosshair (FORCED)
+		if ( FS_ModType("dday") ) // D-Day has no crosshair (FORCED)
 			Cvar_SetValue("crosshair", 0);
 	}
 
 	if (crosshair_scale->modified)
 	{
-		crosshair_scale->modified=false;
+		crosshair_scale->modified = false;
 		if (crosshair_scale->value > 15)
 			Cvar_SetValue("crosshair_scale", 15);
 		else if (crosshair_scale->value < 0.25)
@@ -1796,15 +1795,9 @@ void SCR_DrawCrosshair (void)
 	if (!crosshair_pic[0])
 		return;
 
-	//scale = crosshair_scale->value * (viddef.width*DIV640);
-	//alpha = 0.75 + 0.25*sin(anglemod(cl.time*0.005));
 	scaledSize = crosshair_scale->value * CROSSHAIR_SIZE;
 	pulsealpha = crosshair_alpha->value * crosshair_pulse->value;
 	alpha = max(min(crosshair_alpha->value - pulsealpha + pulsealpha*sin(anglemod(cl.time*0.005)), 1.0), 0.0);
-
-//	R_DrawScaledPic (scr_vrect.x + (int)(((float)scr_vrect.width - scale*(float)crosshair_width)*0.5), // x
-//					scr_vrect.y + (int)(((float)scr_vrect.height - scale*(float)crosshair_height)*0.5),	// y
-//					scale, alpha, crosshair_pic);
 	SCR_DrawPic ( ((float)SCREEN_WIDTH - scaledSize)*0.5, ((float)SCREEN_HEIGHT - scaledSize)*0.5,
 					scaledSize, scaledSize, ALIGN_CENTER, false, crosshair_pic, alpha);
 }

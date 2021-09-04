@@ -66,13 +66,19 @@ extern viddef_t viddef;
 
 void MenuAction_DoEnter (menuaction_s *a)
 {
+	if (!a) return;
+
 	if (a->generic.callback)
 		a->generic.callback(a);
 }
 
 void MenuAction_Draw (menuaction_s *a)
 {
-	int		alpha = UI_MouseOverAlpha(&a->generic);
+	int		alpha;
+
+	if (!a) return;
+
+	alpha = UI_MouseOverAlpha(&a->generic);
 
 	if (a->generic.flags & QMF_LEFT_JUSTIFY)
 	{
@@ -96,8 +102,12 @@ void MenuAction_Draw (menuaction_s *a)
 		a->generic.ownerdraw(a);
 }
 
+//=========================================================
+
 qboolean MenuField_DoEnter (menufield_s *f)
 {
+	if (!f) return false;
+
 	if (f->generic.callback)
 	{
 		f->generic.callback(f);
@@ -108,9 +118,13 @@ qboolean MenuField_DoEnter (menufield_s *f)
 
 void MenuField_Draw (menufield_s *f)
 {
-	int i, alpha = UI_MouseOverAlpha(&f->generic), xtra;
+	int i, alpha, xtra;
 	char tempbuffer[128]="";
 	int offset;
+
+	if (!f) return;
+
+	alpha = UI_MouseOverAlpha(&f->generic);
 
 	if (f->generic.name)
 		UI_DrawStringR2LDark (f->generic.x + f->generic.parent->x + LCOLUMN_OFFSET,
@@ -181,6 +195,8 @@ void MenuField_Draw (menufield_s *f)
 qboolean UI_MenuField_Key (menufield_s *f, int key)
 {
 	extern int keydown[];
+
+	if (!f) return false;
 
 	switch ( key )
 	{
@@ -311,13 +327,17 @@ qboolean UI_MenuField_Key (menufield_s *f, int key)
 	return true;
 }
 
+//=========================================================
+
 void Menulist_DoEnter (menulist_s *l)
 {
 	int start;
 
+	if (!l) return;
+
 	start = l->generic.y / 10 + 1;
 
-	l->curvalue = l->generic.parent->cursor - start;
+	l->curValue = l->generic.parent->cursor - start;
 
 	if (l->generic.callback)
 		l->generic.callback(l);
@@ -326,16 +346,20 @@ void Menulist_DoEnter (menulist_s *l)
 void MenuList_Draw (menulist_s *l)
 {
 	const char **n;
-	int y = 0, alpha = UI_MouseOverAlpha(&l->generic);
-	
+	int y = 0, alpha;
+
+	if (!l) return;
+
+	alpha = UI_MouseOverAlpha(&l->generic);
+
 	UI_DrawStringR2LDark (l->generic.x + l->generic.parent->x + LCOLUMN_OFFSET,	// - 2*MENU_FONT_SIZE,
 						l->generic.y + l->generic.parent->y, l->generic.textSize, l->generic.name, alpha);
 
-	n = l->itemnames;
+	n = l->itemNames;
 
-//	UI_DrawFill (l->generic.parent->x + l->generic.x - 112, l->generic.parent->y + l->generic.y + (l->curvalue+1)*MENU_LINE_SIZE,
+//	UI_DrawFill (l->generic.parent->x + l->generic.x - 112, l->generic.parent->y + l->generic.y + (l->curValue+1)*MENU_LINE_SIZE,
 //				128, MENU_LINE_SIZE, ALIGN_CENTER, false, 16);
-	UI_DrawFill (l->generic.parent->x + l->generic.x - 112, l->generic.parent->y + l->generic.y + (l->curvalue+1)*MENU_LINE_SIZE,
+	UI_DrawFill (l->generic.parent->x + l->generic.x - 112, l->generic.parent->y + l->generic.y + (l->curValue+1)*MENU_LINE_SIZE,
 				128, MENU_LINE_SIZE, ALIGN_CENTER, false, color8red(16), color8green(16), color8blue(16), 255);
 
 	while (*n)
@@ -347,26 +371,49 @@ void MenuList_Draw (menulist_s *l)
 	}
 }
 
+//=========================================================
+
 void MenuSeparator_Draw (menuseparator_s *s)
 {
-	int alpha = UI_MouseOverAlpha(&s->generic);
+	int alpha;
+
+	if (!s) return;
+
+	alpha = UI_MouseOverAlpha(&s->generic);
 
 	if (s->generic.name)
 		UI_DrawStringR2LDark (s->generic.x + s->generic.parent->x,
 								s->generic.y + s->generic.parent->y, s->generic.textSize, s->generic.name, alpha);
 }
 
-void UI_MenuSlider_SetValue (menuslider_s *s, float value)
+//=========================================================
+
+void UI_MenuSlider_SetValue (menuslider_s *s, const char *varName, float cvarMin, float cvarMax, qboolean clamp)
 {
+	if (!s || !varName || varName[0] == '\0')
+		return;
 	if (!s->increment)
 		s->increment = 1.0f;
 
-	s->curPos	= (int)ceil((value - s->baseValue) / s->increment);
+	if (clamp) {
+		UI_ClampCvar (varName, cvarMin, cvarMax);
+	}
+	s->curPos = (int)ceil((Cvar_VariableValue((char *)varName) - s->baseValue) / s->increment);
 	s->curPos = min(max(s->curPos, 0), s->maxPos);
+}
+
+void UI_MenuSlider_SaveValue (menuslider_s *s, const char *varName)
+{
+	if (!s || !varName || varName[0] == '\0')
+		return;
+
+	Cvar_SetValue ((char *)varName, ((float)s->curPos * s->increment) + s->baseValue);
 }
 
 float UI_MenuSlider_GetValue (menuslider_s *s)
 {
+	if (!s) return 0.0f;
+
 	if (!s->increment)
 		s->increment = 1.0f;
 
@@ -375,6 +422,8 @@ float UI_MenuSlider_GetValue (menuslider_s *s)
 
 void MenuSlider_DoSlide (menuslider_s *s, int dir)
 {
+	if (!s) return;
+
 	s->curPos += dir;
 
 	s->curPos = min(max(s->curPos, 0), s->maxPos);
@@ -387,9 +436,13 @@ void MenuSlider_DoSlide (menuslider_s *s, int dir)
 
 void MenuSlider_Draw (menuslider_s *s)
 {
-	int		i, x, y, alpha = UI_MouseOverAlpha(&s->generic);
+	int		i, x, y, alpha;
 	float	tmpValue;
 	char	valueText[8];
+
+	if (!s) return;
+
+	alpha = UI_MouseOverAlpha(&s->generic);
 
 	UI_DrawStringR2LDark (s->generic.x + s->generic.parent->x + LCOLUMN_OFFSET,
 							s->generic.y + s->generic.parent->y, s->generic.textSize, s->generic.name, alpha);
@@ -454,14 +507,93 @@ void MenuSlider_Draw (menuslider_s *s)
 //					s->generic.y + s->generic.parent->y + 1, MENU_FONT_SIZE-2, valueText, alpha);
 }
 
-void MenuSpinControl_DoEnter (menulist_s *s)
+//=========================================================
+
+void UI_MenuSpinControl_SetValue (menulist_s *s, const char *varName, float cvarMin, float cvarMax, qboolean clamp)
 {
-	if (!s->itemnames || !s->numitemnames)
+	if (!s || !varName || varName[0] == '\0')
 		return;
 
-	s->curvalue++;
-	if (s->itemnames[s->curvalue] == 0)
-		s->curvalue = 0;
+	if (clamp) {
+		UI_ClampCvar (varName, cvarMin, cvarMax);
+	}
+	if (s->itemValues) {
+		s->curValue = UI_GetIndexForStringValue(s->itemValues, Cvar_VariableString((char *)varName));
+	}
+	else
+	{
+		if (s->invertValue) {
+			s->curValue = (Cvar_VariableValue((char *)varName) < 0);
+		}
+		else {
+			s->curValue = (int)min(max(Cvar_VariableValue((char *)varName), cvarMin), cvarMax);
+		}
+	}
+}
+
+void UI_MenuSpinControl_SaveValue (menulist_s *s, const char *varName)
+{
+	if (!s || !varName || varName[0] == '\0')
+		return;
+	if (!s->numItems) {
+		Com_Printf (S_COLOR_YELLOW"UI_MenuSpinControl_SaveValue: not initialized!\n");
+		return;
+	}
+	if ( (s->curValue < 0) || (s->curValue >= s->numItems) ) {
+		Com_Printf (S_COLOR_YELLOW"UI_MenuSpinControl_SaveValue: curvalue out of bounds!\n");
+		return;
+	}
+
+	if (s->itemValues) {
+		// Don't save to cvar if this itemvalue is the wildcard
+		if ( Q_stricmp(va("%s", s->itemValues[s->curValue]), UI_ITEMVALUE_WILDCARD) != 0 )
+			Cvar_Set ((char *)varName, va("%s", s->itemValues[s->curValue]));
+	}
+	else
+	{
+		if (s->invertValue) {
+			Cvar_SetValue ((char *)varName, Cvar_VariableValue((char *)varName) * -1 );
+		}
+		else {
+			Cvar_SetInteger ((char *)varName, s->curValue);
+		}
+	}
+}
+
+const char *UI_MenuSpinControl_GetValue (menulist_s *s)
+{
+	const char *value;
+
+	if (!s)
+		return NULL;
+
+	if (!s->numItems) {
+		Com_Printf (S_COLOR_YELLOW"UI_MenuSpinControl_GetValue: not initialized!\n");
+		return NULL;
+	}
+	if ( (s->curValue < 0) || (s->curValue >= s->numItems) ) {
+		Com_Printf (S_COLOR_YELLOW"UI_MenuSpinControl_GetValue: curvalue out of bounds!\n");
+		return NULL;
+	}
+
+	if (s->itemValues) {
+		value = s->itemValues[s->curValue];
+	}
+	else {
+		value = va("%d", s->curValue);
+	}
+
+	return value;
+}
+
+void MenuSpinControl_DoEnter (menulist_s *s)
+{
+	if (!s || !s->itemNames || !s->numItems)
+		return;
+
+	s->curValue++;
+	if (s->itemNames[s->curValue] == 0)
+		s->curValue = 0;
 
 	if (s->generic.callback)
 		s->generic.callback(s);
@@ -469,23 +601,23 @@ void MenuSpinControl_DoEnter (menulist_s *s)
 
 void MenuSpinControl_DoSlide (menulist_s *s, int dir)
 {
-	if (!s->itemnames || !s->numitemnames)
+	if (!s || !s->itemNames || !s->numItems)
 		return;
 
-	s->curvalue += dir;
+	s->curValue += dir;
 
 	if (s->generic.flags & QMF_SKINLIST) // don't allow looping around for skin lists
 	{
-		if (s->curvalue < 0)
-			s->curvalue = 0;
-		else if (s->itemnames[s->curvalue] == 0)
-			s->curvalue--;
+		if (s->curValue < 0)
+			s->curValue = 0;
+		else if (s->itemNames[s->curValue] == 0)
+			s->curValue--;
 	}
 	else {
-		if (s->curvalue < 0)
-			s->curvalue = s->numitemnames-1; // was 0
-		else if (s->itemnames[s->curvalue] == 0)
-			s->curvalue = 0; // was --
+		if (s->curValue < 0)
+			s->curValue = s->numItems-1; // was 0
+		else if (s->itemNames[s->curValue] == 0)
+			s->curValue = 0; // was --
 	}
 
 	if (s->generic.callback)
@@ -494,32 +626,39 @@ void MenuSpinControl_DoSlide (menulist_s *s, int dir)
  
 void MenuSpinControl_Draw (menulist_s *s)
 {
-	int		alpha = UI_MouseOverAlpha(&s->generic);
+	int		alpha;
 	char	buffer[100];
+
+	if (!s)	return;
+
+	alpha = UI_MouseOverAlpha(&s->generic);
 
 	if (s->generic.name)
 	{
 		UI_DrawStringR2LDark (s->generic.x + s->generic.parent->x + LCOLUMN_OFFSET,
 								s->generic.y + s->generic.parent->y, s->generic.textSize, s->generic.name, alpha);
 	}
-	if (!strchr(s->itemnames[s->curvalue], '\n'))
+	if (!strchr(s->itemNames[s->curValue], '\n'))
 	{
 		UI_DrawString (s->generic.x + s->generic.parent->x + RCOLUMN_OFFSET,
-						s->generic.y + s->generic.parent->y, s->generic.textSize, s->itemnames[s->curvalue], alpha);
+						s->generic.y + s->generic.parent->y, s->generic.textSize, s->itemNames[s->curValue], alpha);
 	}
 	else
 	{
 	//	strncpy(buffer, s->itemnames[s->curvalue]);
-		Q_strncpyz (buffer, sizeof(buffer), s->itemnames[s->curvalue]);
+		Q_strncpyz (buffer, sizeof(buffer), s->itemNames[s->curValue]);
 		*strchr(buffer, '\n') = 0;
 		UI_DrawString (s->generic.x + s->generic.parent->x + RCOLUMN_OFFSET,
 						s->generic.y + s->generic.parent->y, s->generic.textSize, buffer, alpha);
 	//	strncpy(buffer, strchr( s->itemnames[s->curvalue], '\n' ) + 1 );
-		Q_strncpyz (buffer, sizeof(buffer), strchr( s->itemnames[s->curvalue], '\n' ) + 1);
+		Q_strncpyz (buffer, sizeof(buffer), strchr( s->itemNames[s->curValue], '\n' ) + 1);
 		UI_DrawString (s->generic.x + s->generic.parent->x + RCOLUMN_OFFSET,
 						s->generic.y + s->generic.parent->y + MENU_LINE_SIZE, s->generic.textSize, buffer, alpha);
 	}
 }
+
+//=========================================================
+
 
 //=========================================================
 
@@ -570,7 +709,11 @@ UI_SelectMenuItem
 */
 qboolean UI_SelectMenuItem (menuframework_s *s)
 {
-	menucommon_s *item = (menucommon_s *)UI_ItemAtMenuCursor(s);
+	menucommon_s *item=NULL;
+
+	if (!s)	return false;
+
+	item = (menucommon_s *)UI_ItemAtMenuCursor(s);
 
 	if (item)
 	{
@@ -602,6 +745,8 @@ UI_MouseSelectItem
 */
 qboolean UI_MouseSelectItem (menucommon_s *item)
 {
+	if (!item)	return false;
+
 	if (item)
 	{
 		switch (item->type)
@@ -629,7 +774,11 @@ UI_SlideMenuItem
 */
 void UI_SlideMenuItem (menuframework_s *s, int dir)
 {
-	menucommon_s *item = (menucommon_s *) UI_ItemAtMenuCursor(s);
+	menucommon_s *item=NULL;
+
+	if (!s)	return;
+
+	item = (menucommon_s *) UI_ItemAtMenuCursor(s);
 
 	if (item)
 	{

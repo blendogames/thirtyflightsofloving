@@ -445,35 +445,37 @@ void InitGame (void)
 	lazarus_cl_gun  = gi.cvar("lazarus_cl_gun",  "0", 0);
 	lazarus_crosshair = gi.cvar("lazarus_crosshair", "0", 0);
 
-	/*if(lazarus_gl_clear->value)
-		gi.cvar_forceset("gl_clear",         va("%d",lazarus_gl_clear->value));
+	/*if (lazarus_gl_clear->value)
+		gi.cvar_forceset("gl_clear",         va("%d", lazarus_gl_clear->value));
 	else
-		gi.cvar_forceset("lazarus_gl_clear", va("%d",gl_clear->value));*/
+		gi.cvar_forceset("lazarus_gl_clear", va("%d", gl_clear->value));*/
 
-	if(!deathmatch->value && !coop->value)
+	if (!deathmatch->value && !coop->value)
 	{
-		/*if(lazarus_pitch->value) {
-			gi.cvar_forceset("cd_loopcount",         va("%d",(int)(lazarus_cd_loop->value)));
-			gi.cvar_forceset("m_pitch",              va("%f",lazarus_pitch->value));
-			gi.cvar_forceset("m_yaw",                va("%f",lazarus_yaw->value));
-			gi.cvar_forceset("cl_gun",               va("%d",(int)(lazarus_cl_gun->value)));
-			gi.cvar_forceset("crosshair",            va("%d",(int)(lazarus_crosshair->value)));
-		} else {*/
-			gi.cvar_forceset("lazarus_cd_loop",        va("%d",(int)(cd_loopcount->value)));
-#ifndef KMQUAKE2_ENGINE_MOD // engine has zoom autosensitivity
-			gi.cvar_forceset("lazarus_pitch",          va("%f",m_pitch->value));
-			gi.cvar_forceset("lazarus_yaw",            va("%f",m_yaw->value));
-			gi.cvar_forceset("lazarus_joyp",           va("%f",joy_pitchsensitivity->value));
-			gi.cvar_forceset("lazarus_joyy",           va("%f",joy_yawsensitivity->value));
+		/*if (lazarus_pitch->value) {
+			gi.cvar_forceset("cd_loopcount",         va("%d", (int)(lazarus_cd_loop->value)));
+			gi.cvar_forceset("m_pitch",              va("%f", lazarus_pitch->value));
+			gi.cvar_forceset("m_yaw",                va("%f", lazarus_yaw->value));
+			gi.cvar_forceset("cl_gun",               va("%d", (int)(lazarus_cl_gun->value)));
+			gi.cvar_forceset("crosshair",            va("%d", (int)(lazarus_crosshair->value)));
+		}
+		else
+		{*/
+			gi.cvar_forceset("lazarus_cd_loop",        va("%d", (int)(cd_loopcount->value)));
+#ifndef KMQUAKE2_ENGINE_MOD // engine has zoom mode and autosensitivity
+			gi.cvar_forceset("lazarus_pitch",          va("%f", m_pitch->value));
+			gi.cvar_forceset("lazarus_yaw",            va("%f", m_yaw->value));
+			gi.cvar_forceset("lazarus_joyp",           va("%f", joy_pitchsensitivity->value));
+			gi.cvar_forceset("lazarus_joyy",           va("%f", joy_yawsensitivity->value));
+			gi.cvar_forceset("lazarus_cl_gun",         va("%d", (int)(cl_gun->value)));
+			gi.cvar_forceset("lazarus_crosshair",      va("%d", (int)(crosshair->value)));
 #endif
-			gi.cvar_forceset("lazarus_cl_gun",         va("%d",(int)(cl_gun->value)));
-			gi.cvar_forceset("lazarus_crosshair",      va("%d",(int)(crosshair->value)));
 		//}
 	}
 
 	tpp = gi.cvar ("tpp", "0", CVAR_ARCHIVE);
 	tpp_auto = gi.cvar ("tpp_auto", "1", 0);
-	crossh = gi.cvar ("crossh", "1", 0);
+//	crossh = gi.cvar ("crossh", "1", 0);
 	allow_download = gi.cvar("allow_download", "0", 0);
 
 	g_showlogic = gi.cvar("g_showlogic", "0", 0); // Knightmare added

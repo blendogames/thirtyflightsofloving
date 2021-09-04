@@ -87,7 +87,7 @@ typedef struct
 	int	minimize, maximize;
 } glmode_t;
 
-glmode_t modes[] = {
+glmode_t gl_modes[] = {
 	{"GL_NEAREST", GL_NEAREST, GL_NEAREST},
 	{"GL_LINEAR", GL_LINEAR, GL_LINEAR},
 	{"GL_NEAREST_MIPMAP_NEAREST", GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST},
@@ -96,7 +96,7 @@ glmode_t modes[] = {
 	{"GL_LINEAR_MIPMAP_LINEAR", GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR}
 };
 
-#define NUM_GL_MODES (sizeof(modes) / sizeof (glmode_t))
+#define NUM_GL_MODES (sizeof(gl_modes) / sizeof (glmode_t))
 
 typedef struct
 {
@@ -167,14 +167,14 @@ void GL_UpdateAnisoMode (void)
 GL_TextureMode
 ===============
 */
-void GL_TextureMode( char *string )
+void GL_TextureMode (char *string)
 {
 	int		i;
 	image_t	*glt;
 
-	for (i=0 ; i< NUM_GL_MODES ; i++)
+	for (i=0; i< NUM_GL_MODES; i++)
 	{
-		if ( !Q_stricmp( modes[i].name, string ) )
+		if ( !Q_stricmp(gl_modes[i].name, string) )
 			break;
 	}
 
@@ -184,8 +184,8 @@ void GL_TextureMode( char *string )
 		return;
 	}
 
-	gl_filter_min = modes[i].minimize;
-	gl_filter_max = modes[i].maximize;
+	gl_filter_min = gl_modes[i].minimize;
+	gl_filter_max = gl_modes[i].maximize;
 
 	// clamp selected anisotropy
 	if (glConfig.anisotropic)

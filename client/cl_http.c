@@ -61,7 +61,7 @@ bandwidth.
 
 // Knightmare- store the names of last HTTP downloads from this server that failed
 // This is needed because some player model download failures can cause endless HTTP download loops
-#define NUM_FAIL_DLDS 64
+#define NUM_FAIL_DLDS 256
 char lastFailedHTTPDownload[NUM_FAIL_DLDS][MAX_OSPATH];
 static unsigned failed_HTTP_Dl_ListIndex;
 
@@ -632,8 +632,8 @@ qboolean CL_QueueHTTPDownload (const char *quakePath, qboolean filelistUseGamedi
 	// Knightmare- don't try again to download via HTTP a file that failed
 	if ( !isFilelist /*&& !needList*/ ) {
 		if (CL_CheckHTTPDownloadFailed((char *)quakePath)) {
-			Com_Printf ("[HTTP] Refusing to download %s again, already in failed HTTP download list.\n", quakePath);
-			return false;
+		//	Com_Printf ("[HTTP] Refusing to download %s again, already in failed HTTP download list.\n", quakePath);
+			return true;
 		}
 	}
 

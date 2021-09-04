@@ -2340,8 +2340,10 @@ void R_BeginFrame( float camera_separation )
 	//
 	if ( r_texturemode->modified )
 	{
-		GL_TextureMode( r_texturemode->string );
+		GL_TextureMode (r_texturemode->string);
 		r_texturemode->modified = false;
+		// we've already set anisotropy, so don't bother setting it again this frame
+		r_anisotropic->modified = false;
 	}
 
 	if (r_anisotropic->modified) // added anisotropic filter update

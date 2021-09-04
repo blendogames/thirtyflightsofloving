@@ -775,10 +775,10 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 
 	self->client->pers.spawn_landmark = false; // paranoia check
 	self->client->pers.spawn_levelchange = false;
-	SetLazarusCrosshair(self); //backup crosshair
+	SetLazarusCrosshair (self); // backup crosshair
 	self->client->zooming = 0;
 	self->client->zoomed = false;
-	SetSensitivities(self,true);
+	SetSensitivities (self, true);
 
 	if (self->client->spycam)
 		camera_off(self);
@@ -2155,8 +2155,8 @@ void ClientBegin (edict_t *ent)
 	}
 
 	// DWH
-	SetLazarusCrosshair(ent); //backup crosshair
-	SetSensitivities(ent,true);
+	SetLazarusCrosshair (ent); // backup crosshair
+	SetSensitivities (ent, true);
 
 	if (game.maxclients == 1)
 	{
@@ -2379,10 +2379,10 @@ void ClientDisconnect (edict_t *ent)
 	// end tpp
 
 	// DWH
-	SetLazarusCrosshair(ent); //backup crosshair
+	SetLazarusCrosshair (ent); // backup crosshair
 	ent->client->zooming = 0;
 	ent->client->zoomed = false;
-	SetSensitivities(ent,true);
+	SetSensitivities (ent, true);
 	// end DWH
 
 	if (ent->client->textdisplay)

@@ -49,52 +49,32 @@ static menuaction_s		s_options_sound_defaults_action;
 static menuaction_s		s_options_sound_back_action;
 
 
-static void UpdateVolumeFunc (void *unused)
+static void VolumeFunc (void *unused)
 {
-	Cvar_SetValue( "s_volume", UI_MenuSlider_GetValue(&s_options_sound_sfxvolume_slider) );
+	UI_MenuSlider_SaveValue (&s_options_sound_sfxvolume_slider, "s_volume");
 }
 
-static void UpdateMusicVolumeFunc (void *unused)
+static void MusicVolumeFunc (void *unused)
 {
-	Cvar_SetValue( "s_musicvolume", UI_MenuSlider_GetValue(&s_options_sound_musicvolume_slider) );
+	UI_MenuSlider_SaveValue (&s_options_sound_musicvolume_slider, "s_musicvolume");
 }
 
-static void UpdateOggMusicFunc (void *unused)
+static void OggMusicFunc (void *unused)
 {
-	Cvar_SetValue( "cl_ogg_music", s_options_sound_oggmusic_box.curvalue );
+	UI_MenuSpinControl_SaveValue (&s_options_sound_oggmusic_box, "cl_ogg_music");
 }
 
-static void UpdateCDVolumeFunc (void *unused)
+static void CDVolumeFunc (void *unused)
 {
-	Cvar_SetValue( "cd_nocd", !s_options_sound_cdvolume_box.curvalue );
+	UI_MenuSpinControl_SaveValue (&s_options_sound_cdvolume_box, "cd_nocd");
 }
 
-static void UpdateSoundQualityFunc (void *unused)
+static void M_UpdateSoundQualityFunc (void *unused)
 {
-	// Knightmare- added DMP's 44/48 KHz sound support
-	//** DMP check the newly added sound quality menu options
-	switch (s_options_sound_quality_list.curvalue)
-	{
-	case 1:
-		Cvar_SetValue( "s_khz", 22 );
-		Cvar_SetValue( "s_loadas8bit", false );
-		break;
-	case 2:
-		Cvar_SetValue( "s_khz", 44 );
-		Cvar_SetValue( "s_loadas8bit", false );
-		break;
-	case 3:
-		Cvar_SetValue( "s_khz", 48 );
-		Cvar_SetValue( "s_loadas8bit", false );
-		break;
-	default:
-		Cvar_SetValue( "s_khz", 11 );
-		Cvar_SetValue( "s_loadas8bit", true );
-		break;
-	}
-	//** DMP end sound menu changes
+	UI_MenuSpinControl_SaveValue (&s_options_sound_quality_list, "s_khz");
+	Cvar_SetInteger ("s_loadas8bit", (s_options_sound_quality_list.curValue == 0));
 
-	Cvar_SetValue ("s_primary", s_options_sound_compatibility_list.curvalue);
+	UI_MenuSpinControl_SaveValue (&s_options_sound_compatibility_list, "s_primary");
 
 	UI_DrawTextBox (168, 192, 36, 3);
 	UI_DrawString (188, 192+MENU_FONT_SIZE, MENU_FONT_SIZE, S_COLOR_ALT"Restarting the sound system. This", 255);
@@ -107,26 +87,17 @@ static void UpdateSoundQualityFunc (void *unused)
 	CL_Snd_Restart_f();
 }
 
-static void SoundSetMenuItemValues (void)
+static void M_SoundSetMenuItemValues (void)
 {
-	UI_MenuSlider_SetValue (&s_options_sound_sfxvolume_slider, Cvar_VariableValue("s_volume"));
-	UI_MenuSlider_SetValue (&s_options_sound_musicvolume_slider, Cvar_VariableValue("s_musicvolume"));
-
-	s_options_sound_oggmusic_box.curvalue		= (Cvar_VariableValue("cl_ogg_music") > 0);
-	s_options_sound_cdvolume_box.curvalue 		= !Cvar_VariableValue("cd_nocd");
-	//**  DMP convert setting into index for option display text
-	switch((int)Cvar_VariableValue("s_khz"))
-	{
-	case 48:  s_options_sound_quality_list.curvalue = 3;  break;
-	case 44:  s_options_sound_quality_list.curvalue = 2;  break;
-	case 22:  s_options_sound_quality_list.curvalue = 1;  break;
-	default:  s_options_sound_quality_list.curvalue = 0;  break;
-	}
-	//** DMP end sound menu changes
-	s_options_sound_compatibility_list.curvalue = Cvar_VariableValue( "s_primary");
+	UI_MenuSlider_SetValue (&s_options_sound_sfxvolume_slider, "s_volume", 0.0f, 1.0f, true);
+	UI_MenuSlider_SetValue (&s_options_sound_musicvolume_slider, "s_musicvolume", 0.0f, 1.0f, true);
+	UI_MenuSpinControl_SetValue (&s_options_sound_oggmusic_box, "cl_ogg_music", 0, 1, true);
+	UI_MenuSpinControl_SetValue (&s_options_sound_cdvolume_box, "cd_nocd", 0, 0, false);
+	UI_MenuSpinControl_SetValue (&s_options_sound_quality_list, "s_khz", 0, 0, false);
+	UI_MenuSpinControl_SetValue (&s_options_sound_compatibility_list, "s_primary", 0, 1, true);
 }
 
-static void SoundResetDefaultsFunc (void *unused)
+static void M_SoundResetDefaultsFunc (void *unused)
 {
 	Cvar_SetToDefault ("s_volume");
 	Cvar_SetToDefault ("cd_nocd");
@@ -145,7 +116,7 @@ static void SoundResetDefaultsFunc (void *unused)
 
 	CL_Snd_Restart_f();
 
-	SoundSetMenuItemValues();
+	M_SoundSetMenuItemValues();
 }
 
 void Menu_Options_Sound_Init (void)
@@ -156,7 +127,12 @@ void Menu_Options_Sound_Init (void)
 		"enabled",
 		0
 	};
-
+	static const char *cd_music_values[] =
+	{
+		"1",
+		"0",
+		0
+	};
 	static const char *quality_items[] =
 	{
 		"low (11KHz/8-bit)",			//** DMP - changed text
@@ -165,10 +141,19 @@ void Menu_Options_Sound_Init (void)
 		"highest (48KHz/16-bit)",		//** DMP - added 48 Khz menu item
 		0
 	};
-
+	static const char *quality_values[] =
+	{
+		"11",
+		"22",	
+		"44",
+		"48",
+		0
+	};
 	static const char *compatibility_items[] =
 	{
-		"max compatibility", "max performance", 0
+		"max compatibility",
+		"max performance",
+		0
 	};
 
 	int y = 3*MENU_LINE_SIZE;
@@ -188,73 +173,75 @@ void Menu_Options_Sound_Init (void)
 	s_options_sound_sfxvolume_slider.generic.x			= 0;
 	s_options_sound_sfxvolume_slider.generic.y			= y;
 	s_options_sound_sfxvolume_slider.generic.name		= "effects volume";
-	s_options_sound_sfxvolume_slider.generic.callback	= UpdateVolumeFunc;
+	s_options_sound_sfxvolume_slider.generic.callback	= VolumeFunc;
 	s_options_sound_sfxvolume_slider.maxPos				= 20;
 	s_options_sound_sfxvolume_slider.baseValue			= 0.0f;
 	s_options_sound_sfxvolume_slider.increment			= 0.05f;
 	s_options_sound_sfxvolume_slider.displayAsPercent	= true;
-	UI_MenuSlider_SetValue (&s_options_sound_sfxvolume_slider, Cvar_VariableValue("s_volume"));
 	s_options_sound_sfxvolume_slider.generic.statusbar	= "volume of sound effects";
+	UI_MenuSlider_SetValue (&s_options_sound_sfxvolume_slider, "s_volume", 0.0f, 1.0f, true);
 
 	s_options_sound_musicvolume_slider.generic.type			= MTYPE_SLIDER;
 	s_options_sound_musicvolume_slider.generic.textSize		= MENU_FONT_SIZE;
 	s_options_sound_musicvolume_slider.generic.x			= 0;
 	s_options_sound_musicvolume_slider.generic.y			= y+=MENU_LINE_SIZE;
 	s_options_sound_musicvolume_slider.generic.name			= "music volume";
-	s_options_sound_musicvolume_slider.generic.callback		= UpdateMusicVolumeFunc;
+	s_options_sound_musicvolume_slider.generic.callback		= MusicVolumeFunc;
 	s_options_sound_musicvolume_slider.maxPos				= 20;
 	s_options_sound_musicvolume_slider.baseValue			= 0.0f;
 	s_options_sound_musicvolume_slider.increment			= 0.05f;
 	s_options_sound_musicvolume_slider.displayAsPercent		= true;
-	UI_MenuSlider_SetValue (&s_options_sound_musicvolume_slider, Cvar_VariableValue("s_musicvolume"));
 	s_options_sound_musicvolume_slider.generic.statusbar	= "volume of ogg vorbis music";
+	UI_MenuSlider_SetValue (&s_options_sound_musicvolume_slider, "s_musicvolume", 0.0f, 1.0f, true);
 
 	s_options_sound_oggmusic_box.generic.type		= MTYPE_SPINCONTROL;
 	s_options_sound_oggmusic_box.generic.textSize	= MENU_FONT_SIZE;
 	s_options_sound_oggmusic_box.generic.x			= 0;
 	s_options_sound_oggmusic_box.generic.y			= y+=MENU_LINE_SIZE;
 	s_options_sound_oggmusic_box.generic.name		= "ogg vorbis music";
-	s_options_sound_oggmusic_box.generic.callback	= UpdateOggMusicFunc;
-	s_options_sound_oggmusic_box.itemnames			= cd_music_items;
-	s_options_sound_oggmusic_box.curvalue 			= (Cvar_VariableValue("cl_ogg_music") > 0);
+	s_options_sound_oggmusic_box.generic.callback	= OggMusicFunc;
+	s_options_sound_oggmusic_box.itemNames			= cd_music_items;
 	s_options_sound_oggmusic_box.generic.statusbar	= "override of CD music with ogg vorbis tracks";
+	UI_MenuSpinControl_SetValue (&s_options_sound_oggmusic_box,"cl_ogg_music", 0, 1, true);
 
 	s_options_sound_cdvolume_box.generic.type		= MTYPE_SPINCONTROL;
 	s_options_sound_cdvolume_box.generic.textSize	= MENU_FONT_SIZE;
 	s_options_sound_cdvolume_box.generic.x			= 0;
 	s_options_sound_cdvolume_box.generic.y			= y+=MENU_LINE_SIZE;
 	s_options_sound_cdvolume_box.generic.name		= "CD music";
-	s_options_sound_cdvolume_box.generic.callback	= UpdateCDVolumeFunc;
-	s_options_sound_cdvolume_box.itemnames			= cd_music_items;
-	s_options_sound_cdvolume_box.curvalue 			= !Cvar_VariableValue("cd_nocd");
+	s_options_sound_cdvolume_box.generic.callback	= CDVolumeFunc;
+	s_options_sound_cdvolume_box.itemNames			= cd_music_items;
+	s_options_sound_cdvolume_box.itemValues			= cd_music_values;
 	s_options_sound_cdvolume_box.generic.statusbar	= "enables or disables CD music";
+	UI_MenuSpinControl_SetValue (&s_options_sound_cdvolume_box, "cd_nocd", 0, 0, false);
 
 	s_options_sound_quality_list.generic.type		= MTYPE_SPINCONTROL;
 	s_options_sound_quality_list.generic.textSize	= MENU_FONT_SIZE;
 	s_options_sound_quality_list.generic.x			= 0;
 	s_options_sound_quality_list.generic.y			= y+=MENU_LINE_SIZE;
 	s_options_sound_quality_list.generic.name		= "sound quality";
-	s_options_sound_quality_list.generic.callback	= UpdateSoundQualityFunc;
-	s_options_sound_quality_list.itemnames			= quality_items;
-	s_options_sound_quality_list.curvalue			= !Cvar_VariableValue( "s_loadas8bit" );
+	s_options_sound_quality_list.generic.callback	= M_UpdateSoundQualityFunc;
+	s_options_sound_quality_list.itemNames			= quality_items;
+	s_options_sound_quality_list.itemValues			= quality_values;
 	s_options_sound_quality_list.generic.statusbar	= "changes quality of sound";
+	UI_MenuSpinControl_SetValue (&s_options_sound_quality_list, "s_khz", 0, 0, false);
 
 	s_options_sound_compatibility_list.generic.type			= MTYPE_SPINCONTROL;
 	s_options_sound_compatibility_list.generic.textSize		= MENU_FONT_SIZE;
 	s_options_sound_compatibility_list.generic.x			= 0;
 	s_options_sound_compatibility_list.generic.y			= y+=MENU_LINE_SIZE;
 	s_options_sound_compatibility_list.generic.name			= "sound compatibility";
-	s_options_sound_compatibility_list.generic.callback		= UpdateSoundQualityFunc;
-	s_options_sound_compatibility_list.itemnames			= compatibility_items;
-	s_options_sound_compatibility_list.curvalue				= Cvar_VariableValue( "s_primary" );
+	s_options_sound_compatibility_list.generic.callback		= M_UpdateSoundQualityFunc;
+	s_options_sound_compatibility_list.itemNames			= compatibility_items;
 	s_options_sound_compatibility_list.generic.statusbar	= "changes buffering mode of sound system";
+	UI_MenuSpinControl_SetValue (&s_options_sound_compatibility_list, "s_primary", 0, 1, true);
 
 	s_options_sound_defaults_action.generic.type		= MTYPE_ACTION;
 	s_options_sound_defaults_action.generic.textSize	= MENU_FONT_SIZE;
 	s_options_sound_defaults_action.generic.x			= MENU_FONT_SIZE;
 	s_options_sound_defaults_action.generic.y			= 18*MENU_LINE_SIZE;
 	s_options_sound_defaults_action.generic.name		= "reset defaults";
-	s_options_sound_defaults_action.generic.callback	= SoundResetDefaultsFunc;
+	s_options_sound_defaults_action.generic.callback	= M_SoundResetDefaultsFunc;
 	s_options_sound_defaults_action.generic.statusbar	= "resets all sound settings to internal defaults";
 
 	s_options_sound_back_action.generic.type			= MTYPE_ACTION;
@@ -274,7 +261,7 @@ void Menu_Options_Sound_Init (void)
 	UI_AddMenuItem (&s_options_sound_menu, (void *) &s_options_sound_defaults_action);
 	UI_AddMenuItem (&s_options_sound_menu, (void *) &s_options_sound_back_action);
 
-	SoundSetMenuItemValues();
+	M_SoundSetMenuItemValues ();
 }
 
 void Menu_Options_Sound_Draw (void)

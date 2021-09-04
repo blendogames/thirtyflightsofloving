@@ -31,6 +31,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define MTYPE_SPINCONTROL	3
 #define MTYPE_SEPARATOR  	4
 #define MTYPE_FIELD			5
+#define MTYPE_KEYBIND		6
 
 #define	K_TAB			9
 #define	K_ENTER			13
@@ -131,10 +132,12 @@ typedef struct
 {
 	menucommon_s	generic;
 
-	int			curvalue;
+	qboolean	invertValue;	// Knightmare added
+	int			curValue;
 
-	const char	**itemnames;
-	int			numitemnames;
+	const char	**itemNames;
+	const char	**itemValues;	// Knightmare added
+	int			numItems;
 } menulist_s;
 
 typedef struct
@@ -146,6 +149,16 @@ typedef struct
 {
 	menucommon_s generic;
 } menuseparator_s;
+
+typedef struct
+{
+	menucommon_s	generic;
+
+	char			*commandName;
+	const char		*enter_statusbar;
+	int				keys[2];
+	qboolean		grabBind;
+} menukeybind_s;
 
 typedef enum {
 	LISTBOX_TEXT,
@@ -163,16 +176,16 @@ typedef struct
 	menucommon_s	generic;
 
 	listboxtype_t	type;
-	scrolltype_t	scrolltype;
+	scrolltype_t	scrollType;
 	int			items_x;
 	int			items_y;
 	int			item_width;
 	int			item_height;
-	int			scrollpos;
-	int			curvalue;
+	int			scrollPos;
+	int			curValue;
 
-	const char	**itemnames;
-	int			numitemnames;
+	const char	**itemNames;
+	int			numItems;
 } menulistbox_s;
 
 typedef struct
@@ -232,7 +245,7 @@ extern char	**ui_resolution_names;
 extern char	**ui_video_modes;
 
 extern char	**ui_aniso_names;
-//extern char	**ui_aniso_values;
+extern char	**ui_aniso_values;
 
 extern char **ui_font_names;
 extern int	ui_numfonts;
@@ -242,7 +255,7 @@ extern int	ui_numfonts;
 
 extern char **ui_crosshair_names;
 //extern char **ui_crosshair_display_names;
-//extern char **ui_crosshair_values;
+extern char **ui_crosshair_values;
 extern int	ui_numcrosshairs;
 
 //=======================================================
@@ -325,8 +338,11 @@ extern struct image_s *ui_playerskin;
 //=======================================================
 
 qboolean UI_IsValidImageFilename (char *name);
+void UI_ClampCvar (const char *varName, float cvarMin, float cvarMax);
 int	UI_GetIndexForStringValue (const char **item_values, char *value);
 int UI_MouseOverAlpha (menucommon_s *m);
+void UI_UnbindCommand (char *command);
+void UI_FindKeysForCommand (char *command, int *twokeys);
 void *UI_ItemAtMenuCursor (menuframework_s *m);
 void UI_SetMenuStatusBar (menuframework_s *s, const char *string);
 int	 UI_TallyMenuSlots (menuframework_s *menu);
@@ -379,7 +395,7 @@ void UI_UpdatePlayerSkinInfo (int mNum, int sNum);
 qboolean UI_HaveValidPlayerModels (void *unused);
 
 //
-// ui_backend.c
+// ui_widgets.c
 //
 extern	vec4_t stCoord_arrow_left;
 extern	vec4_t stCoord_arrow_right;
@@ -387,8 +403,13 @@ extern	vec4_t stCoord_arrow_up;
 extern	vec4_t stCoord_arrow_down;
 
 qboolean UI_MenuField_Key (menufield_s *field, int key);
-void	UI_MenuSlider_SetValue (menuslider_s *s, float value);
+
+void	UI_MenuSlider_SetValue (menuslider_s *s, const char *varName, float cvarMin, float cvarMax, qboolean clamp);
+void	UI_MenuSlider_SaveValue (menuslider_s *s, const char *varName);
 float	UI_MenuSlider_GetValue (menuslider_s *s);
+void	UI_MenuSpinControl_SetValue (menulist_s *s, const char *varName, float cvarMin, float cvarMax, qboolean clamp);
+void	UI_MenuSpinControl_SaveValue (menulist_s *s, const char *varName);
+const char *UI_MenuSpinControl_GetValue (menulist_s *s);
 
 void	UI_DrawMenuItem (void *item);
 qboolean UI_SelectMenuItem (menuframework_s *s);
@@ -494,6 +515,8 @@ void UI_Draw_Cursor (void);
 #define UI_TEXTBOX_PIC				"/gfx/ui/widgets/textbox.pcx"
 #define UI_SLIDER_PIC				"/gfx/ui/widgets/slider.pcx"
 #define UI_ARROWS_PIC				"/gfx/ui/widgets/arrows.pcx"
+
+#define UI_ITEMVALUE_WILDCARD		"???"
 
 extern	cvar_t	*ui_sensitivity;
 extern	cvar_t	*ui_background_alpha;

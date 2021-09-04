@@ -52,7 +52,7 @@ JOIN SERVER MENU
 // Knightmare- client compatibility option
 static void ClientCompatibilityFunc (void *unused)
 {
-	Cvar_SetValue( "cl_servertrick", s_joinserver_compatibility_box.curvalue );
+	UI_MenuSpinControl_SaveValue (&s_joinserver_compatibility_box, "cl_servertrick");
 }
 
 void JoinServerFunc (void *self)
@@ -69,77 +69,75 @@ void AddressBookFunc (void *self)
 	Menu_AddressBook_f ();
 }
 
-// Knightmare- init client compatibility menu option
-static void JoinserverSetMenuItemValues (void)
-{
-	Cvar_SetValue( "cl_servertrick", ClampCvar( 0, 1, Cvar_VariableValue("cl_servertrick") ) );
-	s_joinserver_compatibility_box.curvalue		= Cvar_VariableValue("cl_servertrick");
-}
-
 void SearchLocalGamesFunc (void *self)
 {
 	UI_SearchLocalGames ();
+}
+
+//=======================================================================
+
+// Knightmare- init client compatibility menu option
+static void M_Joinserver_SetMenuItemValues (void)
+{
+	UI_MenuSpinControl_SetValue (&s_joinserver_compatibility_box, "cl_servertrick", 0, 1, true);
 }
 
 //=========================================================
 
 void Menu_JoinServer_Init (void)
 {
-	int i;
-	int y = 0;
-
 	static const char *compatibility_names[] =
 	{
-		"version 56 (KMQuake2)", // was 35
+		"version 56 (KMQuake2)",
 		"version 34 (stock Quake2)",
 		0
 	};
-
-	JoinserverSetMenuItemValues (); // init item values
+	int i;
+	int y = 0;
 
 	s_joinserver_menu.x = SCREEN_WIDTH*0.5 - 160;
 	s_joinserver_menu.y = SCREEN_HEIGHT*0.5 - 80;
 	s_joinserver_menu.nitems = 0;
 
 	// init client compatibility menu option
-	s_joinserver_compat_title.generic.type = MTYPE_SEPARATOR;
-	s_joinserver_compat_title.generic.textSize = MENU_FONT_SIZE;
-	s_joinserver_compat_title.generic.name = "client protocol compatibility";
-	s_joinserver_compat_title.generic.x    = 200;
-	s_joinserver_compat_title.generic.y	   = y;
+	s_joinserver_compat_title.generic.type			= MTYPE_SEPARATOR;
+	s_joinserver_compat_title.generic.textSize		= MENU_FONT_SIZE;
+	s_joinserver_compat_title.generic.name			= "client protocol compatibility";
+	s_joinserver_compat_title.generic.x				= 200;
+	s_joinserver_compat_title.generic.y				= y;
 
-	s_joinserver_compatibility_box.generic.type = MTYPE_SPINCONTROL;
-	s_joinserver_compatibility_box.generic.textSize = MENU_FONT_SIZE;
-	s_joinserver_compatibility_box.generic.name	= "";
-	s_joinserver_compatibility_box.generic.x	= -32;
-	s_joinserver_compatibility_box.generic.y	= y += MENU_LINE_SIZE;
-	s_joinserver_compatibility_box.generic.cursor_offset = -24;
-	s_joinserver_compatibility_box.generic.callback = ClientCompatibilityFunc;
-	s_joinserver_compatibility_box.generic.statusbar = "set to version 34 to join non-KMQuake2 servers";
-	s_joinserver_compatibility_box.itemnames = compatibility_names;
+	s_joinserver_compatibility_box.generic.type				= MTYPE_SPINCONTROL;
+	s_joinserver_compatibility_box.generic.textSize			= MENU_FONT_SIZE;
+	s_joinserver_compatibility_box.generic.name				= "";
+	s_joinserver_compatibility_box.generic.x				= -32;
+	s_joinserver_compatibility_box.generic.y				= y += MENU_LINE_SIZE;
+	s_joinserver_compatibility_box.generic.callback			= ClientCompatibilityFunc;
+	s_joinserver_compatibility_box.itemNames				= compatibility_names;
+	s_joinserver_compatibility_box.generic.statusbar		= "set to version 34 to join non-KMQuake2 servers";
+	s_joinserver_compatibility_box.generic.cursor_offset	= 0;
 
-	s_joinserver_address_book_action.generic.type	= MTYPE_ACTION;
+	s_joinserver_address_book_action.generic.type		= MTYPE_ACTION;
 	s_joinserver_address_book_action.generic.textSize	= MENU_FONT_SIZE;
-	s_joinserver_address_book_action.generic.name	= "address book";
-	s_joinserver_address_book_action.generic.flags	= QMF_LEFT_JUSTIFY;
-	s_joinserver_address_book_action.generic.x		= 0;
-	s_joinserver_address_book_action.generic.y		= y += 2*MENU_LINE_SIZE;
-	s_joinserver_address_book_action.generic.callback = AddressBookFunc;
+	s_joinserver_address_book_action.generic.name		= "address book";
+	s_joinserver_address_book_action.generic.flags		= QMF_LEFT_JUSTIFY;
+	s_joinserver_address_book_action.generic.x			= 0;
+	s_joinserver_address_book_action.generic.y			= y += 2*MENU_LINE_SIZE;
+	s_joinserver_address_book_action.generic.callback	= AddressBookFunc;
 
-	s_joinserver_search_action.generic.type = MTYPE_ACTION;
-	s_joinserver_search_action.generic.textSize = MENU_FONT_SIZE;
-	s_joinserver_search_action.generic.name	= "refresh server list";
-	s_joinserver_search_action.generic.flags	= QMF_LEFT_JUSTIFY;
-	s_joinserver_search_action.generic.x	= 0;
-	s_joinserver_search_action.generic.y	= y += MENU_LINE_SIZE;
-	s_joinserver_search_action.generic.callback = SearchLocalGamesFunc;
-	s_joinserver_search_action.generic.statusbar = "search for servers";
+	s_joinserver_search_action.generic.type			= MTYPE_ACTION;
+	s_joinserver_search_action.generic.textSize		= MENU_FONT_SIZE;
+	s_joinserver_search_action.generic.name			= "refresh server list";
+	s_joinserver_search_action.generic.flags		= QMF_LEFT_JUSTIFY;
+	s_joinserver_search_action.generic.x			= 0;
+	s_joinserver_search_action.generic.y			= y += MENU_LINE_SIZE;
+	s_joinserver_search_action.generic.callback		= SearchLocalGamesFunc;
+	s_joinserver_search_action.generic.statusbar	= "search for servers";
 
-	s_joinserver_server_title.generic.type = MTYPE_SEPARATOR;
-	s_joinserver_server_title.generic.textSize = MENU_FONT_SIZE;
-	s_joinserver_server_title.generic.name = "connect to...";
-	s_joinserver_server_title.generic.x    = 80;
-	s_joinserver_server_title.generic.y	   = y += 2*MENU_LINE_SIZE;
+	s_joinserver_server_title.generic.type		= MTYPE_SEPARATOR;
+	s_joinserver_server_title.generic.textSize	= MENU_FONT_SIZE;
+	s_joinserver_server_title.generic.name		= "connect to...";
+	s_joinserver_server_title.generic.x			= 80;
+	s_joinserver_server_title.generic.y			= y += 2*MENU_LINE_SIZE;
 
 	y += MENU_LINE_SIZE;
 	for ( i = 0; i < UI_MAX_LOCAL_SERVERS; i++ )
@@ -162,6 +160,8 @@ void Menu_JoinServer_Init (void)
 	s_joinserver_back_action.generic.x	= 0;
 	s_joinserver_back_action.generic.y	= y += (UI_MAX_LOCAL_SERVERS+2)*MENU_LINE_SIZE;
 	s_joinserver_back_action.generic.callback = UI_BackMenu;
+
+	M_Joinserver_SetMenuItemValues (); // init item values
 
 	UI_AddMenuItem (&s_joinserver_menu, &s_joinserver_compat_title);
 	UI_AddMenuItem (&s_joinserver_menu, &s_joinserver_compatibility_box);

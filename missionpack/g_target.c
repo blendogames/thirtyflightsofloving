@@ -454,7 +454,11 @@ void use_target_changelevel (edict_t *self, edict_t *other, edict_t *activator)
 		if ((self->spawnflags & 4) && activator->client && !deathmatch->value && !coop->value)
 		{
 			nostatus = 1;
-			stuffcmd(activator,"cl_gun 0;crosshair 0\n");
+#ifdef KMQUAKE2_ENGINE_MOD // engine has zoom mode and autosensitivity
+			stuffcmd (activator, "cl_zoommode 1\n");
+#else
+			stuffcmd (activator, "cl_gun 0;crosshair 0\n");
+#endif
 			activator->client->pers.hand = 2;
 		}
 		if (activator && activator->client) //Knightmare- paranoia

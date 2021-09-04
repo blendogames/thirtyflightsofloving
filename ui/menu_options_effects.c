@@ -54,95 +54,84 @@ static menuaction_s		s_options_effects_back_action;
 
 static void BloodFunc (void *unused)
 {
-	Cvar_SetValue( "cl_blood", s_options_effects_blood_box.curvalue );
+	UI_MenuSpinControl_SaveValue (&s_options_effects_blood_box, "cl_blood"); 
 }
 
 static void OldExplosionFunc (void *unused)
 {
-	Cvar_SetValue( "cl_old_explosions", s_options_effects_oldexplosions_box.curvalue );
+	UI_MenuSpinControl_SaveValue (&s_options_effects_oldexplosions_box, "cl_old_explosions");
 }
 
 static void PlasmaExploSoundFunc (void *unused)
 {
-	Cvar_SetValue( "cl_plasma_explo_sound", s_options_effects_plasmaexplosound_box.curvalue );
+	UI_MenuSpinControl_SaveValue (&s_options_effects_plasmaexplosound_box, "cl_plasma_explo_sound");
 }
 
 static void ItemBobFunc (void *unused)
 {
-	Cvar_SetValue( "cl_item_bobbing", s_options_effects_itembob_box.curvalue );
+	UI_MenuSpinControl_SaveValue (&s_options_effects_itembob_box, "cl_item_bobbing");
 }
 
 static void ParticleCompFunc (void *unused)
 {
-	Cvar_SetValue( "cl_particle_scale", UI_MenuSlider_GetValue(&s_options_effects_particle_comp_slider) );
+	UI_MenuSlider_SaveValue (&s_options_effects_particle_comp_slider, "cl_particle_scale");
 }
 
 static void DecalCallback (void *unused)
 {
-	Cvar_SetValue( "r_decals", UI_MenuSlider_GetValue(&s_options_effects_decal_slider) );
+	UI_MenuSlider_SaveValue (&s_options_effects_decal_slider, "r_decals");
 }
 
 // Psychospaz's changeable rail trail
 static void RailTrailFunc (void *unused)
 {
-	Cvar_SetValue( "cl_railtype", s_options_effects_railtrail_box.curvalue );
+	UI_MenuSpinControl_SaveValue (&s_options_effects_railtrail_box, "cl_railtype");
 }
 
 static void RailColorRedFunc (void *unused)
 {
-	Cvar_SetValue( "cl_railred", UI_MenuSlider_GetValue(&s_options_effects_railcolor_slider[0]) );
+	UI_MenuSlider_SaveValue (&s_options_effects_railcolor_slider[0], "cl_railred");
 }
 
 static void RailColorGreenFunc (void *unused)
 {
-	Cvar_SetValue( "cl_railgreen", UI_MenuSlider_GetValue(&s_options_effects_railcolor_slider[1]) );
+	UI_MenuSlider_SaveValue (&s_options_effects_railcolor_slider[1], "cl_railgreen");
 }
 
 static void RailColorBlueFunc (void *unused)
 {
-	Cvar_SetValue( "cl_railblue", UI_MenuSlider_GetValue(&s_options_effects_railcolor_slider[2]) );
+	UI_MenuSlider_SaveValue (&s_options_effects_railcolor_slider[2], "cl_railblue");
 }
 
 // foostep override option
 static void FootStepFunc (void *unused)
 {
-	Cvar_SetValue( "cl_footstep_override", s_options_effects_footstep_box.curvalue );
+	UI_MenuSpinControl_SaveValue (&s_options_effects_footstep_box, "cl_footstep_override");
 }
 
 
 //=======================================================================
 
-static void EffectsSetMenuItemValues (void)
+static void M_EffectsSetMenuItemValues (void)
 {
-	Cvar_SetValue( "cl_blood", ClampCvar( 0, 4, Cvar_VariableValue("cl_blood") ) );
-	s_options_effects_blood_box.curvalue			= Cvar_VariableValue("cl_blood");
+	UI_MenuSpinControl_SetValue (&s_options_effects_blood_box, "cl_blood", 0, 4, true);
 
-	Cvar_SetValue( "cl_old_explosions", ClampCvar( 0, 1, Cvar_VariableValue("cl_old_explosions") ) );
-	s_options_effects_oldexplosions_box.curvalue = Cvar_VariableValue("cl_old_explosions");
+	UI_MenuSpinControl_SetValue (&s_options_effects_oldexplosions_box, "cl_old_explosions", 0, 1, true);
+	UI_MenuSpinControl_SetValue (&s_options_effects_plasmaexplosound_box, "cl_plasma_explo_sound", 0, 1, true);
+	UI_MenuSpinControl_SetValue (&s_options_effects_itembob_box, "cl_item_bobbing", 0, 1, true);
 
-	Cvar_SetValue( "cl_plasma_explo_sound", ClampCvar( 0, 1, Cvar_VariableValue("cl_plasma_explo_sound") ) );
-	s_options_effects_plasmaexplosound_box.curvalue = Cvar_VariableValue("cl_plasma_explo_sound");
+	UI_MenuSlider_SetValue (&s_options_effects_decal_slider, "r_decals", 0, 1000, true);
+	UI_MenuSlider_SetValue (&s_options_effects_particle_comp_slider, "cl_particle_scale", 1, 5, true);
 
-	Cvar_SetValue( "cl_item_bobbing", ClampCvar( 0, 1, Cvar_VariableValue("cl_item_bobbing") ) );
-	s_options_effects_itembob_box.curvalue = Cvar_VariableValue("cl_item_bobbing");
+	UI_MenuSpinControl_SetValue (&s_options_effects_railtrail_box, "cl_railtype", 0, 2, true);
+	UI_MenuSlider_SetValue (&s_options_effects_railcolor_slider[0], "cl_railred", 0, 256, true);
+	UI_MenuSlider_SetValue (&s_options_effects_railcolor_slider[1], "cl_railgreen", 0, 256, true);
+	UI_MenuSlider_SetValue (&s_options_effects_railcolor_slider[2], "cl_railblue", 0, 256, true);
 
-	Cvar_SetValue( "r_decals", ClampCvar (0, 1000, Cvar_VariableValue("r_decals")) );
-	UI_MenuSlider_SetValue (&s_options_effects_decal_slider, Cvar_VariableValue("r_decals"));
-
-	Cvar_SetValue( "cl_particle_scale", ClampCvar( 0, 5, Cvar_VariableValue("cl_particle_scale") ) );
-	UI_MenuSlider_SetValue (&s_options_effects_particle_comp_slider, Cvar_VariableValue("cl_particle_scale"));
-
-	Cvar_SetValue( "cl_railtype", ClampCvar( 0, 2, Cvar_VariableValue("cl_railtype") ) );
-	s_options_effects_railtrail_box.curvalue		= Cvar_VariableValue("cl_railtype");
-	UI_MenuSlider_SetValue (&s_options_effects_railcolor_slider[0], Cvar_VariableValue("cl_railred"));
-	UI_MenuSlider_SetValue (&s_options_effects_railcolor_slider[1], Cvar_VariableValue("cl_railgreen"));
-	UI_MenuSlider_SetValue (&s_options_effects_railcolor_slider[2], Cvar_VariableValue("cl_railblue"));
-
-	Cvar_SetValue( "cl_footstep_override", ClampCvar( 0, 1, Cvar_VariableValue("cl_footstep_override") ) );
-	s_options_effects_footstep_box.curvalue			= Cvar_VariableValue("cl_footstep_override");
+	UI_MenuSpinControl_SetValue (&s_options_effects_footstep_box, "cl_footstep_override", 0, 1, true);
 }
 
-static void EffectsResetDefaultsFunc (void *unused)
+static void M_EffectsResetDefaultsFunc (void *unused)
 {
 	Cvar_SetToDefault ("cl_blood");
 	Cvar_SetToDefault ("cl_old_explosions");
@@ -156,7 +145,7 @@ static void EffectsResetDefaultsFunc (void *unused)
 	Cvar_SetToDefault ("cl_railblue");	
 	Cvar_SetToDefault ("cl_footstep_override");
 
-	EffectsSetMenuItemValues ();
+	M_EffectsSetMenuItemValues ();
 }
 
 void Options_Effects_MenuInit (void)
@@ -167,7 +156,6 @@ void Options_Effects_MenuInit (void)
 		"yes",
 		0
 	};
-
 	static const char *blood_names[] =
 	{
 		"none",
@@ -177,7 +165,6 @@ void Options_Effects_MenuInit (void)
 		"gore",
 		0
 	};
-
 	static const char *railtrail_names[] =
 	{
 		"colored spiral",
@@ -185,9 +172,7 @@ void Options_Effects_MenuInit (void)
 		"colored devrail",
 		0
 	};
-
-
-	int y = 3*MENU_LINE_SIZE;
+	int	y = 3*MENU_LINE_SIZE;
 
 	s_options_effects_menu.x = SCREEN_WIDTH*0.5;
 	s_options_effects_menu.y = SCREEN_HEIGHT*0.5 - 58;
@@ -205,7 +190,7 @@ void Options_Effects_MenuInit (void)
 	s_options_effects_blood_box.generic.y			= y;
 	s_options_effects_blood_box.generic.name		= "blood type";
 	s_options_effects_blood_box.generic.callback	= BloodFunc;
-	s_options_effects_blood_box.itemnames			= blood_names;
+	s_options_effects_blood_box.itemNames			= blood_names;
 	s_options_effects_blood_box.generic.statusbar	= "changes blood effect type";
 
 	s_options_effects_oldexplosions_box.generic.type		= MTYPE_SPINCONTROL;
@@ -214,7 +199,7 @@ void Options_Effects_MenuInit (void)
 	s_options_effects_oldexplosions_box.generic.y			= y += 2*MENU_LINE_SIZE;
 	s_options_effects_oldexplosions_box.generic.name		= "old style explosions";
 	s_options_effects_oldexplosions_box.generic.callback	= OldExplosionFunc;
-	s_options_effects_oldexplosions_box.itemnames			= yesno_names;
+	s_options_effects_oldexplosions_box.itemNames			= yesno_names;
 	s_options_effects_oldexplosions_box.generic.statusbar	= "brings back those cheesy model explosions";
 
 	s_options_effects_plasmaexplosound_box.generic.type			= MTYPE_SPINCONTROL;
@@ -223,7 +208,7 @@ void Options_Effects_MenuInit (void)
 	s_options_effects_plasmaexplosound_box.generic.y			= y += MENU_LINE_SIZE;
 	s_options_effects_plasmaexplosound_box.generic.name			= "unique plasma explode sound";
 	s_options_effects_plasmaexplosound_box.generic.callback		= PlasmaExploSoundFunc;
-	s_options_effects_plasmaexplosound_box.itemnames			= yesno_names;
+	s_options_effects_plasmaexplosound_box.itemNames			= yesno_names;
 	s_options_effects_plasmaexplosound_box.generic.statusbar	= "gives Phalanx Cannon plasma explosions a unique sound";
 
 	s_options_effects_itembob_box.generic.type					= MTYPE_SPINCONTROL;
@@ -232,7 +217,7 @@ void Options_Effects_MenuInit (void)
 	s_options_effects_itembob_box.generic.y						= y += MENU_LINE_SIZE;
 	s_options_effects_itembob_box.generic.name					= "item bobbing";
 	s_options_effects_itembob_box.generic.callback				= ItemBobFunc;
-	s_options_effects_itembob_box.itemnames						= yesno_names;
+	s_options_effects_itembob_box.itemNames						= yesno_names;
 	s_options_effects_itembob_box.generic.statusbar				= "adds bobbing effect to rotating items";
 
 	s_options_effects_decal_slider.generic.type					= MTYPE_SLIDER;
@@ -266,7 +251,7 @@ void Options_Effects_MenuInit (void)
 	s_options_effects_railtrail_box.generic.y				= y += 2*MENU_LINE_SIZE;
 	s_options_effects_railtrail_box.generic.name			= "railtrail type";
 	s_options_effects_railtrail_box.generic.callback		= RailTrailFunc;
-	s_options_effects_railtrail_box.itemnames				= railtrail_names;
+	s_options_effects_railtrail_box.itemNames				= railtrail_names;
 	s_options_effects_railtrail_box.generic.statusbar		= "changes railgun particle effect";
 
 	s_options_effects_railcolor_slider[0].generic.type		= MTYPE_SLIDER;
@@ -312,7 +297,7 @@ void Options_Effects_MenuInit (void)
 	s_options_effects_footstep_box.generic.y			= y += 2*MENU_LINE_SIZE;
 	s_options_effects_footstep_box.generic.name			= "override footstep sounds";
 	s_options_effects_footstep_box.generic.callback		= FootStepFunc;
-	s_options_effects_footstep_box.itemnames			= yesno_names;
+	s_options_effects_footstep_box.itemNames			= yesno_names;
 	s_options_effects_footstep_box.generic.statusbar	= "sets footstep sounds with definitions in texsurfs.txt";
 
 	s_options_effects_defaults_action.generic.type		= MTYPE_ACTION;
@@ -320,7 +305,7 @@ void Options_Effects_MenuInit (void)
 	s_options_effects_defaults_action.generic.x			= MENU_FONT_SIZE;
 	s_options_effects_defaults_action.generic.y			= y += 2*MENU_LINE_SIZE;
 	s_options_effects_defaults_action.generic.name		= "reset defaults";
-	s_options_effects_defaults_action.generic.callback	= EffectsResetDefaultsFunc;
+	s_options_effects_defaults_action.generic.callback	= M_EffectsResetDefaultsFunc;
 	s_options_effects_defaults_action.generic.statusbar	= "resets all effects settings to internal defaults";
 
 	s_options_effects_back_action.generic.type			= MTYPE_ACTION;
@@ -345,7 +330,7 @@ void Options_Effects_MenuInit (void)
 	UI_AddMenuItem (&s_options_effects_menu, (void *) &s_options_effects_defaults_action);
 	UI_AddMenuItem (&s_options_effects_menu, (void *) &s_options_effects_back_action);
 
-	EffectsSetMenuItemValues ();
+	M_EffectsSetMenuItemValues ();
 }
 
 void Menu_Options_Effects_Draw (void)

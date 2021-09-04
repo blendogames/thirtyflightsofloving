@@ -55,20 +55,15 @@ static menuaction_s		s_playerconfig_back_action;
 
 #define	NUM_SKINBOX_ITEMS 7
 
-static int rate_tbl[] = { 2500, 3200, 5000, 10000, 15000, 25000, 0 };
-static const char *rate_names[] = { "28.8 Modem", "33.6 Modem", "56K/Single ISDN",
-	"Dual ISDN", "Cable/DSL", "T1/LAN", "User defined", 0 };
-
 static void HandednessCallback (void *unused)
 {
-	Cvar_SetValue ("hand", s_playerconfig_handedness_box.curvalue);
+	UI_MenuSpinControl_SaveValue (&s_playerconfig_handedness_box, "hand");
 }
 
 
 static void RateCallback (void *unused)
 {
-	if (s_playerconfig_rate_box.curvalue != sizeof(rate_tbl) / sizeof(*rate_tbl) - 1)
-		Cvar_SetValue ("rate", rate_tbl[s_playerconfig_rate_box.curvalue]);
+	UI_MenuSpinControl_SaveValue (&s_playerconfig_rate_box, "rate");
 }
 
 
@@ -76,10 +71,10 @@ static void Menu_PlayerModelCallback (void *unused)
 {
 	int		mNum, sNum;
 
-	mNum = s_playerconfig_model_box.curvalue;
-	s_playerconfig_skin_box.itemnames = ui_pmi[mNum].skinDisplayNames;
-	s_playerconfig_skin_box.curvalue = 0;
-	sNum = s_playerconfig_skin_box.curvalue;
+	mNum = s_playerconfig_model_box.curValue;
+	s_playerconfig_skin_box.itemNames = ui_pmi[mNum].skinDisplayNames;
+	s_playerconfig_skin_box.curValue = 0;
+	sNum = s_playerconfig_skin_box.curValue;
 
 	UI_UpdatePlayerModelInfo (mNum, sNum);
 }
@@ -89,8 +84,8 @@ static void Menu_PlayerSkinCallback (void *unused)
 {
 	int		mNum, sNum;
 
-	mNum = s_playerconfig_model_box.curvalue;
-	sNum = s_playerconfig_skin_box.curvalue;
+	mNum = s_playerconfig_model_box.curValue;
+	sNum = s_playerconfig_skin_box.curValue;
 	UI_UpdatePlayerSkinInfo (mNum, sNum);
 }
 
@@ -101,17 +96,34 @@ static void Menu_PlayerSkinCallback (void *unused)
 
 qboolean Menu_PlayerConfig_Init (void)
 {
-	int		i, y;
+	int		y;
 	int		mNum = 0, sNum = 0;
-
-	cvar_t *hand = Cvar_Get("hand", "0", CVAR_USERINFO | CVAR_ARCHIVE);
 
 	static const char *handedness_names[] = { "right", "left", "center", 0 };
 
-	if ( (hand->integer < 0) || (hand->integer > 2) )
-		Cvar_SetValue ("hand", 0);
+	static const char *rate_names[] =
+	{
+		"28.8 Modem",
+		"33.6 Modem",
+		"56K/Single ISDN",
+		"Dual ISDN",
+		"Cable/DSL",
+		"T1/LAN",
+		"User defined",
+		0
+	};
+	static const char *rate_values[] =
+	{
+		"2500",
+		"3200",
+		"5000",
+		"10000",
+		"15000",
+		"25000",
+		UI_ITEMVALUE_WILDCARD,
+		0
+	};
 
-//	if (ui_numplayermodels == 0)
 	if ( !UI_HaveValidPlayerModels(NULL) )
 		return false;
 
@@ -134,80 +146,77 @@ qboolean Menu_PlayerConfig_Init (void)
 	s_playerconfig_name_field.length			= 20;
 	s_playerconfig_name_field.visible_length	= 20;
 	Q_strncpyz (s_playerconfig_name_field.buffer, sizeof(s_playerconfig_name_field.buffer), Cvar_VariableString("name"));
-	s_playerconfig_name_field.cursor = (int)strlen( s_playerconfig_name_field.buffer );
+	s_playerconfig_name_field.cursor = (int)strlen(s_playerconfig_name_field.buffer);
 
 	s_playerconfig_model_title.generic.type		= MTYPE_SEPARATOR;
 	s_playerconfig_model_title.generic.textSize	= MENU_FONT_SIZE;
 	s_playerconfig_model_title.generic.flags	= QMF_LEFT_JUSTIFY;
 	s_playerconfig_model_title.generic.name		= "model";
-	s_playerconfig_model_title.generic.x		= -MENU_FONT_SIZE;
+	s_playerconfig_model_title.generic.x		= -2*MENU_FONT_SIZE;
 	s_playerconfig_model_title.generic.y		= y += 3*MENU_LINE_SIZE;
 	
 	s_playerconfig_model_box.generic.type			= MTYPE_SPINCONTROL;
 	s_playerconfig_model_box.generic.textSize		= MENU_FONT_SIZE;
-	s_playerconfig_model_box.generic.x				= -7*MENU_FONT_SIZE;
+	s_playerconfig_model_box.generic.x				= -8*MENU_FONT_SIZE;
 	s_playerconfig_model_box.generic.y				= y += MENU_LINE_SIZE;
 	s_playerconfig_model_box.generic.callback		= Menu_PlayerModelCallback;
-	s_playerconfig_model_box.generic.cursor_offset	= -6*MENU_FONT_SIZE;
-	s_playerconfig_model_box.curvalue = mNum;
-	s_playerconfig_model_box.itemnames = ui_pmnames;
+	s_playerconfig_model_box.generic.cursor_offset	= -1*MENU_FONT_SIZE;
+	s_playerconfig_model_box.curValue				= mNum;
+	s_playerconfig_model_box.itemNames				= ui_pmnames;
 	
 	s_playerconfig_skin_title.generic.type		= MTYPE_SEPARATOR;
 	s_playerconfig_skin_title.generic.textSize	= MENU_FONT_SIZE;
 	s_playerconfig_skin_title.generic.flags		= QMF_LEFT_JUSTIFY;
 	s_playerconfig_skin_title.generic.name		= "skin";
-	s_playerconfig_skin_title.generic.x			= -2*MENU_FONT_SIZE;
+	s_playerconfig_skin_title.generic.x			= -3*MENU_FONT_SIZE;
 	s_playerconfig_skin_title.generic.y			= y += 2*MENU_LINE_SIZE;
 	
 	s_playerconfig_skin_box.generic.type			= MTYPE_SPINCONTROL;
 	s_playerconfig_skin_box.generic.textSize		= MENU_FONT_SIZE;
-	s_playerconfig_skin_box.generic.x				= -7*MENU_FONT_SIZE;
+	s_playerconfig_skin_box.generic.x				= -8*MENU_FONT_SIZE;
 	s_playerconfig_skin_box.generic.y				= y += MENU_LINE_SIZE;
 	s_playerconfig_skin_box.generic.name			= 0;
 	s_playerconfig_skin_box.generic.callback		= Menu_PlayerSkinCallback; // Knightmare added, was 0
-	s_playerconfig_skin_box.generic.cursor_offset	= -6*MENU_FONT_SIZE;
-	s_playerconfig_skin_box.curvalue				= sNum;
-	s_playerconfig_skin_box.itemnames				= ui_pmi[mNum].skinDisplayNames;
+	s_playerconfig_skin_box.generic.cursor_offset	= -1*MENU_FONT_SIZE;
+	s_playerconfig_skin_box.curValue				= sNum;
+	s_playerconfig_skin_box.itemNames				= ui_pmi[mNum].skinDisplayNames;
 	s_playerconfig_skin_box.generic.flags			|= QMF_SKINLIST;
 	
 	s_playerconfig_hand_title.generic.type		= MTYPE_SEPARATOR;
 	s_playerconfig_hand_title.generic.textSize	= MENU_FONT_SIZE;
 	s_playerconfig_hand_title.generic.flags		= QMF_LEFT_JUSTIFY;
 	s_playerconfig_hand_title.generic.name		= "handedness";
-	s_playerconfig_hand_title.generic.x			= 4*MENU_FONT_SIZE;
+	s_playerconfig_hand_title.generic.x			= 3*MENU_FONT_SIZE;
 	s_playerconfig_hand_title.generic.y			= y += 2*MENU_LINE_SIZE;
 	
 	s_playerconfig_handedness_box.generic.type			= MTYPE_SPINCONTROL;
 	s_playerconfig_handedness_box.generic.textSize		= MENU_FONT_SIZE;
-	s_playerconfig_handedness_box.generic.x				= -7*MENU_FONT_SIZE;
+	s_playerconfig_handedness_box.generic.x				= -8*MENU_FONT_SIZE;
 	s_playerconfig_handedness_box.generic.y				= y += MENU_LINE_SIZE;
 	s_playerconfig_handedness_box.generic.name			= 0;
-	s_playerconfig_handedness_box.generic.cursor_offset	= -6*MENU_FONT_SIZE;
+	s_playerconfig_handedness_box.generic.cursor_offset	= -1*MENU_FONT_SIZE;
 	s_playerconfig_handedness_box.generic.callback		= HandednessCallback;
-	s_playerconfig_handedness_box.curvalue				= Cvar_VariableValue( "hand" );
-	s_playerconfig_handedness_box.itemnames				= handedness_names;
-	
-	for (i = 0; i < sizeof(rate_tbl) / sizeof(*rate_tbl) - 1; i++)
-		if (Cvar_VariableValue("rate") == rate_tbl[i])
-			break;
-		
+	s_playerconfig_handedness_box.itemNames				= handedness_names;
+	UI_MenuSpinControl_SetValue (&s_playerconfig_handedness_box, "hand", 0, 2, true);
+			
 	s_playerconfig_rate_title.generic.type		= MTYPE_SEPARATOR;
 	s_playerconfig_rate_title.generic.textSize	= MENU_FONT_SIZE;
 	s_playerconfig_rate_title.generic.flags		= QMF_LEFT_JUSTIFY;
 	s_playerconfig_rate_title.generic.name		= "connect speed";
-	s_playerconfig_rate_title.generic.x			= 7*MENU_FONT_SIZE;
+	s_playerconfig_rate_title.generic.x			= 6*MENU_FONT_SIZE;
 	s_playerconfig_rate_title.generic.y			= y += 2*MENU_LINE_SIZE;
 		
 	s_playerconfig_rate_box.generic.type			= MTYPE_SPINCONTROL;
 	s_playerconfig_rate_box.generic.textSize		= MENU_FONT_SIZE;
-	s_playerconfig_rate_box.generic.x				= -7*MENU_FONT_SIZE;
+	s_playerconfig_rate_box.generic.x				= -8*MENU_FONT_SIZE;
 	s_playerconfig_rate_box.generic.y				= y += MENU_LINE_SIZE;
 	s_playerconfig_rate_box.generic.name			= 0;
-	s_playerconfig_rate_box.generic.cursor_offset	= -6*MENU_FONT_SIZE;
+	s_playerconfig_rate_box.generic.cursor_offset	= -1*MENU_FONT_SIZE;
 	s_playerconfig_rate_box.generic.callback		= RateCallback;
-	s_playerconfig_rate_box.curvalue				= i;
-	s_playerconfig_rate_box.itemnames				= rate_names;
-	
+	s_playerconfig_rate_box.itemNames				= rate_names;
+	s_playerconfig_rate_box.itemValues				= rate_values;
+	UI_MenuSpinControl_SetValue (&s_playerconfig_rate_box, "rate", 0, 0, false);
+
 	s_playerconfig_back_action.generic.type			= MTYPE_ACTION;
 	s_playerconfig_back_action.generic.textSize		= MENU_FONT_SIZE;
 	s_playerconfig_back_action.generic.name			= "back to multiplayer";
@@ -220,7 +229,7 @@ qboolean Menu_PlayerConfig_Init (void)
 	UI_AddMenuItem (&s_player_config_menu, &s_playerconfig_name_field);
 	UI_AddMenuItem (&s_player_config_menu, &s_playerconfig_model_title);
 	UI_AddMenuItem (&s_player_config_menu, &s_playerconfig_model_box);
-	if ( s_playerconfig_skin_box.itemnames )
+	if ( s_playerconfig_skin_box.itemNames )
 	{
 		UI_AddMenuItem (&s_player_config_menu, &s_playerconfig_skin_title);
 		UI_AddMenuItem (&s_player_config_menu, &s_playerconfig_skin_box);
@@ -252,13 +261,13 @@ qboolean Menu_PlayerConfig_CheckIncrement (int dir, float x, float y, float w, f
 	{
 		if (dir) // dir == 1 is left
 		{
-			if (s_playerconfig_skin_box.curvalue > 0)
-				s_playerconfig_skin_box.curvalue--;
+			if (s_playerconfig_skin_box.curValue > 0)
+				s_playerconfig_skin_box.curValue--;
 		}
 		else
 		{
-			if (s_playerconfig_skin_box.curvalue < ui_pmi[s_playerconfig_model_box.curvalue].nskins)
-				s_playerconfig_skin_box.curvalue++;
+			if (s_playerconfig_skin_box.curValue < ui_pmi[s_playerconfig_model_box.curValue].nskins)
+				s_playerconfig_skin_box.curValue++;
 		}
 
 		sound = menu_move_sound;
@@ -287,12 +296,12 @@ void Menu_PlayerConfig_MouseClick (void)
 	for (i=0; i<NUM_SKINBOX_ITEMS; i++)
 		buttons[i].index =- 1;
 
-	if ( (ui_pmi[s_playerconfig_model_box.curvalue].nskins < NUM_SKINBOX_ITEMS) || (s_playerconfig_skin_box.curvalue < 4) )
+	if ( (ui_pmi[s_playerconfig_model_box.curValue].nskins < NUM_SKINBOX_ITEMS) || (s_playerconfig_skin_box.curValue < 4) )
 		i = 0;
-	else if (s_playerconfig_skin_box.curvalue > ui_pmi[s_playerconfig_model_box.curvalue].nskins-4)
-		i = ui_pmi[s_playerconfig_model_box.curvalue].nskins-NUM_SKINBOX_ITEMS;
+	else if (s_playerconfig_skin_box.curValue > ui_pmi[s_playerconfig_model_box.curValue].nskins-4)
+		i = ui_pmi[s_playerconfig_model_box.curValue].nskins-NUM_SKINBOX_ITEMS;
 	else
-		i = s_playerconfig_skin_box.curvalue-3;
+		i = s_playerconfig_skin_box.curValue-3;
 
 	if (i > 0)
 		if (Menu_PlayerConfig_CheckIncrement (1, icon_x-39, icon_y, 32, 32))
@@ -300,7 +309,7 @@ void Menu_PlayerConfig_MouseClick (void)
 
 	for (count=0; count<NUM_SKINBOX_ITEMS; i++,count++)
 	{
-		if ( (i < 0) || (i >= ui_pmi[s_playerconfig_model_box.curvalue].nskins) )
+		if ( (i < 0) || (i >= ui_pmi[s_playerconfig_model_box.curValue].nskins) )
 			continue;
 
 		UI_AddButton (&buttons[count], i, icon_x+icon_offset, icon_y, 32, 32);
@@ -308,7 +317,7 @@ void Menu_PlayerConfig_MouseClick (void)
 	}
 
 	icon_offset = NUM_SKINBOX_ITEMS*34;
-	if (ui_pmi[s_playerconfig_model_box.curvalue].nskins-i > 0)
+	if (ui_pmi[s_playerconfig_model_box.curValue].nskins-i > 0)
 		if (Menu_PlayerConfig_CheckIncrement (0, icon_x+icon_offset+5, icon_y, 32, 32))
 			return;
 
@@ -322,7 +331,7 @@ void Menu_PlayerConfig_MouseClick (void)
 		{
 			if (!ui_mousecursor.buttonused[MOUSEBUTTON1] && ui_mousecursor.buttonclicks[MOUSEBUTTON1]==1)
 			{
-				s_playerconfig_skin_box.curvalue = buttons[i].index;
+				s_playerconfig_skin_box.curValue = buttons[i].index;
 
 				sound = menu_move_sound;
 				ui_mousecursor.buttonused[MOUSEBUTTON1] = true;
@@ -355,12 +364,12 @@ void Menu_PlayerConfig_DrawSkinSelection (void)
 	Vector4Copy (stCoord_arrow_left, arrowTemp[0]);
 	Vector4Copy (stCoord_arrow_right, arrowTemp[1]);
 
-	if ( (ui_pmi[s_playerconfig_model_box.curvalue].nskins < NUM_SKINBOX_ITEMS) || (s_playerconfig_skin_box.curvalue < 4) )
+	if ( (ui_pmi[s_playerconfig_model_box.curValue].nskins < NUM_SKINBOX_ITEMS) || (s_playerconfig_skin_box.curValue < 4) )
 		i = 0;
-	else if ( s_playerconfig_skin_box.curvalue > (ui_pmi[s_playerconfig_model_box.curvalue].nskins - 4) )
-		i = ui_pmi[s_playerconfig_model_box.curvalue].nskins-NUM_SKINBOX_ITEMS;
+	else if ( s_playerconfig_skin_box.curValue > (ui_pmi[s_playerconfig_model_box.curValue].nskins - 4) )
+		i = ui_pmi[s_playerconfig_model_box.curValue].nskins-NUM_SKINBOX_ITEMS;
 	else
-		i = s_playerconfig_skin_box.curvalue - 3;
+		i = s_playerconfig_skin_box.curValue - 3;
 
 	// left arrow
 	if (i > 0) {
@@ -389,14 +398,14 @@ void Menu_PlayerConfig_DrawSkinSelection (void)
 		
 	for (count=0; count<NUM_SKINBOX_ITEMS; i++,count++)
 	{
-		if ( (i < 0) || (i >= ui_pmi[s_playerconfig_model_box.curvalue].nskins) )
+		if ( (i < 0) || (i >= ui_pmi[s_playerconfig_model_box.curValue].nskins) )
 			continue;
 
 		Com_sprintf (scratch, sizeof(scratch), "/players/%s/%s_i.pcx", 
-			ui_pmi[s_playerconfig_model_box.curvalue].directory,
-			ui_pmi[s_playerconfig_model_box.curvalue].skinDisplayNames[i] );
+			ui_pmi[s_playerconfig_model_box.curValue].directory,
+			ui_pmi[s_playerconfig_model_box.curValue].skinDisplayNames[i] );
 
-		if (i == s_playerconfig_skin_box.curvalue)
+		if (i == s_playerconfig_skin_box.curValue)
 			UI_DrawFill (icon_x + icon_offset-1, icon_y-1, 34, 34, ALIGN_CENTER, false, color[0], color[1] ,color[2], 255);
 		UI_DrawPic (icon_x + icon_offset, icon_y, 32, 32,  ALIGN_CENTER, false, scratch, 1.0);
 		icon_offset += 34;
@@ -404,7 +413,7 @@ void Menu_PlayerConfig_DrawSkinSelection (void)
 
 	// right arrow
 	icon_offset = NUM_SKINBOX_ITEMS*34;
-	if ( ui_pmi[s_playerconfig_model_box.curvalue].nskins-i > 0 ) {
+	if ( ui_pmi[s_playerconfig_model_box.curValue].nskins-i > 0 ) {
 		Vector4Set (arrowColor, color[0], color[1], color[2], 255);
 	//	Com_sprintf (scratch, sizeof(scratch), "/gfx/ui/arrows/arrow_right.pcx");
 	}
@@ -438,7 +447,7 @@ void Menu_PlayerConfig_Draw (void)
 	refdef.fov_y = CalcFov (refdef.fov_x, refdef.width, refdef.height);
 	refdef.time = cls.realtime*0.001;
  
-	if ( ui_pmi[s_playerconfig_model_box.curvalue].skinDisplayNames )
+	if ( ui_pmi[s_playerconfig_model_box.curValue].skinDisplayNames )
 	{
 		int			yaw;
 		int			maxframe = 29;
@@ -527,8 +536,8 @@ void Menu_PConfigSaveChanges (void)
 
 	Cvar_Set ("name", s_playerconfig_name_field.buffer);
 
-	mNum = s_playerconfig_model_box.curvalue;
-	sNum = s_playerconfig_skin_box.curvalue;
+	mNum = s_playerconfig_model_box.curValue;
+	sNum = s_playerconfig_skin_box.curValue;
 	Com_sprintf (scratch, sizeof( scratch ), "%s/%s", 
 		ui_pmi[mNum].directory, ui_pmi[mNum].skinDisplayNames[sNum]);
 	Cvar_Set ("skin", scratch);

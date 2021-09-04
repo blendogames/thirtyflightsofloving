@@ -153,7 +153,7 @@ void CL_RequestNextDownload (void)
 	{
 		precache_pak++;
 		if (strlen(cl.configstrings[CS_PAKFILE])) {
-			if (!CL_CheckOrDownloadFile(cl.configstrings[CS_PAKFILE]))
+			if ( !CL_CheckOrDownloadFile(cl.configstrings[CS_PAKFILE]) )
 				return;  // started a download
 		}
 	}
@@ -162,7 +162,7 @@ void CL_RequestNextDownload (void)
 	if (precache_check == CS_MODELS) { // confirm map
 		precache_check = CS_MODELS+2; // 0 isn't used
 		if (allow_download_maps->integer) {
-			if (!CL_CheckOrDownloadFile(cl.configstrings[CS_MODELS+1]))
+			if ( !CL_CheckOrDownloadFile(cl.configstrings[CS_MODELS+1]) )
 				return; // started a download
 		}
 	}
@@ -180,7 +180,7 @@ void CL_RequestNextDownload (void)
 				}
 				if (precache_model_skin == 0)
 				{
-					if (!CL_CheckOrDownloadFile(cl.configstrings[precache_check])) {
+					if ( !CL_CheckOrDownloadFile(cl.configstrings[precache_check]) ) {
 						precache_model_skin = 1;
 						return; // started a download
 					}
@@ -270,7 +270,7 @@ void CL_RequestNextDownload (void)
 						else if (strlen(skinname) > MD2_MAX_SKINNAME-1)
 							Com_Error (ERR_DROP, "Model %s has too long a skin path: %s", cl.configstrings[precache_check], skinname);
 
-						if (!CL_CheckOrDownloadFile(skinname))
+						if ( !CL_CheckOrDownloadFile(skinname) )
 						{
 							precache_model_skin++;
 							return; // started a download
@@ -298,7 +298,7 @@ void CL_RequestNextDownload (void)
 							else if (strlen(skinname) > MD3_MAX_PATH-1)
 								Com_Error (ERR_DROP, "Model %s has too long a skin path: %s", cl.configstrings[precache_check], skinname);
 
-							if (!CL_CheckOrDownloadFile(skinname))
+							if ( !CL_CheckOrDownloadFile(skinname) )
 							{
 								precache_model_skin++;
 								return; // started a download
@@ -322,7 +322,7 @@ void CL_RequestNextDownload (void)
 						else if (strlen(skinname) > MD2_MAX_SKINNAME-1)
 							Com_Error (ERR_DROP, "Sprite %s has too long a skin path: %s", cl.configstrings[precache_check], skinname);
 
-						if (!CL_CheckOrDownloadFile(skinname))
+						if ( !CL_CheckOrDownloadFile(skinname) )
 						{
 							precache_model_skin++;
 							return; // started a download
@@ -353,7 +353,7 @@ void CL_RequestNextDownload (void)
 					continue;
 				}
 				Com_sprintf(fn, sizeof(fn), "sound/%s", cl.configstrings[precache_check++]);
-				if (!CL_CheckOrDownloadFile(fn))
+				if ( !CL_CheckOrDownloadFile(fn) )
 					return; // started a download
 			}
 		}
@@ -366,7 +366,7 @@ void CL_RequestNextDownload (void)
 		while (precache_check < cs_images+max_images &&
 			cl.configstrings[precache_check][0]) {
 			Com_sprintf(fn, sizeof(fn), "pics/%s.pcx", cl.configstrings[precache_check++]);
-			if (!CL_CheckOrDownloadFile(fn))
+			if ( !CL_CheckOrDownloadFile(fn) )
 				return; // started a download
 		}
 		precache_check = cs_playerskins;
@@ -457,7 +457,7 @@ void CL_RequestNextDownload (void)
 				{
 				case 0: // model
 					Com_sprintf(fn, sizeof(fn), "players/%s/tris.md2", model);
-					if (!CL_CheckOrDownloadFile(fn)) {
+					if ( !CL_CheckOrDownloadFile(fn) ) {
 						precache_check = cs_playerskins + i * PLAYER_MULT + 1;
 						return; // started a download
 					}
@@ -466,7 +466,7 @@ void CL_RequestNextDownload (void)
 
 				case 1: // weapon model
 					Com_sprintf(fn, sizeof(fn), "players/%s/weapon.md2", model);
-					if (!CL_CheckOrDownloadFile(fn)) {
+					if ( !CL_CheckOrDownloadFile(fn) ) {
 						precache_check = cs_playerskins + i * PLAYER_MULT + 2;
 						return; // started a download
 					}
@@ -475,7 +475,7 @@ void CL_RequestNextDownload (void)
 
 				case 2: // weapon skin
 					Com_sprintf(fn, sizeof(fn), "players/%s/weapon.pcx", model);
-					if (!CL_CheckOrDownloadFile(fn)) {
+					if ( !CL_CheckOrDownloadFile(fn) ) {
 						precache_check = cs_playerskins + i * PLAYER_MULT + 3;
 						return; // started a download
 					}
@@ -484,7 +484,7 @@ void CL_RequestNextDownload (void)
 
 				case 3: // skin
 					Com_sprintf(fn, sizeof(fn), "players/%s/%s.pcx", model, skin);
-					if (!CL_CheckOrDownloadFile(fn)) {
+					if ( !CL_CheckOrDownloadFile(fn) ) {
 						precache_check = cs_playerskins + i * PLAYER_MULT + 4;
 						return; // started a download
 					}
@@ -493,7 +493,7 @@ void CL_RequestNextDownload (void)
 
 				case 4: // skin_i
 					Com_sprintf(fn, sizeof(fn), "players/%s/%s_i.pcx", model, skin);
-					if (!CL_CheckOrDownloadFile(fn)) {
+					if ( !CL_CheckOrDownloadFile(fn) ) {
 						precache_check = cs_playerskins + i * PLAYER_MULT + 5;
 						return; // started a download
 					}
@@ -564,7 +564,7 @@ void CL_RequestNextDownload (void)
 				else
 					Com_sprintf(fn, sizeof(fn), "env/%s%s.tga", 
 						cl.configstrings[CS_SKY], env_suf[n/2]);
-				if (!CL_CheckOrDownloadFile(fn))
+				if ( !CL_CheckOrDownloadFile(fn) )
 					return; // started a download
 			}
 		}
@@ -589,7 +589,7 @@ void CL_RequestNextDownload (void)
 				char fn[MAX_OSPATH];
 
 				Com_sprintf(fn, sizeof(fn), "textures/%s.wal", map_surfaces[precache_tex++].rname);
-				if (!CL_CheckOrDownloadFile(fn))
+				if ( !CL_CheckOrDownloadFile(fn) )
 					return; // started a download
 			}
 		}
@@ -612,7 +612,7 @@ void CL_RequestNextDownload (void)
 				char fn[MAX_OSPATH];
 
 				Com_sprintf(fn, sizeof(fn), "textures/%s.tga", map_surfaces[precache_tex++].rname);
-				if (!CL_CheckOrDownloadFile(fn))
+				if ( !CL_CheckOrDownloadFile(fn) )
 					return; // started a download
 			}
 		}
@@ -635,7 +635,7 @@ void CL_RequestNextDownload (void)
 				char fn[MAX_OSPATH];
 
 				Com_sprintf(fn, sizeof(fn), "textures/%s.png", map_surfaces[precache_tex++].rname);
-				if (!CL_CheckOrDownloadFile(fn))
+				if ( !CL_CheckOrDownloadFile(fn) )
 					return; // started a download
 			}
 		}
@@ -661,7 +661,7 @@ void CL_RequestNextDownload (void)
 				char fn[MAX_OSPATH];
 
 				Com_sprintf(fn, sizeof(fn), "textures/%s.jpg", map_surfaces[precache_tex++].rname);
-				if (!CL_CheckOrDownloadFile(fn))
+				if ( !CL_CheckOrDownloadFile(fn) )
 					return; // started a download
 			}
 		}
@@ -714,7 +714,7 @@ void CL_DownloadFileName (char *dest, int destlen, const char *fn)
 
 
 // Knightmare- store the names of last downloads that failed
-#define NUM_FAIL_DLDS 64
+#define NUM_FAIL_DLDS 512
 char lastFailedDownload[NUM_FAIL_DLDS][MAX_OSPATH];
 static unsigned failedDlListIndex;
 

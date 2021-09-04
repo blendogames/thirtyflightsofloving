@@ -316,7 +316,7 @@ void UI_Mouseover_Check (menuframework_s *menu)
 							min[0] -= SCR_ScaledScreen(len*item->textSize - LCOLUMN_OFFSET*2);
 						}
 
-						len = (int)strlen(spin->itemnames[spin->curvalue]);
+						len = (int)strlen(spin->itemNames[spin->curValue]);
 					//	max[0] += SCR_ScaledScreen(len*MENU_FONT_SIZE);
 						max[0] += SCR_ScaledScreen(len*item->textSize);
 

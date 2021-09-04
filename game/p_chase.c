@@ -28,7 +28,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 cvar_t *tpp;
 cvar_t *tpp_auto;
-cvar_t *crossh;
+//cvar_t *crossh;
 
 void ChasecamTrack (edict_t *ent);
 
@@ -76,7 +76,7 @@ void ChasecamStart (edict_t *ent)
 	ent->client->chasecam = chasecam;	  
 	ent->client->oldplayer = G_Spawn();
 	CheckChasecam_Viewent(ent);
-	//MakeFakeCrosshair(ent);
+//	MakeFakeCrosshair (ent);
 
 	// remove reflection of real player, if any
 	DeleteReflection (ent, -1);
@@ -122,7 +122,7 @@ void ChasecamRemove (edict_t *ent, int opt)
 	ent->s.modelindex = ent->client->oldplayer->s.modelindex;
 	ent->svflags &= ~SVF_NOCLIENT;
 	
-	//DestroyFakeCrosshair (ent);
+//	DestroyFakeCrosshair (ent);
 	
 	if (opt == OPTION_BACKGROUND)
 	{
@@ -302,7 +302,7 @@ void ChasecamTrack (edict_t *ent)
 	VectorCopy (ent->s.origin, ent->movedir);
 	/* MUST LINK SINCE WE CHANGED THE ORIGIN! */
 	gi.linkentity (ent);
-	//UpdateFakeCrosshair (ent->owner);
+//	UpdateFakeCrosshair (ent->owner);
 }
 
 void Cmd_Chasecam_Toggle (edict_t *ent)

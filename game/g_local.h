@@ -786,7 +786,7 @@ extern	cvar_t	*cl_thirdperson; // Knightmare added
 extern	cvar_t	*corpse_fade;
 extern	cvar_t	*corpse_fadetime;
 extern	cvar_t	*crosshair;
-extern	cvar_t	*crossh;
+//extern	cvar_t	*crossh;
 extern	cvar_t	*developer;
 extern	cvar_t	*footstep_sounds;
 extern	cvar_t	*fov;

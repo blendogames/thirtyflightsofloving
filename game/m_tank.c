@@ -853,8 +853,8 @@ void tank_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
 {
 	int		n;
 
-	if (!(self->fogclip & 2)) //custom bloodtype flag check
-		self->blood_type = 3; //sparks and blood
+	if (!(self->fogclip & 2)) // custom bloodtype flag check
+		self->blood_type = 3; // sparks and blood
 
 	self->monsterinfo.power_armor_type = POWER_ARMOR_NONE;
 

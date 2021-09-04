@@ -55,10 +55,10 @@ static menuaction_s	s_startserver_back_action;
 
 /*
 ===============
-Menu_RefreshMapList
+M_RefreshMapList
 ===============
 */
-void Menu_RefreshMapList (maptype_t maptype)
+void M_RefreshMapList (maptype_t maptype)
 {
 	int		i;
 
@@ -69,31 +69,31 @@ void Menu_RefreshMapList (maptype_t maptype)
 	UI_UpdateMapList (maptype);
 
 	// reset startmap if it's in the part of the list that changed
-	if (s_startmap_list.curvalue >= ui_svr_listfile_nummaps)
-		s_startmap_list.curvalue = 0;
+	if (s_startmap_list.curValue >= ui_svr_listfile_nummaps)
+		s_startmap_list.curValue = 0;
 
-	s_startmap_list.itemnames = ui_svr_mapnames;
-	for (i=0; s_startmap_list.itemnames[i]; i++);
-	s_startmap_list.numitemnames = i;
+	s_startmap_list.itemNames = ui_svr_mapnames;
+	for (i=0; s_startmap_list.itemNames[i]; i++);
+	s_startmap_list.numItems = i;
 }
 
 
 //=============================================================================
 
-void DMOptionsFunc (void *self)
+void M_DMOptionsFunc (void *self)
 {
-	if (s_rules_box.curvalue == 1)
+	if (s_rules_box.curValue == 1)
 		return;
 	Menu_DMOptions_f ();
 }
 
-void RulesChangeFunc (void *self)
+void M_RulesChangeFunc (void *self)
 {
 	maptype_t	maptype = MAP_DM;
 
 	UI_SetCoopMenuMode (false);
 	UI_SetCTFMenuMode (false);
-	if (s_rules_box.curvalue == 0) 	// DM
+	if (s_rules_box.curValue == 0) 	// DM
 	{
 		s_maxclients_field.generic.statusbar = NULL;
 		if (atoi(s_maxclients_field.buffer) <= 8) // set default of 8
@@ -102,7 +102,7 @@ void RulesChangeFunc (void *self)
 		s_startserver_dmoptions_action.generic.statusbar = NULL;
 		maptype = MAP_DM;
 	}
-	else if (s_rules_box.curvalue == 1)		// coop				// PGM
+	else if (s_rules_box.curValue == 1)		// coop				// PGM
 	{
 		s_maxclients_field.generic.statusbar = "4 maximum for cooperative";
 		if (atoi(s_maxclients_field.buffer) > 4)
@@ -112,7 +112,7 @@ void RulesChangeFunc (void *self)
 		maptype = MAP_COOP;
 		UI_SetCoopMenuMode (true);
 	}
-	else if (s_rules_box.curvalue == 2) // CTF
+	else if (s_rules_box.curValue == 2) // CTF
 	{
 		s_maxclients_field.generic.statusbar = NULL;
 		if (atoi(s_maxclients_field.buffer) <= 12) // set default of 12
@@ -122,7 +122,7 @@ void RulesChangeFunc (void *self)
 		maptype = MAP_CTF;
 		UI_SetCTFMenuMode (true);
 	}
-	else if (s_rules_box.curvalue == 3) // 3Team CTF
+	else if (s_rules_box.curValue == 3) // 3Team CTF
 	{
 		s_maxclients_field.generic.statusbar = NULL;
 		if (atoi(s_maxclients_field.buffer) <= 18) // set default of 18
@@ -133,7 +133,7 @@ void RulesChangeFunc (void *self)
 		UI_SetCTFMenuMode (true);
 	}
 	// ROGUE GAMES
-	else if (FS_RoguePath() && s_rules_box.curvalue == 4) // tag	
+	else if (FS_RoguePath() && s_rules_box.curValue == 4) // tag	
 	{
 		s_maxclients_field.generic.statusbar = NULL;
 		if (atoi(s_maxclients_field.buffer) <= 8) // set default of 8
@@ -143,7 +143,7 @@ void RulesChangeFunc (void *self)
 		maptype = MAP_DM;
 	}
 
-	Menu_RefreshMapList (maptype);
+	M_RefreshMapList (maptype);
 }
 
 void Menu_StartServerActionFunc (void *self)
@@ -153,7 +153,7 @@ void Menu_StartServerActionFunc (void *self)
 	int		fraglimit;
 	int		maxclients;
 
-	Q_strncpyz (startmap, sizeof(startmap), strchr( ui_svr_mapnames[s_startmap_list.curvalue], '\n' ) + 1);
+	Q_strncpyz (startmap, sizeof(startmap), strchr( ui_svr_mapnames[s_startmap_list.curValue], '\n' ) + 1);
 
 	maxclients  = atoi( s_maxclients_field.buffer );
 	timelimit	= atoi( s_timelimit_field.buffer );
@@ -164,13 +164,13 @@ void Menu_StartServerActionFunc (void *self)
 	Cvar_SetValue ("fraglimit", ClampCvar( 0, fraglimit, fraglimit ) );
 	Cvar_Set("hostname", s_hostname_field.buffer );
 
-	Cvar_SetValue ("deathmatch", s_rules_box.curvalue != 1);
-	Cvar_SetValue ("coop", s_rules_box.curvalue == 1);
-	Cvar_SetValue ("ctf", s_rules_box.curvalue == 2);
-	Cvar_SetValue ("ttctf", s_rules_box.curvalue == 3);
-	Cvar_SetValue ("gamerules", FS_RoguePath() ? ((s_rules_box.curvalue == 4) ? 2 : 0) : 0);
+	Cvar_SetValue ("deathmatch", s_rules_box.curValue != 1);
+	Cvar_SetValue ("coop", s_rules_box.curValue == 1);
+	Cvar_SetValue ("ctf", s_rules_box.curValue == 2);
+	Cvar_SetValue ("ttctf", s_rules_box.curValue == 3);
+	Cvar_SetValue ("gamerules", FS_RoguePath() ? ((s_rules_box.curValue == 4) ? 2 : 0) : 0);
 
-	UI_StartServer (startmap, (s_dedicated_box.curvalue != 0));
+	UI_StartServer (startmap, (s_dedicated_box.curValue != 0));
 }
 
 void Menu_StartServer_Init (void)
@@ -213,7 +213,7 @@ void Menu_StartServer_Init (void)
 	s_startmap_list.generic.x			= 0;
 	s_startmap_list.generic.y			= y;
 	s_startmap_list.generic.name		= "initial map";
-	s_startmap_list.itemnames			= ui_svr_mapnames;
+	s_startmap_list.itemNames			= ui_svr_mapnames;
 
 	s_rules_box.generic.type		= MTYPE_SPINCONTROL;
 	s_rules_box.generic.textSize	= MENU_FONT_SIZE;
@@ -222,21 +222,21 @@ void Menu_StartServer_Init (void)
 	s_rules_box.generic.name		= "rules";
 //PGM - rogue games only available with rogue DLL.
 	if ( FS_RoguePath() )
-		s_rules_box.itemnames		= dm_coop_names_rogue;
+		s_rules_box.itemNames		= dm_coop_names_rogue;
 	else
-		s_rules_box.itemnames		= dm_coop_names;
+		s_rules_box.itemNames		= dm_coop_names;
 //PGM
 	if (Cvar_VariableValue("ttctf"))
-		s_rules_box.curvalue = 3;
+		s_rules_box.curValue = 3;
 	else if (Cvar_VariableValue("ctf"))
-		s_rules_box.curvalue = 2;
+		s_rules_box.curValue = 2;
 	else if (FS_RoguePath() && Cvar_VariableValue("gamerules") == 2)
-		s_rules_box.curvalue = 4;
+		s_rules_box.curValue = 4;
 	else if (Cvar_VariableValue("coop"))
-		s_rules_box.curvalue = 1;
+		s_rules_box.curValue = 1;
 	else
-		s_rules_box.curvalue = 0;
-	s_rules_box.generic.callback	= RulesChangeFunc;
+		s_rules_box.curValue = 0;
+	s_rules_box.generic.callback	= M_RulesChangeFunc;
 
 	s_timelimit_field.generic.type		= MTYPE_FIELD;
 	s_timelimit_field.generic.textSize	= MENU_FONT_SIZE;
@@ -300,9 +300,9 @@ void Menu_StartServer_Init (void)
 	s_dedicated_box.generic.name			= "dedicated server";;
 	s_dedicated_box.generic.x				= 0;
 	s_dedicated_box.generic.y				= y += 2*MENU_FONT_SIZE;
-	s_dedicated_box.curvalue				= 0;	// always start off
+	s_dedicated_box.curValue				= 0;	// always start off
 	s_dedicated_box.generic.statusbar		= "makes the server faster, but you can't play on this computer";
-	s_dedicated_box.itemnames				= yesno_names;
+	s_dedicated_box.itemNames				= yesno_names;
 
 	s_startserver_dmoptions_action.generic.type			= MTYPE_ACTION;
 	s_startserver_dmoptions_action.generic.textSize		= MENU_FONT_SIZE;
@@ -311,7 +311,7 @@ void Menu_StartServer_Init (void)
 	s_startserver_dmoptions_action.generic.x			= 24;
 	s_startserver_dmoptions_action.generic.y			= y += 2*MENU_FONT_SIZE;
 	s_startserver_dmoptions_action.generic.statusbar	= NULL;
-	s_startserver_dmoptions_action.generic.callback		= DMOptionsFunc;
+	s_startserver_dmoptions_action.generic.callback		= M_DMOptionsFunc;
 
 	s_startserver_start_action.generic.type		= MTYPE_ACTION;
 	s_startserver_start_action.generic.textSize	= MENU_FONT_SIZE;
@@ -343,12 +343,12 @@ void Menu_StartServer_Init (void)
 	UI_CenterMenu (&s_startserver_menu);
 
 	// call this now to set proper inital state
-	RulesChangeFunc (NULL);
+	M_RulesChangeFunc (NULL);
 }
 
 void Menu_DrawStartSeverLevelshot (void)
 {
-	char *mapshotname = UI_UpdateStartSeverLevelshot (s_startmap_list.curvalue);
+	char *mapshotname = UI_UpdateStartSeverLevelshot (s_startmap_list.curValue);
 
 	UI_DrawFill (SCREEN_WIDTH/2+44, SCREEN_HEIGHT/2-70, 244, 184, ALIGN_CENTER, false, 60,60,60,255);
 

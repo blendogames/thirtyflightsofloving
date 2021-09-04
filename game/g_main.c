@@ -162,8 +162,8 @@ void ShutdownGame (void)
 #ifndef KMQUAKE2_ENGINE_MOD // engine has zoom autosensitivity
 		gi.cvar_forceset("m_pitch", va("%f",lazarus_pitch->value));
 #endif
-		//gi.cvar_forceset("cd_loopcount", va("%d",lazarus_cd_loop->value));
-		//gi.cvar_forceset("gl_clear", va("%d", lazarus_gl_clear->value));
+	//	gi.cvar_forceset("cd_loopcount", va("%d", lazarus_cd_loop->value));
+	//	gi.cvar_forceset("gl_clear", va("%d", lazarus_gl_clear->value));
 	}
 	// Lazarus: Turn off fog if it's on
 	if (!dedicated->value) {

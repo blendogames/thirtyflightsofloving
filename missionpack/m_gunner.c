@@ -306,8 +306,9 @@ void gunner_pain (edict_t *self, edict_t *other, float kick, int damage)
 
 	monster_done_dodge (self);
 
-//	if ( (self->moreflags & FL2_COMMANDER) && (damage < 10) )
-//		return;
+	// Tactician Gunner shrugs off small damage
+	if ( (self->moreflags & FL2_COMMANDER) && (damage < 10) )
+		return;
 
 	if (!self->groundentity)
 	{

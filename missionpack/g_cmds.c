@@ -1539,20 +1539,25 @@ void SetLazarusCrosshair (edict_t *ent)
 	if (ent->client->zoomed || ent->client->zooming)
 		return;
 
-	gi.cvar_forceset("lazarus_crosshair",      va("%d",(int)(crosshair->value)));
-	gi.cvar_forceset("lazarus_cl_gun",         va("%d",(int)(cl_gun->value)));
+#ifndef KMQUAKE2_ENGINE_MOD // engine has zoom mode and autosensitivity
+	gi.cvar_forceset("lazarus_crosshair",      va("%d", (int)(crosshair->value)));
+	gi.cvar_forceset("lazarus_cl_gun",         va("%d", (int)(cl_gun->value)));
+#endif
 }
 
-void SetSensitivities (edict_t *ent,qboolean reset)
+void SetSensitivities (edict_t *ent, qboolean reset)
 {
+#ifndef KMQUAKE2_ENGINE_MOD // engine has zoom mode and autosensitivity
 	char	string[512];
-
+#endif
 	if (deathmatch->value || coop->value) return;
 	if (!ent->inuse) return;
 	if (!ent->client) return;
 	if (reset)
 	{
-#ifndef KMQUAKE2_ENGINE_MOD // engine has zoom autosensitivity
+#ifdef KMQUAKE2_ENGINE_MOD // engine has zoom mode and autosensitivity
+		stuffcmd (ent, "cl_zoommode 0\n");
+#else
 		gi.cvar_set ("m_pitch", va("%f", lazarus_pitch->value));
 		gi.cvar_set ("m_yaw", va("%f", lazarus_yaw->value));
 		gi.cvar_set ("joy_pitchsensitivity", va("%f", lazarus_joyp->value));
@@ -1561,50 +1566,51 @@ void SetSensitivities (edict_t *ent,qboolean reset)
 	//	m_yaw->value                = lazarus_yaw->value;
 	//	joy_pitchsensitivity->value = lazarus_joyp->value;
 	//	joy_yawsensitivity->value   = lazarus_joyy->value;
-#endif
+
 		if (crosshair->value != lazarus_crosshair->value)
 		{
-			Com_sprintf(string, sizeof(string), "set crosshair %0d\n",(int)(lazarus_crosshair->value));
-			stuffcmd(ent,string);
+			Com_sprintf (string, sizeof(string), "crosshair %i\n", atoi(lazarus_crosshair->string));
+			stuffcmd (ent, string);
 		}
 		if (cl_gun->value != lazarus_cl_gun->value)
 		{
-			Com_sprintf(string, sizeof(string), "cl_gun %i\n",atoi(lazarus_cl_gun->string));
-			stuffcmd(ent,string);
+			Com_sprintf (string, sizeof(string), "cl_gun %i\n", atoi(lazarus_cl_gun->string));
+			stuffcmd (ent, string);
 		}
+#endif
 		ent->client->pers.hand = hand->value;
 	}
 	else
 	{
+#ifdef KMQUAKE2_ENGINE_MOD // engine has zoom mode and autosensitivity
+		stuffcmd (ent, "cl_zoommode 1\n");
+#else
 		float	ratio;
 
-		//save in lazarus_crosshair
-		Com_sprintf(string, sizeof(string), "lazarus_crosshair %i\n",atoi(crosshair->string));
-		stuffcmd(ent,string);
-		Com_sprintf(string, sizeof(string), "crosshair 0");
-		stuffcmd(ent,string);
+		// save in lazarus_crosshair
+		Com_sprintf (string, sizeof(string), "lazarus_crosshair %i\n", atoi(crosshair->string));
+		stuffcmd (ent, string);
+		Com_sprintf (string, sizeof(string), "crosshair 0\n");
+		stuffcmd (ent, string);
 
-		Com_sprintf(string, sizeof(string), "lazarus_cl_gun %i\n",atoi(cl_gun->string));
-		stuffcmd(ent,string);
-		Com_sprintf(string, sizeof(string), "cl_gun 0");
-		stuffcmd(ent,string);
+		Com_sprintf (string, sizeof(string), "lazarus_cl_gun %i\n", atoi(cl_gun->string));
+		stuffcmd (ent, string);
+		Com_sprintf (string, sizeof(string), "cl_gun 0\n");
+		stuffcmd (ent, string);
 
 		if (!ent->client->sensitivities_init)
 		{
-#ifndef KMQUAKE2_ENGINE_MOD // engine has zoom autosensitivity
 			ent->client->m_pitch = m_pitch->value;
 			ent->client->m_yaw   = m_yaw->value;
 			ent->client->joy_pitchsensitivity = joy_pitchsensitivity->value;
 			ent->client->joy_yawsensitivity   = joy_yawsensitivity->value;
-#endif
 			ent->client->sensitivities_init = true;
 		}
 		if (ent->client->ps.fov >= ent->client->original_fov)
-			ratio = 1.;
+			ratio = 1.0f;
 		else
 			ratio = ent->client->ps.fov / ent->client->original_fov;
 
-#ifndef KMQUAKE2_ENGINE_MOD // engine has zoom autosensitivity
 		gi.cvar_set ("m_pitch", va("%f", ent->client->m_pitch * ratio));
 		gi.cvar_set ("m_yaw", va("%f", ent->client->m_yaw * ratio));
 		gi.cvar_set ("joy_pitchsensitivity", va("%f", ent->client->joy_pitchsensitivity * ratio));
@@ -1615,10 +1621,10 @@ void SetSensitivities (edict_t *ent,qboolean reset)
 	//	joy_yawsensitivity->value   = ent->client->joy_yawsensitivity * ratio;
 #endif
 	}
-#ifndef KMQUAKE2_ENGINE_MOD // engine has zoom autosensitivity
-	Com_sprintf(string, sizeof(string), "m_pitch %g;m_yaw %g;joy_pitchsensitivity %g;joy_yawsensitivity %g\n",
-		m_pitch->value,m_yaw->value,joy_pitchsensitivity->value,joy_yawsensitivity->value);
-	stuffcmd(ent,string);
+#ifndef KMQUAKE2_ENGINE_MOD // engine has zoom mode and autosensitivity
+	Com_sprintf (string, sizeof(string), "m_pitch %g;m_yaw %g;joy_pitchsensitivity %g;joy_yawsensitivity %g\n",
+				m_pitch->value, m_yaw->value, joy_pitchsensitivity->value, joy_yawsensitivity->value);
+	stuffcmd (ent, string);
 #endif
 }
 
@@ -1952,8 +1958,10 @@ void ClientCommand (edict_t *ent)
 		{
 			if (ent->client->ps.fov > 5)
 			{
+#ifndef KMQUAKE2_ENGINE_MOD // engine has zoom mode and autosensitivity
 				if (cl_gun->value)
-					stuffcmd(ent,"cl_gun 0\n");
+					stuffcmd (ent, "cl_gun 0\n");
+#endif
 				ent->client->frame_zoomrate = zoomrate->value * ent->client->secs_per_frame;
 				ent->client->zooming = 1;
 				ent->client->zoomed = true;
@@ -1966,8 +1974,10 @@ void ClientCommand (edict_t *ent)
 		{
 			if (ent->client->ps.fov < ent->client->original_fov)
 			{
+#ifndef KMQUAKE2_ENGINE_MOD // engine has zoom mode and autosensitivity
 				if (cl_gun->value)
-					stuffcmd(ent,"cl_gun 0\n");
+					stuffcmd (ent, "cl_gun 0\n");
+#endif
 				ent->client->frame_zoomrate = zoomrate->value * ent->client->secs_per_frame;
 				ent->client->zooming = -1;
 				ent->client->zoomed = true;
@@ -1987,17 +1997,19 @@ void ClientCommand (edict_t *ent)
 				ent->client->ps.fov = ent->client->original_fov;
 				ent->client->zooming = 0;
 				ent->client->zoomed = false;
-				SetSensitivities(ent,true);
+				SetSensitivities (ent, true);
 			}
 			else if (!ent->client->zoomed && !ent->client->zooming)
 			{
 				ent->client->ps.fov = zoomsnap->value;
 				ent->client->pers.hand = 2;
+#ifndef KMQUAKE2_ENGINE_MOD // engine has zoom mode and autosensitivity
 				if (cl_gun->value)
-					stuffcmd(ent,"cl_gun 0\n");
+					stuffcmd (ent, "cl_gun 0\n");
+#endif
 				ent->client->zooming = 0;
 				ent->client->zoomed = true;
-				SetSensitivities(ent,false);
+				SetSensitivities (ent, false);
 			}
 		}
 	}
@@ -2010,7 +2022,7 @@ void ClientCommand (edict_t *ent)
 				ent->client->ps.fov = ent->client->original_fov;
 				ent->client->zooming = 0;
 				ent->client->zoomed = false;
-				SetSensitivities(ent,true);
+				SetSensitivities (ent, true);
 			}
 		}
 	}
@@ -2022,11 +2034,13 @@ void ClientCommand (edict_t *ent)
 			{
 				ent->client->ps.fov = zoomsnap->value;
 				ent->client->pers.hand = 2;
+#ifndef KMQUAKE2_ENGINE_MOD // engine has zoom mode and autosensitivity
 				if (cl_gun->value)
-					stuffcmd(ent,"cl_gun 0\n");
+					stuffcmd (ent, "cl_gun 0\n");
+#endif
 				ent->client->zooming = 0;
 				ent->client->zoomed = true;
-				SetSensitivities(ent,false);
+				SetSensitivities (ent, false);
 			}
 		}
 	}
@@ -2040,12 +2054,12 @@ void ClientCommand (edict_t *ent)
 				if (ent->client->ps.fov == ent->client->original_fov)
 				{
 					ent->client->zoomed = false;
-					SetSensitivities(ent,true);
+					SetSensitivities (ent, true);
 				}
 				else
 				{
 					gi.cvar_forceset("zoomsnap",va("%f",ent->client->ps.fov));
-					SetSensitivities(ent,false);
+					SetSensitivities (ent, false);
 				}
 			}
 		}
@@ -2060,12 +2074,12 @@ void ClientCommand (edict_t *ent)
 				if (ent->client->ps.fov == ent->client->original_fov)
 				{
 					ent->client->zoomed = false;
-					SetSensitivities(ent,true);
+					SetSensitivities (ent, true);
 				}
 				else
 				{
 					gi.cvar_forceset("zoomsnap",va("%f",ent->client->ps.fov));
-					SetSensitivities(ent,false);
+					SetSensitivities (ent, false);
 				}
 			}
 		}

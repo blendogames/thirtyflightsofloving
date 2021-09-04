@@ -121,12 +121,24 @@ qboolean UI_IsValidImageFilename (char *name)
 
 /*
 ==========================
+UI_ClampCvar
+==========================
+*/
+void UI_ClampCvar (const char *varName, float cvarMin, float cvarMax)
+{
+	Cvar_SetValue ((char *)varName, ClampCvar( cvarMin, cvarMax, Cvar_VariableValue((char *)varName) ));
+}
+
+
+/*
+==========================
 UI_GetIndexForStringValue
 ==========================
 */
 int	UI_GetIndexForStringValue (const char **item_values, char *value)
 {
-	int		i, index = 0;
+	int			i, index = 0, widlcardIndex = -1;
+	qboolean	found = false;
 
 	// catch null array
 	if (!item_values) {
@@ -135,9 +147,19 @@ int	UI_GetIndexForStringValue (const char **item_values, char *value)
 	}
 
 	for (i=0; item_values[i]; i++)
-		if ( !Q_strcasecmp(va("%s",item_values[i]), value) )
-		{	index = i; break;	}
-
+	{	// Store index of wildcard entry
+		if ( !Q_stricmp(va("%s", item_values[i]), UI_ITEMVALUE_WILDCARD) )
+		{	widlcardIndex = i;	}
+		if ( !Q_strcasecmp(va("%s", item_values[i]), value) ) {
+			index = i;
+			found = true;
+			break;
+		}
+	}
+	// Assign index of wildcard entry if not found
+	if ( !found && (widlcardIndex >= 0) ) {
+		index = widlcardIndex;
+	}
 	return index;
 }
 
@@ -162,6 +184,63 @@ int UI_MouseOverAlpha (menucommon_s *m)
 	}
 	else 
 		return 255;
+}
+
+
+/*
+==========================
+UI_UnbindCommand
+==========================
+*/
+void UI_UnbindCommand (char *command)
+{
+	int		j, len, len2;
+	char	*b;
+
+	len = (int)strlen(command);
+
+	for (j=0; j<256; j++)
+	{
+		b = keybindings[j];
+		if (!b)
+			continue;
+		len2 = (int)strlen(b);
+		// compare with longer length to prevent +attack2 being confused with +attack
+		if ( !strncmp(b, command, max(len, len2)) )
+			Key_SetBinding (j, "");
+	}
+}
+
+
+/*
+==========================
+UI_FindKeysForCommand
+==========================
+*/
+void UI_FindKeysForCommand (char *command, int *twokeys)
+{
+	int		count, j, len, len2;
+	char	*b;
+
+	twokeys[0] = twokeys[1] = -1;
+	len = (int)strlen(command);
+	count = 0;
+
+	for (j=0; j<256; j++)
+	{
+		b = keybindings[j];
+		if (!b)
+			continue;
+		len2 = (int)strlen(b);
+		// compare with longer length to prevent +attack2 being confused with +attack
+		if ( !strncmp(b, command, max(len, len2)) )
+		{
+			twokeys[count] = j;
+			count++;
+			if (count == 2)
+				break;
+		}
+	}
 }
 
 
@@ -207,7 +286,7 @@ int UI_TallyMenuSlots (menuframework_s *menu)
 		if ( ((menucommon_s *)menu->items[i])->type == MTYPE_LIST )
 		{
 			int nitems = 0;
-			const char **n = ((menulist_s *)menu->items[i])->itemnames;
+			const char **n = ((menulist_s *)menu->items[i])->itemNames;
 
 			while (*n)
 				nitems++, n++;
@@ -318,7 +397,8 @@ void UI_GetVideoModes (void)
 	int			i, j=0, w=0, h=0, firstMode=0, numModes=0;
 	float		aspect;
 	char		*tok, resBuf[12], aspectBuf[8], nameBuf[20];
-	qboolean	surround = false;
+//	qboolean	surround = false;
+//	cvar_t		*surround_threshold = Cvar_Get ("scr_surroundthreshold", "3.6", 0);
 
 	// count video modes >= 640x480
 	for (i=0; i<UI_MAX_VIDMODES; i++)
@@ -358,10 +438,10 @@ void UI_GetVideoModes (void)
 			Com_sprintf (resBuf, sizeof(resBuf), "%dx%d", w, h);
 
 			// catch surround modes
-			if (aspect > 3.6f) {
+		/*	if (aspect > surround_threshold->value) {	// 3.6f
 				aspect /= 3.0f;
 				surround = true;
-			}
+			} */
 			if (aspect > 2.39f)
 				tok = "24:10";
 			else if (aspect > 2.3f)
@@ -383,9 +463,9 @@ void UI_GetVideoModes (void)
 			else
 				tok = va("%3.1f:1", aspect);
 
-			if (surround)
+		/*	if (surround)
 				Com_sprintf (aspectBuf, sizeof(aspectBuf), "3x%s", tok);
-			else
+			else */
 				Com_sprintf (aspectBuf, sizeof(aspectBuf), "%s", tok);
 
 		//	Com_sprintf (nameBuf, sizeof(nameBuf), "%-12s%s", resBuf, aspectBuf);
@@ -417,7 +497,7 @@ void UI_FreeVideoModes (void)
 
 
 char	**ui_aniso_names = NULL;
-//char	**ui_aniso_values = NULL;
+char	**ui_aniso_values = NULL;
 int		ui_num_aniso_values = 0;
 
 /*
@@ -444,8 +524,8 @@ void UI_GetAnisoValues (void)
 	// allocate lists
 	ui_aniso_names = malloc ((numValues+1) * sizeof(char *));
 	memset (ui_aniso_names, 0, (numValues+1) * sizeof(char *));
-//	ui_aniso_values = malloc ((numValues+1) * sizeof(char *));
-//	memset (ui_aniso_values, 0, (numValues+1) * sizeof(char *));
+	ui_aniso_values = malloc ((numValues+1) * sizeof(char *));
+	memset (ui_aniso_values, 0, (numValues+1) * sizeof(char *));
 
 	// set names and values
 	for (i=0; i<numValues; i++)
@@ -454,7 +534,7 @@ void UI_GetAnisoValues (void)
 			ui_aniso_names[i] = (numValues == 1) ? strdup("not supported") : strdup("off");
 		else
 			ui_aniso_names[i] = strdup(va("%ix", 1<<i));
-	//	ui_aniso_values[i] = strdup(va("%i", 1<<i));
+		ui_aniso_values[i] = strdup(va("%i", 1<<i));
 	}
 
 	ui_num_aniso_values = numValues;
@@ -470,10 +550,10 @@ void UI_FreeAnisoValues (void)
 {
 	if (ui_num_aniso_values > 0) {
 		FS_FreeFileList (ui_aniso_names, ui_num_aniso_values);
-	//	FS_FreeFileList (ui_aniso_values, ui_num_aniso_values);
+		FS_FreeFileList (ui_aniso_values, ui_num_aniso_values);
 	}
 	ui_aniso_names = NULL;
-//	ui_aniso_values = NULL;
+	ui_aniso_values = NULL;
 }
 
 /*
@@ -804,7 +884,7 @@ void UI_FreeHudNames (void)
 #define UI_MAX_CROSSHAIRS 101	// none + ch1-ch100
 char **ui_crosshair_names = NULL;
 //char **ui_crosshair_display_names = NULL;
-//char **ui_crosshair_values = NULL;
+char **ui_crosshair_values = NULL;
 int	ui_numcrosshairs = 0;
 
 /*
@@ -887,7 +967,7 @@ UI_LoadCrosshairs
 */
 void UI_LoadCrosshairs (void)
 {
-//	int		i;
+	int		i;
 
 	ui_crosshair_names = UI_LoadAssetList ("pics", "ch*.*", "none", &ui_numcrosshairs, UI_MAX_CROSSHAIRS, true, false, UI_IsValidCrosshairName);
 	UI_SortCrosshairs (ui_crosshair_names, ui_numcrosshairs);
@@ -895,12 +975,12 @@ void UI_LoadCrosshairs (void)
 /*	ui_crosshair_display_names = malloc( sizeof(char *) * (UI_MAX_CROSSHAIRS+1) );
 	memcpy(ui_crosshair_display_names, ui_crosshair_names, sizeof(char *) * (UI_MAX_CROSSHAIRS+1));
 	ui_crosshair_display_names[0] = strdup("chnone");
-
+*/
 	ui_crosshair_values  = malloc( sizeof(char *) * (UI_MAX_CROSSHAIRS+1) );
 	memset(ui_crosshair_values, 0, sizeof(char *) * (UI_MAX_CROSSHAIRS+1) );
 
 	for (i=0; i<ui_numcrosshairs; i++)
-		ui_crosshair_values[i] = (i == 0) ? strdup("0") : strdup(strtok(ui_crosshair_names[i], "ch")); */
+		ui_crosshair_values[i] = (i == 0) ? strdup("0") : strdup(strtok(ui_crosshair_names[i], "ch")); 
 }
 
 
@@ -920,12 +1000,12 @@ void UI_FreeCrosshairs (void)
 				free (ui_crosshair_display_names[0]);
 			}
 			free (ui_crosshair_display_names);
-		}
-		FS_FreeFileList (ui_crosshair_values, ui_numcrosshairs); */
+		} */
+		FS_FreeFileList (ui_crosshair_values, ui_numcrosshairs);
 	}
 	ui_crosshair_names = NULL;
 //	ui_crosshair_display_names = NULL;
-//	ui_crosshair_values = NULL;
+	ui_crosshair_values = NULL;
 	ui_numcrosshairs = 0;
 }
 

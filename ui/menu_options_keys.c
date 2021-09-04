@@ -98,9 +98,7 @@ static void M_UnbindCommand (char *command)
 
 static void M_FindKeysForCommand (char *command, int *twokeys)
 {
-	int		count;
-	int		j;
-	int	 	l;
+	int		count, j, l;
 	char	*b;
 
 	twokeys[0] = twokeys[1] = -1;
@@ -125,7 +123,7 @@ static void M_FindKeysForCommand (char *command, int *twokeys)
 	}
 }
 
-static void KeysBackCursorDrawFunc (menuaction_s *self) // back action
+static void M_KeysBackCursorDrawFunc (menuaction_s *self) // back action
 {
 	char	*cursor;
 
@@ -137,7 +135,7 @@ static void KeysBackCursorDrawFunc (menuaction_s *self) // back action
 */
 }
 
-static void KeyCursorDrawFunc (menuframework_s *menu)
+static void M_KeyCursorDrawFunc (menuframework_s *menu)
 {
 	char	*cursor;
 
@@ -156,7 +154,7 @@ static void KeyCursorDrawFunc (menuframework_s *menu)
 */
 }
 
-static void DrawKeyBindingFunc (void *self)
+static void M_DrawKeyBindingFunc (void *self)
 {
 	int keys[2];
 	menuaction_s *a = (menuaction_s *) self;
@@ -190,32 +188,32 @@ static void DrawKeyBindingFunc (void *self)
 	}
 }
 
-static void KeyBindingFunc (void *self)
+static void M_KeyBindingFunc (void *self)
 {
 	menuaction_s *a = ( menuaction_s * ) self;
 	int keys[2];
 
-	M_FindKeysForCommand( bindnames[a->generic.localdata[0]][0], keys );
+	M_FindKeysForCommand (bindnames[a->generic.localdata[0]][0], keys);
 
 	if (keys[1] != -1)
-		M_UnbindCommand( bindnames[a->generic.localdata[0]][0]);
+		M_UnbindCommand (bindnames[a->generic.localdata[0]][0]);
 
 	bind_grab = true;
 
 	UI_SetMenuStatusBar (&s_keys_menu, "press a key or button for this action");
 }
 
-void addBindOption (int i, char *list[][2])
-{		
+void M_AddBindOption (int i, char *list[][2])
+{
 	s_keys_binds[i].generic.type	= MTYPE_ACTION;
 	s_keys_binds[i].generic.textSize = MENU_FONT_SIZE;
 	s_keys_binds[i].generic.flags  = QMF_GRAYED;
 	s_keys_binds[i].generic.x		= 0;
 	s_keys_binds[i].generic.y		= i*MENU_LINE_SIZE;
-	s_keys_binds[i].generic.ownerdraw = DrawKeyBindingFunc;
+	s_keys_binds[i].generic.ownerdraw = M_DrawKeyBindingFunc;
 	s_keys_binds[i].generic.localdata[0] = i;
 	s_keys_binds[i].generic.name	= list[s_keys_binds[i].generic.localdata[0]][1];
-	s_keys_binds[i].generic.callback = KeyBindingFunc;
+	s_keys_binds[i].generic.callback = M_KeyBindingFunc;
 
 	if (strstr ("MENUSPACE", list[i][0]))
 		s_keys_binds[i].generic.type	= MTYPE_SEPARATOR;
@@ -229,11 +227,11 @@ static void Menu_Keys_Init (void)
 	s_keys_menu.x = SCREEN_WIDTH*0.5;
 	s_keys_menu.y = SCREEN_HEIGHT*0.5 - 72;
 	s_keys_menu.nitems = 0;
-	s_keys_menu.cursordraw = KeyCursorDrawFunc;
+	s_keys_menu.cursordraw = M_KeyCursorDrawFunc;
 
 	BINDS_MAX = listSize(bindnames);
 	for (i=0;i<BINDS_MAX;i++)
-		addBindOption (i, bindnames);
+		M_AddBindOption (i, bindnames);
 
 	s_keys_back_action.generic.type = MTYPE_ACTION;
 	s_keys_back_action.generic.textSize = MENU_FONT_SIZE;
@@ -242,7 +240,7 @@ static void Menu_Keys_Init (void)
 	s_keys_back_action.generic.y	= (BINDS_MAX+2)*MENU_LINE_SIZE;
 	s_keys_back_action.generic.name	= " back";
 	s_keys_back_action.generic.callback = UI_BackMenu;
-	s_keys_back_action.generic.cursordraw = KeysBackCursorDrawFunc;
+	s_keys_back_action.generic.cursordraw = M_KeysBackCursorDrawFunc;
 
 	for (i=0;i<BINDS_MAX;i++)
 		UI_AddMenuItem (&s_keys_menu, (void *) &s_keys_binds[i]);
@@ -265,7 +263,7 @@ static const char *Menu_Keys_Key (int key)
 {
 	menuaction_s *item = (menuaction_s *) UI_ItemAtMenuCursor( &s_keys_menu );
 
-	//pressing mouse1 to pick a new bind wont force bind/unbind itself - spaz
+	// pressing mouse1 to pick a new bind wont force bind/unbind itself - spaz
 	if ( bind_grab && !(ui_mousecursor.buttonused[MOUSEBUTTON1]&&key==K_MOUSE1))
 	{	
 		if ( key != K_ESCAPE && key != '`' )
@@ -293,7 +291,7 @@ static const char *Menu_Keys_Key (int key)
 	case K_ENTER:
 		if (item == &s_keys_back_action) { // back action hack
 			UI_BackMenu(item); return NULL; }
-		KeyBindingFunc (item);
+		M_KeyBindingFunc (item);
 		return menu_in_sound;
 	case K_BACKSPACE:		// delete bindings
 	case K_DEL:				// delete bindings

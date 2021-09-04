@@ -1200,7 +1200,7 @@ void G_SetClientEffects (edict_t *ent)
 	}
 
 	// show god mode
-	if ((coop->value || deathmatch->value) && ent->flags & FL_GODMODE && !(ent->client && ent->client->chaseactive))
+	if ( (coop->value || deathmatch->value) && (ent->flags & FL_GODMODE) && !(ent->client && ent->client->chaseactive) )
 	{
 		ent->s.effects |= EF_COLOR_SHELL;
 		ent->s.renderfx |= (RF_SHELL_RED|RF_SHELL_GREEN|RF_SHELL_BLUE);

@@ -71,48 +71,50 @@ void DownloadOptionsFunc (void *unused)
 
 void Menu_Multiplayer_Init (void)
 {
-	s_multiplayer_menu.x = SCREEN_WIDTH*0.5 - 64;
-//	s_multiplayer_menu.y = 0;
+	int		x = 0, y = 0;
+
+	s_multiplayer_menu.x = SCREEN_WIDTH*0.5 - 9*MENU_FONT_SIZE;		// -64
+	s_multiplayer_menu.y = SCREEN_HEIGHT*0.5 - 5*MENU_LINE_SIZE;	// 0
 	s_multiplayer_menu.nitems = 0;
 
 	s_join_network_server_action.generic.type		= MTYPE_ACTION;
-	s_join_network_server_action.generic.textSize	= MENU_FONT_SIZE;
+	s_join_network_server_action.generic.textSize	= MENU_HEADER_FONT_SIZE;
 	s_join_network_server_action.generic.flags		= QMF_LEFT_JUSTIFY;
-	s_join_network_server_action.generic.x			= 0;
-	s_join_network_server_action.generic.y			= 0;
-	s_join_network_server_action.generic.name		= " join network server";
+	s_join_network_server_action.generic.x			= x;
+	s_join_network_server_action.generic.y			= y;
+	s_join_network_server_action.generic.name		= "Join Network Server";
 	s_join_network_server_action.generic.callback	= JoinNetworkServerFunc;
 
 	s_start_network_server_action.generic.type		= MTYPE_ACTION;
-	s_start_network_server_action.generic.textSize	= MENU_FONT_SIZE;
+	s_start_network_server_action.generic.textSize	= MENU_HEADER_FONT_SIZE;
 	s_start_network_server_action.generic.flags		= QMF_LEFT_JUSTIFY;
-	s_start_network_server_action.generic.x			= 0;
-	s_start_network_server_action.generic.y			= 2*MENU_FONT_SIZE;
-	s_start_network_server_action.generic.name		= " start network server";
+	s_start_network_server_action.generic.x			= x;
+	s_start_network_server_action.generic.y			= y += 2*MENU_LINE_SIZE;	// 2*MENU_FONT_SIZE
+	s_start_network_server_action.generic.name		= "Start Network Server";
 	s_start_network_server_action.generic.callback	= StartNetworkServerFunc;
 
 	s_player_setup_action.generic.type		= MTYPE_ACTION;
-	s_player_setup_action.generic.textSize	= MENU_FONT_SIZE;
+	s_player_setup_action.generic.textSize	= MENU_HEADER_FONT_SIZE;
 	s_player_setup_action.generic.flags		= QMF_LEFT_JUSTIFY;
-	s_player_setup_action.generic.x			= 0;
-	s_player_setup_action.generic.y			= 4*MENU_FONT_SIZE;
-	s_player_setup_action.generic.name		= " player setup";
+	s_player_setup_action.generic.x			= x;
+	s_player_setup_action.generic.y			= y += 2*MENU_LINE_SIZE;	// 4*MENU_FONT_SIZE
+	s_player_setup_action.generic.name		= "Player Setup";
 	s_player_setup_action.generic.callback	= PlayerSetupFunc;
 
 	s_download_options_action.generic.type		= MTYPE_ACTION;
-	s_download_options_action.generic.textSize	= MENU_FONT_SIZE;
+	s_download_options_action.generic.textSize	= MENU_HEADER_FONT_SIZE;
 	s_download_options_action.generic.flags		= QMF_LEFT_JUSTIFY;
-	s_download_options_action.generic.x			= 0;
-	s_download_options_action.generic.y			= 6*MENU_FONT_SIZE;
-	s_download_options_action.generic.name		= " download options";
+	s_download_options_action.generic.x			= x;
+	s_download_options_action.generic.y			= y += 2*MENU_LINE_SIZE;	// 6*MENU_FONT_SIZE
+	s_download_options_action.generic.name		= "Download Options";
 	s_download_options_action.generic.callback	= DownloadOptionsFunc;
 
 	s_backmain_action.generic.type		= MTYPE_ACTION;
-	s_backmain_action.generic.textSize	= MENU_FONT_SIZE;
+	s_backmain_action.generic.textSize	= MENU_HEADER_FONT_SIZE;
 	s_backmain_action.generic.flags		= QMF_LEFT_JUSTIFY;
-	s_backmain_action.generic.x			= 0;
-	s_backmain_action.generic.y			= 9*MENU_FONT_SIZE;
-	s_backmain_action.generic.name		= " back to main";
+	s_backmain_action.generic.x			= x;
+	s_backmain_action.generic.y			= y += 3*MENU_HEADER_LINE_SIZE;	// 9*MENU_FONT_SIZE
+	s_backmain_action.generic.name		= "Back to Main";
 	s_backmain_action.generic.callback	= UI_BackMenu;
 
 	UI_AddMenuItem (&s_multiplayer_menu, (void *) &s_join_network_server_action);
@@ -123,7 +125,7 @@ void Menu_Multiplayer_Init (void)
 
 	UI_SetMenuStatusBar (&s_multiplayer_menu, NULL);
 
-	UI_CenterMenu (&s_multiplayer_menu);
+//	UI_CenterMenu (&s_multiplayer_menu);
 }
 
 static void Menu_Multiplayer_Draw (void)
