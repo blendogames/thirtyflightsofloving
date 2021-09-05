@@ -215,10 +215,10 @@ void Menu_DownloadOptions_Init (void)
 
 	s_download_back_action.generic.type			= MTYPE_ACTION;
 	s_download_back_action.generic.textSize		= MENU_FONT_SIZE;
-	s_download_back_action.generic.flags		= QMF_LEFT_JUSTIFY;
-	s_download_back_action.generic.x			= 0;
+	s_download_back_action.generic.flags		= 0;				// QMF_LEFT_JUSTIFY
+	s_download_back_action.generic.x			= MENU_FONT_SIZE;	// 0
 	s_download_back_action.generic.y			= y += 3*MENU_LINE_SIZE;
-	s_download_back_action.generic.name			= " back";
+	s_download_back_action.generic.name			= "Back to Multiplayer";
 	s_download_back_action.generic.callback		= UI_BackMenu;
 
 	M_Download_SetMenuItemValues ();

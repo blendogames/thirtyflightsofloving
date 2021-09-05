@@ -839,13 +839,12 @@ void V_Texture_f (void)
 	trace_t	tr;
 	vec3_t	forward, start, end;
 
-//	if (!developer->value) // only works in developer mode
 	if (!developer->integer) // only works in developer mode
 		return;
 
-	VectorCopy(cl.refdef.vieworg, start);
-	AngleVectors(cl.refdef.viewangles, forward, NULL, NULL);
-	VectorMA(start, WORLD_SIZE, forward, end);	// was 8192
+	VectorCopy (cl.refdef.vieworg, start);
+	AngleVectors (cl.refdef.viewangles, forward, NULL, NULL);
+	VectorMA (start, WORLD_SIZE, forward, end);	// was 8192
 	tr = CL_PMSurfaceTrace(cl.playernum+1, start,NULL,NULL,end,MASK_ALL);
 	if (!tr.ent)
 		Com_Printf("Nothing hit?\n");
@@ -853,7 +852,7 @@ void V_Texture_f (void)
 		if (!tr.surface)
 			Com_Printf("Not a brush\n");
 		else
-			Com_Printf("Texture=%s, surface=0x%08x, value=%d\n", tr.surface->name, tr.surface->flags, tr.surface->value);
+			Com_Printf("Texture=%s, surfaceFlags=0x%08x, value=%d\n", tr.surface->name, tr.surface->flags, tr.surface->value);
 	}
 }
 
@@ -868,7 +867,6 @@ void V_Surf_f (void)
 	vec3_t	forward, start, end;
 	int		s;
 
-//	if (!developer->value) // only works in developer mode
 	if (!developer->integer) // only works in developer mode
 		return;
 
@@ -885,10 +883,10 @@ void V_Surf_f (void)
 	else
 		s = atoi(Cmd_Argv(1));
 
-	VectorCopy(cl.refdef.vieworg, start);
-	AngleVectors(cl.refdef.viewangles, forward, NULL, NULL);
-	VectorMA(start, WORLD_SIZE, forward, end);	// was 8192
-	tr = CL_PMSurfaceTrace(cl.playernum+1, start,NULL,NULL,end,MASK_ALL);
+	VectorCopy (cl.refdef.vieworg, start);
+	AngleVectors (cl.refdef.viewangles, forward, NULL, NULL);
+	VectorMA (start, WORLD_SIZE, forward, end);	// was 8192
+	tr = CL_PMSurfaceTrace(cl.playernum+1, start, NULL, NULL, end, MASK_ALL);
 	if (!tr.ent)
 		Com_Printf("Nothing hit?\n");
 	else
@@ -959,7 +957,7 @@ void V_Init (void)
 	// Knightmare- diagnostic commands from Lazarus
 	Cmd_AddCommand ("texture", V_Texture_f);
 	Cmd_AddCommand ("surf", V_Surf_f);
-	//Cmd_AddCommand ("bbox", V_BBox_f);
+//	Cmd_AddCommand ("bbox", V_BBox_f);
 
 	hand = Cvar_Get ("hand", "0", CVAR_ARCHIVE);
 

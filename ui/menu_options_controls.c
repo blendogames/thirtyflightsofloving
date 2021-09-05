@@ -55,6 +55,7 @@ static menuaction_s		s_options_controls_customize_keys_action;
 static menuaction_s		s_options_controls_defaults_action;
 static menuaction_s		s_options_controls_back_action;
 
+//=======================================================================
 
 static void MouseSpeedFunc (void *unused)
 {
@@ -122,6 +123,8 @@ static void CustomizeControlsFunc(void *unused)
 	Menu_Keys_f ();
 }
 
+//=======================================================================
+
 static void M_ControlsSetMenuItemValues (void)
 {
 	UI_MenuSlider_SetValue (&s_options_controls_sensitivity_slider, "sensitivity", 1.0f, 11.0f, false);
@@ -161,6 +164,8 @@ static void M_ControlsResetDefaultsFunc (void *unused)
 
 	M_ControlsSetMenuItemValues ();
 }
+
+//=======================================================================
 
 void Menu_Options_Controls_Init (void)
 {
@@ -262,7 +267,7 @@ void Menu_Options_Controls_Init (void)
 	s_options_controls_alwaysrun_box.generic.type		= MTYPE_SPINCONTROL;
 	s_options_controls_alwaysrun_box.generic.textSize	= MENU_FONT_SIZE;
 	s_options_controls_alwaysrun_box.generic.x			= 0;
-	s_options_controls_alwaysrun_box.generic.y			= y+=2*MENU_LINE_SIZE;
+	s_options_controls_alwaysrun_box.generic.y			= y += 2*MENU_LINE_SIZE;
 	s_options_controls_alwaysrun_box.generic.name		= "always run";
 	s_options_controls_alwaysrun_box.generic.callback	= AlwaysRunFunc;
 	s_options_controls_alwaysrun_box.itemNames			= yesno_names;
@@ -271,7 +276,7 @@ void Menu_Options_Controls_Init (void)
 	s_options_controls_lookspring_box.generic.type		= MTYPE_SPINCONTROL;
 	s_options_controls_lookspring_box.generic.textSize	= MENU_FONT_SIZE;
 	s_options_controls_lookspring_box.generic.x			= 0;
-	s_options_controls_lookspring_box.generic.y			= y+=MENU_LINE_SIZE;
+	s_options_controls_lookspring_box.generic.y			= y += MENU_LINE_SIZE;
 	s_options_controls_lookspring_box.generic.name		= "lookspring";
 	s_options_controls_lookspring_box.generic.callback	= LookspringFunc;
 	s_options_controls_lookspring_box.itemNames			= yesno_names;
@@ -279,7 +284,7 @@ void Menu_Options_Controls_Init (void)
 	s_options_controls_lookstrafe_box.generic.type		= MTYPE_SPINCONTROL;
 	s_options_controls_lookstrafe_box.generic.textSize	= MENU_FONT_SIZE;
 	s_options_controls_lookstrafe_box.generic.x			= 0;
-	s_options_controls_lookstrafe_box.generic.y			= y+=MENU_LINE_SIZE;
+	s_options_controls_lookstrafe_box.generic.y			= y += MENU_LINE_SIZE;
 	s_options_controls_lookstrafe_box.generic.name		= "lookstrafe";
 	s_options_controls_lookstrafe_box.generic.callback	= LookstrafeFunc;
 	s_options_controls_lookstrafe_box.itemNames			= yesno_names;
@@ -287,7 +292,7 @@ void Menu_Options_Controls_Init (void)
 	s_options_controls_freelook_box.generic.type		= MTYPE_SPINCONTROL;
 	s_options_controls_freelook_box.generic.textSize	= MENU_FONT_SIZE;
 	s_options_controls_freelook_box.generic.x			= 0;
-	s_options_controls_freelook_box.generic.y			= y+=MENU_LINE_SIZE;
+	s_options_controls_freelook_box.generic.y			= y += MENU_LINE_SIZE;
 	s_options_controls_freelook_box.generic.name		= "free look";
 	s_options_controls_freelook_box.generic.callback	= FreeLookFunc;
 	s_options_controls_freelook_box.itemNames			= yesno_names;
@@ -296,7 +301,7 @@ void Menu_Options_Controls_Init (void)
 	s_options_controls_joystick_box.generic.type		= MTYPE_SPINCONTROL;
 	s_options_controls_joystick_box.generic.textSize	= MENU_FONT_SIZE;
 	s_options_controls_joystick_box.generic.x			= 0;
-	s_options_controls_joystick_box.generic.y			= y+=MENU_LINE_SIZE;
+	s_options_controls_joystick_box.generic.y			= y += MENU_LINE_SIZE;
 	s_options_controls_joystick_box.generic.name		= "use joystick";
 	s_options_controls_joystick_box.generic.callback	= JoystickFunc;
 	s_options_controls_joystick_box.itemNames			= yesno_names;
@@ -305,15 +310,15 @@ void Menu_Options_Controls_Init (void)
 	s_options_controls_customize_keys_action.generic.type		= MTYPE_ACTION;
 	s_options_controls_customize_keys_action.generic.textSize	= MENU_FONT_SIZE;
 	s_options_controls_customize_keys_action.generic.x			= MENU_FONT_SIZE;
-	s_options_controls_customize_keys_action.generic.y			= y+=2*MENU_LINE_SIZE;
-	s_options_controls_customize_keys_action.generic.name		= "customize controls";
+	s_options_controls_customize_keys_action.generic.y			= y += 2*MENU_LINE_SIZE;
+	s_options_controls_customize_keys_action.generic.name		= "Customize Controls";
 	s_options_controls_customize_keys_action.generic.callback	= CustomizeControlsFunc;
 
 	s_options_controls_defaults_action.generic.type			= MTYPE_ACTION;
 	s_options_controls_defaults_action.generic.textSize		= MENU_FONT_SIZE;
 	s_options_controls_defaults_action.generic.x			= MENU_FONT_SIZE;
 	s_options_controls_defaults_action.generic.y			= 20*MENU_LINE_SIZE;
-	s_options_controls_defaults_action.generic.name			= "reset defaults";
+	s_options_controls_defaults_action.generic.name			= "Reset to Defaults";
 	s_options_controls_defaults_action.generic.callback		= M_ControlsResetDefaultsFunc;
 	s_options_controls_defaults_action.generic.statusbar	= "resets all control settings to internal defaults";
 
@@ -321,7 +326,7 @@ void Menu_Options_Controls_Init (void)
 	s_options_controls_back_action.generic.textSize		= MENU_FONT_SIZE;
 	s_options_controls_back_action.generic.x			= MENU_FONT_SIZE;
 	s_options_controls_back_action.generic.y			= 22*MENU_LINE_SIZE;
-	s_options_controls_back_action.generic.name			= "back to options";
+	s_options_controls_back_action.generic.name			= "Back to Options";
 	s_options_controls_back_action.generic.callback		= UI_BackMenu;
 
 	UI_AddMenuItem (&s_options_controls_menu, (void *) &s_options_controls_header);

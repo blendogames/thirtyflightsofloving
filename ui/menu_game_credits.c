@@ -146,7 +146,7 @@ const char *Menu_Credits_Key (int key)
 		if (creditsBuffer)
 			FS_FreeFile (creditsBuffer);
 		UI_PopMenu ();
-		sound = menu_out_sound;
+		sound = ui_menu_out_sound;
 		break;
 	default:
 		break;

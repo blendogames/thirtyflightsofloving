@@ -204,11 +204,8 @@ static void M_ApplyVideoChanges (void *unused)
 //	UI_ForceMenuOff();
 }
 
-/*
-================
-Menu_Video_Init
-================
-*/
+//=======================================================================
+
 void Menu_Video_Init (void)
 {
 	static const char *yesno_names[] =
@@ -478,14 +475,14 @@ void Menu_Video_Init (void)
 
 	s_advanced_action.generic.type		= MTYPE_ACTION;
 	s_advanced_action.generic.textSize	= MENU_FONT_SIZE;
-	s_advanced_action.generic.name		= "advanced options";
+	s_advanced_action.generic.name		= "Advanced Options";
 	s_advanced_action.generic.x			= 0;
 	s_advanced_action.generic.y			= y += 3*MENU_LINE_SIZE;
 	s_advanced_action.generic.callback	= M_AdvancedOptions;
 
 	s_defaults_action.generic.type		= MTYPE_ACTION;
 	s_defaults_action.generic.textSize	= MENU_FONT_SIZE;
-	s_defaults_action.generic.name		= "reset to defaults";
+	s_defaults_action.generic.name		= "Reset to Defaults";
 	s_defaults_action.generic.x			= 0;
 	s_defaults_action.generic.y			= y += 3*MENU_LINE_SIZE;
 	s_defaults_action.generic.callback	= M_ResetVideoDefaults;
@@ -494,14 +491,14 @@ void Menu_Video_Init (void)
 	// changed cancel to apply changes, thanx to MrG
 	s_apply_action.generic.type			= MTYPE_ACTION;
 	s_apply_action.generic.textSize		= MENU_FONT_SIZE;
-	s_apply_action.generic.name			= "apply changes";
+	s_apply_action.generic.name			= "Apply Changes";
 	s_apply_action.generic.x			= 0;
 	s_apply_action.generic.y			= y += 2*MENU_LINE_SIZE;
 	s_apply_action.generic.callback		= M_ApplyVideoChanges;
 
 	s_backmain_action.generic.type		= MTYPE_ACTION;
 	s_backmain_action.generic.textSize	= MENU_FONT_SIZE;
-	s_backmain_action.generic.name		= "back to main";
+	s_backmain_action.generic.name		= "Back to Main";
 	s_backmain_action.generic.x			= 0;
 	s_backmain_action.generic.y			= y += 2*MENU_LINE_SIZE;
 	s_backmain_action.generic.callback	= UI_BackMenu;
@@ -535,11 +532,6 @@ void Menu_Video_Init (void)
 //	s_video_menu.x -= MENU_FONT_SIZE;
 }
 
-/*
-================
-Menu_Video_Draw
-================
-*/
 void Menu_Video_Draw (void)
 {
 	//int w, h;
@@ -554,11 +546,6 @@ void Menu_Video_Draw (void)
 	UI_DrawMenu (&s_video_menu);
 }
 
-/*
-================
-Video_MenuKey
-================
-*/
 const char *Menu_Video_Key (int key)
 {
 	return UI_DefaultMenuKey (&s_video_menu, key);

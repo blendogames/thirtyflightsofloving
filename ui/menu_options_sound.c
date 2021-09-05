@@ -48,6 +48,7 @@ static menulist_s		s_options_sound_compatibility_list;
 static menuaction_s		s_options_sound_defaults_action;
 static menuaction_s		s_options_sound_back_action;
 
+//=======================================================================
 
 static void VolumeFunc (void *unused)
 {
@@ -68,6 +69,8 @@ static void CDVolumeFunc (void *unused)
 {
 	UI_MenuSpinControl_SaveValue (&s_options_sound_cdvolume_box, "cd_nocd");
 }
+
+//=======================================================================
 
 static void M_UpdateSoundQualityFunc (void *unused)
 {
@@ -118,6 +121,8 @@ static void M_SoundResetDefaultsFunc (void *unused)
 
 	M_SoundSetMenuItemValues();
 }
+
+//=======================================================================
 
 void Menu_Options_Sound_Init (void)
 {
@@ -240,7 +245,7 @@ void Menu_Options_Sound_Init (void)
 	s_options_sound_defaults_action.generic.textSize	= MENU_FONT_SIZE;
 	s_options_sound_defaults_action.generic.x			= MENU_FONT_SIZE;
 	s_options_sound_defaults_action.generic.y			= 18*MENU_LINE_SIZE;
-	s_options_sound_defaults_action.generic.name		= "reset defaults";
+	s_options_sound_defaults_action.generic.name		= "Reset to Defaults";
 	s_options_sound_defaults_action.generic.callback	= M_SoundResetDefaultsFunc;
 	s_options_sound_defaults_action.generic.statusbar	= "resets all sound settings to internal defaults";
 
@@ -248,7 +253,7 @@ void Menu_Options_Sound_Init (void)
 	s_options_sound_back_action.generic.textSize		= MENU_FONT_SIZE;
 	s_options_sound_back_action.generic.x				= MENU_FONT_SIZE;
 	s_options_sound_back_action.generic.y				= 20*MENU_LINE_SIZE;
-	s_options_sound_back_action.generic.name			= "back to options";
+	s_options_sound_back_action.generic.name			= "Back to Options";
 	s_options_sound_back_action.generic.callback		= UI_BackMenu;
 
 	UI_AddMenuItem (&s_options_sound_menu, (void *) &s_options_sound_header);

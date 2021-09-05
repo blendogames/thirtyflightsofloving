@@ -51,6 +51,7 @@ static menulist_s		s_options_effects_footstep_box;
 static menuaction_s		s_options_effects_defaults_action;
 static menuaction_s		s_options_effects_back_action;
 
+//=======================================================================
 
 static void BloodFunc (void *unused)
 {
@@ -147,6 +148,8 @@ static void M_EffectsResetDefaultsFunc (void *unused)
 
 	M_EffectsSetMenuItemValues ();
 }
+
+//=======================================================================
 
 void Options_Effects_MenuInit (void)
 {
@@ -304,7 +307,7 @@ void Options_Effects_MenuInit (void)
 	s_options_effects_defaults_action.generic.textSize	= MENU_FONT_SIZE;
 	s_options_effects_defaults_action.generic.x			= MENU_FONT_SIZE;
 	s_options_effects_defaults_action.generic.y			= y += 2*MENU_LINE_SIZE;
-	s_options_effects_defaults_action.generic.name		= "reset defaults";
+	s_options_effects_defaults_action.generic.name		= "Reset to Defaults";
 	s_options_effects_defaults_action.generic.callback	= M_EffectsResetDefaultsFunc;
 	s_options_effects_defaults_action.generic.statusbar	= "resets all effects settings to internal defaults";
 
@@ -312,7 +315,7 @@ void Options_Effects_MenuInit (void)
 	s_options_effects_back_action.generic.textSize		= MENU_FONT_SIZE;
 	s_options_effects_back_action.generic.x				= MENU_FONT_SIZE;
 	s_options_effects_back_action.generic.y				= y += 2*MENU_LINE_SIZE;
-	s_options_effects_back_action.generic.name			= "back to options";
+	s_options_effects_back_action.generic.name			= "Back to Options";
 	s_options_effects_back_action.generic.callback		= UI_BackMenu;
 
 	UI_AddMenuItem (&s_options_effects_menu, (void *) &s_options_effects_header);

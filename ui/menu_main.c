@@ -283,7 +283,7 @@ void UI_CheckMainMenuMouse (void)
 	if (!ui_mousecursor.buttonused[MOUSEBUTTON2] && ui_mousecursor.buttonclicks[MOUSEBUTTON2]==2)
 	{
 		UI_PopMenu();
-		sound = menu_out_sound;
+		sound = ui_menu_out_sound;
 		ui_mousecursor.buttonused[MOUSEBUTTON2] = true;
 		ui_mousecursor.buttonclicks[MOUSEBUTTON2] = 0;
 	}
@@ -302,7 +302,7 @@ void UI_CheckMainMenuMouse (void)
 				!ui_mousecursor.buttonused[MOUSEBUTTON1] && ui_mousecursor.buttonclicks[MOUSEBUTTON1]==1)
 			{
 				OpenMenuFromMain();
-				sound = menu_move_sound;
+				sound = ui_menu_move_sound;
 				ui_mousecursor.buttonused[MOUSEBUTTON1] = true;
 				ui_mousecursor.buttonclicks[MOUSEBUTTON1] = 0;
 			}
@@ -331,7 +331,7 @@ Menu_Main_Key
 */
 const char *Menu_Main_Key (int key)
 {
-	const char *sound = menu_move_sound;
+	const char *sound = ui_menu_move_sound;
 
 	switch (key)
 	{

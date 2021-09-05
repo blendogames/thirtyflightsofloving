@@ -125,6 +125,8 @@ static void M_ScreenResetDefaultsFunc (void *unused)
 	M_ScreenSetMenuItemValues ();
 }
 
+//=======================================================================
+
 void Menu_Options_Screen_Init (void)
 {
 	static const char *yesno_names[] =
@@ -241,16 +243,16 @@ void Menu_Options_Screen_Init (void)
 	s_options_screen_defaults_action.generic.type		= MTYPE_ACTION;
 	s_options_screen_defaults_action.generic.textSize	= MENU_FONT_SIZE;
 	s_options_screen_defaults_action.generic.x			= MENU_FONT_SIZE;
-	s_options_screen_defaults_action.generic.y			= y+=2*MENU_LINE_SIZE;
-	s_options_screen_defaults_action.generic.name		= "reset defaults";
+	s_options_screen_defaults_action.generic.y			= y += 2*MENU_LINE_SIZE;
+	s_options_screen_defaults_action.generic.name		= "Reset to Defaults";
 	s_options_screen_defaults_action.generic.callback	= M_ScreenResetDefaultsFunc;
 	s_options_screen_defaults_action.generic.statusbar	= "resets all screen settings to internal defaults";
 
 	s_options_screen_back_action.generic.type			= MTYPE_ACTION;
 	s_options_screen_back_action.generic.textSize		= MENU_FONT_SIZE;
 	s_options_screen_back_action.generic.x				= MENU_FONT_SIZE;
-	s_options_screen_back_action.generic.y				= y+=2*MENU_LINE_SIZE;
-	s_options_screen_back_action.generic.name			= "back to options";
+	s_options_screen_back_action.generic.y				= y += 2*MENU_LINE_SIZE;
+	s_options_screen_back_action.generic.name			= "Back to Options";
 	s_options_screen_back_action.generic.callback		= UI_BackMenu;
 
 	UI_AddMenuItem (&s_options_screen_menu, (void *) &s_options_screen_header);
@@ -294,7 +296,7 @@ void Menu_Options_Screen_Crosshair_MouseClick (void)
 
 			ui_mousecursor.buttonused[MOUSEBUTTON1] = true;
 			ui_mousecursor.buttonclicks[MOUSEBUTTON1] = 0;
-			sound = menu_move_sound;
+			sound = ui_menu_move_sound;
 			if ( sound )
 				S_StartLocalSound( sound );
 		}
@@ -307,7 +309,7 @@ void Menu_Options_Screen_Crosshair_MouseClick (void)
 
 			ui_mousecursor.buttonused[MOUSEBUTTON2] = true;
 			ui_mousecursor.buttonclicks[MOUSEBUTTON2] = 0;
-			sound = menu_move_sound;
+			sound = ui_menu_move_sound;
 			if ( sound )
 				S_StartLocalSound( sound );
 		}
@@ -321,11 +323,8 @@ void Menu_Options_Screen_DrawCrosshair (void)
 	UI_DrawFill (SCREEN_WIDTH*0.5 - 17, s_options_screen_menu.y + 43,
 					34, 34, ALIGN_CENTER,  false, 0,0,0,255);
 
-	if (s_options_screen_crosshair_box.curValue < 1)
-		return;
-
 	UI_DrawPic (SCREEN_WIDTH*0.5-16, s_options_screen_menu.y + 44,
-					32, 32, ALIGN_CENTER, false, ui_crosshair_names[s_options_screen_crosshair_box.curValue], 1.0);
+					32, 32, ALIGN_CENTER, false, ui_crosshair_display_names[s_options_screen_crosshair_box.curValue], 1.0);
 }
 
 void Menu_Options_Screen_Draw (void)

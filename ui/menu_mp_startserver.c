@@ -173,6 +173,8 @@ void Menu_StartServerActionFunc (void *self)
 	UI_StartServer (startmap, (s_dedicated_box.curValue != 0));
 }
 
+//=======================================================================
+
 void Menu_StartServer_Init (void)
 {
 	static const char *yesno_names[] =
@@ -306,26 +308,26 @@ void Menu_StartServer_Init (void)
 
 	s_startserver_dmoptions_action.generic.type			= MTYPE_ACTION;
 	s_startserver_dmoptions_action.generic.textSize		= MENU_FONT_SIZE;
-	s_startserver_dmoptions_action.generic.name			= " deathmatch flags";
+	s_startserver_dmoptions_action.generic.name			= "Deathmatch Flags";
 	s_startserver_dmoptions_action.generic.flags		= QMF_LEFT_JUSTIFY;
-	s_startserver_dmoptions_action.generic.x			= 24;
+	s_startserver_dmoptions_action.generic.x			= 4*MENU_FONT_SIZE;
 	s_startserver_dmoptions_action.generic.y			= y += 2*MENU_FONT_SIZE;
 	s_startserver_dmoptions_action.generic.statusbar	= NULL;
 	s_startserver_dmoptions_action.generic.callback		= M_DMOptionsFunc;
 
 	s_startserver_start_action.generic.type		= MTYPE_ACTION;
 	s_startserver_start_action.generic.textSize	= MENU_FONT_SIZE;
-	s_startserver_start_action.generic.name		= " begin";
+	s_startserver_start_action.generic.name		= "Begin";
 	s_startserver_start_action.generic.flags	= QMF_LEFT_JUSTIFY;
-	s_startserver_start_action.generic.x		= 24;
+	s_startserver_start_action.generic.x		= 4*MENU_FONT_SIZE;
 	s_startserver_start_action.generic.y		= y += 2*MENU_LINE_SIZE;
 	s_startserver_start_action.generic.callback	= Menu_StartServerActionFunc;
 
 	s_startserver_back_action.generic.type		= MTYPE_ACTION;
 	s_startserver_back_action.generic.textSize	= MENU_FONT_SIZE;
-	s_startserver_back_action.generic.name		= " back to multiplayer";
+	s_startserver_back_action.generic.name		= "Back to Multiplayer";
 	s_startserver_back_action.generic.flags		= QMF_LEFT_JUSTIFY;
-	s_startserver_back_action.generic.x			= 24;
+	s_startserver_back_action.generic.x			= 4*MENU_FONT_SIZE;
 	s_startserver_back_action.generic.y			= y += 3*MENU_LINE_SIZE;
 	s_startserver_back_action.generic.callback	= UI_BackMenu;
 

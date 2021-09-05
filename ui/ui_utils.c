@@ -883,7 +883,7 @@ void UI_FreeHudNames (void)
 
 #define UI_MAX_CROSSHAIRS 101	// none + ch1-ch100
 char **ui_crosshair_names = NULL;
-//char **ui_crosshair_display_names = NULL;
+char **ui_crosshair_display_names = NULL;
 char **ui_crosshair_values = NULL;
 int	ui_numcrosshairs = 0;
 
@@ -972,10 +972,10 @@ void UI_LoadCrosshairs (void)
 	ui_crosshair_names = UI_LoadAssetList ("pics", "ch*.*", "none", &ui_numcrosshairs, UI_MAX_CROSSHAIRS, true, false, UI_IsValidCrosshairName);
 	UI_SortCrosshairs (ui_crosshair_names, ui_numcrosshairs);
 
-/*	ui_crosshair_display_names = malloc( sizeof(char *) * (UI_MAX_CROSSHAIRS+1) );
+	ui_crosshair_display_names = malloc( sizeof(char *) * (UI_MAX_CROSSHAIRS+1) );
 	memcpy(ui_crosshair_display_names, ui_crosshair_names, sizeof(char *) * (UI_MAX_CROSSHAIRS+1));
 	ui_crosshair_display_names[0] = strdup("chnone");
-*/
+
 	ui_crosshair_values  = malloc( sizeof(char *) * (UI_MAX_CROSSHAIRS+1) );
 	memset(ui_crosshair_values, 0, sizeof(char *) * (UI_MAX_CROSSHAIRS+1) );
 
@@ -994,17 +994,17 @@ void UI_FreeCrosshairs (void)
 	if (ui_numcrosshairs > 0)
 	{
 		FS_FreeFileList (ui_crosshair_names, ui_numcrosshairs);
-	/*	if (ui_crosshair_display_names)
+		if (ui_crosshair_display_names)
 		{
 			if (ui_crosshair_display_names[0]) {
 				free (ui_crosshair_display_names[0]);
 			}
 			free (ui_crosshair_display_names);
-		} */
+		}
 		FS_FreeFileList (ui_crosshair_values, ui_numcrosshairs);
 	}
 	ui_crosshair_names = NULL;
-//	ui_crosshair_display_names = NULL;
+	ui_crosshair_display_names = NULL;
 	ui_crosshair_values = NULL;
 	ui_numcrosshairs = 0;
 }
@@ -2518,11 +2518,11 @@ void UI_UpdatePlayerModelInfo (int mNum, int sNum)
 {
 	char	scratch[MAX_QPATH];
 
-	Com_sprintf( scratch, sizeof(scratch), "players/%s/tris.md2", ui_pmi[mNum].directory );
+	Com_sprintf (scratch, sizeof(scratch), "players/%s/tris.md2", ui_pmi[mNum].directory);
 	ui_playermodel = R_RegisterModel (scratch);
 //	Q_strncpyz (ui_playerconfig_playermodelname, sizeof(ui_playerconfig_playermodelname), scratch);
 
-	Com_sprintf( scratch, sizeof(scratch), "players/%s/%s.pcx", ui_pmi[mNum].directory, ui_pmi[mNum].skinDisplayNames[sNum] );
+	Com_sprintf (scratch, sizeof(scratch), "players/%s/%s.pcx", ui_pmi[mNum].directory, ui_pmi[mNum].skinDisplayNames[sNum]);
 	ui_playerskin = R_RegisterSkin (scratch);
 //	Q_strncpyz (ui_playerconfig_playerskinname, sizeof(ui_playerconfig_playerskinname), scratch);
 

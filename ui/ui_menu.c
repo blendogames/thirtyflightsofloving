@@ -171,7 +171,7 @@ UI_PopMenu
 */
 void UI_PopMenu (void)
 {
-	S_StartLocalSound( menu_out_sound );
+	S_StartLocalSound (ui_menu_out_sound);
 	if (ui_menudepth < 1)
 		Com_Error (ERR_FATAL, "UI_PopMenu: depth < 1");
 	ui_menudepth--;
@@ -249,6 +249,81 @@ void UI_AddMenuItem (menuframework_s *menu, void *item)
 		baseItem->textSize = MENU_FONT_SIZE;
 	baseItem->textSize = min(max(baseItem->textSize, 4), 32);
 	// end Knightmare
+
+	UI_ClearGrabBindItem (menu); // make sure this starts out unset
+}
+
+
+/*
+=================
+UI_SetGrabBindItem
+=================
+*/
+void UI_SetGrabBindItem (menuframework_s *m, menucommon_s *item)
+{
+	int				i;
+	menucommon_s	*it;
+	qboolean		found = false;
+
+	for (i = 0; i < m->nitems; i++)
+	{
+		it = (menucommon_s *)m->items[i];
+		if (it->type == MTYPE_KEYBIND) 
+		{
+			if (it == item) {
+				((menukeybind_s *)it)->grabBind = true;
+				m->grabBindCursor = i;
+				found = true;
+			}
+			else // clear grab flag if it's not the one
+				((menukeybind_s *)it)->grabBind = false;
+		}
+	}
+
+	if (!found)
+		m->grabBindCursor = -1;
+}
+
+
+/*
+=================
+UI_ClearGrabBindItem
+=================
+*/
+void UI_ClearGrabBindItem (menuframework_s *m)
+{
+	int				i;
+	menucommon_s	*it;
+
+	m->grabBindCursor = -1;
+
+	// clear grab flag for all keybind items
+	for (i = 0; i < m->nitems; i++)
+	{
+		it = (menucommon_s *)m->items[i];
+		if (it->type == MTYPE_KEYBIND)
+			((menukeybind_s *)it)->grabBind = false;
+	}
+}
+
+
+/*
+=================
+UI_HasValidGrabBindItem
+=================
+*/
+qboolean UI_HasValidGrabBindItem (menuframework_s *m)
+{
+	if (!m)	return false;
+
+	if ( (m->grabBindCursor != -1)
+		&& (m->grabBindCursor >= 0)
+		&& (m->grabBindCursor < m->nitems)
+		&& (((menucommon_s *)m->items[m->grabBindCursor])->type == MTYPE_KEYBIND)
+		&& (((menukeybind_s *)m->items[m->grabBindCursor])->grabBind) )
+		return true;
+
+	return false;
 }
 
 
@@ -389,7 +464,10 @@ void UI_DrawMenu (menuframework_s *menu)
 		char	*cursor;
 		int		cursorX;
 
-		cursor = ((int)(Sys_Milliseconds()/250)&1) ? UI_ITEMCURSOR_DEFAULT_PIC : UI_ITEMCURSOR_BLINK_PIC;
+		if (item->type == MTYPE_KEYBIND && ((menukeybind_s *)item)->grabBind)
+			cursor = UI_ITEMCURSOR_KEYBIND_PIC;
+		else
+			cursor = ((int)(Sys_Milliseconds()/250)&1) ? UI_ITEMCURSOR_DEFAULT_PIC : UI_ITEMCURSOR_BLINK_PIC;
 
 	//	if (item->flags & QMF_LEFT_JUSTIFY)
 	//		cursorX = menu->x + item->x + item->cursor_offset - 24;
@@ -417,15 +495,17 @@ void UI_DrawMenu (menuframework_s *menu)
 
 	if (item)
 	{
-		if (item->statusbarfunc)
-			item->statusbarfunc ( (void *)item );
+	//	if (item->statusbarfunc)
+	//		item->statusbarfunc ( (void *)item );
+		if (item->type == MTYPE_KEYBIND && ((menukeybind_s *)item)->grabBind && ((menukeybind_s *)item)->enter_statusbar)
+			UI_DrawMenuStatusBar (((menukeybind_s *)item)->enter_statusbar);
 		else if (item->statusbar)
-			UI_DrawStatusBar (item->statusbar);
+			UI_DrawMenuStatusBar (item->statusbar);
 		else
-			UI_DrawStatusBar (menu->statusbar);
+			UI_DrawMenuStatusBar (menu->statusbar);
 	}
 	else
-		UI_DrawStatusBar( menu->statusbar );
+		UI_DrawMenuStatusBar (menu->statusbar);
 }
 
 
@@ -445,8 +525,15 @@ const char *UI_DefaultMenuKey (menuframework_s *m, int key)
 		{
 			if ( item->type == MTYPE_FIELD )
 			{
-				if ( UI_MenuField_Key( ( menufield_s * ) item, key ) )
+				if ( UI_MenuField_Key((menufield_s *) item, key) )
 					return NULL;
+			}
+			else if (item->type == MTYPE_KEYBIND)
+			{
+				if ( (sound = UI_MenuKeyBind_Key((menukeybind_s *)item, key)) != ui_menu_null_sound )
+					return sound;
+				else
+					sound = NULL;
 			}
 		}
 	}
@@ -454,8 +541,8 @@ const char *UI_DefaultMenuKey (menuframework_s *m, int key)
 	switch ( key )
 	{
 	case K_ESCAPE:
-		UI_PopMenu();
-		return menu_out_sound;
+		UI_PopMenu ();
+		return ui_menu_out_sound;
 	case K_KP_UPARROW:
 	case K_UPARROW:
 		if ( m )
@@ -465,7 +552,7 @@ const char *UI_DefaultMenuKey (menuframework_s *m, int key)
 			UI_RefreshCursorLink ();
 
 			UI_AdjustMenuCursor (m, -1);
-			sound = menu_move_sound;
+			sound = ui_menu_move_sound;
 		}
 		break;
 	case K_TAB:
@@ -478,7 +565,7 @@ const char *UI_DefaultMenuKey (menuframework_s *m, int key)
 
 			UI_RefreshCursorLink ();
 			UI_AdjustMenuCursor (m, 1);
-			sound = menu_move_sound;
+			sound = ui_menu_move_sound;
 		}
 		break;
 	case K_KP_LEFTARROW:
@@ -486,7 +573,7 @@ const char *UI_DefaultMenuKey (menuframework_s *m, int key)
 		if ( m )
 		{
 			UI_SlideMenuItem (m, -1);
-			sound = menu_move_sound;
+			sound = ui_menu_move_sound;
 		}
 		break;
 	case K_KP_RIGHTARROW:
@@ -494,7 +581,7 @@ const char *UI_DefaultMenuKey (menuframework_s *m, int key)
 		if ( m )
 		{
 			UI_SlideMenuItem (m, 1);
-			sound = menu_move_sound;
+			sound = ui_menu_move_sound;
 		}
 		break;
 
@@ -546,7 +633,7 @@ const char *UI_DefaultMenuKey (menuframework_s *m, int key)
 	case K_ENTER:
 		if ( m )
 			UI_SelectMenuItem (m);
-		sound = menu_move_sound;
+		sound = ui_menu_move_sound;
 		break;
 	}
 

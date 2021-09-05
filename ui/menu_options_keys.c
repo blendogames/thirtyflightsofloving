@@ -29,6 +29,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "../client/client.h"
 #include "ui_local.h"
 
+#define USE_KEYBIND_CONTROL
+
 /*
 =======================================================================
 
@@ -68,13 +70,22 @@ char *bindnames[][2] =
 { 0, 0 }
 };
 
+#ifndef USE_KEYBIND_CONTROL
 int				keys_cursor;
 static int		bind_grab;
+#endif
 
 static menuframework_s	s_keys_menu;
+#ifdef USE_KEYBIND_CONTROL
+static menukeybind_s	s_keys_binds[64];
+#else
 static menuaction_s		s_keys_binds[64];
+#endif
 static menuaction_s		s_keys_back_action;
 
+//=======================================================================
+
+#ifndef USE_KEYBIND_CONTROL
 static void M_UnbindCommand (char *command)
 {
 	int		j;
@@ -218,36 +229,58 @@ void M_AddBindOption (int i, char *list[][2])
 	if (strstr ("MENUSPACE", list[i][0]))
 		s_keys_binds[i].generic.type	= MTYPE_SEPARATOR;
 }
+#endif	// USE_KEYBIND_CONTROL
+
+//=======================================================================
 
 static void Menu_Keys_Init (void)
 {
-	int BINDS_MAX;
-	int i = 0;
+	int		BINDS_MAX;
+	int		i = 0, x = 0, y = 0;
 
 	s_keys_menu.x = SCREEN_WIDTH*0.5;
 	s_keys_menu.y = SCREEN_HEIGHT*0.5 - 72;
 	s_keys_menu.nitems = 0;
+#ifndef USE_KEYBIND_CONTROL
 	s_keys_menu.cursordraw = M_KeyCursorDrawFunc;
+#endif
 
 	BINDS_MAX = listSize(bindnames);
 	for (i=0;i<BINDS_MAX;i++)
+#ifdef USE_KEYBIND_CONTROL
+	for (i=0; i<BINDS_MAX; i++)
+	{
+		s_keys_binds[i].generic.type			= MTYPE_KEYBIND;
+		s_keys_binds[i].generic.flags			= QMF_ALTCOLOR;
+		s_keys_binds[i].generic.x				= x;
+		s_keys_binds[i].generic.y				= y + i*MENU_LINE_SIZE;
+		s_keys_binds[i].generic.name			= bindnames[i][1];
+		s_keys_binds[i].generic.statusbar		= "enter or mouse1 to change, backspace or del to clear";
+		s_keys_binds[i].commandName				= bindnames[i][0];
+		s_keys_binds[i].enter_statusbar			= "press a key or button for this action";
+	}
+#else
 		M_AddBindOption (i, bindnames);
+#endif
 
-	s_keys_back_action.generic.type = MTYPE_ACTION;
-	s_keys_back_action.generic.textSize = MENU_FONT_SIZE;
-	s_keys_back_action.generic.flags = QMF_LEFT_JUSTIFY;
-	s_keys_back_action.generic.x	= 0;
-	s_keys_back_action.generic.y	= (BINDS_MAX+2)*MENU_LINE_SIZE;
-	s_keys_back_action.generic.name	= " back";
-	s_keys_back_action.generic.callback = UI_BackMenu;
+	s_keys_back_action.generic.type		= MTYPE_ACTION;
+	s_keys_back_action.generic.textSize	= MENU_FONT_SIZE;
+	s_keys_back_action.generic.flags	= QMF_LEFT_JUSTIFY;
+	s_keys_back_action.generic.x		= x;
+	s_keys_back_action.generic.y		= y + (BINDS_MAX+2)*MENU_LINE_SIZE;
+	s_keys_back_action.generic.name		= "Back";
+	s_keys_back_action.generic.callback	= UI_BackMenu;
+#ifndef USE_KEYBIND_CONTROL
 	s_keys_back_action.generic.cursordraw = M_KeysBackCursorDrawFunc;
+#endif
 
 	for (i=0;i<BINDS_MAX;i++)
 		UI_AddMenuItem (&s_keys_menu, (void *) &s_keys_binds[i]);
-
 	UI_AddMenuItem (&s_keys_menu, (void *) &s_keys_back_action);
 
+#ifndef USE_KEYBIND_CONTROL
 	UI_SetMenuStatusBar (&s_keys_menu, "enter or mouse1 to change, backspace to clear");
+#endif
 	// Don't center it- it's too large
 //	UI_CenterMenu (&s_keys_menu);
 }
@@ -255,12 +288,16 @@ static void Menu_Keys_Init (void)
 static void Menu_Keys_Draw (void)
 {
 	UI_DrawBanner ("m_banner_customize"); // Knightmare added
+
 	UI_AdjustMenuCursor (&s_keys_menu, 1);
 	UI_DrawMenu (&s_keys_menu);
 }
 
 static const char *Menu_Keys_Key (int key)
 {
+#ifdef USE_KEYBIND_CONTROL
+	return UI_DefaultMenuKey (&s_keys_menu, key);
+#else
 	menuaction_s *item = (menuaction_s *) UI_ItemAtMenuCursor( &s_keys_menu );
 
 	// pressing mouse1 to pick a new bind wont force bind/unbind itself - spaz
@@ -282,7 +319,7 @@ static const char *Menu_Keys_Key (int key)
 
 		UI_SetMenuStatusBar (&s_keys_menu, "enter to change, backspace to clear");
 		bind_grab = false;
-		return menu_out_sound;
+		return ui_menu_out_sound;
 	}
 
 	switch (key)
@@ -292,15 +329,16 @@ static const char *Menu_Keys_Key (int key)
 		if (item == &s_keys_back_action) { // back action hack
 			UI_BackMenu(item); return NULL; }
 		M_KeyBindingFunc (item);
-		return menu_in_sound;
+		return ui_menu_in_sound;
 	case K_BACKSPACE:		// delete bindings
 	case K_DEL:				// delete bindings
 	case K_KP_DEL:
 		M_UnbindCommand (bindnames[item->generic.localdata[0]][0]);
-		return menu_out_sound;
+		return ui_menu_out_sound;
 	default:
 		return UI_DefaultMenuKey (&s_keys_menu, key);
 	}
+#endif
 }
 
 void Menu_Keys_f (void)

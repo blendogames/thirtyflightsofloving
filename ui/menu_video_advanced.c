@@ -228,11 +228,6 @@ static void M_AdvancedMenuApplyChanges (void *unused)
 
 //=======================================================================
 
-/*
-================
-Menu_Video_Advanced_Init
-================
-*/
 void Menu_Video_Advanced_Init (void)
 {
 	static const char *yesno_names[] =
@@ -563,14 +558,14 @@ void Menu_Video_Advanced_Init (void)
 
 	s_advanced_apply_action.generic.type		= MTYPE_ACTION;
 	s_advanced_apply_action.generic.textSize	= MENU_FONT_SIZE;
-	s_advanced_apply_action.generic.name		= "apply changes";
+	s_advanced_apply_action.generic.name		= "Apply Changes";
 	s_advanced_apply_action.generic.x			= 0;
 	s_advanced_apply_action.generic.y			= y += 2*MENU_LINE_SIZE;
 	s_advanced_apply_action.generic.callback	= M_AdvancedMenuApplyChanges;
 
 	s_back_action.generic.type					= MTYPE_ACTION;
 	s_back_action.generic.textSize				= MENU_FONT_SIZE;
-	s_back_action.generic.name					= "back";
+	s_back_action.generic.name					= "Back";
 	s_back_action.generic.x						= 0;
 	s_back_action.generic.y						= y += 2*MENU_LINE_SIZE;
 	s_back_action.generic.callback				= UI_BackMenu;
@@ -610,11 +605,6 @@ void Menu_Video_Advanced_Init (void)
 //	s_video_advanced_menu.x -= MENU_FONT_SIZE;	
 }
 
-/*
-================
-Menu_Video_Advanced_Draw
-================
-*/
 void Menu_Video_Advanced_Draw (void)
 {
 //	int w, h;
@@ -629,11 +619,6 @@ void Menu_Video_Advanced_Draw (void)
 	UI_DrawMenu (&s_video_advanced_menu);
 }
 
-/*
-================
-Menu_Video_Advanced_Key
-================
-*/
 const char *Menu_Video_Advanced_Key (int key)
 {
 	return UI_DefaultMenuKey (&s_video_advanced_menu, key);

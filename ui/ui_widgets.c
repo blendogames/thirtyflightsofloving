@@ -659,6 +659,114 @@ void MenuSpinControl_Draw (menulist_s *s)
 
 //=========================================================
 
+void MenuKeyBind_DoEnter (menukeybind_s *k)
+{
+	menuframework_s	*menu = k->generic.parent;
+
+	if (!menu)	return;
+
+	UI_FindKeysForCommand (k->commandName, k->keys);
+
+//	if (k->keys[1] != -1)
+//		UI_UnbindCommand (k->commandName);
+
+	UI_SetGrabBindItem (menu, (menucommon_s *)k);
+		
+	if (k->generic.callback)
+		k->generic.callback (k);
+}
+
+void MenuKeyBind_Draw (menukeybind_s *k)
+{
+	menuframework_s	*menu = k->generic.parent;
+	int				x, alpha = UI_MouseOverAlpha(&k->generic);
+	const char		*keyName1, *keyName2;
+
+	UI_DrawMenuString (menu->x + k->generic.x + LCOLUMN_OFFSET,
+						menu->y + k->generic.y, MENU_FONT_SIZE, k->generic.name, alpha,
+						!(k->generic.flags & QMF_LEFT_JUSTIFY), (k->generic.flags & QMF_ALTCOLOR));
+
+	if (k->commandName)
+	{
+		UI_FindKeysForCommand (k->commandName, k->keys);
+
+		if (k->keys[0] == -1)
+		{
+			UI_DrawMenuString (menu->x + k->generic.x + RCOLUMN_OFFSET,
+								menu->y + k->generic.y, MENU_FONT_SIZE, "???", alpha, false, false);
+		}
+		else
+		{
+			keyName1 = Key_KeynumToString (k->keys[0]);
+			UI_DrawMenuString (menu->x + k->generic.x + RCOLUMN_OFFSET,
+								menu->y + k->generic.y, MENU_FONT_SIZE, keyName1, alpha, false, false);
+			if (k->keys[1] != -1)
+			{
+				x = (int)strlen(keyName1) * MENU_FONT_SIZE;
+				keyName2 = Key_KeynumToString (k->keys[1]);
+				UI_DrawMenuString (menu->x + k->generic.x + MENU_FONT_SIZE*3 + x,
+									menu->y + k->generic.y, MENU_FONT_SIZE, "or", alpha, false, false);
+				UI_DrawMenuString (menu->x + k->generic.x + MENU_FONT_SIZE*6 + x,
+									menu->y + k->generic.y, MENU_FONT_SIZE, keyName2, alpha, false, false);
+			}
+		}
+	}
+	else
+		Com_Printf ("UI_MenuKeyBind_Draw: keybind has no commandName!\n");
+
+//	if (k->generic.ownerdraw)
+//		k->generic.ownerdraw(k);
+}
+
+const char *UI_MenuKeyBind_Key (menukeybind_s *k, int key)
+{
+	menuframework_s	*menu = k->generic.parent;
+
+	// pressing mouse1 to pick a new bind wont force bind/unbind itself - spaz
+	if (UI_HasValidGrabBindItem(menu) && k->grabBind
+		&& !(ui_mousecursor.buttonused[MOUSEBUTTON1] && key == K_MOUSE1))
+	{
+		// grab key here
+		if (key != K_ESCAPE && key != '`')
+		{
+			char cmd[1024];
+
+			if (k->keys[1] != -1)	// if two keys are already bound to this, clear them
+				UI_UnbindCommand (k->commandName);
+
+			Com_sprintf (cmd, sizeof(cmd), "bind \"%s\" \"%s\"\n", Key_KeynumToString(key), k->commandName);
+			Cbuf_InsertText (cmd);
+		}
+
+		// don't let selecting with mouse buttons screw everything up
+		UI_RefreshCursorButtons();
+		if (key == K_MOUSE1)
+			ui_mousecursor.buttonclicks[MOUSEBUTTON1] = -1;
+
+		if (menu)
+			UI_ClearGrabBindItem (menu);
+
+		return ui_menu_out_sound;
+	}
+
+	switch (key)
+	{
+	case K_ESCAPE:
+		UI_PopMenu ();
+		return ui_menu_out_sound;
+	case K_ENTER:
+	case K_KP_ENTER:
+		MenuKeyBind_DoEnter (k);
+		return ui_menu_in_sound;
+	case K_BACKSPACE:
+	case K_DEL:
+	case K_KP_DEL:
+		UI_UnbindCommand (k->commandName); // delete bindings
+		return ui_menu_out_sound;
+	default:
+		return ui_menu_null_sound;
+	}
+}
 
 //=========================================================
 
@@ -696,6 +804,9 @@ void UI_DrawMenuItem (void *item)
 	case MTYPE_SEPARATOR:
 		MenuSeparator_Draw ((menuseparator_s *)item);
 		break;
+	case MTYPE_KEYBIND:
+		MenuKeyBind_Draw ((menukeybind_s *)item);
+		break;
 	default:
 		break;
 	}
@@ -728,8 +839,11 @@ qboolean UI_SelectMenuItem (menuframework_s *s)
 		//	Menulist_DoEnter ( (menulist_s *)item );
 			return false;
 		case MTYPE_SPINCONTROL:
-		//	SpinControl_DoEnter ( (menulist_s *)item );
+		//	MenuSpinControl_DoEnter ( (menulist_s *)item );
 			return false;
+		case MTYPE_KEYBIND:
+			MenuKeyBind_DoEnter ( (menukeybind_s *)item );
+			return true;
 		default:
 			break;
 		}
@@ -755,6 +869,9 @@ qboolean UI_MouseSelectItem (menucommon_s *item)
 			return MenuField_DoEnter ( (menufield_s *)item ) ;
 		case MTYPE_ACTION:
 			MenuAction_DoEnter ( (menuaction_s *)item );
+			return true;
+		case MTYPE_KEYBIND:
+			MenuKeyBind_DoEnter ( (menukeybind_s *)item );
 			return true;
 		case MTYPE_LIST:
 		case MTYPE_SPINCONTROL:

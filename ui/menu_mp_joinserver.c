@@ -57,9 +57,7 @@ static void ClientCompatibilityFunc (void *unused)
 
 void JoinServerFunc (void *self)
 {
-	int		index;
-
-	index = (menuaction_s *) self - s_joinserver_server_actions;
+	int	index = (menuaction_s *)self - s_joinserver_server_actions;
 
 	UI_JoinServer (index);
 }
@@ -155,7 +153,7 @@ void Menu_JoinServer_Init (void)
 
 	s_joinserver_back_action.generic.type = MTYPE_ACTION;
 	s_joinserver_back_action.generic.textSize = MENU_FONT_SIZE;
-	s_joinserver_back_action.generic.name	= "back to multiplayer";
+	s_joinserver_back_action.generic.name	= "Back to Multiplayer";
 	s_joinserver_back_action.generic.flags	= QMF_LEFT_JUSTIFY;
 	s_joinserver_back_action.generic.x	= 0;
 	s_joinserver_back_action.generic.y	= y += (UI_MAX_LOCAL_SERVERS+2)*MENU_LINE_SIZE;

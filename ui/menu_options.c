@@ -45,6 +45,8 @@ static menuaction_s		s_options_effects_section;
 static menuaction_s		s_options_interface_section;
 static menuaction_s		s_options_back_action;
 
+//=======================================================================
+
 static void M_MenuSoundFunc (void *unused)
 {
 	Menu_Options_Sound_f ();

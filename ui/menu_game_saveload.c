@@ -116,7 +116,6 @@ void UI_DrawMenuSaveshot (qboolean loadmenu)
 }
 #endif
 
-
 /*
 =============================================================================
 
@@ -147,6 +146,8 @@ void LoadGameCallback (void *self)
 		UI_ForceMenuOff ();
 	}
 }
+
+//=======================================================================
 
 void Menu_LoadGame_Init (void)
 {
@@ -183,7 +184,7 @@ void Menu_LoadGame_Init (void)
 	s_loadgame_back_action.generic.flags	= QMF_LEFT_JUSTIFY;
 	s_loadgame_back_action.generic.x		= 0;
 	s_loadgame_back_action.generic.y		= (UI_MAX_SAVEGAMES+3)*MENU_LINE_SIZE;
-	s_loadgame_back_action.generic.name		= " back";
+	s_loadgame_back_action.generic.name		= "Back";
 	s_loadgame_back_action.generic.callback = UI_BackMenu;
 
 	UI_AddMenuItem (&s_loadgame_menu, &s_loadgame_back_action);
@@ -233,6 +234,8 @@ void SaveGameCallback (void *self)
 	UI_ForceMenuOff ();
 }
 
+//=======================================================================
+
 void Menu_SaveGame_Init (void)
 {
 	int i;
@@ -266,7 +269,7 @@ void Menu_SaveGame_Init (void)
 	s_savegame_back_action.generic.flags  = QMF_LEFT_JUSTIFY;
 	s_savegame_back_action.generic.x		= 0;
 	s_savegame_back_action.generic.y		= (UI_MAX_SAVEGAMES+1)*MENU_LINE_SIZE;
-	s_savegame_back_action.generic.name		= " back";
+	s_savegame_back_action.generic.name		= "Back";
 	s_savegame_back_action.generic.callback = UI_BackMenu;
 
 	UI_AddMenuItem (&s_savegame_menu, &s_savegame_back_action);

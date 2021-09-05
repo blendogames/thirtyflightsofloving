@@ -50,6 +50,8 @@ static menuaction_s		s_credits_action;
 static menuseparator_s	s_blankline;
 static menuaction_s		s_game_back_action;
 
+//=======================================================================
+
 static void EasyGameFunc (void *data)
 {
 	Cvar_ForceSet ("skill", "0");

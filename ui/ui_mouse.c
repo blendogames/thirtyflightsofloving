@@ -242,6 +242,10 @@ void UI_Mouseover_Check (menuframework_s *menu)
 
 	ui_mousecursor.menu = menu;
 
+	// don't allow change in item focus if waiting to grab a key
+	if (UI_HasValidGrabBindItem(menu)) 
+		return;
+
 	if (ui_mousecursor.mouseaction)
 	{
 		lastitem = ui_mousecursor.menuitem;
@@ -274,30 +278,24 @@ void UI_Mouseover_Check (menuframework_s *menu)
 					{
 						len = (int)strlen(item->name);
 						
-						if (item->flags & QMF_LEFT_JUSTIFY)
-						{
+						if (item->flags & QMF_LEFT_JUSTIFY) {
 							min[0] += SCR_ScaledScreen(LCOLUMN_OFFSET*2);
-						//	max[0] = min[0] + SCR_ScaledScreen(len*MENU_FONT_SIZE);
 							max[0] = min[0] + SCR_ScaledScreen(len*item->textSize);
 						}
 						else
-						//	min[0] -= SCR_ScaledScreen(len*MENU_FONT_SIZE + MENU_FONT_SIZE*3);
-							min[0] -= SCR_ScaledScreen(len*item->textSize + item->textSize*3);
+							min[0] -= SCR_ScaledScreen(len*item->textSize + item->textSize*4);
 
 						type = MENUITEM_ACTION;
 					}
 					break;
 				case MTYPE_SLIDER:
 					{
-						if (item->name)
-						{
+						if (item->name) {
 							len = (int)strlen(item->name);
-						//	min[0] -= SCR_ScaledScreen(len*MENU_FONT_SIZE - LCOLUMN_OFFSET*2);
 							min[0] -= SCR_ScaledScreen(len*item->textSize - LCOLUMN_OFFSET*2);
 						}
 						else
 							min[0] -= SCR_ScaledScreen(16);
-					//	max[0] += SCR_ScaledScreen((SLIDER_RANGE + 4) * MENU_FONT_SIZE);
 						max[0] += SCR_ScaledScreen((SLIDER_RANGE + 4) * item->textSize);
 						type = MENUITEM_SLIDER;
 					}
@@ -308,16 +306,12 @@ void UI_Mouseover_Check (menuframework_s *menu)
 						int len;
 						menulist_s *spin = menu->items[i];
 
-
-						if (item->name)
-						{
+						if (item->name) {
 							len = (int)strlen(item->name);
-						//	min[0] -= SCR_ScaledScreen(len*MENU_FONT_SIZE - LCOLUMN_OFFSET*2);
 							min[0] -= SCR_ScaledScreen(len*item->textSize - LCOLUMN_OFFSET*2);
 						}
 
 						len = (int)strlen(spin->itemNames[spin->curValue]);
-					//	max[0] += SCR_ScaledScreen(len*MENU_FONT_SIZE);
 						max[0] += SCR_ScaledScreen(len*item->textSize);
 
 						type = MENUITEM_ROTATE;
@@ -329,9 +323,36 @@ void UI_Mouseover_Check (menuframework_s *menu)
 
 						len = text->visible_length + 2;
 
-					//	max[0] += SCR_ScaledScreen(len*MENU_FONT_SIZE);
 						max[0] += SCR_ScaledScreen(len*item->textSize);
 						type = MENUITEM_TEXT;
+					}
+					break;
+				case MTYPE_KEYBIND:
+					{
+						menukeybind_s *k = menu->items[i];
+						len = (int)strlen(item->name);
+						
+						if (item->flags & QMF_LEFT_JUSTIFY) {
+							min[0] += SCR_ScaledScreen(LCOLUMN_OFFSET*2);
+						}
+						else {
+							min[0] -= SCR_ScaledScreen(len*item->textSize + item->textSize*4);
+						}
+						max[0] = min[0] + SCR_ScaledScreen(len*item->textSize);
+
+						if (k->commandName)
+						{
+							UI_FindKeysForCommand (k->commandName, k->keys);
+							max[0] += SCR_ScaledScreen(MENU_FONT_SIZE*4);
+							if (k->keys[0] == -1)
+								max[0] += SCR_ScaledScreen(MENU_FONT_SIZE*3); // "???"
+							else {
+								max[0] += SCR_ScaledScreen( item->textSize*(int)strlen(Key_KeynumToString(k->keys[0])) ); // key 1
+								if (k->keys[1] != -1) // " or " + key2
+									max[0] += SCR_ScaledScreen( MENU_FONT_SIZE*4 + item->textSize*(int)strlen(Key_KeynumToString(k->keys[1])) );
+							}
+						}
+						type = MENUITEM_KEYBIND;
 					}
 					break;
 				default:
@@ -392,7 +413,7 @@ void UI_MouseCursor_Think (void)
 			ui_mousecursor.buttonclicks[MOUSEBUTTON2] = 0;
 			ui_mousecursor.buttonused[MOUSEBUTTON1] = true;
 			ui_mousecursor.buttonclicks[MOUSEBUTTON1] = 0;
-			S_StartLocalSound (menu_out_sound);
+			S_StartLocalSound (ui_menu_out_sound);
 			if (creditsBuffer)
 				FS_FreeFile (creditsBuffer);
 			UI_PopMenu();
@@ -421,11 +442,11 @@ void UI_MouseCursor_Think (void)
 			{
 				if ( UI_CheckSlider_Mouseover(m, ui_mousecursor.menuitem) ) {
 					UI_DragSlideItem (m, ui_mousecursor.menuitem);
-					sound = menu_drag_sound;
+					sound = ui_menu_drag_sound;
 				}
 				else {
 					UI_SlideMenuItem (m, 1);
-					sound = menu_move_sound;
+					sound = ui_menu_move_sound;
 					ui_mousecursor.buttonused[MOUSEBUTTON1] = true;
 				}
 			}
@@ -438,14 +459,14 @@ void UI_MouseCursor_Think (void)
 					else			
 						UI_SlideMenuItem (m, 1);
 
-					sound = menu_move_sound;
+					sound = ui_menu_move_sound;
 					ui_mousecursor.buttonused[MOUSEBUTTON1] = true;
 				}
 				else
 				{
 					ui_mousecursor.buttonused[MOUSEBUTTON1] = true;
 					UI_MouseSelectItem (ui_mousecursor.menuitem);
-					sound = menu_move_sound;
+					sound = ui_menu_move_sound;
 				}
 			}
 		}
@@ -460,7 +481,7 @@ void UI_MouseCursor_Think (void)
 				else {
 					UI_SlideMenuItem (m, -1);
 				}
-				sound = menu_move_sound;
+				sound = ui_menu_move_sound;
 				ui_mousecursor.buttonused[MOUSEBUTTON2] = true;
 			}
 			else if (!ui_mousecursor.buttonused[MOUSEBUTTON2])
@@ -472,7 +493,7 @@ void UI_MouseCursor_Think (void)
 					else			
 						UI_SlideMenuItem (m, -1);
 
-					sound = menu_move_sound;
+					sound = ui_menu_move_sound;
 					ui_mousecursor.buttonused[MOUSEBUTTON2] = true;
 				}
 			}
@@ -487,7 +508,7 @@ void UI_MouseCursor_Think (void)
 
 		UI_PopMenu ();
 
-		sound = menu_out_sound;
+		sound = ui_menu_out_sound;
 		ui_mousecursor.buttonused[MOUSEBUTTON2] = true;
 		ui_mousecursor.buttonclicks[MOUSEBUTTON2] = 0;
 		ui_mousecursor.buttonused[MOUSEBUTTON1] = true;

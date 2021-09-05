@@ -51,6 +51,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define QMF_NUMBERSONLY		0x00000004
 #define QMF_SKINLIST		0x00000008
 #define QMF_HIDDEN			0x00000010
+#define QMF_ALTCOLOR		0x00000020
 
 //
 #define MENU_SUBTEXT_FONT_SIZE	6
@@ -77,7 +78,8 @@ typedef struct _tag_menuframework
 	int nslots;
 	void *items[64];
 
-	const char *statusbar;
+	const char	*statusbar;
+	int			grabBindCursor;
 
 	void (*cursordraw)( struct _tag_menuframework *m );
 	
@@ -212,6 +214,7 @@ typedef struct
 #define MENUITEM_ROTATE		2
 #define MENUITEM_SLIDER		3
 #define MENUITEM_TEXT		4
+#define MENUITEM_KEYBIND	5
 
 typedef struct
 {
@@ -254,7 +257,7 @@ extern int	ui_numfonts;
 //extern int	ui_numhuds;
 
 extern char **ui_crosshair_names;
-//extern char **ui_crosshair_display_names;
+extern char **ui_crosshair_display_names;
 extern char **ui_crosshair_values;
 extern int	ui_numcrosshairs;
 
@@ -403,6 +406,7 @@ extern	vec4_t stCoord_arrow_up;
 extern	vec4_t stCoord_arrow_down;
 
 qboolean UI_MenuField_Key (menufield_s *field, int key);
+const char *UI_MenuKeyBind_Key (menukeybind_s *k, int key);
 
 void	UI_MenuSlider_SetValue (menuslider_s *s, const char *varName, float cvarMin, float cvarMax, qboolean clamp);
 void	UI_MenuSlider_SaveValue (menuslider_s *s, const char *varName);
@@ -448,6 +452,9 @@ void UI_ForceMenuOff (void);
 void UI_PopMenu (void);
 void UI_BackMenu (void *unused);
 void UI_AddMenuItem (menuframework_s *menu, void *item);
+void UI_SetGrabBindItem (menuframework_s *m, menucommon_s *c);
+void UI_ClearGrabBindItem (menuframework_s *m);
+qboolean UI_HasValidGrabBindItem (menuframework_s *m);
 void UI_AdjustMenuCursor (menuframework_s *menu, int dir);
 void UI_CenterMenu (menuframework_s *menu);
 void UI_DrawMenu (menuframework_s *menu);
@@ -477,11 +484,12 @@ void UI_Shutdown (void);
 #define UI_DrawTiledPic									SCR_DrawTiledPic
 #define UI_DrawChar(x, y, s, t, n, r, g, b, a, i, l)	SCR_DrawChar(x, y, s, t, n, FONT_UI, r, g, b, a, i, l)
 
+void UI_DrawMenuString (int x, int y, int size, const char *string, int alpha, qboolean R2L, qboolean altColor);
 void UI_DrawString (int x, int y, int size, const char *string, int alpha);
 void UI_DrawStringDark (int x, int y, int size, const char *string, int alpha);
 void UI_DrawStringR2L (int x, int y, int size, const char *string, int alpha);
 void UI_DrawStringR2LDark (int x, int y, int size, const char *string, int alpha);
-void UI_DrawStatusBar (const char *string);
+void UI_DrawMenuStatusBar (const char *string);
 void UI_DrawTextBox (int x, int y, int width, int lines);
 void UI_DrawBanner (char *name);
 void UI_Draw_Cursor (void);
@@ -526,11 +534,11 @@ extern	cvar_t	*ui_new_textbox;
 extern	cvar_t	*ui_new_textfield;
 
 // moved these declarations to ui_subsystem.c to avoid redundancy
-extern	char *menu_null_sound;
-extern	char *menu_in_sound;
-extern	char *menu_move_sound;
-extern	char *menu_out_sound;
-extern	char *menu_drag_sound;
+extern	char *ui_menu_null_sound;
+extern	char *ui_menu_in_sound;
+extern	char *ui_menu_move_sound;
+extern	char *ui_menu_out_sound;
+extern	char *ui_menu_drag_sound;
 
 extern qboolean	ui_entersound;		// play after drawing a frame, so caching
 									// won't disrupt the sound

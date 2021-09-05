@@ -37,11 +37,11 @@ cvar_t	*ui_new_textbox;
 cvar_t	*ui_new_textfield;
 
 // moved these here to avoid redundancy
-char *menu_null_sound		= "null";
-char *menu_in_sound			= "misc/menu1.wav";
-char *menu_move_sound		= "misc/menu2.wav";
-char *menu_out_sound		= "misc/menu3.wav";
-char *menu_drag_sound		= "drag";
+char *ui_menu_null_sound		= "null";
+char *ui_menu_in_sound			= "misc/menu1.wav";
+char *ui_menu_move_sound		= "misc/menu2.wav";
+char *ui_menu_out_sound			= "misc/menu3.wav";
+char *ui_menu_drag_sound		= "drag";
 
 qboolean	ui_entersound;		// play after drawing a frame, so caching
 								// won't disrupt the sound
@@ -95,7 +95,7 @@ void UI_Draw (void)
 	// caching images
 	if (ui_entersound)
 	{
-		S_StartLocalSound( menu_in_sound );
+		S_StartLocalSound (ui_menu_in_sound);
 		ui_entersound = false;
 	}
 

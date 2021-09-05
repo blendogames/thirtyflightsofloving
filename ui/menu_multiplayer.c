@@ -47,6 +47,8 @@ static menuaction_s		s_player_setup_action;
 static menuaction_s		s_download_options_action;
 static menuaction_s		s_backmain_action;
 
+//=======================================================================
+
 static void PlayerSetupFunc (void *unused)
 {
 	Menu_PlayerConfig_f ();

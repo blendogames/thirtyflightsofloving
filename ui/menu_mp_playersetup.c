@@ -91,9 +91,6 @@ static void Menu_PlayerSkinCallback (void *unused)
 
 //=======================================================================
 
-
-//=======================================================================
-
 qboolean Menu_PlayerConfig_Init (void)
 {
 	int		y;
@@ -219,7 +216,7 @@ qboolean Menu_PlayerConfig_Init (void)
 
 	s_playerconfig_back_action.generic.type			= MTYPE_ACTION;
 	s_playerconfig_back_action.generic.textSize		= MENU_FONT_SIZE;
-	s_playerconfig_back_action.generic.name			= "back to multiplayer";
+	s_playerconfig_back_action.generic.name			= "Back to Multiplayer";
 	s_playerconfig_back_action.generic.flags		= QMF_LEFT_JUSTIFY;
 	s_playerconfig_back_action.generic.x			= -5*MENU_FONT_SIZE;
 	s_playerconfig_back_action.generic.y			= y += 2*MENU_LINE_SIZE;
@@ -243,6 +240,7 @@ qboolean Menu_PlayerConfig_Init (void)
 	return true;
 }
 
+//=======================================================================
 
 qboolean Menu_PlayerConfig_CheckIncrement (int dir, float x, float y, float w, float h)
 {
@@ -270,7 +268,7 @@ qboolean Menu_PlayerConfig_CheckIncrement (int dir, float x, float y, float w, f
 				s_playerconfig_skin_box.curValue++;
 		}
 
-		sound = menu_move_sound;
+		sound = ui_menu_move_sound;
 		ui_mousecursor.buttonused[MOUSEBUTTON1] = true;
 		ui_mousecursor.buttonclicks[MOUSEBUTTON1] = 0;
 
@@ -333,7 +331,7 @@ void Menu_PlayerConfig_MouseClick (void)
 			{
 				s_playerconfig_skin_box.curValue = buttons[i].index;
 
-				sound = menu_move_sound;
+				sound = ui_menu_move_sound;
 				ui_mousecursor.buttonused[MOUSEBUTTON1] = true;
 				ui_mousecursor.buttonclicks[MOUSEBUTTON1] = 0;
 
@@ -542,6 +540,8 @@ void Menu_PConfigSaveChanges (void)
 		ui_pmi[mNum].directory, ui_pmi[mNum].skinDisplayNames[sNum]);
 	Cvar_Set ("skin", scratch);
 }
+
+//=======================================================================
 
 const char *Menu_PlayerConfig_Key (int key)
 {

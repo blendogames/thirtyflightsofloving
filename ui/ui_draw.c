@@ -36,6 +36,25 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 =======================================================================
 */
 
+/*
+==========================
+UI_DrawMenuString
+==========================
+*/
+void UI_DrawMenuString (int x, int y, int size, const char *string, int alpha, qboolean R2L, qboolean altColor)
+{
+	char	newstring[1024];
+
+	if (altColor)
+		Com_sprintf (newstring, sizeof(newstring), S_COLOR_ALT"%s", string);
+	else
+		Com_sprintf (newstring, sizeof(newstring), "%s", string);
+
+	if (R2L)
+		x -= stringLen(string)*size;
+	UI_DrawString (x, y, size, newstring, alpha);
+}
+
 
 /*
 =============
@@ -91,10 +110,10 @@ void UI_DrawStringR2LDark (int x, int y, int size, const char *string, int alpha
 
 /*
 =============
-UI_DrawStatusBar
+UI_DrawMenuStatusBar
 =============
 */
-void UI_DrawStatusBar (const char *string)
+void UI_DrawMenuStatusBar (const char *string)
 {
 	if (string)
 	{
