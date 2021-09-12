@@ -61,7 +61,7 @@ typedef enum {
 static precacheIteration_t precache_iteration = ITER_HTTP_R1Q2;
 #endif	// USE_CURL
 
-#define PLAYER_MULT 5
+#define PLAYER_MULT 22
 
 // ENV_CNT is map load, ENV_CNT+1 is first env map
 #define ENV_CNT (CS_PLAYERSKINS + MAX_CLIENTS * PLAYER_MULT)
@@ -405,7 +405,6 @@ void CL_RequestNextDownload (void)
 					p = cl.configstrings[cs_playerskins+i];
 				}
 
-			//	strncpy(model, p);
 				Q_strncpyz (model, sizeof(model), p);
 				p = strchr(model, '/');
 				if (!p)
@@ -419,7 +418,6 @@ void CL_RequestNextDownload (void)
 						continue;
 					}
 					else {
-					//	strncpy(skin, p);
 						Q_strncpyz (skin, sizeof(skin), p);
 					}
 				}
@@ -497,7 +495,162 @@ void CL_RequestNextDownload (void)
 						precache_check = cs_playerskins + i * PLAYER_MULT + 5;
 						return; // started a download
 					}
-				//	n = 5;	// from R1Q2
+			// Knightmare- added support for downloading player sounds
+					n++;
+					/*FALL THROUGH*/
+
+				case 5: // death1.wav
+					Com_sprintf(fn, sizeof(fn), "players/%s/death1.wav", model);
+					if ( !CL_CheckOrDownloadFile(fn) ) {
+						precache_check = cs_playerskins + i * PLAYER_MULT + 6;
+						return; // started a download
+					}
+					n++;
+					/*FALL THROUGH*/
+					
+				case 6: // death2.wav
+					Com_sprintf(fn, sizeof(fn), "players/%s/death2.wav", model);
+					if ( !CL_CheckOrDownloadFile(fn) ) {
+						precache_check = cs_playerskins + i * PLAYER_MULT + 7;
+						return; // started a download
+					}
+					n++;
+					/*FALL THROUGH*/
+					
+				case 7: // death3.wav
+					Com_sprintf(fn, sizeof(fn), "players/%s/death3.wav", model);
+					if ( !CL_CheckOrDownloadFile(fn) ) {
+						precache_check = cs_playerskins + i * PLAYER_MULT + 8;
+						return; // started a download
+					}
+					n++;
+					/*FALL THROUGH*/
+					
+				case 8: // death4.wav
+					Com_sprintf(fn, sizeof(fn), "players/%s/death4.wav", model);
+					if ( !CL_CheckOrDownloadFile(fn) ) {
+						precache_check = cs_playerskins + i * PLAYER_MULT + 9;
+						return; // started a download
+					}
+					n++;
+					/*FALL THROUGH*/
+
+				case 9: // fall1.wav
+					Com_sprintf(fn, sizeof(fn), "players/%s/fall1.wav", model);
+					if ( !CL_CheckOrDownloadFile(fn) ) {
+						precache_check = cs_playerskins + i * PLAYER_MULT + 10;
+						return; // started a download
+					}
+					n++;
+					/*FALL THROUGH*/
+
+				case 10: // fall2.wav
+					Com_sprintf(fn, sizeof(fn), "players/%s/fall2.wav", model);
+					if ( !CL_CheckOrDownloadFile(fn) ) {
+						precache_check = cs_playerskins + i * PLAYER_MULT + 11;
+						return; // started a download
+					}
+					n++;
+					/*FALL THROUGH*/
+					
+				case 11: // gurp1.wav
+					Com_sprintf(fn, sizeof(fn), "players/%s/gurp1.wav", model);
+					if ( !CL_CheckOrDownloadFile(fn) ) {
+						precache_check = cs_playerskins + i * PLAYER_MULT + 12;
+						return; // started a download
+					}
+					n++;
+					/*FALL THROUGH*/
+					
+				case 12: // gurp2.wav
+					Com_sprintf(fn, sizeof(fn), "players/%s/gurp2.wav", model);
+					if ( !CL_CheckOrDownloadFile(fn) ) {
+						precache_check = cs_playerskins + i * PLAYER_MULT + 13;
+						return; // started a download
+					}
+					n++;
+					/*FALL THROUGH*/
+					
+				case 13: // jump1.wav
+					Com_sprintf(fn, sizeof(fn), "players/%s/jump1.wav", model);
+					if ( !CL_CheckOrDownloadFile(fn) ) {
+						precache_check = cs_playerskins + i * PLAYER_MULT + 14;
+						return; // started a download
+					}
+					n++;
+					/*FALL THROUGH*/
+					
+				case 14: // pain25_1.wav
+					Com_sprintf(fn, sizeof(fn), "players/%s/pain25_1.wav", model);
+					if ( !CL_CheckOrDownloadFile(fn) ) {
+						precache_check = cs_playerskins + i * PLAYER_MULT + 15;
+						return; // started a download
+					}
+					n++;
+					/*FALL THROUGH*/
+					
+				case 15: // pain25_2.wav
+					Com_sprintf(fn, sizeof(fn), "players/%s/pain25_2.wav", model);
+					if ( !CL_CheckOrDownloadFile(fn) ) {
+						precache_check = cs_playerskins + i * PLAYER_MULT + 16;
+						return; // started a download
+					}
+					n++;
+					/*FALL THROUGH*/
+					
+				case 16: // pain50_1.wav
+					Com_sprintf(fn, sizeof(fn), "players/%s/pain50_1.wav", model);
+					if ( !CL_CheckOrDownloadFile(fn) ) {
+						precache_check = cs_playerskins + i * PLAYER_MULT + 17;
+						return; // started a download
+					}
+					n++;
+					/*FALL THROUGH*/
+					
+				case 17: // pain50_2.wav
+					Com_sprintf(fn, sizeof(fn), "players/%s/pain50_2.wav", model);
+					if ( !CL_CheckOrDownloadFile(fn) ) {
+						precache_check = cs_playerskins + i * PLAYER_MULT + 18;
+						return; // started a download
+					}
+					n++;
+					/*FALL THROUGH*/
+					
+				case 18: // pain75_1.wav
+					Com_sprintf(fn, sizeof(fn), "players/%s/pain75_1.wav", model);
+					if ( !CL_CheckOrDownloadFile(fn) ) {
+						precache_check = cs_playerskins + i * PLAYER_MULT + 19;
+						return; // started a download
+					}
+					n++;
+					/*FALL THROUGH*/
+					
+				case 19: // pain75_2.wav
+					Com_sprintf(fn, sizeof(fn), "players/%s/pain75_2.wav", model);
+					if ( !CL_CheckOrDownloadFile(fn) ) {
+						precache_check = cs_playerskins + i * PLAYER_MULT + 20;
+						return; // started a download
+					}
+					n++;
+					/*FALL THROUGH*/
+					
+				case 20: // pain100_1.wav
+					Com_sprintf(fn, sizeof(fn), "players/%s/pain100_1.wav", model);
+					if ( !CL_CheckOrDownloadFile(fn) ) {
+						precache_check = cs_playerskins + i * PLAYER_MULT + 21;
+						return; // started a download
+					}
+					n++;
+					/*FALL THROUGH*/
+					
+				case 21: // pain100_2.wav
+					Com_sprintf(fn, sizeof(fn), "players/%s/pain100_2.wav", model);
+					if ( !CL_CheckOrDownloadFile(fn) ) {
+						precache_check = cs_playerskins + i * PLAYER_MULT + 22;
+						return; // started a download
+					}
+				//	n = 23;
+			// end Knightmare
 
 					// move on to next model
 				//	precache_check = cs_playerskins + (i + 1) * PLAYER_MULT;
