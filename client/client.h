@@ -354,6 +354,7 @@ typedef struct
 	size_t		downloadposition;	// added for HTTP downloads
 	int			downloadpercent;
 	float		downloadrate;		// Knightmare- to display KB/s
+	qboolean	refreshPlayerModels;	// Knightmare- to force reloading of player models after download
 
 // demo recording info must be here, so it isn't cleared on level change
 	qboolean	demorecording;

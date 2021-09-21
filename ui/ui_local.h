@@ -391,6 +391,7 @@ qboolean UI_CTF_MenuMode (void);
 
 void UI_LoadPlayerModels (void);
 void UI_FreePlayerModels (void);
+void UI_RefreshPlayerModels (void);
 int UI_PlayerModelCmpFunc (const void *_a, const void *_b);
 void UI_InitPlayerModelInfo (int *modelNum, int *skinNum);
 void UI_UpdatePlayerModelInfo (int mNum, int sNum);

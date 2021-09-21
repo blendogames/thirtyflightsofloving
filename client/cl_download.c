@@ -1002,6 +1002,11 @@ qboolean CL_CheckOrDownloadFile (const char *filename)
 	{
 		if ( CL_QueueHTTPDownload(filename, filelistUseGamedir) )
 		{
+			// Knightmare- If we downloaded a player model, force reload of player models in UI
+			if ( strncmp(filename, "players/", 8) == 0 ) {
+				Com_DPrintf ("CL_CheckOrDownloadFile: downloading a player model, forcing reload of player models in UI.\n");
+				cls.refreshPlayerModels = true;
+			}
 			// We return true so that the precache check keeps feeding us more files.
 			// Since we have multiple HTTP connections we want to minimize latency
 			// and be constantly sending requests, not one at a time.
@@ -1070,6 +1075,12 @@ qboolean CL_CheckOrDownloadFile (const char *filename)
 
 	cls.downloadnumber++;
 	cls.forcePacket = true;
+
+	// Knightmare- If we downloaded a player model, force reload of player models in UI
+	if ( strncmp(filename, "players/", 8) == 0 ) {
+		Com_DPrintf ("CL_CheckOrDownloadFile: downloading a player model, forcing reload of player models in UI.\n");
+		cls.refreshPlayerModels = true;
+	}
 
 	return false;
 

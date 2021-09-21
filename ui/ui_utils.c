@@ -2415,6 +2415,24 @@ void UI_FreePlayerModels (void)
 
 /*
 ==========================
+UI_RefreshPlayerModels
+
+Reloads player models if we recently downloaded a player model.
+==========================
+*/
+void UI_RefreshPlayerModels (void)
+{
+	if (cls.refreshPlayerModels) {
+		Com_DPrintf ("UI_RefreshPlayerModels: reloading player models due to recent download of a player model.\n");
+		UI_FreePlayerModels ();
+		UI_PlayerConfig_ScanDirectories ();
+		cls.refreshPlayerModels = false;	// clear the flag
+	}
+}
+
+
+/*
+==========================
 UI_PlayerModelCmpFunc
 ==========================
 */

@@ -1950,6 +1950,7 @@ void CL_InitLocal (void)
 {
 	cls.state = ca_disconnected;
 	cls.realtime = Sys_Milliseconds ();
+	cls.refreshPlayerModels = false;	// Knightmare- clear this flag
 
 	CL_InitInput ();
 

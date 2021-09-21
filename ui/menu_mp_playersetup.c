@@ -55,13 +55,13 @@ static menuaction_s		s_playerconfig_back_action;
 
 #define	NUM_SKINBOX_ITEMS 7
 
-static void HandednessCallback (void *unused)
+static void Menu_PlayerHandednessCallback (void *unused)
 {
 	UI_MenuSpinControl_SaveValue (&s_playerconfig_handedness_box, "hand");
 }
 
 
-static void RateCallback (void *unused)
+static void Menu_PlayerRateCallback (void *unused)
 {
 	UI_MenuSpinControl_SaveValue (&s_playerconfig_rate_box, "rate");
 }
@@ -192,7 +192,7 @@ qboolean Menu_PlayerConfig_Init (void)
 	s_playerconfig_handedness_box.generic.y				= y += MENU_LINE_SIZE;
 	s_playerconfig_handedness_box.generic.name			= 0;
 	s_playerconfig_handedness_box.generic.cursor_offset	= -1*MENU_FONT_SIZE;
-	s_playerconfig_handedness_box.generic.callback		= HandednessCallback;
+	s_playerconfig_handedness_box.generic.callback		= Menu_PlayerHandednessCallback;
 	s_playerconfig_handedness_box.itemNames				= handedness_names;
 	UI_MenuSpinControl_SetValue (&s_playerconfig_handedness_box, "hand", 0, 2, true);
 			
@@ -209,7 +209,7 @@ qboolean Menu_PlayerConfig_Init (void)
 	s_playerconfig_rate_box.generic.y				= y += MENU_LINE_SIZE;
 	s_playerconfig_rate_box.generic.name			= 0;
 	s_playerconfig_rate_box.generic.cursor_offset	= -1*MENU_FONT_SIZE;
-	s_playerconfig_rate_box.generic.callback		= RateCallback;
+	s_playerconfig_rate_box.generic.callback		= Menu_PlayerRateCallback;
 	s_playerconfig_rate_box.itemNames				= rate_names;
 	s_playerconfig_rate_box.itemValues				= rate_values;
 	UI_MenuSpinControl_SetValue (&s_playerconfig_rate_box, "rate", 0, 0, false);
@@ -554,6 +554,7 @@ const char *Menu_PlayerConfig_Key (int key)
 
 void Menu_PlayerConfig_f (void)
 {
+	UI_RefreshPlayerModels ();	// Reload player models if we recently downloaded anything
 	if ( !Menu_PlayerConfig_Init() )
 	{
 		UI_SetMenuStatusBar (&s_multiplayer_menu, "No valid player models found");
