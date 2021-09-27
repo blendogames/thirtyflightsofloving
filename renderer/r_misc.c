@@ -67,7 +67,7 @@ image_t * R_CreateNullTexture (void)
 		nulltex[x][NULLTEX_SIZE-1][2]=
 		nulltex[x][NULLTEX_SIZE-1][3]= 255;
 	}
-	return R_LoadPic ("***notexture***", (byte *)nulltex, NULLTEX_SIZE, NULLTEX_SIZE, it_wall, 32);
+	return R_LoadPic ("*notexture", (byte *)nulltex, NULLTEX_SIZE, NULLTEX_SIZE, it_wall, 32);
 }
 
 
@@ -305,13 +305,13 @@ void R_InitMedia (void)
 	glMedia.notexture = R_CreateNullTexture (); // Generate null texture
 
 	memset (whitetex, 255, sizeof(whitetex));
-	glMedia.whitetexture = R_LoadPic ("***whitetexture***", (byte *)whitetex, NULLTEX_SIZE, NULLTEX_SIZE, it_wall, 32);
+	glMedia.whitetexture = R_LoadPic ("*whitetexture", (byte *)whitetex, NULLTEX_SIZE, NULLTEX_SIZE, it_wall, 32);
 
 	glMedia.distTextureARB = R_CreateDistTextureARB ();			// Generate warp distortion texture
 
 #ifdef ROQ_SUPPORT
 	memset(data2D, 255, 256*256*4);
-	glMedia.rawtexture = R_LoadPic ("***rawtexture***", data2D, 256, 256, it_pic, 32);
+	glMedia.rawtexture = R_LoadPic ("*rawtexture", data2D, 256, 256, it_pic, 32);
 #endif // ROQ_SUPPORT
 	
 	glMedia.envmappic = LoadPartImg ("gfx/effects/envmap.tga", it_wall);

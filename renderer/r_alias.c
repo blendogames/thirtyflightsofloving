@@ -253,8 +253,12 @@ void RB_RenderAliasMesh (maliasmodel_t *paliashdr, unsigned meshnum, unsigned sk
 
 	if (skinParms->blend && !shellModel)
 		GL_BlendFunc (skinParms->blendfunc_src, skinParms->blendfunc_dst);
-	else if (shellModel)
-		GL_BlendFunc (GL_ONE, GL_ONE);
+	else if (shellModel) {
+		if ( FlowingShell() )
+			GL_BlendFunc (GL_ONE, GL_ONE);
+		else
+			GL_BlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	}
 	else
 		GL_BlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	// md3 skin scripting

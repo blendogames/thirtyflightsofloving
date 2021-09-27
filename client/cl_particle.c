@@ -33,7 +33,7 @@ This initializes all particle images - mods play with this...
 */
 void CL_SetParticleImages (void)
 {
-	R_SetParticlePicture(particle_solid,		"***whitetexture***");				// only used for sparks
+	R_SetParticlePicture(particle_solid,		"*whitetexture");				// only used for sparks
 	R_SetParticlePicture(particle_generic,		"gfx/particles/basic.tga");
 	R_SetParticlePicture(particle_smoke,		"gfx/particles/smoke.tga");
 	R_SetParticlePicture(particle_blood,		"gfx/particles/blood.tga");

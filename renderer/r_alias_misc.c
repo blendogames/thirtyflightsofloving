@@ -245,7 +245,7 @@ EnvMapShell
 qboolean EnvMapShell (void)
 {
 	return ( (r_shelltype->integer == 2)
-		|| (r_shelltype->integer == 1 && currententity->alpha == 1.0f) );
+		|| ((r_shelltype->integer == 1) && (currententity->alpha == 1.0f)) );
 }
 
 
@@ -256,7 +256,7 @@ FlowingShell
 */
 qboolean FlowingShell (void)
 {
-	return (r_shelltype->integer == 1 && currententity->alpha != 1.0f);
+	return ( (r_shelltype->integer == 1) && (currententity->alpha != 1.0f) );
 }
 
 
