@@ -1630,7 +1630,6 @@ Qcommon_Init
 void Qcommon_Init (int argc, char **argv)
 {
 	char	*s;
-	//char	*cfgfile; // Knightmare added
 
 	if (setjmp (abortframe) )
 		Sys_Error ("Error during initialization");
@@ -1658,19 +1657,10 @@ void Qcommon_Init (int argc, char **argv)
 
 	FS_InitFilesystem ();
 
-	Cbuf_AddText ("exec default.cfg\n");
-	Cbuf_AddText ("exec kmq2config.cfg\n");
-
-	// Knightmare- look for kmq2config.cfg, if not there, try config.cfg
-	// removed because some settings in existing config.cfgs may cause problems
-	/*FS_LoadFile ("kmq2config.cfg", (void **)&cfgfile);
-	if (cfgfile)
-	{
-		Cbuf_AddText ("exec kmq2config.cfg\n");
-		FS_FreeFile (cfgfile);
-	}
-	else
-		Cbuf_AddText ("exec config.cfg\n");*/
+//	Cbuf_AddText ("exec default.cfg\n");
+//	Cbuf_AddText ("exec kmq2config.cfg\n");
+	// Knightmare- use encapsulated function
+	FS_ExecConfigs (false);
 
 	Cbuf_AddEarlyCommands (true);
 	Cbuf_Execute ();
@@ -1740,7 +1730,6 @@ void Qcommon_Init (int argc, char **argv)
 	// add + commands from command line
 	if (!Cbuf_AddLateCommands ())
 	{	// if the user didn't give any commands, run default action
-//		if (!dedicated->value)
 		if (!dedicated->integer)
 			Cbuf_AddText ("d1\n");
 		else

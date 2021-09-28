@@ -902,6 +902,7 @@ void		FS_InsertInList (char **list, const char *insert, int len, int start);
 void		FS_Dir_f (void);
 
 void		FS_ExecAutoexec (void);
+void		FS_ExecConfigs (qboolean unbind);	// Knightmare added
 
 int			FS_LoadFile (const char *path, void **buffer);
 void		FS_AddPAKFile (const char *packPath, qboolean isProtected); // add pak file function
@@ -1018,17 +1019,17 @@ void	Sys_CopyProtect (void);
 
 // DG: returns the directory the executable (kmquake2.exe on Win32) resides in
 //     *without* a path seperator ("/" or "\") at the end
-const char* Sys_ExeDir();
+const char *Sys_ExeDir (void);
 
 // DG: returns the directory where user data (savegames, configs, demos,
 //     ... - everything written by the game really)
 //     should be written to, e.g. $HOME/.local/share/KMQuake2
 //     *without* path seperator ("/" or "\") at the end
-const char* Sys_PrefDir();
+const char *Sys_PrefDir (void);
 
 // Knightmare- returns the directory where autodownload content
 //		(maps, textures, sounds, skies, models, etc) should be written to
-const char* Sys_DownloadDir();
+const char *Sys_DownloadDir (void);
 
 /*
 ==============================================================
@@ -1041,6 +1042,7 @@ CLIENT / SERVER SYSTEMS
 void CL_Init (void);
 void CL_Drop (void);
 void CL_Shutdown (void);
+void CL_ChangeGameRefresh (void);	// Knightmare added
 void CL_Frame (int msec);
 void Con_Print (char *text);
 void SCR_BeginLoadingPlaque (void);

@@ -245,6 +245,7 @@ void UI_Init (void)
 	Cvar_SetDescription ("ui_new_textfield", "Toggles use of new text field image.  Setting this to 0 uses old font-based tiles.");
 
 	UI_GetVideoInfo ();		// build video mode list
+//	UI_GetModList ();		// load mods list
 	UI_LoadFontNames ();	// load font list
 //	UI_LoadHudNames ();		// load hud list
 	UI_LoadCrosshairs ();	// load crosshairs
@@ -295,6 +296,7 @@ void UI_Shutdown (void)
 		return;
 
 	UI_FreeVideoInfo ();
+//	UI_FreeModList ();
 	UI_FreeFontNames ();
 //	UI_FreeHudNames ();
 	UI_FreeCrosshairs ();
@@ -325,4 +327,39 @@ void UI_Shutdown (void)
 	Cmd_RemoveCommand ("menu_quit");
 
 	ui_initialized = false;
+}
+
+
+/*
+=================
+UI_RefreshData
+=================
+*/
+void UI_RefreshData (void)
+{
+	// Don't refresh data if not initialized
+	// Fixes errors in dedicated console
+	if (!ui_initialized)
+		return;
+
+	// Close all menus before refreshing data
+	UI_ForceMenuOff ();
+
+	UI_FreeVideoInfo ();
+//	UI_FreeModList ();
+	UI_FreeFontNames ();
+//	UI_FreeHudNames ();
+	UI_FreeCrosshairs ();
+	UI_FreeMapList ();
+	UI_FreePlayerModels ();
+
+	UI_GetVideoInfo ();		// build video mode list
+//	UI_GetModList ();		// load mods list
+	UI_LoadFontNames ();	// load font list
+//	UI_LoadHudNames ();		// load hud list
+	UI_LoadCrosshairs ();	// load crosshairs
+	UI_InitServerList ();	// init join server list
+	UI_LoadMapList ();		// load map list
+	UI_LoadPlayerModels (); // load player models
+	UI_InitSavegameData ();	// load savegame data
 }

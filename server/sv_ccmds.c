@@ -1121,11 +1121,14 @@ void SV_StartMod (char *mod)
 	// killserver, start mod, unbind keys, exec configs, and start demos
 	Cbuf_AddText ("killserver\n");
 	Cbuf_AddText (va("game %s\n", mod));
-	Cbuf_AddText ("unbindall\n");
-	Cbuf_AddText ("exec default.cfg\n");
-	Cbuf_AddText ("exec kmq2config.cfg\n");
-	Cbuf_AddText ("exec autoexec.cfg\n");
-	Cbuf_AddText ("d1\n");
+//	Cbuf_AddText ("unbindall\n");
+//	Cbuf_AddText ("exec default.cfg\n");
+//	Cbuf_AddText ("exec kmq2config.cfg\n");
+//	Cbuf_AddText ("exec autoexec.cfg\n");
+	if (!dedicated->integer)
+		Cbuf_AddText ("d1\n");
+	else
+		Cbuf_AddText ("dedicated_start\n");
 }
 
 /*

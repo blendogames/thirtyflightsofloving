@@ -328,7 +328,7 @@ void CL_Explosion_Flash (vec3_t origin, int dist, int size, qboolean plasma)
 	if (cl_particle_scale->value > 1 || plasma)
 	{
 		for (i=0; i<limit; i++)
-			CL_Explosion_FlashParticle(origin, size+2*dist, true);
+			CL_Explosion_FlashParticle (origin, size+2*dist, true);
 		return;
 	}
 
@@ -339,7 +339,7 @@ void CL_Explosion_Flash (vec3_t origin, int dist, int size, qboolean plasma)
 				org[0]=origin[0]+i*dist;
 				org[1]=origin[1]+j*dist;
 				org[2]=origin[2]+k*dist;
-				CL_Explosion_FlashParticle(org, size, false);
+				CL_Explosion_FlashParticle (org, size, false);
 			}
 }
 
@@ -940,7 +940,7 @@ void CL_ParseTEnt (void)
 		}
 		else {
 			CL_Explosion_Particle (pos, 0, false);
-			if (type!=TE_GRENADE_EXPLOSION_WATER)
+			if (type != TE_GRENADE_EXPLOSION_WATER)
 				CL_Explosion_Flash (pos, 10, 50, false);
 		}
 		CL_Explosion_Sparks (pos, 16, 128);

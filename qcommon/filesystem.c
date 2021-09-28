@@ -2492,10 +2492,12 @@ void FS_CopyConfigsToSavegameDir (void)
 			continue;
 		}
 		++cfgName;	// move to after the '/'
-		// don't copy default.cfg or configs written by other engines
+		// Don't copy default.cfg, autoexec.cfg, or configs written by other engines
 		// TODO: keep this up to date!
 		// config.cfg, aprconfig.cfg, bqconfig.cfg, eglcfg.cfg, maxconfig.cfg, q2config.cfg, q2b_config.cfg, q2econfig.cfg, xpconfig.cfg, yq2.cfg
-		if ( (strstr(cfgName, "config.cfg") && stricmp(cfgName, "kmq2config.cfg")) || !stricmp(cfgName, "default.cfg") || !stricmp(cfgName, "eglcfg.cfg") || !stricmp(cfgName, "yq2.cfg") ) {
+		if ( (strstr(cfgName, "config.cfg") && (stricmp(cfgName, "kmq2config.cfg") != 0)) ||
+			!stricmp(cfgName, "default.cfg") || !stricmp(cfgName, "autoexec.cfg") ||
+			!stricmp(cfgName, "eglcfg.cfg") || !stricmp(cfgName, "yq2.cfg") ) {
 			continue;
 		}
 		Com_sprintf (dstCfgPath, sizeof(dstCfgPath), "%s/%s", FS_SaveGameDir(), cfgName);
@@ -2742,7 +2744,6 @@ void FS_SetGamedir (const char *dir)
 	//
 	// flush all data, so it will be forced to reload
 	//
-//	if (dedicated && !dedicated->value)
 	if (dedicated && !dedicated->integer)
 		Cbuf_AddText ("vid_restart\nsnd_restart\n");
 
@@ -2864,23 +2865,58 @@ void FS_Link_f (void)
 
 
 /*
+=================
+FS_ExecConfigs
+
+Executes default.cfg and kmq2config.cfg
+Encapsulated to avoid redundancy
+=================
+*/
+void FS_ExecConfigs (qboolean unbind)
+{
+//	char	*cfgfile;
+
+	if (unbind) {
+		Cbuf_AddText ("unbindall\n");
+	}
+	Cbuf_AddText ("exec default.cfg\n");
+	Cbuf_AddText ("exec kmq2config.cfg\n");
+
+	// Look for kmq2config.cfg, if not there, try config.cfg
+	// Removed because some settings in existing config.cfgs may cause problems
+/*	FS_LoadFile ("kmq2config.cfg", (void **)&cfgfile);
+	if (cfgfile)
+	{
+		Cbuf_AddText ("exec kmq2config.cfg\n");
+		FS_FreeFile (cfgfile);
+	}
+	else
+		Cbuf_AddText ("exec config.cfg\n");
+*/
+}
+
+
+/*
 =============
 FS_ExecAutoexec
 =============
 */
 void FS_ExecAutoexec (void)
 {
-	char *dir;
-	char name [MAX_QPATH];
+	char	*dir;
+	char	name[MAX_QPATH];
 
 	dir = Cvar_VariableString("gamedir");
-	if (*dir)
-		Com_sprintf(name, sizeof(name), "%s/%s/autoexec.cfg", fs_basedir->string, dir); 
-	else
+	if (*dir) {
+		Com_sprintf(name, sizeof(name), "%s/%s/autoexec.cfg", fs_basedir->string, dir);
+	}
+	else {
 		Com_sprintf(name, sizeof(name), "%s/%s/autoexec.cfg", fs_basedir->string, BASEDIRNAME); 
-	if (Sys_FindFirst(name, 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM))
+	}
+	if ( Sys_FindFirst(name, 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM) ) {
 		Cbuf_AddText ("exec autoexec.cfg\n");
-	Sys_FindClose();
+	}
+	Sys_FindClose ();
 }
 
 /*
