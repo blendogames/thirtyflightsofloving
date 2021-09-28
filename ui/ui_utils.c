@@ -373,6 +373,20 @@ void UI_StartServer (char *startmap, qboolean dedicated)
 //	UI_ForceMenuOff ();
 }
 
+
+/*
+===============
+UI_LoadMod
+===============
+*/
+void UI_LoadMod (char *modName)
+{
+	if ( Q_strcasecmp(Cvar_VariableString("game"), modName) ) {
+		UI_ForceMenuOff ();
+		Cbuf_AddText (va("changegame %s\n", modName) );
+	}
+}
+
 /*
 =======================================================================
 
@@ -577,6 +591,187 @@ void UI_FreeVideoInfo (void)
 	UI_FreeVideoModes ();
 	UI_FreeAnisoValues ();
 }
+
+/*
+=======================================================================
+
+	MOD LIST LOADING
+
+=======================================================================
+*/
+
+// TODO: Enable this when mod menu is ready
+#if 0
+#define UI_MAX_MODS 256
+
+char		**ui_mod_names = NULL;
+char		**ui_mod_values = NULL;
+qboolean	ui_mod_isUnsupported[UI_MAX_MODS];
+int			ui_num_mods = 0;
+
+/*
+==========================
+UI_BuildModList
+==========================
+*/
+void UI_BuildModList (void)
+{
+	char		findName[1024];
+	char		modDesc[1024];
+	char		modFormatedName[1024];
+	char		**dirnames;
+	char		*modDir, *modName;
+	FILE		*f;
+	int			count = 0, ndirs = 0, nmods = 0;
+	int			i;
+	qboolean	unsupportedMod;
+
+	ui_mod_names = malloc(sizeof(char *) * (UI_MAX_MODS+1));
+	ui_mod_values = malloc(sizeof(char *) * (UI_MAX_MODS+1));
+	memset(ui_mod_names, 0, sizeof(char *) * (UI_MAX_MODS+1));
+	memset(ui_mod_values, 0, sizeof(char *) * (UI_MAX_MODS+1));
+
+	// add baseq2 first
+	ui_mod_names[0] = strdup("Quake II (vanilla)"); 
+	ui_mod_values[0] = strdup(BASEDIRNAME);
+	ui_mod_isUnsupported[0] = false;
+	count++;
+
+	// get a list of directories
+	Com_sprintf(findName, sizeof(findName), "%s/*.*", FS_HomePath());
+	dirnames = FS_ListFiles (findName, &ndirs, SFF_SUBDIR, 0);
+	if (!dirnames) {
+		ui_num_mods = count;
+		return;
+	}
+		
+	// go through the directories
+	nmods = ndirs;
+	if (nmods > UI_MAX_MODS)
+		nmods = UI_MAX_MODS;
+	if ( (count + nmods) > UI_MAX_MODS )
+		nmods = UI_MAX_MODS - count;
+
+	for (i = 0; i < nmods; i++)
+	{
+		if (dirnames[i] == 0)
+			continue;
+			
+		modDir = COM_SkipPath(dirnames[i]);
+		
+		// Ignore baseq2
+		if ( !Q_strcasecmp(modDir, BASEDIRNAME) )
+			continue;
+	
+		// Must have a pak or pk3 file, or a maps dir
+		if ( !Sys_FindFirst( va("%s/*.pak", dirnames[i]), 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM) ) {
+			Sys_FindClose();
+			if ( !Sys_FindFirst( va("%s/*.pk3", dirnames[i]), 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM) ) {
+				Sys_FindClose();
+				if ( !Sys_FindFirst( va("%s/maps", dirnames[i]), SFF_SUBDIR, 0) ) {
+					Sys_FindClose();
+					continue;
+				}
+			}
+		}
+		Sys_FindClose();
+
+		// check if this mod has a gamex86.dll/gamei386.so without an equivalent KMQ2 dll/so
+		unsupportedMod = false;
+		if ( Sys_FindFirst( va("%s/"STOCK_Q2_GAME_LIBRARY_NAME, dirnames[i]), 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM) )
+		{
+			Sys_FindClose();
+			if ( !Sys_FindFirst( va("%s/"KMQ2_GAME_LIBRARY_NAME, dirnames[i]), 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM) ) {
+				Sys_FindClose();
+				unsupportedMod = true;
+			//	Com_Printf ("UI_BuildModList: mod %s has an unsupported game library.\n", modDir);
+			}
+		}
+		Sys_FindClose();
+
+		// try to load description.txt
+		f = fopen( va("%s/description.txt", dirnames[i]), "rb");
+		if (f != NULL) {
+			fgets(modDesc, sizeof(modDesc), f);
+			fclose(f);
+			modName = modDesc;
+		}
+		else if ( !Q_strcasecmp(modDir, "ctf") )
+			modName = "Quake II: Capture The Flag";
+		else if ( !Q_strcasecmp(modDir, "rogue") )
+			modName = "Quake II: Ground Zero";
+		else if ( !Q_strcasecmp(modDir, "xatrix") )
+			modName = "Quake II: The Reckoning";
+		else if ( !Q_strcasecmp(modDir, "zaero") )
+			modName = "Zaero Mission Pack";
+		else if ( !Q_strcasecmp(modDir, "3zb2") )
+			modName ="3rd Zigrock Bot II";
+		else if ( !Q_strcasecmp(modDir, "gen") )
+			modName = "Generations";
+		else if ( !Q_strcasecmp(modDir, "ra2") )
+			modName = "Rocket Arena 2";
+		else if ( !Q_strcasecmp(modDir, "bots") )
+			modName = "Battle of the Sexes";
+		else if ( !Q_strcasecmp(modDir, "lmctf") )
+			modName = "Loki's Minions CTF";
+		else if ( !Q_strcasecmp(modDir, "wf") )
+			modName = "Weapons Factory";
+		else if ( !Q_strcasecmp(modDir, "wod") )
+			modName = "Weapons of Destruction";
+		else if ( !Q_strcasecmp(modDir, "rts") )
+			modName = "Rob the Strogg";
+		else
+			modName = modDir;
+
+		if (unsupportedMod)
+			Com_sprintf(modFormatedName, sizeof(modFormatedName), S_COLOR_ORANGE"%s\0", modName);
+		else
+			Q_strncpyz(modFormatedName, sizeof(modFormatedName), modName);
+
+		if (!FS_ItemInList(modDir, count, ui_mod_values))
+		{
+		//	FS_InsertInList (ui_mod_names, modName, count, 1);	// start=1 so first item stays first!
+			FS_InsertInList (ui_mod_names, modFormatedName, count, 1);	// start=1 so first item stays first!
+			FS_InsertInList (ui_mod_values, modDir, count, 1);	// start=1 so first item stays first!
+			count++;
+			ui_mod_isUnsupported[count] = unsupportedMod;
+		}
+	}
+	
+	if (dirnames)
+		FS_FreeFileList (dirnames, ndirs);
+
+	ui_num_mods = count;
+}
+
+
+/*
+==========================
+UI_GetModList
+==========================
+*/
+void UI_GetModList (void)
+{
+	UI_BuildModList ();
+//	Com_Printf ("UI_GetModList: found %i mod dirs\n", ui_num_mods);
+}
+
+
+/*
+==========================
+UI_FreeModList
+==========================
+*/
+void UI_FreeModList (void)
+{
+	if (ui_num_mods > 0) {
+		FS_FreeFileList (ui_mod_names, ui_num_mods);
+		FS_FreeFileList (ui_mod_values, ui_num_mods);
+	}
+	ui_mod_names = NULL;
+	ui_mod_values = NULL;
+}
+#endif
 
 /*
 =======================================================================
@@ -1995,8 +2190,10 @@ void UI_BuildStartSeverLevelshotTables (void)
 
 	for (i=0; i<NUM_MAPTYPES; i++)
 	{	// free existing list	
-		if (ui_svr_mapshotvalid[i])
+		if (ui_svr_mapshotvalid[i]) {
 			free(ui_svr_mapshotvalid[i]);
+			ui_svr_mapshotvalid[i] = NULL;
+		}
 
 		// alloc and zero new list
 		ui_svr_mapshotvalid[i] = malloc( sizeof( byte ) * ( ui_svr_maplist_sizes[i] + 1 ) );
@@ -2024,8 +2221,10 @@ void UI_FreeStartSeverLevelshotTables (void)
 
 	for (i=0; i<NUM_MAPTYPES; i++)
 	{
-		if (ui_svr_mapshotvalid[i])
+		if (ui_svr_mapshotvalid[i]) {
 			free(ui_svr_mapshotvalid[i]);
+			ui_svr_mapshotvalid[i] = NULL;
+		}
 	}
 }
 

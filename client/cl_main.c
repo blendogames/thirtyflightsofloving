@@ -3062,3 +3062,19 @@ void CL_Shutdown (void)
 	UI_Shutdown ();			// added UI shutdown
 	Con_Shutdown ();		// added Con shutdown
 }
+
+
+/*
+====================
+CL_ChangeGameRefresh
+
+Called during a gamedir change
+====================
+*/
+void CL_ChangeGameRefresh (void)
+{
+	if (dedicated->integer)
+		return;		// nothing running on the client
+
+	UI_RefreshData ();		// refresh UI data
+}

@@ -902,6 +902,7 @@ void		FS_InsertInList (char **list, const char *insert, int len, int start);
 void		FS_Dir_f (void);
 
 void		FS_ExecAutoexec (void);
+void		FS_ExecConfigs (qboolean unbind);	// Knightmare added
 
 int			FS_LoadFile (const char *path, void **buffer);
 void		FS_AddPAKFile (const char *packPath, qboolean isProtected); // add pak file function
@@ -1041,6 +1042,7 @@ CLIENT / SERVER SYSTEMS
 void CL_Init (void);
 void CL_Drop (void);
 void CL_Shutdown (void);
+void CL_ChangeGameRefresh (void);	// Knightmare added
 void CL_Frame (int msec);
 void Con_Print (char *text);
 void SCR_BeginLoadingPlaque (void);

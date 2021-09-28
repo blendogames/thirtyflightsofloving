@@ -250,6 +250,9 @@ extern char	**ui_video_modes;
 extern char	**ui_aniso_names;
 extern char	**ui_aniso_values;
 
+//extern char	**ui_mod_names;
+//extern char	**ui_mod_values;
+
 extern char **ui_font_names;
 extern int	ui_numfonts;
 
@@ -352,9 +355,13 @@ int	 UI_TallyMenuSlots (menuframework_s *menu);
 
 void UIStartSPGame (void);
 void UI_StartServer (char *startmap, qboolean dedicated);
+void UI_LoadMod (char *modName);
 
 void UI_GetVideoInfo (void);
 void UI_FreeVideoInfo (void);
+
+//void UI_GetModList (void);
+//void UI_FreeModList (void);
 
 void UI_LoadFontNames (void);
 void UI_FreeFontNames (void);
@@ -463,7 +470,7 @@ void UI_DrawMenu (menuframework_s *menu);
 const char *UI_DefaultMenuKey (menuframework_s *m, int key);
 
 //
-// ui_subsystem.c
+// ui_main.c
 //
 void UI_Draw (void);
 void UI_Keydown (int key);
@@ -471,6 +478,7 @@ void UI_RootMenu (void);
 void UI_Precache (void);
 void UI_Init (void);
 void UI_Shutdown (void);
+void UI_RefreshData (void);
 
 //
 // ui_draw.c

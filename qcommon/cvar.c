@@ -335,6 +335,10 @@ cvar_t *Cvar_Set2 (char *var_name, char *value, qboolean force)
 				if (!strcmp(var->name, "game"))
 				{
 					FS_SetGamedir (var->string);
+					// Knightmare added
+					CL_ChangeGameRefresh ();	// refresh client data
+					FS_ExecConfigs (true);		// exec configs
+					// end Knightmare
 					FS_ExecAutoexec ();
 				}
 			}
@@ -593,6 +597,10 @@ void Cvar_GetLatchedVars (void)
 		if (!strcmp(var->name, "game"))
 		{
 			FS_SetGamedir (var->string);
+			// Knightmare added
+			CL_ChangeGameRefresh ();	// refresh client data
+			FS_ExecConfigs (true);		// exec configs
+			// end Knightmare
 			FS_ExecAutoexec ();
 		}
 	}
