@@ -663,6 +663,7 @@ extern	int	cells_index;
 extern	int	slugs_index;
 extern	int fuel_index;
 extern	int	homing_index;
+extern	int	blaster_index;
 extern	int	rl_index;
 extern	int	hml_index;
 

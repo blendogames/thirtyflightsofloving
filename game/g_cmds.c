@@ -2123,10 +2123,10 @@ void ClientCommand (edict_t *ent)
 		Cmd_EntCount_f(ent);
 
 	// alternate attack mode
-	/*else if (!Q_stricmp(cmd,"attack2_off"))
-		Cmd_attack2_f(ent,false);
-	else if (!Q_stricmp(cmd,"attack2_on"))
-		Cmd_attack2_f(ent,true);*/
+	/*else if (!Q_stricmp(cmd, "attack2_off"))
+		Cmd_attack2_f (ent, false);
+	else if (!Q_stricmp(cmd, "attack2_on"))
+		Cmd_attack2_f (ent, true);*/
 
 	// zoom
 	else if (!Q_stricmp(cmd, "zoomin"))

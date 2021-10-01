@@ -1436,6 +1436,7 @@ void turret_breach_touch (edict_t *self, edict_t *other, cplane_t *plane, csurfa
 void SP_turret_breach (edict_t *self)
 {
 	self->class_id = ENTITY_TURRET_BREACH;
+	self->common_name = "Turret Breach";
 
 	// Good guy turrets shoot at monsters, not players. Turn TRACK on if it ain't already
 	if (self->spawnflags & SF_TURRET_GOODGUY)
@@ -1783,6 +1784,7 @@ void SP_turret_driver (edict_t *self)
 	}
 
 	self->class_id = ENTITY_TURRET_DRIVER;
+	self->common_name = "Turret Driver";
 
 	self->movetype = MOVETYPE_PUSH;
 	self->solid = SOLID_BBOX;

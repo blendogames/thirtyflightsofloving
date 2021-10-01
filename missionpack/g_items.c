@@ -68,6 +68,7 @@ int	cells_index;
 int	slugs_index;
 int fuel_index;
 int	homing_index;
+int	blaster_index;
 int rl_index;
 int	hml_index;
 int	pl_index;
@@ -5124,6 +5125,7 @@ void SetItemNames (void)
 	slugs_index			= ITEM_INDEX(FindItem("Slugs"));
 	fuel_index			= ITEM_INDEX(FindItem("Fuel"));
 	homing_index		= ITEM_INDEX(FindItem("Homing Rockets"));
+	blaster_index       = ITEM_INDEX(FindItem("Blaster"));
 	rl_index			= ITEM_INDEX(FindItem("Rocket Launcher"));
 	pr_index			= ITEM_INDEX(FindItem(PLASMA_PICKUP_NAME));		// SKWiD MOD
 	hml_index			= ITEM_INDEX(FindItem("Homing Rocket Launcher"));

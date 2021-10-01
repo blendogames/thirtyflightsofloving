@@ -59,6 +59,7 @@ int	cells_index;
 int	slugs_index;
 int fuel_index;
 int	homing_index;
+int	blaster_index;
 int	rl_index;
 int	hml_index;
 
@@ -778,7 +779,7 @@ qboolean Pickup_Ammo (edict_t *ent, edict_t *other)
 
 	if (weapon && !oldcount)
 	{
-		if (other->client->pers.weapon != ent->item && ( !deathmatch->value || other->client->pers.weapon == FindItem("blaster") || other->client->pers.weapon == FindItem("No weapon") ) )
+		if (other->client->pers.weapon != ent->item && ( !deathmatch->value || other->client->pers.weapon == FindItem("Blaster") || other->client->pers.weapon == FindItem("No weapon") ) )
 			other->client->newweapon = ent->item;
 	}
 
@@ -3278,7 +3279,8 @@ void SetItemNames (void)
 	slugs_index        = ITEM_INDEX(FindItem("slugs"));
 	fuel_index         = ITEM_INDEX(FindItem("fuel"));
 	homing_index       = ITEM_INDEX(FindItem("homing rockets"));
-	rl_index           = ITEM_INDEX(FindItem("rocket launcher"));
+	blaster_index      = ITEM_INDEX(FindItem("Blaster"));
+	rl_index           = ITEM_INDEX(FindItem("Rocket Launcher"));
 	hml_index          = ITEM_INDEX(FindItem("Homing Rocket Launcher"));
 }
 
@@ -3322,7 +3324,7 @@ void Use_Jet ( edict_t *ent, gitem_t *item )
 		// his "jump" when the jetpack is turned off. The same thing is done in 
 		// ClientThink when jetpack timer expires.
 		ent->s.frame = 67;
-		gi.sound(ent,CHAN_GIZMO,gi.soundindex("jetpack/shutdown.wav"), 1, ATTN_NORM, 0);
+		gi.sound(ent, CHAN_GIZMO, gi.soundindex("jetpack/shutdown.wav"), 1, ATTN_NORM, 0);
 	}
 	else
 	{
@@ -3352,7 +3354,7 @@ void Use_Jet ( edict_t *ent, gitem_t *item )
 		}
 		else
 			return;  // Shouldn't have been able to get here, but I'm a pessimist
-		gi.sound( ent, CHAN_GIZMO, gi.soundindex("jetpack/activate.wav"), 1, ATTN_NORM, 0);
+		gi.sound(ent, CHAN_GIZMO, gi.soundindex("jetpack/activate.wav"), 1, ATTN_NORM, 0);
 	}
 }
 #endif

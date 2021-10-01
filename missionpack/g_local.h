@@ -827,6 +827,7 @@ extern	int	cells_index;
 extern	int	slugs_index;
 extern	int fuel_index;
 extern	int	homing_index;
+extern	int	blaster_index;
 extern	int	rl_index;
 extern	int	hml_index;
 extern	int	pl_index;
@@ -1482,23 +1483,30 @@ qboolean ai_chicken (edict_t *ent, edict_t *badguy);
 #define BLASTER_GREEN	2
 #define BLASTER_BLUE	3
 #define BLASTER_RED		4
+
+void check_dodge (edict_t *self, vec3_t start, vec3_t dir, int speed);
 qboolean fire_hit (edict_t *self, vec3_t aim, int damage, int kick);
 void fire_bullet (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, int hspread, int vspread, int mod);
 void fire_shotgun (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, int hspread, int vspread, int count, int mod);
 void fire_blaster (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, int effect, qboolean hyper, int color);
 void fire_grenade (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, float timer, float damage_radius, qboolean contact);
 void fire_grenade2 (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, float timer, float damage_radius, qboolean held);
-//void fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage);
-void fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage, edict_t *home_target);
+void rocket_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf);
 void fire_rail (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick);
 void fire_bfg (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius);
-
+void Grenade_Explode (edict_t *ent);
+void fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage, edict_t *home_target);
 // Knightmare added
 void fire_missile (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage, edict_t *home_target);
-void fire_shock_sphere (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage);
-void fire_plasma_rifle (edict_t *ent, vec3_t start, vec3_t dir, int damage, int speed, qboolean spread);	// SKWiD MOD
+// Lazarus
+qboolean AimGrenade (edict_t *launcher, vec3_t start, vec3_t target, vec_t speed, vec3_t aim, qboolean isProx);
+void Grenade_Evade (edict_t *monster);
+void Grenade_Add_To_Chain (edict_t *grenade);
+void Grenade_Remove_From_Chain (edict_t *grenade);
 
-// RAFAEL
+//
+// g_weapon_xatrix.c
+//
 void fire_ionripper (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, int effect);
 void fire_rocket_heat (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage);
 void fire_blueblaster (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, int effect);
@@ -1508,11 +1516,16 @@ void Trap_Die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, 
 void Cmd_KillTrap_f (edict_t *ent);
 void Trap_Explode (edict_t *ent);
 
-// Lazarus
-qboolean AimGrenade (edict_t *launcher, vec3_t start, vec3_t target, vec_t speed, vec3_t aim, qboolean isProx);
-void Grenade_Evade (edict_t *monster);
-void Grenade_Add_To_Chain (edict_t *grenade);
-void Grenade_Remove_From_Chain (edict_t *grenade);
+//
+// g_weapon_lm.c
+//
+void fire_plasma_rifle (edict_t *ent, vec3_t start, vec3_t dir, int damage, int speed, qboolean spread);	// SKWiD MOD
+
+//
+// g_weapon_km.c
+//
+void fire_shock_sphere (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage);
+void fire_nbomb (edict_t *self, vec3_t start, vec3_t aimdir, int speed);		
 
 //
 // g_weapon_q1.c
@@ -1750,7 +1763,6 @@ edict_t *CheckForProxField (edict_t *ent);
 //void fire_prox (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed);	
 void fire_prox (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int damage_multiplier, int speed, int health, float timer, float damage_radius);
 void fire_nuke (edict_t *self, vec3_t start, vec3_t aimdir, int speed);		
-void fire_nbomb (edict_t *self, vec3_t start, vec3_t aimdir, int speed);		
 void fire_flame (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed);
 void fire_burst (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed);
 void fire_maintain (edict_t *, edict_t *, vec3_t start, vec3_t aimdir, int damage, int speed);

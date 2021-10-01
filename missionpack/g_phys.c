@@ -1654,7 +1654,7 @@ void SV_Physics_Toss (edict_t *ent)
 			backoff = 2.0;
 		else if ((ent->movetype == MOVETYPE_RAIN) && (trace.plane.normal[2] <= 0.7))
 			backoff = 2.0;
-	//	else if (ent->classname && (strlen(ent->classname) > 0) && !strcmp(ent->classname, "shock_sphere"))
+	//	else if (ent->class_id == ENTITY_SHOCK_SPHERE)
 	//		backoff = 1.8;
 		else if (ent->movetype == MOVETYPE_BOUNCE)
 		//	backoff = 1.5;
@@ -1666,15 +1666,14 @@ void SV_Physics_Toss (edict_t *ent)
 
 		ClipVelocity (ent->velocity, trace.plane.normal, ent->velocity, backoff);
 		// RAFAEL
-		if (ent->movetype == MOVETYPE_WALLBOUNCE )
+		if (ent->movetype == MOVETYPE_WALLBOUNCE)
 			vectoangles (ent->velocity, ent->s.angles);
 
 		// stop if on ground
 		if ( (trace.plane.normal[2] > 0.7) && (ent->movetype != MOVETYPE_WALLBOUNCE) )
 		{
 		//	if (ent->velocity[2] < bounce_minv->value || ent->movetype != MOVETYPE_BOUNCE)
-		//	if ((strcmp(ent->classname, "shock_sphere") != 0) && (ent->velocity[2] < bounce_minv->value || ent->movetype != MOVETYPE_BOUNCE) )
-			if ((ent->class_id != ENTITY_SHOCK_SPHERE) && (ent->velocity[2] < bounce_minv->value || ent->movetype != MOVETYPE_BOUNCE) )
+			if ( (ent->class_id != ENTITY_SHOCK_SPHERE) && ((ent->velocity[2] < bounce_minv->value) || (ent->movetype != MOVETYPE_BOUNCE)) )
 			{
 				ent->groundentity = trace.ent;
 				ent->groundentity_linkcount = trace.ent->linkcount;

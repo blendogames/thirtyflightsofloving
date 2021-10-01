@@ -61,7 +61,7 @@ void FadeDieSink (edict_t *ent)
 //          bounding box, and a few other parameters for dead
 //          monsters that change levels with a trigger_transition
 
-qboolean M_SetDeath(edict_t *self, mmove_t **deathmoves)
+qboolean M_SetDeath (edict_t *self, mmove_t **deathmoves)
 {
 	mmove_t	*move=NULL;
 	mmove_t *dmove;

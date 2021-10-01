@@ -534,6 +534,7 @@ extern	int	flares_index;
 extern	int	tbombs_index;
 extern	int	empnuke_index;
 extern	int	plasmashield_index;
+extern	int	blaster_index;
 
 
 // means of death

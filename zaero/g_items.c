@@ -40,6 +40,7 @@ int	tbombs_index;
 int	empnuke_index;
 int	plasmashield_index;
 int	a2k_index;
+int	blaster_index;
 
 #define HEALTH_IGNORE_MAX	1
 #define HEALTH_TIMED		2
@@ -3027,15 +3028,16 @@ void SetItemNames (void)
 	body_armor_index   = ITEM_INDEX(FindItem("Body Armor"));
 	power_screen_index = ITEM_INDEX(FindItem("Power Screen"));
 	power_shield_index = ITEM_INDEX(FindItem("Power Shield"));
-	shells_index = ITEM_INDEX(FindItem("Shells"));
-	bullets_index = ITEM_INDEX(FindItem("Bullets"));
-	grenades_index = ITEM_INDEX(FindItem("Grenades"));
-	rockets_index = ITEM_INDEX(FindItem("Rockets"));
-	cells_index = ITEM_INDEX(FindItem("Cells"));
-	slugs_index = ITEM_INDEX(FindItem("Slugs"));
-	flares_index = ITEM_INDEX(FindItem("Flares"));
-	tbombs_index = ITEM_INDEX(FindItem("IRED"));
-	empnuke_index = ITEM_INDEX(FindItem("EMPNuke"));
+	shells_index       = ITEM_INDEX(FindItem("Shells"));
+	bullets_index      = ITEM_INDEX(FindItem("Bullets"));
+	grenades_index     = ITEM_INDEX(FindItem("Grenades"));
+	rockets_index      = ITEM_INDEX(FindItem("Rockets"));
+	cells_index        = ITEM_INDEX(FindItem("Cells"));
+	slugs_index        = ITEM_INDEX(FindItem("Slugs"));
+	flares_index       = ITEM_INDEX(FindItem("Flares"));
+	tbombs_index       = ITEM_INDEX(FindItem("IRED"));
+	empnuke_index      = ITEM_INDEX(FindItem("EMPNuke"));
 	plasmashield_index = ITEM_INDEX(FindItem("Plasma Shield"));
-	a2k_index = ITEM_INDEX(FindItem("A2K"));
+	a2k_index          = ITEM_INDEX(FindItem("A2K"));
+	blaster_index      = ITEM_INDEX(FindItem("Blaster"));
 }

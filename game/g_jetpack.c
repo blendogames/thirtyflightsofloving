@@ -55,7 +55,7 @@ void Jet_BecomeExplosion( edict_t *ent, int damage )
 	/*TE_EXPLOSION2 is possible too*/
 	gi.WritePosition( ent->s.origin );
 	gi.multicast( ent->s.origin, MULTICAST_PVS );
-	gi.sound( ent, CHAN_BODY, gi.soundindex("misc/udeath.wav"), 1, ATTN_NORM, 0 );
+	gi.sound(ent, CHAN_BODY, gi.soundindex("misc/udeath.wav"), 1, ATTN_NORM, 0 );
 
 	if (level.num_reflectors)
 		ReflectExplosion (TE_EXPLOSION1, ent->s.origin);

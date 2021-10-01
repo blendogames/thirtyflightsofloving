@@ -5,16 +5,14 @@
 //#define INCLUDE_FLAMETHROWER	1
 //#define INCLUDE_INCENDIARY		1
 #define INCLUDE_NUKE			1
-#define INCLUDE_NBOMB               1
+//#define INCLUDE_NBOMB           1
 #define INCLUDE_MELEE			1
 #define INCLUDE_TESLA			1
 #define INCLUDE_BEAMS			1
 
-extern void check_dodge (edict_t *self, vec3_t start, vec3_t dir, int speed);
 extern void hurt_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf);
 extern void droptofloor (edict_t *ent);
 extern void Grenade_Explode (edict_t *ent);
-//extern void Nbomb_Explode (edict_t *ent);
 
 extern void drawbbox (edict_t *ent);
 
@@ -1546,25 +1544,10 @@ void Nuke_Quake (edict_t *self)
 			continue;
 
 		e->groundentity = NULL;
-		if (!strcmp(self->classname, "shock_sphere"))
-		{
-			e->velocity[0] += crandom()* 125;
-			e->velocity[1] += crandom()* 125;
-			e->velocity[2] = self->speed * (150.0 / e->mass);
-		}
-		else
-		{
-			e->velocity[0] += crandom()* 150;
-			e->velocity[1] += crandom()* 150;
-			e->velocity[2] = self->speed * (100.0 / e->mass);
-		}
+		e->velocity[0] += crandom()* 150.0f;
+		e->velocity[1] += crandom()* 150.0f;
+		e->velocity[2] = self->speed * (100.0f / e->mass);
 	}
-/*	if (!strcmp(self->classname, "shock_sphere")) //remove shock sphere after x bounces
-	{
-		if (self->count > sk_shockwave_bounces->value)
-				G_FreeEdict (self);
-		return;  //don't loop
-	}*/
 
 	if (level.time < self->timestamp)
 		self->nextthink = level.time + FRAMETIME;
@@ -1814,249 +1797,6 @@ void fire_nuke (edict_t *self, vec3_t start, vec3_t aimdir, int speed)
 }
 #endif
 
-// *************************
-// BLU-86 (aka Fuel-Air Explosive, aka NEUTRON BOMB)
-// *************************
-#ifdef INCLUDE_NBOMB
-#define NBOMB_DELAY			4
-#define NBOMB_TIME_TO_LIVE	6
-//#define NBOMB_TIME_TO_LIVE	40
-#define NBOMB_RADIUS			256
-#define NBOMB_DAMAGE			5000
-#define NBOMB_QUAKE_TIME		3
-#define NBOMB_QUAKE_STRENGTH	100
-
-void Nbomb_Quake (edict_t *self)
-{
-	int		i;
-	edict_t	*e;
-
-	if (self->last_move_time < level.time)
-	{
-		gi.positioned_sound (self->s.origin, self, CHAN_AUTO, self->noise_index, 0.75, ATTN_NONE, 0);
-		self->last_move_time = level.time + 0.5;
-	}
-
-	for (i=1, e=g_edicts+i; i < globals.num_edicts; i++,e++)
-	{
-		if (!e->inuse)
-			continue;
-		if (!e->client)
-			continue;
-		if (!e->groundentity)
-			continue;
-
-		e->groundentity = NULL;
-		e->velocity[0] += crandom()* 150;
-		e->velocity[1] += crandom()* 150;
-		e->velocity[2] = self->speed * (100.0 / e->mass);
-	}
-
-	if (level.time < self->timestamp)
-		self->nextthink = level.time + FRAMETIME;
-	else
-		G_FreeEdict (self);
-}
-
-
-/*static*/ void Nbomb_Explode (edict_t *ent)
-{
-	if (ent->teammaster->client)
-		PlayerNoise(ent->teammaster, ent->s.origin, PNOISE_IMPACT);
-
-	T_RadiusNukeDamage(ent, ent->teammaster, ent->dmg, ent, ent->dmg_radius, MOD_NBOMB);
-
-	if (ent->dmg > sk_nbomb_damage->value)
-	{
-		if (ent->dmg < (4 * sk_nbomb_damage->value)) //double sound
-				gi.sound(ent, CHAN_ITEM, gi.soundindex("misc/ddamage3.wav"), 1, ATTN_NORM, 0);
-		else //quad sound
-				gi.sound(ent, CHAN_ITEM, gi.soundindex("items/damage3.wav"), 1, ATTN_NORM, 0);
-	}
-
-	gi.sound (ent, CHAN_NO_PHS_ADD+CHAN_VOICE, gi.soundindex ("weapons/grenlx1a.wav"), 1, ATTN_NONE, 0);
-
-
-	gi.WriteByte (svc_temp_entity);
-	gi.WriteByte (TE_EXPLOSION1_BIG);
-	gi.WritePosition (ent->s.origin);
-	gi.multicast (ent->s.origin, MULTICAST_PVS);
-
-	gi.WriteByte (svc_temp_entity);
-	gi.WriteByte (TE_NUKEBLAST);
-	gi.WritePosition (ent->s.origin);
-	gi.multicast (ent->s.origin, MULTICAST_ALL);
-
-	// Lazarus reflections
-	if (level.num_reflectors)
-	{
-		ReflectExplosion (TE_EXPLOSION1_BIG, ent->s.origin);
-	//	ReflectExplosion (TE_NUKEBLAST, ent->s.origin);
-	}
-
-	// become a quake
-	ent->svflags |= SVF_NOCLIENT;
-	ent->noise_index = gi.soundindex ("world/rumble.wav");
-	ent->think = Nbomb_Quake;
-	ent->speed = NBOMB_QUAKE_STRENGTH;
-	ent->timestamp = level.time + NBOMB_QUAKE_TIME;
-	ent->nextthink = level.time + FRAMETIME;
-	ent->last_move_time = 0;
-}
-
-void nbomb_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
-{
-	self->takedamage = DAMAGE_NO;
-	if ((attacker) && !(strcmp(attacker->classname, "nbomb")))
-	{
-//		if ((g_showlogic) && (g_showlogic->value))
-//			gi.dprintf ("nbomb nuked by a nbomb, not nuking\n");
-		G_FreeEdict (self);
-		return;
-	}
-	Nbomb_Explode(self);
-}
-
-void Nbomb_Think(edict_t *ent)
-{
-	float attenuation, default_atten = 1.8;
-	int	muzzleflash;
-
-	attenuation = default_atten/3.0;
-	muzzleflash = MZ_NUKE4;
-
-	if (ent->wait < level.time)
-		Nbomb_Explode(ent);
-	else if (level.time >= (ent->wait - sk_nbomb_life->value))
-	{
-		if (gi.pointcontents (ent->s.origin) & (CONTENTS_SLIME|CONTENTS_LAVA))
-		{
-			Nbomb_Explode (ent);
-			return;
-		}
-
-		// Knightmare- remove smoke trail if we've stopped moving
-		if (ent->groundentity && !VectorLength(ent->velocity))
-			ent->s.effects &= ~EF_GRENADE;
-		// but restore it if we go flying
-		else if (!ent->groundentity)
-			ent->s.effects |= EF_GRENADE;
-
-		ent->think = Nbomb_Think;
-		ent->nextthink = level.time + 0.1;
-		ent->health = 1;
-		ent->owner = NULL;
-
-		gi.WriteByte (svc_muzzleflash);
-		gi.WriteShort (ent-g_edicts);
-		gi.WriteByte (muzzleflash);
-		gi.multicast (ent->s.origin, MULTICAST_PVS);
-
-		if (ent->timestamp <= level.time)
-		{
-/*			gi.sound (ent, CHAN_VOICE, gi.soundindex ("weapons/nukewarn.wav"), 1, ATTN_NORM, 0);
-			ent->timestamp += 10.0;
-		}
-*/
-
-			if ((ent->wait - level.time) <= (sk_nbomb_life->value / 2.0))
-			{
-//				gi.sound (ent, CHAN_NO_PHS_ADD+CHAN_VOICE, gi.soundindex ("weapons/nukewarn2.wav"), 1, ATTN_NORM, 0);
-				gi.sound (ent, CHAN_NO_PHS_ADD+CHAN_VOICE, gi.soundindex ("weapons/nukewarn2.wav"), 1, attenuation, 0);
-//				gi.sound (ent, CHAN_VOICE, gi.soundindex ("weapons/nukewarn2.wav"), 1, ATTN_NORM, 0);
-				ent->timestamp = level.time + 0.3;
-			}
-			else
-			{
-				gi.sound (ent, CHAN_NO_PHS_ADD+CHAN_VOICE, gi.soundindex ("weapons/nukewarn2.wav"), 1, attenuation, 0);
-//				gi.sound (ent, CHAN_VOICE, gi.soundindex ("weapons/nukewarn2.wav"), 1, ATTN_NORM, 0);
-				ent->timestamp = level.time + 0.5;
-			}
-		}
-	}
-	else
-	{
-		if (ent->timestamp <= level.time)
-		{
-			gi.sound (ent, CHAN_NO_PHS_ADD+CHAN_VOICE, gi.soundindex ("weapons/nukewarn2.wav"), 1, attenuation, 0);
-//			gi.sound (ent, CHAN_VOICE, gi.soundindex ("weapons/nukewarn2.wav"), 1, ATTN_NORM, 0);
-//				gi.dprintf ("time %2.2f\n", ent->wait-level.time);
-			ent->timestamp = level.time + 1.0;
-		}
-		ent->nextthink = level.time + FRAMETIME;
-	}
-}
-
-void nbomb_bounce (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
-{
-	if (random() > 0.5)
-		gi.sound (ent, CHAN_VOICE, gi.soundindex ("weapons/hgrenb1a.wav"), 1, ATTN_NORM, 0);
-	else
-		gi.sound (ent, CHAN_VOICE, gi.soundindex ("weapons/hgrenb2a.wav"), 1, ATTN_NORM, 0);
-}
-
-
-extern byte P_DamageModifier(edict_t *ent);
-
-void fire_nbomb (edict_t *self, vec3_t start, vec3_t aimdir, int speed)
-{
-	edict_t	*nbomb;
-	vec3_t	dir;
-	vec3_t	forward, right, up;
-	int		damage_modifier;
-
-	damage_modifier = (int) P_DamageModifier (self);
-
-	vectoangles2 (aimdir, dir);
-	AngleVectors (dir, forward, right, up);
-
-	nbomb = G_Spawn();
-	VectorCopy (start, nbomb->s.origin);
-	VectorScale (aimdir, speed, nbomb->velocity);
-
-	VectorMA (nbomb->velocity, 200 + crandom() * 10.0, up, nbomb->velocity);
-	VectorMA (nbomb->velocity, crandom() * 10.0, right, nbomb->velocity);
-	//Knightmare- add player's base velocity to nbomb
-	if (self->groundentity)
-		VectorAdd (nbomb->velocity, self->groundentity->velocity, nbomb->velocity);
-
-	VectorClear (nbomb->avelocity);
-	VectorClear (nbomb->s.angles);
-	nbomb->movetype = MOVETYPE_BOUNCE;
-	nbomb->clipmask = MASK_SHOT;
-	nbomb->solid = SOLID_BBOX;
-	nbomb->s.effects |= EF_GRENADE;
-	nbomb->s.renderfx |= RF_IR_VISIBLE;
-	VectorSet (nbomb->mins, -8, -8, -16);
-	VectorSet (nbomb->maxs, 8, 8, 14);
-	nbomb->s.modelindex = gi.modelindex ("models/items/ammo/nbomb/tris.md2");
-	nbomb->owner = self;
-	nbomb->teammaster = self;
-	nbomb->wait = level.time + sk_nbomb_delay->value + sk_nbomb_life->value;
-	nbomb->nextthink = level.time + FRAMETIME;
-	nbomb->think = Nbomb_Think;
-	nbomb->touch = nbomb_bounce;
-
-	nbomb->health = 10000;
-	nbomb->takedamage = DAMAGE_YES;
-	nbomb->svflags |= SVF_DAMAGEABLE;
-	nbomb->dmg = sk_nbomb_damage->value * damage_modifier;
-	if (damage_modifier == 1)
-		nbomb->dmg_radius = sk_nbomb_radius->value;
-	else
-		nbomb->dmg_radius = sk_nbomb_radius->value + sk_nbomb_radius->value * (0.25*(float)damage_modifier);
-	// this yields 1.0, 1.5, 2.0, 3.0 times radius
-
-//	if ((g_showlogic) && (g_showlogic->value))
-//		gi.dprintf ("nbomb modifier = %d, damage = %d, radius = %f\n", damage_modifier, nbomb->dmg, nbomb->dmg_radius);
-
-	nbomb->classname = "nbomb";
-	nbomb->class_id = ENTITY_NBOMB;
-	nbomb->die = nbomb_die;
-
-	gi.linkentity (nbomb);
-}
-#endif
 
 // *************************
 // TESLA

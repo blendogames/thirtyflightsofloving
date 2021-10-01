@@ -639,6 +639,22 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 			// Mutant
 			else if (!strcmp(attacker->classname, "monster_mutant"))
 				message = "was clawed by a";
+			// Turret Driver
+		/*	else if ( !strcmp(attacker->classname, "turret_driver") || !strcmp(attacker->classname, "turret_breach") )
+			{
+				if (mod == MOD_ROCKET)
+				{
+					message = "ate a";
+					message2 = "'s rocket";
+				}
+				else if (mod == MOD_R_SPLASH)
+				{
+					message = "almost dodged a";
+					message2 = "'s rocket";
+				}
+				else
+					message = "was killed by a";
+			} */
 		}
 		if (message)
 		{
@@ -2989,11 +3005,11 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 			if (viewing && viewing->classname)
 			{
 				if (!Q_stricmp(viewing->classname, "crane_control") && range <= 100)
-					crane_control_action(viewing,ent,intersect);
+					crane_control_action (viewing, ent, intersect);
 				if (!Q_stricmp(viewing->classname, "target_lock_digit") && range <= 100)
-					lock_digit_increment(viewing,ent);
+					lock_digit_increment (viewing, ent);
 				if (!Q_stricmp(viewing->classname, "func_trainbutton") && (viewing->spawnflags & 1) && range <= 64)
-					trainbutton_use(viewing,ent,ent);
+					trainbutton_use (viewing, ent, ent);
 				// Knightmare- different range for chasecam
 				if (!Q_stricmp(viewing->classname, "func_monitor") && ((range <= 100) || (client->chasetoggle && range <= client->zoom + 160.00)) )
 				{

@@ -858,16 +858,16 @@ void G_SetClientEffects (edict_t *ent)
 		ent->s.renderfx |= (RF_SHELL_RED|RF_SHELL_GREEN|RF_SHELL_BLUE);
 	}
 
-  if(ent->client->zCameraLocalEntity)
-  {
-  	VectorCopy (ent->s.origin, ent->client->zCameraLocalEntity->s.origin);
-  	VectorCopy (ent->s.angles, ent->client->zCameraLocalEntity->s.angles);
-  	VectorCopy (ent->s.old_origin, ent->client->zCameraLocalEntity->s.old_origin);
+	if(ent->client->zCameraLocalEntity)
+	{
+		VectorCopy (ent->s.origin, ent->client->zCameraLocalEntity->s.origin);
+		VectorCopy (ent->s.angles, ent->client->zCameraLocalEntity->s.angles);
+		VectorCopy (ent->s.old_origin, ent->client->zCameraLocalEntity->s.old_origin);
 
-//    ent->client->zCameraLocalEntity->s.frame = ent->s.frame;
-    ent->client->zCameraLocalEntity->s.effects = ent->s.effects;
-//    ent->client->zCameraLocalEntity->s.renderfx |= RF_CUSTOMSKIN;
-  }
+	//	ent->client->zCameraLocalEntity->s.frame = ent->s.frame;
+		ent->client->zCameraLocalEntity->s.effects = ent->s.effects;
+	//	ent->client->zCameraLocalEntity->s.renderfx |= RF_CUSTOMSKIN;
+	}
 }
 
 

@@ -293,7 +293,19 @@ SOURCE=.\g_weapon.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\g_weapon_km.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\g_weapon_lm.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\g_weapon_q1.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\g_weapon_xatrix.c
 # End Source File
 # Begin Source File
 

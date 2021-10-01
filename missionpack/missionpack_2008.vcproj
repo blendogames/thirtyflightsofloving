@@ -616,7 +616,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\g_weapon_km.c"
+				>
+			</File>
+			<File
+				RelativePath=".\g_weapon_lm.c"
+				>
+			</File>
+			<File
 				RelativePath=".\g_weapon_q1.c"
+				>
+			</File>
+			<File
+				RelativePath=".\g_weapon_xatrix.c"
 				>
 			</File>
 			<File

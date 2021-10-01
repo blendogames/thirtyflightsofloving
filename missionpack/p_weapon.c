@@ -249,7 +249,10 @@ current
 */
 void ChangeWeapon (edict_t *ent)
 {
-	int i;
+	int		i;
+#ifdef KMQUAKE2_ENGINE_MOD
+	int		color;
+#endif	// KMQUAKE2_ENGINE_MOD
 
 	if (ent->client->grenade_time)
 	{
@@ -287,12 +290,25 @@ void ChangeWeapon (edict_t *ent)
 
 	ent->client->weaponstate = WEAPON_ACTIVATING;
 	ent->client->ps.gunframe = 0;
-//Knightmare- Gen cam code
-//Skid - CHASECAM
-//	if (!ent->client->chasetoggle)
+
+	// Knightmare- Gen cam code
 	if (!ent->client->chaseactive)
 		ent->client->ps.gunindex = gi.modelindex(ent->client->pers.weapon->view_model);
-//end
+
+	// Knightmare- set blaster skin based on bolt color
+#ifdef KMQUAKE2_ENGINE_MOD
+	if (ITEM_INDEX(ent->client->pers.weapon) == blaster_index)
+	{
+		// select color
+		color = (int)sk_blaster_color->value;
+		// blaster_color could be any other value, so clamp it
+		if ( ((int)sk_blaster_color->value < 1) || ((int)sk_blaster_color->value > 4) )
+			color = BLASTER_ORANGE; 
+		ent->client->ps.gunskin = max((color - 1), 0);
+	}
+	else
+		ent->client->ps.gunskin = 0;
+#endif	// KMQUAKE2_ENGINE_MOD
 
 	// DWH: change weapon model index if necessary
 	if (ITEM_INDEX(ent->client->pers.weapon) == noweapon_index)
@@ -1706,11 +1722,11 @@ void Weapon_Blaster_Fire (edict_t *ent, qboolean altfire)
 	else
 		damage = sk_blaster_damage->value;
 
-	// Knightmare- select color
-	color = sk_blaster_color->value;
+	// select color
+	color = (int)sk_blaster_color->value;
 	// blaster_color could be any other value, so clamp it
-	if (sk_blaster_color->value < 2 || sk_blaster_color->value > 4)
-		color = BLASTER_ORANGE;
+	if ( ((int)sk_blaster_color->value < 1) || ((int)sk_blaster_color->value > 4) )
+		color = BLASTER_ORANGE; 
 //#ifndef KMQUAKE2_ENGINE_MOD
 #if !defined (KMQUAKE2_ENGINE_MOD) && !defined (Q2E_ENGINE_MOD)
 	if (color == BLASTER_RED) color = BLASTER_ORANGE;
@@ -1777,8 +1793,9 @@ void Weapon_HyperBlaster_Fire (edict_t *ent, qboolean altfire)
 			offset[2] = 4 * cos(rotation);
 
 			// Knightmare- select color
-			color = sk_hyperblaster_color->value;
-			if (sk_hyperblaster_color->value < 2 || sk_hyperblaster_color->value > 4)
+			color = (int)sk_hyperblaster_color->value;
+			// hyperblaster_color could be any other value, so clamp it
+			if ( ((int)sk_hyperblaster_color->value < 1) || ((int)sk_hyperblaster_color->value > 4) )
 				color = BLASTER_ORANGE;
 	//	#ifndef KMQUAKE2_ENGINE_MOD
 		#if !defined (KMQUAKE2_ENGINE_MOD) && !defined (Q2E_ENGINE_MOD)
