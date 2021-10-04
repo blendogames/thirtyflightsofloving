@@ -28,7 +28,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //   PatchPlayerModels (ent);
 
 
+#ifdef _WIN32
 #include <direct.h>
+#else
+#include <unistd.h>
+#define _mkdir mkdir
+#endif
 #include "g_local.h"
 
 

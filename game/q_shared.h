@@ -114,7 +114,11 @@ typedef enum {false, true}	qboolean;
 
 
 //BC 11-13-2012 increase this so that the Mac build runs.
+#ifdef _WIN32
 #define	MAX_OSPATH			256		// max length of a filesystem pathname
+#else
+#define	MAX_OSPATH			4096		// max length of a filesystem pathname
+#endif
 
 
 

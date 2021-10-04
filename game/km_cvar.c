@@ -46,7 +46,7 @@ cvar_t	*use_vwep;
 cvar_t	*blaster_damage;
 cvar_t	*blaster_damage_dm;
 cvar_t	*blaster_speed;
-cvar_t	*blaster_color;  //blaster color- 1=yellow, 2=green, 3=blue, 4=red
+extern cvar_t	*blaster_color;  //blaster color- 1=yellow, 2=green, 3=blue, 4=red
 
 cvar_t	*shotgun_damage;
 cvar_t	*shotgun_count;

@@ -1012,7 +1012,12 @@ void InitiallyDead (edict_t *self)
 #define MAX_SKINS		24 //max is 32, but we only need 24
 #define MAX_SKINNAME	64
 
+#ifdef _WIN32
 #include <direct.h>
+#else
+#include <unistd.h>
+#define _mkdir mkdir
+#endif
 #include "pak.h"
 
 int PatchMonsterModel (char *modelname)

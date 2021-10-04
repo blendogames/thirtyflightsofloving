@@ -73,9 +73,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // 
 ///////////////////////////////////////////////////////////////////////
 
-#include "..\g_local.h"
+#include "../g_local.h"
 #include "acebot.h"
+#ifdef _WIN32
 #include <direct.h>
+#else
+#include <unistd.h>
+#define _mkdir mkdir
+#endif
 
 // flags
 qboolean newmap=true;

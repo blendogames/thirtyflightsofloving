@@ -293,6 +293,7 @@ void Do_Text_Display(edict_t *activator, int flags, char *message)
 		FILE			*f;
 		pak_header_t	pakheader;
 		pak_item_t		pakitem;
+		int i;
 		
 		basedir = gi.cvar("basedir", "", 0);
 		gamedir = gi.cvar("gamedir", "", 0);
@@ -544,7 +545,7 @@ void Do_Text_Display(edict_t *activator, int flags, char *message)
 						}
 						memset(hnd->buffer,0,hnd->allocated);
 						memcpy(hnd->buffer,temp_buffer,hnd->size);
-						p1 = hnd->buffer + (p2-temp_buffer);
+						p1 = hnd->buffer + ((size_t)p2-(size_t)temp_buffer);
 						p2 = p1;
 						free(temp_buffer);
 					}
@@ -581,7 +582,7 @@ void Do_Text_Display(edict_t *activator, int flags, char *message)
 				memset(hnd->buffer,0,hnd->allocated);
 				memcpy(hnd->buffer,temp_buffer,hnd->size);
 				p2 = p1;
-				p1 = hnd->buffer + (p2-temp_buffer);
+				p1 = hnd->buffer + ((size_t)p2-(size_t)temp_buffer);
 				free(temp_buffer);
 			}
 			p2 = hnd->buffer + hnd->size;
@@ -611,7 +612,7 @@ void Do_Text_Display(edict_t *activator, int flags, char *message)
 				memset(hnd->buffer,0,hnd->allocated);
 				memcpy(hnd->buffer,temp_buffer,hnd->size);
 				p2 = p1;
-				p1 = hnd->buffer + (p2-temp_buffer);
+				p1 = hnd->buffer + ((size_t)p2-(size_t)temp_buffer);
 				free(temp_buffer);
 			}
 			p2 = hnd->buffer + hnd->size;
@@ -702,7 +703,7 @@ done_linebreaks:
 					while(*p2 != 0)
 						p2++;
 					p2++;
-					memcpy(p1,p2,hnd->buffer+hnd->size-p2+1);
+					memcpy(p1,p2,hnd->buffer+hnd->size-(size_t)p2+1);
 					hnd->nlines--;
 					// Found one (only one is allowed)
 					gi.sound (activator, CHAN_AUTO, gi.soundindex (sound), 1, ATTN_NORM, 0);

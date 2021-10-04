@@ -802,9 +802,9 @@ qboolean SV_CloseEnough (edict_t *ent, edict_t *goal, float dist)
 M_MoveToGoal
 ======================
 */
-mmove_t actor_move_run;
-mmove_t actor_move_stand;
-mmove_t actor_move_walk;
+extern mmove_t actor_move_run;
+extern mmove_t actor_move_stand;
+extern mmove_t actor_move_walk;
 void M_MoveToGoal (edict_t *ent, float dist)
 {
 	edict_t		*goal;

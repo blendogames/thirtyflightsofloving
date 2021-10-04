@@ -570,7 +570,9 @@ void Weapon_Generic2 (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST
 		
 		int	current_weapon_index;
 
+#ifdef KMQUAKE2_ENGINE_MOD
 		ent->client->ps.gunskin=0;
+#endif
 
 		current_weapon_index = ITEM_INDEX(ent->client->pers.weapon);
 		ent->client->pers.selected_item = current_weapon_index;
@@ -2148,7 +2150,9 @@ void Weapon_Camera(edict_t *ent)
 		
 
 		int	current_weapon_index;
+#ifdef KMQUAKE2_ENGINE_MOD
 		ent->client->ps.gunskin=0;
+#endif
 
 		gi.sound(ent, CHAN_ITEM, gi.soundindex("weapons/camerawind.wav"), 0.4, ATTN_NORM, 0);
 
@@ -2249,11 +2253,13 @@ void Weapon_Card (edict_t *ent)
 		//ugly code!
 		if(Q_stricmp(level.mapname, "hof1") == 0)
 		{
+#ifdef KMQUAKE2_ENGINE_MOD
 			if (ent->client->ps.gunskin != 1)
 			{
 				ent->client->ps.gunskin=1;
 				gi.sound(ent, CHAN_ITEM, gi.soundindex("weapons/card_up.wav"), 0.2, ATTN_NORM, 0);
 			}
+#endif
 		}
 
 

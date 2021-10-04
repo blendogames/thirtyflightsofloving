@@ -116,9 +116,14 @@ void Fog_Off (edict_t *player_ent)
 OLD FOG SYSTEM
 =================================================
 */
+#ifdef _WIN32
 #include <windows.h>
+#else
+#define WINAPI
+#include <SDL2/SDL.h>
+#endif
 #define __MSC__
-#include <gl/gl.h>
+#include <GL/gl.h>
 
 fog_t		gfogs[MAX_FOGS];
 
@@ -126,7 +131,11 @@ fog_t		trig_fade_fog;
 fog_t		fade_fog;
 fog_t		*pfog;
 
+#ifdef _WIN32
 HMODULE		hOpenGL;
+#else
+int		hOpenGL = 1;
+#endif
 
 qboolean	InTriggerFog;
 float		last_software_frame;
@@ -672,6 +681,7 @@ void Fog (edict_t *ent) //vec3_t viewpoint)
 
 void Fog_Init()
 {
+#ifdef _WIN32
 	char	GL_Lib[64];
 
 	if(gl_driver_fog && strlen(gl_driver_fog->string))
@@ -690,6 +700,15 @@ void Fog_Init()
 		GL_glFogi       = (GLFOGI)GetProcAddress(hOpenGL,"glFogi");
 		GL_glHint       = (GLHINT)GetProcAddress(hOpenGL,"glHint");
 	}
+#else
+	GL_glClearColor = (GLCLEARCOLOR)SDL_GL_GetProcAddress("glClearColor");
+	GL_glDisable    = (GLDISABLE)SDL_GL_GetProcAddress("glDisable");
+	GL_glEnable     = (GLENABLE)SDL_GL_GetProcAddress("glEnable");
+	GL_glFogf       = (GLFOGF)SDL_GL_GetProcAddress("glFogf");
+	GL_glFogfv      = (GLFOGFV)SDL_GL_GetProcAddress("glFogfv");
+	GL_glFogi       = (GLFOGI)SDL_GL_GetProcAddress("glFogi");
+	GL_glHint       = (GLHINT)SDL_GL_GetProcAddress("glHint");
+#endif
 
 	gfogs[0].Color[0] = gfogs[0].Color[1] = gfogs[0].Color[2] = 0.5;
 	gfogs[0].Model    = 1;
