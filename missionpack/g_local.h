@@ -1762,6 +1762,7 @@ void fire_flechette (edict_t *self, vec3_t start, vec3_t dir, int damage, int sp
 edict_t *CheckForProxField (edict_t *ent);
 //void fire_prox (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed);	
 void fire_prox (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int damage_multiplier, int speed, int health, float timer, float damage_radius);
+void Cmd_DetProx_f (edict_t *ent);
 void fire_nuke (edict_t *self, vec3_t start, vec3_t aimdir, int speed);		
 void fire_flame (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed);
 void fire_burst (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed);

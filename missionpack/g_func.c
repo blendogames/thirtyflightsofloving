@@ -480,29 +480,58 @@ void check_reverse_rotation (edict_t *self, vec3_t point)
 	vec_t	rotation;
 	vec_t	cross;
 
-	if (!(self->flags & FL_REVERSIBLE))
+	if ( !(self->flags & FL_REVERSIBLE) )
 		return;
 
-	VectorSubtract(point,self->s.origin,vec);
-	VectorCopy (self->move_origin,vnext);
-	VectorNormalize(vec);
-	VectorNormalize(vnext);
+	VectorSubtract (point, self->s.origin, vec);
+	VectorCopy (self->move_origin, vnext);
+	VectorNormalize (vec);
+	VectorNormalize (vnext);
 
-	if (self->spawnflags & DOOR_X_AXIS)
+	// Knightmare- use all 3 movedir axis if axis is set manually via move_angles
+	if (VectorLength(self->move_angles) > 0.0f)
 	{
-		rotation = self->moveinfo.distance * self->movedir[ROLL];
-		cross = vec[1]*vnext[2] - vec[2]*vnext[1];
-	}
-	else if (self->spawnflags & DOOR_Y_AXIS)
-	{
-		rotation = self->moveinfo.distance * self->movedir[PITCH];
-		cross = vec[2]*vnext[0] - vec[0]*vnext[2];
+		vec3_t	rotation_c, cross_c;
+		int		i;
+
+		rotation_c[ROLL] = self->moveinfo.distance * self->movedir[ROLL];
+		cross_c[ROLL] = vec[1]*vnext[2] - vec[2]*vnext[1];
+
+		rotation_c[PITCH] = self->moveinfo.distance * self->movedir[PITCH];
+		cross_c[PITCH] = vec[2]*vnext[0] - vec[0]*vnext[2];
+
+		rotation_c[YAW] = self->moveinfo.distance * self->movedir[YAW];
+		cross_c[YAW] = vec[0]*vnext[1] - vec[1]*vnext[0];
+
+		// Use largest of rotation values
+		rotation = cross = 0;
+		for (i = 0; i < 3; i++)
+		{
+			if ( fabs(rotation_c[i]) > fabs(rotation) ) {
+				rotation = rotation_c[i];
+				cross = cross_c[i];
+			}
+		}
 	}
 	else
 	{
-		rotation = self->moveinfo.distance * self->movedir[YAW];
-		cross = vec[0]*vnext[1] - vec[1]*vnext[0];
+		if (self->spawnflags & DOOR_X_AXIS)
+		{
+			rotation = self->moveinfo.distance * self->movedir[ROLL];
+			cross = vec[1]*vnext[2] - vec[2]*vnext[1];
+		}
+		else if (self->spawnflags & DOOR_Y_AXIS)
+		{
+			rotation = self->moveinfo.distance * self->movedir[PITCH];
+			cross = vec[2]*vnext[0] - vec[0]*vnext[2];
+		}
+		else
+		{
+			rotation = self->moveinfo.distance * self->movedir[YAW];
+			cross = vec[0]*vnext[1] - vec[1]*vnext[0];
+		}
 	}
+	// end Knightmare
 
 	if ((self->spawnflags & 1) && (DotProduct(vec,vnext) < 0))
 		cross = -cross;
@@ -538,20 +567,20 @@ void AngleMove_Final (edict_t *ent)
 {
 	vec3_t	move;
 
-	//find out the move we need to make
+	// find out the move we need to make
 	if (ent->moveinfo.state == STATE_UP)
 		VectorSubtract (ent->moveinfo.end_angles, ent->s.angles, move);
 	else
 		VectorSubtract (ent->moveinfo.start_angles, ent->s.angles, move);
-	//if we're there, we're done
+	// if we're there, we're done
 	if (VectorCompare (move, vec3_origin))
 	{
 		AngleMove_Done (ent);
 		return;
 	}
-	//set speed to move there in one timestamp
+	// set speed to move there in one timestamp
 	VectorScale (move, 1.0/FRAMETIME, ent->avelocity);
-	//think again in 0.1 sec
+	// think again in 0.1 sec
 	ent->think = AngleMove_Done;
 	ent->nextthink = level.time + FRAMETIME;
 }
@@ -1657,13 +1686,22 @@ void SP_func_rotating (edict_t *ent)
 		ent->movetype = MOVETYPE_PUSH;
 
 	// set the axis of rotation
-	VectorClear (ent->movedir);
-	if (ent->spawnflags & 4)
-		ent->movedir[2] = 1.0;
-	else if (ent->spawnflags & 8)
-		ent->movedir[0] = 1.0;
-	else // Z_AXIS
-		ent->movedir[1] = 1.0;
+	// Knightmare- use move_angles for manual setting of axis
+	if (VectorLength(ent->move_angles) > 0.0f)	{
+		VectorCopy (ent->move_angles, ent->movedir);
+		VectorNormalize (ent->movedir);
+	}
+	else
+	{
+		VectorClear (ent->movedir);
+		if (ent->spawnflags & 4)
+			ent->movedir[2] = 1.0;
+		else if (ent->spawnflags & 8)
+			ent->movedir[0] = 1.0;
+		else // Z_AXIS
+			ent->movedir[1] = 1.0;
+	}
+	// end Knightmare
 
 	// check for reverse rotation
 	if (ent->spawnflags & 2)
@@ -2882,20 +2920,31 @@ void SP_func_door_rotating (edict_t *ent)
 	VectorClear (ent->s.angles);
 
 	// set the axis of rotation
-	VectorClear (ent->movedir);
-	if (ent->spawnflags & DOOR_X_AXIS)
-		ent->movedir[2] = 1.0;
-	else if (ent->spawnflags & DOOR_Y_AXIS)
-		ent->movedir[0] = 1.0;
-	else // Z_AXIS
-		ent->movedir[1] = 1.0;
+	// Knightmare- use move_angles for manual setting of axis
+	if (VectorLength(ent->move_angles) > 0.0f)	{
+		VectorCopy (ent->move_angles, ent->movedir);
+		VectorNormalize (ent->movedir);
+	}
+	else
+	{
+		VectorClear (ent->movedir);
+		if (ent->spawnflags & DOOR_X_AXIS)
+			ent->movedir[2] = 1.0;
+		else if (ent->spawnflags & DOOR_Y_AXIS)
+			ent->movedir[0] = 1.0;
+		else // Z_AXIS
+			ent->movedir[1] = 1.0;
+	}
+	// end Knightmare
 
 	// check for reverse rotation
 	if (ent->spawnflags & DOOR_REVERSE)
 		VectorNegate (ent->movedir, ent->movedir);
 
-	if (ent->distance)
+	if (ent->distance) {
 		st.distance = ent->distance;
+	}
+
 	if (!st.distance)
 	{
 		gi.dprintf("%s at %s with no distance set\n", ent->classname, vtos(ent->s.origin));
@@ -6068,6 +6117,7 @@ void func_door_swinging_init (edict_t *self)
 	else
 		self->think = Think_SpawnDoorTrigger;
 }
+
 void SP_func_door_swinging (edict_t *self)
 {
 	int		pivot;
@@ -6259,13 +6309,13 @@ void pivot_blocked (edict_t *self, edict_t *other)
 	gi.linkentity(self);
 }
 
-void pivot_stop(edict_t *ent)
+void pivot_stop (edict_t *ent)
 {
 	VectorClear (ent->avelocity);
 	gi.linkentity(ent);
 }
 
-void pivot_touch(edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
+void pivot_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
 	float	time;
 	vec3_t	offset;
@@ -6282,7 +6332,7 @@ void pivot_touch(edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf
 	if (ent->spawnflags & 1)
 	{
 		avelocity[PITCH] = -other->mass*offset[0]/400;
-//		if (avelocity[PITCH] = ent->avelocity[PITCH]) return;
+	//	if (avelocity[PITCH] = ent->avelocity[PITCH]) return;
 		if (offset[0] > 0)
 			ent->move_angles[PITCH] = ent->pos2[PITCH];
 		else
@@ -6293,7 +6343,7 @@ void pivot_touch(edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf
 	else
 	{
 		avelocity[ROLL]  = other->mass*offset[1]/400;
-//		if (avelocity[ROLL] = ent->avelocity[ROLL]) return;
+	//	if (avelocity[ROLL] = ent->avelocity[ROLL]) return;
 		if (offset[1] > 0)
 			ent->move_angles[ROLL] = ent->pos1[ROLL];
 		else

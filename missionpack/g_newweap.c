@@ -399,7 +399,6 @@ void Prox_Explode (edict_t *ent)
 		type = TE_GRENADE_EXPLOSION;
 	else
 		type = TE_ROCKET_EXPLOSION;
-
 	gi.WriteByte (svc_temp_entity);
 	gi.WriteByte (type);
 	gi.WritePosition (origin);
@@ -481,7 +480,7 @@ void prox_seek (edict_t *ent)
 		ent->think = prox_seek;
 		ent->nextthink = level.time + 0.1;
 	}
-	//If we're not attached to a host and may be bouncing around, move field with us
+	// If we're not attached to a host and may be bouncing around, move field with us
 	if (!ent->movewith_ent && ent->teamchain)
 	{
 		VectorCopy (ent->s.origin, ent->teamchain->s.origin);
@@ -549,7 +548,7 @@ void prox_open (edict_t *ent)
 			switch (ent->count)	// Knightmare- use stored multiplier
 			{
 				case 1:
-					ent->wait = level.time + ent->delay;	// sk_prox_life->value	// Knightmare- use stored timer
+					ent->wait = level.time + ent->delay;		// sk_prox_life->value	// Knightmare- use stored timer
 					break;
 				case 2:
 					ent->wait = level.time + ent->delay / 2;	// sk_prox_life->value	// Knightmare- use stored timer
@@ -635,9 +634,9 @@ void prox_land (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
 		// Note that plane can be NULL
 
 		// PMM - code stolen from g_phys (ClipVelocity)
-		vec3_t out;
-		float backoff, change;
-		int i;
+		vec3_t	out;
+		float	backoff, change;
+		int		i;
 
 		if (!plane || !plane->normal) // this happens if you hit a point object, maybe other cases
 		{

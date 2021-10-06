@@ -197,8 +197,8 @@ restart:
 					}
 					else if (e->solid == SOLID_BSP)
 					{
-						// Brush models always start out with angles=0,0,0 (after
-						// G_SetMoveDir). Use more accuracy here
+						// Brush models always start out with angles=0,0,0 (after G_SetMoveDir).
+						// Use more accuracy here.
 						VectorCopy(self->avelocity, e->avelocity);
 					//	VectorCopy(delta_angles, e->s.angles);
 						VectorAdd (e->child_attach_angles, delta_angles, e->s.angles);
@@ -519,31 +519,60 @@ void check_reverse_rotation (edict_t *self, vec3_t point)
 	vec_t	rotation;
 	vec_t	cross;
 
-	if (!(self->flags & FL_REVERSIBLE))
+	if ( !(self->flags & FL_REVERSIBLE) )
 		return;
 
-	VectorSubtract(point,self->s.origin,vec);
-	VectorCopy(self->move_origin,vnext);
-	VectorNormalize(vec);
-	VectorNormalize(vnext);
+	VectorSubtract (point, self->s.origin, vec);
+	VectorCopy (self->move_origin, vnext);
+	VectorNormalize (vec);
+	VectorNormalize (vnext);
 
-	if (self->spawnflags & DOOR_X_AXIS)
+	// Knightmare- use all 3 movedir axis if axis is set manually via move_angles
+	if (VectorLength(self->move_angles) > 0.0f)
 	{
-		rotation = self->moveinfo.distance * self->movedir[ROLL];
-		cross = vec[1]*vnext[2] - vec[2]*vnext[1];
-	}
-	else if (self->spawnflags & DOOR_Y_AXIS)
-	{
-		rotation = self->moveinfo.distance * self->movedir[PITCH];
-		cross = vec[2]*vnext[0] - vec[0]*vnext[2];
+		vec3_t	rotation_c, cross_c;
+		int		i;
+
+		rotation_c[ROLL] = self->moveinfo.distance * self->movedir[ROLL];
+		cross_c[ROLL] = vec[1]*vnext[2] - vec[2]*vnext[1];
+
+		rotation_c[PITCH] = self->moveinfo.distance * self->movedir[PITCH];
+		cross_c[PITCH] = vec[2]*vnext[0] - vec[0]*vnext[2];
+
+		rotation_c[YAW] = self->moveinfo.distance * self->movedir[YAW];
+		cross_c[YAW] = vec[0]*vnext[1] - vec[1]*vnext[0];
+
+		// Use largest of rotation values
+		rotation = cross = 0;
+		for (i = 0; i < 3; i++)
+		{
+			if ( fabs(rotation_c[i]) > fabs(rotation) ) {
+				rotation = rotation_c[i];
+				cross = cross_c[i];
+			}
+		}
 	}
 	else
 	{
-		rotation = self->moveinfo.distance * self->movedir[YAW];
-		cross = vec[0]*vnext[1] - vec[1]*vnext[0];
+		if (self->spawnflags & DOOR_X_AXIS)
+		{
+			rotation = self->moveinfo.distance * self->movedir[ROLL];
+			cross = vec[1]*vnext[2] - vec[2]*vnext[1];
+		}
+		else if (self->spawnflags & DOOR_Y_AXIS)
+		{
+			rotation = self->moveinfo.distance * self->movedir[PITCH];
+			cross = vec[2]*vnext[0] - vec[0]*vnext[2];
+		}
+		else
+		{
+			rotation = self->moveinfo.distance * self->movedir[YAW];
+			cross = vec[0]*vnext[1] - vec[1]*vnext[0];
+		}
 	}
+	// end Knightmare
 
-	if ((self->spawnflags & 1) && (DotProduct(vec,vnext) < 0))
+	if ((self->spawnflags & 1) && (DotProduct(vec, vnext) < 0))
 		cross = -cross;
 
 	if ( (cross < 0) && (rotation > 0) )
@@ -848,7 +877,7 @@ void Move_Begin (edict_t *ent)
 				ent->ideal_yaw = angles[YAW];
 				ent->ideal_pitch = angles[PITCH];
 				if (ent->ideal_pitch < 0) ent->ideal_pitch += 360;
-				VectorClear(ent->movedir);
+				VectorClear (ent->movedir);
 				ent->movedir[1] = 1.0;
 			}
 			VectorSubtract (dest, ent->s.origin, ent->moveinfo.dir);
@@ -1935,13 +1964,22 @@ void SP_func_rotating (edict_t *ent)
 		ent->movetype = MOVETYPE_PUSH;
 
 	// set the axis of rotation
-	VectorClear(ent->movedir);
-	if (ent->spawnflags & 4)
-		ent->movedir[2] = 1.0;
-	else if (ent->spawnflags & 8)
-		ent->movedir[0] = 1.0;
-	else // Z_AXIS
-		ent->movedir[1] = 1.0;
+	// Knightmare- use move_angles for manual setting of axis
+	if (VectorLength(ent->move_angles) > 0.0f)	{
+		VectorCopy (ent->move_angles, ent->movedir);
+		VectorNormalize (ent->movedir);
+	}
+	else
+	{
+		VectorClear(ent->movedir);
+		if (ent->spawnflags & 4)
+			ent->movedir[2] = 1.0;
+		else if (ent->spawnflags & 8)
+			ent->movedir[0] = 1.0;
+		else // Z_AXIS
+			ent->movedir[1] = 1.0;
+	}
+	// end Knightmare
 
 	// check for reverse rotation
 	if (ent->spawnflags & 2)
@@ -2392,9 +2430,9 @@ void swinging_door_reset (edict_t *self)
 	VectorMA (self->s.angles, self->moveinfo.distance, self->movedir, self->pos2);
 	VectorCopy (self->pos1, self->moveinfo.start_angles);
 	VectorCopy (self->pos2, self->moveinfo.end_angles);
-	vectoangles2(self->move_origin,self->move_origin);
-	VectorMA(self->move_origin,self->moveinfo.distance,self->movedir,self->move_origin);
-	AngleVectors(self->move_origin,self->move_origin,NULL,NULL);
+	vectoangles2 (self->move_origin, self->move_origin);
+	VectorMA (self->move_origin, self->moveinfo.distance, self->movedir, self->move_origin);
+	AngleVectors (self->move_origin, self->move_origin, NULL, NULL);
 }
 
 void door_hit_top (edict_t *self)
@@ -2923,13 +2961,22 @@ void SP_func_door_rotating (edict_t *ent)
 	VectorClear (ent->s.angles);
 
 	// set the axis of rotation
-	VectorClear(ent->movedir);
-	if (ent->spawnflags & DOOR_X_AXIS)
-		ent->movedir[2] = 1.0;
-	else if (ent->spawnflags & DOOR_Y_AXIS)
-		ent->movedir[0] = 1.0;
-	else // Z_AXIS
-		ent->movedir[1] = 1.0;
+	// Knightmare- use move_angles for manual setting of axis
+	if (VectorLength(ent->move_angles) > 0.0f)	{
+		VectorCopy (ent->move_angles, ent->movedir);
+		VectorNormalize (ent->movedir);
+	}
+	else
+	{
+		VectorClear(ent->movedir);
+		if (ent->spawnflags & DOOR_X_AXIS)
+			ent->movedir[2] = 1.0;
+		else if (ent->spawnflags & DOOR_Y_AXIS)
+			ent->movedir[0] = 1.0;
+		else // Z_AXIS
+			ent->movedir[1] = 1.0;
+	}
+	// end Knightmare
 
 	// check for reverse rotation
 	if (ent->spawnflags & DOOR_REVERSE)
@@ -3051,7 +3098,8 @@ void SP_func_door_rotating (edict_t *ent)
             get the lighting the way you'd like) then move at runtime to the
             origin of the "pathtarget". */
 
-void func_door_rot_dh_init (edict_t *ent) {
+void func_door_rot_dh_init (edict_t *ent)
+{
 	edict_t		*new_origin;
 
 	new_origin = G_Find (NULL, FOFS(targetname), ent->pathtarget);
@@ -3292,8 +3340,8 @@ void train_wait (edict_t *self)
 		// Spline trains stop rotating when waiting
 		if (self->spawnflags & TRAIN_SPLINE)
 		{
-			VectorClear(self->avelocity);
-			VectorClear(self->velocity);
+			VectorClear (self->avelocity);
+			VectorClear (self->velocity);
 #ifndef POSTTHINK_CHILD_MOVEMENT
 			if (self->movewith_next && (self->movewith_next->movewith_ent == self))
 				set_child_movement (self);
@@ -4860,7 +4908,7 @@ void SP_func_door_secret2 (edict_t *ent)
 	// calculate positions
 	VectorCopy (ent->s.origin, ent->pos0);
 	AngleVectors (ent->s.angles, forward, right, up);
-	VectorCopy(ent->s.angles, ent->move_angles);
+	VectorCopy (ent->s.angles, ent->move_angles);
 	G_SetMovedir (ent->s.angles, ent->movedir);
 
 	if ( (ent->move_angles[1] == 90) || (ent->move_angles[1] == 270) )
@@ -5612,13 +5660,13 @@ void SP_func_bobbingwater (edict_t *self)
 //
 void pivot_blocked (edict_t *self, edict_t *other)
 {
-	VectorCopy(vec3_origin,self->avelocity);
+	VectorCopy (vec3_origin, self->avelocity);
 	gi.linkentity(self);
 }
 
 void pivot_stop (edict_t *ent)
 {
-	VectorClear(ent->avelocity);
+	VectorClear (ent->avelocity);
 	gi.linkentity(ent);
 }
 
@@ -5633,42 +5681,42 @@ void pivot_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *sur
 	if (!other->groundentity) return;       // other is in air
 	if (other->groundentity != ent) return; // other is not standing on ent
 
-	VectorSubtract(ent->s.origin,other->s.origin,offset);
+	VectorSubtract (ent->s.origin, other->s.origin, offset);
 	offset[2] = 0.; // z offset is irrelevant
-	VectorCopy(ent->avelocity,avelocity);
+	VectorCopy (ent->avelocity, avelocity);
 	if (ent->spawnflags & 1)
 	{
 		avelocity[PITCH] = -other->mass*offset[0]/400;
-//		if (avelocity[PITCH] = ent->avelocity[PITCH]) return;
+	//	if (avelocity[PITCH] = ent->avelocity[PITCH]) return;
 		if (offset[0] > 0)
 			ent->move_angles[PITCH] = ent->pos2[PITCH];
 		else
 			ent->move_angles[PITCH] = ent->pos1[PITCH];
-		VectorSubtract(ent->move_angles,ent->s.angles,delta);
+		VectorSubtract (ent->move_angles, ent->s.angles, delta);
 		time = delta[PITCH]/avelocity[PITCH];
 	}
 	else
 	{
 		avelocity[ROLL]  = other->mass*offset[1]/400;
-//		if (avelocity[ROLL] = ent->avelocity[ROLL]) return;
+	//	if (avelocity[ROLL] = ent->avelocity[ROLL]) return;
 		if (offset[1] > 0)
 			ent->move_angles[ROLL] = ent->pos1[ROLL];
 		else
 			ent->move_angles[ROLL] = ent->pos2[ROLL];
-		VectorSubtract(ent->move_angles,ent->s.angles,delta);
-		time = delta[ROLL]/avelocity[ROLL];
+		VectorSubtract (ent->move_angles, ent->s.angles, delta);
+		time = delta[ROLL] / avelocity[ROLL];
 	}
-	gi.dprintf("time=%f, v=%f %f %f\n",time,avelocity[0],avelocity[1],avelocity[2]);
+	gi.dprintf("time=%f, v=%f %f %f\n", time, avelocity[0], avelocity[1], avelocity[2]);
 	if (time > 0)
 	{
-		VectorCopy(avelocity,ent->avelocity);
+		VectorCopy (avelocity, ent->avelocity);
 		ent->think = pivot_stop;
 		ent->nextthink = level.time + time;
 		gi.linkentity(ent);
 	}
 	else
 	{
-		VectorClear(ent->avelocity);
+		VectorClear (ent->avelocity);
 		ent->nextthink = 0;
 	}
 }
@@ -5678,20 +5726,20 @@ void pivot_init (edict_t *ent)
 	trace_t	tr;
 	vec3_t	start, end;
 
-	VectorClear(ent->pos1);
-	VectorClear(ent->pos2);
+	VectorClear (ent->pos1);
+	VectorClear (ent->pos2);
 	if (ent->spawnflags & 1)
 	{
 		end[0] = start[0] = ent->absmin[0];
-		end[1] = start[1] = (ent->absmin[1]+ent->absmax[1])/2;
+		end[1] = start[1] = (ent->absmin[1] + ent->absmax[1]) / 2;
 		start[2] = ent->absmin[2];
-		end[2]   = ent->absmin[2] - (ent->s.origin[0]-ent->absmin[0]);
-		tr=gi.trace(start,NULL,NULL,end,ent,MASK_SOLID);
+		end[2]   = ent->absmin[2] - (ent->s.origin[0] - ent->absmin[0]);
+		tr = gi.trace(start, NULL, NULL, end, ent, MASK_SOLID);
 		if (tr.fraction < 1.0)
 			zmin = tr.endpos[2];
 		else
 			zmin = end[2];
-		ent->pos2[PITCH] = asin((ent->absmin[2]-zmin)/(ent->s.origin[0]-ent->absmin[0]));
+		ent->pos2[PITCH] = asin((ent->absmin[2] - zmin) / (ent->s.origin[0] - ent->absmin[0]));
 
 		end[0] = start[0] = ent->absmax[0];
 		end[2] = ent->absmin[2] - (ent->absmax[0]-ent->s.origin[0]);
@@ -5700,38 +5748,38 @@ void pivot_init (edict_t *ent)
 			zmin = tr.endpos[2];
 		else
 			zmin = end[2];
-		ent->pos1[PITCH] = asin((ent->absmin[2]-zmin)/(ent->absmax[0]-ent->s.origin[0]));
+		ent->pos1[PITCH] = asin((ent->absmin[2] - zmin) / (ent->absmax[0] - ent->s.origin[0]));
 
 		ent->pos1[PITCH] *= 180/M_PI;
 		ent->pos2[PITCH] *= -180/M_PI;
 	}
 	else
 	{
-		end[0] = start[0] = (ent->absmin[0]+ent->absmax[0])/2;
+		end[0] = start[0] = (ent->absmin[0] + ent->absmax[0]) / 2;
 		end[1] = start[1] = ent->absmin[1];
 		start[2] = ent->absmin[2];
-		end[2]   = ent->absmin[2] - (ent->s.origin[1]-ent->absmin[1]);
-		tr=gi.trace(start,NULL,NULL,end,ent,MASK_SOLID);
+		end[2]   = ent->absmin[2] - (ent->s.origin[1] - ent->absmin[1]);
+		tr = gi.trace(start, NULL, NULL, end, ent, MASK_SOLID);
 		if (tr.fraction < 1.0)
 			zmin = tr.endpos[2];
 		else
 			zmin = end[2];
-		ent->pos1[ROLL] = asin((ent->absmin[2]-zmin)/(ent->s.origin[1]-ent->absmin[1]));
+		ent->pos1[ROLL] = asin((ent->absmin[2] - zmin) / (ent->s.origin[1] - ent->absmin[1]));
 
 		end[1] = start[1] = ent->absmax[1];
-		end[2] = ent->absmin[2] - (ent->absmax[1]-ent->s.origin[1]);
-		tr=gi.trace(start,NULL,NULL,end,ent,MASK_SOLID);
+		end[2] = ent->absmin[2] - (ent->absmax[1] - ent->s.origin[1]);
+		tr = gi.trace(start, NULL, NULL, end, ent, MASK_SOLID);
 		if (tr.fraction < 1.0)
 			zmin = tr.endpos[2];
 		else
 			zmin = end[2];
-		ent->pos2[ROLL] = asin((ent->absmin[2]-zmin)/(ent->absmax[1]-ent->s.origin[1]));
+		ent->pos2[ROLL] = asin((ent->absmin[2] - zmin) / (ent->absmax[1] - ent->s.origin[1]));
 
 		ent->pos1[ROLL] *= 180/M_PI;
 		ent->pos2[ROLL] *= -180/M_PI;
 	}
 
-	VectorClear(ent->move_angles);
+	VectorClear (ent->move_angles);
 	gi.linkentity(ent);
 }
 
@@ -5947,15 +5995,15 @@ void func_door_swinging_init (edict_t *self)
 	edict_t		*new_origin;
 	edict_t		*follow;
 
-	follow = G_Find (NULL, FOFS(targetname), self->followtarget);
+	follow = G_Find(NULL, FOFS(targetname), self->followtarget);
 	if (!follow)
 	{
 		gi.dprintf("func_door_swinging at %s, followtarget not found\n", vtos(self->s.origin));
 		G_FreeEdict(self);
 		return;
 	}
-	VectorSubtract(follow->s.origin, self->s.origin, self->move_origin);
-	VectorNormalize(self->move_origin);
+	VectorSubtract (follow->s.origin, self->s.origin, self->move_origin);
+	VectorNormalize (self->move_origin);
 	G_FreeEdict(follow);
 	if (self->pathtarget)
 	{

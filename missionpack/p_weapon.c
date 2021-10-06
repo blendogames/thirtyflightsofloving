@@ -473,15 +473,12 @@ Use_Weapon
 Make the weapon ready if there is ammo
 ================
 */
-void Cmd_DetProx_f (edict_t *ent);
-
 void Use_Weapon (edict_t *ent, gitem_t *in_item)
 {
 	int			ammo_index;
 	gitem_t		*ammo_item;
-	int			index;
 	gitem_t		*item;
-	int			current_weapon_index;
+	int			index, current_weapon_index;
 
 	item  = in_item;
 	index = ITEM_INDEX(item);
@@ -970,12 +967,12 @@ void weapon_grenade_fire (edict_t *ent, qboolean held)
 	vec3_t	offset;
 	vec3_t	forward, right, up;
 	vec3_t	start;
-	int		damage = sk_hand_grenade_damage->value; //was 125
+	int		damage = sk_hand_grenade_damage->value; // was 125
 	float	timer;
 	int		speed;
 	float	radius;
 
-	radius = sk_hand_grenade_radius->value; //was damage + 40
+	radius = sk_hand_grenade_radius->value; // was damage + 40
 	if (is_quad) {
 		damage *= 4;
 //		damage *= damage_multiplier;		// PGM
@@ -1365,10 +1362,10 @@ void weapon_grenadelauncher_fire (edict_t *ent, qboolean altfire)
 // PGM
 // =====
 
-	radius = sk_grenade_radius->value;	// damage + 40;
+	radius = sk_grenade_radius->value;	// damage + 40
 	if (is_quad) {
 		damage *= 4;
-	//	damage *= damage_multiplier;		//pgm
+	//	damage *= damage_multiplier;		// pgm
 		multiplier *= 4;
 	}
 	if (is_double) {
@@ -1462,7 +1459,7 @@ edict_t	*rocket_target (edict_t *self, vec3_t start, vec3_t forward)
 	trace_t     tr;
 	vec3_t      dir, end;
 
-	VectorMA(start, WORLD_SIZE, forward, end);	// was 8192
+	VectorMA (start, WORLD_SIZE, forward, end);	// was 8192
 
 	/* Check for aiming directly at a damageable entity */
 	tr = gi.trace(start, NULL, NULL, end, self, MASK_SHOT);
