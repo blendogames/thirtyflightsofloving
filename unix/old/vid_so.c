@@ -24,13 +24,12 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // is used for both the software and OpenGL rendering versions of the
 // Quake refresh engine.
 
+#include <dlfcn.h> // ELF dl loader
 #include <sys/stat.h>
 #include <unistd.h>
 #include <errno.h>
 
 #include "../client/client.h"
-
-int	vidref_val;
 
 // Console variables that we need to access from this module
 cvar_t		*vid_gamma;

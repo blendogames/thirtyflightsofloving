@@ -83,9 +83,9 @@ typedef enum {false, true}	qboolean;
 	typedef int64_t qint64;
 	typedef unsigned int64_t uint64;
 #elif defined(__linux__) // Linux
-#	include <_G_config.h>
-	typedef _G_int64_t qint64;
-	typedef unsigned _G_int64_t uint64;
+#	include <stdint.h>
+	typedef int64_t qint64;
+	typedef uint64_t uint64;
 #elif defined(__BEOS__)	// Be
 #	include <inttypes.h>
 	typedef int64_t qint64;

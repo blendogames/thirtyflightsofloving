@@ -247,12 +247,52 @@ void RB_DrawArrays (void)
 	if (rb_vertex == 0 || rb_index == 0) // nothing to render
 		return;
 
-	GL_LockArrays (rb_vertex);
+//	GL_LockArrays (rb_vertex);
 	if (glConfig.drawRangeElements)
-		qglDrawRangeElementsEXT(GL_TRIANGLES, 0, rb_vertex, rb_index, GL_UNSIGNED_INT, indexArray);
+		qglDrawRangeElements(GL_TRIANGLES, 0, rb_vertex, rb_index, GL_UNSIGNED_INT, indexArray);
 	else
 		qglDrawElements(GL_TRIANGLES, rb_index, GL_UNSIGNED_INT, indexArray);
-	GL_UnlockArrays ();
+//	GL_UnlockArrays ();
+}
+
+/*
+=================
+RB_DrawRangeArrays
+=================
+*/
+void RB_DrawRangeArrays (unsigned start, unsigned end)
+{
+	unsigned count;
+
+	if (rb_vertex == 0 || end == 0 || end <= start) // nothing to render
+		return;
+
+	count = end - start + 1;
+
+//	GL_LockArrays (rb_vertex);
+	if (glConfig.drawRangeElements)
+		qglDrawRangeElements(GL_TRIANGLES, 0, rb_vertex, count, GL_UNSIGNED_INT, &indexArray[start]);
+	else
+		qglDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, &indexArray[start]);
+//	GL_UnlockArrays ();
+}
+
+/*
+=================
+RB_DrawPrimitiveArrays
+=================
+*/
+void RB_DrawPrimitiveArrays (GLenum mode)
+{
+	if (rb_vertex == 0 || rb_index == 0) // nothing to render
+		return;
+
+//	GL_LockArrays (rb_vertex);
+	if (glConfig.drawRangeElements)
+		qglDrawRangeElements(mode, 0, rb_vertex, rb_index, GL_UNSIGNED_INT, indexArray);
+	else
+		qglDrawElements(mode, rb_index, GL_UNSIGNED_INT, indexArray);
+//	GL_UnlockArrays ();
 }
 
 /*

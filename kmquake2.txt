@@ -25,6 +25,7 @@ Other code by:
 	Dopefish
 	Dukey
 	Echon
+	Ethan Lee
 	Frank Sapone
 	Fuh
 	Harven

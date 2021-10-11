@@ -23,7 +23,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // r_image.c
 
 #include "r_local.h"
-//#include "r_cin.h"
+
+#ifdef _WIN32
+
 #include "../include/jpeg/jpeglib.h"
 #ifdef PNG_SUPPORT
 #if defined (_MSC_VER) && (_MSC_VER <= 1200)	// use older version of libpng for MSVC6
@@ -32,6 +34,19 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "../include/zlibpng/png.h"
 #endif
 #endif	// PNG_SUPPORT
+
+#else // _WIN32
+
+#include <jpeglib.h>
+#ifdef PNG_SUPPORT
+#include <png.h>
+#endif	// PNG_SUPPORT
+
+#endif // _WIN32
+
+#ifndef _WIN32 // Let's not use GLU on Linux/macOS -flibit
+//#define USE_GLMIPMAP
+#endif	// _WIN32
 
 image_t		gltextures[MAX_GLTEXTURES];
 int			numgltextures;
@@ -57,7 +72,8 @@ int		gl_tex_alpha_format = 4;
 int		gl_filter_min = GL_LINEAR_MIPMAP_NEAREST;
 int		gl_filter_max = GL_LINEAR;
 
-void GL_SetTexturePalette( unsigned palette[256] )
+#if 0
+void GL_SetTexturePalette (unsigned palette[256])
 {
 	int i;
 	unsigned char temptable[768];
@@ -79,6 +95,7 @@ void GL_SetTexturePalette( unsigned palette[256] )
 						   temptable );
 	}
 }
+#endif
 
 
 typedef struct
@@ -1849,7 +1866,6 @@ GL_Upload32
 Returns has_alpha
 ===============
 */
-//#define USE_GLMIPMAP
 qboolean GL_Upload32 (unsigned *data, int width, int height, imagetype_t type)
 {
 	unsigned 	*scaled = NULL;
@@ -2679,12 +2695,12 @@ void R_InitImages (void)
 
 	Draw_GetPalette ();
 
-	if (qglColorTableEXT)
+/*	if (qglColorTableEXT)
 	{
 		FS_LoadFile( "pics/16to8.dat", &glState.d_16to8table );
 		if ( !glState.d_16to8table )
 			VID_Error( ERR_FATAL, "Couldn't load pics/16to8.pcx");
-	}
+	} */
 
 	if (glConfig.rendType == GLREND_VOODOO)
 	//if ( glConfig.renderer & ( GL_RENDERER_VOODOO | GL_RENDERER_VOODOO2 ) )

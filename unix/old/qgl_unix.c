@@ -21,7 +21,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
 /*
-** qgl_unix.c
+** QGL_UNIX.C
 **
 ** This file implements the operating system binding of GL to QGL function
 ** pointers.  When doing a port of Quake2 you must implement the following
@@ -32,9 +32,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 #include <float.h>
 #include "../renderer/r_local.h"
-
-#include <SDL.h>
 #include "glw_unix.h"
+
+#include <GL/glx.h>
+
+#include <dlfcn.h>
 
 
 /*
@@ -46,6 +48,14 @@ void (*qfxMesaMakeCurrent)(fxMesaContext ctx);
 fxMesaContext (*qfxMesaGetCurrentContext)(void);
 void (*qfxMesaSwapBuffers)(void);
 */
+
+//GLX Functions
+XVisualInfo * (*qglXChooseVisual)( Display *dpy, int screen, int *attribList );
+GLXContext (*qglXCreateContext)( Display *dpy, XVisualInfo *vis, GLXContext shareList, Bool direct );
+void (*qglXDestroyContext)( Display *dpy, GLXContext ctx );
+Bool (*qglXMakeCurrent)( Display *dpy, GLXDrawable drawable, GLXContext ctx);
+void (*qglXCopyContext)( Display *dpy, GLXContext src, GLXContext dst, GLuint mask );
+void (*qglXSwapBuffers)( Display *dpy, GLXDrawable drawable );
 
 void ( APIENTRY * qglAccum )(GLenum op, GLfloat value);
 void ( APIENTRY * qglAlphaFunc )(GLenum func, GLclampf ref);
@@ -385,7 +395,7 @@ void ( APIENTRY * qglVertexPointer )(GLint size, GLenum type, GLsizei stride, co
 void ( APIENTRY * qglViewport )(GLint x, GLint y, GLsizei width, GLsizei height);
 
 // Knightmare added
-void ( APIENTRY * qglDrawRangeElementsEXT)(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, const void *indices);
+void ( APIENTRY * qglDrawRangeElements)(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, const void *indices);
 
 void ( APIENTRY * qglLockArraysEXT)( int, int);
 void ( APIENTRY * qglUnlockArraysEXT) ( void );
@@ -393,11 +403,10 @@ void ( APIENTRY * qglUnlockArraysEXT) ( void );
 //void ( APIENTRY * qglPointParameterfEXT)( GLenum param, GLfloat value );
 //void ( APIENTRY * qglPointParameterfvEXT)( GLenum param, const GLfloat *value );
 //void ( APIENTRY * qglColorTableEXT)( int, int, int, int, int, const void * );
-void ( APIENTRY * qglColorTableEXT)( GLenum, GLenum, GLsizei, GLenum, GLenum, const GLvoid * );
+//void ( APIENTRY * qglColorTableEXT)( GLenum, GLenum, GLsizei, GLenum, GLenum, const GLvoid * );
 void ( APIENTRY * qgl3DfxSetPaletteEXT)( GLuint * );
 void ( APIENTRY * qglSelectTextureSGIS)( GLenum );
 void ( APIENTRY * qglMTexCoord2fSGIS)( GLenum, GLfloat, GLfloat );
-void ( APIENTRY * qglMultiTexCoord2fARB)(GLenum, GLfloat, GLfloat);
 void ( APIENTRY * qglActiveTextureARB) ( GLenum );
 void ( APIENTRY * qglClientActiveTextureARB) ( GLenum );
 
@@ -2671,14 +2680,13 @@ static void APIENTRY logViewport(GLint x, GLint y, GLsizei width, GLsizei height
 */
 void QGL_Shutdown( void )
 {
-	if ( glw_state.glContext )
+	if ( glw_state.OpenGLLib )
 	{
-		SDL_GL_DeleteContext(glw_state.glContext);
-		SDL_DestroyWindow(glw_state.glWindow);
+		dlclose ( glw_state.OpenGLLib );
+		glw_state.OpenGLLib = NULL;
 	}
 
-	glw_state.glContext = NULL;
-	glw_state.glWindow = NULL;
+	glw_state.OpenGLLib = NULL;
 
 	qglAccum                     = NULL;
 	qglAlphaFunc                 = NULL;
@@ -3024,13 +3032,19 @@ void QGL_Shutdown( void )
 	qfxMesaGetCurrentContext     = NULL;
 	qfxMesaSwapBuffers           = NULL;
 */
+	qglXChooseVisual             = NULL;
+	qglXCreateContext            = NULL;
+	qglXDestroyContext           = NULL;
+	qglXMakeCurrent              = NULL;
+	qglXCopyContext              = NULL;
+	qglXSwapBuffers              = NULL;
 }
 
-#define GPA( a ) SDL_GL_GetProcAddress( a )
+#define GPA( a ) dlsym( glw_state.OpenGLLib, a )
 
 void *qwglGetProcAddress(char *symbol)
 {
-	if (glw_state.glContext)
+	if (glw_state.OpenGLLib)
 		return GPA ( symbol );
 	return NULL;
 }
@@ -3060,18 +3074,21 @@ qboolean QGL_Init( const char *dllname )
 		putenv( envbuffer );
 	}
 
-	SDL_Init(SDL_INIT_VIDEO);
-	glw_state.glWindow = SDL_CreateWindow(
-		WINDOWNAME,
-		SDL_WINDOWPOS_CENTERED,
-		SDL_WINDOWPOS_CENTERED,
-		1280,
-		720,
-		SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN
-	);
-	glw_state.glContext = SDL_GL_CreateContext(glw_state.glWindow);
+	if ( ( glw_state.OpenGLLib = dlopen( dllname, RTLD_LAZY | RTLD_GLOBAL ) ) == 0 )
+	{
+		char	fn[MAX_OSPATH];
+		char	*path;
+		
+		path = Cvar_Get ("basedir", ".", CVAR_NOSET)->string;
+		snprintf (fn, MAX_OSPATH, "%s/%s", path, dllname );
+		
+		if ( ( glw_state.OpenGLLib = dlopen( fn, RTLD_LAZY ) ) == 0 ) {
+			Com_Printf( PRINT_ALL, "%s\n", dlerror() );
+			return false;
+		}
+	}
 	
-	glConfig.allowCDS = true;
+	gl_config.allow_cds = true;
 
 	qglAccum                     = dllAccum = GPA( "glAccum" );
 	qglAlphaFunc                 = dllAlphaFunc = GPA( "glAlphaFunc" );
@@ -3417,6 +3434,12 @@ qboolean QGL_Init( const char *dllname )
 	qfxMesaGetCurrentContext     =  GPA("fxMesaGetCurrentContext");
 	qfxMesaSwapBuffers           =  GPA("fxMesaSwapBuffers");
 */
+	qglXChooseVisual             =  GPA("glXChooseVisual");
+	qglXCreateContext            =  GPA("glXCreateContext");
+	qglXDestroyContext           =  GPA("glXDestroyContext");
+	qglXMakeCurrent              =  GPA("glXMakeCurrent");
+	qglXCopyContext              =  GPA("glXCopyContext");
+	qglXSwapBuffers              =  GPA("glXSwapBuffers");
 
 	qglLockArraysEXT			 = 0;
 	qglUnlockArraysEXT			 = 0;
@@ -3428,8 +3451,6 @@ qboolean QGL_Init( const char *dllname )
 	qglMTexCoord2fSGIS			 = 0;
 	qglActiveTextureARB			 = 0;
 	qglClientActiveTextureARB	 = 0;
-	qglMultiTexCoord2fARB		 = 0;
-
 
 	qglActiveStencilFaceEXT		= 0;
 
@@ -3487,7 +3508,7 @@ void GLimp_EnableLogging( qboolean enable )
 
 			asctime( newtime );
 
-			Com_sprintf( buffer, sizeof(buffer), "%s/gl.log", FS_Savegamedir() );  	// was FS_Gamedir()
+			Com_sprintf( buffer, sizeof(buffer), "%s/gl.log", FS_Savegamedir() ); 	// was FS_Gamedir()
 			glw_state.log_fp = fopen( buffer, "wt" );
 
 			fprintf( glw_state.log_fp, "%s\n", asctime( newtime ) );

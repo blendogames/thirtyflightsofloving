@@ -1970,7 +1970,7 @@ void SCR_DrawLoading (void)
 	qboolean	simplePlaque = (scr_simple_loadscreen->integer != 0);
 
 	if (!scr_draw_loading) {
-		loadingPercent = 0;
+		cls.loadingPercent = 0;
 		return;
 	}
 
@@ -1978,7 +1978,7 @@ void SCR_DrawLoading (void)
 	widescreen = (((float)viddef.width / (float)viddef.height) > STANDARD_ASPECT_RATIO);
 
 	// loading a map...
-	if (loadingMessage && cl.configstrings[CS_MODELS+1][0])
+	if (cls.loadingMessage && cl.configstrings[CS_MODELS+1][0])
 	{
 	//	strncpy (mapfile, cl.configstrings[CS_MODELS+1] + 5);	// skip "maps/"
 		Q_strncpyz (mapfile, sizeof(mapfile), cl.configstrings[CS_MODELS+1] + 5);	// skip "maps/"
@@ -2091,21 +2091,21 @@ void SCR_DrawLoading (void)
 							SCREEN_HEIGHT*0.5 + (plaqueOffset + 48), MENU_FONT_SIZE, ALIGN_CENTER, loadMsg, FONT_SCREEN, 255);	// was - MENU_FONT_SIZE*7.5
 		}
 		if (drawLoadingMsg) {
-			loadMsg = va(S_COLOR_SHADOW"%s", loadingMessages);
+			loadMsg = va(S_COLOR_SHADOW"%s", cls.loadingMessages);
 			SCR_DrawString (SCREEN_WIDTH*0.5 - MENU_FONT_SIZE*stringLen(loadMsg)*0.5,
 							SCREEN_HEIGHT*0.5 + (plaqueOffset + 72), MENU_FONT_SIZE, ALIGN_CENTER, loadMsg, FONT_SCREEN, 255);	// was - MENU_FONT_SIZE*4.5
 		}
 
 		if (simplePlaque)
-			SCR_DrawLoadingTagProgress ("loading_bar", plaqueOffset, (int)loadingPercent);
+			SCR_DrawLoadingTagProgress ("loading_bar", plaqueOffset, (int)cls.loadingPercent);
 		else {
-			SCR_DrawLoadingBar (SCREEN_WIDTH*0.5 - 180, SCREEN_HEIGHT - 20, 360, 15, (int)loadingPercent, 0.6);
+			SCR_DrawLoadingBar (SCREEN_WIDTH*0.5 - 180, SCREEN_HEIGHT - 20, 360, 15, (int)cls.loadingPercent, 0.6);
 			SCR_DrawAlertMessagePicture("loading", false, plaqueOffset);
 		}
 	}
 	else {// just a plain old loading plaque
 		if (simplePlaque)
-			SCR_DrawLoadingTagProgress ("loading_bar", 0, (int)loadingPercent);
+			SCR_DrawLoadingTagProgress ("loading_bar", 0, (int)cls.loadingPercent);
 		else
 			SCR_DrawAlertMessagePicture("loading", true, 0);
 	}

@@ -34,10 +34,10 @@ static int old_mouse_x, old_mouse_y;
 static qboolean	mlooking;
 cvar_t	*m_filter;
 cvar_t	*in_dgamouse;
-cvar_t	*in_autosensitivity;
+cvar_t	*autosensitivity;
 cvar_t	*in_menumouse; /// FIXME Menu Mouse on windowed mode 
 
-extern cursor_t ui_mousecursor;
+//extern cursor_t cursor;
 
 void UI_RefreshCursorMenu (void);
 void UI_RefreshCursorLink (void);
@@ -68,7 +68,7 @@ void IN_Init (void)
 	in_dgamouse = Cvar_Get ("in_dgamouse", "1", CVAR_ARCHIVE);
 	in_menumouse = Cvar_Get ("in_menumouse", "0", CVAR_ARCHIVE);
 	// Knightmare added
-	in_autosensitivity = Cvar_Get ("in_autosensitivity", "1", CVAR_ARCHIVE);
+	autosensitivity = Cvar_Get ("autosensitivity", "1", CVAR_ARCHIVE);
 	Cvar_SetDescription ("autosensitivity", "Enables scaling of mouse and joystick sensitivty when zoomed in.");
 
 	Cmd_AddCommand ("+mlook", IN_MLookDown);
@@ -105,13 +105,14 @@ void IN_Commands (void)
 {
 }
 
+void M_Think_MouseCursor (void);
 void IN_Move (usercmd_t *cmd)
 {
 	if (!mouse_avail)
 		return;
 
-	if (!in_autosensitivity)
-		in_autosensitivity = Cvar_Get ("in_autosensitivity", "1", CVAR_ARCHIVE);
+	if (!autosensitivity)
+		autosensitivity = Cvar_Get ("autosensitivity", "1", CVAR_ARCHIVE);
 
 	if (m_filter->value)
 	{
@@ -122,7 +123,7 @@ void IN_Move (usercmd_t *cmd)
 	old_mouse_x = mx;
 	old_mouse_y = my;
 
-	// now to set the menu cursor
+	//now to set the menu cursor
 	if (cls.key_dest == key_menu)
 	{
 		ui_mousecursor.oldx = ui_mousecursor.x;
@@ -131,13 +132,14 @@ void IN_Move (usercmd_t *cmd)
 		ui_mousecursor.x += mx *  ui_sensitivity->value;
 		ui_mousecursor.y += my *  ui_sensitivity->value;
 
-		if ( (ui_mousecursor.x != ui_mousecursor.oldx) || (ui_mousecursor.y != ui_mousecursor.oldy) )
+		if (ui_mousecursor.x!=ui_mousecursor.oldx || ui_mousecursor.y!=ui_mousecursor.oldy)
 			ui_mousecursor.mouseaction = true;
 
 		if (ui_mousecursor.x < 0) ui_mousecursor.x = 0;
 		if (ui_mousecursor.x > viddef.width) ui_mousecursor.x = viddef.width;
 		if (ui_mousecursor.y < 0) ui_mousecursor.y = 0;
 		if (ui_mousecursor.y > viddef.height) ui_mousecursor.y = viddef.height;
+		M_Think_MouseCursor();
 	}
 
 	// psychospaz - zooming in preserves sensitivity

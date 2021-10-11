@@ -22,6 +22,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 // r_misc.c - particle image loading, and screenshots
 
+#ifdef _WIN32
+
 #include "r_local.h"
 #include "../include/jpeg/jpeglib.h" // Heffo - JPEG Screenshots
 #ifdef PNG_SUPPORT
@@ -32,6 +34,14 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #endif
 #endif	// PNG_SUPPORT
 
+#else	// _WIN32
+
+#include <jpeglib.h>
+#ifdef PNG_SUPPORT
+#include <png.h>
+#endif	// PNG_SUPPORT
+
+#endif	// _WIN32
 
 /*
 ==================

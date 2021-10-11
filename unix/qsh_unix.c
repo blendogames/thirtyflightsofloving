@@ -20,6 +20,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 
+/* For mremap() - must be before sys/mman.h include! */
+#if defined(__linux__) && !defined(_GNU_SOURCE)
+ #define _GNU_SOURCE
+#endif
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <errno.h>
@@ -40,84 +45,125 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 //===============================================================================
 
+// Hunk implementation taken from yquake2
+
 byte *membase;
-int maxhunksize;
-int curhunksize;
+size_t maxhunksize;
+size_t curhunksize;
 
-void *Hunk_Begin (int maxsize)
+void *Hunk_Begin (size_t maxsize)
 {
-	// reserve a huge chunk of memory, but don't commit any yet
-	maxhunksize = maxsize + sizeof(int);
+	/* reserve a huge chunk of memory, but don't commit any yet */
+	/* plus 32 bytes for cacheline */
+	maxhunksize = maxsize + sizeof(size_t) + 32;
 	curhunksize = 0;
+	int flags = MAP_PRIVATE | MAP_ANONYMOUS;
+	int prot = PROT_READ | PROT_WRITE;
 
-#if (defined __FreeBSD__)
-	membase = mmap(0, maxhunksize, PROT_READ|PROT_WRITE, 
-		MAP_PRIVATE|MAP_ANON, -1, 0);
-#else
-	membase = mmap(0, maxhunksize, PROT_READ|PROT_WRITE, 
-		MAP_PRIVATE|MAP_ANONYMOUS, -1, 0);
+#if defined(MAP_ALIGNED_SUPER)
+	const size_t hgpagesize = 1UL<<21;
+	size_t page_size = sysconf(_SC_PAGESIZE);
+
+	/* Archs supported has 2MB for super pages size */
+	if (maxhunksize >= hgpagesize)
+	{
+		maxhunksize = (maxhunksize & ~(page_size-1)) + page_size;
+		flags |= MAP_ALIGNED_SUPER;
+	}
 #endif
 
-	if (membase == NULL || membase == (byte *)-1)
+#if defined(PROT_MAX)
+	/* For now it is FreeBSD exclusif but could possibly be extended
+	   to other like DFBSD for example */
+	prot |= PROT_MAX(prot);
+#endif
+
+	membase = mmap(0, maxhunksize, prot,
+			flags, -1, 0);
+
+	if ((membase == NULL) || (membase == (byte *)-1))
+	{
 		Sys_Error("unable to virtual allocate %d bytes", maxsize);
+	}
 
-	*((int *)membase) = curhunksize;
+	*((size_t *)membase) = curhunksize;
 
-	return membase + sizeof(int);
+	return membase + sizeof(size_t);
 }
 
-void *Hunk_Alloc (int size)
+void *Hunk_Alloc (size_t size)
 {
 	byte *buf;
 
-	// round to cacheline
-	size = (size+31)&~31;
+	/* round to cacheline */
+	size = (size + 31) & ~31;
+
 	if (curhunksize + size > maxhunksize)
+	{
 		Sys_Error("Hunk_Alloc overflow");
-	buf = membase + sizeof(int) + curhunksize;
+	}
+
+	buf = membase + sizeof(size_t) + curhunksize;
 	curhunksize += size;
 	return buf;
 }
 
-int Hunk_End (void)
+size_t Hunk_End (void)
 {
-	byte *n;
+	byte *n = NULL;
 
-#if defined(__FreeBSD__)
-  size_t old_size = maxhunksize;
-  size_t new_size = curhunksize + sizeof(int);
-  void * unmap_base;
-  size_t unmap_len;
-
-  new_size = round_page(new_size);
-  old_size = round_page(old_size);
-  if (new_size > old_size)
-  	n = 0; /* error */
-  else if (new_size < old_size)
-  {
-    unmap_base = (caddr_t)(membase + new_size);
-    unmap_len = old_size - new_size;
-    n = munmap(unmap_base, unmap_len) + membase;
-  }
-#endif
 #if defined(__linux__)
-	n = mremap(membase, maxhunksize, curhunksize + sizeof(int), 0);
+	n = (byte *)mremap(membase, maxhunksize, curhunksize + sizeof(size_t), 0);
+#elif defined(__NetBSD__)
+	n = (byte *)mremap(membase, maxhunksize, NULL, curhunksize + sizeof(size_t), 0);
+#else
+ #ifndef round_page
+ size_t page_size = sysconf(_SC_PAGESIZE);
+ #define round_page(x) ((((size_t)(x)) + page_size-1) & ~(page_size-1))
+ #endif
+
+	size_t old_size = round_page(maxhunksize);
+	size_t new_size = round_page(curhunksize + sizeof(size_t));
+
+	if (new_size > old_size)
+	{
+		/* Can never happen. If it happens something's very wrong. */
+		n = 0;
+	}
+	else if (new_size < old_size)
+	{
+		/* Hunk is to big, we need to shrink it. */
+		n = munmap(membase + new_size, old_size - new_size) + membase;
+	}
+	else
+	{
+		/* No change necessary. */
+		n = membase;
+	}
 #endif
+
 	if (n != membase)
-		Sys_Error("Hunk_End:  Could not remap virtual block (%d)", errno);
-	*((int *)membase) = curhunksize + sizeof(int);
-	
+	{
+		Sys_Error("Hunk_End: Could not remap virtual block (%d)", errno);
+	}
+
+	*((size_t *)membase) = curhunksize + sizeof(size_t);
+
 	return curhunksize;
 }
 
 void Hunk_Free (void *base)
 {
-	byte *m;
+	if (base)
+	{
+		byte *m;
 
-	if (base) {
-		m = ((byte *)base) - sizeof(int);
-		if (munmap(m, *((int *)m)))
+		m = ((byte *)base) - sizeof(size_t);
+
+		if (munmap(m, *((size_t *)m)))
+		{
 			Sys_Error("Hunk_Free: munmap failed (%d)", errno);
+		}
 	}
 }
 

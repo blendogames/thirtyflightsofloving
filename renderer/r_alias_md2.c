@@ -546,7 +546,7 @@ void R_DrawAliasMD2VolumeShadow (dmd2_t *paliashdr, vec3_t bbox[8])
 			qglStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
 		}
 		if (glConfig.drawRangeElements)
-			qglDrawRangeElementsEXT(GL_TRIANGLES, 0, md2shadow_va, md2shadow_index, GL_UNSIGNED_INT, indexArray);
+			qglDrawRangeElements(GL_TRIANGLES, 0, md2shadow_va, md2shadow_index, GL_UNSIGNED_INT, indexArray);
 		else
 			qglDrawElements(GL_TRIANGLES, md2shadow_index, GL_UNSIGNED_INT, indexArray);
 
@@ -562,7 +562,7 @@ void R_DrawAliasMD2VolumeShadow (dmd2_t *paliashdr, vec3_t bbox[8])
 	}
 
 	if (glConfig.drawRangeElements)
-		qglDrawRangeElementsEXT(GL_TRIANGLES, 0, md2shadow_va, md2shadow_index, GL_UNSIGNED_INT, indexArray);
+		qglDrawRangeElements(GL_TRIANGLES, 0, md2shadow_va, md2shadow_index, GL_UNSIGNED_INT, indexArray);
 	else
 		qglDrawElements(GL_TRIANGLES, md2shadow_index, GL_UNSIGNED_INT, indexArray);
 	GL_UnlockArrays();

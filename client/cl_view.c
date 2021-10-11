@@ -40,8 +40,9 @@ cvar_t		*cl_testblend;
 
 cvar_t		*cl_stats;
 
-cvar_t		*hand;
+extern	cvar_t		*hand;
 
+vec3_t		clientOrg; // lerped org of client for server->client side effects
 
 int			r_numdlights;
 dlight_t	r_dlights[MAX_DLIGHTS];
@@ -414,9 +415,9 @@ void CL_PrepRefresh (void)
 		SCR_BeginLoadingPlaque();
 
 	// Knightmare- for Psychospaz's map loading screen
-	loadingMessage = true;
-	Com_sprintf (loadingMessages, sizeof(loadingMessages), S_COLOR_ALT"loading %s", cl.configstrings[CS_MODELS+1]);
-	loadingPercent = 0.0f;
+	cls.loadingMessage = true;
+	Com_sprintf (cls.loadingMessages, sizeof(cls.loadingMessages), S_COLOR_ALT"loading %s", cl.configstrings[CS_MODELS+1]);
+	cls.loadingPercent = 0.0f;
 	// end Knightmare
 
 	// let the render dll load the map
@@ -431,8 +432,8 @@ void CL_PrepRefresh (void)
 	Com_Printf ("                                     \r");
 
 	// Knightmare- for Psychospaz's map loading screen
-	Com_sprintf (loadingMessages, sizeof(loadingMessages), S_COLOR_ALT"loading models...");
-	loadingPercent += 20.0f;
+	Com_sprintf (cls.loadingMessages, sizeof(cls.loadingMessages), S_COLOR_ALT"loading models...");
+	cls.loadingPercent += 20.0f;
 	// end Knightmare
 
 	// precache status bar pics
@@ -462,7 +463,7 @@ void CL_PrepRefresh (void)
 			// Knightmare- for Psychospaz's map loading screen
 			//only make max of 40 chars long
 			if (i > 1)
-				Com_sprintf (loadingMessages, sizeof(loadingMessages),
+				Com_sprintf (cls.loadingMessages, sizeof(cls.loadingMessages),
 					S_COLOR_ALT"loading %s", (strlen(pname)>40)? &pname[strlen(pname)-40]: pname);
 		}
 
@@ -489,10 +490,10 @@ void CL_PrepRefresh (void)
 		if (pname[0] != '*')
 			Com_Printf ("                                     \r");
 		// Knightmare- for Psychospaz's map loading screen
-		loadingPercent += 40.0f/(float)max;
+		cls.loadingPercent += 40.0f/(float)max;
 	}
 	// Knightmare- for Psychospaz's map loading screen
-	Com_sprintf (loadingMessages, sizeof(loadingMessages), S_COLOR_ALT"loading pics...");
+	Com_sprintf (cls.loadingMessages, sizeof(cls.loadingMessages), S_COLOR_ALT"loading pics...");
 
 	Com_Printf ("images\r", i); 
 	SCR_UpdateScreen ();
@@ -508,7 +509,7 @@ void CL_PrepRefresh (void)
 			cl.image_precache[i] = R_DrawFindPic (cl.configstrings[OLD_CS_IMAGES+i]);
 			Sys_SendKeyEvents ();	// pump message loop
 			// Knightmare- for Psychospaz's map loading screen
-			loadingPercent += 20.0f/(float)max;
+			cls.loadingPercent += 20.0f/(float)max;
 		}
 	}
 	else
@@ -520,11 +521,11 @@ void CL_PrepRefresh (void)
 			cl.image_precache[i] = R_DrawFindPic (cl.configstrings[CS_IMAGES+i]);
 			Sys_SendKeyEvents ();	// pump message loop
 			// Knightmare- for Psychospaz's map loading screen
-			loadingPercent += 20.0f/(float)max;
+			cls.loadingPercent += 20.0f/(float)max;
 		}
 	}
 	// Knightmare- for Psychospaz's map loading screen
-	Com_sprintf (loadingMessages, sizeof(loadingMessages), S_COLOR_ALT"loading players...");
+	Com_sprintf (cls.loadingMessages, sizeof(cls.loadingMessages), S_COLOR_ALT"loading players...");
 
 	Com_Printf ("                                     \r");
 
@@ -556,12 +557,12 @@ void CL_PrepRefresh (void)
 		Com_Printf ("                                     \r");
 
 		// Knightmare- for Psychospaz's map loading screen
-		loadingPercent += 20.0f/(float)max;
+		cls.loadingPercent += 20.0f/(float)max;
 	}
 	// Knightmare- for Psychospaz's map loading screen
-	Com_sprintf (loadingMessages, sizeof(loadingMessages), S_COLOR_ALT"loading players...done");
+	Com_sprintf (cls.loadingMessages, sizeof(cls.loadingMessages), S_COLOR_ALT"loading players...done");
 	//hack hack hack - psychospaz
-	loadingPercent = 100.0f;
+	cls.loadingPercent = 100.0f;
 
 	// Knightmare - Vics fix to get rid of male/grunt flicker
 	// CL_LoadClientinfo (&cl.baseclientinfo, "unnamed\\male/grunt");
@@ -604,7 +605,7 @@ void CL_PrepRefresh (void)
 	CL_PlayBackgroundTrack ();
 
 	// Knightmare- for Psychospaz's map loading screen
-	loadingMessage = false;
+	cls.loadingMessage = false;
 	// Knightmare- close loading screen as soon as done
 	cls.disable_screen = false;
 

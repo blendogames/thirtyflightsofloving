@@ -113,6 +113,7 @@ char *Cvar_VariableString (char *var_name)
 /*
 ============
 Cvar_DefaultValue
+
 Knightmare added
 ============
 */
@@ -130,6 +131,7 @@ float Cvar_DefaultValue (char *var_name)
 /*
 ============
 Cvar_DefaultInteger
+
 Knightmare added
 ============
 */
@@ -147,6 +149,7 @@ int Cvar_DefaultInteger (char *var_name)
 /*
 ============
 Cvar_DefaultString
+
 Knightmare added
 ============
 */
@@ -164,6 +167,7 @@ char *Cvar_DefaultString (char *var_name)
 /*
 ============
 Cvar_IsModified
+
 Knightmare added
 ============
 */

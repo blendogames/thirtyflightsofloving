@@ -1331,7 +1331,7 @@ void CL_AddPacketEntities (frame_t *frame)
 				drawEnt = false;
 			}
 			if (!Q_strcasecmp((char *)ent.model, "models/objects/blaser/tris.md2")
-				|| ( !Q_strcasecmp((char *)ent.model, "models/objects/laser/tris.md2") && (ent.skinnum == 2) )	// skinnum 1 is blue blaster bolt
+				|| ( !Q_strcasecmp((char *)ent.model, "models/objects/laser/tris.md2") && (ent.skinnum == 2) )	// skinnum 2 is blue blaster bolt
 				&& !(effects & EF_BLASTER) && cl_add_particles->integer)
 			{	// give the bolt a blue particle glow
 				CL_HyperBlasterEffect (cent->lerp_origin, ent.origin, s1->angles,
@@ -1339,7 +1339,7 @@ void CL_AddPacketEntities (frame_t *frame)
 				drawEnt = false;
 			}
 			if (!Q_strcasecmp((char *)ent.model, "models/objects/rlaser/tris.md2")
-				|| ( !Q_strcasecmp((char *)ent.model, "models/objects/laser/tris.md2") && (ent.skinnum == 3) )	// skinnum 1 is red blaster bolt
+				|| ( !Q_strcasecmp((char *)ent.model, "models/objects/laser/tris.md2") && (ent.skinnum == 3) )	// skinnum 3 is red blaster bolt
 				&& !(effects & EF_BLASTER) && cl_add_particles->integer)
 			{	// give the bolt a red particle glow
 				CL_HyperBlasterEffect (cent->lerp_origin, ent.origin, s1->angles,

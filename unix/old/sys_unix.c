@@ -39,7 +39,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <sys/mman.h>
 #include <errno.h>
 
-#include <SDL.h>
+#ifdef __linux__
+#include <mntent.h>
+#endif
+
+#include <dlfcn.h>
 
 #include "../qcommon/qcommon.h"
 
@@ -86,7 +90,6 @@ void Sys_Printf (char *fmt, ...)
 	unsigned char		*p;
 
 	va_start (argptr, fmt);
-//	vsprintf (text, fmt, argptr);
 	Q_vsnprintf (text, sizeof(text), fmt, argptr);
 	va_end (argptr);
 
@@ -125,14 +128,13 @@ void Sys_Error (const char *error, ...)
 	va_list     argptr;
 	char        string[1024];
 
-// change stdin to non blocking
+	// change stdin to non blocking
 	fcntl (0, F_SETFL, fcntl (0, F_GETFL, 0) & ~FNDELAY);
 
 	CL_Shutdown ();
 	Qcommon_Shutdown ();
 
 	va_start (argptr, error);
-//	vsprintf (string, error, argptr);
 	Q_vsnprintf (string, sizeof(string), error, argptr);
 	va_end (argptr);
 	fprintf(stderr, "Error: %s\n", string);
@@ -146,7 +148,6 @@ void Sys_Warn (char *warning, ...)
 	char        string[1024];
 
 	va_start (argptr, warning);
-//	vsprintf (string, warning, argptr);
 	Q_vsnprintf (string, sizeof(string), warning, argptr);
 	va_end (argptr);
 	fprintf(stderr, "Warning: %s", string);
@@ -225,7 +226,7 @@ Sys_UnloadGame
 void Sys_UnloadGame (void)
 {
 	if (game_library) 
-		SDL_UnloadObject (game_library);
+		dlclose (game_library);
 	game_library = NULL;
 }
 
@@ -273,11 +274,12 @@ void *Sys_GetGameAPI (void *parms)
 	path = NULL;
 	while (1)
 	{
-		path = FS_NextPath (path);
+	//	path = FS_NextPath (path);
+		path = FS_NextGamePath (path);
 		if (!path)
 			return NULL;		// couldn't find one anywhere
-		sprintf (name, "%s/%s/%s", curpath, path, gamename);
-		game_library = SDL_LoadObject (name);
+		Com_sprintf (name, sizeof(name), "%s/%s/%s", curpath, path, gamename);
+		game_library = dlopen (name, RTLD_LAZY );
 		if (game_library)
 		{
 			Com_Printf ("LoadLibrary (%s)\n",name);
@@ -285,7 +287,7 @@ void *Sys_GetGameAPI (void *parms)
 		}
 	}
 
-	GetGameAPI = (void *)SDL_LoadFunction (game_library, "GetGameAPI");
+	GetGameAPI = (void *)dlsym (game_library, "GetGameAPI");
 	if (!GetGameAPI)
 	{
 		Sys_UnloadGame ();		
@@ -332,40 +334,75 @@ const char* Sys_DownloadDir(void)
 
 static void Init_ExeDir (const char* argv0)
 {
-	char *basedir = SDL_GetBasePath();
-	if (basedir == NULL)
-	{
-		/* Oh well. */
-		memset(exe_dir, 0, sizeof(exe_dir));
-		Q_snprintfz(exe_dir, sizeof(exe_dir), ".");
-		return;
-	}
-	Q_strncpyz(exe_dir, sizeof(exe_dir), basedir);
-	SDL_free(basedir);
+#if 1
+	memset(exe_dir, 0, sizeof(exe_dir));
+	Q_snprintfz(exe_dir, sizeof(exe_dir), ".");
+#else
+	char buf[MAX_OSPATH] = {0};
+	const char	*lastSlash;
+	static int mib[4] = {CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, -1};
+	size_t buflen;
+	size_t len = lastSlash ? (lastSlash - buf) : 0;
 
-	/* Intentionally cut off the final separator */
-	exe_dir[strlen(exe_dir) - 1] = '\0';
+	memset(exe_dir, 0, sizeof(exe_dir));
+
+#ifdef __linux__
+	readlink("/proc/self/exe", buf, MAX_OSPATH-1);
+#elif __FreeBSD__
+	sysctl(mib, sizeof(mib)/sizeof(*mib), buf, &buflen, NULL, 0);
+#endif
+
+	 if (!*buf)
+	 {
+		 printf("WARNING: Couldn't get path to executable, reading from argv[0]!\n");
+
+		 if (strlen(argv0) < sizeof(buf))
+		 {
+			 Q_strncpyz(buf, sizeof(buf), argv0);
+		 }
+		 else
+		 {
+			 buf[0] = '\0';
+		 }
+	 }
+
+	// starting at the last slash the executable name begins - we only want the path up to there
+	lastSlash = strrchr(buf, '/');
+	len = lastSlash ? (lastSlash - buf) : 0;
+	if (lastSlash == NULL || len >= sizeof(exe_dir) || len == 0)
+	{
+		printf("WARNING: Couldn't get path to executable! Defaulting to \".\"!\n");
+		Q_snprintfz(exe_dir, sizeof(exe_dir), ".");
+	}
+	else
+	{
+		memcpy(exe_dir, buf, len);
+	}
+#endif
 }
 
 static void Sys_InitPrefDir (void)
 {
-	char *pp = SDL_GetPrefPath(NULL, SAVENAME);
+	char *pp = getenv("XDG_DATA_HOME");
 
-	if (pp != NULL)
+	memset(pref_dir, 0, sizeof(pref_dir));
+
+	if (pp == NULL)
 	{
-		Q_strncpyz(pref_dir, sizeof(pref_dir), pp);
-		Q_strncpyz(download_dir, sizeof(download_dir), pp);
-		SDL_free(pp);
-
-		/* Intentionally cut off the final separator */
-		pref_dir[strlen(pref_dir) - 1] = '\0';
-		download_dir[strlen(download_dir) - 1] = '\0';
+		Q_snprintfz(pref_dir, sizeof(pref_dir), "%s/.local/share/Daikatana", getenv("HOME"));
 		return;
 	}
 
-	printf("WARNING: SDL_GetPrefPath failed, defaulting to installation dir!\n");
-	Q_strncpyz(pref_dir, sizeof(pref_dir), exe_dir);
-	Q_strncpyz(download_dir, sizeof(download_dir), exe_dir);
+	if (strlen(pp) >= sizeof(pref_dir) - 1)
+	{
+		printf("WARNING: $XDG_DATA_HOME contains a too long path, defaulting to installation dir!\n");
+		Q_strncpyz(pref_dir, sizeof(pref_dir), exe_dir);
+		Q_strncpyz (download_dir, sizeof(download_dir), exe_dir);
+		return;
+	}
+
+	Q_strncpyz (pref_dir, sizeof(pref_dir), pp);
+	Q_strncpyz (download_dir, sizeof(download_dir), pp);
 }
 // end Knightmare
 
@@ -381,7 +418,7 @@ int main (int argc, char **argv)
 
 	printf ("\n");	
 	printf ("========= Initialization =================\n");
-	printf ("KMQuake2 -- Version 0.20\n");
+	printf ("KMQuake2 -- Version %4.2f\n", VERSION);
 	printf ("Linux Port by QuDos\n");
 	printf ("http://qudos.quakedev.com/\n");
 	printf ("Compiled: "__DATE__" -- "__TIME__"\n");

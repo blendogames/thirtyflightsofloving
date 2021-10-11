@@ -80,13 +80,13 @@ cvar_t  *gl_driver;
 cvar_t	*gl_clear;
 
 // Psychospaz's console font size option
-cvar_t	*con_font_size;
+extern cvar_t	*con_font_size;
 cvar_t	*con_font;
 cvar_t	*scr_font;
 cvar_t	*ui_font;
-cvar_t	*alt_text_color;
+extern cvar_t	*alt_text_color;
 
-cvar_t	*scr_netgraph_pos;
+extern cvar_t	*scr_netgraph_pos;
 
 cvar_t	*r_norefresh;
 cvar_t	*r_drawentities;
@@ -203,9 +203,9 @@ cvar_t	*r_lockpvs;
 
 cvar_t	*r_3dlabs_broken;
 
-cvar_t	*vid_fullscreen;
-cvar_t	*vid_gamma;
-cvar_t	*vid_ref;
+extern cvar_t	*vid_fullscreen;
+extern cvar_t	*vid_gamma;
+extern cvar_t	*vid_ref;
 
 // Changable color for r_clearcolor (enabled by gl_clar)
 cvar_t	*r_clearcolor_r;
@@ -1458,10 +1458,10 @@ qboolean R_CheckGLExtensions (char *reason)
 	{
 		if (r_ext_draw_range_elements->integer)
 		{
-			qglDrawRangeElementsEXT = (void *) qwglGetProcAddress("glDrawRangeElements");
-			if (!qglDrawRangeElementsEXT)
-				qglDrawRangeElementsEXT = (void *) qwglGetProcAddress("glDrawRangeElementsEXT");
-			if (!qglDrawRangeElementsEXT)
+			qglDrawRangeElements = (void *) qwglGetProcAddress("glDrawRangeElements");
+			if (!qglDrawRangeElements)
+				qglDrawRangeElements = (void *) qwglGetProcAddress("glDrawRangeElementsEXT");
+			if (!qglDrawRangeElements)
 				VID_Printf (PRINT_ALL, "..." S_COLOR_RED "glDrawRangeElements not properly supported!\n");
 			else {
 				VID_Printf (PRINT_ALL, "...using glDrawRangeElements\n");
@@ -1475,10 +1475,10 @@ qboolean R_CheckGLExtensions (char *reason)
 	{
 		if (r_ext_draw_range_elements->integer)
 		{
-			qglDrawRangeElementsEXT = (void *) qwglGetProcAddress("glDrawRangeElementsEXT");
-			if (!qglDrawRangeElementsEXT)
-				qglDrawRangeElementsEXT = (void *) qwglGetProcAddress("glDrawRangeElements");
-			if (!qglDrawRangeElementsEXT)
+			qglDrawRangeElements = (void *) qwglGetProcAddress("glDrawRangeElementsEXT");
+			if (!qglDrawRangeElements)
+				qglDrawRangeElements = (void *) qwglGetProcAddress("glDrawRangeElements");
+			if (!qglDrawRangeElements)
 				VID_Printf (PRINT_ALL, "..." S_COLOR_RED "GL_EXT_draw_range_elements not properly supported!\n");
 			else {
 				VID_Printf (PRINT_ALL, "...enabling GL_EXT_draw_range_elements\n");

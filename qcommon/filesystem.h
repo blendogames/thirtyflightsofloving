@@ -20,6 +20,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 
+#ifdef _WIN32
 #if defined (_MSC_VER) && (_MSC_VER <= 1200)	// use older version of zlib for MSVC6
 #include "../include/zlibpng_vc6/unzip.h"
 #include "../include/zlibpng_vc6/zip.h"
@@ -27,6 +28,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "../include/zlibpng/unzip.h"
 #include "../include/zlibpng/zip.h"
 #endif
+#else // _WIN32
+#include <minizip/unzip.h>
+#include <minizip/zip.h>
+#endif // _WIN32
 
 #define BASEDIRNAME				"baseq2"
 

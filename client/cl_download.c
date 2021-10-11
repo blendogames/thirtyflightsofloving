@@ -854,7 +854,7 @@ CL_DownloadFileName
 */
 void CL_DownloadFileName (char *dest, int destlen, const char *fn)
 {
-	if ( !stricmp(FS_Downloaddir(), FS_Gamedir()) )	// use basedir/gamedir if fs_downloaddir is the same as fs_gamedir
+	if ( !Q_stricmp(FS_Downloaddir(), FS_Gamedir()) )	// use basedir/gamedir if fs_downloaddir is the same as fs_gamedir
 	{
 		if (strncmp(fn, "players", 7) == 0)
 			Com_sprintf (dest, destlen, "%s/%s", BASEDIRNAME, fn);

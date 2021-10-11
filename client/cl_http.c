@@ -852,7 +852,7 @@ static void CL_CheckAndQueueDownload (char *path)
 			f = fopen (gamePath, "rb");
 			if (!f)
 			{
-				if ( !stricmp(FS_Downloaddir(), FS_Gamedir()) )	// if fs_gamedir and fs_downloaddir are the same, don't bother trying fs_gamedir
+				if ( !Q_stricmp(FS_Downloaddir(), FS_Gamedir()) )	// if fs_gamedir and fs_downloaddir are the same, don't bother trying fs_gamedir
 				{
 					exists = false;
 				}

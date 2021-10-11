@@ -79,7 +79,7 @@ trace_t SV_Trace (vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, edict_t *p
 //=============================================================================
 
 //  added for Psychospaz's chasecam
-vec3_t clientOrg; //lerped org of client for server->client side effects
+extern	vec3_t clientOrg; //lerped org of client for server->client side effects
 
 
 typedef struct
@@ -332,6 +332,10 @@ typedef struct
 									// if time gets > 30 seconds ahead, break it
 	int			disable_servercount;	// when we receive a frame and cl.servercount
 									// > cls.disable_servercount, clear disable_screen
+
+	qboolean	loadingMessage;		// whether load message should appear 
+	char		loadingMessages[96];
+	float		loadingPercent;
 
 // connection information
 	char		servername[MAX_OSPATH];	// name of server from original connect
@@ -907,13 +911,6 @@ extern	int			gun_frame;
 extern	struct model_s	*gun_model;
 
 extern	foginfo_t	r_foginfo;	// Knightmare added
-
-
-qboolean loadingMessage;
-
-char loadingMessages[96];
-
-float loadingPercent;
 
 float CalcFov (float fov_x, float width, float height);
 void V_RenderView( float stereo_separation );

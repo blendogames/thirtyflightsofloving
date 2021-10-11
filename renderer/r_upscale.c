@@ -37,7 +37,9 @@ written by Maxim Stepin (MaxSt). it is not 100% identical, but very similar.
 #define uint32_t	unsigned int
 #define uint64_t	uint64
 
+#ifndef UINT64_C
 #define UINT64_C(val)	val##ui64
+#endif	// UINT64_C
 #define FIX(x)			(int)((x) * (1 << 16))
 
 cvar_t *r_upscale_y;

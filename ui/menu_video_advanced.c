@@ -31,8 +31,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 extern cvar_t *vid_ref;
 // these cvars are needed for checking if they've been modified
-cvar_t	*r_intensity;
-cvar_t	*r_font_upscale;
+//extern cvar_t	*r_intensity;
+//extern cvar_t	*r_font_upscale;
 
 /*
 =======================================================================
@@ -222,7 +222,8 @@ static void M_AdvancedVideo_MenuSetValues (void)
 static void M_AdvancedMenuApplyChanges (void *unused)
 {
 	// update for modified r_intensity and r_stencilTwoSide
-	if ( r_intensity->modified || r_font_upscale->modified )
+//	if ( r_intensity->modified || r_font_upscale->modified )
+	if ( Cvar_IsModified("r_intensity") || Cvar_IsModified("r_font_upscale") )
 		vid_ref->modified = true;
 }
 
@@ -316,8 +317,8 @@ void Menu_Video_Advanced_Init (void)
 	};
 	int y = 0;
 
-	r_intensity = Cvar_Get ("r_intensity", "1", 0);
-	r_font_upscale  = Cvar_Get ("r_font_upscale", "1", 0);
+//	r_intensity = Cvar_Get ("r_intensity", "1", 0);
+//	r_font_upscale  = Cvar_Get ("r_font_upscale", "1", 0);
 
 	s_video_advanced_menu.x = SCREEN_WIDTH*0.5;
 	s_video_advanced_menu.y = SCREEN_HEIGHT*0.5 - 100;

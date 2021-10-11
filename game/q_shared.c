@@ -315,7 +315,8 @@ __declspec( naked ) int Q_ftol( float f )
 	__asm ret
 }
 #pragma warning (default:4035)
-#else
+//#else
+#elif !defined(Q_ftol)
 int Q_ftol( float f )
 {
 	return (int)f;

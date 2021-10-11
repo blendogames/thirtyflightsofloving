@@ -552,7 +552,7 @@ extern	char *ui_menu_drag_sound;
 extern qboolean	ui_entersound;		// play after drawing a frame, so caching
 									// won't disrupt the sound
 
-int MainMenuMouseHover;
+extern int MainMenuMouseHover;
 
 void Menu_Main_Draw (void);
 void UI_CheckMainMenuMouse (void);

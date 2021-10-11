@@ -33,9 +33,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 vec3_t	vlightgrid[VLIGHT_GRIDSIZE_X][VLIGHT_GRIDSIZE_Y];
 
-static vec3_t r_avertexnormals[NUMVERTEXNORMALS] = {
-	#include "anorms.h"
-};
 
 void VLight_InitAnormTable (void)
 {

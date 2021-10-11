@@ -138,6 +138,9 @@ cvar_t	*sv_step_fraction;	// Knightmare- this was a define in p_view.c
 
 cvar_t	*g_showlogic; // Knightmare added
 
+// Knightmare- simulated pause for deathmatch
+qboolean	paused;	
+
 void SpawnEntities (char *mapname, char *entities, char *spawnpoint);
 void ClientThink (edict_t *ent, usercmd_t *cmd);
 qboolean ClientConnect (edict_t *ent, char *userinfo);

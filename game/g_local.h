@@ -2058,7 +2058,7 @@ struct edict_s
 #define FLASHLIGHT_ITEM      "Cells"
 
 // Knightmare- simulated pause for deathmatch
-qboolean	paused;	
+extern	qboolean	paused;	
 
 
 //ZOID

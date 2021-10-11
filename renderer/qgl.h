@@ -21,7 +21,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
 /*
-** qgl.h
+** QGL.H
 */
 
 #ifndef __QGL_H__
@@ -31,12 +31,17 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #  include <windows.h>
 #endif
 
-#include <GL/gl.h>
+#if defined(__APPLE__) || (MACOSX)
+#  include <OpenGL/gl.h>
+#  include <OpenGL/glext.h>
+#else
+#  include <GL/gl.h>
+#endif /* __APPLE__ || MACOSX */
 
-#ifdef __linux__
+/*#ifdef __linux__
 //#include <GL/fxmesa.h>
 #include <GL/glx.h>
-#endif
+#endif */
 
 qboolean QGL_Init( const char *dllname );
 void     QGL_Shutdown( void );
@@ -384,10 +389,10 @@ extern  void ( APIENTRY * qglViewport )(GLint x, GLint y, GLsizei width, GLsizei
 
 //extern	void ( APIENTRY * qglPointParameterfEXT)( GLenum param, GLfloat value );
 //extern	void ( APIENTRY * qglPointParameterfvEXT)( GLenum param, const GLfloat *value );
-extern	void ( APIENTRY * qglColorTableEXT)( int, int, int, int, int, const void * );
+//extern	void ( APIENTRY * qglColorTableEXT)( GLenum, GLenum, GLsizei, GLenum, GLenum, const GLvoid * );
 
 // Knightmare added
-extern	void ( APIENTRY * qglDrawRangeElementsEXT)( GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, const void *indices );
+extern	void ( APIENTRY * qglDrawRangeElements)( GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, const void *indices );
 
 extern	void ( APIENTRY * qglLockArraysEXT) (GLint start, GLsizei count);
 extern	void ( APIENTRY * qglUnlockArraysEXT) (void);
@@ -472,7 +477,7 @@ extern BOOL ( WINAPI * qwglSwapIntervalEXT)( int interval );
 extern BOOL ( WINAPI * qwglGetDeviceGammaRampEXT ) ( unsigned char *pRed, unsigned char *pGreen, unsigned char *pBlue );
 extern BOOL ( WINAPI * qwglSetDeviceGammaRampEXT ) ( const unsigned char *pRed, const unsigned char *pGreen, const unsigned char *pBlue );
 
-//Knightmare added
+// Knightmare added
 extern BOOL ( WINAPI * qwglGetDeviceGammaRamp3DFX ) ( HDC, LPVOID );
 extern BOOL ( WINAPI * qwglSetDeviceGammaRamp3DFX ) ( HDC, LPVOID );
 
@@ -486,22 +491,22 @@ extern void *qwglGetProcAddress(char *symbol);
 extern void (*qgl3DfxSetPaletteEXT)(GLuint *);
 
 /*
-//FX Mesa Functions
+// FX Mesa Functions
 extern fxMesaContext (*qfxMesaCreateContext)(GLuint win, GrScreenResolution_t, GrScreenRefresh_t, const GLint attribList[]);
 extern fxMesaContext (*qfxMesaCreateBestContext)(GLuint win, GLint width, GLint height, const GLint attribList[]);
 extern void (*qfxMesaDestroyContext)(fxMesaContext ctx);
 extern void (*qfxMesaMakeCurrent)(fxMesaContext ctx);
 extern fxMesaContext (*qfxMesaGetCurrentContext)(void);
 extern void (*qfxMesaSwapBuffers)(void);
-*/
 
-//GLX Functions
+// GLX Functions
 extern XVisualInfo * (*qglXChooseVisual)( Display *dpy, int screen, int *attribList );
 extern GLXContext (*qglXCreateContext)( Display *dpy, XVisualInfo *vis, GLXContext shareList, Bool direct );
 extern void (*qglXDestroyContext)( Display *dpy, GLXContext ctx );
 extern Bool (*qglXMakeCurrent)( Display *dpy, GLXDrawable drawable, GLXContext ctx);
 extern void (*qglXCopyContext)( Display *dpy, GLXContext src, GLXContext dst, GLuint mask );
 extern void (*qglXSwapBuffers)( Display *dpy, GLXDrawable drawable );
+*/
 
 // 3dfxSetPaletteEXT shunt
 void Fake_glColorTableEXT( GLenum target, GLenum internalformat,
@@ -525,7 +530,7 @@ void Fake_glColorTableEXT( GLenum target, GLenum internalformat,
 #endif
 
 
-// Knightmare- added Vic's RGB brightening
+// Knightmare- added Vic's  RGB brightening
 // Vic - begin
 #ifndef GL_EXT_texture_env_conbine
 

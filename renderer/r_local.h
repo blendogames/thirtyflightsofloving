@@ -629,6 +629,8 @@ void RB_ModifyTextureCoords (float *inArray, float *inVerts, int numVerts, tcmod
 qboolean RB_CheckArrayOverflow (int numVerts, int numIndex);
 void RB_RenderMeshGeneric (qboolean drawTris);
 void RB_DrawArrays (void);
+void RB_DrawRangeArrays (unsigned start, unsigned end);
+void RB_DrawPrimitiveArrays (GLenum mode);
 void RB_DrawMeshTris (void);
 
 
