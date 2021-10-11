@@ -25,8 +25,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "../client/client.h"
 #include "ui_local.h"
 
-extern cvar_t *vid_ref;
-
 void Menu_Video_Init (void);
 
 /*
@@ -117,7 +115,7 @@ static void M_PrepareVideoRefresh (void)
 	Cvar_Set( "gl_driver", "opengl32" );
 
 	// tell them they're modified so they refresh
-	vid_ref->modified = true;
+	Cvar_SetModified ("vid_ref", true);
 }
 
 static void M_ResetVideoDefaults (void *unused)

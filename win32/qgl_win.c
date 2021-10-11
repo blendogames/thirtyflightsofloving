@@ -401,7 +401,7 @@ void ( APIENTRY * qglVertexPointer )(GLint size, GLenum type, GLsizei stride, co
 void ( APIENTRY * qglViewport )(GLint x, GLint y, GLsizei width, GLsizei height);
 
 // Knightmare added
-void ( APIENTRY * qglDrawRangeElementsEXT)(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, const void *indices);
+void ( APIENTRY * qglDrawRangeElements)(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, const void *indices);
 
 void ( APIENTRY * qglLockArraysEXT) ( GLint start, GLsizei count );
 void ( APIENTRY * qglUnlockArraysEXT) ( void );
@@ -3509,7 +3509,7 @@ qboolean QGL_Init( const char *dllname )
 	qwglSetPixelFormat           = GPA( "wglSetPixelFormat" );
 	qwglSwapBuffers              = GPA( "wglSwapBuffers" );
 
-	qglDrawRangeElementsEXT		= 0;
+	qglDrawRangeElements		= 0;
 	qglLockArraysEXT			= 0;
 	qglUnlockArraysEXT			= 0;
 	qwglSwapIntervalEXT			= 0;
