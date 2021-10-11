@@ -44,8 +44,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #endif // _WIN32
 
-#ifndef _WIN32 // Let's not use GLU on Linux/macOS -flibit
-//#define USE_GLMIPMAP
+#ifdef _WIN32 // Let's not use GLU on Linux/macOS -flibit
+#define USE_GLU_MIPMAP
 #endif	// _WIN32
 
 image_t		gltextures[MAX_GLTEXTURES];
@@ -2006,7 +2006,19 @@ qboolean GL_Upload32 (unsigned *data, int width, int height, imagetype_t type)
 	//
 	// generate mipmaps and upload
 	//
-#ifdef USE_GLMIPMAP
+#ifdef USE_GLU_MIPMAP
+	if (mipmap)
+	{
+		if (glState.sgis_mipmap) {
+			qglTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP_SGIS, true);
+			qglTexImage2D (GL_TEXTURE_2D, 0, comp, scaled_width, scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, scaled);
+		} 
+		else
+			gluBuild2DMipmaps (GL_TEXTURE_2D, comp, scaled_width, scaled_height, GL_RGBA, GL_UNSIGNED_BYTE, scaled);
+	} 
+	else
+		qglTexImage2D (GL_TEXTURE_2D, 0, comp, scaled_width, scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, scaled);
+#else	// USE_GLU_MIPMAP
 	qglTexImage2D (GL_TEXTURE_2D, 0, comp, scaled_width, scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, scaled);
 	if (mipmap)
 	{
@@ -2022,19 +2034,7 @@ qboolean GL_Upload32 (unsigned *data, int width, int height, imagetype_t type)
 			qglTexImage2D (GL_TEXTURE_2D, miplevel, comp, mip_width, mip_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, scaled);
 		}
 	}
-#else
-	if (mipmap)
-	{
-		if (glState.sgis_mipmap) {
-			qglTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP_SGIS, true);
-			qglTexImage2D (GL_TEXTURE_2D, 0, comp, scaled_width, scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, scaled);
-		} 
-		else
-			gluBuild2DMipmaps (GL_TEXTURE_2D, comp, scaled_width, scaled_height, GL_RGBA, GL_UNSIGNED_BYTE, scaled);
-	} 
-	else
-		qglTexImage2D (GL_TEXTURE_2D, 0, comp, scaled_width, scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, scaled);
-#endif
+#endif	// USE_GLU_MIPMAP
 
 //	if (scaled_width != width || scaled_height != height)
 	if (resampled)
