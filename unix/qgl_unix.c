@@ -385,7 +385,7 @@ void ( APIENTRY * qglVertexPointer )(GLint size, GLenum type, GLsizei stride, co
 void ( APIENTRY * qglViewport )(GLint x, GLint y, GLsizei width, GLsizei height);
 
 // Knightmare added
-void ( APIENTRY * qglDrawRangeElementsEXT)(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, const void *indices);
+void ( APIENTRY * qglDrawRangeElements)(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, const void *indices);
 
 void ( APIENTRY * qglLockArraysEXT)( int, int);
 void ( APIENTRY * qglUnlockArraysEXT) ( void );
