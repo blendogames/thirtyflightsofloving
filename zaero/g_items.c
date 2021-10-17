@@ -41,6 +41,7 @@ int	empnuke_index;
 int	plasmashield_index;
 int	a2k_index;
 int	blaster_index;
+int	rg_index;
 
 #define HEALTH_IGNORE_MAX	1
 #define HEALTH_TIMED		2
@@ -3040,4 +3041,5 @@ void SetItemNames (void)
 	plasmashield_index = ITEM_INDEX(FindItem("Plasma Shield"));
 	a2k_index          = ITEM_INDEX(FindItem("A2K"));
 	blaster_index      = ITEM_INDEX(FindItem("Blaster"));
+	rg_index           = ITEM_INDEX(FindItem("Railgun"));
 }

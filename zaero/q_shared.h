@@ -939,9 +939,11 @@ typedef enum
 	TE_EXPLOSION1_BIG,		//53
 	TE_EXPLOSION1_NP,		//54
 	TE_FLECHETTE,			//55
+// Knightmare added
 	TE_REDBLASTER,			//56
 	TE_SHOCKSPLASH,			//57
-//ROGUE
+	TE_BLASTER_COLORED,		//58
+	TE_RAILTRAIL_COLORED,	//59
 } temp_event_t;
 
 #define SPLASH_UNKNOWN		0

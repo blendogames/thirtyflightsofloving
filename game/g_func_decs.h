@@ -697,7 +697,7 @@ extern void fire_bfg ( edict_t * self , vec3_t start , vec3_t dir , int damage ,
 extern void bfg_think ( edict_t * self ) ;
 extern void bfg_touch ( edict_t * self , edict_t * other , cplane_t * plane , csurface_t * surf ) ;
 extern void bfg_explode ( edict_t * self ) ;
-extern void fire_rail ( edict_t * self , vec3_t start , vec3_t aimdir , int damage , int kick ) ;
+extern void fire_rail ( edict_t * self , vec3_t start , vec3_t aimdir , int damage , int kick , qboolean useColor , int red , int green , int blue ) ;
 extern void SP_rocket ( edict_t * rocket ) ;
 extern void rocket_delayed_start ( edict_t * rocket ) ;
 extern void fire_rocket ( edict_t * self , vec3_t start , vec3_t dir , int damage , int speed , float damage_radius , int radius_damage , edict_t * home_target ) ;
@@ -1047,7 +1047,7 @@ extern void AddReflection ( edict_t * ent ) ;
 extern void DeleteReflection ( edict_t * ent , int index ) ;
 extern void ReflectSparks ( int type , vec3_t origin , vec3_t movedir ) ;
 extern void ReflectSteam ( vec3_t origin , vec3_t movedir , int count , int sounds , int speed , int wait , int nextid ) ;
-extern void ReflectTrail ( int type , vec3_t start , vec3_t end ) ;
+extern void ReflectTrail ( int type , vec3_t start , vec3_t end , int red , int green , int blue ) ;
 extern void ReflectExplosion ( int type , vec3_t origin ) ;
 extern void G_RunEntity ( edict_t * ent ) ;
 extern void SV_Physics_Conveyor ( edict_t * ent ) ;

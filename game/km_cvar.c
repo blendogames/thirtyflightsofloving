@@ -89,7 +89,11 @@ cvar_t	*sk_hyperblaster_color;  //hyperblaster color- 1=yellow, 2=green, 3=blue,
 
 cvar_t	*sk_railgun_damage;
 cvar_t	*sk_railgun_damage_dm;
+cvar_t	*sk_railgun_skin;
 cvar_t	*sk_rail_color;
+cvar_t	*sk_rail_color_red;
+cvar_t	*sk_rail_color_green;
+cvar_t	*sk_rail_color_blue;
 
 cvar_t	*sk_bfg_damage;
 cvar_t	*sk_bfg_damage_dm;
@@ -178,6 +182,7 @@ cvar_t	*use_coloredtechs;   // enable colored techs, otherwise plain CTF Techs
 cvar_t	*use_lithiumtechs;   // enable lithium style colored runes, otherwise plain CTF Techs
 
 cvar_t	*ctf_blastercolors;   // enable different blaster colors for each team
+cvar_t	*ctf_railcolors;      // enable different railtrail colors for each team
 
 cvar_t	*allow_flagdrop;
 cvar_t	*allow_flagpickup;
@@ -269,7 +274,11 @@ void InitLithiumVars (void)
 
 	sk_railgun_damage = gi.cvar("sk_railgun_damage", "150", 0);
 	sk_railgun_damage_dm = gi.cvar("sk_railgun_damage_dm", "100", 0);
+	sk_railgun_skin = gi.cvar("sk_railgun_skin", "0", 0);
 	sk_rail_color = gi.cvar("sk_rail_color", "1", 0);
+	sk_rail_color_red = gi.cvar("sk_rail_color_red", "255", 0);
+	sk_rail_color_green = gi.cvar("sk_rail_color_green", "20", 0);
+	sk_rail_color_blue = gi.cvar("sk_rail_color_blue", "20", 0);
 
 	sk_bfg_damage = gi.cvar("sk_bfg_damage", "500", 0);
 	sk_bfg_damage_dm = gi.cvar("sk_bfg_damage_dm", "200", 0);
@@ -356,6 +365,7 @@ void InitLithiumVars (void)
 	use_lithiumtechs = gi.cvar("use_lithiumtechs", "0", 0);
 
 	ctf_blastercolors = gi.cvar("ctf_blastercolors", "1", 0);
+	ctf_railcolors = gi.cvar("ctf_railcolors", "1", 0);
 
 	allow_flagdrop = gi.cvar("allow_flagdrop", "1", 0);
 	allow_flagpickup = gi.cvar("allow_flagpickup", "1", 0);

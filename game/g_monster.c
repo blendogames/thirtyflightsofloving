@@ -190,7 +190,7 @@ void monster_fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, i
 
 void monster_fire_railgun (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, int flashtype)
 {
-	fire_rail (self, start, aimdir, damage, kick);
+	fire_rail (self, start, aimdir, damage, kick, false, 0, 0, 0);
 
 	gi.WriteByte (svc_muzzleflash2);
 	gi.WriteShort (self - g_edicts);

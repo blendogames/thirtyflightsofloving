@@ -476,7 +476,7 @@ void target_effect_trail (edict_t *self, edict_t *activator)
 		if ((self->style == TE_RAILTRAIL) || (self->style == TE_BUBBLETRAIL) ||
 		   (self->style == TE_BFG_LASER) || (self->style == TE_DEBUGTRAIL)  ||
 		   (self->style == TE_BUBBLETRAIL2))
-		   ReflectTrail(self->style,self->s.origin,target->s.origin);
+		   ReflectTrail (self->style, self->s.origin, target->s.origin, 0, 0, 0);
 	}
 }
 //===========================================================================

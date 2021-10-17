@@ -785,7 +785,7 @@ void fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed
 fire_rail
 =================
 */
-void fire_rail (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick)
+void fire_rail (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, qboolean useColor, int red, int green, int blue)
 {
 	vec3_t		from, end;
 	trace_t		tr;
@@ -795,8 +795,10 @@ void fire_rail (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick
 
 	// Knightmare- changeable trail color
 #ifdef KMQUAKE2_ENGINE_MOD
-	if (self->client && sk_rail_color->value == 2)
-		tempevent = TE_RAILTRAIL2;
+	if (useColor)
+		tempevent = TE_RAILTRAIL_COLORED;
+//	if (self->client && sk_rail_color->value == 2)
+//		tempevent = TE_RAILTRAIL2;
 	else
 #endif
 		tempevent = TE_RAILTRAIL;
@@ -835,6 +837,13 @@ void fire_rail (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick
 	gi.WriteByte (tempevent); // was TE_RAILTRAIL
 	gi.WritePosition (start);
 	gi.WritePosition (tr.endpos);
+#ifdef KMQUAKE2_ENGINE_MOD
+	if (tempevent == TE_RAILTRAIL_COLORED) {
+		gi.WriteByte (red);
+		gi.WriteByte (green);
+		gi.WriteByte (blue);
+	}
+#endif
 	gi.multicast (self->s.origin, MULTICAST_PHS);
 //	gi.multicast (start, MULTICAST_PHS);
 	if (water)
@@ -843,6 +852,13 @@ void fire_rail (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick
 		gi.WriteByte (TE_RAILTRAIL);
 		gi.WritePosition (start);
 		gi.WritePosition (tr.endpos);
+#ifdef KMQUAKE2_ENGINE_MOD
+		if (tempevent == TE_RAILTRAIL_COLORED) {
+			gi.WriteByte (red);
+			gi.WriteByte (green);
+			gi.WriteByte (blue);
+		}
+#endif
 		gi.multicast (tr.endpos, MULTICAST_PHS);
 	}
 

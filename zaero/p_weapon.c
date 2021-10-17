@@ -233,6 +233,12 @@ void ChangeWeapon (edict_t *ent)
 			color = BLASTER_ORANGE; 
 		ent->client->ps.gunskin = max((color - 1), 0);
 	}
+	else if (ITEM_INDEX(ent->client->pers.weapon) == rg_index)
+	{
+		// select color
+		color = (int)sk_railgun_skin->value;
+		ent->client->ps.gunskin = min(max(color, 0), 3);
+	}
 	else
 		ent->client->ps.gunskin = 0;
 #endif	// KMQUAKE2_ENGINE_MOD
@@ -1396,6 +1402,8 @@ void weapon_railgun_fire (edict_t *ent, qboolean altfire)
 	vec3_t		offset;
 	int			damage;
 	int			kick;
+	int			red=20, green=48, blue=176;
+	qboolean	useColor=false;
 
 	if (deathmatch->value)
 	{	// normal damage is too extreme in dm
@@ -1412,6 +1420,14 @@ void weapon_railgun_fire (edict_t *ent, qboolean altfire)
 	{
 		damage *= 4;
 		kick *= 4;
+	}
+
+	// changeable color
+	if ( (sk_rail_color->value >= 2 ) && ent->client ) {
+		useColor = true;
+		red = (int)sk_rail_color_red->value;
+		green = (int)sk_rail_color_green->value;
+		blue = (int)sk_rail_color_blue->value;
 	}
 
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
@@ -1433,7 +1449,7 @@ void weapon_railgun_fire (edict_t *ent, qboolean altfire)
 	if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
 		ent->client->pers.inventory[ent->client->ammo_index]--;
 
-	fire_rail (ent, start, forward, damage, kick);
+	fire_rail (ent, start, forward, damage, kick, useColor, red, green, blue);
 
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);

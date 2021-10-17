@@ -765,7 +765,7 @@ void actorRailGun (edict_t *self)
 	ActorTarget(self,target);
 	VectorSubtract (target, start, forward);
 	VectorNormalize (forward);
-	fire_rail (self, start, forward, 80, 100);  // Do slightly less damage
+	fire_rail (self, start, forward, 80, 100, false, 0, 0, 0);  // Do slightly less damage
 
 	gi.positioned_sound(start,self,CHAN_WEAPON,gi.soundindex("weapons/railgf1a.wav"),1,ATTN_NORM,0);
 

@@ -62,6 +62,7 @@ int	homing_index;
 int	blaster_index;
 int	rl_index;
 int	hml_index;
+int	rg_index;
 
 #define HEALTH_IGNORE_MAX	1
 #define HEALTH_TIMED		2
@@ -3282,6 +3283,7 @@ void SetItemNames (void)
 	blaster_index      = ITEM_INDEX(FindItem("Blaster"));
 	rl_index           = ITEM_INDEX(FindItem("Rocket Launcher"));
 	hml_index          = ITEM_INDEX(FindItem("Homing Rocket Launcher"));
+	rg_index           = ITEM_INDEX(FindItem("Railgun"));
 }
 
 

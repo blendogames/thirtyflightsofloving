@@ -293,6 +293,7 @@ extern int BoxOnPlaneSide ( vec3_t emins , vec3_t emaxs , struct cplane_s * p ) 
 extern int BoxOnPlaneSide2 ( vec3_t emins , vec3_t emaxs , struct cplane_s * p ) ;
 extern float anglemod ( float a ) ;
 extern float LerpAngle ( float a2 , float a1 , float frac ) ;
+extern int Q_ftol ( float f ) ;
 extern float Q_fabs ( float f ) ;
 extern void R_ConcatTransforms ( float in1 [ 3 ] [ 4 ] , float in2 [ 3 ] [ 4 ] , float out [ 3 ] [ 4 ] ) ;
 extern void R_ConcatRotations ( float in1 [ 3 ] [ 3 ] , float in2 [ 3 ] [ 3 ] , float out [ 3 ] [ 3 ] ) ;
@@ -852,7 +853,7 @@ extern void fire_bfg ( edict_t * self , vec3_t start , vec3_t dir , int damage ,
 extern void bfg_think ( edict_t * self ) ;
 extern void bfg_touch ( edict_t * self , edict_t * other , cplane_t * plane , csurface_t * surf ) ;
 extern void bfg_explode ( edict_t * self ) ;
-extern void fire_rail ( edict_t * self , vec3_t start , vec3_t aimdir , int damage , int kick ) ;
+extern void fire_rail ( edict_t * self , vec3_t start , vec3_t aimdir , int damage , int kick , qboolean useColor , int red , int green , int blue ) ;
 extern void fire_rocket ( edict_t * self , vec3_t start , vec3_t dir , int damage , int speed , float damage_radius , int radius_damage ) ;
 extern void rocket_touch ( edict_t * ent , edict_t * other , cplane_t * plane , csurface_t * surf ) ;
 extern void fire_grenade2 ( edict_t * self , vec3_t start , vec3_t aimdir , int damage , int speed , float timer , float damage_radius , qboolean held ) ;

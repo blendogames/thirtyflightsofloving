@@ -264,6 +264,7 @@ extern int BoxOnPlaneSide ( vec3_t emins , vec3_t emaxs , struct cplane_s * p ) 
 extern int BoxOnPlaneSide2 ( vec3_t emins , vec3_t emaxs , struct cplane_s * p ) ;
 extern float anglemod ( float a ) ;
 extern float LerpAngle ( float a2 , float a1 , float frac ) ;
+extern int Q_ftol ( float f ) ;
 extern float Q_fabs ( float f ) ;
 extern void R_ConcatTransforms ( float in1 [ 3 ] [ 4 ] , float in2 [ 3 ] [ 4 ] , float out [ 3 ] [ 4 ] ) ;
 extern void R_ConcatRotations ( float in1 [ 3 ] [ 3 ] , float in2 [ 3 ] [ 3 ] , float out [ 3 ] [ 3 ] ) ;
@@ -1660,7 +1661,7 @@ extern void fire_bfg ( edict_t * self , vec3_t start , vec3_t dir , int damage ,
 extern void bfg_think ( edict_t * self ) ;
 extern void bfg_touch ( edict_t * self , edict_t * other , cplane_t * plane , csurface_t * surf ) ;
 extern void bfg_explode ( edict_t * self ) ;
-extern void fire_rail ( edict_t * self , vec3_t start , vec3_t aimdir , int damage , int kick ) ;
+extern void fire_rail ( edict_t * self , vec3_t start , vec3_t aimdir , int damage , int kick , qboolean useColor , int red , int green , int blue ) ;
 extern void SP_rocket ( edict_t * rocket ) ;
 extern void rocket_delayed_start ( edict_t * rocket ) ;
 extern void fire_rocket ( edict_t * self , vec3_t start , vec3_t dir , int damage , int speed , float damage_radius , int radius_damage , edict_t * home_target ) ;
@@ -2082,7 +2083,7 @@ extern void ReflectSparks ( int type , vec3_t origin , vec3_t movedir ) ;
 extern void ReflectSteam ( vec3_t origin , vec3_t movedir , int count , int sounds , int speed , int wait , int nextid ) ;
 extern void ReflectHeatBeam ( int te_beam , edict_t * srcEnt , vec3_t start , vec3_t end ) ;
 extern void ReflectLightning ( edict_t * srcEnt , edict_t * dstEnt , vec3_t start , vec3_t end ) ;
-extern void ReflectTrail ( int type , vec3_t start , vec3_t end ) ;
+extern void ReflectTrail ( int type , vec3_t start , vec3_t end , int red , int green , int blue ) ;
 extern void ReflectExplosion ( int type , vec3_t origin ) ;
 extern void SV_Physics_NewToss ( edict_t * ent ) ;
 extern void G_RunEntity ( edict_t * ent ) ;

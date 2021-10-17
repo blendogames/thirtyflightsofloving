@@ -75,7 +75,11 @@ extern	cvar_t	*sk_hyperblaster_color;
 
 extern	cvar_t	*sk_railgun_damage;
 extern	cvar_t	*sk_railgun_damage_dm;
+extern	cvar_t	*sk_railgun_skin;
 extern	cvar_t	*sk_rail_color;
+extern	cvar_t	*sk_rail_color_red;
+extern	cvar_t	*sk_rail_color_green;
+extern	cvar_t	*sk_rail_color_blue;
 
 extern	cvar_t	*sk_bfg_damage;
 extern	cvar_t	*sk_bfg_damage_dm;

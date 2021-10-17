@@ -72,6 +72,7 @@ int	blaster_index;
 int rl_index;
 int	hml_index;
 int	pl_index;
+int	rg_index;
 int	pr_index;		// SKWiD MOD
 int	magslug_index;
 int	flechettes_index;
@@ -5127,6 +5128,7 @@ void SetItemNames (void)
 	homing_index		= ITEM_INDEX(FindItem("Homing Rockets"));
 	blaster_index       = ITEM_INDEX(FindItem("Blaster"));
 	rl_index			= ITEM_INDEX(FindItem("Rocket Launcher"));
+	rg_index           = ITEM_INDEX(FindItem("Railgun"));
 	pr_index			= ITEM_INDEX(FindItem(PLASMA_PICKUP_NAME));		// SKWiD MOD
 	hml_index			= ITEM_INDEX(FindItem("Homing Rocket Launcher"));
 	pl_index			= ITEM_INDEX(FindItem("prox launcher"));

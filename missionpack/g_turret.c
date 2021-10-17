@@ -269,24 +269,24 @@ void turret_breach_fire (edict_t *self)
 					{
 						if (self->moreflags & FL2_TURRET_DOUBLE_ALT_FIRING)
 						{
-							fire_rail(owner, start2, forward2, damage, 0);
+							fire_rail(owner, start2, forward2, damage, 0, false, 0, 0, 0);
 							self->moreflags &= ~FL2_TURRET_DOUBLE_ALT_FIRING;
 						}
 						else
 						{
-							fire_rail(owner, start, forward, damage, 0);
+							fire_rail(owner, start, forward, damage, 0, false, 0, 0, 0);
 							self->moreflags |= FL2_TURRET_DOUBLE_ALT_FIRING;
 						}
 					}
 					else
 					{
-						fire_rail(owner, start, forward, damage, 0);
-						fire_rail(owner, start2, forward2, damage, 0);
+						fire_rail(owner, start, forward, damage, 0, false, 0, 0, 0);
+						fire_rail(owner, start2, forward2, damage, 0, false, 0, 0, 0);
 					}
 				}
 				else
 //CW--
-					fire_rail (owner, start, forward, damage, 0);
+					fire_rail (owner, start, forward, damage, 0, false, 0, 0, 0);
 				gi.positioned_sound (start, self, CHAN_WEAPON, gi.soundindex("weapons/railgf1a.wav"), 1, ATTN_NORM, 0);
 				// was level.time + 1.3
 				self->delay = level.time + max((self->wait + ((2 - skill->value) / 2)), self->wait); 

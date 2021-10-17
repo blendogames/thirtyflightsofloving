@@ -785,7 +785,7 @@ void use_target_blaster (edict_t *self, edict_t *other, edict_t *activator)
 	// Lazarus: weapon choices
 	if (self->sounds == 1)
 	{
-		fire_rail (self, start, movedir, self->dmg, 0);
+		fire_rail (self, start, movedir, self->dmg, 0, false, 0, 0, 0);
 		gi.WriteByte (svc_muzzleflash);
 		gi.WriteShort (self-g_edicts);
 		gi.WriteByte (MZ_RAILGUN);
@@ -2430,7 +2430,7 @@ void target_effect_trail (edict_t *self, edict_t *activator)
 		if ((self->style == TE_RAILTRAIL) || (self->style == TE_BUBBLETRAIL) ||
 		   (self->style == TE_BFG_LASER) || (self->style == TE_DEBUGTRAIL)  ||
 		   (self->style == TE_BUBBLETRAIL2))
-		   ReflectTrail(self->style,self->s.origin,target->s.origin);
+		   ReflectTrail (self->style, self->s.origin, target->s.origin, 0, 0, 0);
 	}
 }
 //===========================================================================

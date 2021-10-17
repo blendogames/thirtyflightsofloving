@@ -86,7 +86,11 @@ extern	cvar_t	*sk_hyperblaster_color;
 
 extern	cvar_t	*sk_railgun_damage;
 extern	cvar_t	*sk_railgun_damage_dm;
+extern	cvar_t	*sk_railgun_skin;
 extern	cvar_t	*sk_rail_color;
+extern	cvar_t	*sk_rail_color_red;
+extern	cvar_t	*sk_rail_color_green;
+extern	cvar_t	*sk_rail_color_blue;
 
 extern	cvar_t	*sk_bfg_damage;
 extern	cvar_t	*sk_bfg_damage_dm;
@@ -172,7 +176,8 @@ extern	cvar_t	*use_techs;          // enables techs
 extern	cvar_t	*use_coloredtechs;   // enable colored techs, otherwise plain CTF Techs
 extern	cvar_t	*use_lithiumtechs;   // enable lithium style colored runes, otherwise plain CTF Techs
 
-extern	cvar_t	*ctf_blastercolors;   // enable different blaster colors for each team
+extern	cvar_t	*ctf_blastercolors;  // enable different blaster colors for each team
+extern	cvar_t	*ctf_railcolors;     // enable different railtrail colors for each team
 
 extern	cvar_t	*allow_flagdrop;
 extern	cvar_t	*allow_flagpickup;

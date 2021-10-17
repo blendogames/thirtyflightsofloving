@@ -732,7 +732,7 @@ void use_target_blaster (edict_t *self, edict_t *other, edict_t *activator)
 	// Lazarus: weapon choices
 	if (self->sounds == 1)
 	{
-		fire_rail (self, start, movedir, self->dmg, 0);
+		fire_rail (self, start, movedir, self->dmg, 0, false, 0, 0, 0);
 		gi.WriteByte (svc_muzzleflash);
 		gi.WriteShort (self-g_edicts);
 		gi.WriteByte (MZ_RAILGUN);

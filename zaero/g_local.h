@@ -535,6 +535,7 @@ extern	int	tbombs_index;
 extern	int	empnuke_index;
 extern	int	plasmashield_index;
 extern	int	blaster_index;
+extern	int	rg_index;
 
 
 // means of death
@@ -834,7 +835,7 @@ void fire_blaster (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int s
 void fire_grenade (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, float timer, float damage_radius, qboolean contact);
 void fire_grenade2 (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, float timer, float damage_radius, qboolean held);
 void fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage);
-void fire_rail (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick);
+void fire_rail (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, qboolean useColor, int red, int green, int blue);
 void fire_bfg (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius);
 
 //

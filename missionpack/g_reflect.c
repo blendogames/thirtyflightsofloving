@@ -72,7 +72,7 @@ void ReflectExplosion (int type, vec3_t origin)
 	}
 }
 
-void ReflectTrail (int type, vec3_t start, vec3_t end)
+void ReflectTrail (int type, vec3_t start, vec3_t end, int red, int green, int blue)
 {
 	int		m;
 	edict_t	*mirror;
@@ -135,6 +135,13 @@ void ReflectTrail (int type, vec3_t start, vec3_t end)
 		gi.WriteByte (type);
 		gi.WritePosition (p1);
 		gi.WritePosition (p2);
+#ifdef KMQUAKE2_ENGINE_MOD
+		if (type == TE_RAILTRAIL_COLORED) {
+			gi.WriteByte (red);
+			gi.WriteByte (green);
+			gi.WriteByte (blue);
+		}
+#endif
 		gi.multicast (p1, MULTICAST_PHS);
 	}
 }

@@ -52,21 +52,21 @@ void ReflectExplosion (int type, vec3_t origin)
 	edict_t	*mirror;
 	vec3_t	org;
 
-	if(!level.num_reflectors)
+	if (!level.num_reflectors)
 		return;
 
 	for(m=0; m<level.num_reflectors; m++)
 	{
 		mirror = g_mirror[m];
 
-		if(!mirror->inuse)
+		if (!mirror->inuse)
 			continue;
-		if(mirror->spawnflags & SF_REFLECT_OFF)
+		if (mirror->spawnflags & SF_REFLECT_OFF)
 			continue;
 
 		// Don't reflect explosions (other than BFG) from floor or ceiling, 
 		// 'cuz there's no way to do it right
-		if((mirror->style <= 1) && (type != TE_BFG_EXPLOSION) && (type != TE_BFG_BIGEXPLOSION))
+		if ((mirror->style <= 1) && (type != TE_BFG_EXPLOSION) && (type != TE_BFG_BIGEXPLOSION))
 			continue;
 
 		VectorCopy(origin,org);
@@ -79,12 +79,12 @@ void ReflectExplosion (int type, vec3_t origin)
 			case 4: org[1] = 2*mirror->absmin[1] - origin[1] + mirror->moveinfo.distance + 2; break;
 			case 5: org[1] = 2*mirror->absmax[1] - origin[1] - mirror->moveinfo.distance - 2; break;
 		}
-		if(org[0] < mirror->absmin[0]) continue;
-		if(org[0] > mirror->absmax[0]) continue;
-		if(org[1] < mirror->absmin[1]) continue;
-		if(org[1] > mirror->absmax[1]) continue;
-		if(org[2] < mirror->absmin[2]) continue;
-		if(org[2] > mirror->absmax[2]) continue;
+		if (org[0] < mirror->absmin[0]) continue;
+		if (org[0] > mirror->absmax[0]) continue;
+		if (org[1] < mirror->absmin[1]) continue;
+		if (org[1] > mirror->absmax[1]) continue;
+		if (org[2] < mirror->absmin[2]) continue;
+		if (org[2] > mirror->absmax[2]) continue;
 
 		gi.WriteByte (svc_temp_entity);
 		gi.WriteByte (type);
@@ -93,26 +93,26 @@ void ReflectExplosion (int type, vec3_t origin)
 	}
 }
 
-void ReflectTrail (int type, vec3_t start, vec3_t end)
+void ReflectTrail (int type, vec3_t start, vec3_t end, int red, int green, int blue)
 {
 	int		m;
 	edict_t	*mirror;
 	vec3_t	p1, p2;
 
-	if(!level.num_reflectors)
+	if (!level.num_reflectors)
 		return;
 
 	for(m=0; m<level.num_reflectors; m++)
 	{
 		mirror = g_mirror[m];
 
-		if(!mirror->inuse)
+		if (!mirror->inuse)
 			continue;
-		if(mirror->spawnflags & SF_REFLECT_OFF)
+		if (mirror->spawnflags & SF_REFLECT_OFF)
 			continue;
 
-		VectorCopy(start,p1);
-		VectorCopy(end,  p2);
+		VectorCopy (start, p1);
+		VectorCopy (end, p2);
 		switch(mirror->style)
 		{
 			case 0:
@@ -140,12 +140,12 @@ void ReflectTrail (int type, vec3_t start, vec3_t end)
 				p2[1] = 2*mirror->absmax[1] -   end[1] - mirror->moveinfo.distance - 2;
 				break;
 		}
-		if(p1[0] < mirror->absmin[0]) continue;
-		if(p1[0] > mirror->absmax[0]) continue;
-		if(p1[1] < mirror->absmin[1]) continue;
-		if(p1[1] > mirror->absmax[1]) continue;
-		if(p1[2] < mirror->absmin[2]) continue;
-		if(p1[2] > mirror->absmax[2]) continue;
+		if (p1[0] < mirror->absmin[0]) continue;
+		if (p1[0] > mirror->absmax[0]) continue;
+		if (p1[1] < mirror->absmin[1]) continue;
+		if (p1[1] > mirror->absmax[1]) continue;
+		if (p1[2] < mirror->absmin[2]) continue;
+		if (p1[2] > mirror->absmax[2]) continue;
 
 		// If p1 is within func_reflect, we assume p2 is also. If map is constructed 
 		// properly this should always be true.
@@ -154,6 +154,13 @@ void ReflectTrail (int type, vec3_t start, vec3_t end)
 		gi.WriteByte (type);
 		gi.WritePosition (p1);
 		gi.WritePosition (p2);
+#ifdef KMQUAKE2_ENGINE_MOD
+		if (type == TE_RAILTRAIL_COLORED) {
+			gi.WriteByte (red);
+			gi.WriteByte (green);
+			gi.WriteByte (blue);
+		}
+#endif
 		gi.multicast (p1, MULTICAST_PVS);
 	}
 }
@@ -164,16 +171,16 @@ void ReflectSteam (vec3_t origin,vec3_t movedir,int count,int sounds,int speed, 
 	edict_t	*mirror;
 	vec3_t	org, dir;
 
-	if(!level.num_reflectors)
+	if (!level.num_reflectors)
 		return;
 
 	for(m=0; m<level.num_reflectors; m++)
 	{
 		mirror = g_mirror[m];
 
-		if(!mirror->inuse)
+		if (!mirror->inuse)
 			continue;
-		if(mirror->spawnflags & SF_REFLECT_OFF)
+		if (mirror->spawnflags & SF_REFLECT_OFF)
 			continue;
 
 		VectorCopy(origin,org);
@@ -205,12 +212,12 @@ void ReflectSteam (vec3_t origin,vec3_t movedir,int count,int sounds,int speed, 
 				dir[1] = -dir[1];
 				break;
 		}
-		if(org[0] < mirror->absmin[0]) continue;
-		if(org[0] > mirror->absmax[0]) continue;
-		if(org[1] < mirror->absmin[1]) continue;
-		if(org[1] > mirror->absmax[1]) continue;
-		if(org[2] < mirror->absmin[2]) continue;
-		if(org[2] > mirror->absmax[2]) continue;
+		if (org[0] < mirror->absmin[0]) continue;
+		if (org[0] > mirror->absmax[0]) continue;
+		if (org[1] < mirror->absmin[1]) continue;
+		if (org[1] > mirror->absmax[1]) continue;
+		if (org[2] < mirror->absmin[2]) continue;
+		if (org[2] > mirror->absmax[2]) continue;
 
 		// If p1 is within func_reflect, we assume p2 is also. If map is constructed 
 		// properly this should always be true.
@@ -234,20 +241,20 @@ void ReflectSparks (int type,vec3_t origin,vec3_t movedir)
 	edict_t	*mirror;
 	vec3_t	org, dir;
 
-	if(!level.num_reflectors)
+	if (!level.num_reflectors)
 		return;
 
 	for(m=0; m<level.num_reflectors; m++)
 	{
 		mirror = g_mirror[m];
 
-		if(!mirror->inuse)
+		if (!mirror->inuse)
 			continue;
-		if(mirror->spawnflags & SF_REFLECT_OFF)
+		if (mirror->spawnflags & SF_REFLECT_OFF)
 			continue;
 		// Don't reflect in floor or ceiling because sparks are affected by
 		// gravity
-		if(mirror->style <= 1)
+		if (mirror->style <= 1)
 			continue;
 
 		VectorCopy(origin,org);
@@ -279,17 +286,17 @@ void ReflectSparks (int type,vec3_t origin,vec3_t movedir)
 				dir[1] = -dir[1];
 				break;
 		}
-		if(org[0] < mirror->absmin[0]) continue;
-		if(org[0] > mirror->absmax[0]) continue;
-		if(org[1] < mirror->absmin[1]) continue;
-		if(org[1] > mirror->absmax[1]) continue;
-		if(org[2] < mirror->absmin[2]) continue;
-		if(org[2] > mirror->absmax[2]) continue;
+		if (org[0] < mirror->absmin[0]) continue;
+		if (org[0] > mirror->absmax[0]) continue;
+		if (org[1] < mirror->absmin[1]) continue;
+		if (org[1] > mirror->absmax[1]) continue;
+		if (org[2] < mirror->absmin[2]) continue;
+		if (org[2] > mirror->absmax[2]) continue;
 
 		gi.WriteByte(svc_temp_entity);
 		gi.WriteByte(type);
 		gi.WritePosition(org);
-		if(type != TE_CHAINFIST_SMOKE) 
+		if (type != TE_CHAINFIST_SMOKE) 
 			gi.WriteDir(dir);
 		gi.multicast(org, MULTICAST_PVS);
 
@@ -300,15 +307,15 @@ void DeleteReflection (edict_t *ent, int index)
 {
 	edict_t	*r;
 
-	if(index < 0)
+	if (index < 0)
 	{
 		int	i;
 		for(i=0; i<6; i++)
 		{
 			r = ent->reflection[i];
-			if(r)
+			if (r)
 			{
-				if(r->client)
+				if (r->client)
 					gi.TagFree(r->client);
 				memset (r, 0, sizeof(*r));
 				r->classname = "freed";
@@ -321,9 +328,9 @@ void DeleteReflection (edict_t *ent, int index)
 	else
 	{
 		r = ent->reflection[index];
-		if(r)
+		if (r)
 		{
-			if(r->client)
+			if (r->client)
 				gi.TagFree(r->client);
 			memset (r, 0, sizeof(*r));
 			r->classname = "freed";
@@ -350,11 +357,11 @@ void AddReflection (edict_t *ent)
 		for(m=0; m<level.num_reflectors && !is_reflected; m++)
 		{
 			mirror = g_mirror[m];
-			if(!mirror->inuse)
+			if (!mirror->inuse)
 				continue;
-			if(mirror->spawnflags & SF_REFLECT_OFF)
+			if (mirror->spawnflags & SF_REFLECT_OFF)
 				continue;
-			if(mirror->style != i)
+			if (mirror->style != i)
 				continue;
 			VectorCopy(ent->s.origin,org);
 			switch(i)
@@ -366,21 +373,21 @@ void AddReflection (edict_t *ent)
 			case 4: org[1] = 2*mirror->absmin[1] - ent->s.origin[1] + mirror->moveinfo.distance + 2; break;
 			case 5: org[1] = 2*mirror->absmax[1] - ent->s.origin[1] - mirror->moveinfo.distance - 2; break;
 			}
-			if(org[0] < mirror->absmin[0]) continue;
-			if(org[0] > mirror->absmax[0]) continue;
-			if(org[1] < mirror->absmin[1]) continue;
-			if(org[1] > mirror->absmax[1]) continue;
-			if(org[2] < mirror->absmin[2]) continue;
-			if(org[2] > mirror->absmax[2]) continue;
+			if (org[0] < mirror->absmin[0]) continue;
+			if (org[0] > mirror->absmax[0]) continue;
+			if (org[1] < mirror->absmin[1]) continue;
+			if (org[1] > mirror->absmax[1]) continue;
+			if (org[2] < mirror->absmin[2]) continue;
+			if (org[2] > mirror->absmax[2]) continue;
 			is_reflected = true;
 		}
-		if(is_reflected)
+		if (is_reflected)
 		{
 			if (!ent->reflection[i])
 			{			
 				ent->reflection[i] = G_Spawn();
 			
-				if(ent->s.effects & EF_ROTATE)
+				if (ent->s.effects & EF_ROTATE)
 				{
 					ent->s.effects &= ~EF_ROTATE;
 					gi.linkentity(ent);
@@ -450,7 +457,7 @@ void AddReflection (edict_t *ent)
 			}
 
 			VectorCopy (org, ent->reflection[i]->s.origin);
-			if(ent->s.renderfx & RF_BEAM)
+			if (ent->s.renderfx & RF_BEAM)
 			{
 				vec3_t	delta;
 
@@ -486,7 +493,7 @@ void use_func_reflect (edict_t *self, edict_t *other, edict_t *activator)
 
 void SP_func_reflect (edict_t *self)
 {
-	if(level.num_reflectors >= MAX_MIRRORS)
+	if (level.num_reflectors >= MAX_MIRRORS)
 	{
 		gi.dprintf("Max number of func_reflect's (%d) exceeded.\n",MAX_MIRRORS);
 		G_FreeEdict(self);
@@ -497,7 +504,7 @@ void SP_func_reflect (edict_t *self)
 	gi.setmodel (self, self->model);
 	self->svflags = SVF_NOCLIENT;
 	g_mirror[level.num_reflectors] = self;
-	if(!st.lip)
+	if (!st.lip)
 		st.lip = 2;
 	self->moveinfo.distance = st.lip;
 	self->use = use_func_reflect;

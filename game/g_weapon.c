@@ -1274,7 +1274,7 @@ void SP_rocket (edict_t *rocket)
 fire_rail
 =================
 */
-void fire_rail (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick)
+void fire_rail (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, qboolean useColor, int red, int green, int blue)
 {
 	vec3_t		from, end;
 	trace_t		tr;
@@ -1282,10 +1282,12 @@ void fire_rail (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick
 	int			mask, tempevent, i=0;
 	qboolean	water;
 
-	//Knightmare- changeable trail color
+	// Knightmare- changeable trail color
 #ifdef KMQUAKE2_ENGINE_MOD
-	if (self->client && sk_rail_color->value == 2)
-		tempevent = TE_RAILTRAIL2;
+	if (useColor)
+		tempevent = TE_RAILTRAIL_COLORED;
+//	else if ( self->client && (sk_rail_color->value == 2) )
+//		tempevent = TE_RAILTRAIL2;
 	else
 #endif
 		tempevent = TE_RAILTRAIL;
@@ -1306,7 +1308,7 @@ void fire_rail (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick
 		}
 		else
 		{
-			//ZOID--added so rail goes through SOLID_BBOX entities (gibs, etc)
+			// ZOID--added so rail goes through SOLID_BBOX entities (gibs, etc)
 			if ((tr.ent->svflags & SVF_MONSTER) || (tr.ent->client) ||
 				(tr.ent->solid == SOLID_BBOX))
 				ignore = tr.ent;
@@ -1326,10 +1328,17 @@ void fire_rail (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick
 	gi.WriteByte (tempevent);
 	gi.WritePosition (start);
 	gi.WritePosition (tr.endpos);
+#ifdef KMQUAKE2_ENGINE_MOD
+	if (tempevent == TE_RAILTRAIL_COLORED) {
+		gi.WriteByte (red);
+		gi.WriteByte (green);
+		gi.WriteByte (blue);
+	}
+#endif
 	gi.multicast (self->s.origin, MULTICAST_PHS);
 
 	if (level.num_reflectors)
-		ReflectTrail(tempevent,start,tr.endpos);
+		ReflectTrail (tempevent, start, tr.endpos, red, green, blue);
 
 	if (water)
 	{
@@ -1337,6 +1346,13 @@ void fire_rail (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick
 		gi.WriteByte (tempevent);
 		gi.WritePosition (start);
 		gi.WritePosition (tr.endpos);
+#ifdef KMQUAKE2_ENGINE_MOD
+		if (tempevent == TE_RAILTRAIL_COLORED) {
+			gi.WriteByte (red);
+			gi.WriteByte (green);
+			gi.WriteByte (blue);
+		}
+#endif
 		gi.multicast (tr.endpos, MULTICAST_PHS);
 	}
 
@@ -1523,7 +1539,7 @@ void bfg_think (edict_t *self)
 		gi.multicast (self->s.origin, MULTICAST_PHS);
 
 		if (level.num_reflectors)
-			ReflectTrail(TE_BFG_LASER,self->s.origin,tr.endpos);
+			ReflectTrail (TE_BFG_LASER, self->s.origin, tr.endpos, 0, 0, 0);
 	}
 
 	self->nextthink = level.time + FRAMETIME;

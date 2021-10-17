@@ -831,6 +831,7 @@ extern	int	blaster_index;
 extern	int	rl_index;
 extern	int	hml_index;
 extern	int	pl_index;
+extern	int	rg_index;
 extern	int	pr_index;		// SKWiD MOD
 extern	int magslug_index;
 extern	int flechettes_index;
@@ -1492,7 +1493,7 @@ void fire_blaster (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int s
 void fire_grenade (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, float timer, float damage_radius, qboolean contact);
 void fire_grenade2 (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, float timer, float damage_radius, qboolean held);
 void rocket_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf);
-void fire_rail (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick);
+void fire_rail (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, qboolean useColor, int red, int green, int blue);
 void fire_bfg (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius);
 void Grenade_Explode (edict_t *ent);
 void fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage, edict_t *home_target);
@@ -1875,7 +1876,7 @@ void ReflectExplosion (int type, vec3_t origin);
 void ReflectSparks (int type, vec3_t origin, vec3_t movedir);
 void ReflectWeldingSparks (byte count, byte color, vec3_t origin, vec3_t movedir);
 void ReflectSteam (vec3_t origin,vec3_t movedir,int count,int sounds,int speed, int wait, int nextid);
-void ReflectTrail (int type, vec3_t start, vec3_t end);
+void ReflectTrail (int type, vec3_t start, vec3_t end, int red, int green, int blue);
 void ReflectLightning (edict_t *srcEnt, edict_t *dstEnt, vec3_t start, vec3_t end);
 void ReflectHeatBeam (int te_beam, edict_t *srcEnt, vec3_t start, vec3_t end);
 
