@@ -252,7 +252,7 @@ void Options_Effects_MenuInit (void)
 	s_options_effects_railtrail_box.generic.textSize		= MENU_FONT_SIZE;
 	s_options_effects_railtrail_box.generic.x				= 0;
 	s_options_effects_railtrail_box.generic.y				= y += 2*MENU_LINE_SIZE;
-	s_options_effects_railtrail_box.generic.name			= "railtrail type";
+	s_options_effects_railtrail_box.generic.name			= "rail trail type";
 	s_options_effects_railtrail_box.generic.callback		= RailTrailFunc;
 	s_options_effects_railtrail_box.itemNames				= railtrail_names;
 	s_options_effects_railtrail_box.generic.statusbar		= "changes railgun particle effect";
@@ -261,37 +261,37 @@ void Options_Effects_MenuInit (void)
 	s_options_effects_railcolor_slider[0].generic.textSize	= MENU_FONT_SIZE;
 	s_options_effects_railcolor_slider[0].generic.x			= 0;
 	s_options_effects_railcolor_slider[0].generic.y			= y += MENU_LINE_SIZE;
-	s_options_effects_railcolor_slider[0].generic.name		= "railtrail - red";
+	s_options_effects_railcolor_slider[0].generic.name		= "rail trail: red";
 	s_options_effects_railcolor_slider[0].generic.callback	= RailColorRedFunc;
 	s_options_effects_railcolor_slider[0].maxPos			= 64;
 	s_options_effects_railcolor_slider[0].baseValue			= 0.0f;
 	s_options_effects_railcolor_slider[0].increment			= 4.0f;
 	s_options_effects_railcolor_slider[0].displayAsPercent	= false;
-	s_options_effects_railcolor_slider[0].generic.statusbar	= "changes railtrail red component";
+	s_options_effects_railcolor_slider[0].generic.statusbar	= "changes railgun particle effect red component";
 
 	s_options_effects_railcolor_slider[1].generic.type		= MTYPE_SLIDER;
 	s_options_effects_railcolor_slider[1].generic.textSize	= MENU_FONT_SIZE;
 	s_options_effects_railcolor_slider[1].generic.x			= 0;
 	s_options_effects_railcolor_slider[1].generic.y			= y += MENU_LINE_SIZE;
-	s_options_effects_railcolor_slider[1].generic.name		= "railtrail - green";
+	s_options_effects_railcolor_slider[1].generic.name		= "rail trail: green";
 	s_options_effects_railcolor_slider[1].generic.callback	= RailColorGreenFunc;
 	s_options_effects_railcolor_slider[1].maxPos			= 64;
 	s_options_effects_railcolor_slider[1].baseValue			= 0.0f;
 	s_options_effects_railcolor_slider[1].increment			= 4.0f;
 	s_options_effects_railcolor_slider[1].displayAsPercent	= false;
-	s_options_effects_railcolor_slider[1].generic.statusbar	= "changes railtrail green component";
+	s_options_effects_railcolor_slider[1].generic.statusbar	= "changes railgun particle effect green component";
 
 	s_options_effects_railcolor_slider[2].generic.type		= MTYPE_SLIDER;
 	s_options_effects_railcolor_slider[2].generic.textSize	= MENU_FONT_SIZE;
 	s_options_effects_railcolor_slider[2].generic.x			= 0;
 	s_options_effects_railcolor_slider[2].generic.y			= y += MENU_LINE_SIZE;
-	s_options_effects_railcolor_slider[2].generic.name		= "railtrail - blue";
+	s_options_effects_railcolor_slider[2].generic.name		= "rail trail: blue";
 	s_options_effects_railcolor_slider[2].generic.callback	= RailColorBlueFunc;
 	s_options_effects_railcolor_slider[2].maxPos			= 64;
 	s_options_effects_railcolor_slider[2].baseValue			= 0.0f;
 	s_options_effects_railcolor_slider[2].increment			= 4.0f;
 	s_options_effects_railcolor_slider[2].displayAsPercent	= false;
-	s_options_effects_railcolor_slider[2].generic.statusbar	= "changes railtrail blue component";
+	s_options_effects_railcolor_slider[2].generic.statusbar	= "changes railgun particle effect blue component";
 
 	// foostep override option
 	s_options_effects_footstep_box.generic.type			= MTYPE_SPINCONTROL;

@@ -18,6 +18,8 @@
 {"Q_StrScanToken", (byte *)Q_StrScanToken},
 {"Q_GlobMatch", (byte *)Q_GlobMatch},
 {"Com_PageInMemory", (byte *)Com_PageInMemory},
+{"Com_ParseColorString", (byte *)Com_ParseColorString},
+{"Com_ParseHexDigit", (byte *)Com_ParseHexDigit},
 {"COM_ParseExt", (byte *)COM_ParseExt},
 {"COM_Parse", (byte *)COM_Parse},
 {"COM_SkipRestOfLine", (byte *)COM_SkipRestOfLine},

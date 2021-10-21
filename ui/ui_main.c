@@ -35,6 +35,10 @@ cvar_t	*ui_item_rotate;
 cvar_t	*ui_cursor_scale;
 cvar_t	*ui_new_textbox;
 cvar_t	*ui_new_textfield;
+// Temp cvars for setting color1 in player config menu
+cvar_t	*ui_player_railred;
+cvar_t	*ui_player_railgreen;
+cvar_t	*ui_player_railblue;
 
 // moved these here to avoid redundancy
 char *ui_menu_null_sound		= "null";
@@ -243,6 +247,13 @@ void UI_Init (void)
 	Cvar_SetDescription ("ui_new_textbox", "Toggles use of new text box image.  Setting this to 0 uses old font-based tiles.");
 	ui_new_textfield = Cvar_Get ("ui_new_textfield", "1", CVAR_ARCHIVE);
 	Cvar_SetDescription ("ui_new_textfield", "Toggles use of new text field image.  Setting this to 0 uses old font-based tiles.");
+	// Temp cvars for setting color1 in player config menu
+	ui_player_railred = Cvar_Get ("ui_player_railred", "20", 0);
+	Cvar_SetDescription ("ui_player_railred", "Temp cvar for setting red color component of player's railgun trail.  Values range 0-255.");
+	ui_player_railgreen = Cvar_Get ("ui_player_railgreen", "48", 0);
+	Cvar_SetDescription ("ui_player_railgreen", "Temp cvar for setting green color component of player's railgun trail.  Values range 0-255.");
+	ui_player_railblue = Cvar_Get ("ui_player_railblue", "176", 0);
+	Cvar_SetDescription ("ui_player_railblue", "Temp cvar for setting blue color component of player's railgun trail.  Values range 0-255.");
 
 	UI_GetVideoInfo ();		// build video mode list
 //	UI_GetModList ();		// load mods list

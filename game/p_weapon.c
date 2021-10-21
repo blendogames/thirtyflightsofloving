@@ -1734,6 +1734,14 @@ void weapon_railgun_fire (edict_t *ent, qboolean altfire)
 			red = 20;	green = 176;	blue = 20;
 		}
 	}
+	// custom client color
+/*	else if ( ent->client && (ent->client->pers.color1[3] != 0) )
+	{
+		useColor = true;
+		red = ent->client->pers.color1[0];
+		green = ent->client->pers.color1[1];
+		blue = ent->client->pers.color1[2];
+	} */
 	// changeable color
 	else if ( (sk_rail_color->value >= 2 ) && ent->client ) {
 		useColor = true;

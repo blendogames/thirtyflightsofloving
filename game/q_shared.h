@@ -415,6 +415,8 @@ char *COM_Parse (char **data_p);
 // data is an in/out parm, returns a parsed out token
 char *COM_ParseExt (char **data_p, qboolean allowNewLines);
 
+qboolean Com_ParseColorString (const char *s, color_t outColor);	// Knightmare added
+
 void Com_sprintf (char *dest, size_t size, char *fmt, ...);
 unsigned int Com_HashFileName (const char *fname, int hashSize, qboolean sized);
 

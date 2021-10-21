@@ -1177,7 +1177,7 @@ void InitClientPersistant (gclient_t *client, int style)
 
 	client->pers.connected = true;
 // tpp
-	//Default chasecam to tpp setting
+	// Default chasecam to tpp setting
     client->pers.chasetoggle = tpp->value;
 // end tpp
 
@@ -1187,6 +1187,10 @@ void InitClientPersistant (gclient_t *client, int style)
 	client->spycam = NULL;
 	client->pers.spawn_landmark = false;
 	client->pers.spawn_levelchange = false;
+
+	// custom client colors
+//	Vector4Set (client->pers.color1, 255, 255, 255, 0);
+//	Vector4Set (client->pers.color2, 255, 255, 255, 0);
 }
 
 
@@ -1805,7 +1809,7 @@ void PutClientInServer (edict_t *ent)
 
 		resp = client->resp;
 		memcpy (userinfo, client->pers.userinfo, sizeof(userinfo));
-		InitClientPersistant (client,spawn_style);
+		InitClientPersistant (client, spawn_style);
 		ClientUserinfoChanged (ent, userinfo);
 	}
 	else if (coop->value)
@@ -1837,9 +1841,9 @@ void PutClientInServer (edict_t *ent)
 	memset (client, 0, sizeof(*client));
 	client->pers = saved;
 	if (client->pers.health <= 0)
-		InitClientPersistant(client, spawn_style);
+		InitClientPersistant (client, spawn_style);
 	else if (spawn_style)
-		SelectStartWeapon(client, spawn_style);
+		SelectStartWeapon (client, spawn_style);
 
 	client->resp = resp;
 	// tpp
@@ -2246,7 +2250,7 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo)
 	// combine name and skin into a configstring
 //ZOID
 	if (ctf->value)
-		CTFAssignSkin(ent, s);
+		CTFAssignSkin (ent, s);
 	else
 //ZOID
 	gi.configstring (CS_PLAYERSKINS+playernum, va("%s\\%s", ent->client->pers.netname, s) );
@@ -2282,6 +2286,29 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo)
 	if (strlen(s))
 		ent->client->pers.hand = atoi(s);
 
+	// custom colors
+/*	s = Info_ValueForKey (userinfo, "color1");
+	if ( (strlen(s) > 0) && (strncmp(s, "default", 7) != 0) ) {
+	//	color_t	testColor;
+	//	if ( Com_ParseColorString (s, testColor) )
+	//		gi.dprintf ("ClientUserinfoChanged: color1 is (%d %d %d) for %s.\n", testColor[0], testColor[1], testColor[2], ent->client->pers.netname);
+	//	else
+	//		gi.dprintf ("ClientUserinfoChanged: color1 (%s) is invalid for %s.\n", s, ent->client->pers.netname);
+		if ( Com_ParseColorString (s, ent->client->pers.color1) )
+			ent->client->pers.color1[3] = 255;	// mark as set
+	}
+
+	s = Info_ValueForKey (userinfo, "color2");
+	if ( (strlen(s) > 0) && (strncmp(s, "default", 7) != 0) ) {
+	//	color_t	testColor;
+	//	if ( Com_ParseColorString (s, testColor) )
+	//		gi.dprintf ("ClientUserinfoChanged: color2 is (%d %d %d) for %s.\n", testColor[0], testColor[1], testColor[2], ent->client->pers.netname);
+	//	else
+	//		gi.dprintf ("ClientUserinfoChanged: color2 (%s) is invalid for %s.\n", s, ent->client->pers.netname);
+		if ( Com_ParseColorString (s, ent->client->pers.color2) )
+			ent->client->pers.color2[3] = 255;	// mark as set
+	} */
+
 	// save off the userinfo in case we want to check something later
 	strncpy (ent->client->pers.userinfo, userinfo, sizeof(ent->client->pers.userinfo)-1);
 }
@@ -2312,8 +2339,9 @@ qboolean ClientConnect (edict_t *ent, char *userinfo)
 
 	// check for a spectator
 	value = Info_ValueForKey (userinfo, "spectator");
-	if (deathmatch->value && *value && strcmp(value, "0")) {
-		int i, numspec;
+	if (deathmatch->value && *value && strcmp(value, "0"))
+	{
+		int		i, numspec;
 
 		if (*spectator_password->string && 
 			strcmp(spectator_password->string, "none") && 
@@ -2331,7 +2359,9 @@ qboolean ClientConnect (edict_t *ent, char *userinfo)
 			Info_SetValueForKey(userinfo, "rejmsg", "Server spectator limit is full.");
 			return false;
 		}
-	} else {
+	}
+	else
+	{
 		// check for a password
 		value = Info_ValueForKey (userinfo, "password");
 		if (*password->string && strcmp(password->string, "none") && 
@@ -2902,7 +2932,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	edict_t		*ground;
 	pmove_t		pm;
 	vec_t		t;
-	//vec3_t		view;
+//	vec3_t		view;
 	vec3_t		oldorigin, oldvelocity;
 	int			i, j;
 	float		ground_speed;

@@ -900,13 +900,10 @@ void CL_ParseTEnt (void)
 		if (type == TE_RAILTRAIL_COLORED)
 		{
 			int		red, green, blue;
-		//	color = MSG_ReadByte (&net_message);
-		//	CL_EffectColor (color, &red, &green, &blue);
 			red = MSG_ReadByte (&net_message);
 			green = MSG_ReadByte (&net_message);
 			blue = MSG_ReadByte (&net_message);
 			CL_RailTrail (pos, pos2, red, green, blue);
-		//	CL_RailTrail (pos, pos2, color8red(color), color8green(color), color8blue(color));
 		}
 		else if (type == TE_RAILTRAIL2) {
 			CL_RailTrail (pos, pos2, 255, 20, 20);
@@ -921,7 +918,6 @@ void CL_ParseTEnt (void)
 	case TE_GRENADE_EXPLOSION:
 	case TE_GRENADE_EXPLOSION_WATER:
 		MSG_ReadPos (&net_message, pos);
-	//	if (cl_old_explosions->value)
 		if (cl_old_explosions->integer)
 		{
 			ex = CL_AllocExplosion ();

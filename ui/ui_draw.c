@@ -237,18 +237,9 @@ UI_Draw_Cursor
 #if 1
 void UI_Draw_Cursor (void)
 {
-//	int		w, h;
-//	float	ofs_x, ofs_y;
 	float	scale = SCR_ScaledScreen(ui_cursor_scale->value); // 0.4
 	char	*cur_img = UI_MOUSECURSOR_PIC;
 
-	// get sizing vars
-/*	R_DrawGetPicSize (&w, &h, UI_MOUSECURSOR_PIC);
-	ofs_x = SCR_ScaledScreen(w) * ui_cursor_scale->value * 0.5;
-	ofs_y = SCR_ScaledScreen(h) * ui_cursor_scale->value * 0.5;
-	
-	R_DrawScaledPic (ui_mousecursor.x - ofs_x, ui_mousecursor.y - ofs_y, scale, 1.0f, cur_img);
-*/
 	SCR_DrawScaledPic (ui_mousecursor.x, ui_mousecursor.y, scale, true, false, cur_img, 1.0f);
 }
 #else
@@ -283,12 +274,12 @@ void UI_Draw_Cursor (void)
 	{
 		if (cursor.menuitem)
 		{
-			if (cursor.menuitemtype == MENUITEM_TEXT)
+		/*	if (cursor.menuitemtype == MENUITEM_TEXT)
 			{
 				cur_img = "/gfx/ui/cursors/m_cur_text.pcx";
 			}
 			else
-			{
+			{ */
 				if ((cursor.buttonused[0] && cursor.buttonclicks[0])
 					|| (cursor.buttonused[1] && cursor.buttonclicks[1]))
 				{
@@ -301,7 +292,7 @@ void UI_Draw_Cursor (void)
 					alpha = 0.85 + 0.15*sin(anglemod(cl.time*0.005));
 				}
 				overlay = "/gfx/ui/cursors/m_cur_over.pcx";
-			}
+		//	}
 		}
 		else
 		{
@@ -312,24 +303,13 @@ void UI_Draw_Cursor (void)
 	
 	if (cur_img)
 	{
-		R_DrawGetPicSize( &w, &h, cur_img );
-		R_DrawScaledPic( cursor.x - scale*w/2, cursor.y - scale*h/2, scale, alpha, cur_img);
+		R_DrawGetPicSize (&w, &h, cur_img);
+		SCR_DrawScaledPic (cursor.x - scale*w/2, cursor.y - scale*h/2, scale, true, false, cur_img, alpha);
 
 		if (overlay) {
-			R_DrawGetPicSize( &w, &h, overlay );
-			R_DrawScaledPic( cursor.x - scale*w/2, cursor.y - scale*h/2, scale, 1, overlay);
+			R_DrawGetPicSize (&w, &h, overlay);
+			SCR_DrawScaledPic (cursor.x - scale*w/2, cursor.y - scale*h/2, scale, true, false, overlay, 1.0f);
 		}
 	}
 }
 #endif
-
-/*void UI_Draw_Cursor (void)
-{
-	int w,h;
-
-	//get sizing vars
-	R_DrawGetPicSize( &w, &h, "m_mouse_cursor" );
-	w = SCR_ScaledScreen(w)*0.5;
-	h = SCR_ScaledScreen(h)*0.5;
-	R_DrawStretchPic (cursor.x-w/2, cursor.y-h/2, w, h, "m_mouse_cursor", 1.0);
-}*/

@@ -45,10 +45,12 @@ static menulist_s		s_playerconfig_model_box;
 static menulist_s		s_playerconfig_skin_box;
 static menulist_s		s_playerconfig_handedness_box;
 static menulist_s		s_playerconfig_rate_box;
+static menuslider_s		s_playerconfig_railcolor_slider[3];
 static menuseparator_s	s_playerconfig_skin_title;
 static menuseparator_s	s_playerconfig_model_title;
 static menuseparator_s	s_playerconfig_hand_title;
 static menuseparator_s	s_playerconfig_rate_title;
+static menuseparator_s	s_playerconfig_railcolor_title;
 static menuaction_s		s_playerconfig_back_action;
 
 //=======================================================================
@@ -64,6 +66,51 @@ static void Menu_PlayerHandednessCallback (void *unused)
 static void Menu_PlayerRateCallback (void *unused)
 {
 	UI_MenuSpinControl_SaveValue (&s_playerconfig_rate_box, "rate");
+}
+
+
+static void Menu_LoadPlayerRailColor (void)
+{
+	color_t	railColor;
+
+	if ( Com_ParseColorString(Cvar_VariableString("color1"), railColor) ) {
+		Cvar_SetInteger ("ui_player_railred", railColor[0]);
+		Cvar_SetInteger ("ui_player_railgreen", railColor[1]);
+		Cvar_SetInteger ("ui_player_railblue", railColor[2]);
+	}
+	UI_MenuSlider_SetValue (&s_playerconfig_railcolor_slider[0], "ui_player_railred", 0, 256, true);
+	UI_MenuSlider_SetValue (&s_playerconfig_railcolor_slider[1], "ui_player_railgreen", 0, 256, true);
+	UI_MenuSlider_SetValue (&s_playerconfig_railcolor_slider[2], "ui_player_railblue", 0, 256, true);
+}
+
+
+static void Menu_SavePlayerRailColor (void)
+{
+	Cvar_Set ( "color1", va("%02X%02X%02X",
+			min(max(Cvar_VariableInteger("ui_player_railred"), 0), 255),
+			min(max(Cvar_VariableInteger("ui_player_railgreen"), 0), 255),
+			min(max(Cvar_VariableInteger("ui_player_railblue"), 0), 255)) );
+}
+
+
+static void Menu_PlayerRailColorRedFunc (void *unused)
+{
+	UI_MenuSlider_SaveValue (&s_playerconfig_railcolor_slider[0], "ui_player_railred");
+	Menu_SavePlayerRailColor ();
+}
+
+
+static void Menu_PlayerRailColorGreenFunc (void *unused)
+{
+	UI_MenuSlider_SaveValue (&s_playerconfig_railcolor_slider[1], "ui_player_railgreen");
+	Menu_SavePlayerRailColor ();
+}
+
+
+static void Menu_PlayerRailColorBlueFunc (void *unused)
+{
+	UI_MenuSlider_SaveValue (&s_playerconfig_railcolor_slider[2], "ui_player_railblue");
+	Menu_SavePlayerRailColor ();
 }
 
 
@@ -214,12 +261,55 @@ qboolean Menu_PlayerConfig_Init (void)
 	s_playerconfig_rate_box.itemValues				= rate_values;
 	UI_MenuSpinControl_SetValue (&s_playerconfig_rate_box, "rate", 0, 0, false);
 
+	s_playerconfig_railcolor_title.generic.type		= MTYPE_SEPARATOR;
+	s_playerconfig_railcolor_title.generic.textSize	= MENU_FONT_SIZE;
+	s_playerconfig_railcolor_title.generic.flags	= QMF_LEFT_JUSTIFY;
+	s_playerconfig_railcolor_title.generic.name		= "railgun effect color";
+	s_playerconfig_railcolor_title.generic.x		= 13*MENU_FONT_SIZE;
+	s_playerconfig_railcolor_title.generic.y		= y += 2*MENU_LINE_SIZE;
+
+	s_playerconfig_railcolor_slider[0].generic.type			= MTYPE_SLIDER;
+	s_playerconfig_railcolor_slider[0].generic.textSize		= MENU_FONT_SIZE;
+	s_playerconfig_railcolor_slider[0].generic.x			= 0*MENU_FONT_SIZE;
+	s_playerconfig_railcolor_slider[0].generic.y			= y += MENU_LINE_SIZE;
+	s_playerconfig_railcolor_slider[0].generic.name			= "red";
+	s_playerconfig_railcolor_slider[0].generic.callback		= Menu_PlayerRailColorRedFunc;
+	s_playerconfig_railcolor_slider[0].maxPos				= 64;
+	s_playerconfig_railcolor_slider[0].baseValue			= 0.0f;
+	s_playerconfig_railcolor_slider[0].increment			= 4.0f;
+	s_playerconfig_railcolor_slider[0].displayAsPercent		= false;
+	s_playerconfig_railcolor_slider[0].generic.statusbar	= "changes player's railgun particle effect red component";
+
+	s_playerconfig_railcolor_slider[1].generic.type			= MTYPE_SLIDER;
+	s_playerconfig_railcolor_slider[1].generic.textSize		= MENU_FONT_SIZE;
+	s_playerconfig_railcolor_slider[1].generic.x			= 0*MENU_FONT_SIZE;
+	s_playerconfig_railcolor_slider[1].generic.y			= y += MENU_LINE_SIZE;
+	s_playerconfig_railcolor_slider[1].generic.name			= "green";
+	s_playerconfig_railcolor_slider[1].generic.callback		= Menu_PlayerRailColorGreenFunc;
+	s_playerconfig_railcolor_slider[1].maxPos				= 64;
+	s_playerconfig_railcolor_slider[1].baseValue			= 0.0f;
+	s_playerconfig_railcolor_slider[1].increment			= 4.0f;
+	s_playerconfig_railcolor_slider[1].displayAsPercent		= false;
+	s_playerconfig_railcolor_slider[1].generic.statusbar	= "changes player's railgun particle effect green component";
+
+	s_playerconfig_railcolor_slider[2].generic.type			= MTYPE_SLIDER;
+	s_playerconfig_railcolor_slider[2].generic.textSize		= MENU_FONT_SIZE;
+	s_playerconfig_railcolor_slider[2].generic.x			= 0*MENU_FONT_SIZE;
+	s_playerconfig_railcolor_slider[2].generic.y			= y += MENU_LINE_SIZE;
+	s_playerconfig_railcolor_slider[2].generic.name			= "blue";
+	s_playerconfig_railcolor_slider[2].generic.callback		= Menu_PlayerRailColorBlueFunc;
+	s_playerconfig_railcolor_slider[2].maxPos				= 64;
+	s_playerconfig_railcolor_slider[2].baseValue			= 0.0f;
+	s_playerconfig_railcolor_slider[2].increment			= 4.0f;
+	s_playerconfig_railcolor_slider[2].displayAsPercent		= false;
+	s_playerconfig_railcolor_slider[2].generic.statusbar	= "changes player's railgun particle effect blue component";
+
 	s_playerconfig_back_action.generic.type			= MTYPE_ACTION;
 	s_playerconfig_back_action.generic.textSize		= MENU_FONT_SIZE;
 	s_playerconfig_back_action.generic.name			= "Back to Multiplayer";
 	s_playerconfig_back_action.generic.flags		= QMF_LEFT_JUSTIFY;
 	s_playerconfig_back_action.generic.x			= -5*MENU_FONT_SIZE;
-	s_playerconfig_back_action.generic.y			= y += 2*MENU_LINE_SIZE;
+	s_playerconfig_back_action.generic.y			= y += 3*MENU_LINE_SIZE;
 	s_playerconfig_back_action.generic.statusbar	= NULL;
 	s_playerconfig_back_action.generic.callback		= UI_BackMenu;
 
@@ -235,7 +325,14 @@ qboolean Menu_PlayerConfig_Init (void)
 	UI_AddMenuItem (&s_player_config_menu, &s_playerconfig_handedness_box);
 	UI_AddMenuItem (&s_player_config_menu, &s_playerconfig_rate_title);
 	UI_AddMenuItem (&s_player_config_menu, &s_playerconfig_rate_box);
+	UI_AddMenuItem (&s_player_config_menu, &s_playerconfig_railcolor_title);
+	UI_AddMenuItem (&s_player_config_menu, (void *) &s_playerconfig_railcolor_slider[0]);
+	UI_AddMenuItem (&s_player_config_menu, (void *) &s_playerconfig_railcolor_slider[1]);
+	UI_AddMenuItem (&s_player_config_menu, (void *) &s_playerconfig_railcolor_slider[2]);
 	UI_AddMenuItem (&s_player_config_menu, &s_playerconfig_back_action);
+
+	// get color components from color1 cvar
+	Menu_LoadPlayerRailColor ();
 
 	return true;
 }

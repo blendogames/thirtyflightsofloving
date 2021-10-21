@@ -509,7 +509,6 @@ extern	cvar_t	*cl_timedemo;
 extern	cvar_t	*cl_async;
 #endif
 
-// Knighthare added
 extern	cvar_t	*info_password;
 extern	cvar_t	*info_spectator;
 extern	cvar_t	*name;
@@ -520,7 +519,10 @@ extern	cvar_t	*msg;
 extern	cvar_t	*hand;
 extern	cvar_t	*gender;
 extern	cvar_t	*gender_auto;
-// end Knightmare
+
+// custom client colors
+extern	cvar_t	*color1;
+//extern	cvar_t	*color2;
 
 extern	cvar_t	*cl_vwep;
 

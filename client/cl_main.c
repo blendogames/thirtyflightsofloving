@@ -165,6 +165,10 @@ cvar_t	*hand;
 cvar_t	*gender;
 cvar_t	*gender_auto;
 
+// custom client colors
+cvar_t	*color1;
+//cvar_t	*color2;
+
 cvar_t	*cl_vwep;
 
 // for the server to tell which version the client is
@@ -2188,6 +2192,12 @@ void CL_InitLocal (void)
 	gender_auto = Cvar_Get ("gender_auto", "1", CVAR_ARCHIVE);
 	Cvar_SetDescription ("gender_auto", "Enables automatic setting of gender based on player model.");
 	gender->modified = false; // clear this so we know when user sets it manually
+
+	// custom client colors
+	color1 = Cvar_Get ("color1", "1430B0", CVAR_USERINFO | CVAR_ARCHIVE);
+	Cvar_SetDescription ("color1", "Sets color for player's railgun effect.  Format is RRGGBB hexadecimal.");
+//	color2 = Cvar_Get ("color2", "FFFFFF", CVAR_USERINFO | CVAR_ARCHIVE);
+//	Cvar_SetDescription ("color2", "Sets player's secondary color.  Format is RRGGBB hexadecimal.");
 
 	cl_vwep = Cvar_Get ("cl_vwep", "1", CVAR_ARCHIVE);
 	Cvar_SetDescription ("cl_vwep", "Enables visible player weapons.");

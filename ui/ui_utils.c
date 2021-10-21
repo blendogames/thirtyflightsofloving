@@ -507,6 +507,7 @@ void UI_FreeVideoModes (void)
 	}
 	ui_resolution_names = NULL;
 	ui_video_modes = NULL;
+	ui_num_video_modes = 0;
 }
 
 
@@ -568,6 +569,7 @@ void UI_FreeAnisoValues (void)
 	}
 	ui_aniso_names = NULL;
 	ui_aniso_values = NULL;
+	ui_num_aniso_values = 0;
 }
 
 /*
@@ -770,6 +772,7 @@ void UI_FreeModList (void)
 	}
 	ui_mod_names = NULL;
 	ui_mod_values = NULL;
+	ui_num_mods = 0;
 }
 #endif
 
@@ -2333,10 +2336,21 @@ struct model_s *ui_playermodel;
 struct model_s *ui_weaponmodel;
 struct image_s *ui_playerskin;
 char *ui_currentweaponmodel;
+/*
+char	ui_playerconfig_playermodelname[MAX_QPATH];
+char	ui_playerconfig_playerskinname[MAX_QPATH];
+char	ui_playerconfig_weaponmodelname[MAX_QPATH];
 
-//char	ui_playerconfig_playermodelname[MAX_QPATH];
-//char	ui_playerconfig_playerskinname[MAX_QPATH];
-//char	ui_playerconfig_weaponmodelname[MAX_QPATH];
+color_t ui_player_color_imageColors[] =
+{
+#include "ui_playercolors.h"
+};
+// last table entry is null value
+#define UI_NUM_PLAYER_COLORS ((sizeof(ui_player_color_imageColors) / sizeof(ui_player_color_imageColors[0])) - 1)
+char **ui_player_color_values = NULL;
+char **ui_player_color_imageNames = NULL;
+int ui_numplayercolors = 0;
+*/
 
 /*
 ==========================
@@ -2574,6 +2588,37 @@ static qboolean UI_PlayerConfig_ScanDirectories (void)
 	return true;	//** DMP warning fix
 }
 
+#if 0
+/*
+==========================
+UI_BuildPlayerColorList
+==========================
+*/
+void UI_BuildPlayerColorList (void)
+{
+	int		i, numColors = 0;
+
+	ui_player_color_values = malloc(sizeof(char *) * (UI_NUM_PLAYER_COLORS+1));
+	ui_player_color_imageNames = malloc(sizeof(char *) * (UI_NUM_PLAYER_COLORS+1));
+	memset(ui_player_color_values, 0, sizeof(char *) * (UI_NUM_PLAYER_COLORS+1));
+	memset(ui_player_color_imageNames, 0, sizeof(char *) * (UI_NUM_PLAYER_COLORS+1));
+
+	for (i = 0; i < UI_NUM_PLAYER_COLORS; i++)
+	{	// last index is custom color
+		if (i == UI_NUM_PLAYER_COLORS-1) {
+			ui_player_color_values[i] = strdup(UI_ITEMVALUE_WILDCARD);
+			ui_player_color_imageNames[i] = strdup(UI_CUSTOMCOLOR_PIC);
+		}
+		else {
+			ui_player_color_values[i] = strdup(va("%02X%02X%02X", ui_player_color_imageColors[i][0], ui_player_color_imageColors[i][1], ui_player_color_imageColors[i][2]));
+			ui_player_color_imageNames[i] = strdup(UI_SOLIDWHITE_PIC);
+		}
+		numColors++;
+	}
+
+	ui_numplayercolors = numColors;
+}
+#endif
 
 /*
 ==========================
@@ -2583,6 +2628,7 @@ UI_LoadPlayerModels
 void UI_LoadPlayerModels (void)
 {
 	UI_PlayerConfig_ScanDirectories ();
+//	UI_BuildPlayerColorList ();
 }
 
 
@@ -2609,6 +2655,15 @@ void UI_FreePlayerModels (void)
 		ui_pmi[i].skinDisplayNames = NULL;
 		ui_pmi[i].nskins = 0;
 	}
+
+/*	if (ui_numplayercolors > 0)
+	{
+		FS_FreeFileList (ui_player_color_values, ui_numplayercolors);
+		FS_FreeFileList (ui_player_color_imageNames, ui_numplayercolors);
+	}
+	ui_player_color_values = NULL;
+	ui_player_color_imageNames = NULL;
+	ui_numplayercolors = 0; */
 }
 
 
@@ -2624,7 +2679,7 @@ void UI_RefreshPlayerModels (void)
 	if (cls.refreshPlayerModels) {
 		Com_DPrintf ("UI_RefreshPlayerModels: reloading player models due to recent download of a player model.\n");
 		UI_FreePlayerModels ();
-		UI_PlayerConfig_ScanDirectories ();
+		UI_LoadPlayerModels ();
 		cls.refreshPlayerModels = false;	// clear the flag
 	}
 }

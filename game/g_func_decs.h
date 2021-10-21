@@ -18,6 +18,8 @@ extern int Q_stricmp ( char * s1 , char * s2 ) ;
 extern qboolean Q_StrScanToken ( const char * string , const char * findToken , qboolean isCommand ) ;
 extern qboolean Q_GlobMatch ( const char * pattern , const char * text , qboolean caseSensitive ) ;
 extern void Com_PageInMemory ( byte * buffer , int size ) ;
+extern qboolean Com_ParseColorString ( const char * s , color_t outColor ) ;
+extern int Com_ParseHexDigit ( const char c ) ;
 extern char * COM_ParseExt ( char * * data_p , qboolean allowNewLines ) ;
 extern char * COM_Parse ( char * * data_p ) ;
 extern void COM_SkipRestOfLine ( char * * data_p ) ;

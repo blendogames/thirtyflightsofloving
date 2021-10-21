@@ -1450,6 +1450,10 @@ typedef struct
 	int			spawn_modelframe;
 	int			spawn_anim_end;
 	gitem_t		*newweapon;
+
+	// Custom client colors
+//	color_t		color1;
+//	color_t		color2;
 } client_persistant_t;
 
 // client data that stays across deathmatch respawns
@@ -1928,6 +1932,7 @@ struct edict_s
 	vec3_t		movewith_offset;
 	vec3_t		parent_attach_angles;
 	vec3_t		child_attach_angles;	// Knightmare added
+//	vec3_t		aim_point;				// Knightmare- safe aim vector for gunner grenades
 	qboolean	do_not_rotate;
 
 	// monster AI

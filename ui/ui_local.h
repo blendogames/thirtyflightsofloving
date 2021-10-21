@@ -336,11 +336,16 @@ extern int ui_numplayermodels;
 extern struct model_s *ui_playermodel;
 extern struct model_s *ui_weaponmodel;
 extern struct image_s *ui_playerskin;
+/*
+extern char	ui_playerconfig_playermodelname[MAX_QPATH];
+extern char	ui_playerconfig_playerskinname[MAX_QPATH];
+extern char	ui_playerconfig_weaponmodelname[MAX_QPATH];
 
-//extern char	ui_playerconfig_playermodelname[MAX_QPATH];
-//extern char	ui_playerconfig_playerskinname[MAX_QPATH];
-//extern char	ui_playerconfig_weaponmodelname[MAX_QPATH];
-
+extern color_t ui_player_color_imageColors[];
+extern char **ui_player_color_values;
+extern char **ui_player_color_imageNames;
+extern int ui_numplayercolors;
+*/
 //=======================================================
 
 qboolean UI_IsValidImageFilename (char *name);
@@ -534,6 +539,8 @@ void UI_Draw_Cursor (void);
 #define UI_ARROWS_PIC				"/gfx/ui/widgets/arrows.pcx"
 
 #define UI_ITEMVALUE_WILDCARD		"???"
+#define	UI_CUSTOMCOLOR_PIC			"/gfx/ui/custom_color.pcx"
+#define	UI_SOLIDWHITE_PIC			"/gfx/ui/solidwhite.pcx"
 
 extern	cvar_t	*ui_sensitivity;
 extern	cvar_t	*ui_background_alpha;
@@ -541,6 +548,10 @@ extern	cvar_t	*ui_item_rotate;
 extern	cvar_t	*ui_cursor_scale;
 extern	cvar_t	*ui_new_textbox;
 extern	cvar_t	*ui_new_textfield;
+// Temp cvars for setting color1 in player config menu
+extern	cvar_t	*ui_player_railred;
+extern	cvar_t	*ui_player_railgreen;
+extern	cvar_t	*ui_player_railblue;
 
 // moved these declarations to ui_subsystem.c to avoid redundancy
 extern	char *ui_menu_null_sound;

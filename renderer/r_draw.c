@@ -589,7 +589,7 @@ void R_DrawPic (drawStruct_t ds)
 		}
 	}
 
-	drawParms.blend = (image->has_alpha || ds.color[3] < 1.0f);
+	drawParms.blend = ( image->has_alpha || (ds.color[0] < 1.0f) || (ds.color[1] < 1.0f) || (ds.color[2] < 1.0f) || (ds.color[3] < 1.0f) );
 	R_DrawPic_Standard (ds.x, ds.y, w, h, ds.offset, texCoords, ds.color, image->texnum, &drawParms, (ds.flags & DSFLAG_CLAMP));
 }
 
