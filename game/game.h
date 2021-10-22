@@ -43,6 +43,23 @@ SOLID_BBOX,			// touch on edge
 SOLID_BSP			// bsp clip, touch on edge
 } solid_t;
 
+// Filesytem data types
+#ifdef GAME_INCLUDE
+typedef int fileHandle_t;
+
+typedef enum {
+	FS_READ,
+	FS_WRITE,
+	FS_APPEND
+} fsMode_t;
+
+typedef enum {
+	FS_SEEK_CUR,
+	FS_SEEK_SET,
+	FS_SEEK_END
+} fsOrigin_t;
+#endif // GAME_INCLUDE
+
 //===============================================================
 
 // link_t is only used for entity area links now
@@ -159,7 +176,7 @@ typedef struct
 	void	(*WriteAngle) (float f);
 
 	// managed memory allocation
-	void	*(*TagMalloc) (int size, int tag);
+	void	*(*TagMalloc) (size_t size, int tag);	// Knightmare- was int size
 	void	(*TagFree) (void *block);
 	void	(*FreeTags) (int tag);
 
@@ -182,9 +199,22 @@ typedef struct
 	// Knightmare- support game DLL loading from pak files thru engine
 	// This can be used to load script files, etc
 #ifdef KMQUAKE2_ENGINE_MOD
-	char	**(*ListPak) (char *find, int *num);
-	int		(*LoadFile) (char *name, void **buf);
+	char	**(*ListPak) (const char *find, int *num);	// Deprecated- DO NOT USE!
+	int		(*LoadFile) (const char *name, void **buf);
 	void	(*FreeFile) (void *buf);
+	void	(*FreeFileList) (char **list, int n);
+	int		(*OpenFile) (const char *name, fileHandle_t *f, fsMode_t mode);
+	int		(*OpenCompressedFile) (const char *zipName, const char *fileName, fileHandle_t *f, fsMode_t mode);
+	void	(*CloseFile) (fileHandle_t f);
+	int		(*FRead) (void *buffer, int size, fileHandle_t f);
+	int		(*FWrite) (const void *buffer, int size, fileHandle_t f);
+	char	*(*GameDir) (void);
+	char	*(*SaveGameDir) (void);
+	void	(*CreatePath) (const char *path);
+	char	**(*GetFileList) (const char *path, const char *extension, int *num);
+	void	(*FSeek) (fileHandle_t f, int offset, fsOrigin_t origin);
+	int		(*FTell) (fileHandle_t f);
+//	void	(*cvar_setdescription) (char *var_name, const char *description);
 #endif
 
 } game_import_t;
