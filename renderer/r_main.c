@@ -1041,7 +1041,7 @@ void R_Register (void)
 	Cvar_SetDescription ("r_log", "Enables logging of OpenGL API calls.");
 	r_bitdepth = Cvar_Get( "r_bitdepth", "0", 0 );
 	Cvar_SetDescription ("r_bitdepth", "Sets color bit depth.  0 = desktop setting.");
-	r_mode = Cvar_Get( "r_mode", "4", CVAR_ARCHIVE );
+	r_mode = Cvar_Get( "r_mode", "6", CVAR_ARCHIVE );
 	Cvar_SetDescription ("r_mode", "Sets enumerated video mode for renderer.  -1 = custom mode.");
 #ifdef _WIN32	// desktop-resolution display mode
 	r_mode_desktop = Cvar_Get( "r_mode_desktop", "0", CVAR_ARCHIVE );
