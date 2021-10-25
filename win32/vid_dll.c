@@ -763,7 +763,7 @@ void VID_Init (void)
 	Cvar_SetDescription ("vid_xpos", "Sets horizontal desktop position of window in windowed mode.");
 	vid_ypos = Cvar_Get ("vid_ypos", "22", CVAR_ARCHIVE);
 	Cvar_SetDescription ("vid_ypos", "Sets vertical desktop position of window in windowed mode.");
-	vid_fullscreen = Cvar_Get ("vid_fullscreen", "1", CVAR_ARCHIVE);
+	vid_fullscreen = Cvar_Get ("vid_fullscreen", "0", CVAR_ARCHIVE);
 //	Cvar_SetDescription ("vid_fullscreen", "Enables fullscreen video mode.");
 	Cvar_SetDescription ("vid_fullscreen", "Sets fullscreen or borderless video mode.  0 = windowed, 1 = fullscreen, 2 = borderless");	// borderless support
 	vid_gamma = Cvar_Get( "vid_gamma", "0.8", CVAR_ARCHIVE ); // was 1.0
