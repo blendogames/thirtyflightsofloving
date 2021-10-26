@@ -4574,7 +4574,7 @@ void SP_target_equip (edict_t *self)
 void checkpoint_use (edict_t *self, edict_t *other, edict_t *activator)
 {
    	gi.WriteByte (11);	        
-	gi.WriteString ("save save1");
+	gi.WriteString ("save save1\n");
 	gi.unicast (self, true);
 }
 
