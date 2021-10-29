@@ -25,6 +25,10 @@ d*_t structures are on-disk representations
 m*_t structures are in-memory
 */
 
+#ifndef MD2_AS_MD3
+#define PROJECTION_SHADOWS // whether to use projection shadows from BeefQuake
+#endif
+
 /*
 ==============================================================================
 

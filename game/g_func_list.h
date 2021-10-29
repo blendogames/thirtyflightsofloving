@@ -759,6 +759,7 @@
 {"G_FreeEdict", (byte *)G_FreeEdict},
 {"G_Spawn", (byte *)G_Spawn},
 {"G_InitEdict", (byte *)G_InitEdict},
+{"G_NewCustomAnim", (byte *)G_NewCustomAnim},
 {"G_CopyString", (byte *)G_CopyString},
 {"vectoangles2", (byte *)vectoangles2},
 {"vectoangles", (byte *)vectoangles},

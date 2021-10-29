@@ -470,7 +470,7 @@ qboolean gunner_grenade_check (edict_t *self)
 	tr = gi.trace(start, vec3_origin, vec3_origin, target, self, MASK_SHOT);
 	if (tr.ent == self->enemy || tr.fraction == 1)
 	{
-		VectorCopy (target, self->pos0);	// save this aim location in case later safety check fails
+		VectorCopy (target, self->aim_point);	// save this aim location in case later safety check fails
 		// Knightmare- added close-range contact grenade safety checks
 		if (isContact) {
 			if ( gunner_ctgrenade_safety_check(self, start, target) )
@@ -485,7 +485,7 @@ qboolean gunner_grenade_check (edict_t *self)
 	tr = gi.trace(start, vec3_origin, vec3_origin, target, self, MASK_SHOT);
 	if (tr.ent == self->enemy || tr.fraction == 1)
 	{
-		VectorCopy (target, self->pos0);	// save this aim location in case later safety check fails
+		VectorCopy (target, self->aim_point);	// save this aim location in case later safety check fails
 		// Knightmare- added close-range contact grenade safety checks
 		if (isContact) {
 			if ( gunner_ctgrenade_safety_check(self, start, target) )
@@ -655,7 +655,7 @@ void GunnerGrenade (edict_t *self)
 	if (isContact)
 	{
 		if ( gunner_ctgrenade_safety_check(self, start, target) ) {
-			VectorCopy (target, self->pos0);	// save this target point
+			VectorCopy (target, self->aim_point);	// save this target point
 			targetSafe = true;
 		}
 		if ( leadingTarget && gunner_ctgrenade_safety_check(self, start, leadTarget) ) {
@@ -663,7 +663,7 @@ void GunnerGrenade (edict_t *self)
 			leadSafe = true;
 		}
 		if ( !targetSafe && !leadSafe ) {
-			VectorCopy (self->pos0, target);	// revert to prev target point
+			VectorCopy (self->aim_point, target);	// revert to prev target point
 		}
 	/*	if ( (g_showlogic) && (g_showlogic->value) )
 		{

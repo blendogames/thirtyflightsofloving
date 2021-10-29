@@ -1286,8 +1286,6 @@ void fire_rail (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick
 #ifdef KMQUAKE2_ENGINE_MOD
 	if (useColor)
 		tempevent = TE_RAILTRAIL_COLORED;
-//	else if ( self->client && (sk_rail_color->value == 2) )
-//		tempevent = TE_RAILTRAIL2;
 	else
 #endif
 		tempevent = TE_RAILTRAIL;

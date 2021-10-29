@@ -1189,6 +1189,7 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 	gi.FreeTags (TAG_LEVEL);
 
 	memset (&level, 0, sizeof(level));
+	memset (g_custom_anims, 0, sizeof(g_custom_anims));		// Knightmare- wipe custom animations
 	memset (g_edicts, 0, game.maxentities * sizeof (g_edicts[0]));
 	// Lazarus: these are used to track model and sound indices
 	//          in g_main.c:

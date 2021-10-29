@@ -759,6 +759,7 @@ extern void G_TouchTriggers ( edict_t * ent ) ;
 extern void G_FreeEdict ( edict_t * ed ) ;
 extern edict_t * G_Spawn ( void ) ;
 extern void G_InitEdict ( edict_t * e ) ;
+extern mmove_t * G_NewCustomAnim ( void ) ;
 extern char * G_CopyString ( char * in ) ;
 extern void vectoangles2 ( vec3_t value1 , vec3_t angles ) ;
 extern void vectoangles ( vec3_t value1 , vec3_t angles ) ;

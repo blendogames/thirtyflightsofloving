@@ -472,6 +472,7 @@ typedef struct
 	int			freezeframes;
 	int			next_skill;
 	int			num_reflectors;
+	int			num_custom_anims;			// Knightmare- custom anim counter
 	qboolean	intermission_letterbox;		// Knightmare- letterboxing
 
 	// Knightmare- for map-specific logic switching
@@ -1167,6 +1168,11 @@ void	ServerCommand (void);
 qboolean SV_FilterPacket (char *from);
 
 //
+// g_target.c
+//
+extern	mmove_t	g_custom_anims[MAX_CUSTOM_ANIMS];
+
+//
 // g_thing.c
 //
 edict_t *SpawnThing();
@@ -1202,6 +1208,7 @@ edict_t *findradius (edict_t *from, vec3_t org, float rad);
 edict_t *G_PickTarget (char *targetname);
 void	G_UseTargets (edict_t *ent, edict_t *activator);
 void	G_SetMovedir (vec3_t angles, vec3_t movedir);
+mmove_t	*G_NewCustomAnim (void);	// Knightmare- util func for custom anims
 void	G_InitEdict (edict_t *e);
 edict_t	*G_Spawn (void);
 void	G_FreeEdict (edict_t *e);
@@ -1452,8 +1459,8 @@ typedef struct
 	gitem_t		*newweapon;
 
 	// Custom client colors
-//	color_t		color1;
-//	color_t		color2;
+	color_t		color1;
+	color_t		color2;
 } client_persistant_t;
 
 // client data that stays across deathmatch respawns
@@ -1932,7 +1939,7 @@ struct edict_s
 	vec3_t		movewith_offset;
 	vec3_t		parent_attach_angles;
 	vec3_t		child_attach_angles;	// Knightmare added
-//	vec3_t		aim_point;				// Knightmare- safe aim vector for gunner grenades
+	vec3_t		aim_point;				// Knightmare- safe aim vector for gunner grenades
 	qboolean	do_not_rotate;
 
 	// monster AI

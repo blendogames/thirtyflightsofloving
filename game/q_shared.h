@@ -159,10 +159,6 @@ __inline int Q_vsnprintf (char *Dest, size_t Count, const char *Format, va_list 
 
 #define MD2_AS_MD3 // whether to load md2s into md3 memory representation
 
-#ifndef MD2_AS_MD3
-#define PROJECTION_SHADOWS // whether to use projection shadows from BeefQuake
-#endif
-
 #define CLIENT_SPLIT_NETFRAME // whether to use split net and render frames in the client
 
 //#define	WARP_LIGHTMAPS	// whether to support lightmaps on warp surfaces
@@ -170,9 +166,12 @@ __inline int Q_vsnprintf (char *Dest, size_t Count, const char *Format, va_list 
 #define CLIENT_THIRDPERSON_CVAR "cg_thirdperson"
 //#define CLIENT_THIRDPERSON_CVAR "cl_3dcam"
 
+#define MAX_CUSTOM_ANIMS	1024	// This sets the size of an mmove_t array that is saved
+									// to the level file, so it affects savegame compatibility.
+
 #define SAVEGAME_USE_FUNCTION_TABLE
 #define SAVEGAME_DLLNAME "Lazarus Quake II mod with CTF"
-#define SAVEGAME_VERSION 4
+#define SAVEGAME_VERSION 5
 
 // angle indexes
 #define	PITCH				0		// up / down
@@ -190,20 +189,20 @@ __inline int Q_vsnprintf (char *Dest, size_t Count, const char *Format, va_list 
 // per-level limits
 //
 #define	MAX_CLIENTS			256		// absolute limit
-#ifdef KMQUAKE2_ENGINE_MOD		//Knightmare- increase MAX_EDICTS
+#ifdef KMQUAKE2_ENGINE_MOD			// Knightmare- increase MAX_EDICTS
 #define	MAX_EDICTS			8192	// must change protocol to increase more
 #else
 #define	MAX_EDICTS			1024	// must change protocol to increase more
 #endif
 #define	MAX_LIGHTSTYLES		256
 
-#ifdef KMQUAKE2_ENGINE_MOD		//Knightmare- Ding-Dong, Index: Overflow is dead!
+#ifdef KMQUAKE2_ENGINE_MOD			// Knightmare- Ding-Dong, Index: Overflow is dead!
 #define	MAX_MODELS			8192	// these are sent over the net as shorts
 #define	MAX_SOUNDS			8192	// so they cannot exceed 64K
 #define	MAX_IMAGES			2048
 #else
-#define	MAX_MODELS			256	// these are sent over the net as bytes
-#define	MAX_SOUNDS			256	// so they cannot be blindly increased
+#define	MAX_MODELS			256		// these are sent over the net as bytes
+#define	MAX_SOUNDS			256		// so they cannot be blindly increased
 #define	MAX_IMAGES			256
 #endif
 

@@ -26,7 +26,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define Function(f) {#f, f}
 
+#ifndef SAVEGAME_USE_FUNCTION_TABLE
 mmove_t mmove_reloc;
+#endif
 
 field_t fields[] = {
 	{"classname", FOFS(classname), F_LSTRING},
@@ -213,7 +215,8 @@ field_t fields[] = {
 	{"org_size", FOFS(org_size), F_VECTOR},
 	{"owner_id", FOFS(owner_id), F_INT},
 	{"parent_attach_angles", FOFS(parent_attach_angles), F_VECTOR},
-	{"child_attach_angles", FOFS(child_attach_angles), F_VECTOR},	// Knightmare added
+	{"child_attach_angles", FOFS(child_attach_angles), F_VECTOR},
+	{"aim_point", FOFS(aim_point), F_VECTOR},
 	{"pitch_speed", FOFS(pitch_speed), F_FLOAT},
 	{"powerarmor", FOFS(powerarmor), F_INT},
 	{"powerarmortype", FOFS(powerarmortype), F_INT},
@@ -1070,8 +1073,8 @@ All pointer variables (except function pointers) must be handled specially.
 */
 void WriteLevelLocals (FILE *f)
 {
-	field_t		*field;
-	level_locals_t		temp;
+	field_t			*field;
+	level_locals_t	temp;
 
 	// all of the ints, floats, and vectors stay as they are
 	temp = level;
@@ -1166,6 +1169,14 @@ void WriteLevel (char *filename)
 	// write out level_locals_t
 	WriteLevelLocals (f);
 
+	// Knightmare added
+	// write out custom animations
+	for (i=0; i<MAX_CUSTOM_ANIMS; i++)
+	{
+		fwrite (&g_custom_anims[i], sizeof(g_custom_anims[i]), 1, f);
+	}
+	// end Knightmare
+
 	// write out all the entities
 	for (i=0; i<globals.num_edicts; i++)
 	{
@@ -1254,6 +1265,14 @@ void ReadLevel (char *filename)
 
 	// load the level locals
 	ReadLevelLocals (f);
+
+	// Knightmare added
+	// load custom animations
+	for (i=0; i<MAX_CUSTOM_ANIMS; i++)
+	{
+		fread (&g_custom_anims[i], sizeof(g_custom_anims[i]), 1, f);
+	}
+	// end Knightmare
 
 	// load all the entities
 	while (1)

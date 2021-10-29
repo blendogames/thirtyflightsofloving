@@ -1189,8 +1189,8 @@ void InitClientPersistant (gclient_t *client, int style)
 	client->pers.spawn_levelchange = false;
 
 	// custom client colors
-//	Vector4Set (client->pers.color1, 255, 255, 255, 0);
-//	Vector4Set (client->pers.color2, 255, 255, 255, 0);
+	Vector4Set (client->pers.color1, 255, 255, 255, 0);
+	Vector4Set (client->pers.color2, 255, 255, 255, 0);
 }
 
 
@@ -2237,7 +2237,7 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo)
 	// set spectator
 	s = Info_ValueForKey (userinfo, "spectator");
 	// spectators are only supported in deathmatch
-	if (deathmatch->value && *s && strcmp(s, "0"))
+	if ( deathmatch->value && *s && strcmp(s, "0") )
 		ent->client->pers.spectator = true;
 	else
 		ent->client->pers.spectator = false;
@@ -2283,12 +2283,12 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo)
 
 	// handedness
 	s = Info_ValueForKey (userinfo, "hand");
-	if (strlen(s))
+	if (strlen(s) > 0)
 		ent->client->pers.hand = atoi(s);
 
 	// custom colors
-/*	s = Info_ValueForKey (userinfo, "color1");
-	if ( (strlen(s) > 0) && (strncmp(s, "default", 7) != 0) ) {
+	s = Info_ValueForKey (userinfo, "color1");
+	if (strlen(s) >= 6) {
 	//	color_t	testColor;
 	//	if ( Com_ParseColorString (s, testColor) )
 	//		gi.dprintf ("ClientUserinfoChanged: color1 is (%d %d %d) for %s.\n", testColor[0], testColor[1], testColor[2], ent->client->pers.netname);
@@ -2299,7 +2299,7 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo)
 	}
 
 	s = Info_ValueForKey (userinfo, "color2");
-	if ( (strlen(s) > 0) && (strncmp(s, "default", 7) != 0) ) {
+	if (strlen(s) >= 6) {
 	//	color_t	testColor;
 	//	if ( Com_ParseColorString (s, testColor) )
 	//		gi.dprintf ("ClientUserinfoChanged: color2 is (%d %d %d) for %s.\n", testColor[0], testColor[1], testColor[2], ent->client->pers.netname);
@@ -2307,7 +2307,7 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo)
 	//		gi.dprintf ("ClientUserinfoChanged: color2 (%s) is invalid for %s.\n", s, ent->client->pers.netname);
 		if ( Com_ParseColorString (s, ent->client->pers.color2) )
 			ent->client->pers.color2[3] = 255;	// mark as set
-	} */
+	}
 
 	// save off the userinfo in case we want to check something later
 	strncpy (ent->client->pers.userinfo, userinfo, sizeof(ent->client->pers.userinfo)-1);
