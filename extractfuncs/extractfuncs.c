@@ -68,8 +68,8 @@ void WriteWhiteSpace (FILE *fp, script_t *script)
 			fputc( c, fp );
 		}
 		c = PS_NextWhiteSpaceChar( script );
-	} //end while
-} //end of the function WriteWhiteSpace
+	} // end while
+} // end of the function WriteWhiteSpace
 
 /*
 =================
@@ -85,8 +85,8 @@ void WriteString (FILE *fp, script_t *script)
 	{
 		fputc( *ptr, fp );
 		ptr++;
-	} //end while
-} //end of the function WriteString
+	} // end while
+} // end of the function WriteString
 
 /*
 =================
@@ -129,12 +129,12 @@ void ScrewUpFile (char *oldfile, char *newfile)
 		else
 		{
 			WriteString( fp, script );
-		} //end else
-	} //end while
+		} // end else
+	} // end while
 	WriteWhiteSpace( fp, script );
 	FreeMemory( script );
 	fclose( fp );
-} //end of the function ScrewUpFile
+} // end of the function ScrewUpFile
 #endif
 
 /*
@@ -160,12 +160,15 @@ DumpReplaceFunctions
 */
 void DumpReplaceFunctions (char *typeName)
 {
-	replacefunc_t *rf;
-	char path[_MAX_PATH];
-	FILE    *f;
-	int len, newlen;
-	unsigned char *buf, *newbuf;
-	int updated;
+	replacefunc_t	*rf;
+	char			path[_MAX_PATH];
+	FILE			*f;
+	int				len, newlen;
+	unsigned char	*buf, *newbuf;
+	int				updated;
+	// Knightmare added
+	size_t			i, j, k, l;
+	char			varNameBuf[256];
 
 	updated = 0;
 
@@ -180,10 +183,43 @@ void DumpReplaceFunctions (char *typeName)
 	for ( rf = replacefuncs; rf; rf = rf->next )
 	{
 		if (typeName)
-			Log_Print( "{\"%s\", &%s},\n", rf->name, rf->name );
+		{
+			// TODO: output all elements of an array
+			if (rf->isArray)
+			{
+				for (i = 0; i < rf->arrayDimSizes[0]; i++)
+				{
+					for (j = 0; j < rf->arrayDimSizes[1]; j++)
+					{
+						for (k = 0; k < rf->arrayDimSizes[2]; k++)
+						{
+							for (l = 0; l < rf->arrayDimSizes[3]; l++) {
+								Com_sprintf (varNameBuf, sizeof(varNameBuf), "%s[%d][%d][%d][%d]", rf->name, i, j, k, l);
+								Log_Print( "{\"%s\", &%s},\n", varNameBuf, varNameBuf );
+							}
+							if (rf->nArrayDims == 3) {
+								Com_sprintf (varNameBuf, sizeof(varNameBuf), "%s[%d][%d][%d]", rf->name, i, j, k);
+								Log_Print( "{\"%s\", &%s},\n", varNameBuf, varNameBuf );
+							}
+						}
+						if (rf->nArrayDims == 2) {
+							Com_sprintf (varNameBuf, sizeof(varNameBuf), "%s[%d][%d]", rf->name, i, j);
+							Log_Print( "{\"%s\", &%s},\n", varNameBuf, varNameBuf );
+						}
+					}
+					if (rf->nArrayDims == 1) {
+						Com_sprintf (varNameBuf, sizeof(varNameBuf), "%s[%d]", rf->name, i);
+						Log_Print( "{\"%s\", &%s},\n", varNameBuf, varNameBuf );
+					}
+				}
+			}
+			else {
+				Log_Print( "{\"%s\", &%s},\n", rf->name, rf->name );
+			}
+		}
 		else
 			Log_Print( "{\"%s\", (byte *)%s},\n", rf->name, rf->name );
-	} //end for
+	} // end for
 	Log_Print( "{0, 0}\n" );
 	Log_Close();
 
@@ -230,6 +266,10 @@ void DumpReplaceFunctions (char *typeName)
 			remove( "debug\\g_save.sbr" );
 			remove( "release\\g_save.obj" );
 			remove( "release\\g_save.sbr" );
+			remove( "x64\\debug\\g_save.obj" );
+			remove( "x64\\debug\\g_save.sbr" );
+			remove( "x64\\release\\g_save.obj" );
+			remove( "x64\\release\\g_save.sbr" );
 #endif
 
 			updated = 1;
@@ -305,6 +345,10 @@ void DumpReplaceFunctions (char *typeName)
 			remove( "debug\\g_save.sbr" );
 			remove( "release\\g_save.obj" );
 			remove( "release\\g_save.sbr" );
+			remove( "x64\\debug\\g_save.obj" );
+			remove( "x64\\debug\\g_save.sbr" );
+			remove( "x64\\release\\g_save.obj" );
+			remove( "x64\\release\\g_save.sbr" );
 #endif
 
 			updated = 1;
@@ -324,8 +368,14 @@ void DumpReplaceFunctions (char *typeName)
 	free( newbuf );
 
 #ifdef _WIN32
-	if ( updated ) {
-		printf( "Updated the function table, recompile required.\n" );
+	if ( updated )
+	{
+		if (typeName) {
+			printf( "Updated the %s table, recompile required.\n", typeName );
+		}
+		else {
+			printf( "Updated the function table, recompile required.\n" );
+		}
 	}
 #endif
 } // end of the function DumpReplaceFunctions
@@ -345,9 +395,9 @@ replacefunc_t *FindFunctionName (char *funcname)
 		{
 			return f;
 		}
-	} //end for
+	} // end for
 	return NULL;
-} //end of the function FindFunctionName
+} // end of the function FindFunctionName
 
 /*
 =================
@@ -369,7 +419,7 @@ int MayScrewUp (char *funcname)
 		return false;
 	}
 	return true;
-} //end of the function MayScrewUp
+} // end of the function MayScrewUp
 
 /*
 =================
@@ -388,8 +438,7 @@ void ConcatDec (tokenList_t *list, char *str, size_t strSize, int inc)
 			return;
 		}
 	}*/
-	if (list->next)
-	{
+	if (list->next) {
 		ConcatDec (list->next, str, strSize, inc);
 	}
 //	strncat (str, list->token.string);
@@ -408,8 +457,7 @@ void AddFunctionName (char *funcname, char *filename, tokenList_t *head)
 	replacefunc_t	*f;
 	tokenList_t     *list;
 
-	if ( FindFunctionName(funcname) )
-	{
+	if ( FindFunctionName(funcname) ) {
 		return;
 	}
 
@@ -450,8 +498,81 @@ void AddFunctionName (char *funcname, char *filename, tokenList_t *head)
 	list = head;
 	f->dec[0] = '\0';
 	ConcatDec (list, f->dec, sizeof(f->dec), 0);
+} // end of the function AddFunctionName
 
-} //end of the function AddFunctionName
+/*
+=================
+ConcatVarDec
+
+Knightmare- this builds out var declaration
+=================
+*/
+void ConcatVarDec (tokenList_t *list, char *str, size_t strSize, int nDims, size_t DimSizes[])
+{
+	int		i;
+	char	buf[32];	
+
+	if (list->next) {
+		ConcatVarDec (list->next, str, strSize, nDims, DimSizes);
+	}
+	Q_strncatz (str, strSize, list->token.string);
+	for (i = 0; i < nDims; i++) {
+		Com_sprintf (buf, sizeof(buf), "[%d]", DimSizes[i]);
+		Q_strncatz (str, strSize, buf );
+	}
+	Q_strncatz (str, strSize, " " );
+}
+
+/*
+=================
+AddVarName
+
+Knightmare- this adds structs / vars of a given type
+=================
+*/
+void AddVarName (char *funcname, int nDims, size_t DimSizes[], char *filename, tokenList_t *head)
+{
+	int				i;
+	replacefunc_t	*f;
+	tokenList_t     *list;
+
+	if ( FindFunctionName(funcname) ) {
+		return;
+	}
+
+	f = (replacefunc_t *) GetMemory(sizeof(replacefunc_t) + (int)strlen(funcname) + 1 + 6 + (int)strlen(filename) + 1);
+	f->name = (char *)f + sizeof(replacefunc_t);
+	Q_strncpyz (f->name, strlen(funcname) + 1, funcname);
+	f->newname = (char *)f + sizeof(replacefunc_t) + strlen(funcname) + 1;
+	Com_sprintf (f->newname, 6, "F%d", numfuncs++);
+	f->filename = (char *)f + sizeof(replacefunc_t) + strlen(funcname) + 1 + strlen(f->newname) + 1;
+	Q_strncpyz (f->filename, strlen(filename) + 1, filename);
+	if (nDims > 0)
+	{
+		f->isArray = 1;
+		f->nArrayDims = min(nDims, MAX_VAR_ARRAY_DIMENSIONS);
+		for (i = 0; i < MAX_VAR_ARRAY_DIMENSIONS; i++) {
+			f->arrayDimSizes[i] = DimSizes[i];
+		}
+	/*	printf ("AddVarName: var %s has array size(s) of: ", funcname);
+		for (i = 0; i < f->nArrayDims; i++) {
+			printf ("[%d]", f->arrayDimSizes[i]);
+		}
+		printf ("\n"); */
+	}
+	else {
+		f->isArray = 0;
+		f->nArrayDims = 0;
+		memset (f->arrayDimSizes, 0, sizeof(f->arrayDimSizes));
+	}
+	f->next = replacefuncs;
+	replacefuncs = f;
+
+	// construct the declaration
+	list = head;
+	f->dec[0] = '\0';
+	ConcatVarDec (list, f->dec, sizeof(f->dec), f->nArrayDims, f->arrayDimSizes);
+}
 
 /*
 =================
@@ -512,36 +633,40 @@ void StripTokenList (tokenList_t *head)
 		}
 	}
 	// now kill everything after lastTrav
-//	KillTokenList( lastTrav );
+//	KillTokenList (lastTrav);
 	lastTrav->next = NULL;
 }
 
 /*
 =================
-GetTypeNamesFromFile
+GetVarNamesFromFile
 
 Knightmare- this gets structs / vars of a given type
 =================
 */
-void GetTypeNamesFromFile (char *filename, char *typeName)
+void GetVarNamesFromFile (char *filename, char *typeName)
 {
 	source_t	*source;
-	token_t		token, lasttoken;
-	int			indent = 0;//, brace;
+	token_t		token, lastToken, varToken;
+	int			indent = 0;
 	int			isStatic = 0;
 	int			isExtern = 0;
+	int			isArray = 0;
+	int			sqBracketLevel = 0;
+	int			nArrayDims = 0;
+	size_t		arrayDimSizes[MAX_VAR_ARRAY_DIMENSIONS] = {0};
 	tokenList_t	*listHead;
 
 	listHead = NULL;
-	source = LoadSourceFile( filename );
+	source = LoadSourceFile (filename);
 	if ( !source ) {
-		Error( "error opening %s", filename );
+		Error ("error opening %s", filename);
 		return;
 	}
 
 	while ( 1 )
 	{
-		if ( !PC_ReadToken( source, &token ) ) {
+		if ( !PC_ReadToken(source, &token) ) {
 			break;
 		}
 		if ( token.type == TT_PUNCTUATION )
@@ -551,6 +676,9 @@ void GetTypeNamesFromFile (char *filename, char *typeName)
 			case ';':
 				isStatic = 0;
 				isExtern = 0;
+				isArray = 0;
+				nArrayDims = 0;
+				memset(arrayDimSizes, 0, sizeof(arrayDimSizes));
 				break;
 			case '{':
 				indent++;
@@ -570,24 +698,68 @@ void GetTypeNamesFromFile (char *filename, char *typeName)
 			if ( token.string[0] == 'e' && !strcmp( token.string, "extern" ) ) {
 				isExtern = 1;
 			}
-			if ( !isStatic && !isExtern && indent == 0 && !strcmp(token.string, typeName) )
+			if ( !isStatic && !isExtern && (indent == 0) && !strcmp(token.string, typeName) )	// type name matches
 			{
-				if ( PC_ReadToken( source, &token ) )
+				if ( PC_ReadToken(source, &token) )		// next token should be var name
 				{
 					if ( token.type == TT_NAME )
 					{
+						memcpy( &varToken, &token, sizeof(token_t) );	// save var name
+
+						// look for array sizes after var name
+						while ( PC_ReadToken(source, &token) )
+						{
+							if ( token.string[0] == ';' ) {	// end of declaration
+								break;
+							}
+							// look for array dimensions ( e.g. var[x]... )
+							if ( token.type == TT_PUNCTUATION )
+							{
+								switch ( token.string[0] )
+								{
+								case '[':
+									isArray = 1;
+									sqBracketLevel++;
+									break;
+								case ']':
+									sqBracketLevel--;
+									if ( sqBracketLevel < 0 )
+										sqBracketLevel = 0;
+									break;
+								}
+							}
+							// set array sizes
+							if ( isArray && (token.type == TT_NUMBER) && (sqBracketLevel == 1) )
+							{
+								if (nArrayDims < MAX_VAR_ARRAY_DIMENSIONS) {
+									arrayDimSizes[nArrayDims] = token.intvalue;							
+									nArrayDims++;
+								}
+								else {
+									printf ("Too many array dimensions for var %s in file %s!\n", varToken.string, filename);
+								}
+							}
+						}
+
 						if (listHead)
 							listHead->next = NULL;
 						listHead = NULL;
-						AddTokenToList( &listHead, &token );
-						AddFunctionName( token.string, filename, listHead );
+						AddTokenToList (&listHead, &varToken);
+						AddVarName (varToken.string, nArrayDims, arrayDimSizes, filename, listHead);
+					//	AddTokenToList (&listHead, &token);
+					//	AddVarName (token.string, nArrayDims, arrayDimSizes, filename, listHead);
+
+						// reset array sizes
+						isArray = 0;
+						nArrayDims = 0;
+						memset(arrayDimSizes, 0, sizeof(arrayDimSizes));
 					}
 				}
 			}
 		}
-		memcpy( &lasttoken, &token, sizeof( token_t ) );
+		memcpy( &lastToken, &token, sizeof(token_t) );
 	}
-	FreeSource( source );
+	FreeSource (source);
 }
 
 /*
@@ -609,9 +781,9 @@ void GetFunctionNamesFromFile (char *filename)
 	}
 
 	listHead = NULL;
-	source = LoadSourceFile( filename );
+	source = LoadSourceFile (filename);
 	if ( !source ) {
-		Error( "error opening %s", filename );
+		Error ("error opening %s", filename);
 		return;
 	}
 
@@ -623,10 +795,10 @@ void GetFunctionNamesFromFile (char *filename)
 //	} //end if
 	while ( 1 )
 	{
-		if ( !PC_ReadToken( source, &token ) ) {
+		if ( !PC_ReadToken(source, &token) ) {
 			break;
 		}
-		AddTokenToList( &listHead, &token );
+		AddTokenToList (&listHead, &token);
 		if ( token.type == TT_PUNCTUATION )
 		{
 			switch ( token.string[0] )
@@ -645,12 +817,12 @@ void GetFunctionNamesFromFile (char *filename)
 			case '(':
 				if ( indent <= 0 && lasttoken.type == TT_NAME )
 				{
-					StripTokenList( listHead );
+					StripTokenList (listHead);
 
 					brace = 1;
-					while ( PC_ReadToken( source, &token ) )
+					while ( PC_ReadToken(source, &token) )
 					{
-						AddTokenToList( &listHead, &token );
+						AddTokenToList (&listHead, &token);
 						if ( token.string[0] == '(' ) {
 							brace++;
 						}
@@ -659,33 +831,33 @@ void GetFunctionNamesFromFile (char *filename)
 							brace--;
 							if ( brace <= 0 )
 							{
-								if ( !PC_ReadToken( source, &token ) ) {
+								if ( !PC_ReadToken(source, &token) ) {
 									break;
 								}
 								if ( token.string[0] == '{' ) {
 									indent++;
-									if ( !isStatic && MayScrewUp( lasttoken.string ) ) {
-										AddFunctionName( lasttoken.string, filename, listHead );
+									if ( !isStatic && MayScrewUp(lasttoken.string) ) {
+										AddFunctionName (lasttoken.string, filename, listHead);
 									}
-								}	//end if
+								}	// end if
 								break;
-							}	//end if
-						}	//end if
-					}	//end while
-				}	//end if
+							}	// end if
+						}	// end if
+					}	// end while
+				}	// end if
 				break;
-			}	//end switch
-		}	//end if
+			}	// end switch
+		}	// end if
 		if ( token.type == TT_NAME )
 		{
 			if ( token.string[0] == 's' && !strcmp( token.string, "static" ) ) {
 				isStatic = 1;
 			}
 		}
-		memcpy( &lasttoken, &token, sizeof( token_t ) );
-	} //end while	
-	FreeSource( source );
-} //end of the function GetFunctionNamesFromFile
+		memcpy( &lasttoken, &token, sizeof(token_t) );
+	} // end while	
+	FreeSource (source);
+} // end of the function GetFunctionNamesFromFile
 
 /*
 =================
@@ -752,7 +924,7 @@ void main (int argc, char *argv[])
 		}
 	}
 
-	if (argc < 1 || (firstParmSet && firstParm < 1))
+	if ( (argc < 1) || (firstParmSet && firstParm < 1) )
 		Usage ();
 	// end Knightmare
 
@@ -763,11 +935,11 @@ void main (int argc, char *argv[])
 		if ( !(filedata.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) )
 		{
 			 if (typeExtract)
-				GetTypeNamesFromFile (filedata.cFileName, typeName);
+				GetVarNamesFromFile (filedata.cFileName, typeName);
 			 else
 				GetFunctionNamesFromFile (filedata.cFileName);
 		}
-		//find the next file
+		// find the next file
 		done = !FindNextFile (handle, &filedata);
 	}
 	if (typeExtract)
@@ -845,7 +1017,7 @@ int main (int argc, char *argv[])
 	{
 	//	printf( "%d: %s\n", i, argv[i] );
 		if (typeExtract)
-			GetTypeNamesFromFile (argv[i], typeName);
+			GetVarNamesFromFile (argv[i], typeName);
 		else
 			GetFunctionNamesFromFile (argv[i]);
 	}

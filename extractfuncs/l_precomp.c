@@ -1960,8 +1960,7 @@ int PC_EvaluateTokens( source_t *source, token_t *tokens, signed long int *intva
 				v->intvalue = 1;
 				v->floatvalue = 1;
 			}     //end if
-			else
-			{
+			else {
 				v->intvalue = 0;
 				v->floatvalue = 0;
 			}     //end else
@@ -1970,7 +1969,10 @@ int PC_EvaluateTokens( source_t *source, token_t *tokens, signed long int *intva
 			v->prev = lastvalue;
 			if ( lastvalue ) {
 				lastvalue->next = v;
-			} else { firstvalue = v;}
+			}
+			else {
+				firstvalue = v;
+			}
 			lastvalue = v;
 			if ( brace ) {
 				t = t->next;
@@ -1998,8 +2000,7 @@ int PC_EvaluateTokens( source_t *source, token_t *tokens, signed long int *intva
 				v->intvalue = -(signed int) t->intvalue;
 				v->floatvalue = -t->floatvalue;
 			}     //end if
-			else
-			{
+			else {
 				v->intvalue = t->intvalue;
 				v->floatvalue = t->floatvalue;
 			}     //end else
@@ -2008,7 +2009,10 @@ int PC_EvaluateTokens( source_t *source, token_t *tokens, signed long int *intva
 			v->prev = lastvalue;
 			if ( lastvalue ) {
 				lastvalue->next = v;
-			} else { firstvalue = v;}
+			}
+			else {
+				firstvalue = v;
+			}
 			lastvalue = v;
 			//last token was a value
 			lastwasvalue = 1;
@@ -2041,7 +2045,7 @@ int PC_EvaluateTokens( source_t *source, token_t *tokens, signed long int *intva
 					 t->subtype == P_RSHIFT || t->subtype == P_LSHIFT ||
 					 t->subtype == P_BIN_AND || t->subtype == P_BIN_OR ||
 					 t->subtype == P_BIN_XOR ) {
-					SourceError( source, "illigal operator %s on floating point operands\n", t->string );
+					SourceError( source, "illegal operator %s on floating point operands\n", t->string );
 					error = 1;
 					break;
 				}     //end if
@@ -2972,7 +2976,7 @@ int PC_ReadToken( source_t *source, token_t *token )
 */
 #ifdef QUAKEC
 			if ( !BuiltinFunction( source ) )
-#endif //QUAKC
+#endif // QUAKC
 			{
 				//read the precompiler directive
 				if ( !PC_ReadDirective( source ) ) {
@@ -2981,12 +2985,12 @@ int PC_ReadToken( source_t *source, token_t *token )
 					return qfalse;
 				}
 				continue;
-			} //end if
-		} //end if
+			} // end if
+		} // end if
 		if ( token->type == TT_PUNCTUATION && *token->string == '$' ) {
 #ifdef QUAKEC
 			if ( !QuakeCMacro( source ) )
-#endif //QUAKEC
+#endif // QUAKEC
 			{
 				//read the precompiler directive
 				if ( !PC_ReadDollarDirective( source ) ) {
@@ -2995,9 +2999,9 @@ int PC_ReadToken( source_t *source, token_t *token )
 					return qfalse;
 				}
 				continue;
-			} //end if
+			} // end if
 		} //end if
-		  //if skipping source because of conditional compilation
+		// if skipping source because of conditional compilation
 		if ( source->skip ) {
 			continue;
 		}
@@ -3009,7 +3013,7 @@ int PC_ReadToken( source_t *source, token_t *token )
 			define = PC_FindHashedDefine( source->definehash, token->string );
 #else
 			define = PC_FindDefine( source->defines, token->string );
-#endif //DEFINEHASHING
+#endif // DEFINEHASHING
 
 			//if it is a define macro
 			if ( define ) {
@@ -3028,14 +3032,14 @@ int PC_ReadToken( source_t *source, token_t *token )
 					return qfalse;
 				}
 				continue;
-			} //end if
-		} //end if
-		  //copy token for unreading
+			} // end if
+		} // end if
+		  // copy token for unreading
 		memcpy( &source->token, token, sizeof( token_t ) );
-		//found a token
+		// found a token
 		return qtrue;
-	} //end while
-} //end of the function PC_ReadToken
+	} // end while
+} // end of the function PC_ReadToken
 //============================================================================
 //
 // Parameter:				-

@@ -89,14 +89,14 @@ __inline int Q_vsnprintf (char *Dest, size_t Count, const char *Format, va_list 
 #define SCFL_NOSTRINGESCAPECHARS    0x0008
 #define SCFL_PRIMITIVE              0x0010
 #define SCFL_NOBINARYNUMBERS        0x0020
-#define SCFL_NONUMBERVALUES     0x0040
+#define SCFL_NONUMBERVALUES			0x0040
 
 //token types
-#define TT_STRING                       1           // string
-#define TT_LITERAL                  2           // literal
-#define TT_NUMBER                       3           // number
-#define TT_NAME                     4           // name
-#define TT_PUNCTUATION              5           // punctuation
+#define TT_STRING					1           // string
+#define TT_LITERAL					2           // literal
+#define TT_NUMBER					3           // number
+#define TT_NAME						4           // name
+#define TT_PUNCTUATION				5           // punctuation
 
 //string sub type
 //---------------
@@ -107,27 +107,27 @@ __inline int Q_vsnprintf (char *Dest, size_t Count, const char *Format, va_list 
 //number sub type
 //---------------
 #define TT_DECIMAL                  0x0008  // decimal number
-#define TT_HEX                          0x0100  // hexadecimal number
-#define TT_OCTAL                        0x0200  // octal number
+#define TT_HEX                      0x0100  // hexadecimal number
+#define TT_OCTAL                    0x0200  // octal number
 #ifdef BINARYNUMBERS
-#define TT_BINARY                       0x0400  // binary number
+#define TT_BINARY                   0x0400  // binary number
 #endif //BINARYNUMBERS
-#define TT_FLOAT                        0x0800  // floating point number
+#define TT_FLOAT                    0x0800  // floating point number
 #define TT_INTEGER                  0x1000  // integer number
 #define TT_LONG                     0x2000  // long number
 #define TT_UNSIGNED                 0x4000  // unsigned number
 //punctuation sub type
 //--------------------
-#define P_RSHIFT_ASSIGN             1
-#define P_LSHIFT_ASSIGN             2
-#define P_PARMS                     3
-#define P_PRECOMPMERGE              4
+#define P_RSHIFT_ASSIGN					1
+#define P_LSHIFT_ASSIGN					2
+#define P_PARMS							3
+#define P_PRECOMPMERGE					4
 
-#define P_LOGIC_AND                 5
-#define P_LOGIC_OR                  6
-#define P_LOGIC_GEQ                 7
-#define P_LOGIC_LEQ                 8
-#define P_LOGIC_EQ                  9
+#define P_LOGIC_AND						5
+#define P_LOGIC_OR						6
+#define P_LOGIC_GEQ						7
+#define P_LOGIC_LEQ						8
+#define P_LOGIC_EQ						9
 #define P_LOGIC_UNEQ                    10
 
 #define P_MUL_ASSIGN                    11
@@ -138,9 +138,9 @@ __inline int Q_vsnprintf (char *Dest, size_t Count, const char *Format, va_list 
 #define P_INC                           16
 #define P_DEC                           17
 
-#define P_BIN_AND_ASSIGN            18
-#define P_BIN_OR_ASSIGN             19
-#define P_BIN_XOR_ASSIGN            20
+#define P_BIN_AND_ASSIGN				18
+#define P_BIN_OR_ASSIGN					19
+#define P_BIN_XOR_ASSIGN				20
 #define P_RSHIFT                        21
 #define P_LSHIFT                        22
 
@@ -159,23 +159,23 @@ __inline int Q_vsnprintf (char *Dest, size_t Count, const char *Format, va_list 
 #define P_BIN_XOR                       34
 #define P_BIN_NOT                       35
 
-#define P_LOGIC_NOT                 36
-#define P_LOGIC_GREATER             37
-#define P_LOGIC_LESS                    38
+#define P_LOGIC_NOT						36
+#define P_LOGIC_GREATER					37
+#define P_LOGIC_LESS					38
 
-#define P_REF                           39
-#define P_COMMA                     40
-#define P_SEMICOLON                 41
-#define P_COLON                     42
-#define P_QUESTIONMARK              43
+#define P_REF							39
+#define P_COMMA							40
+#define P_SEMICOLON						41
+#define P_COLON							42
+#define P_QUESTIONMARK					43
 
-#define P_PARENTHESESOPEN           44
-#define P_PARENTHESESCLOSE          45
-#define P_BRACEOPEN                 46
-#define P_BRACECLOSE                    47
-#define P_SQBRACKETOPEN             48
-#define P_SQBRACKETCLOSE            49
-#define P_BACKSLASH                 50
+#define P_PARENTHESESOPEN				44
+#define P_PARENTHESESCLOSE				45
+#define P_BRACEOPEN						46
+#define P_BRACECLOSE					47
+#define P_SQBRACKETOPEN					48
+#define P_SQBRACKETCLOSE				49
+#define P_BACKSLASH						50
 
 #define P_PRECOMP                       51
 #define P_DOLLAR                        52

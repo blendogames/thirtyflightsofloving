@@ -48,13 +48,20 @@ typedef enum {false, true}  qboolean;
 
 //#define PATHSEPERATOR_STR		"\\"
 
+#define MAX_VAR_ARRAY_DIMENSIONS	4	// Knightmare added
+
 typedef struct replacefunc_s
 {
-	char *name;
-	char *newname;
-	char *filename;
-	char dec[MAX_TOKEN];            //function declaration
-	struct replacefunc_s *next;
+	char	*name;
+	char	*newname;
+	char	*filename;
+	char	dec[MAX_TOKEN];			// function declaration
+	// Knightmare added
+	int		isArray;
+	int		nArrayDims;
+	size_t	arrayDimSizes[MAX_VAR_ARRAY_DIMENSIONS];
+	// end Knightmare
+	struct	replacefunc_s *next;
 } replacefunc_t;
 
 typedef struct tokenList_s
