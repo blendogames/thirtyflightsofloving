@@ -901,7 +901,7 @@ edict_t *FindLeader(void)
 player_die
 ==================
 */
-void player_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
 //CW++
 	edict_t	*ent;
@@ -1687,6 +1687,10 @@ void InitClientPersistant(gclient_t *client)
 
 	client->pers.connected = true;
 
+	// Knightmare- custom client colors
+	Vector4Set (client->pers.color1, 255, 255, 255, 0);
+	Vector4Set (client->pers.color2, 255, 255, 255, 0);
+
 //DH++
 	client->spycam = NULL;
 //DH--
@@ -2173,8 +2177,8 @@ void PutClientInServer(edict_t *ent)
 	
 	resp = client->resp;																			//CW
 	memcpy(userinfo, client->pers.userinfo, sizeof(userinfo));
-	InitClientPersistant(client);
-	ClientUserinfoChanged(ent, userinfo);
+	InitClientPersistant (client);
+	ClientUserinfoChanged (ent, userinfo);
 
 //	Clear everything but the persistant data.
 
@@ -2182,7 +2186,7 @@ void PutClientInServer(edict_t *ent)
 	memset(client, 0, sizeof(*client));
 	client->pers = saved;
 	if (client->pers.health <= 0)
-		InitClientPersistant(client);
+		InitClientPersistant (client);
 
 	client->resp = resp;
 
@@ -2428,7 +2432,7 @@ The game can override any of the settings in place
 (forcing skins or names, etc) before copying it off.
 ============
 */
-void ClientUserinfoChanged(edict_t *ent, char *userinfo)
+void ClientUserinfoChanged (edict_t *ent, char *userinfo)
 {
 	char	*s;
 	int		playernum;
@@ -2485,6 +2489,19 @@ void ClientUserinfoChanged(edict_t *ent, char *userinfo)
 	s = Info_ValueForKey(userinfo, "hand");
 	if (strlen(s))
 		ent->client->pers.hand = atoi(s);
+
+	// Knightmare- custom colors
+	s = Info_ValueForKey (userinfo, "color1");
+	if (strlen(s) >= 6) {
+		if ( Com_ParseColorString (s, ent->client->pers.color1) )
+			ent->client->pers.color1[3] = 255;	// mark as set
+	}
+
+	s = Info_ValueForKey (userinfo, "color2");
+	if (strlen(s) >= 6) {
+		if ( Com_ParseColorString (s, ent->client->pers.color2) )
+			ent->client->pers.color2[3] = 255;	// mark as set
+	}
 
 //CW++
 	if (strlen(ent->client->pers.old_name) == 0)

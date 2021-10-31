@@ -170,8 +170,12 @@ MATHLIB
 */
 
 typedef float vec_t;
+typedef vec_t vec2_t[2];
 typedef vec_t vec3_t[3];
+typedef vec_t vec4_t[4];
 typedef vec_t vec5_t[5];
+
+typedef byte color_t[4];
 
 typedef	int	fixed4_t;
 typedef	int	fixed8_t;
@@ -208,6 +212,20 @@ extern int Q_ftol (float f);
 #define VectorClear(a)			(a[0]=a[1]=a[2]=0)
 #define VectorNegate(a,b)		(b[0]=-a[0],b[1]=-a[1],b[2]=-a[2])
 #define VectorSet(v, x, y, z)	(v[0]=(x), v[1]=(y), v[2]=(z))
+
+#define Vector2Subtract(a,b,c)		(c[0]=a[0]-b[0],c[1]=a[1]-b[1])
+#define Vector2Add(a,b,c)			(c[0]=a[0]+b[0],c[1]=a[1]+b[1])
+#define Vector2Copy(a, b)			(b[0]=a[0], b[1]=a[1])
+#define Vector2Clear(a)				(a[0]=a[1]=0)
+#define Vector2Negate(a,b)			(b[0]=-a[0],b[1]=-a[1])
+#define Vector2Set(v, x, y)			(v[0]=(x), v[1]=(y))
+
+#define Vector4Subtract(a,b,c)		(c[0]=a[0]-b[0],c[1]=a[1]-b[1],c[2]=a[2]-b[2],c[3]=a[3]-b[3])
+#define Vector4Add(a,b,c)			(c[0]=a[0]+b[0],c[1]=a[1]+b[1],c[2]=a[2]+b[2],c[3]=a[3]+b[3])
+#define Vector4Copy(a, b)			(b[0]=a[0], b[1]=a[1], b[2]=a[2], b[3]=a[3])
+#define Vector4Clear(a)				(a[0]=a[1]=a[2]=a[3]=0)
+#define Vector4Negate(a,b)			(b[0]=-a[0],b[1]=-a[1],b[2]=-a[2],b[3]=-a[3])
+#define Vector4Set(v, w, x, y, z)	(v[0]=(w), v[1]=(x), v[2]=(y), v[3]=(z))
 
 void VectorMA (vec3_t veca, float scale, vec3_t vecb, vec3_t vecc);
 
@@ -267,6 +285,8 @@ void COM_DefaultExtension (char *path, char *extension);
 
 char *COM_Parse (char **data_p);
 // data is an in/out parm, returns a parsed out token
+
+qboolean Com_ParseColorString (const char *s, color_t outColor);	// Knightmare added
 
 void Com_sprintf (char *dest, size_t size, char *fmt, ...);
 // Knightmare added
@@ -1068,7 +1088,12 @@ typedef enum
 	TE_WIDOWSPLASH,
 	TE_EXPLOSION1_BIG,
 	TE_EXPLOSION1_NP,
-	TE_FLECHETTE
+	TE_FLECHETTE,
+// Knightmare added
+	TE_REDBLASTER,	
+	TE_SHOCKSPLASH,	
+	TE_BLASTER_COLORED,
+	TE_RAILTRAIL_COLORED,
 //ROGUE
 } temp_event_t;
 

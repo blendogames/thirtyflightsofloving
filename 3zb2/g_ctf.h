@@ -115,7 +115,14 @@ qboolean CTFApplyHaste(edict_t *ent);
 void CTFApplyHasteSound(edict_t *ent);
 void CTFApplyRegeneration(edict_t *ent);
 qboolean CTFHasRegeneration(edict_t *ent);
+void CTFApplyVampire(edict_t *ent, int dmg);
+void CTFApplyVampireSound(edict_t *ent);
+void CTFApplyAmmogen (edict_t *attacker, edict_t *targ);
+void CTFApplyAmmogenSound(edict_t *ent);
 void CTFRespawnTech(edict_t *ent);
+void CTFResetTech (void);
+//void CheckNumTechs (void);
+//void Cmd_TechCount_f (edict_t *ent);
 
 void CTFOpenJoinMenu(edict_t *ent);
 qboolean CTFStartClient(edict_t *ent);

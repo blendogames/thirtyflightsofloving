@@ -488,7 +488,7 @@ char *G_CopyString (char *in)
 }
 
 // Knightmare added
-mmove_t	*G_NewCustomAnim (void)
+mmove_t *G_NewCustomAnim (void)
 {
 	int	idx = 0;
 

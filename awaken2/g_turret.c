@@ -170,13 +170,13 @@ void turret_breach_fire(edict_t *self)
 		switch (self->sounds)
 		{
 			case 1: // Rocket Launcher
-				Fire_Rocket(owner, start, forward, self->mass, sv_rocket_speed->value, 150, self->mass, false);
+				Fire_Rocket (owner, start, forward, self->mass, sv_rocket_speed->value, 150, self->mass, false);
 				gi.positioned_sound(start, self, CHAN_WEAPON, gi.soundindex("weapons/rocklf1a.wav"), 1, ATTN_NORM, 0);
 				self->delay = level.time + self->wait;
 				break;
 
 			case 2: // Railgun
-				Fire_Rail(owner, start, forward, self->mass, 2);
+				Fire_Rail (owner, start, forward, self->mass, 2, false, 0, 0, 0);
 				gi.positioned_sound(start, self, CHAN_WEAPON, gi.soundindex("weapons/railgf1a.wav"), 1, ATTN_NORM, 0);
 				gi.WriteByte(svc_muzzleflash);
 				gi.WriteShort(self-g_edicts);

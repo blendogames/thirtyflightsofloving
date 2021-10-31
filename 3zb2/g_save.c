@@ -171,6 +171,9 @@ void InitGame (void)
 {
 	gi.dprintf ("==== InitGame ====\n");
 
+	// Knightmare- init lithium cvars
+	InitLithiumVars ();
+
 	bot_team_flag1 = NULL;
 	bot_team_flag2 = NULL;
 //	SetBotFlag1(NULL);

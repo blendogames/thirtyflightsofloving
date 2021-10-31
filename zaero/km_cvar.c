@@ -79,10 +79,6 @@ cvar_t	*sk_hyperblaster_color;  //hyperblaster color- 1=yellow, 2=green, 3=blue,
 cvar_t	*sk_railgun_damage;
 cvar_t	*sk_railgun_damage_dm;
 cvar_t	*sk_railgun_skin;
-cvar_t	*sk_rail_color;
-cvar_t	*sk_rail_color_red;
-cvar_t	*sk_rail_color_green;
-cvar_t	*sk_rail_color_blue;
 
 cvar_t	*sk_bfg_damage;
 cvar_t	*sk_bfg_damage_dm;
@@ -269,10 +265,6 @@ void InitLithiumVars (void)
 	sk_railgun_damage = gi.cvar("sk_railgun_damage", "150", 0);
 	sk_railgun_damage_dm = gi.cvar("sk_railgun_damage_dm", "100", 0);
 	sk_railgun_skin = gi.cvar("sk_railgun_skin", "0", 0);
-	sk_rail_color = gi.cvar("sk_rail_color", "1", 0);
-	sk_rail_color_red = gi.cvar("sk_rail_color_red", "255", 0);
-	sk_rail_color_green = gi.cvar("sk_rail_color_green", "20", 0);
-	sk_rail_color_blue = gi.cvar("sk_rail_color_blue", "20", 0);
 
 	sk_bfg_damage = gi.cvar("sk_bfg_damage", "500", 0);
 	sk_bfg_damage_dm = gi.cvar("sk_bfg_damage_dm", "200", 0);

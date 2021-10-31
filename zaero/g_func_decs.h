@@ -253,6 +253,8 @@ extern int Q_strcasecmp ( const char * s1 , const char * s2 ) ;
 extern int Q_strncasecmp ( const char * s1 , const char * s2 , size_t n ) ;
 extern int Q_stricmp ( const char * s1 , const char * s2 ) ;
 extern void Com_PageInMemory ( byte * buffer , int size ) ;
+extern qboolean Com_ParseColorString ( const char * s , color_t outColor ) ;
+extern int Com_ParseHexDigit ( const char c ) ;
 extern char * COM_Parse ( char * * data_p ) ;
 extern char * va ( char * format , ... ) ;
 extern void Swap_Init ( void ) ;

@@ -1143,6 +1143,57 @@ skipwhite:
 
 
 /*
+=================
+Com_ParseHexDigit
+
+Parse an int value from a single hex digit
+=================
+*/
+int Com_ParseHexDigit (const char c)
+{
+	if ( (c >= '0') && (c <= '9') )
+		return (c - '0');
+	if ( (c >= 'A') && (c <= 'F') )
+		return 10 + (c - 'A');
+	if ( (c >= 'a') && (c <= 'f') )
+		return 10 + (c - 'a');
+	return -1;
+}
+
+
+/*
+=================
+Com_ParseColorString
+
+Parse an RGB color from an rrggbb string
+=================
+*/
+qboolean Com_ParseColorString (const char *s, color_t outColor)
+{
+	int		i, digits[6];
+
+	// catch null string or too short string
+	if ( !s || (strlen(s) < 6) ) {
+		outColor[0] = outColor[1] = outColor[2] = 0;
+		return false;
+	}
+
+	// parse thru all 6 digits
+	for (i = 0; i < 6; i++) {
+		digits[i] = Com_ParseHexDigit(s[i]);
+		if (digits[i] < 0)
+			return false;
+	}
+
+	outColor[0] = ((digits[0] & 0xF) << 4) | (digits[1] & 0xF);
+	outColor[1] = ((digits[2] & 0xF) << 4) | (digits[3] & 0xF);
+	outColor[2] = ((digits[4] & 0xF) << 4) | (digits[5] & 0xF);
+
+	return true;
+}
+
+
+/*
 ===============
 Com_PageInMemory
 

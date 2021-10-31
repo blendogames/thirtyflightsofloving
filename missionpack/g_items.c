@@ -1477,7 +1477,7 @@ qboolean Pickup_Armor (edict_t *ent, edict_t *other)
 	int				newcount;
 	float			salvage;
 	int				salvagecount;
-	int				armor_maximum;
+	int				armor_maximum, old_armor_maximum;
 
 	// set armor cap
 	if (ent->item->tag == ARMOR_JACKET)
@@ -1511,20 +1511,28 @@ qboolean Pickup_Armor (edict_t *ent, edict_t *other)
 	else
 	{
 		// get info on old armor
-		if (old_armor_index == jacket_armor_index)
+		if (old_armor_index == jacket_armor_index) {
 			oldinfo = &jacketarmor_info;
-		else if (old_armor_index == combat_armor_index)
+			old_armor_maximum = sk_max_armor_jacket->value;
+		}
+		else if (old_armor_index == combat_armor_index) {
 			oldinfo = &combatarmor_info;
-		else // (old_armor_index == body_armor_index)
+			old_armor_maximum = sk_max_armor_combat->value;
+		}
+		else { // (old_armor_index == body_armor_index)
 			oldinfo = &bodyarmor_info;
+			old_armor_maximum = sk_max_armor_body->value;
+		}
 
-		//if stroner than current armor (always pick up)
+		// if stronger than current armor (always pick up)
 		if (newinfo->normal_protection > oldinfo->normal_protection)
 		{
 			// calc new armor values
 			salvage = oldinfo->normal_protection / newinfo->normal_protection;
 			salvagecount = salvage * other->client->pers.inventory[old_armor_index];
 			newcount = newinfo->base_count + salvagecount;
+		//	if (newcount > newinfo->max_count)
+		//		newcount = newinfo->max_count;
 			if (newcount > armor_maximum)
 				newcount = armor_maximum;
 
@@ -1540,8 +1548,10 @@ qboolean Pickup_Armor (edict_t *ent, edict_t *other)
 			salvage = newinfo->normal_protection / oldinfo->normal_protection;
 			salvagecount = salvage * newinfo->base_count;
 			newcount = other->client->pers.inventory[old_armor_index] + salvagecount;
-			if (newcount > armor_maximum)
-				newcount = armor_maximum;
+		//	if (newcount > oldinfo->max_count)
+		//		newcount = oldinfo->max_count;
+			if (newcount > old_armor_maximum)
+				newcount = old_armor_maximum;
 
 			// if we're already maxed out then we don't need the new armor
 			if (other->client->pers.inventory[old_armor_index] >= newcount)
@@ -1586,7 +1596,7 @@ void Use_PowerArmor (edict_t *ent, gitem_t *item)
 	int		index;
 
 	if (item == FindItemByClassname("item_power_screen"))
-	{	//if player has an active power shield, deacivate that and activate power screen
+	{	// if player has an active power shield, deacivate that and activate power screen
 		if (ent->flags & FL_POWER_SHIELD)
 		{
 			index = ITEM_INDEX(FindItem("cells"));
@@ -1600,13 +1610,13 @@ void Use_PowerArmor (edict_t *ent, gitem_t *item)
 			gi.sound(ent, CHAN_AUTO, gi.soundindex("misc/power2.wav"), 1, ATTN_NORM, 0);
 			gi.sound(ent, CHAN_AUTO, gi.soundindex("misc/power1.wav"), 1, ATTN_NORM, 0);
 		}
-		//if they have an active power screen, deactivate that
+		// if they have an active power screen, deactivate that
 		else if (ent->flags & FL_POWER_SCREEN)
 		{
 			ent->flags &= ~FL_POWER_SCREEN;
 			gi.sound(ent, CHAN_AUTO, gi.soundindex("misc/power2.wav"), 1, ATTN_NORM, 0);
 		}
-		else //activate power screen
+		else // activate power screen
 		{
 			index = ITEM_INDEX(FindItem("cells"));
 			if (!ent->client->pers.inventory[index])
@@ -1620,7 +1630,7 @@ void Use_PowerArmor (edict_t *ent, gitem_t *item)
 		}
 	}
 	else if (item == FindItemByClassname("item_power_shield"))
-	{	//if player has an active power screen, deacivate that and activate power shield
+	{	// if player has an active power screen, deacivate that and activate power shield
 		if (ent->flags & FL_POWER_SCREEN)
 		{
 			index = ITEM_INDEX(FindItem("cells"));
@@ -1634,13 +1644,13 @@ void Use_PowerArmor (edict_t *ent, gitem_t *item)
 			gi.sound(ent, CHAN_AUTO, gi.soundindex("misc/power2.wav"), 1, ATTN_NORM, 0);
 			gi.sound(ent, CHAN_AUTO, gi.soundindex("misc/power1.wav"), 1, ATTN_NORM, 0);
 		}
-		//if they have an active power shield, deactivate it
+		// if they have an active power shield, deactivate it
 		else if (ent->flags & FL_POWER_SHIELD)
 		{
 			ent->flags &= ~FL_POWER_SHIELD;
 			gi.sound(ent, CHAN_AUTO, gi.soundindex("misc/power2.wav"), 1, ATTN_NORM, 0);
 		}
-		else //activate power shield
+		else // activate power shield
 		{
 			index = ITEM_INDEX(FindItem("cells"));
 			if (!ent->client->pers.inventory[index])
@@ -1668,7 +1678,7 @@ qboolean Pickup_PowerArmor (edict_t *ent, edict_t *other)
 			SetRespawn (ent, ent->item->quantity);
 		// auto-use for DM only if we didn't already have one
 		if ( !quantity
-			//Knightmare- don't switch to power screen if we already have a power shield active
+			// Knightmare- don't switch to power screen if we already have a power shield active
 			&& !(ent->item == FindItemByClassname("item_power_screen") && (other->flags & FL_POWER_SHIELD)))
 			ent->item->use (other, ent->item);
 	}
@@ -1683,9 +1693,10 @@ void Drop_PowerArmor (edict_t *ent, gitem_t *item)
 		if ((ent->flags & FL_POWER_SHIELD) && (ent->client->pers.inventory[ITEM_INDEX(item)] == 1))
 			Use_PowerArmor (ent, item);
 	}
-	else
+	else {
 		if ((ent->flags & FL_POWER_SCREEN) && (ent->client->pers.inventory[ITEM_INDEX(item)] == 1))
 			Use_PowerArmor (ent, item);
+	}
 	Drop_General (ent, item);
 }
 
@@ -3079,11 +3090,7 @@ gitem_t	itemlist[] =
 		WEAP_BFG,
 		NULL,
 		0,
-#ifdef KMQUAKE2_ENGINE_MOD
 		"sprites/s_bfg1.sp2 sprites/s_bfg2.sp2 sprites/s_bfg3.sp2 weapons/bfg__f1y.wav weapons/bfg__l1a.wav weapons/bfg__x1b.wav weapons/bfg_hum.wav" // precache
-#else
-		"sprites/s_bfg1.sp2 sprites/s_bfg2.sp2 sprites/s_bfg3.sp2 weapons/bfg__f1y.wav weapons/bfg__l1a.wav weapons/bfg__x1b.wav" // precache
-#endif
 	},
 
 // 26
@@ -3155,7 +3162,11 @@ gitem_t	itemlist[] =
 		WEAP_SHOCKWAVE,				// visible weapon
 		NULL,
 		0,
+#ifdef KMQUAKE2_ENGINE_MOD
 		"weapons/shockactive.wav weapons/shock_hum.wav weapons/shockfire.wav weapons/shockaway.wav weapons/shockhit.wav weapons/shockexp.wav models/objects/shocksphere/tris.md2 models/objects/shockfield/tris.md2 sprites/s_trap.sp2"
+#else
+		"weapons/shockfire.wav weapons/shockhit.wav weapons/shockexp.wav models/objects/shocksphere/tris.md2 models/objects/shockfield/tris.md2 sprites/s_trap.sp2"
+#endif
 	},
 
 // 29	SKWiD MOD

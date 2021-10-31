@@ -181,21 +181,21 @@ extern	cvar_t	*allow_techdrop;
 extern	cvar_t	*allow_techpickup;
 
 extern	cvar_t	*tech_flags;         // determines which techs will show in the game, add these:
-//                                   1 = resist, 2 = strength, 4 = haste, 8 = regen, 16 = vampire, 32 = ammogen
+									 //  1 = resist, 2 = strength, 4 = haste, 8 = regen, 16 = vampire, 32 = ammogen
 extern	cvar_t	*tech_spawn;         // chance a rune will spawn from another item respawning
 extern	cvar_t	*tech_perplayer;     // sets techs per player that will appear in map
 extern	cvar_t	*tech_life;          // seconds a rune will stay around before disappearing
 extern	cvar_t	*tech_min;           // sets minimum number of techs to be in the game
 extern	cvar_t	*tech_max;           // sets maximum number of techs to be in the game
 
-extern	cvar_t	*tech_haste;		// what should I use this for?
+//extern	cvar_t	*tech_haste;	 // what should I use this for?
 extern	cvar_t	*tech_resist;        // sets how much damage is divided by with resist rune
 extern	cvar_t	*tech_strength;      // sets how much damage is multiplied by with strength rune
-extern	cvar_t	*tech_regen;         // sets how fast health is gained back
+//extern	cvar_t	*tech_regen;     // sets how fast health is gained back
 extern	cvar_t	*tech_regen_armor;
-extern	cvar_t	*tech_regen_health_max;      // sets maximum health that can be gained from regen rune
+extern	cvar_t	*tech_regen_health_max;		// sets maximum health that can be gained from regen rune
 extern	cvar_t	*tech_regen_armor_max;      // sets maximum armor that can be gained from regen rune
-extern	cvar_t	*tech_regen_armor_always;      // sets whether armor should be regened regardless of if currently held
+extern	cvar_t	*tech_regen_armor_always;   // sets whether armor should be regened regardless of if currently held
 extern	cvar_t	*tech_vampire;       // sets percentage of health gained from damage inflicted
 extern	cvar_t	*tech_vampiremax;    // sets maximum health that can be gained from vampire rune
 // end CTF stuff

@@ -579,11 +579,15 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 //ZOID
 		if (ctf->value)
 		{
-			CTFPlayerResetGrapple(self);
-			CTFDeadDropFlag(self);
-			CTFDeadDropTech(self);
+			CTFPlayerResetGrapple (self);
+			CTFDeadDropFlag (self);
+			CTFDeadDropTech (self);
 		}
 //ZOID
+		// Knightmare added- drop ammogen backpack
+		if (!OnSameTeam(self, attacker))
+			CTFApplyAmmogen (attacker, self);
+
 		if (deathmatch->value && !(self->svflags & SVF_MONSTER))
 			Cmd_Help_f (self);		// show scores
 	}
@@ -720,6 +724,149 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 
 //=======================================================================
 
+void SwitchToBestStartWeapon (gclient_t *client)
+{
+	if (!client)
+		return;
+
+	if ( client->pers.inventory[slugs_index]
+		&&  client->pers.inventory[ITEM_INDEX(FindItem("railgun"))] )
+	{
+		client->pers.weapon = FindItem ("railgun");
+		return;
+	}
+	if ( client->pers.inventory[magslug_index]
+		&& client->pers.inventory[ITEM_INDEX (FindItem ("phalanx"))])
+	{
+		client->pers.weapon = FindItem ("phalanx");	
+		return;
+	}
+	if ( (client->pers.inventory[cells_index] >= 2)
+		&& client->pers.inventory[ITEM_INDEX (FindItem ("Ionripper"))])
+	{
+		client->pers.weapon = FindItem ("Ionripper");	
+		return;
+	}
+/*	if ( (client->pers.inventory[cells_index] >= 2)
+		&&  client->pers.inventory[ITEM_INDEX(FindItem("Plasma Beam"))] )
+	{
+		client->pers.weapon = FindItem ("Plasma Beam");
+		return;
+	} */
+	if ( client->pers.inventory[cells_index]
+		&&  client->pers.inventory[ITEM_INDEX(FindItem("hyperblaster"))] )
+	{
+		client->pers.weapon = FindItem ("hyperblaster");
+		return;
+	}
+/*	if ( client->pers.inventory[flechettes_index]
+		&&  client->pers.inventory[ITEM_INDEX(FindItem("ETF Rifle"))] )
+	{
+		client->pers.weapon = FindItem ("ETF Rifle");
+		return;
+	}
+	if ( client->pers.inventory[disruptors_index]
+		&&  client->pers.inventory[ITEM_INDEX(FindItem("Disintegrator"))] )
+	{
+		client->pers.weapon = FindItem ("Disintegrator");
+		return;
+	} */
+	if ( client->pers.inventory[bullets_index]
+		&&  client->pers.inventory[ITEM_INDEX(FindItem("chaingun"))] )
+	{
+		client->pers.weapon = FindItem ("chaingun");
+		return;
+	}
+	if ( client->pers.inventory[bullets_index]
+		&&  client->pers.inventory[ITEM_INDEX(FindItem("machinegun"))] )
+	{
+		client->pers.weapon = FindItem ("machinegun");
+		return;
+	}
+	if ( client->pers.inventory[shells_index] >= 2
+		&&  client->pers.inventory[ITEM_INDEX(FindItem("super shotgun"))] )
+	{
+		client->pers.weapon = FindItem ("super shotgun");
+		return;
+	}
+	if ( client->pers.inventory[shells_index]
+		&&  client->pers.inventory[ITEM_INDEX(FindItem("shotgun"))] )
+	{
+		client->pers.weapon = FindItem ("shotgun");
+		return;
+	}
+
+	client->pers.weapon = FindItem ("blaster");
+}
+
+void SelectStartWeapon (gclient_t *client)
+{
+	gitem_t		*item;
+
+//test
+//	item = FindItem("Zig Flag");
+//	client->pers.selected_item = ITEM_INDEX(item);
+//	client->pers.inventory[client->pers.selected_item] = 1;
+//	item = FindItem("Trap");
+//	client->pers.inventory[ITEM_INDEX(item)] = 100;
+//test		
+
+	item = FindItem("Blaster");		// was Fdi_BLASTER
+	client->pers.selected_item = ITEM_INDEX(item);
+	client->pers.inventory[client->pers.selected_item] = 1;
+//	client->pers.weapon = item;
+//ZOID
+	client->pers.lastweapon = item;
+//ZOID
+
+//ZOID
+	item = FindItem("Grapple");
+	if (ctf->value)
+		client->pers.inventory[ITEM_INDEX(item)] = 1; //ponpoko
+//ZOID
+
+	// Knightmare- DM start values
+	if (deathmatch->value)
+	{
+		client->pers.inventory[ITEM_INDEX(FindItem("Shells"))] = sk_dm_start_shells->value;
+		client->pers.inventory[ITEM_INDEX(FindItem("Bullets"))] = sk_dm_start_bullets->value;
+		client->pers.inventory[ITEM_INDEX(FindItem("Rockets"))] = sk_dm_start_rockets->value;
+		client->pers.inventory[ITEM_INDEX(FindItem("Grenades"))] = sk_dm_start_grenades->value;
+		client->pers.inventory[ITEM_INDEX(FindItem("Cells"))] = sk_dm_start_cells->value;
+		client->pers.inventory[ITEM_INDEX(FindItem("Slugs"))] = sk_dm_start_slugs->value;
+		client->pers.inventory[ITEM_INDEX(FindItem("Mag Slug"))] = sk_dm_start_magslugs->value;
+		client->pers.inventory[ITEM_INDEX(FindItem("Trap"))] = sk_dm_start_traps->value;
+	/*
+		client->pers.inventory[ITEM_INDEX(FindItem("Flechettes"))] = sk_dm_start_flechettes->value;
+		client->pers.inventory[ITEM_INDEX(FindItem("Disruptors"))] = sk_dm_start_rounds->value;
+		client->pers.inventory[ITEM_INDEX(FindItem("Prox"))] = sk_dm_start_prox->value;
+		client->pers.inventory[ITEM_INDEX(FindItem("Tesla"))] = sk_dm_start_tesla->value;
+		client->pers.inventory[ITEM_INDEX(FindItem("Shocksphere"))] = sk_dm_start_shocksphere->value;
+	*/
+		client->pers.inventory[ITEM_INDEX(FindItem("Shotgun"))] = sk_dm_start_shotgun->value;
+		client->pers.inventory[ITEM_INDEX(FindItem("Super Shotgun"))] = sk_dm_start_sshotgun->value;
+		client->pers.inventory[ITEM_INDEX(FindItem("Machinegun"))] = sk_dm_start_machinegun->value;
+		client->pers.inventory[ITEM_INDEX(FindItem("Chaingun"))] = sk_dm_start_chaingun->value;
+		client->pers.inventory[ITEM_INDEX(FindItem("Grenade Launcher"))] = sk_dm_start_grenadelauncher->value;
+		client->pers.inventory[ITEM_INDEX(FindItem("Rocket Launcher"))] = sk_dm_start_rocketlauncher->value;
+		client->pers.inventory[ITEM_INDEX(FindItem("HyperBlaster"))] = sk_dm_start_hyperblaster->value;
+		client->pers.inventory[ITEM_INDEX(FindItem("Railgun"))] = sk_dm_start_railgun->value;
+		client->pers.inventory[ITEM_INDEX(FindItem("BFG10K"))] = sk_dm_start_bfg->value;
+		client->pers.inventory[ITEM_INDEX(FindItem("Ionripper"))] = sk_dm_start_ionripper->value;
+		client->pers.inventory[ITEM_INDEX(FindItem("Phalanx"))] = sk_dm_start_phalanx->value;
+	/*
+		client->pers.inventory[ITEM_INDEX(FindItem("ETF Rifle"))] = sk_dm_start_etfrifle->value;
+		client->pers.inventory[ITEM_INDEX(FindItem("Prox Launcher"))] = sk_dm_start_proxlauncher->value;
+		client->pers.inventory[ITEM_INDEX(FindItem("Plasma Beam"))] = sk_dm_start_plasmabeam->value;
+		client->pers.inventory[ITEM_INDEX(FindItem("Disintegrator"))] = sk_dm_start_disruptor->value;
+		client->pers.inventory[ITEM_INDEX(FindItem("Chainfist"))] = sk_dm_start_chainfist->value;
+		client->pers.inventory[ITEM_INDEX(FindItem("Shockwave"))] = sk_dm_start_shockwave->value;
+		client->pers.inventory[ITEM_INDEX(FindItem(PLASMA_PICKUP_NAME))] = sk_dm_start_plasmarifle->value;
+	*/
+		SwitchToBestStartWeapon (client);
+	}
+}
+
 /*
 ==============
 InitClientPersistant
@@ -730,50 +877,38 @@ but is called after each death and level change in deathmatch
 */
 void InitClientPersistant (gclient_t *client)
 {
-	gitem_t		*item;
+//	gitem_t		*item;
 
 	memset (&client->pers, 0, sizeof(client->pers));
 
-//test
-//	item = FindItem("Zig Flag");
-//	client->pers.selected_item = ITEM_INDEX(item);
-//	client->pers.inventory[client->pers.selected_item] = 1;
-//	item = FindItem("Trap");
-//	client->pers.inventory[ITEM_INDEX(item)] = 100;
-//test		
-
-	item = /*Fdi_BLASTER;//*/FindItem("Blaster");
-	client->pers.selected_item = ITEM_INDEX(item);
-	client->pers.inventory[client->pers.selected_item] = 1;
-
-	client->pers.weapon = item;
-//ZOID
-	client->pers.lastweapon = item;
-//ZOID
-
-//ZOID
-	item = FindItem("Grapple");
-	if (ctf->value)	client->pers.inventory[ITEM_INDEX(item)] = 1; //ponpoko
-//ZOID
+	SelectStartWeapon (client);
 
 	client->pers.health			= 100;
-	client->pers.max_health		= 100;
+	if (deathmatch->value)
+		client->pers.max_health		= sk_max_health_dm->value;
+	else
+		client->pers.max_health		= sk_max_health->value;
+	client->pers.max_fc_health	= sk_max_foodcube_health->value;
 
-	client->pers.max_bullets	= 200;
-	client->pers.max_shells		= 100;
-	client->pers.max_rockets	= 50;
-	client->pers.max_grenades	= 50;
-	client->pers.max_cells		= 200;
-	client->pers.max_slugs		= 50;
+	client->pers.max_bullets	= sk_max_bullets->value;	// was 200
+	client->pers.max_shells		= sk_max_shells->value;		// was 100
+	client->pers.max_rockets	= sk_max_rockets->value;	// was 50
+	client->pers.max_grenades	= sk_max_grenades->value;	// was 50
+	client->pers.max_cells		= sk_max_cells->value;		// was 200
+	client->pers.max_slugs		= sk_max_slugs->value;		// was 50
 
 	// RAFAEL
-	client->pers.max_magslug	= 50;
-	client->pers.max_trap		= 5;
+	client->pers.max_magslug	= sk_max_magslugs->value;	// was 50
+	client->pers.max_trap		= sk_max_traps->value;		// was 5
 
 	// Knightmare added
 	client->pers.max_armor		= 200;
 
 	client->pers.connected = true;
+
+	// Kngihtmare- custom client colors
+	Vector4Set (client->pers.color1, 255, 255, 255, 0);
+	Vector4Set (client->pers.color2, 255, 255, 255, 0);
 }
 
 
@@ -820,7 +955,8 @@ void SaveClientData (void)
 			continue;
 		game.clients[i].pers.health = ent->health;
 		game.clients[i].pers.max_health = ent->max_health;
-		game.clients[i].pers.powerArmorActive = (ent->flags & FL_POWER_ARMOR);
+	//	game.clients[i].pers.powerArmorActive = (ent->flags & (FL_POWER_SHIELD|FL_POWER_SCREEN));
+		game.clients[i].pers.savedFlags = (ent->flags & (FL_GODMODE|FL_NOTARGET|FL_POWER_SHIELD|FL_POWER_SCREEN));
 		if (coop->value)
 			game.clients[i].pers.score = ent->client->resp.score;
 	}
@@ -830,8 +966,9 @@ void FetchClientEntData (edict_t *ent)
 {
 	ent->health = ent->client->pers.health;
 	ent->max_health = ent->client->pers.max_health;
-	if (ent->client->pers.powerArmorActive)
-		ent->flags |= FL_POWER_ARMOR;
+//	if (ent->client->pers.powerArmorActive)
+//		ent->flags |= FL_POWER_ARMOR;
+	ent->flags |= ent->client->pers.savedFlags;
 	if (coop->value)
 		ent->client->resp.score = ent->client->pers.score;
 }
@@ -1341,7 +1478,7 @@ void PutClientInServer (edict_t *ent)
 	memcpy (&client->zc,&zgcl,sizeof(zgcl_t));
 	client->pers = saved;
 	if (client->pers.health <= 0)
-		InitClientPersistant(client);
+		InitClientPersistant (client);
 	client->resp = resp;
 
 	// copy some data from the client to the entity
@@ -1400,6 +1537,14 @@ void PutClientInServer (edict_t *ent)
 	}
 
 	client->ps.gunindex = gi.modelindex(client->pers.weapon->view_model);
+
+	// Knightmare- Server-side speed control stuff
+#ifdef KMQUAKE2_ENGINE_MOD
+	client->ps.maxspeed = player_max_speed->value;
+	client->ps.duckspeed = player_crouch_speed->value;
+	client->ps.accel = player_accel->value;
+	client->ps.stopspeed = player_stopspeed->value;
+#endif
 
 	// clear entity state values
 	ent->s.effects = 0;
@@ -1631,6 +1776,19 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo)
 		ent->client->pers.hand = atoi(s);
 	}
 
+	// Knightmare- custom colors
+	s = Info_ValueForKey (userinfo, "color1");
+	if (strlen(s) >= 6) {
+		if ( Com_ParseColorString (s, ent->client->pers.color1) )
+			ent->client->pers.color1[3] = 255;	// mark as set
+	}
+
+	s = Info_ValueForKey (userinfo, "color2");
+	if (strlen(s) >= 6) {
+		if ( Com_ParseColorString (s, ent->client->pers.color2) )
+			ent->client->pers.color2[3] = 255;	// mark as set
+	}
+
 	// save off the userinfo in case we want to check something later
 	strncpy (ent->client->pers.userinfo, userinfo, sizeof(ent->client->pers.userinfo)-1);
 }
@@ -1740,8 +1898,8 @@ void ClientDisconnect (edict_t *ent)
 
 	gi.bprintf (PRINT_HIGH, "%s disconnected\n", ent->client->pers.netname);
 //ZOID
-	CTFDeadDropFlag(ent);
-	CTFDeadDropTech(ent);
+	CTFDeadDropFlag (ent);
+	CTFDeadDropTech (ent);
 //ZOID
 
 	// send effect
@@ -1916,9 +2074,8 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	byte		impulse;
 	pmove_t		pm;
 	float		ground_speed;
-
-	vec3_t	min,max,v,vv;
-	float x;
+	vec3_t		min,max,v,vv;
+	float		x;
 	trace_t		rs_trace;
 
 	static	edict_t		*old_ground;
@@ -1939,6 +2096,14 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	else
 		ent->client->ps.pmove.pm_flags &= ~PMF_NO_PREDICTION;
 	// end Knightmare
+
+	// Knightmare- Server-side speed control stuff
+#ifdef KMQUAKE2_ENGINE_MOD
+	ent->client->ps.maxspeed = player_max_speed->value;
+	ent->client->ps.duckspeed = player_crouch_speed->value;
+	ent->client->ps.accel = player_accel->value;
+	ent->client->ps.stopspeed = player_stopspeed->value;
+#endif
 
 	impulse = ucmd->impulse;
 

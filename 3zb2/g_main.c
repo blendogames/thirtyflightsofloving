@@ -513,6 +513,11 @@ void G_RunFrame (void)
 		return;
 	}
 
+#if 0
+	if ( use_techs->value || (ctf->value && !((int)dmflags->value & DF_CTF_NO_TECH)) )
+		CheckNumTechs ();
+#endif
+
 //
 // Bot Spawning
 //

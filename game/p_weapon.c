@@ -769,13 +769,13 @@ void weapon_grenade_fire (edict_t *ent, qboolean held)
 	vec3_t	offset;
 	vec3_t	forward, right;
 	vec3_t	start;
-	int		damage = sk_hand_grenade_damage->value;
+	int		damage = (int)sk_hand_grenade_damage->value;
 	float	timer;
 	int		speed;
 	float	radius;
 
-	radius = sk_hand_grenade_radius->value; //was damage + 40
-	radius = damage+40;
+	radius = sk_hand_grenade_radius->value;	// was damage + 40
+	radius = damage + 40;
 	if (is_quad)
 		damage *= 4;
 
@@ -933,10 +933,10 @@ void weapon_grenadelauncher_fire (edict_t *ent, qboolean altfire)
 	vec3_t	offset;
 	vec3_t	forward, right;
 	vec3_t	start;
-	int		damage = sk_grenade_damage->value;
+	int		damage = (int)sk_grenade_damage->value;
 	float	radius;
 
-	radius = sk_grenade_radius->value; // damage+40;
+	radius = sk_grenade_radius->value; // damage + 40
 	if (is_quad)
 		damage *= 4;
 
@@ -947,9 +947,9 @@ void weapon_grenadelauncher_fire (edict_t *ent, qboolean altfire)
 	VectorScale (forward, -2, ent->client->kick_origin);
 	ent->client->kick_angles[0] = -1;
 
-	fire_grenade (ent, start, forward, damage, sk_grenade_speed->value, 2.5, radius, altfire);
+	fire_grenade (ent, start, forward, damage, (int)sk_grenade_speed->value, 2.5, radius, altfire);
 	// temporary crap to test grenade bounce
-//	fire_grenade (ent, start, forward, damage, sk_grenade_speed->value, 25, radius);
+//	fire_grenade (ent, start, forward, damage, (int)sk_grenade_speed->value, 25, radius);
 
 	gi.WriteByte (svc_muzzleflash);
 	gi.WriteShort (ent-g_edicts);
@@ -1032,8 +1032,8 @@ void Weapon_RocketLauncher_Fire (edict_t *ent, qboolean altfire)
 	float	damage_radius;
 	int		radius_damage;
 
-	damage = sk_rocket_damage->value + (int)(random() * sk_rocket_damage2->value);
-	radius_damage = sk_rocket_rdamage->value;
+	damage = (int)sk_rocket_damage->value + (int)(random() * (int)sk_rocket_damage2->value);
+	radius_damage = (int)sk_rocket_rdamage->value;
 	damage_radius = sk_rocket_radius->value;
 	if (is_quad)
 	{
@@ -1060,10 +1060,10 @@ void Weapon_RocketLauncher_Fire (edict_t *ent, qboolean altfire)
 		}
 		
 		target = rocket_target(ent, start, forward);
-		fire_rocket (ent, start, forward, damage, sk_rocket_speed->value, damage_radius, radius_damage, target);
+		fire_rocket (ent, start, forward, damage, (int)sk_rocket_speed->value, damage_radius, radius_damage, target);
 	}
 	else
-		fire_rocket (ent, start, forward, damage, sk_rocket_speed->value, damage_radius, radius_damage, NULL);
+		fire_rocket (ent, start, forward, damage, (int)sk_rocket_speed->value, damage_radius, radius_damage, NULL);
 
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);
@@ -1126,9 +1126,9 @@ void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, in
 	ent->client->kick_angles[0] = -1;
 
 	if (!hyper)
-		fire_blaster (ent, start, forward, damage, sk_blaster_speed->value, effect, hyper, color);
+		fire_blaster (ent, start, forward, damage, (int)sk_blaster_speed->value, effect, hyper, color);
 	else
-		fire_blaster (ent, start, forward, damage, sk_hyperblaster_speed->value, effect, hyper, color);
+		fire_blaster (ent, start, forward, damage, (int)sk_hyperblaster_speed->value, effect, hyper, color);
 
 	// Knightmare- select muzzle flash
 	if (hyper)
@@ -1195,11 +1195,11 @@ void Weapon_Blaster_Fire (edict_t *ent, qboolean altfire)
 	int		color;
 
 	if (deathmatch->value)
-		damage = sk_blaster_damage_dm->value;
+		damage = (int)sk_blaster_damage_dm->value;
 	else
-		damage = sk_blaster_damage->value;
+		damage = (int)sk_blaster_damage->value;
 
-	// select color
+	// selectable color
 	color = (int)sk_blaster_color->value;
 	// blaster_color could be any other value, so clamp it
 	if ( ((int)sk_blaster_color->value < 1) || ((int)sk_blaster_color->value > 4) )
@@ -1269,7 +1269,7 @@ void Weapon_HyperBlaster_Fire (edict_t *ent, qboolean altfire)
 			offset[1] = 0;
 			offset[2] = 4 * cos(rotation);
 
-			// Knightmare- select color
+			// Knightmare- selectable color
 			color = (int)sk_hyperblaster_color->value;
 			// hyperblaster_color could be any other value, so clamp it
 			if ( ((int)sk_hyperblaster_color->value < 1) || ((int)sk_hyperblaster_color->value > 4) )
@@ -1295,9 +1295,9 @@ void Weapon_HyperBlaster_Fire (edict_t *ent, qboolean altfire)
 				effect = 0;
 
 			if (deathmatch->value)
-				damage = sk_hyperblaster_damage_dm->value;
+				damage = (int)sk_hyperblaster_damage_dm->value;
 			else
-				damage = sk_hyperblaster_damage->value;
+				damage = (int)sk_hyperblaster_damage->value;
 			Blaster_Fire (ent, offset, damage, true, effect, color);
 			if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
 				ent->client->pers.inventory[ent->client->ammo_index]--;
@@ -1350,7 +1350,7 @@ void Machinegun_Fire (edict_t *ent, qboolean altfire)
 	vec3_t		start;
 	vec3_t		forward, right;
 	vec3_t		angles;
-	int			damage = sk_machinegun_damage->value;
+	int			damage = (int)sk_machinegun_damage->value;
 	int			kick = 2;
 	vec3_t		offset;
 
@@ -1403,9 +1403,9 @@ void Machinegun_Fire (edict_t *ent, qboolean altfire)
 	// get start / end positions
 	VectorAdd (ent->client->v_angle, ent->client->kick_angles, angles);
 	AngleVectors (angles, forward, right, NULL);
-	VectorSet(offset, 0, 8, ent->viewheight-8);
+	VectorSet (offset, 0, 8, ent->viewheight-8);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
-	fire_bullet (ent, start, forward, damage, kick, sk_machinegun_hspread->value, sk_machinegun_vspread->value, MOD_MACHINEGUN);
+	fire_bullet (ent, start, forward, damage, kick, (int)sk_machinegun_hspread->value, (int)sk_machinegun_vspread->value, MOD_MACHINEGUN);
 
 	gi.WriteByte (svc_muzzleflash);
 	gi.WriteShort (ent-g_edicts);
@@ -1450,9 +1450,9 @@ void Chaingun_Fire (edict_t *ent, qboolean altfire)
 	int			kick = 2;
 
 	if (deathmatch->value)
-		damage = sk_chaingun_damage_dm->value;
+		damage = (int)sk_chaingun_damage_dm->value;
 	else
-		damage = sk_chaingun_damage->value;
+		damage = (int)sk_chaingun_damage->value;
 
 	if (ent->client->ps.gunframe == 5)
 		gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/chngnu1a.wav"), 1, ATTN_IDLE, 0);
@@ -1542,7 +1542,7 @@ void Chaingun_Fire (edict_t *ent, qboolean altfire)
 		VectorSet(offset, 0, r, u + ent->viewheight-8);
 		P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 
-		fire_bullet (ent, start, forward, damage, kick, sk_chaingun_hspread->value, sk_chaingun_vspread->value, MOD_CHAINGUN);
+		fire_bullet (ent, start, forward, damage, kick, (int)sk_chaingun_hspread->value, (int)sk_chaingun_vspread->value, MOD_CHAINGUN);
 	}
 
 	// send muzzle flash
@@ -1580,7 +1580,7 @@ void weapon_shotgun_fire (edict_t *ent, qboolean altfire)
 	vec3_t		start;
 	vec3_t		forward, right;
 	vec3_t		offset;
-	int			damage = sk_shotgun_damage->value;
+	int			damage = (int)sk_shotgun_damage->value;
 	int			kick = 8;
 
 	if (ent->client->ps.gunframe == 9)
@@ -1604,9 +1604,9 @@ void weapon_shotgun_fire (edict_t *ent, qboolean altfire)
 	}
 
 	if (deathmatch->value)
-		fire_shotgun (ent, start, forward, damage, kick, sk_shotgun_hspread->value, sk_shotgun_vspread->value, sk_shotgun_count->value, MOD_SHOTGUN);
+		fire_shotgun (ent, start, forward, damage, kick, (int)sk_shotgun_hspread->value, (int)sk_shotgun_vspread->value, (int)sk_shotgun_count->value, MOD_SHOTGUN);
 	else
-		fire_shotgun (ent, start, forward, damage, kick, sk_shotgun_hspread->value, sk_shotgun_vspread->value, sk_shotgun_count->value, MOD_SHOTGUN);
+		fire_shotgun (ent, start, forward, damage, kick, (int)sk_shotgun_hspread->value, (int)sk_shotgun_vspread->value, (int)sk_shotgun_count->value, MOD_SHOTGUN);
 
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);
@@ -1636,7 +1636,7 @@ void weapon_supershotgun_fire (edict_t *ent, qboolean altfire)
 	vec3_t		forward, right;
 	vec3_t		offset;
 	vec3_t		v;
-	int			damage = sk_sshotgun_damage->value;
+	int			damage = (int)sk_sshotgun_damage->value;
 	int			kick = 12;
 
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
@@ -1657,10 +1657,10 @@ void weapon_supershotgun_fire (edict_t *ent, qboolean altfire)
 	v[YAW]   = ent->client->v_angle[YAW] - 5;
 	v[ROLL]  = ent->client->v_angle[ROLL];
 	AngleVectors (v, forward, NULL, NULL);
-	fire_shotgun (ent, start, forward, damage, kick, sk_sshotgun_hspread->value, sk_sshotgun_vspread->value, sk_sshotgun_count->value/2, MOD_SSHOTGUN);
+	fire_shotgun (ent, start, forward, damage, kick, (int)sk_sshotgun_hspread->value, (int)sk_sshotgun_vspread->value, (int)sk_sshotgun_count->value/2, MOD_SSHOTGUN);
 	v[YAW]   = ent->client->v_angle[YAW] + 5;
 	AngleVectors (v, forward, NULL, NULL);
-	fire_shotgun (ent, start, forward, damage, kick, sk_sshotgun_hspread->value, sk_sshotgun_vspread->value, sk_sshotgun_count->value/2, MOD_SSHOTGUN);
+	fire_shotgun (ent, start, forward, damage, kick, (int)sk_sshotgun_hspread->value, (int)sk_sshotgun_vspread->value, (int)sk_sshotgun_count->value/2, MOD_SSHOTGUN);
 
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);
@@ -1705,12 +1705,12 @@ void weapon_railgun_fire (edict_t *ent, qboolean altfire)
 
 	if (deathmatch->value)
 	{	// normal damage is too extreme in dm
-		damage = sk_railgun_damage_dm->value;
+		damage = (int)sk_railgun_damage_dm->value;
 		kick = 200;
 	}
 	else
 	{
-		damage = sk_railgun_damage->value;
+		damage = (int)sk_railgun_damage->value;
 		kick = 250;
 	}
 
@@ -1791,9 +1791,9 @@ void weapon_bfg_fire (edict_t *ent, qboolean altfire)
 	float	damage_radius = sk_bfg_radius->value;
 
 	if (deathmatch->value)
-		damage = sk_bfg_damage_dm->value;
+		damage = (int)sk_bfg_damage_dm->value;
 	else
-		damage = sk_bfg_damage->value;
+		damage = (int)sk_bfg_damage->value;
 
 	if (ent->client->ps.gunframe == 9)
 	{
@@ -1831,7 +1831,7 @@ void weapon_bfg_fire (edict_t *ent, qboolean altfire)
 
 	VectorSet(offset, 8, 8, ent->viewheight-8);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
-	fire_bfg (ent, start, forward, damage, sk_bfg_speed->value, damage_radius);
+	fire_bfg (ent, start, forward, damage, (int)sk_bfg_speed->value, damage_radius);
 
 	ent->client->ps.gunframe++;
 
@@ -1862,7 +1862,7 @@ void kick_attack (edict_t *ent)
 	vec3_t		start;
 	vec3_t		forward, right;
 	vec3_t		offset;
-	int			damage = sk_jump_kick_damage->value;
+	int			damage = (int)sk_jump_kick_damage->value;
 	int			kick = 300;
 	trace_t		tr;
 	vec3_t		end;

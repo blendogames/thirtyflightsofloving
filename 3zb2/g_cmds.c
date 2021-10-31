@@ -1166,6 +1166,8 @@ void ClientCommand (edict_t *ent)
 	} else if (Q_stricmp(cmd, "id") == 0) {
 		CTFID_f (ent);
 	}
+//	else if (Q_stricmp(cmd, "techcount") == 0)
+//		Cmd_TechCount_f (ent);
 //ZOID
 	else	// anything that doesn't match a command will be a chat
 		Cmd_Say_f (ent, false, true);

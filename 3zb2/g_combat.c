@@ -358,6 +358,9 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 	damage = CTFApplyStrength(attacker, damage);
 //ZOID
 
+	if (!OnSameTeam(targ, attacker))
+		CTFApplyVampire (attacker, damage);
+
 	if (targ->flags & FL_NO_KNOCKBACK)
 		knockback = 0;
 

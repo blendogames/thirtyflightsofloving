@@ -1417,7 +1417,7 @@ void Fire_Bullet(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kic
 void Fire_Shotgun(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, int hspread, int vspread, int count, int mod);
 void Fire_Blaster(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, int effect);	//CW
 void Fire_Rocket(edict_t *self, vec3_t start, vec3_t dir, int damage, float speed, float damage_radius, int radius_damage, qboolean guided);
-void Fire_Rail(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick);
+void Fire_Rail(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, qboolean useColor, int red, int green, int blue);
 
 //CW++
 void Rocket_Touch(edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf);
@@ -1610,6 +1610,10 @@ typedef struct
 
 	gitem_t		*weapon;
 	gitem_t		*lastweapon;																		//CW
+
+	// Knightmare- Custom client colors
+	color_t		color1;
+	color_t		color2;
 } client_persistant_t;
 
 // client data that stays across deathmatch respawns

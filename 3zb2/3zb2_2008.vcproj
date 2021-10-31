@@ -155,6 +155,7 @@
 				AssemblerListingLocation=".\x64\Release/"
 				ObjectFile=".\x64\Release/"
 				ProgramDataBaseFileName=".\x64\Release/"
+				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DisableSpecificWarnings="4996"
 			/>
@@ -1175,6 +1176,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\km_cvar.c"
+				>
+			</File>
+			<File
 				RelativePath="m_move.c"
 				>
 				<FileConfiguration
@@ -1476,11 +1481,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\g_ctf.h"
+				>
+			</File>
+			<File
 				RelativePath="g_local.h"
 				>
 			</File>
 			<File
 				RelativePath="game.h"
+				>
+			</File>
+			<File
+				RelativePath=".\km_cvar.h"
 				>
 			</File>
 			<File

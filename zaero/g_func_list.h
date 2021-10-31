@@ -253,6 +253,8 @@
 {"Q_strncasecmp", (byte *)Q_strncasecmp},
 {"Q_stricmp", (byte *)Q_stricmp},
 {"Com_PageInMemory", (byte *)Com_PageInMemory},
+{"Com_ParseColorString", (byte *)Com_ParseColorString},
+{"Com_ParseHexDigit", (byte *)Com_ParseHexDigit},
 {"COM_Parse", (byte *)COM_Parse},
 {"va", (byte *)va},
 {"Swap_Init", (byte *)Swap_Init},

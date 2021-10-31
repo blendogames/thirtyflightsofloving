@@ -907,7 +907,7 @@ qboolean Pickup_Armor (edict_t *ent, edict_t *other)
 	int				newcount;
 	float			salvage;
 	int				salvagecount;
-	int				armor_maximum;
+	int				armor_maximum, old_armor_maximum;
 
 	// set armor cap
 	if (ent->item->tag == ARMOR_JACKET)
@@ -941,19 +941,28 @@ qboolean Pickup_Armor (edict_t *ent, edict_t *other)
 	else
 	{
 		// get info on old armor
-		if (old_armor_index == jacket_armor_index)
+		if (old_armor_index == jacket_armor_index) {
 			oldinfo = &jacketarmor_info;
-		else if (old_armor_index == combat_armor_index)
+			old_armor_maximum = sk_max_armor_jacket->value;
+		}
+		else if (old_armor_index == combat_armor_index) {
 			oldinfo = &combatarmor_info;
-		else // (old_armor_index == body_armor_index)
+			old_armor_maximum = sk_max_armor_combat->value;
+		}
+		else { // (old_armor_index == body_armor_index)
 			oldinfo = &bodyarmor_info;
+			old_armor_maximum = sk_max_armor_body->value;
+		}
 
+		// if stronger than current armor (always pick up)
 		if (newinfo->normal_protection > oldinfo->normal_protection)
 		{
 			// calc new armor values
 			salvage = oldinfo->normal_protection / newinfo->normal_protection;
 			salvagecount = salvage * other->client->pers.inventory[old_armor_index];
 			newcount = newinfo->base_count + salvagecount;
+		//	if (newcount > newinfo->max_count)
+		//		newcount = newinfo->max_count;
 			if (newcount > armor_maximum)
 				newcount = armor_maximum;
 
@@ -969,8 +978,10 @@ qboolean Pickup_Armor (edict_t *ent, edict_t *other)
 			salvage = newinfo->normal_protection / oldinfo->normal_protection;
 			salvagecount = salvage * newinfo->base_count;
 			newcount = other->client->pers.inventory[old_armor_index] + salvagecount;
-			if (newcount > armor_maximum)
-				newcount = armor_maximum;
+		//	if (newcount > oldinfo->max_count)
+		//		newcount = oldinfo->max_count;
+			if (newcount > old_armor_maximum)
+				newcount = old_armor_maximum;
 
 			// if we're already maxed out then we don't need the new armor
 			if (other->client->pers.inventory[old_armor_index] >= newcount)

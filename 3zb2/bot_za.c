@@ -4552,11 +4552,11 @@ gi.bprintf(PRINT_HIGH,"aw shit!!\n");*/
 			
 			if (!(rs_trace.contents & CONTENTS_LADDER) && rs_trace.fraction)
 			{
-//	gi.WriteByte (svc_temp_entity);
-//	gi.WriteByte (TE_RAILTRAIL);
-//	gi.WritePosition (ent->s.origin);
-//	gi.WritePosition (temppos);
-//	gi.multicast (ent->s.origin, MULTICAST_PHS);
+			//	gi.WriteByte (svc_temp_entity);
+			//	gi.WriteByte (TE_RAILTRAIL);
+			//	gi.WritePosition (ent->s.origin);
+			//	gi.WritePosition (temppos);
+			//	gi.multicast (ent->s.origin, MULTICAST_PHS);
 
 				ent->velocity[0] = 0;
 				ent->velocity[1] = 0;
@@ -5751,11 +5751,11 @@ gi.bprintf(PRINT_HIGH,"ladder founded! %f\n",iyaw);
 
 			if ((!(rs_trace.contents & CONTENTS_LADDER) || k) /*&& rs_trace.fraction < 1.0*/)
 			{
-//	gi.WriteByte (svc_temp_entity);
-//	gi.WriteByte (TE_RAILTRAIL);
-//	gi.WritePosition (ent->s.origin);
-//	gi.WritePosition (temppos);
-//	gi.multicast (ent->s.origin, MULTICAST_PHS);
+			//	gi.WriteByte (svc_temp_entity);
+			//	gi.WriteByte (TE_RAILTRAIL);
+			//	gi.WritePosition (ent->s.origin);
+			//	gi.WritePosition (temppos);
+			//	gi.multicast (ent->s.origin, MULTICAST_PHS);
 
 				ent->velocity[0] = 0;
 				ent->velocity[1] = 0;

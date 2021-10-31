@@ -92,7 +92,7 @@ void shrapnel_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *
 		return;
 
 	T_Damage (other, ent, ent->owner, ent->velocity, ent->s.origin, 
-		plane->normal, sk_tbomb_shrapnel_damage->value, 8, 0, MOD_TRIPBOMB);
+		plane->normal, (int)sk_tbomb_shrapnel_damage->value, 8, 0, MOD_TRIPBOMB);
 	G_FreeEdict(ent);
 }
 
@@ -124,7 +124,7 @@ void TripBomb_Explode (edict_t *ent)
 	gi.multicast (ent->s.origin, MULTICAST_PHS);
 
 	// throw off some debris
-	for (i = 0; i < sk_tbomb_shrapnel->value; i++)
+	for (i = 0; i < (int)sk_tbomb_shrapnel->value; i++)
 	{
 		edict_t *sh = G_Spawn();
 		vec3_t forward, right, up;
@@ -422,7 +422,7 @@ void weapon_lasertripbomb_fire (edict_t *ent)
 		vec3_t	offset;
 		vec3_t	forward;
 		vec3_t	start;
-		int damage = sk_tbomb_damage->value;
+		int damage = (int)sk_tbomb_damage->value;
 		float radius = sk_tbomb_radius->value;
 		if (is_quad)
 			damage *= 4;
@@ -613,7 +613,7 @@ void SP_misc_lasertripbomb (edict_t *bomb)
 	}
 
 	// set up ourself
-	setupBomb(bomb, "misc_ired", sk_tbomb_damage->value, sk_tbomb_radius->value);
+	setupBomb (bomb, "misc_ired", sk_tbomb_damage->value, sk_tbomb_radius->value);
 	
 	if (bomb->targetname)
 	{
@@ -638,7 +638,7 @@ Sonic Cannon
 
 void weapon_sc_fire (edict_t *ent)
 {
-	int		maxfiretime = sk_soniccannon_maxfiretime->value;
+	int		maxfiretime = (int)sk_soniccannon_maxfiretime->value;
 
 	if (!(ent->client->buttons & BUTTON_ATTACK))
 	{
@@ -1052,9 +1052,9 @@ void Weapon_FlareLauncher_Fire (edict_t *ent)
 
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
 
-	VectorSet(offset, 8, 8, ent->viewheight-8);
+	VectorSet (offset, 8, 8, ent->viewheight-8);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
-	fire_flare(ent, start, forward, sk_flaregun_damage->value, sk_flaregun_speed->value, sk_flaregun_radius->value, sk_flaregun_rdamage->value);
+	fire_flare (ent, start, forward, (int)sk_flaregun_damage->value, (int)sk_flaregun_speed->value, sk_flaregun_radius->value, (int)sk_flaregun_rdamage->value);
 
 	ent->client->ps.gunframe++;
 
@@ -1141,13 +1141,13 @@ void weapon_sniperrifle_fire (edict_t *ent)
 
 	if (deathmatch->value)
 	{	// normal damage is too extreme in dm
-		damage = sk_sniperrifle_damage_dm->value; // 150
-		kick = sk_sniperrifle_kick_dm->value; // 300
+		damage = (int)sk_sniperrifle_damage_dm->value; // 150
+		kick = (int)sk_sniperrifle_kick_dm->value; // 300
 	}
 	else
 	{
-		damage = sk_sniperrifle_damage->value; // 250
-		kick = 	sk_sniperrifle_kick->value; // 400
+		damage = (int)sk_sniperrifle_damage->value; // 250
+		kick = (int)sk_sniperrifle_kick->value; // 400
 	}
 
 	if (is_quad)
@@ -1239,7 +1239,7 @@ void Weapon_SniperRifle(edict_t *ent)
 				gi.modelindex("models/weapons/v_sniper/scope/tris.md2") );
 			ent->client->ps.gunframe = 0;
 			ent->client->ps.fov = (deathmatch->value ? dmFov : spFov);
-			ent->client->sniperFramenum = level.framenum + (sk_sniper_charge_time->value * 10);	// SNIPER_CHARGE_TIME
+			ent->client->sniperFramenum = level.framenum + ((int)sk_sniper_charge_time->value * 10);	// SNIPER_CHARGE_TIME
 			return;
 		}
 
@@ -1322,7 +1322,7 @@ void Weapon_SniperRifle(edict_t *ent)
 		
 		// start recharge
 		ent->client->weaponstate = WEAPON_READY;
-		ent->client->sniperFramenum = level.framenum + (sk_sniper_charge_time->value * 10);	// SNIPER_CHARGE_TIME;
+		ent->client->sniperFramenum = level.framenum + ((int)sk_sniper_charge_time->value * 10);	// SNIPER_CHARGE_TIME;
 	}
 }
 

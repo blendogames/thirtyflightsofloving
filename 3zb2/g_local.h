@@ -14,6 +14,7 @@
 //ZOID
 #include "p_menu.h"
 //ZOID
+#include "km_cvar.h"	// Knightmare added
 
 // the "gameversion" client command will print this plus compile date
 #define	GAMEVERSION	"baseq2"
@@ -53,7 +54,8 @@
 #define	FL_WATERJUMP			0x00000200	// player jumping out of water
 #define	FL_TEAMSLAVE			0x00000400	// not the first on the team
 #define FL_NO_KNOCKBACK			0x00000800
-#define FL_POWER_ARMOR			0x00001000	// power armor (if any) is active
+#define FL_POWER_SHIELD			0x00001000	// power armor (if any) is active
+#define FL_POWER_SCREEN			0x00002000
 #define FL_RESPAWN				0x80000000	// used for item respawning
 
 
@@ -260,6 +262,7 @@ typedef struct gitem_s
 	void		(*weaponthink)(struct edict_s *ent);
 	char		*pickup_sound;
 	char		*world_model;
+	int			world_model_skinnum; // Knightmare- added skinnum here so items can share models
 	int			world_model_flags;
 	char		*view_model;
 
@@ -485,6 +488,19 @@ extern	int	snd_fry;
 extern	int	jacket_armor_index;
 extern	int	combat_armor_index;
 extern	int	body_armor_index;
+extern	int	power_screen_index;
+extern	int	power_shield_index;
+// Knightmare added
+extern	int	shells_index;
+extern	int	bullets_index;
+extern	int	grenades_index;
+extern	int	rockets_index;
+extern	int	cells_index;
+extern	int	slugs_index;
+extern	int	magslug_index;
+extern	int	trap_index;
+extern	int	blaster_index;
+extern	int	rg_index;
 
 
 // means of death
@@ -675,6 +691,7 @@ void door_use_areaportals (edict_t *self, qboolean open);
 void PrecacheItem (gitem_t *it);
 void InitItems (void);
 void SetItemNames (void);
+void SetAmmoPickupValues (void);
 gitem_t	*FindItem (char *pickup_name);
 gitem_t	*FindItemByClassname (char *classname);
 #define	ITEM_INDEX(x) ((x)-itemlist)
@@ -797,17 +814,26 @@ qboolean visible (edict_t *self, edict_t *other);
 qboolean FacingIdeal(edict_t *self);
 
 //
+// km_cvar.c
+//
+void InitLithiumVars (void);	// init lithium cvars
+
+//
 // g_weapon.c
 //
+#define BLASTER_ORANGE	1
+#define BLASTER_GREEN	2
+#define BLASTER_BLUE	3
+#define BLASTER_RED		4
 void ThrowDebris (edict_t *self, char *modelname, float speed, vec3_t origin);
 qboolean fire_hit (edict_t *self, vec3_t aim, int damage, int kick);
 void fire_bullet (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, int hspread, int vspread, int mod);
 void fire_shotgun (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, int hspread, int vspread, int count, int mod);
-void fire_blaster (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, int effect, qboolean hyper);
+void fire_blaster (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, int effect, qboolean hyper, int color);
 void fire_grenade (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, float timer, float damage_radius, qboolean contact);
 void fire_grenade2 (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, float timer, float damage_radius, qboolean held);
 void fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage);
-void fire_rail (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick);
+void fire_rail (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, qboolean useColor, int red, int green, int blue);
 void fire_bfg (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius);
 // RAFAEL
 void fire_ionripper (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, int effect);
@@ -926,7 +952,9 @@ typedef struct
 	// values saved and restored from edicts when changing levels
 	int			health;
 	int			max_health;
-	qboolean	powerArmorActive;
+	int			max_fc_health;
+//	qboolean	powerArmorActive;
+	int			savedFlags;	// Knightmare added
 
 	int			selected_item;
 	int			inventory[MAX_ITEMS];
@@ -954,6 +982,10 @@ typedef struct
 	int			helpchanged;
 
 	qboolean	spectator;			// client is a spectator
+
+	// Knightmare- Custom client colors
+	color_t		color1;
+	color_t		color2;
 } client_persistant_t;
 
 /*

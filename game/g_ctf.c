@@ -610,7 +610,7 @@ char *CTFTeamName (int team)
 	return "UNKNOWN"; // Hanzo pointed out this was spelled wrong as "UKNOWN"
 }
 
-//Knightmare added
+// Knightmare added
 int PlayersOnCTFTeam (int checkteam)
 {
 	int i, total = 0;
@@ -1343,7 +1343,7 @@ qboolean CTFPickup_Flag (edict_t *ent, edict_t *other)
 	// hey, its not our flag, pick it up
 
 	// Knightmare- added disable pickup option
-	if (!allow_flagpickup->value && PlayersOnCTFTeam (ctf_team) == 0) {
+	if (!allow_flagpickup->value && PlayersOnCTFTeam(ctf_team) == 0) {
 		if (level.time - other->client->ctf_lasttechmsg > 2) {
 			safe_centerprintf(other, "Not allowed to take empty teams' flags!");
 			other->client->ctf_lasttechmsg = level.time;
@@ -2859,7 +2859,6 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer)
 /* TECH																	  */
 /*------------------------------------------------------------------------*/
 
-
 void Apply_Tech_Shell (gitem_t *item, edict_t *ent)
 {
 	ent->s.renderfx = RF_GLOW;
@@ -2953,7 +2952,8 @@ qboolean CTFPickup_Tech (edict_t *ent, edict_t *other)
 	int i;
 
 	i = 0;
-	while (tnames[i]) {
+	while (tnames[i])
+	{
 		if ((tech = FindItemByClassname(tnames[i])) != NULL &&
 			other->client->pers.inventory[ITEM_INDEX(tech)]) {
 			CTFHasTech(other);
@@ -2998,7 +2998,8 @@ static edict_t *FindTechSpawn (void)
 	if ((spot = FindTechSpawn()) != NULL) {
 		SpawnTech(tech->item, spot);
 		G_FreeEdict(tech);
-	} else {
+	}
+	else {
 		tech->nextthink = level.time + CTF_TECH_TIMEOUT;
 		tech->think = TechThink;
 	}
@@ -3012,7 +3013,7 @@ void CTFDrop_Tech (edict_t *ent, gitem_t *item)
 		return;
 
 	tech = Drop_Item(ent, item);
-	tech->nextthink = level.time + tech_life->value; // was CTF_TECH_TIMEOUT
+	tech->nextthink = level.time + tech_life->value;	// was CTF_TECH_TIMEOUT
 	tech->think = TechThink;
 
 	if (allow_techpickup->value)
@@ -3023,7 +3024,7 @@ void CTFDrop_Tech (edict_t *ent, gitem_t *item)
 
 	ent->client->pers.inventory[ITEM_INDEX(item)] = 0;
 
-	Apply_Tech_Shell(item, tech);
+	Apply_Tech_Shell (item, tech);
 }
 
 void CTFDeadDropTech (edict_t *ent)
@@ -3052,7 +3053,7 @@ void CTFDeadDropTech (edict_t *ent)
 	}
 }
 
-//ScarFace- this function counts the number of runes in circulation
+// ScarFace- this function counts the number of runes in circulation
 int TechCount (void)
 {
 	gitem_t	*tech;
@@ -3071,7 +3072,7 @@ int TechCount (void)
 		if (!strncmp(mapent->classname, "item_tech", 9))
 			count++;
 	}
-	//cycle through all players to find techs
+	// cycle through all players to find techs
 	for (i = 0; i < game.maxclients; i++)
 	{
 		cl_ent = g_edicts + 1 + i;
@@ -3110,7 +3111,7 @@ int NumOfTech (int index)
 		if (!strcmp(mapent->classname, techname))
 			count++;
 	}
-	//cycle through all players to find techs
+	// cycle through all players to find techs
 	for (i = 0; i < game.maxclients; i++)
 	{
 		cl_ent = g_edicts + 1 + i;
@@ -3121,7 +3122,7 @@ int NumOfTech (int index)
 				count++;
 		}
 	}
-	//gi.dprintf ("Number of tech%d in map: %d\n", index+1, count);
+//	gi.dprintf ("Number of tech%d in map: %d\n", index+1, count);
 	return count;
 }
 
@@ -3131,7 +3132,7 @@ void Cmd_TechCount_f (edict_t *ent)
 {
 	int count;
 	count = TechCount();
-	//gi.dprintf ("Number of techs in game: %d\n", count);
+//	gi.dprintf ("Number of techs in game: %d\n", count);
 	safe_cprintf(ent, PRINT_HIGH, "Number of techs in game: %d\n", count);
 }
 
@@ -3142,10 +3143,10 @@ void SpawnMoreTechs (int oldtechcount, int newtechcount, int numtechtypes)
 	edict_t	*spot;
 	int i, j;
 
-	//gi.dprintf ("Number of techs in loop: %d\n", numtechtypes);
+//	gi.dprintf ("Number of techs in loop: %d\n", numtechtypes);
 	i = oldtechcount % numtechtypes; //Spawn next tech in succession of the last one spawned
 	j = oldtechcount; //Start with count at old tech 
-	//gi.dprintf ("tech number to start on: %d\n", (i+1));
+//	gi.dprintf ("tech number to start on: %d\n", (i+1));
 	while ( (j < numtechtypes) || ((j < tech_max->value) && (j < newtechcount)) )
 	{
 		while ( (tnames[i]) &&
@@ -3163,7 +3164,7 @@ void SpawnMoreTechs (int oldtechcount, int newtechcount, int numtechtypes)
 		}
 		i = 0;
 	}
-	//gi.dprintf ("Current number of techs in game: %d\n", j);
+//	gi.dprintf ("Current number of techs in game: %d\n", j);
 }
 
 // ScarFace- remove some runes
@@ -3173,7 +3174,7 @@ void RemoveTechs (int oldtechcount, int newtechcount, int numtechtypes)
 	int i, j, k;
 	int removed;
 
-	//gi.dprintf ("Number of techs desired: %d\n", newtechcount);
+//	gi.dprintf ("Number of techs desired: %d\n", newtechcount);
 	// find the last tech added or the tech to be removed
 	if ((oldtechcount % numtechtypes) == 0)
 		i = TECHTYPES-1;
@@ -3186,7 +3187,7 @@ void RemoveTechs (int oldtechcount, int newtechcount, int numtechtypes)
 	}
 
 	j = oldtechcount;
-	//gi.dprintf ("tech number to start removing on: %d\n", (i+1));
+//	gi.dprintf ("tech number to start removing on: %d\n", (i+1));
 	while ((tnames[i]) && (j > newtechcount)) //leave at least 1 of each tech
 	{
 		removed = 0; //flag to remove only one tech per pass
@@ -3205,26 +3206,26 @@ void RemoveTechs (int oldtechcount, int newtechcount, int numtechtypes)
 			if (removed == 1) //don't keep removing techs of this type
 				break;
 		}
-		//If we can't find this tech in map, wait until a player drops it instead of removing others
+		// If we can't find this tech in map, wait until a player drops it instead of removing others
 		if (removed == 0)
 			return;
 		i--;
 	}
-	//gi.dprintf ("Current number of techs in game: %d\n", j);
+//	gi.dprintf ("Current number of techs in game: %d\n", j);
 }
 
 // ScarFace- this function checks to see if we need to spawn or remove runes
 void CheckNumTechs (void)
 {
 	edict_t	*cl_ent;
-	int i, numclients;
-	int newtechcount, numtechs, techbits;
-	int numtechtypes = 0;
+	int		i, numclients;
+	int		newtechcount, numtechs, techbits;
+	int		numtechtypes = 0;
 
-	if (!deathmatch->value || level.time <= 0) // don't run while no in map
+	if ( !deathmatch->value || (level.time <= 0) ) // don't run while no in map
 		return;
 
-	if (!use_techs->value || (ctf->value && ((int)dmflags->value & DF_CTF_NO_TECH)) )
+	if ( !use_techs->value || (ctf->value && ((int)dmflags->value & DF_CTF_NO_TECH)) )
 		return;
 
 	// clamp tech_flags to valid range
@@ -3302,8 +3303,7 @@ void CheckNumTechs (void)
 	VectorScale (forward, 100, ent->velocity);
 	ent->velocity[2] = 300;
 
-//	ent->nextthink = level.time + CTF_TECH_TIMEOUT;
-	ent->nextthink = level.time + tech_life->value;
+	ent->nextthink = level.time + tech_life->value;	// was CTF_TECH_TIMEOUT
 	ent->think = TechThink;
 
 	gi.linkentity (ent);
@@ -3313,7 +3313,7 @@ void CheckNumTechs (void)
 {
 	gitem_t *tech;
 	edict_t *spot;
-	int i, techbits;
+	int		i, techbits;
 
 	// clamp tech_flags to valid range
 	techbits = (int)(tech_flags->value);
@@ -3569,7 +3569,7 @@ void CTFApplyVampire (edict_t *ent, int dmg)
 		if (ent->health < tech_vampiremax->value)
 		{
 			ent->health += dmg * tech_vampire->value;
-			ent->health = min(ent->health,tech_vampiremax->value);
+			ent->health = min(ent->health, tech_vampiremax->value);
 		}
 		CTFApplyVampireSound(ent);
 	}

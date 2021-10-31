@@ -1004,6 +1004,10 @@ typedef struct
 	int			score;			// for calculating total unit score in coop games
 
 	float visorFrames;
+
+	// Knightmare- Custom client colors
+	color_t		color1;
+	color_t		color2;
 } client_persistant_t;
 
 // client data that stays across deathmatch respawns
@@ -1184,6 +1188,7 @@ struct edict_s
 	float		speed, accel, decel, aspeed;
 	vec3_t		movedir;
 	vec3_t		pos1, pos2;
+	vec3_t		pos0;	// Knightmare- initial position for secret doors
 
 	vec3_t		velocity;
 	vec3_t		avelocity;

@@ -1952,8 +1952,6 @@ void ForcewallOff(edict_t *player)
 ClientCommand
 =================
 */
-void Cmd_TechCount_f (edict_t *ent);
-
 void ClientCommand (edict_t *ent)
 {
 	char	*cmd;
@@ -2094,7 +2092,7 @@ void ClientCommand (edict_t *ent)
 		}
 	}
 	else if (Q_stricmp(cmd, "techcount") == 0)
-		Cmd_TechCount_f(ent);
+		Cmd_TechCount_f (ent);
 
 //ZOID
 #ifdef FLASHLIGHT_MOD

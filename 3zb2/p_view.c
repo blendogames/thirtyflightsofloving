@@ -892,6 +892,21 @@ void G_SetClientSound (edict_t *ent)
 		ent->s.sound = gi.soundindex("weapons/rg_hum.wav");
 	else if (strcmp(weap, "weapon_bfg") == 0)
 		ent->s.sound = gi.soundindex("weapons/bfg_hum.wav");
+	// RAFAEL
+	else if (strcmp (weap, "weapon_phalanx") == 0)
+		ent->s.sound = gi.soundindex ("weapons/phaloop.wav");
+#ifdef KMQUAKE2_ENGINE_MOD
+	// Knightmare - ambient sounds for ION Ripper and Shockwave
+	else if ( (strcmp (weap, "weapon_boomer") == 0) && sk_ionripper_extra_sounds->value)
+		ent->s.sound = gi.soundindex ("weapons/ion_hum.wav");
+//	else if (strcmp (weap, "weapon_shockwave") == 0)
+//		ent->s.sound = gi.soundindex ("weapons/shock_hum.wav");
+// SKWiD MOD
+//	else if (strcmp(weap, "weapon_plasma") == 0)
+//		ent->s.sound = gi.soundindex(PLASMA_SOUND_IDLE);
+// END
+#endif
+
 	else if (ent->client->weapon_sound)
 		ent->s.sound = ent->client->weapon_sound;
 	else

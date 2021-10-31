@@ -195,6 +195,8 @@ void CTFApplyAmmogen (edict_t *attacker, edict_t *targ);
 void CTFApplyAmmogenSound(edict_t *ent);
 void CTFRespawnTech(edict_t *ent);
 void CTFResetTech(void);
+void CheckNumTechs (void);
+void Cmd_TechCount_f (edict_t *ent);
 
 void CTFOpenJoinMenu(edict_t *ent);
 void TTCTFOpenJoinMenu(edict_t *ent); // Knightmare added

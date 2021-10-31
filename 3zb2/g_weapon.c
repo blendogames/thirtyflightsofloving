@@ -323,6 +323,7 @@ Fires a single blaster bolt.  Used by the blaster and hyper blaster.
 void blaster_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
 	int		mod;
+	int		tempevent;	// Knightmare added
 
 	if (other == self->owner)
 		return;
@@ -347,9 +348,26 @@ void blaster_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *
 	}
 	else
 	{
-//gi.bprintf(PRINT_HIGH,"%s\n",other->classname);
+		// Knightmare- changable color
+		if (self->style == BLASTER_GREEN) //green
+			tempevent = TE_BLASTER2;
+		else if (self->style == BLASTER_BLUE) //blue
+	#ifdef KMQUAKE2_ENGINE_MOD // Knightmare- looks better than flechette
+			tempevent =  TE_BLUEHYPERBLASTER;
+	#else
+			tempevent = TE_FLECHETTE;
+	#endif
+	#ifdef KMQUAKE2_ENGINE_MOD
+		else if (self->style == BLASTER_RED) //red
+			tempevent =  TE_REDBLASTER;
+	#endif
+		else //standard yellow
+			tempevent = TE_BLASTER;
+
+	//	gi.bprintf(PRINT_HIGH,"%s\n",other->classname);
 		gi.WriteByte (svc_temp_entity);
-		gi.WriteByte (TE_BLASTER);
+	//	gi.WriteByte (TE_BLASTER);
+		gi.WriteByte (tempevent);
 		gi.WritePosition (self->s.origin);
 		if (!plane)
 			gi.WriteDir (vec3_origin);
@@ -361,7 +379,7 @@ void blaster_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *
 	G_FreeEdict (self);
 }
 
-void fire_blaster (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int effect, qboolean hyper)
+void fire_blaster (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int effect, qboolean hyper, int color)
 {
 	edict_t	*bolt;
 	trace_t	tr;
@@ -379,7 +397,18 @@ void fire_blaster (edict_t *self, vec3_t start, vec3_t dir, int damage, int spee
 	bolt->s.effects |= effect;
 	VectorClear (bolt->mins);
 	VectorClear (bolt->maxs);
+	// Knightmare- changable color
+	if (color == BLASTER_GREEN) // green
+		bolt->s.skinnum = 1;
+	else if (color == BLASTER_BLUE) // blue
+		bolt->s.skinnum = 2;
+	else if (color == BLASTER_RED) // red
+		bolt->s.skinnum = 3;
+	else // standard orange
+		bolt->s.skinnum = 0;
 	bolt->s.modelindex = gi.modelindex ("models/objects/laser/tris.md2");
+	bolt->style = color;
+
 	bolt->s.sound = gi.soundindex ("misc/lasfly.wav");
 	bolt->owner = self;
 	bolt->touch = blaster_touch;
@@ -812,14 +841,22 @@ void fire_lockon_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, in
 fire_rail
 =================
 */
-void fire_rail (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick)
+void fire_rail (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, qboolean useColor, int red, int green, int blue)
 {
 	vec3_t		from;
 	vec3_t		end;
 	trace_t		tr;
 	edict_t		*ignore;
-	int			mask, i=0;
+	int			mask, tempevent, i=0;
 	qboolean	water;
+
+	// Knightmare- changeable trail color
+#ifdef KMQUAKE2_ENGINE_MOD
+	if (useColor)
+		tempevent = TE_RAILTRAIL_COLORED;
+	else
+#endif
+		tempevent = TE_RAILTRAIL;
 
 	VectorMA (start, WORLD_SIZE, aimdir, end);	// was 8192
 	VectorCopy (start, from);
@@ -852,17 +889,33 @@ void fire_rail (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick
 
 	// send gun puff / flash
 	gi.WriteByte (svc_temp_entity);
-	gi.WriteByte (TE_RAILTRAIL);
+//	gi.WriteByte (TE_RAILTRAIL);
+	gi.WriteByte (tempevent);
 	gi.WritePosition (start);
 	gi.WritePosition (tr.endpos);
+#ifdef KMQUAKE2_ENGINE_MOD
+	if (tempevent == TE_RAILTRAIL_COLORED) {
+		gi.WriteByte (red);
+		gi.WriteByte (green);
+		gi.WriteByte (blue);
+	}
+#endif
 	gi.multicast (self->s.origin, MULTICAST_PHS);
 //	gi.multicast (start, MULTICAST_PHS);
 	if (water)
 	{
 		gi.WriteByte (svc_temp_entity);
-		gi.WriteByte (TE_RAILTRAIL);
+	//	gi.WriteByte (TE_RAILTRAIL);
+		gi.WriteByte (tempevent);
 		gi.WritePosition (start);
 		gi.WritePosition (tr.endpos);
+#ifdef KMQUAKE2_ENGINE_MOD
+		if (tempevent == TE_RAILTRAIL_COLORED) {
+			gi.WriteByte (red);
+			gi.WriteByte (green);
+			gi.WriteByte (blue);
+		}
+#endif
 		gi.multicast (tr.endpos, MULTICAST_PHS);
 	}
 
@@ -1147,18 +1200,27 @@ void fire_bfg (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, f
 // RAFAEL
 /*
 =================
-	fire_ionripper
+fire_ionripper
 =================
 */
 
 void ionripper_sparks (edict_t *self)
 {
+	byte	count, color;
+
+	count = 0;
+	color = 0xe4 + (rand()&3);
+
+	// Knightmare- explode sound
+	if (sk_ionripper_extra_sounds->value)
+		gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, gi.soundindex ("weapons/ionexp.wav"), 1, ATTN_NONE, 0);
+
 	gi.WriteByte (svc_temp_entity);
 	gi.WriteByte (TE_WELDING_SPARKS);
-	gi.WriteByte (0);
+	gi.WriteByte (count);	// 0
 	gi.WritePosition (self->s.origin);
 	gi.WriteDir (vec3_origin);
-	gi.WriteByte (0xe4 + (rand()&3));
+	gi.WriteByte (color);	// 0xe4 + (rand()&3)
 	gi.multicast (self->s.origin, MULTICAST_PVS);
 
 	G_FreeEdict (self);
@@ -1181,6 +1243,20 @@ void ionripper_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t
 
 	if (other->takedamage)
 	{
+	// Knightmare- hit sound
+#ifdef KMQUAKE2_ENGINE_MOD
+		if (sk_ionripper_extra_sounds->value)
+		{
+			float r = random();
+			if (r < 0.3333)
+				gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, gi.soundindex ("weapons/ionhit1.wav"), 1, ATTN_NONE, 0);
+			else if (r < 0.6666)
+				gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, gi.soundindex ("weapons/ionhit2.wav"), 1, ATTN_NONE, 0);
+			else
+				gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, gi.soundindex ("weapons/ionhit3.wav"), 1, ATTN_NONE, 0);
+		}
+#endif
+
 		T_Damage (other, self, self->owner, self->velocity, self->s.origin, plane->normal, self->dmg, 1, DAMAGE_ENERGY, MOD_RIPPER);
 
 	}

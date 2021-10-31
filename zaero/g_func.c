@@ -41,6 +41,7 @@
 #define	STATE_BOTTOM		1
 #define STATE_UP			2
 #define STATE_DOWN			3
+#define STATE_LOWEST		4	// Knightmare added
 
 #define STATE_STOPPED		0
 #define STATE_ACCEL			1
@@ -440,8 +441,13 @@ void plat_hit_top (edict_t *ent)
 	{
 		if (ent->moveinfo.sound_end)
 			gi.sound (ent, CHAN_NO_PHS_ADD+CHAN_VOICE, ent->moveinfo.sound_end, 1, ATTN_STATIC, 0);
-		ent->s.sound = 0;
+	//	ent->s.sound = 0;
 	}
+	ent->s.sound = 0;	// Knightmare- make sure this is always set to 0, lead mover or not!
+#ifdef LOOP_SOUND_ATTENUATION	// Knightmare added
+	ent->s.attenuation = ent->attenuation;
+#endif
+
 	ent->moveinfo.state = STATE_TOP;
 
 	ent->think = plat_go_down;
@@ -454,8 +460,13 @@ void plat_hit_bottom (edict_t *ent)
 	{
 		if (ent->moveinfo.sound_end)
 			gi.sound (ent, CHAN_NO_PHS_ADD+CHAN_VOICE, ent->moveinfo.sound_end, 1, ATTN_STATIC, 0);
-		ent->s.sound = 0;
+	//	ent->s.sound = 0;
 	}
+	ent->s.sound = 0;	// Knightmare- make sure this is always set to 0, lead mover or not!
+#ifdef LOOP_SOUND_ATTENUATION	// Knightmare added
+	ent->s.attenuation = ent->attenuation;
+#endif
+
 	ent->moveinfo.state = STATE_BOTTOM;
 }
 
@@ -466,6 +477,9 @@ void plat_go_down (edict_t *ent)
 		if (ent->moveinfo.sound_start)
 			gi.sound (ent, CHAN_NO_PHS_ADD+CHAN_VOICE, ent->moveinfo.sound_start, 1, ATTN_STATIC, 0);
 		ent->s.sound = ent->moveinfo.sound_middle;
+#ifdef LOOP_SOUND_ATTENUATION	// Knightmare added
+		ent->s.attenuation = ent->attenuation;
+#endif
 	}
 	ent->moveinfo.state = STATE_DOWN;
 	Move_Calc (ent, ent->moveinfo.end_origin, plat_hit_bottom, false);
@@ -478,6 +492,9 @@ void plat_go_up (edict_t *ent)
 		if (ent->moveinfo.sound_start)
 			gi.sound (ent, CHAN_NO_PHS_ADD+CHAN_VOICE, ent->moveinfo.sound_start, 1, ATTN_STATIC, 0);
 		ent->s.sound = ent->moveinfo.sound_middle;
+#ifdef LOOP_SOUND_ATTENUATION	// Knightmare added
+		ent->s.attenuation = ent->attenuation;
+#endif
 	}
 	ent->moveinfo.state = STATE_UP;
 	Move_Calc (ent, ent->moveinfo.start_origin, plat_hit_top, false);
@@ -763,6 +780,9 @@ void rotating_use (edict_t *self, edict_t *other, edict_t *activator)
 			self->moveinfo.state = STATE_ACCEL;
 		}
 		self->s.sound = self->moveinfo.sound_middle;
+#ifdef LOOP_SOUND_ATTENUATION	// Knightmare added
+		self->s.attenuation = self->attenuation;
+#endif
 		if (self->spawnflags & 16)
 			self->touch = rotating_touch;
 	}
@@ -1024,8 +1044,10 @@ void door_hit_top (edict_t *self)
 	{
 		if (self->moveinfo.sound_end)
 			gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_end, 1, ATTN_STATIC, 0);
-		self->s.sound = 0;
+	//	self->s.sound = 0;
 	}
+	self->s.sound = 0;	// Knightmare- make sure this is always set to 0, lead mover or not!
+
 	self->moveinfo.state = STATE_TOP;
 	if (self->spawnflags & DOOR_TOGGLE)
 		return;
@@ -1042,8 +1064,10 @@ void door_hit_bottom (edict_t *self)
 	{
 		if (self->moveinfo.sound_end)
 			gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_end, 1, ATTN_STATIC, 0);
-		self->s.sound = 0;
+	//	self->s.sound = 0;
 	}
+	self->s.sound = 0;	// Knightmare- make sure this is always set to 0, lead mover or not!
+
 	self->moveinfo.state = STATE_BOTTOM;
 	door_use_areaportals (self, false);
 }
@@ -1055,6 +1079,9 @@ void door_go_down (edict_t *self)
 		if (self->moveinfo.sound_start)
 			gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_start, 1, ATTN_STATIC, 0);
 		self->s.sound = self->moveinfo.sound_middle;
+#ifdef LOOP_SOUND_ATTENUATION	// Knightmare added
+		self->s.attenuation = self->attenuation;
+#endif
 	}
 	if (self->max_health)
 	{
@@ -1086,6 +1113,9 @@ void door_go_up (edict_t *self, edict_t *activator)
 		if (self->moveinfo.sound_start)
 			gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_start, 1, ATTN_STATIC, 0);
 		self->s.sound = self->moveinfo.sound_middle;
+#ifdef LOOP_SOUND_ATTENUATION	// Knightmare added
+		self->s.attenuation = self->attenuation;
+#endif
 	}
 	self->moveinfo.state = STATE_UP;
 	if (strcmp(self->classname, "func_door") == 0)
@@ -1736,7 +1766,8 @@ void train_next (edict_t *self)
 again:
 	if (!self->target)
 	{
-//		gi.dprintf ("train_next: no next target\n");
+	//	gi.dprintf ("train_next: no next target\n");
+		self->s.sound = 0;	// Knightmare added
 		return;
 	}
 
@@ -1802,6 +1833,9 @@ again:
 		if (self->moveinfo.sound_start)
 			gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_start, 1, ATTN_STATIC, 0);
 		self->s.sound = self->moveinfo.sound_middle;
+#ifdef LOOP_SOUND_ATTENUATION
+		self->s.attenuation = self->attenuation;
+#endif
 	}
 
 	if (self->classname != NULL && Q_stricmp(self->classname, "misc_viper") == 0)
@@ -1891,6 +1925,7 @@ void train_use (edict_t *self, edict_t *other, edict_t *activator)
 			return;
 		self->spawnflags &= ~TRAIN_START_ON;
 		VectorClear (self->velocity);
+		self->s.sound = 0;	// Knightmare added
 		self->nextthink = 0;
 	}
 	else
@@ -2199,34 +2234,92 @@ void door_secret_done (edict_t *self);
 void door_secret_use (edict_t *self, edict_t *other, edict_t *activator)
 {
 	// make sure we're not already moving
-	if (!VectorCompare(self->s.origin, vec3_origin))
+//	if (!VectorCompare(self->s.origin, vec3_origin))
+	if ((self->moveinfo.state != STATE_LOWEST) && (self->moveinfo.state != STATE_TOP))
 		return;
 
-	Move_Calc (self, self->pos1, door_secret_move1, false);
-	door_use_areaportals (self, true);
+	// added sound
+	if (self->moveinfo.sound_start)
+		gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_start, 1, self->attenuation, 0); // was ATTN_STATIC
+	if (self->moveinfo.sound_middle)
+	{
+		self->s.sound = self->moveinfo.sound_middle;
+#ifdef LOOP_SOUND_ATTENUATION
+		self->s.attenuation = self->attenuation;
+#endif
+	}
+
+//	Move_Calc (self, self->pos1, door_secret_move1, false);
+//	door_use_areaportals (self, true);
+	if (self->moveinfo.state == STATE_LOWEST)
+	{
+		self->moveinfo.state = STATE_DOWN;
+		Move_Calc (self, self->pos1, door_secret_move1, false);
+		door_use_areaportals (self, true);
+	}
+	else	// Knightmare added
+	{
+		self->moveinfo.state = STATE_UP;
+		Move_Calc (self, self->pos1, door_secret_move5, false);
+	}
 }
 
 void door_secret_move1 (edict_t *self)
 {
 	self->nextthink = level.time + 1.0;
 	self->think = door_secret_move2;
+	self->moveinfo.state = STATE_BOTTOM;
+
+	// added sound
+	self->s.sound = 0;
+	if (self->moveinfo.sound_end)
+		gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_end, 1, self->attenuation, 0); // was ATTN_STATIC
 }
 
 void door_secret_move2 (edict_t *self)
 {
+	// added sound
+	if (self->moveinfo.sound_start)
+		gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_start, 1, self->attenuation, 0); // was ATTN_STATIC
+	if (self->moveinfo.sound_middle) {
+		self->s.sound = self->moveinfo.sound_middle;
+#ifdef LOOP_SOUND_ATTENUATION
+		self->s.attenuation = self->attenuation;
+#endif
+	}
+
+	self->moveinfo.state = STATE_UP;
 	Move_Calc (self, self->pos2, door_secret_move3, false);
 }
 
 void door_secret_move3 (edict_t *self)
 {
+	self->moveinfo.state = STATE_TOP;
+
+	// added sound
+	self->s.sound = 0;
+	if (self->moveinfo.sound_end)
+		gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_end, 1, self->attenuation, 0); // was ATTN_STATIC
+
 	if (self->wait == -1)
 		return;
+
 	self->nextthink = level.time + self->wait;
 	self->think = door_secret_move4;
 }
 
 void door_secret_move4 (edict_t *self)
 {
+	// added sound
+	if (self->moveinfo.sound_start)
+		gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_start, 1, self->attenuation, 0); // was ATTN_STATIC
+	if (self->moveinfo.sound_middle) {
+		self->s.sound = self->moveinfo.sound_middle;
+#ifdef LOOP_SOUND_ATTENUATION
+		self->s.attenuation = self->attenuation;
+#endif
+	}
+	self->moveinfo.state = STATE_UP;
 	Move_Calc (self, self->pos1, door_secret_move5, false);
 }
 
@@ -2234,20 +2327,48 @@ void door_secret_move5 (edict_t *self)
 {
 	self->nextthink = level.time + 1.0;
 	self->think = door_secret_move6;
+	self->moveinfo.state = STATE_BOTTOM;
+
+	// added sound
+	self->s.sound = 0;
+	if (self->moveinfo.sound_end)
+		gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_end, 1, self->attenuation, 0); // was ATTN_STATIC
 }
 
 void door_secret_move6 (edict_t *self)
 {
-	Move_Calc (self, vec3_origin, door_secret_done, false);
+	// added sound
+	if (self->moveinfo.sound_start)
+		gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_start, 1, self->attenuation, 0); // was ATTN_STATIC
+	if (self->moveinfo.sound_middle) {
+		self->s.sound = self->moveinfo.sound_middle;
+#ifdef LOOP_SOUND_ATTENUATION
+		self->s.attenuation = self->attenuation;
+#endif
+	}
+
+	self->moveinfo.state = STATE_DOWN;
+	Move_Calc (self, self->pos0, door_secret_done, false);
+//	Move_Calc (self, vec3_origin, door_secret_done, false);
 }
 
 void door_secret_done (edict_t *self)
 {
 	if (!(self->targetname) || (self->spawnflags & SECRET_ALWAYS_SHOOT))
 	{
-		self->health = 0;
+		// Knightmare- restore user-set health here
+		// now that the correct die function is set
+	//	self->health = 0;
+		self->health = self->max_health;
 		self->takedamage = DAMAGE_YES;
 	}
+	self->moveinfo.state = STATE_LOWEST;	// Knightmare added
+
+    // added sound
+	self->s.sound = 0;
+	if (self->moveinfo.sound_end)
+		gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_end, 1, self->attenuation, 0); // was ATTN_STATIC
+
 	door_use_areaportals (self, false);
 }
 
@@ -2283,9 +2404,21 @@ void SP_func_door_secret (edict_t *ent)
 	float	width;
 	float	length;
 
-	ent->moveinfo.sound_start = gi.soundindex  ("doors/dr1_strt.wav");
-	ent->moveinfo.sound_middle = gi.soundindex  ("doors/dr1_mid.wav");
-	ent->moveinfo.sound_end = gi.soundindex  ("doors/dr1_end.wav");
+	if (ent->sounds != 1)
+	{
+		ent->moveinfo.sound_start = gi.soundindex  ("doors/dr1_strt.wav");
+		ent->moveinfo.sound_middle = gi.soundindex  ("doors/dr1_mid.wav");
+		ent->moveinfo.sound_end = gi.soundindex  ("doors/dr1_end.wav");
+	}
+	else
+	{
+		ent->moveinfo.sound_start = 0;
+		ent->moveinfo.sound_middle = 0;
+		ent->moveinfo.sound_end = 0;
+	}
+
+	if (ent->attenuation <= 0)	// Knightmare added
+		ent->attenuation = ATTN_STATIC;
 
 	ent->movetype = MOVETYPE_PUSH;
 	ent->solid = SOLID_BSP;
@@ -2293,10 +2426,16 @@ void SP_func_door_secret (edict_t *ent)
 
 	ent->blocked = door_secret_blocked;
 	ent->use = door_secret_use;
+	ent->moveinfo.state = STATE_LOWEST;	// Knightmare added
 
 	if (!(ent->targetname) || (ent->spawnflags & SECRET_ALWAYS_SHOOT))
 	{
-		ent->health = 0;
+		// Knightmare- we can allow user-set health here
+		// now that the correct die function is set
+	//	ent->health = 0;
+		if (!ent->health)
+			ent->health = 1;
+		ent->max_health = ent->health;
 		ent->takedamage = DAMAGE_YES;
 		ent->die = door_secret_die;
 	}
@@ -2312,6 +2451,7 @@ void SP_func_door_secret (edict_t *ent)
 	ent->moveinfo.speed = 50;
 
 	// calculate positions
+	VectorCopy (ent->s.origin, ent->pos0);
 	AngleVectors (ent->s.angles, forward, right, up);
 	VectorClear (ent->s.angles);
 	side = 1.0 - (ent->spawnflags & SECRET_1ST_LEFT);
@@ -2329,7 +2469,8 @@ void SP_func_door_secret (edict_t *ent)
 	if (ent->health)
 	{
 		ent->takedamage = DAMAGE_YES;
-		ent->die = door_killed;
+	//	ent->die = door_killed;
+		ent->die = door_secret_die;	// Knightmare- this had the wrong die function set!
 		ent->max_health = ent->health;
 	}
 	else if (ent->targetname && ent->message)

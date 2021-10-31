@@ -786,6 +786,7 @@ void CL_ParseTEnt (void)
 	explosion_t	*ex;
 	int		cnt;
 	int		color;
+	int		red, green, blue;
 	int		r, i;
 	int		ent;
 	int		magnitude;
@@ -899,7 +900,6 @@ void CL_ParseTEnt (void)
 		MSG_ReadPos (&net_message, pos2);
 		if (type == TE_RAILTRAIL_COLORED)
 		{
-			int		red, green, blue;
 			red = MSG_ReadByte (&net_message);
 			green = MSG_ReadByte (&net_message);
 			blue = MSG_ReadByte (&net_message);
@@ -1171,10 +1171,15 @@ void CL_ParseTEnt (void)
 	case TE_BLASTER2:			// green blaster hitting wall
 	case TE_BLUEHYPERBLASTER:	// blue blaster hitting wall
 	case TE_REDBLASTER:			// red blaster hitting wall
+	case TE_BLASTER_COLORED:	// variable colored blaster hitting wall
 	case TE_FLECHETTE:			// flechette hitting wall
 		MSG_ReadPos (&net_message, pos);
 		MSG_ReadDir (&net_message, dir);
-	//	if (cl_old_explosions->value)
+		if (type == TE_BLASTER_COLORED) {
+			red = MSG_ReadByte (&net_message);
+			green = MSG_ReadByte (&net_message);
+			blue = MSG_ReadByte (&net_message);
+		}
 		if ( cl_old_explosions->integer || !(cl_add_particles->integer) )
 		{
 			ex = CL_AllocExplosion ();
@@ -1235,27 +1240,35 @@ void CL_ParseTEnt (void)
 		}
 		// Psychospaz's enhanced particle code	
 		{
-			int		red, green, blue, numparts;
-		//	float	partsize = (cl_old_explosions->value) ? 2 : 4;
+			int		pRed, pGreen, pBlue, redDelta, greenDelta, blueDelta, numparts;
 			float	partsize = (cl_old_explosions->integer) ? 2 : 4;
-		//	numparts = (cl_old_explosions->value) ? 12 : (32 / max(cl_particle_scale->value/2, 1));
 			numparts = (cl_old_explosions->integer) ? 12 : (32 / max(cl_particle_scale->value/2, 1));
 			if (type == TE_BLASTER2) {
-				CL_BlasterParticles (pos, dir, numparts, partsize, 50, 235, 50, -10, 0, -10);
-				red=50; green=235; blue=50; }
+				pRed = 50;		pGreen = 235;		pBlue = 50;
+				redDelta = -10;	greenDelta = 0;		blueDelta = -10;
+			}
 			else if (type == TE_BLUEHYPERBLASTER) {
-				CL_BlasterParticles (pos, dir, numparts, partsize, 50, 50, 235, -10, 0, -10);
-				red=50; green=50; blue=235; }
+				pRed = 50;		pGreen = 50;		pBlue = 235;
+				redDelta = -10;	greenDelta = 0;		blueDelta = -10;
+			}
 			else if (type == TE_REDBLASTER) {
-				CL_BlasterParticles (pos, dir, numparts, partsize, 235, 50, 50, 0, -90, -30);
-				red=235; green=50; blue=50; }
+				pRed = 235;		pGreen = 50;		pBlue = 50;
+				redDelta = 255;	greenDelta = -30;	blueDelta = -30;
+			}
 			else if (type == TE_FLECHETTE) {
- 				CL_BlasterParticles (pos, dir, numparts, partsize, 100, 100, 195, -10, 0, -10);
-				red=100; green=100; blue=195; }
+				pRed = 100;		pGreen = 100;		pBlue = 195;
+				redDelta = -10;	greenDelta = 0;		blueDelta = -10;
+			}
+			else if (type == TE_BLASTER_COLORED) {
+				pRed = red;		pGreen = green;		pBlue = blue;
+				redDelta = -10;	greenDelta = -10;		blueDelta = -10;
+			}
 			else { // TE_BLASTER
-				CL_BlasterParticles (pos, dir, numparts, partsize, 255, 150, 50, 0, -90, -30); // was 40
-				red=255; green=150; blue=50; }
-			CL_ParticleBlasterDecal(pos, dir, 10, red, green, blue);
+				pRed = 255;		pGreen = 150;		pBlue = 50; // was 40
+				redDelta = 255;	greenDelta = -90;	blueDelta = -30;
+			}
+			CL_BlasterParticles (pos, dir, numparts, partsize, pRed, pGreen, pBlue, redDelta, greenDelta, blueDelta);
+			CL_ParticleBlasterDecal(pos, dir, 10, pRed, pGreen, pBlue);
 		}
 		S_StartSound (pos,  0, 0, clMedia.sfx_lashit, 1, ATTN_NORM, 0);
 		break;

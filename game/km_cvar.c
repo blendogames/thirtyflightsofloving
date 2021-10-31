@@ -186,21 +186,21 @@ cvar_t	*allow_techdrop;
 cvar_t	*allow_techpickup;
 
 cvar_t	*tech_flags;         // determines which techs will show in the game, add these:
-//                                   1 = resist, 2 = strength, 4 = haste, 8 = regen, 16 = vampire, 32 = ammogen
+							 // 1 = resist, 2 = strength, 4 = haste, 8 = regen, 16 = vampire, 32 = ammogen
 cvar_t	*tech_spawn;         // chance a rune will spawn from another item respawning
 cvar_t	*tech_perplayer;     // sets techs per player that will appear in map
 cvar_t	*tech_life;          // seconds a rune will stay around before disappearing
 cvar_t	*tech_min;           // sets minimum number of techs to be in the game
 cvar_t	*tech_max;           // sets maximum number of techs to be in the game
 
-cvar_t	*tech_haste; // what should I use this for?
+//cvar_t	*tech_haste;	 // what should I use this for?
 cvar_t	*tech_resist;        // sets how much damage is divided by with resist rune
 cvar_t	*tech_strength;      // sets how much damage is multiplied by with strength rune
-cvar_t	*tech_regen;         // sets how fast health is gained back
+//cvar_t	*tech_regen;     // sets how fast health is gained back
 cvar_t	*tech_regen_armor;
-cvar_t	*tech_regen_health_max;      // sets maximum health that can be gained from regen rune
+cvar_t	*tech_regen_health_max;     // sets maximum health that can be gained from regen rune
 cvar_t	*tech_regen_armor_max;      // sets maximum armor that can be gained from regen rune
-cvar_t	*tech_regen_armor_always;      // sets whether armor should be regened regardless of if currently held
+cvar_t	*tech_regen_armor_always;   // sets whether armor should be regened regardless of if currently held
 cvar_t	*tech_vampire;       // sets percentage of health gained from damage inflicted
 cvar_t	*tech_vampiremax;    // sets maximum health that can be gained from vampire rune
 // end CTF stuff
@@ -371,10 +371,10 @@ void InitLithiumVars (void)
 	tech_min = gi.cvar("tech_min", "2", 0);
 	tech_max = gi.cvar("tech_max", "10", 0);
 
-	tech_haste = gi.cvar("tech_haste", "", 0);
+//	tech_haste = gi.cvar("tech_haste", "", 0);
 	tech_resist = gi.cvar("tech_resist", "2.0", 0);
 	tech_strength = gi.cvar("tech_strength", "2.0", 0);
-	tech_regen = gi.cvar("tech_regen", "0.25", 0);
+//	tech_regen = gi.cvar("tech_regen", "0.25", 0);
 	tech_regen_armor = gi.cvar("tech_regen_armor", "1", 0);
 	tech_regen_health_max = gi.cvar("tech_regen_health_max", "150", 0);
 	tech_regen_armor_max = gi.cvar("tech_regen_armor_max", "150", 0);

@@ -824,6 +824,10 @@ void InitClientPersistant (gclient_t *client)
 
 	client->pers.connected = true;
 	client->pers.gl_polyblend = 1;
+
+	// Knightmare- custom client colors
+	Vector4Set (client->pers.color1, 255, 255, 255, 0);
+	Vector4Set (client->pers.color2, 255, 255, 255, 0);
 }
 
 
@@ -1541,6 +1545,19 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo)
 	if (strlen(s))
 	{
 		ent->client->pers.gl_polyblend = atoi(s);
+	}
+
+	// Knightmare- custom colors
+	s = Info_ValueForKey (userinfo, "color1");
+	if (strlen(s) >= 6) {
+		if ( Com_ParseColorString (s, ent->client->pers.color1) )
+			ent->client->pers.color1[3] = 255;	// mark as set
+	}
+
+	s = Info_ValueForKey (userinfo, "color2");
+	if (strlen(s) >= 6) {
+		if ( Com_ParseColorString (s, ent->client->pers.color2) )
+			ent->client->pers.color2[3] = 255;	// mark as set
 	}
 
 	// save off the userinfo in case we want to check something later

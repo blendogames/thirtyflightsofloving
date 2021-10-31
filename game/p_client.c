@@ -853,10 +853,10 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	//ZOID
 		if (ctf->value)
 		{
-			CTFPlayerResetGrapple(self);
-			CTFDeadDropFlag(self);
+			CTFPlayerResetGrapple (self);
+			CTFDeadDropFlag (self);
 		}
-		CTFDeadDropTech(self);
+		CTFDeadDropTech (self);
 	//ZOID
 		// Knightmare added- drop ammogen backpack
 		if (!OnSameTeam(self, attacker))
@@ -2951,8 +2951,8 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	// Lazarus: Copy latest usercmd stuff for use in other routines
 	client->ucmd = *ucmd;
 
-	VectorCopy(ent->s.origin,oldorigin);
-	VectorCopy(ent->velocity,oldvelocity);
+	VectorCopy (ent->s.origin, oldorigin);
+	VectorCopy (ent->velocity, oldvelocity);
 	ground = ent->groundentity;
 
 	if (ground && (ground->movetype == MOVETYPE_PUSH) && (ground != world) && ground->turn_rider)

@@ -21,6 +21,9 @@ void MoveClientToIntermission (edict_t *ent)
 	VectorCopy (level.intermission_angle, ent->client->ps.viewangles);
 	ent->client->ps.pmove.pm_type = PM_FREEZE;
 	ent->client->ps.gunindex = 0;
+#ifdef KMQUAKE2_ENGINE_MOD
+	ent->client->ps.gunindex2 = 0;
+#endif
 	ent->client->ps.blend[3] = 0;
 	ent->client->ps.rdflags &= ~RDF_UNDERWATER;
 
@@ -36,7 +39,11 @@ void MoveClientToIntermission (edict_t *ent)
 	ent->s.modelindex = 0;
 	ent->s.modelindex2 = 0;
 	ent->s.modelindex3 = 0;
-	ent->s.modelindex = 0;
+	ent->s.modelindex4 = 0;
+#ifdef KMQUAKE2_ENGINE_MOD
+	ent->s.modelindex5 = 0;
+	ent->s.modelindex6 = 0;
+#endif
 	ent->s.effects = 0;
 	ent->s.sound = 0;
 	ent->solid = SOLID_NOT;

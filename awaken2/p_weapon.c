@@ -1018,7 +1018,7 @@ void Weapon_RocketLauncher(edict_t *self)
 RAILGUN
 ======================================================================
 */
-void Weapon_Railgun_Fire(edict_t *self)
+void Weapon_Railgun_Fire (edict_t *self)
 {
 	vec3_t	start;
 	vec3_t	forward;
@@ -1026,6 +1026,8 @@ void Weapon_Railgun_Fire(edict_t *self)
 	vec3_t	offset;
 	int		damage;
 	int		kick = 200;
+	int			red=20, green=48, blue=176;
+	qboolean	useColor=false;
 
 //	Set damage and kick values.
 
@@ -1034,6 +1036,15 @@ void Weapon_Railgun_Fire(edict_t *self)
 	{
 		damage *= (int)sv_quad_factor->value;
 		kick *= (int)sv_quad_factor->value;
+	}
+
+	// Knightmare- custom client color
+	if ( self->client && (self->client->pers.color1[3] != 0) )
+	{
+		useColor = true;
+		red = self->client->pers.color1[0];
+		green = self->client->pers.color1[1];
+		blue = self->client->pers.color1[2];
 	}
 
 //	Set projectile start position and weapon kick info.
@@ -1047,7 +1058,7 @@ void Weapon_Railgun_Fire(edict_t *self)
 
 //	Fire!
 
-	Fire_Rail(self, start, forward, damage, kick);
+	Fire_Rail (self, start, forward, damage, kick, useColor, red, green, blue);
 	gi.WriteByte(svc_muzzleflash);
 	gi.WriteShort(self-g_edicts);
 	gi.WriteByte(MZ_RAILGUN | is_silenced);

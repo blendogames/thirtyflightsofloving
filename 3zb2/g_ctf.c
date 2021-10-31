@@ -12,7 +12,7 @@ typedef struct ctfgame_s
 qboolean bots_moveok ( edict_t *ent,float ryaw,vec3_t pos,float dist,float *bottom);
 //PON
 ctfgame_t ctfgame;
-qboolean techspawn = false;
+qboolean techs_spawned = false;
 
 cvar_t *ctf;
 cvar_t *ctf_forcejoin;
@@ -140,8 +140,10 @@ char *ctf_statusbar =
 "endif"
 ;
 
+#define TECHTYPES 6
+
 static char *tnames[] = {
-	"item_tech1", "item_tech2", "item_tech3", "item_tech4",
+	"item_tech1", "item_tech2", "item_tech3", "item_tech4", "item_tech5", "item_tech6",
 	NULL
 };
 
@@ -242,7 +244,7 @@ static qboolean loc_CanSee (edict_t *targ, edict_t *inflictor)
 static gitem_t *flag1_item;
 static gitem_t *flag2_item;
 
-void CTFInit(void)
+void CTFInit (void)
 {
 	ctf = gi.cvar("ctf", "0", CVAR_SERVERINFO);
 	ctf_forcejoin = gi.cvar("ctf_forcejoin", "", 0);
@@ -252,20 +254,48 @@ void CTFInit(void)
 	if (!flag2_item)
 		flag2_item = FindItemByClassname("item_flag_team2");
 	memset(&ctfgame, 0, sizeof(ctfgame));
-	techspawn = false;
+	techs_spawned = false;
 }
 
 /*--------------------------------------------------------------------------*/
 
-char *CTFTeamName(int team)
+char *CTFTeamName (int team)
 {
 	switch (team) {
 	case CTF_TEAM1:
 		return "RED";
 	case CTF_TEAM2:
 		return "BLUE";
+//	case CTF_TEAM3:
+//		return "GREEN"; // Knightmare added
 	}
 	return "UKNOWN";
+}
+
+// Knightmare added
+int PlayersOnCTFTeam (int checkteam)
+{
+	int i, total = 0;
+	for (i = 0; i < maxclients->value; i++)
+	{
+		if (!g_edicts[i+1].inuse)
+			continue;
+		if (game.clients[i].resp.ctf_team == checkteam)
+			total++;
+	}
+	return total;
+}
+
+// Knightmare added
+int CTFFlagTeam (gitem_t *flag)
+{
+	if (flag == flag1_item)
+		return CTF_TEAM1;
+	else if (flag == flag2_item)
+		return CTF_TEAM2;
+//	else if (flag == flag3_item)
+//		return CTF_TEAM3;
+	return CTF_NOTEAM; // invalid flag
 }
 
 char *CTFOtherTeamName(int team)
@@ -275,9 +305,25 @@ char *CTFOtherTeamName(int team)
 		return "BLUE";
 	case CTF_TEAM2:
 		return "RED";
+//	case CTF_TEAM3: // Knightmare added
+//		return "RED";
 	}
 	return "UKNOWN";
 }
+
+// Knightmare added
+/*char *CTFOtherTeamName2 (int team)
+{
+	switch (team) {
+	case CTF_TEAM1:
+		return "GREEN";
+	case CTF_TEAM2:
+		return "GREEN";
+	case CTF_TEAM3: // Knightmare added
+		return "BLUE";
+	}
+	return "UNKNOWN"; // Hanzo pointed out this was spelled wrong as "UKNOWN"
+} */
 
 int CTFOtherTeam(int team)
 {
@@ -286,9 +332,24 @@ int CTFOtherTeam(int team)
 		return CTF_TEAM2;
 	case CTF_TEAM2:
 		return CTF_TEAM1;
+//	case CTF_TEAM3: // Knightmare added
+//		return CTF_TEAM1;
 	}
 	return -1; // invalid value
 }
+
+/*int CTFOtherTeam2 (int team)
+{
+	switch (team) {
+	case CTF_TEAM1:
+		return CTF_TEAM3;
+	case CTF_TEAM2:
+		return CTF_TEAM3;
+	case CTF_TEAM3: // Knightmare added
+		return CTF_TEAM2;
+	}
+	return -1; // invalid value
+} */
 
 /*--------------------------------------------------------------------------*/
 
@@ -662,7 +723,7 @@ qboolean CTFPickup_Flag(edict_t *ent, edict_t *other)
 		ctf_team = CTF_TEAM2;
 	else {
 		if (!(ent->svflags & SVF_MONSTER))
-		gi.cprintf(ent, PRINT_HIGH, "Don't know what team the flag is on.\n");
+			gi.cprintf(ent, PRINT_HIGH, "Don't know what team the flag is on.\n");
 		return false;
 	}
 
@@ -738,6 +799,16 @@ qboolean CTFPickup_Flag(edict_t *ent, edict_t *other)
 	}
 
 	// hey, its not our flag, pick it up
+
+	// Knightmare- added disable pickup option
+	if (!allow_flagpickup->value && PlayersOnCTFTeam (ctf_team) == 0) {
+		if (level.time - other->client->ctf_lasttechmsg > 2) {
+			gi.centerprintf (other, "Not allowed to take empty teams' flags!");
+			other->client->ctf_lasttechmsg = level.time;
+		}
+		return false;
+	}
+
 	gi.bprintf(PRINT_HIGH, "%s got the %s flag!\n",
 		other->client->pers.netname, CTFTeamName(ctf_team));
 	other->client->resp.score += CTF_FLAG_BONUS;
@@ -810,17 +881,78 @@ void CTFDeadDropFlag(edict_t *self)
 
 qboolean CTFDrop_Flag(edict_t *ent, gitem_t *item)
 {
-	if (rand() & 1) 
+	edict_t *dropped = NULL;
+
+	// Knightmare changed this
+	if (!allow_flagdrop->value)
 	{
-		if (!(ent->svflags & SVF_MONSTER))
-		gi.cprintf(ent, PRINT_HIGH, "Only lusers drop flags.\n");
+		if (rand() & 1) 
+		{
+			if (!(ent->svflags & SVF_MONSTER))
+				gi.cprintf(ent, PRINT_HIGH, "Only losers drop flags.\n");
+		}
+		else
+		{
+			if (!(ent->svflags & SVF_MONSTER))
+				gi.cprintf(ent, PRINT_HIGH, "Winners don't drop flags.\n");
+		}
+		return false;
 	}
 	else
 	{
-		if (!(ent->svflags & SVF_MONSTER))
-		gi.cprintf(ent, PRINT_HIGH, "Winners don't drop flags.\n");
+		if (ent->client->pers.inventory[ITEM_INDEX(flag1_item)]) 
+		{
+			dropped = Drop_Item(ent, flag1_item);
+			ent->client->pers.inventory[ITEM_INDEX(flag1_item)] = 0;
+			gi.cprintf(ent, PRINT_HIGH, "%s dropped the RED flag!\n", ent->client->pers.netname);
+			if (dropped) {
+				// hack the velocity to make it bounce random
+				dropped->velocity[0] = (rand() % 600) - 300;
+				dropped->velocity[1] = (rand() % 600) - 300;
+				dropped->think = CTFDropFlagThink;
+				dropped->nextthink = level.time + CTF_AUTO_FLAG_RETURN_TIMEOUT;
+				dropped->touch = CTFDropFlagTouch;
+				dropped->timestamp = level.time;
+				dropped->touch_debounce_time = level.time + 1.0;
+				dropped->owner = ent; 
+			}
+		}
+		if (ent->client->pers.inventory[ITEM_INDEX(flag2_item)]) 
+		{
+			dropped = Drop_Item(ent, flag2_item);
+			ent->client->pers.inventory[ITEM_INDEX(flag2_item)] = 0;
+			gi.cprintf(ent, PRINT_HIGH, "%s dropped the BLUE flag!\n", ent->client->pers.netname);
+			if (dropped) {
+				// hack the velocity to make it bounce random
+				dropped->velocity[0] = (rand() % 600) - 300;
+				dropped->velocity[1] = (rand() % 600) - 300;
+				dropped->think = CTFDropFlagThink;
+				dropped->nextthink = level.time + CTF_AUTO_FLAG_RETURN_TIMEOUT;
+				dropped->touch = CTFDropFlagTouch;
+				dropped->timestamp = level.time;
+				dropped->touch_debounce_time = level.time + 1.0;
+				dropped->owner = ent; 
+			}
+		}
+	/*	if (ent->client->pers.inventory[ITEM_INDEX(flag3_item)]) 
+		{
+			dropped = Drop_Item(ent, flag3_item);
+			ent->client->pers.inventory[ITEM_INDEX(flag3_item)] = 0;
+			gi.cprintf(ent, PRINT_HIGH, "%s dropped the GREEN flag!\n", ent->client->pers.netname);
+			if (dropped) {
+				// hack the velocity to make it bounce random
+				dropped->velocity[0] = (rand() % 600) - 300;
+				dropped->velocity[1] = (rand() % 600) - 300;
+				dropped->think = CTFDropFlagThink;
+				dropped->nextthink = level.time + CTF_AUTO_FLAG_RETURN_TIMEOUT;
+				dropped->touch = CTFDropFlagTouch;
+				dropped->timestamp = level.time;
+				dropped->touch_debounce_time = level.time + 1.0;
+				dropped->owner = ent; 
+			}
+		} */
+		return true;
 	}
-	return false;
 }
 
 static void CTFFlagThink(edict_t *ent)
@@ -977,7 +1109,7 @@ static void CTFSetIDView(edict_t *ent)
 			CS_PLAYERSKINS + (best - g_edicts - 1);
 }
 
-void SetCTFStats(edict_t *ent)
+void SetCTFStats (edict_t *ent)
 {
 	gitem_t *tech;
 	int i;
@@ -1937,7 +2069,70 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer)
 /* TECH																	  */
 /*------------------------------------------------------------------------*/
 
-void CTFHasTech(edict_t *who)
+void Apply_Tech_Shell (gitem_t *item, edict_t *ent)
+{
+	ent->s.renderfx = RF_GLOW;
+
+	if (use_lithiumtechs->value)
+	{
+		ent->s.modelindex = gi.modelindex ("models/items/keys/pyramid/tris.md2");
+		ent->item->world_model = "models/items/keys/pyramid/tris.md2";
+		ent->item->icon = "k_pyramid";
+	}
+	else
+	{
+		if (!strcmp(item->classname, "item_tech1")) {
+			ent->s.modelindex = gi.modelindex ("models/ctf/resistance/tris.md2");
+			ent->item->world_model = "models/ctf/resistance/tris.md2";
+			ent->item->icon = "tech1";
+		}
+		else if (!strcmp(item->classname, "item_tech2")) {
+			ent->s.modelindex = gi.modelindex ("models/ctf/strength/tris.md2");
+			ent->item->world_model = "models/ctf/strength/tris.md2";
+			ent->item->icon = "tech2";
+		}
+		else if (!strcmp(item->classname, "item_tech3")) {
+			ent->s.modelindex = gi.modelindex ("models/ctf/haste/tris.md2");
+			ent->item->world_model = "models/ctf/haste/tris.md2";
+			ent->item->icon = "tech3";
+		}
+		else if (!strcmp(item->classname, "item_tech4")) {
+			ent->s.modelindex = gi.modelindex ("models/ctf/regeneration/tris.md2");
+			ent->item->world_model = "models/ctf/regeneration/tris.md2";
+			ent->item->icon = "tech4";
+		}
+		else if (!strcmp(item->classname, "item_tech5")) {
+			ent->s.modelindex = gi.modelindex ("models/ctf/vampire/tris.md2");
+			ent->item->world_model = "models/ctf/vampire/tris.md2";
+			ent->item->icon = "tech5";
+		}
+		else if (!strcmp(item->classname, "item_tech6")) {
+			ent->s.modelindex = gi.modelindex ("models/ctf/ammogen/tris.md2");
+			ent->item->world_model = "models/ctf/ammogen/tris.md2";
+			ent->item->icon = "tech6";
+		}
+	}
+
+	if (!use_coloredtechs->value && !use_lithiumtechs->value)
+		return;
+
+	if (!strcmp(item->classname, "item_tech1")) // resist
+		ent->s.effects |= EF_QUAD;
+	else if (!strcmp(item->classname, "item_tech2")) // strength
+		ent->s.effects |= EF_PENT;
+	else if (!strcmp(item->classname, "item_tech3")) // haste
+		ent->s.effects |= EF_DOUBLE;
+	else if (!strcmp(item->classname, "item_tech4")) { // regen
+		ent->s.effects |= EF_COLOR_SHELL;
+		ent->s.renderfx = RF_SHELL_GREEN; 
+	}
+	else if (!strcmp(item->classname, "item_tech5")) // vampire
+		ent->s.effects |= EF_QUAD | EF_PENT;
+	else if (!strcmp(item->classname, "item_tech6")) // ammogen
+		ent->s.effects |= EF_HALF_DAMAGE;
+}
+
+void CTFHasTech (edict_t *who)
 {
 	if (who->svflags & SVF_MONSTER) return ;
 	if (level.time - who->client->ctf_lasttechmsg > 2) {
@@ -1946,7 +2141,7 @@ void CTFHasTech(edict_t *who)
 	}
 }
 
-gitem_t *CTFWhat_Tech(edict_t *ent)
+gitem_t *CTFWhat_Tech (edict_t *ent)
 {
 	gitem_t *tech;
 	int i;
@@ -1968,7 +2163,8 @@ qboolean CTFPickup_Tech (edict_t *ent, edict_t *other)
 	int i;
 
 	i = 0;
-	while (tnames[i]) {
+	while (tnames[i])
+	{
 		if ((tech = FindItemByClassname(tnames[i])) != NULL &&
 			other->client->pers.inventory[ITEM_INDEX(tech)]) {
 			CTFHasTech(other);
@@ -1984,6 +2180,15 @@ qboolean CTFPickup_Tech (edict_t *ent, edict_t *other)
 }
 
 static void SpawnTech(gitem_t *item, edict_t *spot);
+
+void CTFTechTouch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
+{
+	//owner (who dropped us) can't touch for two secs
+	if ((other == ent->owner) && (level.time < ent->touch_debounce_time))
+		return;
+
+	Touch_Item (ent, other, plane, surf);
+}
 
 static edict_t *FindTechSpawn(void)
 {
@@ -2004,30 +2209,44 @@ static void TechThink(edict_t *tech)
 	if ((spot = FindTechSpawn()) != NULL) {
 		SpawnTech(tech->item, spot);
 		G_FreeEdict(tech);
-	} else {
+	}
+	else {
 		tech->nextthink = level.time + CTF_TECH_TIMEOUT;
 		tech->think = TechThink;
 	}
 }
 
-void CTFDrop_Tech(edict_t *ent, gitem_t *item)
+void CTFDrop_Tech (edict_t *ent, gitem_t *item)
 {
 	edict_t *tech;
 
+	if (!allow_techdrop->value)
+		return;
+
 	tech = Drop_Item(ent, item);
-	tech->nextthink = level.time + CTF_TECH_TIMEOUT;
+	tech->nextthink = level.time + tech_life->value;	// was CTF_TECH_TIMEOUT
 	tech->think = TechThink;
+
+	if (allow_techpickup->value)
+	{
+		tech->touch = CTFTechTouch;
+		tech->touch_debounce_time = level.time + 1.0;
+	}
+
 	ent->client->pers.inventory[ITEM_INDEX(item)] = 0;
+
+	Apply_Tech_Shell (item, tech);
 }
 
-void CTFDeadDropTech(edict_t *ent)
+void CTFDeadDropTech (edict_t *ent)
 {
 	gitem_t *tech;
 	edict_t *dropped;
 	int i;
 
 	i = 0;
-	while (tnames[i]) {
+	while (tnames[i])
+	{
 		if ((tech = FindItemByClassname(tnames[i])) != NULL &&
 			ent->client->pers.inventory[ITEM_INDEX(tech)]) {
 			dropped = Drop_Item(ent, tech);
@@ -2038,10 +2257,232 @@ void CTFDeadDropTech(edict_t *ent)
 			dropped->think = TechThink;
 			dropped->owner = NULL;
 			ent->client->pers.inventory[ITEM_INDEX(tech)] = 0;
+			Apply_Tech_Shell (tech, dropped);
 		}
 		i++;
 	}
 }
+
+#if 0
+// ScarFace- this function counts the number of runes in circulation
+int TechCount (void)
+{
+	gitem_t	*tech;
+	edict_t	*cl_ent;
+	edict_t	*mapent = NULL;
+	int i, j;
+	int count = 0;
+
+	mapent = g_edicts+1; // skip the worldspawn
+	// cycle through all ents to find techs
+	for (i = 1; i < globals.num_edicts; i++, mapent++)
+	{
+		if (!mapent->classname)
+			continue;
+
+		if (!strncmp(mapent->classname, "item_tech", 9))
+			count++;
+	}
+	// cycle through all players to find techs
+	for (i = 0; i < game.maxclients; i++)
+	{
+		cl_ent = g_edicts + 1 + i;
+		if (cl_ent->inuse)
+		{
+			j = 0;
+			while (tnames[j])
+			{
+				if ((tech = FindItemByClassname(tnames[j])) != NULL &&
+					cl_ent->client->pers.inventory[ITEM_INDEX(tech)])
+					count++;
+				j++;
+			}
+		}
+	}
+	return count;
+}
+
+int NumOfTech (int index)
+{
+	gitem_t	*tech;
+	edict_t	*cl_ent;
+	edict_t	*mapent = NULL;
+	int i;
+	int count = 0;
+	char techname [80];
+
+	mapent = g_edicts+1; // skip the worldspawn
+	// cycle through all ents to find techs
+	for (i = 1; i < globals.num_edicts; i++, mapent++)
+	{
+		if (!mapent->classname)
+			continue;
+
+		Com_sprintf(techname, sizeof(techname), "item_tech%d", index+1);
+		if (!strcmp(mapent->classname, techname))
+			count++;
+	}
+	// cycle through all players to find techs
+	for (i = 0; i < game.maxclients; i++)
+	{
+		cl_ent = g_edicts + 1 + i;
+		if (cl_ent->inuse)
+		{
+			if ((tech = FindItemByClassname(tnames[index])) != NULL &&
+				cl_ent->client->pers.inventory[ITEM_INDEX(tech)])
+				count++;
+		}
+	}
+//	gi.dprintf ("Number of tech%d in map: %d\n", index+1, count);
+	return count;
+}
+
+
+// ScarFace- a diagnostic function to display the number of runes in circulation
+void Cmd_TechCount_f (edict_t *ent)
+{
+	int count;
+	count = TechCount();
+	gi.dprintf ("Number of techs in game: %d\n", count);
+//	safe_cprintf(ent, PRINT_HIGH, "Number of techs in game: %d\n", count);
+}
+
+// ScarFace- spawn the additional runes
+void SpawnMoreTechs (int oldtechcount, int newtechcount, int numtechtypes)
+{
+	gitem_t	*tech;
+	edict_t	*spot;
+	int		i, j;
+
+//	gi.dprintf ("Number of techs in loop: %d\n", numtechtypes);
+	i = oldtechcount % numtechtypes;	// Spawn next tech in succession of the last one spawned
+	j = oldtechcount;					// Start with count at old tech 
+//	gi.dprintf ("tech number to start on: %d\n", (i+1));
+	while ( (j < numtechtypes) || ((j < tech_max->value) && (j < newtechcount)) )
+	{
+		while ( (tnames[i]) &&
+				((j < numtechtypes) || ((j < tech_max->value) && (j < newtechcount))) )
+		{
+			if (((tech = FindItemByClassname(tnames[i])) != NULL &&
+				 (spot = FindTechSpawn()) != NULL)
+				&& ((int)(tech_flags->value) & (0x1 << i)))
+			{
+			//	gi.dprintf ("Spawning tech%d\n", (i+1));
+				SpawnTech (tech, spot);
+				j++;
+			}
+			i++;
+		}
+		i = 0;
+	}
+//	gi.dprintf ("Current number of techs in game: %d\n", j);
+}
+
+// ScarFace- remove some runes
+void RemoveTechs (int oldtechcount, int newtechcount, int numtechtypes)
+{
+	edict_t	*mapent = NULL;
+	int		i, j, k;
+	int		removed;
+
+//	gi.dprintf ("Number of techs desired: %d\n", newtechcount);
+	// find the last tech added or the tech to be removed
+	if ((oldtechcount % numtechtypes) == 0)
+		i = TECHTYPES-1;
+	else {
+
+		for (i=TECHTYPES-1; i>=0; i--)
+			if ( NumOfTech(i) > (oldtechcount / numtechtypes)
+				|| !((int)(tech_flags->value) & (0x1 << i)) )
+				break;
+	}
+
+	j = oldtechcount;
+//	gi.dprintf ("tech number to start removing on: %d\n", (i+1));
+	while ((tnames[i]) && (j > newtechcount)) //leave at least 1 of each tech
+	{
+		removed = 0; //flag to remove only one tech per pass
+		mapent = g_edicts+1; //skip the worldspawn
+		for (k = 1; k < globals.num_edicts; k++, mapent++)
+		{
+			if (!mapent->classname)
+				continue;
+			if (!strcmp(mapent->classname, tnames[i]))
+			{
+				//gi.dprintf ("Removing tech%d\n", (i+1));
+				G_FreeEdict (mapent);
+				j--;
+				removed = 1;
+			}
+			if (removed == 1) //don't keep removing techs of this type
+				break;
+		}
+		// If we can't find this tech in map, wait until a player drops it instead of removing others
+		if (removed == 0)
+			return;
+		i--;
+	}
+//	gi.dprintf ("Current number of techs in game: %d\n", j);
+}
+
+// ScarFace- this function checks to see if we need to spawn or remove runes
+void CheckNumTechs (void)
+{
+	edict_t	*cl_ent;
+	int		i, numclients;
+	int		newtechcount, numtechs, techbits;
+	int		numtechtypes = 0;
+
+	if ( !deathmatch->value || (level.time <= 0) ) // don't run while no in map
+		return;
+
+	if ( !use_techs->value || (ctf->value && ((int)dmflags->value & DF_CTF_NO_TECH)) )
+		return;
+	
+	// clamp tech_flags to valid range
+	techbits = (int)(tech_flags->value);
+	if (techbits < 1 || techbits > 63) {
+		gi.dprintf ("Invalid tech_flags, setting default of 15.\n");
+		gi.cvar_forceset("tech_flags", "15");
+	}
+
+	// count number of tech types enabled
+	i = 0;
+	while (tnames[i]) {
+		if ((int)(tech_flags->value) & (0x1 << i))
+			numtechtypes++;
+		i++;
+	}
+
+	// count num of clients
+	numclients = 0;
+	for (i = 0; i < game.maxclients; i++)
+	{
+		cl_ent = g_edicts + 1 + i;
+		if (cl_ent->inuse)
+			numclients++;
+	}
+
+	newtechcount = tech_perplayer->value * numclients;
+	if (newtechcount > tech_max->value) // cap at tech_max
+		newtechcount = tech_max->value;
+	if (newtechcount < numtechtypes) // leave at least 1 of each enabled tech
+		newtechcount = numtechtypes;
+	numtechs = TechCount();
+	if (newtechcount > numtechs)
+	{
+	//	gi.dprintf ("Number of techs to spawn: %d\n", newtechcount);
+		gi.dprintf ("CheckNumTech: spawning more techs (numtechs = %d, newtechcount=%d, numtechtypes=%d).\n", numtechs, newtechcount, numtechtypes);
+		SpawnMoreTechs (numtechs, newtechcount, numtechtypes);
+	}
+	if (newtechcount < numtechs)
+	{
+	//	gi.dprintf ("Number of techs to spawn: %d\n", newtechcount);
+		gi.dprintf ("CheckNumTech: removing techs (numtechs = %d, newtechcount=%d, numtechtypes=%d).\n", numtechs, newtechcount, numtechtypes);
+		RemoveTechs (numtechs, newtechcount, numtechtypes);
+	}
+}
+#endif
 
 static void SpawnTech (gitem_t *item, edict_t *spot)
 {
@@ -2058,7 +2499,10 @@ static void SpawnTech (gitem_t *item, edict_t *spot)
 	ent->item = item;
 	ent->spawnflags = DROPPED_ITEM;
 	ent->s.effects = item->world_model_flags;
-	ent->s.renderfx = RF_GLOW;
+
+	Apply_Tech_Shell (item, ent);
+
+//	ent->s.renderfx = RF_GLOW;
 	VectorSet (ent->mins, -15, -15, -15);
 	VectorSet (ent->maxs, 15, 15, 15);
 	if (ent->item->world_model)	//PONKO
@@ -2078,7 +2522,7 @@ static void SpawnTech (gitem_t *item, edict_t *spot)
 	VectorScale (forward, 100, ent->velocity);
 	ent->velocity[2] = 300;
 
-	ent->nextthink = level.time + CTF_TECH_TIMEOUT;
+	ent->nextthink = level.time + tech_life->value;	// was CTF_TECH_TIMEOUT
 	ent->think = TechThink;
 
 	gi.linkentity (ent);
@@ -2086,14 +2530,23 @@ static void SpawnTech (gitem_t *item, edict_t *spot)
 
 static void SpawnTechs (edict_t *ent)
 {
-	gitem_t *tech;
-	edict_t *spot;
-	int i;
+	gitem_t	*tech;
+	edict_t	*spot;
+	int		i, techbits;
+
+	// clamp tech_flags to valid range
+	techbits = (int)(tech_flags->value);
+	if (techbits < 1 || techbits > 63) {
+		gi.dprintf ("Invalid tech_flags, setting default of 15.\n");
+		gi.cvar_forceset("tech_flags", "15");
+	}
 
 	i = 0;
-	while (tnames[i]) {
+	while (tnames[i])
+	{
 		if ((tech = FindItemByClassname(tnames[i])) != NULL &&
-			(spot = FindTechSpawn()) != NULL)
+			(spot = FindTechSpawn()) != NULL
+			&& ((int)tech_flags->value & (0x1 << i)) )
 			SpawnTech(tech, spot);
 		i++;
 	}
@@ -2113,13 +2566,14 @@ void CTFSetupTechSpawn (void)
 {
 	edict_t *ent;
 
-	if (techspawn || ((int)dmflags->value & DF_CTF_NO_TECH))
+	if (techs_spawned || ((int)dmflags->value & DF_CTF_NO_TECH))
+//	if (!use_techs->value || (ctf->value && ((int)dmflags->value & DF_CTF_NO_TECH)) )
 		return;
 
 	ent = G_Spawn();
 	ent->nextthink = level.time + 2;
 	ent->think = SpawnTechs;
-	techspawn = true;
+	techs_spawned = true;
 }
 
 int CTFApplyResistance(edict_t *ent, int dmg)
@@ -2135,7 +2589,7 @@ int CTFApplyResistance(edict_t *ent, int dmg)
 	if (dmg && tech && ent->client && ent->client->pers.inventory[ITEM_INDEX(tech)]) {
 		// make noise
 	   	gi.sound(ent, CHAN_VOICE, gi.soundindex("ctf/tech1.wav"), volume, ATTN_NORM, 0);
-		return dmg / 2;
+		return dmg / tech_resist->value;	// was 2
 	}
 	return dmg;
 }
@@ -2147,7 +2601,7 @@ int CTFApplyStrength(edict_t *ent, int dmg)
 	if (!tech)
 		tech = FindItemByClassname("item_tech2");
 	if (dmg && tech && ent->client && ent->client->pers.inventory[ITEM_INDEX(tech)]) {
-		return dmg * 2;
+		return dmg * tech_strength->value;	// was 2
 	}
 	return dmg;
 }
@@ -2224,23 +2678,43 @@ void CTFApplyRegeneration(edict_t *ent)
 
 	if (!tech)
 		tech = FindItemByClassname("item_tech4");
-	if (tech && client->pers.inventory[ITEM_INDEX(tech)]) {
-		if (client->ctf_regentime < level.time) {
+	if (tech && client->pers.inventory[ITEM_INDEX(tech)])
+	{
+		if (client->ctf_regentime < level.time)
+		{
 			client->ctf_regentime = level.time;
-			if (ent->health < 150) {
+			if (ent->health < tech_regen_health_max->value)		// was 150
+			{
 				ent->health += 5;
-				if (ent->health > 150)
-					ent->health = 150;
+				if (ent->health > tech_regen_health_max->value)	// was 150
+					ent->health = tech_regen_health_max->value;	// was 150
 				client->ctf_regentime += 0.5;
 				noise = true;
 			}
-			index = ArmorIndex (ent);
-			if (index && client->pers.inventory[index] < 150) {
-				client->pers.inventory[index] += 5;
-				if (client->pers.inventory[index] > 150)
-					client->pers.inventory[index] = 150;
-				client->ctf_regentime += 0.5;
-				noise = true;
+			if (tech_regen_armor->value)
+			{
+				index = ArmorIndex (ent);
+				if (index && client->pers.inventory[index] < tech_regen_armor_max->value)	// was 150
+				{
+					client->pers.inventory[index] += 5;
+					if (client->pers.inventory[index] > tech_regen_armor_max->value)	// was 150
+						client->pers.inventory[index] = tech_regen_armor_max->value;	// was 150
+					client->ctf_regentime += 0.5;
+					noise = true;
+				}
+				else if (tech_regen_armor_always->value)
+				{
+					index = combat_armor_index;
+					if (index && client->pers.inventory[index] < tech_regen_armor_max->value) 
+					{
+						client->pers.inventory[index] += 5;
+						if (client->pers.inventory[index] > tech_regen_armor_max->value)
+							client->pers.inventory[index] = tech_regen_armor_max->value;
+						client->ctf_regentime += 0.5;
+						noise = true;
+					}
+
+				}
 			}
 		}
 		if (noise && ent->client->ctf_techsndtime < level.time) {
@@ -2261,6 +2735,89 @@ qboolean CTFHasRegeneration(edict_t *ent)
 		return true;
 	return false;
 }
+
+// Knightmare added
+void CTFApplyVampire (edict_t *ent, int dmg)
+{
+	static gitem_t *tech = NULL;
+
+	//if (!deathmatch->value)
+	//	return;
+
+	if (!tech)
+		tech = FindItemByClassname("item_tech5");
+	if (dmg && tech && ent->client && ent->client->pers.inventory[ITEM_INDEX(tech)])
+	{
+		if (ent->health < tech_vampiremax->value)
+		{
+			ent->health += dmg * tech_vampire->value;
+			ent->health = min(ent->health, tech_vampiremax->value);
+		}
+		CTFApplyVampireSound(ent);
+	}
+}
+
+// Knightmare added
+void CTFApplyVampireSound (edict_t *ent)
+{
+	static gitem_t *tech = NULL;
+	float volume = 1.0;
+
+	if (ent->client && ent->client->silencer_shots)
+		volume = 0.2;
+
+	if (!tech)
+		tech = FindItemByClassname("item_tech5");
+	if (tech && ent->client &&
+		ent->client->pers.inventory[ITEM_INDEX(tech)] &&
+		ent->client->ctf_techsndtime < level.time) {
+		ent->client->ctf_techsndtime = level.time + 1;
+		gi.sound(ent, CHAN_VOICE, gi.soundindex("ctf/tech5.wav"), volume, ATTN_NORM, 0);
+	}
+}
+
+// Knightmare added
+void CTFApplyAmmogen (edict_t *attacker, edict_t *targ)
+{
+	static gitem_t *tech = NULL, *pack = NULL;
+
+	if (!deathmatch->value)
+		return;
+
+	if (!attacker || !targ)
+		return;
+
+	if (!tech)
+		tech = FindItemByClassname("item_tech6");
+	if (!pack)
+		pack = FindItemByClassname("item_ammogen_pack");
+	if (tech && pack && attacker->client && targ->client && attacker->client->pers.inventory[ITEM_INDEX(tech)])
+	{
+		Drop_Item(targ, pack);
+		CTFApplyAmmogenSound(attacker);
+	}
+}
+
+// Knightmare added
+void CTFApplyAmmogenSound (edict_t *ent)
+{
+	static gitem_t *tech = NULL;
+	float volume = 1.0;
+
+	if (ent->client && ent->client->silencer_shots)
+		volume = 0.2;
+
+	if (!tech)
+		tech = FindItemByClassname("item_tech6");
+	if (tech && ent->client &&
+		ent->client->pers.inventory[ITEM_INDEX(tech)] &&
+		ent->client->ctf_techsndtime < level.time)
+	{
+		ent->client->ctf_techsndtime = level.time + 1;
+		gi.sound(ent, CHAN_VOICE, gi.soundindex("ctf/tech6.wav"), volume, ATTN_NORM, 0);
+	}
+}
+
 
 /*
 ======================================================================

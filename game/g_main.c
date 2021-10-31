@@ -531,9 +531,6 @@ G_RunFrame
 Advances the world by 0.1 seconds
 ================
 */
-
-void CheckNumTechs(void);
-
 void G_RunFrame (void)
 {
 	int		i;
@@ -565,7 +562,7 @@ void G_RunFrame (void)
 		return;
 	}
 
-	if (use_techs->value || (ctf->value && !((int)dmflags->value & DF_CTF_NO_TECH)) )
+	if ( use_techs->value || (ctf->value && !((int)dmflags->value & DF_CTF_NO_TECH)) )
 		CheckNumTechs ();
 
 	//

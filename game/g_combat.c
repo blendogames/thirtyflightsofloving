@@ -927,7 +927,7 @@ void T_Damage (edict_t *in_targ, edict_t *inflictor, edict_t *in_attacker, vec3_
 	else
 		te_sparks = TE_SPARKS;
 
-	VectorNormalize(dir);
+	VectorNormalize (dir);
 
 // bonus damage for suprising a monster
 	if (!(dflags & DAMAGE_RADIUS) && (targ->svflags & SVF_MONSTER) && (attacker->client) && (!targ->enemy) && (targ->health > 0))
@@ -935,11 +935,11 @@ void T_Damage (edict_t *in_targ, edict_t *inflictor, edict_t *in_attacker, vec3_
 
 //ZOID
 //strength tech
-	damage = CTFApplyStrength(attacker, damage);
+	damage = CTFApplyStrength (attacker, damage);
 //ZOID
 
 	if (!OnSameTeam(targ, attacker))
-		CTFApplyVampire(attacker, damage);
+		CTFApplyVampire (attacker, damage);
 
 	if (targ->flags & FL_NO_KNOCKBACK)
 		knockback = 0;

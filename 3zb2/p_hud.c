@@ -13,15 +13,18 @@ void MoveClientToIntermission (edict_t *ent)
 {
 	if(!(ent->svflags & SVF_MONSTER))
 	{
-	ent->client->showscores = true;
-//	VectorCopy (level.intermission_origin, ent->s.origin);
-	ent->client->ps.pmove.origin[0] = level.intermission_origin[0]*8;
-	ent->client->ps.pmove.origin[1] = level.intermission_origin[1]*8;
-	ent->client->ps.pmove.origin[2] = level.intermission_origin[2]*8;
-	VectorCopy (level.intermission_angle, ent->client->ps.viewangles);
-	ent->client->ps.pmove.pm_type = PM_FREEZE;
-	ent->client->ps.gunindex = 0;
-	ent->client->ps.blend[3] = 0;
+		ent->client->showscores = true;
+	//	VectorCopy (level.intermission_origin, ent->s.origin);
+		ent->client->ps.pmove.origin[0] = level.intermission_origin[0]*8;
+		ent->client->ps.pmove.origin[1] = level.intermission_origin[1]*8;
+		ent->client->ps.pmove.origin[2] = level.intermission_origin[2]*8;
+		VectorCopy (level.intermission_angle, ent->client->ps.viewangles);
+		ent->client->ps.pmove.pm_type = PM_FREEZE;
+		ent->client->ps.gunindex = 0;
+#ifdef KMQUAKE2_ENGINE_MOD
+		ent->client->ps.gunindex2 = 0;
+#endif
+		ent->client->ps.blend[3] = 0;
 	}
 
 	VectorCopy (level.intermission_origin, ent->s.origin);
@@ -47,7 +50,11 @@ void MoveClientToIntermission (edict_t *ent)
 	ent->s.modelindex = 0;
 	ent->s.modelindex2 = 0;
 	ent->s.modelindex3 = 0;
-	ent->s.modelindex = 0;
+	ent->s.modelindex4 = 0;
+#ifdef KMQUAKE2_ENGINE_MOD
+	ent->s.modelindex5 = 0;
+	ent->s.modelindex6 = 0;
+#endif
 	ent->s.effects = 0;
 	ent->s.sound = 0;
 	ent->solid = SOLID_NOT;
@@ -413,7 +420,7 @@ void G_SetStats (edict_t *ent)
 		cells = ent->client->pers.inventory[ITEM_INDEX(Fdi_CELLS/*FindItem ("cells")*/)];
 		if (cells == 0)
 		{	// ran out of cells for power armor
-			ent->flags &= ~FL_POWER_ARMOR;
+			ent->flags &= ~(FL_POWER_SHIELD|FL_POWER_SCREEN);
 			gi.sound(ent, CHAN_ITEM, gi.soundindex("misc/power2.wav"), 1, ATTN_NORM, 0);
 			power_armor_type = 0;;
 		}
