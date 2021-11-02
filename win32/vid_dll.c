@@ -562,10 +562,16 @@ qboolean VID_GetModeInfo (int *width, int *height, int mode)
 	// desktop-resolution display mode
 	if ( r_mode_desktop->integer && (vid_fullscreen->integer >= 2) )
 	{
-		*width = GetSystemMetrics(SM_CXVIRTUALSCREEN);
-		*height = GetSystemMetrics(SM_CYVIRTUALSCREEN);
-		if ( (width == 0) || (height == 0) )
+		int		dskWidth=0, dskHeight=0;
+		dskWidth = GetSystemMetrics(SM_CXVIRTUALSCREEN);
+		dskHeight = GetSystemMetrics(SM_CYVIRTUALSCREEN);
+		// Check for API call failure
+		if ( (dskWidth == 0) || (dskHeight == 0) )
 			return false;
+
+		*width  = dskWidth;
+		*height = dskHeight;
+
 		return true;
 	}
 
