@@ -565,14 +565,13 @@ qboolean VID_GetModeInfo (int *width, int *height, int mode)
 		int		dskWidth=0, dskHeight=0;
 		dskWidth = GetSystemMetrics(SM_CXVIRTUALSCREEN);
 		dskHeight = GetSystemMetrics(SM_CYVIRTUALSCREEN);
-		// Check for API call failure
-		if ( (dskWidth == 0) || (dskHeight == 0) )
-			return false;
-
-		*width  = dskWidth;
-		*height = dskHeight;
-
-		return true;
+		// Check that API call succeeded
+		if ( (dskWidth > 0) && (dskHeight > 0) ) {
+			*width  = dskWidth;
+			*height = dskHeight;
+			return true;
+		}
+		// Fall back to r_mode if the above fails
 	}
 
 	if (mode == -1) // custom mode
