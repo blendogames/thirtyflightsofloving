@@ -38,7 +38,7 @@ void ActorTarget (edict_t *self, vec3_t target)
 
 	if (!self->enemy)
 	{
-		VectorClear(target);
+		VectorClear (target);
 		return;
 	}
 
@@ -49,9 +49,9 @@ void ActorTarget (edict_t *self, vec3_t target)
 
 	if (self->enemy->health > 0)
 	{
-		int		weapon;
-		trace_t	tr;
-		vec3_t	start;
+		int			weapon;
+		trace_t		tr;
+		vec3_t		start;
 		qboolean	can_see=false;
 
 		VectorCopy(self->s.origin,start);
@@ -113,11 +113,11 @@ void actorBlaster (edict_t *self)
 		return;
 
 	// Knightmare- select color and effect
-	if (sk_blaster_color->value == 2) {			// green
+	if ((int)sk_blaster_color->value == 2) {			// green
 		color = BLASTER_GREEN;
 		effect = (EF_BLASTER|EF_TRACKER);
 	}
-	else if (sk_blaster_color->value == 3) {	// blue
+	else if ((int)sk_blaster_color->value == 3) {	// blue
 		color = BLASTER_BLUE;
 #ifdef KMQUAKE2_ENGINE_MOD
 		effect = EF_BLASTER|EF_BLUEHYPERBLASTER;
@@ -126,7 +126,7 @@ void actorBlaster (edict_t *self)
 #endif
 	}
 #ifdef KMQUAKE2_ENGINE_MOD
-	else if (sk_blaster_color->value == 4) {	// red
+	else if ((int)sk_blaster_color->value == 4) {	// red
 		color = BLASTER_RED;
 		effect = EF_BLASTER|EF_IONRIPPER;
 	}
@@ -458,37 +458,38 @@ void actorGrenadeLauncher (edict_t *self)
 		float	drop;
 		float	last_error, last_up, v_error;
 		int		i;
+
 		VectorCopy (forward, target);	// save target point
 		// horizontal distance to target
-		x = sqrt( forward[0]*forward[0] + forward[1]*forward[1]);
-		cosa = sqrt(aim[0]*aim[0] + aim[1]*aim[1]);
+		x = sqrt( forward[0] * forward[0] + forward[1] * forward[1]);
+		cosa = sqrt(aim[0] * aim[0] + aim[1] * aim[1]);
 		// constant horizontal velocity (since grenades don't have drag)
 		vx = GRENADE_VELOCITY * cosa;
 		// time to reach target x
-		t = x/vx;
+		t = x / vx;
 		// in that time, grenade will drop this much:
-		drop = 0.5*sv_gravity->value*t*(t+FRAMETIME);
+		drop = 0.5 * sv_gravity->value * t * (t + FRAMETIME);
 		forward[2] = target[2] + drop;
 		// this is a good first cut, but incorrect since angle now changes, so
 		// horizontal speed changes
 		VectorCopy (forward, aim);
 		VectorNormalize (aim);
-		cosa = sqrt(aim[0]*aim[0] + aim[1]*aim[1]);
+		cosa = sqrt(aim[0] * aim[0] + aim[1] * aim[1]);
 		vx = GRENADE_VELOCITY * cosa;
-		t = x/vx;
-		y = GRENADE_VELOCITY*aim[2]*t - 0.5*sv_gravity->value*t*(t+FRAMETIME);
-		v_error = target[2]-y;
-		last_error = 2*v_error;
+		t = x / vx;
+		y = GRENADE_VELOCITY * aim[2] * t - 0.5 * sv_gravity->value * t * (t + FRAMETIME);
+		v_error = target[2] - y;
+		last_error = 2 * v_error;
 		for (i=0; i<10 && fabs(v_error) > 4 && fabs(v_error) < fabs(last_error); i++)
 		{
-			drop = 0.5*sv_gravity->value*t*(t+FRAMETIME);
+			drop = 0.5 * sv_gravity->value * t * (t + FRAMETIME);
 			forward[2] = target[2] + drop;
 			VectorCopy (forward, aim);
 			VectorNormalize (aim);
-			cosa = sqrt(aim[0]*aim[0] + aim[1]*aim[1]);
+			cosa = sqrt(aim[0] * aim[0] + aim[1] * aim[1]);
 			vx = GRENADE_VELOCITY * cosa;
-			t = x/vx;
-			y = GRENADE_VELOCITY*aim[2]*t - 0.5*sv_gravity->value*t*(t+FRAMETIME);
+			t = x / vx;
+			y = GRENADE_VELOCITY * aim[2] * t - 0.5 * sv_gravity->value * t * (t + FRAMETIME);
 			v_error = target[2]-y;
 			// If error is increasing... we can't get there from here and
 			// probably shouldn't be here in the first place. Too late now...
@@ -516,13 +517,13 @@ void actorGrenadeLauncher (edict_t *self)
 				// OK... the aim vector hit a solid, but would the grenade actually hit?
 				int		contents;
 
-				cosa = sqrt(aim[0]*aim[0] + aim[1]*aim[1]);
+				cosa = sqrt(aim[0] * aim[0] + aim[1] * aim[1]);
 				vx = GRENADE_VELOCITY * cosa;
 				VectorSubtract (tr.endpos, start, dist);
 				dist[2] = 0;
 				x = VectorLength(dist);
-				t = x/vx;
-				drop = 0.5*sv_gravity->value*t*(t+FRAMETIME);
+				t = x / vx;
+				drop = 0.5 * sv_gravity->value * t * (t + FRAMETIME);
 				tr.endpos[2] -= drop;
 				// move just a bit in the aim direction
 				tr.endpos[0] += aim[0];
@@ -537,13 +538,13 @@ void actorGrenadeLauncher (edict_t *self)
 					tr = gi.trace(start, vec3_origin, vec3_origin, target, self, MASK_SOLID);
 					if (tr.fraction < 1.0)
 					{
-						cosa = sqrt(aim[0]*aim[0] + aim[1]*aim[1]);
+						cosa = sqrt(aim[0] * aim[0] + aim[1] * aim[1]);
 						vx = GRENADE_VELOCITY * cosa;
 						VectorSubtract (tr.endpos, start, dist);
 						dist[2] = 0;
 						x = VectorLength(dist);
-						t = x/vx;
-						drop = 0.5*sv_gravity->value*t*(t+FRAMETIME);
+						t = x / vx;
+						drop = 0.5 * sv_gravity->value * t * (t + FRAMETIME);
 						tr.endpos[2] -= drop;
 						tr.endpos[0] += aim[0];
 						tr.endpos[1] += aim[1];
@@ -567,7 +568,7 @@ void actorGrenadeLauncher (edict_t *self)
 
 		VectorCopy (self->velocity, v1);
 		VectorNormalize (v1);
-		delta = -monster_speed/GRENADE_VELOCITY;
+		delta = -monster_speed / GRENADE_VELOCITY;
 		VectorMA (aim, delta, v1, aim);
 		VectorNormalize (aim);
 	}
@@ -646,12 +647,12 @@ void actorHyperblaster (edict_t *self)
 	else
 	{
 		// Knightmare- select color
-		if (sk_hyperblaster_color->value == 2)		// green
+		if ((int)sk_hyperblaster_color->value == 2)		// green
 			color = BLASTER_GREEN;
-		else if (sk_hyperblaster_color->value == 3)	// blue
+		else if ((int)sk_hyperblaster_color->value == 3)	// blue
 			color = BLASTER_BLUE;
 	#ifdef KMQUAKE2_ENGINE_MOD
-		else if (sk_hyperblaster_color->value == 4)	// red
+		else if ((int)sk_hyperblaster_color->value == 4)	// red
 			color = BLASTER_RED;
 	#endif
 		else										// standard yellow
@@ -664,12 +665,12 @@ void actorHyperblaster (edict_t *self)
 		VectorNormalize (forward);
 		if ((random() * 3) < 1)
 		{
-			if (sk_hyperblaster_color->value == 2)		// green
+			if ((int)sk_hyperblaster_color->value == 2)		// green
 				effect = (EF_HYPERBLASTER|EF_TRACKER);
-			else if (sk_hyperblaster_color->value == 3)	// blue
+			else if ((int)sk_hyperblaster_color->value == 3)	// blue
 				effect = EF_BLUEHYPERBLASTER;
 	#ifdef KMQUAKE2_ENGINE_MOD
-			else if (sk_hyperblaster_color->value == 4)	// red
+			else if ((int)sk_hyperblaster_color->value == 4)	// red
 				effect = EF_HYPERBLASTER|EF_IONRIPPER;
 	#endif
 			else										// standard yellow
@@ -812,7 +813,7 @@ void actorIonripper (edict_t *self)
 	vec3_t	start, target;
 	vec3_t	forward, right, up;
 	vec3_t	tempang;
-	int		damage;
+	int		damage, speed;
 
 	if (!self->enemy || !self->enemy->inuse)
 		return;
@@ -828,12 +829,10 @@ void actorIonripper (edict_t *self)
 
 	gi.positioned_sound(start, self, CHAN_WEAPON, gi.soundindex("weapons/rippfire.wav"), 1, ATTN_NORM, 0);
 
-	if (self->monsterinfo.aiflags & AI_TWO_GUNS)
-		damage = 40;
-	else
-		damage = 50;
+	damage = (self->monsterinfo.aiflags & AI_TWO_GUNS) ? 40 : 50;
+	speed = (int)sk_ionripper_speed->value;
 
-	fire_ionripper (self, start, forward, damage, 500, EF_IONRIPPER);
+	fire_ionripper (self, start, forward, damage, speed, EF_IONRIPPER);
 
 	if (developer->value)
 		TraceAimPoint (start, target);
@@ -843,7 +842,7 @@ void actorIonripper (edict_t *self)
 		G_ProjectSource2(self->s.origin, self->muzzle2, forward, right, up, start);
 		VectorSubtract (target, start, forward);
 		VectorNormalize (forward);
-		fire_ionripper (self, start, forward, damage, 500, EF_IONRIPPER);
+		fire_ionripper (self, start, forward, damage, speed, EF_IONRIPPER);
 	}
 }
 
@@ -852,15 +851,19 @@ void actorPhalanx (edict_t *self)
 {
 	vec3_t	start, target;
 	vec3_t	forward, right, up;
-	int		damage = 80;
-	float	damage_radius = 120;
-	int		radius_damage = 120;
+	int		damage, speed;
+	float	damage_radius = 120.0f;
+	int		radius_damage;
 
 	if (!self->enemy || !self->enemy->inuse)
 		return;
 
 	if (level.time >= self->monsterinfo.pausetime)
 		return;
+
+	damage = (self->monsterinfo.aiflags & AI_TWO_GUNS) ? 80 : 60;
+	speed = (int)sk_phalanx_speed->value;
+	radius_damage = (self->monsterinfo.aiflags & AI_TWO_GUNS) ? 90 : 120;
 
 	if (self->actor_gunframe == 2 || self->actor_gunframe == 3)
 	{
@@ -884,14 +887,14 @@ void actorPhalanx (edict_t *self)
 			forward[YAW] -= 1.5;
 			VectorNormalize (forward);
 
-			fire_phalanx_plasma (self, start, forward, damage, 725, damage_radius, radius_damage);
+			fire_phalanx_plasma (self, start, forward, damage, speed, damage_radius, radius_damage);
 		}
 		else
 		{
 			forward[YAW] += 1.5;
 			VectorNormalize (forward);
 
-			fire_phalanx_plasma (self, start, forward, damage, 725, damage_radius, radius_damage);
+			fire_phalanx_plasma (self, start, forward, damage, speed, damage_radius, radius_damage);
 
 			gi.positioned_sound(start, self, CHAN_WEAPON, gi.soundindex("weapons/plasshot.wav"), 1, ATTN_NORM, 0);
 
@@ -913,6 +916,7 @@ void actorETF_Rifle (edict_t *self)
 	int		damage;
 	float	damage_radius;
 	int		radius_damage;
+	int		speed;
 
 	if (!self->enemy || !self->enemy->inuse) {
 		self->monsterinfo.pausetime = 0;
@@ -930,15 +934,12 @@ void actorETF_Rifle (edict_t *self)
 
 	gi.positioned_sound(start, self, CHAN_WEAPON, gi.soundindex("weapons/nail1.wav"), 1, ATTN_NORM, 0);
 
-	if (self->monsterinfo.aiflags & AI_TWO_GUNS)
-		damage = 8;
-	else
-		damage = 10;
+	damage = (self->monsterinfo.aiflags & AI_TWO_GUNS) ? 8 : 10;
+	radius_damage = (self->monsterinfo.aiflags & AI_TWO_GUNS) ? 16 : 20;
+	damage_radius = 100.0f;
+	speed = (int)sk_etf_rifle_speed->value;
 
-	damage_radius = 100;
-	radius_damage = 20;
-
-	fire_flechette (self, start, forward, damage, 1500, damage_radius, radius_damage);
+	fire_flechette (self, start, forward, damage, speed, damage_radius, radius_damage);
 
 	if (developer->value)
 		TraceAimPoint (start, target);
@@ -949,7 +950,7 @@ void actorETF_Rifle (edict_t *self)
 		ActorTarget (self, target);
 		VectorSubtract (target, start, forward);
 		VectorNormalize (forward);
-		fire_flechette (self, start, forward, damage, 1500, damage_radius, radius_damage);
+		fire_flechette (self, start, forward, damage, speed, damage_radius, radius_damage);
 	}
 }
 
@@ -1005,7 +1006,7 @@ void actorDisintegrator (edict_t *self)
 {
 	vec3_t	start, target;
 	vec3_t	forward, right, up;
-	int		damage;
+	int		damage, speed;
 
 	if (!self->enemy || !self->enemy->inuse)
 		return;
@@ -1018,12 +1019,10 @@ void actorDisintegrator (edict_t *self)
 
 	gi.positioned_sound(start, self, CHAN_WEAPON, gi.soundindex("weapons/disint2.wav"), 1, ATTN_NORM, 0);
 
-	if (self->monsterinfo.aiflags & AI_TWO_GUNS)
-		damage = 30;
-	else
-		damage = 40;
+	damage = (self->monsterinfo.aiflags & AI_TWO_GUNS) ? 32 : 40;
+	speed = (int)sk_disruptor_speed->value;
 
-	fire_tracker (self, start, forward, damage, sk_disruptor_speed->value, self->enemy);
+	fire_tracker (self, start, forward, damage, speed, self->enemy);
 
 	if (developer->value)
 		TraceAimPoint (start, target);
@@ -1033,6 +1032,73 @@ void actorDisintegrator (edict_t *self)
 		G_ProjectSource2(self->s.origin, self->muzzle2, forward, right, up, start);
 		VectorSubtract (target, start, forward);
 		VectorNormalize (forward);
-		fire_tracker (self, start, forward, damage, sk_disruptor_speed->value, self->enemy);
+		fire_tracker (self, start, forward, damage, speed, self->enemy);
+	}
+}
+
+// Plasma Rifle (LMSP)
+void actorPlasmaRifle (edict_t *self)
+{
+	vec3_t		start, target;
+	vec3_t		forward, right, up;
+	vec3_t		angles, offset_r, offset_l, offsetSpread;
+	int			damage, speed;
+	float		dist, spreadWidth, bboxWidth;
+	qboolean	spread=false;
+
+	if (!self->enemy || !self->enemy->inuse)
+		return;
+
+	AngleVectors (self->s.angles, forward, right, up);
+	G_ProjectSource2 (self->s.origin, self->muzzle, forward, right, up, start);
+	ActorTarget (self, target);
+	VectorSubtract (target, start, forward);
+	dist = VectorLength (forward);
+	VectorNormalize (forward);
+
+	// Get spread from start to target for enemies, compare against bbox size
+	// Use spread mode if bbox size >= spread * 0.9
+	if (self->enemy->solid == SOLID_BBOX)
+	{
+		vectoangles (forward, angles);
+		// right spread, -10 yaw
+		angles[YAW] -= 10;
+		AngleVectors (angles, offset_r, NULL, NULL);
+		VectorScale (offset_r, dist, offset_r);
+		// left spread, +10 yaw
+		angles[YAW] += 20;
+		AngleVectors (angles, offset_l, NULL, NULL);
+		VectorScale (offset_l, dist, offset_l);
+		// Get distance between spread points at target range
+		VectorSubtract (offset_l, offset_r, offsetSpread);
+		spreadWidth = VectorLength (offsetSpread);
+		// Compare to enemy bbox size
+		bboxWidth = self->enemy->maxs[0] - self->enemy->mins[0];
+		if (bboxWidth >= (spreadWidth * 0.9f))
+			spread = true;
+	}
+
+	if (spread) {
+		damage = (self->monsterinfo.aiflags & AI_TWO_GUNS) ? 34 : 43;
+		speed = (int)sk_plasma_rifle_speed_spread->value;
+		gi.positioned_sound(start, self, CHAN_WEAPON, gi.soundindex(PLASMA_SOUND_FIRE2), 1, ATTN_NORM, 0);
+	}
+	else {
+		damage = (self->monsterinfo.aiflags & AI_TWO_GUNS) ? 48: 60;
+		speed = (int)sk_plasma_rifle_speed_bounce->value;
+		gi.positioned_sound(start, self, CHAN_WEAPON, gi.soundindex(PLASMA_SOUND_FIRE1), 1, ATTN_NORM, 0);
+	}
+
+	fire_plasma_rifle (self, start, forward, damage, speed, spread);
+
+	if (developer->value)
+		TraceAimPoint (start, target);
+
+	if (self->monsterinfo.aiflags & AI_TWO_GUNS)
+	{
+		G_ProjectSource2(self->s.origin, self->muzzle2, forward, right, up, start);
+		VectorSubtract (target, start, forward);
+		VectorNormalize (forward);
+		fire_plasma_rifle (self, start, forward, damage, speed, spread);
 	}
 }

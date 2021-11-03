@@ -353,19 +353,19 @@ void blaster_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *
 	}
 	else
 	{
-		if (self->style == BLASTER_GREEN) //green
+		if (self->style == BLASTER_GREEN) // green
 			tempevent = TE_BLASTER2;
-		else if (self->style == BLASTER_BLUE) //blue
+		else if (self->style == BLASTER_BLUE) // blue
 	#ifdef KMQUAKE2_ENGINE_MOD // Knightmare- looks better than flechette
 			tempevent =  TE_BLUEHYPERBLASTER;
 	#else
 			tempevent = TE_FLECHETTE;
 	#endif
 	#ifdef KMQUAKE2_ENGINE_MOD
-		else if (self->style == BLASTER_RED) //red
+		else if (self->style == BLASTER_RED) // red
 			tempevent =  TE_REDBLASTER;
 	#endif
-		else //standard yellow
+		else // standard yellow
 			tempevent = TE_BLASTER;
 
 		gi.WriteByte (svc_temp_entity);

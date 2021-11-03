@@ -727,20 +727,20 @@ void actor_fire (edict_t *self)
 		actorGrenadeLauncher (self);
 		break;
 	case 7:
-		actorRocket(self);
+		actorRocket (self);
 		break;
 	case 8:
-		actorHyperblaster(self);
+		actorHyperblaster (self);
 		if (level.time >= self->monsterinfo.pausetime)
 			self->monsterinfo.aiflags &= ~AI_HOLD_FRAME;
 		else
 			self->monsterinfo.aiflags |= AI_HOLD_FRAME;
 		break;
 	case 9:
-		actorRailGun(self);
+		actorRailGun (self);
 		break;
 	case 10:
-		actorBFG(self);
+		actorBFG (self);
 		if (level.time >= self->monsterinfo.pausetime)
 			self->monsterinfo.aiflags &= ~AI_HOLD_FRAME;
 		else
@@ -798,7 +798,7 @@ void actor_seekcover (edict_t *self)
 		actor_run (self);
 		return;
 	}
-	VectorCopy(self->mins,mins);
+	VectorCopy (self->mins, mins);
 	mins[2] += 18;
 	if (mins[2] > 0) mins[2] = 0;
 	VectorCopy (self->maxs, maxs);
@@ -1361,7 +1361,7 @@ void SP_misc_actor (edict_t *self)
 		self->actor_weapon[0] = 0;
 		self->actor_weapon[1] = -self->sounds;
 	}
-	else if (self->sounds < 10)
+	else if (self->sounds <= 10)
 	{
 		self->actor_weapon[0] = self->sounds;
 		self->actor_weapon[1] = 0;
@@ -1540,7 +1540,7 @@ void SP_misc_actor (edict_t *self)
 	{
 		int	weapon;
 		weapon = self->actor_weapon[0];
-		if (weapon == 6 || weapon == 7 || weapon == 10)
+		if ( (weapon == 6) || (weapon == 7) || (weapon == 10) )
 			self->monsterinfo.min_range = 200;
 		else
 			self->monsterinfo.min_range = 0;

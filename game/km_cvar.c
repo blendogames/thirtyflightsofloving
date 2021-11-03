@@ -381,5 +381,5 @@ void InitLithiumVars (void)
 	tech_regen_armor_always = gi.cvar("tech_regen_armor_always", "0", 0);
 	tech_vampire = gi.cvar("tech_vampire", "0.5", 0);
 	tech_vampiremax = gi.cvar("tech_vampiremax", "200", 0);
-	// end CTF Tech stuff
+	// end CTF stuff
 }

@@ -1145,7 +1145,7 @@ void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, in
 		else if (color == BLASTER_RED)
 			muzzleflash = MZ_REDHYPERBLASTER;
 	#endif
-		else //standard orange
+		else // standard orange
 			muzzleflash = MZ_HYPERBLASTER;
 	}
 	else
@@ -1162,7 +1162,7 @@ void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, in
 		else if (color == BLASTER_RED)
 			muzzleflash = MZ_REDBLASTER;
 	#endif
-		else //standard orange
+		else // standard orange
 			muzzleflash = MZ_BLASTER;
 	}
 

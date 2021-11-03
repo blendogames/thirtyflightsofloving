@@ -729,7 +729,7 @@ void actor_fire (edict_t *self)
 		actorGrenadeLauncher (self);
 		break;
 	case 7:
-		actorRocket(self);
+		actorRocket (self);
 		break;
 	case 8:
 		actorHyperblaster(self);
@@ -739,10 +739,10 @@ void actor_fire (edict_t *self)
 			self->monsterinfo.aiflags |= AI_HOLD_FRAME;
 		break;
 	case 9:
-		actorRailGun(self);
+		actorRailGun (self);
 		break;
 	case 10:
-		actorBFG(self);
+		actorBFG (self);
 		if (level.time >= self->monsterinfo.pausetime)
 			self->monsterinfo.aiflags &= ~AI_HOLD_FRAME;
 		else
@@ -752,28 +752,31 @@ void actor_fire (edict_t *self)
 		actorIonripper(self);
 		break;
 	case 12:
-		actorPhalanx(self);
+		actorPhalanx (self);
 		if (level.time >= self->monsterinfo.pausetime)
 			self->monsterinfo.aiflags &= ~AI_HOLD_FRAME;
 		else
 			self->monsterinfo.aiflags |= AI_HOLD_FRAME;
 		break;
 	case 13:
-		actorETF_Rifle(self);
+		actorETF_Rifle (self);
 		if (level.time >= self->monsterinfo.pausetime)
 			self->monsterinfo.aiflags &= ~AI_HOLD_FRAME;
 		else
 			self->monsterinfo.aiflags |= AI_HOLD_FRAME;
 		break;
 	case 14:
-		actorPlasmaBeam(self);
+		actorPlasmaBeam (self);
 		if (level.time >= self->monsterinfo.pausetime)
 			self->monsterinfo.aiflags &= ~AI_HOLD_FRAME;
 		else
 			self->monsterinfo.aiflags |= AI_HOLD_FRAME;
 		break;
 	case 15:
-		actorDisintegrator(self);
+		actorDisintegrator (self);
+		break;
+	case 16:
+		actorPlasmaRifle (self);
 		break;
 	}
 }
@@ -1056,6 +1059,10 @@ void actor_attack (edict_t *self)
 		self->monsterinfo.currentmove = attackmove;
 		self->monsterinfo.pausetime = level.time + 10 * FRAMETIME;
 		break;
+	case 16:
+		self->monsterinfo.currentmove = attackmove;
+		self->monsterinfo.pausetime = level.time + 10 * FRAMETIME;
+		break;
 	}
 }
 
@@ -1112,7 +1119,7 @@ qboolean actor_checkattack (edict_t *self)
 
 	weapon = self->actor_weapon[self->actor_current_weapon];
 	// If actor has no weapon, well then of course he should not attack
-	if (weapon < 1 || weapon > 15) // Knightmare- mission pack weapon support, was > 10
+	if (weapon < 1 || weapon > 16) // Knightmare- mission pack weapon support, was > 10
 			return false;
 
 	if (self->enemy->health > 0)
@@ -1336,6 +1343,7 @@ Ignored if health<0, unless flies=1. In that event, the initially dead actor wil
   1300 : ETF Rifle
   1400 : Plasma beam
   1500 : Disintegrator
+  1600 : Plasma Rifle (LMSP)
 "style" Specifies the 0-based index of the skin the actor will use. Default=0. The valid range for style is 0 to the number of skins referenced from within the model itself minus one. What number references what skin is dependent on the individual model. If the style value +1 exceeds the number of referenced skins, skin 0 will be used. The number of available skins for all player models distributed with Lazarus are given in the ActorPak documentation. 
 "target" targetname of the path_corner the actor will move to.
 "targetname" Name of the specific actor.
@@ -1466,7 +1474,7 @@ void SP_misc_actor (edict_t *self)
 		self->actor_weapon[0] = 0;
 		self->actor_weapon[1] = -self->sounds;
 	}
-	else if (self->sounds < 15) // Knightmare- added mission pack weapon support, was < 10
+	else if (self->sounds <= 16) // Knightmare- added mission pack weapon support, was <= 10
 	{
 		self->actor_weapon[0] = self->sounds;
 		self->actor_weapon[1] = 0;
@@ -1643,10 +1651,12 @@ void SP_misc_actor (edict_t *self)
 		self->monsterinfo.min_range = 0;
 	else
 	{
-		int	weapon;
+		int		weapon;
 		weapon = self->actor_weapon[0];
-		if (weapon == 6 || weapon == 7 || weapon == 10 || weapon == 12) // Knightmare- added phalanx support
+		if ( (weapon == 6) || (weapon == 7) || (weapon == 10) || (weapon == 12) ) // Knightmare- added phalanx support
 			self->monsterinfo.min_range = 200;
+		else if (weapon == 13)
+			self->monsterinfo.min_range = 100;		// Knightamre- min range for ETF rifle
 		else
 			self->monsterinfo.min_range = 0;
 	}
@@ -2140,6 +2150,8 @@ void actor_files (void)
 			case 13:	Com_strcat (filename, sizeof(filename), "w_etfrifle.md2");		break;
 			case 14:	Com_strcat (filename, sizeof(filename), "w_plasma.md2");		break;
 			case 15:	Com_strcat (filename, sizeof(filename), "w_disrupt.md2");		break;
+			// LMSP plasma rifle
+			case 16:	Com_strcat (filename, sizeof(filename), "w_plasmarifle.md2");	break;
 			// end Knightmare
 			default:	Com_strcat (filename, sizeof(filename), "w_blaster.md2");		break;
 			}
