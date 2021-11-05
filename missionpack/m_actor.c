@@ -824,7 +824,7 @@ void actor_seekcover (edict_t *self)
 	trace_t	trace1, trace2;
 
 	// No point in hiding from enemy if.. we don't have an enemy
-	if (!self->enemy || !self->enemy->inuse)
+	if ( !self->enemy || !self->enemy->inuse )
 	{
 		actor_run (self);
 		return;
@@ -835,14 +835,14 @@ void actor_seekcover (edict_t *self)
 		return;
 	}
 	// Don't hide from non-humanoid stuff
-	if (!self->enemy->client && !(self->enemy->svflags & SVF_MONSTER))
+	if ( !self->enemy->client && !(self->enemy->svflags & SVF_MONSTER) )
 	{
 		actor_run(self);
 		return;
 	}
 	// This shouldn't happen, we're just being cautious. Quit now if
 	// already chasing a "thing"
-	if (self->movetarget && !Q_stricmp(self->movetarget->classname,"thing"))
+	if ( self->movetarget && !Q_stricmp(self->movetarget->classname, "thing") )
 	{
 		actor_run (self);
 		return;
@@ -908,7 +908,7 @@ void actor_seekcover (edict_t *self)
 	}
 	if (best_dist < 32)
 	{
-		actor_run(self);
+		actor_run (self);
 		return;
 	}
 	// This snaps the angles, which may not be all that good but it sure
@@ -922,7 +922,7 @@ void actor_seekcover (edict_t *self)
 	self->movetarget = self->goalentity = thing;
 	self->monsterinfo.aiflags &= ~(AI_SOUND_TARGET | AI_STAND_GROUND | AI_TEMP_STAND_GROUND);
 	self->monsterinfo.aiflags |= (AI_SEEK_COVER | AI_CHASE_THING);
-	gi.linkentity(self);
+	gi.linkentity (self);
 	actor_run (self);
 }
 
@@ -1081,11 +1081,11 @@ void actor_attack (edict_t *self)
 		break;
 	case ACTOR_WEAP_DISRUPTOR:
 		self->monsterinfo.currentmove = attackmove;
-		self->monsterinfo.pausetime = level.time + 10 * FRAMETIME;
+		self->monsterinfo.pausetime = level.time + 9 * FRAMETIME;
 		break;
 	case ACTOR_WEAP_PLASMARIFLE:
 		self->monsterinfo.currentmove = attackmove;
-		self->monsterinfo.pausetime = level.time + 20 * FRAMETIME;
+		self->monsterinfo.pausetime = level.time + 18 * FRAMETIME;
 		break;
 	}
 }
@@ -1095,7 +1095,7 @@ void actor_use (edict_t *self, edict_t *other, edict_t *activator)
 	vec3_t	v;
 
 	self->goalentity = self->movetarget = G_PickTarget(self->target);
-	if ((!self->movetarget) || (strcmp(self->movetarget->classname, "target_actor") != 0))
+	if ( (!self->movetarget) || (strcmp(self->movetarget->classname, "target_actor") != 0) )
 	{
 		gi.dprintf ("%s has bad target %s at %s\n", self->classname, self->target, vtos(self->s.origin));
 		self->target = NULL;
@@ -1143,7 +1143,7 @@ qboolean actor_checkattack (edict_t *self)
 
 	weapon = self->actor_weapon[self->actor_current_weapon];
 	// If actor has no weapon, well then of course he should not attack
-	if (weapon < ACTOR_WEAP_FIRST || weapon > ACTOR_WEAP_LAST) // Knightmare- mission pack weapon support, was > 10
+	if ( (weapon < ACTOR_WEAP_FIRST) || (weapon > ACTOR_WEAP_LAST) ) // Knightmare- mission pack weapon support, was > 10
 			return false;
 
 	if (self->enemy->health > 0)
@@ -1173,7 +1173,7 @@ qboolean actor_checkattack (edict_t *self)
 		return true;
 	}
 	
-// missile attack
+	// missile attack
 	if (!self->monsterinfo.attack)
 		return false;
 
@@ -1189,7 +1189,7 @@ qboolean actor_checkattack (edict_t *self)
 	}
 	else
 	{
-		if (weapon >= 2 && weapon <= 5)
+		if ( (weapon >= ACTOR_WEAP_SHOTGUN) && (weapon <= ACTOR_WEAP_CHAINGUN) )
 		{
 			// Scatter guns - probability of firing based on percentage of rounds
 			// that will hit target at a given range.
@@ -1202,17 +1202,17 @@ qboolean actor_checkattack (edict_t *self)
 			poorchance = 0.01;
 			switch (weapon)
 			{
-			case 2: lorange=270; hirange=500; break;
-			case 3: lorange= 90; hirange=200; break;
-			case 4: lorange=450; hirange=628; break;
-			case 5: lorange=450; hirange=628; break;
+			case ACTOR_WEAP_SHOTGUN:	lorange = 270;	hirange = 500;	break;
+			case ACTOR_WEAP_SSHOTGUN:	lorange = 90;	hirange = 200;	break;
+			case ACTOR_WEAP_MACHINEGUN:	lorange = 450;	hirange = 628;	break;
+			case ACTOR_WEAP_CHAINGUN:	lorange = 450;	hirange = 628;	break;
 			}
 			if (range <= lorange)
 				chance = goodchance;
 			else if (range > hirange)
 				chance = poorchance;
 			else
-				chance = goodchance + (range-lorange)/(hirange-lorange)*(poorchance-goodchance);
+				chance = goodchance + (range - lorange) / (hirange - lorange) * (poorchance - goodchance);
 		}
 		else
 		{
@@ -1244,7 +1244,7 @@ qboolean actor_checkattack (edict_t *self)
 	if (random () < chance)
 	{
 		self->monsterinfo.attack_state = AS_MISSILE;
-		self->monsterinfo.attack_finished = level.time + 2*random();
+		self->monsterinfo.attack_finished = level.time + 2 * random();
 		return true;
 	}
 
@@ -1398,7 +1398,7 @@ void SP_misc_actor (edict_t *self)
 {
 	char	modelpath[256];
 	char	*p;
-	int		i;
+	int		i, weapon;
 	int		ActorID = 0;
 	size_t	modelSize;
 
@@ -1444,7 +1444,7 @@ void SP_misc_actor (edict_t *self)
 			ActorID = i+1;
 	}
 
-	if (!VectorLength(self->bleft) && !VectorLength(self->tright))
+	if ( !VectorLength(self->bleft) && !VectorLength(self->tright) )
 	{
 		switch (ActorID)
 		{
@@ -1509,7 +1509,7 @@ void SP_misc_actor (edict_t *self)
 		self->actor_weapon[1] = self->sounds % 100;
 	}
 
-	if (!VectorLength(self->muzzle))
+	if ( !VectorLength(self->muzzle) )
 	{
 		switch (ActorID)
 		{
@@ -1519,33 +1519,33 @@ void SP_misc_actor (edict_t *self)
 		case ACTOR_HUNTER:
 			switch (self->actor_weapon[0])
 			{
-			case  1: VectorSet (self->muzzle, 32, 5, 15);	break;
-			case  2: VectorSet (self->muzzle, 36, 5, 15);	break;
-			case  3: VectorSet (self->muzzle, 36, 5, 15);	break;
-			case  4: VectorSet (self->muzzle, 38, 4, 19);	break;
-			case  5: VectorSet (self->muzzle, 45, 4.5, 15);	break;
-			case  6: VectorSet (self->muzzle, 32, 5, 15);	break;
-			case  7: VectorSet (self->muzzle, 40, 5, 15);	break;
-			case  8: VectorSet (self->muzzle, 41, 4, 19);	break;
-			case  9: VectorSet (self->muzzle, 40, 4, 19);	break;
-			case 10: VectorSet (self->muzzle, 42, 5, 20);	break;
-			default: VectorSet (self->muzzle, 40, 4, 19);	break;
+			case ACTOR_WEAP_BLASTER:		VectorSet (self->muzzle, 32, 5, 15);	break;
+			case ACTOR_WEAP_SHOTGUN:		VectorSet (self->muzzle, 36, 5, 15);	break;
+			case ACTOR_WEAP_SSHOTGUN:		VectorSet (self->muzzle, 36, 5, 15);	break;
+			case ACTOR_WEAP_MACHINEGUN:		VectorSet (self->muzzle, 38, 4, 19);	break;
+			case ACTOR_WEAP_CHAINGUN:		VectorSet (self->muzzle, 45, 4.5, 15);	break;
+			case ACTOR_WEAP_GLAUNCHER:		VectorSet (self->muzzle, 32, 5, 15);	break;
+			case ACTOR_WEAP_RLAUCHER:		VectorSet (self->muzzle, 40, 5, 15);	break;
+			case ACTOR_WEAP_HYPERBLASTER:	VectorSet (self->muzzle, 41, 4, 19);	break;
+			case ACTOR_WEAP_RAILGUN:		VectorSet (self->muzzle, 40, 4, 19);	break;
+			case ACTOR_WEAP_BFG:			VectorSet (self->muzzle, 42, 5, 20);	break;
+			default:						VectorSet (self->muzzle, 40, 4, 19);	break;
 			}
 			break;
 		case ACTOR_PARANOID:
 			switch (self->actor_weapon[0])
 			{
-			case  1: VectorSet (self->muzzle, 18, 7, 10);	break;
-			case  2: VectorSet (self->muzzle, 22, 7, 10);	break;
-			case  3: VectorSet (self->muzzle, 22, 7, 10);	break;
-			case  4: VectorSet (self->muzzle, 18, 7, 12);	break;
-			case  5: VectorSet (self->muzzle, 26, 7, 16);	break;
-			case  6: VectorSet (self->muzzle, 24, 7, 10);	break;
-			case  7: VectorSet (self->muzzle, 26, 7, 10);	break;
-			case  8: VectorSet (self->muzzle, 18, 7, 14);	break;
-			case  9: VectorSet (self->muzzle, 28, 7, 10);	break;
-			case 10: VectorSet (self->muzzle, 28, 7, 10);	break;
-			default: VectorSet (self->muzzle, 28, 7, 10);	break;
+			case ACTOR_WEAP_BLASTER:		VectorSet (self->muzzle, 18, 7, 10);	break;
+			case ACTOR_WEAP_SHOTGUN:		VectorSet (self->muzzle, 22, 7, 10);	break;
+			case ACTOR_WEAP_SSHOTGUN:		VectorSet (self->muzzle, 22, 7, 10);	break;
+			case ACTOR_WEAP_MACHINEGUN:		VectorSet (self->muzzle, 18, 7, 12);	break;
+			case ACTOR_WEAP_CHAINGUN:		VectorSet (self->muzzle, 26, 7, 16);	break;
+			case ACTOR_WEAP_GLAUNCHER:		VectorSet (self->muzzle, 24, 7, 10);	break;
+			case ACTOR_WEAP_RLAUCHER:		VectorSet (self->muzzle, 26, 7, 10);	break;
+			case ACTOR_WEAP_HYPERBLASTER:	VectorSet (self->muzzle, 18, 7, 14);	break;
+			case ACTOR_WEAP_RAILGUN:		VectorSet (self->muzzle, 28, 7, 10);	break;
+			case ACTOR_WEAP_BFG:			VectorSet (self->muzzle, 28, 7, 10);	break;
+			default:						VectorSet (self->muzzle, 28, 7, 10);	break;
 			}
 			break;
 		case ACTOR_RATAMAHATTA:
@@ -1560,17 +1560,17 @@ void SP_misc_actor (edict_t *self)
 		case ACTOR_SLITH:
 			switch (self->actor_weapon[0])
 			{
-			case  1: VectorSet (self->muzzle, 32, 7, 10);	break;
-			case  2: VectorSet (self->muzzle, 32, 7, 10);	break;
-			case  3: VectorSet (self->muzzle, 32, 7, 10);	break;
-			case  4: VectorSet (self->muzzle, 25, 5, -1);	break;
-			case  5: VectorSet (self->muzzle, 25, 5, -1);	break;
-			case  6: VectorSet (self->muzzle, 32, 7, 10);	break;
-			case  7: VectorSet (self->muzzle, 32, 7, 10);	break;
-			case  8: VectorSet (self->muzzle, 12, 6, -1);	break;
-			case  9: VectorSet (self->muzzle, 32, 7, 10);	break;
-			case 10: VectorSet (self->muzzle, 20, 5, -1);	break;
-			default: VectorSet (self->muzzle, 32, 7, 10);	break;
+			case ACTOR_WEAP_BLASTER:		VectorSet (self->muzzle, 32, 7, 10);	break;
+			case ACTOR_WEAP_SHOTGUN:		VectorSet (self->muzzle, 32, 7, 10);	break;
+			case ACTOR_WEAP_SSHOTGUN:		VectorSet (self->muzzle, 32, 7, 10);	break;
+			case ACTOR_WEAP_MACHINEGUN:		VectorSet (self->muzzle, 25, 5, -1);	break;
+			case ACTOR_WEAP_CHAINGUN:		VectorSet (self->muzzle, 25, 5, -1);	break;
+			case ACTOR_WEAP_GLAUNCHER:		VectorSet (self->muzzle, 32, 7, 10);	break;
+			case ACTOR_WEAP_RLAUCHER:		VectorSet (self->muzzle, 32, 7, 10);	break;
+			case ACTOR_WEAP_HYPERBLASTER:	VectorSet (self->muzzle, 12, 6, -1);	break;
+			case ACTOR_WEAP_RAILGUN:		VectorSet (self->muzzle, 32, 7, 10);	break;
+			case ACTOR_WEAP_BFG:			VectorSet (self->muzzle, 20, 5, -1);	break;
+			default:						VectorSet (self->muzzle, 32, 7, 10);	break;
 			}
 			break;
 		case ACTOR_TERRAN:
@@ -1582,17 +1582,17 @@ void SP_misc_actor (edict_t *self)
 		case ACTOR_WASTE:
 			switch (self->actor_weapon[0])
 			{
-			case  1: VectorSet (self->muzzle, 12, 9, 9);	break;
-			case  2: VectorSet (self->muzzle, 22, 9, 9);	break;
-			case  3: VectorSet (self->muzzle, 20, 9, 9);	break;
-			case  4: VectorSet (self->muzzle, 11, 11, 7);	break;
-			case  5: VectorSet (self->muzzle, 26, 8, 8);	break;
-			case  6: VectorSet (self->muzzle, 18, 9, 7);	break;
-			case  7: VectorSet (self->muzzle, 26, 9, 7);	break;
-			case  8: VectorSet (self->muzzle, 26, 7.5, 8);	break;
-			case  9: VectorSet (self->muzzle, 26, 9, 7);	break;
-			case 10: VectorSet (self->muzzle, 22, 11, 7);	break;
-			default: VectorSet (self->muzzle, 26, 9, 7);	break;
+			case ACTOR_WEAP_BLASTER:		VectorSet (self->muzzle, 12, 9, 9);		break;
+			case ACTOR_WEAP_SHOTGUN:		VectorSet (self->muzzle, 22, 9, 9);		break;
+			case ACTOR_WEAP_SSHOTGUN:		VectorSet (self->muzzle, 20, 9, 9);		break;
+			case ACTOR_WEAP_MACHINEGUN:		VectorSet (self->muzzle, 11, 11, 7);	break;
+			case ACTOR_WEAP_CHAINGUN:		VectorSet (self->muzzle, 26, 8, 8);		break;
+			case ACTOR_WEAP_GLAUNCHER:		VectorSet (self->muzzle, 18, 9, 7);		break;
+			case ACTOR_WEAP_RLAUCHER:		VectorSet (self->muzzle, 26, 9, 7);		break;
+			case ACTOR_WEAP_HYPERBLASTER:	VectorSet (self->muzzle, 26, 7.5, 8);	break;
+			case ACTOR_WEAP_RAILGUN:		VectorSet (self->muzzle, 26, 9, 7);		break;
+			case ACTOR_WEAP_BFG:			VectorSet (self->muzzle, 22, 11, 7);	break;
+			default:						VectorSet (self->muzzle, 26, 9, 7);		break;
 			}
 			break;
 		case ACTOR_XENOID:
@@ -1601,31 +1601,31 @@ void SP_misc_actor (edict_t *self)
 		case ACTOR_ZUMLIN:
 			switch (self->actor_weapon[0])
 			{
-			case  1: VectorSet (self->muzzle, 22, 3, 8);	break;
-			case  2: VectorSet (self->muzzle, 20, 2, 9);	break;
-			case  3: VectorSet (self->muzzle, 20, 2, 9);	break;
-			case  4: VectorSet (self->muzzle, 8, 5, 4);		break;
-			case  5: VectorSet (self->muzzle, 22, 2, 4);	break;
-			case  6: VectorSet (self->muzzle, 20, 2, 7);	break;
-			case  7: VectorSet (self->muzzle, 30, 2, 9);	break;
-			case  8: VectorSet (self->muzzle, 20, 3, 2);	break;
-			case  9: VectorSet (self->muzzle, 26, 2, 9);	break;
-			case 10: VectorSet (self->muzzle, 16, 5, -2);	break;
-			default: VectorSet (self->muzzle, 26, 2, 9);	break;
+			case ACTOR_WEAP_BLASTER:		VectorSet (self->muzzle, 22, 3, 8);		break;
+			case ACTOR_WEAP_SHOTGUN:		VectorSet (self->muzzle, 20, 2, 9);		break;
+			case ACTOR_WEAP_SSHOTGUN:		VectorSet (self->muzzle, 20, 2, 9);		break;
+			case ACTOR_WEAP_MACHINEGUN:		VectorSet (self->muzzle, 8, 5, 4);		break;
+			case ACTOR_WEAP_CHAINGUN:		VectorSet (self->muzzle, 22, 2, 4);		break;
+			case ACTOR_WEAP_GLAUNCHER:		VectorSet (self->muzzle, 20, 2, 7);		break;
+			case ACTOR_WEAP_RLAUCHER:		VectorSet (self->muzzle, 30, 2, 9);		break;
+			case ACTOR_WEAP_HYPERBLASTER:	VectorSet (self->muzzle, 20, 3, 2);		break;
+			case ACTOR_WEAP_RAILGUN:		VectorSet (self->muzzle, 26, 2, 9);		break;
+			case ACTOR_WEAP_BFG:			VectorSet (self->muzzle, 16, 5, -2);	break;
+			default:						VectorSet (self->muzzle, 26, 2, 9);		break;
 			}
 			break;
 		default:
 			switch (self->actor_weapon[0])
 			{
-			case 4: VectorSet (self->muzzle, 6, 9, 6);			break;
-			case 5: VectorSet (self->muzzle, 20, 9, 8);			break;
-			case 8: VectorSet (self->muzzle, 18, 8, 6);			break;
-			default:VectorSet (self->muzzle, 18.4, 7.4, 9.6);	break;
+			case ACTOR_WEAP_MACHINEGUN:		VectorSet (self->muzzle, 6, 9, 6);			break;
+			case ACTOR_WEAP_CHAINGUN:		VectorSet (self->muzzle, 20, 9, 8);			break;
+			case ACTOR_WEAP_HYPERBLASTER:	VectorSet (self->muzzle, 18, 8, 6);			break;
+			default:						VectorSet (self->muzzle, 18.4, 7.4, 9.6);	break;
 			}
 		}
 	}
 
-	if (!VectorLength(self->muzzle2))
+	if ( !VectorLength(self->muzzle2) )
 	{
 		switch (ActorID)
 		{
@@ -1637,7 +1637,7 @@ void SP_misc_actor (edict_t *self)
 			break;
 		}
 	}
-	if (VectorLength(self->muzzle2))
+	if ( VectorLength(self->muzzle2) )
 		self->monsterinfo.aiflags |= AI_TWO_GUNS;
 
 	self->pain = actor_pain;
@@ -1663,7 +1663,7 @@ void SP_misc_actor (edict_t *self)
 	// There are several actions (mainly following a player leader) that
 	// are only applicable to misc_actor (not other monsters)
 	self->monsterinfo.aiflags |= AI_ACTOR;
-	if (!(self->spawnflags & SF_ACTOR_BAD_GUY) || (self->spawnflags & SF_MONSTER_GOODGUY))
+	if ( !(self->spawnflags & SF_ACTOR_BAD_GUY) || (self->spawnflags & SF_MONSTER_GOODGUY) )
 		self->monsterinfo.aiflags |= AI_GOOD_GUY;
 
 	if (self->powerarmor)
@@ -1680,12 +1680,12 @@ void SP_misc_actor (edict_t *self)
 		self->monsterinfo.min_range = 0;
 	else
 	{
-		int		weapon;
 		weapon = self->actor_weapon[0];
-		if ( (weapon == 6) || (weapon == 7) || (weapon == 10) || (weapon == 12) ) // Knightmare- added phalanx support
+		if ( (weapon == ACTOR_WEAP_GLAUNCHER) || (weapon == ACTOR_WEAP_RLAUCHER)
+			|| (weapon == ACTOR_WEAP_BFG) || (weapon == ACTOR_WEAP_PHALANX) ) // Knightmare- added phalanx support
 			self->monsterinfo.min_range = 200;
-		else if (weapon == 13)
-			self->monsterinfo.min_range = 100;		// Knightamre- min range for ETF rifle
+		else if (weapon == ACTOR_WEAP_ETFRIFLE)		// Knightamre- min range for ETF rifle
+			self->monsterinfo.min_range = 100;
 		else
 			self->monsterinfo.min_range = 0;
 	}
@@ -1706,7 +1706,7 @@ void SP_misc_actor (edict_t *self)
 	walkmonster_start (self);
 
 	// We've built the misc_actor model to include the standard
-	// Q2 male skins, specified with the style key. Default=grunt
+	// Q2 male skins, specified with the style key. Default = grunt
 	self->s.skinnum = self->style;
 
 	// actors always start in a dormant state, they *must* be used to get going
