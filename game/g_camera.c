@@ -33,13 +33,13 @@ void camera_off (edict_t *ent)
 		return;
     if (!ent->client->spycam)
 		return;
-	if(ent->client->spycam->viewer == ent)
+	if (ent->client->spycam->viewer == ent)
 		ent->client->spycam->viewer = NULL;
 
 	ent->client->spycam->flags &= ~FL_ROBOT;
-	if(ent->client->spycam->svflags & SVF_MONSTER)
+	if (ent->client->spycam->svflags & SVF_MONSTER)
 		ent->client->spycam->svflags &= ~SVF_NOCLIENT;
-	VectorCopy(ent->client->camplayer->s.origin,ent->s.origin);
+	VectorCopy (ent->client->camplayer->s.origin, ent->s.origin);
 	gi.TagFree(ent->client->camplayer->client); 
 	G_FreeEdict (ent->client->camplayer); 
 
@@ -49,10 +49,10 @@ void camera_off (edict_t *ent)
 	for (i=0 ; i<3 ; i++)
 		ent->client->ps.pmove.delta_angles[i] = 
 			ANGLE2SHORT(ent->client->org_viewangles[i] - ent->client->resp.cmd_angles[i]);
-	VectorCopy(ent->client->org_viewangles, ent->client->resp.cmd_angles);
-	VectorCopy(ent->client->org_viewangles, ent->s.angles);
-	VectorCopy(ent->client->org_viewangles, ent->client->ps.viewangles);
-	VectorCopy(ent->client->org_viewangles, ent->client->v_angle);
+	VectorCopy (ent->client->org_viewangles, ent->client->resp.cmd_angles);
+	VectorCopy (ent->client->org_viewangles, ent->s.angles);
+	VectorCopy (ent->client->org_viewangles, ent->client->ps.viewangles);
+	VectorCopy (ent->client->org_viewangles, ent->client->v_angle);
 	
 	ent->client->ps.gunindex        = gi.modelindex(ent->client->pers.weapon->view_model);
 	ent->client->ps.pmove.pm_flags &= ~PMF_NO_PREDICTION;
@@ -82,14 +82,14 @@ void camera_off (edict_t *ent)
 
 void faker_animate(edict_t *self)
 {
-	if(self->s.frame < 0 || self->s.frame > 39)
+	if (self->s.frame < 0 || self->s.frame > 39)
 	{
 		self->s.frame = 0;
 	}
 	else
 	{
 		self->s.frame++;
-		if(self->s.frame > 39)
+		if (self->s.frame > 39)
 			self->s.frame = 0;
 	}
 	self->nextthink = level.time + FRAMETIME;
@@ -119,7 +119,7 @@ void camera_on (edict_t *ent)
 		camera->viewer = ent;
 
 	// save current viewangles and restore them with camera_off
-	VectorCopy(ent->client->v_angle,ent->client->org_viewangles);
+	VectorCopy (ent->client->v_angle, ent->client->org_viewangles);
 
     // copy over all important player data to fake player
 	ent->client->camplayer = G_Spawn();
@@ -143,20 +143,20 @@ void camera_on (edict_t *ent)
 	faker->light_level  = ent->light_level;
 	faker->think        = faker_animate;
 	faker->nextthink    = level.time + FRAMETIME;
-	VectorCopy(ent->mins,faker->mins);
-	VectorCopy(ent->maxs,faker->maxs);
+	VectorCopy (ent->mins, faker->mins);
+	VectorCopy (ent->maxs, faker->maxs);
     // create a client so you can pick up items/be shot/etc while in camera
 	cl = (gclient_t *) gi.TagMalloc(sizeof(gclient_t), TAG_LEVEL); 
-	memset(cl,0,sizeof(gclient_t));
+	memset (cl, 0, sizeof(gclient_t));
 	ent->client->camplayer->client = cl; 
 	ent->client->camplayer->target_ent = ent;
 	gi.linkentity (faker); 
 
-	AngleVectors(camera->s.angles,forward,left,up);
+	AngleVectors (camera->s.angles, forward, left, up);
 
-	VectorMA(camera->s.origin, camera->move_origin[0],forward,ent->s.origin);
-	VectorMA(ent->s.origin,   -camera->move_origin[1],left,   ent->s.origin);
-	VectorMA(ent->s.origin,    camera->move_origin[2],up,     ent->s.origin);
+	VectorMA (camera->s.origin, camera->move_origin[0], forward, ent->s.origin);
+	VectorMA (ent->s.origin,   -camera->move_origin[1], left,    ent->s.origin);
+	VectorMA (ent->s.origin,    camera->move_origin[2], up,      ent->s.origin);
 
 	ent->movetype = MOVETYPE_NOCLIP;
 	ent->clipmask = 0;
@@ -186,7 +186,7 @@ void camera_on (edict_t *ent)
 	}
 
 	if (ent->client->spycam->viewmessage)
-		safe_centerprintf(ent,ent->client->spycam->viewmessage);
+		safe_centerprintf (ent, ent->client->spycam->viewmessage);
 }
 
 
@@ -194,10 +194,10 @@ edict_t *G_FindNextCamera (edict_t *camera, edict_t *monitor)
 {
 	edict_t	*next;
 
-	if(!monitor->target) return NULL;
+	if (!monitor->target) return NULL;
 
 	// If we already have a camera that's a monster, make it visible now
-	if(camera && (camera->svflags & SVF_MONSTER))
+	if (camera && (camera->svflags & SVF_MONSTER))
 	{
 		camera->svflags &= ~SVF_NOCLIENT;
 		gi.linkentity(camera);
@@ -207,14 +207,15 @@ edict_t *G_FindNextCamera (edict_t *camera, edict_t *monitor)
 	// or just scan through the list of entities. If count for the first camera
 	// in the map is 0, then we'll just use the map order.
 
-	next = G_Find(NULL,FOFS(targetname),monitor->target);
-	if(!next) return NULL;
-	if(!next->count) {
-		
-		if(camera) {
+	next = G_Find(NULL, FOFS(targetname), monitor->target);
+	if (!next) return NULL;
+	if (!next->count)
+	{
+		if (camera) {
 			next = camera;
 			next++;
-		} else
+		}
+		else
 			next = g_edicts;
 		
 		for ( ; next < &g_edicts[globals.num_edicts] ; next++)
@@ -228,9 +229,9 @@ edict_t *G_FindNextCamera (edict_t *camera, edict_t *monitor)
 			if (!next->targetname)
 				continue;
 			// don't select "inactive" cameras
-			if (!Q_stricmp (next->classname,"turret_breach") && (next->spawnflags & 16))
+			if ( !Q_stricmp (next->classname, "turret_breach") && (next->spawnflags & 16) )
 				continue;
-			if (!Q_stricmp (next->targetname, monitor->target))
+			if ( !Q_stricmp (next->targetname, monitor->target) )
 				goto found_one;
 
 		}
@@ -246,43 +247,50 @@ edict_t *G_FindNextCamera (edict_t *camera, edict_t *monitor)
 			if (!next->targetname)
 				continue;
 			// don't select "inactive" cameras
-			if (!Q_stricmp (next->classname,"turret_breach") && (next->spawnflags & 16))
+			if ( !Q_stricmp (next->classname, "turret_breach") && (next->spawnflags & 16) )
 				continue;
-			if (!Q_stricmp (next->targetname, monitor->target))
+			if ( !Q_stricmp (next->targetname, monitor->target ))
 				goto found_one;
 		}
-	} else {
+	}
+	else
+	{
 		int		which, start;
 
-		if(camera) {
+		if (camera) {
 			which = camera->count+1;
-			if(which > monitor->count) which = 1;
+			if (which > monitor->count) which = 1;
 		}
 		else
 			which = 1;
 		start = which;
 		next = g_edicts+1;
-		while(1) {
-			if(next->targetname) {
-				if(!Q_stricmp(next->targetname,monitor->target)) {
-					if(next->count == which) {
-						if(!next->inuse || (next->deadflag == DEAD_DEAD) ||
-							(!Q_stricmp (next->classname,"turret_breach") && (next->spawnflags & 16)) )
+		while (1)
+		{
+			if (next->targetname)
+			{
+				if ( !Q_stricmp(next->targetname, monitor->target) )
+				{
+					if (next->count == which)
+					{
+						if (!next->inuse || (next->deadflag == DEAD_DEAD) ||
+							( !Q_stricmp (next->classname, "turret_breach") && (next->spawnflags & 16) ) )
 						{
 							next = g_edicts;
 							which++;
-							if(which > monitor->count) which=1;
-							if(which == start) return NULL;
-						} else
+							if (which > monitor->count) which = 1;
+							if (which == start) return NULL;
+						}
+						else
 							goto found_one;
 					}
 				}
 			}
-			if(next == &g_edicts[globals.num_edicts-1]) {
+			if (next == &g_edicts[globals.num_edicts-1]) {
 				next = g_edicts;
 				which++;
-				if(which > monitor->count) which = 1;
-				if(which == start) return NULL;
+				if (which > monitor->count) which = 1;
+				if (which == start) return NULL;
 			}
 			next++;
 		}
@@ -290,7 +298,7 @@ edict_t *G_FindNextCamera (edict_t *camera, edict_t *monitor)
 	return NULL;
 
 found_one:
-	if(!(monitor->spawnflags & 32) && (next->svflags & SVF_MONSTER))
+	if (!(monitor->spawnflags & 32) && (next->svflags & SVF_MONSTER))
 		next->svflags |= SVF_NOCLIENT;
 	return next;
 }
@@ -300,10 +308,10 @@ edict_t *G_FindPrevCamera (edict_t *camera, edict_t *monitor)
 	edict_t	*prev;
 	edict_t	*newcamera;
 
-	if(!monitor->target) return NULL;
+	if (!monitor->target) return NULL;
 
 	// If we already have a camera that's a monster, make it visible now
-	if(camera && (camera->svflags & SVF_MONSTER))
+	if (camera && (camera->svflags & SVF_MONSTER))
 	{
 		camera->svflags &= ~SVF_NOCLIENT;
 		gi.linkentity(camera);
@@ -313,9 +321,9 @@ edict_t *G_FindPrevCamera (edict_t *camera, edict_t *monitor)
 	// or just scan through the list of entities. If count for the first camera
 	// in the map is 0, then we'll just use the map order.
 
-	prev = G_Find(NULL,FOFS(targetname),monitor->target);
-	if(!prev) return NULL;
-	if(!prev->count)
+	prev = G_Find(NULL, FOFS(targetname), monitor->target);
+	if (!prev) return NULL;
+	if (!prev->count)
 	{
 		newcamera = NULL;
 		for (prev = g_edicts ; prev < &g_edicts[globals.num_edicts] ; prev++)
@@ -331,9 +339,9 @@ edict_t *G_FindPrevCamera (edict_t *camera, edict_t *monitor)
 			if (!prev->targetname)
 				continue;
 			// don't select "inactive" cameras
-			if (!Q_stricmp (prev->classname,"turret_breach") && (prev->spawnflags & 16))
+			if ( !Q_stricmp (prev->classname, "turret_breach") && (prev->spawnflags & 16) )
 				continue;
-			if (!Q_stricmp (prev->targetname, monitor->target))
+			if ( !Q_stricmp (prev->targetname, monitor->target) )
 				newcamera = prev;
 		}
 		goto found_one;
@@ -342,39 +350,42 @@ edict_t *G_FindPrevCamera (edict_t *camera, edict_t *monitor)
 	{
 		int		which, start;
 
-		if(camera) {
+		if (camera) {
 			which = camera->count-1;
-			if(which <= 0) which = monitor->count;
+			if (which <= 0) which = monitor->count;
 		}
 		else 
 			which = monitor->count;
 		start = which;
 		prev = g_edicts+1;
-		while(1) {
-			if(prev->targetname) {
-				if(!Q_stricmp(prev->targetname,monitor->target)) {
-					if(prev->count == which) {
-						if(!prev->inuse || (prev->deadflag == DEAD_DEAD) ||
-							(!Q_stricmp (prev->classname,"turret_breach") && (prev->spawnflags & 16)))
+		while (1)
+		{
+			if (prev->targetname)
+			{
+				if ( !Q_stricmp(prev->targetname, monitor->target) )
+				{
+					if (prev->count == which)
+					{
+						if (!prev->inuse || (prev->deadflag == DEAD_DEAD) ||
+							( !Q_stricmp (prev->classname, "turret_breach") && (prev->spawnflags & 16)) )
 						{
 							prev = g_edicts;
 							which--;
-							if(which <= 0) which=monitor->count;
-							if(which == start) return NULL;
+							if (which <= 0) which = monitor->count;
+							if (which == start) return NULL;
 						}
-						else
-						{
+						else {
 							newcamera = prev;
 							goto found_one;
 						}
 					}
 				}
 			}
-			if(prev == &g_edicts[globals.num_edicts-1]) {
+			if (prev == &g_edicts[globals.num_edicts-1]) {
 				prev = g_edicts;
 				which--;
-				if(which <= 0) which=monitor->count;
-				if(which == start) return NULL;
+				if (which <= 0) which=monitor->count;
+				if (which == start) return NULL;
 			}
 			prev++;
 		}
@@ -392,15 +403,15 @@ void use_camera (edict_t *self, edict_t *other, edict_t *activator)
 {
 	edict_t	*target;
 
-	if(!activator->client) return;
-	if(activator->client->spycam)	// already using camera
+	if (!activator->client) return;
+	if (activator->client->spycam)	// already using camera
 		return;
 
-	target = G_FindNextCamera(NULL,self);
-	if(!target) return;
+	target = G_FindNextCamera(NULL, self);
+	if (!target) return;
 
 	// if currently in thirdperson, turn that sucker off
-	if(tpp->value && activator->client->chasetoggle)
+	if (tpp->value && activator->client->chasetoggle)
 		Cmd_Chasecam_Toggle (activator);
 
 #ifdef KMQUAKE2_ENGINE_MOD
@@ -423,16 +434,16 @@ void func_monitor_init (edict_t *self)
 
 	self->count = 0;
 	camera = NULL;
-	while( (camera=G_Find(camera,FOFS(targetname),self->target)) != NULL)
+	while ( (camera = G_Find(camera, FOFS(targetname), self->target)) != NULL)
 		self->count++;
-	if(!self->count)
+	if (!self->count)
 		self->s.effects = 0; // don't animate a func_monitor that has no cameras
 }
 
 void SP_func_monitor (edict_t *self)
 {
-	if( !self->target ) {
-		gi.dprintf("func_monitor without a target at %s\n",vtos(self->s.origin));
+	if ( !self->target ) {
+		gi.dprintf("func_monitor without a target at %s\n", vtos(self->s.origin));
 		G_FreeEdict(self);
 		return;
 	}

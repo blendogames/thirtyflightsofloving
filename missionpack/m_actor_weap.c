@@ -1019,7 +1019,7 @@ void actorDisintegrator (edict_t *self)
 
 	gi.positioned_sound(start, self, CHAN_WEAPON, gi.soundindex("weapons/disint2.wav"), 1, ATTN_NORM, 0);
 
-	damage = (self->monsterinfo.aiflags & AI_TWO_GUNS) ? 32 : 40;
+	damage = (self->monsterinfo.aiflags & AI_TWO_GUNS) ? 34 : 45;
 	speed = (int)sk_disruptor_speed->value;
 
 	fire_tracker (self, start, forward, damage, speed, self->enemy);

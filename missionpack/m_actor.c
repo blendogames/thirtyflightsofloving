@@ -6,6 +6,26 @@
 #include "m_actor.h"
 #include "pak.h"
 
+#define ACTOR_WEAP_BLASTER		1
+#define ACTOR_WEAP_SHOTGUN		2
+#define ACTOR_WEAP_SSHOTGUN		3
+#define ACTOR_WEAP_MACHINEGUN	4
+#define ACTOR_WEAP_CHAINGUN		5
+#define ACTOR_WEAP_GLAUNCHER	6
+#define ACTOR_WEAP_RLAUCHER		7
+#define ACTOR_WEAP_HYPERBLASTER	8
+#define ACTOR_WEAP_RAILGUN		9
+#define ACTOR_WEAP_BFG			10
+#define ACTOR_WEAP_IONRIPPER	11
+#define ACTOR_WEAP_PHALANX		12
+#define ACTOR_WEAP_ETFRIFLE		13
+#define ACTOR_WEAP_PLASMABEAM	14
+#define ACTOR_WEAP_DISRUPTOR	15
+#define ACTOR_WEAP_PLASMARIFLE	16
+
+#define ACTOR_WEAP_FIRST		1
+#define ACTOR_WEAP_LAST			16
+
 static char wavname[NUM_ACTOR_SOUNDS][32] = 
 { "jump1.wav",
   "pain25_1.wav",
@@ -468,54 +488,58 @@ void actor_ideal_range(edict_t *self)
 
 	switch (weapon)
 	{
-	case 2:
+	case ACTOR_WEAP_SHOTGUN:
 		self->monsterinfo.ideal_range[0] = 0;
 		self->monsterinfo.ideal_range[1] = 270;
 		break;
-	case 3:
+	case ACTOR_WEAP_SSHOTGUN:
 		self->monsterinfo.ideal_range[0] = 0;
 		self->monsterinfo.ideal_range[1] = 90;
 		break;
-	case 4:
-	case 5:
+	case ACTOR_WEAP_MACHINEGUN:
+	case ACTOR_WEAP_CHAINGUN:
 		self->monsterinfo.ideal_range[0] = 0;
 		self->monsterinfo.ideal_range[1] = 450;
 		break;
-	case 6:
+	case ACTOR_WEAP_GLAUNCHER:
 		self->monsterinfo.ideal_range[0] = 200;
 		self->monsterinfo.ideal_range[1] = 450;
 		break;
-	case 7:
+	case ACTOR_WEAP_RLAUCHER:
 		self->monsterinfo.ideal_range[0] = 300;
 		self->monsterinfo.ideal_range[1] = 1000;
 		break;
-	case 8:
+	case ACTOR_WEAP_HYPERBLASTER:
 		self->monsterinfo.ideal_range[0] = 200;
 		self->monsterinfo.ideal_range[1] = 500;
 		break;
-	case 9:
-	case 10:
+	case ACTOR_WEAP_RAILGUN:
+	case ACTOR_WEAP_BFG:
 		self->monsterinfo.ideal_range[0] = 300;
 		self->monsterinfo.ideal_range[1] = 1000;
 		break;
 	// Knightmare- added mission pack weapon support
-	case 11:
+	case ACTOR_WEAP_IONRIPPER:
 		self->monsterinfo.ideal_range[0] = 0;
 		self->monsterinfo.ideal_range[1] = 600;
 		break;
-	case 12:
+	case ACTOR_WEAP_PHALANX:
 		self->monsterinfo.ideal_range[0] = 300;
 		self->monsterinfo.ideal_range[1] = 1000;
 		break;
-	case 13:
-		self->monsterinfo.ideal_range[0] = 20;
+	case ACTOR_WEAP_ETFRIFLE:
+		self->monsterinfo.ideal_range[0] = 100;
 		self->monsterinfo.ideal_range[1] = 1000;
 		break;
-	case 14:
+	case ACTOR_WEAP_PLASMABEAM:
 		self->monsterinfo.ideal_range[0] = 0;
 		self->monsterinfo.ideal_range[1] = 1500;
 		break;
-	case 15:
+	case ACTOR_WEAP_DISRUPTOR:
+		self->monsterinfo.ideal_range[0] = 0;
+		self->monsterinfo.ideal_range[1] = 1000;
+		break;
+	case ACTOR_WEAP_PLASMARIFLE:
 		self->monsterinfo.ideal_range[0] = 0;
 		self->monsterinfo.ideal_range[1] = 1000;
 		break;
@@ -702,80 +726,80 @@ void actor_fire (edict_t *self)
 
 	switch (weapon)
 	{
-	case 1:
+	case ACTOR_WEAP_BLASTER:
 		actorBlaster (self);
 		break;
-	case 2:
+	case ACTOR_WEAP_SHOTGUN:
 		actorShotgun (self);
 		break;
-	case 3:
+	case ACTOR_WEAP_SSHOTGUN:
 		actorSuperShotgun (self);
 		break;
-	case 4:
+	case ACTOR_WEAP_MACHINEGUN:
 		actorMachineGun (self);
 		if (level.time >= self->monsterinfo.pausetime)
 			self->monsterinfo.aiflags &= ~AI_HOLD_FRAME;
 		else
 			self->monsterinfo.aiflags |= AI_HOLD_FRAME;
 		break;
-	case 5:
+	case ACTOR_WEAP_CHAINGUN:
 		actorChaingun (self);
 		if (level.time >= self->monsterinfo.pausetime)
 			self->monsterinfo.aiflags &= ~AI_HOLD_FRAME;
 		else
 			self->monsterinfo.aiflags |= AI_HOLD_FRAME;
 		break;
-	case 6:
+	case ACTOR_WEAP_GLAUNCHER:
 		actorGrenadeLauncher (self);
 		break;
-	case 7:
+	case ACTOR_WEAP_RLAUCHER:
 		actorRocket (self);
 		break;
-	case 8:
+	case ACTOR_WEAP_HYPERBLASTER:
 		actorHyperblaster(self);
 		if (level.time >= self->monsterinfo.pausetime)
 			self->monsterinfo.aiflags &= ~AI_HOLD_FRAME;
 		else
 			self->monsterinfo.aiflags |= AI_HOLD_FRAME;
 		break;
-	case 9:
+	case ACTOR_WEAP_RAILGUN:
 		actorRailGun (self);
 		break;
-	case 10:
+	case ACTOR_WEAP_BFG:
 		actorBFG (self);
 		if (level.time >= self->monsterinfo.pausetime)
 			self->monsterinfo.aiflags &= ~AI_HOLD_FRAME;
 		else
 			self->monsterinfo.aiflags |= AI_HOLD_FRAME;
 		break;
-	case 11:
+	case ACTOR_WEAP_IONRIPPER:
 		actorIonripper(self);
 		break;
-	case 12:
+	case ACTOR_WEAP_PHALANX:
 		actorPhalanx (self);
 		if (level.time >= self->monsterinfo.pausetime)
 			self->monsterinfo.aiflags &= ~AI_HOLD_FRAME;
 		else
 			self->monsterinfo.aiflags |= AI_HOLD_FRAME;
 		break;
-	case 13:
+	case ACTOR_WEAP_ETFRIFLE:
 		actorETF_Rifle (self);
 		if (level.time >= self->monsterinfo.pausetime)
 			self->monsterinfo.aiflags &= ~AI_HOLD_FRAME;
 		else
 			self->monsterinfo.aiflags |= AI_HOLD_FRAME;
 		break;
-	case 14:
+	case ACTOR_WEAP_PLASMABEAM:
 		actorPlasmaBeam (self);
 		if (level.time >= self->monsterinfo.pausetime)
 			self->monsterinfo.aiflags &= ~AI_HOLD_FRAME;
 		else
 			self->monsterinfo.aiflags |= AI_HOLD_FRAME;
 		break;
-	case 15:
+	case ACTOR_WEAP_DISRUPTOR:
 		actorDisintegrator (self);
 		break;
-	case 16:
+	case ACTOR_WEAP_PLASMARIFLE:
 		actorPlasmaRifle (self);
 		break;
 	}
@@ -977,30 +1001,30 @@ void actor_attack (edict_t *self)
 
 	switch (weapon)
 	{
-	case 1:
+	case ACTOR_WEAP_BLASTER:
 		self->monsterinfo.currentmove = attackmove;
 		self->monsterinfo.pausetime = level.time + 2 * FRAMETIME;
 		break;
-	case 2:
+	case ACTOR_WEAP_SHOTGUN:
 		self->monsterinfo.currentmove = attackmove;
 		self->monsterinfo.pausetime = level.time + 6 * FRAMETIME;
 		break;
-	case 3:
+	case ACTOR_WEAP_SSHOTGUN:
 		self->monsterinfo.currentmove = attackmove;
 		self->monsterinfo.pausetime = level.time + 10 * FRAMETIME;
 		break;
-	case 4:
+	case ACTOR_WEAP_MACHINEGUN:
 		self->monsterinfo.currentmove = attackmove;
 		n = (rand() & 15) + 10;
 		self->monsterinfo.pausetime = level.time + n * FRAMETIME;
 		break;
-	case 5:
+	case ACTOR_WEAP_CHAINGUN:
 		self->monsterinfo.currentmove = attackmove;
 		n = (rand() & 20) + 20;
 		self->monsterinfo.pausetime = level.time + n * FRAMETIME;
 		break;
-	case 6:
-	case 7:
+	case ACTOR_WEAP_GLAUNCHER:
+	case  ACTOR_WEAP_RLAUCHER:
 		self->monsterinfo.currentmove = attackmove;
 		if (self->monsterinfo.aiflags & AI_STAND_GROUND)
 		{ // if hes just standing there refire rate is normal
@@ -1011,16 +1035,16 @@ void actor_attack (edict_t *self)
 			self->monsterinfo.pausetime = level.time + 2;
 		}
 		break;
-	case 8:
+	case ACTOR_WEAP_HYPERBLASTER:
 		self->monsterinfo.currentmove = attackmove;
 		n = (rand() & 15) + 3 + 7;
 		self->monsterinfo.pausetime = level.time + n * FRAMETIME;
 		break;
-	case 9:
+	case ACTOR_WEAP_RAILGUN:
 		self->monsterinfo.currentmove = attackmove;
 		self->monsterinfo.pausetime = level.time + 3;
 		break;
-	case 10:
+	case ACTOR_WEAP_BFG:
 		if (level.time > self->endtime)
 		{
 			self->monsterinfo.currentmove = attackmove;
@@ -1029,11 +1053,11 @@ void actor_attack (edict_t *self)
 		else
 			self->monsterinfo.currentmove = &actor_move_stand;
 		break;
-	case 11:
+	case ACTOR_WEAP_IONRIPPER:
 		self->monsterinfo.currentmove = attackmove;
 		self->monsterinfo.pausetime = level.time + 6 * FRAMETIME;
 		break;
-	case 12:
+	case ACTOR_WEAP_PHALANX:
 		self->monsterinfo.currentmove = attackmove;
 	//	self->monsterinfo.pausetime = level.time + 4;
 		if (self->monsterinfo.aiflags & AI_STAND_GROUND)
@@ -1045,23 +1069,23 @@ void actor_attack (edict_t *self)
 			self->monsterinfo.pausetime = level.time + 2;
 		}
 		break;
-	case 13:
+	case ACTOR_WEAP_ETFRIFLE:
 		self->monsterinfo.currentmove = attackmove;
 		n = (rand() & 11) + 7;
 		self->monsterinfo.pausetime = level.time + n * FRAMETIME;
 		break;
-	case 14:
+	case ACTOR_WEAP_PLASMABEAM:
 		self->monsterinfo.currentmove = attackmove;
 		n = (rand() & 10) + 5;
 		self->monsterinfo.pausetime = level.time + n * FRAMETIME;
 		break;
-	case 15:
+	case ACTOR_WEAP_DISRUPTOR:
 		self->monsterinfo.currentmove = attackmove;
 		self->monsterinfo.pausetime = level.time + 10 * FRAMETIME;
 		break;
-	case 16:
+	case ACTOR_WEAP_PLASMARIFLE:
 		self->monsterinfo.currentmove = attackmove;
-		self->monsterinfo.pausetime = level.time + 10 * FRAMETIME;
+		self->monsterinfo.pausetime = level.time + 20 * FRAMETIME;
 		break;
 	}
 }
@@ -1119,7 +1143,7 @@ qboolean actor_checkattack (edict_t *self)
 
 	weapon = self->actor_weapon[self->actor_current_weapon];
 	// If actor has no weapon, well then of course he should not attack
-	if (weapon < 1 || weapon > 16) // Knightmare- mission pack weapon support, was > 10
+	if (weapon < ACTOR_WEAP_FIRST || weapon > ACTOR_WEAP_LAST) // Knightmare- mission pack weapon support, was > 10
 			return false;
 
 	if (self->enemy->health > 0)
@@ -1474,7 +1498,7 @@ void SP_misc_actor (edict_t *self)
 		self->actor_weapon[0] = 0;
 		self->actor_weapon[1] = -self->sounds;
 	}
-	else if (self->sounds <= 16) // Knightmare- added mission pack weapon support, was <= 10
+	else if (self->sounds <= ACTOR_WEAP_LAST)	// Knightmare- added mission pack weapon support, was <= 10
 	{
 		self->actor_weapon[0] = self->sounds;
 		self->actor_weapon[1] = 0;
@@ -1505,6 +1529,7 @@ void SP_misc_actor (edict_t *self)
 			case  8: VectorSet (self->muzzle, 41, 4, 19);	break;
 			case  9: VectorSet (self->muzzle, 40, 4, 19);	break;
 			case 10: VectorSet (self->muzzle, 42, 5, 20);	break;
+			default: VectorSet (self->muzzle, 40, 4, 19);	break;
 			}
 			break;
 		case ACTOR_PARANOID:
@@ -1520,6 +1545,7 @@ void SP_misc_actor (edict_t *self)
 			case  8: VectorSet (self->muzzle, 18, 7, 14);	break;
 			case  9: VectorSet (self->muzzle, 28, 7, 10);	break;
 			case 10: VectorSet (self->muzzle, 28, 7, 10);	break;
+			default: VectorSet (self->muzzle, 28, 7, 10);	break;
 			}
 			break;
 		case ACTOR_RATAMAHATTA:
@@ -1544,6 +1570,7 @@ void SP_misc_actor (edict_t *self)
 			case  8: VectorSet (self->muzzle, 12, 6, -1);	break;
 			case  9: VectorSet (self->muzzle, 32, 7, 10);	break;
 			case 10: VectorSet (self->muzzle, 20, 5, -1);	break;
+			default: VectorSet (self->muzzle, 32, 7, 10);	break;
 			}
 			break;
 		case ACTOR_TERRAN:
@@ -1565,6 +1592,7 @@ void SP_misc_actor (edict_t *self)
 			case  8: VectorSet (self->muzzle, 26, 7.5, 8);	break;
 			case  9: VectorSet (self->muzzle, 26, 9, 7);	break;
 			case 10: VectorSet (self->muzzle, 22, 11, 7);	break;
+			default: VectorSet (self->muzzle, 26, 9, 7);	break;
 			}
 			break;
 		case ACTOR_XENOID:
@@ -1583,6 +1611,7 @@ void SP_misc_actor (edict_t *self)
 			case  8: VectorSet (self->muzzle, 20, 3, 2);	break;
 			case  9: VectorSet (self->muzzle, 26, 2, 9);	break;
 			case 10: VectorSet (self->muzzle, 16, 5, -2);	break;
+			default: VectorSet (self->muzzle, 26, 2, 9);	break;
 			}
 			break;
 		default:
@@ -2135,25 +2164,25 @@ void actor_files (void)
 			Com_sprintf (filename, sizeof(filename), "players/%s/", e->usermodel);
 			switch (e->actor_weapon[k])
 			{
-			case 2:		Com_strcat (filename, sizeof(filename), "w_shotgun.md2");		break;
-			case 3:		Com_strcat (filename, sizeof(filename), "w_sshotgun.md2");		break;
-			case 4:		Com_strcat (filename, sizeof(filename), "w_machinegun.md2");	break;
-			case 5:		Com_strcat (filename, sizeof(filename), "w_chaingun.md2");		break;
-			case 6:		Com_strcat (filename, sizeof(filename), "w_glauncher.md2");		break;
-			case 7:		Com_strcat (filename, sizeof(filename), "w_rlauncher.md2");		break;
-			case 8:		Com_strcat (filename, sizeof(filename), "w_hyperblaster.md2");	break;
-			case 9:		Com_strcat (filename, sizeof(filename), "w_railgun.md2");		break;
-			case 10:	Com_strcat (filename, sizeof(filename), "w_bfg.md2");			break;
+			case ACTOR_WEAP_SHOTGUN:		Com_strcat (filename, sizeof(filename), "w_shotgun.md2");		break;
+			case ACTOR_WEAP_SSHOTGUN:		Com_strcat (filename, sizeof(filename), "w_sshotgun.md2");		break;
+			case ACTOR_WEAP_MACHINEGUN:		Com_strcat (filename, sizeof(filename), "w_machinegun.md2");	break;
+			case ACTOR_WEAP_CHAINGUN:		Com_strcat (filename, sizeof(filename), "w_chaingun.md2");		break;
+			case ACTOR_WEAP_GLAUNCHER:		Com_strcat (filename, sizeof(filename), "w_glauncher.md2");		break;
+			case ACTOR_WEAP_RLAUCHER:		Com_strcat (filename, sizeof(filename), "w_rlauncher.md2");		break;
+			case ACTOR_WEAP_HYPERBLASTER:	Com_strcat (filename, sizeof(filename), "w_hyperblaster.md2");	break;
+			case ACTOR_WEAP_RAILGUN:		Com_strcat (filename, sizeof(filename), "w_railgun.md2");		break;
+			case ACTOR_WEAP_BFG:			Com_strcat (filename, sizeof(filename), "w_bfg.md2");			break;
 			// Knightmare- mission pack weapon support
-			case 11:	Com_strcat (filename, sizeof(filename), "w_ripper.md2");		break;
-			case 12:	Com_strcat (filename, sizeof(filename), "w_phalanx.md2");		break;
-			case 13:	Com_strcat (filename, sizeof(filename), "w_etfrifle.md2");		break;
-			case 14:	Com_strcat (filename, sizeof(filename), "w_plasma.md2");		break;
-			case 15:	Com_strcat (filename, sizeof(filename), "w_disrupt.md2");		break;
+			case ACTOR_WEAP_IONRIPPER:		Com_strcat (filename, sizeof(filename), "w_ripper.md2");		break;
+			case ACTOR_WEAP_PHALANX:		Com_strcat (filename, sizeof(filename), "w_phalanx.md2");		break;
+			case ACTOR_WEAP_ETFRIFLE:		Com_strcat (filename, sizeof(filename), "w_etfrifle.md2");		break;
+			case ACTOR_WEAP_PLASMABEAM:		Com_strcat (filename, sizeof(filename), "w_plasma.md2");		break;
+			case ACTOR_WEAP_DISRUPTOR:		Com_strcat (filename, sizeof(filename), "w_disrupt.md2");		break;
 			// LMSP plasma rifle
-			case 16:	Com_strcat (filename, sizeof(filename), "w_plasmarifle.md2");	break;
+			case ACTOR_WEAP_PLASMARIFLE:	Com_strcat (filename, sizeof(filename), "w_plasmarifle.md2");	break;
 			// end Knightmare
-			default:	Com_strcat (filename, sizeof(filename), "w_blaster.md2");		break;
+			default:						Com_strcat (filename, sizeof(filename), "w_blaster.md2");		break;
 			}
 
 			if (strlen(gamedir->string))

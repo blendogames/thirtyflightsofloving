@@ -21,7 +21,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 
-//ed - weapon protos
+// ed - weapon protos
 void actorBlaster (edict_t *self);
 void actorShotgun (edict_t *self);
 void actorSuperShotgun (edict_t *self);

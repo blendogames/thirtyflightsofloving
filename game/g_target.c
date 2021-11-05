@@ -3751,7 +3751,7 @@ void target_failure_player_die (edict_t *player)
 	player->client->zoomed = false;
 	SetSensitivities(player,true);
 	if (player->client->spycam)
-		camera_off(player);
+		camera_off (player);
 	VectorClear (player->avelocity);
 	player->takedamage = DAMAGE_NO;
 	player->movetype = MOVETYPE_NONE;
