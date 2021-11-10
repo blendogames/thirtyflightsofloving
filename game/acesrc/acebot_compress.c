@@ -37,7 +37,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#ifndef __APPLE__
 #include <malloc.h>
+#endif
 
 #define N		 4096	/* size of ring buffer */
 #define F		   18	/* upper limit for match_length */

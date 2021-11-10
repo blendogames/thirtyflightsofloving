@@ -123,7 +123,11 @@ OLD FOG SYSTEM
 #include <SDL2/SDL.h>
 #endif
 #define __MSC__
+#ifdef __APPLE__
+#include <OpenGL/gl.h>
+#else
 #include <GL/gl.h>
+#endif
 
 fog_t		gfogs[MAX_FOGS];
 

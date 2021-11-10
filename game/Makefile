@@ -1,6 +1,13 @@
 # Makefile for Thirty Flights of Loving Game DLL
 # Written by Ethan "flibitijibibo" Lee
 
+ifeq ($(shell uname), Darwin)
+	SUFFIX = dylib
+else
+	SUFFIX = so
+	LDFLAGS := -Wl,--no-undefined
+endif
+
 TFOL_SRC = \
 	g_abel_camshoot.c \
 	g_abel_civspawner.c \
@@ -90,7 +97,7 @@ TFOL_SRC = \
 	acesrc/acebot_spawn.c
 
 all:
-	$(CC) -o baseq2/kmq2gamex86_64.so -g -w -Wl,--no-undefined -fpic -fPIC -shared $(TFOL_SRC) -lSDL2 -lm
+	$(CC) -o baseq2/kmq2gamex86_64.$(SUFFIX) -g -w $(LDFLAGS) -fpic -fPIC -shared $(TFOL_SRC) -lSDL2 -lm
 	cp ../../kmquake2-tfol/quake2/kmquake2 .
 
 clean:
