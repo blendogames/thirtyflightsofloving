@@ -939,7 +939,10 @@ void SP_worldspawn(edict_t *ent)
 	if (sv_gametype->value == G_CTF)																//CW
 	{
 		gi.configstring(CS_STATUSBAR, ctf_statusbar);
-		CTFPrecache();
+		CTFPrecache ();
+#ifdef KMQUAKE2_ENGINE_MOD
+		gi.configstring (CS_HUDVARIANT, "ctf");		// use CTF HUD script variant
+#endif
 	}
 //ZOID--
 
@@ -947,16 +950,26 @@ void SP_worldspawn(edict_t *ent)
 	else if (sv_gametype->value == G_TDM)
 	{
 		gi.configstring(CS_STATUSBAR, tdm_statusbar);
-		TDMPrecache();
+		TDMPrecache ();
+#ifdef KMQUAKE2_ENGINE_MOD
+		gi.configstring (CS_HUDVARIANT, "ctf");		// use CTF HUD script variant
+#endif
 	}
 	else if (sv_gametype->value == G_ASLT)
 	{
 		gi.configstring(CS_STATUSBAR, aslt_statusbar);
-		ASLTPrecache();
+		ASLTPrecache ();
+#ifdef KMQUAKE2_ENGINE_MOD
+			gi.configstring (CS_HUDVARIANT, "awaken2_assault");	// use Awaken2 assault HUD script variant
+#endif
 	}
-	else
+	else {
 //CW--
 		gi.configstring(CS_STATUSBAR, dm_statusbar);
+#ifdef KMQUAKE2_ENGINE_MOD
+			gi.configstring (CS_HUDVARIANT, "default");	// use DM/SP HUD script variant
+#endif
+	}
 
 	//---------------
 

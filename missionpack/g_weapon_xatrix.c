@@ -18,8 +18,10 @@ void ionripper_sparks (edict_t *self)
 	color = 0xe4 + (rand()&3);
 
 	// Knightmare- explode sound
+#ifdef KMQUAKE2_ENGINE_MOD
 	if (sk_ionripper_extra_sounds->value)
 		gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, gi.soundindex ("weapons/ionexp.wav"), 1, ATTN_NONE, 0);
+#endif
 
 	gi.WriteByte (svc_temp_entity);
 	gi.WriteByte (TE_WELDING_SPARKS);
@@ -54,8 +56,8 @@ void ionripper_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t
 	if (other->takedamage)
 	{
 	// Knightmare- hit sound
-		if (sk_ionripper_extra_sounds->value)
 #ifdef KMQUAKE2_ENGINE_MOD
+		if (sk_ionripper_extra_sounds->value)
 		{
 			float r = random();
 			if (r < 0.3333)
@@ -65,8 +67,6 @@ void ionripper_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t
 			else
 				gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, gi.soundindex ("weapons/ionhit3.wav"), 1, ATTN_NONE, 0);
 		}
-#else
-			gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, gi.soundindex ("weapons/ionhit1.wav"), 1, ATTN_NONE, 0);
 #endif
 		T_Damage (other, self, self->owner, self->velocity, self->s.origin, plane->normal, self->dmg, 1, DAMAGE_ENERGY, MOD_RIPPER);
 	}
@@ -322,13 +322,6 @@ void phalanx_plasma_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurfa
 		ReflectExplosion (TE_PLASMA_EXPLOSION, ent->s.origin);
 
 	G_FreeEdict (ent);
-}
-
-
-// Knightmare- remove this after the next savegame version increment!
-void plasma_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
-{
-	phalanx_plasma_touch (ent, other, plane, surf);
 }
 
 

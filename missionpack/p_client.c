@@ -1670,6 +1670,10 @@ void SelectStartWeapon (gclient_t *client, int style)
 	case  18:
 		item = FindItem("Shockwave");
 		break;
+	case -19:
+	case  19:
+		item = FindItem(PLASMA_PICKUP_NAME);
+		break;
 	default:
 		item = FindItem("Blaster");
 		break;
@@ -1747,8 +1751,8 @@ void SelectStartWeapon (gclient_t *client, int style)
 		client->pers.inventory[ITEM_INDEX(FindItem("Plasma Beam"))] = sk_dm_start_plasmabeam->value;
 		client->pers.inventory[ITEM_INDEX(FindItem("Disintegrator"))] = sk_dm_start_disruptor->value;
 		client->pers.inventory[ITEM_INDEX(FindItem("Chainfist"))] = sk_dm_start_chainfist->value;
-		client->pers.inventory[ITEM_INDEX(FindItem("Shockwave"))] = sk_dm_start_shockwave->value;
 		client->pers.inventory[ITEM_INDEX(FindItem(PLASMA_PICKUP_NAME))] = sk_dm_start_plasmarifle->value;
+		client->pers.inventory[ITEM_INDEX(FindItem("Shockwave"))] = sk_dm_start_shockwave->value;
 		client->pers.inventory[ITEM_INDEX(FindItem("Flare Gun"))] = sk_dm_start_flaregun->value;
 	//	client->pers.inventory[ITEM_INDEX(FindItem("Sniper Rifle"))] = sk_dm_start_sniperrifle->value;
 	//	client->pers.inventory[ITEM_INDEX(FindItem("Sonic Cannon"))] = sk_dm_start_soniccannon->value;
@@ -1767,7 +1771,7 @@ but is called after each death and level change in deathmatch
 */
 void InitClientPersistant (gclient_t *client, int style)
 {
-	//gitem_t		*item;
+//	gitem_t		*item;
 
 	memset (&client->pers, 0, sizeof(client->pers));
 
@@ -1824,6 +1828,10 @@ void InitClientPersistant (gclient_t *client, int style)
 	client->spycam = NULL;
 	client->pers.spawn_landmark = false;
 	client->pers.spawn_levelchange = false;
+
+	// custom client colors
+	Vector4Set (client->pers.color1, 255, 255, 255, 0);
+	Vector4Set (client->pers.color2, 255, 255, 255, 0);
 }
 
 
@@ -2623,11 +2631,11 @@ void PutClientInServer (edict_t *ent)
 
 	// clear entity state values
 	ent->s.effects = 0;
-	ent->s.modelindex = MAX_MODELS-1;		// was 255, will use the skin specified model
+	ent->s.modelindex = MAX_MODELS-1;			// will use the skin specified model, was 255
 	if (ITEM_INDEX(client->pers.weapon) == noweapon_index)
 		ent->s.modelindex2 = 0;
 	else
-		ent->s.modelindex2 = MAX_MODELS-1;		// was 255, custom gun model
+		ent->s.modelindex2 = MAX_MODELS-1;		// custom gun model, was 255
 	// skinnum is player num and weapon number
 	// weapon number will be added in changeweapon
 	ent->s.skinnum = ent - g_edicts - 1;
@@ -2956,10 +2964,23 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo)
 		ent->client->pers.hand = atoi(s);
 	}
 
+	// custom colors
+	s = Info_ValueForKey (userinfo, "color1");
+	if (strlen(s) >= 6) {
+		if ( Com_ParseColorString (s, ent->client->pers.color1) )
+			ent->client->pers.color1[3] = 255;	// mark as set
+	}
+
+	s = Info_ValueForKey (userinfo, "color2");
+	if (strlen(s) >= 6) {
+		if ( Com_ParseColorString (s, ent->client->pers.color2) )
+			ent->client->pers.color2[3] = 255;	// mark as set
+	}
+
 	// save off the userinfo in case we want to check something later
 	strncpy (ent->client->pers.userinfo, userinfo, sizeof(ent->client->pers.userinfo)-1);
 	if (use_vwep->value)
-		ShowGun(ent); //Knightmare- added vwep code
+		ShowGun (ent); // Knightmare- added vwep code
 }
 
 

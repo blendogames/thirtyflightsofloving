@@ -687,7 +687,7 @@ extern mmove_t actor_move_flipoff ;
 extern mmove_t actor_move_pain3 ;
 extern mmove_t actor_move_pain2 ;
 extern mmove_t actor_move_pain1 ;
-extern mmove_t mmove_reloc ;
+extern mmove_t g_custom_anims[1024] ;
 extern mmove_t actor_move_walk_back ;
 extern mmove_t actor_move_walk ;
 extern mmove_t actor_move_stand ;

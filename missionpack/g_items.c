@@ -2990,7 +2990,6 @@ gitem_t	itemlist[] =
 // 22
 /*QUAKED weapon_boomer (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
-
 	{
 		"weapon_boomer",
 		Pickup_Weapon,
@@ -3016,7 +3015,31 @@ gitem_t	itemlist[] =
 #endif
 	},
 
-// 23
+// 23	SKWiD MOD
+/*QUAKED weapon_plasma (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
+*/
+	{
+		"weapon_plasma",
+		Pickup_Weapon,
+		Use_Weapon,
+		Drop_Weapon,
+		Weapon_Plasma_Rifle,
+		"misc/w_pkup.wav",
+		PLASMA_MODEL_WORLD, 0, EF_ROTATE,
+		PLASMA_MODEL_VIEW,
+		"w_plasma",		// icon
+		PLASMA_PICKUP_NAME,	// pickup
+		0,
+		PLASMA_CELLS_PER_SHOT,	// bat - was 1
+		"Cells",
+		IT_WEAPON|IT_STAY_COOP|IT_LM,
+		WEAP_PLASMARIFLE,
+		NULL,
+		0,
+		"PLASMA_PRECACHE"
+	},
+
+// 24
 /*QUAKED weapon_railgun (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -3040,7 +3063,7 @@ gitem_t	itemlist[] =
 		"weapons/rg_hum.wav weapons/railgf1a.wav" // precache
 	},
 
-// 24
+// 25
 /*QUAKED weapon_phalanx (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
 
@@ -3069,7 +3092,7 @@ gitem_t	itemlist[] =
 #endif
 	},
 
-// 25
+// 26
 /*QUAKED weapon_bfg (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -3093,7 +3116,7 @@ gitem_t	itemlist[] =
 		"sprites/s_bfg1.sp2 sprites/s_bfg2.sp2 sprites/s_bfg3.sp2 weapons/bfg__f1y.wav weapons/bfg__l1a.wav weapons/bfg__x1b.wav weapons/bfg_hum.wav" // precache
 	},
 
-// 26
+// 27
 /*QUAKED weapon_disintegrator (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -3117,7 +3140,7 @@ gitem_t	itemlist[] =
 		"models/items/spawngro/tris.md2 models/proj/disintegrator/tris.md2 weapons/disrupt.wav weapons/disint2.wav weapons/disrupthit.wav",	// precaches
 	},
 
-// 27
+// 28
 /*QUAKED weapon_chainfist (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -3141,7 +3164,7 @@ gitem_t	itemlist[] =
 		"weapons/sawidle.wav weapons/sawhit.wav",			// precaches
 	},
 
-// 28
+// 29
 /*QUAKED weapon_shockwave (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
 	{
@@ -3167,30 +3190,6 @@ gitem_t	itemlist[] =
 #else
 		"weapons/shockfire.wav weapons/shockhit.wav weapons/shockexp.wav models/objects/shocksphere/tris.md2 models/objects/shockfield/tris.md2 sprites/s_trap.sp2"
 #endif
-	},
-
-// 29	SKWiD MOD
-/*QUAKED weapon_plasma (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
-*/
-	{
-		"weapon_plasma",
-		Pickup_Weapon,
-		Use_Weapon,
-		Drop_Weapon,
-		Weapon_Plasma_Rifle,
-		"misc/w_pkup.wav",
-		PLASMA_MODEL_WORLD, 0, EF_ROTATE,
-		PLASMA_MODEL_VIEW,
-		"w_plasma",		// icon
-		PLASMA_PICKUP_NAME,	// pickup
-		0,
-		PLASMA_CELLS_PER_SHOT,	// bat - was 1
-		"Cells",
-		IT_WEAPON|IT_STAY_COOP|IT_LM,
-		WEAP_PLASMARIFLE,
-		NULL,
-		0,
-		"PLASMA_PRECACHE"
 	},
 
 // 30
@@ -3820,7 +3819,7 @@ model="models/items/ammo/fuel/medium/"
 		2, // width
 		60,
 		NULL,
-		IT_STAY_COOP|IT_POWERUP,
+		IT_POWERUP|IT_STAY_COOP,
 		0,
 		NULL,
 		0,
@@ -3844,7 +3843,7 @@ model="models/items/ammo/fuel/medium/"
 		2, // width
 		60,
 		NULL,
-		IT_STAY_COOP|IT_POWERUP,
+		IT_POWERUP|IT_STAY_COOP,
 		0,
 		NULL,
 		0,
@@ -3893,7 +3892,7 @@ gives +1 to maximum health
 		1, // width
 		30,
 		"Cells",
-		IT_STAY_COOP|IT_POWERUP|IT_ZAERO,
+		IT_POWERUP|IT_STAY_COOP|IT_ZAERO,
 		0,
 		NULL,
 		0,

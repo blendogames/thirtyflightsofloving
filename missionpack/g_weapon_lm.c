@@ -92,8 +92,8 @@ void plasma_rifle_spread_touch (edict_t *self, edict_t *other, cplane_t *plane, 
 		return;
 	}
 
-	// Don't collide with other plasma goops
-	if ( Q_stricmp(other->classname, "goop") == 0 )
+	// Don't collide with other plasma balls
+	if ( Q_stricmp(other->classname, "plasmaball") == 0 )
 		return;
 	
 	if ( self->owner->client )
@@ -137,45 +137,45 @@ void plasma_rifle_spread_touch (edict_t *self, edict_t *other, cplane_t *plane, 
 
 /*
 ==============================================================================
-Spawn_Goop
+Spawn_Plasmaball
 
 Spawns the plasma entities, and defines values global to both weapon modes.
 ==============================================================================
 */
-edict_t *Spawn_Goop (edict_t *ent, vec3_t start)
+edict_t *Spawn_Plasmaball (edict_t *ent, vec3_t start)
 {
-	edict_t *goop;	// = G_Spawn();
+	edict_t *plasmaball;	// = G_Spawn();
 
 	// sanity check
 	if (!ent) {
 		return NULL;
 	}
 
-	goop = G_Spawn();
+	plasmaball = G_Spawn();
 
-	goop->owner = ent;
-	goop->clipmask = MASK_SHOT;
-	goop->solid = SOLID_BBOX;
-	goop->svflags = SVF_DEADMONSTER;
+	plasmaball->owner = ent;
+	plasmaball->clipmask = MASK_SHOT;
+	plasmaball->solid = SOLID_BBOX;
+	plasmaball->svflags = SVF_DEADMONSTER;
 	
-	VectorCopy (start, goop->s.origin);
-	goop->classname = "goop";
-	goop->class_id = ENTITY_GOOP;
+	VectorCopy (start, plasmaball->s.origin);
+	plasmaball->classname = "plasmaball";
+	plasmaball->class_id = ENTITY_PLASMABALL;
 
-	goop->s.effects |= EF_BLUEHYPERBLASTER | EF_ANIM_ALLFAST;
+	plasmaball->s.effects |= EF_BLUEHYPERBLASTER | EF_ANIM_ALLFAST;
 	// bat to get rid of the blue flag effect
-//	goop->s.effects |= EF_IONRIPPER | EF_ANIM_ALLFAST;
-	goop->s.renderfx = RF_TRANSLUCENT;
-	goop->s.modelindex = gi.modelindex(PLASMA_SPRITE_FLY);
-	goop->s.sound = gi.soundindex(PLASMA_SOUND_FLYBY);
+//	plasmaball->s.effects |= EF_IONRIPPER | EF_ANIM_ALLFAST;
+	plasmaball->s.renderfx = RF_TRANSLUCENT;
+	plasmaball->s.modelindex = gi.modelindex(PLASMA_SPRITE_FLY);
+	plasmaball->s.sound = gi.soundindex(PLASMA_SOUND_FLYBY);
 
 	// give it some thickness for the bounce
-//	VectorSet (goop->mins, -12, -12, -12);
-//	VectorSet (goop->maxs, 12, 12, 12);
-	VectorSet (goop->mins, -6, -6, -6);
-	VectorSet (goop->maxs, 6, 6, 6);
+//	VectorSet (plasmaball->mins, -12, -12, -12);
+//	VectorSet (plasmaball->maxs, 12, 12, 12);
+	VectorSet (plasmaball->mins, -6, -6, -6);
+	VectorSet (plasmaball->maxs, 6, 6, 6);
 
-	return goop;
+	return plasmaball;
 }
 
 
@@ -189,37 +189,37 @@ Uses MOVETYPE_WALLBOUNCE.
 */
 void fire_plasma_rifle_bounce (edict_t *ent, vec3_t start, vec3_t dir, int damage, int speed)
 {
-	edict_t *goop = NULL;
+	edict_t *plasmaball = NULL;
 
 	// sanity check
 	if (!ent) {
 		return;
 	}
 
-	goop = Spawn_Goop (ent, start);
-	if (!goop) {
+	plasmaball = Spawn_Plasmaball (ent, start);
+	if (!plasmaball) {
 		return;
 	}
 
-	goop->movetype = MOVETYPE_WALLBOUNCE;	// Knightmare- use same movetype as ION Ripper projectiles
+	plasmaball->movetype = MOVETYPE_WALLBOUNCE;	// Knightmare- use same movetype as ION Ripper projectiles
 
-	VectorScale (dir, speed, goop->velocity);		// Knightmare- use parm speed
-	VectorCopy (goop->velocity, goop->s.angles);		// needed for post touch
+	VectorScale (dir, speed, plasmaball->velocity);		// Knightmare- use parm speed
+	VectorCopy (plasmaball->velocity, plasmaball->s.angles);		// needed for post touch
 	
 	//-bat
-	goop->dmg = damage;		// Knightmare- use parm damage
-	goop->touch = plasma_rifle_bounce_touch;
+	plasmaball->dmg = damage;		// Knightmare- use parm damage
+	plasmaball->touch = plasma_rifle_bounce_touch;
 	
-	goop->think = G_FreeEdict;				// change this to handle
-//	goop->nextthink = level.time + 3.0;		// sprite animation?
-//	goop->nextthink = level.time + 1.5;
-	goop->nextthink = level.time + sk_plasma_rifle_life_bounce->value;
+	plasmaball->think = G_FreeEdict;				// change this to handle
+//	plasmaball->nextthink = level.time + 3.0;		// sprite animation?
+//	plasmaball->nextthink = level.time + 1.5;
+	plasmaball->nextthink = level.time + sk_plasma_rifle_life_bounce->value;
 
-	gi.linkentity (goop);
+	gi.linkentity (plasmaball);
 
 	// Knightmare- added missing check_dodge() call
 	if (ent->client)
-		check_dodge (ent, goop->s.origin, dir, speed);
+		check_dodge (ent, plasmaball->s.origin, dir, speed);
 }
 
 
@@ -233,9 +233,9 @@ one initial bouncy bullet.
 */
 void fire_plasma_rifle_spread (edict_t *ent, vec3_t start, vec3_t dir, int damage, int speed)
 {
-	edict_t	*goop_l = NULL;
-	edict_t *goop_c = NULL;
-	edict_t	*goop_r = NULL;
+	edict_t	*plasmaball_l = NULL;
+	edict_t *plasmaball_c = NULL;
+	edict_t	*plasmaball_r = NULL;
 	vec3_t	dir_r, dir_l, angles;
 
 	// sanity check
@@ -243,66 +243,66 @@ void fire_plasma_rifle_spread (edict_t *ent, vec3_t start, vec3_t dir, int damag
 		return;
 	}
 
-	goop_l = Spawn_Goop (ent, start);
-	goop_c = Spawn_Goop (ent, start);
-	goop_r = Spawn_Goop (ent, start);
-	if (!goop_l || !goop_c || !goop_r) {
+	plasmaball_l = Spawn_Plasmaball (ent, start);
+	plasmaball_c = Spawn_Plasmaball (ent, start);
+	plasmaball_r = Spawn_Plasmaball (ent, start);
+	if (!plasmaball_l || !plasmaball_c || !plasmaball_r) {
 		return;
 	}
 
-	goop_l->movetype = MOVETYPE_FLYMISSILE;
-	goop_c->movetype = MOVETYPE_FLYMISSILE;
-	goop_r->movetype = MOVETYPE_FLYMISSILE;
+	plasmaball_l->movetype = MOVETYPE_FLYMISSILE;
+	plasmaball_c->movetype = MOVETYPE_FLYMISSILE;
+	plasmaball_r->movetype = MOVETYPE_FLYMISSILE;
 
-	VectorClear (goop_l->mins);
-	VectorClear (goop_l->maxs);
-	VectorClear (goop_c->mins);
-	VectorClear (goop_c->maxs);
-	VectorClear (goop_r->mins);
-	VectorClear (goop_r->maxs);
+	VectorClear (plasmaball_l->mins);
+	VectorClear (plasmaball_l->maxs);
+	VectorClear (plasmaball_c->mins);
+	VectorClear (plasmaball_c->maxs);
+	VectorClear (plasmaball_r->mins);
+	VectorClear (plasmaball_r->maxs);
 
 	// Knightmare- use parm damage
-	goop_l->dmg = damage;
-	goop_c->dmg = damage;
-	goop_r->dmg = damage;
+	plasmaball_l->dmg = damage;
+	plasmaball_c->dmg = damage;
+	plasmaball_r->dmg = damage;
 
 	// center spread, line of sight
-	VectorScale (dir, speed, goop_c->velocity);		// Knightmare- use parm speed
+	VectorScale (dir, speed, plasmaball_c->velocity);		// Knightmare- use parm speed
 	vectoangles (dir, angles);
 
 	// right spread, has 10+ in yaw
 	angles[YAW] -= 10;
 	AngleVectors (angles, dir_r, NULL, NULL);
-	VectorScale (dir_r, speed, goop_r->velocity);		// Knightmare- use parm speed
+	VectorScale (dir_r, speed, plasmaball_r->velocity);		// Knightmare- use parm speed
 
 	// left spread, has 10- in yaw
 	angles[YAW] += 20;
 	AngleVectors (angles, dir_l, NULL, NULL);
-	VectorScale (dir_l, speed, goop_l->velocity);		// Knightmare- use parm speed
+	VectorScale (dir_l, speed, plasmaball_l->velocity);		// Knightmare- use parm speed
 
-	goop_l->touch = plasma_rifle_spread_touch;
-	goop_c->touch = plasma_rifle_spread_touch;
-	goop_r->touch = plasma_rifle_spread_touch;
+	plasmaball_l->touch = plasma_rifle_spread_touch;
+	plasmaball_c->touch = plasma_rifle_spread_touch;
+	plasmaball_r->touch = plasma_rifle_spread_touch;
 	
-	goop_l->think = G_FreeEdict;
-	goop_c->think = G_FreeEdict;
-	goop_r->think = G_FreeEdict;
-//	goop_l->nextthink = level.time + 3.0;
-//	goop_c->nextthink = level.time + 3.0;
-//	goop_r->nextthink = level.time + 3.0;
-	goop_l->nextthink = level.time + sk_plasma_rifle_life_spread->value;
-	goop_c->nextthink = level.time + sk_plasma_rifle_life_spread->value;
-	goop_r->nextthink = level.time + sk_plasma_rifle_life_spread->value;
+	plasmaball_l->think = G_FreeEdict;
+	plasmaball_c->think = G_FreeEdict;
+	plasmaball_r->think = G_FreeEdict;
+//	plasmaball_l->nextthink = level.time + 3.0;
+//	plasmaball_c->nextthink = level.time + 3.0;
+//	plasmaball_r->nextthink = level.time + 3.0;
+	plasmaball_l->nextthink = level.time + sk_plasma_rifle_life_spread->value;
+	plasmaball_c->nextthink = level.time + sk_plasma_rifle_life_spread->value;
+	plasmaball_r->nextthink = level.time + sk_plasma_rifle_life_spread->value;
 
-	gi.linkentity (goop_l);
-	gi.linkentity (goop_c);
-	gi.linkentity (goop_r);
+	gi.linkentity (plasmaball_l);
+	gi.linkentity (plasmaball_c);
+	gi.linkentity (plasmaball_r);
 
 	// Knightmare- added missing check_dodge() calls
 	if (ent->client) {
-		check_dodge (ent, goop_c->s.origin, dir, speed);
-		check_dodge (ent, goop_r->s.origin, dir_r, speed);
-		check_dodge (ent, goop_l->s.origin, dir_l, speed);
+		check_dodge (ent, plasmaball_c->s.origin, dir, speed);
+		check_dodge (ent, plasmaball_r->s.origin, dir_r, speed);
+		check_dodge (ent, plasmaball_l->s.origin, dir_l, speed);
 	}
 }
 
@@ -326,50 +326,50 @@ void fire_plasma_rifle (edict_t *ent, vec3_t start, vec3_t dir, int damage, int 
 	}
 }
 
-// NOTE: SP_goop should ONLY be used to spawn plasma rifle shots that change maps
+// NOTE: SP_plasmaball should ONLY be used to spawn plasma rifle shots that change maps
 //       via a trigger_transition. It should NOT be used for map entities.
 
-void goop_delayed_start (edict_t *goop)
+void plasmaball_delayed_start (edict_t *plasmaball)
 {
 	if (g_edicts[1].linkcount)
 	{
-		VectorScale(goop->movedir, goop->moveinfo.speed, goop->velocity);
-		goop->nextthink = level.time + 8000/goop->moveinfo.speed;
-		goop->think = G_FreeEdict;
-		gi.linkentity(goop);
+		VectorScale(plasmaball->movedir, plasmaball->moveinfo.speed, plasmaball->velocity);
+		plasmaball->nextthink = level.time + 8000/plasmaball->moveinfo.speed;
+		plasmaball->think = G_FreeEdict;
+		gi.linkentity(plasmaball);
 	}
 	else
-		goop->nextthink = level.time + FRAMETIME;
+		plasmaball->nextthink = level.time + FRAMETIME;
 }
 
-void SP_goop (edict_t *goop)
+void SP_plasmaball (edict_t *plasmaball)
 {
 	vec3_t	dir;
 
-	goop->s.modelindex = gi.modelindex(PLASMA_SPRITE_FLY);
-	goop->s.effects |= EF_BLUEHYPERBLASTER | EF_ANIM_ALLFAST;
-	goop->s.sound = gi.soundindex(PLASMA_SOUND_FLYBY);
+	plasmaball->s.modelindex = gi.modelindex(PLASMA_SPRITE_FLY);
+	plasmaball->s.effects |= EF_BLUEHYPERBLASTER | EF_ANIM_ALLFAST;
+	plasmaball->s.sound = gi.soundindex(PLASMA_SOUND_FLYBY);
 
 	// set to the spread variant as we don't need a high speed bouncing projectile just after a map transition
-	goop->touch = plasma_rifle_spread_touch;
-	AngleVectors(goop->s.angles, dir, NULL, NULL);
-	VectorCopy (dir, goop->movedir);
-	goop->moveinfo.speed = VectorLength(goop->velocity);
-	if (goop->moveinfo.speed <= 0)
-		goop->moveinfo.speed = sk_plasma_rifle_speed_spread->value;	//	1200
+	plasmaball->touch = plasma_rifle_spread_touch;
+	AngleVectors(plasmaball->s.angles, dir, NULL, NULL);
+	VectorCopy (dir, plasmaball->movedir);
+	plasmaball->moveinfo.speed = VectorLength(plasmaball->velocity);
+	if (plasmaball->moveinfo.speed <= 0)
+		plasmaball->moveinfo.speed = sk_plasma_rifle_speed_spread->value;	//	1200
 
-	// For SP, freeze goop until player spawns in
+	// For SP, freeze plasmaball until player spawns in
 	if (game.maxclients == 1)
 	{
-		VectorClear(goop->velocity);
-		goop->think = goop_delayed_start;
-		goop->nextthink = level.time + FRAMETIME;
+		VectorClear(plasmaball->velocity);
+		plasmaball->think = plasmaball_delayed_start;
+		plasmaball->nextthink = level.time + FRAMETIME;
 	}
 	else
 	{
-		goop->think = G_FreeEdict;
-		goop->nextthink = level.time + 8000/goop->moveinfo.speed;
+		plasmaball->think = G_FreeEdict;
+		plasmaball->nextthink = level.time + 8000/plasmaball->moveinfo.speed;
 	}
-	gi.linkentity (goop);
+	gi.linkentity (plasmaball);
 }
 // end M82 Plasma Rifle

@@ -619,6 +619,22 @@ char *G_CopyString (char *in)
 	return out;
 }
 
+// Knightmare added
+mmove_t *G_NewCustomAnim (void)
+{
+	int	idx = 0;
+
+	if (level.num_custom_anims < MAX_CUSTOM_ANIMS) {
+		idx = level.num_custom_anims;
+		level.num_custom_anims++;
+		return &g_custom_anims[idx];
+	}
+	else {
+	//	gi.dprintf ("G_NewCustomAnimIndex: no more custom anims available!\n");
+		return NULL;
+	}
+}
+// end Knightmare
 
 void G_InitEdict (edict_t *e)
 {

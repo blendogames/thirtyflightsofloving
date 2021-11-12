@@ -1698,20 +1698,32 @@ void SP_worldspawn (edict_t *ent)
 	// status bar program
 	if (deathmatch->value)
 	{
-//ZOID
-		if (ctf->value) {
+// ZOID
+		if (ctf->value)
+		{
 			if (ttctf->value) // Knightmare added
 				gi.configstring (CS_STATUSBAR, ttctf_statusbar);
 			else
 				gi.configstring (CS_STATUSBAR, ctf_statusbar);
-			CTFPrecache();
+			CTFPrecache ();
+#ifdef KMQUAKE2_ENGINE_MOD
+			gi.configstring (CS_HUDVARIANT, "ctf");		// use CTF HUD script variant
+#endif
 		}
-		else
+		else {
 			gi.configstring (CS_STATUSBAR, dm_statusbar);
+#ifdef KMQUAKE2_ENGINE_MOD
+			gi.configstring (CS_HUDVARIANT, "default");	// use DM/SP HUD script variant
+#endif
+		}
 	}
-//ZOID
-	else
+// ZOID
+	else {
 		gi.configstring (CS_STATUSBAR, single_statusbar);
+#ifdef KMQUAKE2_ENGINE_MOD
+		gi.configstring (CS_HUDVARIANT, "default");		// use DM/SP HUD script variant
+#endif
+	}
 	//---------------
 
 // ACEBOT_ADD

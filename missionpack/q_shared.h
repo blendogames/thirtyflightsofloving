@@ -111,7 +111,7 @@ __inline int Q_vsnprintf (char *Dest, size_t Count, const char *Format, va_list 
 #else
 #define SAVEGAME_DLLNAME "Rogue + Xatrix + Lazarus integrated mod"
 #endif	// CITADELMOD_FEATURES
-#define SAVEGAME_VERSION 5
+#define SAVEGAME_VERSION 6
 
 // angle indexes
 #define	PITCH				0		// up / down
@@ -1361,7 +1361,8 @@ ROGUE - VERSIONS
 #define	CS_ITEMS			(CS_LIGHTS+MAX_LIGHTSTYLES)
 #define	CS_PLAYERSKINS		(CS_ITEMS+MAX_ITEMS)
 #define CS_GENERAL			(CS_PLAYERSKINS+MAX_CLIENTS)
-#define	CS_PAKFILE			(CS_GENERAL+MAX_GENERAL)
+#define	CS_HUDVARIANT		(CS_GENERAL+MAX_GENERAL)
+#define	CS_PAKFILE			(CS_HUDVARIANT+1)
 #define	MAX_CONFIGSTRINGS	(CS_PAKFILE+1)
 
 // Knightmare- hacked configstring offsets for backward compatiblity
@@ -1373,7 +1374,6 @@ ROGUE - VERSIONS
 #define OLD_CS_GENERAL			(OLD_CS_PLAYERSKINS+MAX_CLIENTS)
 #define	OLD_MAX_CONFIGSTRINGS	(OLD_CS_GENERAL+MAX_GENERAL)
 // end Knightmare
-
 
 //==============================================
 

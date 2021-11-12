@@ -115,6 +115,7 @@ __inline int Q_vsnprintf (char *Dest, size_t Count, const char *Format, va_list 
 #endif
 
 #define	MAX_ITEMS			256
+#define MAX_GENERAL			(MAX_CLIENTS*2)	// general config strings
 
 // Knightmare- world size
 #ifdef KMQUAKE2_ENGINE_MOD
@@ -1084,8 +1085,20 @@ typedef enum
 #define	CS_LIGHTS			(CS_IMAGES+MAX_IMAGES)
 #define	CS_ITEMS			(CS_LIGHTS+MAX_LIGHTSTYLES)
 #define	CS_PLAYERSKINS		(CS_ITEMS+MAX_ITEMS)
-#define MAX_CONFIGSTRINGS	(CS_PLAYERSKINS+MAX_CLIENTS)
+#define CS_GENERAL			(CS_PLAYERSKINS+MAX_CLIENTS)
+#define	CS_HUDVARIANT		(CS_GENERAL+MAX_GENERAL)
+#define	CS_PAKFILE			(CS_HUDVARIANT+1)
+//#define MAX_CONFIGSTRINGS	(CS_GENERAL+MAX_GENERAL)
 
+// Knightmare- hacked configstring offsets for backward compatiblity
+#define OLD_CS_SOUNDS			(CS_MODELS+OLD_MAX_MODELS)
+#define	OLD_CS_IMAGES			(OLD_CS_SOUNDS+OLD_MAX_SOUNDS)
+#define	OLD_CS_LIGHTS			(OLD_CS_IMAGES+OLD_MAX_IMAGES)
+#define	OLD_CS_ITEMS			(OLD_CS_LIGHTS+MAX_LIGHTSTYLES)
+#define	OLD_CS_PLAYERSKINS		(OLD_CS_ITEMS+MAX_ITEMS)
+#define OLD_CS_GENERAL			(OLD_CS_PLAYERSKINS+MAX_CLIENTS)
+#define	OLD_MAX_CONFIGSTRINGS	(OLD_CS_GENERAL+MAX_GENERAL)
+// end Knightmare
 
 //==============================================
 

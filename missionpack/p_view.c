@@ -1381,9 +1381,9 @@ void G_SetClientSound (edict_t *ent)
 		ent->s.sound = gi.soundindex("jetpack/stutter.wav");
 	else if (strcmp(weap, "weapon_railgun") == 0)
 		ent->s.sound = gi.soundindex("weapons/rg_hum.wav");
-#ifdef KMQUAKE2_ENGINE_MOD
 	else if (strcmp(weap, "weapon_bfg") == 0)
 		ent->s.sound = gi.soundindex("weapons/bfg_hum.wav");
+#ifdef KMQUAKE2_ENGINE_MOD
 	// RAFAEL
 	else if (strcmp (weap, "weapon_phalanx") == 0)
 		ent->s.sound = gi.soundindex ("weapons/phaloop.wav");

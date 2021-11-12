@@ -1623,14 +1623,19 @@ void SP_worldspawn (edict_t *ent)
 
 	// status bar program
 	if (deathmatch->value)
-//ZOID
-		if (ctf->value) {
+	{
+// ZOID
+		if (ctf->value)
+		{
 			gi.configstring (CS_STATUSBAR, ctf_statusbar);
-			//precaches
+#ifdef KMQUAKE2_ENGINE_MOD
+			gi.configstring (CS_HUDVARIANT, "ctf");		// use CTF HUD script variant
+#endif
+			// precaches
 			gi.imageindex("sbfctf1");
 			gi.imageindex("sbfctf2");
-//			gi.imageindex("ctfsb1");
-//			gi.imageindex("ctfsb2");
+		//	gi.imageindex("ctfsb1");
+		//	gi.imageindex("ctfsb2");
 			gi.imageindex("i_ctf1");
 			gi.imageindex("i_ctf2");
 			gi.imageindex("i_ctf1d");
@@ -1638,19 +1643,28 @@ void SP_worldspawn (edict_t *ent)
 			gi.imageindex("i_ctf1t");
 			gi.imageindex("i_ctf2t");
 			gi.imageindex("i_ctfj");
-
-/*			if (ctf->value == 2)
+		/*	if (ctf->value == 2)
 			{
 				gi.modelindex("models/weapons/v_hook/tris.md2");
 				gi.soundindex("weapons/grapple/grhit.wav");
 				gi.soundindex("weapons/grapple/grpull.wav");
 				gi.soundindex("weapons/grapple/grfire.wav");
 			}*/
-		} else
-//ZOID
-		gi.configstring (CS_STATUSBAR, dm_statusbar);
-	else
+		}
+		else {
+// ZOID
+			gi.configstring (CS_STATUSBAR, dm_statusbar);
+#ifdef KMQUAKE2_ENGINE_MOD
+			gi.configstring (CS_HUDVARIANT, "3zb2");	// use 3ZB2 HUD script variant
+#endif
+		}
+	}
+	else {
 		gi.configstring (CS_STATUSBAR, single_statusbar);
+#ifdef KMQUAKE2_ENGINE_MOD
+		gi.configstring (CS_HUDVARIANT, "3zb2");		// use 3ZB2 HUD script variant
+#endif
+	}
 
 	//---------------
 

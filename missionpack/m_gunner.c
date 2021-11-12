@@ -306,10 +306,6 @@ void gunner_pain (edict_t *self, edict_t *other, float kick, int damage)
 
 	monster_done_dodge (self);
 
-	// Tactician Gunner shrugs off small damage
-	if ( (self->moreflags & FL2_COMMANDER) && (damage < 10) )
-		return;
-
 	if (!self->groundentity)
 	{
 	//	if ((g_showlogic) && (g_showlogic->value))
@@ -337,6 +333,10 @@ void gunner_pain (edict_t *self, edict_t *other, float kick, int damage)
 
 	if (skill->value == 3)
 		return;		// no pain anims in nightmare
+
+	// Tactician Gunner shrugs off small damage
+	if ( (self->moreflags & FL2_COMMANDER) && (damage < 10) )
+		return;
 
 	if (self->moreflags & FL2_COMMANDER) {
 		smallDamage = 20;

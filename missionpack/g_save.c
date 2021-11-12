@@ -10,7 +10,9 @@
 void ChasecamRemove (edict_t *ent);
 void ChasecamStart (edict_t *ent);
 
+#ifndef SAVEGAME_USE_FUNCTION_TABLE
 mmove_t mmove_reloc;
+#endif
 
 field_t fields[] = {
 	{"classname", FOFS(classname), F_LSTRING},
@@ -1161,7 +1163,7 @@ All pointer variables (except function pointers) must be handled specially.
 */
 void WriteLevelLocals (FILE *f)
 {
-	field_t		*field;
+	field_t				*field;
 	level_locals_t		temp;
 
 	// all of the ints, floats, and vectors stay as they are
@@ -1240,7 +1242,7 @@ void WriteLevel (char *filename)
 	FILE	*f;
 	void	*base;
 
-	if(developer->value)
+	if (developer->value)
 		gi.dprintf ("==== WriteLevel ====\n");
 
 	f = fopen (filename, "wb");
@@ -1257,6 +1259,14 @@ void WriteLevel (char *filename)
 
 	// write out level_locals_t
 	WriteLevelLocals (f);
+
+	// Knightmare added
+	// write out custom animations
+	for (i=0; i<MAX_CUSTOM_ANIMS; i++)
+	{
+		fwrite (&g_custom_anims[i], sizeof(g_custom_anims[i]), 1, f);
+	}
+	// end Knightmare
 
 	// write out all the entities
 	for (i=0; i<globals.num_edicts; i++)
@@ -1370,6 +1380,14 @@ void ReadLevel (char *filename)
 
 	// load the level locals
 	ReadLevelLocals (f);
+
+	// Knightmare added
+	// load custom animations
+	for (i=0; i<MAX_CUSTOM_ANIMS; i++)
+	{
+		fread (&g_custom_anims[i], sizeof(g_custom_anims[i]), 1, f);
+	}
+	// end Knightmare
 
 	// load all the entities
 	while (1)

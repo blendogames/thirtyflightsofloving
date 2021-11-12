@@ -69,6 +69,7 @@ void SP_target_crosslevel_target (edict_t *ent);
 void SP_target_laser (edict_t *self);
 void SP_target_help (edict_t *ent);
 void SP_target_actor (edict_t *ent);
+void SP_target_animation (edict_t *self);
 void SP_target_lightramp (edict_t *self);
 void SP_target_earthquake (edict_t *ent);
 void SP_target_character (edict_t *ent);
@@ -366,7 +367,7 @@ void SP_tesla (edict_t *self);
 void SP_trap (edict_t *self);
 void SP_rocket (edict_t *self);
 void SP_missile (edict_t *self);
-void SP_goop (edict_t *self);	// SKWiD MOD
+void SP_plasmaball (edict_t *self);	// SKWiD MOD
 //
 // end Lazarus
 
@@ -436,6 +437,7 @@ spawn_t	spawns[] = {
 	{"target_laser", SP_target_laser},
 	{"target_help", SP_target_help},
 	{"target_actor", SP_target_actor},
+	{"target_animation", SP_target_animation},
 	{"target_lightramp", SP_target_lightramp},
 	{"target_earthquake", SP_target_earthquake},
 	{"target_character", SP_target_character},
@@ -766,7 +768,7 @@ spawn_t	spawns[] = {
 	{"homing rocket", SP_rocket},
 	{"missile", SP_missile},
 	{"homing rocket", SP_missile},
-	{"goop", SP_goop},	// SKWiD MOD
+	{"plasmaball", SP_plasmaball},	// SKWiD MOD
 // end Lazarus
 
 	{NULL, NULL}
@@ -1636,6 +1638,7 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 	gi.FreeTags (TAG_LEVEL);
 
 	memset (&level, 0, sizeof(level));
+	memset (g_custom_anims, 0, sizeof(g_custom_anims));		// Knightmare- wipe custom animations
 	memset (g_edicts, 0, game.maxentities * sizeof (g_edicts[0]));
 
 	// Lazarus: these are used to track model and sound indices
@@ -2164,6 +2167,10 @@ void SP_worldspawn (edict_t *ent)
 		gi.configstring (CS_STATUSBAR, dm_statusbar);
 	else
 		gi.configstring (CS_STATUSBAR, single_statusbar);
+
+#ifdef KMQUAKE2_ENGINE_MOD
+	gi.configstring (CS_HUDVARIANT, "default");		// use DM/SP HUD script variant
+#endif
 
 	//---------------
 
@@ -2972,7 +2979,7 @@ void Widowlegs_Spawn (vec3_t startpos, vec3_t angles)
 
 int nohud = 0;
 
-void Hud_On()
+void Hud_On (void)
 {
 	if (deathmatch->value)
 		gi.configstring (CS_STATUSBAR, dm_statusbar);
@@ -2981,13 +2988,13 @@ void Hud_On()
 	nohud = 0;
 }
 
-void Hud_Off()
+void Hud_Off (void)
 {
 	gi.configstring (CS_STATUSBAR, NULL);
 	nohud = 1;
 }
 
-void Cmd_ToggleHud ()
+void Cmd_ToggleHud (void)
 {
 	if (deathmatch->value)
 		return;

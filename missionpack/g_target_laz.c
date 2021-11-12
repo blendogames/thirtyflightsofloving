@@ -2768,6 +2768,9 @@ void SP_target_monitor (edict_t *self)
  "message" - specifies allowable classname to animate. This prevents 
              animating entities with inapplicable frame numbers
 =====================================================================================*/
+
+mmove_t	g_custom_anims[MAX_CUSTOM_ANIMS];	// array of custom anins, saved to level file
+
 void target_animate (edict_t *ent)
 {
 	if ( (ent->s.frame <  ent->monsterinfo.currentmove->firstframe) ||
@@ -2817,7 +2820,7 @@ void target_animation_use (edict_t *self, edict_t *other, edict_t *activator)
 	{
 		if (!self->target)
 			return;
-		target = G_Find(NULL,FOFS(targetname),self->target);
+		target = G_Find(NULL, FOFS(targetname), self->target);
 		if (!target)
 			return;
 	}
@@ -2845,7 +2848,7 @@ void target_animation_use (edict_t *self, edict_t *other, edict_t *activator)
 
 void SP_target_animation (edict_t *self)
 {
-#if 1
+#if 0
 	gi.dprintf("Target_animation is currently not implemented.\n");
 	G_FreeEdict(self);
 	return;
@@ -2896,7 +2899,14 @@ void SP_target_animation (edict_t *self)
 			self->framenumbers = 1;
 	}
 	self->use = target_animation_use;
-	move = gi.TagMalloc(sizeof(mmove_t), TAG_LEVEL);
+//	move = gi.TagMalloc(sizeof(mmove_t), TAG_LEVEL);
+	move = G_NewCustomAnim();
+	if (!move) {
+		gi.dprintf("target_animation: no more custom anims available!\n");
+		G_FreeEdict(self);
+		return;
+	}
+
 	self->monsterinfo.currentmove = move;
 #endif
 }

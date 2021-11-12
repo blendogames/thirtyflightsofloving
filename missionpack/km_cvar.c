@@ -70,10 +70,6 @@ cvar_t	*sk_hyperblaster_color;		// hyperblaster color- 1=yellow, 2=green, 3=blue
 cvar_t	*sk_railgun_damage;
 cvar_t	*sk_railgun_damage_dm;
 cvar_t	*sk_railgun_skin;
-cvar_t	*sk_rail_color;
-cvar_t	*sk_rail_color_red;
-cvar_t	*sk_rail_color_green;
-cvar_t	*sk_rail_color_blue;
 
 cvar_t	*sk_bfg_damage;
 cvar_t	*sk_bfg_damage_dm;
@@ -109,6 +105,8 @@ cvar_t	*sk_etf_rifle_speed;
 
 cvar_t	*sk_plasmabeam_damage;
 cvar_t	*sk_plasmabeam_damage_dm;
+cvar_t	*sk_plasmabeam_kick;
+cvar_t	*sk_plasmabeam_kick_dm;
 
 cvar_t	*sk_disruptor_damage;
 cvar_t	*sk_disruptor_damage_dm;
@@ -128,6 +126,16 @@ cvar_t	*sk_tesla_health;
 cvar_t	*sk_chainfist_damage;
 cvar_t	*sk_chainfist_damage_dm;
 
+cvar_t	*sk_plasma_rifle_damage_bounce;
+cvar_t	*sk_plasma_rifle_damage_bounce_dm;
+cvar_t	*sk_plasma_rifle_damage_spread;
+cvar_t	*sk_plasma_rifle_damage_spread_dm;
+cvar_t	*sk_plasma_rifle_speed_bounce;
+cvar_t	*sk_plasma_rifle_speed_spread;
+cvar_t	*sk_plasma_rifle_radius;
+cvar_t	*sk_plasma_rifle_life_bounce;
+cvar_t	*sk_plasma_rifle_life_spread;
+
 cvar_t	*sk_nuke_delay;
 cvar_t	*sk_nuke_life;
 cvar_t	*sk_nuke_radius;
@@ -145,16 +153,6 @@ cvar_t	*sk_shockwave_radius;
 cvar_t	*sk_shockwave_speed;
 cvar_t	*sk_shockwave_effect_damage;
 cvar_t	*sk_shockwave_effect_radius;
-
-cvar_t	*sk_plasma_rifle_damage_bounce;
-cvar_t	*sk_plasma_rifle_damage_bounce_dm;
-cvar_t	*sk_plasma_rifle_damage_spread;
-cvar_t	*sk_plasma_rifle_damage_spread_dm;
-cvar_t	*sk_plasma_rifle_speed_bounce;
-cvar_t	*sk_plasma_rifle_speed_spread;
-cvar_t	*sk_plasma_rifle_radius;
-cvar_t	*sk_plasma_rifle_life_bounce;
-cvar_t	*sk_plasma_rifle_life_spread;
 
 cvar_t	*sk_flaregun_damage;
 cvar_t	*sk_flaregun_rdamage;
@@ -225,8 +223,8 @@ cvar_t	*sk_dm_start_proxlauncher;
 cvar_t	*sk_dm_start_plasmabeam;
 cvar_t	*sk_dm_start_disruptor;
 cvar_t	*sk_dm_start_chainfist;
-cvar_t	*sk_dm_start_shockwave;
 cvar_t	*sk_dm_start_plasmarifle;
+cvar_t	*sk_dm_start_shockwave;
 cvar_t	*sk_dm_start_flaregun;
 //cvar_t	*sk_dm_start_sniperrifle;
 //cvar_t	*sk_dm_start_soniccannon;
@@ -411,10 +409,6 @@ void InitLithiumVars (void)
 	sk_railgun_damage = gi.cvar("sk_railgun_damage", "150", 0);
 	sk_railgun_damage_dm = gi.cvar("sk_railgun_damage_dm", "100", 0);
 	sk_railgun_skin = gi.cvar("sk_railgun_skin", "0", 0);
-	sk_rail_color = gi.cvar("sk_rail_color", "1", 0);
-	sk_rail_color_red = gi.cvar("sk_rail_color_red", "255", 0);
-	sk_rail_color_green = gi.cvar("sk_rail_color_green", "20", 0);
-	sk_rail_color_blue = gi.cvar("sk_rail_color_blue", "20", 0);
 
 	sk_bfg_damage = gi.cvar("sk_bfg_damage", "500", 0);
 	sk_bfg_damage_dm = gi.cvar("sk_bfg_damage_dm", "200", 0);
@@ -450,6 +444,8 @@ void InitLithiumVars (void)
 
 	sk_plasmabeam_damage = gi.cvar("sk_plasmabeam_damage", "15", 0);
 	sk_plasmabeam_damage_dm = gi.cvar("sk_plasmabeam_damage_dm", "15", 0);
+	sk_plasmabeam_kick = gi.cvar("sk_plasmabeam_kick", "30", 0);
+	sk_plasmabeam_kick_dm = gi.cvar("sk_plasmabeam_kick_dm", "75", 0);
 
 	sk_disruptor_damage = gi.cvar("sk_disruptor_damage", "45", 0);
 	sk_disruptor_damage_dm = gi.cvar("sk_disruptor_damage_dm", "30", 0);
@@ -469,6 +465,16 @@ void InitLithiumVars (void)
 	sk_chainfist_damage = gi.cvar("sk_chainfist_damage", "15", 0);
 	sk_chainfist_damage_dm = gi.cvar("sk_chainfist_damage_dm", "30", 0);
 
+	sk_plasma_rifle_damage_bounce = gi.cvar("sk_plasma_rifle_damage_bounce", "60", 0);
+	sk_plasma_rifle_damage_bounce_dm = gi.cvar("sk_plasma_rifle_damage_bounce_dm", "39", 0);
+	sk_plasma_rifle_damage_spread = gi.cvar("sk_plasma_rifle_damage_spread", "43", 0);
+	sk_plasma_rifle_damage_spread_dm = gi.cvar("sk_plasma_rifle_damage_spread_dm", "28", 0);
+	sk_plasma_rifle_speed_bounce = gi.cvar("sk_plasma_rifle_speed_bounce", "1200", 0);
+	sk_plasma_rifle_speed_spread = gi.cvar("sk_plasma_rifle_speed_spread", "1200", 0);
+	sk_plasma_rifle_radius = gi.cvar("sk_plasma_rifle_radius", "70", 0);
+	sk_plasma_rifle_life_bounce = gi.cvar("sk_plasma_rifle_life_bounce", "3", 0);
+	sk_plasma_rifle_life_spread = gi.cvar("sk_plasma_rifle_life_spread", "3", 0);
+
 	sk_nuke_delay = gi.cvar("sk_nuke_delay", "4", 0);
 	sk_nuke_life = gi.cvar("sk_nuke_life", "6", 0);
 	sk_nuke_radius = gi.cvar("sk_nuke_radius", "512", 0);
@@ -486,16 +492,6 @@ void InitLithiumVars (void)
 	sk_shockwave_speed = gi.cvar("sk_shockwave_speed", "650", 0);
 	sk_shockwave_effect_damage = gi.cvar("sk_shockwave_effect_damage", "100", 0);
 	sk_shockwave_effect_radius = gi.cvar("sk_shockwave_effect_radius", "340", 0);
-
-	sk_plasma_rifle_damage_bounce = gi.cvar("sk_plasma_rifle_damage_bounce", "60", 0);
-	sk_plasma_rifle_damage_bounce_dm = gi.cvar("sk_plasma_rifle_damage_bounce_dm", "39", 0);
-	sk_plasma_rifle_damage_spread = gi.cvar("sk_plasma_rifle_damage_spread", "43", 0);
-	sk_plasma_rifle_damage_spread_dm = gi.cvar("sk_plasma_rifle_damage_spread_dm", "28", 0);
-	sk_plasma_rifle_speed_bounce = gi.cvar("sk_plasma_rifle_speed_bounce", "1200", 0);
-	sk_plasma_rifle_speed_spread = gi.cvar("sk_plasma_rifle_speed_spread", "1200", 0);
-	sk_plasma_rifle_radius = gi.cvar("sk_plasma_rifle_radius", "70", 0);
-	sk_plasma_rifle_life_bounce = gi.cvar("sk_plasma_rifle_life_bounce", "3", 0);
-	sk_plasma_rifle_life_spread = gi.cvar("sk_plasma_rifle_life_spread", "3", 0);
 
 	sk_flaregun_damage = gi.cvar("sk_flaregun_damage", "1", 0);
 	sk_flaregun_rdamage = gi.cvar("sk_flaregun_rdamage", "1", 0);
@@ -565,8 +561,8 @@ void InitLithiumVars (void)
 	sk_dm_start_plasmabeam = gi.cvar("sk_dm_start_plasmabeam", "0", 0);
 	sk_dm_start_disruptor = gi.cvar("sk_dm_start_disruptor", "0", 0);
 	sk_dm_start_chainfist = gi.cvar("sk_dm_start_chainfist", "0", 0);
-	sk_dm_start_shockwave = gi.cvar("sk_dm_start_shockwave", "0", 0);
 	sk_dm_start_plasmarifle = gi.cvar("sk_dm_start_plasmarifle", "0", 0);
+	sk_dm_start_shockwave = gi.cvar("sk_dm_start_shockwave", "0", 0);
 	sk_dm_start_flaregun = gi.cvar("sk_dm_start_flaregun", "0", 0);
 //	sk_dm_start_sniperrifle = gi.cvar("sk_dm_start_sniperrifle", "0", 0);
 //	sk_dm_start_soniccannon = gi.cvar("sk_dm_start_soniccannon", "0", 0);

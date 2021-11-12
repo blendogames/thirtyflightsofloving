@@ -1582,7 +1582,7 @@ void SP_misc_actor (edict_t *self)
 	walkmonster_start (self);
 
 	// We've built the misc_actor model to include the standard
-	// Q2 male skins, specified with the style key. Default = grunt
+	// Q2 male skins, specified with the style key. Default=grunt
 	self->s.skinnum = self->style;
 
 	// actors always start in a dormant state, they *must* be used to get going

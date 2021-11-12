@@ -225,9 +225,9 @@ VWEP
 ===============
 */
 
-void ShowGun(edict_t *ent)
+void ShowGun (edict_t *ent)
 {
-	if (ent->s.modelindex == (MAX_MODELS-1)) //was 255 
+	if (ent->s.modelindex == (MAX_MODELS-1)) // was 255 
 	{
 		int i=0;
 
@@ -268,7 +268,7 @@ void ChangeWeapon (edict_t *ent)
 	ent->client->machinegun_shots = 0;
 
 	// set visible model
-	if (ent->s.modelindex == (MAX_MODELS-1)) //was 255
+	if (ent->s.modelindex == (MAX_MODELS-1)) // was 255
 	{
 		if (ent->client->pers.weapon)
 			i = ((ent->client->pers.weapon->weapmodel & 0xff) << 8);
@@ -722,14 +722,13 @@ void Weapon_Generic (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
 	}
 
 	// Knightmare- activate and putaway sounds for ION Ripper and Shockwave
+#ifdef KMQUAKE2_ENGINE_MOD
 	if (!strcmp (ent->client->pers.weapon->pickup_name, "ION Ripper") && sk_ionripper_extra_sounds->value)
 	{
 		if (ent->client->ps.gunframe == 0)
 			gi.sound (ent, CHAN_AUTO, gi.soundindex("weapons/ionactive.wav"), 1.0, ATTN_NORM, 0);
-#ifdef KMQUAKE2_ENGINE_MOD
 		else if (ent->client->ps.gunframe == 37)
 			gi.sound (ent, CHAN_AUTO, gi.soundindex("weapons/ionaway.wav"), 1.0, ATTN_NORM, 0);
-#endif
 	}
 	if (!strcmp (ent->client->pers.weapon->pickup_name, "Shockwave"))
 	{
@@ -738,6 +737,7 @@ void Weapon_Generic (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
 		else if (ent->client->ps.gunframe == 62)
 			gi.sound (ent, CHAN_AUTO, gi.soundindex("weapons/shockaway.wav"), 1.0, ATTN_NORM, 0);
 	}
+#endif
 
 	if (ent->client->weaponstate == WEAPON_DROPPING)
 	{
@@ -835,7 +835,7 @@ void Weapon_Generic (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
 				ent->client->latched_buttons &= ~BUTTONS_ATTACK;
 				ent->client->buttons &= ~BUTTONS_ATTACK;
 			}
-			if (current_weapon_index == pr_index) // plasma rifle bounce/spread switch
+			else if (current_weapon_index == pr_index) // plasma rifle bounce/spread switch
 			{
 				ent->client->pers.plasma_mode = (!ent->client->pers.plasma_mode);
 				if (ent->client->pers.plasma_mode)
@@ -920,7 +920,7 @@ void Weapon_Generic (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
 			if (current_weapon_index == pr_index)
 			{
 				if ( ent->client->ps.gunframe == 35 )
-					gi.sound(ent, CHAN_WEAPON, gi.soundindex(PLASMA_SOUND_VENT), 1, ATTN_NORM,0 );
+					gi.sound(ent, CHAN_WEAPON, gi.soundindex(PLASMA_SOUND_VENT), 1, ATTN_NORM, 0 );
 			}
 
 			ent->client->ps.gunframe++;
@@ -973,7 +973,7 @@ void weapon_grenade_fire (edict_t *ent, qboolean held)
 	vec3_t	offset;
 	vec3_t	forward, right, up;
 	vec3_t	start;
-	int		damage = sk_hand_grenade_damage->value; // was 125
+	int		damage = (int)sk_hand_grenade_damage->value; // was 125
 	float	timer;
 	int		speed;
 	float	radius;
@@ -1359,10 +1359,10 @@ void weapon_grenadelauncher_fire (edict_t *ent, qboolean altfire)
 	switch(ent->client->pers.weapon->tag)
 	{
 		case AMMO_PROX:
-			damage = sk_prox_damage->value;
+			damage = (int)sk_prox_damage->value;
 			break;
 		default:
-			damage = sk_grenade_damage->value;
+			damage = (int)sk_grenade_damage->value;
 			break;
 	}
 // PGM
@@ -1510,8 +1510,8 @@ void Weapon_RocketLauncher_Fire (edict_t *ent, qboolean altfire)
 	float	damage_radius;
 	int		radius_damage;
 
-	damage = sk_rocket_damage->value + (int)(random() * sk_rocket_damage2->value);
-	radius_damage = sk_rocket_rdamage->value;
+	damage = (int)sk_rocket_damage->value + (int)(random() * (int)sk_rocket_damage2->value);
+	radius_damage = (int)sk_rocket_rdamage->value;
 	damage_radius = sk_rocket_radius->value;
 	if (is_quad) {
 //PGM
@@ -1554,10 +1554,10 @@ void Weapon_RocketLauncher_Fire (edict_t *ent, qboolean altfire)
 		}
 		
 		target = rocket_target(ent, start, forward);
-		fire_rocket (ent, start, forward, damage, sk_rocket_speed->value, damage_radius, radius_damage, target);
+		fire_rocket (ent, start, forward, damage, (int)sk_rocket_speed->value, damage_radius, radius_damage, target);
 	}
 	else
-		fire_rocket (ent, start, forward, damage, sk_rocket_speed->value, damage_radius, radius_damage, NULL);
+		fire_rocket (ent, start, forward, damage, (int)sk_rocket_speed->value, damage_radius, radius_damage, NULL);
 
 	// send muzzle flash
 	// Knightmare- Gen cam code
@@ -1649,9 +1649,9 @@ int Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, int
 	// end Zaero
 
 	if (!hyper)
-		fire_blaster (ent, start, forward, damage, sk_blaster_speed->value, effect, hyper, color);
+		fire_blaster (ent, start, forward, damage, (int)sk_blaster_speed->value, effect, hyper, color);
 	else
-		fire_blaster (ent, start, forward, damage, sk_hyperblaster_speed->value, effect, hyper, color);
+		fire_blaster (ent, start, forward, damage, (int)sk_hyperblaster_speed->value, effect, hyper, color);
 
 	// Knightmare- select muzzle flash
 	if (hyper)
@@ -1721,9 +1721,9 @@ void Weapon_Blaster_Fire (edict_t *ent, qboolean altfire)
 	int		color;
 
 	if (deathmatch->value)
-		damage = sk_blaster_damage_dm->value;
+		damage = (int)sk_blaster_damage_dm->value;
 	else
-		damage = sk_blaster_damage->value;
+		damage = (int)sk_blaster_damage->value;
 
 	// select color
 	color = (int)sk_blaster_color->value;
@@ -1820,9 +1820,9 @@ void Weapon_HyperBlaster_Fire (edict_t *ent, qboolean altfire)
 				effect = 0;
 
 			if (deathmatch->value)
-				damage = sk_hyperblaster_damage_dm->value;
+				damage = (int)sk_hyperblaster_damage_dm->value;
 			else
-				damage = sk_hyperblaster_damage->value;
+				damage = (int)sk_hyperblaster_damage->value;
 		//	Blaster_Fire (ent, offset, damage, true, effect, color);
 			if ( Blaster_Fire (ent, offset, damage, true, effect, color) ) {
 				if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
@@ -1878,7 +1878,7 @@ void Machinegun_Fire (edict_t *ent, qboolean altfire)
 	vec3_t		start;
 	vec3_t		forward, right;
 	vec3_t		angles;
-	int			damage = sk_machinegun_damage->value;
+	int			damage = (int)sk_machinegun_damage->value;
 	int			kick = 2;
 	vec3_t		offset;
 
@@ -1940,9 +1940,9 @@ void Machinegun_Fire (edict_t *ent, qboolean altfire)
 	AngleVectors (angles, forward, right, NULL);
 	VectorSet(offset, 0, 8, ent->viewheight-8);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
-	fire_bullet (ent, start, forward, damage, kick, sk_machinegun_hspread->value, sk_machinegun_vspread->value, MOD_MACHINEGUN);
+	fire_bullet (ent, start, forward, damage, kick, (int)sk_machinegun_hspread->value, (int)sk_machinegun_vspread->value, MOD_MACHINEGUN);
 
-	//Knightmare- Gen cam code
+	// Knightmare- Gen cam code
 //	if (ent->client && ent->client->chasetoggle)
 	if (ent->client && ent->client->chaseactive)
 	{
@@ -1999,9 +1999,9 @@ void Chaingun_Fire (edict_t *ent, qboolean altfire)
 	int			kick = 2;
 
 	if (deathmatch->value)
-		damage = sk_chaingun_damage_dm->value;
+		damage = (int)sk_chaingun_damage_dm->value;
 	else
-		damage = sk_chaingun_damage->value;
+		damage = (int)sk_chaingun_damage->value;
 
 	if (ent->client->ps.gunframe == 5)
 		gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/chngnu1a.wav"), 1, ATTN_IDLE, 0);
@@ -2158,7 +2158,7 @@ void weapon_shotgun_fire (edict_t *ent, qboolean altfire)
 	vec3_t		start;
 	vec3_t		forward, right;
 	vec3_t		offset;
-	int			damage = sk_shotgun_damage->value;
+	int			damage = (int)sk_shotgun_damage->value;
 	int			kick = 8;
 
 	if (ent->client->ps.gunframe == 9)
@@ -2189,9 +2189,9 @@ void weapon_shotgun_fire (edict_t *ent, qboolean altfire)
 	}
 
 	if (deathmatch->value)
-		fire_shotgun (ent, start, forward, damage, kick, sk_shotgun_hspread->value, sk_shotgun_vspread->value, sk_shotgun_count->value, MOD_SHOTGUN);
+		fire_shotgun (ent, start, forward, damage, kick, (int)sk_shotgun_hspread->value, (int)sk_shotgun_vspread->value, (int)sk_shotgun_count->value, MOD_SHOTGUN);
 	else
-		fire_shotgun (ent, start, forward, damage, kick, sk_shotgun_hspread->value, sk_shotgun_vspread->value, sk_shotgun_count->value, MOD_SHOTGUN);
+		fire_shotgun (ent, start, forward, damage, kick, (int)sk_shotgun_hspread->value, (int)sk_shotgun_vspread->value, (int)sk_shotgun_count->value, MOD_SHOTGUN);
 
 	// send muzzle flash
 	//Knightmare- Gen cam code
@@ -2235,7 +2235,7 @@ void weapon_supershotgun_fire (edict_t *ent, qboolean altfire)
 	vec3_t		forward, right;
 	vec3_t		offset;
 	vec3_t		v;
-	int			damage = sk_sshotgun_damage->value;
+	int			damage = (int)sk_sshotgun_damage->value;
 	int			kick = 12;
 
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
@@ -2263,10 +2263,10 @@ void weapon_supershotgun_fire (edict_t *ent, qboolean altfire)
 	v[YAW]   = ent->client->v_angle[YAW] - 5;
 	v[ROLL]  = ent->client->v_angle[ROLL];
 	AngleVectors (v, forward, NULL, NULL);
-	fire_shotgun (ent, start, forward, damage, kick, sk_sshotgun_hspread->value, sk_sshotgun_vspread->value, sk_sshotgun_count->value/2, MOD_SSHOTGUN);
+	fire_shotgun (ent, start, forward, damage, kick, (int)sk_sshotgun_hspread->value, (int)sk_sshotgun_vspread->value, (int)sk_sshotgun_count->value/2, MOD_SSHOTGUN);
 	v[YAW]   = ent->client->v_angle[YAW] + 5;
 	AngleVectors (v, forward, NULL, NULL);
-	fire_shotgun (ent, start, forward, damage, kick, sk_sshotgun_hspread->value, sk_sshotgun_vspread->value, sk_sshotgun_count->value/2, MOD_SSHOTGUN);
+	fire_shotgun (ent, start, forward, damage, kick, (int)sk_sshotgun_hspread->value, (int)sk_sshotgun_vspread->value, (int)sk_sshotgun_count->value/2, MOD_SSHOTGUN);
 
 	// send muzzle flash
 	// Knightmare- Gen cam code
@@ -2325,12 +2325,12 @@ void weapon_railgun_fire (edict_t *ent, qboolean altfire)
 
 	if (deathmatch->value)
 	{	// normal damage is too extreme in dm
-		damage = sk_railgun_damage_dm->value;
+		damage = (int)sk_railgun_damage_dm->value;
 		kick = 200;
 	}
 	else
 	{
-		damage = sk_railgun_damage->value;
+		damage = (int)sk_railgun_damage->value;
 		kick = 250;
 	}
 
@@ -2347,12 +2347,13 @@ void weapon_railgun_fire (edict_t *ent, qboolean altfire)
 		kick *= 2;
 	}
 
-	// changeable color
-	if ( (sk_rail_color->value >= 2 ) && ent->client ) {
+	// custom client color
+	if ( ent->client && (ent->client->pers.color1[3] != 0) )
+	{
 		useColor = true;
-		red = (int)sk_rail_color_red->value;
-		green = (int)sk_rail_color_green->value;
-		blue = (int)sk_rail_color_blue->value;
+		red = ent->client->pers.color1[0];
+		green = ent->client->pers.color1[1];
+		blue = ent->client->pers.color1[2];
 	}
 
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
@@ -2455,9 +2456,9 @@ void weapon_bfg_fire (edict_t *ent, qboolean altfire)
 	// end Zaero
 
 	if (deathmatch->value)
-		damage = sk_bfg_damage_dm->value;
+		damage = (int)sk_bfg_damage_dm->value;
 	else
-		damage = sk_bfg_damage->value;
+		damage = (int)sk_bfg_damage->value;
 
 	if (ent->client->ps.gunframe == 9)
 	{
@@ -2516,7 +2517,7 @@ void weapon_bfg_fire (edict_t *ent, qboolean altfire)
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 */
 
-	fire_bfg (ent, start, forward, damage, sk_bfg_speed->value, damage_radius); //was 400
+	fire_bfg (ent, start, forward, damage, (int)sk_bfg_speed->value, damage_radius);	// was 400
 
 	ent->client->ps.gunframe++;
 
@@ -2556,13 +2557,13 @@ void weapon_ionripper_fire (edict_t *ent, qboolean altfire)
 	if (deathmatch->value)
 	{
 		// tone down for deathmatch
-		damage = sk_ionripper_damage_dm->value;
-		kick = sk_ionripper_kick_dm->value;	// 40
+		damage = (int)sk_ionripper_damage_dm->value;
+		kick = (int)sk_ionripper_kick_dm->value;	// 40
 	}
 	else
 	{
-		damage = sk_ionripper_damage->value;
-		kick = sk_ionripper_kick->value;	// 60
+		damage = (int)sk_ionripper_damage->value;
+		kick = (int)sk_ionripper_kick->value;	// 60
 	}
 	
 	if (is_quad) {
@@ -2596,7 +2597,7 @@ void weapon_ionripper_fire (edict_t *ent, qboolean altfire)
 	}
 	// end Zaero
 
-	fire_ionripper (ent, start, forward, damage, sk_ionripper_speed->value, EF_IONRIPPER);
+	fire_ionripper (ent, start, forward, damage, (int)sk_ionripper_speed->value, EF_IONRIPPER);
 
 	// send muzzle flash
 	//Knightmare- Gen cam code
@@ -2654,8 +2655,8 @@ void weapon_phalanx_fire (edict_t *ent, qboolean altfire)
 	float		damage_radius;
 	int			radius_damage;
 
-	damage = sk_phalanx_damage->value  + (int)(random() * sk_phalanx_damage2->value);
-	radius_damage = sk_phalanx_radius_damage->value;
+	damage = (int)sk_phalanx_damage->value  + (int)(random() * (int)sk_phalanx_damage2->value);
+	radius_damage = (int)sk_phalanx_radius_damage->value;
 	damage_radius = sk_phalanx_radius->value;
 	
 	if (is_quad) {
@@ -2691,7 +2692,7 @@ void weapon_phalanx_fire (edict_t *ent, qboolean altfire)
 		v[ROLL]  = ent->client->v_angle[ROLL];
 		AngleVectors (v, forward, right, up);
 			
-		fire_phalanx_plasma (ent, start, forward, damage, sk_phalanx_speed->value, damage_radius, radius_damage);
+		fire_phalanx_plasma (ent, start, forward, damage, (int)sk_phalanx_speed->value, damage_radius, radius_damage);
 
 		if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
 			ent->client->pers.inventory[ent->client->ammo_index]--;
@@ -2702,7 +2703,7 @@ void weapon_phalanx_fire (edict_t *ent, qboolean altfire)
 		v[YAW]   = ent->client->v_angle[YAW] + 1.5;
 		v[ROLL]  = ent->client->v_angle[ROLL];
 		AngleVectors (v, forward, right, up);
-		fire_phalanx_plasma (ent, start, forward, damage, sk_phalanx_speed->value, damage_radius, radius_damage);
+		fire_phalanx_plasma (ent, start, forward, damage, (int)sk_phalanx_speed->value, damage_radius, radius_damage);
 
 		// send muzzle flash
 		// Knightmare- Gen cam code
@@ -2928,9 +2929,9 @@ void weapon_chainfist_fire (edict_t *ent, qboolean altfire)
 	int		damage;
 
 	if (deathmatch->value)
-		damage = sk_chainfist_damage_dm->value;
+		damage = (int)sk_chainfist_damage_dm->value;
 	else
-		damage = sk_chainfist_damage->value;
+		damage = (int)sk_chainfist_damage->value;
 
 	if (is_quad) {
 	//	damage *= damage_multiplier;
@@ -3088,9 +3089,9 @@ void weapon_tracker_fire (edict_t *self, qboolean altfire)
 
 	// PMM - felt a little high at 25
 	if (deathmatch->value)
-		damage = sk_disruptor_damage_dm->value;
+		damage = (int)sk_disruptor_damage_dm->value;
 	else
-		damage = sk_disruptor_damage->value;
+		damage = (int)sk_disruptor_damage->value;
 
 	if (is_quad) {
 //		damage *= damage_multiplier;		//PGM
@@ -3144,7 +3145,7 @@ void weapon_tracker_fire (edict_t *self, qboolean altfire)
 	VectorScale (forward, -2, self->client->kick_origin);
 	self->client->kick_angles[0] = -1;
 
-	fire_tracker (self, start, forward, damage, sk_disruptor_speed->value, enemy);
+	fire_tracker (self, start, forward, damage, (int)sk_disruptor_speed->value, enemy);
 
 	// send muzzle flash
 	// Knightmare- Gen cam code
@@ -3201,12 +3202,12 @@ void weapon_etf_rifle_fire (edict_t *ent, qboolean altfire)
 	vec3_t	offset;
 
 	damage_radius = sk_etf_rifle_radius->value;
-	radius_damage = sk_etf_rifle_radius_damage->value;
+	radius_damage = (int)sk_etf_rifle_radius_damage->value;
 
 	if (deathmatch->value)
-		damage = sk_etf_rifle_damage->value;
+		damage = (int)sk_etf_rifle_damage->value;
 	else
-		damage = sk_etf_rifle_damage->value;
+		damage = (int)sk_etf_rifle_damage->value;
 
 	// PGM - adjusted to use the quantity entry in the weapon structure.
 	if (ent->client->pers.inventory[ent->client->ammo_index] < ent->client->pers.weapon->quantity)
@@ -3262,7 +3263,7 @@ void weapon_etf_rifle_fire (edict_t *ent, qboolean altfire)
 	tempPt[2] += ent->viewheight;
 	P_ProjectSource2 (ent->client, tempPt, offset, forward, right, up, start);
 //	gi.dprintf("start: %s\n", vtos(start));
-	fire_flechette (ent, start, forward, damage, sk_etf_rifle_speed->value, damage_radius, radius_damage);
+	fire_flechette (ent, start, forward, damage, (int)sk_etf_rifle_speed->value, damage_radius, radius_damage);
 
 	// send muzzle flash
 	//Knightmare- Gen cam code
@@ -3331,8 +3332,8 @@ void Weapon_ETF_Rifle (edict_t *ent)
 
 // pgm - this now uses ent->client->pers.weapon->quantity like all the other weapons
 //#define HEATBEAM_AMMO_USE		2		
-#define	HEATBEAM_DM_DMG			30
-#define HEATBEAM_SP_DMG			30
+#define	HEATBEAM_DM_DMG			15
+#define HEATBEAM_SP_DMG			15
 
 void Heatbeam_Fire (edict_t *ent, qboolean altfire)
 {
@@ -3345,20 +3346,20 @@ void Heatbeam_Fire (edict_t *ent, qboolean altfire)
 	// for comparison, the hyperblaster is 15/20
 	// jim requested more damage, so try 15/15 --- PGM 07/23/98
 	if (deathmatch->value)
-		damage = sk_plasmabeam_damage->value;
+		damage = (int)sk_plasmabeam_damage_dm->value;
 	else
-		damage = sk_plasmabeam_damage->value;
+		damage = (int)sk_plasmabeam_damage->value;
 
 	if (deathmatch->value)  // really knock 'em around in deathmatch
-		kick = 75;
+		kick = (int)sk_plasmabeam_kick_dm->value;	// was 75
 	else
-		kick = 30;
+		kick = (int)sk_plasmabeam_kick->value;		// was 30
 
-//	if (ent->client->pers.inventory[ent->client->ammo_index] < HEATBEAM_AMMO_USE)
-//	{
-//		NoAmmoWeaponChange (ent);
-//		return;
-//	}
+/*	if (ent->client->pers.inventory[ent->client->ammo_index] < HEATBEAM_AMMO_USE)
+	{
+		NoAmmoWeaponChange (ent);
+		return;
+	} */
 
 	ent->client->ps.gunframe++;
 
@@ -3527,8 +3528,8 @@ void Shockwave_Fire (edict_t *ent, qboolean altfire)
 	int			radius_damage;
 	qboolean	emp_missfire = false;	// added for Zaero
 
-	damage = sk_shockwave_damage->value + (int)(random() * sk_shockwave_damage2->value);
-	radius_damage = sk_shockwave_rdamage->value;
+	damage = (int)sk_shockwave_damage->value + (int)(random() * (int)sk_shockwave_damage2->value);
+	radius_damage = (int)sk_shockwave_rdamage->value;
 	damage_radius = sk_shockwave_radius->value;
 
 	if (is_quad) {
@@ -3593,7 +3594,7 @@ void Shockwave_Fire (edict_t *ent, qboolean altfire)
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 */
 
-	fire_shock_sphere (ent, start, forward, damage, sk_shockwave_speed->value, damage_radius, radius_damage);
+	fire_shock_sphere (ent, start, forward, damage, (int)sk_shockwave_speed->value, damage_radius, radius_damage);
 
 	// send muzzle flash and sound
 	// Knightmare- Gen cam code
@@ -3764,7 +3765,7 @@ void kick_attack (edict_t *ent )
 	vec3_t		start;
 	vec3_t		forward, right;
 	vec3_t		offset;
-	int			damage = sk_jump_kick_damage->value;
+	int			damage = (int)sk_jump_kick_damage->value;
 	int			kick = 300;
 	trace_t		tr;
 	vec3_t		end;

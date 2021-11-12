@@ -889,6 +889,10 @@ void SP_worldspawn (edict_t *ent)
 	else
 		gi.configstring (CS_STATUSBAR, single_statusbar);
 
+#ifdef KMQUAKE2_ENGINE_MOD
+	gi.configstring (CS_HUDVARIANT, "default");		// use DM/SP HUD script variant
+#endif
+
 	//---------------
 
 

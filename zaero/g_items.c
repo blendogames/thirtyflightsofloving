@@ -1970,8 +1970,12 @@ always owned, never in the world
 		WEAP_RAILGUN,
 		NULL,
 		0,
-/* precache */ "models/weapons/v_sniper/scope/tris.md2 models/weapons/v_sniper/dmscope/tris.md2 weapons/sniper/beep.wav weapons/sniper/fire.wav "
-		/*"weapons/sniper/snip_act.wav weapons/sniper/snip_bye.wav"*/,
+#ifdef	KMQUAKE2_ENGINE_MOD
+/* precache */ "models/weapons/v_sniper/scope/tris.md2 models/weapons/v_sniper/dmscope/tris.md2 weapons/sniper/beep.wav weapons/sniper/fire.wav weapons/sniper/snip_act.wav weapons/sniper/snip_bye.wav",
+#else
+/* precache */ "models/weapons/v_sniper/scope/tris.md2 models/weapons/v_sniper/dmscope/tris.md2 weapons/sniper/beep.wav weapons/sniper/fire.wav",
+#endif	// KMQUAKE2_ENGINE_MOD
+		/*"weapons/sniper/snip_act.wav weapons/sniper/snip_bye.wav"*/
 		HIDE_FROM_SELECTION
 	},
 
@@ -2309,7 +2313,7 @@ always owned, never in the world
 /* width */		2,
 		60,
 		NULL,
-		IT_STAY_COOP|IT_POWERUP,
+		IT_POWERUP|IT_STAY_COOP,
 		0,
 		NULL,
 		0,
@@ -2332,7 +2336,7 @@ always owned, never in the world
 /* width */		2,
 		60,
 		NULL,
-		IT_STAY_COOP|IT_POWERUP,
+		IT_POWERUP|IT_STAY_COOP,
 		0,
 		NULL,
 		0,
@@ -2355,7 +2359,7 @@ always owned, never in the world
 /* width */		1,
 		30,
 		"Cells",
-		IT_STAY_COOP|IT_POWERUP,
+		IT_POWERUP|IT_STAY_COOP,
 		0,
 		NULL,
 		0,

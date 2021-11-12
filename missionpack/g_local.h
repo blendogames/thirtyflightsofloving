@@ -578,6 +578,7 @@ typedef struct
 	int			freezeframes;
 	int			next_skill;
 	int			num_reflectors;
+	int			num_custom_anims;			// Knightmare- custom anim counter
 	qboolean	intermission_letterbox;		// Knightmare- letterboxing
 	// end Lazarus
 
@@ -1206,7 +1207,7 @@ edict_t *G_PickTarget (char *targetname);
 void	G_UseTargets (edict_t *ent, edict_t *activator);
 void	G_SetMovedir (vec3_t angles, vec3_t movedir);
 void	G_SetMovedir2 (vec3_t angles, vec3_t movedir);
-
+mmove_t	*G_NewCustomAnim (void);	// Knightmare- util func for custom anims
 void	G_InitEdict (edict_t *e);
 edict_t	*G_Spawn (void);
 void	G_FreeEdict (edict_t *e);
@@ -1490,12 +1491,12 @@ qboolean fire_hit (edict_t *self, vec3_t aim, int damage, int kick);
 void fire_bullet (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, int hspread, int vspread, int mod);
 void fire_shotgun (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, int hspread, int vspread, int count, int mod);
 void fire_blaster (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, int effect, qboolean hyper, int color);
+void Grenade_Explode (edict_t *ent);
 void fire_grenade (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, float timer, float damage_radius, qboolean contact);
 void fire_grenade2 (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, float timer, float damage_radius, qboolean held);
-void rocket_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf);
 void fire_rail (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, qboolean useColor, int red, int green, int blue);
 void fire_bfg (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius);
-void Grenade_Explode (edict_t *ent);
+void rocket_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf);
 void fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage, edict_t *home_target);
 // Knightmare added
 void fire_missile (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage, edict_t *home_target);
@@ -1908,24 +1909,34 @@ void G_FindTeams();
 void Cmd_ToggleHud ();
 void Hud_On();
 void Hud_Off();
+
 //
 // g_svcmds.c
 //
 void	ServerCommand (void);
 qboolean SV_FilterPacket (char *from);
+
+//
+// g_target_laz.c
+//
+extern	mmove_t	g_custom_anims[MAX_CUSTOM_ANIMS];
+
 //
 // g_thing.c
 //
 edict_t *SpawnThing();
+
 //
 // g_tracktrain.c
 //
 void tracktrain_disengage (edict_t *train);
+
 //
 // g_turret.c
 //
 void turret_breach_fire(edict_t *ent);
 void turret_disengage (edict_t *ent);
+
 //
 // g_trigger.c
 //
@@ -2033,8 +2044,6 @@ typedef struct
 	int			max_fuel;
 	int			max_homing_rockets;
 
-//	int			max_armor; // KM
-
 	qboolean	spawn_landmark;
 	qboolean	spawn_levelchange;
 	vec3_t		spawn_offset;
@@ -2056,6 +2065,10 @@ typedef struct
 
 	float		visorFrames;
 	// end Zaero
+
+	// Custom client colors
+	color_t		color1;
+	color_t		color2;
 } client_persistant_t;
 
 // client data that stays across deathmatch respawns

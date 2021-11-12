@@ -373,6 +373,34 @@ void monster_fire_ionripper (edict_t *self, vec3_t start, vec3_t dir, int damage
 	gi.multicast (start, MULTICAST_PVS);
 }
 
+// Knightmare- this should have been added by Xatrix!
+void monster_fire_phalanx (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage, int flashtype)
+{
+	// Zaero add
+	if (EMPNukeCheck(self, start))
+	{
+		gi.sound (self, CHAN_AUTO, gi.soundindex("items/empnuke/emp_missfire.wav"), 1, ATTN_NORM, 0);
+		return;
+	}
+	// end Zaero
+
+	fire_phalanx_plasma (self, start, dir, damage, speed, damage_radius, radius_damage);
+
+	// Sends new MZ2_GLADBETA_PHALANX_1 for KMQ2 builds, or MZ2_GLADIATOR_RAILGUN_1 for non-KMQ2
+	gi.WriteByte (svc_muzzleflash2);
+	gi.WriteShort (self - g_edicts);
+#ifdef KMQUAKE2_ENGINE_MOD
+	if (flashtype >= MZ2_SEND_SHORT) {
+		gi.WriteByte (MZ2_SEND_SHORT);
+		gi.WriteShort (flashtype);
+		gi.WriteByte (0);
+	}
+	else
+#endif
+		gi.WriteByte (flashtype);
+	gi.multicast (start, MULTICAST_PVS);
+}
+
 // RAFAEL
 void monster_fire_rocket_heat (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int flashtype)
 {
@@ -508,34 +536,6 @@ void monster_fire_dabeam (edict_t *self)
  
 	self->spawnflags |= 0x80000001;
 	self->svflags &= ~SVF_NOCLIENT;
-}
-
-// Knightmare- this should have been added by Xatrix!
-void monster_fire_phalanx (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage, int flashtype)
-{
-	// Zaero add
-	if (EMPNukeCheck(self, start))
-	{
-		gi.sound (self, CHAN_AUTO, gi.soundindex("items/empnuke/emp_missfire.wav"), 1, ATTN_NORM, 0);
-		return;
-	}
-	// end Zaero
-
-	fire_phalanx_plasma (self, start, dir, damage, speed, damage_radius, radius_damage);
-
-	// Sends new MZ2_GLADBETA_PHALANX_1 for KMQ2 builds, or MZ2_GLADIATOR_RAILGUN_1 for non-KMQ2
-	gi.WriteByte (svc_muzzleflash2);
-	gi.WriteShort (self - g_edicts);
-#ifdef KMQUAKE2_ENGINE_MOD
-	if (flashtype >= MZ2_SEND_SHORT) {
-		gi.WriteByte (MZ2_SEND_SHORT);
-		gi.WriteShort (flashtype);
-		gi.WriteByte (0);
-	}
-	else
-#endif
-		gi.WriteByte (flashtype);
-	gi.multicast (start, MULTICAST_PVS);
 }
 
 // ROGUE

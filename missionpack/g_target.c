@@ -717,7 +717,7 @@ void use_target_blaster (edict_t *self, edict_t *other, edict_t *activator)
 		}
 	}
 	else
-	{	//Knightmare- set movedir here, allowing angles to be updated by movewith code
+	{	// Knightmare- set movedir here, allowing angles to be updated by movewith code
 		G_SetMovedir2 (self->s.angles, self->movedir);
 		VectorCopy(self->movedir,movedir);
 	}
