@@ -995,6 +995,8 @@ NoExtFunction:
 						Q_strncatz(cpuString, maxSize, " Core 2");
 					else if (extModel == 0x47)	// Broadwell
 						Q_strncatz(cpuString, maxSize, " Core i7/i5 5xxx");
+					else if (extModel == 0x97)	// Alder Lake
+						Q_strncatz(cpuString, maxSize, " Core i9/i7/i5/i3 12xxx");
 					else if (extModel == 0xA7)	// Rocket Lake
 						Q_strncatz(cpuString, maxSize, " Core i9/i7/i5/i3 11xxx");
 					break;
