@@ -1295,7 +1295,10 @@ void Sys_Init (void)
 			Q_strncpyz (string, sizeof(string), "Windows 8.1");
 		}
 		else if (osInfo.dwMajorVersion == 10 && osInfo.dwMinorVersion == 0) {
-			Q_strncpyz (string, sizeof(string), "Windows 10");
+			if (osInfo.dwBuildNumber >= 22000)
+				Q_strncpyz (string, sizeof(string), "Windows 11");
+			else
+				Q_strncpyz (string, sizeof(string), "Windows 10");
 		}
 #else	// (_MSC_VER < 1300)
 		if (osInfo.dwMajorVersion == 4) {
@@ -1343,10 +1346,18 @@ void Sys_Init (void)
 				Q_strncpyz (string, sizeof(string), "Windows Server 2012 R2");
 		}
 		else if (osInfo.dwMajorVersion == 10 && osInfo.dwMinorVersion == 0) {
-			if (osInfo.wProductType == VER_NT_WORKSTATION)
-				Q_strncpyz (string, sizeof(string), "Windows 10");
-			else
-				Q_strncpyz (string, sizeof(string), "Windows Server 2016");
+			if (osInfo.wProductType == VER_NT_WORKSTATION) {
+				if (osInfo.dwBuildNumber >= 22000)
+					Q_strncpyz (string, sizeof(string), "Windows 11");
+				else
+					Q_strncpyz (string, sizeof(string), "Windows 10");
+			}
+			else {
+				if (osInfo.dwBuildNumber == 17763)
+					Q_strncpyz (string, sizeof(string), "Windows Server 2019");
+				else
+					Q_strncpyz (string, sizeof(string), "Windows Server 2016");
+			}
 		}
 #endif	// (_MSC_VER < 1300)
 		else {
