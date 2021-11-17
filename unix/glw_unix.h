@@ -20,14 +20,13 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 
-#ifndef __linux__
-#ifndef __FreeBSD__
-#error You shouldnt be including this file on non-Linux platforms
+#if !defined(__linux__) && !defined(__FreeBSD__) && !defined(__APPLE__)
+#error You shouldn't be including this file on non-Linux platforms
 #endif
 #endif
 
-#ifndef __GLW_LINUX_H__
-#define __GLW_LINUX_H__
+#ifndef __GLW_UNIX_H__
+#define __GLW_UNIX_H__
 
 typedef struct
 {
@@ -39,4 +38,4 @@ typedef struct
 
 extern glwstate_t glw_state;
 
-#endif
+#endif	// __GLW_UNIX_H__

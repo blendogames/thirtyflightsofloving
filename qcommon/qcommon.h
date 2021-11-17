@@ -68,7 +68,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #if defined (_M_X64) || defined (_M_AMD64) || defined (__x86_64__)
 #define	CPUSTRING	"AMD64"
 #define STOCK_Q2_GAME_LIBRARY_NAME "gamei386.so"
-#define KMQ2_GAME_LIBRARY_NAME "kmq2gamex86_64.so"
+#define KMQ2_GAME_LIBRARY_NAME "kmq2gamex64.so"
 #elif defined __i386__
 #define CPUSTRING "i386"
 #define STOCK_Q2_GAME_LIBRARY_NAME "gamei386.so"
@@ -99,8 +99,38 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define OS_STRING "MacOS"
 
+// KMQ2 MacOSX port uses the Fruitz of Dojo plug system.
+// Comment this out if you want to use dylibs.
+#define USE_Q2PLUG
+
+#if defined (_M_X64) || defined (_M_AMD64) || defined (__x86_64__)
+
+#define	CPUSTRING	"AMD64"
+#ifdef USE_Q2PLUG
 #define STOCK_Q2_GAME_LIBRARY_NAME "GameMac.q2plug"
 #define KMQ2_GAME_LIBRARY_NAME "GameMac.kmq2plug"
+#else	// USE_Q2PLUG
+#define STOCK_Q2_GAME_LIBRARY_NAME "gamei386.dylib"
+#define KMQ2_GAME_LIBRARY_NAME "kmq2gamex64.dylib"
+#endif	// USE_Q2PLUG
+
+#elif defined __i386__
+
+#define CPUSTRING "i386"
+
+#ifdef USE_Q2PLUG
+#define STOCK_Q2_GAME_LIBRARY_NAME "GameMac.q2plug"
+#define KMQ2_GAME_LIBRARY_NAME "GameMac.kmq2plug"
+#else	// USE_Q2PLUG
+#define STOCK_Q2_GAME_LIBRARY_NAME "gamei386.dylib"
+#define KMQ2_GAME_LIBRARY_NAME "kmq2gamei386.dylib"
+#endif	// USE_Q2PLUG
+
+#else
+
+#define CPUSTRING "Unknown"
+
+#endif
 
 #else	// !WIN32
 
@@ -1051,5 +1081,11 @@ void SV_Init (void);
 void SV_Shutdown (char *finalmsg, qboolean reconnect);
 void SV_Frame (int msec);
 
+#ifndef WINDOWNAME
+#define WINDOWNAME "KMQuake2"
+#endif
+#ifndef SAVENAME
+#define SAVENAME "quake2"
+#endif
 
 #endif // __QCOMMON_H

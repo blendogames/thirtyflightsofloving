@@ -26,9 +26,15 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <stdio.h>
 
+#if defined(__APPLE__) || (MACOSX)
+#include <OpenGL/gl.h>
+#include <OpenGL/glu.h>
+#else
 #include <GL/gl.h>
 #include <GL/glu.h>
-#include "glext.h" //Knightmare- MrG's shader waterwarp support
+#endif // __APPLE__ || MACOSX
+
+#include "glext.h" // Knightmare- MrG's shader waterwarp support
 #include <math.h>
 
 #ifndef __linux__

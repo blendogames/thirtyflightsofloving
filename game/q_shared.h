@@ -78,11 +78,12 @@ typedef enum {false, true}	qboolean;
 #	include <sys/types.h>
 	typedef SInt64 qint64;
 	typedef UInt64 uint64;
-#elif defined(__APPLE__) || defined(MACOSX) // MacOS X Framework build
+/*#elif defined(__APPLE__) || defined(MACOSX) // MacOS X Framework build
 #	include <sys/types.h>
 	typedef int64_t qint64;
 	typedef unsigned int64_t uint64;
-#elif defined(__linux__) // Linux
+#elif defined(__linux__) // Linux */
+#elif defined(__linux__) || defined(__APPLE__) || defined(MACOSX) // Linux, MacOSX
 #	include <stdint.h>
 	typedef int64_t qint64;
 	typedef uint64_t uint64;

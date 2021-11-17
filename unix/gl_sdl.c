@@ -8,19 +8,22 @@
 
 glwstate_t glw_state;
 
-int mx, my;
-qboolean mouse_active = false;
+int		mx, my;
+//qboolean mouse_active = false;
+float	controller_leftx, controller_lefty, controller_rightx, controller_righty;
+extern	cvar_t *in_joystick;
 
-int GLimp_Init(void *hinstance, void *wndproc)
+int GLimp_Init (void *hinstance, void *wndproc)
 {
 	/* No-op */
 	return 1;
 }
 
-void GLimp_Shutdown(void)
+void GLimp_Shutdown (void)
 {
-	SDL_SetRelativeMouseMode(SDL_FALSE);
-	mouse_active = false;
+//	SDL_SetRelativeMouseMode(SDL_FALSE);
+//	mouse_active = false;
+	/* No-op */
 }
 
 void GLimp_BeginFrame(float camera_seperation)
@@ -28,18 +31,27 @@ void GLimp_BeginFrame(float camera_seperation)
 	/* No-op */
 }
 
-void GLimp_EndFrame(void)
+void GLimp_EndFrame (void)
 {
 	SDL_GL_SwapWindow(glw_state.glWindow);
 }
 
-int GLimp_SetMode(int *pwidth, int *pheight, int mode, dispType_t fullscreen)
+int GLimp_SetMode (int *pwidth, int *pheight, int mode, dispType_t fullscreen)
 {
-	int width, height;
+	int			width, height;
+	const char	*steam_tenfoot = NULL;
+
 	if (!VID_GetModeInfo(&width, &height, mode))
 	{
 		Com_Printf(" invalid mode\n");
 		return rserr_invalid_mode;
+	}
+
+	/* For Big Picture/SteamOS, unconditionally use fullscreen */
+	steam_tenfoot = SDL_getenv("SteamTenfoot");
+	if (steam_tenfoot != NULL && SDL_strcmp(steam_tenfoot, "1") == 0)
+	{
+		fullscreen = dt_fullscreen;
 	}
 
 	if (fullscreen == dt_fullscreen)
@@ -79,19 +91,19 @@ int GLimp_SetMode(int *pwidth, int *pheight, int mode, dispType_t fullscreen)
 	return rserr_ok;
 }
 
-void UpdateGammaRamp(void)
+void UpdateGammaRamp (void)
 {
 	/* Unsupported in 2021 */
 }
 
-char *Sys_GetClipboardData(void)
+char *Sys_GetClipboardData (void)
 {
 	return SDL_GetClipboardText();
 }
 
-void IN_Activate(qboolean active)
+void IN_Activate (qboolean active)
 {
-	if (active)
+/*	if (active)
 	{
 		if (!mouse_active)
 		{
@@ -107,7 +119,8 @@ void IN_Activate(qboolean active)
 			SDL_SetRelativeMouseMode(SDL_FALSE);
 			mouse_active = false;
 		}
-	}
+	} */
+	/* No-op */
 }
 
 /* IN_Translate functions taken from yquake2 */
@@ -117,7 +130,7 @@ void IN_Activate(qboolean active)
  * the id Tech 2 engines interal representation.
  */
 static int
-IN_TranslateSDLtoQ2Key(unsigned int keysym)
+IN_TranslateSDLtoQ2Key (unsigned int keysym)
 {
 	int key = 0;
 
@@ -155,7 +168,6 @@ IN_TranslateSDLtoQ2Key(unsigned int keysym)
 		case SDLK_RIGHT:
 			key = K_RIGHTARROW;
 			break;
-
 
 		case SDLK_RALT:
 		case SDLK_LALT:
@@ -225,7 +237,6 @@ IN_TranslateSDLtoQ2Key(unsigned int keysym)
 			key = K_F12;
 			break;
 
-
 		case SDLK_KP_7:
 			key = K_KP_HOME;
 			break;
@@ -282,7 +293,64 @@ IN_TranslateSDLtoQ2Key(unsigned int keysym)
 	return key;
 }
 
-void HandleEvents(void)
+/* This however was devised by flibit to match the old TFOL binding layout */
+static int
+IN_TranslateSDLtoQ2Button(SDL_GameControllerButton button)
+{
+	int key = 0;
+
+	switch (button)
+	{
+		case SDL_CONTROLLER_BUTTON_A:
+			key = K_JOY1;
+			break;
+		case SDL_CONTROLLER_BUTTON_B:
+			key = K_JOY2;
+			break;
+		case SDL_CONTROLLER_BUTTON_X:
+			key = K_JOY3;
+			break;
+		case SDL_CONTROLLER_BUTTON_Y:
+			key = K_JOY4;
+			break;
+		case SDL_CONTROLLER_BUTTON_BACK:
+			key = K_AUX7;
+			break;
+		case SDL_CONTROLLER_BUTTON_START:
+			key = K_AUX8;
+			break;
+		case SDL_CONTROLLER_BUTTON_LEFTSTICK:
+			key = K_AUX9;
+			break;
+		case SDL_CONTROLLER_BUTTON_RIGHTSTICK:
+			key = K_AUX10;
+			break;
+		case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:
+			key = K_AUX5;
+			break;
+		case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:
+			key = K_AUX6;
+			break;
+		case SDL_CONTROLLER_BUTTON_DPAD_UP:
+			key = K_AUX29;
+			break;
+		case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
+			key = K_AUX31;
+			break;
+		case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
+			key = K_AUX32;
+			break;
+		case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
+			key = K_AUX30;
+			break;
+		default:
+			break;
+
+	}
+	return key;
+}
+
+void HandleEvents (void)
 {
 	int multiclicktime = 750;
 	SDL_Event evt;
@@ -361,12 +429,14 @@ void HandleEvents(void)
 		}
 		else if (evt.type == SDL_MOUSEMOTION)
 		{
-			if (mouse_active)
+		/*	if (mouse_active)
 			{
-				/* Relative should be on here */
+				// Relative should be on here
 				mx += evt.motion.xrel;
 				my += evt.motion.yrel;
-			}
+			} */
+			mx += evt.motion.xrel;
+			my += evt.motion.yrel;
 		}
 		else if (evt.type == SDL_MOUSEBUTTONDOWN)
 		{
@@ -435,5 +505,96 @@ void HandleEvents(void)
 			Key_Event(dir, 1, Sys_Milliseconds());
 			Key_Event(dir, 0, Sys_Milliseconds());
 		}
+		// flibitijibibo added
+		else if (evt.type == SDL_CONTROLLERDEVICEADDED)
+		{
+			SDL_GameController *c = SDL_GameControllerOpen(evt.cdevice.which);
+			Com_DPrintf ("Connected %s\n", SDL_GameControllerName(c));
+		}
+		else if (evt.type == SDL_CONTROLLERDEVICEREMOVED)
+		{
+			SDL_GameController *c = SDL_GameControllerFromInstanceID(evt.cdevice.which);
+			Com_DPrintf ("Disconnected %s\n", SDL_GameControllerName(c));
+			SDL_GameControllerClose(c);
+		}
+		else if (evt.type == SDL_CONTROLLERBUTTONDOWN)
+		{
+			if (in_joystick->value)
+			{
+				Key_Event (
+					IN_TranslateSDLtoQ2Button(evt.cbutton.button),
+					1,
+					Sys_Milliseconds()
+				);
+			}
+		}
+		else if (evt.type == SDL_CONTROLLERBUTTONUP)
+		{
+			Key_Event (
+				IN_TranslateSDLtoQ2Button(evt.cbutton.button),
+				0,
+				Sys_Milliseconds()
+			);
+		}
+		else if (evt.type == SDL_CONTROLLERAXISMOTION)
+		{
+			if (evt.caxis.axis == SDL_CONTROLLER_AXIS_TRIGGERLEFT)
+			{
+				if (!in_joystick->value)
+				{
+					evt.caxis.value = 0;
+				}
+				Key_Event (
+					K_AUX27,
+					evt.caxis.value > 3855,
+					Sys_Milliseconds()
+				);
+			}
+			else if (evt.caxis.axis == SDL_CONTROLLER_AXIS_TRIGGERRIGHT)
+			{
+				if (!in_joystick->value)
+				{
+					evt.caxis.value = 0;
+				}
+				Key_Event (
+					K_AUX28,
+					evt.caxis.value > 3855,
+					Sys_Milliseconds()
+				);
+			}
+			else if (evt.caxis.axis == SDL_CONTROLLER_AXIS_LEFTX)
+			{
+				if ( !in_joystick->value || (SDL_abs(evt.caxis.value) <= 7849) )
+				{
+					evt.caxis.value = 0;
+				}
+				controller_leftx = evt.caxis.value / 32768.0f;
+			}
+			else if (evt.caxis.axis == SDL_CONTROLLER_AXIS_LEFTY)
+			{
+				if ( !in_joystick->value || (SDL_abs(evt.caxis.value) <= 7849) )
+				{
+					evt.caxis.value = 0;
+				}
+				controller_lefty = evt.caxis.value / 32768.0f;
+			}
+			else if (evt.caxis.axis == SDL_CONTROLLER_AXIS_RIGHTX)
+			{
+				if ( !in_joystick->value || (SDL_abs(evt.caxis.value) <= 8689) )
+				{
+					evt.caxis.value = 0;
+				}
+				controller_rightx = evt.caxis.value / 32768.0f;
+			}
+			else if (evt.caxis.axis == SDL_CONTROLLER_AXIS_RIGHTY)
+			{
+				if ( !in_joystick->value || (SDL_abs(evt.caxis.value) <= 8689) )
+				{
+					evt.caxis.value = 0;
+				}
+				controller_righty = evt.caxis.value / 32768.0f;
+			}
+		}
+		// end flibitijibibo
 	}
 }

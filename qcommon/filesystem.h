@@ -28,6 +28,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "../include/zlibpng/unzip.h"
 #include "../include/zlibpng/zip.h"
 #endif
+#elif defined (__linux__)
+#include "../unix/zip/unzip.h"
+#include "../unix/zip/zip.h"
 #else // _WIN32
 #include <minizip/unzip.h>
 #include <minizip/zip.h>

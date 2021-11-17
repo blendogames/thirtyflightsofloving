@@ -2532,7 +2532,11 @@ void FS_InitFilesystem (void)
 
 	// basedir <path>
 	// allows the game to run from outside the data tree
+#if defined(__linux__) || defined(__APPLE__) || defined(MACOSX)
+	fs_basedir = Cvar_Get ("basedir", Sys_ExeDir(), CVAR_NOSET);
+#else
 	fs_basedir = Cvar_Get ("basedir", ".", CVAR_NOSET);
+#endif
 	Cvar_SetDescription ("basedir", "Sets the root folder where KMQuake2 mounts game directories.  Only settable from the command line with +set basedir <dir>.  Only change this if you want KMQ2 to run with data files outside the Quake2 folder.");
 
 	// cddir <path>
@@ -2904,7 +2908,7 @@ FS_ExecAutoexec
 void FS_ExecAutoexec (void)
 {
 	char	*dir;
-	char	name[MAX_QPATH];
+	char	name[MAX_OSPATH];
 
 	dir = Cvar_VariableString("gamedir");
 	if (*dir) {

@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 cvar_t	*in_mouse;
 cvar_t	*in_joystick;
 extern int mx, my;
+extern float controller_leftx, controller_lefty, controller_rightx, controller_righty;
 static qboolean	mouse_avail;
 static int old_mouse_x, old_mouse_y;
 
@@ -75,7 +76,11 @@ void IN_Init (void)
 	Cmd_AddCommand ("-mlook", IN_MLookUp);
 	Cmd_AddCommand ("force_centerview", Force_CenterView_f);
 
-	mx = my = 0.0;  
+	mx = my = 0;
+	controller_leftx = 0.0f;
+	controller_lefty = 0.0f;
+	controller_rightx = 0.0f;
+	controller_righty = 0.0f;
 
 	if (in_mouse->value)
 		mouse_avail = true;
@@ -107,6 +112,8 @@ void IN_Commands (void)
 
 void IN_Move (usercmd_t *cmd)
 {
+	float speed, aspeed;
+
 	if (!mouse_avail)
 		return;
 
@@ -138,6 +145,9 @@ void IN_Move (usercmd_t *cmd)
 		if (ui_mousecursor.x > viddef.width) ui_mousecursor.x = viddef.width;
 		if (ui_mousecursor.y < 0) ui_mousecursor.y = 0;
 		if (ui_mousecursor.y > viddef.height) ui_mousecursor.y = viddef.height;
+
+		if (!cls.consoleActive)
+			UI_MouseCursor_Think ();
 	}
 
 	// psychospaz - zooming in preserves sensitivity

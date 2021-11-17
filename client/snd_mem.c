@@ -358,13 +358,13 @@ sfxcache_t *S_LoadSound (sfx_t *s)
 	info = GetWavinfo (s->name, data, size);
 	/*if (info.channels != 1)
 	{
-		Com_Printf ("%s is a stereo sample\n",s->name);
+		Com_Printf ("%s is a stereo sample\n", s->name);
 		FS_FreeFile (data);
 		return NULL;
 	}*/
-	if (info.channels < 1 || info.channels > 2)	//CDawg changed
+	if (info.channels < 1 || info.channels > 2)	// CDawg changed
 	{
-		Com_Printf ("%s has an invalid number of channels\n", s->name);
+		Com_Printf ("%s has an invalid number of channels (%d)\n", s->name, info.channels);
 		FS_FreeFile (data);
 		return NULL;
 	}
@@ -385,7 +385,7 @@ sfxcache_t *S_LoadSound (sfx_t *s)
 	sc->length = info.samples;
 	sc->loopstart = info.loopstart;
 	//sc->speed = info.rate;
-	sc->speed = info.rate * info.channels;	//CDawg changed
+	sc->speed = info.rate * info.channels;	// CDawg changed
 	sc->width = info.width;
 	sc->stereo = info.channels;
 	sc->music = !strncmp (namebuffer, "music/", 6);

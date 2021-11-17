@@ -143,7 +143,7 @@ void Com_Printf (char *fmt, ...)
 //	if (logfile_active && logfile_active->value)
 	if (logfile_active && logfile_active->integer)
 	{
-		char	name[MAX_QPATH];
+		char	name[MAX_OSPATH];
 		
 		if (!logfile)
 		{
@@ -1779,10 +1779,9 @@ void Qcommon_Frame (int msec)
 	if ( log_stats->modified )
 	{
 		log_stats->modified = false;
-	//	if ( log_stats->value )
 		if ( log_stats->integer )
 		{
-			char	name[MAX_QPATH];
+			char	name[MAX_OSPATH];
 
 			if ( log_stats_file )
 			{

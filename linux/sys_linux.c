@@ -250,7 +250,7 @@ void *Sys_GetGameAPI (void *parms)
 #elif defined __alpha__
 	const char *gamename = "kmq2gameaxp.so";
 #elif defined __x86_64__
-	const char *gamename = "kmq2gamex86_64.so";
+	const char *gamename = "kmq2gamex64.so";
 #elif defined __powerpc__
 	const char *gamename = "kmq2gameppc.so";
 #elif defined __sparc__

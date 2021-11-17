@@ -39,8 +39,15 @@ BUILD_DEBUG_DIR=build_debug
 BUILD_RELEASE_DIR=build_release
 BINDIR=quake2
 
+ifeq ($(OSTYPE),Linux)
+  LDFLAGS+='-Wl,-rpath,$$ORIGIN/lib64'
+else ifeq ($(OSTYPE),Darwin)
+  BASE_CFLAGS:=-mmacosx-version-min=10.9
+  LDFLAGS+='-Wl,-rpath,@executable_path/osx'
+endif
+
 CC?=gcc
-BASE_CFLAGS=
+BASE_CFLAGS?=
 DEBUG_CFLAGS=$(BASE_CFLAGS) -g -ggdb -Wall -pipe
 RELEASE_CFLAGS=$(BASE_CFLAGS) -O2 -ffast-math -funroll-loops -fomit-frame-pointer -fexpensive-optimizations
 
@@ -57,18 +64,11 @@ UNIX_DIR=$(MOUNT_DIR)/unix
 GAME_DIR=$(MOUNT_DIR)/game
 NULL_DIR=$(MOUNT_DIR)/null
 
-ifeq ($(OSTYPE),FreeBSD)
-  LDFLAGS=-lm -lz
-endif
-ifeq ($(OSTYPE),Linux)
-  LDFLAGS=-lm -lz -lminizip
-endif
-
 #Ogg Vorbis support
-LDFLAGS += \
-	-lvorbisfile \
-	-lvorbis \
-	-logg 
+LDFLAGS+=-lvorbisfile
+
+#C runtime, zlib
+LDFLAGS+=-lm -lz
 
 #LOCALBASE?=/usr
 LOCALBASE?=/usr/local
@@ -99,7 +99,11 @@ ifeq ($(strip $(BUILD_LIBDIR)),YES)
   BASE_CFLAGS+=-DLIBDIR='\"$(LIBDIR)\"'
 endif
 
-SHLIBEXT=so
+ifeq ($(OSTYPE),Darwin)
+	SHLIBEXT=dylib
+else
+	SHLIBEXT=so
+endif
 
 SHLIBCFLAGS=-fPIC
 SHLIBLDFLAGS=-shared
@@ -167,7 +171,7 @@ release:
 		$(BUILD_RELEASE_DIR)/ref_gl \
 		$(BUILD_RELEASE_DIR)/game
 
-	$(MAKE) targets BUILDDIR=$(BUILD_RELEASE_DIR) CFLAGS+="$(RELEASE_CFLAGS) -DKMQUAKE2_VERSION='\"$(VERSION)\"'"
+	$(MAKE) targets BUILDDIR=$(BUILD_RELEASE_DIR) CFLAGS+="$(RELEASE_CFLAGS) -DKMQUAKE2_VERSION='\"$(VERSION)\"' -DWINDOWNAME='\"$(WINDOWNAME)\"' -DSAVENAME='\"$(SAVENAME)\"'"
 
 targets: $(TARGETS)
 
@@ -241,6 +245,7 @@ QUAKE2_OBJS = \
 	$(BUILDDIR)/client/md4.o \
 	$(BUILDDIR)/client/net_chan.o \
 	$(BUILDDIR)/client/wildcard.o \
+	$(BUILDDIR)/client/zip.o \
 	$(BUILDDIR)/client/unzip.o \
 	$(BUILDDIR)/client/ioapi.o\
 	\
@@ -290,9 +295,14 @@ QUAKE2_OBJS = \
 	$(BUILDDIR)/ref_gl/gl_sdl.o \
 	\
 	$(BUILDDIR)/ref_gl/qgl_unix.o \
-	$(BUILDDIR)/client/cd_unix.o \
 	$(BUILDDIR)/client/snd_sdl.o
-	
+
+	ifeq ($(OSTYPE),Darwin)
+	QUAKE2_OBJS += $(BUILDDIR)/client/cd_null.o
+else
+	QUAKE2_OBJS += $(BUILDDIR)/client/cd_unix.o
+endif
+
 QUAKE2_AS_OBJS = \
 	$(BUILDDIR)/client/snd_mixa.o
 
@@ -524,6 +534,9 @@ $(BUILDDIR)/client/sv_world.o :   	$(SERVER_DIR)/sv_world.c
 $(BUILDDIR)/client/cd_unix.o :   	$(UNIX_DIR)/cd_unix.c
 	$(DO_CC)
 
+$(BUILDDIR)/client/cd_null.o :   	$(NULL_DIR)/cd_null.c
+	$(DO_CC)
+
 $(BUILDDIR)/client/qsh_unix.o :  	$(UNIX_DIR)/qsh_unix.c
 	$(DO_CC)
 
@@ -550,6 +563,9 @@ $(BUILDDIR)/client/net_udp.o :    	$(UNIX_DIR)/net_udp.c
 
 $(BUILDDIR)/client/snd_sdl.o :    	$(UNIX_DIR)/snd_sdl.c
 	$(DO_CC) $(SDLCFLAGS)
+
+$(BUILDDIR)/client/zip.o :		$(UNIX_DIR)/zip/zip.c
+	$(DO_CC)
 
 $(BUILDDIR)/client/unzip.o :		$(UNIX_DIR)/zip/unzip.c
 	$(DO_CC)
@@ -650,6 +666,7 @@ Q2DED_OBJS = \
 	$(BUILDDIR)/ded/md4.o \
 	$(BUILDDIR)/ded/net_chan.o \
 	$(BUILDDIR)/ded/wildcard.o \
+	$(BUILDDIR)/ded/zip.o \
 	$(BUILDDIR)/ded/unzip.o \
 	$(BUILDDIR)/ded/ioapi.o\
 	\
@@ -701,6 +718,9 @@ $(BUILDDIR)/ded/net_chan.o :   $(COMMON_DIR)/net_chan.c
 	$(DO_DED_CC)
 
 $(BUILDDIR)/ded/wildcard.o :   $(COMMON_DIR)/wildcard.c
+	$(DO_DED_CC)
+
+$(BUILDDIR)/ded/zip.o :      $(UNIX_DIR)/zip/zip.c
 	$(DO_DED_CC)
 
 $(BUILDDIR)/ded/unzip.o :      $(UNIX_DIR)/zip/unzip.c
@@ -841,7 +861,7 @@ GAME_OBJS = \
 	$(BUILDDIR)/game/q_shared.o
 	
 $(BINDIR)/baseq2/kmq2game$(ARCH).$(SHLIBEXT) : $(GAME_OBJS)
-	$(CC) $(CFLAGS) $(SHLIBLDFLAGS) -o $@ $(GAME_OBJS) -lGL
+	$(CC) $(CFLAGS) $(SHLIBLDFLAGS) -o $@ $(GAME_OBJS)
 
 $(BUILDDIR)/game/acebot_ai.o :          $(GAME_DIR)/acebot_ai.c
 	$(DO_SHLIB_CC)

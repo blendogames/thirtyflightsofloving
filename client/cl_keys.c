@@ -26,6 +26,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "../win32/winquake.h"
 #endif
 
+#if defined(__APPLE__) || (MACOSX)
+#include <ctype.h>
+#endif // __APPLE__ || MACOSX
+
 /*
 
 key up events are sent even if in console mode
@@ -67,7 +71,11 @@ keyname_t keynames[] =
 	{"LEFTARROW", K_LEFTARROW},
 	{"RIGHTARROW", K_RIGHTARROW},
 
+#if defined(__APPLE__) || (MACOSX)
+	{"OPTION", K_ALT},
+#else
 	{"ALT", K_ALT},
+#endif // __APPLE__ || MACOSX
 	{"CTRL", K_CTRL},
 	{"SHIFT", K_SHIFT},
 	
@@ -94,6 +102,14 @@ keyname_t keynames[] =
 	{"NUMLOCK", K_NUMLOCK},
 	{"CAPSLOCK", K_CAPSLOCK},
 	{"SCROLLOCK", K_SCROLLOCK},
+//	{"PRINTSCRN", K_PRINTSCRN},
+
+#if defined(__APPLE__) || (MACOSX)
+	{"F13", K_F13},
+	{"F14", K_F14},
+	{"F15", K_F15},
+	{"COMMAND", K_COMMAND},
+#endif // __APPLE__ || MACOSX
 
 	{"MOUSE1", K_MOUSE1},
 	{"MOUSE2", K_MOUSE2},
@@ -141,6 +157,25 @@ keyname_t keynames[] =
 	{"AUX31", K_AUX31},
 	{"AUX32", K_AUX32},
 
+#if defined(__APPLE__) || (MACOSX)
+	{"KP_0", K_KP_INS},
+	{"KP_1", K_KP_END},
+	{"KP_2", K_KP_DOWNARROW},
+	{"KP_3", K_KP_PGDN},
+	{"KP_4", K_KP_LEFTARROW},
+	{"KP_5", K_KP_5},
+	{"KP_6", K_KP_RIGHTARROW},
+	{"KP_7", K_KP_HOME},
+	{"KP_8", K_KP_UPARROW},
+	{"KP_9", K_KP_PGUP},
+	{"KP_SLASH", K_KP_SLASH},
+	{"KP_MINUS", K_KP_MINUS},
+	{"KP_PLUS", K_KP_PLUS},
+	{"KP_MULT", K_KP_MULT},
+	{"KP_ENTER", K_KP_ENTER},
+	{"KP_DOT", K_KP_DEL},
+	{"KP_EQUAL", K_KP_EQUAL},
+#else
 	{"KP_HOME",			K_KP_HOME },
 	{"KP_UPARROW",		K_KP_UPARROW },
 	{"KP_PGUP",			K_KP_PGUP },
@@ -157,6 +192,7 @@ keyname_t keynames[] =
 	{"KP_MINUS",		K_KP_MINUS },
 	{"KP_PLUS",			K_KP_PLUS },
 	{"KP_MULT",			K_KP_MULT },
+#endif // __APPLE__ || MACOSX
 
 	{"MWHEELUP", K_MWHEELUP },
 	{"MWHEELDOWN", K_MWHEELDOWN },
@@ -205,6 +241,76 @@ void CompleteCommand (void)
 	}
 }
 
+
+/*
+================
+Key_ParseKeypad
+================
+*/
+int Key_ParseKeypad (int inKey)
+{
+	int outKey;
+
+	switch (inKey)
+	{
+	case K_KP_SLASH:
+		outKey = '/';
+		break;
+	case K_KP_MULT:
+		outKey = '*';
+		break;
+	case K_KP_MINUS:
+		outKey = '-';
+		break;
+	case K_KP_PLUS:
+		outKey = '+';
+		break;
+	case K_KP_HOME:
+		outKey = '7';
+		break;
+	case K_KP_UPARROW:
+		outKey = '8';
+		break;
+	case K_KP_PGUP:
+		outKey = '9';
+		break;
+	case K_KP_LEFTARROW:
+		outKey = '4';
+		break;
+	case K_KP_5:
+		outKey = '5';
+		break;
+	case K_KP_RIGHTARROW:
+		outKey = '6';
+		break;
+	case K_KP_END:
+		outKey = '1';
+		break;
+	case K_KP_DOWNARROW:
+		outKey = '2';
+		break;
+	case K_KP_PGDN:
+		outKey = '3';
+		break;
+	case K_KP_INS:
+		outKey = '0';
+		break;
+	case K_KP_DEL:
+		outKey = '.';
+		break;
+#if defined(__APPLE__) || (MACOSX)
+    case K_KP_EQUAL:
+		outKey = '=';
+		break;
+#endif // __APPLE__ || MACOSX
+	default:
+		outKey = inKey;
+		break;
+	}
+	return outKey;
+}
+
+
 /*
 ====================
 Key_Console
@@ -216,56 +322,13 @@ void Key_Console (int key)
 {
 	int i;
 
-	switch ( key )
-	{
-	case K_KP_SLASH:
-		key = '/';
-		break;
-	case K_KP_MULT:
-		key = '*';
-		break;
-	case K_KP_MINUS:
-		key = '-';
-		break;
-	case K_KP_PLUS:
-		key = '+';
-		break;
-	case K_KP_HOME:
-		key = '7';
-		break;
-	case K_KP_UPARROW:
-		key = '8';
-		break;
-	case K_KP_PGUP:
-		key = '9';
-		break;
-	case K_KP_LEFTARROW:
-		key = '4';
-		break;
-	case K_KP_5:
-		key = '5';
-		break;
-	case K_KP_RIGHTARROW:
-		key = '6';
-		break;
-	case K_KP_END:
-		key = '1';
-		break;
-	case K_KP_DOWNARROW:
-		key = '2';
-		break;
-	case K_KP_PGDN:
-		key = '3';
-		break;
-	case K_KP_INS:
-		key = '0';
-		break;
-	case K_KP_DEL:
-		key = '.';
-		break;
-	}
+	key = Key_ParseKeypad (key);
 
+#if defined(__APPLE__) || (MACOSX)
+	if ( ( toupper( key ) == 'V' && keydown[K_COMMAND] ) ||
+#else
 	if ( ( toupper( key ) == 'V' && keydown[K_CTRL] ) ||
+#endif // __APPLE__ || MACOSX
 		 ( ( ( key == K_INS ) || ( key == K_KP_INS ) ) && keydown[K_SHIFT] ) )
 	{
 		char *cbd;
@@ -628,6 +691,17 @@ int Key_StringToKeynum (char *str)
 	if (!str[1])
 		return str[0];
 
+#if defined(__APPLE__) || (MACOSX)
+	if (!Q_strcasecmp (str, "ALT"))
+	{
+		for (kn=keynames ; kn->name ; kn++)
+		{
+			if (!Q_strcasecmp ("OPTION", kn->name))
+				return (kn->keynum);
+		}
+	}
+#endif // __APPLE__ || MACOSX
+
 	for (kn=keynames ; kn->name ; kn++)
 	{
 		if (!Q_strcasecmp(str,kn->name))
@@ -694,6 +768,15 @@ void Key_SetBinding (int keynum, char *binding)
 	Q_strncpyz (new, l+1, binding);
 	new[l] = 0;
 	keybindings[keynum] = new;	
+/*
+#if defined(__APPLE__) || (MACOSX)
+	if (keynum == K_F12)
+	{
+		extern void	IN_SetF12EjectEnabled (qboolean theState);
+		IN_SetF12EjectEnabled (keybindings[keynum][0] == 0x00);
+	}
+#endif // __APPLE__ || MACOSX
+*/
 }
 
 /*
@@ -934,6 +1017,17 @@ void Key_Event (int key, qboolean down, unsigned time)
 	// update auto-repeat status
 	if (down)
 	{
+/*
+#if defined(__APPLE__) || (MACOSX)
+		extern int	Sys_CheckSpecialKeys (int theKey);
+
+		// don't accept key down events at the loading screen!
+		if (cls.disable_screen == true || Sys_CheckSpecialKeys (key) != 0)
+		{
+			return;
+		}
+#endif // __APPLE__ || MACOSX
+*/
 		key_repeats[key]++;
 		if (key != K_BACKSPACE 
 			&& key != K_UPARROW		// added from Quake2max

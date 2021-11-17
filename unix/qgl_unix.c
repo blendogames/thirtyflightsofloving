@@ -2669,10 +2669,11 @@ static void APIENTRY logViewport(GLint x, GLint y, GLsizei width, GLsizei height
 **
 ** Unloads the specified DLL then nulls out all the proc pointers.
 */
-void QGL_Shutdown( void )
+void QGL_Shutdown (void)
 {
 	if ( glw_state.glContext )
 	{
+		SDL_SetRelativeMouseMode(SDL_FALSE);
 		SDL_GL_DeleteContext(glw_state.glContext);
 		SDL_DestroyWindow(glw_state.glWindow);
 	}
@@ -3028,7 +3029,7 @@ void QGL_Shutdown( void )
 
 #define GPA( a ) SDL_GL_GetProcAddress( a )
 
-void *qwglGetProcAddress(char *symbol)
+void *qwglGetProcAddress (char *symbol)
 {
 	if (glw_state.glContext)
 		return GPA ( symbol );
@@ -3046,7 +3047,7 @@ void *qwglGetProcAddress(char *symbol)
 ** 
 */
 
-qboolean QGL_Init( const char *dllname )
+qboolean QGL_Init (const char *dllnam )
 {
 	// update 3Dfx gamma irrespective of underlying DLL
 	{
@@ -3060,7 +3061,15 @@ qboolean QGL_Init( const char *dllname )
 		putenv( envbuffer );
 	}
 
-	SDL_Init(SDL_INIT_VIDEO);
+//	SDL_Init (SDL_INIT_VIDEO);
+	SDL_Init (SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER);
+	SDL_GL_SetAttribute (SDL_GL_RED_SIZE, 8);
+	SDL_GL_SetAttribute (SDL_GL_GREEN_SIZE, 8);
+	SDL_GL_SetAttribute (SDL_GL_BLUE_SIZE, 8);
+	SDL_GL_SetAttribute (SDL_GL_ALPHA_SIZE, 8);
+	SDL_GL_SetAttribute (SDL_GL_DEPTH_SIZE, 24);
+	SDL_GL_SetAttribute (SDL_GL_STENCIL_SIZE, 8);
+	SDL_GL_SetAttribute (SDL_GL_DOUBLEBUFFER, 1);
 	glw_state.glWindow = SDL_CreateWindow(
 		WINDOWNAME,
 		SDL_WINDOWPOS_CENTERED,
@@ -3069,9 +3078,16 @@ qboolean QGL_Init( const char *dllname )
 		720,
 		SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN
 	);
+#ifdef __linux__
+	SDL_Surface *icon = SDL_LoadBMP(WINDOWNAME ".bmp");
+	SDL_SetWindowIcon(glw_state.glWindow, icon);
+	SDL_FreeSurface(icon);
+#endif
 	glw_state.glContext = SDL_GL_CreateContext(glw_state.glWindow);
-	
+	SDL_SetRelativeMouseMode (SDL_TRUE);
+
 	glConfig.allowCDS = true;
+	glConfig.have_stencil = true;
 
 	qglAccum                     = dllAccum = GPA( "glAccum" );
 	qglAlphaFunc                 = dllAlphaFunc = GPA( "glAlphaFunc" );
@@ -3472,7 +3488,7 @@ qboolean QGL_Init( const char *dllname )
 	return true;
 }
 
-void GLimp_EnableLogging( qboolean enable )
+void GLimp_EnableLogging (qboolean enable)
 {
 	if ( enable )
 	{
@@ -4172,7 +4188,7 @@ void GLimp_EnableLogging( qboolean enable )
 }
 
 
-void GLimp_LogNewFrame( void )
+void GLimp_LogNewFrame (void)
 {
 	fprintf( glw_state.log_fp, "*** R_BeginFrame ***\n" );
 }

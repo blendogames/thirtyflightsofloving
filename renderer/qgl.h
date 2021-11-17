@@ -483,7 +483,8 @@ extern BOOL ( WINAPI * qwglSetDeviceGammaRamp3DFX ) ( HDC, LPVOID );
 
 #endif
 
-#ifdef __linux__
+//#ifdef __linux__
+#if defined(__linux__) || defined(__APPLE__) || defined(MACOSX)
 
 // local function in dll
 extern void *qwglGetProcAddress(char *symbol);

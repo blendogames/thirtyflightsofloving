@@ -2413,7 +2413,7 @@ Writes key bindings and archived cvars to config.cfg
 qboolean CL_WriteConfiguration (char *cfgName)
 {
 	FILE	*f;
-	char	path[MAX_QPATH];
+	char	path[MAX_OSPATH];
 
 	if (!cfgName)
 		return false;

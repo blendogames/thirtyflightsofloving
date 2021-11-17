@@ -239,22 +239,28 @@ Loads the game dll
 void *Sys_GetGameAPI (void *parms)
 {
 	void	*(*GetGameAPI) (void *);
-
 	char	name[MAX_OSPATH];
 	char	curpath[MAX_OSPATH];
 	char	*path;
 
+#ifdef (__APPLE__)
+	// KMQ2 MacOSX port uses the Fruitz of Dojo plug system.  So this will go unused.
+	#define LIB_SUFFIX "dylib"
+#else
+	#define LIB_SUFFIX "so"
+#endif
+
 	// Knightmare- changed game library name for better cohabitation
 #ifdef __i386__
-	const char *gamename = "kmq2gamei386.so";
+	const char *gamename = "kmq2gamei386." LIB_SUFFIX;
 #elif defined __alpha__
-	const char *gamename = "kmq2gameaxp.so";
+	const char *gamename = "kmq2gameaxp." LIB_SUFFIX;
 #elif defined __x86_64__
-	const char *gamename = "kmq2gamex86_64.so";
+	const char *gamename = "kmq2gamex64." LIB_SUFFIX;
 #elif defined __powerpc__
-	const char *gamename = "kmq2gameppc.so";
+	const char *gamename = "kmq2gameppc." LIB_SUFFIX;
 #elif defined __sparc__
-	const char *gamename = "kmq2gamesparc.so";
+	const char *gamename = "kmq2gamesparc." LIB_SUFFIX;
 #else
 #error Unknown arch
 #endif
@@ -276,7 +282,14 @@ void *Sys_GetGameAPI (void *parms)
 		path = FS_NextPath (path);
 		if (!path)
 			return NULL;		// couldn't find one anywhere
-		sprintf (name, "%s/%s/%s", curpath, path, gamename);
+//		Com_sprintf (name, sizeof(name), "%s/%s/%s", curpath, path, gamename);
+		if (path[0] == '/') {
+			// Path is rooted, override curpath
+			Com_sprintf (name, sizeof(name), "%s/%s", path, gamename);
+		}
+		else {
+			Com_sprintf (name, sizeof(name), "%s/%s/%s", curpath, path, gamename);
+		}
 		game_library = SDL_LoadObject (name);
 		if (game_library)
 		{
@@ -381,8 +394,9 @@ int main (int argc, char **argv)
 
 	printf ("\n");	
 	printf ("========= Initialization =================\n");
-	printf ("KMQuake2 -- Version 0.20\n");
+	printf ("KMQuake2 -- Version 0.20u8\n");
 	printf ("Linux Port by QuDos\n");
+	printf ("SDL2 Port by flibitijibibo\n");
 	printf ("http://qudos.quakedev.com/\n");
 	printf ("Compiled: "__DATE__" -- "__TIME__"\n");
 	printf ("==========================================\n\n");

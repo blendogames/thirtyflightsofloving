@@ -63,6 +63,13 @@ typedef enum {
 	K_CAPSLOCK,
 	K_SCROLLOCK,
 
+#if defined(__APPLE__) || (MACOSX)
+	K_F13	=		156,
+	K_F14	=		157,
+	K_F15	=		158,
+	K_COMMAND	=	159,
+#endif // __APPLE__ || MACOSX
+
 	K_KP_HOME	=	160,
 	K_KP_UPARROW,
 	K_KP_PGUP,
@@ -79,6 +86,12 @@ typedef enum {
 	K_KP_MINUS,
 	K_KP_PLUS,
 	K_KP_MULT,
+
+#if defined(__APPLE__) || (MACOSX)
+	K_KP_EQUAL	=	176,
+#endif // __APPLE__ || MACOSX
+
+//	K_PRINTSCRN	= 177,
 
 	K_PAUSE		= 255,
 
