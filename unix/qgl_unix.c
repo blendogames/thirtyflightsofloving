@@ -3047,7 +3047,7 @@ void *qwglGetProcAddress (char *symbol)
 ** 
 */
 
-qboolean QGL_Init (const char *dllnam )
+qboolean QGL_Init (const char *dllname)
 {
 	// update 3Dfx gamma irrespective of underlying DLL
 	{
