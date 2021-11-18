@@ -99,6 +99,12 @@ ifeq ($(strip $(BUILD_LIBDIR)),YES)
   BASE_CFLAGS+=-DLIBDIR='\"$(LIBDIR)\"'
 endif
 
+ifeq ($(ARCH),x86_64)
+	LIBARCHNAME=x64
+else
+	LIBARCHNAME=$(ARCH)
+endif
+
 ifeq ($(OSTYPE),Darwin)
 	SHLIBEXT=dylib
 else
@@ -133,7 +139,7 @@ ifeq ($(strip $(BUILD_KMQUAKE2_DEDICATED)),YES)
 endif
 
 ifeq ($(strip $(BUILD_GAME)),YES)
-  TARGETS+=$(BINDIR)/baseq2/kmq2game$(ARCH).$(SHLIBEXT)
+  TARGETS+=$(BINDIR)/baseq2/kmq2game$(LIBARCHNAME).$(SHLIBEXT)
 endif
 
 all:
@@ -860,7 +866,7 @@ GAME_OBJS = \
 	$(BUILDDIR)/game/p_weapon.o \
 	$(BUILDDIR)/game/q_shared.o
 	
-$(BINDIR)/baseq2/kmq2game$(ARCH).$(SHLIBEXT) : $(GAME_OBJS)
+$(BINDIR)/baseq2/kmq2game$(LIBARCHNAME).$(SHLIBEXT) : $(GAME_OBJS)
 	$(CC) $(CFLAGS) $(SHLIBLDFLAGS) -o $@ $(GAME_OBJS)
 
 $(BUILDDIR)/game/acebot_ai.o :          $(GAME_DIR)/acebot_ai.c
