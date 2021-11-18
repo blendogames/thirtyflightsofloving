@@ -97,7 +97,7 @@ TFOL_SRC = \
 	acesrc/acebot_spawn.c
 
 all:
-	$(CC) -o baseq2/kmq2gamex86_64.$(SUFFIX) -g -w $(LDFLAGS) -fpic -fPIC -shared $(TFOL_SRC) -lSDL2 -lm
+	$(CC) -o baseq2/kmq2gamex64.$(SUFFIX) -g -w $(LDFLAGS) -fpic -fPIC -shared $(TFOL_SRC) -lSDL2 -lm
 	cp ../../kmquake2-tfol/quake2/kmquake2 .
 
 clean:
