@@ -32,8 +32,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "../unix/zip/unzip.h"
 #include "../unix/zip/zip.h"
 #else // _WIN32
-#include <minizip/unzip.h>
-#include <minizip/zip.h>
+//#include <minizip/unzip.h>
+//#include <minizip/zip.h>
+// KMQ2 MacOSX port builds with the above, but the below should work as well.
+#include "../unix/zip/unzip.h"
+#include "../unix/zip/zip.h"
 #endif // _WIN32
 
 #define BASEDIRNAME				"baseq2"

@@ -243,7 +243,7 @@ void *Sys_GetGameAPI (void *parms)
 	char	curpath[MAX_OSPATH];
 	char	*path;
 
-#ifdef (__APPLE__)
+#ifdef __APPLE__
 	// KMQ2 MacOSX port uses the Fruitz of Dojo plug system.  So this will go unused.
 	#define LIB_SUFFIX "dylib"
 #else

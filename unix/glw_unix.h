@@ -23,7 +23,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #if !defined(__linux__) && !defined(__FreeBSD__) && !defined(__APPLE__)
 #error You shouldn't be including this file on non-Linux platforms
 #endif
-#endif
 
 #ifndef __GLW_UNIX_H__
 #define __GLW_UNIX_H__

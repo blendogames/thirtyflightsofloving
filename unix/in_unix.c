@@ -174,6 +174,34 @@ void IN_Move (usercmd_t *cmd)
 		cmd->forwardmove -= m_forward->value * my;
 
 	mx = my = 0;
+
+	// flibitijibibo added
+	if (!in_joystick->value)
+	{
+		return;
+	}
+
+	// add controller movement to cmd
+	if ( (in_speed.state & 1) ^ (int)cl_run->value)
+		speed = 2;
+	else
+		speed = 1;
+
+	aspeed = speed * cls.netFrameTime;
+	cmd->sidemove += controller_leftx * speed * cl_sidespeed->value;
+	cmd->forwardmove -= controller_lefty * speed * cl_forwardspeed->value;
+
+	if (in_autosensitivity->integer && cl.base_fov < 90)
+	{
+		cl.viewangles[YAW] -= controller_rightx * aspeed * cl_pitchspeed->value * (cl.refdef.fov_x/90.0);
+		cl.viewangles[PITCH] += controller_righty * aspeed * cl_pitchspeed->value * (cl.refdef.fov_x/90.0);
+	}
+	else
+	{
+		cl.viewangles[YAW] -= controller_rightx * aspeed * cl_pitchspeed->value;
+		cl.viewangles[PITCH] += controller_righty * aspeed * cl_pitchspeed->value;
+	}
+	// end flibitijibibo
 }
 
 void IN_Frame (void)
@@ -185,6 +213,4 @@ void IN_Frame (void)
 		IN_Activate(false);
 	else
 		IN_Activate(true);
-
 }
-
