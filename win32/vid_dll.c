@@ -393,7 +393,6 @@ LONG WINAPI MainWndProc (
 			RECT r;
 			int		style;
 
-		//	if (!vid_fullscreen->value)
 			if (!vid_fullscreen->integer)
 			{
 				xPos = (short) LOWORD(lParam);    // horizontal position 
@@ -483,7 +482,6 @@ LONG WINAPI MainWndProc (
 		{
 			if ( vid_fullscreen )
 			{
-			//	Cvar_SetValue( "vid_fullscreen", !vid_fullscreen->value );
 				Cvar_SetValue( "vid_fullscreen", !vid_fullscreen->integer );
 			}
 			return 0;
@@ -744,8 +742,6 @@ void VID_CheckChanges (void)
 	// update our window position
 	if ( vid_xpos->modified || vid_ypos->modified )
 	{
-	//	if (!vid_fullscreen->value)
-	//		VID_UpdateWindowPosAndSize( vid_xpos->value, vid_ypos->value );
 		if (!vid_fullscreen->integer)
 			VID_UpdateWindowPosAndSize( vid_xpos->integer, vid_ypos->integer );
 
@@ -768,7 +764,7 @@ void VID_Init (void)
 	Cvar_SetDescription ("vid_xpos", "Sets horizontal desktop position of window in windowed mode.");
 	vid_ypos = Cvar_Get ("vid_ypos", "22", CVAR_ARCHIVE);
 	Cvar_SetDescription ("vid_ypos", "Sets vertical desktop position of window in windowed mode.");
-	vid_fullscreen = Cvar_Get ("vid_fullscreen", "0", CVAR_ARCHIVE);
+	vid_fullscreen = Cvar_Get ("vid_fullscreen", "1", CVAR_ARCHIVE);
 //	Cvar_SetDescription ("vid_fullscreen", "Enables fullscreen video mode.");
 	Cvar_SetDescription ("vid_fullscreen", "Sets fullscreen or borderless video mode.  0 = windowed, 1 = fullscreen, 2 = borderless");	// borderless support
 	vid_gamma = Cvar_Get( "vid_gamma", "0.8", CVAR_ARCHIVE ); // was 1.0
