@@ -58,19 +58,13 @@ static unsigned char gammatable[256];
 cvar_t		*r_intensity;
 
 unsigned	d_8to24table[256];
-float		d_8to24tablef[256][3]; //Knightmare- MrG's Vertex array stuff
+float		d_8to24tablef[256][3]; // Knightmare- MrG's Vertex array stuff
 
 qboolean GL_Upload8 (byte *data, int width, int height, imagetype_t type);
 qboolean GL_Upload32 (unsigned *data, int width, int height, imagetype_t type);
 
-/*
-int		gl_solid_format = 3;
-int		gl_alpha_format = 4;
-int		gl_tex_solid_format = 3;
-int		gl_tex_alpha_format = 4;
-*/
-int		gl_filter_min = GL_LINEAR_MIPMAP_NEAREST;
-int		gl_filter_max = GL_LINEAR;
+int		gl_filter_min;
+int		gl_filter_max;
 
 #if 0
 void GL_SetTexturePalette (unsigned palette[256])
@@ -115,6 +109,7 @@ glmode_t gl_modes[] = {
 
 #define NUM_GL_MODES (sizeof(gl_modes) / sizeof (glmode_t))
 
+#if 0	// removed
 typedef struct
 {
 	char *name;
@@ -145,7 +140,7 @@ gltmode_t gl_solid_modes[] = {
 };
 
 #define NUM_GL_SOLID_MODES (sizeof(gl_solid_modes) / sizeof (gltmode_t))
-
+#endif
 
 /*
 ===============
@@ -2664,12 +2659,6 @@ void R_InitImages (void)
 
 	// Knightmare- reinitialize these after a vid_restart
 	// this is needed because the renderer is no longer a DLL
-/*
-	gl_solid_format = 3;
-	gl_alpha_format = 4;
-	gl_tex_solid_format = 3;
-	gl_tex_alpha_format = 4;
-*/
 	gl_filter_min = GL_LINEAR_MIPMAP_NEAREST;
 	gl_filter_max = GL_LINEAR;
 

@@ -1021,6 +1021,7 @@ void	GL_SelectTexture (unsigned tmu);
 void	GL_Bind (int texnum);
 void	GL_MBind (unsigned tmu, int texnum);
 void	GL_SetDefaultState (void);
+void	GL_PrintError (int errorCode, char *funcName);
 
 /*
 ====================================================================

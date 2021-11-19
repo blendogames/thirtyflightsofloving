@@ -843,9 +843,9 @@ void GLimp_EndFrame (void)
 	int		err;
 
 	err = qglGetError();
-//	assert( err == GL_NO_ERROR );
 	if (err != GL_NO_ERROR)	// Output error code instead
-		VID_Printf (PRINT_DEVELOPER, "OpenGL Error %i\n", err);
+	//	VID_Printf (PRINT_DEVELOPER, "OpenGL Error %i\n", err);
+		GL_PrintError (err, "GLimp_EndFrame");
 
 	if ( stricmp( r_drawbuffer->string, "GL_BACK" ) == 0 )
 	{

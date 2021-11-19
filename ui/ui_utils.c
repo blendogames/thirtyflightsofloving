@@ -1561,16 +1561,10 @@ void UI_SearchLocalGames (void)
 	//	strncpy (ui_local_server_names[i], NO_SERVER_STRING);
 		Q_strncpyz (ui_local_server_names[i], sizeof(ui_local_server_names[i]), NO_SERVER_STRING);
 
-	UI_DrawTextBox (168, 192, 36, 3);
-	UI_DrawString (188, 192+MENU_FONT_SIZE, MENU_FONT_SIZE, S_COLOR_ALT"Searching for local servers, this", 255);
-	UI_DrawString (188, 192+MENU_FONT_SIZE*2, MENU_FONT_SIZE, S_COLOR_ALT"could take up to a minute, so", 255);
-	UI_DrawString (188, 192+MENU_FONT_SIZE*3, MENU_FONT_SIZE, S_COLOR_ALT"please be patient.", 255);
-
-	// the text box won't show up unless we do a buffer swap
-	GLimp_EndFrame();
+	UI_DrawPopupMessage ("Searching for local servers.\nThis could take up to a minute,\nso please be patient.");
 
 	// send out info packets
-	CL_PingServers_f();
+	CL_PingServers_f ();
 }
 
 

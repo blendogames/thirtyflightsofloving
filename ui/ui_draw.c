@@ -41,7 +41,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 UI_DrawMenuString
 ==========================
 */
-void UI_DrawMenuString (int x, int y, int size, const char *string, int alpha, qboolean R2L, qboolean altColor)
+void UI_DrawMenuString (int x, int y, int size, scralign_t align, const char *string, int alpha, qboolean R2L, qboolean altColor)
 {
 	char	newstring[1024];
 
@@ -52,7 +52,7 @@ void UI_DrawMenuString (int x, int y, int size, const char *string, int alpha, q
 
 	if (R2L)
 		x -= stringLen(string)*size;
-	UI_DrawString (x, y, size, newstring, alpha);
+	UI_DrawString (x, y, size, align, newstring, FONT_UI, alpha);
 }
 
 
@@ -61,9 +61,9 @@ void UI_DrawMenuString (int x, int y, int size, const char *string, int alpha, q
 UI_DrawString
 =============
 */
-void UI_DrawString (int x, int y, int size, const char *string, int alpha)
+void UI_DrawString (int x, int y, int size, scralign_t align, const char *string, fontslot_t font, int alpha)
 {
-	SCR_DrawString (x, y, size, ALIGN_CENTER, string, FONT_UI, alpha);
+	SCR_DrawString (x, y, size, align, string, font, alpha);
 }
 
 
@@ -72,12 +72,12 @@ void UI_DrawString (int x, int y, int size, const char *string, int alpha)
 UI_DrawStringDark
 =============
 */
-void UI_DrawStringDark (int x, int y, int size, const char *string, int alpha)
+void UI_DrawStringDark (int x, int y, int size, scralign_t align, const char *string, fontslot_t font, int alpha)
 {
 	char	newstring[1024];
 
 	Com_sprintf (newstring, sizeof(newstring), S_COLOR_ALT"%s", string);
-	SCR_DrawString (x, y, size, ALIGN_CENTER, newstring, FONT_UI, alpha);
+	SCR_DrawString (x, y, size, align, newstring, font, alpha);
 }
 
 
@@ -86,10 +86,10 @@ void UI_DrawStringDark (int x, int y, int size, const char *string, int alpha)
 UI_DrawStringR2L
 =============
 */
-void UI_DrawStringR2L (int x, int y, int size, const char *string, int alpha)
+void UI_DrawStringR2L (int x, int y, int size, scralign_t align, const char *string, fontslot_t font, int alpha)
 {
 	x -= stringLen(string)*size;	// MENU_FONT_SIZE
-	SCR_DrawString (x, y, size, ALIGN_CENTER, string, FONT_UI, alpha);
+	SCR_DrawString (x, y, size, align, string, font, alpha);
 }
 
 
@@ -98,13 +98,13 @@ void UI_DrawStringR2L (int x, int y, int size, const char *string, int alpha)
 UI_DrawStringR2LDark
 =============
 */
-void UI_DrawStringR2LDark (int x, int y, int size, const char *string, int alpha)
+void UI_DrawStringR2LDark (int x, int y, int size, scralign_t align, const char *string, fontslot_t font, int alpha)
 {
 	char	newstring[1024];
 
 	Com_sprintf (newstring, sizeof(newstring), S_COLOR_ALT"%s", string);
 	x -= stringLen(string)*size;	// MENU_FONT_SIZE
-	SCR_DrawString (x, y, size, ALIGN_CENTER, newstring, FONT_UI, alpha);
+	SCR_DrawString (x, y, size, align, newstring, font, alpha);
 }
 
 
@@ -121,7 +121,7 @@ void UI_DrawMenuStatusBar (const char *string)
 
 		UI_DrawFill (0, SCREEN_HEIGHT-(MENU_FONT_SIZE+3), SCREEN_WIDTH, MENU_FONT_SIZE+4, ALIGN_BOTTOM_STRETCH, false, 60,60,60,255 );	// go 1 pixel past screen bottom to prevent gap from scaling
 		UI_DrawFill (0, SCREEN_HEIGHT-(MENU_FONT_SIZE+3), SCREEN_WIDTH, 1, ALIGN_BOTTOM_STRETCH, false, 0,0,0,255 );
-		SCR_DrawString (SCREEN_WIDTH/2-(l/2)*MENU_FONT_SIZE, SCREEN_HEIGHT-(MENU_FONT_SIZE+1), MENU_FONT_SIZE, ALIGN_BOTTOM, string, FONT_UI, 255 );
+		UI_DrawString (SCREEN_WIDTH/2-(l/2)*MENU_FONT_SIZE, SCREEN_HEIGHT-(MENU_FONT_SIZE+1), MENU_FONT_SIZE, ALIGN_BOTTOM, string, FONT_UI, 255 );
 	}
 	else
 		UI_DrawFill (0, SCREEN_HEIGHT-(MENU_FONT_SIZE+3), SCREEN_WIDTH, MENU_FONT_SIZE+4, ALIGN_BOTTOM_STRETCH, false, 0,0,0,255 );	// go 1 pixel past screen bottom to prevent gap from scaling
@@ -130,10 +130,10 @@ void UI_DrawMenuStatusBar (const char *string)
 
 /*
 =============
-UI_DrawTextBox
+UI_DrawMenuTextBox
 =============
 */
-void UI_DrawTextBox (int x, int y, int width, int lines)
+void UI_DrawMenuTextBox (int x, int y, int width, int lines)
 {
 	int		cx, cy;
 	int		n;
@@ -212,6 +212,55 @@ void UI_DrawTextBox (int x, int y, int width, int lines)
 		UI_DrawPicST (cx, cy+MENU_FONT_SIZE, MENU_FONT_SIZE, MENU_FONT_SIZE, stCoord_textBox[8], ALIGN_CENTER, true, color_identity, UI_TEXTBOX_PIC);
 	else
 		UI_DrawChar (cx, cy+MENU_FONT_SIZE, MENU_FONT_SIZE, ALIGN_CENTER, 9, 255, 255, 255, 255, false, true);
+}
+
+
+/*
+==========================
+UI_DrawPopupMessage
+==========================
+*/
+void UI_DrawPopupMessage (char *message)
+{
+	int		i, x, y, numlines=0, width, widest=0, padding, boxwidth;
+	char	buffer[1024], *parse, *tok;
+
+	if (!message)	return;
+
+	memset (&buffer, 0, sizeof(buffer));
+	Com_sprintf(buffer, sizeof(buffer), message);
+
+	// get max width and num of lines
+	parse = buffer;
+	while (*parse)
+	{
+		width = 0;
+		while (*parse && *parse != '\n') {
+			width++;	parse++;
+		}
+		numlines++;
+		widest = max(widest, width);
+
+		if (*parse)
+			parse++;	// skip the \n
+	}
+	padding = (widest % 2 == 0) ? 2 : 3;
+	boxwidth = min(widest + padding, SCREEN_WIDTH/MENU_FONT_SIZE-2);
+	numlines = min(numlines, SCREEN_HEIGHT/MENU_FONT_SIZE-2);
+
+	// draw the box
+	x = SCREEN_WIDTH/2 - ((boxwidth+2)*MENU_FONT_SIZE/2);
+	y = SCREEN_HEIGHT/2 -((numlines+2)*MENU_FONT_SIZE/2);
+	UI_DrawMenuTextBox (x, y, boxwidth, numlines);
+
+	// draw the text
+	parse = buffer;
+	for (i=0, tok = strtok (parse, "\n"); i<numlines, tok != NULL; i++, tok = strtok (NULL, "\n"))
+		UI_DrawMenuString (x+((padding+2)*MENU_FONT_SIZE/2), y+MENU_FONT_SIZE*(i+1), MENU_FONT_SIZE,
+							ALIGN_CENTER, va("%s%s",S_COLOR_ALT,tok), 255, false, false);
+
+	// the text box won't show up unless we do a buffer swap
+	R_EndFrame ();
 }
 
 

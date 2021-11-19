@@ -2183,8 +2183,7 @@ void R_Shutdown (void)
 R_BeginFrame
 @@@@@@@@@@@@@@@@@@@@@
 */
-void UpdateGammaRamp (void); //Knightmare added
-void RefreshFont (void);
+void UpdateGammaRamp (void); // hardware gamma
 void R_BeginFrame( float camera_separation )
 {
 	qboolean clearColor_modified = false;
@@ -2374,6 +2373,18 @@ void R_BeginFrame( float camera_separation )
 	//
 	R_Clear ();
 }
+
+
+/*
+@@@@@@@@@@@@@@@@@@@@@
+R_EndFrame
+@@@@@@@@@@@@@@@@@@@@@
+*/
+void R_EndFrame (void)
+{
+	GLimp_EndFrame ();
+}
+
 
 /*
 =============

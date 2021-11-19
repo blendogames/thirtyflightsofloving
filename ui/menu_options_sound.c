@@ -72,6 +72,11 @@ static void CDVolumeFunc (void *unused)
 
 //=======================================================================
 
+void M_Sound_DrawUpdateMessage (void)
+{
+	UI_DrawPopupMessage ("Restarting the sound system.\nThis could take up to a minute,\nso please be patient.");
+}
+
 static void M_UpdateSoundQualityFunc (void *unused)
 {
 	UI_MenuSpinControl_SaveValue (&s_options_sound_quality_list, "s_khz");
@@ -79,15 +84,9 @@ static void M_UpdateSoundQualityFunc (void *unused)
 
 	UI_MenuSpinControl_SaveValue (&s_options_sound_compatibility_list, "s_primary");
 
-	UI_DrawTextBox (168, 192, 36, 3);
-	UI_DrawString (188, 192+MENU_FONT_SIZE, MENU_FONT_SIZE, S_COLOR_ALT"Restarting the sound system. This", 255);
-	UI_DrawString (188, 192+MENU_FONT_SIZE*2, MENU_FONT_SIZE, S_COLOR_ALT"could take up to a minute, so", 255);
-	UI_DrawString (188, 192+MENU_FONT_SIZE*3, MENU_FONT_SIZE, S_COLOR_ALT"please be patient.", 255);
-
-	// the text box won't show up unless we do a buffer swap
-	GLimp_EndFrame();
-
-	CL_Snd_Restart_f();
+	// show update wait message
+	M_Sound_DrawUpdateMessage ();	
+	CL_Snd_Restart_f ();
 }
 
 static void M_SoundSetMenuItemValues (void)
@@ -109,17 +108,10 @@ static void M_SoundResetDefaultsFunc (void *unused)
 	Cvar_SetToDefault ("s_loadas8bit");
 	Cvar_SetToDefault ("s_primary");
 
-	UI_DrawTextBox (168, 192, 36, 3);
-	UI_DrawString (188, 192+MENU_FONT_SIZE, MENU_FONT_SIZE, S_COLOR_ALT"Restarting the sound system. This", 255);
-	UI_DrawString (188, 192+MENU_FONT_SIZE*2, MENU_FONT_SIZE, S_COLOR_ALT"could take up to a minute, so", 255);
-	UI_DrawString (188, 192+MENU_FONT_SIZE*3, MENU_FONT_SIZE, S_COLOR_ALT"please be patient.", 255);
-
-	// the text box won't show up unless we do a buffer swap
-	GLimp_EndFrame();
-
-	CL_Snd_Restart_f();
-
-	M_SoundSetMenuItemValues();
+	// show update wait message
+	M_Sound_DrawUpdateMessage ();
+	CL_Snd_Restart_f ();
+	M_SoundSetMenuItemValues ();
 }
 
 //=======================================================================

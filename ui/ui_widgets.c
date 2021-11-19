@@ -84,19 +84,19 @@ void MenuAction_Draw (menuaction_s *a)
 	{
 		if (a->generic.flags & QMF_GRAYED)
 			UI_DrawStringDark (a->generic.x + a->generic.parent->x + LCOLUMN_OFFSET,
-								a->generic.y + a->generic.parent->y, a->generic.textSize, a->generic.name, alpha);
+								a->generic.y + a->generic.parent->y, a->generic.textSize, ALIGN_CENTER, a->generic.name, FONT_UI, alpha);
 		else
 			UI_DrawString (a->generic.x + a->generic.parent->x + LCOLUMN_OFFSET,
-							a->generic.y + a->generic.parent->y, a->generic.textSize, a->generic.name, alpha);
+							a->generic.y + a->generic.parent->y, a->generic.textSize, ALIGN_CENTER, a->generic.name, FONT_UI, alpha);
 	}
 	else
 	{
 		if (a->generic.flags & QMF_GRAYED)
 			UI_DrawStringR2LDark (a->generic.x + a->generic.parent->x + LCOLUMN_OFFSET,
-									a->generic.y + a->generic.parent->y, a->generic.textSize, a->generic.name, alpha);
+									a->generic.y + a->generic.parent->y, a->generic.textSize, ALIGN_CENTER, a->generic.name, FONT_UI, alpha);
 		else
 			UI_DrawStringR2L (a->generic.x + a->generic.parent->x + LCOLUMN_OFFSET,
-								a->generic.y + a->generic.parent->y, a->generic.textSize, a->generic.name, alpha);
+								a->generic.y + a->generic.parent->y, a->generic.textSize, ALIGN_CENTER, a->generic.name, FONT_UI, alpha);
 	}
 	if (a->generic.ownerdraw)
 		a->generic.ownerdraw(a);
@@ -128,7 +128,7 @@ void MenuField_Draw (menufield_s *f)
 
 	if (f->generic.name)
 		UI_DrawStringR2LDark (f->generic.x + f->generic.parent->x + LCOLUMN_OFFSET,
-								f->generic.y + f->generic.parent->y, f->generic.textSize, f->generic.name, 255);
+								f->generic.y + f->generic.parent->y, f->generic.textSize, ALIGN_CENTER, f->generic.name, FONT_UI, 255);
 
 	if (xtra = stringLengthExtra(f->buffer))
 	{
@@ -189,7 +189,7 @@ void MenuField_Draw (menufield_s *f)
 		Com_sprintf (tempbuffer, sizeof(tempbuffer),	"%s%c", tempbuffer, 11);
 
 	UI_DrawString (f->generic.x + f->generic.parent->x + f->generic.textSize*3,
-					f->generic.y + f->generic.parent->y, f->generic.textSize, tempbuffer, alpha);
+					f->generic.y + f->generic.parent->y, f->generic.textSize, ALIGN_CENTER, tempbuffer, FONT_UI, alpha);
 }
 
 qboolean UI_MenuField_Key (menufield_s *f, int key)
@@ -345,15 +345,15 @@ void Menulist_DoEnter (menulist_s *l)
 
 void MenuList_Draw (menulist_s *l)
 {
-	const char **n;
-	int y = 0, alpha;
+	const char	**n;
+	int			y = 0, alpha;
 
 	if (!l) return;
 
 	alpha = UI_MouseOverAlpha(&l->generic);
 
 	UI_DrawStringR2LDark (l->generic.x + l->generic.parent->x + LCOLUMN_OFFSET,	// - 2*MENU_FONT_SIZE,
-						l->generic.y + l->generic.parent->y, l->generic.textSize, l->generic.name, alpha);
+						l->generic.y + l->generic.parent->y, l->generic.textSize, ALIGN_CENTER, l->generic.name, FONT_UI, alpha);
 
 	n = l->itemNames;
 
@@ -365,7 +365,7 @@ void MenuList_Draw (menulist_s *l)
 	while (*n)
 	{
 		UI_DrawStringR2LDark (l->generic.x + l->generic.parent->x + LCOLUMN_OFFSET,
-							l->generic.y + l->generic.parent->y + y + MENU_LINE_SIZE, l->generic.textSize, *n, alpha);
+							l->generic.y + l->generic.parent->y + y + MENU_LINE_SIZE, l->generic.textSize, ALIGN_CENTER, *n, FONT_UI, alpha);
 		n++;
 		y += MENU_LINE_SIZE;
 	}
@@ -383,7 +383,7 @@ void MenuSeparator_Draw (menuseparator_s *s)
 
 	if (s->generic.name)
 		UI_DrawStringR2LDark (s->generic.x + s->generic.parent->x,
-								s->generic.y + s->generic.parent->y, s->generic.textSize, s->generic.name, alpha);
+								s->generic.y + s->generic.parent->y, s->generic.textSize, ALIGN_CENTER, s->generic.name, FONT_UI, alpha);
 }
 
 //=========================================================
@@ -445,7 +445,7 @@ void MenuSlider_Draw (menuslider_s *s)
 	alpha = UI_MouseOverAlpha(&s->generic);
 
 	UI_DrawStringR2LDark (s->generic.x + s->generic.parent->x + LCOLUMN_OFFSET,
-							s->generic.y + s->generic.parent->y, s->generic.textSize, s->generic.name, alpha);
+							s->generic.y + s->generic.parent->y, s->generic.textSize, ALIGN_CENTER, s->generic.name, FONT_UI, alpha);
 
 	if (!s->maxPos)
 		s->maxPos = 1;
@@ -502,9 +502,9 @@ void MenuSlider_Draw (menuslider_s *s)
 			Com_sprintf (valueText, sizeof(valueText), "%4.2f", tmpValue);
 	}
 	UI_DrawString (s->generic.x + s->generic.parent->x + RCOLUMN_OFFSET + 2*SLIDER_ENDCAP_WIDTH + i*SLIDER_SECTION_WIDTH + MENU_FONT_SIZE/2,
-					s->generic.y + s->generic.parent->y + 1, MENU_FONT_SIZE-2, valueText, alpha);
+					s->generic.y + s->generic.parent->y + 1, MENU_FONT_SIZE-2, ALIGN_CENTER, valueText, FONT_UI, alpha);
 //	UI_DrawString (s->generic.x + s->generic.parent->x + s->generic.textSize*SLIDER_RANGE + RCOLUMN_OFFSET + 2.5*MENU_FONT_SIZE,
-//					s->generic.y + s->generic.parent->y + 1, MENU_FONT_SIZE-2, valueText, alpha);
+//					s->generic.y + s->generic.parent->y + 1, MENU_FONT_SIZE-2, ALIGN_CENTER, valueText, FONT_UI, alpha);
 }
 
 //=========================================================
@@ -636,12 +636,12 @@ void MenuSpinControl_Draw (menulist_s *s)
 	if (s->generic.name)
 	{
 		UI_DrawStringR2LDark (s->generic.x + s->generic.parent->x + LCOLUMN_OFFSET,
-								s->generic.y + s->generic.parent->y, s->generic.textSize, s->generic.name, alpha);
+								s->generic.y + s->generic.parent->y, s->generic.textSize, ALIGN_CENTER, s->generic.name, FONT_UI, alpha);
 	}
 	if (!strchr(s->itemNames[s->curValue], '\n'))
 	{
 		UI_DrawString (s->generic.x + s->generic.parent->x + RCOLUMN_OFFSET,
-						s->generic.y + s->generic.parent->y, s->generic.textSize, s->itemNames[s->curValue], alpha);
+						s->generic.y + s->generic.parent->y, s->generic.textSize, ALIGN_CENTER, s->itemNames[s->curValue], FONT_UI, alpha);
 	}
 	else
 	{
@@ -649,11 +649,11 @@ void MenuSpinControl_Draw (menulist_s *s)
 		Q_strncpyz (buffer, sizeof(buffer), s->itemNames[s->curValue]);
 		*strchr(buffer, '\n') = 0;
 		UI_DrawString (s->generic.x + s->generic.parent->x + RCOLUMN_OFFSET,
-						s->generic.y + s->generic.parent->y, s->generic.textSize, buffer, alpha);
+						s->generic.y + s->generic.parent->y, s->generic.textSize, ALIGN_CENTER, buffer, FONT_UI, alpha);
 	//	strncpy(buffer, strchr( s->itemnames[s->curvalue], '\n' ) + 1 );
 		Q_strncpyz (buffer, sizeof(buffer), strchr( s->itemNames[s->curValue], '\n' ) + 1);
 		UI_DrawString (s->generic.x + s->generic.parent->x + RCOLUMN_OFFSET,
-						s->generic.y + s->generic.parent->y + MENU_LINE_SIZE, s->generic.textSize, buffer, alpha);
+						s->generic.y + s->generic.parent->y + MENU_LINE_SIZE, s->generic.textSize, ALIGN_CENTER, buffer, FONT_UI, alpha);
 	}
 }
 
@@ -683,7 +683,7 @@ void MenuKeyBind_Draw (menukeybind_s *k)
 	const char		*keyName1, *keyName2;
 
 	UI_DrawMenuString (menu->x + k->generic.x + LCOLUMN_OFFSET,
-						menu->y + k->generic.y, MENU_FONT_SIZE, k->generic.name, alpha,
+						menu->y + k->generic.y, MENU_FONT_SIZE, ALIGN_CENTER, k->generic.name, alpha,
 						!(k->generic.flags & QMF_LEFT_JUSTIFY), (k->generic.flags & QMF_ALTCOLOR));
 
 	if (k->commandName)
@@ -693,21 +693,21 @@ void MenuKeyBind_Draw (menukeybind_s *k)
 		if (k->keys[0] == -1)
 		{
 			UI_DrawMenuString (menu->x + k->generic.x + RCOLUMN_OFFSET,
-								menu->y + k->generic.y, MENU_FONT_SIZE, "???", alpha, false, false);
+								menu->y + k->generic.y, MENU_FONT_SIZE, ALIGN_CENTER, "???", alpha, false, false);
 		}
 		else
 		{
 			keyName1 = Key_KeynumToString (k->keys[0]);
 			UI_DrawMenuString (menu->x + k->generic.x + RCOLUMN_OFFSET,
-								menu->y + k->generic.y, MENU_FONT_SIZE, keyName1, alpha, false, false);
+								menu->y + k->generic.y, MENU_FONT_SIZE, ALIGN_CENTER, keyName1, alpha, false, false);
 			if (k->keys[1] != -1)
 			{
 				x = (int)strlen(keyName1) * MENU_FONT_SIZE;
 				keyName2 = Key_KeynumToString (k->keys[1]);
 				UI_DrawMenuString (menu->x + k->generic.x + MENU_FONT_SIZE*3 + x,
-									menu->y + k->generic.y, MENU_FONT_SIZE, "or", alpha, false, false);
+									menu->y + k->generic.y, MENU_FONT_SIZE, ALIGN_CENTER, "or", alpha, false, false);
 				UI_DrawMenuString (menu->x + k->generic.x + MENU_FONT_SIZE*6 + x,
-									menu->y + k->generic.y, MENU_FONT_SIZE, keyName2, alpha, false, false);
+									menu->y + k->generic.y, MENU_FONT_SIZE, ALIGN_CENTER, keyName2, alpha, false, false);
 			}
 		}
 	}

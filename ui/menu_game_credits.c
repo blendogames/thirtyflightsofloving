@@ -130,7 +130,7 @@ void Menu_Credits_Draw (void)
 
 		x = ( SCREEN_WIDTH - len * MENU_FONT_SIZE - stringoffset * MENU_FONT_SIZE ) / 2
 			+ stringoffset * MENU_FONT_SIZE;
-		UI_DrawString (x, y, MENU_FONT_SIZE, credits[i], alpha*255);
+		UI_DrawString (x, y, MENU_FONT_SIZE, ALIGN_CENTER, credits[i], FONT_UI, alpha*255);
 	}
 }
 

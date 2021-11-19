@@ -865,74 +865,13 @@ based on code from BeefQuake R6
 */
 void R_DrawAliasVolumeShadow (maliasmodel_t *paliashdr, vec3_t bbox[8])
 {
-	vec3_t		light, vecAdd;	// temp
+	vec3_t		light, vecAdd;
 	vec3_t		shadowVec, endBBox[8], volumeMins, volumeMaxs;
 	float		projected_distance;
-	int			i, j, skinnum;	// lnum
+	int			i, j, skinnum;
 	qboolean	zFail = (r_shadow_zfail->integer != 0);
 	qboolean	inVolume = false;
 //	GLenum		incr, decr;
-//	float		dist, highest, lowest;
-//	float		angle, cosp, sinp, cosy, siny, cosr, sinr, ix, iy, iz;
-//	dlight_t	*dl;
-
-#if 0
-	dl = r_newrefdef.dlights;
-
-	VectorSet(vecAdd, 680,0,1024); // set base vector, was 576,0,1024
-
-	// compute average light vector from dlights
-	for (i=0, lnum=0; i<r_newrefdef.num_dlights; i++, dl++)
-	{
-		if (VectorCompare(dl->origin, currententity->origin))
-			continue;
-		
-		VectorSubtract(dl->origin, currententity->origin, temp);
-		dist = dl->intensity - VectorLength(temp);
-		if (dist <= 0)
-			continue;
-		
-		lnum++;
-		// Factor in the intensity of a dlight
-		VectorScale (temp, dist*0.25, temp);
-		VectorAdd (vecAdd, temp, vecAdd);
-	}
-	VectorNormalize(vecAdd);
-	VectorScale(vecAdd, 1024, vecAdd);
-
-	// get projection distance from lightspot height
-	highest = lowest = bbox[0][2];
-	for (i=0; i<8; i++) {
-		if (bbox[i][2] > highest) highest = bbox[i][2];
-		if (bbox[i][2] < lowest) lowest = bbox[i][2];
-	}
-	projected_distance = (fabs(highest - lightspot[2]) + (highest-lowest)) / vecAdd[2];
-
-	VectorCopy(vecAdd, light);
-	
-	// reverse-rotate light vector based on angles
-	angle = -currententity->angles[PITCH] / 180 * M_PI;
-	cosp = cos(angle), sinp = sin(angle);
-	angle = -currententity->angles[YAW] / 180 * M_PI;
-	cosy = cos(angle), siny = sin(angle);
-	angle = -currententity->angles[ROLL] / 180 * M_PI * R_RollMult(); // roll is backwards
-	cosr = cos(angle), sinr = sin(angle);
-
-	// rotate for yaw (z axis)
-	ix = light[0], iy = light[1];
-	light[0] = cosy * ix - siny * iy + 0;
-	light[1] = siny * ix + cosy * iy + 0;
-
-	// rotate for pitch (y axis)
-	ix = light[0], iz = light[2];
-	light[0] = cosp * ix + 0 + sinp * iz;
-	light[2] = -sinp * ix + 0 + cosp * iz;
-
-	// rotate for roll (x axis)
-	iy = light[1], iz = light[2];
-	light[1] = 0 + cosr * iy - sinr * iz;
-	light[2] = 0 + sinr * iy + cosr * iz;
-#endif
 
 	projected_distance = R_CalcAliasVolumeShadowLightVector (bbox, light);
 
@@ -994,11 +933,11 @@ void R_DrawAliasVolumeShadow (maliasmodel_t *paliashdr, vec3_t bbox[8])
 	for (i=0; i<paliashdr->num_meshes; i++)
 	{
 		skinnum = (currententity->skinnum<paliashdr->meshes[i].num_skins)?currententity->skinnum:0;
-		if (paliashdr->meshes[i].skins[skinnum].renderparms.noshadow)
+		if (paliashdr->meshes[i].skins[skinnum].renderparms.nodraw || paliashdr->meshes[i].skins[skinnum].renderparms.noshadow)
 			continue;
 
 		R_BuildShadowVolume (paliashdr, i, light, projected_distance, r_shadowvolumes->integer);
-		GL_LockArrays (shadow_va);
+	//	GL_LockArrays (shadow_va);
 
 		if (!r_shadowvolumes->integer)
 		{
@@ -1070,7 +1009,7 @@ void R_DrawAliasVolumeShadow (maliasmodel_t *paliashdr, vec3_t bbox[8])
 		else
 			R_DrawShadowVolume ();
 
-		GL_UnlockArrays ();
+	//	GL_UnlockArrays ();
 	}
 
 	// end stenciling and draw stenciled volume

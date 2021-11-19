@@ -533,7 +533,7 @@ void R_DrawAliasMD2VolumeShadow (dmd2_t *paliashdr, vec3_t bbox[8])
 	}
 
 	R_BuildMD2ShadowVolume(paliashdr, light, projected_distance, r_shadowvolumes->integer||!zfail);
-	GL_LockArrays(md2shadow_va);
+//	GL_LockArrays(md2shadow_va);
 
 	if (!r_shadowvolumes->integer)
 	{	// increment stencil if backface is behind depthbuffer
@@ -565,7 +565,7 @@ void R_DrawAliasMD2VolumeShadow (dmd2_t *paliashdr, vec3_t bbox[8])
 		qglDrawRangeElements(GL_TRIANGLES, 0, md2shadow_va, md2shadow_index, GL_UNSIGNED_INT, indexArray);
 	else
 		qglDrawElements(GL_TRIANGLES, md2shadow_index, GL_UNSIGNED_INT, indexArray);
-	GL_UnlockArrays();
+//	GL_UnlockArrays();
 
 	/*for (i=-1; i<r_newrefdef.num_dlights; i++) //, dl++)
 	{

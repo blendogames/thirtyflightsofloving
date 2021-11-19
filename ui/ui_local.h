@@ -498,13 +498,14 @@ void UI_RefreshData (void);
 #define UI_DrawTiledPic									SCR_DrawTiledPic
 #define UI_DrawChar(x, y, s, t, n, r, g, b, a, i, l)	SCR_DrawChar(x, y, s, t, n, FONT_UI, r, g, b, a, i, l)
 
-void UI_DrawMenuString (int x, int y, int size, const char *string, int alpha, qboolean R2L, qboolean altColor);
-void UI_DrawString (int x, int y, int size, const char *string, int alpha);
-void UI_DrawStringDark (int x, int y, int size, const char *string, int alpha);
-void UI_DrawStringR2L (int x, int y, int size, const char *string, int alpha);
-void UI_DrawStringR2LDark (int x, int y, int size, const char *string, int alpha);
+void UI_DrawMenuString (int x, int y, int size, scralign_t align, const char *string, int alpha, qboolean R2L, qboolean altColor);
+void UI_DrawString (int x, int y, int size, scralign_t align, const char *string, fontslot_t font, int alpha);
+void UI_DrawStringDark (int x, int y, int size, scralign_t align, const char *string, fontslot_t font, int alpha);
+void UI_DrawStringR2L (int x, int y, int size, scralign_t align, const char *string, fontslot_t font, int alpha);
+void UI_DrawStringR2LDark (int x, int y, int size, scralign_t align, const char *string, fontslot_t font, int alpha);
 void UI_DrawMenuStatusBar (const char *string);
-void UI_DrawTextBox (int x, int y, int width, int lines);
+void UI_DrawMenuTextBox (int x, int y, int width, int lines);
+void UI_DrawPopupMessage (char *message);
 void UI_DrawBanner (char *name);
 void UI_Draw_Cursor (void);
 

@@ -815,7 +815,7 @@ void	R_DrawStretchRaw (int x, int y, int w, int h, int cols, int rows, byte *dat
 */
 void	R_SetPalette (const unsigned char *palette);	// NULL = game palette
 void	R_BeginFrame (float camera_separation);
-void	GLimp_EndFrame (void);
+void	R_EndFrame (void);
 
 void	GLimp_AppActivate (qboolean activate);
 

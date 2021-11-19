@@ -2368,13 +2368,13 @@ void SCR_TimeRefresh_f (void)
 
 	if (Cmd_Argc() == 2)
 	{	// run without page flipping
-		R_BeginFrame( 0 );
+		R_BeginFrame (0);
 		for (i=0 ; i<128 ; i++)
 		{
 			cl.refdef.viewangles[1] = i/128.0*360.0;
 			R_RenderFrame (&cl.refdef);
 		}
-		GLimp_EndFrame();
+		R_EndFrame ();
 	}
 	else
 	{
@@ -2382,9 +2382,9 @@ void SCR_TimeRefresh_f (void)
 		{
 			cl.refdef.viewangles[1] = i/128.0*360.0;
 
-			R_BeginFrame( 0 );
+			R_BeginFrame (0);
 			R_RenderFrame (&cl.refdef);
-			GLimp_EndFrame();
+			R_EndFrame ();
 		}
 	}
 
@@ -2559,7 +2559,7 @@ void SCR_UpdateScreen (void)
 
 	for ( i = 0; i < numframes; i++ )
 	{
-		R_BeginFrame( separation[i] );
+		R_BeginFrame (separation[i]);
 
 		if (scr_draw_loading == 2)
 		{	//  loading plaque over black screen
@@ -2659,5 +2659,5 @@ void SCR_UpdateScreen (void)
 		}
 		SCR_DrawConsole ();
 	}
-	GLimp_EndFrame();
+	R_EndFrame ();
 }

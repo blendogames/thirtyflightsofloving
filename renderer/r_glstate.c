@@ -624,3 +624,44 @@ void GL_SetDefaultState (void)
 
 	GL_UpdateSwapInterval();
 }
+
+/*
+=================
+GL_PrintError
+=================
+*/
+void GL_PrintError (int errorCode, char *funcName)
+{
+	switch (errorCode)
+	{
+	case GL_INVALID_ENUM:
+		VID_Printf (PRINT_DEVELOPER, "%s: GL_INVALID_ENUM\n", funcName);
+		break;
+	case GL_INVALID_VALUE:
+		VID_Printf (PRINT_DEVELOPER, "%s: GL_INVALID_VALUE\n", funcName);
+		break;
+	case GL_INVALID_OPERATION:
+		VID_Printf (PRINT_DEVELOPER, "%s: GL_INVALID_OPERATION\n", funcName);
+		break;
+	case GL_STACK_OVERFLOW:
+		VID_Printf (PRINT_DEVELOPER, "%s: GL_STACK_OVERFLOW\n", funcName);
+		break;
+	case GL_STACK_UNDERFLOW:
+		VID_Printf (PRINT_DEVELOPER, "%s: GL_STACK_UNDERFLOW\n", funcName);
+		break;
+	case GL_OUT_OF_MEMORY:
+		VID_Printf (PRINT_DEVELOPER, "%s: GL_OUT_OF_MEMORY\n", funcName);
+		break;
+	case GL_TABLE_TOO_LARGE:
+		VID_Printf (PRINT_DEVELOPER, "%s: GL_TABLE_TOO_LARGE\n", funcName);
+		break;
+#ifdef GL_INVALID_FRAMEBUFFER_OPERATION_EXT
+	case GL_INVALID_FRAMEBUFFER_OPERATION_EXT:
+		VID_Printf (PRINT_DEVELOPER, "GL_INVALID_FRAMEBUFFER_OPERATION_EXT\n", funcName);
+		break;
+#endif
+	default:
+		VID_Printf (PRINT_DEVELOPER, "%s: GL ERROR UNKNOWN (%i)\n", funcName, errorCode);
+		break;
+	}
+}
