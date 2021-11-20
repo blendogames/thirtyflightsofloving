@@ -1426,6 +1426,7 @@ qboolean R_CheckGLExtensions (char *reason)
 		return false;
 	}
 
+#if 0
 	// GL_EXT_compiled_vertex_array
 	// GL_SGI_compiled_vertex_array
 	glConfig.extCompiledVertArray = false;
@@ -1451,6 +1452,7 @@ qboolean R_CheckGLExtensions (char *reason)
 	}
 	else
 		VID_Printf (PRINT_ALL, "...GL_EXT/SGI_compiled_vertex_array not found\n" );
+#endif
 
 	// glDrawRangeElements on GL 1.2 or higher or GL_EXT_draw_range_elements
 	glConfig.drawRangeElements = false;

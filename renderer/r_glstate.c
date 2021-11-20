@@ -189,6 +189,7 @@ qboolean GL_HasStencil (void)
 	return (glConfig.have_stencil && r_stencil->integer);
 }
 
+
 /*
 =================
 R_ParticleStencil
@@ -385,7 +386,7 @@ void GL_DepthRange (GLfloat rMin, GLfloat rMax)
 	qglDepthRange (rMin, rMax);
 }
 
-
+#if 0
 /*
 =============
 GL_LockArrays
@@ -418,6 +419,7 @@ void GL_UnlockArrays (void)
 	qglUnlockArraysEXT ();
 	glState.arraysLocked = false;
 }
+#endif
 
 /*
 =================
@@ -436,6 +438,7 @@ void GL_EnableTexture (unsigned tmu)
 	glState.activetmu[tmu] = true;
 }
 
+
 /*
 =================
 GL_DisableTexture
@@ -451,6 +454,7 @@ void GL_DisableTexture (unsigned tmu)
 	qglDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	glState.activetmu[tmu] = false;
 }
+
 
 /*
 =================
@@ -474,6 +478,7 @@ void GL_EnableMultitexture (qboolean enable)
 	GL_TexEnv(GL_REPLACE);
 }
 
+
 /*
 =================
 GL_SelectTexture
@@ -493,6 +498,7 @@ void GL_SelectTexture (unsigned tmu)
 	qglClientActiveTextureARB(GL_TEXTURE0_ARB+tmu);
 }
 
+
 /*
 =================
 GL_Bind
@@ -511,6 +517,7 @@ void GL_Bind (int texnum)
 	qglBindTexture (GL_TEXTURE_2D, texnum);
 }
 
+
 /*
 =================
 GL_MBind
@@ -528,6 +535,7 @@ void GL_MBind (unsigned tmu, int texnum)
 
 	GL_Bind(texnum);
 }
+
 
 /*
 =================
@@ -550,7 +558,7 @@ void GL_SetDefaultState (void)
 	glState.stencilTest = false;
 	glState.depthTest = false;
 	glState.scissorTest = false;
-	glState.arraysLocked = false;
+//	glState.arraysLocked = false;
 
 	glState.cullMode = GL_FRONT;
 	glState.shadeModelMode = GL_FLAT;
@@ -624,6 +632,7 @@ void GL_SetDefaultState (void)
 
 	GL_UpdateSwapInterval();
 }
+
 
 /*
 =================

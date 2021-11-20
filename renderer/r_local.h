@@ -524,13 +524,13 @@ void V_AddBlend (float r, float g, float b, float a, float *v_blend);
 //
 // r_main.c
 //
-qboolean R_Init ( void *hinstance, void *hWnd, char *reason );
+qboolean R_Init (void *hinstance, void *hWnd, char *reason);
 void R_ClearState (void);
 void R_Shutdown (void);
 void R_RenderView (refdef_t *fd);
-void R_BeginFrame( float camera_separation );
-void R_SwapBuffers( int );
-void R_SetPalette ( const unsigned char *palette);
+void R_BeginFrame (float camera_separation);
+void R_SwapBuffers (int);
+void R_SetPalette (const unsigned char *palette);
 
 //
 // r_misc.c
@@ -903,7 +903,7 @@ typedef struct
 	qboolean	atiSeparateStencil;
 	qboolean	extStencilTwoSide;
 
-	qboolean	extCompiledVertArray;
+//	qboolean	extCompiledVertArray;
 	qboolean	drawRangeElements;
 
 	// texture shader support
@@ -967,7 +967,7 @@ typedef struct
 
 	qboolean		texRectangle;
 	qboolean		in2d;
-	qboolean		arraysLocked;
+//	qboolean		arraysLocked;
 	// End - MrG
 
 	GLenum			cullMode;
@@ -1012,8 +1012,8 @@ void	GL_BlendFunc (GLenum src, GLenum dst);
 void	GL_DepthFunc (GLenum func);
 void	GL_DepthMask (GLboolean mask);
 void	GL_DepthRange (GLfloat rMin, GLfloat rMax);
-void	GL_LockArrays (int numVerts);
-void	GL_UnlockArrays (void);
+//void	GL_LockArrays (int numVerts);
+//void	GL_UnlockArrays (void);
 void	GL_EnableTexture (unsigned tmu);
 void	GL_DisableTexture (unsigned tmu);
 void	GL_EnableMultitexture(qboolean enable);
