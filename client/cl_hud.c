@@ -306,12 +306,20 @@ void CL_ExecuteLayoutString (char *s, qboolean isStatusBar)
 	float			(*getScreenScale)(void);
 	float			scrLeft, scrWidth;
 
+#ifndef NOTTHIRTYFLIGHTS
+	int		selected;
+	int		num,selected_num,i;
+	int w, h;
+	drawStruct_t ds;
+#endif
+
 	if (cls.state != ca_active || !cl.refresh_prepped)
 		return;
 
 	if (!s[0])
 		return;
 
+#ifdef NOTTHIRTYFLIGHTS
 	// Knightmare- hack for connected to server using old protocol
 	// Changed config strings require different parsing
 	if ( LegacyProtocol() ) {
@@ -322,6 +330,295 @@ void CL_ExecuteLayoutString (char *s, qboolean isStatusBar)
 		cs_images = CS_IMAGES;
 		max_images = MAX_IMAGES;
 	}
+#else
+	//FULLSCREEN VIGNETTE EFFECT
+	memset(&ds, 0, sizeof(drawStruct_t));
+	ds.pic = "/pics/vignette.pcx";
+	ds.x = 0;
+	ds.y = 0;
+	ds.w = viddef.width;
+	ds.h = viddef.height;
+	Vector2Copy(vec2_origin, ds.offset);
+	Vector4Copy(vec4_identity, ds.color);
+	ds.color[3] = 0.8;
+	R_DrawPic(ds);
+	/*R_DrawStretchPic (
+		0,
+		0,
+		viddef.width,
+		viddef.height,
+		"/pics/vignette.pcx",
+		0.8);*/
+
+
+	value = cl.frame.playerstate.stats[STAT_HINTTITLE];
+
+    if (value > 0)
+	{
+		//R_DrawScaledPic (viddef.width/2 - scaledHud(180), viddef.height/2 - scaledHud(45), HudScale() * 0.7, value * 0.01, "hint_title");
+		//int title;
+
+		//GravityBone hack. Make the GravityBone title appear if we're in a GB map.
+		char	mapfile[32];
+
+		if (cl.configstrings[CS_MODELS+1][0])
+		{
+			strcpy (mapfile, cl.configstrings[CS_MODELS+1] + 5);	// skip "maps/"
+			mapfile[strlen(mapfile)-4] = 0;		// cut off ".bsp"
+		}
+
+		if (Q_stricmp( mapfile, "parlo1") == 0) //name of GB map.
+		{
+			SCR_DrawLegacyPic (viddef.width/2 - SCR_ScaledHud(180), viddef.height/2 - SCR_ScaledHud(45), SCR_GetHudScale() * 0.7, "hint_title", value * 0.01);	//GB image
+		}
+		else
+		{
+			SCR_DrawLegacyPic (
+				viddef.width - 512 - 64,
+				viddef.height/2 - 256,
+				1,
+				"title",
+				value * 0.01);
+
+			SCR_DrawLegacyPic (
+				viddef.width/2 - 256,
+				viddef.height - 148,
+				1,
+				"copyright",
+				value * 0.01);
+		}
+	}
+
+
+	//terrible hack. the last drawn thing gets corrupted for some reason. so this is a little dummy picture.
+	memset(&ds, 0, sizeof(drawStruct_t));
+	ds.pic = "/pics/ch1.pcx";
+	ds.x = 0;
+	ds.y = 0;
+	ds.w = 1;
+	ds.h = 1;
+	Vector2Copy(vec2_origin, ds.offset);
+	Vector4Copy(vec4_identity, ds.color);
+	ds.color[3] = 0;
+	R_DrawPic(ds);
+	/*R_DrawStretchPic (
+		0,
+		0,
+		1,
+		1,
+		"/pics/ch1.pcx",
+		0);*/
+
+	value = cl.frame.playerstate.stats[STAT_HUDMSG];
+
+    if (value == 1)
+	{
+		/*
+		R_DrawStretchPic (
+		0,
+		0,
+		viddef.width,
+		viddef.height,
+		"/pics/drunk.png",
+		0.6);
+*/
+
+		
+
+
+			SCR_DrawLegacyPic (
+				viddef.width/2 - SCR_ScaledHud(240),
+				viddef.height/2 - SCR_ScaledHud(16),
+				SCR_GetHudScale() * 0.5,
+				"contractcomplete",
+				1.0);
+
+	}
+	else if (value == 2)
+	{
+		SCR_DrawLegacyPic (
+			SCR_ScaledHud(1),
+			viddef.height - SCR_ScaledHud(64),
+			SCR_GetHudScale() * 0.35,
+			"find_exit",
+			1.0);
+	}
+	else if (value == 3)
+	{
+		//TFOL "the end"
+		SCR_DrawLegacyPic (
+			viddef.width - SCR_ScaledHud(128),
+			viddef.height - SCR_ScaledHud(128),
+			SCR_GetHudScale() * 0.8,
+			"drunk",
+			1.0);
+	}
+
+	
+
+	//selected = cl.frame.playerstate.stats[STAT_SELECTED_ITEM];
+	//Com_Printf ("%i\n",cl.frame.playerstate.stats[STAT_SELECTED_ITEM]);
+
+
+	//===== draw camera viewfinder.
+	if (cl.frame.playerstate.stats[STAT_SELECTED_ITEM])
+	{
+		if (cl.frame.playerstate.stats[STAT_SELECTED_ITEM] == 12)
+		{
+			memset(&ds, 0, sizeof(drawStruct_t));
+			ds.pic = "/pics/viewfinder.tga";
+			ds.x = 0;
+			ds.y = 0;
+			ds.w = viddef.width;
+			ds.h = viddef.height;
+			Vector2Copy(vec2_origin, ds.offset);
+			Vector4Copy(vec4_identity, ds.color);
+			R_DrawPic(ds);
+			/*R_DrawStretchPic (
+				0,
+				0,
+				viddef.width,
+				viddef.height,
+				"/pics/viewfinder.tga",
+				1.0);*/
+
+
+			if (cl.frame.playerstate.stats[STAT_PHOTOCOUNT])
+			{
+				char pcount[32];
+				sprintf(pcount, "%d of %d Photos", cl.frame.playerstate.stats[STAT_PHOTOCOUNT], cl.frame.playerstate.stats[STAT_MAXPHOTOS]);
+
+				//cl.frame.playerstate.stats[STAT_PHOTOCOUNT]
+				Hud_DrawString (SCR_ScaledHud(270), SCR_ScaledHud(465), pcount, 255, false);
+			}
+		}
+	}
+
+
+	//Com_Printf ("%i\n",cl.frame.playerstate.stats[STAT_SELECTED_ITEM]);
+
+	if (cl.frame.playerstate.stats[STAT_WEAPBOX] > 0)
+	{
+		float adj=1.0;
+	
+
+		selected = cl.frame.playerstate.stats[STAT_SELECTED_ITEM];
+		num = 0;
+		selected_num = 0;
+		
+
+
+		if (cl.frame.playerstate.stats[STAT_WEAPBOX] < 20)
+		{
+			adj = 0.05 * cl.frame.playerstate.stats[STAT_WEAPBOX];
+			
+		}
+
+		for (i=0; i<MAX_ITEMS; i++)
+		{
+			float alpha;
+			float boxalpha;
+			char block[32];
+			char num[2];
+			char picname[16];
+			float alph;
+
+
+
+			if (cl.inventory[i])
+			{
+				if (i==selected)
+				{
+					selected_num = num;
+					alpha=1.0;
+					boxalpha=1.0;
+					alph=255;
+					
+				}
+				else
+				{
+					alpha=0.55;
+					boxalpha=0.4;
+					alph = 150;
+				}
+				//Com_Printf ("%s\n",cl.configstrings[CS_ITEMS+i]);
+
+
+
+
+
+				if (i==9)
+					sprintf(picname, "%s", "w_freon");
+				else if (i==10)
+					sprintf(picname, "%s", "w_hammer");
+				else if (i==11)
+					sprintf(picname, "%s", "w_drill");
+				else
+					sprintf(picname, "%s", "w_camera");
+
+			}
+
+			if (cl.frame.playerstate.stats[STAT_WEAPBOX] < 20)
+			{
+				alpha *= adj;
+				boxalpha *= adj;
+				alph *= adj;
+			}
+
+			sprintf(num, "%i", i-8);
+			sprintf(block, "%s", cl.configstrings[CS_ITEMS+i]);
+			
+
+
+
+			
+			if (cl.inventory[i])
+			{
+				if (i!=selected)
+				{
+					SCR_DrawLegacyPic (
+						SCR_ScaledHud(560),
+						SCR_ScaledHud(-560+(64*i)),
+						SCR_GetHudScale() * 0.45,
+						"w_box", boxalpha);
+				}
+				else
+				{
+					SCR_DrawLegacyPic (
+						SCR_ScaledHud(560),
+						SCR_ScaledHud(-560+(64*i)),
+						SCR_GetHudScale() * 0.45,
+						"w_box_sel", boxalpha);
+				}
+
+				SCR_DrawLegacyPic (
+					SCR_ScaledHud(560),
+					SCR_ScaledHud(-560+(64*i)),
+					SCR_GetHudScale() * 0.45,
+					picname, alpha);
+
+				//draw number.
+				Hud_DrawString (
+					SCR_ScaledHud(607),
+					SCR_ScaledHud(-535+(64*i)),
+					num,
+					alph,
+					false);
+			}
+
+			if (i==selected)
+			{
+				sprintf(picname, "%s%s", picname,"_name");
+
+				SCR_DrawLegacyPic (
+					SCR_ScaledHud(500),
+					SCR_ScaledHud(-560+(64*i)),
+					SCR_GetHudScale() * 0.45,
+					picname, alpha);
+			}
+		}
+	}
+#endif
 
 	// Get our scaling functions
 	if (isStatusBar) {
@@ -522,6 +819,39 @@ void CL_ExecuteLayoutString (char *s, qboolean isStatusBar)
 			SCR_DrawLegacyPic (x, y, getScreenScale(), token, scr_hudalpha->value);
 			continue;
 		}
+
+#ifndef NOTTHIRTYFLIGHTS
+		if (!strcmp(token, "picn2"))
+		{	// draw a pic from a name
+			drawStruct_t ds;
+
+			token = COM_Parse (&s);
+
+			
+
+
+			// FIXME TFOL -flibit SCR_AddDirtyPoint (x, y);
+
+			R_DrawFill (0, 0, viddef.width, viddef.height, 0, 0, 0, 180);
+
+			//zzzz
+			//SCR_AddDirtyPoint (x+scaledHud(24)-1, y+scaledHud(24)-1);
+
+
+			//R_DrawScaledPic (scaledHud(640-512), 0, HudScale()*0.5, 1.0, token);
+			memset(&ds, 0, sizeof(drawStruct_t));
+			ds.pic = &token[0];
+			ds.x = SCR_ScaledHud(128);
+			ds.y = 0;
+			ds.w = SCR_ScaledHud(128);
+			ds.h = viddef.height;
+			Vector2Copy(vec2_origin, ds.offset);
+			Vector4Copy(vec4_identity, ds.color);
+			R_DrawPic(ds);
+			// R_DrawStretchPic (SCR_ScaledHud(128), 0, SCR_ScaledHud(512), viddef.height, token, 1.0);
+			continue;
+		}
+#endif
 
 		if (!strcmp(token, "num"))
 		{	// draw a number

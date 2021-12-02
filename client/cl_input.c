@@ -283,6 +283,9 @@ Send the intended movement message to the server
 */
 void CL_BaseMove (usercmd_t *cmd)
 {	
+	float sidespeed = cl_sidespeed->value;
+	float forwardspeed = cl_forwardspeed->value;
+
 	CL_AdjustAngles ();
 
 	// overhead cam doesn't allow vertical aiming
@@ -292,24 +295,42 @@ void CL_BaseMove (usercmd_t *cmd)
 	memset (cmd, 0, sizeof(*cmd));
 	
 	VectorCopy (cl.viewangles, cmd->angles);
+
+#ifndef NOTTHIRTYFLIGHTS
+	if (cl.frame.playerstate.stats[STAT_FREEZE] > 0)
+		return;
+
+	if (cl.frame.playerstate.stats[STAT_MOVESLOW] > 0)
+	{
+		sidespeed = 0;
+		forwardspeed *= 0.4;
+	}
+#endif
+
 	if (in_strafe.state & 1)
 	{
-		cmd->sidemove += cl_sidespeed->value * CL_KeyState (&in_right);
-		cmd->sidemove -= cl_sidespeed->value * CL_KeyState (&in_left);
+		cmd->sidemove += sidespeed * CL_KeyState (&in_right);
+		cmd->sidemove -= sidespeed * CL_KeyState (&in_left);
 	}
 
-	cmd->sidemove += cl_sidespeed->value * CL_KeyState (&in_moveright);
-	cmd->sidemove -= cl_sidespeed->value * CL_KeyState (&in_moveleft);
+	cmd->sidemove += sidespeed * CL_KeyState (&in_moveright);
+	cmd->sidemove -= sidespeed * CL_KeyState (&in_moveleft);
 
 	cmd->upmove += cl_upspeed->value * CL_KeyState (&in_up);
 	cmd->upmove -= cl_upspeed->value * CL_KeyState (&in_down);
 
 	if (! (in_klook.state & 1) )
 	{	
-		cmd->forwardmove += cl_forwardspeed->value * CL_KeyState (&in_forward);
-		cmd->forwardmove -= cl_forwardspeed->value * CL_KeyState (&in_back);
-	}	
+		cmd->forwardmove += forwardspeed * CL_KeyState (&in_forward);
+		cmd->forwardmove -= forwardspeed * CL_KeyState (&in_back);
+	}
 
+#ifndef NOTTHIRTYFLIGHTS
+	if ((cmd->sidemove != 0 || cmd->forwardmove != 0) && lookspring->value)
+	{
+		IN_CenterView();
+	}
+#else
 //
 // adjust for speed key / running
 //
@@ -319,7 +340,8 @@ void CL_BaseMove (usercmd_t *cmd)
 		cmd->forwardmove *= 2;
 		cmd->sidemove *= 2;
 		cmd->upmove *= 2;
-	}	
+	}
+#endif
 }
 
 void CL_ClampPitch (void)
@@ -339,6 +361,36 @@ void CL_ClampPitch (void)
 		cl.viewangles[PITCH] = 89 - pitch;
 	if (cl.viewangles[PITCH] + pitch < -89)
 		cl.viewangles[PITCH] = -89 - pitch;
+
+#ifndef NOTTHIRTYFLIGHTS
+    if (cl.frame.playerstate.stats[STAT_VL_ON] > 0)
+    {
+            //lock player angle range.
+            float   yaw;
+			float   ymin, ymax;
+    
+            yaw = SHORT2ANGLE(cl.frame.playerstate.pmove.delta_angles[YAW]);
+            //if (yaw > 180)
+              //      yaw -= 360;
+            if (yaw > 360)
+                  yaw -= 360;
+
+			if (yaw < 0)
+				yaw += 360;
+
+			ymin = cl.frame.playerstate.stats[STAT_VL_BASE] - cl.frame.playerstate.stats[STAT_VL_RANGE];
+			ymax = cl.frame.playerstate.stats[STAT_VL_BASE] + cl.frame.playerstate.stats[STAT_VL_RANGE];
+			//bc
+
+
+			//Com_Printf ("clview%f / yaw %f / ymin %f / ymax %f\n", cl.viewangles[YAW], yaw,ymin,ymax);
+    
+            if (cl.viewangles[YAW] + yaw > ymax)
+                    cl.viewangles[YAW] = ymax - yaw;
+            else if (cl.viewangles[YAW] + yaw < ymin)
+                    cl.viewangles[YAW] = ymin - yaw;
+    }
+#endif
 }
 
 /*
@@ -426,8 +478,10 @@ void CL_InitInput (void)
 	Cmd_AddCommand ("-moveleft", IN_MoveleftUp);
 	Cmd_AddCommand ("+moveright", IN_MoverightDown);
 	Cmd_AddCommand ("-moveright", IN_MoverightUp);
+#ifdef NOTTHIRTYFLIGHTS
 	Cmd_AddCommand ("+speed", IN_SpeedDown);
 	Cmd_AddCommand ("-speed", IN_SpeedUp);
+#endif
 	Cmd_AddCommand ("+attack", IN_AttackDown);
 	Cmd_AddCommand ("-attack", IN_AttackUp);
 	

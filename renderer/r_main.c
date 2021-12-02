@@ -959,7 +959,11 @@ void R_Register (void)
 	Cvar_SetDescription ("scr_font", "Sets name of font image for HUD text.");
 	ui_font = Cvar_Get ("ui_font", "default", CVAR_ARCHIVE);
 	Cvar_SetDescription ("ui_font", "Sets name of font image for menu text.");
+#ifdef NOTTHIRTYFLIGHTS
 	alt_text_color = Cvar_Get ("alt_text_color", "2", CVAR_ARCHIVE);
+#else
+	alt_text_color = Cvar_Get ("alt_text_color", "9", CVAR_ARCHIVE);
+#endif
 //	Cvar_SetDescription ("alt_text_color", "Sets color of high-bit highlighted text.");
 
 	scr_netgraph_pos = Cvar_Get ("netgraph_pos", "0", CVAR_ARCHIVE);
@@ -1001,7 +1005,11 @@ void R_Register (void)
 	Cvar_SetDescription ("r_model_shading", "Enables shading on alias models.  Accepted values are 0, 1, 2, or 3.");
 	r_model_dlights = Cvar_Get( "r_model_dlights", "8", CVAR_ARCHIVE );
 	Cvar_SetDescription ("r_model_dlights", "Sets maximum number of dynamic lights for a model.");
+#ifdef NOTTHIRTYFLIGHTS
 	r_model_minlight = Cvar_Get ("r_model_minlight", "0.02", CVAR_ARCHIVE );
+#else
+	r_model_minlight = Cvar_Get ("r_model_minlight", "0.1", CVAR_ARCHIVE );
+#endif
 	Cvar_SetDescription ("r_model_minlight", "Sets minimum light level for alias model rendering.");
 	r_entity_doublelight  = Cvar_Get ("r_entity_doublelight", "0", CVAR_ARCHIVE );
 	Cvar_SetDescription ("r_entity_doublelight", "Enables original glitchy double-lighting of models.  This is a sort-of-exploit, but is not considered a cheat.");
@@ -1011,13 +1019,21 @@ void R_Register (void)
 	r_rgbscale = Cvar_Get ("r_rgbscale", "2", CVAR_ARCHIVE);	// Vic's RGB brightening
 	Cvar_SetDescription ("r_rgbscale", "Sets RGB scaling factor.  Accepted values are 1,  2, or 4.");
 
+#ifdef NOTTHIRTYFLIGHTS
 	r_waterwave = Cvar_Get ("r_waterwave", "0", CVAR_ARCHIVE );
+#else
+	r_waterwave = Cvar_Get ("r_waterwave", "5", CVAR_ARCHIVE );
+#endif
 	Cvar_SetDescription ("r_waterwave", "Sets amplitude of water waves.");
 	r_caustics = Cvar_Get ("r_caustics", "1", CVAR_ARCHIVE );
 	Cvar_SetDescription ("r_caustics", "Enables rendering of underwater caustic effect.  0 = disabled, 1 = normal, 2 = fragment warp.");
 	r_glows = Cvar_Get ("r_glows", "1", CVAR_ARCHIVE );
 	Cvar_SetDescription ("r_glows", "Enables rendering of texture glow layers.");
+#ifdef NOTTHIRTYFLIGHTS
 	r_saveshotsize = Cvar_Get ("r_saveshotsize", "1", CVAR_ARCHIVE );
+#else
+	r_saveshotsize = Cvar_Get ("r_saveshotsize", "0", CVAR_ARCHIVE );
+#endif
 	Cvar_SetDescription ("r_saveshotsize", "Enables saveshot resolutions above 256x256.");
 //	r_nosubimage = Cvar_Get( "r_nosubimage", "0", 0 );	// unused
 
@@ -1041,7 +1057,11 @@ void R_Register (void)
 	Cvar_SetDescription ("r_log", "Enables logging of OpenGL API calls.");
 	r_bitdepth = Cvar_Get( "r_bitdepth", "0", 0 );
 	Cvar_SetDescription ("r_bitdepth", "Sets color bit depth.  0 = desktop setting.");
+#ifdef NOTTHIRTYFLIGHTS
 	r_mode = Cvar_Get( "r_mode", "6", CVAR_ARCHIVE );
+#else
+	r_mode = Cvar_Get( "r_mode", "17", CVAR_ARCHIVE );
+#endif
 	Cvar_SetDescription ("r_mode", "Sets enumerated video mode for renderer.  -1 = custom mode.");
 #ifdef _WIN32	// desktop-resolution display mode
 	r_mode_desktop = Cvar_Get( "r_mode_desktop", "0", CVAR_ARCHIVE );
@@ -1049,7 +1069,11 @@ void R_Register (void)
 #endif
 	r_lightmap = Cvar_Get ("r_lightmap", "0", 0);
 	Cvar_SetDescription ("r_lightmap", "Enables lightmap-only world rendering.");
+#ifdef NOTTHIRTYFLIGHTS
 	r_shadows = Cvar_Get ("r_shadows", "0", CVAR_ARCHIVE );
+#else
+	r_shadows = Cvar_Get ("r_shadows", "1", CVAR_ARCHIVE );
+#endif
 	Cvar_SetDescription ("r_shadows", "Enables rendering of shadows.  0 = none, 1 = planar, 2 = dynamic planar, 3 = projection.");
 	r_shadowalpha = Cvar_Get ("r_shadowalpha", "0.4", CVAR_ARCHIVE );
 	Cvar_SetDescription ("r_shadowalpha", "Sets opacity of shadows.");
@@ -1107,7 +1131,11 @@ void R_Register (void)
 	Cvar_SetDescription ("r_nvfog_dist_mode", "Sets nVidia distance fog mode.  Accepted values are GL_EYE_PLANE_ABSOLUTE_NV, GL_EYE_PLANE, and GL_EYE_RADIAL_NV.");
 
 	// changed default texture mode to bilinear
+#ifdef NOTTHIRTYFLIGHTS
 	r_texturemode = Cvar_Get( "r_texturemode", "GL_LINEAR_MIPMAP_NEAREST", CVAR_ARCHIVE );
+#else
+	r_texturemode = Cvar_Get( "r_texturemode", "GL_LINEAR_MIPMAP_LINEAR", CVAR_ARCHIVE );
+#endif
 	Cvar_SetDescription ("r_texturemode", "Sets texture filtering mode.  Accepted values are GL_LINEAR_MIPMAP_NEAREST and GL_LINEAR_MIPMAP_LINEAR.");
 //	r_texturealphamode = Cvar_Get( "r_texturealphamode", "default", CVAR_ARCHIVE );
 //	r_texturesolidmode = Cvar_Get( "r_texturesolidmode", "default", CVAR_ARCHIVE );
@@ -1154,7 +1182,11 @@ void R_Register (void)
 	Cvar_SetDescription ("r_pixel_shader_warp", "Enables pixel shader water warp effect.");
 
 	// allow disabling of lightmaps on trans surfaces
+#ifdef NOTTHIRTYFLIGHTS
 	r_trans_lighting = Cvar_Get( "r_trans_lighting", "2", CVAR_ARCHIVE );
+#else
+	r_trans_lighting = Cvar_Get( "r_trans_lighting", "0", CVAR_ARCHIVE );
+#endif
 	Cvar_SetDescription ("r_trans_lighting", "Enables lighting on translucent surfaces. 0 = disabled, 1 = vertex lighting, 2 = lightmap.");
 
 	// allow disabling of lighting on warp surfaces
@@ -1191,7 +1223,11 @@ void R_Register (void)
 	r_screenshot_format = Cvar_Get( "r_screenshot_format", "jpg", CVAR_ARCHIVE );			// determines screenshot format
 	Cvar_SetDescription ("r_screenshot_format", "Sets the image format for screenshots.  Accepted values are tga, jpg, and png.");
 //	r_screenshot_jpeg = Cvar_Get( "r_screenshot_jpeg", "1", CVAR_ARCHIVE );					// Heffo - JPEG Screenshots
+#ifdef NOTTHIRTYFLIGHTS
 	r_screenshot_jpeg_quality = Cvar_Get( "r_screenshot_jpeg_quality", "85", CVAR_ARCHIVE );	// Heffo - JPEG Screenshots
+#else
+	r_screenshot_jpeg_quality = Cvar_Get( "r_screenshot_jpeg_quality", "100", CVAR_ARCHIVE );	// Heffo - JPEG Screenshots
+#endif
 	Cvar_SetDescription ("r_screenshot_jpeg_quality", "Sets the image quality for JPEG screenshots.  Accepted values are 1-100.");
 	r_screenshot_gamma_correct = Cvar_Get( "r_screenshot_gamma_correct", "0", CVAR_ARCHIVE );	// gamma correction for screenshots
 	Cvar_SetDescription ("r_screenshot_gamma_correct", "Enables gamma correction of screenshots.");
@@ -1209,7 +1245,11 @@ void R_Register (void)
 	r_3dlabs_broken = Cvar_Get( "r_3dlabs_broken", "1", CVAR_ARCHIVE );
 	Cvar_SetDescription ("r_3dlabs_broken", "Enables CDS hack for broken 3DLabs drivers.");
 
+#ifdef NOTTHIRTYFLIGHTS
+	vid_fullscreen = Cvar_Get( "vid_fullscreen", "0", CVAR_ARCHIVE );
+#else
 	vid_fullscreen = Cvar_Get( "vid_fullscreen", "1", CVAR_ARCHIVE );
+#endif
 //	Cvar_SetDescription ("vid_fullscreen", "Enables fullscreen video mode.");
 	Cvar_SetDescription ("vid_fullscreen", "Sets fullscreen or borderless video mode.  0 = windowed, 1 = fullscreen, 2 = borderless");	// borderless support
 	vid_gamma = Cvar_Get( "vid_gamma", "0.8", CVAR_ARCHIVE ); // was 1.0
@@ -1225,7 +1265,11 @@ void R_Register (void)
 	r_clearcolor_b = Cvar_Get( "r_clearcolor_b", "0.5", CVAR_ARCHIVE );
 	Cvar_SetDescription ("r_clearcolor_b", "Sets blue component (normalized) of background color used with gl_clear set to 1.  Accepted values are 0-1.");
 
+#ifdef NOTTHIRTYFLIGHTS
 	r_bloom = Cvar_Get( "r_bloom", "0", CVAR_ARCHIVE );	// BLOOMS
+#else
+	r_bloom = Cvar_Get( "r_bloom", "1", CVAR_ARCHIVE );	// BLOOMS
+#endif
 	Cvar_SetDescription ("r_bloom", "Enables bloom postprocess effect.");
 
 	r_celshading = Cvar_Get( "r_celshading", "0", CVAR_ARCHIVE );

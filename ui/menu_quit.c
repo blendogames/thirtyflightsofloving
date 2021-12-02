@@ -97,9 +97,15 @@ const char *Menu_Quit_Key (int key)
 #else // QUITMENU_NOKEY
 	switch (key)
 	{
+#ifndef NOTTHIRTYFLIGHTS
+	case K_BACKSPACE:
+#endif
 	case K_ESCAPE:
 	case 'n':
 	case 'N':
+#ifndef NOTTHIRTYFLIGHTS
+		S_StartLocalSound ("world/cheer.wav");
+#endif
 		UI_PopMenu ();
 		break;
 
@@ -126,7 +132,24 @@ void Menu_Quit_Draw (void)
 	int		w, h;
 
 	R_DrawGetPicSize (&w, &h, "quit");
+#ifdef NOTTHIRTYFLIGHTS
 	UI_DrawPic (SCREEN_WIDTH/2-w/2, SCREEN_HEIGHT/2-h/2, w, h, ALIGN_CENTER, false, "quit", 1.0);
+#else
+	w *= 0.6;
+	h *= 0.6;
+
+	SCR_DrawPic (
+		SCREEN_WIDTH/2-w/2  + (5*sin(anglemod(cl.time*0.0025))),
+		SCREEN_HEIGHT/2-h/2 - 20  +  (3*sin(anglemod(cl.time*0.005))),
+		w, h, ALIGN_CENTER, false, "quit", 1.0);
+
+
+
+	SCR_DrawPic (
+		SCREEN_WIDTH/2-w/2   + (9*sin(anglemod(cl.time*0.0025))),
+		SCREEN_HEIGHT/2-h/2 + 20  +  (6*sin(anglemod(cl.time*0.005))),
+		w, h, ALIGN_CENTER, false, "quit2", 1.0);
+#endif
 #endif // QUITMENU_NOKEY
 }
 

@@ -807,6 +807,19 @@ void V_RenderView (float stereo_separation)
         qsort( cl.refdef.entities, cl.refdef.num_entities, sizeof( cl.refdef.entities[0] ), (int (*)(const void *, const void *))CL_EntityCmpFnc );
 	}
 
+#ifndef NOTTHIRTYFLIGHTS
+	//bc uggghh hack
+	cl.refdef.bloomintensity = cl.frame.playerstate.stats[STAT_BLOOMINTENSITY] / 100.0;
+
+	cl.refdef.bloomalpha = cl.frame.playerstate.stats[STAT_BLOOMALPHA] / 1000.0;
+	cl.refdef.bloomdarken = cl.frame.playerstate.stats[STAT_BLOOMDARKEN];
+	
+
+	//Com_Printf("redner %f   Stat:  %f\n",cl.refdef.bloomintensity ,  cl.frame.playerstate.stats[STAT_BLOOMINTENSITY]);
+
+	//Com_Printf("redner %f   Stat:  %f\n", cl.refdef.bloomdarken ,  cl.frame.playerstate.stats[STAT_BLOOMDARKEN]);
+#endif
+
 	R_RenderFrame (&cl.refdef);
 //	if (cl_stats->value)
 	if (cl_stats->integer)

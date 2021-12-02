@@ -570,7 +570,9 @@ void CL_ParseMuzzleFlash2 (void)
 	case MZ2_GUNNER_MACHINEGUN_8:
 		dl->color[0] = 1;dl->color[1] = 1;dl->color[2] = 0;
 		CL_GunSmokeEffect (origin, vec3_origin);
+#ifdef NOTTHIRTYFLIGHTS
 		S_StartSound (NULL, ent, CHAN_WEAPON, S_RegisterSound("gunner/gunatck2.wav"), 1, ATTN_NORM, 0);
+#endif
 		break;
 
 	case MZ2_ACTOR_MACHINEGUN_1:
@@ -762,7 +764,9 @@ void CL_ParseMuzzleFlash2 (void)
 //	case MZ2_CARRIER_ROCKET_3:
 //	case MZ2_CARRIER_ROCKET_4:
 		dl->color[0] = 1;dl->color[1] = 0.5;dl->color[2] = 0.2;
+#ifdef NOTTHIRTYFLIGHTS
 		S_StartSound (NULL, ent, CHAN_WEAPON, S_RegisterSound("tank/rocket.wav"), 1, ATTN_NORM, 0);
+#endif
 		break;
 
 	case MZ2_GUNNER_GRENADE_1:
@@ -770,7 +774,9 @@ void CL_ParseMuzzleFlash2 (void)
 	case MZ2_GUNNER_GRENADE_3:
 	case MZ2_GUNNER_GRENADE_4:
 		dl->color[0] = 1;dl->color[1] = 0.5;dl->color[2] = 0;
+#ifdef NOTTHIRTYFLIGHTS
 		S_StartSound (NULL, ent, CHAN_WEAPON, S_RegisterSound("gunner/gunatck3.wav"), 1, ATTN_NORM, 0);
+#endif
 		break;
 
 	case MZ2_GLADIATOR_RAILGUN_1:

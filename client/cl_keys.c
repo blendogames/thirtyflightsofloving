@@ -119,21 +119,37 @@ keyname_t keynames[] =
 	{"MOUSE5", K_MOUSE5},
 	//end Knightmare
 
+#ifdef NOTTHIRTYFLIGHTS
 	{"JOY1", K_JOY1},
 	{"JOY2", K_JOY2},
 	{"JOY3", K_JOY3},
 	{"JOY4", K_JOY4},
+#else
+	{"^2[A]", K_JOY1},
+	{"^1[B]", K_JOY2},
+	{"^4[X]", K_JOY3},
+	{"^3[Y]", K_JOY4},
+#endif
 
 	{"AUX1", K_AUX1},
 	{"AUX2", K_AUX2},
 	{"AUX3", K_AUX3},
 	{"AUX4", K_AUX4},
+#ifdef NOTTHIRTYFLIGHTS
 	{"AUX5", K_AUX5},
 	{"AUX6", K_AUX6},
 	{"AUX7", K_AUX7},
 	{"AUX8", K_AUX8},
 	{"AUX9", K_AUX9},
 	{"AUX10", K_AUX10},
+#else
+	{"[LEFT BUMPER]", K_AUX5},
+	{"[RIGHT BUMPER]", K_AUX6},
+	{"[BACK]", K_AUX7},
+	{"[START]", K_AUX8},
+	{"[L3]", K_AUX9},
+	{"[R3]", K_AUX10},
+#endif
 	{"AUX11", K_AUX11},
 	{"AUX12", K_AUX12},
 	{"AUX13", K_AUX13},
@@ -150,12 +166,21 @@ keyname_t keynames[] =
 	{"AUX24", K_AUX24},
 	{"AUX25", K_AUX25},
 	{"AUX26", K_AUX26},
+#ifdef NOTTHIRTYFLIGHTS
 	{"AUX27", K_AUX27},
 	{"AUX28", K_AUX28},
 	{"AUX29", K_AUX29},
 	{"AUX30", K_AUX30},
 	{"AUX31", K_AUX31},
 	{"AUX32", K_AUX32},
+#else
+	{"[LEFT TRIGGER]", K_AUX27},
+	{"[RIGHT TRIGGER]", K_AUX28},
+	{"[D-PAD UP]", K_AUX29},
+	{"[D-PAD RIGHT]", K_AUX30},
+	{"[D-PAD DOWN]", K_AUX31},
+	{"[D-PAD LEFT]", K_AUX32},
+#endif
 
 #if defined(__APPLE__) || (MACOSX)
 	{"KP_0", K_KP_INS},
@@ -1061,6 +1086,10 @@ void Key_Event (int key, qboolean down, unsigned time)
 	{
 		if (!down)
 			return;
+#ifndef NOTTHIRTYFLIGHTS
+		else if (!cl_enableconsole->value && !cls.consoleActive)
+			return;
+#endif
 		Con_ToggleConsole_f ();
 		return;
 	}

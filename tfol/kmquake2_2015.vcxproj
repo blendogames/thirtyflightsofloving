@@ -1,0 +1,449 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectName>kmquake2</ProjectName>
+    <ProjectGuid>{10E97B41-1A5F-4BFC-B922-3321F99FAEB5}</ProjectGuid>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+    <UseOfMfc>false</UseOfMfc>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+    <UseOfMfc>false</UseOfMfc>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+    <UseOfMfc>false</UseOfMfc>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+    <UseOfMfc>false</UseOfMfc>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>15.0.28307.799</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>.\debug\</OutDir>
+    <IntDir>.\debug\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>.\x64\debug\</OutDir>
+    <IntDir>.\x64\debug\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>.\</OutDir>
+    <IntDir>.\release\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>.\x64\release\</OutDir>
+    <IntDir>.\x64\release\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>.\debug/quake2.tlb</TypeLibraryName>
+      <HeaderFileName />
+    </Midl>
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PrecompiledHeaderOutputFile>.\debug/quake2.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>.\debug/</AssemblerListingLocation>
+      <ObjectFileName>.\debug/</ObjectFileName>
+      <ProgramDataBaseFileName>.\debug/</ProgramDataBaseFileName>
+      <BrowseInformation>true</BrowseInformation>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <CompileAs>CompileAsC</CompileAs>
+      <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>wsock32.lib;winmm.lib;glu32.lib;libjpeg_2015_d.lib;zlib_d.lib;libogg_d.lib;libvorbisfile_d.lib;libpng_2015_d.lib;libcurl_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>..\..\tfol.exe</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\win32\lib\;..\win32\lib\VS2015\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>MSVCRT;LIBCMT;LIBCD;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>.\debug/tfol.pdb</ProgramDatabaseFile>
+      <GenerateMapFile>true</GenerateMapFile>
+      <MapFileName>.\debug/tfol.map</MapFileName>
+      <SubSystem>Windows</SubSystem>
+      <LargeAddressAware>true</LargeAddressAware>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention />
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+    <Bscmake>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>.\debug/quake2.bsc</OutputFile>
+    </Bscmake>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>X64</TargetEnvironment>
+      <TypeLibraryName>.\debug/quake2.tlb</TypeLibraryName>
+      <HeaderFileName />
+    </Midl>
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PrecompiledHeaderOutputFile>.\x64\debug/quake2.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName>$(IntDir)</ProgramDataBaseFileName>
+      <BrowseInformation>true</BrowseInformation>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <CompileAs>CompileAsC</CompileAs>
+      <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>winmm.lib;wsock32.lib;glu32.lib;libcurl_x64_d.lib;libjpeg_2015_x64_d.lib;libogg_x64_d.lib;libvorbisfile_x64_d.lib;zlib_x64_d.lib;libpng_2015_x64_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>..\..\tfol_x64.exe</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\win32\lib\x64\;..\win32\lib\VS2015\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>LIBCMT;LIBCD;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>.\x64\debug/tfol.pdb</ProgramDatabaseFile>
+      <GenerateMapFile>true</GenerateMapFile>
+      <MapFileName>.\x64\debug/tfol.map</MapFileName>
+      <SubSystem>Windows</SubSystem>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention />
+      <TargetMachine>MachineX64</TargetMachine>
+    </Link>
+    <Bscmake>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>.\debug/quake2.bsc</OutputFile>
+    </Bscmake>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>.\release/quake2.tlb</TypeLibraryName>
+      <HeaderFileName />
+    </Midl>
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS; _CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeaderOutputFile>.\release/quake2.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>.\release/</AssemblerListingLocation>
+      <ObjectFileName>.\release/</ObjectFileName>
+      <ProgramDataBaseFileName>.\release/</ProgramDataBaseFileName>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <CompileAs>CompileAsC</CompileAs>
+      <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;winmm.lib;wsock32.lib;glu32.lib;libjpeg_2015_r.lib;zlib_r.lib;libogg_r.lib;libvorbisfile_r.lib;libpng_2015_r.lib;libcurl_r.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>..\..\tfol.exe</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\win32\lib\;..\win32\lib\VS2015\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>MSVCRT;LIBC;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ProgramDatabaseFile>.\release/tfol.pdb</ProgramDatabaseFile>
+      <SubSystem>Windows</SubSystem>
+      <LargeAddressAware>true</LargeAddressAware>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention />
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+    <Bscmake>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>.\release/quake2.bsc</OutputFile>
+    </Bscmake>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>X64</TargetEnvironment>
+      <TypeLibraryName>.\release/quake2.tlb</TypeLibraryName>
+      <HeaderFileName />
+    </Midl>
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <IntrinsicFunctions>false</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS; _CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>false</StringPooling>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <FunctionLevelLinking>false</FunctionLevelLinking>
+      <PrecompiledHeaderOutputFile>.\x64\release/quake2.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName>$(IntDir)</ProgramDataBaseFileName>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <CompileAs>CompileAsC</CompileAs>
+      <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>winmm.lib;wsock32.lib;glu32.lib;libcurl_x64_r.lib;libjpeg_2015_x64_r.lib;libogg_x64_r.lib;libvorbisfile_x64_r.lib;zlib_x64_r.lib;libpng_2015_x64_r.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>..\..\tfol_x64.exe</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\win32\lib\x64\;..\win32\lib\VS2015\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>LIBC;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ProgramDatabaseFile>.\x64\release/tfol.pdb</ProgramDatabaseFile>
+      <SubSystem>Windows</SubSystem>
+      <LinkTimeCodeGeneration />
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention />
+      <TargetMachine>MachineX64</TargetMachine>
+    </Link>
+    <Bscmake>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>.\release/quake2.bsc</OutputFile>
+    </Bscmake>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\client\cl_cin.c" />
+    <ClCompile Include="..\client\cl_cinematic.c" />
+    <ClCompile Include="..\client\cl_console.c" />
+    <ClCompile Include="..\client\cl_download.c" />
+    <ClCompile Include="..\client\cl_effects.c" />
+    <ClCompile Include="..\client\cl_ents.c" />
+    <ClCompile Include="..\client\cl_event.c" />
+    <ClCompile Include="..\client\cl_http.c" />
+    <ClCompile Include="..\client\cl_hud.c" />
+    <ClCompile Include="..\client\cl_input.c" />
+    <ClCompile Include="..\client\cl_keys.c" />
+    <ClCompile Include="..\client\cl_lights.c" />
+    <ClCompile Include="..\client\cl_loc.c" />
+    <ClCompile Include="..\client\cl_main.c" />
+    <ClCompile Include="..\client\cl_parse.c" />
+    <ClCompile Include="..\client\cl_particle.c" />
+    <ClCompile Include="..\client\cl_pred.c" />
+    <ClCompile Include="..\client\cl_screen.c" />
+    <ClCompile Include="..\client\cl_string.c" />
+    <ClCompile Include="..\client\cl_tempent.c" />
+    <ClCompile Include="..\client\cl_utils.c" />
+    <ClCompile Include="..\client\cl_view.c" />
+    <ClCompile Include="..\client\snd_dma.c" />
+    <ClCompile Include="..\client\snd_mem.c" />
+    <ClCompile Include="..\client\snd_mix.c" />
+    <ClCompile Include="..\client\snd_stream.c" />
+    <ClCompile Include="..\client\x86.c" />
+    <ClCompile Include="..\game\m_flash.c" />
+    <ClCompile Include="..\game\q_shared.c" />
+    <ClCompile Include="..\qcommon\cmd.c" />
+    <ClCompile Include="..\qcommon\cmodel.c" />
+    <ClCompile Include="..\qcommon\common.c" />
+    <ClCompile Include="..\qcommon\crc.c" />
+    <ClCompile Include="..\qcommon\cvar.c" />
+    <ClCompile Include="..\qcommon\filesystem.c" />
+    <ClCompile Include="..\qcommon\md4.c" />
+    <ClCompile Include="..\qcommon\net_chan.c" />
+    <ClCompile Include="..\qcommon\pmove.c" />
+    <ClCompile Include="..\qcommon\wildcard.c" />
+    <ClCompile Include="..\renderer\r_alias.c" />
+    <ClCompile Include="..\renderer\r_alias_md2.c" />
+    <ClCompile Include="..\renderer\r_alias_misc.c" />
+    <ClCompile Include="..\renderer\r_arb_program.c" />
+    <ClCompile Include="..\renderer\r_backend.c" />
+    <ClCompile Include="..\renderer\r_beam.c" />
+    <ClCompile Include="..\renderer\r_bloom.c" />
+    <ClCompile Include="..\renderer\r_draw.c" />
+    <ClCompile Include="..\renderer\r_entity.c" />
+    <ClCompile Include="..\renderer\r_fog.c" />
+    <ClCompile Include="..\renderer\r_fragment.c" />
+    <ClCompile Include="..\renderer\r_glstate.c" />
+    <ClCompile Include="..\renderer\r_image.c" />
+    <ClCompile Include="..\renderer\r_light.c" />
+    <ClCompile Include="..\renderer\r_main.c" />
+    <ClCompile Include="..\renderer\r_misc.c" />
+    <ClCompile Include="..\renderer\r_model.c" />
+    <ClCompile Include="..\renderer\r_particle.c" />
+    <ClCompile Include="..\renderer\r_sky.c" />
+    <ClCompile Include="..\renderer\r_sprite.c" />
+    <ClCompile Include="..\renderer\r_surface.c" />
+    <ClCompile Include="..\renderer\r_upscale.c" />
+    <ClCompile Include="..\renderer\r_vlights.c" />
+    <ClCompile Include="..\renderer\r_warp.c" />
+    <ClCompile Include="..\server\sv_ccmds.c" />
+    <ClCompile Include="..\server\sv_ents.c" />
+    <ClCompile Include="..\server\sv_game.c" />
+    <ClCompile Include="..\server\sv_init.c" />
+    <ClCompile Include="..\server\sv_main.c" />
+    <ClCompile Include="..\server\sv_send.c" />
+    <ClCompile Include="..\server\sv_user.c" />
+    <ClCompile Include="..\server\sv_world.c" />
+    <ClCompile Include="..\ui\menu_game.c" />
+    <ClCompile Include="..\ui\menu_game_credits.c" />
+    <ClCompile Include="..\ui\menu_game_saveload.c" />
+    <ClCompile Include="..\ui\menu_main.c" />
+    <ClCompile Include="..\ui\menu_mp_addressbook.c" />
+    <ClCompile Include="..\ui\menu_mp_dmoptions.c" />
+    <ClCompile Include="..\ui\menu_mp_download.c" />
+    <ClCompile Include="..\ui\menu_mp_joinserver.c" />
+    <ClCompile Include="..\ui\menu_mp_playersetup.c" />
+    <ClCompile Include="..\ui\menu_mp_startserver.c" />
+    <ClCompile Include="..\ui\menu_multiplayer.c" />
+    <ClCompile Include="..\ui\menu_options.c" />
+    <ClCompile Include="..\ui\menu_options_controls.c" />
+    <ClCompile Include="..\ui\menu_options_effects.c" />
+    <ClCompile Include="..\ui\menu_options_interface.c" />
+    <ClCompile Include="..\ui\menu_options_keys.c" />
+    <ClCompile Include="..\ui\menu_options_screen.c" />
+    <ClCompile Include="..\ui\menu_options_sound.c" />
+    <ClCompile Include="..\ui\menu_quit.c" />
+    <ClCompile Include="..\ui\menu_video.c" />
+    <ClCompile Include="..\ui\menu_video_advanced.c" />
+    <ClCompile Include="..\ui\ui_draw.c" />
+    <ClCompile Include="..\ui\ui_main.c" />
+    <ClCompile Include="..\ui\ui_menu.c" />
+    <ClCompile Include="..\ui\ui_mouse.c" />
+    <ClCompile Include="..\ui\ui_utils.c" />
+    <ClCompile Include="..\ui\ui_widgets.c" />
+    <ClCompile Include="..\win32\cd_win.c" />
+    <ClCompile Include="..\win32\conproc.c" />
+    <ClCompile Include="..\win32\glw_imp.c" />
+    <ClCompile Include="..\win32\in_win.c" />
+    <ClCompile Include="..\win32\net_wins.c" />
+    <ClCompile Include="..\win32\qgl_win.c" />
+    <ClCompile Include="..\win32\q_shwin.c" />
+    <ClCompile Include="..\win32\snd_win.c" />
+    <ClCompile Include="..\win32\sys_console.c" />
+    <ClCompile Include="..\win32\sys_win.c" />
+    <ClCompile Include="..\win32\vid_dll.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\client\anorms.h" />
+    <ClInclude Include="..\client\cdaudio.h" />
+    <ClInclude Include="..\client\cinematic.h" />
+    <ClInclude Include="..\client\client.h" />
+    <ClInclude Include="..\client\console.h" />
+    <ClInclude Include="..\client\input.h" />
+    <ClInclude Include="..\client\keys.h" />
+    <ClInclude Include="..\client\particles.h" />
+    <ClInclude Include="..\client\ref.h" />
+    <ClInclude Include="..\client\screen.h" />
+    <ClInclude Include="..\client\snd_loc.h" />
+    <ClInclude Include="..\client\sound.h" />
+    <ClInclude Include="..\client\vid.h" />
+    <ClInclude Include="..\game\game.h" />
+    <ClInclude Include="..\game\q_shared.h" />
+    <ClInclude Include="..\qcommon\bspfile.h" />
+    <ClInclude Include="..\qcommon\filesystem.h" />
+    <ClInclude Include="..\qcommon\qcommon.h" />
+    <ClInclude Include="..\qcommon\qfiles.h" />
+    <ClInclude Include="..\qcommon\wildcard.h" />
+    <ClInclude Include="..\renderer\anorms.h" />
+    <ClInclude Include="..\renderer\anormtab.h" />
+    <ClInclude Include="..\renderer\glext.h" />
+    <ClInclude Include="..\renderer\qgl.h" />
+    <ClInclude Include="..\renderer\r_alias.h" />
+    <ClInclude Include="..\renderer\r_local.h" />
+    <ClInclude Include="..\renderer\r_model.h" />
+    <ClInclude Include="..\renderer\vlights.h" />
+    <ClInclude Include="..\renderer\warpsin.h" />
+    <ClInclude Include="..\server\server.h" />
+    <ClInclude Include="..\ui\ui_local.h" />
+    <ClInclude Include="..\win32\conproc.h" />
+    <ClInclude Include="..\win32\winquake.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="kmq2_2015.rc">
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">_DEBUG;_WIN64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NDEBUG;_WIN64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="tfol.ico" />
+    <Image Include="startup.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="..\projects\VS2015\kmquake2.exe.manifest" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

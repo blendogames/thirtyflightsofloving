@@ -251,9 +251,13 @@ void CL_EntityEvent (entity_state_t *ent)
 			CL_FootSteps (ent, false, false);
 		break;
 	case EV_LOUDSTEP:
+#ifdef NOTTHIRTYFLIGHTS
 	//	if (cl_footsteps->value)
 		if (cl_footsteps->integer)
 			CL_FootSteps (ent, true, false);
+#else
+		S_StartSound (NULL, ent->number, CHAN_BODY, S_RegisterSound("player/land0.wav"), 1.0, ATTN_NORM, 0);
+#endif
 		break;
 //end Knightmare
 	case EV_FALLSHORT:

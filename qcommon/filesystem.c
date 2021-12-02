@@ -917,7 +917,9 @@ int FS_Read (void *buffer, int size, fileHandle_t f)
 			else
 			{	// Already tried once
 				//Com_Error(ERR_FATAL, va("FS_Read: 0 bytes read from %s", handle->name));
+#ifdef NOTTHIRTYFLIGHTS //bc hide this error message. todo: make it display during developer2 mode.
 				Com_DPrintf(S_COLOR_YELLOW"FS_Read: 0 bytes read from %s\n", handle->name);
+#endif
 				return size - remaining;
 			}
 		}
@@ -2573,12 +2575,14 @@ void FS_InitFilesystem (void)
 
 	// set up pref dir under Win32 here
 #ifdef _WIN32
+#ifdef NOTTHIRTYFLIGHTS
 	// whether to use user profile dir for savegames, configs, screenshots, etc
 	if ( COM_CheckParm ("-portable") || COM_CheckParm ("+portable") || (FS_LoadFile("portable.cfg", NULL) != -1) )
 		win_use_profile_dir = Cvar_Get ("win_use_profile_dir", "0", CVAR_NOSET);
 	else
 		win_use_profile_dir = Cvar_Get ("win_use_profile_dir", "1", CVAR_NOSET);
 	Cvar_SetDescription ("win_use_profile_dir", "Internal value that determines whether to use the <userprofile>/Saved Games/KMQuake2 folder on Windows Vista and later for config files, saved games, screenshots, etc.  On Win 2000/XP it uses Documents/My Games/KMQuake2.  To disable this, add -portable to the command line or add an empty portable.cfg file in the Quake2/baseq2 folder.");
+#endif
 
 	Sys_InitPrefDir ();	// set up pref dir now instead of calling a function every time it's needed
 #endif

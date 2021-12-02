@@ -95,6 +95,13 @@ cvar_t	*cg_thirdperson_indemo;
 cvar_t	*cg_thirdperson_overhead;
 cvar_t	*cg_thirdperson_overhead_dist;
 
+#ifndef NOTTHIRTYFLIGHTS
+cvar_t *cl_3dcam_yaw;
+cvar_t *cl_enableconsole;
+extern cvar_t *s_volume;
+extern cvar_t *s_musicvolume;
+#endif
+
 cvar_t	*cl_blood;
 cvar_t	*cl_old_explosions;	// Option for old explosions
 cvar_t	*cl_plasma_explo_sound;	// Option for unique plasma explosion sound
@@ -1904,6 +1911,69 @@ void CL_Precache_f (void)
 }
 
 
+void cl_volume_lower_f (void)
+{
+	int volume;
+
+	if (s_volume->value >= 0.1)
+		Cvar_SetValue ("s_volume", s_volume->value - 0.1);
+	else
+		Cvar_SetValue ("s_volume", 0);
+
+	if (s_volume->value > 0)
+	{
+		volume = s_volume->value * 100;
+		Com_Printf ("Sound Volume: %i%%\n", volume);
+	}
+	else
+		Com_Printf ("Sound Volume: OFF\n");
+}
+
+void cl_volume_raise_f (void)
+{
+	int volume;
+	
+	if (s_volume->value <= 0.9)
+		Cvar_SetValue ("s_volume", s_volume->value + 0.1);
+	else
+		Cvar_SetValue ("s_volume", 1.0);
+
+	volume = s_volume->value * 100;
+	Com_Printf ("Sound Volume: %i%%\n", volume);
+}
+
+void cl_musicvolume_lower_f (void)
+{
+	int volume;
+	
+	if (s_musicvolume->value >= 0.1)
+		Cvar_SetValue ("s_musicvolume", s_musicvolume->value - 0.1);
+	else
+		Cvar_SetValue ("s_musicvolume", 0);
+
+	if (s_musicvolume->value > 0)
+	{
+		volume = s_musicvolume->value * 100;
+		Com_Printf ("Music Volume: %i%%\n", volume);
+	}
+	else
+		Com_Printf ("Music Volume: OFF\n");
+}
+
+void cl_musicvolume_raise_f (void)
+{
+	int volume;
+	
+	if (s_musicvolume->value <= 0.9)
+		Cvar_SetValue ("s_musicvolume", s_musicvolume->value + 0.1);
+	else
+		Cvar_SetValue ("s_musicvolume", 1.0);
+
+	volume = s_musicvolume->value * 100;
+	Com_Printf ("Music Volume: %i%%\n", volume);
+}
+
+
 #ifdef LOC_SUPPORT // Xile/NiceAss LOC
 /*
 =================
@@ -2067,6 +2137,11 @@ void CL_InitLocal (void)
 	cg_thirdperson_overhead_dist = Cvar_Get ("cg_thirdperson_overhead_dist", "192", CVAR_ARCHIVE);
 	Cvar_SetDescription ("cg_thirdperson_overhead_dist", "Sets camera distance for overhead third-person camera mode.");
 
+#ifndef NOTTHIRTYFLIGHTS
+	cl_enableconsole = Cvar_Get ("cl_enableconsole", "0", CVAR_ARCHIVE);
+	cl_3dcam_yaw = Cvar_Get ("cl_3dcam_yaw", "0", CVAR_ARCHIVE);
+#endif
+
 	cl_blood = Cvar_Get ("cl_blood", "2", CVAR_ARCHIVE);
 	Cvar_SetDescription ("cl_blood", "Sets blood effect type.  0 = none, 1 = puff, 2 = splat,  3 = bleed, 4 = gore.");
 
@@ -2103,9 +2178,17 @@ void CL_InitLocal (void)
 	r_decal_life = Cvar_Get ("r_decal_life", "1000", CVAR_ARCHIVE);
 	Cvar_SetDescription ("r_decal_life", "Sets duration in seconds of decals.");
 
+#ifdef NOTTHIRTYFLIGHTS
 	con_font_size = Cvar_Get ("con_font_size", "8", CVAR_ARCHIVE);
+#else
+	con_font_size = Cvar_Get ("con_font_size", "16", CVAR_ARCHIVE);
+#endif
 	Cvar_SetDescription ("con_font_size", "Sets size of console font.  Values > 8 are larger than default, while values < 8 are smaller.");
+#ifdef NOTTHIRTYFLIGHTS
 	alt_text_color = Cvar_Get ("alt_text_color", "2", CVAR_ARCHIVE);
+#else
+	alt_text_color = Cvar_Get ("alt_text_color", "9", CVAR_ARCHIVE);
+#endif
 	Cvar_SetDescription ("alt_text_color", "Sets color of high-bit highlighted text.");
 
 	// whether to try to play OGGs instead of CD tracks
@@ -2116,12 +2199,21 @@ void CL_InitLocal (void)
 	cl_xatrix_music = Cvar_Get ("cl_xatrix_music", "0", CVAR_ARCHIVE);
 	Cvar_SetDescription ("cl_xatrix_music", "Forces remapping of Ogg Vorbs tracks for The Reckoning mission pack.");
 
+#ifdef NOTTHIRTYFLIGHTS
 	cl_upspeed = Cvar_Get ("cl_upspeed", "200", 0);
 	Cvar_SetDescription ("cl_upspeed", "Scalar adjustment for jumping/upward swimming sensitiviy.");
 	cl_forwardspeed = Cvar_Get ("cl_forwardspeed", "200", 0);
 	Cvar_SetDescription ("cl_forwardspeed", "Scalar adjustment for forward movement sensitiviy.");
 	cl_sidespeed = Cvar_Get ("cl_sidespeed", "200", 0);
 	Cvar_SetDescription ("cl_sidespeed", "Scalar adjustment for sideways movement sensitiviy.");
+#else
+	cl_upspeed = Cvar_Get ("cl_upspeed", "150", 0);
+	Cvar_SetDescription ("cl_upspeed", "Scalar adjustment for jumping/upward swimming sensitiviy.");
+	cl_forwardspeed = Cvar_Get ("cl_forwardspeed", "150", 0);
+	Cvar_SetDescription ("cl_forwardspeed", "Scalar adjustment for forward movement sensitiviy.");
+	cl_sidespeed = Cvar_Get ("cl_sidespeed", "150", 0);
+	Cvar_SetDescription ("cl_sidespeed", "Scalar adjustment for sideways movement sensitiviy.");
+#endif
 	cl_yawspeed = Cvar_Get ("cl_yawspeed", "140", 0);
 	Cvar_SetDescription ("cl_yawspeed", "Scalar adjustment for view yaw speed.");
 	cl_pitchspeed = Cvar_Get ("cl_pitchspeed", "150", 0);
@@ -2137,7 +2229,11 @@ void CL_InitLocal (void)
 	Cvar_SetDescription ("lookspring", "Enables automatic centering of view when freelook is disabled.");
 	lookstrafe = Cvar_Get ("lookstrafe", "0", CVAR_ARCHIVE);
 	Cvar_SetDescription ("lookstrafe", "Enables lookstrafe mode (horizontal mouse movement as strafing).");
+#ifdef NOTTHIRTYFLIGHTS
 	sensitivity = Cvar_Get ("sensitivity", "3", CVAR_ARCHIVE);
+#else
+	sensitivity = Cvar_Get ("sensitivity", "5", CVAR_ARCHIVE);
+#endif
 	Cvar_SetDescription ("sensitivity", "Sets in-game mouse sensitivity.");
 
 	m_pitch = Cvar_Get ("m_pitch", "0.022", CVAR_ARCHIVE);
@@ -2176,7 +2272,11 @@ void CL_InitLocal (void)
 	Cvar_SetDescription ("password", "Sets password for multiplayer games.");
 	info_spectator = Cvar_Get ("spectator", "0", CVAR_USERINFO);
 	Cvar_SetDescription ("spectator", "Sets spectator mode for multiplayer games.");
+#ifdef NOTTHIRTYFLIGHTS
 	name = Cvar_Get ("name", "unnamed", CVAR_USERINFO | CVAR_ARCHIVE);
+#else
+	name = Cvar_Get ("name", "Citizen Abel", CVAR_USERINFO | CVAR_ARCHIVE);
+#endif
 	Cvar_SetDescription ("name", "Sets player name.");
 	skin = Cvar_Get ("skin", "male/grunt", CVAR_USERINFO | CVAR_ARCHIVE);
 	Cvar_SetDescription ("skin", "Sets player model and skin, e.g. \"male/grunt\".");
@@ -2305,6 +2405,13 @@ void CL_InitLocal (void)
 	Cmd_AddCommand ("invdrop", NULL);
 	Cmd_AddCommand ("weapnext", NULL);
 	Cmd_AddCommand ("weapprev", NULL);
+
+#ifndef NOTTHIRTYFLIGHTS
+	Cmd_AddCommand ("volume_lower", cl_volume_lower_f);
+	Cmd_AddCommand ("volume_raise", cl_volume_raise_f);
+	Cmd_AddCommand ("musicvolume_lower", cl_musicvolume_lower_f);
+	Cmd_AddCommand ("musicvolume_raise", cl_musicvolume_raise_f);
+#endif
 
 	// Chat Ignore from R1Q2/Q2Pro
 	// Init list pointers

@@ -247,7 +247,11 @@ void SV_CopySaveGame (char *src, char *dst)
 	FS_CopyFile (name, name2);
 
 	// Knightmare- copy screenshot
+#ifdef NOTTHIRTYFLIGHTS
 	if (strcmp(dst, "kmq2save000")) // no screenshot for start of level autosaves
+#else
+	if (strcmp(dst, "save0")) // no screenshot for start of level autosaves
+#endif
 	{
 	//	Com_sprintf (name, sizeof(name), "%s/save/%s/shot.jpg", FS_Savegamedir(), src);	// was FS_Gamedir()
 	//	Com_sprintf (name2, sizeof(name2), "%s/save/%s/shot.jpg", FS_Savegamedir(), dst);	// was FS_Gamedir()
@@ -449,7 +453,11 @@ SV_WriteServerFile
 
 ==============
 */
+#ifdef NOTTHIRTYFLIGHTS
 void SV_WriteServerFile (qboolean autosave, qboolean quicksave)
+#else
+void SV_WriteServerFile (qboolean autosave, qboolean checkpoint)
+#endif
 {
 	FILE	*f;
 	cvar_t	*var;
@@ -475,16 +483,38 @@ void SV_WriteServerFile (qboolean autosave, qboolean quicksave)
 	time (&aclock);
 	newtime = localtime (&aclock);
 
+#ifndef NOTTHIRTYFLIGHTS
+	if (checkpoint)
+	{
+		//this is a special scripted savegame with special name.
+		Com_sprintf (comment, sizeof(comment), "AUTOSAVE ^9%s", sv.configstrings[CS_NAME]);
+	}
+	else
+#endif
 	if (!autosave)
 	{
+#ifdef NOTTHIRTYFLIGHTS
 		Com_sprintf (comment,sizeof(comment), "%2i:%i%i %2i/%2i  ", newtime->tm_hour
 			, newtime->tm_min/10, newtime->tm_min%10,
 			newtime->tm_mon+1, newtime->tm_mday);
+#else
+		Com_sprintf (comment,sizeof(comment), "%2i:%i%i ^9",
+			newtime->tm_hour,
+			newtime->tm_min/10,
+			newtime->tm_min%10
+			//newtime->tm_mon+1,
+			//newtime->tm_mday
+			);
+#endif
 		strncat (comment, sv.configstrings[CS_NAME], sizeof(comment)-1-strlen(comment) );
 	}
 	else
 	{	// autosaved
+#ifdef NOTTHIRTYFLIGHTS
 		Com_sprintf (comment, sizeof(comment), "ENTERING %s", sv.configstrings[CS_NAME]);
+#else
+		Com_sprintf (comment, sizeof(comment), "ENTERING ^9%s", sv.configstrings[CS_NAME]);
+#endif
 	}
 
 	fwrite (comment, 1, sizeof(comment), f);
@@ -510,8 +540,10 @@ void SV_WriteServerFile (qboolean autosave, qboolean quicksave)
 	
 	if (autosave)
 		Com_sprintf (comment, sizeof(comment), "AUTO SAVE");
+#ifdef NOTTHIRTYFLIGHTS
 	else if (quicksave)
 		Com_sprintf (comment, sizeof(comment), "QUICK SAVE");
+#endif
 
 	fwrite (infoHeader, 1, sizeof(infoHeader), f);
 	fwrite (newtime, 1, sizeof(struct tm), f);
@@ -728,7 +760,11 @@ void SV_GameMap_f (void)
 		&& Q_strcasecmp (map+l-4, ".pcx"))
 	{
 		SV_WriteServerFile (true, false);
+#ifdef NOTTHIRTYFLIGHTS
 		SV_CopySaveGame ("current", "kmq2save000");
+#else
+		SV_CopySaveGame ("current", "save0");
+#endif
 	}
 }
 
@@ -894,8 +930,10 @@ void SV_Savegame_f (void)
 //	quicksave = ( !dedicated->value && (!strcmp(Cmd_Argv(1), "quick") || !strcmp(Cmd_Argv(1), "quik")) );
 	quicksave = ( !dedicated->integer && (!strcmp(Cmd_Argv(1), "quick") || !strcmp(Cmd_Argv(1), "quik")) );
 
+#ifdef NOTTHIRTYFLIGHTS
 	// Knightmare- grab screen for quicksave
 	if (quicksave)
+#endif
 		R_GrabScreen();
 
 //	if (maxclients->value == 1 && svs.clients[0].edict->client->ps.stats[STAT_HEALTH] <= 0)
@@ -911,6 +949,9 @@ void SV_Savegame_f (void)
 		Com_Printf ("Bad savedir.\n");
 	}
 
+#ifndef NOTTHIRTYFLIGHTS
+	if (!strstr(dir, "save1"))
+#endif
 	Com_Printf (S_COLOR_CYAN"Saving game \"%s\"...\n", dir);
 
 	// archive current level, including all client edicts.
@@ -919,7 +960,14 @@ void SV_Savegame_f (void)
 	SV_WriteLevelFile ();
 
 	// save server state
+#ifdef NOTTHIRTYFLIGHTS
 	SV_WriteServerFile (false, quicksave);
+#else
+	if (strstr (dir, "save1"))
+		SV_WriteServerFile (false,true);
+	else
+		SV_WriteServerFile (false,false);
+#endif
 
 	// take screenshot
 	SV_WriteScreenshot ();
@@ -927,6 +975,9 @@ void SV_Savegame_f (void)
 	// copy it off
 	SV_CopySaveGame ("current", dir);
 
+#ifndef NOTTHIRTYFLIGHTS
+	if (!strstr(dir, "save1"))
+#endif
 	Com_Printf (S_COLOR_CYAN"Done.\n");
 }
 

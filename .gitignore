@@ -6,6 +6,7 @@ bin/
 # ignore all the windows binaries - they shouldn't be committed! 
 Debug/
 Release/
+baseq2/
 .vs/
 *.log
 *.ncb
@@ -17,3 +18,7 @@ Release/
 *.clw
 *.pdb
 *.ilk
+kmq2gamex86.dll
+kmquake2.exe
+*.vc.db
+*.vc.opendb

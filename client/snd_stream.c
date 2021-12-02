@@ -177,7 +177,9 @@ static qboolean S_OpenBackgroundTrack (const char *name, bgTrack_t *track)
 		return false;
 	}
 
+#ifdef NOTTHIRTYFLIGHTS
 	track->start = ov_raw_tell(vorbisFile);
+#endif
 	track->rate = vorbisInfo->rate;
 	track->width = 2;
 	track->channels = vorbisInfo->channels; // Knightmare added
@@ -362,6 +364,7 @@ void S_StreamBackgroundTrack (void)
 					}
 					s_bgTrack.looping = true;
 				}
+#ifdef NOTTHIRTYFLIGHTS
 				else
 				{	// check if it's time to switch to the ambient track
 					if ( ++ogg_loopcounter >= ogg_loopcount->integer
@@ -379,9 +382,14 @@ void S_StreamBackgroundTrack (void)
 							s_bgTrack.ambient_looping = true;
 					}
 				}
+#endif
 
 				// Restart the track, skipping over the header
+#ifdef NOTTHIRTYFLIGHTS
 				ov_raw_seek(s_bgTrack.vorbisFile, (ogg_int64_t)s_bgTrack.start);
+#else
+				ov_pcm_seek(s_bgTrack.vorbisFile, 0);
+#endif
 			}
 
 			/*if (s_bgTrack.read)
@@ -446,7 +454,9 @@ void S_StartBackgroundTrack (const char *introTrack, const char *loopTrack)
 	// Start it up
 	Q_strncpyz (s_bgTrack.introName, sizeof(s_bgTrack.introName), introTrack);
 	Q_strncpyz (s_bgTrack.loopName, sizeof(s_bgTrack.loopName), loopTrack);
+#ifdef NOTTHIRTYFLIGHTS
 	Q_strncpyz (s_bgTrack.ambientName, sizeof(s_bgTrack.ambientName), va("music/%s.ogg", ogg_ambient_track->string));
+#endif
 
 	// set a loop counter so that this track will change to the ambient track later
 	ogg_loopcounter = 0;
@@ -794,9 +804,12 @@ void S_OGG_StatusCmd (void)
 {
 	char	*trackName;
 
+#ifdef NOTTHIRTYFLIGHTS
 	if (s_bgTrack.ambient_looping)
 		trackName = s_bgTrack.ambientName;
-	else if (s_bgTrack.looping)
+	else
+#endif
+	if (s_bgTrack.looping)
 		trackName = s_bgTrack.loopName;
 	else
 		trackName = s_bgTrack.introName;

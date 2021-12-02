@@ -31,6 +31,10 @@ int			ui_menudepth;
 void	(*m_drawfunc) (void);
 const char *(*m_keyfunc) (int key);
 
+#ifndef NOTTHIRTYFLIGHTS
+extern char *menu_click;
+#endif
+
 /*
 =======================================================================
 
@@ -464,33 +468,38 @@ void UI_DrawMenu (menuframework_s *menu)
 		char	*cursor;
 		int		cursorX;
 
+#ifdef NOTTHIRTYFLIGHTS
 		if (item->type == MTYPE_KEYBIND && ((menukeybind_s *)item)->grabBind)
 			cursor = UI_ITEMCURSOR_KEYBIND_PIC;
 		else
 			cursor = ((int)(Sys_Milliseconds()/250)&1) ? UI_ITEMCURSOR_DEFAULT_PIC : UI_ITEMCURSOR_BLINK_PIC;
-
-	//	if (item->flags & QMF_LEFT_JUSTIFY)
-	//		cursorX = menu->x + item->x + item->cursor_offset - 24;
-	//	else
-	//		cursorX = menu->x + item->cursor_offset;
+#else
+		if (item->flags & QMF_LEFT_JUSTIFY)
+			cursorX = menu->x + item->x + item->cursor_offset - 24;
+		else
+			cursorX = menu->x + item->cursor_offset;
+#endif
+#ifdef NOTTHIRTYFLIGHTS
 		cursorX = menu->x + item->x + item->cursor_offset;
 		if ( (item->flags & QMF_LEFT_JUSTIFY) && (item->type == MTYPE_ACTION) )
 			cursorX -= 4*MENU_FONT_SIZE;
 
 		UI_DrawPic (cursorX, menu->y+item->y, item->textSize, item->textSize, ALIGN_CENTER, false, cursor, 255);
-
-	/*	if (item->flags & QMF_LEFT_JUSTIFY)
+#else
+		// TFOL added the sin/anglemod portion and removed the blink
+		if (item->flags & QMF_LEFT_JUSTIFY)
 		{
-			UI_DrawChar (menu->x+item->x+item->cursor_offset-24, menu->y+item->y,
-						item->textSize, ALIGN_CENTER, 12+((int)(Sys_Milliseconds()/250)&1),
+			SCR_DrawChar (menu->x+item->x+item->cursor_offset-28+ (3*sin(anglemod(cl.time*0.01))), menu->y+item->y,
+						item->textSize, ALIGN_CENTER, 13 /* 12+((int)(Sys_Milliseconds()/250)&1) */,
 						FONT_UI, 255,255,255,255, false, true);
 		}
 		else
 		{
-			UI_DrawChar (menu->x+item->cursor_offset, menu->y+item->y,
-						item->textSize, ALIGN_CENTER, 12+((int)(Sys_Milliseconds()/250)&1),
+			SCR_DrawChar (menu->x+item->cursor_offset+ (5*sin(anglemod(cl.time*0.01))), menu->y+item->y,
+						item->textSize, ALIGN_CENTER, 13 /* 12+((int)(Sys_Milliseconds()/250)&1) */,
 						FONT_UI, 255,255,255,255, false, true);
-		} */
+		}
+#endif
 	}
 
 	if (item)
@@ -629,11 +638,35 @@ const char *UI_DefaultMenuKey (menuframework_s *m, int key)
 	case K_AUX31:
 	case K_AUX32:
 		
+#ifndef NOTTHIRTYFLIGHTS
+	case K_SPACE:
+#endif
 	case K_KP_ENTER:
 	case K_ENTER:
+#ifdef NOTTHIRTYFLIGHTS
 		if ( m )
 			UI_SelectMenuItem (m);
 		sound = ui_menu_move_sound;
+#else
+		if ( m )
+		{
+			if ( item->type == MTYPE_CHECKBOX )
+			{
+				
+				UI_SlideMenuItem( m, 1 );
+				sound = menu_click;
+			}
+			else 
+			{
+				
+				UI_SelectMenuItem( m );
+
+				if ( item->type == MTYPE_ACTION )
+					sound = ui_menu_move_sound;
+				
+			}
+		}
+#endif
 		break;
 	}
 
