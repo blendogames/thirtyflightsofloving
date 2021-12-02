@@ -1082,7 +1082,7 @@ void GL_UpdateSwapInterval (void)
 
 		if ( !glState.stereo_enabled ) 
 		{
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__linux__) || defined(__APPLE__)
 			if ( qwglSwapIntervalEXT )
 				qwglSwapIntervalEXT( (registration_active) ? 0 : r_swapinterval->integer );
 #endif

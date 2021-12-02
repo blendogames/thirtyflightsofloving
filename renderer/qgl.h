@@ -472,7 +472,7 @@ extern int  ( WINAPI * qwglGetLayerPaletteEntries)(HDC, int, int, int,
 extern BOOL ( WINAPI * qwglRealizeLayerPalette)(HDC, int, BOOL);
 extern BOOL ( WINAPI * qwglSwapLayerBuffers)(HDC, UINT);
 
-extern BOOL ( WINAPI * qwglSwapIntervalEXT)( int interval );
+extern BOOL ( WINAPI * qwglSwapIntervalEXT)(int interval);
 
 extern BOOL ( WINAPI * qwglGetDeviceGammaRampEXT ) ( unsigned char *pRed, unsigned char *pGreen, unsigned char *pBlue );
 extern BOOL ( WINAPI * qwglSetDeviceGammaRampEXT ) ( const unsigned char *pRed, const unsigned char *pGreen, const unsigned char *pBlue );
@@ -488,6 +488,7 @@ extern BOOL ( WINAPI * qwglSetDeviceGammaRamp3DFX ) ( HDC, LPVOID );
 
 // local function in dll
 extern void *qwglGetProcAddress(char *symbol);
+extern qboolean qwglSwapIntervalEXT(int interval);
 
 extern void (*qgl3DfxSetPaletteEXT)(GLuint *);
 

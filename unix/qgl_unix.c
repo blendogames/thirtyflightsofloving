@@ -3036,6 +3036,11 @@ void *qwglGetProcAddress (char *symbol)
 	return NULL;
 }
 
+qboolean qwglSwapIntervalEXT (int interval)
+{
+	return (SDL_GL_SetSwapInterval(interval) == 0);
+}
+
 /*
 ** QGL_Init
 **

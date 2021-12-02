@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "../renderer/r_local.h"
-#include "../client/keys.h"
+#include "../client/client.h"
 #include "../ui/ui_local.h"
 
 #include <SDL.h>
