@@ -178,7 +178,7 @@ void Menu_Credits_Draw (void)
 
 	Menu_DrawString(leftMargin, 220, "^7ADDITIONAL AUDIO", 128);
 	Menu_DrawString(leftIndent, 230, "^7Jared Emerson-Johnson", 255);		Menu_DrawString(210, 230, "^7basound.com", 128);
-	Menu_DrawString(leftIndent, 240, "^7AJ Locascio", 255);				Menu_DrawString(210, 240, "^7brontoco.com", 128);
+	Menu_DrawString(leftIndent, 240, "^7AJ Locascio", 255);
 
 
 	
@@ -189,7 +189,7 @@ void Menu_Credits_Draw (void)
 	Menu_DrawString(leftIndent , 290, "^7Dustin Darcy", 255);
 	Menu_DrawString(leftIndent , 300, "^7MJ Kwan", 255);
 	Menu_DrawString(leftIndent , 310, "^7Mimi Kwan", 255);
-	Menu_DrawString(leftIndent , 320, "^7Mike Tipul", 255);			Menu_DrawString(210, 320, "^7nukeitfromorbit.tv", 128);	
+	Menu_DrawString(leftIndent , 320, "^7Mike Tipul", 255);
 	Menu_DrawString(leftIndent , 330, "^7Neil Mehta", 255);
 	Menu_DrawString(leftIndent , 340, "^7Rob MacBride", 255);		Menu_DrawString(210, 340, "^7cargocollective.com/robmacbfolio", 128);
 	Menu_DrawString(leftIndent , 350, "^7Robert Yang", 255);			Menu_DrawString(210, 350, "^7blog.radiator.debacle.us", 128);
@@ -200,11 +200,13 @@ void Menu_Credits_Draw (void)
 
 
 
-	Menu_DrawString(leftMargin , 410, "^7MAC PORT", 128);
-	Menu_DrawString(leftIndent , 420, "^7Corwin Light-Williams", 255);
+	Menu_DrawString(leftMargin, 410, "^7LINUX, SDL2 PORT", 128);
+	Menu_DrawString(leftIndent, 420, "^7Ethan Lee", 255);
 
-	Menu_DrawString(leftMargin , 430, "^7LINUX, SDL2 PORT", 128);
-	Menu_DrawString(leftIndent , 440, "^7Ethan Lee", 255);
+	Menu_DrawString(leftMargin , 435, "^7MAC PORT", 128);
+	Menu_DrawString(leftIndent , 445, "^7Corwin Light-Williams", 255);
+
+	
 	#undef Menu_DrawString
 #endif
 }
