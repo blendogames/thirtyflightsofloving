@@ -18,3 +18,4 @@ Please note this license only applies to Thirty Flights of Loving's source code.
 - Quake II engine by [id Software](https://www.idsoftware.com)
 - KMQuake II by [Knightmare](http://www.markshan.com/knightmare)
 - Lazarus by David Hyde and Mad Dog
+- port by [Ethan Lee](https://flibitijibibo.com)
