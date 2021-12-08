@@ -185,7 +185,9 @@ static void M_ApplyVideoChanges (void *unused)
 	}
 
 	UI_MenuSpinControl_SaveValue (&s_fs_box, "vid_fullscreen");
+#ifdef _WIN32 /* FIXME: Unix vid_gamma -flibit */
 	UI_MenuSlider_SaveValue (&s_brightness_slider, "vid_gamma");
+#endif
 	UI_MenuSpinControl_SaveValue (&s_texfilter_box, "r_texturemode");
 	UI_MenuSpinControl_SaveValue (&s_aniso_box, "r_anisotropic");
 	UI_MenuSpinControl_SaveValue (&s_texqual_box, "r_picmip");
