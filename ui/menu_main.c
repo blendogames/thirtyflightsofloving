@@ -469,6 +469,7 @@ const char *Menu_Main_Key (int key)
 
 	switch (key)
 	{
+	case K_JOY2: //BC 1/30/2024 gamepad B button
 	case K_ESCAPE:
 #ifdef ERASER_COMPAT_BUILD // special hack for Eraser build
 		if (cls.state == ca_disconnected)
@@ -487,18 +488,21 @@ const char *Menu_Main_Key (int key)
 #endif
 		break;
 
+	case K_AUX31: //BC 1/30/2024 dpad down.
 	case K_KP_DOWNARROW:
 	case K_DOWNARROW:
 		if (++m_main_cursor >= MAIN_ITEMS)
 			m_main_cursor = 0;
 		return sound;
 
+	case K_AUX29: //BC 1/30/2024 dpad up.
 	case K_KP_UPARROW:
 	case K_UPARROW:
 		if (--m_main_cursor < 0)
 			m_main_cursor = MAIN_ITEMS - 1;
 		return sound;
 
+	case K_JOY1: //BC 1/30/2024 gamepad A button
 	case K_KP_ENTER:
 	case K_ENTER:
 		ui_entersound = true;

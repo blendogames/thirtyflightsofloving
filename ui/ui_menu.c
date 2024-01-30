@@ -549,9 +549,11 @@ const char *UI_DefaultMenuKey (menuframework_s *m, int key)
 
 	switch ( key )
 	{
+	case K_JOY2: //BC 1/30/2024 gamepad B button
 	case K_ESCAPE:
 		UI_PopMenu ();
 		return ui_menu_out_sound;
+	case K_AUX29: //BC 1/30/2024 dpad up.
 	case K_KP_UPARROW:
 	case K_UPARROW:
 		if ( m )
@@ -564,6 +566,7 @@ const char *UI_DefaultMenuKey (menuframework_s *m, int key)
 			sound = ui_menu_move_sound;
 		}
 		break;
+	case K_AUX31: //BC 1/30/2024 dpad down.
 	case K_TAB:
 	case K_KP_DOWNARROW:
 	case K_DOWNARROW:
@@ -577,6 +580,7 @@ const char *UI_DefaultMenuKey (menuframework_s *m, int key)
 			sound = ui_menu_move_sound;
 		}
 		break;
+	case K_AUX32: //BC 1/30/2024 dpad left.
 	case K_KP_LEFTARROW:
 	case K_LEFTARROW:
 		if ( m )
@@ -585,6 +589,7 @@ const char *UI_DefaultMenuKey (menuframework_s *m, int key)
 			sound = ui_menu_move_sound;
 		}
 		break;
+	case K_AUX30: //BC 1/30/2024 dpad right.
 	case K_KP_RIGHTARROW:
 	case K_RIGHTARROW:
 		if ( m )
@@ -602,7 +607,7 @@ const char *UI_DefaultMenuKey (menuframework_s *m, int key)
 	case K_MOUSE5:*/
 	//end Knightmare
 	case K_JOY1:
-	case K_JOY2:
+	//case K_JOY2: //BC B button for menu selection
 	case K_JOY3:
 	case K_JOY4:
 	case K_AUX1:
@@ -633,10 +638,10 @@ const char *UI_DefaultMenuKey (menuframework_s *m, int key)
 	case K_AUX26:
 	case K_AUX27:
 	case K_AUX28:
-	case K_AUX29:
-	case K_AUX30:
-	case K_AUX31:
-	case K_AUX32:
+	//case K_AUX29: //BC dpad up for menu selection
+	//case K_AUX30: //BC dpad right for menu selection
+	//case K_AUX31: //BC dpad down for menu selection
+	//case K_AUX32: //BC dpad left for menu selection
 		
 #ifndef NOTTHIRTYFLIGHTS
 	case K_SPACE:
