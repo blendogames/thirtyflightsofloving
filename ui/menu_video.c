@@ -185,7 +185,9 @@ static void M_ApplyVideoChanges (void *unused)
 	}
 
 	UI_MenuSpinControl_SaveValue (&s_fs_box, "vid_fullscreen");
+#ifdef _WIN32 /* FIXME: Unix vid_gamma -flibit */
 	UI_MenuSlider_SaveValue (&s_brightness_slider, "vid_gamma");
+#endif
 	UI_MenuSpinControl_SaveValue (&s_texfilter_box, "r_texturemode");
 	UI_MenuSpinControl_SaveValue (&s_aniso_box, "r_anisotropic");
 	UI_MenuSpinControl_SaveValue (&s_texqual_box, "r_picmip");
@@ -396,6 +398,7 @@ void Menu_Video_Init (void)
 	s_fs_box.generic.statusbar		= "changes bettween fullscreen, borderless window, and windowed display";
 	UI_MenuSpinControl_SetValue (&s_fs_box, "vid_fullscreen", 0, 2, true);
 
+#ifdef _WIN32 /* FIXME: Unix vid_gamma -flibit */
 	s_brightness_slider.generic.type		= MTYPE_SLIDER;
 	s_brightness_slider.generic.textSize	= MENU_FONT_SIZE;
 	s_brightness_slider.generic.x			= 0;
@@ -412,6 +415,7 @@ void Menu_Video_Init (void)
 	s_brightness_slider.displayAsPercent	= false;
 	s_brightness_slider.generic.statusbar	= "changes display brightness";
 	UI_MenuSlider_SetValue (&s_brightness_slider, "vid_gamma", 0.3f, 1.3f, true);
+#endif /* _WIN32 */
 
 	s_texfilter_box.generic.type		= MTYPE_SPINCONTROL;
 	s_texfilter_box.generic.textSize	= MENU_FONT_SIZE;
@@ -584,7 +588,9 @@ void Menu_Video_Init (void)
 	UI_AddMenuItem (&s_video_menu, (void *) &s_customheight_field);
 
 	UI_AddMenuItem (&s_video_menu, (void *) &s_fs_box);
+#ifdef _WIN32 /* FIXME: Unix vid_gamma -flibit */
 	UI_AddMenuItem (&s_video_menu, (void *) &s_brightness_slider);
+#endif /* _WIN32 */
 	UI_AddMenuItem (&s_video_menu, (void *) &s_texfilter_box);
 	UI_AddMenuItem (&s_video_menu, (void *) &s_aniso_box);
 	UI_AddMenuItem (&s_video_menu, (void *) &s_texqual_box);
