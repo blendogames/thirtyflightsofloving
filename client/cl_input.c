@@ -303,7 +303,7 @@ void CL_BaseMove (usercmd_t *cmd)
 	if (cl.frame.playerstate.stats[STAT_MOVESLOW] > 0)
 	{
 		sidespeed = 0;
-		forwardspeed *= 0.4;
+		forwardspeed *= .5f; //BC 1/30/2024 changed this from .4 to .5 because it was causing issues
 	}
 #endif
 

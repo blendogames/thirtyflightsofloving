@@ -968,8 +968,11 @@ void IN_JoyMove (usercmd_t *cmd)
 			else
 			{
 				// user wants forward control to be forward control
-				if (fabs(fAxisValue) > joy_forwardthreshold->value)
+				if (fabs(fAxisValue) > joy_forwardthreshold->value && cl.frame.playerstate.stats[STAT_FREEZE] <= 0 /*BC 1/30/2024 don't allow joystick movement during stat_freeze*/ )
 				{
+					if (cl.frame.playerstate.stats[STAT_MOVESLOW]) //BC 1/30/2024 slow down movement during stat_moveslow
+						speed *= .5f;
+
 					cmd->forwardmove += (fAxisValue * joy_forwardsensitivity->value) * speed * cl_forwardspeed->value;
 				}
 			}
