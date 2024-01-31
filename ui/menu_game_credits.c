@@ -219,6 +219,9 @@ const char *Menu_Credits_Key (int key)
 	switch (key)
 	{
 #ifndef NOTTHIRTYFLIGHTS
+
+	case K_JOY1: //BC 1/30/2024 gamepad A button
+	case K_JOY2: //BC 1/30/2024 gamepad B button
 	case K_SPACE:
 	case K_ENTER:
 #endif

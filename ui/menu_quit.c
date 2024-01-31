@@ -100,6 +100,7 @@ const char *Menu_Quit_Key (int key)
 #ifndef NOTTHIRTYFLIGHTS
 	case K_BACKSPACE:
 #endif
+	case K_JOY2: //BC 1/30/2024 gamepad B button
 	case K_ESCAPE:
 	case 'n':
 	case 'N':
@@ -109,6 +110,7 @@ const char *Menu_Quit_Key (int key)
 		UI_PopMenu ();
 		break;
 
+	case K_JOY1: //BC 1/30/2024 gamepad A button
 	case 'Y':
 	case 'y':
 		cls.key_dest = key_console;

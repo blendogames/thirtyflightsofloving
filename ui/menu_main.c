@@ -489,6 +489,7 @@ const char *Menu_Main_Key (int key)
 		break;
 
 	case K_AUX31: //BC 1/30/2024 dpad down.
+	case K_JOY_DOWN: //BC 1/30/2024 joystick down.
 	case K_KP_DOWNARROW:
 	case K_DOWNARROW:
 		if (++m_main_cursor >= MAIN_ITEMS)
@@ -496,6 +497,7 @@ const char *Menu_Main_Key (int key)
 		return sound;
 
 	case K_AUX29: //BC 1/30/2024 dpad up.
+	case K_JOY_UP: //BC 1/30/2024 joystick up.
 	case K_KP_UPARROW:
 	case K_UPARROW:
 		if (--m_main_cursor < 0)

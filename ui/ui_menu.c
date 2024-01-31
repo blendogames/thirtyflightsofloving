@@ -554,6 +554,7 @@ const char *UI_DefaultMenuKey (menuframework_s *m, int key)
 		UI_PopMenu ();
 		return ui_menu_out_sound;
 	case K_AUX29: //BC 1/30/2024 dpad up.
+	case K_JOY_UP: //BC 1/30/2024 joystick up.
 	case K_KP_UPARROW:
 	case K_UPARROW:
 		if ( m )
@@ -567,6 +568,7 @@ const char *UI_DefaultMenuKey (menuframework_s *m, int key)
 		}
 		break;
 	case K_AUX31: //BC 1/30/2024 dpad down.
+	case K_JOY_DOWN: //BC 1/30/2024 joystick down.
 	case K_TAB:
 	case K_KP_DOWNARROW:
 	case K_DOWNARROW:

@@ -142,6 +142,7 @@ qboolean	mouseparmsvalid;
 int			window_center_x, window_center_y;
 RECT		window_rect;
 
+qboolean	joystickVerticalMoved;
 
 /*
 ===========
@@ -509,6 +510,8 @@ void IN_Init (void)
 
 	IN_StartupMouse ();
 	IN_StartupJoystick ();
+
+	joystickVerticalMoved = false;
 }
 
 /*
@@ -970,6 +973,32 @@ void IN_JoyMove (usercmd_t *cmd)
 					cmd->forwardmove += (fAxisValue * joy_forwardsensitivity->value) * speed * cl_forwardspeed->value;
 				}
 			}
+
+
+			//BC 1/30/2024 allow joystick menu selection.
+			if (fabs(fAxisValue) > joy_forwardthreshold->value)
+			{
+				if (fAxisValue < 0)
+				{
+					//joystick up.
+					//Com_Printf("joystick up\n");
+					Key_Event(K_JOY_UP, true, sys_msg_time);
+				}
+				else
+				{
+					//joystick down.
+					Key_Event(K_JOY_DOWN, true, sys_msg_time);
+				}
+
+				joystickVerticalMoved = true;
+			}
+			else if (joystickVerticalMoved == true)
+			{
+				joystickVerticalMoved = false;
+				Key_Event(K_JOY_UP, false, 0);
+				Key_Event(K_JOY_DOWN, false, 0);
+			}
+
 			break;
 
 		case AxisSide:
