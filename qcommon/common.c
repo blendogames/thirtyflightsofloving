@@ -1631,6 +1631,12 @@ void Qcommon_Init (int argc, char **argv)
 {
 	char	*s;
 
+#ifndef NOTTHIRTYFLIGHTS
+	//BC when player launches the game for the very first time.
+	qboolean	firsttime = false;
+	char	*cfgfile;
+#endif
+
 	if (setjmp (abortframe) )
 		Sys_Error ("Error during initialization");
 
@@ -1656,6 +1662,12 @@ void Qcommon_Init (int argc, char **argv)
 	Cbuf_Execute ();
 
 	FS_InitFilesystem ();
+
+#ifndef NOTTHIRTYFLIGHTS
+	FS_LoadFile("kmq2config.cfg", (void **)&cfgfile);
+	if (!cfgfile)
+		firsttime = true; //if no kmq2config file, then assume this is the first time player is starting the game.
+#endif
 
 //	Cbuf_AddText ("exec default.cfg\n");
 //	Cbuf_AddText ("exec kmq2config.cfg\n");
@@ -1683,7 +1695,11 @@ void Qcommon_Init (int argc, char **argv)
 	fixedtime = Cvar_Get ("fixedtime", "0", CVAR_CHEAT);
 	Cvar_SetDescription ("fixedtime", "Fixed frametime feature.  Non-zero values set time in ms for each common frame.  This is considered a cheat in multiplayer.");
 
+#ifdef NOTTHIRTYFLIGHTS
 	logfile_active = Cvar_Get ("logfile", "0", 0);
+#else
+	logfile_active = Cvar_Get ("logfile", "2", 0);
+#endif
 	Cvar_SetDescription ("logfile", "Enables logging of console to qconsole.log.  Values > 1 cause writes on every console ouput.");
 	showtrace = Cvar_Get ("showtrace", "0", 0);
 	Cvar_SetDescription ("showtrace", "Toggles output of per-frame trace operation counts to console.");
@@ -1731,7 +1747,20 @@ void Qcommon_Init (int argc, char **argv)
 	if (!Cbuf_AddLateCommands ())
 	{	// if the user didn't give any commands, run default action
 		if (!dedicated->integer)
+#ifdef NOTTHIRTYFLIGHTS
 			Cbuf_AddText ("d1\n");
+#else
+		{
+			if (!firsttime)
+			{
+				Cbuf_AddText("d1\n");
+			}
+			else
+			{
+				Cbuf_AddText("firstgame\n"); //BC execute this if this is the first time player is starting the game.
+			}
+		}
+#endif
 		else
 			Cbuf_AddText ("dedicated_start\n");
 		Cbuf_Execute ();
@@ -1742,7 +1771,7 @@ void Qcommon_Init (int argc, char **argv)
 		SCR_EndLoadingPlaque ();
 	}
 
-	Com_Printf ("====== KMQuake2 Initialized ======\n\n");
+	Com_Printf ("====== " WINDOWNAME " Initialized ======\n\n");
 	
 	// testing crap
 	/*{

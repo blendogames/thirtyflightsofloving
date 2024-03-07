@@ -960,9 +960,9 @@ void Con_DrawConsole (float frac, qboolean trans)
 
 	// changed to "KMQuake2 vx.xx"
 #ifdef ERASER_COMPAT_BUILD
-	Com_sprintf (version, sizeof(version), S_COLOR_BOLD S_COLOR_SHADOW S_COLOR_ALT"KMQuake2 v%4.2fu%d (Eraser compatible)", VERSION, VERSION_UPDATE);
+	Com_sprintf (version, sizeof(version), S_COLOR_BOLD S_COLOR_SHADOW S_COLOR_ALT WINDOWNAME" v%4.2fu%d (Eraser compatible)", VERSION, VERSION_UPDATE);
 #else // ERASER_COMPAT_BUILD
-	Com_sprintf (version, sizeof(version), S_COLOR_BOLD S_COLOR_SHADOW S_COLOR_ALT"KMQuake2 v%4.2fu%d", VERSION, VERSION_UPDATE);
+	Com_sprintf (version, sizeof(version), S_COLOR_BOLD S_COLOR_SHADOW S_COLOR_ALT WINDOWNAME" v%4.2fu%d", VERSION, VERSION_UPDATE);
 #endif // NEW_ENTITY_STATE_MEMBERS
 
 	Con_DrawString ((int)(conLeft+conWidth)-FONT_SIZE*(stringLen((const char *)&version))-3, y-(int)(1.25*FONT_SIZE), version, FONT_CONSOLE, 255);

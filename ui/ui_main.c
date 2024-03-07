@@ -73,6 +73,7 @@ void UI_Draw (void)
 	// dim everything behind it down
 	if (cl.cinematictime > 0 || cls.state == ca_disconnected)
 	{
+#ifdef NOTTHIRTYFLIGHTS
 		if (R_DrawFindPic(UI_BACKGROUND_NAME))
 		{
 		//	R_DrawStretchPic (0, 0, viddef.width, viddef.height, UI_BACKGROUND_NAME, 1.0f);
@@ -80,12 +81,15 @@ void UI_Draw (void)
 			UI_DrawPic(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, ALIGN_CENTER, false, UI_BACKGROUND_NAME, 1.0f);
 		}
 		else
+#endif
 			R_DrawFill (0,0,viddef.width, viddef.height, 0, 0, 0, 255);
 	}
+#ifdef NOTTHIRTYFLIGHTS
 	// ingame menu uses alpha
 	else if (R_DrawFindPic(UI_BACKGROUND_NAME))
 	//	R_DrawStretchPic (0, 0, viddef.width, viddef.height, UI_BACKGROUND_NAME, ui_background_alpha->value);
 		UI_DrawPic(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, ALIGN_CENTER, false, UI_BACKGROUND_NAME, ui_background_alpha->value);
+#endif
 	else
 		R_DrawFill (0, 0, viddef.width, viddef.height, 0, 0, 0, (int)(ui_background_alpha->value*255.0f));
 

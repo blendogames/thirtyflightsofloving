@@ -282,15 +282,27 @@ void R_InitBloomTextures (void)
 {
 
 //	r_bloom = Cvar_Get( "r_bloom", "0", CVAR_ARCHIVE );
+#ifdef NOTTHIRTYFLIGHTS
 	r_bloom_alpha = Cvar_Get( "r_bloom_alpha", "0.25", CVAR_ARCHIVE );			// was 0.33
+#else
+	r_bloom_alpha = Cvar_Get( "r_bloom_alpha", "0.3", CVAR_ARCHIVE );			// new: 0.2. was 0.33
+#endif
 	Cvar_SetDescription ("r_bloom_alpha", "Sets opacity of bloom blends.");
 	r_bloom_diamond_size = Cvar_Get( "r_bloom_diamond_size", "8", CVAR_ARCHIVE );
 	Cvar_SetDescription ("r_bloom_diamond_size", "Sets size of bloom diamonds.  Accepted values are 4, 6, or 8.");
+#ifdef NOTTHIRTYFLIGHTS
 	r_bloom_intensity = Cvar_Get( "r_bloom_intensity", "2.5", CVAR_ARCHIVE );	// was 0.6
+#else
+	r_bloom_intensity = Cvar_Get( "r_bloom_intensity", "2", CVAR_ARCHIVE );	// new: 2.5. was 0.6
+#endif
 	Cvar_SetDescription ("r_bloom_intensity", "Sets intensity of bloom effect.");
 	r_bloom_threshold = Cvar_Get( "r_bloom_threshold", "0.68", CVAR_ARCHIVE );	// was 0.08
 	Cvar_SetDescription ("r_bloom_threshold", "Sets brightness threshold for bloom effect.");
+#ifdef NOTTHIRTYFLIGHTS
 	r_bloom_darken = Cvar_Get( "r_bloom_darken", "5", CVAR_ARCHIVE );			// was 4
+#else
+	r_bloom_darken = Cvar_Get( "r_bloom_darken", "2", CVAR_ARCHIVE );			// new: 5. was 4
+#endif
 	Cvar_SetDescription ("r_bloom_darken", "Sets number of darkening pass for bloom effect.");
 	r_bloom_sample_size = Cvar_Get( "r_bloom_sample_size", "256", CVAR_ARCHIVE );	// was 128
 	Cvar_SetDescription ("r_bloom_sample_size", "Sets sample size in pixels for bloom effect.");
@@ -310,8 +322,14 @@ void R_InitBloomTextures (void)
 R_Bloom_DrawEffect
 =================
 */
-void R_Bloom_DrawEffect (void)
+void R_Bloom_DrawEffect ( refdef_t *fd )
 {
+#ifdef NOTTHIRTYFLIGHTS
+	float bloomAlpha = r_bloom_alpha->value;
+#else
+	float bloomAlpha = r_bloom_alpha->value + fd->bloomalpha;
+#endif
+
 	GL_Bind(r_bloomeffecttexture->texnum);  
 	GL_Enable(GL_BLEND);
 	GL_BlendFunc(GL_ONE, GL_ONE);
@@ -326,19 +344,19 @@ void R_Bloom_DrawEffect (void)
 	indexArray[rb_index++] = rb_vertex+3;
 	VA_SetElem2(texCoordArray[0][rb_vertex], 0, sampleText_tch);
 	VA_SetElem3(vertexArray[rb_vertex],	curView_x, curView_y, 0);
-	VA_SetElem4(colorArray[rb_vertex], r_bloom_alpha->value, r_bloom_alpha->value, r_bloom_alpha->value, 1.0f);
+	VA_SetElem4(colorArray[rb_vertex], bloomAlpha, bloomAlpha, bloomAlpha, 1.0f);
 	rb_vertex++;
 	VA_SetElem2(texCoordArray[0][rb_vertex], 0,	0);
 	VA_SetElem3(vertexArray[rb_vertex], curView_x, curView_y + curView_height, 0);
-	VA_SetElem4(colorArray[rb_vertex], r_bloom_alpha->value, r_bloom_alpha->value, r_bloom_alpha->value, 1.0f);
+	VA_SetElem4(colorArray[rb_vertex], bloomAlpha, bloomAlpha, bloomAlpha, 1.0f);
 	rb_vertex++;
 	VA_SetElem2(texCoordArray[0][rb_vertex], sampleText_tcw, 0);
 	VA_SetElem3(vertexArray[rb_vertex], curView_x + curView_width, curView_y + curView_height, 0);
-	VA_SetElem4(colorArray[rb_vertex], r_bloom_alpha->value, r_bloom_alpha->value, r_bloom_alpha->value, 1.0f);
+	VA_SetElem4(colorArray[rb_vertex], bloomAlpha, bloomAlpha, bloomAlpha, 1.0f);
 	rb_vertex++;
 	VA_SetElem2(texCoordArray[0][rb_vertex], sampleText_tcw, sampleText_tch);
 	VA_SetElem3(vertexArray[rb_vertex], curView_x + curView_width, curView_y, 0);
-	VA_SetElem4(colorArray[rb_vertex], r_bloom_alpha->value, r_bloom_alpha->value, r_bloom_alpha->value, 1.0f);
+	VA_SetElem4(colorArray[rb_vertex], bloomAlpha, bloomAlpha, bloomAlpha, 1.0f);
 	rb_vertex++;
 	RB_DrawArrays ();
 	rb_vertex = rb_index = 0;
@@ -449,9 +467,14 @@ void R_Bloom_GeneratexCross (void)
 R_Bloom_GeneratexDiamonds
 =================
 */
-void R_Bloom_GeneratexDiamonds (void)
+void R_Bloom_GeneratexDiamonds ( refdef_t *fd )
 {
 	int				i, j;
+#ifdef NOTTHIRTYFLIGHTS
+	float bloomIntensity = r_bloom_intensity->value;
+#else
+	float bloomIntensity = r_bloom_intensity->value * fd->bloomintensity;
+#endif
 	static float	intensity;
 
 	// set up sample size workspace
@@ -494,7 +517,7 @@ void R_Bloom_GeneratexDiamonds (void)
 		R_Bloom_DrawStart
 		for (i=0; i<r_bloom_diamond_size->integer; i++) {
 			for (j=0; j<r_bloom_diamond_size->integer; j++) {
-				intensity = r_bloom_intensity->value * 0.3 * Diamond8x[i][j];
+				intensity = bloomIntensity * 0.3 * Diamond8x[i][j];
 				if ( intensity < r_bloom_threshold->value ) continue;
 				R_Bloom_SamplePass( i-4, j-4, intensity, intensity, intensity, 1.0 );
 			}
@@ -508,7 +531,7 @@ void R_Bloom_GeneratexDiamonds (void)
 		R_Bloom_DrawStart
 		for (i=0; i<r_bloom_diamond_size->integer; i++) {
 			for (j=0; j<r_bloom_diamond_size->integer; j++) {
-				intensity = r_bloom_intensity->value * 0.5 * Diamond6x[i][j];
+				intensity = bloomIntensity * 0.5 * Diamond6x[i][j];
 				if ( intensity < r_bloom_threshold->value ) continue;
 				R_Bloom_SamplePass( i-3, j-3, intensity, intensity, intensity, 1.0 );
 			}
@@ -522,7 +545,7 @@ void R_Bloom_GeneratexDiamonds (void)
 		R_Bloom_DrawStart
 		for (i=0; i<r_bloom_diamond_size->integer; i++) {
 			for (j=0; j<r_bloom_diamond_size->integer; j++) {
-				intensity = r_bloom_intensity->value * 0.8f * Diamond4x[i][j];
+				intensity = bloomIntensity * 0.8f * Diamond4x[i][j];
 				if ( intensity < r_bloom_threshold->value ) continue;
 				R_Bloom_SamplePass( i-2, j-2, intensity, intensity, intensity, 1.0 );
 			}
@@ -640,7 +663,7 @@ void R_BloomBlend ( refdef_t *fd )
 
 	// create the bloom image
 	R_Bloom_DownsampleView();
-	R_Bloom_GeneratexDiamonds();
+	R_Bloom_GeneratexDiamonds(fd);
 //	R_Bloom_GeneratexCross();
 
 	// restore the screen-backup to the screen
@@ -656,7 +679,7 @@ void R_BloomBlend ( refdef_t *fd )
 		r_screenbackuptexture_width,
 		r_screenbackuptexture_height, 1.0, 1.0, 1, 1, 1, 1 );
 
-	R_Bloom_DrawEffect();
+	R_Bloom_DrawEffect(fd);
 
 	// Knightmare added
 	R_SetupGL ();

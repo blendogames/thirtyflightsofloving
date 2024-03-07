@@ -22,17 +22,24 @@ ARCH := $(shell uname -m | sed -e s/i.86/i386/ -e s/sun4u/sparc/ -e s/sparc64/sp
 ######################################
 
 BUILD_DATADIR=NO                # Use DATADIR to read (data, renderers, etc.) and ~/.quake2 to write.
-BUILD_GAME=YES                  # game$(ARCH).so
+BUILD_GAME=NO                   # game$(ARCH).so
 BUILD_KMQUAKE2=YES              # kmquake client executable
 BUILD_KMQUAKE2_DEDICATED=NO     # build a dedicated kmquake2 server (set this to YES when it compiles again)
 BUILD_LIBDIR=NO                 # Use LIBDIR to read data and renderers (independent from DATADIR).
+BUILD_TFOL=YES                  # Build Thirty Flights of Loving
 
 ######################################
 
 ######################################
 
-WINDOWNAME=KMQuake2
-SAVENAME=quake2
+ifeq ($(strip $(BUILD_TFOL)),YES)
+  WINDOWNAME=Thirty Flights of Loving
+  SAVENAME=thirtyflightsofloving
+else
+  WINDOWNAME=KMQuake2
+  SAVENAME=quake2
+  BASE_CFLAGS:=-DNOTTHIRTYFLIGHTS
+endif
 VERSION=0.20
 MOUNT_DIR=.
 BUILD_DEBUG_DIR=build_debug
@@ -79,7 +86,7 @@ LIBDIR?=$(LOCALBASE)/lib/kmquake2
 
 SDL_CONFIG?=sdl2-config
 SDLCFLAGS=$(shell $(SDL_CONFIG) --cflags)
-SDLLDFLAGS=$(shell $(SDL_CONFIG) --libs) -lpng -ljpeg -lcurl
+SDLLDFLAGS=$(shell $(SDL_CONFIG) --libs) -lpng -ljpeg
 SDLGLCFLAGS=$(SDLCFLAGS) -DOPENGL
 SDLGLLDFLAGS=$(SDLLDFLAGS)
 

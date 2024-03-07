@@ -317,7 +317,11 @@ void Menu_Video_Advanced_Init (void)
 
 	s_options_advanced_header.generic.type		= MTYPE_SEPARATOR;
 	s_options_advanced_header.generic.textSize	= MENU_HEADER_FONT_SIZE;
+#ifdef NOTTHIRTYFLIGHTS
 	s_options_advanced_header.generic.name		= "Advanced Options";
+#else
+	s_options_advanced_header.generic.name		= "ADVANCED OPTIONS";
+#endif
 	s_options_advanced_header.generic.x			= MENU_HEADER_FONT_SIZE/2 * (int)strlen(s_options_advanced_header.generic.name);
 	s_options_advanced_header.generic.y			= y;
 
@@ -550,14 +554,22 @@ void Menu_Video_Advanced_Init (void)
 
 	s_advanced_apply_action.generic.type		= MTYPE_ACTION;
 	s_advanced_apply_action.generic.textSize	= MENU_FONT_SIZE;
+#ifdef NOTTHIRTYFLIGHTS
 	s_advanced_apply_action.generic.name		= "Apply Changes";
+#else
+	s_advanced_apply_action.generic.name		= "APPLY CHANGES";
+#endif
 	s_advanced_apply_action.generic.x			= 0;
 	s_advanced_apply_action.generic.y			= y += 2*MENU_LINE_SIZE;
 	s_advanced_apply_action.generic.callback	= M_AdvancedMenuApplyChanges;
 
 	s_back_action.generic.type					= MTYPE_ACTION;
 	s_back_action.generic.textSize				= MENU_FONT_SIZE;
+#ifdef NOTTHIRTYFLIGHTS
 	s_back_action.generic.name					= "Back";
+#else
+	s_back_action.generic.name					= "Done";
+#endif
 	s_back_action.generic.x						= 0;
 	s_back_action.generic.y						= y += 2*MENU_LINE_SIZE;
 	s_back_action.generic.callback				= UI_BackMenu;

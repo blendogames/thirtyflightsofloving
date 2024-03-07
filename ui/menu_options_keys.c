@@ -29,7 +29,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "../client/client.h"
 #include "ui_local.h"
 
+#ifdef NOTTHIRTYFLIGHTS
 #define USE_KEYBIND_CONTROL
+#endif
 
 /*
 =======================================================================
@@ -41,6 +43,7 @@ KEYS MENU
 
 char *bindnames[][2] =
 {
+#ifdef NOTTHIRTYFLIGHTS
 {"+attack", 		"attack"},
 {"+attack2", 		"alternate attack"},
 {"+use", 			"activate"},
@@ -67,6 +70,21 @@ char *bindnames[][2] =
 {"invprev",			"prev item"},
 {"invnext",			"next item"},
 {"cmd help", 		"help computer" }, 
+#else
+{"+forward", 		"Move Forward"},
+{"+back", 			"Move Backward"},
+{"+moveleft", 		"Move Left"},
+{"+moveright", 		"Move Right"},
+{"+moveup",			"Jump"},
+{"+movedown",		"Crouch"},
+{"+attack", 		"Use Item"},
+{"weapprev", 		"Select Previous Item"},
+{"weapnext", 		"Select Next Item"},
+{"+use", 			"Action"},
+{"centerview", 		"Center View"},
+{"save quick",		"Quick Save"},
+{"load quick",		"Quick Load"},
+#endif
 { 0, 0 }
 };
 
@@ -136,6 +154,7 @@ static void M_FindKeysForCommand (char *command, int *twokeys)
 
 static void M_KeysBackCursorDrawFunc (menuaction_s *self) // back action
 {
+#ifdef NOTTHIRTYFLIGHTS
 	char	*cursor;
 
 	cursor = ((int)(Sys_Milliseconds()/250)&1) ? UI_ITEMCURSOR_DEFAULT_PIC : UI_ITEMCURSOR_BLINK_PIC;
@@ -144,10 +163,20 @@ static void M_KeysBackCursorDrawFunc (menuaction_s *self) // back action
 /*	UI_DrawChar (SCREEN_WIDTH*0.5 - 24, s_keys_menu.y + self->generic.y, MENU_FONT_SIZE, ALIGN_CENTER,
 					12+((int)(Sys_Milliseconds()/250)&1), 255, 255, 255, 255, false, true);
 */
+#else
+	SCR_DrawChar (SCREEN_WIDTH*0.5 - 24+ (5*sin(anglemod(cl.time*0.01))),
+		s_keys_menu.y + self->generic.y,
+		MENU_FONT_SIZE,
+		ALIGN_CENTER,
+		13,
+		FONT_UI,
+		255,255,255,255, false, true);
+#endif
 }
 
 static void M_KeyCursorDrawFunc (menuframework_s *menu)
 {
+#ifdef NOTTHIRTYFLIGHTS
 	char	*cursor;
 
 	if (bind_grab)
@@ -163,6 +192,16 @@ static void M_KeyCursorDrawFunc (menuframework_s *menu)
 		UI_DrawChar (menu->x, menu->y + menu->cursor * MENU_LINE_SIZE, MENU_FONT_SIZE, ALIGN_CENTER,
 						12+((int)(Sys_Milliseconds()/250)&1), 255, 255, 255, 255, false, true);
 */
+#else
+		SCR_DrawChar (menu->x+ (5*sin(anglemod(cl.time*0.01))),
+			menu->y + menu->cursor * MENU_LINE_SIZE,
+			MENU_FONT_SIZE,
+			ALIGN_CENTER,
+			13,
+			FONT_UI,
+			255,255,255,
+			255, false, true);
+#endif
 }
 
 static void M_DrawKeyBindingFunc (void *self)
@@ -174,27 +213,41 @@ static void M_DrawKeyBindingFunc (void *self)
 		
 	if (keys[0] == -1)
 	{
+#ifdef NOTTHIRTYFLIGHTS
 		UI_DrawString (a->generic.x + a->generic.parent->x + 16,
-						a->generic.y + a->generic.parent->y, a->generic.textSize, "???", 255);
+						a->generic.y + a->generic.parent->y, a->generic.textSize, ALIGN_CENTER, "???", FONT_UI, 255);
+#else
+		UI_DrawString (a->generic.x + a->generic.parent->x + 16,
+						a->generic.y + a->generic.parent->y, a->generic.textSize, ALIGN_CENTER, "^1<NONE>", FONT_UI, 255);
+#endif
 	}
 	else
 	{
 		int x;
 		const char *name;
+		int alpha;
+#ifdef NOTTHIRTYFLIGHTS
+		alpha=255;
+#else
+		if (ui_mousecursor.menuitem == a)
+			alpha=255;
+		else
+			alpha=160;
+#endif
 
 		name = Key_KeynumToString (keys[0]);
 
 		UI_DrawString (a->generic.x + a->generic.parent->x + 16,
-						a->generic.y + a->generic.parent->y, a->generic.textSize, name , 255);
+						a->generic.y + a->generic.parent->y, a->generic.textSize, ALIGN_CENTER, name, FONT_UI, alpha);
 
 		x = (int)strlen(name) * MENU_FONT_SIZE;
 
 		if (keys[1] != -1)
 		{
 			UI_DrawString (a->generic.x + a->generic.parent->x + MENU_FONT_SIZE*3 + x,
-							a->generic.y + a->generic.parent->y, a->generic.textSize, "or", 255);
+							a->generic.y + a->generic.parent->y, a->generic.textSize, ALIGN_CENTER, "or", FONT_UI, alpha);
 			UI_DrawString (a->generic.x + a->generic.parent->x + MENU_FONT_SIZE*6 + x,
-							a->generic.y + a->generic.parent->y, a->generic.textSize, Key_KeynumToString(keys[1]), 255);
+							a->generic.y + a->generic.parent->y, a->generic.textSize, ALIGN_CENTER, Key_KeynumToString(keys[1]), FONT_UI, alpha);
 		}
 	}
 }
@@ -211,7 +264,11 @@ static void M_KeyBindingFunc (void *self)
 
 	bind_grab = true;
 
+#ifdef NOTTHIRTYFLIGHTS
 	UI_SetMenuStatusBar (&s_keys_menu, "press a key or button for this action");
+#else
+	UI_SetMenuStatusBar (&s_keys_menu, "Press a key or button.");
+#endif
 }
 
 void M_AddBindOption (int i, char *list[][2])
@@ -268,7 +325,11 @@ static void Menu_Keys_Init (void)
 	s_keys_back_action.generic.flags	= QMF_LEFT_JUSTIFY;
 	s_keys_back_action.generic.x		= x;
 	s_keys_back_action.generic.y		= y + (BINDS_MAX+2)*MENU_LINE_SIZE;
+#ifdef NOTTHIRTYFLIGHTS
 	s_keys_back_action.generic.name		= "Back";
+#else
+	s_keys_back_action.generic.name		= "Done";
+#endif
 	s_keys_back_action.generic.callback	= UI_BackMenu;
 #ifndef USE_KEYBIND_CONTROL
 	s_keys_back_action.generic.cursordraw = M_KeysBackCursorDrawFunc;
@@ -279,7 +340,11 @@ static void Menu_Keys_Init (void)
 	UI_AddMenuItem (&s_keys_menu, (void *) &s_keys_back_action);
 
 #ifndef USE_KEYBIND_CONTROL
+#ifdef NOTTHIRTYFLIGHTS
 	UI_SetMenuStatusBar (&s_keys_menu, "enter or mouse1 to change, backspace to clear");
+#else
+	UI_SetMenuStatusBar (&s_keys_menu, "Press ENTER or LEFT CLICK to change the key. Press BACKSPACE to clear.");
+#endif
 #endif
 	// Don't center it- it's too large
 //	UI_CenterMenu (&s_keys_menu);
@@ -287,7 +352,11 @@ static void Menu_Keys_Init (void)
 
 static void Menu_Keys_Draw (void)
 {
+#ifdef NOTTHIRTYFLIGHTS
 	UI_DrawBanner ("m_banner_customize"); // Knightmare added
+#else
+	UI_DrawBanner ("m_banner_options");
+#endif
 
 	UI_AdjustMenuCursor (&s_keys_menu, 1);
 	UI_DrawMenu (&s_keys_menu);
@@ -317,7 +386,11 @@ static const char *Menu_Keys_Key (int key)
 		if (key == K_MOUSE1)
 			ui_mousecursor.buttonclicks[MOUSEBUTTON1] = -1;
 
+#ifdef NOTTHIRTYFLIGHTS
 		UI_SetMenuStatusBar (&s_keys_menu, "enter to change, backspace to clear");
+#else
+		UI_SetMenuStatusBar (&s_keys_menu, "Press ENTER or LEFT CLICK to change the key. Press BACKSPACE to clear.");
+#endif
 		bind_grab = false;
 		return ui_menu_out_sound;
 	}

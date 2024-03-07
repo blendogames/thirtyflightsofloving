@@ -30,6 +30,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 cursor_t ui_mousecursor;
 
+#ifndef NOTTHIRTYFLIGHTS
+qboolean hasitem;
+char *menu_click		= "misc/click.wav";
+#endif
+
 /*
 =======================================================================
 
@@ -317,6 +322,38 @@ void UI_Mouseover_Check (menuframework_s *menu)
 						type = MENUITEM_ROTATE;
 					}
 					break;
+				case MTYPE_CHECKBOX:
+					{
+						int len;
+						menulist_s *spin = menu->items[i];
+
+
+						//mouseover detection.
+						if (item->flags & QMF_LEFT_JUSTIFY)
+						{
+							min[0] += SCR_ScaledScreen(LCOLUMN_OFFSET*2);
+
+							if (item->name)
+							{
+								len = strlen(item->name);
+								max[0] += SCR_ScaledScreen(len*MENU_FONT_SIZE);
+							}
+						}
+						else
+						{
+							if (item->name)
+							{
+								len = strlen(item->name);
+								min[0] -= SCR_ScaledScreen(len*MENU_FONT_SIZE - LCOLUMN_OFFSET*2);
+							}
+
+							len = strlen(spin->itemNames[spin->curValue]);
+							max[0] += SCR_ScaledScreen(len*MENU_FONT_SIZE);
+						}
+
+						type = MENUITEM_ROTATE;
+					}
+					break;
 				case MTYPE_FIELD:
 					{
 						menufield_s *text = menu->items[i];
@@ -407,7 +444,11 @@ void UI_MouseCursor_Think (void)
 	}
 	if (m_drawfunc == Menu_Credits_Draw) // have to hack for credits :p
 	{
+#ifdef NOTTHIRTYFLIGHTS
 		if (ui_mousecursor.buttonclicks[MOUSEBUTTON2])
+#else
+		if ((ui_mousecursor.buttonclicks[MOUSEBUTTON1])||(ui_mousecursor.buttonclicks[MOUSEBUTTON2]))
+#endif
 		{
 			ui_mousecursor.buttonused[MOUSEBUTTON2] = true;
 			ui_mousecursor.buttonclicks[MOUSEBUTTON2] = 0;
@@ -420,6 +461,26 @@ void UI_MouseCursor_Think (void)
 			return;
 		}
 	}
+#ifndef NOTTHIRTYFLIGHTS
+	else if (m_drawfunc == Menu_Quit_Draw) //hack for quit menu
+	{
+		if (ui_mousecursor.buttonclicks[MOUSEBUTTON2])
+		{
+			ui_mousecursor.buttonused[MOUSEBUTTON2] = true;
+			ui_mousecursor.buttonclicks[MOUSEBUTTON2] = 0;
+			ui_mousecursor.buttonused[MOUSEBUTTON1] = true;
+			ui_mousecursor.buttonclicks[MOUSEBUTTON1] = 0;
+
+			S_StartLocalSound ("world/cheer.wav");
+
+
+
+			UI_PopMenu ();
+			
+			return;
+		}
+	}
+#endif
 
 /*	// clicking on the player model menu...
 	if (m_drawfunc == Menu_PlayerConfig_Draw)
@@ -435,6 +496,13 @@ void UI_MouseCursor_Think (void)
 
 	if (ui_mousecursor.menuitem)
 	{
+#ifndef NOTTHIRTYFLIGHTS
+		if (!hasitem)
+		{
+			sound = ui_menu_move_sound;
+			hasitem=true;
+		}
+#endif
 		// MOUSE1
 		if (ui_mousecursor.buttondown[MOUSEBUTTON1])
 		{
@@ -446,7 +514,11 @@ void UI_MouseCursor_Think (void)
 				}
 				else {
 					UI_SlideMenuItem (m, 1);
+#ifndef NOTTHIRTYFLIGHTS
 					sound = ui_menu_move_sound;
+#else
+					sound = menu_click;
+#endif
 					ui_mousecursor.buttonused[MOUSEBUTTON1] = true;
 				}
 			}
@@ -514,6 +586,13 @@ void UI_MouseCursor_Think (void)
 		ui_mousecursor.buttonused[MOUSEBUTTON1] = true;
 		ui_mousecursor.buttonclicks[MOUSEBUTTON1] = 0;
 	}
+#ifndef NOTTHIRTYFLIGHTS
+	else
+	{
+		if (hasitem==true)
+			hasitem=false;
+	}
+#endif
 
 	// clicking on the player model menu...
 	if (m_drawfunc == Menu_PlayerConfig_Draw)

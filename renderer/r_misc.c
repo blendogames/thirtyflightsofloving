@@ -601,7 +601,11 @@ void R_ScaledScreenshot (char *name)
 	cinfo.in_color_space = JCS_RGB;
 	cinfo.input_components = 3;
 	jpeg_set_defaults(&cinfo);
+#ifdef NOTTHIRTYFLIGHTS
 	jpeg_set_quality(&cinfo, 85, TRUE); // was 100
+#else
+	jpeg_set_quality(&cinfo, 100, TRUE); // was 100
+#endif
 
 	// Start Compression
 	jpeg_start_compress(&cinfo, true);
@@ -735,7 +739,11 @@ void R_ScreenShot_JPG (qboolean silent)
 	cinfo.input_components = 3;
 	jpeg_set_defaults(&cinfo);
 	if ((r_screenshot_jpeg_quality->integer >= 101) || (r_screenshot_jpeg_quality->integer <= 0))
+#ifdef NOTTHIRTYFLIGHTS
 		Cvar_Set("r_screenshot_jpeg_quality", "85");
+#else
+		Cvar_Set("r_screenshot_jpeg_quality", "100");
+#endif
 	jpeg_set_quality(&cinfo, r_screenshot_jpeg_quality->integer, TRUE);
 
 	// Start Compression

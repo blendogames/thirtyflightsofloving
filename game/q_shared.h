@@ -146,7 +146,9 @@ __inline int Q_vsnprintf (char *Dest, size_t Count, const char *Format, va_list 
 #define LARGE_MAP_SIZE
 // enable to include looping of attenuated sounds
 // changes entity_state_t struct
+#ifdef NOTTHIRTYFLIGHTS
 #define LOOP_SOUND_ATTENUATION
+#endif
 // enable to save compressed savegame files
 #define COMPRESSED_SAVEGAMES
 #endif
@@ -156,11 +158,15 @@ __inline int Q_vsnprintf (char *Dest, size_t Count, const char *Format, va_list 
 #define PNG_SUPPORT // whether to include PNG image support
 #define LOC_SUPPORT	// whether to include loc file support
 
+#ifdef NOTTHIRTYFLIGHTS
 #define USE_CURL	// whether to include HTTP downloading
+#endif
 
 #define MD2_AS_MD3 // whether to load md2s into md3 memory representation
 
+#ifdef NOTTHIRTYFLIGHTS
 #define CLIENT_SPLIT_NETFRAME // whether to use split net and render frames in the client
+#endif
 
 //#define	WARP_LIGHTMAPS	// whether to support lightmaps on warp surfaces
 
@@ -1342,6 +1348,29 @@ typedef enum
 // Knightmare added
 	TE_REDBLASTER,			//56
 	TE_SHOCKSPLASH,			//57
+#ifndef NOTTHIRTYFLIGHTS
+	// Quake2MaX temp events
+	TE_STAIN,				//58
+	TE_SMOKEPUFF,			//59
+	TE_LIGHTNINGFLARE,		//60
+	TE_LIGHTNINGSIZED,		//61
+	TE_FOOTPRINT,			//62
+	TE_FLAMEBURST,			//63
+	TE_LASERSTUN,			//64
+	TE_STUNBLAST,			//65
+	TE_DISRUPTOR_EXPLOSION,	//66
+	TE_DISINTEGRATE,		//67
+	TE_LENSFLARE,			//68
+	TE_WEATHERFX,			//69
+	TE_FREONHIT,			//70
+	TE_CIGSMOKE,			//71
+	TE_CIGBIGSMOKE,			//72
+	TE_BURPGAS,				//73
+	TE_WINEGLASSBREAK,		//74
+	TE_BLOODCOUGH,			//75
+	TE_LOBBYGLASS,			//76
+	TE_SHRED,				//77
+#endif
 	TE_BLASTER_COLORED,		//58
 	TE_RAILTRAIL_COLORED,	//59
 } temp_event_t;
@@ -1397,6 +1426,39 @@ typedef enum
 #define STAT_SPECTATOR			17
 #define STAT_SPEED              22
 #define STAT_ZOOM               23
+
+
+#ifndef NOTTHIRTYFLIGHTS
+#define STAT_HINTTITLE			24
+#define STAT_USEABLE			25
+#define STAT_HUDMSG			26
+#define STAT_WEAPBOX			27
+#define STAT_PHOTOCOUNT			28
+#define STAT_MAXPHOTOS			29
+#define STAT_VL_ON			30 //viewlock.
+#define STAT_VL_BASE			31
+#define STAT_VL_RANGE			32
+#define STAT_FREEZE			33
+#define STAT_CAMTURN			34
+#define STAT_ATTACHMENT1		35
+#define STAT_CAMDIP			36
+#define STAT_ATTACHMENT2		37
+#define STAT_ATTACHMENT1FRAME		38
+#define STAT_ATTACHMENT2FRAME		39
+#define STAT_ATTACHMENT1SKIN		40
+#define STAT_ATTACHMENT2SKIN		41
+#define STAT_ATTACHMENT1HEIGHT		42
+#define STAT_ATTACHMENT2HEIGHT		43
+#define STAT_BLOOMINTENSITY		44
+#define STAT_BLOOMALPHA			45
+#define STAT_BLOOMDARKEN		46
+#define STAT_GODMODE			47
+#define STAT_MOVESLOW			48
+#define STAT_GUNARMS			49
+#define STAT_GUNARM_YAW			50
+#define STAT_GUNARM_PITCH		51
+#endif
+
 // Knightmare- some extra stats for scripted HUDs
 #define STAT_TIMER_RANGE		251
 #define STAT_MAXAMMO			252
@@ -1577,7 +1639,7 @@ typedef struct entity_state_s
 	int		modelindex;
 	int		modelindex2, modelindex3, modelindex4;	// weapons, CTF flags, etc
 #ifdef NEW_ENTITY_STATE_MEMBERS // Knightmare- Privater wanted this
-	int		modelindex5, modelindex6; 	// more attached models
+	int		modelindex5, modelindex6, modelindex7, modelindex8; 	// more attached models
 #endif
 	int		frame;
 	int		skinnum;
