@@ -1434,11 +1434,11 @@ void fire_heat (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, 
 // RAFAEL
 /*
 =================
-	fire_plasma
+fire_plasma
 =================
 */
 
-void plasma_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
+void phalanx_plasma_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
 	vec3_t		origin;
 
@@ -1474,38 +1474,38 @@ void plasma_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *su
 
 
 // RAFAEL
-void fire_plasma (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage)
+void fire_phalanx_plasma (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage)
 {
-	edict_t *plasma;
+	edict_t *ph_plasma;
 
-	plasma = G_Spawn();
-	VectorCopy (start, plasma->s.origin);
-	VectorCopy (dir, plasma->movedir);
-	vectoangles (dir, plasma->s.angles);
-	VectorScale (dir, speed, plasma->velocity);
-	plasma->movetype = MOVETYPE_FLYMISSILE;
-	plasma->clipmask = MASK_SHOT;
-	plasma->solid = SOLID_BBOX;
+	ph_plasma = G_Spawn();
+	VectorCopy (start, ph_plasma->s.origin);
+	VectorCopy (dir, ph_plasma->movedir);
+	vectoangles (dir, ph_plasma->s.angles);
+	VectorScale (dir, speed, ph_plasma->velocity);
+	ph_plasma->movetype = MOVETYPE_FLYMISSILE;
+	ph_plasma->clipmask = MASK_SHOT;
+	ph_plasma->solid = SOLID_BBOX;
 
-	VectorClear (plasma->mins);
-	VectorClear (plasma->maxs);
+	VectorClear (ph_plasma->mins);
+	VectorClear (ph_plasma->maxs);
 	
-	plasma->owner = self;
-	plasma->touch = plasma_touch;
-	plasma->nextthink = level.time + 8000/speed;
-	plasma->think = G_FreeEdict;
-	plasma->dmg = damage;
-	plasma->radius_dmg = radius_damage;
-	plasma->dmg_radius = damage_radius;
-	plasma->s.sound = gi.soundindex ("weapons/rockfly.wav");
+	ph_plasma->owner = self;
+	ph_plasma->touch = phalanx_plasma_touch;
+	ph_plasma->nextthink = level.time + 8000/speed;
+	ph_plasma->think = G_FreeEdict;
+	ph_plasma->dmg = damage;
+	ph_plasma->radius_dmg = radius_damage;
+	ph_plasma->dmg_radius = damage_radius;
+	ph_plasma->s.sound = gi.soundindex ("weapons/rockfly.wav");
 	
-	plasma->s.modelindex = gi.modelindex ("sprites/s_photon.sp2");
-	plasma->s.effects |= EF_PLASMA | EF_ANIM_ALLFAST;
+	ph_plasma->s.modelindex = gi.modelindex ("sprites/s_photon.sp2");
+	ph_plasma->s.effects |= EF_PLASMA | EF_ANIM_ALLFAST;
 	
 	if (self->client)
-		check_dodge (self, plasma->s.origin, dir, speed);
+		check_dodge (self, ph_plasma->s.origin, dir, speed);
 
-	gi.linkentity (plasma);
+	gi.linkentity (ph_plasma);
 
 	
 }

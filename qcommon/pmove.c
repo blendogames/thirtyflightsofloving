@@ -1016,8 +1016,8 @@ void PM_FlyMove (qboolean doclip)
 	}
 
 #ifndef NOTTHIRTYFLIGHTS
-	//BC speed up the noclip mode.
-	wishspeed *= 4;
+    //BC speed up the noclip mode
+    wishspeed *= 4;
 #endif
 
 	currentspeed = DotProduct(pml.velocity, wishdir);

@@ -683,11 +683,11 @@ qboolean check_jump_blocked (edict_t *monster, float jumpDist, float downLimit, 
 	else if (monster->movetarget) target = monster->movetarget;	
 	else return false;
 
-	VectorSubtract(target->s.origin, monster->s.origin, point1);
+	VectorSubtract (target->s.origin, monster->s.origin, point1);
 	d0 = VectorLength(point1);
 
 	AngleVectors (monster->s.angles, forward, NULL, up);
-	VectorMA(monster->s.origin, 48, forward, point1);
+	VectorMA (monster->s.origin, 48, forward, point1);
 	VectorCopy (point1, point2);
 
 	// check our enemy's comparative elevation
@@ -697,7 +697,7 @@ qboolean check_jump_blocked (edict_t *monster, float jumpDist, float downLimit, 
 		enemy_relHeight = 1;
 	else enemy_relHeight = 0;
 
-	if (enemy_relHeight == -1 && downLimit)
+	if ( (enemy_relHeight == -1) && downLimit )
 	{
 		// make sure jump off location is accessible
 		jumpTrace = gi.trace(monster->s.origin, monster->mins, monster->maxs, point1, monster, MASK_MONSTERSOLID);
@@ -711,38 +711,38 @@ qboolean check_jump_blocked (edict_t *monster, float jumpDist, float downLimit, 
 			if ( (target->absmin[2] - jumpTrace.endpos[2]) > 32) return false;
 			if (jumpTrace.plane.normal[2] < 0.9) return false;
 
-			VectorSubtract(target->s.origin, jumpTrace.endpos, point1);
+			VectorSubtract (target->s.origin, jumpTrace.endpos, point1);
 			d1 = VectorLength(point1);
 			if (d0 < d1)
 				return false;
 
-			monster->velocity[0] = forward[0]*jumpDist*10;
-			monster->velocity[1] = forward[1]*jumpDist*10;
-			monster->velocity[2] = max(monster->velocity[2],100);
+			monster->velocity[0] = forward[0] * jumpDist * 10;
+			monster->velocity[1] = forward[1] * jumpDist * 10;
+			monster->velocity[2] = max(monster->velocity[2], 100);
 
-			gi.linkentity(monster);
+			gi.linkentity (monster);
 			return true;
 		}
 	}
-	else if (enemy_relHeight == 1 && upLimit)
+	else if ( (enemy_relHeight == 1) && upLimit )
 	{
 		point1[2] = monster->absmax[2] + upLimit;
 		jumpTrace = gi.trace(point1, vec3_origin, vec3_origin, point2, monster, MASK_MONSTERSOLID | MASK_WATER);
-		if (jumpTrace.fraction < 1 && !jumpTrace.startsolid && !jumpTrace.allsolid
-			&& (jumpTrace.endpos[2] - monster->absmin[2]) <= upLimit && jumpTrace.contents & MASK_SOLID)
+		if ( (jumpTrace.fraction < 1) && !jumpTrace.startsolid && !jumpTrace.allsolid
+			&& ((jumpTrace.endpos[2] - monster->absmin[2]) <= upLimit) && (jumpTrace.contents & MASK_SOLID) )
 		{
-			VectorSubtract(target->s.origin, jumpTrace.endpos, point1);
+			VectorSubtract (target->s.origin, jumpTrace.endpos, point1);
 			d1 = VectorLength(point1);
 			if (d0 < d1)
 				return false;
 
-			face_wall(monster);
-			monster->monsterinfo.jump(monster);
-			monster->velocity[0] = forward[0]*jumpDist*10;
-			monster->velocity[1] = forward[1]*jumpDist*10;
-			monster->velocity[2] = max(monster->velocity[2],200);
+			face_wall (monster);
+			monster->monsterinfo.jump (monster);
+			monster->velocity[0] = forward[0] * jumpDist * 10;
+			monster->velocity[1] = forward[1] * jumpDist * 10;
+			monster->velocity[2] = max(monster->velocity[2], 200);
 
-			gi.linkentity(monster);
+			gi.linkentity (monster);
 			return true;
 		}
 	}
@@ -774,7 +774,7 @@ qboolean face_wall (edict_t *monster)
 	trace = gi.trace(monster->s.origin, vec3_origin, vec3_origin, point, monster, MASK_MONSTERSOLID);
 	if (trace.fraction < 1 && !trace.startsolid && !trace.allsolid)
 	{
-		vectoangles2(trace.plane.normal, angles);
+		vectoangles2 (trace.plane.normal, angles);
 		monster->ideal_yaw = angles[YAW] + 180;
 		if (monster->ideal_yaw > 360) monster->ideal_yaw -= 360;
 		M_ChangeYaw(monster);

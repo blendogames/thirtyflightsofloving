@@ -505,7 +505,7 @@ mframe_t chick_frames_end_attack1 [] =
 };
 mmove_t chick_move_end_attack1 = {FRAME_attak128, FRAME_attak132, chick_frames_end_attack1, chick_run};
 
-void chick_rerocket(edict_t *self)
+void chick_rerocket (edict_t *self)
 {
 	if (self->enemy->health > 0)
 	{
@@ -520,7 +520,7 @@ void chick_rerocket(edict_t *self)
 	self->monsterinfo.currentmove = &chick_move_end_attack1;
 }
 
-void chick_attack1(edict_t *self)
+void chick_attack1 (edict_t *self)
 {
 	self->monsterinfo.currentmove = &chick_move_attack1;
 }
@@ -549,7 +549,7 @@ mframe_t chick_frames_end_slash [] =
 mmove_t chick_move_end_slash = {FRAME_attak213, FRAME_attak216, chick_frames_end_slash, chick_run};
 
 
-void chick_reslash(edict_t *self)
+void chick_reslash (edict_t *self)
 {
 	if (self->enemy->health > 0)
 	{
@@ -568,7 +568,7 @@ void chick_reslash(edict_t *self)
 	self->monsterinfo.currentmove = &chick_move_end_slash;
 }
 
-void chick_slash(edict_t *self)
+void chick_slash (edict_t *self)
 {
 	self->monsterinfo.currentmove = &chick_move_slash;
 }
@@ -584,24 +584,30 @@ mmove_t chick_move_start_slash = {FRAME_attak201, FRAME_attak203, chick_frames_s
 
 
 
-void chick_melee(edict_t *self)
+void chick_melee (edict_t *self)
 {
 	self->monsterinfo.currentmove = &chick_move_start_slash;
 }
 
 
-void chick_attack(edict_t *self)
+void chick_attack (edict_t *self)
 {
 	self->monsterinfo.currentmove = &chick_move_start_attack1;
 }
 
-void chick_sight(edict_t *self, edict_t *other)
+void chick_sight (edict_t *self, edict_t *other)
 {
 	gi.sound (self, CHAN_VOICE, sound_sight, 1, ATTN_NORM, 0);
 }
 
+// Knightmare added- this sound was unused
+void chick_search (edict_t *self)
+{
+	gi.sound (self, CHAN_VOICE, sound_search, 1, ATTN_NORM, 0);
+}
 
-void SP_monster_chick_precache(void)
+// Knightmare- added soundcache function
+void monster_chick_soundcache (edict_t *self)
 {
 	sound_missile_prelaunch	= gi.soundindex ("chick/chkatck1.wav");	
 	sound_missile_launch	= gi.soundindex ("chick/chkatck2.wav");	
@@ -619,6 +625,13 @@ void SP_monster_chick_precache(void)
 	sound_search			= gi.soundindex ("chick/chksrch1.wav");	
 }
 
+void SP_monster_chick_precache (edict_t *self)
+{
+	// Knightmare- use soundcache function
+	monster_chick_soundcache (self);
+}
+
+
 /*QUAKED monster_chick (1 .5 0) (-16 -16 -24) (16 16 32) Ambush Trigger_Spawn Sight
 */
 void SP_monster_chick (edict_t *self)
@@ -629,7 +642,7 @@ void SP_monster_chick (edict_t *self)
 		return;
 	}
 
-  SP_monster_chick_precache();
+  SP_monster_chick_precache (self);
 
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;
@@ -651,6 +664,7 @@ void SP_monster_chick (edict_t *self)
 	self->monsterinfo.attack = chick_attack;
 	self->monsterinfo.melee = chick_melee;
 	self->monsterinfo.sight = chick_sight;
+	self->monsterinfo.search = chick_search;		// Knightmare added
 
 	gi.linkentity (self);
 

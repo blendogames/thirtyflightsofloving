@@ -639,6 +639,20 @@ qboolean boss5_blocked (edict_t *self, float dist)
 // monster_boss5
 //
 
+// Knightmare- added soundcache function
+void monster_boss5_soundcache (edict_t *self)
+{
+	sound_pain1 = gi.soundindex ("bosstank/btkpain1.wav");
+	sound_pain2 = gi.soundindex ("bosstank/btkpain2.wav");
+	sound_pain3 = gi.soundindex ("bosstank/btkpain3.wav");
+	sound_death = gi.soundindex ("bosstank/btkdeth1.wav");
+	sound_search1 = gi.soundindex ("bosstank/btkunqv1.wav");
+	sound_search2 = gi.soundindex ("bosstank/btkunqv2.wav");
+
+//	self->s.sound = gi.soundindex ("bosstank/btkengn1.wav");
+	tread_sound = gi.soundindex ("bosstank/btkengn1.wav");
+}
+
 /*QUAKED monster_boss5 (1 .5 0) (-64 -64 0) (64 64 112) Ambush Trigger_Spawn Sight GoodGuy NoGib HomingRockets
 */
 void SP_monster_boss5 (edict_t *self)
@@ -649,15 +663,8 @@ void SP_monster_boss5 (edict_t *self)
 		return;
 	}
 
-	sound_pain1 = gi.soundindex ("bosstank/btkpain1.wav");
-	sound_pain2 = gi.soundindex ("bosstank/btkpain2.wav");
-	sound_pain3 = gi.soundindex ("bosstank/btkpain3.wav");
-	sound_death = gi.soundindex ("bosstank/btkdeth1.wav");
-	sound_search1 = gi.soundindex ("bosstank/btkunqv1.wav");
-	sound_search2 = gi.soundindex ("bosstank/btkunqv2.wav");
-
-//	self->s.sound = gi.soundindex ("bosstank/btkengn1.wav");
-	tread_sound = gi.soundindex ("bosstank/btkengn1.wav");
+	// Knightmare- use soundcache function
+	monster_boss5_soundcache (self);
 
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;

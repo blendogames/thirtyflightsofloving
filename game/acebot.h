@@ -302,64 +302,64 @@ void     Use_Plat (edict_t *ent, edict_t *other, edict_t *activator);
 
 // acebot_ai.c protos
 void     ACEAI_Think (edict_t *self);
-void     ACEAI_PickLongRangeGoal(edict_t *self);
-void     ACEAI_PickShortRangeGoal(edict_t *self);
-qboolean ACEAI_FindEnemy(edict_t *self);
-void     ACEAI_ChooseWeapon(edict_t *self);
+void     ACEAI_PickLongRangeGoal (edict_t *self);
+void     ACEAI_PickShortRangeGoal (edict_t *self);
+qboolean ACEAI_FindEnemy (edict_t *self);
+void     ACEAI_ChooseWeapon (edict_t *self);
 
 // acebot_cmds.c protos
-qboolean ACECM_Commands(edict_t *ent);
-void     ACECM_Store();
+qboolean ACECM_Commands (edict_t *ent);
+void     ACECM_Store (void);
 
 // acebot_items.c protos
-void     ACEIT_PlayerAdded(edict_t *ent);
-void     ACEIT_PlayerRemoved(edict_t *ent);
-qboolean ACEIT_IsVisible(edict_t *self, vec3_t goal);
-qboolean ACEIT_IsReachable(edict_t *self,vec3_t goal);
+void     ACEIT_PlayerAdded (edict_t *ent);
+void     ACEIT_PlayerRemoved (edict_t *ent);
+qboolean ACEIT_IsVisible (edict_t *self, vec3_t goal);
+qboolean ACEIT_IsReachable (edict_t *self,vec3_t goal);
 qboolean ACEIT_ChangeWeapon (edict_t *ent, gitem_t *item);
 qboolean ACEIT_CanUseArmor (gitem_t *item, edict_t *other);
-float	 ACEIT_ItemNeed(edict_t *self, int item);
-int		 ACEIT_ClassnameToIndex(char *classname);
+float	 ACEIT_ItemNeed (edict_t *self, int item);
+int		 ACEIT_ClassnameToIndex (char *classname);
 void     ACEIT_BuildItemNodeTable (qboolean rebuild);
 
 // acebot_movement.c protos
-qboolean ACEMV_SpecialMove(edict_t *self,usercmd_t *ucmd);
-void     ACEMV_Move(edict_t *self, usercmd_t *ucmd);
+qboolean ACEMV_SpecialMove (edict_t *self,usercmd_t *ucmd);
+void     ACEMV_Move (edict_t *self, usercmd_t *ucmd);
 void     ACEMV_Attack (edict_t *self, usercmd_t *ucmd);
 void     ACEMV_Wander (edict_t *self, usercmd_t *ucmd);
 
 // acebot_nodes.c protos
-int      ACEND_FindCost(int from, int to);
-int      ACEND_FindCloseReachableNode(edict_t *self, int dist, int type);
-int      ACEND_FindClosestReachableNode(edict_t *self, int range, int type);
-void     ACEND_SetGoal(edict_t *self, int goal_node);
-qboolean ACEND_FollowPath(edict_t *self);
-void     ACEND_GrapFired(edict_t *self);
-qboolean ACEND_CheckForLadder(edict_t *self);
-void     ACEND_PathMap(edict_t *self);
-void     ACEND_InitNodes(void);
-void     ACEND_ShowNode(int node);
-void     ACEND_DrawPath();
-void     ACEND_ShowPath(edict_t *self, int goal_node);
-int      ACEND_AddNode(edict_t *self, int type);
-void     ACEND_UpdateNodeEdge(int from, int to);
-void     ACEND_RemoveNodeEdge(edict_t *self, int from, int to);
-void     ACEND_ResolveAllPaths();
-void     ACEND_SaveNodes();
-void     ACEND_LoadNodes();
+int      ACEND_FindCost (int from, int to);
+int      ACEND_FindCloseReachableNode (edict_t *self, int dist, int type);
+int      ACEND_FindClosestReachableNode (edict_t *self, int range, int type);
+void     ACEND_SetGoal (edict_t *self, int goal_node);
+qboolean ACEND_FollowPath (edict_t *self);
+void     ACEND_GrapFired (edict_t *self);
+qboolean ACEND_CheckForLadder (edict_t *self);
+void     ACEND_PathMap (edict_t *self);
+void     ACEND_InitNodes (void);
+void     ACEND_ShowNode (int node);
+void     ACEND_DrawPath (void);
+void     ACEND_ShowPath (edict_t *self, int goal_node);
+int      ACEND_AddNode (edict_t *self, int type);
+void     ACEND_UpdateNodeEdge (int from, int to);
+void     ACEND_RemoveNodeEdge (edict_t *self, int from, int to);
+void     ACEND_ResolveAllPaths (void);
+void     ACEND_SaveNodes (void);
+void     ACEND_LoadNodes (void);
 
 // acebot_spawn.c protos
-//void	 ACESP_SaveBots(); // Knightmare- removed this
-//void	 ACESP_LoadBots(); // Knightmare- removed this
-void	 ACESP_LoadBotInfo(); // Knightmare added
-void     ACESP_HoldSpawn(edict_t *self);
+//void	 ACESP_SaveBots (void); // Knightmare- removed this
+//void	 ACESP_LoadBots (void); // Knightmare- removed this
+void	 ACESP_LoadBotInfo (void); // Knightmare added
+void     ACESP_HoldSpawn (edict_t *self);
 void     ACESP_PutClientInServer (edict_t *bot, qboolean respawn, int team);
 void     ACESP_Respawn (edict_t *self);
 edict_t *ACESP_FindFreeClient (void);
-void     ACESP_SetName(edict_t *bot, char *name, char *skin, char *team);
+void     ACESP_SetName (edict_t *bot, char *name, char *skin, char *team);
 void     ACESP_SpawnBot (char *team, char *name, char *skin, char *userinfo);
-void     ACESP_ReAddBots();
-void     ACESP_RemoveBot(char *name);
+void     ACESP_ReAddBots (void);
+void     ACESP_RemoveBot (char *name);
 void	 safe_cprintf (edict_t *ent, int printlevel, char *fmt, ...);
 void     safe_centerprintf (edict_t *ent, char *fmt, ...);
 void     safe_bprintf (int printlevel, char *fmt, ...);

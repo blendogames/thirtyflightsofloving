@@ -1109,7 +1109,8 @@ void create_sentien_laser(edict_t *self)
 }
 
 
-void SP_monster_sentien_precache (void)
+// Knightmare- added soundcache function
+void monster_sentien_soundcache (edict_t *self)
 {
 	sound_idle1 = gi.soundindex("monsters/sentien/sen_idle1.wav");
 	sound_idle2 = gi.soundindex("monsters/sentien/sen_idle2.wav");
@@ -1126,10 +1127,16 @@ void SP_monster_sentien_precache (void)
 //	sound_att3 = gi.soundindex("monsters/sentien/sen_att3.wav");
 }
 
+void SP_monster_sentien_precache (edict_t *self)
+{
+	// Knightmare- use soundcache function
+	monster_sentien_soundcache (self);
+}
+
 
 void SP_monster_sentien (edict_t *self)
 {                  
-	SP_monster_sentien_precache ();
+	SP_monster_sentien_precache (self);
 
 	self->mass = 500;
 	self->s.modelindex = gi.modelindex ("models/monsters/sentien/tris.md2");

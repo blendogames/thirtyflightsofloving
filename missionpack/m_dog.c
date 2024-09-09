@@ -431,7 +431,15 @@ void dog_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, 
 		self->monsterinfo.currentmove = &dog_move_death2;
 }		
 
-
+// Knightmare- added soundcache function
+void monster_dog_soundcache (edict_t *self)
+{
+	sound_pain = gi.soundindex ("dog/dpain1.wav");
+	sound_death = gi.soundindex ("dog/ddeath.wav");
+	sound_attack = gi.soundindex ("dog/dattack1.wav");
+	sound_sight = gi.soundindex ("dog/dsight.wav");
+	sound_idle = gi.soundindex ("dog/idle.wav");
+}
 
 //
 // SPAWN
@@ -447,14 +455,12 @@ void SP_monster_dog (edict_t *self)
 		G_FreeEdict (self);
 		return;
 	}
-	sound_pain = gi.soundindex ("dog/dpain1.wav");
-	sound_death = gi.soundindex ("dog/ddeath.wav");
-	sound_attack = gi.soundindex ("dog/dattack1.wav");
-	sound_sight = gi.soundindex ("dog/dsight.wav");
-	sound_idle = gi.soundindex ("dog/idle.wav");
+
+	// Knightmare- use soundcache function
+	monster_dog_soundcache (self);
 
 	// precache gibs
-	gi.modelindex ("mmodels/monsters/dog/h_dog.md2");
+	gi.modelindex ("models/monsters/dog/h_dog.md2");
 	
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;
@@ -471,9 +477,9 @@ void SP_monster_dog (edict_t *self)
 	VectorSet (self->maxs, 16, 16, 8);
 
 	if (!self->health)
-		self->health = 50;
+		self->health = 30;
 	if (!self->gib_health)
-		self->gib_health = -100;
+		self->gib_health = -40;
 	if (!self->mass)
 		self->mass = 80;
 

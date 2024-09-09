@@ -36,34 +36,34 @@ ADVANCED VIDEO MENU
 
 =======================================================================
 */
-static menuframework_s	s_video_advanced_menu;
-static menuseparator_s	s_options_advanced_header;	
-static menuslider_s		s_lightmapscale_slider;
-static menuslider_s		s_textureintensity_slider;
-static menulist_s  		s_rgbscale_box;
-static menulist_s  		s_trans_lighting_box;
-static menulist_s  		s_warp_lighting_box;
-static menuslider_s		s_lightcutoff_slider;
-static menulist_s  		s_solidalpha_box;
-static menulist_s  		s_texshader_warp_box;
-static menuslider_s  	s_waterwave_slider;
-static menulist_s  		s_caustics_box;
-static menulist_s		s_particle_overdraw_box;
-static menulist_s		s_lightbloom_box;
-static menulist_s		s_modelshading_box;
-static menulist_s		s_shadows_box;
-static menulist_s		s_two_side_stencil_box;
-static menulist_s  		s_ent_shell_box;
-static menulist_s  		s_celshading_box;
-static menuslider_s  	s_celshading_width_slider;
-static menulist_s  		s_glass_envmap_box;
-static menulist_s  		s_screenshotformat_box;
-static menuslider_s  	s_screenshotjpegquality_slider;
-static menulist_s  		s_saveshotsize_box;
-static menulist_s		s_upscale_font_box;
+static menuFramework_s	s_video_advanced_menu;
+static menuSeparator_s	s_options_advanced_header;	
+static menuSlider_s		s_lightmapscale_slider;
+static menuSlider_s		s_textureintensity_slider;
+static menuPicker_s  		s_rgbscale_box;
+static menuPicker_s  		s_trans_lighting_box;
+static menuPicker_s  		s_warp_lighting_box;
+static menuSlider_s		s_lightcutoff_slider;
+static menuPicker_s  		s_solidalpha_box;
+static menuPicker_s  		s_texshader_warp_box;
+static menuSlider_s  	s_waterwave_slider;
+static menuPicker_s  		s_caustics_box;
+static menuPicker_s		s_particle_overdraw_box;
+static menuPicker_s		s_lightbloom_box;
+static menuPicker_s		s_modelshading_box;
+static menuPicker_s		s_shadows_box;
+static menuPicker_s		s_two_side_stencil_box;
+static menuPicker_s  		s_ent_shell_box;
+static menuPicker_s  		s_celshading_box;
+static menuSlider_s  	s_celshading_width_slider;
+static menuPicker_s  		s_glass_envmap_box;
+static menuPicker_s  		s_screenshotformat_box;
+static menuSlider_s  	s_screenshotjpegquality_slider;
+static menuPicker_s  		s_saveshotsize_box;
+static menuPicker_s		s_upscale_font_box;
 
-static menuaction_s		s_advanced_apply_action;
-static menuaction_s		s_back_action;
+static menuAction_s		s_advanced_apply_action;
+static menuAction_s		s_back_action;
 
 //=======================================================================
 
@@ -632,5 +632,5 @@ const char *Menu_Video_Advanced_Key (int key)
 void Menu_Video_Advanced_f (void)
 {
 	Menu_Video_Advanced_Init ();
-	UI_PushMenu (Menu_Video_Advanced_Draw, Menu_Video_Advanced_Key);
+	UI_PushMenu (&s_video_advanced_menu);
 }

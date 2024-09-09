@@ -43,6 +43,8 @@ int			model_dlights_num;
 
 float		shellFlowH, shellFlowV;
 
+//============================================================
+
 /*
 =================
 mirrorValue
@@ -76,7 +78,7 @@ float R_CalcEntAlpha (float alpha, vec3_t point)
 
 	newAlpha = alpha;
 
-	if (!(currententity->renderfx & RF2_CAMERAMODEL) || !(currententity->flags & RF_TRANSLUCENT))
+	if (!(currententity->renderfx & RF_CAMERAMODEL) || !(currententity->flags & RF_TRANSLUCENT))
 	{
 		newAlpha = max(min(newAlpha, 1.0f), 0.0f);
 		return newAlpha;
@@ -279,13 +281,13 @@ void R_SetShellBlend (qboolean toggle)
 			qglTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
 			qglTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
 
-			GL_Bind(glMedia.spheremappic->texnum);
+			GL_Bind(glMedia.sphereMapTexture->texnum);
 
 			qglEnable(GL_TEXTURE_GEN_S);
 			qglEnable(GL_TEXTURE_GEN_T);
 		}
 		else if (FlowingShell())
-			GL_Bind(glMedia.shelltexture->texnum);
+			GL_Bind(glMedia.shellTexture->texnum);
 		else
 			GL_DisableTexture(0);
 
@@ -311,6 +313,7 @@ void R_SetShellBlend (qboolean toggle)
 	}
 }
 
+
 /*
 =================
 R_FlipModel
@@ -328,7 +331,7 @@ void R_FlipModel (qboolean on, qboolean cullOnly)
 			qglPushMatrix();
 			qglLoadIdentity();
 			qglScalef( -1, 1, 1 );
-			MYgluPerspective( r_newrefdef.fov_y, ( float ) r_newrefdef.width / r_newrefdef.height,  4,  r_farz);	// Knightmare- was 4096
+			MYgluPerspective( r_newrefdef.fov_y, ( float ) r_newrefdef.width / r_newrefdef.height,  4,  r_farZ);	// Knightmare- was 4096
 			qglMatrixMode( GL_MODELVIEW );
 		}
 		GL_CullFace( GL_BACK );
@@ -343,6 +346,7 @@ void R_FlipModel (qboolean on, qboolean cullOnly)
 		GL_CullFace( GL_FRONT );
 	}
 }
+
 
 /*
 =================
@@ -375,6 +379,7 @@ void R_SetBlendModeOn (image_t *skin)
 	}
 }
 
+
 /*
 =================
 R_SetBlendModeOff
@@ -390,6 +395,7 @@ void R_SetBlendModeOff (void)
 	}
 }
 
+
 /*
 =================
 R_SetShadeLight
@@ -398,6 +404,7 @@ R_SetShadeLight
 void R_SetShadeLight (void)
 {
 	int		i;
+	vec_t	modelview_lightscale;
 
 	if (currententity->flags & RF_MASK_SHELL)
 	{
@@ -422,8 +429,15 @@ void R_SetShadeLight (void)
 	}
 	else if ( currententity->flags & RF_FULLBRIGHT )
 	{
-		for (i=0 ; i<3 ; i++)
+		for (i=0; i<3; i++)
 			shadelight[i] = 1.0;
+	}
+	else if ( r_newrefdef.rdflags & RDF_NOWORLDMODEL )
+	{	// shading for model views based on inverse intensity
+		for (i=0; i<3; i++)
+			shadelight[i] = glState.inverse_intensity;
+		modelview_lightscale = min(max(r_modelview_lightscale->value, 0.0f), 1.0f);
+		VectorScale (shadelight, modelview_lightscale, shadelight);
 	}
 	else
 	{
@@ -432,15 +446,15 @@ void R_SetShadeLight (void)
 		{
 			int max = r_model_dlights->integer;
 
-			if (max<0) max=0;
-			if (max>MAX_MODEL_DLIGHTS) max=MAX_MODEL_DLIGHTS;
+			if (max < 0)					max = 0;
+			if (max > MAX_MODEL_DLIGHTS)	max = MAX_MODEL_DLIGHTS;
 
 			R_LightPointDynamics (currententity->origin, shadelight, model_dlights, 
 				&model_dlights_num, max);
 		}
 		else
 		{
-			R_LightPoint (currententity->origin, shadelight, false);//true);
+			R_LightPoint (currententity->origin, shadelight, false);	// true
 			model_dlights_num = 0;
 		}
 
@@ -546,6 +560,7 @@ void R_SetShadeLight (void)
 	shadedots = r_avertexnormal_dots[((int)(currententity->angles[1] * (SHADEDOT_QUANT / 360.0))) & (SHADEDOT_QUANT - 1)];
 }
 
+
 /*
 =================
 R_DrawAliasModelBBox
@@ -558,7 +573,7 @@ void R_DrawAliasModelBBox (vec3_t bbox[8], entity_t *e, float red, float green, 
 	if (!r_showbbox->integer)
 		return;
 
-	if (e->flags & RF_WEAPONMODEL || e->flags & RF_VIEWERMODEL || e->flags & RF_BEAM || e->renderfx & RF2_CAMERAMODEL)
+	if (e->flags & RF_WEAPONMODEL || e->flags & RF_VIEWERMODEL || e->flags & RF_BEAM || e->renderfx & RF_CAMERAMODEL)
 		return;
 
 	GL_Disable (GL_CULL_FACE);
@@ -569,40 +584,46 @@ void R_DrawAliasModelBBox (vec3_t bbox[8], entity_t *e, float red, float green, 
 
 	rb_vertex = rb_index = 0;
 	indexArray[rb_index++] = rb_vertex+0;
-	indexArray[rb_index++] = rb_vertex+1;
 	indexArray[rb_index++] = rb_vertex+2;
+	indexArray[rb_index++] = rb_vertex+1;
 	indexArray[rb_index++] = rb_vertex+1;
 	indexArray[rb_index++] = rb_vertex+2;
 	indexArray[rb_index++] = rb_vertex+3;
+
+	indexArray[rb_index++] = rb_vertex+1;
+	indexArray[rb_index++] = rb_vertex+5;
+	indexArray[rb_index++] = rb_vertex+4; 
+	indexArray[rb_index++] = rb_vertex+1;
+	indexArray[rb_index++] = rb_vertex+4;
+	indexArray[rb_index++] = rb_vertex+0;
 
 	indexArray[rb_index++] = rb_vertex+0;
-	indexArray[rb_index++] = rb_vertex+1;
-	indexArray[rb_index++] = rb_vertex+4;
-	indexArray[rb_index++] = rb_vertex+1;
-	indexArray[rb_index++] = rb_vertex+4;
-	indexArray[rb_index++] = rb_vertex+5;
-
+	indexArray[rb_index++] = rb_vertex+6;
 	indexArray[rb_index++] = rb_vertex+2;
+	indexArray[rb_index++] = rb_vertex+0;
 	indexArray[rb_index++] = rb_vertex+4;
 	indexArray[rb_index++] = rb_vertex+6;
 
-	indexArray[rb_index++] = rb_vertex+1;
-	indexArray[rb_index++] = rb_vertex+5;
-	indexArray[rb_index++] = rb_vertex+7;
-
 	indexArray[rb_index++] = rb_vertex+2;
+	indexArray[rb_index++] = rb_vertex+6;
+	indexArray[rb_index++] = rb_vertex+7;
+	indexArray[rb_index++] = rb_vertex+2;
+	indexArray[rb_index++] = rb_vertex+7;
+	indexArray[rb_index++] = rb_vertex+3;
+
+	indexArray[rb_index++] = rb_vertex+3;
+	indexArray[rb_index++] = rb_vertex+5;
+	indexArray[rb_index++] = rb_vertex+1;
 	indexArray[rb_index++] = rb_vertex+3;
 	indexArray[rb_index++] = rb_vertex+7;
-	indexArray[rb_index++] = rb_vertex+2;
-	indexArray[rb_index++] = rb_vertex+6;
-	indexArray[rb_index++] = rb_vertex+7;
+	indexArray[rb_index++] = rb_vertex+5;
 
 	indexArray[rb_index++] = rb_vertex+4;
 	indexArray[rb_index++] = rb_vertex+5;
 	indexArray[rb_index++] = rb_vertex+7;
 	indexArray[rb_index++] = rb_vertex+4;
-	indexArray[rb_index++] = rb_vertex+6;
 	indexArray[rb_index++] = rb_vertex+7;
+	indexArray[rb_index++] = rb_vertex+6;
 	for (i=0; i<8; i++) {
 		VA_SetElem3v(vertexArray[rb_vertex], bbox[i]);
 		rb_vertex++;
@@ -612,6 +633,88 @@ void R_DrawAliasModelBBox (vec3_t bbox[8], entity_t *e, float red, float green, 
 
 	GL_EnableTexture (0);
 	qglColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+	qglEnableClientState (GL_COLOR_ARRAY);
+	qglPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
+	GL_Enable (GL_CULL_FACE);
+}
+
+
+/*
+=================
+R_DrawEntityBBox
+=================
+*/
+void R_DrawEntityBBox (entity_t *e, float red, float green, float blue, float alpha)
+{
+	int		i;
+	vec3_t	tmp, bbox[8];
+
+	if ( !r_showbbox_entity->integer )
+		return;
+
+	if ( (e->flags & RF_WEAPONMODEL) || (e->flags & RF_VIEWERMODEL) ||
+		(e->flags & RF_BEAM) || (e->flags & RF_FLARE) || (e->renderfx & RF_CAMERAMODEL) )
+		return;
+
+	if ( VectorCompare(e->mins, vec3_origin) && VectorCompare(e->maxs, vec3_origin) )
+		return;
+
+	for (i = 0; i < 8; i++) {
+		tmp[0] = ((i & 1) ? e->mins[0] : e->maxs[0]);
+		tmp[1] = ((i & 2) ? e->mins[1] : e->maxs[1]);
+		tmp[2] = ((i & 4) ? e->mins[2] : e->maxs[2]);
+		VectorCopy (tmp, bbox[i]);
+	}
+
+	GL_Disable (GL_CULL_FACE);
+	qglPolygonMode (GL_FRONT_AND_BACK, GL_LINE);
+	qglDisableClientState (GL_COLOR_ARRAY);
+	qglColor4f (red, green, blue, alpha);
+	GL_DisableTexture (0);
+	qglPushMatrix ();
+	qglTranslatef (e->origin[0], e->origin[1], e->origin[2]);
+
+	rb_vertex = rb_index = 0;
+	indexArray[rb_index++] = rb_vertex+1;
+	indexArray[rb_index++] = rb_vertex+0;
+	indexArray[rb_index++] = rb_vertex+2;
+	indexArray[rb_index++] = rb_vertex+3;
+
+	indexArray[rb_index++] = rb_vertex+0;
+	indexArray[rb_index++] = rb_vertex+1;
+	indexArray[rb_index++] = rb_vertex+5; 
+	indexArray[rb_index++] = rb_vertex+4;
+
+	indexArray[rb_index++] = rb_vertex+2;
+	indexArray[rb_index++] = rb_vertex+0;
+	indexArray[rb_index++] = rb_vertex+4;
+	indexArray[rb_index++] = rb_vertex+6;
+
+	indexArray[rb_index++] = rb_vertex+3;
+	indexArray[rb_index++] = rb_vertex+2;
+	indexArray[rb_index++] = rb_vertex+6;
+	indexArray[rb_index++] = rb_vertex+7;
+
+	indexArray[rb_index++] = rb_vertex+1;
+	indexArray[rb_index++] = rb_vertex+3;
+	indexArray[rb_index++] = rb_vertex+7;
+	indexArray[rb_index++] = rb_vertex+5;
+
+	indexArray[rb_index++] = rb_vertex+4;
+	indexArray[rb_index++] = rb_vertex+5;
+	indexArray[rb_index++] = rb_vertex+7;
+	indexArray[rb_index++] = rb_vertex+6;
+
+	for (i=0; i<8; i++) {
+		VA_SetElem3v (vertexArray[rb_vertex], bbox[i]);
+		rb_vertex++;
+	}
+	RB_DrawPrimitiveArrays (GL_QUADS);
+	rb_vertex = rb_index = 0;
+
+	qglPopMatrix ();
+	GL_EnableTexture (0);
+	qglColor4f (1.0f, 1.0f, 1.0f, 1.0f);
 	qglEnableClientState (GL_COLOR_ARRAY);
 	qglPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
 	GL_Enable (GL_CULL_FACE);

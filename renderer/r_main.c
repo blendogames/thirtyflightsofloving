@@ -27,6 +27,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 void R_Clear (void);
 
+#if defined(__APPLE__) || (MACOSX)
+#include <ctype.h>
+extern void strlwr (char *theString);
+#endif // __APPLE__ || MACOSX
+
 viddef_t	vid;
 
 model_t		*r_worldmodel;
@@ -64,9 +69,9 @@ vec3_t	r_origin;
 
 float	r_world_matrix[16];
 float	r_base_world_matrix[16];
-vec4_t	r_clearColor = {0, 0.5, 0.5, 0.5};				// for gl_clear
+vec4_t	r_clearColor = {0, 0.5, 0.5, 0.5};				// for r_clear
 
-GLdouble	r_farz;	// Knightmare- variable sky range, made this a global var
+GLdouble	r_farZ;	// Knightmare- variable sky range, made this a global var
 
 //
 // screen size info
@@ -77,10 +82,10 @@ int		r_viewcluster, r_viewcluster2, r_oldviewcluster, r_oldviewcluster2;
 
 cvar_t	*gl_allow_software;
 cvar_t  *gl_driver;
-cvar_t	*gl_clear;
+cvar_t	*r_clear;
 
 // Psychospaz's console font size option
-extern cvar_t	*con_font_size;
+//cvar_t	*con_font_size;
 cvar_t	*con_font;
 cvar_t	*scr_font;
 cvar_t	*ui_font;
@@ -90,6 +95,7 @@ extern cvar_t	*scr_netgraph_pos;
 
 cvar_t	*r_norefresh;
 cvar_t	*r_drawentities;
+cvar_t	*r_drawflares;
 cvar_t	*r_drawworld;
 cvar_t	*r_speeds;
 cvar_t	*r_fullbright;
@@ -102,7 +108,6 @@ cvar_t	*r_lefthand;
 cvar_t	*r_waterwave;	// water waves
 cvar_t  *r_caustics;	// Barnes water caustics
 cvar_t  *r_glows;		// texture glows
-cvar_t	*r_saveshotsize;//  save shot size option
 
 cvar_t	*r_dlights_normal; // lerped dlights on models
 cvar_t	*r_model_shading;
@@ -133,21 +138,27 @@ cvar_t	*r_pixel_shader_warp; // allow disabling the nVidia water warp
 cvar_t	*r_trans_lighting; // disabling of lightmaps on trans surfaces
 cvar_t	*r_warp_lighting; // allow disabling of lighting on warp surfaces
 cvar_t	*r_warp_lighting_sample_offset; // allow adjustment of lighting sampling offset
+cvar_t	*r_load_warp_lightmaps;		// allow loading of lightmaps on warp surfaces
 cvar_t	*r_solidalpha;			// allow disabling of trans33+trans66 surface flag combining
 cvar_t	*r_entity_fliproll;		// allow disabling of backwards alias model roll
 cvar_t	*r_old_nullmodel;		// allow selection of nullmodel
+cvar_t	*r_modelview_lightscale;		// lighting scale for menu modelviews
+cvar_t	*r_occlusion_test;				// allow disabling of OpenGL occlusion test for flares
 
 cvar_t	*r_glass_envmaps; // Psychospaz's envmapping
 //cvar_t	*r_trans_surf_sorting; // trans bmodel sorting
 cvar_t	*r_shelltype; // entity shells: 0 = solid, 1 = warp, 2 = spheremap
 cvar_t	*r_ext_texture_compression; // Heffo - ARB Texture Compression
+cvar_t	*r_lightcutoff;	//** DMP - allow dynamic light cutoff to be user-settable
+
+cvar_t	*r_debug_media;		// enables output of generated textures as .tga on startup
 cvar_t	*r_screenshot_format;		// determines screenshot format
 //cvar_t	*r_screenshot_jpeg;			// Heffo - JPEG Screenshots
 cvar_t	*r_screenshot_jpeg_quality;	// Heffo - JPEG Screenshots
 cvar_t	*r_screenshot_gamma_correct;	// gamma correction for screenshots
+cvar_t	*r_screenshot_use_mapname;	// screenshot filename contains mapname
 
 //cvar_t	*r_motionblur;				// motionblur
-cvar_t	*r_lightcutoff;	//** DMP - allow dynamic light cutoff to be user-settable
 
 cvar_t	*r_log;
 cvar_t	*r_bitdepth;
@@ -182,7 +193,8 @@ cvar_t	*r_picmip;
 cvar_t	*r_skymip;
 //cvar_t	*r_playermip;	// unused
 cvar_t	*r_showtris;
-cvar_t	*r_showbbox;	// show model bounding box
+cvar_t	*r_showbbox;		// show model culling bounding box
+cvar_t	*r_showbbox_entity;	// show solid entity bounding box
 cvar_t	*r_ztrick;
 cvar_t	*r_finish;
 cvar_t	*r_cull;
@@ -223,27 +235,7 @@ cvar_t	*r_fog_skyratio;	// variable sky fog ratio
 cvar_t	*r_subdivide_size;	// chop size for warp surfaces
 //cvar_t	*r_saturation;		//** DMP
 
-
-/*
-=================
-R_CullBox
-
-Returns true if the box is completely outside the frustom
-=================
-*/
-qboolean R_CullBox (vec3_t mins, vec3_t maxs)
-{
-	int		i;
-
-	if (r_nocull->integer)
-		return false;
-
-	for (i=0 ; i<4 ; i++)
-		if ( BOX_ON_PLANE_SIDE(mins, maxs, &frustum[i]) == 2)
-			return true;
-	return false;
-}
-
+//=======================================================================
 
 /*
 ============
@@ -418,13 +410,13 @@ void R_SetupFrame (void)
 	// clear out the portion of the screen that the NOWORLDMODEL defines
 	/*if ( r_newrefdef.rdflags & RDF_NOWORLDMODEL )
 	{
-		GL_Enable( GL_SCISSOR_TEST );
-		qglClearColor( 0.3, 0.3, 0.3, 1 );
-		qglScissor( r_newrefdef.x, vid.height - r_newrefdef.height - r_newrefdef.y, r_newrefdef.width, r_newrefdef.height );
-		qglClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-	//	qglClearColor( 1, 0, 0.5, 0.5 );
+		GL_Enable (GL_SCISSOR_TEST);
+		qglClearColor (0.3, 0.3, 0.3, 1);
+		qglScissor (r_newrefdef.x, vid.height - r_newrefdef.height - r_newrefdef.y, r_newrefdef.width, r_newrefdef.height);
+		qglClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//	qglClearColor (1, 0, 0.5, 0.5);
 		qglClearColor (r_clearColor[0], r_clearColor[1], r_clearColor[2], r_clearColor[3]);
-		GL_Disable( GL_SCISSOR_TEST );
+		GL_Disable (GL_SCISSOR_TEST);
 	}*/
 }
 
@@ -449,6 +441,36 @@ void MYgluPerspective( GLdouble fovy, GLdouble aspect,
 
 /*
 =============
+R_SetFarZ
+
+Calcs farz falue from skybox size
+=============
+*/
+void R_SetFarZ (float skyDistance)
+{
+	GLdouble boxsize, farZ;	// variable sky range
+
+	boxsize = max(skyDistance, MIN_SKYDIST) * SKY_DOME_MULT;
+//	boxsize -= 252 * ceil (boxsize / 2300);
+	farZ = 1.0;
+	while (farZ < boxsize)		// make this a power of 2
+	{
+		farZ *= 2.0;
+		if (farZ >= (GLdouble)(WORLD_SIZE*4))	// don't make it larger than this, was 65536
+			break;
+	}
+	farZ *= 2.0;	// double since boxsize is distance from camera to edge of skybox
+					// not total size of skybox
+	r_farZ = farZ;	// save to global var
+
+	VID_Printf (PRINT_DEVELOPER, "farz now set to %g\n", farZ);
+
+	R_InitSkyBoxInfo ();		// reset skybox data
+}
+
+
+/*
+=============
 R_SetupGL
 =============
 */
@@ -457,17 +479,15 @@ void R_SetupGL (void)
 	float	screenaspect;
 //	float	yfov;
 	int		x, x2, y2, y, w, h;
-//	static	GLdouble farz;	// variable sky range
-//	GLdouble boxsize;
 
 	// Knightmare- update r_modulate in real time
-    if (r_modulate->modified && (r_worldmodel)) //Don't do this if no map is loaded
+    if ( r_modulate->modified && (r_worldmodel) ) //Don't do this if no map is loaded
 	{
 		msurface_t *surf; 
 		int i;
 		
-        for (i=0,surf = r_worldmodel->surfaces; i<r_worldmodel->numsurfaces; i++,surf++)
-            surf->cached_light[0]=0; 
+        for (i=0, surf = r_worldmodel->surfaces; i<r_worldmodel->numsurfaces; i++, surf++)
+            surf->cached_light[0] = 0; 
 
         r_modulate->modified = 0; 
 	} 
@@ -493,22 +513,11 @@ void R_SetupGL (void)
 	// calc farz falue from skybox size
 	if (r_skydistance->modified)
 	{
-		GLdouble boxsize, farz;	// variable sky range
-
-		r_skydistance->modified = false;
-		boxsize = r_skydistance->value;
-		boxsize -= 252 * ceil (boxsize / 2300);
-		farz = 1.0;
-		while (farz < boxsize) //make this a power of 2
-		{
-			farz *= 2.0;
-			if (farz >= 65536) //don't make it larger than this
-				break;
+		// only set r_farZ here if mapper-specified skyDistance is unset
+		if (r_skyInfo.skyDistance <= 0.0f) {
+			R_SetFarZ (r_skydistance->value);
 		}
-		farz *= 2.0; //double since boxsize is distance from camera to edge of skybox
-					//not total size of skybox
-		VID_Printf(PRINT_DEVELOPER, "farz now set to %g\n", farz);
-		r_farz = farz;	// save to global var
+		r_skydistance->modified = false;
 	}
 	// end Knightmare
 
@@ -521,7 +530,7 @@ void R_SetupGL (void)
     qglLoadIdentity ();
 
 	//Knightmare- 12/26/2001- increase back clipping plane distance
-    MYgluPerspective (r_newrefdef.fov_y,  screenaspect,  4, r_farz);	// was 4096
+    MYgluPerspective (r_newrefdef.fov_y,  screenaspect,  4, r_farZ);	// was 4096
 	//end Knightmare
 
 	GL_CullFace(GL_FRONT);
@@ -566,14 +575,14 @@ void R_Clear (void)
 {
 	GLbitfield	clearBits = 0;	// bitshifter's consolidation
 
-	if (gl_clear->integer)
+	if (r_clear->integer)
 		clearBits |= GL_COLOR_BUFFER_BIT;
 
 	if (r_ztrick->integer)
 	{
 		static int trickframe;
 
-	//	if (gl_clear->integer)
+	//	if (r_clear->integer)
 	//		qglClear (GL_COLOR_BUFFER_BIT);
 
 		trickframe++;
@@ -592,7 +601,7 @@ void R_Clear (void)
 	}
 	else
 	{
-	//	if (gl_clear->integer)
+	//	if (r_clear->integer)
 	//		qglClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	//	else
 	//		qglClear (GL_DEPTH_BUFFER_BIT);
@@ -705,7 +714,7 @@ void R_RenderView (refdef_t *fd)
 	{
 		GL_Disable (GL_ALPHA_TEST);
 
-		R_RenderDlights();
+		R_RenderDlights ();
 
 		if (r_transrendersort->integer) {
 		//	R_BuildParticleList ();
@@ -723,6 +732,8 @@ void R_RenderView (refdef_t *fd)
 
 		R_DrawAllParticles ();
 
+		R_DrawEntitiesOnList (ents_flares);
+
 		R_DrawEntitiesOnList(ents_viewweaps);
 
 		R_ParticleStencil (1);
@@ -730,8 +741,10 @@ void R_RenderView (refdef_t *fd)
 		R_ParticleStencil (2);
 
 		R_ParticleStencil (3);
-		if (r_particle_overdraw->integer) // redraw over alpha surfaces, those behind are occluded
+		if (r_particle_overdraw->integer) { // redraw over alpha surfaces, those behind are occluded
 			R_DrawAllParticles ();
+			R_DrawEntitiesOnList (ents_flares);
+		}
 		R_ParticleStencil (4);
 
 		// always draw vwep last...
@@ -772,13 +785,13 @@ void R_ShowSpeeds (void)
 	for (i=0; i<lines; i++)
 	{
 		switch (i) {
-			case 0:	n = sprintf (buf, "%5i wcall", c_brush_calls); break;
-			case 1:	n = sprintf (buf, "%5i wsurf", c_brush_surfs); break;
-			case 2:	n = sprintf (buf, "%5i wpoly", c_brush_polys); break;
-			case 3: n = sprintf (buf, "%5i epoly", c_alias_polys); break;
-			case 4: n = sprintf (buf, "%5i ppoly", c_part_polys); break;
-		//	case 5: n = sprintf (buf, "%5i tex  ", c_visible_textures); break;
-		//	case 6: n = sprintf (buf, "%5i lmaps", c_visible_lightmaps); break;
+			case 0:	Com_sprintf (buf, sizeof(buf), "%5i wcall", c_brush_calls); n = (int)strlen(buf); break;
+			case 1:	Com_sprintf (buf, sizeof(buf), "%5i wsurf", c_brush_surfs); n = (int)strlen(buf); break;
+			case 2:	Com_sprintf (buf, sizeof(buf), "%5i wpoly", c_brush_polys); n = (int)strlen(buf); break;
+			case 3: Com_sprintf (buf, sizeof(buf), "%5i epoly", c_alias_polys); n = (int)strlen(buf); break;
+			case 4: Com_sprintf (buf, sizeof(buf), "%5i ppoly", c_part_polys); n = (int)strlen(buf); break;
+		//	case 5: Com_sprintf (buf, sizeof(buf), "%5i tex  ", c_visible_textures); n = (int)strlen(buf); break;
+		//	case 6: Com_sprintf (buf, sizeof(buf), "%5i lmaps", c_visible_lightmaps); n = (int)strlen(buf); break;
 			default: break;
 		}
 		if (scr_netgraph_pos->integer)
@@ -962,7 +975,7 @@ void R_Register (void)
 #ifdef NOTTHIRTYFLIGHTS
 	alt_text_color = Cvar_Get ("alt_text_color", "2", CVAR_ARCHIVE);
 #else
-	alt_text_color = Cvar_Get ("alt_text_color", "9", CVAR_ARCHIVE);
+    alt_text_color = Cvar_Get ("alt_text_color", "9", CVAR_ARCHIVE);
 #endif
 //	Cvar_SetDescription ("alt_text_color", "Sets color of high-bit highlighted text.");
 
@@ -972,8 +985,8 @@ void R_Register (void)
 	Cvar_SetDescription ("gl_driver", "Sets driver for OpenGL.  This should stay as \"opengl32\".");
 	gl_allow_software = Cvar_Get( "gl_allow_software", "0", 0 );
 	Cvar_SetDescription ("gl_allow_software", "Whether to allow software implementations of OpenGL.");
-	gl_clear = Cvar_Get ("gl_clear", "0", 0);
-	Cvar_SetDescription ("gl_clear", "Enables clearing of the screen to prevent HOM effects.");
+	r_clear = Cvar_Get ("r_clear", "0", 0);
+	Cvar_SetDescription ("r_clear", "Enables clearing of the screen to prevent HOM effects.");
 
 	r_lefthand = Cvar_Get( "hand", "0", CVAR_USERINFO | CVAR_ARCHIVE );
 	r_norefresh = Cvar_Get ("r_norefresh", "0", CVAR_CHEAT);
@@ -982,6 +995,8 @@ void R_Register (void)
 	Cvar_SetDescription ("r_fullbright", "Enables fullbright rendering (no lighting).");
 	r_drawentities = Cvar_Get ("r_drawentities", "1", 0);
 	Cvar_SetDescription ("r_drawentities", "Enables drawing of entities.");
+	r_drawflares = Cvar_Get ("r_drawflares", "1", 0);
+	Cvar_SetDescription ("r_drawflares", "Enables drawing of Kex flares.");
 	r_drawworld = Cvar_Get ("r_drawworld", "1", CVAR_CHEAT);
 	Cvar_SetDescription ("r_drawworld", "Enables drawing of the world.");
 	r_novis = Cvar_Get ("r_novis", "0", CVAR_CHEAT);
@@ -994,7 +1009,7 @@ void R_Register (void)
 	Cvar_SetDescription ("r_ignorehwgamma", "Disables hardware gamma control when set to 1.");
 	r_displayrefresh = Cvar_Get ("r_displayrefresh", "0", CVAR_ARCHIVE); // refresh rate control
 	Cvar_SetDescription ("r_displayrefresh", "Sets display refresh rate.");
-	AssertCvarRange (r_displayrefresh, 0, 240, true);
+	AssertCvarRange (r_displayrefresh, 0, 500, true);
 	r_speeds = Cvar_Get ("r_speeds", "0", 0);
 	Cvar_SetDescription ("r_speeds", "Enables output of rendering surface/polygon total for surfaces, entities, and particles.");
 
@@ -1029,12 +1044,6 @@ void R_Register (void)
 	Cvar_SetDescription ("r_caustics", "Enables rendering of underwater caustic effect.  0 = disabled, 1 = normal, 2 = fragment warp.");
 	r_glows = Cvar_Get ("r_glows", "1", CVAR_ARCHIVE );
 	Cvar_SetDescription ("r_glows", "Enables rendering of texture glow layers.");
-#ifdef NOTTHIRTYFLIGHTS
-	r_saveshotsize = Cvar_Get ("r_saveshotsize", "1", CVAR_ARCHIVE );
-#else
-	r_saveshotsize = Cvar_Get ("r_saveshotsize", "0", CVAR_ARCHIVE );
-#endif
-	Cvar_SetDescription ("r_saveshotsize", "Enables saveshot resolutions above 256x256.");
 //	r_nosubimage = Cvar_Get( "r_nosubimage", "0", 0 );	// unused
 
 	// correct trasparent sorting
@@ -1058,9 +1067,13 @@ void R_Register (void)
 	r_bitdepth = Cvar_Get( "r_bitdepth", "0", 0 );
 	Cvar_SetDescription ("r_bitdepth", "Sets color bit depth.  0 = desktop setting.");
 #ifdef NOTTHIRTYFLIGHTS
-	r_mode = Cvar_Get( "r_mode", "6", CVAR_ARCHIVE );
+#if defined(__APPLE__) || (MACOSX)
+	r_mode = Cvar_Get( "r_mode", "0", CVAR_ARCHIVE );
 #else
-	r_mode = Cvar_Get( "r_mode", "17", CVAR_ARCHIVE );
+	r_mode = Cvar_Get( "r_mode", "6", CVAR_ARCHIVE );
+#endif // __APPLE__ || MACOSX
+#else
+    r_mode = Cvar_Get( "r_mode", "17", CVAR_ARCHIVE );
 #endif
 	Cvar_SetDescription ("r_mode", "Sets enumerated video mode for renderer.  -1 = custom mode.");
 #ifdef _WIN32	// desktop-resolution display mode
@@ -1099,8 +1112,10 @@ void R_Register (void)
 	Cvar_SetDescription ("r_skymip", "Enables scaling down of skybox textures by a factor of 2.");
 	r_showtris = Cvar_Get ("r_showtris", "0", CVAR_CHEAT);
 	Cvar_SetDescription ("r_showtris", "Enables drawing of triangle outlines.  0 = disabled, 1 = no depth testing, 2 = depth testing enabled.");
-	r_showbbox = Cvar_Get ("r_showbbox", "0", CVAR_CHEAT); // show model bounding box
-	Cvar_SetDescription ("r_showbbox", "Enables drawing of entity culling bounding boxes.");
+	r_showbbox = Cvar_Get ("r_showbbox", "0", CVAR_CHEAT);
+	Cvar_SetDescription ("r_showbbox", "Enables drawing of model culling bounding boxes.");
+	r_showbbox_entity = Cvar_Get ("r_showbbox_entity", "0", CVAR_CHEAT);
+	Cvar_SetDescription ("r_showbbox_entity", "Enables drawing of solid entity bounding boxes.");
 	r_ztrick = Cvar_Get ("r_ztrick", "0", 0);
 	Cvar_SetDescription ("r_ztrick", "Enables the skipping of clearing the depth buffer before each render frame.");
 	r_finish = Cvar_Get ("r_finish", "0", CVAR_ARCHIVE);
@@ -1136,7 +1151,7 @@ void R_Register (void)
 #else
 	r_texturemode = Cvar_Get( "r_texturemode", "GL_LINEAR_MIPMAP_LINEAR", CVAR_ARCHIVE );
 #endif
-	Cvar_SetDescription ("r_texturemode", "Sets texture filtering mode.  Accepted values are GL_LINEAR_MIPMAP_NEAREST and GL_LINEAR_MIPMAP_LINEAR.");
+	Cvar_SetDescription ("r_texturemode", "Sets texture filtering mode.  Accepted values are GL_NEAREST, GL_NEAREST_MIPMAP_NEAREST, GL_LINEAR, GL_LINEAR_MIPMAP_NEAREST, and GL_LINEAR_MIPMAP_LINEAR.");
 //	r_texturealphamode = Cvar_Get( "r_texturealphamode", "default", CVAR_ARCHIVE );
 //	r_texturesolidmode = Cvar_Get( "r_texturesolidmode", "default", CVAR_ARCHIVE );
 	r_lockpvs = Cvar_Get( "r_lockpvs", "0", 0 );
@@ -1190,15 +1205,19 @@ void R_Register (void)
 	Cvar_SetDescription ("r_trans_lighting", "Enables lighting on translucent surfaces. 0 = disabled, 1 = vertex lighting, 2 = lightmap.");
 
 	// allow disabling of lighting on warp surfaces
-	r_warp_lighting = Cvar_Get( "r_warp_lighting", "1", CVAR_ARCHIVE );
-	Cvar_SetDescription ("r_warp_lighting", "Enables lighting on warp/water surfaces. 0 = disabled, 1 = vertex lighting.");
+	r_warp_lighting = Cvar_Get( "r_warp_lighting", "2", CVAR_ARCHIVE );
+	Cvar_SetDescription ("r_warp_lighting", "Enables lighting on warp/water surfaces. 0 = disabled, 1 = vertex lighting, 2 = lightmap (if available).");
 
 	// allow adjustment of lighting sampling offset
 	r_warp_lighting_sample_offset = Cvar_Get( "r_warp_lighting_sample_offset", "1", CVAR_ARCHIVE );
 	Cvar_SetDescription ("r_warp_lighting_sample_offset", "Sets offset sampling distance for vertex light sampling.");
 
+	// allow loading of lightmaps on warp surfaces
+	r_load_warp_lightmaps = Cvar_Get( "r_load_warp_lightmaps", "1", CVAR_ARCHIVE );
+	Cvar_SetDescription ("r_load_warp_lightmaps", "Enables loading of lightmaps on warp surfaces for Q2 BSPs (version 38).");
+
 	// allow disabling of trans33+trans66 surface flag combining
-	r_solidalpha = Cvar_Get( "r_solidalpha", "1", CVAR_ARCHIVE );
+	r_solidalpha = Cvar_Get( "r_solidalpha", "0", CVAR_ARCHIVE );
 	Cvar_SetDescription ("r_solidalpha", "Enables rendering of solid alphas (1.0f) when both trans33 and trans66 flags are set.");
 	
 	// allow disabling of backwards alias model roll
@@ -1208,6 +1227,14 @@ void R_Register (void)
 	// allow selection of nullmodel
 	r_old_nullmodel = Cvar_Get( "r_old_nullmodel", "0", CVAR_ARCHIVE );	
 	Cvar_SetDescription ("r_old_nullmodel", "Enables reversing of backwards entity roll.");
+
+	// lighting scale for menu modelviews
+	r_modelview_lightscale = Cvar_Get( "r_modelview_lightscale", "0.8", CVAR_ARCHIVE );	
+	Cvar_SetDescription ("r_modelview_lightscale", "Sets lighting scale for models displayed in menus.  1.0 = fully bright, 0.0 = fully dark.");
+
+	// allow disabling of OpenGL occlusion test for flares
+	r_occlusion_test = Cvar_Get( "r_occlusion_test", "1", CVAR_ARCHIVE );
+	Cvar_SetDescription ("r_occlusion_test", "Enables use of occlusion testing for flares.");
 
 	// added Psychospaz's envmapping
 	r_glass_envmaps = Cvar_Get( "r_glass_envmaps", "1", CVAR_ARCHIVE );
@@ -1220,19 +1247,24 @@ void R_Register (void)
 	r_ext_texture_compression = Cvar_Get( "r_ext_texture_compression", "0", CVAR_ARCHIVE ); // Heffo - ARB Texture Compression
 	Cvar_SetDescription ("r_ext_texture_compression", "Enables ARB texure compression.");
 
+	r_lightcutoff = Cvar_Get( "r_lightcutoff", "0", CVAR_ARCHIVE );	//** DMP dynamic light cutoffnow variable
+	Cvar_SetDescription ("r_lightcutoff", "Sets cutoff distance for dynamic lights.  Lower = smoother.  Higher = faster.");
+
+	r_debug_media = Cvar_Get( "r_debug_media", "0", 0 );		// enables output of generated textures as .tga on startup
+	Cvar_SetDescription ("r_debug_media", "Enables output of generated textures as .tga on renderer startup.");
+
 	r_screenshot_format = Cvar_Get( "r_screenshot_format", "jpg", CVAR_ARCHIVE );			// determines screenshot format
 	Cvar_SetDescription ("r_screenshot_format", "Sets the image format for screenshots.  Accepted values are tga, jpg, and png.");
 //	r_screenshot_jpeg = Cvar_Get( "r_screenshot_jpeg", "1", CVAR_ARCHIVE );					// Heffo - JPEG Screenshots
-#ifdef NOTTHIRTYFLIGHTS
-	r_screenshot_jpeg_quality = Cvar_Get( "r_screenshot_jpeg_quality", "85", CVAR_ARCHIVE );	// Heffo - JPEG Screenshots
-#else
+// Didn't change this due to it being the correct value upstream - Brad
 	r_screenshot_jpeg_quality = Cvar_Get( "r_screenshot_jpeg_quality", "100", CVAR_ARCHIVE );	// Heffo - JPEG Screenshots
-#endif
 	Cvar_SetDescription ("r_screenshot_jpeg_quality", "Sets the image quality for JPEG screenshots.  Accepted values are 1-100.");
 	r_screenshot_gamma_correct = Cvar_Get( "r_screenshot_gamma_correct", "0", CVAR_ARCHIVE );	// gamma correction for screenshots
 	Cvar_SetDescription ("r_screenshot_gamma_correct", "Enables gamma correction of screenshots.");
+	r_screenshot_use_mapname = Cvar_Get( "r_screenshot_use_mapname", "0", CVAR_ARCHIVE );	// screenshot filename contains mapname
+	Cvar_SetDescription ("r_screenshot_use_mapname", "Enables mapname in screenshot filenames.");
 
-	//r_motionblur = Cvar_Get( "r_motionblur", "0", CVAR_ARCHIVE );	// motionblur
+//	r_motionblur = Cvar_Get( "r_motionblur", "0", CVAR_ARCHIVE );	// motion blur
 
 	r_drawbuffer = Cvar_Get( "r_drawbuffer", "GL_BACK", 0 );
 	Cvar_SetDescription ("r_drawbuffer", "Sets draw buffer type.  Accepted values are GL_BACK and GL_FRONT.");
@@ -1259,16 +1291,16 @@ void R_Register (void)
 
 	// Changable color for r_clearcolor (enabled by gl_clar)
 	r_clearcolor_r = Cvar_Get( "r_clearcolor_r", "0", CVAR_ARCHIVE );
-	Cvar_SetDescription ("r_clearcolor_r", "Sets red component (normalized) of background color used with gl_clear set to 1.  Accepted values are 0-1.");
+	Cvar_SetDescription ("r_clearcolor_r", "Sets red component (normalized) of background color used with r_clear set to 1.  Accepted values are 0-1.");
 	r_clearcolor_g = Cvar_Get( "r_clearcolor_g", "0.5", CVAR_ARCHIVE );
-	Cvar_SetDescription ("r_clearcolor_g", "Sets green component (normalized) of background color used with gl_clear set to 1.  Accepted values are 0-1.");
+	Cvar_SetDescription ("r_clearcolor_g", "Sets green component (normalized) of background color used with r_clear set to 1.  Accepted values are 0-1.");
 	r_clearcolor_b = Cvar_Get( "r_clearcolor_b", "0.5", CVAR_ARCHIVE );
-	Cvar_SetDescription ("r_clearcolor_b", "Sets blue component (normalized) of background color used with gl_clear set to 1.  Accepted values are 0-1.");
+	Cvar_SetDescription ("r_clearcolor_b", "Sets blue component (normalized) of background color used with r_clear set to 1.  Accepted values are 0-1.");
 
 #ifdef NOTTHIRTYFLIGHTS
 	r_bloom = Cvar_Get( "r_bloom", "0", CVAR_ARCHIVE );	// BLOOMS
 #else
-	r_bloom = Cvar_Get( "r_bloom", "1", CVAR_ARCHIVE );	// BLOOMS
+	r_bloom = Cvar_Get( "r_bloom", "1", CVAR_ARCHIVE );
 #endif
 	Cvar_SetDescription ("r_bloom", "Enables bloom postprocess effect.");
 
@@ -1277,16 +1309,14 @@ void R_Register (void)
 	r_celshading_width = Cvar_Get( "r_celshading_width", "4", CVAR_ARCHIVE );
 	Cvar_SetDescription ("r_celshading_width", "Sets width in pixels of cel shading outlines.");
 
-	r_skydistance = Cvar_Get("r_skydistance", "24000", CVAR_ARCHIVE); // variable sky range
+	r_skydistance = Cvar_Get("r_skydistance", "18400", CVAR_ARCHIVE); // variable sky range
 	Cvar_SetDescription ("r_skydistance", "Sets render distance of skybox.  Larger values mean a longer visible distance areas with the skybox visible.");
-	r_fog_skyratio = Cvar_Get("r_fog_skyratio", "10", CVAR_ARCHIVE);	// variable sky fog ratio
-	Cvar_SetDescription ("r_fog_skyratio", "Sets ratio of fog far distance for skyboxes versus standard world surfaces.");
+	r_fog_skyratio = Cvar_Get("r_fog_skyratio", "-1", CVAR_ARCHIVE);	// variable sky fog ratio
+	Cvar_SetDescription ("r_fog_skyratio", "Sets ratio of fog far distance for skyboxes versus standard world surfaces.  -1 = auto.");
 	r_subdivide_size = Cvar_Get("r_subdivide_size", "64", CVAR_ARCHIVE);	// chop size for warp surfaces
 	Cvar_SetDescription ("r_subdivide_size", "Sets subdivision size of warp surfaces.  Requires vid_restart for changes to take effect.");
 
 //	r_saturation = Cvar_Get( "r_saturation", "1.0", CVAR_ARCHIVE );	//** DMP saturation setting (.89 good for nvidia)
-	r_lightcutoff = Cvar_Get( "r_lightcutoff", "0", CVAR_ARCHIVE );	//** DMP dynamic light cutoffnow variable
-	Cvar_SetDescription ("r_lightcutoff", "Sets cutoff distance for dynamic lights.  Lower = smoother.  Higher = faster.");
 
 	Cmd_AddCommand ("imagelist", R_ImageList_f);
 	Cmd_AddCommand ("screenshot", R_ScreenShot_f);
@@ -1371,48 +1401,6 @@ qboolean R_SetMode (void)
 	return true;
 }
 
-#if 0	// replaced by Q_StrScanToken()
-/*
-===============
-StringContainsToken
-
-A non-ambiguous alternative to strstr.
-Useful for parsing the GL extension string.
-Similar to code in Fruitz of Dojo Quake2 MacOSX Port.
-===============
-*/
-qboolean StringContainsToken (const char *string, const char *findToken)
-{
-	int			tokenLen;
-	const char	*strPos;
-	char		*tokPos, *terminatorPos;
-
-	if ( !string || !findToken ) 
-		return false;
-	if ( (strchr(findToken, ' ') != NULL) || (findToken[0] == 0) )
-		return false;
-
-	strPos = string;
-	tokenLen = (int)strlen(findToken);
-	
-	while (1)
-	{
-		tokPos = strstr (strPos, findToken);
-
-		if ( !tokPos )
-			break;
-
-		terminatorPos = tokPos + tokenLen;
-
-		if ( (tokPos == strPos || *(tokPos - 1) == ' ') && (*terminatorPos == ' ' || *terminatorPos == 0) )
-			return true;
-
-		strPos = terminatorPos;
-	}
-
-	return false;
-}
-#endif
 
 /*
 ===============
@@ -1423,50 +1411,61 @@ Grabs GL extensions
 */
 qboolean R_CheckGLExtensions (char *reason)
 {
-	qboolean multitexture_found = false;
+	qboolean	ogl_multitexture_found = false;
+	qboolean	arb_multitexture_found = false;
+	qboolean	ogl_occlusion_query_found = false;
+	qboolean	arb_occlusion_query_found = false;
 
-	// OpenGL multitexture on GL 1.2.1 or later or GL_ARB_multitexture
-	// This is checked first, is required
+	// OpenGL multitexture on GL 1.2.1 or later
+	// This is checked first, either this or GL_ARB_multitexture are required
 	glConfig.max_texunits = 2; // must have at least 2
 	if ( (glConfig.version_major >= 2) || (glConfig.version_major == 1 && glConfig.version_minor > 2)
 		|| (glConfig.version_major == 1 && glConfig.version_minor == 2 && glConfig.version_release >= 1) )
 	{
-		qglMultiTexCoord2fARB = (void *) qwglGetProcAddress( "glMultiTexCoord2f" );
-		qglActiveTextureARB = (void *) qwglGetProcAddress( "glActiveTexture" );
-		qglClientActiveTextureARB = (void *) qwglGetProcAddress( "glClientActiveTexture" );
-		if (!qglMultiTexCoord2fARB || !qglActiveTextureARB || !qglClientActiveTextureARB) {
+		qglActiveTextureARB = dllActiveTexture = (void *) qwglGetProcAddress( "glActiveTexture" );
+		qglClientActiveTextureARB = dllClientActiveTexture = (void *) qwglGetProcAddress( "glClientActiveTexture" );
+		qglMultiTexCoord2fARB = dllMultiTexCoord2f = (void *) qwglGetProcAddress( "glMultiTexCoord2f" );
+		if ( !qglMultiTexCoord2fARB || !qglActiveTextureARB || !qglClientActiveTextureARB ) {
 			VID_Printf (PRINT_ALL, "...OpenGL multitexture not found, checking for GL_ARB_multitexture\n" );
 		}
 		else {
 			VID_Printf (PRINT_ALL, "...using OpenGL multitexture\n" );
 			qglGetIntegerv(GL_MAX_TEXTURE_UNITS, &glConfig.max_texunits);
 			VID_Printf (PRINT_ALL, "...GL_MAX_TEXTURE_UNITS: %i\n", glConfig.max_texunits);
-			multitexture_found = true;
+			ogl_multitexture_found = true;
 		}
 	}
-	if ( (!multitexture_found) && Q_StrScanToken( glConfig.extensions_string, "GL_ARB_multitexture", false ) )
+
+	// GL_ARB_multitexture
+	if ( Q_StrScanToken( glConfig.extensions_string, "GL_ARB_multitexture", false ) )
 	{
-		qglMultiTexCoord2fARB = (void *) qwglGetProcAddress( "glMultiTexCoord2fARB" );
-		qglActiveTextureARB = (void *) qwglGetProcAddress( "glActiveTextureARB" );
-		qglClientActiveTextureARB = (void *) qwglGetProcAddress( "glClientActiveTextureARB" );
-		if (!qglMultiTexCoord2fARB || !qglActiveTextureARB || !qglClientActiveTextureARB) {
-			QGL_Shutdown();
-			VID_Printf (PRINT_ALL, "R_Init() - GL_ARB_multitexture functions not implemented in driver!\n" );
-			memcpy (reason, "GL_ARB_multitexture not properly implemented in driver!\0", 55);
-			return false;
+		if (ogl_multitexture_found) {
+			VID_Printf( PRINT_ALL, "...GL_ARB_multitexture deprecated in favor of OpenGL multitexture\n" );
 		}
-		else {
-			VID_Printf (PRINT_ALL, "...using GL_ARB_multitexture\n" );
-			qglGetIntegerv(GL_MAX_TEXTURE_UNITS_ARB, &glConfig.max_texunits);
-			VID_Printf (PRINT_ALL, "...GL_MAX_TEXTURE_UNITS_ARB: %i\n", glConfig.max_texunits);
-			multitexture_found = true;
+		else
+		{
+			qglActiveTextureARB = dllActiveTexture = (void *) qwglGetProcAddress( "glActiveTextureARB" );
+			qglClientActiveTextureARB = dllClientActiveTexture = (void *) qwglGetProcAddress( "glClientActiveTextureARB" );
+			qglMultiTexCoord2fARB = dllMultiTexCoord2f = (void *) qwglGetProcAddress( "glMultiTexCoord2fARB" );
+			if ( !qglMultiTexCoord2fARB || !qglActiveTextureARB || !qglClientActiveTextureARB ) {
+				QGL_Shutdown();
+				VID_Printf (PRINT_ALL, "R_Init() - GL_ARB_multitexture functions not implemented in driver!\n" );
+				memcpy (reason, "GL_ARB_multitexture not properly implemented in driver!\0", 55);
+				return false;
+			}
+			else {
+				VID_Printf (PRINT_ALL, "...using GL_ARB_multitexture\n" );
+				qglGetIntegerv(GL_MAX_TEXTURE_UNITS_ARB, &glConfig.max_texunits);
+				VID_Printf (PRINT_ALL, "...GL_MAX_TEXTURE_UNITS_ARB: %i\n", glConfig.max_texunits);
+				arb_multitexture_found = true;
+			}
 		}
 	}
-	if (!multitexture_found)
+	if ( !ogl_multitexture_found && !arb_multitexture_found )
 	{
 		QGL_Shutdown();
-        VID_Printf (PRINT_ALL, "R_Init() - GL_ARB_multitexture not found\n" );
-		memcpy (reason, "GL_ARB_multitexture not supported by driver!\0", 44);
+        VID_Printf (PRINT_ALL, "R_Init() - OpenGL multitexture and GL_ARB_multitexture not found\n" );
+		memcpy (reason, "OpenGL multitexture and GL_ARB_multitexture not supported by driver!\0", 44);
 		return false;
 	}
 
@@ -1474,17 +1473,17 @@ qboolean R_CheckGLExtensions (char *reason)
 	// GL_EXT_compiled_vertex_array
 	// GL_SGI_compiled_vertex_array
 	glConfig.extCompiledVertArray = false;
-	if ( Q_StrScanToken( glConfig.extensions_string, "GL_EXT_compiled_vertex_array", false ) || 
-		 Q_StrScanToken( glConfig.extensions_string, "GL_SGI_compiled_vertex_array", false ) )
+	if ( Q_StrScanToken(glConfig.extensions_string, "GL_EXT_compiled_vertex_array", false ) || 
+		 Q_StrScanToken(glConfig.extensions_string, "GL_SGI_compiled_vertex_array", false ) )
 	{
 		if (r_ext_compiled_vertex_array->integer)
 		{
-			qglLockArraysEXT = (void *) qwglGetProcAddress( "glLockArraysEXT" );
-			qglUnlockArraysEXT = (void *) qwglGetProcAddress( "glUnlockArraysEXT" );
-			if (!qglLockArraysEXT || !qglUnlockArraysEXT) {
+			qglLockArraysEXT = dllLockArraysEXT = (void *) qwglGetProcAddress( "glLockArraysEXT" );
+			qglUnlockArraysEXT = dllUnlockArraysEXT = (void *) qwglGetProcAddress( "glUnlockArraysEXT" );
+			if ( !qglLockArraysEXT || !qglUnlockArraysEXT ) {
 				VID_Printf (PRINT_ALL, "..." S_COLOR_RED "GL_EXT/SGI_compiled_vertex_array not properly supported!\n");
-				qglLockArraysEXT	= NULL;
-				qglUnlockArraysEXT	= NULL;
+				qglLockArraysEXT	= dllLockArraysEXT = NULL;
+				qglUnlockArraysEXT	= dllLockArraysEXT = NULL;
 			}
 			else {
 				VID_Printf (PRINT_ALL, "...enabling GL_EXT/SGI_compiled_vertex_array\n" );
@@ -1504,10 +1503,10 @@ qboolean R_CheckGLExtensions (char *reason)
 	{
 		if (r_ext_draw_range_elements->integer)
 		{
-			qglDrawRangeElements = (void *) qwglGetProcAddress("glDrawRangeElements");
-			if (!qglDrawRangeElements)
-				qglDrawRangeElements = (void *) qwglGetProcAddress("glDrawRangeElementsEXT");
-			if (!qglDrawRangeElements)
+			qglDrawRangeElements = dllDrawRangeElements = (void *) qwglGetProcAddress("glDrawRangeElements");
+			if ( !qglDrawRangeElements )
+				qglDrawRangeElements = dllDrawRangeElements = (void *) qwglGetProcAddress("glDrawRangeElementsEXT");
+			if ( !qglDrawRangeElements )
 				VID_Printf (PRINT_ALL, "..." S_COLOR_RED "glDrawRangeElements not properly supported!\n");
 			else {
 				VID_Printf (PRINT_ALL, "...using glDrawRangeElements\n");
@@ -1517,14 +1516,14 @@ qboolean R_CheckGLExtensions (char *reason)
 		else
 			VID_Printf (PRINT_ALL, "...ignoring glDrawRangeElements\n");
 	}
-	else if ( Q_StrScanToken( glConfig.extensions_string, "GL_EXT_draw_range_elements", false ) )
+	else if ( Q_StrScanToken(glConfig.extensions_string, "GL_EXT_draw_range_elements", false ) )
 	{
 		if (r_ext_draw_range_elements->integer)
 		{
-			qglDrawRangeElements = (void *) qwglGetProcAddress("glDrawRangeElementsEXT");
-			if (!qglDrawRangeElements)
-				qglDrawRangeElements = (void *) qwglGetProcAddress("glDrawRangeElements");
-			if (!qglDrawRangeElements)
+			qglDrawRangeElements = dllDrawRangeElements = (void *) qwglGetProcAddress("glDrawRangeElementsEXT");
+			if ( !qglDrawRangeElements )
+				qglDrawRangeElements = dllDrawRangeElements = (void *) qwglGetProcAddress("glDrawRangeElements");
+			if ( !qglDrawRangeElements )
 				VID_Printf (PRINT_ALL, "..." S_COLOR_RED "GL_EXT_draw_range_elements not properly supported!\n");
 			else {
 				VID_Printf (PRINT_ALL, "...enabling GL_EXT_draw_range_elements\n");
@@ -1536,7 +1535,6 @@ qboolean R_CheckGLExtensions (char *reason)
 	}
 	else
 		VID_Printf (PRINT_ALL, "...GL_EXT_draw_range_elements not found\n" );
-
 
 	// GL_ARB_texture_non_power_of_two
 	glConfig.arbTextureNonPowerOfTwo = false;
@@ -1707,7 +1705,7 @@ qboolean R_CheckGLExtensions (char *reason)
 	//		VID_Printf (PRINT_ALL, "...ignoring GL_EXT_stencil_two_side\n");
 	}
 	else
-		Com_Printf("...GL_EXT_stencil_two_side not found\n");
+		VID_Printf (PRINT_ALL, "...GL_EXT_stencil_two_side not found\n");
 
 	// GL_ARB_fragment_program
 	glConfig.arb_fragment_program = false;
@@ -1796,6 +1794,67 @@ qboolean R_CheckGLExtensions (char *reason)
 		glConfig.NV_texshaders = false;
 	}
 */
+
+	// OpenGL occlusion query on GL 1.5 or later
+	// This is checked first, either this or GL_ARB_occlusion_query are needed for Kex flares to render properly
+	glConfig.occlusionQuery = false;
+	glConfig.queryBitsSupported = 0;
+	if ( (glConfig.version_major >= 2) || (glConfig.version_major == 1 && glConfig.version_minor >= 5) )
+	{
+	//	VID_Printf (PRINT_ALL, "...checking for OpenGL occlusion query on OpenGL 1.5 or later...\n" );
+		qglGenQueries = (void *) qwglGetProcAddress( "glGenQueries" );
+		qglDeleteQueries = (void *) qwglGetProcAddress( "glDeleteQueries" );
+		qglIsQuery = (void *) qwglGetProcAddress( "glIsQuery" );
+		qglBeginQuery = (void *) qwglGetProcAddress( "glBeginQuery" );
+		qglEndQuery = (void *) qwglGetProcAddress( "glEndQuery" );
+		qglGetQueryiv = (void *) qwglGetProcAddress( "glGetQueryiv" );
+		qglGetQueryObjectiv = (void *) qwglGetProcAddress( "glGetQueryObjectiv" );
+		qglGetQueryObjectuiv = (void *) qwglGetProcAddress( "glGetQueryObjectuiv" );
+		if ( !qglGenQueries || !qglDeleteQueries || !qglIsQuery || !qglBeginQuery ||
+			!qglEndQuery || !qglGetQueryiv || !qglGetQueryObjectiv || !qglGetQueryObjectuiv ) {
+			VID_Printf (PRINT_ALL, "...OpenGL occlusion query not found, checking for GL_ARB_occlusion_query\n" );
+		}
+		else {
+			VID_Printf (PRINT_ALL, "...using OpenGL occlusion query\n" );
+			qglGetQueryiv (GL_SAMPLES_PASSED, GL_QUERY_COUNTER_BITS, &glConfig.queryBitsSupported);
+			VID_Printf (PRINT_ALL, "...GL_QUERY_COUNTER_BITS: %i\n", glConfig.queryBitsSupported);
+			glConfig.occlusionQuery = true;
+			ogl_occlusion_query_found = true;
+		}
+	}
+
+	// GL_ARB_occlusion_query
+	if ( Q_StrScanToken(glConfig.extensions_string, "GL_ARB_occlusion_query", false ) )
+	{
+		if (ogl_occlusion_query_found) {
+			VID_Printf( PRINT_ALL, "...GL_ARB_occlusion_query deprecated in favor of OpenGL occlusion query\n" );
+		}
+		else
+		{
+			qglGenQueries = (void *) qwglGetProcAddress( "glGenQueriesARB" );
+			qglDeleteQueries = (void *) qwglGetProcAddress( "glDeleteQueriesARB" );
+			qglIsQuery = (void *) qwglGetProcAddress( "glIsQueryARB" );
+			qglBeginQuery = (void *) qwglGetProcAddress( "glBeginQueryARB" );
+			qglEndQuery = (void *) qwglGetProcAddress( "glEndQueryARB" );
+			qglGetQueryiv = (void *) qwglGetProcAddress( "glGetQueryivARB" );
+			qglGetQueryObjectiv = (void *) qwglGetProcAddress( "glGetQueryObjectivARB" );
+			qglGetQueryObjectuiv = (void *) qwglGetProcAddress( "glGetQueryObjectuivARB" );
+			if ( !qglGenQueries || !qglDeleteQueries || !qglIsQuery || !qglBeginQuery ||
+				!qglEndQuery || !qglGetQueryiv || !qglGetQueryObjectiv || !qglGetQueryObjectuiv ) {
+				VID_Printf (PRINT_ALL, "...GL_ARB_occlusion_query functions not implemented in driver!\n" );
+			}
+			else {
+				VID_Printf (PRINT_ALL, "...using GL_ARB_occlusion_query\n" );
+				qglGetQueryiv (GL_SAMPLES_PASSED, GL_QUERY_COUNTER_BITS_ARB, &glConfig.queryBitsSupported);
+				VID_Printf (PRINT_ALL, "...GL_QUERY_COUNTER_BITS_ARB: %i\n", glConfig.queryBitsSupported);
+				glConfig.occlusionQuery = true;
+				arb_occlusion_query_found = true;
+			}
+		}
+	}
+	if ( !ogl_occlusion_query_found && !arb_occlusion_query_found ) {
+		VID_Printf (PRINT_ALL, "OpenGL occlusion query and GL_ARB_occlusion_query not found.  Kex flares will be rendered conventionally.\n" );
+	}
 
 	// GL_EXT_texture_filter_anisotropic - NeVo
 	glConfig.anisotropic = false;
@@ -1920,17 +1979,21 @@ qboolean R_Init ( void *hinstance, void *hWnd, char *reason )
 		r_turbsin[j] *= 0.5;
 	}
 
+	// clear saveshot buffer
+	r_saveShot.buffer = NULL;
+	r_saveShot.width = r_saveShot.height = 0;
+
 	Draw_GetPalette ();
-	R_Register();
+	R_Register ();
 
 	// place default error
 	memcpy (reason, "Unknown failure on intialization!\0", 34);
 
-#ifdef _WIN32
+#if defined (_WIN32) || (__APPLE__) || (MACOSX) || (__linux__)
 	// output system info
 	VID_Printf (PRINT_ALL, "OS: %s\n", Cvar_VariableString("sys_osVersion"));
 	VID_Printf (PRINT_ALL, "CPU: %s\n", Cvar_VariableString("sys_cpuString"));
-	VID_Printf (PRINT_ALL, "RAM: %s MB\n", Cvar_VariableString("sys_ramMegs"));
+	VID_Printf (PRINT_ALL, "RAM: %s MB (%s MB accessible)\n", Cvar_VariableString("sys_ramMegs"), Cvar_VariableString("sys_ramMegs_perApp"));
 #endif
 
 	// initialize our QGL dynamic bindings
@@ -1987,13 +2050,17 @@ qboolean R_Init ( void *hinstance, void *hWnd, char *reason )
 //	VID_Printf (PRINT_DEVELOPER, "GL_EXTENSIONS: %s\n", glConfig.extensions_string );
 	if (developer->integer > 0)	// print extensions 2 to a line
 	{
-		char		*extString, *extTok;
+		char		*extString, *p, *extTok;
 		unsigned	line = 0;
+		size_t		extLen;
+
 		VID_Printf (PRINT_DEVELOPER, "GL_EXTENSIONS: " );
 		extString = (char *)glConfig.extensions_string;
-		while (1)
+		extLen = strlen(extString);
+		p = extString;
+		while (p < (extString + extLen))
 		{
-			extTok = COM_Parse(&extString);
+			extTok = COM_Parse(&p);
 			if (!extTok[0])
 				break;
 			line++;
@@ -2015,28 +2082,28 @@ qboolean R_Init ( void *hinstance, void *hWnd, char *reason )
 	strlwr(vendor_buffer);
 
 	// find out the renderer model
-	if (strstr(vendor_buffer, "nvidia")) {
+	if ( strstr(vendor_buffer, "nvidia") ) {
 		glConfig.rendType = GLREND_NVIDIA;
-		if (strstr(renderer_buffer, "geforce"))	glConfig.rendType |= GLREND_GEFORCE;
+		if ( strstr(renderer_buffer, "geforce") )		glConfig.rendType |= GLREND_GEFORCE;
 	}
-	else if (strstr(vendor_buffer, "ati")) {
+	else if ( strstr(vendor_buffer, "ati") ) {
 		glConfig.rendType = GLREND_ATI;
-		if (strstr(vendor_buffer, "radeon"))		glConfig.rendType |= GLREND_RADEON;
+		if  (strstr(vendor_buffer, "radeon") )			glConfig.rendType |= GLREND_RADEON;
 	}
-	else if (strstr(vendor_buffer, "matrox"))		glConfig.rendType = GLREND_MATROX;
-	else if (strstr(vendor_buffer, "intel"))		glConfig.rendType = GLREND_INTEL;
-	else if (strstr	(vendor_buffer, "sgi"))			glConfig.rendType = GLREND_SGI;
-	else if (strstr	(renderer_buffer, "permedia"))	glConfig.rendType = GLREND_PERMEDIA2;
-	else if (strstr	(renderer_buffer, "glint"))		glConfig.rendType = GLREND_GLINT_MX;
-	else if (strstr	(renderer_buffer, "glzicd"))	glConfig.rendType = GLREND_REALIZM;
-	else if (strstr	(renderer_buffer, "pcx1"))		glConfig.rendType = GLREND_PCX1;
-	else if (strstr	(renderer_buffer, "pcx2"))		glConfig.rendType = GLREND_PCX2;
-	else if (strstr	(renderer_buffer, "pmx"))		glConfig.rendType = GLREND_PMX;
-	else if (strstr	(renderer_buffer, "verite"))	glConfig.rendType = GLREND_RENDITION;
-	else if (strstr	(vendor_buffer, "sis"))			glConfig.rendType = GLREND_SIS;
-	else if (strstr (renderer_buffer, "voodoo"))	glConfig.rendType = GLREND_VOODOO;
-	else if (strstr	(renderer_buffer, "gdi generic")) glConfig.rendType = GLREND_MCD;
-	else											glConfig.rendType = GLREND_DEFAULT;
+	else if ( strstr(vendor_buffer, "matrox") )			glConfig.rendType = GLREND_MATROX;
+	else if ( strstr(vendor_buffer, "intel") )			glConfig.rendType = GLREND_INTEL;
+	else if ( strstr(vendor_buffer, "sgi") )			glConfig.rendType = GLREND_SGI;
+	else if ( strstr(renderer_buffer, "permedia") )		glConfig.rendType = GLREND_PERMEDIA2;
+	else if ( strstr(renderer_buffer, "glint") )		glConfig.rendType = GLREND_GLINT_MX;
+	else if ( strstr(renderer_buffer, "glzicd") )		glConfig.rendType = GLREND_REALIZM;
+	else if ( strstr(renderer_buffer, "pcx1") )			glConfig.rendType = GLREND_PCX1;
+	else if ( strstr(renderer_buffer, "pcx2") )			glConfig.rendType = GLREND_PCX2;
+	else if ( strstr(renderer_buffer, "pmx") )			glConfig.rendType = GLREND_PMX;
+	else if ( strstr(renderer_buffer, "verite") )		glConfig.rendType = GLREND_RENDITION;
+	else if ( strstr(vendor_buffer, "sis") )			glConfig.rendType = GLREND_SIS;
+	else if ( strstr(renderer_buffer, "voodoo") )		glConfig.rendType = GLREND_VOODOO;
+	else if ( strstr(renderer_buffer, "gdi generic") )	glConfig.rendType = GLREND_MCD;
+	else												glConfig.rendType = GLREND_DEFAULT;
 
 	if ( toupper( r_monolightmap->string[1] ) != 'F' )
 	{
@@ -2099,10 +2166,10 @@ qboolean R_Init ( void *hinstance, void *hWnd, char *reason )
 		return false;
 
 /*
-	Com_Printf( "Size of dlights: %i\n", sizeof (dlight_t)*MAX_DLIGHTS );
-	Com_Printf( "Size of entities: %i\n", sizeof (entity_t)*MAX_ENTITIES );
-	Com_Printf( "Size of particles: %i\n", sizeof (particle_t)*MAX_PARTICLES );
-	Com_Printf( "Size of decals: %i\n", sizeof (particle_t)*MAX_DECAL_FRAGS );
+	VID_Printf (PRINT_ALL, "Size of dlights: %i\n", sizeof (dlight_t)*MAX_DLIGHTS);
+	VID_Printf (PRINT_ALL, "Size of entities: %i\n", sizeof (entity_t)*MAX_ENTITIES);
+	VID_Printf (PRINT_ALL, "Size of particles: %i\n", sizeof (particle_t)*MAX_PARTICLES);
+	VID_Printf (PRINT_ALL, "Size of decals: %i\n", sizeof (particle_t)*MAX_DECAL_FRAGS);
 */
 
 	// set r_clearColor
@@ -2110,7 +2177,9 @@ qboolean R_Init ( void *hinstance, void *hWnd, char *reason )
 	r_clearColor[1] = min(max(r_clearcolor_g->value, 0.0f), 1.0f);
 	r_clearColor[2] = min(max(r_clearcolor_b->value, 0.0f), 1.0f);
 
-	GL_SetDefaultState();
+	GL_SetDefaultState ();
+
+	R_ClearOcclusionQuerySampleList ();
 
 	// draw our stereo patterns
 #if 0 // commented out until H3D pays us the money they owe us
@@ -2141,9 +2210,11 @@ R_ClearState
 */
 void R_ClearState (void)
 {	
-	R_SetFogVars (false, 0, 0, 0, 0, 0, 0, 0); // clear fog effets
+	R_SetFogVars (false, 0, 0, 0, 0, 0, 0, 0);	// clear fog effets
+	R_InitSkyBoxInfo ();						// reset skybox data
 	GL_EnableMultitexture (false);
 	GL_SetDefaultState ();
+	R_ClearOcclusionQuerySampleList ();
 }
 
 
@@ -2154,20 +2225,24 @@ GL_Strings_f
 */
 void GL_Strings_f (void)
 {
-	char		*extString, *extTok;
+	char		*extString, *p, *extTok;
 	unsigned	line = 0;
+	size_t		extLen;
 
 	VID_Printf (PRINT_ALL, "GL_VENDOR: %s\n", glConfig.vendor_string );
 	VID_Printf (PRINT_ALL, "GL_RENDERER: %s\n", glConfig.renderer_string );
 	VID_Printf (PRINT_ALL, "GL_VERSION: %s\n", glConfig.version_string );
 	VID_Printf (PRINT_ALL, "GL_MAX_TEXTURE_SIZE: %i\n", glConfig.max_texsize );
+	VID_Printf (PRINT_ALL, "GL_MAX_TEXTURE_UNITS_ARB: %i\n", glConfig.max_texunits);
 //	VID_Printf (PRINT_ALL, "GL_EXTENSIONS: %s\n", glConfig.extensions_string );
 	// print extensions 2 to a line
 	VID_Printf (PRINT_ALL, "GL_EXTENSIONS: " );
 	extString = (char *)glConfig.extensions_string;
-	while (1)
+	extLen = strlen(extString);
+	p = extString;
+	while (p < (extString + extLen))
 	{
-		extTok = COM_Parse(&extString);
+		extTok = COM_Parse(&p);
 		if (!extTok[0])
 			break;
 		line++;
@@ -2200,15 +2275,17 @@ void R_Shutdown (void)
 	Cmd_RemoveCommand ("gl_strings");
 //	Cmd_RemoveCommand ("resetvertexlights");
 
-	// Knightmare- Free saveshot buffer
-	if (saveshotdata)
-		free(saveshotdata);
-	saveshotdata = NULL;	// make sure this is null after a vid restart!
+	// free saveshot buffer
+	if (r_saveShot.buffer)
+		Z_Free (r_saveShot.buffer);
+	r_saveShot.buffer = NULL;		// make sure this is null after a vid restart!
+	r_saveShot.width = r_saveShot.height = 0;
 
 	Mod_FreeAll ();
 
+	R_ShutdownOcclusionQueries ();
+
 	R_ShutdownImages ();
-//	R_ClearDisplayLists ();
 	R_ShutdownMedia ();
 
 	//
@@ -2465,9 +2542,8 @@ void R_SetPalette ( const unsigned char *palette)
 			rp[i*4+3] = 0xff;
 		}
 	}
-	//GL_SetTexturePalette( r_rawpalette );
 
-	qglClearColor (0,0,0,0);
+	qglClearColor (0, 0, 0, 0);
 	qglClear (GL_COLOR_BUFFER_BIT);
 //	qglClearColor (1,0, 0.5 , 0.5);
 	qglClearColor (r_clearColor[0], r_clearColor[1], r_clearColor[2], r_clearColor[3]);

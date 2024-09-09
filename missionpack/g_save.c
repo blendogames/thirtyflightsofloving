@@ -158,6 +158,27 @@ field_t fields[] = {
 	{"item", STOFS(item), F_LSTRING, FFL_SPAWNTEMP},
 	{"phase", STOFS(phase), F_FLOAT, FFL_SPAWNTEMP},
 	{"shift", STOFS(shift), F_FLOAT, FFL_SPAWNTEMP},
+	// Knightmare added
+	{"q1sounds", STOFS(q1sounds), F_INT, FFL_SPAWNTEMP|FFL_DEFAULT_NEG},
+	{"skydistance", STOFS(skydistance), F_FLOAT, FFL_SPAWNTEMP},
+	{"cloudname", STOFS(cloudname), F_LSTRING, FFL_SPAWNTEMP},
+	{"lightningfreq", STOFS(lightningfreq), F_FLOAT, FFL_SPAWNTEMP|FFL_DEFAULT_NEG},
+	{"cloudxdir", STOFS(cloudxdir), F_FLOAT, FFL_SPAWNTEMP|FFL_DEFAULT_NEG},
+	{"cloudydir", STOFS(cloudydir), F_FLOAT, FFL_SPAWNTEMP|FFL_DEFAULT_NEG},
+	{"cloud1tile", STOFS(cloud1tile), F_FLOAT, FFL_SPAWNTEMP|FFL_DEFAULT_NEG},
+	{"cloud1speed", STOFS(cloud1speed), F_FLOAT, FFL_SPAWNTEMP|FFL_DEFAULT_NEG},
+	{"cloud1alpha", STOFS(cloud1alpha), F_FLOAT, FFL_SPAWNTEMP|FFL_DEFAULT_NEG},
+	{"cloud2tile", STOFS(cloud2tile), F_FLOAT, FFL_SPAWNTEMP|FFL_DEFAULT_NEG},
+	{"cloud2speed", STOFS(cloud2speed), F_FLOAT, FFL_SPAWNTEMP|FFL_DEFAULT_NEG},
+	{"cloud2alpha", STOFS(cloud2alpha), F_FLOAT, FFL_SPAWNTEMP|FFL_DEFAULT_NEG},
+	{"cloud3tile", STOFS(cloud3tile), F_FLOAT, FFL_SPAWNTEMP|FFL_DEFAULT_NEG},
+	{"cloud3speed", STOFS(cloud3speed), F_FLOAT, FFL_SPAWNTEMP|FFL_DEFAULT_NEG},
+	{"cloud3alpha", STOFS(cloud3alpha), F_FLOAT, FFL_SPAWNTEMP|FFL_DEFAULT_NEG},
+	{"fade_start_dist", STOFS(fade_start_dist), F_INT, FFL_SPAWNTEMP},
+	{"fade_end_dist", STOFS(fade_end_dist), F_INT, FFL_SPAWNTEMP},
+	{"image", STOFS(image), F_LSTRING, FFL_SPAWNTEMP},
+	{"rgba", STOFS(rgba), F_LSTRING, FFL_SPAWNTEMP},
+	{"spritetype", STOFS(spritetype), F_INT, FFL_SPAWNTEMP},
 
 	// need for item field in edict struct, FFL_SPAWNTEMP item will be skipped on saves
 	{"item", FOFS(item), F_ITEM},
@@ -405,7 +426,7 @@ void InitGame (void)
 	gun_y = gi.cvar ("gun_y", "0", 0);
 	gun_z = gi.cvar ("gun_z", "0", 0);
 
-	//FIXME: sv_ prefix is wrong for these
+	// FIXME: sv_ prefix is wrong for these
 	sv_rollspeed = gi.cvar ("sv_rollspeed", "200", 0);
 	sv_rollangle = gi.cvar ("sv_rollangle", "2", 0);
 	sv_maxvelocity = gi.cvar ("sv_maxvelocity", "2000", 0);
@@ -413,6 +434,16 @@ void InitGame (void)
 
 	sv_stopspeed = gi.cvar ("sv_stopspeed", "100", 0);		// PGM - was #define in g_phys.c
 	sv_step_fraction = gi.cvar ("sv_step_fraction", "0.90", 0);	// Knightmare- this was a define in p_view.c
+
+	// Knightmare- enables trigger_gravity affecting players in non-Rogue maps
+	sv_trigger_gravity_player = gi.cvar("sv_trigger_gravity_player", "0", CVAR_ARCHIVE);
+
+	g_aimfix = gi.cvar ("g_aimfix", "0", CVAR_ARCHIVE);								// Knightmare- from Yamagi Q2
+	g_aimfix_min_dist = gi.cvar ("g_aimfix_min_dist", "128", CVAR_ARCHIVE);			// Knightmare- minimum range for aimfix
+	g_aimfix_taper_dist = gi.cvar ("g_aimfix_taper_dist", "128", CVAR_ARCHIVE);		// Knightmare- transition range for aimfix
+
+	g_nm_maphacks = gi.cvar ("g_nm_maphacks", "0", 0);								// Knightmare- enables hacks for Neil Manke's Q2 maps
+	g_use_rogue_spawnflags = gi.cvar ("g_use_rogue_spawnflags", "0", CVAR_LATCH);	// Knightmare- enables use of Rogue spawnflags for target_laser in non-Rogue maps
 
 //ROGUE
 	g_showlogic = gi.cvar ("g_showlogic", "0", 0);
@@ -513,27 +544,27 @@ void InitGame (void)
 	rotate_distance = gi.cvar("rotate_distance", "1", CVAR_SERVERINFO);
 
 	// GL stuff
-	gl_clear = gi.cvar("gl_clear", "0", 0);
+	gl_clear = gi.cvar(GL_CLEAR_CVAR, "0", 0);
 
 	// Lazarus saved cvars that we may or may not manipulate, but need to
 	// restore to original values upon map exit.
-	lazarus_cd_loop = gi.cvar("lazarus_cd_loop", "0", 0);
-	lazarus_gl_clear= gi.cvar("lazarus_gl_clear","0", 0);
-	lazarus_pitch   = gi.cvar("lazarus_pitch",   "0", 0);
-	lazarus_yaw     = gi.cvar("lazarus_yaw",     "0", 0);
-	lazarus_joyp    = gi.cvar("lazarus_joyp",    "0", 0);
-	lazarus_joyy    = gi.cvar("lazarus_joyy",    "0", 0);
-	lazarus_cl_gun  = gi.cvar("lazarus_cl_gun",  "0", 0);
-	lazarus_crosshair = gi.cvar("lazarus_crosshair", "0", 0);
+	lazarus_cd_loop		= gi.cvar("lazarus_cd_loop", "0", 0);
+	lazarus_r_clear		= gi.cvar("lazarus_r_clear", "0", 0);
+	lazarus_pitch		= gi.cvar("lazarus_pitch", "0", 0);
+	lazarus_yaw			= gi.cvar("lazarus_yaw", "0", 0);
+	lazarus_joyp		= gi.cvar("lazarus_joyp", "0", 0);
+	lazarus_joyy		= gi.cvar("lazarus_joyy", "0", 0);
+	lazarus_cl_gun		= gi.cvar("lazarus_cl_gun", "0", 0);
+	lazarus_crosshair	= gi.cvar("lazarus_crosshair", "0", 0);
 
-	/*if (lazarus_gl_clear->value)
-		gi.cvar_forceset("gl_clear",         va("%d", lazarus_gl_clear->value));
+/*	if (lazarus_r_clear->value)
+		gi.cvar_forceset(GL_CLEAR_CVAR,         va("%d", lazarus_r_clear->value));
 	else
-		gi.cvar_forceset("lazarus_gl_clear", va("%d", gl_clear->value));*/
+		gi.cvar_forceset("lazarus_r_clear", va("%d", gl_clear->value)); */
 
 	if (!deathmatch->value && !coop->value)
 	{
-		/*if (lazarus_pitch->value) {
+	/*	if (lazarus_pitch->value) {
 			gi.cvar_forceset("cd_loopcount",         va("%d", (int)(lazarus_cd_loop->value)));
 			gi.cvar_forceset("m_pitch",              va("%f", lazarus_pitch->value));
 			gi.cvar_forceset("m_yaw",                va("%f", lazarus_yaw->value));
@@ -541,7 +572,7 @@ void InitGame (void)
 			gi.cvar_forceset("crosshair",            va("%d", (int)(lazarus_crosshair->value)));
 		}
 		else
-		{*/
+		{ */
 			gi.cvar_forceset("lazarus_cd_loop",        va("%d", (int)(cd_loopcount->value)));
 #ifndef KMQUAKE2_ENGINE_MOD // engine has zoom mode and autosensitivity
 			gi.cvar_forceset("lazarus_pitch",          va("%f", m_pitch->value));
@@ -569,6 +600,11 @@ void InitGame (void)
 
 	bounce_bounce = gi.cvar("bounce_bounce", "0.5", 0);
 	bounce_minv   = gi.cvar("bounce_minv",   "60",  0);
+
+#ifndef KMQUAKE2_ENGINE_MOD
+    // From Q2Pro- export our own features
+    gi.cvar_forceset ("g_features", va("%d", GMF_ENHANCED_SAVEGAMES));
+#endif
 
 	// items
 	InitItems ();
@@ -598,7 +634,7 @@ void InitGame (void)
 //======
 
 #ifdef FMOD_FOOTSTEPS
-	if(footstep_sounds->value)
+	if (footstep_sounds->value)
 		ReadTextureSurfaceAssignments();
 #endif
 }
@@ -606,6 +642,10 @@ void InitGame (void)
 //=========================================================
 
 #ifdef SAVEGAME_USE_FUNCTION_TABLE
+
+#ifdef _MSC_VER
+#pragma warning(disable : 4054)	// type cast for function pointers
+#endif	// _MSC_VER
 
 typedef struct {
 	char *funcStr;
@@ -1277,7 +1317,7 @@ void WriteLevel (char *filename)
 		// Knightmare- don't save reflections
 		if (ent->flags & FL_REFLECT)
 			continue;
-		if (!Q_stricmp(ent->classname,"target_playback"))
+		if ( !Q_stricmp(ent->classname, "target_playback") )
 		{
 			edict_t	e;
 			memcpy(&e,ent,sizeof(edict_t));
@@ -1336,7 +1376,7 @@ void ReadLevel (char *filename)
 	void	*base;
 	edict_t	*ent;
 
-	if(developer->value)
+	if (developer->value)
 		gi.dprintf ("==== ReadLevel ====\n");
 
 	f = fopen (filename, "rb");
@@ -1444,4 +1484,11 @@ void ReadLevel (char *filename)
 		LoadTransitionEnts();
 		actor_files();
 	}
+
+	// Knightmare- reload static cached sounds for entities
+	G_SoundcacheEntities ();
+
+	// Knightmare- precache transitioning player inventories here
+	// Fixes lag when changing weapons after level transition
+	G_PrecachePlayerInventories ();
 }

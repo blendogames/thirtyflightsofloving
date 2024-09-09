@@ -13,6 +13,8 @@
 #endif
 
 #include <assert.h>
+#include <limits.h>
+#include <ctype.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdarg.h>
@@ -71,8 +73,6 @@ __inline int Q_vsnprintf (char *Dest, size_t Count, const char *Format, va_list 
 #ifdef KMQUAKE2_ENGINE_MOD
 // 32-bit pmove coords when using custom engine
 #define LARGE_MAP_SIZE
-// looping of attenuated sounds
-#define LOOP_SOUND_ATTENUATION
 #endif
 
 #define SAVEGAME_USE_FUNCTION_TABLE
@@ -274,9 +274,9 @@ void RotatePointAroundVector( vec3_t dst, const vec3_t dir, const vec3_t point, 
 //=============================================
 
 char *COM_SkipPath (char *pathname);
-void COM_StripExtension (char *in, char *out);
-void COM_FileBase (char *in, char *out);
-void COM_FilePath (char *in, char *out);
+void COM_StripExtension (char *in, char *out, size_t outSize);
+void COM_FileBase (char *in, char *out, size_t outSize);
+void COM_FilePath (char *in, char *out, size_t outSize);
 void COM_DefaultExtension (char *path, size_t pathSize, char *extension);
 
 char *COM_Parse (char **data_p);
@@ -965,6 +965,10 @@ typedef enum
 	TE_SHOCKSPLASH,			//57
 	TE_BLASTER_COLORED,		//58
 	TE_RAILTRAIL_COLORED,	//59
+	TE_LIGHTNING_ATTACK,	//60
+	TE_EXPLOSION_Q1,		//61
+	TE_SPIKEIMPACT_Q1,		//62
+	TE_LAVASPLASH_Q1,		//63
 } temp_event_t;
 
 #define SPLASH_UNKNOWN		0
@@ -1087,7 +1091,15 @@ typedef enum
 #define	CS_PLAYERSKINS		(CS_ITEMS+MAX_ITEMS)
 #define CS_GENERAL			(CS_PLAYERSKINS+MAX_CLIENTS)
 #define	CS_HUDVARIANT		(CS_GENERAL+MAX_GENERAL)
-#define	CS_PAKFILE			(CS_HUDVARIANT+1)
+#define CS_SKYDISTANCE		(CS_HUDVARIANT+1)
+#define CS_CLOUDNAME		(CS_SKYDISTANCE+1)
+#define CS_CLOUDLIGHTFREQ	(CS_CLOUDNAME+1)
+#define CS_CLOUDDIR			(CS_CLOUDLIGHTFREQ+1)	// CLOUDX CLOUDY %f %f format
+#define CS_CLOUDTILE		(CS_CLOUDDIR+1)			// CLOUD1 CLOUD2 CLOUD3 %f %f %f format
+#define CS_CLOUDSPEED		(CS_CLOUDTILE+1)		// CLOUD1 CLOUD2 CLOUD3 %f %f %f format
+#define CS_CLOUDALPHA		(CS_CLOUDSPEED+1)		// CLOUD1 CLOUD2 CLOUD3 %f %f %f format
+#define	CS_PAKFILE			(CS_CLOUDALPHA+1)
+#define	MAX_CONFIGSTRINGS	(CS_PAKFILE+1)
 //#define MAX_CONFIGSTRINGS	(CS_GENERAL+MAX_GENERAL)
 
 // Knightmare- hacked configstring offsets for backward compatiblity
@@ -1140,13 +1152,13 @@ typedef struct entity_state_s
 	vec3_t	old_origin;		// for lerping
 	int		modelindex;
 	int		modelindex2, modelindex3, modelindex4;	// weapons, CTF flags, etc
-#ifdef KMQUAKE2_ENGINE_MOD //Knightmare- Privater wanted this
-	int		modelindex5, modelindex6;	//more attached models
+#ifdef KMQUAKE2_ENGINE_MOD // Knightmare- Privater wanted this
+	int		modelindex5, modelindex6;	// more attached models
 #endif
 	int		frame;
 	int		skinnum;
-#ifdef KMQUAKE2_ENGINE_MOD //Knightmare- allow the server to set this
-	float	alpha;	//entity transparency
+#ifdef KMQUAKE2_ENGINE_MOD	// Knightmare- allow the server to set this
+	float	alpha;			// entity transparency
 #endif
 	int		effects;
 	int		renderfx;
@@ -1154,8 +1166,8 @@ typedef struct entity_state_s
 							// 8*(bits 5-9) is z down distance, 8(bits10-15) is z up
 							// gi.linkentity sets this properly
 	int		sound;			// for looping sounds, to guarantee shutoff
-#ifdef LOOP_SOUND_ATTENUATION // Knightmare- added sound attenuation
-	float	attenuation;
+#ifdef KMQUAKE2_ENGINE_MOD		// Knightmare- allow the server to set this
+	float	loop_attenuation;	// looped sound attenuation
 #endif
 	int		event;			// impulse events -- muzzle flashes, footsteps, etc
 							// events only go out for a single frame, they

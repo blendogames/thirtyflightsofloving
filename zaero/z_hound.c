@@ -543,7 +543,9 @@ End Death Stuff
 ===
 */
 
-void SP_monster_hound_precache(void)
+
+// Knightmare- added soundcache function
+void monster_hound_soundcache (edict_t *self)
 {
 	sound_pain1 = gi.soundindex ("monsters/hound/hpain1.wav");	
 	sound_pain2 = gi.soundindex ("monsters/hound/hpain2.wav");	
@@ -554,6 +556,12 @@ void SP_monster_hound_precache(void)
 	sound_jump = gi.soundindex("monsters/hound/hjump.wav");
 	sound_bite = gi.soundindex("monsters/hound/hbite1.wav");
 	sound_bitemiss = gi.soundindex("monsters/hound/hbite2.wav");
+}
+
+void SP_monster_hound_precache (edict_t *self)
+{
+	// Knightmare- use soundcache function
+	monster_hound_soundcache (self);
 }
 
 
@@ -567,7 +575,7 @@ void SP_monster_hound (edict_t *self)
 		return;
 	}
 
-	SP_monster_hound_precache();
+	SP_monster_hound_precache (self);
 
 	self->s.modelindex = gi.modelindex ("models/monsters/guard/hound/tris.md2");
 	VectorSet (self->mins, -16, -16, -24);
@@ -616,20 +624,20 @@ void SP_monster_hound (edict_t *self)
 
 void monster_think (edict_t *self);
 qboolean monster_start (edict_t *self);
-void hound_createHound(edict_t *self, float healthPercent)
+void hound_createHound (edict_t *self, float healthPercent)
 {
 	edict_t *hound;
 	
 	hound = G_Spawn();
 	
-	//*hound = *self;
+//	*hound = *self;
 	
 	hound->s.modelindex = gi.modelindex ("models/monsters/guard/hound/tris.md2");
 	VectorSet (hound->mins, -16, -16, -24);
 	VectorSet (hound->maxs, 16, 16, 24);
-	VectorCopy(self->s.origin, hound->s.origin);
-	VectorCopy(self->s.old_origin, hound->s.old_origin);
-	VectorCopy(self->s.angles, hound->s.angles);
+	VectorCopy (self->s.origin, hound->s.origin);
+	VectorCopy (self->s.old_origin, hound->s.old_origin);
+	VectorCopy (self->s.angles, hound->s.angles);
 	hound->movetype = MOVETYPE_STEP;
 	hound->solid = SOLID_BBOX;
 	hound->takedamage = DAMAGE_YES;
@@ -665,12 +673,10 @@ void hound_createHound(edict_t *self, float healthPercent)
 	hound->think = monster_think;
 	hound->nextthink = level.time + FRAMETIME;
 
-	//monster_start(hound);
+//	monster_start(hound);
 
 	gi.linkentity (hound);
 
 	// move the fucker now!!!
 	ai_move (hound, 20);
 }
-
-

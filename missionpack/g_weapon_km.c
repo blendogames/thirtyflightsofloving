@@ -361,16 +361,17 @@ void fire_shock_sphere (edict_t *self, vec3_t start, vec3_t dir, int damage, int
 
 void shocksphere_delayed_start (edict_t *shocksphere)
 {
-	if (g_edicts[1].linkcount)
+//	if (g_edicts[1].linkcount)
+	if ( AnyPlayerSpawned() )	// Knightmare- function handles multiple players
 	{
-		VectorScale(shocksphere->movedir,shocksphere->moveinfo.speed,shocksphere->velocity);
+		VectorScale (shocksphere->movedir, shocksphere->moveinfo.speed, shocksphere->velocity);
 		if (shocksphere->count > 0)
 			shocksphere->movetype  = MOVETYPE_BOUNCE;
 		else
 			shocksphere->movetype  = MOVETYPE_WALLBOUNCE;
 		shocksphere->nextthink = level.time + FRAMETIME;
 		shocksphere->think     = shock_sphere_think;
-		gi.linkentity(shocksphere);
+		gi.linkentity (shocksphere);
 	}
 	else
 		shocksphere->nextthink = level.time + FRAMETIME;
@@ -385,10 +386,10 @@ void SP_shocksphere (edict_t *shocksphere)
 	if (game.maxclients == 1)
 	{
 		shocksphere->movetype  = MOVETYPE_NONE;
-		VectorCopy(shocksphere->velocity,shocksphere->movedir);
-		VectorNormalize(shocksphere->movedir);
+		VectorCopy (shocksphere->velocity, shocksphere->movedir);
+		VectorNormalize (shocksphere->movedir);
 		shocksphere->moveinfo.speed = VectorLength(shocksphere->velocity);
-		VectorClear(shocksphere->velocity);
+		VectorClear (shocksphere->velocity);
 		shocksphere->think     = shocksphere_delayed_start;
 		shocksphere->nextthink = level.time + FRAMETIME;
 	}

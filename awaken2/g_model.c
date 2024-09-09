@@ -27,7 +27,8 @@
 //
 //	"usermodel" = The model to load (models/ is already coded)
 //	"startframe" = The starting frame : default 0
-//	"userframes" = The number of frames you want to display after startframe
+//	"framenumbers" = The number of frames you want to display after startframe
+//	"spritetype"   = Set this to 1 to make sprites render as angled and vertical
 //	"solidstate" = 1 : SOLID_NOT - not solid at all
 //			       2 : SOLID_BBOX - solid and affected by gravity
 //			       3 : NO DROP - solid but not affected by gravity
@@ -75,8 +76,8 @@ void model_spawn_use (edict_t *self, edict_t *other, edict_t *activator)
 			self->nextthink = level.time + FRAMETIME;
 		}
 		self->s.sound = self->noise_index;
-#ifdef LOOP_SOUND_ATTENUATION
-		self->s.attenuation = self->attenuation;
+#ifdef KMQUAKE2_ENGINE_MOD
+		self->s.loop_attenuation = self->attenuation;
 #endif
 	}
 	else             //we started active
@@ -231,11 +232,15 @@ void SP_model_spawn (edict_t *ent)
 		ent->s.frame = ent->startframe;
 	}
 
+	// Knightmare- support for angled sprites
+	if (st.spritetype == 1)
+		ent->s.renderfx |= RF_SPRITE_ORIENTED;
+
 	if (st.noise)
 		ent->noise_index = gi.soundindex  (st.noise);
 	ent->s.sound = ent->noise_index;
-#ifdef LOOP_SOUND_ATTENUATION
-	ent->s.attenuation = ent->attenuation;
+#ifdef KMQUAKE2_ENGINE_MOD
+	ent->s.loop_attenuation = ent->attenuation;
 #endif
 
 	if (ent->skinnum) // Knightmare- selectable skin

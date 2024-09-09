@@ -478,11 +478,24 @@ void hknight_magic (edict_t *self)
 }
 
 
+// Knightmare- added soundcache function
+void monster_q1_hknight_soundcache (edict_t *self)
+{
+	sound_death =	gi.soundindex ("q1hknight/death1.wav");
+	sound_gib =		gi.soundindex ("q1player/udeath.wav");
+	sound_pain =	gi.soundindex ("q1hknight/pain1.wav");
+	sound_idle =	gi.soundindex ("q1hknight/idle.wav");
+	sound_sight =	gi.soundindex ("q1hknight/sight1.wav");
+	sound_sword1 =	gi.soundindex ("q1hknight/slash1.wav");
+	sound_sword2 =	gi.soundindex ("q1hknight/slash1.wav");
+	sound_flame =	gi.soundindex ("q1hknight/attack1.wav");
+}
+
 //
 // SPAWN
 //
 
-/*QUAKED SP_monster_q1_hknight (1 .5 0) (-16 -16 -24) (16 16 40) Ambush Trigger_Spawn Sight
+/*QUAKED monster_q1_hknight (1 .5 0) (-16 -16 -24) (16 16 40) Ambush Trigger_Spawn Sight
 model="models/monsters/q1hknight/tris.md2"
 */
 void SP_monster_q1_hknight (edict_t *self)
@@ -493,14 +506,8 @@ void SP_monster_q1_hknight (edict_t *self)
 		return;
 	}
 
-	sound_death =	gi.soundindex ("q1hknight/death1.wav");
-	sound_gib =		gi.soundindex ("q1player/udeath.wav");
-	sound_pain =	gi.soundindex ("q1hknight/pain1.wav");
-	sound_idle =	gi.soundindex ("q1hknight/idle.wav");
-	sound_sight =	gi.soundindex ("q1hknight/sight1.wav");
-	sound_sword1 =	gi.soundindex ("q1hknight/slash1.wav");
-	sound_sword2 =	gi.soundindex ("q1hknight/slash1.wav");
-	sound_flame =	gi.soundindex ("q1hknight/attack1.wav");
+	// Knightmare- use soundcache function
+	monster_q1_hknight_soundcache (self);
 
 	// precache gibs
 	gi.modelindex ("models/monsters/q1hknight/head/tris.md2");

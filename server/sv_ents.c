@@ -122,12 +122,12 @@ void SV_EmitProjectileUpdate (sizebuf_t *msg)
 =============
 SV_EmitPacketEntities
 
-Writes a delta update of an entity_state_t list to the message.
+Writes a delta update of an centity_state_t list to the message.
 =============
 */
 void SV_EmitPacketEntities (client_frame_t *from, client_frame_t *to, sizebuf_t *msg)
 {
-	entity_state_t	*oldent, *newent;
+	centity_state_t	*oldent = NULL, *newent = NULL;
 	int		oldindex, newindex;
 	int		oldnum, newnum;
 	int		from_num_entities;
@@ -303,7 +303,7 @@ void SV_WritePlayerstateToClient (client_frame_t *from, client_frame_t *to, size
 		pflags |= PS_WEAPONFRAME;
 
 #ifdef NEW_PLAYER_STATE_MEMBERS
-	//Knightmare added
+	// Knightmare added
 	if (ps->gunskin != ops->gunskin)
 		pflags |= PS_WEAPONSKIN;
 
@@ -328,18 +328,18 @@ void SV_WritePlayerstateToClient (client_frame_t *from, client_frame_t *to, size
 
   	if (ps->stopspeed != ops->stopspeed)
 		pflags |= PS_STOPSPEED;
-#endif	//end Knightmare
+#endif	// end Knightmare
 
 	pflags |= PS_WEAPONINDEX;
-	pflags |= PS_WEAPONINDEX2; //Knightmare added
+	pflags |= PS_WEAPONINDEX2;	// Knightmare added
 
 
 	//
 	// write it
 	//
 	MSG_WriteByte (msg, svc_playerinfo);
-	//MSG_WriteShort (msg, pflags);
-	MSG_WriteLong (msg, pflags); //Knightmare- write as long
+//	MSG_WriteShort (msg, pflags);
+	MSG_WriteLong (msg, pflags);	// Knightmare- write as long
 
 	//
 	// write the pmove_state_t
@@ -347,17 +347,11 @@ void SV_WritePlayerstateToClient (client_frame_t *from, client_frame_t *to, size
 	if (pflags & PS_M_TYPE)
 		MSG_WriteByte (msg, ps->pmove.pm_type);
 
-	if (pflags & PS_M_ORIGIN) // FIXME- map size
+	if (pflags & PS_M_ORIGIN)
 	{
-#ifdef LARGE_MAP_SIZE
-		MSG_WritePMCoordNew (msg, ps->pmove.origin[0]);
-		MSG_WritePMCoordNew (msg, ps->pmove.origin[1]);
-		MSG_WritePMCoordNew (msg, ps->pmove.origin[2]);
-#else
-		MSG_WriteShort (msg, ps->pmove.origin[0]);
-		MSG_WriteShort (msg, ps->pmove.origin[1]);
-		MSG_WriteShort (msg, ps->pmove.origin[2]);
-#endif
+		MSG_WritePMCoord (msg, ps->pmove.origin[0]);
+		MSG_WritePMCoord (msg, ps->pmove.origin[1]);
+		MSG_WritePMCoord (msg, ps->pmove.origin[2]);
 	}
 
 	if (pflags & PS_M_VELOCITY)
@@ -407,12 +401,12 @@ void SV_WritePlayerstateToClient (client_frame_t *from, client_frame_t *to, size
 		MSG_WriteChar (msg, ps->kick_angles[2]*4);
 	}
 
-	if (pflags & PS_WEAPONINDEX)	//Knightmare- 12/23/2001- send as short
+	if (pflags & PS_WEAPONINDEX)	// Knightmare- send as short
 		MSG_WriteShort (msg, ps->gunindex);
 
-#ifdef NEW_PLAYER_STATE_MEMBERS	//Knightmare added
+#ifdef NEW_PLAYER_STATE_MEMBERS	// Knightmare added
 	if (pflags & PS_WEAPONINDEX2)
-		MSG_WriteShort (msg, ps->gunindex2); //Knightmare- gunindex2 support
+		MSG_WriteShort (msg, ps->gunindex2);	// Knightmare- gunindex2 support
 #endif		
 
 	if ((pflags & PS_WEAPONFRAME) || (pflags & PS_WEAPONFRAME2))
@@ -420,9 +414,9 @@ void SV_WritePlayerstateToClient (client_frame_t *from, client_frame_t *to, size
 		if (pflags & PS_WEAPONFRAME)
 			MSG_WriteByte (msg, ps->gunframe);
 
-#ifdef NEW_PLAYER_STATE_MEMBERS 	//Knightmare added
+#ifdef NEW_PLAYER_STATE_MEMBERS 	// Knightmare added
 		if (pflags & PS_WEAPONFRAME2)
-			MSG_WriteByte (msg, ps->gunframe2); //Knightmare- gunframe2 support
+			MSG_WriteByte (msg, ps->gunframe2); // Knightmare- gunframe2 support
 #endif
 
 		MSG_WriteChar (msg, ps->gunoffset[0]*4);
@@ -502,7 +496,7 @@ void SV_WriteFrameToClient (client_t *client, sizebuf_t *msg)
 	client_frame_t		*frame, *oldframe;
 	int					lastframe;
 
-	//Com_Printf ("%i -> %i\n", client->lastframe, sv.framenum);
+//	Com_Printf ("%i -> %i\n", client->lastframe, sv.framenum);
 	// this is the frame we are creating
 	frame = &client->frames[sv.framenum & UPDATE_MASK];
 
@@ -513,7 +507,7 @@ void SV_WriteFrameToClient (client_t *client, sizebuf_t *msg)
 	}
 	else if (sv.framenum - client->lastframe >= (UPDATE_BACKUP - 3) )
 	{	// client hasn't gotten a good message through in a long time
-//		Com_Printf ("%s: Delta request from out-of-date packet.\n", client->name);
+	//	Com_Printf ("%s: Delta request from out-of-date packet.\n", client->name);
 		oldframe = NULL;
 		lastframe = -1;
 	}
@@ -600,6 +594,58 @@ void SV_FatPVS (vec3_t org)
 
 /*
 =============
+SV_SetEntStateAddedFields
+
+Sets additional fields in a centity_state_t struct
+=============
+*/
+void SV_SetEntStateAddedFields (edict_t *ent, centity_state_t *s)
+{
+	vec3_t	bmins, bmaxs;
+
+	if ( !ent || !ent->inuse || !s )
+		return;
+
+	// set mins/maxs if solid encoding of bbox doesn't match
+	// assumes ent has already been linked
+	if ( (ent->solid == SOLID_BBOX) && !(ent->svflags & SVF_DEADMONSTER) &&
+		( !VectorCompare(ent->mins, vec3_origin) || !VectorCompare(ent->maxs, vec3_origin) ) )
+	{
+		MSG_UnpackSolid16 (ent->s.solid, bmins, bmaxs);
+
+		if ( !VectorCompare(ent->mins, bmins) || !VectorCompare(ent->maxs, bmaxs) )	// packed bbox doesn't match
+		{
+			if ( ((int)ent->mins[0] < SHRT_MIN) || ((int)ent->mins[0] > SHRT_MAX) ||
+				((int)ent->mins[1] < SHRT_MIN) || ((int)ent->mins[1] > SHRT_MAX) ||
+				((int)ent->mins[2] < SHRT_MIN) || ((int)ent->mins[2] > SHRT_MAX) ||
+				((int)ent->maxs[0] < SHRT_MIN) || ((int)ent->maxs[0] > SHRT_MAX) ||
+				((int)ent->maxs[1] < SHRT_MIN) || ((int)ent->maxs[1] > SHRT_MAX) ||
+				((int)ent->maxs[2] < SHRT_MIN) || ((int)ent->maxs[2] > SHRT_MAX) ) {
+				s->iflags |= IF_REAL_BBOX;
+			}
+			else if ( ((int)ent->mins[0] > 0) || ((int)ent->mins[0] < -255) ||
+					((int)ent->mins[1] > 0) || ((int)ent->mins[1] < -255) ||
+					((int)ent->mins[2] > 0) || ((int)ent->mins[2] < -255) ||
+					((int)ent->maxs[2] < 0) || ((int)ent->maxs[2] > 255) ||
+					((int)ent->maxs[2] < 0) || ((int)ent->maxs[2] > 255) ||
+					((int)ent->maxs[2] < -32) || ((int)ent->maxs[2] > 223) ) {	// z maxs can go to -32
+				s->iflags |= IF_REAL_BBOX_16;
+			}
+			else {
+				s->iflags |= IF_REAL_BBOX_8;
+			}
+
+			VectorCopy (ent->mins, s->mins);
+			VectorCopy (ent->maxs, s->maxs);
+		}
+	}
+
+	// additional centity_state_t fields will be set here
+}
+
+
+/*
+=============
 SV_BuildClientFrame
 
 Decides which entities are going to be visible to the client, and
@@ -613,7 +659,7 @@ void SV_BuildClientFrame (client_t *client)
 	edict_t	*ent;
 	edict_t	*clent;
 	client_frame_t	*frame;
-	entity_state_t	*state;
+	centity_state_t	*state;
 	int		l;
 	int		clientarea, clientcluster;
 	int		leafnum;
@@ -751,11 +797,18 @@ void SV_BuildClientFrame (client_t *client)
 			Com_DPrintf ("FIXING ENT->S.NUMBER!!!\n");
 			ent->s.number = e;
 		}
-		*state = ent->s;
+	//	*state = ent->s;
+		// Knightmare- do manual copy instead of implicit memcpy
+		memset (state, 0, sizeof(centity_state_t));
+		memcpy (state, &ent->s, sizeof(entity_state_t));
 
 		// don't mark players missiles as solid
 		if (ent->owner == client->edict)
 			state->solid = 0;
+
+		// set centity_state_t added fields- bbox, Q3 model player frames, etc
+		SV_SetEntStateAddedFields (ent, state);
+		// end Knightmare
 
 		svs.next_client_entities++;
 		frame->num_entities++;
@@ -775,7 +828,8 @@ void SV_RecordDemoMessage (void)
 {
 	int			e;
 	edict_t		*ent;
-	entity_state_t	nostate;
+	centity_state_t	nostate;
+	centity_state_t	entstate;
 	sizebuf_t	buf;
 	byte		buf_data[32768];
 	int			len;
@@ -801,7 +855,16 @@ void SV_RecordDemoMessage (void)
 			ent->s.number && 
 			(ent->s.modelindex || ent->s.effects || ent->s.sound || ent->s.event) && 
 			!(ent->svflags & SVF_NOCLIENT))
-			MSG_WriteDeltaEntity (&nostate, &ent->s, &buf, false, true);
+		//	MSG_WriteDeltaEntity (&nostate, &ent->s, &buf, false, true);
+			// Knightmare- copy off ent->s to temp centity_state_t
+			memset (&entstate, 0, sizeof(centity_state_t));
+			memcpy (&entstate, &ent->s, sizeof(entity_state_t));
+
+			// set centity_state_t added fields- bbox, Q3 model player frames, etc
+			SV_SetEntStateAddedFields (ent, &entstate);
+
+			MSG_WriteDeltaEntity (&nostate, &entstate, &buf, false, true);
+			// end Knightmare
 
 		e++;
 		ent = EDICT_NUM(e);

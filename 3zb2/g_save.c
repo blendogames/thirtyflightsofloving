@@ -75,6 +75,31 @@ field_t fields[] = {
 	{"play", FOFS(play), F_FUNCTION, FFL_NOSPAWN},
 	// end Knightmare
 
+	// Knightmare added
+	{"phase", STOFS(phase), F_FLOAT, FFL_SPAWNTEMP},
+	{"shift", STOFS(shift), F_FLOAT, FFL_SPAWNTEMP},
+	{"skydistance", STOFS(skydistance), F_FLOAT, FFL_SPAWNTEMP},
+	{"cloudname", STOFS(cloudname), F_LSTRING, FFL_SPAWNTEMP},
+	{"lightningfreq", STOFS(lightningfreq), F_FLOAT, FFL_SPAWNTEMP|FFL_DEFAULT_NEG},
+	{"cloudxdir", STOFS(cloudxdir), F_FLOAT, FFL_SPAWNTEMP|FFL_DEFAULT_NEG},
+	{"cloudydir", STOFS(cloudydir), F_FLOAT, FFL_SPAWNTEMP|FFL_DEFAULT_NEG},
+	{"cloud1tile", STOFS(cloud1tile), F_FLOAT, FFL_SPAWNTEMP|FFL_DEFAULT_NEG},
+	{"cloud1speed", STOFS(cloud1speed), F_FLOAT, FFL_SPAWNTEMP|FFL_DEFAULT_NEG},
+	{"cloud1alpha", STOFS(cloud1alpha), F_FLOAT, FFL_SPAWNTEMP|FFL_DEFAULT_NEG},
+	{"cloud2tile", STOFS(cloud2tile), F_FLOAT, FFL_SPAWNTEMP|FFL_DEFAULT_NEG},
+	{"cloud2speed", STOFS(cloud2speed), F_FLOAT, FFL_SPAWNTEMP|FFL_DEFAULT_NEG},
+	{"cloud2alpha", STOFS(cloud2alpha), F_FLOAT, FFL_SPAWNTEMP|FFL_DEFAULT_NEG},
+	{"cloud3tile", STOFS(cloud3tile), F_FLOAT, FFL_SPAWNTEMP|FFL_DEFAULT_NEG},
+	{"cloud3speed", STOFS(cloud3speed), F_FLOAT, FFL_SPAWNTEMP|FFL_DEFAULT_NEG},
+	{"cloud3alpha", STOFS(cloud3alpha), F_FLOAT, FFL_SPAWNTEMP|FFL_DEFAULT_NEG},
+	{"radius", STOFS(radius), F_FLOAT, FFL_SPAWNTEMP},
+	{"alpha", STOFS(alpha), F_FLOAT, FFL_SPAWNTEMP},
+	{"fade_start_dist", STOFS(fade_start_dist), F_INT, FFL_SPAWNTEMP},
+	{"fade_end_dist", STOFS(fade_end_dist), F_INT, FFL_SPAWNTEMP},
+	{"image", STOFS(image), F_LSTRING, FFL_SPAWNTEMP},
+	{"rgba", STOFS(rgba), F_LSTRING, FFL_SPAWNTEMP},
+	{"spritetype", STOFS(spritetype), F_INT, FFL_SPAWNTEMP},
+
 	// temp spawn vars -- only valid when the spawn function is called
 	{"lip", STOFS(lip), F_INT, FFL_SPAWNTEMP},
 	{"distance", STOFS(distance), F_INT, FFL_SPAWNTEMP},
@@ -246,6 +271,10 @@ void InitGame (void)
 	bob_roll = gi.cvar ("bob_roll", "0.002", 0);
 
 	turn_rider = gi.cvar("turn_rider", "1", CVAR_SERVERINFO);	// Knightmare added
+
+	g_aimfix = gi.cvar ("g_aimfix", "0", CVAR_ARCHIVE);								// Knightmare- from Yamagi Q2
+	g_aimfix_min_dist = gi.cvar ("g_aimfix_min_dist", "128", CVAR_ARCHIVE);			// Knightmare- minimum range for aimfix
+	g_aimfix_taper_dist = gi.cvar ("g_aimfix_taper_dist", "128", CVAR_ARCHIVE);	// Knightmare- transition range for aimfix
 
 	// items
 	InitItems ();

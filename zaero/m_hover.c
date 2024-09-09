@@ -500,13 +500,17 @@ void hover_pain (edict_t *self, edict_t *other, float kick, int damage)
 
 void hover_deadthink (edict_t *self)
 {
+#ifdef KMQUAKE2_ENGINE_MOD
 	int		n;
+#endif	// KMQUAKE2_ENGINE_MOD
 
 	if (!self->groundentity && level.time < self->timestamp)
 	{
 		self->nextthink = level.time + FRAMETIME;
 		return;
 	}
+
+#ifdef KMQUAKE2_ENGINE_MOD
 	// Knightmare- gibs!
 	gi.sound (self, CHAN_VOICE, gi.soundindex ("misc/udeath.wav"), 1, ATTN_NORM, 0);
 	for (n= 0; n < 8; n++)
@@ -518,6 +522,7 @@ void hover_deadthink (edict_t *self)
 	for (n= 0; n < 4; n++)
 		ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", 200, GIB_ORGANIC);
 	ThrowGib (self, "models/objects/gibs/head2/tris.md2", 200, GIB_ORGANIC);
+#endif	// KMQUAKE2_ENGINE_MOD
 	BecomeExplosion1(self);
 }
 
@@ -532,6 +537,12 @@ void hover_dead (edict_t *self)
 	gi.linkentity (self);
 }
 
+#ifdef KMQUAKE2_ENGINE_MOD
+#define NUM_SM_MEAT_GIBS		6
+#else
+#define NUM_SM_MEAT_GIBS		2
+#endif	// KMQUAKE2_ENGINE_MOD
+
 void hover_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
 	int		n;
@@ -541,13 +552,15 @@ void hover_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 	if (self->health <= self->gib_health)
 	{	// Knightmare- more gibs!
 		gi.sound (self, CHAN_VOICE, gi.soundindex ("misc/udeath.wav"), 1, ATTN_NORM, 0);
+#ifdef KMQUAKE2_ENGINE_MOD
 		for (n = 0; n < 8; n++)
 			ThrowGib (self, "models/objects/gibs/sm_metal/tris.md2", damage, GIB_METALLIC);
 		for (n = 0; n < 2; n++)
 			ThrowGib (self, "models/objects/gibs/gear/tris.md2", damage, GIB_METALLIC);
+#endif	// KMQUAKE2_ENGINE_MOD
 		for (n = 0; n < 2; n++)
 			ThrowGib (self, "models/objects/gibs/bone/tris.md2", damage, GIB_ORGANIC);
-		for (n = 0; n < 4; n++)
+		for (n = 0; n < NUM_SM_MEAT_GIBS; n++)
 			ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
 		ThrowGib (self, "models/objects/gibs/head2/tris.md2", damage, GIB_ORGANIC);
 		BecomeExplosion1(self);
@@ -619,7 +632,8 @@ void hover_dodge (edict_t *self, edict_t *attacker, float eta)
 	//	self->monsterinfo.currentmove = &hover_move_run;
 }
 
-void SP_monster_hover_precache(void)
+// Knightmare- added soundcache function
+void monster_hover_soundcache (edict_t *self)
 {
 	sound_pain1 = gi.soundindex ("hover/hovpain1.wav");	
 	sound_pain2 = gi.soundindex ("hover/hovpain2.wav");	
@@ -628,6 +642,12 @@ void SP_monster_hover_precache(void)
 	sound_sight = gi.soundindex ("hover/hovsght1.wav");	
 	sound_search1 = gi.soundindex ("hover/hovsrch1.wav");	
 	sound_search2 = gi.soundindex ("hover/hovsrch2.wav");	
+}
+
+void SP_monster_hover_precache (edict_t *self)
+{
+	// Knightmare- use soundcache function
+	monster_hover_soundcache (self);
 }
 
 /*QUAKED monster_hover (1 .5 0) (-16 -16 -24) (16 16 32) Ambush Trigger_Spawn Sight
@@ -640,7 +660,7 @@ void SP_monster_hover (edict_t *self)
 		return;
 	}
 
-  SP_monster_hover_precache();
+	SP_monster_hover_precache (self);
 
 	gi.soundindex ("hover/hovatck1.wav");	
 

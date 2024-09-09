@@ -17,9 +17,15 @@ void playQuadSound(edict_t *ent)
 void weapon_grenade_fire (edict_t *ent, qboolean held);
 
 
-void P_ProjectSource (gclient_t *client, vec3_t point, vec3_t distance, vec3_t forward, vec3_t right, vec3_t result)
+void P_ProjectSource (edict_t *client_ent, vec3_t point, vec3_t distance, vec3_t forward, vec3_t right, vec3_t result)
 {
-	vec3_t	_distance;
+	gclient_t	*client = NULL;
+	vec3_t		_distance;
+
+	if ( !client_ent || !client_ent->client )
+		return;
+
+	client = client_ent->client;
 
 	VectorCopy (distance, _distance);
 	if (client->pers.hand == LEFT_HANDED)
@@ -27,6 +33,39 @@ void P_ProjectSource (gclient_t *client, vec3_t point, vec3_t distance, vec3_t f
 	else if (client->pers.hand == CENTER_HANDED)
 		_distance[1] = 0;
 	G_ProjectSource (point, _distance, forward, right, result);
+
+	// Yamagi Q2/Berserker: fix - now the projectile hits exactly where the crosshair is pointing.
+	if (g_aimfix->value)
+	{
+		vec3_t		start, end, rangeVec, forward2;
+		vec_t		range, featherFrac;
+		trace_t		tr;
+
+		VectorSet (start, client_ent->s.origin[0], client_ent->s.origin[1], client_ent->s.origin[2] + client_ent->viewheight);
+		VectorMA (start, WORLD_SIZE, forward, end);
+
+		tr = gi.trace(start, NULL, NULL, end, client_ent, MASK_SHOT);
+		// Knightmare- check against minimum range for aimfix so we can still shoot around corners
+		VectorSubtract (start, tr.endpos, rangeVec);
+		range = VectorLength(rangeVec);
+		if ( (tr.fraction < 1) && (range >= g_aimfix_min_dist->value) )
+		{
+			if (range < (g_aimfix_min_dist->value + g_aimfix_taper_dist->value) )
+			{	// within feathering range
+				featherFrac = (range - g_aimfix_min_dist->value) / g_aimfix_taper_dist->value;
+				VectorSubtract (tr.endpos, result, forward2);
+				VectorNormalize (forward2);
+				VectorScale (forward2, featherFrac, forward2);
+				VectorScale (forward, 1.0f - featherFrac, forward);
+				VectorAdd (forward, forward2, forward);
+				VectorNormalize (forward);
+			}
+			else {	// regular aimfix
+				VectorSubtract (tr.endpos, result, forward);
+				VectorNormalize (forward);
+			}
+		}
+	}
 }
 
 
@@ -574,7 +613,7 @@ void weapon_grenade_fire (edict_t *ent, qboolean held)
 
 	VectorSet(offset, 8, 8, ent->viewheight-8);
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
-	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
+	P_ProjectSource (ent, ent->s.origin, offset, forward, right, start);	// Knightmare- changed parms for aimfix
 
 	timer = ent->client->grenade_time - level.time;
 	speed = GRENADE_MINSPEED + (GRENADE_TIMER - timer) * ((GRENADE_MAXSPEED - GRENADE_MINSPEED) / GRENADE_TIMER);
@@ -722,7 +761,7 @@ void weapon_grenadelauncher_fire (edict_t *ent, qboolean altfire)
 
 	VectorSet(offset, 8, 8, ent->viewheight-8);
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
-	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
+	P_ProjectSource (ent, ent->s.origin, offset, forward, right, start);	// Knightmare- changed parms for aimfix
 
 	VectorScale (forward, -2, ent->client->kick_origin);
 	ent->client->kick_angles[0] = -1;
@@ -785,7 +824,7 @@ void Weapon_RocketLauncher_Fire (edict_t *ent, qboolean altfire)
 	ent->client->kick_angles[0] = -1;
 
 	VectorSet(offset, 8, 8, ent->viewheight-8);
-	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
+	P_ProjectSource (ent, ent->s.origin, offset, forward, right, start);	// Knightmare- changed parms for aimfix
 
 	if (EMPNukeCheck(ent, start))
 	{
@@ -839,7 +878,7 @@ int Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, int
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
 	VectorSet(offset, 24, 8, ent->viewheight-8);
 	VectorAdd (offset, g_offset, offset);
-	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
+	P_ProjectSource (ent, ent->s.origin, offset, forward, right, start);	// Knightmare- changed parms for aimfix
 
 	VectorScale (forward, -2, ent->client->kick_origin);
 	ent->client->kick_angles[0] = -1;
@@ -1112,7 +1151,7 @@ void Machinegun_Fire (edict_t *ent, qboolean altfire)
 	VectorAdd (ent->client->v_angle, ent->client->kick_angles, angles);
 	AngleVectors (angles, forward, right, NULL);
 	VectorSet(offset, 0, 8, ent->viewheight-8);
-	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
+	P_ProjectSource (ent, ent->s.origin, offset, forward, right, start);	// Knightmare- changed parms for aimfix
 	fire_bullet (ent, start, forward, damage, kick, (int)sk_machinegun_hspread->value, (int)sk_machinegun_vspread->value, MOD_MACHINEGUN);
 
 	gi.WriteByte (svc_muzzleflash);
@@ -1236,7 +1275,7 @@ void Chaingun_Fire (edict_t *ent, qboolean altfire)
 		r = 7 + crandom()*4;
 		u = crandom()*4;
 		VectorSet(offset, 0, r, u + ent->viewheight-8);
-		P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
+		P_ProjectSource (ent, ent->s.origin, offset, forward, right, start);	// Knightmare- changed parms for aimfix
 
 		fire_bullet (ent, start, forward, damage, kick, (int)sk_chaingun_hspread->value, (int)sk_chaingun_vspread->value, MOD_CHAINGUN);
   }
@@ -1291,7 +1330,7 @@ void weapon_shotgun_fire (edict_t *ent, qboolean altfire)
 	ent->client->kick_angles[0] = -2;
 
 	VectorSet(offset, 0, 8,  ent->viewheight-8);
-	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
+	P_ProjectSource (ent, ent->s.origin, offset, forward, right, start);	// Knightmare- changed parms for aimfix
 
 	if (is_quad)
 	{
@@ -1344,7 +1383,7 @@ void weapon_supershotgun_fire (edict_t *ent, qboolean altfire)
 	ent->client->kick_angles[0] = -2;
 
 	VectorSet(offset, 0, 8,  ent->viewheight-8);
-	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
+	P_ProjectSource (ent, ent->s.origin, offset, forward, right, start);	// Knightmare- changed parms for aimfix
 
 	if (is_quad)
 	{
@@ -1356,9 +1395,34 @@ void weapon_supershotgun_fire (edict_t *ent, qboolean altfire)
 	v[YAW]   = ent->client->v_angle[YAW] - 5;
 	v[ROLL]  = ent->client->v_angle[ROLL];
 	AngleVectors (v, forward, NULL, NULL);
+
+	// from Yamagi Q2
+	if (g_aimfix->value)
+	{	
+		AngleVectors (v, forward, right, NULL);
+
+		VectorScale (forward, -2, ent->client->kick_origin);
+		ent->client->kick_angles[0] = -2;
+
+		VectorSet (offset, 0, 8, ent->viewheight - 8);
+		P_ProjectSource (ent, ent->s.origin, offset, forward, right, start);
+	}
 	fire_shotgun (ent, start, forward, damage, kick, (int)sk_sshotgun_hspread->value, (int)sk_sshotgun_vspread->value, (int)sk_sshotgun_count->value/2, MOD_SSHOTGUN);
+
 	v[YAW]   = ent->client->v_angle[YAW] + 5;
 	AngleVectors (v, forward, NULL, NULL);
+
+	// from Yamagi Q2
+	if (g_aimfix->value)
+	{	
+		AngleVectors (v, forward, right, NULL);
+
+		VectorScale (forward, -2, ent->client->kick_origin);
+		ent->client->kick_angles[0] = -2;
+
+		VectorSet (offset, 0, 8, ent->viewheight - 8);
+		P_ProjectSource (ent, ent->s.origin, offset, forward, right, start);
+	}
 	fire_shotgun (ent, start, forward, damage, kick, (int)sk_sshotgun_hspread->value, (int)sk_sshotgun_vspread->value, (int)sk_sshotgun_count->value/2, MOD_SSHOTGUN);
 
 	// send muzzle flash
@@ -1437,7 +1501,7 @@ void weapon_railgun_fire (edict_t *ent, qboolean altfire)
 	ent->client->kick_angles[0] = -3;
 
 	VectorSet(offset, 0, 7,  ent->viewheight-8);
-	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
+	P_ProjectSource (ent, ent->s.origin, offset, forward, right, start);	// Knightmare- changed parms for aimfix
 
 	ent->client->ps.gunframe++;
 
@@ -1493,7 +1557,7 @@ void weapon_bfg_fire (edict_t *ent, qboolean altfire)
 	VectorScale (forward, -2, ent->client->kick_origin);
 
 	VectorSet(offset, 8, 8, ent->viewheight-8);
-	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
+	P_ProjectSource (ent, ent->s.origin, offset, forward, right, start);	// Knightmare- changed parms for aimfix
 
 	if(ent->client->ps.gunframe == 9)
 	{

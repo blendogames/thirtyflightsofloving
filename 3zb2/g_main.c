@@ -66,6 +66,10 @@ float	ctfjob_update;
 
 cvar_t	*turn_rider;	// Knightmare added
 
+cvar_t	*g_aimfix;				// Knightmare- from Yamagi Q2
+cvar_t	*g_aimfix_min_dist;		// Knightmare- minimum range for aimfix
+cvar_t	*g_aimfix_taper_dist;	// Knightmare- transition range for aimfix
+
 void SpawnEntities (char *mapname, char *entities, char *spawnpoint);
 void ClientThink (edict_t *ent, usercmd_t *cmd);
 qboolean ClientConnect (edict_t *ent, char *userinfo, qboolean loadgame);
@@ -189,7 +193,7 @@ void ClientEndServerFrames (void)
 		ent = g_edicts + 1 + i;
 		if (!ent->inuse || !ent->client)
 			continue;
-		if (!(ent->svflags & SVF_MONSTER))  
+		if (!(ent->svflags & SVF_MONSTER))
 			ClientEndServerFrame (ent);
 	}
 
@@ -205,32 +209,41 @@ get next map's file name
 */
 void Get_NextMap (void)
 {
-	FILE	*fp;
+	FILE		*fp;
 	qboolean	firstflag = false;
-	char	Buff[MAX_QPATH];
-	char	top[MAX_QPATH];
-	char	nextmap[MAX_QPATH];
-	int		i;
-	
-	if (!maplist->string) return;
+	char		fileName[256];	// Knightmare added
+	char		Buff[MAX_QPATH];
+	char		top[MAX_QPATH];
+	char		nextmap[MAX_QPATH];
+	int			i;
 
-	Com_sprintf (Buff, sizeof(Buff), ".\\%s\\3ZBMAPS.LST", gamepath->string);
-	fp = fopen(Buff,"r");
-	if (fp == NULL) return;
-	
-	//search section
-	while(1)
+	if ( !maplist->string )
+		return;
+
+//	Com_sprintf (fileName, sizeof(fileName), ".\\%s\\3ZBMAPS.LST", gamepath->string);
+	// Knightmare- use GameDir() instead
+	Com_sprintf (fileName, sizeof(fileName), "%s/3zbmaps.lst", GameDir());
+	fp = fopen(fileName, "r");
+	if (fp == NULL)
+		return;
+
+	// search section
+	while (1)
 	{
-		if (fgets( Buff, sizeof(Buff), fp ) == NULL) goto NONEXTMAP;
+		if (fgets( Buff, sizeof(Buff), fp ) == NULL)
+			goto NONEXTMAP;
 
-		if (Buff[0] != '[') continue;
+		if (Buff[0] != '[')
+			continue;
 
 		i = 0;
-		while(1)
+		while (1)
 		{
-			if (Buff[i] == ']') Buff[i] = 0;
+			if (Buff[i] == ']')
+				Buff[i] = 0;
 
-			if (Buff[i] == 0) break;
+			if (Buff[i] == 0)
+				break;
 
 			if (++i >= sizeof(Buff))
 			{
@@ -368,7 +381,7 @@ void CheckNeedPass (void)
 
 	// if password or spectator_password has changed, update needpass
 	// as needed
-	if (password->modified || spectator_password->modified) 
+	if (password->modified || spectator_password->modified)
 	{
 		password->modified = spectator_password->modified = false;
 
@@ -565,7 +578,7 @@ void G_RunFrame (void)
 			{
 //gi.bprintf(PRINT_HIGH,"Assigned!!!\n");
 				CTFJobAssign();
-				ctfjob_update = level.time + FRAMETIME * 2; 
+				ctfjob_update = level.time + FRAMETIME * 2;
 			}
 		}
 //////////旗のスコアチェック
@@ -593,7 +606,7 @@ void G_RunFrame (void)
 										g_edicts[j].client->resp.score += 1;
 								}
 							}
-						}	
+						}
 					}
 				}
 				if (zflag_ent != NULL)
@@ -606,7 +619,7 @@ void G_RunFrame (void)
 						if (ZIGDrop_Flag(ent,zflag_item))
 						{
 							VectorCopy (v, zflag_ent->s.origin);
-						}			
+						}
 					}
 				}
 			}
@@ -623,7 +636,7 @@ void G_RunFrame (void)
 
 	if (next_fragadd < level.time)
 	{
-		if (zflag_ent == NULL && !haveflag && !ctf->value 
+		if (zflag_ent == NULL && !haveflag && !ctf->value
 			&& zigmode->value == 1 && zigflag_spawn == 2)
 		{
 			SelectSpawnPoint (ent, v, vv);

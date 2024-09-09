@@ -22,12 +22,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 // snd_loc.h -- private sound functions
 
-#ifdef OGG_SUPPORT
-#if defined (_MSC_VER) && (_MSC_VER <= 1200)	// use older version of Ogg Vorbis for MSVC6
-#include "../include/ogg_vc6/vorbisfile.h"
-#else
-#include "../include/ogg/vorbisfile.h"
-#endif
+#ifdef OGG_SUPPORT	// Knightmare added- ogg vorbis support
+#include "../libraries/oggvorbis/vorbis_inc/vorbisfile.h"
 #include "../include/al/altypes.h"
 #include "./snd_ogg.h"
 #endif
@@ -74,7 +70,7 @@ typedef struct {
 #else
 	fileHandle_t		file;
 #endif
-#ifdef NOTTHIRTYFLIGHTS // flibit removed this, null.ogg exposes an infinite loop
+#ifdef NOTTHIRTYFLIGHTS
 	int					start;
 #endif
 	int					rate;

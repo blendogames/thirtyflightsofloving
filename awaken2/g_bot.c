@@ -17,6 +17,68 @@ vec3_t VEC_TMAXS4 = { 4.0F,  4.0F,  4.0F};
 qboolean Bot_Fall(edict_t *ent, vec3_t pos, float dist);
 
 //=====================================================
+// Knightmare- moved these vars here to fix GCC compiler errors
+//Maj++
+// Item Ammo (IT_AMMO)
+gitem_t *item_shells,
+		*item_cells,
+		*item_rockets,
+		*item_slugs,
+		*item_bullets,
+
+// Item Weapons (IT_WEAPON)
+//CW++
+		*item_chainsaw,
+		*item_deserteagle,
+		*item_gausspistol,
+		*item_mac10,
+		*item_jackhammer,
+		*item_esg,
+		*item_c4,
+		*item_trap,
+		*item_rocketlauncher,
+		*item_flamethrower,
+		*item_railgun,
+		*item_shockrifle,
+		*item_disclauncher,
+		*item_agm,
+		*item_grapple,
+//CW--
+
+// Item Armor (IT_ARMOR)
+		*item_jacketarmor,
+		*item_combatarmor,
+		*item_bodyarmor,
+		*item_armorshard,
+		*item_powerscreen,
+		*item_powershield,
+
+// Item Health (IT_HEALTH)
+		*item_adrenaline,
+		*item_health,
+		*item_stimpak,
+		*item_health_large,
+		*item_health_mega,
+
+// Item Powerup (IT_POWERUP)
+		*item_quad,
+		*item_invulnerability,
+		*item_silencer,
+		*item_breather,
+		*item_enviro,
+		*item_teleporter,																			//CW++
+
+// Item Pak (IT_PACK)
+		*item_pack,
+		*item_bandolier,
+
+// Item Nodes (IT_NODE)
+		*item_navi1,
+		*item_navi2,
+		*item_navi3;
+//Maj--
+// end Knightmare
+
 //=====================================================
 
 botinfo_t	Bot[MAXBOTS+1];
@@ -263,7 +325,7 @@ qboolean TriggerHurtCheck(edict_t *ent)
 	end[1] = ent->s.origin[1];
 	while ((trighurt = G_Find(trighurt, FOFS(classname), "trigger_hurt")) != NULL)
 	{
-		if ((ent->s.origin[0] > trighurt->mins[0]) && (ent->s.origin[0] < trighurt->maxs[0]) && 
+		if ((ent->s.origin[0] > trighurt->mins[0]) && (ent->s.origin[0] < trighurt->maxs[0]) &&
 			(ent->s.origin[1] > trighurt->mins[1]) && (ent->s.origin[1] < trighurt->maxs[1]) &&
 			(ent->s.origin[2] - ent->mins[2] > trighurt->maxs[2]))
 		{
@@ -539,7 +601,7 @@ void droptofloor2(edict_t *ent)
 	vec3_t	v;
 	float	i;
 	float	j = 0;
-	float	yaw;	
+	float	yaw;
 
 	VectorSet(ent->mins, -15, -15, -15);
 	VectorSet(ent->maxs, 8, 8, 15);
@@ -679,7 +741,7 @@ void TraceAllSolid(edict_t *ent, vec3_t point, trace_t tr)
 		trace_t	tracep;
 		vec3_t	stp;
 		vec3_t	v1;
-		vec3_t	v2;		
+		vec3_t	v2;
 
 		VectorSet(v1, -16, -16, -24);
 		VectorSet(v2, 16, 16, 4);
@@ -920,8 +982,8 @@ void Bot_CheckEnemy(gclient_t *client, edict_t *attacker, edict_t *targ, int mod
 			qboolean switch_enemy;
 
 			switch_enemy = ((mod == MOD_SR_HOMING)		|| (mod == MOD_SR_DISINT_WAVE)	|| (mod == MOD_RAILGUN)			|| (mod == MOD_ROCKET)			||
-							(mod == MOD_GAUSS_BLASTER)	|| (mod == MOD_GAUSS_BEAM)		|| (mod == MOD_FLAMETHROWER)	|| (mod == MOD_CHAINSAW)		|| 
-							(mod == MOD_AGM_DISRUPT)	|| (mod == MOD_AGM_LAVA_HELD)	|| (mod == MOD_AGM_SLIME_HELD)	|| (mod == MOD_AGM_WATER_HELD)	|| 
+							(mod == MOD_GAUSS_BLASTER)	|| (mod == MOD_GAUSS_BEAM)		|| (mod == MOD_FLAMETHROWER)	|| (mod == MOD_CHAINSAW)		||
+							(mod == MOD_AGM_DISRUPT)	|| (mod == MOD_AGM_LAVA_HELD)	|| (mod == MOD_AGM_SLIME_HELD)	|| (mod == MOD_AGM_WATER_HELD)	||
 							(mod == MOD_AGM_TRIG_HURT)	|| (mod == MOD_AGM_TARG_LASER));
 			switch_enemy = switch_enemy && (client->current_enemy != attacker);
 
@@ -967,7 +1029,7 @@ void CheckCampSite(edict_t *ent, edict_t *other)
 	other->client->camptime = level.time + 20.0 + (rand() % 11);	// 20..30
 	other->client->chattime = level.time + (rand() % 16);			// 0..15
 	other->client->taunttime = other->client->camptime + 10.0;		// turn taunting off whilst camping
-	
+
 	VectorCopy(ent->s.origin, other->client->lastorigin);
 	other->client->lastorigin[2] += 16.0;
 	other->client->campitem = ent->item;							//camping near this item
@@ -1109,7 +1171,7 @@ void RandomizeParameters(int i)
 //CW--
 
 //==============================================
-void LoadBotNames(void) 
+void LoadBotNames(void)
 {
 	int i;
 
@@ -1298,39 +1360,47 @@ void ReadRouteFile(void)
 	int		j;
 
 //CW++
-	cvar_t	*game;
+/*	cvar_t	*game;
 
 	game = gi.cvar("game", "", 0);
 	if (!*game->string)
 		Com_sprintf(name, sizeof(name), "%s/botroutes/%s.chn", GAMEVERSION, level.mapname);
 	else
-		Com_sprintf(name, sizeof(name), "%s/botroutes/%s.chn", game->string, level.mapname);
+		Com_sprintf(name, sizeof(name), "%s/botroutes/%s.chn", game->string, level.mapname); */
+	// Knightmare- use SavegameDir() / GameDir() instead
+	Com_sprintf(name, sizeof(name), "%s/botroutes/%s.chn", SavegameDir(), level.mapname);
+	fp = fopen(name, "rb");
+	if ( !fp ) {
+		Com_sprintf(name, sizeof(name), "%s/botroutes/%s.chn", GameDir(), level.mapname);
+		fp = fopen(name, "rb");
+	}
 //CW--
 
 	TotalRouteNodes = 0;
 
-	if ((fp = fopen(name, "rb")) != NULL)															//CW
+//	if ((fp = fopen(name, "rb")) != NULL)															//CW
+	if (fp != NULL)															//CW
 	{
 		char		code[8];
 		unsigned	int size;
 
 		CurrentIndex = 0;
-		memset(Route, 0, sizeof(Route));															//CW
-		memset(code, 0, 8);
+		memset (Route, 0, sizeof(Route));															//CW
+		memset (code, 0, 8);
 
-		fread(code, sizeof(char), 8, fp);
-		fread(&CurrentIndex, sizeof(int), 1, fp);
+		fread (code, sizeof(char), 8, fp);
+		fread (&CurrentIndex, sizeof(int), 1, fp);
 		size = (unsigned int)CurrentIndex * sizeof(route_t);
-		fread(Route, size, 1, fp);
-		fclose(fp);
+		fread (Route, size, 1, fp);
+		fclose (fp);
 
 		TotalRouteNodes = CurrentIndex;
-		gi.dprintf("AwakenBots: %d route nodes for map\n", TotalRouteNodes);
+		gi.dprintf ("AwakenBots: %d route nodes for map\n", TotalRouteNodes);
 	}
 
 	if (TotalRouteNodes == 0)
 	{
-		gi.dprintf("AwakenBots: No route file loaded\n");											//CW
+		gi.dprintf ("AwakenBots: No route file loaded\n");											//CW
 		return;
 	}
 
@@ -1414,7 +1484,7 @@ void Move_LastRouteIndex(void)
 	{
 		memset(&Route[CurrentIndex], 0, sizeof(route_t));
 		if (CurrentIndex > 0)
-			Route[CurrentIndex].index = Route[CurrentIndex - 1].index + 1; 
+			Route[CurrentIndex].index = Route[CurrentIndex - 1].index + 1;
 	}
 }
 
@@ -1560,7 +1630,7 @@ qboolean SpawnBot(int botindex)																		//CW...
 }
 
 //=============================================
-// Temp edict to re-insert active bots into game 
+// Temp edict to re-insert active bots into game
 //=============================================
 void PutNextBotInGame(edict_t *ent)
 {
@@ -1614,7 +1684,7 @@ qboolean RemoveBot(edict_t *ent)
 }
 
 //=============================================
-// Temp edict to remove bots from the game 
+// Temp edict to remove bots from the game
 // without causing overflows.
 //=============================================
 void BotRemover_Think(edict_t *self)
@@ -1680,7 +1750,7 @@ void RemoveNumBots_Safe(int numbots)
 
 
 //=============================================
-// Temp edict to spawn bots into the game 
+// Temp edict to spawn bots into the game
 // without causing overflows.
 //=============================================
 void BotSpawner_Think(edict_t *self)
@@ -1756,7 +1826,7 @@ void SpawnNumBots_Safe(int numbots)
 	}
 }
 
- 
+
 //=======================================================
 //============ TAUNTING/CHATTING/INSULTING ==============
 //=======================================================
@@ -1789,7 +1859,7 @@ void InsultVictim(edict_t *ent, edict_t *victim)
 				case 7: gi_bprintf(3, "%s: DOH!\n", ent->client->pers.netname); break;				//CW++
 			}
 		}
-	} 
+	}
 	else					// insults to other players
 	{
 		if (myrandom < 0.75)
@@ -2326,7 +2396,7 @@ qboolean HasAmmoForWeapon(edict_t *self, gitem_t *weapon)
 
 	if ((int)dmflags->value & DF_INFINITE_AMMO)
 		return true;
-	
+
 	return (self->client->pers.inventory[ITEM_INDEX(FindItem(weapon->ammo))] >= weapon->quantity);
 }
 
@@ -2971,7 +3041,7 @@ void Combat_Normal(edict_t *ent, float distance)
 
 			trace_priority = TRP_MOVEKEEP;
 			ent->client->moveyaw = ent->s.angles[YAW];
-			
+
 			if ((my_weapon == WEAP_DISCLAUNCHER) || InSight(ent, target))
 				ent->client->buttons |= BUTTON_ATTACK;
 
@@ -2982,7 +3052,7 @@ void Combat_Normal(edict_t *ent, float distance)
 	}
 
 //	Battlemode handling: avoid our own weapon explosions.
-	
+
 	if (ent->client->battlemode & FIRE_AVOIDEXPLO)													//CW...
 	{
 		if (--ent->client->battlecount > 0)
@@ -3015,7 +3085,7 @@ void Combat_Normal(edict_t *ent, float distance)
 
 	if (ent->client->battlemode & FIRE_C4)
 	{
-		if (--ent->client->battlecount > 0) 
+		if (--ent->client->battlecount > 0)
 		{
 			GetAimAngle(ent, aim, distance);
 
@@ -3077,7 +3147,7 @@ void Combat_Normal(edict_t *ent, float distance)
 				ent->client->homing_plasma = false;
 				trace_priority = TRP_ANGLEKEEP;
 				ent->client->buttons |= BUTTON_ATTACK;
-				
+
 				return;
 			}
 
@@ -3087,7 +3157,7 @@ void Combat_Normal(edict_t *ent, float distance)
 				GetAimAngle(ent, aim, distance);
 				trace_priority = TRP_ANGLEKEEP;
 				ent->client->buttons |= BUTTON_ATTACK;
-				
+
 				return;
 			}
 
@@ -3098,7 +3168,7 @@ void Combat_Normal(edict_t *ent, float distance)
 				ent->client->ft_firebomb = true;
 				trace_priority = TRP_ANGLEKEEP;
 				ent->client->buttons |= BUTTON_ATTACK;
-				
+
 				return;
 			}
 
@@ -3111,7 +3181,7 @@ void Combat_Normal(edict_t *ent, float distance)
 				trace_priority = TRP_ANGLEKEEP;
 				if (ent->client->weaponstate == WEAPON_READY)
 					ent->client->buttons |= BUTTON_ATTACK;
-				
+
 				return;
 			}
 //CW--
@@ -3404,7 +3474,7 @@ void Combat_Normal(edict_t *ent, float distance)
 		if (B_UseWeapon(ent, aim, distance, WEAP_MAC10))
 			goto FIRED;
 	}
-	
+
 	//Shock Rifle
 	if (distance < 1600)
 	{
@@ -3531,7 +3601,7 @@ void Combat_Normal(edict_t *ent, float distance)
 	VectorSubtract(ent->client->vtemp, ent->s.origin, vdir);
 	ent->s.angles[YAW] = Get_yaw(vdir);
 	ent->s.angles[PITCH] = Get_pitch(vdir);
-	trace_priority = TRP_ANGLEKEEP;	
+	trace_priority = TRP_ANGLEKEEP;
 //CW--
 
 	return;
@@ -3605,7 +3675,7 @@ FIRED:	// shoot the weapon
 }
 
 //============================================================
-void Set_Combatstate(edict_t *ent) 
+void Set_Combatstate(edict_t *ent)
 {
 	edict_t	*enemy;																					//CW++
 	vec3_t	vtmp;
@@ -3646,7 +3716,7 @@ void Set_Combatstate(edict_t *ent)
 	}
 //CW--
 
-	if (!Bot_trace(ent, ent->client->current_enemy)) 
+	if (!Bot_trace(ent, ent->client->current_enemy))
 	{
 		if (ent->client->targetlock <= level.time)
 		{
@@ -3759,7 +3829,7 @@ void Bot_SearchEnemy(edict_t *ent)
 						if (VectorLength(vdir) < BOT_PNOISE_SELF_DIST)								//CW
 							target = trent;
 					}
-					
+
 					if ((target == NULL) && (trent->mynoise2->teleport_time >= level.time - FRAMETIME))
 					{
 						VectorSubtract(trent->mynoise2->s.origin, ent->s.origin, vdir);				//CW
@@ -3773,7 +3843,7 @@ void Bot_SearchEnemy(edict_t *ent)
 				if ((target == NULL) && (trent->mynoise->teleport_time >= level.time - FRAMETIME))
 				{
 					trace_t tr;
-					
+
 					AngleVectors(trent->client->v_angle, vdir, NULL, NULL);
 					VectorScale(vdir, BOT_PNOISE_RADIUS, vdir);
 					VectorAdd(trent->s.origin, vdir, end);
@@ -3818,7 +3888,7 @@ void Bot_SearchEnemy(edict_t *ent)
 		{
 			ent->client->current_enemy = target;
 			ent->client->targetlock = level.time + 2.0;												//CW++
-		} 
+		}
 	}
 }
 
@@ -4031,7 +4101,7 @@ int Bot_TestMove(edict_t *ent, float ryaw, vec3_t pos, float dist, float *bottom
 		trstart[2] = trend[2] - 8190;
 		tr = gi.trace(trend, trmin, trmax, trstart, ent, MASK_BOTSOLIDX|MASK_OPAQUE);
 		*bottom = tr.endpos[2] - ent->s.origin[2];
-		
+
 		contents = 0;
 		if (!ent->waterlevel)
 		{
@@ -4319,7 +4389,7 @@ JUMPCATCH:
 		}
 	}
 
-	VectorCopy(vdir, vv); 
+	VectorCopy(vdir, vv);
 	vv[2] = 0;
 	if (mode == 2)
 	{
@@ -4580,7 +4650,7 @@ void Bot_AI(edict_t *ent)
 	int			contents;																			//CW++
 	int			i;
 	int			j = 0;																				//CW
-	int			k;	
+	int			k;
 	qboolean	ladderdrop;
 	qboolean	canrocj;
 	qboolean	waterjumped;
@@ -4840,7 +4910,7 @@ DCHCANC:
 			if (ent->groundentity && (ent->waterlevel < 2))
 				dist = MOVE_SPD_RUN * ent->moveinfo.speed;
 			else
-				dist = MOVE_SPD_WATER * ent->moveinfo.speed; 
+				dist = MOVE_SPD_WATER * ent->moveinfo.speed;
 		}
 
 		if (ent->groundentity)
@@ -5122,7 +5192,7 @@ DCHCANC:
 				{
 					ent->client->routetrace = true;
 					ent->client->routelocktime = level.time + 1.5;
-					
+
 					break;
 				}
 			}
@@ -5180,7 +5250,7 @@ DCHCANC:
 					goto GOMOVE;
 				}
 			}
-		
+
 			ent->client->pers.routeindex++;
 		}
 
@@ -5406,7 +5476,7 @@ DCHCANC:
 
 								Get_RouteOrigin(ent->client->pers.routeindex, v);
 								VectorSubtract(v, ent->s.origin, temppos);
-								
+
 								if (trace_priority < TRP_ANGLEKEEP)
 									ent->s.angles[PITCH] = Get_pitch(temppos);
 
@@ -5623,7 +5693,7 @@ DCHCANC:
 					else if ((it_ent->s.origin[2] - it_ent->s.old_origin[2] > -2) && trace_priority)
 					{
 						ent->client->movestate |= STS_W_ONTRAIN;
-						ent->client->waiting_obj = it_ent; 
+						ent->client->waiting_obj = it_ent;
 					}
 					else
 						ent->client->movestate |= STS_W_DONT;
@@ -5854,7 +5924,7 @@ DCHCANC:
 			VectorSubtract(ent->client->movtarget_pt, ent->s.origin, temppos);
 			temppos[2] = 0;
 			dist *= 0.25;
-			if ((VectorLength(temppos) < 10) || VectorCompare(ent->s.origin, ent->client->movtarget_pt)) 
+			if ((VectorLength(temppos) < 10) || VectorCompare(ent->s.origin, ent->client->movtarget_pt))
 			{
 				if (!ent->client->waiting_obj->union_ent)
 				{
@@ -6120,7 +6190,7 @@ GOMOVE:
 			if (ent->client->ps.pmove.pm_flags & PMF_DUCKED)
 				k = 0;
 		}
-		
+
 		f1 = (ent->client->waterstate) ? BOTTOM_LIMIT_WATER : -JumpMax;
 
 		if (ent->client->nextcheck < level.time + 1.0)
@@ -6415,7 +6485,7 @@ GOMOVE:
 							}
 						}
 					}
-					
+
 					// fall2
 					if (Bot_Fall(ent, temppos, dist))
 						break;
@@ -6680,7 +6750,7 @@ GOMOVE:
 					if (!e->inuse || !e->targetname)
 						continue;
 
-					if (!stricmp(str, e->targetname))
+					if (!Q_stricmp(str, e->targetname))
 					{
 						if (e->classname[0] == 't')
 						{
@@ -6905,7 +6975,7 @@ VCHCANSEL:
 				tempflag = 1;
 		}
 
-		// 
+		//
 		if (tempflag == 0)
 		{
 			iyaw = ent->client->moveyaw - 90;
@@ -7084,7 +7154,7 @@ void Bot_Think(edict_t *ent)
 	}
 
 //	Perform general AI routines for the bot (movement, combat, chatting, camping, etc).
-	
+
 	Bot_AI(ent);
 
 	if (ent->health < 25)																			//CW

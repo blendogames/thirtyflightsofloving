@@ -16,6 +16,8 @@
 #endif
 
 #include <assert.h>
+#include <limits.h>
+#include <ctype.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdarg.h>
@@ -69,8 +71,6 @@ __inline int Q_vsnprintf (char *Dest, size_t Count, const char *Format, va_list 
 #ifdef KMQUAKE2_ENGINE_MOD
 // 32-bit pmove coords when using custom engine
 #define LARGE_MAP_SIZE
-// looping of attenuated sounds
-#define LOOP_SOUND_ATTENUATION
 #endif
 
 // angle indexes
@@ -96,7 +96,7 @@ __inline int Q_vsnprintf (char *Dest, size_t Count, const char *Format, va_list 
 #endif
 #define	MAX_LIGHTSTYLES		256
 
-#ifdef KMQUAKE2_ENGINE_MOD		//Knightmare- Ding-Dong, Index: Overflow is dead!
+#ifdef KMQUAKE2_ENGINE_MOD		// Knightmare- Ding-Dong, Index: Overflow is dead!
 #define	MAX_MODELS			8192	// these are sent over the net as shorts
 #define	MAX_SOUNDS			8192	// so they cannot exceed 64K
 #define	MAX_IMAGES			2048
@@ -278,15 +278,19 @@ void RotatePointAroundVector( vec3_t dst, const vec3_t dir, const vec3_t point, 
 //=============================================
 
 char *COM_SkipPath (char *pathname);
-void COM_StripExtension (char *in, char *out);
-void COM_FileBase (char *in, char *out);
-void COM_FilePath (char *in, char *out);
-void COM_DefaultExtension (char *path, char *extension);
+void COM_StripExtension (char *in, char *out, size_t outSize);
+void COM_FileBase (char *in, char *out, size_t outSize);
+void COM_FilePath (char *in, char *out, size_t outSize);
+void COM_DefaultExtension (char *path, size_t pathSize, char *extension);
 
 char *COM_Parse (char **data_p);
 // data is an in/out parm, returns a parsed out token
 
-qboolean Com_ParseColorString (const char *s, color_t outColor);	// Knightmare added
+// Knightmare- added color parsing
+qboolean Com_ParseColorString (const char *s, color_t outColor);
+unsigned int Com_ParseColorStringPacked (const char *s);
+qboolean Com_ParseRGBAField (const char *s, color_t outColor);
+unsigned int Com_ParseRGBAFieldPacked (const char *s);
 
 void Com_sprintf (char *dest, size_t size, char *fmt, ...);
 // Knightmare added
@@ -459,7 +463,7 @@ COLLISION DETECTION
 #define	SURF_FLOWING	0x40	// scroll towards angle
 #define	SURF_NODRAW		0x80	// don't bother referencing the texture
 
-//Knightmare 12/22/2001
+// Knightmare 12/22/2001
 // Never used in the game, just here for completeness:
 #define	SURF_HINT		0x100	// make a primary bsp splitter
 #define	SURF_SKIP		0x200	// completely ignore, allowing non-closed brushes
@@ -489,7 +493,7 @@ COLLISION DETECTION
 #define	SURF_CHOPPY		0x20000000
 #define	SURF_CHOPPY2	0x40000000
 #define	SURF_CHOPPY3	0x80000000
-//end Knightmare
+// end Knightmare
 
 // content masks
 #define	MASK_ALL				(-1)
@@ -726,12 +730,25 @@ typedef struct
 #define RF_USE_DISGUISE		0x00040000
 //ROGUE
 
-#define RF_NOSHADOW			0x00080000 //Knightmare- no shadow flag
-#define	RF_ENVMAP			0x00100000 // Knightmare- envmap flag
+#define RF_NOSHADOW			0x00080000
 
-#define	RF2_NOSHADOW		0x00000001		//no shadow..
-#define RF2_FORCE_SHADOW	0x00000002		//forced shadow...
-#define RF2_CAMERAMODEL		0x00000004		//client camera model
+// Knightmare- Kex additions
+#define	RF_CASTSHADOW		0x00100000
+#define	RF_SHELL_LITE_GREEN	0x00200000
+#define	RF_CUSTOM_LIGHT		0x00400000
+#define	RF_FLARE			0x00800000
+#define	RF_OLD_FRAME_LERP	0x01000000
+#define	RF_DOT_SHADOW		0x02000000
+#define	RF_LOW_PRIORITY		0x04000000
+#define	RF_NO_LOD			0x08000000
+#define	RF_NO_STEREO		RF_WEAPONMODEL
+#define	RF_STAIR_STEP		0x10000000
+
+#define RF_FLARE_LOCK_ANGLE	RF_MINLIGHT
+// end Kex additions
+
+// Knightmare- denotes a sprite that is angled vertically
+#define	RF_SPRITE_ORIENTED	RF_MINLIGHT
 
 // player_state_t->refdef flags
 #define	RDF_UNDERWATER		1		// warp the screen as apropriate
@@ -779,12 +796,12 @@ typedef struct
 #define	MZ_NUKE4			38
 #define	MZ_NUKE8			39
 //ROGUE
-//Knightmare 1/3/2002- blue blaster and green hyperblaster
+// Knightmare 1/3/2002- blue blaster and green hyperblaster
 #define	MZ_BLUEBLASTER		40
 #define	MZ_GREENHYPERBLASTER	41
 #define	MZ_REDBLASTER		42
 #define	MZ_REDHYPERBLASTER	43
-//end Knightmare
+// end Knightmare
 
 #define MZ_SILENCED			128		// bit flag ORed with one of the above numbers
 
@@ -1089,12 +1106,16 @@ typedef enum
 	TE_EXPLOSION1_BIG,
 	TE_EXPLOSION1_NP,
 	TE_FLECHETTE,
+//ROGUE
 // Knightmare added
 	TE_REDBLASTER,	
 	TE_SHOCKSPLASH,	
 	TE_BLASTER_COLORED,
 	TE_RAILTRAIL_COLORED,
-//ROGUE
+	TE_LIGHTNING_ATTACK,
+	TE_EXPLOSION_Q1,
+	TE_SPIKEIMPACT_Q1,
+	TE_LAVASPLASH_Q1,
 } temp_event_t;
 
 #define SPLASH_UNKNOWN		0
@@ -1229,11 +1250,18 @@ typedef enum
 #define	CS_PLAYERSKINS		(CS_ITEMS+MAX_ITEMS)
 #define CS_GENERAL			(CS_PLAYERSKINS+MAX_CLIENTS)
 #define	CS_HUDVARIANT		(CS_GENERAL+MAX_GENERAL)
-#define	CS_PAKFILE			(CS_HUDVARIANT+1)
+#define CS_SKYDISTANCE		(CS_HUDVARIANT+1)
+#define CS_CLOUDNAME		(CS_SKYDISTANCE+1)
+#define CS_CLOUDLIGHTFREQ	(CS_CLOUDNAME+1)
+#define CS_CLOUDDIR			(CS_CLOUDLIGHTFREQ+1)	// CLOUDX CLOUDY %f %f format
+#define CS_CLOUDTILE		(CS_CLOUDDIR+1)			// CLOUD1 CLOUD2 CLOUD3 %f %f %f format
+#define CS_CLOUDSPEED		(CS_CLOUDTILE+1)		// CLOUD1 CLOUD2 CLOUD3 %f %f %f format
+#define CS_CLOUDALPHA		(CS_CLOUDSPEED+1)		// CLOUD1 CLOUD2 CLOUD3 %f %f %f format
+#define	CS_PAKFILE			(CS_CLOUDALPHA+1)
 #define	MAX_CONFIGSTRINGS	(CS_PAKFILE+1)
 //#define	MAX_CONFIGSTRINGS	(CS_GENERAL+MAX_GENERAL)
 
-//Knightmare- hacked configstring offsets for old demos
+// Knightmare- hacked configstring offsets for old demos
 #define OLD_CS_SOUNDS			(CS_MODELS+OLD_MAX_MODELS)
 #define	OLD_CS_IMAGES			(OLD_CS_SOUNDS+OLD_MAX_SOUNDS)
 #define	OLD_CS_LIGHTS			(OLD_CS_IMAGES+OLD_MAX_IMAGES)
@@ -1241,7 +1269,7 @@ typedef enum
 #define	OLD_CS_PLAYERSKINS		(OLD_CS_ITEMS+MAX_ITEMS)
 #define OLD_CS_GENERAL			(OLD_CS_PLAYERSKINS+MAX_CLIENTS)
 #define	OLD_MAX_CONFIGSTRINGS	(OLD_CS_GENERAL+MAX_GENERAL)
-//end Knightmare
+// end Knightmare
 
 //==============================================
 
@@ -1283,13 +1311,13 @@ typedef struct entity_state_s
 	vec3_t	old_origin;		// for lerping
 	int		modelindex;
 	int		modelindex2, modelindex3, modelindex4;	// weapons, CTF flags, etc
-#ifdef KMQUAKE2_ENGINE_MOD //Knightmare- Privater wanted this
-	int		modelindex5, modelindex6;	//more attached models
+#ifdef KMQUAKE2_ENGINE_MOD	// Knightmare- Privater wanted this
+	int		modelindex5, modelindex6;	// more attached models
 #endif
 	int		frame;
 	int		skinnum;
-#ifdef KMQUAKE2_ENGINE_MOD //Knightmare- allow the server to set this
-	float	alpha;	//entity transparency
+#ifdef KMQUAKE2_ENGINE_MOD	// Knightmare- allow the server to set this
+	float	alpha;			// entity transparency
 #endif
 	unsigned int		effects;		// PGM - we're filling it, so it needs to be unsigned
 	int		renderfx;
@@ -1297,8 +1325,8 @@ typedef struct entity_state_s
 							// 8*(bits 5-9) is z down distance, 8(bits10-15) is z up
 							// gi.linkentity sets this properly
 	int		sound;			// for looping sounds, to guarantee shutoff
-#ifdef LOOP_SOUND_ATTENUATION // Knightmare- added sound attenuation
-	float	attenuation;
+#ifdef KMQUAKE2_ENGINE_MOD		// Knightmare- allow the server to set this
+	float	loop_attenuation;	// looped sound attenuation
 #endif
 	int		event;			// impulse events -- muzzle flashes, footsteps, etc
 							// events only go out for a single frame, they
@@ -1328,7 +1356,7 @@ typedef struct
 	int			gunindex;
 	int			gunframe;
 
-#ifdef KMQUAKE2_ENGINE_MOD //Knightmare added
+#ifdef KMQUAKE2_ENGINE_MOD // Knightmare added
 	int			gunskin;		// for animated weapon skins
 	int			gunindex2;		// for a second weapon model (boot)
 	int			gunframe2;
@@ -1340,7 +1368,7 @@ typedef struct
 	int			waterspeed;
 	int			accel;
 	int			stopspeed;
-#endif							//end Knightmare
+#endif							// end Knightmare
 
 	float		blend[4];		// rgba full screen effect
 	

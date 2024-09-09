@@ -24,7 +24,7 @@ static int	sound_sight;
 
 void gladb_idle (edict_t *self)
 {
-	if (!(self->spawnflags & SF_MONSTER_AMBUSH))
+	if ( !(self->spawnflags & SF_MONSTER_AMBUSH) )
 		gi.sound (self, CHAN_VOICE, sound_idle, 1, ATTN_IDLE, 0);
 }
 
@@ -361,17 +361,10 @@ qboolean gladb_blocked (edict_t *self, float dist)
 //PGM
 //===========
 
-/*QUAKED monster_gladb (1 .5 0) (-32 -32 -24) (32 32 40) Ambush Trigger_Spawn Sight GoodGuy NoGib
-*/
-void SP_monster_gladb (edict_t *self)
+
+// Knightmare- added soundcache function
+void monster_gladb_soundcache (edict_t *self)
 {
-	if (deathmatch->value)
-	{
-		G_FreeEdict (self);
-		return;
-	}
-
-
 	sound_pain1 = gi.soundindex ("gladiator/pain.wav");	
 	sound_pain2 = gi.soundindex ("gladiator/gldpain2.wav");	
 #ifdef CITADELMOD_FEATURES // Knightmare- special death sound for Citadel
@@ -389,6 +382,21 @@ void SP_monster_gladb (edict_t *self)
 	sound_idle = gi.soundindex ("gladiator/gldidle1.wav");
 	sound_search = gi.soundindex ("gladiator/gldsrch1.wav");
 	sound_sight = gi.soundindex ("gladiator/sight.wav");
+}
+
+
+/*QUAKED monster_gladb (1 .5 0) (-32 -32 -24) (32 32 40) Ambush Trigger_Spawn Sight GoodGuy NoGib
+*/
+void SP_monster_gladb (edict_t *self)
+{
+	if (deathmatch->value)
+	{
+		G_FreeEdict (self);
+		return;
+	}
+
+	// Knightmare- use soundcache function
+	monster_gladb_soundcache (self);
 
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;

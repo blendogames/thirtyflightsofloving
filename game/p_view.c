@@ -239,7 +239,7 @@ void SV_CalcViewOffset (edict_t *ent)
 	// if dead, fix the angle and don't add any kick
 	if (ent->deadflag)
 	{
-		if(ent->deadflag != DEAD_FROZEN)
+		if (ent->deadflag != DEAD_FROZEN)
 		{
 			VectorClear (angles);
 
@@ -331,17 +331,17 @@ void SV_CalcViewOffset (edict_t *ent)
 	// absolutely bound offsets
 	// so the view can never be outside the player box
 
-	if(ent->client->chasetoggle) {
+	if (ent->client->chasetoggle) {
 		VectorSet (v, 0, 0, 0);
-		if(ent->client->chasecam != NULL) {
+		if (ent->client->chasecam != NULL) {
 			ent->client->ps.pmove.origin[0] = ent->client->chasecam->s.origin[0]*8;
 			ent->client->ps.pmove.origin[1] = ent->client->chasecam->s.origin[1]*8;
 			ent->client->ps.pmove.origin[2] = ent->client->chasecam->s.origin[2]*8;
 		}
-	} else if(ent->client->spycam) {
+	} else if (ent->client->spycam) {
 		VectorSet (v, 0, 0, 0);
         VectorCopy (ent->client->spycam->s.angles, ent->client->ps.viewangles); 
-		if(ent->client->spycam->svflags & SVF_MONSTER)
+		if (ent->client->spycam->svflags & SVF_MONSTER)
 			ent->client->ps.viewangles[PITCH] = ent->client->spycam->move_angles[PITCH];
 	} else {
 		if (v[0] < -14)
@@ -556,7 +556,8 @@ void SV_CalcBlend (edict_t *ent)
 		float alpha;
 
 		// Turn off fade for dead software players or they won't see menu
-		if ( (ent->health <= 0) && (Q_stricmp(vid_ref->string,"gl")) && (Q_stricmp(vid_ref->string,"kmgl")) )
+	//	if ( (ent->health <= 0) && (Q_stricmp(vid_ref->string, "gl")) && (Q_stricmp(vid_ref->string, "kmgl")) )
+		if ( (ent->health <= 0) && !Q_strncmp(vid_ref->string, "soft", 4) )
 			ent->client->fadein = 0;
 
 		if (ent->client->fadein > level.framenum)
@@ -624,7 +625,7 @@ void P_SlamDamage (edict_t *ent)
 	{
 		if (ent->health > 0)
 		{
-		/*	if(delta > 65)
+		/*	if (delta > 65)
 				ent->s.event = EV_FALLFAR;
 			else
 				ent->s.event = EV_FALL;*/
@@ -815,7 +816,7 @@ void P_WorldEffects (void)
 	if (old_waterlevel && ! waterlevel)
 	{
 		PlayerNoise(current_player, current_player->s.origin, PNOISE_SELF);
-		if(old_watertype & CONTENTS_MUD)
+		if (old_watertype & CONTENTS_MUD)
 			gi.sound (current_player, CHAN_BODY, gi.soundindex("mud/mud_out1.wav"), 1, ATTN_NORM, 0);
 		else
 			gi.sound (current_player, CHAN_BODY, gi.soundindex("player/watr_out.wav"), 1, ATTN_NORM, 0);
@@ -827,7 +828,7 @@ void P_WorldEffects (void)
 	//
 	if (old_waterlevel != 3 && waterlevel == 3)
 	{
-		if(current_player->in_mud)
+		if (current_player->in_mud)
 			gi.sound (current_player, CHAN_BODY, gi.soundindex("mud/mud_un1.wav"), 1, ATTN_NORM, 0);
 		else
 			gi.sound (current_player, CHAN_BODY, gi.soundindex("player/watr_un.wav"), 1, ATTN_NORM, 0);
@@ -967,7 +968,7 @@ void G_SetClientEffects (edict_t *ent)
 	if (ent->health <= 0 || level.intermissiontime)
 		return;
 
-	if(ent->flags & FL_DISGUISED)
+	if (ent->flags & FL_DISGUISED)
 		ent->s.renderfx |= RF_USE_DISGUISE;
 
 	if (ent->powerarmor_time > level.time)
@@ -1011,37 +1012,42 @@ void G_SetClientEffects (edict_t *ent)
 
 	if (ent->client->flashlight)
 	{
-		vec3_t end, forward, offset, right, start, up;
-		trace_t tr;
+		vec3_t	fl_forward, fl_right, offset, start, end, flashpoint;
+		trace_t	tr;
+		int		mask = CONTENTS_SOLID|CONTENTS_MONSTER|CONTENTS_DEADMONSTER|CONTENTS_SLIME|CONTENTS_LAVA;
 
-		if(level.flashlight_cost > 0) {
-			if(!Q_stricmp(FLASHLIGHT_ITEM,"health") || 
-					(ent->client->pers.inventory[ITEM_INDEX(FindItem(FLASHLIGHT_ITEM))]>=level.flashlight_cost) ) {
+		if (level.flashlight_cost > 0)
+		{
+			if ( !Q_stricmp(FLASHLIGHT_ITEM, "health" ) || 
+					(ent->client->pers.inventory[ITEM_INDEX(FindItem(FLASHLIGHT_ITEM))] >= level.flashlight_cost) ) {
 				// Player has items remaining
-				if(ent->client->flashlight_time <= level.time) {
-					ent->client->pers.inventory[ITEM_INDEX(FindItem(FLASHLIGHT_ITEM))]-=level.flashlight_cost;
+				if (ent->client->flashlight_time <= level.time) {
+					ent->client->pers.inventory[ITEM_INDEX(FindItem(FLASHLIGHT_ITEM))] -= level.flashlight_cost;
 					ent->client->flashlight_time = level.time + FLASHLIGHT_DRAIN;
 				}
-			} else {
+			}
+			else {
 				// Out of item
 				ent->client->flashlight = false;
 			}
 		}
-		if(ent->client->flashlight) {
-			AngleVectors (ent->s.angles, forward, right, up);
-			VectorSet(offset, 0, 0, ent->viewheight-8);
-			G_ProjectSource (ent->s.origin, offset, forward, right, start);
-			VectorMA(start,384,forward,end);	// was 128		
-			tr = gi.trace (start,NULL,NULL, end, ent, CONTENTS_SOLID|CONTENTS_MONSTER|CONTENTS_DEADMONSTER);
+		if (ent->client->flashlight)
+		{
+			AngleVectors (ent->s.angles, fl_forward, fl_right, NULL);
+			VectorSet (offset, 0, 0, ent->viewheight - 8);
+		//	G_ProjectSource (ent->s.origin, offset, fl_forward, fl_right, start);
+			VectorAdd (ent->s.origin, offset, start);
+			VectorMA (start, 384, fl_forward, end);
+			tr = gi.trace (start, NULL, NULL, end, ent, mask);
 			if (tr.fraction != 1)
-				VectorMA(tr.endpos,-4,forward,end);
-			VectorCopy(tr.endpos,end);
+				VectorMA (tr.endpos, -4, fl_forward, flashpoint);
+			else
+				VectorCopy (tr.endpos, flashpoint);
 			gi.WriteByte (svc_temp_entity);
 			gi.WriteByte (TE_FLASHLIGHT);
-			gi.WritePosition (end);
+			gi.WritePosition (flashpoint);
 			gi.WriteShort (ent - g_edicts);
-			gi.multicast (end, MULTICAST_PVS);
-
+			gi.multicast (flashpoint, MULTICAST_PVS);
 		}
 	}
 }
@@ -1064,7 +1070,7 @@ void G_SetClientEvent (edict_t *ent)
 			if ( (int)(current_client->bobtime+bobmove) != bobcycle )
 				ent->s.event = EV_FOOTSTEP;	 //Knightmare- move Lazarus footsteps client-side
 		}
-		else if( ent->in_mud && (ent->waterlevel == 1) && (xyspeed > 40))
+		else if ( ent->in_mud && (ent->waterlevel == 1) && (xyspeed > 40))
 		{
 			if ( (level.framenum % 10) == 0 )
 				ent->s.event = EV_WADE_MUD; //Knightmare- move this client-side
@@ -1080,22 +1086,22 @@ void G_SetClientEvent (edict_t *ent)
 			}
 		}
 	}
-	//Knightmare- swimming sounds
+	// Knightmare- swimming sounds
 	else if ((ent->waterlevel == 2) && (xyspeed > 60) && !(ent->in_mud))
 	{
 		if ( (int)(current_client->bobtime+bobmove) != bobcycle )
 			ent->s.event = EV_WADE;	 //Knightmare- move Lazarus footsteps client-side
 	}
-	else if( (level.framenum % 4) == 0)
+	else if ( (level.framenum % 4) == 0)
 	{
-		if(!ent->waterlevel && (ent->movetype != MOVETYPE_NOCLIP) && (fabs(ent->velocity[2]) > 50))
+		if ( !ent->waterlevel && (ent->movetype != MOVETYPE_NOCLIP) && (fabs(ent->velocity[2]) > 50) )
 		{
 			vec3_t	end, forward;
 			trace_t	tr;
-			AngleVectors(ent->s.angles,forward,NULL,NULL);
-			VectorMA(ent->s.origin,2,forward,end);
-			tr = gi.trace(ent->s.origin,ent->mins,ent->maxs,end,ent,CONTENTS_LADDER);
-			if(tr.fraction < 1.0)
+			AngleVectors (ent->s.angles, forward, NULL, NULL);
+			VectorMA (ent->s.origin, 2, forward, end);
+			tr = gi.trace(ent->s.origin, ent->mins, ent->maxs, end, ent, CONTENTS_LADDER);
+			if (tr.fraction < 1.0)
 				ent->s.event = EV_CLIMB_LADDER;	 //Knightmare- move Lazarus footsteps client-side
 		}
 	}
@@ -1208,9 +1214,9 @@ void G_SetClientFrame (edict_t *ent)
 	if (!ent->groundentity && client->anim_priority <= ANIM_WAVE && (!floor || ent->waterlevel > 2))
 		goto newanim;
 
-	if(client->anim_priority == ANIM_REVERSE)
+	if (client->anim_priority == ANIM_REVERSE)
 	{
-		if(ent->s.frame > client->anim_end)
+		if (ent->s.frame > client->anim_end)
 		{
 			ent->s.frame--;
 			return;
@@ -1308,7 +1314,7 @@ void WhatsIt(edict_t *ent)
 {
 	char string[128];
 
-	if(!ent->client->whatsit)
+	if (!ent->client->whatsit)
 		return;
 
 	Com_sprintf (string, sizeof(string), "xv 0 yb -68 cstring2 \"%s\" ", ent->client->whatsit);
@@ -1405,7 +1411,7 @@ void ClientEndServerFrame (edict_t *ent)
 	bobcycle = (int)bobtime;
 
 	// Lazarus: vehicle drivers don't bob
-	if(ent->vehicle)
+	if (ent->vehicle)
 		bobfracsin = 0.;
 	else
 		bobfracsin = fabs(sin(bobtime*M_PI));
@@ -1475,7 +1481,7 @@ void ClientEndServerFrame (edict_t *ent)
 				DeathmatchScoreboardMessage (ent, ent->enemy);
 			gi.unicast (ent, false);
 		}
-		else if(ent->client->whatsit)
+		else if (ent->client->whatsit)
 			WhatsIt(ent);
 	}
 

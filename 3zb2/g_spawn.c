@@ -98,6 +98,9 @@ void SP_misc_eastertank (edict_t *self);
 void SP_misc_easterchick (edict_t *self);
 void SP_misc_easterchick2 (edict_t *self);
 
+// Knightmare- Kex flares
+void SP_misc_flare (edict_t *self);
+
 void SP_monster_berserk (edict_t *self);
 void SP_monster_gladiator (edict_t *self);
 void SP_monster_gunner (edict_t *self);
@@ -278,6 +281,9 @@ spawn_t	spawns[] = {
 	{"misc_eastertank", SP_misc_eastertank},
 	{"misc_easterchick", SP_misc_easterchick},
 	{"misc_easterchick2", SP_misc_easterchick2},
+
+	// Knightmare- Kex flares
+	{"misc_flare", SP_misc_flare},
 
 	// RAFAEL
 //	{"misc_crashviper", SP_misc_crashviper},
@@ -502,6 +508,45 @@ void ED_ParseField (char *key, char *value, edict_t *ent)
 	}
 //	gi.dprintf ("%s is not a field %s\n", key,ent->classname);
 }
+
+
+// Knightmare added
+/*
+===============
+ED_SetDefaultFields
+
+Sets the default binary values in an edict
+===============
+*/
+void ED_SetDefaultFields (edict_t *ent)
+{
+	field_t	*f;
+	byte	*b;
+	
+	for (f=fields ; f->name ; f++)
+	{
+		if (f->flags & FFL_DEFAULT_NEG)
+		{
+			if (f->flags & FFL_SPAWNTEMP)
+				b = (byte *)&st;
+			else
+				b = (byte *)ent;
+				
+			if (f->type == F_LSTRING)
+				*(char **)(b+f->ofs) = ED_NewString ("-1");
+			else if ( (f->type == F_VECTOR) || (f->type == F_ANGLEHACK) ) {
+				((float *)(b+f->ofs))[0] = -1.0f;
+				((float *)(b+f->ofs))[1] = -1.0f;
+				((float *)(b+f->ofs))[2] = -1.0f;
+			}
+			else if (f->type == F_INT)
+				*(int *)(b+f->ofs) = -1;
+			else if (f->type == F_FLOAT)
+				*(float *)(b+f->ofs) = -1.0f;
+		}
+	}
+}
+// end Knightmare
 
 /*
 ==============================================================================
@@ -806,6 +851,9 @@ char *ED_ParseEdict (char *data, edict_t *ent)
 
 	init = false;
 	memset (&st, 0, sizeof(st));
+
+	// Knightmare- set field defaults
+	ED_SetDefaultFields (ent);
 
 	// Knightmare- look for and load an alias for this ent
 	alias_loaded = ED_ParseEntityAlias (data, ent);
@@ -1481,8 +1529,8 @@ char *single_statusbar =
 
 // timer
 "if 9 "
-"	xv	262 "
-"	num	2	10 "
+"	xv	230 "
+"	num	4	10 "
 "	xv	296 "
 "	pic	9 "
 "endif "
@@ -1539,8 +1587,8 @@ char *dm_statusbar =
 
 // timer
 "if 9 "
-"	xv	246 "
-"	num	2	10 "
+"	xv	230 "
+"	num	4	10 "
 "	xv	296 "
 "	pic	9 "
 "endif "
@@ -1612,6 +1660,27 @@ void SP_worldspawn (edict_t *ent)
 
 	gi.configstring (CS_SKYAXIS, va("%f %f %f",
 		st.skyaxis[0], st.skyaxis[1], st.skyaxis[2]) );
+
+	// Knightmare- configstrings added for DK-style clouds support
+#ifdef KMQUAKE2_ENGINE_MOD
+	gi.configstring (CS_SKYDISTANCE, va("%f", st.skydistance) );
+
+	if (st.cloudname && st.cloudname[0])
+		gi.configstring (CS_CLOUDNAME, st.cloudname);
+	else
+		gi.configstring (CS_CLOUDNAME, "");
+
+	gi.configstring (CS_CLOUDLIGHTFREQ, va("%f", st.lightningfreq) );
+
+	gi.configstring (CS_CLOUDDIR, va("%f %f", st.cloudxdir, st.cloudydir) );
+
+	gi.configstring (CS_CLOUDTILE, va("%f %f %f", st.cloud1tile, st.cloud2tile, st.cloud3tile) );
+
+	gi.configstring (CS_CLOUDSPEED, va("%f %f %f", st.cloud1speed, st.cloud2speed, st.cloud3speed) );
+
+	gi.configstring (CS_CLOUDALPHA, va("%f %f %f", st.cloud1alpha, st.cloud2alpha, st.cloud3alpha) );
+#endif	// KMQUAKE2_ENGINE_MOD
+	// end DK-style clouds support
 
 	// Knightmare- if a named soundtrack is specified, play it instead of from CD
 	if (ent->musictrack && strlen(ent->musictrack))

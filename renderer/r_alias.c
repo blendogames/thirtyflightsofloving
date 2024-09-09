@@ -280,7 +280,7 @@ void RB_RenderAliasMesh (maliasmodel_t *paliashdr, unsigned meshnum, unsigned sk
 		for (i=0; i<rb_vertex; i++)
 			colorArray[i][3] = thisalpha*skinParms->envmap;
 
-		GL_Bind(glMedia.envmappic->texnum);
+		GL_Bind(glMedia.envMapTexture->texnum);
 
 		qglEnable(GL_TEXTURE_GEN_S);
 		qglEnable(GL_TEXTURE_GEN_T);
@@ -302,7 +302,7 @@ void RB_RenderAliasMesh (maliasmodel_t *paliashdr, unsigned meshnum, unsigned sk
 		GL_Enable (GL_BLEND);
 		GL_BlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		GL_Bind (glMedia.celshadetexture->texnum);
+		GL_Bind (glMedia.celShadeTexture->texnum);
 
 		qglTexCoordPointer (2, GL_FLOAT, sizeof(celTexCoordArray[0]), celTexCoordArray[0]);
 		qglDisableClientState (GL_COLOR_ARRAY);
@@ -392,7 +392,7 @@ void R_DrawAliasMeshes (maliasmodel_t *paliashdr, entity_t *e, qboolean mirrored
 	vec3_t			tempNormalsArray[MD3_MAX_VERTS];
 	vec2_t			tempSkinCoord;
 	vec3_t			meshlight, lightcolor;
-	float			alpha, meshalpha, thisalpha, shellscale, frontlerp, backlerp = e->backlerp, mirrormult;
+	float			alpha, meshalpha, thisalpha, shellscale, frontlerp, backlerp = e->backlerp, mirrormult = 1.0f;
 	image_t			*skin;
 	renderparms_t	skinParms;
 	qboolean		shellModel = e->flags & RF_MASK_SHELL;
@@ -461,7 +461,7 @@ void R_DrawAliasMeshes (maliasmodel_t *paliashdr, entity_t *e, qboolean mirrored
 		}
 		if (!skin) {
 			skinnum = 0;
-			skin = glMedia.notexture;
+			skin = glMedia.noTexture;
 		}
 
 		// md3 skin scripting
@@ -1110,13 +1110,13 @@ static qboolean R_CullAliasModel (vec3_t bbox[8], vec3_t shadowBBox[8], entity_t
 
 	if ( ( e->frame >= paliashdr->num_frames ) || ( e->frame < 0 ) )
 	{
-		VID_Printf (PRINT_ALL, "R_CullAliasModel %s: no such frame %d\n", 
+		VID_Printf (PRINT_DEVELOPER, "R_CullAliasModel %s: no such frame %d\n", 
 			currentmodel->name, e->frame);
 		e->frame = 0;
 	}
 	if ( ( e->oldframe >= paliashdr->num_frames ) || ( e->oldframe < 0 ) )
 	{
-		VID_Printf (PRINT_ALL, "R_CullAliasModel %s: no such oldframe %d\n", 
+		VID_Printf (PRINT_DEVELOPER, "R_CullAliasModel %s: no such oldframe %d\n", 
 			currentmodel->name, e->oldframe);
 		e->oldframe = 0;
 	}
@@ -1285,7 +1285,7 @@ void R_DrawAliasModel (entity_t *e)
 	}
 
 	// also skip this for viewermodels and cameramodels
-	if ( !(e->flags & RF_WEAPONMODEL || e->flags & RF_VIEWERMODEL || e->renderfx & RF2_CAMERAMODEL) )
+	if ( !(e->flags & RF_WEAPONMODEL || e->flags & RF_VIEWERMODEL || e->renderfx & RF_CAMERAMODEL) )
 	{
 	//	if (R_CullAliasModel(bbox, e))
 	//		return;
@@ -1311,7 +1311,7 @@ void R_DrawAliasModel (entity_t *e)
 		else if (r_lefthand->integer == 1)
 			mirrorview = true;
 	}
-	else if (e->renderfx & RF2_CAMERAMODEL)
+	else if (e->renderfx & RF_CAMERAMODEL)
 	{
 		if (r_lefthand->integer == 1)
 			mirrormodel = true;
@@ -1354,14 +1354,14 @@ void R_DrawAliasModel (entity_t *e)
 
 	if ( (e->frame >= paliashdr->num_frames) || (e->frame < 0) )
 	{
-		VID_Printf (PRINT_ALL, "R_DrawAliasModel %s: no such frame %d\n", currentmodel->name, e->frame);
+		VID_Printf (PRINT_DEVELOPER, "R_DrawAliasModel %s: no such frame %d\n", currentmodel->name, e->frame);
 		e->frame = 0;
 		e->oldframe = 0;
 	}
 
 	if ( (e->oldframe >= paliashdr->num_frames) || (e->oldframe < 0))
 	{
-		VID_Printf (PRINT_ALL, "R_DrawAliasModel %s: no such oldframe %d\n",
+		VID_Printf (PRINT_DEVELOPER, "R_DrawAliasModel %s: no such oldframe %d\n",
 			currentmodel->name, e->oldframe);
 		e->frame = 0;
 		e->oldframe = 0;
@@ -1479,7 +1479,7 @@ void R_DrawAliasModelShadow (entity_t *e)
 		return;
 
 	// also skip this for viewermodels and cameramodels
-	if ( !(e->flags & RF_WEAPONMODEL || e->flags & RF_VIEWERMODEL || e->renderfx & RF2_CAMERAMODEL) )
+	if ( !(e->flags & RF_WEAPONMODEL || e->flags & RF_VIEWERMODEL || e->renderfx & RF_CAMERAMODEL) )
 	{
 		if (R_CullAliasModel(bbox, e))
 			return;
@@ -1489,7 +1489,7 @@ void R_DrawAliasModelShadow (entity_t *e)
 	if (aliasShadowAlpha < DIV255) // out of range
 		return;
 
-	if (e->renderfx & RF2_CAMERAMODEL)
+	if (e->renderfx & RF_CAMERAMODEL)
 	{
 		if (r_lefthand->integer == 1)
 			mirrormodel = true;

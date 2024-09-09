@@ -786,17 +786,9 @@ void freddie_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dama
 }
 
 
-/*QUAKED monster_q1_freddie (1 0 0) (-32 -32 -24) (32 32 64) Ambush Trigger_Spawn Sight
-model="models/monsters/q1freddie/tris.md2"
-*/
-void SP_monster_q1_freddie (edict_t *self)
+// Knightmare- added soundcache function
+void monster_q1_freddie_soundcache (edict_t *self)
 {
-	if (deathmatch->value)
-	{
-		G_FreeEdict (self);
-		return;
-	}
-
 	sound_pain1 =		gi.soundindex ("q1freddie/pain.wav");
 	sound_pain2 =		gi.soundindex ("q1freddie/painshrt.wav");
 	sound_death =		gi.soundindex ("q1freddie/death.wav");
@@ -811,6 +803,21 @@ void SP_monster_q1_freddie (edict_t *self)
 	sound_step1  =		gi.soundindex ("q1freddie/step.wav");
 	sound_step2  =		gi.soundindex ("q1freddie/step2.wav");
 	sound_step3  =		gi.soundindex ("q1freddie/step3.wav");
+}
+
+/*QUAKED monster_q1_freddie (1 0 0) (-32 -32 -24) (32 32 64) Ambush Trigger_Spawn Sight
+model="models/monsters/q1freddie/tris.md2"
+*/
+void SP_monster_q1_freddie (edict_t *self)
+{
+	if (deathmatch->value)
+	{
+		G_FreeEdict (self);
+		return;
+	}
+
+	// Knightmare- use soundcache function
+	monster_q1_freddie_soundcache (self);
 
 	// precache gibs
 	gi.modelindex ("models/monsters/q1ogre/head/tris.md2");

@@ -2,6 +2,9 @@
 
 #include "g_local.h"
 
+void door_go_down (edict_t *self);
+qboolean chthon_bolt (edict_t *self, int no);
+
 //======================================================================
 // CRUCIFIED ZOMBIE
 //======================================================================
@@ -196,7 +199,7 @@ void SP_misc_q1_air_bubbles (edict_t *self)
 /*QUAKED misc_q1_globe (0 1 0) (-4 -4 -4) (4 4 4)
 This is a sprite, is not solid
 */
-void SP_misc_q1_globe(edict_t *self)
+void SP_misc_q1_globe (edict_t *self)
 {
 	self->movetype = MOVETYPE_NONE;
 	self->solid = SOLID_NOT;
@@ -381,6 +384,234 @@ void SP_target_q1_trap (edict_t *self)
 	self->svflags = SVF_NOCLIENT;
 }
 
+//======================================================================
+// LIGHTNING BOLT
+//======================================================================
+
+/*static*/ void target_fire_lightning (edict_t *self, vec3_t start, vec3_t dir, int damage)
+{
+	vec3_t	end;
+	trace_t	tr;
+
+	VectorNormalize (dir);
+	VectorMA (start, 600, dir, end);
+	tr = gi.trace (start, NULL, NULL, end, self, MASK_SHOT);
+	
+	gi.WriteByte (svc_temp_entity);
+#ifdef KMQUAKE2_ENGINE_MOD
+	gi.WriteByte (TE_LIGHTNING_ATTACK);
+	gi.WriteShort (self - g_edicts);
+	gi.WritePosition (start);
+	gi.WritePosition (tr.endpos); 
+	gi.WriteByte (3);	// model 3 specifies trap bolt model 
+#else
+	gi.WriteByte (TE_MEDIC_CABLE_ATTACK);
+	gi.WriteShort (self - g_edicts);
+	gi.WritePosition (start);
+	gi.WritePosition (tr.endpos); 
+#endif	// KMQUAKE2_ENGINE_MOD
+	gi.multicast (start, MULTICAST_PVS);
+		
+	if ( (tr.ent != self) && (tr.ent->takedamage) )
+		T_Damage (tr.ent, self, self, dir, tr.endpos, tr.plane.normal, damage, 0, DAMAGE_ENERGY, MOD_Q1_LIGHTNING_TRAP);
+}
+
+void think_targetbolt (edict_t *self)
+{
+	qboolean	electrodes_found = false;
+	qboolean	discharge_done = false;
+	edict_t		*le1 = NULL;
+	edict_t		*le2 = NULL;
+
+	// find our electrodes
+	if ( self->pathtarget && (self->pathtarget[0] != 0) )
+		le1 = G_Find (NULL, FOFS(targetname), self->pathtarget);
+	if ( self->followtarget && (self->followtarget[0] != 0) )
+		le2 = G_Find (NULL, FOFS(targetname), self->followtarget);
+
+	// check if electrodes exist and are the correct entity type
+	if ( (le1 != NULL) && (le2 != NULL) )
+	{
+		if ( ( !Q_stricmp(le1->classname, "func_door") ||
+			!Q_stricmp(le1->classname, "func_door_rotating") ||
+			!Q_stricmp(le1->classname, "func_door_rot_dh") ) &&
+			( !Q_stricmp(le2->classname, "func_door") ||
+			!Q_stricmp(le2->classname, "func_door_rotating") ||
+			!Q_stricmp(le2->classname, "func_door_rot_dh") ) )
+		{
+			electrodes_found = true;
+		}
+	}
+
+	// bail out if on qe1m7 and electrodes not found
+/*	if ( (Q_stricmp(level.mapname, "qe1m7") == 0) && !electrodes_found ) {
+		self->nextthink = 0;
+		self->think = NULL;
+		self->delay = 0;
+		return;
+	} */
+
+	// if discnarge is complete, clear think pointer and timer
+	if (level.time >= self->delay) {
+		self->nextthink = 0;
+		self->think = NULL;
+		self->delay = 0;
+		discharge_done = true;
+	}
+	// if not done, fire lightning bolt again
+	else {
+		target_fire_lightning (self, self->s.origin, self->movedir, 0);	// damage is 0 because we're just extending the effect
+	//	gi.sound (self, CHAN_AUTO, gi.soundindex ("q1weapons/lhit.wav"), 1.0, ATTN_NORM, 0);
+		self->nextthink = level.time + 0.2;
+		self->think = think_targetbolt;
+	}
+
+	// if discnarge is complete, retract electrodes
+	if ( electrodes_found && discharge_done ) {
+		door_go_down (le1);
+		door_go_down (le2);
+	}
+}
+
+void use_target_bolt (edict_t *self, edict_t *other, edict_t *activator)
+{
+	int			bstate1 = 0, bstate2 = 0;
+	vec3_t		dir, start, end;
+	trace_t		tr;
+	qboolean	electrodes_found = false;
+	qboolean	electrodes_aligned = false;
+	qboolean	chthon_shocked = false;
+	edict_t		*le1 = NULL;
+	edict_t		*le2 = NULL;
+	edict_t		*t = NULL;
+	edict_t		*chthon = NULL;
+
+	// find our electrodes
+	if ( self->pathtarget && (self->pathtarget[0] != 0) )
+		le1 = G_Find (NULL, FOFS(targetname), self->pathtarget);
+	if ( self->followtarget && (self->followtarget[0] != 0) )
+		le2 = G_Find (NULL, FOFS(targetname), self->followtarget);
+		
+	// check if electrodes exist and are the correct entity type
+	// also check if they are aligned
+	if ( (le1 != NULL) && (le2 != NULL) )
+	{
+		if ( ( !Q_stricmp(le1->classname, "func_door") ||
+			!Q_stricmp(le1->classname, "func_door_rotating") ||
+			!Q_stricmp(le1->classname, "func_door_rot_dh") ) &&
+			( !Q_stricmp(le2->classname, "func_door") ||
+			!Q_stricmp(le2->classname, "func_door_rotating") ||
+			!Q_stricmp(le2->classname, "func_door_rot_dh") ) )
+		{
+			electrodes_found = true;
+			bstate1 = le1->moveinfo.state;
+			bstate2 = le2->moveinfo.state;
+		//	if (bstate1 == bstate2)
+			if ( ( (bstate1 == 0) && (bstate2 == 0) ) || ( (bstate1 == 1) && (bstate2 == 1) ) )
+				electrodes_aligned = true;
+		}
+	}
+		
+	// bail out if electrodes found and not aligned
+	if ( electrodes_found && !electrodes_aligned ) {
+		return;
+	}
+
+	// if both electrodes are up, fire lightning from our target ent target_q1_bolt 
+	if ( electrodes_aligned && bstate1 )
+	{
+		t = G_Find (NULL, FOFS(targetname), self->target);
+		if ( t && !Q_stricmp(t->classname, "target_q1_bolt") )
+		{
+			target_fire_lightning (t, t->s.origin, t->movedir, t->dmg);
+		//	gi.sound (t, CHAN_AUTO, gi.soundindex("q1weapons/lstart.wav"), 1.0, ATTN_NORM, 0);
+			gi.sound (t, CHAN_AUTO, t->noise_index, 1.0, ATTN_NORM, 0);
+			t->nextthink = level.time + 0.2;
+			t->think = think_targetbolt;
+			t->delay = level.time + 1.8;
+			return;
+		}
+	}
+	// if both electrodes are down, find Chthon and shock him
+	else if ( electrodes_aligned && (bstate2 == 0) && (bstate1 == 0) )
+	{
+		// prevent electrodes from retracting until shock is finished
+		le1->nextthink = 0;
+		le2->nextthink = 0;
+
+		// trace forward according to movedir and see if we hit Chthon
+		VectorCopy (self->movedir, dir);
+		VectorNormalize (dir);
+		VectorCopy (self->s.origin, start);
+		VectorMA (start, 600, dir, end);
+		tr = gi.trace (start, NULL, NULL, end, self, MASK_SHOT);
+		if ( (tr.ent != self) && tr.ent->classname && (tr.ent->classname[0] != 0) &&
+			( !Q_stricmp(tr.ent->classname, "q1_monster_chton") || !Q_stricmp(tr.ent->classname, "monster_q1_chthon") ) )
+		{
+			chthon = tr.ent;
+			if ( !chthon->deadflag && chthon->enemy ) {
+				chthon_shocked = true;
+				self->count++;
+				if ( chthon_bolt (chthon, self->count) )
+					self->count = 0;
+			}
+		//	else
+		//		gi.dprintf ("Chthon does not have an enemy\n");
+		}
+	//	else
+	//		gi.dprintf ("Could not find Chthon\n");
+	}
+
+	// do no extra damage to Chthon to avoid causing early death sequence
+	if (chthon_shocked)
+		target_fire_lightning (self, self->s.origin, self->movedir, 0);
+	else
+		target_fire_lightning (self, self->s.origin, self->movedir, self->dmg);
+//	gi.sound (self, CHAN_AUTO, gi.soundindex("q1weapons/lstart.wav"), 1.0, ATTN_NORM, 0);
+	gi.sound (self, CHAN_AUTO, self->noise_index, 1.0, ATTN_NORM, 0);
+	self->nextthink = level.time + 0.2;
+	self->think = think_targetbolt;
+	self->delay = level.time + 1.8;
+}
+
+/*QUAKED q1_target_bolt (1 0 0) (-8 -8 -8) (8 8 8)
+Fires lightning bolt in the set direction when triggered.
+*/
+
+void SP_target_q1_bolt (edict_t *self)
+{
+	self->use = use_target_bolt;
+	self->count = 0;
+	G_SetMovedir (self->s.angles, self->movedir);
+//	self->noise_index = gi.soundindex ("q1weapons/lhit.wav"); 
+//	gi.soundindex ("q1weapons/lstart.wav");
+	self->noise_index = gi.soundindex ("q1misc/power.wav"); 
+	
+	// check pathtarget and followtarget, set default values if unset
+/*	if (Q_stricmp(level.mapname, "qe1m7") == 0)	// qe1m7 uses hardcoded targetnames for electrodes
+	{
+		if ( !self->pathtarget || (self->pathtarget[0] == 0) || !self->followtarget || (self->followtarget[0] == 0) ) {
+			gi.dprintf ("target_q1_bolt without a pathtarget/followtarget at %s\n", vtos(self->s.origin));
+			self->pathtarget = G_CopyString ("t12");
+			self->followtarget = G_CopyString ("t13");
+		}
+	}
+	else
+	{ */
+		if ( !self->pathtarget || (strlen(self->pathtarget) == 0) ) {
+			gi.dprintf ("target_q1_bolt without a pathtarget at %s\n", vtos(self->s.origin));
+			self->pathtarget = G_CopyString ("foo_1");
+		}
+		if ( !self->followtarget || (strlen(self->followtarget) == 0) ) {
+			gi.dprintf ("target_q1_bolt without a followtarget at %s\n", vtos(self->s.origin));
+			self->followtarget = G_CopyString ("foo_2");
+		}
+//	}
+
+	if (!self->dmg)
+		self->dmg = 50;
+	self->svflags = SVF_NOCLIENT;
+}
 
 //======================================================================
 // Q1 EXPLOBOX

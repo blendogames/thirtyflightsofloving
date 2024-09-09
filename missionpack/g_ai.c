@@ -212,7 +212,7 @@ void ai_stand (edict_t *self, float dist)
 	if (!(self->spawnflags & SF_MONSTER_SIGHT) && (self->monsterinfo.idle) && (level.time > self->monsterinfo.idle_time))
 	{
 			if (self->monsterinfo.aiflags & AI_MEDIC)
-			abortHeal(self,false, false, false);
+			abortHeal (self, false, false, false);
 
 		if (self->monsterinfo.idle_time)
 		{
@@ -1086,7 +1086,7 @@ qboolean M_CheckAttack (edict_t *self)
 		VectorCopy (self->enemy->s.origin, spot2);
 		spot2[2] += self->enemy->viewheight;
 
-		// Knightmare- laser grunts can shoot through glass
+		// Knightmare- laser guards can shoot through glass
 		if (!strcmp(self->classname, "monster_soldier_lasergun") && (self->spawnflags & SOLDIER_LASERGUN_THROUGH_GLASS))
 			tr = gi.trace (spot1, NULL, NULL, spot2, self, CONTENTS_SOLID|CONTENTS_MONSTER|CONTENTS_SLIME|CONTENTS_LAVA);
 		else
@@ -2126,12 +2126,12 @@ static int chase_angle[] = {270,450,225,495,540};
 qboolean ai_chicken (edict_t *self, edict_t *badguy)
 {
 	int		i;
-	edict_t	*thing;
+//	edict_t	*thing = NULL;
 	vec3_t	atk, dir, best_dir, end, forward;
 	vec_t	travel, yaw;
 	vec3_t	mins, maxs;
 	vec3_t	testpos;
-	vec_t	best_dist=0;
+	vec_t	best_dist = 0;
 	trace_t	trace1, trace2;
 
 	// No point in hiding from attacker if he's gone
@@ -2200,6 +2200,7 @@ qboolean ai_chicken (edict_t *self, edict_t *badguy)
 	}
 	return false;
 
+#if 0	// Knightmare- unreachable code
 	if (best_dist < 32)
 		return false;
 
@@ -2219,4 +2220,5 @@ qboolean ai_chicken (edict_t *self, edict_t *badguy)
 	self->monsterinfo.run(self);
 	self->monsterinfo.chicken_framenum = level.framenum;
 	return true;
+#endif
 }

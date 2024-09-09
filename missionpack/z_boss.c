@@ -727,7 +727,7 @@ void HookDragThink (edict_t *self)
 	float	length, speed;
 	vec3_t	hookoffset	= {-5, -24, 34};
 	vec3_t	forward, right;
-	vec3_t  offset = {0, 0, 0};
+//	vec3_t  offset = {0, 0, 0};
 
 	if (self->enemy && self->enemy->health > 0)
 	{
@@ -811,7 +811,7 @@ void HookThink (edict_t *self)
 	vec3_t	vec;
 	vec3_t	hookoffset	= {-3, -24, 34};
 	vec3_t	forward, right;
-	vec3_t  offset = {0, 0, 0};
+//	vec3_t  offset = {0, 0, 0};
 
 	if (self->powerarmor_time < level.time)
 	{
@@ -853,7 +853,7 @@ void FireHook (edict_t *self)
 	vec3_t	vec;
 	vec3_t	hookoffset	= {-1, -24, 34};
 	edict_t	*hook;
-	float speed;
+	float	speed;
 
 	AngleVectors (self->s.angles, forward, right, NULL);
 
@@ -1704,7 +1704,9 @@ End Death Stuff
 ===
 */
 
-void SP_monster_zboss_precache (void)
+
+// Knightmare- added soundcache function
+void monster_zboss_soundcache (edict_t *self)
 {
 	sound_pain1 = gi.soundindex ("monsters/bossz/bpain1.wav");	
 	sound_pain2 = gi.soundindex ("monsters/bossz/bpain2.wav");	
@@ -1730,6 +1732,12 @@ void SP_monster_zboss_precache (void)
 	sound_taunt3 = gi.soundindex("monsters/bossz/btaunt3.wav");
 }
 
+void SP_monster_zboss_precache (edict_t *self)
+{
+	// Knightmare- use soundcache function
+	monster_zboss_soundcache (self);
+}
+
 
 /*QUAKED monster_zboss (1 .5 0) (-32 -32 -16) (32 32 72) Ambush Trigger_Spawn Sight GoodGuy NoGib
 model="models/monsters/bossz/mech/"
@@ -1744,7 +1752,7 @@ void SP_monster_zboss (edict_t *self)
 		return;
 	}
 
-	SP_monster_zboss_precache();
+	SP_monster_zboss_precache (self);
 
 	// Lazarus: special purpose skins
 	if ( self->style )

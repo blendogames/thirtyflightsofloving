@@ -133,3 +133,22 @@ typedef struct maliasmodel_s
     int				num_meshes;
 	maliasmesh_t	*meshes;
 } maliasmodel_t;
+
+//
+// Sprite representation in memory
+//
+
+typedef struct mspriteframe_s
+{
+	int				width;
+	int				height;
+	int				origin_x;		// raster coordinates inside pic
+	int				origin_y;
+	char			name[MD2_MAX_SKINNAME];	// name of pcx file
+} mspriteframe_t;
+
+typedef struct mspritemodel_s
+{
+	int				num_frames;
+	mspriteframe_t	*frames;
+} mspritemodel_t;

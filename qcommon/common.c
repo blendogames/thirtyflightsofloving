@@ -68,6 +68,8 @@ int		time_after_game;
 int		time_before_ref;
 int		time_after_ref;
 
+qboolean LegacyProtocol (void);
+
 /*
 ============================================================================
 
@@ -296,6 +298,9 @@ Handles byte ordering and avoids alignment errors
 ==============================================================================
 */
 
+#define BIT_23	0x00800000
+#define UPRBITS	0xFF000000
+
 vec3_t	bytedirs[NUMVERTEXNORMALS] =
 {
 #include "../client/anorms.h"
@@ -371,6 +376,21 @@ void MSG_WriteFloat (sizebuf_t *sb, float f)
 	SZ_Write (sb, &dat.l, 4);
 }
 
+// Knightmare added- for sending floats as nearest-integer shorts by rounding to nearest int first
+void MSG_WriteFloatAsShort (sizebuf_t *sb, float f)
+{
+	// DG: float -> int always rounds down (3.99999f => 3), let's round up if > x.5
+	// by adding almost 0.5 (analog for negative numbers) => x.5 becomes x, x.51 becomes (x+1)
+	float	rounding = 0.4999f;
+	short	asShort;
+
+	if (f < 0.0f)
+		rounding = -rounding;
+	asShort = f + rounding;
+
+	MSG_WriteShort (sb, asShort);
+}
+
 void MSG_WriteString (sizebuf_t *sb, char *s)
 {
 	if (!s)
@@ -380,63 +400,43 @@ void MSG_WriteString (sizebuf_t *sb, char *s)
 }
 
 
-// 24-bit coordinate transmission code
-#ifdef LARGE_MAP_SIZE
-
-#define BIT_23	0x00800000
-#define UPRBITS	0xFF000000
-qboolean LegacyProtocol (void);
-
-void MSG_WriteCoordNew (sizebuf_t *sb, float f)
-{
-	int tmp;
-	byte trans1;
-	unsigned short trans2;
-
-	tmp = f*8;			// 1/8 granulation, leaves bounds of +/-1M in signed 24-bit form
-	trans1 = tmp >>16;	// bits 16-23
-	trans2 = tmp;		// bits 0-15
-
-	// Don't mess with sign bits on this end to allow overflow (map wrap-around).
-
-	MSG_WriteByte (sb, trans1);
-	MSG_WriteShort (sb, trans2);
-}
-
-float MSG_ReadCoordNew (sizebuf_t *msg_read)
-{
-	int tmp;
-	byte trans1;
-	unsigned short trans2;
-
-	trans1 = MSG_ReadByte(msg_read);
-	trans2 = MSG_ReadShort(msg_read);
-
-	tmp = trans1 <<16;	// bits 16-23
-	tmp += trans2;		// bits 0-15
-
-	// Sign bit 23 means it's negative, so fill upper
-	// 8 bits with 1s for 2's complement negative.
-	if (tmp & BIT_23)	
-		tmp |= UPRBITS;
-
-	return tmp * (1.0/8);	// restore 1/8 granulation
-}
-
+// Knightmare- 24-bit player coordinate transmission code
 // Player movement coords are already in 1/8 precision integer form
-void MSG_WritePMCoordNew (sizebuf_t *sb, int in)
+void MSG_WritePMCoord24 (sizebuf_t *sb, int in)
 {
 	byte trans1;
 	unsigned short trans2;
 
-	trans1 = in >>16;	// bits 16-23
+	trans1 = in >> 16;	// bits 16-23
 	trans2 = in;		// bits 0-15
 
 	MSG_WriteByte (sb, trans1);
 	MSG_WriteShort (sb, trans2);
 }
 
-int MSG_ReadPMCoordNew (sizebuf_t *msg_read)
+void MSG_WritePMCoord16 (sizebuf_t *sb, int in)
+{
+	MSG_WriteShort (sb, in);
+}
+
+#ifdef LARGE_MAP_SIZE
+
+void MSG_WritePMCoord (sizebuf_t *sb, int in)
+{
+	MSG_WritePMCoord24 (sb, in);
+}
+
+#else // LARGE_MAP_SIZE
+
+void MSG_WritePMCoord (sizebuf_t *sb, int in)
+{
+	MSG_WritePMCoord16 (sb, in);
+}
+
+#endif // LARGE_MAP_SIZE
+
+
+int MSG_ReadPMCoord24 (sizebuf_t *msg_read)
 {
 	int tmp;
 	byte trans1;
@@ -445,7 +445,7 @@ int MSG_ReadPMCoordNew (sizebuf_t *msg_read)
 	trans1 = MSG_ReadByte(msg_read);
 	trans2 = MSG_ReadShort(msg_read);
 
-	tmp = trans1 <<16;	// bits 16-23
+	tmp = trans1 << 16;	// bits 16-23
 	tmp += trans2;		// bits 0-15
 
 	// Sign bit 23 means it's negative, so fill upper
@@ -456,48 +456,99 @@ int MSG_ReadPMCoordNew (sizebuf_t *msg_read)
 	return tmp;
 }
 
-#endif // LARGE_MAP_SIZE
-
+int MSG_ReadPMCoord16 (sizebuf_t *msg_read)
+{
+	return MSG_ReadShort (&net_message);
+}
 
 #ifdef LARGE_MAP_SIZE
 
-void MSG_WriteCoord (sizebuf_t *sb, float f)
+int MSG_ReadPMCoord (sizebuf_t *msg_read)
 {
-	MSG_WriteCoordNew (sb, f);
+	if ( LegacyProtocol() )
+		return MSG_ReadPMCoord16 (msg_read);
+	else
+		return MSG_ReadPMCoord24 (msg_read);
 }
 
 #else // LARGE_MAP_SIZE
 
-void MSG_WriteCoord (sizebuf_t *sb, float f)
+int MSG_ReadPMCoord (sizebuf_t *msg_read)
+{
+	return MSG_ReadPMCoord16 (msg_read);
+}
+
+#endif // LARGE_MAP_SIZE
+
+void MSG_WriteCoord24 (sizebuf_t *sb, float f)
+{
+	int tmp;
+	byte trans1;
+	unsigned short trans2;
+
+	tmp = f*8;			// 1/8 granulation, leaves bounds of +/-1M in signed 24-bit form
+	trans1 = tmp >> 16;	// bits 16-23
+	trans2 = tmp;		// bits 0-15
+
+	// Don't mess with sign bits on this end to allow overflow (map wrap-around).
+
+	MSG_WriteByte (sb, trans1);
+	MSG_WriteShort (sb, trans2);
+}
+
+void MSG_WriteCoord16 (sizebuf_t *sb, float f)
 {
 	MSG_WriteShort (sb, (int)(f*8));
 }
 
+#ifdef LARGE_MAP_SIZE
+
+void MSG_WriteCoord (sizebuf_t *sb, float f)
+{
+	MSG_WriteCoord24 (sb, f);
+}
+
+#else // LARGE_MAP_SIZE
+
+void MSG_WriteCoord (sizebuf_t *sb, float f)
+{
+	MSG_WriteCoord16 (sb, f);
+}
+
 #endif // LARGE_MAP_SIZE
 
+void MSG_WritePos24 (sizebuf_t *sb, vec3_t pos)
+{
+	 MSG_WriteCoord24 (sb, pos[0]);
+	 MSG_WriteCoord24 (sb, pos[1]);
+	 MSG_WriteCoord24 (sb, pos[2]);
+}
+
+void MSG_WritePos16 (sizebuf_t *sb, vec3_t pos)
+{
+	 MSG_WriteCoord16 (sb, pos[0]);
+	 MSG_WriteCoord16 (sb, pos[1]);
+	 MSG_WriteCoord16 (sb, pos[2]);
+}
 
 #ifdef LARGE_MAP_SIZE
 
 void MSG_WritePos (sizebuf_t *sb, vec3_t pos)
 {
-	MSG_WriteCoordNew (sb, pos[0]);
-	MSG_WriteCoordNew (sb, pos[1]);
-	MSG_WriteCoordNew (sb, pos[2]);
+	MSG_WritePos24 (sb, pos);
 }
 
 #else // LARGE_MAP_SIZE
 
 void MSG_WritePos (sizebuf_t *sb, vec3_t pos)
 {
-	MSG_WriteShort (sb, (int)(pos[0]*8));
-	MSG_WriteShort (sb, (int)(pos[1]*8));
-	MSG_WriteShort (sb, (int)(pos[2]*8));
+	MSG_WritePos16 (sb, pos);
 }
 
 #endif // LARGE_MAP_SIZE
 
 
-void MSG_WriteAngle (sizebuf_t *sb, float f)
+void MSG_WriteAngle8 (sizebuf_t *sb, float f)
 {
 	MSG_WriteByte (sb, (int)(f*256/360) & 255);
 }
@@ -505,6 +556,11 @@ void MSG_WriteAngle (sizebuf_t *sb, float f)
 void MSG_WriteAngle16 (sizebuf_t *sb, float f)
 {
 	MSG_WriteShort (sb, ANGLE2SHORT(f));
+}
+
+void MSG_WriteAngle (sizebuf_t *sb, float f)
+{
+	MSG_WriteAngle8 (sb, f);
 }
 
 
@@ -604,9 +660,9 @@ Writes part of a packetentities message.
 Can delta from either a baseline or a previous packet_entity
 ==================
 */
-void MSG_WriteDeltaEntity (entity_state_t *from, entity_state_t *to, sizebuf_t *msg, qboolean force, qboolean newentity)
+void MSG_WriteDeltaEntity (centity_state_t *from, centity_state_t *to, sizebuf_t *msg, qboolean force, qboolean newentity)
 {
-	int		bits;
+	unsigned int	bits, bits2;
 
 	if (!to->number)
 		Com_Error (ERR_FATAL, "Unset entity number");
@@ -614,7 +670,7 @@ void MSG_WriteDeltaEntity (entity_state_t *from, entity_state_t *to, sizebuf_t *
 		Com_Error (ERR_FATAL, "Entity number >= MAX_EDICTS");
 
 // send an update
-	bits = 0;
+	bits = bits2 = 0;
 
 	if (to->number >= 256)
 		bits |= U_NUMBER16;		// number8 is implicit otherwise
@@ -670,9 +726,33 @@ void MSG_WriteDeltaEntity (entity_state_t *from, entity_state_t *to, sizebuf_t *
 		else
 			bits |= U_RENDERFX8|U_RENDERFX16;
 	}
+
+	// Knightmare- added alpha
+#ifdef NEW_ENTITY_STATE_MEMBERS
+	// cap new value to correct range
+	if (to->alpha < 0.0)
+		to->alpha = 0.0;
+	if (to->alpha > 1.0)
+		to->alpha = 1.0;
+	// Since the floating point value is never quite the same,
+	// compare the new and the old as what they will be sent as
+	if ((int)(to->alpha*255) != (int)(from->alpha*255))
+		bits |= U_ALPHA;
+#endif
 	
 	if ( to->solid != from->solid )
 		bits |= U_SOLID;
+
+	if ( (to->iflags & (IF_REAL_BBOX|IF_REAL_BBOX_16|IF_REAL_BBOX_8)) &&
+		( !VectorCompare(to->mins, from->mins) || !VectorCompare(to->maxs, from->maxs) ) )
+	{
+		if (to->iflags & IF_REAL_BBOX)
+			bits |= U_MINSMAXS_8|U_MINSMAXS_16;
+		else if (to->iflags & IF_REAL_BBOX_16)
+			bits |= U_MINSMAXS_16;
+		else if (to->iflags & IF_REAL_BBOX_8)
+			bits |= U_MINSMAXS_8;
+	}
 
 	// event is not delta compressed, just 0 compressed
 	if ( to->event  )
@@ -688,56 +768,57 @@ void MSG_WriteDeltaEntity (entity_state_t *from, entity_state_t *to, sizebuf_t *
 		bits |= U_MODEL4;
 
 #ifdef NEW_ENTITY_STATE_MEMBERS
-	// 1/18/2002- extra model indices	
+	// Knightmare- extra model indices	
 	if ( to->modelindex5 != from->modelindex5 )
-		bits |= U_MODEL5;
+		bits2 |= U2_MODEL5;
 	if ( to->modelindex6 != from->modelindex6 )
-		bits |= U_MODEL6;
+		bits2 |= U2_MODEL6;
 #endif
 
 	if ( to->sound != from->sound )
 		bits |= U_SOUND;
 
 #ifdef NEW_ENTITY_STATE_MEMBERS
-#ifdef LOOP_SOUND_ATTENUATION
-	if (to->attenuation != from->attenuation)
+	if (to->loop_attenuation != from->loop_attenuation)
 		bits |= U_ATTENUAT;
-#endif
 #endif
 
 	if (newentity || (to->renderfx & RF_BEAM))
 		bits |= U_OLDORIGIN;
 
-	// Knightmare 5/11/2002- added alpha
-#ifdef NEW_ENTITY_STATE_MEMBERS
-	// cap new value to correct range
-	if (to->alpha < 0.0)
-		to->alpha = 0.0;
-	if (to->alpha > 1.0)
-		to->alpha = 1.0;
-	// Since the floating point value is never quite the same,
-	// compare the new and the old as what they will be sent as
-	if ((int)(to->alpha*255) != (int)(from->alpha*255))
-		bits |= U_ALPHA;
-#endif
+	// alpha was here
 
 	//
 	// write the message
 	//
-	if (!bits && !force)
+	if (!bits && !bits2 && !force)
 		return;		// nothing to send!
 
 	//----------
 
-	if (bits & 0xff000000)
-		bits |= U_MOREBITS3 | U_MOREBITS2 | U_MOREBITS1;
-	else if (bits & 0x00ff0000)
-		bits |= U_MOREBITS2 | U_MOREBITS1;
-	else if (bits & 0x0000ff00)
-		bits |= U_MOREBITS1;
+	// Knightmare- handle 2nd dword of bits
+	if (bits2 != 0)
+	{
+		bits |= U_MOREBITS4 | U_MOREBITS3 | U_MOREBITS2 | U_MOREBITS1;
+		if (bits2 & 0xff000000)
+			bits2 |= U2_MOREBITS7 | U2_MOREBITS6 | U2_MOREBITS5;
+		else if (bits2 & 0x00ff0000)
+			bits2 |= U2_MOREBITS6 | U2_MOREBITS5;
+		else if (bits2 & 0x0000ff00)
+			bits2 |= U2_MOREBITS5;
+	}
+	else
+	{
+		if (bits & 0xff000000)
+			bits |= U_MOREBITS3 | U_MOREBITS2 | U_MOREBITS1;
+		else if (bits & 0x00ff0000)
+			bits |= U_MOREBITS2 | U_MOREBITS1;
+		else if (bits & 0x0000ff00)
+			bits |= U_MOREBITS1;
+	}
 
+	// send first dword of bits
 	MSG_WriteByte (msg,	bits&255 );
-
 	if (bits & 0xff000000)
 	{
 		MSG_WriteByte (msg,	(bits>>8)&255 );
@@ -754,6 +835,27 @@ void MSG_WriteDeltaEntity (entity_state_t *from, entity_state_t *to, sizebuf_t *
 		MSG_WriteByte (msg,	(bits>>8)&255 );
 	}
 
+	if (bits2 != 0)
+	{
+		// send second dword of bits
+		MSG_WriteByte (msg,	bits2 & 255);
+		if (bits2 & 0xff000000)
+		{
+			MSG_WriteByte (msg,	(bits2 >> 8) & 255);
+			MSG_WriteByte (msg,	(bits2 >> 16) & 255);
+			MSG_WriteByte (msg,	(bits2 >> 24) & 255);
+		}
+		else if (bits2 & 0x00ff0000)
+		{
+			MSG_WriteByte (msg,	(bits2 >> 8) & 255);
+			MSG_WriteByte (msg,	(bits2 >> 16) & 255);
+		}
+		else if (bits2 & 0x0000ff00)
+		{
+			MSG_WriteByte (msg,	(bits2 >> 8) & 255);
+		}
+	}
+
 	//----------
 
 	if (bits & U_NUMBER16)
@@ -761,8 +863,7 @@ void MSG_WriteDeltaEntity (entity_state_t *from, entity_state_t *to, sizebuf_t *
 	else
 		MSG_WriteByte (msg,	to->number);
 
-	//Knightmare- 12/23/2001
-	//changed these to shorts
+	// Knightmare- changed these to shorts
 	if (bits & U_MODEL)
 		MSG_WriteShort (msg, to->modelindex);
 	if (bits & U_MODEL2)
@@ -773,10 +874,10 @@ void MSG_WriteDeltaEntity (entity_state_t *from, entity_state_t *to, sizebuf_t *
 		MSG_WriteShort (msg, to->modelindex4);
 
 #ifdef NEW_ENTITY_STATE_MEMBERS
-	// 1/18/2002- extra model indices
-	if (bits & U_MODEL5)
+	// Knightmare- extra model indices	
+	if (bits2 & U2_MODEL5)
 		MSG_WriteShort (msg, to->modelindex5);
-	if (bits & U_MODEL6)
+	if (bits2 & U2_MODEL6)
 		MSG_WriteShort (msg, to->modelindex6);
 #endif
 
@@ -807,6 +908,15 @@ void MSG_WriteDeltaEntity (entity_state_t *from, entity_state_t *to, sizebuf_t *
 	else if (bits & U_RENDERFX16)
 		MSG_WriteShort (msg, to->renderfx);
 
+	// Knightmare- added alpha
+#ifdef NEW_ENTITY_STATE_MEMBERS
+	if (bits & U_ALPHA)
+	{
+	//	Com_Printf ("Sending alpha of %.2f for entity %i\n", to->alpha, to->number);
+		MSG_WriteByte (msg, (byte)(to->alpha*255));
+	}
+#endif
+
 	if (bits & U_ORIGIN1)
 		MSG_WriteCoord (msg, to->origin[0]);		
 	if (bits & U_ORIGIN2)
@@ -814,12 +924,13 @@ void MSG_WriteDeltaEntity (entity_state_t *from, entity_state_t *to, sizebuf_t *
 	if (bits & U_ORIGIN3)
 		MSG_WriteCoord (msg, to->origin[2]);
 
+	// Knightmare- switched to 16-bit angles
 	if (bits & U_ANGLE1)
-		MSG_WriteAngle(msg, to->angles[0]);
+		MSG_WriteAngle16 (msg, to->angles[0]);
 	if (bits & U_ANGLE2)
-		MSG_WriteAngle(msg, to->angles[1]);
+		MSG_WriteAngle16 (msg, to->angles[1]);
 	if (bits & U_ANGLE3)
-		MSG_WriteAngle(msg, to->angles[2]);
+		MSG_WriteAngle16 (msg, to->angles[2]);
 
 	if (bits & U_OLDORIGIN)
 	{
@@ -828,33 +939,39 @@ void MSG_WriteDeltaEntity (entity_state_t *from, entity_state_t *to, sizebuf_t *
 		MSG_WriteCoord (msg, to->old_origin[2]);
 	}
 
-#ifdef NEW_ENTITY_STATE_MEMBERS
-	//Knightmare 5/11/2002- added alpha
-	if (bits & U_ALPHA)
-	{
-	//	Com_Printf("Entity alpha: %f\n", to->alpha);
-		MSG_WriteByte (msg, (byte)(to->alpha*255));
-	}
-#endif
+	// alpha was here
 
-	//Knightmare- 12/23/2001
-	//changed this to short
+	// Knightmare- changed this to short
 	if (bits & U_SOUND)
 		MSG_WriteShort (msg, to->sound);
 
 #ifdef NEW_ENTITY_STATE_MEMBERS
-#ifdef LOOP_SOUND_ATTENUATION
 	if (bits & U_ATTENUAT)
-		MSG_WriteByte (msg, (int)(min(max(to->attenuation, 0.0f), 4.0f)*64.0));
-#endif
+		MSG_WriteByte (msg, (int)(min(max(to->loop_attenuation, 0.0f), 4.0f)*64.0));
 #endif
 
 	if (bits & U_EVENT)
 		MSG_WriteByte (msg, to->event);
 	if (bits & U_SOLID)
 		MSG_WriteShort (msg, to->solid);
-}
 
+	if ( (bits & (U_MINSMAXS_8|U_MINSMAXS_16)) == (U_MINSMAXS_8|U_MINSMAXS_16) ) {
+		MSG_WritePos (msg, to->mins);
+		MSG_WritePos (msg, to->maxs);
+	/*	Com_Printf ("Sending world-coord bbox for entity %i (%.2f %.2f %.2f)->(%.2f %.2f %.2f)\n",
+					to->number, to->mins[0], to->mins[1], to->mins[2], to->maxs[0], to->maxs[1], to->maxs[2]); */
+	}
+	else if (bits & U_MINSMAXS_8) {
+		MSG_WriteBBox8 (msg, to->mins, to->maxs);
+	/*	Com_Printf ("Sending 8-bit bbox for entity %i (%.2f %.2f %.2f)->(%.2f %.2f %.2f)\n",
+					to->number, to->mins[0], to->mins[1], to->mins[2], to->maxs[0], to->maxs[1], to->maxs[2]); */
+	}
+	else if (bits & U_MINSMAXS_16) {
+		MSG_WriteBBox16 (msg, to->mins, to->maxs);
+	/*	Com_Printf ("Sending 16-bit bbox for entity %i (%.2f %.2f %.2f)->(%.2f %.2f %.2f)\n",
+					to->number, to->mins[0], to->mins[1], to->mins[2], to->maxs[0], to->maxs[1], to->maxs[2]); */
+	}
+}
 
 //============================================================
 
@@ -951,6 +1068,13 @@ float MSG_ReadFloat (sizebuf_t *msg_read)
 	return dat.f;	
 }
 
+// Knightmare added- for reading floats sent as shorts
+float MSG_ReadFloatAsShort (sizebuf_t *msg_read)
+{
+	int n = MSG_ReadShort (msg_read);
+	return (float)n;
+}
+
 char *MSG_ReadString (sizebuf_t *msg_read)
 {
 	static char	string[MSG_STRING_SIZE];	// 2048
@@ -991,58 +1115,85 @@ char *MSG_ReadStringLine (sizebuf_t *msg_read)
 	return string;
 }
 
-
-#ifdef LARGE_MAP_SIZE
-
-float MSG_ReadCoord (sizebuf_t *msg_read)
+float MSG_ReadCoord24 (sizebuf_t *msg_read)
 {
-	if (LegacyProtocol())
-		return MSG_ReadShort(msg_read) * (1.0/8);
-	else
-		return MSG_ReadCoordNew(msg_read);
+	int tmp;
+	byte trans1;
+	unsigned short trans2;
+
+	trans1 = MSG_ReadByte (msg_read);
+	trans2 = MSG_ReadShort (msg_read);
+
+	tmp = trans1 << 16;	// bits 16-23
+	tmp += trans2;		// bits 0-15
+
+	// Sign bit 23 means it's negative, so fill upper
+	// 8 bits with 1s for 2's complement negative.
+	if (tmp & BIT_23)	
+		tmp |= UPRBITS;
+
+	return tmp * (1.0/8);	// restore 1/8 granulation
 }
 
-#else // LARGE_MAP_SIZE
-
-float MSG_ReadCoord (sizebuf_t *msg_read)
+float MSG_ReadCoord16 (sizebuf_t *msg_read)
 {
 	return MSG_ReadShort(msg_read) * (1.0/8);
 }
 
+#ifdef LARGE_MAP_SIZE
+
+float MSG_ReadCoord (sizebuf_t *msg_read)
+{
+	if ( LegacyProtocol() )
+		return MSG_ReadCoord16 (msg_read);
+	else
+		return MSG_ReadCoord24 (msg_read);
+}
+
+#else // LARGE_MAP_SIZE
+
+float MSG_ReadCoord (sizebuf_t *msg_read)
+{
+	return MSG_ReadCoord16 (msg_read);
+}
+
 #endif // LARGE_MAP_SIZE
 
+void MSG_ReadPos24 (sizebuf_t *msg_read, vec3_t pos)
+{
+	pos[0] = MSG_ReadCoord24 (msg_read);
+	pos[1] = MSG_ReadCoord24 (msg_read);
+	pos[2] = MSG_ReadCoord24 (msg_read);
+}
+
+void MSG_ReadPos16 (sizebuf_t *msg_read, vec3_t pos)
+{
+	pos[0] = MSG_ReadCoord16 (msg_read);
+	pos[1] = MSG_ReadCoord16 (msg_read);
+	pos[2] = MSG_ReadCoord16 (msg_read);
+}
 
 #ifdef LARGE_MAP_SIZE
 
 void MSG_ReadPos (sizebuf_t *msg_read, vec3_t pos)
 {
-	if (LegacyProtocol())
-	{
-		pos[0] = MSG_ReadShort(msg_read) * (1.0/8);
-		pos[1] = MSG_ReadShort(msg_read) * (1.0/8);
-		pos[2] = MSG_ReadShort(msg_read) * (1.0/8);
-	}
+	if ( LegacyProtocol() )
+		MSG_ReadPos16 (msg_read, pos);
 	else
-	{
-		pos[0] = MSG_ReadCoordNew(msg_read);
-		pos[1] = MSG_ReadCoordNew(msg_read);
-		pos[2] = MSG_ReadCoordNew(msg_read);
-	}
+		MSG_ReadPos24 (msg_read, pos);
 }
 
 #else // LARGE_MAP_SIZE
 
 void MSG_ReadPos (sizebuf_t *msg_read, vec3_t pos)
 {
-	pos[0] = MSG_ReadShort(msg_read) * (1.0/8);
-	pos[1] = MSG_ReadShort(msg_read) * (1.0/8);
-	pos[2] = MSG_ReadShort(msg_read) * (1.0/8);
+	MSG_ReadPos16 (msg_read, pos);
 }
 
 #endif // LARGE_MAP_SIZE
 
 
-float MSG_ReadAngle (sizebuf_t *msg_read)
+float MSG_ReadAngle8 (sizebuf_t *msg_read)
 {
 	return MSG_ReadChar(msg_read) * (360.0/256);
 }
@@ -1099,6 +1250,80 @@ void MSG_ReadData (sizebuf_t *msg_read, void *data, int len)
 		((byte *)data)[i] = MSG_ReadByte (msg_read);
 }
 
+//===========================================================================
+
+int MSG_PackSolid16 (vec3_t bmins, vec3_t bmaxs)
+{
+	int 	i, j, k, packed;
+	
+	// assume that x/y are equal and symetric
+	i = bmaxs[0] / 8;
+	i = min(max(i, 1), 31);
+
+	// z is not symetric
+	j = (-bmins[2]) / 8;
+	j = min(max(j, 1), 31);
+
+	// and z maxs can be negative...
+	k = (bmaxs[2] + 32) / 8;
+	k = min(max(k, 1), 63);
+
+	packed = (k<<10) | (j<<5) | i;
+	
+	return packed;
+}
+
+void MSG_UnpackSolid16 (int packed, vec3_t bmins, vec3_t bmaxs)
+{
+	int		x, zd, zu;
+	
+	x = 8 *(packed & 31);
+	zd = 8 * ((packed >> 5) & 31);
+	zu = 8 * ((packed >> 10) & 63) - 32;
+
+	VectorSet (bmins, -x, -x, -zd);
+	VectorSet (bmaxs, x, x, zu);
+}
+
+void MSG_WriteBBox8 (sizebuf_t *sb, vec3_t bmins, vec3_t bmaxs)
+{
+	MSG_WriteByte (sb, (int)(-bmins[0]) & 255);
+	MSG_WriteByte (sb, (int)(-bmins[1]) & 255);
+	MSG_WriteByte (sb, (int)(-bmins[2]) & 255);
+	MSG_WriteByte (sb, (int)bmaxs[0] & 255);
+	MSG_WriteByte (sb, (int)bmaxs[1] & 255);
+	MSG_WriteByte (sb, (int)(bmaxs[2] + 32.0f) & 255);	// z maxs can go to -32
+}
+
+void MSG_WriteBBox16 (sizebuf_t *sb, vec3_t bmins, vec3_t bmaxs)
+{
+	MSG_WriteFloatAsShort (sb, bmins[0]);
+	MSG_WriteFloatAsShort (sb, bmins[1]);
+	MSG_WriteFloatAsShort (sb, bmins[2]);
+	MSG_WriteFloatAsShort (sb, bmaxs[0]);
+	MSG_WriteFloatAsShort (sb, bmaxs[1]);
+	MSG_WriteFloatAsShort (sb, bmaxs[2]);
+}
+
+void MSG_ReadBBox8 (sizebuf_t *msg_read, vec3_t bmins, vec3_t bmaxs)
+{
+	bmins[0] = -1.0f * (float)MSG_ReadByte (msg_read);
+	bmins[1] = -1.0f * (float)MSG_ReadByte (msg_read);
+	bmins[2] = -1.0f * (float)MSG_ReadByte (msg_read);
+	bmaxs[0] = (float)MSG_ReadByte (msg_read);
+	bmaxs[1] = (float)MSG_ReadByte (msg_read);
+	bmaxs[2] = (float)MSG_ReadByte (msg_read) - 32.0f;
+}
+
+void MSG_ReadBBox16 (sizebuf_t *msg_read, vec3_t bmins, vec3_t bmaxs)
+{
+	bmins[0] = MSG_ReadFloatAsShort (msg_read);
+	bmins[1] = MSG_ReadFloatAsShort (msg_read);
+	bmins[2] = MSG_ReadFloatAsShort (msg_read);
+	bmaxs[0] = MSG_ReadFloatAsShort (msg_read);
+	bmaxs[1] = MSG_ReadFloatAsShort (msg_read);
+	bmaxs[2] = MSG_ReadFloatAsShort (msg_read);
+}
 
 //===========================================================================
 
@@ -1160,9 +1385,7 @@ void SZ_Print (sizebuf_t *buf, char *data)
 		memcpy ((byte *)SZ_GetSpace(buf, len),data,len);
 }
 
-
 //============================================================================
-
 
 /*
 ================
@@ -1241,8 +1464,6 @@ void COM_AddParm (char *parm)
 }
 
 
-
-
 /// just for debugging
 int	memsearch (byte *start, int count, int search)
 {
@@ -1310,7 +1531,6 @@ void Info_Print (char *s)
 		Com_Printf ("%s\n", value);
 	}
 }
-
 
 /*
 ==============================================================================
@@ -1425,9 +1645,7 @@ void *Z_Malloc (size_t size)
 	return Z_TagMalloc (size, 0);
 }
 
-
 //============================================================================
-
 
 /*
 ====================
@@ -1440,7 +1658,7 @@ For proxy protecting
 
 ====================
 */
-byte	COM_BlockSequenceCheckByte (byte *base, int length, int sequence, int challenge)
+byte COM_BlockSequenceCheckByte (byte *base, int length, int sequence, int challenge)
 {
 	Sys_Error("COM_BlockSequenceCheckByte called\n");
 
@@ -1558,7 +1776,7 @@ COM_BlockSequenceCRCByte
 For proxy protecting
 ====================
 */
-byte	COM_BlockSequenceCRCByte (byte *base, int length, int sequence)
+byte COM_BlockSequenceCRCByte (byte *base, int length, int sequence)
 {
 	int		n;
 	byte	*p;
@@ -1738,11 +1956,16 @@ void Qcommon_Init (int argc, char **argv)
 	CL_Init ();
 
 #ifdef _WIN32  // Knightmare- remove startup logo, code from TomazQuake
-//	if (!dedicated->value)
 	if (!dedicated->integer)
 		Sys_ShowConsole (false);
 #endif
-
+/*
+#if defined(__APPLE__) || (MACOSX)
+	// Hide console
+	if (!dedicated->integer)
+		Sys_ShowConsole (false);
+#endif // defined(__APPLE__) || (MACOSX)
+*/
 	// add + commands from command line
 	if (!Cbuf_AddLateCommands ())
 	{	// if the user didn't give any commands, run default action
@@ -1771,7 +1994,7 @@ void Qcommon_Init (int argc, char **argv)
 		SCR_EndLoadingPlaque ();
 	}
 
-	Com_Printf ("====== " WINDOWNAME " Initialized ======\n\n");
+	Com_Printf ("====== KMQuake2 Initialized ======\n\n");
 	
 	// testing crap
 	/*{
@@ -1934,6 +2157,112 @@ void Qcommon_Shutdown (void)
 	FS_Shutdown ();
 }
 
+//============================================================================
+
+/*
+==================
+Com_ParseSteamLibraryFolders
+==================
+*/
+char *Com_ParseSteamLibraryFolders (const char *fileContents, size_t contentsLen, const char *relPath, const char *appID)
+{
+	int			libraryNum = 0;
+	char		*s = NULL, *token = NULL;
+	char		*key = NULL, *value = NULL;
+	char		keySave[128];
+	static char	libraryPath[MAX_OSPATH];
+	static char	gamePath[MAX_OSPATH];
+	qboolean	foundPath = false;
+
+	if ( !fileContents || (fileContents[0] == 0) || !relPath || (relPath[0] == 0) || !appID || (appID[0] == 0) )
+		return NULL;
+
+	gamePath[0] = 0;
+	s = (char *)fileContents;
+
+	if (strcmp(COM_ParseExt(&s, true), "libraryfolders") != 0)
+		return NULL;
+	if (strcmp(COM_ParseExt(&s, true), "{") != 0)
+		return NULL;
+
+	while (s < (fileContents + contentsLen))
+	{
+		// get library number, check if at end of file
+		token = COM_ParseExt(&s, true);
+		if ( !token || (token[0] == 0) || !strcmp(token, "}") )
+			break;
+		libraryNum = atoi(token);
+
+		// get opening brace for this library section
+		token = COM_ParseExt(&s, true);
+		if ( !token || (token[0] == 0) || (strcmp(token, "{") != 0) )
+			break;
+
+	//	Com_Printf ("Com_ParseSteamLibraryFolders: Parsing library VDF (%i)...\n", libraryNum);
+
+		// parse key/value pairs for this library
+		while (s < (fileContents + contentsLen))
+		{
+			key = COM_ParseExt(&s, true);
+			if ( !key || (key[0] == 0) || !strcmp(key, "}") ) {
+				break;
+			}
+			else if ( !strcmp(key, "path") ) {
+				value = COM_ParseExt(&s, true);
+				Q_strncpyz (libraryPath, sizeof(libraryPath), value);
+			//	Com_Printf ("Com_ParseSteamLibraryFolders: found library path of %s\n", libraryPath);
+			}
+			else if ( !strcmp(key, "apps") )
+			{
+			//	Com_Printf ("Com_ParseSteamLibraryFolders: Parsing apps list for library path %s...\n", libraryPath);
+				// get opening brace for this apps section
+				token = COM_ParseExt(&s, true);
+				if ( !token || (token[0] == 0) || (strcmp(token, "{") != 0) )
+					break;
+
+				// parse key/value pairs for this apps section
+				while (s < (fileContents + contentsLen))
+				{
+					key = COM_ParseExt(&s, true);
+					if ( !key || (key[0] == 0) || !strcmp(key, "}") )
+						break;
+
+					Q_strncpyz (keySave, sizeof(keySave), key);
+					value = COM_ParseExt(&s, true);
+
+					if ( !strcmp(keySave, appID) ) {
+						Q_strncpyz (gamePath, sizeof(gamePath), libraryPath);
+						Q_strncatz (gamePath, sizeof(gamePath), relPath);
+						foundPath = true;
+					//	Com_Printf ("Com_ParseSteamLibraryFolders: found matching appID\n");
+					}
+
+					if ( foundPath && (gamePath[0] != 0) )
+						break;
+				}
+			}
+			else {
+				// just grab the value for this key pair
+				value = COM_ParseExt(&s, true);
+			}
+
+			if ( foundPath && (gamePath[0] != 0) )
+				break;
+		}
+
+		if ( foundPath && (gamePath[0] != 0) ) {
+		//	Com_Printf ("Com_ParseSteamLibraryFolders: Found game path %s...\n", gamePath);
+			break;
+		}
+	}
+
+	if (gamePath[0] != 0)
+		return gamePath;
+	else
+		return NULL;
+}
+
+//============================================================================
 
 /*
 =================
@@ -2082,7 +2411,7 @@ const char *MakePrintable (const void *subject, size_t numchars)
 		}
 		else
 		{
-			sprintf (tmp, "%.3d", s[0]);
+			Com_sprintf (tmp, sizeof(tmp), "%.3d", s[0]);
 			*p++ = '\\';
 			*p++ = tmp[0];
 			*p++ = tmp[1];

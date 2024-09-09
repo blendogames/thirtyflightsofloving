@@ -74,7 +74,7 @@ void InitTree(void)  /* initialize trees */
 	for (i = 0; i < N; i++) dad[i] = NIL;
 }
 
-void InsertNode(int r)
+void InsertNode (int r)
 	/* Inserts string of length F, text_buf[r..r+F-1], into one of the
 	   trees (text_buf[r]'th tree) and returns the longest-match position
 	   and length via the global variables match_position and match_length.
@@ -109,7 +109,7 @@ void InsertNode(int r)
 	dad[p] = NIL;  /* remove p */
 }
 
-void DeleteNode(int p)  /* deletes node p from tree */
+void DeleteNode (int p)  /* deletes node p from tree */
 {
 	int  q;
 	
@@ -130,7 +130,7 @@ void DeleteNode(int p)  /* deletes node p from tree */
 	dad[p] = NIL;
 }
 
-int Encode(char *filename, unsigned char *buffer, int bufsize, int version)
+int Encode (char *filename, unsigned char *buffer, int bufsize, int version)
 {
 	int  i, c, len, r, s, last_match_length, code_buf_ptr;
 	unsigned char  code_buf[17], mask;
@@ -229,7 +229,7 @@ int Encode(char *filename, unsigned char *buffer, int bufsize, int version)
 }
 
 // Be careful with your buffersize, will return an exit of -1 if failure
-int Decode(char *filename, unsigned char *buffer, int bufsize)	/* Just the reverse of Encode(). */
+int Decode (char *filename, unsigned char *buffer, int bufsize)	/* Just the reverse of Encode(). */
 {
 	int  i, j, k, r, c;
 	unsigned int  flags;
@@ -275,35 +275,36 @@ int Decode(char *filename, unsigned char *buffer, int bufsize)	/* Just the rever
 		}
 	}
 	
-	fclose(pIn);
+	fclose (pIn);
 	return bufptr; // return uncompressed size
 }
+
 /*
 // tester
-int main(int argc, char *argv[])
+int main (int argc, char *argv[])
 {
-	//char  *s;
-	unsigned char i;
-	int csize,ucsize;
-	unsigned char *buffer1;
-	int bufsize = 20000;
+//	char			*s;
+	unsigned char	i;
+	int				csize, ucsize;
+	unsigned char	*buffer1;
+	int				bufsize = 20000;
 	
 	buffer1 = (unsigned char *)malloc(bufsize);
 
 	buffer1[500] = 'c';
 	buffer1[785] = 's';
 	
-	csize = Encode("testbuf.bin", buffer1, bufsize);//sizeof(buffer1));
+	csize = Encode ("testbuf.bin", buffer1, bufsize);	// sizeof(buffer1)
 	
 	buffer1[500] = 0;
 	buffer1[785] = 0;
 	
-	ucsize = Decode("testbuf.bin", buffer1, bufsize);
+	ucsize = Decode ("testbuf.bin", buffer1, bufsize);
 		
-	printf("Output: %c %c\n",buffer1[500],buffer1[785]);
-	printf("Compressed: %d Uncompressed:%d\n",csize,ucsize);
+	printf ("Output: %c %c\n",buffer1[500], buffer1[785]);
+	printf ("Compressed: %d Uncompressed:%d\n", csize, ucsize);
 
-	free(buffer1);
+	free (buffer1);
 
 	return EXIT_SUCCESS;
 }

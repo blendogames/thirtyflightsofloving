@@ -283,9 +283,6 @@ Send the intended movement message to the server
 */
 void CL_BaseMove (usercmd_t *cmd)
 {	
-	float sidespeed = cl_sidespeed->value;
-	float forwardspeed = cl_forwardspeed->value;
-
 	CL_AdjustAngles ();
 
 	// overhead cam doesn't allow vertical aiming
@@ -302,28 +299,28 @@ void CL_BaseMove (usercmd_t *cmd)
 
 	if (cl.frame.playerstate.stats[STAT_MOVESLOW] > 0)
 	{
-		sidespeed = 0;
-		forwardspeed *= .5f; //BC 1/30/2024 changed this from .4 to .5 because it was causing issues
+		cl_sidespeed->value = 0;
+		cl_forwardspeed->value *= .5f; //BC 1/30/2024 changed this from .4 to .5 because it was causing issues
 	}
 #endif
 
 	if (in_strafe.state & 1)
 	{
-		cmd->sidemove += sidespeed * CL_KeyState (&in_right);
-		cmd->sidemove -= sidespeed * CL_KeyState (&in_left);
+		cmd->sidemove += cl_sidespeed->value * CL_KeyState (&in_right);
+		cmd->sidemove -= cl_sidespeed->value * CL_KeyState (&in_left);
 	}
 
-	cmd->sidemove += sidespeed * CL_KeyState (&in_moveright);
-	cmd->sidemove -= sidespeed * CL_KeyState (&in_moveleft);
+	cmd->sidemove += cl_sidespeed->value * CL_KeyState (&in_moveright);
+	cmd->sidemove -= cl_sidespeed->value * CL_KeyState (&in_moveleft);
 
 	cmd->upmove += cl_upspeed->value * CL_KeyState (&in_up);
 	cmd->upmove -= cl_upspeed->value * CL_KeyState (&in_down);
 
 	if (! (in_klook.state & 1) )
 	{	
-		cmd->forwardmove += forwardspeed * CL_KeyState (&in_forward);
-		cmd->forwardmove -= forwardspeed * CL_KeyState (&in_back);
-	}
+		cmd->forwardmove += cl_forwardspeed->value * CL_KeyState (&in_forward);
+		cmd->forwardmove -= cl_forwardspeed->value * CL_KeyState (&in_back);
+    }	
 
 #ifndef NOTTHIRTYFLIGHTS
 	if ((cmd->sidemove != 0 || cmd->forwardmove != 0) && lookspring->value)
@@ -392,6 +389,8 @@ void CL_ClampPitch (void)
     }
 #endif
 }
+
+
 
 /*
 ==============

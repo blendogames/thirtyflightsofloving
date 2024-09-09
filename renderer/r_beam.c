@@ -48,7 +48,7 @@ void R_RenderBeam (vec3_t start, vec3_t end, float size, float red, float green,
 	GL_BlendFunc (GL_SRC_ALPHA, GL_ONE); // this fixes the black background
 	GL_Enable (GL_BLEND);
 	GL_ShadeModel (GL_SMOOTH);
-	GL_Bind(glMedia.particlebeam->texnum);
+	GL_Bind(glMedia.particleBeam->texnum);
 	Vector4Set(beamColor, red/255, green/255, blue/255, alpha/255);
 
 	VectorSubtract(start, end, ang_up);

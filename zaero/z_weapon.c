@@ -17,7 +17,6 @@ void NoAmmoWeaponChange (edict_t *ent);
 void check_dodge (edict_t *self, vec3_t start, vec3_t dir, int speed);
 
 void Grenade_Explode(edict_t *ent);
-void P_ProjectSource (gclient_t *client, vec3_t point, vec3_t distance, vec3_t forward, vec3_t right, vec3_t result);
 
 
 void fire_sconnan (edict_t *self);
@@ -373,7 +372,7 @@ qboolean fire_lasertripbomb (edict_t *self, vec3_t start, vec3_t dir, float time
 	vec3_t endPos;
 	vec3_t _dir;
 	edict_t *bomb = NULL;
-	edict_t *laser = NULL;
+//	edict_t *laser = NULL;
 
 	VectorScale(dir, 64, _dir);
 	VectorAdd(start, _dir, endPos);
@@ -474,8 +473,8 @@ void Weapon_LaserTripBomb (edict_t *ent)
 	const int idleFirst = 16;
 	const int idleLast = 43;
 	const int fireFirst = 7;
-	const int fireLast = 15;
-	const int activateFirst = 0;
+//	const int fireLast = 15;
+//	const int activateFirst = 0;
 	const int activateLast = 6;
 	
 	if (ent->client->weaponstate == WEAPON_DROPPING)
@@ -811,7 +810,7 @@ void fire_sconnanEffects (edict_t *self)
 	self->client->kick_angles[0] = -3;
 
 	VectorSet(offset, 0, 7,  self->viewheight-8);
-	P_ProjectSource (self->client, self->s.origin, offset, forward, right, start);
+	P_ProjectSource (self, self->s.origin, offset, forward, right, start);	// Knightmare- changed parms for aimfix
 
 	VectorMA (start, WORLD_SIZE, forward, end);	// was 8192
 
@@ -854,7 +853,7 @@ void fire_sconnan (edict_t *self)
 	self->client->kick_angles[0] = -3;
 
 	VectorSet(offset, 0, 7,  self->viewheight-8);
-	P_ProjectSource (self->client, self->s.origin, offset, forward, right, start);
+	P_ProjectSource (self, self->s.origin, offset, forward, right, start);	// Knightmare- changed parms for aimfix
 
 	VectorMA (start, WORLD_SIZE, forward, end);	// was 8192
 
@@ -977,9 +976,9 @@ void flare_flash (edict_t *ent)
 
 void flare_think (edict_t *self)
 {
-	edict_t *target = NULL;
-	edict_t *closestEnt = NULL;
-	float closestDist = 0.0;
+//	edict_t *target = NULL;
+//	edict_t *closestEnt = NULL;
+//	float closestDist = 0.0;
 
 	// on our last leg?
 	if (level.time > self->timeout)
@@ -1053,7 +1052,7 @@ void Weapon_FlareLauncher_Fire (edict_t *ent)
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
 
 	VectorSet (offset, 8, 8, ent->viewheight-8);
-	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
+	P_ProjectSource (ent, ent->s.origin, offset, forward, right, start);	// Knightmare- changed parms for aimfix
 	fire_flare (ent, start, forward, (int)sk_flaregun_damage->value, (int)sk_flaregun_speed->value, sk_flaregun_radius->value, (int)sk_flaregun_rdamage->value);
 
 	ent->client->ps.gunframe++;
@@ -1398,7 +1397,7 @@ void weapon_a2k_fire (edict_t *ent)
 	{
 		// boom
 		edict_t		*exp = NULL;
-		edict_t		*e = NULL;
+	//	edict_t		*e = NULL;
 		float		damage = sk_a2k_damage->value; // was 2500
 		float		dmg_radius = sk_a2k_radius->value; // was 512
 
@@ -1469,7 +1468,7 @@ qboolean push_hit (edict_t *self, vec3_t start, vec3_t aim, int damage, int kick
 	trace_t tr;
 	vec3_t end;
 	vec3_t v;
-	edict_t *e = NULL;
+//	edict_t *e = NULL;
 
 	//see if enemy is in range
 	VectorMA(start, 64, aim, end);

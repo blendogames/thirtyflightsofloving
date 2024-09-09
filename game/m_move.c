@@ -115,24 +115,24 @@ pr_global_struct->trace_normal is set to the normal of the blocking wall
 //it again later in catagorize position?
 qboolean SV_movestep (edict_t *ent, vec3_t move, qboolean relink)
 {
-	float		dz;
+	float		dz = 0.0f;
 	vec3_t		oldorg, neworg, end;
 	trace_t		trace;
 	int			i;
-	float		stepsize;
-	float		jumpheight;
+	float		stepsize = 0.0f;
+	float		jumpheight = 0.0f;
 	vec3_t		test;
-	int			contents;
+	int			contents = 0;
 
-	qboolean	canjump;
-	float		d1, d2;
-	int			jump;		// 1=jump up, -1=jump down
+	qboolean	canjump = false;
+	float		d1 = 0.0f, d2 = 0.0f;
+	int			jump = 0;		// 1=jump up, -1=jump down
 	vec3_t		forward, up;
 	vec3_t		dir;
 	vec_t		dist;
 	vec_t		g1, g2;
-	edict_t		*grenade;
-	edict_t		*target;
+	edict_t		*grenade = NULL;
+	edict_t		*target = NULL;
 
 	// try the move	
 	VectorCopy (ent->s.origin, oldorg);

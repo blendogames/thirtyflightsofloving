@@ -786,7 +786,7 @@ void fire_loogie (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed
 	loogie->nextthink = level.time + 2;
 	loogie->think = G_FreeEdict;
 	loogie->dmg = damage;
-	loogie->classname = "loogie";
+	loogie->classname = "gekk_loogie";
 	loogie->class_id = ENTITY_LOOGIE;
 	gi.linkentity (loogie);
 
@@ -808,7 +808,7 @@ void gekk_loogie_delayed_start (edict_t *loogie)
 		VectorScale(loogie->movedir,loogie->moveinfo.speed,loogie->velocity);
 		loogie->nextthink = level.time + 2;
 		loogie->think = G_FreeEdict;
-		gi.linkentity(loogie);
+		gi.linkentity (loogie);
 	}
 	else
 		loogie->nextthink = level.time + FRAMETIME;
@@ -818,13 +818,13 @@ void SP_gekk_loogie (edict_t *loogie)
 {
 	loogie->s.modelindex = gi.modelindex ("models/objects/loogy/tris.md2");
 	loogie->touch = loogie_touch;
-	VectorCopy(loogie->velocity,loogie->movedir);
-	VectorNormalize(loogie->movedir);
+	VectorCopy (loogie->velocity, loogie->movedir);
+	VectorNormalize (loogie->movedir);
 	loogie->moveinfo.speed = VectorLength(loogie->velocity);
-	VectorClear(loogie->velocity);
+	VectorClear (loogie->velocity);
 	loogie->think = gekk_loogie_delayed_start;
 	loogie->nextthink = level.time + FRAMETIME;
-	gi.linkentity(loogie);
+	gi.linkentity (loogie);
 }
 
 void loogie (edict_t *self)
@@ -1736,6 +1736,26 @@ void gekk_dodge (edict_t *self, edict_t *attacker, float eta, trace_t *tr)
 	
 }
 
+// Knightmare- added soundcache function
+void monster_gekk_soundcache (edict_t *self)
+{
+	sound_swing = gi.soundindex ("gek/gk_atck1.wav");
+	sound_hit = gi.soundindex ("gek/gk_atck2.wav");
+	sound_hit2 = gi.soundindex ("gek/gk_atck3.wav");
+	sound_death = gi.soundindex ("gek/gk_deth1.wav");
+	sound_pain1 = gi.soundindex ("gek/gk_pain1.wav");
+	sound_sight = gi.soundindex ("gek/gk_sght1.wav");
+	sound_search = gi.soundindex ("gek/gk_idle1.wav");
+	sound_step1 = gi.soundindex ("gek/gk_step1.wav");
+	sound_step2 = gi.soundindex ("gek/gk_step2.wav");
+	sound_step3 = gi.soundindex ("gek/gk_step3.wav");
+	sound_thud = gi.soundindex ("mutant/thud1.wav");
+	
+	sound_chantlow = gi.soundindex ("gek/gek_low.wav");
+	sound_chantmid = gi.soundindex ("gek/gek_mid.wav");
+	sound_chanthigh = gi.soundindex ("gek/gek_high.wav");
+}
+
 //
 // SPAWN
 //
@@ -1753,22 +1773,9 @@ void SP_monster_gekk (edict_t *self)
 		return;
 	}
 
-	sound_swing = gi.soundindex ("gek/gk_atck1.wav");
-	sound_hit = gi.soundindex ("gek/gk_atck2.wav");
-	sound_hit2 = gi.soundindex ("gek/gk_atck3.wav");
-	sound_death = gi.soundindex ("gek/gk_deth1.wav");
-	sound_pain1 = gi.soundindex ("gek/gk_pain1.wav");
-	sound_sight = gi.soundindex ("gek/gk_sght1.wav");
-	sound_search = gi.soundindex ("gek/gk_idle1.wav");
-	sound_step1 = gi.soundindex ("gek/gk_step1.wav");
-	sound_step2 = gi.soundindex ("gek/gk_step2.wav");
-	sound_step3 = gi.soundindex ("gek/gk_step3.wav");
-	sound_thud = gi.soundindex ("mutant/thud1.wav");
-	
-	sound_chantlow = gi.soundindex ("gek/gek_low.wav");
-	sound_chantmid = gi.soundindex ("gek/gek_mid.wav");
-	sound_chanthigh = gi.soundindex ("gek/gek_high.wav");
-	
+	// Knightmare- use soundcache function
+	monster_gekk_soundcache (self);
+
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;
 

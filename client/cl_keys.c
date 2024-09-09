@@ -962,6 +962,10 @@ void Key_Init (void)
 	consolekeys[K_KP_PGDN] = true;
     consolekeys[K_KP_MULT] = true;
 
+#ifdef __MACOSX_
+	consolekeys[K_KP_EQUAL] = true;
+#endif // __MACOSX_
+
 	consolekeys[K_SHIFT] = true;
 	consolekeys[K_INS] = true;
 	consolekeys[K_KP_INS] = true;
@@ -1070,8 +1074,7 @@ void Key_Event (int key, qboolean down, unsigned time)
 			return;	// ignore most autorepeats
 			
 	//	if (key >= 200 && !keybindings[key])
-		if ( (key >= 200) && !keybindings[key] && (key != K_MWHEELDOWN) && (key != K_MWHEELUP)
-			&& (key != K_JOY_UP) && (key != K_JOY_DOWN))	// bitshifter's fix
+		if ( (key >= 200) && !keybindings[key] && (key != K_MWHEELDOWN) && (key != K_MWHEELUP))	// bitshifter's fix
 			Com_Printf ("%s is unbound, hit F4 to set.\n", Key_KeynumToString (key) );
 	}
 	else
@@ -1198,7 +1201,9 @@ void Key_Event (int key, qboolean down, unsigned time)
 // if not a consolekey, send to the interpreter no matter what mode is
 //
 	// Knightmare changed
-	if ( (cls.key_dest == key_menu && menubound[key])
+	// allow keys F1-F12 to be grabbed
+//	if ( (cls.key_dest == key_menu && menubound[key])
+	if ( ( (cls.key_dest == key_menu) && menubound[key] && !((key >= K_F1) && (key <= K_F12) && UI_MenuHasGrabBind()) )
 	|| (cls.consoleActive && !consolekeys[key])
 	|| (cls.key_dest == key_game && ( cls.state == ca_active || !consolekeys[key] ) && !cls.consoleActive) )
 	//|| (cls.key_dest == key_console && !consolekeys[key])

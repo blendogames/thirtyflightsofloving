@@ -20,33 +20,49 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 
-// cl_util.c -- misc client utility functions
+// cl_utils.c -- misc client utility functions
 
 #include "client.h"
 
 //=================================================
 
 // Here I convert old 256 color palette to RGB
-const byte default_pal[768] = {
-#include "q2palette.h"
+const byte	q2Palette[768] = {
+#include "../qcommon/q2palette.h"
 };
 
+const byte	q1Palette[768] = {
+#include "../qcommon/q1palette.h"
+};
 
-int	color8red (int color8)
+int	Q2PalColorRed (int palIdx)
 { 
-	return (default_pal[color8*3+0]);
+	return q2Palette[palIdx*3+0];
 }
 
-
-int	color8green (int color8)
+int	Q2PalColorGreen (int palIdx)
 {
-	return (default_pal[color8*3+1]);;
+	return q2Palette[palIdx*3+1];
 }
 
-
-int	color8blue (int color8)
+int	Q2PalColorBlue (int palIdx)
 {
-	return (default_pal[color8*3+2]);;
+	return q2Palette[palIdx*3+2];
+}
+
+int	Q1PalColorRed (int palIdx)
+{ 
+	return q1Palette[palIdx*3+0];
+}
+
+int	Q1PalColorGreen (int palIdx)
+{
+	return q1Palette[palIdx*3+1];
+}
+
+int	Q1PalColorBlue (int palIdx)
+{
+	return q1Palette[palIdx*3+2];
 }
 
 //=================================================
@@ -361,92 +377,8 @@ qboolean isNumeric (char ch)
 	else return false;
 }
 
+
 //=================================================
-
-/*
-==========================
-vectoangles
-==========================
-*/
-void vectoangles (vec3_t value1, vec3_t angles)
-{
-	float	forward;
-	float	yaw, pitch;
-	
-	if (value1[1] == 0 && value1[0] == 0)
-	{
-		yaw = 0;
-		if (value1[2] > 0)
-			pitch = 90;
-		else
-			pitch = 270;
-	}
-	else
-	{
-		// PMM - fixed to correct for pitch of 0
-		if (value1[0])
-			yaw = (atan2(value1[1], value1[0]) * 180 / M_PI);
-		else if (value1[1] > 0)
-			yaw = 90;
-		else
-			yaw = 270;
-
-		if (yaw < 0)
-			yaw += 360;
-
-		forward = sqrt (value1[0]*value1[0] + value1[1]*value1[1]);
-		pitch = (atan2(value1[2], forward) * 180 / M_PI);
-		if (pitch < 0)
-			pitch += 360;
-	}
-
-	angles[PITCH] = -pitch;
-	angles[YAW] = yaw;
-	angles[ROLL] = 0;
-}
-
-
-/*
-==========================
-vectoangles2
-==========================
-*/
-void vectoangles2 (vec3_t value1, vec3_t angles)
-{
-	float	forward;
-	float	yaw, pitch;
-	
-	if (value1[1] == 0 && value1[0] == 0)
-	{
-		yaw = 0;
-		if (value1[2] > 0)
-			pitch = 90;
-		else
-			pitch = 270;
-	}
-	else
-	{
-	// PMM - fixed to correct for pitch of 0
-		if (value1[0])
-			yaw = (atan2(value1[1], value1[0]) * 180 / M_PI);
-		else if (value1[1] > 0)
-			yaw = 90;
-		else
-			yaw = 270;
-
-		if (yaw < 0)
-			yaw += 360;
-
-		forward = sqrt (value1[0]*value1[0] + value1[1]*value1[1]);
-		pitch = (atan2(value1[2], forward) * 180 / M_PI);
-		if (pitch < 0)
-			pitch += 360;
-	}
-
-	angles[PITCH] = -pitch;
-	angles[YAW] = yaw;
-	angles[ROLL] = 0;
-}
 
 /*
 ===============

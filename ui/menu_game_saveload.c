@@ -31,13 +31,13 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <sys/types.h>
 #include <sys/stat.h>
 
-static menuframework_s	s_loadgame_menu;
-static menuaction_s		s_loadgame_actions[UI_MAX_SAVEGAMES];
-static menuaction_s		s_loadgame_back_action;
+static menuFramework_s	s_loadgame_menu;
+static menuAction_s		s_loadgame_actions[UI_MAX_SAVEGAMES];
+static menuAction_s		s_loadgame_back_action;
 
-static menuframework_s	s_savegame_menu;
-static menuaction_s		s_savegame_actions[UI_MAX_SAVEGAMES];
-static menuaction_s		s_savegame_back_action;
+static menuFramework_s	s_savegame_menu;
+static menuAction_s		s_savegame_actions[UI_MAX_SAVEGAMES];
+static menuAction_s		s_savegame_back_action;
 
 /*
 =============================================================================
@@ -96,13 +96,13 @@ void UI_DrawMenuSaveshot (qboolean loadmenu)
 
 	UI_DrawFill (SCREEN_WIDTH/2+44, SCREEN_HEIGHT/2-70, 244, 184, ALIGN_CENTER, false, 60,60,60,255);
 
-	if ( loadmenu && (i == 0) && ui_savevalid[i] && ui_saveshotvalid[i])	// m_mapshotvalid ) // autosave shows mapshot
+	if ( loadmenu && (i == 0) && UI_SaveshotIsValid[i] && UI_SaveshotIsValid[i])	// m_mapshotvalid ) // autosave shows mapshot
 	{
 		Com_sprintf(mapshotname, sizeof(mapshotname), "/levelshots/%s.pcx", ui_mapname);
 
 		UI_DrawPic (SCREEN_WIDTH/2+46, SCREEN_HEIGHT/2-68, 240, 180, ALIGN_CENTER, false, mapshotname, 1.0);
 	}
-	else if ( ui_savevalid[i] && ui_saveshotvalid[i] )
+	else if ( UI_SaveshotIsValid[i] && UI_SaveshotIsValid[i] )
 	{
 	//	Com_sprintf(shotname, sizeof(shotname), "/save/kmq2save%03i/shot.jpg", i);
 #ifdef NOTTHIRTYFLIGHTS
@@ -113,7 +113,7 @@ void UI_DrawMenuSaveshot (qboolean loadmenu)
 
 		UI_DrawPic (SCREEN_WIDTH/2+46, SCREEN_HEIGHT/2-68, 240, 180, ALIGN_CENTER, false, shotname, 1.0);
 	}
-	else if (ui_saveshotvalid[UI_MAX_SAVEGAMES])
+	else if (UI_SaveshotIsValid[UI_MAX_SAVEGAMES])
 		UI_DrawPic (SCREEN_WIDTH/2+46, SCREEN_HEIGHT/2-68, 240, 180, ALIGN_CENTER, false, "/gfx/ui/noscreen.pcx", 1.0);
 	else
 		UI_DrawFill (SCREEN_WIDTH/2+46, SCREEN_HEIGHT/2-68, 240, 180, ALIGN_CENTER, false, 0,0,0,255);
@@ -128,15 +128,17 @@ LOADGAME MENU
 =============================================================================
 */
 
-extern	char *load_saveshot;
+extern	char *scr_load_saveshot;
+#define load_saveshot scr_load_saveshot
+
 char loadshotname[MAX_QPATH];
 
 void LoadGameCallback (void *self)
 {
-	menuaction_s *a = (menuaction_s *) self;
+	menuAction_s *a = (menuAction_s *) self;
 
 	// set saveshot name here
-	if ( ui_saveshotvalid[ a->generic.localdata[0] ] && (a->generic.localdata[0] != 0) )	// autosave has no saveshot, but uses levelshot instead
+	if ( UI_SaveshotIsValid( a->generic.localdata[0] ) && (a->generic.localdata[0] != 0) )	// autosave has no saveshot, but uses levelshot instead
 	{
 	//	Com_sprintf(loadshotname, sizeof(loadshotname), "/save/kmq2save%03i/shot.jpg", a->generic.localdata[0]);
 #ifdef NOTTHIRTYFLIGHTS
@@ -149,7 +151,7 @@ void LoadGameCallback (void *self)
 		load_saveshot = NULL;
 	}
 
-	if ( ui_savevalid[ a->generic.localdata[0] ] ) {
+	if ( UI_SaveshotIsValid( a->generic.localdata[0] ) ) {
 #ifdef NOTTHIRTYFLIGHTS
 		Cbuf_AddText (va("load kmq2save%03i\n",  a->generic.localdata[0] ) );
 #else
@@ -234,7 +236,7 @@ const char *Menu_LoadGame_Key (int key)
 void Menu_LoadGame_f (void)
 {
 	Menu_LoadGame_Init ();
-	UI_PushMenu (Menu_LoadGame_Draw, Menu_LoadGame_Key);
+	UI_PushMenu (&s_savegame_menu);
 }
 
 
@@ -248,7 +250,7 @@ SAVEGAME MENU
 
 void SaveGameCallback (void *self)
 {
-	menuaction_s *a = (menuaction_s *) self;
+	menuAction_s *a = (menuAction_s *) self;
 
 #ifdef NOTTHIRTYFLIGHTS
 	Cbuf_AddText (va("save kmq2save%03i\n", a->generic.localdata[0] ));
@@ -340,6 +342,7 @@ void Menu_SaveGame_f (void)
 		return;		// not playing a game
 
 	Menu_SaveGame_Init ();
-	UI_PushMenu (Menu_SaveGame_Draw, Menu_SaveGame_Key);
+	UI_PushMenu (&s_loadgame_menu);
 //	Load_Savestrings ();
 }
+

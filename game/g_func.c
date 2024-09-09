@@ -182,8 +182,8 @@ restart:
 					}
 					else if (!Q_stricmp(e->classname, "func_door_rotating"))
 					{
-						VectorCopy(self->avelocity,e->avelocity);
-					//	VectorCopy(delta_angles, e->pos1);
+						VectorCopy (self->avelocity,e->avelocity);
+					//	VectorCopy (delta_angles, e->pos1);
 						VectorAdd (e->child_attach_angles, delta_angles, e->pos1);
 						VectorMA (e->pos1, e->moveinfo.distance, e->movedir, e->pos2);
 						if (e->moveinfo.state == STATE_TOP)
@@ -199,14 +199,14 @@ restart:
 					{
 						// Brush models always start out with angles=0,0,0 (after G_SetMoveDir).
 						// Use more accuracy here.
-						VectorCopy(self->avelocity, e->avelocity);
-					//	VectorCopy(delta_angles, e->s.angles);
+						VectorCopy (self->avelocity, e->avelocity);
+					//	VectorCopy (delta_angles, e->s.angles);
 						VectorAdd (e->child_attach_angles, delta_angles, e->s.angles);
 					}
 					else if (e->movetype == MOVETYPE_NONE)
 					{
-						VectorCopy(self->avelocity, e->avelocity);
-					//	VectorCopy(delta_angles, e->s.angles);
+						VectorCopy (self->avelocity, e->avelocity);
+					//	VectorCopy (delta_angles, e->s.angles);
 						VectorAdd (e->child_attach_angles, delta_angles, e->s.angles);
 					}
 					else
@@ -446,7 +446,7 @@ void spline_calc (edict_t *train, vec3_t p1, vec3_t p2, vec3_t a1, vec3_t a2, fl
 	v[0] = (n2 * p1[0] - (n2 - mn_2) * c1[0] - (mn_2 - m2) * c2[0] - m2 * p2[0]) / -s;
 	v[1] = (n2 * p1[1] - (n2 - mn_2) * c1[1] - (mn_2 - m2) * c2[1] - m2 * p2[1]) / -s;
 	v[2] = (n2 * p1[2] - (n2 - mn_2) * c1[2] - (mn_2 - m2) * c2[2] - m2 * p2[2]) / -s;
-	vectoangles2(v, a);
+	vectoangles2 (v, a);
 	if (train->roll_speed > 0)	// Knightmare added
 		a[ROLL] = a1[ROLL] + m*(a2[ROLL] - a1[ROLL]);
 }
@@ -473,7 +473,7 @@ void train_spline (edict_t *self)
 
 	if ( (train->from != train->to) && !train->moveinfo.is_blocked && (train->spawnflags & TRAIN_START_ON))
 	{
-		if (train->moveinfo.ratio >= 1.0f) //Knightmare- don't keep moving at end of curve
+		if (train->moveinfo.ratio >= 1.0f) // Knightmare- don't keep moving at end of curve
 		{
 			VectorClear(self->avelocity);
 			VectorClear(self->velocity);
@@ -873,7 +873,7 @@ void Move_Begin (edict_t *ent)
 					VectorAdd(ent->s.origin,ent->mins,v);
 					VectorSubtract(ent->target_ent->s.origin,v,v);
 				}
-				vectoangles2(v,angles);
+				vectoangles2 (v, angles);
 				ent->ideal_yaw = angles[YAW];
 				ent->ideal_pitch = angles[PITCH];
 				if (ent->ideal_pitch < 0) ent->ideal_pitch += 360;
@@ -1208,8 +1208,8 @@ void plat_go_down (edict_t *ent)
 		if (ent->moveinfo.sound_start)
 			gi.sound (ent, CHAN_NO_PHS_ADD+CHAN_VOICE, ent->moveinfo.sound_start, 1, ent->attenuation, 0); // was ATTN_STATIC
 		ent->s.sound = ent->moveinfo.sound_middle;
-#ifdef LOOP_SOUND_ATTENUATION
-		ent->s.attenuation = ent->attenuation;
+#ifdef KMQUAKE2_ENGINE_MOD
+		ent->s.loop_attenuation = ent->attenuation;
 #endif
 	}
 	ent->moveinfo.state = STATE_DOWN;
@@ -1223,8 +1223,8 @@ void plat_go_up (edict_t *ent)
 		if (ent->moveinfo.sound_start)
 			gi.sound (ent, CHAN_NO_PHS_ADD+CHAN_VOICE, ent->moveinfo.sound_start, 1, ent->attenuation, 0); // was ATTN_STATIC
 		ent->s.sound = ent->moveinfo.sound_middle;
-#ifdef LOOP_SOUND_ATTENUATION
-		ent->s.attenuation = ent->attenuation;
+#ifdef KMQUAKE2_ENGINE_MOD
+		ent->s.loop_attenuation = ent->attenuation;
 #endif
 	}
 	ent->moveinfo.state = STATE_UP;
@@ -1242,7 +1242,7 @@ void plat_blocked (edict_t *self, edict_t *other)
 		{
 			// Lazarus: Some of our ents don't have origin near the model
 			vec3_t save;
-			VectorCopy(other->s.origin,save);
+			VectorCopy (other->s.origin,save);
 			VectorMA (other->absmin, 0.5, other->size, other->s.origin);
 			BecomeExplosion1 (other);
 		}
@@ -1312,7 +1312,10 @@ edict_t *plat_spawn_inside_trigger (edict_t *ent)
 	tmax[2] = ent->maxs[2] + 8;
 
 	// Knightmare- for PLAT_LOW_TRIGGER, we need to add st.lip, not subtract it!
-//	tmin[2] = tmax[2] - (ent->pos1[2] - ent->pos2[2] + st.lip);
+/*	tmin[2] = tmax[2] - (ent->pos1[2] - ent->pos2[2] + st.lip);
+
+	if (ent->spawnflags & PLAT_LOW_TRIGGER)
+		tmax[2] = tmin[2] + 8; */
 
 	if (ent->spawnflags & PLAT_LOW_TRIGGER) {
 		tmin[2] = tmax[2] - (ent->pos1[2] - ent->pos2[2]) + st.lip;
@@ -1432,9 +1435,9 @@ void SP_func_plat (edict_t *ent)
 
 	if ( (level.maptype == MAPTYPE_CUSTOM) && (ent->sounds > 1) && (ent->sounds < 100) ) // custom sounds
 	{
-		ent->moveinfo.sound_start = gi.soundindex  (va("plats/pt%02i_strt.wav", ent->sounds));
-		ent->moveinfo.sound_middle = gi.soundindex  (va("plats/pt%02i_mid.wav", ent->sounds));
-		ent->moveinfo.sound_end = gi.soundindex  (va("plats/pt%02i_end.wav", ent->sounds));
+		ent->moveinfo.sound_start = gi.soundindex (va("plats/pt%02i_strt.wav", ent->sounds));
+		ent->moveinfo.sound_middle = gi.soundindex (va("plats/pt%02i_mid.wav", ent->sounds));
+		ent->moveinfo.sound_end = gi.soundindex (va("plats/pt%02i_end.wav", ent->sounds));
 	}
 	else
 	{
@@ -1543,8 +1546,8 @@ void plat2_go_down (edict_t *ent)
 		if (ent->moveinfo.sound_start)
 			gi.sound (ent, CHAN_NO_PHS_ADD+CHAN_VOICE, ent->moveinfo.sound_start, 1, ent->attenuation, 0); // was ATTN_STATIC
 		ent->s.sound = ent->moveinfo.sound_middle;
-#ifdef LOOP_SOUND_ATTENUATION
-		ent->s.attenuation = ent->attenuation;
+#ifdef KMQUAKE2_ENGINE_MOD
+		ent->s.loop_attenuation = ent->attenuation;
 #endif
 	}
 	ent->moveinfo.state = STATE_DOWN;
@@ -1560,8 +1563,8 @@ void plat2_go_up (edict_t *ent)
 		if (ent->moveinfo.sound_start)
 			gi.sound (ent, CHAN_NO_PHS_ADD+CHAN_VOICE, ent->moveinfo.sound_start, 1, ent->attenuation, 0); // was ATTN_STATIC
 		ent->s.sound = ent->moveinfo.sound_middle;
-#ifdef LOOP_SOUND_ATTENUATION
-		ent->s.attenuation = ent->attenuation;
+#ifdef KMQUAKE2_ENGINE_MOD
+		ent->s.loop_attenuation = ent->attenuation;
 #endif
 	}
 	ent->moveinfo.state = STATE_UP;
@@ -1663,7 +1666,7 @@ void plat2_blocked (edict_t *self, edict_t *other)
 		{
 			// Lazarus: Some of our ents don't have origin near the model
 			vec3_t save;
-			VectorCopy(other->s.origin,save);
+			VectorCopy (other->s.origin,save);
 			VectorMA (other->absmin, 0.5, other->size, other->s.origin);
 			BecomeExplosion1 (other);
 		}
@@ -1827,9 +1830,9 @@ void SP_func_plat2 (edict_t *ent)
 
 	if ( (level.maptype == MAPTYPE_CUSTOM) && (ent->sounds > 1) && (ent->sounds < 100) ) // custom sounds
 	{
-		ent->moveinfo.sound_start = gi.soundindex  (va("plats/pt%02i_strt.wav", ent->sounds));
-		ent->moveinfo.sound_middle = gi.soundindex  (va("plats/pt%02i_mid.wav", ent->sounds));
-		ent->moveinfo.sound_end = gi.soundindex  (va("plats/pt%02i_end.wav", ent->sounds));
+		ent->moveinfo.sound_start = gi.soundindex (va("plats/pt%02i_strt.wav", ent->sounds));
+		ent->moveinfo.sound_middle = gi.soundindex (va("plats/pt%02i_mid.wav", ent->sounds));
+		ent->moveinfo.sound_end = gi.soundindex (va("plats/pt%02i_end.wav", ent->sounds));
 	}
 	else
 	{
@@ -1907,7 +1910,7 @@ void rotating_blocked (edict_t *self, edict_t *other)
 		if (other) {
 			// Lazarus: Some of our ents don't have origin near the model
 			vec3_t save;
-			VectorCopy(other->s.origin,save);
+			VectorCopy (other->s.origin,save);
 			VectorMA (other->absmin, 0.5, other->size, other->s.origin);
 			BecomeExplosion1 (other);
 		}
@@ -1939,8 +1942,8 @@ void rotating_use (edict_t *self, edict_t *other, edict_t *activator)
 	else
 	{
 		self->s.sound = self->moveinfo.sound_middle;
-#ifdef LOOP_SOUND_ATTENUATION
-		self->s.attenuation = self->attenuation;
+#ifdef KMQUAKE2_ENGINE_MOD
+		self->s.loop_attenuation = self->attenuation;
 #endif
 		if (self->spawnflags & ROTATING_ACCEL)	// accelerate
 			rotating_accel (self);
@@ -2037,7 +2040,7 @@ void func_rotating_dh_init (edict_t *ent) {
 
 	new_origin = G_Find (NULL, FOFS(targetname), ent->pathtarget);
 	if (new_origin)
-		VectorCopy(new_origin->s.origin,ent->s.origin);
+		VectorCopy (new_origin->s.origin,ent->s.origin);
 	SP_func_rotating (ent);
 }
 
@@ -2175,7 +2178,7 @@ void SP_func_button (edict_t *ent)
 	gi.setmodel (ent, ent->model);
 
 	if ( (level.maptype == MAPTYPE_CUSTOM) && (ent->sounds > 1) && (ent->sounds < 100) ) // custom sounds
-		ent->moveinfo.sound_start = gi.soundindex  (va("switches/butn%02i.wav", ent->sounds));
+		ent->moveinfo.sound_start = gi.soundindex (va("switches/butn%02i.wav", ent->sounds));
 	else if (ent->sounds != 1)
 		ent->moveinfo.sound_start = gi.soundindex ("switches/butn2.wav");
 
@@ -2323,7 +2326,7 @@ void movewith_init (edict_t *ent)
 		child->movewith_ent = ent;
 		// Copy parent's current angles to the child. They SHOULD be 0,0,0 at this point
 		// for all currently supported parents, but ya never know.
-		VectorCopy(ent->s.angles, child->parent_attach_angles);
+		VectorCopy (ent->s.angles, child->parent_attach_angles);
 		VectorCopy (child->s.angles, child->child_attach_angles);
 		if (child->org_movetype < 0)
 			child->org_movetype = child->movetype;
@@ -2340,9 +2343,9 @@ void movewith_init (edict_t *ent)
 
 void SP_func_trainbutton (edict_t *ent)
 {
-	if (!ent->movewith)
+	if ( !ent->movewith )
 	{
-		SP_func_button(ent);
+		SP_func_button (ent);
 		return;
 	}
 	ent->class_id = ENTITY_FUNC_TRAINBUTTON;
@@ -2506,8 +2509,8 @@ void door_go_down (edict_t *self)
 		if (self->moveinfo.sound_start)
 			gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_start, 1, self->attenuation, 0); // was ATTN_STATIC
 		self->s.sound = self->moveinfo.sound_middle;
-#ifdef LOOP_SOUND_ATTENUATION
-		self->s.attenuation = self->attenuation;
+#ifdef KMQUAKE2_ENGINE_MOD
+		self->s.loop_attenuation = self->attenuation;
 #endif
 	}
 	if (self->max_health)
@@ -2554,8 +2557,8 @@ void door_go_up (edict_t *self, edict_t *activator)
 		if (self->moveinfo.sound_start)
 			gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_start, 1, self->attenuation, 0); // was ATTN_STATIC
 		self->s.sound = self->moveinfo.sound_middle;
-#ifdef LOOP_SOUND_ATTENUATION
-		self->s.attenuation = self->attenuation;
+#ifdef KMQUAKE2_ENGINE_MOD
+		self->s.loop_attenuation = self->attenuation;
 #endif
 	}
 	if (strcmp(self->classname, "func_door") == 0)
@@ -2710,7 +2713,7 @@ void Think_SpawnDoorTrigger (edict_t *ent)
 	if (ent->movewith)
 	{
 		other->movewith = ent->movewith;
-		VectorCopy(ent->s.origin,other->s.origin);
+		VectorCopy (ent->s.origin,other->s.origin);
 		VectorSubtract(other->mins,other->s.origin,other->mins);
 		VectorSubtract(other->maxs,other->s.origin,other->maxs);
 		if (ent->movewith_ent) {
@@ -2736,7 +2739,7 @@ void door_blocked  (edict_t *self, edict_t *other)
 		if (other) {
 			// Lazarus: Some of our ents don't have origin near the model
 			vec3_t save;
-			VectorCopy(other->s.origin,save);
+			VectorCopy (other->s.origin,save);
 			VectorMA (other->absmin, 0.5, other->size, other->s.origin);
 			BecomeExplosion1 (other);
 		}
@@ -2809,15 +2812,15 @@ void SP_func_door (edict_t *ent)
 
 	if ( (level.maptype == MAPTYPE_CUSTOM) && (ent->sounds > 4) && (ent->sounds < 100) ) // custom sounds
 	{
-		ent->moveinfo.sound_start = gi.soundindex  (va("doors/dr%02i_strt.wav", ent->sounds));
-		ent->moveinfo.sound_middle = gi.soundindex  (va("doors/dr%02i_mid.wav", ent->sounds));
-		ent->moveinfo.sound_end = gi.soundindex  (va("doors/dr%02i_end.wav", ent->sounds));
+		ent->moveinfo.sound_start = gi.soundindex (va("doors/dr%02i_strt.wav", ent->sounds));
+		ent->moveinfo.sound_middle = gi.soundindex (va("doors/dr%02i_mid.wav", ent->sounds));
+		ent->moveinfo.sound_end = gi.soundindex (va("doors/dr%02i_end.wav", ent->sounds));
 	}
 	else if (ent->sounds != 1)
 	{
-		ent->moveinfo.sound_start = gi.soundindex  ("doors/dr1_strt.wav");
-		ent->moveinfo.sound_middle = gi.soundindex  ("doors/dr1_mid.wav");
-		ent->moveinfo.sound_end = gi.soundindex  ("doors/dr1_end.wav");
+		ent->moveinfo.sound_start = gi.soundindex ("doors/dr1_strt.wav");
+		ent->moveinfo.sound_middle = gi.soundindex ("doors/dr1_mid.wav");
+		ent->moveinfo.sound_end = gi.soundindex ("doors/dr1_end.wav");
 	}
 	else
 	{
@@ -3013,15 +3016,15 @@ void SP_func_door_rotating (edict_t *ent)
 
 	if ( (level.maptype == MAPTYPE_CUSTOM) && (ent->sounds > 4) && (ent->sounds < 100) ) // custom sounds
 	{
-		ent->moveinfo.sound_start = gi.soundindex  (va("doors/dr%02i_strt.wav", ent->sounds));
-		ent->moveinfo.sound_middle = gi.soundindex  (va("doors/dr%02i_mid.wav", ent->sounds));
-		ent->moveinfo.sound_end = gi.soundindex  (va("doors/dr%02i_end.wav", ent->sounds));
+		ent->moveinfo.sound_start = gi.soundindex (va("doors/dr%02i_strt.wav", ent->sounds));
+		ent->moveinfo.sound_middle = gi.soundindex (va("doors/dr%02i_mid.wav", ent->sounds));
+		ent->moveinfo.sound_end = gi.soundindex (va("doors/dr%02i_end.wav", ent->sounds));
 	}
 	else if (ent->sounds != 1)
 	{
-		ent->moveinfo.sound_start = gi.soundindex  ("doors/dr1_strt.wav");
-		ent->moveinfo.sound_middle = gi.soundindex  ("doors/dr1_mid.wav");
-		ent->moveinfo.sound_end = gi.soundindex  ("doors/dr1_end.wav");
+		ent->moveinfo.sound_start = gi.soundindex ("doors/dr1_strt.wav");
+		ent->moveinfo.sound_middle = gi.soundindex ("doors/dr1_mid.wav");
+		ent->moveinfo.sound_end = gi.soundindex ("doors/dr1_end.wav");
 	}
 	else
 	{
@@ -3104,7 +3107,7 @@ void func_door_rot_dh_init (edict_t *ent)
 
 	new_origin = G_Find (NULL, FOFS(targetname), ent->pathtarget);
 	if (new_origin) {
-		VectorCopy(new_origin->s.origin,ent->s.origin);
+		VectorCopy (new_origin->s.origin,ent->s.origin);
 		VectorCopy (ent->s.origin, ent->moveinfo.start_origin);
 		VectorCopy (ent->s.origin, ent->moveinfo.end_origin);
 		gi.linkentity(ent);
@@ -3118,13 +3121,15 @@ void func_door_rot_dh_init (edict_t *ent)
 
 void SP_func_door_rot_dh (edict_t *ent)
 {
-	SP_func_door_rotating(ent);
-	if (!ent->pathtarget) return;
+	SP_func_door_rotating (ent);
+
+	if ( !ent->pathtarget )
+		return;
 
 	// Wait a few frames so that we're sure pathtarget has been parsed.
 	ent->think = func_door_rot_dh_init;
 	ent->nextthink = level.time + 2*FRAMETIME;
-	gi.linkentity(ent);
+	gi.linkentity (ent);
 }
 
 /*QUAKED func_water (0 .5 .8) ? START_OPEN MUD
@@ -3272,7 +3277,7 @@ void train_blocked (edict_t *self, edict_t *other)
 		{
 			// Lazarus: Some of our ents don't have origin near the model
 			vec3_t save;
-			VectorCopy(other->s.origin,save);
+			VectorCopy (other->s.origin,save);
 			VectorMA (other->absmin, 0.5, other->size, other->s.origin);
 			BecomeExplosion1 (other);
 		}
@@ -3307,7 +3312,8 @@ void train_wait (edict_t *self)
 	}
 
 	// Lazarus: rotating trains
-	if (self->target_ent)
+//	if ( self->target_ent )
+	if ( self->target_ent && (level.maptype != MAPTYPE_ROGUE) )	// Knightmare- skip this for Rogue maps
 	{
 		if (self->target_ent->speed)
 		{
@@ -3358,7 +3364,13 @@ void train_wait (edict_t *self)
 		}
 		else if (self->spawnflags & TRAIN_TOGGLE)  // && wait < 0
 		{
-			train_next (self);
+			// Knightmare- for Rogue maps, let train_next wait until we get called
+			if (level.maptype == MAPTYPE_ROGUE) {
+				self->target_ent = NULL;
+			}
+			else {
+				train_next (self);
+			}
 			self->spawnflags &= ~TRAIN_START_ON;
 			VectorClear (self->velocity);
 			if ( !(self->spawnflags & TRAIN_ROTATE_CONSTANT) )
@@ -3383,6 +3395,11 @@ void train_wait (edict_t *self)
 		train_next (self);
 	}
 	
+}
+
+// Knightmare- dummy function for Rogue train teams
+void train_piece_wait (edict_t *self)
+{
 }
 
 // Rroff's rotating train stuff, with quite a few changes
@@ -3680,7 +3697,7 @@ again:
 	if (adjust_train_corners->value)
 		VectorSubtract(ent->s.origin, corner_offset, adjusted_pathpoint);
 	else
-		VectorCopy(ent->s.origin, adjusted_pathpoint);
+		VectorCopy (ent->s.origin, adjusted_pathpoint);
 
 	self->target = ent->target;
 
@@ -3740,6 +3757,23 @@ again:
 		goto again;
 	}
 
+	// Knightmare- handle speed changes for Rogue maps
+	if ( (ent->speed) && (level.maptype == MAPTYPE_ROGUE) )
+	{
+		self->speed = ent->speed;
+		self->moveinfo.speed = ent->speed;
+		if (ent->accel)
+			self->moveinfo.accel = ent->accel;
+		else
+			self->moveinfo.accel = ent->speed;
+		if (ent->decel)
+			self->moveinfo.decel = ent->decel;
+		else
+			self->moveinfo.decel = ent->speed;
+		self->moveinfo.current_speed = 0;
+	}
+	// end Knightmare
+
 	self->moveinfo.wait = ent->wait;
 	self->target_ent = ent;
 
@@ -3748,8 +3782,8 @@ again:
 		if (self->moveinfo.sound_start)
 			gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_start, 1, self->attenuation, 0); // was ATTN_STATIC
 		self->s.sound = self->moveinfo.sound_middle;
-#ifdef LOOP_SOUND_ATTENUATION
-		self->s.attenuation = self->attenuation;
+#ifdef KMQUAKE2_ENGINE_MOD
+		self->s.loop_attenuation = self->attenuation;
 #endif
 	}
 
@@ -3784,7 +3818,7 @@ again:
 	}
 
 	// Rroff rotating
-	if (self->spawnflags & TRAIN_ROTATE && !(ent->spawnflags & 2))
+	if ( (self->spawnflags & TRAIN_ROTATE) && !(ent->spawnflags & 2) )
 	{
 		// Lazarus: No no no :-). This is measuring from the center
 		//          of the func_train to the path_corner. Should
@@ -3797,13 +3831,13 @@ again:
 			VectorAdd(self->s.origin,self->mins,v);
 			VectorSubtract(adjusted_pathpoint, v, v); // was ent->s.origin
 		}
-		vectoangles2(v,angles);
+		vectoangles2 (v, angles);
 		self->ideal_yaw = angles[YAW];
 		self->ideal_pitch = angles[PITCH];
 		if (self->ideal_pitch < 0) self->ideal_pitch += 360;
 		self->ideal_roll = ent->roll;
 
-		VectorClear(self->movedir);
+		VectorClear (self->movedir);
 		self->movedir[1] = 1.0;
 
 	}
@@ -3832,6 +3866,32 @@ again:
 
 	Move_Calc (self, dest, train_wait);
 	self->spawnflags |= TRAIN_START_ON;
+
+	// Knightmare- special team hack for Rogue maps
+	if ( self->team && (level.maptype == MAPTYPE_ROGUE) )
+	{
+		edict_t	*teamEnt;
+		vec3_t	teamDir, teamDest;
+		int		num_pieces_found = 0;
+
+		VectorSubtract (dest, self->s.origin, teamDir);
+		for (teamEnt = self->teamchain; teamEnt; teamEnt = teamEnt->teamchain)
+		{
+			VectorAdd (teamDir, teamEnt->s.origin, teamDest);
+			VectorCopy (teamEnt->s.origin, teamEnt->moveinfo.start_origin);
+			VectorCopy (teamDest, teamEnt->moveinfo.end_origin);
+
+			teamEnt->moveinfo.state = STATE_TOP;
+			teamEnt->speed = self->speed;
+			teamEnt->moveinfo.speed = self->moveinfo.speed;
+			teamEnt->moveinfo.accel = self->moveinfo.accel;
+			teamEnt->moveinfo.decel = self->moveinfo.decel;
+			teamEnt->movetype = MOVETYPE_PUSH;
+			Move_Calc (teamEnt, teamDest, train_piece_wait);
+			num_pieces_found++;
+		}
+	}
+	// end Knightmare
 }
 
 void train_resume (edict_t *self)
@@ -3843,12 +3903,12 @@ void train_resume (edict_t *self)
 
 	ent = self->target_ent;
 
-	//Knightmare- calc the real target for the train's mins,
-	//since that is 1 unit below the corner of the bmodel in all 3 dimensions
+	// Knightmare- calc the real target for the train's mins,
+	// since that is 1 unit below the corner of the bmodel in all 3 dimensions
 	if (adjust_train_corners->value)
 		VectorSubtract(ent->s.origin, corner_offset, adjusted_pathpoint);
 	else
-		VectorCopy(ent->s.origin, adjusted_pathpoint);
+		VectorCopy (ent->s.origin, adjusted_pathpoint);
 
 	if (self->spawnflags & TRAIN_ORIGIN)	// Knightmare- func_train_origin support
 		VectorCopy (ent->s.origin, dest);
@@ -3911,14 +3971,17 @@ void func_train_find (edict_t *self)
 	if (adjust_train_corners->value)
 		VectorSubtract(ent->s.origin, corner_offset, adjusted_pathpoint);
 	else
-		VectorCopy(ent->s.origin, adjusted_pathpoint);
+		VectorCopy (ent->s.origin, adjusted_pathpoint);
 
-	if (self->spawnflags & TRAIN_ROTATE)
+	if (self->spawnflags & TRAIN_ROTATE) {
 		ent->think = train_yaw;
-	else if (self->spawnflags & TRAIN_SPLINE)
+	}
+	else if (self->spawnflags & TRAIN_SPLINE) {
 		ent->think = train_spline;
-	else
+	}
+	else {
 		ent->think = train_children_think;
+	}
 	ent->enemy = self;
 	ent->nextthink = level.time + FRAMETIME;
 
@@ -4119,20 +4182,20 @@ void SP_func_train (edict_t *self)
 	{
 		edict_t *speaker;
 
-		self->noise_index    = self->moveinfo.sound_middle;
+		self->noise_index		= self->moveinfo.sound_middle;
 		self->moveinfo.sound_middle = 0;
-		speaker = G_Spawn();
-		speaker->classname   = "moving_speaker";
-		speaker->s.sound     = 0;
-		speaker->volume      = 1;
-		speaker->attenuation = self->attenuation; // was 3
-		speaker->owner       = self;
-		speaker->think       = Moving_Speaker_Think;
-		speaker->nextthink   = level.time + 2*FRAMETIME;
-		speaker->spawnflags  = 7;       // owner must be moving to play
-		self->speaker        = speaker;
-		if (VectorLength(self->s.origin))
-			VectorCopy(self->s.origin,speaker->s.origin);
+		speaker					= G_Spawn();
+		speaker->classname		= "moving_speaker";
+		speaker->s.sound		= 0;
+		speaker->volume			= 1;
+		speaker->attenuation	= self->attenuation; // was 3
+		speaker->owner			= self;
+		speaker->think			= Moving_Speaker_Think;
+		speaker->nextthink		= level.time + 2*FRAMETIME;
+		speaker->spawnflags		= 7;       // owner must be moving to play
+		self->speaker			= speaker;
+		if ( VectorLength(self->s.origin) )
+			VectorCopy (self->s.origin, speaker->s.origin);
 		else {
 			VectorAdd (self->absmin, self->absmax, speaker->s.origin);
 			VectorScale (speaker->s.origin, 0.5, speaker->s.origin);
@@ -4375,8 +4438,8 @@ void door_secret_use (edict_t *self, edict_t *other, edict_t *activator)
 		gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_start, 1, self->attenuation, 0); // was ATTN_STATIC
 	if (self->moveinfo.sound_middle) {
 		self->s.sound = self->moveinfo.sound_middle;
-#ifdef LOOP_SOUND_ATTENUATION
-		self->s.attenuation = self->attenuation;
+#ifdef KMQUAKE2_ENGINE_MOD
+		self->s.loop_attenuation = self->attenuation;
 #endif
 	}
 //	Move_Calc (self, self->pos1, door_secret_move1);
@@ -4410,8 +4473,8 @@ void door_secret_move2 (edict_t *self)
 		gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_start, 1, self->attenuation, 0); // was ATTN_STATIC
 	if (self->moveinfo.sound_middle) {
 		self->s.sound = self->moveinfo.sound_middle;
-#ifdef LOOP_SOUND_ATTENUATION
-		self->s.attenuation = self->attenuation;
+#ifdef KMQUAKE2_ENGINE_MOD
+		self->s.loop_attenuation = self->attenuation;
 #endif
 	}
 	self->moveinfo.state = STATE_UP;	// Knightmare added
@@ -4439,8 +4502,8 @@ void door_secret_move4 (edict_t *self)
 		gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_start, 1, self->attenuation, 0); // was ATTN_STATIC
 	if (self->moveinfo.sound_middle) {
 		self->s.sound = self->moveinfo.sound_middle;
-#ifdef LOOP_SOUND_ATTENUATION
-		self->s.attenuation = self->attenuation;
+#ifdef KMQUAKE2_ENGINE_MOD
+		self->s.loop_attenuation = self->attenuation;
 #endif
 	}
 	self->moveinfo.state = STATE_UP;	// Knightmare added
@@ -4465,8 +4528,8 @@ void door_secret_move6 (edict_t *self)
 		gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_start, 1, self->attenuation, 0); // was ATTN_STATIC
 	if (self->moveinfo.sound_middle) {
 		self->s.sound = self->moveinfo.sound_middle;
-#ifdef LOOP_SOUND_ATTENUATION
-		self->s.attenuation = self->attenuation;
+#ifdef KMQUAKE2_ENGINE_MOD
+		self->s.loop_attenuation = self->attenuation;
 #endif
 	}
 
@@ -4505,7 +4568,7 @@ void door_secret_blocked  (edict_t *self, edict_t *other)
 		{
 			// Lazarus: Some of our ents don't have origin near the model
 			vec3_t save;
-			VectorCopy(other->s.origin,save);
+			VectorCopy (other->s.origin,save);
 			VectorMA (other->absmin, 0.5, other->size, other->s.origin);
 			BecomeExplosion1 (other);
 		}
@@ -4536,15 +4599,15 @@ void SP_func_door_secret (edict_t *ent)
 
 	if ( (level.maptype == MAPTYPE_CUSTOM) && (ent->sounds > 4) && (ent->sounds < 100) ) // custom sounds
 	{
-		ent->moveinfo.sound_start = gi.soundindex  (va("doors/dr%02i_strt.wav", ent->sounds));
-		ent->moveinfo.sound_middle = gi.soundindex  (va("doors/dr%02i_mid.wav", ent->sounds));
-		ent->moveinfo.sound_end = gi.soundindex  (va("doors/dr%02i_end.wav", ent->sounds));
+		ent->moveinfo.sound_start = gi.soundindex (va("doors/dr%02i_strt.wav", ent->sounds));
+		ent->moveinfo.sound_middle = gi.soundindex (va("doors/dr%02i_mid.wav", ent->sounds));
+		ent->moveinfo.sound_end = gi.soundindex (va("doors/dr%02i_end.wav", ent->sounds));
 	}
 	else if (ent->sounds != 1)
 	{
-		ent->moveinfo.sound_start = gi.soundindex  ("doors/dr1_strt.wav");
-		ent->moveinfo.sound_middle = gi.soundindex  ("doors/dr1_mid.wav");
-		ent->moveinfo.sound_end = gi.soundindex  ("doors/dr1_end.wav");
+		ent->moveinfo.sound_start = gi.soundindex ("doors/dr1_strt.wav");
+		ent->moveinfo.sound_middle = gi.soundindex ("doors/dr1_mid.wav");
+		ent->moveinfo.sound_end = gi.soundindex ("doors/dr1_end.wav");
 	}
 	else
 	{
@@ -4698,8 +4761,8 @@ void door_secret2_use (edict_t *self, edict_t *other, edict_t *activator)
 			gi.sound (door, CHAN_NO_PHS_ADD+CHAN_VOICE, door->moveinfo.sound_start, 1, door->attenuation, 0); // was ATTN_STATIC
 		if (door->moveinfo.sound_middle) {
 			door->s.sound = door->moveinfo.sound_middle;
-	#ifdef LOOP_SOUND_ATTENUATION
-			door->s.attenuation = door->attenuation;
+	#ifdef KMQUAKE2_ENGINE_MOD
+			door->s.loop_attenuation = door->attenuation;
 	#endif
 		}
 		if (door->moveinfo.state == STATE_LOWEST) {
@@ -4746,8 +4809,8 @@ void door_secret2_move2 (edict_t *self)
 		gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_start, 1, self->attenuation, 0); // was ATTN_STATIC
 	if (self->moveinfo.sound_middle) {
 		self->s.sound = self->moveinfo.sound_middle;
-#ifdef LOOP_SOUND_ATTENUATION
-		self->s.attenuation = self->attenuation;
+#ifdef KMQUAKE2_ENGINE_MOD
+		self->s.loop_attenuation = self->attenuation;
 #endif
 	}
 	self->moveinfo.state = STATE_UP;
@@ -4776,8 +4839,8 @@ void door_secret2_move4 (edict_t *self)
 		gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_start, 1, self->attenuation, 0); // was ATTN_STATIC
 	if (self->moveinfo.sound_middle) {
 		self->s.sound = self->moveinfo.sound_middle;
-#ifdef LOOP_SOUND_ATTENUATION
-		self->s.attenuation = self->attenuation;
+#ifdef KMQUAKE2_ENGINE_MOD
+		self->s.loop_attenuation = self->attenuation;
 #endif
 	}
 	self->moveinfo.state = STATE_UP;
@@ -4802,8 +4865,8 @@ void door_secret2_move6 (edict_t *self)
 		gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_start, 1, self->attenuation, 0); // was ATTN_STATIC
 	if (self->moveinfo.sound_middle)
 		self->s.sound = self->moveinfo.sound_middle;
-#ifdef LOOP_SOUND_ATTENUATION
-		self->s.attenuation = self->attenuation;
+#ifdef KMQUAKE2_ENGINE_MOD
+		self->s.loop_attenuation = self->attenuation;
 #endif
 	self->moveinfo.state = STATE_DOWN;
 	Move_Calc (self, self->pos0, door_secret2_done);
@@ -4867,15 +4930,15 @@ void SP_func_door_secret2 (edict_t *ent)
 
 	if ( (level.maptype == MAPTYPE_CUSTOM) && (ent->sounds > 4) && (ent->sounds < 100) ) // custom sounds
 	{
-		ent->moveinfo.sound_start = gi.soundindex  (va("doors/dr%02i_strt.wav", ent->sounds));
-		ent->moveinfo.sound_middle = gi.soundindex  (va("doors/dr%02i_mid.wav", ent->sounds));
-		ent->moveinfo.sound_end = gi.soundindex  (va("doors/dr%02i_end.wav", ent->sounds));
+		ent->moveinfo.sound_start = gi.soundindex (va("doors/dr%02i_strt.wav", ent->sounds));
+		ent->moveinfo.sound_middle = gi.soundindex (va("doors/dr%02i_mid.wav", ent->sounds));
+		ent->moveinfo.sound_end = gi.soundindex (va("doors/dr%02i_end.wav", ent->sounds));
 	}
 	else if (ent->sounds != 1)
 	{
-		ent->moveinfo.sound_start = gi.soundindex  ("doors/dr1_strt.wav");
-		ent->moveinfo.sound_middle = gi.soundindex  ("doors/dr1_mid.wav");
-		ent->moveinfo.sound_end = gi.soundindex  ("doors/dr1_end.wav");
+		ent->moveinfo.sound_start = gi.soundindex ("doors/dr1_strt.wav");
+		ent->moveinfo.sound_middle = gi.soundindex ("doors/dr1_mid.wav");
+		ent->moveinfo.sound_end = gi.soundindex ("doors/dr1_end.wav");
 	}
 	else
 	{
@@ -5290,7 +5353,7 @@ void box_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf
 		}
 
 		// Override oldvelocity
-		VectorCopy(self->velocity,self->oldvelocity);
+		VectorCopy (self->velocity,self->oldvelocity);
 		gi.linkentity(self);
 		return;
 	}
@@ -5309,7 +5372,7 @@ void box_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf
 		if (axis == 2 && v[axis] > 0)
 		{
 			v11 = VectorLength(self->velocity);
-			VectorCopy(self->velocity,v);
+			VectorCopy (self->velocity,v);
 			VectorNormalize(v);
 			if (!other->groundentity) {
 				other->velocity[2] = self->velocity[2];
@@ -5462,7 +5525,7 @@ void SP_func_pushable (edict_t *self)
 	if (!self->mass)
 		self->mass = 400;
 
-	if (st.item) //Knightmare- item support
+	if (st.item) // Knightmare- item support
 	{
 		self->item = FindItemByClassname (st.item);
 		if (!self->item)
@@ -5978,8 +6041,8 @@ void swinging_door_killed (edict_t *self, edict_t *inflictor, edict_t *attacker,
 			if (ent->moveinfo.sound_start)
 				gi.sound (ent, CHAN_NO_PHS_ADD+CHAN_VOICE, ent->moveinfo.sound_start, 1, ent->attenuation, 0); // was ATTN_STATIC
 			ent->s.sound = ent->moveinfo.sound_middle;
-	#ifdef LOOP_SOUND_ATTENUATION
-			ent->s.attenuation = ent->attenuation;
+	#ifdef KMQUAKE2_ENGINE_MOD
+			ent->s.loop_attenuation = ent->attenuation;
 	#endif
 		}
 		ent->moveinfo.state = STATE_UP;
@@ -6039,10 +6102,10 @@ void SP_func_door_swinging (edict_t *self)
 		self->spawnflags &= ~DOOR_REVERSE;
 		self->flags |= FL_REVOLVING;
 	}
-	if (!self->followtarget)
+	if ( !self->followtarget )
 	{
-		gi.dprintf("func_door_swinging with no followtarget at %s\n",vtos(self->s.origin));
-		G_FreeEdict(self);
+		gi.dprintf ("func_door_swinging with no followtarget at %s\n",vtos(self->s.origin));
+		G_FreeEdict (self);
 		return;
 	}
 	SP_func_door_rotating (self);
@@ -6061,5 +6124,5 @@ void SP_func_door_swinging (edict_t *self)
 	// Wait a few frames so that we're sure pathtarget has been parsed.
 	self->think = func_door_swinging_init;
 	self->nextthink = level.time + 2*FRAMETIME;
-	gi.linkentity(self);
+	gi.linkentity (self);
 }

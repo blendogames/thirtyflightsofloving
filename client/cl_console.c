@@ -26,7 +26,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 console_t	con;
 
+cvar_t		*con_font_size;
 cvar_t		*con_notifytime;
+
 qboolean	newconback_found = false;	// whether to draw Q3-style console
 
 extern	char	key_lines[32][MAXCMDLINE];
@@ -77,13 +79,13 @@ void Con_ToggleConsole_f (void)
 	Key_ClearTyping ();
 	Con_ClearNotify ();
 
+//	if (cls.key_dest == key_console)
 	if (cls.consoleActive) // Knightmare changed
-	//if (cls.key_dest == key_console)
 	{
 		cls.consoleActive = false; // Knightmare added
 
-		//UI_ForceMenuOff ();
-		//if (cls.key_dest != key_menu)
+	//	UI_ForceMenuOff ();
+	//	if (cls.key_dest != key_menu)
 		if (Cvar_VariableValue ("maxclients") == 1 
 			&& Com_ServerState () && cls.key_dest != key_menu)
 				Cvar_Set ("paused", "0");
@@ -91,8 +93,8 @@ void Con_ToggleConsole_f (void)
 	else
 	{
 		cls.consoleActive = true; // Knightmare added
-		//UI_ForceMenuOff ();
-		//cls.key_dest = key_console;	
+	//	UI_ForceMenuOff ();
+	//	cls.key_dest = key_console;	
 
 		if (Cvar_VariableValue ("maxclients") == 1 
 			&& Com_ServerState () && cls.key_dest != key_menu)
@@ -109,19 +111,19 @@ void Con_ToggleChat_f (void)
 {
 	Key_ClearTyping ();
 
+//	if (cls.key_dest == key_console)
 	if (cls.consoleActive) // Knightmare added
-	//if (cls.key_dest == key_console)
 	{
 		if (cls.state == ca_active)
 		{
 			UI_ForceMenuOff ();
-			cls.consoleActive = false; // Knightmare added
+			cls.consoleActive = false;	// Knightmare added
 			cls.key_dest = key_game;
 		}
 	}
 	else
-		//cls.key_dest = key_console;
-		cls.consoleActive = true; // Knightmare added
+	//	cls.key_dest = key_console;
+		cls.consoleActive = true;		// Knightmare added
 
 	Con_ClearNotify ();
 }
@@ -252,11 +254,23 @@ void Con_CheckResize (void)
 {
 	int		i, j, width, oldwidth, oldtotallines, numlines, numchars;
 	char	tbuf[CON_TEXTSIZE];
+	float	conWidth = SCREEN_WIDTH;
 
-	if (con_font_size)
-		width = viddef.width/FONT_SIZE - 2;
-	else	 // (viddef.width / 8) - 2
-		width = (viddef.width >> 3) - 2;
+	if (scr_initialized)
+	{	// scale from SCREEN_WIDTH for eyefinity centered console
+		SCR_ScaleCoords (NULL, NULL, &conWidth, NULL, ALIGN_STRETCH);
+		if (con_font_size)
+			width = ((int)conWidth)/FONT_SIZE - 2;
+		else
+			width = (((int)conWidth)>> 3) - 2;
+		// end eyefinity centered console
+	}
+	else {
+		if (con_font_size)
+			width = viddef.width/FONT_SIZE - 2;
+		else	 // (viddef.width / 8) - 2
+			width = (viddef.width >> 3) - 2;
+	}
 	width = min((MAXCMDLINE - 2), width);	// clamp width to MAXCMDLINE - 2 to prevent buffer overflow
 
 	if (width == con.linewidth)
@@ -318,10 +332,12 @@ void Con_Init (void)
 	con.linewidth = -1;
 	con.backedit = 0;
 
+	// init this cvar first, as it's used by Con_CheckResize()
+	con_font_size = Cvar_Get ("con_font_size", "8", CVAR_ARCHIVE);
+	Cvar_SetDescription ("con_font_size", "Sets size of console font.  Values > 8 are larger than default, while values < 8 are smaller.");
+
 	Con_CheckResize ();
 	
-	Com_Printf ("Console initialized.\n");
-
 //
 // register our commands
 //
@@ -343,6 +359,8 @@ void Con_Init (void)
 #endif	// PNG_SUPPORT
 		|| (FS_LoadFile("gfx/ui/newconback.jpg", NULL) != -1) )
 		newconback_found = true;
+
+	Com_Printf ("Console initialized.\n");
 
 	con.initialized = true;
 }
@@ -940,14 +958,14 @@ void Con_DrawConsole (float frac, qboolean trans)
 	//	ds.x = (int)conLeft;	ds.w = conWidth;
 		ds.x = (int)picLeft;	ds.w = picWidth;
 		ds.y = 0;	ds.h = lines-(int)barheight;
-		R_DrawPic (ds);
+		R_DrawPic (&ds);
 	}
 	else {
 		ds.pic = "conback";
 	//	ds.x = (int)conLeft;	ds.w = conWidth;
 		ds.x = (int)picLeft;	ds.w = picWidth;
 		ds.y = (lines-(int)picHeight-(int)barheight);	ds.h = (int)picHeight;
-		R_DrawPic (ds);
+		R_DrawPic (&ds);
 	}
 
 	// pillarbox sides if console is wider than scaled pic
@@ -958,12 +976,8 @@ void Con_DrawConsole (float frac, qboolean trans)
 		R_DrawFill ((int)picLeft + (int)picWidth, 0, (int)pboxWidth, lines-(int)barheight, 0, 0, 0, (int)(alpha*255.0f));
 	}
 
-	// changed to "KMQuake2 vx.xx"
-#ifdef ERASER_COMPAT_BUILD
-	Com_sprintf (version, sizeof(version), S_COLOR_BOLD S_COLOR_SHADOW S_COLOR_ALT WINDOWNAME" v%4.2fu%d (Eraser compatible)", VERSION, VERSION_UPDATE);
-#else // ERASER_COMPAT_BUILD
-	Com_sprintf (version, sizeof(version), S_COLOR_BOLD S_COLOR_SHADOW S_COLOR_ALT WINDOWNAME" v%4.2fu%d", VERSION, VERSION_UPDATE);
-#endif // NEW_ENTITY_STATE_MEMBERS
+	// changed to "KMQuake2 vx.xx cpuarch"
+	Com_sprintf (version, sizeof(version), S_COLOR_BOLD S_COLOR_SHADOW S_COLOR_ALT"KMQuake2 v%4.2fu%d %s", VERSION, VERSION_UPDATE, CPUSTRING);
 
 	Con_DrawString ((int)(conLeft+conWidth)-FONT_SIZE*(stringLen((const char *)&version))-3, y-(int)(1.25*FONT_SIZE), version, FONT_CONSOLE, 255);
 

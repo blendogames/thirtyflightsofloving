@@ -39,14 +39,29 @@ qboolean		ogg_started = false;	// Initialization flag
 ogg_status_t	ogg_status;		// Status indicator
 
 #define			MAX_OGGLIST 512
+
+#define			USE_OGGLIST_STRUCT
+
+typedef struct {
+	char	name[MAX_QPATH];
+	char	*importFilePath;
+} oggListItem_t;
+
+#ifdef USE_OGGLIST_STRUCT
+oggListItem_t	*ogg_filelist = NULL;	// List of Ogg Vorbis files
+#else
 char			**ogg_filelist = NULL;	// List of Ogg Vorbis files
+#endif	// USE_OGGLIST_STRUCT
 int				ogg_curfile;			// Index of currently played file
 int				ogg_numfiles = 0;		// Number of Ogg Vorbis files
+int				ogg_numImportFiles = 0;	// Number of imported Ogg Vorbis files
 int				ogg_loopcounter;
 
 cvar_t			*ogg_loopcount;
 cvar_t			*ogg_ambient_track;
 
+extern cvar_t	*fs_quakeimportpath;	// Install path of Quake1 for content mounting, id1 folder paks are automatically added
+extern cvar_t	*fs_quake2rrimportpath;	// Install path of Quake2RR for content mounting, baseq2 folder paks are automatically added
 
 /*
 =======================================================================
@@ -138,8 +153,9 @@ static qboolean S_OpenBackgroundTrack (const char *name, bgTrack_t *track)
 	char	filename[1024];
 	char	*path = NULL;
 #endif
+	int		i;
 
-	//Com_Printf("Opening background track: %s\n", name);
+//	Com_Printf ("Opening background track: %s\n", name);
 
 #ifdef OGG_DIRECT_FILE
 	do {
@@ -148,32 +164,47 @@ static qboolean S_OpenBackgroundTrack (const char *name, bgTrack_t *track)
 		if ( (track->file = fopen(filename, "rb")) != 0)
 			break;
 	} while ( path );
-#else
-	FS_FOpenFile(name, &track->file, FS_READ);
-#endif
-	if (!track->file)
-	{
-		Com_Printf(S_COLOR_YELLOW"S_OpenBackgroundTrack: couldn't find %s\n", name);
+#else	// OGG_DIRECT_FILE
+	FS_FOpenFile (name, &track->file, FS_READ);
+
+#ifdef USE_OGGLIST_STRUCT
+	if ( !track->file )
+	{	// Check for import path for this file in ogg list
+		for (i = 0; i < ogg_numfiles; i++)
+		{
+			if ( !Q_stricmp(ogg_filelist[i].name, (char *)name) ) {
+				if ( (ogg_filelist[i].importFilePath != NULL) && (ogg_filelist[i].importFilePath[0] != 0) ) {
+					FS_FOpenDirectFile (ogg_filelist[i].importFilePath, &track->file, FS_READ);
+				}
+				break;
+			}
+		}
+	}
+#endif	// USE_OGGLIST_STRUCT
+
+#endif	// OGG_DIRECT_FILE
+	if ( !track->file ) {
+		Com_Printf (S_COLOR_YELLOW"S_OpenBackgroundTrack: couldn't find %s\n", name);
 		return false;
 	}
 
 	track->vorbisFile = vorbisFile = Z_Malloc(sizeof(OggVorbis_File));
 
-	//Com_Printf("Opening callbacks for background track\n");
+//	Com_Printf ("Opening callbacks for background track\n");
 
 	// bombs out here- ovc_read, FS_Read 0 bytes error
 	if (ov_open_callbacks(track, vorbisFile, NULL, 0, vorbisCallbacks) < 0)
 	{
-		Com_Printf(S_COLOR_YELLOW"S_OpenBackgroundTrack: couldn't open OGG stream (%s)\n", name);
+		Com_Printf (S_COLOR_YELLOW"S_OpenBackgroundTrack: couldn't open OGG stream (%s)\n", name);
 		return false;
 	}
 
-	//Com_Printf("Getting info for background track\n");
+//	Com_Printf ("Getting info for background track\n");
 
 	vorbisInfo = ov_info(vorbisFile, -1);
 	if (vorbisInfo->channels != 1 && vorbisInfo->channels != 2)
 	{
-		Com_Printf(S_COLOR_YELLOW"S_OpenBackgroundTrack: only mono and stereo OGG files supported (%s)\n", name);
+		Com_Printf (S_COLOR_YELLOW"S_OpenBackgroundTrack: only mono and stereo OGG files supported (%s)\n", name);
 		return false;
 	}
 
@@ -185,8 +216,8 @@ static qboolean S_OpenBackgroundTrack (const char *name, bgTrack_t *track)
 	track->channels = vorbisInfo->channels; // Knightmare added
 	track->format = (vorbisInfo->channels == 2) ? AL_FORMAT_STEREO16 : AL_FORMAT_MONO16;
 
-	//Com_Printf("Vorbis info: frequency: %i channels: %i bitrate: %i\n",
-	//	vorbisInfo->rate, vorbisInfo->channels, vorbisInfo->bitrate_nominal);
+//	Com_Printf ("Vorbis info: frequency: %i channels: %i bitrate: %i\n",
+//		vorbisInfo->rate, vorbisInfo->channels, vorbisInfo->bitrate_nominal);
 
 	return true;
 }
@@ -233,20 +264,23 @@ void S_StreamBackgroundTrack (void)
 	//unsigned	buffer;
 	int			samples; // Knightmare added
 
-	if (!s_bgTrack.file || !s_musicvolume->value)
+	if ( !ogg_started )
 		return;
 
-	if (!s_streamingChannel)
+	if ( !s_bgTrack.file || !s_musicvolume->value )
+		return;
+
+	if ( !s_streamingChannel )
 		return;
 
 	// Unqueue and delete any processed buffers
-	/*qalGetSourcei(s_streamingChannel->sourceNum, AL_BUFFERS_PROCESSED, &processed);
+/*	qalGetSourcei(s_streamingChannel->sourceNum, AL_BUFFERS_PROCESSED, &processed);
 	if (processed > 0){
 		while (processed--){
 			qalSourceUnqueueBuffers(s_streamingChannel->sourceNum, 1, &buffer);
 			qalDeleteBuffers(1, &buffer);
 		}
-	}*/
+	} */
 
 	//Com_Printf("Streaming background track\n");
 
@@ -295,9 +329,9 @@ void S_StreamBackgroundTrack (void)
 		S_RawSamples(samples, s_bgTrack.rate,s_bgTrack. width, s_bgTrack.channels, data, true);
 
 		// Upload and queue the new buffer
-		/*qalGenBuffers(1, &buffer);
+	/*	qalGenBuffers(1, &buffer);
 		qalBufferData(buffer, s_bgTrack.format, data, size, s_bgTrack.rate);
-		qalSourceQueueBuffers(s_streamingChannel->sourceNum, 1, &buffer);*/
+		qalSourceQueueBuffers(s_streamingChannel->sourceNum, 1, &buffer); */
 
 		queued++;
 	}
@@ -307,9 +341,9 @@ void S_StreamBackgroundTrack (void)
 	//qalSourcef(s_streamingChannel->sourceNum, AL_GAIN, s_musicVolume->value);
 
 	// If not playing, then do so
-	/*qalGetSourcei(s_streamingChannel->sourceNum, AL_SOURCE_STATE, &state);
+/*	qalGetSourcei(s_streamingChannel->sourceNum, AL_SOURCE_STATE, &state);
 	if (state != AL_PLAYING)
-		qalSourcePlay(s_streamingChannel->sourceNum);*/
+		qalSourcePlay(s_streamingChannel->sourceNum); */
 }
 
 #else
@@ -326,10 +360,13 @@ void S_StreamBackgroundTrack (void)
 	float	scale;
 	byte	data[MAX_RAW_SAMPLES*4];
 
-	if (!s_bgTrack.file || !s_musicvolume->value)
+	if ( !ogg_started )
 		return;
 
-	if (!s_streamingChannel)
+	if ( !s_bgTrack.file || !s_musicvolume->value )
+		return;
+
+	if ( !s_streamingChannel )
 		return;
 
 	if (s_rawend < paintedtime)
@@ -388,11 +425,11 @@ void S_StreamBackgroundTrack (void)
 #ifdef NOTTHIRTYFLIGHTS
 				ov_raw_seek(s_bgTrack.vorbisFile, (ogg_int64_t)s_bgTrack.start);
 #else
-				ov_pcm_seek(s_bgTrack.vorbisFile, 0);
+                ov_pcm_seek(s_bgTrack.vorbisFile, 0);
 #endif
 			}
 
-			/*if (s_bgTrack.read)
+		/*	if (s_bgTrack.read)
 				read = s_bgTrack->read( s_bgTrack, data + total, maxRead - total );
 			else
 				read = FS_Read( data + total, maxRead - total, s_bgTrack->file );
@@ -413,7 +450,7 @@ void S_StreamBackgroundTrack (void)
 					s_bgTrack->seek( s_bgTrack, s_bgTrack->info.dataofs );
 				else
 					FS_Seek(s_bgTrack->file, s_bgTrack->info.dataofs, FS_SEEK_SET);
-			}*/
+			} */
 			total += read;
 		}
 		S_RawSamples (samples, s_bgTrack.rate, s_bgTrack.width, s_bgTrack.channels, data, true );
@@ -445,7 +482,7 @@ S_StartBackgroundTrack
 */
 void S_StartBackgroundTrack (const char *introTrack, const char *loopTrack)
 {
-	if (!ogg_started) // was sound_started
+	if ( !ogg_started )
 		return;
 
 	// Stop any playing tracks
@@ -482,12 +519,12 @@ S_StopBackgroundTrack
 */
 void S_StopBackgroundTrack (void)
 {
-	if (!ogg_started) // was sound_started
+	if ( !ogg_started )
 		return;
 
 	S_StopStreaming ();
 
-	S_CloseBackgroundTrack(&s_bgTrack);
+	S_CloseBackgroundTrack (&s_bgTrack);
 
 	ogg_status = STOP;
 
@@ -501,14 +538,14 @@ S_StartStreaming
 */
 void S_StartStreaming (void)
 {
-	if (!ogg_started) // was sound_started
+	if ( !ogg_started )
 		return;
 
-	if (s_streamingChannel)
+	if ( s_streamingChannel )
 		return;		// Already started
 
 	s_streamingChannel = S_PickChannel(0, 0);
-	if (!s_streamingChannel)
+	if ( !s_streamingChannel )
 		return;
 
 	s_streamingChannel->streaming = true;
@@ -535,19 +572,19 @@ S_StopStreaming
 */
 void S_StopStreaming (void)
 {
-	//int			processed;
-	//unsigned	buffer;
+//	int			processed;
+//	unsigned	buffer;
 
-	if (!ogg_started) // was sound_started
+	if ( !ogg_started )
 		return;
 
-	if (!s_streamingChannel)
+	if ( !s_streamingChannel )
 		return;		// Already stopped
 
 	s_streamingChannel->streaming = false;
 
 	// Clean up the source
-	/*qalSourceStop(s_streamingChannel->sourceNum);
+/*	qalSourceStop(s_streamingChannel->sourceNum);
 
 	qalGetSourcei(s_streamingChannel->sourceNum, AL_BUFFERS_PROCESSED, &processed);
 	if (processed > 0){
@@ -561,7 +598,7 @@ void S_StopStreaming (void)
 
 	// FIXME: OpenAL bug?
 	qalDeleteSources(1, &s_streamingChannel->sourceNum);
-	qalGenSources(1, &s_streamingChannel->sourceNum);*/
+	qalGenSources(1, &s_streamingChannel->sourceNum); */
 
 	s_streamingChannel = NULL;
 }
@@ -580,7 +617,7 @@ Based on code by QuDos
 */
 void S_OGG_Init (void)
 {
-	if (ogg_started)
+	if ( ogg_started )
 		return;
 
 	// Cvars
@@ -590,13 +627,14 @@ void S_OGG_Init (void)
 	Cvar_SetDescription ("ogg_ambient_track", "Sets the name of the Ogg Vorbis file used for the ambient music track.");
 
 	// Console commands
-	Cmd_AddCommand("ogg", S_OGG_ParseCmd);
+	Cmd_AddCommand ("ogg", S_OGG_ParseCmd);
 
 	// Build list of files
 	Com_Printf("Searching for Ogg Vorbis files...\n");
 	ogg_numfiles = 0;
-	S_OGG_LoadFileList();
-	Com_Printf("%d Ogg Vorbis files found.\n", ogg_numfiles);
+	S_OGG_LoadFileList ();
+//	Com_Printf ("%d Ogg Vorbis files found.\n", ogg_numfiles);
+	Com_Printf ("%d Ogg Vorbis files found (%i imported).\n", ogg_numfiles, ogg_numImportFiles);
 
 	// Initialize variables
 	if (ogg_first_init) {
@@ -622,21 +660,32 @@ void S_OGG_Shutdown (void)
 {
 	int		i;
 
-	if (!ogg_started)
+	if ( !ogg_started )
 		return;
 
 	S_StopBackgroundTrack ();
 
 	// Free the list of files
 	for (i = 0; i < ogg_numfiles; i++)
-		free(ogg_filelist[i]);
+	{
+#ifdef USE_OGGLIST_STRUCT
+		if (ogg_filelist[i].importFilePath) {
+			Z_Free (ogg_filelist[i].importFilePath);
+			ogg_filelist[i].importFilePath = NULL;
+		}
+#else	// USE_OGGLIST_STRUCT
+		Z_Free (ogg_filelist[i]);
+		ogg_filelist[i] = NULL;
+#endif	// USE_OGGLIST_STRUCT
+	}
 	if (ogg_numfiles > 0)
-		free(ogg_filelist);
+		Z_Free (ogg_filelist);
 	ogg_filelist = NULL;
 	ogg_numfiles = 0;
+	ogg_numImportFiles = 0;
 
 	// Remove console commands
-	Cmd_RemoveCommand("ogg");
+	Cmd_RemoveCommand ("ogg");
 
 	ogg_started = false;
 }
@@ -659,6 +708,30 @@ void S_OGG_Restart (void)
 
 /*
 ==========
+S_OGG_ItemInOggList
+
+Checks if a file is in the Ogg Vorbis filelist
+==========
+*/
+qboolean S_OGG_ItemInOggList (const char *check, int num, oggListItem_t *list)
+{
+	int		i;
+
+	if ( !check || !list )
+		return false;
+
+	for (i = 0; i <num; i++)
+	{
+		if ( !Q_strcasecmp((char *)check, (char *)list[i].name) )
+			return true;
+	}
+
+	return false;
+}
+
+
+/*
+==========
 S_OGG_LoadFileList
 
 Load list of Ogg Vorbis files in music/
@@ -667,113 +740,152 @@ Based on code by QuDos
 */
 void S_OGG_LoadFileList (void)
 {
-	char	*p, *path = NULL;
-	char	**list;			// List of .ogg files
-//	char	findname[MAX_OSPATH];
-	char	lastPath[MAX_OSPATH];	// Knightmare added
-	int		i, len, numfiles = 0;
+	char		*p, *path = NULL;
+	char		**list;			// List of .ogg files
+//	char		findname[MAX_OSPATH];
+	char		lastPath[MAX_OSPATH];	// Knightmare added
+	int			i, j, len, numfiles = 0;
+	// Knightmare added
+	oggImport_t	oi;
+	int			ogg_numImports = 0;		// Number of ogg_json imports
+	int			jsonSize;
+	byte		*jsonData = NULL;
+	char		*jsonStr = NULL;
+	qboolean	json_parsed = false;
+	const char	*importRootPath = NULL;
+	char		importFullPath[MAX_OSPATH];
+	size_t		nameLen;
 
-	ogg_filelist = malloc(sizeof(char *) * MAX_OGGLIST);
-	memset( ogg_filelist, 0, sizeof( char * ) * MAX_OGGLIST );
+#ifdef USE_OGGLIST_STRUCT
+	ogg_filelist = Z_Malloc(sizeof(oggListItem_t) * MAX_OGGLIST);
+#else
+	ogg_filelist = Z_Malloc(sizeof(char *) * MAX_OGGLIST);
+#endif	// USE_OGGLIST_STRUCT
 	lastPath[0] = 0;
 
-#if 1
 	list = FS_GetFileList("music", "ogg", &numfiles);
-	// Add valid Ogg Vorbis file to the list
-	for (i=0; i<numfiles && ogg_numfiles<MAX_OGGLIST; i++)
+	// Add valid Ogg Vorbis files to the list
+	for (i=0; i < numfiles && ogg_numfiles < MAX_OGGLIST; i++)
 	{
 		if (!list || !list[i])
 			continue;
 
 		len = (int)strlen(list[i]);
-		if ( strcmp(list[i]+max(len-4,0), ".ogg") )
+		if ( strcmp(list[i]+max(len-4, 0), ".ogg") )
 			continue;
 
 		p = list[i];
 
-		if (!FS_ItemInList(p, ogg_numfiles, ogg_filelist)) // check if already in list
+#ifdef USE_OGGLIST_STRUCT
+		if ( !S_OGG_ItemInOggList(p, ogg_numfiles, ogg_filelist) ) // check if already in list
 		{
-			ogg_filelist[ogg_numfiles] = malloc(strlen(p)+1);
-			Com_sprintf (ogg_filelist[ogg_numfiles], strlen(p)+1, "%s\0", p);
+			Q_strncpyz (ogg_filelist[ogg_numfiles].name, sizeof(ogg_filelist[ogg_numfiles].name), p);
 			ogg_numfiles++;
 		}
-	}
-#else
-	// Set search path
-	path = FS_NextPath(path);
-	while (path) 
-	{	// Knightmare- catch repeated paths
-		if ( strlen(lastPath) > 0 && !strcmp (path, lastPath) ) {
-			path = FS_NextPath( path );
-			continue;
-		}
-
-		// Get file list
-		Com_sprintf( findname, sizeof(findname), "%s/music/*.ogg", path );
-		list = FS_ListFiles(findname, &numfiles, 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM);
-
-		// Add valid Ogg Vorbis file to the list
-		for (i=0; i<numfiles && ogg_numfiles<MAX_OGGLIST; i++)
+#else	// USE_OGGLIST_STRUCT
+		if ( !FS_ItemInList(p, ogg_numfiles, ogg_filelist) ) // check if already in list
 		{
-			if (!list || !list[i])
-				continue;
-
-			len = (int)strlen(list[i]);
-			if ( strcmp(list[i]+max(len-4,0), ".ogg") )
-				continue;
-
-			p = list[i];
-		//	if (!strstr(p, ".ogg"))
-		//		continue;
-		//	if (!S_OGG_Check(p))
-		//		continue;
-			if (!FS_ItemInList(p, ogg_numfiles, ogg_filelist)) // check if already in list
-			{
-				ogg_filelist[ogg_numfiles] = malloc(strlen(p)+1);
-				Com_sprintf (ogg_filelist[ogg_numfiles], strlen(p)+1, "%s\0", p);
-				ogg_numfiles++;
-			}
+			ogg_filelist[ogg_numfiles] = CopyString (p);
+			ogg_numfiles++;
 		}
-		if (numfiles) // Free the file list
-			FS_FreeFileList(list, numfiles);
-
-		Q_strncpyz (lastPath, sizeof(lastPath), path);	// Knightmare- copy to lastPath
-		path = FS_NextPath( path );
+#endif	// USE_OGGLIST_STRUCT
 	}
-	// check pak after
-	if (list = FS_ListPak("music/", &numfiles))
+
+	// Free ogg filelist
+	if (numfiles) {
+		FS_FreeFileList (list, numfiles);
+		list = NULL;
+		numfiles = 0;
+	}
+
+	// Load imported Ogg files based on ogg_json scripts
+#ifdef USE_OGGLIST_STRUCT
+	list = FS_GetFileList("music", "ogg_json", &numfiles);
+	// Add valid ogg_json files to the list
+	for (i=0; i < numfiles && ogg_numfiles < MAX_OGGLIST; i++)
 	{
-		// Add valid Ogg Vorbis file to the list
-		for (i=0; i<numfiles && ogg_numfiles<MAX_OGGLIST; i++)
+		if (!list || !list[i])
+			continue;
+
+		len = (int)strlen(list[i]);
+		if ( strcmp(list[i]+max(len-9, 0), ".ogg_json") )
+			continue;
+
+		path = list[i];
+
+		jsonSize = FS_LoadFile (path, &jsonData);
+		jsonStr = (char *)jsonData;
+		if (jsonStr)
 		{
-			if (!list || !list[i])
-				continue;
-
-			len = (int)strlen(list[i]);
-			if ( strcmp(list[i]+max(len-4,0), ".ogg") )
-				continue;
-
-			p = list[i];
-		//	if (!strstr(p, ".ogg"))
-		//		continue;
-		//	if (!S_OGG_Check(p))
-		//		continue;
-			if (!FS_ItemInList(p, ogg_numfiles, ogg_filelist)) // check if already in list
+			json_parsed = Com_ParseOggJSON (path, jsonStr, jsonSize, &oi, false);
+			if (json_parsed)
 			{
-				ogg_filelist[ogg_numfiles] = malloc(strlen(p)+1);
-				Com_sprintf (ogg_filelist[ogg_numfiles], strlen(p)+1, "%s\0", p);
-				ogg_numfiles++;
+				if ( (oi.virtualName[0] != 0) && (oi.importGame[0] != 0) && (oi.importPath[0] != 0) )
+				{
+					ogg_numImports++;
+					importRootPath = NULL;
+					Com_DPrintf ("virtualName: %s\n", oi.virtualName);
+					Com_DPrintf ("importGame: %s\n", oi.importGame);
+					for (j = 0; j < MAX_OGG_IMPORT_PATHS; j++) {
+						if (oi.importPath[j][0] != 0)
+							Com_DPrintf ("importPath%i: %s\n", j, oi.importPath[j]);
+					}
+
+					// Get import root path for this ogg_json script
+					if ( ( !Q_stricmp(oi.importGame, "Quake") || !Q_stricmp(oi.importGame, "Quake1") || !Q_stricmp(oi.importGame, "Quake1RR") ) &&
+						(fs_quakeimportpath != NULL) && (fs_quakeimportpath->string[0] != 0) ) {
+						importRootPath = fs_quakeimportpath->string;
+					}
+					else if ( !Q_stricmp(oi.importGame, "Quake2RR")  &&
+						(fs_quake2rrimportpath != NULL) && (fs_quake2rrimportpath->string[0] != 0) ) {
+						importRootPath = fs_quake2rrimportpath->string;
+					}
+					// Add support for any other import root paths here
+
+					// Check import paths for actual ogg file, add to ogg_filelist if found
+					if (importRootPath != NULL)
+					{
+						for (j = 0; j < MAX_OGG_IMPORT_PATHS; j++)
+						{
+							if (oi.importPath[j][0] != 0)
+							{
+								Com_sprintf (importFullPath, sizeof(importFullPath), "%s/%s", importRootPath, oi.importPath[j]);
+								if ( FS_DirectFileExists(importFullPath) )
+								{
+									nameLen = strlen(oi.virtualName);
+									if ( Q_stricmp(oi.virtualName + nameLen - 4, ".ogg") != 0 ) {
+										Com_sprintf (ogg_filelist[ogg_numfiles].name, sizeof(ogg_filelist[ogg_numfiles].name), "%s.ogg", oi.virtualName);
+									}
+									else {
+										Q_strncpyz (ogg_filelist[ogg_numfiles].name, sizeof(ogg_filelist[ogg_numfiles].name), oi.virtualName);
+									}
+									ogg_filelist[ogg_numfiles].importFilePath = CopyString (importFullPath);
+									ogg_numfiles++;
+									ogg_numImportFiles++;
+									break;
+								}
+							}
+						}
+					}
+				}
 			}
+			FS_FreeFile (jsonData);
+			jsonData = NULL;
+			jsonStr = NULL;
 		}
 	}
-#endif
+	Com_DPrintf ("%i ogg_json import scripts found.\n", ogg_numImports);
 
-	if (numfiles)
-		FS_FreeFileList(list, numfiles);
+	// Free temp filelist
+	if (numfiles) {
+		FS_FreeFileList (list, numfiles);
+		list = NULL;
+		numfiles = 0;
+	}
+#endif	// USE_OGGLIST_STRUCT
 }
 
 // =====================================================================
-
 
 /*
 =================
@@ -809,7 +921,7 @@ void S_OGG_StatusCmd (void)
 		trackName = s_bgTrack.ambientName;
 	else
 #endif
-	if (s_bgTrack.looping)
+    if (s_bgTrack.looping)
 		trackName = s_bgTrack.loopName;
 	else
 		trackName = s_bgTrack.introName;
@@ -848,7 +960,16 @@ void S_OGG_ListCmd (void)
 	}
 
 	for (i = 0; i < ogg_numfiles; i++)
-		Com_Printf("%d %s\n", i+1, ogg_filelist[i]);
+	{
+#ifdef USE_OGGLIST_STRUCT
+		if ( (ogg_filelist[i].importFilePath != NULL) && (ogg_filelist[i].importFilePath[0] != 0) )
+			Com_Printf ("%d %s (imported from %s)\n", i+1, ogg_filelist[i].name, ogg_filelist[i].importFilePath);
+		else
+			Com_Printf ("%d %s\n", i+1, ogg_filelist[i].name);
+#else	// USE_OGGLIST_STRUCT
+		Com_Printf ("%d %s\n", i+1, ogg_filelist[i]);
+#endif	// USE_OGGLIST_STRUCT
+	}
 
 	Com_Printf("%d Ogg Vorbis files.\n", ogg_numfiles);
 }

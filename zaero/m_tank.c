@@ -740,6 +740,14 @@ mframe_t tank_frames_death1 [] =
 };
 mmove_t	tank_move_death = {FRAME_death101, FRAME_death132, tank_frames_death1, tank_dead};
 
+#ifdef KMQUAKE2_ENGINE_MOD
+#define NUM_SM_MEAT_GIBS		8
+#define NUM_SM_METAL_GIBS		16
+#else
+#define NUM_SM_MEAT_GIBS		4
+#define NUM_SM_METAL_GIBS		4
+#endif	// KMQUAKE2_ENGINE_MOD
+
 void tank_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
 	int		n;
@@ -751,12 +759,14 @@ void tank_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
 	if (self->health <= self->gib_health)
 	{	// Knightmare- more gibs
 		gi.sound (self, CHAN_VOICE, gi.soundindex ("misc/udeath.wav"), 1, ATTN_NORM, 0);
-		for (n = 0; n < 8; n++)
+		for (n = 0; n < NUM_SM_MEAT_GIBS; n++)
 			ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
-		for (n = 0; n < 8; n++)
+		for (n = 0; n < NUM_SM_METAL_GIBS; n++)
 			ThrowGib (self, "models/objects/gibs/sm_metal/tris.md2", damage, GIB_METALLIC);
+#ifdef KMQUAKE2_ENGINE_MOD
 		for (n = 0; n < 8; n++)
 			ThrowGib (self, "models/objects/gibs/gear/tris.md2", damage, GIB_METALLIC);
+#endif	// KMQUAKE2_ENGINE_MOD
 		ThrowGib (self, "models/objects/gibs/chest/tris.md2", damage, GIB_ORGANIC);
 		ThrowHead (self, "models/objects/gibs/gear/tris.md2", damage, GIB_METALLIC);
 		self->deadflag = DEAD_DEAD;
@@ -776,16 +786,8 @@ void tank_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
 }
 
 
-//
-// monster_tank
-//
-
-/*QUAKED monster_tank (1 .5 0) (-32 -32 -16) (32 32 72) Ambush Trigger_Spawn Sight
-*/
-/*QUAKED monster_tank_commander (1 .5 0) (-32 -32 -16) (32 32 72) Ambush Trigger_Spawn Sight
-*/
-
-void SP_monster_tank_precache(void)
+// Knightmare- added soundcache function
+void monster_tank_soundcache (edict_t *self)
 {
 	sound_pain = gi.soundindex ("tank/tnkpain2.wav");
 	sound_thud = gi.soundindex ("tank/tnkdeth2.wav");
@@ -796,6 +798,22 @@ void SP_monster_tank_precache(void)
 	sound_strike = gi.soundindex ("tank/tnkatck5.wav");
 	sound_sight = gi.soundindex ("tank/sight1.wav");
 }
+
+void SP_monster_tank_precache (edict_t *self)
+{
+	// Knightmare- use soundcache function
+	monster_tank_soundcache (self);
+}
+
+
+//
+// monster_tank
+//
+
+/*QUAKED monster_tank (1 .5 0) (-32 -32 -16) (32 32 72) Ambush Trigger_Spawn Sight
+*/
+/*QUAKED monster_tank_commander (1 .5 0) (-32 -32 -16) (32 32 72) Ambush Trigger_Spawn Sight
+*/
 
 void SP_monster_tank (edict_t *self)
 {
@@ -811,7 +829,7 @@ void SP_monster_tank (edict_t *self)
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;
 
-  SP_monster_tank_precache();
+	SP_monster_tank_precache (self);
 
 	gi.soundindex ("tank/tnkatck1.wav");
 	gi.soundindex ("tank/tnkatk2a.wav");

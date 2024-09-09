@@ -151,7 +151,7 @@ void V_AddEntity (entity_t *ent)
 		{
 			V_AddViewerEntAlpha(ent);
 			ent->flags &= ~RF_VIEWERMODEL;
-			ent->renderfx |= RF2_CAMERAMODEL;
+			ent->renderfx |= RF_CAMERAMODEL;
 		}
 	}
 	// end Knightmare
@@ -393,28 +393,100 @@ void V_TestLights (void)
 
 /*
 =================
+CL_SetSkyData
+=================
+*/
+void CL_SetSkyData (void)
+{
+	float		rotate, distance, lightningFreq = 0.0f;
+	vec3_t		temp, axis = {0.0f, 0.0f, 1.0f};
+	vec2_t		cloudDir = {1.0f, 0.8f};
+	vec3_t		cloudTile = {8.0f, 2.0f, 1.0f};
+	vec3_t		cloudSpeed = {1.0f, 4.0f, 8.0f};
+	vec3_t		cloudAlpha = {0.9f, 0.6f, 0.0f};
+
+	rotate = atof (cl.configstrings[CS_SKYROTATE]);
+//	sscanf (cl.configstrings[CS_SKYAXIS], "%f %f %f", &axis[0], &axis[1], &axis[2]);
+	if (sscanf (cl.configstrings[CS_SKYAXIS], "%f %f %f", &axis[0], &axis[1], &axis[2]) == EOF) {
+		Com_Printf (S_COLOR_YELLOW"CL_PrepRefresh: invalid string '%s' for CS_SKYAXIS.\n", cl.configstrings[CS_SKYAXIS]);
+	}
+	distance = atof (cl.configstrings[CS_SKYDISTANCE]);
+//	R_SetSky (cl.configstrings[CS_SKY], rotate, axis, distance);
+
+	// DK-style clouds support
+	temp[0] = atof (cl.configstrings[CS_CLOUDLIGHTFREQ]);
+	lightningFreq = (temp[0] >= 0.0f) ? temp[0] : lightningFreq;
+	if (sscanf (cl.configstrings[CS_CLOUDDIR], "%f %f", &temp[0], &temp[1]) == EOF) {
+		Com_DPrintf ("CL_PrepRefresh: invalid string '%s' for CS_CLOUDDIR.\n", cl.configstrings[CS_CLOUDDIR]);
+	}
+	else {
+		cloudDir[0] = (temp[0] >= 0.0f) ? temp[0] : cloudDir[0];
+		cloudDir[1] = (temp[1] >= 0.0f) ? temp[1] : cloudDir[1];
+	}
+	if (sscanf (cl.configstrings[CS_CLOUDTILE], "%f %f %f", &temp[0], &temp[1], &temp[2]) == EOF) {
+		Com_DPrintf ("CL_PrepRefresh: invalid string '%s' for CS_CLOUDTILE.\n", cl.configstrings[CS_CLOUDTILE]);
+	}
+	else {
+		cloudTile[0] = (temp[0] >= 0.0f) ? temp[0] : cloudTile[0];
+		cloudTile[1] = (temp[1] >= 0.0f) ? temp[1] : cloudTile[1];
+		cloudTile[2] = (temp[2] >= 0.0f) ? temp[2] : cloudTile[2];
+	}
+	if (sscanf (cl.configstrings[CS_CLOUDSPEED], "%f %f %f", &temp[0], &temp[1], &temp[2]) == EOF) {
+		Com_DPrintf ("CL_PrepRefresh: invalid string '%s' for CS_CLOUDSPEED.\n", cl.configstrings[CS_CLOUDSPEED]);
+	}
+	else {
+		cloudSpeed[0] = (temp[0] >= 0.0f) ? temp[0] : cloudSpeed[0];
+		cloudSpeed[1] = (temp[1] >= 0.0f) ? temp[1] : cloudSpeed[1];
+		cloudSpeed[2] = (temp[2] >= 0.0f) ? temp[2] : cloudSpeed[2];
+	}
+	if (sscanf (cl.configstrings[CS_CLOUDALPHA], "%f %f %f", &temp[0], &temp[1], &temp[2]) == EOF) {
+		Com_DPrintf ("CL_PrepRefresh: invalid string '%s' for CS_CLOUDALPHA.\n", cl.configstrings[CS_CLOUDALPHA]);
+	}
+	else {
+		cloudAlpha[0] = (temp[0] >= 0.0f) ? temp[0] : cloudAlpha[0];
+		cloudAlpha[1] = (temp[1] >= 0.0f) ? temp[1] : cloudAlpha[1];
+		cloudAlpha[2] = (temp[2] >= 0.0f) ? temp[2] : cloudAlpha[2];
+	}
+	R_SetSky (cl.configstrings[CS_SKY], cl.configstrings[CS_CLOUDNAME], rotate, axis, distance, lightningFreq, cloudDir, cloudTile, cloudSpeed, cloudAlpha);
+	// end DK-style clouds support
+}
+
+
+/*
+=================
 CL_PrepRefresh
 
 Call before entering a new level, or after changing dlls
 =================
 */
-qboolean needLoadingPlaque (void);
 void CL_PrepRefresh (void)
 {
-	char		mapname[64];
 	int			i, max;
+	int			cs_images, max_images, cs_playerskins;
+	char		mapname[64];
 	char		pname[MAX_QPATH];
-	float		rotate;
-	vec3_t		axis;
-	qboolean	newPlaque = needLoadingPlaque();
+	qboolean	newPlaque = SCR_NeedLoadingPlaque();
 
 	if (!cl.configstrings[CS_MODELS+1][0])
 		return;		// no map loaded
 
+	// Knightmare- hack for connected to server using old protocol
+	// Changed config strings require different parsing
+	if ( LegacyProtocol() ) {
+		cs_images = OLD_CS_IMAGES;
+		max_images = OLD_MAX_IMAGES;
+		cs_playerskins = OLD_CS_PLAYERSKINS;
+	}
+	else {
+		cs_images = CS_IMAGES;
+		max_images = MAX_IMAGES;
+		cs_playerskins = CS_PLAYERSKINS;
+	}
+
 	if (newPlaque)
 		SCR_BeginLoadingPlaque();
 
-	// Knightmare- for Psychospaz's map loading screen
+	// update load message
 	cls.loadingMessage = true;
 	Com_sprintf (cls.loadingMessages, sizeof(cls.loadingMessages), S_COLOR_ALT"loading %s", cl.configstrings[CS_MODELS+1]);
 	cls.loadingPercent = 0.0f;
@@ -431,10 +503,9 @@ void CL_PrepRefresh (void)
 	R_BeginRegistration (mapname);
 	Com_Printf ("                                     \r");
 
-	// Knightmare- for Psychospaz's map loading screen
+	// update load message
 	Com_sprintf (cls.loadingMessages, sizeof(cls.loadingMessages), S_COLOR_ALT"loading models...");
 	cls.loadingPercent += 20.0f;
-	// end Knightmare
 
 	// precache status bar pics
 	Com_Printf ("pics\r"); 
@@ -443,12 +514,17 @@ void CL_PrepRefresh (void)
 	Com_Printf ("                                     \r");
 
 	CL_RegisterTEntModels ();
+	CL_RegisterParticleImages ();	// moved from R_InitMedia()
+
+	// increment load percent
+	cls.loadingPercent += 5.0f;
+	SCR_UpdateScreen ();
 
 	num_cl_weaponmodels = 1;
-//	strncpy(cl_weaponmodels[0], "weapon.md2");
-	Q_strncpyz(cl_weaponmodels[0], sizeof(cl_weaponmodels[0]), "weapon.md2");
+//	strncpy (cl_weaponmodels[0], "weapon.md2");
+	Q_strncpyz (cl_weaponmodels[0], sizeof(cl_weaponmodels[0]), "weapon.md2");
 
-	// Knightmare- for Psychospaz's map loading screen
+	// count models for progress indicator
 	for (i=1, max=0 ; i<MAX_MODELS && cl.configstrings[CS_MODELS+i][0] ; i++)
 		max++;
 
@@ -460,8 +536,8 @@ void CL_PrepRefresh (void)
 		if (pname[0] != '*')
 		{
 			Com_Printf ("%s\r", pname); 
-			// Knightmare- for Psychospaz's map loading screen
-			//only make max of 40 chars long
+			// update load message
+			// only make max of 40 chars long
 			if (i > 1)
 				Com_sprintf (cls.loadingMessages, sizeof(cls.loadingMessages),
 					S_COLOR_ALT"loading %s", (strlen(pname)>40)? &pname[strlen(pname)-40]: pname);
@@ -474,7 +550,7 @@ void CL_PrepRefresh (void)
 			// special player weapon model
 			if (num_cl_weaponmodels < MAX_CLIENTWEAPONMODELS)
 			{
-				strncpy(cl_weaponmodels[num_cl_weaponmodels], cl.configstrings[CS_MODELS+i]+1,
+				strncpy (cl_weaponmodels[num_cl_weaponmodels], cl.configstrings[CS_MODELS+i]+1,
 					sizeof(cl_weaponmodels[num_cl_weaponmodels]) - 1);
 				num_cl_weaponmodels++;
 			}
@@ -489,79 +565,54 @@ void CL_PrepRefresh (void)
 		}
 		if (pname[0] != '*')
 			Com_Printf ("                                     \r");
-		// Knightmare- for Psychospaz's map loading screen
+		// increment load percent
 		cls.loadingPercent += 40.0f/(float)max;
 	}
-	// Knightmare- for Psychospaz's map loading screen
+	// update load message
 	Com_sprintf (cls.loadingMessages, sizeof(cls.loadingMessages), S_COLOR_ALT"loading pics...");
 
 	Com_Printf ("images\r", i); 
 	SCR_UpdateScreen ();
 
-	// Knightmare- BIG UGLY HACK for connected to server using old protocol
-	// Changed configstrings require different parsing
-	if (LegacyProtocol() )
-	{	// Knightmare- for Psychospaz's map loading screen
-		for (i=1, max=0; i<OLD_MAX_IMAGES && cl.configstrings[OLD_CS_IMAGES+i][0]; i++)
-			max++;
-		for (i=1; i<OLD_MAX_IMAGES && cl.configstrings[OLD_CS_IMAGES+i][0]; i++)
-		{
-			cl.image_precache[i] = R_DrawFindPic (cl.configstrings[OLD_CS_IMAGES+i]);
-			Sys_SendKeyEvents ();	// pump message loop
-			// Knightmare- for Psychospaz's map loading screen
-			cls.loadingPercent += 20.0f/(float)max;
-		}
+	// count images for progress indicator
+	for (i=1, max=0; i<max_images && cl.configstrings[cs_images+i][0]; i++)
+		max++;
+
+	for (i=1; i<max_images && cl.configstrings[cs_images+i][0]; i++)
+	{
+		cl.image_precache[i] = R_DrawFindPic (cl.configstrings[cs_images+i]);
+		Sys_SendKeyEvents ();	// pump message loop
+		// increment load percent
+		cls.loadingPercent += 15.0f/(float)max;		// was += 20.0f/(float)max
 	}
-	else
-	{	// Knightmare- for Psychospaz's map loading screen
-		for (i=1, max=0; i<MAX_IMAGES && cl.configstrings[CS_IMAGES+i][0]; i++)
-			max++;
-		for (i=1; i<MAX_IMAGES && cl.configstrings[CS_IMAGES+i][0]; i++)
-		{
-			cl.image_precache[i] = R_DrawFindPic (cl.configstrings[CS_IMAGES+i]);
-			Sys_SendKeyEvents ();	// pump message loop
-			// Knightmare- for Psychospaz's map loading screen
-			cls.loadingPercent += 20.0f/(float)max;
-		}
-	}
-	// Knightmare- for Psychospaz's map loading screen
+
+	// update load message
 	Com_sprintf (cls.loadingMessages, sizeof(cls.loadingMessages), S_COLOR_ALT"loading players...");
 
 	Com_Printf ("                                     \r");
 
-	// Knightmare- for Psychospaz's map loading screen
-	for (i=1, max=0 ; i<MAX_CLIENTS ; i++)
-		if ( LegacyProtocol() ) {
-			if (cl.configstrings[OLD_CS_PLAYERSKINS+i][0])
-				max++;
-		} else {
-			if (cl.configstrings[CS_PLAYERSKINS+i][0])
-				max++;
-		}
+	// count clients for progress indicator
+	for (i=1, max=0; i<MAX_CLIENTS; i++)
+		if (cl.configstrings[cs_playerskins+i][0])
+			max++;
 
 	for (i=0; i < MAX_CLIENTS; i++)
 	{
-		// Knightmare- BIG UGLY HACK for old connected to server using old protocol
-		// Changed configstrings require different parsing
-		if ( LegacyProtocol() ) {
-			if (!cl.configstrings[OLD_CS_PLAYERSKINS+i][0])
-				continue;
-		} else {
-			if (!cl.configstrings[CS_PLAYERSKINS+i][0])
-				continue;
-		}
+		if (!cl.configstrings[cs_playerskins+i][0])
+			continue;
 		Com_Printf ("client %i\r", i); 
 		SCR_UpdateScreen ();
 		Sys_SendKeyEvents ();	// pump message loop
 		CL_ParseClientinfo (i);
 		Com_Printf ("                                     \r");
 
-		// Knightmare- for Psychospaz's map loading screen
+		// increment load percent
 		cls.loadingPercent += 20.0f/(float)max;
 	}
-	// Knightmare- for Psychospaz's map loading screen
+
+	// update load message
 	Com_sprintf (cls.loadingMessages, sizeof(cls.loadingMessages), S_COLOR_ALT"loading players...done");
-	//hack hack hack - psychospaz
+	// psychospaz- hack hack hack
 	cls.loadingPercent = 100.0f;
 
 	// Knightmare - Vics fix to get rid of male/grunt flicker
@@ -579,13 +630,12 @@ void CL_PrepRefresh (void)
 	// set sky textures and speed
 	Com_Printf ("sky\r", i); 
 	SCR_UpdateScreen ();
-	rotate = atof (cl.configstrings[CS_SKYROTATE]);
-//	sscanf (cl.configstrings[CS_SKYAXIS], "%f %f %f", &axis[0], &axis[1], &axis[2]);
-	if (sscanf (cl.configstrings[CS_SKYAXIS], "%f %f %f", &axis[0], &axis[1], &axis[2]) == EOF) {
-		Com_Error (ERR_DROP, "CL_PrepRefresh: invalid string '%s' for CS_SKYAXIS.\n", cl.configstrings[CS_SKYAXIS]);
-	}
-	R_SetSky (cl.configstrings[CS_SKY], rotate, axis);
+	CL_SetSkyData ();
+
 	Com_Printf ("                                     \r");
+
+	// refresh any models in open menu to avoid freeing them
+	UI_RefreshMenuItems ();
 
 	// the renderer can now free unneeded stuff
 	R_EndRegistration ();
@@ -604,7 +654,7 @@ void CL_PrepRefresh (void)
 	// start the cd track
 	CL_PlayBackgroundTrack ();
 
-	// Knightmare- for Psychospaz's map loading screen
+	// disable load message
 	cls.loadingMessage = false;
 	// Knightmare- close loading screen as soon as done
 	cls.disable_screen = false;
@@ -664,6 +714,38 @@ void V_Gun_Model_f (void)
 	}
 	Com_sprintf (name, sizeof(name), "models/%s/tris.md2", Cmd_Argv(1));
 	gun_model = R_RegisterModel (name);
+}
+
+// This doesn't exist upstream - Brad
+char *SCR_FindKey (char *key)
+{
+	static char	mapmsg[16];
+	int			k;
+	qboolean	found_bind=false;
+
+	for (k=0 ; k<256 ; k++)
+	{
+		if (keybindings[k] && keybindings[k][0])
+		{						
+			if (!Q_stricmp(keybindings[k], key))
+			{							
+				Com_sprintf (mapmsg, sizeof(mapmsg), "%s", Key_KeynumToString(k));
+				found_bind = true;
+			}
+		}
+	}
+
+	if (!found_bind)
+	{
+		//no key bound to action. Give you question marks!
+		Com_sprintf (mapmsg, sizeof(mapmsg), "^1?");
+	}
+
+	if (mapmsg)
+	{
+		//return the final result:					
+		return mapmsg;		
+	}
 }
 
 //============================================================================

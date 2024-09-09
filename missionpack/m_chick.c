@@ -39,7 +39,7 @@ static int	sound_search;
 
 void ChickMoan (edict_t *self)
 {
-	if (!(self->spawnflags & SF_MONSTER_AMBUSH))
+	if ( !(self->spawnflags & SF_MONSTER_AMBUSH) )
 	{
 		if (random() < 0.5)
 			gi.sound (self, CHAN_VOICE, sound_idle1, 1, ATTN_IDLE, 0);
@@ -363,6 +363,12 @@ mframe_t chick_frames_death1 [] =
 };
 mmove_t chick_move_death1 = {FRAME_death101, FRAME_death112, chick_frames_death1, chick_dead};
 
+#ifdef KMQUAKE2_ENGINE_MOD
+#define NUM_BONE_GIBS	4
+#else
+#define NUM_BONE_GIBS	2
+#endif	// KMQUAKE2_ENGINE_MOD
+
 void chick_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
 	int		n;
@@ -379,14 +385,16 @@ void chick_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 	if (self->health <= self->gib_health && !(self->spawnflags & SF_MONSTER_NOGIB))
 	{
 		gi.sound (self, CHAN_VOICE, gi.soundindex ("misc/udeath.wav"), 1, ATTN_NORM, 0);
-		for (n = 0; n < 4; n++)
+		for (n = 0; n < NUM_BONE_GIBS; n++)
 			ThrowGib (self, "models/objects/gibs/bone/tris.md2", 0, 0, damage, GIB_ORGANIC);
+		for (n = 0; n < 4; n++)
+			ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", 0, 0, damage, GIB_ORGANIC);
+#ifdef KMQUAKE2_ENGINE_MOD
 		for (n = 0; n < 2; n++)
 			ThrowGib (self, "models/monsters/blackwidow/gib3/tris.md2", 0, 0, damage, GIB_METALLIC);
 		for (n = 0; n < 2; n++)
 			ThrowGib (self, "models/objects/gibs/sm_metal/tris.md2", 0, 0, damage, GIB_METALLIC);
-		for (n = 0; n < 4; n++)
-			ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", 0, 0, damage, GIB_ORGANIC);
+#endif	// KMQUAKE2_ENGINE_MOD
 		ThrowHead (self, "models/objects/gibs/head2/tris.md2", 0, 0, damage, GIB_ORGANIC);
 		self->deadflag = DEAD_DEAD;
 		return;
@@ -654,9 +662,9 @@ void ChickRocket (edict_t *self)
 				//	else
 				//		monster_fire_rocket (self, start, dir, 50, 500, MZ2_CHICK_ROCKET_1, NULL);
 				}
-//				else if ((g_showlogic) && (g_showlogic->value))
-//					// ok, I give up
-//					gi.dprintf ("chick avoiding blindfire shot\n");
+			//	else if ((g_showlogic) && (g_showlogic->value))
+					// ok, I give up
+			//		gi.dprintf ("chick avoiding blindfire shot\n");
 			}
 		}
 	}
@@ -669,14 +677,14 @@ void ChickRocket (edict_t *self)
 				|| (self->monsterinfo.visibility < FOG_CANSEEGOOD))
 			{
 			//	if (self->s.skinnum > 1)
-				//	monster_fire_rocket_heat (self, start, dir, 50, 500, MZ2_CHICK_ROCKET_1);
+			//		monster_fire_rocket_heat (self, start, dir, 50, 500, MZ2_CHICK_ROCKET_1);
 					monster_fire_rocket (self, start, dir, 50, 500, MZ2_CHICK_ROCKET_1,
 						(self->spawnflags & SF_MONSTER_SPECIAL ? self->enemy : NULL) );
 			//	else
 			//		monster_fire_rocket (self, start, dir, 50, 500, MZ2_CHICK_ROCKET_1, NULL);
 			}
-	//		else
-	//			gi.dprintf("didn't make it halfway to target...aborting\n");
+		//	else
+		//		gi.dprintf("didn't make it halfway to target...aborting\n");
 		}
 	}
 }	
@@ -741,7 +749,7 @@ mframe_t chick_frames_end_attack1 [] =
 };
 mmove_t chick_move_end_attack1 = {FRAME_attak128, FRAME_attak132, chick_frames_end_attack1, chick_run};
 
-void chick_rerocket(edict_t *self)
+void chick_rerocket (edict_t *self)
 {
 	if (self->monsterinfo.aiflags & AI_MANUAL_STEERING)
 	{
@@ -762,7 +770,7 @@ void chick_rerocket(edict_t *self)
 	self->monsterinfo.currentmove = &chick_move_end_attack1;
 }
 
-void chick_attack1(edict_t *self)
+void chick_attack1 (edict_t *self)
 {
 	self->monsterinfo.currentmove = &chick_move_attack1;
 }
@@ -791,7 +799,7 @@ mframe_t chick_frames_end_slash [] =
 mmove_t chick_move_end_slash = {FRAME_attak213, FRAME_attak216, chick_frames_end_slash, chick_run};
 
 
-void chick_reslash(edict_t *self)
+void chick_reslash (edict_t *self)
 {
 	if (self->enemy->health > 0)
 	{
@@ -810,7 +818,7 @@ void chick_reslash(edict_t *self)
 	self->monsterinfo.currentmove = &chick_move_end_slash;
 }
 
-void chick_slash(edict_t *self)
+void chick_slash (edict_t *self)
 {
 	self->monsterinfo.currentmove = &chick_move_slash;
 }
@@ -826,13 +834,13 @@ mmove_t chick_move_start_slash = {FRAME_attak201, FRAME_attak203, chick_frames_s
 
 
 
-void chick_melee(edict_t *self)
+void chick_melee (edict_t *self)
 {
 	self->monsterinfo.currentmove = &chick_move_start_slash;
 }
 
 
-void chick_attack(edict_t *self)
+void chick_attack (edict_t *self)
 {
 	float r, chance;
 
@@ -877,9 +885,15 @@ void chick_attack(edict_t *self)
 	self->monsterinfo.currentmove = &chick_move_start_attack1;
 }
 
-void chick_sight(edict_t *self, edict_t *other)
+void chick_sight (edict_t *self, edict_t *other)
 {
 	gi.sound (self, CHAN_VOICE, sound_sight, 1, ATTN_NORM, 0);
+}
+
+// Knightmare added- this sound was unused
+void chick_search (edict_t *self)
+{
+	gi.sound (self, CHAN_VOICE, sound_search, 1, ATTN_NORM, 0);
 }
 
 //===========
@@ -941,17 +955,10 @@ void chick_sidestep (edict_t *self)
 		self->monsterinfo.currentmove = &chick_move_run;
 }
 
-/*QUAKED monster_chick (1 .5 0) (-16 -16 -24) (16 16 32) Ambush Trigger_Spawn Sight Blind NoGib HomingRockets
-Blind - monster will just stand there until triggered
-*/
-void SP_monster_chick (edict_t *self)
-{
-	if (deathmatch->value)
-	{
-		G_FreeEdict (self);
-		return;
-	}
 
+// Knightmare- added soundcache function
+void monster_chick_soundcache (edict_t *self)
+{
 	sound_missile_prelaunch	= gi.soundindex ("chick/chkatck1.wav");	
 	sound_missile_launch	= gi.soundindex ("chick/chkatck2.wav");	
 	sound_melee_swing		= gi.soundindex ("chick/chkatck3.wav");	
@@ -967,6 +974,22 @@ void SP_monster_chick (edict_t *self)
 	sound_pain3				= gi.soundindex ("chick/chkpain3.wav");	
 	sound_sight				= gi.soundindex ("chick/chksght1.wav");	
 	sound_search			= gi.soundindex ("chick/chksrch1.wav");	
+}
+
+
+/*QUAKED monster_chick (1 .5 0) (-16 -16 -8) (16 16 48) Ambush Trigger_Spawn Sight Blind NoGib HomingRockets
+Blind - monster will just stand there until triggered
+*/
+void SP_monster_chick (edict_t *self)
+{
+	if (deathmatch->value)
+	{
+		G_FreeEdict (self);
+		return;
+	}
+
+	// Knightmare- use soundcache function
+	monster_chick_soundcache (self);
 
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;
@@ -988,7 +1011,7 @@ void SP_monster_chick (edict_t *self)
 	if (!self->health)
 		self->health = 175;
 	if (!self->gib_health)
-		self->gib_health = -150;
+		self->gib_health = -150;	// Knightmare- was -70
 	if (!self->mass)
 		self->mass = 200;
 
@@ -1003,11 +1026,12 @@ void SP_monster_chick (edict_t *self)
 	self->monsterinfo.duck = chick_duck;
 	self->monsterinfo.unduck = monster_duck_up;
 	self->monsterinfo.sidestep = chick_sidestep;
-	//self->monsterinfo.dodge = chick_dodge;
+//	self->monsterinfo.dodge = chick_dodge;
 	// pmm
 	self->monsterinfo.attack = chick_attack;
 	self->monsterinfo.melee = chick_melee;
 	self->monsterinfo.sight = chick_sight;
+	self->monsterinfo.search = chick_search;		// Knightmare added
 	self->monsterinfo.blocked = chick_blocked;		// PGM
 
 	gi.linkentity (self);
@@ -1036,15 +1060,6 @@ void SP_monster_chick (edict_t *self)
 	else if (!self->monsterinfo.flies)
 		self->monsterinfo.flies = 0.40;
 
-	self->common_name = "Iron Maiden";
-	self->class_id = ENTITY_MONSTER_CHICK;
-
-	// PMM
-	// Knightmare- no blindfire with homing rockets in easy or medium skill
-	if (!(self->spawnflags & SF_MONSTER_SPECIAL) || skill->value >= 2)
-		self->monsterinfo.blindfire = true;
-	walkmonster_start (self);
-
 	if (self->spawnflags & SF_MONSTER_SPECIAL) // Knightmare- homing rockets
 	{
 		self->classname = "monster_chick_heat";
@@ -1052,9 +1067,21 @@ void SP_monster_chick (edict_t *self)
 			self->blood_type = 3; // sparks and blood
 		else
 			self->fogclip |= 2; // custom bloodtype flag
+
 		self->common_name = "Beta-Class Iron Maiden";
 		self->class_id = ENTITY_MONSTER_CHICK_HEAT;
 	}
+	else {
+		self->common_name = "Iron Maiden";
+		self->class_id = ENTITY_MONSTER_CHICK;
+	}
+
+	// PMM
+	// Knightmare- no blindfire with homing rockets in easy or medium skill
+	if (!(self->spawnflags & SF_MONSTER_SPECIAL) || skill->value >= 2)
+		self->monsterinfo.blindfire = true;
+
+	walkmonster_start (self);
 }
 
 /*QUAKED monster_chick_heat (1 .5 0) (-16 -16 -24) (16 16 32) Ambush Trigger_Spawn Sight GoodGuy NoGib

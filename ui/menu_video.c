@@ -35,29 +35,29 @@ VIDEO MENU
 =======================================================================
 */
 
-static menuframework_s	s_video_menu;
-static menulist_s		s_mode_list;
-static menuseparator_s	s_customwidth_title;
-static menuseparator_s	s_customheight_title;
-static menufield_s		s_customwidth_field;
-static menufield_s		s_customheight_field;
-static menulist_s  		s_fs_box;
-static menuslider_s		s_brightness_slider;
-static menulist_s		s_texqual_box;
-static menulist_s		s_texfilter_box;
-static menulist_s		s_aniso_box;
-static menulist_s		s_npot_mipmap_box;
-static menulist_s		s_sgis_mipmap_box;
-//static menulist_s  		s_texcompress_box;
-static menulist_s  		s_vsync_box;
-static menulist_s		s_refresh_box;	// Knightmare- refresh rate option
-static menulist_s  		s_adjust_fov_box;
-static menulist_s  		s_async_box;
+static menuFramework_s	s_video_menu;
+static menuPicker_s		s_mode_list;
+static menuSeparator_s	s_customwidth_title;
+static menuSeparator_s	s_customheight_title;
+static menuField_s		s_customwidth_field;
+static menuField_s		s_customheight_field;
+static menuPicker_s  		s_fs_box;
+static menuSlider_s		s_brightness_slider;
+static menuPicker_s		s_texqual_box;
+static menuPicker_s		s_texfilter_box;
+static menuPicker_s		s_aniso_box;
+static menuPicker_s		s_npot_mipmap_box;
+static menuPicker_s		s_sgis_mipmap_box;
+//static menuPicker_s  		s_texcompress_box;
+static menuPicker_s  		s_vsync_box;
+static menuPicker_s		s_refresh_box;	// Knightmare- refresh rate option
+static menuPicker_s  		s_adjust_fov_box;
+static menuPicker_s  		s_async_box;
 
-static menuaction_s		s_advanced_action;
-static menuaction_s		s_defaults_action;
-static menuaction_s		s_apply_action;
-static menuaction_s		s_backmain_action;
+static menuAction_s		s_advanced_action;
+static menuAction_s		s_defaults_action;
+static menuAction_s		s_apply_action;
+static menuAction_s		s_backmain_action;
 
 //=======================================================================
 
@@ -637,6 +637,6 @@ const char *Menu_Video_Key (int key)
 void Menu_Video_f (void)
 {
 	Menu_Video_Init ();
-	UI_PushMenu (Menu_Video_Draw, Menu_Video_Key);
+	UI_PushMenu (&s_video_menu);
 	M_ShowCustomFields ();
 }

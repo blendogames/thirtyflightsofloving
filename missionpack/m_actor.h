@@ -1,4 +1,4 @@
-// ed - weapon protos
+// Mappack - weapon protos
 void actorBlaster (edict_t *self);
 void actorShotgun (edict_t *self);
 void actorSuperShotgun (edict_t *self);

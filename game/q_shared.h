@@ -35,6 +35,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #endif
 
 #include <assert.h>
+#include <limits.h>
+#include <ctype.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdarg.h>
@@ -83,7 +85,7 @@ typedef enum {false, true}	qboolean;
 	typedef int64_t qint64;
 	typedef unsigned int64_t uint64;
 #elif defined(__linux__) // Linux */
-#elif defined(__linux__) || defined(__APPLE__) || defined(MACOSX) // Linux, MacOSX
+#elif defined(__unix__) // Linux, MacOSX
 #	include <stdint.h>
 	typedef int64_t qint64;
 	typedef uint64_t uint64;
@@ -132,14 +134,8 @@ __inline int Q_vsnprintf (char *Dest, size_t Count, const char *Format, va_list 
 // Knightmare- whether to include new engine enhancements
 #define	KMQUAKE2_ENGINE_MOD
 
-// enable to build exe that is compatible with Eraser bot
-// Eraser Bot's precompiled p_trail.c not compatible with modified entity state structure
-//#define ERASER_COMPAT_BUILD
-
 #ifdef KMQUAKE2_ENGINE_MOD
-#ifndef ERASER_COMPAT_BUILD
 #define NEW_ENTITY_STATE_MEMBERS
-#endif
 #define NEW_PLAYER_STATE_MEMBERS
 // enable to build exe with 24-bit coordinate transmission
 // changes pmove origin size in game DLLs
@@ -168,10 +164,14 @@ __inline int Q_vsnprintf (char *Dest, size_t Count, const char *Format, va_list 
 #define CLIENT_SPLIT_NETFRAME // whether to use split net and render frames in the client
 #endif
 
-//#define	WARP_LIGHTMAPS	// whether to support lightmaps on warp surfaces
-
 #define CLIENT_THIRDPERSON_CVAR "cg_thirdperson"
 //#define CLIENT_THIRDPERSON_CVAR "cl_3dcam"
+
+#ifdef KMQUAKE2_ENGINE_MOD
+#define GL_CLEAR_CVAR	"r_clear"
+#else
+#define GL_CLEAR_CVAR	"gl_clear"
+#endif
 
 #define MAX_CUSTOM_ANIMS	1024	// This sets the size of an mmove_t array that is saved
 									// to the level file, so it affects savegame compatibility.
@@ -368,6 +368,10 @@ void VectorScale (vec3_t in, vec_t scale, vec3_t out);
 int Q_log2(int val);
 float Q_rsqrt (float in);	// From Q2E
 
+// Knightmare- moved these from g_utils.c so they can be used by the client
+void vectoangles (vec3_t vec, vec3_t angles);
+void vectoangles2 (vec3_t vec, vec3_t angles);
+
 // From Q2E
 void VectorRotate (const vec3_t v, const vec3_t matrix[3], vec3_t out);
 void AnglesToAxis (const vec3_t angles, vec3_t axis[3]);
@@ -421,7 +425,11 @@ char *COM_Parse (char **data_p);
 // data is an in/out parm, returns a parsed out token
 char *COM_ParseExt (char **data_p, qboolean allowNewLines);
 
-qboolean Com_ParseColorString (const char *s, color_t outColor);	// Knightmare added
+// Knightmare- added color parsing
+qboolean Com_ParseColorString (const char *s, color_t outColor);
+unsigned int Com_ParseColorStringPacked (const char *s);
+qboolean Com_ParseRGBAField (const char *s, color_t outColor);
+unsigned int Com_ParseRGBAFieldPacked (const char *s);
 
 void Com_sprintf (char *dest, size_t size, char *fmt, ...);
 unsigned int Com_HashFileName (const char *fname, int hashSize, qboolean sized);
@@ -921,6 +929,8 @@ typedef struct
 #define RF_TRANS_ADDITIVE	8192
 #define RF_MIRRORMODEL		16384
 
+#define RF_CAMERAMODEL		RF_WEAPONMODEL		// client camera model
+
 // ROGUE
 #define RF_IR_VISIBLE		0x00008000		// 32768
 #define	RF_SHELL_DOUBLE		0x00010000		// 65536
@@ -928,13 +938,27 @@ typedef struct
 #define RF_USE_DISGUISE		0x00040000
 // ROGUE
 
-#define RF_NOSHADOW			0x00080000 // Knightmare- no shadow flag
+#define RF_NOSHADOW			0x00080000		// Knightmare- no shadow flag
+
+// Knightmare- Kex additions
+#define	RF_CASTSHADOW		0x00100000
+#define	RF_SHELL_LITE_GREEN	0x00200000
+#define	RF_CUSTOM_LIGHT		0x00400000
+#define	RF_FLARE			0x00800000
+#define	RF_OLD_FRAME_LERP	0x01000000
+#define	RF_DOT_SHADOW		0x02000000
+#define	RF_LOW_PRIORITY		0x04000000
+#define	RF_NO_LOD			0x08000000
+#define	RF_NO_STEREO		RF_WEAPONMODEL
+#define	RF_STAIR_STEP		0x10000000
+
+#define RF_FLARE_LOCK_ANGLE	RF_MINLIGHT
+// end Kex additions
+
+// Knightmare- denotes a sprite that is angled vertically
+#define	RF_SPRITE_ORIENTED	RF_MINLIGHT
 
 #define RF_MASK_SHELL		(RF_SHELL_RED|RF_SHELL_GREEN|RF_SHELL_BLUE|RF_SHELL_DOUBLE|RF_SHELL_HALF_DAM)
-
-#define	RF2_NOSHADOW		0x00000001		//no shadow..
-#define RF2_FORCE_SHADOW	0x00000002		//forced shadow...
-#define RF2_CAMERAMODEL		0x00000004		//client camera model
 
 // player_state_t->refdef flags
 #define	RDF_UNDERWATER		1		// warp the screen as apropriate
@@ -1373,6 +1397,10 @@ typedef enum
 #endif
 	TE_BLASTER_COLORED,		//58
 	TE_RAILTRAIL_COLORED,	//59
+	TE_LIGHTNING_ATTACK,	//60
+	TE_EXPLOSION_Q1,		//61
+	TE_SPIKEIMPACT_Q1,		//62
+	TE_LAVASPLASH_Q1,		//63
 } temp_event_t;
 
 #define SPLASH_UNKNOWN		0
@@ -1426,7 +1454,6 @@ typedef enum
 #define STAT_SPECTATOR			17
 #define STAT_SPEED              22
 #define STAT_ZOOM               23
-
 
 #ifndef NOTTHIRTYFLIGHTS
 #define STAT_HINTTITLE			24
@@ -1577,7 +1604,14 @@ ROGUE - VERSIONS
 #define	CS_PLAYERSKINS		(CS_ITEMS+MAX_ITEMS)
 #define CS_GENERAL			(CS_PLAYERSKINS+MAX_CLIENTS)
 #define	CS_HUDVARIANT		(CS_GENERAL+MAX_GENERAL)
-#define	CS_PAKFILE			(CS_HUDVARIANT+1)
+#define CS_SKYDISTANCE		(CS_HUDVARIANT+1)
+#define CS_CLOUDNAME		(CS_SKYDISTANCE+1)
+#define CS_CLOUDLIGHTFREQ	(CS_CLOUDNAME+1)
+#define CS_CLOUDDIR			(CS_CLOUDLIGHTFREQ+1)	// CLOUDX CLOUDY %f %f format
+#define CS_CLOUDTILE		(CS_CLOUDDIR+1)			// CLOUD1 CLOUD2 CLOUD3 %f %f %f format
+#define CS_CLOUDSPEED		(CS_CLOUDTILE+1)		// CLOUD1 CLOUD2 CLOUD3 %f %f %f format
+#define CS_CLOUDALPHA		(CS_CLOUDSPEED+1)		// CLOUD1 CLOUD2 CLOUD3 %f %f %f format
+#define	CS_PAKFILE			(CS_CLOUDALPHA+1)
 #define	MAX_CONFIGSTRINGS	(CS_PAKFILE+1)
 //#define	MAX_CONFIGSTRINGS	(CS_GENERAL+MAX_GENERAL)
 
@@ -1597,6 +1631,27 @@ ROGUE - VERSIONS
 #define CS_SIZE(cs) \
     ((cs) >= CS_STATUSBAR && (cs) < CS_AIRACCEL ? \
       MAX_QPATH * (CS_AIRACCEL - (cs)) : MAX_QPATH)
+
+#ifdef _MSC_VER
+// inline version handles both CS_STATUSBAR and CS_GENERAL cleanly
+__inline size_t GetConfigstringSize (int cs) {
+	size_t ret;
+	if ( (cs >= CS_STATUSBAR) && (cs < CS_AIRACCEL) )
+	{	ret = MAX_QPATH * (CS_AIRACCEL - cs);	}
+	else if ( (cs >= CS_GENERAL) && (cs < CS_HUDVARIANT) )
+	{	ret = MAX_QPATH * (CS_HUDVARIANT - cs);	}
+	else
+	{	ret = MAX_QPATH;	}
+	return ret;
+}
+#else
+// messy macro to make GCC happy in debug mode
+#define GetConfigstringSize(cs) \
+    ((cs) >= CS_STATUSBAR && (cs) < CS_AIRACCEL ? \
+	MAX_QPATH * (CS_AIRACCEL - (cs)) : \
+	(cs) >= CS_GENERAL && (cs) < CS_HUDVARIANT ? \
+	MAX_QPATH * (CS_HUDVARIANT - (cs)) : MAX_QPATH)
+#endif	// _MSC_VER
 
 //==============================================
 
@@ -1639,12 +1694,12 @@ typedef struct entity_state_s
 	int		modelindex;
 	int		modelindex2, modelindex3, modelindex4;	// weapons, CTF flags, etc
 #ifdef NEW_ENTITY_STATE_MEMBERS // Knightmare- Privater wanted this
-	int		modelindex5, modelindex6, modelindex7, modelindex8; 	// more attached models
+	int		modelindex5, modelindex6; 	// more attached models
 #endif
 	int		frame;
 	int		skinnum;
 #ifdef NEW_ENTITY_STATE_MEMBERS // Knightmare- allow the server to set this
-	float	alpha;	//entity transparency
+	float	alpha;				// entity transparency
 #endif
 	unsigned int		effects;		// PGM - we're filling it, so it needs to be unsigned
 	int		renderfx;
@@ -1653,14 +1708,56 @@ typedef struct entity_state_s
 							// gi.linkentity sets this properly
 	int		sound;			// for looping sounds, to guarantee shutoff
 #ifdef NEW_ENTITY_STATE_MEMBERS // Knightmare- allow the server to set this
-#ifdef LOOP_SOUND_ATTENUATION // Knightmare- added sound attenuation
-	float	attenuation;
-#endif
+	float	loop_attenuation;	// looped sound attenuation
 #endif
 	int		event;			// impulse events -- muzzle flashes, footsteps, etc
 							// events only go out for a single frame, they
 							// are automatically cleared each frame
 } entity_state_t;
+
+
+#define	IF_REAL_BBOX	0x00000001
+#define	IF_REAL_BBOX_16	0x00000002
+#define	IF_REAL_BBOX_8	0x00000004
+
+// centity_state_t is an extended copy of entity_state_t
+// with additional fields sent by the server but not shared with
+// the game library
+// KEEP THIS SYNCED WITH entity_state_t!!!
+typedef struct centity_state_s
+{
+	int		number;			// edict index
+
+	vec3_t	origin;
+	vec3_t	angles;
+	vec3_t	old_origin;		// for lerping
+	int		modelindex;
+	int		modelindex2, modelindex3, modelindex4;	// weapons, CTF flags, etc
+#ifdef NEW_ENTITY_STATE_MEMBERS // Knightmare- Privater wanted this
+	int		modelindex5, modelindex6; 	// more attached models
+#endif
+	int		frame;
+	int		skinnum;
+#ifdef NEW_ENTITY_STATE_MEMBERS // Knightmare- allow the server to set this
+	float	alpha;				// entity transparency
+#endif
+	unsigned int		effects;		// PGM - we're filling it, so it needs to be unsigned
+	int		renderfx;
+	int		solid;			// for client side prediction, 8*(bits 0-4) is x/y radius
+							// 8*(bits 5-9) is z down distance, 8(bits10-15) is z up
+							// gi.linkentity sets this properly
+	int		sound;			// for looping sounds, to guarantee shutoff
+#ifdef NEW_ENTITY_STATE_MEMBERS // Knightmare- allow the server to set this
+	float	loop_attenuation;
+#endif
+	int		event;			// impulse events -- muzzle flashes, footsteps, etc
+							// events only go out for a single frame, they
+							// are automatically cleared each frame
+
+	// SERVER/CLIENT-ONLY FIELDS BELOW
+	vec3_t			mins, maxs;		// for particle volumes or prediction against real entity bboxes
+	unsigned int	iflags;			// added for sending real bbox info
+} centity_state_t;
 
 //==============================================
 

@@ -316,7 +316,8 @@ void gladiator_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int da
 }
 
 
-void SP_monster_gladiator_precache(void)
+// Knightmare- added soundcache function
+void monster_gladiator_soundcache (edict_t *self)
 {
 	sound_pain1 = gi.soundindex ("gladiator/pain.wav");	
 	sound_pain2 = gi.soundindex ("gladiator/gldpain2.wav");	
@@ -330,6 +331,12 @@ void SP_monster_gladiator_precache(void)
 	sound_sight = gi.soundindex ("gladiator/sight.wav");
 }
 
+void SP_monster_gladiator_precache (edict_t *self)
+{
+	// Knightmare- use soundcache function
+	monster_gladiator_soundcache (self);
+}
+
 
 /*QUAKED monster_gladiator (1 .5 0) (-32 -32 -24) (32 32 64) Ambush Trigger_Spawn Sight
 */
@@ -341,7 +348,7 @@ void SP_monster_gladiator (edict_t *self)
 		return;
 	}
 
-  SP_monster_gladiator_precache();
+  SP_monster_gladiator_precache (self);
 
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;

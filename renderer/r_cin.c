@@ -307,7 +307,7 @@ cblock_t Huff1Decompress (cblock_t in)
 
 	/*if (input - in.data != in.count && input - in.data != in.count+1)
 	{
-		Com_Printf ("Decompression overread by %i", (input - in.data) - in.count);
+		VID_Printf (PRINT_ALL, "Decompression overread by %i", (input - in.data) - in.count);
 	}*/
 	out.count = out_p - out.data;
 
@@ -395,7 +395,7 @@ void R_CIN_RunCinematic (void)
 
 	if (frame > cin->frame+1)
 	{
-		//Com_Printf ("Dropped frame: %i > %i\n", frame, cin->frame+1);
+	//	VID_Printf (PRINT_ALL, "Dropped frame: %i > %i\n", frame, cin->frame+1);
 		cin->time = Sys_Milliseconds() - cin->frame*1000/14;
 	}
 	if (cin->pic)

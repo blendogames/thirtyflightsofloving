@@ -46,8 +46,8 @@ void Use_Target_Speaker (edict_t *ent, edict_t *other, edict_t *activator)
 			ent->s.sound = 0;	// turn it off
 		else
 			ent->s.sound = ent->noise_index;	// start it
-#ifdef LOOP_SOUND_ATTENUATION	// Knightmare added
-			ent->s.attenuation = ent->attenuation;
+#ifdef KMQUAKE2_ENGINE_MOD	// Knightmare added
+			ent->s.loop_attenuation = ent->attenuation;
 #endif
 	}
 	else
@@ -88,8 +88,8 @@ void SP_target_speaker (edict_t *ent)
 	// check for prestarted looping sound
 	if (ent->spawnflags & 1) {
 		ent->s.sound = ent->noise_index;
-#ifdef LOOP_SOUND_ATTENUATION	// Knightmare added
-		ent->s.attenuation = ent->attenuation;
+#ifdef KMQUAKE2_ENGINE_MOD	// Knightmare added
+		ent->s.loop_attenuation = ent->attenuation;
 #endif
 	}
 

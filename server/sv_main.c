@@ -121,7 +121,7 @@ Given an netadr_t, returns the matching client.
 */
 client_t *GetClientFromAdr (netadr_t address)
 {
-	client_t	*cl;
+	client_t	*cl = NULL;
 	int			i;
 	qboolean	found = false;
 
@@ -237,7 +237,7 @@ char	*SV_StatusString (void)
 			if (statusLength + playerLength >= sizeof(status) )
 				break;		// can't hold any more
 		//	strncpy (status + statusLength, player);
-			Q_strncpyz (status+statusLength, sizeof(status)-statusLength, player);
+			Q_strncpyz (status+statusLength, sizeof(status) - statusLength, player);
 			statusLength += playerLength;
 		}
 	}
@@ -287,7 +287,6 @@ void SVC_Info (void)
 	int		i, count;
 	int		version;
 
-//	if (maxclients->value == 1)
 	if (maxclients->integer == 1)
 		return;		// ignore in single player
 

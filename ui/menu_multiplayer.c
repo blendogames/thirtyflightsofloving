@@ -22,15 +22,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 // menu_multiplayer.c -- the multiplayer menu 
 
-#include <ctype.h>
-#ifdef _WIN32
-#include <io.h>
-#endif
 #include "../client/client.h"
 #include "ui_local.h"
 
+#ifdef NOTTHIRTYFLIGHTS
 #define MAPLIST_ARENAS
-
 
 /*
 =======================================================================
@@ -40,12 +36,13 @@ MULTIPLAYER MENU
 =======================================================================
 */
 
-menuframework_s			s_multiplayer_menu;
-static menuaction_s		s_join_network_server_action;
-static menuaction_s		s_start_network_server_action;
-static menuaction_s		s_player_setup_action;
-static menuaction_s		s_download_options_action;
-static menuaction_s		s_backmain_action;
+menuFramework_s			s_multiplayer_menu;
+static menuImage_s		s_multiplayer_banner;
+static menuAction_s		s_join_network_server_action;
+static menuAction_s		s_start_network_server_action;
+static menuAction_s		s_player_setup_action;
+static menuAction_s		s_download_options_action;
+static menuAction_s		s_backmain_action;
 
 //=======================================================================
 
@@ -73,11 +70,33 @@ void DownloadOptionsFunc (void *unused)
 
 void Menu_Multiplayer_Init (void)
 {
-	int		x = 0, y = 0;
+	int		x, y;
 
-	s_multiplayer_menu.x = SCREEN_WIDTH*0.5 - 9*MENU_FONT_SIZE;		// -64
-	s_multiplayer_menu.y = SCREEN_HEIGHT*0.5 - 5*MENU_LINE_SIZE;	// 0
-	s_multiplayer_menu.nitems = 0;
+	// menu.x = 264, menu.y = 200
+	x = SCREEN_WIDTH*0.5 - 9*MENU_FONT_SIZE;
+	y = SCREEN_HEIGHT*0.5 - 5*MENU_LINE_SIZE;
+
+	s_multiplayer_menu.x			= 0;	// SCREEN_WIDTH*0.5 - 9*MENU_FONT_SIZE;		// -64
+	s_multiplayer_menu.y			= 0;	// SCREEN_HEIGHT*0.5 - 5*MENU_LINE_SIZE;	// 0
+	s_multiplayer_menu.nitems		= 0;
+	s_multiplayer_menu.isPopup		= false;
+	s_multiplayer_menu.background	= NULL;
+	s_multiplayer_menu.drawFunc		= UI_DefaultMenuDraw;
+	s_multiplayer_menu.keyFunc		= UI_DefaultMenuKey;
+	s_multiplayer_menu.canOpenFunc	= NULL;
+
+	s_multiplayer_banner.generic.type		= MTYPE_IMAGE;
+	s_multiplayer_banner.generic.x			= 0;
+	s_multiplayer_banner.generic.y			= 9*MENU_LINE_SIZE;
+	s_multiplayer_banner.width				= 275;
+	s_multiplayer_banner.height				= 32;
+	s_multiplayer_banner.imageName			= "/pics/m_banner_multiplayer.pcx";
+	s_multiplayer_banner.alpha				= 255;
+	s_multiplayer_banner.border				= 0;
+	s_multiplayer_banner.hCentered			= true;
+	s_multiplayer_banner.vCentered			= false;
+	s_multiplayer_banner.useAspectRatio		= false;
+	s_multiplayer_banner.generic.isHidden	= false;
 
 	s_join_network_server_action.generic.type		= MTYPE_ACTION;
 	s_join_network_server_action.generic.textSize	= MENU_HEADER_FONT_SIZE;
@@ -119,6 +138,7 @@ void Menu_Multiplayer_Init (void)
 	s_backmain_action.generic.name		= "Back to Main";
 	s_backmain_action.generic.callback	= UI_BackMenu;
 
+	UI_AddMenuItem (&s_multiplayer_menu, (void *) &s_multiplayer_banner);
 	UI_AddMenuItem (&s_multiplayer_menu, (void *) &s_join_network_server_action);
 	UI_AddMenuItem (&s_multiplayer_menu, (void *) &s_start_network_server_action);
 	UI_AddMenuItem (&s_multiplayer_menu, (void *) &s_player_setup_action);
@@ -126,25 +146,12 @@ void Menu_Multiplayer_Init (void)
 	UI_AddMenuItem (&s_multiplayer_menu, (void *) &s_backmain_action);
 
 	UI_SetMenuStatusBar (&s_multiplayer_menu, NULL);
-
-//	UI_CenterMenu (&s_multiplayer_menu);
 }
 
-static void Menu_Multiplayer_Draw (void)
-{
-	UI_DrawBanner ("m_banner_multiplayer");
-
-	UI_AdjustMenuCursor (&s_multiplayer_menu, 1);
-	UI_DrawMenu (&s_multiplayer_menu);
-}
-
-const char *Menu_Multiplayer_Key (int key)
-{
-	return UI_DefaultMenuKey (&s_multiplayer_menu, key);
-}
 
 void Menu_Multiplayer_f (void)
 {
 	Menu_Multiplayer_Init ();
-	UI_PushMenu (Menu_Multiplayer_Draw, Menu_Multiplayer_Key);
+	UI_PushMenu (&s_multiplayer_menu);
 }
+#endif

@@ -87,7 +87,7 @@ void cleanupHeal (edict_t *self, qboolean change_frame)
 	{
 		edict_t	*temp;	// Lazarus
 
-		//self->enemy->monsterinfo.healer = NULL;
+	//	self->enemy->monsterinfo.healer = NULL;
 		self->enemy->monsterinfo.aiflags &= ~AI_RESURRECTING;
 		self->enemy->takedamage = DAMAGE_AIM;
 		// Lazarus
@@ -96,7 +96,7 @@ void cleanupHeal (edict_t *self, qboolean change_frame)
 		temp->target_ent = self->enemy;
 		temp->think = medic_deadmonster_think;
 		temp->nextthink = level.time + 2.0;
-		gi.linkentity(temp);
+		gi.linkentity (temp);
 		M_SetEffects (self->enemy);
 	}
 
@@ -104,7 +104,7 @@ void cleanupHeal (edict_t *self, qboolean change_frame)
 		self->monsterinfo.nextframe = FRAME_attack52;
 }
 
-void DeleteBadMedic(edict_t *self)
+void DeleteBadMedic (edict_t *self)
 {
 	edict_t	*monster;
 
@@ -118,14 +118,16 @@ void DeleteBadMedic(edict_t *self)
 	}
 	G_FreeEdict(self);
 }
-void abortHeal (edict_t *self, qboolean mark)
+void abortHeal (edict_t *self, qboolean change_frame, qboolean gib, qboolean mark)
 {
-	edict_t	*temp;
+	int				hurt;
+	static vec3_t	pain_normal = {0, 0, 1};
+	edict_t			*temp;
 
 	// clean up target
-	cleanupHeal (self, true);
+	cleanupHeal (self, change_frame);
 
-	if ((mark) && (self->enemy) && (self->enemy->inuse))
+	if ( (mark) && (self->enemy) && (self->enemy->inuse) )
 	{
 		if ((self->enemy->monsterinfo.badMedic1) && (self->enemy->monsterinfo.badMedic1->inuse)
 			&& (!strncmp(self->enemy->monsterinfo.badMedic1->classname, "monster_medic", 13)) )
@@ -141,6 +143,16 @@ void abortHeal (edict_t *self, qboolean mark)
 			temp->monsterinfo.badMedic2 = self;
 		temp->think = DeleteBadMedic;
 		temp->nextthink = level.time + 60;
+	}
+
+	// Knightmare- Rogue addition, gib target if specified
+	if ( (gib) && (self->enemy) && (self->enemy->inuse) )
+	{
+		if (self->enemy->gib_health)
+			hurt = -self->enemy->gib_health;
+		else
+			hurt = 500;
+		T_Damage (self->enemy, self, self, vec3_origin, self->enemy->s.origin, pain_normal, hurt, 0, 0, MOD_UNKNOWN);
 	}
 
 	// clean up self
@@ -246,7 +258,7 @@ void medic_StopPatrolling (edict_t *self)
 		return;
 	}
 	if (self->monsterinfo.aiflags & AI_MEDIC)
-		abortHeal(self,false);
+		abortHeal (self, false, false, false);
 }
 
 void medic_NextPatrolPoint (edict_t *self, edict_t *hint)
@@ -355,14 +367,14 @@ void medic_NextPatrolPoint (edict_t *self, edict_t *hint)
 
 void medic_idle (edict_t *self)
 {
-	if (!(self->spawnflags & SF_MONSTER_AMBUSH))
+	if ( !(self->spawnflags & SF_MONSTER_AMBUSH) )
 		gi.sound (self, CHAN_VOICE, sound_idle1, 1, ATTN_IDLE, 0);
 
 	if (self->monsterinfo.aiflags & AI_MEDIC)
 	{
 		// Then we must have reached this point after losing sight
 		// of our patient.
-		abortHeal(self,false);
+		abortHeal (self, false, false, false);
 	}
 
 	if (medic_FindDeadMonster(self))
@@ -901,6 +913,7 @@ static vec3_t	medic_cable_offsets[] =
 void medic_cable_attack (edict_t *self)
 {
 	vec3_t	offset, start, end, f, r;
+	vec3_t	maxs;
 	trace_t	tr;
 	vec3_t	dir;
 	float	distance;
@@ -908,24 +921,24 @@ void medic_cable_attack (edict_t *self)
 	if ((!self->enemy) || (!self->enemy->inuse) || (self->enemy->svflags & SVF_GIB))
 	{
 		//gi.dprintf ("medic_cable_attack: aborting heal due to target being removed or gibbed\n");
-		abortHeal (self,false);
+		abortHeal (self, true, false, false);
 		return;
 	}
 
-	//Knightmare- don't heal insanes or actors or critters
+	// Knightmare- don't heal insanes or actors or critters
 	if (!strcmp (self->enemy->classname, "misc_insane") || !strcmp (self->enemy->classname, "misc_actor")
 		|| !strcmp (self->enemy->classname, "monster_mutant") || !strcmp (self->enemy->classname, "monster_flipper")) 
 	{
 		//gi.dprintf ("medic_cable_attack: not healing insane or actor or critter\n");
-		abortHeal (self, true);
+		abortHeal (self, true, false, true);
 		return;
 	}
 
 	// Lazarus: check embeddment
 	if (embedded(self->enemy))
 	{
-		//gi.dprintf ("medic_cable_attack: dead monster embedded in solid, aborting heal\n");
-		abortHeal (self,false);
+	//	gi.dprintf ("medic_cable_attack: dead monster embedded in solid, aborting heal\n");
+		abortHeal (self, true, false, true);
 		return;
 	}
 
@@ -933,8 +946,8 @@ void medic_cable_attack (edict_t *self)
 	// abort it .. we got switched to someone else due to damage
 	if ((self->enemy->client) || (self->enemy->health > 0))
 	{
-		//gi.dprintf ("medic_cable_attack: aborting heal due to target health > 0 or client\n");
-		abortHeal (self,false);
+	//	gi.dprintf ("medic_cable_attack: aborting heal due to target health > 0 or client\n");
+		abortHeal (self, true, false, false);
 		return;
 	}
 
@@ -949,18 +962,18 @@ void medic_cable_attack (edict_t *self)
 	distance = VectorLength(dir);
 	if (distance < MEDIC_MIN_DISTANCE)
 	{
-		//gi.dprintf("medic_cable_attack: MEDIC_MIN_DISTANCE\n");
-		abortHeal (self,false);
+	//	gi.dprintf("medic_cable_attack: MEDIC_MIN_DISTANCE\n");
+		abortHeal (self, true, false, false);
 		return;
 	}
 
 	// Lazarus: Check for enemy behind muzzle... don't do these guys, 'cause usually this
 	// results in monster entanglement
 	VectorNormalize(dir);
-	if (DotProduct(dir,f) < 0.)
+	if (DotProduct(dir, f) < 0.0f)
 	{
-		//gi.dprintf ("medic_cable_attack: aborting heal due to possible entanglment\n");
-		abortHeal (self,false);
+	//	gi.dprintf ("medic_cable_attack: aborting heal due to possible entanglment\n");
+		abortHeal (self, true, false, false);
 		return;
 	}
 
@@ -981,14 +994,14 @@ void medic_cable_attack (edict_t *self)
 			// give up on second try
 			if (self->monsterinfo.medicTries > 1)
 			{
-				abortHeal (self,true);
+				abortHeal (self, true, false, true);
 				return;
 			}
 			self->monsterinfo.medicTries++;
 			cleanupHeal (self, 1);
 			return;
 		}
-		abortHeal (self,false);
+		abortHeal (self, true, false, false);
 		return;
 	}
 
@@ -1007,46 +1020,67 @@ void medic_cable_attack (edict_t *self)
 		self->enemy->combattarget = NULL;
 		self->enemy->deathtarget = NULL;
 		self->enemy->owner = self;
-		// Lazarus: reset initially dead monsters to use the INVERSE of their
-		// initial health, and force gib_health to default value
-		if (self->enemy->max_health < 0)
-		{
-			self->enemy->max_health = -self->enemy->max_health;
-			self->enemy->gib_health = 0;
-		}
-		self->enemy->health = self->enemy->max_health;
-		self->enemy->takedamage = DAMAGE_AIM;
-		self->enemy->flags &= ~FL_NO_KNOCKBACK;
-		self->enemy->pain_debounce_time = 0;
-		self->enemy->damage_debounce_time = 0;
-		self->enemy->deadflag = DEAD_NO;
-		if (self->enemy->s.effects & EF_FLIES)
-			M_FliesOff(self->enemy);
-		ED_CallSpawn (self->enemy);
-		self->enemy->monsterinfo.healer = NULL;
-		self->enemy->owner = NULL;
 
-		// Knightmare- disable deadmonster_think
-		if (self->enemy->postthink)
-			self->enemy->postthink = NULL;
+		// Knightmare- check for obstruction of monster bbox
+		VectorCopy (self->enemy->maxs, maxs);
+		maxs[2] += 48;
+		tr = gi.trace (self->enemy->s.origin, self->enemy->mins, maxs, self->enemy->s.origin, self->enemy, MASK_MONSTERSOLID);
+		if ( tr.startsolid || tr.allsolid ) {
+			abortHeal (self, true, true, false);
+			return;
+		}
+		else if (tr.ent != world)
+		{
+			abortHeal (self, true, true, false);
+			return;
+		}
+		else if ( strncmp(self->enemy->classname, "player", 6) != 0 )	// Phatman: Prevent player_noise spawn function error
+		{
+			// Lazarus: reset initially dead monsters to use the INVERSE of their
+			// initial health, and force gib_health to default value
+			if (self->enemy->max_health < 0)
+			{
+				self->enemy->max_health = -self->enemy->max_health;
+				self->enemy->gib_health = 0;
+			}
+			self->enemy->health = self->enemy->max_health;
+			self->enemy->takedamage = DAMAGE_AIM;
+			self->enemy->flags &= ~FL_NO_KNOCKBACK;
+			self->enemy->pain_debounce_time = 0;
+			self->enemy->damage_debounce_time = 0;
+			self->enemy->deadflag = DEAD_NO;
 
-		if (self->enemy->think)
-		{
-			self->enemy->nextthink = level.time;
-			self->enemy->think (self->enemy);
-		}
-		self->enemy->monsterinfo.aiflags &= ~AI_RESURRECTING;
-		M_SetEffects(self->enemy);
-		if (self->oldenemy && self->oldenemy->client)
-		{
-			self->enemy->enemy = self->oldenemy;
-			FoundTarget (self->enemy);
-		}
-		else
-		{
-			// Lazarus: this should make oblivious monsters 
-			// find player again
-			self->enemy->enemy = NULL;
+			// turn off flies
+			if (self->enemy->s.effects & EF_FLIES)
+				M_FliesOff(self->enemy);
+
+			ED_CallSpawn (self->enemy);
+			self->enemy->monsterinfo.healer = NULL;
+			self->enemy->owner = NULL;
+
+			// Knightmare- disable deadmonster_think
+			if (self->enemy->postthink)
+				self->enemy->postthink = NULL;
+
+			if (self->enemy->think)
+			{
+				self->enemy->nextthink = level.time;
+				self->enemy->think (self->enemy);
+			}
+			self->enemy->monsterinfo.aiflags &= ~AI_RESURRECTING;
+			M_SetEffects(self->enemy);
+
+			if (self->oldenemy && self->oldenemy->client)
+			{
+				self->enemy->enemy = self->oldenemy;
+				FoundTarget (self->enemy);
+			}
+			else
+			{
+				// Lazarus: this should make oblivious monsters 
+				// find player again
+				self->enemy->enemy = NULL;
+			}
 		}
 	}
 	else
@@ -1169,31 +1203,32 @@ qboolean medic_checkattack (edict_t *self)
 		// if we ran out of time, give up
 		if (self->timestamp < level.time)
 		{
-			//if (developer->value)
-			//	gi.dprintf("medic at %s timed out, abort heal\n",vtos(self->s.origin));
-			abortHeal (self, true);
+		//	if (developer->value)
+		//		gi.dprintf("medic at %s timed out, abort heal\n",vtos(self->s.origin));
+			abortHeal (self, true, false, true);
 			self->timestamp = 0;
 			return false;
 		}
 		
 		// if our target went away
-		if ((!self->enemy) || (!self->enemy->inuse)) {
-			abortHeal (self,false);
+		if ( (!self->enemy) || (!self->enemy->inuse) ) {
+			abortHeal (self, true, false, false);
 			return false;
 		}
 		// if target is embedded in a solid
 		if (embedded(self->enemy))
 		{
-			abortHeal (self,false);
+			abortHeal (self, true, false, true);
 			return false;
 		}
-		r = realrange(self,self->enemy);
+		r = realrange(self, self->enemy);
 		if (r > MEDIC_MAX_HEAL_DISTANCE+10) {
 			self->monsterinfo.attack_state = AS_STRAIGHT;
-			//abortHeal(self,false);
+		//	abortHeal (self, true, false, true);
 			return false;
-		} else if (r < MEDIC_MIN_DISTANCE) {
-			abortHeal(self,false);
+		}
+		else if (r < MEDIC_MIN_DISTANCE) {
+			abortHeal (self, true, false, false);
 			return false;
 		}
 		// Lazarus 1.6.2.3: if point-to-point vector from cable to
@@ -1229,6 +1264,22 @@ qboolean medic_checkattack (edict_t *self)
 }
 
 
+// Knightmare- added soundcache function
+void monster_medic_soundcache (edict_t *self)
+{
+	sound_idle1 = gi.soundindex ("medic/idle.wav");
+	sound_pain1 = gi.soundindex ("medic/medpain1.wav");
+	sound_pain2 = gi.soundindex ("medic/medpain2.wav");
+	sound_die = gi.soundindex ("medic/meddeth1.wav");
+	sound_sight = gi.soundindex ("medic/medsght1.wav");
+	sound_search = gi.soundindex ("medic/medsrch1.wav");
+	sound_hook_launch = gi.soundindex ("medic/medatck2.wav");
+	sound_hook_hit = gi.soundindex ("medic/medatck3.wav");
+	sound_hook_heal = gi.soundindex ("medic/medatck4.wav");
+	sound_hook_retract = gi.soundindex ("medic/medatck5.wav");
+}
+
+
 /*QUAKED monster_medic (1 .5 0) (-16 -16 -24) (16 16 32) Ambush Trigger_Spawn Sight
 */
 void SP_monster_medic (edict_t *self)
@@ -1244,16 +1295,9 @@ void SP_monster_medic (edict_t *self)
 		G_FreeEdict (self);
 		return;
 	}
-	sound_idle1 = gi.soundindex ("medic/idle.wav");
-	sound_pain1 = gi.soundindex ("medic/medpain1.wav");
-	sound_pain2 = gi.soundindex ("medic/medpain2.wav");
-	sound_die = gi.soundindex ("medic/meddeth1.wav");
-	sound_sight = gi.soundindex ("medic/medsght1.wav");
-	sound_search = gi.soundindex ("medic/medsrch1.wav");
-	sound_hook_launch = gi.soundindex ("medic/medatck2.wav");
-	sound_hook_hit = gi.soundindex ("medic/medatck3.wav");
-	sound_hook_heal = gi.soundindex ("medic/medatck4.wav");
-	sound_hook_retract = gi.soundindex ("medic/medatck5.wav");
+
+	// Knightmare- use soundcache function
+	monster_medic_soundcache (self);
 
 	gi.soundindex ("medic/medatck1.wav");
 

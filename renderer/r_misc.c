@@ -24,26 +24,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "r_local.h"
 
-#ifdef _WIN32
-
-#include "../include/jpeg/jpeglib.h" // Heffo - JPEG Screenshots
-#ifdef PNG_SUPPORT
-#if defined (_MSC_VER) && (_MSC_VER <= 1200)	// use older version of libpng for MSVC6
-#include "../include/zlibpng_vc6/png.h"
-#else
-#include "../include/zlibpng/png.h"
-#endif
-#endif	// PNG_SUPPORT
-
-#else	// _WIN32
-
-#include <jpeglib.h>
-#ifdef PNG_SUPPORT
-#include <png.h>
-#endif	// PNG_SUPPORT
-
-#endif	// _WIN32
-
 /*
 ==================
 R_CreateNullTexture
@@ -52,33 +32,55 @@ R_CreateNullTexture
 #define NULLTEX_SIZE 16
 image_t * R_CreateNullTexture (void)
 {
-	byte	nulltex[NULLTEX_SIZE][NULLTEX_SIZE][4];
+	byte	null_tex[NULLTEX_SIZE][NULLTEX_SIZE][4];
 	int		x;
 
-	memset (nulltex, 32, sizeof(nulltex));
-	for (x=0; x<NULLTEX_SIZE; x++)
+	memset (null_tex, 32, sizeof(null_tex));
+	for (x = 0; x < NULLTEX_SIZE; x++)
 	{
-		nulltex[0][x][0]=
-		nulltex[0][x][1]=
-		nulltex[0][x][2]=
-		nulltex[0][x][3]= 255;
+		null_tex[0][x][0]=
+		null_tex[0][x][1]=
+		null_tex[0][x][2]=
+		null_tex[0][x][3]= 255;
 
-		nulltex[x][0][0]=
-		nulltex[x][0][1]=
-		nulltex[x][0][2]=
-		nulltex[x][0][3]= 255;
+		null_tex[x][0][0]=
+		null_tex[x][0][1]=
+		null_tex[x][0][2]=
+		null_tex[x][0][3]= 255;
 
-		nulltex[NULLTEX_SIZE-1][x][0]=
-		nulltex[NULLTEX_SIZE-1][x][1]=
-		nulltex[NULLTEX_SIZE-1][x][2]=
-		nulltex[NULLTEX_SIZE-1][x][3]= 255;
+		null_tex[NULLTEX_SIZE-1][x][0]=
+		null_tex[NULLTEX_SIZE-1][x][1]=
+		null_tex[NULLTEX_SIZE-1][x][2]=
+		null_tex[NULLTEX_SIZE-1][x][3]= 255;
 
-		nulltex[x][NULLTEX_SIZE-1][0]=
-		nulltex[x][NULLTEX_SIZE-1][1]=
-		nulltex[x][NULLTEX_SIZE-1][2]=
-		nulltex[x][NULLTEX_SIZE-1][3]= 255;
+		null_tex[x][NULLTEX_SIZE-1][0]=
+		null_tex[x][NULLTEX_SIZE-1][1]=
+		null_tex[x][NULLTEX_SIZE-1][2]=
+		null_tex[x][NULLTEX_SIZE-1][3]= 255;
 	}
-	return R_LoadPic ("*notexture", (byte *)nulltex, NULLTEX_SIZE, NULLTEX_SIZE, it_wall, 32);
+
+	if (r_debug_media->integer)
+		R_WriteTGA (&null_tex[0][0][0], NULLTEX_SIZE, NULLTEX_SIZE, 4, "debug_tex/null_texture.tga", true, false);
+
+	return R_LoadPic ("*notexture", (byte *)null_tex, NULLTEX_SIZE, NULLTEX_SIZE, it_wall, 32);
+}
+
+
+/*
+==================
+R_CreateWhiteTexture
+==================
+*/
+image_t *R_CreateWhiteTexture (void)
+{
+	byte	white_tex[NULLTEX_SIZE][NULLTEX_SIZE][4];
+	
+	memset (white_tex, 255, sizeof(white_tex));
+
+	if (r_debug_media->integer)
+		R_WriteTGA (&white_tex[0][0][0], NULLTEX_SIZE, NULLTEX_SIZE, 4, "debug_tex/white_texture.tga", true, false);
+
+	return R_LoadPic ("*whitetexture", (byte *)white_tex, NULLTEX_SIZE, NULLTEX_SIZE, it_wall, 32);
 }
 
 
@@ -90,19 +92,19 @@ R_CreateDistTextureARB
 #define DIST_SIZE 16
 image_t *R_CreateDistTextureARB (void)
 {
-	byte	dist[DIST_SIZE][DIST_SIZE][4];
+	byte	dist_tex[DIST_SIZE][DIST_SIZE][4];
 	int		x, y;
 	image_t	*image;
 
 	srand(Sys_TickCount());
-	for (x=0; x<DIST_SIZE; x++)
-		for (y=0; y<DIST_SIZE; y++) {
-			dist[x][y][0] = rand()%255;
-			dist[x][y][1] = rand()%255;
-			dist[x][y][2] = rand()%48;
-			dist[x][y][3] = rand()%48;
+	for (x = 0; x < DIST_SIZE; x++)
+		for (y = 0; y < DIST_SIZE; y++) {
+			dist_tex[x][y][0] = rand()%255;
+			dist_tex[x][y][1] = rand()%255;
+			dist_tex[x][y][2] = rand()%48;
+			dist_tex[x][y][3] = rand()%48;
 		}
-	image = R_LoadPic ("*disttexture", (byte *)dist, DIST_SIZE, DIST_SIZE, it_wall, 32);
+	image = R_LoadPic ("*disttexture", (byte *)dist_tex, DIST_SIZE, DIST_SIZE, it_wall, 32);
 
 	qglBindTexture(GL_TEXTURE_2D, image->texnum);
 
@@ -112,6 +114,9 @@ image_t *R_CreateDistTextureARB (void)
 	qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	qglHint(GL_GENERATE_MIPMAP_HINT_SGIS, GL_NICEST);
 	qglTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP_SGIS, GL_TRUE);
+
+	if (r_debug_media->integer)
+		R_WriteTGA (&dist_tex[0][0][0], DIST_SIZE, DIST_SIZE, 4, "debug_tex/dist_texture_arb.tga", true, false);
 
 	return image;
 }
@@ -174,8 +179,8 @@ image_t *R_CreateCelShadeTexture (void)
 	int		x, y;
 	image_t	*image;
 
-	for (x=0; x<CEL_SHADE_SIZE; x++)
-		for (y=0; y<CEL_SHADE_SIZE; y++) {
+	for (x = 0; x < CEL_SHADE_SIZE; x++)
+		for (y = 0; y < CEL_SHADE_SIZE; y++) {
 			cel_tex[x][y][0] = (byte)cel_tex_colors[y][0];
 			cel_tex[x][y][1] = (byte)cel_tex_colors[y][0];
 			cel_tex[x][y][2] = (byte)cel_tex_colors[y][0];
@@ -188,31 +193,51 @@ image_t *R_CreateCelShadeTexture (void)
 	qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
+	if (r_debug_media->integer)
+		R_WriteTGA (&cel_tex[0][0][0], CEL_SHADE_SIZE, CEL_SHADE_SIZE, 4, "debug_tex/celshade_texture.tga", true, false);
+
 	return image;
 }
 
 
+#ifdef ROQ_SUPPORT
 /*
 ==================
-LoadPartImg
+R_CreateRawTexture
 ==================
 */
-image_t *LoadPartImg (char *name, imagetype_t type)
+#define RAW_TEX_SIZE 256
+image_t *R_CreateRawTexture (void)
+{
+	byte	raw_tex[RAW_TEX_SIZE * RAW_TEX_SIZE * 4]; // Raw texture
+
+	memset (raw_tex, 255, sizeof(raw_tex));
+	return R_LoadPic ("*rawtexture", (byte *)raw_tex, RAW_TEX_SIZE, RAW_TEX_SIZE, it_pic, 32);
+}
+#endif // ROQ_SUPPORT
+
+
+/*
+==================
+R_LoadPartImg
+==================
+*/
+image_t *R_LoadPartImg (char *name, imagetype_t type)
 {
 	image_t *image = R_FindImage(name, type);
-	if (!image) image = glMedia.notexture;
+	if (!image) image = glMedia.noTexture;
 	return image;
 }
 
 
 /*
 ==================
-R_SetParticlePicture
+R_SetParticleImg
 ==================
 */
-void R_SetParticlePicture (int num, char *name)
+void R_SetParticleImg (int num, char *name)
 {
-	glMedia.particletextures[num] = LoadPartImg (name, it_part);
+	glMedia.particleTextures[num] = R_LoadPartImg (name, it_part);
 }
 
 
@@ -295,8 +320,13 @@ R_ClearDisplayLists
 */
 void R_ClearDisplayLists (void)
 {
+	int		i;
+
 	if (glMedia.displayLists[0] != 0)	// clear only if not null
 		qglDeleteLists (glMedia.displayLists[0], NUM_DISPLAY_LISTS);
+
+	for (i=0; i<NUM_DISPLAY_LISTS; i++)
+		glMedia.displayLists[i] = 0;
 }
 
 
@@ -307,45 +337,35 @@ R_InitMedia
 */
 void R_InitMedia (void)
 {
-	int		x;
-	byte	whitetex[NULLTEX_SIZE][NULLTEX_SIZE][4];
-#ifdef ROQ_SUPPORT
-	byte	data2D[256*256*4]; // Raw texture
-#endif // ROQ_SUPPORT
+	int		i;
 
-	glMedia.notexture = R_CreateNullTexture (); // Generate null texture
-
-	memset (whitetex, 255, sizeof(whitetex));
-	glMedia.whitetexture = R_LoadPic ("*whitetexture", (byte *)whitetex, NULLTEX_SIZE, NULLTEX_SIZE, it_wall, 32);
-
-	glMedia.distTextureARB = R_CreateDistTextureARB ();			// Generate warp distortion texture
+	glMedia.noTexture = R_CreateNullTexture ();				// Generate null texture
+	glMedia.whiteTexture = R_CreateWhiteTexture ();			// Generate white texture
+	glMedia.distTextureARB = R_CreateDistTextureARB ();		// Generate warp distortion texture
+	glMedia.celShadeTexture = R_CreateCelShadeTexture ();	// Generate cel shading texture
 
 #ifdef ROQ_SUPPORT
-	memset(data2D, 255, 256*256*4);
-	glMedia.rawtexture = R_LoadPic ("*rawtexture", data2D, 256, 256, it_pic, 32);
+	glMedia.rawTexture = R_CreateRawTexture ();				// Generate raw texture for cinematics
 #endif // ROQ_SUPPORT
 	
-	glMedia.envmappic = LoadPartImg ("gfx/effects/envmap.tga", it_wall);
-	glMedia.spheremappic = LoadPartImg ("gfx/effects/spheremap.tga", it_skin);
-	glMedia.shelltexture = LoadPartImg ("gfx/effects/shell_generic.tga", it_skin);
-
-	glMedia.celshadetexture = R_CreateCelShadeTexture ();
-
-	glMedia.causticwaterpic = LoadPartImg ("gfx/water/caustic_water.tga", it_wall);
-	glMedia.causticslimepic = LoadPartImg ("gfx/water/caustic_slime.tga", it_wall);
-	glMedia.causticlavapic = LoadPartImg ("gfx/water/caustic_lava.tga", it_wall);
-	glMedia.particlebeam = LoadPartImg ("gfx/particles/beam.tga", it_part);
+	glMedia.envMapTexture = R_LoadPartImg ("gfx/effects/envmap.tga", it_wall);
+	glMedia.sphereMapTexture = R_LoadPartImg ("gfx/effects/spheremap.tga", it_skin);
+	glMedia.shellTexture = R_LoadPartImg ("gfx/effects/shell_generic.tga", it_skin);
+	glMedia.flareTexture = R_LoadPartImg ("gfx/effects/flare.tga", it_skin);
+	glMedia.causticWaterTexture = R_LoadPartImg ("gfx/water/caustic_water.tga", it_wall);
+	glMedia.causticSlimeTexture = R_LoadPartImg ("gfx/water/caustic_slime.tga", it_wall);
+	glMedia.causticLavaTexture = R_LoadPartImg ("gfx/water/caustic_lava.tga", it_wall);
+	glMedia.particleBeam = R_LoadPartImg ("gfx/particles/beam.tga", it_part);
 
 	// Psychospaz's enhanced particles
-	for (x=0; x<PARTICLE_TYPES; x++)
-		glMedia.particletextures[x] = NULL;
+	// These are loaded in CL_PrepRefresh
+	for (i=0; i<PARTICLE_TYPES; i++)
+		glMedia.particleTextures[i] = NULL;
 
-	for (x=0; x<NUM_DISPLAY_LISTS; x++) 
-		glMedia.displayLists[x] = 0;	// was NULL
+	for (i=0; i<NUM_DISPLAY_LISTS; i++) 
+		glMedia.displayLists[i] = 0;
 
 	R_CreateDisplayLists ();
-
-	CL_SetParticleImages ();
 }
 
 
@@ -358,23 +378,22 @@ void R_ShutdownMedia (void)
 {
 	int		i;
 
-	glMedia.notexture = NULL;
-	glMedia.whitetexture = NULL;
+	glMedia.noTexture = NULL;
+	glMedia.whiteTexture = NULL;
 	glMedia.distTextureARB = NULL;
-	glMedia.rawtexture = NULL;
-	
-	glMedia.envmappic = NULL;
-	glMedia.spheremappic = NULL;
-	glMedia.shelltexture = NULL;
-	glMedia.celshadetexture = NULL;
-
-	glMedia.causticwaterpic = NULL;
-	glMedia.causticslimepic = NULL;
-	glMedia.causticlavapic = NULL;
-	glMedia.particlebeam = NULL;
+	glMedia.celShadeTexture = NULL;
+	glMedia.rawTexture = NULL;
+	glMedia.envMapTexture = NULL;
+	glMedia.sphereMapTexture = NULL;
+	glMedia.shellTexture = NULL;
+	glMedia.flareTexture = NULL;
+	glMedia.causticWaterTexture = NULL;
+	glMedia.causticSlimeTexture = NULL;
+	glMedia.causticLavaTexture = NULL;
+	glMedia.particleBeam = NULL;
 
 	for (i=0; i<PARTICLE_TYPES; i++)
-		glMedia.particletextures[i] = NULL;
+		glMedia.particleTextures[i] = NULL;
 
 	R_ClearDisplayLists ();
 }
@@ -524,8 +543,8 @@ void R_ResampleShot (void *indata, int inwidth, int inheight, void *outdata, int
 			row1 -= outwidth*3; 
 		} 
 	} 
-	free(row1); 
-	free(row2); 
+	free (row1); 
+	free (row2); 
 } 
 
 
@@ -535,100 +554,52 @@ R_ScaledScreenshot
 by Knightmare
 ================== 
 */
+saveShot_t	r_saveShot;
 
-byte	*saveshotdata;
-
-void R_ScaledScreenshot (char *name)
+void R_ScaledScreenshot (const char *name)
 {
-	struct jpeg_compress_struct		cinfo;
-	struct jpeg_error_mgr			jerr;
-	JSAMPROW						s[1];
-	FILE							*file;
-	char							shotname[MAX_OSPATH];
-	int								saveshotWidth, saveshotHeight, offset, grab_width;
-	byte							*jpgdata;
+	char		shotname[MAX_OSPATH];
+	int			saveshotWidth, saveshotHeight;
+	byte		*rgbdata;
 
-	if (!saveshotdata)	return;
+	if (!r_saveShot.buffer)
+		return;
 
-	// Round down width to nearest multiple of 4
-	grab_width = vid.width & ~3;
-
-	// Optional hi-res saveshots
 	saveshotWidth = saveshotHeight = 256;
-	if (r_saveshotsize->integer)
-	{
-		if (grab_width >= 1024)
-			saveshotWidth = 1024;
-		else if (grab_width >= 512)
-			saveshotWidth = 512;
+	if (r_saveShot.width >= 2048)
+		saveshotWidth = 2048;
+	else if (r_saveShot.width >= 1024)
+		saveshotWidth = 1024;
+	else if (r_saveShot.width >= 512)
+		saveshotWidth = 512;
 
-		if (vid.height >= 1024)
-			saveshotHeight = 1024;
-		else if (vid.height >= 512)
-			saveshotHeight = 512;
-	}
-/*	if (r_saveshotsize->integer && (grab_width >= 1024) && (vid.height >= 1024))
-		saveshotsize = 1024;
-	else if (r_saveshotsize->integer && (grab_width >= 512) && (vid.height >= 512))
-		saveshotsize = 512;
-	else
-		saveshotsize = 256;*/
+	if (r_saveShot.height >= 2048)
+		saveshotHeight = 2048;
+	else if (r_saveShot.height >= 1024)
+		saveshotHeight = 1024;
+	else if (r_saveShot.height >= 512)
+		saveshotHeight = 512;
 
 	// Allocate room for reduced screenshot
-	jpgdata = malloc(saveshotWidth * saveshotHeight * 3);
-	if (!jpgdata)	return;
-
-	// Resize grabbed screen
-	R_ResampleShot(saveshotdata, grab_width, vid.height, jpgdata, saveshotWidth, saveshotHeight);
-
-	// Open the file for Binary Output
-	Com_sprintf (shotname, sizeof(shotname), "%s", name);
-	file = fopen(shotname, "wb");
-	if (!file)
-	{
-		VID_Printf (PRINT_ALL, "Menu_ScreenShot: Couldn't create %s\n", name); 
+	rgbdata = malloc(saveshotWidth * saveshotHeight * 3);
+	if ( !rgbdata ) {
 		return;
- 	}
-
-	// Initialise the JPEG compression object
-	cinfo.err = jpeg_std_error(&jerr);
-	jpeg_create_compress(&cinfo);
-	jpeg_stdio_dest(&cinfo, file);
-
-	// Setup JPEG Parameters
-	cinfo.image_width = saveshotWidth; //256;
-	cinfo.image_height = saveshotHeight; //256;
-	cinfo.in_color_space = JCS_RGB;
-	cinfo.input_components = 3;
-	jpeg_set_defaults(&cinfo);
-#ifdef NOTTHIRTYFLIGHTS
-	jpeg_set_quality(&cinfo, 85, TRUE); // was 100
-#else
-	jpeg_set_quality(&cinfo, 100, TRUE); // was 100
-#endif
-
-	// Start Compression
-	jpeg_start_compress(&cinfo, true);
-
-	// Feed Scanline data
-	offset = (cinfo.image_width * cinfo.image_height * 3) - (cinfo.image_width * 3);
-	while (cinfo.next_scanline < cinfo.image_height)
-	{
-		s[0] = &jpgdata[offset - (cinfo.next_scanline * (cinfo.image_width * 3))];
-		jpeg_write_scanlines(&cinfo, s, 1);
 	}
 
-	// Finish Compression
-	jpeg_finish_compress(&cinfo);
+	// Resize grabbed screen
+	R_ResampleShot (r_saveShot.buffer, r_saveShot.width, r_saveShot.height, rgbdata, saveshotWidth, saveshotHeight);
 
-	// Destroy JPEG object
-	jpeg_destroy_compress(&cinfo);
+	Com_sprintf (shotname, sizeof(shotname), "%s", name);
+    // This seems to be what replaced jpeg_set_quality code in original code
+    // May not be necessary but better safe than sorry here - Brad
+#ifdef NOTTHIRTYFLIGHTS
+	R_WriteJPG (rgbdata, saveshotWidth, saveshotHeight, 3, shotname, 85, false, false);	// was 100
+#else
+	R_WriteJPG (rgbdata, saveshotWidth, saveshotHeight, 3, shotname, 100, false, false);
+#endif
 
-	// Close File
-	fclose(file);
-
-	// Free Reduced screenshot
-	free(jpgdata);
+	// Free reduced screenshot
+	free (rgbdata);
 }
 
 
@@ -641,47 +612,59 @@ by Knightmare
 void R_GrabScreen (void)
 {	
 	int		grab_width, grab_x;
+	float	screenAspect;
 
 	// Free saveshot buffer first
-	if (saveshotdata)
-		free(saveshotdata);
+	if (r_saveShot.buffer) {
+		Z_Free (r_saveShot.buffer);
+		r_saveShot.buffer = NULL;
+	}
 
 	// Round down width to nearest multiple of 4
-	grab_width = vid.width & ~3;
+	// Properly handle surround modes
+	screenAspect = (float)vid.width / (float)vid.height;
+	if ( (Cvar_VariableInteger("scr_surroundlayout") != 0) && (screenAspect >= Cvar_VariableValue("scr_surroundthreshold")) ) {
+		grab_width = (float)vid.width * (Cvar_VariableValue("scr_surroundright") - Cvar_VariableValue("scr_surroundleft"));
+		grab_width &= ~3;
+	}
+	else {
+		grab_width = vid.width & ~3;
+	}
 	grab_x = (vid.width - grab_width) / 2;
 
 	// Allocate room for a copy of the framebuffer
-	saveshotdata = malloc(grab_width * vid.height * 3);
-	if (!saveshotdata)	return;
+	r_saveShot.buffer = Z_Malloc(grab_width * vid.height * 3);
+	if ( !r_saveShot.buffer )	return;
 
-	// Read the framebuffer into our storage
-	qglReadPixels(grab_x, 0, grab_width, vid.height, GL_RGB, GL_UNSIGNED_BYTE, saveshotdata);
+	// Read the framebuffer into our storage and store dimensions
+	qglReadPixels (grab_x, 0, grab_width, vid.height, GL_RGB, GL_UNSIGNED_BYTE, r_saveShot.buffer);
+	r_saveShot.width = grab_width;
+	r_saveShot.height = vid.height;
 }
 
 
 /* 
 ================== 
 R_ScreenShot_JPG
-By Robert 'Heffo' Heffernan
 ================== 
 */
 void R_ScreenShot_JPG (qboolean silent)
 {
-	struct jpeg_compress_struct		cinfo;
-	struct jpeg_error_mgr			jerr;
-	byte							*rgbdata;
-	JSAMPROW						s[1];
-	FILE							*file;
-	char							picname[80], checkname[MAX_OSPATH];
-	int								i, offset, grab_width, grab_x;
+	byte		*rgbdata;
+	FILE		*file = NULL;
+	char		picname[80], mapname[MAX_QPATH], checkname[MAX_OSPATH];
+	int			i, grab_width, grab_x;
 
 	// Create the screenshots directory if it doesn't exist
 	Com_sprintf (checkname, sizeof(checkname), "%s/screenshots", FS_Savegamedir());	// was FS_Gamedir()
 	Sys_Mkdir (checkname);
 
-	// Knightmare- changed screenshot filenames, up to 10000 screenies
+	// Copy mapname to buffer
+	Q_strncpyz (mapname, sizeof(mapname), Cvar_VariableString("mapname"));
+
 	// Find a file name to save it to 
-	for (i=0; i<=9999; i++) 
+	// Knightmare- changed screenshot filenames, up to 10000 screenies
+	for (i = 0; i <= 9999; i++) 
 	{ 
 		int one, ten, hundred, thousand;
 
@@ -690,24 +673,19 @@ void R_ScreenShot_JPG (qboolean silent)
 		ten = (i - thousand*1000 - hundred*100)*0.1;
 		one = i - thousand*1000 - hundred*100 - ten*10;
 
-		Com_sprintf (picname, sizeof(picname), "kmquake2_%i%i%i%i.jpg", thousand, hundred, ten, one);
+		// Include mapname in filename if enabled
+		if ( r_screenshot_use_mapname->integer && (r_worldmodel != NULL) && (mapname[0] != 0) )
+			Com_sprintf (picname, sizeof(picname), "%s_%i%i%i%i.jpg", mapname, thousand, hundred, ten, one);
+		else
+			Com_sprintf (picname, sizeof(picname), "kmquake2_%i%i%i%i.jpg", thousand, hundred, ten, one);
 		Com_sprintf (checkname, sizeof(checkname), "%s/screenshots/%s", FS_Savegamedir(), picname);	// was FS_Gamedir()
 		file = fopen (checkname, "rb");
 		if (!file)
 			break;	// file doesn't exist
 		fclose (file);
 	} 
-	if (i == 10000) 
-	{
+	if (i == 10000) {
 		VID_Printf (PRINT_ALL, "R_ScreenShot_JPG: Screenshots directory is full!\n"); 
-		return;
- 	}
-
-	// Open the file for Binary Output
-	file = fopen(checkname, "wb");
-	if (!file)
-	{
-		VID_Printf (PRINT_ALL, "R_ScreenShot_JPG: Couldn't create a file\n"); 
 		return;
  	}
 
@@ -717,61 +695,29 @@ void R_ScreenShot_JPG (qboolean silent)
 
 	// Allocate room for a copy of the framebuffer
 	rgbdata = malloc(grab_width * vid.height * 3);
-	if (!rgbdata)
-	{
-		fclose(file);
+	if ( !rgbdata ) {
 		return;
 	}
 
 	// Read the framebuffer into our storage
 //	qglReadPixels(grab_x, 0, grab_width, vid.height, GL_RGB, GL_UNSIGNED_BYTE, rgbdata);
-	R_ScreenShot_Read_Buffer(grab_x, grab_width, rgbdata);
+	R_ScreenShot_Read_Buffer (grab_x, grab_width, rgbdata);
 
-	// Initialise the JPEG compression object
-	cinfo.err = jpeg_std_error(&jerr);
-	jpeg_create_compress(&cinfo);
-	jpeg_stdio_dest(&cinfo, file);
-
-	// Setup JPEG Parameters
-	cinfo.image_width = grab_width;
-	cinfo.image_height = vid.height;
-	cinfo.in_color_space = JCS_RGB;
-	cinfo.input_components = 3;
-	jpeg_set_defaults(&cinfo);
-	if ((r_screenshot_jpeg_quality->integer >= 101) || (r_screenshot_jpeg_quality->integer <= 0))
+	if ( (r_screenshot_jpeg_quality->integer >= 101) || (r_screenshot_jpeg_quality->integer <= 0) )
 #ifdef NOTTHIRTYFLIGHTS
-		Cvar_Set("r_screenshot_jpeg_quality", "85");
+		Cvar_Set ("r_screenshot_jpeg_quality", "85");
 #else
-		Cvar_Set("r_screenshot_jpeg_quality", "100");
+		Cvar_Set ("r_screenshot_jpeg_quality", "100");
 #endif
-	jpeg_set_quality(&cinfo, r_screenshot_jpeg_quality->integer, TRUE);
 
-	// Start Compression
-	jpeg_start_compress(&cinfo, true);
+	R_WriteJPG (rgbdata, grab_width, vid.height, 3, checkname, r_screenshot_jpeg_quality->integer, false, false);
 
-	// Feed Scanline data
-	offset = (cinfo.image_width * cinfo.image_height * 3) - (cinfo.image_width * 3);
-	while(cinfo.next_scanline < cinfo.image_height)
-	{
-		s[0] = &rgbdata[offset - (cinfo.next_scanline * (cinfo.image_width * 3))];
-		jpeg_write_scanlines(&cinfo, s, 1);
-	}
-
-	// Finish Compression
-	jpeg_finish_compress(&cinfo);
-
-	// Destroy JPEG object
-	jpeg_destroy_compress(&cinfo);
-
-	// Close File
-	fclose(file);
-
-	// Free Temp Framebuffer
-	free(rgbdata);
+	// Free temp framebuffer
+	free (rgbdata);
 
 	// Done!
 	if (!silent)
-		VID_Printf (PRINT_ALL, "Wrote %s\n", picname);
+		VID_Printf (PRINT_ALL, "Wrote %s (at %i%% quality)\n", picname, r_screenshot_jpeg_quality->integer);
 }
 
 
@@ -779,9 +725,9 @@ void R_ScreenShot_JPG (qboolean silent)
 
 // fix for old libpng on MSVC6
 //#if defined (PNG_LIBPNG_VER) && (PNG_LIBPNG_VER < 10209)
-#ifndef png_jmpbuf
+/*#ifndef png_jmpbuf
 #define png_jmpbuf(a)	((a)->jmpbuf)
-#endif
+#endif */
 
 /* 
 ================== 
@@ -790,24 +736,21 @@ R_ScreenShot_PNG
 */
 void R_ScreenShot_PNG (qboolean silent)
 {
-	char		picname[80], checkname[MAX_OSPATH];
+	char		picname[80], mapname[MAX_QPATH], checkname[MAX_OSPATH];
 	int			i, grab_width, grab_x;
-	png_structp	png_sptr;
-	png_infop	png_infoptr;
 	byte		*rgbdata;
-	void		*lineptr;
-	FILE		*file;
+	FILE		*file = NULL;
 
 	// create the screenshots directory if it doesn't exist
 	Com_sprintf (checkname, sizeof(checkname), "%s/screenshots", FS_Savegamedir());	// was FS_Gamedir()
 	Sys_Mkdir (checkname);
 
-// 
-// find a file name to save it to 
-// 
+	// Copy mapname to buffer
+	Q_strncpyz (mapname, sizeof(mapname), Cvar_VariableString("mapname"));
 
+	// Find a file name to save it to 
 	// Knightmare- changed screenshot filenames, up to 10000 screenies
-	for (i=0; i<=9999; i++) 
+	for (i = 0; i <= 9999; i++) 
 	{ 
 		int one, ten, hundred, thousand;
 
@@ -816,15 +759,18 @@ void R_ScreenShot_PNG (qboolean silent)
 		ten = (i - thousand*1000 - hundred*100)*0.1;
 		one = i - thousand*1000 - hundred*100 - ten*10;
 
-		Com_sprintf (picname, sizeof(picname), "kmquake2_%i%i%i%i.png", thousand, hundred, ten, one);
+		// Include mapname in filename if enabled
+		if ( r_screenshot_use_mapname->integer && (r_worldmodel != NULL) && (mapname[0] != 0) )
+			Com_sprintf (picname, sizeof(picname), "%s_%i%i%i%i.png", mapname, thousand, hundred, ten, one);
+		else
+			Com_sprintf (picname, sizeof(picname), "kmquake2_%i%i%i%i.png", thousand, hundred, ten, one);
 		Com_sprintf (checkname, sizeof(checkname), "%s/screenshots/%s", FS_Savegamedir(), picname);	// was FS_Gamedir()
 		file = fopen (checkname, "rb");
 		if (!file)
 			break;	// file doesn't exist
 		fclose (file);
 	} 
-	if (i == 10000) 
-	{
+	if (i == 10000) {
 		VID_Printf (PRINT_ALL, "R_ScreenShot_PNG: Screenshots directory is full!\n"); 
 		return;
  	}
@@ -835,69 +781,17 @@ void R_ScreenShot_PNG (qboolean silent)
 
 	// Allocate room for a copy of the framebuffer
 	rgbdata = malloc(grab_width * vid.height * 3);
-	if (!rgbdata)
-	{
+	if ( !rgbdata ) {
 		return;
 	}
 
 	// Read the framebuffer into our storage
 //	qglReadPixels(grab_x, 0, grab_width, vid.height, GL_RGB, GL_UNSIGNED_BYTE, rgbdata);
-	R_ScreenShot_Read_Buffer(grab_x, grab_width, rgbdata);
+	R_ScreenShot_Read_Buffer (grab_x, grab_width, rgbdata);
 
-	png_sptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
-	if (!png_sptr)
-	{
-		free(rgbdata);
-		VID_Printf (PRINT_ALL, "R_ScreenShot_PNG: Couldn't create PNG struct\n"); 
-		return;
-	}
+	R_WritePNG (rgbdata, grab_width, vid.height, 3, checkname, false, false);
 
-	png_infoptr = png_create_info_struct(png_sptr);
-	if (!png_infoptr)
-	{
-		png_destroy_write_struct(&png_sptr, 0);
-		free(rgbdata);
-		VID_Printf (PRINT_ALL, "R_ScreenShot_PNG: Couldn't create info struct\n"); 
-		return;
-	}
-
-//	if ( setjmp(png_sptr->jmpbuf) )
-	if ( setjmp(png_jmpbuf(png_sptr)) )
-	{
-		png_destroy_info_struct(png_sptr, &png_infoptr);
-		png_destroy_write_struct(&png_sptr, 0);
-		free(rgbdata);
-		VID_Printf (PRINT_ALL, "R_ScreenShot_PNG: bad data\n"); 
-		return;
-	}
-
-	// open png file
-	file = fopen(checkname, "wb");
-	if (!file)
-	{
-		png_destroy_info_struct(png_sptr, &png_infoptr);
-		png_destroy_write_struct (&png_sptr, 0);
-		free(rgbdata);
-		VID_Printf (PRINT_ALL, "R_ScreenShot_PNG: Couldn't create a file\n"); 
-		return;
- 	}
-
-	// encode and output
-	png_init_io(png_sptr, file);
-	png_set_IHDR(png_sptr, png_infoptr, grab_width, vid.height, 8,
-		PNG_COLOR_TYPE_RGB, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
-	png_write_info(png_sptr, png_infoptr);
-	for (i=vid.height-1; i>=0; i--)
-	{
-		lineptr = rgbdata + i*grab_width*3;
-		png_write_row(png_sptr, lineptr);
-	}
-	png_write_end(png_sptr, png_infoptr);
-
-	// clean up
-	fclose (file);
-	png_destroy_info_struct(png_sptr, &png_infoptr);
-	png_destroy_write_struct(&png_sptr, 0);
+	// Free temp framebuffer
 	free (rgbdata);
 
 	if (!silent)
@@ -906,36 +800,29 @@ void R_ScreenShot_PNG (qboolean silent)
 #endif	// PNG_SUPPORT
 
 
-/* 
+//#define	USE_WRITETGA
+/*
 ================== 
 R_ScreenShot_TGA
 ================== 
-*/  
+*/
 void R_ScreenShot_TGA (qboolean silent) 
 {
 	byte		*buffer;
-	char		picname[80]; 
-	char		checkname[MAX_OSPATH];
+	char		picname[80], mapname[MAX_QPATH], checkname[MAX_OSPATH];
 	int			i, c, temp, grab_width, grab_x;
-	FILE		*f;
-
-/*	// Heffo - JPEG Screenshots
-	if (r_screenshot_jpeg->integer)
-	{
-		R_ScreenShot_JPG();
-		return;
-	}*/
+	FILE		*file = NULL;
 
 	// create the screenshots directory if it doesn't exist
 	Com_sprintf (checkname, sizeof(checkname), "%s/screenshots", FS_Savegamedir());	// was FS_Gamedir()
 	Sys_Mkdir (checkname);
 
-// 
-// find a file name to save it to 
-// 
+	// Copy mapname to buffer
+	Q_strncpyz (mapname, sizeof(mapname), Cvar_VariableString("mapname"));
 
+	// Find a file name to save it to 
 	// Knightmare- changed screenshot filenames, up to 10000 screenies
-	for (i=0; i<=9999; i++) 
+	for (i = 0; i <= 9999; i++) 
 	{ 
 		int one, ten, hundred, thousand;
 
@@ -944,15 +831,18 @@ void R_ScreenShot_TGA (qboolean silent)
 		ten = (i - thousand*1000 - hundred*100)*0.1;
 		one = i - thousand*1000 - hundred*100 - ten*10;
 
-		Com_sprintf (picname, sizeof(picname), "kmquake2_%i%i%i%i.tga", thousand, hundred, ten, one);
+		// Include mapname in filename if enabled
+		if ( r_screenshot_use_mapname->integer && (r_worldmodel != NULL) && (mapname[0] != 0) )
+			Com_sprintf (picname, sizeof(picname), "%s_%i%i%i%i.tga", mapname, thousand, hundred, ten, one);
+		else
+			Com_sprintf (picname, sizeof(picname), "kmquake2_%i%i%i%i.tga", thousand, hundred, ten, one);
 		Com_sprintf (checkname, sizeof(checkname), "%s/screenshots/%s", FS_Savegamedir(), picname);	// was FS_Gamedir()
-		f = fopen (checkname, "rb");
-		if (!f)
+		file = fopen (checkname, "rb");
+		if (!file)
 			break;	// file doesn't exist
-		fclose (f);
+		fclose (file);
 	} 
-	if (i == 10000) 
-	{
+	if (i == 10000) {
 		VID_Printf (PRINT_ALL, "R_ScreenShot_TGA: Screenshots directory is full!\n"); 
 		return;
  	}
@@ -961,41 +851,54 @@ void R_ScreenShot_TGA (qboolean silent)
 	grab_width = vid.width & ~3;
 	grab_x = (vid.width - grab_width) / 2;
 
-	buffer = malloc(grab_width*vid.height*3 + 18);
+#ifdef USE_WRITETGA
+	buffer = malloc(grab_width * vid.height * 3);
+	if ( !buffer ) {
+		return;
+	}
+	// Read the framebuffer into our storage
+//	qglReadPixels (0, 0, vid.width, vid.height, GL_RGBA, GL_UNSIGNED_BYTE, buffer); 
+	R_ScreenShot_Read_Buffer (grab_x, grab_width, buffer);
+
+	R_WriteTGA (buffer, grab_width, vid.height, 3, checkname, false, false);
+
+	free (buffer);
+#else	// USE_WRITETGA
+	buffer = malloc(grab_width * vid.height * 3 + 18);
 	memset (buffer, 0, 18);
 	buffer[2] = 2;		// uncompressed type
-	buffer[12] = grab_width&255;
-	buffer[13] = grab_width>>8;
-	buffer[14] = vid.height&255;
-	buffer[15] = vid.height>>8;
+	buffer[12] = grab_width & 255;
+	buffer[13] = grab_width >> 8;
+	buffer[14] = vid.height & 255;
+	buffer[15] = vid.height >> 8;
 	buffer[16] = 24;	// pixel size
 
-//	qglReadPixels (grab_x, 0, grab_width, vid.height, GL_RGB, GL_UNSIGNED_BYTE, buffer+18 ); 
-	R_ScreenShot_Read_Buffer(grab_x, grab_width, buffer+18);
+//	qglReadPixels (grab_x, 0, grab_width, vid.height, GL_RGB, GL_UNSIGNED_BYTE, buffer+18); 
+	R_ScreenShot_Read_Buffer (grab_x, grab_width, buffer+18);
 
 	// swap rgb to bgr
 	c = 18+grab_width*vid.height*3;
-	for (i = 18; i < c; i += 3)
-	{
+	for (i = 18; i < c; i += 3) {
 		temp = buffer[i];
 		buffer[i] = buffer[i+2];
 		buffer[i+2] = temp;
 	}
 
-	f = fopen (checkname, "wb");
-	if (!f) {
+	file = fopen (checkname, "wb");
+	if (!file) {
 		free (buffer);
 		VID_Printf (PRINT_ALL, "R_ScreenShot_TGA: Couldn't create a file\n"); 
 		return;
  	}
-	fwrite (buffer, 1, c, f);
-	fclose (f);
+	fwrite (buffer, 1, c, file);
+	fclose (file);
 
 	free (buffer);
+#endif	// USE_WRITETGA
 
 	if (!silent)
 		VID_Printf (PRINT_ALL, "Wrote %s\n", picname);
-} 
+}
 
 
 /* 

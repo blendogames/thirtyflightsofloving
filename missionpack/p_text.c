@@ -38,22 +38,22 @@ void Text_BuildDisplay (texthnd_t *hnd)
 	for(i=0; i<hnd->page_length+2; i++)
 		text[i].text = NULL;
 
-	if(!(hnd->flags & 2))
+	if (!(hnd->flags & 2))
 	{
 		text[MAX_LINES-1].text = "Esc to quit";
-		if(hnd->nlines > MAX_LINES-2)
+		if (hnd->nlines > MAX_LINES-2)
 			text[MAX_LINES-2].text = "Use [ and ] to scroll";
 	}
 
 	p1 = hnd->buffer+hnd->start_char;
 	p3 = hnd->buffer+hnd->size-1;
-	if(hnd->curline > 0)
+	if (hnd->curline > 0)
 	{
 		// Scan for hnd->curline'th 0 byte, point to following character
 		n  = hnd->curline;
 		while(p1 < p3 && n)
 		{
-			if(*p1==0) n--;
+			if (*p1==0) n--;
 			p1++;
 		}
 	}
@@ -61,13 +61,13 @@ void Text_BuildDisplay (texthnd_t *hnd)
 	i = 0;
 	p2 = p1;
 	text[i].text = p2;
-	if(hnd->nlines > hnd->page_length)
+	if (hnd->nlines > hnd->page_length)
 		imax = hnd->page_length-2;
 	else
 		imax = hnd->page_length-1;
 	while(p2 <= p3 && i < imax)
 	{
-		if(*p2 == 0 && p2 < p3)
+		if (*p2 == 0 && p2 < p3)
 		{
 			i++;
 			p2++;
@@ -128,7 +128,7 @@ void Text_Update (edict_t *ent)
 		{
 			tnext = t;
 			tnext++;
-			if(*tnext == 'c')
+			if (*tnext == 'c')
 			{
 				align = TEXT_CENTER;
 				t++;
@@ -166,7 +166,7 @@ void Text_Update (edict_t *ent)
 		}
 		alt = false;
 	}
-//	if(strlen(string) > 1000)
+//	if (strlen(string) > 1000)
 //		gi.dprintf("WARNING: formatted string length (%d) > 1000\n",strlen(string));
 
 	gi.WriteByte (svc_layout);
@@ -215,7 +215,7 @@ void Text_Prev (edict_t *ent)
 
 	hnd = ent->client->textdisplay;
 
-	if(hnd->curline > 0)
+	if (hnd->curline > 0)
 	{
 	//	hnd->curline = max(0, hnd->curline-MAX_LINES/2);
 		hnd->curline = max(0, hnd->curline-hnd->page_length+1);
@@ -284,20 +284,20 @@ void Do_Text_Display (edict_t *activator, int flags, char *message)
 		Com_strcpy (filename, sizeof(filename), basedir->string);
 		if (strlen(gamedir->string))
 		{
-			Com_strcat (filename, sizeof(filename), "\\");
+			Com_strcat (filename, sizeof(filename), "/");
 			Com_strcat (filename, sizeof(filename), gamedir->string);
 		}
 	*/
 		if (strlen(gamedir->string))
-			Com_sprintf(filename, sizeof(filename), "%s\\%s", basedir->string, gamedir->string);
+			Com_sprintf(filename, sizeof(filename), "%s/%s", basedir->string, gamedir->string);
 		else
-			Com_sprintf(filename, sizeof(filename), "%s\\baseq2", basedir->string);
+			Com_sprintf(filename, sizeof(filename), "%s/baseq2", basedir->string);
 
 		// First check for existence of text file in pak0.pak -> pak9.pak
 		in_pak = false;
 		for (i=0; i<=9 && !in_pak; i++)
 		{
-			Com_sprintf(pakfile, sizeof(pakfile), "%s\\pak%d.pak", filename, i);
+			Com_sprintf(pakfile, sizeof(pakfile), "%s/pak%d.pak", filename, i);
 			if (NULL != (f = fopen(pakfile, "rb")))
 			{
 				num = (int)fread(&pakheader, 1, sizeof(pak_header_t), f);
@@ -337,25 +337,25 @@ void Do_Text_Display (edict_t *activator, int flags, char *message)
 				fclose(f);
 			}
 		}
-		if (!in_pak)
+		if ( !in_pak )
 		{
-			Com_strcat (filename, sizeof(filename), "\\maps\\");
+			Com_strcat (filename, sizeof(filename), "/maps/");
 			Com_strcat (filename, sizeof(filename), message);
-			f = fopen(filename,"rb");
-			if(!f)
+			f = fopen(filename, "rb");
+			if ( !f )
 			{ 
-				gi.dprintf("File not found:%s\n",filename);
+				gi.dprintf ("File not found: %s\n", filename);
 				return;
 			}
-			fseek(f,0,SEEK_END);
+			fseek (f, 0, SEEK_END);
 			L = ftell (f);
-			fseek(f,0,SEEK_SET);
+			fseek (f, 0, SEEK_SET);
 			hnd->allocated = L+128;
 			hnd->buffer = gi.TagMalloc(hnd->allocated, TAG_LEVEL);
-			if (!hnd->buffer)
+			if ( !hnd->buffer )
 			{
-				gi.dprintf("Memory allocation failure on target_text\n");
-				Text_Close(activator);
+				gi.dprintf ("Memory allocation failure on target_text\n");
+				Text_Close (activator);
 				return;
 			}
 			memset(hnd->buffer,0,hnd->allocated);
@@ -364,10 +364,10 @@ void Do_Text_Display (edict_t *activator, int flags, char *message)
 		}
 #endif // KMQUAKE2_ENGINE_MOD
 
-		if (!hnd->buffer)
+		if ( !hnd->buffer )
 		{
-			gi.dprintf("Umm... how'd you get here?\n");
-			Text_Close(activator);
+			gi.dprintf ("Umm... how'd you get here?\n");
+			Text_Close (activator);
 			return;
 		}
 	}
@@ -490,7 +490,7 @@ void Do_Text_Display (edict_t *activator, int flags, char *message)
 					centered = true;
 					right_justified = false;
 				}
-				else if(*p1 == 'r')
+				else if (*p1 == 'r')
 				{
 					p1++;
 					centered = false;

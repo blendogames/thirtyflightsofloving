@@ -583,12 +583,8 @@ void mutant_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 }
 
 
-//
-// SPAWN
-//
-
-
-void SP_monster_mutant_precache(void)
+// Knightmare- added soundcache function
+void monster_mutant_soundcache (edict_t *self)
 {
 	sound_swing = gi.soundindex ("mutant/mutatck1.wav");
 	sound_hit = gi.soundindex ("mutant/mutatck2.wav");
@@ -605,6 +601,16 @@ void SP_monster_mutant_precache(void)
 	sound_thud = gi.soundindex ("mutant/thud1.wav");
 }
 
+void SP_monster_mutant_precache (edict_t *self)
+{
+	// Knightmare- use soundcache function
+	monster_mutant_soundcache (self);
+}
+
+
+//
+// SPAWN
+//
 
 /*QUAKED monster_mutant (1 .5 0) (-32 -32 -24) (32 32 32) Ambush Trigger_Spawn Sight
 */
@@ -616,7 +622,7 @@ void SP_monster_mutant (edict_t *self)
 		return;
 	}
 
-  SP_monster_mutant_precache();
+	SP_monster_mutant_precache (self);
 	
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;

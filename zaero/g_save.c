@@ -122,7 +122,28 @@ field_t fields[] = {
 	{"noise", STOFS(noise), F_LSTRING, FFL_SPAWNTEMP},
 	{"pausetime", STOFS(pausetime), F_FLOAT, FFL_SPAWNTEMP},
 	{"item", STOFS(item), F_LSTRING, FFL_SPAWNTEMP},
-	
+	// Knightmare added
+	{"phase", STOFS(phase), F_FLOAT, FFL_SPAWNTEMP},
+	{"shift", STOFS(shift), F_FLOAT, FFL_SPAWNTEMP},
+	{"skydistance", STOFS(skydistance), F_FLOAT, FFL_SPAWNTEMP},
+	{"cloudname", STOFS(cloudname), F_LSTRING, FFL_SPAWNTEMP},
+	{"lightningfreq", STOFS(lightningfreq), F_FLOAT, FFL_SPAWNTEMP|FFL_DEFAULT_NEG},
+	{"cloudxdir", STOFS(cloudxdir), F_FLOAT, FFL_SPAWNTEMP|FFL_DEFAULT_NEG},
+	{"cloudydir", STOFS(cloudydir), F_FLOAT, FFL_SPAWNTEMP|FFL_DEFAULT_NEG},
+	{"cloud1tile", STOFS(cloud1tile), F_FLOAT, FFL_SPAWNTEMP|FFL_DEFAULT_NEG},
+	{"cloud1speed", STOFS(cloud1speed), F_FLOAT, FFL_SPAWNTEMP|FFL_DEFAULT_NEG},
+	{"cloud1alpha", STOFS(cloud1alpha), F_FLOAT, FFL_SPAWNTEMP|FFL_DEFAULT_NEG},
+	{"cloud2tile", STOFS(cloud2tile), F_FLOAT, FFL_SPAWNTEMP|FFL_DEFAULT_NEG},
+	{"cloud2speed", STOFS(cloud2speed), F_FLOAT, FFL_SPAWNTEMP|FFL_DEFAULT_NEG},
+	{"cloud2alpha", STOFS(cloud2alpha), F_FLOAT, FFL_SPAWNTEMP|FFL_DEFAULT_NEG},
+	{"cloud3tile", STOFS(cloud3tile), F_FLOAT, FFL_SPAWNTEMP|FFL_DEFAULT_NEG},
+	{"cloud3speed", STOFS(cloud3speed), F_FLOAT, FFL_SPAWNTEMP|FFL_DEFAULT_NEG},
+	{"cloud3alpha", STOFS(cloud3alpha), F_FLOAT, FFL_SPAWNTEMP|FFL_DEFAULT_NEG},
+	{"fade_start_dist", STOFS(fade_start_dist), F_INT, FFL_SPAWNTEMP},
+	{"fade_end_dist", STOFS(fade_end_dist), F_INT, FFL_SPAWNTEMP},
+	{"image", STOFS(image), F_LSTRING, FFL_SPAWNTEMP},
+	{"rgba", STOFS(rgba), F_LSTRING, FFL_SPAWNTEMP},
+
 	//need for item field in edict struct, FFL_SPAWNTEMP item will be skipped on saves
 	{"item", FOFS(item), F_ITEM},
 	
@@ -334,6 +355,10 @@ void InitGame (void)
 	sv_stopspeed = gi.cvar ("sv_stopspeed", "100", 0);		// PGM - was #define in g_phys.c
 	sv_step_fraction = gi.cvar ("sv_step_fraction", "0.90", 0);	// Knightmare- this was a define in p_view.c
 
+	g_aimfix = gi.cvar ("g_aimfix", "0", CVAR_ARCHIVE);								// Knightmare- from Yamagi Q2
+	g_aimfix_min_dist = gi.cvar ("g_aimfix_min_dist", "128", CVAR_ARCHIVE);			// Knightmare- minimum range for aimfix
+	g_aimfix_taper_dist = gi.cvar ("g_aimfix_taper_dist", "128", CVAR_ARCHIVE);	// Knightmare- transition range for aimfix
+
 	// noset vars
 	dedicated = gi.cvar ("dedicated", "0", CVAR_NOSET);
 
@@ -346,7 +371,7 @@ void InitGame (void)
 	deathmatch = gi.cvar ("deathmatch", "0", CVAR_LATCH);
 	coop = gi.cvar ("coop", "0", CVAR_LATCH);
 	skill = gi.cvar ("skill", "1", CVAR_LATCH);
-	//maxentities = gi.cvar ("maxentities", "1024", CVAR_LATCH);
+//	maxentities = gi.cvar ("maxentities", "1024", CVAR_LATCH);
 	maxentities = gi.cvar ("maxentities", va("%i",MAX_EDICTS), CVAR_LATCH);
 
 	// change anytime vars
@@ -369,16 +394,21 @@ void InitGame (void)
 	printSoundRejects = gi.cvar("printsoundrejects", "0", CVAR_SERVERINFO);
 #endif
 
+#ifndef KMQUAKE2_ENGINE_MOD
+    // From Q2Pro- export our own features
+    gi.cvar_forceset ("g_features", va("%d", GMF_ENHANCED_SAVEGAMES));
+#endif
+
 	// items
 	InitItems ();
 
 #if defined(_DEBUG) && defined(_Z_TESTMODE)
 
 	gi.dprintf ("==== InitTestWeapon ====\n");
-	InitTestWeapon();
+	InitTestWeapon ();
 
 	gi.dprintf ("==== InitTestItem ====\n");
-	InitTestItem();
+	InitTestItem ();
 
 #endif
 
@@ -404,6 +434,10 @@ void InitGame (void)
 //=========================================================
 
 #ifdef SAVEGAME_USE_FUNCTION_TABLE
+
+#ifdef _MSC_VER
+#pragma warning(disable : 4054)	// type cast for function pointers
+#endif	// _MSC_VER
 
 #include "z_list.h"
 
@@ -1182,5 +1216,11 @@ void ReadLevel (char *filename)
 			if (strcmp(ent->classname, "target_crosslevel_target") == 0)
 				ent->nextthink = level.time + ent->delay;
 	}
-}
 
+	// Knightmare- reload static cached sounds for entities
+	G_SoundcacheEntities ();
+
+	// Knightmare- precache transitioning player inventories here
+	// Fixes lag when changing weapons after level transition
+	G_PrecachePlayerInventories ();
+}

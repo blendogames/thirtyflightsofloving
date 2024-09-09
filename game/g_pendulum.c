@@ -220,7 +220,7 @@ void pendulum_blocked (edict_t *self, edict_t *other)
 				wave = 2*M_PI - wave;
 		}
 		time = wave/sgor;
-		self->startframe = level.framenum - time*10.;
+		self->startframe = level.framenum - time * 10.0;
 		self->moveinfo.start_angles[ROLL] = -fabs(angles[ROLL] / cos(wave));
 
 		// Now we know the new pendulum velocity and crate velocity, *assuming*
@@ -441,7 +441,7 @@ void pendulum_use (edict_t *self, edict_t *other, edict_t *activator)
 		{
 			float	delay;
 			delay = self->delay * 2.0 * M_PI * sqrt(self->radius/(float)sv_gravity->value);
-			delay = 0.1 * (int)(10*delay);
+			delay = 0.1 * (int)(10 * delay);
 			self->nextthink  = level.time + delay;
 			self->startframe = level.framenum + delay*10;
 			if(!(self->spawnflags & SF_PENDULUM_STOP_AT_TOP))

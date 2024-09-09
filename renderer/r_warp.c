@@ -230,15 +230,12 @@ void R_SubdivideSurface (msurface_t *surf)
 
 //=========================================================
 
-
-
 // speed up sin calculations - Ed
 float	r_turbsin[] =
 {
 	#include "warpsin.h"
 };
 #define TURBSCALE (256.0 / (2 * M_PI))
-
 
 
 #if 0
@@ -298,8 +295,6 @@ void R_InitDSTTex (void)
 #endif
 
 
-image_t *R_TextureAnimation (msurface_t *surf);
-
 /*
 =============
 RB_RenderWarpSurface
@@ -312,7 +307,7 @@ void RB_RenderWarpSurface (msurface_t *surf)
 	float		args[7] = {0,0.05,0,0,0.04,0,0};
 	float		alpha = colorArray[0][3];
 	image_t		*image = R_TextureAnimation (surf);
-	qboolean	lightmapped = surf->isLightmapped && (r_worldmodel->bspFeatures & BSPF_WARPLIGHTMAPS);
+	qboolean	lightmapped = surf->isLightmapped && R_WarpLightmaps_Enabled() && !(surf->texinfo->flags & SURF_NOLIGHTENV);
 	qboolean	vertexLight = r_warp_lighting->integer && !lightmapped && !(surf->texinfo->flags & SURF_NOLIGHTENV);
 	qboolean	texShaderWarpARB = glConfig.arb_fragment_program && r_pixel_shader_warp->integer;
 	qboolean	texShaderWarp = texShaderWarpARB;
@@ -338,18 +333,21 @@ void RB_RenderWarpSurface (msurface_t *surf)
 	if (texShaderWarpARB)
 	{
 		GL_SelectTexture(0);
-		GL_MBind(0, image->texnum);
+	//	GL_MBind(0, image->texnum);
 
 		if (lightmapped)
 		{
-		//	GL_EnableTexture(1);
+			if (r_lightmap->integer != 0)
+				GL_MBind (0, glMedia.whiteTexture->texnum);
+			else
+				GL_MBind (0, image->texnum);
+
 			if (r_fullbright->integer != 0)
-				GL_MBind (1, glMedia.whitetexture->texnum);
+				GL_MBind (1, glMedia.whiteTexture->texnum);
 			else
 				GL_MBind (1, glState.lightmap_textures + surf->lightmaptexturenum);
 
 			GL_EnableTexture(2);
-		//	GL_MBind(2, dst_texture_ARB);
 			GL_MBind(2, glMedia.distTextureARB->texnum);
 
 			GL_Enable (GL_FRAGMENT_PROGRAM_ARB);
@@ -358,8 +356,9 @@ void RB_RenderWarpSurface (msurface_t *surf)
 		}
 		else
 		{
+			GL_MBind (0, image->texnum);
+
 			GL_EnableTexture(1);
-		//	GL_MBind(1, dst_texture_ARB);
 			GL_MBind(1, glMedia.distTextureARB->texnum);
 
 			GL_Enable (GL_FRAGMENT_PROGRAM_ARB);
@@ -376,7 +375,7 @@ void RB_RenderWarpSurface (msurface_t *surf)
 
 			GL_EnableTexture(1);
 			if (r_fullbright->integer != 0)
-				GL_MBind (1, glMedia.whitetexture->texnum);
+				GL_MBind (1, glMedia.whiteTexture->texnum);
 			else
 				GL_MBind (1, glState.lightmap_textures + surf->lightmaptexturenum);
 		}
@@ -428,7 +427,7 @@ void R_DrawWarpSurface (msurface_t *surf, float alpha, qboolean render)
 	mpolyvertex_t	*v;
 	vec3_t		point;
 	int			i, texWidth, texHeight;
-	qboolean	lightmapped = surf->isLightmapped && (r_worldmodel->bspFeatures & BSPF_WARPLIGHTMAPS);
+	qboolean	lightmapped = surf->isLightmapped && R_WarpLightmaps_Enabled() && !(surf->texinfo->flags & SURF_NOLIGHTENV);
 	qboolean	vertexLight = r_warp_lighting->integer && !lightmapped && !r_fullbright->integer && !(surf->texinfo->flags & SURF_NOLIGHTENV);
 
 	c_brush_surfs++;
@@ -450,7 +449,7 @@ void R_DrawWarpSurface (msurface_t *surf, float alpha, qboolean render)
 	{
 		c_brush_polys += (bp->numverts-2);
 		p = bp;
-		if (RB_CheckArrayOverflow (p->numverts, (p->numverts-2)*3))
+		if ( RB_CheckArrayOverflow(p->numverts, (p->numverts-2)*3) )
 			RB_RenderWarpSurface (surf);
 		for (i = 0; i < p->numverts-2; i++) {
 			indexArray[rb_index++] = rb_vertex;
@@ -469,8 +468,8 @@ void R_DrawWarpSurface (msurface_t *surf, float alpha, qboolean render)
 			s += scroll;
 			s /= (float)texWidth;
 			t /= (float)texHeight;
+			VectorCopy (v->xyz, point);
 //=============== Water waves ========================
-			VectorCopy(v->xyz, point);
 			if ( r_waterwave->value > 0 && !(surf->texinfo->flags & SURF_FLOWING)
 				&& surf->plane->normal[2] > 0
 				&& surf->plane->normal[2] > surf->plane->normal[0]

@@ -1,0 +1,376 @@
+CTC v.04:
+-added 3rd person animation for:
+  bayonet slashing
+  grenade pin pulling
+-added SVT bayonet code
+-improved turret code:
+  player can use turret with "arty" command
+  player's view lines up with tip of gun for better aiming
+  should be less laggy
+  mapper sets "tank 1", player disappears inside tank
+  mapper sets "stance" to force player to particular stance:  set "stance" to 1,2 or 4 (NOT 3) for stand, duck, crawl
+  crosshair added
+-binoculars are now aimed with "true sight" bind and fired with fire button instead of using "arty" key
+-fixed binoculars shaking
+-func_trains can now be objectives.  Mapper adds "obj_gain" "obj_loss" "obj_name" fields to use.  Set "style 1" for animated,"style 2" for animated fast.
+-correct objective sound played when objective destroyed.  Axis and Allies were switched before
+-added "deathtarget" field for func_explosive_objective, entity targeted when destroyed
+-player is translucent when invulnerable from spawning
+-"thrown back" message for grenades
+-sabre death message
+-hitboxes fixed when changing stances
+-fixed annoying limp swaying
+-player doesnt face enemy when killed
+-mapper can set class limits
+-"sv_maplist" command added from quake2 v3.21
+-next map to be played printed when level ends
+-some server defaults changed
+-"+" added next to medic in scoreboard (accidently left out in shaef 1.0)
+-Potato Masher spins better
+-brain gib spins
+-"style 1" makes misc_md2's translucent
+-improved USM shotgun reload code
+-shotgunner starts with 20 spare shells
+-added Thompson to USM dll for officer
+-improved underwater code:
+  players can change stance underwater
+  players can go prone underwater to swim faster
+  shooting underwater exploit fixed
+-added Molotov Cocktail to Russian dll
+-Player can hold Molotov after lighting it by holding in fire button
+-moved GBR,ITA,POL,RUS & USM firing functions into game dll to help with stability
+-new SP_airstrike entity & spawn_toggle for toggling info_reinforcements_start between teams
+-map spawned weapons now come with ammo fully loaded and no extra clips
+
+
+
+
+
+
+
+
+
+
+v1.0  3/20/04
+-removed check_dodge calls
+
+v.21b  2/29/04
+-removed ent file code
+-turret fixes
+-added blood sprays into max_gib count limit
+
+v.21
+-added user controlled turrets for mappers
+-work on chase mode/observer mode
+-jump meter no longer dependent on player's framerate
+-mappers can set misc_md2's to be toggled on and off.  Just add a targetname value and trigger it.
+-mapper can set a different "model" for misc_viper
+-fix for ceiling doors not opening from below
+-[REMOVED]mapper can set class limits for individual classes.  For each class "info_sniper_start" etc. set a "count" value to the number you want or to "-1" to disable the class.[REMOVED]
+-airstrike planes fly faster when going over long distances so the sound effect is timed better.
+-fixed hip firing anim not playing
+-3rd person player model brings binoculars up to eyes when aiming
+-fixed airstrike countdown message saying "0 seconds to go"
+-removed knife sparks appearing at 0,0,0 when thrown
+-player can switch to observer after joining team
+-mapper can target events with objective_touch
+-mapper can make explodable func_trains by setting a health value
+
+v.20
+-enabled toggled lights in deathmatch for mappers.
+-added random teleporters.  Mapper puts more than 1 teleporter destination to use it.
+-menu is removed when going into observer mode
+-added chase mode when observing.  Observer presses fire button to chase nearest player.  And "[" and "]" keys to jump between players.
+-players can pick up extra clips from the ground when they already have  some (had to have 0 before).
+-changed "gamemap" to "map" on map change.
+-class bugs should be fixed.
+
+v.19c
+-small adjustment to firing code to stop linux errors
+-stopped stray footstep sounds that dont match ground texture
+-mappers can set obj_owner to 2 (allies) or 3 (axis) to prevent that team from triggering trigger_multiple or trigger_once. (for situations like the doors on simserhof, flags on invade1).
+
+v.19b
+-removed old maplist fix to prepare for windows server testing
+
+v.19  
+-better fix for fast swimming exploit
+-fix for double airstrike bug/exploit
+-fixed bug with fast stance changing showing standing player in crouch
+-fixed demos crashing
+
+v.18b  12/16/03
+-trying to fix bugs with v.18
+
+v.18 12/13/03
+-corpse can now be shot when player is still in body waiting to respawn(removed v.18b)
+-fixed objectives not working on outpost
+-worked on extra animations: prone to stand and hip firing,  when extra_anims 1 is set with new models.
+-fix for duds giving infinite grenades
+-objects get pushed out of the way instead of exploding when blocking doors
+-fixed erratic knife slashing bug
+
+v.17  12/02/03
+-new entity for mappers "spawn_protect".   Put this in a team's base, attach it to a brush and set the "obj_owner" to the team number (0 or 1).  Other team's players going into the area can't fire and are killed if they dont leave in 5 seconds.  Also any nades thrown in will be duds.
+-added thud sound when tnt hits wall.
+-fixed minor helmet bug
+-brain now comes out of head with headshot (was coming out of stomach/chest)
+-worked on blood sprays
+-bombs now come out of middle of airstrike plane instead from in front of the nose.
+-added code in for airstrike plane models and stuka sound (requires new models and sounds)
+-added code in for mauser model to fix shaking (requires new model)
+
+
+v.16  
+-removed "Killbox" from teleporter code.
+-fixed minor airstrike bugs
+-airstrike planes now tilt when dropping bombs
+-fixed bug with announcing winner incorrectly
+-New cvar "objective_protect".  Set this to 1 and players can not destroy or damage their own team's objectives.  The default setting is 1.
+-fixed doors causing players to spin around (needs testing for side effects)
+-worked on knife code.  Throw animation now plays correctly and the knife spins through the air better.
+-helmets spin in random direction when thrown
+-fixed intermission view being in floor sometimes
+
+
+v.15  11/24/03
+-removed ability to fire hmg when standing and facing downward
+-added parachute code for airborne class (will require new model so disabled for now)
+-improved hitboxes on corpses (still needs work or can't be fixed entirely)
+-rewrote most of the arty/airstrike code.  Airstrikes are now brought in and dropped by plane (the p51 model).  USA sound changed to faf/p51f.wav
+-player view can no longer go outside the map when changing stances or crouched
+-fixed drop weapons spinning infinitely (weapons land nicer now too)
+-temporary fix to decrease mauser shaking
+
+v.14  11/16/03
+-helmets no longer stick to walls, dont disappear when hitting objectives or other players
+-knives dont disappear when hitting objectives or other players
+-better fix for stopping blood spray with drop_shot
+-players cause damage to things they fall on from heights (including other players)
+-fix for bleeding message coming up at wrong time
+-rewrote game ending code to announce tie games correctly
+-players frozen properly when in limbo mode
+
+
+v.13  11/08/03
+-items and weapons are thrown in somewhat random direction when dropped. 
+-added code to fix binocular view being off center sometimes.  This requires a pak file change so disabled for now.
+-flamethrower tank can be shot and blown up.  When the tank is hit, flames shoot out that can catch teammates on fire.
+-wave animation shown for player when throwing nades
+-added wobble when bullet hits off helmet
+-stopped blood spraying with drop_shot
+-knife no longer floats in the air when dropped
+
+
+
+v.12  10/18/03
+-sniper scope now dependent on the weapon, not player's team
+-made weapons more accurate in truesight
+-fixed inaccurate sniping bug
+-added fix for "arty" crashing from bayonet code
+-sniper scope fades in faster
+-added fix for standing dead bug underwater
+-drowning sounds when level is over should be stopped
+
+
+v.11  9/18/03
+-you can now use the "arty" key to use the bayonet on the enfield for the gbr dll.  Or bind a key to "attack2" (they can replace each other).
+
+-final fix for nades disappearing (hopefully)
+
+-sniper changes:
+   added fade in effect when looking into scope
+   worked on gun animations so the gun is shown being lowered from the eye correctly
+   made the kick smoother when firing
+   model shaking during idle animations should be fixed
+   bullet trajectory now affected by explosions and scope wobble
+   faint blue tint on screen when scoped (also for binoculars)
+   fixed not being able to switch to pistol quickly
+
+-rocket launcher changes:
+   firing animations now play correctly for bazooka and panzershrek
+   rocket trails added
+
+-smoother kick added to pistols, sniper & rifles.
+
+-firing animation now plays fully for last bullet shots for all guns.
+
+
+  
+
+v.10  9/13/03
+-animation tweaks:
+  added second wave animation to player model when finishing reloading
+  added wave animation to player model for sniper/mauser bolting
+  shortened strafe-aim-walk animation to 5 frames
+  player model animations now 'limp' when running after leg wounds.
+
+-flamethrower changes:
+  stopped flaming through walls
+  reduced smoke particles/sparks from flamers by 70% to reduce lag
+  added sound effect to small flames on ground (sound/inland/fire.wav)
+  white diamond bug fixed from last version
+
+-players only bleed when moving (awaiting feedback)
+-shots now line up with gun sights better, taking view bob/pitch and explosions into account
+-mappers can now use custom player skins with their maps.  Add a "skin" variable into the info_team_start for the team you want to add the skin for ie "skin  snowcamo".  snowcamo_medic.pcx will be the medic skin for that team.  snowcamo.pcx will be the skin for all other classes.
+-no knockback when punching teammates
+-final fixes for grenades on slopes bug.  Disappearing/stuck nades should be fixed.
+-pings dont go above 999 on menu now
+-put hitbox width back to old size because of getting stuck on doors.  Will work on it later.  The height is still the same.
+
+
+v.09 9/07/03
+-standing dead bug problem with extra_anims fixed 
+-fix for custom gbr flamethrower pack not appearing
+-changes to drop_shot:  fixed player dropping 2 weapons, player doesnt lose health when weapon is shot out of hands, hitbox changed from stomach to chest.
+-fixed bug with arms disappearing when picking up helmet.
+-jump animation only plays when player jumps now, not when going down slopes.
+-other tweaks for Parts' new anims.
+-speed restriction added to rocket launchers in TS
+-fixed fast moving underwater exploit (last fix only worked on autos)
+-added dll_version cvar back in
+-tweaked hitboxes so they match the player model better.
+
+v.08e (4.2s) 6/06/03
+-fix added for cmd_scope crash bug
+
+v.08d (4.2s)  6/04/03
+-re-added unused items to code from v.08 (was causing a crash in Windows)
+
+v.08c (4.2s)
+-removed extra models from team dlls
+-attempted fix for nade crash
+-victory pic re-added (was left out of scoreboard code by mistake)
+-changed DEVVERSION to 4.2s
+-removed "dll_version" serverinfo cvar
+
+v.08b
+-more work for Parts' animations (this wont work until new models are done/released)
+-removed quake2 maps thing
+-removed not being able to change weapons while reloading
+
+v.08 5/30/03
+-stopped multiple copies of same v_ weapon being used for each team (might have to be removed later for new animations)
+-removed mauser tweak (should be a model change later instead)
+-added jump motion to 1st person view weapon when jumping
+-updated code to stop passworded server crash
+-fixed slowdown when coming out of truesight on mauser
+-player cant change weapons when reloading
+-new commands for selecting weapons:
+use sniper, use pistol, use rifle, use smg, use lmg, use hmg, use rocket, use flamer.  Works for all teams.
+-fix for class menu coming up at wrong time (menu problems should be fixed)
+-increased range on medics when healing to make it easier to heal
+-non dday maps no longer crash quake 2 when loading
+-removed non dday and unused items from code
+-fixed last wounded death message crash
+
+v.07 5/25/03
+-fix for scoreboard not coming up at beginning
+-player can press fire button to bring up team or class menu when they need it when dead
+-worked on footstep code.  Footsteps play correctly for slower classes now
+-new option for passwording teams:  allied_password, axis_password  for open squad practices.  For example if the servers sets axis_password "abcd", the player has to set password "abcd" to be able to join axis.  axis_password/allied_password "none" turns it off.
+-worked on auto select.  Team kill count now considered when selecting team.
+-crash from last version fixed
+
+
+v.06 5/18/03 (Unstable version)
+-sniper not unzooming when jumping fixed
+-bug with player having nade shot out of hand fixed
+-grenade slope bug and quirks that arose from trying to fix it should be fixed
+-throwing grenade through floor when prone fixed
+-kills should appear on server browsers/gamespy now if player_scores 1 is set
+-fixed server crashing on passworded servers
+-removed view offset from last version
+-worked on scoreboard
+-disabled shouting when dead
+-fixed %C to work correctly
+-players can only shout once every 1/2 second
+-fixed target_explosions reporting deaths incorrectly in death message
+-stopped nades exploding after map ends
+-"force_auto_select" cvar.  player can only use auto select to join when set.
+-bug with airborne landing in water and jumping high fixed
+
+
+v.05 5/13/03
+-raised volume on victory song
+-support for animated misc_md2's added.  Mapper adds a setting for "frames" to the misc_md2 entity for the number of frames in the model.  Also works for sprites.
+-fix for maplist crashing
+-players can join teams and pick classes at countdown at start of map
+-fixed random respawn intervals and added respawn timer
+-Fixed flamethrower making sound under water
+-new command "objectives" for player to use to bring up objective pic
+-standing corpse when changing teams bug fixed
+-fixed delay on player model going into truesight frame
+-fixed delay on player model going from prone to standing
+-work on Parts' new animations
+-players can use variables in chat messages to print various info:
+%L prints nearest objective or map location (map location requires mapper to add "map_location" entity to their map with "message" field filled out)
+%T prints the name of any nearby teammates
+%M prints the name of nearest team medic
+example : say_team "%M, I need a medic near the %L!" = "Wade, I need a medic near the Right Pillbox!"
+%C prints the name of the player's class
+-Added horizontal view offset to players (awaiting feedback)
+-fixed 2 death sounds playing on falling death
+
+
+v.04 5/09/03
+-raised fist/helmet damage
+-death messages indicate who last wounded a player when he suicides/falls to death/gets himself killed.
+-victory song blasting fixed
+-all level sounds turned off when victory song plays.
+-pistol no ammo animation bug fixed
+-flame sound playing on flamethrower with no fuel fixed
+-alternate fix for nade on slope bug (still bugged though, needs work)
+-fixed mauser not playing bolt animation when changing truesight
+-fixed fast swimming exploit
+-changed truesight frame for player model to frame1 so firing looks better
+-attempted fix for dead usa player models appearing on gbr/rus maps
+-attempted fix for gbr map crashes
+-new cvar "extra_anims" for Parts' new animations (will be disabled on public server)
+-flamethrower slowed down when firing
+-1 second delay put on player id so name stays on screen longer
+
+
+v.03 5/03/03
+-fixed 2nd menu crashing bug
+-helmet death message added
+-punching causes knockback
+-nade on slope bug fixed (needs testing to make sure there's no adverse effects)
+-fixed popping out of true-sight on slopes, replaced with better anti-dive code
+-put hmg bullets back to normal from last version
+-new cvar  "max_gibs"  sets the amount of gibs & debris to be on server at once.  This will stop lockups from a lot of players dying in an explosion at once and cut down on lag in general.  Default setting is max_gibs 20.
+-team icons now appear in the corner correctly in software mode
+-removed pulsing light from dropped items
+-quake 2 3.21 password code implemented
+-artillery changes:  death messages added, stopped horizontal artillery bug, artillery can be cancelled without having to look through binoculars
+-team kill messages announced as "(Friendly fire)"
+-standing hmg code implemented
+
+
+v.02b 4/28/03
+-menu crashing fix from last version
+-getting stuck in teleporter fix
+
+
+v.02 4/27/03
+fix for counting players per team.  Should fix auto-joining and scoreboard showing players count per team incorrectly.
+-new hmg firing code.  Regular bullets come out slow like the tracers.  Raised hmg tracer/bullet speed (awaiting feedback)
+-stamina meter bug fix.   Non-jumps no longer lower stamina.
+-tweaked player stance_view heights to line up with player models' eyes better
+-tweaked timing on grenade pin pull noises to line up with the animation correctly
+-tweaked weapon bolt/reload sounds timing
+-allied hmg first bullet fix
+-campaign_mode cvar added.  Set campaign_mode 0 to have maps always move forward.  Default is campaign_mode 1
+-dday5 goes to dday1 when allies win
+-tweaked where sniper bullets & rockets originate to match with player's eye better
+
+
+v.01 4/20/03
+-changed "hyper3" references in code workspace to "usa"
+-Mauser raised sights to line up better
+-aim bug fix implemented.
+-scoreboard changes implemented.
+-"player_scores 1"  enables individual player scores (disabled by default)
+-explosions screwing up smg kick fixed.
+-added "dll" to serverinfo to show version number (.01).

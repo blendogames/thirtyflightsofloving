@@ -131,12 +131,13 @@ void fire_ionripper (edict_t *self, vec3_t start, vec3_t dir, int damage, int sp
 //       entities.
 void ion_delayed_start (edict_t *ion)
 {
-	if (g_edicts[1].linkcount)
+//	if (g_edicts[1].linkcount)
+	if ( AnyPlayerSpawned() )	// Knightmare- function handles multiple players
 	{
-		VectorScale(ion->movedir,ion->moveinfo.speed,ion->velocity);
+		VectorScale (ion->movedir, ion->moveinfo.speed, ion->velocity);
 		ion->nextthink = level.time + 3;
 		ion->think = ionripper_sparks;
-		gi.linkentity(ion);
+		gi.linkentity (ion);
 	}
 	else
 		ion->nextthink = level.time + FRAMETIME;
@@ -148,13 +149,13 @@ void SP_ion (edict_t *ion)
 	ion->s.modelindex = gi.modelindex ("models/objects/boomrang/tris.md2");
 	ion->s.sound = gi.soundindex ("misc/lasfly.wav");
 	ion->touch = ionripper_touch;
-	VectorCopy(ion->velocity,ion->movedir);
-	VectorNormalize(ion->movedir);
+	VectorCopy (ion->velocity, ion->movedir);
+	VectorNormalize (ion->movedir);
 	ion->moveinfo.speed = VectorLength(ion->velocity);
-	VectorClear(ion->velocity);
+	VectorClear (ion->velocity);
 	ion->think = ion_delayed_start;
 	ion->nextthink = level.time + FRAMETIME;
-	gi.linkentity(ion);
+	gi.linkentity (ion);
 }
 
 
@@ -367,12 +368,13 @@ void fire_phalanx_plasma (edict_t *self, vec3_t start, vec3_t dir, int damage, i
 
 void phalanx_plasma_delayed_start (edict_t *ph_plasma)
 {
-	if (g_edicts[1].linkcount)
+//	if (g_edicts[1].linkcount)
+	if ( AnyPlayerSpawned() )	// Knightmare- function handles multiple players
 	{
-		VectorScale(ph_plasma->movedir, ph_plasma->moveinfo.speed, ph_plasma->velocity);
+		VectorScale (ph_plasma->movedir, ph_plasma->moveinfo.speed, ph_plasma->velocity);
 		ph_plasma->nextthink = level.time + 8000.0f / ph_plasma->moveinfo.speed;
 		ph_plasma->think = G_FreeEdict;
-		gi.linkentity(ph_plasma);
+		gi.linkentity (ph_plasma);
 	}
 	else
 		ph_plasma->nextthink = level.time + FRAMETIME;
@@ -386,7 +388,7 @@ void SP_phalanx_plasma (edict_t *ph_plasma)
 	ph_plasma->s.effects |= EF_PLASMA | EF_ANIM_ALLFAST;
 	ph_plasma->s.sound      = gi.soundindex ("weapons/rockfly.wav");
 	ph_plasma->touch = phalanx_plasma_touch;
-	AngleVectors(ph_plasma->s.angles, dir, NULL, NULL);
+	AngleVectors (ph_plasma->s.angles, dir, NULL, NULL);
 	VectorCopy (dir, ph_plasma->movedir);
 	ph_plasma->moveinfo.speed = VectorLength(ph_plasma->velocity);
 	if (ph_plasma->moveinfo.speed <= 0)
@@ -395,7 +397,7 @@ void SP_phalanx_plasma (edict_t *ph_plasma)
 	// For SP, freeze plasma until player spawns in
 	if (game.maxclients == 1)
 	{
-		VectorClear(ph_plasma->velocity);
+		VectorClear (ph_plasma->velocity);
 		ph_plasma->think = phalanx_plasma_delayed_start;
 		ph_plasma->nextthink = level.time + FRAMETIME;
 	}
@@ -415,24 +417,40 @@ TRAP
 ==============================================================================
 */
 
-extern void SP_item_foodcube (edict_t *best);
+extern void SP_item_foodcube (edict_t *self);
 
-extern int	gibsthisframe;
-extern int lastgibframe;
+// Knightmare added
+void Foodcube_Think (edict_t *self)
+{
+	// do nothing until we're on ground and stationary
+	if ( !self->groundentity || (VectorLength(self->velocity) > 0) ) {
+		self->nextthink = level.time + 0.1;
+		return;
+	}
+	
+//	gi.dprintf ("foodcube_think: converting to item\n");
+	VectorClear	(self->mins);
+	VectorClear (self->maxs);
+	self->think = NULL;
+	self->nextthink = 0;
+	SP_item_foodcube (self);
+}
+
 
 void Trap_Think (edict_t *ent)
 {
 	edict_t	*target = NULL;
 	edict_t	*best = NULL;
+	edict_t	*foodcube = NULL;
 	vec3_t	vec;
 	int		len, i;
 	int		oldlen = 8000;
-//	vec3_t	forward, right, up;
+	vec3_t	forward, right, up;
 	
 	if (ent->timestamp < level.time)
 	{
 		ent->s.frame = 6;
-	//	BecomeExplosion1(ent);
+	//	BecomeExplosion1 (ent);
 		// note to self
 		// cause explosion damage???
 		return;
@@ -456,10 +474,9 @@ void Trap_Think (edict_t *ent)
 
 			for (i=0; i<3; i++)
 			{
-				
 				// Knightmare- forget this, enough gibs are spawned already.
 				// Lazarus: Prevent gib showers from causing SZ_GetSpace: overflow
-			/*	if (level.framenum > lastgibframe)
+				if (level.framenum > lastgibframe)
 				{
 					gibsthisframe = 0;
 					lastgibframe = level.framenum;
@@ -469,8 +486,8 @@ void Trap_Think (edict_t *ent)
 				{
 					best = G_Spawn();
 
-				//	if (strcmp (ent->enemy->classname, "monster_gekk") == 0)
-					if (ent->enemy->blood_type == 1)
+				//	if (ent->enemy->blood_type == 1)
+					if (strcmp (ent->enemy->classname, "monster_gekk") == 0)
 					{
 						best->s.modelindex = gi.modelindex ("models/objects/gekkgib/torso/tris.md2");	
 					//	best->s.effects |= TE_GREENBLOOD;
@@ -497,10 +514,10 @@ void Trap_Think (edict_t *ent)
 
 					AngleVectors (ent->s.angles, forward, right, up);
 				
-					RotatePointAroundVector( vec, up, right, ((360.0/3)* i)+ent->delay);
-					VectorMA (vec, ent->wait/2, vec, vec);
-					VectorAdd(vec, ent->s.origin, vec);
-					VectorAdd(vec, forward, best->s.origin);
+					RotatePointAroundVector (vec, up, right, ((360.0/3)* i)+ent->delay);
+					VectorMA (vec, ent->wait / 2, vec, vec);
+					VectorAdd (vec, ent->s.origin, vec);
+					VectorAdd (vec, forward, best->s.origin);
   
 					best->s.origin[2] = ent->s.origin[2] + ent->wait;
 				
@@ -522,27 +539,37 @@ void Trap_Think (edict_t *ent)
 						best->waterlevel = 1;
 
 				//	best->nextthink = level.time + 0.1;
-					best->nextthink = level.time + 10 + random()*10;
+					best->nextthink = level.time + 2 + random() * 1;
 				//	best->think = G_FreeEdict;
 					best->think = gib_fade;
 					gi.linkentity (best);
-				} */
-
-				best = G_Spawn ();
-				VectorCopy (ent->s.origin, best->s.origin);
-				best->s.origin[2]+= 32;
-				SP_item_foodcube (best);
-				best->velocity[2] = 400;
-				best->count = 20; //was best->mass
-				gi.linkentity (best);
-				if (ent->timestamp < (level.time - 1)) //close if time is just about up
-					ent->s.frame++;
-				else //go back to previous state
-					ent->s.frame = 4;
+				}
 			}
-				
+
+			foodcube = G_Spawn ();
+			VectorCopy (ent->s.origin, foodcube->s.origin);
+			foodcube->s.origin[2] += 32;
+		//	SP_item_foodcube (foodcube);
+			// Knightmare- fix for droptofloor: startsolid error
+			// spawn as a bbox entity, then change to item once on floor
+			foodcube->s.modelindex = gi.modelindex("models/objects/trapfx/tris.md2");
+			VectorSet (foodcube->mins, -4, -4, -16);
+			VectorSet (foodcube->maxs, 4, 4, -12);
+			foodcube->solid = SOLID_TRIGGER;
+			foodcube->movetype = MOVETYPE_TOSS;
+			foodcube->think = Foodcube_Think;
+			foodcube->nextthink = level.time + 0.5;
+			// end Knightmare
+			foodcube->velocity[2] = 400;
+			foodcube->count = max(ent->mass, 20);	// was ent->mass
+			gi.linkentity (foodcube);
+			
 		//	if (ent->wait < 19)
 		//		ent->s.frame++;
+			if (ent->timestamp < (level.time - 1)) // close if time is just about up
+				ent->s.frame++;
+			else // go back to previous state
+				ent->s.frame = 4;
 
 			return;
 		}
@@ -552,13 +579,13 @@ void Trap_Think (edict_t *ent)
 			ent->nextthink = level.time + 1.0;
 			ent->think = G_FreeEdict;
 
-		/*	best = G_Spawn ();
-			SP_item_foodcube (best);
-			VectorCopy (ent->s.origin, best->s.origin);
-			best->s.origin[2]+= 16;
-			best->velocity[2] = 400;
-			best->count = ent->mass;
-			gi.linkentity (best);
+		/*	foodcube = G_Spawn ();
+			SP_item_foodcube (foodcube);
+			VectorCopy (ent->s.origin, foodcube->s.origin);
+			foodcube->s.origin[2]+= 16;
+			foodcube->velocity[2] = 400;
+			foodcube->count = ent->mass;
+			gi.linkentity (foodcube);
 		*/
 			return;
 		}
@@ -583,12 +610,15 @@ void Trap_Think (edict_t *ent)
 			continue;
 		if (!(target->svflags & SVF_MONSTER) && !target->client)
 			continue;
-		// if (target == ent->owner)
-		//	continue;
+	//	if (target == ent->owner)
+	//		continue;
 		if (target->health <= 0)
 			continue;
 		if (!visible (ent, target))
 		 	continue;
+		// Knightmare- ignore crucified insanes
+		if ( (Q_stricmp(target->classname, "misc_insane") == 0) && (target->moreflags & FL2_CRUCIFIED) )
+			continue;
 		if (!best)
 		{
 			best = target;
@@ -648,7 +678,7 @@ void Trap_Think (edict_t *ent)
 			}
 			else
 			{
-				BecomeExplosion1(ent);
+				BecomeExplosion1 (ent);
 				// note to self
 				// cause explosion damage???
 				return;
@@ -668,7 +698,6 @@ void fire_trap (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int spee
 	AngleVectors (dir, forward, right, up);
 
 	trap = G_Spawn();
-	trap->classname = "trap";
 	VectorCopy (start, trap->s.origin);
 	VectorScale (aimdir, speed, trap->velocity);
 	VectorMA (trap->velocity, 200 + crandom() * 10.0, up, trap->velocity);
@@ -694,7 +723,7 @@ void fire_trap (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int spee
 	trap->think = Trap_Think;
 	trap->dmg = damage;
 	trap->dmg_radius = damage_radius;
-	trap->classname = "htrap";
+	trap->classname = "trap";	// was "htrap"
 	trap->class_id = ENTITY_TRAP;
 	// RAFAEL 16-APR-98
 	trap->s.sound = gi.soundindex ("weapons/traploop.wav");
@@ -723,13 +752,14 @@ void fire_trap (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int spee
 
 void trap_delayed_start (edict_t *trap)
 {
-	if (g_edicts[1].linkcount)
+//	if (g_edicts[1].linkcount)
+	if ( AnyPlayerSpawned() )	// Knightmare- function handles multiple players
 	{
-		VectorScale(trap->movedir,trap->moveinfo.speed,trap->velocity);
+		VectorScale (trap->movedir, trap->moveinfo.speed, trap->velocity);
 		trap->movetype  = MOVETYPE_BOUNCE;
 		trap->nextthink = level.time + 1.0;
 		trap->think = Trap_Think;
-		gi.linkentity(trap);
+		gi.linkentity (trap);
 	}
 	else
 		trap->nextthink = level.time + FRAMETIME;
@@ -744,10 +774,10 @@ void SP_trap (edict_t *trap)
 	if (game.maxclients == 1)
 	{
 		trap->movetype  = MOVETYPE_NONE;
-		VectorCopy(trap->velocity,trap->movedir);
-		VectorNormalize(trap->movedir);
+		VectorCopy (trap->velocity, trap->movedir);
+		VectorNormalize (trap->movedir);
 		trap->moveinfo.speed = VectorLength(trap->velocity);
-		VectorClear(trap->velocity);
+		VectorClear (trap->velocity);
 		trap->think     = trap_delayed_start;
 		trap->nextthink = level.time + FRAMETIME;
 	}
@@ -767,13 +797,13 @@ void Trap_Die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, 
 }
 
 
-void Cmd_KillTrap_f (edict_t *ent)
+void Cmd_DetTrap_f (edict_t *ent)
 {
 	edict_t *blip = NULL;
 
-	while ((blip = findradius(blip, ent->s.origin, 1000)) != NULL)
+	while ((blip = findradius(blip, ent->s.origin, 2048)) != NULL)	// was 1024
 	{
-		if (!strcmp(blip->classname, "htrap") && blip->owner == ent)
+		if (!strcmp(blip->classname, "trap") && blip->owner == ent)	// was "htrap"
 		{
 			blip->think = Trap_Explode;
 			blip->nextthink = level.time + 0.1;

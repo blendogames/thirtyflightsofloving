@@ -439,7 +439,7 @@ void NET_OpenIP (void)
 	ip = Cvar_Get ("ip", "localhost", CVAR_NOSET);
 
 	if (!ip_sockets[NS_SERVER]) {
-		server_port = port;	// added for r1ch fix
+		server_port = (int) port;	// added for r1ch fix
 		ip_sockets[NS_SERVER] = NET_Socket (ip->string, port->value);
 	}
 	if (!ip_sockets[NS_CLIENT])

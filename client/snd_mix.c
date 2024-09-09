@@ -235,10 +235,10 @@ void S_PaintChannels(int endtime)
 
 	snd_vol = s_volume->value*256;
 
-//Com_Printf ("%i to %i\n", paintedtime, endtime);
+//	Com_Printf ("%i to %i\n", paintedtime, endtime);
 	while (paintedtime < endtime)
 	{
-	// if paintbuffer is smaller than DMA buffer
+		// if paintbuffer is smaller than DMA buffer
 		end = endtime;
 		if (endtime - paintedtime > PAINTBUFFER_SIZE)
 			end = paintedtime + PAINTBUFFER_SIZE;
@@ -247,7 +247,8 @@ void S_PaintChannels(int endtime)
 		while (1)
 		{
 			ps = s_pendingplays.next;
-			if (ps == &s_pendingplays)
+		//	if (ps == &s_pendingplays)
+			if ( !ps || (ps == &s_pendingplays) )	// Paril's fix for increasing PAINTBUFFER_SIZE
 				break;	// no more pending sounds
 			if (ps->begin <= paintedtime)
 			{
@@ -260,10 +261,10 @@ void S_PaintChannels(int endtime)
 			break;
 		}
 
-	// clear the paint buffer
+		// clear the paint buffer
 		if (s_rawend < paintedtime)
 		{
-//			Com_Printf ("clear\n");
+		//	Com_Printf ("clear\n");
 			memset(paintbuffer, 0, (end - paintedtime) * sizeof(portable_samplepair_t));
 		}
 		else
@@ -278,10 +279,10 @@ void S_PaintChannels(int endtime)
 				s = i&(MAX_RAW_SAMPLES-1);
 				paintbuffer[i-paintedtime] = s_rawsamples[s];
 			}
-//		if (i != end)
-//			Com_Printf ("partial stream\n");
-//		else
-//			Com_Printf ("full stream\n");
+	//	if (i != end)
+	//		Com_Printf ("partial stream\n");
+	//	else
+	//		Com_Printf ("full stream\n");
 			for ( ; i<end ; i++)
 			{
 				paintbuffer[i-paintedtime].left =
@@ -290,7 +291,7 @@ void S_PaintChannels(int endtime)
 		}
 
 
-	// paint in the channels.
+		// paint in the channels.
 		ch = channels;
 		for (i=0; i<MAX_CHANNELS ; i++, ch++)
 		{
@@ -322,7 +323,7 @@ void S_PaintChannels(int endtime)
 					ltime += count;
 				}
 
-			// if at end of loop, restart
+				// if at end of loop, restart
 				if (ltime >= ch->end)
 				{
 					if (ch->autosound)
@@ -344,7 +345,7 @@ void S_PaintChannels(int endtime)
 															  
 		}
 
-	// transfer out according to DMA format
+		// transfer out according to DMA format
 		S_TransferPaintBuffer(end);
 		paintedtime = end;
 	}

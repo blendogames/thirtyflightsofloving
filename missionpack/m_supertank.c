@@ -417,7 +417,7 @@ mframe_t supertank_frames_end_attack1[]=
 mmove_t supertank_move_end_attack1 = {FRAME_attak1_7, FRAME_attak1_20, supertank_frames_end_attack1, supertank_run};
 
 
-void supertank_reattack1(edict_t *self)
+void supertank_reattack1 (edict_t *self)
 {
 	if (visible(self, self->enemy))
 		if (random() < 0.9)
@@ -441,8 +441,8 @@ void supertank_pain (edict_t *self, edict_t *other, float kick, int damage)
 			return;
 
 	// Lessen the chance of him going into his pain frames
-	if (damage <=25)
-		if (random()<0.2)
+	if (damage <= 25)
+		if (random() < 0.2)
 			return;
 
 	// Don't go into pain if he's firing his rockets
@@ -654,25 +654,28 @@ void BossExplode (edict_t *self)
 	case 9:
 		self->s.sound = 0;
 
+#ifdef KMQUAKE2_ENGINE_MOD
 		// Knightmare- big explosion
 		gi.WriteByte (svc_temp_entity);
 		gi.WriteByte (TE_EXPLOSION1_BIG);
 		gi.WritePosition (org);
 		gi.multicast (self->s.origin, MULTICAST_PVS);
+#endif	// KMQUAKE2_ENGINE_MOD
 
 		for (n = 0; n < 4; n++)
 			ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", 0, 0, 500, GIB_ORGANIC);
+		for (n = 0; n < 8; n++)
+			ThrowGib (self, "models/objects/gibs/sm_metal/tris.md2", 0, 0, 500, GIB_METALLIC);
+#ifdef KMQUAKE2_ENGINE_MOD
 		for (n = 0; n < 4; n++)
 			ThrowGib (self, "models/objects/gibs/bone/tris.md2", 0, 0, 500, GIB_ORGANIC);
 		for (n = 0; n < 8; n++)
 			ThrowGib (self, "models/objects/gibs/gear/tris.md2", 0, 0, 500, GIB_METALLIC);
-		for (n = 0; n < 8; n++)
-			ThrowGib (self, "models/objects/gibs/sm_metal/tris.md2", 0, 0, 500, GIB_METALLIC);
-		if (!strcmp(self->classname, "monster_jorg"))
-		{
+		if (!strcmp(self->classname, "monster_jorg")) {
 			for (n = 0; n < 4; n++)
 				ThrowGib (self, "models/monsters/blackwidow/gib3/tris.md2", 0, 0, 500, GIB_METALLIC);
 		}
+#endif	// KMQUAKE2_ENGINE_MOD
 		ThrowGib (self, "models/objects/gibs/chest/tris.md2", 0, 0, 500, GIB_ORGANIC);
 		ThrowHead (self, "models/objects/gibs/gear/tris.md2", 0, 0, 500, GIB_METALLIC);
 		self->deadflag = DEAD_DEAD;
@@ -733,6 +736,22 @@ qboolean supertank_blocked (edict_t *self, float dist)
 //PGM
 //===========
 
+
+// Knightmare- added soundcache function
+void monster_supertank_soundcache (edict_t *self)
+{
+	sound_pain1 = gi.soundindex ("bosstank/btkpain1.wav");
+	sound_pain2 = gi.soundindex ("bosstank/btkpain2.wav");
+	sound_pain3 = gi.soundindex ("bosstank/btkpain3.wav");
+	sound_death = gi.soundindex ("bosstank/btkdeth1.wav");
+	sound_search1 = gi.soundindex ("bosstank/btkunqv1.wav");
+	sound_search2 = gi.soundindex ("bosstank/btkunqv2.wav");
+
+//	self->s.sound = gi.soundindex ("bosstank/btkengn1.wav");
+	tread_sound = gi.soundindex ("bosstank/btkengn1.wav");
+}
+
+
 //
 // monster_supertank
 //
@@ -755,15 +774,8 @@ void SP_monster_supertank (edict_t *self)
 	//	self->style = 0; //clear for custom bloodtype flag
 	}
 
-	sound_pain1 = gi.soundindex ("bosstank/btkpain1.wav");
-	sound_pain2 = gi.soundindex ("bosstank/btkpain2.wav");
-	sound_pain3 = gi.soundindex ("bosstank/btkpain3.wav");
-	sound_death = gi.soundindex ("bosstank/btkdeth1.wav");
-	sound_search1 = gi.soundindex ("bosstank/btkunqv1.wav");
-	sound_search2 = gi.soundindex ("bosstank/btkunqv2.wav");
-
-//	self->s.sound = gi.soundindex ("bosstank/btkengn1.wav");
-	tread_sound = gi.soundindex ("bosstank/btkengn1.wav");
+	// Knightmare- use soundcache function
+	monster_supertank_soundcache (self);
 
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;

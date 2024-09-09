@@ -47,7 +47,7 @@ static int	sound_sight;
 
 void gladiator_idle (edict_t *self)
 {
-	if (!(self->spawnflags & SF_MONSTER_AMBUSH))
+	if ( !(self->spawnflags & SF_MONSTER_AMBUSH) )
 		gi.sound (self, CHAN_VOICE, sound_idle, 1, ATTN_IDLE, 0);
 }
 
@@ -369,16 +369,10 @@ qboolean gladiator_blocked (edict_t *self, float range)
 	return false;
 }
 
-/*QUAKED monster_gladiator (1 .5 0) (-32 -32 -24) (32 32 64) Ambush Trigger_Spawn Sight
-*/
-void SP_monster_gladiator (edict_t *self)
-{
-	if (deathmatch->value)
-	{
-		G_FreeEdict (self);
-		return;
-	}
 
+// Knightmare- added soundcache function
+void monster_gladiator_soundcache (edict_t *self)
+{
 	sound_pain1 = gi.soundindex ("gladiator/pain.wav");	
 	sound_pain2 = gi.soundindex ("gladiator/gldpain2.wav");	
 	sound_die = gi.soundindex ("gladiator/glddeth2.wav");	
@@ -389,6 +383,21 @@ void SP_monster_gladiator (edict_t *self)
 	sound_idle = gi.soundindex ("gladiator/gldidle1.wav");
 	sound_search = gi.soundindex ("gladiator/gldsrch1.wav");
 	sound_sight = gi.soundindex ("gladiator/sight.wav");
+}
+
+
+/*QUAKED monster_gladiator (1 .5 0) (-32 -32 -24) (32 32 64) Ambush Trigger_Spawn Sight
+*/
+void SP_monster_gladiator (edict_t *self)
+{
+	if (deathmatch->value)
+	{
+		G_FreeEdict (self);
+		return;
+	}
+
+	// Knightmare- use soundcache function
+	monster_gladiator_soundcache (self);
 
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;

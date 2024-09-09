@@ -393,6 +393,18 @@ void q1grunt_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dama
 }
 
 
+// Knightmare- added soundcache function
+void monster_q1_grunt_soundcache (edict_t *self)
+{
+	sound_idle =	gi.soundindex ("q1grunt/idle.wav");
+	sound_sight =	gi.soundindex ("q1grunt/sight1.wav");
+	sound_pain1 =	gi.soundindex ("q1grunt/pain1.wav");
+	sound_pain2 =   gi.soundindex ("q1grunt/pain2.wav");
+	sound_death =	gi.soundindex ("q1grunt/death1.wav");
+	sound_gib =		gi.soundindex ("q1player/udeath.wav");
+	sound_attack =  gi.soundindex ("q1grunt/sattck1.wav");
+}
+
 //
 // SPAWN
 //
@@ -407,14 +419,9 @@ void SP_monster_q1_grunt (edict_t *self)
 		G_FreeEdict (self);
 		return;
 	}
-	
-	sound_idle =	gi.soundindex ("q1grunt/idle.wav");
-	sound_sight =	gi.soundindex ("q1grunt/sight1.wav");
-	sound_pain1 =	gi.soundindex ("q1grunt/pain1.wav");
-	sound_pain2 =   gi.soundindex ("q1grunt/pain2.wav");
-	sound_death =	gi.soundindex ("q1grunt/death1.wav");
-	sound_gib =		gi.soundindex ("q1player/udeath.wav");
-	sound_attack =  gi.soundindex ("q1grunt/sattck1.wav");
+
+	// Knightmare- use soundcache function
+	monster_q1_grunt_soundcache (self);
 
 	// precache backpack
 	gi.modelindex ("models/items/q1backpack/tris.md2");

@@ -25,8 +25,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "client.h"
 
-void CL_ItemRespawnParticles (vec3_t org);
-void CL_TeleportParticles (vec3_t org);
 
 #define MAX_TEX_SURF 2048 // was 256
 struct texsurf_s
@@ -119,7 +117,7 @@ Since this is a replacement for plain Jane EV_FOOTSTEP, we already know
 the player is definitely on the ground when this is called.
 ===============
 */
-void CL_FootSteps (entity_state_t *ent, qboolean loud, qboolean recursed)
+void CL_FootSteps (centity_state_t *ent, qboolean loud, qboolean recursed)
 {
 	trace_t	tr;
 	vec3_t	end;
@@ -225,7 +223,7 @@ the female events are there for backwards compatability
 ==============
 */
 
-void CL_EntityEvent (entity_state_t *ent)
+void CL_EntityEvent (centity_state_t *ent)
 {
 	switch (ent->event)
 	{
@@ -241,7 +239,7 @@ void CL_EntityEvent (entity_state_t *ent)
 		break;
 	case EV_PLAYER_TELEPORT2:
 		S_StartSound (NULL, ent->number, CHAN_WEAPON, clMedia.sfx_player_teleport2[rand()%5], 1, ATTN_IDLE, 0);
-		CL_TeleportParticles (ent->origin);
+		CL_TeleportParticles_Q1 (ent->origin);
 		break;
 	case EV_FOOTSTEP:
 	//	if (cl_footsteps->value)
@@ -251,8 +249,8 @@ void CL_EntityEvent (entity_state_t *ent)
 			CL_FootSteps (ent, false, false);
 		break;
 	case EV_LOUDSTEP:
-#ifdef NOTTHIRTYFLIGHTS
 	//	if (cl_footsteps->value)
+#ifdef NOTTHIRTYFLIGHTS
 		if (cl_footsteps->integer)
 			CL_FootSteps (ent, true, false);
 #else

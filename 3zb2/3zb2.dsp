@@ -141,6 +141,10 @@ SOURCE=.\g_misc.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\g_misc_kex.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\g_model.c
 # End Source File
 # Begin Source File
@@ -189,7 +193,7 @@ SOURCE=.\g_weapon.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\game.def
+SOURCE=.\km_cvar.c
 # End Source File
 # Begin Source File
 
@@ -251,6 +255,14 @@ SOURCE=.\q_shared.h
 # Begin Group "Resource Files"
 
 # PROP Default_Filter "ico;cur;bmp;dlg;rc2;rct;bin;cnt;rtf;gif;jpg;jpeg;jpe"
+# Begin Source File
+
+SOURCE=.\3zb2.rc
+# End Source File
+# Begin Source File
+
+SOURCE=.\game.def
+# End Source File
 # End Group
 # End Target
 # End Project

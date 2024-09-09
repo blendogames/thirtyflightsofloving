@@ -651,7 +651,7 @@ void G_VoteWin(qboolean op_forced)
 					continue;
 				if (!e->inuse)
 					continue;
-				
+
 				if (e->client->ctf_grapple)
 					CTFResetGrapple(e->client->ctf_grapple);
 
@@ -1005,7 +1005,7 @@ void Vote_SettingsApply(edict_t *ent, pmenuhnd_t *p)
 		gi_cprintf(ent, PRINT_HIGH, "You haven't changed anything!\n");
 		return;
 	}
-	
+
 //	Set the proposal message, and request the vote.
 
 	switch (settings->v_type)
@@ -1607,7 +1607,7 @@ void Vote_ChangeNoHealth(edict_t *ent, pmenuhnd_t *p)
 		settings->v_type = VOTE_NOHEALTH;
 	else
 		settings->v_type = VOTE_NONE;
-	
+
 	settings->no_health = !settings->no_health;
 	Vote_DMFlagsUpdate(ent, p);
 }
@@ -1626,7 +1626,7 @@ void Vote_ChangeNoItems(edict_t *ent, pmenuhnd_t *p)
 		settings->v_type = VOTE_NOITEMS;
 	else
 		settings->v_type = VOTE_NONE;
-	
+
 	settings->no_items = !settings->no_items;
 	Vote_DMFlagsUpdate(ent, p);
 }
@@ -1645,7 +1645,7 @@ void Vote_ChangeWeaponsStay(edict_t *ent, pmenuhnd_t *p)
 		settings->v_type = VOTE_WEAPONSSTAY;
 	else
 		settings->v_type = VOTE_NONE;
-	
+
 	settings->weapons_stay = !settings->weapons_stay;
 	Vote_DMFlagsUpdate(ent, p);
 }
@@ -1664,7 +1664,7 @@ void Vote_ChangeNoFalling(edict_t *ent, pmenuhnd_t *p)
 		settings->v_type = VOTE_NOFALLING;
 	else
 		settings->v_type = VOTE_NONE;
-	
+
 	settings->no_falling = !settings->no_falling;
 	Vote_DMFlagsUpdate(ent, p);
 }
@@ -1683,7 +1683,7 @@ void Vote_ChangeNoArmor(edict_t *ent, pmenuhnd_t *p)
 		settings->v_type = VOTE_NOARMOR;
 	else
 		settings->v_type = VOTE_NONE;
-	
+
 	settings->no_armor = !settings->no_armor;
 	Vote_DMFlagsUpdate(ent, p);
 }
@@ -1702,7 +1702,7 @@ void Vote_ChangeInfiniteAmmo(edict_t *ent, pmenuhnd_t *p)
 		settings->v_type = VOTE_INFINITEAMMO;
 	else
 		settings->v_type = VOTE_NONE;
-	
+
 	settings->infinite_ammo = !settings->infinite_ammo;
 	Vote_DMFlagsUpdate(ent, p);
 }
@@ -1721,7 +1721,7 @@ void Vote_ChangeQuadDrop(edict_t *ent, pmenuhnd_t *p)
 		settings->v_type = VOTE_QUADDROP;
 	else
 		settings->v_type = VOTE_NONE;
-	
+
 	settings->quad_drop = !settings->quad_drop;
 	Vote_DMFlagsUpdate(ent, p);
 }
@@ -1740,7 +1740,7 @@ void Vote_ChangeFastSwitch(edict_t *ent, pmenuhnd_t *p)
 		settings->v_type = VOTE_FASTSWITCH;
 	else
 		settings->v_type = VOTE_NONE;
-	
+
 	settings->fast_switch = !settings->fast_switch;
 	Vote_DMFlagsUpdate(ent, p);
 }
@@ -1759,7 +1759,7 @@ void Vote_ChangeExtraItems(edict_t *ent, pmenuhnd_t *p)
 		settings->v_type = VOTE_EXTRAITEMS;
 	else
 		settings->v_type = VOTE_NONE;
-	
+
 	settings->extra_items = !settings->extra_items;
 	Vote_DMFlagsUpdate(ent, p);
 }
@@ -1778,7 +1778,7 @@ void Vote_ChangeNoReplacements(edict_t *ent, pmenuhnd_t *p)
 		settings->v_type = VOTE_NOREPLACEMENTS;
 	else
 		settings->v_type = VOTE_NONE;
-	
+
 	settings->no_replacements = !settings->no_replacements;
 	Vote_DMFlagsUpdate(ent, p);
 }
@@ -1797,7 +1797,7 @@ void Vote_ChangeCTFNoTechs(edict_t *ent, pmenuhnd_t *p)
 		settings->v_type = VOTE_NOTECHS;
 	else
 		settings->v_type = VOTE_NONE;
-	
+
 	settings->no_techs = !settings->no_techs;
 	Vote_DMFlagsUpdate(ent, p);
 }
@@ -1816,7 +1816,7 @@ void Vote_ChangeCTFSpawnsOnly(edict_t *ent, pmenuhnd_t *p)
 		settings->v_type = VOTE_CTFSPAWNS;
 	else
 		settings->v_type = VOTE_NONE;
-	
+
 	settings->ctf_spawns = !settings->ctf_spawns;
 	Vote_DMFlagsUpdate(ent, p);
 }
@@ -2021,7 +2021,7 @@ void Vote_ChangeInvuln(edict_t *ent, pmenuhnd_t *p)
 		settings->v_type = VOTE_INVULN;
 	else
 		settings->v_type = VOTE_NONE;
-	
+
 	settings->invuln = !settings->invuln;
 	Vote_PowerupsUpdate(ent, p);
 }
@@ -2040,7 +2040,7 @@ void Vote_ChangeQuad(edict_t *ent, pmenuhnd_t *p)
 		settings->v_type = VOTE_QUAD;
 	else
 		settings->v_type = VOTE_NONE;
-	
+
 	settings->quad = !settings->quad;
 	Vote_PowerupsUpdate(ent, p);
 }
@@ -2059,7 +2059,7 @@ void Vote_ChangeSiphon(edict_t *ent, pmenuhnd_t *p)
 		settings->v_type = VOTE_SIPHON;
 	else
 		settings->v_type = VOTE_NONE;
-	
+
 	settings->siphon = !settings->siphon;
 	Vote_PowerupsUpdate(ent, p);
 }
@@ -2078,7 +2078,7 @@ void Vote_ChangeD89(edict_t *ent, pmenuhnd_t *p)
 		settings->v_type = VOTE_D89;
 	else
 		settings->v_type = VOTE_NONE;
-	
+
 	settings->d89 = !settings->d89;
 	Vote_PowerupsUpdate(ent, p);
 }
@@ -2097,7 +2097,7 @@ void Vote_ChangeHaste(edict_t *ent, pmenuhnd_t *p)
 		settings->v_type = VOTE_HASTE;
 	else
 		settings->v_type = VOTE_NONE;
-	
+
 	settings->haste = !settings->haste;
 	Vote_PowerupsUpdate(ent, p);
 }
@@ -2116,7 +2116,7 @@ void Vote_ChangeTele(edict_t *ent, pmenuhnd_t *p)
 		settings->v_type = VOTE_TELE;
 	else
 		settings->v_type = VOTE_NONE;
-	
+
 	settings->tele = !settings->tele;
 	Vote_PowerupsUpdate(ent, p);
 }
@@ -2135,7 +2135,7 @@ void Vote_ChangeAntibeam(edict_t *ent, pmenuhnd_t *p)
 		settings->v_type = VOTE_ANTIBEAM;
 	else
 		settings->v_type = VOTE_NONE;
-	
+
 	settings->antibeam = !settings->antibeam;
 	Vote_PowerupsUpdate(ent, p);
 }
@@ -2154,7 +2154,7 @@ void Vote_ChangeEnviro(edict_t *ent, pmenuhnd_t *p)
 		settings->v_type = VOTE_ENVIRO;
 	else
 		settings->v_type = VOTE_NONE;
-	
+
 	settings->enviro = !settings->enviro;
 	Vote_PowerupsUpdate(ent, p);
 }
@@ -2173,7 +2173,7 @@ void Vote_ChangeSilencer(edict_t *ent, pmenuhnd_t *p)
 		settings->v_type = VOTE_SILENCER;
 	else
 		settings->v_type = VOTE_NONE;
-	
+
 	settings->silencer = !settings->silencer;
 	Vote_PowerupsUpdate(ent, p);
 }
@@ -2192,7 +2192,7 @@ void Vote_ChangeBreather(edict_t *ent, pmenuhnd_t *p)
 		settings->v_type = VOTE_BREATHER;
 	else
 		settings->v_type = VOTE_NONE;
-	
+
 	settings->breather = !settings->breather;
 	Vote_PowerupsUpdate(ent, p);
 }
@@ -2561,7 +2561,7 @@ void Vote_ChangeAGM(edict_t *ent, pmenuhnd_t *p)
 		settings->v_type = VOTE_AGM;
 	else
 		settings->v_type = VOTE_NONE;
-	
+
 	settings->agm = !settings->agm;
 	Vote_WeaponsUpdate(ent, p);
 }
@@ -2580,7 +2580,7 @@ void Vote_ChangeDiscLauncher(edict_t *ent, pmenuhnd_t *p)
 		settings->v_type = VOTE_DISCLAUNCHER;
 	else
 		settings->v_type = VOTE_NONE;
-	
+
 	settings->disclauncher = !settings->disclauncher;
 	Vote_WeaponsUpdate(ent, p);
 }
@@ -3609,32 +3609,39 @@ void GMenu_Main(edict_t *ent, pmenuhnd_t *p)
 FILE* OpenMOTDFile(void)
 {
 	FILE	*iostream;
-	cvar_t	*game;
-	char	filename[MAX_OSPATH];
+	cvar_t	*basedir, *gamedir;
+	char	filename[256];  // was MAX_OSPATH
 
 	if (strlen(sv_motd_file->string) == 0)
 		return NULL;
 
-	game = gi.cvar("game", "", 0);
-	if (!*game->string)
+//	gamedir = gi.cvar("game", "", 0);
+	// Knightmare- use basedir & gamedir for MOTD path
+	basedir = gi.cvar("basedir", "", 0);
+	gamedir = gi.cvar("gamedir", "", 0);
+	if ( !*gamedir->string)
 	{
-		if (strlen(GAMEVERSION) + strlen(sv_motd_file->string) + 2 > MAX_OSPATH)
+	//	if (strlen(GAMEVERSION) + strlen(sv_motd_file->string) + 2 > MAX_OSPATH)
+		if (strlen(basedir->string) + strlen(GAMEVERSION) + strlen(sv_motd_file->string) + 3 > MAX_OSPATH)
 		{
 			gi.dprintf("WARNING: MOTD filename is too long.\n");
 			return NULL;
 		}
 
-		Com_sprintf(filename, sizeof(filename), "%s/%s", GAMEVERSION, sv_motd_file->string);
+	//	Com_sprintf(filename, sizeof(filename), "%s/%s", GAMEVERSION, sv_motd_file->string);
+		Com_sprintf(filename, sizeof(filename), "%s/%s/%s", basedir->string, GAMEVERSION, sv_motd_file->string);
 	}
 	else
 	{
-		if (strlen(game->string) + strlen(sv_motd_file->string) + 2 > MAX_OSPATH)
+	//	if (strlen(gamedir->string) + strlen(sv_motd_file->string) + 2 > MAX_OSPATH)
+		if (strlen(basedir->string) + strlen(gamedir->string) + strlen(sv_motd_file->string) + 3 > MAX_OSPATH)
 		{
 			gi.dprintf("WARNING: MOTD filename is too long.\n");
 			return NULL;
 		}
 
-		Com_sprintf(filename, sizeof(filename), "%s/%s", game->string, sv_motd_file->string);
+	//	Com_sprintf(filename, sizeof(filename), "%s/%s", game->string, sv_motd_file->string);
+		Com_sprintf(filename, sizeof(filename), "%s/%s/%s", basedir->string, gamedir->string, sv_motd_file->string);
 	}
 
 	if ((iostream = fopen(filename, "r")) == NULL)

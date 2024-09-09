@@ -52,7 +52,7 @@ static int	sound_sight;
 
 void gunner_idlesound (edict_t *self)
 {
-	if (!(self->spawnflags & SF_MONSTER_AMBUSH))
+	if ( !(self->spawnflags & SF_MONSTER_AMBUSH) )
 		gi.sound (self, CHAN_VOICE, sound_idle, 1, ATTN_IDLE, 0);
 }
 
@@ -846,6 +846,19 @@ void gunner_jump (edict_t *self)
 	self->monsterinfo.currentmove = &gunner_move_jump;
 }
 
+// Knightmare- added soundcache function
+void monster_gunner_soundcache (edict_t *self)
+{
+	sound_death = gi.soundindex ("gunner/death1.wav");	
+	sound_pain = gi.soundindex ("gunner/gunpain2.wav");	
+	sound_pain2 = gi.soundindex ("gunner/gunpain1.wav");	
+	sound_idle = gi.soundindex ("gunner/gunidle1.wav");	
+	sound_open = gi.soundindex ("gunner/gunatck1.wav");	
+	sound_search = gi.soundindex ("gunner/gunsrch1.wav");	
+	sound_sight = gi.soundindex ("gunner/sight1.wav");	
+}
+
+
 /*QUAKED monster_gunner (1 .5 0) (-16 -16 -24) (16 16 32) Ambush Trigger_Spawn Sight GoodGuy NoGib ContactGrenades
 */
 void SP_monster_gunner (edict_t *self)
@@ -856,13 +869,10 @@ void SP_monster_gunner (edict_t *self)
 		return;
 	}
 
-	sound_death = gi.soundindex ("gunner/death1.wav");	
-	sound_pain = gi.soundindex ("gunner/gunpain2.wav");	
-	sound_pain2 = gi.soundindex ("gunner/gunpain1.wav");	
-	sound_idle = gi.soundindex ("gunner/gunidle1.wav");	
-	sound_open = gi.soundindex ("gunner/gunatck1.wav");	
-	sound_search = gi.soundindex ("gunner/gunsrch1.wav");	
-	sound_sight = gi.soundindex ("gunner/sight1.wav");	
+	// Knightmare- use soundcache function
+	monster_gunner_soundcache (self);
+
+	// precache
 	gi.soundindex ("gunner/gunatck2.wav");
 	gi.soundindex ("gunner/gunatck3.wav");
 
@@ -877,6 +887,14 @@ void SP_monster_gunner (edict_t *self)
 	}
 	
 	self->s.modelindex = gi.modelindex ("models/monsters/gunner/tris.md2");
+
+	// Coconut Monkey 2 sombrero
+	{
+		cvar_t	*gamedir = gi.cvar("gamedir", "", 0);
+		if ( (int)g_nm_maphacks->value && (strlen(gamedir->string) > 0) && !strcmp(gamedir->string, "coconut2") )
+			self->s.modelindex2 = gi.modelindex ("models/monsters/gunner/gear.md2");
+	}
+
 	VectorSet (self->mins, -16, -16, -24);
 	VectorSet (self->maxs, 16, 16, 32);
 

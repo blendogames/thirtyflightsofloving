@@ -9,7 +9,6 @@ a non-instant attack weapon.  It checks to see if a
 monster's dodge function should be called.
 =================
 */
-//static void check_dodge (edict_t *self, vec3_t start, vec3_t dir, int speed)
 void check_dodge (edict_t *self, vec3_t start, vec3_t dir, int speed)		//PGM
 {
 	vec3_t	end;
@@ -25,12 +24,12 @@ void check_dodge (edict_t *self, vec3_t start, vec3_t dir, int speed)		//PGM
 	}
 	VectorMA (start, WORLD_SIZE, dir, end);	// was 8192
 	tr = gi.trace (start, NULL, NULL, end, self, MASK_SHOT);
-	if ((tr.ent) && (tr.ent->svflags & SVF_MONSTER) && (tr.ent->health > 0) && (tr.ent->monsterinfo.dodge) && infront(tr.ent, self))
+	if ( (tr.ent) && (tr.ent->svflags & SVF_MONSTER) && (tr.ent->health > 0) && (tr.ent->monsterinfo.dodge) && infront(tr.ent, self) )
 	{
-			VectorSubtract (tr.endpos, start, v);
-			eta = (VectorLength(v) - tr.ent->maxs[0]) / speed;
-//			tr.ent->monsterinfo.dodge (tr.ent, self, eta);
-			tr.ent->monsterinfo.dodge (tr.ent, self, eta, &tr);
+		VectorSubtract (tr.endpos, start, v);
+		eta = (VectorLength(v) - tr.ent->maxs[0]) / speed;
+	//	tr.ent->monsterinfo.dodge (tr.ent, self, eta);
+		tr.ent->monsterinfo.dodge (tr.ent, self, eta, &tr);
 	}
 }
 
@@ -479,12 +478,13 @@ void fire_blueblaster (edict_t *self, vec3_t start, vec3_t dir, int damage, int 
 //       entities.
 void bolt_delayed_start (edict_t *bolt)
 {
-	if (g_edicts[1].linkcount)
+//	if (g_edicts[1].linkcount)
+	if ( AnyPlayerSpawned() )	// Knightmare- function handles multiple players
 	{
-		VectorScale(bolt->movedir,bolt->moveinfo.speed,bolt->velocity);
+		VectorScale (bolt->movedir, bolt->moveinfo.speed, bolt->velocity);
 		bolt->nextthink = level.time + 2;
 		bolt->think = G_FreeEdict;
-		gi.linkentity(bolt);
+		gi.linkentity (bolt);
 	}
 	else
 		bolt->nextthink = level.time + FRAMETIME;
@@ -503,13 +503,13 @@ void SP_bolt (edict_t *bolt)
 	bolt->s.modelindex = gi.modelindex ("models/objects/laser/tris.md2");
 	bolt->s.sound = gi.soundindex ("misc/lasfly.wav");
 	bolt->touch = blaster_touch;
-	VectorCopy(bolt->velocity,bolt->movedir);
-	VectorNormalize(bolt->movedir);
+	VectorCopy (bolt->velocity, bolt->movedir);
+	VectorNormalize (bolt->movedir);
 	bolt->moveinfo.speed = VectorLength(bolt->velocity);
-	VectorClear(bolt->velocity);
+	VectorClear (bolt->velocity);
 	bolt->think = bolt_delayed_start;
 	bolt->nextthink = level.time + FRAMETIME;
-	gi.linkentity(bolt);
+	gi.linkentity (bolt);
 }
 
 /*
@@ -524,7 +524,7 @@ void Grenade_Evade (edict_t *monster)
 {
 	edict_t	*grenade;
 	vec3_t	grenade_vec;
-	float	grenade_dist, best_r, best_yaw, r;
+	float	grenade_dist = 0.0f, best_r, best_yaw = 0.0f, r;
 	float	yaw;
 	int		i;
 	vec3_t	forward;
@@ -842,13 +842,14 @@ void fire_grenade2 (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int 
 
 void grenade_delayed_start (edict_t *grenade)
 {
-	if (g_edicts[1].linkcount)
+//	if (g_edicts[1].linkcount)
+	if ( AnyPlayerSpawned() )	// Knightmare- function handles multiple players
 	{
-		VectorScale(grenade->movedir,grenade->moveinfo.speed,grenade->velocity);
+		VectorScale (grenade->movedir, grenade->moveinfo.speed, grenade->velocity);
 		grenade->movetype  = MOVETYPE_BOUNCE;
 		grenade->nextthink = level.time + 2.5;
 		grenade->think     = Grenade_Explode;
-		gi.linkentity(grenade);
+		gi.linkentity (grenade);
 	}
 	else
 		grenade->nextthink = level.time + FRAMETIME;
@@ -863,10 +864,10 @@ void SP_grenade (edict_t *grenade)
 	if (game.maxclients == 1)
 	{
 		grenade->movetype  = MOVETYPE_NONE;
-		VectorCopy(grenade->velocity,grenade->movedir);
-		VectorNormalize(grenade->movedir);
+		VectorCopy (grenade->velocity, grenade->movedir);
+		VectorNormalize (grenade->movedir);
 		grenade->moveinfo.speed = VectorLength(grenade->velocity);
-		VectorClear(grenade->velocity);
+		VectorClear (grenade->velocity);
 		grenade->think     = grenade_delayed_start;
 		grenade->nextthink = level.time + FRAMETIME;
 	}
@@ -881,15 +882,16 @@ void SP_grenade (edict_t *grenade)
 
 void handgrenade_delayed_start (edict_t *grenade)
 {
-	if (g_edicts[1].linkcount)
+//	if (g_edicts[1].linkcount)
+	if ( AnyPlayerSpawned() )	// Knightmare- function handles multiple players
 	{
-		VectorScale(grenade->movedir,grenade->moveinfo.speed,grenade->velocity);
+		VectorScale (grenade->movedir, grenade->moveinfo.speed, grenade->velocity);
 		grenade->movetype  = MOVETYPE_BOUNCE;
 		grenade->nextthink = level.time + 2.5;
 		grenade->think     = Grenade_Explode;
 		if (grenade->owner)
 			gi.sound (grenade->owner, CHAN_WEAPON, gi.soundindex ("weapons/hgrent1a.wav"), 1, ATTN_NORM, 0);
-		gi.linkentity(grenade);
+		gi.linkentity (grenade);
 	}
 	else
 		grenade->nextthink = level.time + FRAMETIME;
@@ -904,10 +906,10 @@ void SP_handgrenade (edict_t *grenade)
 	if (game.maxclients == 1)
 	{
 		grenade->movetype  = MOVETYPE_NONE;
-		VectorCopy(grenade->velocity,grenade->movedir);
-		VectorNormalize(grenade->movedir);
+		VectorCopy (grenade->velocity, grenade->movedir);
+		VectorNormalize (grenade->movedir);
 		grenade->moveinfo.speed = VectorLength(grenade->velocity);
-		VectorClear(grenade->velocity);
+		VectorClear (grenade->velocity);
 		grenade->think     = handgrenade_delayed_start;
 		grenade->nextthink = level.time + FRAMETIME;
 	}
@@ -1293,12 +1295,13 @@ void fire_missile (edict_t *self, vec3_t start, vec3_t dir, int damage, int spee
 
 void missile_delayed_start (edict_t *missile)
 {
-	if (g_edicts[1].linkcount)
+//	if (g_edicts[1].linkcount)
+	if ( AnyPlayerSpawned() )	// Knightmare- function handles multiple players
 	{
-		VectorScale(missile->movedir,missile->moveinfo.speed,missile->velocity);
+		VectorScale (missile->movedir, missile->moveinfo.speed, missile->velocity);
 		missile->nextthink = level.time + 8000/missile->moveinfo.speed;
 		missile->think = G_FreeEdict;
-		gi.linkentity(missile);
+		gi.linkentity (missile);
 	}
 	else
 		missile->nextthink = level.time + FRAMETIME;
@@ -1311,7 +1314,7 @@ void SP_missile (edict_t *missile)
 	missile->s.modelindex = gi.modelindex ("models/objects/bomb/tris.md2");
 	missile->s.sound      = gi.soundindex ("weapons/rockfly.wav");
 	missile->touch = missile_touch;
-	AngleVectors(missile->s.angles,dir,NULL,NULL);
+	AngleVectors (missile->s.angles, dir, NULL, NULL);
 	VectorCopy (dir, missile->movedir);
 	missile->moveinfo.speed = VectorLength(missile->velocity);
 	if (missile->moveinfo.speed <= 0)
@@ -1320,7 +1323,7 @@ void SP_missile (edict_t *missile)
 	// For SP, freeze missile until player spawns in
 	if (game.maxclients == 1)
 	{
-		VectorClear(missile->velocity);
+		VectorClear (missile->velocity);
 		missile->think = missile_delayed_start;
 		missile->nextthink = level.time + FRAMETIME;
 	}
@@ -1394,12 +1397,12 @@ void homing_think (edict_t *self)
 
 void Rocket_Evade (edict_t *rocket, vec3_t	dir, float speed)
 {
-	float	rocket_dist, best_r, best_yaw, dist, r;
-	float	time;
-	float	dot;
-	float	yaw;
+	float	rocket_dist = 0.0f, best_r = 0.0f, best_yaw = 0.0f, dist, r = 0.0f;
+	float	time = 0.0f;
+	float	dot = 0.0f;
+	float	yaw = 0.0f;
 	int		i;
-	edict_t	*ent=NULL;
+	edict_t	*ent = NULL;
 	trace_t	tr;
 	vec3_t	hitpoint;
 	vec3_t	forward, pos, best_pos;
@@ -1580,8 +1583,8 @@ void rocket_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *su
 
 void fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage, edict_t *home_target)
 {
-	edict_t	*rocket;
-	qboolean homing = false;
+	edict_t		*rocket;
+	qboolean	homing = false;
 
 	rocket = G_Spawn();
 	VectorCopy (start, rocket->s.origin);
@@ -1614,8 +1617,8 @@ void fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed
 //	else
 		rocket->s.modelindex = gi.modelindex ("models/objects/rocket/tris.md2");
 
-	if (strstr(self->classname,"monster_") && (self->spawnflags & SF_MONSTER_SPECIAL)
-		&& strcmp(self->classname, "monster_turret"))
+	if ( !strncmp(self->classname, "monster_", 8) && (self->spawnflags & SF_MONSTER_SPECIAL)
+		&& (strcmp(self->classname, "monster_turret") != 0) )
 		homing = true;
 	// Knightmare- use different skin, not different model, for homing rocket
 	if (home_target || (self->client && self->client->pers.fire_mode) || homing)
@@ -1634,7 +1637,7 @@ void fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed
 	rocket->dmg_radius = damage_radius;
 	rocket->s.sound = gi.soundindex ("weapons/rockfly.wav");
 
-	if (home_target)
+	if ( home_target || homing )
 	{
 		// homers are shootable
 		VectorSet(rocket->mins, -10, -3, 0);
@@ -1654,7 +1657,7 @@ void fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed
 		if (self->client)
 		{
 			self->client->homing_rocket = rocket;
-//			check_dodge (self, rocket->s.origin, dir, speed);
+		//	check_dodge (self, rocket->s.origin, dir, speed);
 		}
 		Rocket_Evade (rocket, dir, speed);
 	}
@@ -1673,12 +1676,13 @@ void fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed
 
 void rocket_delayed_start (edict_t *rocket)
 {
-	if (g_edicts[1].linkcount)
+//	if (g_edicts[1].linkcount)
+	if ( AnyPlayerSpawned() )	// Knightmare- function handles multiple players
 	{
-		VectorScale(rocket->movedir,rocket->moveinfo.speed,rocket->velocity);
+		VectorScale (rocket->movedir, rocket->moveinfo.speed, rocket->velocity);
 		rocket->nextthink = level.time + 8000/rocket->moveinfo.speed;
 		rocket->think = G_FreeEdict;
-		gi.linkentity(rocket);
+		gi.linkentity (rocket);
 	}
 	else
 		rocket->nextthink = level.time + FRAMETIME;
@@ -1689,11 +1693,11 @@ void SP_rocket (edict_t *rocket)
 	vec3_t	dir;
 
 	rocket->s.modelindex = gi.modelindex ("models/objects/rocket/tris.md2");
-	if (!strcmp(rocket->classname, "homing rocket"))
+	if ( !strcmp(rocket->classname, "homing rocket") )
 		rocket->s.skinnum = 1;
 	rocket->s.sound      = gi.soundindex ("weapons/rockfly.wav");
 	rocket->touch = rocket_touch;
-	AngleVectors(rocket->s.angles,dir,NULL,NULL);
+	AngleVectors (rocket->s.angles, dir, NULL, NULL);
 	VectorCopy (dir, rocket->movedir);
 	rocket->moveinfo.speed = VectorLength(rocket->velocity);
 	if (rocket->moveinfo.speed <= 0)
@@ -1702,7 +1706,7 @@ void SP_rocket (edict_t *rocket)
 	// For SP, freeze rocket until player spawns in
 	if (game.maxclients == 1)
 	{
-		VectorClear(rocket->velocity);
+		VectorClear (rocket->velocity);
 		rocket->think = rocket_delayed_start;
 		rocket->nextthink = level.time + FRAMETIME;
 	}
@@ -1903,6 +1907,12 @@ void fire_rail (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick
 fire_bfg
 =================
 */
+// BFG_HOMING_SENSITIVITY valid ranges:
+// 0.0 (disables homing) to 1.0 (changes direction quickly)
+#define BFG_HOMING_SENSITIVITY	0.25	// was 0.5
+// SF_BFG_HOMING spawn flag for bfg blast entity class
+#define SF_BFG_HOMING			1
+
 void bfg_explode (edict_t *self)
 {
 	edict_t	*ent;
@@ -2006,6 +2016,9 @@ void bfg_think (edict_t *self)
 	vec3_t	end;
 	int		dmg;
 	trace_t	tr;
+	// Phatman: Used for homing BFG
+	edict_t	*closest = NULL;
+	vec_t   distance;
 
 	if (deathmatch->value)
 		dmg = sk_bfg_damage2_dm->value; //was 5
@@ -2063,8 +2076,44 @@ void bfg_think (edict_t *self)
 				break;
 			}
 
+			// Phatman: Homing BFG shot
+			if ((self->spawnflags & SF_BFG_HOMING) && tr.ent->client)
+			{
+				vec3_t	diff;
+				vec_t	len;
+				VectorSubtract (self->s.origin, tr.ent->s.origin, diff);
+				len = VectorLength(diff);
+				if ( !closest || (len < distance) )
+				{
+					closest = ent;
+					distance = len;
+				}
+			}
+
 			ignore = tr.ent;
 			VectorCopy (tr.endpos, start);
+		}
+
+		// Phatman: Homing BFG shot - based on homing_think
+		if ((self->spawnflags & SF_BFG_HOMING) && closest)
+		{
+			static const vec_t HomingSensitivity =
+				(BFG_HOMING_SENSITIVITY) < 0.0 ? 0.0 :
+				(BFG_HOMING_SENSITIVITY) > 1.0 ? 1.0 :
+				(BFG_HOMING_SENSITIVITY);
+			vec3_t	new_velocity;
+			vec_t	speed;
+			VectorMA (closest->absmin, 0.5, closest->size, point);
+			VectorCopy (self->velocity, new_velocity);
+			VectorNormalize (new_velocity);
+			VectorSubtract (point, self->s.origin, dir);
+			VectorNormalize (dir);
+			VectorScale (dir, HomingSensitivity, dir);
+			VectorAdd (dir, new_velocity, dir);
+			VectorNormalize (dir);
+			VectorCopy (dir, self->movedir);
+			speed = VectorLength(self->velocity);
+			VectorScale (dir, speed, self->velocity);
 		}
 
 		gi.WriteByte (svc_temp_entity);
@@ -2082,7 +2131,7 @@ void bfg_think (edict_t *self)
 }
 
 
-void fire_bfg (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius)
+void fire_bfg (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, qboolean homing)
 {
 	edict_t	*bfg;
 
@@ -2106,6 +2155,8 @@ void fire_bfg (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, f
 	bfg->dmg_radius = damage_radius;
 	bfg->classname = "bfg blast";
 	bfg->s.sound = gi.soundindex ("weapons/bfg__l1a.wav");
+	if (homing) // Phatman: Required for homing BFG shots
+		bfg->spawnflags |= SF_BFG_HOMING;
 
 	bfg->think = bfg_think;
 	bfg->nextthink = level.time + FRAMETIME;

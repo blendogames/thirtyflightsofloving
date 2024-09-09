@@ -20,7 +20,8 @@
 //
 int PatchPlayerModels (char *modelname)
 {
-	cvar_t	*game;
+	cvar_t		*basedir = NULL;
+	cvar_t		*gamedir = NULL;
 	int		j;
 	int		numskins;		// number of skin entries
 	char	skins[MAX_MD2SKINS][MAX_SKINNAME];	// skin entries
@@ -35,8 +36,9 @@ int PatchPlayerModels (char *modelname)
 	int		newoffset;	// model data offset (after skins)
 
 	// get game (moddir) name
-	game = gi.cvar("game", "", 0);
-	if (!*game->string)
+	basedir = gi.cvar("basedir", "", 0);
+	gamedir = gi.cvar("game", "", 0);
+	if (!*gamedir->string)
 		return 0;	// we're in baseq2
 
 //	Com_sprintf (outfilename, sizeof(outfilename), "%s/players/%s/tris.md2", game->string, modelname);
@@ -104,7 +106,9 @@ int PatchPlayerModels (char *modelname)
 	numskins = 32;
 
 	// load original player model
-	Com_sprintf (infilename, sizeof(infilename), "baseq2/players/%s/tris.md2", modelname);
+//	Com_sprintf (infilename, sizeof(infilename), "baseq2/players/%s/tris.md2", modelname);
+	// Knightmare- use basedir for compatibility on all platforms
+	Com_sprintf (infilename, sizeof(infilename), "%s/baseq2/players/%s/tris.md2", basedir->string, modelname);
 	if ( !(infile = fopen (infilename, "rb")) )
 		return 0;	// no player model (this shouldn't happen)
 	

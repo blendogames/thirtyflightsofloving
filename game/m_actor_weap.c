@@ -369,8 +369,8 @@ void actorChaingun (edict_t *self)
 		self->actor_gunframe++;
 
 	self->s.sound = gi.soundindex("weapons/chngnl1a.wav");
-#ifdef LOOP_SOUND_ATTENUATION
-	self->s.attenuation = ATTN_IDLE;
+#ifdef KMQUAKE2_ENGINE_MOD
+	self->s.loop_attenuation = ATTN_IDLE;
 #endif
 
 	if (self->actor_gunframe <= 9)
@@ -475,9 +475,9 @@ void actorGrenadeLauncher (edict_t *self)
 	if (aim[2] < 1.0)
 	{
 		float	cosa, t, x, vx, y;
-		float	drop;
-		float	last_error, last_up, v_error;
-		int		i;
+		float	drop = 0.0f;
+		float	last_error = 0.0f, last_up = 0.0f, v_error = 0.0f;
+		int		i = 0;
 
 		VectorCopy (forward, target);	// save target point
 		// horizontal distance to target
@@ -655,8 +655,8 @@ void actorHyperblaster (edict_t *self)
 	}
 
 	self->s.sound = gi.soundindex("weapons/hyprbl1a.wav");
-#ifdef LOOP_SOUND_ATTENUATION
-	self->s.attenuation = ATTN_IDLE;
+#ifdef KMQUAKE2_ENGINE_MOD
+	self->s.loop_attenuation = ATTN_IDLE;
 #endif
 
 	if (level.time >= self->monsterinfo.pausetime)

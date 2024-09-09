@@ -34,10 +34,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define DIV256 0.00390625
 #define DIV512 0.001953125
 
-#define Vector4Set(v, w, x, y, z)	(v[0]=(w), v[1]=(x), v[2]=(y), v[3]=(z))
-#define Vector2Set(v, x, y)	(v[0]=(x), v[1]=(y))
-#define Vector2Copy(v, w)	(w[0]=v[0], w[1]=v[1])
-
 #define	MAX_DLIGHTS		64 // was 32
 #define	MAX_ENTITIES	2048 // was 128
 #define	MAX_PARTICLES	8192 // was 4096
@@ -80,6 +76,7 @@ typedef enum
 #define DSFLAG_SCALED			0x0004		// scale up using scale values, instead of width and height
 #define DSFLAG_CLAMP			0x0004		// texture edge clamping
 #define DSFLAG_MASKED			0x0008		// use mask image
+#define DSFLAG_ADDITIVE			0x0010		// use additive blending
 
 typedef struct
 {
@@ -99,31 +96,41 @@ typedef struct
 
 typedef struct entity_s
 {
-	struct model_s		*model;			// opaque type outside refresh
-	float				angles[3];
-	//vec3_t				axis[3];		// Rotation vectors
+	struct model_s	*model;			// opaque type outside refresh
+	float			angles[3];
+//	vec3_t			axis[3];		// Rotation vectors
 
 	// most recent data
-	float				origin[3];		// also used as RF_BEAM's "from"
-	int					frame;			// also used as RF_BEAM's diameter
+	float			origin[3];		// also used as RF_BEAM's "from"
+	int				frame;			// also used as RF_BEAM's diameter
 
 	// previous data for lerping
-	float				oldorigin[3];	// also used as RF_BEAM's "to"
-	int					oldframe;
+	float			oldorigin[3];	// also used as RF_BEAM's "to"
+	int				oldframe;
+
+	// bounding box (decoded from centity_state_t solid)
+	vec3_t			mins;
+	vec3_t			maxs;
 
 	// misc
-	float	backlerp;				// 0.0 = current, 1.0 = old
-	int		skinnum;				// also used as RF_BEAM's palette index
+	float			backlerp;		// 0.0 = current, 1.0 = old
+	int				skinnum;		// also used as RF_BEAM's palette index
 
-	int		lightstyle;				// for flashing entities
-	float	alpha;					// ignore if RF_TRANSLUCENT isn't set
+	int				lightstyle;		// for flashing entities
+	float			alpha;			// ignore if RF_TRANSLUCENT isn't set
 
-	float	scale;
+	float			scale;
 
 	struct image_s	*skin;			// NULL for inline skin
-	int		flags;
-	int		renderfx;
+	int				flags;
+	int				renderfx;
 
+	// added for Kex flares, only used for ents with RF_FLARE set
+	int				edict_num;
+	int				fade_start_dist;
+	int				fade_end_dist;
+	float			sprite_radius;
+	vec3_t			color[2];
 } entity_t;
 
 #define ENTITY_FLAGS  68
@@ -227,7 +234,8 @@ typedef struct
 	int			red;
 	int			green;
 	int			blue;
-} foginfo_t;	// end Knightmare
+} foginfo_t;
+// end Knightmare
 
 typedef struct
 {
@@ -242,6 +250,7 @@ typedef struct
 	float		fov_x, fov_y;
 	float		vieworg[3];
 	float		viewangles[3];
+//	vec3_t		viewaxis[3];		// From Q2E
 	float		blend[4];			// rgba 0-1 full screen blend
 	float		time;				// time is uesed to auto animate
 	int			rdflags;			// RDF_UNDERWATER, etc

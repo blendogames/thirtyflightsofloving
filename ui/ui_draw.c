@@ -55,18 +55,6 @@ void UI_DrawMenuString (int x, int y, int size, scralign_t align, const char *st
 	UI_DrawString (x, y, size, align, newstring, FONT_UI, alpha);
 }
 
-
-/*
-=============
-UI_DrawString
-=============
-*/
-void UI_DrawString (int x, int y, int size, scralign_t align, const char *string, fontslot_t font, int alpha)
-{
-	SCR_DrawString (x, y, size, align, string, font, alpha);
-}
-
-
 /*
 =============
 UI_DrawStringDark
@@ -77,7 +65,7 @@ void UI_DrawStringDark (int x, int y, int size, scralign_t align, const char *st
 	char	newstring[1024];
 
 	Com_sprintf (newstring, sizeof(newstring), S_COLOR_ALT"%s", string);
-	SCR_DrawString (x, y, size, align, newstring, font, alpha);
+	UI_DrawString (x, y, size, align, newstring, font, alpha);
 }
 
 
@@ -89,7 +77,7 @@ UI_DrawStringR2L
 void UI_DrawStringR2L (int x, int y, int size, scralign_t align, const char *string, fontslot_t font, int alpha)
 {
 	x -= stringLen(string)*size;	// MENU_FONT_SIZE
-	SCR_DrawString (x, y, size, align, string, font, alpha);
+	UI_DrawString (x, y, size, align, string, font, alpha);
 }
 
 
@@ -104,7 +92,7 @@ void UI_DrawStringR2LDark (int x, int y, int size, scralign_t align, const char 
 
 	Com_sprintf (newstring, sizeof(newstring), S_COLOR_ALT"%s", string);
 	x -= stringLen(string)*size;	// MENU_FONT_SIZE
-	SCR_DrawString (x, y, size, align, newstring, font, alpha);
+	UI_DrawString (x, y, size, align, newstring, font, alpha);
 }
 
 
@@ -303,7 +291,9 @@ void UI_Draw_Cursor (void)
 	char *overlay = NULL;
 	char *cur_img = NULL;
 
-	if (m_drawfunc == Menu_Main_Draw)
+    void *m_drawfunc = ((menuFramework_s *) ui_mousecursor.menuitem)->drawFunc;
+
+	if (m_drawfunc == Menu_Main_f)
 	{
 		if (MainMenuMouseHover)
 		{

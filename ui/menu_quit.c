@@ -22,10 +22,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 // menu_quit.c -- the quit menu
 
-#include <ctype.h>
-#ifdef _WIN32
-#include <io.h>
-#endif
 #include "../client/client.h"
 #include "ui_local.h"
 
@@ -39,12 +35,17 @@ QUIT MENU
 =======================================================================
 */
 
-#ifdef QUITMENU_NOKEY
+static menuFramework_s	s_quit_menu;
 
-static menuframework_s	s_quit_menu;
-static menuseparator_s	s_quit_header;
-static menuaction_s		s_quit_yes_action;
-static menuaction_s		s_quit_no_action;
+#ifdef QUITMENU_NOKEY
+static menuLabel_s		s_quit_header;
+static menuAction_s		s_quit_yes_action;
+static menuAction_s		s_quit_no_action;
+#else
+static menuImage_s		s_quit_pic;
+#endif // QUITMENU_NOKEY
+
+//=======================================================================
 
 static void QuitYesFunc (void *unused)
 {
@@ -52,44 +53,76 @@ static void QuitYesFunc (void *unused)
 	CL_Quit_f ();
 }
 
+//=======================================================================
+
 void Menu_Quit_Init (void)
 {
-	s_quit_menu.x = SCREEN_WIDTH*0.5 - 24;
-	s_quit_menu.y = SCREEN_HEIGHT*0.5 - 58;
-	s_quit_menu.nitems = 0;
+	int		x, y;
 
-	s_quit_header.generic.type		= MTYPE_SEPARATOR;
-	s_quit_header.generic.textSize	= MENU_FONT_SIZE;
+	// menu.x = 296, menu.y = 202
+	x = SCREEN_WIDTH*0.5 - 3*MENU_FONT_SIZE;
+	y = SCREEN_HEIGHT*0.5 - 38;
+
+	s_quit_menu.x					= 0;	// SCREEN_WIDTH*0.5 - 24
+	s_quit_menu.y					= 0;	// SCREEN_HEIGHT*0.5 - 58
+	s_quit_menu.nitems				= 0;
+	s_quit_menu.nitems				= 0;
+	s_quit_menu.isPopup				= false;
+	s_quit_menu.background			= NULL;
+	s_quit_menu.canOpenFunc			= NULL;
+	s_quit_menu.drawFunc			= UI_DefaultMenuDraw;
+
+#ifdef QUITMENU_NOKEY
+	s_quit_menu.keyFunc				= UI_DefaultMenuKey;
+
+	s_quit_header.generic.type		= MTYPE_LABEL;
+	s_quit_header.generic.textSize	= MENU_HEADER_FONT_SIZE;
 	s_quit_header.generic.name		= "Quit game?";
-	s_quit_header.generic.x			= MENU_FONT_SIZE*0.7 * (int)strlen(s_quit_header.generic.name);
-	s_quit_header.generic.y			= 20;
+	s_quit_header.generic.x			= x + MENU_FONT_SIZE*0.9 * (int)strlen(s_quit_header.generic.name);
+	s_quit_header.generic.y			= y;	// 20
 
 	s_quit_yes_action.generic.type			= MTYPE_ACTION;
-	s_quit_yes_action.generic.textSize		= MENU_FONT_SIZE;
+	s_quit_yes_action.generic.textSize		= MENU_HEADER_FONT_SIZE;
 	s_quit_yes_action.generic.flags			= QMF_LEFT_JUSTIFY;
-	s_quit_yes_action.generic.x				= MENU_FONT_SIZE*3;
-	s_quit_yes_action.generic.y				= 60;
-	s_quit_yes_action.generic.name			= "yes";
+	s_quit_yes_action.generic.x				= x + MENU_FONT_SIZE*3;
+	s_quit_yes_action.generic.y				= y += MENU_LINE_SIZE*4;	// 60
+	s_quit_yes_action.generic.name			= "Yes";
 	s_quit_yes_action.generic.callback		= QuitYesFunc;
 	s_quit_yes_action.generic.cursor_offset	= -MENU_FONT_SIZE;
 
 	s_quit_no_action.generic.type			= MTYPE_ACTION;
-	s_quit_no_action.generic.textSize		= MENU_FONT_SIZE;
+	s_quit_no_action.generic.textSize		= MENU_HEADER_FONT_SIZE;
 	s_quit_no_action.generic.flags			= QMF_LEFT_JUSTIFY;
-	s_quit_no_action.generic.x				= MENU_FONT_SIZE*3;
-	s_quit_no_action.generic.y				= 80;
-	s_quit_no_action.generic.name			= "no";
+	s_quit_no_action.generic.x				= x + MENU_FONT_SIZE*3;
+	s_quit_no_action.generic.y				= y += MENU_LINE_SIZE*2;	// 80
+	s_quit_no_action.generic.name			= "No";
 	s_quit_no_action.generic.callback		= UI_BackMenu;
 	s_quit_no_action.generic.cursor_offset	= -MENU_FONT_SIZE;
 
 	UI_AddMenuItem (&s_quit_menu, (void *) &s_quit_header);
 	UI_AddMenuItem (&s_quit_menu, (void *) &s_quit_yes_action);
 	UI_AddMenuItem (&s_quit_menu, (void *) &s_quit_no_action);
+#else // QUITMENU_NOKEY
+	s_quit_menu.keyFunc		= UI_QuitMenuKey;
+
+	s_quit_pic.generic.type		= MTYPE_IMAGE;
+	s_quit_pic.generic.x		= 0;
+	s_quit_pic.generic.y		= 12*MENU_LINE_SIZE;
+	s_quit_pic.width			= 320;
+	s_quit_pic.height			= 240;
+	s_quit_pic.imageName		= "/pics/quit.pcx";
+	s_quit_pic.alpha			= 255;
+	s_quit_pic.border			= 0;
+	s_quit_pic.hCentered		= true;
+	s_quit_pic.vCentered		= true;
+	s_quit_pic.useAspectRatio	= false;
+	s_quit_pic.generic.isHidden	= false;
+
+	UI_AddMenuItem (&s_quit_menu, (void *) &s_quit_pic);
+#endif // QUITMENU_NOKEY
 }
 
-#endif // QUITMENU_NOKEY
-
-
+// Forward ported from old engine - Brad
 const char *Menu_Quit_Key (int key)
 {
 #ifdef QUITMENU_NOKEY
@@ -154,12 +187,8 @@ void Menu_Quit_Draw (void)
 #endif
 #endif // QUITMENU_NOKEY
 }
-
-
 void Menu_Quit_f (void)
 {
-#ifdef QUITMENU_NOKEY
-	Menu_Quit_Init();
-#endif
-	UI_PushMenu (Menu_Quit_Draw, Menu_Quit_Key);
+	Menu_Quit_Init ();
+	UI_PushMenu (&s_quit_menu);
 }

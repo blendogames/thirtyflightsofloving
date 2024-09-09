@@ -30,12 +30,32 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define	VERSION_UPDATE	8
 
 #define	BASEDIRNAME	"baseq2"
+#define	Q1_MAINDIRNAME	"id1"
 
+// Savegame subdir varies by CPU architecture
+// This prevents comingling different binary save formats
 #if defined (_M_X64) || defined (_M_AMD64) || defined (__x86_64__)
-#define SAVEDIRNAME "save_x64"
+#define ARCH_SAVEDIR "save_x64"
+#elif defined (_M_IX86) || defined (__i386__)
+#define ARCH_SAVEDIR "save"
+#elif defined (_M_IA64) || defined (__ia64__)
+#define ARCH_SAVEDIR "save_ia64"
+#elif defined (_M_ALPHA) || defined (__alpha__)
+#define ARCH_SAVEDIR "save_axp"
+#elif defined (_M_ARM) || defined (__arm__)
+#define ARCH_SAVEDIR "save_arm32"
+#elif defined (_M_ARM64) || defined (__aarch64__)
+#define ARCH_SAVEDIR "save_arm64"
+#elif defined (__ppc__)
+#define ARCH_SAVEDIR "save_ppc"
+#elif defined (__sparc__)
+#define ARCH_SAVEDIR "save_sparc"
 #else
-#define SAVEDIRNAME "save"
+#define ARCH_SAVEDIR "save_unk"
 #endif
+
+// Added for backwards compatibilty - Brad
+#define SAVEDIRNAME ARCH_SAVEDIR
 
 #define DEFAULTPAK			"pak"
 #define DEFAULTMODEL		"male"
@@ -49,12 +69,17 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define STOCK_Q2_GAME_LIBRARY_NAME "gamex86.dll"
 #define KMQ2_GAME_LIBRARY_NAME "kmq2gamex64.dll"
 //#ifdef _M_IX86
-#elif defined(_M_IX86) || defined (__i386__) // [Slipyx] mingw case
+#elif defined (_M_IX86) || defined (__i386__) // [Slipyx] mingw case
 #define	CPUSTRING	"x86"
 #define OS_STRING	"Win32"
 #define STOCK_Q2_GAME_LIBRARY_NAME "gamex86.dll"
 #define KMQ2_GAME_LIBRARY_NAME "kmq2gamex86.dll"
-#elif defined _M_ALPHA
+#elif defined (_M_IA64) || defined (__ia64__)
+#define	CPUSTRING	"ia64"
+#define OS_STRING	"Win64"
+#define STOCK_Q2_GAME_LIBRARY_NAME "gamex86.dll"
+#define KMQ2_GAME_LIBRARY_NAME "kmq2gameia64.dll"
+#elif defined (_M_ALPHA) || defined (__alpha__)
 #define	CPUSTRING	"AXP"
 #define OS_STRING	"Win32"
 #define STOCK_Q2_GAME_LIBRARY_NAME "gameaxp.dll"
@@ -69,16 +94,38 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define	CPUSTRING	"AMD64"
 #define STOCK_Q2_GAME_LIBRARY_NAME "gamei386.so"
 #define KMQ2_GAME_LIBRARY_NAME "kmq2gamex64.so"
-#elif defined __i386__
+#elif defined (__i386__)
 #define CPUSTRING "i386"
 #define STOCK_Q2_GAME_LIBRARY_NAME "gamei386.so"
 #define KMQ2_GAME_LIBRARY_NAME "kmq2gamei386.so"
-#elif defined __alpha__
+#elif defined (__ia64__)
+#define CPUSTRING "ia64"
+#define STOCK_Q2_GAME_LIBRARY_NAME "gamei386.so"
+#define KMQ2_GAME_LIBRARY_NAME "kmq2gameia64.so"
+#elif defined (__alpha__)
 #define CPUSTRING "axp"
 #define STOCK_Q2_GAME_LIBRARY_NAME "gameaxp.so"
 #define KMQ2_GAME_LIBRARY_NAME "kmq2gameaxp.so"
+#elif defined (__arm__)
+#define CPUSTRING "arm32"
+#define STOCK_Q2_GAME_LIBRARY_NAME "gamei386.so"
+#define KMQ2_GAME_LIBRARY_NAME "kmq2gamearm32.so"
+#elif defined (__aarch64__)
+#define CPUSTRING "arm64"
+#define STOCK_Q2_GAME_LIBRARY_NAME "gamei386.so"
+#define KMQ2_GAME_LIBRARY_NAME "kmq2gamearm64.so"
+#elif defined (__powerpc__)
+#define CPUSTRING "ppc"
+#define STOCK_Q2_GAME_LIBRARY_NAME "gamei386.so"
+#define KMQ2_GAME_LIBRARY_NAME "kmq2gameppc.so"
+#elif defined (__sparc__)
+#define CPUSTRING "sparc"
+#define STOCK_Q2_GAME_LIBRARY_NAME "gamei386.so"
+#define KMQ2_GAME_LIBRARY_NAME "kmq2gamesparc.so"
 #else
 #define CPUSTRING "Unknown"
+#define STOCK_Q2_GAME_LIBRARY_NAME "gamei386.so"
+#define KMQ2_GAME_LIBRARY_NAME "kmq2gameunk.so"
 #endif
 
 #elif defined __sun__
@@ -108,6 +155,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #if defined (_M_X64) || defined (_M_AMD64) || defined (__x86_64__)
 
 #define	CPUSTRING	"AMD64"
+
 #ifdef USE_Q2PLUG
 #define STOCK_Q2_GAME_LIBRARY_NAME "GameMac.q2plug"
 #define KMQ2_GAME_LIBRARY_NAME "GameMac.kmq2plug"
@@ -116,7 +164,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define KMQ2_GAME_LIBRARY_NAME "kmq2gamex64.dylib"
 #endif	// USE_Q2PLUG
 
-#elif defined __i386__
+#elif defined (__i386__)
 
 #define CPUSTRING "i386"
 
@@ -128,16 +176,50 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define KMQ2_GAME_LIBRARY_NAME "kmq2gamei386.dylib"
 #endif	// USE_Q2PLUG
 
+#elif defined (__aarch64__)
+
+#define CPUSTRING "arm64"
+
+#ifdef USE_Q2PLUG
+#define STOCK_Q2_GAME_LIBRARY_NAME "GameMac.q2plug"
+#define KMQ2_GAME_LIBRARY_NAME "GameMac.kmq2plug"
+#else	// USE_Q2PLUG
+#define STOCK_Q2_GAME_LIBRARY_NAME "gamei386.dylib"
+#define KMQ2_GAME_LIBRARY_NAME "kmq2gamearm64.dylib"
+#endif	// USE_Q2PLUG
+
+#elif defined (__ppc__)
+
+#define CPUSTRING "ppc"
+
+#ifdef USE_Q2PLUG
+#define STOCK_Q2_GAME_LIBRARY_NAME "GameMac.q2plug"
+#define KMQ2_GAME_LIBRARY_NAME "GameMac.kmq2plug"
+#else	// USE_Q2PLUG
+#define STOCK_Q2_GAME_LIBRARY_NAME "gamei386.dylib"
+#define KMQ2_GAME_LIBRARY_NAME "kmq2gameppc.dylib"
+#endif	// USE_Q2PLUG
+
 #else
 
 #define CPUSTRING "Unknown"
+
+#ifdef USE_Q2PLUG
+#define STOCK_Q2_GAME_LIBRARY_NAME "GameMac.q2plug"
+#define KMQ2_GAME_LIBRARY_NAME "GameMac.kmq2plug"
+#else	// USE_Q2PLUG
+#define STOCK_Q2_GAME_LIBRARY_NAME "gamei386.dylib"
+#define KMQ2_GAME_LIBRARY_NAME "kmq2gameunk.dylib"
+#endif	// USE_Q2PLUG
 
 #endif
 
 #else	// !WIN32
 
 #define OS_STRING "NON-WIN32"
-#define	CPUSTRING	"NON-WIN32"
+#define	CPUSTRING "NON-WIN32"
+#define STOCK_Q2_GAME_LIBRARY_NAME "gamei386.so"
+#define KMQ2_GAME_LIBRARY_NAME "kmq2gameunk.so"
 
 #endif
 
@@ -179,13 +261,15 @@ void MSG_WriteByte (sizebuf_t *sb, int c);
 void MSG_WriteShort (sizebuf_t *sb, int c);
 void MSG_WriteLong (sizebuf_t *sb, int c);
 void MSG_WriteFloat (sizebuf_t *sb, float f);
+void MSG_WriteFloatAsShort (sizebuf_t *sb, float f);	// Knightmare added
 void MSG_WriteString (sizebuf_t *sb, char *s);
 void MSG_WriteCoord (sizebuf_t *sb, float f);
 void MSG_WritePos (sizebuf_t *sb, vec3_t pos);
-void MSG_WriteAngle (sizebuf_t *sb, float f);
+void MSG_WriteAngle8 (sizebuf_t *sb, float f);
 void MSG_WriteAngle16 (sizebuf_t *sb, float f);
+void MSG_WriteAngle (sizebuf_t *sb, float f);
 void MSG_WriteDeltaUsercmd (sizebuf_t *sb, struct usercmd_s *from, struct usercmd_s *cmd);
-void MSG_WriteDeltaEntity (struct entity_state_s *from, struct entity_state_s *to, sizebuf_t *msg, qboolean force, qboolean newentity);
+void MSG_WriteDeltaEntity (struct centity_state_s *from, struct centity_state_s *to, sizebuf_t *msg, qboolean force, qboolean newentity);
 void MSG_WriteDir (sizebuf_t *sb, vec3_t vector);
 
 
@@ -196,12 +280,13 @@ int		MSG_ReadByte (sizebuf_t *sb);
 int		MSG_ReadShort (sizebuf_t *sb);
 int		MSG_ReadLong (sizebuf_t *sb);
 float	MSG_ReadFloat (sizebuf_t *sb);
+float	MSG_ReadFloatAsShort (sizebuf_t *msg_read);	// Knightmare added
 char	*MSG_ReadString (sizebuf_t *sb);
 char	*MSG_ReadStringLine (sizebuf_t *sb);
 
 float	MSG_ReadCoord (sizebuf_t *sb);
 void	MSG_ReadPos (sizebuf_t *sb, vec3_t pos);
-float	MSG_ReadAngle (sizebuf_t *sb);
+float	MSG_ReadAngle8 (sizebuf_t *sb);
 float	MSG_ReadAngle16 (sizebuf_t *sb);
 void	MSG_ReadDeltaUsercmd (sizebuf_t *sb, struct usercmd_s *from, struct usercmd_s *cmd);
 
@@ -209,10 +294,19 @@ void	MSG_ReadDir (sizebuf_t *sb, vec3_t vector);
 
 void	MSG_ReadData (sizebuf_t *sb, void *buffer, int size);
 
-#ifdef LARGE_MAP_SIZE // 24-bit pmove origin coordinate transmission code
-void	MSG_WritePMCoordNew (sizebuf_t *sb, int in);
-int		MSG_ReadPMCoordNew (sizebuf_t *msg_read);
-#endif
+// 24-bit pmove origin coordinate transmission code
+void	MSG_WritePMCoord (sizebuf_t *sb, int in);
+int		MSG_ReadPMCoord (sizebuf_t *msg_read);
+
+// packing/unpacking of bboxes for centity_state_t solid field
+int		MSG_PackSolid16 (vec3_t bmins, vec3_t bmaxs);
+void	MSG_UnpackSolid16 (int packed, vec3_t bmins, vec3_t bmaxs);
+
+// transmission of real entity bboxes
+void MSG_WriteBBox8 (sizebuf_t *sb, vec3_t bmins, vec3_t bmaxs);
+void MSG_WriteBBox16 (sizebuf_t *sb, vec3_t bmins, vec3_t bmaxs);
+void MSG_ReadBBox8 (sizebuf_t *msg_read, vec3_t bmins, vec3_t bmaxs);
+void MSG_ReadBBox16 (sizebuf_t *msg_read, vec3_t bmins, vec3_t bmaxs);
 
 //============================================================================
 
@@ -246,6 +340,10 @@ qboolean IsValidChar (int c);
 void ExpandNewLines (char *string);
 char *StripQuotes (char *string);
 const char *MakePrintable (const void *subject, size_t numchars);
+
+//============================================================================
+
+char *Com_ParseSteamLibraryFolders (const char *fileContents, size_t contentsLen, const char *relPath, const char *appID);
 
 //============================================================================
 
@@ -283,12 +381,15 @@ PROTOCOL
 #define	PORT_SERVER	27910
 
 //=========================================
-//Knightmare- increase UPDATE_BACKUP to eliminate "U_REMOVE: oldnum != newnum"
-#define	UPDATE_BACKUP	64	// copies of entity_state_t to keep buffered
+#define	UPDATE_BACKUP	16	// copies of centity_state_t to keep buffered
 							// must be power of two
-//#define	UPDATE_BACKUP	16
+//#define	UPDATE_BACKUP	64
 
 #define	UPDATE_MASK		(UPDATE_BACKUP-1)
+
+// Knightmare- increase MAX_PACKET_ENTITIES to eliminate "U_REMOVE: oldnum != newnum"
+//#define MAX_PACKET_ENTITIES	64
+#define MAX_PACKET_ENTITIES	1024
 
 //==================
 // the svc_strings[] array in cl_parse.c should mirror this
@@ -326,7 +427,7 @@ enum svc_ops_e
 	svc_packetentities,			// [...]
 	svc_deltapacketentities,	// [...]
 	svc_frame,
-	svc_fog,					// = 21 Knightmare added
+	svc_lazarus_fog,			// = 21 Knightmare added
 
 	num_svc_ops
 };
@@ -409,49 +510,63 @@ enum clc_ops_e
 
 //==============================================
 
-// entity_state_t communication
+// centity_state_t communication
 
 // try to pack the common update flags into the first byte
-#define	U_ORIGIN1	(1<<0)
-#define	U_ORIGIN2	(1<<1)
-#define	U_ANGLE2	(1<<2)
-#define	U_ANGLE3	(1<<3)
-#define	U_FRAME8	(1<<4)		// frame is a byte
-#define	U_EVENT		(1<<5)
-#define	U_REMOVE	(1<<6)		// REMOVE this entity, don't add it
-#define	U_MOREBITS1	(1<<7)		// read one additional byte
+#define	U_ORIGIN1		(1<<0)
+#define	U_ORIGIN2		(1<<1)
+#define	U_ANGLE2		(1<<2)
+#define	U_ANGLE3		(1<<3)
+#define	U_FRAME8		(1<<4)		// frame is a byte
+#define	U_EVENT			(1<<5)
+#define	U_REMOVE		(1<<6)		// REMOVE this entity, don't add it
+#define	U_MOREBITS1		(1<<7)		// read one additional byte
 
 // second byte
-#define	U_NUMBER16	(1<<8)		// NUMBER8 is implicit if not set
-#define	U_ORIGIN3	(1<<9)
-#define	U_ANGLE1	(1<<10)
-#define	U_MODEL		(1<<11)
-#define U_RENDERFX8	(1<<12)		// fullbright, etc
-#define	U_EFFECTS8	(1<<14)		// autorotate, trails, etc
-#define	U_MOREBITS2	(1<<15)		// read one additional byte
+#define	U_NUMBER16		(1<<8)		// NUMBER8 is implicit if not set
+#define	U_ORIGIN3		(1<<9)
+#define	U_ANGLE1		(1<<10)
+#define	U_MODEL			(1<<11)
+#define U_RENDERFX8		(1<<12)		// fullbright, etc
+#define U_ALPHA			(1<<13)		// translucency
+#define	U_EFFECTS8		(1<<14)		// autorotate, trails, etc
+#define	U_MOREBITS2		(1<<15)		// read one additional byte
 
 // third byte
-#define	U_SKIN8		(1<<16)
-#define	U_FRAME16	(1<<17)		// frame is a short
-#define	U_RENDERFX16 (1<<18)	// 8 + 16 = 32
-#define	U_EFFECTS16	(1<<19)		// 8 + 16 = 32
-#define	U_MODEL2	(1<<20)		// weapons, flags, etc
-#define	U_MODEL3	(1<<21)
-#define	U_MODEL4	(1<<22)
-#define	U_MOREBITS3	(1<<23)		// read one additional byte
+#define	U_SKIN8			(1<<16)
+#define	U_FRAME16		(1<<17)		// frame is a short
+#define	U_RENDERFX16	(1<<18)		// 8 + 16 = 32
+#define	U_EFFECTS16		(1<<19)		// 8 + 16 = 32
+#define	U_MODEL2		(1<<20)		// weapons, flags, etc
+#define	U_MODEL3		(1<<21)
+#define	U_MODEL4		(1<<22)
+#define	U_MOREBITS3		(1<<23)		// read one additional byte
 
 // fourth byte
-#define	U_OLDORIGIN	(1<<24)		// FIXME: get rid of this
-#define	U_SKIN16	(1<<25)
-#define	U_SOUND		(1<<26)
-#define	U_SOLID		(1<<27)
-
+#define	U_OLDORIGIN		(1<<24)		// FIXME: get rid of this
+#define	U_SKIN16		(1<<25)
+#define	U_SOUND			(1<<26)
+#define	U_SOLID			(1<<27)
 // Knightmare- 1/18/2002- bits for extra model indices
-#define	U_VELOCITY	(1<<28)	// for R1Q2 protocol
-#define	U_MODEL5	(1<<28)		
-#define	U_MODEL6	(1<<29)
-#define	U_ATTENUAT	(1<<30)	// sound attenuation
-#define	U_ALPHA		(1<<31)	// transparency
+#define	U_MINSMAXS_8	(1<<28)		// byte mins/maxs for accurate bbox clipping in client prediction
+#define	U_MINSMAXS_16	(1<<29)		// short mins/maxs for when bytes aren't enough, 8 + 16 = 24
+#define	U_ATTENUAT		(1<<30)		// sound attenuation
+#define	U_MOREBITS4		(1<<31)		// read one additional byte
+
+// second dword, these fields should be the least often sent
+// fifth byte
+#define	U2_MODEL5		(1<<0)		// fifth model
+#define	U2_MODEL6		(1<<1)		// sixth model
+#define	U2_MOREBITS5	(1<<7)		// read one additional byte
+
+// sixth byte
+#define	U2_MOREBITS6	(1<<15)		// read one additional byte
+
+// seventh byte
+#define	U2_MOREBITS7	(1<<23)		// read one additional byte
+
+// eighth byte
+#define	U2_MOREBITS8	(1<<31)		// read one additional byte
 // end Knightmare
 
 /*
@@ -634,9 +749,11 @@ int		Cvar_DefaultInteger (char *var_name);
 char	*Cvar_DefaultString (char *var_name);
 // returns an empty string if not defined
 
-// Knightmare added
 cvar_t *Cvar_SetToDefault (char *var_name);
-// end Knightmare
+// resets cvar to default value
+
+cvar_t	*Cvar_ForceSetToDefault (char *var_name);
+// resets cvar to default value even if NOSET or LATCH
 
 void Cvar_SetDescription (char *var_name, char *description);
 // sets description string of given cvar
@@ -901,6 +1018,7 @@ void		FS_Shutdown (void);
 void		FS_DPrintf (const char *format, ...);
 FILE		*FS_FileForHandle (fileHandle_t f);
 int			FS_FOpenFile (const char *name, fileHandle_t *f, fsMode_t mode);
+int			FS_FOpenDirectFile (const char *name, fileHandle_t *f, fsMode_t mode);
 int			FS_FOpenCompressedFile (const char *zipName, const char *fileName, fileHandle_t *f, fsMode_t mode);
 void		FS_FCloseFile (fileHandle_t f);
 int			FS_Read (void *buffer, int size, fileHandle_t f);
@@ -912,6 +1030,7 @@ void		FS_Seek (fileHandle_t f, int offset, fsOrigin_t origin);
 int			FS_FTell (fileHandle_t f);
 int			FS_Tell (fileHandle_t f);
 qboolean	FS_FileExists (const char *path);
+qboolean	FS_DirectFileExists (const char *rawPath);
 qboolean	FS_LocalFileExists (const char *path);
 qboolean	FS_SaveFileExists (const char *path);
 qboolean	FS_DownloadFileExists (const char *path);
@@ -922,22 +1041,23 @@ void		FS_DeleteFile (const char *path);
 char		*FS_GameDir (void);
 char		*FS_SaveGameDir (void);
 char		*FS_DownloadDir (void);
+char		*FS_RootDataPath (void);
 char		*FS_HomePath (void);
 void		FS_CreatePath (const char *path);
 void		FS_DeletePath (const char *path);
 char		*FS_NextPath (const char *prevPath);
 char		*FS_NextGamePath (const char *prevPath);
+int			FS_FileLength (FILE *f);
 char		**FS_ListFiles (const char *findname, int *numfiles, unsigned musthave, unsigned canthave);
 void		FS_FreeFileList (char **list, int n);
 qboolean	FS_ItemInList (const char *check, int num, const char **list);
-void		FS_InsertInList (char **list, const char *insert, int len, int start);
 void		FS_Dir_f (void);
 
 void		FS_ExecAutoexec (void);
 void		FS_ExecConfigs (qboolean unbind);	// Knightmare added
 
 int			FS_LoadFile (const char *path, void **buffer);
-void		FS_AddPAKFile (const char *packPath, qboolean isProtected); // add pak file function
+void		FS_AddPAKFile (const char *packPath, qboolean isProtected, qboolean isQuakeImport); // add pak file function
 void		FS_AddPK3File (const char *packPath, qboolean isProtected); // add pk3 file function
 char		**FS_ListPak (const char *find, int *num); // pak list function
 char		**FS_GetFileList (const char *path, const char *extension, int *num);
@@ -947,8 +1067,28 @@ void		FS_FreeFile (void *buffer);
 
 // Psychospaz's mod detector
 qboolean	FS_ModType (const char *name);
+qboolean	FS_XatrixPath (void);
 qboolean	FS_RoguePath (void);
 
+/*
+==============================================================
+
+JSON PARSING
+
+==============================================================
+*/
+
+qboolean Com_ParseWalJSON (const char *fileName, const char *jsonStr, size_t jsonStrLen, miptex_t *mt, color_t *color, qboolean verbose);
+
+#define MAX_OGG_IMPORT_PATHS	8
+
+typedef struct {
+	char	virtualName[MAX_QPATH];
+	char	importGame[MAX_QPATH];
+	char	importPath[MAX_OGG_IMPORT_PATHS][MAX_QPATH];
+} oggImport_t;
+
+qboolean Com_ParseOggJSON (const char *fileName, const char *jsonStr, size_t jsonStrLen, oggImport_t *iData, qboolean verbose);
 
 /*
 ==============================================================
@@ -957,7 +1097,6 @@ MISC
 
 ==============================================================
 */
-
 
 #define	ERR_FATAL	0		// exit the entire game with a popup window
 #define	ERR_DROP	1		// print to console and disconnect from game
@@ -1042,12 +1181,32 @@ void	*Sys_GetGameAPI (void *parms);
 // loads the game dll and calls the api init function
 
 char	*Sys_ConsoleInput (void);
-void	Sys_ConsoleOutput (char *string);
+void	Sys_ConsoleOutput (const char *string);
+void	Sys_ShowConsole (qboolean show);
 void	Sys_SendKeyEvents (void);
 void	Sys_Error (const char *error, ...);
 void	Sys_Quit (void);
 char	*Sys_GetClipboardData( void );
 void	Sys_CopyProtect (void);
+
+// Knightmare- general-purpose dynamic library loading from Yamagi Q2
+void	*Sys_LoadLibrary (const char *libPath, const char *initFuncName, void **libHandle);
+void	Sys_FreeLibrary (void *libHandle);
+void	*Sys_GetProcAddress (void *libHandle, const char *funcName);
+
+// Knightmare- these init Q1/Q1RR/Q2RR Steam install dirs
+void Sys_InitQ1SteamInstallDir (void);
+void Sys_InitQ1RRSteamInstallDir (void);
+void Sys_InitQ2RRSteamInstallDir (void);
+
+// Knightmare- these return Steam install dirs of Q1/Q1RR/Q2RR, if available
+const char *Sys_Q1SteamInstallDir (void);
+const char *Sys_Q1RRSteamInstallDir (void);
+const char *Sys_Q2RRSteamInstallDir (void);
+
+// Knightmare- inits pref and download dirs
+//		Must be called after cvar fs_basegame is initialized in FS_InitFilesystem()
+static void Sys_InitPrefDir (void);
 
 // DG: returns the directory the executable (kmquake2.exe on Win32) resides in
 //     *without* a path seperator ("/" or "\") at the end
@@ -1082,12 +1241,5 @@ void SCR_BeginLoadingPlaque (void);
 void SV_Init (void);
 void SV_Shutdown (char *finalmsg, qboolean reconnect);
 void SV_Frame (int msec);
-
-#ifndef WINDOWNAME
-#define WINDOWNAME "KMQuake2"
-#endif
-#ifndef SAVENAME
-#define SAVENAME "quake2"
-#endif
 
 #endif // __QCOMMON_H

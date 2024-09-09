@@ -9,7 +9,8 @@ jorg
 #include "g_local.h"
 #include "m_boss31.h"
 
-void SP_monster_makron_put (edict_t *self);
+void MakronPrecache (edict_t *self);
+void SP_monster_makron (edict_t *self);
 qboolean visible (edict_t *self, edict_t *other);
 
 static int	sound_pain1;
@@ -319,7 +320,7 @@ mframe_t jorg_frames_death1 [] =
 	ai_move,	0,	MakronToss,
 	ai_move,	0,	jorg_dead // was BossExplode
 };
-mmove_t jorg_move_death = {FRAME_death01, FRAME_death50, jorg_frames_death1, NULL}; //was jorg_dead
+mmove_t jorg_move_death = {FRAME_death01, FRAME_death50, jorg_frames_death1, NULL}; // was jorg_dead
 
 mframe_t jorg_frames_attack2 []=
 {
@@ -489,7 +490,7 @@ void jorgBFG (edict_t *self)
 							 int kick, 
 							 float damage_radius, 
 							 int flashtype)*/
-	monster_fire_bfg (self, start, dir, 50, 300, 100, 200, MZ2_JORG_BFG_1);
+	monster_fire_bfg (self, start, dir, 50, 300, 100, 200, MZ2_JORG_BFG_1, false);
 }	
 
 void jorg_firebullet_right (edict_t *self)
@@ -576,8 +577,8 @@ void jorg_attack(edict_t *self)
 	{
 		gi.sound (self, CHAN_VOICE, sound_attack1, 1, ATTN_NORM,0);
 		self->s.sound = gi.soundindex ("boss3/w_loop.wav");
-	#ifdef LOOP_SOUND_ATTENUATION
-		self->s.attenuation = ATTN_IDLE;
+	#ifdef KMQUAKE2_ENGINE_MOD
+		self->s.loop_attenuation = ATTN_IDLE;
 	#endif
 		self->monsterinfo.currentmove = &jorg_move_start_attack1;
 	}
@@ -588,7 +589,7 @@ void jorg_attack(edict_t *self)
 	}
 }
 
-//Knightmare- explosions and throw a few gibs, but don't gib body
+// Knightmare- explosions and throw a few gibs, but don't gib body
 void JorgExplode (edict_t *self)
 {
 	vec3_t	org;
@@ -726,7 +727,7 @@ void jorg_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
 	// check for gib
 	if (self->health <= self->gib_health)
 	{
-		if (self->deadflag == DEAD_DEAD && (self->fogclip & 1) && (self->svflags & SVF_DEADMONSTER))
+		if ( (self->deadflag == DEAD_DEAD) && (self->fogclip & 1) && (self->svflags & SVF_DEADMONSTER) )
 			BossExplode (self);	// explode if already dead and have tossed makron
 		else
 			self->fog_index |= 1; // else set gib flag
@@ -763,7 +764,7 @@ qboolean Jorg_CheckAttack (edict_t *self)
 		VectorCopy (self->enemy->s.origin, spot2);
 		spot2[2] += self->enemy->viewheight;
 
-		//Knightmare- don't shoot from behind a window
+		// Knightmare- don't shoot from behind a window
 		tr = gi.trace (spot1, NULL, NULL, spot2, self, CONTENTS_SOLID|CONTENTS_MONSTER|CONTENTS_SLIME|CONTENTS_LAVA|CONTENTS_WINDOW);
 
 		// do we have a clear shot?
@@ -839,18 +840,9 @@ qboolean Jorg_CheckAttack (edict_t *self)
 }
 
 
-void MakronPrecache (void);
-
-/*QUAKED monster_jorg (1 .5 0) (-80 -80 0) (90 90 140) Ambush Trigger_Spawn Sight GoodGuy NoGib
-*/
-void SP_monster_jorg (edict_t *self)
+// Knightmare- added soundcache function
+void monster_jorg_soundcache (edict_t *self)
 {
-	if (deathmatch->value)
-	{
-		G_FreeEdict (self);
-		return;
-	}
-
 	sound_pain1 = gi.soundindex ("boss3/bs3pain1.wav");
 	sound_pain2 = gi.soundindex ("boss3/bs3pain2.wav");
 	sound_pain3 = gi.soundindex ("boss3/bs3pain3.wav");
@@ -865,8 +857,22 @@ void SP_monster_jorg (edict_t *self)
 	sound_step_right = gi.soundindex ("boss3/step2.wav");
 	sound_firegun = gi.soundindex ("boss3/xfire.wav");
 	sound_death_hit = gi.soundindex ("boss3/d_hit.wav");
+}
 
-	MakronPrecache ();
+/*QUAKED monster_jorg (1 .5 0) (-80 -80 0) (90 90 140) Ambush Trigger_Spawn Sight GoodGuy NoGib
+*/
+void SP_monster_jorg (edict_t *self)
+{
+	if (deathmatch->value)
+	{
+		G_FreeEdict (self);
+		return;
+	}
+
+	// Knightmare- use soundcache function
+	monster_jorg_soundcache (self);
+
+	MakronPrecache (self);
 
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;
@@ -914,9 +920,9 @@ void SP_monster_jorg (edict_t *self)
 	self->monsterinfo.checkattack = Jorg_CheckAttack;
 	
 	if (!self->blood_type)
-		self->blood_type = 2; //sparks
+		self->blood_type = 2;	// sparks
 	else
-		self->fogclip |= 2; //custom bloodtype flag
+		self->fogclip |= 2;		// custom bloodtype flag
 
 	gi.linkentity (self);
 	

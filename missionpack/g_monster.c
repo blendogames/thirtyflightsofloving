@@ -5,6 +5,8 @@
 
 void InitiallyDead (edict_t *self);
 
+
+
 // Lazarus: If worldspawn CORPSE_SINK effects flag is set,
 //          monsters/actors fade out and sink into the floor
 //          30 seconds after death
@@ -293,7 +295,7 @@ void monster_fire_railgun (edict_t *self, vec3_t start, vec3_t aimdir, int damag
 	gi.multicast (start, MULTICAST_PVS);
 }
 
-void monster_fire_bfg (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, int kick, float damage_radius, int flashtype)
+void monster_fire_bfg (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, int kick, float damage_radius, int flashtype, qboolean homing)
 {
 	// Zaero add
 	if (EMPNukeCheck(self, start))
@@ -303,7 +305,7 @@ void monster_fire_bfg (edict_t *self, vec3_t start, vec3_t aimdir, int damage, i
 	}
 	// end Zaero
 
-	fire_bfg (self, start, aimdir, damage, speed, damage_radius);
+	fire_bfg (self, start, aimdir, damage, speed, damage_radius, homing);
 
 	gi.WriteByte (svc_muzzleflash2);
 	gi.WriteShort (self - g_edicts);
@@ -914,7 +916,7 @@ void M_WorldEffects (edict_t *ent)
 		return;
 	}
 
-	if ((ent->watertype & CONTENTS_LAVA) && !(ent->flags & FL_IMMUNE_LAVA))
+	if ( (ent->watertype & CONTENTS_LAVA) && !(ent->flags & FL_IMMUNE_LAVA) )
 	{
 		if (ent->damage_debounce_time < level.time)
 		{
@@ -923,7 +925,7 @@ void M_WorldEffects (edict_t *ent)
 		}
 	}
 	// No slime damage for dead monsters
-	if ((ent->watertype & CONTENTS_SLIME) && !(ent->flags & FL_IMMUNE_SLIME) && !(ent->svflags & SVF_DEADMONSTER))
+	if ( (ent->watertype & CONTENTS_SLIME) && !(ent->flags & FL_IMMUNE_SLIME) && !(ent->svflags & SVF_DEADMONSTER) )
 	{
 		if (ent->damage_debounce_time < level.time)
 		{
@@ -934,9 +936,9 @@ void M_WorldEffects (edict_t *ent)
 
 	if ( !(ent->flags & FL_INWATER) )
 	{
-		if (!(ent->svflags & SVF_DEADMONSTER))
-		{
-			if ((ent->watertype & CONTENTS_LAVA) && (ent->health > 0))
+		if ( !(ent->svflags & SVF_DEADMONSTER) )
+		{	// No falling in lava sound for Chthon
+			if ( (ent->watertype & CONTENTS_LAVA) && (ent->health > 0) && !(ent->flags & FL_IMMUNE_LAVA) )
 			{
 				if (random() <= 0.5)
 					gi.sound (ent, CHAN_BODY, gi.soundindex("player/lava1.wav"), 1, ATTN_NORM, 0);
@@ -1217,7 +1219,7 @@ Using a monster makes it angry at the current activator
 
 void monster_use (edict_t *self, edict_t *other, edict_t *activator)
 {
-	if (self->enemy)
+	if ( !activator || self->enemy )	// Phatman: Solves a crash condition
 		return;
 	if (self->health <= 0)
 		return;
@@ -1241,7 +1243,7 @@ void monster_use (edict_t *self, edict_t *other, edict_t *activator)
 		if (self->monsterinfo.aiflags & AI_GOOD_GUY)
 			self->monsterinfo.monsterflags |= MFL_DO_NOT_COUNT;
 		self->monsterinfo.aiflags &= ~(AI_GOOD_GUY + AI_FOLLOW_LEADER);
-		if (self->dmgteam && !Q_stricmp(self->dmgteam,"player"))
+		if (self->dmgteam && !Q_stricmp(self->dmgteam, "player"))
 			self->dmgteam = NULL;
 	}
 
@@ -1265,7 +1267,8 @@ void monster_triggered_spawn (edict_t *self)
 	self->air_finished = level.time + 12;
 
 	// Knightmare- teleport effect for Q1 monsters
-	if (self->flags & FL_Q1_MONSTER) {
+	if ( (self->flags & FL_Q1_MONSTER) && !IsQ1Chthon(self) )
+	{
 #ifdef KMQUAKE2_ENGINE_MOD
 		self->s.event = EV_PLAYER_TELEPORT2;
 #else
@@ -1283,6 +1286,21 @@ void monster_triggered_spawn (edict_t *self)
 	// end Zaero
 
 	gi.linkentity (self);
+
+	// Knightmare- special handling for Q1 Chthon
+	if ( IsQ1Chthon(self) )
+	{
+	//	gi.dprintf("SPAWNING CHTHON\n");
+		self->think = monster_think;
+		self->nextthink = level.time + FRAMETIME;
+		self->monsterinfo.pausetime = 20;
+	//	self->monsterinfo.stand (self);
+		self->enemy = NULL;
+		gi.linkentity (self);
+		chthon_rise (self);
+		return;
+	}
+
 	monster_start_go (self);
 
 	if (self->enemy && !(self->spawnflags & 1) && !(self->enemy->flags & FL_NOTARGET))
@@ -1305,7 +1323,7 @@ void monster_triggered_spawn_use (edict_t *self, edict_t *other, edict_t *activa
 	self->nextthink = level.time + FRAMETIME;
 
 	// Knightmare- good guy monsters shouldn't have an enemy from this
-	if (activator->client && !(self->monsterinfo.aiflags & AI_GOOD_GUY))
+	if (activator && activator->client && !(self->monsterinfo.aiflags & AI_GOOD_GUY))
 		self->enemy = activator;
 
 	// Lazarus: Add 'em up
@@ -1337,22 +1355,24 @@ void monster_death_use (edict_t *self)
 	edict_t	*player;
 	int		i;
 
-	if (!strcmp(self->classname, "monster_turret"))
-		gi.dprintf("monster_turret firing targets\n");
+//	if ( !strcmp(self->classname, "monster_turret") )
+//		gi.dprintf ("monster_turret firing targets\n");
 
 	self->flags &= ~(FL_FLY|FL_SWIM);
 	self->monsterinfo.aiflags &= AI_GOOD_GUY;
 
-	//Knightmare- remove powerscreen and other effects from dead monsters
+	// Knightmare- remove powerscreen and other effects from dead monsters
 	self->s.effects &= ~(EF_COLOR_SHELL|EF_POWERSCREEN|EF_DOUBLE|EF_QUAD|EF_PENT);
 	self->s.renderfx &= ~(RF_SHELL_RED|RF_SHELL_GREEN|RF_SHELL_BLUE|RF_SHELL_DOUBLE);
 
 	// Lazarus: If actor/monster is being used as a camera by a player,
 	// turn camera off for that player
-	for(i=0,player=g_edicts+1; i<maxclients->value; i++, player++)
+	for (i = 0, player = g_edicts+1; i<maxclients->value; i++, player++)
 	{
-		if (player->client && player->client->spycam == self)
-			camera_off(player);
+		if ( !player->inuse )	// Phatman: Solves a crash condition
+			continue;
+		if ( player->client && (player->client->spycam == self) )
+			camera_off (player);
 	}
 
 	if (self->item)
@@ -1373,6 +1393,8 @@ void monster_death_use (edict_t *self)
 
 //============================================================================
 
+void SP_gibhead (edict_t *gib);
+
 qboolean monster_start (edict_t *self)
 {
 	if (deathmatch->value)
@@ -1384,9 +1406,7 @@ qboolean monster_start (edict_t *self)
 	// Lazarus: Already gibbed monsters passed across levels via trigger_transition:
 	if ( (self->max_health > 0) && (self->health <= self->gib_health) && !(self->spawnflags & SF_MONSTER_NOGIB) )
 	{
-		void	SP_gibhead(edict_t *);
-
-		SP_gibhead(self);
+		SP_gibhead (self);
 		return true;
 	}
 
@@ -1396,7 +1416,7 @@ qboolean monster_start (edict_t *self)
 		|| (UseSpecialGoodGuyFlag(self) && (self->spawnflags & 16)) )
 	{
 		self->monsterinfo.aiflags |= AI_GOOD_GUY;
-		if (!self->dmgteam)
+		if ( !self->dmgteam )
 		{
 			size_t	dmgSize = 8*sizeof(char);
 			self->dmgteam = gi.TagMalloc(dmgSize, TAG_LEVEL);
@@ -1422,10 +1442,12 @@ qboolean monster_start (edict_t *self)
 	if ( (self->spawnflags & SF_MONSTER_AMBUSH) && !(self->monsterinfo.aiflags & AI_GOOD_GUY) )
 		self->spawnflags |= SF_MONSTER_SIGHT;
 
+	// Lazarus: Don't add trigger spawned monsters until they are actually spawned
+	// Knightmare- this is annoying, and will likely annoy most Q2 players as well
 	// Zaero- spawnflag 16 = do not count
-	//	if ( !(self->monsterinfo.aiflags & AI_GOOD_GUY) && !(self->monsterinfo.aiflags & AI_DO_NOT_COUNT) )
-	//	if ( !(self->monsterinfo.aiflags & AI_GOOD_GUY) && !(self->monsterinfo.monsterflags & MFL_DO_NOT_COUNT)/* && !(self->spawnflags & SF_MONSTER_TRIGGER_SPAWN*/ )
-	// Zaero- spawnflag 16 = do not count
+//	if ( !(self->monsterinfo.aiflags & AI_GOOD_GUY) && !(self->monsterinfo.aiflags & AI_DO_NOT_COUNT) )
+//	if ( !(self->monsterinfo.aiflags & AI_GOOD_GUY) && !(self->monsterinfo.monsterflags & MFL_DO_NOT_COUNT) && !(self->spawnflags & SF_MONSTER_TRIGGER_SPAWN) )
+//	if ( !(self->monsterinfo.aiflags & AI_GOOD_GUY) && !(self->monsterinfo.monsterflags & MFL_DO_NOT_COUNT) )
 	if ( !(self->monsterinfo.aiflags & AI_GOOD_GUY) && !(self->monsterinfo.monsterflags & MFL_DO_NOT_COUNT) && !( (level.maptype == MAPTYPE_ZAERO) && (self->spawnflags & 16) ) )
 		level.total_monsters++;
 
@@ -1437,7 +1459,7 @@ qboolean monster_start (edict_t *self)
 	self->use = monster_use;
 
 	// Lazarus - don't reset max_health unnecessarily
-	if (!self->max_health)
+	if ( !self->max_health )
 		self->max_health = self->health;
 
 	// Reset skinnum for revived monsters
@@ -1531,8 +1553,10 @@ qboolean monster_start (edict_t *self)
 	}
 
 	// randomize what frame they start on
-	if (self->monsterinfo.currentmove)
+	// Knightmare- don't do this for Q1 Chthon
+	if ( self->monsterinfo.currentmove && !IsQ1Chthon(self) ) {
 		self->s.frame = self->monsterinfo.currentmove->firstframe + (rand() % (self->monsterinfo.currentmove->lastframe - self->monsterinfo.currentmove->firstframe + 1));
+	}
 
 	// PMM - get this so I don't have to do it in all of the monsters
 	self->monsterinfo.base_height = self->maxs[2];
@@ -1614,7 +1638,9 @@ void monster_start_go (edict_t *self)
 			gi.dprintf ("%s can't find target %s at %s\n", self->classname, self->target, vtos(self->s.origin));
 			self->target = NULL;
 			self->monsterinfo.pausetime = 100000000;
-			self->monsterinfo.stand (self);
+			if ( !IsQ1Chthon(self) ) {	// Knightmare- Don't put Chthon in stand frames
+				self->monsterinfo.stand (self);
+			}
 		}
 		else if (strcmp (self->movetarget->classname, "path_corner") == 0)
 		{
@@ -1632,7 +1658,9 @@ void monster_start_go (edict_t *self)
 		{
 			self->goalentity = self->movetarget = NULL;
 			self->monsterinfo.pausetime = 100000000;
-			self->monsterinfo.stand (self);
+			if ( !IsQ1Chthon(self) ) {	// Knightmare- Don't put Chthon in stand frames
+				self->monsterinfo.stand (self);
+			}
 		}
 	}
 	else
@@ -1765,10 +1793,11 @@ void stationarymonster_triggered_spawn_use (edict_t *self, edict_t *other, edict
 	self->think = stationarymonster_triggered_spawn;
 	self->nextthink = level.time + FRAMETIME;
 	// Knightmare- good guy monsters shouldn't have an enemy from this
-	if (activator->client && !(self->monsterinfo.aiflags & AI_GOOD_GUY))
+	if (activator && activator->client && !(self->monsterinfo.aiflags & AI_GOOD_GUY))
 		self->enemy = activator;
 	// Lazarus: Add 'em up
-//	if (!(self->monsterinfo.aiflags & AI_GOOD_GUY))
+	// Knightmare- this is annoying, and will likely annoy most Q2 players as well
+//	if ( !(self->monsterinfo.aiflags & AI_GOOD_GUY) )
 //		level.total_monsters++;
 	self->use = monster_use;
 }
@@ -1845,843 +1874,10 @@ void InitiallyDead (edict_t *self)
 	gi.linkentity(self);
 }
 
-#define MAX_SKINS		32 // max is 32, and we need all of them!
-#define MAX_SKINNAME	64
-
-#include "pak.h"
-
-int PatchMonsterModel (char *modelname)
-{
-	cvar_t		*gamedir;
-	int			j;
-	int			numskins;			// number of skin entries
-	char		skins[MAX_SKINS][MAX_SKINNAME];	// skin entries
-	char		infilename[MAX_OSPATH];
-	char		outfilename[MAX_OSPATH];
-	char		tempname[MAX_OSPATH];
-	char		*p;
-	FILE		*infile;
-	FILE		*outfile;
-	dmdl_t		model;				// model header
-	byte		*data;				// model data
-	int			datasize;			// model data size (bytes)
-	int			newoffset;			// model data offset (after skins)
-	qboolean	is_tank = false;
-	qboolean	is_soldier = false;
-	// Knightmare added
-	qboolean	is_brain = false;
-	qboolean	is_gekk = false;
-	qboolean	is_fixbot = false;
-	qboolean	is_chick = false;
-	qboolean	is_gunner = false;
-	qboolean	is_soldierh = false;
-	qboolean	is_carrier = false;
-	qboolean	is_hover = false;
-	qboolean	is_medic = false;
-	qboolean	is_turret = false;
-	qboolean	is_vulture = false;
-	qboolean	is_zboss_mech = false;
-	qboolean	is_zboss_pilot = false;
-	qboolean	is_q1monster = false;
-
-	qboolean	gamedirpakfile = false;
-
-	// get game (moddir) name
-	gamedir = gi.cvar("game", "", 0);
-	if (!*gamedir->string)
-		return 0;	// we're in baseq2
-
-//	Com_sprintf (outfilename, sizeof(outfilename), "%s/%s", gamedir->string, modelname);
-	Com_sprintf (tempname, sizeof(tempname), modelname);
-	SavegameDirRelativePath (tempname, outfilename, sizeof(outfilename));
-	if (outfile = fopen (outfilename, "rb"))
-	{
-		// output file already exists, move along
-		fclose (outfile);
-	//	gi.dprintf ("PatchMonsterModel: Could not save %s, file already exists\n", outfilename);
-		return 0;
-	}
-
-
-	numskins = 8;
-	// special cases
-	if (!strcmp(modelname, "models/monsters/tank/tris.md2"))
-	{
-		is_tank = true;
-		numskins = 16;
-	}
-	else if (!strcmp(modelname, "models/monsters/soldier/tris.md2"))
-	{
-		is_soldier = true;
-		numskins = 32;	// was 24
-	}
-	// Knightmare added
-#ifdef CITADELMOD_FEATURES
-	else if (!strcmp(modelname, "models/monsters/brain/tris.md2"))
-	{
-		is_brain = true;
-		numskins = 16;
-	}
-#endif
-	else if (!strcmp(modelname, "models/monsters/gekk/tris.md2"))
-	{
-		is_gekk = true;
-		numskins = 12;
-	}
-	else if (!strcmp(modelname, "models/monsters/fixbot/tris.md2"))
-	{
-		is_fixbot = true;
-		numskins = 4;
-	}
-	else if (!strcmp(modelname, "models/monsters/bitch/tris.md2")
-		|| !strcmp(modelname, "models/monsters/bitch2/tris.md2"))
-	{
-		is_chick = true;
-		numskins = 16;
-	}
-	else if (!strcmp(modelname, "models/monsters/gunner/tris.md2"))
-	{
-		is_gunner = true;
-		numskins = 16;
-	}
-	else if (!strcmp(modelname, "models/monsters/soldierh/tris.md2"))
-	{
-		is_soldierh = true;
-		numskins = 24;
-	}
-	else if (!strcmp(modelname, "models/monsters/carrier/tris.md2"))
-	{
-		is_carrier = true;
-		numskins = 8;
-	}
-	else if (!strcmp(modelname, "models/monsters/hover/tris.md2"))
-	{
-		is_hover = true;
-		numskins = 16;
-	}
-	else if (!strcmp(modelname, "models/monsters/medic/tris.md2"))
-	{
-		is_medic = true;
-		numskins = 16;
-	}
-	else if (!strcmp(modelname, "models/monsters/turret/tris.md2"))
-	{
-		is_turret = true;
-		numskins = 12;
-	}
-	else if (!strcmp(modelname, "models/monsters/vulture/tris.md2"))
-	{
-		is_vulture = true;
-		numskins = 4;
-	}
-	else if (!strcmp(modelname, "models/monsters/bossz/mech/tris.md2"))
-	{
-		is_zboss_mech = true;
-		numskins = 12;
-	}
-	else if (!strcmp(modelname, "models/monsters/bossz/pilot/tris.md2"))
-	{
-		is_zboss_pilot = true;
-		numskins = 12;
-	}
-	else if ( !strcmp(modelname, "models/monsters/q1dog/tris.md2") ||  !strcmp(modelname, "models/monsters/q1enforcer/tris.md2")
-			|| !strcmp(modelname, "models/monsters/q1fiend/tris.md2") || !strcmp(modelname, "models/monsters/q1freddie/tris.md2")
-			|| !strcmp(modelname, "models/monsters/q1grunt/tris.md2") || !strcmp(modelname, "models/monsters/q1hknight/tris.md2")
-			|| !strcmp(modelname, "models/monsters/q1knight/tris.md2") || !strcmp(modelname, "models/monsters/q1ogre/tris.md2")
-			|| !strcmp(modelname, "models/monsters/q1rotfish/tris.md2") || !strcmp(modelname, "models/monsters/q1scrag/tris.md2")
-			|| !strcmp(modelname, "models/monsters/q1shalrath/tris.md2") || !strcmp(modelname, "models/monsters/q1shambler/tris.md2")
-			|| !strcmp(modelname, "models/monsters/q1tarbaby/tris.md2") || !strcmp(modelname, "models/monsters/q1zombie/tris.md2") )
-	{
-		is_q1monster = true;
-		numskins = 4;
-	}
-
-	// end Knightmare
-
-	for (j=0; j<numskins; j++)
-	{
-		memset (skins[j], 0, MAX_SKINNAME);
-		Com_strcpy( skins[j], sizeof(skins[j]), modelname );
-		p = strstr( skins[j], "tris.md2" );
-		if (!p)
-		{
-			fclose (outfile);
-			gi.dprintf( "Error patching %s\n",modelname);
-			return 0;
-		}
-		*p = 0;
-		if (is_soldier)
-		{
-			switch (j)
-			{
-			case 0:
-				Com_strcat (skins[j], sizeof(skins[j]), "skin_lt.pcx"); break;
-			case 1:
-				Com_strcat (skins[j], sizeof(skins[j]), "skin_ltp.pcx"); break;
-			case 2:
-				Com_strcat (skins[j], sizeof(skins[j]), "skin.pcx"); break;
-			case 3:
-				Com_strcat (skins[j], sizeof(skins[j]), "pain.pcx"); break;
-			case 4:
-				Com_strcat (skins[j], sizeof(skins[j]), "skin_ss.pcx"); break;
-			case 5:
-				Com_strcat (skins[j], sizeof(skins[j]), "skin_ssp.pcx"); break;
-			case 6:
-				Com_strcat (skins[j], sizeof(skins[j]), "skin_pl.pcx"); break;
-			case 7:
-				Com_strcat (skins[j], sizeof(skins[j]), "skin_plp.pcx"); break;
-			case 8:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom1_lt.pcx"); break;
-			case 9:
-				Com_strcat (skins[j], sizeof(skins[j]), "custompain1_lt.pcx"); break;
-			case 10:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom1.pcx"); break;
-			case 11:
-				Com_strcat (skins[j], sizeof(skins[j]), "custompain1.pcx"); break;
-			case 12:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom1_ss.pcx"); break;
-			case 13:
-				Com_strcat (skins[j], sizeof(skins[j]), "custompain1_ss.pcx"); break;
-			case 14:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom1_pl.pcx"); break;
-			case 15:
-				Com_strcat (skins[j], sizeof(skins[j]), "custompain1_pl.pcx"); break;
-			case 16:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom2_lt.pcx"); break;
-			case 17:
-				Com_strcat (skins[j], sizeof(skins[j]), "custompain2_lt.pcx"); break;
-			case 18:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom2.pcx"); break;
-			case 19:
-				Com_strcat (skins[j], sizeof(skins[j]), "custompain2.pcx"); break;
-			case 20:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom2_ss.pcx"); break;
-			case 21:
-				Com_strcat (skins[j], sizeof(skins[j]), "custompain2_ss.pcx"); break;
-			case 22:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom2_pl.pcx"); break;
-			case 23:
-				Com_strcat (skins[j], sizeof(skins[j]), "custompain2_pl.pcx"); break;
-			case 24:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom3_lt.pcx"); break;
-			case 25:
-				Com_strcat (skins[j], sizeof(skins[j]), "custompain3_lt.pcx"); break;
-			case 26:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom3.pcx"); break;
-			case 27:
-				Com_strcat (skins[j], sizeof(skins[j]), "custompain3.pcx"); break;
-			case 28:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom3_ss.pcx"); break;
-			case 29:
-				Com_strcat (skins[j], sizeof(skins[j]), "custompain3_ss.pcx"); break;
-			case 30:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom3_pl.pcx"); break;
-			case 31:
-				Com_strcat (skins[j], sizeof(skins[j]), "custompain3_pl.pcx"); break;
-			}
-		}
-		else if (is_tank)
-		{
-			switch (j)
-			{
-			case 0:
-				Com_strcat (skins[j], sizeof(skins[j]), "skin.pcx"); break;
-			case 1:
-				Com_strcat (skins[j], sizeof(skins[j]), "pain.pcx"); break;
-			case 2:
-				Com_strcat (skins[j], sizeof(skins[j]), "../ctank/skin.pcx"); break;
-			case 3:
-				Com_strcat (skins[j], sizeof(skins[j]), "../ctank/pain.pcx"); break;
-			case 4:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom1.pcx"); break;
-			case 5:
-				Com_strcat (skins[j], sizeof(skins[j]), "custompain1.pcx"); break;
-			case 6:
-				Com_strcat (skins[j], sizeof(skins[j]), "../ctank/custom1.pcx"); break;
-			case 7:
-				Com_strcat (skins[j], sizeof(skins[j]), "../ctank/custompain1.pcx"); break;
-			case 8:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom2.pcx"); break;
-			case 9:
-				Com_strcat (skins[j], sizeof(skins[j]), "custompain2.pcx"); break;
-			case 10:
-				Com_strcat (skins[j], sizeof(skins[j]), "../ctank/custom2.pcx"); break;
-			case 11:
-				Com_strcat (skins[j], sizeof(skins[j]), "../ctank/custompain2.pcx"); break;
-			case 12:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom3.pcx"); break;
-			case 13:
-				Com_strcat (skins[j], sizeof(skins[j]), "custompain3.pcx"); break;
-			case 14:
-				Com_strcat (skins[j], sizeof(skins[j]), "../ctank/custom3.pcx"); break;
-			case 15:
-				Com_strcat (skins[j], sizeof(skins[j]), "../ctank/custompain3.pcx"); break;
-			}
-		}
-		// Knightmare added
-#ifdef CITADELMOD_FEATURES
-		else if (is_brain)
-		{
-			switch (j)
-			{
-			case 0:
-				Com_strcat (skins[j], sizeof(skins[j]), "skin.pcx"); break;
-			case 1:
-				Com_strcat (skins[j], sizeof(skins[j]), "pain.pcx"); break;
-			case 2:
-				Com_strcat (skins[j], sizeof(skins[j]), "beta.pcx"); break;
-			case 3:
-				Com_strcat (skins[j], sizeof(skins[j]), "betapain.pcx"); break;
-			case 4:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom1.pcx"); break;
-			case 5:
-				Com_strcat (skins[j], sizeof(skins[j]), "custompain1.pcx"); break;
-			case 6:
-				Com_strcat (skins[j], sizeof(skins[j]), "custombeta1.pcx"); break;
-			case 7:
-				Com_strcat (skins[j], sizeof(skins[j]), "custombeta_p1.pcx"); break;
-			case 8:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom2.pcx"); break;
-			case 9:
-				Com_strcat (skins[j], sizeof(skins[j]), "custompain2.pcx"); break;
-			case 10:
-				Com_strcat (skins[j], sizeof(skins[j]), "custombeta2.pcx"); break;
-			case 11:
-				Com_strcat (skins[j], sizeof(skins[j]), "custombeta_p2.pcx"); break;
-			case 12:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom3.pcx"); break;
-			case 13:
-				Com_strcat (skins[j], sizeof(skins[j]), "custompain3.pcx"); break;
-			case 14:
-				Com_strcat (skins[j], sizeof(skins[j]), "custombeta3.pcx"); break;
-			case 15:
-				Com_strcat (skins[j], sizeof(skins[j]), "custombeta_p3.pcx"); break;
-			}
-		}
-#endif
-		else if (is_gekk)
-		{
-			switch (j)
-			{
-			case 0:
-				Com_strcat (skins[j], sizeof(skins[j]), "gekk.pcx"); break;
-			case 1:
-				Com_strcat (skins[j], sizeof(skins[j]), "gekpain1.pcx"); break;
-			case 2:
-				Com_strcat (skins[j], sizeof(skins[j]), "gekpain2.pcx"); break;
-			case 3:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom1.pcx"); break;
-			case 4:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom1pain1.pcx"); break;
-			case 5:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom1pain2.pcx"); break;
-			case 6:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom2.pcx"); break;
-			case 7:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom2pain1.pcx"); break;
-			case 8:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom2pain2.pcx"); break;
-			case 9:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom3.pcx"); break;
-			case 10:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom3pain1.pcx"); break;
-			case 11:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom3pain2.pcx"); break;
-			}
-		}
-		else if (is_fixbot)
-		{
-			switch (j)
-			{
-			case 0:
-				Com_strcat (skins[j], sizeof(skins[j]), "droid.pcx"); break;
-			case 1:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom1.pcx"); break;
-			case 2:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom2.pcx"); break;
-			case 3:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom3.pcx"); break;
-			}
-		}
-		else if (is_chick)
-		{
-			switch (j)
-			{
-			case 0:
-				Com_strcat (skins[j], sizeof(skins[j]), "skin.pcx"); break;
-			case 1:
-				Com_strcat (skins[j], sizeof(skins[j]), "pain.pcx"); break;
-			case 2:
-				Com_strcpy (skins[j], sizeof(skins[j]), "models/monsters/bitch/bi_sk3.pcx"); break;
-			case 3:
-				Com_strcpy (skins[j], sizeof(skins[j]), "models/monsters/bitch/bi_pain.pcx"); break;
-			case 4:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom1.pcx"); break;
-			case 5:
-				Com_strcat (skins[j], sizeof(skins[j]), "custompain1.pcx"); break;
-			case 6:
-				Com_strcat (skins[j], sizeof(skins[j]), "custombeta1.pcx"); break;
-			case 7:
-				Com_strcat (skins[j], sizeof(skins[j]), "custombeta_p1.pcx"); break;
-			case 8:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom2.pcx"); break;
-			case 9:
-				Com_strcat (skins[j], sizeof(skins[j]), "custompain2.pcx"); break;
-			case 10:
-				Com_strcat (skins[j], sizeof(skins[j]), "custombeta2.pcx"); break;
-			case 11:
-				Com_strcat (skins[j], sizeof(skins[j]), "custombeta_p2.pcx"); break;
-			case 12:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom3.pcx"); break;
-			case 13:
-				Com_strcat (skins[j], sizeof(skins[j]), "custompain3.pcx"); break;
-			case 14:
-				Com_strcat (skins[j], sizeof(skins[j]), "custombeta3.pcx"); break;
-			case 15:
-				Com_strcat (skins[j], sizeof(skins[j]), "custombeta_p3.pcx"); break;
-			}
-		}
-		else if (is_gunner)
-		{
-			switch (j)
-			{
-			case 0:
-				Com_strcat (skins[j], sizeof(skins[j]), "skin.pcx"); break;
-			case 1:
-				Com_strcat (skins[j], sizeof(skins[j]), "pain.pcx"); break;
-			case 2:
-				Com_strcpy (skins[j], sizeof(skins[j]), "tact_skin.pcx"); break;
-			case 3:
-				Com_strcpy (skins[j], sizeof(skins[j]), "tact_pain.pcx"); break;
-			case 4:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom1.pcx"); break;
-			case 5:
-				Com_strcat (skins[j], sizeof(skins[j]), "custompain1.pcx"); break;
-			case 6:
-				Com_strcat (skins[j], sizeof(skins[j]), "custombeta1.pcx"); break;
-			case 7:
-				Com_strcat (skins[j], sizeof(skins[j]), "custombeta_p1.pcx"); break;
-			case 8:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom2.pcx"); break;
-			case 9:
-				Com_strcat (skins[j], sizeof(skins[j]), "custompain2.pcx"); break;
-			case 10:
-				Com_strcat (skins[j], sizeof(skins[j]), "custombeta2.pcx"); break;
-			case 11:
-				Com_strcat (skins[j], sizeof(skins[j]), "custombeta_p2.pcx"); break;
-			case 12:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom3.pcx"); break;
-			case 13:
-				Com_strcat (skins[j], sizeof(skins[j]), "custompain3.pcx"); break;
-			case 14:
-				Com_strcat (skins[j], sizeof(skins[j]), "custombeta3.pcx"); break;
-			case 15:
-				Com_strcat (skins[j], sizeof(skins[j]), "custombeta_p3.pcx"); break;
-			}
-		}
-		else if (is_soldierh)
-		{
-			switch (j)
-			{
-			case 0:
-				Com_strcat (skins[j], sizeof(skins[j]), "sold01.pcx"); break;
-			case 1:
-				Com_strcat (skins[j], sizeof(skins[j]), "sold01_p.pcx"); break;
-			case 2:
-				Com_strcat (skins[j], sizeof(skins[j]), "sold02.pcx"); break;
-			case 3:
-				Com_strcat (skins[j], sizeof(skins[j]), "sold02_p.pcx"); break;
-			case 4:
-				Com_strcat (skins[j], sizeof(skins[j]), "sold03.pcx"); break;
-			case 5:
-				Com_strcat (skins[j], sizeof(skins[j]), "sold03_p.pcx"); break;
-			case 6:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom1sold1.pcx"); break;
-			case 7:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom1sold1_p.pcx"); break;
-			case 8:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom1sold2.pcx"); break;
-			case 9:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom1sold2_p.pcx"); break;
-			case 10:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom1sold3.pcx"); break;
-			case 11:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom1sold3_p.pcx"); break;
-			case 12:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom2sold1.pcx"); break;
-			case 13:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom2sold1_p.pcx"); break;
-			case 14:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom2sold2.pcx"); break;
-			case 15:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom2sold2_p.pcx"); break;
-			case 16:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom2sold3.pcx"); break;
-			case 17:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom2sold3_p.pcx"); break;
-			case 18:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom3sold1.pcx"); break;
-			case 19:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom3sold1_p.pcx"); break;
-			case 20:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom3sold2.pcx"); break;
-			case 21:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom3sold2_p.pcx"); break;
-			case 22:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom3sold3.pcx"); break;
-			case 23:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom3sold3_p.pcx"); break;
-			}
-		}
-		else if (is_carrier)
-		{
-			switch (j)
-			{
-			case 0:
-				Com_strcat (skins[j], sizeof(skins[j]), "skin.pcx"); break;
-			case 1:
-				Com_strcat (skins[j], sizeof(skins[j]), "pain2.pcx"); break;
-			case 2:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom1.pcx"); break;
-			case 3:
-				Com_strcat (skins[j], sizeof(skins[j]), "custompain1.pcx"); break;
-			case 4:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom2.pcx"); break;
-			case 5:
-				Com_strcat (skins[j], sizeof(skins[j]), "custompain2.pcx"); break;
-			case 6:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom3.pcx"); break;
-			case 7:
-				Com_strcat (skins[j], sizeof(skins[j]), "custompain3.pcx"); break;
-			}
-		}
-		else if (is_hover || is_medic)
-		{
-			switch (j)
-			{
-			case 0:
-				Com_strcat (skins[j], sizeof(skins[j]), "skin.pcx"); break;
-			case 1:
-				Com_strcat (skins[j], sizeof(skins[j]), "pain.pcx"); break;
-			case 2:
-				Com_strcat (skins[j], sizeof(skins[j]), "rskin.pcx"); break;
-			case 3:
-				Com_strcat (skins[j], sizeof(skins[j]), "rpain.pcx"); break;
-			case 4:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom1.pcx"); break;
-			case 5:
-				Com_strcat (skins[j], sizeof(skins[j]), "custompain1.pcx"); break;
-			case 6:
-				Com_strcat (skins[j], sizeof(skins[j]), "custombeta1.pcx"); break;
-			case 7:
-				Com_strcat (skins[j], sizeof(skins[j]), "custombeta_p1.pcx"); break;
-			case 8:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom2.pcx"); break;
-			case 9:
-				Com_strcat (skins[j], sizeof(skins[j]), "custompain2.pcx"); break;
-			case 10:
-				Com_strcat (skins[j], sizeof(skins[j]), "custombeta2.pcx"); break;
-			case 11:
-				Com_strcat (skins[j], sizeof(skins[j]), "custombeta_p2.pcx"); break;
-			case 12:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom3.pcx"); break;
-			case 13:
-				Com_strcat (skins[j], sizeof(skins[j]), "custompain3.pcx"); break;
-			case 14:
-				Com_strcat (skins[j], sizeof(skins[j]), "custombeta2.pcx"); break;
-			case 15:
-				Com_strcat (skins[j], sizeof(skins[j]), "custombeta_p2.pcx"); break;
-			}
-		}
-		else if (is_turret)
-		{
-			switch (j)
-			{
-			case 0:
-				Com_strcat (skins[j], sizeof(skins[j]), "skin.pcx"); break;
-			case 1:
-				Com_strcat (skins[j], sizeof(skins[j]), "skin1.pcx"); break;
-			case 2:
-				Com_strcat (skins[j], sizeof(skins[j]), "skin2.pcx"); break;
-			case 3:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom1_1.pcx"); break;
-			case 4:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom1_2.pcx"); break;
-			case 5:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom1_3.pcx"); break;
-			case 6:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom2_1.pcx"); break;
-			case 7:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom2_2.pcx"); break;
-			case 8:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom2_3.pcx"); break;
-			case 9:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom3_1.pcx"); break;
-			case 10:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom3_2.pcx"); break;
-			case 11:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom3_3.pcx"); break;
-			}
-		}
-		else if (is_vulture)
-		{
-			switch (j)
-			{
-			case 0:
-				Com_strcat (skins[j], sizeof(skins[j]), "vulture.pcx"); break;
-			case 1:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom1.pcx"); break;
-			case 2:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom2.pcx"); break;
-			case 3:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom3.pcx"); break;
-			}
-		}
-		else if (is_zboss_mech || is_zboss_pilot)
-		{
-			switch (j)
-			{
-			case 0:
-				Com_strcat (skins[j], sizeof(skins[j]), "skin.pcx"); break;
-			case 1:
-				Com_strcat (skins[j], sizeof(skins[j]), "pain1.pcx"); break;
-			case 2:
-				Com_strcat (skins[j], sizeof(skins[j]), "pain2.pcx"); break;
-			case 3:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom1.pcx"); break;
-			case 4:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom1_p1.pcx"); break;
-			case 5:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom1_p2.pcx"); break;
-			case 6:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom2.pcx"); break;
-			case 7:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom2_p1.pcx"); break;
-			case 8:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom2_p2.pcx"); break;
-			case 9:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom3.pcx"); break;
-			case 10:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom3_p1.pcx"); break;
-			case 11:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom3_p2.pcx"); break;
-			}
-		}
-		else if (is_q1monster)
-		{
-			switch (j)
-			{
-			case 0:
-				Com_strcat (skins[j], sizeof(skins[j]), "skin0.pcx"); break;
-			case 1:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom1.pcx"); break;
-			case 2:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom2.pcx"); break;
-			case 3:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom3.pcx"); break;
-			}
-		}
-		// end Knightmare
-		else
-		{
-			switch (j)
-			{
-			case 0:
-				Com_strcat (skins[j], sizeof(skins[j]), "skin.pcx"); break;
-			case 1:
-				Com_strcat (skins[j], sizeof(skins[j]), "pain.pcx"); break;
-			case 2:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom1.pcx"); break;
-			case 3:
-				Com_strcat (skins[j], sizeof(skins[j]), "custompain1.pcx"); break;
-			case 4:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom2.pcx"); break;
-			case 5:
-				Com_strcat (skins[j], sizeof(skins[j]), "custompain2.pcx"); break;
-			case 6:
-				Com_strcat (skins[j], sizeof(skins[j]), "custom3.pcx"); break;
-			case 7:
-				Com_strcat (skins[j], sizeof(skins[j]), "custompain3.pcx"); break;
-			}
-		}
-	}
-
-	// load original model from baseq2
-	Com_sprintf (infilename, sizeof(infilename), "baseq2/%s", modelname);
-	// Knightmare- if not in baseq2, look in current gamedir
-	// can't do this- the output file already exists
-	//if ( !(infile = fopen (infilename, "rb")) )
-	//	GameDirRelativePath (modelname, infilename, sizeof(infilename));
-
-	// If file doesn't exist on user's hard disk, it must be in 
-	// a pak file
-	if ( !(infile = fopen (infilename, "rb")) )
-	{
-		pak_header_t	pakheader;
-		pak_item_t		pakitem;
-		FILE			*fpak;
-		int				i, k, numitems;
-		char			pakfile[MAX_OSPATH];
-
-		// Knightmare- look in all pak files in baseq2
-		for (i=0; i<10; i++)
-		{
-			Com_sprintf (pakfile, sizeof(pakfile), "baseq2/pak%i.pak", i);
-			fpak = fopen(pakfile, "rb");
-			if (!fpak && (i == 0)) // if pak0.pak isn't on hard disk, try CD
-			{
-				cvar_t	*cddir;
-
-				cddir = gi.cvar("cddir", "", 0);
-				Com_sprintf(pakfile, sizeof(pakfile), "%s/baseq2/pak0.pak",cddir->string);
-				fpak = fopen(pakfile,"rb");
-				if (!fpak)
-				{
-					gi.dprintf("PatchMonsterModel: Cannot find pak0.pak on CD\n");
-				//	return 0;
-					continue;
-				}
-			}
-			else if (!fpak) // this pak not found, go on to next
-				continue;
-			fread(&pakheader,1,sizeof(pak_header_t),fpak);
-			numitems = pakheader.dsize/sizeof(pak_item_t);
-			fseek(fpak,pakheader.dstart,SEEK_SET);
-			data = NULL;
-			for (k=0; k<numitems && !data; k++)
-			{
-				fread(&pakitem,1,sizeof(pak_item_t),fpak);
-				if (!Q_stricmp(pakitem.name,modelname))
-				{
-					fseek(fpak,pakitem.start,SEEK_SET);
-					fread(&model, sizeof(dmdl_t), 1, fpak);
-					datasize = model.ofs_end - model.ofs_skins;
-					if ( !(data = malloc (datasize)) )	// make sure freed locally
-					{
-						fclose(fpak);
-						gi.dprintf ("PatchMonsterModel: Could not allocate memory for model\n");
-						return 0;
-					}
-					fread (data, sizeof (byte), datasize, fpak);
-				}
-			}
-			fclose(fpak);
-			if (data) // we found it, so stop searching
-				break;
-		}
-		if (!data) // if not in baseq2 pak file, check pakfiles in current gamedir
-		{
-			char		pakname[MAX_OSPATH];
-
-			// check all pakfiles in current gamedir
-			for (i=0; i<10; i++)
-			{
-				Com_sprintf (pakname, sizeof(pakname), "pak%i.pak", i);
-				GameDirRelativePath (pakname, pakfile, sizeof(pakfile));
-				fpak = fopen(pakfile,"rb");
-				if (!fpak) // this pak not found, go on to next
-					continue;
-				fread(&pakheader,1,sizeof(pak_header_t),fpak);
-				numitems = pakheader.dsize/sizeof(pak_item_t);
-				fseek(fpak,pakheader.dstart,SEEK_SET);
-				data = NULL;
-				for (k=0; k<numitems && !data; k++)
-				{
-					fread(&pakitem,1,sizeof(pak_item_t),fpak);
-					if (!Q_stricmp(pakitem.name,modelname))
-					{
-						fseek(fpak,pakitem.start,SEEK_SET);
-						fread(&model, sizeof(dmdl_t), 1, fpak);
-						datasize = model.ofs_end - model.ofs_skins;
-						if ( !(data = malloc (datasize)) )	// make sure freed locally
-						{
-							fclose(fpak);
-							gi.dprintf ("PatchMonsterModel: Could not allocate memory for model\n");
-							return 0;
-						}
-						fread (data, sizeof (byte), datasize, fpak);
-					}
-				}
-				fclose(fpak);
-				if (data) // we found it, so stop searching
-				{
-					gamedirpakfile = true;
-					break;
-				}
-			}
-			if (!data)
-			{
-				gi.dprintf("PatchMonsterModel: Could not find %s in pak file(s)\n",modelname);
-				return 0;
-			}
-		}
-	}
-	else
-	{
-		fread (&model, sizeof (dmdl_t), 1, infile);
-	
-		datasize = model.ofs_end - model.ofs_skins;
-		if ( !(data = malloc (datasize)) )	// make sure freed locally
-		{
-			gi.dprintf ("PatchMonsterModel: Could not allocate memory for model\n");
-			return 0;
-		}
-		fread (data, sizeof (byte), datasize, infile);
-	
-		fclose (infile);
-	}
-	
-	// update model info
-	model.num_skins = numskins;
-	
-	newoffset = numskins * MAX_SKINNAME;
-	model.ofs_st     += newoffset;
-	model.ofs_tris   += newoffset;
-	model.ofs_frames += newoffset;
-	model.ofs_glcmds += newoffset;
-	model.ofs_end    += newoffset;
-	
-	// save new model
-/*	Com_sprintf (outfilename, sizeof(outfilename), "%s/models", gamedir->string);	// make some dirs if needed
-	_mkdir (outfilename);
-	Com_strcat (outfilename, sizeof(outfilename), "/monsters");
-	_mkdir (outfilename);
-	Com_sprintf (outfilename, sizeof(outfilename), "%s/%s", gamedir->string, modelname);
-	p = strstr(outfilename,"/tris.md2");
-	*p = 0;
-	_mkdir (outfilename);
-	Com_sprintf (outfilename, sizeof(outfilename), "%s/%s", gamedir->string, modelname);
-*/	
-	Com_sprintf (tempname, sizeof(tempname), modelname);
-	SavegameDirRelativePath (tempname, outfilename, sizeof(outfilename));
-	CreatePath (outfilename);
-
-	if ( !(outfile = fopen (outfilename, "wb")) )
-	{
-		// file couldn't be created for some other reason
-		gi.dprintf ("PatchMonsterModel: Could not save %s\n", outfilename);
-		free (data);
-		return 0;
-	}
-	
-	fwrite (&model, sizeof (dmdl_t), 1, outfile);
-	fwrite (skins, sizeof (char), newoffset, outfile);
-	fwrite (data, sizeof (byte), datasize, outfile);
-	
-	fclose (outfile);
-
-	// Knightmare- if we loaded the model from a pak file in the same gamedir,
-	// then we need to insert it into a higher-numbered pakfile, otherwise it won't be loaded
-
-	gi.dprintf ("PatchMonsterModel: Saved %s\n", outfilename);
-	free (data);
-	return 1;
-}
-
 
 void HintTestNext (edict_t *self, edict_t *hint)
 {
-	edict_t		*next=NULL;
+	edict_t		*next = NULL;
 	edict_t		*e;
 	vec3_t		dir;
 
@@ -2748,11 +1944,11 @@ void HintTestNext (edict_t *self, edict_t *hint)
 int HintTestStart (edict_t *self)
 {
 	edict_t	*e;
-	edict_t	*hint=NULL;
+	edict_t	*hint = NULL;
 	float	dist;
 	vec3_t	dir;
 	int		i;
-	float	bestdistance=99999;
+	float	bestdistance = 99999;
 
 //	if (!hint_chains_exist)
 	if (!hint_paths_present)

@@ -284,6 +284,7 @@ extern	int chat_bufferlen;
 extern	int chat_backedit;
 extern	qboolean	chat_team;
 
+int Key_ParseKeypad (int inKey);
 void Key_Event (int key, qboolean down, unsigned time);
 void Key_Init (void);
 void Key_WriteBindings (FILE *f);

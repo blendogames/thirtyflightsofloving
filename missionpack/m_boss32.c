@@ -421,7 +421,7 @@ void makronBFG (edict_t *self)
 	VectorSubtract (vec, start, dir);
 	VectorNormalize (dir);
 	gi.sound (self, CHAN_VOICE, sound_attack_bfg, 1, ATTN_NORM, 0);
-	monster_fire_bfg (self, start, dir, 50, 300, 100, 300, MZ2_MAKRON_BFG);
+	monster_fire_bfg (self, start, dir, 50, 300, 100, 300, MZ2_MAKRON_BFG, false);
 }
 
 
@@ -632,8 +632,8 @@ void makron_attack(edict_t *self)
 	VectorSubtract (self->enemy->s.origin, self->s.origin, vec);
 	range = VectorLength (vec);
 	
-	//Knightmare- gross hack for map6 of COS3- no BFG attack
-	if (Q_stricmp(level.mapname, "grinsp3f") == 0)
+	// Knightmare- hack for map6 of COS3- no BFG attack
+	if ( IsMakronNoBFGHackMap() )
 	{
 		if (r <= 0.5)
 			self->monsterinfo.currentmove = &makron_move_attack4;
@@ -841,12 +841,27 @@ qboolean Makron_CheckAttack (edict_t *self)
 	return false;
 }
 
+//===========
+//PGM
+qboolean Makron_blocked (edict_t *self, float dist)
+{
+	if (blocked_checkshot (self, 0.25 + (0.05 * skill->value) ))
+		return true;
+
+	if (blocked_checkplat (self, dist))
+		return true;
+
+	return false;
+}
+//PGM
+//===========
 
 //
 // monster_makron
 //
 
-void MakronPrecache (void)
+// Knightmare- added soundcache function
+void monster_makron_soundcache (edict_t *self)
 {
 	sound_pain4 = gi.soundindex ("makron/pain3.wav");
 	sound_pain5 = gi.soundindex ("makron/pain2.wav");
@@ -862,24 +877,15 @@ void MakronPrecache (void)
 	sound_taunt2 = gi.soundindex ("makron/voice3.wav");
 	sound_taunt3 = gi.soundindex ("makron/voice.wav");
 	sound_hit = gi.soundindex ("makron/bhit.wav");
+}
+
+void MakronPrecache (edict_t *self)
+{
+	// Knightmare- use soundcache function
+	monster_makron_soundcache (self);
 
 	gi.modelindex ("models/monsters/boss3/rider/tris.md2");
 }
-
-//===========
-//PGM
-qboolean Makron_blocked (edict_t *self, float dist)
-{
-	if (blocked_checkshot (self, 0.25 + (0.05 * skill->value) ))
-		return true;
-
-	if (blocked_checkplat (self, dist))
-		return true;
-
-	return false;
-}
-//PGM
-//===========
 
 /*QUAKED monster_makron (1 .5 0) (-30 -30 0) (30 30 90) Ambush Trigger_Spawn Sight GoodGuy NoGib
 */
@@ -898,7 +904,7 @@ void SP_monster_makron_put (edict_t *self)
 		return;
 	}
 
-	MakronPrecache ();
+	MakronPrecache (self);
 
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;
@@ -997,9 +1003,10 @@ void MakronSpawn (edict_t *self)
 
 	SP_monster_makron_put (self);
 
-	// Knightmare- gross hack for map6 of COS3- don't jump
-	if (Q_stricmp(level.mapname, "grinsp3f") == 0)
+	// Knightmare- hack for map6 of COS3- don't jump
+	if ( IsMakronNoJumpHackMap() )
 		return;
+
 	// jump at player
 	player = level.sight_client;
 	if (!player)

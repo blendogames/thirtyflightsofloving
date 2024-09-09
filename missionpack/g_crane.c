@@ -87,8 +87,8 @@ void moving_speaker_think (edict_t *self)
 		}
 		if (moved) {
 			self->s.sound = self->owner->noise_index;
-	#ifdef LOOP_SOUND_ATTENUATION
-			self->s.attenuation = self->attenuation;
+	#ifdef KMQUAKE2_ENGINE_MOD
+			self->s.loop_attenuation = self->attenuation;
 	#endif
 		}
 		else
@@ -100,8 +100,8 @@ void moving_speaker_think (edict_t *self)
 			self->s.sound = 0;
 		else {
 			self->s.sound = self->noise_index;
-#ifdef LOOP_SOUND_ATTENUATION
-			self->s.attenuation = self->attenuation;
+#ifdef KMQUAKE2_ENGINE_MOD
+			self->s.loop_attenuation = self->attenuation;
 #endif
 		}
 	}
@@ -517,16 +517,16 @@ void Crane_Move_Begin (edict_t *ent)
 	gi.linkentity(ent);
 }
 
-void G_FindCraneParts()
+void G_FindCraneParts (void)
 {
-	vec3_t  dist;
-	edict_t *cable;
-	edict_t *control;
-	edict_t *beam;
-	edict_t *hoist;
-	edict_t *hook;
-	edict_t *light;
-	edict_t *p1, *p2;
+	vec3_t		dist;
+	edict_t		*cable = NULL;
+	edict_t		*control = NULL;
+	edict_t		*beam = NULL;
+	edict_t		*hoist = NULL;
+	edict_t		*hook = NULL;
+	edict_t		*light = NULL;
+	edict_t		*p1 = NULL, *p2 = NULL;
 
 	edict_t	*e;
 	int		direction;
@@ -1421,7 +1421,7 @@ void SP_crane_hook (edict_t *self)
 	else
 		self->noise_index = 0;
 
-#ifdef LOOP_SOUND_ATTENUATION
+#ifdef KMQUAKE2_ENGINE_MOD
 	if (self->attenuation <= 0)
 		self->attenuation = ATTN_IDLE;
 #endif
@@ -1483,7 +1483,7 @@ void SP_crane_hoist (edict_t *self)
 	else
 		self->noise_index = 0;
 
-#ifdef LOOP_SOUND_ATTENUATION
+#ifdef KMQUAKE2_ENGINE_MOD
 	if (self->attenuation <= 0)
 		self->attenuation = ATTN_IDLE;
 #endif
@@ -1549,7 +1549,7 @@ void SP_crane_beam (edict_t *self)
 	else
 		self->noise_index = 0;
 
-#ifdef LOOP_SOUND_ATTENUATION
+#ifdef KMQUAKE2_ENGINE_MOD
 	if (self->attenuation <= 0)
 		self->attenuation = ATTN_IDLE;
 #endif

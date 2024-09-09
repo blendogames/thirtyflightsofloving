@@ -77,7 +77,7 @@ void berserk_fidget (edict_t *self)
 
 	self->monsterinfo.currentmove = &berserk_move_stand_fidget;
 
-	if (!(self->spawnflags & SF_MONSTER_AMBUSH))
+	if ( !(self->spawnflags & SF_MONSTER_AMBUSH) )
 		gi.sound (self, CHAN_WEAPON, sound_idle, 1, ATTN_IDLE, 0);
 }
 
@@ -205,7 +205,17 @@ mmove_t berserk_move_attack_club = {FRAME_att_c9, FRAME_att_c20, berserk_frames_
 
 void berserk_strike (edict_t *self)
 {
-	//FIXME play impact sound
+	vec3_t aim;
+
+	if (!self)
+	{
+		return;
+	}
+
+	VectorSet(aim, MELEE_DISTANCE, 0, -6);
+	fire_hit(self, aim, (10 + (rand() % 6)), 400);       /* Slower attack */
+
+	// FIXME play impact sound
 }
 
 
@@ -230,14 +240,66 @@ mframe_t berserk_frames_attack_strike [] =
 mmove_t berserk_move_attack_strike = {FRAME_att_c21, FRAME_att_c34, berserk_frames_attack_strike, berserk_run};
 
 
+void berserk_attack_running_club(edict_t* self)
+{
+	/* Same as regular club attack */
+	vec3_t aim;
+
+	if (!self)
+	{
+		return;
+	}
+
+	VectorSet(aim, MELEE_DISTANCE, self->mins[0], -4);
+	fire_hit(self, aim, (5 + (rand() % 6)), 400);       /* Slower attack */
+}
+
+mframe_t berserk_frames_attack_running_club [] =
+{
+	ai_charge, 21, NULL,
+	ai_charge, 11, NULL,
+	ai_charge, 21, NULL,
+	ai_charge, 25, NULL,
+	ai_charge, 18, NULL,
+	ai_charge, 19, NULL,
+	ai_charge, 21, NULL,
+	ai_charge, 11, NULL,
+	ai_charge, 21, NULL,
+	ai_charge, 25, NULL,
+	ai_charge, 18, NULL,
+	ai_charge, 19, NULL,
+	ai_charge, 21, NULL,
+	ai_charge, 11, NULL,
+	ai_charge, 21, NULL,
+	ai_charge, 25, berserk_swing,
+	ai_charge, 18, berserk_attack_running_club,
+	ai_charge, 19, NULL
+};
+
+mmove_t berserk_move_attack_running_club = {FRAME_r_att1, FRAME_r_att18, berserk_frames_attack_running_club, berserk_run};
+
 void berserk_melee (edict_t *self)
 {
+	const int r = rand() % 4;
+
 	monster_done_dodge (self);
 
-	if ((rand() % 2) == 0)
+/*	if ((rand() % 2) == 0)
 		self->monsterinfo.currentmove = &berserk_move_attack_spike;
 	else
+		self->monsterinfo.currentmove = &berserk_move_attack_club; */
+	if (r == 0) {
+		self->monsterinfo.currentmove = &berserk_move_attack_spike;
+	}
+	else if (r == 1) {
+		self->monsterinfo.currentmove = &berserk_move_attack_strike;
+	}
+	else if (r == 2) {
 		self->monsterinfo.currentmove = &berserk_move_attack_club;
+	}
+	else {
+		self->monsterinfo.currentmove = &berserk_move_attack_running_club;
+	}
 }
 
 
@@ -518,6 +580,18 @@ void berserk_sidestep (edict_t *self)
 }
 
 
+// Knightmare- added soundcache function
+void monster_berserk_soundcache (edict_t *self)
+{
+	sound_pain  = gi.soundindex ("berserk/berpain2.wav");
+	sound_die   = gi.soundindex ("berserk/berdeth2.wav");
+	sound_idle  = gi.soundindex ("berserk/beridle1.wav");
+	sound_punch = gi.soundindex ("berserk/attack.wav");
+	sound_search = gi.soundindex ("berserk/bersrch1.wav");
+	sound_sight = gi.soundindex ("berserk/sight.wav");
+}
+
+
 /*QUAKED monster_berserk (1 .5 0) (-16 -16 -24) (16 16 32) Ambush Trigger_Spawn Sight GoodGuy NoGib
 */
 void SP_monster_berserk (edict_t *self)
@@ -529,12 +603,8 @@ void SP_monster_berserk (edict_t *self)
 	}
 
 	// pre-caches
-	sound_pain  = gi.soundindex ("berserk/berpain2.wav");
-	sound_die   = gi.soundindex ("berserk/berdeth2.wav");
-	sound_idle  = gi.soundindex ("berserk/beridle1.wav");
-	sound_punch = gi.soundindex ("berserk/attack.wav");
-	sound_search = gi.soundindex ("berserk/bersrch1.wav");
-	sound_sight = gi.soundindex ("berserk/sight.wav");
+	// Knightmare- use soundcache function
+	monster_berserk_soundcache (self);
 
 	// Lazarus: special purpose skins
 	if ( self->style )
@@ -579,6 +649,12 @@ void SP_monster_berserk (edict_t *self)
 		self->monsterinfo.jumpup = 48;
 		self->monsterinfo.jumpdn = 160;
 	}
+	else
+	{
+		self->monsterinfo.jump = NULL;
+		self->monsterinfo.jumpup = 0;
+		self->monsterinfo.jumpdn = 0;
+	}
 
 	self->monsterinfo.currentmove = &berserk_move_stand;
 	if (self->health < 0)
@@ -591,7 +667,7 @@ void SP_monster_berserk (edict_t *self)
 	self->monsterinfo.scale = MODEL_SCALE;
 
 	if (!self->blood_type)
-		self->blood_type = 3; //sparks and blood
+		self->blood_type = 3; // sparks and blood
 
 	// Lazarus
 	if (self->powerarmor)

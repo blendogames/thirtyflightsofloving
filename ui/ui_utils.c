@@ -39,62 +39,108 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 =======================================================================
 */
 
-#if 0
 /*
-=================
-FreeFileList
-=================
+================
+UI_TextColor
+This sets the text color for scrollbars,
+defers to CL_ function for all others.
+================
 */
-void FreeFileList (char **list, int n)
+void UI_TextColor (int colornum, qboolean scrollbar, int *red, int *green, int *blue)
 {
-	int i;
+	if (!red || !green || !blue) // paranoia
+		return;
 
-	for (i = 0; i < n; i++)
-	{
-		if (list && list[i])
-		{
-			free(list[i]);
-			list[i] = 0;
-		}
+	if (!scrollbar) {
+		CL_TextColor (colornum, red, green, blue);
+		return;
 	}
-	free(list);
-}
 
-/*
-=================
-ItemInList
-=================
-*/
-qboolean ItemInList (char *check, int num, char **list)
-{
-	int i;
-	for (i=0;i<num;i++)
-		if (!Q_strcasecmp(check, list[i]))
-			return true;
-	return false;
-}
-
-/*
-=================
-InsertInList
-=================
-*/
-void InsertInList (char **list, char *insert, int len, int start)
-{
-	int i;
-	if (!list) return;
-
-	for (i=start; i<len; i++)
+	switch (colornum)
 	{
-		if (!list[i])
-		{
-			list[i] = strdup(insert);
-			return;
-		}
+		case 1:		// red
+			*red =	255;
+			*green=	20;
+			*blue =	20;
+			break;
+		case 2:		// green
+			*red =	0;
+			*green=	255;
+			*blue =	90;
+			break;
+		case 3:		// yellow
+			*red =	255;
+			*green=	255;
+			*blue =	0;
+			break;
+		case 4:		// blue
+			*red =	0;
+			*green=	60;
+			*blue =	255;
+			break;
+		case 5:		// cyan
+			*red =	0;
+			*green=	255;
+			*blue =	255;
+			break;
+		case 6:		// magenta
+			*red =	255;
+			*green=	0;
+			*blue =	255;
+			break;
+		case 9:		// orange
+			*red =	255;
+			*green=	135;
+			*blue =	0;
+			break;
+		case 10:	// violet
+			*red =	160;
+			*green=	20;
+			*blue =	255;
+			break;
+		case 11:	// indigo
+			*red =	80;
+			*green=	0;
+			*blue =	255;
+			break;
+		case 12:	// viridian
+			*red =	80;
+			*green=	255;
+			*blue =	180;
+			break;
+		case 13:	// pink
+			*red =	255;
+			*green=	125;
+			*blue =	175;
+			break;
+		case 0:		// gray
+		case 7:		// white
+		case 8:		// black
+		case 14:	// silver
+		default:	// white
+			*red =	255;
+			*green=	255;
+			*blue =	255;
+			break;
 	}
-	list[len] = strdup(insert);
 }
-#endif
+
+
+/*
+==========================
+UI_TextColorHighlight
+==========================
+*/
+void UI_TextColorHighlight (int colornum, int *red, int *green, int *blue)
+{
+	if (!red || !green || !blue) // paranoia
+		return;
+
+	UI_TextColor (colornum, false, red, green, blue);
+	*red *= 0.7;
+	*green *= 0.7;
+	*blue *= 0.7;
+}
 
 
 /*
@@ -104,7 +150,7 @@ UI_IsValidImageFilename
 */
 qboolean UI_IsValidImageFilename (char *name)
 {
-	int		len = (int)strlen(name);
+	size_t	len = strlen(name);
 
 	if (	!strcmp(name+max(len-4,0), ".pcx")
 		||	!strcmp(name+max(len-4,0), ".tga")
@@ -118,6 +164,8 @@ qboolean UI_IsValidImageFilename (char *name)
 	return false;
 }
 
+#ifndef NOTTHIRTYFLIGHTS
+// Forward ported from old engine - Brad
 
 /*
 ==========================
@@ -127,6 +175,78 @@ UI_ClampCvar
 void UI_ClampCvar (const char *varName, float cvarMin, float cvarMax)
 {
 	Cvar_SetValue ((char *)varName, ClampCvar( cvarMin, cvarMax, Cvar_VariableValue((char *)varName) ));
+}
+#endif
+
+/*
+==========================
+UI_GetScreenAspect
+==========================
+*/
+float UI_GetScreenAspect (void)
+{
+	float	screenAspect = (4.0f/3.0f);
+
+	if ( (viddef.width > 0) && (viddef.height > 0) )
+	{
+		screenAspect = (float)viddef.width / (float)viddef.height;
+		// properly handle surround modes
+		if ( (Cvar_VariableInteger("scr_surroundlayout") != 0) && (screenAspect >= Cvar_VariableValue("scr_surroundthreshold")) ) {
+			screenAspect *= (Cvar_VariableValue("scr_surroundright") - Cvar_VariableValue("scr_surroundleft"));
+		}
+		screenAspect = min(max(screenAspect, 1.2f), (32.0f/9.0f));	// clamp between 5:4 and 32:9
+	}
+	return screenAspect;
+}
+
+
+/*
+==========================
+UI_ClampCvarForControl
+==========================
+*/
+void UI_ClampCvarForControl (menuCommon_s *item)
+{
+	float	cvarMin, cvarMax;
+
+	if (!item->cvarClamp)
+		return;
+	cvarMin = item->cvarMin;
+	cvarMax = item->cvarMax;
+	if (cvarMin == 0 && cvarMax == 0)	 // unitialized
+		return;
+	Cvar_SetValue (item->cvar, ClampCvar( cvarMin, cvarMax, Cvar_VariableValue(item->cvar) ));
+}
+
+
+/*
+==========================
+UI_GetCurValueForControl
+==========================
+*/
+int UI_GetCurValueForControl (menuCommon_s *item)
+{
+	if (!item)	return 0;
+
+	switch (item->type)
+	{
+	case MTYPE_KEYBINDLIST:
+		return ((menuKeyBindList_s *)item)->curValue;
+	case MTYPE_SLIDER:
+		return ((menuSlider_s *)item)->curPos;
+	case MTYPE_PICKER:
+		return ((menuPicker_s *)item)->curValue;
+	case MTYPE_CHECKBOX:
+		return ((menuCheckBox_s *)item)->curValue;
+	case MTYPE_LISTBOX:
+		return ((menuListBox_s *)item)->curValue;
+	case MTYPE_COMBOBOX:
+		return ((menuComboBox_s *)item)->curValue;
+	case MTYPE_LISTVIEW:
+		return ((menuListView_s *)item)->curValue;
+	default:
+		return 0;
+	}
 }
 
 
@@ -169,25 +289,45 @@ int	UI_GetIndexForStringValue (const char **item_values, char *value)
 UI_MouseOverAlpha
 ==========================
 */
-int UI_MouseOverAlpha (menucommon_s *m)
+int UI_MouseOverAlpha (menuCommon_s *menu)
 {
-	if (ui_mousecursor.menuitem == m)
+	if (ui_mousecursor.menuitem == menu)
 	{
 		int alpha;
 
 #ifdef NOTTHIRTYFLIGHTS
-		alpha = 125 + 25 * cos(anglemod(cl.time*0.005));
+		alpha = 195 + 60 * cos(anglemod(cl.time*0.005));
 
-		if (alpha>255) alpha = 255;
-		if (alpha<0) alpha = 0;
+		if (alpha > 255) alpha = 255;
+		if (alpha < 0) alpha = 0;
 #else
-		alpha = 255;
+        alpha = 255;
 #endif
 
 		return alpha;
 	}
 	else 
 		return 255;
+}
+
+
+/*
+==========================
+UI_MouseOverSubItem
+==========================
+*/
+qboolean UI_MouseOverSubItem (int x, int y, int w, int h, scralign_t align)
+{
+	float	x1, y1, w1, h1;
+
+	x1 = x;	y1 = y;	w1 = w; h1 = h;
+	SCR_ScaleCoords (&x1, &y1, &w1, &h1, align);
+
+	if ( ui_mousecursor.x >= x1 && ui_mousecursor.x < (x1+w1) 
+		&& ui_mousecursor.y >= y1 &&  ui_mousecursor.y < (y1+h1) )
+		return true;
+
+	return false;
 }
 
 
@@ -253,12 +393,14 @@ void UI_FindKeysForCommand (char *command, int *twokeys)
 UI_ItemAtMenuCursor
 =================
 */
-void *UI_ItemAtMenuCursor (menuframework_s *m)
+void *UI_ItemAtMenuCursor (menuFramework_s *menu)
 {
-	if (m->cursor < 0 || m->cursor >= m->nitems)
-		return 0;
+	if (!menu)	return NULL;
 
-	return m->items[m->cursor];
+	if ( (menu->cursor < 0) || (menu->cursor >= menu->nitems) )
+		return NULL;
+
+	return menu->items[menu->cursor];
 }
 
 
@@ -267,11 +409,27 @@ void *UI_ItemAtMenuCursor (menuframework_s *m)
 UI_SetMenuStatusBar
 =================
 */
-void UI_SetMenuStatusBar (menuframework_s *m, const char *string)
+void UI_SetMenuStatusBar (menuFramework_s *menu, const char *string)
 {
-	if (!m)	return;
+	if (!menu)	return;
 
-	m->statusbar = string;
+	menu->statusbar = string;
+}
+
+
+/*
+=================
+UI_SetMenuCurrentItemStatusBar
+=================
+*/
+void UI_SetMenuCurrentItemStatusBar (menuFramework_s *menu, const char *string)
+{	
+	menuCommon_s *curItem;
+
+	if (!menu)	return;
+
+	if ( (curItem = (menuCommon_s *)UI_ItemAtMenuCursor(menu)) != NULL )
+		curItem->statusbar = string;
 }
 
 
@@ -280,26 +438,14 @@ void UI_SetMenuStatusBar (menuframework_s *m, const char *string)
 UI_TallyMenuSlots
 =================
 */
-int UI_TallyMenuSlots (menuframework_s *menu)
+int UI_TallyMenuSlots (menuFramework_s *menu)
 {
-	int i;
-	int total = 0;
+	int		i, total = 0;
+
+	if (!menu)	return 0;
 
 	for (i = 0; i < menu->nitems; i++)
-	{
-		if ( ((menucommon_s *)menu->items[i])->type == MTYPE_LIST )
-		{
-			int nitems = 0;
-			const char **n = ((menulist_s *)menu->items[i])->itemNames;
-
-			while (*n)
-				nitems++, n++;
-
-			total += nitems;
-		}
-		else
-			total++;
-	}
+		total++;
 
 	return total;
 }
@@ -317,15 +463,13 @@ int UI_TallyMenuSlots (menuframework_s *menu)
 UI_StartSPGame
 ===============
 */
-void UIStartSPGame (void)
+void UI_StartSPGame (void)
 {
 	// disable updates and start the cinematic going
 	cl.servercount = -1;
 	UI_ForceMenuOff ();
 	Cvar_SetValue( "deathmatch", 0 );
 	Cvar_SetValue( "coop", 0 );
-	Cvar_SetValue( "ctf", 0 );
-	Cvar_SetValue( "ttctf", 0 );
 	Cvar_SetValue( "gamerules", 0 );		//PGM
 
 	if (cls.state != ca_disconnected) // don't force loadscreen if disconnected
@@ -387,439 +531,141 @@ UI_LoadMod
 */
 void UI_LoadMod (char *modName)
 {
-	if ( Q_strcasecmp(Cvar_VariableString("game"), modName) ) {
+	if ( Q_strcasecmp(Cvar_VariableString("game"), modName) != 0 ) {
 		UI_ForceMenuOff ();
 		Cbuf_AddText (va("changegame %s\n", modName) );
 	}
 }
 
-/*
-=======================================================================
-
-	VIDEO INFO LOADING
-
-=======================================================================
-*/
-
-#define UI_MAX_VIDMODES 128
-
-char	**ui_resolution_names = NULL;
-char	**ui_video_modes = NULL;
-int		ui_num_video_modes = 0;
 
 /*
-==========================
-UI_GetVideoModes
-==========================
+===============
+UI_LoadModFromList
+===============
 */
-void UI_GetVideoModes (void)
+void UI_LoadModFromList (int index)
 {
-	int			i, j=0, w=0, h=0, firstMode=0, numModes=0;
-	float		aspect;
-	char		*tok, resBuf[12], aspectBuf[8], nameBuf[20];
-//	qboolean	surround = false;
-//	cvar_t		*surround_threshold = Cvar_Get ("scr_surroundthreshold", "3.6", 0);
-
-	// count video modes >= 640x480
-	for (i=0; i<UI_MAX_VIDMODES; i++)
-	{
-		if ( !VID_GetModeInfo(&w, &h, i) )
-			break;
-
-		if (w >= 640 && h >= 480) {
-			numModes++;
-			if (numModes == 1)
-				firstMode = i;
-		}
-	}
-	// allocate lists
-	ui_resolution_names = malloc ((numModes+2) * sizeof(char *));
-	memset (ui_resolution_names, 0, (numModes+2) * sizeof(char *));
-	ui_video_modes = malloc ((numModes+2) * sizeof(char *));
-	memset (ui_video_modes, 0, (numModes+2) * sizeof(char *));
-
-	// add custom resolution item
-//	ui_resolution_names[0] = strdup ("custom      ???");
-	ui_resolution_names[0] = strdup ("[custom   ] [ ??? ]");
-	ui_video_modes[0] = strdup ("-1");	
-
-	// add to lists
-	for (i=firstMode, j=1; i<(firstMode+numModes); i++, j++)
-	{
-		if ( !VID_GetModeInfo(&w, &h, i) )
-			break;
-
-		if (w >= 640 && h >= 480)
-		{
-			aspect = (float)w / (float)h;
-			memset (resBuf, 0, sizeof(resBuf));
-			memset (aspectBuf, 0, sizeof(aspectBuf));
-			memset (nameBuf, 0, sizeof(nameBuf));
-			Com_sprintf (resBuf, sizeof(resBuf), "%dx%d", w, h);
-
-			// catch surround modes
-		/*	if (aspect > surround_threshold->value) {	// 3.6f
-				aspect /= 3.0f;
-				surround = true;
-			} */
-			if (aspect > 2.39f)
-				tok = "24:10";
-			else if (aspect > 2.3f)
-				tok = "21:9";
-			else if (aspect > 1.9f)
-				tok = "16:8";
-			else if (aspect > 1.85f)
-				tok = "17:10";
-			else if (aspect > 1.65f)
-				tok = "16:9";
-			else if (aspect > 1.6f)
-				tok = "15:9";
-			else if (aspect > 1.55f)
-				tok = "16:10";
-			else if (aspect > 1.3f)
-				tok = "4:3";
-			else if (aspect > 1.2f)
-				tok = "5:4";
-			else
-				tok = va("%3.1f:1", aspect);
-
-		/*	if (surround)
-				Com_sprintf (aspectBuf, sizeof(aspectBuf), "3x%s", tok);
-			else */
-				Com_sprintf (aspectBuf, sizeof(aspectBuf), "%s", tok);
-
-		//	Com_sprintf (nameBuf, sizeof(nameBuf), "%-12s%s", resBuf, aspectBuf);
-			Com_sprintf (nameBuf, sizeof(nameBuf), "[%-9s] [%-5s]", resBuf, aspectBuf);
-
-			ui_resolution_names[j] = strdup (nameBuf);
-			ui_video_modes[j] = strdup (va("%i", i));	
-		}
-	}
-
-	ui_num_video_modes = numModes;
-}
-
-
-/*
-==========================
-UI_FreeVideoModes
-==========================
-*/
-void UI_FreeVideoModes (void)
-{
-	if (ui_num_video_modes > 0) {
-		FS_FreeFileList (ui_resolution_names, ui_num_video_modes);
-		FS_FreeFileList (ui_video_modes, ui_num_video_modes);
-	}
-	ui_resolution_names = NULL;
-	ui_video_modes = NULL;
-	ui_num_video_modes = 0;
-}
-
-
-char	**ui_aniso_names = NULL;
-char	**ui_aniso_values = NULL;
-int		ui_num_aniso_values = 0;
-
-/*
-==========================
-UI_GetAnisoValues
-==========================
-*/
-void UI_GetAnisoValues (void)
-{
-	int		i, numValues;
-	float	aniso_avail = Cvar_VariableValue("r_anisotropic_avail");
-
-	if (aniso_avail < 2.0)
-		numValues = 1;
-	else if (aniso_avail < 4.0)
-		numValues = 2;
-	else if (aniso_avail < 8.0)
-		numValues = 3;
-	else if (aniso_avail < 16.0)
-		numValues = 4;
-	else // >= 16.0
-		numValues = 5;
-
-	// allocate lists
-	ui_aniso_names = malloc ((numValues+1) * sizeof(char *));
-	memset (ui_aniso_names, 0, (numValues+1) * sizeof(char *));
-	ui_aniso_values = malloc ((numValues+1) * sizeof(char *));
-	memset (ui_aniso_values, 0, (numValues+1) * sizeof(char *));
-
-	// set names and values
-	for (i=0; i<numValues; i++)
-	{
-		if (i == 0)
-			ui_aniso_names[i] = (numValues == 1) ? strdup("not supported") : strdup("off");
-		else
-			ui_aniso_names[i] = strdup(va("%ix", 1<<i));
-		ui_aniso_values[i] = strdup(va("%i", 1<<i));
-	}
-
-	ui_num_aniso_values = numValues;
-}
-
-
-/*
-==========================
-UI_FreeAnisoValues
-==========================
-*/
-void UI_FreeAnisoValues (void)
-{
-	if (ui_num_aniso_values > 0) {
-		FS_FreeFileList (ui_aniso_names, ui_num_aniso_values);
-		FS_FreeFileList (ui_aniso_values, ui_num_aniso_values);
-	}
-	ui_aniso_names = NULL;
-	ui_aniso_values = NULL;
-	ui_num_aniso_values = 0;
-}
-
-/*
-==========================
-UI_GetVideoInfo
-==========================
-*/
-void UI_GetVideoInfo (void)
-{
-	UI_GetVideoModes ();
-	UI_GetAnisoValues ();
-}
-
-/*
-==========================
-UI_FreeVideoInfo
-==========================
-*/
-void UI_FreeVideoInfo (void)
-{
-	UI_FreeVideoModes ();
-	UI_FreeAnisoValues ();
-}
-
-/*
-=======================================================================
-
-	MOD LIST LOADING
-
-=======================================================================
-*/
-
-// TODO: Enable this when mod menu is ready
-#if 0
-#define UI_MAX_MODS 256
-
-char		**ui_mod_names = NULL;
-char		**ui_mod_values = NULL;
-qboolean	ui_mod_isUnsupported[UI_MAX_MODS];
-int			ui_num_mods = 0;
-
-/*
-==========================
-UI_BuildModList
-==========================
-*/
-void UI_BuildModList (void)
-{
-	char		findName[1024];
-	char		modDesc[1024];
-	char		modFormatedName[1024];
-	char		**dirnames;
-	char		*modDir, *modName;
-	FILE		*f;
-	int			count = 0, ndirs = 0, nmods = 0;
-	int			i;
-	qboolean	unsupportedMod;
-
-	ui_mod_names = malloc(sizeof(char *) * (UI_MAX_MODS+1));
-	ui_mod_values = malloc(sizeof(char *) * (UI_MAX_MODS+1));
-	memset(ui_mod_names, 0, sizeof(char *) * (UI_MAX_MODS+1));
-	memset(ui_mod_values, 0, sizeof(char *) * (UI_MAX_MODS+1));
-
-	// add baseq2 first
-	ui_mod_names[0] = strdup("Quake II (vanilla)"); 
-	ui_mod_values[0] = strdup(BASEDIRNAME);
-	ui_mod_isUnsupported[0] = false;
-	count++;
-
-	// get a list of directories
-	Com_sprintf(findName, sizeof(findName), "%s/*.*", FS_HomePath());
-	dirnames = FS_ListFiles (findName, &ndirs, SFF_SUBDIR, 0);
-	if (!dirnames) {
-		ui_num_mods = count;
+	// bounds check
+	if ( (index < 0) || (index >= ui_num_mods) )
 		return;
-	}
-		
-	// go through the directories
-	nmods = ndirs;
-	if (nmods > UI_MAX_MODS)
-		nmods = UI_MAX_MODS;
-	if ( (count + nmods) > UI_MAX_MODS )
-		nmods = UI_MAX_MODS - count;
 
-	for (i = 0; i < nmods; i++)
+	if ( Q_strcasecmp(Cvar_VariableString("game"), ui_mod_info[index].gameDir) != 0 )
 	{
-		if (dirnames[i] == 0)
-			continue;
-			
-		modDir = COM_SkipPath(dirnames[i]);
-		
-		// Ignore baseq2
-		if ( !Q_strcasecmp(modDir, BASEDIRNAME) )
-			continue;
+		UI_ForceMenuOff ();
+		Cvar_ForceSet ("basegame", ui_mod_info[index].baseGame1);
+		Cvar_ForceSet ("basegame2", ui_mod_info[index].baseGame2);
+		Cvar_ForceSet ("basegame3", ui_mod_info[index].baseGame3);
+		Cvar_ForceSet ("quake_importpath_auto", va("%i", ui_mod_info[index].quakeImportPathAuto));
+		Cvar_ForceSet ("quakerr_importpath_auto", va("%i", ui_mod_info[index].quakeRRImportPathAuto));
+		Cvar_ForceSet ("quake_importpath", ui_mod_info[index].quakeImportPath);
+		Cvar_ForceSet ("quake_maingame", ui_mod_info[index].quakeMainGame);
+		Cvar_ForceSet ("quake_game1", ui_mod_info[index].quakeGame1);
+		Cvar_ForceSet ("quake_game2", ui_mod_info[index].quakeGame2);
+		Cvar_ForceSet ("quake_game3", ui_mod_info[index].quakeGame3);
+		Cvar_ForceSet ("quake_game4", ui_mod_info[index].quakeGame4);
 	
-		// Must have a pak or pk3 file, or a maps dir
-		if ( !Sys_FindFirst( va("%s/*.pak", dirnames[i]), 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM) ) {
-			Sys_FindClose();
-			if ( !Sys_FindFirst( va("%s/*.pk3", dirnames[i]), 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM) ) {
-				Sys_FindClose();
-				if ( !Sys_FindFirst( va("%s/maps", dirnames[i]), SFF_SUBDIR, 0) ) {
-					Sys_FindClose();
-					continue;
-				}
-			}
-		}
-		Sys_FindClose();
-
-		// check if this mod has a gamex86.dll/gamei386.so without an equivalent KMQ2 dll/so
-		unsupportedMod = false;
-		if ( Sys_FindFirst( va("%s/"STOCK_Q2_GAME_LIBRARY_NAME, dirnames[i]), 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM) )
-		{
-			Sys_FindClose();
-			if ( !Sys_FindFirst( va("%s/"KMQ2_GAME_LIBRARY_NAME, dirnames[i]), 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM) ) {
-				Sys_FindClose();
-				unsupportedMod = true;
-			//	Com_Printf ("UI_BuildModList: mod %s has an unsupported game library.\n", modDir);
-			}
-		}
-		Sys_FindClose();
-
-		// try to load description.txt
-		f = fopen( va("%s/description.txt", dirnames[i]), "rb");
-		if (f != NULL) {
-			fgets(modDesc, sizeof(modDesc), f);
-			fclose(f);
-			modName = modDesc;
-		}
-		else if ( !Q_strcasecmp(modDir, "ctf") )
-			modName = "Quake II: Capture The Flag";
-		else if ( !Q_strcasecmp(modDir, "rogue") )
-			modName = "Quake II: Ground Zero";
-		else if ( !Q_strcasecmp(modDir, "xatrix") )
-			modName = "Quake II: The Reckoning";
-		else if ( !Q_strcasecmp(modDir, "zaero") )
-			modName = "Zaero Mission Pack";
-		else if ( !Q_strcasecmp(modDir, "3zb2") )
-			modName ="3rd Zigrock Bot II";
-		else if ( !Q_strcasecmp(modDir, "gen") )
-			modName = "Generations";
-		else if ( !Q_strcasecmp(modDir, "ra2") )
-			modName = "Rocket Arena 2";
-		else if ( !Q_strcasecmp(modDir, "bots") )
-			modName = "Battle of the Sexes";
-		else if ( !Q_strcasecmp(modDir, "lmctf") )
-			modName = "Loki's Minions CTF";
-		else if ( !Q_strcasecmp(modDir, "wf") )
-			modName = "Weapons Factory";
-		else if ( !Q_strcasecmp(modDir, "wod") )
-			modName = "Weapons of Destruction";
-		else if ( !Q_strcasecmp(modDir, "rts") )
-			modName = "Rob the Strogg";
-		else
-			modName = modDir;
-
-		if (unsupportedMod)
-			Com_sprintf(modFormatedName, sizeof(modFormatedName), S_COLOR_ORANGE"%s\0", modName);
-		else
-			Q_strncpyz(modFormatedName, sizeof(modFormatedName), modName);
-
-		if (!FS_ItemInList(modDir, count, ui_mod_values))
-		{
-		//	FS_InsertInList (ui_mod_names, modName, count, 1);	// start=1 so first item stays first!
-			FS_InsertInList (ui_mod_names, modFormatedName, count, 1);	// start=1 so first item stays first!
-			FS_InsertInList (ui_mod_values, modDir, count, 1);	// start=1 so first item stays first!
-			count++;
-			ui_mod_isUnsupported[count] = unsupportedMod;
-		}
-	}
+		Cvar_ForceSet ("quake2rr_importpath_auto", va("%i", ui_mod_info[index].quake2RRImportPathAuto));
+		Cvar_ForceSet ("quake2rr_importpath", ui_mod_info[index].quake2RRImportPath);
+		Cvar_ForceSet ("quake2rr_maingame", ui_mod_info[index].quake2RRMainGame);
+		Cvar_ForceSet ("quake2rr_game1", ui_mod_info[index].quake2RRGame1);
+		Cvar_ForceSet ("quake2rr_game2", ui_mod_info[index].quake2RRGame2);
+		Cvar_ForceSet ("quake2rr_game3", ui_mod_info[index].quake2RRGame3);
+		Cvar_ForceSet ("quake2rr_game4", ui_mod_info[index].quake2RRGame4);
 	
-	if (dirnames)
-		FS_FreeFileList (dirnames, ndirs);
-
-	ui_num_mods = count;
-}
-
-
-/*
-==========================
-UI_GetModList
-==========================
-*/
-void UI_GetModList (void)
-{
-	UI_BuildModList ();
-//	Com_Printf ("UI_GetModList: found %i mod dirs\n", ui_num_mods);
-}
-
-
-/*
-==========================
-UI_FreeModList
-==========================
-*/
-void UI_FreeModList (void)
-{
-	if (ui_num_mods > 0) {
-		FS_FreeFileList (ui_mod_names, ui_num_mods);
-		FS_FreeFileList (ui_mod_values, ui_num_mods);
+		Cbuf_AddText ( va("changegame %s\n", ui_mod_info[index].gameDir) );
 	}
-	ui_mod_names = NULL;
-	ui_mod_values = NULL;
-	ui_num_mods = 0;
 }
-#endif
 
 /*
 =======================================================================
 
-	GENERIC ASSET LIST LOADING
+	GENERIC ASSET LIST LOADING / MANAGEMENT
 
 =======================================================================
 */
+
+#define UI_USE_ZMALLOC
+
+#ifdef UI_USE_ZMALLOC
+#define UI_Malloc			Z_Malloc
+#define UI_CopyString		CopyString
+#define UI_Free				Z_Free
+#else	// UI_USE_ZMALLOC
+__inline void *UI_Malloc (size_t size)
+{
+	byte *ret;
+
+	ret = malloc (size);
+	memset (ret, 0, size);
+	return (void *)ret;
+}
+#define UI_CopyString		strdup
+#define UI_Free 			free
+#endif	// UI_USE_ZMALLOC
 
 /*
 ==========================
 UI_InsertInAssetList
 ==========================
 */
-void UI_InsertInAssetList (char **list, char *insert, int len, int start)
+void UI_InsertInAssetList (char **list, const char *insert, int len, int start, qboolean frontInsert)
 {
 	int i, j;
 
-	if (!list || !insert) return;
-	if (start < 0) return;
-//	if (start >= len) return;
-	if (start > len) return;
+	if ( !list || !insert )	return;
+	if ( (len < 1) || (start < 0) || (start > len) )	return;
 
-	// i=start so default stays first!
-	for (i=start; i<len; i++)
+	if (frontInsert)
 	{
-		if (!list[i])
-			break;
-
-		if (strcmp( list[i], insert ))
+		for (i=start; i<len; i++)	// i=start so default stays first!
 		{
-			for (j=len; j>i; j--)
-				list[j] = list[j-1];
+			if (!list[i])
+				break;
 
-			list[i] = strdup(insert);
-			return;
+			if (strcmp( list[i], insert ))
+			{
+				for (j=len; j>i; j--)
+					list[j] = list[j-1];
+
+				list[i] = UI_CopyString((char *)insert);
+				return;
+			}
 		}
 	}
-	list[len] = strdup(insert);
+	else
+	{
+		for (i=start; i<len; i++)	// i=start so default stays first!
+		{
+			if (!list[i])
+			{
+				list[i] = UI_CopyString((char *)insert);
+				return;
+			}
+		}
+	}
+	list[len] = UI_CopyString((char *)insert);
+}
+
+
+/*
+=================
+UI_ItemInAssetList
+=================
+*/
+qboolean UI_ItemInAssetList (const char *check, int num, const char **list)
+{
+	int		i;
+
+	if (!check || !list)
+		return false;
+	for (i=0; i<num; i++)
+	{
+		if (!list[i])
+			continue;
+		if ( !Q_strcasecmp((char *)check, (char *)list[i]) )
+			return true;
+	}
+	return false;
 }
 
 
@@ -833,10 +679,10 @@ Used for fonts, huds, and crosshairs
 */
 char **UI_LoadAssetList (char *dir, char *nameMask, char *firstItem, int *returnCount, int maxItems, qboolean stripExtension, qboolean frontInsert, qboolean (*checkName)(char *p))
 {
-	char	**list = 0, **itemFiles;
-	char	*path = NULL, *curItem, *p, *ext;
+	char	**list = 0, **itemFiles = 0;
+	char	*path = NULL, *curItem = NULL, *p = NULL, *ext = NULL;
 //	char	findName[1024];
-	int		nItems = 0, nItemNames, i, baseLen, extLen;
+	int		nItems = 0, nItemNames = 0, i, baseLen = 0, extLen = 0;
 
 	// check pointers
 	if (!dir || !nameMask || !firstItem || !returnCount || !checkName)
@@ -844,11 +690,11 @@ char **UI_LoadAssetList (char *dir, char *nameMask, char *firstItem, int *return
 	if (maxItems < 2) // must allow at least 2 items
 		return NULL;
 
-	list = malloc(sizeof(char *) * (maxItems+1));
-	memset(list, 0, sizeof(char *) * (maxItems+1));
+	list = UI_Malloc(sizeof(char *) * (maxItems+1));
+//	memset (list, 0, sizeof(char *) * (maxItems+1));
 
 	// set first item name
-	list[0] = strdup(firstItem); 
+	list[0] = UI_CopyString(firstItem); 
 	nItemNames = 1;
 
 #if 1
@@ -870,10 +716,10 @@ char **UI_LoadAssetList (char *dir, char *nameMask, char *firstItem, int *return
 		}
 		curItem = p;
 
-		if (!FS_ItemInList(curItem, nItemNames, list))
+		if ( !UI_ItemInAssetList(curItem, nItemNames, list) )
 		{
-			// UI_InsertInAssetList (frontInsert) not needed due to sorting in FS_GetFileList()
-			FS_InsertInList (list, curItem, nItemNames, 1);	// start=1 so first item stays first!
+			// frontInsert not needed due to sorting in FS_GetFileList()
+			UI_InsertInAssetList (list, curItem, nItemNames, 1, false);	// start=1 so first item stays first!
 			nItemNames++;
 		}
 		
@@ -905,12 +751,9 @@ char **UI_LoadAssetList (char *dir, char *nameMask, char *firstItem, int *return
 			}
 			curItem = p;
 
-			if (!FS_ItemInList(curItem, nItemNames, list))
+			if ( !UI_ItemInAssetList(curItem, nItemNames, list) )
 			{
-				if (frontInsert)
-					UI_InsertInAssetList (list, curItem, nItemNames, 1);	// start=1 so first item stays first!
-				else
-					FS_InsertInList (list, curItem, nItemNames, 1);	// start=1 so first item stays first!
+				UI_InsertInAssetList (list, curItem, nItemNames, 1, frontInsert);	// start=1 so first item stays first!
 				nItemNames++;
 			}
 			
@@ -944,12 +787,9 @@ char **UI_LoadAssetList (char *dir, char *nameMask, char *firstItem, int *return
 			}
 			curItem = p;
 
-			if (!FS_ItemInList(curItem, nItemNames, list))
+			if ( !UI_ItemInAssetList(curItem, nItemNames, list) )
 			{
-				if (frontInsert)
-					UI_InsertInAssetList (list, curItem, nItemNames, 1);	// start=1 so first item stays first!
-				else
-					FS_InsertInList (list, curItem, nItemNames, 1);	// start=1 so first item stays first!
+				UI_InsertInAssetList (list, curItem, nItemNames, 1, frontInsert);	// start=1 so first item stays first!
 				nItemNames++;
 			}
 			
@@ -971,6 +811,236 @@ char **UI_LoadAssetList (char *dir, char *nameMask, char *firstItem, int *return
 		*returnCount = nItemNames;
 
 	return list;		
+}
+
+
+/*
+=================
+UI_FreeAssetList
+=================
+*/
+void UI_FreeAssetList (char **list, int n)
+{
+	int i;
+
+	for (i = 0; i < n; i++)
+	{
+		if (list && list[i])
+		{
+			UI_Free (list[i]);
+			list[i] = 0;
+		}
+	}
+	UI_Free (list);
+}
+
+/*
+=======================================================================
+
+	VIDEO INFO LOADING
+
+=======================================================================
+*/
+
+#define UI_MAX_VIDMODES 128
+
+char	**ui_resolution_names = NULL;
+char	**ui_video_modes = NULL;
+int		ui_num_video_modes = 0;
+
+/*
+==========================
+UI_GetVideoModes
+==========================
+*/
+void UI_GetVideoModes (void)
+{
+	int			i, j=0, w=0, h=0, firstMode=0, numModes=0;
+	float		aspect;
+	char		*tok, resBuf[12], aspectBuf[8], nameBuf[20];
+	qboolean	surround = false;
+	cvar_t		*surround_threshold = Cvar_Get ("scr_surroundthreshold", "3.6", 0);
+
+	// count video modes >= 640x480
+	for (i=0; i<UI_MAX_VIDMODES; i++)
+	{
+		if ( !VID_GetModeInfo(&w, &h, i) )
+			break;
+
+		if (w >= 640 && h >= 480) {
+			numModes++;
+			if (numModes == 1)
+				firstMode = i;
+		}
+	}
+	// allocate lists
+	ui_resolution_names = UI_Malloc((numModes+2) * sizeof(char *));
+	ui_video_modes = UI_Malloc((numModes+2) * sizeof(char *));
+//	memset (ui_resolution_names, 0, (numModes+2) * sizeof(char *));
+//	memset (ui_video_modes, 0, (numModes+2) * sizeof(char *));
+
+	// add custom resolution item
+	ui_resolution_names[0] = UI_CopyString ("custom      ???");
+//	ui_resolution_names[0] = UI_CopyString ("[custom   ] [ ??? ]");
+	ui_video_modes[0] = UI_CopyString ("-1");	
+
+	// add to lists
+	for (i=firstMode, j=1; i<(firstMode+numModes); i++, j++)
+	{
+		if ( !VID_GetModeInfo(&w, &h, i) )
+			break;
+
+		if (w >= 640 && h >= 480)
+		{
+			aspect = (float)w / (float)h;
+			memset (resBuf, 0, sizeof(resBuf));
+			memset (aspectBuf, 0, sizeof(aspectBuf));
+			memset (nameBuf, 0, sizeof(nameBuf));
+			Com_sprintf (resBuf, sizeof(resBuf), "%dx%d", w, h);
+
+			// catch surround modes
+			if (aspect > surround_threshold->value) {	// 3.6f
+				aspect /= 3.0f;
+				surround = true;
+			}
+			if (aspect > 3.49f)
+				tok = "32:9";
+			else if (aspect > 2.39f)
+				tok = "24:10";
+			else if (aspect > 2.3f)
+				tok = "21:9";
+			else if (aspect > 1.9f)
+				tok = "16:8";
+			else if (aspect > 1.85f)
+				tok = "17:10";
+			else if (aspect > 1.65f)
+				tok = "16:9";
+			else if (aspect > 1.6f)
+				tok = "15:9";
+			else if (aspect > 1.55f)
+				tok = "16:10";
+			else if (aspect > 1.3f)
+				tok = "4:3";
+			else if (aspect > 1.2f)
+				tok = "5:4";
+			else
+				tok = va("%3.1f:1", aspect);
+
+			if (surround)
+				Com_sprintf (aspectBuf, sizeof(aspectBuf), "3x%s", tok);
+			else
+				Com_sprintf (aspectBuf, sizeof(aspectBuf), "%s", tok);
+
+			Com_sprintf (nameBuf, sizeof(nameBuf), "%-12s%s", resBuf, aspectBuf);
+		//	Com_sprintf (nameBuf, sizeof(nameBuf), "[%-9s] [%-5s]", resBuf, aspectBuf);
+
+			ui_resolution_names[j] = UI_CopyString (nameBuf);
+			ui_video_modes[j] = UI_CopyString (va("%i", i));	
+		}
+	}
+
+	ui_num_video_modes = numModes;
+}
+
+
+/*
+==========================
+UI_FreeVideoModes
+==========================
+*/
+void UI_FreeVideoModes (void)
+{
+	if (ui_num_video_modes > 0) {
+		UI_FreeAssetList (ui_resolution_names, ui_num_video_modes);
+		UI_FreeAssetList (ui_video_modes, ui_num_video_modes);
+	}
+	ui_resolution_names = NULL;
+	ui_video_modes = NULL;
+	ui_num_video_modes = 0;
+}
+
+
+char	**ui_aniso_names = NULL;
+char	**ui_aniso_values = NULL;
+int		ui_num_aniso_values = 0;
+
+/*
+==========================
+UI_GetAnisoValues
+==========================
+*/
+void UI_GetAnisoValues (void)
+{
+	int		i, numValues;
+	float	aniso_avail = Cvar_VariableValue("r_anisotropic_avail");
+
+	if (aniso_avail < 2.0)
+		numValues = 1;
+	else if (aniso_avail < 4.0)
+		numValues = 2;
+	else if (aniso_avail < 8.0)
+		numValues = 3;
+	else if (aniso_avail < 16.0)
+		numValues = 4;
+	else // >= 16.0
+		numValues = 5;
+
+	// allocate lists
+	ui_aniso_names = UI_Malloc((numValues+1) * sizeof(char *));
+	ui_aniso_values = UI_Malloc((numValues+1) * sizeof(char *));
+//	memset (ui_aniso_names, 0, (numValues+1) * sizeof(char *));
+//	memset (ui_aniso_values, 0, (numValues+1) * sizeof(char *));
+
+	// set names and values
+	for (i=0; i<numValues; i++)
+	{
+		if (i == 0)
+			ui_aniso_names[i] = (numValues == 1) ? UI_CopyString("not supported") : UI_CopyString("off");
+		else
+			ui_aniso_names[i] = UI_CopyString(va("%ix", 1<<i));
+		ui_aniso_values[i] = UI_CopyString(va("%i", 1<<i));
+	}
+
+	ui_num_aniso_values = numValues;
+}
+
+
+/*
+==========================
+UI_FreeAnisoValues
+==========================
+*/
+void UI_FreeAnisoValues (void)
+{
+	if (ui_num_aniso_values > 0) {
+		UI_FreeAssetList (ui_aniso_names, ui_num_aniso_values);
+		UI_FreeAssetList (ui_aniso_values, ui_num_aniso_values);
+	}
+	ui_aniso_names = NULL;
+	ui_aniso_values = NULL;
+	ui_num_aniso_values = 0;
+}
+
+/*
+==========================
+UI_GetVideoInfo
+==========================
+*/
+void UI_GetVideoInfo (void)
+{
+	UI_GetVideoModes ();
+	UI_GetAnisoValues ();
+}
+
+/*
+==========================
+UI_FreeVideoInfo
+==========================
+*/
+void UI_FreeVideoInfo (void)
+{
+	UI_FreeVideoModes ();
+	UI_FreeAnisoValues ();
 }
 
 /*
@@ -1015,7 +1085,7 @@ UI_FreeFontNames
 void UI_FreeFontNames (void)
 {
 	if (ui_numfonts > 0) {
-		FS_FreeFileList (ui_font_names, ui_numfonts);
+		UI_FreeAssetList (ui_font_names, ui_numfonts);
 	}
 	ui_font_names = NULL;
 	ui_numfonts = 0;
@@ -1029,8 +1099,6 @@ void UI_FreeFontNames (void)
 =======================================================================
 */
 
-// TODO: Enable this when HUD loading is working
-#if 0
 #define UI_MAX_HUDS 128
 char **ui_hud_names = NULL;
 int	ui_numhuds = 0;
@@ -1042,7 +1110,7 @@ UI_IsValidHudName
 */
 qboolean UI_IsValidHudName (char *name)
 {
-	int		len = (int)strlen(name);
+	size_t		len = strlen(name);
 
 	if ( !strcmp(name+max(len-4,0), ".hud") )
 		return true;
@@ -1069,13 +1137,12 @@ UI_FreeHudNames
 */
 void UI_FreeHudNames (void)
 {
-	if (ui_numhuds > 0){
-		FS_FreeFileList (ui_hud_names, ui_numhuds);
+	if (ui_numhuds > 0) {
+		UI_FreeAssetList (ui_hud_names, ui_numhuds);
 	}
 	ui_hud_names = NULL;
 	ui_numhuds = 0;
 }
-#endif
 
 /*
 =======================================================================
@@ -1088,6 +1155,7 @@ void UI_FreeHudNames (void)
 #define UI_MAX_CROSSHAIRS 101	// none + ch1-ch100
 char **ui_crosshair_names = NULL;
 char **ui_crosshair_display_names = NULL;
+color_t *ui_crosshair_display_colors = NULL;
 char **ui_crosshair_values = NULL;
 int	ui_numcrosshairs = 0;
 
@@ -1099,6 +1167,7 @@ UI_SortCrosshairs
 void UI_SortCrosshairs (char **list, int len)
 {
 	int			i, j;
+	char		crosshA[16], crosshB[16];
 	char		*temp;
 	qboolean	moved;
 
@@ -1111,8 +1180,10 @@ void UI_SortCrosshairs (char **list, int len)
 		for (j=0; j<i; j++)
 		{
 		//	if (!list[j]) break;
-			if (!list[j] || !list[j+1]) continue;
-			if ( atoi(strdup(list[j]+2)) > atoi(strdup(list[j+1]+2)) )
+			if ( !list[j] || !list[j+1] ) continue;
+			Q_strncpyz (crosshA, sizeof(crosshA), list[j]+2);
+			Q_strncpyz (crosshB, sizeof(crosshB), list[j+1]+2);
+			if ( atoi(crosshA) > atoi(crosshB) )
 			{
 				temp = list[j];
 				list[j] = list[j+1];
@@ -1132,35 +1203,58 @@ UI_IsValidCrosshairName
 */
 qboolean UI_IsValidCrosshairName (char *name)
 {
-	int		namelen;
+	char		crossh[16];
+	size_t		len;
 
 	if ( !UI_IsValidImageFilename(name) )
 		return false;
 
+	Q_strncpyz (crossh, sizeof(crossh), name);
 	// filename must be chxxx
-	if ( strncmp(name, "ch", 2) ) 
+	if ( strncmp(crossh, "ch", 2) ) 
 		return false;
-	namelen = (int)strlen(strdup(name));
-	if (namelen < 7 || namelen > 9)
+	len = strlen(crossh);
+	if ( (len < 7) || (len > 9) )
 		return false;
-	if ( !isNumeric(name[2]) )
+	if ( !isNumeric(crossh[2]) )
 		return false;
-	if ( namelen >= 8 && !isNumeric(name[3]) )
+	if ( (len >= 8) && !isNumeric(crossh[3]) )
 		return false;
 	// ch0 is invalid
-	if ( namelen == 7 && name[2] == '0' )
+	if ( (len == 7) && (crossh[2] == '0') )
 		return false;
-	// ch100 is only valid 5-char name
-	if ( namelen == 9 && (name[2] != '1' || name[3] != '0' || name[4] != '0') )
+	// ch100 is only valid 5-char filename
+	if ( (len == 9) && ( (crossh[2] != '1') || (crossh[3] != '0') || (crossh[4] != '0') ) )
 		return false;
-	// ch100-ch128 are only valid 5-char names
-/*	if ( namelen == 9 &&
-		( !isNumeric(name[4]) || name[2] != '1'
-		|| (name[2] == '1' && name[3] > '2')
-		|| (name[2] == '1' && name[3] == '2' && name[4] > '8') ) )
-		return false;*/
+	// ch100-ch128 are only valid 5-char filenames
+/*	if ( (len == 9) &&
+		( !isNumeric(crossh[4]) || (crossh[2] != '1')
+		|| (( crossh[2] == '1') && (crossh[3] > '2') )
+		|| ( (crossh[2] == '1') && (crossh[3] == '2') && (crossh[4] > '8') ) ) )
+		return false; */
 
 	return true;
+}
+
+
+/*
+==========================
+UI_UpdateCrosshairColors
+==========================
+*/
+void UI_UpdateCrosshairColors (int inRed, int inGreen, int inBlue)
+{
+	int		i, red, green, blue;
+
+	red = min(max(inRed, 0), 255);
+	green = min(max(inGreen, 0), 255);
+	blue = min(max(inBlue, 0), 255);
+
+	for (i = 0; i < ui_numcrosshairs; i++) {
+		ui_crosshair_display_colors[i][0] = red;
+		ui_crosshair_display_colors[i][1] = green;
+		ui_crosshair_display_colors[i][2] = blue;
+	}
 }
 
 
@@ -1176,15 +1270,18 @@ void UI_LoadCrosshairs (void)
 	ui_crosshair_names = UI_LoadAssetList ("pics", "ch*.*", "none", &ui_numcrosshairs, UI_MAX_CROSSHAIRS, true, false, UI_IsValidCrosshairName);
 	UI_SortCrosshairs (ui_crosshair_names, ui_numcrosshairs);
 
-	ui_crosshair_display_names = malloc( sizeof(char *) * (UI_MAX_CROSSHAIRS+1) );
-	memcpy(ui_crosshair_display_names, ui_crosshair_names, sizeof(char *) * (UI_MAX_CROSSHAIRS+1));
-	ui_crosshair_display_names[0] = strdup("chnone");
+	ui_crosshair_display_names = UI_Malloc(sizeof(char *) * (UI_MAX_CROSSHAIRS+1));
+	memcpy (ui_crosshair_display_names, ui_crosshair_names, sizeof(char *) * (UI_MAX_CROSSHAIRS+1));
+	ui_crosshair_display_names[0] = UI_CopyString("chnone");
 
-	ui_crosshair_values  = malloc( sizeof(char *) * (UI_MAX_CROSSHAIRS+1) );
-	memset(ui_crosshair_values, 0, sizeof(char *) * (UI_MAX_CROSSHAIRS+1) );
+	ui_crosshair_display_colors = UI_Malloc(sizeof(color_t) * (UI_MAX_CROSSHAIRS+1));
+	memset (ui_crosshair_display_colors, 255, sizeof(color_t) * (UI_MAX_CROSSHAIRS+1));
+
+	ui_crosshair_values = UI_Malloc(sizeof(char *) * (UI_MAX_CROSSHAIRS+1));
+//	memset (ui_crosshair_values, 0, sizeof(char *) * (UI_MAX_CROSSHAIRS+1));
 
 	for (i=0; i<ui_numcrosshairs; i++)
-		ui_crosshair_values[i] = (i == 0) ? strdup("0") : strdup(strtok(ui_crosshair_names[i], "ch")); 
+		ui_crosshair_values[i] = (i == 0) ? UI_CopyString("0") : UI_CopyString(strtok(ui_crosshair_names[i], "ch")); 
 }
 
 
@@ -1197,20 +1294,801 @@ void UI_FreeCrosshairs (void)
 {
 	if (ui_numcrosshairs > 0)
 	{
-		FS_FreeFileList (ui_crosshair_names, ui_numcrosshairs);
+		UI_FreeAssetList (ui_crosshair_names, ui_numcrosshairs);
 		if (ui_crosshair_display_names)
 		{
 			if (ui_crosshair_display_names[0]) {
-				free (ui_crosshair_display_names[0]);
+				UI_Free (ui_crosshair_display_names[0]);
 			}
-			free (ui_crosshair_display_names);
+			UI_Free (ui_crosshair_display_names);
 		}
-		FS_FreeFileList (ui_crosshair_values, ui_numcrosshairs);
+		UI_Free (ui_crosshair_display_colors);
+		UI_FreeAssetList (ui_crosshair_values, ui_numcrosshairs);
 	}
 	ui_crosshair_names = NULL;
 	ui_crosshair_display_names = NULL;
+	ui_crosshair_display_colors = NULL;
 	ui_crosshair_values = NULL;
 	ui_numcrosshairs = 0;
+}
+
+/*
+=======================================================================
+
+	KEY BIND LIST LOADING
+
+=======================================================================
+*/
+
+keyBindListHandle_t ui_customKeyBindList;
+
+/*
+==========================
+UI_CountKeyBinds
+==========================
+*/
+void UI_CountKeyBinds (keyBindListHandle_t *handle, char **script, char *buffer, int bufSize)
+{
+	char		*p, *tok;
+	qboolean	validBindItem;
+
+	if ( !handle || !script || !buffer )
+		return;
+
+	p = *script;
+	while (p < (buffer + bufSize))
+	{
+		tok = COM_ParseExt (&p, true);
+		if (!tok[0]) {
+			Com_Printf (S_COLOR_YELLOW"WARNING: UI_CountKeyBinds: no concluding '}' in 'keyBindList' in keybind list %s\n", handle->fileName);
+			return;
+		}
+		if ( !Q_stricmp(tok, "}") )
+			break;
+		else if ( !Q_strcasecmp(tok, "keyBind") )
+		{
+			validBindItem = true;
+			
+			tok = COM_ParseExt (&p, true);
+			if (!tok[0]) {
+				Com_Printf (S_COLOR_YELLOW"WARNING: UI_CountKeyBinds: missing parameters for 'keyBind' in keybind list %s\n", handle->fileName);
+				validBindItem = false;
+			}
+
+			if ( !Q_stricmp(tok, "{") )
+			{
+				while (p < (buffer + bufSize))
+				{
+					tok = COM_ParseExt (&p, true);
+					if (!tok[0]) {
+						Com_Printf (S_COLOR_YELLOW"WARNING: UI_CountKeyBinds: no concluding '}' in 'keyBind' in keybind list %s\n", handle->fileName);
+						validBindItem = false;
+					}
+					if ( !Q_stricmp(tok, "}") )
+						break;
+				}
+			}
+			else {
+				Com_Printf (S_COLOR_YELLOW"WARNING: UI_CountKeyBinds: expected '{', found '%s' instead in 'keyBind' in keybind list %s\n", tok, handle->fileName);
+				validBindItem = false;
+			}
+
+			if (validBindItem) {
+				handle->maxKeyBinds++;
+			}
+		}
+		else {
+			Com_Printf (S_COLOR_YELLOW"WARNING: UI_CountKeyBinds: unknown command '%s' after item %i while looking for 'keyBind' in keybind list %s\n", tok, handle->maxKeyBinds, handle->fileName);
+			return;
+		}
+	}
+//	Com_Printf ("UI_CountKeyBinds: counted %i 'keyBind' items in keybind list %s\n", handle->maxKeyBinds, handle->fileName);
+}
+
+
+/*
+==========================
+UI_ParseKeyBind
+==========================
+*/
+qboolean UI_ParseKeyBind (keyBindListHandle_t *handle, char **script, char *buffer, int bufSize)
+{
+	char		command[MAX_OSPATH] = {0};
+	char		display[MAX_OSPATH] = {0};
+	char		*tok;
+	qboolean	gotCommand = false, gotDisplay = false;
+
+	if ( !handle || !script || !buffer )
+		return false;
+
+	if (handle->numKeyBinds == handle->maxKeyBinds) {
+		Com_Printf (S_COLOR_YELLOW"WARNING: UI_ParseKeyBind: exceeded maxKeyBinds (%i > %i) in hud script %s\n", handle->numKeyBinds, handle->maxKeyBinds, handle->fileName);
+		return false;
+	}
+
+	tok = COM_ParseExt (script, true);
+	if (!tok[0]) {
+		Com_Printf (S_COLOR_YELLOW"WARNING: UI_ParseKeyBind: missing parameters for 'keyBind' item %i in keybind list %s\n", handle->numKeyBinds+1, handle->fileName);
+		return false;
+	}
+
+	if ( !Q_stricmp(tok, "{") )
+	{
+		while ( (*script) < (buffer + bufSize) )
+		{
+			tok = COM_ParseExt (script, true);
+			if (!tok[0]) {
+				Com_Printf (S_COLOR_YELLOW"WARNING: UI_ParseKeyBind: no concluding '}' in 'keyBind' item %i in keybind list %s\n", handle->numKeyBinds+1, handle->fileName);
+				return false;
+			}
+			if ( !Q_stricmp(tok, "}") )
+				break;
+			if ( !Q_strcasecmp(tok, "commandName") )
+			{
+				tok = COM_ParseExt (script, true);
+				if (!tok[0]) {
+					Com_Printf (S_COLOR_YELLOW"WARNING: UI_ParseKeyBind: missing parameter for 'commandName' in 'keyBind' item %i in keybind list %s\n", handle->numKeyBinds+1, handle->fileName);
+					return false;
+				}
+				Q_strncpyz (command, sizeof(command), tok);
+				gotCommand = true;
+			}
+			else if ( !Q_strcasecmp(tok, "displayName") )
+			{
+				tok = COM_ParseExt (script, true);
+				if (!tok[0]) {
+					Com_Printf (S_COLOR_YELLOW"WARNING: UI_ParseKeyBind: missing parameter for 'displayName' in 'keyBind' item %i in keybind list %s\n", handle->numKeyBinds+1, handle->fileName);
+					return false;
+				}
+				Q_strncpyz (display, sizeof(display), tok);
+				gotDisplay = true;
+			}
+			else {
+				Com_Printf (S_COLOR_YELLOW"WARNING: UI_ParseKeyBind: unknown function '%s' for 'keyBind' item %i in keybind list %s\n", tok, handle->numKeyBinds+1, handle->fileName);
+				return false;
+			}
+		}
+	}
+	else {
+		Com_Printf (S_COLOR_YELLOW"WARNING: UI_ParseKeyBind: expected '{', found '%s' instead in 'keyBind' item %i in keybind list %s\n", tok, handle->numKeyBinds+1, handle->fileName);
+		return false;
+	}
+
+	if ( gotCommand && gotDisplay ) {
+		handle->bindList[handle->numKeyBinds].commandName = UI_CopyString(command);
+		handle->bindList[handle->numKeyBinds].displayName = UI_CopyString(display);
+		handle->numKeyBinds++;
+	}
+	else {
+		Com_Printf (S_COLOR_YELLOW"WARNING: UI_ParseKeyBind: 'keyBind' item %i is missing 'commandName' or 'displayName' in keybind list %s\n", handle->numKeyBinds+1, handle->fileName);
+		return false;
+	}
+
+	return true;
+}
+
+
+/*
+==========================
+UI_ParseKeyBindList
+==========================
+*/
+qboolean UI_ParseKeyBindList (keyBindListHandle_t *handle, char *buffer, int bufSize)
+{
+	char		*p, *tok;
+	qboolean	foundKeyBindList = false;
+
+	if ( !handle || !buffer )
+		return false;
+
+	p = buffer;
+	while (p < (buffer + bufSize) )
+	{
+		tok = COM_ParseExt (&p, true);
+		if (!tok[0])
+			break;
+
+		if ( !Q_strcasecmp(tok, "keyBindList") )
+		{
+			// only one keyBindList per file!
+			if (foundKeyBindList) {
+				Com_Printf (S_COLOR_YELLOW"WARNING: UI_ParseKeyBindList: found extra 'keyBindList' in keybind list %s\n", handle->fileName);
+				return false;
+			}
+			foundKeyBindList = true;
+
+			tok = COM_ParseExt (&p, true);
+			if ( Q_stricmp(tok, "{") ) {
+				Com_Printf (S_COLOR_YELLOW"WARNING: UI_ParseKeyBindList: expected '{', found %s instead in keybind list %s\n", tok, handle->fileName);
+				return false;
+			}
+
+			// count num of keybinds and alloc memory accordingly
+			UI_CountKeyBinds (handle, &p, buffer, bufSize);
+		//	Com_Printf ("UI_ParseKeyBindList: allocating memory for %i 'keyBind' items in keybind list %s\n", handle->maxKeyBinds, handle->fileName);
+			handle->bindList = UI_Malloc(sizeof(keyBindSubitem_t) * (handle->maxKeyBinds+1));
+		//	memset (handle->bindList, 0, sizeof(keyBindSubitem_t) * (handle->maxKeyBinds+1));
+
+			while (p < (buffer + bufSize))
+			{
+				tok = COM_ParseExt (&p, true);
+				if (!tok[0]) {
+					Com_Printf (S_COLOR_YELLOW"WARNING: UI_ParseKeyBindList: no concluding '}' in 'keyBindList' in keybind list %s\n", handle->fileName);
+					return false;
+				}
+				if ( !Q_stricmp(tok, "}") )
+					break;
+				else if ( !Q_strcasecmp(tok, "keyBind") ) {
+					if ( !UI_ParseKeyBind(handle, &p, buffer, bufSize) )
+						return false;
+				}
+				else {
+					Com_Printf (S_COLOR_YELLOW"WARNING: UI_ParseKeyBindList: unknown command '%s' after item %i while looking for 'keyBind' in keybind list %s\n", tok, handle->numKeyBinds, handle->fileName);
+					return false;
+				}
+			}
+		}
+		// ignore any crap after the keyBindList
+		else if ( !foundKeyBindList ) {
+			Com_Printf (S_COLOR_YELLOW"WARNING: UI_ParseKeyBindList: unknown command '%s' while looking for 'keyBindList' in keybind list %s\n", tok, handle->fileName);
+			return false;
+		}
+	}
+
+	return true;
+}
+
+
+/*
+==========================
+UI_LoadKeyBindListFromFile
+==========================
+*/
+void UI_LoadKeyBindListFromFile (keyBindListHandle_t *handle)
+{
+	int		i, bufSize;
+	char	*buffer;
+
+	if ( !handle || !handle->fileName || (strlen(handle->fileName) < 1) )
+		return;
+
+	bufSize = FS_LoadFile (handle->fileName, (void **)&buffer);
+	if ( !buffer ) {
+		// failed to load, keep bindlist if already loaded
+		Com_Printf ("UI_LoadKeyBindListFromFile: couldn't load %s\n", handle->fileName);
+		return;
+	}
+	if (bufSize < 1) {
+		// 0 size file, keep bindlist if already loaded
+		Com_Printf ("UI_LoadKeyBindListFromFile: %s has 0 size\n", handle->fileName);
+		FS_FreeFile (buffer);
+		return;
+	}
+
+	// Parse it
+	if ( UI_ParseKeyBindList(handle, buffer, bufSize) ) {
+		Com_Printf ("UI_LoadKeyBindListFromFile: loaded keyBindList %s with %i keyBinds\n", handle->fileName, handle->numKeyBinds);
+	}
+	else {	// handle parse failure
+		if (handle->bindList)
+		{
+			for (i=0; i<handle->maxKeyBinds; i++) {
+				if (handle->bindList[i].commandName)
+					UI_Free ((char *)handle->bindList[i].commandName);
+				if (handle->bindList[i].displayName)
+					UI_Free ((char *)handle->bindList[i].displayName);
+			}
+			UI_Free (handle->bindList);
+			handle->bindList = NULL;
+			handle->maxKeyBinds = 0;
+			handle->numKeyBinds = 0;
+		}
+	}
+
+	FS_FreeFile (buffer);
+}
+
+
+/*
+==========================
+UI_LoadKeyBindList
+==========================
+*/
+void UI_LoadKeyBindList (void)
+{
+	memset (&ui_customKeyBindList, 0, sizeof(ui_customKeyBindList));
+	Com_sprintf (ui_customKeyBindList.fileName, sizeof(ui_customKeyBindList.fileName), UI_CUSTOM_KEYBIND_FILE);
+	UI_LoadKeyBindListFromFile (&ui_customKeyBindList);
+}
+
+
+/*
+==========================
+UI_FreeKeyBindList
+==========================
+*/
+void UI_FreeKeyBindList (void)
+{
+	int		i;
+
+	if (ui_customKeyBindList.bindList)
+	{
+		for (i=0; i<ui_customKeyBindList.maxKeyBinds; i++) {
+			if (ui_customKeyBindList.bindList[i].commandName)
+				UI_Free ((char *)ui_customKeyBindList.bindList[i].commandName);
+			if (ui_customKeyBindList.bindList[i].displayName)
+				UI_Free ((char *)ui_customKeyBindList.bindList[i].displayName);
+		}
+		UI_Free (ui_customKeyBindList.bindList);
+		ui_customKeyBindList.bindList = NULL;
+		ui_customKeyBindList.maxKeyBinds = 0;
+		ui_customKeyBindList.numKeyBinds = 0;
+	}
+}
+
+/*
+=======================================================================
+
+	MOD LIST LOADING
+
+=======================================================================
+*/
+
+#define UI_MAX_MODS 256
+#define MAX_MODINFO_TEXT 8192
+
+char		**ui_mod_names = NULL;
+char		**ui_mod_values = NULL;
+modInfo_t	*ui_mod_info = NULL;
+int			ui_num_mods = 0;
+
+/*
+==========================
+UI_ParseModInfoFromFile
+==========================
+*/
+qboolean UI_ParseModInfoFromFile (const char *filename, char *gameDir, char *modTitle, char *baseGame1, char *baseGame2, char *baseGame3,
+									char *quakeImportPathAuto, char *quakeRRImportPathAuto, char *quakeImportPath,
+									char *quakeMainGame, char *quakeGame1, char *quakeGame2, char *quakeGame3, char *quakeGame4,
+									char *quake2RRImportPathAuto, char *quake2RRImportPath, char *quake2RRMainGame,
+									char *quake2RRGame1, char *quake2RRGame2, char *quake2RRGame3, char *quake2RRGame4,
+									size_t bufSize)
+{
+	int				len;
+	fileHandle_t	f;
+	char			buf[MAX_MODINFO_TEXT];
+	char			*s, *token, *dest;
+	qboolean		foundModInfo = false;
+
+	// sanity check pointers and bufSize
+	if ( !filename || !gameDir || !modTitle || !baseGame1 || !baseGame2 || !baseGame3 ||
+		!quakeImportPathAuto || !quakeRRImportPathAuto || !quakeImportPath ||
+		!quakeMainGame || !quakeGame1 || !quakeGame2  || !quakeGame3  || !quakeGame4  || (bufSize < 1) )
+		return false;
+
+	// clear buffers
+	gameDir[0] = modTitle[0] = 0;
+	baseGame1[0] = baseGame2[0] = baseGame3[0] = 0;
+	quakeImportPathAuto[0] = quakeRRImportPathAuto[0] = quakeImportPath[0] = 0;
+	quakeMainGame[0] = quakeGame1[0] = quakeGame2[0] = quakeGame3[0] = quakeGame4[0] = 0;
+	quake2RRImportPathAuto[0] = quake2RRImportPath[0] = 0;
+	quake2RRMainGame[0] = quake2RRGame1[0] = quake2RRGame2[0] = quake2RRGame3[0] = quake2RRGame4[0] = 0;
+
+	len = FS_FOpenFile (filename, &f, FS_READ);
+	if (!f) {
+	//	Com_Printf ("UI_ParseModInfoFromFile: file not found: %s\n", filename);
+		return false;
+	}
+	if (len >= MAX_MODINFO_TEXT) {
+		Com_Printf (S_COLOR_RED"UI_ParseModInfoFromFile: file too large: %s is %i, max allowed is %i", filename, len, MAX_MODINFO_TEXT);
+		FS_FCloseFile (f);
+		return false;
+	}
+
+	FS_Read (buf, len, f);
+	buf[len] = 0;
+	FS_FCloseFile (f);
+
+//	Com_Printf ("UI_ParseModInfoFromFile: loaded file %s of size %i\n", filename, len);
+
+	s = buf;
+	while (s < (buf + len))
+	{
+		token = COM_ParseExt (&s, true);
+		if (!token[0])
+			break;
+
+		if ( !Q_strcasecmp(token, "modInfo") )
+		{
+			// only one modInfo per file!
+			if (foundModInfo) {
+				Com_Printf ("UI_ParseModInfoFromFile: found extra 'modInfo' in file %s\n", filename);
+				return false;
+			}
+			foundModInfo = true;
+
+			token = COM_ParseExt (&s, true);
+			if (token[0] != '{') {
+				Com_Printf ("UI_ParseModInfoFromFile: found %s when expecting '{' in file %s\n", token, filename);
+				return false;
+			}
+
+			// go through all the parms
+			while (s < (buf + len))
+			{
+				dest = NULL;
+				token = COM_ParseExt (&s, true);
+				if ( !token[0] || !s ) {
+					Com_Printf ("UI_ParseModInfoFromFile: EOF without closing brace in file %s\n", filename);
+					break;
+				}
+				if (token[0] == '}')
+					break;
+
+				if ( !Q_strcasecmp(token, "gameDir") )
+					dest = gameDir;
+				else if ( !Q_strcasecmp(token, "title") )
+					dest = modTitle;
+				else if ( !Q_strcasecmp(token, "baseGame") )
+					dest = baseGame1;
+				else if ( !Q_strcasecmp(token, "baseGame2") )
+					dest = baseGame2;
+				else if ( !Q_strcasecmp(token, "baseGame3") )
+					dest = baseGame3;
+				else if ( !Q_strcasecmp(token, "quakeImportPathAuto") )
+					dest = quakeImportPathAuto;
+				else if ( !Q_strcasecmp(token, "quakeRRImportPathAuto") )
+					dest = quakeRRImportPathAuto;
+				else if ( !Q_strcasecmp(token, "quakeImportPath") )
+					dest = quakeImportPath;
+				else if ( !Q_strcasecmp(token, "quakeMainGame") )
+					dest = quakeMainGame;
+				else if ( !Q_strcasecmp(token, "quakeGame1") )
+					dest = quakeGame1;
+				else if ( !Q_strcasecmp(token, "quakeGame2") )
+					dest = quakeGame2;
+				else if ( !Q_strcasecmp(token, "quakeGame3") )
+					dest = quakeGame3;
+				else if ( !Q_strcasecmp(token, "quakeGame4") )
+					dest = quakeGame4;
+				else if ( !Q_strcasecmp(token, "quake2RRImportPathAuto") )
+					dest = quake2RRImportPathAuto;
+				else if ( !Q_strcasecmp(token, "quake2RRImportPath") )
+					dest = quake2RRImportPath;
+				else if ( !Q_strcasecmp(token, "quake2RRMainGame") )
+					dest = quake2RRMainGame;
+				else if ( !Q_strcasecmp(token, "quake2RRGame1") )
+					dest = quake2RRGame1;
+				else if ( !Q_strcasecmp(token, "quake2RRGame2") )
+					dest = quake2RRGame2;
+				else if ( !Q_strcasecmp(token, "quake2RRGame3") )
+					dest = quake2RRGame3;
+				else if ( !Q_strcasecmp(token, "quake2RRGame4") )
+					dest = quake2RRGame4;
+				else
+					Com_Printf ("UI_ParseModInfoFromFile: unknown parameter '%s' in file %s\n", token, filename);
+
+				if (dest)
+				{
+					token = COM_ParseExt (&s, true);
+					if (!token[0]) {
+						Com_Printf ("UI_ParseModInfoFromFile: unexpected EOF in file %s\n", filename);
+						return false;
+					}
+					if (token[0] == '}') {
+						Com_Printf ("UI_ParseModInfoFromFile: closing brace without data in file %s\n", filename);
+						break;
+					}
+					if (!s) {
+						Com_Printf ("UI_ParseModInfoFromFile: EOF without closing brace in file %s\n", filename);
+						break;
+					}
+					Q_strncpyz (dest, bufSize, token);
+				}
+			}
+		}
+		// ignore any crap after the modInfo
+		else if ( !foundModInfo ) {
+			Com_Printf ("UI_ParseModInfoFromFile: unknown command '%s' while looking for 'modInfo' in file %s\n", token, filename);
+			return false;
+		}
+	}
+	if (strlen(gameDir) == 0) {
+		Com_Printf (S_COLOR_ORANGE "UI_ParseModInfoFromFile: 'gameDir' not found in file %s\n", filename);
+		return false;
+	}
+	if (strlen(modTitle) == 0) {
+		Com_Printf (S_COLOR_ORANGE "UI_ParseModInfoFromFile: 'title' not found in file %s\n", filename);
+		return false;
+	}
+	return true;
+}
+
+
+/*
+==========================
+UI_BuildModList
+==========================
+*/
+void UI_BuildModList (void)
+{
+	char		findName[1024];
+	char		infoFile[MAX_OSPATH];
+	char		modDesc[MAX_TOKEN_CHARS];
+	char		modFormatedName[MAX_TOKEN_CHARS];
+	char		**dirnames;
+	char		*modDir, *modName;
+	char		gameDir[MAX_TOKEN_CHARS], baseGame1[MAX_TOKEN_CHARS], baseGame2[MAX_TOKEN_CHARS], baseGame3[MAX_TOKEN_CHARS];
+	char		quakeImportPathAuto[MAX_TOKEN_CHARS], quakeRRImportPathAuto[MAX_TOKEN_CHARS];
+	char		quakeImportPath[MAX_TOKEN_CHARS], quakeMainGame[MAX_TOKEN_CHARS];
+	char		quakeGame1[MAX_TOKEN_CHARS], quakeGame2[MAX_TOKEN_CHARS], quakeGame3[MAX_TOKEN_CHARS], quakeGame4[MAX_TOKEN_CHARS];
+	char		quake2RRImportPathAuto[MAX_TOKEN_CHARS];
+	char		quake2RRImportPath[MAX_TOKEN_CHARS], quake2RRMainGame[MAX_TOKEN_CHARS];
+	char		quake2RRGame1[MAX_TOKEN_CHARS], quake2RRGame2[MAX_TOKEN_CHARS], quake2RRGame3[MAX_TOKEN_CHARS], quake2RRGame4[MAX_TOKEN_CHARS];
+	int			count = 0, ndirs = 0, nmods = 0;
+	int			i;
+	qboolean	unsupportedMod = false;
+
+	ui_mod_names = UI_Malloc(sizeof(char *) * (UI_MAX_MODS+1));
+	ui_mod_values = UI_Malloc(sizeof(char *) * (UI_MAX_MODS+1));
+	ui_mod_info = UI_Malloc(sizeof(modInfo_t) * (UI_MAX_MODS+1));
+
+	// add baseq2 first
+	ui_mod_names[0] = UI_CopyString("Quake II (vanilla)"); 
+	ui_mod_values[0] = UI_CopyString(BASEDIRNAME);
+	ui_mod_info[0].gameDir = UI_CopyString(BASEDIRNAME);
+	ui_mod_info[0].baseGame1 = UI_CopyString("");
+	ui_mod_info[0].baseGame2 = UI_CopyString("");
+	ui_mod_info[0].baseGame3 = UI_CopyString("");
+	ui_mod_info[0].quakeImportPath = UI_CopyString("");
+	ui_mod_info[0].quakeMainGame = UI_CopyString(Q1_MAINDIRNAME);
+	ui_mod_info[0].quakeGame1 = UI_CopyString("");
+	ui_mod_info[0].quakeGame2 = UI_CopyString("");
+	ui_mod_info[0].quakeGame3 = UI_CopyString("");
+	ui_mod_info[0].quakeGame4 = UI_CopyString("");
+	ui_mod_info[0].quakeImportPathAuto = false;
+	ui_mod_info[0].quakeRRImportPathAuto = false;
+	ui_mod_info[0].quake2RRImportPath = UI_CopyString("");
+	ui_mod_info[0].quake2RRMainGame = UI_CopyString(BASEDIRNAME);
+	ui_mod_info[0].quake2RRGame1 = UI_CopyString("");
+	ui_mod_info[0].quake2RRGame2 = UI_CopyString("");
+	ui_mod_info[0].quake2RRGame3 = UI_CopyString("");
+	ui_mod_info[0].quake2RRGame4 = UI_CopyString("");
+	ui_mod_info[0].quake2RRImportPathAuto = false;
+	ui_mod_info[0].isUnsupported = false;
+	count++;
+
+	// get a list of directories
+	Com_sprintf (findName, sizeof(findName), "%s/*.*", FS_RootDataPath());
+	dirnames = FS_ListFiles (findName, &ndirs, SFF_SUBDIR, 0);
+	if (!dirnames) {
+		ui_num_mods = count;
+		return;
+	}
+	
+	// go through the directories
+	nmods = ndirs;
+	if (nmods > UI_MAX_MODS)
+		nmods = UI_MAX_MODS;
+	if ( (count + nmods) > UI_MAX_MODS )
+		nmods = UI_MAX_MODS - count;
+
+	for (i = 0; i < nmods; i++)
+	{
+		if (dirnames[i] == 0)
+			continue;
+			
+		modDir = COM_SkipPath(dirnames[i]);
+		
+		// Ignore baseq2
+		if ( !Q_strcasecmp(modDir, BASEDIRNAME) )
+			continue;
+	
+		// Must have a pak or pk3 file, a maps dir, or a modinfo.def file
+		if ( !Sys_FindFirst( va("%s/*.pak", dirnames[i]), 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM) ) {
+			Sys_FindClose ();
+			if ( !Sys_FindFirst( va("%s/*.pk3", dirnames[i]), 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM) ) {
+				Sys_FindClose ();
+				if ( !Sys_FindFirst( va("%s/maps", dirnames[i]), SFF_SUBDIR, 0) ) {
+					Sys_FindClose ();
+					if ( !Sys_FindFirst( va("%s/modinfo.def", dirnames[i]), 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM) ) {
+						Sys_FindClose ();
+						continue;
+					}
+				}
+			}
+		}
+		Sys_FindClose ();
+
+		// check if this mod has a gamex86.dll/gamei386.so without an equivalent KMQ2 dll/so
+		unsupportedMod = false;
+
+	//	if ( Sys_FindFirst( va("%s/"STOCK_Q2_GAME_LIBRARY_NAME, dirnames[i]), 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM) )
+		if ( FS_DirectFileExists( va("%s/"STOCK_Q2_GAME_LIBRARY_NAME, dirnames[i]) ) )
+		{
+		//	Sys_FindClose ();
+		//	if ( !Sys_FindFirst( va("%s/"KMQ2_GAME_LIBRARY_NAME, dirnames[i]), 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM) ) {
+			if ( !FS_DirectFileExists( va("%s/"KMQ2_GAME_LIBRARY_NAME, dirnames[i]) ) ) {
+			//	Sys_FindClose ();
+				unsupportedMod = true;
+			//	Com_Printf ("UI_BuildModList: mod %s has an unsupported game library.\n", modDir);
+			}
+		}
+	//	Sys_FindClose ();
+
+		// clear optional fields
+		baseGame1[0] = baseGame2[0] = baseGame3[0] = 0;
+		quakeImportPathAuto[0] = quakeRRImportPathAuto[0] = 0;
+		quakeImportPath[0] = quakeMainGame[0] = 0;
+		quakeGame1[0] = quakeGame2[0] = quakeGame3[0] = quakeGame4[0] = 0;
+		quake2RRImportPathAuto[0] = quake2RRImportPath[0] = quake2RRMainGame[0] = 0;
+		quake2RRGame1[0] = quake2RRGame2[0] = quake2RRGame3[0] = quake2RRGame4[0] = 0;
+
+		// try to load and parse modinfo.def
+		Com_sprintf (infoFile, sizeof(infoFile), "../%s/modinfo.def", modDir);
+		if ( UI_ParseModInfoFromFile(infoFile, gameDir, modDesc, baseGame1, baseGame2, baseGame3,
+									quakeImportPathAuto, quakeRRImportPathAuto, quakeImportPath,
+									quakeMainGame, quakeGame1, quakeGame2, quakeGame3, quakeGame4, 
+									quake2RRImportPathAuto, quake2RRImportPath, quake2RRMainGame,
+									quake2RRGame1, quake2RRGame2, quake2RRGame3, quake2RRGame4,
+									MAX_TOKEN_CHARS) )
+		{
+		//	Com_Printf ("UI_BuildModList: loaded modinfo file %s\n  gameDir: %s modDesc: \"%s\"^r\n", infoFile, gameDir, modDesc);
+		//	Com_Printf ("  baseGame1: %s baseGame2: %s baseGame3: %s \n", baseGame1, baseGame2, baseGame3);
+		//	Com_Printf ("  quakeImportPathAuto: %s quakeRRImportPathAuto: %s quakeImportPath: %s\n", quakeImportPathAuto, quakeRRImportPathAuto, quakeImportPath);
+		//	Com_Printf ("  quakeMainGame: %s quakeGame1: %s quakeGame2: %s quakeGame3: %s quakeGame4: %s\n", quakeMainGame, quakeGame1, quakeGame2, quakeGame3, quakeGame4);
+		//	Com_Printf ("  quake2RRImportPathAuto: %s quake2RRImportPath: %s quake2RRMainGame: %s \n", quake2RRImportPathAuto, quake2RRImportPath, quake2RRMainGame);
+		//	Com_Printf ("  quake2RRGame1: %s quake2RRGame2: %s quake2RRGame3: %s quake2RRGame4: %s\n", quake2RRGame1, quake2RRGame2, quake2RRGame3, quake2RRGame4);
+			// make sure quakeMainGame is set
+			if (quakeMainGame[0] == 0)
+				Q_strncpyz (quakeMainGame, sizeof(quakeMainGame), Q1_MAINDIRNAME);
+			// make sure quake2RRMainGame is set
+			if (quake2RRMainGame[0] == 0)
+				Q_strncpyz (quake2RRMainGame, sizeof(quake2RRMainGame), BASEDIRNAME);
+			// catch gameDir in modinfo not matching game path
+			if ( Q_strcasecmp(modDir, gameDir) != 0 ) {
+				Com_Printf (S_COLOR_ORANGE"UI_BuildModList: modinfo file %s has conflicting 'gameDir' value: %s\n", infoFile, gameDir);
+			}
+			modName = modDesc;
+		}
+		else if ( !Q_strcasecmp(modDir, "ctf") )
+			modName = "Quake II: Capture The Flag";
+		else if ( !Q_strcasecmp(modDir, "xatrix") )
+			modName = "Quake II: The Reckoning";
+		else if ( !Q_strcasecmp(modDir, "rogue") )
+			modName = "Quake II: Ground Zero";
+		else if ( !Q_strcasecmp(modDir, "zaero") )
+			modName = "Zaero Mission Pack";
+		else if ( !Q_strcasecmp(modDir, "3zb2") )
+			modName = "3rd-Zigock Bot II";
+		else if ( !Q_strcasecmp(modDir, "awaken2") )
+			modName = "Awakening II: The Resurrection";
+		else if ( !Q_strcasecmp(modDir, "ra2") )
+			modName = "Rocket Arena 2";
+		else if ( !Q_strcasecmp(modDir, "bots") )
+			modName = "Battle of the Sexes";
+		else if ( !Q_strcasecmp(modDir, "lmctf") )
+			modName = "Loki's Minions CTF";
+		else if ( !Q_strcasecmp(modDir, "wf") )
+			modName = "Weapons Factory";
+		else if ( !Q_strcasecmp(modDir, "wod") )
+			modName = "Weapons of Destruction";
+		else if ( !Q_strcasecmp(modDir, "rts") )
+			modName = "Rob the Strogg";
+		else
+			modName = modDir;
+
+		if (unsupportedMod)
+			Com_sprintf (modFormatedName, sizeof(modFormatedName), S_COLOR_ORANGE"%s\0", modName);
+		else
+			Q_strncpyz (modFormatedName, sizeof(modFormatedName), modName);
+
+		if ( !UI_ItemInAssetList(modDir, count, ui_mod_values) )
+		{
+			UI_InsertInAssetList (ui_mod_names, modFormatedName, count, 1, false);	// start=1 so first item stays first!
+			UI_InsertInAssetList (ui_mod_values, modDir, count, 1, false);	// start=1 so first item stays first!
+			ui_mod_info[count].gameDir = UI_CopyString(modDir);
+			ui_mod_info[count].baseGame1 = UI_CopyString(baseGame1);
+			ui_mod_info[count].baseGame2 = UI_CopyString(baseGame2);
+			ui_mod_info[count].baseGame3 = UI_CopyString(baseGame3);
+
+			if ( ( (atoi(quakeImportPathAuto) > 0) || !strcmp(quakeImportPathAuto, "true") || !strcmp(quakeImportPathAuto, "yes") ) 
+				&& ( (strcmp(quakeImportPathAuto, "false") != 0) && (strcmp(quakeImportPathAuto, "no") != 0) ) )
+				ui_mod_info[count].quakeImportPathAuto = true;
+			else
+				ui_mod_info[count].quakeImportPathAuto = false;
+
+			if ( ( (atoi(quakeRRImportPathAuto) > 0) || !strcmp(quakeRRImportPathAuto, "true") || !strcmp(quakeRRImportPathAuto, "yes") ) 
+				&& ( (strcmp(quakeRRImportPathAuto, "false") != 0) && (strcmp(quakeRRImportPathAuto, "no") != 0) ) )
+				ui_mod_info[count].quakeRRImportPathAuto = true;
+			else
+				ui_mod_info[count].quakeRRImportPathAuto = false;
+
+			if ( ( (atoi(quake2RRImportPathAuto) > 0) || !strcmp(quake2RRImportPathAuto, "true") || !strcmp(quake2RRImportPathAuto, "yes") ) 
+				&& ( (strcmp(quake2RRImportPathAuto, "false") != 0) && (strcmp(quake2RRImportPathAuto, "no") != 0) ) )
+				ui_mod_info[count].quake2RRImportPathAuto = true;
+			else
+				ui_mod_info[count].quake2RRImportPathAuto = false;
+
+			ui_mod_info[count].quakeImportPath = UI_CopyString(quakeImportPath);
+			ui_mod_info[count].quakeMainGame = UI_CopyString(quakeMainGame);
+			ui_mod_info[count].quakeGame1 = UI_CopyString(quakeGame1);
+			ui_mod_info[count].quakeGame2 = UI_CopyString(quakeGame2);
+			ui_mod_info[count].quakeGame3 = UI_CopyString(quakeGame3);
+			ui_mod_info[count].quakeGame4 = UI_CopyString(quakeGame4);
+			ui_mod_info[count].quake2RRImportPath = UI_CopyString(quake2RRImportPath);
+			ui_mod_info[count].quake2RRMainGame = UI_CopyString(quake2RRMainGame);
+			ui_mod_info[count].quake2RRGame1 = UI_CopyString(quake2RRGame1);
+			ui_mod_info[count].quake2RRGame2 = UI_CopyString(quake2RRGame2);
+			ui_mod_info[count].quake2RRGame3 = UI_CopyString(quake2RRGame3);
+			ui_mod_info[count].quake2RRGame4 = UI_CopyString(quake2RRGame4);
+			ui_mod_info[count].isUnsupported = unsupportedMod;
+			count++;
+		}
+	}
+	
+	if (dirnames)
+		FS_FreeFileList (dirnames, ndirs);
+
+	ui_num_mods = count;
+}
+
+
+/*
+==========================
+UI_GetModList
+==========================
+*/
+void UI_GetModList (void)
+{
+	UI_BuildModList ();
+//	Com_Printf ("UI_GetModList: found %i mod dirs\n", ui_num_mods);
+}
+
+
+/*
+==========================
+UI_FreeModList
+==========================
+*/
+void UI_FreeModList (void)
+{
+	int		i;
+
+	if (ui_num_mods > 0)
+	{
+		UI_FreeAssetList (ui_mod_names, ui_num_mods);
+		UI_FreeAssetList (ui_mod_values, ui_num_mods);
+		// free modInfo table
+		for (i = 0; i < ui_num_mods; i++)
+		{
+			UI_Free (ui_mod_info[i].gameDir);
+			UI_Free (ui_mod_info[i].baseGame1);
+			UI_Free (ui_mod_info[i].baseGame2);
+			UI_Free (ui_mod_info[i].baseGame3);
+			UI_Free (ui_mod_info[i].quakeImportPath);
+			UI_Free (ui_mod_info[i].quakeMainGame);
+			UI_Free (ui_mod_info[i].quakeGame1);
+			UI_Free (ui_mod_info[i].quakeGame2);
+			UI_Free (ui_mod_info[i].quakeGame3);
+			UI_Free (ui_mod_info[i].quakeGame4);
+			ui_mod_info[i].gameDir = NULL;
+			ui_mod_info[i].baseGame1 = NULL;
+			ui_mod_info[i].baseGame2 = NULL;
+			ui_mod_info[i].baseGame3 = NULL;
+			ui_mod_info[i].quakeImportPath = NULL;
+			ui_mod_info[i].quakeMainGame = NULL;
+			ui_mod_info[i].quakeGame1 = NULL;
+			ui_mod_info[i].quakeGame2 = NULL;
+			ui_mod_info[i].quakeGame3 = NULL;
+			ui_mod_info[i].quakeGame4 = NULL;
+		}
+		UI_Free (ui_mod_info);
+	}
+	ui_mod_names = NULL;
+	ui_mod_values = NULL;
+	ui_mod_info = NULL;
+	ui_num_mods = 0;
 }
 
 /*
@@ -1221,11 +2099,14 @@ SAVEGAME / SAVESHOT HANDLING
 =============================================================================
 */
 
-char		ui_savestrings[UI_MAX_SAVEGAMES][32];
-qboolean	ui_savevalid[UI_MAX_SAVEGAMES+1];
+char		*ui_savegame_names[UI_MAX_SAVEGAMES];
+char		*ui_loadgame_names[UI_MAX_SAVEGAMES+1];
+char		ui_savestrings[UI_MAX_SAVEGAMES][64]; // The default here is what TFOL uses - Brad
+qboolean	ui_savevalid[UI_MAX_SAVEGAMES];
 time_t		ui_savetimestamps[UI_MAX_SAVEGAMES];
 qboolean	ui_savechanged[UI_MAX_SAVEGAMES];
-qboolean	ui_saveshotvalid[UI_MAX_SAVEGAMES+1];
+qboolean	ui_saveshot_valid[UI_MAX_SAVEGAMES+1];
+float		ui_saveshot_aspect[UI_MAX_SAVEGAMES+1];
 
 char		ui_mapname[MAX_QPATH];
 char		ui_saveload_shotname[MAX_QPATH];
@@ -1241,18 +2122,20 @@ void UI_Load_Savestrings (qboolean update)
 	FILE	*fp;
 	fileHandle_t	f;
 	char	name[MAX_OSPATH];
+	char	comment[32];
 	char	mapname[MAX_TOKEN_CHARS];
+	char	infoHeader[10];
 	char	*ch;
 	time_t	old_timestamp;
 	struct	stat	st;
 
 	for (i=0; i<UI_MAX_SAVEGAMES; i++)
 	{
-	//	Com_sprintf (name, sizeof(name), "%s/save/kmq2save%03i/server.ssv", FS_Savegamedir(), i);	// was FS_Gamedir()
+	//	Com_sprintf (name, sizeof(name), "%s/save/kmq2save%03i/server.ssv", FS_Savegamedir(), i);
 #ifdef NOTTHIRTYFLIGHTS
-		Com_sprintf (name, sizeof(name), "%s/"SAVEDIRNAME"/kmq2save%03i/server.ssv", FS_Savegamedir(), i);	// was FS_Gamedir()
+		Com_sprintf (name, sizeof(name), "%s/%s/kmq2save%03i/server.ssv", FS_Savegamedir(), ARCH_SAVEDIR, i);	// was FS_Gamedir()
 #else
-		Com_sprintf (name, sizeof(name), "%s/"SAVEDIRNAME"/save%i/server.ssv", FS_Savegamedir(), i);	// was FS_Gamedir()
+		Com_sprintf (name, sizeof(name), "%s/%s/save%03i/server.ssv", FS_Savegamedir(), ARCH_SAVEDIR, i);	// was FS_Gamedir()
 #endif
 
 		old_timestamp = ui_savetimestamps[i];
@@ -1277,24 +2160,27 @@ void UI_Load_Savestrings (qboolean update)
 			fclose (fp);
 		//	Com_sprintf (name, sizeof(name), "save/kmq2save%03i/server.ssv", i);
 #ifdef NOTTHIRTYFLIGHTS
-			Com_sprintf (name, sizeof(name), SAVEDIRNAME"/kmq2save%03i/server.ssv", i);
+			Com_sprintf (name, sizeof(name), "%s/kmq2save%03i/server.ssv", ARCH_SAVEDIR, i);
 #else
-			Com_sprintf (name, sizeof(name), SAVEDIRNAME"/save%i/server.ssv", i);
+			Com_sprintf (name, sizeof(name), "%s/save%03i/server.ssv", ARCH_SAVEDIR, i);
 #endif
 			FS_FOpenFile (name, &f, FS_READ);
-			if (!f)
-			{
-				//Com_Printf("Save file %s not found.\n", name);
+			if (!f) {
 				Q_strncpyz (ui_savestrings[i], sizeof(ui_savestrings[i]), EMPTY_GAME_STRING);
 				ui_savevalid[i] = false;
 				ui_savetimestamps[i] = 0;
 			}
 			else
 			{
-				FS_Read (ui_savestrings[i], sizeof(ui_savestrings[i]), f);
+			//	FS_Read (ui_savestrings[i], sizeof(ui_savestrings[i]), f);
+				FS_Read (comment, sizeof(comment), f);
+				Com_sprintf (ui_savestrings[i], sizeof(ui_savestrings[i]), "%s", comment);
 
-				if (i==0) { // grab mapname
-					FS_Read (mapname, sizeof(mapname), f);
+				// grab mapname
+				FS_Read (mapname, sizeof(mapname), f);
+				if (i == 0)
+				{
+				//	FS_Read (mapname, sizeof(mapname), f);
 					if (mapname[0] == '*') // skip * marker
 						Com_sprintf (ui_mapname, sizeof(ui_mapname), mapname+1);
 					else
@@ -1302,12 +2188,53 @@ void UI_Load_Savestrings (qboolean update)
 					if (ch = strchr (ui_mapname, '$'))
 						*ch = 0; // terminate string at $ marker
 				}
+
+				// read extra save info if present
+				FS_Read (infoHeader, sizeof(infoHeader), f);
+				if ( !strncmp(infoHeader, "KMQ2SSV", 7) )
+				{
+					char	comment2[32], aspectstring[18], datestring[20];
+					struct	tm		savedate;
+					int		hour;
+					float	aspect;
+
+					FS_Read (&savedate, sizeof(struct tm), f);
+					FS_Read (comment, sizeof(comment), f);
+					FS_Read (comment2, sizeof(comment2), f);
+					FS_Read (aspectstring, sizeof(aspectstring), f);
+
+					hour = savedate.tm_hour;
+					if (hour > 12) hour -= 12;
+					if (hour == 0) hour += 12;
+					Com_sprintf (datestring, sizeof(datestring), "%2i/%2i/%4i %2i:%i%i %s", savedate.tm_mon+1, savedate.tm_mday, savedate.tm_year+1900,
+								hour, savedate.tm_min/10, savedate.tm_min%10, (savedate.tm_hour > 12) ? "PM" : "AM");
+
+					if (strlen(comment2) > 0)
+						Com_sprintf (ui_savestrings[i], sizeof(ui_savestrings[i]), "%s\n%s %s", comment, comment2, datestring);
+					else
+						Com_sprintf (ui_savestrings[i], sizeof(ui_savestrings[i]), "%s\n%s", comment, datestring);
+
+					aspect = atof(aspectstring);
+					if (aspect > 0.0f)
+						ui_saveshot_aspect[i] = aspect;
+					else
+						ui_saveshot_aspect[i] = 0.0f;	// 0.0f defaults to current screen aspect
+				}
 				FS_FCloseFile(f);
 				ui_savevalid[i] = true;
 			}
 		}
 		ui_savechanged[i] = (ui_savetimestamps[i] != old_timestamp);
 	}
+
+	// create pointer arrays for load and save menus
+	ui_loadgame_names[UI_MAX_SAVEGAMES] = NULL;
+	for (i = 0; i < UI_MAX_SAVEGAMES; i++)
+		ui_loadgame_names[i] = ui_savestrings[i];
+
+	ui_savegame_names[UI_MAX_SAVEGAMES-1] = NULL;
+	for (i = 0; i < UI_MAX_SAVEGAMES-1; i++)
+		ui_savegame_names[i] = ui_savestrings[i+1];	// don't include the autosave slot
 }
 
 
@@ -1327,31 +2254,59 @@ void UI_ValidateSaveshots (void)
 			continue;
 		if ( ui_savevalid[i] )
 		{
-			if (i == 0)
+			if (i == 0)	// mapshot for autosave
 				Com_sprintf(shotname, sizeof(shotname), "/levelshots/%s.pcx", ui_mapname);
 			else
 			{	// free previously loaded shots
 			//	Com_sprintf(shotname, sizeof(shotname), "save/kmq2save%03i/shot.jpg", i);
 #ifdef NOTTHIRTYFLIGHTS
-				Com_sprintf(shotname, sizeof(shotname), SAVEDIRNAME"/kmq2save%03i/shot.jpg", i);
+				Com_sprintf(shotname, sizeof(shotname), "%s/kmq2save%03i/shot.jpg", ARCH_SAVEDIR, i);
 #else
-				Com_sprintf(shotname, sizeof(shotname), SAVEDIRNAME"/save%i/shot.jpg", i);
+				Com_sprintf(shotname, sizeof(shotname), "%s/save%03i/shot.jpg", ARCH_SAVEDIR, i);
 #endif
 				R_FreePic (shotname);
 			//	Com_sprintf(shotname, sizeof(shotname), "/save/kmq2save%03i/shot.jpg", i);
 #ifdef NOTTHIRTYFLIGHTS
-				Com_sprintf(shotname, sizeof(shotname), "/"SAVEDIRNAME"/kmq2save%03i/shot.jpg", i);
+				Com_sprintf(shotname, sizeof(shotname), "/%s/kmq2save%03i/shot.jpg", ARCH_SAVEDIR, i);
 #else
-				Com_sprintf(shotname, sizeof(shotname), "/"SAVEDIRNAME"/save%i/shot.jpg", i);
+				Com_sprintf(shotname, sizeof(shotname), "/%s/save%03i/shot.jpg", ARCH_SAVEDIR, i);
 #endif
 			}
 			if (R_DrawFindPic(shotname))
-				ui_saveshotvalid[i] = true;
+				ui_saveshot_valid[i] = true;
 			else
-				ui_saveshotvalid[i] = false;
+				ui_saveshot_valid[i] = false;
 		}
 		else
-			ui_saveshotvalid[i] = false;
+			ui_saveshot_valid[i] = false;
+	}
+}
+
+
+/*
+==========================
+UI_UpdateSaveshotAspect
+==========================
+*/
+float UI_UpdateSaveshotAspect (int index)
+{
+	float	saveAspect, curAspect;
+
+	// check index
+	if (index < 0 || index >= UI_MAX_SAVEGAMES)
+		return DEFAULT_SAVESHOT_ASPECT;
+
+	if ( (index > 0) && UI_SaveshotIsValid(index) )
+	{
+		saveAspect = ui_saveshot_aspect[index];
+		curAspect = UI_GetScreenAspect();
+		if (saveAspect == 0.0f)		// 0.0f defaults to current screen aspect
+			return curAspect;
+		else
+			return min(max(saveAspect, 1.2f), (curAspect * 1.2f));	// clamp between 5:4 and 1.2 * current screen aspect
+	}
+	else {
+		return DEFAULT_SAVESHOT_ASPECT;	// levelshots and null saveshot are 4:3
 	}
 }
 
@@ -1367,19 +2322,19 @@ char *UI_UpdateSaveshot (int index)
 	if (index < 0 || index >= UI_MAX_SAVEGAMES)
 		return NULL;
 
-	if ( ui_savevalid[index] && ui_saveshotvalid[index] ) {
+	if ( ui_savevalid[index] && ui_saveshot_valid[index] ) {
 		if ( index == 0 )
-			Com_sprintf(ui_saveload_shotname, sizeof(ui_saveload_shotname), "/levelshots/%s.pcx", ui_mapname);
+			Com_sprintf (ui_saveload_shotname, sizeof(ui_saveload_shotname), "/levelshots/%s.pcx", ui_mapname);
 		else
-		//	Com_sprintf(ui_saveload_shotname, sizeof(ui_saveload_shotname), "/save/kmq2save%03i/shot.jpg", index);
+		//	Com_sprintf (ui_saveload_shotname, sizeof(ui_saveload_shotname), "/save/kmq2save%03i/shot.jpg", index);
 #ifdef NOTTHIRTYFLIGHTS
-			Com_sprintf(ui_saveload_shotname, sizeof(ui_saveload_shotname), "/"SAVEDIRNAME"/kmq2save%03i/shot.jpg", index);
+			Com_sprintf (ui_saveload_shotname, sizeof(ui_saveload_shotname), "/%s/kmq2save%03i/shot.jpg", ARCH_SAVEDIR, index);
 #else
-			Com_sprintf(ui_saveload_shotname, sizeof(ui_saveload_shotname), "/"SAVEDIRNAME"/save%i/shot.jpg", index);
+			Com_sprintf (ui_saveload_shotname, sizeof(ui_saveload_shotname), "/%s/save%03i/shot.jpg", ARCH_SAVEDIR, index);
 #endif
 	}
-	else if ( ui_saveshotvalid[UI_MAX_SAVEGAMES] )
-		Com_sprintf(ui_saveload_shotname, sizeof(ui_saveload_shotname), UI_NOSCREEN_NAME);
+	else if ( ui_saveshot_valid[UI_MAX_SAVEGAMES] )
+		Com_sprintf (ui_saveload_shotname, sizeof(ui_saveload_shotname), UI_NOSCREEN_NAME);
 	else	// no saveshot or nullshot
 		return NULL;
 
@@ -1410,18 +2365,18 @@ void UI_InitSavegameData (void)
 	for (i=0; i<UI_MAX_SAVEGAMES; i++) {
 		ui_savetimestamps[i] = 0;
 		ui_savechanged[i] = true;
+		ui_saveshot_aspect[i] = DEFAULT_SAVESHOT_ASPECT;
 	}
+	ui_saveshot_aspect[UI_MAX_SAVEGAMES] = DEFAULT_SAVESHOT_ASPECT;
 
 	UI_Load_Savestrings (false);
 	UI_ValidateSaveshots ();	// register saveshots
 
 	// register null saveshot, this is only done once
-	if (R_DrawFindPic("/gfx/ui/noscreen.pcx"))
-		ui_saveshotvalid[UI_MAX_SAVEGAMES] = true;
+	if ( R_DrawFindPic(UI_NOSCREEN_NAME) )
+		ui_saveshot_valid[UI_MAX_SAVEGAMES] = true;
 	else
-		ui_saveshotvalid[UI_MAX_SAVEGAMES] = false;
-
-	ui_savevalid[UI_MAX_SAVEGAMES] = false;	// this element is always false to handle the back action
+		ui_saveshot_valid[UI_MAX_SAVEGAMES] = false;
 }
 
 
@@ -1451,7 +2406,7 @@ qboolean UI_SaveshotIsValid (int index)
 	if (index < 0 || index >= UI_MAX_SAVEGAMES)
 		return false;
 
-	return ui_saveshotvalid[index];
+	return ui_saveshot_valid[index];
 }
 
 
@@ -1478,7 +2433,7 @@ int		ui_num_servers;
 
 // user readable information
 char ui_local_server_names[UI_MAX_LOCAL_SERVERS][UI_LOCAL_SERVER_NAMELEN];
-//char	*ui_serverlist_names[UI_MAX_LOCAL_SERVERS+1];
+char	*ui_serverlist_names[UI_MAX_LOCAL_SERVERS+1];
 
 // network address
 netadr_t ui_local_server_netadr[UI_MAX_LOCAL_SERVERS];
@@ -1502,8 +2457,8 @@ UI_AddToServerList
 void UI_AddToServerList (netadr_t adr, char *info)
 {
 	int		i;
-    int     iPing;
-    char    *pszProtocol;
+    int     iPing = 0;
+    char    *pszProtocol = NULL;
 
 	if (ui_num_servers == UI_MAX_LOCAL_SERVERS)
 		return;
@@ -1511,16 +2466,20 @@ void UI_AddToServerList (netadr_t adr, char *info)
 	while ( *info == ' ' )
 		info++;
 
+	// FIXME: How to check if address is a loopback?
+//	if ( adr.type == NA_LOOPBACK )
+//		return;
+
 	// Ignore if duplicated
 	for (i=0; i<ui_num_servers; i++)
-        if ( strncmp(info, &ui_local_server_names[i][11], sizeof(ui_local_server_names[0])-10)==0 )	// crashes here
+        if ( strncmp(info, &ui_local_server_names[i][11], sizeof(ui_local_server_names[0])-10) == 0 )
 			return;
 
     iPing = 0 ;
 	for (i=0 ; i<UI_MAX_LOCAL_SERVERS ; i++)
     {
-        if ( memcmp(&adr.ip, &global_adr_server_netadr[i].ip, sizeof(adr.ip))==0 
-             && adr.port == global_adr_server_netadr[i].port )
+        if ( (memcmp(&adr.ip, &global_adr_server_netadr[i].ip, sizeof(adr.ip)) == 0)
+             && (adr.port == global_adr_server_netadr[i].port) )
         {
             // bookmark server
             iPing = Sys_Milliseconds() - global_adr_server_time[i] ;
@@ -1584,7 +2543,6 @@ void UI_SearchLocalGames (void)
 
 	ui_num_servers = 0;
 	for (i=0 ; i<UI_MAX_LOCAL_SERVERS ; i++)
-	//	strncpy (ui_local_server_names[i], NO_SERVER_STRING);
 		Q_strncpyz (ui_local_server_names[i], sizeof(ui_local_server_names[i]), NO_SERVER_STRING);
 
 	UI_DrawPopupMessage ("Searching for local servers.\nThis could take up to a minute,\nso please be patient.");
@@ -1626,10 +2584,10 @@ void UI_InitServerList (void)
 {
 	int		i;
 
-//	ui_serverlist_names[UI_MAX_LOCAL_SERVERS] = NULL;
+	ui_serverlist_names[UI_MAX_LOCAL_SERVERS] = NULL;
 	for ( i = 0; i < UI_MAX_LOCAL_SERVERS; i++ ) {
 		Com_sprintf (ui_local_server_names[i], sizeof(ui_local_server_names[i]), NO_SERVER_STRING);
-	//	ui_serverlist_names[i] = ui_local_server_names[i];
+		ui_serverlist_names[i] = ui_local_server_names[i];
 	}
 }
 
@@ -1649,16 +2607,16 @@ gametype_names_t gametype_names[] =
 	{MAP_3TCTF, "3tctf"},
 };
 
+#define MAPLIST_FORMAT "%s\n%s"
+
 maptype_t ui_svr_maptype;
-static int	ui_svr_nummaps;
-char **ui_svr_mapnames;
+char **ui_svr_mapnames = NULL;
 static int	ui_svr_maplist_sizes[NUM_MAPTYPES] = {0, 0, 0, 0};
 static char	**ui_svr_maplists[NUM_MAPTYPES] = {NULL, NULL, NULL, NULL};
-int	ui_svr_listfile_nummaps;
-static char **ui_svr_listfile_mapnames;
-static int	ui_svr_arena_nummaps[NUM_MAPTYPES];
-static char **ui_svr_arena_mapnames[NUM_MAPTYPES];
-//static	byte *ui_svr_mapshotvalid; // levelshot truth table
+int	ui_svr_listfile_nummaps = 0;
+static char **ui_svr_listfile_mapnames = NULL;
+static int	ui_svr_arena_nummaps[NUM_MAPTYPES] = {0, 0, 0, 0};
+static char **ui_svr_arena_mapnames[NUM_MAPTYPES] = {NULL, NULL, NULL, NULL};
 static	byte *ui_svr_mapshotvalid[NUM_MAPTYPES] = {NULL, NULL, NULL, NULL};	// levelshot truth tables
 char ui_startserver_shotname [MAX_QPATH];
 qboolean	ui_svr_coop = false;
@@ -1674,20 +2632,27 @@ UI_ParseArenaFromFile
 Partially from Q3 source
 ===============
 */
-qboolean UI_ParseArenaFromFile (char *filename, char *shortname, char *longname, char *gametypes, size_t bufSize)
+qboolean UI_ParseArenaFromFile (const char *filename, char *shortname, char *longname, char *gametypes, size_t bufSize)
 {
 	int				len;
 	fileHandle_t	f;
 	char			buf[MAX_ARENAS_TEXT];
 	char			*s, *token, *dest;
 
+	// sanity check pointers and bufSize
+	if ( !filename || !shortname || !longname || !gametypes || (bufSize < 1) )
+		return false;
+
+	// zero buffers
+	shortname[0] = longname[0] = gametypes[0] = 0;
+
 	len = FS_FOpenFile (filename, &f, FS_READ);
 	if (!f) {
-		Com_Printf (S_COLOR_RED "UI_ParseArenaFromFile: file not found: %s\n", filename);
+		Com_Printf (S_COLOR_RED"UI_ParseArenaFromFile: file not found: %s\n", filename);
 		return false;
 	}
 	if (len >= MAX_ARENAS_TEXT) {
-		Com_Printf (S_COLOR_RED "UI_ParseArenaFromFile: file too large: %s is %i, max allowed is %i", filename, len, MAX_ARENAS_TEXT);
+		Com_Printf (S_COLOR_RED"UI_ParseArenaFromFile: file too large: %s is %i, max allowed is %i", filename, len, MAX_ARENAS_TEXT);
 		FS_FCloseFile (f);
 		return false;
 	}
@@ -1698,13 +2663,13 @@ qboolean UI_ParseArenaFromFile (char *filename, char *shortname, char *longname,
 
 	s = buf;
 	// get the opening curly brace
-	token = COM_Parse (&s);
-	if (!token) {
-		Com_Printf ("UI_ParseArenaFromFile: unexpected EOF\n");
+	token = COM_ParseExt (&s, true);
+	if ( !token[0] || !s ) {
+		Com_Printf ("UI_ParseArenaFromFile: unexpected EOF in file %s\n", filename);
 		return false;
 	}
 	if (token[0] != '{') {
-		Com_Printf ("UI_ParseArenaFromFile: found %s when expecting {\n", token);
+		Com_Printf ("UI_ParseArenaFromFile: found %s when expecting '{' in file %s\n", token, filename);
 		return false;
 	}
 
@@ -1712,44 +2677,48 @@ qboolean UI_ParseArenaFromFile (char *filename, char *shortname, char *longname,
 	while (s < (buf + len))
 	{
 		dest = NULL;
-		token = COM_Parse (&s);
-		if (token && (token[0] == '}')) break;
-		if (!token || !s) {
-			Com_Printf ("UI_ParseArenaFromFile: EOF without closing brace\n");
+		token = COM_ParseExt (&s, true);
+		if ( !token[0] || !s ) {
+			Com_Printf ("UI_ParseArenaFromFile: EOF without closing brace in file %s\n", filename);
 			break;
 		}
+		if (token[0] == '}')
+			break;
 
-		if (!Q_strcasecmp(token, "map"))
+		if ( !Q_strcasecmp(token, "map") )
 			dest = shortname;
-		else if (!Q_strcasecmp(token, "longname"))
+		else if ( !Q_strcasecmp(token, "longname") )
 			dest = longname;
-		else if (!Q_strcasecmp(token, "type"))
+		else if ( !Q_strcasecmp(token, "type") )
 			dest = gametypes;
+		else
+			Com_Printf ("UI_ParseArenaFromFile: unknown parameter '%s' in file %s\n", token, filename);
+
 		if (dest)
 		{
-			token = COM_Parse (&s);
-			if (!token) {
-				Com_Printf ("UI_ParseArenaFromFile: unexpected EOF\n");
+			token = COM_ParseExt (&s, true);
+			if (!token[0]) {
+				Com_Printf ("UI_ParseArenaFromFile: unexpected EOF in file %s\n", filename);
 				return false;
 			}
 			if (token[0] == '}') {
-				Com_Printf ("UI_ParseArenaFromFile: closing brace without data\n");
+				Com_Printf ("UI_ParseArenaFromFile: closing brace without data in file %s\n", filename);
 				break;
 			}
 			if (!s) {
-				Com_Printf ("UI_ParseArenaFromFile: EOF without closing brace\n");
+				Com_Printf ("UI_ParseArenaFromFile: EOF without closing brace in file %s\n", filename);
 				break;
 			}
-		//	strncpy(dest, token);
 			Q_strncpyz (dest, bufSize, token);
 		}
 	}
-	if (!shortname || !strlen(shortname)) {
-		Com_Printf (S_COLOR_RED "UI_ParseArenaFromFile: %s: map field not found\n", filename);
+	if (strlen(shortname) == 0) {
+		Com_Printf (S_COLOR_RED "UI_ParseArenaFromFile: %s: 'map' parm not found\n", filename);
 		return false;
 	}
-	if (!strlen(longname))
-		longname = shortname;
+	if (strlen(longname) == 0) {
+		Q_strncpyz (longname, bufSize, shortname);
+	}
 	return true;
 }
 
@@ -1796,7 +2765,7 @@ UI_LoadArenas
 */
 void UI_LoadArenas (void)
 {
-	char		*p, *s, *s2, *tok, *tok2;
+	char		*p, *s1, *s2, *tok2;	// *tok1
 	char		**arenafiles = NULL;
 	char		**tmplist = NULL;
 	char		*path = NULL;
@@ -1805,24 +2774,24 @@ void UI_LoadArenas (void)
 	char		longname[MAX_TOKEN_CHARS];
 	char		gametypes[MAX_TOKEN_CHARS];
 	char		scratch[200];
+	char		tok1[MAX_TOKEN_CHARS];
 	int			i, j, len, narenas = 0, narenanames = 0;
-	size_t		nameSize;
 	qboolean	type_supported[NUM_MAPTYPES];
 
 	//
-	// free existing lists and malloc new ones
+	// free existing lists and allocate new ones
 	//
 	for (i=0; i<NUM_MAPTYPES; i++)
 	{
 		if (ui_svr_arena_mapnames[i])
-			FS_FreeFileList (ui_svr_arena_mapnames[i], ui_svr_arena_nummaps[i]);
+			UI_FreeAssetList (ui_svr_arena_mapnames[i], ui_svr_arena_nummaps[i]);
 		ui_svr_arena_nummaps[i] = 0;
-		ui_svr_arena_mapnames[i] = malloc( sizeof( char * ) * MAX_ARENAS );
-		memset( ui_svr_arena_mapnames[i], 0, sizeof( char * ) * MAX_ARENAS );
+		ui_svr_arena_mapnames[i] = UI_Malloc(sizeof(char *) * MAX_ARENAS);
+	//	memset (ui_svr_arena_mapnames[i], 0, sizeof(char *) * MAX_ARENAS);
 	}
 
-	tmplist = malloc( sizeof( char * ) * MAX_ARENAS );
-	memset( tmplist, 0, sizeof( char * ) * MAX_ARENAS );
+	tmplist = UI_Malloc(sizeof(char *) * MAX_ARENAS);
+//	memset (tmplist, 0, sizeof(char *) * MAX_ARENAS);
 
 #if 1
 	arenafiles = FS_GetFileList ("scripts", "arena", &narenas);
@@ -1832,51 +2801,45 @@ void UI_LoadArenas (void)
 			continue;
 
 		len = (int)strlen(arenafiles[i]);
-		if ( strcmp(arenafiles[i]+max(len-6,0), ".arena") )
+		if ( strcmp(arenafiles[i] + max(len-6, 0), ".arena") )
 			continue;
 
 		p = arenafiles[i];
 
-		if (!FS_ItemInList(p, narenanames, tmplist)) // check if already in list
+		if ( !UI_ItemInAssetList(p, narenanames, tmplist) ) // check if already in list
 		{
 			if (UI_ParseArenaFromFile (p, shortname, longname, gametypes, MAX_TOKEN_CHARS))
 			{
-			//	Com_sprintf(scratch, sizeof(scratch), MAPLIST_FORMAT, longname, shortname);
-				Com_sprintf(scratch, sizeof(scratch), "%s\n%s", longname, shortname);
+				Com_sprintf(scratch, sizeof(scratch), MAPLIST_FORMAT, longname, shortname);
 				
 				for (j=0; j<NUM_MAPTYPES; j++)
 					type_supported[j] = false;
-				s = gametypes;
-				tok = strdup(COM_Parse (&s));
-				while (s != NULL)
+				s1 = gametypes;
+				Q_strncpyz (tok1, sizeof(tok1), COM_Parse(&s1));
+				while (s1 != NULL)
 				{
 					for (j=0; j<NUM_MAPTYPES; j++)
 					{
 						s2 = gametype_names[j].tokens;
 						tok2 = COM_Parse (&s2);
 						while (s2 != NULL) {
-							if ( !Q_strcasecmp(tok, tok2) )
+							if ( !Q_strcasecmp(tok1, tok2) )
 								type_supported[j] = true;
 							tok2 = COM_Parse (&s2);
 						}
 					}
-					if (tok)	free (tok);
-					tok = strdup(COM_Parse(&s));
+					Q_strncpyz (tok1, sizeof(tok1), COM_Parse(&s1));
 				}
-				if (tok)	free (tok);
 
 				for (j=0; j<NUM_MAPTYPES; j++)
 					if (type_supported[j]) {
-						nameSize = strlen(scratch) + 1;
-						ui_svr_arena_mapnames[j][ui_svr_arena_nummaps[j]] = malloc(nameSize);
-					//	strncpy(ui_svr_arena_mapnames[j][ui_svr_arena_nummaps[j]], scratch);
-						Q_strncpyz (ui_svr_arena_mapnames[j][ui_svr_arena_nummaps[j]], nameSize, scratch);
+						ui_svr_arena_mapnames[j][ui_svr_arena_nummaps[j]] = UI_CopyString(scratch);
 						ui_svr_arena_nummaps[j]++;
 					}
 
 			//	Com_Printf ("UI_LoadArenas: successfully loaded arena file %s: mapname: %s levelname: %s gametypes: %s\n", p, shortname, longname, gametypes);
 				narenanames++;
-				FS_InsertInList(tmplist, p, narenanames, 0); // add to list
+				UI_InsertInAssetList (tmplist, p, narenanames, 0, false); // add to list
 			}
 		}
 	}
@@ -1896,54 +2859,49 @@ void UI_LoadArenas (void)
 				continue;
 
 			len = (int)strlen(arenafiles[i]);
-			if ( strcmp(arenafiles[i]+max(len-6,0), ".arena") )
+			if ( strcmp(arenafiles[i] + max(len-6, 0), ".arena") )
 				continue;
 
 			p = arenafiles[i] + strlen(path) + 1;	// skip over path and next slash
 
-			if (!FS_ItemInList(p, narenanames, tmplist)) // check if already in list
+			if ( !UI_ItemInAssetList(p, narenanames, tmplist) ) // check if already in list
 			{
 				if (UI_ParseArenaFromFile (p, shortname, longname, gametypes, MAX_TOKEN_CHARS))
 				{
-					Com_sprintf(scratch, sizeof(scratch), "%s\n%s", longname, shortname);
+					Com_sprintf(scratch, sizeof(scratch), MAPLIST_FORMAT, longname, shortname);
 					
 					for (j=0; j<NUM_MAPTYPES; j++)
 						type_supported[j] = false;
-					s = gametypes;
-					tok = strdup(COM_Parse (&s));
-					while (s != NULL)
+					s1 = gametypes;
+					Q_strncpyz (tok1, sizeof(tok1), COM_Parse(&s1));
+					while (s1 != NULL)
 					{
 						for (j=0; j<NUM_MAPTYPES; j++)
 						{
 							s2 = gametype_names[j].tokens;
 							tok2 = COM_Parse (&s2);
 							while (s2 != NULL) {
-								if ( !Q_strcasecmp(tok, tok2) )
+								if ( !Q_strcasecmp(tok1, tok2) )
 									type_supported[j] = true;
 								tok2 = COM_Parse (&s2);
 							}
 						}
-						if (tok)	free (tok);
-						tok = strdup(COM_Parse(&s));
+						Q_strncpyz (tok1, sizeof(tok1), COM_Parse(&s1));
 					}
-					if (tok)	free (tok);
 
 					for (j=0; j<NUM_MAPTYPES; j++)
 						if (type_supported[j]) {
-							nameSize = strlen(scratch) + 1;
-							ui_svr_arena_mapnames[j][ui_svr_arena_nummaps[j]] = malloc(nameSize);
-						//	strncpy(ui_svr_arena_mapnames[j][ui_svr_arena_nummaps[j]], scratch);
-							Q_strncpyz(ui_svr_arena_mapnames[j][ui_svr_arena_nummaps[j]], nameSize, scratch);
+							ui_svr_arena_mapnames[j][ui_svr_arena_nummaps[j]] = UI_CopyString(scratch);
 							ui_svr_arena_nummaps[j]++;
 						}
 
 				//	Com_Printf ("UI_LoadArenas: successfully loaded arena file %s: mapname: %s levelname: %s gametypes: %s\n", p, shortname, longname, gametypes);
 					narenanames++;
-					FS_InsertInList(tmplist, p, narenanames, 0); // add to list
+					UI_InsertInAssetList (tmplist, p, narenanames, 0, false); // add to list
 				}			
 			}
 		}
-		if (narenas)
+		if (narenas > 0)
 			FS_FreeFileList (arenafiles, narenas);
 		
 		path = FS_NextPath (path);
@@ -1954,67 +2912,62 @@ void UI_LoadArenas (void)
 	//
 	if (arenafiles = FS_ListPak("scripts/", &narenas))
 	{
-		for (i=0; i<narenas && narenanames<MAX_ARENAS; i++)
+		for (i = 0; i < narenas && narenanames < MAX_ARENAS; i++)
 		{
 			if (!arenafiles || !arenafiles[i])
 				continue;
 
 			len = (int)strlen(arenafiles[i]);
-			if ( strcmp(arenafiles[i]+max(len-6,0), ".arena") )
+			if ( strcmp(arenafiles[i] + max(len-6, 0), ".arena") )
 				continue;
 
 			p = arenafiles[i];
 
-			if (!FS_ItemInList(p, narenanames, tmplist)) // check if already in list
+			if ( !UI_ItemInAssetList(p, narenanames, tmplist) ) // check if already in list
 			{
 				if (UI_ParseArenaFromFile (p, shortname, longname, gametypes, MAX_TOKEN_CHARS))
 				{
-					Com_sprintf(scratch, sizeof(scratch), "%s\n%s", longname, shortname);
+					Com_sprintf(scratch, sizeof(scratch), MAPLIST_FORMAT, longname, shortname);
 					
 					for (j=0; j<NUM_MAPTYPES; j++)
 						type_supported[j] = false;
-					s = gametypes;
-					tok = strdup(COM_Parse (&s));
-					while (s != NULL)
+					s1 = gametypes;
+					Q_strncpyz (tok1, sizeof(tok1), COM_Parse(&s1));
+					while (s1 != NULL)
 					{
 						for (j=0; j<NUM_MAPTYPES; j++)
 						{
 							s2 = gametype_names[j].tokens;
 							tok2 = COM_Parse (&s2);
 							while (s2 != NULL) {
-								if ( !Q_strcasecmp(tok, tok2) )
+								if ( !Q_strcasecmp(tok1, tok2) )
 									type_supported[j] = true;
 								tok2 = COM_Parse (&s2);
 							}
 						}
-						if (tok)	free (tok);
-						tok = strdup(COM_Parse(&s));
+						Q_strncpyz (tok1, sizeof(tok1), COM_Parse(&s1));
 					}
-					if (tok)	free (tok);
 
 					for (j=0; j<NUM_MAPTYPES; j++)
 						if (type_supported[j]) {
-							nameSize = strlen(scratch) + 1;
-							ui_svr_arena_mapnames[j][ui_svr_arena_nummaps[j]] = malloc(nameSize);
-						//	strncpy(ui_svr_arena_mapnames[j][ui_svr_arena_nummaps[j]], scratch);
-							Q_strncpyz(ui_svr_arena_mapnames[j][ui_svr_arena_nummaps[j]], nameSize, scratch);
+							ui_svr_arena_mapnames[j][ui_svr_arena_nummaps[j]] = UI_CopyString(scratch);
 							ui_svr_arena_nummaps[j]++;
 						}
 
-					//Com_Printf ("UI_LoadArenas: successfully loaded arena file %s: mapname: %s levelname: %s gametypes: %s\n", p, shortname, longname, gametypes);
+				//	Com_Printf ("UI_LoadArenas: successfully loaded arena file %s: mapname: %s levelname: %s gametypes: %s\n", p, shortname, longname, gametypes);
 					narenanames++;
-					FS_InsertInList(tmplist, strdup(p), narenanames, 0); // add to list
+					UI_InsertInAssetList (tmplist, p, narenanames, 0, false); // add to list
 				}
 			}
 		}
 	}
 #endif
 
-	if (narenas)
+	if (narenas > 0)
 		FS_FreeFileList (arenafiles, narenas);
 
-	if (narenanames)
-		FS_FreeFileList (tmplist, narenanames);
+	if (narenanames > 0)
+		UI_FreeAssetList (tmplist, narenanames);
 
 	for (i=0; i<NUM_MAPTYPES; i++)
 		UI_SortArenas (ui_svr_arena_mapnames[i], ui_svr_arena_nummaps[i]);
@@ -2035,24 +2988,25 @@ void UI_LoadMapList (void)
 	char	*buffer, *s;
 	char	mapsname[1024];
 	int		i, j, length;
-	size_t	nameSize;
 	FILE	*fp;
 
 	//
 	// free existing list
 	//
-	if (ui_svr_listfile_mapnames)
-		FS_FreeFileList (ui_svr_listfile_mapnames, ui_svr_listfile_nummaps);
+	if (ui_svr_listfile_mapnames) {
+		UI_FreeAssetList (ui_svr_listfile_mapnames, ui_svr_listfile_nummaps);
+	}
+	ui_svr_listfile_mapnames = NULL;
 	ui_svr_listfile_nummaps = 0;
 
 	//
 	// load the list of map names
 	//
-	Com_sprintf( mapsname, sizeof( mapsname ), "%s/maps.lst", FS_Gamedir() );	// FIXME: should this be FS_Savegamedir()?
-	if ( ( fp = fopen( mapsname, "rb" ) ) == 0 )
+	Com_sprintf( mapsname, sizeof(mapsname), "%s/maps.lst", FS_Gamedir() );	// FIXME: should this be FS_Savegamedir()?
+	if ( ( fp = fopen(mapsname, "rb") ) == 0 )
 	{
-		if ( ( length = FS_LoadFile( "maps.lst", ( void ** ) &buffer ) ) == -1 )
-			Com_Error( ERR_DROP, "couldn't find maps.lst\n" );
+		if ( ( length = FS_LoadFile("maps.lst", (void **)&buffer)) == -1 )
+			Com_Error (ERR_DROP, "couldn't find maps.lst\n");
 	}
 	else
 	{
@@ -2063,8 +3017,8 @@ void UI_LoadMapList (void)
 		length = ftell(fp);
 		fseek(fp, 0, SEEK_SET);
 #endif
-		buffer = malloc( length );
-		fread( buffer, length, 1, fp );
+		buffer = malloc(length);
+		fread (buffer, length, 1, fp);
 	}
 
 	s = buffer;
@@ -2083,8 +3037,8 @@ void UI_LoadMapList (void)
 		buffer = "base1 \"Outer Base\"\n";
 	}
 
-	ui_svr_listfile_mapnames = malloc( sizeof( char * ) * ( ui_svr_listfile_nummaps + 1 ) );
-	memset( ui_svr_listfile_mapnames, 0, sizeof( char * ) * ( ui_svr_listfile_nummaps + 1 ) );
+	ui_svr_listfile_mapnames = UI_Malloc(sizeof(char *) * (ui_svr_listfile_nummaps + 1));
+//	memset (ui_svr_listfile_mapnames, 0, sizeof(char *) * (ui_svr_listfile_nummaps + 1));
 
 	s = buffer;
 
@@ -2094,25 +3048,22 @@ void UI_LoadMapList (void)
 		char	longname[MAX_TOKEN_CHARS];
 		char	scratch[200];
 
-	//	strncpy( shortname, COM_Parse( &s ) );
-	//	strncpy( longname, COM_Parse( &s ) );
+	//	strncpy (shortname, COM_Parse(&s));
+	//	strncpy (longname, COM_Parse(&s));
 		Q_strncpyz (shortname, sizeof(shortname), COM_Parse(&s));
 		Q_strncpyz (longname, sizeof(longname), COM_Parse(&s));
-		Com_sprintf (scratch, sizeof( scratch ), "%s\n%s", longname, shortname);
-		nameSize = strlen(scratch) + 1;
-		ui_svr_listfile_mapnames[i] = malloc( nameSize );
-	//	strncpyz( ui_svr_listfile_mapnames[i], scratch );
-		Q_strncpyz (ui_svr_listfile_mapnames[i], nameSize, scratch);
+		Com_sprintf (scratch, sizeof(scratch), MAPLIST_FORMAT, longname, shortname);
+		ui_svr_listfile_mapnames[i] = UI_CopyString(scratch);
 	}
 	ui_svr_listfile_mapnames[ui_svr_listfile_nummaps] = 0;
 
 	if ( fp != 0 )
 	{
 		fp = 0;
-		free( buffer );
+		free (buffer);
 	}
 	else
-		FS_FreeFile( buffer );
+		FS_FreeFile (buffer);
 
 	UI_LoadArenas ();
 
@@ -2120,12 +3071,12 @@ void UI_LoadMapList (void)
 	for (i=0; i<NUM_MAPTYPES; i++)
 	{
 		if (ui_svr_maplists[i]) {
-			free (ui_svr_maplists[i]);
+			UI_Free (ui_svr_maplists[i]);
 		}
 		ui_svr_maplists[i] = NULL;
 		ui_svr_maplist_sizes[i] = ui_svr_listfile_nummaps + ui_svr_arena_nummaps[i];
-		ui_svr_maplists[i] = malloc( sizeof( char * ) * (ui_svr_maplist_sizes[i] + 1) );
-		memset( ui_svr_maplists[i], 0, sizeof( char * ) * (ui_svr_maplist_sizes[i] + 1) );
+		ui_svr_maplists[i] = UI_Malloc(sizeof(char *) * (ui_svr_maplist_sizes[i] + 1));
+	//	memset (ui_svr_maplists[i], 0, sizeof(char *) * (ui_svr_maplist_sizes[i] + 1));
 
 		for (j = 0; j < ui_svr_maplist_sizes[i]; j++)
 		{
@@ -2136,7 +3087,7 @@ void UI_LoadMapList (void)
 		}
 	}
 
-	ui_svr_maptype = MAP_DM; // init maptype
+	ui_svr_maptype = MAP_DM; // initial maptype
 	ui_svr_mapnames = ui_svr_maplists[ui_svr_maptype];
 
 	UI_BuildStartSeverLevelshotTables ();
@@ -2158,7 +3109,7 @@ void UI_FreeMapList (void)
 	for (i=0; i<NUM_MAPTYPES; i++)
 	{
 		if (ui_svr_maplists[i]) {
-			free (ui_svr_maplists[i]);
+			UI_Free (ui_svr_maplists[i]);
 		}
 		ui_svr_maplists[i] = NULL;
 		ui_svr_maplist_sizes[i] = 0;
@@ -2169,7 +3120,7 @@ void UI_FreeMapList (void)
 	// free list from file
 	//
 	if (ui_svr_listfile_mapnames) {
-		FS_FreeFileList (ui_svr_listfile_mapnames, ui_svr_listfile_nummaps);
+		UI_FreeAssetList (ui_svr_listfile_mapnames, ui_svr_listfile_nummaps);
 	}
 	ui_svr_listfile_mapnames = NULL;
 	ui_svr_listfile_nummaps = 0;
@@ -2180,7 +3131,7 @@ void UI_FreeMapList (void)
 	for (i=0; i<NUM_MAPTYPES; i++)
 	{
 		if (ui_svr_arena_mapnames[i]) {
-			FS_FreeFileList (ui_svr_arena_mapnames[i], ui_svr_arena_nummaps[i]);
+			UI_FreeAssetList (ui_svr_arena_mapnames[i], ui_svr_arena_nummaps[i]);
 		}
 		ui_svr_arena_mapnames[i] = NULL;
 		ui_svr_arena_nummaps[i] = 0;
@@ -2214,13 +3165,13 @@ void UI_BuildStartSeverLevelshotTables (void)
 	for (i=0; i<NUM_MAPTYPES; i++)
 	{	// free existing list	
 		if (ui_svr_mapshotvalid[i]) {
-			free(ui_svr_mapshotvalid[i]);
+			UI_Free (ui_svr_mapshotvalid[i]);
 			ui_svr_mapshotvalid[i] = NULL;
 		}
 
 		// alloc and zero new list
-		ui_svr_mapshotvalid[i] = malloc( sizeof( byte ) * ( ui_svr_maplist_sizes[i] + 1 ) );
-		memset( ui_svr_mapshotvalid[i], 0, sizeof( byte ) * ( ui_svr_maplist_sizes[i] + 1 ) );
+		ui_svr_mapshotvalid[i] = UI_Malloc(sizeof(byte) * (ui_svr_maplist_sizes[i] + 1));
+	//	memset (ui_svr_mapshotvalid[i], 0, sizeof(byte) * (ui_svr_maplist_sizes[i] + 1));
 
 		// register null levelshot
 		if (ui_svr_mapshotvalid[i][ui_svr_maplist_sizes[i]] == M_UNSET) {	
@@ -2245,7 +3196,7 @@ void UI_FreeStartSeverLevelshotTables (void)
 	for (i=0; i<NUM_MAPTYPES; i++)
 	{
 		if (ui_svr_mapshotvalid[i]) {
-			free(ui_svr_mapshotvalid[i]);
+			UI_Free (ui_svr_mapshotvalid[i]);
 			ui_svr_mapshotvalid[i] = NULL;
 		}
 	}
@@ -2349,18 +3300,18 @@ qboolean UI_CTF_MenuMode (void)
 
 playermodelinfo_s ui_pmi[MAX_PLAYERMODELS];
 char *ui_pmnames[MAX_PLAYERMODELS];
-int ui_numplayermodels;
+int ui_numplayermodels = 0;
 
 // save skins and models here so as to not have to re-register every frame
 struct model_s *ui_playermodel;
 struct model_s *ui_weaponmodel;
 struct image_s *ui_playerskin;
 char *ui_currentweaponmodel;
-/*
+
 char	ui_playerconfig_playermodelname[MAX_QPATH];
 char	ui_playerconfig_playerskinname[MAX_QPATH];
 char	ui_playerconfig_weaponmodelname[MAX_QPATH];
-
+/*
 color_t ui_player_color_imageColors[] =
 {
 #include "ui_playercolors.h"
@@ -2382,7 +3333,7 @@ static qboolean UI_IsSkinIcon (char *name)
 	int		len;
 	char	*s, scratch[1024];
 
-	Q_strncpyz(scratch, sizeof(scratch), name);
+	Q_strncpyz (scratch, sizeof(scratch), name);
 	*strrchr(scratch, '.') = 0;
 	s = scratch;
 	len = (int)strlen(s);
@@ -2403,7 +3354,6 @@ static qboolean UI_IconOfSkinExists (char *skin, char **files, int nfiles, char 
 	Q_strncpyz (scratch, sizeof(scratch), skin);
 	*strrchr(scratch, '.') = 0;
 	Q_strncatz (scratch, sizeof(scratch), suffix);
-//	strncat(scratch, "_i.pcx");
 
 	for (i = 0; i < nfiles; i++)
 	{
@@ -2445,7 +3395,7 @@ UI_PlayerConfig_ScanDirectories
 */
 static qboolean UI_PlayerConfig_ScanDirectories (void)
 {
-	char findname[1024];
+	char findName[1024];
 	char scratch[1024];
 	int ndirs = 0, npms = 0;
 	char **dirnames;
@@ -2463,9 +3413,9 @@ static qboolean UI_PlayerConfig_ScanDirectories (void)
 		do 
 		{
 			path = FS_NextPath(path);
-			Com_sprintf( findname, sizeof(findname), "%s/players/*.*", path );
+			Com_sprintf (findName, sizeof(findName), "%s/players/*.*", path);
 
-			if ( (dirnames = FS_ListFiles(findname, &ndirs, SFF_SUBDIR, 0)) != 0 )
+			if ( (dirnames = FS_ListFiles(findName, &ndirs, SFF_SUBDIR, 0)) != 0 )
 				break;
 		} while (path);
 
@@ -2508,27 +3458,26 @@ static qboolean UI_PlayerConfig_ScanDirectories (void)
 			}
 
 			// verify the existence of tris.md2
-		//	strncpy(scratch, dirnames[i]);
-		//	strncat(scratch, "/tris.md2");
-			Q_strncpyz(scratch, sizeof(scratch), dirnames[i]);
-			Q_strncatz(scratch, sizeof(scratch), "/tris.md2");
+		//	strncpy (scratch, dirnames[i]);
+		//	strncat (scratch, "/tris.md2");
+			Q_strncpyz (scratch, sizeof(scratch), dirnames[i]);
+			Q_strncatz (scratch, sizeof(scratch), "/tris.md2");
 			if ( !Sys_FindFirst(scratch, 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM) )
 			{
-				free(dirnames[i]);
+				free (dirnames[i]);
 				dirnames[i] = 0;
-				Sys_FindClose();
+				Sys_FindClose ();
 				continue;
 			}
-			Sys_FindClose();
+			Sys_FindClose ();
 
 			// verify the existence of at least one skin
-		//	strncpy(scratch, va("%s%s", dirnames[i], "/*.*")); // was "/*.pcx"
-			Q_strncpyz(scratch, sizeof(scratch), va("%s%s", dirnames[i], "/*.*")); // was "/*.pcx"
+			Q_strncpyz (scratch, sizeof(scratch), va("%s%s", dirnames[i], "/*.*")); // was "/*.pcx"
 			imagenames = FS_ListFiles (scratch, &nimagefiles, 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM);
 
 			if (!imagenames)
 			{
-				free(dirnames[i]);
+				free (dirnames[i]);
 				dirnames[i] = 0;
 				continue;
 			}
@@ -2546,15 +3495,13 @@ static qboolean UI_PlayerConfig_ScanDirectories (void)
 			b = strrchr(dirnames[i], '\\');
 			c = (a > b) ? a : b;
 
-		//	strncpy(ui_pmi[ui_numplayermodels].displayname, c+1, MAX_DISPLAYNAME-1);
-		//	strncpy(ui_pmi[ui_numplayermodels].directory, c+1);
-			Q_strncpyz(ui_pmi[ui_numplayermodels].displayname, sizeof(ui_pmi[ui_numplayermodels].displayname), c+1);
-			Q_strncpyz(ui_pmi[ui_numplayermodels].directory, sizeof(ui_pmi[ui_numplayermodels].directory), c+1);
+			Q_strncpyz (ui_pmi[ui_numplayermodels].displayname, sizeof(ui_pmi[ui_numplayermodels].displayname), c+1);
+			Q_strncpyz (ui_pmi[ui_numplayermodels].directory, sizeof(ui_pmi[ui_numplayermodels].directory), c+1);
 
-			skinnames = malloc(sizeof(char *) * (nskins+1));
-			memset(skinnames, 0, sizeof(char *) * (nskins+1));
-			skiniconnames = malloc(sizeof(char *) * (nskins+1));
-			memset(skiniconnames, 0, sizeof(char *) * (nskins+1));
+			skinnames = UI_Malloc(sizeof(char *) * (nskins+1));
+			skiniconnames = UI_Malloc(sizeof(char *) * (nskins+1));
+		//	memset (skinnames, 0, sizeof(char *) * (nskins+1));
+		//	memset (skiniconnames, 0, sizeof(char *) * (nskins+1));
 
 			// copy the valid skins
 			if (nimagefiles)
@@ -2569,13 +3516,13 @@ static qboolean UI_PlayerConfig_ScanDirectories (void)
 						c = (a > b) ? a : b;
 
 					//	strncpy(scratch, c+1);
-						Q_strncpyz(scratch, sizeof(scratch), c+1);
+						Q_strncpyz (scratch, sizeof(scratch), c+1);
 
 						if ( strrchr(scratch, '.') )
 							*strrchr(scratch, '.') = 0;
 
-						skinnames[s] = strdup(scratch);
-						skiniconnames[s] = strdup(va("/players/%s/%s_i.pcx", ui_pmi[ui_numplayermodels].directory, scratch));
+						skinnames[s] = UI_CopyString(scratch);
+						skiniconnames[s] = UI_CopyString(va("/players/%s/%s_i.pcx", ui_pmi[ui_numplayermodels].directory, scratch));
 						s++;
 					}
 				}
@@ -2590,8 +3537,8 @@ static qboolean UI_PlayerConfig_ScanDirectories (void)
 		//	b = strrchr(dirnames[i], '\\');
 		//	c = (a > b) ? a : b;
 
-		//	Q_strncpyz(ui_pmi[ui_numplayermodels].displayname, sizeof(ui_pmi[ui_numplayermodels].displayname), c+1);
-		//	Q_strncpyz(ui_pmi[ui_numplayermodels].directory, sizeof(ui_pmi[ui_numplayermodels].directory), c+1);
+		//	Q_strncpyz (ui_pmi[ui_numplayermodels].displayname, sizeof(ui_pmi[ui_numplayermodels].displayname), c+1);
+		//	Q_strncpyz (ui_pmi[ui_numplayermodels].directory, sizeof(ui_pmi[ui_numplayermodels].directory), c+1);
 
 			FS_FreeFileList (imagenames, nimagefiles);
 
@@ -2603,9 +3550,9 @@ static qboolean UI_PlayerConfig_ScanDirectories (void)
 
 	// if no valid player models found in path,
 	// try next path, if there is one
-	} while (path);	// (s_numplayermodels == 0 && path);
+	} while (path);	// (ui_numplayermodels == 0 && path);
 
-	return true;	//** DMP warning fix
+	return true;	// DMP warning fix
 }
 
 #if 0
@@ -2618,20 +3565,20 @@ void UI_BuildPlayerColorList (void)
 {
 	int		i, numColors = 0;
 
-	ui_player_color_values = malloc(sizeof(char *) * (UI_NUM_PLAYER_COLORS+1));
-	ui_player_color_imageNames = malloc(sizeof(char *) * (UI_NUM_PLAYER_COLORS+1));
-	memset(ui_player_color_values, 0, sizeof(char *) * (UI_NUM_PLAYER_COLORS+1));
-	memset(ui_player_color_imageNames, 0, sizeof(char *) * (UI_NUM_PLAYER_COLORS+1));
+	ui_player_color_values = UI_Malloc(sizeof(char *) * (UI_NUM_PLAYER_COLORS+1));
+	ui_player_color_imageNames = UI_Malloc(sizeof(char *) * (UI_NUM_PLAYER_COLORS+1));
+//	memset (ui_player_color_values, 0, sizeof(char *) * (UI_NUM_PLAYER_COLORS+1));
+//	memset (ui_player_color_imageNames, 0, sizeof(char *) * (UI_NUM_PLAYER_COLORS+1));
 
 	for (i = 0; i < UI_NUM_PLAYER_COLORS; i++)
 	{	// last index is custom color
 		if (i == UI_NUM_PLAYER_COLORS-1) {
-			ui_player_color_values[i] = strdup(UI_ITEMVALUE_WILDCARD);
-			ui_player_color_imageNames[i] = strdup(UI_CUSTOMCOLOR_PIC);
+			ui_player_color_values[i] = UI_CopyString(UI_ITEMVALUE_WILDCARD);
+			ui_player_color_imageNames[i] = UI_CopyString(UI_CUSTOMCOLOR_PIC);
 		}
 		else {
-			ui_player_color_values[i] = strdup(va("%02X%02X%02X", ui_player_color_imageColors[i][0], ui_player_color_imageColors[i][1], ui_player_color_imageColors[i][2]));
-			ui_player_color_imageNames[i] = strdup(UI_SOLIDWHITE_PIC);
+			ui_player_color_values[i] = UI_CopyString(va("%02X%02X%02X", ui_player_color_imageColors[i][0], ui_player_color_imageColors[i][1], ui_player_color_imageColors[i][2]));
+			ui_player_color_imageNames[i] = UI_CopyString(UI_SOLIDWHITE_PIC);
 		}
 		numColors++;
 	}
@@ -2663,23 +3610,20 @@ void UI_FreePlayerModels (void)
 
 	for (i = 0; i < ui_numplayermodels; i++)
 	{
-		int j;
-
-		for (j = 0; j < ui_pmi[i].nskins; j++)
-		{
-			if (ui_pmi[i].skinDisplayNames[j])
-				free(ui_pmi[i].skinDisplayNames[j]);
-			ui_pmi[i].skinDisplayNames[j] = NULL;
+		if (ui_pmi[i].nskins > 0) {
+			UI_FreeAssetList (ui_pmi[i].skinDisplayNames, ui_pmi[i].nskins);
+			UI_FreeAssetList (ui_pmi[i].skinIconNames, ui_pmi[i].nskins);
 		}
-		free(ui_pmi[i].skinDisplayNames);
 		ui_pmi[i].skinDisplayNames = NULL;
+		ui_pmi[i].skinIconNames = NULL;
 		ui_pmi[i].nskins = 0;
 	}
+	ui_numplayermodels = 0;
 
 /*	if (ui_numplayercolors > 0)
 	{
-		FS_FreeFileList (ui_player_color_values, ui_numplayercolors);
-		FS_FreeFileList (ui_player_color_imageNames, ui_numplayercolors);
+		UI_FreeAssetList (ui_player_color_values, ui_numplayercolors);
+		UI_FreeAssetList (ui_player_color_imageNames, ui_numplayercolors);
 	}
 	ui_player_color_values = NULL;
 	ui_player_color_imageNames = NULL;
@@ -2750,27 +3694,27 @@ void UI_InitPlayerModelInfo (int *modelNum, int *skinNum)
 		return;
 	}
 		
-	Q_strncpyz(currentdirectory, sizeof(currentdirectory), Cvar_VariableString ("skin"));
+	Q_strncpyz (currentdirectory, sizeof(currentdirectory), Cvar_VariableString ("skin"));
 
-	if ( strchr( currentdirectory, '/' ) )
+	if ( strchr(currentdirectory, '/') )
 	{
-		Q_strncpyz(currentskin, sizeof(currentskin), strchr( currentdirectory, '/' ) + 1);
-		*strchr( currentdirectory, '/' ) = 0;
+		Q_strncpyz (currentskin, sizeof(currentskin), strchr( currentdirectory, '/' ) + 1);
+		*strchr(currentdirectory, '/') = 0;
 	}
-	else if ( strchr( currentdirectory, '\\' ) )
+	else if ( strchr(currentdirectory, '\\') )
 	{
-		Q_strncpyz(currentskin, sizeof(currentskin), strchr( currentdirectory, '\\' ) + 1);
-		*strchr( currentdirectory, '\\' ) = 0;
+		Q_strncpyz (currentskin, sizeof(currentskin), strchr( currentdirectory, '\\' ) + 1);
+		*strchr(currentdirectory, '\\') = 0;
 	}
 	else
 	{
-		Q_strncpyz(currentdirectory, sizeof(currentdirectory), "male");
-		Q_strncpyz(currentskin, sizeof(currentskin), "grunt");
+		Q_strncpyz (currentdirectory, sizeof(currentdirectory), "male");
+		Q_strncpyz (currentskin, sizeof(currentskin), "grunt");
 	}
 
-	qsort( ui_pmi, ui_numplayermodels, sizeof( ui_pmi[0] ), UI_PlayerModelCmpFunc );
+	qsort (ui_pmi, ui_numplayermodels, sizeof(ui_pmi[0]), UI_PlayerModelCmpFunc);
 
-	memset( ui_pmnames, 0, sizeof( ui_pmnames ) );
+	memset (ui_pmnames, 0, sizeof(ui_pmnames));
 	for (i = 0; i < ui_numplayermodels; i++)
 	{
 		ui_pmnames[i] = ui_pmi[i].displayname;
@@ -2812,11 +3756,11 @@ void UI_UpdatePlayerModelInfo (int mNum, int sNum)
 
 	Com_sprintf (scratch, sizeof(scratch), "players/%s/tris.md2", ui_pmi[mNum].directory);
 	ui_playermodel = R_RegisterModel (scratch);
-//	Q_strncpyz (ui_playerconfig_playermodelname, sizeof(ui_playerconfig_playermodelname), scratch);
+	Q_strncpyz (ui_playerconfig_playermodelname, sizeof(ui_playerconfig_playermodelname), scratch);
 
 	Com_sprintf (scratch, sizeof(scratch), "players/%s/%s.pcx", ui_pmi[mNum].directory, ui_pmi[mNum].skinDisplayNames[sNum]);
 	ui_playerskin = R_RegisterSkin (scratch);
-//	Q_strncpyz (ui_playerconfig_playerskinname, sizeof(ui_playerconfig_playerskinname), scratch);
+	Q_strncpyz (ui_playerconfig_playerskinname, sizeof(ui_playerconfig_playerskinname), scratch);
 
 	// show current weapon model (if any)
 	if (ui_currentweaponmodel && strlen(ui_currentweaponmodel))
@@ -2832,7 +3776,7 @@ void UI_UpdatePlayerModelInfo (int mNum, int sNum)
 		Com_sprintf (scratch, sizeof(scratch), "players/%s/weapon.md2", ui_pmi[mNum].directory);
 		ui_weaponmodel = R_RegisterModel (scratch);
 	}
-//	Q_strncpyz (ui_playerconfig_weaponmodelname, sizeof(ui_playerconfig_weaponmodelname), scratch);
+	Q_strncpyz (ui_playerconfig_weaponmodelname, sizeof(ui_playerconfig_weaponmodelname), scratch);
 }
 
 
@@ -2847,7 +3791,7 @@ void UI_UpdatePlayerSkinInfo (int mNum, int sNum)
 
 	Com_sprintf(scratch, sizeof(scratch), "players/%s/%s.pcx", ui_pmi[mNum].directory, ui_pmi[mNum].skinDisplayNames[sNum]);
 	ui_playerskin = R_RegisterSkin(scratch);
-//	Q_strncpyz (ui_playerconfig_playerskinname, sizeof(ui_playerconfig_playerskinname), scratch);
+	Q_strncpyz (ui_playerconfig_playerskinname, sizeof(ui_playerconfig_playerskinname), scratch);
 }
 
 

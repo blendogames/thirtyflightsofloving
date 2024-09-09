@@ -37,19 +37,19 @@ EFFECTS MENU
 =======================================================================
 */
 
-static menuframework_s	s_options_effects_menu;
-static menuseparator_s	s_options_effects_header;
-static menulist_s		s_options_effects_blood_box;
-static menulist_s		s_options_effects_oldexplosions_box;
-static menulist_s		s_options_effects_plasmaexplosound_box;
-static menulist_s		s_options_effects_itembob_box;
-static menuslider_s		s_options_effects_decal_slider;
-static menuslider_s		s_options_effects_particle_comp_slider;
-static menulist_s		s_options_effects_railtrail_box;
-static menuslider_s		s_options_effects_railcolor_slider[3];
-static menulist_s		s_options_effects_footstep_box;
-static menuaction_s		s_options_effects_defaults_action;
-static menuaction_s		s_options_effects_back_action;
+static menuFramework_s	s_options_effects_menu;
+static menuSeparator_s	s_options_effects_header;
+static menuPicker_s		s_options_effects_blood_box;
+static menuPicker_s		s_options_effects_oldexplosions_box;
+static menuPicker_s		s_options_effects_plasmaexplosound_box;
+static menuPicker_s		s_options_effects_itembob_box;
+static menuSlider_s		s_options_effects_decal_slider;
+static menuSlider_s		s_options_effects_particle_comp_slider;
+static menuPicker_s		s_options_effects_railtrail_box;
+static menuSlider_s		s_options_effects_railcolor_slider[3];
+static menuPicker_s		s_options_effects_footstep_box;
+static menuAction_s		s_options_effects_defaults_action;
+static menuAction_s		s_options_effects_back_action;
 
 //=======================================================================
 
@@ -346,11 +346,11 @@ void Menu_Options_Effects_Draw (void)
 
 const char *Menu_Options_Effects_Key (int key)
 {
-	return UI_DefaultMenuKey (&s_options_effects_menu, key);
+    return UI_DefaultMenuKey (&s_options_effects_menu, key);
 }
 
 void Menu_Options_Effects_f (void)
 {
 	Options_Effects_MenuInit ();
-	UI_PushMenu (Menu_Options_Effects_Draw, Menu_Options_Effects_Key);
+	UI_PushMenu (&s_options_effects_menu);
 }

@@ -124,12 +124,13 @@ void S_Init (void)
 {
 	cvar_t	*cv;
 
-	Com_Printf("\n------- Sound Initialization -------\n");
+	Com_Printf ("\n------- Sound Initialization -------\n");
 
 	cv = Cvar_Get ("s_initsound", "1", 0);
 	Cvar_SetDescription ("s_initsound", "Enables the initialization of the sound subsystem.");
-	if (!cv->value)
+	if ( !cv->integer ) {
 		Com_Printf ("not initializing.\n");
+	}
 	else
 	{
 		s_volume = Cvar_Get ("s_volume", "1.0", CVAR_ARCHIVE);
@@ -153,15 +154,15 @@ void S_Init (void)
 		Cvar_SetDescription ("s_musicvolume", "Sets the music volume (normalized).  0 = mute, 1.0 = max.");
 	#endif
 
-		Cmd_AddCommand("play", S_Play);
-		Cmd_AddCommand("stopsound", S_StopAllSounds);
-		Cmd_AddCommand("soundlist", S_SoundList);
-		Cmd_AddCommand("soundinfo", S_SoundInfo_f);
+		Cmd_AddCommand ("play", S_Play);
+		Cmd_AddCommand ("stopsound", S_StopAllSounds);
+		Cmd_AddCommand ("soundlist", S_SoundList);
+		Cmd_AddCommand ("soundinfo", S_SoundInfo_f);
 	#ifdef OGG_SUPPORT
-		Cmd_AddCommand("ogg_restart", S_OGG_Restart);
+		Cmd_AddCommand ("ogg_restart", S_OGG_Restart);
 	#endif
 
-		if (!SNDDMA_Init())
+		if ( !SNDDMA_Init() )
 			return;
 
 		S_InitScaletable ();
@@ -175,13 +176,13 @@ void S_Init (void)
 		Com_Printf ("sound sampling rate: %i\n", dma.speed);
 
 		S_StopAllSounds ();
-	}
 
 #ifdef OGG_SUPPORT
-	S_OGG_Init();
+		S_OGG_Init ();
 #endif
+	}
 
-	Com_Printf("------------------------------------\n");
+	Com_Printf ("------------------------------------\n");
 }
 
 
@@ -205,12 +206,12 @@ void S_Shutdown (void)
 
 	sound_started = 0;
 
-	Cmd_RemoveCommand("play");
-	Cmd_RemoveCommand("stopsound");
-	Cmd_RemoveCommand("soundlist");
-	Cmd_RemoveCommand("soundinfo");
+	Cmd_RemoveCommand ("play");
+	Cmd_RemoveCommand ("stopsound");
+	Cmd_RemoveCommand ("soundlist");
+	Cmd_RemoveCommand ("soundinfo");
 #ifdef OGG_SUPPORT
-	Cmd_RemoveCommand("ogg_restart");
+	Cmd_RemoveCommand ("ogg_restart");
 #endif
 
 	// free all sounds
@@ -635,7 +636,7 @@ void S_IssuePlaysound (playsound_t *ps)
 	S_FreePlaysound (ps);
 }
 
-struct sfx_s *S_RegisterSexedSound (entity_state_t *ent, char *base)
+struct sfx_s *S_RegisterSexedSound (centity_state_t *ent, char *base)
 {
 	int				n;
 	char			*p;
@@ -648,7 +649,7 @@ struct sfx_s *S_RegisterSexedSound (entity_state_t *ent, char *base)
 	// determine what model the client is using
 	model[0] = 0;
 
-	// Knightmare- BIG UGLY HACK for old connected to server using old protocol
+	// Knightmare- hack for old connected to server using old protocol
 	// Changed config strings require different parsing
 	if ( LegacyProtocol() )
 		n = OLD_CS_PLAYERSKINS + ent->number - 1;
@@ -893,7 +894,7 @@ void S_AddLoopSounds (void)
 	int			num;
 	float		dist_mult;
 	vec3_t		origin_v;	// Knightmare added
-	entity_state_t	*ent;
+	centity_state_t	*ent;
 
 	if (cl_paused->value)
 		return;
@@ -927,14 +928,10 @@ void S_AddLoopSounds (void)
 		ent = &cl_parse_entities[num];
 
 #ifdef NEW_ENTITY_STATE_MEMBERS
-	#ifdef LOOP_SOUND_ATTENUATION
-		if (ent->attenuation <= 0.0f || ent->attenuation == ATTN_STATIC)
+		if (ent->loop_attenuation <= 0.0f || ent->loop_attenuation == ATTN_STATIC)
 			dist_mult = SOUND_LOOPATTENUATE;
 		else
-			dist_mult = ent->attenuation * 0.0005;
-	#else
-		dist_mult = SOUND_LOOPATTENUATE;
-	#endif
+			dist_mult = ent->loop_attenuation * 0.0005;
 #else
 		dist_mult = SOUND_LOOPATTENUATE;
 #endif

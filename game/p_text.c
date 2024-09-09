@@ -307,20 +307,20 @@ void Do_Text_Display (edict_t *activator, int flags, char *message)
 		Q_strncpyz(filename, sizeof(filename), basedir->string);
 		if (strlen(gamedir->string))
 		{
-			Q_strncatz(filename, sizeof(filename), "\\");
+			Q_strncatz(filename, sizeof(filename), "/");
 			Q_strncatz(filename, sizeof(filename), gamedir->string);
 		}
 	*/
 		if (strlen(gamedir->string))
-			Com_sprintf (filename, sizeof(filename), "%s\\%s", basedir->string, gamedir->string);
+			Com_sprintf (filename, sizeof(filename), "%s/%s", basedir->string, gamedir->string);
 		else
-			Com_sprintf (filename, sizeof(filename), "%s\\baseq2", basedir->string);
+			Com_sprintf (filename, sizeof(filename), "%s/baseq2", basedir->string);
 
 		// First check for existence of text file in pak0.pak -> pak9.pak
 		in_pak = false;
 		for (i=0; i<=9 && !in_pak; i++)
 		{
-			Com_sprintf (pakfile, sizeof(pakfile), "%s\\pak%d.pak", filename, i);
+			Com_sprintf (pakfile, sizeof(pakfile), "%s/pak%d.pak", filename, i);
 			if (NULL != (f = fopen(pakfile, "rb")))
 			{
 				num = (int)fread(&pakheader,1,sizeof(pak_header_t),f);
@@ -363,9 +363,9 @@ void Do_Text_Display (edict_t *activator, int flags, char *message)
 		}
 		if (!in_pak)
 		{
-		//	strncat(filename, "\\maps\\");
+		//	strncat(filename, "/maps/");
 		//	strncat(filename, message);
-			Q_strncatz(filename, sizeof(filename), "\\maps\\");
+			Q_strncatz(filename, sizeof(filename), "/maps/");
 			Q_strncatz(filename, sizeof(filename), message);
 			f = fopen(filename,"rb");
 			if (!f)

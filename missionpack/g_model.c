@@ -9,7 +9,7 @@ Spawning a user defined model
 =============================
 */
 
-//ed - added all these spawnflags and stuff
+// Mappack - added all these spawnflags and stuff
 
 /*QUAKED model_spawn (1 0 0) (-8 -8 -8) (8 8 8) x TOGGLE NOT_IR PLAYER NO_MODEL ANIM_ONCE
 Spawns a user defined model, you can specify whether its solid, if so how big the box is, and apply nearly
@@ -35,6 +35,7 @@ Note: The animation flags override startframe and framenumbers settings you may 
 "usermodel"		The model to load (models/ is already coded)
 "startframe"	The starting frame : default 0
 "framenumbers"  The number of frames you want to display after startframe
+"spritetype"	Set this to 1 to make sprites render as angled and vertical
 "skinnum"		The skin number to use, default 0
 "health"		If non-zero and solidstate is 3 or 4 (solid), the entity will be shootable. When destroyed, it blows up with a no-damage explosion. 
 "solidstate" 
@@ -133,8 +134,8 @@ void model_spawn_use (edict_t *self, edict_t *other, edict_t *activator)
 			self->nextthink = level.time + FRAMETIME;
 		}
 		self->s.sound = self->noise_index;
-#ifdef LOOP_SOUND_ATTENUATION
-		self->s.attenuation = self->attenuation;
+#ifdef KMQUAKE2_ENGINE_MOD
+		self->s.loop_attenuation = self->attenuation;
 #endif
 	}
 	else	// we started active
@@ -277,11 +278,15 @@ void SP_model_spawn (edict_t *ent)
 		ent->s.frame = ent->startframe;
 	}
 
+	// Knightmare- support for angled sprites
+	if (st.spritetype == 1)
+		ent->s.renderfx |= RF_SPRITE_ORIENTED;
+
 	if (st.noise)
 		ent->noise_index = gi.soundindex  (st.noise);
 	//ent->s.sound = ent->noise_index;
-#ifdef LOOP_SOUND_ATTENUATION
-	ent->s.attenuation = ent->attenuation;
+#ifdef KMQUAKE2_ENGINE_MOD
+	ent->s.loop_attenuation = ent->attenuation;
 #endif
 
 	if (ent->skinnum) // Knightmare- selectable skin

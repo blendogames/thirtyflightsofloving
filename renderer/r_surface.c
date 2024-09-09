@@ -258,6 +258,21 @@ float R_SurfAlphaCalc (int flags)
 		return 1.0;
 }
 
+
+/*
+================
+R_WarpLightmaps_Enabled
+================
+*/
+qboolean R_WarpLightmaps_Enabled (void)
+{
+	if ( (r_worldmodel->bspFeatures & BSPF_WARPLIGHTMAPS) || (r_worldmodel->warpLightmapOverride && (r_warp_lighting->integer == 2)) )
+		return true;
+	
+	return false;
+}
+
+
 /*
 ================
 R_SurfIsDynamic
@@ -268,7 +283,8 @@ qboolean R_SurfIsDynamic (msurface_t *surf, int *mapNum)
 	int			map;
 	qboolean	is_dynamic = false;
 
-	if (!surf)	return false;
+	if ( !surf )
+		return false;
 	if (r_fullbright->integer != 0)
 		return false;
 
@@ -286,7 +302,7 @@ qboolean R_SurfIsDynamic (msurface_t *surf, int *mapNum)
 	{
 dynamic:
 #ifdef BATCH_LM_UPDATES
-		if (r_dynamic->integer || surf->cached_dlight) {
+		if ( r_dynamic->integer || surf->cached_dlight ) {
 #else
 		if (r_dynamic->integer) {
 #endif	// BATCH_LM_UPDATES
@@ -313,12 +329,16 @@ qboolean R_SurfIsLit (msurface_t *s)
 	if (r_fullbright->integer != 0)
 		return false;
 
-	if (s->flags & SURF_DRAWTURB)		
-		return (s->texinfo->flags & (SURF_TRANS33|SURF_TRANS66))
-				&& !(s->texinfo->flags & SURF_NOLIGHTENV) && r_warp_lighting->integer;
+	if (s->flags & SURF_DRAWTURB)
+	{
+		if ( R_WarpLightmaps_Enabled() )	// map has warp lightmaps
+			return ( s->isLightmapped && !(s->texinfo->flags & SURF_NOLIGHTENV) );
+		else
+			return ( (r_warp_lighting->integer > 0) && !(s->texinfo->flags & SURF_NOLIGHTENV) );				
+	}
 	else
-		return (s->texinfo->flags & (SURF_TRANS33|SURF_TRANS66))
-				&& !(s->texinfo->flags & SURF_NOLIGHTENV) && r_trans_lighting->integer;
+		return ( (s->texinfo->flags & (SURF_TRANS33|SURF_TRANS66))
+				&& !(s->texinfo->flags & SURF_NOLIGHTENV) && r_trans_lighting->integer );
 }
 
 /*
@@ -361,7 +381,7 @@ qboolean R_SurfsAreBatchable (msurface_t *s1, msurface_t *s2)
 			return false;
 
 #ifdef WARP_LIGHTMAPS
-		if (r_worldmodel->bspFeatures & BSPF_WARPLIGHTMAPS)
+		if ( R_WarpLightmaps_Enabled() )
 		{
 			// lightmapped surfaces can't be batched with non-lightmapped ones
 			if ( s1->isLightmapped != s2->isLightmapped )
@@ -376,15 +396,17 @@ qboolean R_SurfsAreBatchable (msurface_t *s1, msurface_t *s2)
 	else if ( (s1->texinfo->flags & (SURF_TRANS33|SURF_TRANS66))
 		&& (s2->texinfo->flags & (SURF_TRANS33|SURF_TRANS66)) )
 	{
-		if (r_trans_lighting->integer == 2
-			&& ((R_SurfIsLit(s1) && s1->lightmaptexturenum) || (R_SurfIsLit(s2) && s2->lightmaptexturenum)))
-			return false;
 		if (R_SurfIsLit(s1) != R_SurfIsLit(s2))
 			return false;
+		if (r_trans_lighting->integer == 2) {
+			if ( (R_SurfIsLit(s1) && s1->lightmaptexturenum) || (R_SurfIsLit(s2) && s2->lightmaptexturenum) )
+		//	if ( (R_SurfIsLit(s1) && R_SurfIsLit(s2)) && (s1->lightmaptexturenum != s2->lightmaptexturenum) ) // lightmap image must be same
+			return false;
+		}
 		// must be single pass to be batchable
 		if ( r_glows->integer
-			&& ((R_TextureAnimationGlow(s1) != glMedia.notexture)
-				|| (R_TextureAnimationGlow(s2) != glMedia.notexture)) )
+			&& ((R_TextureAnimationGlow(s1) != glMedia.noTexture)
+				|| (R_TextureAnimationGlow(s2) != glMedia.noTexture)) )
 			return false;
 		if (R_SurfHasEnvMap(s1) || R_SurfHasEnvMap(s2))
 			return false;
@@ -399,7 +421,7 @@ qboolean R_SurfsAreBatchable (msurface_t *s1, msurface_t *s2)
 		if (s1->lightmaptexturenum != s2->lightmaptexturenum)	// lightmap image must be same
 			return false;
 #ifndef BATCH_LM_UPDATES
-		if (R_SurfIsDynamic(s1, NULL) || R_SurfIsDynamic(s2, NULL)) // can't be dynamically list
+		if (R_SurfIsDynamic(s1, NULL) || R_SurfIsDynamic(s2, NULL)) // can't be dynamically lit
 			return false;
 #endif	// BATCH_LM_UPDATES
 		if ((s1->texinfo->flags & SURF_ALPHATEST) != (s2->texinfo->flags & SURF_ALPHATEST))
@@ -434,7 +456,7 @@ void RB_RenderGLPoly (msurface_t *surf, qboolean light)
 	if (rb_vertex == 0 || rb_index == 0) // nothing to render
 		return;
 
-	glowPass = ( r_glows->integer && (glow != glMedia.notexture) && light );
+	glowPass = ( r_glows->integer && (glow != glMedia.noTexture) && light );
 	envMap = R_SurfHasEnvMap (surf);
 	causticPass = ( r_caustics->integer && (surf->flags & SURF_MASK_CAUSTIC) && light );
 
@@ -560,23 +582,21 @@ void R_DrawAlphaSurface (msurface_t *s, entity_t *e)
 	GL_BlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	// disable depth testing for all bmodel surfs except solid alphas
-	if ( s->entity && !((s->flags & SURF_TRANS33) && (s->flags & SURF_TRANS66)) )
+	if ( e && !((s->flags & SURF_TRANS33) && (s->flags & SURF_TRANS66)) )
 		GL_DepthMask (false);
 	else
 		GL_DepthMask (true);
 
 	// moving trans brushes - spaz
-	if (s->entity)
-		R_RotateForEntity (s->entity, true);
+	if (e)
+		R_RotateForEntity (e, true);
 
 	light = R_SurfIsLit(s);
-//	solidAlpha = ( (s->texinfo->flags & SURF_TRANS33|SURF_TRANS66) == SURF_TRANS33|SURF_TRANS66 );
-//	envMap = ( (s->flags & SURF_ENVMAP) && r_glass_envmaps->integer && !solidAlpha);
 
 	if (s->flags & SURF_DRAWTURB)
 	{	
 #ifdef WARP_LIGHTMAPS
-		if (s->isLightmapped && (r_worldmodel->bspFeatures & BSPF_WARPLIGHTMAPS)) {
+		if ( s->isLightmapped && R_WarpLightmaps_Enabled() && !(s->texinfo->flags & SURF_NOLIGHTENV) ) {
 			GL_EnableMultitexture (true);
 			R_SetLightingMode (RF_TRANSLUCENT);
 			R_DrawWarpSurface (s, R_SurfAlphaCalc(s->texinfo->flags), !R_SurfsAreBatchable (s, s->texturechain));
@@ -663,7 +683,7 @@ void R_UpdateSurfaceLightmap (msurface_t *surf)
 #endif	// WARP_LIGHTMAPS
 		return;
 
-	if (R_SurfIsDynamic (surf, &map))
+	if ( R_SurfIsDynamic (surf, &map) )
 	{
 		unsigned	*base = gl_lms.lightmap_update[surf->lightmaptexturenum];
 		rect_t		*rect = &gl_lms.lightrect[surf->lightmaptexturenum];
@@ -699,7 +719,7 @@ void R_RebuildLightmaps (void)
 
 	for (i=1; i<gl_lms.current_lightmap_texture; i++)
 	{
-		if (!gl_lms.modified[i])
+		if ( !gl_lms.modified[i] )
 			continue;
 
 		if ( !glConfig.newLMFormat )
@@ -824,7 +844,7 @@ static void RB_DrawEnvMap (void)
 {
 	qboolean	previousBlend = false;
 
-	GL_MBind (0, glMedia.envmappic->texnum);
+	GL_MBind (0, glMedia.envMapTexture->texnum);
 	GL_BlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	if (!glState.blend)	GL_Enable (GL_BLEND);
 	else				previousBlend = true;
@@ -874,11 +894,11 @@ RB_CausticForSurface
 image_t *RB_CausticForSurface (msurface_t *surf)
 {
 	if (surf->flags & SURF_UNDERLAVA)
-		return glMedia.causticlavapic;
+		return glMedia.causticLavaTexture;
 	else if (surf->flags & SURF_UNDERSLIME)
-		return glMedia.causticslimepic;
+		return glMedia.causticSlimeTexture;
 	else
-		return glMedia.causticwaterpic;
+		return glMedia.causticWaterTexture;
 }
 
 
@@ -976,8 +996,8 @@ static void RB_RenderLightmappedSurface (msurface_t *surf)
 	if (rb_vertex == 0 || rb_index == 0) // nothing to render
 		return;
 
-	glowLayer = ( r_glows->integer && (glow != glMedia.notexture) && (glConfig.max_texunits > 2) );
-	glowPass = ( r_glows->integer && (glow != glMedia.notexture) && !glowLayer );
+	glowLayer = ( r_glows->integer && (glow != glMedia.noTexture) && (glConfig.max_texunits > 2) );
+	glowPass = ( r_glows->integer && (glow != glMedia.noTexture) && !glowLayer );
 	envMap = R_SurfHasEnvMap (surf);
 	causticPass = ( r_caustics->integer && !(surf->texinfo->flags & SURF_ALPHATEST)
 		&& (surf->flags & SURF_MASK_CAUSTIC) );
@@ -1021,7 +1041,7 @@ static void RB_RenderLightmappedSurface (msurface_t *surf)
 
 	GL_MBind (0, image->texnum);
 	if ( (r_fullbright->integer != 0) || (surf->texinfo->flags & SURF_NOLIGHTENV) )
-		GL_MBind (1, glMedia.whitetexture->texnum);
+		GL_MBind (1, glMedia.whiteTexture->texnum);
 	else
 		GL_MBind (1, glState.lightmap_textures + lmtex);
 	
@@ -1334,7 +1354,7 @@ void R_DrawInlineBModel (entity_t *e, int causticflag)
 				else	// warp surface
 				{ 
 #ifdef WARP_LIGHTMAPS
-					if (psurf->isLightmapped && (r_worldmodel->bspFeatures & BSPF_WARPLIGHTMAPS))
+					if ( psurf->isLightmapped && R_WarpLightmaps_Enabled() && !(psurf->texinfo->flags & SURF_NOLIGHTENV) )
 					{
 						psurf->texturechain = image->warp_lm_texturechain;
 						image->warp_lm_texturechain = psurf;
@@ -1408,8 +1428,7 @@ void R_DrawBrushModel (entity_t *e)
 	if (R_CullBox (mins, maxs))
 		return;
 
-	qglColor3f (1,1,1);
-	memset (gl_lms.lightmap_surfaces, 0, sizeof(gl_lms.lightmap_surfaces));
+	qglColor3f (1.0f, 1.0f, 1.0f);
 
 	VectorSubtract (r_newrefdef.vieworg, e->origin, modelorg);
 	if (rotated)
@@ -1527,7 +1546,7 @@ void R_AddWorldSurface (msurface_t *surf)
 		else	// warp surface
 		{
 #ifdef WARP_LIGHTMAPS
-			if (surf->isLightmapped && (r_worldmodel->bspFeatures & BSPF_WARPLIGHTMAPS))
+			if ( surf->isLightmapped && R_WarpLightmaps_Enabled() && !(surf->texinfo->flags & SURF_NOLIGHTENV) )
 			{
 				surf->texturechain = image->warp_lm_texturechain;
 				image->warp_lm_texturechain = surf;
@@ -1678,7 +1697,6 @@ void R_DrawWorld (void)
 	glState.currenttextures[0] = glState.currenttextures[1] = -1;
 
 	qglColor3f (1,1,1);
-	memset (gl_lms.lightmap_surfaces, 0, sizeof(gl_lms.lightmap_surfaces));
 	R_ClearSkyBox ();
 
 	R_RecursiveWorldNode (r_worldmodel->nodes);

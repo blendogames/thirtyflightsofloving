@@ -21,20 +21,20 @@ removeip <ip>
 The ip address is specified in dot format, and any unspecified digits will match any value,
 so you can specify an entire class C network with "addip 192.246.40".
 
-Removeip will only remove an address specified exactly the same way.  You cannot addip a 
+Removeip will only remove an address specified exactly the same way.  You cannot addip a
 subnet, then removeip a single host.
 
 listip
 Prints the current list of filters.
 
 writeip
-Dumps "addip <ip>" commands to listip.cfg so it can be execed at a later date.  The filter 
+Dumps "addip <ip>" commands to listip.cfg so it can be execed at a later date.  The filter
 lists are not saved and restored by default, because I believe it would cause too much confusion.
 
 filterban <0 or 1>
-If 1 (the default), then ip addresses matching the current list will be prohibited from entering 
+If 1 (the default), then ip addresses matching the current list will be prohibited from entering
 the game (this is the default setting).
-If 0, then only addresses matching the list will be allowed.  This lets you easily set up a 
+If 0, then only addresses matching the list will be allowed.  This lets you easily set up a
 private game, or a game that only allows players from your local network.
 
 
@@ -64,13 +64,13 @@ static qboolean StringToFilter(char *s, ipfilter_t *f)
 	int		j;
 	byte	b[4];
 	byte	m[4];
-	
+
 	for (i = 0; i < 4;  i++)
 	{
 		b[i] = 0;
 		m[i] = 0;
 	}
-	
+
 	for (i = 0; i < 4; i++)
 	{
 		if ((*s < '0') || (*s > '9'))
@@ -78,7 +78,7 @@ static qboolean StringToFilter(char *s, ipfilter_t *f)
 			gi.cprintf(NULL, PRINT_HIGH, "Bad filter address: %s\n", s);
 			return false;
 		}
-		
+
 		j = 0;
 		while ((*s >= '0') && (*s <= '9'))
 		{
@@ -95,10 +95,10 @@ static qboolean StringToFilter(char *s, ipfilter_t *f)
 
 		s++;
 	}
-	
+
 	f->mask = *(unsigned *)m;
 	f->compare = *(unsigned *)b;
-	
+
 	return true;
 }
 
@@ -128,7 +128,7 @@ qboolean SV_FilterPacket(char *from)
 			break;
 		i++, p++;
 	}
-	
+
 	in = *(unsigned *)m;
 	for (i = 0; i < numipfilters; i++)
 	{
@@ -148,7 +148,7 @@ SVCmd_AddIP_f
 void SVCmd_AddIP_f(void)
 {
 	int i;
-	
+
 	if (gi.argc() < 3)
 	{
 		gi.cprintf(NULL, PRINT_HIGH, "Usage:  addip <ip-mask>\n");
@@ -170,7 +170,7 @@ void SVCmd_AddIP_f(void)
 		}
 		numipfilters++;
 	}
-	
+
 	if (!StringToFilter(gi.argv(2), &ipfilters[i]))
 		ipfilters[i].compare = 0xffffffff;
 }
@@ -234,20 +234,22 @@ void SVCmd_ListIP_f(void)
 SVCmd_WriteIP_f
 =================
 */
-void SVCmd_WriteIP_f(void)
+void SVCmd_WriteIP_f (void)
 {
 	FILE	*f;
-	cvar_t	*game;
 	char	name[MAX_OSPATH];
 	byte	b[4];
 	int		i;
+/*	cvar_t	*game;
 
 	game = gi.cvar("game", "", 0);
 
 	if (!*game->string)
 		Com_sprintf(name, sizeof(name), "%s/listip.cfg", GAMEVERSION);
 	else
-		Com_sprintf(name, sizeof(name), "%s/listip.cfg", game->string);
+		Com_sprintf(name, sizeof(name), "%s/listip.cfg", game->string); */
+	// Knightmare- use SavegameDir() instead for compatibility on all platforms
+	Com_sprintf(name, sizeof(name), "%s/listip.cfg", SavegameDir());
 
 	gi.cprintf(NULL, PRINT_HIGH, "Writing %s.\n", name);
 
@@ -257,15 +259,15 @@ void SVCmd_WriteIP_f(void)
 		gi.cprintf(NULL, PRINT_HIGH, "Couldn't open %s\n", name);
 		return;
 	}
-	
-	fprintf(f, "set filterban %d\n", (int)filterban->value);
+
+	fprintf (f, "set filterban %d\n", (int)filterban->value);
 
 	for (i = 0; i < numipfilters; i++)
 	{
 		*(unsigned *)b = ipfilters[i].compare;
 		fprintf(f, "sv addip %i.%i.%i.%i\n", b[0], b[1], b[2], b[3]);
 	}
-	
+
 	fclose(f);
 }
 
@@ -478,7 +480,7 @@ void SVCmd_ListBots_f(void)
 
 		if (!ent->isabot)
 			continue;
- 
+
 		gi.dprintf("%3d %-16.16s %03d [%d:%d:%d]\n", i,
 					ent->client->pers.netname,
 					ent->client->resp.score,
@@ -495,14 +497,14 @@ void SVCmd_ListBots_f(void)
 SVCmd_SaveChain_f
 =================
 */
-void SVCmd_SaveChain_f(void)
+void SVCmd_SaveChain_f (void)
 {
 	unsigned int	size;
 	char			name[256];
 	FILE			*fpout;
 
 //CW++
-	cvar_t	*game;
+//	cvar_t	*game;
 //CW--
 
 	if (!(int)chedit->value)
@@ -512,13 +514,16 @@ void SVCmd_SaveChain_f(void)
 	}
 
 //CW++
-	game = gi.cvar("game", "", 0);
+/*	game = gi.cvar("game", "", 0);
 	if (!*game->string)
 		Com_sprintf(name, sizeof(name), "%s/botroutes/%s.chn", GAMEVERSION, level.mapname);
 	else
-		Com_sprintf(name, sizeof(name), "%s/botroutes/%s.chn", game->string, level.mapname);
+		Com_sprintf(name, sizeof(name), "%s/botroutes/%s.chn", game->string, level.mapname); */
+	// Knightmare- use SavegameDir() instead
+	Com_sprintf(name, sizeof(name), "%s/botroutes/%s.chn", SavegameDir(), level.mapname);
 //CW--
 
+	CreatePath (name);
 	fpout = fopen(name, "wb");
 	if (fpout == NULL)
 		gi.cprintf(NULL, PRINT_HIGH, "Can't open %s\n", name);

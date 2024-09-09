@@ -119,6 +119,8 @@ void SP_misc_eastertank (edict_t *self);
 void SP_misc_easterchick (edict_t *self);
 void SP_misc_easterchick2 (edict_t *self);
 
+void SP_misc_flare (edict_t *self);
+
 void SP_monster_berserk (edict_t *self);
 void SP_monster_gladiator (edict_t *self);
 void SP_monster_gunner (edict_t *self);
@@ -354,6 +356,8 @@ spawn_t	spawns[] = {
 	{"misc_easterchick", SP_misc_easterchick},
 	{"misc_easterchick2", SP_misc_easterchick2},
 
+	{"misc_flare", SP_misc_flare},
+
 	{"monster_berserk", SP_monster_berserk},
 	{"monster_gladiator", SP_monster_gladiator},
 	{"monster_gunner", SP_monster_gunner},
@@ -478,6 +482,58 @@ spawn_t	spawns[] = {
 // end Lazarus
 	{NULL, NULL}
 };
+
+// Knightmare- sound precache functions
+void monster_berserk_soundcache (edict_t *self);
+void monster_boss2_soundcache (edict_t *self);
+void monster_jorg_soundcache (edict_t *self);
+void monster_makron_soundcache (edict_t *self);
+void monster_brain_soundcache (edict_t *self);
+void monster_chick_soundcache (edict_t *self);
+void monster_flipper_soundcache (edict_t *self);
+void monster_floater_soundcache (edict_t *self);
+void monster_flyer_soundcache (edict_t *self);
+void monster_gladiator_soundcache (edict_t *self);
+void monster_gunner_soundcache (edict_t *self);
+void monster_hover_soundcache (edict_t *self);
+void monster_infantry_soundcache (edict_t *self);
+void misc_insane_soundcache (edict_t *self);
+void monster_medic_soundcache (edict_t *self);
+void monster_mutant_soundcache (edict_t *self);
+void monster_parasite_soundcache (edict_t *self);
+void monster_soldier_x_soundcache (edict_t *self);
+void monster_supertank_soundcache (edict_t *self);
+void monster_tank_soundcache (edict_t *self);
+
+// Knightmare- sound precache table
+soundcache_t	soundcaches[] = {
+	{"monster_berserk", monster_berserk_soundcache},
+	{"monster_boss2", monster_boss2_soundcache},
+	{"monster_jorg", monster_jorg_soundcache},
+	{"monster_makron", monster_makron_soundcache},
+	{"monster_brain", monster_brain_soundcache},
+	{"monster_chick", monster_chick_soundcache},
+	{"monster_flipper", monster_flipper_soundcache},
+	{"monster_floater", monster_floater_soundcache},
+	{"monster_flyer", monster_flyer_soundcache},
+	{"monster_gladiator", monster_gladiator_soundcache},
+	{"monster_gunner", monster_gunner_soundcache},
+	{"monster_hover", monster_hover_soundcache},
+	{"monster_infantry", monster_infantry_soundcache},
+	{"misc_insane", misc_insane_soundcache},
+	{"monster_medic", monster_medic_soundcache},
+	{"monster_mutant", monster_mutant_soundcache},
+	{"monster_parasite", monster_parasite_soundcache},
+	{"monster_soldier_light", monster_soldier_x_soundcache},
+	{"monster_soldier", monster_soldier_x_soundcache},
+	{"monster_soldier_ss", monster_soldier_x_soundcache},
+	{"monster_supertank",  monster_supertank_soundcache},
+	{"monster_tank", monster_tank_soundcache},
+	{"monster_tank_commander", monster_tank_soundcache},
+
+	{NULL, NULL}
+};
+// end Knightmare
 
 // Knightmare- global pointer for the entity alias script
 // The file should be loaded into memory, because we can't
@@ -608,7 +664,7 @@ void ED_ParseField (char *key, char *value, edict_t *ent)
 
 	for (f=fields ; f->name ; f++)
 	{
-		if (!(f->flags & FFL_NOSPAWN) && !Q_stricmp(f->name, key))
+		if ( !(f->flags & FFL_NOSPAWN) && !Q_stricmp(f->name, key) )
 		{	// found it
 			if (f->flags & FFL_SPAWNTEMP)
 				b = (byte *)&st;
@@ -649,6 +705,45 @@ void ED_ParseField (char *key, char *value, edict_t *ent)
 	}
 	gi.dprintf ("%s is not a field\n", key);
 }
+
+
+// Knightmare added
+/*
+===============
+ED_SetDefaultFields
+
+Sets the default binary values in an edict
+===============
+*/
+void ED_SetDefaultFields (edict_t *ent)
+{
+	field_t	*f;
+	byte	*b;
+	
+	for (f=fields ; f->name ; f++)
+	{
+		if (f->flags & FFL_DEFAULT_NEG)
+		{
+			if (f->flags & FFL_SPAWNTEMP)
+				b = (byte *)&st;
+			else
+				b = (byte *)ent;
+				
+			if (f->type == F_LSTRING)
+				*(char **)(b+f->ofs) = ED_NewString ("-1");
+			else if ( (f->type == F_VECTOR) || (f->type == F_ANGLEHACK) ) {
+				((float *)(b+f->ofs))[0] = -1.0f;
+				((float *)(b+f->ofs))[1] = -1.0f;
+				((float *)(b+f->ofs))[2] = -1.0f;
+			}
+			else if (f->type == F_INT)
+				*(int *)(b+f->ofs) = -1;
+			else if (f->type == F_FLOAT)
+				*(float *)(b+f->ofs) = -1.0f;
+		}
+	}
+}
+// end Knightmare
 
 /*
 ==============================================================================
@@ -840,7 +935,7 @@ qboolean ED_ParseEntityAlias (char *data, edict_t *ent)
 	search_data = data;  // copy entity data postion
 	// go through all the dictionary pairs looking for the classname
 	while (1)
-	{	//parse keyname
+	{	// parse keyname
 		search_token = COM_Parse (&search_data);
 		if (!search_data)
 			gi.error ("ED_ParseEntityAlias: end of entity data without closing brace");
@@ -881,7 +976,7 @@ qboolean ED_ParseEntityAlias (char *data, edict_t *ent)
 			}
 			// matching classname must be outside braces
 			if (!strcmp(search_token, entclassname) && (braceLevel == 0)) {
-				//gi.dprintf ("Alias for %s found in alias script file.\n", search_token);
+			//	gi.dprintf ("Alias for %s found in alias script file.\n", search_token);
 				alias_found = true;
 				break;
 			}
@@ -947,11 +1042,14 @@ char *ED_ParseEdict (char *data, edict_t *ent)
 	qboolean	init;
 	char		keyname[256];
 	char		*com_token;
-	//Knightmare added
+	// Knightmare added
 	qboolean	alias_loaded = false;
 
 	init = false;
 	memset (&st, 0, sizeof(st));
+
+	// Knightmare- set field defaults
+	ED_SetDefaultFields (ent);
 
 	// Knightmare- look for and load an alias for this ent
 	alias_loaded = ED_ParseEntityAlias (data, ent);
@@ -1010,6 +1108,105 @@ char *ED_ParseEdict (char *data, edict_t *ent)
 
 
 /*
+===========
+G_PrecachePlayerInventories
+
+Precaches inventory for all players transitioning
+across maps in SP and coop.
+============
+*/
+void G_PrecachePlayerInventories (void)
+{
+	int			i, j;
+	gclient_t	*client = NULL;
+	gitem_t		*item = NULL;
+
+	if (deathmatch->value)	// not needed in DM/CTF
+		return;
+
+	for (i = 0; i < game.maxclients; i++)
+	{
+		if (&game.clients[i] != NULL)
+		{
+		//	gi.dprintf ("PrecachePlayerInventories(): precaching for client %i\n", i);
+			client = &game.clients[i];
+			for (j = 0; j < game.num_items; j++)
+			{
+				if (client->pers.inventory[j] > 0) {
+					item = &itemlist[j];
+					if (item != NULL) {
+					//	gi.dprintf ("PrecachePlayerInventories(): precaching item %i: %s\n", j, item->classname);
+						PrecacheItem (item);
+					}
+				}
+			}
+		}
+	}
+}
+
+
+/*
+================
+G_FixTeams
+
+Borrowed from Rogue source
+================
+*/
+void G_FixTeams (void)
+{
+	edict_t	*e, *e2, *chain;
+	int		i, j;
+	int		c, c2;
+
+	c = 0;
+	c2 = 0;
+	for (i=1, e=g_edicts+i ; i < globals.num_edicts ; i++,e++)
+	{
+		if (!e->inuse)
+			continue;
+		if (!e->team)
+			continue;
+		// Lazarus- ignore bmodel spawner (its team isn't used)
+		if (e->classname && !Q_stricmp(e->classname, "target_bmodel_spawner"))
+			continue; 
+		if (!strcmp(e->classname, "func_train"))
+		{
+			if (e->flags & FL_TEAMSLAVE)
+			{
+				chain = e;
+				e->teammaster = e;
+				e->teamchain = NULL;
+				e->flags &= ~FL_TEAMSLAVE;
+				c++;
+				c2++;
+				for (j=1, e2=g_edicts+j ; j < globals.num_edicts ; j++,e2++)
+				{
+					if (e2 == e)
+						continue;
+					if (!e2->inuse)
+						continue;
+					if (!e2->team)
+						continue;
+					if (!strcmp(e->team, e2->team))
+					{
+						c2++;
+						chain->teamchain = e2;
+						e2->teammaster = e;
+						e2->teamchain = NULL;
+						chain = e2;
+						e2->flags |= FL_TEAMSLAVE;
+						e2->movetype = MOVETYPE_PUSH;
+						e2->speed = e->speed;
+					}
+				}
+			}
+		}
+	}
+	gi.dprintf ("%i teams repaired\n", c);
+}
+
+
+/*
 ================
 G_FindTeams
 
@@ -1036,11 +1233,11 @@ void G_FindTeams (void)
 		if (e->flags & FL_TEAMSLAVE)
 			continue;
 		// Lazarus: some entities may have psuedo-teams that shouldn't be handled here
-		if (e->classname && !Q_stricmp(e->classname,"target_change"))
+		if (e->classname && !Q_stricmp(e->classname, "target_change"))
 			continue;
-		if (e->classname && !Q_stricmp(e->classname,"target_bmodel_spawner"))
+		if (e->classname && !Q_stricmp(e->classname, "target_bmodel_spawner"))
 			continue;
-		if (e->classname && !Q_stricmp(e->classname,"target_clone"))
+		if (e->classname && !Q_stricmp(e->classname, "target_clone"))
 			continue;
 		chain = e;
 		e->teammaster = e;
@@ -1065,7 +1262,12 @@ void G_FindTeams (void)
 		}
 	}
 
-	if(level.time < 2)
+	// Knightmare- set up Rogue train teams
+	if (level.maptype == MAPTYPE_ROGUE) {
+		G_FixTeams ();
+	}
+
+	if (level.time < 2)
 		gi.dprintf ("%i teams with %i entities\n", c, c2);
 }
 
@@ -1099,7 +1301,7 @@ void LoadTransitionEnts (void)
 			}
 		}
 		trans_ent_filename (t_file, sizeof(t_file));
-		f = fopen(t_file,"rb");
+		f = fopen(t_file, "rb");
 		if (!f)
 			gi.error("LoadTransitionEnts: Cannot open %s\n", t_file);
 		else
@@ -1120,7 +1322,7 @@ void LoadTransitionEnts (void)
 					}
 					else if (ent->deadflag == DEAD_DEAD)
 					{
-						ent->health = min(ent->health,-1);
+						ent->health = min(ent->health, -1);
 					}
 				}
 				VectorAdd (ent->s.origin, v_spawn, ent->s.origin);
@@ -1233,7 +1435,7 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 	// end Knightmare
 
 	// Knightamre- load the entity alias script file
-	LoadAliasData();
+	LoadAliasData ();
 	//gi.dprintf ("Size of alias data: %i\n", alias_data_size);
 
 // parse ents
@@ -1363,14 +1565,14 @@ removeflags:
 	PlayerTrail_Init ();
 
 //ZOID
-	CTFSpawn();
+	CTFSpawn ();
 	// Knightmare added
 	if (deathmatch->value && !ctf->value)
 		CTFSetupTechSpawn ();	
 //ZOID
 
 	if (!deathmatch->value)
-		SetupHintPaths();
+		SetupHintPaths ();
 
 	for (i=1, ent=g_edicts+i; i < globals.num_edicts; i++, ent++)
 	{
@@ -1428,8 +1630,48 @@ removeflags:
 
 	actor_files ();
 
+	// Knightmare- precache transitioning player inventories here
+	// Fixes lag when changing weapons after level transition
+	G_PrecachePlayerInventories ();
 }
 
+
+//===================================================================
+
+// Knightmare added
+/*
+==============
+G_SoundcacheEntities
+
+Reloads static cached sounds for entities using spawns table
+==============
+*/
+void G_SoundcacheEntities (void)
+{
+	int		i;
+	edict_t	*ent = NULL;
+	soundcache_t	*s = NULL;
+
+	ent = &g_edicts[0];
+	for (i = 0; i < globals.num_edicts; i++, ent++)
+	{
+		if (!ent->inuse)
+			continue;
+
+		// check normal spawn functions
+		for (s=soundcaches; s->name; s++)
+		{
+			if ( !strcmp(s->name, ent->classname) )
+			{	// found it
+				if (s->soundcache != NULL) {
+					s->soundcache (ent);
+				}
+				break;
+			}
+		}
+	}
+}
+// end Knightmare
 
 //===================================================================
 
@@ -1592,7 +1834,7 @@ char *dm_statusbar =
 "num 3 14 "
 
 // tech
-"yb -129 "
+"yb -75 "
 "if 26 "
   "xr -26 "
   "pic 26 "
@@ -1677,6 +1919,27 @@ void SP_worldspawn (edict_t *ent)
 
 	gi.configstring (CS_SKYAXIS, va("%f %f %f",
 		st.skyaxis[0], st.skyaxis[1], st.skyaxis[2]) );
+
+	// Knightmare- configstrings added for DK-style clouds support
+#ifdef KMQUAKE2_ENGINE_MOD
+	gi.configstring (CS_SKYDISTANCE, va("%f", st.skydistance) );
+
+	if (st.cloudname && st.cloudname[0])
+		gi.configstring (CS_CLOUDNAME, st.cloudname);
+	else
+		gi.configstring (CS_CLOUDNAME, "");
+
+	gi.configstring (CS_CLOUDLIGHTFREQ, va("%f", st.lightningfreq) );
+
+	gi.configstring (CS_CLOUDDIR, va("%f %f", st.cloudxdir, st.cloudydir) );
+
+	gi.configstring (CS_CLOUDTILE, va("%f %f %f", st.cloud1tile, st.cloud2tile, st.cloud3tile) );
+
+	gi.configstring (CS_CLOUDSPEED, va("%f %f %f", st.cloud1speed, st.cloud2speed, st.cloud3speed) );
+
+	gi.configstring (CS_CLOUDALPHA, va("%f %f %f", st.cloud1alpha, st.cloud2alpha, st.cloud3alpha) );
+#endif	// KMQUAKE2_ENGINE_MOD
+	// end DK-style clouds support
 
 	// Knightmare- if a named soundtrack is specified, play it instead of from CD
 	if (ent->musictrack && strlen(ent->musictrack))
@@ -1843,24 +2106,24 @@ void SP_worldspawn (edict_t *ent)
 	gi.soundindex ("mud/wade_mud1.wav");
 	gi.soundindex ("mud/wade_mud2.wav");
 
-	Lights();
+	Lights ();
 
 	// Fog clipping - if "fogclip" is non-zero, force gl_clear to a good
 	// value for obscuring HOM with fog... "good" is driver-dependent
 	if (ent->fogclip)
 	{
-		if(gl_driver && !Q_stricmp(gl_driver->string,"3dfxgl"))
-			gi.cvar_forceset("gl_clear", "0");
+		if ( gl_driver && !Q_stricmp(gl_driver->string, "3dfxgl") )
+			gi.cvar_forceset (GL_CLEAR_CVAR, "0");
 		else
-			gi.cvar_forceset("gl_clear", "1");
+			gi.cvar_forceset (GL_CLEAR_CVAR, "1");
 	}
 
 	// cvar overrides for effects flags:
-	if(alert_sounds->value)
+	if (alert_sounds->value)
 		world->effects |= FX_WORLDSPAWN_ALERTSOUNDS;
-	if(corpse_fade->value)
+	if (corpse_fade->value)
 		world->effects |= FX_WORLDSPAWN_CORPSEFADE;
-	if(jump_kick->value)
+	if (jump_kick->value)
 		world->effects |= FX_WORLDSPAWN_JUMPKICK;
 }
 
@@ -1868,7 +2131,7 @@ void SP_worldspawn (edict_t *ent)
 
 int nohud = 0;
 
-void Hud_On()
+void Hud_On (void)
 {
 	if (deathmatch->value)
 		gi.configstring (CS_STATUSBAR, dm_statusbar);
@@ -1877,18 +2140,18 @@ void Hud_On()
 	nohud = 0;
 }
 
-void Hud_Off()
+void Hud_Off (void)
 {
 	gi.configstring (CS_STATUSBAR, NULL);
 	nohud = 1;
 }
 
-void Cmd_ToggleHud ()
+void Cmd_ToggleHud (void)
 {
 	if (deathmatch->value)
 		return;
-  if (nohud)
-		Hud_On();
+	if (nohud)
+		Hud_On ();
 	else
-		Hud_Off();
+		Hud_Off ();
 }

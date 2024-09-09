@@ -29,12 +29,12 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 cvar_t	*mega_gibs;			 // whether to spawn extra gibs, default to 0
 cvar_t	*player_gib_health;  // what health level to gib players at
 cvar_t	*allow_player_use_abandoned_turret; //whether to allow player to use turrets in exisiting maps
-cvar_t	*adjust_train_corners; //whether to subtract (1,1,1) from train path corners to fix misalignments
+cvar_t	*adjust_train_corners; // whether to subtract (1,1,1) from train path corners to fix misalignments
 
-cvar_t	*add_velocity_throw;	//whether to add player's velocity to thrown objects
+cvar_t	*add_velocity_throw;	// whether to add player's velocity to thrown objects
 
-cvar_t	*falling_armor_damage; //whether player's armor absorbs damage from falling
-cvar_t	*player_jump_sounds; //whether to play that STUPID grunting sound when the player jumps
+cvar_t	*falling_armor_damage; // whether player's armor absorbs damage from falling
+cvar_t	*player_jump_sounds; // whether to play that STUPID grunting sound when the player jumps
 
 // Server-side speed control stuff
 cvar_t	*player_max_speed;
@@ -48,7 +48,7 @@ cvar_t	*use_vwep;
 cvar_t	*sk_blaster_damage;
 cvar_t	*sk_blaster_damage_dm;
 cvar_t	*sk_blaster_speed;
-cvar_t	*sk_blaster_color;  //blaster color- 1=yellow, 2=green, 3=blue, 4=red
+cvar_t	*sk_blaster_color;  // blaster color- 1=yellow, 2=green, 3=blue, 4=red
 
 cvar_t	*sk_shotgun_damage;
 cvar_t	*sk_shotgun_count;
@@ -85,7 +85,7 @@ cvar_t	*sk_rocket_speed;
 cvar_t	*sk_hyperblaster_damage;
 cvar_t	*sk_hyperblaster_damage_dm;
 cvar_t	*sk_hyperblaster_speed;
-cvar_t	*sk_hyperblaster_color;  //hyperblaster color- 1=yellow, 2=green, 3=blue, 4=red
+cvar_t	*sk_hyperblaster_color;  // hyperblaster color- 1=yellow, 2=green, 3=blue, 4=red
 
 cvar_t	*sk_railgun_damage;
 cvar_t	*sk_railgun_damage_dm;
@@ -152,16 +152,16 @@ cvar_t	*sk_pack_cells;    // 300
 cvar_t	*sk_pack_slugs;    // 100
 cvar_t	*sk_pack_fuel;
 
-cvar_t	*sk_box_shells; //value of shells
-cvar_t	*sk_box_bullets; //value of bullets
-cvar_t	*sk_box_grenades; //value of grenade pack
-cvar_t	*sk_box_rockets; //value of rocket pack
-cvar_t	*sk_box_cells; //value of cell pack
-cvar_t	*sk_box_slugs; //value of slug box
-cvar_t	*sk_box_fuel; //value of fuel
+cvar_t	*sk_box_shells;		// value of shells
+cvar_t	*sk_box_bullets;	// value of bullets
+cvar_t	*sk_box_grenades;	// value of grenade pack
+cvar_t	*sk_box_rockets;	// value of rocket pack
+cvar_t	*sk_box_cells;		// value of cell pack
+cvar_t	*sk_box_slugs;		// value of slug box
+cvar_t	*sk_box_fuel;		// value of fuel
 
-cvar_t	*sk_armor_bonus_value; //value of armor shards
-cvar_t	*sk_health_bonus_value; //value of stimpacks
+cvar_t	*sk_armor_bonus_value;	// value of armor shards
+cvar_t	*sk_health_bonus_value;	// value of stimpacks
 cvar_t	*sk_powerup_max;
 cvar_t	*sk_nuke_max;
 cvar_t	*sk_nbomb_max;

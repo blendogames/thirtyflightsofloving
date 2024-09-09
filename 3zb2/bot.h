@@ -6,12 +6,12 @@
 void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point);
 
 //bot spawn & remove
-qboolean	SpawnBot(int i);
-void		Bot_LevelChange();
-void		Load_BotInfo();
-void		Bot_SpawnCall();
-void		RemoveBot();
-void		SpawnBotReserving();
+qboolean	SpawnBot (int i);
+void		Bot_LevelChange  (void);
+void		Load_BotInfo (void);
+void		Bot_SpawnCall (void);
+void		RemoveBot (void);
+void		SpawnBotReserving (void);
 
 //weapon
 void Weapon_Blaster (edict_t *ent);
@@ -38,15 +38,15 @@ qboolean Bot_trace2 (edict_t *ent,vec3_t ttz);
 float Get_yaw (vec3_t vec);		//
 float Get_pitch (vec3_t vec);	//
 float Get_vec_yaw (vec3_t vec,float yaw);
-void ShowGun(edict_t *ent);
+void ShowGun (edict_t *ent);
 void SpawnItem3 (edict_t *ent, gitem_t *item);
-int Bot_moveT ( edict_t *ent,float ryaw,vec3_t pos,float dist,float *bottom);
-void Set_BotAnim(edict_t *ent,int anim,int frame,int end);
+int Bot_moveT (edict_t *ent,float ryaw,vec3_t pos,float dist,float *bottom);
+void Set_BotAnim (edict_t *ent,int anim,int frame,int end);
 void plat_go_up (edict_t *ent);
-int Get_KindWeapon(gitem_t	*it);
-qboolean TargetJump(edict_t *ent,vec3_t tpos);
+int Get_KindWeapon (gitem_t	*it);
+qboolean TargetJump (edict_t *ent,vec3_t tpos);
 qboolean Bot_traceS (edict_t *ent,edict_t *other);
-qboolean Bot_Fall(edict_t *ent,vec3_t pos,float dist);
+qboolean Bot_Fall (edict_t *ent,vec3_t pos,float dist);
 
 void SelectSpawnPoint (edict_t *ent, vec3_t origin, vec3_t angles);
 void ClientUserinfoChanged (edict_t *ent, char *userinfo);
@@ -54,30 +54,30 @@ void CopyToBodyQue (edict_t *ent);
 
 //route util
 qboolean TraceX (edict_t *ent,vec3_t p2);
-void Move_LastRouteIndex();
-void Get_RouteOrigin(int index,vec3_t pos);
+void Move_LastRouteIndex (void);
+void Get_RouteOrigin (int index,vec3_t pos);
 
 //Bot Func
-void ZigockJoinMenu(edict_t *ent);
-qboolean ZigockStartClient(edict_t *ent);
-void Cmd_AirStrike(edict_t *ent);
+void ZigockJoinMenu (edict_t *ent);
+qboolean ZigockStartClient (edict_t *ent);
+void Cmd_AirStrike (edict_t *ent);
 void BotEndServerFrame (edict_t *ent);
 void SpawnItem2 (edict_t *ent, gitem_t *item);
-void Get_WaterState(edict_t *ent);
+void Get_WaterState (edict_t *ent);
 void Bot_Think (edict_t *self);
 void PutBotInServer (edict_t *ent);
-void SpawnBotReserving2(int *red,int *blue);
+void SpawnBotReserving2 (int *red,int *blue);
 
 //Combat AI
-void Combat_Level0(edict_t *ent,int foundedenemy,int enewep,float aim,float distance,int skill);
-void Combat_LevelX(edict_t *ent,int foundedenemy,int enewep,float aim,float distance,int skill);
-void UsePrimaryWeapon(edict_t *ent);
+void Combat_Level0 (edict_t *ent,int foundedenemy,int enewep,float aim,float distance,int skill);
+void Combat_LevelX (edict_t *ent,int foundedenemy,int enewep,float aim,float distance,int skill);
+void UsePrimaryWeapon (edict_t *ent);
 
 //Explotion Index
-void UpdateExplIndex(edict_t* ent);
+void UpdateExplIndex (edict_t* ent);
 
 //flag
-qboolean ZIGDrop_Flag(edict_t *ent, gitem_t *item);
+qboolean ZIGDrop_Flag (edict_t *ent, gitem_t *item);
 
 //p_view.c
 void BotEndServerFrame (edict_t *ent);
@@ -86,16 +86,16 @@ void BotEndServerFrame (edict_t *ent);
 void Bots_Move_NORM (edict_t *ent);		//normal AI
 
 //spawn
-void SetBotFlag1(edict_t *ent);	//チーム1の旗
-void SetBotFlag2(edict_t *ent);  //チーム2の旗
-void CTFSetupNavSpawn();	//ナビの設置
+void SetBotFlag1 (edict_t *ent);	//チーム1の旗
+void SetBotFlag2 (edict_t *ent);  //チーム2の旗
+void CTFSetupNavSpawn (void);	//ナビの設置
 
 //ctf
 void CTFJobAssign (void);		//job assign
 
 //VWep
 // ### Hentai ### BEGIN
-//void ShowGun(edict_t *ent);
+//void ShowGun (edict_t *ent);
 // ###	Hentai ### END
 
 //----------------------------------------------------------------
@@ -115,7 +115,7 @@ void CTFJobAssign (void);		//job assign
 
 //classes
 #define CLS_NONE	0	//normal
-#define CLS_ALPHA	1	//sniper	
+#define CLS_ALPHA	1	//sniper
 #define CLS_BETA	2
 #define CLS_GAMMA	3
 #define CLS_DELTA	4
@@ -140,7 +140,7 @@ void CTFJobAssign (void);		//job assign
 
 //waterstate
 #define	WAS_NONE			0
-#define	WAS_FLOAT			1	
+#define	WAS_FLOAT			1
 #define	WAS_IN				2
 
 //route
@@ -183,7 +183,7 @@ void CTFJobAssign (void);		//job assign
 //combat
 #define AIMING_POSGAP		5
 #define AIMING_ANGLEGAP_S	0.75	//shot gun
-#define AIMING_ANGLEGAP_M	0.35 //machine gun	
+#define AIMING_ANGLEGAP_M	0.35 //machine gun
 
 //team play state
 #define TMS_NONE		0

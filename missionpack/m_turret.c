@@ -375,7 +375,7 @@ void TurretFire (edict_t *self)
 	vec3_t	start, end, dir;
 	float	time, dist, chance;
 	trace_t	trace;
-	int		rocketSpeed;
+	int		rocketSpeed = 0;
 
 	TurretAim (self);
 
@@ -498,7 +498,7 @@ void TurretFireBlind (edict_t *self)
 	vec3_t	forward;
 	vec3_t	start, end, dir;
 	float	dist, chance;
-	int		rocketSpeed;
+	int		rocketSpeed = 0;
 
 	TurretAim (self);
 
@@ -805,7 +805,7 @@ void turret_wake (edict_t *self)
 	self->takedamage = DAMAGE_AIM;
 	self->movetype = MOVETYPE_NONE;
 	// prevent counting twice
-	//self->monsterinfo.aiflags |= AI_DO_NOT_COUNT;
+//	self->monsterinfo.aiflags |= AI_DO_NOT_COUNT;
 	self->monsterinfo.monsterflags |= MFL_DO_NOT_COUNT;
 
 	gi.linkentity (self);
@@ -818,7 +818,7 @@ void turret_wake (edict_t *self)
 		self->s.skinnum = 2;
 
 	// but we do want the death to count
-	//self->monsterinfo.aiflags &= ~AI_DO_NOT_COUNT;
+//	self->monsterinfo.aiflags &= ~AI_DO_NOT_COUNT;
 	self->monsterinfo.monsterflags &= ~MFL_DO_NOT_COUNT;
 }
 
@@ -1031,7 +1031,7 @@ void SP_monster_turret (edict_t *self)
 	self->die = turret_die;
 
 	// map designer didn't specify weapon type. set it now.
-	if (!(self->spawnflags & SPAWN_WEAPONCHOICE))
+	if ( !(self->spawnflags & SPAWN_WEAPONCHOICE) )
 	{
 		self->spawnflags |= SPAWN_BLASTER;
 	//	self->spawnflags |= SPAWN_MACHINEGUN;
@@ -1133,7 +1133,7 @@ void SP_monster_turret (edict_t *self)
 		self->takedamage = DAMAGE_NO;
 		self->use = turret_activate;
 		turret_wall_spawn(self);
-		//if ((!(self->monsterinfo.aiflags & AI_GOOD_GUY)) && (!(self->monsterinfo.aiflags & AI_DO_NOT_COUNT)))
+	//	if ((!(self->monsterinfo.aiflags & AI_GOOD_GUY)) && (!(self->monsterinfo.aiflags & AI_DO_NOT_COUNT)))
 		if ((!(self->monsterinfo.aiflags & AI_GOOD_GUY)) && (!(self->monsterinfo.monsterflags & MFL_DO_NOT_COUNT)))
 			level.total_monsters++;
 	}
@@ -1151,9 +1151,9 @@ void SP_monster_turret (edict_t *self)
 		self->spawnflags &= ~SPAWN_ROCKET;
 		self->s.skinnum = 0;
 	}
-	else if (self->spawnflags & SPAWN_RAILGUN) //was SPAWN_MACHINEGUN
+	else if (self->spawnflags & SPAWN_RAILGUN)	// was SPAWN_MACHINEGUN
 	{	
-		//gi.soundindex ("infantry/infatck1.wav");
+	//	gi.soundindex ("infantry/infatck1.wav");
 		gi.soundindex ("gladiator/railgun.wav");
 		self->spawnflags &= ~SPAWN_ROCKET;
 		self->s.skinnum = 1;

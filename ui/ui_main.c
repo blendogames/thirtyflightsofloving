@@ -22,15 +22,12 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 // ui_main.c -- menu subsystem functions
 
-#include <ctype.h>
-#ifdef _WIN32
-#include <io.h>
-#endif
 #include "../client/client.h"
 #include "ui_local.h"
 
 cvar_t	*ui_sensitivity;
 cvar_t	*ui_background_alpha;
+cvar_t	*ui_debug_itembounds;
 cvar_t	*ui_item_rotate;
 cvar_t	*ui_cursor_scale;
 cvar_t	*ui_new_textbox;
@@ -74,42 +71,58 @@ void UI_Draw (void)
 	if (cl.cinematictime > 0 || cls.state == ca_disconnected)
 	{
 #ifdef NOTTHIRTYFLIGHTS
-		if (R_DrawFindPic(UI_BACKGROUND_NAME))
-		{
-		//	R_DrawStretchPic (0, 0, viddef.width, viddef.height, UI_BACKGROUND_NAME, 1.0f);
-			R_DrawFill (0, 0, viddef.width, viddef.height, 0, 0, 0, 255);
-			UI_DrawPic(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, ALIGN_CENTER, false, UI_BACKGROUND_NAME, 1.0f);
+		if ( (ui_menuState.menu->background != NULL) && (strlen(ui_menuState.menu->background) > 0)
+			&& R_DrawFindPic ((char *)ui_menuState.menu->background) ) 
+        {
+			SCR_DrawFill (0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, ALIGN_STRETCH_ALL, true, 0, 0, 0, 255);
+			SCR_DrawPic (0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, ALIGN_CENTER, true, (char *)ui_menuState.menu->background, 1.0f);
+		}
+		else if ( R_DrawFindPic(UI_BACKGROUND_NAME) )
+        {
+			SCR_DrawFill (0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, ALIGN_STRETCH_ALL, true, 0, 0, 0, 255);
+			SCR_DrawPic (0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, ALIGN_CENTER, true, UI_BACKGROUND_NAME, 1.0f);
 		}
 		else
 #endif
-			R_DrawFill (0,0,viddef.width, viddef.height, 0, 0, 0, 255);
+			SCR_DrawFill (0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, ALIGN_STRETCH_ALL, true, 0, 0, 0, 255);
 	}
-#ifdef NOTTHIRTYFLIGHTS
 	// ingame menu uses alpha
-	else if (R_DrawFindPic(UI_BACKGROUND_NAME))
-	//	R_DrawStretchPic (0, 0, viddef.width, viddef.height, UI_BACKGROUND_NAME, ui_background_alpha->value);
-		UI_DrawPic(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, ALIGN_CENTER, false, UI_BACKGROUND_NAME, ui_background_alpha->value);
+#ifdef NOTTHIRTYFLIGHTS
+	elseif ( (ui_menuState.menu->background != NULL) && (strlen(ui_menuState.menu->background) > 0)
+    {
+			&& R_DrawFindPic ((char *)ui_menuState.menu->background) ) 
+			SCR_DrawPic (0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, ALIGN_CENTER, true, (char *)ui_menuState.menu->background, ui_background_alpha->value);
+		else if ( R_DrawFindPic(UI_BACKGROUND_NAME) )
+			SCR_DrawPic (0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, ALIGN_CENTER, true, UI_BACKGROUND_NAME, ui_background_alpha->value);
+    }
 #endif
-	else
-		R_DrawFill (0, 0, viddef.width, viddef.height, 0, 0, 0, (int)(ui_background_alpha->value*255.0f));
+		else
+			SCR_DrawFill (0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, ALIGN_STRETCH, true, 0, 0, 0, (int)(ui_background_alpha->value*255));
 
-	// Knigthmare- added Psychospaz's mouse support
-	UI_RefreshCursorMenu();
+	// added Psychospaz's mouse support
+	UI_RefreshCursorMenu ();
 
-	m_drawfunc ();
+	// draw it
+	if (ui_menuState.menu)
+    {
+		if (ui_menuState.menu->drawFunc)
+			ui_menuState.menu->drawFunc (ui_menuState.menu);
+		else
+			UI_DefaultMenuDraw (ui_menuState.menu);
+    }
 
 	// delay playing the enter sound until after the
 	// menu has been drawn, to avoid delay while
 	// caching images
 	if (ui_entersound)
-	{
+    {
 		S_StartLocalSound (ui_menu_in_sound);
 		ui_entersound = false;
-	}
+    }
 
-	// Knigthmare- added Psychospaz's mouse support
-	//menu cursor for mouse usage :)
-	UI_Draw_Cursor();
+	// added Psychospaz's mouse support
+	// menu cursor for mouse usage :)
+	UI_Draw_Cursor ();
 }
 
 
@@ -122,9 +135,32 @@ void UI_Keydown (int key)
 {
 	const char *s;
 
-	if (m_keyfunc)
-		if ( ( s = m_keyfunc( key ) ) != 0 )
-			S_StartLocalSound( ( char * ) s );
+	if (ui_menuState.menu)
+	{
+		if (ui_menuState.menu->keyFunc) {
+			if ( ( s = ui_menuState.menu->keyFunc(ui_menuState.menu, key) ) != 0 )
+				S_StartLocalSound ((char *) s);
+		}
+		else {
+			if ( ( s = UI_DefaultMenuKey(ui_menuState.menu, key) ) != 0 )
+				S_StartLocalSound ((char *) s);
+		}
+	}
+}
+
+
+/*
+=================
+UI_MenuHasGrabBind
+=================
+*/
+qboolean UI_MenuHasGrabBind (void)
+{
+	if ( (ui_menudepth > 0) && ui_menuState.menu) {
+		if ( UI_HasValidGrabBindItem(ui_menuState.menu) ) 
+			return true;
+	}
+	return false;
 }
 
 
@@ -146,8 +182,8 @@ UI_Precache
 */
 void UI_Precache (void)
 {
-	int		i;
-	char	scratch[80];
+//	int		i;
+//	char	scratch[80];
 
 	// general images
 	R_DrawFindPic (LOADSCREEN_NAME); 
@@ -160,6 +196,7 @@ void UI_Precache (void)
 	R_DrawFindPic ("/pics/downloading.pcx");
 	R_DrawFindPic ("/pics/downloading_bar.pcx");
 	R_DrawFindPic ("/pics/loading_led1.pcx");
+	R_DrawFindPic ("/pics/pause.pcx");
 
 	// cursors
 //	R_DrawFindPic (UI_MOUSECURSOR_MAIN_PIC);
@@ -172,10 +209,10 @@ void UI_Precache (void)
 	R_DrawFindPic (UI_ITEMCURSOR_KEYBIND_PIC);
 	R_DrawFindPic (UI_ITEMCURSOR_BLINK_PIC);
 
-	for (i = 0; i < NUM_MAINMENU_CURSOR_FRAMES; i++) {
+/*	for (i = 0; i < NUM_MAINMENU_CURSOR_FRAMES; i++) {
 		Com_sprintf (scratch, sizeof(scratch), "/pics/m_cursor%d.pcx", i);
 		R_DrawFindPic (scratch);
-	}
+	} */
 
 	// main menu items
 	R_DrawFindPic ("/pics/m_main_game.pcx");
@@ -186,8 +223,8 @@ void UI_Precache (void)
 	R_DrawFindPic ("/pics/m_main_options_sel.pcx");
 	R_DrawFindPic ("/pics/m_main_video.pcx");
 	R_DrawFindPic ("/pics/m_main_video_sel.pcx");
-//	R_DrawFindPic ("/pics/m_main_mods.pcx");
-//	R_DrawFindPic ("/pics/m_main_mods_sel.pcx");
+	R_DrawFindPic ("/pics/m_main_mods.pcx");
+	R_DrawFindPic ("/pics/m_main_mods_sel.pcx");
 	R_DrawFindPic ("/pics/m_main_quit.pcx");
 	R_DrawFindPic ("/pics/m_main_quit_sel.pcx");
 	R_DrawFindPic ("/pics/m_main_plaque.pcx");
@@ -206,25 +243,25 @@ void UI_Precache (void)
 	R_DrawFindPic ("/pics/m_banner_options.pcx");
 	R_DrawFindPic ("/pics/m_banner_customize.pcx");
 	R_DrawFindPic ("/pics/m_banner_video.pcx");
-//	R_DrawFindPic ("/pics/m_banner_mods.pcx");
+	R_DrawFindPic ("/pics/m_banner_mods.pcx");
 	R_DrawFindPic ("/pics/quit.pcx");
-//	R_DrawFindPic ("/pics/areyousure.pcx");
+	R_DrawFindPic ("/pics/areyousure.pcx");
 //	R_DrawFindPic ("/pics/yn.pcx");
 
 	// GUI elements
 	R_DrawFindPic ("/gfx/ui/widgets/listbox_background.pcx");
-//	R_DrawFindPic (UI_CHECKBOX_ON_PIC);
-//	R_DrawFindPic (UI_CHECKBOX_OFF_PIC);
+	R_DrawFindPic (UI_CHECKBOX_PIC);
 	R_DrawFindPic (UI_FIELD_PIC);
 	R_DrawFindPic (UI_TEXTBOX_PIC);
 	R_DrawFindPic (UI_SLIDER_PIC);
 	R_DrawFindPic (UI_ARROWS_PIC);
+	R_DrawFindPic (UI_SCROLLKNOB_PIC);
 
-//	R_DrawFindPic ("/gfx/ui/listbox_background.pcx");
-//	R_DrawFindPic ("/gfx/ui/arrows/arrow_left.pcx");
-//	R_DrawFindPic ("/gfx/ui/arrows/arrow_left_d.pcx");
-//	R_DrawFindPic ("/gfx/ui/arrows/arrow_right.pcx");
-//	R_DrawFindPic ("/gfx/ui/arrows/arrow_right_d.pcx"); 
+	// Playerconfig menu elements
+//	R_DrawFindPic (UI_CUSTOMCOLOR_PIC);
+//	R_DrawFindPic (UI_SOLIDWHITE_PIC);
+	R_DrawFindPic (UI_RAILCORE_PIC);
+	R_DrawFindPic (UI_RAILSPIRAL_PIC);
 }
 
 
@@ -235,7 +272,7 @@ UI_Init
 */
 void UI_Init (void)
 {
-	// init this cvar here so M_Print can use it
+	// init this cvar here so UI_Print can use it
 	if (!alt_text_color)
 		alt_text_color = Cvar_Get ("alt_text_color", "2", CVAR_ARCHIVE);
 
@@ -243,6 +280,8 @@ void UI_Init (void)
 	Cvar_SetDescription ("ui_sensitivity", "Sets sensitvity of mouse in menus.");
 	ui_background_alpha = Cvar_Get ("ui_background_alpha", "0.6", CVAR_ARCHIVE);
 	Cvar_SetDescription ("ui_background_alpha", "Sets opacity of background menu image when ingame.");
+	ui_debug_itembounds = Cvar_Get ("ui_debug_itembounds", "0", 0);
+	Cvar_SetDescription ("ui_debug_itembounds", "Shows mouse interaction bounds of menu controls.");
 	ui_item_rotate = Cvar_Get ("ui_item_rotate", "0", CVAR_ARCHIVE);
 	Cvar_SetDescription ("ui_item_rotate", "Reverses direction of mouse click rotation for menu lists.");
 	ui_cursor_scale = Cvar_Get ("ui_cursor_scale", "0.4", 0);
@@ -260,10 +299,11 @@ void UI_Init (void)
 	Cvar_SetDescription ("ui_player_railblue", "Temp cvar for setting blue color component of player's railgun trail.  Values range 0-255.");
 
 	UI_GetVideoInfo ();		// build video mode list
-//	UI_GetModList ();		// load mods list
 	UI_LoadFontNames ();	// load font list
-//	UI_LoadHudNames ();		// load hud list
+	UI_LoadHudNames ();		// load hud list
 	UI_LoadCrosshairs ();	// load crosshairs
+	UI_LoadKeyBindList ();	// load key bind list
+	//UI_GetModList ();		// load mods list
 	UI_InitServerList ();	// init join server list
 	UI_LoadMapList();		// load map list
 	UI_LoadPlayerModels (); // load player models
@@ -276,6 +316,7 @@ void UI_Init (void)
 		Cmd_AddCommand ("menu_loadgame", Menu_LoadGame_f);
 		Cmd_AddCommand ("menu_savegame", Menu_SaveGame_f);
 		Cmd_AddCommand ("menu_credits", Menu_Credits_f );
+#ifdef NOTTHIRTYFLIGHTS
 	Cmd_AddCommand ("menu_multiplayer", Menu_Multiplayer_f );
 		Cmd_AddCommand ("menu_joinserver", Menu_JoinServer_f);
 			Cmd_AddCommand ("menu_addressbook", Menu_AddressBook_f);
@@ -285,6 +326,8 @@ void UI_Init (void)
 		Cmd_AddCommand ("menu_downloadoptions", Menu_DownloadOptions_f);
 	Cmd_AddCommand ("menu_video", Menu_Video_f);
 		Cmd_AddCommand ("menu_video_advanced", Menu_Video_Advanced_f);
+	Cmd_AddCommand ("menu_mods", Menu_Mods_f);
+#endif
 	Cmd_AddCommand ("menu_options", Menu_Options_f);
 		Cmd_AddCommand ("menu_sound", Menu_Options_Sound_f);
 		Cmd_AddCommand ("menu_controls", Menu_Options_Controls_f);
@@ -311,10 +354,11 @@ void UI_Shutdown (void)
 		return;
 
 	UI_FreeVideoInfo ();
-//	UI_FreeModList ();
 	UI_FreeFontNames ();
-//	UI_FreeHudNames ();
+	UI_FreeHudNames ();
 	UI_FreeCrosshairs ();
+	UI_FreeKeyBindList ();
+	//UI_FreeModList ();
 	UI_FreeMapList ();
 	UI_FreePlayerModels ();
 
@@ -332,6 +376,7 @@ void UI_Shutdown (void)
 	Cmd_RemoveCommand ("menu_downloadoptions");
 	Cmd_RemoveCommand ("menu_video");
 	Cmd_RemoveCommand ("menu_video_advanced");
+	Cmd_RemoveCommand ("menu_mods");
 	Cmd_RemoveCommand ("menu_options");
 	Cmd_RemoveCommand ("menu_sound");
 	Cmd_RemoveCommand ("menu_controls");
@@ -360,19 +405,21 @@ void UI_RefreshData (void)
 	// Close all menus before refreshing data
 	UI_ForceMenuOff ();
 
-	UI_FreeVideoInfo ();
-//	UI_FreeModList ();
+//	UI_FreeVideoInfo ();	// Removed, unnecessary to re-init this
 	UI_FreeFontNames ();
-//	UI_FreeHudNames ();
+	UI_FreeHudNames ();
 	UI_FreeCrosshairs ();
+	UI_FreeKeyBindList ();
+//	UI_FreeModList ();		// Removed, unnecessary to re-init this
 	UI_FreeMapList ();
 	UI_FreePlayerModels ();
 
-	UI_GetVideoInfo ();		// build video mode list
-//	UI_GetModList ();		// load mods list
+//	UI_GetVideoInfo ();		// build video mode list	Removed, unnecessary to re-init this
 	UI_LoadFontNames ();	// load font list
-//	UI_LoadHudNames ();		// load hud list
+	UI_LoadHudNames ();		// load hud list
 	UI_LoadCrosshairs ();	// load crosshairs
+	UI_LoadKeyBindList ();	// load key bind list
+//	UI_GetModList ();		// load mods list			Removed, unnecessary to re-init this
 	UI_InitServerList ();	// init join server list
 	UI_LoadMapList ();		// load map list
 	UI_LoadPlayerModels (); // load player models

@@ -355,7 +355,9 @@ void CL_LocWrite (void)
 	FS_CreatePath (filename);
 
 //	if (!(f = fopen(va("locs/%s.loc", mapname), "w")))
-	if (!(f = fopen(filename, "w")))
+//	if (!(f = fopen(filename, "w")))
+	f = fopen(filename, "w");
+	if ( !f )
 	{
 		Com_Printf(S_COLOR_YELLOW"Unable to open locs/%s.loc for writing.\n", mapname);
 		return;

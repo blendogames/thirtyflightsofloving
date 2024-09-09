@@ -45,8 +45,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "../client/ref.h"
 
-
 #include "qgl.h"
+
+// define REF_INCLUDE so that the right print/utility function calls
+// are used in shared code
+//#define REF_INCLUDE
 
 // up / down
 #define	PITCH	0
@@ -54,6 +57,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define	YAW		1
 // fall over
 #define	ROLL	2
+
+#define	WARP_LIGHTMAPS	// whether to support lightmaps on warp surfaces
+
+#define random()	((rand () & 0x7fff) / ((float)0x7fff))
+#define crandom()	(2.0 * (random() - 0.5))
 
 #ifndef __VIDDEF_T
 #define __VIDDEF_T
@@ -115,12 +123,14 @@ typedef struct image_s
 } image_t;
 
 #define	MAX_LIGHTMAPS	256	// change by Brendon Chung, was 128
+#define	MAX_SCRAPS		32	// was 1
 
 #define	TEXNUM_LIGHTMAPS	1024
 //#define	TEXNUM_SCRAPS		1152
 //#define	TEXNUM_IMAGES		1153
-#define	TEXNUM_SCRAPS		TEXNUM_LIGHTMAPS + MAX_LIGHTMAPS
-#define	TEXNUM_IMAGES		TEXNUM_SCRAPS + 1
+#define	TEXNUM_SCRAPS		(TEXNUM_LIGHTMAPS + MAX_LIGHTMAPS)
+//#define	TEXNUM_IMAGES		(TEXNUM_SCRAPS + 1)
+#define	TEXNUM_IMAGES		(TEXNUM_SCRAPS + MAX_SCRAPS)
 
 #define	MAX_GLTEXTURES	16384	// 4096 // Knightmare increased, was 1024
 
@@ -187,19 +197,20 @@ typedef enum {
 } displaylist_t;
 
 typedef struct glmedia_s {
-	image_t		*notexture;			// used for bad textures
-	image_t		*whitetexture;		// used for solid colors
+	image_t		*noTexture;			// used for bad textures
+	image_t		*whiteTexture;		// used for solid colors
 	image_t		*distTextureARB;	// used for warp distortion
-	image_t		*rawtexture;		// used for cinematics
-	image_t		*envmappic;
-	image_t		*spheremappic;
-	image_t		*shelltexture;
-	image_t		*celshadetexture;
-	image_t		*causticwaterpic;
-	image_t		*causticslimepic;
-	image_t		*causticlavapic;
-	image_t		*particlebeam;
-	image_t		*particletextures[PARTICLE_TYPES];
+	image_t		*celShadeTexture;	// used for cel shading
+	image_t		*rawTexture;		// used for cinematics
+	image_t		*envMapTexture;
+	image_t		*sphereMapTexture;
+	image_t		*shellTexture;
+	image_t		*flareTexture;		// used for Kex flares
+	image_t		*causticWaterTexture;
+	image_t		*causticSlimeTexture;
+	image_t		*causticLavaTexture;
+	image_t		*particleBeam;
+	image_t		*particleTextures[PARTICLE_TYPES];
 	unsigned	displayLists[NUM_DISPLAY_LISTS];
 } glmedia_t;
 
@@ -214,7 +225,12 @@ extern	cplane_t	frustum[4];
 extern	int			c_brush_calls, c_brush_surfs, c_brush_polys, c_alias_polys, c_part_polys;
 
 // Knightmare- saveshot buffer
-extern	byte	*saveshotdata;
+typedef struct {
+	int		width;
+	int		height;
+	byte	*buffer;
+} saveShot_t;
+extern	saveShot_t	r_saveShot;
 
 
 extern	int			gl_filter_min, gl_filter_max;
@@ -227,7 +243,7 @@ extern	vec3_t	vpn;
 extern	vec3_t	vright;
 extern	vec3_t	r_origin;
 
-extern	GLdouble	r_farz;	// Knightmare- variable sky range, made this a global var
+extern	GLdouble	r_farZ;	// Knightmare- variable sky range, made this a global var
 
 //
 // screen size info
@@ -235,12 +251,13 @@ extern	GLdouble	r_farz;	// Knightmare- variable sky range, made this a global va
 extern	refdef_t	r_newrefdef;
 extern	int		r_viewcluster, r_viewcluster2, r_oldviewcluster, r_oldviewcluster2;
 
-extern	cvar_t	*gl_clear;
 extern  cvar_t  *gl_driver;
+extern	cvar_t	*r_clear;
 
 extern	cvar_t	*r_norefresh;
 extern	cvar_t	*r_lefthand;
 extern	cvar_t	*r_drawentities;
+extern	cvar_t	*r_drawflares;
 extern	cvar_t	*r_drawworld;
 extern	cvar_t	*r_speeds;
 extern	cvar_t	*r_fullbright;
@@ -253,7 +270,6 @@ extern	cvar_t	*r_displayrefresh; // Knightmare- refresh rate control
 extern	cvar_t	*r_waterwave;	// Knightmare- water waves
 extern	cvar_t  *r_caustics;	// Barnes water caustics
 extern	cvar_t  *r_glows;		// texture glows
-extern	cvar_t	*r_saveshotsize;// Knightmare- save shot size option
 
 // Knightmare- lerped dlights on models
 extern	cvar_t *r_dlights_normal;
@@ -292,21 +308,25 @@ extern	cvar_t	*r_pixel_shader_warp; // allow disabling the nVidia water warp
 extern	cvar_t	*r_trans_lighting; // allow disabling of lighting on trans surfaces
 extern	cvar_t	*r_warp_lighting; // allow disabling of lighting on warp surfaces
 extern	cvar_t	*r_warp_lighting_sample_offset; // allow adjustment of lighting sampling offset
+extern	cvar_t	*r_load_warp_lightmaps;		// allow loading of lightmaps on warp surfaces
 extern	cvar_t	*r_solidalpha;			// allow disabling of trans33+trans66 surface flag combining
 extern	cvar_t	*r_entity_fliproll;		// allow disabling of backwards alias model roll
 extern	cvar_t	*r_old_nullmodel;		// allow selection of nullmodel
+extern	cvar_t	*r_modelview_lightscale;	// lighting scale for menu modelviews
+extern	cvar_t	*r_occlusion_test;			// allow disabling of OpenGL occlusion test for flares
 
 extern	cvar_t	*r_glass_envmaps; // Psychospaz's envmapping
 //extern	cvar_t	*r_trans_surf_sorting; // trans bmodel sorting
 extern	cvar_t	*r_shelltype; // entity shells: 0 = solid, 1 = warp, 2 = spheremap
-
 extern	cvar_t	*r_ext_texture_compression; // Heffo - ARB Texture Compression
 extern	cvar_t	*r_lightcutoff;	//** DMP - allow dynamic light cutoff to be user-settable
 
+extern	cvar_t	*r_debug_media;		// enables output of generated textures as .tga on startup
 extern	cvar_t	*r_screenshot_format;		// determines screenshot format
 //extern	cvar_t	*r_screenshot_jpeg;			// Heffo - JPEG Screenshots
 extern	cvar_t	*r_screenshot_jpeg_quality;	// Heffo - JPEG Screenshots
 extern	cvar_t	*r_screenshot_gamma_correct;	// gamma correction for screenshots
+extern	cvar_t	*r_screenshot_use_mapname;	// screenshot filename contains mapname
 
 //extern	cvar_t	*r_nosubimage;	// unused
 extern	cvar_t	*r_bitdepth;
@@ -337,7 +357,8 @@ extern	cvar_t	*r_picmip;
 extern	cvar_t	*r_skymip;
 //extern	cvar_t	*r_playermip;	// unused
 extern	cvar_t	*r_showtris;
-extern	cvar_t	*r_showbbox;	// Knightmare- show model bounding box
+extern	cvar_t	*r_showbbox;		// show model culling bounding box
+extern	cvar_t	*r_showbbox_entity;	// show solid entity bounding box
 extern	cvar_t	*r_finish;
 extern	cvar_t	*r_ztrick;
 extern	cvar_t	*r_cull;
@@ -392,7 +413,7 @@ extern	int		c_visible_textures;
 
 extern	float	r_world_matrix[16];
 
-extern	vec4_t	r_clearColor;			// for gl_clear
+extern	vec4_t	r_clearColor;			// for r_clear
 
 // entity sorting struct
 typedef struct sortedelement_s sortedelement_t;
@@ -406,38 +427,42 @@ struct sortedelement_s
 
 
 //
-// r_image.c
-//
-void R_TranslatePlayerSkin (int playernum);
-
-// Knightmare- added some of Psychospaz's shortcuts
-void ElementAddNode (sortedelement_t *base, sortedelement_t *thisElement);
-int transCompare (const void *arg1, const void *arg2);
-
-void R_MaxColorVec (vec3_t color);
-
-//
 // r_entity.c
 //
+extern	unsigned int	r_occlusionQueries[MAX_EDICTS];
+extern	unsigned int	r_occlusionQuerySamples[MAX_EDICTS];
+extern	byte			r_occlusionQueryPending[MAX_EDICTS];
+
 extern	sortedelement_t *ents_trans;
+extern	sortedelement_t *ents_flares;
 extern	sortedelement_t *ents_viewweaps;
 extern	sortedelement_t *ents_viewweaps_trans;
 
+void R_ClearOcclusionQuerySampleList (void);
+void R_ShutdownOcclusionQueries (void);
+void R_RotateForEntity (entity_t *e, qboolean full);
+int R_RollMult (void);
+void ElementAddNode (sortedelement_t *base, sortedelement_t *thisElement);
+void R_OccludeTestEntitiesOnList (sortedelement_t *list);
 void R_DrawEntitiesOnList (sortedelement_t *list);
 void R_DrawAllEntities (qboolean addViewWeaps);
 void R_DrawAllEntityShadows (void);
 void R_DrawSolidEntities ();
 
+
 //
 // r_particle.c
 //
 extern	sortedelement_t *parts_prerender;
+
+int transCompare (const void *arg1, const void *arg2);
 void R_BuildParticleList (void);
 void R_SortParticlesOnList (void);
 void R_DrawParticles (sortedelement_t *list);
 void R_DrawAllParticles (void);
 void R_DrawDecals (void);
 void R_DrawAllDecals (void);
+
 
 //
 // r_light.c
@@ -472,14 +497,15 @@ typedef struct
 	int			type;
 	int			current_lightmap_texture;
 
-	msurface_t	*lightmap_surfaces[MAX_LIGHTMAPS];
+//	msurface_t	*lightmap_surfaces[MAX_LIGHTMAPS];
 
 	int			allocated[LM_BLOCK_WIDTH];
 
 	// the lightmap texture data needs to be kept in
 	// main memory so texsubimage can update properly
+#ifndef BATCH_LM_UPDATES
 	unsigned	lightmap_buffer[LM_BLOCK_WIDTH*LM_BLOCK_HEIGHT];
-#ifdef BATCH_LM_UPDATES	// Knightmare added
+#else	// BATCH_LM_UPDATES
 	unsigned	*lightmap_update[MAX_LIGHTMAPS];
 	rect_t		lightrect[MAX_LIGHTMAPS];
 	qboolean	modified[MAX_LIGHTMAPS];
@@ -489,10 +515,11 @@ typedef struct
 extern gllightmapstate_t gl_lms;
 
 
+void R_MaxColorVec (vec3_t color);
 //void R_LightPoint (vec3_t p, vec3_t color);
 void R_LightPoint (vec3_t p, vec3_t color, qboolean isEnt);
 void R_LightPointDynamics (vec3_t p, vec3_t color, m_dlight_t *list, int *amount, int max);
-void R_SurfLightPoint (msurface_t *surf, vec3_t p, vec3_t color, qboolean baselight);
+void R_SurfLightPoint (msurface_t *surf, vec3_t p, vec3_t color, qboolean vertexLightBase);
 void R_PushDlights (void);
 void R_ShadowLight (vec3_t pos, vec3_t lightAdd);
 void R_MarkLights (dlight_t *light, int bit, mnode_t *node);
@@ -509,17 +536,18 @@ void R_BeginBuildingLightmaps (model_t *m);
 extern	model_t	*r_worldmodel;
 
 extern	unsigned	d_8to24table[256];
-extern	float		d_8to24tablef[256][3]; //Knightmare added
 
 extern	int		registration_sequence;
 
 
 //
-// cl_utils.c
+// r_utils.c
 //
-void vectoangles (vec3_t value1, vec3_t angles);
+float R_ClampValue (float in, float min, float max);
+float R_SmoothStep (float in, float side0, float side1);
+qboolean R_CullBox (vec3_t mins, vec3_t maxs);
+char *R_CopyString (char *in);
 
-void V_AddBlend (float r, float g, float b, float a, float *v_blend);
 
 //
 // r_main.c
@@ -531,6 +559,8 @@ void R_RenderView (refdef_t *fd);
 void R_BeginFrame (float camera_separation);
 void R_SwapBuffers (int);
 void R_SetPalette (const unsigned char *palette);
+void R_SetFarZ (float skyDistance);
+
 
 //
 // r_misc.c
@@ -539,35 +569,28 @@ void R_CreateDisplayLists (void);
 void R_ClearDisplayLists (void);
 void R_InitMedia (void);
 void R_ShutdownMedia (void);
+void R_GrabScreen (void);					// screenshots for savegames
+void R_ScaledScreenshot (const char *name);	// screenshots for savegames
 void R_ScreenShot_f (void);
 void R_ScreenShot_Silent_f (void);
 void R_ScreenShot_TGA_f (void);
 void R_ScreenShot_JPG_f (void);
 void R_ScreenShot_PNG_f (void);
 
+
 //
-// r_model.c
+// r_alias_md2.c
 //
 void R_DrawAliasMD2Model (entity_t *e);
 void R_DrawAliasMD2ModelShadow (entity_t *e);
-//Harven++ MD3
+
+
+//
+// r_alias.c
+//
 void R_DrawAliasModel (entity_t *e);
 void R_DrawAliasModelShadow (entity_t *e);
-//Harven-- MD3
-void R_DrawBrushModel (entity_t *e);
-void R_DrawSpriteModel (entity_t *e);
-void R_DrawBeam( entity_t *e );
-void R_DrawWorld (void);
-void R_RenderDlights (void);
-void R_DrawAllAlphaSurfaces (void);
-void R_RenderBrushPoly (msurface_t *fa);
-void R_InitMedia (void);
-void R_DrawInitLocal (void);
-void R_SubdivideSurface (msurface_t *fa);
-qboolean R_CullBox (vec3_t mins, vec3_t maxs);
-void R_RotateForEntity (entity_t *e, qboolean full);
-int R_RollMult (void);
-void R_MarkLeaves (void);
+
 
 //
 // r_alias_misc.c
@@ -600,7 +623,23 @@ void	R_FlipModel (qboolean on, qboolean cullOnly);
 void	R_SetBlendModeOn (image_t *skin);
 void	R_SetBlendModeOff (void);
 void	R_SetShadeLight (void);
-void R_DrawAliasModelBBox (vec3_t bbox[8], entity_t *e, float red, float green, float blue, float alpha);
+void	R_DrawAliasModelBBox (vec3_t bbox[8], entity_t *e, float red, float green, float blue, float alpha);
+void	R_DrawEntityBBox (entity_t *e, float red, float green, float blue, float alpha);
+
+
+//
+// r_sprite.c
+//
+void R_DrawSpriteModel (entity_t *e);
+void R_OccludeTestFlare (entity_t *e);
+void R_DrawFlare (entity_t *e);
+
+
+//
+// r_beam.c
+//
+void R_DrawBeam( entity_t *e );
+
 
 //
 // r_backend.c
@@ -668,17 +707,69 @@ extern GLuint vertex_programs[NUM_VERTEX_PROGRAM];
 //
 // r_warp.c
 //
-//glpoly_t *WaterWarpPolyVerts (glpoly_t *p);
-void R_InitDSTTex (void);
-void R_DrawWarpSurface (msurface_t *fa, float alpha, qboolean render);
+void R_SubdivideSurface (msurface_t *surf);
+void R_DrawWarpSurface (msurface_t *surf, float alpha, qboolean render);
 
 
 //
 // r_sky.c
 //
-void R_AddSkySurface (msurface_t *fa);
+#define	OLD_Q2_SKYDIST		2300
+#define DEFAULT_SKYDIST		18400
+#define	MIN_SKYDIST			256
+#define	SKY_GRID_NUMVERTS	24
+#define	SKY_DOME_MULT		1.5f
+
+typedef struct {
+	int			ctr_i, ctr_j;	// center point
+	int			numFlashes;
+	float		startRad;
+	float		curRad;
+	float		startBright;
+	float		curBright;
+	float		decay;
+	float		lastTime;		// last update timestamp
+} skyLightning_t;
+
+typedef struct {
+	char		skyBoxName[MAX_QPATH];
+	char		cloudName[MAX_QPATH];
+
+	float		skyRotate;
+	vec3_t		skyAxis;
+	float		skyDistance;
+
+	image_t		*sky_images[6];
+	image_t		*cloud_image;
+
+	float		skyMins[2][6];
+	float		skyMaxs[2][6];
+	float		sky_min, sky_max;
+
+	float		lightningFreq;
+	vec2_t		cloudDir;
+	vec3_t		cloudTile;
+	vec3_t		cloudSpeed;
+	vec3_t		cloudAlpha;
+
+	vec3_t		cloudVerts[SKY_GRID_NUMVERTS * SKY_GRID_NUMVERTS];
+	vec2_t		cloudBaseTexCoords[SKY_GRID_NUMVERTS * SKY_GRID_NUMVERTS];
+	vec2_t		cloudTexCoords[SKY_GRID_NUMVERTS * SKY_GRID_NUMVERTS];
+	float		cloudTileSize;
+	qboolean	cloudVertsInitialized;
+
+	skyLightning_t	lightning;
+} skyInfo_t;
+
+extern skyInfo_t	r_skyInfo;
+
+void R_AddSkySurface (msurface_t *surf);
+float R_GetSkyDistance (void);
+void R_InitSkyBoxInfo (void);
 void R_ClearSkyBox (void);
 void R_DrawSkyBox (void);
+void R_SetSky (const char *skyName, const char *cloudName, float rotate, vec3_t axis, float distance,
+			   float lightningFreq, vec2_t cloudDir, vec3_t cloudTile, vec3_t cloudSpeed, vec3_t cloudAlpha);
 
 
 //
@@ -686,19 +777,15 @@ void R_DrawSkyBox (void);
 //
 //extern	surfaceHandle_t	r_surfaceHandles[MAX_SURFACE_HANDLES];
 
+image_t *R_TextureAnimation (msurface_t *surf);
+qboolean R_WarpLightmaps_Enabled (void);
 void R_DrawWorld (void);
 void R_DrawAllAlphaSurfaces (void);
-void R_RenderBrushPoly (msurface_t *fa);
 void R_DrawBrushModel (entity_t *e);
 void R_MarkLeaves (void);
-qboolean R_CullBox (vec3_t mins, vec3_t maxs);
 void R_BuildPolygonFromSurface (msurface_t *surf);
 void R_ResetVertextLights_f (void);
 void R_BuildVertexLight (msurface_t *surf);
-#ifdef BATCH_LM_UPDATES
-void R_UpdateSurfaceLightmap (msurface_t *surf);
-void R_RebuildLightmaps (void);
-#endif
 
 
 // 
@@ -719,31 +806,26 @@ char	*va(char *format, ...);
 #endif
 
 
-//void COM_StripExtension (char *in, char *out, size_t outSize);
-
 //
 // r_draw.c
 //
 void	R_RefreshFont (fontslot_t font);
 void	R_RefreshAllFonts (void);
+void	R_DrawInitLocal (void);
 void	R_DrawGetPicSize (int *w, int *h, char *name);
-void	R_DrawPic (drawStruct_t ds)	;
-
-//void	R_DrawPic (int x, int y, char *name);
-// added alpha for Psychospaz's transparent console
-//void	R_DrawStretchPic (int x, int y, int w, int h, char *name, float alpha);
-// Psychospaz's scaled crosshair support
-//void	R_DrawScaledPic (int x, int y, float scale, float alpha, char *pic);
-
+float	R_CharMapScale (void);
 void	R_InitChars (void);
 void	R_FlushChars (fontslot_t font);
 void	R_DrawChar (float x, float y, int num, fontslot_t font, float scale, 
 			int red, int green, int blue, int alpha, qboolean italic, qboolean last);
 void	R_DrawString (float x, float y, const char *string, fontslot_t font, float scale, 
 				int red, int green, int blue, int alpha, qboolean italic, qboolean shadow);
-void	R_DrawTileClear (int x, int y, int w, int h, char *name);
+image_t	*R_DrawFindPic (char *name);
+void	R_DrawGetPicSize (int *w, int *h, char *pic);
+void	R_DrawPic (drawStruct_t *ds);
 void	R_DrawFill (int x, int y, int w, int h, int red, int green, int blue, int alpha);
-float	R_CharMapScale (void);
+void	R_DrawFadeScreen (void);
+void	R_DrawCameraEffect (void);
 
 #ifdef ROQ_SUPPORT
 void	R_DrawStretchRaw (int x, int y, int w, int h, const byte *raw, int rawWidth, int rawHeight);
@@ -755,28 +837,30 @@ void	r_DrawStretchRaw (int x, int y, int w, int h, int cols, int rows, byte *dat
 //
 // r_image.c
 //
-int		Draw_GetPalette (void);
-//void GL_ResampleTexture (unsigned *in, int inwidth, int inheight, unsigned *out,  int outwidth, int outheight);
+void R_GammaCorrect (byte *buffer, int size);
+int	Draw_GetPalette (void);
 void GL_ResampleTexture (void *indata, int inwidth, int inheight, void *outdata,  int outwidth, int outheight);
 struct image_s *R_RegisterSkin (char *name);
 
-void LoadPCX (char *filename, byte **pic, byte **palette, int *width, int *height);
-// Knightmare added
-void LoadTGA (char *name, byte **pic, int *width, int *height);
-void LoadJPG (char *filename, byte **pic, int *width, int *height);
+void R_LoadPCX (const char *filename, byte **pic, byte **palette, int *width, int *height);
+void R_LoadTGA (const char *filename, byte **pic, int *width, int *height);
+void R_WriteTGA (byte *rawImage, int width, int height, int nBytes, const char *filename, qboolean relativePath, qboolean checkIfExists);
+void R_LoadPNG (const char *filename, byte **pic, int *width, int *height);
+void R_WritePNG (byte *rawImage, int width, int height, int nBytes, const char *filename, qboolean relativePath, qboolean checkIfExists);
+void R_LoadJPG (const char *filename, byte **pic, int *width, int *height);
+void R_WriteJPG (byte *rawImage, int width, int height, int nBytes, const char *filename, int quality, qboolean relativePath, qboolean checkIfExists);
 
-image_t *R_LoadPic (char *name, byte *pic, int width, int height, imagetype_t type, int bits);
-image_t	*R_FindImage (char *name, imagetype_t type);
+image_t *R_LoadPic (const char *name, byte *pic, int width, int height, imagetype_t type, int bits);
+image_t *R_LoadQuakePic (const char *name, byte *pic, int width, int height, imagetype_t type, int bits);
+image_t	*R_FindImage (const char *rawName, imagetype_t type);
 void GL_UpdateAnisoMode (void);
-void GL_TextureMode( char *string );
+void GL_TextureMode (char *string);
 void R_ImageList_f (void);
-//void	GL_SetTexturePalette( unsigned palette[256] );
 void R_InitFailedImgList (void);
 void R_InitImages (void);
 void R_ShutdownImages (void);
 void R_FreeUnusedImages (void);
-//void GL_TextureAlphaMode( char *string );
-//void GL_TextureSolidMode( char *string );
+
 
 //
 // r_upscale.c
@@ -790,6 +874,7 @@ void R_Upscale_Init (void);
 */
 void GL_DrawParticles( int num_particles );
 
+
 //
 // r_fog.c
 //
@@ -802,50 +887,16 @@ void R_InitFogVars (void);
 void R_SetFogVars (qboolean enable, int model, int density,
 				   int start, int end, int red, int green, int blue);
 
+
+//
+// r_fragment.c
+//
+int R_MarkFragments (const vec3_t origin, const vec3_t axis[3], float radius, int maxPoints, vec3_t *points, int maxFragments, markFragment_t *fragments);
+
+
 /*
 ** GL config stuff
 */
-/*#define GL_RENDERER_VOODOO		0x00000001
-#define GL_RENDERER_VOODOO2   	0x00000002
-#define GL_RENDERER_VOODOO_RUSH	0x00000004
-#define GL_RENDERER_BANSHEE		0x00000008
-#define	GL_RENDERER_3DFX		0x0000000F
-
-#define GL_RENDERER_PCX1		0x00000010
-#define GL_RENDERER_PCX2		0x00000020
-#define GL_RENDERER_PMX			0x00000040
-#define	GL_RENDERER_POWERVR		0x00000070
-
-#define GL_RENDERER_PERMEDIA2	0x00000100
-#define GL_RENDERER_GLINT_MX	0x00000200
-#define GL_RENDERER_GLINT_TX	0x00000400
-#define GL_RENDERER_3DLABS_MISC	0x00000800
-#define	GL_RENDERER_3DLABS		0x00000F00
-
-#define GL_RENDERER_REALIZM		0x00001000
-#define GL_RENDERER_REALIZM2	0x00002000
-#define	GL_RENDERER_INTERGRAPH	0x00003000
-
-#define GL_RENDERER_3DPRO		0x00004000
-#define GL_RENDERER_REAL3D		0x00008000
-#define GL_RENDERER_RIVA128		0x00010000
-#define GL_RENDERER_DYPIC		0x00020000
-
-#define GL_RENDERER_V1000		0x00040000
-#define GL_RENDERER_V2100		0x00080000
-#define GL_RENDERER_V2200		0x00100000
-#define	GL_RENDERER_RENDITION	0x001C0000
-
-#define GL_RENDERER_O2          0x00100000
-#define GL_RENDERER_IMPACT      0x00200000
-#define GL_RENDERER_RE			0x00400000
-#define GL_RENDERER_IR			0x00800000
-#define	GL_RENDERER_SGI			0x00F00000
-
-#define GL_RENDERER_MCD			0x01000000
-#define GL_RENDERER_OTHER		0x80000000*/
-
-
 enum {
 	GLREND_DEFAULT		= 1 << 0,
 
@@ -911,6 +962,10 @@ typedef struct
 	qboolean	arb_vertex_program;
 //	qboolean	NV_texshaders;
 
+	// ARB occlusion query support
+	qboolean	occlusionQuery;
+	int			queryBitsSupported;
+
 	// anisotropic filtering
 	qboolean	anisotropic;
 	float		max_anisotropy;
@@ -931,7 +986,7 @@ typedef struct
 
 	int				prev_mode;
 
-	unsigned char	*d_16to8table;
+//	unsigned char	*d_16to8table;
 
 	int				lightmap_textures;
 
@@ -1033,8 +1088,6 @@ IMPORTED FUNCTIONS
 
 void	VID_Error (int err_level, char *str, ...);
 
-void	CL_SetParticleImages (void);
-
 void	Cmd_AddCommand (char *name, void(*cmd)(void));
 void	Cmd_RemoveCommand (char *name);
 int		Cmd_Argc (void);
@@ -1063,8 +1116,6 @@ void	 Cvar_SetValue (char *name, float value);
 
 qboolean	VID_GetModeInfo (int *width, int *height, int mode);
 void		VID_NewWindow (int width, int height);
-// Knightmare- added import of text color for renderer
-void		CL_TextColor (int colornum, int *red, int *green, int *blue);
 
 /*
 ====================================================================

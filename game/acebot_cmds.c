@@ -128,7 +128,7 @@ qboolean ACECM_Commands (edict_t *ent)
 ///////////////////////////////////////////////////////////////////////
 void ACECM_Store (void)
 {
-	ACEND_SaveNodes();
+	ACEND_SaveNodes ();
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -244,4 +244,3 @@ void safe_bprintf (int printlevel, char *fmt, ...)
 		gi.cprintf(cl_ent, printlevel, "%s", bigbuffer);
 	}
 }
-

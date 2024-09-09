@@ -35,6 +35,7 @@ vec4_t vec4_origin = {0,0,0,0};
 //============================================================================
 
 #ifdef _WIN32
+//#if defined (_MSC_VER) && (_MSC_VER <= 1200)
 #pragma optimize( "", off )
 #endif
 
@@ -94,6 +95,7 @@ void RotatePointAroundVector (vec3_t dst, const vec3_t dir, const vec3_t point, 
 }
 
 #ifdef _WIN32
+//#if defined (_MSC_VER) && (_MSC_VER <= 1200)
 #pragma optimize( "", on )
 #endif
 
@@ -105,7 +107,7 @@ void AngleVectors (vec3_t angles, vec3_t forward, vec3_t right, vec3_t up)
 	static float		sr, sp, sy, cr, cp, cy;
 	// static to help MS compiler fp bugs
 
-	if (!angles)
+	if ( !angles )
 		return;
 
 	angle = angles[YAW] * (M_PI*2 / 360);
@@ -876,12 +878,95 @@ float Q_rsqrt (float in)
 	return y;
 }
 
-int Q_log2(int val)
+int Q_log2 (int val)
 {
 	int answer=0;
 	while (val>>=1)
 		answer++;
 	return answer;
+}
+
+/*
+==========================
+vectoangles
+==========================
+*/
+void vectoangles (vec3_t value1, vec3_t angles)
+{
+	float	forward;
+	float	yaw, pitch;
+	
+	if (value1[1] == 0 && value1[0] == 0)
+	{
+		yaw = 0;
+		if (value1[2] > 0)
+			pitch = 90;
+		else
+			pitch = 270;
+	}
+	else
+	{
+	// PMM - fixed to correct for pitch of 0
+		if (value1[0])
+			yaw = (int) (atan2(value1[1], value1[0]) * 180 / M_PI);
+		else if (value1[1] > 0)
+			yaw = 90;
+		else
+			yaw = 270;
+		if (yaw < 0)
+			yaw += 360;
+
+		forward = sqrt (value1[0]*value1[0] + value1[1]*value1[1]);
+		pitch = (int) (atan2(value1[2], forward) * 180 / M_PI);
+		if (pitch < 0)
+			pitch += 360;
+	}
+
+	angles[PITCH] = -pitch;
+	angles[YAW] = yaw;
+	angles[ROLL] = 0;
+}
+
+/*
+==========================
+vectoangles2
+==========================
+*/
+void vectoangles2 (vec3_t value1, vec3_t angles)
+{
+	float	forward;
+	float	yaw, pitch;
+	
+	if (value1[1] == 0 && value1[0] == 0)
+	{
+		yaw = 0;
+		if (value1[2] > 0)
+			pitch = 90;
+		else
+			pitch = 270;
+	}
+	else
+	{
+	// PMM - fixed to correct for pitch of 0
+		if (value1[0])
+			yaw = (atan2(value1[1], value1[0]) * 180 / M_PI);
+		else if (value1[1] > 0)
+			yaw = 90;
+		else
+			yaw = 270;
+
+		if (yaw < 0)
+			yaw += 360;
+
+		forward = sqrt (value1[0]*value1[0] + value1[1]*value1[1]);
+		pitch = (atan2(value1[2], forward) * 180 / M_PI);
+		if (pitch < 0)
+			pitch += 360;
+	}
+
+	angles[PITCH] = -pitch;
+	angles[YAW] = yaw;
+	angles[ROLL] = 0;
 }
 
 /*
@@ -1063,7 +1148,7 @@ void COM_StripExtension (char *in, char *out, size_t outSize)
 		s--;
 	}
 
-	Q_strncpyz(out, outSize, in);
+	Q_strncpyz (out, outSize, in);
 	if (last-in < outSize)
 		out[last-in] = 0;
 }
@@ -1165,7 +1250,7 @@ void COM_DefaultExtension (char *path, size_t pathSize, char *extension)
 	}
 
 //	strncat (path, extension);
-	Q_strncatz(path, pathSize, extension);
+	Q_strncatz (path, pathSize, extension);
 }
 
 /*
@@ -1316,20 +1401,25 @@ void Swap_Init (void)
 ============
 va
 
-does a varargs printf into a temp buffer, so I don't need to have
+Does a varargs printf into a temp buffer, so I don't need to have
 varargs versions of all text functions.
+Multi-buffer allows use by nested functions without overwrite of
+buffer(s) used by previous function call.
 ============
 */
 char *va (char *format, ...)
 {
 	va_list			argptr;
-	static char		string[1024];
+	static char		string[16][1024];
+	static unsigned	index;
 	
+	index &= 15;
+
 	va_start (argptr, format);
-	Q_vsnprintf (string, sizeof(string), format, argptr);
+	Q_vsnprintf (string[index], sizeof(string[index]), format, argptr);
 	va_end (argptr);
 
-	return string;	
+	return string[index++];	
 }
 
 /*
@@ -1634,12 +1724,12 @@ int Com_ParseHexDigit (const char c)
 =================
 Com_ParseColorString
 
-Parse an RGB color from an rrggbb string
+Parse an RGB(A) color from an rrggbb(aa) formatted string
 =================
 */
 qboolean Com_ParseColorString (const char *s, color_t outColor)
 {
-	int		i, digits[6];
+	int		i, digits[8];
 
 	// catch null string or too short string
 	if ( !s || (strlen(s) < 6) ) {
@@ -1647,18 +1737,139 @@ qboolean Com_ParseColorString (const char *s, color_t outColor)
 		return false;
 	}
 
-	// parse thru all 6 digits
-	for (i = 0; i < 6; i++) {
-		digits[i] = Com_ParseHexDigit(s[i]);
-		if (digits[i] < 0)
-			return false;
+	if (strlen(s) >= 8)	// RRGGBB
+	{
+		// parse thru all 8 digits
+		for (i = 0; i < 8; i++) {
+			digits[i] = Com_ParseHexDigit(s[i]);
+			if (digits[i] < 0)
+				return false;
+		}
+		outColor[0] = ((digits[0] & 0xF) << 4) | (digits[1] & 0xF);
+		outColor[1] = ((digits[2] & 0xF) << 4) | (digits[3] & 0xF);
+		outColor[2] = ((digits[4] & 0xF) << 4) | (digits[5] & 0xF);
+		outColor[3] = ((digits[6] & 0xF) << 4) | (digits[7] & 0xF);
+	}
+	else	// RRGGBBAA
+	{
+		// parse thru all 6 digits
+		for (i = 0; i < 6; i++) {
+			digits[i] = Com_ParseHexDigit(s[i]);
+			if (digits[i] < 0)
+				return false;
+		}
+		outColor[0] = ((digits[0] & 0xF) << 4) | (digits[1] & 0xF);
+		outColor[1] = ((digits[2] & 0xF) << 4) | (digits[3] & 0xF);
+		outColor[2] = ((digits[4] & 0xF) << 4) | (digits[5] & 0xF);
 	}
 
-	outColor[0] = ((digits[0] & 0xF) << 4) | (digits[1] & 0xF);
-	outColor[1] = ((digits[2] & 0xF) << 4) | (digits[3] & 0xF);
-	outColor[2] = ((digits[4] & 0xF) << 4) | (digits[5] & 0xF);
+	return true;
+}
+
+
+/*
+=================
+Com_ParseColorStringPacked
+
+Parse an RGB color from an rrggbb sformatted string
+Returns in packed integer RGBA form
+=================
+*/
+unsigned int Com_ParseColorStringPacked (const char *s)
+{
+	unsigned int	retVal = 0;
+	color_t			color;
+	qboolean		parsed;
+
+	parsed = Com_ParseColorString (s, color);
+
+	if (parsed) {
+		retVal = (color[0] & 255) + ((color[1] & 255) << 8) +
+				((color[2] & 255) << 16) + ((color[3] & 255) << 24);
+	}
+	return retVal;
+}
+
+
+/*
+=================
+Com_ParseRGBAField
+
+Parse an RGBA color from an "r g b a" or "r g b" formatted string
+=================
+*/
+qboolean Com_ParseRGBAField (const char *s, color_t outColor)
+{
+	int				i, numComponents;
+	int				components_int[4] = {0};
+	float			components[4] = {0};
+	size_t			colorLen;
+	qboolean		floatFormat = true;
+
+	if (!s) {
+		return false;
+	}
+
+	colorLen = strlen(s);
+	if (colorLen < 5)	// rgba string too short
+		return false;
+
+	numComponents = sscanf (s, "%f %f %f %f", &components[0], &components[1], &components[2], &components[3]);
+	if ( (numComponents < 3) || (numComponents > 4) )	// invalid rgba string
+		return false;
+
+	for (i = 0; i < numComponents; i++) {
+		if (components[i] > 1.0f)
+			floatFormat = false;
+	}
+
+	if ( floatFormat )	// float representation
+	{
+		if (numComponents == 3)	// alpha is default 1.0
+			components[3] = 1.0f;
+		Vector4Set (outColor,
+					(int)(components[0] * 255) & 255, (int)(components[1] * 255) & 255,
+					(int)(components[2] * 255) & 255, (int)(components[3] * 255) & 255);
+	}
+	else	// integer representation
+	{	// rescan as int to avoid any float conversion errors
+		numComponents = sscanf (s, "%d %d %d %d", &components_int[0], &components_int[1], &components_int[2], &components_int[3]);
+		if ( (numComponents < 3) || (numComponents > 4) )	// invalid rgba string
+			return false;
+
+		if (numComponents == 3)	// alpha is default 255
+			components_int[3] = 255;
+		Vector4Set (outColor,
+					components_int[0] & 255, components_int[1] & 255,
+					components_int[2] & 255, components_int[3] & 255);
+	}
 
 	return true;
+}
+
+
+/*
+=================
+Com_ParseRGBAFieldPacked
+
+Parse an RGBA color from an "r g b a" or "r g b" formatted string
+Returns in packed integer RGBA form
+=================
+*/
+unsigned int Com_ParseRGBAFieldPacked (const char *s)
+{
+	unsigned int	retVal = 0;
+	color_t			color;
+	qboolean		parsed;
+
+	parsed = Com_ParseRGBAField (s, color);
+
+	if (parsed) {
+		retVal = (color[0] & 255) + ((color[1] & 255) << 8) +
+				((color[2] & 255) << 16) + ((color[3] & 255) << 24);
+	}	
+
+	return retVal;
 }
 
 
@@ -2056,19 +2267,7 @@ size_t Q_strncpyz (char *dst, size_t dstSize, const char *src)
 	const char	*s = src;
 	size_t		decSize = dstSize;
 
-	if (!dst) {
-	//	Com_Error (ERR_FATAL, "Q_strncpyz: NULL dst");
-	//	Com_Printf ("Q_strncpyz: NULL dst\n");
-		return 0;
-	}
-	if (!src) {
-	//	Com_Error (ERR_FATAL, "Q_strncpyz: NULL src");
-	//	Com_Printf ("Q_strncpyz: NULL src\n");
-		return 0;
-	}
-	if (dstSize < 1) {
-	//	Com_Error (ERR_FATAL, "Q_strncpyz: dstSize < 1");
-	//	Com_Printf ("Q_strncpyz: dstSize < 1\n");
+	if ( !dst || !src || (dstSize < 1) ) {
 		return 0;
 	}
 
@@ -2081,9 +2280,9 @@ size_t Q_strncpyz (char *dst, size_t dstSize, const char *src)
 	dst[dstSize-1] = 0;
 
 	if (decSize == 0)	// Insufficent room in dst, return count + length of remaining src
-		return (s - src - 1 + strlen(s));
+		return (s - src + strlen(s));	// was s - src - 1 + strlen(s)
 	else
-		return (s - src - 1);	// returned count excludes NULL terminator
+		return (s - src);	// returned count excludes NULL terminator
 }
 
 
@@ -2101,19 +2300,7 @@ size_t Q_strncatz (char *dst, size_t dstSize, const char *src)
 	size_t		decSize = dstSize;
 	size_t		dLen;
 
-	if (!dst) {
-	//	Com_Error (ERR_FATAL, "Q_strncatz: NULL dst");
-	//	Com_Printf ("Q_strncatz: NULL dst\n");
-		return 0;
-	}
-	if (!src) {
-	//	Com_Error (ERR_FATAL, "Q_strncatz: NULL src");
-	//	Com_Printf ("Q_strncatz: NULL src\n");
-		return 0;
-	}
-	if (dstSize < 1) {
-	//	Com_Error (ERR_FATAL, "Q_strncatz: dstSize < 1");
-	//	Com_Printf ("Q_strncatz: dstSize < 1\n");
+	if ( !dst || !src || (dstSize < 1) ) {
 		return 0;
 	}
 
@@ -2209,14 +2396,12 @@ void Com_sprintf (char *dest, size_t size, char *fmt, ...)
 	va_start (argptr, fmt);
 	len = Q_vsnprintf (bigbuffer, sizeof(bigbuffer), fmt, argptr);
 	va_end (argptr);
-#ifdef NOTTHIRTYFLIGHTS // FIXME: Can we print this when cl_enableconsole? -flibit
 //	if (len >= size)
 //		Com_Printf ("Com_sprintf: overflow of %i in %i\n", len, size);
 	if (len < 0)
 		Com_Printf ("Com_sprintf: overflow in temp buffer of size %i\n", sizeof(bigbuffer));
 	else if (len >= size)
 		Com_Printf ("Com_sprintf: overflow of %i in dest buffer of size %i\n", len, size);
-#endif
 	strncpy (dest, bigbuffer, size-1);
 	dest[size-1] = 0;
 }
@@ -2409,7 +2594,9 @@ void Info_SetValueForKey (char *s, char *key, char *value)
 
 	Com_sprintf (newi, sizeof(newi), "\\%s\\%s", key, value);
 
-	if (strlen(newi) + strlen(s) > maxsize)
+	// Knightmare- according to Maraakate, this can overflow
+//	if (strlen(newi) + strlen(s) > maxsize)
+	if (strlen(newi) + strlen(s) >= maxsize)
 	{
 		Com_Printf ("Info string length exceeded\n");
 		return;

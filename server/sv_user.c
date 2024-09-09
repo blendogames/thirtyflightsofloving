@@ -231,8 +231,8 @@ void SV_Baselines_f (void)
 {
 	int				startPos, start;
 	int				maxLen;	// Knightmare added
-	entity_state_t	nullstate;
-	entity_state_t	*base;
+	centity_state_t	nullstate;
+	centity_state_t	*base;
 
 	Com_DPrintf ("Baselines() from %s\n", sv_client->name);
 

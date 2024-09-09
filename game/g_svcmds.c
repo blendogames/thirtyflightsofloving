@@ -244,14 +244,16 @@ void SVCmd_WriteIP_f (void)
 	char	name[MAX_OSPATH];
 	byte	b[4];
 	int		i;
-	cvar_t	*game;
+/*	cvar_t	*game;
 
 	game = gi.cvar("game", "", 0);
 
 	if (!*game->string)
 		Com_sprintf (name, sizeof(name), "%s/listip.cfg", GAMEVERSION);
 	else
-		Com_sprintf (name, sizeof(name), "%s/listip.cfg", game->string);
+		Com_sprintf (name, sizeof(name), "%s/listip.cfg", game->string); */
+	// Knightmare- use SavegameDir() instead for compatibility on all platforms
+	Com_sprintf (name, sizeof(name), "%s/listip.cfg", SavegameDir());
 
 	safe_cprintf (NULL, PRINT_HIGH, "Writing %s.\n", name);
 
@@ -262,7 +264,7 @@ void SVCmd_WriteIP_f (void)
 		return;
 	}
 	
-	fprintf(f, "set filterban %d\n", (int)filterban->value);
+	fprintf (f, "set filterban %d\n", (int)filterban->value);
 
 	for (i=0 ; i<numipfilters ; i++)
 	{

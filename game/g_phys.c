@@ -205,8 +205,12 @@ qboolean SV_RunThink (edict_t *ent)
 		return true;
 	
 	ent->nextthink = 0;
-	if (!ent->think)
-		gi.error ("NULL ent->think for %s",ent->classname);
+	if ( !ent->think )
+	{
+	//	gi.error ("NULL ent->think for %s", ent->classname);
+		gi.dprintf ("NULL ent->think for %s\n", ent->classname);
+		return true;
+	}
 	ent->think (ent);
 
 	return false;
@@ -805,15 +809,18 @@ pushed_t	pushed[MAX_EDICTS], *pushed_p;
 
 edict_t	*obstacle;
 
-void MoveRiders(edict_t *platform, edict_t *ignore, vec3_t move, vec3_t amove, qboolean turn)
+void MoveRiders (edict_t *platform, edict_t *ignore, vec3_t move, vec3_t amove, qboolean turn)
 {
 	int	i;
 	edict_t	*rider;
 
-	for (i=1, rider=g_edicts+i; i<=globals.num_edicts; i++, rider++) {
-		if ((rider->groundentity == platform) && (rider != ignore)) {
+	for (i=1, rider=g_edicts+i; i<=globals.num_edicts; i++, rider++)
+	{
+		if ((rider->groundentity == platform) && (rider != ignore))
+		{
 			VectorAdd(rider->s.origin,move,rider->s.origin);
-			if (turn && (amove[YAW] != 0.)) {
+			if (turn && (amove[YAW] != 0.))
+			{
 				if (!rider->client)
 					rider->s.angles[YAW] += amove[YAW];
 				else
@@ -825,11 +832,13 @@ void MoveRiders(edict_t *platform, edict_t *ignore, vec3_t move, vec3_t amove, q
 				}
 			}
 			gi.linkentity(rider);
-			if (SV_TestEntityPosition(rider)) {
+			if (SV_TestEntityPosition(rider))
+			{
 				// Move is blocked. Since this is for riders, not pushees,
 				// it should be ok to just back the move for this rider off
 				VectorSubtract(rider->s.origin,move,rider->s.origin);
-				if (turn && (amove[YAW] != 0.)) {
+				if (turn && (amove[YAW] != 0.))
+				{
 					rider->s.angles[YAW] -= amove[YAW];
 					if (rider->client)
 					{
@@ -838,7 +847,8 @@ void MoveRiders(edict_t *platform, edict_t *ignore, vec3_t move, vec3_t amove, q
 					}
 				}
 				gi.linkentity(rider);
-			} else {
+			}
+			else {
 				// move this rider's riders
 				MoveRiders(rider,ignore,move,amove,turn);
 			}
@@ -857,7 +867,7 @@ false block tests in SV_Push if another bmodel is in the vicinity.
 ============
 */
 
-void RealBoundingBox(edict_t *ent, vec3_t mins, vec3_t maxs)
+void RealBoundingBox (edict_t *ent, vec3_t mins, vec3_t maxs)
 {
 	vec3_t	forward, left, up, f1, l1, u1;
 	vec3_t	p[8];
@@ -1286,7 +1296,7 @@ void SV_Physics_Pusher (edict_t *ent)
 	edict_t		*part, *mv;
 
 	// if not a team captain, movement will be handled elsewhere
-	if ( ent->flags & FL_TEAMSLAVE)
+	if (ent->flags & FL_TEAMSLAVE)
 		return;
 
 	// make sure all team slaves can move before commiting
@@ -1396,7 +1406,7 @@ Non moving objects can only think
 */
 void SV_Physics_None (edict_t *ent)
 {
-// regular thinking
+	// regular thinking
 	SV_RunThink (ent);
 }
 
@@ -1444,11 +1454,15 @@ void SV_Physics_Toss (edict_t *ent)
 	qboolean	isinwater;
 	vec3_t		old_origin;
 
-// regular thinking
+	// regular thinking
 	SV_RunThink (ent);
 
+	// Phatman fix: ent was somtimes being freed inside SV_RunThink
+    if ( !ent->inuse )
+        return;
+
 	// if not a team captain, so movement will be handled elsewhere
-	if ( ent->flags & FL_TEAMSLAVE)
+	if (ent->flags & FL_TEAMSLAVE)
 		return;
 
 	if (ent->groundentity)
@@ -1457,12 +1471,12 @@ void SV_Physics_Toss (edict_t *ent)
 	if (ent->velocity[2] > 0)
 		ent->groundentity = NULL;
 
-// check for the groundentity going away
+	// check for the groundentity going away
 	if (ent->groundentity)
 		if (!ent->groundentity->inuse)
 			ent->groundentity = NULL;
 
-// Lazarus: conveyor
+	// Lazarus: conveyor
 	if (ent->groundentity && (ent->groundentity->movetype == MOVETYPE_CONVEYOR))
 	{
 		vec3_t	point, end;
@@ -1702,15 +1716,15 @@ void SV_Physics_Step (edict_t *ent)
 	if (ent->mass > 0 && ent->density == 0.)
 	{
 		ent->volume = ent->size[0] * ent->size[1] * ent->size[2];
-		ent->density = ent->mass/ent->volume;
+		ent->density = ent->mass / ent->volume;
 
 		if (ent->movetype == MOVETYPE_PUSHABLE)
 		{
 			// This stuff doesn't apply to anything else, and... heh...
 			// caused monster_flipper to sink
 
-			ent->bob      = min(2.0,300.0/ent->mass);
-			ent->duration = max(2.0,1.0 + ent->mass/100.0f);
+			ent->bob      = min(2.0, 300.0 / ent->mass);
+			ent->duration = max(2.0, 1.0 + ent->mass / 100.0f);
 			
 			// Figure out neutral bouyancy line for this entity
 			// This isn't entirely realistic, but helps gameplay:
@@ -1727,8 +1741,8 @@ void SV_Physics_Step (edict_t *ent)
 	// (monsters take care of this in g_monster.c)
 	if (!(ent->svflags & SVF_MONSTER) && (ent->flags & FL_SWIM) )
 	{
-		point[0] = (ent->absmax[0] + ent->absmin[0])/2;
-		point[1] = (ent->absmax[1] + ent->absmin[1])/2;
+		point[0] = (ent->absmax[0] + ent->absmin[0]) / 2;
+		point[1] = (ent->absmax[1] + ent->absmin[1]) / 2;
 		point[2] = ent->absmin[2] + 1;
 		cont = gi.pointcontents (point);
 		if (!(cont & MASK_WATER)) {
@@ -1739,7 +1753,7 @@ void SV_Physics_Step (edict_t *ent)
 		{
 			ent->watertype = cont;
 			ent->waterlevel = 1;
-			point[2] = ent->absmin[2] + ent->size[2]/2;
+			point[2] = ent->absmin[2] + ent->size[2] / 2;
 			cont = gi.pointcontents (point);
 			if (cont & MASK_WATER)
 			{
@@ -2053,9 +2067,10 @@ void SV_Physics_Step (edict_t *ent)
 			gi.sound (ent, CHAN_BODY, gi.soundindex("player/watr_in.wav"), 1, ATTN_NORM, 0);
 	}
 
-// regular thinking
+	// regular thinking
 	SV_RunThink (ent);
-	VectorCopy(ent->velocity,ent->oldvelocity);
+
+	VectorCopy (ent->velocity, ent->oldvelocity);
 }
 
 
@@ -2403,9 +2418,11 @@ void SV_Physics_Vehicle (edict_t *ent)
 		if (!ent->inuse)
 			return;
 	}
-//  regular thinking
+
+	// regular thinking
 	SV_RunThink (ent);
-	VectorCopy(ent->velocity,ent->oldvelocity);
+
+	VectorCopy (ent->velocity, ent->oldvelocity);
 }
 
 //============================================================================
@@ -2525,18 +2542,22 @@ void SV_Physics_Debris (edict_t *ent)
 	qboolean	isinwater;
 	vec3_t		old_origin;
 
-// regular thinking
+	// regular thinking
 	SV_RunThink (ent);
+
+	// Phatman fix: ent was somtimes being freed inside SV_RunThink
+    if ( !ent->inuse )
+        return;
 
 	if (ent->velocity[2] > 0)
 		ent->groundentity = NULL;
 
-// check for the groundentity going away
+	// check for the groundentity going away
 	if (ent->groundentity)
 		if (!ent->groundentity->inuse)
 			ent->groundentity = NULL;
 
-// if onground, return without moving
+	// if onground, return without moving
 	if ( ent->groundentity )
 		return;
 
@@ -2545,7 +2566,7 @@ void SV_Physics_Debris (edict_t *ent)
 	SV_AddGravity (ent);
 
 // move angles
-	//Knightmare- avelocity of target angle breakaway is constant
+	// Knightmare- avelocity of target angle breakaway is constant
 	VectorMA (ent->s.angles, FRAMETIME, ent->avelocity, ent->s.angles);
 
 // move origin
@@ -2696,10 +2717,10 @@ void G_RunEntity (edict_t *ent)
 		break;
 	// Lazarus
 	case MOVETYPE_WALK:
-		SV_Physics_None(ent);
+		SV_Physics_None (ent);
 		break;
 	case MOVETYPE_CONVEYOR:
-		SV_Physics_Conveyor(ent);
+		SV_Physics_Conveyor (ent);
 		break;
 	default:
 		gi.error ("SV_Physics: bad movetype %i", (int)ent->movetype);			

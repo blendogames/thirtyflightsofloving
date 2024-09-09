@@ -45,10 +45,10 @@ static int	sound_sight;
 
 void flipper_stand (edict_t *self);
 
-//Knightmare added- these sounds were unused
+// Knightmare added- these sounds were unused
 void flipper_breathe (edict_t *self)
 {
-	if (self->waterlevel > 0) //only make bubble sounds if submerged
+	if (self->waterlevel > 0) // only make bubble sounds if submerged
 		gi.sound (self, CHAN_VOICE, sound_idle, 1, ATTN_IDLE, 0);
 }
 
@@ -150,7 +150,7 @@ mframe_t flipper_frames_walk [] =
 	ai_walk, 4, NULL,
 	ai_walk, 4, NULL,
 	ai_walk, 4, NULL,
-	ai_walk, 4, flipper_breathe, //Knightmare added- breathing
+	ai_walk, 4, flipper_breathe, // Knightmare added- breathing
 	ai_walk, 4, NULL,
 	ai_walk, 4, NULL,
 	ai_walk, 4, NULL
@@ -388,6 +388,20 @@ void flipper_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dama
 	self->monsterinfo.currentmove = &flipper_move_death;
 }
 
+// Knightmare- added soundcache function
+void monster_flipper_soundcache (edict_t *self)
+{
+	sound_pain1		= gi.soundindex ("flipper/flppain1.wav");	
+	sound_pain2		= gi.soundindex ("flipper/flppain2.wav");	
+	sound_death		= gi.soundindex ("flipper/flpdeth1.wav");	
+	sound_chomp		= gi.soundindex ("flipper/flpatck1.wav");
+	sound_attack	= gi.soundindex ("flipper/flpatck2.wav");
+	sound_idle		= gi.soundindex ("flipper/flpidle1.wav");
+	sound_search	= gi.soundindex ("flipper/flpsrch1.wav");
+	sound_sight		= gi.soundindex ("flipper/flpsght1.wav");
+}
+
+
 /*QUAKED monster_flipper (1 .5 0) (-16 -16 -24) (16 16 32) Ambush Trigger_Spawn Sight
 */
 void SP_monster_flipper (edict_t *self)
@@ -398,14 +412,8 @@ void SP_monster_flipper (edict_t *self)
 		return;
 	}
 
-	sound_pain1		= gi.soundindex ("flipper/flppain1.wav");	
-	sound_pain2		= gi.soundindex ("flipper/flppain2.wav");	
-	sound_death		= gi.soundindex ("flipper/flpdeth1.wav");	
-	sound_chomp		= gi.soundindex ("flipper/flpatck1.wav");
-	sound_attack	= gi.soundindex ("flipper/flpatck2.wav");
-	sound_idle		= gi.soundindex ("flipper/flpidle1.wav");
-	sound_search	= gi.soundindex ("flipper/flpsrch1.wav");
-	sound_sight		= gi.soundindex ("flipper/flpsght1.wav");
+	// Knightmare- use soundcache function
+	monster_flipper_soundcache (self);
 
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;

@@ -115,7 +115,7 @@ mmove_t infantry_move_fidget = {FRAME_stand01, FRAME_stand49, infantry_frames_fi
 void infantry_fidget (edict_t *self)
 {
 	self->monsterinfo.currentmove = &infantry_move_fidget;
-	if (!(self->spawnflags & SF_MONSTER_AMBUSH))
+	if ( !(self->spawnflags & SF_MONSTER_AMBUSH) )
 		gi.sound (self, CHAN_VOICE, sound_idle, 1, ATTN_IDLE, 0);
 }
 
@@ -489,7 +489,7 @@ void infantry_fire_prep (edict_t *self)
 {
 	int n;
 	n = (rand() & 15) + 3 + 1;
-	self->monsterinfo.pausetime = level.time + n*FRAMETIME;
+	self->monsterinfo.pausetime = level.time + n * FRAMETIME;
 }
 
 // pmm
@@ -640,7 +640,7 @@ qboolean infantry_blocked (edict_t *self, float dist)
 
 	if (blocked_checkjump (self, dist, 192, 40))
 	{
-		infantry_jump(self);
+		infantry_jump (self);
 		return true;
 	}
 
@@ -790,8 +790,9 @@ void infantry_sidestep (edict_t *self)
 		self->monsterinfo.currentmove = &infantry_move_run;
 }
 
-// Zaero added
-void SP_monster_infantry_precache (void)
+
+// Knightmare- added soundcache function
+void monster_infantry_soundcache (edict_t *self)
 {
 	sound_pain1 = gi.soundindex ("infantry/infpain1.wav");
 	sound_pain2 = gi.soundindex ("infantry/infpain2.wav");
@@ -807,7 +808,15 @@ void SP_monster_infantry_precache (void)
 	sound_search = gi.soundindex ("infantry/infsrch1.wav");
 	sound_idle = gi.soundindex ("infantry/infidle1.wav");
 }
+
+// Zaero added
+/*void SP_monster_infantry_precache (edict_t *self)
+{
+	// Knightmare- use soundcache function
+	monster_infantry_soundcache (self);
+} */
 // end Zaero
+
 
 /*QUAKED monster_infantry (1 .5 0) (-16 -16 -24) (16 16 32) Ambush Trigger_Spawn Sight GoodGuy NoGib
 */
@@ -819,20 +828,9 @@ void SP_monster_infantry (edict_t *self)
 		return;
 	}
 
-	sound_pain1 = gi.soundindex ("infantry/infpain1.wav");
-	sound_pain2 = gi.soundindex ("infantry/infpain2.wav");
-	sound_die1 = gi.soundindex ("infantry/infdeth1.wav");
-	sound_die2 = gi.soundindex ("infantry/infdeth2.wav");
+	// Knightmare- use soundcache function
+	monster_infantry_soundcache (self);
 
-	sound_gunshot = gi.soundindex ("infantry/infatck1.wav");
-	sound_weapon_cock = gi.soundindex ("infantry/infatck3.wav");
-	sound_punch_swing = gi.soundindex ("infantry/infatck2.wav");
-	sound_punch_hit = gi.soundindex ("infantry/melee2.wav");
-	
-	sound_sight = gi.soundindex ("infantry/infsght1.wav");
-	sound_search = gi.soundindex ("infantry/infsrch1.wav");
-	sound_idle = gi.soundindex ("infantry/infidle1.wav");
-	
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;
 
@@ -879,6 +877,12 @@ void SP_monster_infantry (edict_t *self)
 		self->monsterinfo.jump = infantry_jump;
 		self->monsterinfo.jumpup = 48;
 		self->monsterinfo.jumpdn = 160;
+	}
+	else
+	{
+		self->monsterinfo.jump = NULL;
+		self->monsterinfo.jumpup = 0;
+		self->monsterinfo.jumpdn = 0;
 	}
 
 	// Lazarus

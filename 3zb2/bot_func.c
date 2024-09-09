@@ -2,16 +2,17 @@
 #include "m_player.h"
 
 
-qboolean Get_YenPos(char *Buff,int *curr)
+qboolean Get_YenPos (char *Buff, int *curr)
 {
 	int i;
 
 	i = *curr + 1;
 
-	while(1)
+	while (1)
 	{
-//		if (i >= strlen(Buff)) return false;
-		if (Buff[i] == 0 || Buff[i] == 10 || Buff[i] == 13)
+	//	if (i >= strlen(Buff))
+	//		return false;
+		if ( (Buff[i] == 0) || (Buff[i] == 10) || (Buff[i] == 13) )
 		{
 			*curr = i;
 			return true;
@@ -21,7 +22,10 @@ qboolean Get_YenPos(char *Buff,int *curr)
 			*curr = i;
 			return true;
 		}
-		if (Buff[i] == '\t') Buff[i] = 0;
+		if (Buff[i] == '\t')
+		{
+			Buff[i] = 0;
+		}
 		i++;
 	}
 }
@@ -31,20 +35,23 @@ qboolean Get_YenPos(char *Buff,int *curr)
 // Load bot's infomation from 3ZBConfig.cfg
 //
 //----------------------------------------------------------------
-void Load_BotInfo()
+void Load_BotInfo (void)
 {
 	char	MessageSection[50];
+	char	fileName[256];
 	char	Buff[1024];
-	int		i,j,k,l;
-
+	int		i, j, k, l;
 	FILE	*fp;
+#ifndef _WIN32
+	size_t  len;
+#endif // _WIN32
 
 	SpawnWaitingBots = 0;
 	ListedBotCount = 0;
 
-	//init message
-	memset(ClientMessage,0,sizeof(ClientMessage));
-	//set message section
+	// init message
+	memset (ClientMessage, 0, sizeof(ClientMessage));
+	// set message section
 	if (!ctf->value && chedit->value)
 		Com_strcpy (MessageSection, sizeof(MessageSection), MESS_CHAIN_DM);
 	else if (ctf->value && !chedit->value)
@@ -54,20 +61,20 @@ void Load_BotInfo()
 	else
 		Com_strcpy (MessageSection, sizeof(MessageSection), MESS_DEATHMATCH);
 
-	//init botlist
+	// init botlist
 	ListedBots = 0;
 	j = 1;
-	for(i = 0;i < MAXBOTS;i++)
+	for (i = 0; i < MAXBOTS; i++)
 	{
-		//netname
+		// netname
 		Com_sprintf (Buff, sizeof(Buff), "Zigock[%i]",i);
 		Com_strcpy (Bot[i].netname, sizeof(Bot[i].netname), Buff);
-		//model
+		// model
 		Com_strcpy (Bot[i].model, sizeof(Bot[i].model), "male");
-		//skin
+		// skin
 		Com_strcpy (Bot[i].model, sizeof(Bot[i].model), "grunt");
-	
-		//param
+
+		// param
 		Bot[i].param[BOP_WALK] = 0;
 		Bot[i].param[BOP_AIM] = 5;
 		Bot[i].param[BOP_PICKUP] = 5;
@@ -77,80 +84,109 @@ void Load_BotInfo()
 		Bot[i].param[BOP_HRANGE] = 180;
 		Bot[i].param[BOP_REACTION] = 0;
 
-		//spawn flag
+		// spawn flag
 		Bot[i].spflg = 0;
-		//team
+		// team
 		Bot[i].team = j;
 		if (++j > 2) j = 1;
 	}
 
-	//botlist value
+	// botlist value
 	botlist = gi.cvar ("botlist", "default", CVAR_SERVERINFO | CVAR_LATCH);
 	gamepath = gi.cvar ("game", "0", CVAR_NOSET);
 
-	//load info
-	Com_sprintf (Buff, sizeof(Buff), ".\\%s\\3ZBconfig.cfg",gamepath->string);
-	fp = fopen(Buff, "rt");
+	// load info
+//	Com_sprintf (fileName, sizeof(fileName), ".\\%s\\3ZBconfig.cfg", gamepath->string);
+	// Knightmare- use GameDir() instead
+	Com_sprintf (fileName, sizeof(fileName), "%s/3zbconfig.cfg", GameDir());
+	fp = fopen(fileName, "rt");
 	if (fp == NULL)
 	{
-		gi.dprintf("3ZB CFG: file not found.\n");
+		gi.dprintf ("3ZB CFG: file not found.\n");
 		return;
 	}
 	else
 	{
-		fseek( fp, 0, SEEK_SET);	//êÊì™Ç÷à⁄ìÆ
-		while(1)
+		fseek (fp, 0, SEEK_SET);	//êÊì™Ç÷à⁄ìÆ
+		while (1)
 		{
-			if (fgets( Buff, sizeof(Buff), fp ) == NULL) goto MESS_NOTFOUND;
-			if (!Q_strncasecmp(MessageSection,Buff,strlen(MessageSection))) break;	// Knightmare- was _strnicmp()
+			if (fgets( Buff, sizeof(Buff), fp ) == NULL)
+				goto MESS_NOTFOUND;
+			if ( !Q_strncasecmp(MessageSection, Buff, strlen(MessageSection)) )
+				break;	// Knightmare- was _strnicmp()
 		}
 
-		while(1)
+		while (1)
 		{
-			if (fgets( Buff, sizeof(Buff), fp ) == NULL) goto MESS_NOTFOUND;
-			if (Buff[0] == '.' || Buff[0] == '[' || Buff[0] == '#') break;
+			if (fgets( Buff, sizeof(Buff), fp ) == NULL)
+				goto MESS_NOTFOUND;
+			if (Buff[0] == '.' || Buff[0] == '[' || Buff[0] == '#')
+				break;
 			k = (int)strlen(Buff);
-			if ((strlen(Buff) + strlen(ClientMessage)) > MAX_STRING_CHARS - 1) break;
+			if ((strlen(Buff) + strlen(ClientMessage)) > MAX_STRING_CHARS - 1)
+				break;
+
+		// Knightmare- replace carriage returns on Linux
+#ifndef _WIN32
+			len = strlen(Buff);
+			for (i = 0; i < len; i++) {
+				if (Buff[i] == '\r')
+					Buff[i] = ' ';
+			}
+#endif // _WIN32
+
 			Com_strcat (ClientMessage, sizeof(ClientMessage), Buff);
 		}
 MESS_NOTFOUND:
 	//	if (botlist->string == NULL)
 	//		Com_strcpy (MessageSection, sizeof(MessageSection), BOTLIST_SECTION_DM);
-	//	else 
-		Com_sprintf (MessageSection, sizeof(MessageSection), "[%s]",botlist->string);
-		fseek( fp, 0, SEEK_SET);	//êÊì™Ç÷à⁄ìÆ
-		while(1)
+	//	else
+		Com_sprintf (MessageSection, sizeof(MessageSection), "[%s]", botlist->string);
+		fseek (fp, 0, SEEK_SET);	//êÊì™Ç÷à⁄ìÆ
+		while (1)
 		{
 			if (fgets( Buff, sizeof(Buff), fp ) == NULL)
 			{
 				MessageSection[0] = 0;
 				break;
 			}
-			if (!Q_strncasecmp(MessageSection, Buff,strlen(MessageSection))) break;	// Knightmare- was _strnicmp()
+			if ( !Q_strncasecmp(MessageSection, Buff, strlen(MessageSection)) ) 	// Knightmare- was _strnicmp()
+				break;
 		}
-		//when not found
+		// when not found
 		if (MessageSection[0] == 0)
 		{
 			Com_strcpy (MessageSection, sizeof(MessageSection), BOTLIST_SECTION_DM);
-			fseek( fp, 0, SEEK_SET);	//êÊì™Ç÷à⁄ìÆ
-			while(1)
+			fseek (fp, 0, SEEK_SET);	//êÊì™Ç÷à⁄ìÆ
+			while (1)
 			{
-				if (fgets( Buff, sizeof(Buff), fp ) == NULL) goto BOTLIST_NOTFOUND;
-				if (!Q_strncasecmp(MessageSection, Buff, strlen(MessageSection))) break;	// Knightmare- was _strnicmp()
+				if (fgets( Buff, sizeof(Buff), fp ) == NULL)
+					goto BOTLIST_NOTFOUND;
+				if ( !Q_strncasecmp(MessageSection, Buff, strlen(MessageSection)) )	// Knightmare- was _strnicmp()
+					break;
 			}
 		}
 
 		i = 0;
-		for(i = 0;i < MAXBOTS;i++)
+		for (i = 0; i < MAXBOTS; i++)
 		{
-			if (fgets( Buff, sizeof(Buff), fp ) == NULL) break;
-			if (Buff[0] == '[') break;
-			if (Buff[0] == '\n' || Buff[0] == '#') {i--;continue;}
-			j = 2,k = 1;
-			if (!strncmp(Buff,"\\\\",2))
+			if (fgets( Buff, sizeof(Buff), fp ) == NULL)
+				break;
+			if (Buff[0] == '[')
+				break;
+#ifndef _WIN32
+			if ( (Buff[0] == '\n') || (Buff[0] == '\r') || (Buff[0] == '#') ) {
+#else
+			if ( (Buff[0] == '\n') || (Buff[0] == '#') ) {
+#endif // _WIN32
+				i--;
+				continue;
+			}
+			j = 2, k = 1;
+			if ( !strncmp(Buff, "\\\\", 2) )
 			{
-				//netname
-				if (Get_YenPos(Buff,&k))
+				// netname
+				if ( Get_YenPos(Buff, &k) )
 				{
 					Buff[k] = 0;
 					if (strlen(&Buff[j]) < 21)
@@ -158,8 +194,8 @@ MESS_NOTFOUND:
 					j = k + 1;
 				}
 				else break;
-				//model name
-				if (Get_YenPos(Buff,&k))
+				// model name
+				if ( Get_YenPos(Buff, &k) )
 				{
 					Buff[k] = 0;
 					if (strlen(&Buff[j]) < 21)
@@ -168,8 +204,8 @@ MESS_NOTFOUND:
 					k++;
 				}
 				else break;
-				//skin name
-				if (Get_YenPos(Buff,&k))
+				// skin name
+				if ( Get_YenPos(Buff, &k) )
 				{
 					Buff[k] = 0;
 					if (strlen(&Buff[j]) < 21)
@@ -178,10 +214,10 @@ MESS_NOTFOUND:
 					k++;
 				}
 				else break;
-				for(l = 0;l < MAXBOP;l++)
+				for (l = 0; l < MAXBOP; l++)
 				{
-					//param0-7
-					if (Get_YenPos(Buff,&k))
+					// param0-15
+					if ( Get_YenPos(Buff, &k) )
 					{
 						Buff[k] = 0;
 						Bot[i].param[l] = (unsigned char)atoi(&Buff[j]);
@@ -190,36 +226,52 @@ MESS_NOTFOUND:
 					}
 					else break;
 				}
-				if (l < MAXBOP) break;
-				//team
-				if (Get_YenPos(Buff,&k))
+				if (l < MAXBOP)
+					break;
+				// team
+				if ( Get_YenPos(Buff, &k) )
 				{
 					Buff[k] = 0;
-					if (Buff[j] == 'R') Bot[i].team = 1;
-					else if (Buff[j] == 'B') Bot[i].team = 2;
-					else Bot[i].team = 1;
+					if (Buff[j] == 'R')
+						Bot[i].team = 1;
+					else if (Buff[j] == 'B')
+						Bot[i].team = 2;
+					else
+						Bot[i].team = 1;
 					j = k + 1;
 					k++;
 				}
 				else break;
-				//auto spawn
-				if (Get_YenPos(Buff,&k))
+				// auto spawn
+				if ( Get_YenPos(Buff, &k) )
 				{
 					Buff[k] = 0;
 					Bot[i].spflg = atoi(&Buff[j]);
-//gi.dprintf("%i %s\n",Bot[i].spflg,&Buff[j]);
-					if (Bot[i].spflg == BOT_SPRESERVED && autospawn->value && !chedit->value) SpawnWaitingBots++; 
+				//	gi.dprintf ("%i %s\n", Bot[i].spflg,&Buff[j]);
+					if (Bot[i].spflg == BOT_SPRESERVED && autospawn->value && !chedit->value) SpawnWaitingBots++;
 					else Bot[i].spflg = BOT_SPAWNNOT;
 				}
 				else break;
+
+				// Knightmare- debug output
+			/*	gi.dprintf ("Bot #%i netname: %s ^rmodel: %s skin: %s team: %s\n", i,
+								Bot[i].netname, Bot[i].model, Bot[i].skin, (Bot[i].team == 1) ? "red" : "blue" );
+				gi.dprintf ("Bot #%i params: [%i %i %i %i %i %i %i] [%i %i %i %i] [%i %i %i %i %i]\n", i,
+								Bot[i].param[0], Bot[i].param[1], Bot[i].param[2], Bot[i].param[3],
+								Bot[i].param[4],  Bot[i].param[5], Bot[i].param[6], Bot[i].param[7],
+								Bot[i].param[8], Bot[i].param[9], Bot[i].param[10], Bot[i].param[11],
+								Bot[i].param[12], Bot[i].param[13], Bot[i].param[14], Bot[i].param[15]); */
+
 				ListedBots++;
 			}
 		}
 	}
 BOTLIST_NOTFOUND:
-	fclose(fp);
+	fclose (fp);
 
-	gi.dprintf("%i of Bots is listed.\n",ListedBots);	
+//	gi.dprintf ("%i of Bots is listed.\n", ListedBots);
+	// Knightmare- use better grammar for this message, LOL
+	gi.dprintf ("Loaded %i bots from %s\n", ListedBots, fileName);
 	spawncycle = level.time + FRAMETIME * 100;
 }
 
@@ -309,7 +361,7 @@ void Bot_Think (edict_t *self)
 				self->client->respawn_time = level.time;
 				CopyToBodyQue (self);
 				PutBotInServer(self);
-			}		
+			}
 		}
 	}
 	else
@@ -329,7 +381,7 @@ void Bot_Think (edict_t *self)
 	M_CatagorizePosition (self);
 	BotEndServerFrame (self);
 	self->nextthink = level.time + FRAMETIME;
-	return;	
+	return;
 }
 
 //----------------------------------------------------------------
@@ -356,7 +408,7 @@ void InitializeBot (edict_t *ent,int botindex )
 	memset (&client->resp, 0, sizeof(client->resp));
 
 	//set botindex NO.
-	client->zc.botindex = botindex;	
+	client->zc.botindex = botindex;
 
 	client->resp.enterframe = level.framenum;
 
@@ -398,14 +450,14 @@ void PutBotInServer (edict_t *ent)
 	gclient_t		*client;
 	vec3_t			spawn_origin, spawn_angles;
 	trace_t			rs_trace;
-	zgcl_t			*zc;		
-	
+	zgcl_t			*zc;
+
 	zc = &ent->client->zc;
 
 //test
 //	item = FindItem("Trap");
 //	ent->client->pers.inventory[ITEM_INDEX(item)] = 100;
-//test	
+//test
 
 	//current weapon
 	client = ent->client;
@@ -465,8 +517,8 @@ void PutBotInServer (edict_t *ent)
 
 	ent->pain = player_pain;
 	ent->die = player_die;
-	ent->touch = NULL; 
-	
+	ent->touch = NULL;
+
 	ent->moveinfo.decel = level.time;
 	ent->pain_debounce_time = level.time;
 	ent->targetname = NULL;
@@ -563,14 +615,14 @@ void PutBotInServer (edict_t *ent)
 //
 //----------------------------------------------------------------
 
-qboolean SpawnBot(int i)
+qboolean SpawnBot (int i)
 {
 	edict_t		*bot,*ent;
 	int			k,j;
 
 
 //gi.cprintf (NULL,PRINT_HIGH,"Called %s %s %s\n",Bot[i].netname,Bot[i].model,Bot[i].skin);
-//return false;	
+//return false;
 
 	if (	Get_NumOfPlayer () >= game.maxclients )
 	{
@@ -587,14 +639,14 @@ qboolean SpawnBot(int i)
 	j = targetindex;
 	if (chedit->value)
 	{
-		for(k = CurrentIndex - 1;k > 0 ;k--)
+		for (k = CurrentIndex - 1;k > 0 ;k--)
 		{
 			if (Route[k].index == 0) break;
 
 			if (Route[k].state == GRS_NORMAL)
 			{
 				if (--j <= 0) break;
-			}  
+			}
 		}
 
 		bot->client->zc.rt_locktime = level.time + FRAMETIME * 20;
@@ -636,16 +688,16 @@ qboolean SpawnBot(int i)
 //	int i	index of bot list
 //
 //----------------------------------------------------------------
-void Bot_SpawnCall()
+void Bot_SpawnCall (void)
 {
 	int i;
 
-	for(i = 0;i < MAXBOTS;i++)
+	for( i = 0;i < MAXBOTS;i++)
 	{
 		if (Bot[i].spflg == BOT_SPRESERVED)
 		{
 			if (SpawnBot(i)) Bot[i].spflg = BOT_SPAWNED;
-			else 
+			else
 			{
 				Bot[i].spflg = BOT_SPAWNNOT;
 				targetindex = 0;
@@ -661,11 +713,11 @@ void Bot_SpawnCall()
 // spawn bots reserving
 //
 //----------------------------------------------------------------
-void SpawnBotReserving()
+void SpawnBotReserving (void)
 {
 	int	i;
 
-	for(i = 0;i < MAXBOTS; i++)
+	for (i = 0;i < MAXBOTS; i++)
 	{
 		if (Bot[i].spflg == BOT_SPAWNNOT)
 		{
@@ -682,7 +734,7 @@ void SpawnBotReserving()
 // randomized spawn bots reserving
 //
 //----------------------------------------------------------------
-void SpawnBotReserving2(int *red,int *blue)
+void SpawnBotReserving2 (int *red,int *blue)
 {
 	int	i,j;
 
@@ -697,7 +749,7 @@ void SpawnBotReserving2(int *red,int *blue)
 			SpawnWaitingBots++;
 			if (*red > *blue) Bot[j].team = 2;
 			else Bot[j].team = 1;
-			
+
 			if (Bot[j].team == 1) *red = *red + 1;
 			else if (Bot[j].team == 2) *blue = *blue + 1;
 //gi.cprintf(NULL,PRINT_HIGH,"team %i\n",Bot[j].team);
@@ -715,14 +767,14 @@ void SpawnBotReserving2(int *red,int *blue)
 //	int i	index of bot list
 //
 //----------------------------------------------------------------
-void RemoveBot()
+void RemoveBot (void)
 {
 	int			i;
 	int			botindex;
 	edict_t		*e,*ent;
 	gclient_t	*client;
 
-	for(i = MAXBOTS - 1;i >= 0;i--)
+	for (i = MAXBOTS - 1;i >= 0;i--)
 	{
 		if (Bot[i].spflg == BOT_SPAWNED || Bot[i].spflg == BOT_NEXTLEVEL)
 		{
@@ -754,7 +806,7 @@ void RemoveBot()
 				else Bot[botindex].spflg = BOT_SPRESERVED;
 
 				gi.bprintf (PRINT_HIGH, "%s disconnected\n", e->client->pers.netname);
-	
+
 				// send effect
 				gi.WriteByte (svc_muzzleflash);
 				gi.WriteShort (e-g_edicts);
@@ -771,7 +823,7 @@ void RemoveBot()
 					CTFDeadDropTech(e);
 					// end Bouman fix
 				}
-				
+
 				gi.linkentity (e);
 
 				e->inuse = false;
@@ -805,16 +857,16 @@ void RemoveBot()
 //----------------------------------------------------------------
 //Level Change Removing
 //
-// 
+//
 //
 //----------------------------------------------------------------
-void Bot_LevelChange()
+void Bot_LevelChange (void)
 {
 	int i,j,k;
 
 	j = 0,k = 0;
 
-	for(i = 0;i < MAXBOTS;i++)
+	for (i = 0;i < MAXBOTS;i++)
 	{
 		if (Bot[i].spflg)
 		{
@@ -826,7 +878,7 @@ void Bot_LevelChange()
 			j++;
 		}
 	}
-	for(i = 0;i < k; i++)
+	for (i = 0;i < k; i++)
 	{
 		RemoveBot();
 	}
@@ -837,7 +889,7 @@ void Bot_LevelChange()
 //
 //	Ragomode menu
 //
-void ZigockClientJoin(edict_t  *ent,int zclass)
+void ZigockClientJoin (edict_t  *ent,int zclass)
 {
 	PMenu_Close(ent);
 
@@ -857,9 +909,9 @@ void ZigockClientJoin(edict_t  *ent,int zclass)
 			ent->client->pers.netname, CTFTeamName(ent->client->resp.ctf_team/*desired_team*/));
 	}
 }
-void ClientJoinAsAlpha(edict_t *ent,pmenu_t *entries)
+void ClientJoinAsAlpha (edict_t *ent,pmenu_t *entries)
 {
-	ZigockClientJoin(ent,1);		
+	ZigockClientJoin(ent,1);
 }
 
 pmenu_t zgjoinmenu[] = {
@@ -881,12 +933,12 @@ pmenu_t zgjoinmenu[] = {
 	{ "(TAB to Return)",	PMENU_ALIGN_LEFT, NULL, NULL },
 };
 
-void ZigockJoinMenu(edict_t *ent)
+void ZigockJoinMenu (edict_t *ent)
 {
 	PMenu_Open(ent, zgjoinmenu,4, sizeof(zgjoinmenu) / sizeof(pmenu_t));
 }
 
-qboolean ZigockStartClient(edict_t *ent)
+qboolean ZigockStartClient (edict_t *ent)
 {
 	if (ent->moveinfo.sound_end != CLS_NONE)
 		return false;
@@ -951,7 +1003,7 @@ void AirSight_Think(edict_t *ent)
 	VectorCopy(ent->target_ent->s.origin,ent->s.origin);
 
 	if ( ent->owner->client->resp.ctf_team == CTF_TEAM2 && ctf->value)
-	{ 
+	{
 		ent->s.frame = 1;
 	}
 	else ent->s.frame = 0;
@@ -960,7 +1012,8 @@ void AirSight_Think(edict_t *ent)
 	ent->nextthink = level.time + FRAMETIME * 6;
 	gi.linkentity (ent);
 }
-void AirStrike_Think(edict_t *ent)
+
+void AirStrike_Think (edict_t *ent)
 {
 	int	i,j;
 	edict_t	*target,*sight;
@@ -1001,13 +1054,14 @@ void AirStrike_Think(edict_t *ent)
 					sight->target_ent = target;
 					gi.linkentity (sight);
 					j++;
-				} 
+				}
 			}
 		}
 	}
 
 }
-void Cmd_AirStrike(edict_t *ent)
+
+void Cmd_AirStrike (edict_t *ent)
 {
 	edict_t	*viper;
 	trace_t	rs_trace;
@@ -1018,7 +1072,7 @@ void Cmd_AirStrike(edict_t *ent)
 
 	VectorCopy(ent->s.origin,strpoint);
 	strpoint[2] += 8190;
-	
+
 	rs_trace = gi.trace (ent->s.origin,NULL,NULL,strpoint,ent, MASK_SHOT);
 
 	if (!(rs_trace.surface && (rs_trace.surface->flags & SURF_SKY)))
@@ -1028,7 +1082,7 @@ void Cmd_AirStrike(edict_t *ent)
 	}
 /*	if ((rs_trace.endpos[2] - ent->s.origin[2]) < 300)
 	{
-		gi.cprintf(ent,PRINT_HIGH,"can't call Viper.\n");	
+		gi.cprintf(ent,PRINT_HIGH,"can't call Viper.\n");
 	}*/
 
 	VectorCopy(rs_trace.endpos,strpoint);
@@ -1060,7 +1114,7 @@ void Cmd_AirStrike(edict_t *ent)
 	VectorCopy(tmp,viper->s.origin);
 
 
-	viper->velocity[0] = cos(f) * 300; 
+	viper->velocity[0] = cos(f) * 300;
 	viper->velocity[1] = sin(f) * 300;
 	viper->velocity[2] = 0;
 
@@ -1081,10 +1135,10 @@ void Cmd_AirStrike(edict_t *ent)
 	//	viper->s.effects |= EF_ROTATE | EF_COLOR_SHELL;
 //	viper->s.renderfx |= RF_SHELL_BLUE | RF_SHELL_GREEN;
 	VectorCopy(strpoint,viper->moveinfo.start_angles);	//strikepoint
-	
+
 //	viper->think = Pod_think;
 //	viper->nextthink = level.time + FRAMETIME;
-	viper->classname = "viper";	
+	viper->classname = "viper";
 	viper->s.origin[2] += 16;
 	gi.linkentity (viper);
 }

@@ -479,8 +479,8 @@ void ACEND_InitNodes (void)
 {
 	numnodes = 1;
 	numitemnodes = 1;
-	memset(nodes,0,sizeof(node_t) * MAX_NODES);
-	memset(path_table,INVALID,sizeof(short int)*MAX_NODES*MAX_NODES);
+	memset (nodes,0,sizeof(node_t) * MAX_NODES);
+	memset (path_table,INVALID,sizeof(short int)*MAX_NODES*MAX_NODES);
 			
 }
 
@@ -489,11 +489,11 @@ void ACEND_InitNodes (void)
 ///////////////////////////////////////////////////////////////////////
 void ACEND_ShowNode (int node)
 {
-	edict_t *ent;
+//	edict_t *ent;
 
 	return; // commented out for now. uncommend to show nodes during debugging,
 	        // but too many will cause overflows. You have been warned.
-
+/*
 	ent = G_Spawn();
 
 	ent->movetype = MOVETYPE_NONE;
@@ -514,7 +514,7 @@ void ACEND_ShowNode (int node)
 
 	VectorCopy(nodes[node].origin,ent->s.origin);
 	gi.linkentity (ent);
-
+*/
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -778,9 +778,9 @@ void ACEND_SaveNodes (void)
 	
 	for (i=0; i<numnodes; i++)
 		for (j=0; j<numnodes; j++)
-			fwrite(&path_table[i][j] ,sizeof(short int), 1, pOut); // write count
+			fwrite(&path_table[i][j], sizeof(short int), 1, pOut); // write count
 		
-	fwrite(item_table,sizeof(item_table_t),num_items,pOut); 		// write out the fact table
+	fwrite (item_table, sizeof(item_table_t), num_items,pOut); 		// write out the fact table
 
 	fclose(pOut);
 	

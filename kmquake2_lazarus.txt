@@ -1,6 +1,6 @@
 KMQuake2_Lazarus
 
-Version 2.230
+Version 2.24
 
 
 NOTE: This game DLL requires KMQuake2 to run!
@@ -33,15 +33,61 @@ Support for custom sounds for doors, plats, func_trackchanges, and buttons.  To 
 
 		switches/butnxx.wav
 
-	where xx is the style value in 2 digits, e.g. 01 for a style value of 1.
+	where xx is the style value in 2 digits, e.g. 07 for a style value of 7.
 
 Support for mapper-specified Ogg Vorbis music.  Use the key "musictrack" in the worldspawn to specify
 	the name of the track, e.g. a musictrack key "foo" will play "gamedir/music/foo.ogg".  This key
 	also works with target_cd.  Tracks are not yet supported inside pak or pk3 files.
+	
+Support for mapper-specified skyboxes with clouds.  Skyboxes must be made with an alpha channel to define
+	the foreground and horizon line that is drawn in front of the clouds.
+	The following keys can be set in worldpsawn and target_sky:
+	"skydistance"	draw distance of skybox in world units
+	"cloudname"		clouds image name (in folder <gamedir>/env)
+	"lightningfreq"	time between lighting flashes (default 0.0)
+	"cloudxdir"		movement direction of clouds on X axis (default 1.0)
+	"cloudydir"		movement direction of clouds on Y axis (default 0.8)
+	"cloud1tile"	tile size of first cloud layer (default 8.0)
+	"cloud2tile"	tile size of second cloud layer (default 2.0)
+	"cloud3tile"	tile size of third cloud layer (default 1.0)
+	"cloud1speed"	movment speed of first cloud layer (default 1.0)
+	"cloud2speed"	movment speed of second cloud layer (default 4.0)
+	"cloud3speed"	movment speed of third cloud layer (default 8.0)
+	"cloud1alpha"	translucency of first cloud layer (default 0.9)
+	"cloud2alpha"	translucency of second cloud layer (default 0.6)
+	"cloud3alpha"	translucency of third cloud layer (default 0.0)
+	
+Support for mapper-specified angled sprites using the model_spawn entity.  When the "spritetype" key is set to 1,
+	model_spawn entities using sprites will be drawn vertically, in an X-shaped form.
 
 Support for double-barreled turrets.  Code by Musashi.
 	Set the turret_breach's combattarget to the targetname of the second info_notnull.
 	To have the barrels alternate in firing, give the turret_breach a style value of 1.
+
+Entity alias script support- this enables mappers to create predefined entity aliases, allowing easy placement of
+	pre-configured entities in maps, based on highly configurable generic entities like model_spawn and model_train.
+	These aliases are defined in a text file called ext_data/entalias.def.  Alternately, aliases can be defined on
+	a per-map basis in a map-specific file called ext_data/entalias/<mapname>.alias.  A sample alias file is included. 
+	NOTE: This file can be loaded from inside a pak file.
+
+Func_breakaway, a new bmodel entity that will break away from its surroundings.  See the included QERadiant entity
+	defintion file for more information.
+
+Misc_flare, the customizable flare entity from Quake2 Remaster (Kex).  See the included QERadiant entity defintion file
+	for more information.
+
+Target_command, a new entity that sends a command to the console to be executed. See the included QERadiant entity
+	defintion file for more information.
+
+Item_armor_shard_flat, a version of the armor shard that sits on the ground.
+
+An salpha entity key, to set the transparency of entities.  Give it a decimal value between 0 and 1 (exclusive) to use it.
+	It supports 254 levels of transparency.
+	NOTE: don't combine this with trans33 or trans66 surfaces on the same brush model.
+
+A commander skin spawnflag for misc_eastertank.
+
+A Big spawnflag for target_explosion, which makes it spawn a larger explosion.
 
 Integrated ACE bots.  The ACE Bot is a product of Steve Yeager, and is available from the
 	ACE Bot homepage, at http://www.axionfx.com/ace.  This program is a modification of
@@ -72,14 +118,15 @@ Lithium weapon and item balancing cvars, including how much ammo you can pick up
 	(see the included  default.cfg).
 
 	CTF cvars:
-		ctf_blastercolors 0/1-	whether to have teams use matching colored blasters
-		allow_flagdrop 0/1- 	whether to allow players to drop flags in CTF
-		allow_flagpickup 0/1- 	whether to allow players to take flags of empty teams
+		ctf_blastercolors	0/1-	whether to have teams use matching colored blasters
+		ctf_railcolors		0/1-	whether to have teams use matching colored railgun trails
+		allow_flagdrop		0/1- 	whether to allow players to drop flags in CTF
+		allow_flagpickup	0/1- 	whether to allow players to take flags of empty teams
 
 	Tech cvars:
-		use_techs 0/1-		whether to use techs in deathmatch
-		use_coloredtechs 0/1-	whether to use colored shells on techs
-		use_lithiumtechs 0/1-	whether to use Lithium-style colored pyramid key techs
+		use_techs 		 	0/1-	whether to use techs in deathmatch
+		use_coloredtechs 	0/1-	whether to use colored shells on techs
+		use_lithiumtechs 	0/1-	whether to use Lithium-style colored pyramid key techs
 
 		tech_flags -	determines which tech will show in the game, a sum of these:
 				1 = resist, 2 = strength, 4 = haste, 8 = regen, 16 = vampire, 32 = ammogen
@@ -118,28 +165,6 @@ Lithium weapon and item balancing cvars, including how much ammo you can pick up
 		sk_dm_start_hyperblaster-		Whether to start with with hyperblaster in DM
 		sk_dm_start_railgun-			Whether to start with with railgun in DM
 		sk_dm_start_bfg-				Whether to start with with bfg in DM
-
-Entity alias script support- this enables mappers to create predefined entity aliases, allowing easy placement of
-	pre-configured entities in maps, based on highly configurable generic entities like model_spawn and model_train.
-	These aliases are defined in a text file called ext_data/entalias.def.  Alternately, aliases can be defined on
-	a per-map basis in a map-specific file called ext_data/entalias/<mapname>.alias.  A sample alias file is included. 
-	NOTE: This file can be loaded from inside a pak file.
-
-Func_breakaway, a new bmodel entity that will break away from its surroundings.  See the included QERadiant entity
-	defintion file for more information.
-
-Target_command, a new entity that sends a command to the console to be executed. See the included QERadiant entity
-	defintion file for more information.
-
-Item_armor_shard_flat, a version of the armor shard that sits on the ground.
-
-An salpha entity key, to set the transparency of entities.  Give it a decimal value between 0 and 1 (exclusive) to use it.
-	It supports 254 levels of transparency.
-	NOTE: don't combine this with trans33 or trans66 surfaces on the same brush model.
-
-A commander skin spawnflag for misc_eastertank.
-
-A Big spawnflag for target_explosion, which makes it spawn a larger explosion.
 
 Single-player obituaries- tells you which monster killed you and how.
 

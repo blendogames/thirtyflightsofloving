@@ -174,10 +174,10 @@ void R_SetFogVars (qboolean enable, int model, int density,
 				   int start, int end, int red, int green, int blue)
 {
 	int		temp;
-	float	maxFogFar, skyRatio;
+	float	maxFogFar, skyDistance, skyRatio;
 
-	//VID_Printf( PRINT_ALL, "Setting fog variables: model %i density %i near %i far %i red %i green %i blue %i\n",
-	//	model, density, start, end, red, green, blue );
+//	VID_Printf( PRINT_ALL, "Setting fog variables: model %i density %i near %i far %i red %i green %i blue %i\n",
+//		model, density, start, end, red, green, blue );
 
 	// Skip this if QGL subsystem is already down
 	if (!qglDisable)	return;
@@ -193,15 +193,24 @@ void R_SetFogVars (qboolean enable, int model, int density,
 	if (r_skydistance && r_skydistance->value)
 		maxFogFar = r_skydistance->value;
 	else
-		maxFogFar = 10000.0;
-	maxFogFar = max(maxFogFar, 1024.0);
+		maxFogFar = 10000.0f;
+	maxFogFar = max(maxFogFar, 1024.0f);
 
-	if (r_fog_skyratio && r_fog_skyratio->value)
-		skyRatio = r_fog_skyratio->value;
+	skyDistance = R_GetSkyDistance();
+
+	if ( r_fog_skyratio )
+	{
+		if (r_fog_skyratio->integer < 0)	// -1 is auto distance based on old Q2 sky distance of 2300
+			skyRatio = (skyDistance / OLD_Q2_SKYDIST);
+		else if (r_fog_skyratio->value >= 1.0f)
+			skyRatio = r_fog_skyratio->value;
+		else
+			skyRatio = 10.0f;
+	}
 	else
-		skyRatio = 10.0;
-	skyRatio = max (skyRatio, 1.0);
-	skyRatio = min (skyRatio, 100.0);
+		skyRatio = 10.0f;
+	skyRatio = max (skyRatio, 0.1f);
+	skyRatio = min (skyRatio, 1000.0f);
 
 	r_fogmodel = FogModels[temp];
 	r_fogdensity = (float)density;
@@ -211,29 +220,29 @@ void R_SetFogVars (qboolean enable, int model, int density,
 		r_fogfar = (float)end;
 		r_fogskyfar = r_fogfar * skyRatio;
 	}
-	r_fogColor[0] = ((float)red)/255.0;
-	r_fogColor[1] = ((float)green)/255.0;
-	r_fogColor[2] = ((float)blue)/255.0;
+	r_fogColor[0] = ((float)red)/255.0f;
+	r_fogColor[1] = ((float)green)/255.0f;
+	r_fogColor[2] = ((float)blue)/255.0f;
 
 	// clamp vars
-	r_fogdensity = max(r_fogdensity, 0.0);
-	r_fogdensity = min(r_fogdensity, 100.0);
-	r_fogskydensity = max(r_fogskydensity, 0.0);
-	r_fogskydensity = min(r_fogskydensity, (100.0 / skyRatio));
+	r_fogdensity = max(r_fogdensity, 0.0f);
+	r_fogdensity = min(r_fogdensity, 100.0f);
+	r_fogskydensity = max(r_fogskydensity, 0.0f);
+	r_fogskydensity = min(r_fogskydensity, (100.0f / skyRatio));
 	r_fognear = max(r_fognear, 0.0f);
-	r_fognear = min(r_fognear, 10000.0-64.0);
-	r_fogfar = max(r_fogfar, r_fognear+64.0);
+	r_fognear = min(r_fognear, 10000.0f - 64.0f);
+	r_fogfar = max(r_fogfar, r_fognear + 64.0f);
 //	r_fogfar = min(r_fogfar, 10000.0);
 	r_fogfar = min(r_fogfar, maxFogFar);
-	r_fogskyfar = max(r_fogskyfar, (r_fognear+64.0)*skyRatio);
+	r_fogskyfar = max(r_fogskyfar, (r_fognear + 64.0f) * skyRatio);
 	r_fogskyfar = min(r_fogskyfar, maxFogFar*skyRatio);
-	r_fogColor[0] = max(r_fogColor[0], 0.0);
-	r_fogColor[0] = min(r_fogColor[0], 1.0);
-	r_fogColor[1] = max(r_fogColor[1], 0.0);
-	r_fogColor[1] = min(r_fogColor[1], 1.0);
-	r_fogColor[2] = max(r_fogColor[2], 0.0);
-	r_fogColor[2] = min(r_fogColor[2], 1.0);
+	r_fogColor[0] = max(r_fogColor[0], 0.0f);
+	r_fogColor[0] = min(r_fogColor[0], 1.0f);
+	r_fogColor[1] = max(r_fogColor[1], 0.0f);
+	r_fogColor[1] = min(r_fogColor[1], 1.0f);
+	r_fogColor[2] = max(r_fogColor[2], 0.0f);
+	r_fogColor[2] = min(r_fogColor[2], 1.0f);
 
-	//VID_Printf( PRINT_ALL, "Set fog variables: model %i density %f near %f far %f red %f green %f blue %f\n",
-	//	model, r_fogdensity, r_fognear, r_fogfar, r_fogColor[0], r_fogColor[1], r_fogColor[2] );
+/*	VID_Printf (PRINT_ALL, "Set fog variables: model %i density %f near %f far %f red %f green %f blue %f\n",
+		model, r_fogdensity, r_fognear, r_fogfar, r_fogColor[0], r_fogColor[1], r_fogColor[2]); */
 }

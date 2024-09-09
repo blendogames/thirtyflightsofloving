@@ -627,8 +627,8 @@ qboolean Boss2_CheckAttack (edict_t *self)
 }
 
 
-
-void SP_monster_boss2_precache(void)
+// Knightmare- added soundcache function
+void monster_boss2_soundcache (edict_t *self)
 {
 	sound_pain1 = gi.soundindex ("bosshovr/bhvpain1.wav");
 	sound_pain2 = gi.soundindex ("bosshovr/bhvpain2.wav");
@@ -637,6 +637,11 @@ void SP_monster_boss2_precache(void)
 	sound_search1 = gi.soundindex ("bosshovr/bhvunqv1.wav");
 }
 
+void SP_monster_boss2_precache (edict_t *self)
+{
+	// Knightmare- use soundcache function
+	monster_boss2_soundcache (self);
+}
 
 
 /*QUAKED monster_boss2 (1 .5 0) (-56 -56 0) (56 56 80) Ambush Trigger_Spawn Sight
@@ -649,7 +654,7 @@ void SP_monster_boss2 (edict_t *self)
 		return;
 	}
 
-  SP_monster_boss2_precache();
+	SP_monster_boss2_precache (self);
 
 	self->s.sound = gi.soundindex ("bosshovr/bhvengn1.wav");
 

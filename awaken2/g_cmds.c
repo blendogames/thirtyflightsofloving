@@ -267,10 +267,10 @@ void Cmd_Give_f(edict_t *ent)
 
 		if (!Q_stricmp(name, "quad damage"))
 			it->classname = "item_quad";
-		
+
 		if (!Q_stricmp(name, "invulnerability"))
 			it->classname = "item_invulnerability";
-		
+
 		if (!Q_stricmp(name, "silencer"))
 			it->classname = "item_silencer";
 //CW--
@@ -1617,7 +1617,7 @@ void Plot_Route(edict_t *self)
 void Cmd_ShowBotRoute_f(edict_t *ent)
 {
 	edict_t	*plotter = NULL;
-	
+
 //	Sanity checks.
 
 	if (dedicated->value)
@@ -1643,7 +1643,7 @@ void Cmd_ShowBotRoute_f(edict_t *ent)
 		plotter->think = Plot_Route;
 		plotter->nextthink = level.time + FRAMETIME;
 	}
-	
+
 	plotter->count = 0;
 }
 
@@ -2182,7 +2182,7 @@ void Cmd_GiveOp_f(edict_t *ent)
 		gi.dprintf("INFO: ...but a password wasn't specified.\n");
 		return;
 	}
-	
+
 	if (strcmp(gi.argv(1), sv_op_password->string))
 	{
 		gi_cprintf(ent, PRINT_HIGH, "Operator status denied.\n");
@@ -2810,7 +2810,7 @@ Cmd_Players_f
 =================
 */
 void Cmd_Players_f(edict_t *ent)
-{	
+{
 	char	small[64];
 	char	large[1280];
 	int		index[256];
@@ -2915,21 +2915,21 @@ qboolean CheckFlood(edict_t *ent)
 	{
 		cl = ent->client;
 
-        if (level.time < cl->flood_locktill)
+		if (level.time < cl->flood_locktill)
 		{
 			gi_cprintf(ent, PRINT_HIGH, "You can't talk for %d more seconds\n", (int)(cl->flood_locktill - level.time));
-            return true;
-        }
+			return true;
+		}
 
-        i = cl->flood_whenhead - flood_msgs->value + 1;
-        if (i < 0)
-            i = (sizeof(cl->flood_when) / sizeof(cl->flood_when[0])) + i;
+		i = cl->flood_whenhead - flood_msgs->value + 1;
+		if (i < 0)
+			i = (sizeof(cl->flood_when) / sizeof(cl->flood_when[0])) + i;
 		if (cl->flood_when[i] && (level.time - cl->flood_when[i] < flood_persecond->value))
 		{
 			cl->flood_locktill = level.time + flood_waitdelay->value;
 			gi_cprintf(ent, PRINT_CHAT, "Flood protection:  You can't talk for %d seconds.\n", (int)flood_waitdelay->value);
-            return true;
-        }
+			return true;
+		}
 		cl->flood_whenhead = (cl->flood_whenhead + 1) %	(sizeof(cl->flood_when) / sizeof(cl->flood_when[0]));
 		cl->flood_when[cl->flood_whenhead] = level.time;
 	}
@@ -3054,17 +3054,17 @@ void Cmd_UndoChain_f(edict_t *ent, int step)
 				rs_trace = gi.trace(Route[i].Pt, ent->mins, ent->maxs, Route[i].Pt, ent, MASK_BOTSOLID);
 				if ((--count <= 0) && !rs_trace.allsolid && !rs_trace.startsolid)
 					break;
-			}  
+			}
 		}
 
 		gi_cprintf(ent, PRINT_HIGH, "Backed %i %i steps.\n", CurrentIndex - i, step);
-		
+
 		CurrentIndex = i;
 		VectorCopy(Route[CurrentIndex].Pt, ent->s.origin);
 		VectorCopy(Route[CurrentIndex].Pt, ent->s.old_origin);
 		memset(&Route[CurrentIndex], 0, sizeof(route_t));
 		if (CurrentIndex > 0)
-			Route[CurrentIndex].index = Route[CurrentIndex - 1].index + 1; 
+			Route[CurrentIndex].index = Route[CurrentIndex - 1].index + 1;
 	}
 }
 //Pon--
@@ -3192,7 +3192,7 @@ void ClientCommand(edict_t *ent)
 	else if (Q_stricmp(cmd, "yes") == 0)
 		Cmd_VoteYes_f(ent, false);
 	else if (Q_stricmp(cmd, "no") == 0)
-		Cmd_VoteNo_f(ent, false);	
+		Cmd_VoteNo_f(ent, false);
 	else if (!Q_stricmp(cmd, "mission"))
 		Cmd_Mission_f(ent);
 	else if (!Q_stricmp(cmd, "play_voice"))

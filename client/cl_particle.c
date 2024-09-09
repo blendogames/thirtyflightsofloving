@@ -27,82 +27,59 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 /*
 ===============
-CL_SetParticleImages
+CL_RegisterParticleImages
 This initializes all particle images - mods play with this...
 ===============
 */
-void CL_SetParticleImages (void)
+void CL_RegisterParticleImages (void)
 {
-	R_SetParticlePicture(particle_solid,		"*whitetexture");				// only used for sparks
-	R_SetParticlePicture(particle_generic,		"gfx/particles/basic.tga");
-	R_SetParticlePicture(particle_smoke,		"gfx/particles/smoke.tga");
-	R_SetParticlePicture(particle_blood,		"gfx/particles/blood.tga");
-	R_SetParticlePicture(particle_blooddrop,	"gfx/particles/blood_drop.tga");
-	R_SetParticlePicture(particle_blooddrip,	"gfx/particles/blood_drip.tga");
-	R_SetParticlePicture(particle_redblood,		"gfx/particles/blood_red.tga");
-	R_SetParticlePicture(particle_bubble,		"gfx/particles/bubble.tga");
-	R_SetParticlePicture(particle_blaster,		"gfx/particles/blaster.tga");
-	R_SetParticlePicture(particle_blasterblob,	"gfx/particles/blaster_blob.tga");
-	R_SetParticlePicture(particle_beam,			"gfx/particles/beam.tga");
-	R_SetParticlePicture(particle_beam2,		"gfx/particles/beam2.tga"); // only used for railgun
-	R_SetParticlePicture(particle_lightning,	"gfx/particles/lightning.tga");
-	R_SetParticlePicture(particle_inferno,		"gfx/particles/inferno.tga");
-//	R_SetParticlePicture(particle_lensflare,	"gfx/particles/lensflare.tga");
-//	R_SetParticlePicture(particle_lightflare,	"gfx/particles/lightflare.jpg");
-//	R_SetParticlePicture(particle_shield,		"gfx/particles/shield.jpg");
-	//animations
-	//rocket explosion
-	R_SetParticlePicture(particle_rflash,		"gfx/particles/r_flash.tga");
-	R_SetParticlePicture(particle_rexplosion1,	"gfx/particles/r_explod_1.tga");
-	R_SetParticlePicture(particle_rexplosion2,	"gfx/particles/r_explod_2.tga");
-	R_SetParticlePicture(particle_rexplosion3,	"gfx/particles/r_explod_3.tga");
-	R_SetParticlePicture(particle_rexplosion4,	"gfx/particles/r_explod_4.tga");
-	R_SetParticlePicture(particle_rexplosion5,	"gfx/particles/r_explod_5.tga");
-	R_SetParticlePicture(particle_rexplosion6,	"gfx/particles/r_explod_6.tga");
-	R_SetParticlePicture(particle_rexplosion7,	"gfx/particles/r_explod_7.tga");
-	//disruptor explosion		
-//	R_SetParticlePicture(particle_dexplosion1,	"gfx/particles/d_explod_1.tga");
-//	R_SetParticlePicture(particle_dexplosion2,	"gfx/particles/d_explod_2.tga");
-//	R_SetParticlePicture(particle_dexplosion3,	"gfx/particles/d_explod_3.tga");
+	R_SetParticleImg (particle_solid,		"*whitetexture");				// only used for sparks
+	R_SetParticleImg (particle_generic,		"gfx/particles/basic.tga");
+	R_SetParticleImg (particle_smoke,		"gfx/particles/smoke.tga");
+	R_SetParticleImg (particle_blood,		"gfx/particles/blood.tga");
+	R_SetParticleImg (particle_blooddrop,	"gfx/particles/blood_drop.tga");
+	R_SetParticleImg (particle_blooddrip,	"gfx/particles/blood_drip.tga");
+	R_SetParticleImg (particle_redblood,	"gfx/particles/blood_red.tga");
+	R_SetParticleImg (particle_bubble,		"gfx/particles/bubble.tga");
+	R_SetParticleImg (particle_blaster,		"gfx/particles/blaster.tga");
+	R_SetParticleImg (particle_blasterblob,	"gfx/particles/blaster_blob.tga");
+	R_SetParticleImg (particle_beam,		"gfx/particles/beam.tga");
+	R_SetParticleImg (particle_beam2,		"gfx/particles/beam2.tga"); // only used for railgun
+	R_SetParticleImg (particle_lightning,	"gfx/particles/lightning.tga");
+	R_SetParticleImg (particle_inferno,		"gfx/particles/inferno.tga");
+//	R_SetParticleImg (particle_lensflare,	"gfx/particles/lensflare.tga");
+//	R_SetParticleImg (particle_lightflare,	"gfx/particles/lightflare.jpg");
+//	R_SetParticleImg (particle_shield,		"gfx/particles/shield.jpg");
 
-	R_SetParticlePicture(particle_bfgmark,		"gfx/decals/bfgmark.tga");
-	R_SetParticlePicture(particle_burnmark,		"gfx/decals/burnmark.tga");
-	R_SetParticlePicture(particle_blooddecal1,	"gfx/decals/blood_1.tga");
-	R_SetParticlePicture(particle_blooddecal2,	"gfx/decals/blood_2.tga");
-	R_SetParticlePicture(particle_blooddecal3,	"gfx/decals/blood_3.tga");
-	R_SetParticlePicture(particle_blooddecal4,	"gfx/decals/blood_4.tga");
-	R_SetParticlePicture(particle_blooddecal5,	"gfx/decals/blood_5.tga");
-	R_SetParticlePicture(particle_shadow,		"gfx/decals/shadow.tga");
-	R_SetParticlePicture(particle_bulletmark,	"gfx/decals/bulletmark.tga");
-	R_SetParticlePicture(particle_trackermark,	"gfx/decals/trackermark.tga");
-//	R_SetParticlePicture(particle_footprint,	"gfx/decals/footprint.tga");
+	// animations
+	// rocket explosion
+	R_SetParticleImg (particle_rflash,		"gfx/particles/r_flash.tga");
+	R_SetParticleImg (particle_rexplosion1,	"gfx/particles/r_explod_1.tga");
+	R_SetParticleImg (particle_rexplosion2,	"gfx/particles/r_explod_2.tga");
+	R_SetParticleImg (particle_rexplosion3,	"gfx/particles/r_explod_3.tga");
+	R_SetParticleImg (particle_rexplosion4,	"gfx/particles/r_explod_4.tga");
+	R_SetParticleImg (particle_rexplosion5,	"gfx/particles/r_explod_5.tga");
+	R_SetParticleImg (particle_rexplosion6,	"gfx/particles/r_explod_6.tga");
+	R_SetParticleImg (particle_rexplosion7,	"gfx/particles/r_explod_7.tga");
 
-	// BEGIN TFOL
-	R_SetParticlePicture(particle_freongeneric,	"gfx/particles/freonbasic.tga");
-	R_SetParticlePicture(particle_glass,		"gfx/particles/glass.tga");
-	R_SetParticlePicture(particle_glass2,		"gfx/particles/glass2.tga");
+	// disruptor explosion		
+//	R_SetParticleImg (particle_dexplosion1,	"gfx/particles/d_explod_1.tga");
+//	R_SetParticleImg (particle_dexplosion2,	"gfx/particles/d_explod_2.tga");
+//	R_SetParticleImg (particle_dexplosion3,	"gfx/particles/d_explod_3.tga");
 
-	R_SetParticlePicture(particle_music1,		"gfx/particles/music1.tga");
-	R_SetParticlePicture(particle_music2,		"gfx/particles/music2.tga");
-	R_SetParticlePicture(particle_music3,		"gfx/particles/music3.tga");
-
-	R_SetParticlePicture(particle_heart,		"gfx/particles/heart.tga");
-
-	R_SetParticlePicture(particle_shred0,		"models/monsters/drone/shred0.png");
-	R_SetParticlePicture(particle_shred1,		"models/monsters/drone/shred1.png");
-	R_SetParticlePicture(particle_shred2,		"models/monsters/drone/shred2.png");
-	// END TFOL
-}
-
-
-/*
-===============
-CL_GetRandomBloodParticle
-===============
-*/
-int CL_GetRandomBloodParticle (void)
-{
-	return particle_blooddecal1 + rand()%5;
+	// decals
+	R_SetParticleImg (particle_bfgmark,		"gfx/decals/bfgmark.tga");
+	R_SetParticleImg (particle_burnmark,	"gfx/decals/burnmark.tga");
+	R_SetParticleImg (particle_blooddecal1,	"gfx/decals/blood_1.tga");
+	R_SetParticleImg (particle_blooddecal2,	"gfx/decals/blood_2.tga");
+	R_SetParticleImg (particle_blooddecal3,	"gfx/decals/blood_3.tga");
+	R_SetParticleImg (particle_blooddecal4,	"gfx/decals/blood_4.tga");
+	R_SetParticleImg (particle_blooddecal5,	"gfx/decals/blood_5.tga");
+	R_SetParticleImg (particle_shadow,		"gfx/decals/shadow.tga");
+	R_SetParticleImg (particle_bulletmark,	"gfx/decals/bulletmark.tga");
+	R_SetParticleImg (particle_trackermark,	"gfx/decals/trackermark.tga");
+	R_SetParticleImg (particle_acidmark,	"gfx/decals/acidmark.tga");
+//	R_SetParticleImg (particle_footprint,	"gfx/decals/footprint.tga");
 }
 
 
@@ -651,6 +628,16 @@ void CL_AddParticles (void)
 			alpha = p->alpha;
 		}
 
+		size = p->size + p->sizevel * time;	// moved from below
+		if (size <= 0.0f)	// shrank away to nothing
+		{
+			p->alpha = 0.0f;
+			p->flags = 0;
+			p->next = free_particles;
+			free_particles = p;
+			continue;
+		}
+
 		p->next = NULL;
 		if (!tail)
 			active = tail = p;
@@ -671,19 +658,20 @@ void CL_AddParticles (void)
 		for (i=0;i<3;i++)
 		{
 			color[i] = p->color[i] + p->colorvel[i]*time;
-			if (color[i]>255) color[i]=255;
-			if (color[i]<0) color[i]=0;
+			color[i] = min(max(color[i], 0), 255);
+		//	if (color[i] > 255) color[i] = 255;
+		//	if (color[i] < 0) color[i] = 0;
 			
 			angle[i] = p->angle[i];
 			org[i] = p->org[i] + p->vel[i]*time + p->accel[i]*time2;
 		}
 
-		if (p->flags&PART_GRAVITY)
-			org[2]+=time2*-PARTICLE_GRAVITY;
+		if (p->flags & PART_GRAVITY)
+			org[2] += time2 * -PARTICLE_GRAVITY;
 
-		size = p->size + p->sizevel*time;
+	//	size = p->size + p->sizevel*time;	// moved above
 
-		for (i=0;i<P_LIGHTS_MAX;i++)
+		for (i = 0; i < P_LIGHTS_MAX; i++)
 		{
 			const cplight_t *plight = &p->lights[i];
 			if (plight->isactive)
@@ -695,15 +683,15 @@ void CL_AddParticles (void)
 
 		if (p->thinknext && p->think)
 		{
-			p->thinknext=false;
-			p->think(p, org, angle, &alpha, &size, &image, &time);
+			p->thinknext = false;
+			p->think (p, org, angle, &alpha, &size, &image, &time);
 		}
 
 		if (flags & PART_DECAL)
 		{
 			decalpolys_t *d;
 			if (p->decalnum > 0 && p->decal)
-				for (d=p->decal; d; d=d->nextpoly)
+				for (d = p->decal; d; d = d->nextpoly)
 					V_AddDecal (org, angle, color, alpha, p->blendfunc_src, p->blendfunc_dst, size, image, flags, d);
 			else
 				V_AddDecal (org, angle, color, alpha, p->blendfunc_src, p->blendfunc_dst, size, image, flags, NULL);
@@ -722,7 +710,7 @@ void CL_AddParticles (void)
 
 	active_particles = active;
 
-	CL_CleanDecalPolys(); // clean up active_decals linked list
+	CL_CleanDecalPolys (); // clean up active_decals linked list
 }
 
 

@@ -291,28 +291,28 @@ extern	cvar_t	*sk_pack_give_rogue_ammo;
 extern	cvar_t	*sk_pack_give_zaero_ammo;
 
 // pickup values
-extern	cvar_t	*sk_box_shells; // value of shells
-extern	cvar_t	*sk_box_bullets; // value of bullets
-extern	cvar_t	*sk_box_grenades; // value of grenade pack
-extern	cvar_t	*sk_box_rockets; // value of rocket pack
-extern	cvar_t	*sk_box_cells; // value of cell pack
-extern	cvar_t	*sk_box_slugs; // value of slug box
-extern	cvar_t	*sk_box_magslugs; // value ofmagslug box
-extern	cvar_t	*sk_box_flechettes; // value of flechettes
-extern	cvar_t	*sk_box_prox; // value of prox
-extern	cvar_t	*sk_box_tesla; // value of tesla pack
-extern	cvar_t	*sk_box_disruptors; // value of disruptor pack
-extern	cvar_t	*sk_box_shocksphere; // value of shocksphere
-extern	cvar_t	*sk_box_trap; // value of trap
-extern	cvar_t	*sk_box_fuel; // value of fuel
-extern	cvar_t	*sk_box_flares;	// value of flares box
-extern	cvar_t	*sk_box_tbombs;	// value of IRED box
-extern	cvar_t	*sk_box_empnuke;	// value of EMP nuke
+extern	cvar_t	*sk_box_shells;			// value of shells
+extern	cvar_t	*sk_box_bullets;		// value of bullets
+extern	cvar_t	*sk_box_grenades;		// value of grenade pack
+extern	cvar_t	*sk_box_rockets;		// value of rocket pack
+extern	cvar_t	*sk_box_cells;			// value of cell pack
+extern	cvar_t	*sk_box_slugs;			// value of slug box
+extern	cvar_t	*sk_box_magslugs;		// value ofmagslug box
+extern	cvar_t	*sk_box_flechettes;		// value of flechettes
+extern	cvar_t	*sk_box_prox;			// value of prox
+extern	cvar_t	*sk_box_tesla;			// value of tesla pack
+extern	cvar_t	*sk_box_disruptors;		// value of disruptor pack
+extern	cvar_t	*sk_box_shocksphere;	// value of shocksphere
+extern	cvar_t	*sk_box_trap;			// value of trap
+extern	cvar_t	*sk_box_fuel;			// value of fuel
+extern	cvar_t	*sk_box_flares;			// value of flares box
+extern	cvar_t	*sk_box_tbombs;			// value of IRED box
+extern	cvar_t	*sk_box_empnuke;		// value of EMP nuke
 extern	cvar_t	*sk_box_plasmashield;	// value of plasma shield
 
 // items/powerups
-extern	cvar_t	*sk_armor_bonus_value; //value of armor shards
-extern	cvar_t	*sk_health_bonus_value; //value of stimpacks
+extern	cvar_t	*sk_armor_bonus_value;	//value of armor shards
+extern	cvar_t	*sk_health_bonus_value;	//value of stimpacks
 extern	cvar_t	*sk_powerup_max;
 extern	cvar_t	*sk_nuke_max;
 extern	cvar_t	*sk_nbomb_max;

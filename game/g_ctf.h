@@ -102,6 +102,8 @@ typedef enum {
 extern cvar_t *ctf;
 extern cvar_t *ttctf; // Knightmare added
 
+extern	char *ctf_tnames[];
+
 #define CTF_TEAM1_SKIN "ctf_r"
 #define CTF_TEAM2_SKIN "ctf_b"
 #define CTF_TEAM3_SKIN "ctf_g" // Knightmare added

@@ -363,6 +363,26 @@ void G_SetMovedir (vec3_t angles, vec3_t movedir)
 }
 
 
+// Knightmare- this is almost the same as G_SetMovedir,
+// only it doesn't clear the source vector
+// useful for point entities that use movedir
+void G_SetMovedir2 (vec3_t angles, vec3_t movedir)
+{
+	if ( VectorCompare (angles, VEC_UP) )
+	{
+		VectorCopy (MOVEDIR_UP, movedir);
+	}
+	else if ( VectorCompare (angles, VEC_DOWN) )
+	{
+		VectorCopy (MOVEDIR_DOWN, movedir);
+	}
+	else
+	{
+		AngleVectors (angles, movedir, NULL, NULL);
+	}
+}
+
+
 float vectoyaw (vec3_t vec)
 {
 	float	yaw;
@@ -401,78 +421,6 @@ float vectoyaw2 (vec3_t vec)
 	}
 
 	return yaw;
-}
-
-
-void vectoangles (vec3_t value1, vec3_t angles)
-{
-	float	forward;
-	float	yaw, pitch;
-	
-	if (value1[1] == 0 && value1[0] == 0)
-	{
-		yaw = 0;
-		if (value1[2] > 0)
-			pitch = 90;
-		else
-			pitch = 270;
-	}
-	else
-	{
-		if (value1[0])
-			yaw = (int) (atan2(value1[1], value1[0]) * 180 / M_PI);
-		else if (value1[1] > 0)
-			yaw = 90;
-		else
-			yaw = 270;
-		if (yaw < 0)
-			yaw += 360;
-
-		forward = sqrt (value1[0]*value1[0] + value1[1]*value1[1]);
-		pitch = (int) (atan2(value1[2], forward) * 180 / M_PI);
-		if (pitch < 0)
-			pitch += 360;
-	}
-
-	angles[PITCH] = -pitch;
-	angles[YAW] = yaw;
-	angles[ROLL] = 0;
-}
-
-void vectoangles2 (vec3_t value1, vec3_t angles)
-{
-	float	forward;
-	float	yaw, pitch;
-	
-	if (value1[1] == 0 && value1[0] == 0)
-	{
-		yaw = 0;
-		if (value1[2] > 0)
-			pitch = 90;
-		else
-			pitch = 270;
-	}
-	else
-	{
-		if (value1[0])
-			yaw = (atan2(value1[1], value1[0]) * 180 / M_PI);
-		else if (value1[1] > 0)
-			yaw = 90;
-		else
-			yaw = 270;
-
-		if (yaw < 0)
-			yaw += 360;
-
-		forward = sqrt (value1[0]*value1[0] + value1[1]*value1[1]);
-		pitch = (atan2(value1[2], forward) * 180 / M_PI);
-		if (pitch < 0)
-			pitch += 360;
-	}
-
-	angles[PITCH] = -pitch;
-	angles[YAW] = yaw;
-	angles[ROLL] = 0;
 }
 
 char *G_CopyString (char *in)
@@ -793,27 +741,27 @@ edict_t	*LookingAt (edict_t *ent, int filter, vec3_t endpos, float *range)
 
 	if (!ent->client)
 	{
-		if (endpos) VectorClear(endpos);
+		if (endpos) VectorClear (endpos);
 		if (range) *range = 0;
 		return NULL;
 	}
 	VectorClear(end);
 	if (ent->client->chasetoggle)
 	{
-		AngleVectors(ent->client->v_angle, forward, NULL, NULL);
-		VectorCopy(ent->client->chasecam->s.origin,start);
+		AngleVectors (ent->client->v_angle, forward, NULL, NULL);
+		VectorCopy (ent->client->chasecam->s.origin, start);
 		ignore = ent->client->chasecam;
 	}
 	else if (ent->client->spycam)
 	{
 		AngleVectors(ent->client->ps.viewangles, forward, NULL, NULL);
-		VectorCopy(ent->s.origin,start);
+		VectorCopy (ent->s.origin, start);
 		ignore = ent->client->spycam;
 	}
 	else
 	{
-		AngleVectors(ent->client->v_angle, forward, NULL, NULL);
-		VectorCopy(ent->s.origin, start);
+		AngleVectors (ent->client->v_angle, forward, NULL, NULL);
+		VectorCopy (ent->s.origin, start);
 		start[2] += ent->viewheight;
 		ignore = ent;
 	}
@@ -821,8 +769,8 @@ edict_t	*LookingAt (edict_t *ent, int filter, vec3_t endpos, float *range)
 	VectorMA(start, WORLD_SIZE, forward, end);	// was 8192
 	
 	/* First check for looking directly at a pickup item */
-	VectorSet(mins, MIN_WORLD_COORD, MIN_WORLD_COORD, MIN_WORLD_COORD);	// was -4096, -4096, -4096
-	VectorSet(maxs, MAX_WORLD_COORD, MAX_WORLD_COORD, MAX_WORLD_COORD);	// was 4096, 4096, 4096
+	VectorSet (mins, MIN_WORLD_COORD, MIN_WORLD_COORD, MIN_WORLD_COORD);	// was -4096, -4096, -4096
+	VectorSet (maxs, MAX_WORLD_COORD, MAX_WORLD_COORD, MAX_WORLD_COORD);	// was 4096, 4096, 4096
 	num = gi.BoxEdicts (mins, maxs, trigger, MAX_EDICTS, AREA_TRIGGERS);
 	for (i=0 ; i<num ; i++)
 	{
@@ -837,7 +785,7 @@ edict_t	*LookingAt (edict_t *ent, int filter, vec3_t endpos, float *range)
 			continue;
 		VectorSubtract(who->s.origin,start,dir);
 		r = VectorLength(dir);
-		VectorMA(start, r, forward, entp);
+		VectorMA (start, r, forward, entp);
 		if (entp[0] < who->s.origin[0] - 17) continue;
 		if (entp[1] < who->s.origin[1] - 17) continue;
 		if (entp[2] < who->s.origin[2] - 17) continue;
@@ -845,7 +793,7 @@ edict_t	*LookingAt (edict_t *ent, int filter, vec3_t endpos, float *range)
 		if (entp[1] > who->s.origin[1] + 17) continue;
 		if (entp[2] > who->s.origin[2] + 17) continue;
 		if (endpos)
-			VectorCopy(who->s.origin,endpos);
+			VectorCopy (who->s.origin, endpos);
 		if (range)
 			*range = r;
 		return who;
@@ -889,10 +837,55 @@ edict_t	*LookingAt (edict_t *ent, int filter, vec3_t endpos, float *range)
 		endpos[2] = tr.endpos[2];
 	}
 	if (range) {
-		VectorSubtract(tr.endpos,start,start);
+		VectorSubtract (tr.endpos, start, start);
 		*range = VectorLength(start);
 	}
 	return tr.ent;
+}
+
+char *GameDir (void)
+{
+#ifdef KMQUAKE2_ENGINE_MOD
+	return gi.GameDir();
+#else	// KMQUAKE2_ENGINE_MOD
+	static char	buffer[MAX_OSPATH];
+	cvar_t		*basedir, *gamedir;
+
+	basedir = gi.cvar("basedir", "", 0);
+	gamedir = gi.cvar("gamedir", "", 0);
+	if ( strlen(gamedir->string) > 0 )
+		Com_sprintf (buffer, sizeof(buffer), "%s/%s", basedir->string, gamedir->string);
+	else
+		Com_sprintf (buffer, sizeof(buffer), "%s/baseq2", basedir->string);
+
+	return buffer;
+#endif	// KMQUAKE2_ENGINE_MOD
+}
+
+char *SavegameDir (void)
+{
+#ifdef KMQUAKE2_ENGINE_MOD
+	return gi.SaveGameDir();
+#else	// KMQUAKE2_ENGINE_MOD
+	static char	buffer[MAX_OSPATH];
+	cvar_t	*basedir, *gamedir, *savegamepath;
+
+	basedir = gi.cvar("basedir", "", 0);
+	gamedir = gi.cvar("gamedir", "", 0);
+	savegamepath = gi.cvar("savegamepath", "", 0);
+	// use Unofficial Q2 Patch's savegamepath cvar if set
+	if ( strlen(savegamepath->string) > 0 ) {
+		Q_strncpyz (buffer, sizeof(buffer), savegamepath->string);
+	}
+	else {
+		if ( strlen(gamedir->string) > 0 )
+			Com_sprintf (buffer, sizeof(buffer), "%s/%s", basedir->string, gamedir->string);
+		else
+			Com_sprintf (buffer, sizeof(buffer), "%s/baseq2", basedir->string);
+	}
+
+	return buffer;
+#endif	// KMQUAKE2_ENGINE_MOD
 }
 
 void GameDirRelativePath (const char *filename, char *output, size_t outputSize)
@@ -904,10 +897,10 @@ void GameDirRelativePath (const char *filename, char *output, size_t outputSize)
 
 	basedir = gi.cvar("basedir", "", 0);
 	gamedir = gi.cvar("gamedir", "", 0);
-	if (strlen(gamedir->string))
-		Com_sprintf(output, outputSize, "%s/%s/%s", basedir->string, gamedir->string, filename);
+	if ( strlen(gamedir->string) > 0 )
+		Com_sprintf (output, outputSize, "%s/%s/%s", basedir->string, gamedir->string, filename);
 	else
-		Com_sprintf(output, outputSize, "%s/baseq2/%s", basedir->string, filename);
+		Com_sprintf (output, outputSize, "%s/baseq2/%s", basedir->string, filename);
 #endif	// KMQUAKE2_ENGINE_MOD
 }
 
@@ -916,14 +909,21 @@ void SavegameDirRelativePath (const char *filename, char *output, size_t outputS
 #ifdef KMQUAKE2_ENGINE_MOD
 	Com_sprintf(output, outputSize, "%s/%s", gi.SaveGameDir(), filename);
 #else	// KMQUAKE2_ENGINE_MOD
-	cvar_t	*basedir, *gamedir;
+	cvar_t	*basedir, *gamedir, *savegamepath;
 
 	basedir = gi.cvar("basedir", "", 0);
 	gamedir = gi.cvar("gamedir", "", 0);
-	if (strlen(gamedir->string))
-		Com_sprintf(output, outputSize, "%s/%s/%s", basedir->string, gamedir->string, filename);
-	else
-		Com_sprintf(output, outputSize, "%s/baseq2/%s", basedir->string, filename);
+	savegamepath = gi.cvar("savegamepath", "", 0);
+	// use Unofficial Q2 Patch's savegamepath cvar if set
+	if ( strlen(savegamepath->string) > 0 ) {
+		Com_sprintf (output, outputSize, "%s/%s", savegamepath->string, filename);
+	}
+	else {
+		if ( strlen(gamedir->string) > 0 )
+			Com_sprintf (output, outputSize, "%s/%s/%s", basedir->string, gamedir->string, filename);
+		else
+			Com_sprintf (output, outputSize, "%s/baseq2/%s", basedir->string, filename);
+	}
 #endif	// KMQUAKE2_ENGINE_MOD
 }
 
@@ -942,7 +942,7 @@ void CreatePath (const char *path)
 	}
 	Q_strncpyz (tmpBuf, sizeof(tmpBuf), path);
 
-	for (ofs = tmpBuf+1 ; *ofs ; ofs++)
+	for (ofs = tmpBuf+1; *ofs; ofs++)
 	{
 		if (*ofs == '/' || *ofs == '\\')
 		{	// create the directory
@@ -953,6 +953,88 @@ void CreatePath (const char *path)
 	}
 #endif	// KMQUAKE2_ENGINE_MOD
 }
+
+qboolean LocalFileExists (const char *path)
+{
+	char	realPath[MAX_OSPATH];
+	FILE	*f;
+
+	SavegameDirRelativePath (path, realPath, sizeof(realPath));
+	f = fopen (realPath, "rb");
+	if (f) {
+		fclose (f);
+		return true;
+	}
+	return false;
+}
+
+
+// Knightmare added
+/*
+====================
+AnyPlayerSpawned
+
+Checks if any player has spawned.
+Original code by Phatman.
+====================
+*/
+qboolean AnyPlayerSpawned (void)
+{
+	int		i;
+
+	for (i = 0; i < game.maxclients; i++) {
+		if ( g_edicts[i + 1].inuse && g_edicts[i + 1].linkcount )
+			return true;
+	}
+
+	return false;
+}
+
+
+/*
+====================
+AllPlayersSpawned
+
+Checks if all players have spawned.
+Original code by Phatman.
+====================
+*/
+qboolean AllPlayersSpawned (void)
+{
+	int		i;
+
+	for (i = 0; i < game.maxclients; i++) {
+		if ( g_edicts[i + 1].inuse && !g_edicts[i + 1].linkcount )
+			return false;
+	}
+
+	return true;
+}
+
+
+/*
+====================
+AllPlayersLinkcountCmp
+
+Checks if all players linkcount matches value.
+Returns true if any value matches.
+cmp_linkcount is the value to compare against.
+====================
+*/
+qboolean AllPlayersLinkcountCmp (int cmp_linkcount)
+{
+	int			i;
+	qboolean	matched = false;
+
+	for (i = 0; i < game.maxclients; i++) {
+		if ( g_edicts[i + 1].inuse && (g_edicts[i + 1].linkcount == cmp_linkcount) )
+			matched = true;
+	}
+
+	return matched;
+}
+// end Knightmare
+
 
 /* Lazarus: G_UseTarget is similar to G_UseTargets, but only triggers
             a single target rather than all entities matching target

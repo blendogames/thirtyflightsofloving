@@ -257,37 +257,37 @@ cvar_t	*sk_max_plasmashield;
 //cvar_t	*sk_max_a2k;
 
 // maximum settings if a player gets a bandolier
-cvar_t	*sk_bando_bullets;  // 300
-cvar_t	*sk_bando_shells;   // 200
-cvar_t	*sk_bando_cells;    // 300
-cvar_t	*sk_bando_slugs;    // 100
-cvar_t	*sk_bando_magslugs;
-cvar_t	*sk_bando_flechettes; // 250
-cvar_t	*sk_bando_rounds; // 150
-cvar_t	*sk_bando_fuel;
-cvar_t	*sk_bando_flares;	// 50
+cvar_t	*sk_bando_bullets;		// 300
+cvar_t	*sk_bando_shells;		// 200
+cvar_t	*sk_bando_cells;		// 300
+cvar_t	*sk_bando_slugs;		// 100
+cvar_t	*sk_bando_magslugs;		// 75
+cvar_t	*sk_bando_flechettes;	// 250
+cvar_t	*sk_bando_rounds;		// 150
+cvar_t	*sk_bando_fuel;			// 1500
+cvar_t	*sk_bando_flares;		// 50
 
 // maximum settings if a player gets a pack
-cvar_t	*sk_pack_health;
-cvar_t	*sk_pack_armor;
-cvar_t	*sk_pack_bullets;  // 300
-cvar_t	*sk_pack_shells;   // 200
-cvar_t	*sk_pack_rockets;  // 100
-cvar_t	*sk_pack_grenades; // 100
-cvar_t	*sk_pack_cells;    // 300
-cvar_t	*sk_pack_slugs;    // 100
-cvar_t	*sk_pack_magslugs;
-cvar_t	*sk_pack_traps;
-cvar_t	*sk_pack_flechettes;
-cvar_t	*sk_pack_rounds;
-cvar_t	*sk_pack_prox;
-cvar_t	*sk_pack_tesla;
-cvar_t	*sk_pack_shocksphere;
-cvar_t	*sk_pack_fuel;
-cvar_t	*sk_pack_flares;	// 60
-cvar_t	*sk_pack_tbombs;	// 100
-cvar_t	*sk_pack_empnuke;	// 100
-cvar_t	*sk_pack_plasmashield; // 40
+cvar_t	*sk_pack_health;		// 120
+cvar_t	*sk_pack_armor;			// 250
+cvar_t	*sk_pack_bullets;		// 300
+cvar_t	*sk_pack_shells;		// 200
+cvar_t	*sk_pack_rockets;		// 100
+cvar_t	*sk_pack_grenades;		// 100
+cvar_t	*sk_pack_cells;			// 300
+cvar_t	*sk_pack_slugs;			// 100
+cvar_t	*sk_pack_magslugs;		// 100
+cvar_t	*sk_pack_traps;			// 50
+cvar_t	*sk_pack_flechettes;	// 300
+cvar_t	*sk_pack_rounds;		// 200
+cvar_t	*sk_pack_prox;			// 100
+cvar_t	*sk_pack_tesla;			// 100
+cvar_t	*sk_pack_shocksphere;	// 20
+cvar_t	*sk_pack_fuel;			// 2000
+cvar_t	*sk_pack_flares;		// 60
+cvar_t	*sk_pack_tbombs;		// 100
+cvar_t	*sk_pack_empnuke;		// 100
+cvar_t	*sk_pack_plasmashield;	// 40
 //cvar_t	*sk_pack_a2k;		// 1
 
 cvar_t	*sk_pack_give_xatrix_ammo;
@@ -295,28 +295,28 @@ cvar_t	*sk_pack_give_rogue_ammo;
 cvar_t	*sk_pack_give_zaero_ammo;
 
 // pickup values
-cvar_t	*sk_box_shells; // value of shells
-cvar_t	*sk_box_bullets; // value of bullets
-cvar_t	*sk_box_grenades; // value of grenade pack
-cvar_t	*sk_box_rockets; // value of rocket pack
-cvar_t	*sk_box_cells; // value of cell pack
-cvar_t	*sk_box_slugs; // value of slug box
-cvar_t	*sk_box_magslugs; // value ofmagslug box
-cvar_t	*sk_box_flechettes; // value of flechettes
-cvar_t	*sk_box_prox; // value of prox
-cvar_t	*sk_box_tesla; // value of tesla pack
-cvar_t	*sk_box_disruptors; // value of disruptor pack
-cvar_t	*sk_box_shocksphere; // value of shocksphere
-cvar_t	*sk_box_trap; // value of trap
-cvar_t	*sk_box_fuel; // value of fuel
-cvar_t	*sk_box_flares;	// value of flares box
-cvar_t	*sk_box_tbombs;	// value of IRED box
-cvar_t	*sk_box_empnuke;	// value of EMP nuke
+cvar_t	*sk_box_shells;			// value of shells
+cvar_t	*sk_box_bullets;		// value of bullets
+cvar_t	*sk_box_grenades;		// value of grenade pack
+cvar_t	*sk_box_rockets;		// value of rocket pack
+cvar_t	*sk_box_cells;			// value of cell pack
+cvar_t	*sk_box_slugs;			// value of slug box
+cvar_t	*sk_box_magslugs;		// value ofmagslug box
+cvar_t	*sk_box_flechettes;		// value of flechettes
+cvar_t	*sk_box_prox;			// value of prox
+cvar_t	*sk_box_tesla;			// value of tesla pack
+cvar_t	*sk_box_disruptors;		// value of disruptor pack
+cvar_t	*sk_box_shocksphere;	// value of shocksphere
+cvar_t	*sk_box_trap;			// value of trap
+cvar_t	*sk_box_fuel;			// value of fuel
+cvar_t	*sk_box_flares;			// value of flares box
+cvar_t	*sk_box_tbombs;			// value of IRED box
+cvar_t	*sk_box_empnuke;		// value of EMP nuke
 cvar_t	*sk_box_plasmashield;	// value of plasma shield
 
 // items/powerups
-cvar_t	*sk_armor_bonus_value; // value of armor shards
-cvar_t	*sk_health_bonus_value; // value of stimpacks
+cvar_t	*sk_armor_bonus_value;	// value of armor shards
+cvar_t	*sk_health_bonus_value;	// value of stimpacks
 cvar_t	*sk_powerup_max;
 cvar_t	*sk_nuke_max;
 cvar_t	*sk_nbomb_max;

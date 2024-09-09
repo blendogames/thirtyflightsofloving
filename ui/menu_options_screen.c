@@ -37,18 +37,18 @@ SCREEN MENU
 =======================================================================
 */
 
-static menuframework_s	s_options_screen_menu;
-static menuseparator_s	s_options_screen_header;
-static menulist_s		s_options_screen_crosshair_box;
-static menuslider_s		s_options_screen_crosshairscale_slider;
-static menuslider_s		s_options_screen_crosshairalpha_slider;
-static menuslider_s		s_options_screen_crosshairpulse_slider;
-static menuslider_s		s_options_screen_hudscale_slider;
-static menuslider_s		s_options_screen_hudalpha_slider;
-static menulist_s		s_options_screen_hudsqueezedigits_box;
-static menulist_s		s_options_screen_fps_box;
-static menuaction_s		s_options_screen_defaults_action;
-static menuaction_s		s_options_screen_back_action;
+static menuFramework_s	s_options_screen_menu;
+static menuSeparator_s	s_options_screen_header;
+static menuPicker_s		s_options_screen_crosshair_box;
+static menuSlider_s		s_options_screen_crosshairscale_slider;
+static menuSlider_s		s_options_screen_crosshairalpha_slider;
+static menuSlider_s		s_options_screen_crosshairpulse_slider;
+static menuSlider_s		s_options_screen_hudscale_slider;
+static menuSlider_s		s_options_screen_hudalpha_slider;
+static menuPicker_s		s_options_screen_hudsqueezedigits_box;
+static menuPicker_s		s_options_screen_fps_box;
+static menuAction_s		s_options_screen_defaults_action;
+static menuAction_s		s_options_screen_back_action;
 
 //=======================================================================
 
@@ -344,5 +344,5 @@ const char *Menu_Options_Screen_Key (int key)
 void Menu_Options_Screen_f (void)
 {
 	Menu_Options_Screen_Init ();
-	UI_PushMenu (Menu_Options_Screen_Draw, Menu_Options_Screen_Key);
+	UI_PushMenu (&s_options_screen_menu);
 }

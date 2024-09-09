@@ -182,7 +182,10 @@ void Killed (edict_t *targ, edict_t *inflictor, edict_t *attacker, int damage, v
 	if ((targ->svflags & SVF_MONSTER) && (targ->deadflag != DEAD_DEAD))
 	{
 		targ->touch = NULL;
-		monster_death_use (targ);
+		// Q1: Fire Chthon's targets after he sinks back in
+		if ( !IsQ1Chthon(targ) ) {
+			monster_death_use (targ);
+		}
 	}
 
 	// Lazarus: disengage from tracktrain
@@ -241,13 +244,13 @@ dflags		these flags are used to control how T_Damage works
 */
 static int CheckPowerArmor (edict_t *ent, vec3_t point, vec3_t normal, int damage, int dflags)
 {
-	gclient_t	*client;
+	gclient_t	*client = NULL;
 	int			save;
 	int			power_armor_type;
-	int			index;
+	int			index = 0;
 	int			damagePerCell;
 	int			pa_te_type;
-	int			power;
+	int			power = 0;
 	int			power_used;
 
 	if (!damage)
@@ -353,7 +356,7 @@ static int CheckArmor (edict_t *ent, vec3_t point, vec3_t normal, int damage, in
 	if (!client)
 		return 0;
 
-	// ROGUE - added DAMAGE_NO_REG_ARMOR for atf rifle
+	// ROGUE - added DAMAGE_NO_REG_ARMOR for etf rifle
 	if (dflags & (DAMAGE_NO_ARMOR | DAMAGE_NO_REG_ARMOR))
 		return 0;
 
@@ -397,7 +400,7 @@ void CallMyFriends (edict_t *targ, edict_t *attacker)
 		return;
 
 	// Knightmare- skip this for insanes
-	if (!strcmp(targ->classname, "misc_insane"))
+	if ( !strcmp(targ->classname, "misc_insane") )
 		return;
 
 	// Lazarus dmgteam stuff
@@ -1075,10 +1078,12 @@ void T_Damage (edict_t *in_targ, edict_t *inflictor, edict_t *in_attacker, vec3_
 
 	// Shamblers take half damage from explosives
 	if ( (targ->svflags & SVF_MONSTER) &&
-		( (Q_stricmp(targ->classname,"q1_monster_shambler") == 0) || (Q_stricmp(targ->classname,"monster_q1_shambler") == 0) ) &&
+		( (Q_stricmp(targ->classname, "q1_monster_shambler") == 0) || (Q_stricmp(targ->classname, "monster_q1_shambler") == 0) ) &&
 		( (Q_stricmp(inflictor->classname, "grenade") == 0) || (Q_stricmp(inflictor->classname, "hgrenade") == 0)
-		|| (Q_stricmp(inflictor->classname, "prox") == 0) || (Q_stricmp(inflictor->classname, "plasma") == 0)
-		|| (Q_stricmp(inflictor->classname, "rocket") == 0) || (Q_stricmp(inflictor->classname, "homing rocket") == 0) ) )
+		|| (Q_stricmp(inflictor->classname, "rocket") == 0) || (Q_stricmp(inflictor->classname, "homing rocket") == 0)
+		|| (Q_stricmp(inflictor->classname, "prox") == 0) || (Q_stricmp(inflictor->classname, "phalanx_plasma") == 0)
+		|| (Q_stricmp(inflictor->classname, "q1_grenade") == 0) || (Q_stricmp(inflictor->classname, "q1_rocket") == 0)
+		|| (Q_stricmp(inflictor->classname, "q1_firepod") == 0) || (Q_stricmp(inflictor->classname, "chthon_lavaball") == 0) ) )
 		damage = (int)((float)damage * 0.5f);
 
 	// Skid - q1 monsters don't go flying
@@ -1149,7 +1154,7 @@ void T_Damage (edict_t *in_targ, edict_t *inflictor, edict_t *in_attacker, vec3_
 	// ROGUE
 
 	// Knightmare- falling doesn't damage armor
-	if (mod == MOD_FALLING && !falling_armor_damage->value)
+	if ( (mod == MOD_FALLING) && !falling_armor_damage->value )
 	{
 		psave = 0;
 		asave = 0;
@@ -1278,6 +1283,11 @@ void T_Damage (edict_t *in_targ, edict_t *inflictor, edict_t *in_attacker, vec3_
 				}
 				if (!good_damage) return;
 			}
+			// Knightmare- lightning-only damage flag for Chthon
+			if ( (targ->takedamage == DAMAGE_LIGHTING_ONLY) &&
+				!( (mod == MOD_Q1_LIGHTNING_TRAP) || (mod == MOD_Q1_LG) ) )
+				take = 0;
+
 			// Zaero
 			if (targ->takedamage != DAMAGE_IMMORTAL)
 				targ->health = targ->health - take;
@@ -1314,14 +1324,14 @@ void T_Damage (edict_t *in_targ, edict_t *inflictor, edict_t *in_attacker, vec3_
 	}
 //PGM
 
-	if ((targ->svflags & SVF_MONSTER)
+	if ( (targ->svflags & SVF_MONSTER)
 		// Knightmare- no damage reaction from negative damage lasers and triggers
-		&& ( (damage > 0) || ((mod != MOD_TRIGGER_HURT) && (mod != MOD_TARGET_LASER)) ))
+		&& ( (damage > 0) || ((mod != MOD_TRIGGER_HURT) && (mod != MOD_TARGET_LASER)) ) )
 	{
 		M_ReactToDamage (targ, attacker, inflictor);
 		// PMM - fixme - if anyone else but the medic ever uses AI_MEDIC, check for it here instead
 		// of in the medic's pain function
-		if (!(targ->monsterinfo.aiflags & AI_DUCKED) && (take))
+		if ( !(targ->monsterinfo.aiflags & AI_DUCKED) && (take) )
 		{
 			if (targ->pain)
 				targ->pain (targ, attacker, knockback, take);
@@ -1330,18 +1340,18 @@ void T_Damage (edict_t *in_targ, edict_t *inflictor, edict_t *in_attacker, vec3_
 				targ->pain_debounce_time = level.time + 5;
 		}
 	}
-	else if ((client)
+	else if ( (client)
 		// Knightmare- no damage reaction from negative damage lasers and triggers
-		&& ( (damage > 0) || ((mod != MOD_TRIGGER_HURT) && (mod != MOD_TARGET_LASER)) ))
+		&& ( (damage > 0) || ((mod != MOD_TRIGGER_HURT) && (mod != MOD_TARGET_LASER)) ) )
 	{
-		if (!(targ->flags & FL_GODMODE) && (take)) {
+		if ( !(targ->flags & FL_GODMODE) && (take) ) {
 			if (targ->pain)
 				targ->pain (targ, attacker, knockback, take);
 		}
 	}
-	else if ((take)
+	else if ( (take)
 		// Knightmare- no damage reaction from negative damage lasers and triggers
-		&& ( (damage > 0) || ((mod != MOD_TRIGGER_HURT) && (mod != MOD_TARGET_LASER)) ))
+		&& ( (damage > 0) || ((mod != MOD_TRIGGER_HURT) && (mod != MOD_TARGET_LASER)) ) )
 	{
 		if (targ->pain)
 			targ->pain (targ, attacker, knockback, take);
@@ -1368,7 +1378,7 @@ T_RadiusDamage
 */
 void T_RadiusDamage (edict_t *inflictor, edict_t *attacker, float damage, edict_t *ignore, float radius, int mod)
 {
-	float	points;
+	float	points = 0.0f;
 	edict_t	*ent = NULL;
 	vec3_t	v;
 	vec3_t	dir;
@@ -1379,8 +1389,8 @@ void T_RadiusDamage (edict_t *inflictor, edict_t *attacker, float damage, edict_
 			continue;
 		if (!ent->takedamage)
 			continue;
-		//if (ent->svflags & SVF_GIB) //Knightmare- gibs aren't destoyed by splash damage
-		//	continue;
+	//	if (ent->svflags & SVF_GIB) // Knightmare- gibs aren't destoyed by splash damage
+	//		continue;
 
 		VectorAdd (ent->mins, ent->maxs, v);
 		VectorMA (ent->s.origin, 0.5, v, v);

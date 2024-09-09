@@ -331,12 +331,13 @@ void fire_plasma_rifle (edict_t *ent, vec3_t start, vec3_t dir, int damage, int 
 
 void plasmaball_delayed_start (edict_t *plasmaball)
 {
-	if (g_edicts[1].linkcount)
+//	if (g_edicts[1].linkcount)
+	if ( AnyPlayerSpawned() )	// Knightmare- function handles multiple players
 	{
-		VectorScale(plasmaball->movedir, plasmaball->moveinfo.speed, plasmaball->velocity);
+		VectorScale (plasmaball->movedir, plasmaball->moveinfo.speed, plasmaball->velocity);
 		plasmaball->nextthink = level.time + 8000/plasmaball->moveinfo.speed;
 		plasmaball->think = G_FreeEdict;
-		gi.linkentity(plasmaball);
+		gi.linkentity (plasmaball);
 	}
 	else
 		plasmaball->nextthink = level.time + FRAMETIME;
@@ -352,7 +353,7 @@ void SP_plasmaball (edict_t *plasmaball)
 
 	// set to the spread variant as we don't need a high speed bouncing projectile just after a map transition
 	plasmaball->touch = plasma_rifle_spread_touch;
-	AngleVectors(plasmaball->s.angles, dir, NULL, NULL);
+	AngleVectors (plasmaball->s.angles, dir, NULL, NULL);
 	VectorCopy (dir, plasmaball->movedir);
 	plasmaball->moveinfo.speed = VectorLength(plasmaball->velocity);
 	if (plasmaball->moveinfo.speed <= 0)
@@ -361,7 +362,7 @@ void SP_plasmaball (edict_t *plasmaball)
 	// For SP, freeze plasmaball until player spawns in
 	if (game.maxclients == 1)
 	{
-		VectorClear(plasmaball->velocity);
+		VectorClear (plasmaball->velocity);
 		plasmaball->think = plasmaball_delayed_start;
 		plasmaball->nextthink = level.time + FRAMETIME;
 	}

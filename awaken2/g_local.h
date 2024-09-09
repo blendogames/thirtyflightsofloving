@@ -2,7 +2,7 @@
 
 #include "q_shared.h"
 
-// Define GAME_INCLUDE so that game.h does not define the short, server-visible 
+// Define GAME_INCLUDE so that game.h does not define the short, server-visible
 // gclient_t and edict_t structures, because we define the full size ones in this file.
 #define	GAME_INCLUDE
 #include "game.h"
@@ -118,9 +118,9 @@ typedef enum
 	DAMAGE_AIM					// auto targeting recognizes this
 } damage_t;
 
-typedef enum 
+typedef enum
 {
-	WEAPON_READY, 
+	WEAPON_READY,
 	WEAPON_ACTIVATING,
 	WEAPON_DROPPING,
 	WEAPON_FIRING
@@ -312,64 +312,65 @@ typedef struct gitem_s
 	char		*precaches;		// string of all models, sounds, and images this item will use
 } gitem_t;
 
+// Knightmare- made these vars extern to fix GCC compiler errors
 //Maj++
 // Item Ammo (IT_AMMO)
-gitem_t *item_shells,
-        *item_cells,
-        *item_rockets,
-        *item_slugs,
-        *item_bullets,
+extern	gitem_t *item_shells,
+				*item_cells,
+				*item_rockets,
+				*item_slugs,
+				*item_bullets,
 
 // Item Weapons (IT_WEAPON)
 //CW++
-		*item_chainsaw,
-        *item_deserteagle,
-        *item_gausspistol,
-        *item_mac10,
-        *item_jackhammer,
-        *item_esg,
-        *item_c4,
-        *item_trap,
-        *item_rocketlauncher,
-        *item_flamethrower,
-        *item_railgun,
-        *item_shockrifle,
-		*item_disclauncher,
-		*item_agm,
-		*item_grapple,
+				*item_chainsaw,
+				*item_deserteagle,
+				*item_gausspistol,
+        		*item_mac10,
+        		*item_jackhammer,
+				*item_esg,
+        		*item_c4,
+        		*item_trap,
+				*item_rocketlauncher,
+				*item_flamethrower,
+				*item_railgun,
+				*item_shockrifle,
+				*item_disclauncher,
+				*item_agm,
+				*item_grapple,
 //CW--
 
 // Item Armor (IT_ARMOR)
-        *item_jacketarmor,
-        *item_combatarmor,
-        *item_bodyarmor,
-        *item_armorshard,
-        *item_powerscreen,
-        *item_powershield,
+				*item_jacketarmor,
+				*item_combatarmor,
+				*item_bodyarmor,
+				*item_armorshard,
+				*item_powerscreen,
+				*item_powershield,
 
 // Item Health (IT_HEALTH)
-        *item_adrenaline,
-        *item_health,
-        *item_stimpak,
-        *item_health_large,
-        *item_health_mega,
+				*item_adrenaline,
+				*item_health,
+				*item_stimpak,
+				*item_health_large,
+				*item_health_mega,
 
 // Item Powerup (IT_POWERUP)
-        *item_quad,
-        *item_invulnerability,
-        *item_silencer,
-        *item_breather,
-        *item_enviro,
-		*item_teleporter,																			//CW++
+				*item_quad,
+				*item_invulnerability,
+				*item_silencer,
+				*item_breather,
+				*item_enviro,
+				*item_teleporter,																			//CW++
 
 // Item Pak (IT_PACK)
-        *item_pack,
-        *item_bandolier,
+				*item_pack,
+				*item_bandolier,
 
 // Item Nodes (IT_NODE)
-        *item_navi1,
-        *item_navi2,
-        *item_navi3;
+				*item_navi1,
+				*item_navi2,
+				*item_navi3;
 //Maj--
 
 
@@ -520,7 +521,7 @@ typedef struct vote_settings_s
 	qboolean jackhammer;
 	qboolean c4;
 	qboolean traps;
-	qboolean esg;	
+	qboolean esg;
 	qboolean rocketlauncher;
 	qboolean flamethrower;
 	qboolean railgun;
@@ -614,6 +615,37 @@ typedef struct
 	float		maxyaw;
 	float		minpitch;
 	float		maxpitch;
+	float		phase;
+
+	float		shift;
+
+	// Knightmare- added for sky distance
+	float		skydistance;
+	// Knightmare- added for DK-style clouds
+	char		*cloudname;
+	float		lightningfreq;
+	float		cloudxdir;
+	float		cloudydir;
+	float		cloud1tile;
+	float		cloud1speed;
+	float		cloud1alpha;
+	float		cloud2tile;
+	float		cloud2speed;
+	float		cloud2alpha;
+	float		cloud3tile;
+	float		cloud3speed;
+	float		cloud3alpha;
+
+	// Knightmare- added for misc_flare
+	float		radius;
+	float		alpha;
+	int			fade_start_dist;
+	int			fade_end_dist;
+	char		*image;
+	char		*rgba;
+
+	// Knightmare- added for angled sprites
+	int			spritetype;
 } spawn_temp_t;
 
 
@@ -1203,9 +1235,10 @@ extern	cvar_t	*turn_rider;	// Knightmare added
 //
 #define FFL_SPAWNTEMP		1
 #define FFL_NOSPAWN			2
+#define FFL_DEFAULT_NEG		4	// Knightmare- spawntemp that defaults to -1
 
 typedef enum {
-	F_INT, 
+	F_INT,
 	F_FLOAT,
 	F_LSTRING,			// string on disk, pointer in memory, TAG_LEVEL
 	F_GSTRING,			// string on disk, pointer in memory, TAG_GAME
@@ -1330,10 +1363,13 @@ void	vectoangles (vec3_t vec, vec3_t angles);
 qboolean infront(edict_t *self, edict_t *other);													//CW
 qboolean visible(edict_t *self, edict_t *other);													//CW
 // Knightmare added
-void	vectoangles2 (vec3_t vec, vec3_t angles);
+void vectoangles2 (vec3_t vec, vec3_t angles);
+char *GameDir (void);
+char *SavegameDir (void);
 void GameDirRelativePath (const char *filename, char *output, size_t outputSize);
 void SavegameDirRelativePath (const char *filename, char *output, size_t outputSize);
 void CreatePath (const char *path);
+qboolean LocalFileExists (const char *path);
 // end Knightmare
 
 //CW++
@@ -1598,7 +1634,7 @@ typedef struct
 
 	char		old_name[MAX_NAMELEN];																//CW
 	char		ip[22];
-	
+
 	qboolean	op_status;
 	qboolean	muted;
 //CW--
@@ -1877,7 +1913,7 @@ struct edict_s
 
 	// FIXME: move these fields to a server private sv_entity_t
 	link_t		area;					// linked to a division node or leaf
-	
+
 	int			num_clusters;			// if -1, use headnode instead
 	int			clusternums[MAX_ENT_CLUSTERS];
 	int			headnode;				// unused if num_clusters != -1
@@ -1904,7 +1940,7 @@ struct edict_s
 
 	char		*model;
 	float		freetime;				// sv.time when the object was freed
-	
+
 	//
 	// only used locally in game, not by server
 	//
@@ -2026,7 +2062,7 @@ struct edict_s
 //CW++
 	edict_t		*next_node;				// next C4/Trap node in linked list
 	edict_t		*prev_node;				// previous C4/Trap node in linked list
-	
+
 	qboolean	tractored;				// we've been killed by a tractor-beam trap
 	qboolean	disintegrated;			// we've been disintegrated by a shockbolt
 	qboolean	burning;				// we're on fire
@@ -2149,7 +2185,7 @@ extern botinfo_t Bot[MAXBOTS+1];
 #define FLAME_LIVETIME_0			2.0
 #define FLAME_LIVETIME_R			5.0
 #define SPIKE_LIVETIME				3.0
-#define PLASMA_LIVETIME				5.0	
+#define PLASMA_LIVETIME				5.0
 #define	BLASTER_LIVETIME			2.0
 
 #define FT_CELLS_PER_SHOT			10

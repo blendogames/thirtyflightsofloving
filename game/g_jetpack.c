@@ -72,7 +72,7 @@ void Jet_BecomeExplosion( edict_t *ent, int damage )
 gives the best results. Of course its a little dangerous because
 if we dont take care, we can move into solid*/
 
-void Jet_ApplyLifting( edict_t *ent )
+void Jet_ApplyLifting ( edict_t *ent )
 {
 	float		delta;
 	vec3_t	new_origin;
@@ -81,8 +81,8 @@ void Jet_ApplyLifting( edict_t *ent )
 	/*must be >0, time/10 = time in sec for a complete cycle (up/down)*/
 	float		amplitude = 2.0;
 	/*calculate the z-distance to lift in this step*/
-	delta = sin( (float)((level.framenum%time)*(360/time))/180*M_PI ) * amplitude;
-	delta = (float)((int)(delta*8))/8; /*round to multiples of 0.125*/
+	delta = sin( (float)((level.framenum % time) * (360 / time)) / 180 * M_PI ) * amplitude;
+	delta = (float)((int)(delta * 8)) / 8; /*round to multiples of 0.125*/
 	VectorCopy( ent->s.origin, new_origin );
 	new_origin[2] += delta;
 	if( VectorLength(ent->velocity) == 0 )

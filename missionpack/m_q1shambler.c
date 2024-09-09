@@ -335,6 +335,7 @@ static qboolean shambler_magic_attack_ok (vec3_t start, vec3_t end)
 	return true;
 }
 
+#if 0
 // Added from Decino's Q2Infighter code
 void shambler_sparks (edict_t *self)
 {
@@ -351,7 +352,35 @@ void shambler_sparks (edict_t *self)
 	gi.WriteByte (15);
 	gi.multicast (spark_pt, MULTICAST_PVS);
 }
+#endif
 
+// Knightmare- added lightning bolt
+void shambler_lightning_animate (edict_t *bolt)
+{
+	bolt->s.frame++;
+	bolt->nextthink = level.time + 0.1f;
+	if (bolt->s.frame >= 2) {
+		bolt->think = G_FreeEdict;
+	}
+}
+
+void shambler_show_lightning (edict_t *self)
+{
+	edict_t *bolt = NULL;
+
+	bolt = G_Spawn();
+	VectorCopy (self->s.origin, bolt->s.origin);
+	VectorCopy (self->s.old_origin, bolt->s.old_origin);
+	VectorCopy (self->s.angles, bolt->s.angles);
+	bolt->s.modelindex = gi.modelindex ("models/monsters/q1shambler/s_light/tris.md2");
+	bolt->s.frame = 0;
+	bolt->s.renderfx |= RF_FULLBRIGHT | RF_NOSHADOW;
+	bolt->solid = SOLID_NOT;
+	bolt->nextthink = level.time + 0.1f;
+	bolt->think = shambler_lightning_animate;
+	gi.linkentity (bolt);
+}
+// end Knightmare
 
 void shambler_magic_attack (edict_t *self)
 {
@@ -371,15 +400,15 @@ void shambler_magic_attack (edict_t *self)
 	G_ProjectSource (self->s.origin, offset, f, r, start);
 
 	VectorCopy (self->enemy->s.origin, end);
-	if (!shambler_magic_attack_ok(start, end))
+	if ( !shambler_magic_attack_ok(start, end) )
 	{
 		end[2] = self->enemy->s.origin[2] + self->enemy->maxs[2] - 8;
-		if (!shambler_magic_attack_ok(start, end))
+		if ( !shambler_magic_attack_ok(start, end) )
 		{
 			end[2] = self->enemy->s.origin[2] + self->enemy->mins[2] + 8;
-			if (!shambler_magic_attack_ok(start, end))
+			if ( !shambler_magic_attack_ok(start, end) )
 			{
-				shambler_run(self);
+				shambler_run (self);
 				return;
 			}
 		}
@@ -393,6 +422,15 @@ void shambler_magic_attack (edict_t *self)
 	if (self->s.frame == FRAME_magic6)
 		gi.sound (self, CHAN_WEAPON, sound_boom, 1, ATTN_NORM, 0);
 
+#ifdef KMQUAKE2_ENGINE_MOD
+	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (TE_LIGHTNING_ATTACK);
+	gi.WriteShort (self - g_edicts);
+	gi.WritePosition (start);
+	gi.WritePosition (end);
+	gi.WriteByte (1);	// model 1 specifies Shambler bolt model 
+	gi.multicast (self->s.origin, MULTICAST_PVS);
+#else
 #if 1	// From Decino's Q2Infighter mod
 	gi.WriteByte (svc_temp_entity);
 	gi.WriteByte (TE_LIGHTNING);
@@ -409,6 +447,7 @@ void shambler_magic_attack (edict_t *self)
 	gi.WritePosition (end);
 	gi.multicast (self->s.origin, MULTICAST_PVS);
 #endif
+#endif	// KMQUAKE2_ENGINE_MOD
 
 	VectorSubtract (start, end, dir);
 	T_Damage (self->enemy, self, self, dir, self->enemy->s.origin, vec3_origin, damage, 0, 0, 0);
@@ -418,15 +457,15 @@ void shambler_magic_attack (edict_t *self)
 void shambler_skill3 (edict_t *self)
 {
 	if (skill->value == 3)
-		shambler_attack(self);
+		shambler_attack (self);
 }
 
 
 mframe_t shambler_frames_magic_attack[] =
 {
 	ai_charge, 0, shambler_attack_sound,
-	ai_charge, 0, shambler_sparks,	// NULL,
-	ai_charge, 0, shambler_sparks,	// NULL,
+	ai_charge, 0, NULL,						// was shambler_sparks
+	ai_charge, 0, shambler_show_lightning,	// was shambler_sparks
 	ai_charge, 0, NULL,
 	ai_charge, 0, NULL,
 	ai_charge, 0, shambler_magic_attack,
@@ -503,6 +542,21 @@ void shambler_melee(edict_t *self)
 }
 
 
+// Knightmare- added soundcache function
+void monster_q1_shambler_soundcache (edict_t *self)
+{
+	sound_melee1 =	gi.soundindex ("q1shambler/melee1.wav");	
+	sound_melee2 =	gi.soundindex ("q1shambler/melee1.wav");	
+	sound_melee3 =	gi.soundindex ("q1shambler/smack.wav");	
+	sound_attack =	gi.soundindex ("q1shambler/sattck1.wav");			
+	sound_boom =	gi.soundindex ("q1shambler/sboom.wav");
+	sound_pain =	gi.soundindex ("q1shambler/shurt2.wav");	
+	sound_death =	gi.soundindex ("q1shambler/sdeath.wav");			
+	sound_gib =		gi.soundindex ("q1player/udeath.wav");
+	sound_idle =	gi.soundindex ("q1shambler/sidle.wav");			
+	sound_sight =	gi.soundindex ("q1shambler/ssight.wav");
+}
+
 //
 // SPAWN
 //
@@ -518,22 +572,17 @@ void SP_monster_q1_shambler (edict_t *self)
 		return;
 	}
 
-	sound_melee1 =	gi.soundindex ("q1shambler/melee1.wav");	
-	sound_melee2 =	gi.soundindex ("q1shambler/melee1.wav");	
-	sound_melee3 =	gi.soundindex ("q1shambler/smack.wav");	
-	sound_attack =	gi.soundindex ("q1shambler/sattck1.wav");			
-	sound_boom =	gi.soundindex ("q1shambler/sboom.wav");
-	sound_pain =	gi.soundindex ("q1shambler/shurt2.wav");	
-	sound_death =	gi.soundindex ("q1shambler/sdeath.wav");			
-	sound_gib =		gi.soundindex ("q1player/udeath.wav");
-	sound_idle =	gi.soundindex ("q1shambler/sidle.wav");			
-	sound_sight =	gi.soundindex ("q1shambler/ssight.wav");
+	// Knightmare- use soundcache function
+	monster_q1_shambler_soundcache (self);
 
 	// precache gibs
 	gi.modelindex ("models/monsters/q1shambler/head/tris.md2");
 	gi.modelindex ("models/objects/q1gibs/q1gib1/tris.md2");
 	gi.modelindex ("models/objects/q1gibs/q1gib2/tris.md2");
 	gi.modelindex ("models/objects/q1gibs/q1gib3/tris.md2");
+
+	// precache lightning bolt
+	gi.modelindex ("models/monsters/q1shambler/s_light/tris.md2");
 
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;

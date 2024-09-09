@@ -23,9 +23,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "g_local.h"
 
-#define IF_VISIBLE 8
-#define SEEK_PLAYER 128
-
 
 /*QUAKED target_temp_entity (1 0 0) (-8 -8 -8) (8 8 8)
 Fire an origin based temp entity event to the clients.
@@ -91,8 +88,8 @@ void Use_Target_Speaker (edict_t *ent, edict_t *other, edict_t *activator)
 		}
 		else {
 			ent->s.sound = ent->noise_index;	// start it
-#ifdef LOOP_SOUND_ATTENUATION
-			ent->s.attenuation = ent->attenuation;
+#ifdef KMQUAKE2_ENGINE_MOD
+			ent->s.loop_attenuation = ent->attenuation;
 #endif
 		}
 	}
@@ -169,8 +166,8 @@ void SP_target_speaker (edict_t *ent)
 	// check for prestarted looping sound
 	if (ent->spawnflags & 1) {
 		ent->s.sound = ent->noise_index;
-#ifdef LOOP_SOUND_ATTENUATION
-		ent->s.attenuation = ent->attenuation;
+#ifdef KMQUAKE2_ENGINE_MOD
+		ent->s.loop_attenuation = ent->attenuation;
 #endif
 	}
 
@@ -479,12 +476,12 @@ void use_target_changelevel (edict_t *self, edict_t *other, edict_t *activator)
 		if (self->spawnflags & 2 && activator->client)
 		{
 			activator->client->pers.spawn_landmark = true;
-			VectorSubtract(activator->s.origin,self->s.origin,
+			VectorSubtract (activator->s.origin,self->s.origin,
 				activator->client->pers.spawn_offset);
-			VectorCopy(activator->velocity,activator->client->pers.spawn_velocity);
-			VectorCopy(activator->s.angles,activator->client->pers.spawn_angles);
+			VectorCopy (activator->velocity,activator->client->pers.spawn_velocity);
+			VectorCopy (activator->s.angles,activator->client->pers.spawn_angles);
 			activator->client->pers.spawn_angles[ROLL] = 0;
-			VectorCopy(activator->client->ps.viewangles,activator->client->pers.spawn_viewangles);
+			VectorCopy (activator->client->ps.viewangles,activator->client->pers.spawn_viewangles);
 			activator->client->pers.spawn_pm_flags = activator->client->ps.pmove.pm_flags;
 			if (self->s.angles[YAW])
 			{
@@ -495,11 +492,11 @@ void use_target_changelevel (edict_t *self, edict_t *other, edict_t *activator)
 				angles[YAW] = self->s.angles[YAW];
 				AngleVectors(angles,forward,right,NULL);
 				VectorNegate(right,right);
-				VectorCopy(activator->client->pers.spawn_offset,v);
+				VectorCopy (activator->client->pers.spawn_offset,v);
 				G_ProjectSource (vec3_origin,
 					             v, forward, right,
 								 activator->client->pers.spawn_offset);
-				VectorCopy(activator->client->pers.spawn_velocity,v);
+				VectorCopy (activator->client->pers.spawn_velocity,v);
 				G_ProjectSource (vec3_origin,
 					             v, forward, right,
 								 activator->client->pers.spawn_velocity);
@@ -523,7 +520,7 @@ void use_target_changelevel (edict_t *self, edict_t *other, edict_t *activator)
 			activator->client->pers.hand = 2;
 		}
 
-		if (activator && activator->client) //Knightmare- paranoia
+		if (activator && activator->client) // Knightmare- paranoia
 		{
 			activator->client->pers.spawn_levelchange = true;
 			activator->client->pers.spawn_gunframe    = activator->client->ps.gunframe;
@@ -734,30 +731,34 @@ void SP_target_spawner (edict_t *self)
 
 //==========================================================
 
-/*QUAKED target_blaster (1 0 0) (-8 -8 -8) (8 8 8) NOTRAIL NOEFFECTS
+/*QUAKED target_blaster (1 0 0) (-8 -8 -8) (8 8 8) NOTRAIL NOEFFECTS START_ON IF_VISIBLE SILENT x x SEEKPLAYER
 Fires a blaster bolt in the set direction when triggered.
 
 dmg		default is 15
 speed	default is 1000
+wait	firing rate per second, default is 0
+"count" number of times it can be used (wait > 0 only)
+"sounds"
+   0 = blaster
+   1 = railgun
+   2 = rocket
+   3 = bfg
+   4 = homing rocket
+   5 = machinegun
+   6 = grenade
 */
 
-/* Lazarus:
-sounds - weapon choice
-0 = blaster
-1 = railgun
-2 = rocket
-3 = bfg
-4 = homing rocket
-5 = machinegun
-6 = grenade
-*/
+#define BLASTER_START_ON	4
+#define BLASTER_IF_VISIBLE	8
+#define BLASTER_SILENT		16
+#define BLASTER_SEEK_PLAYER 128
 
 void use_target_blaster (edict_t *self, edict_t *other, edict_t *activator)
 {
 	vec3_t	movedir, start, target;
-	int effect;
+	int		effect;
 
-	VectorCopy(self->s.origin,start);
+	VectorCopy (self->s.origin, start);
 	if (self->enemy)
 	{
 		if (self->sounds == 6)
@@ -767,13 +768,16 @@ void use_target_blaster (edict_t *self, edict_t *other, edict_t *activator)
 		}
 		else
 		{
-			VectorMA(self->enemy->absmin,0.5,self->enemy->size,target);
-			VectorSubtract(target,start,movedir);
-			VectorNormalize(movedir);
+			VectorMA (self->enemy->absmin, 0.5, self->enemy->size, target);
+			VectorSubtract (target, start, movedir);
+			VectorNormalize (movedir);
 		}
 	}
 	else
-		VectorCopy(self->movedir,movedir);
+	{	// Knightmare- set movedir here, allowing angles to be updated by movewith code
+		G_SetMovedir2 (self->s.angles, self->movedir);
+		VectorCopy (self->movedir, movedir);
+	}
 
 	if (self->spawnflags & 2)
 		effect = 0;
@@ -793,31 +797,31 @@ void use_target_blaster (edict_t *self, edict_t *other, edict_t *activator)
 	}
 	else if (self->sounds == 2)
 	{
-		fire_rocket(self, start, movedir, self->dmg, self->speed, self->dmg, self->dmg, NULL);
+		fire_rocket (self, start, movedir, self->dmg, self->speed, self->dmg, self->dmg, NULL);
 		gi.positioned_sound (start, self, CHAN_WEAPON, gi.soundindex("weapons/rocklf1a.wav"), 1, ATTN_NORM, 0);
 	}
 	else if (self->sounds == 3)
 	{
-		fire_bfg(self, start, movedir, self->dmg, self->speed, self->dmg);
+		fire_bfg (self, start, movedir, self->dmg, self->speed, self->dmg);
 		gi.positioned_sound (start, self, CHAN_WEAPON, gi.soundindex("weapons/laser2.wav"), 1, ATTN_NORM, 0);
 	}
 	else if (self->sounds == 4)
 	{
-		fire_rocket(self, start, movedir, self->dmg, self->speed, self->dmg, self->dmg, self->enemy);
+		fire_rocket (self, start, movedir, self->dmg, self->speed, self->dmg, self->dmg, self->enemy);
 		gi.positioned_sound (start, self, CHAN_WEAPON, gi.soundindex("weapons/rocklf1a.wav"), 1, ATTN_NORM, 0);
 	}
 	else if (self->sounds == 5)
 	{
-		fire_bullet(self, start, movedir, self->dmg, 2, 0, 0, MOD_TARGET_BLASTER);
-		gi.WriteByte(svc_temp_entity);
-		gi.WriteByte(TE_CHAINFIST_SMOKE);
-		gi.WritePosition(start);
-		gi.multicast(start, MULTICAST_PVS);
-		gi.positioned_sound(start,self,CHAN_WEAPON,gi.soundindex(va("weapons/machgf%db.wav",rand() % 5 + 1)),1,ATTN_NORM,0);
+		fire_bullet (self, start, movedir, self->dmg, 2, 0, 0, MOD_TARGET_BLASTER);
+		gi.WriteByte (svc_temp_entity);
+		gi.WriteByte (TE_CHAINFIST_SMOKE);
+		gi.WritePosition (start);
+		gi.multicast (start, MULTICAST_PVS);
+		gi.positioned_sound (start,self,CHAN_WEAPON,gi.soundindex(va("weapons/machgf%db.wav",rand() % 5 + 1)),1,ATTN_NORM,0);
 	}
 	else if (self->sounds == 6)
 	{
-		fire_grenade(self, start, movedir, self->dmg, self->speed, 2.5, self->dmg+40, false);
+		fire_grenade (self, start, movedir, self->dmg, self->speed, 2.5, self->dmg+40, false);
 		gi.WriteByte (svc_muzzleflash2);
 		gi.WriteShort (self - g_edicts);
 		gi.WriteByte (MZ2_GUNNER_GRENADE_1);
@@ -825,7 +829,8 @@ void use_target_blaster (edict_t *self, edict_t *other, edict_t *activator)
 	}
 	else {
 		fire_blaster (self, start, movedir, self->dmg, self->speed, effect, MOD_TARGET_BLASTER, BLASTER_ORANGE);
-		gi.sound (self, CHAN_VOICE, self->noise_index, 1, ATTN_NORM, 0);
+		if (self->noise_index)
+			gi.sound (self, CHAN_VOICE, self->noise_index, 1, ATTN_NORM, 0);
 	}
 }
 
@@ -837,7 +842,8 @@ void target_blaster_think (edict_t *self)
 	vec3_t	target;
 	int		i;
 
-	if (self->spawnflags & SEEK_PLAYER) {
+	if (self->spawnflags & BLASTER_SEEK_PLAYER)
+	{
 		// this takes precedence over everything else
 
 		// If we are currently targeting a non-player, reset and look for
@@ -853,18 +859,18 @@ void target_blaster_think (edict_t *self)
 				self->enemy = NULL;
 		}
 
-		// We have a live not-notarget player as target. If IF_VISIBLE is 
+		// We have a live not-notarget player as target. If BLASTER_IF_VISIBLE is 
 		// set, see if we can see him
-		if (self->enemy && (self->spawnflags & IF_VISIBLE) ) {
-			VectorMA(self->enemy->absmin,0.5,self->enemy->size,target);
-			tr = gi.trace(self->s.origin,vec3_origin,vec3_origin,target,self,MASK_OPAQUE);
+		if (self->enemy && (self->spawnflags & BLASTER_IF_VISIBLE) ) {
+			VectorMA (self->enemy->absmin, 0.5, self->enemy->size, target);
+			tr = gi.trace(self->s.origin, vec3_origin, vec3_origin, target, self, MASK_OPAQUE);
 			if (tr.fraction != 1.0)
 				self->enemy = NULL;
 		}
 
 		// If we STILL have an enemy, then he must be a good player target. Frag him
 		if (self->enemy) {
-			use_target_blaster(self,self,self);
+			use_target_blaster (self, self, self);
 			if (self->wait)
 				self->nextthink = level.time + self->wait;
 			return;
@@ -874,16 +880,16 @@ void target_blaster_think (edict_t *self)
 		// also hit on func_monitor-viewing fake players
 		for (i=1, player=g_edicts+1; i<globals.num_edicts && !self->enemy; i++, player++)
 		{
-			if (!player->inuse) continue;
-			if (!player->client) continue;
+			if ( !player->inuse ) continue;
+			if ( !player->client ) continue;
 			if (player->svflags & SVF_NOCLIENT) continue;
 			if (player->health >= 0 && !(player->flags & FL_NOTARGET) )
 			{
-				if (self->spawnflags & IF_VISIBLE)
+				if (self->spawnflags & BLASTER_IF_VISIBLE)
 				{
 					// player must be seen to shoot
-					VectorMA(player->s.origin,0.5,player->size,target);
-					tr = gi.trace(self->s.origin,vec3_origin,vec3_origin,target,self,MASK_OPAQUE);
+					VectorMA (player->s.origin, 0.5, player->size, target);
+					tr = gi.trace(self->s.origin, vec3_origin, vec3_origin, target, self, MASK_OPAQUE);
 					if (tr.fraction == 1.0)
 						self->enemy = player;
 				}
@@ -895,7 +901,7 @@ void target_blaster_think (edict_t *self)
 		}
 		// If we have an enemy, shoot
 		if (self->enemy) {
-			use_target_blaster(self,self,self);
+			use_target_blaster(self, self, self);
 			if (self->wait)
 				self->nextthink = level.time + self->wait;
 			return;
@@ -907,7 +913,7 @@ void target_blaster_think (edict_t *self)
 
 	if (self->target)
 	{
-		if (!(self->spawnflags & IF_VISIBLE))
+		if (!(self->spawnflags & BLASTER_IF_VISIBLE))
 		{
 			// have a target, don't care whether it's visible; cannot be a gibbed monster
 			self->enemy = NULL;
@@ -937,8 +943,8 @@ void target_blaster_think (edict_t *self)
 				if ( ent->health > ent->gib_health)
 				{
 					// Not a gibbed monster
-					VectorMA(ent->absmin,0.5,ent->size,target);
-					tr = gi.trace(self->s.origin,vec3_origin,vec3_origin,target,self,MASK_OPAQUE);
+					VectorMA (ent->absmin, 0.5, ent->size, target);
+					tr = gi.trace(self->s.origin, vec3_origin, vec3_origin, target, self, MASK_OPAQUE);
 					if (tr.fraction == 1.0)
 					{
 						self->enemy = ent;
@@ -949,8 +955,8 @@ void target_blaster_think (edict_t *self)
 			}
 		}
 	}
-	if (self->enemy || !(self->spawnflags & IF_VISIBLE) ) {
-		use_target_blaster(self,self,self);
+	if ( self->enemy || !(self->spawnflags & BLASTER_IF_VISIBLE) ) {
+		use_target_blaster (self, self, self);
 		if (self->wait)
 			self->nextthink = level.time + self->wait;
 	}
@@ -972,7 +978,7 @@ void toggle_target_blaster (edict_t *self, edict_t *other, edict_t *activator)
 	{
 
 		self->count--;
-		if (!self->count) {
+		if ( !self->count ) {
 			self->think = G_FreeEdict;
 			self->nextthink = level.time + 1;
 		}
@@ -990,7 +996,8 @@ void toggle_target_blaster (edict_t *self, edict_t *other, edict_t *activator)
 
 void target_blaster_init (edict_t *self)
 {
-	if (self->target) {
+	if (self->target)
+	{
 		edict_t	*ent;
 		ent = G_Find (NULL, FOFS(targetname), self->target);
 		if (!ent)
@@ -998,19 +1005,23 @@ void target_blaster_init (edict_t *self)
 		self->enemy = ent;
 	}
 }
+
 void SP_target_blaster (edict_t *self)
 {
-	G_SetMovedir (self->s.angles, self->movedir);
-	self->noise_index = gi.soundindex ("weapons/laser2.wav");
+//	G_SetMovedir (self->s.angles, self->movedir);
 
-	if (!self->dmg)
+	// Knightmare- added silent option
+	if (!self->spawnflags & BLASTER_SILENT)
+		self->noise_index = gi.soundindex ("weapons/laser2.wav");
+
+	if ( !self->dmg )
 		self->dmg = 15;
-	if (!self->speed)
+	if ( !self->speed )
 		self->speed = 1000;
 
 	// If SEEK_PLAYER is not set and there's no target, then
 	// IF_VISIBLE is meaningless
-	if (!(self->spawnflags & 128) && !self->target)
+	if ( !(self->spawnflags & BLASTER_SEEK_PLAYER) && !self->target )
 		self->spawnflags &= ~16;
 
 	if (self->wait)
@@ -1024,7 +1035,7 @@ void SP_target_blaster (edict_t *self)
 		else
 			self->nextthink = 0;
 	}
-	else if (self->target || (self->spawnflags & SEEK_PLAYER)) {
+	else if (self->target || (self->spawnflags & BLASTER_SEEK_PLAYER)) {
 		self->use = find_target_blaster_target;
 		if (self->target) {
 			self->think = target_blaster_init;
@@ -1114,26 +1125,30 @@ void SP_target_crosslevel_target (edict_t *self)
 
 //==========================================================
 
-/*QUAKED target_laser (0 .5 .8) (-8 -8 -8) (8 8 8) START_ON RED GREEN BLUE YELLOW ORANGE FAT
+/*QUAKED target_laser (0 .5 .8) (-8 -8 -8) (8 8 8) START_ON RED GREEN BLUE YELLOW ORANGE FAT SEEK_PLAYER x x x x x WINDOW_STOP
 When triggered, fires a laser.  You can either set a target
 or a direction.
 */
+
+#define LASER_ON				1
+#define LASER_FAT				64
+#define LASER_SEEK_PLAYER		128
+#define LASER_STOPWINDOW		8192
+#define ROGUE_LASER_STOPWINDOW	128
+#define ROGUE_LASER_SEEK_PLAYER	8192
 
 // DWH - player-seeking laser stuff
 void target_laser_ps_think (edict_t *self)
 {
 	edict_t	*ignore;
 	edict_t *player;
+	vec3_t	start, end, point;
+	vec3_t	realmin, last_movedir, target;
 	trace_t	tr;
-	vec3_t	start;
-	vec3_t	end;
-	vec3_t	point;
-	vec3_t	last_movedir;
-	vec3_t	target;
-	int		count;
-	int		i;
+	int		i, count;
 
-	if ( self->wait > 0) {
+	if ( self->wait > 0)
+	{
 		if ( level.time >= self->starttime ) {
 			self->starttime = level.time + self->wait;
 			self->endtime   = level.time + self->delay;
@@ -1149,27 +1164,38 @@ void target_laser_ps_think (edict_t *self)
 	else
 		count = 4;
 
-	if (self->enemy) {
+	if (self->enemy)
+	{
 		if (self->enemy->flags & FL_NOTARGET || (self->enemy->health < self->enemy->gib_health) )
 			self->enemy = NULL;
 		else {
 			// first make sure laser can see the center of the enemy
-			VectorMA(self->enemy->absmin,0.5,self->enemy->size,target);
-			tr = gi.trace(self->s.origin,vec3_origin,vec3_origin,target,self,MASK_OPAQUE);
+		//	VectorMA (self->enemy->absmin, 0.5, self->enemy->size, target);
+			// Knightmare- calc min coordinate, don't use absmin
+			VectorAdd (self->enemy->s.origin, self->enemy->mins, realmin);
+			VectorMA (realmin, 0.5, self->enemy->size, target);
+			tr = gi.trace(self->s.origin, vec3_origin, vec3_origin, target, self, MASK_OPAQUE);
 			if (tr.fraction != 1.0)
 				self->enemy = NULL;
 		}
 	}
-	if (!self->enemy) {
+
+	if ( !self->enemy )
+	{
 		// find a player - as with target_blaster, search entire entity list so
 		// we'll pick up fake players representing camera-viewers
-		for (i=1, player=g_edicts+1; i<globals.num_edicts && !self->enemy; i++, player++) {
-			if (!player->inuse) continue;
-			if (!player->client) continue;
+		for (i=1, player=g_edicts+1; i<globals.num_edicts && !self->enemy; i++, player++)
+		{
+			if ( !player->inuse ) continue;
+			if ( !player->client ) continue;
 			if (player->svflags & SVF_NOCLIENT) continue;
-			if ((player->health >= player->gib_health) && !(player->flags & FL_NOTARGET) ) {
-				VectorMA(player->absmin,0.5,player->size,target);
-				tr = gi.trace(self->s.origin,vec3_origin,vec3_origin,target,self,MASK_OPAQUE);
+			if ( (player->health >= player->gib_health) && !(player->flags & FL_NOTARGET) )
+			{
+			//	VectorMA (player->absmin, 0.5, player->size, target);
+				// Knightmare- calc min coordinate, don't use absmin
+				VectorAdd (player->s.origin, player->mins, realmin);
+				VectorMA (realmin, 0.5, player->size, target);
+				tr = gi.trace(self->s.origin, vec3_origin, vec3_origin, target, self, MASK_OPAQUE);
 				if (tr.fraction == 1.0) {
 					self->enemy = player;
 					self->spawnflags |= 0x80000001;
@@ -1178,7 +1204,7 @@ void target_laser_ps_think (edict_t *self)
 			}
 		}
 	}
-	if (!self->enemy) {
+	if ( !self->enemy ) {
 		self->svflags |= SVF_NOCLIENT;
 		self->nextthink = level.time + FRAMETIME;
 		return;
@@ -1186,10 +1212,13 @@ void target_laser_ps_think (edict_t *self)
 
 	self->svflags &= ~SVF_NOCLIENT;
 	VectorCopy (self->movedir, last_movedir);
-	VectorMA (self->enemy->absmin, 0.5, self->enemy->size, point);
+//	VectorMA (self->enemy->absmin, 0.5, self->enemy->size, point);
+	// Knightmare- calc min coordinate, don't use absmin
+	VectorAdd (self->enemy->s.origin, self->enemy->mins, realmin);
+	VectorMA (realmin, 0.5, self->enemy->size, point);
 	VectorSubtract (point, self->s.origin, self->movedir);
 	VectorNormalize (self->movedir);
-	if (!VectorCompare(self->movedir, last_movedir))
+	if ( !VectorCompare(self->movedir, last_movedir) )
 		self->spawnflags |= 0x80000000;
 
 	ignore = self;
@@ -1254,7 +1283,7 @@ void target_laser_ps_on (edict_t *self)
 
 void target_laser_ps_off (edict_t *self)
 {
-	self->spawnflags &= ~1;
+	self->spawnflags &= ~LASER_ON;
 	self->svflags |= SVF_NOCLIENT;
 	self->nextthink = 0;
 }
@@ -1262,10 +1291,11 @@ void target_laser_ps_off (edict_t *self)
 void target_laser_ps_use (edict_t *self, edict_t *other, edict_t *activator)
 {
 	self->activator = activator;
-	if (self->spawnflags & 1) {
+	if (self->spawnflags & LASER_ON)
+	{
 		target_laser_ps_off (self);
 		self->count--;
-		if (!self->count) {
+		if ( !self->count ) {
 			self->think = G_FreeEdict;
 			self->nextthink = level.time + 1;
 		}
@@ -1277,15 +1307,14 @@ void target_laser_ps_use (edict_t *self, edict_t *other, edict_t *activator)
 void target_laser_think (edict_t *self)
 {
 	edict_t	*ignore;
-	vec3_t	start;
-	vec3_t	end;
+	vec3_t	start, end, point;
+	vec3_t	last_movedir, realmin;
 	trace_t	tr;
-	vec3_t	point;
-	vec3_t	last_movedir;
 	int		count;
 
 	// DWH
-	if ( self->wait > 0) {
+	if ( self->wait > 0)
+	{
 		// pulsed laser
 		if ( level.time >= self->starttime ) {
 			self->starttime = level.time + self->wait;
@@ -1306,19 +1335,29 @@ void target_laser_think (edict_t *self)
 	if (self->enemy)
 	{
 		VectorCopy (self->movedir, last_movedir);
-		VectorMA (self->enemy->absmin, 0.5, self->enemy->size, point);
+	//	VectorMA (self->enemy->absmin, 0.5, self->enemy->size, point);
+		// Knightmare- calc min coordinate, don't use absmin
+		VectorAdd (self->enemy->s.origin, self->enemy->mins, realmin);
+		VectorMA (realmin, 0.5, self->enemy->size, point);
 		VectorSubtract (point, self->s.origin, self->movedir);
 		VectorNormalize (self->movedir);
-		if (!VectorCompare(self->movedir, last_movedir))
+		if ( !VectorCompare(self->movedir, last_movedir) )
 			self->spawnflags |= 0x80000000;
 	}
+	else // Knightmare- set movedir here so if our angles get updated...
+		G_SetMovedir2 (self->s.angles, self->movedir);
 
 	ignore = self;
 	VectorCopy (self->s.origin, start);
 	VectorMA (start, 2048, self->movedir, end);
 	while (1)
 	{
-		tr = gi.trace (start, NULL, NULL, end, ignore, CONTENTS_SOLID|CONTENTS_MONSTER|CONTENTS_DEADMONSTER);
+		// Knightmare- spawnflag 8192 stops at window, or spawnflag 128 in Rogue maps 
+		if ( ( (level.maptype != MAPTYPE_ROGUE) && (self->spawnflags & LASER_STOPWINDOW) ) ||
+			( (level.maptype == MAPTYPE_ROGUE) && (self->spawnflags & ROGUE_LASER_STOPWINDOW) ) )
+			tr = gi.trace (start, NULL, NULL, end, ignore, MASK_SHOT);
+		else
+			tr = gi.trace (start, NULL, NULL, end, ignore, CONTENTS_SOLID|CONTENTS_MONSTER|CONTENTS_DEADMONSTER);
 
 		if (!tr.ent)
 			break;
@@ -1377,7 +1416,7 @@ void target_laser_on (edict_t *self)
 
 void target_laser_off (edict_t *self)
 {
-	self->spawnflags &= ~1;
+	self->spawnflags &= ~LASER_ON;
 	self->svflags |= SVF_NOCLIENT;
 	self->nextthink = 0;
 }
@@ -1385,7 +1424,8 @@ void target_laser_off (edict_t *self)
 void target_laser_use (edict_t *self, edict_t *other, edict_t *activator)
 {
 	self->activator = activator;
-	if (self->spawnflags & 1) {
+	if (self->spawnflags & LASER_ON)
+	{
 		target_laser_off (self);
 		self->count--;
 		if (!self->count) {
@@ -1409,7 +1449,7 @@ void target_laser_start (edict_t *self)
 	// set the beam diameter
 	if (self->mass > 1)
 		self->s.frame = self->mass;
-	else if (self->spawnflags & 64)
+	else if (self->spawnflags & LASER_FAT)
 		self->s.frame = 16;
 	else
 		self->s.frame = 4;
@@ -1426,38 +1466,43 @@ void target_laser_start (edict_t *self)
 	else if (self->spawnflags & 32)
 		self->s.skinnum = 0xe0e1e2e3;
 
-
-	if (!self->dmg)
+	if ( !self->dmg )
 		self->dmg = 1;
+
 	VectorSet (self->mins, -8, -8, -8);
 	VectorSet (self->maxs, 8, 8, 8);
 
 	// DWH
 
 	// pulsed laser
-	if (self->wait > 0) {
+	if (self->wait > 0)
+	{
 		if (self->delay >= self->wait) {
 			gi.dprintf("target_laser at %s, delay must be < wait.\n",
 				vtos(self->s.origin));
-			self->wait = 0;
+			self->wait = 0.0f;
 		}
-		else if (self->delay == 0.) {
+		else if (self->delay == 0.0f) {
 			gi.dprintf("target_laser at %s, wait > 0 but delay = 0\n",
 				vtos(self->s.origin));
-			self->wait = 0;
+			self->wait = 0.0f;
 		}
 	}
 
-	if (self->spawnflags & 128) {
+//	if (self->spawnflags & LASER_SEEK_PLAYER)
+	// Knightmare- spawnflag 128 specifies SEEK_PLAYER, or spawnflag 8192 in Rogue maps 
+	if ( ( (level.maptype != MAPTYPE_ROGUE) && (self->spawnflags & LASER_SEEK_PLAYER) ) ||
+		( (level.maptype == MAPTYPE_ROGUE) && (self->spawnflags & ROGUE_LASER_SEEK_PLAYER) ) )
+	{
 		// player-seeking laser
 		self->enemy = NULL;
 		self->use = target_laser_ps_use;
 		self->think = target_laser_ps_think;
 		gi.linkentity(self);
 		if (self->spawnflags & 1)
-			target_laser_ps_on(self);
+			target_laser_ps_on (self);
 		else
-			target_laser_ps_off(self);
+			target_laser_ps_off (self);
 		return;
 	}
 	// end DWH
@@ -1473,7 +1518,7 @@ void target_laser_start (edict_t *self)
 		}
 		else
 		{
-			G_SetMovedir (self->s.angles, self->movedir);
+			G_SetMovedir2 (self->s.angles, self->movedir);
 		}
 	}
 	self->use = target_laser_use;
@@ -1771,11 +1816,11 @@ void SP_target_earthquake (edict_t *self)
 //
 void target_locator_init (edict_t *self)
 {
-	int num_points=0;
-	int i, N, nummoves;
-	qboolean looped;
-	edict_t *tgt0, *tgtlast, *target, *next;
-	edict_t *move;
+	int			num_points = 0;
+	int			i, N, nummoves;
+	qboolean	looped;
+	edict_t		*tgt0 = NULL, *tgtlast = NULL, *target = NULL, *next = NULL;
+	edict_t		*move = NULL;
 
 	move = NULL;
 	move = G_Find(move,FOFS(targetname),self->target);
@@ -1788,7 +1833,7 @@ void target_locator_init (edict_t *self)
 		return;
 	}
 	target = G_Find(NULL,FOFS(targetname),self->pathtarget);
-	if (!target)
+	if ( !target )
 	{
 		gi.dprintf("Pathtarget of target_locator (%s) not found.\n",
 			self->pathtarget);
@@ -1837,7 +1882,7 @@ void target_locator_init (edict_t *self)
 		{
 			target = next;
 			if (!(target->spawnflags & 1)) i++;
-			if (target==tgtlast)
+			if (target == tgtlast)
 			{
 				// We've looped thru all path_corners, but not
 				// reached the target number yet. This can only
@@ -1852,16 +1897,15 @@ void target_locator_init (edict_t *self)
 
 		// Assumptions here: SOLID_BSP entities are assumed to be brush models,
 		// all others are point ents
-		if (move->solid == SOLID_BSP)
-		{
-			vec3_t origin;
-			VectorAdd(move->absmin,move->absmax,origin);
-			VectorScale(origin,0.5,origin);
-			VectorSubtract(target->s.origin,origin,move->s.origin);
+		if (move->solid == SOLID_BSP) {
+			vec3_t	origin;
+			VectorAdd (move->absmin ,move->absmax, origin);
+			VectorScale (origin, 0.5, origin);
+			VectorSubtract (target->s.origin, origin, move->s.origin);
 		}
 		else {
-			VectorCopy(target->s.origin,move->s.origin);
-			VectorCopy(target->s.angles,move->s.angles);
+			VectorCopy (target->s.origin,move->s.origin);
+			VectorCopy (target->s.angles,move->s.angles);
 		}
 		M_droptofloor(move);
 		gi.linkentity(move);
@@ -1905,11 +1949,11 @@ void SP_target_locator (edict_t *self)
 
 void use_target_anger (edict_t *self, edict_t *other, edict_t *activator)
 {
-	edict_t		*kill_me, *movetarget;
-	edict_t		*t;
+	edict_t		*kill_me = NULL, *movetarget = NULL;
+	edict_t		*t = NULL;
 	vec3_t		vec;
-	float		dist, best_dist;
-	edict_t		*best_target;
+	float		dist = 0.0f, best_dist = 0.0f;
+	edict_t		*best_target = NULL;
 
 	if (self->pathtarget)
 		movetarget = G_PickTarget(self->pathtarget);
@@ -1952,7 +1996,7 @@ void use_target_anger (edict_t *self, edict_t *other, edict_t *activator)
 							best_target = NULL;
 							if (kill_me->health > 0)
 							{
-								VectorSubtract(kill_me->s.origin,t->s.origin,vec);
+								VectorSubtract (kill_me->s.origin,t->s.origin,vec);
 								best_dist = VectorLength(vec);
 								best_target = kill_me;
 							}
@@ -1965,7 +2009,7 @@ void use_target_anger (edict_t *self, edict_t *other, edict_t *activator)
 									continue;
 								if (kill_me->health <= 0)
 									continue;
-								VectorSubtract(kill_me->s.origin,t->s.origin,vec);
+								VectorSubtract (kill_me->s.origin,t->s.origin,vec);
 								dist = VectorLength(vec);
 								if (dist < best_dist)
 								{
@@ -2128,7 +2172,7 @@ void ThrowRock (edict_t *self, char *modelname, float speed, vec3_t origin, vec3
 	chunk = G_Spawn();
 	VectorCopy (origin, chunk->s.origin);
 	gi.setmodel (chunk, modelname);
-	VectorCopy(size,chunk->maxs);
+	VectorCopy (size,chunk->maxs);
 	VectorScale(chunk->maxs,0.5,chunk->maxs);
 	VectorNegate(chunk->maxs,chunk->mins);
 	chunk->velocity[0] = speed * self->movedir[0] + var * crandom();
@@ -2536,7 +2580,7 @@ void target_effect_tunnel_sparks (edict_t *self, edict_t *activator)
 	vec3_t	origin;
 	int		i;
 
-	VectorCopy(self->s.origin,origin);
+	VectorCopy (self->s.origin,origin);
 	for (i=0; i<self->count; i++)
 	{
 		origin[2] += (self->speed * 0.01) * (i + random());
@@ -2766,7 +2810,7 @@ void target_attractor_think_single (edict_t *self)
 			if (!ent->inuse) continue;
 			if (ent->health <= 0) continue;
 			num_targets++;
-			VectorSubtract(self->s.origin,ent->s.origin,dir);
+			VectorSubtract (self->s.origin,ent->s.origin,dir);
 			dist = VectorLength(dir);
 			if (dist > self->moveinfo.distance) continue;
 			if (self->spawnflags & ATTRACTOR_SIGHT) {
@@ -2787,7 +2831,7 @@ void target_attractor_think_single (edict_t *self)
 			if (ent->health <= 0) continue;
 			if (!(ent->svflags & SVF_MONSTER)) continue;
 			num_targets++;
-			VectorSubtract(self->s.origin,ent->s.origin,dir);
+			VectorSubtract (self->s.origin,ent->s.origin,dir);
 			dist = VectorLength(dir);
 			if (dist > self->moveinfo.distance) continue;
 			if (self->spawnflags & ATTRACTOR_SIGHT) {
@@ -2808,7 +2852,7 @@ void target_attractor_think_single (edict_t *self)
 			if (!ent->inuse) continue;
 			num_targets++;
 			VectorAdd(ent->s.origin,ent->origin_offset,targ_org);
-			VectorSubtract(self->s.origin,targ_org,dir);
+			VectorSubtract (self->s.origin,targ_org,dir);
 			dist = VectorLength(dir);
 			if (dist > self->moveinfo.distance) continue;
 			if (self->spawnflags & ATTRACTOR_SIGHT) {
@@ -2839,9 +2883,10 @@ void target_attractor_think_single (edict_t *self)
 	}
 
 	VectorAdd(target->s.origin,target->origin_offset,targ_org);
-	VectorSubtract(self->s.origin,targ_org,dir);
+	VectorSubtract (self->s.origin, targ_org, dir);
 	dist = VectorLength(dir);
-	if (readout->value) gi.dprintf("distance=%g, pull speed=%g\n",dist,self->moveinfo.speed);
+	if (readout->value)
+		gi.dprintf("distance=%g, pull speed=%g\n", dist, self->moveinfo.speed);
 
 	if ((self->pathtarget) && (self->spawnflags & ATTRACTOR_PATHTARGET))
 	{
@@ -2857,8 +2902,8 @@ void target_attractor_think_single (edict_t *self)
 			self->spawnflags &= ~ATTRACTOR_PATHTARGET;
 		}
 	}
-	VectorNormalize(dir);
-	speed = VectorNormalize(target->velocity);
+	VectorNormalize (dir);
+	speed = VectorNormalize (target->velocity);
 	speed = max(fabs(self->moveinfo.speed),speed);
 	if (self->moveinfo.speed < 0) speed = -speed;
 	if (speed > dist*10)
@@ -2910,9 +2955,9 @@ void target_attractor_think_single (edict_t *self)
 		vec3_t	new_origin;
 
 		if (target->client)
-			VectorCopy(target->s.origin,new_origin);
+			VectorCopy (target->s.origin,new_origin);
 		else
-			VectorMA(targ_org,FRAMETIME,target->velocity,new_origin);
+			VectorMA (targ_org,FRAMETIME,target->velocity,new_origin);
 		
 		switch (self->sounds)
 		{
@@ -2997,7 +3042,7 @@ void target_attractor_think(edict_t *self)
 		num_targets++;
 		
 		VectorAdd(target->s.origin,target->origin_offset,targ_org);
-		VectorSubtract(self->s.origin,targ_org,dir);
+		VectorSubtract (self->s.origin,targ_org,dir);
 		dist = VectorLength(dir);
 
 		if (self->spawnflags & ATTRACTOR_SIGHT) {
@@ -3022,8 +3067,8 @@ void target_attractor_think(edict_t *self)
 				self->spawnflags &= ~ATTRACTOR_PATHTARGET;
 			}
 		}
-		VectorNormalize(dir);
-		speed = VectorNormalize(target->velocity);
+		VectorNormalize (dir);
+		speed = VectorNormalize (target->velocity);
 		speed = max(fabs(self->moveinfo.speed),speed);
 		if (self->moveinfo.speed < 0) speed = -speed;
 		if (speed > dist*10) {
@@ -3098,8 +3143,8 @@ void use_target_attractor(edict_t *self, edict_t *other, edict_t *activator)
 	else {
 		self->spawnflags |= (ATTRACTOR_ON + ATTRACTOR_PATHTARGET);
 		self->s.sound = self->noise_index;
-	#ifdef LOOP_SOUND_ATTENUATION
-		self->s.attenuation = self->attenuation;
+	#ifdef KMQUAKE2_ENGINE_MOD
+		self->s.loop_attenuation = self->attenuation;
 	#endif
 
 		if (self->spawnflags & ATTRACTOR_SINGLE)
@@ -3182,12 +3227,12 @@ void SP_target_attractor(edict_t *self)
 ===================================================================*/
 void use_target_CD (edict_t *self, edict_t *other, edict_t *activator)
 {
-	if (self->musictrack && strlen(self->musictrack))
+	if ( self->musictrack && strlen(self->musictrack) )
 		gi.configstring (CS_CDTRACK, self->musictrack);
 	else
 		gi.configstring (CS_CDTRACK, va("%d",self->sounds));
-	if ((self->dmg > 0) && (!deathmatch->value) && (!coop->value))
-		stuffcmd(&g_edicts[1],va("cd_loopcount %d\n",self->dmg));
+	if ( (self->dmg > 0) && (!deathmatch->value) && (!coop->value) )
+		stuffcmd (&g_edicts[1], va("cd_loopcount %d\n", self->dmg));
 
 	self->count--;
 	if (!self->count) {
@@ -3322,23 +3367,23 @@ void target_monitor_move (edict_t *self)
 	VectorMA (goal, 2, forward, goal);
 
 	// pad for floors and ceilings
-	VectorCopy(goal, o);
+	VectorCopy (goal, o);
 	o[2] += 6;
 	trace = gi.trace(goal, NULL, NULL, o, self, MASK_SOLID);
 	if (trace.fraction < 1) {
-		VectorCopy(trace.endpos, goal);
+		VectorCopy (trace.endpos, goal);
 		goal[2] -= 6;
 	}
 
-	VectorCopy(goal, o);
+	VectorCopy (goal, o);
 	o[2] -= 6;
 	trace = gi.trace(goal, NULL, NULL, o, self, MASK_SOLID);
 	if (trace.fraction < 1) {
-		VectorCopy(trace.endpos, goal);
+		VectorCopy (trace.endpos, goal);
 		goal[2] += 6;
 	}
 
-	VectorCopy(goal, self->s.origin);
+	VectorCopy (goal, self->s.origin);
 	self->nextthink = level.time + FRAMETIME;
 	gi.linkentity(self);
 }
@@ -3406,6 +3451,7 @@ void use_target_monitor (edict_t *self, edict_t *other, edict_t *activator)
 	cl = (gclient_t *)gi.TagMalloc(sizeof(gclient_t), TAG_LEVEL); 
 	faker->client = cl; 
 	faker->target_ent = activator;
+	faker->s.number = faker - g_edicts;	// Phatman: silence server warning
 	gi.linkentity (faker); 
 
 	if (self->target_ent && self->target_ent->inuse)
@@ -3624,7 +3670,7 @@ void target_animation_use (edict_t *self, edict_t *other, edict_t *activator)
 	{
 		if (!self->target)
 			return;
-		target = G_Find(NULL,FOFS(targetname),self->target);
+		target = G_Find(NULL, FOFS(targetname), self->target);
 		if (!target)
 			return;
 	}
@@ -3729,7 +3775,7 @@ void target_failure_wipe (edict_t *self)
 
 	player = &g_edicts[1];	// Gotta be, since this is SP only
 	if (player->client->textdisplay)
-		Text_Close(player);
+		Text_Close (player);
 }
 
 void target_failure_player_die (edict_t *player)
@@ -3822,7 +3868,8 @@ void use_target_failure (edict_t *self, edict_t *other, edict_t *activator)
 		gi.sound (activator, CHAN_VOICE|CHAN_RELIABLE, self->noise_index, 1, ATTN_NORM, 0);
 
 	self->target_ent = activator;
-	if (Q_stricmp(vid_ref->string,"gl") && Q_stricmp(vid_ref->string,"kmgl"))
+//	if ( Q_stricmp(vid_ref->string, "gl") && Q_stricmp(vid_ref->string, "kmgl") )
+	if ( !Q_strncmp(vid_ref->string, "soft", 4) )
 	{
 		self->flags = 12;
 		self->think = target_failure_fade_lights;
@@ -3942,11 +3989,11 @@ void use_target_change (edict_t *self, edict_t *other, edict_t *activator)
 			else
 				target_ent->noise_index = self->noise_index;
 		}
-#ifdef LOOP_SOUND_ATTENUATION
+#ifdef KMQUAKE2_ENGINE_MOD
 		if (self->attenuation)
 		{
-			if (target_ent->s.attenuation == target_ent->attenuation)
-				target_ent->s.attenuation = target_ent->attenuation = self->attenuation;
+			if (target_ent->s.loop_attenuation == target_ent->attenuation)
+				target_ent->s.loop_attenuation = target_ent->attenuation = self->attenuation;
 			else
 				target_ent->attenuation = self->attenuation;
 		}
@@ -4262,7 +4309,7 @@ void use_target_set_effect (edict_t *self, edict_t *other, edict_t *activator)
 {
 	edict_t *target;
 
-	target = G_Find(NULL,FOFS(targetname),self->target);
+	target = G_Find(NULL, FOFS(targetname), self->target);
 	while (target)
 	{
 		if (self->style == 1)
@@ -4280,7 +4327,7 @@ void use_target_set_effect (edict_t *self, edict_t *other, edict_t *activator)
 			target->s.effects = self->effects;
 			target->s.renderfx = self->renderfx;
 		}
-#ifdef KMQUAKE2_ENGINE_MOD //Knightmare added
+#ifdef KMQUAKE2_ENGINE_MOD // Knightmare added
 		if ((self->alpha >= 0.0) && (self->alpha <= 1.0))
 			target->s.alpha = self->alpha;
 #endif
@@ -4317,8 +4364,49 @@ void SP_target_set_effect (edict_t *self)
 =============================================================================*/
 void use_target_sky (edict_t *self, edict_t *other, edict_t *activator)
 {
-	gi.configstring(CS_SKY,self->pathtarget);
-	stuffcmd(&g_edicts[1],va("sky %s\n",self->pathtarget));
+	int		i;
+	char	string[1024];
+
+#ifdef KMQUAKE2_ENGINE_MOD
+	// Knightmare- added cloudname support
+	if ( self->followtarget && (self->followtarget[0] != 0) )
+	{
+		gi.configstring (CS_SKY, self->pathtarget);
+		gi.configstring (CS_CLOUDNAME, self->followtarget);
+		gi.configstring (CS_SKYROTATE, va("%f", self->speed) );
+		gi.configstring (CS_SKYAXIS, va("%f %f %f",
+						self->avelocity[0], self->avelocity[1], self->avelocity[2]) );
+		gi.configstring (CS_SKYDISTANCE, va("%f", self->radius) );
+		gi.configstring (CS_CLOUDLIGHTFREQ, va("%f", self->duration) );
+		gi.configstring (CS_CLOUDDIR, va("%f %f", self->offset[0], self->offset[1]) );
+		gi.configstring (CS_CLOUDTILE, va("%f %f %f", self->size[0], self->size[1], self->size[2]) );
+		gi.configstring (CS_CLOUDSPEED, va("%f %f %f", self->velocity[0], self->velocity[1], self->velocity[2]) );
+		gi.configstring (CS_CLOUDALPHA, va("%f %f %f", self->color[0], self->color[1], self->color[2]) );
+		Com_sprintf (string, sizeof(string), "skyclouds %s %s %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f\n",
+					self->pathtarget, self->followtarget, self->speed, self->avelocity[0], self->avelocity[1], self->avelocity[2], self->radius,
+					self->duration, self->offset[0], self->offset[1], self->size[0], self->size[1], self->size[2],
+					self->velocity[0], self->velocity[1], self->velocity[2], self->color[0], self->color[1], self->color[2]);
+	}
+	else {
+#endif	// KMQUAKE2_ENGINE_MOD
+		gi.configstring (CS_SKY, self->pathtarget);
+		gi.configstring (CS_SKYROTATE, va("%f", self->speed) );
+		gi.configstring (CS_SKYAXIS, va("%f %f %f",
+						self->avelocity[0], self->avelocity[1], self->avelocity[2]) );
+#ifdef KMQUAKE2_ENGINE_MOD
+		gi.configstring (CS_SKYDISTANCE, va("%f", self->radius) );
+		Com_sprintf (string, sizeof(string), "sky %s %.2f %.2f %.2f %.2f %.2f\n", self->pathtarget,
+					self->speed, self->avelocity[0], self->avelocity[1], self->avelocity[2], self->radius);
+	}
+#else
+		Com_sprintf (string, sizeof(string), "sky %s %.2f %.2f %.2f %.2f\n", self->pathtarget,
+					self->speed, self->avelocity[0], self->avelocity[1], self->avelocity[2]);
+#endif	// KMQUAKE2_ENGINE_MOD
+
+	for (i = 0; i < game.maxclients; i++)
+		stuffcmd (&g_edicts[i + 1], string);
+	// end Knightmare
+
 	self->count--;
 	if (!self->count) {
 		self->think = G_FreeEdict;
@@ -4328,21 +4416,45 @@ void use_target_sky (edict_t *self, edict_t *other, edict_t *activator)
 
 void SP_target_sky (edict_t *self)
 {
-	size_t	pathSize;
+	size_t	pathSize, followSize;
 
-	if (!st.sky || !*st.sky)
+	if ( !st.sky || !*st.sky )
 	{
-		gi.dprintf("Target_sky with no sky string at %s\n",vtos(self->s.origin));
-		G_FreeEdict(self);
+		gi.dprintf ("Target_sky with no sky string at %s\n", vtos(self->s.origin));
+		G_FreeEdict (self);
 		return;
 	}
 
 	self->class_id = ENTITY_TARGET_SKY;
 
-	pathSize = strlen(st.sky)+1;
+	pathSize = strlen(st.sky) + 1;
 	self->pathtarget = gi.TagMalloc(pathSize, TAG_LEVEL);
-//	strncpy(self->pathtarget, st.sky);
 	Q_strncpyz (self->pathtarget, pathSize, st.sky);
+	self->speed = st.skyrotate;
+	VectorCopy (st.skyaxis, self->avelocity);
+	self->radius = st.skydistance;
+
+	// Knightmare- added cloudname support
+	if ( st.cloudname && (st.cloudname[0] != 0) )
+	{
+		followSize = strlen(st.cloudname) + 1;
+		self->followtarget = gi.TagMalloc(followSize, TAG_LEVEL);
+		Q_strncpyz (self->followtarget, followSize, st.cloudname);
+		self->duration = st.lightningfreq;
+		self->offset[0] = st.cloudxdir;
+		self->offset[1] = st.cloudydir;
+		self->size[0] = st.cloud1tile;
+		self->velocity[0] = st.cloud1speed;
+		self->color[0] = st.cloud1alpha;
+		self->size[1] = st.cloud2tile;
+		self->velocity[1] = st.cloud2speed;
+		self->color[1] = st.cloud2alpha;
+		self->size[2] = st.cloud3tile;
+		self->velocity[2] = st.cloud3speed;
+		self->color[2] = st.cloud3alpha;
+	}
+	// end Knightmare
+
 	self->use = use_target_sky;
 }
 
@@ -4481,8 +4593,8 @@ void clone (edict_t *self, edict_t *other, edict_t *activator)
 	child->moveinfo.sound_start  = parent->moveinfo.sound_start;
 	child->moveinfo.sound_middle = parent->moveinfo.sound_middle;
 	child->moveinfo.sound_end    = parent->moveinfo.sound_end;
-	VectorCopy(parent->movedir,child->movedir);
-	VectorCopy(self->s.angles, child->s.angles);
+	VectorCopy (parent->movedir,child->movedir);
+	VectorCopy (self->s.angles, child->s.angles);
 	if (VectorLength(child->s.angles) != 0)
 	{
 		if (child->s.angles[YAW] == 90 || child->s.angles[YAW] == 270)
@@ -4524,35 +4636,35 @@ void clone (edict_t *self, edict_t *other, edict_t *activator)
 	// classname-specific stuff
 	if (!Q_stricmp(child->classname, "func_button"))
 	{
-		VectorCopy(child->s.origin,child->pos1);
+		VectorCopy (child->s.origin,child->pos1);
 		child->moveinfo.distance = parent->moveinfo.distance;
-		VectorMA(child->pos1, child->moveinfo.distance, child->movedir, child->pos2);
+		VectorMA (child->pos1, child->moveinfo.distance, child->movedir, child->pos2);
 		child->moveinfo.state = 1;
 		child->moveinfo.speed = child->speed;
 		child->moveinfo.accel = child->accel;
 		child->moveinfo.decel = child->decel;
 		child->moveinfo.wait  = child->wait;
-		VectorCopy(child->pos1,     child->moveinfo.start_origin);
-		VectorCopy(child->s.angles, child->moveinfo.start_angles);
-		VectorCopy(child->pos2,     child->moveinfo.end_origin);
-		VectorCopy(child->s.angles, child->moveinfo.end_angles);
+		VectorCopy (child->pos1,     child->moveinfo.start_origin);
+		VectorCopy (child->s.angles, child->moveinfo.start_angles);
+		VectorCopy (child->pos2,     child->moveinfo.end_origin);
+		VectorCopy (child->s.angles, child->moveinfo.end_angles);
 		if (!child->targetname)
 			child->touch = button_touch;
 	}
 	else if (!Q_stricmp(child->classname, "func_door"))
 	{
-		VectorCopy(child->s.origin,child->pos1);
+		VectorCopy (child->s.origin,child->pos1);
 		child->moveinfo.distance = parent->moveinfo.distance;
-		VectorMA(child->pos1, child->moveinfo.distance, child->movedir, child->pos2);
+		VectorMA (child->pos1, child->moveinfo.distance, child->movedir, child->pos2);
 		child->moveinfo.state = 1;
 		child->moveinfo.speed = child->speed;
 		child->moveinfo.accel = child->accel;
 		child->moveinfo.decel = child->decel;
 		child->moveinfo.wait  = child->wait;
-		VectorCopy(child->pos1,     child->moveinfo.start_origin);
-		VectorCopy(child->s.angles, child->moveinfo.start_angles);
-		VectorCopy(child->pos2,     child->moveinfo.end_origin);
-		VectorCopy(child->s.angles, child->moveinfo.end_angles);
+		VectorCopy (child->pos1,     child->moveinfo.start_origin);
+		VectorCopy (child->s.angles, child->moveinfo.start_angles);
+		VectorCopy (child->pos2,     child->moveinfo.end_origin);
+		VectorCopy (child->s.angles, child->moveinfo.end_angles);
 		if (child->health || child->targetname)
 			child->think = Think_CalcMoveSpeed;
 		else
@@ -4562,19 +4674,19 @@ void clone (edict_t *self, edict_t *other, edict_t *activator)
 	else if (!Q_stricmp(child->classname, "func_door_rotating"))
 	{
 		VectorClear(child->s.angles);
-		VectorCopy(parent->s.angles,child->s.angles);
-		VectorCopy(parent->pos1, child->pos1);
-		VectorCopy(parent->pos2, child->pos2);
+		VectorCopy (parent->s.angles,child->s.angles);
+		VectorCopy (parent->pos1, child->pos1);
+		VectorCopy (parent->pos2, child->pos2);
 		child->moveinfo.distance = parent->moveinfo.distance;
 		child->moveinfo.state = 1;
 		child->moveinfo.speed = child->speed;
 		child->moveinfo.accel = child->accel;
 		child->moveinfo.decel = child->decel;
 		child->moveinfo.wait  = child->wait;
-		VectorCopy(child->s.origin, child->moveinfo.start_origin);
-		VectorCopy(child->pos1,     child->moveinfo.start_angles);
-		VectorCopy(child->s.origin, child->moveinfo.end_origin);
-		VectorCopy(child->pos2,     child->moveinfo.end_angles);
+		VectorCopy (child->s.origin, child->moveinfo.start_origin);
+		VectorCopy (child->pos1,     child->moveinfo.start_angles);
+		VectorCopy (child->s.origin, child->moveinfo.end_origin);
+		VectorCopy (child->pos2,     child->moveinfo.end_angles);
 		if (child->health || child->targetname)
 			child->think = Think_CalcMoveSpeed;
 		else
@@ -4617,16 +4729,16 @@ void clone (edict_t *self, edict_t *other, edict_t *activator)
 			speaker->spawnflags  = 7;       // owner must be moving to play
 			child->speaker        = speaker;
 			if (VectorLength(child->s.origin))
-				VectorCopy(child->s.origin,speaker->s.origin);
+				VectorCopy (child->s.origin,speaker->s.origin);
 			else {
 				VectorAdd(child->absmin,child->absmax,speaker->s.origin);
 				VectorScale(speaker->s.origin,0.5,speaker->s.origin);
 			}
-			VectorSubtract(speaker->s.origin,child->s.origin,speaker->offset);
+			VectorSubtract (speaker->s.origin,child->s.origin,speaker->offset);
 		}
 	}
 
-#ifdef KMQUAKE2_ENGINE_MOD //Knightmare added
+#ifdef KMQUAKE2_ENGINE_MOD // Knightmare added
 	if ((self->alpha >= 0.0) && (self->alpha <= 1.0))
 		child->s.alpha = self->alpha;
 #endif

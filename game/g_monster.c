@@ -40,20 +40,20 @@ void FadeSink (edict_t *ent)
 		ent->s.renderfx &= ~RF_TRANSLUCENT;
 		ent->s.effects |= EF_SPHERETRANS;
 	}
-	if (ent->count==10)
-		ent->think=G_FreeEdict;
-	ent->nextthink=level.time+FRAMETIME;
+	if (ent->count == 10)
+		ent->think = G_FreeEdict;
+	ent->nextthink = level.time+FRAMETIME;
 }
 void FadeDieSink (edict_t *ent)
 {
 	ent->takedamage = DAMAGE_NO;	// can't gib 'em once they start sinking
 	ent->s.effects &= ~EF_FLIES;
 	ent->s.sound = 0;
-	ent->s.origin[2]-=SINKAMT;
-	ent->s.renderfx=RF_TRANSLUCENT;
-	ent->think=FadeSink;
-	ent->nextthink=level.time+FRAMETIME;
-	ent->count=0;
+	ent->s.origin[2] -= SINKAMT;
+	ent->s.renderfx = RF_TRANSLUCENT;
+	ent->think = FadeSink;
+	ent->nextthink = level.time + FRAMETIME;
+	ent->count = 0;
 }
 
 
@@ -63,7 +63,7 @@ void FadeDieSink (edict_t *ent)
 
 qboolean M_SetDeath (edict_t *self, mmove_t **deathmoves)
 {
-	mmove_t	*move=NULL;
+	mmove_t	*move = NULL;
 	mmove_t *dmove;
 
 	if (self->health > 0)
@@ -617,7 +617,7 @@ Using a monster makes it angry at the current activator
 */
 void monster_use (edict_t *self, edict_t *other, edict_t *activator)
 {
-	if (self->enemy)
+	if ( !activator || self->enemy )	// Phatman: Solves a crash condition
 		return;
 	if (self->health <= 0)
 		return;
@@ -678,11 +678,12 @@ void monster_triggered_spawn_use (edict_t *self, edict_t *other, edict_t *activa
 	self->think = monster_triggered_spawn;
 	self->nextthink = level.time + FRAMETIME;
 	// Knightmare- good guy monsters shouldn't have an enemy from this
-	if (activator->client && !(self->monsterinfo.aiflags & AI_GOOD_GUY))
+	if (activator && activator->client && !(self->monsterinfo.aiflags & AI_GOOD_GUY))
 		self->enemy = activator;
 	// Lazarus: Add 'em up
-	if (!(self->monsterinfo.aiflags & AI_GOOD_GUY))
-		level.total_monsters++;
+	// Knightmare- this is annoying, and will likely annoy most Q2 players as well
+//	if ( !(self->monsterinfo.aiflags & AI_GOOD_GUY) )
+//		level.total_monsters++;
 	self->use = monster_use;
 }
 
@@ -716,8 +717,11 @@ void monster_death_use (edict_t *self)
 
 	// Lazarus: If actor/monster is being used as a camera by a player,
 	// turn camera off for that player
-	for (i=0,player=g_edicts+1; i<maxclients->value; i++, player++) {
-		if (player->client && player->client->spycam == self)
+	for (i = 0, player = g_edicts+1; i<maxclients->value; i++, player++)
+	{
+		if ( !player->inuse )	// Phatman: Solves a crash condition
+			continue;
+		if ( player->client && (player->client->spycam == self) )
 			camera_off(player);
 	}
 
@@ -760,7 +764,7 @@ qboolean monster_start (edict_t *self)
 	if ( UseRegularGoodGuyFlag(self) && (self->spawnflags & SF_MONSTER_GOODGUY) )
 	{
 		self->monsterinfo.aiflags |= AI_GOOD_GUY;
-		if (!self->dmgteam) {
+		if ( !self->dmgteam ) {
 			self->dmgteam = gi.TagMalloc(8*sizeof(char), TAG_LEVEL);
 		//	strncpy(self->dmgteam,"player");
 			Q_strncpyz(self->dmgteam, 8, "player");
@@ -780,11 +784,13 @@ qboolean monster_start (edict_t *self)
 		self->spawnflags &= ~MONSTER_SIGHT;
 		self->spawnflags |= MONSTER_AMBUSH;
 	} */
-	if ((self->spawnflags & SF_MONSTER_AMBUSH) && !(self->monsterinfo.aiflags & AI_GOOD_GUY))
+	if ( (self->spawnflags & SF_MONSTER_AMBUSH) && !(self->monsterinfo.aiflags & AI_GOOD_GUY) )
 		self->spawnflags |= SF_MONSTER_SIGHT;
 
 	// Lazarus: Don't add trigger spawned monsters until they are actually spawned
-	if (!(self->monsterinfo.aiflags & AI_GOOD_GUY) && !(self->spawnflags & SF_MONSTER_TRIGGER_SPAWN))
+	// Knightmare- this is annoying, and will likely annoy most Q2 players as well
+//	if ( !(self->monsterinfo.aiflags & AI_GOOD_GUY) && !(self->spawnflags & SF_MONSTER_TRIGGER_SPAWN) )
+	if ( !(self->monsterinfo.aiflags & AI_GOOD_GUY) )
 		level.total_monsters++;
 
 	self->nextthink = level.time + FRAMETIME;
@@ -1071,350 +1077,6 @@ void InitiallyDead (edict_t *self)
 		}
 	}
 	gi.linkentity(self);
-}
-
-#define MAX_SKINS		24 // max is 32, but we only need 24
-#define MAX_SKINNAME	64
-
-#include "pak.h"
-
-int PatchMonsterModel (char *modelname)
-{
-	cvar_t		*gamedir;
-	int			j;
-	int			numskins;			// number of skin entries
-	char		skins[MAX_SKINS][MAX_SKINNAME];	// skin entries
-	char		infilename[MAX_OSPATH];
-	char		outfilename[MAX_OSPATH];
-	char		tempname[MAX_OSPATH];
-	char		*p;
-	FILE		*infile;
-	FILE		*outfile;
-	dmdl_t		model;				// model header
-	byte		*data;				// model data
-	int			datasize;			// model data size (bytes)
-	int			newoffset;			// model data offset (after skins)
-	qboolean	is_tank=false;
-	qboolean	is_soldier=false;
-
-	qboolean	gamedirpakfile=false;
-
-	// get game (moddir) name
-	gamedir = gi.cvar("game", "", 0);
-	if (!*gamedir->string)
-		return 0;	// we're in baseq2
-
-//	Com_sprintf (outfilename, sizeof(outfilename), "%s/%s", gamedir->string, modelname);
-	Com_sprintf (tempname, sizeof(tempname), modelname);
-	SavegameDirRelativePath (tempname, outfilename, sizeof(outfilename));
-	if (outfile = fopen (outfilename, "rb"))
-	{
-		// output file already exists, move along
-		fclose (outfile);
-	//	gi.dprintf ("PatchMonsterModel: Could not save %s, file already exists\n", outfilename);
-		return 0;
-	}
-
-	numskins = 8;
-	// special cases
-	if (!strcmp(modelname,"models/monsters/tank/tris.md2"))
-	{
-		is_tank = true;
-		numskins = 16;
-	}
-	else if (!strcmp(modelname,"models/monsters/soldier/tris.md2"))
-	{
-		is_soldier = true;
-		numskins = 24;
-	}
-
-	for (j=0; j<numskins; j++)
-	{
-		memset (skins[j], 0, MAX_SKINNAME);
-	//	strncpy( skins[j], modelname );
-		Q_strncpyz (skins[j], sizeof(skins[j]), modelname);
-		p = strstr(skins[j], "tris.md2");
-		if (!p)
-		{
-			fclose (outfile);
-			gi.dprintf( "Error patching %s\n",modelname);
-			return 0;
-		}
-		*p = 0;
-		if (is_soldier)
-		{
-			switch (j) {
-			case 0:
-				Q_strncatz (skins[j], sizeof(skins[j]), "skin_lt.pcx"); break;
-			case 1:
-				Q_strncatz (skins[j], sizeof(skins[j]), "skin_ltp.pcx"); break;
-			case 2:
-				Q_strncatz (skins[j], sizeof(skins[j]), "skin.pcx"); break;
-			case 3:
-				Q_strncatz (skins[j], sizeof(skins[j]), "pain.pcx"); break;
-			case 4:
-				Q_strncatz (skins[j], sizeof(skins[j]), "skin_ss.pcx"); break;
-			case 5:
-				Q_strncatz (skins[j], sizeof(skins[j]), "skin_ssp.pcx"); break;
-			case 6:
-				Q_strncatz (skins[j], sizeof(skins[j]), "custom1_lt.pcx"); break;
-			case 7:
-				Q_strncatz (skins[j], sizeof(skins[j]), "custompain1_lt.pcx"); break;
-			case 8:
-				Q_strncatz (skins[j], sizeof(skins[j]), "custom1.pcx"); break;
-			case 9:
-				Q_strncatz (skins[j], sizeof(skins[j]), "custompain1.pcx"); break;
-			case 10:
-				Q_strncatz (skins[j], sizeof(skins[j]), "custom1_ss.pcx"); break;
-			case 11:
-				Q_strncatz (skins[j], sizeof(skins[j]), "custompain1_ss.pcx"); break;
-			case 12:
-				Q_strncatz (skins[j], sizeof(skins[j]), "custom2_lt.pcx"); break;
-			case 13:
-				Q_strncatz (skins[j], sizeof(skins[j]), "custompain2_lt.pcx"); break;
-			case 14:
-				Q_strncatz (skins[j], sizeof(skins[j]), "custom2.pcx"); break;
-			case 15:
-				Q_strncatz (skins[j], sizeof(skins[j]), "custompain2.pcx"); break;
-			case 16:
-				Q_strncatz (skins[j], sizeof(skins[j]), "custom2_ss.pcx"); break;
-			case 17:
-				Q_strncatz (skins[j], sizeof(skins[j]), "custompain2_ss.pcx"); break;
-			case 18:
-				Q_strncatz (skins[j], sizeof(skins[j]), "custom3_lt.pcx"); break;
-			case 19:
-				Q_strncatz (skins[j], sizeof(skins[j]), "custompain3_lt.pcx"); break;
-			case 20:
-				Q_strncatz (skins[j], sizeof(skins[j]), "custom3.pcx"); break;
-			case 21:
-				Q_strncatz (skins[j], sizeof(skins[j]), "custompain3.pcx"); break;
-			case 22:
-				Q_strncatz (skins[j], sizeof(skins[j]), "custom3_ss.pcx"); break;
-			case 23:
-				Q_strncatz (skins[j], sizeof(skins[j]), "custompain3_ss.pcx"); break;
-			}
-		}
-		else if (is_tank)
-		{
-			switch (j) {
-			case 0:
-				Q_strncatz (skins[j], sizeof(skins[j]), "skin.pcx"); break;
-			case 1:
-				Q_strncatz (skins[j], sizeof(skins[j]), "pain.pcx"); break;
-			case 2:
-				Q_strncatz (skins[j], sizeof(skins[j]), "../ctank/skin.pcx"); break;
-			case 3:
-				Q_strncatz (skins[j], sizeof(skins[j]), "../ctank/pain.pcx"); break;
-			case 4:
-				Q_strncatz (skins[j], sizeof(skins[j]), "custom1.pcx"); break;
-			case 5:
-				Q_strncatz (skins[j], sizeof(skins[j]), "custompain1.pcx"); break;
-			case 6:
-				Q_strncatz (skins[j], sizeof(skins[j]), "../ctank/custom1.pcx"); break;
-			case 7:
-				Q_strncatz (skins[j], sizeof(skins[j]), "../ctank/custompain1.pcx"); break;
-			case 8:
-				Q_strncatz (skins[j], sizeof(skins[j]), "custom2.pcx"); break;
-			case 9:
-				Q_strncatz (skins[j], sizeof(skins[j]), "custompain2.pcx"); break;
-			case 10:
-				Q_strncatz (skins[j], sizeof(skins[j]), "../ctank/custom2.pcx"); break;
-			case 11:
-				Q_strncatz (skins[j], sizeof(skins[j]), "../ctank/custompain2.pcx"); break;
-			case 12:
-				Q_strncatz (skins[j], sizeof(skins[j]), "custom3.pcx"); break;
-			case 13:
-				Q_strncatz (skins[j], sizeof(skins[j]), "custompain3.pcx"); break;
-			case 14:
-				Q_strncatz (skins[j], sizeof(skins[j]), "../ctank/custom3.pcx"); break;
-			case 15:
-				Q_strncatz (skins[j], sizeof(skins[j]), "../ctank/custompain3.pcx"); break;
-			}
-		}
-		else
-		{
-			switch (j) {
-			case 0:
-				Q_strncatz (skins[j], sizeof(skins[j]), "skin.pcx"); break;
-			case 1:
-				Q_strncatz (skins[j], sizeof(skins[j]), "pain.pcx"); break;
-			case 2:
-				Q_strncatz (skins[j], sizeof(skins[j]), "custom1.pcx"); break;
-			case 3:
-				Q_strncatz (skins[j], sizeof(skins[j]), "custompain1.pcx"); break;
-			case 4:
-				Q_strncatz (skins[j], sizeof(skins[j]), "custom2.pcx"); break;
-			case 5:
-				Q_strncatz (skins[j], sizeof(skins[j]), "custompain2.pcx"); break;
-			case 6:
-				Q_strncatz (skins[j], sizeof(skins[j]), "custom3.pcx"); break;
-			case 7:
-				Q_strncatz (skins[j], sizeof(skins[j]), "custompain3.pcx"); break;
-			}
-		}
-	}
-
-	// load original model
-	Com_sprintf (infilename, sizeof(infilename), "baseq2/%s", modelname);
-
-	// If file doesn't exist on user's hard disk, it must be in 
-	// a pak file
-	if ( !(infile = fopen (infilename, "rb")) )
-	{
-		pak_header_t	pakheader;
-		pak_item_t		pakitem;
-		FILE			*fpak;
-		int				i, k, numitems;
-		char			pakfile[MAX_OSPATH];
-
-		// Knightmare- look in all pak files in baseq2
-		for (i=0; i<10; i++)
-		{
-			Com_sprintf (pakfile, sizeof(pakfile), "baseq2/pak%i.pak", i);
-		//	fpak = fopen("baseq2/pak0.pak","rb");
-			fpak = fopen(pakfile, "rb");
-			if (!fpak)
-			{
-				cvar_t	*cddir;
-				char	pakfile[MAX_OSPATH];
-
-				cddir = gi.cvar("cddir", "", 0);
-				Com_sprintf (pakfile, sizeof(pakfile), "%s/baseq2/pak0.pak",cddir->string);
-				fpak = fopen(pakfile,"rb");
-				if (!fpak)
-				{
-					gi.dprintf("PatchMonsterModel: Cannot find pak0.pak\n");
-					return 0;
-				}
-			}
-			fread(&pakheader,1,sizeof(pak_header_t),fpak);
-			numitems = pakheader.dsize/sizeof(pak_item_t);
-			fseek(fpak,pakheader.dstart,SEEK_SET);
-			data = NULL;
-			for (k=0; k<numitems && !data; k++)
-			{
-				fread(&pakitem,1,sizeof(pak_item_t),fpak);
-				if (!Q_stricmp(pakitem.name,modelname))
-				{
-					fseek(fpak,pakitem.start,SEEK_SET);
-					fread(&model, sizeof(dmdl_t), 1, fpak);
-					datasize = model.ofs_end - model.ofs_skins;
-					if ( !(data = malloc (datasize)) )	// make sure freed locally
-					{
-						fclose(fpak);
-						gi.dprintf ("PatchMonsterModel: Could not allocate memory for model\n");
-						return 0;
-					}
-					fread (data, sizeof (byte), datasize, fpak);
-				}
-			}
-			fclose(fpak);
-			if (data) // we found it, so stop searching
-				break;
-		}
-		if (!data) // if not in baseq2 pak file, check pakfiles in current gamedir
-		{
-			char		pakname[MAX_OSPATH];
-
-			// check all pakfiles in current gamedir
-			for (i=0; i<10; i++)
-			{
-				Com_sprintf (pakname, sizeof(pakname), "pak%i.pak", i);
-				GameDirRelativePath (pakname, pakfile, sizeof(pakfile));
-				fpak = fopen(pakfile,"rb");
-				if (!fpak) // this pak not found, go on to next
-					continue;
-				fread(&pakheader,1,sizeof(pak_header_t),fpak);
-				numitems = pakheader.dsize/sizeof(pak_item_t);
-				fseek(fpak,pakheader.dstart,SEEK_SET);
-				data = NULL;
-				for (k=0; k<numitems && !data; k++)
-				{
-					fread(&pakitem,1,sizeof(pak_item_t),fpak);
-					if (!Q_stricmp(pakitem.name,modelname))
-					{
-						fseek(fpak,pakitem.start,SEEK_SET);
-						fread(&model, sizeof(dmdl_t), 1, fpak);
-						datasize = model.ofs_end - model.ofs_skins;
-						if ( !(data = malloc (datasize)) )	// make sure freed locally
-						{
-							fclose(fpak);
-							gi.dprintf ("PatchMonsterModel: Could not allocate memory for model\n");
-							return 0;
-						}
-						fread (data, sizeof (byte), datasize, fpak);
-					}
-				}
-				fclose(fpak);
-				if (data) // we found it, so stop searching
-				{
-					gamedirpakfile = true;
-					break;
-				}
-			}
-		}
-		if (!data)
-		{
-			gi.dprintf("PatchMonsterModel: Could not find %s in baseq2/pak0.pak\n",modelname);
-			return 0;
-		}
-	}
-	else
-	{
-		fread (&model, sizeof (dmdl_t), 1, infile);
-	
-		datasize = model.ofs_end - model.ofs_skins;
-		if ( !(data = malloc (datasize)) )	// make sure freed locally
-		{
-			gi.dprintf ("PatchMonsterModel: Could not allocate memory for model\n");
-			return 0;
-		}
-		fread (data, sizeof (byte), datasize, infile);
-	
-		fclose (infile);
-	}
-	
-	// update model info
-	model.num_skins = numskins;
-	
-	newoffset = numskins * MAX_SKINNAME;
-	model.ofs_st     += newoffset;
-	model.ofs_tris   += newoffset;
-	model.ofs_frames += newoffset;
-	model.ofs_glcmds += newoffset;
-	model.ofs_end    += newoffset;
-	
-	// save new model
-/*	Com_sprintf (outfilename, sizeof(outfilename), "%s/models", gamedir->string);	// make some dirs if needed
-	_mkdir (outfilename);
-	Q_strncatz (outfilename, sizeof(outfilename), "/monsters");
-	_mkdir (outfilename);
-	Com_sprintf (outfilename, sizeof(outfilename), "%s/%s", gamedir->string, modelname);
-	p = strstr(outfilename,"/tris.md2");
-	*p = 0;
-	_mkdir (outfilename);
-	Com_sprintf (outfilename, sizeof(outfilename), "%s/%s", gamedir->string, modelname);
-*/	
-	Com_sprintf (tempname, sizeof(tempname), modelname);
-	SavegameDirRelativePath (tempname, outfilename, sizeof(outfilename));
-	CreatePath (outfilename);
-
-	if ( !(outfile = fopen (outfilename, "wb")) )
-	{
-		// file couldn't be created for some other reason
-		gi.dprintf ("PatchMonsterModel: Could not save %s\n", outfilename);
-		free (data);
-		return 0;
-	}
-	
-	fwrite (&model, sizeof (dmdl_t), 1, outfile);
-	fwrite (skins, sizeof (char), newoffset, outfile);
-	fwrite (data, sizeof (byte), datasize, outfile);
-	
-	fclose (outfile);
-	gi.dprintf ("PatchMonsterModel: Saved %s\n", outfilename);
-	free (data);
-	return 1;
 }
 
 

@@ -1493,8 +1493,8 @@ void SP_trigger_bbox (edict_t *ent)
 		VectorSet(ent->bleft,-16,-16,-16);
 		VectorSet(ent->tright,16, 16, 16);
 	}
-	VectorCopy(ent->bleft,ent->mins);
-	VectorCopy(ent->tright,ent->maxs);
+	VectorCopy (ent->bleft,ent->mins);
+	VectorCopy (ent->tright,ent->maxs);
 
 	ent->max_health = ent->health;
 	if (ent->health > 0)
@@ -1591,10 +1591,10 @@ void trigger_look_touch (edict_t *self, edict_t *other, cplane_t *plane, csurfac
 		else
 		{
 			AngleVectors(other->client->v_angle, forward, NULL, NULL);
-			VectorCopy(other->s.origin,start);
+			VectorCopy (other->s.origin,start);
 			start[2] += other->viewheight;
 		}
-		VectorSubtract(self->s.origin,start,dir);
+		VectorSubtract (self->s.origin,start,dir);
 		dist = VectorLength(dir);
 		VectorMA(start,dist,forward,end);
 		
@@ -1783,27 +1783,27 @@ void SP_trigger_speaker (edict_t *self)
 //==============================================================================
 void WriteEdict (FILE *f, edict_t *ent);
 
-qboolean HasSpawnFunction(edict_t *ent)
+qboolean HasSpawnFunction (edict_t *ent)
 {
 	spawn_t	*s;
 	gitem_t	*item;
 	int		i;
 
-	if (!ent->classname)
+	if ( !ent->classname )
 		return false;
 
 	// check item spawn functions
-	for (i=0,item=itemlist ; i<game.num_items ; i++,item++)
+	for (i=0, item=itemlist; i<game.num_items; i++,item++)
 	{
-		if (!item->classname)
+		if ( !item->classname )
 			continue;
-		if (!strcmp(item->classname, ent->classname))
+		if ( !strcmp(item->classname, ent->classname) )
 			return true;
 	}
 	// check normal spawn functions
-	for (s=spawns ; s->name ; s++)
+	for (s=spawns; s->name; s++)
 	{
-		if (!strcmp(s->name, ent->classname))
+		if ( !strcmp(s->name, ent->classname) )
 			return true;
 	}
 	return false;
@@ -1815,12 +1815,12 @@ void WriteTransitionEdict (FILE *f, edict_t *changelevel, edict_t *ent)
 	field_t		*field;
 	void		*p;
 
-	memcpy(&e,ent,sizeof(edict_t));
-	if (!Q_stricmp(e.classname,"target_laser") ||
-		!Q_stricmp(e.classname,"target_blaster")  )
-		vectoangles(e.movedir,e.s.angles);
+	memcpy (&e, ent, sizeof(edict_t));
+	if ( !Q_stricmp(e.classname, "target_laser") ||
+		!Q_stricmp(e.classname, "target_blaster") )
+		vectoangles (e.movedir, e.s.angles);
 
-	if (!Q_stricmp(e.classname,"target_speaker"))
+	if (!Q_stricmp(e.classname, "target_speaker"))
 		e.spawnflags |= 8;  // indicates that "message" contains noise
 
 	if (changelevel->s.angles[YAW])
@@ -1829,29 +1829,29 @@ void WriteTransitionEdict (FILE *f, edict_t *changelevel, edict_t *ent)
 		vec3_t	forward, right, v;
 		vec3_t	spawn_offset;
 		
-		VectorSubtract(e.s.origin,changelevel->s.origin,spawn_offset);
+		VectorSubtract (e.s.origin, changelevel->s.origin, spawn_offset);
 		angles[PITCH] = angles[ROLL] = 0.;
 		angles[YAW] = changelevel->s.angles[YAW];
-		AngleVectors(angles,forward,right,NULL);
-		VectorNegate(right,right);
-		VectorCopy(spawn_offset,v);
+		AngleVectors (angles, forward, right, NULL);
+		VectorNegate (right, right);
+		VectorCopy (spawn_offset, v);
 		G_ProjectSource (vec3_origin, v, forward, right, spawn_offset);
-		VectorCopy(spawn_offset,e.s.origin);
-		VectorCopy(e.velocity,v);
+		VectorCopy (spawn_offset, e.s.origin);
+		VectorCopy (e.velocity, v);
 		G_ProjectSource (vec3_origin, v, forward, right, e.velocity);
 		e.s.angles[YAW] += angles[YAW];
 	}
 	else
 	{
-		VectorSubtract(e.s.origin,changelevel->s.origin,e.s.origin);
+		VectorSubtract (e.s.origin, changelevel->s.origin, e.s.origin);
 	}
 	// wipe out all edict_t and function members, since
 	// they won't be valid in the next map and might otherwise
 	// cause.... umm... big crash
 	temp = (byte *)&e;
-	for (field=fields ; field->name ; field++)
+	for (field=fields; field->name; field++)
 	{
-		if ((field->type == F_EDICT) || (field->type == F_FUNCTION))
+		if ( (field->type == F_EDICT) || (field->type == F_FUNCTION) )
 		{
 			p = (void *)(temp + field->ofs);
 			*(edict_t **)p = NULL;
@@ -1859,7 +1859,7 @@ void WriteTransitionEdict (FILE *f, edict_t *changelevel, edict_t *ent)
 	}
 	// Clean out a few more things
 	e.s.number = 0;
-	memset (&e.moveinfo,   0,sizeof(moveinfo_t));
+	memset (&e.moveinfo, 0, sizeof(moveinfo_t));
 	memset (&e.area, 0, sizeof(e.area));
 	e.linkcount = 0;
 	e.nextthink = 0;
@@ -1875,7 +1875,7 @@ void WriteTransitionEdict (FILE *f, edict_t *changelevel, edict_t *ent)
 	e.noise_index = 0;
 	// If the ent is a live bad guy monster, remove him from the total
 	// monster count. He'll be added back in in the new map.
-	if ((e.svflags & SVF_MONSTER) && !(e.monsterinfo.aiflags & AI_GOOD_GUY))
+	if ( (e.svflags & SVF_MONSTER) && !(e.monsterinfo.aiflags & AI_GOOD_GUY) )
 	{
 		if (e.health > 0)
 			level.total_monsters--;
@@ -1885,9 +1885,9 @@ void WriteTransitionEdict (FILE *f, edict_t *changelevel, edict_t *ent)
 	// Enemy isn't preserved... let's try a new flag for
 	// single-player only that tells monster to find
 	// the player again at startup
-	if (!coop->value && !deathmatch->value)
+	if ( !coop->value && !deathmatch->value )
 	{
-		if (ent->enemy == &g_edicts[1] && ent->health > 0)
+		if ( (ent->enemy == &g_edicts[1]) && (ent->health > 0) )
 			e.monsterinfo.aiflags = AI_RESPAWN_FINDPLAYER;
 	}
 	if (e.classname &&
@@ -1895,7 +1895,7 @@ void WriteTransitionEdict (FILE *f, edict_t *changelevel, edict_t *ent)
 	   (e.svflags & SVF_GIB) )
 	   //(e.health <= e.gib_health) )
 		e.classname = "gibhead";
-	WriteEdict(f,&e);
+	WriteEdict (f, &e);
 }
 
 entlist_t DoNotMove[] = {
@@ -1944,9 +1944,23 @@ entlist_t DoNotMove[] = {
 void trans_ent_filename (char *filename, size_t filenameSize)
 {
 #if defined (_M_X64) || defined (_M_AMD64) || defined (__x86_64__)
-	SavegameDirRelativePath("save_x64/trans.ent", filename, filenameSize);
+	SavegameDirRelativePath ("save_x64/trans.ent", filename, filenameSize);
+#elif defined (_M_IX86) || defined (__i386__)
+	SavegameDirRelativePath ("save/trans.ent", filename, filenameSize);
+#elif defined (_M_IA64) || defined (__ia64__)
+	SavegameDirRelativePath ("save_ia64/trans.ent", filename, filenameSize);
+#elif defined (_M_ALPHA) || defined (__alpha__)
+	SavegameDirRelativePath ("save_axp/trans.ent", filename, filenameSize);
+#elif defined (_M_ARM) || defined (__arm__)
+	SavegameDirRelativePath ("save_arm32/trans.ent", filename, filenameSize);
+#elif defined (_M_ARM64) || defined (__aarch64__)
+	SavegameDirRelativePath ("save_arm64/trans.ent", filename, filenameSize);
+#elif defined (__ppc__)
+	SavegameDirRelativePath ("save_ppc/trans.ent", filename, filenameSize);
+#elif defined (__sparc__)
+	SavegameDirRelativePath ("save_sparc/trans.ent", filename, filenameSize);
 #else
-	SavegameDirRelativePath("save/trans.ent", filename, filenameSize);
+	SavegameDirRelativePath ("save_unk/trans.ent", filename, filenameSize);
 #endif
 }
 
@@ -1960,11 +1974,11 @@ int trigger_transition_ents (edict_t *changelevel, edict_t *self)
 	entlist_t	*p;
 	FILE		*f;
 
-	trans_ent_filename(t_file, sizeof(t_file));
-	f = fopen(t_file,"wb");
-	if (!f)
+	trans_ent_filename (t_file, sizeof(t_file));
+	f = fopen(t_file, "wb");
+	if ( !f )
 	{
-		gi.dprintf("Error opening %s for writing\n",t_file);
+		gi.dprintf ("Error opening %s for writing\n", t_file);
 		return 0;
 	}
 	// First scan entities for brush models that SHOULD change levels, e.g. func_tracktrain,
@@ -1989,18 +2003,18 @@ int trigger_transition_ents (edict_t *changelevel, edict_t *self)
 			classSize = 17;
 			e->classname = gi.TagMalloc(classSize, TAG_LEVEL);
 			Q_strncpyz (e->classname, classSize, "info_train_start");
-			targetnameSize = strlen(ent->targetname)+1;
+			targetnameSize = strlen(ent->targetname) + 1;
 			e->targetname = gi.TagMalloc(targetnameSize, TAG_LEVEL);
 			Q_strncpyz (e->targetname, targetnameSize, ent->targetname);
-			targetSize = strlen(ent->target)+1;
+			targetSize = strlen(ent->target) + 1;
 			e->target = gi.TagMalloc(targetSize, TAG_LEVEL);
 			Q_strncpyz (e->target, targetSize, ent->target);
 			e->spawnflags = ent->spawnflags;
-			VectorCopy(ent->s.origin,e->s.origin);
-			VectorCopy(ent->s.angles,e->s.angles);
-			VectorCopy(ent->offset,  e->offset);
-			VectorCopy(ent->bleft,   e->bleft);
-			VectorCopy(ent->tright,  e->tright);
+			VectorCopy (ent->s.origin,e->s.origin);
+			VectorCopy (ent->s.angles,e->s.angles);
+			VectorCopy (ent->offset,  e->offset);
+			VectorCopy (ent->bleft,   e->bleft);
+			VectorCopy (ent->tright,  e->tright);
 			e->sounds = ent->sounds;
 			e->viewheight = ent->viewheight;
 			e->speed = ent->moveinfo.speed;
@@ -2013,12 +2027,12 @@ int trigger_transition_ents (edict_t *changelevel, edict_t *self)
 				e->style = ent->owner - g_edicts;
 			else
 				e->style = 0;
-			gi.linkentity(e);
+			gi.linkentity (e);
 
 			ent->owner = NULL;
 			ent->spawnflags |= 24;	// SF_TRACKTRAIN_OTHERMAP | SF_TRACKTRAIN_DISABLED
-			VectorClear(ent->velocity);
-			VectorClear(ent->avelocity);
+			VectorClear (ent->velocity);
+			VectorClear (ent->avelocity);
 			ent->moveinfo.state = ent->moveinfo.prevstate = 0;	// STOP
 			gi.linkentity(ent);
 		}
@@ -2053,8 +2067,8 @@ int trigger_transition_ents (edict_t *changelevel, edict_t *self)
 			ent->owner_id = -(ent->owner - g_edicts);
 		else
 			ent->owner_id = 0;
-		WriteTransitionEdict(f,changelevel,ent);
-		gi.unlinkentity(ent);
+		WriteTransitionEdict (f, changelevel, ent);
+		gi.unlinkentity (ent);
 		ent->inuse = false;
 	}
 	// Repeat, ONLY for ents owned by non-players
@@ -2088,13 +2102,13 @@ int trigger_transition_ents (edict_t *changelevel, edict_t *self)
 		if (!ent->owner_id) continue;
 		total++;
 		ent->id = total;
-		WriteTransitionEdict(f,changelevel,ent);
-		gi.unlinkentity(ent);
+		WriteTransitionEdict (f, changelevel, ent);
+		gi.unlinkentity (ent);
 		ent->inuse = false;
 	}
 
-	fflush(f);
-	fclose(f);
+	fflush (f);
+	fclose (f);
 	return total;
 }
 

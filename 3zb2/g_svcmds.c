@@ -8,7 +8,7 @@
 ==============================================================================
 
 PACKET FILTERING
- 
+
 
 You can add or remove addresses from the filter list with:
 
@@ -57,13 +57,13 @@ static qboolean StringToFilter (char *s, ipfilter_t *f)
 	int		i, j;
 	byte	b[4];
 	byte	m[4];
-	
+
 	for (i=0 ; i<4 ; i++)
 	{
 		b[i] = 0;
 		m[i] = 0;
 	}
-	
+
 	for (i=0 ; i<4 ; i++)
 	{
 		if (*s < '0' || *s > '9')
@@ -71,7 +71,7 @@ static qboolean StringToFilter (char *s, ipfilter_t *f)
 			gi.cprintf(NULL, PRINT_HIGH, "Bad filter address: %s\n", s);
 			return false;
 		}
-		
+
 		j = 0;
 		while (*s >= '0' && *s <= '9')
 		{
@@ -86,10 +86,10 @@ static qboolean StringToFilter (char *s, ipfilter_t *f)
 			break;
 		s++;
 	}
-	
+
 	f->mask = *(unsigned *)m;
 	f->compare = *(unsigned *)b;
-	
+
 	return true;
 }
 
@@ -117,7 +117,7 @@ qboolean SV_FilterPacket (char *from)
 			break;
 		i++, p++;
 	}
-	
+
 	in = *(unsigned *)m;
 
 	for (i=0 ; i<numipfilters ; i++)
@@ -136,7 +136,7 @@ SV_AddIP_f
 void SVCmd_AddIP_f (void)
 {
 	int		i;
-	
+
 	if (gi.argc() < 3) {
 		gi.cprintf(NULL, PRINT_HIGH, "Usage:  addip <ip-mask>\n");
 		return;
@@ -154,7 +154,7 @@ void SVCmd_AddIP_f (void)
 		}
 		numipfilters++;
 	}
-	
+
 	if (!StringToFilter (gi.argv(2), &ipfilters[i]))
 		ipfilters[i].compare = 0xffffffff;
 }
@@ -219,14 +219,16 @@ void SVCmd_WriteIP_f (void)
 	char	name[MAX_OSPATH];
 	byte	b[4];
 	int		i;
-	cvar_t	*game;
+/*	cvar_t	*game;
 
 	game = gi.cvar("game", "", 0);
 
 	if (!*game->string)
 		Com_sprintf (name, sizeof(name), "%s/listip.cfg", GAMEVERSION);
 	else
-		Com_sprintf (name, sizeof(name), "%s/listip.cfg", game->string);
+		Com_sprintf (name, sizeof(name), "%s/listip.cfg", game->string); */
+	// Knightmare- use SavegameDir() instead for compatibility on all platforms
+	Com_sprintf (name, sizeof(name), "%s/listip.cfg", SavegameDir());
 
 	gi.cprintf (NULL, PRINT_HIGH, "Writing %s.\n", name);
 
@@ -236,15 +238,15 @@ void SVCmd_WriteIP_f (void)
 		gi.cprintf (NULL, PRINT_HIGH, "Couldn't open %s\n", name);
 		return;
 	}
-	
-	fprintf(f, "set filterban %d\n", (int)filterban->value);
+
+	fprintf (f, "set filterban %d\n", (int)filterban->value);
 
 	for (i=0 ; i<numipfilters ; i++)
 	{
 		*(unsigned *)b = ipfilters[i].compare;
 		fprintf (f, "sv addip %i.%i.%i.%i\n", b[0], b[1], b[2], b[3]);
 	}
-	
+
 	fclose (f);
 }
 
@@ -269,7 +271,7 @@ void Move_LastRouteIndex()
 	if(CurrentIndex < MAXNODES)
 	{
 		memset(&Route[CurrentIndex],0,sizeof(route_t));
-		if(CurrentIndex > 0) Route[CurrentIndex].index = Route[CurrentIndex - 1].index + 1; 
+		if(CurrentIndex > 0) Route[CurrentIndex].index = Route[CurrentIndex - 1].index + 1;
 	}
 }
 
@@ -282,95 +284,116 @@ void	RouteTreepointSet()
 	{
 		if(Route[i].state == GRS_NORMAL)
 		{
-			
+
 
 		}
 	}
 }
 
 
-
-
-void	Svcmd_Test_f (void)
+void Svcmd_Test_f (void)
 {
 	gi.cprintf (NULL, PRINT_HIGH, "Svcmd_Test_f()\n");
 }
 
+
 //chainファイルのセーブ
 void SaveChain (void)
 {
-	char name[256];
-	FILE *fpout;
-	unsigned int size;
+	char			name[256];
+	FILE			*fpout;
+	unsigned int	size;
 
-	if(!chedit->value)
+	if (!chedit->value)
 	{
 		gi.cprintf (NULL, PRINT_HIGH, "Not a chaining mode.\n");
 		return;
 	}
 
 	//とりあえずCTFだめ
-	if (ctf->value) 
-		Com_sprintf (name, sizeof(name), ".\\%s\\chctf\\%s.chf",gamepath->string,level.mapname);
+/*	if (ctf->value)
+		Com_sprintf (name, sizeof(name), ".\\%s\\chctf\\%s.chf", gamepath->string, level.mapname);
 	else
-		Com_sprintf (name, sizeof(name), ".\\%s\\chdtm\\%s.chn",gamepath->string,level.mapname);
+		Com_sprintf (name, sizeof(name), ".\\%s\\chdtm\\%s.chn", gamepath->string, level.mapname); */
+	// Knightmare- use SavegameDir() instead
+	if (ctf->value)
+		Com_sprintf (name, sizeof(name), "%s/chctf/%s.chf", SavegameDir(), level.mapname);
+	else
+		Com_sprintf (name, sizeof(name), "%s/chdtm/%s.chn", SavegameDir(), level.mapname);
 
+	CreatePath (name);
 	fpout = fopen(name, "wb");
-	if(fpout == NULL) gi.cprintf(NULL,PRINT_HIGH,"Can't open %s\n",name);
+	if (fpout == NULL)
+		gi.cprintf(NULL,PRINT_HIGH,"Can't open %s\n",name);
 	else
 	{
-		if(!ctf->value)	fwrite("3ZBRGDTM",sizeof(char),8,fpout);
-		else fwrite("3ZBRGCTF",sizeof(char),8,fpout);
+		if (!ctf->value)
+			fwrite ("3ZBRGDTM", sizeof(char), 8, fpout);
+		else
+			fwrite ("3ZBRGCTF", sizeof(char), 8, fpout);
 
-		fwrite(&CurrentIndex,sizeof(int),1,fpout);
+		fwrite(&CurrentIndex, sizeof(int),1,fpout);
 
 		size = (unsigned int)CurrentIndex * sizeof(route_t);
 
-		fwrite(Route,size,1,fpout);
+		fwrite (Route, size, 1, fpout);
 
 		gi.cprintf (NULL, PRINT_HIGH,"%s Saving done.\n",name);
-		fclose(fpout);
+		fclose (fpout);
 	}
 }
+
 //Spawn Command
-void SpawnCommand(int i)
+void SpawnCommand (int i)
 {
 	int	j;
 
-	if(chedit->value){ gi.cprintf(NULL,PRINT_HIGH,"Can't spawn.");return;}
+	if	(chedit->value) {
+		gi.cprintf(NULL,PRINT_HIGH,"Can't spawn.");
+		return;
+	}
 
-	if(i <= 0) {gi.cprintf(NULL,PRINT_HIGH,"Specify num of bots.");return;}
+	if	(i <= 0) {
+		gi.cprintf(NULL,PRINT_HIGH,"Specify num of bots.");
+		return;
+	}
 
-	for(j = 0;j < i;j++)
+	for	(j = 0; j < i; j++)
 	{
-		SpawnBotReserving();
+		SpawnBotReserving ();
 	}
 }
 
 //Random Spawn Command
-
-void RandomSpawnCommand(int i)
+void RandomSpawnCommand (int i)
 {
-	int	j,k,red = 0,blue = 0;
-
+	int		j, k, red = 0, blue = 0;
 	edict_t	*e;
 
-	if(chedit->value){ gi.cprintf(NULL,PRINT_HIGH,"Can't spawn.");return;}
+	if (chedit->value) {
+			gi.cprintf(NULL,PRINT_HIGH,"Can't spawn.");
+		return;
+	}
 
-	if(i <= 0) {gi.cprintf(NULL,PRINT_HIGH,"Specify num of bots.");return;}
+	if (i <= 0) {
+		gi.cprintf(NULL,PRINT_HIGH,"Specify num of bots.");
+		return;
+	}
 
 	//count current teams
 	for ( k = 1 ; k <= maxclients->value ; k++)
 	{
 		e = &g_edicts[k];
-		if(e->inuse && e->client)
+		if (e->inuse && e->client)
 		{
-			if(e->client->resp.ctf_team == CTF_TEAM1) red++;
-			else if(e->client->resp.ctf_team == CTF_TEAM2) blue++;
+			if (e->client->resp.ctf_team == CTF_TEAM1)
+				red++;
+			else if (e->client->resp.ctf_team == CTF_TEAM2)
+				blue++;
 		}
 	}
 
-	for(j = 0;j < i;j++)
+	for (j = 0;j < i;j++)
 	{
 		SpawnBotReserving2(&red,&blue);
 //gi.cprintf(NULL,PRINT_HIGH,"R B %i %i\n",red,blue);
@@ -378,7 +401,7 @@ void RandomSpawnCommand(int i)
 }
 
 //Remove Command
-void RemoveCommand(int i)
+void RemoveCommand (int i)
 {
 	int	j;
 
@@ -392,7 +415,7 @@ void RemoveCommand(int i)
 }
 
 //Debug Spawn Command
-void DebugSpawnCommand(int i)
+void DebugSpawnCommand (int i)
 {
 	if(!chedit->value) {gi.cprintf(NULL,PRINT_HIGH,"Can't debug.");return;}
 
@@ -415,7 +438,7 @@ The game can issue gi.argc() / gi.argv() commands to get the rest
 of the parameters
 =================
 */
-void	ServerCommand (void)
+void ServerCommand (void)
 {
 	char	*cmd;
 

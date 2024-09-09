@@ -547,7 +547,7 @@ void DeleteReflection (edict_t *ent, int index)
 void AddReflection (edict_t *ent)
 {
 	gclient_t	*cl;
-	edict_t		*mirror;
+	edict_t		*mirror = NULL;
 	float		roll;
 	int			i, m;
 	qboolean	is_reflected;

@@ -44,33 +44,16 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 // HTTP downloading from R1Q2
 #ifdef USE_CURL
-#ifdef _WIN32
-#define CURL_STATICLIB
-#define CURL_HIDDEN_SYMBOLS
-#define CURL_EXTERN_SYMBOL
-#define CURL_CALLING_CONVENTION __cdecl
-#endif
+#include "qcurl.h"
 
-//#if defined (_MSC_VER) && (_MSC_VER <= 1200)	// use older version of libcurl for MSVC6
-//#include "../include/curl_old/curl.h"
-//#define CURL_ERROR(x)	va("%i",(x))
-//#else
-#define CURL_STATICLIB
-#if defined (_MSC_VER) && (_MSC_VER <= 1200)	// use older version of libcurl for MSVC6
-#include "../include/curl_vc6/curl.h"
-#else
-#include "../include/curl/curl.h"
-#endif
-#define CURL_ERROR(x)	curl_easy_strerror(x)
-//#endif
-
+#define MAX_HTTP_HANDLES	8	// was 4
 #endif	// USE_CURL
 // end HTTP downloading from R1Q2
 
-//Knightmare added
+// Knightmare added
 #include "../game/game.h"
 trace_t SV_Trace (vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, edict_t *passedict, int contentmask);
-//end Knightmare
+// end Knightmare
 
 #define random()	((rand () & 0x7fff) / ((float)0x7fff))
 #define crandom()	(2.0 * (random() - 0.5))
@@ -96,9 +79,9 @@ typedef struct
 
 typedef struct
 {
-	entity_state_t	baseline;		// delta from this if not from a previous frame
-	entity_state_t	current;
-	entity_state_t	prev;			// will always be valid, but might just be a copy of current
+	centity_state_t	baseline;		// delta from this if not from a previous frame
+	centity_state_t	current;
+	centity_state_t	prev;			// will always be valid, but might just be a copy of current
 
 	int			serverframe;		// if not current, this ent isn't in the frame
 
@@ -130,18 +113,6 @@ extern int num_cl_weaponmodels;
 
 #ifdef USE_CURL	// HTTP downloading from R1Q2
 
-void CL_CancelHTTPDownloads (qboolean permKill);
-void CL_InitHTTPDownloads (void);
-qboolean CL_QueueHTTPDownload (const char *quakePath, qboolean filelistUseGamedir);	// YQ2 Q2pro download addition
-void CL_RunHTTPDownloads (void);
-qboolean CL_PendingHTTPDownloads (void);
-void CL_SetHTTPServer (const char *URL);
-void CL_HTTP_Cleanup (qboolean fullShutdown);
-void CL_HTTP_ResetMapAbort (void);	// Knightmare added
-qboolean CL_CheckHTTPError (void);	// YQ2 UDP fallback addition
-void CL_HTTP_EnableGenericFilelist (void);	// YQ2 UDP fallback addition
-void CL_HTTP_SetDownloadGamedir (const char *gamedir);	// YQ2 Q2pro download addition
-
 typedef enum
 {
 	DLQ_STATE_NOT_STARTED,
@@ -153,7 +124,10 @@ typedef struct dlqueue_s
 {
 	struct dlqueue_s	*next;
 	char				quakePath[MAX_QPATH];
-	qboolean			isPak;	// Knightmare added
+	qboolean			isPak;			// Knightmare added
+	qboolean			useQ2ProPath;	// Knightmare added
+	qboolean			isDuplicated;	// Knightmare added
+	qboolean			isAltEntry;		// Knightmare added
 	dlq_state			state;
 } dlqueue_t;
 
@@ -373,14 +347,15 @@ typedef struct
 #ifdef USE_CURL	// HTTP downloading from R1Q2
 	dlqueue_t		downloadQueue;			//queue of paths we need
 	
-	dlhandle_t		HTTPHandles[4];			//actual download handles
-	//don't raise this!
-	//i use a hardcoded maximum of 4 simultaneous connections to avoid
-	//overloading the server. i'm all too familiar with assholes who set
-	//their IE or Firefox max connections to 16 and rape my Apache processes
-	//every time they load a page... i'd rather not have my q2 client also
-	//have the ability to do so - especially since we're possibly downloading
-	//large files.
+	dlhandle_t		HTTPHandles[MAX_HTTP_HANDLES];			// actual download handles, was 4
+	// Don't raise this!
+	// I use a hardcoded maximum of 4 simultaneous connections to avoid
+	// overloading the server. I'm all too familiar with assholes who set
+	// their IE or Firefox max connections to 16 and rape my Apache processes
+	// every time they load a page... I'd rather not have my Q2 client also
+	// have the ability to do so - especially since we're possibly downloading
+	// large files.
+	// Yeah whatever, this restriction was 11 years old.
 
 	char			downloadServer[512];	//base url prefix to download from
 	// FS: Added because Whale's Weapons HTTP server rejects you after a lot of 404s.  Then you lose HTTP until a hard reconnect.
@@ -461,7 +436,6 @@ extern	cvar_t	*cl_footstep_override;
 extern	cvar_t	*r_decals; // decal control
 extern	cvar_t	*r_decal_life; // decal duration in seconds
 
-extern	cvar_t	*con_font_size;
 extern	cvar_t	*alt_text_color;
 
 //Knightmare 12/28/2001- BramBo's FPS counter
@@ -546,7 +520,8 @@ extern	cvar_t	*cl_http_downloads;
 extern	cvar_t	*cl_http_filelists;
 extern	cvar_t	*cl_http_proxy;
 extern	cvar_t	*cl_http_max_connections;
-extern	cvar_t	*cl_http_fallback;
+extern	cvar_t	*cl_http_pathtype;
+extern	cvar_t	*cl_http_download_lowercase;
 #endif	// USE_CURL
 
 typedef struct
@@ -569,7 +544,7 @@ extern	cdlight_t	cl_dlights[MAX_DLIGHTS];
 #define	MAX_PARSE_ENTITIES	4096 //was 16384
 //#define	MAX_PARSE_ENTITIES	1024
 
-extern	entity_state_t	cl_parse_entities[MAX_PARSE_ENTITIES];
+extern	centity_state_t	cl_parse_entities[MAX_PARSE_ENTITIES];
 
 //=============================================================================
 
@@ -608,7 +583,6 @@ typedef struct cl_sustain
 	int			thinkinterval;
 	vec3_t		org;
 	vec3_t		dir;
-	vec3_t		playerDir;
 	int			color;
 	int			count;
 	int			magnitude;
@@ -618,7 +592,7 @@ typedef struct cl_sustain
 #define MAX_SUSTAINS		32
 void CL_ParticleSteamEffect2(cl_sustain_t *self);
 
-void CL_TeleporterParticles (entity_state_t *ent);
+void CL_TeleporterParticles (centity_state_t *ent);
 void CL_ParticleEffect (vec3_t org, vec3_t dir, int color, int count);
 void CL_ParticleEffect2 (vec3_t org, vec3_t dir, int color, int count);
 // RAFAEL
@@ -706,8 +680,8 @@ void CL_ClearTEnts (void);
 
 //=================================================
 
-int CL_ParseEntityBits (unsigned *bits);
-void CL_ParseDelta (entity_state_t *from, entity_state_t *to, int number, int bits);
+int CL_ParseEntityBits (unsigned *bits, unsigned *bits2);
+void CL_ParseDelta (centity_state_t *from, centity_state_t *to, int number, int bits, int bits2);
 void CL_ParseFrame (void);
 
 void CL_ParseTEnt (void);
@@ -771,43 +745,39 @@ void	R_Shutdown (void);
 // an implicit "pics/" prepended to the name. (a pic name that starts with a
 // slash will not use the "pics/" prefix or the ".pcx" postfix)
 void	R_BeginRegistration (char *map);
+void	R_EndRegistration (void);
 struct model_s *R_RegisterModel (char *name);
 struct image_s *R_RegisterSkin (char *name);
 struct image_s *R_DrawFindPic (char *name);
+qboolean R_RegistrationIsActive (void);
+qboolean R_ModelIsValid (struct model_s *model);
 
 void	R_FreePic (char *name); // Knightmare added
-void	R_SetSky (char *name, float rotate, vec3_t axis);
-void	R_EndRegistration (void);
+void	R_SetSky (const char *skyName, const char *cloudName, float rotate, vec3_t axis, float distance,
+				float lightningFreq, vec2_t cloudDir, vec3_t cloudTile, vec3_t cloudSpeed, vec3_t cloudAlpha);
 
 void	R_RenderFrame (refdef_t *fd);
 
-void	R_SetParticlePicture (int num, char *name); // Knightmare added
+void	R_SetParticleImg (int num, char *name);	// Knightmare added
+void	R_GrabScreen (void);					// screenshots for savegames
+void	R_ScaledScreenshot (const char *name);	// screenshots for savegames
 
+float	R_CharMapScale (void);
 void	R_DrawChar (float x, float y, int c, fontslot_t font, float scale,
 					int red, int green, int blue, int alpha, qboolean italic, qboolean last);
 void	R_DrawString (float x, float y, const char *string, fontslot_t font, float scale, 
 					int red, int green, int blue, int alpha, qboolean italic, qboolean shadow);
 
+float	R_CharMapScale (void); // Knightmare added char scaling from Quake2Max
 void	R_DrawGetPicSize (int *w, int *h, char *name);	// will return 0 0 if not found
-
-void	R_DrawPic (drawStruct_t ds);
-
-//void	R_DrawPic (int x, int y, char *name);
-// added alpha for Psychospaz's transparent console
-//void	R_DrawStretchPic (int x, int y, int w, int h, char *name, float alpha);
-//void	R_DrawScaledPic (int x, int y, float scale, float alpha, char *name);
-//void	R_DrawTileClear (int x, int y, int w, int h, char *name);
+void	R_DrawPic (drawStruct_t *ds);
 
 void	R_DrawFill (int x, int y, int w, int h, int red, int green, int blue, int alpha);
-
+void	R_DrawFadeScreen (void);
 void	R_DrawCameraEffect (void);
-
-void	R_GrabScreen (void); // screenshots for savegames
-void	R_ScaledScreenshot (char *name); //  screenshots for savegames
 
 int		R_MarkFragments (const vec3_t origin, const vec3_t axis[3], float radius, int maxPoints, vec3_t *points, int maxFragments, markFragment_t *fragments);
 
-float	R_CharMapScale (void); // Knightmare added char scaling from Quake2Max
 
 // Draw images for cinematic rendering (which can have a different palette). Note that calls
 #ifdef ROQ_SUPPORT
@@ -904,6 +874,12 @@ void CL_ParseClientinfo (int player);
 //
 // cl_download.c
 //
+typedef struct {
+	char			fileName[MAX_OSPATH];
+	unsigned int	failCount;
+	qboolean		isDuplicated;
+} failedDownload_t;
+
 void CL_ResetPrecacheCheck (void);
 void CL_RequestNextDownload (void);
 qboolean CL_CheckOrDownloadFile (const char *filename);
@@ -911,6 +887,22 @@ void CL_Download_f (void);
 void CL_ParseDownload (void);
 void CL_Download_Reset_KBps_counter (void);
 void CL_Download_Calculate_KBps (int byteDistance, int totalSize);
+
+//
+// cl_http.c
+//
+#ifdef USE_CURL	// HTTP downloading from R1Q2
+
+void CL_CancelHTTPDownloads (qboolean permKill);
+void CL_InitHTTPDownloads (void);
+qboolean CL_QueueHTTPDownload (const char *quakePath);
+void CL_RunHTTPDownloads (void);
+qboolean CL_PendingHTTPDownloads (void);
+void CL_SetHTTPServer (const char *URL);
+void CL_HTTP_Cleanup (qboolean fullShutdown);
+void CL_HTTP_ResetMapAbort (void);	// Knightmare added
+
+#endif	// USE_CURL
 
 //
 // cl_view.c
@@ -956,6 +948,14 @@ typedef struct {
 	struct sfx_s	*sfx_lightning;
 	struct sfx_s	*sfx_disrexp;
 	struct sfx_s	*sfx_shockhit;
+	struct sfx_s	*sfx_q1_explo;
+	struct sfx_s	*sfx_q1_tink;
+	struct sfx_s	*sfx_q1_ric1;
+	struct sfx_s	*sfx_q1_ric2;
+	struct sfx_s	*sfx_q1_ric3;
+	struct sfx_s	*sfx_q1_laserhit;
+	struct sfx_s	*sfx_q1_scraghit;
+	struct sfx_s	*sfx_q1_hknighthit;
 #ifdef NOTTHIRTYFLIGHTS
 	struct sfx_s	*sfx_footsteps[4];
 #else
@@ -998,12 +998,18 @@ typedef struct {
 	struct model_s	*mod_monster_heatbeam;
 	struct model_s	*mod_explo_big;
 	struct model_s	*mod_shocksplash;
+	struct model_s	*mod_q1_explo;
+	struct model_s	*mod_q1_lightning_1;
+	struct model_s	*mod_q1_lightning_2;
+	struct model_s	*mod_q1_lightning_3;
 } clientMedia_t;
 
 extern clientMedia_t clMedia;
 
 void CL_RegisterTEntSounds (void);
 void CL_RegisterTEntModels (void);
+void CL_ClearTEnts (void);
+void CL_ShutdownTEntMedia (void);
 void CL_SmokeAndFlash(vec3_t origin);
 
 
@@ -1013,7 +1019,8 @@ void CL_SmokeAndFlash(vec3_t origin);
 void CL_InitPrediction (void);
 void CL_PredictMove (void);
 void CL_CheckPredictionError (void);
-//Knightmare added
+void CL_PredictMovement (void);
+// Knightmare added
 trace_t CL_Trace (vec3_t start, vec3_t end, float size,  int contentmask);
 trace_t CL_BrushTrace (vec3_t start, vec3_t end, float size,  int contentmask);
 trace_t CL_PMTrace (vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end);
@@ -1036,7 +1043,7 @@ extern cparticle_t	particles[MAX_PARTICLES];
 extern int			cl_numparticles;
 
 void CL_FixParticleCvars (void);
-int CL_GetRandomBloodParticle (void);
+void CL_RegisterParticleImages (void);
 void CL_ClipDecal (cparticle_t *part, float radius, float orient, vec3_t origin, vec3_t dir);
 float CL_NewParticleTime (void);
 
@@ -1073,12 +1080,35 @@ void CL_ReclipDecals (void);
 //
 // cl_effects.c
 //
+void CL_LightningBeam (vec3_t start, vec3_t end, int srcEnt, int dstEnt, float size);
+void CL_TeleportParticles (vec3_t org);
+void CL_TeleportParticles_Q1 (vec3_t org);
+void CL_LogoutEffect (vec3_t org, int type);
+void CL_ItemRespawnParticles (vec3_t org);
 void CL_BigTeleportParticles (vec3_t org);
+void CL_Explosion_Decal (vec3_t org, float size, int decalnum);
+void CL_Explosion_Particle (vec3_t org, float scale, qboolean rocket);
+void CL_Explosion_FlashParticle (vec3_t org, float size, qboolean large);
+void CL_BloodHit (vec3_t org, vec3_t dir);
+void CL_GreenBloodHit (vec3_t org, vec3_t dir);
+void CL_ParticleEffectSparks (vec3_t org, vec3_t dir, vec3_t color, int count);
+void CL_ParticleBulletDecal(vec3_t org, vec3_t dir, float size);
+void CL_ParticleBlasterDecal (vec3_t org, vec3_t dir, float size, int red, int green, int blue);
+void CL_ParticlePlasmaBeamDecal(vec3_t org, vec3_t dir, float size);
+void CL_ParticleAcidDecal (vec3_t org, vec3_t dir, float size, int red, int green, int blue);
+void CL_Explosion_Sparks (vec3_t org, int size, int count);
+void CL_Explosion_Sparks_Q1 (vec3_t org, int size, int count);
+void CL_Explosion_Blob_Q1 (vec3_t org, int size, int count);
+void CL_ParticleImpact_Q1 (vec3_t org, vec3_t dir, int colorIdx, float size, int count, qboolean shaded);
+void CL_Lavasplash_Q1 (vec3_t org, int size);
+void CL_TracerTrail_Q1 (vec3_t start, vec3_t end, centity_t *old, int type);
+void CL_BFGExplosionParticles (vec3_t org);
+void CL_TeleportParticles (vec3_t org);
 void CL_RocketTrail (vec3_t start, vec3_t end, centity_t *old);
 void CL_DiminishingTrail (vec3_t start, vec3_t end, centity_t *old, int flags);
 void CL_FlyEffect (centity_t *ent, vec3_t origin);
 void CL_BfgParticles (entity_t *ent);
-void CL_EntityEvent (entity_state_t *ent);
+void CL_EntityEvent (centity_state_t *ent);
 void CL_TrapParticles (entity_t *ent);	// RAFAEL
 void CL_BlasterTrail (vec3_t start, vec3_t end, int red, int green, int blue,
 									int reddelta, int greendelta, int bluedelta);
@@ -1094,7 +1124,7 @@ void CL_BlasterParticles (vec3_t org, vec3_t dir, int count, float size,
 void CL_QuadTrail (vec3_t start, vec3_t end);
 void CL_RailTrail (vec3_t start, vec3_t end, int red, int green, int blue);
 void CL_BubbleTrail (vec3_t start, vec3_t end);
-void CL_FlagTrail (vec3_t start, vec3_t end, qboolean isred, qboolean isgreen);
+void CL_FlagTrail (vec3_t start, vec3_t end, int red, int green, int blue);
 void CL_IonripperTrail (vec3_t start, vec3_t end); // RAFAEL
 // ========
 // PGM
@@ -1123,9 +1153,12 @@ void CL_WidowSplash (vec3_t org);
 //
 // cl_utils.c
 //
-int	color8red (int color8);
-int	color8green (int color8);
-int	color8blue (int color8);
+int	Q2PalColorRed (int palIdx);
+int	Q2PalColorGreen (int palIdx);
+int	Q2PalColorBlue (int palIdx);
+int	Q1PalColorRed (int palIdx);
+int	Q1PalColorGreen (int palIdx);
+int	Q1PalColorBlue (int palIdx);
 void CL_TextColor (int colornum, int *red, int *green, int *blue);	// for use with the alt_text_color cvar
 void CL_EffectColor (int colornum, int *red, int *green, int *blue);
 float ClampCvar (float min, float max, float value);
@@ -1134,8 +1167,6 @@ int stringLengthExtra (const char *string);
 char *unformattedString (const char *string);
 int listSize (char *list[][2]);
 qboolean isNumeric (char ch);
-void vectoangles (vec3_t value1, vec3_t angles);
-void vectoangles2 (vec3_t value1, vec3_t angles);
 qboolean FartherPoint (vec3_t pt1, vec3_t pt2);
 qboolean LegacyProtocol (void);
 qboolean R1Q2Protocol (void);
@@ -1161,11 +1192,15 @@ void CL_LocHelp_f (void);
 //
 // menus
 //
+extern	char *ui_currentweaponmodel;
+
 void UI_Init (void);
 void UI_Shutdown (void);
-void UI_Keydown (int key);
 void UI_Draw (void);
+void UI_Keydown (int key);
+qboolean UI_MenuHasGrabBind (void);
 void UI_ForceMenuOff (void);
+void UI_RefreshMenuItems (void);
 void UI_AddToServerList (netadr_t adr, char *info);
 void UI_RootMenu (void);
 
@@ -1174,10 +1209,6 @@ void UI_RootMenu (void);
 //
 void CL_ParseInventory (void);
 
-//
-// cl_pred.c
-//
-void CL_PredictMovement (void);
 
 #if id386
 void x86_TimerStart( void );

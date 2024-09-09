@@ -653,16 +653,9 @@ End Death Stuff
 ===
 */
 
-/*QUAKED monster_parasite (1 .5 0) (-16 -16 -24) (16 16 8) Ambush Trigger_Spawn Sight GoodGuy NoGib
-*/
-void SP_monster_parasite (edict_t *self)
+// Knightmare- added soundcache function
+void monster_parasite_soundcache (edict_t *self)
 {
-	if (deathmatch->value)
-	{
-		G_FreeEdict (self);
-		return;
-	}
-
 	sound_pain1 = gi.soundindex ("parasite/parpain1.wav");	
 	sound_pain2 = gi.soundindex ("parasite/parpain2.wav");	
 	sound_die = gi.soundindex ("parasite/pardeth1.wav");	
@@ -674,6 +667,21 @@ void SP_monster_parasite (edict_t *self)
 	sound_tap = gi.soundindex("parasite/paridle1.wav");
 	sound_scratch = gi.soundindex("parasite/paridle2.wav");
 	sound_search = gi.soundindex("parasite/parsrch1.wav");
+}
+
+
+/*QUAKED monster_parasite (1 .5 0) (-16 -16 -24) (16 16 8) Ambush Trigger_Spawn Sight GoodGuy NoGib
+*/
+void SP_monster_parasite (edict_t *self)
+{
+	if (deathmatch->value)
+	{
+		G_FreeEdict (self);
+		return;
+	}
+
+	// Knightmare- use soundcache function
+	monster_parasite_soundcache (self);
 
 	// Lazarus: special purpose skins
 	if ( self->style )
@@ -729,6 +737,12 @@ void SP_monster_parasite (edict_t *self)
 		self->monsterinfo.jump = parasite_jump;
 		self->monsterinfo.jumpup = 32;
 		self->monsterinfo.jumpdn = 160;
+	}
+	else
+	{
+		self->monsterinfo.jump = NULL;
+		self->monsterinfo.jumpup = 0;
+		self->monsterinfo.jumpdn = 0;
 	}
 
 	self->common_name = "Parasite";

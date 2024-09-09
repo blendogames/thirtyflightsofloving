@@ -1739,7 +1739,6 @@ void spectator_respawn (edict_t *ent)
 
 //==============================================================
 
-
 /*
 ===========
 PutClientInServer
@@ -1753,23 +1752,23 @@ void PutClientInServer (edict_t *ent)
 	extern	int			nostatus;
 	vec3_t				mins = {-16, -16, -24};
 	vec3_t				maxs = {16, 16, 32};
-	int					index;
+	int					index = 0;
 	vec3_t				spawn_origin, spawn_angles, spawn_viewangles;
-	gclient_t			*client;
+	gclient_t			*client = NULL;
 	int		i;
 	// tpp
-	int					chasetoggle;
-	gitem_t				*newweapon;
+	int					chasetoggle = 0;
+	gitem_t				*newweapon = NULL;
     char				userinfo[MAX_INFO_STRING];
 	// end tpp
-	qboolean			spawn_landmark;
-	qboolean			spawn_levelchange;
-	int					spawn_gunframe;
-	int					spawn_modelframe;
-	int					spawn_anim_end;
-	int					spawn_pm_flags;
-	int					spawn_style;
-	int					spawn_health;
+	qboolean			spawn_landmark = false;
+	qboolean			spawn_levelchange= false;
+	int					spawn_gunframe = 0;
+	int					spawn_modelframe = 0;
+	int					spawn_anim_end = 0;
+	int					spawn_pm_flags = 0;
+	int					spawn_style = 0;
+	int					spawn_health = 0;
 	client_persistant_t	saved;
 	client_respawn_t	resp;
 
@@ -2119,7 +2118,7 @@ void ClientBegin (edict_t *ent)
 	ent->client = game.clients + (ent - g_edicts - 1);
 
 	// Lazarus: Set the alias for our alternate attack
-	//	stuffcmd(ent, "alias +attack2 attack2_on; alias -attack2 attack2_off\n");
+//	stuffcmd(ent, "alias +attack2 attack2_on; alias -attack2 attack2_off\n");
 	
 	if (deathmatch->value)
 	{
@@ -2130,9 +2129,9 @@ void ClientBegin (edict_t *ent)
 	Fog_Off (ent);
 //	Fog (ent);
 
-	stuffcmd(ent,"alias +zoomin zoomin;alias -zoomin zoominstop\n");
-	stuffcmd(ent,"alias +zoomout zoomout;alias -zoomout zoomoutstop\n");
-	stuffcmd(ent,"alias +zoom zoomon;alias -zoom zoomoff\n");
+	stuffcmd (ent,"alias +zoomin zoomin;alias -zoomin zoominstop\n");
+	stuffcmd (ent,"alias +zoomout zoomout;alias -zoomout zoomoutstop\n");
+	stuffcmd (ent,"alias +zoom zoomon;alias -zoom zoomoff\n");
 
 	// if there is already a body waiting for us (a loadgame), just
 	// take it, otherwise spawn one from scratch
@@ -2960,7 +2959,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	else
 		ground_speed = 0;
 
-	if ( (ent->in_mud)               ||
+	if ( (ent->in_mud)              ||
 		(ent->client->push)         ||
 		(ent->vehicle)              ||
 		(ent->client->chasetoggle)  ||
@@ -3057,18 +3056,18 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 						viewing->monsterinfo.aiflags    &= ~AI_FOLLOW_LEADER;
 						viewing->monsterinfo.old_leader  = NULL;
 						viewing->monsterinfo.leader      = NULL;
-						viewing->movetarget = viewing->goalentity = NULL;
-						viewing->monsterinfo.stand(viewing);
+						viewing->movetarget				 = viewing->goalentity = NULL;
+						viewing->monsterinfo.stand (viewing);
 					}
 					else
 					{
 						vec3_t	dir;
 						viewing->monsterinfo.aiflags |= AI_FOLLOW_LEADER;
 						viewing->monsterinfo.leader   = ent;
-						VectorSubtract(ent->s.origin,viewing->s.origin,dir);
+						VectorSubtract(ent->s.origin, viewing->s.origin, dir);
 						viewing->ideal_yaw = vectoyaw(dir);
 						if (fabs(viewing->s.angles[YAW] - viewing->ideal_yaw) < 90)
-							actor_salute(viewing);
+							actor_salute (viewing);
 					}
 				}
 			}
@@ -3159,10 +3158,10 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		vec3_t	intersect;
 		float	range;
 
-		viewing = LookingAt(ent,0,intersect,&range);
+		viewing = LookingAt(ent, 0, intersect, &range);
 		if ( !(viewing && viewing->classname
-			&& (Q_stricmp(viewing->classname,"func_monitor") || Q_stricmp(viewing->classname,"func_pushable"))
-			&& range <= 100) )
+			&& (Q_stricmp(viewing->classname, "func_monitor") || Q_stricmp(viewing->classname, "func_pushable"))
+			&& (range <= 100)) )
 		{
 			if ((ucmd->buttons & BUTTON_USE) && (!deathmatch->value))
 			{
@@ -3227,7 +3226,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 
 // SPYCAM
 	if (client->spycam) {
-		ClientSpycam(ent);
+		ClientSpycam (ent);
 		return; // no movement while in cam
     } // END SPYCAM
 
@@ -3286,7 +3285,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 			{
 				if (jetpack_weenie->value)
 				{
-					Jet_ApplyJet( ent, ucmd );
+					Jet_ApplyJet (ent, ucmd);
 					if (client->jetpack_framenum < level.framenum)
 					{
 						if (!client->jetpack_infinite)

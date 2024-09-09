@@ -18,7 +18,6 @@ void check_dodge (edict_t *self, vec3_t start, vec3_t dir, int speed);
 void barrel_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf);
 
 void Grenade_Explode (edict_t *ent);
-void P_ProjectSource (gclient_t *client, vec3_t point, vec3_t distance, vec3_t forward, vec3_t right, vec3_t result);
 
 //#ifdef USE_ZAERO_ITEMS_WEAPONS
 void zCam_TrackEntity (struct edict_s *player, struct edict_s *track, qboolean playerVisiable, qboolean playerOffset);

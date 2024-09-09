@@ -22,10 +22,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 // menu_game.c -- the single player menu and credits
 
-#include <ctype.h>
-#ifdef _WIN32
-#include <io.h>
-#endif
 #include "../client/client.h"
 #include "ui_local.h"
 
@@ -37,59 +33,57 @@ GAME MENU
 =============================================================================
 */
 
-static int		m_game_cursor;
-
-static menuframework_s	s_game_menu;
-static menuaction_s		s_easy_game_action;
-static menuaction_s		s_medium_game_action;
-static menuaction_s		s_hard_game_action;
-static menuaction_s		s_nitemare_game_action;
-static menuaction_s		s_load_game_action;
-static menuaction_s		s_save_game_action;
-static menuaction_s		s_credits_action;
-static menuseparator_s	s_blankline;
-static menuaction_s		s_game_back_action;
+static menuFramework_s	s_game_menu;
+static menuImage_s		s_game_banner;
+static menuAction_s		s_easy_game_action;
+static menuAction_s		s_medium_game_action;
+static menuAction_s		s_hard_game_action;
+static menuAction_s		s_nitemare_game_action;
+static menuAction_s		s_load_game_action;
+static menuAction_s		s_save_game_action;
+static menuAction_s		s_credits_action;
+static menuAction_s		s_game_back_action;
 
 #ifndef NOTTHIRTYFLIGHTS
-static menuaction_s		s_gravitybone;
-static menuaction_s		s_commentarymode;
+static menuAction_s		s_gravitybone;
+static menuAction_s		s_commentarymode;
 #ifdef IDLETHUMBS
-static menuaction_s		s_idlemode;
+static menuAction_s		s_idlemode;
 #endif
 #endif
 
 //=======================================================================
 
 #ifdef NOTTHIRTYFLIGHTS
-static void EasyGameFunc (void *data)
+static void M_EasyGameFunc (void *data)
 {
 	Cvar_ForceSet ("skill", "0");
-	UIStartSPGame ();
+	UI_StartSPGame ();
 }
 
-static void MediumGameFunc (void *data)
+static void M_MediumGameFunc (void *data)
 {
 	Cvar_ForceSet ("skill", "1");
-	UIStartSPGame ();
+	UI_StartSPGame ();
 }
 
-static void HardGameFunc (void *data)
+static void M_HardGameFunc (void *data)
 {
 	Cvar_ForceSet ("skill", "2");
-	UIStartSPGame ();
+	UI_StartSPGame ();
 }
 
-static void NitemareGameFunc (void *data)
+static void M_NitemareGameFunc (void *data)
 {
 	Cvar_ForceSet ("skill", "3");
-	UIStartSPGame ();
+	UI_StartSPGame ();
 }
 #else
-static void MediumGameFunc( void *data )
+static void MediumGameFunc (void *data)
 {
-	Cvar_ForceSet( "commentary", "0" );
-	Cvar_ForceSet( "skill", "1" );
-	UIStartSPGame();
+    Cvar_ForceSet ("commentary", "0" );
+	Cvar_ForceSet ("skill", "1");
+	UI_StartSPGame ();
 }
 
 static void GravityboneFunc( void *data )
@@ -116,7 +110,7 @@ static void CommentaryFunc( void *data )
 {
 	Cvar_ForceSet( "skill", "1" );
 	Cvar_ForceSet( "commentary", "1" );
-	UIStartSPGame();
+	UI_StartSPGame();
 }
 
 static void IdleGameFunc( void *data )
@@ -139,17 +133,17 @@ static void IdleGameFunc( void *data )
 }
 #endif
 
-static void LoadGameFunc (void *unused)
+static void M_LoadGameFunc (void *unused)
 {
 	Menu_LoadGame_f ();
 }
 
-static void SaveGameFunc (void *unused)
+static void M_SaveGameFunc (void *unused)
 {
 	Menu_SaveGame_f ();
 }
 
-static void CreditsFunc (void *unused)
+static void M_CreditsFunc (void *unused)
 {
 	Menu_Credits_f ();
 }
@@ -158,17 +152,39 @@ static void CreditsFunc (void *unused)
 
 void Menu_Game_Init (void)
 {
-	int x = 0, y = 0;
+	int		x, y;
 #ifndef NOTTHIRTYFLIGHTS
-	static const char *yesno_names[] =
-	{
-		"no", "yes", 0
-	};
+    static const char *yesno_names[] =
+    {
+        "no", "yes", 0
+    };
 #endif
 
-	s_game_menu.x = SCREEN_WIDTH*0.5 - 3*MENU_LINE_SIZE;
-	s_game_menu.y = SCREEN_HEIGHT*0.5 - 5*MENU_LINE_SIZE;	// 0
-	s_game_menu.nitems = 0;
+	// menu.x = 296, menu.y = 190
+	x = SCREEN_WIDTH*0.5 - 3*MENU_LINE_SIZE;
+	y = SCREEN_HEIGHT*0.5 - 5*MENU_LINE_SIZE;
+
+	s_game_menu.x			= 0;	// SCREEN_WIDTH*0.5 - 3*MENU_LINE_SIZE;
+	s_game_menu.y			= 0;	// SCREEN_HEIGHT*0.5 - 5*MENU_LINE_SIZE;
+	s_game_menu.nitems		= 0;
+	s_game_menu.isPopup		= false;
+	s_game_menu.background	= NULL;
+	s_game_menu.drawFunc	= UI_DefaultMenuDraw;
+	s_game_menu.keyFunc		= UI_DefaultMenuKey;
+	s_game_menu.canOpenFunc	= NULL;
+
+	s_game_banner.generic.type		= MTYPE_IMAGE;
+	s_game_banner.generic.x			= 0;
+	s_game_banner.generic.y			= 9*MENU_LINE_SIZE;
+	s_game_banner.width				= 275;
+	s_game_banner.height			= 32;
+	s_game_banner.imageName			= "/pics/m_banner_game.pcx";
+	s_game_banner.alpha				= 255;
+	s_game_banner.border			= 0;
+	s_game_banner.hCentered			= true;
+	s_game_banner.vCentered			= false;
+	s_game_banner.useAspectRatio	= false;
+	s_game_banner.generic.isHidden	= false;
 
 #ifdef NOTTHIRTYFLIGHTS
 	s_easy_game_action.generic.type			= MTYPE_ACTION;
@@ -177,7 +193,7 @@ void Menu_Game_Init (void)
 	s_easy_game_action.generic.x			= x;
 	s_easy_game_action.generic.y			= y; // 0
 	s_easy_game_action.generic.name			= "Easy";
-	s_easy_game_action.generic.callback		= EasyGameFunc;
+	s_easy_game_action.generic.callback		= M_EasyGameFunc;
 
 	s_medium_game_action.generic.type		= MTYPE_ACTION;
 	s_medium_game_action.generic.textSize	= MENU_HEADER_FONT_SIZE;
@@ -185,7 +201,7 @@ void Menu_Game_Init (void)
 	s_medium_game_action.generic.x			= x;
 	s_medium_game_action.generic.y			= y += 1.5*MENU_LINE_SIZE;
 	s_medium_game_action.generic.name		= "Medium";
-	s_medium_game_action.generic.callback	= MediumGameFunc;
+	s_medium_game_action.generic.callback	= M_MediumGameFunc;
 
 	s_hard_game_action.generic.type			= MTYPE_ACTION;
 	s_hard_game_action.generic.textSize		= MENU_HEADER_FONT_SIZE;
@@ -193,7 +209,7 @@ void Menu_Game_Init (void)
 	s_hard_game_action.generic.x			= x;
 	s_hard_game_action.generic.y			= y += 1.5*MENU_LINE_SIZE;
 	s_hard_game_action.generic.name			= "Hard";
-	s_hard_game_action.generic.callback		= HardGameFunc;
+	s_hard_game_action.generic.callback		= M_HardGameFunc;
 
 	s_nitemare_game_action.generic.type			= MTYPE_ACTION;
 	s_nitemare_game_action.generic.textSize		= MENU_HEADER_FONT_SIZE;
@@ -201,7 +217,7 @@ void Menu_Game_Init (void)
 	s_nitemare_game_action.generic.x			= x;
 	s_nitemare_game_action.generic.y			= y += 1.5*MENU_LINE_SIZE;
 	s_nitemare_game_action.generic.name			= "Nightmare";
-	s_nitemare_game_action.generic.callback		= NitemareGameFunc;
+	s_nitemare_game_action.generic.callback		= M_NitemareGameFunc;
 #else
 	s_medium_game_action.generic.type	= MTYPE_ACTION;
 	s_medium_game_action.generic.textSize		= MENU_HEADER_FONT_SIZE;
@@ -246,19 +262,16 @@ void Menu_Game_Init (void)
 	y += MENU_LINE_SIZE;
 #endif
 
-	s_blankline.generic.type = MTYPE_SEPARATOR;
-	s_blankline.generic.textSize = MENU_FONT_SIZE;
-
 	s_load_game_action.generic.type			= MTYPE_ACTION;
 	s_load_game_action.generic.textSize		= MENU_HEADER_FONT_SIZE;
 	s_load_game_action.generic.flags		= QMF_LEFT_JUSTIFY;
 	s_load_game_action.generic.x			= x;
-	s_load_game_action.generic.y			= y += 2*MENU_HEADER_LINE_SIZE;	// 2*MENU_LINE_SIZE
+	s_load_game_action.generic.y			= y += 2*MENU_HEADER_LINE_SIZE;
 	s_load_game_action.generic.name			= "Load Game";
 #ifndef NOTTHIRTYFLIGHTS
-	s_load_game_action.generic.iconname		= "load";
+    s_load_game_action.generic.iconname     = "load";
 #endif
-	s_load_game_action.generic.callback		= LoadGameFunc;
+	s_load_game_action.generic.callback		= M_LoadGameFunc;
 
 	s_save_game_action.generic.type			= MTYPE_ACTION;
 	s_save_game_action.generic.textSize		= MENU_HEADER_FONT_SIZE;
@@ -267,26 +280,26 @@ void Menu_Game_Init (void)
 	s_save_game_action.generic.y			= y += 1.5*MENU_LINE_SIZE;
 	s_save_game_action.generic.name			= "Save Game";
 #ifndef NOTTHIRTYFLIGHTS
-	s_save_game_action.generic.iconname		= "save";
+    s_save_game_action.generic.iconname     = "save";
 #endif
-	s_save_game_action.generic.callback		= SaveGameFunc;
+	s_save_game_action.generic.callback		= M_SaveGameFunc;
 
 	s_credits_action.generic.type			= MTYPE_ACTION;
 	s_credits_action.generic.textSize		= MENU_HEADER_FONT_SIZE;
 	s_credits_action.generic.flags			= QMF_LEFT_JUSTIFY;
 	s_credits_action.generic.x				= x;
-	s_credits_action.generic.y				= y += 2*MENU_HEADER_LINE_SIZE;	// 1.5*MENU_LINE_SIZE
+	s_credits_action.generic.y				= y += 2*MENU_HEADER_LINE_SIZE;
 	s_credits_action.generic.name			= "Credits";
 #ifndef NOTTHIRTYFLIGHTS
-	s_credits_action.generic.iconname		= "credits";
+    s_credits_action.generic.iconname     = "credits";
+	s_credits_action.generic.callback		= M_CreditsFunc;
 #endif
-	s_credits_action.generic.callback		= CreditsFunc;
 
 	s_game_back_action.generic.type			= MTYPE_ACTION;
 	s_game_back_action.generic.textSize		= MENU_HEADER_FONT_SIZE;
 	s_game_back_action.generic.flags		= QMF_LEFT_JUSTIFY;
 	s_game_back_action.generic.x			= x;
-	s_game_back_action.generic.y			= y += 3*MENU_HEADER_LINE_SIZE;	// 2*MENU_LINE_SIZE
+	s_game_back_action.generic.y			= y += 3*MENU_HEADER_LINE_SIZE;
 #ifdef NOTTHIRTYFLIGHTS
 	s_game_back_action.generic.name			= "Back to Main";
 #else
@@ -295,6 +308,7 @@ void Menu_Game_Init (void)
 #endif
 	s_game_back_action.generic.callback		= UI_BackMenu;
 
+	UI_AddMenuItem (&s_game_menu, (void *) &s_game_banner);
 #ifdef NOTTHIRTYFLIGHTS
 	UI_AddMenuItem (&s_game_menu, (void *) &s_easy_game_action);
 	UI_AddMenuItem (&s_game_menu, (void *) &s_medium_game_action);
@@ -304,24 +318,20 @@ void Menu_Game_Init (void)
 	UI_AddMenuItem (&s_game_menu, (void *) &s_medium_game_action);
 	UI_AddMenuItem (&s_game_menu, (void *) &s_commentarymode);
 #ifdef IDLETHUMBS
-	UI_AddMenuItem (&s_game_menu, ( void * ) &s_idlemode);
+    UI_AddMenuItem (&s_game_menu, (void *) &s_idlemode);
 #endif
-	UI_AddMenuItem (&s_game_menu, (void *) &s_gravitybone);
+    UI_AddMenuItem (&s_game_menu, (void *) &s_gravitybone);
 #endif
-
-	UI_AddMenuItem (&s_game_menu, (void *) &s_blankline);
 
 	UI_AddMenuItem (&s_game_menu, (void *) &s_load_game_action);
 	UI_AddMenuItem (&s_game_menu, (void *) &s_save_game_action);
 
-	UI_AddMenuItem (&s_game_menu, (void *) &s_blankline);
 	UI_AddMenuItem (&s_game_menu, (void *) &s_credits_action);
 
 	UI_AddMenuItem (&s_game_menu, (void *) &s_game_back_action);
-
-//	UI_CenterMenu (&s_game_menu);
 }
 
+// Forward Ported from old engine; may not work properly on new engine - Brad
 void icondraw (char *name)
 {
 	int w, h;
@@ -336,9 +346,9 @@ void icondraw (char *name)
 void Menu_Game_Draw (void)
 {
 #ifndef NOTTHIRTYFLIGHTS
-	menucommon_s *citem;
+	menuCommon_s *citem;
 #endif
-	UI_DrawBanner ("m_banner_game");
+	//UI_DrawBanner ("m_banner_game"); - Replaced in framework struct - Brad
 	UI_AdjustMenuCursor (&s_game_menu, 1);
 	UI_DrawMenu (&s_game_menu);
 #ifndef NOTTHIRTYFLIGHTS
@@ -363,16 +373,16 @@ void Menu_Game_Draw (void)
 		}
 	}
 #endif
+    UI_DefaultMenuDraw (&s_game_menu);
 }
 
-const char *Menu_Game_Key (int key)
+void Menu_Game_Key (int key)
 {
-	return UI_DefaultMenuKey (&s_game_menu, key);
+    UI_DefaultMenuKey (&s_game_menu, key);
 }
 
 void Menu_Game_f (void)
 {
 	Menu_Game_Init ();
-	UI_PushMenu (Menu_Game_Draw, Menu_Game_Key);
-	m_game_cursor = 1;
+	UI_PushMenu (&s_game_menu);
 }

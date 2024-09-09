@@ -156,8 +156,8 @@ void q1shalrath_fire (edict_t *self)
 	vectoangles (aim, dir);
 	AngleVectors (dir, forward, right, up);
 
-	r = crandom()*1000;
-	u = crandom()*500;
+	r = crandom() * 1000;
+	u = crandom() * 500;
 	VectorMA (start, 8192, forward, end);
 	VectorMA (end, r, right, end);
 	VectorMA (end, u, up, end);
@@ -171,7 +171,7 @@ void q1shalrath_fire (edict_t *self)
 
 void q1shalrath_attack_snd (edict_t *self)
 {
-	gi.sound (self, CHAN_AUTO, sound_attack, 1, ATTN_NORM, 0);
+	gi.sound (self, CHAN_VOICE, sound_attack, 1, ATTN_NORM, 0);
 }
 
 mframe_t q1shalrath_frames_attack [] =
@@ -270,6 +270,18 @@ void q1shalrath_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int d
 }
 
 
+// Knightmare- added soundcache function
+void monster_q1_shalrath_soundcache (edict_t *self)
+{
+	sound_sight		= gi.soundindex ("q1shalrath/sight.wav");
+	sound_pain1		= gi.soundindex ("q1shalrath/pain.wav");
+	sound_gib		= gi.soundindex ("q1player/udeath.wav");
+	sound_death		= gi.soundindex ("q1shalrath/death.wav");
+	sound_attack	= gi.soundindex ("q1shalrath/attack.wav");
+	sound_attack2	= gi.soundindex ("q1shalrath/attack2.wav");
+	sound_idle		= gi.soundindex ("q1shalrath/idle.wav");
+}
+
 //
 // SPAWN
 //
@@ -284,14 +296,9 @@ void SP_monster_q1_shalrath (edict_t *self)
 		G_FreeEdict (self);
 		return;
 	}
-	
-	sound_sight		= gi.soundindex ("q1shalrath/sight.wav");
-	sound_pain1		= gi.soundindex ("q1shalrath/pain.wav");
-	sound_gib		= gi.soundindex ("q1player/udeath.wav");
-	sound_death		= gi.soundindex ("q1shalrath/death.wav");
-	sound_attack	= gi.soundindex ("q1shalrath/attack.wav");
-	sound_attack2	= gi.soundindex ("shalrath/attack2.wav");
-	sound_idle		= gi.soundindex ("q1shalrath/idle.wav");
+
+	// Knightmare- use soundcache function
+	monster_q1_shalrath_soundcache (self);
 
 	// precache gibs
 	gi.modelindex ("models/monsters/q1shalrath/head/tris.md2");

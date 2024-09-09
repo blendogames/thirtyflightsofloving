@@ -544,18 +544,22 @@ void flyer_pain (edict_t *self, edict_t *other, float kick, int damage)
 
 void flyer_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
+#ifdef KMQUAKE2_ENGINE_MOD
 	int n;
+
 	// Knightmare- gibs!
 	for (n= 0; n < 4; n++)
 		ThrowGib (self, "models/objects/gibs/sm_metal/tris.md2", damage, GIB_METALLIC);
 	for (n= 0; n < 2; n++)
 		ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
+#endif	// KMQUAKE2_ENGINE_MOD
 	gi.sound (self, CHAN_VOICE, sound_die, 1, ATTN_NORM, 0);
 	BecomeExplosion1(self);
 }
 	
 
-void SP_monster_flyer_precache(void)
+// Knightmare- added soundcache function
+void monster_flyer_soundcache (edict_t *self)
 {
 	sound_sight = gi.soundindex ("flyer/flysght1.wav");
 	sound_idle = gi.soundindex ("flyer/flysrch1.wav");
@@ -564,6 +568,12 @@ void SP_monster_flyer_precache(void)
 	sound_slash = gi.soundindex ("flyer/flyatck2.wav");
 	sound_sproing = gi.soundindex ("flyer/flyatck1.wav");
 	sound_die = gi.soundindex ("flyer/flydeth1.wav");
+}
+
+void SP_monster_flyer_precache (edict_t *self)
+{
+	// Knightmare- use soundcache function
+	monster_flyer_soundcache (self);
 }
 
 
@@ -584,7 +594,7 @@ void SP_monster_flyer (edict_t *self)
 		self->target = NULL;
 	}
 
-  SP_monster_flyer_precache();
+  SP_monster_flyer_precache (self);
 
 	gi.soundindex ("flyer/flyatck3.wav");
 

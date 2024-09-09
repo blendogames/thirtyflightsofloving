@@ -483,7 +483,9 @@ End Death Stuff
 ===
 */
 
-void SP_monster_parasite_precache(void)
+
+// Knightmare- added soundcache function
+void monster_parasite_soundcache (edict_t *self)
 {
 	sound_pain1 = gi.soundindex ("parasite/parpain1.wav");	
 	sound_pain2 = gi.soundindex ("parasite/parpain2.wav");	
@@ -498,6 +500,12 @@ void SP_monster_parasite_precache(void)
 	sound_search = gi.soundindex("parasite/parsrch1.wav");
 }
 
+void SP_monster_parasite_precache (edict_t *self)
+{
+	// Knightmare- use soundcache function
+	monster_parasite_soundcache (self);
+}
+
 
 /*QUAKED monster_parasite (1 .5 0) (-16 -16 -24) (16 16 32) Ambush Trigger_Spawn Sight
 */
@@ -509,7 +517,7 @@ void SP_monster_parasite (edict_t *self)
 		return;
 	}
 
-  SP_monster_parasite_precache();
+	SP_monster_parasite_precache (self);
 
 	self->s.modelindex = gi.modelindex ("models/monsters/parasite/tris.md2");
 	VectorSet (self->mins, -16, -16, -24);

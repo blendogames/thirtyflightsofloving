@@ -48,6 +48,10 @@ cvar_t	*sv_cheats;
 cvar_t	*sv_stopspeed;	//PGM	 (this was a define in g_phys.c)
 cvar_t	*sv_step_fraction;	// Knightmare- this was a define in p_view.c
 
+cvar_t	*g_aimfix;				// Knightmare- from Yamagi Q2
+cvar_t	*g_aimfix_min_dist;		// Knightmare- minimum range for aimfix
+cvar_t	*g_aimfix_taper_dist;	// Knightmare- transition range for aimfix
+
 cvar_t	*readout;	// Knightmare added
 
 #ifdef CACHE_SOUND

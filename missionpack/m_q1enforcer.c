@@ -327,21 +327,9 @@ void q1enforcer_attack (edict_t *self)
 }
 
 
-//
-// SPAWN
-//
-
-/*QUAKED SP_monster_q1_enforcer (1 .5 0) (-16 -16 -24) (16 16 32) Ambush Trigger_Spawn Sight
-model="models/monsters/q1enforcer/tris.md2"
-*/
-void SP_monster_q1_enforcer (edict_t *self)
+// Knightmare- added soundcache function
+void monster_q1_enforcer_soundcache (edict_t *self)
 {
-	if (deathmatch->value)
-	{
-		G_FreeEdict (self);
-		return;
-	}
-
 	sound_pain1		= gi.soundindex ("q1enforcer/pain1.wav");
 	sound_pain2		= gi.soundindex ("q1enforcer/pain2.wav");
 	sound_death		= gi.soundindex ("q1enforcer/death1.wav");
@@ -352,6 +340,25 @@ void SP_monster_q1_enforcer (edict_t *self)
 	sound_sight3	= gi.soundindex ("q1enforcer/sight3.wav");
 	sound_sight4	= gi.soundindex ("q1enforcer/sight4.wav");
 	sound_fire		= gi.soundindex ("q1enforcer/enfire.wav");
+}
+
+//
+// SPAWN
+//
+
+/*QUAKED monster_q1_enforcer (1 .5 0) (-16 -16 -24) (16 16 32) Ambush Trigger_Spawn Sight
+model="models/monsters/q1enforcer/tris.md2"
+*/
+void SP_monster_q1_enforcer (edict_t *self)
+{
+	if (deathmatch->value)
+	{
+		G_FreeEdict (self);
+		return;
+	}
+
+	// Knightmare- use soundcache function
+	monster_q1_enforcer_soundcache (self);
 
 	// precache backpack
 	gi.modelindex ("models/items/q1backpack/tris.md2");
@@ -359,7 +366,7 @@ void SP_monster_q1_enforcer (edict_t *self)
 	// precache gibs
 	gi.modelindex ("models/monsters/q1enforcer/head/tris.md2");
 	gi.modelindex ("models/objects/q1gibs/q1gib1/tris.md2");
-	gi.modelindex ("models/objects/q1gibs/q1gib3/tris.md2");
+	gi.modelindex ("models/objects/q1gibs/q1gib2/tris.md2");
 	// precache laser
 	q1_laser_precache ();
 

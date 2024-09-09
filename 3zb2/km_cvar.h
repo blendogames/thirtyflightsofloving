@@ -282,7 +282,7 @@ extern	cvar_t	*sk_breather_time;
 extern	cvar_t	*sk_enviro_time;
 extern	cvar_t	*sk_silencer_shots;
 //extern	cvar_t	*sk_ir_time;
-//extern	cvar_t	*sk_double_time;
+extern	cvar_t	*sk_double_time;
 extern	cvar_t	*sk_quad_fire_time;
 
 // CTF stuff

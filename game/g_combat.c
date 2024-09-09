@@ -247,14 +247,14 @@ dflags		these flags are used to control how T_Damage works
 */
 static int CheckPowerArmor (edict_t *ent, vec3_t point, vec3_t normal, int damage, int dflags)
 {
-	gclient_t	*client;
-	int			save;
-	int			power_armor_type;
-	int			index;
-	int			damagePerCell;
-	int			pa_te_type;
-	int			power=0;
-	int			power_used;
+	gclient_t	*client = NULL;
+	int			save = 0;
+	int			power_armor_type = 0;
+	int			index = 0;
+	int			damagePerCell = 0;
+	int			pa_te_type = 0;
+	int			power = 0;
+	int			power_used = 0;
 
 	if (!damage)
 		return 0;
@@ -628,7 +628,7 @@ void M_ReactToDamage (edict_t *targ, edict_t *attacker)
 				if (best_dist == 0.)
 					return;
 				thing = SpawnThing();
-				vectoangles(best_dir,thing->s.angles);
+				vectoangles (best_dir, thing->s.angles);
 			}
 			if ( (!Q_stricmp(attacker->classname,"func_door"))    ||
 				(!Q_stricmp(attacker->classname,"func_pushable"))   )
@@ -645,7 +645,7 @@ void M_ReactToDamage (edict_t *targ, edict_t *attacker)
 			else
 				thing->touch_debounce_time = level.time + max(5.0,dist/50.);
 			thing->target_ent = targ;
-			ED_CallSpawn(thing);
+			ED_CallSpawn (thing);
 			targ->movetarget = targ->goalentity = thing;
 			targ->monsterinfo.aiflags &= ~AI_SOUND_TARGET;
 			targ->monsterinfo.aiflags |= AI_CHASE_THING;

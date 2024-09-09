@@ -54,8 +54,8 @@ void Use_Target_Speaker (edict_t *ent, edict_t *other, edict_t *activator)
 		}
 		else {
 			ent->s.sound = ent->noise_index;	// start it
-#ifdef LOOP_SOUND_ATTENUATION
-			ent->s.attenuation = ent->attenuation;
+#ifdef KMQUAKE2_ENGINE_MOD
+			ent->s.loop_attenuation = ent->attenuation;
 #endif
 		}
 	}
@@ -132,8 +132,8 @@ void SP_target_speaker (edict_t *ent)
 	// check for prestarted looping sound
 	if (ent->spawnflags & 1) {
 		ent->s.sound = ent->noise_index;
-#ifdef LOOP_SOUND_ATTENUATION
-		ent->s.attenuation = ent->attenuation;
+#ifdef KMQUAKE2_ENGINE_MOD
+		ent->s.loop_attenuation = ent->attenuation;
 #endif
 	}
 
@@ -418,12 +418,12 @@ void use_target_changelevel (edict_t *self, edict_t *other, edict_t *activator)
 		if (self->spawnflags & 2 && activator->client)
 		{
 			activator->client->pers.spawn_landmark = true;
-			VectorSubtract(activator->s.origin,self->s.origin,
+			VectorSubtract (activator->s.origin,self->s.origin,
 				activator->client->pers.spawn_offset);
-			VectorCopy(activator->velocity,activator->client->pers.spawn_velocity);
-			VectorCopy(activator->s.angles,activator->client->pers.spawn_angles);
+			VectorCopy (activator->velocity,activator->client->pers.spawn_velocity);
+			VectorCopy (activator->s.angles,activator->client->pers.spawn_angles);
 			activator->client->pers.spawn_angles[ROLL] = 0;
-			VectorCopy(activator->client->ps.viewangles,activator->client->pers.spawn_viewangles);
+			VectorCopy (activator->client->ps.viewangles,activator->client->pers.spawn_viewangles);
 			activator->client->pers.spawn_pm_flags = activator->client->ps.pmove.pm_flags;
 			if (self->s.angles[YAW])
 			{
@@ -434,11 +434,11 @@ void use_target_changelevel (edict_t *self, edict_t *other, edict_t *activator)
 				angles[YAW] = self->s.angles[YAW];
 				AngleVectors(angles,forward,right,NULL);
 				VectorNegate(right,right);
-				VectorCopy(activator->client->pers.spawn_offset,v);
+				VectorCopy (activator->client->pers.spawn_offset,v);
 				G_ProjectSource (vec3_origin,
 					             v, forward, right,
 								 activator->client->pers.spawn_offset);
-				VectorCopy(activator->client->pers.spawn_velocity,v);
+				VectorCopy (activator->client->pers.spawn_velocity,v);
 				G_ProjectSource (vec3_origin,
 					             v, forward, right,
 								 activator->client->pers.spawn_velocity);
@@ -496,7 +496,7 @@ void use_target_changelevel (edict_t *self, edict_t *other, edict_t *activator)
 				if (!(itemlist[n].flags & IT_WEAPON) || itemlist[n].weapmodel != WEAP_BLASTER )
 					activator->client->pers.inventory[n] = 0;
 			}
-			//Knightmare- always have null weapon
+			// Knightmare- always have null weapon
 			if (!deathmatch->value)
 				activator->client->pers.inventory[ITEM_INDEX(FindItem("No Weapon"))] = 1;
 			// Switch to blaster
@@ -661,13 +661,13 @@ void SP_target_spawner (edict_t *self)
 
 //==========================================================
 
-/*QUAKED target_blaster (1 0 0) (-8 -8 -8) (8 8 8) NO_TRAIL NO_EFFECTS START_ON IF_VISIBLE x x x SEEKPLAYER
+/*QUAKED target_blaster (1 0 0) (-8 -8 -8) (8 8 8) NO_TRAIL NO_EFFECTS START_ON IF_VISIBLE SILENT x x SEEKPLAYER
 Fires a blaster bolt in the set direction when triggered.
 
-"count" number of times it can be used (wait>0 only)
-"dmg" Default= 15
-"speed"	Default= 1000
-"wait" firing rate per second; default=0
+"dmg" Default = 15
+"speed"	Default = 1000
+"wait" firing rate per second; default = 0
+"count" number of times it can be used (wait > 0 only)
 "movewith" targetname of train or other ent to move with
 "sounds"
    0 = Blaster
@@ -675,28 +675,29 @@ Fires a blaster bolt in the set direction when triggered.
    2 = Rocket
    3 = BFG
    4 = Homing rockets
-
+   5 = machinegun
+   6 = grenade
 */
 
-#define BLASTER_START_ON 4
-#define BLASTER_IF_VISIBLE 8
+#define BLASTER_START_ON	4
+#define BLASTER_IF_VISIBLE	8
 #define BLASTER_SILENT		16
 #define BLASTER_SEEK_PLAYER 128
 
 void use_target_blaster (edict_t *self, edict_t *other, edict_t *activator)
 {
 	vec3_t	movedir, start, target;
-	int effect;
+	int		effect;
 
 	// Zaero add
-	if (EMPNukeCheck(self, self->s.origin))
+	if ( EMPNukeCheck(self, self->s.origin) )
 	{
 		gi.sound (self, CHAN_AUTO, gi.soundindex("items/empnuke/emp_missfire.wav"), 1, ATTN_NORM, 0);
 		return;
 	}
 	// end Zaero
 
-	VectorCopy(self->s.origin,start);
+	VectorCopy (self->s.origin, start);
 	if (self->enemy)
 	{
 		if (self->enemy->health < 0)
@@ -711,15 +712,15 @@ void use_target_blaster (edict_t *self, edict_t *other, edict_t *activator)
 		}
 		else
 		{
-			VectorMA(self->enemy->absmin,0.5,self->enemy->size,target);
-			VectorSubtract(target,start,movedir);
-			VectorNormalize(movedir);
+			VectorMA (self->enemy->absmin, 0.5, self->enemy->size, target);
+			VectorSubtract (target, start, movedir);
+			VectorNormalize (movedir);
 		}
 	}
 	else
 	{	// Knightmare- set movedir here, allowing angles to be updated by movewith code
 		G_SetMovedir2 (self->s.angles, self->movedir);
-		VectorCopy(self->movedir,movedir);
+		VectorCopy (self->movedir, movedir);
 	}
 
 	if (self->spawnflags & 2)
@@ -740,31 +741,31 @@ void use_target_blaster (edict_t *self, edict_t *other, edict_t *activator)
 	}
 	else if (self->sounds == 2)
 	{
-		fire_rocket(self, start, movedir, self->dmg, self->speed, self->dmg, self->dmg, NULL);
+		fire_rocket (self, start, movedir, self->dmg, self->speed, self->dmg, self->dmg, NULL);
 		gi.positioned_sound (start, self, CHAN_WEAPON, gi.soundindex("weapons/rocklf1a.wav"), 1, ATTN_NORM, 0);
 	}
 	else if (self->sounds == 3)
 	{
-		fire_bfg(self, start, movedir, self->dmg, self->speed, self->dmg);
+		fire_bfg (self, start, movedir, self->dmg, self->speed, self->dmg, false);
 		gi.positioned_sound (start, self, CHAN_WEAPON, gi.soundindex("weapons/laser2.wav"), 1, ATTN_NORM, 0);
 	}
 	else if (self->sounds == 4)
 	{
-		fire_rocket(self, start, movedir, self->dmg, self->speed, self->dmg, self->dmg, self->enemy);
+		fire_rocket (self, start, movedir, self->dmg, self->speed, self->dmg, self->dmg, self->enemy);
 		gi.positioned_sound (start, self, CHAN_WEAPON, gi.soundindex("weapons/rocklf1a.wav"), 1, ATTN_NORM, 0);
 	}
 	else if (self->sounds == 5)
 	{
-		fire_bullet(self, start, movedir, self->dmg, 2, 0, 0, MOD_TARGET_BLASTER);
-		gi.WriteByte(svc_temp_entity);
-		gi.WriteByte(TE_CHAINFIST_SMOKE);
-		gi.WritePosition(start);
-		gi.multicast(start, MULTICAST_PVS);
-		gi.positioned_sound(start,self,CHAN_WEAPON,gi.soundindex(va("weapons/machgf%db.wav",rand() % 5 + 1)),1,ATTN_NORM,0);
+		fire_bullet (self, start, movedir, self->dmg, 2, 0, 0, MOD_TARGET_BLASTER);
+		gi.WriteByte (svc_temp_entity);
+		gi.WriteByte (TE_CHAINFIST_SMOKE);
+		gi.WritePosition (start);
+		gi.multicast (start, MULTICAST_PVS);
+		gi.positioned_sound (start,self,CHAN_WEAPON,gi.soundindex(va("weapons/machgf%db.wav",rand() % 5 + 1)),1,ATTN_NORM,0);
 	}
 	else if (self->sounds == 6)
 	{
-		fire_grenade(self, start, movedir, self->dmg, self->speed, 2.5, self->dmg+40, false);
+		fire_grenade (self, start, movedir, self->dmg, self->speed, 2.5, self->dmg+40, false);
 		gi.WriteByte (svc_muzzleflash2);
 		gi.WriteShort (self - g_edicts);
 		gi.WriteByte (MZ2_GUNNER_GRENADE_1);
@@ -805,12 +806,12 @@ void target_blaster_think (edict_t *self)
 				self->enemy = NULL;
 		}
 
-		// We have a live not-notarget player as target. If IF_VISIBLE is 
+		// We have a live not-notarget player as target. If BLASTER_IF_VISIBLE is 
 		// set, see if we can see him
 		if (self->enemy && (self->spawnflags & BLASTER_IF_VISIBLE) )
 		{
-			VectorMA(self->enemy->absmin,0.5,self->enemy->size,target);
-			tr = gi.trace(self->s.origin,vec3_origin,vec3_origin,target,self,MASK_OPAQUE);
+			VectorMA (self->enemy->absmin, 0.5, self->enemy->size, target);
+			tr = gi.trace(self->s.origin, vec3_origin, vec3_origin, target, self, MASK_OPAQUE);
 			if (tr.fraction != 1.0)
 				self->enemy = NULL;
 		}
@@ -826,17 +827,18 @@ void target_blaster_think (edict_t *self)
 	
 		// Find a player - note that we search the entire entity list so we'll
 		// also hit on func_monitor-viewing fake players
-		for (i=1, player=g_edicts+1; i<globals.num_edicts && !self->enemy; i++, player++) {
-			if (!player->inuse) continue;
-			if (!player->client) continue;
+		for (i=1, player=g_edicts+1; i<globals.num_edicts && !self->enemy; i++, player++)
+		{
+			if ( !player->inuse ) continue;
+			if ( !player->client ) continue;
 			if (player->svflags & SVF_NOCLIENT) continue;
 			if (player->health >= 0 && !(player->flags & FL_NOTARGET) )
 			{
 				if (self->spawnflags & BLASTER_IF_VISIBLE)
 				{
 					// player must be seen to shoot
-					VectorMA(player->s.origin,0.5,player->size,target);
-					tr = gi.trace(self->s.origin,vec3_origin,vec3_origin,target,self,MASK_OPAQUE);
+					VectorMA (player->s.origin, 0.5, player->size, target);
+					tr = gi.trace(self->s.origin, vec3_origin, vec3_origin, target, self, MASK_OPAQUE);
 					if (tr.fraction == 1.0)
 						self->enemy = player;
 				}
@@ -848,9 +850,8 @@ void target_blaster_think (edict_t *self)
 			}
 		}
 		// If we have an enemy, shoot
-		if (self->enemy)
-		{
-			use_target_blaster(self,self,self);
+		if (self->enemy) {
+			use_target_blaster (self, self, self);
 			if (self->wait)
 				self->nextthink = level.time + self->wait;
 			return;
@@ -862,7 +863,7 @@ void target_blaster_think (edict_t *self)
 
 	if (self->target)
 	{
-		if (!(self->spawnflags & BLASTER_IF_VISIBLE))
+		if ( !(self->spawnflags & BLASTER_IF_VISIBLE) )
 		{
 			// have a target, don't care whether it's visible; cannot be a gibbed monster
 			self->enemy = NULL;
@@ -870,7 +871,7 @@ void target_blaster_think (edict_t *self)
 			while (ent && !self->enemy)
 			{
 				// if target is not a monster, we're done
-				if ( !(ent->svflags & SVF_MONSTER))
+				if ( !(ent->svflags & SVF_MONSTER) )
 				{
 					self->enemy = ent;
 					break;
@@ -895,8 +896,8 @@ void target_blaster_think (edict_t *self)
 				if ( ent->health > ent->gib_health)
 				{
 					// Not a gibbed monster
-					VectorMA(ent->absmin,0.5,ent->size,target);
-					tr = gi.trace(self->s.origin,vec3_origin,vec3_origin,target,self,MASK_OPAQUE);
+					VectorMA (ent->absmin, 0.5, ent->size, target);
+					tr = gi.trace(self->s.origin, vec3_origin, vec3_origin, target, self, MASK_OPAQUE);
 					if (tr.fraction == 1.0)
 					{
 						self->enemy = ent;
@@ -907,9 +908,9 @@ void target_blaster_think (edict_t *self)
 			}
 		}
 	}
-	if (self->enemy || !(self->spawnflags & BLASTER_IF_VISIBLE) )
+	if ( self->enemy || !(self->spawnflags & BLASTER_IF_VISIBLE) )
 	{
-		use_target_blaster(self,self,self);
+		use_target_blaster (self, self, self);
 		if (self->wait)
 			self->nextthink = level.time + self->wait;
 	}
@@ -963,19 +964,21 @@ void SP_target_blaster (edict_t *self)
 {
 //	self->use = use_target_blaster;
 //	G_SetMovedir (self->s.angles, self->movedir);
+
 	// Knightmare- added silent option
 	if (!self->spawnflags & BLASTER_SILENT)
 		self->noise_index = gi.soundindex ("weapons/laser2.wav");
 
-	if (!self->dmg)
+	if ( !self->dmg )
 		self->dmg = 15;
-	if (!self->speed)
+	if ( !self->speed )
 		self->speed = 1000;
 
 	// If SEEK_PLAYER is not set and there's no target, then
 	// IF_VISIBLE is meaningless
-	if (!(self->spawnflags & BLASTER_SEEK_PLAYER) && !self->target)
+	if ( !(self->spawnflags & BLASTER_SEEK_PLAYER) && !self->target )
 		self->spawnflags &= ~16;
+
 	if (self->wait)
 	{
 		// toggled target_blaster
@@ -1112,15 +1115,17 @@ WINDOWSTOP - stops at CONTENTS_WINDOW
 
 //======
 // PGM
-#define LASER_ON			1
-//#define LASER_RED			0x0002
-//#define LASER_GREEN		0x0004
-//#define LASER_BLUE		0x0008
-//#define LASER_YELLOW		0x0010
-//#define LASER_ORANGE		0x0020
-#define LASER_FAT			64
-#define LASER_STOPWINDOW	128
-#define	LASER_SEEK_PLAYER	8192
+#define LASER_ON				1
+//#define LASER_RED				2
+//#define LASER_GREEN			4
+//#define LASER_BLUE			8
+//#define LASER_YELLOW			16
+//#define LASER_ORANGE			32
+#define LASER_FAT				64
+#define LASER_SEEK_PLAYER		128
+#define LASER_STOPWINDOW		8192
+#define ROGUE_LASER_STOPWINDOW	128
+#define ROGUE_LASER_SEEK_PLAYER	8192
 // PGM
 //======
 
@@ -1129,23 +1134,18 @@ void target_laser_ps_think (edict_t *self)
 {
 	edict_t	*ignore;
 	edict_t *player;
+	vec3_t	start, end, point;
+	vec3_t	last_movedir, realmin, target;
 	trace_t	tr;
-	vec3_t	start;
-	vec3_t	end;
-	vec3_t	point;
-	vec3_t	last_movedir;
-	vec3_t	target;
-	int		count;
-	int		i;
+	int		i, count;
 
-	if ( self->wait > 0) {
-		if ( level.time >= self->starttime )
-		{
+	if ( self->wait > 0)
+	{
+		if ( level.time >= self->starttime ) {
 			self->starttime = level.time + self->wait;
 			self->endtime   = level.time + self->delay;
 		}
-		else if ( level.time >= self->endtime )
-		{
+		else if ( level.time >= self->endtime ) {
 			self->nextthink = level.time + FRAMETIME;
 			return;
 		}
@@ -1156,31 +1156,39 @@ void target_laser_ps_think (edict_t *self)
 	else
 		count = 4;
 
-	if (self->enemy) {
+	if (self->enemy)
+	{
 		if (self->enemy->flags & FL_NOTARGET || (self->enemy->health < self->enemy->gib_health) )
 			self->enemy = NULL;
 		else
 		{
 			// first make sure laser can see the center of the enemy
-			VectorMA(self->enemy->absmin,0.5,self->enemy->size,target);
-			tr = gi.trace(self->s.origin,vec3_origin,vec3_origin,target,self,MASK_OPAQUE);
+		//	VectorMA (self->enemy->absmin, 0.5, self->enemy->size, target);
+			// Knightmare- calc min coordinate, don't use absmin
+			VectorAdd (self->enemy->s.origin, self->enemy->mins, realmin);
+			VectorMA (realmin, 0.5, self->enemy->size, target);
+			tr = gi.trace(self->s.origin, vec3_origin, vec3_origin, target, self, MASK_OPAQUE);
 			if (tr.fraction != 1.0)
 				self->enemy = NULL;
 		}
 	}
-	if (!self->enemy)
+
+	if ( !self->enemy )
 	{
 		// find a player - as with target_blaster, search entire entity list so
 		// we'll pick up fake players representing camera-viewers
 		for (i=1, player=g_edicts+1; i<globals.num_edicts && !self->enemy; i++, player++)
 		{
-			if (!player->inuse) continue;
-			if (!player->client) continue;
+			if ( !player->inuse ) continue;
+			if ( !player->client ) continue;
 			if (player->svflags & SVF_NOCLIENT) continue;
-			if ((player->health >= player->gib_health) && !(player->flags & FL_NOTARGET) )
+			if ( (player->health >= player->gib_health) && !(player->flags & FL_NOTARGET) )
 			{
-				VectorMA(player->absmin,0.5,player->size,target);
-				tr = gi.trace(self->s.origin,vec3_origin,vec3_origin,target,self,MASK_OPAQUE);
+			//	VectorMA (player->absmin, 0.5, player->size, target);
+				// Knightmare- calc min coordinate, don't use absmin
+				VectorAdd (player->s.origin, player->mins, realmin);
+				VectorMA (realmin, 0.5, player->size, target);
+				tr = gi.trace(self->s.origin, vec3_origin, vec3_origin, target, self, MASK_OPAQUE);
 				if (tr.fraction == 1.0) {
 					self->enemy = player;
 					self->spawnflags |= 0x80000001;
@@ -1189,8 +1197,7 @@ void target_laser_ps_think (edict_t *self)
 			}
 		}
 	}
-	if (!self->enemy)
-	{
+	if ( !self->enemy ) {
 		self->svflags |= SVF_NOCLIENT;
 		self->nextthink = level.time + FRAMETIME;
 		return;
@@ -1198,10 +1205,13 @@ void target_laser_ps_think (edict_t *self)
 
 	self->svflags &= ~SVF_NOCLIENT;
 	VectorCopy (self->movedir, last_movedir);
-	VectorMA (self->enemy->absmin, 0.5, self->enemy->size, point);
+//	VectorMA (self->enemy->absmin, 0.5, self->enemy->size, point);
+	// Knightmare- calc min coordinate, don't use absmin
+	VectorAdd (self->enemy->s.origin, self->enemy->mins, realmin);
+	VectorMA (realmin, 0.5, self->enemy->size, point);
 	VectorSubtract (point, self->s.origin, self->movedir);
 	VectorNormalize (self->movedir);
-	if (!VectorCompare(self->movedir, last_movedir))
+	if ( !VectorCompare(self->movedir, last_movedir) )
 		self->spawnflags |= 0x80000000;
 
 	ignore = self;
@@ -1267,7 +1277,7 @@ void target_laser_ps_on (edict_t *self)
 
 void target_laser_ps_off (edict_t *self)
 {
-	self->spawnflags &= ~1;
+	self->spawnflags &= ~LASER_ON;
 	self->svflags |= SVF_NOCLIENT;
 	self->nextthink = 0;
 }
@@ -1275,12 +1285,11 @@ void target_laser_ps_off (edict_t *self)
 void target_laser_ps_use (edict_t *self, edict_t *other, edict_t *activator)
 {
 	self->activator = activator;
-	if (self->spawnflags & 1)
+	if (self->spawnflags & LASER_ON)
 	{
 		target_laser_ps_off (self);
 		self->count--;
-		if (!self->count)
-		{
+		if ( !self->count ) {
 			self->think = G_FreeEdict;
 			self->nextthink = level.time + 1;
 		}
@@ -1292,25 +1301,20 @@ void target_laser_ps_use (edict_t *self, edict_t *other, edict_t *activator)
 void target_laser_think (edict_t *self)
 {
 	edict_t	*ignore;
-	vec3_t	start;
-	vec3_t	end;
+	vec3_t	start, end, point;
+	vec3_t	last_movedir, realmin;
 	trace_t	tr; // trace;
-	vec3_t	point;
-	vec3_t	last_movedir;
 	int		count;
-	vec3_t	realmin;
 
 	// DWH
 	if ( self->wait > 0)
 	{
 		// pulsed laser
-		if ( level.time >= self->starttime )
-		{
+		if ( level.time >= self->starttime ) {
 			self->starttime = level.time + self->wait;
 			self->endtime   = level.time + self->delay;
 		}
-		else if ( level.time >= self->endtime )
-		{
+		else if ( level.time >= self->endtime ) {
 			self->nextthink = level.time + FRAMETIME;
 			return;
 		}
@@ -1324,15 +1328,15 @@ void target_laser_think (edict_t *self)
 
 	if (self->enemy)
 	{
-		//Knightmare- calc min coordinate, don't use absmin
-		VectorAdd(self->enemy->s.origin, self->enemy->mins, realmin);
 
 		VectorCopy (self->movedir, last_movedir);
 	//	VectorMA (self->enemy->absmin, 0.5, self->enemy->size, point);
+		// Knightmare- calc min coordinate, don't use absmin
+		VectorAdd (self->enemy->s.origin, self->enemy->mins, realmin);
 		VectorMA (realmin, 0.5, self->enemy->size, point);
 		VectorSubtract (point, self->s.origin, self->movedir);
 		VectorNormalize (self->movedir);
-		if (!VectorCompare(self->movedir, last_movedir))
+		if ( !VectorCompare(self->movedir, last_movedir) )
 			self->spawnflags |= 0x80000000;
 	}
 	else // Knightmare- set movedir here so if our angles get updated...
@@ -1342,15 +1346,18 @@ void target_laser_think (edict_t *self)
 	VectorCopy (self->s.origin, start);
 
 	// Knightmare- if started in solid, move forward
-	//while (gi.pointcontents(start) & CONTENTS_SOLID)
-	//	VectorMA (start, 1, self->movedir, start);
+//	while (gi.pointcontents(start) & CONTENTS_SOLID)
+//		VectorMA (start, 1, self->movedir, start);
 
 	VectorMA (start, 2048, self->movedir, end);
 	while (1)
 	{
 //======
 // PGM
-		if (self->spawnflags & LASER_STOPWINDOW)
+	//	if (self->spawnflags & LASER_STOPWINDOW)
+		// Knightmare- spawnflag 8192 stops at window, or spawnflag 128 in Rogue maps 
+		if ( ( (level.maptype != MAPTYPE_ROGUE) && !((int)g_use_rogue_spawnflags->value) && (self->spawnflags & LASER_STOPWINDOW) ) ||
+			( ( (level.maptype == MAPTYPE_ROGUE) || ((int)g_use_rogue_spawnflags->value) ) && (self->spawnflags & ROGUE_LASER_STOPWINDOW) ) )
 			tr = gi.trace (start, NULL, NULL, end, ignore, MASK_SHOT);
 		else
 			tr = gi.trace (start, NULL, NULL, end, ignore, CONTENTS_SOLID|CONTENTS_MONSTER|CONTENTS_DEADMONSTER);
@@ -1372,9 +1379,9 @@ void target_laser_think (edict_t *self)
 			}
 		}
 
-		//PMM added SVF_DAMAGEABLE
+		// PMM added SVF_DAMAGEABLE
 		// if we hit something that's not a monster or player or is immune to lasers, we're done
-		//if (!(tr.ent->svflags & SVF_MONSTER) && (!tr.ent->client))
+	//	if (!(tr.ent->svflags & SVF_MONSTER) && (!tr.ent->client))
 		if (!(tr.ent->svflags & SVF_MONSTER) && (!tr.ent->client) && !(tr.ent->svflags & SVF_DAMAGEABLE))
 		{
 			if (self->spawnflags & 0x80000000 && (self->style != 3))
@@ -1416,7 +1423,7 @@ void target_laser_on (edict_t *self)
 
 void target_laser_off (edict_t *self)
 {
-	self->spawnflags &= ~1;
+	self->spawnflags &= ~LASER_ON;
 	self->svflags |= SVF_NOCLIENT;
 	self->nextthink = 0;
 }
@@ -1424,7 +1431,7 @@ void target_laser_off (edict_t *self)
 void target_laser_use (edict_t *self, edict_t *other, edict_t *activator)
 {
 	self->activator = activator;
-	if (self->spawnflags & 1)
+	if (self->spawnflags & LASER_ON)
 	{
 		target_laser_off (self);
 		self->count--;
@@ -1442,32 +1449,32 @@ void target_laser_start (edict_t *self)
 {
 	edict_t *ent;
 	vec3_t	forward;
-	vec3_t	xhangar2laspoint1 = {572,-2848,164};
-	vec3_t	xhangar2laspoint2 = {572,-2848,200};
-	vec3_t	xhangar2laspoint3 = {572,-2848,236};
-	vec3_t	xcompnd2laspoint1 = {768,2088,40};
+	vec3_t	xhangar2laspoint1 = {572, -2848, 164};
+	vec3_t	xhangar2laspoint2 = {572, -2848, 200};
+	vec3_t	xhangar2laspoint3 = {572, -2848, 236};
+	vec3_t	xcompnd2laspoint1 = {768, 2088, 40};
 
 	self->movetype = MOVETYPE_NONE;
 	self->solid = SOLID_NOT;
 	self->s.renderfx |= RF_BEAM|RF_TRANSLUCENT;
 	self->s.modelindex = 1;		// must be non-zero
 
-	//Knightmare- horrendously ugly hack for the 3 lasers on xhangar2
+	// Knightmare- horrendously ugly hack for the 3 lasers on xhangar2
 	if (!Q_stricmp(level.mapname, "xhangar2")
 		&& ( VectorCompare(self->s.origin, xhangar2laspoint1)
 		||   VectorCompare(self->s.origin, xhangar2laspoint2)
 		|| VectorCompare(self->s.origin, xhangar2laspoint3) ))
 	{
-		//gi.dprintf("Moving target_laser origin backward 4 units\n");
+	//	gi.dprintf("Moving target_laser origin backward 4 units\n");
 		VectorSet (forward, 0, 1, 0);
 		VectorMA (self->s.origin, -4, forward, self->s.origin);
 	}
 
-	//Knightmare- another horrendously ugly hack for the laser on xcompnd2
+	// Knightmare- another horrendously ugly hack for the laser on xcompnd2
 	if (!Q_stricmp(level.mapname, "xcompnd2")
 		&& VectorCompare(self->s.origin, xcompnd2laspoint1) )
 	{
-		//gi.dprintf("Moving target_laser origin backward 1 unit\n");
+	//	gi.dprintf("Moving target_laser origin backward 1 unit\n");
 		VectorSet (forward, 1, 0, 0);
 		VectorMA (self->s.origin, -1, forward, self->s.origin);
 	}
@@ -1475,7 +1482,7 @@ void target_laser_start (edict_t *self)
 	// set the beam diameter
 	if (self->mass > 1)
 		self->s.frame = self->mass;
-	else if (self->spawnflags & 64)
+	else if (self->spawnflags & LASER_FAT)
 		self->s.frame = 16;
 	else
 		self->s.frame = 4;
@@ -1492,7 +1499,7 @@ void target_laser_start (edict_t *self)
 	else if (self->spawnflags & 32)
 		self->s.skinnum = 0xe0e1e2e3;
 
-	if (!self->dmg)
+	if ( !self->dmg )
 		self->dmg = 1;
 
 	VectorSet (self->mins, -8, -8, -8);
@@ -1503,20 +1510,22 @@ void target_laser_start (edict_t *self)
 	// pulsed laser
 	if (self->wait > 0)
 	{
-		if (self->delay >= self->wait)
-		{
+		if (self->delay >= self->wait) {
 			gi.dprintf("target_laser at %s, delay must be < wait.\n",
 				vtos(self->s.origin));
-			self->wait = 0;
-		} else if (self->delay == 0.)
-		{
+			self->wait = 0.0f;
+		}
+		else if (self->delay == 0.0f) {
 			gi.dprintf("target_laser at %s, wait > 0 but delay = 0\n",
 				vtos(self->s.origin));
-			self->wait = 0;
+			self->wait = 0.0f;
 		}
 	}
 
-	if (self->spawnflags & 256)
+//	if (self->spawnflags & LASER_SEEK_PLAYER)
+	// Knightmare- spawnflag 128 specifies SEEK_PLAYER, or spawnflag 8192 in Rogue maps 
+	if ( ( (level.maptype != MAPTYPE_ROGUE) && !((int)g_use_rogue_spawnflags->value) && (self->spawnflags & LASER_SEEK_PLAYER) ) ||
+		( ( (level.maptype == MAPTYPE_ROGUE) || ((int)g_use_rogue_spawnflags->value) ) && (self->spawnflags & ROGUE_LASER_SEEK_PLAYER) ) )
 	{
 		// player-seeking laser
 		self->enemy = NULL;
@@ -1524,13 +1533,12 @@ void target_laser_start (edict_t *self)
 		self->think = target_laser_ps_think;
 		gi.linkentity(self);
 		if (self->spawnflags & 1)
-			target_laser_ps_on(self);
+			target_laser_ps_on (self);
 		else
-			target_laser_ps_off(self);
+			target_laser_ps_off (self);
 		return;
 	}
 	// end DWH
-
 
 	if (!self->enemy)
 	{
@@ -1604,11 +1612,9 @@ WINDOWSTOP - stops at CONTENTS_WINDOW
 void old_target_laser_think (edict_t *self)
 {
 	edict_t	*ignore;
-	vec3_t	start;
-	vec3_t	end;
+	vec3_t	start, end, point;
+	vec3_t	last_movedir, realmin;
 	trace_t	tr;
-	vec3_t	point;
-	vec3_t	last_movedir;
 	int		count;
 
 	if (self->spawnflags & 0x80000000)
@@ -1619,7 +1625,10 @@ void old_target_laser_think (edict_t *self)
 	if (self->enemy)
 	{
 		VectorCopy (self->movedir, last_movedir);
-		VectorMA (self->enemy->absmin, 0.5, self->enemy->size, point);
+	//	VectorMA (self->enemy->absmin, 0.5, self->enemy->size, point);
+		// Knightmare- calc min coordinate, don't use absmin
+		VectorAdd (self->enemy->s.origin, self->enemy->mins, realmin);
+		VectorMA (realmin, 0.5, self->enemy->size, point);
 		VectorSubtract (point, self->s.origin, self->movedir);
 		VectorNormalize (self->movedir);
 		if (!VectorCompare(self->movedir, last_movedir))
@@ -1633,7 +1642,10 @@ void old_target_laser_think (edict_t *self)
 	VectorMA (start, 2048, self->movedir, end);
 	while (1)
 	{
-		tr = gi.trace (start, NULL, NULL, end, ignore, CONTENTS_SOLID|CONTENTS_MONSTER|CONTENTS_DEADMONSTER);
+		if (self->spawnflags & LASER_STOPWINDOW)
+			tr = gi.trace (start, NULL, NULL, end, ignore, MASK_SHOT);
+		else
+			tr = gi.trace (start, NULL, NULL, end, ignore, CONTENTS_SOLID|CONTENTS_MONSTER|CONTENTS_DEADMONSTER);
 
 		if (!tr.ent)
 			break;
@@ -1991,7 +2003,7 @@ void target_earthquake_think (edict_t *self)
 	int		i;
 	edict_t	*e;
 
-	if (!(self->spawnflags & 1))					// PGM
+	if ( !(self->spawnflags & 1) )					// PGM
 	{											// PGM
 		if (self->last_move_time < level.time)
 		{
@@ -2074,6 +2086,6 @@ void SP_target_earthquake (edict_t *self)
 	self->think = target_earthquake_think;
 	self->use = target_earthquake_use;
 
-	if (!(self->spawnflags & 1))									// PGM
+	if ( !(self->spawnflags & 1) )									// PGM
 		self->noise_index = gi.soundindex ("world/quake.wav");
 }

@@ -865,9 +865,9 @@ void target_movewith_use (edict_t *self, edict_t *activator, edict_t *other)
 {
 	edict_t	*t = NULL;
 
-	if (!self->target)
+	if ( !self->target )
 		return;
-	while ((t = G_Find (t, FOFS(targetname), self->target)))
+	while ( (t = G_Find (t, FOFS(targetname), self->target)) )
 	{
 		if (self->spawnflags & 1)
 		{
@@ -897,11 +897,11 @@ void SP_target_movewith (edict_t *self)
 	self->class_id = ENTITY_TARGET_MOVEWITH;
 
 	if (!self->targetname)
-		gi.dprintf("target_movewith without a targetname at %s\n", vtos(self->s.origin));
+		gi.dprintf ("target_movewith without a targetname at %s\n", vtos(self->s.origin));
 	if (!self->target)
-		gi.dprintf("target_movewith without a target at %s\n", vtos(self->s.origin));
+		gi.dprintf ("target_movewith without a target at %s\n", vtos(self->s.origin));
 	if (!self->pathtarget && !(self->spawnflags & 1))
-		gi.dprintf("target_movewith without a pathtarget at %s\n", vtos(self->s.origin));
+		gi.dprintf ("target_movewith without a pathtarget at %s\n", vtos(self->s.origin));
 
 	self->svflags |= SVF_NOCLIENT;
 	self->use = target_movewith_use;
@@ -999,11 +999,11 @@ void target_change_use (edict_t *self, edict_t *activator, edict_t *other)
 			else
 				target_ent->noise_index = self->noise_index;
 		}
-#ifdef LOOP_SOUND_ATTENUATION
+#ifdef KMQUAKE2_ENGINE_MOD
 		if (self->attenuation)
 		{
-			if (target_ent->s.attenuation == target_ent->attenuation)
-				target_ent->s.attenuation = target_ent->attenuation = self->attenuation;
+			if (target_ent->s.loop_attenuation == target_ent->attenuation)
+				target_ent->s.loop_attenuation = target_ent->attenuation = self->attenuation;
 			else
 				target_ent->attenuation = self->attenuation;
 		}
@@ -1138,9 +1138,9 @@ void SP_target_change (edict_t *self)
 	self->class_id = ENTITY_TARGET_CHANGE;
 
 	if (!self->targetname)
-		gi.dprintf("target_change without a targetname at %s\n", vtos(self->s.origin));
+		gi.dprintf ("target_change without a targetname at %s\n", vtos(self->s.origin));
 	if (!self->target)
-		gi.dprintf("target_change without a target at %s\n", vtos(self->s.origin));
+		gi.dprintf ("target_change without a target at %s\n", vtos(self->s.origin));
 
 	self->svflags |= SVF_NOCLIENT;
 	self->use = target_change_use;
@@ -1255,7 +1255,7 @@ void SP_target_rotation (edict_t *self)
 
 	if (!self->target)
 	{
-		gi.dprintf("target_rotation without a target at %s\n",vtos(self->s.origin));
+		gi.dprintf ("target_rotation without a target at %s\n",vtos(self->s.origin));
 		G_FreeEdict(self);
 		return;
 	}
@@ -1264,7 +1264,7 @@ void SP_target_rotation (edict_t *self)
 
 	if ( (self->spawnflags & 3) == 3)
 	{
-		gi.dprintf("target_rotation at %s: NO_LOOP and RANDOM are mutually exclusive.\n");
+		gi.dprintf ("target_rotation at %s: NO_LOOP and RANDOM are mutually exclusive.\n");
 		self->spawnflags = 2;
 	}
 
@@ -1281,9 +1281,9 @@ void SP_target_rotation (edict_t *self)
 	self->sounds++;
 	
 /*	if (!self->targetname)
-		gi.dprintf("target_rotation without a targetname at %s\n", vtos(self->s.origin));
+		gi.dprintf ("target_rotation without a targetname at %s\n", vtos(self->s.origin));
 	if (!self->target)
-		gi.dprintf("target_rotation without a target at %s\n", vtos(self->s.origin));
+		gi.dprintf ("target_rotation without a target at %s\n", vtos(self->s.origin));
 	if (!strstr(self->target, ","))
 	{
 		gi.dprintf("target_rotation with less than 2 targets at %s\n", vtos(self->s.origin));
@@ -1317,12 +1317,12 @@ A CD/OGG track player
 
 void target_cd_use (edict_t *self, edict_t *activator, edict_t *other)
 {
-	if (self->musictrack && strlen(self->musictrack))
+	if ( self->musictrack && strlen(self->musictrack) )
 		gi.configstring (CS_CDTRACK, self->musictrack);
 	else
 		gi.configstring (CS_CDTRACK, va("%d", self->sounds) );
-	if ((self->dmg > 0) && (!deathmatch->value) && (!coop->value))
-		stuffcmd(&g_edicts[1],va("cd_loopcount %d\n",self->dmg)); 
+	if ( (self->dmg > 0) && (!deathmatch->value) && (!coop->value) )
+		stuffcmd (&g_edicts[1], va("cd_loopcount %d\n", self->dmg)); 
 	self->count--;
 	if (self->count == 0)
 	{
@@ -1336,7 +1336,7 @@ void SP_target_cd (edict_t *self)
 	self->class_id = ENTITY_TARGET_CD;
 
 	if (!self->targetname)
-		gi.dprintf("target_cd without a targetname at %s\n", vtos(self->s.origin));
+		gi.dprintf ("target_cd without a targetname at %s\n", vtos(self->s.origin));
 	if (!self->sounds)
 		self->sounds = 2;
 	if (!self->dmg)
@@ -1379,29 +1379,87 @@ void SP_target_skill (edict_t *self)
 Change the level's environment map
 
 "sky" env map name
+"cloudname" clouds image name
+"skyrotate" sky rotation speed
+"skyaxis" sky rotation axis
+"skydistance" draw distance of skybox
+"cloudname" clouds image name
+"lightningfreq" time between lighting flashes
+"cloudxdir" movement of clouds on X axis
+"cloudydir" movement of clouds on Y axis
+"cloud1tile" tile size of first cloud layer
+"cloud2tile" tile size of second cloud layer
+"cloud3tile" tile size of third cloud layer
+"cloud1speed" movment speed of first cloud layer
+"cloud2speed" movment speed of second cloud layer
+"cloud3speed" movment speed of third cloud layer
+"cloud1alpha" translucency of first cloud layer
+"cloud2alpha" translucency of second cloud layer
+"cloud3alpha" translucency of third cloud layer
 "count" number of times it can be used
 */
 
 void target_sky_use (edict_t *self, edict_t *activator, edict_t *other)
 {
-	gi.configstring(CS_SKY,self->pathtarget);
-	stuffcmd(&g_edicts[1],va("sky %s\n",self->pathtarget));
+	int		i;
+	char	string[1024];
+
+#ifdef KMQUAKE2_ENGINE_MOD
+	// Knightmare- added cloudname support
+	if ( self->followtarget && (self->followtarget[0] != 0) )
+	{
+		gi.configstring (CS_SKY, self->pathtarget);
+		gi.configstring (CS_CLOUDNAME, self->followtarget);
+		gi.configstring (CS_SKYROTATE, va("%f", self->speed) );
+		gi.configstring (CS_SKYAXIS, va("%f %f %f",
+						self->avelocity[0], self->avelocity[1], self->avelocity[2]) );
+		gi.configstring (CS_SKYDISTANCE, va("%f", self->radius) );
+		gi.configstring (CS_CLOUDLIGHTFREQ, va("%f", self->duration) );
+		gi.configstring (CS_CLOUDDIR, va("%f %f", self->offset[0], self->offset[1]) );
+		gi.configstring (CS_CLOUDTILE, va("%f %f %f", self->size[0], self->size[1], self->size[2]) );
+		gi.configstring (CS_CLOUDSPEED, va("%f %f %f", self->velocity[0], self->velocity[1], self->velocity[2]) );
+		gi.configstring (CS_CLOUDALPHA, va("%f %f %f", self->color[0], self->color[1], self->color[2]) );
+		Com_sprintf (string, sizeof(string), "skyclouds %s %s %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f\n",
+					self->pathtarget, self->followtarget, self->speed, self->avelocity[0], self->avelocity[1], self->avelocity[2], self->radius,
+					self->duration, self->offset[0], self->offset[1], self->size[0], self->size[1], self->size[2],
+					self->velocity[0], self->velocity[1], self->velocity[2], self->color[0], self->color[1], self->color[2]);
+	}
+	else {
+#endif	// KMQUAKE2_ENGINE_MOD
+		gi.configstring (CS_SKY, self->pathtarget);
+		gi.configstring (CS_SKYROTATE, va("%f", self->speed) );
+		gi.configstring (CS_SKYAXIS, va("%f %f %f",
+						self->avelocity[0], self->avelocity[1], self->avelocity[2]) );
+#ifdef KMQUAKE2_ENGINE_MOD
+		gi.configstring (CS_SKYDISTANCE, va("%f", self->radius) );
+		Com_sprintf (string, sizeof(string), "sky %s %.2f %.2f %.2f %.2f %.2f\n", self->pathtarget,
+					self->speed, self->avelocity[0], self->avelocity[1], self->avelocity[2], self->radius);
+	}
+#else
+		Com_sprintf (string, sizeof(string), "sky %s %.2f %.2f %.2f %.2f\n", self->pathtarget,
+					self->speed, self->avelocity[0], self->avelocity[1], self->avelocity[2]);
+#endif	// KMQUAKE2_ENGINE_MOD
+
+	for (i = 0; i < game.maxclients; i++)
+		stuffcmd (&g_edicts[i + 1], string);
+	// end Knightmare
+
 	self->count--;
 	if (self->count == 0)
 	{
-		self->nextthink = level.time + FRAMETIME;
 		self->think = G_FreeEdict;
+		self->nextthink = level.time + 1;
 	}
 }
 
 void SP_target_sky (edict_t *self)
 {
-	size_t	pathSize;
+	size_t	pathSize, followSize;
 
 	if (!st.sky || !*st.sky)
 	{
-		gi.dprintf("Target_sky with no sky string at %s\n",vtos(self->s.origin));
-		G_FreeEdict(self);
+		gi.dprintf ("Target_sky with no sky string at %s\n", vtos(self->s.origin));
+		G_FreeEdict (self);
 		return;
 	}
 	self->class_id = ENTITY_TARGET_SKY;
@@ -1409,11 +1467,35 @@ void SP_target_sky (edict_t *self)
 	pathSize = strlen(st.sky)+1;
 	self->pathtarget = gi.TagMalloc(pathSize, TAG_LEVEL);
 	Com_strcpy (self->pathtarget, pathSize, st.sky);
+	self->speed = st.skyrotate;
+	VectorCopy (st.skyaxis, self->avelocity);
+	self->radius = st.skydistance;
 
-	self->svflags |= SVF_NOCLIENT;
+	// Knightmare- added cloudname support
+	if ( st.cloudname && (st.cloudname[0] != 0) )
+	{
+		followSize = strlen(st.cloudname) + 1;
+		self->followtarget = gi.TagMalloc(followSize, TAG_LEVEL);
+		Com_strcpy (self->followtarget, followSize, st.cloudname);
+		self->duration = st.lightningfreq;
+		self->offset[0] = st.cloudxdir;
+		self->offset[1] = st.cloudydir;
+		self->size[0] = st.cloud1tile;
+		self->velocity[0] = st.cloud1speed;
+		self->color[0] = st.cloud1alpha;
+		self->size[1] = st.cloud2tile;
+		self->velocity[1] = st.cloud2speed;
+		self->color[1] = st.cloud2alpha;
+		self->size[2] = st.cloud3tile;
+		self->velocity[2] = st.cloud3speed;
+		self->color[2] = st.cloud3alpha;
+	}
+	// end Knightmare
+
+//	self->svflags |= SVF_NOCLIENT;
+//	gi.linkentity (self);
+
 	self->use = target_sky_use;
-
-	gi.linkentity (self);
 }
 
 
@@ -1634,7 +1716,7 @@ void SP_target_rocks (edict_t *self)
 	gi.modelindex ("models/objects/rock2/tris.md2");
 
 	if (!self->targetname)
-		gi.dprintf("target_rocks without a targetname at %s\n", vtos(self->s.origin));
+		gi.dprintf ("target_rocks without a targetname at %s\n", vtos(self->s.origin));
 	if (!self->mass)
 		self->mass = 500;
 	if (!self->speed)
@@ -1828,20 +1910,20 @@ void clone (edict_t *self)
 		ent->team = G_CopyString(self->team);
 	if (self->newteam)
 		ent->team = G_CopyString(self->newteam);
-#ifdef KMQUAKE2_ENGINE_MOD //Knightmare added
+#ifdef KMQUAKE2_ENGINE_MOD // Knightmare added
 	if ((self->alpha >= 0.0) && (self->alpha <= 1.0))
 		ent->s.alpha = self->alpha;
 #endif
-	ent->svflags |= SVF_CLONED; //mark this entity as cloned
-	ReInitialize_Entity(ent); //call its spawn function
+	ent->svflags |= SVF_CLONED; // mark this entity as cloned
+	ReInitialize_Entity (ent); // call its spawn function
 
 	//set up orgin offset
 	VectorAdd(ent->absmin, ent->absmax, ent->origin_offset);
 	VectorScale(ent->origin_offset, 0.5, ent->origin_offset);
 	VectorSubtract(ent->origin_offset, ent->s.origin, ent->origin_offset);
-	//Kill anything in the way
+	// Kill anything in the way
 	gi.unlinkentity(ent);
-	//Knightmare- only killbox if spawned entity is solid
+	// Knightmare- only killbox if spawned entity is solid
 	if (ent->solid == SOLID_BSP || ent->solid == SOLID_BBOX)
 		KillBox(ent);
 	gi.linkentity(ent);
@@ -1863,13 +1945,13 @@ void SP_target_clone (edict_t *self)
 {
 	if (!self->targetname && !(self->spawnflags & 1))
 	{
-		gi.dprintf("%s without a targetname and without start_on at %s\n", self->classname, vtos(self->s.origin));
+		gi.dprintf ("%s without a targetname and without start_on at %s\n", self->classname, vtos(self->s.origin));
 		G_FreeEdict(self);
 		return;
 	}
 	if (!self->source)
 	{
-		gi.dprintf("%s without a source at %s\n", self->classname, vtos(self->s.origin));
+		gi.dprintf ("%s without a source at %s\n", self->classname, vtos(self->s.origin));
 		G_FreeEdict(self);
 		return;
 	}
@@ -2302,8 +2384,8 @@ void use_target_attractor(edict_t *self, edict_t *other, edict_t *activator)
 	{
 		self->spawnflags |= (ATTRACTOR_ON + ATTRACTOR_PATHTARGET);
 		self->s.sound = self->noise_index;
-	#ifdef LOOP_SOUND_ATTENUATION
-		self->s.attenuation = self->attenuation;
+	#ifdef KMQUAKE2_ENGINE_MOD
+		self->s.loop_attenuation = self->attenuation;
 	#endif
 		if (self->spawnflags & ATTRACTOR_SINGLE)
 			self->think = target_attractor_think_single;
@@ -2320,8 +2402,8 @@ void SP_target_attractor (edict_t *self)
 	if (!self->target && !(self->spawnflags & ATTRACTOR_PLAYER) &&
 		!(self->spawnflags & ATTRACTOR_MONSTER))
 	{
-		gi.dprintf("target_attractor without a target at %s\n",vtos(self->s.origin));
-		G_FreeEdict(self);
+		gi.dprintf ("target_attractor without a target at %s\n",vtos(self->s.origin));
+		G_FreeEdict (self);
 		return;
 	}
 	self->class_id = ENTITY_TARGET_ATTRACTOR;
@@ -2596,9 +2678,10 @@ void use_target_monitor (edict_t *self, edict_t *other, edict_t *activator)
 	VectorCopy (activator->mins, faker->mins);
 	VectorCopy (activator->maxs, faker->maxs);
     // create a client so you can pick up items/be shot/etc while in camera
-	cl = (gclient_t *) gi.TagMalloc(sizeof(gclient_t), TAG_LEVEL); 
+	cl = (gclient_t *)gi.TagMalloc(sizeof(gclient_t), TAG_LEVEL); 
 	faker->client = cl; 
 	faker->target_ent = activator;
+	faker->s.number = faker - g_edicts;	// Phatman: silence server warning
 	gi.linkentity (faker); 
 
 	if (self->target_ent && self->target_ent->inuse)
@@ -2921,7 +3004,8 @@ void target_failure_wipe (edict_t *self)
 	edict_t	*player;
 
 	player = &g_edicts[1];	// Gotta be, since this is SP only
-	if (player->client->textdisplay) Text_Close(player);
+	if (player->client->textdisplay)
+		Text_Close (player);
 }
 
 void target_failure_player_die (edict_t *player)
@@ -3015,7 +3099,8 @@ void use_target_failure (edict_t *self, edict_t *other, edict_t *activator)
 		gi.sound (activator, CHAN_VOICE|CHAN_RELIABLE, self->noise_index, 1, ATTN_NORM, 0);
 
 	self->target_ent = activator;
-	if (Q_stricmp(vid_ref->string,"gl") && Q_stricmp(vid_ref->string,"kmgl"))
+//	if (Q_stricmp(vid_ref->string,"gl") && Q_stricmp(vid_ref->string,"kmgl"))
+	if ( !Q_strncasecmp(vid_ref->string, "soft", 4) )
 	{
 		self->flags = 12;
 		self->think = target_failure_fade_lights;
@@ -3063,11 +3148,11 @@ void SP_target_failure (edict_t *self)
 //
 void target_locator_init (edict_t *self)
 {
-	int num_points=0;
-	int i, N, nummoves;
-	qboolean looped;
-	edict_t *tgt0, *tgtlast, *target, *next;
-	edict_t *move;
+	int			num_points = 0;
+	int			i, N, nummoves;
+	qboolean	looped;
+	edict_t		*tgt0 = NULL, *tgtlast = NULL, *target = NULL, *next = NULL;
+	edict_t		*move = NULL;
 
 	move = NULL;
 	move = G_Find(move,FOFS(targetname),self->target);
@@ -3129,7 +3214,7 @@ void target_locator_init (edict_t *self)
 		{
 			target = next;
 			if (!(target->spawnflags & 1)) i++;
-			if (target==tgtlast)
+			if (target == tgtlast)
 			{
 				// We've looped thru all path_corners, but not
 				// reached the target number yet. This can only

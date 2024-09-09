@@ -21,15 +21,39 @@ static int	sound_search;
 static int	sound_sight;
 
 
+//
+// NOTE(gnemeth): Em3raldTig3r's BFGladiator sounds
+//
+static int bfglad_sound_pain1;
+static int bfglad_sound_pain2;
+static int bfglad_sound_gun;
+static int bfglad_sound_die;
+static int bfglad_sound_idle;
+static int bfglad_sound_sight;
+
+
 void gladiator_idle (edict_t *self)
 {
-	if (!(self->spawnflags & SF_MONSTER_AMBUSH))
-		gi.sound (self, CHAN_VOICE, sound_idle, 1, ATTN_IDLE, 0);
+	if ( !(self->spawnflags & SF_MONSTER_AMBUSH) ) {
+		// Em3raldTig3r's BFGladiator sounds
+		if (self->moreflags & FL2_BFG_GLAD) {
+			gi.sound(self, CHAN_VOICE, bfglad_sound_idle, 1, ATTN_IDLE, 0);
+		}
+		else {
+			gi.sound (self, CHAN_VOICE, sound_idle, 1, ATTN_IDLE, 0);
+		}
+	}
 }
 
 void gladiator_sight (edict_t *self, edict_t *other)
 {
-	gi.sound (self, CHAN_VOICE, sound_sight, 1, ATTN_NORM, 0);
+	// Em3raldTig3r's BFGladiator sounds
+	if (self->moreflags & FL2_BFG_GLAD) {
+		gi.sound (self, CHAN_VOICE, bfglad_sound_sight, 1, ATTN_NORM, 0);
+	}
+	else {
+		gi.sound (self, CHAN_VOICE, sound_sight, 1, ATTN_NORM, 0);
+	}
 }
 
 void gladiator_search (edict_t *self)
@@ -168,7 +192,13 @@ void GladiatorGun (edict_t *self)
 	VectorSubtract (self->pos1, start, dir);
 	VectorNormalize (dir);
 
-	monster_fire_railgun (self, start, dir, 50, 100, MZ2_GLADIATOR_RAILGUN_1);
+	// Genmeth- BFG Gladiator
+	if (self->moreflags & FL2_BFG_GLAD) {
+		monster_fire_bfg (self, start, dir, 25, 300, 100, 300, MZ2_MAKRON_BFG, true);
+	}
+	else {
+		monster_fire_railgun (self, start, dir, 50, 100, MZ2_GLADIATOR_RAILGUN_1);
+	}
 }
 
 mframe_t gladiator_frames_attack_gun [] =
@@ -197,8 +227,15 @@ void gladiator_attack(edict_t *self)
 		return;
 
 	// charge up the railgun
-	gi.sound (self, CHAN_WEAPON, sound_gun, 1, ATTN_NORM, 0);
-	VectorCopy (self->enemy->s.origin, self->pos1);	//save for aiming the shot
+	// Em3raldTig3r's BFGladiator sounds
+	if (self->moreflags & FL2_BFG_GLAD) {
+		gi.sound (self, CHAN_WEAPON, bfglad_sound_gun, 1, ATTN_NORM, 0);
+	}
+	else {
+		gi.sound (self, CHAN_WEAPON, sound_gun, 1, ATTN_NORM, 0);
+	}
+
+	VectorCopy (self->enemy->s.origin, self->pos1);	// save for aiming the shot
 	self->pos1[2] += self->enemy->viewheight;
 	self->monsterinfo.currentmove = &gladiator_move_attack_gun;
 }
@@ -241,10 +278,19 @@ void gladiator_pain (edict_t *self, edict_t *other, float kick, int damage)
 
 	self->pain_debounce_time = level.time + 3;
 
-	if (random() < 0.5)
-		gi.sound (self, CHAN_VOICE, sound_pain1, 1, ATTN_NORM, 0);
-	else
-		gi.sound (self, CHAN_VOICE, sound_pain2, 1, ATTN_NORM, 0);
+	// Em3raldTig3r's BFGladiator sounds
+	if (self->moreflags & FL2_BFG_GLAD) {
+		if (random() < 0.5)
+			gi.sound (self, CHAN_VOICE, bfglad_sound_pain1, 1, ATTN_NORM, 0);
+		else
+			gi.sound (self, CHAN_VOICE, bfglad_sound_pain2, 1, ATTN_NORM, 0);
+	}
+	else {
+		if (random() < 0.5)
+			gi.sound (self, CHAN_VOICE, sound_pain1, 1, ATTN_NORM, 0);
+		else
+			gi.sound (self, CHAN_VOICE, sound_pain2, 1, ATTN_NORM, 0);
+	}
 
 	if (skill->value == 3)
 		return;		// no pain anims in nightmare
@@ -324,7 +370,13 @@ void gladiator_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int da
 		return;
 
 	// regular death
-	gi.sound (self, CHAN_VOICE, sound_die, 1, ATTN_NORM, 0);
+	// Em3raldTig3r's BFGladiator sounds
+	if (self->moreflags & FL2_BFG_GLAD) {
+		gi.sound (self, CHAN_VOICE, bfglad_sound_die, 1, ATTN_NORM, 0);
+	}
+	else {
+		gi.sound (self, CHAN_VOICE, sound_die, 1, ATTN_NORM, 0);
+	}
 	self->s.skinnum |= 1;
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_YES;
@@ -346,7 +398,47 @@ qboolean gladiator_blocked (edict_t *self, float dist)
 //PGM
 //===========
 
+// Knightmare- added soundcache function
+void monster_gladiator_soundcache (edict_t *self)
+{
+	if (strcmp(self->classname, "monster_bfgladiator") == 0)
+	{
+		bfglad_sound_pain1 = gi.soundindex("bfgladiator/pain.wav");
+		bfglad_sound_pain2 = gi.soundindex("bfgladiator/pain2.wav");
+		bfglad_sound_die = gi.soundindex("bfgladiator/glddeth2.wav");
+		bfglad_sound_gun = gi.soundindex("bfgladiator/glattack.wav");
+		bfglad_sound_idle = gi.soundindex("bfgladiator/gldidle1.wav");
+		bfglad_sound_sight = gi.soundindex("bfgladiator/sight.wav");
+
+	//	sound_pain1 = gi.soundindex("gladiator/pain.wav");	// Knightmare- not used
+	//	sound_pain2 = gi.soundindex("gladiator/gldpain2.wav");	// Knightmare- not used
+	//	sound_die = gi.soundindex("gladiator/glddeth2.wav");	// Knightmare- not used
+	//	sound_gun = gi.soundindex("gladiator/railgun.wav");	// Knightmare- not used
+		sound_cleaver_swing = gi.soundindex("gladiator/melee1.wav");
+		sound_cleaver_hit = gi.soundindex("gladiator/melee2.wav");
+		sound_cleaver_miss = gi.soundindex("gladiator/melee3.wav");
+	//	sound_idle = gi.soundindex("gladiator/gldidle1.wav");	// Knightmare- not used
+		sound_search = gi.soundindex("gladiator/gldsrch1.wav");
+	//	sound_sight = gi.soundindex("gladiator/sight.wav");	// Knightmare- not used
+	}
+	else
+	{
+		sound_pain1 = gi.soundindex ("gladiator/pain.wav");	
+		sound_pain2 = gi.soundindex ("gladiator/gldpain2.wav");	
+		sound_die = gi.soundindex ("gladiator/glddeth2.wav");	
+		sound_gun = gi.soundindex ("gladiator/railgun.wav");
+		sound_cleaver_swing = gi.soundindex ("gladiator/melee1.wav");
+		sound_cleaver_hit = gi.soundindex ("gladiator/melee2.wav");
+		sound_cleaver_miss = gi.soundindex ("gladiator/melee3.wav");
+		sound_idle = gi.soundindex ("gladiator/gldidle1.wav");
+		sound_search = gi.soundindex ("gladiator/gldsrch1.wav");
+		sound_sight = gi.soundindex ("gladiator/sight.wav");
+	}
+}
+
 /*QUAKED monster_gladiator (1 .5 0) (-32 -32 -24) (32 32 40) Ambush Trigger_Spawn Sight GoodGuy NoGib
+*/
+/*QUAKED monster_bfgladiator (1 .5 0) (-32 -32 -24) (32 32 40) Ambush Trigger_Spawn Sight GoodGuy NoGib
 */
 void SP_monster_gladiator (edict_t *self)
 {
@@ -356,38 +448,64 @@ void SP_monster_gladiator (edict_t *self)
 		return;
 	}
 
+	// Knightmare- use soundcache function
+	monster_gladiator_soundcache (self);
 
-	sound_pain1 = gi.soundindex ("gladiator/pain.wav");	
-	sound_pain2 = gi.soundindex ("gladiator/gldpain2.wav");	
-	sound_die = gi.soundindex ("gladiator/glddeth2.wav");	
-	sound_gun = gi.soundindex ("gladiator/railgun.wav");
-	sound_cleaver_swing = gi.soundindex ("gladiator/melee1.wav");
-	sound_cleaver_hit = gi.soundindex ("gladiator/melee2.wav");
-	sound_cleaver_miss = gi.soundindex ("gladiator/melee3.wav");
-	sound_idle = gi.soundindex ("gladiator/gldidle1.wav");
-	sound_search = gi.soundindex ("gladiator/gldsrch1.wav");
-	sound_sight = gi.soundindex ("gladiator/sight.wav");
+	//
+	// NOTE(gnemeth): Em3raldTig3r's monster_bfgladiator for Q25
+	//
+	if (strcmp(self->classname, "monster_bfgladiator") == 0)
+	{
+		// Lazarus: special purpose skins
+		if ( self->style )
+		{
+			PatchMonsterModel ("models/monsters/bfgladiatr/tris.md2");
+			self->s.skinnum = self->style * 2;
+		}
+
+		self->s.modelindex = gi.modelindex("models/monsters/bfgladiatr/tris.md2");
+
+		if (!self->health)
+			self->health = 500;
+		if (!self->gib_health)
+			self->gib_health = -175;
+		if (!self->mass)
+			self->mass = 400;
+		if (!self->powerarmor)
+			self->powerarmor = 100;
+
+		self->common_name = "BFGladiator";
+		self->class_id = ENTITY_MONSTER_BFGLADIATOR;
+
+		self->moreflags |= FL2_BFG_GLAD;	// Knigtmare- special flag instead of using string compares
+	}
+	else
+	{
+		// Lazarus: special purpose skins
+		if ( self->style )
+		{
+			PatchMonsterModel ("models/monsters/gladiatr/tris.md2");
+			self->s.skinnum = self->style * 2;
+		}
+
+		self->s.modelindex = gi.modelindex ("models/monsters/gladiatr/tris.md2");
+
+		if (!self->health)
+			self->health = 400;
+		if (!self->gib_health)
+			self->gib_health = -175;
+		if (!self->mass)
+			self->mass = 400;
+
+		self->common_name = "Gladiator";
+		self->class_id = ENTITY_MONSTER_GLADIATOR;
+	}
 
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;
 
-	// Lazarus: special purpose skins
-	if ( self->style )
-	{
-		PatchMonsterModel("models/monsters/gladiatr/tris.md2");
-		self->s.skinnum = self->style * 2;
-	}
-
-	self->s.modelindex = gi.modelindex ("models/monsters/gladiatr/tris.md2");
 	VectorSet (self->mins, -32, -32, -24);
 	VectorSet (self->maxs, 32, 32, 40);
-
-	if (!self->health)
-		self->health = 400;
-	if (!self->gib_health)
-		self->gib_health = -175;
-	if (!self->mass)
-		self->mass = 400;
 
 	self->pain = gladiator_pain;
 	self->die = gladiator_die;
@@ -404,7 +522,7 @@ void SP_monster_gladiator (edict_t *self)
 	self->monsterinfo.blocked = gladiator_blocked;		// PGM
 
 	if (!self->blood_type)
-		self->blood_type = 3; //sparks and blood
+		self->blood_type = 3; // sparks and blood
 
 	// Lazarus
 	if (self->powerarmor)
@@ -417,9 +535,6 @@ void SP_monster_gladiator (edict_t *self)
 	}
 	if (!self->monsterinfo.flies)
 		self->monsterinfo.flies = 0.05;
-
-	self->common_name = "Gladiator";
-	self->class_id = ENTITY_MONSTER_GLADIATOR;
 
 	gi.linkentity (self);
 

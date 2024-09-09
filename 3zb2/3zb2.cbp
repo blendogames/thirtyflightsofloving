@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="3zb2" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug Win x86">
+				<Option output="./kmq2gamex86" prefix_auto="1" extension_auto="1" />
+				<Option object_output="codeblocks/Debug/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Option createStaticLib="1" />
+				<Compiler>
+					<Add option="-DWIN32" />
+					<Add option="-D_DEBUG" />
+					<Add option="-D_WINDOWS" />
+					<Add option="-W" />
+					<Add option="-g" />
+					<Add option="-O0" />
+				</Compiler>
+				<Linker>
+					<Add library="winmm" />
+				</Linker>
+			</Target>
+			<Target title="Debug Win x64">
+				<Option output="./kmq2gamex64" prefix_auto="1" extension_auto="1" />
+				<Option object_output="codeblocks/x64/Debug/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Option createStaticLib="1" />
+				<Compiler>
+					<Add option="-DWIN32" />
+					<Add option="-D_DEBUG" />
+					<Add option="-D_WINDOWS" />
+					<Add option="-W" />
+					<Add option="-O0" />
+				</Compiler>
+				<Linker>
+					<Add library="winmm" />
+				</Linker>
+			</Target>
+			<Target title="Release Win x86">
+				<Option output="./kmq2gamex86" prefix_auto="1" extension_auto="1" />
+				<Option object_output="codeblocks/Release/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Option createStaticLib="1" />
+				<Compiler>
+					<Add option="-DWIN32" />
+					<Add option="-DNDEBUG" />
+					<Add option="-D_WINDOWS" />
+					<Add option="-W" />
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add library="winmm" />
+				</Linker>
+			</Target>
+			<Target title="Release Win x64">
+				<Option output="./kmq2gamex64" prefix_auto="1" extension_auto="1" />
+				<Option object_output="codeblocks/x64/Release/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Option createStaticLib="1" />
+				<Compiler>
+					<Add option="-DWIN32" />
+					<Add option="-DNDEBUG" />
+					<Add option="-D_WINDOWS" />
+					<Add option="-W" />
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add library="winmm" />
+				</Linker>
+			</Target>
+			<Target title="Debug Unix x86">
+				<Option output="./kmq2gamei386" prefix_auto="0" extension_auto="1" />
+				<Option object_output="codeblocks/Debug/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Option createStaticLib="1" />
+				<Compiler>
+					<Add option="-fPIC" />
+					<Add option="-m32" />
+					<Add option="-g" />
+					<Add option="-W" />
+					<Add option="-O0" />
+					<Add option="-D_DEBUG" />
+				</Compiler>
+				<Linker>
+					<Add option="-m32" />
+				</Linker>
+			</Target>
+			<Target title="Debug Unix x64">
+				<Option output="./kmq2gamex64" prefix_auto="0" extension_auto="1" />
+				<Option object_output="codeblocks/x64/Debug/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Option createStaticLib="1" />
+				<Compiler>
+					<Add option="-fPIC" />
+					<Add option="-m64" />
+					<Add option="-g" />
+					<Add option="-W" />
+					<Add option="-O0" />
+					<Add option="-D_DEBUG" />
+				</Compiler>
+				<Linker>
+					<Add option="-m64" />
+				</Linker>
+			</Target>
+			<Target title="Release Unix x86">
+				<Option output="./kmq2gamei386" prefix_auto="0" extension_auto="1" />
+				<Option object_output="codeblocks/Release/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Option createStaticLib="1" />
+				<Compiler>
+					<Add option="-O2" />
+					<Add option="-fPIC" />
+					<Add option="-m32" />
+					<Add option="-W" />
+					<Add option="-DNDEBUG" />
+				</Compiler>
+				<Linker>
+					<Add option="-m32" />
+				</Linker>
+			</Target>
+			<Target title="Release Unix x64">
+				<Option output="./kmq2gamex64" prefix_auto="0" extension_auto="1" />
+				<Option object_output="codeblocks/x64/Release/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Option createStaticLib="1" />
+				<Compiler>
+					<Add option="-O2" />
+					<Add option="-fPIC" />
+					<Add option="-m64" />
+					<Add option="-W" />
+					<Add option="-DNDEBUG" />
+				</Compiler>
+				<Linker>
+					<Add option="-m64" />
+				</Linker>
+			</Target>
+		</Build>
+		<Unit filename="3zb2.cbp" />
+		<Unit filename="bot.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="bot.h" />
+		<Unit filename="bot_fire.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="bot_func.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="bot_za.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="botstr.h" />
+		<Unit filename="g_chase.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="g_cmds.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="g_combat.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="g_ctf.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="g_ctf.h" />
+		<Unit filename="g_func.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="g_items.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="g_local.h" />
+		<Unit filename="g_main.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="g_misc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="g_misc_kex.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="g_model.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="g_monster.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="g_mtrain.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="g_newfnc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="g_phys.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="g_save.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="g_spawn.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="g_svcmds.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="g_target.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="g_trigger.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="g_utils.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="g_weapon.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="game.def" />
+		<Unit filename="game.h" />
+		<Unit filename="km_cvar.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="km_cvar.h" />
+		<Unit filename="m_move.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="m_player.h" />
+		<Unit filename="p_client.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="p_hud.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="p_menu.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="p_menu.h" />
+		<Unit filename="p_trail.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="p_view.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="p_weapon.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pak.h" />
+		<Unit filename="q_shared.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="q_shared.h" />
+		<Extensions />
+	</Project>
+</CodeBlocks_project_file>

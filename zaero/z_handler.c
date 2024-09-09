@@ -10,23 +10,27 @@ handler handler
 #include "z_handler.h"
 
 
-
+//void SP_monster_infantry_precache (edict_t *self);
+//void SP_monster_hound_precache (edict_t *self);
+void monster_infantry_soundcache (edict_t *self);
+void monster_hound_soundcache (edict_t *self);
 
 void handler_standWhatNext (edict_t *self);
 void handler_standSitWhatNext (edict_t *self);
 void handler_stand (edict_t *self);
 void handler_attack (edict_t *self);
-void hound_createHound(edict_t *self, float healthPercent);
-void handler_ConvertToInfantry(edict_t *self);
+void hound_createHound (edict_t *self, float healthPercent);
+void handler_ConvertToInfantry (edict_t *self);
 
 void hound_sight (edict_t *self, edict_t *other);
 void infantry_sight (edict_t *self, edict_t *other);
 
 static int	sound_attack;
+/*
 static int	sound_scratch;
 static int	sound_sitdown;
 static int	sound_standup;
-
+*/
 
 void handler_sight (edict_t *self, edict_t *other)
 {
@@ -223,7 +227,7 @@ void handler_standWhatNext (edict_t *self)
 {
 	float r = random();
 
-	if(r < 0.90)
+	if (r < 0.90)
 	{
 	  self->monsterinfo.currentmove = &handler_stand3;
 	}
@@ -238,11 +242,11 @@ void handler_standSitWhatNext (edict_t *self)
 {
 	float r = random();
 
-	if(r < 0.70)
+	if (r < 0.70)
 	{
 	  self->monsterinfo.currentmove = &handler_stand1;
 	}
-	else if(r < 0.85)
+	else if (r < 0.85)
 	{
 	  self->monsterinfo.currentmove = &handler_stand2;
 	}
@@ -255,9 +259,9 @@ void handler_standSitWhatNext (edict_t *self)
 
 void handler_stand (edict_t *self)
 {
-	float r = random();
+//	float r = random();
 
-	if(self->monsterinfo.currentmove != &handler_stand1 &&
+	if (self->monsterinfo.currentmove != &handler_stand1 &&
 				self->monsterinfo.currentmove != &handler_stand2 &&
         self->monsterinfo.currentmove != &handler_stand3 &&
         self->monsterinfo.currentmove != &handler_stand4 &&
@@ -288,18 +292,18 @@ void handler_pain (edict_t *self, edict_t *other, float kick, int damage)
 void handler_createHound(edict_t *self)
 {
 	self->s.modelindex2 = 0;
-	hound_createHound(self, (self->health / 175.0));
+	hound_createHound (self, (self->health / 175.0));
 }
 
 
 void CheckIdleLoop(edict_t *self)
 {
-	if(!self->powerarmor_time && self->spawnflags & 8)
+	if (!self->powerarmor_time && self->spawnflags & 8)
 	{
 		self->powerarmor_time = level.time + (FRAMETIME * random() * 3);
 	}
 
-	if(self->powerarmor_time > level.time)
+	if (self->powerarmor_time > level.time)
 	{
 		self->s.frame -= 2;
 	}
@@ -307,13 +311,13 @@ void CheckIdleLoop(edict_t *self)
 
 void CheckForEnemy(edict_t *self)
 {
-	if(self->enemy && (self->enemy->client || (self->enemy->svflags & SVF_MONSTER)))
+	if (self->enemy && (self->enemy->client || (self->enemy->svflags & SVF_MONSTER)))
 	{
 		self->powerarmor_time = 0;
 		return;
 	}
 
-	if(self->powerarmor_time < level.time)
+	if (self->powerarmor_time < level.time)
 	{
 		self->enemy = NULL;
 		handler_stand(self);
@@ -364,9 +368,6 @@ void handler_attack (edict_t *self)
 }
 
 
-
-
-
 /*
 ===
 Death Stuff Starts
@@ -396,13 +397,13 @@ End Death Stuff
 ===
 */
 
-void SP_monster_infantry_precache(void);
-void SP_monster_hound_precache();
 
-void SP_monster_handler_precache(void)
+// Knightmare- added soundcache function
+void monster_handler_soundcache (edict_t *self)
 {
-	SP_monster_infantry_precache();
-	SP_monster_hound_precache();
+	// Knightmare- use soundcache functions
+	monster_infantry_soundcache (self);
+	monster_hound_soundcache (self);
 
 	sound_attack = gi.soundindex("monsters/guard/hhattack.wav");
 /*
@@ -410,6 +411,15 @@ void SP_monster_handler_precache(void)
 	sound_sitdown = gi.soundindex("monsters/guard/hhsitdown.wav");
 	sound_standup = gi.soundindex("monsters/guard/hhstandup.wav");
 */
+}
+
+void SP_monster_handler_precache (edict_t *self)
+{
+	// Knightmare- use soundcache function
+	monster_handler_soundcache (self);
+
+//	SP_monster_infantry_precache (self);
+//	SP_monster_hound_precache (self);
 }
 
 
@@ -423,22 +433,22 @@ void SP_monster_handler (edict_t *self)
 		return;
 	}
 
-  SP_monster_handler_precache();
+	SP_monster_handler_precache (self);
 
 	self->s.modelindex = gi.modelindex ("models/monsters/guard/handler/tris.md2");
 	self->s.modelindex2 = gi.modelindex ("models/monsters/guard/hound/tris.md2");
 
-/*
-Handler
-X = -36 to 3
-Y = -3  to 27
-Z = -24 to 28
+	/*
+	Handler
+	X = -36 to 3
+	Y = -3  to 27
+	Z = -24 to 28
 
-Hound
-X = -12 to 11
-Y = -30 to 30
-Z = -24  to 8
-*/
+	Hound
+	X = -12 to 11
+	Y = -30 to 30
+	Z = -24  to 8
+	*/
 
 	VectorSet (self->mins, -32, -32, -24);
 	VectorSet (self->maxs, 32, 32, 32);
@@ -465,7 +475,7 @@ Z = -24  to 8
 	self->monsterinfo.currentmove = &handler_stand1;	
 	self->monsterinfo.scale = MODEL_SCALE;
 
-	if(!(self->spawnflags & 16))
+	if (!(self->spawnflags & 16))
 	{
 		level.total_monsters++; // add one for the hound which is created later :)
 	}

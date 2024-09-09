@@ -219,13 +219,13 @@ void Widow2Spawn (edict_t *self)
 
 			self->monsterinfo.monster_used++;
 			ent->monsterinfo.commander = self;
-//			if ((g_showlogic) && (g_showlogic->value))
-//				gi.dprintf ("widow: post-spawn : %d slots left\n", SELF_SLOTS_LEFT);
+		//	if ((g_showlogic) && (g_showlogic->value))
+		//		gi.dprintf ("widow: post-spawn : %d slots left\n", SELF_SLOTS_LEFT);
 
 			ent->nextthink = level.time;
 			ent->think (ent);
 			
-			//ent->monsterinfo.aiflags |= AI_SPAWNED_WIDOW|AI_DO_NOT_COUNT|AI_IGNORE_SHOTS;
+		//	ent->monsterinfo.aiflags |= AI_SPAWNED_WIDOW|AI_DO_NOT_COUNT|AI_IGNORE_SHOTS;
 			ent->monsterinfo.aiflags |= AI_IGNORE_SHOTS;
 			ent->monsterinfo.monsterflags |= MFL_SPAWNED_WIDOW|MFL_DO_NOT_COUNT;
 
@@ -244,27 +244,27 @@ void Widow2Spawn (edict_t *self)
 						designated_enemy = PickCoopTarget(ent);
 						if (designated_enemy)
 						{
-//							if ((g_showlogic) && (g_showlogic->value))
-//							{
-//								gi.dprintf ("PickCoopTarget returned a %s - ", designated_enemy->classname);
-//								if (designated_enemy->client)
-//									gi.dprintf ("with name %s\n", designated_enemy->client->pers.netname);
-//								else
-//									gi.dprintf ("NOT A CLIENT\n");
-//							}
+						/*	if ((g_showlogic) && (g_showlogic->value))
+							{
+								gi.dprintf ("PickCoopTarget returned a %s - ", designated_enemy->classname);
+								if (designated_enemy->client)
+									gi.dprintf ("with name %s\n", designated_enemy->client->pers.netname);
+								else
+									gi.dprintf ("NOT A CLIENT\n");
+							} */
 						}
 						else
 						{
-//							if ((g_showlogic) && (g_showlogic->value))
-//								gi.dprintf ("pick coop failed, using my current enemy\n");
+						//	if ((g_showlogic) && (g_showlogic->value))
+						//		gi.dprintf ("pick coop failed, using my current enemy\n");
 							designated_enemy = self->enemy;
 						}
 					}
 				}
 				else
 				{
-//					if ((g_showlogic) && (g_showlogic->value))
-//						gi.dprintf ("pick coop failed, using my current enemy\n");
+				//	if ((g_showlogic) && (g_showlogic->value))
+				//		gi.dprintf ("pick coop failed, using my current enemy\n");
 					designated_enemy = self->enemy;
 				}
 			}
@@ -861,7 +861,7 @@ void widow2_attack (edict_t *self)
 				self->monsterinfo.currentmove = &widow2_move_attack_pre_beam;
 			else if ((luck <= 0.7) && !(level.time < self->monsterinfo.attack_finished))
 			{
-//				gi.sound (self, CHAN_WEAPON, sound_disrupt, 1, ATTN_NORM, 0);
+			//	gi.sound (self, CHAN_WEAPON, sound_disrupt, 1, ATTN_NORM, 0);
 				self->monsterinfo.currentmove = &widow2_move_attack_disrupt;
 			}
 			else
@@ -873,7 +873,7 @@ void widow2_attack (edict_t *self)
 				self->monsterinfo.currentmove = &widow2_move_attack_pre_beam;
 			else
 			{
-//				gi.sound (self, CHAN_WEAPON, sound_disrupt, 1, ATTN_NORM, 0);
+			//	gi.sound (self, CHAN_WEAPON, sound_disrupt, 1, ATTN_NORM, 0);
 				self->monsterinfo.currentmove = &widow2_move_attack_disrupt;
 			}
 		}
@@ -889,7 +889,7 @@ void widow2_attack (edict_t *self)
 				self->monsterinfo.currentmove = &widow2_move_spawn;
 			else
 			{
-//				gi.sound (self, CHAN_WEAPON, sound_disrupt, 1, ATTN_NORM, 0);
+			//	gi.sound (self, CHAN_WEAPON, sound_disrupt, 1, ATTN_NORM, 0);
 				self->monsterinfo.currentmove = &widow2_move_attack_disrupt;
 			}
 		}
@@ -899,7 +899,7 @@ void widow2_attack (edict_t *self)
 				self->monsterinfo.currentmove = &widow2_move_attack_pre_beam;
 			else
 			{
-//				gi.sound (self, CHAN_WEAPON, sound_disrupt, 1, ATTN_NORM, 0);
+			//	gi.sound (self, CHAN_WEAPON, sound_disrupt, 1, ATTN_NORM, 0);
 				self->monsterinfo.currentmove = &widow2_move_attack_disrupt;
 			}
 		}
@@ -1052,12 +1052,12 @@ qboolean Widow2_CheckAttack (edict_t *self)
 {
 	vec3_t		spot1, spot2;
 	vec3_t		temp;
-	float		chance;
+	float		chance = 0.0f;
 	trace_t		tr;
 	qboolean	enemy_infront;
-	int			enemy_range;
-	float		enemy_yaw;
-	float		real_enemy_range;
+	int			enemy_range = 0;
+	float		enemy_yaw = 0.0f;
+	float		real_enemy_range = 0.0f;
 	vec3_t		f, r, u;
 
 	if (!self->enemy)
@@ -1163,10 +1163,22 @@ qboolean Widow2_CheckAttack (edict_t *self)
 	return false;
 }
 
-void Widow2Precache ()
+// Knightmare- added soundcache function
+void monster_widow2_soundcache (edict_t *self)
+{
+	sound_pain1 = gi.soundindex ("widow/bw2pain1.wav");
+	sound_pain2 = gi.soundindex ("widow/bw2pain2.wav");
+	sound_pain3 = gi.soundindex ("widow/bw2pain3.wav");
+	sound_death = gi.soundindex ("widow/death.wav");
+	sound_search1 = gi.soundindex ("bosshovr/bhvunqv1.wav");
+//	sound_disrupt = gi.soundindex ("gladiator/railgun.wav");
+	sound_tentacles_retract = gi.soundindex ("brain/brnatck3.wav");
+}
+
+void Widow2Precache (void)
 {
 	// cache in all of the stalker stuff, widow stuff, spawngro stuff, gibs
-//Knightmare- I disabled these, since they weren't used.
+	// Knightmare- I disabled these, since they weren't used.
 //	gi.soundindex ("parasite/parpain1.wav");	
 //	gi.soundindex ("parasite/parpain2.wav");	
 //	gi.soundindex ("parasite/pardeth1.wav");	
@@ -1188,8 +1200,8 @@ void Widow2Precache ()
 	gi.modelindex ("models/monsters/blackwidow/gib1/tris.md2");
 	gi.modelindex ("models/monsters/blackwidow/gib2/tris.md2");
 	gi.modelindex ("models/monsters/blackwidow/gib3/tris.md2");
-	//Knightmare- this isn't used
-	//gi.modelindex ("models/monsters/blackwidow/gib4/tris.md2");
+	// Knightmare- this isn't used
+//	gi.modelindex ("models/monsters/blackwidow/gib4/tris.md2");
 	gi.modelindex ("models/monsters/blackwidow2/gib1/tris.md2");
 	gi.modelindex ("models/monsters/blackwidow2/gib2/tris.md2");
 	gi.modelindex ("models/monsters/blackwidow2/gib3/tris.md2");
@@ -1206,13 +1218,8 @@ void SP_monster_widow2 (edict_t *self)
 		return;
 	}
 
-	sound_pain1 = gi.soundindex ("widow/bw2pain1.wav");
-	sound_pain2 = gi.soundindex ("widow/bw2pain2.wav");
-	sound_pain3 = gi.soundindex ("widow/bw2pain3.wav");
-	sound_death = gi.soundindex ("widow/death.wav");
-	sound_search1 = gi.soundindex ("bosshovr/bhvunqv1.wav");
-//	sound_disrupt = gi.soundindex ("gladiator/railgun.wav");
-	sound_tentacles_retract = gi.soundindex ("brain/brnatck3.wav");
+	// Knightmare- use soundcache function
+	monster_widow2_soundcache (self);
 
 //	self->s.sound = gi.soundindex ("bosshovr/bhvengn1.wav");
 
@@ -1473,13 +1480,13 @@ void ThrowWidowGibReal (edict_t *self, char *gibname, int damage, int type, vec3
 
 void BloodFountain (edict_t *self, int number, vec3_t startpos, int damage)
 {
-	int n;
+/*	int n;
 	vec3_t	vd;
-	vec3_t	origin, size, velocity;
+	vec3_t	origin, size, velocity; */
 
 	return;
 
-	for (n= 0; n < number; n++)
+/*	for (n= 0; n < number; n++)
 	{
 		if (startpos)
 			VectorCopy (startpos, origin);
@@ -1497,13 +1504,13 @@ void BloodFountain (edict_t *self, int number, vec3_t startpos, int damage)
 		velocity[0] *= 2;
 		velocity[1] *= 2;
 
-//		gi.WriteByte (svc_temp_entity);
-//		gi.WriteByte (TE_BLOOD_FOUNTAIN);
-//		gi.WritePosition (origin);
-//		gi.WritePosition (velocity);
-//		gi.WriteShort (50);
-//		gi.multicast (self->s.origin, MULTICAST_ALL);
-	}
+	//	gi.WriteByte (svc_temp_entity);
+	//	gi.WriteByte (TE_BLOOD_FOUNTAIN);
+	//	gi.WritePosition (origin);
+	//	gi.WritePosition (velocity);
+	//	gi.WriteShort (50);
+	//	gi.multicast (self->s.origin, MULTICAST_ALL);
+	} */
 }
 
 void ThrowSmallStuff (edict_t *self, vec3_t point)

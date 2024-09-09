@@ -1,16 +1,45 @@
 #include "g_local.h"
 
 // Fog is sent to engine like this:
-// gi.WriteByte (svc_fog); // svc_fog = 21
-// gi.WriteByte (fog_enable); // 1 = on, 0 = off
-// gi.WriteByte (fog_model); // 0, 1, or 2
-// gi.WriteByte (fog_density); // 1-100
-// gi.WriteShort (fog_near); // >0, <fog_far
-// gi.WriteShort (fog_far); // >fog_near-64, < 5000
-// gi.WriteByte (fog_red); // 0-255
-// gi.WriteByte (fog_green); // 0-255
-// gi.WriteByte (fog_blue); // 0-255
+// gi.WriteByte (svc_lazarus_fog);	// svc_lazarus_fog = 21
+// gi.WriteByte (fog_enable);		// 1 = on, 0 = off
+// gi.WriteByte (fog_model);		// 0, 1, or 2
+// gi.WriteByte (fog_density);		// 1-100
+// gi.WriteShort (fog_near);		// >0, <fog_far
+// gi.WriteShort (fog_far);			// >fog_near-64, < 5000
+// gi.WriteByte (fog_red);			// 0-255
+// gi.WriteByte (fog_green);		// 0-255
+// gi.WriteByte (fog_blue);			// 0-255
 // gi.unicast (player_ent, true);
+
+#ifdef DISABLE_FOG
+
+void Fog_Init (void)	{}
+void Fog (edict_t *ent)	{}
+void Fog_Off (edict_t *ent)	{}
+void Fog_Off_Global (void)	{}
+void Fog_ConsoleFog (void)	{}
+void GLFog (void)	{}
+void trig_fog_fade (edict_t *self)	{}
+void init_trigger_fog_delay (edict_t *self)	{}
+void fog_fade (edict_t *self)	{}
+void target_fog_use (edict_t *self, edict_t *other, edict_t *activator)	{}
+void trigger_fog_use (edict_t *self, edict_t *other, edict_t *activator)	{}
+void SP_trigger_fog (edict_t *self)
+{
+	G_FreeEdict(self);
+}
+void SP_trigger_fog_bbox (edict_t *self)
+{
+	G_FreeEdict(self);
+}
+void SP_target_fog (edict_t *self)
+{
+	G_FreeEdict(self);
+}
+void Cmd_Fog_f (edict_t *ent)	{}
+
+#else // DISABLE_FOG
 
 #ifdef KMQUAKE2_ENGINE_MOD // engine fog
 
@@ -331,7 +360,7 @@ void GLFog (edict_t *ent)
 		fog_color[2] == last_fog_color[2] )
 		return;
 
-	gi.WriteByte (svc_fog);			// svc_fog = 21
+	gi.WriteByte (svc_lazarus_fog);	// svc_lazarus_fog = 21
 	gi.WriteByte (1);				// enable message
 	gi.WriteByte (fog_model);		// model 0, 1, or 2
 	gi.WriteByte (fog_density);		// density 1-100
@@ -473,7 +502,8 @@ void Fog (edict_t *ent)
 	VectorCopy(ent->s.origin, viewpoint);
 	viewpoint[2] += ent->viewheight;
 
-	if (Q_stricmp(vid_ref->string, "gl") != 0)
+//	if (Q_stricmp(vid_ref->string, "gl") != 0)
+	if ( !Q_strncasecmp(vid_ref->string, "soft", 4) )
 	{
 		last_software_frame = level.framenum;
 		level.active_fog = 0;
@@ -578,15 +608,15 @@ void Fog_Off (edict_t *ent)
 
 #ifdef KMQUAKE2_ENGINE_MOD // engine fog
 
-	gi.WriteByte (svc_fog); // svc_fog = 21
-	gi.WriteByte (0); // disable message, remaining paramaters are ignored
-	gi.WriteByte (0); // 0, 1, or 2
-	gi.WriteByte (0); // 1-100
-	gi.WriteShort (0); // >0, <fog_far
-	gi.WriteShort (0); // >fog_near-64, < 5000
-	gi.WriteByte (0); // 0-255
-	gi.WriteByte (0); // 0-255
-	gi.WriteByte (0); // 0-255
+	gi.WriteByte (svc_lazarus_fog);	// svc_lazarus_fog = 21
+	gi.WriteByte (0);				// disable message, remaining paramaters are ignored
+	gi.WriteByte (0);				// 0, 1, or 2
+	gi.WriteByte (0);				// 1-100
+	gi.WriteShort (0);				// >0, <fog_far
+	gi.WriteShort (0);				// >fog_near-64, < 5000
+	gi.WriteByte (0);				// 0-255
+	gi.WriteByte (0);				// 0-255
+	gi.WriteByte (0);				// 0-255
 	gi.unicast (ent, true);
 
 	// write to last fog state
@@ -597,7 +627,8 @@ void Fog_Off (edict_t *ent)
 
 	if (gl_driver && vid_ref)
 	{
-		if (!strcmp(vid_ref->string, "gl"))
+	//	if (!strcmp(vid_ref->string, "gl"))
+		if ( !Q_strncasecmp(vid_ref->string, "gl", 2) )
 		{
 			if (hOpenGL)
 				GL_glDisable (GL_FOG);
@@ -616,7 +647,8 @@ void Fog_Off_Global (void)
 #ifndef KMQUAKE2_ENGINE_MOD // old sever-side fog
 	if (gl_driver && vid_ref)
 	{
-		if (!strcmp(vid_ref->string, "gl"))
+	//	if (!strcmp(vid_ref->string, "gl"))
+		if ( !Q_strncasecmp(vid_ref->string, "gl", 2) )
 		{
 			if (hOpenGL)
 				GL_glDisable (GL_FOG);
@@ -1095,3 +1127,5 @@ void SP_trigger_fog_bbox (edict_t *self)
 	VectorCopy (self->tright, self->maxs);
 	gi.linkentity(self);
 }
+
+#endif // DISABLE_FOG

@@ -342,12 +342,12 @@ qboolean Pickup_Powerup (edict_t *ent, edict_t *other)
 		if (ent->count < 0)
 		{
 			other->client->jetpack_infinite = true;
-			Add_Ammo(other,fuel,100000);
+			Add_Ammo (other, fuel, 100000);
 		}
 		else
 		{
 			other->client->jetpack_infinite = false;
-			Add_Ammo(other,fuel,ent->count);
+			Add_Ammo (other, fuel, ent->count);
 		}
 	}
 #endif
@@ -389,9 +389,9 @@ qboolean Pickup_Powerup (edict_t *ent, edict_t *other)
 	/*	if (ent->item->use)
 			ent->item->use (other, ent->item);
 		else
-			gi.dprintf("Powerup has no use function!\n");*/
+			gi.dprintf("Powerup has no use function!\n");
+	*/
 //PGM
-	
 	}
 
 	return true;
@@ -787,7 +787,7 @@ void Use_IR (edict_t *ent, gitem_t *item)
 
 void Use_Double (edict_t *ent, gitem_t *item)
 {
-		int		timeout;
+	int		timeout;
 
 	ent->client->pers.inventory[ITEM_INDEX(item)]--;
 	ValidateSelectedItem (ent);
@@ -802,9 +802,9 @@ void Use_Double (edict_t *ent, gitem_t *item)
 	}
 
 	if (ent->client->double_framenum > level.framenum)
-		ent->client->double_framenum += (sk_double_time->value * 10);
+		ent->client->double_framenum += timeout;
 	else
-		ent->client->double_framenum = level.framenum + (sk_double_time->value * 10);
+		ent->client->double_framenum = level.framenum + timeout;
 
 	gi.sound(ent, CHAN_ITEM, gi.soundindex("misc/ddamage1.wav"), 1, ATTN_NORM, 0);
 }
@@ -2112,9 +2112,9 @@ void droptofloor (edict_t *ent)
 	vec3_t		dest;
 	float		*v;
 
-	v = tv(-15,-15,-15);
+	v = tv(-15, -15, -15);
 	VectorCopy (v, ent->mins);
-	v = tv(15,15,15);
+	v = tv(15, 15, 15);
 	VectorCopy (v, ent->maxs);
 
 	if (ent->model)
@@ -2131,15 +2131,21 @@ void droptofloor (edict_t *ent)
 
 	if (!(ent->spawnflags & ITEM_NO_DROPTOFLOOR))	// Knightmare- allow marked items to spawn in solids
 	{
-		v = tv(0,0,-128);
+		v = tv(0, 0, -128);
 		VectorAdd (ent->s.origin, v, dest);
 
 		tr = gi.trace (ent->s.origin, ent->mins, ent->maxs, dest, ent, MASK_SOLID);
 		if (tr.startsolid)
-		{
-			gi.dprintf ("droptofloor: %s startsolid at %s\n", ent->classname, vtos(ent->s.origin));
-			G_FreeEdict (ent);
-			return;
+		{	// RAFAEL
+			if (strcmp (ent->classname, "foodcube") == 0) {
+				VectorCopy (ent->s.origin, tr.endpos);
+				ent->velocity[2] = 0;
+			}
+			else {
+				gi.dprintf ("droptofloor: %s startsolid at %s\n", ent->classname, vtos(ent->s.origin));
+				G_FreeEdict (ent);
+				return;
+			}
 		}
 
 		VectorCopy (tr.endpos, ent->s.origin);
@@ -2563,7 +2569,7 @@ gitem_t	itemlist[] =
 		"" // precache
 	},
 
-//Knightmare- armor shard that lies flat on the ground
+// Knightmare- armor shard that lies flat on the ground
 // 5
 /*QUAKED item_armor_shard_flat (.3 .3 1) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN
 */
@@ -5093,7 +5099,7 @@ void SP_item_foodcube (edict_t *self)
 	SpawnItem (self, FindItem ("Health"));
 	self->spawnflags |= DROPPED_ITEM;
 	self->style = HEALTH_IGNORE_MAX|HEALTH_FOODCUBE;
-	//gi.soundindex ("items/s_health.wav");
+//	gi.soundindex ("items/s_health.wav");
 	gi.soundindex ("items/m_health.wav");
 	self->classname = "foodcube";
 }
@@ -5234,9 +5240,9 @@ void Use_Stasis ( edict_t *ent, gitem_t *item )
 //ROGUE
 void SP_xatrix_item (edict_t *self)
 {
-	gitem_t	*item;
+	gitem_t	*item = NULL;
 	int		i;
-	char	*spawnClass;
+	char	*spawnClass = NULL;
 
 	if (!self->classname)
 		return;

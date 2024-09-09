@@ -209,6 +209,63 @@ void R_DrawAlphaSurfaces (void)
 
 /*
 ================
+LM_UploadBlock_Old
+================
+*/
+static void LM_UploadBlock_Old (qboolean dynamic)
+{
+	int texture;
+	int height = 0;
+
+	if ( dynamic ) {
+		texture = 0;
+	}
+	else {
+		texture = gl_lms.current_lightmap_texture;
+	}
+
+	GL_Bind( glState.lightmap_textures + texture );
+	qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	if ( dynamic )
+	{
+		int i;
+
+		for ( i = 0; i < LM_BLOCK_WIDTH; i++ )
+		{
+			if ( gl_lms.allocated[i] > height )
+				height = gl_lms.allocated[i];
+		}
+
+		qglTexSubImage2D( GL_TEXTURE_2D, 0,
+						  0, 0,
+						  LM_BLOCK_WIDTH, height,
+	//					  GL_LIGHTMAP_FORMAT, GL_LIGHTMAP_TYPE,
+						  gl_lms.format, gl_lms.type,
+						  gl_lms.lightmap_buffer );
+	}
+	else
+	{
+		qglTexImage2D( GL_TEXTURE_2D, 0, 
+					   gl_lms.internal_format,
+					   LM_BLOCK_WIDTH, LM_BLOCK_HEIGHT, 
+					   0, 
+	//				   GL_LIGHTMAP_FORMAT, GL_LIGHTMAP_TYPE, 
+					   gl_lms.format, gl_lms.type,
+#ifdef BATCH_LM_UPDATES
+					   gl_lms.lightmap_update[gl_lms.current_lightmap_texture] );
+#else
+					   gl_lms.lightmap_buffer );
+#endif	// BATCH_LM_UPDATES
+		if ( ++gl_lms.current_lightmap_texture == MAX_LIGHTMAPS )
+			VID_Error( ERR_DROP, "LM_UploadBlock_Old() - MAX_LIGHTMAPS exceeded\n" );
+	}
+}
+
+
+/*
+================
 R_BlendLightMaps
 
 This routine takes all the given light mapped surfaces in the world and
@@ -319,7 +376,7 @@ void R_BlendLightmaps (void)
 				msurface_t *drawsurf;
 
 				// upload what we have so far
-				LM_UploadBlock(true);
+				LM_UploadBlock_Old (true);
 
 				// draw all surfaces that use this lightmap
 				for ( drawsurf = newdrawsurf; drawsurf != surf; drawsurf = drawsurf->lightmapchain )
@@ -333,7 +390,7 @@ void R_BlendLightmaps (void)
 				newdrawsurf = drawsurf;
 
 				// clear the block
-				LM_InitBlock();
+				LM_InitBlock ();
 
 				// try uploading the block now
 				if (!LM_AllocBlock(smax, tmax, &surf->dlight_s, &surf->dlight_t))
@@ -350,7 +407,7 @@ void R_BlendLightmaps (void)
 
 		// draw remainder of dynamic lightmaps that haven't been uploaded yet
 		if (newdrawsurf)
-			LM_UploadBlock( true );
+			LM_UploadBlock_Old (true);
 
 		for (surf = newdrawsurf; surf != 0; surf = surf->lightmapchain)
 		{
@@ -719,6 +776,72 @@ void R_DrawInlineBModel_Old (entity_t *e, int causticflag)
 		GL_TexEnv (GL_REPLACE);
 		GL_DepthMask (true);
 	}
+}
+
+
+/*
+=================
+R_DrawBrushModel_Old
+=================
+*/
+void R_DrawBrushModel_Old (entity_t *e)
+{
+	vec3_t		mins, maxs, org;
+	int			i, contents[9], contentsAND, contentsOR, causticflag = 0;
+	qboolean	rotated, viewInWater;
+
+	if (currentmodel->nummodelsurfaces == 0)
+		return;
+
+	currententity = e;
+	glState.currenttextures[0] = glState.currenttextures[1] = -1;
+
+	if (e->angles[0] || e->angles[1] || e->angles[2])
+	{
+		rotated = true;
+		for (i=0; i<3; i++)
+		{
+			mins[i] = e->origin[i] - currentmodel->radius;
+			maxs[i] = e->origin[i] + currentmodel->radius;
+		}
+	}
+	else
+	{
+		rotated = false;
+		VectorAdd (e->origin, currentmodel->mins, mins);
+		VectorAdd (e->origin, currentmodel->maxs, maxs);
+	}
+
+	if (R_CullBox (mins, maxs))
+		return;
+
+	qglColor3f (1,1,1);
+	memset (gl_lms.lightmap_surfaces, 0, sizeof(gl_lms.lightmap_surfaces));
+
+	VectorSubtract (r_newrefdef.vieworg, e->origin, modelorg);
+	if (rotated)
+	{
+		vec3_t	temp;
+		vec3_t	forward, right, up;
+
+		VectorCopy (modelorg, temp);
+		AngleVectors (e->angles, forward, right, up);
+		modelorg[0] = DotProduct (temp, forward);
+		modelorg[1] = -DotProduct (temp, right);
+		modelorg[2] = DotProduct (temp, up);
+	}
+
+    qglPushMatrix ();
+	R_RotateForEntity (e, true);
+
+	GL_EnableMultitexture (true);
+//	R_SetLightingMode (e->flags);
+
+	R_DrawInlineBModel_Old (e, causticflag);
+
+	GL_EnableMultitexture (false);
+
+	qglPopMatrix ();
 }
 
 

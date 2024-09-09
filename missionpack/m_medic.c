@@ -114,16 +114,16 @@ void cleanupHeal (edict_t *self, qboolean change_frame)
 
 void abortHeal (edict_t *self, qboolean change_frame, qboolean gib, qboolean mark)
 {
-	int hurt;
-	static vec3_t	pain_normal = { 0, 0, 1 };
+	int				hurt;
+	static vec3_t	pain_normal = {0, 0, 1};
 
 	// clean up target
 	cleanupHeal (self, change_frame);
 	// gib em!
-	if ((mark) && (self->enemy) && (self->enemy->inuse))
+	if ( (mark) && (self->enemy) && (self->enemy->inuse) )
 	{
-//		if ((g_showlogic) && (g_showlogic->value))
-//			gi.dprintf ("%s - marking target as bad\n", self->classname);
+	//	if ((g_showlogic) && (g_showlogic->value))
+	//		gi.dprintf ("%s - marking target as bad\n", self->classname);
 		// if the first badMedic slot is filled by a medic, skip it and use the second one
 		if ((self->enemy->monsterinfo.badMedic1) && (self->enemy->monsterinfo.badMedic1->inuse)
 			&& (!strncmp(self->enemy->monsterinfo.badMedic1->classname, "monster_medic", 13)) )
@@ -135,10 +135,10 @@ void abortHeal (edict_t *self, qboolean change_frame, qboolean gib, qboolean mar
 			self->enemy->monsterinfo.badMedic1 = self;
 		}
 	}
-	if ((gib) && (self->enemy) && (self->enemy->inuse))
+	if ( (gib) && (self->enemy) && (self->enemy->inuse) )
 	{
-//		if ((g_showlogic) && (g_showlogic->value))
-//			gi.dprintf ("%s - gibbing bad heal target", self->classname);
+	//	if ((g_showlogic) && (g_showlogic->value))
+	//		gi.dprintf ("%s - gibbing bad heal target", self->classname);
 
 		if (self->enemy->gib_health)
 			hurt = - self->enemy->gib_health;
@@ -148,10 +148,10 @@ void abortHeal (edict_t *self, qboolean change_frame, qboolean gib, qboolean mar
 		T_Damage (self->enemy, self, self, vec3_origin, self->enemy->s.origin,
 					pain_normal, hurt, 0, 0, MOD_UNKNOWN);
 	}
-	// clean up self
 
+	// clean up self
 	self->monsterinfo.aiflags &= ~AI_MEDIC;
-	if ((self->oldenemy) && (self->oldenemy->inuse) && (self->oldenemy != self->enemy))
+	if ( (self->oldenemy) && (self->oldenemy->inuse) && (self->oldenemy != self->enemy) )
 	{
 		self->enemy = self->oldenemy;
 		self->oldenemy = NULL;
@@ -290,7 +290,7 @@ void medic_StopPatrolling (edict_t *self)
 		return;
 	}
 	if (self->monsterinfo.aiflags & AI_MEDIC)
-		abortHeal(self,false,false,false);
+		abortHeal (self, false, false, false);
 }
 
 void medic_NextPatrolPoint (edict_t *self, edict_t *hint)
@@ -678,10 +678,10 @@ void medic_run (edict_t *self)
 			return;
 		}
 	}
-//	else if (!canReach(self, self->enemy))
-//	{
-//		abortHeal (self, 0);
-//	}
+/*	else if (!canReach(self, self->enemy))
+	{
+		abortHeal (self, false, false, false);
+	} */
 
 	if (self->monsterinfo.aiflags & AI_STAND_GROUND)
 		self->monsterinfo.currentmove = &medic_move_stand;
@@ -1036,7 +1036,7 @@ void medic_cable_attack (edict_t *self)
 		abortHeal (self, true, false, false);
 		return;
 	}
-	//Knightmare- don't heal insanes or actors or critters
+	// Knightmare- don't heal insanes or actors or critters
 	if (!strcmp (self->enemy->classname, "misc_insane") || !strcmp (self->enemy->classname, "misc_actor")
 		|| !strcmp (self->enemy->classname, "monster_mutant") || !strcmp (self->enemy->classname, "monster_flipper") 
 		|| !strcmp (self->enemy->classname, "monster_gekk"))
@@ -1075,36 +1075,36 @@ void medic_cable_attack (edict_t *self)
 	{
 	//	if ((g_showlogic) && (g_showlogic->value))
 	//		gi.dprintf ("medic - aborting heal due to proximity to target ");
-		abortHeal (self, true, false, false );
+		abortHeal (self, true, false, false);
 		return;
 	}
-	/*if ((g_showlogic)&&(g_showlogic->value))
+/*	if ((g_showlogic)&&(g_showlogic->value))
 		gi.dprintf ("distance to target is %f\n", distance);
 	if (distance > 300)
-		return;*/
+		return; */
 
 	// Lazarus: Check for enemy behind muzzle... don't do these guys, 'cause usually this
 	// results in monster entanglement
-	/*VectorNormalize(dir);
-	if (DotProduct(dir,f) < 0.)
+/*	VectorNormalize(dir);
+	if (DotProduct(dir, f) < 0.0f)
 	{
 		gi.dprintf ("medic - aborting heal due to proximity to target ");
 		abortHeal (self, true, false, false);
 		return;
-	}*.
+	} */
 
 	// check for min/max pitch
 	// PMM -- took out since it doesn't look bad when it fails
-	/*vectoangles (dir, angles);
+/*	vectoangles (dir, angles);
 	if (angles[0] < -180)
 		angles[0] += 360;
 	if (fabs(angles[0]) > 45)
 	{
 		if ((g_showlogic) && (g_showlogic->value))
 			gi.dprintf ("medic - aborting heal due to bad angle\n");
-		abortHeal(self);
+		abortHeal (self, true, false, false);
 		return;
-	}*/
+	} */
 
 	tr = gi.trace (start, NULL, NULL, self->enemy->s.origin, self, MASK_SOLID);
 	if (tr.fraction != 1.0 && tr.ent != self->enemy)
@@ -1118,7 +1118,7 @@ void medic_cable_attack (edict_t *self)
 				return;
 			}
 			self->monsterinfo.medicTries++;
-			cleanupHeal (self, 1);
+			cleanupHeal (self, true);
 			return;
 		}
 	//	if ((g_showlogic) && (g_showlogic->value))
@@ -1170,7 +1170,7 @@ void medic_cable_attack (edict_t *self)
 		maxs[2] += 48;   // compensate for change when they die
 
 		tr = gi.trace (self->enemy->s.origin, self->enemy->mins, maxs, self->enemy->s.origin, self->enemy, MASK_MONSTERSOLID);
-		if (tr.startsolid || tr.allsolid)
+		if ( tr.startsolid || tr.allsolid )
 		{
 		//	if ((g_showlogic) && (g_showlogic->value))
 		//		gi.dprintf ("Spawn point obstructed, aborting heal!\n");
@@ -1188,10 +1188,10 @@ void medic_cable_attack (edict_t *self)
 		{
 			if ((g_showlogic) && (g_showlogic->value))
 				gi.dprintf ("heal in world, aborting!\n");
-			abortHeal (self, 1);
+			abortHeal (self, true, false, false);
 			return;
-		}*/
-		else
+		} */
+		else if ( strncmp(self->enemy->classname, "player", 6) != 0 )	// Phatman: Prevent player_noise spawn function error
 		{
 		//	self->enemy->monsterinfo.aiflags |= AI_DO_NOT_COUNT;
 			self->enemy->monsterinfo.monsterflags |= MFL_DO_NOT_COUNT;
@@ -1209,9 +1209,11 @@ void medic_cable_attack (edict_t *self)
 			self->enemy->pain_debounce_time = 0;
 			self->enemy->damage_debounce_time = 0;
 			self->enemy->deadflag = DEAD_NO;
+
 			// turn off flies
 			if (self->enemy->s.effects & EF_FLIES)
 				M_FliesOff(self->enemy);
+
 			ED_CallSpawn (self->enemy);
 			self->enemy->monsterinfo.healer = NULL;
 		//	self->enemy->owner = NULL;
@@ -1231,8 +1233,8 @@ void medic_cable_attack (edict_t *self)
 			self->enemy->monsterinfo.aiflags |= AI_IGNORE_SHOTS;
 			self->enemy->monsterinfo.monsterflags |= MFL_DO_NOT_COUNT;
 
-			if ((self->oldenemy) && (self->oldenemy->inuse) && (self->oldenemy->health > 0)
-				&& (self->oldenemy != self->enemy)) // Knightmare- don't have monster attack himself
+			if ( (self->oldenemy) && (self->oldenemy->inuse) && (self->oldenemy->health > 0)
+				&& (self->oldenemy != self->enemy) ) // Knightmare- don't have monster attack himself
 			{	// turn healed monster on our enemy
 			//	if ((g_showlogic) && (g_showlogic->value))
 			//		gi.dprintf ("setting heal target's enemy to %s\n", self->oldenemy->classname);
@@ -1240,7 +1242,7 @@ void medic_cable_attack (edict_t *self)
 				FoundTarget (self->enemy);
 			}
 			// Knightmare- maybe this will fix it
-			else if (self->monsterinfo.last_player_enemy && (self->monsterinfo.last_player_enemy->health > 0))
+			else if ( self->monsterinfo.last_player_enemy && (self->monsterinfo.last_player_enemy->health > 0) )
 			{
 			//	gi.dprintf ("setting medic's healmonster's enemy to last player\n");
 				self->enemy->enemy = self->monsterinfo.last_player_enemy;
@@ -1252,7 +1254,7 @@ void medic_cable_attack (edict_t *self)
 			//	if (g_showlogic && g_showlogic->value)
 			//		gi.dprintf ("no valid enemy to set!\n");
 				self->enemy->enemy = NULL;
-				if (!FindTarget (self->enemy))
+				if ( !FindTarget (self->enemy) )
 				{
 					// no valid enemy, so stop acting
 					self->enemy->monsterinfo.pausetime = level.time + 100000000;
@@ -1260,7 +1262,7 @@ void medic_cable_attack (edict_t *self)
 				}
 				self->enemy = NULL;
 				self->oldenemy = NULL;
-				if (!FindTarget (self))
+				if ( !FindTarget (self) )
 				{
 					// no valid enemy, so stop acting
 					self->monsterinfo.pausetime = level.time + 100000000;
@@ -1504,14 +1506,14 @@ void medic_determine_spawn (edict_t *self)
 
 void medic_spawngrows (edict_t *self)
 {
-	vec3_t	f, r, offset, startpoint, spawnpoint;
-	int		summonStr;
-	int		count;
-	int		inc;
-	int		num_summoned; // should be 1, 3, or 5
-	int		num_success = 0;
-	float	current_yaw;
-	qboolean	behind = false;
+	vec3_t		f, r, offset, startpoint, spawnpoint;
+	int			summonStr;
+	int			count;
+	int			inc;
+	int			num_summoned; // should be 1, 3, or 5
+	int			num_success = 0;
+	float		current_yaw;
+//	qboolean	behind = false;
 
 	// if we've been directed to turn around
 	if (self->monsterinfo.aiflags & AI_MANUAL_STEERING)
@@ -1654,7 +1656,7 @@ void medic_finish_spawn (edict_t *self)
 			ent->think (ent);
 		}
 
-		//ent->monsterinfo.aiflags |= AI_IGNORE_SHOTS|AI_DO_NOT_COUNT|AI_SPAWNED_MEDIC_C;
+	//	ent->monsterinfo.aiflags |= AI_IGNORE_SHOTS|AI_DO_NOT_COUNT|AI_SPAWNED_MEDIC_C;
 		ent->monsterinfo.aiflags |= AI_IGNORE_SHOTS;
 		ent->monsterinfo.monsterflags |= MFL_DO_NOT_COUNT|MFL_SPAWNED_MEDIC_C;
 		ent->monsterinfo.commander = self;
@@ -1799,10 +1801,10 @@ qboolean medic_checkattack (edict_t *self)
 	if (self->monsterinfo.aiflags & AI_MEDIC)
 	{
 		// if our target went away
-		if ((!self->enemy) || (!self->enemy->inuse))
+		if ( (!self->enemy) || (!self->enemy->inuse) )
 		{
-//			if (g_showlogic && g_showlogic->value)
-//				gi.dprintf ("aborting heal target due to gib\n");
+		//	if (g_showlogic && g_showlogic->value)
+		//		gi.dprintf ("aborting heal target due to gib\n");
 			abortHeal (self, true, false, false);
 			return false;
 		}
@@ -1810,8 +1812,8 @@ qboolean medic_checkattack (edict_t *self)
 		// if we ran out of time, give up
 		if (self->timestamp < level.time)
 		{
-//			if (g_showlogic && g_showlogic->value)
-//				gi.dprintf ("aborting heal target (%s) due to time\n", self->enemy->classname);
+		//	if (g_showlogic && g_showlogic->value)
+		//		gi.dprintf ("aborting heal target (%s) due to time\n", self->enemy->classname);
 			abortHeal (self, true, false, true);
 			self->timestamp = 0;
 			return false;
@@ -1957,9 +1959,9 @@ void medic_dodge (edict_t *self, edict_t *attacker, float eta, trace_t *tr)
 
 void MedicCommanderCache (void)
 {
-	//edict_t	*newEnt;
-	int	modelidx;
-	//int i;
+//	edict_t	*newEnt;
+	int		modelidx;
+//	int		i;
 
 	//Knightmare- this is not needed and crashes some maps
 /*	//FIXME - better way to do this?  this is quick and dirty
@@ -1971,14 +1973,13 @@ void MedicCommanderCache (void)
 		VectorCopy(vec3_origin, newEnt->s.angles);
 		newEnt->classname = ED_NewString (reinforcements[i]);
 		
-		//newEnt->monsterinfo.aiflags |= AI_DO_NOT_COUNT;
+	//	newEnt->monsterinfo.aiflags |= AI_DO_NOT_COUNT;
 		newEnt->monsterinfo.monsterflags |= MFL_DO_NOT_COUNT;
 
 		ED_CallSpawn(newEnt);
 		// FIXME - could copy mins/maxs into reinforcements from here
 		G_FreeEdict (newEnt);
-	}
-*/
+	} */
 	modelidx = gi.modelindex("models/items/spawngro/tris.md2");
 	modelidx = gi.modelindex("models/items/spawngro2/tris.md2");
 }
@@ -2047,6 +2048,39 @@ qboolean medic_blocked (edict_t *self, float dist)
 //PGM
 //===========
 
+// Knightmare- added soundcache function
+void monster_medic_soundcache (edict_t *self)
+{
+	if (strcmp(self->classname, "monster_medic_commander") == 0)
+	{
+		// commander sounds
+		commander_sound_idle1 = gi.soundindex ("medic_commander/medidle.wav");
+		commander_sound_pain1 = gi.soundindex ("medic_commander/medpain1.wav");
+		commander_sound_pain2 = gi.soundindex ("medic_commander/medpain2.wav");
+		commander_sound_die = gi.soundindex ("medic_commander/meddeth.wav");
+		commander_sound_sight = gi.soundindex ("medic_commander/medsght.wav");
+		commander_sound_search = gi.soundindex ("medic_commander/medsrch.wav");
+		commander_sound_hook_launch = gi.soundindex ("medic_commander/medatck2c.wav");
+		commander_sound_hook_hit = gi.soundindex ("medic_commander/medatck3a.wav");
+		commander_sound_hook_heal = gi.soundindex ("medic_commander/medatck4a.wav");
+		commander_sound_hook_retract = gi.soundindex ("medic_commander/medatck5a.wav");
+		commander_sound_spawn = gi.soundindex ("medic_commander/monsterspawn1.wav");
+	}
+	else
+	{
+		sound_idle1 = gi.soundindex ("medic/idle.wav");
+		sound_pain1 = gi.soundindex ("medic/medpain1.wav");
+		sound_pain2 = gi.soundindex ("medic/medpain2.wav");
+		sound_die = gi.soundindex ("medic/meddeth1.wav");
+		sound_sight = gi.soundindex ("medic/medsght1.wav");
+		sound_search = gi.soundindex ("medic/medsrch1.wav");
+		sound_hook_launch = gi.soundindex ("medic/medatck2.wav");
+		sound_hook_hit = gi.soundindex ("medic/medatck3.wav");
+		sound_hook_heal = gi.soundindex ("medic/medatck4.wav");
+		sound_hook_retract = gi.soundindex ("medic/medatck5.wav");
+	}
+}
+
 /*QUAKED monster_medic_commander (1 .5 0) (-16 -16 -24) (16 16 32) Ambush Trigger_Spawn Sight GoodGuy NoGib
 */
 /*QUAKED monster_medic (1 .5 0) (-16 -16 -24) (16 16 32) Ambush Trigger_Spawn Sight GoodGuy NoGib
@@ -2061,10 +2095,8 @@ void SP_monster_medic (edict_t *self)
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;
 
-	if (strcmp(self->classname, "monster_medic_commander") == 0)
-	{
+	if (strcmp(self->classname, "monster_medic_commander") == 0) {
 		self->s.skinnum = 2;
-		self->moreflags |= FL2_COMMANDER;
 	}
 	else {
 		self->s.skinnum = 0;
@@ -2081,6 +2113,9 @@ void SP_monster_medic (edict_t *self)
 	VectorSet (self->mins, -24, -24, -24);
 	VectorSet (self->maxs, 24, 24, 32);
 
+	// Knightmare- use soundcache function
+	monster_medic_soundcache (self);
+
 	//PMM
 	if (strcmp(self->classname, "monster_medic_commander") == 0)
 	{
@@ -2093,18 +2128,7 @@ void SP_monster_medic (edict_t *self)
 		else if (skill->value == 3)
 			self->monsterinfo.monster_slots = 8;
 
-		// commander sounds
-		commander_sound_idle1 = gi.soundindex ("medic_commander/medidle.wav");
-		commander_sound_pain1 = gi.soundindex ("medic_commander/medpain1.wav");
-		commander_sound_pain2 = gi.soundindex ("medic_commander/medpain2.wav");
-		commander_sound_die = gi.soundindex ("medic_commander/meddeth.wav");
-		commander_sound_sight = gi.soundindex ("medic_commander/medsght.wav");
-		commander_sound_search = gi.soundindex ("medic_commander/medsrch.wav");
-		commander_sound_hook_launch = gi.soundindex ("medic_commander/medatck2c.wav");
-		commander_sound_hook_hit = gi.soundindex ("medic_commander/medatck3a.wav");
-		commander_sound_hook_heal = gi.soundindex ("medic_commander/medatck4a.wav");
-		commander_sound_hook_retract = gi.soundindex ("medic_commander/medatck5a.wav");
-		commander_sound_spawn = gi.soundindex ("medic_commander/monsterspawn1.wav");
+		// precache
 		gi.soundindex ("tank/tnkatck3.wav");
 		MedicCommanderCache ();
 		// Knightmare- precache blaster bolt
@@ -2118,19 +2142,15 @@ void SP_monster_medic (edict_t *self)
 			self->mass = 600;
 
 		self->yaw_speed = 40; // default is 20
+
+		self->common_name = "Medic Commander";
+		self->class_id = ENTITY_MONSTER_MEDIC_COMMANDER;
+
+		self->moreflags |= FL2_COMMANDER;
 	}
 	else
 	{
-		sound_idle1 = gi.soundindex ("medic/idle.wav");
-		sound_pain1 = gi.soundindex ("medic/medpain1.wav");
-		sound_pain2 = gi.soundindex ("medic/medpain2.wav");
-		sound_die = gi.soundindex ("medic/meddeth1.wav");
-		sound_sight = gi.soundindex ("medic/medsght1.wav");
-		sound_search = gi.soundindex ("medic/medsrch1.wav");
-		sound_hook_launch = gi.soundindex ("medic/medatck2.wav");
-		sound_hook_hit = gi.soundindex ("medic/medatck3.wav");
-		sound_hook_heal = gi.soundindex ("medic/medatck4.wav");
-		sound_hook_retract = gi.soundindex ("medic/medatck5.wav");
+		// precache
 		gi.soundindex ("medic/medatck1.wav");
 
 		if (!self->health)
@@ -2139,6 +2159,9 @@ void SP_monster_medic (edict_t *self)
 			self->gib_health = -150;
 		if (!self->mass)
 			self->mass = 400;
+
+		self->common_name = "Medic";
+		self->class_id = ENTITY_MONSTER_MEDIC;
 	}
 
 	self->pain = medic_pain;
@@ -2191,15 +2214,6 @@ void SP_monster_medic (edict_t *self)
 		M_SetDeath (self, (mmove_t **)&deathmoves);
 	}
 	self->monsterinfo.scale = MODEL_SCALE;
-
-	if (strcmp(self->classname, "monster_medic_commander") == 0) {
-		self->common_name = "Medic Commander";
-		self->class_id = ENTITY_MONSTER_MEDIC_COMMANDER;
-	}
-	else {
-		self->common_name = "Medic";
-		self->class_id = ENTITY_MONSTER_MEDIC;
-	}
 
 	walkmonster_start (self);
 

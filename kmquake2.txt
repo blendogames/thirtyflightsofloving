@@ -1,10 +1,10 @@
 ------------------------------
-KMQuake2 v0.20 with update 8
+KMQuake2 v0.20 with update 8 Test Build
 
 Readme.txt
 ------------------------------
 Enhanced Quake2 OpenGL-only engine with integrated Lazarus support
-(kmquake2.exe & kmq2gamex86.dll && kmquake2.pk3)
+(kmquake2.exe, kmquake2_x64.exe, kmq2gamex86.dll, kmq2gamex64.dll, kmq2_pak00.pk3 & kmq2_pak01.pk3)
 
 	By Knightmare (knightmare66@yahoo.com)
 
@@ -19,6 +19,7 @@ Other code by:
 	Bitshifter
 	BramBo
 	CDawg
+	Daniel Gibson
 	David M. Pochron
 	Discoloda
 	DarkOne
@@ -61,19 +62,21 @@ Menu dogtags, HUD numbers, and F1 computer icon by Pieter Verhoeven
 
 Menu screen by MDK
 
-Load screen by Christopher "Sherpa" Owen
+Load screen by Fabian Rosten
 
-Weapon glow skins in kmquake2_extras.pk3 by Odium and Kman and from Quake2XP
+Weapon glow skins in kmq2_pak01.pk3 by Odium and Kman and from Quake2XP
 
-Uses Zlib compression library, (C) 1995-2017 Jean-loup Gailly and Mark Adler
+Doom3 HUD by Odium
 
-Uses libjpeg (Independent JPEG Group's software) Copyright (C) 1994-2013, Thomas G. Lane, Guido Vollbeding
+Uses Zlib compression library, (C) 1995-2022 Jean-loup Gailly and Mark Adler
 
-Uses libpng image library, Copyright (c) 1998-2017 Glenn Randers-Pehrson
+Uses libjpeg (Independent JPEG Group's software) Copyright (C) 1994-2020, Thomas G. Lane, Guido Vollbeding
+
+Uses libpng image library, Copyright (c) 1998-2022 Glenn Randers-Pehrson
 
 Uses libogg and libvorbis audio libraries, Copyright (c) 2002-2015 Xiph.org Foundation
 
-Uses libcurl data transfer library, Copyright (c) 1996 - 2020, Daniel Stenberg
+Uses libcurl data transfer library, Copyright (c) 1996 - 2022, Daniel Stenberg
 
 ------------------------------
 Key Features
@@ -88,7 +91,7 @@ Key Features
 - Supports server-side control of looped sound attenuation
 - Includes default Lazarus DLL with ACE bots, CTF and 3Team CTF support
 - Uses modified Quake2maX particle effects
-- Improved menus and console (uses some code from Quake2maX)
+- Improved menus and console
 - Streamlined, more memory-efficent adaptation of decal system from Quake2maX
 - TGA, PNG, and JPG texture, skin, and pic autoloading
 - Autoscaling of hi-res replacement textures
@@ -103,14 +106,24 @@ Key Features
 - Integrated support for Lazarus footstep sounds
 
 ------------------------------
+System Requirements
+------------------------------
+- OpenGL 1.2 compatible 3D accelerator, OpenGL 1.4 support or higher
+	(GeForce FX/Radeon 9500 or better) recommended.
+	Absolutely MUST have GL_ARB_multitexture support, 3Dfx cards are NOT supported.
+- Pentium III or Athlon 800MHz+
+- At least 1 GB of RAM for 32-bit operating systems, at least 2GB for 64-bit operating systems.
+- OS: Windows XP supported, Windows Vista or later recommended.  Earlier Windows versions are not supported.
+
+------------------------------
 How To Run
 ------------------------------
-	Unzip into your Quake2 directory (where quake2.exe is) and make a shortcut with path
+	Unzip into your Quake2 folder (where quake2.exe is) and make a shortcut with path
 
 	x\quake2\kmquake2.exe +set game gamedir (for singleplayer, LAN games, and net client use)
 
 	where X is your Quake2 dir's parent dir (for example, C: or D:\games), and gamedir
-	is the game subdirectory (if any) where the mod you want to run is.  NOTE: for the
+	is the game subfolder (if any) where the mod you want to run is.  NOTE: for the
 	mod's code to run, it must be compiled into a kmq2gamex86.dll (see end of file for
 	instructions).
 
@@ -121,6 +134,38 @@ How To Run
 	You can have up to 3 basegames set:
 	
 	+set basegame xatrix +set basegame2 rogue +set basegame3 zaero
+
+	To mount assets from the Steam re-release version of Quake1 using a pak remap script (see kmq2_misc_scripting.txt), add 
+	
+	+set quakerr_importpath_auto 1
+	
+	For the original Steam version, add
+	
+	+set quake_importpath_auto 1
+	
+	For non-Steam versions of Quake1, add
+	
+	+set quake_importpath X:\Quake
+	
+	Where X:\Quake is the Quake1 install path.
+	
+	You can also mount up to 4 Quake1 mission packs or mods in addition to the id1 folder:
+	
+	+set quakegame1 hipnotic +set quakegame2 rogue +set quakegame3 nehahra +set quakegame4 ad
+
+	To mount assets from the Steam re-release version of Quake2 using a pak remap script (see kmq2_misc_scripting.txt), add 
+	
+	+set quake2rr_importpath_auto 1
+		
+	For non-Steam versions of the Quake2 re-release, add
+	
+	+set quake2rr_importpath X:\Quake2RR
+	
+	Where X:\Quake2RR is the Quake2 re-release install path.
+	
+	You can also mount up to 4 Quake2 re-release mods in addition to the baseq2 folder:
+	
+	+set quake2rrgame1 mapjam1 +set quake2rrgame2 mapjam2 +set quake2rrgame3 mapjam3 +set quake2rrgame4 mapjam4
 
 	To ensure connection to all standard Quake2 protocol (34) servers, add
 	
@@ -134,6 +179,10 @@ How To Run
 	+set scanforcd 1
 
 	to the command line.  This is disabled by default.
+	
+	If you are launching KMQuake2 from the Steam interface, you can move the included quake2.exe (or quake2_x64.exe)
+	launcher in the steam_wrapper folder into the Quake2 install folder alongside kmquake2.exe.
+	This is a better method than renaming kmquake2.exe to quake2.exe.
 
 	KMQuake2 writes/reads savegames, config files, demos, etc. to <userprofile>/Saved Games/KMQuake2 on Windows Vista
 	and later, and to My Documents/My Games/KMQuake2 on Windows 2000/XP/2003.
@@ -143,19 +192,17 @@ How To Run
 	The classic Quake 2 behavior of writing config files/savegames/etc to the Quake2 folder can be restored by adding the parameter
 	"-portable" to the command line, or by placing an empty text file called "portable.cfg" in the baseq2 folder.
 
-	An OpenGL 1.2 compatible 3D accelerator, OpenGL 1.4 support or higher (GeForce FX/Radeon 9500 or better) recommended.
-	Absolutely MUST have GL_ARB_multitexture support, 3Dfx cards are NOT supported.
-	Pentium III or Athlon 800MHz+
-	At least 512MB of RAM (1 GB recommended) for 32-bit operating sytems, at least 2GB for 64-bit operating sytsems.
+	If it crashes on startup, make sure that kmq2gamex86.dll is in the baseq2 folder.
 
-	If it crashes on startup, make sure that kmq2gamex86.dll is in the baseq2 subdir.
+	If the controls are missing in the menus and particle effects don't appear properly,
+	make sure that kmquake2.pk3 is in the baseq2 folder.
 
 	If you experience lockups on an ATI video card, set entity shell type to solid or flowing
 	in the advanced section of the video menu.  The envmap effect may be causing the lockups.
 
 	If performance is too slow, or there are no visible or all black textures, type
 	"exec lowend.cfg; vid_restart" in the console.  If you still get all-black
-	textures, remove all config files from the game directory you are running in and restart.
+	textures, remove all config files from the game and savegame directories you are running in and restart.
 	This will make KMQ2 fall back on the internal cvar defaults.
 
 	It is strongly recommened that you copy the idlog.cin file from the Quake2 CD to your

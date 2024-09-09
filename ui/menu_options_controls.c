@@ -37,26 +37,26 @@ CONTROLS MENU
 =======================================================================
 */
 
-static menuframework_s	s_options_controls_menu;
-static menuseparator_s	s_options_controls_header;
-static menuslider_s		s_options_controls_sensitivity_slider;
-static menulist_s		s_options_controls_alwaysrun_box;
-static menulist_s		s_options_controls_thirdperson_box;
-static menuslider_s		s_options_controls_thirdperson_distance_slider;
-static menuslider_s		s_options_controls_thirdperson_offset_slider;
-static menuslider_s		s_options_controls_thirdperson_angle_slider;
-static menulist_s		s_options_controls_invertmouse_box;
-static menulist_s		s_options_controls_autosensitivity_box;
-static menulist_s		s_options_controls_lookspring_box;
-static menulist_s		s_options_controls_lookstrafe_box;
-static menulist_s		s_options_controls_freelook_box;
-static menulist_s		s_options_controls_joystick_box;
-static menuaction_s		s_options_controls_customize_keys_action;
-static menuaction_s		s_options_controls_defaults_action;
-static menuaction_s		s_options_controls_back_action;
+static menuFramework_s	s_options_controls_menu;
+static menuSeparator_s	s_options_controls_header;
+static menuSlider_s		s_options_controls_sensitivity_slider;
+static menuPicker_s		s_options_controls_alwaysrun_box;
+static menuPicker_s		s_options_controls_thirdperson_box;
+static menuSlider_s		s_options_controls_thirdperson_distance_slider;
+static menuSlider_s		s_options_controls_thirdperson_offset_slider;
+static menuSlider_s		s_options_controls_thirdperson_angle_slider;
+static menuPicker_s		s_options_controls_invertmouse_box;
+static menuPicker_s		s_options_controls_autosensitivity_box;
+static menuPicker_s		s_options_controls_lookspring_box;
+static menuPicker_s		s_options_controls_lookstrafe_box;
+static menuPicker_s		s_options_controls_freelook_box;
+static menuPicker_s		s_options_controls_joystick_box;
+static menuAction_s		s_options_controls_customize_keys_action;
+static menuAction_s		s_options_controls_defaults_action;
+static menuAction_s		s_options_controls_back_action;
 
 #ifndef NOTTHIRTYFLIGHTS
-static menulist_s		s_options_controls_console_box;
+static menuListBox_s		s_options_controls_console_box;
 static void ConsoleFunc( void *unused )
 {
 	Cvar_SetValue( "cl_enableconsole", s_options_controls_console_box.curValue );
@@ -425,6 +425,7 @@ void Menu_Options_Controls_Draw (void)
 
 	UI_AdjustMenuCursor (&s_options_controls_menu, 1);
 	UI_DrawMenu (&s_options_controls_menu);
+    UI_DefaultMenuDraw (&s_options_controls_menu);
 }
 
 const char *Menu_Options_Controls_Key (int key)
@@ -435,5 +436,5 @@ const char *Menu_Options_Controls_Key (int key)
 void Menu_Options_Controls_f (void)
 {
 	Menu_Options_Controls_Init ();
-	UI_PushMenu (Menu_Options_Controls_Draw, Menu_Options_Controls_Key);
+	UI_PushMenu (&s_options_controls_menu);
 }

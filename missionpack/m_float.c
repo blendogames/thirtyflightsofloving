@@ -25,7 +25,7 @@ void floater_sight (edict_t *self, edict_t *other)
 
 void floater_idle (edict_t *self)
 {
-	if (!(self->spawnflags & SF_MONSTER_AMBUSH))
+	if ( !(self->spawnflags & SF_MONSTER_AMBUSH) )
 		gi.sound (self, CHAN_VOICE, sound_idle, 1, ATTN_IDLE, 0);
 }
 
@@ -642,6 +642,7 @@ void floater_dead (edict_t *self)
 
 void floater_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
+#ifdef KMQUAKE2_ENGINE_MOD
 	int	n;  // Knightmare added
 
 	for (n = 0; n < 4; n++)
@@ -650,7 +651,7 @@ void floater_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dama
 		ThrowGib (self, "models/objects/gibs/sm_metal/tris.md2", 0, 0, damage, GIB_METALLIC);
 	for (n = 0; n < 2; n++)
 		ThrowGib (self, "models/objects/gibs/gear/tris.md2", 0, 0, damage, GIB_METALLIC);
-
+#endif	// KMQUAKE2_ENGINE_MOD
 	gi.sound (self, CHAN_VOICE, sound_death1, 1, ATTN_NORM, 0);
 	BecomeExplosion1 (self);
 }
@@ -667,6 +668,20 @@ qboolean floater_blocked (edict_t *self, float dist)
 //PGM
 //===========
 
+
+// Knightmare- added soundcache function
+void monster_floater_soundcache (edict_t *self)
+{
+	sound_attack2 = gi.soundindex ("floater/fltatck2.wav");
+	sound_attack3 = gi.soundindex ("floater/fltatck3.wav");
+	sound_death1 = gi.soundindex ("floater/fltdeth1.wav");
+	sound_idle = gi.soundindex ("floater/fltidle1.wav");
+	sound_pain1 = gi.soundindex ("floater/fltpain1.wav");
+	sound_pain2 = gi.soundindex ("floater/fltpain2.wav");
+	sound_sight = gi.soundindex ("floater/fltsght1.wav");
+}
+
+
 /*QUAKED monster_floater (1 .5 0) (-24 -24 -24) (24 24 32) Ambush Trigger_Spawn Sight GoodGuy
 */
 void SP_monster_floater (edict_t *self)
@@ -677,13 +692,8 @@ void SP_monster_floater (edict_t *self)
 		return;
 	}
 
-	sound_attack2 = gi.soundindex ("floater/fltatck2.wav");
-	sound_attack3 = gi.soundindex ("floater/fltatck3.wav");
-	sound_death1 = gi.soundindex ("floater/fltdeth1.wav");
-	sound_idle = gi.soundindex ("floater/fltidle1.wav");
-	sound_pain1 = gi.soundindex ("floater/fltpain1.wav");
-	sound_pain2 = gi.soundindex ("floater/fltpain2.wav");
-	sound_sight = gi.soundindex ("floater/fltsght1.wav");
+	// Knightmare- use soundcache function
+	monster_floater_soundcache (self);
 
 	gi.soundindex ("floater/fltatck1.wav");
 
@@ -724,7 +734,7 @@ void SP_monster_floater (edict_t *self)
 	self->monsterinfo.idle = floater_idle;
 	self->monsterinfo.blocked = floater_blocked;		// PGM
 
-	//Knightmare - sparks, not blood, on damage
+	// Knightmare - sparks, not blood, on damage
 	if (!self->blood_type)
 		self->blood_type = 2; //sparks
 	else

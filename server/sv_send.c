@@ -426,7 +426,7 @@ qboolean SV_SendClientDatagram (client_t *client)
 
 	msg.allowoverflow = true;
 
-	// send over all the relevant entity_state_t
+	// send over all the relevant centity_state_t
 	// and the player_state_t
 	SV_WriteFrameToClient (client, &msg);
 

@@ -10,7 +10,6 @@ void Weapon_Generic (edict_t *ent,
 					 int *pause_frames, 
 					 int *fire_frames, 
 					 void (*fire)(edict_t *ent));
-void P_ProjectSource (gclient_t *client, vec3_t point, vec3_t distance, vec3_t forward, vec3_t right, vec3_t result);
 
 
 static char testItem_className[256];
@@ -52,7 +51,7 @@ void Weapon_LineDraw_Fire (edict_t *ent)
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
 
 	VectorSet(offset, 0, 7,  ent->viewheight - 8);
-	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
+	P_ProjectSource (ent, ent->s.origin, offset, forward, right, start);	// Knightmare- changed parms for aimfix
 
 	if (!ent->client->lineDraw)
 	{
@@ -200,7 +199,6 @@ void convertToVector(char *vecStr, vec3_t *size)
 }
 
 
-
 void InitTestWeapon (void)
 {
 	FILE *wCfgFile;
@@ -212,8 +210,10 @@ void InitTestWeapon (void)
 		return;
 	}
 
-	Com_strcpy (fname, sizeof(fname), gamedir->string);
-	Com_strcat (fname, sizeof(fname), "/testweapon.cfg");
+//	Com_strcpy (fname, sizeof(fname), gamedir->string);
+//	Com_strcat (fname, sizeof(fname), "/testweapon.cfg");
+	// Knightmare- use SavegameDir() instead
+	Com_sprintf (fname, sizeof(fname), "%s/testweapon.cfg", SavegameDir());
 
 	wCfgFile = fopen(fname, "rt");
 	if (!wCfgFile)
@@ -412,7 +412,7 @@ void Cmd_TestItem (edict_t *ent)
 }
 
 
-void InitTestItem(void)
+void InitTestItem (void)
 {
 	FILE *wCfgFile;
 	char fname[256];
@@ -423,8 +423,10 @@ void InitTestItem(void)
 		return;
 	}
 
-	Com_strcpy (fname, sizeof(fname), gamedir->string);
-	Com_strcat (fname, sizeof(fname), "/testitem.cfg");
+//	Com_strcpy (fname, sizeof(fname), gamedir->string);
+//	Com_strcat (fname, sizeof(fname), "/testitem.cfg");
+	// Knightmare- use SavegameDir() instead
+	Com_sprintf (fname, sizeof(fname), "%s/testitem.cfg", SavegameDir());
 
 	wCfgFile = fopen(fname, "rt");
 	if (!wCfgFile)

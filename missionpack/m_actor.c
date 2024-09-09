@@ -1127,11 +1127,11 @@ qboolean actor_checkattack (edict_t *self)
 {
 	vec3_t		v;
 	vec3_t		forward, right, start, end;
-	float		chance;
-	float		range;
-	float		goodchance, poorchance, lorange, hirange;
+	float		chance = 0.0f;
+	float		range = 0.0f;
+	float		goodchance = 0.0f, poorchance = 0.0f, lorange = 0.0f, hirange = 0.0f;
 	trace_t		tr;
-	int			weapon;
+	int			weapon = 0;
 
 	// Paranoia check
 	if (!self->enemy)
@@ -1299,7 +1299,7 @@ qboolean actor_blocked (edict_t *self, float dist)
 	if (blocked_checkshot (self, 0.25 + (0.05 * skill->value) ))
 		return true;
 
-	if (blocked_checkjump (self, dist, self->monsterinfo.jumpdn, self->monsterinfo.jumpup))
+	if (blocked_checkjump_laz (self, dist, self->monsterinfo.jumpdn, self->monsterinfo.jumpup))
 		return true;
 
 	if (blocked_checkplat (self, dist))
@@ -1657,6 +1657,12 @@ void SP_misc_actor (edict_t *self)
 		self->monsterinfo.jump = actor_jump;
 		self->monsterinfo.jumpup = 48;
 		self->monsterinfo.jumpdn = 160;
+	}
+	else
+	{
+		self->monsterinfo.jump = NULL;
+		self->monsterinfo.jumpup = 0;
+		self->monsterinfo.jumpdn = 0;
 	}
 //	self->monsterinfo.blocked = actor_blocked;
 

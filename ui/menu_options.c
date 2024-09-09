@@ -37,20 +37,20 @@ OPTIONS MENU
 =======================================================================
 */
 
-static menuframework_s	s_options_menu;
-static menuaction_s		s_options_sound_section;
-static menuaction_s		s_options_controls_section;
-static menuaction_s		s_options_screen_section;
-static menuaction_s		s_options_effects_section;
-static menuaction_s		s_options_interface_section;
-static menuaction_s		s_options_back_action;
+static menuFramework_s	s_options_menu;
+static menuAction_s		s_options_sound_section;
+static menuAction_s		s_options_controls_section;
+static menuAction_s		s_options_screen_section;
+static menuAction_s		s_options_effects_section;
+static menuAction_s		s_options_interface_section;
+static menuAction_s		s_options_back_action;
 
 #ifndef NOTTHIRTYFLIGHTS
-static menuaction_s		s_options_video_section;
+static menuAction_s		s_options_video_section;
 
-static menuframework_s		s_dialogue_menu;
-static menuaction_s		s_dialogue_text_section;
-static menuaction_s		s_dialogue_ok_section;
+static menuFramework_s		s_dialogue_menu;
+static menuAction_s		s_dialogue_text_section;
+static menuAction_s		s_dialogue_ok_section;
 #endif
 
 //=======================================================================
@@ -172,7 +172,7 @@ void Menu_Options_Init (void)
 void Menu_Options_Draw (void)
 {
 #ifndef NOTTHIRTYFLIGHTS
-	menucommon_s *citem;
+	menuCommon_s *citem;
 #endif
 
 	UI_DrawBanner ("m_banner_options");
@@ -196,15 +196,16 @@ void Menu_Options_Draw (void)
 		icondraw( name );
 	}
 #endif
+    UI_DefaultMenuDraw (&s_options_menu);
 }
 
-const char *Menu_Options_Key (int key)
+void Menu_Options_Key (int key)
 {
-	return UI_DefaultMenuKey (&s_options_menu, key);
+	UI_DefaultMenuKey (&s_options_menu, key);
 }
 
 void Menu_Options_f (void)
 {
 	Menu_Options_Init ();
-	UI_PushMenu (Menu_Options_Draw, Menu_Options_Key);
+	UI_PushMenu (&s_options_menu);
 }

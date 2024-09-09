@@ -312,6 +312,9 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 			case MOD_FALLING_ROCKS:
 				message = "was killed by falling rocks";
 				break;
+			case MOD_Q1_LIGHTNING_TRAP:
+				message = "had an enlightening experience";
+				break;
 		}
 		if (attacker == self)
 		{
@@ -686,6 +689,11 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 			{
 				message = "got an infusion of plasma from a";
 			}
+			// Disruptor guard
+			else if (!strcmp(attacker->classname, "monster_soldier_dist"))
+			{
+				message = "got sucked into the singularity by a";
+			}
 			// Enforcer
 			else if (!strcmp(attacker->classname, "monster_infantry"))
 			{
@@ -723,15 +731,25 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 			// Berserker
 			else if (!strcmp(attacker->classname, "monster_berserk"))
 				message = "was smashed by a";
-			// Gladiator/Beta Class Gladiator
+			// Gladiator / Beta Class Gladiator / BFGladiator
 			else if (!strcmp(attacker->classname, "monster_gladiator")
-				|| !strcmp(attacker->classname, "monster_gladb"))
+				|| !strcmp(attacker->classname, "monster_gladb")
+				|| !strcmp(attacker->classname, "monster_bfgladiator") )
 			{
 				if (mod == MOD_RAILGUN)
 					message = "was railed by a";
 				else if ((mod == MOD_PHALANX) || (mod == MOD_PHALANX_SPLASH)) {
 					message = "was evaporated by a";
 					message2 = "'s particle cannon";
+				}
+				else if (mod == MOD_BFG_LASER) {
+					message = "saw the pretty lights from a";
+				}
+				else if (mod == MOD_BFG_BLAST) {
+					message = "was disintegrated by a";
+				}
+				else if (mod == MOD_BFG_EFFECT) {
+					message = "couldn't hide from a";
 				}
 				else if (mod == MOD_HIT) {
 					message = "was mangled by a";
@@ -1101,6 +1119,9 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 			// Spawn
 			else if ( !Q_stricmp(attacker->classname, "q1_monster_tarbaby") || !Q_stricmp(attacker->classname, "monster_q1_tarbaby") )
 				message = "was slimed by a";
+			// Chthon
+			else if ( !Q_stricmp(attacker->classname, "q1_monster_chton") || !Q_stricmp(attacker->classname, "monster_q1_chthon") )
+				message = "couldn't face";
 			// Freddie
 			else if ( !Q_stricmp(attacker->classname, "q1_monster_freddie") || !Q_stricmp(attacker->classname, "monster_q1_freddie") )
 				message = "was exterminated by";
@@ -1404,13 +1425,13 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	{
 		// PMM
 		// don't toss gibs if we got vaped by the nuke
-		if (!(self->flags & FL_NUKED))
+		if ( !(self->flags & FL_NUKED) )
 		{
 		// pmm
 			// gib
 			gi.sound (self, CHAN_BODY, gi.soundindex ("misc/udeath.wav"), 1, ATTN_NORM, 0);
 			// more meaty gibs for your dollar!
-			if ((deathmatch->value) && (self->health < (self->gib_health * 2))) {
+			if ( (deathmatch->value) && (self->health < (self->gib_health * 2)) ) {
 				for (n = 0; n < 4; n++)
 					ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", 0, 0, damage, GIB_ORGANIC);
 			}
@@ -2529,7 +2550,7 @@ void PutClientInServer (edict_t *ent)
 	memcpy (userinfo, ent->client->pers.userinfo, sizeof(userinfo));
 	ClientUserinfoChanged (ent, userinfo);
 
-	//Knightmare- backup chasetoggle
+	// Knightmare- backup chasetoggle
 	if (client->chasetoggle)
 		tempchase = 1;
 	else
@@ -2808,9 +2829,9 @@ void ClientBegin (edict_t *ent)
 
 	Fog_Off (ent);
 
-	stuffcmd(ent,"alias +zoomin zoomin;alias -zoomin zoominstop\n");
-	stuffcmd(ent,"alias +zoomout zoomout;alias -zoomout zoomoutstop\n");
-	stuffcmd(ent,"alias +zoom zoomon;alias -zoom zoomoff\n");
+	stuffcmd (ent,"alias +zoomin zoomin;alias -zoomin zoominstop\n");
+	stuffcmd (ent,"alias +zoomout zoomout;alias -zoomout zoomoutstop\n");
+	stuffcmd (ent,"alias +zoom zoomon;alias -zoom zoomoff\n");
 
 	// if there is already a body waiting for us (a loadgame), just
 	// take it, otherwise spawn one from scratch
@@ -3483,7 +3504,7 @@ void ClientSpycam (edict_t *ent)
 				}
 				else if (is_actor)
 				{
-					int	weapon = camera->actor_weapon[camera->actor_current_weapon];
+				//	int	weapon = camera->actor_weapon[camera->actor_current_weapon];
 					if (!camera->enemy)
 					{
 						edict_t	*target;
@@ -3900,11 +3921,14 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		else
 			client->ps.pmove.pm_type = PM_NORMAL;
 
+		if (level.time > ent->gravity_debounce_time) {
 	//PGM	trigger_gravity support
-		if (level.time > ent->gravity_debounce_time)
-	//	client->ps.pmove.gravity = sv_gravity->value;
-			client->ps.pmove.gravity = sv_gravity->value * ent->gravity;
+			if ( (level.maptype == MAPTYPE_ROGUE) || sv_trigger_gravity_player->value ) // Knightmare- only do this for Rogue maps
+				client->ps.pmove.gravity = sv_gravity->value * ent->gravity;
+			else
+				client->ps.pmove.gravity = sv_gravity->value;
 	//PGM
+		}
 		else
 			client->ps.pmove.gravity = 0;
 
@@ -4182,7 +4206,9 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		gi.linkentity (ent);
 
 	//PGM trigger_gravity support
-		ent->gravity = 1.0;
+		if ( (level.maptype == MAPTYPE_ROGUE) || sv_trigger_gravity_player->value ) { // Knightmare- only do this for Rogue maps
+			ent->gravity = 1.0;
+		}
 	//PGM
 		if (ent->movetype != MOVETYPE_NOCLIP)
 			G_TouchTriggers (ent);

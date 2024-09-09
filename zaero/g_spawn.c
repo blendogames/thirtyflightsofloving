@@ -1,11 +1,11 @@
 
 #include "g_local.h"
 
-typedef struct
+/*typedef struct
 {
 	char	*name;
 	void	(*spawn)(edict_t *ent);
-} spawn_t;
+} spawn_t; */
 
 
 void SP_item_health (edict_t *self);
@@ -144,8 +144,6 @@ void SP_monster_zboss (edict_t *self);
 void SP_target_zboss_target(edict_t *self);
 void SP_func_barrier(edict_t *self);
 void SP_misc_seat(edict_t *self);
-
-
 
 spawn_t	spawns[] = {
 	{"item_health", SP_item_health},
@@ -293,6 +291,70 @@ spawn_t	spawns[] = {
 	{NULL, NULL}
 };
 
+// Knightmare- sound precache functions
+void monster_berserk_soundcache (edict_t *self);
+void monster_boss2_soundcache (edict_t *self);
+void monster_jorg_soundcache (edict_t *self);
+void monster_makron_soundcache (edict_t *self);
+void monster_brain_soundcache (edict_t *self);
+void monster_chick_soundcache (edict_t *self);
+void monster_flipper_soundcache (edict_t *self);
+void monster_floater_soundcache (edict_t *self);
+void monster_flyer_soundcache (edict_t *self);
+void monster_gladiator_soundcache (edict_t *self);
+void monster_gunner_soundcache (edict_t *self);
+void monster_hover_soundcache (edict_t *self);
+void monster_infantry_soundcache (edict_t *self);
+void misc_insane_soundcache (edict_t *self);
+void monster_medic_soundcache (edict_t *self);
+void monster_mutant_soundcache (edict_t *self);
+void monster_parasite_soundcache (edict_t *self);
+void monster_soldier_x_soundcache (edict_t *self);
+void monster_supertank_soundcache (edict_t *self);
+void monster_tank_soundcache (edict_t *self);
+
+// Zaero
+void monster_handler_soundcache (edict_t *self);
+void monster_hound_soundcache (edict_t *self);
+void monster_sentien_soundcache (edict_t *self);
+void monster_zboss_soundcache (edict_t *self);
+
+// Knightmare- sound precache table
+soundcache_t	soundcaches[] = {
+	{"monster_berserk", monster_berserk_soundcache},
+	{"monster_boss2", monster_boss2_soundcache},
+	{"monster_jorg", monster_jorg_soundcache},
+	{"monster_makron", monster_makron_soundcache},
+	{"monster_brain", monster_brain_soundcache},
+	{"monster_chick", monster_chick_soundcache},
+	{"monster_flipper", monster_flipper_soundcache},
+	{"monster_floater", monster_floater_soundcache},
+	{"monster_flyer", monster_flyer_soundcache},
+	{"monster_gladiator", monster_gladiator_soundcache},
+	{"monster_gunner", monster_gunner_soundcache},
+	{"monster_hover", monster_hover_soundcache},
+	{"monster_infantry", monster_infantry_soundcache},
+	{"misc_insane", misc_insane_soundcache},
+	{"monster_medic", monster_medic_soundcache},
+	{"monster_mutant", monster_mutant_soundcache},
+	{"monster_parasite", monster_parasite_soundcache},
+	{"monster_soldier_light", monster_soldier_x_soundcache},
+	{"monster_soldier", monster_soldier_x_soundcache},
+	{"monster_soldier_ss", monster_soldier_x_soundcache},
+	{"monster_supertank",  monster_supertank_soundcache},
+	{"monster_tank", monster_tank_soundcache},
+	{"monster_tank_commander", monster_tank_soundcache},
+
+	// Zaero
+	{"monster_hound", monster_hound_soundcache},
+	{"monster_handler", monster_handler_soundcache},
+	{"monster_sentien", monster_sentien_soundcache},
+	{"monster_zboss", monster_zboss_soundcache},
+
+	{NULL, NULL}
+};
+// end Knightmare
+
 /*
 ===============
 ED_CallSpawn
@@ -432,6 +494,46 @@ void ED_ParseField (char *key, char *value, edict_t *ent)
 	gi.dprintf ("%s is not a field\n", key);
 }
 
+
+// Knightmare added
+/*
+===============
+ED_SetDefaultFields
+
+Sets the default binary values in an edict
+===============
+*/
+void ED_SetDefaultFields (edict_t *ent)
+{
+	field_t	*f;
+	byte	*b;
+	
+	for (f=fields ; f->name ; f++)
+	{
+		if (f->flags & FFL_DEFAULT_NEG)
+		{
+			if (f->flags & FFL_SPAWNTEMP)
+				b = (byte *)&st;
+			else
+				b = (byte *)ent;
+				
+			if (f->type == F_LSTRING)
+				*(char **)(b+f->ofs) = ED_NewString ("-1");
+			else if ( (f->type == F_VECTOR) || (f->type == F_ANGLEHACK) ) {
+				((float *)(b+f->ofs))[0] = -1.0f;
+				((float *)(b+f->ofs))[1] = -1.0f;
+				((float *)(b+f->ofs))[2] = -1.0f;
+			}
+			else if (f->type == F_INT)
+				*(int *)(b+f->ofs) = -1;
+			else if (f->type == F_FLOAT)
+				*(float *)(b+f->ofs) = -1.0f;
+		}
+	}
+}
+// end Knightmare
+
+
 /*
 ====================
 ED_ParseEdict
@@ -448,6 +550,9 @@ char *ED_ParseEdict (char *data, edict_t *ent)
 
 	init = false;
 	memset (&st, 0, sizeof(st));
+
+	// Knightmare- set field defaults
+	ED_SetDefaultFields (ent);
 
 // go through all the dictionary pairs
 	while (1)
@@ -483,6 +588,44 @@ char *ED_ParseEdict (char *data, edict_t *ent)
 		memset (ent, 0, sizeof(*ent));
 
 	return data;
+}
+
+
+/*
+===========
+G_PrecachePlayerInventories
+
+Precaches inventory for all players transitioning
+across maps in SP and coop.
+============
+*/
+void G_PrecachePlayerInventories (void)
+{
+	int			i, j;
+	gclient_t	*client = NULL;
+	gitem_t		*item = NULL;
+
+	if (deathmatch->value)	// not needed in DM/CTF
+		return;
+
+	for (i = 0; i < game.maxclients; i++)
+	{
+		if (&game.clients[i] != NULL)
+		{
+		//	gi.dprintf ("PrecachePlayerInventories(): precaching for client %i\n", i);
+			client = &game.clients[i];
+			for (j = 0; j < game.num_items; j++)
+			{
+				if (client->pers.inventory[j] > 0) {
+					item = &itemlist[j];
+					if (item != NULL) {
+					//	gi.dprintf ("PrecachePlayerInventories(): precaching item %i: %s\n", j, item->classname);
+						PrecacheItem (item);
+					}
+				}
+			}
+		}
+	}
 }
 
 
@@ -652,9 +795,49 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 
 	PlayerTrail_Init ();
 
-	Z_SpawnDMItems();
+	Z_SpawnDMItems ();
+
+	// Knightmare- precache transitioning player inventories here
+	// Fixes lag when changing weapons after level transition
+	G_PrecachePlayerInventories ();
 }
 
+//===================================================================
+
+// Knightmare added
+/*
+==============
+G_SoundcacheEntities
+
+Reloads static cached sounds for entities using spawns table
+==============
+*/
+void G_SoundcacheEntities (void)
+{
+	int		i;
+	edict_t	*ent = NULL;
+	soundcache_t	*s = NULL;
+
+	ent = &g_edicts[0];
+	for (i = 0; i < globals.num_edicts; i++, ent++)
+	{
+		if (!ent->inuse)
+			continue;
+
+		// check normal spawn functions
+		for (s=soundcaches; s->name; s++)
+		{
+			if ( !strcmp(s->name, ent->classname) )
+			{	// found it
+				if (s->soundcache != NULL) {
+					s->soundcache (ent);
+				}
+				break;
+			}
+		}
+	}
+}
+// end Knightmare
 
 //===================================================================
 
@@ -725,9 +908,9 @@ char *single_statusbar =
 "	yb	-50 "
 "endif "
 
-// timer
+// timer (was xv 262)
 "if 9 "
-"	xv	262 "
+"	xv	230 "
 "	num	4	10 "
 "	xv	296 "
 "	pic	9 "
@@ -794,9 +977,9 @@ char *dm_statusbar =
 "	yb	-50 "
 "endif "
 
-// timer
+// timer (was xv 246)
 "if 9 "
-"	xv	246 "
+"	xv	230 "
 "	num	4	10 "
 "	xv	296 "
 "	pic	9 "
@@ -874,6 +1057,27 @@ void SP_worldspawn (edict_t *ent)
 
 	gi.configstring (CS_SKYAXIS, va("%f %f %f",
 		st.skyaxis[0], st.skyaxis[1], st.skyaxis[2]) );
+
+	// Knightmare- configstrings added for DK-style clouds support
+#ifdef KMQUAKE2_ENGINE_MOD
+	gi.configstring (CS_SKYDISTANCE, va("%f", st.skydistance) );
+
+	if (st.cloudname && st.cloudname[0])
+		gi.configstring (CS_CLOUDNAME, st.cloudname);
+	else
+		gi.configstring (CS_CLOUDNAME, "");
+
+	gi.configstring (CS_CLOUDLIGHTFREQ, va("%f", st.lightningfreq) );
+
+	gi.configstring (CS_CLOUDDIR, va("%f %f", st.cloudxdir, st.cloudydir) );
+
+	gi.configstring (CS_CLOUDTILE, va("%f %f %f", st.cloud1tile, st.cloud2tile, st.cloud3tile) );
+
+	gi.configstring (CS_CLOUDSPEED, va("%f %f %f", st.cloud1speed, st.cloud2speed, st.cloud3speed) );
+
+	gi.configstring (CS_CLOUDALPHA, va("%f %f %f", st.cloud1alpha, st.cloud2alpha, st.cloud3alpha) );
+#endif	// KMQUAKE2_ENGINE_MOD
+	// end DK-style clouds support
 
 	// Knightmare- if a named soundtrack is specified, play it instead of from CD
 	if (ent->musictrack && strlen(ent->musictrack))

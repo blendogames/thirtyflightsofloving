@@ -237,7 +237,7 @@ cvar_t *Cvar_Get (char *var_name, char *var_value, int flags)
 	{
 		var->flags |= flags;
 		// Knightmare- added cvar defaults
-		Z_Free(var->default_string);
+		Z_Free (var->default_string);
 		var->default_string = CopyString (var_value);
 
 		return var;
@@ -399,12 +399,26 @@ cvar_t *Cvar_Set (char *var_name, char *value)
 /*
 ============
 Cvar_SetToDefault
+
 Knightmare added
 ============
 */
 cvar_t *Cvar_SetToDefault (char *var_name)
 {
 	return Cvar_Set2 (var_name, Cvar_DefaultString(var_name), false);
+}
+
+
+/*
+============
+Cvar_ForceSetToDefault
+
+Knightmare added
+============
+*/
+cvar_t	*Cvar_ForceSetToDefault (char *var_name)
+{
+	return Cvar_Set2 (var_name, Cvar_DefaultString(var_name), true);
 }
 
 
@@ -425,10 +439,10 @@ void Cvar_SetDescription (char *var_name, char *description)
 		return;
 	}
 	if (var->description) {
-		free(var->description);
+		Z_Free (var->description);
 	}
 	if ( description && (strlen(description) > 1) ) {
-		var->description = strdup(description);
+		var->description = CopyString (description);
 	}
 }
 
@@ -739,7 +753,7 @@ void Cvar_Toggle_f (void)
 		return;
 	}
 
-	Cvar_Set2(var->name, va("%i", !var->integer), false);
+	Cvar_Set2 (var->name, va("%i", !var->integer), false);
 }
 
 
@@ -765,7 +779,7 @@ void Cvar_Reset_f (void)
 		return;
 	}
 
-	Cvar_Set2(var->name, var->default_string, false);
+	Cvar_Set2 (var->name, var->default_string, false);
 }
 
 

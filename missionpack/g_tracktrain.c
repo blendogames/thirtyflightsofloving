@@ -35,7 +35,7 @@ void tracktrain_reach_dest (edict_t *self);
 
 static float track_AngleMod (float in)
 {
-	float out;
+	float out = 0.0f;
 
 	if (in < 0)
 		out = in + 360 * ((int)(in / 360)+1);
@@ -182,8 +182,8 @@ void trackchange_done (edict_t *self)
 			train->moveinfo.state = train->moveinfo.prevstate;
 			if (train->moveinfo.state && (train->sounds > 0)) {
 				train->s.sound = gi.soundindex(va("%sspeed%d.wav", train->source, abs(train->moveinfo.state)));
-	#ifdef LOOP_SOUND_ATTENUATION
-				train->s.attenuation = train->attenuation;
+	#ifdef KMQUAKE2_ENGINE_MOD
+				train->s.loop_attenuation = train->attenuation;
 	#endif
 			}
 			train->moveinfo.next_speed = train->moveinfo.state * train->moveinfo.speed/3;
@@ -295,8 +295,8 @@ void trackchange_use (edict_t *self, edict_t *other, edict_t *activator)
 	if (self->moveinfo.sound_start)
 		gi.positioned_sound (self->s.origin, self, CHAN_AUTO, self->moveinfo.sound_start, 1, self->attenuation, 0); // was ATTN_NORM
 	self->s.sound = self->moveinfo.sound_middle;
-#ifdef LOOP_SOUND_ATTENUATION
-	self->s.attenuation = self->attenuation;
+#ifdef KMQUAKE2_ENGINE_MOD
+	self->s.loop_attenuation = self->attenuation;
 #endif
 
 	self->think     = trackchange_done;
@@ -363,7 +363,19 @@ void SP_func_trackchange (edict_t *self)
 	else
 		self->moveinfo.state = STATE_TOP;
 
-	if (self->sounds > 1 && self->sounds < 100) // custom sounds
+	if (st.q1sounds == 1)
+	{
+		self->moveinfo.sound_start = gi.soundindex ("q1plats/plat1.wav");
+		self->moveinfo.sound_middle = 0;
+		self->moveinfo.sound_end = gi.soundindex ("q1plats/plat2.wav");
+	}
+	else if (st.q1sounds == 2)
+	{
+		self->moveinfo.sound_start = gi.soundindex ("q1plats/medplat1.wav");
+		self->moveinfo.sound_middle = 0;
+		self->moveinfo.sound_end = gi.soundindex ("q1plats/medplat2.wav");
+	}
+	else if (self->sounds > 1 && self->sounds < 100) // custom sounds
 	{
 		self->moveinfo.sound_start = gi.soundindex  (va("plats/pt%02i_strt.wav", self->sounds));
 		self->moveinfo.sound_middle = gi.soundindex  (va("plats/pt%02i_mid.wav", self->sounds));
@@ -460,8 +472,8 @@ void tracktrain_drive (edict_t *train, edict_t *other )
 	train->moveinfo.next_speed = train->moveinfo.speed;
 	if (train->sounds) {
 		train->s.sound = gi.soundindex(va("%sspeed%d.wav", train->source, abs(train->moveinfo.state)));
-#ifdef LOOP_SOUND_ATTENUATION
-		train->s.attenuation = train->attenuation;
+#ifdef KMQUAKE2_ENGINE_MOD
+		train->s.loop_attenuation = train->attenuation;
 #endif
 	}
 	else
@@ -514,8 +526,8 @@ void tracktrain_disengage (edict_t *train)
 			train->moveinfo.state = STOP;
 			train->moveinfo.next_speed = 0;
 			train->s.sound = gi.soundindex(va("%sspeed1.wav",train->source));
-	#ifdef LOOP_SOUND_ATTENUATION
-			train->s.attenuation = train->attenuation;
+	#ifdef KMQUAKE2_ENGINE_MOD
+			train->s.loop_attenuation = train->attenuation;
 	#endif
 		}
 
@@ -542,11 +554,11 @@ void tracktrain_hide (edict_t *self)
 
 void tracktrain_think (edict_t *self)
 {
-	float	distance, speed, time;
-	float	yaw, pitch;
+	float	distance = 0.0f, speed = 0.0f, time = 0.0f;
+	float	yaw = 0.0f, pitch = 0.0f;
 	vec3_t	forward, left, up, f1, l1, u1, v;
-	int		i;
-	edict_t	*ent;
+	int		i = 0;
+	edict_t	*ent = NULL;
 
 	if (self->spawnflags & SF_TRACKTRAIN_OTHERMAP)
 	{
@@ -659,8 +671,8 @@ void tracktrain_think (edict_t *self)
 								self->s.frame = (self->moveinfo.state - RFAST)*2 + (1 - (self->s.frame % 2));
 							if (self->moveinfo.state && (self->sounds > 0)) {
 								self->s.sound = gi.soundindex(va("%sspeed%d.wav", self->source, abs(self->moveinfo.state)));
-						#ifdef LOOP_SOUND_ATTENUATION
-								self->s.attenuation = self->attenuation;
+						#ifdef KMQUAKE2_ENGINE_MOD
+								self->s.loop_attenuation = self->attenuation;
 						#endif
 							}
 							else
@@ -679,8 +691,8 @@ void tracktrain_think (edict_t *self)
 								self->s.frame = (self->moveinfo.state - RFAST)*2 + (1 - (self->s.frame % 2));
 							if (self->moveinfo.state && (self->sounds > 0)) {
 								self->s.sound = gi.soundindex(va("%sspeed%d.wav",self->source,abs(self->moveinfo.state)));
-						#ifdef LOOP_SOUND_ATTENUATION
-								self->s.attenuation = self->attenuation;
+						#ifdef KMQUAKE2_ENGINE_MOD
+								self->s.loop_attenuation = self->attenuation;
 						#endif
 							}
 							else
@@ -1252,7 +1264,7 @@ edict_t *NextPathTrack(edict_t *train, edict_t *path)
 
 			if (!next)
 			{
-				float	dot;
+				float	dot = 0.0f;
 
 				// Finally, check this path_track's target and target2
 				if (path->target)
@@ -1269,8 +1281,8 @@ edict_t *NextPathTrack(edict_t *train, edict_t *path)
 				}
 				if (path->target2 && !(path->spawnflags & SF_PATH_ALTPATH))
 				{
-					edict_t	*next2;
-					float	dot2;
+					edict_t	*next2 = NULL;
+					float	dot2 = 0.0f;
 					
 					next2 = G_PickTarget (path->target2);
 					if ( next2 == path )
@@ -1298,7 +1310,7 @@ edict_t *NextPathTrack(edict_t *train, edict_t *path)
 	}
 	else	// Moving forward
 	{
-		float	dot;
+		float	dot = 0.0f;
 
 		if (path->target)
 		{
@@ -1314,8 +1326,8 @@ edict_t *NextPathTrack(edict_t *train, edict_t *path)
 		}
 		if (path->target2 && !(path->spawnflags & SF_PATH_ALTPATH))
 		{
-			edict_t	*next2;
-			float	dot2;
+			edict_t	*next2 = NULL;
+			float	dot2 = 0.0f;
 
 			next2 = G_PickTarget (path->target2);
 			if ( next2 == path )
@@ -1401,13 +1413,13 @@ edict_t *NextPathTrack(edict_t *train, edict_t *path)
 	return next;
 }
 
-void LookAhead( edict_t *train, vec3_t point, float dist )
+void LookAhead (edict_t *train, vec3_t point, float dist)
 {
-	float originalDist = dist;
-	float length;
+//	float	originalDist = dist;
+	float	length;
 	vec3_t	v;
-	edict_t	*path;
-	int		n=0;
+	edict_t	*path = NULL;
+	int		n = 0;
 	
 	path = train->target_ent;
 	if (!path || dist < 0)
@@ -1832,7 +1844,7 @@ void func_tracktrain_find (edict_t *self)
 				//This is now the child's original position
 				if ( (e->solid == SOLID_BSP) && strcmp(e->classname,"func_rotating")
 					&& strcmp(e->classname,"func_door_rotating"))
-					ReInitialize_Entity(e);
+					ReInitialize_Entity (e);
 				gi.linkentity (e);
 			}
 		}
@@ -1864,8 +1876,8 @@ void tracktrain_use (edict_t *self, edict_t *other, edict_t *activator)
 			self->moveinfo.next_speed = self->moveinfo.speed;
 			if (self->sounds) {
 				self->s.sound = gi.soundindex(va("%sspeed%d.wav", self->source, abs(self->moveinfo.state)));
-		#ifdef LOOP_SOUND_ATTENUATION
-				self->s.attenuation = self->attenuation;
+		#ifdef KMQUAKE2_ENGINE_MOD
+				self->s.loop_attenuation = self->attenuation;
 		#endif
 			}
 			else
@@ -2019,7 +2031,8 @@ void find_tracktrain (edict_t *self)
 
 	// This gives game a chance to put player in place before
 	// restarting train
-	if (!g_edicts[1].linkcount)
+//	if (!g_edicts[1].linkcount)
+	if ( !AnyPlayerSpawned() )	// Knightmare- function handles multiple players
 	{
 		self->nextthink = level.time + FRAMETIME;
 		return;
@@ -2062,8 +2075,8 @@ void find_tracktrain (edict_t *self)
 	}
 	if (train->moveinfo.state && (train->sounds > 0)) {
 		train->s.sound = gi.soundindex(va("%sspeed%d.wav", train->source, abs(train->moveinfo.state)));
-#ifdef LOOP_SOUND_ATTENUATION
-		train->s.attenuation = train->attenuation;
+#ifdef KMQUAKE2_ENGINE_MOD
+		train->s.loop_attenuation = train->attenuation;
 #endif
 	}
 	else

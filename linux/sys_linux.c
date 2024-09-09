@@ -63,7 +63,7 @@ static char	download_dir[MAX_OSPATH];
 // General routines
 // =======================================================================
 
-void Sys_ConsoleOutput (char *string)
+void Sys_ConsoleOutput (const char *string)
 {
 	if (nostdout && nostdout->value)
 		return;
@@ -215,6 +215,96 @@ void Sys_ShowConsole (qboolean show)
 
 /*****************************************************************************/
 
+/*
+=================
+Sys_LoadLibrary
+
+From Yamagi Q2
+=================
+*/
+void *Sys_LoadLibrary (const char *libPath, const char *initFuncName, void **libHandle)
+{
+	void	*hLibrary, *funcPtr;
+
+	*libHandle = NULL;
+
+#ifdef USE_SANITIZER
+	hLibrary = dlopen (libPath, RTLD_LAZY | RTLD_NODELETE);
+#else
+	hLibrary = dlopen (libPath, RTLD_LAZY);
+#endif
+
+	if ( !hLibrary ) {
+		Com_DPrintf("Sys_LoadLibrary: failure on %s, dlopen returned %s\n", libPath, dlerror());
+		return NULL;
+	}
+
+	if (initFuncName != NULL)
+	{
+		funcPtr = dlsym (hLibrary, initFuncName);
+
+		if ( !funcPtr ) {
+			Com_DPrintf("Sys_LoadLibrary: failure in %s on %s, dlclose returned %s\n", libPath, initFuncName, dlerror());
+			dlclose (hLibrary);
+			return NULL;
+		}
+	}
+	else {
+		funcPtr = NULL;
+	}
+
+	*libHandle = hLibrary;
+
+	Com_DPrintf("Sys_LoadLibrary: sucessfully loaded %s\n", libPath);
+
+	return funcPtr;
+}
+
+
+/*
+=================
+Sys_FreeLibrary
+
+From Yamagi Q2
+=================
+*/
+void Sys_FreeLibrary (void *libHandle)
+{
+	if ( libHandle && dlclose(libHandle) )
+	{
+		Com_Error(ERR_FATAL, "dlclose failed on %p: %s", libHandle, dlerror());
+	}
+}
+
+
+/*
+=================
+Sys_GetProcAddress
+
+From Yamagi Q2
+=================
+*/
+void *Sys_GetProcAddress (void *libHandle, const char *initFuncName)
+{
+    if (libHandle == NULL)
+    {
+#ifdef RTLD_DEFAULT
+        return dlsym(RTLD_DEFAULT, initFuncName);
+#else
+        /* POSIX suggests that this is a portable equivalent */
+        static void *global_namespace = NULL;
+
+        if (global_namespace == NULL)
+            global_namespace = dlopen(NULL, RTLD_GLOBAL|RTLD_LAZY);
+
+        return dlsym (global_namespace, initFuncName);
+#endif
+    }
+    return dlsym (libHandle, initFuncName);
+}
+
+/*****************************************************************************/
+
 static void *game_library;
 
 /*
@@ -245,15 +335,21 @@ void *Sys_GetGameAPI (void *parms)
 	char	*path;
 
 	// Knightmare- changed game library name for better cohabitation
-#ifdef __i386__
-	const char *gamename = "kmq2gamei386.so";
-#elif defined __alpha__
-	const char *gamename = "kmq2gameaxp.so";
-#elif defined __x86_64__
+#if defined (_M_X64) || defined (_M_AMD64) || defined (__x86_64__)
 	const char *gamename = "kmq2gamex64.so";
-#elif defined __powerpc__
+#elif defined (__i386__)
+	const char *gamename = "kmq2gamei386.so";
+#elif defined (__ia64__)
+	const char *gamename = "kmq2gameia64.so";
+#elif defined (__alpha__)
+	const char *gamename = "kmq2gameaxp.so";
+#elif defined (__arm__)
+	const char *gamename = "kmq2gamearm32.so";
+#elif defined (__aarch64__)
+	const char *gamename = "kmq2gamearm64.so";
+#elif defined (__powerpc__)
 	const char *gamename = "kmq2gameppc.so";
-#elif defined __sparc__
+#elif defined (__sparc__)
 	const char *gamename = "kmq2gamesparc.so";
 #else
 #error Unknown arch
@@ -338,7 +434,7 @@ const char* Sys_DownloadDir(void)
 	return download_dir;
 }
 
-static void Init_ExeDir (const char* argv0)
+void Init_ExeDir (const char* argv0)
 {
 #if 1
 	memset(exe_dir, 0, sizeof(exe_dir));
@@ -387,7 +483,7 @@ static void Init_ExeDir (const char* argv0)
 #endif
 }
 
-static void Sys_InitPrefDir (void)
+void Sys_InitPrefDir (void)
 {
 	char *pp = getenv("XDG_DATA_HOME");
 
@@ -395,15 +491,15 @@ static void Sys_InitPrefDir (void)
 
 	if (pp == NULL)
 	{
-		Q_snprintfz(pref_dir, sizeof(pref_dir), "%s/.local/share/Daikatana", getenv("HOME"));
+		Q_snprintfz(pref_dir, sizeof(pref_dir), "%s/.local/share/KMQuake2", getenv("HOME"));
 		return;
 	}
 
 	if (strlen(pp) >= sizeof(pref_dir) - 1)
 	{
-		printf("WARNING: $XDG_DATA_HOME contains a too long path, defaulting to installation dir!\n");
-		Q_strncpyz(pref_dir, sizeof(pref_dir), exe_dir);
-		Q_strncpyz (download_dir, sizeof(download_dir), exe_dir);
+		printf("WARNING: $XDG_DATA_HOME contains a too long path, defaulting to fs_basedir!\n");
+		Q_strncpyz (pref_dir, sizeof(pref_dir), fs_basedir->string);
+		Q_strncpyz (download_dir, sizeof(download_dir), fs_basedir->string);
 		return;
 	}
 
@@ -422,24 +518,23 @@ int main (int argc, char **argv)
 	saved_euid = geteuid();
 	seteuid(getuid());
 
-	// Knightmare- init exe/pref dirs
-	Init_ExeDir(argv[0]);
-	Sys_InitPrefDir();
+	// Knightmare- init exe dir
+	Init_ExeDir (argv[0]);
 
-	Qcommon_Init(argc, argv);
+	Qcommon_Init (argc, argv);
 
 	fcntl(0, F_SETFL, fcntl (0, F_GETFL, 0) | FNDELAY);
 
 	nostdout = Cvar_Get("nostdout", "0", 0);
 	if (!nostdout->value) {
 		fcntl(0, F_SETFL, fcntl (0, F_GETFL, 0) | FNDELAY);
-//		printf ("Linux Quake -- Version %0.3f\n", LINUX_VERSION);
+	//	printf ("Linux Quake II -- Version %0.3f\n", LINUX_VERSION);
 	}
 
     oldtime = Sys_Milliseconds ();
     while (1)
     {
-// find time spent rendering last frame
+		// find time spent rendering last frame
 		do {
 			newtime = Sys_Milliseconds ();
 			time = newtime - oldtime;

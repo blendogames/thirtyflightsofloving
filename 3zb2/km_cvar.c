@@ -289,7 +289,7 @@ cvar_t	*sk_breather_time;
 cvar_t	*sk_enviro_time;
 cvar_t	*sk_silencer_shots;
 //cvar_t	*sk_ir_time;
-//cvar_t	*sk_double_time;
+cvar_t	*sk_double_time;
 cvar_t	*sk_quad_fire_time;
 
 // CTF stuff
@@ -603,7 +603,7 @@ void InitLithiumVars (void)
 	sk_enviro_time = gi.cvar("sk_enviro_time", "30", 0);
 	sk_silencer_shots = gi.cvar("sk_silencer_shots", "30", 0);
 //	sk_ir_time = gi.cvar("sk_ir_time", "30", 0);
-//	sk_double_time = gi.cvar("sk_double_time", "30", 0);
+	sk_double_time = gi.cvar("sk_double_time", "30", 0);
 	sk_quad_fire_time = gi.cvar("sk_quad_fire_time", "30", 0);
 
 	// CTF stuff

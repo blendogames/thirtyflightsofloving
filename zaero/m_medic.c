@@ -695,7 +695,8 @@ qboolean medic_checkattack (edict_t *self)
 }
 
 
-void SP_monster_medic_precache(void)
+// Knightmare- added soundcache function
+void monster_medic_soundcache (edict_t *self)
 {
 	sound_idle1 = gi.soundindex ("medic/idle.wav");
 	sound_pain1 = gi.soundindex ("medic/medpain1.wav");
@@ -709,6 +710,12 @@ void SP_monster_medic_precache(void)
 	sound_hook_retract = gi.soundindex ("medic/medatck5.wav");
 }
 
+void SP_monster_medic_precache (edict_t *self)
+{
+	// Knightmare- use soundcache function
+	monster_medic_soundcache (self);
+}
+
 
 /*QUAKED monster_medic (1 .5 0) (-16 -16 -24) (16 16 32) Ambush Trigger_Spawn Sight
 */
@@ -720,7 +727,7 @@ void SP_monster_medic (edict_t *self)
 		return;
 	}
 
-  SP_monster_medic_precache();
+	SP_monster_medic_precache (self);
 
 	gi.soundindex ("medic/medatck1.wav");
 

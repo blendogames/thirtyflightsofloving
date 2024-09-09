@@ -670,7 +670,7 @@ void SV_Physics_Toss (edict_t *ent)
 	qboolean	wasinwater;
 	qboolean	isinwater;
 	vec3_t		old_origin;
-  float speed;
+	float		speed = 0.0f;	// Knightmare- init this var
 
 // regular thinking
 	SV_RunThink (ent);

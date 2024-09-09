@@ -172,7 +172,7 @@ void SV_LinkEdict (edict_t *ent)
 	int			leafs[MAX_TOTAL_ENT_LEAFS];
 	int			clusters[MAX_TOTAL_ENT_LEAFS];
 	int			num_leafs;
-	int			i, j, k;
+	int			i, j;
 	int			area;
 	int			topnode;
 
@@ -189,36 +189,15 @@ void SV_LinkEdict (edict_t *ent)
 	VectorSubtract (ent->maxs, ent->mins, ent->size);
 	
 	// encode the size into the entity_state for client prediction
-	if (ent->solid == SOLID_BBOX && !(ent->svflags & SVF_DEADMONSTER))
-	{	// assume that x/y are equal and symetric
-		i = ent->maxs[0]/8;
-		if (i<1)
-			i = 1;
-		if (i>31)
-			i = 31;
-
-		// z is not symetric
-		j = (-ent->mins[2])/8;
-		if (j<1)
-			j = 1;
-		if (j>31)
-			j = 31;
-
-		// and z maxs can be negative...
-		k = (ent->maxs[2]+32)/8;
-		if (k<1)
-			k = 1;
-		if (k>63)
-			k = 63;
-
-		ent->s.solid = (k<<10) | (j<<5) | i;
+	if (ent->solid == SOLID_BBOX && !(ent->svflags & SVF_DEADMONSTER)) {
+		ent->s.solid = MSG_PackSolid16 (ent->mins, ent->maxs);
 	}
-	else if (ent->solid == SOLID_BSP)
-	{
+	else if (ent->solid == SOLID_BSP) {
 		ent->s.solid = 31;		// a solid_bbox will never create this value
 	}
-	else
+	else {
 		ent->s.solid = 0;
+	}
 
 	// set the abs box
 	if (ent->solid == SOLID_BSP && 

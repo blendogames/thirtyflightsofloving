@@ -404,6 +404,32 @@ typedef struct
 	float		maxyaw;
 	float		minpitch;
 	float		maxpitch;
+	float		phase;
+
+	float		shift;
+
+	// Knightmare- added for sky distance
+	float		skydistance;
+	// Knightmare- added for DK-style clouds
+	char		*cloudname;
+	float		lightningfreq;
+	float		cloudxdir;
+	float		cloudydir;
+	float		cloud1tile;
+	float		cloud1speed;
+	float		cloud1alpha;
+	float		cloud2tile;
+	float		cloud2speed;
+	float		cloud2alpha;
+	float		cloud3tile;
+	float		cloud3speed;
+	float		cloud3alpha;
+
+	// Knightmare- added for misc_flare
+	int			fade_start_dist;
+	int			fade_end_dist;
+	char		*image;
+	char		*rgba;
 } spawn_temp_t;
 
 
@@ -636,6 +662,10 @@ extern	cvar_t	*readout;	// Knightmare added
 extern	cvar_t	*sv_stopspeed;		// PGM - this was a define in g_phys.c
 extern	cvar_t	*sv_step_fraction;	// Knightmare- this was a define in p_view.c
 
+extern	cvar_t	*g_aimfix;				// Knightmare- from Yamagi Q2
+extern	cvar_t	*g_aimfix_min_dist;		// Knightmare- minimum range for aimfix
+extern	cvar_t	*g_aimfix_taper_dist;	// Knightmare- transition range for aimfix
+
 #define world	(&g_edicts[0])
 
 // item spawnflags
@@ -653,6 +683,7 @@ extern	cvar_t	*sv_step_fraction;	// Knightmare- this was a define in p_view.c
 //
 #define FFL_SPAWNTEMP		1
 #define FFL_NOSPAWN			2
+#define FFL_DEFAULT_NEG		4	// Knightmare- spawntemp that defaults to -1
 
 typedef enum {
 	F_INT, 
@@ -677,9 +708,22 @@ typedef struct
 	int		flags;
 } field_t;
 
+typedef struct
+{
+	char	*name;
+	void	(*spawn)(edict_t *ent);
+} spawn_t;
+
+// Knightmare- added soundcache struct
+typedef struct
+{
+	char	*name;
+	void	(*soundcache)(edict_t *ent);	
+} soundcache_t;
 
 extern	field_t fields[];
 extern	gitem_t	itemlist[];
+extern	spawn_t	spawns[];
 
 
 //
@@ -739,6 +783,13 @@ char	*vtos (vec3_t v);
 
 float vectoyaw (vec3_t vec);
 void vectoangles (vec3_t vec, vec3_t angles);
+
+char *GameDir (void);
+char *SavegameDir (void);
+void GameDirRelativePath (const char *filename, char *output, size_t outputSize);
+void SavegameDirRelativePath (const char *filename, char *output, size_t outputSize);
+void CreatePath (const char *path);
+qboolean LocalFileExists (const char *path);
 
 //
 // km_cvar.c
@@ -867,6 +918,17 @@ void player_pain (edict_t *self, edict_t *other, float kick, int damage);
 void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point);
 
 //
+// g_spawn.c
+//
+void ED_CallSpawn (edict_t *ent);
+void G_PrecachePlayerInventories (void);	// Knightmare added
+void G_SoundcacheEntities (void);			// Knightmare added
+void G_FindTeams();
+void Cmd_ToggleHud ();
+void Hud_On();
+void Hud_Off();
+
+//
 // g_svcmds.c
 //
 void	ServerCommand (void);
@@ -885,9 +947,10 @@ void ValidateSelectedItem (edict_t *ent);
 void DeathmatchScoreboardMessage (edict_t *client, edict_t *killer);
 
 //
-// g_pweapon.c
+// p_weapon.c
 //
 void PlayerNoise(edict_t *who, vec3_t where, int type);
+void P_ProjectSource (edict_t *client_ent, vec3_t point, vec3_t distance, vec3_t forward, vec3_t right, vec3_t result);	// Knightmare- changed parms for aimfix
 
 //
 // m_move.c

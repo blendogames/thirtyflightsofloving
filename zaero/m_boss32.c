@@ -798,7 +798,8 @@ qboolean Makron_CheckAttack (edict_t *self)
 // monster_makron
 //
 
-void MakronPrecache (void)
+// Knightmare- added soundcache function
+void monster_makron_soundcache (edict_t *self)
 {
 	sound_pain4 = gi.soundindex ("makron/pain3.wav");
 	sound_pain5 = gi.soundindex ("makron/pain2.wav");
@@ -814,6 +815,12 @@ void MakronPrecache (void)
 	sound_taunt2 = gi.soundindex ("makron/voice3.wav");
 	sound_taunt3 = gi.soundindex ("makron/voice.wav");
 	sound_hit = gi.soundindex ("makron/bhit.wav");
+}
+
+void MakronPrecache (edict_t *self)
+{
+	// Knightmare- use soundcache function
+	monster_makron_soundcache (self);
 
 	gi.modelindex ("models/monsters/boss3/rider/tris.md2");
 }
@@ -828,7 +835,7 @@ void SP_monster_makron (edict_t *self)
 		return;
 	}
 
-	MakronPrecache ();
+	MakronPrecache (self);
 
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;

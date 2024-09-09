@@ -27,7 +27,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 static vec3_t avelocities [NUMVERTEXNORMALS];
 
-
 //=================================================
 
 /*
@@ -46,14 +45,14 @@ void CL_LightningBeam (vec3_t start, vec3_t end, int srcEnt, int dstEnt, float s
 		{
 			p=list;
 			p->time = cl.time;
-			VectorCopy(start, p->angle);
-			VectorCopy(end, p->org);
+			VectorCopy (start, p->angle);
+			VectorCopy (end, p->org);
 
 			if (p->link)
 			{
 				p->link->time = cl.time;
-				VectorCopy(start, p->link->angle);
-				VectorCopy(end, p->link->org);
+				VectorCopy (start, p->link->angle);
+				VectorCopy (end, p->link->org);
 			}
 			else
 			{
@@ -115,10 +114,10 @@ void CL_LightningBeam (vec3_t start, vec3_t end, int srcEnt, int dstEnt, float s
 	for (list=active_particles; list; list=list->next)
 		if ( (list->src_ent == srcEnt) && (list->dst_ent == dstEnt) && (list->image == particle_lightning) )
 		{
-			p=list;
+			p = list;
 			/*p->start =*/ p->time = cl.time;
-			VectorCopy(start, p->angle);
-			VectorCopy(end, p->org);
+			VectorCopy (start, p->angle);
+			VectorCopy (end, p->org);
 
 			return;
 		}
@@ -162,35 +161,36 @@ void CL_Explosion_Decal (vec3_t org, float size, int decalnum)
 		vec3_t		end1, end2, normal, sorg, dorg;
 		vec3_t		planenormals[6];
 
-		VectorSet(angle[0], -1, 0, 0);
-		VectorSet(angle[1], 1, 0, 0);
-		VectorSet(angle[2], 0, 1, 0);
-		VectorSet(angle[3], 0, -1, 0);
-		VectorSet(angle[4], 0, 0, 1);
-		VectorSet(angle[5], 0, 0, -1);
+		VectorSet (angle[0], -1, 0, 0);
+		VectorSet (angle[1], 1, 0, 0);
+		VectorSet (angle[2], 0, 1, 0);
+		VectorSet (angle[3], 0, -1, 0);
+		VectorSet (angle[4], 0, 0, 1);
+		VectorSet (angle[5], 0, 0, -1);
 
 		for (i=0; i<6; i++)
 		{
-			VectorMA(org, -offset, angle[i], sorg); // move origin 8 units back
-			VectorMA(sorg, size/2+offset, angle[i], end1);
+			VectorMA (org, -offset, angle[i], sorg); // move origin 8 units back
+			VectorMA (sorg, size/2+offset, angle[i], end1);
 			trace1 = CL_Trace (sorg, end1, 0, CONTENTS_SOLID);
 			if (trace1.fraction < 1) // hit a surface
 			{	// make sure we haven't hit this plane before
-				VectorCopy(trace1.plane.normal, planenormals[i]);
+				VectorCopy (trace1.plane.normal, planenormals[i]);
 				for (j=0; j<i; j++)
-					if (VectorCompare(planenormals[j],planenormals[i])) continue;
+					if ( VectorCompare(planenormals[j],planenormals[i]) )
+						continue;
 				// try tracing directly to hit plane
-				VectorNegate(trace1.plane.normal, normal);
-				VectorMA(sorg, size/2, normal, end2);
+				VectorNegate (trace1.plane.normal, normal);
+				VectorMA (sorg, size/2, normal, end2);
 				trace2 = CL_Trace (sorg, end2, 0, CONTENTS_SOLID);
 				// if seond trace hit same plane
-				if (trace2.fraction < 1 && VectorCompare(trace2.plane.normal, trace1.plane.normal))
-					VectorCopy(trace2.endpos, dorg);
+				if ( (trace2.fraction < 1) && VectorCompare(trace2.plane.normal, trace1.plane.normal) )
+					VectorCopy (trace2.endpos, dorg);
 				else
-					VectorCopy(trace1.endpos, dorg);
-				//if (CM_PointContents(dorg,0) & MASK_WATER) // no scorch marks underwater
-				//	continue;
-				VecToAngleRolled(normal, rand()%360, ang);
+					VectorCopy (trace1.endpos, dorg);
+			//	if (CM_PointContents(dorg,0) & MASK_WATER) // no scorch marks underwater
+			//		continue;
+				VecToAngleRolled (normal, rand()%360, ang);
 				p = CL_SetupParticle (
 					ang[0],	ang[1],	ang[2],
 					dorg[0],dorg[1],dorg[2],
@@ -205,7 +205,7 @@ void CL_Explosion_Decal (vec3_t org, float size, int decalnum)
 					PART_SHADED|PART_DECAL|PART_ALPHACOLOR,
 					CL_DecalAlphaThink, true);
 			}
-			/*VecToAngleRolled(angle[i], rand()%360, ang);
+		/*	VecToAngleRolled (angle[i], rand()%360, ang);
 			p = CL_SetupParticle (
 				ang[0],	ang[1],	ang[2],
 				org[0],	org[1],	org[2],
@@ -218,7 +218,7 @@ void CL_Explosion_Decal (vec3_t org, float size, int decalnum)
 				size,		0,			
 				particle_burnmark,
 				PART_SHADED|PART_DECAL|PART_ALPHACOLOR,
-				CL_DecalAlphaThink, true);*/
+				CL_DecalAlphaThink, true); */
 		}
 	}
 }
@@ -408,6 +408,272 @@ void CL_Explosion_Sparks (vec3_t org, int size, int count)
 
 
 /*
+===============
+CL_Explosion_Sparks_Q1
+===============
+*/
+void CL_Explosion_Sparks_Q1 (vec3_t org, int size, int count)
+{
+	int		i, palIdx;
+	vec3_t	color, colvel;
+
+	for (i = 0; i < (int)((float)count/max(cl_particle_scale->value, 1.0f)); i++)
+	{
+		palIdx = 111;
+		VectorSet (color, Q1PalColorRed(palIdx), Q1PalColorGreen(palIdx), Q1PalColorBlue(palIdx));
+
+		if (i & 1)
+			VectorSet (colvel, -32, -64, 10);
+		else
+			VectorSet (colvel, -16, -32, 5);
+
+		CL_SetupParticle (
+			0,	0,	0,
+			org[0] + ((rand()%32)-16),	org[1] + ((rand()%32)-16),	org[2] + ((rand()%32)-16),
+			(rand()%512)-256,	(rand()%512)-256,	(rand()%512)-256,
+			0,		0,		0,
+			color[0],	color[1],	color[2],
+			colvel[0],	colvel[1],	colvel[2],
+			1,		0,
+			GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA,
+			size,	size*-1.5f,
+			particle_generic,
+			0,
+			NULL, false);
+	}
+}
+
+
+/*
+===============
+CL_Explosion_Blob_Q1
+===============
+*/
+void CL_Explosion_Blob_Q1 (vec3_t org, int size, int count)
+{
+	int		i, palIdx;
+	vec3_t	color, accel;
+
+	for (i = 0; i < (int)((float)count/max(cl_particle_scale->value, 1.0f)); i++)
+	{
+		if (i & 1) {
+		//	palIdx = 66 + (rand()%6);
+			VectorSet (accel, 0, 0, PARTICLE_GRAVITY);
+		}
+		else {
+		//	palIdx = 150 + (rand()%6);
+			VectorSet (accel, 0, 0, -PARTICLE_GRAVITY);
+		}
+		palIdx = 150 + (rand()%6);
+		VectorSet (color, Q1PalColorRed(palIdx), Q1PalColorGreen(palIdx), Q1PalColorBlue(palIdx));
+
+		CL_SetupParticle (
+			0,	0,	0,
+			org[0] + ((rand()%32)-16),	org[1] + ((rand()%32)-16),	org[2] + ((rand()%32)-16),
+			(rand()%256)-128,	(rand()%256)-128,	(rand()%512)-256,
+			accel[0],	accel[1],	accel[2],
+			color[0],	color[1],	color[2],
+			0,			0,			0,
+			1,		0,
+			GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA,
+			size,	size*-0.75f,
+			particle_generic,
+			0,
+			NULL, false);
+	}
+}
+
+
+/*
+===============
+CL_ParticleImapact_Q1_Think
+===============
+*/
+#define pImpactMaxVelocity 100
+void CL_ParticleImapact_Q1_Think (cparticle_t *p, vec3_t org, vec3_t angle, float *alpha, float *size, int *image, float *time)
+{
+	vec_t	length;
+	float	clipsize = 1.0;
+
+	CL_ParticleBounceThink (p, org, angle, alpha, &clipsize, image, time);
+
+	length = VectorNormalize(p->vel);
+	if (length > pImpactMaxVelocity)
+		VectorScale (p->vel, pImpactMaxVelocity, p->vel);
+	else
+		VectorScale (p->vel, length, p->vel);
+}
+
+
+/*
+===============
+CL_ParticleImpact_Q1
+===============
+*/
+void CL_ParticleImpact_Q1 (vec3_t org, vec3_t dir, int colorIdx, float size, int count, qboolean shaded)
+{
+	int		i, palIdx, flags;
+	vec3_t	origin, color;
+
+	flags = (shaded) ? (PART_GRAVITY|PART_SHADED) : PART_GRAVITY;
+
+	for (i = 0; i < (int)((float)count/max(cl_particle_scale->value, 1.0f)); i++)
+	{
+	//	VectorSet (origin, org[0] + ((rand()%15)-8), org[1] + ((rand()%15)-8), org[2] + ((rand()%15)-8));
+		VectorSet (origin,
+			org[0] + dir[0]*(1 + size*0.5 + random()*3),
+			org[1] + dir[1]*(1 + size*0.5 + random()*3),
+			org[2] + dir[2]*(1 + size*0.5 + random()*3) );
+		palIdx = (colorIdx & ~7) + (rand() & 7);
+		VectorSet (color, Q1PalColorRed(palIdx), Q1PalColorGreen(palIdx), Q1PalColorBlue(palIdx));
+
+		CL_SetupParticle (
+			0,	0,	0,
+			origin[0],	origin[1],	origin[2],
+			dir[0] * 15 + ((rand()%30)-15),	dir[1] * 15 + ((rand()%30)-15),	dir[2] * 15 + ((rand()%30)-15),
+			0,			0,			0,
+			color[0],	color[1],	color[2],
+			0,			0,			0,
+			1,		0,
+			GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA,
+			size,	size*-0.66f,
+			particle_generic,
+			flags,
+			CL_ParticleImapact_Q1_Think, true);
+	}
+}
+
+
+/*
+===============
+CL_Lavasplash_Q1
+===============
+*/
+void CL_Lavasplash_Q1 (vec3_t org, int size)
+{
+	int		i, j, palIdx;
+	int		start, end;
+	float	vel;
+	vec3_t	color, dir, pOrg, velocity;
+
+	if ( (cl_particle_scale->integer >= 2) && (cl_particle_scale->integer <= 5) ) {
+		start = -16 + ((cl_particle_scale->integer - 1) * 2);
+		end = 16 - ((cl_particle_scale->integer - 1) * 2);
+	}
+	else {
+		start = -16;
+		end = 16;
+	}
+
+	for (i = start; i < end; i++)
+	{
+		for (j = start; j < end; j++)
+		{
+			palIdx = 224 + (rand()%7);
+			VectorSet (color, Q1PalColorRed(palIdx), Q1PalColorGreen(palIdx), Q1PalColorBlue(palIdx));
+			VectorSet (dir, j*8 + (rand()&7), i*8 + (rand()&7), 256);
+			VectorSet (pOrg, org[0] + dir[0], org[1] + dir[1], org[2] + (rand()&63));
+			VectorNormalize (dir);
+			vel = (float)(50 + (rand()&63));
+			VectorScale (dir, vel, velocity);
+
+			CL_SetupParticle (
+				0,	0,	0,
+				pOrg[0],		pOrg[1],		pOrg[2],
+				velocity[0],	velocity[1],	velocity[2],
+				0,		0,		0,
+				color[0],	color[1],	color[2],
+				0,			0,			0,
+				1,		0,
+				GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA,
+				size,	size*-0.25f,
+				particle_generic,
+				PART_GRAVITY,
+				NULL, false);
+		}
+	}
+}
+
+
+/*
+===============
+CL_TracerTrail_Q1
+===============
+*/
+void CL_TracerTrail_Q1 (vec3_t start, vec3_t end, centity_t *old, int type)
+{
+	int			palIdx, flags = 0;
+	static int	tracerCount = 0;
+	vec3_t		pStart, vec, pOrg, vel, color;
+	float		len, oldlen, dec, size, sizeVel;
+
+	VectorCopy (start, pStart);
+	VectorSubtract (end, start, vec);
+	len = oldlen = VectorNormalize (vec);
+	size = 3;
+
+	dec = 3;
+	VectorScale (vec, dec, vec);
+
+	while (len > 0.0f)
+	{
+		len -= dec;
+		
+		VectorClear (vel);
+		switch (type)
+		{
+		case 1:	// acid tracer
+			flags |= PART_SHADED;
+		case 2:	// flame tracer
+			sizeVel = -2.0f;
+			if (type == 1)
+				palIdx = 196 + ((tracerCount & 4) << 1);	// was 52
+			else
+				palIdx = 226 + ((tracerCount & 4) << 1);	// was 230
+			VectorCopy (pStart, pOrg);
+			tracerCount++;
+			if (tracerCount & 1) {
+				vel[0] = 30 * vec[1];
+				vel[1] = 30 * -vec[0];
+			}
+			else {
+				vel[0] = 30 * -vec[1];
+				vel[1] = 30 * vec[0];
+			}
+			break;
+		case 3:	// firepod tracer
+			sizeVel = -3.0f;
+			palIdx = 152 + (rand() & 3);
+			VectorSet (pOrg, pStart[0] + ((rand()&15) - 8), pStart[1] + ((rand()&15) - 8), pStart[2] + ((rand()&15) - 8) );
+			break;
+		default:
+			sizeVel = -2.0f;
+			palIdx = 20 + (rand() & 7);
+			VectorCopy (pStart, pOrg);
+			break;
+		}
+		VectorSet (color, Q1PalColorRed(palIdx), Q1PalColorGreen(palIdx), Q1PalColorBlue(palIdx));
+
+		CL_SetupParticle (
+			0,	0,	0,
+			pOrg[0],	pOrg[1],	pOrg[2],
+			vel[0],		vel[1],		vel[2],
+			0,			0,			0,
+			color[0],	color[1],	color[2],
+			0,			0,			0,
+			1,		0,
+			GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA,
+			size,	size * sizeVel,			
+			particle_generic,
+			flags,
+			NULL, false);
+
+		VectorAdd (pStart, vec, pStart);
+	}
+}
+
+
+/*
 =====================
 
 Blood effects
@@ -435,7 +701,7 @@ void CL_ParticleBloodDecalThink (cparticle_t *p, vec3_t org, vec3_t angle, float
 		*size *= sqrt(0.5 + 0.5*(*time/TIMEBLOODGROW));
 
 		AngleVectors (angle, dir, NULL, NULL);
-		VectorNegate(dir, dir);
+		VectorNegate (dir, dir);
 		CL_ClipDecal(p, *size, angle[2], org, dir);
 	}*/
 
@@ -481,6 +747,16 @@ void CL_ParticleBloodPuffThink (cparticle_t *p, vec3_t org, vec3_t angle, float 
 
 /*
 ===============
+CL_GetRandomBloodParticle
+===============
+*/
+int CL_GetRandomBloodParticle (void)
+{
+	return particle_blooddecal1 + rand()%5;
+}
+
+/*
+===============
 CL_ParticleBloodThink
 ===============
 */
@@ -492,9 +768,9 @@ void CL_ParticleBloodThink (cparticle_t *p, vec3_t org, vec3_t angle, float *alp
 	if (trace.fraction < 1.0) // delete and stain...
 	{
 	//	if (r_decals->value && (p->flags & PART_LEAVEMARK)
-		if (r_decals->integer && (p->flags & PART_LEAVEMARK)
+		if ( r_decals->integer && (p->flags & PART_LEAVEMARK)
 			&& !VectorCompare(trace.plane.normal, vec3_origin)
-			&& !(CM_PointContents(p->oldorg,0) & MASK_WATER)) // no blood splatters underwater...
+			&& !(CM_PointContents(p->oldorg,0) & MASK_WATER) ) // no blood splatters underwater...
 		{
 			vec3_t	normal, dir;
 			int		i;
@@ -513,10 +789,10 @@ void CL_ParticleBloodThink (cparticle_t *p, vec3_t org, vec3_t angle, float *alp
 
 			if (!timedout)
 			{
-				VectorNegate(trace.plane.normal, normal);
-				VecToAngleRolled(normal, rand()%360, p->angle);
+				VectorNegate (trace.plane.normal, normal);
+				VecToAngleRolled (normal, rand()%360, p->angle);
 				
-				VectorCopy(trace.endpos, p->org);
+				VectorCopy (trace.endpos, p->org);
 				VectorClear(p->vel);
 				VectorClear(p->accel);
 				p->image = CL_GetRandomBloodParticle();
@@ -540,7 +816,7 @@ void CL_ParticleBloodThink (cparticle_t *p, vec3_t org, vec3_t angle, float *alp
 				p->decalnum = 0;
 				p->decal = NULL;
 				AngleVectors (p->angle, dir, NULL, NULL);
-				VectorNegate(dir, dir);
+				VectorNegate (dir, dir);
 				CL_ClipDecal(p, p->size, -p->angle[2], p->org, dir);
 				if (p->decalnum)
 					became_decal = true;
@@ -555,7 +831,7 @@ void CL_ParticleBloodThink (cparticle_t *p, vec3_t org, vec3_t angle, float *alp
 			p->alpha = 0;
 		}
 	}
-	VectorCopy(org, p->oldorg);
+	VectorCopy (org, p->oldorg);
 
 	p->thinknext = true;
 }
@@ -602,7 +878,7 @@ void CL_BloodBleed (vec3_t org, vec3_t dir, int count)
 	VectorScale(dir, 10, pos);
 	for (i=0; i<count; i++)
 	{
-		VectorSet(pos,
+		VectorSet (pos,
 			dir[0]+random()*(cl_blood->value-2)*0.01,
 			dir[1]+random()*(cl_blood->value-2)*0.01,
 			dir[2]+random()*(cl_blood->value-2)*0.01);
@@ -719,6 +995,7 @@ void CL_GreenBloodHit (vec3_t org, vec3_t dir)
 
 }
 
+
 /*
 ===============
 CL_ParticleEffect
@@ -730,7 +1007,7 @@ void CL_ParticleEffect (vec3_t org, vec3_t dir, int color8, int count)
 {
 	int			i;
 	float		d;
-	vec3_t color = { color8red(color8), color8green(color8), color8blue(color8)};
+	vec3_t color = { Q2PalColorRed(color8), Q2PalColorGreen(color8), Q2PalColorBlue(color8) };
 
 	for (i=0 ; i<count ; i++)
 	{
@@ -751,18 +1028,18 @@ void CL_ParticleEffect (vec3_t org, vec3_t dir, int color8, int count)
 	}
 }
 
+
 /*
 ===============
 CL_ParticleEffect2
 ===============
 */
-
 #define colorAdd 25
 void CL_ParticleEffect2 (vec3_t org, vec3_t dir, int color8, int count)
 {
 	int			i;
 	float		d;
-	vec3_t color = { color8red(color8), color8green(color8), color8blue(color8)};
+	vec3_t color = { Q2PalColorRed(color8), Q2PalColorGreen(color8), Q2PalColorBlue(color8) };
 
 	for (i=0 ; i<count ; i++)
 	{
@@ -783,18 +1060,18 @@ void CL_ParticleEffect2 (vec3_t org, vec3_t dir, int color8, int count)
 	}
 }
 
+
 // RAFAEL
 /*
 ===============
 CL_ParticleEffect3
 ===============
 */
-
 void CL_ParticleEffect3 (vec3_t org, vec3_t dir, int color8, int count)
 {
 	int			i;
 	float		d;
-	vec3_t color = { color8red(color8), color8green(color8), color8blue(color8)};
+	vec3_t color = { Q2PalColorRed(color8), Q2PalColorGreen(color8), Q2PalColorBlue(color8) };
 
 	for (i=0 ; i<count ; i++)
 	{
@@ -847,6 +1124,7 @@ void CL_ParticleSplashThink (cparticle_t *p, vec3_t org, vec3_t angle, float *al
 	p->thinknext = true;
 }
 
+
 /*
 ===============
 CL_ParticleEffectSplash
@@ -858,7 +1136,7 @@ void CL_ParticleEffectSplash (vec3_t org, vec3_t dir, int color8, int count)
 {
 	int			i;
 	float		d;
-	vec3_t color = {color8red(color8), color8green(color8), color8blue(color8)};
+	vec3_t color = { Q2PalColorRed(color8), Q2PalColorGreen(color8), Q2PalColorBlue(color8) };
 
 	for (i=0 ; i<count ; i++)
 	{
@@ -913,7 +1191,7 @@ void CL_ParticleEffectSparks (vec3_t org, vec3_t dir, vec3_t color, int count)
 {
 	int			i;
 	float		d;
-	cparticle_t *p;
+	cparticle_t *p = NULL;
 
 	for (i=0 ; i<count ; i++)
 	{
@@ -952,8 +1230,8 @@ void CL_ParticleBulletDecal (vec3_t org, vec3_t dir, float size)
 	if (!r_decals->integer)
 		return;
 
-	VectorMA(org, DECAL_OFFSET, dir, origin);
-	VectorMA(org, -DECAL_OFFSET, dir, end);
+	VectorMA (org, DECAL_OFFSET, dir, origin);
+	VectorMA (org, -DECAL_OFFSET, dir, end);
 	tr = CL_Trace (origin, end, 0, CONTENTS_SOLID);
 	//tr = CL_Trace (origin, end, 1, 1);
 
@@ -961,10 +1239,10 @@ void CL_ParticleBulletDecal (vec3_t org, vec3_t dir, float size)
 	//if (!tr.allsolid)
 		return;
 
-	VectorNegate(tr.plane.normal, angle);
-	//VectorNegate(dir, angle);
-	VecToAngleRolled(angle, rand()%360, ang);
-	VectorCopy(tr.endpos, origin);
+	VectorNegate (tr.plane.normal, angle);
+	//VectorNegate (dir, angle);
+	VecToAngleRolled (angle, rand()%360, ang);
+	VectorCopy (tr.endpos, origin);
 
 	p = CL_SetupParticle (
 		ang[0],	ang[1],	ang[2],
@@ -996,18 +1274,18 @@ void CL_ParticleRailDecal (vec3_t org, vec3_t dir, float size, int red, int gree
 	if (!r_decals->integer)
 		return;
 
-	VectorMA(org, -RAIL_DECAL_OFFSET, dir, origin);
-	VectorMA(org, 2*RAIL_DECAL_OFFSET, dir, end);
+	VectorMA (org, -RAIL_DECAL_OFFSET, dir, origin);
+	VectorMA (org, 2*RAIL_DECAL_OFFSET, dir, end);
 	tr = CL_Trace (origin, end, 0, CONTENTS_SOLID);
 
-	if (tr.fraction==1)
+	if (tr.fraction == 1)
 		return;
-	if (VectorCompare(tr.plane.normal, vec3_origin))
+	if ( VectorCompare(tr.plane.normal, vec3_origin) )
 		return;
 
-	VectorNegate(tr.plane.normal, angle);
-	VecToAngleRolled(angle, rand()%360, ang);
-	VectorCopy(tr.endpos, origin);
+	VectorNegate (tr.plane.normal, angle);
+	VecToAngleRolled (angle, rand()%360, ang);
+	VectorCopy (tr.endpos, origin);
 
 	CL_SetupParticle (
 		ang[0],	ang[1],	ang[2],
@@ -1067,18 +1345,18 @@ void CL_ParticleBlasterDecal (vec3_t org, vec3_t dir, float size, int red, int g
 	if (!r_decals->integer)
 		return;
  
-	VectorMA(org, DECAL_OFFSET, dir, origin);
-	VectorMA(org, -DECAL_OFFSET, dir, end);
+	VectorMA (org, DECAL_OFFSET, dir, origin);
+	VectorMA (org, -DECAL_OFFSET, dir, end);
 	tr = CL_Trace (origin, end, 0, CONTENTS_SOLID);
 
-	if (tr.fraction==1)
+	if (tr.fraction == 1)
 		return;
-	if (VectorCompare(tr.plane.normal, vec3_origin))
+	if ( VectorCompare(tr.plane.normal, vec3_origin) )
 		return;
 
-	VectorNegate(tr.plane.normal, angle);
-	VecToAngleRolled(angle, rand()%360, ang);
-	VectorCopy(tr.endpos, origin);
+	VectorNegate (tr.plane.normal, angle);
+	VecToAngleRolled (angle, rand()%360, ang);
+	VectorCopy (tr.endpos, origin);
 
 	p = CL_SetupParticle (
 		ang[0],	ang[1],	ang[2],
@@ -1203,18 +1481,18 @@ void CL_ParticlePlasmaBeamDecal (vec3_t org, vec3_t dir, float size)
 	if (!r_decals->integer)
 		return;
  
-	VectorMA(org, DECAL_OFFSET, dir, origin);
-	VectorMA(org, -DECAL_OFFSET, dir, end);
+	VectorMA (org, DECAL_OFFSET, dir, origin);
+	VectorMA (org, -DECAL_OFFSET, dir, end);
 	tr = CL_Trace (origin, end, 0, CONTENTS_SOLID);
 
-	if (tr.fraction==1)
+	if (tr.fraction == 1)
 		return;
-	if (VectorCompare(tr.plane.normal, vec3_origin))
+	if ( VectorCompare(tr.plane.normal, vec3_origin) )
 		return;
 
-	VectorNegate(tr.plane.normal, angle);
-	VecToAngleRolled(angle, rand()%360, ang);
-	VectorCopy(tr.endpos, origin);
+	VectorNegate (tr.plane.normal, angle);
+	VecToAngleRolled (angle, rand()%360, ang);
+	VectorCopy (tr.endpos, origin);
 
 	p = CL_SetupParticle (
 		ang[0],	ang[1],	ang[2],
@@ -1234,10 +1512,53 @@ void CL_ParticlePlasmaBeamDecal (vec3_t org, vec3_t dir, float size)
 
 /*
 ===============
+CL_ParticleAcidDecal
+===============
+*/
+void CL_ParticleAcidDecal (vec3_t org, vec3_t dir, float size, int red, int green, int blue)
+{
+	cparticle_t	*p;
+	vec3_t		ang, angle, end, origin;
+	trace_t		tr;
+
+	if (!r_decals->integer)
+		return;
+ 
+	VectorMA (org, DECAL_OFFSET, dir, origin);
+	VectorMA (org, -DECAL_OFFSET, dir, end);
+	tr = CL_Trace (origin, end, 0, CONTENTS_SOLID);
+
+	if (tr.fraction == 1)
+		return;
+	if ( VectorCompare(tr.plane.normal, vec3_origin) )
+		return;
+
+	VectorNegate (tr.plane.normal, angle);
+	VecToAngleRolled (angle, rand()%360, ang);
+	VectorCopy (tr.endpos, origin);
+
+	p = CL_SetupParticle (
+		ang[0],	ang[1],	ang[2],
+		origin[0],	origin[1],	origin[2],
+		0,		0,		0,
+		0,		0,		0,
+		red,	green,	blue,
+		0,		0,		0,
+		0.85,	-1/r_decal_life->value,
+		GL_SRC_ALPHA, GL_ONE,
+		size,		0,			
+		particle_acidmark,
+		PART_SHADED|PART_DECAL,
+		NULL, false);
+}
+
+
+/*
+===============
 CL_TeleporterParticles
 ===============
 */
-void CL_TeleporterParticles (entity_state_t *ent)
+void CL_TeleporterParticles (centity_state_t *ent)
 {
 	int			i;
 
@@ -1267,24 +1588,24 @@ CL_LogoutEffect
 */
 void CL_LogoutEffect (vec3_t org, int type)
 {
-	int			i;
+	int		i;
 	vec3_t	color;
 
 	for (i=0 ; i<500 ; i++)
 	{
-		if (type == MZ_LOGIN)// green
+		if (type == MZ_LOGIN)	// green
 		{
 			color[0] = 20;
 			color[1] = 200;
 			color[2] = 20;
 		}
-		else if (type == MZ_LOGOUT)// red
+		else if (type == MZ_LOGOUT)	// red
 		{
 			color[0] = 200;
 			color[1] = 20;
 			color[2] = 20;
 		}
-		else// yellow
+		else	// yellow
 		{
 			color[0] = 200;
 			color[1] = 200;
@@ -1417,337 +1738,6 @@ void CL_ParticleBlasterThink (cparticle_t *p, vec3_t org, vec3_t angle, float *a
 }
 
 
-void pLobbyGlassThink (cparticle_t *p, vec3_t org, vec3_t angle, float *alpha, float *size, int *image, float *time)
-{
-	vec_t  length;
-	vec3_t len;
-	float clipsize = 1.0;
-	VectorSubtract(p->angle, org, len);
-
-	*size *= (float)(10/VectorLength(len)) * 1.0/((4-*size));
-	*size += *time * p->sizevel;
-
-	if (*size > 10)
-		*size = 10;
-	if (*size < 3)
-		*size = 3;
-
-	CL_ParticleBounceThink (p, org, angle, alpha, &clipsize, image, time); // was size
-
-	length = VectorNormalize(p->vel);
-	if (length>256)
-		VectorScale(p->vel,	256,	p->vel);
-	else
-		VectorScale(p->vel,	length, p->vel);
-}
-
-
-void pFreonThink (cparticle_t *p, vec3_t org, vec3_t angle, float *alpha, float *size, int *image, float *time)
-{
-	vec_t  length;
-	vec3_t len;
-	float clipsize = 1.0;
-	VectorSubtract(p->angle, org, len);
-
-	*size *= (float)(pBlasterMaxSize/VectorLength(len)) * 1.0/((4-*size));
-	*size += *time * p->sizevel;
-
-	if (*size > pBlasterMaxSize)
-		*size = pBlasterMaxSize;
-	if (*size < pBlasterMinSize)
-		*size = pBlasterMinSize;
-
-	CL_ParticleBounceThink (p, org, angle, alpha, &clipsize, image, time); // was size
-
-	length = VectorNormalize(p->vel);
-	if (length>pBlasterMaxVelocity)
-		VectorScale(p->vel,	pBlasterMaxVelocity,	p->vel);
-	else
-		VectorScale(p->vel,	length, p->vel);
-
-/*	vec3_t len;
-	VectorSubtract(p->angle, org, len);
-	
-	*size *= (float)(pBlasterMaxSize/VectorLength(len)) * 1.0/((4-*size));
-	if (*size > pBlasterMaxSize)
-		*size = pBlasterMaxSize;
-	
-	p->thinknext = true;*/
-}
-
-
-void CL_LavaParticles (vec3_t org, vec3_t dir, int count, int red, int green, int blue,
-												int reddelta, int greendelta, int bluedelta)
-{
-	int			i;
-	//float		d;
-	float speed = .75;
-	cparticle_t *p;
-	vec3_t		origin;
-
-	count = 1;
-
-	for (i = 0; i < count; i++)
-	{
-		VectorSet(origin,
-			org[0] + dir[0]*(1 + random()*64 ),
-			org[1] + dir[1]*(1 + random()*64  ),
-			org[2] + dir[2]*(1 + random()*16 )
-			);
-
-		p = CL_SetupParticle (
-			org[0],	org[1],	org[2],
-			origin[0],	origin[1],	origin[2],
-			(dir[0]*75 + crand()*40)*speed,	(dir[1]*75 + crand()*40)*speed,	(dir[2]*75 + crand()*40)*speed,
-			0,		0,		0,
-			red,		green,		blue,
-			reddelta,	greendelta,	bluedelta,
-			1,		-0.5 / (0.5 + frand()*0.3), //alpha
-			GL_SRC_ALPHA, GL_ONE, 
-			96,	-0.01,		  //size
-			particle_smoke,
-			PART_GRAVITY,
-			NULL,true);
-	}
-
-	speed *= 1.7;
-
-	count = 1;
-
-
-	for (i = 0; i < count; i++)
-	{
-		VectorSet(origin,
-			org[0] + dir[0]*(1 + random()*48 ),
-			org[1] + dir[1]*(1 + random()*48  ),
-			org[2] + dir[2]*(1 + random()*16 )
-			);
-
-		p = CL_SetupParticle (
-			org[0],	org[1],	org[2],
-			origin[0],	origin[1],	origin[2],
-			(dir[0]*75 + crand()*40)*speed,	(dir[1]*75 + crand()*40)*speed,	(dir[2]*75 + crand()*40)*speed,
-			0,		0,		0,
-			red,		green,		blue,
-			reddelta,	greendelta,	bluedelta,
-			1,		-0.3, //alpha
-			GL_SRC_ALPHA, GL_ONE, 
-			14,	-5,		  //size
-			particle_generic,
-			PART_GRAVITY,
-			NULL,true);
-	}
-}
-
-
-
-void CL_HeartParticles (vec3_t org, vec3_t dir, int count, int red, int green, int blue,
-												int reddelta, int greendelta, int bluedelta)
-{
-	int			i;
-	//float		d;
-	float speed = .7;
-	cparticle_t *p;
-	vec3_t		origin;
-
-	count = 1;
-
-	for (i = 0; i < count; i++)
-	{
-		/*VectorSet(origin,
-			org[0] + dir[0]*(1 + random()*3 + pBlasterMaxSize/2.0),
-			org[1] + dir[1]*(1 + random()*3 + pBlasterMaxSize/2.0),
-			org[2] + dir[2]*(1 + random()*3 + pBlasterMaxSize/2.0)
-			);*/
-
-		VectorSet(origin,
-			org[0] + dir[0]*(1 + random()*2),
-			org[1] + dir[1]*(1 + random()*2),
-			org[2] + dir[2]*(1 + random()*2)
-			);
-
-		p = CL_SetupParticle (
-			crandom() * 4, crandom() * 4,crandom() * 4,
-			//org[1],	org[2],
-			origin[0],	origin[1],	origin[2],
-			//(dir[0]*75 + crand()*40)*speed,	(dir[1]*75 + crand()*40)*speed,	(dir[2]*75 + crand()*40)*speed,
-
-			(dir[0]*10 + crand()*5)*speed,	(dir[1]*10 + crand()*5)*speed,	(dir[2]*10 + crand()*5)*speed,
-
-			0,		0,		0,
-			red,		green,		blue,
-			reddelta,	greendelta,	bluedelta,
-			0.5,		-0.1,
-			GL_SRC_ALPHA, GL_ONE,
-			5,	-0.1,	
-			particle_heart,
-			0,
-			CL_ParticleBlasterThink,true);
-	}
-}
-
-
-void CL_MusicParticles (vec3_t org, vec3_t dir, int count, int red, int green, int blue,
-												int reddelta, int greendelta, int bluedelta)
-{
-	int			i;
-	float speed = .75;
-	cparticle_t *p;
-	vec3_t		origin;
-	float ltime;
-
-	ltime = (float)cl.time / 1000.0;
-
-	count = 1;
-
-	//the little droplets.
-	for (i = 0; i < count; i++)
-	{
-		int irand;
-		int textureName;
-		irand = random() * 3;
-
-		if (irand <= 0)
-			textureName = particle_music1;
-		else if (irand == 1)
-			textureName = particle_music2;
-		else
-			textureName = particle_music3;
-
-		VectorSet(origin,
-			org[0] + (-2 + random()*4 ),
-			org[1] + (-2 + random()*4 ),
-			org[2] + (-2 + random()*4 )			
-			);
-
-		origin[0] += sin(ltime * 1.5) * 8;
-		origin[1] += cos(ltime * 1.5) * 8;
-
-
-		p = CL_SetupParticle (
-			0,0, 0,
-			origin[0],	origin[1],	origin[2],
-
-			(dir[0]*2 + crand()*4)*speed,
-			(dir[1]*2 + crand()*4)*speed,
-			dir[2]  + 8, //float up.
-
-			0,		0,		0,
-			red,		green,		blue,
-			reddelta,	greendelta,	bluedelta,
-			1,		0, //alpha
-			GL_SRC_ALPHA, GL_ONE, 
-			2,	-0.7,		  //size -5
-			textureName,
-			0,
-			NULL,true);
-	}
-}
-
-void CL_WaterfallParticles (vec3_t org, vec3_t dir, int count, int red, int green, int blue,
-												int reddelta, int greendelta, int bluedelta)
-{
-	int			i;
-	//float		d;
-	float speed = .75;
-	cparticle_t *p;
-	vec3_t		origin;
-
-	count = 1;
-
-	//the wash on the top.
-	for (i = 0; i < count; i++)
-	{
-		VectorSet(origin,
-			org[0] + (-32 + random()*64 ),
-			org[1] + (-32 + random()*64 ),
-			org[2] + (-8 + random()*16 )
-			);
-
-		p = CL_SetupParticle (
-			org[0],	org[1],	org[2],
-			origin[0],	origin[1],	origin[2],
-			(dir[0]*75 + crand()*64)*speed,
-			(dir[1]*75 + crand()*64)*speed,
-			(dir[2]*75 + crand()*64)*speed,
-			0,		0,		0,
-			red,		green,		blue,
-			reddelta,	greendelta,	bluedelta,
-			0.4,		-0.3 / (0.5 + frand()*0.3), //alpha
-			GL_SRC_ALPHA, GL_ONE, 
-			16,	96,		  //size
-			particle_smoke,
-			PART_GRAVITY,
-			NULL,true);
-	}
-
-	count=2;
-
-	//the main torrent of water.
-	for (i = 0; i < count; i++)
-	{
-		VectorSet(origin,
-			org[0] + (-6 + random()*12 ),
-			org[1] + (-6 + random()*12 ),
-			org[2] + (-6 + random()*12 )
-			);
-
-		p = CL_SetupParticle (
-			org[0],	org[1],	org[2],
-			origin[0],	origin[1],	origin[2],
-			(dir[0]*75 + crand()*8)*speed,
-			(dir[1]*75 + crand()*8)*speed,
-			(dir[2]*75 + crand()*128)*speed,
-			0,		0,		0,
-			red,		green,		blue,
-			reddelta,	greendelta,	bluedelta,
-			0.3,		-0.1, //alpha
-			GL_SRC_ALPHA, GL_ONE, 
-			32,	16.0,		  //size
-			particle_smoke,
-			PART_GRAVITY,
-			NULL,true);
-	}
-
-
-
-	//speed *= 1.7;
-
-	speed *= (random()*2.9);
-
-	count = 2;
-
-
-	//the little droplets.
-	for (i = 0; i < count; i++)
-	{
-		VectorSet(origin,
-			org[0] + (-12 + random()*24 ),
-			org[1] + (-12 + random()*24 ),
-			org[2] + (-12 + random()*24 )			
-			);
-
-		p = CL_SetupParticle (
-			org[0],	org[1],	org[2],
-			origin[0],	origin[1],	origin[2],
-
-			(dir[0]*4 + crand()*8)*speed,
-			(dir[1]*4 + crand()*8)*speed,
-			(dir[2]*75 + crand()*40)*speed,
-
-			0,		0,		0,
-			red,		green,		blue,
-			reddelta,	greendelta,	bluedelta,
-			1,		-0.15, //alpha
-			GL_SRC_ALPHA, GL_ONE, 
-			1.8,	0.1,		  //size -5
-			particle_generic,
-			PART_GRAVITY,
-			NULL,true);
-	}
-}
-
-
 /*
 ===============
 CL_BlasterParticles
@@ -1760,12 +1750,12 @@ void CL_BlasterParticles (vec3_t org, vec3_t dir, int count, float size,
 {
 	int			i;
 	float		speed = .75;
-	cparticle_t *p;
+	cparticle_t *p = NULL;
 	vec3_t		origin;
 
 	for (i = 0; i < count; i++)
 	{
-		VectorSet(origin,
+		VectorSet (origin,
 			org[0] + dir[0]*(1 + random()*3 + pBlasterMaxSize/2.0),
 			org[1] + dir[1]*(1 + random()*3 + pBlasterMaxSize/2.0),
 			org[2] + dir[2]*(1 + random()*3 + pBlasterMaxSize/2.0)
@@ -1802,401 +1792,6 @@ void CL_BlasterParticles (vec3_t org, vec3_t dir, int count, float size,
 	}
 	if (p) // added light effect
 		CL_AddParticleLight (p, 150, 0, ((float)red)/255, ((float)green)/255, ((float)blue)/255);
-}
-
-
-void CL_FreonParticles (vec3_t org, vec3_t dir, int count, int red, int green, int blue,
-											int reddelta, int greendelta, int bluedelta)
-{
-	int			i;
-	//float		d;
-	float speed = .75;
-	cparticle_t *p;
-	vec3_t		origin;
-
-	for (i = 0; i < count; i++)
-	{
-		VectorSet(origin,
-			org[0] + dir[0]*(1 + random()*3 + pBlasterMaxSize/2.0),
-			org[1] + dir[1]*(1 + random()*3 + pBlasterMaxSize/2.0),
-			org[2] + dir[2]*(1 + random()*3 + pBlasterMaxSize/2.0)
-			);
-
-		p = CL_SetupParticle (
-			org[0],	org[1],	org[2],
-			origin[0],	origin[1],	origin[2],
-			(dir[0]*7 + crand()*4)*speed,	(dir[1]*7 + crand()*4)*speed,	(dir[2]*7 + crand()*4)*speed,
-			0,		0,		0,
-			red,		green,		blue,
-			reddelta,	greendelta,	bluedelta,
-			1,		-3,
-			GL_SRC_ALPHA, GL_ONE,
-			0.01,	-0.5,		
-			particle_smoke,
-			0,
-			pFreonThink,true);
-	
-	/*	d = rand()&5;
-		p = CL_SetupParticle (
-			org[0],	org[1],	org[2],
-			org[0]+((rand()&5)-2)+d*dir[0],	org[1]+((rand()&5)-2)+d*dir[1],	org[2]+((rand()&5)-2)+d*dir[2],
-			(dir[0]*50 + crand()*20)*speed,	(dir[1]*50 + crand()*20)*speed,	(dir[2]*50 + crand()*20)*speed,
-			0,			0,			0,
-			red,		green,		blue,
-			reddelta,	greendelta,	bluedelta,
-			1,		-1.0 / (0.5 + frand()*0.3),
-			GL_SRC_ALPHA, GL_ONE,
-			4,		-1.0,
-			particle_generic,
-			PART_GRAVITY,
-			pBlasterThink,true);*/
-	}
-}
-
-
-void CL_bloodcough(vec3_t org, vec3_t dir,  int count,
-				  int red, int green, int blue,
-				int reddelta, int greendelta, int bluedelta)
-{
-	int			i;
-	//float		d;
-	float speed = 2;
-	cparticle_t *p;
-	vec3_t		origin;
-	vec3_t r, u;
-
-	Com_Printf ("dir1 %f %f %f\n", dir[0], dir[1], dir[2]);
-
-	//dir[0] *= 56;
-	//dir[1] *= 56;
-	//dir[2] *= 56;
-
-	Com_Printf ("dir2 %f %f %f\n", dir[0], dir[1], dir[2]);
-
-	for (i = 0; i < 16; i++)
-	{
-		vec3_t velocity;
-
-		VectorSet(origin,
-			org[0],
-			org[1],
-			org[2]
-			);
-
-		velocity[0] = crand() * 2;
-		velocity[1] = crand() * 2;
-		velocity[2] = 1;
-
-		VectorAdd (velocity, dir, velocity);	
-
-		p = CL_SetupParticle (
-			org[0],	org[1],	org[2],
-
-			origin[0],	origin[1],	origin[2],
-
-			velocity[0],	velocity[1],	velocity[2],
-			//dir[0] * speed + 5, dir[1] * speed + 5, dir[2] * speed + 5,			
-
-			0,		0,		0,
-			255,		255,		255,
-			0,	0,	0,
-			0.4,		-0.3,//alpha
-			GL_SRC_ALPHA, GL_ONE, 
-			0.4+crand()*0.2,	0.1+crand()*0.1,		//size
-			particle_smoke,
-			0,
-			NULL,true);
-
-	}
-}
-
-void CL_burpgas(vec3_t org, vec3_t dir, int count,
-				  int red, int green, int blue,
-				int reddelta, int greendelta, int bluedelta)
-{
-	int			i;
-	//float		d;
-	float speed = 6;
-	cparticle_t *p;
-	vec3_t		origin;
-
-	for (i = 0; i < 8; i++)
-	{
-		VectorSet(origin,
-			org[0],
-			org[1],
-			org[2]
-			);
-
-		p = CL_SetupParticle (
-			org[0],	org[1],	org[2],
-
-			origin[0],	origin[1],	origin[2],
-
-			(dir[0]*0.2 + crand()*0.2)*speed,	(dir[1]*0.2 + crand()*0.2)*speed,	(dir[2]*2 + crand()*1)*speed,
-
-			0,		0,		0,
-			128,		255,		128,
-			0,	0,	0,
-			0.4,		-0.06,//alpha
-			GL_SRC_ALPHA, GL_ONE, 
-			0.8+crand()*0.2,	8+crand()*0.1,		//size
-			particle_smoke,
-			0,
-			NULL,true);
-	
-	}
-}
-
-
-void CL_shred (vec3_t org, vec3_t dir, int count,
-				  int red, int green, int blue,
-				int reddelta, int greendelta, int bluedelta)
-{
-	int			i;
-	cparticle_t *p;
-	vec3_t		origin;
-	float speed = 9 + random() * 4;	
-	
-
-	dir[2] += 5;
-
-	for (i = 0; i < count; i++)
-	{
-		int image;
-		float rsize;
-		int r = random()  * 3;
-
-		if (r == 0)
-			image = particle_shred0;
-		else if (r == 1)
-			image = particle_shred1;
-		else
-			image = particle_shred2;
-
-		VectorSet(origin,
-			org[0],
-			org[1],
-			org[2]
-			);
-
-		if (random() > 0.3)
-			rsize = 5  + crand()* 2;
-		else
-			rsize = 2 + crand() * 1;
-
-		p = CL_SetupParticle (
-			org[0] + crand() * 350,	org[1]+ crand() * 350,	org[2]+ crand() * 350,
-			origin[0] + crand()* 8,	origin[1]+ crand()* 8,	origin[2]+ crand()* 8,
-			(dir[0]*0.2 + crand()*2.9)*speed,	(dir[1]*0.2 + crand()*2.9)*speed,	(dir[2]*1.5 + crand()*1)*speed,
-			0,		0,		0,
-			red,		green,		blue,
-			0,	0,	0,
-			1,		0,//alpha
-			GL_SRC_ALPHA, GL_ONE, 
-			rsize,	random() * -1,		//size
-			particle_shred0,
-			PART_GRAVITY,
-			NULL,0);
-	}
-}
-
-
-void CL_lobbyglass (vec3_t org, vec3_t dir, int count,
-				  int red, int green, int blue,
-				int reddelta, int greendelta, int bluedelta)
-{
-	int			i;
-	//float		d;
-	float speed = 7;
-	cparticle_t *p;
-	vec3_t		origin;
-
-	dir[2] += 5;
-
-	for (i = 0; i < count; i++)
-	{
-		//(dir[2]*1 + crand()*2)*(random()*5)
-		float zspeed = -96 + crandom() * 64;
-
-		VectorSet(origin,
-			org[0],
-			org[1],
-			org[2]
-			);
-
-		p = CL_SetupParticle (
-			org[0] + crand() * 350,	org[1]+ crand() * 350,	org[2]+ crand() * 350,
-			origin[0] + crand()*48,	origin[1]+ crand()*48,	     origin[2]+ crand()*5,
-			(dir[0]*0.2 + crand()*2.9)*speed,	(dir[1]*0.2 + crand()*2.9)*speed,	zspeed,
-			0,		0,		0,
-			red,		green,		blue,
-			0,	0,	0,
-			1,		-0.06,//alpha
-			GL_SRC_ALPHA, GL_ONE, 
-			6+crand()*2,	0,		//size
-			particle_glass,
-			PART_GRAVITY   /*|PART_TRANS|PART_SHADED*/,
-			NULL,true);
-		
-		p = CL_SetupParticle (
-			org[0] + crand() * 350,	org[1]+ crand() * 350,	org[2]+ crand() * 350,
-			origin[0] + crand()*5,	origin[1]+ crand()*5,	origin[2]+ crand()*5,
-			(dir[0]*0.2 + crand()*3.9)*speed,	(dir[1]*0.2 + crand()*3.9)*speed,	zspeed,
-			0,		0,		0,
-			red,		green,		blue,
-			0,	0,	0,
-			1,		-0.06,//alpha
-			GL_SRC_ALPHA, GL_ONE, 
-			6+crand()*2,	0,		//size
-			particle_glass2,
-			PART_GRAVITY   /*|PART_TRANS|PART_SHADED*/,
-			NULL,true);
-
-	}
-}
-
-
-
-void CL_wineglassbreak (vec3_t org, vec3_t dir, int count,
-				  int red, int green, int blue,
-				int reddelta, int greendelta, int bluedelta)
-{
-	int			i;
-	//float		d;
-	float speed = 7;
-	cparticle_t *p;
-	vec3_t		origin;
-
-	dir[2] += 5;
-
-	for (i = 0; i < count; i++)
-	{
-		VectorSet(origin,
-			org[0],
-			org[1],
-			org[2]
-			);
-
-		p = CL_SetupParticle (
-			org[0],	org[1],	org[2],
-
-			origin[0] + crand()*0.3,	origin[1]+ crand()*0.3,	origin[2]+ crand()*0.3,
-
-			(dir[0]*0.2 + crand()*2.9)*speed,	(dir[1]*0.2 + crand()*2.9)*speed,	(dir[2]*2 + crand()*1)*speed,
-
-			0,		0,		0,
-			red,		green,		blue,
-			0,	0,	0,
-			0.8,		-0.06,//alpha
-			GL_SRC_ALPHA, GL_ONE, 
-			0.9+crand()*0.7,	0,		//size
-			particle_glass,
-			PART_GRAVITY,
-			NULL,0);
-		
-		p = CL_SetupParticle (
-			org[0],	org[1],	org[2],
-
-			origin[0] + crand()*0.3,	origin[1]+ crand()*0.3,	origin[2]+ crand()*0.3,
-
-			(dir[0]*0.2 + crand()*3.9)*speed,	(dir[1]*0.2 + crand()*3.9)*speed,	(dir[2]*2 + crand()*2)*speed,
-
-			0,		0,		0,
-			red,		green,		blue,
-			0,	0,	0,
-			0.8,		-0.06,//alpha
-			GL_SRC_ALPHA, GL_ONE, 
-			0.9+crand()*0.7,	0,		//size
-			particle_glass2,
-			PART_GRAVITY,
-			NULL,0);
-
-	}
-
-
-
-	//zz
-}
-
-
-
-void CL_cigsmoke (vec3_t org, vec3_t dir, int count,
-				  int red, int green, int blue,
-				int reddelta, int greendelta, int bluedelta)
-{
-	int			i;
-	//float		d;
-	float speed = .75;
-	cparticle_t *p;
-	vec3_t		origin;
-
-	for (i = 0; i < count; i++)
-	{
-		VectorSet(origin,
-			org[0],
-			org[1],
-			org[2]
-			);
-
-		p = CL_SetupParticle (
-			org[0],	org[1],	org[2],
-
-			origin[0],	origin[1],	origin[2],
-
-			(dir[0]*0.2 + crand()*0.2)*speed,	(dir[1]*0.2 + crand()*0.2)*speed,	(dir[2]*2 + crand()*1)*speed,
-
-			0,		0,		0,
-			red,		green,		blue,
-			0,	0,	0,
-			0.5,		-0.06,//alpha
-			GL_SRC_ALPHA, GL_ONE, 
-			0.05+crand()*0.2,	0.1+crand()*0.1,		//size
-			particle_smoke,
-			0,
-			NULL,true);
-	
-	}
-}
-
-void CL_cigbigsmoke (vec3_t org, vec3_t dir, int count,
-				  int red, int green, int blue,
-				int reddelta, int greendelta, int bluedelta)
-{
-	int			i;
-	//float		d;
-	float speed = .75;
-	cparticle_t *p;
-	vec3_t		origin;
-
-	for (i = 0; i < count; i++)
-	{
-		VectorSet(origin,
-			org[0],
-			org[1],
-			org[2]
-			);
-
-		p = CL_SetupParticle (
-			org[0],	org[1],	org[2],
-
-			origin[0],	origin[1],	origin[2],
-
-			(dir[0]*0.2 + crand()*0.9)*speed,
-			(dir[1]*0.2 + crand()*0.9)*speed,
-			(dir[2]*6 + crand()*4)*speed,
-
-			0,		0,		0,
-			red,		green,		blue,
-			0,	0,	0,
-			0.7,		-0.3,//alpha
-			GL_SRC_ALPHA, GL_ONE, 
-			0.3+crand()*0.5,	1.5+crand()*1.5,		//size
-			particle_smoke,
-			0,
-			NULL,true);
-	
-	}
 }
 
 
@@ -2369,7 +1964,6 @@ void CL_HyperBlasterEffect (vec3_t start, vec3_t end, vec3_t angle, int red, int
 		CL_HyperBlasterGlow (start, end, red, green, blue, reddelta, greendelta, bluedelta);
 }
 
-
 void CL_FreonTrail (vec3_t start, vec3_t end, int red, int green, int blue,
 										int reddelta, int greendelta, int bluedelta)
 {
@@ -2422,7 +2016,6 @@ void CL_FreonEffect (vec3_t start, vec3_t end, vec3_t angle, int red, int green,
 	CL_FreonTrail (start, end, red, green, blue, reddelta, greendelta, bluedelta);
 }
 
-
 /*
 ===============
 CL_QuadTrail
@@ -2470,7 +2063,7 @@ void CL_QuadTrail (vec3_t start, vec3_t end)
 CL_FlagTrail
 ===============
 */
-void CL_FlagTrail (vec3_t start, vec3_t end, qboolean isred, qboolean isgreen)
+void CL_FlagTrail (vec3_t start, vec3_t end, int red, int green, int blue)
 {
 	vec3_t		move;
 	vec3_t		vec;
@@ -2493,8 +2086,8 @@ void CL_FlagTrail (vec3_t start, vec3_t end, qboolean isred, qboolean isgreen)
 			move[0] + crand()*16, move[1] + crand()*16, move[2] + crand()*16,
 			crand()*5,	crand()*5, crand()*5,
 			0,		0,		0,
-			(isred)?255:0, (isgreen)?255:0, (!isred && !isgreen)?255:0,
-			0,	0,	0,
+			red,	green,	blue,
+			0,		0,		0,
 			1,		-1.0 / (0.8+frand()*0.2),
 			GL_SRC_ALPHA, GL_ONE,
 			1,			0,			
@@ -2612,20 +2205,6 @@ void CL_DiminishingTrail (vec3_t start, vec3_t end, centity_t *old, int flags)
 							CL_ParticleBloodThink, true);
 					else
 						p = CL_SetupParticle (
-							0,	0,	0,
-							move[0] + crand()*orgscale,	move[1] + crand()*orgscale,	move[2] + crand()*orgscale,
-							crand()*velscale,	crand()*velscale,	crand()*velscale,
-							0,		0,		0,
-							255,	0,		0,
-							0,		0,		0,
-							1,		-1.0 / (1+frand()*0.4),
-							GL_SRC_ALPHA, GL_ONE,
-							5,			-1,			
-							particle_blood,
-							PART_GRAVITY|PART_SHADED,
-							CL_ParticleBloodThink, true);
-#else
-						p = CL_SetupParticle (
 							0,	0,	random()*360,
 							move[0] + crand()*orgscale,	move[1] + crand()*orgscale,	move[2] + crand()*orgscale,
 							crand()*velscale,	crand()*velscale,	crand()*velscale,
@@ -2638,6 +2217,20 @@ void CL_DiminishingTrail (vec3_t start, vec3_t end, centity_t *old, int flags)
 							particle_shield,
 							PART_OVERBRIGHT|PART_GRAVITY|PART_SHADED,
 							CL_ParticleBloodThink,true);
+#else
+						p = CL_SetupParticle (
+							0,	0,	0,
+							move[0] + crand()*orgscale,	move[1] + crand()*orgscale,	move[2] + crand()*orgscale,
+							crand()*velscale,	crand()*velscale,	crand()*velscale,
+							0,		0,		0,
+							255,	0,		0,
+							0,		0,		0,
+							1,		-1.0 / (1+frand()*0.4),
+							GL_SRC_ALPHA, GL_ONE,
+							5,			-1,			
+							particle_blood,
+							PART_GRAVITY|PART_SHADED,
+							CL_ParticleBloodThink, true);
 #endif
 					if ( p && (crand() < (double)0.0001F) )
 						p->flags |= PART_LEAVEMARK;
@@ -2685,11 +2278,7 @@ void CL_DiminishingTrail (vec3_t start, vec3_t end, centity_t *old, int flags)
 							0,		0,		20,
 							255,	255,	255,
 							0,		0,		0,
-#ifdef NOTTHIRTYFLIGHTS
 							0.5,		-0.5,
-#else
-							0.5,		-0.35,
-#endif
 							GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA,
 							5,			5,			
 							particle_smoke,
@@ -2922,7 +2511,7 @@ void CL_DevRailTrail (vec3_t start, vec3_t end, int red, int green, int blue)
 	}
 	len = VectorNormalize (vec);
 	len = min (len, cl_rail_length->value);  // cap length
-	VectorCopy(vec, point);
+	VectorCopy (vec, point);
 
 	dec = 4;
 	VectorScale (vec, dec, vec);
@@ -3341,16 +2930,14 @@ CL_TrapParticles
 */
 void CL_TrapParticles (entity_t *ent)
 {
-	vec3_t		move;
-	vec3_t		vec;
-	vec3_t		start, end;
-	float		len;
-	int			dec;
+	int			i, j, k, dec;
+	float		len, vel;
+	vec3_t		move, vec, start, end, dir, org;
 
-	ent->origin[2]-=14;
+	ent->origin[2] -= 14;
 	VectorCopy (ent->origin, start);
 	VectorCopy (ent->origin, end);
-	end[2]+=64;
+	end[2] += 64;
 
 	VectorCopy (start, move);
 	VectorSubtract (end, start, vec);
@@ -3381,22 +2968,13 @@ void CL_TrapParticles (entity_t *ent)
 		VectorAdd (move, vec, move);
 	}
 
-	{
-	int			i, j, k;
-	float		vel;
-	vec3_t		dir;
-	vec3_t		org;
-
-	
 	ent->origin[2]+=14;
 	VectorCopy (ent->origin, org);
 
-
-	for (i=-2 ; i<=2 ; i+=4)
-		for (j=-2 ; j<=2 ; j+=4)
-			for (k=-2 ; k<=4 ; k+=4)
+	for (i = -2; i <= 2; i += 4)
+		for (j = -2; j <= 2; j += 4)
+			for (k = -2; k <= 4; k += 4)
 			{
-
 				dir[0] = j * 8;
 				dir[1] = i * 8;
 				dir[2] = k * 8;
@@ -3417,9 +2995,7 @@ void CL_TrapParticles (entity_t *ent)
 					particle_generic,
 					PART_GRAVITY,
 					NULL, false);
-
 			}
-	}
 }
 
 
@@ -3459,27 +3035,73 @@ CL_TeleportParticles
 */
 void CL_TeleportParticles (vec3_t org)
 {
-	int			i, j, k;
+	int			i, j, k;	// palIdx
 	float		vel;
-	vec3_t		dir;
+	vec3_t		dir;	// color
 
-	for (i=-16 ; i<=16 ; i+=4)
-		for (j=-16 ; j<=16 ; j+=4)
-			for (k=-16 ; k<=32 ; k+=4)
+	for (i = -16; i <= 16; i += 4)
+		for (j = -16; j <= 16;  j+= 4)
+			for (k = -16; k <= 32; k += 4)
 			{
 				dir[0] = j*16;
 				dir[1] = i*16;
 				dir[2] = k*16;
 
 				VectorNormalize (dir);						
-				vel = 150 + (rand()&63);
+				vel = 150 + (rand() & 63);
+
+			//	palIdx = 7 + (rand() & 7);
+			//	VectorSet (color, Q2PalColorRed(palIdx), Q2PalColorGreen(palIdx), Q2PalColorBlue(palIdx));
 
 				CL_SetupParticle (
 					0,	0,	0,
 					org[0]+i+(rand()&3), org[1]+j+(rand()&3),	org[2]+k+(rand()&3),
 					dir[0]*vel,	dir[1]*vel,	dir[2]*vel,
 					0,		0,		0,
-					200 + 55*rand(),	200 + 55*rand(),	200 + 55*rand(),
+					200 + (rand()%56),	200 + (rand()%56),	200 + (rand()%56),
+			//		color[0],			color[1],			color[2],
+					0,		0,		0,
+					1,		-1.0 / (0.3 + (rand()&7) * 0.02),
+					GL_SRC_ALPHA, GL_ONE,
+					1,			3,			
+					particle_generic,
+					PART_GRAVITY,
+					NULL, false);
+			}
+}
+
+
+/*
+===============
+CL_TeleportParticles_Q1
+===============
+*/
+void CL_TeleportParticles_Q1 (vec3_t org)
+{
+	int			i, j, k, palIdx;
+	float		vel;
+	vec3_t		dir, color;
+
+	for (i = -16; i <= 16; i += 4)
+		for (j = -16; j <= 16;  j+= 4)
+			for (k = -16; k <= 32; k += 4)
+			{
+				dir[0] = j*16;
+				dir[1] = i*16;
+				dir[2] = k*16;
+
+				VectorNormalize (dir);						
+				vel = 150 + (rand() & 63);
+
+				palIdx = 7 + (rand() & 7);
+				VectorSet (color, Q1PalColorRed(palIdx), Q1PalColorGreen(palIdx), Q1PalColorBlue(palIdx));
+
+				CL_SetupParticle (
+					0,	0,	0,
+					org[0]+i+(rand()&3), org[1]+j+(rand()&3),	org[2]+k+(rand()&3),
+					dir[0]*vel,	dir[1]*vel,	dir[2]*vel,
+					0,		0,		0,
+					color[0],			color[1],			color[2],
 					0,		0,		0,
 					1,		-1.0 / (0.3 + (rand()&7) * 0.02),
 					GL_SRC_ALPHA, GL_ONE,
@@ -3587,7 +3209,7 @@ void CL_ForceWall (vec3_t start, vec3_t end, int color8)
 	vec3_t		move;
 	vec3_t		vec;
 	float		len;
-	vec3_t color = { color8red(color8), color8green(color8), color8blue(color8)};
+	vec3_t color = { Q2PalColorRed(color8), Q2PalColorGreen(color8), Q2PalColorBlue(color8) };
 
 	VectorCopy (start, move);
 	VectorSubtract (end, start, vec);
@@ -3779,10 +3401,10 @@ void CL_ParticleSteamEffect (vec3_t org, vec3_t dir, int red, int green, int blu
 	cparticle_t	*p;
 	float		d;
 	vec3_t		r, u;
-	//vec3_t color = { color8red(color8), color8green(color8), color8blue(color8)};
+//	vec3_t color = { Q2PalColorRed(color8), Q2PalColorGreen(color8), Q2PalColorBlue(color8) };
 
-	//vectoangles2 (dir, angle_dir);
-	//AngleVectors (angle_dir, f, r, u);
+//	vectoangles2 (dir, angle_dir);
+//	AngleVectors (angle_dir, f, r, u);
 
 	MakeNormalVectors (dir, r, u);
 
@@ -3830,10 +3452,10 @@ void CL_ParticleSteamEffect2 (cl_sustain_t *self)
 	vec3_t		r, u;
 	vec3_t		dir;
 	int			color8 = self->color + (rand()&7);
-	vec3_t color = { color8red(color8), color8green(color8), color8blue(color8)};
+	vec3_t color = { Q2PalColorRed(color8), Q2PalColorGreen(color8), Q2PalColorBlue(color8) };
 
-	//vectoangles2 (dir, angle_dir);
-	//AngleVectors (angle_dir, f, r, u);
+//	vectoangles2 (dir, angle_dir);
+//	AngleVectors (angle_dir, f, r, u);
 
 	VectorCopy (self->dir, dir);
 	MakeNormalVectors (dir, r, u);
@@ -3850,7 +3472,7 @@ void CL_ParticleSteamEffect2 (cl_sustain_t *self)
 			0,		0,		0,
 			1.0,		-1.0 / (0.5 + frand()*0.3),
 			GL_SRC_ALPHA, GL_ONE,
-			4,			0,
+			4,			0,			
 			particle_smoke,
 			PART_GRAVITY,
 #else
@@ -3863,7 +3485,6 @@ void CL_ParticleSteamEffect2 (cl_sustain_t *self)
 			PART_TRANS|PART_SHADED|PART_GRAVITY,
 #endif
 			NULL, false);
-
 		if (!p)
 			return;
 
@@ -3896,7 +3517,7 @@ void CL_TrackerTrail (vec3_t start, vec3_t end)
 	VectorSubtract (end, start, vec);
 	len = VectorNormalize (vec);
 
-	VectorCopy(vec, forward);
+	VectorCopy (vec, forward);
 	vectoangles2 (forward, angle_dir);
 	AngleVectors (angle_dir, forward, right, up);
 
@@ -3926,7 +3547,7 @@ void CL_TrackerTrail (vec3_t start, vec3_t end)
 			return;
 
 		dist = DotProduct(move, forward);
-		VectorMA(move, 8 * cos(dist), up, p->org);
+		VectorMA (move, 8 * cos(dist), up, p->org);
 
 		VectorAdd (move, vec, move);
 	}
@@ -3967,7 +3588,7 @@ void CL_Tracker_Shell (vec3_t origin)
 		dir[1] = crand();
 		dir[2] = crand();
 		VectorNormalize(dir);
-		VectorMA(origin, 40, dir, p->org);
+		VectorMA (origin, 40, dir, p->org);
 	}
 }
 
@@ -4007,7 +3628,7 @@ void CL_MonsterPlasma_Shell(vec3_t origin)
 		dir[2] = crand();
 		VectorNormalize(dir);
 	
-		VectorMA(origin, 10, dir, p->org);
+		VectorMA (origin, 10, dir, p->org);
 	}
 }
 
@@ -4055,7 +3676,7 @@ void CL_Widowbeamout (cl_sustain_t *self)
 		dir[2] = crand();
 		VectorNormalize(dir);
 	
-		VectorMA(self->org, (45.0 * ratio), dir, p->org);
+		VectorMA (self->org, (45.0 * ratio), dir, p->org);
 	}
 }
 
@@ -4105,8 +3726,8 @@ void CL_Nukeblast (cl_sustain_t *self)
 		dir[2] = crand();
 		VectorNormalize(dir);
 		VectorScale(dir, -1, p->angle);
-		VectorMA(self->org, 200.0*size, dir, p->org); //was 100
-		VectorMA(vec3_origin, 400.0*size, dir, p->vel); //was 100
+		VectorMA (self->org, 200.0*size, dir, p->org); //was 100
+		VectorMA (vec3_origin, 400.0*size, dir, p->vel); //was 100
 
 	}
 }
@@ -4147,8 +3768,8 @@ void CL_WidowSplash (vec3_t org)
 		dir[1] = crand();
 		dir[2] = crand();
 		VectorNormalize(dir);
-		VectorMA(org, 45.0, dir, p->org);
-		VectorMA(vec3_origin, 40.0, dir, p->vel);
+		VectorMA (org, 45.0, dir, p->org);
+		VectorMA (vec3_origin, 40.0, dir, p->vel);
 	}
 }
 
@@ -4190,7 +3811,7 @@ void CL_Tracker_Explode (vec3_t	origin)
 		VectorScale(dir, -1, backdir);
 
 		VectorCopy (origin, p->org); //Knightmare- start at center, not edge
-	//	VectorMA(origin, 64, dir, p->org); 
+	//	VectorMA (origin, 64, dir, p->org); 
 		VectorScale(dir, (crand()*128), p->vel); //was backdir, 64
 	}
 	
@@ -4208,7 +3829,7 @@ void CL_TagTrail (vec3_t start, vec3_t end, int color8)
 	vec3_t		vec;
 	float		len;
 	int			dec;
-	vec3_t color = { color8red(color8), color8green(color8), color8blue(color8)};
+	vec3_t color = { Q2PalColorRed(color8), Q2PalColorGreen(color8), Q2PalColorBlue(color8) };
 
 	VectorCopy (start, move);
 	VectorSubtract (end, start, vec);
@@ -4248,7 +3869,7 @@ CL_ColorExplosionParticles
 void CL_ColorExplosionParticles (vec3_t org, int color8, int run)
 {
 	int			i;
-	vec3_t color = {color8red(color8), color8green(color8), color8blue(color8)};
+	vec3_t color = { Q2PalColorRed(color8), Q2PalColorGreen(color8), Q2PalColorBlue(color8) };
 
 	for (i=0 ; i<128 ; i++)
 	{
@@ -4351,7 +3972,7 @@ void CL_ElectricParticles (vec3_t org, vec3_t dir, int count)
 #ifdef NOTTHIRTYFLIGHTS
 			1,		-1.0 / (0.5 + frand()*0.3),
 			GL_SRC_ALPHA, GL_ONE,
-			6,		-3,
+			6,		-3,			
 			particle_solid,
 #else
 			1,		-4,

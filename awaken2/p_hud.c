@@ -501,8 +501,8 @@ void G_SetStats(edict_t *ent)
 	ent->client->ps.stats[STAT_HEALTH_ICON] = level.pic_health;
 	ent->client->ps.stats[STAT_HEALTH] = ent->health;
 #ifdef KMQUAKE2_ENGINE_MOD	// for enhanced HUD
-//	ent->client->ps.stats[STAT_MAXHEALTH] = min(max(ent->client->pers.max_health, 0), 10000);
-	ent->client->ps.stats[STAT_MAXHEALTH] = min(max(ent->max_health, 0), 10000);
+//	ent->client->ps.stats[STAT_MAXHEALTH] = min(max(ent->client->pers.max_health, 0), SHRT_MAX);
+	ent->client->ps.stats[STAT_MAXHEALTH] = min(max(ent->max_health, 0), SHRT_MAX);
 #endif
 
 	// ammo
@@ -520,7 +520,7 @@ void G_SetStats(edict_t *ent)
 		ent->client->ps.stats[STAT_AMMO_ICON] = gi.imageindex(item->icon);
 		ent->client->ps.stats[STAT_AMMO] = ent->client->pers.inventory[ent->client->ammo_index];
 #ifdef KMQUAKE2_ENGINE_MOD	// for enhanced HUD
-		ent->client->ps.stats[STAT_MAXAMMO] = min(max(GetMaxAmmoByIndex(ent->client, ent->client->ammo_index), 0), 10000);
+		ent->client->ps.stats[STAT_MAXAMMO] = min(max(GetMaxAmmoByIndex(ent->client, ent->client->ammo_index), 0), SHRT_MAX);
 #endif
 	}
 	
@@ -546,7 +546,7 @@ void G_SetStats(edict_t *ent)
 			ent->client->ps.stats[STAT_ARMOR_ICON] = gi.imageindex ("i_powerscreen");
 		ent->client->ps.stats[STAT_ARMOR] = cells;
 #ifdef KMQUAKE2_ENGINE_MOD	// for enhanced HUD
-		ent->client->ps.stats[STAT_MAXARMOR] = min(max(ent->client->pers.max_cells, 0), 10000);
+		ent->client->ps.stats[STAT_MAXARMOR] = min(max(ent->client->pers.max_cells, 0), SHRT_MAX);
 #endif
 	}
 	else if (index)
@@ -555,7 +555,7 @@ void G_SetStats(edict_t *ent)
 		ent->client->ps.stats[STAT_ARMOR_ICON] = gi.imageindex(item->icon);
 		ent->client->ps.stats[STAT_ARMOR] = ent->client->pers.inventory[index];
 #ifdef KMQUAKE2_ENGINE_MOD	// for enhanced HUD
-		ent->client->ps.stats[STAT_MAXARMOR] = min(max(GetMaxArmorByIndex(index), 0), 10000);
+		ent->client->ps.stats[STAT_MAXARMOR] = min(max(GetMaxArmorByIndex(index), 0), SHRT_MAX);
 #endif
 	}
 	else
@@ -595,7 +595,7 @@ void G_SetStats(edict_t *ent)
 
 		ent->client->ps.stats[STAT_TIMER] = ent->client->gauss_dmg;
 #ifdef KMQUAKE2_ENGINE_MOD	// for enhanced HUD
-		ent->client->ps.stats[STAT_TIMER_RANGE] = min(max((int)sv_gauss_damage_max->value, 0), 10000);
+		ent->client->ps.stats[STAT_TIMER_RANGE] = min(max((int)sv_gauss_damage_max->value, 0), SHRT_MAX);
 #endif
 	}
 	else if (ent->client->agm_showcharge)
@@ -615,7 +615,7 @@ void G_SetStats(edict_t *ent)
 		ent->client->ps.stats[STAT_TIMER_ICON] = gi.imageindex("p_quad");
 		ent->client->ps.stats[STAT_TIMER] = (ent->client->quad_framenum - level.framenum) / 10;
 #ifdef KMQUAKE2_ENGINE_MOD	// for enhanced HUD
-		ent->client->ps.stats[STAT_TIMER_RANGE] = min(max(QUAD_TIMEOUT_FRAMES / 10, 0), 10000);
+		ent->client->ps.stats[STAT_TIMER_RANGE] = min(max(QUAD_TIMEOUT_FRAMES / 10, 0), SHRT_MAX);
 #endif
 	}
 	else if (ent->client->invincible_framenum > level.framenum)
@@ -623,7 +623,7 @@ void G_SetStats(edict_t *ent)
 		ent->client->ps.stats[STAT_TIMER_ICON] = gi.imageindex("p_invulnerability");
 		ent->client->ps.stats[STAT_TIMER] = (ent->client->invincible_framenum - level.framenum) / 10;
 #ifdef KMQUAKE2_ENGINE_MOD	// for enhanced HUD
-		ent->client->ps.stats[STAT_TIMER_RANGE] = min(max(INVINCIBLE_TIMEOUT_FRAMES / 10, 0), 10000);
+		ent->client->ps.stats[STAT_TIMER_RANGE] = min(max(INVINCIBLE_TIMEOUT_FRAMES / 10, 0), SHRT_MAX);
 #endif
 	}
 //CW++
@@ -632,7 +632,7 @@ void G_SetStats(edict_t *ent)
 		ent->client->ps.stats[STAT_TIMER_ICON] = gi.imageindex("p_siphon");
 		ent->client->ps.stats[STAT_TIMER] = (ent->client->siphon_framenum - level.framenum) / 10;
 #ifdef KMQUAKE2_ENGINE_MOD	// for enhanced HUD
-		ent->client->ps.stats[STAT_TIMER_RANGE] = min(max(SIPHON_TIMEOUT_FRAMES / 10, 0), 10000);
+		ent->client->ps.stats[STAT_TIMER_RANGE] = min(max(SIPHON_TIMEOUT_FRAMES / 10, 0), SHRT_MAX);
 #endif
 	}
 	else if (ent->client->needle_framenum > level.framenum)
@@ -640,7 +640,7 @@ void G_SetStats(edict_t *ent)
 		ent->client->ps.stats[STAT_TIMER_ICON] = gi.imageindex("p_needle");
 		ent->client->ps.stats[STAT_TIMER] = (ent->client->needle_framenum - level.framenum) / 10;
 #ifdef KMQUAKE2_ENGINE_MOD	// for enhanced HUD
-		ent->client->ps.stats[STAT_TIMER_RANGE] = min(max(NEEDLE_TIMEOUT_FRAMES / 10, 0), 10000);
+		ent->client->ps.stats[STAT_TIMER_RANGE] = min(max(NEEDLE_TIMEOUT_FRAMES / 10, 0), SHRT_MAX);
 #endif
 	}
 	else if (ent->client->haste_framenum > level.framenum)
@@ -648,7 +648,7 @@ void G_SetStats(edict_t *ent)
 		ent->client->ps.stats[STAT_TIMER_ICON] = gi.imageindex("p_haste");
 		ent->client->ps.stats[STAT_TIMER] = (ent->client->haste_framenum - level.framenum) / 10;
 #ifdef KMQUAKE2_ENGINE_MOD	// for enhanced HUD
-		ent->client->ps.stats[STAT_TIMER_RANGE] = min(max(HASTE_TIMEOUT_FRAMES / 10, 0), 10000);
+		ent->client->ps.stats[STAT_TIMER_RANGE] = min(max(HASTE_TIMEOUT_FRAMES / 10, 0), SHRT_MAX);
 #endif
 	}
 //CW--
@@ -657,7 +657,7 @@ void G_SetStats(edict_t *ent)
 		ent->client->ps.stats[STAT_TIMER_ICON] = gi.imageindex("p_envirosuit");
 		ent->client->ps.stats[STAT_TIMER] = (ent->client->enviro_framenum - level.framenum) / 10;
 #ifdef KMQUAKE2_ENGINE_MOD	// for enhanced HUD
-		ent->client->ps.stats[STAT_TIMER_RANGE] = min(max(ENVIROSUIT_TIMEOUT_FRAMES / 10, 0), 10000);
+		ent->client->ps.stats[STAT_TIMER_RANGE] = min(max(ENVIROSUIT_TIMEOUT_FRAMES / 10, 0), SHRT_MAX);
 #endif
 	}
 	else if (ent->client->breather_framenum > level.framenum)
@@ -665,7 +665,7 @@ void G_SetStats(edict_t *ent)
 		ent->client->ps.stats[STAT_TIMER_ICON] = gi.imageindex("p_rebreather");
 		ent->client->ps.stats[STAT_TIMER] = (ent->client->breather_framenum - level.framenum) / 10;
 #ifdef KMQUAKE2_ENGINE_MOD	// for enhanced HUD
-		ent->client->ps.stats[STAT_TIMER_RANGE] = min(max(BREATHER_TIMEOUT_FRAMES / 10, 0), 10000);
+		ent->client->ps.stats[STAT_TIMER_RANGE] = min(max(BREATHER_TIMEOUT_FRAMES / 10, 0), SHRT_MAX);
 #endif
 	}
 //CW++
@@ -674,7 +674,7 @@ void G_SetStats(edict_t *ent)
 		ent->client->ps.stats[STAT_TIMER_ICON] = gi.imageindex("k_datacd");
 		ent->client->ps.stats[STAT_TIMER] = (ent->client->antibeam_framenum - level.framenum) / 10;
 #ifdef KMQUAKE2_ENGINE_MOD	// for enhanced HUD
-		ent->client->ps.stats[STAT_TIMER_RANGE] = min(max(ANTIBEAM_TIMEOUT_FRAMES / 10, 0), 10000);
+		ent->client->ps.stats[STAT_TIMER_RANGE] = min(max(ANTIBEAM_TIMEOUT_FRAMES / 10, 0), SHRT_MAX);
 #endif
 	}
 //CW--

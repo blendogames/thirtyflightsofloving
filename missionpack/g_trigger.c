@@ -1844,7 +1844,7 @@ void WriteTransitionEdict (FILE *f, edict_t *changelevel, edict_t *ent)
 	}
 	if (e.classname &&
 	   ( !Q_stricmp(e.classname,"misc_actor") || strstr(e.classname,"monster_") ) &&
-	   //Knightmare- changed this from a gib_health check, to take into account no_gib monsters
+	   // Knightmare- changed this from a gib_health check, to take into account no_gib monsters
 	   (e.svflags & SVF_GIB) )
 		e.classname = "gibhead";
 	WriteEdict(f,&e);
@@ -1906,9 +1906,23 @@ entlist_t DoNotMove[] = {
 void trans_ent_filename (char *filename, size_t filenameSize)
 {
 #if defined (_M_X64) || defined (_M_AMD64) || defined (__x86_64__)
-	SavegameDirRelativePath("save_x64/trans.ent", filename, filenameSize);
+	SavegameDirRelativePath ("save_x64/trans.ent", filename, filenameSize);
+#elif defined (_M_IX86) || defined (__i386__)
+	SavegameDirRelativePath ("save/trans.ent", filename, filenameSize);
+#elif defined (_M_IA64) || defined (__ia64__)
+	SavegameDirRelativePath ("save_ia64/trans.ent", filename, filenameSize);
+#elif defined (_M_ALPHA) || defined (__alpha__)
+	SavegameDirRelativePath ("save_axp/trans.ent", filename, filenameSize);
+#elif defined (_M_ARM) || defined (__arm__)
+	SavegameDirRelativePath ("save_arm32/trans.ent", filename, filenameSize);
+#elif defined (_M_ARM64) || defined (__aarch64__)
+	SavegameDirRelativePath ("save_arm64/trans.ent", filename, filenameSize);
+#elif defined (__ppc__)
+	SavegameDirRelativePath ("save_ppc/trans.ent", filename, filenameSize);
+#elif defined (__sparc__)
+	SavegameDirRelativePath ("save_sparc/trans.ent", filename, filenameSize);
 #else
-	SavegameDirRelativePath("save/trans.ent", filename, filenameSize);
+	SavegameDirRelativePath ("save_unk/trans.ent", filename, filenameSize);
 #endif
 }
 
@@ -1916,20 +1930,20 @@ int trigger_transition_ents (edict_t *changelevel, edict_t *self)
 {
 	char		t_file[MAX_OSPATH];
 	int			i, j;
-	int			total=0;
+	int			total = 0;
 	qboolean	nogo;
 	edict_t		*ent;
 	entlist_t	*p;
 	FILE		*f;
 
 	if (developer->value)
-		gi.dprintf("==== WriteTransitionEnts ====\n");
+		gi.dprintf ("==== WriteTransitionEnts ====\n");
 
 	trans_ent_filename (t_file, sizeof(t_file));
-	f = fopen(t_file,"wb");
-	if (!f)
+	f = fopen(t_file, "wb");
+	if ( !f )
 	{
-		gi.dprintf("Error opening %s for writing\n",t_file);
+		gi.dprintf ("Error opening %s for writing\n",t_file);
 		return 0;
 	}
 	// First scan entities for brush models that SHOULD change levels, e.g. func_tracktrain,

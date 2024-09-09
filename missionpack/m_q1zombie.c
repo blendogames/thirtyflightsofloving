@@ -625,6 +625,19 @@ void q1zombie_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dam
 }
 
 
+// Knightmare- added soundcache function
+void monster_q1_zombie_soundcache (edict_t *self)
+{
+	sound_idleC	= gi.soundindex ("q1zombie/idle_w2.wav");
+	sound_idle	= gi.soundindex ("q1zombie/z_idle.wav");
+	sound_idle2	= gi.soundindex ("q1zombie/z_idle1.wav");
+	sound_pain	= gi.soundindex ("q1zombie/z_pain.wav");
+	sound_pain2	= gi.soundindex ("q1zombie/z_pain1.wav");
+	sound_fall	= gi.soundindex ("q1zombie/z_fall.wav");
+	sound_gib	= gi.soundindex ("q1zombie/z_gib.wav");
+	sound_shot	= gi.soundindex ("q1zombie/z_shot1.wav");
+}
+
 //
 // SPAWN
 //
@@ -633,7 +646,6 @@ void q1zombie_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dam
 model="models/monsters/q1zombie/tris.md2"
 "sounds"  1 makes the zombie crucified
 */
-
 void SP_misc_q1_zombie_crucified (edict_t *self);
 void SP_monster_q1_zombie (edict_t *self)
 {
@@ -650,14 +662,8 @@ void SP_monster_q1_zombie (edict_t *self)
 		return;
 	}
 
-	sound_idleC	= gi.soundindex ("q1zombie/idle_w2.wav");
-	sound_idle	= gi.soundindex ("q1zombie/z_idle.wav");
-	sound_idle2	= gi.soundindex ("q1zombie/z_idle1.wav");
-	sound_pain	= gi.soundindex ("q1zombie/z_pain.wav");
-	sound_pain2	= gi.soundindex ("q1zombie/z_pain1.wav");
-	sound_fall	= gi.soundindex ("q1zombie/z_fall.wav");
-	sound_gib	= gi.soundindex ("q1zombie/z_gib.wav");
-	sound_shot	= gi.soundindex ("q1zombie/z_shot1.wav");
+	// Knightmare- use soundcache function
+	monster_q1_zombie_soundcache (self);
 
 	// precache gibs
 	gi.modelindex ("models/monsters/q1zombie/head/tris.md2");
@@ -665,7 +671,7 @@ void SP_monster_q1_zombie (edict_t *self)
 	gi.modelindex ("models/objects/q1gibs/q1gib2/tris.md2");
 	gi.modelindex ("models/objects/q1gibs/q1gib3/tris.md2");
 	// precache projectile gib
-	q1_gib_precache ();
+	q1_zombiegib_precache ();
 
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;

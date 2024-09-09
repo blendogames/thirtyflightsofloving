@@ -56,7 +56,7 @@ typedef struct
 	struct cmodel_s		*models[MAX_MODELS];
 
 	char		configstrings[MAX_CONFIGSTRINGS][MAX_QPATH];
-	entity_state_t	baselines[MAX_EDICTS];
+	centity_state_t	baselines[MAX_EDICTS];
 
 	// the multicast buffer is used to send a message to a set of clients
 	// it is only used to marshall data until SV_Multicast is called
@@ -159,27 +159,27 @@ typedef struct
 
 typedef struct
 {
-	qboolean	initialized;				// sv_init has completed
-	int			realtime;					// always increasing, no clamping, etc
+	qboolean		initialized;				// sv_init has completed
+	int				realtime;					// always increasing, no clamping, etc
 
-	char		mapcmd[MAX_TOKEN_CHARS];	// ie: *intro.cin+base 
+	char			mapcmd[MAX_TOKEN_CHARS];	// ie: *intro.cin+base 
 
-	int			spawncount;					// incremented each server start
-											// used to check late spawns
+	int				spawncount;					// incremented each server start
+												// used to check late spawns
 
-	client_t	*clients;					// [maxclients->value];
-	int			num_client_entities;		// maxclients->value*UPDATE_BACKUP*MAX_PACKET_ENTITIES
-	int			next_client_entities;		// next client_entity to use
-	entity_state_t	*client_entities;		// [num_client_entities]
+	client_t		*clients;					// [maxclients->value];
+	int				num_client_entities;		// maxclients->value*UPDATE_BACKUP*MAX_PACKET_ENTITIES
+	int				next_client_entities;		// next client_entity to use
+	centity_state_t	*client_entities;			// [num_client_entities]
 
-	int			last_heartbeat;
+	int				last_heartbeat;
 
-	challenge_t	challenges[MAX_CHALLENGES];	// to prevent invalid IPs from connecting
+	challenge_t		challenges[MAX_CHALLENGES];	// to prevent invalid IPs from connecting
 
 	// serverrecord values
-	FILE		*demofile;
-	sizebuf_t	demo_multicast;
-	byte		demo_multicast_buf[MAX_MSGLEN];
+	FILE			*demofile;
+	sizebuf_t		demo_multicast;
+	byte			demo_multicast_buf[MAX_MSGLEN];
 } server_static_t;
 
 //=============================================================================
@@ -292,6 +292,7 @@ void SV_Status_f (void);
 //
 void SV_WriteFrameToClient (client_t *client, sizebuf_t *msg);
 void SV_RecordDemoMessage (void);
+void SV_SetEntStateAddedFields (edict_t *ent, centity_state_t *s);	// Knightmare added
 void SV_BuildClientFrame (client_t *client);
 
 

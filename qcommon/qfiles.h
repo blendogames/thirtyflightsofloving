@@ -37,19 +37,18 @@ The .pak files are just a linear collapse of a directory tree
 
 typedef struct
 {
-	char	name[56];
-	int		filepos, filelen;
+	char				name[56];
+	unsigned int		filepos, filelen;
 } dpackfile_t;
 
 typedef struct
 {
-	int		ident;		// == IDPAKHEADER
-	int		dirofs;
-	int		dirlen;
+	unsigned int		ident;		// == IDPAKHEADER
+	unsigned int		dirofs;
+	unsigned int		dirlen;
 } dpackheader_t;
 
-#define	MAX_FILES_IN_PACK	4096
-
+#define	MAX_FILES_IN_PACK	16384	// Knightmare- was 4096, increased for Q2 re-release pak
 
 /*
 ========================================================================
@@ -76,6 +75,96 @@ typedef struct
     unsigned char	data;			// unbounded
 } pcx_t;
 
+/*
+========================================================================
+
+.MDL triangle model file format, from Quake source
+
+========================================================================
+*/
+
+#define IDMDLHEADER		(('O'<<24)+('P'<<16)+('D'<<8)+'I')
+#define MDL_ALIAS_VERSION	6
+#define MDL_ONSEAM			0x0020
+
+#define MDL_MAX_TRIANGLES	2048
+#define MDL_MAX_VERTS		1024
+#define MDL_MAX_FRAMES		256
+#define MDL_MAX_SKINS		32
+
+typedef enum { ST_SYNC = 0, ST_RAND } mdl_synctype_t;
+
+typedef enum { MDL_SINGLE = 0, MDL_GROUP } mdl_frametype_t;
+
+typedef enum { MDL_SKIN_SINGLE = 0, MDL_SKIN_GROUP } mdl_skintype_t;
+
+typedef struct {
+	int				onSeam;
+	int				s;
+	int				t;
+} dmdl_stvert_t;
+
+typedef struct {
+	byte			v[3];
+	byte			lightnormalindex;
+} dmdl_trivertx_t;
+
+typedef struct dtriangle_s {
+	int				facesFront;
+	int				vertIndex[3];
+} dmdl_triangle_t;
+
+typedef struct {
+	mdl_frametype_t	type;
+} dmdl_frametype_t;
+
+typedef struct {
+	dmdl_trivertx_t	bbox_min;	// lightnormal isn't used
+	dmdl_trivertx_t	bbox_max;	// lightnormal isn't used
+	char			name[16];	// frame name from grabbing
+} dmdl_frame_t;
+
+typedef struct {
+	int				num_frames;
+	dmdl_trivertx_t	bbox_min;	// lightnormal isn't used
+	dmdl_trivertx_t	bbox_max;	// lightnormal isn't used
+} dmdl_group_t;
+
+typedef struct {
+	float			interval;
+} dmdl_interval_t;
+
+typedef struct {
+	mdl_skintype_t	type;
+} dmdl_skintype_t;
+
+typedef struct {
+	int				num_skins;
+} dmdl_skingroup_t;
+
+typedef struct {
+	float			interval;
+} dmdl_skininterval_t;
+
+typedef struct {
+	int				ident;
+	int				version;
+
+	vec3_t			scale;
+	vec3_t			scale_origin;
+	float			bounding_radius;
+	vec3_t			eye_position;
+
+	int				num_skins;
+	int				skin_width;
+	int				skin_height;
+	int				num_verts;
+	int				num_tris;
+	int				num_frames;
+	mdl_synctype_t	sync_type;
+	int				flags;
+	float			size;
+} dmdl_t;
 
 /*
 ========================================================================
@@ -85,7 +174,7 @@ typedef struct
 ========================================================================
 */
 
-#define IDMD2HEADER		(('2'<<24)+('P'<<16)+('D'<<8)+'I')
+#define IDMD2HEADER			(('2'<<24)+('P'<<16)+('D'<<8)+'I')
 #define MD2_ALIAS_VERSION	8
 
 #define	MD2_MAX_TRIANGLES	4096
@@ -96,20 +185,20 @@ typedef struct
 
 typedef struct
 {
-	short	s;
-	short	t;
+	short			s;
+	short			t;
 } dmd2coord_t;
 
-typedef struct 
+typedef struct
 {
-	short	index_xyz[3];
-	short	index_st[3];
+	short			index_xyz[3];
+	short			index_st[3];
 } dmd2triangle_t;
 
 typedef struct
 {
-	byte	v[3];			// scaled byte to fit in frame mins/maxs
-	byte	lightnormalindex;
+	byte			v[3];			// scaled byte to fit in frame mins/maxs
+	byte			lightnormalindex;
 } dmd2vertex_t;
 
 #define DTRIVERTX_V0   0
@@ -204,11 +293,11 @@ typedef struct
 
 typedef struct
 {
-    vec3_t			mins;
+	vec3_t			mins;
 	vec3_t			maxs;
-    vec3_t			translate;
-    float			radius;
-    char			creator[16];
+	vec3_t			translate;
+	float			radius;
+	char			creator[16];
 } dmd3frame_t;
 
 typedef struct 
@@ -232,45 +321,98 @@ typedef struct
 
 typedef struct
 {
-    char			id[4];
+	int				id;
 
-    char			name[MD3_MAX_PATH];
+	char			name[MD3_MAX_PATH];
 
 	int				flags;
 
-    int				num_frames;
-    int				num_skins;
-    int				num_verts;
-    int				num_tris;
+	int				num_frames;
+	int				num_skins;
+	int				num_verts;
+	int				num_tris;
 
-    int				ofs_tris;
-    int				ofs_skins;
-    int				ofs_tcs;
-    int				ofs_verts;
+	int				ofs_tris;
+	int				ofs_skins;
+	int				ofs_tcs;
+	int				ofs_verts;
 
-    int				meshsize;
+	int				meshsize;
 } dmd3mesh_t;
 
 typedef struct
 {
-    int				id;
-    int				version;
+	int				id;
+	int				version;
 
-    char			filename[MD3_MAX_PATH];
+	char			filename[MD3_MAX_PATH];
 
 	int				flags;
 
-    int				num_frames;
-    int				num_tags;
-    int				num_meshes;
-    int				num_skins;
+	int				num_frames;
+	int				num_tags;
+	int				num_meshes;
+	int				num_skins;
 
-    int				ofs_frames;
-    int				ofs_tags;
-    int				ofs_meshes;
-    int				ofs_end;
+	int				ofs_frames;
+	int				ofs_tags;
+	int				ofs_meshes;
+	int				ofs_end;
 } dmd3_t;
 
+/*
+========================================================================
+
+.SPR sprite file format, from Quake source
+
+========================================================================
+*/
+
+#define IDSPRHEADER		(('P'<<24)+('S'<<16)+('D'<<8)+'I')
+		// little-endian "IDSP"
+#define SPR_VERSION		1
+#define SPR32_VERSION	32
+
+#define SPR_VP_PARALLEL_UPRIGHT		0
+#define SPR_FACING_UPRIGHT			1
+#define SPR_VP_PARALLEL				2
+#define SPR_ORIENTED				3
+#define SPR_VP_PARALLEL_ORIENTED	4
+
+typedef enum { SPR_SINGLE=0, SPR_GROUP } spr1_frametype_t;
+
+typedef struct
+{
+	spr1_frametype_t	type;
+} dspr1_frametype_t;
+
+typedef struct
+{
+	int		origin[2];
+	int		width, height;
+} dspr1_frame_t;
+
+typedef struct
+{
+	int		num_frames;
+} dspr1_group_t;
+
+typedef struct
+{
+	float	interval;
+} dspr1_interval_t;
+
+typedef struct
+{
+	int				ident;
+	int				version;
+	int				type;
+	float			bounding_radius;
+	int				width, height;
+	int				num_frames;
+	float			beam_length;
+	mdl_synctype_t	synctype;
+} dspr1_t;
 
 /*
 ========================================================================
@@ -306,7 +448,6 @@ typedef struct {
 ==============================================================================
 */
 
-
 #define	MIPLEVELS	4
 typedef struct miptex_s
 {
@@ -318,8 +459,6 @@ typedef struct miptex_s
 	int			contents;
 	int			value;
 } miptex_t;
-
-
 
 /*
 ==============================================================================
@@ -339,21 +478,13 @@ typedef struct miptex_s
 // 16 bit short limits
 #define	MAX_MAP_MODELS		1024
 
-#ifdef LARGE_MAP_SIZE
-#define	MAX_MAP_BRUSHES		16384
-#else
-#define	MAX_MAP_BRUSHES		8192
-#endif
+#define	MAX_MAP_BRUSHES		16384	// was 8192
 
 #define	MAX_MAP_ENTITIES	2048	// unused by engine
 
-#ifdef LARGE_MAP_SIZE
-#define	MAX_MAP_ENTSTRING	0x80000
-#else
-#define	MAX_MAP_ENTSTRING	0x40000
-#endif
+#define	MAX_MAP_ENTSTRING	0x80000	// was 0x40000
 
-#define	MAX_MAP_TEXINFO		16384	// was 8192
+#define	MAX_MAP_TEXINFO		65536	// was 8192, 16384
 #define	MAX_MAP_AREAS		256
 #define	MAX_MAP_AREAPORTALS	1024
 #define	MAX_MAP_PLANES		65536

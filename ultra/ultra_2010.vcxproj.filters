@@ -1,0 +1,385 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
+    </Filter>
+    <Filter Include="Header Files\Eraser %28h%29">
+      <UniqueIdentifier>{ab2ddbca-019a-405a-8ac9-38c6929a4df9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\EraserULTRA %28h%29">
+      <UniqueIdentifier>{c749a511-0494-43c6-822a-dff3612d1544}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Misc %28h%29">
+      <UniqueIdentifier>{41dd6cd6-d9a1-4008-9a16-570f2e67f4b3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Zlib %28h%29">
+      <UniqueIdentifier>{f00085f3-3920-4606-b59a-6d121dc87a0c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Eraser">
+      <UniqueIdentifier>{757018b3-b136-43f5-a2d9-b7bcdda62bb1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\EraserULTRA">
+      <UniqueIdentifier>{a3b7d35d-3d17-438d-95a9-8f2104f42e36}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Misc">
+      <UniqueIdentifier>{d7669bbf-1a61-4cc2-b87c-bbda3e7d589f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Zlib">
+      <UniqueIdentifier>{47330faf-9aee-4b5a-9d48-09c87bda19c4}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="dm_ball.c">
+      <Filter>Source Files\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="dm_tag.c">
+      <Filter>Source Files\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include=".\g_ai.c">
+      <Filter>Source Files\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include=".\g_chase.c">
+      <Filter>Source Files\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include=".\g_cmds.c">
+      <Filter>Source Files\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include=".\g_combat.c">
+      <Filter>Source Files\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="g_func_rogue.c">
+      <Filter>Source Files\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include=".\g_func.c">
+      <Filter>Source Files\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include=".\g_items.c">
+      <Filter>Source Files\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="g_dm_rogue.c">
+      <Filter>Source Files\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include=".\g_main.c">
+      <Filter>Source Files\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include=".\g_misc.c">
+      <Filter>Source Files\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include=".\g_misc_kex.c">
+      <Filter>Source Files\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include=".\g_model.c">
+      <Filter>Source Files\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include=".\g_monster.c">
+      <Filter>Source Files\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include=".\g_phys.c">
+      <Filter>Source Files\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include=".\g_save.c">
+      <Filter>Source Files\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="g_sphere.c">
+      <Filter>Source Files\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include=".\g_spawn.c">
+      <Filter>Source Files\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include=".\g_svcmds.c">
+      <Filter>Source Files\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include=".\g_target.c">
+      <Filter>Source Files\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include=".\g_trigger.c">
+      <Filter>Source Files\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="g_trigger_rogue.c">
+      <Filter>Source Files\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include=".\g_utils.c">
+      <Filter>Source Files\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="g_weapon_rogue.c">
+      <Filter>Source Files\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include=".\g_weapon.c">
+      <Filter>Source Files\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="g_weapon_xatrix.c">
+      <Filter>Source Files\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include=".\p_client.c">
+      <Filter>Source Files\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include=".\p_hud.c">
+      <Filter>Source Files\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include=".\p_menu.c">
+      <Filter>Source Files\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include=".\p_view.c">
+      <Filter>Source Files\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include=".\p_weapon.c">
+      <Filter>Source Files\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include=".\q_shared.c">
+      <Filter>Source Files\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="g_ctf.c">
+      <Filter>Source Files\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="g_mtrain.c">
+      <Filter>Source Files\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="g_target_rogue.c">
+      <Filter>Source Files\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="g_weapon_lmctf.c">
+      <Filter>Source Files\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="m_move.c">
+      <Filter>Source Files\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include=".\p_trail.c">
+      <Filter>Source Files\Eraser</Filter>
+    </ClCompile>
+    <ClCompile Include="bot_ai.c">
+      <Filter>Source Files\Eraser</Filter>
+    </ClCompile>
+    <ClCompile Include="bot_die.c">
+      <Filter>Source Files\Eraser</Filter>
+    </ClCompile>
+    <ClCompile Include="bot_items.c">
+      <Filter>Source Files\Eraser</Filter>
+    </ClCompile>
+    <ClCompile Include="bot_misc.c">
+      <Filter>Source Files\Eraser</Filter>
+    </ClCompile>
+    <ClCompile Include="bot_nav.c">
+      <Filter>Source Files\Eraser</Filter>
+    </ClCompile>
+    <ClCompile Include="bot_spawn.c">
+      <Filter>Source Files\Eraser</Filter>
+    </ClCompile>
+    <ClCompile Include="bot_wpns.c">
+      <Filter>Source Files\Eraser</Filter>
+    </ClCompile>
+    <ClCompile Include="camclient.c">
+      <Filter>Source Files\Eraser</Filter>
+    </ClCompile>
+    <ClCompile Include="g_compress.c">
+      <Filter>Source Files\Eraser</Filter>
+    </ClCompile>
+    <ClCompile Include="g_map_mod.c">
+      <Filter>Source Files\Eraser</Filter>
+    </ClCompile>
+    <ClCompile Include="aj_banning.c">
+      <Filter>Source Files\EraserULTRA</Filter>
+    </ClCompile>
+    <ClCompile Include="aj_confcycle.c">
+      <Filter>Source Files\EraserULTRA</Filter>
+    </ClCompile>
+    <ClCompile Include="aj_cvar.c">
+      <Filter>Source Files\EraserULTRA</Filter>
+    </ClCompile>
+    <ClCompile Include="aj_lmctf.c">
+      <Filter>Source Files\EraserULTRA</Filter>
+    </ClCompile>
+    <ClCompile Include="aj_main.c">
+      <Filter>Source Files\EraserULTRA</Filter>
+    </ClCompile>
+    <ClCompile Include="aj_menu.c">
+      <Filter>Source Files\EraserULTRA</Filter>
+    </ClCompile>
+    <ClCompile Include="aj_replacelist.c">
+      <Filter>Source Files\EraserULTRA</Filter>
+    </ClCompile>
+    <ClCompile Include="aj_runes.c">
+      <Filter>Source Files\EraserULTRA</Filter>
+    </ClCompile>
+    <ClCompile Include="aj_scoreboard.c">
+      <Filter>Source Files\EraserULTRA</Filter>
+    </ClCompile>
+    <ClCompile Include="aj_statusbars.c">
+      <Filter>Source Files\EraserULTRA</Filter>
+    </ClCompile>
+    <ClCompile Include="e_grapple.c">
+      <Filter>Source Files\EraserULTRA</Filter>
+    </ClCompile>
+    <ClCompile Include="e_hook.c">
+      <Filter>Source Files\EraserULTRA</Filter>
+    </ClCompile>
+    <ClCompile Include="funhook.c">
+      <Filter>Source Files\EraserULTRA</Filter>
+    </ClCompile>
+    <ClCompile Include="sf_ammosort.c">
+      <Filter>Source Files\EraserULTRA</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\adler32.c">
+      <Filter>Source Files\Zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\compress.c">
+      <Filter>Source Files\Zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\crc32.c">
+      <Filter>Source Files\Zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\deflate.c">
+      <Filter>Source Files\Zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\gzclose.c">
+      <Filter>Source Files\Zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\gzlib.c">
+      <Filter>Source Files\Zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\gzread.c">
+      <Filter>Source Files\Zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\gzwrite.c">
+      <Filter>Source Files\Zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\infback.c">
+      <Filter>Source Files\Zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\inffast.c">
+      <Filter>Source Files\Zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\inflate.c">
+      <Filter>Source Files\Zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\inftrees.c">
+      <Filter>Source Files\Zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\ioapi.c">
+      <Filter>Source Files\Zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\trees.c">
+      <Filter>Source Files\Zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\uncompr.c">
+      <Filter>Source Files\Zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\unzip.c">
+      <Filter>Source Files\Zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\zip.c">
+      <Filter>Source Files\Zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\zutil.c">
+      <Filter>Source Files\Zlib</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include=".\q_shared.h">
+      <Filter>Header Files\Misc %28h%29</Filter>
+    </ClInclude>
+    <ClInclude Include=".\game.h">
+      <Filter>Header Files\Misc %28h%29</Filter>
+    </ClInclude>
+    <ClInclude Include=".\g_local.h">
+      <Filter>Header Files\Misc %28h%29</Filter>
+    </ClInclude>
+    <ClInclude Include=".\p_menu.h">
+      <Filter>Header Files\Misc %28h%29</Filter>
+    </ClInclude>
+    <ClInclude Include=".\pak.h">
+      <Filter>Header Files\Misc %28h%29</Filter>
+    </ClInclude>
+    <ClInclude Include="plasma.h">
+      <Filter>Header Files\Misc %28h%29</Filter>
+    </ClInclude>
+    <ClInclude Include="zlib\unzip.h">
+      <Filter>Header Files\Zlib %28h%29</Filter>
+    </ClInclude>
+    <ClInclude Include="zlib\zip.h">
+      <Filter>Header Files\Zlib %28h%29</Filter>
+    </ClInclude>
+    <ClInclude Include="extra.h">
+      <Filter>Header Files\Misc %28h%29</Filter>
+    </ClInclude>
+    <ClInclude Include="g_ctf.h">
+      <Filter>Header Files\Misc %28h%29</Filter>
+    </ClInclude>
+    <ClInclude Include="g_items.h">
+      <Filter>Header Files\Misc %28h%29</Filter>
+    </ClInclude>
+    <ClInclude Include="m_player.h">
+      <Filter>Header Files\Misc %28h%29</Filter>
+    </ClInclude>
+    <ClInclude Include="p_trail.h">
+      <Filter>Header Files\Misc %28h%29</Filter>
+    </ClInclude>
+    <ClInclude Include="bot_procs.h">
+      <Filter>Header Files\Eraser %28h%29</Filter>
+    </ClInclude>
+    <ClInclude Include="camclient.h">
+      <Filter>Header Files\Eraser %28h%29</Filter>
+    </ClInclude>
+    <ClInclude Include="g_map_mod.h">
+      <Filter>Header Files\Eraser %28h%29</Filter>
+    </ClInclude>
+    <ClInclude Include="aj_banning.h">
+      <Filter>Header Files\EraserULTRA %28h%29</Filter>
+    </ClInclude>
+    <ClInclude Include="aj_confcycle.h">
+      <Filter>Header Files\EraserULTRA %28h%29</Filter>
+    </ClInclude>
+    <ClInclude Include="aj_lmctf.h">
+      <Filter>Header Files\EraserULTRA %28h%29</Filter>
+    </ClInclude>
+    <ClInclude Include="aj_main.h">
+      <Filter>Header Files\EraserULTRA %28h%29</Filter>
+    </ClInclude>
+    <ClInclude Include="aj_menu.h">
+      <Filter>Header Files\EraserULTRA %28h%29</Filter>
+    </ClInclude>
+    <ClInclude Include="aj_replacelist.h">
+      <Filter>Header Files\EraserULTRA %28h%29</Filter>
+    </ClInclude>
+    <ClInclude Include="aj_runes.h">
+      <Filter>Header Files\EraserULTRA %28h%29</Filter>
+    </ClInclude>
+    <ClInclude Include="aj_scoreboard.h">
+      <Filter>Header Files\EraserULTRA %28h%29</Filter>
+    </ClInclude>
+    <ClInclude Include="aj_startmax.h">
+      <Filter>Header Files\EraserULTRA %28h%29</Filter>
+    </ClInclude>
+    <ClInclude Include="aj_statusbars.h">
+      <Filter>Header Files\EraserULTRA %28h%29</Filter>
+    </ClInclude>
+    <ClInclude Include="aj_weaponbalancing.h">
+      <Filter>Header Files\EraserULTRA %28h%29</Filter>
+    </ClInclude>
+    <ClInclude Include="e_grapple.h">
+      <Filter>Header Files\EraserULTRA %28h%29</Filter>
+    </ClInclude>
+    <ClInclude Include="e_hook.h">
+      <Filter>Header Files\EraserULTRA %28h%29</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include=".\game.def">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="ultra_2010.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>

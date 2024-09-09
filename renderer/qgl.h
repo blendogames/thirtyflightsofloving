@@ -393,13 +393,23 @@ extern  void ( APIENTRY * qglViewport )(GLint x, GLint y, GLsizei width, GLsizei
 
 // Knightmare added
 extern	void ( APIENTRY * qglDrawRangeElements)( GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, const void *indices );
-
 extern	void ( APIENTRY * qglLockArraysEXT) (GLint start, GLsizei count);
 extern	void ( APIENTRY * qglUnlockArraysEXT) (void);
 
-extern	void ( APIENTRY * qglMultiTexCoord2fARB)( GLenum, GLfloat, GLfloat ); // Knightmare added
+// Knightmare- added dll pointers for logging rangeElements and lock/unlockArrays calls
+extern	void ( APIENTRY * dllDrawRangeElements)( GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, const void *indices );
+extern	void ( APIENTRY * dllLockArraysEXT) (GLint start, GLsizei count);
+extern	void ( APIENTRY * dllUnlockArraysEXT) (void);
+
+// Knightmare added
 extern	void ( APIENTRY * qglActiveTextureARB)( GLenum );
 extern	void ( APIENTRY * qglClientActiveTextureARB)( GLenum );
+extern	void ( APIENTRY * qglMultiTexCoord2fARB)( GLenum, GLfloat, GLfloat );
+
+// Knightmare- added dll pointers for logging multitexture calls
+extern	void ( APIENTRY * dllActiveTexture) ( GLenum texUnit );
+extern	void ( APIENTRY * dllClientActiveTexture) ( GLenum texUnit );
+extern	void ( APIENTRY * dllMultiTexCoord2f)( GLenum texUnit, GLfloat s, GLfloat t );
 
 extern	void ( APIENTRY * qglActiveStencilFaceEXT) (GLenum face);
 
@@ -440,6 +450,15 @@ extern void ( APIENTRY * qglGetVertexAttribivARB)(GLuint, GLenum, GLint *);
 extern void ( APIENTRY * qglGetVertexAttribPointervARB)(GLuint, GLenum, GLvoid* *);
 extern GLboolean ( APIENTRY * qglIsProgramARB)(GLuint);
 
+// OpenGL/ARB Occlusion query stuff
+extern void ( APIENTRY * qglGenQueries) (GLsizei, GLuint *);
+extern void ( APIENTRY * qglDeleteQueries) (GLsizei, const GLuint *);
+extern GLboolean ( APIENTRY * qglIsQuery) (GLuint);
+extern void ( APIENTRY * qglBeginQuery) (GLenum, GLuint);
+extern void ( APIENTRY * qglEndQuery) (GLenum);
+extern void ( APIENTRY * qglGetQueryiv) (GLenum, GLenum, GLint *);
+extern void ( APIENTRY * qglGetQueryObjectiv) (GLuint, GLenum, GLint *);
+extern void ( APIENTRY * qglGetQueryObjectuiv) (GLuint, GLenum, GLuint *);
 
 #ifdef _WIN32
 

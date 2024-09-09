@@ -347,7 +347,7 @@ void G_UseTargets (edict_t *ent, edict_t *activator)
 			// doors fire area portals in a specific way
 			if (!Q_stricmp(t->classname, "func_areaportal") &&
 				(!Q_stricmp(ent->classname, "func_door") || !Q_stricmp(ent->classname, "func_door_rotating")
-				/*DWH*/ || !Q_stricmp(ent->classname,"func_door_rot_dh")
+				/*DWH*/ || !Q_stricmp(ent->classname, "func_door_rot_dh")
 				/*Knightmare*/|| !Q_stricmp(ent->classname, "func_door_secret") || !Q_stricmp(ent->classname, "func_door_secret2")))
 				continue;
 
@@ -378,7 +378,7 @@ This is just a convenience function
 for making temporary vectors for function calls
 =============
 */
-float	*tv (float x, float y, float z)
+float *tv (float x, float y, float z)
 {
 	static	int		index;
 	static	vec3_t	vecs[8];
@@ -405,7 +405,7 @@ This is just a convenience function
 for printing vectors
 =============
 */
-char	*vtos (vec3_t v)
+char *vtos (vec3_t v)
 {
 	static	int		index;
 	static	char	str[8][32];
@@ -444,16 +444,16 @@ void G_SetMovedir (vec3_t angles, vec3_t movedir)
 	VectorClear (angles);
 }
 
-//Knightmare- this is almost the same as G_SetMovedir,
-//only it doesn't clear the source vector
-//useful for point entities that use movedir
+// Knightmare- this is almost the same as G_SetMovedir,
+// only it doesn't clear the source vector
+// useful for point entities that use movedir
 void G_SetMovedir2 (vec3_t angles, vec3_t movedir)
 {
-	if (VectorCompare (angles, VEC_UP))
+	if ( VectorCompare (angles, VEC_UP) )
 	{
 		VectorCopy (MOVEDIR_UP, movedir);
 	}
-	else if (VectorCompare (angles, VEC_DOWN))
+	else if ( VectorCompare (angles, VEC_DOWN) )
 	{
 		VectorCopy (MOVEDIR_DOWN, movedir);
 	}
@@ -1087,6 +1087,51 @@ edict_t	*LookingAt (edict_t *ent, int filter, vec3_t endpos, float *range)
 	return tr.ent;
 }
 
+char *GameDir (void)
+{
+#ifdef KMQUAKE2_ENGINE_MOD
+	return gi.GameDir();
+#else	// KMQUAKE2_ENGINE_MOD
+	static char	buffer[MAX_OSPATH];
+	cvar_t		*basedir, *gamedir;
+
+	basedir = gi.cvar("basedir", "", 0);
+	gamedir = gi.cvar("gamedir", "", 0);
+	if ( strlen(gamedir->string) > 0 )
+		Com_sprintf (buffer, sizeof(buffer), "%s/%s", basedir->string, gamedir->string);
+	else
+		Com_sprintf (buffer, sizeof(buffer), "%s/baseq2", basedir->string);
+
+	return buffer;
+#endif	// KMQUAKE2_ENGINE_MOD
+}
+
+char *SavegameDir (void)
+{
+#ifdef KMQUAKE2_ENGINE_MOD
+	return gi.SaveGameDir();
+#else	// KMQUAKE2_ENGINE_MOD
+	static char	buffer[MAX_OSPATH];
+	cvar_t	*basedir, *gamedir, *savegamepath;
+
+	basedir = gi.cvar("basedir", "", 0);
+	gamedir = gi.cvar("gamedir", "", 0);
+	savegamepath = gi.cvar("savegamepath", "", 0);
+	// use Unofficial Q2 Patch's savegamepath cvar if set
+	if ( strlen(savegamepath->string) > 0 ) {
+		Com_strcpy (buffer, sizeof(buffer), savegamepath->string);
+	}
+	else {
+		if ( strlen(gamedir->string) > 0 )
+			Com_sprintf (buffer, sizeof(buffer), "%s/%s", basedir->string, gamedir->string);
+		else
+			Com_sprintf (buffer, sizeof(buffer), "%s/baseq2", basedir->string);
+	}
+
+	return buffer;
+#endif	// KMQUAKE2_ENGINE_MOD
+}
+
 void GameDirRelativePath (const char *filename, char *output, size_t outputSize)
 {
 #ifdef KMQUAKE2_ENGINE_MOD
@@ -1096,10 +1141,10 @@ void GameDirRelativePath (const char *filename, char *output, size_t outputSize)
 
 	basedir = gi.cvar("basedir", "", 0);
 	gamedir = gi.cvar("gamedir", "", 0);
-	if (strlen(gamedir->string))
-		Com_sprintf(output, outputSize, "%s/%s/%s", basedir->string, gamedir->string, filename);
+	if ( strlen(gamedir->string) > 0 )
+		Com_sprintf (output, outputSize, "%s/%s/%s", basedir->string, gamedir->string, filename);
 	else
-		Com_sprintf(output, outputSize, "%s/baseq2/%s", basedir->string, filename);
+		Com_sprintf (output, outputSize, "%s/baseq2/%s", basedir->string, filename);
 #endif	// KMQUAKE2_ENGINE_MOD
 }
 
@@ -1108,14 +1153,21 @@ void SavegameDirRelativePath (const char *filename, char *output, size_t outputS
 #ifdef KMQUAKE2_ENGINE_MOD
 	Com_sprintf(output, outputSize, "%s/%s", gi.SaveGameDir(), filename);
 #else	// KMQUAKE2_ENGINE_MOD
-	cvar_t	*basedir, *gamedir;
+	cvar_t	*basedir, *gamedir, *savegamepath;
 
 	basedir = gi.cvar("basedir", "", 0);
 	gamedir = gi.cvar("gamedir", "", 0);
-	if (strlen(gamedir->string))
-		Com_sprintf(output, outputSize, "%s/%s/%s", basedir->string, gamedir->string, filename);
-	else
-		Com_sprintf(output, outputSize, "%s/baseq2/%s", basedir->string, filename);
+	savegamepath = gi.cvar("savegamepath", "", 0);
+	// use Unofficial Q2 Patch's savegamepath cvar if set
+	if ( strlen(savegamepath->string) > 0 ) {
+		Com_sprintf (output, outputSize, "%s/%s", savegamepath->string, filename);
+	}
+	else {
+		if ( strlen(gamedir->string) > 0 )
+			Com_sprintf (output, outputSize, "%s/%s/%s", basedir->string, gamedir->string, filename);
+		else
+			Com_sprintf (output, outputSize, "%s/baseq2/%s", basedir->string, filename);
+	}
 #endif	// KMQUAKE2_ENGINE_MOD
 }
 
@@ -1134,7 +1186,7 @@ void CreatePath (const char *path)
 	}
 	Com_strcpy (tmpBuf, sizeof(tmpBuf), path);
 
-	for (ofs = tmpBuf+1 ; *ofs ; ofs++)
+	for (ofs = tmpBuf+1; *ofs; ofs++)
 	{
 		if (*ofs == '/' || *ofs == '\\')
 		{	// create the directory
@@ -1145,6 +1197,88 @@ void CreatePath (const char *path)
 	}
 #endif	// KMQUAKE2_ENGINE_MOD
 }
+
+qboolean LocalFileExists (const char *path)
+{
+	char	realPath[MAX_OSPATH];
+	FILE	*f;
+
+	SavegameDirRelativePath (path, realPath, sizeof(realPath));
+	f = fopen (realPath, "rb");
+	if (f) {
+		fclose (f);
+		return true;
+	}
+	return false;
+}
+
+
+// Knightmare added
+/*
+====================
+AnyPlayerSpawned
+
+Checks if any player has spawned.
+Original code by Phatman.
+====================
+*/
+qboolean AnyPlayerSpawned (void)
+{
+	int		i;
+
+	for (i = 0; i < game.maxclients; i++) {
+		if ( g_edicts[i + 1].inuse && g_edicts[i + 1].linkcount )
+			return true;
+	}
+
+	return false;
+}
+
+
+/*
+====================
+AllPlayersSpawned
+
+Checks if all players have spawned.
+Original code by Phatman.
+====================
+*/
+qboolean AllPlayersSpawned (void)
+{
+	int		i;
+
+	for (i = 0; i < game.maxclients; i++) {
+		if ( g_edicts[i + 1].inuse && !g_edicts[i + 1].linkcount )
+			return false;
+	}
+
+	return true;
+}
+
+
+/*
+====================
+AllPlayersLinkcountCmp
+
+Checks if all players linkcount matches value.
+Returns true if any value matches.
+cmp_linkcount is the value to compare against.
+====================
+*/
+qboolean AllPlayersLinkcountCmp (int cmp_linkcount)
+{
+	int			i;
+	qboolean	matched = false;
+
+	for (i = 0; i < game.maxclients; i++) {
+		if ( g_edicts[i + 1].inuse && (g_edicts[i + 1].linkcount == cmp_linkcount) )
+			matched = true;
+	}
+
+	return matched;
+}
+// end Knightmare
+
 
 /* Lazarus: G_UseTarget is similar to G_UseTargets, but only triggers
             a single target rather than all entities matching target
@@ -1226,7 +1360,7 @@ void G_UseTarget (edict_t *ent, edict_t *activator, edict_t *target)
 		// doors fire area portals in a specific way
 		if (!Q_stricmp(target->classname, "func_areaportal") &&
 			(!Q_stricmp(ent->classname, "func_door") || !Q_stricmp(ent->classname, "func_door_rotating") 
-			|| !Q_stricmp(ent->classname,"func_door_rot_dh")))
+			|| !Q_stricmp(ent->classname, "func_door_rot_dh")))
 			return;
 
 		if (target == ent)
@@ -1559,6 +1693,40 @@ windows to progress.
 qboolean IsZaeroRailgunHackMap (void)
 {
 	if (Q_stricmp(level.mapname, "zdef4") == 0)
+		return true;
+	return false;
+}
+
+
+// Knightmare added
+/*
+====================
+IsMakronNoBFGHackMap
+
+Checks if the current map is one where the Makon's BFG
+attacks need to be disabled (map6 of COS3: The Final Objective).
+====================
+*/
+qboolean IsMakronNoBFGHackMap (void)
+{
+	if (Q_stricmp(level.mapname, "grinsp3f") == 0)
+		return true;
+	return false;
+}
+
+
+// Knightmare added
+/*
+====================
+IsMakronNoJumpHackMap
+
+Checks if the current map is one where the Makon's jump animation
+at spawn needs to be disabled (map6 of COS3: The Final Objective).
+====================
+*/
+qboolean IsMakronNoJumpHackMap (void)
+{
+	if (Q_stricmp(level.mapname, "grinsp3f") == 0)
 		return true;
 	return false;
 }

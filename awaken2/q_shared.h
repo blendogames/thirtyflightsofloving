@@ -34,6 +34,8 @@
 #endif
 
 #include <assert.h>
+#include <limits.h>
+#include <ctype.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdarg.h>
@@ -87,8 +89,6 @@ __inline int Q_vsnprintf (char *Dest, size_t Count, const char *Format, va_list 
 #ifdef KMQUAKE2_ENGINE_MOD
 // 32-bit pmove coords when using custom engine
 #define LARGE_MAP_SIZE
-// looping of attenuated sounds
-#define LOOP_SOUND_ATTENUATION
 #endif
 
 // angle indexes
@@ -320,7 +320,11 @@ void COM_DefaultExtension (char *path, size_t pathSize, char *extension);
 char *COM_Parse (char **data_p);
 // data is an in/out parm, returns a parsed out token
 
-qboolean Com_ParseColorString (const char *s, color_t outColor);	// Knightmare added
+// Knightmare- added color parsing
+qboolean Com_ParseColorString (const char *s, color_t outColor);
+unsigned int Com_ParseColorStringPacked (const char *s);
+qboolean Com_ParseRGBAField (const char *s, color_t outColor);
+unsigned int Com_ParseRGBAFieldPacked (const char *s);
 
 void Com_sprintf (char *dest, size_t size, char *fmt, ...);
 // Knightmare added
@@ -730,6 +734,26 @@ typedef struct
 #define RF_USE_DISGUISE		0x00040000
 //ROGUE
 
+#define RF_NOSHADOW			0x00080000
+
+// Knightmare- Kex additions
+#define	RF_CASTSHADOW		0x00100000
+#define	RF_SHELL_LITE_GREEN	0x00200000
+#define	RF_CUSTOM_LIGHT		0x00400000
+#define	RF_FLARE			0x00800000
+#define	RF_OLD_FRAME_LERP	0x01000000
+#define	RF_DOT_SHADOW		0x02000000
+#define	RF_LOW_PRIORITY		0x04000000
+#define	RF_NO_LOD			0x08000000
+#define	RF_NO_STEREO		RF_WEAPONMODEL
+#define	RF_STAIR_STEP		0x10000000
+
+#define RF_FLARE_LOCK_ANGLE	RF_MINLIGHT
+// end Kex additions
+
+// Knightmare- denotes a sprite that is angled vertically
+#define	RF_SPRITE_ORIENTED	RF_MINLIGHT
+
 // player_state_t->refdef flags
 #define	RDF_UNDERWATER		1				// warp the screen as apropriate
 #define RDF_NOWORLDMODEL	2				// used for player configuration screen
@@ -841,10 +865,14 @@ typedef enum
 	TE_FLECHETTE,
 // ROGUE
 // Knightmare added
-	TE_REDBLASTER,			//56
-	TE_SHOCKSPLASH,			//57
-	TE_BLASTER_COLORED,		//58
-	TE_RAILTRAIL_COLORED,	//59
+	TE_REDBLASTER,
+	TE_SHOCKSPLASH,
+	TE_BLASTER_COLORED,
+	TE_RAILTRAIL_COLORED,
+	TE_LIGHTNING_ATTACK,
+	TE_EXPLOSION_Q1,
+	TE_SPIKEIMPACT_Q1,
+	TE_LAVASPLASH_Q1,
 } temp_event_t;
 
 #define SPLASH_UNKNOWN		0
@@ -968,7 +996,14 @@ typedef enum
 #define	CS_PLAYERSKINS		(CS_ITEMS+MAX_ITEMS)				//1312
 #define CS_GENERAL			(CS_PLAYERSKINS+MAX_CLIENTS)		//1568
 #define	CS_HUDVARIANT		(CS_GENERAL+MAX_GENERAL)
-#define	CS_PAKFILE			(CS_HUDVARIANT+1)
+#define CS_SKYDISTANCE		(CS_HUDVARIANT+1)
+#define CS_CLOUDNAME		(CS_SKYDISTANCE+1)
+#define CS_CLOUDLIGHTFREQ	(CS_CLOUDNAME+1)
+#define CS_CLOUDDIR			(CS_CLOUDLIGHTFREQ+1)	// CLOUDX CLOUDY %f %f format
+#define CS_CLOUDTILE		(CS_CLOUDDIR+1)			// CLOUD1 CLOUD2 CLOUD3 %f %f %f format
+#define CS_CLOUDSPEED		(CS_CLOUDTILE+1)		// CLOUD1 CLOUD2 CLOUD3 %f %f %f format
+#define CS_CLOUDALPHA		(CS_CLOUDSPEED+1)		// CLOUD1 CLOUD2 CLOUD3 %f %f %f format
+#define	CS_PAKFILE			(CS_CLOUDALPHA+1)
 #define	MAX_CONFIGSTRINGS	(CS_PAKFILE+1)
 //#define	MAX_CONFIGSTRINGS	(CS_GENERAL+MAX_GENERAL)			//2080
 
@@ -1022,21 +1057,21 @@ typedef struct entity_state_s
 	int		modelindex2;	// weapons
 	int		modelindex3;	// CTF flags
 	int		modelindex4;	// indicator sprites/models
-#ifdef KMQUAKE2_ENGINE_MOD //Knightmare- Privater wanted this
-	int		modelindex5, modelindex6;	//more attached models
+#ifdef KMQUAKE2_ENGINE_MOD	// Knightmare- Privater wanted this
+	int		modelindex5, modelindex6;	// more attached models
 #endif
 	int		frame;
 	int		skinnum;
-#ifdef KMQUAKE2_ENGINE_MOD //Knightmare- allow the server to set this
-	float	alpha;	//entity transparency
+#ifdef KMQUAKE2_ENGINE_MOD	// Knightmare- allow the server to set this
+	float	alpha;			// entity transparency
 #endif
 	unsigned int effects;	// PGM - we're filling it, so it needs to be unsigned
 	int		renderfx;
 	int		solid;			// for client side prediction, 8*(bits 0-4) is x/y radius
 							// 8*(bits 5-9) is z down distance, 8(bits10-15) is z up (gi.linkentity sets this properly)
 	int		sound;			// for looping sounds, to guarantee shutoff
-#ifdef LOOP_SOUND_ATTENUATION // Knightmare- added sound attenuation
-	float	attenuation;
+#ifdef KMQUAKE2_ENGINE_MOD		// Knightmare- allow the server to set this
+	float	loop_attenuation;	// looped sound attenuation
 #endif
 	int		event;			// impulse events -- muzzle flashes, footsteps, etc
 							// events only go out for a single frame; they are automatically cleared each frame

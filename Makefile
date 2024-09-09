@@ -22,7 +22,7 @@ ARCH := $(shell uname -m | sed -e s/i.86/i386/ -e s/sun4u/sparc/ -e s/sparc64/sp
 ######################################
 
 BUILD_DATADIR=NO                # Use DATADIR to read (data, renderers, etc.) and ~/.quake2 to write.
-BUILD_GAME=NO                   # game$(ARCH).so
+BUILD_GAME=YES                  # game$(ARCH).so
 BUILD_KMQUAKE2=YES              # kmquake client executable
 BUILD_KMQUAKE2_DEDICATED=NO     # build a dedicated kmquake2 server (set this to YES when it compiles again)
 BUILD_LIBDIR=NO                 # Use LIBDIR to read data and renderers (independent from DATADIR).
@@ -65,7 +65,7 @@ endif
 CLIENT_DIR=$(MOUNT_DIR)/client
 UI_DIR=$(MOUNT_DIR)/ui
 SERVER_DIR=$(MOUNT_DIR)/server
-REF_GL_DIR=$(MOUNT_DIR)/renderer
+REND_GL1_DIR=$(MOUNT_DIR)/renderer
 COMMON_DIR=$(MOUNT_DIR)/qcommon
 UNIX_DIR=$(MOUNT_DIR)/unix
 GAME_DIR=$(MOUNT_DIR)/game
@@ -138,11 +138,11 @@ DO_SHLIB_AS=$(CC) $(CFLAGS) $(SHLIBCFLAGS) -DELF -x assembler-with-cpp -o $@ -c 
 
 
 ifeq ($(strip $(BUILD_KMQUAKE2)),YES)
-  TARGETS+=$(BINDIR)/kmquake2
+  TARGETS+=$(BINDIR)/kmquake2_$(LIBARCHNAME)
 endif
 
 ifeq ($(strip $(BUILD_KMQUAKE2_DEDICATED)),YES)
- TARGETS += $(BINDIR)/kmquake2_netserver
+ TARGETS += $(BINDIR)/kmquake2_netserver_$(LIBARCHNAME)
 endif
 
 ifeq ($(strip $(BUILD_GAME)),YES)
@@ -171,7 +171,7 @@ debug:
 		$(BINDIR)/baseq2 \
 		$(BUILD_DEBUG_DIR)/client \
 		$(BUILD_DEBUG_DIR)/ded \
-		$(BUILD_DEBUG_DIR)/ref_gl \
+		$(BUILD_DEBUG_DIR)/rend_gl1 \
 		$(BUILD_DEBUG_DIR)/game
 		
 	$(MAKE) targets BUILDDIR=$(BUILD_DEBUG_DIR) CFLAGS+="$(DEBUG_CFLAGS) -DKMQUAKE2_VERSION='\"$(VERSION) Debug\"' -DWINDOWNAME='\"$(WINDOWNAME)\"' -DSAVENAME='\"$(SAVENAME)\"'"
@@ -181,7 +181,7 @@ release:
 		$(BINDIR)/baseq2 \
 		$(BUILD_RELEASE_DIR)/client \
 		$(BUILD_RELEASE_DIR)/ded \
-		$(BUILD_RELEASE_DIR)/ref_gl \
+		$(BUILD_RELEASE_DIR)/rend_gl1 \
 		$(BUILD_RELEASE_DIR)/game
 
 	$(MAKE) targets BUILDDIR=$(BUILD_RELEASE_DIR) CFLAGS+="$(RELEASE_CFLAGS) -DKMQUAKE2_VERSION='\"$(VERSION)\"' -DWINDOWNAME='\"$(WINDOWNAME)\"' -DSAVENAME='\"$(SAVENAME)\"'"
@@ -201,15 +201,17 @@ QUAKE2_OBJS = \
 	$(BUILDDIR)/client/cl_ents.o \
 	$(BUILDDIR)/client/cl_event.o \
 	$(BUILDDIR)/client/cl_http.o \
-	$(BUILDDIR)/client/cl_input.o \
 	$(BUILDDIR)/client/cl_hud.o \
+	$(BUILDDIR)/client/cl_hud_script.o \
+	$(BUILDDIR)/client/cl_input.o \
 	$(BUILDDIR)/client/cl_keys.o \
 	$(BUILDDIR)/client/cl_lights.o \
 	$(BUILDDIR)/client/cl_loc.o \
 	$(BUILDDIR)/client/cl_main.o \
 	$(BUILDDIR)/client/cl_parse.o \
 	$(BUILDDIR)/client/cl_particle.o \
-	$(BUILDDIR)/client/cl_pred.o \
+	$(BUILDDIR)/client/cl_predict.o \
+	$(BUILDDIR)/client/cl_qcurl.o \
 	$(BUILDDIR)/client/cl_screen.o \
 	$(BUILDDIR)/client/cl_string.o \
 	$(BUILDDIR)/client/cl_tempent.o \
@@ -221,10 +223,13 @@ QUAKE2_OBJS = \
 	$(BUILDDIR)/client/snd_stream.o \
 	$(BUILDDIR)/client/m_flash.o \
 	\
+	$(BUILDDIR)/client/menu_apply_changes.o \
+	$(BUILDDIR)/client/menu_credits.o \
+	$(BUILDDIR)/client/menu_defaults_confirm.o \
 	$(BUILDDIR)/client/menu_game.o \
-	$(BUILDDIR)/client/menu_game_credits.o \
 	$(BUILDDIR)/client/menu_game_saveload.o \
 	$(BUILDDIR)/client/menu_main.o \
+	$(BUILDDIR)/client/menu_mods.o \
 	$(BUILDDIR)/client/menu_mp_addressbook.o \
 	$(BUILDDIR)/client/menu_mp_dmoptions.o \
 	$(BUILDDIR)/client/menu_mp_download.o \
@@ -255,6 +260,7 @@ QUAKE2_OBJS = \
 	$(BUILDDIR)/client/crc.o \
 	$(BUILDDIR)/client/cvar.o \
 	$(BUILDDIR)/client/filesystem.o \
+	$(BUILDDIR)/client/json_parse.o \
 	$(BUILDDIR)/client/md4.o \
 	$(BUILDDIR)/client/net_chan.o \
 	$(BUILDDIR)/client/wildcard.o \
@@ -271,55 +277,56 @@ QUAKE2_OBJS = \
 	$(BUILDDIR)/client/sv_user.o \
 	$(BUILDDIR)/client/sv_world.o \
 	\
-	$(BUILDDIR)/client/qsh_unix.o \
-	$(BUILDDIR)/client/vid_so.o \
-	$(BUILDDIR)/client/sys_unix.o \
-	$(BUILDDIR)/client/glob.o \
-	$(BUILDDIR)/client/in_unix.o \
-	$(BUILDDIR)/client/net_udp.o \
+	$(BUILDDIR)/client/unix_qsh.o \
+	$(BUILDDIR)/client/unix_vid.o \
+	$(BUILDDIR)/client/unix_main.o \
+	$(BUILDDIR)/client/unix_glob.o \
+	$(BUILDDIR)/client/unix_input.o \
+	$(BUILDDIR)/client/unix_net.o \
 	\
 	$(BUILDDIR)/client/q_shared.o \
 	$(BUILDDIR)/client/pmove.o \
 	\
-	$(BUILDDIR)/ref_gl/r_alias.o \
-	$(BUILDDIR)/ref_gl/r_alias_md2.o \
-	$(BUILDDIR)/ref_gl/r_alias_misc.o \
-	$(BUILDDIR)/ref_gl/r_arb_program.o \
-	$(BUILDDIR)/ref_gl/r_backend.o \
-	$(BUILDDIR)/ref_gl/r_beam.o \
-	$(BUILDDIR)/ref_gl/r_bloom.o \
-	$(BUILDDIR)/ref_gl/r_draw.o \
-	$(BUILDDIR)/ref_gl/r_entity.o \
-	$(BUILDDIR)/ref_gl/r_fog.o \
-	$(BUILDDIR)/ref_gl/r_fragment.o \
-	$(BUILDDIR)/ref_gl/r_glstate.o \
-	$(BUILDDIR)/ref_gl/r_image.o \
-	$(BUILDDIR)/ref_gl/r_light.o \
-	$(BUILDDIR)/ref_gl/r_main.o \
-	$(BUILDDIR)/ref_gl/r_misc.o \
-	$(BUILDDIR)/ref_gl/r_model.o \
-	$(BUILDDIR)/ref_gl/r_particle.o \
-	$(BUILDDIR)/ref_gl/r_sky.o \
-	$(BUILDDIR)/ref_gl/r_sprite.o \
-	$(BUILDDIR)/ref_gl/r_surface.o \
-	$(BUILDDIR)/ref_gl/r_upscale.o \
-	$(BUILDDIR)/ref_gl/r_vlights.o \
-	$(BUILDDIR)/ref_gl/r_warp.o \
-	$(BUILDDIR)/ref_gl/gl_sdl.o \
+	$(BUILDDIR)/rend_gl1/r_alias.o \
+	$(BUILDDIR)/rend_gl1/r_alias_md2.o \
+	$(BUILDDIR)/rend_gl1/r_alias_misc.o \
+	$(BUILDDIR)/rend_gl1/r_arb_program.o \
+	$(BUILDDIR)/rend_gl1/r_backend.o \
+	$(BUILDDIR)/rend_gl1/r_beam.o \
+	$(BUILDDIR)/rend_gl1/r_bloom.o \
+	$(BUILDDIR)/rend_gl1/r_draw.o \
+	$(BUILDDIR)/rend_gl1/r_entity.o \
+	$(BUILDDIR)/rend_gl1/r_fog.o \
+	$(BUILDDIR)/rend_gl1/r_fragment.o \
+	$(BUILDDIR)/rend_gl1/r_glstate.o \
+	$(BUILDDIR)/rend_gl1/r_image.o \
+	$(BUILDDIR)/rend_gl1/r_light.o \
+	$(BUILDDIR)/rend_gl1/r_main.o \
+	$(BUILDDIR)/rend_gl1/r_misc.o \
+	$(BUILDDIR)/rend_gl1/r_model.o \
+	$(BUILDDIR)/rend_gl1/r_particle.o \
+	$(BUILDDIR)/rend_gl1/r_sky.o \
+	$(BUILDDIR)/rend_gl1/r_sprite.o \
+	$(BUILDDIR)/rend_gl1/r_surface.o \
+	$(BUILDDIR)/rend_gl1/r_upscale.o \
+	$(BUILDDIR)/rend_gl1/r_utils.o \
+	$(BUILDDIR)/rend_gl1/r_vlights.o \
+	$(BUILDDIR)/rend_gl1/r_warp.o \
+	$(BUILDDIR)/rend_gl1/sdl_gl.o \
 	\
-	$(BUILDDIR)/ref_gl/qgl_unix.o \
-	$(BUILDDIR)/client/snd_sdl.o
+	$(BUILDDIR)/rend_gl1/unix_qgl.o \
+	$(BUILDDIR)/client/sdl_snd.o
 
 	ifeq ($(OSTYPE),Darwin)
 	QUAKE2_OBJS += $(BUILDDIR)/client/cd_null.o
 else
-	QUAKE2_OBJS += $(BUILDDIR)/client/cd_unix.o
+	QUAKE2_OBJS += $(BUILDDIR)/client/unix_cd.o
 endif
 
 QUAKE2_AS_OBJS = \
 	$(BUILDDIR)/client/snd_mixa.o
 
-$(BINDIR)/kmquake2 : $(QUAKE2_OBJS) $(QUAKE2_AS_OBJS) $(QUAKE2_LNX_OBJS)
+$(BINDIR)/kmquake2_$(LIBARCHNAME) : $(QUAKE2_OBJS) $(QUAKE2_AS_OBJS) $(QUAKE2_LNX_OBJS)
 	@echo
 	@echo "==================== Linking $@ ===================="
 	@echo
@@ -349,10 +356,13 @@ $(BUILDDIR)/client/cl_event.o :    	$(CLIENT_DIR)/cl_event.c
 $(BUILDDIR)/client/cl_http.o :      	$(CLIENT_DIR)/cl_http.c
 	$(DO_CC)
 
-$(BUILDDIR)/client/cl_input.o :   	$(CLIENT_DIR)/cl_input.c
+$(BUILDDIR)/client/cl_hud.o :     	$(CLIENT_DIR)/cl_hud.c
 	$(DO_CC)
 
-$(BUILDDIR)/client/cl_hud.o :     	$(CLIENT_DIR)/cl_hud.c
+$(BUILDDIR)/client/cl_hud_script.o :     	$(CLIENT_DIR)/cl_hud_script.c
+	$(DO_CC)
+
+$(BUILDDIR)/client/cl_input.o :   	$(CLIENT_DIR)/cl_input.c
 	$(DO_CC)
 
 $(BUILDDIR)/client/cl_keys.o :       	$(CLIENT_DIR)/cl_keys.c
@@ -373,7 +383,10 @@ $(BUILDDIR)/client/cl_parse.o :   	$(CLIENT_DIR)/cl_parse.c
 $(BUILDDIR)/client/cl_particle.o :   	$(CLIENT_DIR)/cl_particle.c
 	$(DO_CC)
 
-$(BUILDDIR)/client/cl_pred.o :    	$(CLIENT_DIR)/cl_pred.c
+$(BUILDDIR)/client/cl_predict.o :    	$(CLIENT_DIR)/cl_predict.c
+	$(DO_CC)
+
+$(BUILDDIR)/client/cl_qcurl.o :    	$(CLIENT_DIR)/cl_qcurl.c
 	$(DO_CC)
 
 $(BUILDDIR)/client/cl_screen.o :    	$(CLIENT_DIR)/cl_screen.c
@@ -406,16 +419,25 @@ $(BUILDDIR)/client/snd_stream.o :    	$(CLIENT_DIR)/snd_stream.c
 $(BUILDDIR)/client/m_flash.o :    	$(GAME_DIR)/m_flash.c
 	$(DO_CC)
 	
-$(BUILDDIR)/client/menu_game.o :    	$(UI_DIR)/menu_game.c
+$(BUILDDIR)/client/menu_apply_changes.o :    	$(UI_DIR)/menu_apply_changes.c
 	$(DO_CC)
 	
-$(BUILDDIR)/client/menu_game_credits.o :    	$(UI_DIR)/menu_game_credits.c
+$(BUILDDIR)/client/menu_credits.o :    	$(UI_DIR)/menu_credits.c
+	$(DO_CC)
+	
+$(BUILDDIR)/client/menu_defaults_confirm.o :    	$(UI_DIR)/menu_defaults_confirm.c
+	$(DO_CC)
+	
+$(BUILDDIR)/client/menu_game.o :    	$(UI_DIR)/menu_game.c
 	$(DO_CC)
 	
 $(BUILDDIR)/client/menu_game_saveload.o :    	$(UI_DIR)/menu_game_saveload.c
 	$(DO_CC)
 	
 $(BUILDDIR)/client/menu_main.o :    	$(UI_DIR)/menu_main.c
+	$(DO_CC)
+	
+$(BUILDDIR)/client/menu_mods.o :    	$(UI_DIR)/menu_mods.c
 	$(DO_CC)
 	
 $(BUILDDIR)/client/menu_mp_addressbook.o :    	$(UI_DIR)/menu_mp_addressbook.c
@@ -505,6 +527,9 @@ $(BUILDDIR)/client/cvar.o :       	$(COMMON_DIR)/cvar.c
 $(BUILDDIR)/client/filesystem.o :      	$(COMMON_DIR)/filesystem.c
 	$(DO_CC)
 
+$(BUILDDIR)/client/json_parse.o :   	$(COMMON_DIR)/json_parse.c
+	$(DO_CC)
+
 $(BUILDDIR)/client/md4.o :        	$(COMMON_DIR)/md4.c
 	$(DO_CC)
 
@@ -544,37 +569,37 @@ $(BUILDDIR)/client/sv_user.o :    	$(SERVER_DIR)/sv_user.c
 $(BUILDDIR)/client/sv_world.o :   	$(SERVER_DIR)/sv_world.c
 	$(DO_CC)
 
-$(BUILDDIR)/client/cd_unix.o :   	$(UNIX_DIR)/cd_unix.c
+$(BUILDDIR)/client/unix_cd.o :   	$(UNIX_DIR)/unix_cd.c
 	$(DO_CC)
 
 $(BUILDDIR)/client/cd_null.o :   	$(NULL_DIR)/cd_null.c
 	$(DO_CC)
 
-$(BUILDDIR)/client/qsh_unix.o :  	$(UNIX_DIR)/qsh_unix.c
+$(BUILDDIR)/client/unix_qsh.o :  	$(UNIX_DIR)/unix_qsh.c
 	$(DO_CC)
 
-$(BUILDDIR)/client/vid_so.o :     	$(UNIX_DIR)/vid_so.c
+$(BUILDDIR)/client/unix_vid.o :     	$(UNIX_DIR)/unix_vid.c
 	$(DO_CC)
 
-$(BUILDDIR)/client/snd_unix.o :  	$(UNIX_DIR)/snd_unix.c
+$(BUILDDIR)/client/unix_snd.o :  	$(UNIX_DIR)/unix_snd.c
 	$(DO_CC)
 
 $(BUILDDIR)/client/snd_mixa.o :   	$(UNIX_DIR)/snd_mixa.s
 	$(DO_AS)
 
-$(BUILDDIR)/client/sys_unix.o :  	$(UNIX_DIR)/sys_unix.c
+$(BUILDDIR)/client/unix_main.o :  	$(UNIX_DIR)/unix_main.c
 	$(DO_CC) $(SDLCFLAGS)
 
-$(BUILDDIR)/client/glob.o :       	$(UNIX_DIR)/glob.c
+$(BUILDDIR)/client/unix_glob.o :       	$(UNIX_DIR)/unix_glob.c
 	$(DO_CC)
 
-$(BUILDDIR)/client/in_unix.o :       	$(UNIX_DIR)/in_unix.c
+$(BUILDDIR)/client/unix_input.o :       	$(UNIX_DIR)/unix_input.c
 	$(DO_CC)
 
-$(BUILDDIR)/client/net_udp.o :    	$(UNIX_DIR)/net_udp.c
+$(BUILDDIR)/client/unix_net.o :    	$(UNIX_DIR)/unix_net.c
 	$(DO_CC)
 
-$(BUILDDIR)/client/snd_sdl.o :    	$(UNIX_DIR)/snd_sdl.c
+$(BUILDDIR)/client/sdl_snd.o :    	$(UNIX_DIR)/sdl_snd.c
 	$(DO_CC) $(SDLCFLAGS)
 
 $(BUILDDIR)/client/zip.o :		$(UNIX_DIR)/zip/zip.c
@@ -586,82 +611,85 @@ $(BUILDDIR)/client/unzip.o :		$(UNIX_DIR)/zip/unzip.c
 $(BUILDDIR)/client/ioapi.o :		$(UNIX_DIR)/zip/ioapi.c
 	$(DO_CC)
 	
-$(BUILDDIR)/ref_gl/r_alias.o :       	$(REF_GL_DIR)/r_alias.c
+$(BUILDDIR)/rend_gl1/r_alias.o :       	$(REND_GL1_DIR)/r_alias.c
 	$(DO_GL_SHLIB_CC)
 
-$(BUILDDIR)/ref_gl/r_alias_md2.o :        	$(REF_GL_DIR)/r_alias_md2.c
+$(BUILDDIR)/rend_gl1/r_alias_md2.o :        	$(REND_GL1_DIR)/r_alias_md2.c
 	$(DO_GL_SHLIB_CC)
 	
-$(BUILDDIR)/ref_gl/r_alias_misc.o :        	$(REF_GL_DIR)/r_alias_misc.c
+$(BUILDDIR)/rend_gl1/r_alias_misc.o :        	$(REND_GL1_DIR)/r_alias_misc.c
 	$(DO_GL_SHLIB_CC)
 	
-$(BUILDDIR)/ref_gl/r_arb_program.o :        	$(REF_GL_DIR)/r_arb_program.c
+$(BUILDDIR)/rend_gl1/r_arb_program.o :        	$(REND_GL1_DIR)/r_arb_program.c
 	$(DO_GL_SHLIB_CC)
 
-$(BUILDDIR)/ref_gl/r_backend.o :        	$(REF_GL_DIR)/r_backend.c
+$(BUILDDIR)/rend_gl1/r_backend.o :        	$(REND_GL1_DIR)/r_backend.c
 	$(DO_GL_SHLIB_CC)
 	
-$(BUILDDIR)/ref_gl/r_beam.o :        	$(REF_GL_DIR)/r_beam.c
+$(BUILDDIR)/rend_gl1/r_beam.o :        	$(REND_GL1_DIR)/r_beam.c
 	$(DO_GL_SHLIB_CC)
 	
-$(BUILDDIR)/ref_gl/r_bloom.o :        	$(REF_GL_DIR)/r_bloom.c
+$(BUILDDIR)/rend_gl1/r_bloom.o :        	$(REND_GL1_DIR)/r_bloom.c
 	$(DO_GL_SHLIB_CC)
 	
-$(BUILDDIR)/ref_gl/r_draw.o :        	$(REF_GL_DIR)/r_draw.c
+$(BUILDDIR)/rend_gl1/r_draw.o :        	$(REND_GL1_DIR)/r_draw.c
 	$(DO_GL_SHLIB_CC)
 	
-$(BUILDDIR)/ref_gl/r_entity.o :        	$(REF_GL_DIR)/r_entity.c
+$(BUILDDIR)/rend_gl1/r_entity.o :        	$(REND_GL1_DIR)/r_entity.c
 	$(DO_GL_SHLIB_CC)
 	
-$(BUILDDIR)/ref_gl/r_fog.o :        	$(REF_GL_DIR)/r_fog.c
+$(BUILDDIR)/rend_gl1/r_fog.o :        	$(REND_GL1_DIR)/r_fog.c
 	$(DO_GL_SHLIB_CC)
 	
-$(BUILDDIR)/ref_gl/r_fragment.o :       $(REF_GL_DIR)/r_fragment.c
+$(BUILDDIR)/rend_gl1/r_fragment.o :       $(REND_GL1_DIR)/r_fragment.c
 	$(DO_GL_SHLIB_CC)
 	
-$(BUILDDIR)/ref_gl/r_glstate.o :       $(REF_GL_DIR)/r_glstate.c
+$(BUILDDIR)/rend_gl1/r_glstate.o :       $(REND_GL1_DIR)/r_glstate.c
 	$(DO_GL_SHLIB_CC)
 
-$(BUILDDIR)/ref_gl/r_image.o :       	$(REF_GL_DIR)/r_image.c
+$(BUILDDIR)/rend_gl1/r_image.o :       	$(REND_GL1_DIR)/r_image.c
 	$(DO_GL_SHLIB_CC)
 
-$(BUILDDIR)/ref_gl/r_light.o :       	$(REF_GL_DIR)/r_light.c
+$(BUILDDIR)/rend_gl1/r_light.o :       	$(REND_GL1_DIR)/r_light.c
 	$(DO_GL_SHLIB_CC)
 
-$(BUILDDIR)/ref_gl/r_main.o :       	$(REF_GL_DIR)/r_main.c
+$(BUILDDIR)/rend_gl1/r_main.o :       	$(REND_GL1_DIR)/r_main.c
 	$(DO_GL_SHLIB_CC)
 
-$(BUILDDIR)/ref_gl/r_misc.o :       	$(REF_GL_DIR)/r_misc.c
+$(BUILDDIR)/rend_gl1/r_misc.o :       	$(REND_GL1_DIR)/r_misc.c
 	$(DO_GL_SHLIB_CC)
 
-$(BUILDDIR)/ref_gl/r_model.o :       	$(REF_GL_DIR)/r_model.c
+$(BUILDDIR)/rend_gl1/r_model.o :       	$(REND_GL1_DIR)/r_model.c
 	$(DO_GL_SHLIB_CC)
 
-$(BUILDDIR)/ref_gl/r_particle.o :       $(REF_GL_DIR)/r_particle.c
+$(BUILDDIR)/rend_gl1/r_particle.o :       $(REND_GL1_DIR)/r_particle.c
 	$(DO_GL_SHLIB_CC)
 
-$(BUILDDIR)/ref_gl/r_sky.o :       	$(REF_GL_DIR)/r_sky.c
+$(BUILDDIR)/rend_gl1/r_sky.o :       	$(REND_GL1_DIR)/r_sky.c
 	$(DO_GL_SHLIB_CC)
 
-$(BUILDDIR)/ref_gl/r_sprite.o :       	$(REF_GL_DIR)/r_sprite.c
+$(BUILDDIR)/rend_gl1/r_sprite.o :       	$(REND_GL1_DIR)/r_sprite.c
 	$(DO_GL_SHLIB_CC)
 
-$(BUILDDIR)/ref_gl/r_surface.o :       	$(REF_GL_DIR)/r_surface.c
+$(BUILDDIR)/rend_gl1/r_surface.o :       	$(REND_GL1_DIR)/r_surface.c
 	$(DO_GL_SHLIB_CC)
 
-$(BUILDDIR)/ref_gl/r_upscale.o :       	$(REF_GL_DIR)/r_upscale.c
+$(BUILDDIR)/rend_gl1/r_upscale.o :       	$(REND_GL1_DIR)/r_upscale.c
 	$(DO_GL_SHLIB_CC)
 
-$(BUILDDIR)/ref_gl/r_vlights.o :       	$(REF_GL_DIR)/r_vlights.c
+$(BUILDDIR)/rend_gl1/r_utils.o :       	$(REND_GL1_DIR)/r_utils.c
 	$(DO_GL_SHLIB_CC)
 
-$(BUILDDIR)/ref_gl/r_warp.o :        	$(REF_GL_DIR)/r_warp.c
+$(BUILDDIR)/rend_gl1/r_vlights.o :       	$(REND_GL1_DIR)/r_vlights.c
 	$(DO_GL_SHLIB_CC)
 
-$(BUILDDIR)/ref_gl/gl_sdl.o :      	$(UNIX_DIR)/gl_sdl.c
+$(BUILDDIR)/rend_gl1/r_warp.o :        	$(REND_GL1_DIR)/r_warp.c
+	$(DO_GL_SHLIB_CC)
+
+$(BUILDDIR)/rend_gl1/sdl_gl.o :      	$(UNIX_DIR)/sdl_gl.c
 	$(DO_GL_SHLIB_CC) $(SDLCFLAGS)
 
-$(BUILDDIR)/ref_gl/qgl_unix.o :      	$(UNIX_DIR)/qgl_unix.c
+$(BUILDDIR)/rend_gl1/unix_qgl.o :      	$(UNIX_DIR)/unix_qgl.c
 	$(DO_GL_SHLIB_CC)
 
 #############################################################################
@@ -676,6 +704,7 @@ Q2DED_OBJS = \
 	$(BUILDDIR)/ded/crc.o \
 	$(BUILDDIR)/ded/cvar.o \
 	$(BUILDDIR)/ded/filesystem.o \
+	$(BUILDDIR)/ded/json_parse.o \
 	$(BUILDDIR)/ded/md4.o \
 	$(BUILDDIR)/ded/net_chan.o \
 	$(BUILDDIR)/ded/wildcard.o \
@@ -692,10 +721,10 @@ Q2DED_OBJS = \
 	$(BUILDDIR)/ded/sv_user.o \
 	$(BUILDDIR)/ded/sv_world.o \
 	\
-	$(BUILDDIR)/ded/qsh_unix.o \
-	$(BUILDDIR)/ded/sys_unix.o \
-	$(BUILDDIR)/ded/glob.o \
-	$(BUILDDIR)/ded/net_udp.o \
+	$(BUILDDIR)/ded/unix_qsh.o \
+	$(BUILDDIR)/ded/unix_main.o \
+	$(BUILDDIR)/ded/unix_glob.o \
+	$(BUILDDIR)/ded/unix_net.o \
 	\
 	$(BUILDDIR)/ded/q_shared.o \
 	$(BUILDDIR)/ded/pmove.o \
@@ -703,7 +732,7 @@ Q2DED_OBJS = \
 	$(BUILDDIR)/ded/cl_null.o \
 	$(BUILDDIR)/ded/cd_null.o
 
-$(BINDIR)/kmquake2_netserver : $(Q2DED_OBJS)
+$(BINDIR)/kmquake2_netserver_$(LIBARCHNAME) : $(Q2DED_OBJS)
 	$(CC) $(CFLAGS) -o $@ $(Q2DED_OBJS) $(LDFLAGS)
 
 $(BUILDDIR)/ded/cmd.o :        $(COMMON_DIR)/cmd.c
@@ -722,6 +751,9 @@ $(BUILDDIR)/ded/cvar.o :       $(COMMON_DIR)/cvar.c
 	$(DO_DED_CC)
 
 $(BUILDDIR)/ded/filesystem.o :      $(COMMON_DIR)/filesystem.c
+	$(DO_DED_CC)
+
+$(BUILDDIR)/ded/json_parse.o :   $(COMMON_DIR)/json_parse.c
 	$(DO_DED_CC)
 
 $(BUILDDIR)/ded/md4.o :        $(COMMON_DIR)/md4.c
@@ -772,16 +804,16 @@ $(BUILDDIR)/ded/sv_user.o :    $(SERVER_DIR)/sv_user.c
 $(BUILDDIR)/ded/sv_world.o :   $(SERVER_DIR)/sv_world.c
 	$(DO_DED_CC)
 
-$(BUILDDIR)/ded/qsh_unix.o :   $(UNIX_DIR)/qsh_unix.c
+$(BUILDDIR)/ded/unix_qsh.o :   $(UNIX_DIR)/unix_qsh.c
 	$(DO_DED_CC)
 
-$(BUILDDIR)/ded/sys_unix.o :   $(UNIX_DIR)/sys_unix.c
+$(BUILDDIR)/ded/unix_main.o :   $(UNIX_DIR)/unix_main.c
 	$(DO_DED_CC)
 
-$(BUILDDIR)/ded/glob.o :       $(UNIX_DIR)/glob.c
+$(BUILDDIR)/ded/unix_glob.o :       $(UNIX_DIR)/unix_glob.c
 	$(DO_DED_CC)
 
-$(BUILDDIR)/ded/net_udp.o :    $(UNIX_DIR)/net_udp.c
+$(BUILDDIR)/ded/unix_net.o :    $(UNIX_DIR)/unix_net.c
 	$(DO_DED_CC)
 
 $(BUILDDIR)/ded/cd_null.o :    $(NULL_DIR)/cd_null.c    
@@ -818,10 +850,13 @@ GAME_OBJS = \
 	$(BUILDDIR)/game/g_lock.o \
 	$(BUILDDIR)/game/g_main.o \
 	$(BUILDDIR)/game/g_misc.o \
+	$(BUILDDIR)/game/g_misc_kex.o \
+	$(BUILDDIR)/game/g_misc_laz.o \
 	$(BUILDDIR)/game/g_model.o \
 	$(BUILDDIR)/game/g_monster.o \
 	$(BUILDDIR)/game/g_moreai.o \
 	$(BUILDDIR)/game/g_mtrain.o \
+	$(BUILDDIR)/game/g_patchmonstermodels.o \
 	$(BUILDDIR)/game/g_patchplayermodels.o \
 	$(BUILDDIR)/game/g_pendulum.o \
 	$(BUILDDIR)/game/g_phys.o \
@@ -942,6 +977,12 @@ $(BUILDDIR)/game/g_main.o :       	$(GAME_DIR)/g_main.c
 $(BUILDDIR)/game/g_misc.o :       	$(GAME_DIR)/g_misc.c
 	$(DO_SHLIB_CC)
 
+$(BUILDDIR)/game/g_misc_kex.o :       	$(GAME_DIR)/g_misc_kex.c
+	$(DO_SHLIB_CC)
+
+$(BUILDDIR)/game/g_misc_laz.o :       	$(GAME_DIR)/g_misc_laz.c
+	$(DO_SHLIB_CC)
+
 $(BUILDDIR)/game/g_model.o :      	$(GAME_DIR)/g_model.c
 	$(DO_SHLIB_CC)
 
@@ -952,6 +993,9 @@ $(BUILDDIR)/game/g_moreai.o :      	$(GAME_DIR)/g_moreai.c
 	$(DO_SHLIB_CC)
 
 $(BUILDDIR)/game/g_mtrain.o :      	$(GAME_DIR)/g_mtrain.c
+	$(DO_SHLIB_CC)
+
+$(BUILDDIR)/game/g_patchmonstermodels.o : $(GAME_DIR)/g_patchmonstermodels.c
 	$(DO_SHLIB_CC)
 
 $(BUILDDIR)/game/g_patchplayermodels.o : $(GAME_DIR)/g_patchplayermodels.c

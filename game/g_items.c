@@ -3309,7 +3309,7 @@ void Use_Flashlight ( edict_t *ent, gitem_t *item )
 	{
 		if (ent->client->pers.inventory[ITEM_INDEX(FindItem(FLASHLIGHT_ITEM))] < level.flashlight_cost)
 		{
-			safe_cprintf(ent,PRINT_HIGH,"Flashlight requires %s\n",FLASHLIGHT_ITEM);
+			safe_cprintf (ent, PRINT_HIGH, "Flashlight requires %s\n", FLASHLIGHT_ITEM);
 			return;
 		}
 #if FLASHLIGHT_USE != POWERUP_USE_ITEM

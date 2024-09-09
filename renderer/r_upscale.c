@@ -205,8 +205,8 @@ static q_noinline uint32_t R_Upscale2x_blend (int rule, uint32_t E, uint32_t A, 
 	case 16:
 		return same(B, D) ? blend_14_1_1(E, D, B) : E;
 	default:
-	//	Com_Error(ERR_FATAL, "%s: bad rule %d", __func__, rule);
-		Com_Error(ERR_FATAL, "HQ2x_blend: bad rule %d", rule);
+	//	VID_Error (ERR_FATAL, "%s: bad rule %d", __func__, rule);
+		VID_Error (ERR_FATAL, "HQ2x_blend: bad rule %d", rule);
 		return 0;
 	}
 }
@@ -382,8 +382,8 @@ static q_noinline void R_Upscale4x_blend (int rule, uint32_t *p00, uint32_t *p01
 		*p11 = E;
 		break;
 	default:
-	//	Com_Error(ERR_FATAL, "%s: bad rule %d", __func__, rule);
-		Com_Error(ERR_FATAL, "HQ4x_blend: bad rule %d",rule);
+	//	VID_Error (ERR_FATAL, "%s: bad rule %d", __func__, rule);
+		VID_Error (ERR_FATAL, "HQ4x_blend: bad rule %d",rule);
 		break;
 	}
 }

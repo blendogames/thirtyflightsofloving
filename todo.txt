@@ -326,6 +326,12 @@ implement cvar descriptions								- done!!
 
 add screenshot gamma correction							- done!!
 
+implement cvar descriptions								- done!!
+
+add cel shading											- done!!
+
+add userinfo-based railtrail color cvar					- done!!
+
 --------------------------------------------------------------------------
 
 add lightmap bluring

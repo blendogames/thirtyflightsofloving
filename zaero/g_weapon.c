@@ -35,13 +35,13 @@ void check_dodge (edict_t *self, vec3_t start, vec3_t dir, int speed)
 		tr.ent->monsterinfo.dodge (tr.ent, self, eta);
 
 		// if dodgetimeout on, turn off...
-		if(tr.ent->monsterinfo.aiflags & AI_DODGETIMEOUT)
+		if (tr.ent->monsterinfo.aiflags & AI_DODGETIMEOUT)
 		{
 			tr.ent->monsterinfo.aiflags &= ~AI_DODGETIMEOUT;
 			tr.ent->monsterinfo.dodgetimeout = 0;
 		}
 
-		if(skill->value > 3)
+		if (skill->value > 3)
 		{
 			skilllevel = 3;
 		}
@@ -51,12 +51,12 @@ void check_dodge (edict_t *self, vec3_t start, vec3_t dir, int speed)
 		}
 
 		// if timeout hasn't started, set
-		if(!tr.ent->monsterinfo.dodgetimeout)
+		if (!tr.ent->monsterinfo.dodgetimeout)
 		{
 			tr.ent->monsterinfo.dodgetimeout = level.time + ((4 - skilllevel) * 1.1);
 		}
 
-		if(level.time > tr.ent->monsterinfo.dodgetimeout)
+		if (level.time > tr.ent->monsterinfo.dodgetimeout)
 		{
 			tr.ent->monsterinfo.dodgetimeout = level.time + (skilllevel * 4);
 			tr.ent->monsterinfo.aiflags |= AI_DODGETIMEOUT;
@@ -332,7 +332,7 @@ void blaster_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *
 	if (other == self->owner)
 		return;
 
-//  if(other->owner == self->owner && strcmp(other->classname, "PlasmaShield") == 0)
+//  if (other->owner == self->owner && strcmp(other->classname, "PlasmaShield") == 0)
 //  {
 //    return;
 //  }
@@ -505,7 +505,7 @@ void Grenade_Explode (edict_t *ent)
 	if (other == ent->owner)
 		return;
 
-//  if(other->owner == ent->owner && strcmp(other->classname, "PlasmaShield") == 0)
+//  if (other->owner == ent->owner && strcmp(other->classname, "PlasmaShield") == 0)
 //  {
 //    return;
 //  }
@@ -646,10 +646,10 @@ void animrocket(edict_t *ent)
 {
   ent->s.frame++;
 
-  if((ent->s.frame % 2) == 0)
+  if ((ent->s.frame % 2) == 0)
     ent->s.skinnum++;
 
-  if(ent->s.frame > 12)
+  if (ent->s.frame > 12)
   {
 	  gi.WriteByte (svc_temp_entity);
 	  if (ent->waterlevel)
@@ -678,7 +678,7 @@ void rocket_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *su
 	if (other == ent->owner)
 		return;
 
-//  if(other->owner == ent->owner && strcmp(other->classname, "PlasmaShield") == 0)
+//  if (other->owner == ent->owner && strcmp(other->classname, "PlasmaShield") == 0)
 //  {
 //    return;
 //  }
@@ -921,7 +921,7 @@ void bfg_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf
 	if (other == self->owner)
 		return;
 
-//  if(other->owner == self->owner && strcmp(other->classname, "PlasmaShield") == 0)
+//  if (other->owner == self->owner && strcmp(other->classname, "PlasmaShield") == 0)
 //  {
 //    return;
 //  }

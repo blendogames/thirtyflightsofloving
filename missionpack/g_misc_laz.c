@@ -257,7 +257,8 @@ void target_precipitation_think (edict_t *self)
 	// Don't start raining until player is in the game. The following 
 	// takes care of both initial map load conditions and restored saved games.
 	// This is a gross abuse of groundentity_linkcount. Sue me.
-	if (g_edicts[1].linkcount == self->groundentity_linkcount)
+//	if (g_edicts[1].linkcount == self->groundentity_linkcount)
+	if ( AllPlayersLinkcountCmp(self->groundentity_linkcount) )	// Knightmare- function handles multiple players
 		return;
 	else
 		self->groundentity_linkcount = g_edicts[1].linkcount;
@@ -341,7 +342,8 @@ void target_precipitation_delayed_use (edict_t *self)
 	// Since target_precipitation tends to be a processor hog,
 	// for START_ON we wait until the player has spawned into the
 	// game to ease the startup burden somewhat
-	if (g_edicts[1].linkcount)
+//	if (g_edicts[1].linkcount)
+	if ( AllPlayersSpawned() )	// Knightmare- function handles multiple players
 	{
 		self->think = target_precipitation_think;
 		self->think(self);
@@ -375,7 +377,7 @@ void SP_target_precipitation (edict_t *ent)
 
 		if (!ent->usermodel)
 		{
-			gi.dprintf("target_precipitation style=user\nwith no usermodel.\n");
+			gi.dprintf ("target_precipitation style=user\nwith no usermodel.\n");
 			G_FreeEdict(ent);
 			return;
 		}
@@ -386,9 +388,9 @@ void SP_target_precipitation (edict_t *ent)
 			bufSize = strlen(ent->usermodel)+10;
 			buffer = gi.TagMalloc(bufSize, TAG_LEVEL);
 			if (strstr(ent->usermodel,".sp2"))
-				Com_sprintf(buffer, bufSize, "sprites/%s", ent->usermodel);
+				Com_sprintf (buffer, bufSize, "sprites/%s", ent->usermodel);
 			else
-				Com_sprintf(buffer, bufSize, "models/%s", ent->usermodel);
+				Com_sprintf (buffer, bufSize, "models/%s", ent->usermodel);
 			ent->usermodel = buffer;
 		}
 
@@ -472,7 +474,8 @@ void target_fountain_think (edict_t *self)
 	// Don't start raining until player is in the game. The following 
 	// takes care of both initial map load conditions and restored saved games.
 	// This is a gross abuse of groundentity_linkcount. Sue me.
-	if (g_edicts[1].linkcount == self->groundentity_linkcount)
+//	if (g_edicts[1].linkcount == self->groundentity_linkcount)
+	if ( AllPlayersLinkcountCmp(self->groundentity_linkcount) )	// Knightmare- function handles multiple players
 		return;
 	else
 		self->groundentity_linkcount = g_edicts[1].linkcount;
@@ -558,7 +561,8 @@ void target_fountain_delayed_use (edict_t *self)
 	// Since target_fountain tends to be a processor hog,
 	// for START_ON we wait until the player has spawned into the
 	// game to ease the startup burden somewhat
-	if (g_edicts[1].linkcount)
+//	if (g_edicts[1].linkcount)
+	if ( AllPlayersSpawned() )	// Knightmare- function handles multiple players
 	{
 		self->think = target_fountain_think;
 		self->think(self);
@@ -592,7 +596,7 @@ void SP_target_fountain (edict_t *ent)
 	ent->style = STYLE_WEATHER_USER;
 	if (!ent->usermodel)
 	{
-		gi.dprintf("target_fountain with no usermodel.\n");
+		gi.dprintf ("target_fountain with no usermodel.\n");
 		G_FreeEdict(ent);
 		return;
 	}
@@ -603,9 +607,9 @@ void SP_target_fountain (edict_t *ent)
 		bufSize = strlen(ent->usermodel)+10;
 		buffer = gi.TagMalloc(bufSize, TAG_LEVEL);
 		if (strstr(ent->usermodel,".sp2"))
-			Com_sprintf(buffer, bufSize, "sprites/%s", ent->usermodel);
+			Com_sprintf (buffer, bufSize, "sprites/%s", ent->usermodel);
 		else
-			Com_sprintf(buffer, bufSize, "models/%s", ent->usermodel);
+			Com_sprintf (buffer, bufSize, "models/%s", ent->usermodel);
 		ent->usermodel = buffer;
 	}
 
@@ -656,21 +660,23 @@ MISC_DEADSOLDIER MODEL PATCH
 
 int PatchDeadSoldier (void)
 {
-	cvar_t		*gamedir;
+	cvar_t		*basedir = NULL;
+	cvar_t		*gamedir = NULL;
 	char		skins[NUM_SKINS][MAX_SKINNAME];	// skin entries
 	char		infilename[MAX_OSPATH];
 	char		outfilename[MAX_OSPATH];
 	char		tempname[MAX_OSPATH];
 	int			j;
-//	char		*p;
-	FILE		*infile;
-	FILE		*outfile;
-	dmdl_t		model;				// model header
-	byte		*data;				// model data
-	int			datasize;			// model data size (bytes)
-	int			newoffset;			// model data offset (after skins)
+//	char		*p = NULL;
+	FILE		*infile = NULL;
+	FILE		*outfile = NULL;
+	dmdl_t		model = {0};		// model header
+	byte		*data = NULL;		// model data
+	int			datasize = 0;		// model data size (bytes)
+	int			newoffset = 0;		// model data offset (after skins)
 
 	// get game (moddir) name
+	basedir = gi.cvar("basedir", "", 0);
 	gamedir = gi.cvar("game", "", 0);
 	if (!*gamedir->string)
 		return 0;	// we're in baseq2
@@ -708,7 +714,9 @@ int PatchDeadSoldier (void)
 
 
 	// load original model
-	Com_sprintf (infilename, sizeof(infilename), "baseq2/%s", DEADSOLDIER_MODEL);
+//	Com_sprintf (infilename, sizeof(infilename), "baseq2/%s", DEADSOLDIER_MODEL);
+	// Knightmare- use basedir for compatibility on all platforms
+	Com_sprintf (infilename, sizeof(infilename), "%s/baseq2/%s", basedir->string, DEADSOLDIER_MODEL);
 	if ( !(infile = fopen (infilename, "rb")) )
 	{
 		// If file doesn't exist on user's hard disk, it must be in 
@@ -716,49 +724,53 @@ int PatchDeadSoldier (void)
 
 		pak_header_t	pakheader;
 		pak_item_t		pakitem;
+		char			pakfile[MAX_OSPATH];
 		FILE			*fpak;
 		int				k, numitems;
 
-		fpak = fopen("baseq2/pak0.pak","rb");
+	//	fpak = fopen ("baseq2/pak0.pak", "rb");
+		// Knightmare- use basedir for compatibility on all platforms
+		Com_sprintf (pakfile, sizeof(pakfile), "%s/baseq2/pak0.pak", basedir->string);
+		fpak = fopen (pakfile, "rb");
 		if (!fpak)
 		{
 			cvar_t	*cddir;
 			char	pakfile[MAX_OSPATH];
 
 			cddir = gi.cvar("cddir", "", 0);
-			Com_sprintf(pakfile, sizeof(pakfile), "%s/baseq2/pak0.pak",cddir->string);
-			fpak = fopen(pakfile,"rb");
+			Com_sprintf (pakfile, sizeof(pakfile), "%s/baseq2/pak0.pak", cddir->string);
+			fpak = fopen(pakfile, "rb");
 			if (!fpak)
 			{
-				gi.dprintf("PatchDeadSoldier: Cannot find pak0.pak\n");
+				gi.dprintf ("PatchDeadSoldier: Cannot find pak0.pak\n");
 				return 0;
 			}
 		}
-		fread(&pakheader,1,sizeof(pak_header_t),fpak);
-		numitems = pakheader.dsize/sizeof(pak_item_t);
-		fseek(fpak,pakheader.dstart,SEEK_SET);
+		fread (&pakheader, 1, sizeof(pak_header_t), fpak);
+		numitems = pakheader.dsize / sizeof(pak_item_t);
+		fseek (fpak,pakheader.dstart, SEEK_SET);
 		data = NULL;
 		for (k=0; k<numitems && !data; k++)
 		{
-			fread(&pakitem,1,sizeof(pak_item_t),fpak);
-			if (!Q_stricmp(pakitem.name,DEADSOLDIER_MODEL))
+			fread (&pakitem,1,sizeof(pak_item_t),fpak);
+			if ( !Q_stricmp(pakitem.name, DEADSOLDIER_MODEL) )
 			{
-				fseek(fpak,pakitem.start,SEEK_SET);
-				fread(&model, sizeof(dmdl_t), 1, fpak);
+				fseek (fpak, pakitem.start, SEEK_SET);
+				fread (&model, sizeof(dmdl_t), 1, fpak);
 				datasize = model.ofs_end - model.ofs_skins;
 				if ( !(data = malloc (datasize)) )	// make sure freed locally
 				{
-					fclose(fpak);
+					fclose (fpak);
 					gi.dprintf ("PatchDeadSoldier: Could not allocate memory for model\n");
 					return 0;
 				}
 				fread (data, sizeof (byte), datasize, fpak);
 			}
 		}
-		fclose(fpak);
+		fclose (fpak);
 		if (!data)
 		{
-			gi.dprintf("PatchDeadSoldier: Could not find %s in baseq2/pak0.pak\n",DEADSOLDIER_MODEL);
+			gi.dprintf ("PatchDeadSoldier: Could not find %s in baseq2/pak0.pak\n",DEADSOLDIER_MODEL);
 			return 0;
 		}
 	}

@@ -46,7 +46,7 @@
 #define	svc_layout			4
 #define	svc_inventory		5
 #define	svc_stufftext		11
-#define	svc_fog				21
+#define	svc_lazarus_fog		21
 
 //==================================================================
 
@@ -136,6 +136,7 @@
 #define	FL2_TURRET_DOUBLE_ALT_FIRING	0x00000004	// secondary barrel in use for alternate firing
 #define FL2_CRUCIFIED			0x00000008	// insane is crucified 
 #define FL2_COMMANDER			0x00000008	// Medic Commander / Daedalus internal flag
+#define FL2_BFG_GLAD			0x00000008	// BFG Gladiator variant
 #define FL2_WEAPON_ALT			0x00000010	// plasma guard has spread mode
 #define FL2_DO_NOT_REFLECT		0x00000020	// do not reflect this entity
 
@@ -157,7 +158,8 @@ typedef enum
 	DAMAGE_YES,			// will take damage if hit
 	DAMAGE_AIM,			// auto targeting recognizes this
 	// Zaero
-	DAMAGE_IMMORTAL		// similar to DAMAGE_YES, but health is not deducted
+	DAMAGE_IMMORTAL,		// similar to DAMAGE_YES, but health is not deducted
+	DAMAGE_LIGHTING_ONLY	// only damaged by lightning
 } damage_t;
 
 typedef enum 
@@ -254,7 +256,7 @@ typedef enum
 #define AI_CROUCH               0x40000000
 #define AI_EVADE_GRENADE		0x80000000
 
-// Knightmare- thes are for aiflags2
+// Knightmare- these are for aiflags2
 #define AI2_FREEFORALL           0x00000001	// Set by target_monsterbattle, lets dmgteam monsters
                                             // attack monsters on opposion dmgteam
 #define AI2_RANGE_PAUSE          0x00000002
@@ -428,7 +430,7 @@ typedef struct gitem_s
 	void		(*weaponthink)(struct edict_s *ent);
 	char		*pickup_sound;
 	char		*world_model;
-	int			world_model_skinnum; //Knightmare- added skinnum here since some items share models
+	int			world_model_skinnum; // Knightmare- added skinnum here since some items share models
 	int			world_model_flags;
 	char		*view_model;
 
@@ -617,6 +619,35 @@ typedef struct
 	float		phase;
 
 	float		shift;
+
+	// Knightmare- added for Q1-style doors/plats/buttons
+	int			q1sounds;
+
+	// Knightmare- added for sky distance
+	float		skydistance;
+	// Knightmare- added for DK-style clouds
+	char		*cloudname;
+	float		lightningfreq;
+	float		cloudxdir;
+	float		cloudydir;
+	float		cloud1tile;
+	float		cloud1speed;
+	float		cloud1alpha;
+	float		cloud2tile;
+	float		cloud2speed;
+	float		cloud2alpha;
+	float		cloud3tile;
+	float		cloud3speed;
+	float		cloud3alpha;
+
+	// Knightmare- added for misc_flare
+	int			fade_start_dist;
+	int			fade_end_dist;
+	char		*image;
+	char		*rgba;
+
+	// Knightmare- added for angled sprites
+	int			spritetype;
 } spawn_temp_t;
 
 
@@ -960,6 +991,7 @@ extern int lastgibframe;
 #define MOD_Q1_LASER			87
 #define MOD_Q1_FLAMEBOLT		88
 #define MOD_Q1_FIREPOD			89
+#define MOD_Q1_LIGHTNING_TRAP	90
 
 #define MOD_FRIENDLY_FIRE	0x8000000
 
@@ -1017,6 +1049,14 @@ extern	cvar_t	*sv_maplist;
 extern	cvar_t	*sv_stopspeed;		// PGM - this was a define in g_phys.c
 extern	cvar_t	*sv_step_fraction;	// Knightmare- this was a define in p_view.c
 
+extern	cvar_t	*sv_trigger_gravity_player;	// Knightmare- enables trigger_gravity affecting players in non-Rogue maps
+
+extern	cvar_t	*g_aimfix;				// Knightmare- from Yamagi Q2
+extern	cvar_t	*g_aimfix_min_dist;		// Knightmare- minimum range for aimfix
+extern	cvar_t	*g_aimfix_taper_dist;	// Knightmare- transition range for aimfix
+extern	cvar_t	*g_nm_maphacks;			// Knightmare- enables hacks for Neil Manke's Q2 maps
+extern	cvar_t	*g_use_rogue_spawnflags;	// Knightmare- enables use of Rogue spawnflags for target_laser in non-Rogue maps
+
 //ROGUE
 extern	cvar_t	*g_showlogic;
 extern	cvar_t	*gamerules;
@@ -1059,7 +1099,7 @@ extern	cvar_t	*jump_kick;
 extern	cvar_t	*lazarus_cd_loop;
 extern	cvar_t	*lazarus_cl_gun;
 extern	cvar_t	*lazarus_crosshair;
-extern	cvar_t	*lazarus_gl_clear;
+extern	cvar_t	*lazarus_r_clear;
 extern	cvar_t	*lazarus_joyp;
 extern	cvar_t	*lazarus_joyy;
 extern	cvar_t	*lazarus_pitch;
@@ -1111,6 +1151,7 @@ extern	int		max_soundindex;
 //
 #define FFL_SPAWNTEMP		1
 #define FFL_NOSPAWN			2
+#define FFL_DEFAULT_NEG		4	// Knightmare- spawntemp that defaults to -1
 
 typedef enum {
 	F_INT, 
@@ -1140,6 +1181,13 @@ typedef struct
 	char	*name;
 	void	(*spawn)(edict_t *ent);
 } spawn_t;
+
+// Knightmare- added soundcache struct
+typedef struct
+{
+	char	*name;
+	void	(*soundcache)(edict_t *ent);	
+} soundcache_t;
 
 // Lazarus: worldspawn effects
 #define FX_WORLDSPAWN_NOHELP       1
@@ -1206,7 +1254,7 @@ edict_t *findradius (edict_t *from, vec3_t org, float rad);
 edict_t *G_PickTarget (char *targetname);
 void	G_UseTargets (edict_t *ent, edict_t *activator);
 void	G_SetMovedir (vec3_t angles, vec3_t movedir);
-void	G_SetMovedir2 (vec3_t angles, vec3_t movedir);
+void	G_SetMovedir2 (vec3_t angles, vec3_t movedir);	// Knightmare added
 mmove_t	*G_NewCustomAnim (void);	// Knightmare- util func for custom anims
 void	G_InitEdict (edict_t *e);
 edict_t	*G_Spawn (void);
@@ -1231,18 +1279,28 @@ float SnapToEights(float x);
 // Lazarus
 float AtLeast (float x, float dx);
 edict_t	*LookingAt (edict_t *ent, int filter, vec3_t endpos, float *range);
+
+char *GameDir (void);
+char *SavegameDir (void);
 void GameDirRelativePath (const char *filename, char *output, size_t outputSize);
 void SavegameDirRelativePath (const char *filename, char *output, size_t outputSize);
 void CreatePath (const char *path);
+qboolean LocalFileExists (const char *path);
+qboolean AnyPlayerSpawned (void);	// Knightmare added
+qboolean AllPlayersSpawned (void);	// Knightmare added
+qboolean AllPlayersLinkcountCmp (int cmp_linkcount);	// Knightmare added
+
 void G_UseTarget (edict_t *ent, edict_t *activator, edict_t *target);
-qboolean IsIdMap (void); // Knightmare added
-qboolean IsXatrixMap (void); // Knightmare added
-qboolean IsRogueMap (void); // Knightmare added
-qboolean IsZaeroMap (void); // Knightmare added
-qboolean IsZaeroRailgunHackMap (void); // Knightmare added
-qboolean CheckCoop_MapHacks (edict_t *ent); // FS: Coop: Check if we have to modify some stuff for coop so we don't have to rely on distributing ent files
-qboolean UseSpecialGoodGuyFlag (edict_t *monster); // Knightmare added
-qboolean UseRegularGoodGuyFlag (edict_t *monster); // Knightmare added
+qboolean IsIdMap (void);		// Knightmare added
+qboolean IsXatrixMap (void);	// Knightmare added
+qboolean IsRogueMap (void);		// Knightmare added
+qboolean IsZaeroMap (void);		// Knightmare added
+qboolean IsZaeroRailgunHackMap (void);	// Knightmare added
+qboolean IsMakronNoBFGHackMap (void);	// Knightmare added
+qboolean IsMakronNoJumpHackMap (void);	// Knightmare added
+qboolean CheckCoop_MapHacks (edict_t *ent);	// FS: Coop: Check if we have to modify some stuff for coop so we don't have to rely on distributing ent files
+qboolean UseSpecialGoodGuyFlag (edict_t *monster);	// Knightmare added
+qboolean UseRegularGoodGuyFlag (edict_t *monster);	// Knightmare added
 
 //ROGUE
 void	G_ProjectSource2 (vec3_t point, vec3_t distance, vec3_t forward, vec3_t right, vec3_t up, vec3_t result);
@@ -1255,7 +1313,9 @@ edict_t *findradius2 (edict_t *from, vec3_t org, float rad);
 // g_utils_q1.c
 //
 float PointDist (vec3_t x, vec3_t y);
+qboolean IsQ1Chthon (edict_t *self);
 void Q1TeleportSounds (edict_t *ent);
+void chthon_rise (edict_t *self);
 
 //
 // g_combat.c
@@ -1371,7 +1431,7 @@ void monster_fire_grenade (edict_t *self, vec3_t start, vec3_t aimdir, int damag
 void monster_fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int flashtype, edict_t *homing_target);
 void monster_fire_missile (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int flashtype, edict_t *homing_target);	// Knightmare added
 void monster_fire_railgun (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, int flashtype);
-void monster_fire_bfg (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, int kick, float damage_radius, int flashtype);
+void monster_fire_bfg (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, int kick, float damage_radius, int flashtype, qboolean homing);
 
 // RAFAEL
 void monster_fire_blueblaster (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int flashtype, int effect);
@@ -1415,7 +1475,6 @@ void monster_done_dodge (edict_t *self);
 
 void InitiallyDead (edict_t *self);
 qboolean M_SetDeath(edict_t *self, mmove_t **deathmoves);
-int PatchMonsterModel (char *modelname);
 
 
 //
@@ -1495,7 +1554,7 @@ void Grenade_Explode (edict_t *ent);
 void fire_grenade (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, float timer, float damage_radius, qboolean contact);
 void fire_grenade2 (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, float timer, float damage_radius, qboolean held);
 void fire_rail (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, qboolean useColor, int red, int green, int blue);
-void fire_bfg (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius);
+void fire_bfg (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, qboolean homing);
 void rocket_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf);
 void fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage, edict_t *home_target);
 // Knightmare added
@@ -1515,7 +1574,7 @@ void fire_blueblaster (edict_t *self, vec3_t start, vec3_t aimdir, int damage, i
 void fire_phalanx_plasma (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage);	// Knightmare- renamed this, was fire_plasma
 void fire_trap (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, float timer, float damage_radius, qboolean held);
 void Trap_Die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point);
-void Cmd_KillTrap_f (edict_t *ent);
+void Cmd_DetTrap_f (edict_t *ent);
 void Trap_Explode (edict_t *ent);
 
 //
@@ -1542,7 +1601,7 @@ void q1_explode (edict_t *self);
 void q1_fire_grenade (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, float timer, float damage_radius);
 void q1_grenade_precache (void);
 void q1_fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage);
-void q1_rocket_precahce (void);
+void q1_rocket_precache (void);
 void q1_fire_lightning (edict_t *self, vec3_t start, vec3_t dir, int damage);
 void q1_fire_firepod (edict_t *self, vec3_t dir);
 void q1_firepod_precache (void);
@@ -1551,40 +1610,7 @@ void q1_fire_lavaball_precache (void);
 void q1_fire_acidspit (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed);
 void q1_acidspit_precache (void);
 void q1_fire_gib (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed);
-void q1_gib_precache (void);
-
-//
-// m_actor.c
-//
-void actor_attack (edict_t *actor);
-void actor_files ();
-void actor_fire (edict_t *actor);
-void actor_jump (edict_t *actor);
-void actor_moveit (edict_t *player, edict_t *actor);
-void actor_run (edict_t *actor);
-void actor_run_back (edict_t *actor);
-void actor_salute (edict_t *actor);
-void actor_stand (edict_t *actor);
-void actor_walk (edict_t *actor);
-void actor_walk_back (edict_t *actor);
-mmove_t actor_move_crouch;
-mmove_t actor_move_crouchwalk;
-mmove_t actor_move_crouchwalk_back;
-mmove_t	actor_move_run;
-mmove_t	actor_move_run_back;
-mmove_t	actor_move_run_bad;
-mmove_t actor_move_stand;
-mmove_t actor_move_walk;
-mmove_t	actor_move_walk_back;
-
-//
-// m_medic.c
-//
-#define	MEDIC_MIN_DISTANCE	32
-#define MEDIC_MAX_HEAL_DISTANCE	400
-#define	MEDIC_TRY_TIME		10.0
-
-void abortHeal (edict_t *self, qboolean change_frame, qboolean gib, qboolean mark);
+void q1_zombiegib_precache (void);
 
 //
 // g_ptrail.c
@@ -1659,15 +1685,15 @@ void actor_salute (edict_t *actor);
 void actor_stand (edict_t *actor);
 void actor_walk (edict_t *actor);
 void actor_walk_back (edict_t *actor);
-mmove_t actor_move_crouch;
-mmove_t actor_move_crouchwalk;
-mmove_t actor_move_crouchwalk_back;
-mmove_t	actor_move_run;
-mmove_t	actor_move_run_back;
-mmove_t	actor_move_run_bad;
-mmove_t actor_move_stand;
-mmove_t actor_move_walk;
-mmove_t	actor_move_walk_back;
+extern mmove_t actor_move_crouch;
+extern mmove_t actor_move_crouchwalk;
+extern mmove_t actor_move_crouchwalk_back;
+extern mmove_t	actor_move_run;
+extern mmove_t	actor_move_run_back;
+extern mmove_t	actor_move_run_bad;
+extern mmove_t actor_move_stand;
+extern mmove_t actor_move_walk;
+extern mmove_t	actor_move_walk_back;
 
 //
 // m_medic.c
@@ -1680,6 +1706,7 @@ void abortHeal (edict_t *self, qboolean change_frame, qboolean gib, qboolean mar
 void medic_NextPatrolPoint(edict_t *ent,edict_t *hintpath);
 edict_t *medic_FindDeadMonster (edict_t *ent);
 void medic_StopPatrolling(edict_t *ent);
+
 //
 // m_move.c
 //
@@ -1750,13 +1777,13 @@ void Cmd_Chasecam_Toggle (edict_t *ent);
 // p_weapon.c
 //
 void PlayerNoise(edict_t *who, vec3_t where, int type);
-void P_ProjectSource (gclient_t *client, vec3_t point, vec3_t distance, vec3_t forward, vec3_t right, vec3_t result);
+void P_ProjectSource (edict_t *client_ent, vec3_t point, vec3_t distance, vec3_t forward, vec3_t right, vec3_t result);	// Knightmare- changed parms for aimfix
 void kick_attack (edict_t *ent);
 
 //====================
 // ROGUE PROTOTYPES
 //
-// g_newweap.c
+// g_weapon_rogue.c
 //
 #define PROX_TEST_SIZE 7.0f
 //extern float nuke_framenum;
@@ -1778,7 +1805,7 @@ void fire_tracker (edict_t *self, vec3_t start, vec3_t dir, int damage, int spee
 
 // ROGUE
 //
-// g_newai.c
+// g_ai_rogue.c
 //
 #define	MAX_HINT_CHAINS		100
 extern int	hint_paths_present;
@@ -1788,6 +1815,7 @@ extern int	num_hint_paths;
 qboolean blocked_checkshot (edict_t *self, float shotChance);
 qboolean blocked_checkplat (edict_t *self, float dist);
 qboolean blocked_checkjump (edict_t *self, float dist, float maxDown, float maxUp);
+qboolean blocked_checkjump_laz (edict_t *self, float dist, float maxDown, float maxUp);
 qboolean blocked_checknewenemy (edict_t *self);
 qboolean monsterlost_checkhint (edict_t *self);
 qboolean inback (edict_t *self, edict_t *other);
@@ -1821,7 +1849,7 @@ void Vengeance_Launch (edict_t *self);
 void Hunter_Launch (edict_t *self);
 
 //
-// g_newdm.c
+// g_dm_rogue.c
 //
 void InitGameRules(void);
 edict_t *DoRandomRespawn (edict_t *ent);
@@ -1830,20 +1858,6 @@ qboolean Tag_PickupToken (edict_t *ent, edict_t *other);
 void Tag_DropToken (edict_t *ent, gitem_t *item);
 void Tag_PlayerDeath(edict_t *targ, edict_t *inflictor, edict_t *attacker);
 void fire_doppleganger (edict_t *ent, vec3_t start, vec3_t aimdir);
-
-//
-// g_spawn.c
-//
-void ReInitialize_Entity (edict_t *ent);
-edict_t *CreateMonster(vec3_t origin, vec3_t angles, char *classname);
-edict_t *CreateFlyMonster (vec3_t origin, vec3_t angles, vec3_t mins, vec3_t maxs, char *classname);
-edict_t *CreateGroundMonster (vec3_t origin, vec3_t angles, vec3_t mins, vec3_t maxs, char *classname, int height);
-qboolean FindSpawnPoint (vec3_t startpoint, vec3_t mins, vec3_t maxs, vec3_t spawnpoint, float maxMoveUp);
-qboolean CheckSpawnPoint (vec3_t origin, vec3_t mins, vec3_t maxs);
-qboolean CheckGroundSpawnPoint (vec3_t origin, vec3_t entMins, vec3_t entMaxs, float height, float gravity);
-void DetermineBBox (char *classname, vec3_t mins, vec3_t maxs);
-void SpawnGrow_Spawn (vec3_t startpos, int size);
-void Widowlegs_Spawn (vec3_t startpos, vec3_t angles);
 
 //
 // p_client.c
@@ -1856,6 +1870,11 @@ float PlayersRangeFromSpot (edict_t *spot);
 
 // ROGUE PROTOTYPES
 //====================
+
+//
+// g_patchmonstermodels.c
+//
+int PatchMonsterModel (char *modelname);
 
 //
 // g_patchplayermodels.c
@@ -1892,7 +1911,7 @@ int FMOD_PlaySound(edict_t *ent);
 void FMOD_UpdateListenerPos();
 void FMOD_UpdateSpeakerPos(edict_t *speaker);
 qboolean FMOD_Init();
-//Knightmare- this is now handled client-side
+// Knightmare- this is now handled client-side
 #ifdef FMOD_FOOTSTEPS
 void FootStep(edict_t *ent);
 void PlayFootstep(edict_t *ent, footstep_t index);
@@ -1905,10 +1924,23 @@ void target_playback_delayed_start (edict_t *ent);
 // g_spawn.c
 //
 void ED_CallSpawn (edict_t *ent);
-void G_FindTeams();
-void Cmd_ToggleHud ();
-void Hud_On();
-void Hud_Off();
+void ReInitialize_Entity (edict_t *ent);
+void G_PrecachePlayerInventories (void);	// Knightmare added
+void G_SoundcacheEntities (void);			// Knightmare added
+void G_FindTeams (void);
+void Cmd_ToggleHud (void);
+void Hud_On (void);
+void Hud_Off (void);
+// ROGUE
+edict_t *CreateMonster (vec3_t origin, vec3_t angles, char *classname);
+edict_t *CreateFlyMonster (vec3_t origin, vec3_t angles, vec3_t mins, vec3_t maxs, char *classname);
+edict_t *CreateGroundMonster (vec3_t origin, vec3_t angles, vec3_t mins, vec3_t maxs, char *classname, int height);
+qboolean FindSpawnPoint (vec3_t startpoint, vec3_t mins, vec3_t maxs, vec3_t spawnpoint, float maxMoveUp);
+qboolean CheckSpawnPoint (vec3_t origin, vec3_t mins, vec3_t maxs);
+qboolean CheckGroundSpawnPoint (vec3_t origin, vec3_t entMins, vec3_t entMaxs, float height, float gravity);
+void DetermineBBox (char *classname, vec3_t mins, vec3_t maxs);
+void SpawnGrow_Spawn (vec3_t startpos, int size);
+void Widowlegs_Spawn (vec3_t startpos, vec3_t angles);
 
 //
 // g_svcmds.c
@@ -1934,7 +1966,7 @@ void tracktrain_disengage (edict_t *train);
 //
 // g_turret.c
 //
-void turret_breach_fire(edict_t *ent);
+void turret_breach_fire (edict_t *ent);
 void turret_disengage (edict_t *ent);
 
 //
@@ -2590,7 +2622,7 @@ struct edict_s
 	int			dmg;
 	int			radius_dmg;
 	float		dmg_radius;
-	int			sounds;			//make this a spawntemp var?
+	int			sounds;			// make this a spawntemp var?
 	int			count;
 
 	edict_t		*chain;
@@ -2675,10 +2707,10 @@ struct edict_s
 								// of HOM
 
 	// Mappack - for ridahs controllable turret (but beels weapon thing)
-	edict_t		*turret;	//ugly ?
+	edict_t		*turret;		// ugly ?
 	edict_t		*child;			// "real" infantry guy, child of remote turret_driver
 
-	edict_t		*vehicle;		//pointer for vehicle player is driving
+	edict_t		*vehicle;		// pointer for vehicle player is driving
 	char		*idle_noise;
 	float		radius;
 

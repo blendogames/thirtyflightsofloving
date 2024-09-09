@@ -190,8 +190,8 @@ qboolean SV_movestep (edict_t *ent, vec3_t move, qboolean relink)
 	float		stepsize;
 	vec3_t		test;
 	int			contents;
-	edict_t		*current_bad;		// PGM
-	float		minheight;			// pmm
+	edict_t		*current_bad = NULL;	// PGM
+	float		minheight;				// pmm
 
 	qboolean	canjump;
 	float		d1, d2;
@@ -201,8 +201,8 @@ qboolean SV_movestep (edict_t *ent, vec3_t move, qboolean relink)
 	vec3_t		dir;
 	vec_t		dist;
 	vec_t		g1, g2;
-	edict_t		*grenade;
-	edict_t		*target;
+	edict_t		*grenade = NULL;
+	edict_t		*target = NULL;
 
 //======
 //PGM
@@ -402,7 +402,7 @@ qboolean SV_movestep (edict_t *ent, vec3_t move, qboolean relink)
 
 	// Lazarus- Determine whether monster is capable of and/or should jump
 	jump = 0;
-	if ((ent->monsterinfo.jump) && !(ent->monsterinfo.aiflags & AI_DUCKED))
+	if ( (ent->monsterinfo.jump) && !(ent->monsterinfo.aiflags & AI_DUCKED) )
 	{
 		// Don't jump if path is blocked by monster or player. Otherwise,
 		// monster might attempt to jump OVER the monster/player, which 
@@ -432,7 +432,7 @@ qboolean SV_movestep (edict_t *ent, vec3_t move, qboolean relink)
 	if (trace.allsolid)
 	//	return false;
 	{
-		if (canjump && (ent->monsterinfo.jumpup > 0))
+		if ( canjump && (ent->monsterinfo.jumpup > 0) )
 		{
 			neworg[2] += ent->monsterinfo.jumpup - stepsize;
 			trace = gi.trace (neworg, ent->mins, ent->maxs, end, ent, MASK_MONSTERSOLID);
@@ -613,7 +613,7 @@ qboolean SV_movestep (edict_t *ent, vec3_t move, qboolean relink)
 	}
 
 	// Lazarus
-	if ((trace.fraction == 1) && !jump && canjump && (ent->monsterinfo.jumpdn > 0))
+	if ( (trace.fraction == 1) && !jump && canjump && (ent->monsterinfo.jumpdn > 0) )
 	{
 		end[2] = oldorg[2] + move[2] - ent->monsterinfo.jumpdn;
 		trace = gi.trace (neworg, ent->mins, ent->maxs, end, ent, MASK_MONSTERSOLID | MASK_WATER);

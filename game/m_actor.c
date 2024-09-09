@@ -1051,11 +1051,11 @@ qboolean actor_checkattack (edict_t *self)
 {
 	vec3_t		v;
 	vec3_t		forward, right, start, end;
-	float		chance;
-	float		range;
-	float		goodchance, poorchance, lorange, hirange;
+	float		chance = 0.0f;
+	float		range = 0.0f;
+	float		goodchance = 0.0f, poorchance = 0.0f, lorange = 0.0f, hirange = 0.0f;
 	trace_t		tr;
-	int			weapon;
+	int			weapon = 0;
 
 	// Paranoia check
 	if (!self->enemy)
@@ -1219,6 +1219,7 @@ void actor_jump (edict_t *self)
 	gi.sound (self, CHAN_VOICE, self->actor_sound_index[ACTOR_SOUND_JUMP], 1, ATTN_NORM, 0);
 	self->monsterinfo.currentmove = &actor_move_jump;
 }
+
 qboolean actor_blocked (edict_t *self, float dist)
 {
 	if (check_shot_blocked (self, 0.25 + (0.05 * skill->value) ))
@@ -1582,7 +1583,7 @@ void SP_misc_actor (edict_t *self)
 	walkmonster_start (self);
 
 	// We've built the misc_actor model to include the standard
-	// Q2 male skins, specified with the style key. Default=grunt
+	// Q2 male skins, specified with the style key. Default = grunt
 	self->s.skinnum = self->style;
 
 	// actors always start in a dormant state, they *must* be used to get going
@@ -2012,7 +2013,8 @@ void actor_files (void)
 
 		// repeat this WHOLE DAMN THING for weapons
 
-		for (k=0; k<2; k++) {
+		for (k=0; k<2; k++)
+		{
 			if (w_match[k]) continue;
 			if (!e->actor_weapon[k]) continue;
 			if ((k==1) && (e->actor_weapon[0] == e->actor_weapon[1])) {

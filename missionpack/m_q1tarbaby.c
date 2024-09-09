@@ -244,8 +244,10 @@ void tarbaby_pain (edict_t *self, edict_t *other, float kick, int damage)
 
 void tarbaby_dead (edict_t *self)
 {
-	edict_t	*explode;
 	vec3_t	temp;
+#ifndef KMQUAKE2_ENGINE_MOD
+	edict_t	*explode = NULL;
+#endif	// KMQUAKE2_ENGINE_MOD
 
 	T_RadiusDamage (self, self, 120, NULL, 120, MOD_UNKNOWN);
 
@@ -256,6 +258,13 @@ void tarbaby_dead (edict_t *self)
 	VectorScale (temp, -8, temp);
 	VectorAdd (self->s.origin, temp, temp);
 
+#ifdef KMQUAKE2_ENGINE_MOD
+	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (TE_EXPLOSION_Q1);
+	gi.WritePosition (temp);
+	gi.WriteByte (1);	// subtype 1 specifies blob explosion
+	gi.multicast (temp, MULTICAST_PVS);
+#else	// KMQUAKE2_ENGINE_MOD
 	explode = G_Spawn ();
 	VectorCopy (temp, explode->s.origin);
 	VectorCopy (temp, explode->s.old_origin);
@@ -270,6 +279,7 @@ void tarbaby_dead (edict_t *self)
 	explode->think = q1_explode; 
 	explode->nextthink = level.time + FRAMETIME;
 	gi.linkentity (explode);
+#endif	// KMQUAKE2_ENGINE_MOD
 
 	gi.unlinkentity (self);
 	self->solid = SOLID_NOT;
@@ -302,6 +312,15 @@ void tarbaby_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dama
 }
 
 
+// Knightmare- added soundcache function
+void monster_q1_tarbaby_soundcache (edict_t *self)
+{
+	sound_death	= gi.soundindex ("q1blob/death1.wav");
+	sound_hit	= gi.soundindex ("q1blob/hit1.wav");
+	sound_land	= gi.soundindex ("q1blob/land1.wav");
+	sound_sight	= gi.soundindex ("q1blob/sight1.wav");
+}
+
 //
 // SPAWN
 //
@@ -317,10 +336,8 @@ void SP_monster_q1_tarbaby (edict_t *self)
 		return;
 	}
 
-	sound_death	= gi.soundindex ("q1blob/death1.wav");
-	sound_hit	= gi.soundindex ("q1blob/hit1.wav");
-	sound_land	= gi.soundindex ("q1blob/land1.wav");
-	sound_sight	= gi.soundindex ("q1blob/sight1.wav");
+	// Knightmare- use soundcache function
+	monster_q1_tarbaby_soundcache (self);
 
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;

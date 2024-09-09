@@ -43,7 +43,7 @@ void NoAmmoWeaponChange (edict_t *ent);
 
 // DWH - Added TurretTarget to scan the player's view for a damageable target.
 // Used with homing rockets
-edict_t	*TurretTarget(edict_t *self)
+edict_t	*TurretTarget (edict_t *self)
 {
 	float       bd, d;
 	int			i;
@@ -51,11 +51,11 @@ edict_t	*TurretTarget(edict_t *self)
 	trace_t     tr;
 	vec3_t      dir, end, forward, right, up, start;
 
-	AngleVectors(self->s.angles, forward, right, up);
-	VectorMA(self->s.origin, self->move_origin[0], forward, start);
-	VectorMA(start,          self->move_origin[1], right,   start);
-	VectorMA(start,          self->move_origin[2], up,      start);
-	VectorMA(start, WORLD_SIZE, forward, end);	// was 8192
+	AngleVectors (self->s.angles, forward, right, up);
+	VectorMA (self->s.origin, self->move_origin[0], forward, start);
+	VectorMA (start,          self->move_origin[1], right,   start);
+	VectorMA (start,          self->move_origin[2], up,      start);
+	VectorMA (start, WORLD_SIZE, forward, end);	// was 8192
 
 	/* Check for aiming directly at a damageable entity */
 	tr = gi.trace(start, NULL, NULL, end, self, MASK_SHOT);
@@ -65,19 +65,20 @@ edict_t	*TurretTarget(edict_t *self)
 	/* Check for damageable entity within a tolerance of view angle */
 	bd = 0;
 	best = NULL;
-	for (i=1, who=g_edicts+1; i<globals.num_edicts; i++, who++)	{
+	for (i=1, who=g_edicts+1; i<globals.num_edicts; i++, who++)
+	{
 		if (!who->inuse)
 			continue;
 		if (who->takedamage == DAMAGE_NO)
 			continue;
 		if (who->solid == SOLID_NOT)
 			continue;
-		VectorMA(who->absmin,0.5,who->size,end);
+		VectorMA (who->absmin, 0.5, who->size,end);
 		tr = gi.trace (start, vec3_origin, vec3_origin, end, self, MASK_OPAQUE);
 		if (tr.fraction < 1.0)
 			continue;
-		VectorSubtract(end, self->s.origin, dir);
-		VectorNormalize(dir);
+		VectorSubtract (end, self->s.origin, dir);
+		VectorNormalize (dir);
 		d = DotProduct(forward, dir);
 		if (d > bd) {
 			bd = d;
@@ -91,13 +92,14 @@ edict_t	*TurretTarget(edict_t *self)
 }
 // end DWH
 
-void turret_blocked(edict_t *self, edict_t *other)
+void turret_blocked (edict_t *self, edict_t *other)
 {
 	edict_t	*attacker;
 	edict_t	*ent;
 	edict_t	*master;
 
-	if (other == world) {
+	if (other == world)
+	{
 		// world brush - stop
 		self->avelocity[YAW] = 0;
 		if (self->team) {
@@ -106,14 +108,14 @@ void turret_blocked(edict_t *self, edict_t *other)
 		}
 		if (self->owner)
 			self->owner->avelocity[YAW] = 0;
-		gi.linkentity(self);
+		gi.linkentity (self);
 	}
 
 	if (other->takedamage)
 	{
 		vec3_t	dir;
-		VectorSubtract(other->s.origin,self->s.origin,dir);
-		VectorNormalize(dir);
+		VectorSubtract (other->s.origin, self->s.origin, dir);
+		VectorNormalize (dir);
 
 		if (self->teammaster)
 			master = self->teammaster;
@@ -181,8 +183,7 @@ void turret_breach_fire (edict_t *self)
 	edict_t	*owner;
 	vec3_t	forward, right, up;
 	vec3_t	start;
-	int		damage;
-	int		speed;
+	int		damage, speed, radius;
 //CW++
 	vec3_t	forward2, right2, up2;
 	vec3_t	start2;
@@ -211,12 +212,12 @@ void turret_breach_fire (edict_t *self)
 	speed = 550 + 50 * skill->value;
 
 	// DWH: automated turrets have no driver, so use self
-	if (self->owner && !(self->owner->spawnflags & SF_TURRETDRIVER_REMOTE_DRIVER))
+	if ( self->owner && !(self->owner->spawnflags & SF_TURRETDRIVER_REMOTE_DRIVER) )
 		owner = self->owner;
 	else
 		owner = self;
 	/*
-	ed - self->teammaster->owner causes quake 2 to crash when the player uses BUTTON_SHOOT
+	Mappack - self->teammaster->owner causes quake 2 to crash when the player uses BUTTON_SHOOT
 	     its been changed to self->owner incase anything weird happens.
 	*/
 
@@ -227,8 +228,11 @@ void turret_breach_fire (edict_t *self)
 		switch (self->sounds)
 		{
 			case 1: // railgun
-			{
-				damage = 150;	//CWFIXME use self->mass
+			{	// CW FIXME use self->mass
+				if ( !self->mass )
+					damage = 100;	// was 150	
+				else
+					damage = self->mass;
 //CW++
 				if (self->moreflags & FL2_TURRET_DOUBLE)
 				{
@@ -236,39 +240,43 @@ void turret_breach_fire (edict_t *self)
 					{
 						if (self->moreflags & FL2_TURRET_DOUBLE_ALT_FIRING)
 						{
-							fire_rail(owner, start2, forward2, damage, 0, false, 0, 0, 0);
+							fire_rail (owner, start2, forward2, damage, 0, false, 0, 0, 0);
 							self->moreflags &= ~FL2_TURRET_DOUBLE_ALT_FIRING;
 						}
 						else
 						{
-							fire_rail(owner, start, forward, damage, 0, false, 0, 0, 0);
+							fire_rail (owner, start, forward, damage, 0, false, 0, 0, 0);
 							self->moreflags |= FL2_TURRET_DOUBLE_ALT_FIRING;
 						}
 					}
 					else
 					{
-						fire_rail(owner, start, forward, damage, 0, false, 0, 0, 0);
-						fire_rail(owner, start2, forward2, damage, 0, false, 0, 0, 0);
+						fire_rail (owner, start, forward, damage, 0, false, 0, 0, 0);
+						fire_rail (owner, start2, forward2, damage, 0, false, 0, 0, 0);
 					}
 				}
 				else
 //CW--
 					fire_rail (owner, start, forward, damage, 0, false, 0, 0, 0);
+
 				gi.positioned_sound (start, self, CHAN_WEAPON, gi.soundindex("weapons/railgf1a.wav"), 1, ATTN_NORM, 0);
 
-				//ed - muzzleflash ? on a turret ? Yeah baby
+				// Mappack - Muzzleflash?  On a turret?  Yeah baby!
 				gi.WriteByte (svc_muzzleflash);
 				gi.WriteShort (self-g_edicts);
 				gi.WriteByte (MZ_RAILGUN);
 				gi.multicast (start, MULTICAST_PVS);
 
-				self->delay = level.time + self->wait;
-
+			//	self->delay = level.time + self->wait;
+				self->delay = level.time + max((self->wait + ((2 - skill->value) / 2)), self->wait); 
 				break;
 			}
 			case 2: // rocket
 			{
-				damage = 100 + random() * 50;
+				if ( !self->mass )
+					damage = 100 + random() * 50;
+				else
+					damage = self->mass + random() * (self->mass / 2);
 //CW++
 				if (self->moreflags & FL2_TURRET_DOUBLE)
 				{
@@ -276,33 +284,37 @@ void turret_breach_fire (edict_t *self)
 					{
 						if (self->moreflags & FL2_TURRET_DOUBLE_ALT_FIRING)
 						{
-							fire_rocket(owner, start2, forward2, damage, speed, 150, damage, NULL);
+							fire_rocket (owner, start2, forward2, damage, speed, 150, damage, NULL);
 							self->moreflags &= ~FL2_TURRET_DOUBLE_ALT_FIRING;
 						}
 						else
 						{
-							fire_rocket(owner, start, forward, damage, speed, 150, damage, NULL);
+							fire_rocket (owner, start, forward, damage, speed, 150, damage, NULL);
 							self->moreflags |= FL2_TURRET_DOUBLE_ALT_FIRING;
 						}
 					}
 					else
 					{
-						fire_rocket(owner, start, forward, damage, speed, 150, damage, NULL);
-						fire_rocket(owner, start2, forward2, damage, speed, 150, damage, NULL);
+						fire_rocket (owner, start, forward, damage, speed, 150, damage, NULL);
+						fire_rocket (owner, start2, forward2, damage, speed, 150, damage, NULL);
 					}
 				}
 				else
 //CW--
 					fire_rocket (owner, start, forward, damage, speed, 150, damage, NULL);
+
 				gi.positioned_sound (start, self, CHAN_WEAPON, gi.soundindex("weapons/rocklf1a.wav"), 1, ATTN_NORM, 0);
 				
-				self->delay = level.time + self->wait;
-
+		//		self->delay = level.time + self->wait;
+				self->delay = level.time + max((self->wait + ((2 - skill->value) / 2)), self->wait); 
 				break;
 			}
 			case 3: // BFG
 			{
-				damage = 500;
+				if ( !self->mass )
+					damage = 200;	// was 500
+				else
+					damage = self->mass;
 //CW++
 				if (self->moreflags & FL2_TURRET_DOUBLE)
 				{
@@ -310,33 +322,41 @@ void turret_breach_fire (edict_t *self)
 					{
 						if (self->moreflags & FL2_TURRET_DOUBLE_ALT_FIRING)
 						{
-							fire_bfg(owner, start2, forward2, damage, speed, 1000);
+							fire_bfg (owner, start2, forward2, damage, speed, 1000);
 							self->moreflags &= ~FL2_TURRET_DOUBLE_ALT_FIRING;
 						}
 						else
 						{
-							fire_bfg(owner, start, forward, damage, speed, 1000);
+							fire_bfg (owner, start, forward, damage, speed, 1000);
 							self->moreflags |= FL2_TURRET_DOUBLE_ALT_FIRING;
 						}
 					}
 					else
 					{
-						fire_bfg(owner, start, forward, damage, speed, 1000);
-						fire_bfg(owner, start2, forward2, damage, speed, 1000);
+						fire_bfg (owner, start, forward, damage, speed, 1000);
+						fire_bfg (owner, start2, forward2, damage, speed, 1000);
 					}
 				}
 				else
 //CW--
 					fire_bfg (owner, start, forward, damage, speed, 1000);
-				gi.positioned_sound (start, self, CHAN_WEAPON, gi.soundindex("weapons/laser2.wav"), 1, ATTN_NORM, 0);
 
-				self->delay = level.time + self->wait;
+			//	gi.positioned_sound (start, self, CHAN_WEAPON, gi.soundindex("weapons/laser2.wav"), 1, ATTN_NORM, 0);
+				gi.positioned_sound (start, self, CHAN_WEAPON, gi.soundindex("makron/bfg_fire.wav"), 1, ATTN_NORM, 0);
+
+			//	self->delay = level.time + self->wait;
+				self->delay = level.time + max((self->wait + ((2 - skill->value) / 2)), self->wait); 
 
 				break;
 			}
 			case 4: // Homing rockets
 			{
-				damage = 100 + random() * 50;
+				if ( !self->mass )
+					damage = 100 + random() * 50;
+				else
+					damage = self->mass + random() * (self->mass / 2);
+
+
 				if (owner->target_ent == self || owner == self)
 				{
 					// monster-controlled or automated turret
@@ -358,15 +378,18 @@ void turret_breach_fire (edict_t *self)
 				//	fire_rocket (owner, start, forward, damage, speed, 150, damage, NULL);
 					hrocket_turret_fire (self, owner, start, forward, start2, forward2, damage, speed, 150, damage, NULL);			//CW
 				}
+
 				gi.positioned_sound (start, self, CHAN_WEAPON, gi.soundindex("weapons/rocklf1a.wav"), 1, ATTN_NORM, 0);
 				
-				self->delay = level.time + self->wait;
+			//	self->delay = level.time + self->wait;
+				self->delay = level.time + max((self->wait + ((2 - skill->value) / 2)), self->wait); 
 
 				break;
 			}
 			case 5: // Machinegun
 			{
 				// "wait" = damage for machinegun - default = 2
+				damage = self->wait;
 //CW++
 				if (self->moreflags & FL2_TURRET_DOUBLE)
 				{
@@ -374,34 +397,39 @@ void turret_breach_fire (edict_t *self)
 					{
 						if (self->moreflags & FL2_TURRET_DOUBLE_ALT_FIRING)
 						{
-							fire_bullet(owner, start2, forward2, self->wait, 4, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, MOD_MACHINEGUN);
+							fire_bullet (owner, start2, forward2, damage, 4, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, MOD_MACHINEGUN);
 							self->moreflags &= ~FL2_TURRET_DOUBLE_ALT_FIRING;
 						}
 						else
 						{
-							fire_bullet(owner, start, forward, self->wait, 4, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, MOD_MACHINEGUN);
+							fire_bullet (owner, start, forward, damage, 4, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, MOD_MACHINEGUN);
 							self->moreflags |= FL2_TURRET_DOUBLE_ALT_FIRING;
 						}
 					}
 					else
 					{
-						fire_bullet(owner, start, forward, self->wait, 4, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, MOD_MACHINEGUN);
-						fire_bullet(owner, start2, forward2, self->wait, 4, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, MOD_MACHINEGUN);
+						fire_bullet (owner, start, forward, damage, 4, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, MOD_MACHINEGUN);
+						fire_bullet (owner, start2, forward2, damage, 4, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, MOD_MACHINEGUN);
 					}
 				}
 				else
 //CW--
-					fire_bullet (owner, start, forward, self->wait, 4, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, MOD_MACHINEGUN);
+					fire_bullet (owner, start, forward, damage, 4, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, MOD_MACHINEGUN);
+
 				gi.WriteByte (svc_muzzleflash);
 				gi.WriteShort (self-g_edicts);
 				gi.WriteByte (MZ_MACHINEGUN);
 				gi.multicast (start, MULTICAST_PVS);
+
 				self->delay = level.time; // No delay on machinegun
 				break;
 			}
 			case 6: // Hyperblaster
 			{
 				unsigned int	effect, color;
+
+				// "wait" = damage for hyperblaster - default = 2
+				damage = self->wait;
 
 				if (self->effects == 1)	// Blue
 				{	effect = EF_BLUEHYPERBLASTER; color = BLASTER_BLUE;	}
@@ -422,31 +450,42 @@ void turret_breach_fire (edict_t *self)
 					{
 						if (self->moreflags & FL2_TURRET_DOUBLE_ALT_FIRING)
 						{
-							fire_blaster (owner, start2, forward2, self->wait, 1000, (!(HB_Shots % 4))?effect:0, true, color);
+							fire_blaster (owner, start2, forward2, damage, 1000, (!(HB_Shots % 4))?effect:0, true, color);
 							self->moreflags &= ~FL2_TURRET_DOUBLE_ALT_FIRING;
 						}
 						else
 						{
-							fire_blaster (owner, start, forward, self->wait, 1000, (!(HB_Shots % 4))?effect:0, true, color);
+							fire_blaster (owner, start, forward, damage, 1000, (!(HB_Shots % 4))?effect:0, true, color);
 							self->moreflags |= FL2_TURRET_DOUBLE_ALT_FIRING;
 						}
 					}
 					else
 					{
-						fire_blaster (owner, start, forward, self->wait, 1000, (!(HB_Shots % 4))?effect:0, true, color);
+						fire_blaster (owner, start, forward, damage, 1000, (!(HB_Shots % 4))?effect:0, true, color);
 						fire_blaster (owner, start2, forward2, self->wait, 1000, 0, true, color);
 					}
 				}
 				else
 //CW--
-					fire_blaster (owner, start, forward, self->wait, 1000, (!(HB_Shots % 4))?effect:0, true, color);
-				gi.positioned_sound (start, self,CHAN_WEAPON, gi.soundindex("weapons/hyprbf1a.wav"), 1, ATTN_NORM, 0);
-			//	gi.positioned_sound (start, self, CHAN_WEAPON, gi.soundindex("makron/blaster.wav"), 1, ATTN_NORM, 0);
-				self->delay = level.time; // No delay
+					fire_blaster (owner, start, forward, damage, 1000, (!(HB_Shots % 4))?effect:0, true, color);
+
+				if (self->renderfx > 0)
+					gi.positioned_sound (start, self, CHAN_WEAPON, gi.soundindex("makron/blaster.wav"), 1, ATTN_NORM, 0);
+				else
+					gi.positioned_sound (start, self, CHAN_WEAPON, gi.soundindex("weapons/hyprbf1a.wav"), 1, ATTN_NORM, 0);
+
+				self->delay = level.time; // No delay on hyperblaster
 				break;
 			}
 			case 7: // Grenade launcher
 			{
+				if ( !self->mass )
+					damage = 50;
+				else
+					damage = self->mass;
+
+				radius = 90;
+				speed = self->fog_far;
 //CW++
 				if (self->moreflags & FL2_TURRET_DOUBLE)
 				{
@@ -454,34 +493,38 @@ void turret_breach_fire (edict_t *self)
 					{
 						if (self->moreflags & FL2_TURRET_DOUBLE_ALT_FIRING)
 						{
-							fire_grenade (owner, start2, forward2, 50, self->fog_far, 2.5, 90, false);
+							fire_grenade (owner, start2, forward2, damage, speed, 2.5, radius, false);
 							self->moreflags &= ~FL2_TURRET_DOUBLE_ALT_FIRING;
 						}
 						else
 						{
-							fire_grenade (owner, start, forward, 50, self->fog_far, 2.5, 90, false);
+							fire_grenade (owner, start, forward, damage, speed, 2.5, radius, false);
 							self->moreflags |= FL2_TURRET_DOUBLE_ALT_FIRING;
 						}
 					}
 					else
 					{
-						fire_grenade (owner, start, forward, 50, self->fog_far, 2.5, 90, false);
-						fire_grenade (owner, start2, forward2, 50, self->fog_far, 2.5, 90, false);
+						fire_grenade (owner, start, forward, damage, speed, 2.5, radius, false);
+						fire_grenade (owner, start2, forward2, damage, speed, 2.5, radius, false);
 					}
 				}
 				else
 //CW--
-					fire_grenade (owner, start, forward, 50, self->fog_far, 2.5, 90, false);
+					fire_grenade (owner, start, forward, damage, speed, 2.5, radius, false);
+
 				gi.WriteByte (svc_muzzleflash2);
 				gi.WriteShort (self - g_edicts);
 				gi.WriteByte (MZ2_GUNNER_GRENADE_1);
 				gi.multicast (start, MULTICAST_PVS);
-				self->delay = level.time + self->wait;
+
+			//	self->delay = level.time + self->wait;
+				self->delay = level.time + max((self->wait + ((2 - skill->value) / 2)), self->wait); 
 				break;
 			}
 			default:
 			{
-				damage = 100;
+			//	damage = 100;
+				damage = 100 + random() * 50;
 //CW++
 				if (self->moreflags & FL2_TURRET_DOUBLE)
 				{
@@ -489,28 +532,28 @@ void turret_breach_fire (edict_t *self)
 					{
 						if (self->moreflags & FL2_TURRET_DOUBLE_ALT_FIRING)
 						{
-							fire_rocket(owner, start2, forward2, damage, speed, 150, damage, NULL);
+							fire_rocket (owner, start2, forward2, damage, speed, 150, damage, NULL);
 							self->moreflags &= ~FL2_TURRET_DOUBLE_ALT_FIRING;
 						}
 						else
 						{
-							fire_rocket(owner, start, forward, damage, speed, 150, damage, NULL);
+							fire_rocket (owner, start, forward, damage, speed, 150, damage, NULL);
 							self->moreflags |= FL2_TURRET_DOUBLE_ALT_FIRING;
 						}
 					}
 					else
 					{
-						fire_rocket(owner, start, forward, damage, speed, 150, damage, NULL);
-						fire_rocket(owner, start2, forward2, damage, speed, 150, damage, NULL);
+						fire_rocket (owner, start, forward, damage, speed, 150, damage, NULL);
+						fire_rocket (owner, start2, forward2, damage, speed, 150, damage, NULL);
 					}
 				}
 				else
 //CW--
 					fire_rocket (owner, start, forward, damage, speed, 150, damage, NULL);
+
 				gi.positioned_sound (start, self, CHAN_WEAPON, gi.soundindex("weapons/rocklf1a.wav"), 1, ATTN_NORM, 0);
 				
-				self->delay = level.time + self->wait;
-
+				self->delay = level.time + 1;	// self->wait
 				break;
 			}
 		}
@@ -528,7 +571,7 @@ void turret_disengage (edict_t *self)
 				
 	ent = self->owner;
 				
-	//ed - to keep remove tracking of the entity
+	// Mappack - to keep remove tracking of the entity
 	ent->turret = NULL;
 				
 	// throw them back from turret
@@ -612,7 +655,7 @@ void turret_turn (edict_t *self)
 	}
 	
 //=======	
-	AnglesNormalize(self->move_angles);
+	AnglesNormalize (self->move_angles);
 
 	// clamp angles to mins & maxs
 	if (self->move_angles[PITCH] > self->pos1[PITCH])
@@ -627,7 +670,8 @@ void turret_turn (edict_t *self)
 	else
 		yaw_restrict = false;
 
-	if ( yaw_restrict ) {
+	if ( yaw_restrict )
+	{
 		float	yaw_range;
 		float	yaw_base;
 		yaw_range = self->pos2[YAW] - self->pos1[YAW];
@@ -700,12 +744,12 @@ void turret_breach_think (edict_t *self)
 	trace_t		tr;
 	vec3_t		dir, angles;
 	vec3_t		target;
-	qboolean	remote_monster;
-	qboolean	yaw_restrict;
-	float		yaw_r, yaw_0;
-	int			i;
+	qboolean	remote_monster = false;
+	qboolean	yaw_restrict = false;
+	float		yaw_r = 0.0f, yaw_0 = 0.0f;
+	int			i = 0;
 
-	turret_turn(self);
+	turret_turn (self);
 	yaw_r = self->pos2[YAW] - self->pos1[YAW];
 	if (yaw_r < 0)
 		yaw_r += 360;
@@ -824,9 +868,9 @@ void turret_breach_think (edict_t *self)
 			// jump button disables turret
 
 		//	if (self->owner->client->ps.pmove.velocity[2] > 15) 
-		//		turret_disengage(self);
+		//		turret_disengage (self);
 			else if (self->owner->client->ucmd.upmove >= 20)
-				turret_disengage(self);
+				turret_disengage (self);
 		}
 	}
 	else if ((self->spawnflags & SF_TURRET_PLAYER_CONTROLLABLE
@@ -870,7 +914,7 @@ void turret_breach_think (edict_t *self)
 				ent->movetype = MOVETYPE_PUSH;	// don't let them move, or they'll get stuck
 				ent->gravity = 0;
 
-				//ed - to keep track of the entity
+				// Mappack - to keep track of the entity
 				ent->turret = self;
 
 				// turn off client side prediction for this player
@@ -878,7 +922,7 @@ void turret_breach_think (edict_t *self)
 
 				gi.linkentity(ent);
 
-				//ed - set the flag on the client so that when they shoot the 
+				// Mappack - set the flag on the client so that when they shoot the 
 				//     turret shoots instead of "using" it
 				ent->flags |= FL_TURRET_OWNER;
 			}
@@ -913,12 +957,12 @@ void turret_breach_think (edict_t *self)
 					!(self->enemy->svflags & SVF_NOCLIENT) &&
 					!(self->enemy->flags & FL_NOTARGET)               )
 				{
-					if (gi.inPVS(self->s.origin,self->enemy->s.origin))
+					if ( gi.inPVS(self->s.origin, self->enemy->s.origin) )
 					{
-						VectorMA(self->enemy->absmin,0.5,self->enemy->size,target);
-						VectorSubtract(target,self->s.origin,dir);
-						vectoangles(dir,angles);
-						AnglesNormalize(angles);
+						VectorMA (self->enemy->absmin, 0.5, self->enemy->size, target);
+						VectorSubtract (target, self->s.origin, dir);
+						vectoangles (dir, angles);
+						AnglesNormalize (angles);
 						if ( yaw_restrict )
 						{
 							yaw_0  = angles[YAW] - self->pos1[YAW];
@@ -931,13 +975,13 @@ void turret_breach_think (edict_t *self)
 						}
 						else
 						{
-							VectorCopy(self->s.origin,t_start);
-							VectorCopy(dir,f);
-							VectorNormalize(f);
+							VectorCopy (self->s.origin, t_start);
+							VectorCopy (dir ,f);
+							VectorNormalize (f);
 							VectorMA(t_start,self->teammaster->base_radius,f,t_start);
-							tr = gi.trace(t_start,vec3_origin,vec3_origin,target,self,MASK_SHOT);
+							tr = gi.trace(t_start, vec3_origin, vec3_origin, target, self, MASK_SHOT);
 							if (tr.ent == self->enemy) {
-								VectorSubtract(target,self->s.origin,dir);
+								VectorSubtract (target ,self->s.origin, dir);
 								best_dist = VectorLength(dir) - 100;
 							}
 							else
@@ -963,25 +1007,28 @@ void turret_breach_think (edict_t *self)
 		}
 			
 		// hunt for monster
-		if (!remote_monster) {
-			for (i=maxclients->value+1; i<globals.num_edicts; i++) {
+		if (!remote_monster)
+		{
+			for (i=maxclients->value+1; i<globals.num_edicts; i++)
+			{
 				gomer = g_edicts + i;
 				if (gomer == self->enemy) continue; // no need to re-check this guy
 				if (!gomer->inuse) continue;
 				if (!(gomer->svflags & SVF_MONSTER)) continue;
 				if (gomer->health < gomer->gib_health) continue;
 				if (gomer->svflags & SVF_NOCLIENT) continue;
-				if (!gi.inPVS(self->s.origin,gomer->s.origin)) continue;
-				VectorMA(gomer->absmin,0.5,gomer->size,target);
-				VectorCopy(self->s.origin,t_start);
-				VectorSubtract(target,self->s.origin,dir);
-				VectorCopy(dir,f);
-				VectorNormalize(f);
-				VectorMA(t_start,self->teammaster->base_radius,f,t_start);
-				tr = gi.trace(t_start,vec3_origin,vec3_origin,target,self,MASK_SHOT);
-				if (tr.ent == gomer) {
-					vectoangles(dir,angles);
-					AnglesNormalize(angles);
+				if (!gi.inPVS(self->s.origin, gomer->s.origin)) continue;
+				VectorMA (gomer->absmin, 0.5, gomer->size, target);
+				VectorCopy (self->s.origin, t_start);
+				VectorSubtract (target, self->s.origin, dir);
+				VectorCopy (dir, f);
+				VectorNormalize (f);
+				VectorMA (t_start, self->teammaster->base_radius, f, t_start);
+				tr = gi.trace(t_start, vec3_origin, vec3_origin, target, self, MASK_SHOT);
+				if (tr.ent == gomer)
+				{
+					vectoangles (dir, angles);
+					AnglesNormalize (angles);
 					if ( yaw_restrict )
 					{
 						yaw_0  = angles[YAW] - self->pos1[YAW];
@@ -990,8 +1037,9 @@ void turret_breach_think (edict_t *self)
 					}
 					if ( (angles[PITCH] <= self->pos1[PITCH]) && (angles[PITCH] >= self->pos2[PITCH]) &&
 						( !yaw_restrict || (yaw_0 <= yaw_r) )
-						) {
-						dist = VectorLength(dir);
+						)
+					{
+						dist = VectorLength (dir);
 						if (dist < best_dist) {
 							self->enemy = gomer;
 							best_dist = dist;
@@ -1012,25 +1060,27 @@ void turret_breach_think (edict_t *self)
 
 		// hunt for closest player - hunt ALL entities since
 		// we want to view fake players using camera
-		for (i=1; i<globals.num_edicts; i++) {
+		for (i=1; i<globals.num_edicts; i++)
+		{
 			gomer = g_edicts + i;
 			if (!gomer->inuse) continue;
 			if (!gomer->client) continue;
 			if (gomer->svflags & SVF_NOCLIENT) continue;
 			if (gomer->health < gomer->gib_health) continue;
 			if (gomer->flags & FL_NOTARGET) continue;
-			if (!gi.inPVS(self->s.origin,gomer->s.origin)) continue;
-			VectorMA(gomer->absmin,0.5,gomer->size,target);
+			if ( !gi.inPVS(self->s.origin ,gomer->s.origin) ) continue;
+			VectorMA (gomer->absmin, 0.5, gomer->size, target);
 
-			VectorCopy(self->s.origin,t_start);
-			VectorSubtract(target,self->s.origin,dir);
-			VectorCopy(dir,f);
-			VectorNormalize(f);
-			VectorMA(t_start,self->teammaster->base_radius,f,t_start);
-			tr = gi.trace(t_start,vec3_origin,vec3_origin,target,self,MASK_SHOT);
-			if (tr.ent == gomer) {
-				vectoangles(dir,angles);
-				AnglesNormalize(angles);
+			VectorCopy (self->s.origin, t_start);
+			VectorSubtract (target, self->s.origin, dir);
+			VectorCopy (dir, f);
+			VectorNormalize (f);
+			VectorMA (t_start, self->teammaster->base_radius, f, t_start);
+			tr = gi.trace(t_start, vec3_origin, vec3_origin, target, self, MASK_SHOT);
+			if (tr.ent == gomer)
+			{
+				vectoangles (dir, angles);
+				AnglesNormalize (angles);
 				if ( yaw_restrict )
 				{
 					yaw_0  = angles[YAW] - self->pos1[YAW];
@@ -1038,7 +1088,8 @@ void turret_breach_think (edict_t *self)
 						yaw_0 += 360;
 				}
 				if ( (angles[PITCH] <= self->pos1[PITCH]) && (angles[PITCH] >= self->pos2[PITCH]) &&
-					( !yaw_restrict || (yaw_0 <= yaw_r) ) ) {
+					( !yaw_restrict || (yaw_0 <= yaw_r) ) )
+				{
 					dist = VectorLength(dir);
 					if (dist < best_dist) {
 						self->enemy = gomer;
@@ -1060,31 +1111,31 @@ good_enemy:
 				target[2] -= 16;
 			if (skill->value >= 2)
 			{
-				VectorMA(target,FRAMETIME,self->enemy->velocity,target);
+				VectorMA (target, FRAMETIME, self->enemy->velocity, target);
 
-/* May add some variant of this for skill 3 later. For now, the following is virtually 
-   indistinguishable from skill 2 for most normal setups. Trouble is, it is sometimes
-   EASIER than skill 2.
+			/* May add some variant of this for skill 3 later. For now, the following is virtually 
+			   indistinguishable from skill 2 for most normal setups. Trouble is, it is sometimes
+			   EASIER than skill 2.
 
 				if (skill->value > 2)
 				{
 					float	t;
-					VectorSubtract(target,self->s.origin,dir);
-					VectorNormalize(dir);
-					vectoangles(dir,dir);
-					VectorSubtract(dir,self->s.angles,dir);
-					AnglesNormalize(dir);
+					VectorSubtract (target, self->s.origin, dir);
+					VectorNormalize (dir);
+					vectoangles (dir, dir);
+					VectorSubtract (dir, self->s.angles, dir);
+					AnglesNormalize (dir);
 					dir[2] = max( fabs(dir[0]), fabs(dir[1]) );
 					if (dir[2] > 0)
 					{
 						t = dir[2]/self->speed;
-						VectorMA(target,t,self->enemy->velocity,target);
+						VectorMA (target, t, self->enemy->velocity, target);
 					}
 				} */
 			}
 			if (self->sounds == 7)
 			{
-				if (!AimGrenade (self, start, target, self->fog_far, dir))
+				if ( !AimGrenade (self, start, target, self->fog_far, dir) )
 				{
 					// Can't get a grenade to target. Correct yaw but
 					// not pitch
@@ -1093,13 +1144,13 @@ good_enemy:
 					vectoangles (dir, self->move_angles);
 					self->move_angles[PITCH] = pitch;
 					if (skill->value > 0)
-						turret_turn(self);
+						turret_turn (self);
 					return;
 				}
 			}
 			else
 				VectorSubtract (target, self->s.origin, dir);
-			VectorNormalize(dir);
+			VectorNormalize (dir);
 			vectoangles (dir, self->move_angles);
 			// decide if we should shoot
 			victim = NULL;
@@ -1125,14 +1176,14 @@ good_enemy:
 					{
 						vec3_t	range;
 						vec_t	r;
-						VectorSubtract(self->enemy->s.origin,self->owner->s.origin,range);
-						r = VectorLength(range);
+						VectorSubtract (self->enemy->s.origin, self->owner->s.origin, range);
+						r = VectorLength (range);
 						if (r < 128) return;
 					}
 					if (level.time < self->monsterinfo.attack_finished)
 					{
 						if (skill->value > 0)
-							turret_turn(self);
+							turret_turn (self);
 						return;
 					}
 					if ( (self->sounds == 5) || (self->sounds == 6) )
@@ -1142,21 +1193,21 @@ good_enemy:
 					if ((level.time - self->monsterinfo.trail_time) < reaction_time)
 					{
 						if (skill->value > 0)
-							turret_turn(self);
+							turret_turn (self);
 						return;
 					}
 					self->monsterinfo.attack_finished = level.time + reaction_time;
 					if ( (self->sounds != 5) && (self->sounds != 6) )
 						self->monsterinfo.attack_finished += self->wait;
-					turret_breach_fire(self);
+					turret_breach_fire (self);
 					if (skill->value > 0)
-						turret_turn(self);
+						turret_turn (self);
 				}
 			}
 			else
 			{
 				if (skill->value > 0)
-					turret_turn(self);
+					turret_turn (self);
 			}
 		}
 	}
@@ -1166,14 +1217,14 @@ good_enemy:
 	{
 		if (self->followtarget)
 		{
-			self->enemy = G_Find(NULL,FOFS(targetname),self->followtarget);
+			self->enemy = G_Find(NULL, FOFS(targetname), self->followtarget);
 			if (self->enemy)
 			{
 				VectorMA (self->enemy->absmin, 0.5, self->enemy->size, target);
 				VectorSubtract (target, self->s.origin, dir);
 				vectoangles (dir, self->move_angles);
 				if (skill->value > 0)
-					turret_turn(self);
+					turret_turn (self);
 			}
 		}
 	}
@@ -1182,54 +1233,54 @@ good_enemy:
 void turret_breach_finish_init (edict_t *self)
 {
 	// get and save info for muzzle location
-	if (!self->target)
+	if ( !self->target )
 	{
 		gi.dprintf("%s at %s needs a target\n", self->classname, vtos(self->s.origin));
 	}
 	else
 	{
 		self->target_ent = G_PickTarget (self->target);
-		if (!self->target_ent)
+		if ( !self->target_ent )
 		{
-			gi.dprintf("%s at %s, target %s does not exist\n",
+			gi.dprintf ("%s at %s, target %s does not exist\n",
 				self->classname, vtos(self->s.origin), self->target);
-			G_FreeEdict(self);
+			G_FreeEdict (self);
 			return;
 		}
 		VectorSubtract (self->target_ent->s.origin, self->s.origin, self->move_origin);
 		// Knightmare- if we've been moved by a func_train before initializing,
 		// shift firing point by the distance moved
-		if (VectorLength(self->offset))
+		if (VectorLength(self->offset) != 0.0f)
 			VectorAdd (self->move_origin, self->offset, self->move_origin);
 
-		G_FreeEdict(self->target_ent);
+		G_FreeEdict (self->target_ent);
 
 //CW++	Double-barrelled turrets.
 
 		self->target_ent = NULL;
-		self->target_ent = G_PickTarget(self->combattarget);
+		self->target_ent = G_PickTarget (self->combattarget);
 		if (self->target_ent)
 		{
-			VectorSubtract(self->target_ent->s.origin, self->s.origin, self->muzzle2);
+			VectorSubtract (self->target_ent->s.origin, self->s.origin, self->muzzle2);
 			// Knightmare- if we've been moved by a func_train before initializing,
 			// shift firing point by the distance moved
-			if (VectorLength(self->offset))
+			if (VectorLength(self->offset) != 0.0f)
 				VectorAdd (self->muzzle2, self->offset, self->muzzle2);
 
 			self->moreflags |= FL2_TURRET_DOUBLE;
 			if (self->style > 0)
 				self->moreflags |= FL2_TURRET_DOUBLE_ALT;
 
-			G_FreeEdict(self->target_ent);
+			G_FreeEdict (self->target_ent);
 		}
 //CW--
 	}
 
-	if (!self->team)
+	if ( !self->team )
 		self->teammaster = self;
 	self->teammaster->dmg = self->dmg;
 
-	if (!(self->spawnflags & (SF_TURRET_TRIGGER_SPAWN | SF_TURRET_GOODGUY | SF_TURRET_INACTIVE) )) {
+	if ( !(self->spawnflags & (SF_TURRET_TRIGGER_SPAWN | SF_TURRET_GOODGUY | SF_TURRET_INACTIVE) ) ) {
 		self->think = turret_breach_think;
 		self->think (self);
 	}
@@ -1243,18 +1294,19 @@ void turret_breach_finish_init (edict_t *self)
 void turret_die_temp_think(edict_t *self)
 {
 	edict_t	*target;
-	target = G_Find(NULL,FOFS(targetname),self->destroytarget);
-	while (target) {
+	target = G_Find(NULL, FOFS(targetname), self->destroytarget);
+	while (target)
+	{
 		if (target && target->use)
-			target->use(target,self->target_ent,self->target_ent);
-		target = G_Find(target,FOFS(targetname),self->destroytarget);
+			target->use (target, self->target_ent, self->target_ent);
+		target = G_Find(target, FOFS(targetname), self->destroytarget);
 	}
 	G_FreeEdict(self);
 }
 
 void turret_driver_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point);
 void SP_monster_infantry (edict_t *self);
-void monster_start_go(edict_t *self);
+void monster_start_go (edict_t *self);
 void turret_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
 	int	i;
@@ -1262,7 +1314,8 @@ void turret_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	edict_t	*player;
 
 	// ensure turret_base stops rotating
-	if (self->team) {
+	if (self->team)
+	{
 		for (ent = self->teammaster; ent; ent = ent->teamchain) {
 			if (ent != self) {
 				ent->avelocity[1] = 0;
@@ -1292,7 +1345,8 @@ void turret_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 					monster->svflags &= ~SVF_NOCLIENT;
 					monster_start_go (monster);
 					gi.linkentity (monster);
-					if (monster->enemy) FoundTarget(monster);
+					if (monster->enemy)
+						FoundTarget(monster);
 				}
 			}
 			else {
@@ -1300,17 +1354,18 @@ void turret_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 			}
 		}
 		// if turret is being used as a camera by a player, turn camera off for that player
-		for (i=0,player=g_edicts+1; i<maxclients->value; i++, player++) {
+		for (i=0, player=g_edicts+1; i<maxclients->value; i++, player++) {
 			if (player->client && player->client->spycam == self)
-				camera_off(player);
+				camera_off (player);
 		}
-		if (self->deathtarget) {
+		if (self->deathtarget)
+		{
 			edict_t	*target;
-			target = G_Find(NULL,FOFS(targetname),self->deathtarget);
+			target = G_Find(NULL, FOFS(targetname), self->deathtarget);
 			while (target) {
 				if (target && target->use)
-					target->use(target,attacker,attacker);
-				target = G_Find(target,FOFS(targetname),self->deathtarget);
+					target->use (target, attacker, attacker);
+				target = G_Find(target, FOFS(targetname), self->deathtarget);
 			}
 		}
 	}
@@ -1322,11 +1377,11 @@ void turret_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 			{
 				// we were already dead, so deathtarget has been fired
 				edict_t	*target;
-				target = G_Find(NULL,FOFS(targetname),self->destroytarget);
+				target = G_Find(NULL, FOFS(targetname), self->destroytarget);
 				while (target) {
 					if (target && target->use)
-						target->use(target,attacker,attacker);
-					target = G_Find(target,FOFS(targetname),self->destroytarget);
+						target->use(target, attacker, attacker);
+					target = G_Find(target, FOFS(targetname), self->destroytarget);
 				}
 			}
 			else
@@ -1341,19 +1396,23 @@ void turret_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 				temp->nextthink = level.time + 2*FRAMETIME;
 				temp->destroytarget = self->destroytarget;
 				temp->target_ent = attacker;
-				gi.linkentity(temp);
+				gi.linkentity (temp);
 			}
 			self->nextthink = 0;
-			gi.linkentity(self);
+			gi.linkentity (self);
 		}
+
 		if (self->dmg > 0)
-			BecomeExplosion1(self);
+			BecomeExplosion1 (self);
 		else
-			G_FreeEdict(self);
+			G_FreeEdict (self);
+
 		return;
 	}
+
 	if (self->deadflag == DEAD_DEAD)
 		return;
+
 	self->deadflag = DEAD_DEAD;
 	self->takedamage = DAMAGE_YES;
 	// slow turret down and level it... or for MD2 turrets set to minpitch
@@ -1363,18 +1422,19 @@ void turret_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	else
 		self->move_angles[0] = 0;
 }
+
 void toggle_turret_breach (edict_t *self, edict_t *other, edict_t *activator)
 {
 	if (!(self->spawnflags & SF_TURRET_INACTIVE))
 	{
 		self->spawnflags |= SF_TURRET_INACTIVE;
-		VectorCopy(self->s.angles,self->move_angles);
-		if (self->team) {
+		VectorCopy (self->s.angles, self->move_angles);
+		if (self->team)
+		{
 			edict_t	*ent;
-			for (ent = self->teammaster; ent; ent = ent->teamchain)
-			{
-				VectorClear(ent->avelocity);
-				gi.linkentity(ent);
+			for (ent = self->teammaster; ent; ent = ent->teamchain) {
+				VectorClear (ent->avelocity);
+				gi.linkentity (ent);
 			}
 		}
 		self->think = NULL;
@@ -1399,9 +1459,10 @@ void use_turret_breach (edict_t *self, edict_t *other, edict_t *activator)
 		else
 			self->solid = SOLID_BSP;
 		self->think = turret_breach_think;
-		self->think(self);
+		self->think (self);
 	}
 }
+
 void turret_breach_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
 	// This added for Lazarus to help prevent player from becoming stuck when 
@@ -1433,10 +1494,75 @@ void turret_breach_touch (edict_t *self, edict_t *other, cplane_t *plane, csurfa
 	}
 }
 
+/*QUAKED turret_breach (.5 1 .5) ? OCCUPIABLE TRIGGER_SPAWN TRACK GOODGUY START_OFF
+This portion of the turret can change both pitch and yaw.
+The model  should be made with a flat pitch.
+It (and the associated base) need to be oriented towards 0.
+Use "angle" to set the starting angle.
+
+"speed"     Speed of rotation in deg/sec. Default = 50
+"dmg"       Negative value disables explosion on death, default = 10
+"distance"  Initial velocity of fired grenades in units/sec
+"angle"     Specifies the facing angle of the turret on the XY plane.
+            The turret_breach should be constructed so that its intended "front" faces 0;
+            the value of angle determines the direction the front will face when the map is loaded. Default = 0.
+"target"    The info_notnull (rocket origin)
+"count"     Camera number (default = 0)
+"minpitch"  Minimum allowable pitch angle. Default = -30.
+"maxpitch"  Maximum allowable pitch angle. Default = 30.
+"minyaw"    Minimum allowable yaw angle. Default = 0.
+"maxyaw"    Maximum allowable yaw angle. Default = 360.
+"combattarget" The second info_notnull (rocket origin) for a double-barreled turret.
+"style"     Set this to 1 to make a double-barreled turret alternate between barrels.
+"targetname"  Name of this breach
+"team"      Give this the same value as the turret_base "team" key
+"health"    How many times it's shot before it starts working. Default = 0
+"gib_health" Gib level. Default = 0
+"deathtarget"  Trigger at death
+"destroytarget"  Trigger at gib 
+"followtarget"  Targetname of entity to track
+"movewith"  Targetname of ent to move with
+"viewmessage"  Message which appears on the screen when a turret is accessed using a func_monitor,
+			either through initial access or when switching from one turret to the next.
+
+"sounds"   Weapon to use:
+           -1) No fire (used for cameras)
+            1) Railgun
+            2) Rocket Launcher
+            3) BFG
+            4) Homing Rockets
+            5) Machine Gun
+            6) Hyperblaster
+            7) Grenade
+"effects"   Sets hyperblaster color. 0 = Orange, 1 = Blue, 2 = Green, 3 = Red
+"renderfx"  Set to 1 to use Makron blaster sound instead of default for HB.
+"mass"      Sets damage for all weapon types except MG and HB.
+"wait"  The meaning of "wait" is dependent on the weapon type (sounds) used.
+        Firing rate: When sounds = 1, 2, 3, 4, or 7 (RG, RL, BFG, HomingRL, GL), "wait"
+        sets the number of seconds to wait between weapon firing events.
+        Note: An additional skill-level dependent "reaction time" delay is added to this, as described by the formula:
+
+        [reaction time] = [2-skill] / 2
+
+        So if a RL turret uses wait = 1, on normal skill the actual time between firings would be 1.5 seconds.
+        Damage level: When sounds = 5 or 6 (MG or HB), "wait" sets the amount of damage points each shot will do
+        (firing rate is fixed at 10 shots/second).  Ignored when sounds = -1. Default = 2.
+*/
 void SP_turret_breach (edict_t *self)
 {
 	self->class_id = ENTITY_TURRET_BREACH;
 	self->common_name = "Turret Breach";
+
+	// Knightmare- no goodguy flag on Neil Manke's maps
+	if ( (int)g_nm_maphacks->value
+		&& ( (Q_stricmp(level.mapname, "cm3pt1") == 0)
+		|| (Q_stricmp(level.mapname, "cm3pt3") == 0) 
+		|| (Q_stricmp(level.mapname, "sofm2") == 0)
+		|| (Q_stricmp(level.mapname, "sofpt1") == 0) ) )
+	{
+		gi.dprintf ("Removing goodguy flag from turret.\n");
+		self->spawnflags &= ~SF_TURRET_GOODGUY;
+	}
 
 	// Good guy turrets shoot at monsters, not players. Turn TRACK on if it ain't already
 	if (self->spawnflags & SF_TURRET_GOODGUY)
@@ -1462,11 +1588,11 @@ void SP_turret_breach (edict_t *self)
 		if ( (VectorLength(self->bleft) == 0) &&
 			 (VectorLength(self->tright) == 0)   )
 		{
-			VectorSet(self->bleft, -16, -16, -16);
-			VectorSet(self->tright, 16, 16, 16);
+			VectorSet (self->bleft, -16, -16, -16);
+			VectorSet (self->tright, 16, 16, 16);
 		}
-		VectorCopy(self->bleft, self->mins);
-		VectorCopy(self->tright, self->maxs);
+		VectorCopy (self->bleft, self->mins);
+		VectorCopy (self->tright, self->maxs);
 
 		if (self->spawnflags & SF_TURRET_TRIGGER_SPAWN)
 		{
@@ -1517,10 +1643,11 @@ void SP_turret_breach (edict_t *self)
 	if (!st.maxyaw)
 		st.maxyaw = 360;
 
-	if (!self->wait)
-		self->wait = 2.0;
+	if ( !self->wait ) {	// wait is damage for machinegun and hyperblaster
+		self->wait = 2.0f;
+	}
 
-	if (self->health) {
+	if (self->health > 0) {
 		self->die = turret_die;
 		self->takedamage = DAMAGE_YES;
 	}
@@ -1528,6 +1655,7 @@ void SP_turret_breach (edict_t *self)
 		self->die = NULL;
 		self->takedamage = DAMAGE_NO;
 	}
+
 	// Added touch routine to help prevent player from getting stuck after
 	// jumping on turret barrel
 	self->touch = turret_breach_touch;
@@ -1625,15 +1753,18 @@ void turret_driver_die (edict_t *self, edict_t *inflictor, edict_t *attacker, in
 {
 	edict_t	*ent;
 
-	if (self->target_ent->inuse) {
+	if (self->target_ent->inuse)
+	{
 
 		// level the gun
 		self->target_ent->move_angles[0] = 0;
 		
-		if (self->spawnflags & SF_TURRETDRIVER_REMOTE_DRIVER)
+		if (self->spawnflags & SF_TURRETDRIVER_REMOTE_DRIVER) {
 			// "remote" driver... turn off TRACK for turret
 			self->target_ent->spawnflags &= ~SF_TURRET_TRACKING;
-		else {
+		}
+		else
+		{
 			// remove the driver from the end of the team chain
 			for (ent = self->target_ent->teammaster; ent->teamchain != self; ent = ent->teamchain)
 				;
@@ -1663,7 +1794,7 @@ void turret_driver_think (edict_t *self)
 
 	self->nextthink = level.time + FRAMETIME;
 
-	//ed - yaay, turrets will kill monsters and stuff now.
+	// Mappack - yaay, turrets will kill monsters and stuff now.
 	if (self->enemy && (!self->enemy->inuse || self->enemy->health <= 0))
 		self->enemy = NULL;
 
@@ -1822,19 +1953,19 @@ void SP_turret_driver (edict_t *self)
 	self->think = turret_driver_link;
 	self->nextthink = level.time + FRAMETIME;
 
-	if (self->spawnflags & SF_TURRETDRIVER_REMOTE_DRIVER) {
+	if (self->spawnflags & SF_TURRETDRIVER_REMOTE_DRIVER)
+	{
 		// remote turret driver - go ahead and create his "real" infantry replacement
 		// NOW so the switch won't be so time-consuming
 		edict_t	*infantry;
 		infantry = G_Spawn();
 		infantry->spawnflags = SF_TURRET_TRIGGER_SPAWN;
-		VectorCopy(self->s.angles,infantry->s.angles);
-		VectorCopy(self->s.origin,infantry->s.origin);
+		VectorCopy (self->s.angles, infantry->s.angles);
+		VectorCopy (self->s.origin, infantry->s.origin);
 		infantry->s.origin[2] += 1.0;
 		infantry->health = self->health;
-		SP_monster_infantry(infantry);
+		SP_monster_infantry (infantry);
 		self->child = infantry;
 	}
 	gi.linkentity (self);
 }
-

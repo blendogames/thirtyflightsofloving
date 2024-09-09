@@ -46,8 +46,8 @@ void fd_secret_use (edict_t *self, edict_t *other, edict_t *activator)
 		gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_start, 1, self->attenuation, 0); // was ATTN_STATIC
 	if (self->moveinfo.sound_middle) {
 		self->s.sound = self->moveinfo.sound_middle;
-#ifdef LOOP_SOUND_ATTENUATION
-		self->s.attenuation = self->attenuation;
+#ifdef KMQUAKE2_ENGINE_MOD
+		self->s.loop_attenuation = self->attenuation;
 #endif
 	}
 
@@ -105,8 +105,8 @@ void fd_secret_move2 (edict_t *self)
 		gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_start, 1, self->attenuation, 0); // was ATTN_STATIC
 	if (self->moveinfo.sound_middle) {
 		self->s.sound = self->moveinfo.sound_middle;
-#ifdef LOOP_SOUND_ATTENUATION
-		self->s.attenuation = self->attenuation;
+#ifdef KMQUAKE2_ENGINE_MOD
+		self->s.loop_attenuation = self->attenuation;
 #endif
 	}
 
@@ -141,8 +141,8 @@ void fd_secret_move4 (edict_t *self)
 		gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_start, 1, self->attenuation, 0); // was ATTN_STATIC
 	if (self->moveinfo.sound_middle) {
 		self->s.sound = self->moveinfo.sound_middle;
-#ifdef LOOP_SOUND_ATTENUATION
-		self->s.attenuation = self->attenuation;
+#ifdef KMQUAKE2_ENGINE_MOD
+		self->s.loop_attenuation = self->attenuation;
 #endif
 	}
 
@@ -173,8 +173,8 @@ void fd_secret_move6 (edict_t *self)
 		gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_start, 1, self->attenuation, 0); // was ATTN_STATIC
 	if (self->moveinfo.sound_middle) {
 		self->s.sound = self->moveinfo.sound_middle;
-#ifdef LOOP_SOUND_ATTENUATION
-		self->s.attenuation = self->attenuation;
+#ifdef KMQUAKE2_ENGINE_MOD
+		self->s.loop_attenuation = self->attenuation;
 #endif
 	}
 

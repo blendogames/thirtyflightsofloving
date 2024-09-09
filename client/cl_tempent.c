@@ -25,7 +25,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "client.h"
 #include "particles.h"
 
-void CL_LightningBeam (vec3_t start, vec3_t end, int srcEnt, int dstEnt, float size);
 
 typedef enum
 {
@@ -76,27 +75,11 @@ laser_t		cl_lasers[MAX_LASERS];
 cl_sustain_t	cl_sustains[MAX_SUSTAINS];
 //ROGUE
 
-//PGM
-extern void CL_TeleportParticles (vec3_t org);
-//PGM
 
-// Psychospaz's enhanced particle code
-void CL_Explosion_Particle (vec3_t org, float scale, qboolean rocket);
-void CL_Explosion_FlashParticle (vec3_t org, float size, qboolean large);
-void CL_BloodHit (vec3_t org, vec3_t dir);
-void CL_GreenBloodHit (vec3_t org, vec3_t dir);
-void CL_ParticleEffectSparks (vec3_t org, vec3_t dir, vec3_t color, int count);
-void CL_ParticleBulletDecal(vec3_t org, vec3_t dir, float size);
-void CL_ParticlePlasmaBeamDecal(vec3_t org, vec3_t dir, float size);
-void CL_ParticleBlasterDecal (vec3_t org, vec3_t dir, float size, int red, int green, int blue);
-void CL_Explosion_Decal (vec3_t org, float size, int decalnum);
-
-void CL_Explosion_Sparks (vec3_t org, int size, int count);
-void CL_BFGExplosionParticles (vec3_t org);
 
 clientMedia_t clMedia;
 
-void ReadTextureSurfaceAssignments();
+void ReadTextureSurfaceAssignments (void);
 
 /*
 =================
@@ -126,12 +109,18 @@ void CL_RegisterTEntSounds (void)
 	clMedia.sfx_disrexp = S_RegisterSound ("weapons/disrupthit.wav");
 	// shockwave impact
 	clMedia.sfx_shockhit = S_RegisterSound ("weapons/shockhit.wav");
+	// Quake explosion
+	clMedia.sfx_q1_explo = S_RegisterSound ("q1weapons/r_exp3.wav");
+	// Quake spike impacts
+	clMedia.sfx_q1_tink = S_RegisterSound ("q1weapons/tink1.wav");
+	clMedia.sfx_q1_ric1 = S_RegisterSound ("q1weapons/ric1.wav");
+	clMedia.sfx_q1_ric2 = S_RegisterSound ("q1weapons/ric2.wav");
+	clMedia.sfx_q1_ric3 = S_RegisterSound ("q1weapons/ric3.wav");
+	clMedia.sfx_q1_laserhit = S_RegisterSound ("q1enforcer/enfstop.wav");
+	clMedia.sfx_q1_scraghit = S_RegisterSound ("q1scrag/hit.wav");
+	clMedia.sfx_q1_hknighthit = S_RegisterSound ("q1hknight/hit.wav");
 
-#ifdef NOTTHIRTYFLIGHTS
 	for (i=0 ; i<4 ; i++) {
-#else
-	for (i=0 ; i<3 ; i++) {
-#endif
 		Com_sprintf (name, sizeof(name), "player/step%i.wav", i+1);
 		clMedia.sfx_footsteps[i] = S_RegisterSound (name);
 	}
@@ -236,18 +225,10 @@ CL_RegisterTEntModels
 */
 void CL_RegisterTEntModels (void)
 {
-#ifdef NOTTHIRTYFLIGHTS
 	clMedia.mod_explode = R_RegisterModel ("models/objects/explode/tris.md2");
-#else
-	clMedia.mod_explode = R_RegisterModel ("models/objects/fan/tris.md2");
-#endif
 	clMedia.mod_smoke = R_RegisterModel ("models/objects/smoke/tris.md2");
 	clMedia.mod_flash = R_RegisterModel ("models/objects/flash/tris.md2");
-#ifdef NOTTHIRTYFLIGHTS
 	clMedia.mod_parasite_segment = R_RegisterModel ("models/monsters/parasite/segment/tris.md2");
-#else
-	clMedia.mod_parasite_segment = R_RegisterModel ("models/objects/chain/tris.md2");
-#endif
 	clMedia.mod_grapple_cable = R_RegisterModel ("models/ctf/segment/tris.md2");
 	clMedia.mod_parasite_tip = R_RegisterModel ("models/monsters/parasite/tip/tris.md2");
 	clMedia.mod_explo = R_RegisterModel ("models/objects/r_explode/tris.md2");
@@ -262,6 +243,10 @@ void CL_RegisterTEntModels (void)
 
 	// new effect models
 	clMedia.mod_shocksplash = R_RegisterModel ("models/objects/shocksplash/tris.md2");
+	clMedia.mod_q1_explo = R_RegisterModel ("sprites/s_explod.sp2");
+	clMedia.mod_q1_lightning_1 = R_RegisterModel ("models/objects/q1lightning1/tris.md2");
+	clMedia.mod_q1_lightning_2 = R_RegisterModel ("models/objects/q1lightning2/tris.md2");
+	clMedia.mod_q1_lightning_3 = R_RegisterModel ("models/objects/q1lightning3/tris.md2");
 
 	R_RegisterModel ("models/objects/laser/tris.md2");
 	R_RegisterModel ("models/objects/grenade2/tris.md2");
@@ -280,6 +265,7 @@ void CL_RegisterTEntModels (void)
 	R_DrawFindPic ("a_grenades");
 }	
 
+
 /*
 =================
 CL_ClearTEnts
@@ -296,6 +282,19 @@ void CL_ClearTEnts (void)
 	memset (cl_sustains, 0, sizeof(cl_sustains));
 //ROGUE
 }
+
+
+/*
+=================
+CL_ShutdownTEntMedia
+=================
+*/
+void CL_ShutdownTEntMedia (void)
+{
+	// just zero everything
+	memset (&clMedia, 0, sizeof(clMedia));
+}
+
 
 /*
 =================
@@ -398,17 +397,38 @@ void CL_ParseParticles (void)
 CL_ParseBeam
 =================
 */
-int CL_ParseBeam (struct model_s *model)
+int CL_ParseBeam (int type, struct model_s *model)
 {
 	int		ent;
 	vec3_t	start, end;
 	beam_t	*b;
-	int		i;
+	int		i, modelNum;
 	
 	ent = MSG_ReadShort (&net_message);
 	
 	MSG_ReadPos (&net_message, start);
 	MSG_ReadPos (&net_message, end);
+
+	// Read an additional byte to override model for TE_LIGHTNING_ATTACK
+	if (type == TE_LIGHTNING_ATTACK)
+	{
+		modelNum = MSG_ReadByte (&net_message);
+		if (modelNum == 1)
+			model = clMedia.mod_q1_lightning_1;
+		else if (modelNum == 2)
+			model = clMedia.mod_q1_lightning_2;
+		else if (modelNum == 3)
+			model = clMedia.mod_q1_lightning_3;
+		else
+			model = clMedia.mod_lightning;
+	}
+
+	// Psychspaz's enhanced particles
+	if ( (model == clMedia.mod_lightning) && !cl_old_explosions->integer )
+	{
+		CL_LightningBeam (start, end, ent, 0, 5);
+		return ent;
+	}
 
 // override any beam with the same entity
 	for (i=0, b=cl_beams ; i< MAX_BEAMS ; i++, b++)
@@ -446,7 +466,7 @@ int CL_ParseBeam (struct model_s *model)
 CL_ParseBeam2
 =================
 */
-int CL_ParseBeam2 (struct model_s *model)
+int CL_ParseBeam2 (int type, struct model_s *model)
 {
 	int		ent;
 	vec3_t	start, end, offset;
@@ -568,8 +588,7 @@ CL_ParseLightning
 // Psychspaz's enhanced particles
 int CL_ParseLightning (void)
 {
-
-	vec3_t	start, end; // move,vec
+	vec3_t	start, end;		// move,vec
 	int		srcEnt, dstEnt; // len, dec
 	
 	srcEnt = MSG_ReadShort (&net_message);
@@ -578,7 +597,49 @@ int CL_ParseLightning (void)
 	MSG_ReadPos (&net_message, start);
 	MSG_ReadPos (&net_message, end);
 
-	CL_LightningBeam (start, end, srcEnt, dstEnt, 5);
+	if (cl_old_explosions->integer)
+	{
+		beam_t	*b;
+		int		i;
+
+		// override any beam with the same source AND destination entities
+		for (i=0, b=cl_beams ; i< MAX_BEAMS ; i++, b++)
+		{
+			if (b->entity == srcEnt && b->dest_entity == dstEnt)
+			{
+			//	Com_Printf("%d: OVERRIDE  %d -> %d\n", cl.time, srcEnt, destEnt);
+				b->entity = srcEnt;
+				b->dest_entity = dstEnt;
+				b->model = clMedia.mod_lightning;
+				b->endtime = cl.time + 200;
+				VectorCopy (start, b->start);
+				VectorCopy (end, b->end);
+				VectorClear (b->offset);
+				return srcEnt;
+			}
+		}
+
+		// find a free beam
+		for (i=0, b=cl_beams ; i< MAX_BEAMS ; i++, b++)
+		{
+			if (!b->model || b->endtime < cl.time)
+			{
+			//	Com_Printf("%d: NORMAL  %d -> %d\n", cl.time, srcEnt, destEnt);
+				b->entity = srcEnt;
+				b->dest_entity = dstEnt;
+				b->model = clMedia.mod_lightning;
+				b->endtime = cl.time + 200;
+				VectorCopy (start, b->start);
+				VectorCopy (end, b->end);
+				VectorClear (b->offset);
+				return srcEnt;
+			}
+		}
+		Com_Printf ("beam list overflow!\n");	
+	}
+	else {
+		CL_LightningBeam (start, end, srcEnt, dstEnt, 5);
+	}
 		
 	return srcEnt;
 }
@@ -694,7 +755,7 @@ void CL_ParseSteam (void)
 		magnitude = MSG_ReadShort (&net_message);
 		color = r & 0xff;
 		CL_ParticleSteamEffect (pos, dir,
-			color8red(color), color8green(color), color8blue(color),
+			Q2PalColorRed(color), Q2PalColorGreen(color), Q2PalColorBlue(color),
 			-20, -20, -20, cnt, magnitude);
 		//CL_ParticleSteamEffect (pos, dir, 240, 240, 240, -20, -20, -20, cnt, magnitude);
 		//S_StartSound (pos,  0, 0, clMedia.sfx_lashit, 1, ATTN_NORM, 0);
@@ -793,15 +854,17 @@ static byte splash_color[] = {0x00, 0xe0, 0xb0, 0x50, 0xd0, 0xe0, 0xe8};
 
 void CL_ParseTEnt (void)
 {
-	int		type;
+	int		type = 0, subtype = 0;
 	vec3_t	pos, pos2, dir;
 	explosion_t	*ex;
-	int		cnt;
-	int		color;
-	int		red, green, blue;
+	int		cnt = 0, rnd = 0;
+	int		color = 0;
+	int		red = 0, green = 0, blue = 0;
+	int		pRed, pGreen, pBlue, redDelta, greenDelta, blueDelta, numparts;
 	int		r, i;
-	int		ent;
-	int		magnitude;
+	int		ent = 0;
+	int		magnitude = 0;
+	float	partsize;
 
 	CL_FixParticleCvars (); // clamp critical effects vars to acceptable bounds
 
@@ -926,75 +989,6 @@ void CL_ParseTEnt (void)
 		S_StartSound (pos2, 0, 0, clMedia.sfx_railg, 1, ATTN_NORM, 0);
 		break;
 
-#ifndef NOTTHIRTYFLIGHTS
-	case TE_SHRED:
-
-		MSG_ReadPos (&net_message, pos);
-		MSG_ReadDir (&net_message, dir);
-
-		CL_shred (pos, dir, 32,
-			255,255,255,
-			0,0, 0); // was 40
-
-		break;
-
-	case TE_LOBBYGLASS:
-
-		MSG_ReadPos (&net_message, pos);
-		MSG_ReadDir (&net_message, dir);
-
-		CL_lobbyglass (pos, dir, 48,
-			255,255,255,
-			0,0, 0); // was 40
-
-		break;
-
-	case TE_BURPGAS:
-		//bc
-		MSG_ReadPos (&net_message, pos);
-		MSG_ReadDir (&net_message, dir);
-
-		CL_burpgas (pos, dir, 1,
-			100,190,190,
-			190,0, 0); // was 40
-
-
-
-
-
-		break;
-	case TE_CIGSMOKE:
-		//bc
-		MSG_ReadPos (&net_message, pos);
-		MSG_ReadDir (&net_message, dir);
-
-		CL_cigsmoke (pos, dir, 1, 100,
-			190,190, 190,
-			0, 0,0); // was 40
-
-		break;
-	case TE_CIGBIGSMOKE:
-		//bc
-		MSG_ReadPos (&net_message, pos);
-		MSG_ReadDir (&net_message, dir);
-
-		CL_cigbigsmoke (pos, dir, 1, 100,
-			190,190, 190,
-			0, 0,0); // was 40
-
-		break;
-	case TE_WINEGLASSBREAK:
-		MSG_ReadPos (&net_message, pos);
-		MSG_ReadDir (&net_message, dir);
-
-		CL_wineglassbreak (pos, dir, 32, 255,
-			255,255,
-			0,
-			0, 0,0); // was 40
-
-		break;
-#endif
-
 	case TE_EXPLOSION2:
 	case TE_GRENADE_EXPLOSION:
 	case TE_GRENADE_EXPLOSION_WATER:
@@ -1092,7 +1086,6 @@ void CL_ParseTEnt (void)
 		break;
 
 	case TE_EXPLOSION1_NP:						// PMM
-#ifdef NOTTHIRTYFLIGHTS
 		MSG_ReadPos (&net_message, pos);
 	//	if (cl_old_explosions->value)
 		if (cl_old_explosions->integer)
@@ -1118,15 +1111,6 @@ void CL_ParseTEnt (void)
 		}
 		CL_Explosion_Sparks (pos, 10, 128);
 		S_StartSound (pos, 0, 0, clMedia.sfx_grenexp, 1, ATTN_NORM, 0);
-#else
-		MSG_ReadPos (&net_message, pos);
-		//MSG_ReadDir (&net_message, dir);
-
-		
-		VectorSet(dir, 0, 0, 0);
-
- 		CL_WaterfallParticles (pos, dir, 64, 190, 170, 255, 0, 0, 0);
-#endif
 		break;
 
 	case TE_EXPLOSION1:
@@ -1165,6 +1149,97 @@ void CL_ParseTEnt (void)
 			S_StartSound (pos, 0, 0, clMedia.sfx_rockexp, 1, ATTN_NORM, 0);
 		break;
 
+	case TE_EXPLOSION_Q1:
+		MSG_ReadPos (&net_message, pos);
+		subtype = MSG_ReadByte (&net_message);
+		ex = CL_AllocExplosion ();
+		VectorCopy (pos, ex->ent.origin);
+		ex->type = ex_poly;
+		ex->ent.flags = RF_FULLBRIGHT|RF_NOSHADOW;
+		ex->start = cl.frame.servertime - 100;
+		ex->light = 350;
+		if (subtype == 1) {	// blob explosion
+			ex->lightcolor[0] = 0.8;
+			ex->lightcolor[1] = 0.4;
+			ex->lightcolor[2] = 1.0;
+		}
+		else {				// standard explosion
+			ex->lightcolor[0] = 1.0;
+			ex->lightcolor[1] = 0.5;
+			ex->lightcolor[2] = 0.5;
+		}
+		ex->ent.model = clMedia.mod_q1_explo;
+		ex->ent.scale = 1.5f;
+		ex->baseframe = 0;
+		ex->frames = 6;
+		if (subtype == 1) {	// blob explosion
+			CL_Explosion_Blob_Q1 (pos, 4, 512);
+		}
+		else {				// standard explosion
+			CL_Explosion_Flash (pos, 10, 50, false);
+			CL_Explosion_Sparks_Q1 (pos, 4, 512);
+			CL_Explosion_Decal (pos, 50, particle_burnmark);
+		}
+		S_StartSound (pos, 0, 0, clMedia.sfx_q1_explo, 1, ATTN_NORM, 0);
+		break;
+
+	case TE_SPIKEIMPACT_Q1:
+		MSG_ReadPos (&net_message, pos);
+		MSG_ReadDir (&net_message, dir);
+		subtype = MSG_ReadByte (&net_message);
+		if (subtype > 4)
+			subtype = 0;
+		if ( (subtype == 0) || (subtype == 1) )	// Q1 spike or superspike
+		{
+			CL_ParticleImpact_Q1 (pos, dir, 0, 3, (subtype == 1) ? 20 : 10, true);
+			CL_ParticleBulletDecal (pos, dir, 2.8);
+			if (rand() % 5) {
+				S_StartSound (pos, 0, 0, clMedia.sfx_q1_tink, 1, ATTN_NORM, 0);
+			}
+			else
+			{
+				rnd = rand() & 3;
+				if (rnd == 1)
+					S_StartSound (pos, 0, 0, clMedia.sfx_q1_ric1, 1, ATTN_NORM, 0);
+				else if (rnd == 2)
+					S_StartSound (pos, 0, 0, clMedia.sfx_q1_ric2, 1, ATTN_NORM, 0);
+				else
+					S_StartSound (pos, 0, 0, clMedia.sfx_q1_ric3, 1, ATTN_NORM, 0);
+			}
+		}
+		else if (subtype == 2)	// Q1 enforcer laser
+		{
+			pRed = 207;		pGreen = 99;		pBlue = 43;
+		//	if (cl_old_explosions->integer) {
+				CL_ParticleImpact_Q1 (pos, dir, 234, 3, 24, false);	// original Q1 palette idx was 0
+		/*	}
+			else {
+				numparts = 24 / max(cl_particle_scale->value/2, 1);
+				redDelta = 205;	greenDelta = -90;	blueDelta = -39;
+				CL_BlasterParticles (pos, dir, numparts, 3, pRed, pGreen, pBlue, redDelta, greenDelta, blueDelta);
+			} */
+			CL_ParticleBlasterDecal (pos, dir, 10, pRed, pGreen, pBlue);
+			S_StartSound (pos, 0, 0, clMedia.sfx_q1_laserhit, 1, ATTN_NORM, 0);
+		}
+		else if (subtype == 3)	// Q1 scrag acid bolt
+		{
+			CL_ParticleImpact_Q1 (pos, dir, 196, 3, 30, true);	// original Q1 palette idx was 20
+			CL_ParticleAcidDecal (pos, dir, 14, Q1PalColorRed(196), Q1PalColorGreen(196), Q1PalColorBlue(196));
+			S_StartSound (pos, 0, 0, clMedia.sfx_q1_scraghit, 1, ATTN_NORM, 0);
+		}
+		else if (subtype == 4)	// Q1 hell knight flame
+		{
+			CL_ParticleImpact_Q1 (pos, dir, 226, 3, 20, false);
+			CL_ParticlePlasmaBeamDecal (pos, dir, 10);
+			S_StartSound (pos, 0, 0, clMedia.sfx_q1_hknighthit, 1, ATTN_NORM, 0);
+		}
+		break;
+
+	case TE_LAVASPLASH_Q1:
+		MSG_ReadPos (&net_message, pos);
+		CL_Lavasplash_Q1 (pos, 4);
+		break;
+
 	case TE_BFG_EXPLOSION:
 		MSG_ReadPos (&net_message, pos);
 		ex = CL_AllocExplosion ();
@@ -1200,7 +1275,7 @@ void CL_ParseTEnt (void)
 
 	case TE_PARASITE_ATTACK:
 	case TE_MEDIC_CABLE_ATTACK:
-		ent = CL_ParseBeam (clMedia.mod_parasite_segment);
+		ent = CL_ParseBeam (type, clMedia.mod_parasite_segment);
 		break;
 
 	case TE_BOSSTPORT:			// boss teleporting to station
@@ -1210,7 +1285,7 @@ void CL_ParseTEnt (void)
 		break;
 
 	case TE_GRAPPLE_CABLE:
-		ent = CL_ParseBeam2 (clMedia.mod_grapple_cable);
+		ent = CL_ParseBeam2 (type, clMedia.mod_grapple_cable);
 		break;
 
 	// RAFAEL
@@ -1221,7 +1296,7 @@ void CL_ParseTEnt (void)
 		color = MSG_ReadByte (&net_message);
 	// Psychospaz's enhanced particle code
 		{
-			vec3_t sparkcolor = {color8red(color), color8green(color), color8blue(color)};
+			vec3_t sparkcolor = { Q2PalColorRed(color), Q2PalColorGreen(color), Q2PalColorBlue(color) };
 			CL_ParticleEffectSparks (pos, dir, sparkcolor, 40);
 		}
 		ex = CL_AllocExplosion ();
@@ -1255,40 +1330,11 @@ void CL_ParseTEnt (void)
 		CL_ParticleEffect3 (pos, dir, color, cnt);
 		break;
 
-#ifndef NOTTHIRTYFLIGHTS
-	case TE_FREONHIT:
-		MSG_ReadPos (&net_message, pos);
-		MSG_ReadDir (&net_message, dir);
-
-
-		CL_ParticleBlasterDecal(pos, dir, 7, 100,230,250);
-
-		CL_FreonParticles (pos, dir, 1, 100,230,250, 0, -90, -30); // was 40
-
-		
-
-		
-
-
-		break;
-#endif
 //=============
 //PGM
 	// PMM -following code integrated for flechette (different color)
 	case TE_BLASTER:			// blaster hitting wall
 	case TE_BLASTER2:			// green blaster hitting wall
-#ifndef NOTTHIRTYFLIGHTS
-		MSG_ReadPos (&net_message, pos);
-		MSG_ReadDir (&net_message, dir);
-
-		if (pos)
-		{
-			vec3_t color = { 64, 64, 64 };
-			CL_ParticleEffectSparks (pos, dir, color, 4);
-		}
-
-		break;
-#endif
 	case TE_BLUEHYPERBLASTER:	// blue blaster hitting wall
 	case TE_REDBLASTER:			// red blaster hitting wall
 	case TE_BLASTER_COLORED:	// variable colored blaster hitting wall
@@ -1359,50 +1405,35 @@ void CL_ParseTEnt (void)
 			ex->frames = 4;
 		}
 		// Psychospaz's enhanced particle code	
-		{
-			int		pRed, pGreen, pBlue, redDelta, greenDelta, blueDelta, numparts;
-			float	partsize = (cl_old_explosions->integer) ? 2 : 4;
-			numparts = (cl_old_explosions->integer) ? 12 : (32 / max(cl_particle_scale->value/2, 1));
-			if (type == TE_BLASTER2) {
-				pRed = 50;		pGreen = 235;		pBlue = 50;
-				redDelta = -10;	greenDelta = 0;		blueDelta = -10;
-			}
-			else if (type == TE_BLUEHYPERBLASTER) {
-				pRed = 50;		pGreen = 50;		pBlue = 235;
-				redDelta = -10;	greenDelta = 0;		blueDelta = -10;
-			}
-			else if (type == TE_REDBLASTER) {
-				pRed = 235;		pGreen = 50;		pBlue = 50;
-				redDelta = 255;	greenDelta = -30;	blueDelta = -30;
-			}
-			else if (type == TE_FLECHETTE) {
-				pRed = 100;		pGreen = 100;		pBlue = 195;
-				redDelta = -10;	greenDelta = 0;		blueDelta = -10;
-			}
-			else if (type == TE_BLASTER_COLORED) {
-				pRed = red;		pGreen = green;		pBlue = blue;
-				redDelta = -10;	greenDelta = -10;		blueDelta = -10;
-			}
-			else { // TE_BLASTER
-				pRed = 255;		pGreen = 150;		pBlue = 50; // was 40
-				redDelta = 255;	greenDelta = -90;	blueDelta = -30;
-			}
-#ifdef NOTTHIRTYFLIGHTS
-			if (type == TE_FLECHETTE)
-			{
-				CL_LavaParticles (pos, dir, numparts, 255, 50, 10, 0, 0, 0);
-			}
-			else
-#endif
-			CL_BlasterParticles (pos, dir, numparts, partsize, pRed, pGreen, pBlue, redDelta, greenDelta, blueDelta);
-#ifdef NOTTHIRTYFLIGHTS
-			if (type != TE_FLECHETTE)
-#endif
-			CL_ParticleBlasterDecal(pos, dir, 10, pRed, pGreen, pBlue);
+		partsize = (cl_old_explosions->integer) ? 2 : 4;
+		numparts = (cl_old_explosions->integer) ? 12 : (32 / max(cl_particle_scale->value/2, 1));
+		if (type == TE_BLASTER2) {
+			pRed = 50;		pGreen = 235;		pBlue = 50;
+			redDelta = -10;	greenDelta = 0;		blueDelta = -10;
 		}
-#ifdef NOTTHIRTYFLIGHTS
+		else if (type == TE_BLUEHYPERBLASTER) {
+			pRed = 50;		pGreen = 50;		pBlue = 235;
+			redDelta = -10;	greenDelta = 0;		blueDelta = -10;
+		}
+		else if (type == TE_REDBLASTER) {
+			pRed = 235;		pGreen = 50;		pBlue = 50;
+			redDelta = 255;	greenDelta = -30;	blueDelta = -30;
+		}
+		else if (type == TE_FLECHETTE) {
+			pRed = 100;		pGreen = 100;		pBlue = 195;
+			redDelta = -10;	greenDelta = 0;		blueDelta = -10;
+		}
+		else if (type == TE_BLASTER_COLORED) {
+			pRed = red;		pGreen = green;		pBlue = blue;
+			redDelta = -10;	greenDelta = -10;		blueDelta = -10;
+		}
+		else { // TE_BLASTER
+			pRed = 255;		pGreen = 150;		pBlue = 50; // was 40
+			redDelta = 255;	greenDelta = -90;	blueDelta = -30;
+		}
+		CL_BlasterParticles (pos, dir, numparts, partsize, pRed, pGreen, pBlue, redDelta, greenDelta, blueDelta);
+		CL_ParticleBlasterDecal(pos, dir, 10, pRed, pGreen, pBlue);
 		S_StartSound (pos,  0, 0, clMedia.sfx_lashit, 1, ATTN_NORM, 0);
-#endif
 		break;
 
 	// shockwave impact effect
@@ -1414,8 +1445,8 @@ void CL_ParseTEnt (void)
 		{
 			ex = CL_AllocExplosion ();
 			VectorMA (pos, 16.0*(i+1), dir, ex->ent.origin);
-			vectoangles2(dir, ex->ent.angles);
-			//VectorCopy (dir, ex->ent.angles);
+			vectoangles2 (dir, ex->ent.angles);
+		//	VectorCopy (dir, ex->ent.angles);
 			ex->type = ex_poly2;
 			ex->ent.flags |= RF_FULLBRIGHT|RF_TRANSLUCENT|RF_NOSHADOW;
 			ex->start = cl.frame.servertime - 100;
@@ -1439,6 +1470,10 @@ void CL_ParseTEnt (void)
 		S_StartSound (NULL, ent, CHAN_WEAPON, clMedia.sfx_lightning, 1, ATTN_NORM, 0);
 		break;
 
+	case TE_LIGHTNING_ATTACK:	
+		ent = CL_ParseBeam (type, clMedia.mod_lightning);
+		break;
+
 	case TE_DEBUGTRAIL:
 		MSG_ReadPos (&net_message, pos);
 		MSG_ReadPos (&net_message, pos2);
@@ -1459,14 +1494,7 @@ void CL_ParseTEnt (void)
 		break;
 
 	case TE_HEATBEAM:
-#ifdef NOTTHIRTYFLIGHTS
 		ent = CL_ParsePlayerBeam (clMedia.mod_heatbeam);
-#else
-		//BC music notes.
-		MSG_ReadPos (&net_message, pos);
-		VectorSet(dir, 0, 0, 0);
- 		CL_MusicParticles (pos, dir, 64, 255, 255, 255, 0, 0, 0);
-#endif
 		break;
 
 	case TE_MONSTER_HEATBEAM:
@@ -1474,7 +1502,6 @@ void CL_ParseTEnt (void)
 		break;
 
 	case TE_HEATBEAM_SPARKS:
-#ifdef NOTTHIRTYFLIGHTS
 		cnt = 50;
 		MSG_ReadPos (&net_message, pos);
 		MSG_ReadDir (&net_message, dir);
@@ -1482,12 +1509,6 @@ void CL_ParseTEnt (void)
 		magnitude = 60;
 		CL_ParticleSteamEffect (pos, dir, 240, 240, 240, -20, -20, -20, cnt, magnitude);
 		S_StartSound (pos,  0, 0, clMedia.sfx_lashit, 1, ATTN_NORM, 0);
-#else
-		//bc hearts
-		MSG_ReadPos (&net_message, pos);
-		MSG_ReadDir (&net_message, dir);
- 		CL_HeartParticles (pos, dir, 64, 255, 255, 255, 0, 0, 0);
-#endif
 		break;
 	
 	case TE_HEATBEAM_STEAM:
@@ -1531,11 +1552,7 @@ void CL_ParseTEnt (void)
 		MSG_ReadPos (&net_message, pos);
 		MSG_ReadDir (&net_message, dir);
 	// new blue electric sparks
-#ifdef NOTTHIRTYFLIGHTS
 		CL_ElectricParticles (pos, dir, 40);
-#else
-		CL_ElectricParticles (pos, dir, 70);
-#endif
 		//FIXME : replace or remove this sound
 		S_StartSound (pos, 0, 0, clMedia.sfx_lashit, 1, ATTN_NORM, 0);
 		break;
@@ -1567,18 +1584,6 @@ void CL_ParseTEnt (void)
 		MSG_ReadPos (&net_message, pos);
 		CL_WidowSplash (pos);
 		break;
-#ifndef NOTTHIRTYFLIGHTS
-	case TE_BLOODCOUGH:
-		MSG_ReadPos (&net_message, pos);
-		MSG_ReadDir (&net_message, dir);
-
-		CL_bloodcough (pos, dir,  32, 255,
-			255,255,
-			0,
-			0, 0, 0); // was 40
-
-		break;
-#endif
 //PGM
 //==============
 
@@ -1759,13 +1764,15 @@ void CL_AddBeams (void)
 			{
 				ent.angles[0] = pitch;
 				ent.angles[1] = yaw;
-#ifdef NOTTHIRTYFLIGHTS
 				ent.angles[2] = rand()%360;
-#else
-				ent.angles[2] = 24*sin(anglemod(cl.time*0.0015));
-#endif
 			}
-			//AnglesToAxis(ent.angles, ent.axis);
+			// Knightmare- make all lightning beams fullbright
+			if ( (b->model == clMedia.mod_q1_lightning_1) ||
+				(b->model == clMedia.mod_q1_lightning_2) ||
+				(b->model == clMedia.mod_q1_lightning_3) ) {
+				ent.flags |= RF_FULLBRIGHT;
+			}
+		//	AnglesToAxis(ent.angles, ent.axis);
 
 			ent.flags |= RF_NOSHADOW; // beams don't cast shadows
 //			Com_Printf("B: %d -> %d\n", b->entity, b->dest_entity);
@@ -1803,18 +1810,18 @@ void CL_AddPlayerBeams (void)
 	int			i,j;
 	beam_t		*b;
 	vec3_t		dist, org;
-	float		d;
+	float		d = 0.0f;
 	entity_t	ent;
-	float		yaw, pitch;
-	float		forward;
-	float		len, steps;
-	int			framenum;
-	float		model_length;
-	float		hand_multiplier;
+	float		yaw = 0.0f, pitch = 0.0f;
+	float		forward = 0.0f;
+	float		len = 0.0f, steps = 0.0f;
+	int			framenum = 0;
+	float		model_length = 0.0f;
+	float		hand_multiplier = 0.0f;
 	frame_t		*oldframe;
 	player_state_t	*ps, *ops;
-	qboolean	firstperson, chasecam;
-	int			newhandmult;
+	qboolean	firstperson = false, chasecam = false;
+	int			newhandmult = 0;
 	vec3_t		thirdp_pbeam_offset;
 	vec3_t		pbeam_offset_dir;
 
@@ -2089,7 +2096,14 @@ void CL_AddPlayerBeams (void)
 				ent.angles[1] = yaw;
 				ent.angles[2] = rand()%360;
 			}
-			//AnglesToAxis(ent.angles, ent.axis);
+			// Knightmare- make all lightning beams fullbright
+			if ( (b->model == clMedia.mod_q1_lightning_1) ||
+				(b->model == clMedia.mod_q1_lightning_2) ||
+				(b->model == clMedia.mod_q1_lightning_3) ) {
+				ent.flags |= RF_FULLBRIGHT;
+			}
+		//	AnglesToAxis(ent.angles, ent.axis);
+
 			ent.flags |= RF_NOSHADOW; // beams don't cast shadows
 		//	Com_Printf("B: %d -> %d\n", b->entity, b->dest_entity);
 			V_AddEntity (&ent);

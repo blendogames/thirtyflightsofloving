@@ -52,7 +52,7 @@ edict_t *G_Find(edict_t *from, size_t fieldofs, char *match)	// Knightmare- chan
 =================
 FindClientRadius
 
-Returns active client entities whose bounding boxes are within a 
+Returns active client entities whose bounding boxes are within a
 spherical volume centred around the specified point.
 =================
 */
@@ -90,7 +90,7 @@ edict_t *FindClientRadius(edict_t *from, vec3_t origin, float radius)
 =================
 FindPointRadius
 
-Returns solid and non-solid entities whose origins are within a 
+Returns solid and non-solid entities whose origins are within a
 spherical volume centred around the specified point.
 =================
 */
@@ -124,7 +124,7 @@ edict_t *FindPointRadius(edict_t *from, vec3_t org, float rad)
 =================
 FindRadius
 
-Returns solid entities whose bounding boxes are within a 
+Returns solid entities whose bounding boxes are within a
 spherical volume centred around the specified point.
 =================
 */
@@ -255,7 +255,7 @@ void G_UseTargets(edict_t *ent, edict_t *activator)
 //CW--
 		return;
 	}
-	
+
 //	Print the message.
 
 	if ((ent->message) && !(activator->svflags & SVF_MONSTER))
@@ -277,7 +277,7 @@ void G_UseTargets(edict_t *ent, edict_t *activator)
 
 				gi_centerprintf(cl_ent, "%s", ent->message);
 			}
-			
+
 			if (ent->noise_index)
 				gi.positioned_sound(world->s.origin, world, CHAN_AUTO, ent->noise_index, 1, ATTN_NONE, 0);
 			else
@@ -430,8 +430,8 @@ void G_SetMovedir(vec3_t angles, vec3_t movedir)
 float vectoyaw(vec3_t vec)
 {
 	float yaw;
-	
-	if (/* vec[YAW] == 0 && */ vec[PITCH] == 0.0) 
+
+	if (/* vec[YAW] == 0 && */ vec[PITCH] == 0.0)
 	{
 		yaw = 0.0;
 		if (vec[YAW] > 0.0)
@@ -454,7 +454,7 @@ void vectoangles(vec3_t value1, vec3_t angles)
 	float	forward;
 	float	yaw;
 	float	pitch;
-	
+
 	if ((value1[1] == 0.0) && (value1[0] == 0.0))
 	{
 		yaw = 0.0F;
@@ -475,7 +475,7 @@ void vectoangles(vec3_t value1, vec3_t angles)
 			yaw += 360.0;
 
 		forward = sqrt(value1[0]*value1[0] + value1[1]*value1[1]);
-		pitch = (int)(RAD2DEG(atan2(value1[2], forward)));											//CW	
+		pitch = (int)(RAD2DEG(atan2(value1[2], forward)));											//CW
 		if (pitch < 0.0)
 			pitch += 360.0;
 	}
@@ -490,7 +490,7 @@ void vectoangles2 (vec3_t value1, vec3_t angles)
 {
 	float	forward;
 	float	yaw, pitch;
-	
+
 	if (value1[1] == 0 && value1[0] == 0)
 	{
 		yaw = 0;
@@ -527,7 +527,7 @@ char *G_CopyString(char *in)
 {
 	size_t	outSize;
 	char *out;
-	
+
 //	out = gi.TagMalloc((int)strlen(in)+1, TAG_LEVEL);
 	outSize = strlen(in) + 1;
 	out = gi.TagMalloc(outSize, TAG_LEVEL);
@@ -571,10 +571,10 @@ edict_t *G_Spawn(void)
 			return e;
 		}
 	}
-	
+
 	if (i == game.maxentities)
 		gi.error("ED_Alloc: no free edicts");
-		
+
 	globals.num_edicts++;
 	G_InitEdict(e);
 
@@ -742,7 +742,7 @@ qboolean KillBox(edict_t *ent)
 		tr = gi.trace(ent->s.origin, ent->mins, ent->maxs, ent->s.origin, NULL, MASK_PLAYERSOLID);
 
 //CW++
-//		If we're inside a solid, do a point check on our origin to see if 
+//		If we're inside a solid, do a point check on our origin to see if
 //		we're also inside another player (this fixes the "buried teleporters" bug).
 
 		if (tr.startsolid)
@@ -773,6 +773,51 @@ qboolean KillBox(edict_t *ent)
 }
 
 // Knightmare added
+char *GameDir (void)
+{
+#ifdef KMQUAKE2_ENGINE_MOD
+	return gi.GameDir();
+#else	// KMQUAKE2_ENGINE_MOD
+	static char	buffer[MAX_OSPATH];
+	cvar_t		*basedir, *gamedir;
+
+	basedir = gi.cvar("basedir", "", 0);
+	gamedir = gi.cvar("gamedir", "", 0);
+	if ( strlen(gamedir->string) > 0 )
+		Com_sprintf (buffer, sizeof(buffer), "%s/%s", basedir->string, gamedir->string);
+	else
+		Com_sprintf (buffer, sizeof(buffer), "%s/baseq2", basedir->string);
+
+	return buffer;
+#endif	// KMQUAKE2_ENGINE_MOD
+}
+
+char *SavegameDir (void)
+{
+#ifdef KMQUAKE2_ENGINE_MOD
+	return gi.SaveGameDir();
+#else	// KMQUAKE2_ENGINE_MOD
+	static char	buffer[MAX_OSPATH];
+	cvar_t	*basedir, *gamedir, *savegamepath;
+
+	basedir = gi.cvar("basedir", "", 0);
+	gamedir = gi.cvar("gamedir", "", 0);
+	savegamepath = gi.cvar("savegamepath", "", 0);
+	// use Unofficial Q2 Patch's savegamepath cvar if set
+	if ( strlen(savegamepath->string) > 0 ) {
+		Com_strcpy (buffer, sizeof(buffer), savegamepath->string);
+	}
+	else {
+		if ( strlen(gamedir->string) > 0 )
+			Com_sprintf (buffer, sizeof(buffer), "%s/%s", basedir->string, gamedir->string);
+		else
+			Com_sprintf (buffer, sizeof(buffer), "%s/baseq2", basedir->string);
+	}
+
+	return buffer;
+#endif	// KMQUAKE2_ENGINE_MOD
+}
+
 void GameDirRelativePath (const char *filename, char *output, size_t outputSize)
 {
 #ifdef KMQUAKE2_ENGINE_MOD
@@ -782,10 +827,10 @@ void GameDirRelativePath (const char *filename, char *output, size_t outputSize)
 
 	basedir = gi.cvar("basedir", "", 0);
 	gamedir = gi.cvar("gamedir", "", 0);
-	if (strlen(gamedir->string))
-		Com_sprintf(output, outputSize, "%s/%s/%s", basedir->string, gamedir->string, filename);
+	if ( strlen(gamedir->string) > 0 )
+		Com_sprintf (output, outputSize, "%s/%s/%s", basedir->string, gamedir->string, filename);
 	else
-		Com_sprintf(output, outputSize, "%s/baseq2/%s", basedir->string, filename);
+		Com_sprintf (output, outputSize, "%s/baseq2/%s", basedir->string, filename);
 #endif	// KMQUAKE2_ENGINE_MOD
 }
 
@@ -794,14 +839,21 @@ void SavegameDirRelativePath (const char *filename, char *output, size_t outputS
 #ifdef KMQUAKE2_ENGINE_MOD
 	Com_sprintf(output, outputSize, "%s/%s", gi.SaveGameDir(), filename);
 #else	// KMQUAKE2_ENGINE_MOD
-	cvar_t	*basedir, *gamedir;
+	cvar_t	*basedir, *gamedir, *savegamepath;
 
 	basedir = gi.cvar("basedir", "", 0);
 	gamedir = gi.cvar("gamedir", "", 0);
-	if (strlen(gamedir->string))
-		Com_sprintf(output, outputSize, "%s/%s/%s", basedir->string, gamedir->string, filename);
-	else
-		Com_sprintf(output, outputSize, "%s/baseq2/%s", basedir->string, filename);
+	savegamepath = gi.cvar("savegamepath", "", 0);
+	// use Unofficial Q2 Patch's savegamepath cvar if set
+	if ( strlen(savegamepath->string) > 0 ) {
+		Com_sprintf (output, outputSize, "%s/%s", savegamepath->string, filename);
+	}
+	else {
+		if ( strlen(gamedir->string) > 0 )
+			Com_sprintf (output, outputSize, "%s/%s/%s", basedir->string, gamedir->string, filename);
+		else
+			Com_sprintf (output, outputSize, "%s/baseq2/%s", basedir->string, filename);
+	}
 #endif	// KMQUAKE2_ENGINE_MOD
 }
 
@@ -820,7 +872,7 @@ void CreatePath (const char *path)
 	}
 	Com_strcpy (tmpBuf, sizeof(tmpBuf), path);
 
-	for (ofs = tmpBuf+1 ; *ofs ; ofs++)
+	for (ofs = tmpBuf+1; *ofs; ofs++)
 	{
 		if (*ofs == '/' || *ofs == '\\')
 		{	// create the directory
@@ -830,6 +882,20 @@ void CreatePath (const char *path)
 		}
 	}
 #endif	// KMQUAKE2_ENGINE_MOD
+}
+
+qboolean LocalFileExists (const char *path)
+{
+	char	realPath[MAX_OSPATH];
+	FILE	*f;
+
+	SavegameDirRelativePath (path, realPath, sizeof(realPath));
+	f = fopen (realPath, "rb");
+	if (f) {
+		fclose (f);
+		return true;
+	}
+	return false;
 }
 // end Knightmare
 
@@ -851,7 +917,7 @@ qboolean visible(edict_t *self, edict_t *other)														//CW
 	VectorCopy(other->s.origin, spot2);
 	spot2[2] += other->viewheight;
 	trace = gi.trace(spot1, vec3_origin, vec3_origin, spot2, self, MASK_OPAQUE);
-	
+
 	if (trace.fraction == 1.0)
 		return true;
 
@@ -871,12 +937,12 @@ qboolean infront(edict_t *self, edict_t *other)														//CW
 	vec3_t	vec;
 	vec3_t	forward;
 	float	dot;
-	
+
 	AngleVectors(self->s.angles, forward, NULL, NULL);
 	VectorSubtract(other->s.origin, self->s.origin, vec);
 	VectorNormalize(vec);
 	dot = DotProduct(vec, forward);
-	
+
 	if (dot > 0.3)
 		return true;
 
@@ -957,7 +1023,7 @@ void TList_DelNode(edict_t *ent)
 		prev->next_node = index->next_node;
 		index->next_node->prev_node = prev;
 	}
-	
+
 	--ent->owner->client->resp.nodes_active;
 }
 
@@ -993,11 +1059,11 @@ void TList_AddNode(edict_t *ent)
 		if (ent->owner->next_node->die == C4_DieFromDamage)
 			C4_Die(ent->owner->next_node);
 		else
-			Trap_Die(ent->owner->next_node);			
+			Trap_Die(ent->owner->next_node);
 	}
 
 //	Add the new node to the end of the list.
-	
+
 	if (ent->owner->next_node)
 	{
 		index = ent->owner->next_node;
@@ -1016,7 +1082,7 @@ void TList_AddNode(edict_t *ent)
 =================
 PrintFFAScores
 
-Sort the player scores for DM/FFA games, 
+Sort the player scores for DM/FFA games,
 and print them to the server console.
 =================
 */
@@ -1093,7 +1159,7 @@ void PrintFFAScores(void)
 =================
 PrintTeamScores
 
-Sort the player scores by team, 
+Sort the player scores by team,
 and print them to the server console.
 =================
 */
@@ -1206,20 +1272,22 @@ void dm(char *msg)
 File opening functions
 ===============================
 */
-FILE* OpenMaplistFile(qboolean report)
+FILE* OpenMaplistFile (qboolean report)
 {
 	FILE	*iostream;
-	cvar_t	*game;
+//	cvar_t	*game;
 	char	filename[MAX_OSPATH];
 
 	if (strlen(sv_map_file->string) == 0)
 		return NULL;
 
-	game = gi.cvar("game", "", 0);
+/*	game = gi.cvar("game", "", 0);
 	if (!*game->string)
-		Com_sprintf(filename, sizeof(filename), "%s/%s", GAMEVERSION, sv_map_file->string);
+		Com_sprintf (filename, sizeof(filename), "%s/%s", GAMEVERSION, sv_map_file->string);
 	else
-		Com_sprintf(filename, sizeof(filename), "%s/%s", game->string, sv_map_file->string);
+		Com_sprintf (filename, sizeof(filename), "%s/%s", game->string, sv_map_file->string); */
+	// Knightmare- use GameDir() instead
+	Com_sprintf (filename, sizeof(filename), "%s/%s", GameDir(), sv_map_file->string);
 
 	iostream = fopen(filename, "r");
 	if (report)
@@ -1233,20 +1301,22 @@ FILE* OpenMaplistFile(qboolean report)
 	return iostream;
 }
 
-FILE* OpenConfiglistFile(qboolean report)
+FILE* OpenConfiglistFile (qboolean report)
 {
 	FILE	*iostream;
-	cvar_t	*game;
+//	cvar_t	*game;
 	char	filename[MAX_OSPATH];
 
 	if (strlen(sv_config_file->string) == 0)
 		return NULL;
 
-	game = gi.cvar("game", "", 0);
+/*	game = gi.cvar("game", "", 0);
 	if (!*game->string)
-		Com_sprintf(filename, sizeof(filename), "%s/%s", GAMEVERSION, sv_config_file->string);
+		Com_sprintf (filename, sizeof(filename), "%s/%s", GAMEVERSION, sv_config_file->string);
 	else
-		Com_sprintf(filename, sizeof(filename), "%s/%s", game->string, sv_config_file->string);
+		Com_sprintf (filename, sizeof(filename), "%s/%s", game->string, sv_config_file->string); */
+	// Knightmare- use GameDir() instead
+	Com_sprintf (filename, sizeof(filename), "%s/%s", GameDir(), sv_config_file->string);
 
 	iostream = fopen(filename, "r");
 	if (report)
@@ -1260,25 +1330,39 @@ FILE* OpenConfiglistFile(qboolean report)
 	return iostream;
 }
 
-FILE* OpenAGMDropFile(qboolean report, qboolean readonly)
+FILE* OpenAGMDropFile (qboolean report, qboolean readonly)
 {
 	FILE	*iostream;
-	cvar_t	*game;
+//	cvar_t	*game;
 	char	filename[MAX_OSPATH];
 
 	if (strlen(sv_agm_drop_file->string) == 0)
 		return NULL;
 
-	game = gi.cvar("game", "", 0);
+/*	game = gi.cvar("game", "", 0);
 	if (!*game->string)
-		Com_sprintf(filename, sizeof(filename), "%s/%s", GAMEVERSION, sv_agm_drop_file->string);
+		Com_sprintf (filename, sizeof(filename), "%s/%s", GAMEVERSION, sv_agm_drop_file->string);
 	else
-		Com_sprintf(filename, sizeof(filename), "%s/%s", game->string, sv_agm_drop_file->string);
+		Com_sprintf (filename, sizeof(filename), "%s/%s", game->string, sv_agm_drop_file->string);
 
 	if (readonly)
 		iostream = fopen(filename, "r");
 	else
+		iostream = fopen(filename, "a+"); */
+	// Knightmare- use SavegameDir() / GameDir() instead
+	if (readonly)
+	{
+		Com_sprintf (filename, sizeof(filename), "%s/%s", SavegameDir(), sv_agm_drop_file->string);
+		iostream = fopen(filename, "r");
+		if ( !iostream ) {
+			Com_sprintf (filename, sizeof(filename), "%s/%s", GameDir(), sv_agm_drop_file->string);
+			iostream = fopen(filename, "r");
+		}
+	}
+	else {
+		Com_sprintf (filename, sizeof(filename), "%s/%s", SavegameDir(), sv_agm_drop_file->string);
 		iostream = fopen(filename, "a+");
+	}
 
 	if (report)
 	{
@@ -1291,25 +1375,39 @@ FILE* OpenAGMDropFile(qboolean report, qboolean readonly)
 	return iostream;
 }
 
-FILE* OpenDiscLauncherDropFile(qboolean report, qboolean readonly)
+FILE* OpenDiscLauncherDropFile (qboolean report, qboolean readonly)
 {
 	FILE	*iostream;
-	cvar_t	*game;
+//	cvar_t	*game;
 	char	filename[MAX_OSPATH];
 
 	if (strlen(sv_disc_drop_file->string) == 0)
 		return NULL;
 
-	game = gi.cvar("game", "", 0);
+/*	game = gi.cvar("game", "", 0);
 	if (!*game->string)
-		Com_sprintf(filename, sizeof(filename), "%s/%s", GAMEVERSION, sv_disc_drop_file->string);
+		Com_sprintf (filename, sizeof(filename), "%s/%s", GAMEVERSION, sv_disc_drop_file->string);
 	else
-		Com_sprintf(filename, sizeof(filename), "%s/%s", game->string, sv_disc_drop_file->string);
+		Com_sprintf (filename, sizeof(filename), "%s/%s", game->string, sv_disc_drop_file->string);
 
 	if (readonly)
 		iostream = fopen(filename, "r");
 	else
+		iostream = fopen(filename, "a+"); */
+	// Knightmare- use SavegameDir() / GameDir() instead
+	if (readonly)
+	{
+		Com_sprintf (filename, sizeof(filename), "%s/%s", SavegameDir(), sv_disc_drop_file->string);
+		iostream = fopen(filename, "r");
+		if ( !iostream ) {
+			Com_sprintf (filename, sizeof(filename), "%s/%s", GameDir(), sv_disc_drop_file->string);
+			iostream = fopen(filename, "r");
+		}
+	}
+	else {
+		Com_sprintf (filename, sizeof(filename), "%s/%s", SavegameDir(), sv_disc_drop_file->string);
 		iostream = fopen(filename, "a+");
+	}
 
 	if (report)
 	{
@@ -1322,25 +1420,39 @@ FILE* OpenDiscLauncherDropFile(qboolean report, qboolean readonly)
 	return iostream;
 }
 
-FILE* OpenBotConfigFile(qboolean report, qboolean readonly)
+FILE* OpenBotConfigFile (qboolean report, qboolean readonly)
 {
 	FILE	*iostream;
-	cvar_t	*game;
+//	cvar_t	*game;
 	char	filename[MAX_OSPATH];
 
 	if (strlen(sv_bots_config_file->string) == 0)
 		return NULL;
 
-	game = gi.cvar("game", "", 0);
+/*	game = gi.cvar("game", "", 0);
 	if (!*game->string)
-		Com_sprintf(filename, sizeof(filename), "%s/%s", GAMEVERSION, sv_bots_config_file->string);
+		Com_sprintf (filename, sizeof(filename), "%s/%s", GAMEVERSION, sv_bots_config_file->string);
 	else
-		Com_sprintf(filename, sizeof(filename), "%s/%s", game->string, sv_bots_config_file->string);
+		Com_sprintf (filename, sizeof(filename), "%s/%s", game->string, sv_bots_config_file->string);
 
 	if (readonly)
 		iostream = fopen(filename, "r");
 	else
+		iostream = fopen(filename, "a+"); */
+	// Knightmare- use SavegameDir() / GameDir() instead
+	if (readonly)
+	{
+		Com_sprintf (filename, sizeof(filename), "%s/%s", SavegameDir(), sv_bots_config_file->string);
+		iostream = fopen(filename, "r");
+		if ( !iostream ) {
+			Com_sprintf (filename, sizeof(filename), "%s/%s", GameDir(), sv_bots_config_file->string);
+			iostream = fopen(filename, "r");
+		}
+	}
+	else {
+		Com_sprintf (filename, sizeof(filename), "%s/%s", SavegameDir(), sv_bots_config_file->string);
 		iostream = fopen(filename, "a+");
+	}
 
 	if (report)
 	{
@@ -1401,7 +1513,7 @@ edict_t	*LookingAt(edict_t *ent, int filter, vec3_t endpos, float *range)
 	}
 
 	VectorMA(start, WORLD_SIZE, forward, end);	// was 8192.0
-	
+
 	// First check for looking directly at a pickup item
 	VectorSet(mins, -4096.0, -4096.0, -4096.0);
 	VectorSet(maxs,  4096.0,  4096.0,  4096.0);
@@ -1631,13 +1743,13 @@ qboolean FileExists(char *checkname, filetype_t ftype)
 			fclose(fstream);
 			return true;
 		}
-		
+
 //		Search paks in the game directory.
 
 		if (InPak(basedir->string, gamedir->string, path))
 			return true;
 	}
-	
+
 //	Search in the 'baseq2' directory for external file.
 
 	Com_sprintf(filename, sizeof(filename), "%s/baseq2/%s", basedir->string, path);
@@ -1646,7 +1758,7 @@ qboolean FileExists(char *checkname, filetype_t ftype)
 		fclose(fstream);
 		return true;
 	}
-	
+
 //	Search paks in the 'baseq2' directory.
 
 	if (InPak(basedir->string, "baseq2", path))
@@ -1747,7 +1859,7 @@ void gi_bprintf(int printlevel, char *fmt, ...)
 
 	va_end(argptr);
 
-	if (dedicated->value)		
+	if (dedicated->value)
 		gi.cprintf(NULL, printlevel, "%s", bigbuffer);												//r1: format string exploit fix
 
 	for (i = 0; i < game.maxclients; i++)

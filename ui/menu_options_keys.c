@@ -93,13 +93,13 @@ int				keys_cursor;
 static int		bind_grab;
 #endif
 
-static menuframework_s	s_keys_menu;
+static menuFramework_s	s_keys_menu;
 #ifdef USE_KEYBIND_CONTROL
-static menukeybind_s	s_keys_binds[64];
+static menuKeybind_s	s_keys_binds[64];
 #else
-static menuaction_s		s_keys_binds[64];
+static menuAction_s		s_keys_binds[64];
 #endif
-static menuaction_s		s_keys_back_action;
+static menuAction_s		s_keys_back_action;
 
 //=======================================================================
 
@@ -152,7 +152,7 @@ static void M_FindKeysForCommand (char *command, int *twokeys)
 	}
 }
 
-static void M_KeysBackCursorDrawFunc (menuaction_s *self) // back action
+static void M_KeysBackCursorDrawFunc (menuAction_s *self) // back action
 {
 #ifdef NOTTHIRTYFLIGHTS
 	char	*cursor;
@@ -166,15 +166,15 @@ static void M_KeysBackCursorDrawFunc (menuaction_s *self) // back action
 #else
 	SCR_DrawChar (SCREEN_WIDTH*0.5 - 24+ (5*sin(anglemod(cl.time*0.01))),
 		s_keys_menu.y + self->generic.y,
-		MENU_FONT_SIZE,
 		ALIGN_CENTER,
+		MENU_FONT_SIZE,
 		13,
-		FONT_UI,
-		255,255,255,255, false, true);
+//		FONT_UI,
+		255, 255, 255, 255, false, true);
 #endif
 }
 
-static void M_KeyCursorDrawFunc (menuframework_s *menu)
+static void M_KeyCursorDrawFunc (menuFramework_s *menu)
 {
 #ifdef NOTTHIRTYFLIGHTS
 	char	*cursor;
@@ -195,19 +195,18 @@ static void M_KeyCursorDrawFunc (menuframework_s *menu)
 #else
 		SCR_DrawChar (menu->x+ (5*sin(anglemod(cl.time*0.01))),
 			menu->y + menu->cursor * MENU_LINE_SIZE,
-			MENU_FONT_SIZE,
 			ALIGN_CENTER,
+			MENU_FONT_SIZE,
 			13,
-			FONT_UI,
-			255,255,255,
-			255, false, true);
+//			FONT_UI,
+			255, 255, 255, 255, false, true);
 #endif
 }
 
 static void M_DrawKeyBindingFunc (void *self)
 {
 	int keys[2];
-	menuaction_s *a = (menuaction_s *) self;
+	menuAction_s *a = (menuAction_s *) self;
 
 	M_FindKeysForCommand( bindnames[a->generic.localdata[0]][0], keys);
 		
@@ -254,7 +253,7 @@ static void M_DrawKeyBindingFunc (void *self)
 
 static void M_KeyBindingFunc (void *self)
 {
-	menuaction_s *a = ( menuaction_s * ) self;
+	menuAction_s *a = ( menuAction_s * ) self;
 	int keys[2];
 
 	M_FindKeysForCommand (bindnames[a->generic.localdata[0]][0], keys);
@@ -350,7 +349,7 @@ static void Menu_Keys_Init (void)
 //	UI_CenterMenu (&s_keys_menu);
 }
 
-static void Menu_Keys_Draw (void)
+static void *Menu_Keys_Draw (void)
 {
 #ifdef NOTTHIRTYFLIGHTS
 	UI_DrawBanner ("m_banner_customize"); // Knightmare added
@@ -367,7 +366,7 @@ static const char *Menu_Keys_Key (int key)
 #ifdef USE_KEYBIND_CONTROL
 	return UI_DefaultMenuKey (&s_keys_menu, key);
 #else
-	menuaction_s *item = (menuaction_s *) UI_ItemAtMenuCursor( &s_keys_menu );
+	menuAction_s *item = (menuAction_s *) UI_ItemAtMenuCursor( &s_keys_menu );
 
 	// pressing mouse1 to pick a new bind wont force bind/unbind itself - spaz
 	if ( bind_grab && !(ui_mousecursor.buttonused[MOUSEBUTTON1]&&key==K_MOUSE1))
@@ -412,10 +411,11 @@ static const char *Menu_Keys_Key (int key)
 		return UI_DefaultMenuKey (&s_keys_menu, key);
 	}
 #endif
+    return UI_DefaultMenuKey (&s_keys_menu, key);
 }
 
 void Menu_Keys_f (void)
 {
 	Menu_Keys_Init ();
-	UI_PushMenu (Menu_Keys_Draw, Menu_Keys_Key);
+	UI_PushMenu (&s_keys_menu);
 }

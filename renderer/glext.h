@@ -56,6 +56,11 @@ extern "C" {
 /* Header file version number, required by OpenGL ABI for Linux */
 /* glext.h last updated 2004/6/22 */
 /* Current version at http://oss.sgi.com/projects/ogl-sample/registry/ */
+// Knightmare- fix conflicting GL_GLEXT_VERSION on MacOS
+#ifdef	GL_GLEXT_VERSION
+#undef GL_GLEXT_VERSION
+#endif
+
 #define GL_GLEXT_VERSION 23
 
 #ifndef GL_VERSION_1_2

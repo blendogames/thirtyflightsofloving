@@ -1,0 +1,383 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectName>dday</ProjectName>
+    <ProjectGuid>{22B1C86F-AE95-4E8E-AB32-43D95D1D7842}</ProjectGuid>
+    <RootNamespace>dday_2010</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>NotSet</CharacterSet>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>NotSet</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>NotSet</CharacterSet>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>NotSet</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\Debug\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\Debug\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\Release\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\Release\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\x64\Debug\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\x64\Debug\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\x64\Release\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\x64\Release\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BrowseInformation>true</BrowseInformation>
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <CompileAs>CompileAsC</CompileAs>
+      <DisableSpecificWarnings>4996;4201;4100;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>./gamex86.dll</OutputFile>
+      <ModuleDefinitionFile>.\..\..\game.def</ModuleDefinitionFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>$(IntDir)kmq2gamex86.pdb</ProgramDatabaseFile>
+      <GenerateMapFile>true</GenerateMapFile>
+      <MapFileName>$(IntDir)kmq2gamex86.map</MapFileName>
+      <SubSystem>Windows</SubSystem>
+      <BaseAddress>0x20000000</BaseAddress>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <ImportLibrary>$(IntDir)kmq2gamex86.lib</ImportLibrary>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+    <Bscmake>
+      <OutputFile>$(IntDir)game.bsc</OutputFile>
+    </Bscmake>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <IntrinsicFunctions>false</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <CompileAs>CompileAsC</CompileAs>
+      <DisableSpecificWarnings>4996;4201;4100;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>./gamex86.dll</OutputFile>
+      <ModuleDefinitionFile>.\..\..\game.def</ModuleDefinitionFile>
+      <ProgramDatabaseFile>
+      </ProgramDatabaseFile>
+      <SubSystem>Windows</SubSystem>
+      <BaseAddress>0x20000000</BaseAddress>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <ImportLibrary>$(IntDir)kmq2gamex86.lib</ImportLibrary>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+    <Bscmake>
+      <OutputFile>$(IntDir)game.bsc</OutputFile>
+    </Bscmake>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BrowseInformation>true</BrowseInformation>
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <CompileAs>CompileAsC</CompileAs>
+      <DisableSpecificWarnings>4996;4201;4100;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>./kmq2gamex64.dll</OutputFile>
+      <ModuleDefinitionFile>.\..\..\game.def</ModuleDefinitionFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>$(IntDir)kmq2gamex64.pdb</ProgramDatabaseFile>
+      <GenerateMapFile>true</GenerateMapFile>
+      <MapFileName>$(IntDir)kmq2gamex64.map</MapFileName>
+      <SubSystem>Windows</SubSystem>
+      <BaseAddress>0x20000000</BaseAddress>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <ImportLibrary>$(IntDir)kmq2gamex64.lib</ImportLibrary>
+      <TargetMachine>MachineX64</TargetMachine>
+    </Link>
+    <Bscmake>
+      <OutputFile>$(IntDir)game.bsc</OutputFile>
+    </Bscmake>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <CompileAs>CompileAsC</CompileAs>
+      <DisableSpecificWarnings>4996;4201;4100;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>./kmq2gamex64.dll</OutputFile>
+      <ModuleDefinitionFile>.\..\..\game.def</ModuleDefinitionFile>
+      <ProgramDatabaseFile>
+      </ProgramDatabaseFile>
+      <SubSystem>Windows</SubSystem>
+      <BaseAddress>0x20000000</BaseAddress>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <ImportLibrary>$(IntDir)kmq2gamex64.lib</ImportLibrary>
+      <TargetMachine>MachineX64</TargetMachine>
+    </Link>
+    <Bscmake>
+      <OutputFile>$(IntDir)game.bsc</OutputFile>
+    </Bscmake>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <None Include="..\..\docs\GNU.TXT" />
+    <None Include="..\..\docs\LICENSE.TXT" />
+    <None Include="..\..\docs\readme.amiga.txt" />
+    <None Include="..\..\docs\readme.linux.txt" />
+    <None Include="..\..\docs\README.TXT" />
+    <None Include="..\..\game.def" />
+    <None Include="..\..\Makefile" />
+    <None Include="..\..\makefile.ami" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="dday_2010.rc">
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">_WIN64</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">_WIN64</PreprocessorDefinitions>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\ai\ai_local.h" />
+    <ClInclude Include="..\..\ai\ai_nodes_local.h" />
+    <ClInclude Include="..\..\ai\ai_nodes_shared.h" />
+    <ClInclude Include="..\..\ai\ai_weapons.h" />
+    <ClInclude Include="..\..\ai\AStar.h" />
+    <ClInclude Include="..\..\game.h" />
+    <ClInclude Include="..\..\gbr\gbr_classes.h" />
+    <ClInclude Include="..\..\gbr\gbr_defines.h" />
+    <ClInclude Include="..\..\gbr\gbr_main.h" />
+    <ClInclude Include="..\..\grm\grm_classes.h" />
+    <ClInclude Include="..\..\grm\grm_defines.h" />
+    <ClInclude Include="..\..\grm\grm_main.h" />
+    <ClInclude Include="..\..\g_cmds.h" />
+    <ClInclude Include="..\..\g_defines.h" />
+    <ClInclude Include="..\..\g_local.h" />
+    <ClInclude Include="..\..\g_maps.h" />
+    <ClInclude Include="..\..\ita\ita_classes.h" />
+    <ClInclude Include="..\..\ita\ita_defines.h" />
+    <ClInclude Include="..\..\ita\ita_main.h" />
+    <ClInclude Include="..\..\jpn\jpn_classes.h" />
+    <ClInclude Include="..\..\jpn\jpn_defines.h" />
+    <ClInclude Include="..\..\jpn\jpn_main.h" />
+    <ClInclude Include="..\..\m_actor.h" />
+    <ClInclude Include="..\..\m_insane.h" />
+    <ClInclude Include="..\..\m_player.h" />
+    <ClInclude Include="..\..\pol\pol_classes.h" />
+    <ClInclude Include="..\..\pol\pol_defines.h" />
+    <ClInclude Include="..\..\pol\pol_main.h" />
+    <ClInclude Include="..\..\p_classes.h" />
+    <ClInclude Include="..\..\p_menu.h" />
+    <ClInclude Include="..\..\p_menus.h" />
+    <ClInclude Include="..\..\p_observer.h" />
+    <ClInclude Include="..\..\q_shared.h" />
+    <ClInclude Include="..\..\rus\rus_classes.h" />
+    <ClInclude Include="..\..\rus\rus_defines.h" />
+    <ClInclude Include="..\..\rus\rus_main.h" />
+    <ClInclude Include="..\..\usa\usa_classes.h" />
+    <ClInclude Include="..\..\usa\usa_defines.h" />
+    <ClInclude Include="..\..\usa\usa_main.h" />
+    <ClInclude Include="..\..\usm\usm_classes.h" />
+    <ClInclude Include="..\..\usm\usm_defines.h" />
+    <ClInclude Include="..\..\usm\usm_main.h" />
+    <ClInclude Include="..\..\x_fbomb.h" />
+    <ClInclude Include="..\..\x_fire.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\ai\ai_class_dmbot.c" />
+    <ClCompile Include="..\..\ai\ai_class_monster_default.c" />
+    <ClCompile Include="..\..\ai\ai_dropnodes.c" />
+    <ClCompile Include="..\..\ai\ai_items.c" />
+    <ClCompile Include="..\..\ai\ai_links.c" />
+    <ClCompile Include="..\..\ai\ai_main.c" />
+    <ClCompile Include="..\..\ai\ai_movement.c" />
+    <ClCompile Include="..\..\ai\ai_navigation.c" />
+    <ClCompile Include="..\..\ai\ai_nodes.c" />
+    <ClCompile Include="..\..\ai\ai_tools.c" />
+    <ClCompile Include="..\..\ai\ai_weapons.c" />
+    <ClCompile Include="..\..\ai\AStar.c" />
+    <ClCompile Include="..\..\ai\bot_common.c" />
+    <ClCompile Include="..\..\ai\bot_spawn.c" />
+    <ClCompile Include="..\..\gbr\gbr_guninfo.c" />
+    <ClCompile Include="..\..\gbr\gbr_item.c" />
+    <ClCompile Include="..\..\gbr\gbr_main.c" />
+    <ClCompile Include="..\..\gbr\gbr_spawn.c" />
+    <ClCompile Include="..\..\gbr\gbr_weapon.c" />
+    <ClCompile Include="..\..\grm\grm_guninfo.c" />
+    <ClCompile Include="..\..\grm\grm_item.c" />
+    <ClCompile Include="..\..\grm\grm_main.c" />
+    <ClCompile Include="..\..\grm\grm_spawn.c" />
+    <ClCompile Include="..\..\grm\grm_weapon.c" />
+    <ClCompile Include="..\..\g_ai.c" />
+    <ClCompile Include="..\..\g_arty.c" />
+    <ClCompile Include="..\..\g_cmds.c" />
+    <ClCompile Include="..\..\g_combat.c" />
+    <ClCompile Include="..\..\g_ents.c" />
+    <ClCompile Include="..\..\g_func.c" />
+    <ClCompile Include="..\..\g_items.c" />
+    <ClCompile Include="..\..\g_main.c" />
+    <ClCompile Include="..\..\g_maps.c" />
+    <ClCompile Include="..\..\g_misc.c" />
+    <ClCompile Include="..\..\g_monster.c" />
+    <ClCompile Include="..\..\g_objectives.c" />
+    <ClCompile Include="..\..\g_phys.c" />
+    <ClCompile Include="..\..\g_save.c" />
+    <ClCompile Include="..\..\g_spawn.c" />
+    <ClCompile Include="..\..\g_svcmds.c" />
+    <ClCompile Include="..\..\g_target.c" />
+    <ClCompile Include="..\..\g_trigger.c" />
+    <ClCompile Include="..\..\g_turret.c" />
+    <ClCompile Include="..\..\g_utils.c" />
+    <ClCompile Include="..\..\g_weapon.c" />
+    <ClCompile Include="..\..\ita\ita_guninfo.c" />
+    <ClCompile Include="..\..\ita\ita_item.c" />
+    <ClCompile Include="..\..\ita\ita_main.c" />
+    <ClCompile Include="..\..\ita\ita_spawn.c" />
+    <ClCompile Include="..\..\ita\ita_weapon.c" />
+    <ClCompile Include="..\..\jpn\jpn_guninfo.c" />
+    <ClCompile Include="..\..\jpn\jpn_item.c" />
+    <ClCompile Include="..\..\jpn\jpn_main.c" />
+    <ClCompile Include="..\..\jpn\jpn_spawn.c" />
+    <ClCompile Include="..\..\jpn\jpn_weapon.c" />
+    <ClCompile Include="..\..\m_actor.c" />
+    <ClCompile Include="..\..\m_civilian.c" />
+    <ClCompile Include="..\..\m_flash.c" />
+    <ClCompile Include="..\..\m_insane.c" />
+    <ClCompile Include="..\..\m_move.c" />
+    <ClCompile Include="..\..\pol\pol_guninfo.c" />
+    <ClCompile Include="..\..\pol\pol_item.c" />
+    <ClCompile Include="..\..\pol\pol_main.c" />
+    <ClCompile Include="..\..\pol\pol_spawn.c" />
+    <ClCompile Include="..\..\pol\pol_weapon.c" />
+    <ClCompile Include="..\..\p_classes.c" />
+    <ClCompile Include="..\..\p_client.c" />
+    <ClCompile Include="..\..\p_generic_wep.c" />
+    <ClCompile Include="..\..\p_hud.c" />
+    <ClCompile Include="..\..\p_menu.c" />
+    <ClCompile Include="..\..\p_observer.c" />
+    <ClCompile Include="..\..\p_trail.c" />
+    <ClCompile Include="..\..\p_view.c" />
+    <ClCompile Include="..\..\p_weapon.c" />
+    <ClCompile Include="..\..\q_shared.c" />
+    <ClCompile Include="..\..\rus\rus_guninfo.c" />
+    <ClCompile Include="..\..\rus\rus_item.c" />
+    <ClCompile Include="..\..\rus\rus_main.c" />
+    <ClCompile Include="..\..\rus\rus_spawn.c" />
+    <ClCompile Include="..\..\rus\rus_weapon.c" />
+    <ClCompile Include="..\..\usa\usa_guninfo.c" />
+    <ClCompile Include="..\..\usa\usa_item.c" />
+    <ClCompile Include="..\..\usa\usa_main.c" />
+    <ClCompile Include="..\..\usa\usa_spawn.c" />
+    <ClCompile Include="..\..\usa\usa_weapon.c" />
+    <ClCompile Include="..\..\usm\usm_guninfo.c" />
+    <ClCompile Include="..\..\usm\usm_item.c" />
+    <ClCompile Include="..\..\usm\usm_main.c" />
+    <ClCompile Include="..\..\usm\usm_spawn.c" />
+    <ClCompile Include="..\..\usm\usm_weapon.c" />
+    <ClCompile Include="..\..\u_entmgr.c" />
+    <ClCompile Include="..\..\x_fbomb.c" />
+    <ClCompile Include="..\..\x_fire.c" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

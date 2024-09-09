@@ -3,19 +3,19 @@
 #ifdef JETPACK_MOD
 /*we get silly velocity-effects when we are on ground and try to
   accelerate, so lift us a little bit if possible*/
-qboolean Jet_AvoidGround( edict_t *ent )
+qboolean Jet_AvoidGround (edict_t *ent)
 {
 	vec3_t		new_origin;
 	trace_t	trace;
 	qboolean	success;
 
-/*Check if there is enough room above us before we change origin[2]*/
+	/*Check if there is enough room above us before we change origin[2]*/
 
 	new_origin[0] = ent->s.origin[0];
 	new_origin[1] = ent->s.origin[1];
 	new_origin[2] = ent->s.origin[2] + 0.5;
 	trace = gi.trace( ent->s.origin, ent->mins, ent->maxs, new_origin, ent, MASK_PLAYERSOLID );
-	if ( success=(trace.plane.normal[2]==0) )
+	if ( success = (trace.plane.normal[2] == 0) )
 		/*no ceiling?*/
 		ent->s.origin[2] += 0.5;
 		/*then make sure off ground*/
@@ -25,7 +25,7 @@ qboolean Jet_AvoidGround( edict_t *ent )
 /*If a player dies with activated jetpack this function will be called
 and produces a little explosion*/
 
-void Jet_BecomeExplosion( edict_t *ent, int damage )
+void Jet_BecomeExplosion (edict_t *ent, int damage)
 {
 	gi.WriteByte( svc_temp_entity );
 	gi.WriteByte( TE_EXPLOSION1 );
@@ -49,7 +49,7 @@ void Jet_BecomeExplosion( edict_t *ent, int damage )
 gives the best results. Of course its a little dangerous because
 if we dont take care, we can move into solid*/
 
-void Jet_ApplyLifting( edict_t *ent )
+void Jet_ApplyLifting (edict_t *ent)
 {
 	float		delta;
 	vec3_t	new_origin;
@@ -62,7 +62,7 @@ void Jet_ApplyLifting( edict_t *ent )
 	delta = (float)((int)(delta*8))/8; /*round to multiples of 0.125*/
 	VectorCopy( ent->s.origin, new_origin );
 	new_origin[2] += delta;
-	if( VectorLength(ent->velocity) == 0 )
+	if ( VectorLength(ent->velocity) == 0 )
 	{
 		/*i dont know the reason yet, but there is some floating so we
 		have to compensate that here (only if there is no velocity left)*/
@@ -79,7 +79,7 @@ void Jet_ApplyLifting( edict_t *ent )
 
 /*This function applys some sparks to your jetpack*/
 
-void Jet_ApplySparks ( edict_t *ent )
+void Jet_ApplySparks (edict_t *ent)
 {
 	vec3_t  forward, right;
 	vec3_t  pack_pos, jet_vector;
@@ -108,7 +108,7 @@ The other modifications results in the use of the built-in quake functions,
 there is no change in moving behavior (reinventing the wheel is a lot of
 "fun" and a BIG waste of time ;-))*/
 
-void Jet_ApplyJet( edict_t *ent, usercmd_t *ucmd )
+void Jet_ApplyJet (edict_t *ent, usercmd_t *ucmd)
 {
 	float	direction;
 	float	scale;
@@ -139,7 +139,7 @@ void Jet_ApplyJet( edict_t *ent, usercmd_t *ucmd )
 			/*are we accelerating backward or forward?*/
 			direction = (ucmd->forwardmove<0) ? -1.0 : 1.0;
 			/*add the acceleration for each direction*/
-			if(jetpack_weenie->value)
+			if (jetpack_weenie->value)
 			{
 				acc[0] += forward[0] * direction * 60;
 				acc[1] += forward[1] * direction * 60;
@@ -156,7 +156,7 @@ void Jet_ApplyJet( edict_t *ent, usercmd_t *ucmd )
 		{      /*are we accelerating left or right*/
 			direction = (ucmd->sidemove<0) ? -1.0 : 1.0;
 			/*add only to x and y acceleration*/
-			if(jetpack_weenie->value)
+			if (jetpack_weenie->value)
 				scale = direction * 40;
 			else
 				scale = direction * 80;
@@ -167,7 +167,7 @@ void Jet_ApplyJet( edict_t *ent, usercmd_t *ucmd )
 	    /*if we crouch or jump add Up-Down-Booster acceleration (30)*/
 	    if ( ucmd->upmove )
 		{
-			if(jetpack_weenie->value)
+			if (jetpack_weenie->value)
 				scale = 30;
 			else
 				scale = 45;
@@ -190,29 +190,29 @@ void Jet_ApplyJet( edict_t *ent, usercmd_t *ucmd )
 	    ent->velocity[2] = (float)((int)(ent->velocity[2]*8))/8;
 		/*Bound X and Y velocity so that friction and acceleration dont need to be
 		synced on maxvelocitys*/
-		if(jetpack_weenie->value)
+		if (jetpack_weenie->value)
 		{
-			if(ent->velocity[0] >  300) ent->velocity[0] =  300;
-			if(ent->velocity[0] < -300) ent->velocity[0] = -300;
-			if(ent->velocity[1] >  300) ent->velocity[1] =  300;
-			if(ent->velocity[1] < -300) ent->velocity[1] = -300;
+			if (ent->velocity[0] >  300) ent->velocity[0] =  300;
+			if (ent->velocity[0] < -300) ent->velocity[0] = -300;
+			if (ent->velocity[1] >  300) ent->velocity[1] =  300;
+			if (ent->velocity[1] < -300) ent->velocity[1] = -300;
 		}
 		else
 		{
-			if(ent->velocity[0] >  1000) ent->velocity[0] =  1000;
-			if(ent->velocity[0] < -1000) ent->velocity[0] = -1000;
-			if(ent->velocity[1] >  1000) ent->velocity[1] =  1000;
-			if(ent->velocity[1] < -1000) ent->velocity[1] = -1000;
+			if (ent->velocity[0] >  1000) ent->velocity[0] =  1000;
+			if (ent->velocity[0] < -1000) ent->velocity[0] = -1000;
+			if (ent->velocity[1] >  1000) ent->velocity[1] =  1000;
+			if (ent->velocity[1] < -1000) ent->velocity[1] = -1000;
 		}
 	    /*add some gentle up and down when idle (not accelerating)*/
-		if( (VectorLength(acc) == 0) && (!ent->groundentity))
+		if ( (VectorLength(acc) == 0) && (!ent->groundentity))
 			Jet_ApplyLifting( ent );
 	} //if ( ent->client->jetpack_nextthink...
 	/*add rolling when we fly curves or boost left/right*/
-	if((bob_roll->value > 0) && (jetpack_weenie->value || !ent->groundentity))
+	if ((bob_roll->value > 0) && (jetpack_weenie->value || !ent->groundentity))
 	{
 		ent->client->kick_angles[ROLL] = -DotProduct( ent->velocity, right ) * ent->client->jetpack_roll;
-		if(ucmd->sidemove)
+		if (ucmd->sidemove)
 			ent->client->jetpack_roll = min(0.02,ent->client->jetpack_roll + 0.002);
 		else
 			ent->client->jetpack_roll = max(0.00,ent->client->jetpack_roll - 0.002);

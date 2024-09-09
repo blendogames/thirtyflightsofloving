@@ -852,6 +852,16 @@ qboolean Boss2_CheckAttack (edict_t *self)
 }
 
 
+// Knightmare- added soundcache function
+void monster_boss2_soundcache (edict_t *self)
+{
+	sound_pain1 = gi.soundindex ("bosshovr/bhvpain1.wav");
+	sound_pain2 = gi.soundindex ("bosshovr/bhvpain2.wav");
+	sound_pain3 = gi.soundindex ("bosshovr/bhvpain3.wav");
+	sound_death = gi.soundindex ("bosshovr/bhvdeth1.wav");
+	sound_search1 = gi.soundindex ("bosshovr/bhvunqv1.wav");
+}
+
 
 /*QUAKED monster_boss2 (1 .5 0) (-56 -56 0) (56 56 80) Ambush Trigger_Spawn Sight GoodGuy NoGib HomingRockets
 */
@@ -863,15 +873,12 @@ void SP_monster_boss2 (edict_t *self)
 		return;
 	}
 
-	sound_pain1 = gi.soundindex ("bosshovr/bhvpain1.wav");
-	sound_pain2 = gi.soundindex ("bosshovr/bhvpain2.wav");
-	sound_pain3 = gi.soundindex ("bosshovr/bhvpain3.wav");
-	sound_death = gi.soundindex ("bosshovr/bhvdeth1.wav");
-	sound_search1 = gi.soundindex ("bosshovr/bhvunqv1.wav");
+	// Knightmare- use soundcache function
+	monster_boss2_soundcache (self);
 
 	self->s.sound = gi.soundindex ("bosshovr/bhvengn1.wav");
-#ifdef LOOP_SOUND_ATTENUATION
-	self->s.attenuation = ATTN_IDLE;
+#ifdef KMQUAKE2_ENGINE_MOD
+	self->s.loop_attenuation = ATTN_IDLE;
 #endif
 
 	self->movetype = MOVETYPE_STEP;

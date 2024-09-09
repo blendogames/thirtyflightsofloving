@@ -411,7 +411,7 @@ void WidowSpawn (edict_t *self)
 			ent->nextthink = level.time;
 			ent->think (ent);
 
-			//ent->monsterinfo.aiflags |= AI_SPAWNED_WIDOW|AI_DO_NOT_COUNT|AI_IGNORE_SHOTS;
+		//	ent->monsterinfo.aiflags |= AI_SPAWNED_WIDOW|AI_DO_NOT_COUNT|AI_IGNORE_SHOTS;
 			ent->monsterinfo.aiflags |= AI_IGNORE_SHOTS;
 			ent->monsterinfo.monsterflags |= MFL_SPAWNED_WIDOW|MFL_DO_NOT_COUNT;
 
@@ -677,7 +677,7 @@ void WidowRail (edict_t *self)
 	vec3_t	start;
 	vec3_t	dir;
 	vec3_t	forward, right;
-	int		flash;
+	int		flash = 0;
 
 //	gi.dprintf ("railing!\n");
 	AngleVectors (self->s.angles, forward, right, NULL);
@@ -1450,10 +1450,10 @@ void WidowPowerups (edict_t *self)
 
 qboolean Widow_CheckAttack (edict_t *self)
 {
-	vec3_t	spot1, spot2;
-	vec3_t	temp;
-	float	chance;
-	trace_t	tr;
+	vec3_t		spot1, spot2;
+	vec3_t		temp;
+	float		chance = 0.0f;
+	trace_t		tr;
 	qboolean	enemy_infront;
 	int			enemy_range;
 	float		enemy_yaw;
@@ -1645,7 +1645,19 @@ void WidowCalcSlots (edict_t *self)
 //		gi.dprintf ("number of slots changed from %d to %d\n", old_slots, self->monsterinfo.monster_slots);
 }
 
-void WidowPrecache ()
+
+// Knightmare- added soundcache function
+void monster_widow_soundcache (edict_t *self)
+{
+	sound_pain1 = gi.soundindex ("widow/bw1pain1.wav");
+	sound_pain2 = gi.soundindex ("widow/bw1pain2.wav");
+	sound_pain3 = gi.soundindex ("widow/bw1pain3.wav");
+	sound_search1 = gi.soundindex ("bosshovr/bhvunqv1.wav");
+//	sound_sight	= gi.soundindex ("widow/sight.wav");
+	sound_rail = gi.soundindex ("gladiator/railgun.wav");
+}
+
+void WidowPrecache (void)
 {
 	// cache in all of the stalker stuff, widow stuff, spawngro stuff, gibs
 	gi.soundindex ("stalker/pain.wav");
@@ -1665,8 +1677,8 @@ void WidowPrecache ()
 	gi.modelindex ("models/monsters/blackwidow/gib1/tris.md2");
 	gi.modelindex ("models/monsters/blackwidow/gib2/tris.md2");
 	gi.modelindex ("models/monsters/blackwidow/gib3/tris.md2");
-	//Knightmare- this isn't used
-	//gi.modelindex ("models/monsters/blackwidow/gib4/tris.md2");
+	// Knightmare- this isn't used
+//	gi.modelindex ("models/monsters/blackwidow/gib4/tris.md2");
 	gi.modelindex ("models/monsters/blackwidow2/gib1/tris.md2");
 	gi.modelindex ("models/monsters/blackwidow2/gib2/tris.md2");
 	gi.modelindex ("models/monsters/blackwidow2/gib3/tris.md2");
@@ -1690,12 +1702,8 @@ void SP_monster_widow (edict_t *self)
 		return;
 	}
 
-	sound_pain1 = gi.soundindex ("widow/bw1pain1.wav");
-	sound_pain2 = gi.soundindex ("widow/bw1pain2.wav");
-	sound_pain3 = gi.soundindex ("widow/bw1pain3.wav");
-	sound_search1 = gi.soundindex ("bosshovr/bhvunqv1.wav");
-//	sound_sight	= gi.soundindex ("widow/sight.wav");
-	sound_rail = gi.soundindex ("gladiator/railgun.wav");
+	// Knightmare- use soundcache function
+	monster_widow_soundcache (self);
 
 //	self->s.sound = gi.soundindex ("bosshovr/bhvengn1.wav");
 
@@ -1780,8 +1788,8 @@ void SP_monster_widow (edict_t *self)
 	}
 	self->monsterinfo.scale = MODEL_SCALE;
 
-	WidowPrecache();
-	WidowCalcSlots(self);
+	WidowPrecache ();
+	WidowCalcSlots (self);
 	widow_damage_multiplier = 1;
 
 	walkmonster_start (self);

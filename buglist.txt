@@ -61,3 +61,6 @@ Maps.lst on disk override same filename inside pak?
 
 Text color codes not handled properly by Con_Print()?
 	- FIXED by adding formatting tracking for console line feed
+
+Endless HTTP downloading loops with 24-bit texture downloading enabled
+	- FIXED by replacing erroneous "precache_check < CS_IMAGES+max_images" check with "precache_check < cs_images+max_images"

@@ -733,7 +733,8 @@ void SV_CalcBlend (edict_t *ent)
 		float alpha;
 
 		// Turn off fade for dead software players or they won't see menu
-		if ((ent->health <= 0) && (Q_stricmp(vid_ref->string,"gl")) && (Q_stricmp(vid_ref->string,"kmgl")))
+	//	if ((ent->health <= 0) && (Q_stricmp(vid_ref->string,"gl")) && (Q_stricmp(vid_ref->string,"kmgl")))
+		if ( (ent->health <= 0) && !Q_strncasecmp(vid_ref->string, "soft", 4) )
 			ent->client->fadein = 0;
 
 		if (ent->client->fadein > level.framenum)
@@ -1218,36 +1219,43 @@ void G_SetClientEffects (edict_t *ent)
 	}
 */
 //PGM
-	//Knightmare- flashlight
+	// Knightmare- flashlight
 	if (ent->client->flashlight_active)
 	{
-		vec3_t		forward;
-		vec3_t		flashpoint;
+		vec3_t		fl_forward, fl_right, offset, start, end, flashpoint;
 		trace_t		tr;
 		int			mask;
 
-		mask = MASK_SHOT|CONTENTS_SLIME|CONTENTS_LAVA;
-		//if set to use cells and at the end of the minute
-		if (ent->client->flashlight_framenum == level.time && ent->client->flashlight_cell_usage > 0)
-		{	//check if have the cells, if not, switch off
+		mask = CONTENTS_SOLID|CONTENTS_MONSTER|CONTENTS_DEADMONSTER|CONTENTS_SLIME|CONTENTS_LAVA;
+		// if set to use cells and at the end of the minute
+		if ( (ent->client->flashlight_framenum == level.time) && (ent->client->flashlight_cell_usage > 0) )
+		{	// check if have the cells, if not, switch off
 			if (ent->client->pers.inventory[ITEM_INDEX(FindItem("Cells"))] < ent->client->flashlight_cell_usage)
 			{
 				ent->client->flashlight_active = false;
 				ent->client->flashlight_framenum = 0;
-				return;
 			}
 			ent->client->pers.inventory[ITEM_INDEX(FindItem("Cells"))] -= ent->client->flashlight_cell_usage;
 			ent->client->flashlight_framenum = level.time + 60;
 		}
-
-		AngleVectors (ent->client->v_angle, forward, NULL, NULL);
-		VectorMA (ent->s.origin, 384, forward, flashpoint);
-		tr = gi.trace (ent->s.origin, NULL, NULL, flashpoint, ent, mask);
-		gi.WriteByte (svc_temp_entity);
-		gi.WriteByte (TE_FLASHLIGHT);
-		gi.WritePosition (tr.endpos);
-		gi.WriteShort (ent - g_edicts);
-		gi.multicast (tr.endpos, MULTICAST_PVS);
+		if (ent->client->flashlight_active)
+		{
+			AngleVectors (ent->s.angles, fl_forward, fl_right, NULL);
+			VectorSet (offset, 0, 0, ent->viewheight - 8);
+		//	G_ProjectSource (ent->s.origin, offset, fl_forward, fl_right, start);
+			VectorAdd (ent->s.origin, offset, start);
+			VectorMA (start, 384, fl_forward, end);
+			tr = gi.trace (start, NULL, NULL, end, ent, mask);
+			if (tr.fraction != 1)
+				VectorMA (tr.endpos, -4, fl_forward, flashpoint);
+			else
+				VectorCopy (tr.endpos, flashpoint);
+			gi.WriteByte (svc_temp_entity);
+			gi.WriteByte (TE_FLASHLIGHT);
+			gi.WritePosition (flashpoint);
+			gi.WriteShort (ent - g_edicts);
+			gi.multicast (flashpoint, MULTICAST_PVS);
+		}
 	}
 }
 
@@ -1322,9 +1330,9 @@ void G_SetClientEvent (edict_t *ent)
 		{
 			vec3_t	end, forward;
 			trace_t	tr;
-			AngleVectors(ent->s.angles,forward,NULL,NULL);
-			VectorMA(ent->s.origin,2,forward,end);
-			tr = gi.trace(ent->s.origin,ent->mins,ent->maxs,end,ent,CONTENTS_LADDER);
+			AngleVectors (ent->s.angles, forward, NULL, NULL);
+			VectorMA (ent->s.origin, 2, forward, end);
+			tr = gi.trace(ent->s.origin, ent->mins, ent->maxs, end, ent, CONTENTS_LADDER);
 			if (tr.fraction < 1.0)
 		#ifndef FMOD_FOOTSTEPS
 				ent->s.event = EV_CLIMB_LADDER;	 // Knightmare- move Lazarus footsteps client-side
@@ -1336,13 +1344,13 @@ void G_SetClientEvent (edict_t *ent)
 
 				switch (r)
 				{
-				case 0: PlayFootstep(ent,FOOTSTEP_LADDER1); break;
-				case 1: PlayFootstep(ent,FOOTSTEP_LADDER3); break;
-				case 2: PlayFootstep(ent,FOOTSTEP_LADDER2); break;
-				case 3: PlayFootstep(ent,FOOTSTEP_LADDER4); break;
+				case 0: PlayFootstep(ent, FOOTSTEP_LADDER1); break;
+				case 1: PlayFootstep(ent, FOOTSTEP_LADDER3); break;
+				case 2: PlayFootstep(ent, FOOTSTEP_LADDER2); break;
+				case 3: PlayFootstep(ent, FOOTSTEP_LADDER4); break;
 				}
 			}
-		#endif //FMOD_FOOTSTEPS
+		#endif // FMOD_FOOTSTEPS
 		}
 	}
 }
@@ -1557,7 +1565,7 @@ and right after spawning
 */
 // Lazarus: "whatsit" display
 
-void WhatsIt( edict_t *ent)
+void WhatsIt (edict_t *ent)
 {
 	char string[128];
 

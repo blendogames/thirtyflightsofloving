@@ -177,7 +177,7 @@ void lock_code_use (edict_t *self, edict_t *other, edict_t *activator)
 			gi.dprintf("Lock has not been properly initialized.\n");
 			return;
 		}
-		Com_sprintf(message, sizeof(message), "Lock combination is %s",game.lock_code);
+		Com_sprintf (message, sizeof(message), "Lock combination is %s",game.lock_code);
 		Do_Text_Display(activator, 0, message);
 		L = (int)strlen(game.lock_code);
 		for (i=0; i<L; i++)
@@ -191,7 +191,7 @@ void lock_code_use (edict_t *self, edict_t *other, edict_t *activator)
 			gi.dprintf("Target of target_lock_code does not exist\n");
 		else
 		{
-			Com_sprintf(message, sizeof(message), "Lock combination is %s",game.lock_code);
+			Com_sprintf (message, sizeof(message), "Lock combination is %s",game.lock_code);
 			Do_Text_Display(activator, 0, message);
 			L = min(8, (int)strlen(lock->key_message));
 			for (i=0; i<L; i++)

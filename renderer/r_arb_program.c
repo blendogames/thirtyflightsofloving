@@ -86,7 +86,6 @@ void main() {
 }
 */
 
-#if 1
 static char fragment_program_warp[] =
 "!!ARBfp1.0\n"
 //"OPTION ARB_precision_hint_fastest;\n"
@@ -108,27 +107,6 @@ static char fragment_program_warp[] =
 "MUL result.color, col, rgbscale;\n"
 
 "END\n";
-#else
-static char fragment_program_warp[] =
-"!!ARBfp1.0\n"
-//"OPTION ARB_precision_hint_fastest;\n"
-"OPTION ARB_precision_hint_nicest;\n"
-
-"PARAM rgbscale = program.local[0];\n"
-"TEMP offset, coord, dist, col;\n"
-
-"TEX offset, fragment.texcoord[0], texture[0], 2D;\n"
-"MUL offset, offset, 0.5;\n"
-
-// fetch the water texture
-"ADD coord.x, fragment.texcoord[1].x, offset.z;\n"
-"ADD coord.y, fragment.texcoord[1].y, offset.w;\n"
-"TEX dist, coord, texture[1], 2D;\n"
-"MUL col, dist, fragment.color;\n"
-"MUL result.color, col, rgbscale;\n"
-
-"END\n";
-#endif
 
 
 static char fragment_program_warp_lightmap[] =

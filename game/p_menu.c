@@ -125,7 +125,7 @@ void PMenu_Do_Update(edict_t *ent)
 			t++;
 		}
 	//	sprintf(string + strlen(string), "yv %d ", 32 + i * 8);
-		Com_sprintf (string + strlen(string), sizeof(string)-strlen(string), "yv %d ", 32 + i * 8);
+		Com_sprintf (string + strlen(string), sizeof(string) - strlen(string), "yv %d ", 32 + i * 8);
 		if (p->align == PMENU_ALIGN_CENTER)
 			x = 196/2 - (int)strlen(t)*4 + 64;
 		else if (p->align == PMENU_ALIGN_RIGHT)

@@ -75,7 +75,7 @@ void ChasecamStart (edict_t *ent)
 	chasecam->think = ChasecamTrack;
 	ent->client->chasecam = chasecam;	  
 	ent->client->oldplayer = G_Spawn();
-	CheckChasecam_Viewent(ent);
+	CheckChasecam_Viewent (ent);
 //	MakeFakeCrosshair (ent);
 
 	// remove reflection of real player, if any

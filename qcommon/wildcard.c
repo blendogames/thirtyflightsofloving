@@ -14,7 +14,7 @@
    You should have received a copy of the GNU General Public License with
    the c2html, java2html, pas2html or perl2html source package as the
    file COPYING. If not, write to the Free Software Foundation, Inc.,
-   59 Temple Place - Suite 330, Boston, MA
+   51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
    02111-1307, USA.
 */
 

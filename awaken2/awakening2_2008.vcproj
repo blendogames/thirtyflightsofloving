@@ -49,16 +49,14 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/MP"
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
-				PrecompiledHeaderFile=".\Release/awakening2_2008.pch"
-				AssemblerListingLocation=".\Release/"
-				ObjectFile=".\Release/"
-				ProgramDataBaseFileName=".\Release/"
+				PrecompiledHeaderFile=""
 				SuppressStartupBanner="true"
 				DisableSpecificWarnings="4996"
 			/>
@@ -80,12 +78,12 @@
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				ModuleDefinitionFile=".\game.def"
-				ProgramDatabaseFile=".\Release/gamex86.pdb"
+				ProgramDatabaseFile=""
 				SubSystem="2"
 				BaseAddress="0x20000000"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
-				ImportLibrary=".\Release/gamex86.lib"
+				ImportLibrary="$(IntDir)\gamex86.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -99,8 +97,6 @@
 			/>
 			<Tool
 				Name="VCBscMakeTool"
-				SuppressStartupBanner="true"
-				OutputFile=".\Release/awakening2_2008.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -144,16 +140,14 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/MP"
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
-				PrecompiledHeaderFile=".\x64\Release/awakening2_2008.pch"
-				AssemblerListingLocation=".\x64\Release/"
-				ObjectFile=".\x64\Release/"
-				ProgramDataBaseFileName=".\x64\Release/"
+				PrecompiledHeaderFile=""
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DisableSpecificWarnings="4996"
@@ -176,12 +170,12 @@
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				ModuleDefinitionFile=".\game.def"
-				ProgramDatabaseFile=".\x64\Release/kmq2gamex64.pdb"
+				ProgramDatabaseFile=""
 				SubSystem="2"
 				BaseAddress="0x20000000"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
-				ImportLibrary=".\x64\Release/kmq2gamex64.lib"
+				ImportLibrary="$(IntDir)\kmq2gamex64.lib"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -195,8 +189,6 @@
 			/>
 			<Tool
 				Name="VCBscMakeTool"
-				SuppressStartupBanner="true"
-				OutputFile=".\Release/awakening2_2008.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -240,13 +232,11 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/MP"
 				Optimization="0"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;BUILDING_REF_GL"
 				RuntimeLibrary="1"
-				PrecompiledHeaderFile=".\Debug/awakening2_2008.pch"
-				AssemblerListingLocation=".\Debug/"
-				ObjectFile=".\Debug/"
-				ProgramDataBaseFileName=".\Debug/"
+				PrecompiledHeaderFile=""
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="1"
@@ -271,12 +261,14 @@
 				SuppressStartupBanner="true"
 				ModuleDefinitionFile=".\game.def"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile=".\Debug/gamex86.pdb"
+				ProgramDatabaseFile="$(IntDir)\gamex86.pdb"
+				GenerateMapFile="true"
+				MapFileName="$(IntDir)\gamex86.map"
 				SubSystem="2"
 				BaseAddress="0x20000000"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
-				ImportLibrary=".\Debug/gamex86.lib"
+				ImportLibrary="$(IntDir)\gamex86.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -290,8 +282,6 @@
 			/>
 			<Tool
 				Name="VCBscMakeTool"
-				SuppressStartupBanner="true"
-				OutputFile=".\Debug/awakening2_2008.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -335,13 +325,11 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/MP"
 				Optimization="0"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;BUILDING_REF_GL"
 				RuntimeLibrary="1"
-				PrecompiledHeaderFile=".\x64\Debug/awakening2_2008.pch"
-				AssemblerListingLocation=".\x64\Debug/"
-				ObjectFile=".\x64\Debug/"
-				ProgramDataBaseFileName=".\x64\Debug/"
+				PrecompiledHeaderFile=""
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="1"
@@ -366,12 +354,14 @@
 				SuppressStartupBanner="true"
 				ModuleDefinitionFile=".\game.def"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile=".\x64\Debug/kmq2gamex64.pdb"
+				ProgramDatabaseFile="$(IntDir)\kmq2gamex64.pdb"
+				GenerateMapFile="true"
+				MapFileName="$(IntDir)\kmq2gamex64.map"
 				SubSystem="2"
 				BaseAddress="0x20000000"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
-				ImportLibrary=".\x64\Debug/kmq2gamex64.lib"
+				ImportLibrary="$(IntDir)\kmq2gamex64.lib"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -385,8 +375,6 @@
 			/>
 			<Tool
 				Name="VCBscMakeTool"
-				SuppressStartupBanner="true"
-				OutputFile=".\Debug/awakening2_2008.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -669,6 +657,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\g_misc_kex.c"
+				>
 			</File>
 			<File
 				RelativePath=".\g_model.c"
@@ -1240,6 +1232,26 @@
 			Name="Resource Files"
 			Filter="ico;cur;bmp;dlg;rc2;rct;bin;cnt;rtf;gif;jpg;jpeg;jpe"
 			>
+			<File
+				RelativePath=".\awakening2_2008.rc"
+				>
+				<FileConfiguration
+					Name="Release|x64"
+					>
+					<Tool
+						Name="VCResourceCompilerTool"
+						PreprocessorDefinitions="NDEBUG;_WIN64"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|x64"
+					>
+					<Tool
+						Name="VCResourceCompilerTool"
+						PreprocessorDefinitions="_DEBUG;_WIN64"
+					/>
+				</FileConfiguration>
+			</File>
 			<File
 				RelativePath="game.def"
 				>

@@ -538,7 +538,9 @@ void infantry_attack(edict_t *self)
 		self->monsterinfo.currentmove = &infantry_move_attack1;
 }
 
-void SP_monster_infantry_precache(void)
+
+// Knightmare- added soundcache function
+void monster_infantry_soundcache (edict_t *self)
 {
 	sound_pain1 = gi.soundindex ("infantry/infpain1.wav");
 	sound_pain2 = gi.soundindex ("infantry/infpain2.wav");
@@ -555,6 +557,14 @@ void SP_monster_infantry_precache(void)
 	sound_idle = gi.soundindex ("infantry/infidle1.wav");
 }
 
+// Zaero added
+void SP_monster_infantry_precache (edict_t *self)
+{
+	// Knightmare- use soundcache function
+	monster_infantry_soundcache (self);
+}
+
+
 /*QUAKED monster_infantry (1 .5 0) (-16 -16 -24) (16 16 32) Ambush Trigger_Spawn Sight
 */
 void SP_monster_infantry (edict_t *self)
@@ -565,7 +575,7 @@ void SP_monster_infantry (edict_t *self)
 		return;
 	}
 
-	SP_monster_infantry_precache();
+	SP_monster_infantry_precache (self);
 
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;
@@ -601,8 +611,10 @@ void SP_monster_infantry (edict_t *self)
 void handler_ConvertToInfantry(edict_t *self)
 {
 	self->s.modelindex = gi.modelindex("models/monsters/infantry/tris.md2");
+
 	VectorSet (self->mins, -16, -16, -24);
 	VectorSet (self->maxs, 16, 16, 32);
+
 	self->pain = infantry_pain;
 	self->die = infantry_die;
 

@@ -1,0 +1,250 @@
+================================
+
+	ARENA SCRIPTING
+	
+================================
+
+KMQuake2 0.20u8 supports loading Quake3-style .arena files, both from inside pak/pk3 files, and from
+loose files outside of paks.
+
+The name of the script file is the same as the bsp it contains information for, but with a .arena extension.
+For example, the arena script for highlandcastle_b3.bsp is named highlandcastle_b3.arena.
+
+Here's an example of an arena script for this map:
+
+{
+map				"highlandcastle_b3"
+longname		"Castle in the Highlands"
+type			"dm teamdm"
+}
+
+This script specifies that the name of the .bsp file to load is highlandcastle_b3.bsp, the map title to display
+in the start server menu is "Castle in the Highlands", and the game mode supported is deathmatch.
+
+The start server menu's maplist is filtered by the currently selected gametype.  Here are the valid type tokens:
+	Deathmatch:		dm teamdm ffa team
+	Cooperative:	coop
+	CTF:			ctf
+	3Team CTF:		3tctf
+	
+================================
+
+	MODINFO SCRIPTING
+	
+================================
+
+KMQuake2 0.20u8 features a Mods menu that allows in-game switching of the loaded mod or gamedir, without
+overwriting settings or key binds.
+
+This menu also reads info on each mod from a text file named modinfo.def, located inside the game folder for
+each mod.
+
+Here's an example of a modinfo script:
+
+modInfo
+{
+	title		"Meadow Rumble II: Revenge of the Ovinomancer"
+	gameDir		"mwrumble2"
+	baseGame	"xatrix"
+	baseGame2	"rogue"
+	baseGame3	"zaero"
+	quakeImportPathAuto "1"
+	quakeRRImportPathAuto "1"
+	quakeImportPath "D:\Quake"
+	quakeMainGame	"id1"
+	quakeGame1		"hipnotic"
+	quakeGame2		"rogue"
+	quakeGame3		"nehahra"
+	quakeGame4		"ad"
+	quake2RRImportPathAuto	"1"
+	quake2RRImportPath	"D:\Quake2RR"
+	quake2RRMainGame	"baseq2"
+	quake2RRGame1 		"sewerjam1"
+}
+
+This script specifies that that the title of the mod is "Meadow Rumble II: Revenge of the Ovinomancer",
+that the game folder for the mod is named mwrumble2, and that this mod mounts the xatrix, rogue, and zaero game folders.
+The latter is done by the menu internally setting the basegame, basegame2, and basegame3 cvars.
+
+It also mounts pak files in the id1, hipnotic, rogue, nehahra, and ad folders under the Quake import path.
+For the Quake import path, it will first try to find the the Quake re-release Steam install path.
+If it can't find the Quake re-release Steam install path, it will then try to find the original Quake Steam install path.
+If it can't find the original Quake Steam install path, it will then use the path D:\Quake as the Quake import path.
+
+Additionally, it mounts pak files in the baseq2 and sewerjam1 folders under the Quake2 re-release import path.
+If it can't find the Quake2 re-release Steam install path, it will then use the path D:\Quake2RR as the Quake2 re-release
+import path.
+
+================================
+
+	PAK REMAP LIST SCRIPTING
+
+================================
+
+KMQuake2 0.20u8 supports remapping pak files under the Quake and Quake2 Rerelease import paths.  Only pak files are mounted,
+and only pak items that are remapped will load from those paks.  The other pak items are ignored.
+
+The pak remap list is loaded from a separate script for each folder under the Quake (or Quake2 Rerelease) import path. 
+This file is named <quake_gamedir>_pakremap.def.  For example, the paks under the id1 folder are remapped using a script
+called id1_pakremap.def.  This script must be located inside the game folder for the mod using it.  It must be
+a loose file, it cannot be loaded from a pak or pk3 file.
+
+Here's an example of an id1_pakremap.def script for mounting the paks in the id1 folder:
+
+pakRemapList
+{
+	{ "gfx/palette.lmp" "''" }
+	{ "progs/gib1.mdl" "models/objects/q1gibs/q1gib1/tris.md2" }
+	{ "progs/gib2.mdl" "models/objects/q1gibs/q1gib2/tris.md2" }
+	{ "progs/gib3.mdl" "models/objects/q1gibs/q1gib3/tris.md2" }
+	{ "progs/shambler.mdl" "models/monsters/q1shambler/tris.md2" }
+	{ "progs/h_shams.mdl" "models/monsters/q1shambler/head/tris.md2" }
+	{ "progs/s_light.mdl" "models/monsters/q1shambler/s_light/tris.md2" }
+	{ "sound/player/udeath.wav" "sound/q1player/udeath.wav" }
+	{ "sound/shambler/melee1.wav" "sound/q1shambler/melee1.wav" }
+	{ "sound/shambler/melee2.wav" "sound/q1shambler/melee2.wav" }
+	{ "sound/shambler/sattck1.wav" "sound/q1shambler/sattck1.wav" }
+	{ "sound/shambler/sboom.wav" "sound/q1shambler/sboom.wav" }
+	{ "sound/shambler/sdeath.wav" "sound/q1shambler/sdeath.wav" }
+	{ "sound/shambler/shurt2.wav" "sound/q1shambler/shurt2.wav" }
+	{ "sound/shambler/sidle.wav" "sound/q1shambler/sidle.wav" }
+	{ "sound/shambler/smack.wav" "sound/q1shambler/smack.wav" }
+	{ "sound/shambler/ssight.wav" "sound/q1shambler/ssight.wav" }
+}
+
+This pak remap script remaps the models and sounds used by the Shambler, including gibs and the lightning bolt
+attachement.  It also loads the item gfx/palette.lmp with no remapping of its name, as the '' symbol denotes name duplication.
+
+The remap script parser will output any errors it encounters.  This output from filesystem initialization is not
+visible in thein-game console.  So you will need to start KMQuake2 in dedicated mode to see if the script was correctly
+parsed.  Here's an example of such output:
+
+Loaded 267 pak remaps from file ./gamedir/id1_pakremap.def
+Remapped 214 items in pak D:\Quake/id1/pak0.pak
+Remapped 53 items in pak D:\Quake/id1/pak1.pak
+
+If the total number of remapped items in all paks in the mounted gamedir does not match the number of pak remaps
+in the script, then one of the remaps is misspelled.  In which case the filesystem will output a message:
+
+Pak remap orgName gfx/palete.lmp in ./gamedir/id1_pakremap.def was not found in any paks
+
+Check the spelling of the remap against the contents of the gamedir's paks to correct it.
+
+================================
+
+	OGG_JSON SCRIPTING
+
+================================
+
+KMQuake2 0.20u8 supports remapping .ogg files from under the Quake and Quake2 Rerelease import paths via .ogg_json scripts.
+These scripts are loaded from the "music" folder under the current gamedir.
+
+Each .ogg_json script specifies a single .ogg file to import.  It must have the same name before the '.' as the virtual filename that
+the imported .ogg file will be mapped to.
+
+Here's an example of a .ogg_json script named q1track02.ogg_json that mounts a .ogg file from the Quake import path:
+
+{
+	"virtualName" : "music/q1track02",
+	"importGame" : "Quake1",
+	"importPath0" : "id1/music/track02.ogg",
+	"importPath1" : "rerelease/id1/music/track02.ogg",
+	"importPath2" : "id1/sound/cdtracks/track002.ogg",
+	"importPath3" : "id1/sound/cdtracks/track02.ogg",
+	"importPath4" : "id1/music/track002.ogg",
+	"importPath5" : "id1/music/cdtracks/track002.ogg",
+	"importPath6" : "id1/music/cdtracks/track02.ogg"
+}
+
+"virtualName"
+This key specifies the virtual filename that the imported ogg file will be mapped to.  It must match the filename
+of the .ogg_json script.
+
+"importGame"
+This key specifies the name of the game path to import from.  The values "Quake", "Quake1", "Quake1RR", and "Quake2RR" are supported.
+The first three values specify the currently loaded Quake import path, while the fourth specifies the currently loaded Quake2 Rerelease
+import path.
+
+"importPath0" - "importPath7"
+These keys specify the file paths under the currently loaded Quake (or Quake2 Rerelease) import path to try.
+Multiple paths are needed becase the path for a .ogg file varies based on whether it's under the Steam Quake rerelease path,
+the Steam Quake original release path, or one used by a Quake source port in a traditional install path.
+
+You can see a list of the loaded ogg vorbis files in the console by typing "ogg list".  Here's an example of such output:
+
+1 music/track02.ogg
+.
+.
+.
+20 music/track21.ogg
+21 music/q1track02.ogg (imported from D:\\Steam\steamapps\common\Quake\rerelease/id1/music/track02.ogg)
+22 music/q1track03.ogg (imported from D:\\Steam\steamapps\common\Quake\rerelease/id1/music/track03.ogg)
+23 music/q1track04.ogg (imported from D:\\Steam\steamapps\common\Quake\rerelease/id1/music/track04.ogg)
+24 music/q1track05.ogg (imported from D:\\Steam\steamapps\common\Quake\rerelease/id1/music/track05.ogg)
+25 music/q1track06.ogg (imported from D:\\Steam\steamapps\common\Quake\rerelease/id1/music/track06.ogg)
+26 music/q1track07.ogg (imported from D:\\Steam\steamapps\common\Quake\rerelease/id1/music/track07.ogg)
+27 music/q1track08.ogg (imported from D:\\Steam\steamapps\common\Quake\rerelease/id1/music/track08.ogg)
+28 music/q1track09.ogg (imported from D:\\Steam\steamapps\common\Quake\rerelease/id1/music/track09.ogg)
+29 music/q1track10.ogg (imported from D:\\Steam\steamapps\common\Quake\rerelease/id1/music/track10.ogg)
+30 music/q1track11.ogg (imported from D:\\Steam\steamapps\common\Quake\rerelease/id1/music/track11.ogg)
+30 Ogg Vorbis files.
+
+You can test each remapped ogg file by typing "ogg play <trackname>" in the console, where <trackname> is the name without
+the "music/" prefix or the ".ogg" extension (e.g. "ogg play q1track02").
+
+If none of the "importPath" file path keys match a .ogg file under the Quake (or Quake2 Rerelease) import paths,
+or the Quake (or Quake2 Rerelease) import path is not set up correctly, you will get an error message like this in the console:
+
+"S_OpenBackgroundTrack: couldn't find <filename>"
+
+when trying to play the remapped .ogg file in the console.
+
+In that case, check that the "quake_importpath" cvar matches the path of the Quake install to be imported from
+(or that the "quake2rr_importpath" cvar matches the path of the Quake2 Rerelease install), and that at
+least one of the "importPath" file path keys are properly relative to the Quake (or Quake2 Rerelease) import path.
+
+================================
+
+	KEYBIND LIST SCRIPTING
+
+================================
+
+KMQuake2 0.20u8 features a new key binding menu with a scrolling list, allowing a large number of keys to be
+bound.  This menu supports loading its list of key binds from a filenamed scripts/ui/keybinds.def.
+
+Here's an example of a keybind list file:
+
+keyBindList
+{
+	// Basic Q2 binds
+	keyBind
+	{
+		commandName "+attack"
+		displayName "Attack"
+	}
+	keyBind
+	{
+		commandName "+attack2"
+		displayName "Alternate Attack"
+	}
+	keyBind
+	{
+		commandName "+use"
+		displayName "Activate"
+	}
+	.
+	.
+	.
+}
+
+The file opens with the identifier "keyBindList", followed by a left curly brace.  It is terminated at the end
+of the list with a right curly brace.
+
+Individual key binds are opened with the identifier "keyBind", followed with another left curly brace, and they are
+closed with a right curly brace.  Each key bind has two values- a "commandName" that sets the command to bind,
+and a "displayName" that sets the name displayed in the key bind menu.
+
+Lines starting with a "//" are comments that are ignored.
+
+The dots represent additional keybinds that can be added.  There is no limit on the number of key binds that can
+be placed in this file.

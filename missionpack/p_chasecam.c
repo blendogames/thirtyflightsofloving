@@ -365,6 +365,7 @@ void CheckChasecam_Viewent (edict_t *ent)
 		ent->client->oldplayer->s.modelindex2 = ent->s.modelindex2;
 		ent->client->oldplayer->s.modelindex3 = ent->s.modelindex3;
 		ent->client->oldplayer->s = ent->s;
+		ent->client->oldplayer->s.number = ent->client->oldplayer - g_edicts;	// Phatman: silence server warning
 		gi.linkentity (ent->client->oldplayer);
 	}
 }

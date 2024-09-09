@@ -1,0 +1,6 @@
+libogg     1.3.5   (libogg-1.3.5.zip)
+libvorbis  1.3.7   (libvorbis-1.3.7.zip)
+
+#include paths have been edited to refer to headers under ogg_inc/ and vorbis_inc/ subidrs.
+
+vorbis_src/barkmel.c and vorbis_src/psytune.c have been #if 0'd out to prevent compilation.

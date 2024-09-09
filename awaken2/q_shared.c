@@ -945,6 +945,7 @@ void COM_DefaultExtension (char *path, size_t pathSize, char *extension)
 		src--;
 	}
 
+//	strncat (path, extension);
 	Com_strcat(path, pathSize, extension);
 }
 
@@ -1204,12 +1205,12 @@ int Com_ParseHexDigit (const char c)
 =================
 Com_ParseColorString
 
-Parse an RGB color from an rrggbb string
+Parse an RGB(A) color from an rrggbb(aa) formatted string
 =================
 */
 qboolean Com_ParseColorString (const char *s, color_t outColor)
 {
-	int		i, digits[6];
+	int		i, digits[8];
 
 	// catch null string or too short string
 	if ( !s || (strlen(s) < 6) ) {
@@ -1217,18 +1218,139 @@ qboolean Com_ParseColorString (const char *s, color_t outColor)
 		return false;
 	}
 
-	// parse thru all 6 digits
-	for (i = 0; i < 6; i++) {
-		digits[i] = Com_ParseHexDigit(s[i]);
-		if (digits[i] < 0)
-			return false;
+	if (strlen(s) >= 8)	// RRGGBB
+	{
+		// parse thru all 8 digits
+		for (i = 0; i < 8; i++) {
+			digits[i] = Com_ParseHexDigit(s[i]);
+			if (digits[i] < 0)
+				return false;
+		}
+		outColor[0] = ((digits[0] & 0xF) << 4) | (digits[1] & 0xF);
+		outColor[1] = ((digits[2] & 0xF) << 4) | (digits[3] & 0xF);
+		outColor[2] = ((digits[4] & 0xF) << 4) | (digits[5] & 0xF);
+		outColor[3] = ((digits[6] & 0xF) << 4) | (digits[7] & 0xF);
+	}
+	else	// RRGGBBAA
+	{
+		// parse thru all 6 digits
+		for (i = 0; i < 6; i++) {
+			digits[i] = Com_ParseHexDigit(s[i]);
+			if (digits[i] < 0)
+				return false;
+		}
+		outColor[0] = ((digits[0] & 0xF) << 4) | (digits[1] & 0xF);
+		outColor[1] = ((digits[2] & 0xF) << 4) | (digits[3] & 0xF);
+		outColor[2] = ((digits[4] & 0xF) << 4) | (digits[5] & 0xF);
 	}
 
-	outColor[0] = ((digits[0] & 0xF) << 4) | (digits[1] & 0xF);
-	outColor[1] = ((digits[2] & 0xF) << 4) | (digits[3] & 0xF);
-	outColor[2] = ((digits[4] & 0xF) << 4) | (digits[5] & 0xF);
+	return true;
+}
+
+
+/*
+=================
+Com_ParseColorStringPacked
+
+Parse an RGB color from an rrggbb sformatted string
+Returns in packed integer RGBA form
+=================
+*/
+unsigned int Com_ParseColorStringPacked (const char *s)
+{
+	unsigned int	retVal = 0;
+	color_t			color;
+	qboolean		parsed;
+
+	parsed = Com_ParseColorString (s, color);
+
+	if (parsed) {
+		retVal = (color[0] & 255) + ((color[1] & 255) << 8) +
+				((color[2] & 255) << 16) + ((color[3] & 255) << 24);
+	}
+	return retVal;
+}
+
+
+/*
+=================
+Com_ParseRGBAField
+
+Parse an RGBA color from an "r g b a" or "r g b" formatted string
+=================
+*/
+qboolean Com_ParseRGBAField (const char *s, color_t outColor)
+{
+	int				i, numComponents;
+	int				components_int[4] = {0};
+	float			components[4] = {0};
+	size_t			colorLen;
+	qboolean		floatFormat = true;
+
+	if (!s) {
+		return false;
+	}
+
+	colorLen = strlen(s);
+	if (colorLen < 5)	// rgba string too short
+		return false;
+
+	numComponents = sscanf (s, "%f %f %f %f", &components[0], &components[1], &components[2], &components[3]);
+	if ( (numComponents < 3) || (numComponents > 4) )	// invalid rgba string
+		return false;
+
+	for (i = 0; i < numComponents; i++) {
+		if (components[i] > 1.0f)
+			floatFormat = false;
+	}
+
+	if ( floatFormat )	// float representation
+	{
+		if (numComponents == 3)	// alpha is default 1.0
+			components[3] = 1.0f;
+		Vector4Set (outColor,
+					(int)(components[0] * 255) & 255, (int)(components[1] * 255) & 255,
+					(int)(components[2] * 255) & 255, (int)(components[3] * 255) & 255);
+	}
+	else	// integer representation
+	{	// rescan as int to avoid any float conversion errors
+		numComponents = sscanf (s, "%d %d %d %d", &components_int[0], &components_int[1], &components_int[2], &components_int[3]);
+		if ( (numComponents < 3) || (numComponents > 4) )	// invalid rgba string
+			return false;
+
+		if (numComponents == 3)	// alpha is default 255
+			components_int[3] = 255;
+		Vector4Set (outColor,
+					components_int[0] & 255, components_int[1] & 255,
+					components_int[2] & 255, components_int[3] & 255);
+	}
 
 	return true;
+}
+
+
+/*
+=================
+Com_ParseRGBAFieldPacked
+
+Parse an RGBA color from an "r g b a" or "r g b" formatted string
+Returns in packed integer RGBA form
+=================
+*/
+unsigned int Com_ParseRGBAFieldPacked (const char *s)
+{
+	unsigned int	retVal = 0;
+	color_t			color;
+	qboolean		parsed;
+
+	parsed = Com_ParseRGBAField (s, color);
+
+	if (parsed) {
+		retVal = (color[0] & 255) + ((color[1] & 255) << 8) +
+				((color[2] & 255) << 16) + ((color[3] & 255) << 24);
+	}	
+
+	return retVal;
 }
 // end Knightmare
 
@@ -1327,13 +1449,7 @@ size_t Com_strcpy (char *dest, size_t destSize, const char *src)
 	const char	*s = src;
 	size_t		decSize = destSize;
 
-	if (!dest) {
-		return 0;
-	}
-	if (!src) {
-		return 0;
-	}
-	if (destSize < 1) {
+	if ( !dest || !src || (destSize < 1) ) {
 		return 0;
 	}
 
@@ -1346,9 +1462,9 @@ size_t Com_strcpy (char *dest, size_t destSize, const char *src)
 	dest[destSize-1] = 0;
 
 	if (decSize == 0)	// Insufficent room in dst, return count + length of remaining src
-		return (s - src - 1 + strlen(s));
+		return (s - src + strlen(s));	// was s - src - 1 + strlen(s)
 	else
-		return (s - src - 1);	// returned count excludes NULL terminator
+		return (s - src);	// returned count excludes NULL terminator
 }
 
 // Knightmare added
@@ -1359,13 +1475,7 @@ size_t Com_strcat (char *dest, size_t destSize, const char *src)
 	size_t		decSize = destSize;
 	size_t		dLen;
 
-	if (!dest) {
-		return 0;
-	}
-	if (!src) {
-		return 0;
-	}
-	if (destSize < 1) {
+	if ( !dest || !src || (destSize < 1) ) {
 		return 0;
 	}
 
@@ -1557,7 +1667,10 @@ void Info_SetValueForKey(char *s, char *key, char *value)
 		return;
 
 	Com_sprintf(newi, sizeof(newi), "\\%s\\%s", key, value);
-	if (strlen(newi) + strlen(s) > maxsize)
+
+	// Knightmare- according to Maraakate, this can overflow
+//	if (strlen(newi) + strlen(s) > maxsize)
+	if (strlen(newi) + strlen(s) >= maxsize)
 	{
 		Com_Printf("Info string length exceeded\n");
 		return;

@@ -676,7 +676,7 @@ void Use_Quad (edict_t *ent, gitem_t *item)
 	}
 	else
 	{
-		timeout = 300;
+		timeout = (sk_quad_time->value * 10);	// was 300
 	}
 
 	if (ent->client->quad_framenum > level.framenum)
@@ -703,7 +703,7 @@ void Use_Double (edict_t *ent, gitem_t *item)
 		double_drop_timeout_hack = 0;
 	}
 	else
-		timeout = (sk_quad_time->value * 10);	// was 300
+		timeout = (sk_double_time->value * 10);	// was 300
 
 	if (ent->client->double_framenum > level.framenum)
 		ent->client->double_framenum += timeout;

@@ -62,8 +62,16 @@ executing.  This is a precacution against having a malicious server
 instruct clients to write files over areas they shouldn't.
 */
 
+int		file_from_protected_pak = 0;			// from Yamagi Q2
+int		file_from_pak = 0;		// This is set by FS_FOpenFile
+int		file_from_pk3 = 0;		// This is set by FS_FOpenFile
+char	last_pk3_name[MAX_QPATH];	// This is set by FS_FOpenFile
+int		fs_numPakItemRemaps = 0;
+char	fs_pakRemapScriptName[MAX_OSPATH];
+
 void CDAudio_Stop (void);
 void Com_FileExtension (const char *path, char *dst, int dstSize);
+
 
 /*
 =================
@@ -91,8 +99,10 @@ void FS_FilePath (const char *path, char *dst, int dstSize)
 char *type_extensions[] =
 {
 	"bsp",
+	"mdl",
 	"md2",
 	"md3",
+	"spr",
 	"sp2",
 	"dm2",
 	"cin",
@@ -101,6 +111,7 @@ char *type_extensions[] =
 	"ogg",
 	"pcx",
 	"wal",
+	"wal_json",
 	"tga",
 	"jpg",
 	"png",
@@ -114,8 +125,10 @@ char *type_extensions[] =
 	"hud",
 //	"menu",
 //	"efx",
+	"lmp",
 	0
 };
+
 
 /*
 =================
@@ -153,26 +166,6 @@ int FS_FileLength (FILE *f)
 
 	return end;
 }
-
-#if 0
-/*
-================
-FS_Filelength
-================
-*/
-int FS_Filelength (FILE *f)
-{
-	int		pos;
-	int		end;
-
-	pos = ftell (f);
-	fseek (f, 0, SEEK_END);
-	end = ftell (f);
-	fseek (f, pos, SEEK_SET);
-
-	return end;
-}
-#endif
 
 
 /*
@@ -212,13 +205,34 @@ void FS_CreatePath (const char *path)
 // Psychospaz's mod detector
 qboolean FS_ModType (const char *name)
 {
-	fsSearchPath_t	*search;
+/*	fsSearchPath_t	*search;
 
 	for (search = fs_searchPaths ; search ; search = search->next)
 	{
 		if (strstr (search->path, name))
 			return true;
 	}
+	return false; */
+	// The above trips on fs_basegame, etc.
+	// Comparing against fs_gamedir is faster and more direct.
+	char *p;
+
+	if (strlen(fs_gamedir) == 0)
+		return false;
+	p = strrchr(fs_gamedir, '/');
+	if (!p)
+		return false;
+	p++;
+
+	return (Q_stricmp((char *)name, p) == 0);
+}
+
+
+// This enables Xatrix menu options
+qboolean FS_XatrixPath (void)
+{
+	if ( FS_ModType("xatrix") || fs_xatrixgame->integer )
+		return true;
 	return false;
 }
 
@@ -226,7 +240,6 @@ qboolean FS_ModType (const char *name)
 // This enables Rogue menu options for Q2MP4
 qboolean FS_RoguePath (void)
 {
-//	if (FS_ModType("rogue") || fs_roguegame->value)
 	if (FS_ModType("rogue") || fs_roguegame->integer)
 		return true;
 	return false;
@@ -304,9 +317,22 @@ char *FS_DownloadDir (void)
 
 /*
 =================
-FS_HomePath
+FS_RootDataPath
 
 Called to find game root path
+=================
+*/
+char *FS_RootDataPath (void)
+{
+	return fs_basedir->string;
+}
+
+
+/*
+=================
+FS_HomePath
+
+Called to find home path
 =================
 */
 char *FS_HomePath (void)
@@ -397,6 +423,7 @@ fsHandle_t *FS_GetFileByHandle (fileHandle_t f)
 	return &fs_handles[f-1];
 }
 
+
 #ifdef BINARY_PACK_SEARCH
 /*
 =================
@@ -448,6 +475,7 @@ int FS_FindPackItem (fsPack_t *pack, char *itemName, unsigned int itemHash)
 	return -1;
 }
 #endif	// BINARY_PACK_SEARCH
+
 
 /*
 =================
@@ -614,7 +642,7 @@ int FS_FOpenFileRead (fsHandle_t *handle)
 									return pack->files[i].size;
 							}
 
-							unzClose(handle->zip);
+							unzClose (handle->zip);
 						}
 					}
 
@@ -654,6 +682,7 @@ int FS_FOpenFileRead (fsHandle_t *handle)
 	return -1;
 }
 
+
 /*
 =================
 FS_FOpenFile
@@ -666,8 +695,8 @@ and PK3).
 */
 int FS_FOpenFile (const char *name, fileHandle_t *f, fsMode_t mode)
 {
-	fsHandle_t	*handle;
-	int			size;
+	fsHandle_t	*handle = NULL;
+	int			size = 0;
 
 	handle = FS_HandleForFile(name, f);
 
@@ -688,6 +717,64 @@ int FS_FOpenFile (const char *name, fileHandle_t *f, fsMode_t mode)
 	default:
 		Com_Error(ERR_FATAL, "FS_FOpenFile: bad mode (%i)", mode);
 	}
+
+	if (size != -1)
+		return size;
+
+	// Couldn't open, so free the handle
+	memset(handle, 0, sizeof(*handle));
+
+	*f = 0;
+	return -1;
+}
+
+
+/*
+=================
+FS_FOpenDirectFile
+
+Opens a file for "mode".
+Returns file size or -1 if an error occurs/not found.
+Opens separate files in absolute paths only.
+=================
+*/
+int FS_FOpenDirectFile (const char *name, fileHandle_t *f, fsMode_t mode)
+{
+	fsHandle_t	*handle = NULL;
+	int			size = -1;
+
+	handle = FS_HandleForFile(name, f);
+
+	Q_strncpyz(handle->name, sizeof(handle->name), name);
+	handle->mode = mode;
+
+	switch (mode)
+	{
+	case FS_READ:
+		handle->file = fopen(name, "rb");
+		if (handle->file) {
+			fs_fileInPack = false;
+			size = FS_FileLength(handle->file);
+		}
+		break;
+	case FS_WRITE:
+		handle->file = fopen(name, "wb");
+		if (handle->file) {
+			size = 0;
+		}
+		break;
+	case FS_APPEND:
+		handle->file = fopen(name, "ab");
+		if (handle->file) {
+			size = FS_FileLength(handle->file);
+		}
+		break;
+	default:
+		Com_Error (ERR_FATAL, "FS_FOpenDirectFile: bad mode (%i)", mode);
+	}
+
+	if (fs_debug->integer)
+		Com_Printf ("FS_FOpenDirectFile: %s\n", handle->name);
 
 	if (size != -1)
 		return size;
@@ -783,7 +870,7 @@ int FS_FOpenCompressedFileRead (fsHandle_t *handle, const char *zipName, const c
 						return info.uncompressed_size;
 					}
 				}
-				unzClose(handle->zip);
+				unzClose (handle->zip);
 			}
 		}
 	}
@@ -814,7 +901,7 @@ int FS_FOpenCompressedFile (const char *zipName, const char *fileName, fileHandl
 {
 	fsHandle_t	*handle = NULL;
 	char		name[MAX_OSPATH];
-	int			size;
+	int			size = 0;
 
 	Com_sprintf (name, sizeof(name), "%s/%s", zipName, fileName);
 	handle = FS_HandleForFile(name, f);
@@ -852,6 +939,7 @@ int FS_FOpenCompressedFile (const char *zipName, const char *fileName, fileHandl
 	return -1;
 }
 
+
 /*
 =================
 FS_FCloseFile
@@ -864,19 +952,20 @@ void FS_FCloseFile (fileHandle_t f)
 	handle = FS_GetFileByHandle(f);
 
 	if (handle->file)
-		fclose(handle->file);
+		fclose (handle->file);
 	else if (handle->zip) {
-		unzCloseCurrentFile(handle->zip);
-		unzClose(handle->zip);
+		unzCloseCurrentFile (handle->zip);
+		unzClose (handle->zip);
 	}
 	else if (handle->writeZip)
 	{
-		zipCloseFileInZip(handle->writeZip);
-		zipClose(handle->writeZip, NULL);
+		zipCloseFileInZip (handle->writeZip);
+		zipClose (handle->writeZip, NULL);
 	}
 
 	memset(handle, 0, sizeof(*handle));
 }
+
 
 /*
 =================
@@ -991,6 +1080,7 @@ int FS_FRead (void *buffer, int size, int count, fileHandle_t f)
 	return size;
 }
 
+
 /*
 =================
 FS_Write
@@ -998,11 +1088,11 @@ FS_Write
 Properly handles partial writes
 =================
 */
-int FS_Write (const void *buffer, int size, fileHandle_t f){
-
-	fsHandle_t	*handle;
-	int			remaining, w;
-	byte		*buf;
+int FS_Write (const void *buffer, int size, fileHandle_t f)
+{
+	fsHandle_t	*handle = NULL;
+	int			remaining = 0, w = 0;
+	byte		*buf = NULL;
 
 	handle = FS_GetFileByHandle(f);
 
@@ -1038,6 +1128,7 @@ int FS_Write (const void *buffer, int size, fileHandle_t f){
 
 	return size;
 }
+
 
 /*
 =================
@@ -1075,6 +1166,7 @@ int FS_CompressFile (const char *fileName, const char *zipName, const char *inte
 	return size;
 }
 
+
 /*
 =================
 FS_DecompressFile
@@ -1109,6 +1201,7 @@ int FS_DecompressFile (const char *fileName, const char *zipName, const char *in
 	return size;
 }
 
+
 /*
 =================
 FS_FTell
@@ -1134,6 +1227,7 @@ int FS_FTell (fileHandle_t f)
 
 	return 0;
 }
+
 
 /*
 =================
@@ -1167,8 +1261,8 @@ char **FS_ListPak (const char *find, int *num)
 		}
 	}
 
-	list = malloc( sizeof( char * ) * nfiles );
-	memset( list, 0, sizeof( char * ) * nfiles );
+	list = malloc(sizeof(char *) * nfiles);
+	memset(list, 0, sizeof(char *) * nfiles);
 
 	for (search = fs_searchPaths; search; search = search->next)
 	{
@@ -1192,6 +1286,7 @@ char **FS_ListPak (const char *find, int *num)
 
 	return list;		
 }
+
 
 /*
 =================
@@ -1300,6 +1395,7 @@ char **FS_FindFiles (const char *path, const char *extension, int *num)
 	return outList;
 }
 
+
 /*
 =================
 FS_FilteredFindFiles
@@ -1390,6 +1486,7 @@ char **FS_FilteredFindFiles (const char *pattern, int *num)
 	return outList;
 }
 
+
 /*
 =================
 FS_GetFileList
@@ -1407,6 +1504,7 @@ char **FS_GetFileList (const char *path, const char *extension, int *num)
 		return FS_FindFiles (path, extension, num);
 }
 
+
 /*
 =================
 FS_Seek
@@ -1414,9 +1512,9 @@ FS_Seek
 */
 void FS_Seek (fileHandle_t f, int offset, fsOrigin_t origin)
 {
-	fsHandle_t		*handle;
+	fsHandle_t		*handle = NULL;
 	unz_file_info	info;
-	int				remaining, r, len;
+	int				remaining = 0, r, len;
 	byte			dummy[0x8000];
 
 	handle = FS_GetFileByHandle(f);
@@ -1494,6 +1592,7 @@ void FS_Seek (fileHandle_t f, int offset, fsOrigin_t origin)
 	}
 }
 
+
 /*
 =================
 FS_Tell
@@ -1521,6 +1620,7 @@ int FS_Tell (fileHandle_t f)
 		return -1;
 }
 
+
 /*
 =================
 FS_FileExists
@@ -1539,9 +1639,36 @@ qboolean FS_FileExists (const char *path)
 	return false;
 }
 
+
+/*
+=================
+FS_DirectFileExists
+
+Similar to FS_FileExists,
+but only takes absolute paths.
+Does not use FS_FOpenFile() or searchpaths.
+================
+*/
+qboolean FS_DirectFileExists (const char *rawPath)
+{
+	FILE		*f;
+
+	f = fopen (rawPath, "rb");
+	if (f) {
+		fclose (f);
+		return true;
+	}
+	return false;
+}
+
+
 /*
 =================
 FS_LocalFileExists
+
+Similar to FS_FileExists,
+but only looks under fs_gamedir.
+Does not use FS_FOpenFile() or searchpaths.
 ================
 */
 qboolean FS_LocalFileExists (const char *path)
@@ -1552,15 +1679,20 @@ qboolean FS_LocalFileExists (const char *path)
 	Com_sprintf (realPath, sizeof(realPath), "%s/%s", FS_GameDir(), path);
 	f = fopen (realPath, "rb");
 	if (f) {
-		fclose(f);
+		fclose (f);
 		return true;
 	}
 	return false;
 }
 
+
 /*
 =================
 FS_SaveFileExists
+
+Similar to FS_FileExists,
+but only looks under fs_savegamedir.
+Does not use FS_FOpenFile() or searchpaths.
 ================
 */
 qboolean FS_SaveFileExists (const char *path)
@@ -1571,15 +1703,20 @@ qboolean FS_SaveFileExists (const char *path)
 	Com_sprintf (realPath, sizeof(realPath), "%s/%s", FS_SaveGameDir(), path);	// was FS_GameDir()
 	f = fopen (realPath, "rb");
 	if (f) {
-		fclose(f);
+		fclose (f);
 		return true;
 	}
 	return false;
 }
 
+
 /*
 =================
 FS_DownloadFileExists
+
+Similar to FS_FileExists,
+but only looks under fs_downloaddir.
+Does not use FS_FOpenFile() or searchpaths.
 ================
 */
 qboolean FS_DownloadFileExists (const char *path)
@@ -1590,11 +1727,13 @@ qboolean FS_DownloadFileExists (const char *path)
 	Com_sprintf (realPath, sizeof(realPath), "%s/%s", FS_DownloadDir(), path);
 	f = fopen (realPath, "rb");
 	if (f) {
-		fclose(f);
+		fclose (f);
 		return true;
 	}
 	return false;
 }
+
+
 /*
 ================
 FS_CopyFile
@@ -1630,6 +1769,7 @@ void FS_CopyFile (const char *src, const char *dst)
 	fclose (f2);
 }
 
+
 /*
 =================
 FS_RenameFile
@@ -1643,6 +1783,7 @@ void FS_RenameFile (const char *oldPath, const char *newPath)
 		FS_DPrintf("FS_RenameFile: failed to rename %s to %s\n", oldPath, newPath);
 }
 
+
 /*
 =================
 FS_DeleteFile
@@ -1655,6 +1796,7 @@ void FS_DeleteFile (const char *path)
 	if (remove(path))
 		FS_DPrintf("FS_DeleteFile: failed to delete %s\n", path);
 }
+
 
 /*
 =================
@@ -1695,6 +1837,7 @@ int FS_LoadFile (const char *path, void **buffer)
 	return size;
 }
 
+
 /*
 =================
 FS_FreeFile
@@ -1707,8 +1850,270 @@ void FS_FreeFile (void *buffer)
 		FS_DPrintf("FS_FreeFile: NULL buffer\n");
 		return;
 	}
-	Z_Free(buffer);
+	Z_Free (buffer);
 }
+
+
+/*
+=================
+FS_LoadPakRemapScript
+ 
+Parses import pak remap script named <dirName>_pakremap.def
+=================
+*/
+void FS_LoadPakRemapScript (const char *gameDir, const char *importDir)
+{
+	char		fileName[MAX_OSPATH];
+	FILE		*scriptFile = NULL;
+	size_t		fileSize, bufSize, len;
+	byte		*pakRemapFileBuf;
+	char		*s, *token, *remapStart, *orgName, *remapName;
+	int			i, numItemRemaps = 0;
+	qboolean	foundPakRemap = false;
+
+	// free any loaded remap script first
+	if (fs_pakItemRemaps) {
+		Z_Free (fs_pakItemRemaps);
+		fs_pakItemRemaps = NULL;
+		fs_numPakItemRemaps = 0;
+	}
+
+	// load the remap script
+	Com_sprintf (fileName, sizeof(fileName), "%s/%s/%s_pakremap.def", fs_basedir->string, gameDir, importDir);
+	Q_strncpyz (fs_pakRemapScriptName, sizeof(fs_pakRemapScriptName), fileName);
+	scriptFile = fopen(fileName, "rb");
+	if ( !scriptFile ) {
+		Com_DPrintf ("FS_LoadPakRemapScript: couldn't load %s\n", fileName);
+		return;
+	}
+
+	// get size of remap script
+	fseek (scriptFile, 0L, SEEK_END);
+	fileSize = ftell(scriptFile);
+	fseek (scriptFile, 0L, SEEK_SET);
+
+	// allocate file size + 1 for null terminator
+	bufSize = fileSize + 1;
+	pakRemapFileBuf = Z_Malloc (bufSize);
+
+	// read the script
+	len = fread (pakRemapFileBuf, 1, fileSize, scriptFile);
+	fclose (scriptFile);
+	scriptFile = NULL;
+	if (len != fileSize) {
+		Com_Printf ("FS_LoadPakRemapScript: couldn't read %i bytes from %s\n", fileSize, fileName);
+		Z_Free (pakRemapFileBuf);
+		return;
+	}
+
+	// parse it
+	s = pakRemapFileBuf;
+	while (s < (pakRemapFileBuf + len))
+	{
+		token = COM_ParseExt (&s, true);
+		if (!token[0])
+			break;
+
+		if ( !Q_strcasecmp(token, "pakRemapList") )
+		{
+			// only one pakRemapList per file!
+			if (foundPakRemap) {
+				Com_Printf ("FS_LoadPakRemapScript: found extra 'pakRemapList' in file %s\n", fileName);
+				Z_Free (pakRemapFileBuf);
+				return;
+			}
+			foundPakRemap = true;
+
+			token = COM_ParseExt (&s, true);
+			if (token[0] != '{') {
+				Com_Printf ("FS_LoadPakRemapScript: found %s when expecting '{' in file %s\n", token, fileName);
+				Z_Free (pakRemapFileBuf);
+				return;
+			}
+
+			// save start point in remap list
+			remapStart = s;
+
+			// count number of remap pairs
+			while (s < (pakRemapFileBuf + len))
+			{
+				token = COM_ParseExt (&s, true);
+				if ( !token[0] || !s ) {
+					Com_Printf ("FS_LoadPakRemapScript: EOF without closing brace in file %s\n", fileName);
+					break;
+				}
+				// closing brace before pair opening brace means we're done
+				if (token[0] == '}') {
+					break;
+				}
+				else if (token[0] != '{') {
+					Com_Printf ("FS_LoadPakRemapScript: found %s when expecting '{' in file %s\n", token, fileName);
+					Z_Free (pakRemapFileBuf);
+					return;
+				}
+				// get orgName
+				orgName = COM_ParseExt (&s, true);
+				if ( !orgName[0] || !s ) {
+					Com_Printf ("FS_LoadPakRemapScript: EOF without closing brace in file %s\n", fileName);
+					break;
+				}
+				// get remapName
+				remapName = COM_ParseExt (&s, true);
+				if ( /*!remapName[0] ||*/ !s ) {
+					Com_Printf ("FS_LoadPakRemapScript: EOF without closing brace in file %s\n", fileName);
+					break;
+				}
+				// get remap pair end brace
+				token = COM_ParseExt (&s, true);
+				if ( !token[0] || !s ) {
+					Com_Printf ("FS_LoadPakRemapScript: EOF without closing brace in file %s\n", fileName);
+					break;
+				}
+				if (token[0] != '}') {
+					Com_Printf ("FS_LoadPakRemapScript: found %s when expecting '}' in file %s\n", token, fileName);
+					break;
+				}
+				// at this point, we've successfully parsed a single item remap
+				numItemRemaps++;
+			}
+
+			// bail out if we couldn't load any remaps
+			if (numItemRemaps == 0) {
+				Com_Printf ("FS_LoadPakRemapScript: couldn't parse any item remaps in file %s\n", fileName);
+				Z_Free (pakRemapFileBuf);
+				return;
+			}
+
+			// alloc remap list
+			fs_pakItemRemaps = Z_Malloc (sizeof(fsPackItemRemap_t) * numItemRemaps);
+
+			// now go through all the remap pairs and put them in the list
+			s = remapStart;
+			i = 0;
+			while ( (s < (pakRemapFileBuf + len)) && (i < numItemRemaps) )
+			{
+				token = COM_ParseExt (&s, true);
+				if ( !token[0] || !s ) {
+					Com_Printf ("FS_LoadPakRemapScript: EOF without closing brace in file %s\n", fileName);
+					break;
+				}
+				// closing brace before pair opening brace means we're done
+				if (token[0] == '}') {
+					break;
+				}
+				else if (token[0] != '{') {
+					Com_Printf ("FS_LoadPakRemapScript: found %s when expecting '{' in file %s\n", token, fileName);
+					Z_Free (pakRemapFileBuf);
+					return;
+				}
+
+				// get orgName
+				orgName = COM_ParseExt (&s, true);
+				if ( !orgName[0] || !s ) {
+					Com_Printf ("FS_LoadPakRemapScript: EOF without closing brace in file %s\n", fileName);
+					break;
+				}
+				Q_strncpyz (fs_pakItemRemaps[i].orgName, sizeof(fs_pakItemRemaps[i].orgName), orgName);
+
+				// get remapName
+				remapName = COM_ParseExt (&s, true);
+				if ( /*!remapName[0] ||*/ !s ) {
+					Com_Printf ("FS_LoadPakRemapScript: EOF without closing brace in file %s\n", fileName);
+					break;
+				}
+				// if remap name is an empty string (or ''), use orgName for unchanged filename
+				if ( (remapName[0] == '\0') || !Q_stricmp(remapName, "''") )
+					Q_strncpyz (fs_pakItemRemaps[i].remapName, sizeof(fs_pakItemRemaps[i].remapName), fs_pakItemRemaps[i].orgName);
+				else
+					Q_strncpyz (fs_pakItemRemaps[i].remapName, sizeof(fs_pakItemRemaps[i].remapName), remapName);
+
+				// get remap pair end brace
+				token = COM_ParseExt (&s, true);
+				if ( !token[0] || !s ) {
+					Com_Printf ("FS_LoadPakRemapScript: EOF without closing brace in file %s\n", fileName);
+					break;
+				}
+				if (token[0] != '}') {
+					Com_Printf ("FS_LoadPakRemapScript: found %s when expecting '}' in file %s\n", token, fileName);
+					break;
+				}
+
+				// increment array position
+				i++;
+			}
+		}
+
+		// ignore any crap after the pakRemapList
+		else if ( !foundPakRemap ) {
+			Com_Printf ("FS_LoadPakRemapScript: unknown command '%s' while looking for 'pakRemapList' in file %s\n", token, fileName);
+			Z_Free (pakRemapFileBuf);
+			return;
+		}
+	}
+
+	// free the buffer
+	Z_Free (pakRemapFileBuf);
+
+	Com_Printf ("Loaded %i pak remaps from file %s\n", numItemRemaps, fileName);
+	fs_numPakItemRemaps = numItemRemaps;
+}
+
+
+/*
+=================
+FS_FreePakRemapScript
+ 
+Frees import pak remap script named <dirName>_pakremap.def
+=================
+*/
+void FS_FreePakRemapScript (void)
+{
+	int			i;
+
+	// check for unused rename entries
+	for (i = 0; i < fs_numPakItemRemaps; i++)
+	{
+		if (fs_pakItemRemaps[i].timesUsed == 0)
+			Com_Printf ("Pak remap orgName %s in %s was not found in any paks\n", fs_pakItemRemaps[i].orgName, fs_pakRemapScriptName);
+	}
+
+	if (fs_pakItemRemaps)
+		Z_Free (fs_pakItemRemaps);
+	fs_pakItemRemaps = NULL;
+	fs_numPakItemRemaps = 0;
+	fs_pakRemapScriptName[0] = 0;
+}
+
+
+/*
+=================
+FS_GetPakFileRemapName
+ 
+Gets a remapped name for a given pakitem
+name from the loaded remap script
+=================
+*/
+qboolean FS_GetPakFileRemapName (const char *pakItemName, char *remapName, size_t remapNameSize)
+{
+	int			i;
+	qboolean	nameRemapped = false;
+
+	if ( !fs_pakItemRemaps || !fs_numPakItemRemaps )
+		return false;
+
+	for (i = 0; i < fs_numPakItemRemaps; i++)
+	{
+		if ( !Q_stricmp(fs_pakItemRemaps[i].orgName, (char *)pakItemName) ) {
+			Q_strncpyz (remapName, remapNameSize, fs_pakItemRemaps[i].remapName);
+			fs_pakItemRemaps[i].timesUsed++;
+			nameRemapped = true;
+			break;
+		}
+	}
+
+	return nameRemapped;
+}
+
 
 // Some incompetently packaged mods have these files in their paks!
 char *pakfile_ignore_names[] =
@@ -1807,18 +2212,22 @@ Loads the header and directory, adding the files at the beginning of
 the list so they override previous pack files.
 =================
 */
-fsPack_t *FS_LoadPAK (const char *packPath)
+fsPack_t *FS_LoadPAK (const char *packPath, qboolean isQuakeImport)
 {
 	int				numFiles, i;
 	fsPackFile_t	*files;
 	fsPack_t		*pack;
 	FILE			*handle;
-	dpackheader_t		header;
-	dpackfile_t		info[MAX_FILES_IN_PACK];
+	dpackheader_t	header;
+	dpackfile_t		*info = NULL;		// made this dynamically allocated to avoid stack overflow
 	unsigned		contentFlags = 0;
+	int				numRemappedItems = 0;
 #ifdef BINARY_PACK_SEARCH
+	char			**remapNames = NULL;
 	int				*sortIndices;
 	unsigned int	*sortHashes;
+#else
+	char			remapName[MAX_QPATH];
 #endif	// BINARY_PACK_SEARCH
 
 	handle = fopen(packPath, "rb");
@@ -1827,9 +2236,8 @@ fsPack_t *FS_LoadPAK (const char *packPath)
 
 	fread(&header, 1, sizeof(dpackheader_t), handle);
 	
-	if (LittleLong(header.ident) != IDPAKHEADER)
-	{
-		fclose(handle);
+	if (LittleLong(header.ident) != IDPAKHEADER) {
+		fclose (handle);
 		Com_Error(ERR_FATAL, "FS_LoadPAK: %s is not a pack file", packPath);
 	}
 
@@ -1837,71 +2245,132 @@ fsPack_t *FS_LoadPAK (const char *packPath)
 	header.dirlen = LittleLong(header.dirlen);
 
 	numFiles = header.dirlen / sizeof(dpackfile_t);
-	if (numFiles > MAX_FILES_IN_PACK || numFiles == 0)
-	{
-		fclose(handle);
+	if (numFiles == 0) {
+		fclose (handle);
 		Com_Error(ERR_FATAL, "FS_LoadPAK: %s has %i files", packPath, numFiles);
 	}
 
+	info = Z_Malloc(header.dirlen);
 	files = Z_Malloc(numFiles * sizeof(fsPackFile_t));
 
 	fseek(handle, header.dirofs, SEEK_SET);
 	fread(info, 1, header.dirlen, handle);
 
 #ifdef BINARY_PACK_SEARCH
-	// create sort table
+	// Create remap list
+	if ( isQuakeImport ) {
+		remapNames = Z_Malloc(numFiles * sizeof(char *));
+		for (i = 0; i < numFiles; i++) {
+			remapNames[i] = Z_Malloc(sizeof(char) * MAX_QPATH);
+		}
+	}
+	// Create sort table
 	sortIndices = Z_Malloc(numFiles * sizeof(int));
 	sortHashes = Z_Malloc(numFiles * sizeof(unsigned));
 	nameHashes = sortHashes;
 	for (i = 0; i < numFiles; i++)
 	{
 		sortIndices[i] = i;
-		sortHashes[i] = Com_HashFileName(info[i].name, 0, false);
+		if ( isQuakeImport ) {
+			if ( FS_GetPakFileRemapName(info[i].name, remapNames[i], MAX_QPATH) )
+				sortHashes[i] = Com_HashFileName(remapNames[i], 0, false);
+			else
+				sortHashes[i] = Com_HashFileName(info[i].name, 0, false);
+		}
+		else {
+			sortHashes[i] = Com_HashFileName(info[i].name, 0, false);
+		}
 	}
 	qsort((void *)sortIndices, numFiles, sizeof(int), FS_PakFileCompare);
 
 	// Parse the directory
 	for (i = 0; i < numFiles; i++)
 	{
-	//	strncpy(files[i].name, info[sortIndices[i]].name);
 		Q_strncpyz(files[i].name, sizeof(files[i].name), info[sortIndices[i]].name);
 		files[i].hash = sortHashes[sortIndices[i]];
 		files[i].offset = LittleLong(info[sortIndices[i]].filepos);
 		files[i].size = LittleLong(info[sortIndices[i]].filelen);
-		files[i].ignore = FS_FileInPakBlacklist(files[i].name, false);	// check against pak loading blacklist
+		if ( isQuakeImport )
+		{	// pak entries in imported Quake paks MUST be remapped, otherwise they are ignored
+			if ( remapNames[sortIndices[i]][0] != 0 ) {
+				Q_strncpyz (files[i].name, sizeof(files[i].name), remapNames[sortIndices[i]]);
+				files[i].ignore = false;
+				files[i].isRemapped = true;
+				numRemappedItems++;
+			}
+			else {
+				files[i].ignore = true;
+				files[i].isRemapped = false;
+			}
+		}
+		else {
+			files[i].ignore = FS_FileInPakBlacklist(files[i].name, false);	// check against pak loading blacklist
+			files[i].isRemapped = false;
+		}
 		if (!files[i].ignore)	// add type flag for this file
 			contentFlags |= FS_TypeFlagForPakItem(files[i].name);
 	}
 
-	// free sort table
+	// Free remap list
+	if ( isQuakeImport )
+	{
+		for (i = 0; i < numFiles; i++) {
+			Z_Free (remapNames[i]);
+			remapNames[i] = NULL;
+		}
+		Z_Free (remapNames);
+	}
+	// Free sort table
 	Z_Free (sortIndices);
 	Z_Free (sortHashes);
 	nameHashes = NULL;
 #else	// Parse the directory
 	for (i = 0; i < numFiles; i++)
 	{
-	//	strncpy(files[i].name, info[i].name);
 		Q_strncpyz(files[i].name, sizeof(files[i].name), info[i].name);
 		files[i].hash = Com_HashFileName(info[i].name, 0, false);	// Added to speed up seaching
 		files[i].offset = LittleLong(info[i].filepos);
 		files[i].size = LittleLong(info[i].filelen);
-		files[i].ignore = FS_FileInPakBlacklist(info[i].name, false);	// check against pak loading blacklist
+		if ( isQuakeImport )
+		{	// pak entries in imported Quake paks MUST be remapped, otherwise they are ignored
+			if ( FS_GetPakFileRemapName(info[i].name, remapName, MAX_QPATH) ) {
+				Q_strncpyz (files[i].name, sizeof(files[i].name), remapName);
+				files[i].ignore = false;
+				files[i].isRemapped = true;
+				numRemappedItems++;
+			}
+			else {
+				files[i].ignore = true;
+				files[i].isRemapped = false;
+			}
+		}
+		else {
+			files[i].ignore = FS_FileInPakBlacklist(info[i].name, false);	// check against pak loading blacklist
+			files[i].isRemapped = false;
+		}
 		if (!files[i].ignore)	// add type flag for this file
 			contentFlags |= FS_TypeFlagForPakItem(files[i].name);
 	}
 #endif	// BINARY_PACK_SEARCH
 
+	Z_Free (info);
+
 	pack = Z_Malloc(sizeof(fsPack_t));
-//	strncpy(pack->name, packPath);
 	Q_strncpyz(pack->name, sizeof(pack->name), packPath);
 	pack->pak = handle;
 	pack->pk3 = NULL;
 	pack->numFiles = numFiles;
 	pack->files = files;
 	pack->contentFlags = contentFlags;
+	pack->isQuakeImportPak = isQuakeImport;
+	pack->numRemappedFiles = numRemappedItems;
+
+	if ( isQuakeImport && (numRemappedItems > 0) )
+		Com_Printf ("Remapped %i items in pak %s\n", numRemappedItems, packPath);
 
 	return pack;
 }
+
 
 /*
 =================
@@ -1910,12 +2379,12 @@ FS_AddPAKFile
 Adds a Pak file to the searchpath
 =================
 */
-void FS_AddPAKFile (const char *packPath, qboolean isProtected)
+void FS_AddPAKFile (const char *packPath, qboolean isProtected, qboolean isQuakeImport)
 {
 	fsSearchPath_t	*search;
 	fsPack_t		*pack;
 
-    pack = FS_LoadPAK (packPath);
+    pack = FS_LoadPAK (packPath, isQuakeImport);
     if (!pack)
         return;
 	pack->isProtectedPak = isProtected;	// From Yamagi Q2
@@ -1924,6 +2393,7 @@ void FS_AddPAKFile (const char *packPath, qboolean isProtected)
     search->next = fs_searchPaths;
     fs_searchPaths = search;
 }
+
 
 /*
 =================
@@ -1956,15 +2426,14 @@ fsPack_t *FS_LoadPK3 (const char *packPath)
 	if (!handle)
 		return NULL;
 
-	if (unzGetGlobalInfo(handle, &global) != UNZ_OK)
-	{
-		unzClose(handle);
+	if (unzGetGlobalInfo(handle, &global) != UNZ_OK) {
+		unzClose (handle);
 		Com_Error(ERR_FATAL, "FS_LoadPK3: %s is not a pack file", packPath);
 	}
+
 	numFiles = global.number_entry;
-	if (numFiles > MAX_FILES_IN_PACK || numFiles == 0)
-	{
-		unzClose(handle);
+	if (numFiles == 0) {
+		unzClose (handle);
 		Com_Error(ERR_FATAL, "FS_LoadPK3: %s has %i files", packPath, numFiles);
 	}
 	files = Z_Malloc(numFiles * sizeof(fsPackFile_t));
@@ -1989,6 +2458,7 @@ fsPack_t *FS_LoadPK3 (const char *packPath)
 		tmpFiles[i].offset = -1;		// Not used in ZIP files
 		tmpFiles[i].size = info.uncompressed_size;
 		tmpFiles[i].ignore = FS_FileInPakBlacklist(fileName, true);	// check against pak loading blacklist
+		tmpFiles[i].isRemapped = false;
 		if (!tmpFiles[i].ignore)	// add type flag for this file
 			contentFlags |= FS_TypeFlagForPakItem(tmpFiles[i].name);
 		i++;
@@ -2005,6 +2475,7 @@ fsPack_t *FS_LoadPK3 (const char *packPath)
 		files[i].offset = tmpFiles[sortIndices[i]].offset;
 		files[i].size = tmpFiles[sortIndices[i]].size;
 		files[i].ignore = tmpFiles[sortIndices[i]].ignore;
+		files[i].isRemapped = tmpFiles[sortIndices[i]].isRemapped;
 	}
 
 	// free sort table
@@ -2025,6 +2496,7 @@ fsPack_t *FS_LoadPK3 (const char *packPath)
 		files[i].offset = -1;		// Not used in ZIP files
 		files[i].size = info.uncompressed_size;
 		files[i].ignore = FS_FileInPakBlacklist(fileName, true);	// check against pak loading blacklist
+		files[i].isRemapped = false;
 		if (!files[i].ignore)	// add type flag for this file
 			contentFlags |= FS_TypeFlagForPakItem(files[i].name);
 		i++;
@@ -2041,9 +2513,12 @@ fsPack_t *FS_LoadPK3 (const char *packPath)
 	pack->numFiles = numFiles;
 	pack->files = files;
 	pack->contentFlags = contentFlags;
+	pack->isQuakeImportPak = false;
+	pack->numRemappedFiles = 0;
 
 	return pack;
 }
+
 
 /*
 =================
@@ -2066,6 +2541,30 @@ void FS_AddPK3File (const char *packPath, qboolean isProtected)
     search->next = fs_searchPaths;
     fs_searchPaths = search;
 }
+
+
+/*
+=================
+FS_AddQuakeImportGameDirectory
+
+Only loads numerical pack files in path.
+=================
+*/
+void FS_AddQuakeImportGameDirectory (const char *dir)
+{
+	char	packPath[MAX_OSPATH];
+	int		i;
+
+	//
+	// add any pak files in the format pak0.pak pak1.pak, ...
+	//
+	for (i=0; i<100; i++)
+	{
+		Com_sprintf (packPath, sizeof(packPath), "%s/pak%i.pak", dir, i);
+		FS_AddPAKFile (packPath, true, true);
+	}
+}
+
 
 /*
 =================
@@ -2094,15 +2593,15 @@ void FS_AddPaksInDirectory (const char *dir)
 	for (i=0; i<100; i++)    // Pooy - paks can now go up to 100
 	{
 		Com_sprintf (packPath, sizeof(packPath), "%s/pak%i.pak", dir, i);
-		FS_AddPAKFile (packPath, ((i<10) ? true : false));	// pak0.pak is protected
+		FS_AddPAKFile (packPath, ((i<10) ? true : false), false);	// pak0.pak is protected
 	}
     //
     // NeVo - pak3's!
-    // add any pk3 files in the format pak0.pk3 pak1.pk3, ...
+    // add any pk3 files in the format kmq2_pak00.pk3 kmq2_pak01.pk3, ...
     //
     for (i=0; i<100; i++)    // Pooy - paks can now go up to 100
     {
-        Com_sprintf (packPath, sizeof(packPath), "%s/pak%i.pk3", dir, i);
+        Com_sprintf (packPath, sizeof(packPath), "%s/kmq2_pak%02i.pk3", dir, i);
         FS_AddPK3File (packPath, false);
     }
 
@@ -2112,11 +2611,11 @@ void FS_AddPaksInDirectory (const char *dir)
             case 0:
 			default:
                 // Standard Quake II pack file '.pak'
-                Com_sprintf( findname, sizeof(findname), "%s/%s", dir, "*.pak" );
+                Com_sprintf (findname, sizeof(findname), "%s/%s", dir, "*.pak");
                 break;
             case 1: 
                 // Quake III pack file '.pk3'
-                Com_sprintf( findname, sizeof(findname), "%s/%s", dir, "*.pk3" );
+                Com_sprintf (findname, sizeof(findname), "%s/%s", dir, "*.pk3");
                 break;
         }
 		// VoiD -S- *.pack support
@@ -2137,9 +2636,9 @@ void FS_AddPaksInDirectory (const char *dir)
 				qboolean numberedpak = false;
 				for (k=0; k<100; k++)
 				{
-					Com_sprintf( buf, sizeof(buf), "/pak%i.pak", k);
-					Com_sprintf( buf2, sizeof(buf2), "/pak%i.pk3", k);
-					if ( strstr(dirnames[j], buf) || strstr(dirnames[j], buf2)) {
+					Com_sprintf (buf, sizeof(buf), "/pak%i.pak", k);
+					Com_sprintf (buf2, sizeof(buf2), "/kmq2_pak%02i.pk3", k);
+					if ( strstr(dirnames[j], buf) || strstr(dirnames[j], buf2) ) {
 						numberedpak = true;
 						break;
 					}
@@ -2151,7 +2650,7 @@ void FS_AddPaksInDirectory (const char *dir)
 					if (i == 1)
 						FS_AddPK3File (dirnames[j], false);
 					else
-						FS_AddPAKFile (dirnames[j], false);
+						FS_AddPAKFile (dirnames[j], false, false);
                 }
                 free( dirnames[j] );
             }
@@ -2160,6 +2659,7 @@ void FS_AddPaksInDirectory (const char *dir)
         // VoiD -E- *.pack support
     } 
 }
+
 
 /*
 =================
@@ -2191,7 +2691,6 @@ void FS_AddGameDirectory (const char *dir)
 }
 
 
-#ifdef USE_SAVEGAMEDIR
 /*
 =================
 FS_AddSaveGameDirectory
@@ -2210,12 +2709,13 @@ void FS_AddSaveGameDirectory (const char *dir)
 	if (strlen(dir) < 1)	// catch 0-length string
 		return;
 
-	Com_sprintf (fs_savegamedir, sizeof(fs_savegamedir), "%s/%s", Sys_PrefDir(), dir);
+	Q_strncpyz (fs_savegamedir, sizeof(fs_savegamedir), dir);
 
 	if (!Q_stricmp(fs_savegamedir, fs_gamedir))	// only add if different from fs_gamedir
 		return;
 
-	FS_CreatePath (va("%s/", fs_savegamedir));	// create savegamedir if it doesn't yet exist
+	// create savegamedir if it doesn't yet exist
+	FS_CreatePath (va("%s/", fs_savegamedir));
 
 	//
 	// Add the directory to the search path
@@ -2247,12 +2747,13 @@ void FS_AddDownloadDirectory (const char *dir)
 	if (strlen(dir) < 1)	// catch 0-length string
 		return;
 
-	Com_sprintf (fs_downloaddir, sizeof(fs_downloaddir), "%s/%s", Sys_DownloadDir(), dir);
+	Q_strncpyz (fs_downloaddir, sizeof(fs_downloaddir), dir);
 
 	if (!Q_stricmp(fs_downloaddir, fs_gamedir))	// only add if different from fs_gamedir
 		return;
 
-	FS_CreatePath (va("%s/", fs_downloaddir));	//  create downloaddir if it doesn't yet exist
+	// create downloaddir if it doesn't yet exist
+	FS_CreatePath (va("%s/", fs_downloaddir));
 
 	//
 	// Add the directory to the search path
@@ -2268,7 +2769,6 @@ void FS_AddDownloadDirectory (const char *dir)
 	//
 	FS_AddPaksInDirectory (dir);
 }
-#endif // USE_SAVEGAMEDIR
 
 
 /*
@@ -2364,7 +2864,11 @@ void FS_Path_f (void)
 	{
 		if (search->pack)
 		{
-			Com_Printf("%s (%i files)\n", search->pack->name, search->pack->numFiles);
+		//	Com_Printf("%s (%i files)\n", search->pack->name, search->pack->numFiles);
+			if (search->pack->isQuakeImportPak)
+				Com_Printf ("%s (%i files, %i remapped)\n", search->pack->name, search->pack->numFiles,  search->pack->numRemappedFiles);
+			else
+				Com_Printf ("%s (%i files)\n", search->pack->name, search->pack->numFiles);
 			totalFiles += search->pack->numFiles;
 		}
 		else
@@ -2373,10 +2877,8 @@ void FS_Path_f (void)
 
 //	Com_Printf("\n");
 	Com_Printf("Current game dir: %s\n", fs_gamedir);
-#ifdef USE_SAVEGAMEDIR
 	Com_Printf("Current savegame dir: %s\n", fs_savegamedir);
 	Com_Printf("Current download dir: %s\n", fs_downloaddir);
-#endif
 
 	for (i = 0, handle = fs_handles; i < MAX_HANDLES; i++, handle++)
 	{
@@ -2391,6 +2893,7 @@ void FS_Path_f (void)
 
 	Com_Printf("%i files in PAK/PK3 files\n\n", totalFiles);
 }
+
 
 /*
 =================
@@ -2424,16 +2927,16 @@ void FS_Startup (void)
 				pack = fs_searchPaths->pack;
 
 				if (pack->pak)
-					fclose(pack->pak);
+					fclose (pack->pak);
 				if (pack->pk3)
-					unzClose(pack->pk3);
+					unzClose (pack->pk3);
 
-				Z_Free(pack->files);
-				Z_Free(pack);
+				Z_Free (pack->files);
+				Z_Free (pack);
 			}
 
 			next = fs_searchPaths->next;
-			Z_Free(fs_searchPaths);
+			Z_Free (fs_searchPaths);
 			fs_searchPaths = next;
 		}
 
@@ -2450,12 +2953,11 @@ void FS_Startup (void)
 //	strncpy(fs_currentGame, fs_gamedirvar->string);
 	Q_strncpyz(fs_currentGame, sizeof(fs_currentGame), fs_gamedirvar->string);
 
-	FS_Path_f();
+	FS_Path_f ();
 }
 #endif
 
 
-#ifdef USE_SAVEGAMEDIR
 /*
 =================
 FS_CopyConfigsToSavegameDir
@@ -2477,7 +2979,7 @@ void FS_CopyConfigsToSavegameDir (void)
 	kmq2ConfigFile = fopen(va("%s/kmq2config.cfg", FS_SaveGameDir()), "rb");
 	if (kmq2ConfigFile != NULL)
 	{
-		fclose(kmq2ConfigFile);
+		fclose (kmq2ConfigFile);
 		return;
 	}
 
@@ -2497,9 +2999,11 @@ void FS_CopyConfigsToSavegameDir (void)
 		// Don't copy default.cfg, autoexec.cfg, or configs written by other engines
 		// TODO: keep this up to date!
 		// config.cfg, aprconfig.cfg, bqconfig.cfg, eglcfg.cfg, maxconfig.cfg, q2config.cfg, q2b_config.cfg, q2econfig.cfg, xpconfig.cfg, yq2.cfg
-		if ( (strstr(cfgName, "config.cfg") && (Q_stricmp(cfgName, "kmq2config.cfg") != 0)) ||
+	/*	if ( (strstr(cfgName, "config.cfg") && (Q_stricmp(cfgName, "kmq2config.cfg") != 0)) ||
 			!Q_stricmp(cfgName, "default.cfg") || !Q_stricmp(cfgName, "autoexec.cfg") ||
-			!Q_stricmp(cfgName, "eglcfg.cfg") || !Q_stricmp(cfgName, "yq2.cfg") ) {
+			!Q_stricmp(cfgName, "eglcfg.cfg") || !Q_stricmp(cfgName, "yq2.cfg") ) { */
+		// Only copy kmq2config.cfg
+		if (Q_stricmp(cfgName, "kmq2config.cfg") != 0) {
 			continue;
 		}
 		Com_sprintf (dstCfgPath, sizeof(dstCfgPath), "%s/%s", FS_SaveGameDir(), cfgName);
@@ -2507,7 +3011,6 @@ void FS_CopyConfigsToSavegameDir (void)
 	}
 	Sys_FindClose();
 }
-#endif	// USE_SAVEGAMEDIR
 
 
 /*
@@ -2521,16 +3024,19 @@ char *Sys_GetCurrentDirectory (void);
 
 void FS_InitFilesystem (void)
 {
-	// init savegame/download dirs as null string
+	// Init savegame/download dirs as null string
 	fs_savegamedir[0] = '\0';
 	fs_downloaddir[0] = '\0';
 
-	// Register our commands and cvars
-	Cmd_AddCommand("path", FS_Path_f);
-	Cmd_AddCommand("link", FS_Link_f);
-	Cmd_AddCommand("dir", FS_Dir_f);
+	// Init pakItemRemaps pointer as null
+	fs_pakItemRemaps = NULL;
 
-	Com_Printf("\n----- Filesystem Initialization -----\n");
+	// Register our commands and cvars
+	Cmd_AddCommand ("path", FS_Path_f);
+	Cmd_AddCommand ("link", FS_Link_f);
+	Cmd_AddCommand ("dir", FS_Dir_f);
+
+	Com_Printf ("\n----- Filesystem Initialization -----\n");
 
 	// basedir <path>
 	// allows the game to run from outside the data tree
@@ -2549,31 +3055,77 @@ void FS_InitFilesystem (void)
 	if (fs_cddir->string[0])
 		FS_AddGameDirectory (va("%s/"BASEDIRNAME, fs_cddir->string) );
 
-	// start up with baseq2 by default
+	// Start up with baseq2 by default
 	FS_AddGameDirectory (va("%s/"BASEDIRNAME, fs_basedir->string) );
-	// any set gamedirs will be freed up to here
+
+	// Any set gamedirs will be freed up to here
 	fs_baseSearchPaths = fs_searchPaths;
 
 //	strncpy(fs_currentGame, BASEDIRNAME);
-	Q_strncpyz(fs_currentGame, sizeof(fs_currentGame), BASEDIRNAME);
+	Q_strncpyz (fs_currentGame, sizeof(fs_currentGame), BASEDIRNAME);
 
-	// check for game override
+	// Init cvars
 	fs_homepath = Cvar_Get("homepath", Sys_GetCurrentDirectory(), CVAR_NOSET);
 	Cvar_SetDescription ("homepath", "Current directory that KMQuake2 is running in.  This is a NOSET value.");
 	fs_debug = Cvar_Get("fs_debug", "0", 0);
 	Cvar_SetDescription ("fs_debug", "Enables console output of filesystem operations.");
+	fs_xatrixgame = Cvar_Get("xatrixgame", "0", CVAR_LATCH);
+	Cvar_SetDescription ("xatrixgame", "Enables Xatrix-specific features in start server menu when not running under the Xatrix gamedir.");
 	fs_roguegame = Cvar_Get("roguegame", "0", CVAR_LATCH);
 	Cvar_SetDescription ("roguegame", "Enables Rogue-specific features in start server menu when not running under the Rogue gamedir.");
-	fs_basegamedir = Cvar_Get ("basegame", "", CVAR_LATCH);
+	fs_basegamedir1 = Cvar_Get ("basegame", "", CVAR_LATCH|CVAR_SAVE_IGNORE);
 	Cvar_SetDescription ("basegame", "Additional game data path.  Use in conjunction with game to load content from one mod while running another.");
-	fs_basegamedir2 = Cvar_Get ("basegame2", "", CVAR_LATCH);
+	fs_basegamedir2 = Cvar_Get ("basegame2", "", CVAR_LATCH|CVAR_SAVE_IGNORE);
 	Cvar_SetDescription ("basegame2", "Second additional game data path.  Use in conjunction with basegame and game to load content from two mods while running another.");
-	fs_basegamedir3 = Cvar_Get ("basegame3", "", CVAR_LATCH);	// Knightmare added
+	fs_basegamedir3 = Cvar_Get ("basegame3", "", CVAR_LATCH|CVAR_SAVE_IGNORE);
 	Cvar_SetDescription ("basegame3", "Third additional game data path.  Use in conjunction with basegame2, basegame, and game to load content from three mods while running another.");
 	fs_gamedirvar = Cvar_Get ("game", "", CVAR_LATCH|CVAR_SERVERINFO|CVAR_SAVE_IGNORE);
 	Cvar_SetDescription ("game", "Sets the mod/game dir.  Only set this from the command line with \"+set game <moddir>\".  Use the \"changegame\" command to change game folders while KMQuake2 is running.");
 
-	// set up pref dir under Win32 here
+	// Whether to auto-detect Quake1 Steam install path
+	fs_quakeimportpath_auto = Cvar_Get("quake_importpath_auto", "0", CVAR_LATCH|CVAR_SAVE_IGNORE);
+	Cvar_SetDescription ("quake_importpath_auto", "Whether to auto-detect Steam install path of Quake1 for content mounting.");
+	// Whether to auto-detect Quake1RR Steam install path
+	fs_quakerrimportpath_auto = Cvar_Get("quakerr_importpath_auto", "0", CVAR_LATCH|CVAR_SAVE_IGNORE);
+	Cvar_SetDescription ("quakerr_importpath_auto", "Whether to auto-detect Steam install path of Quake1 re-release for content mounting.");
+	// Install path of Quake1 for content mounting, id1 folder paks are automatically added
+	fs_quakeimportpath = Cvar_Get("quake_importpath", "", CVAR_LATCH|CVAR_SAVE_IGNORE);
+	Cvar_SetDescription ("quake_importpath", "Install path of Quake1 for content mounting (e.g. X:/Quake).  Id1 folder is automatically added.");
+	// Name override of Quake1 id1 folder, to allow mounting content for other Quake1 engine games such as Hexen2
+	fs_quakemaingame = Cvar_Get("quake_maingame", Q1_MAINDIRNAME, CVAR_LATCH|CVAR_SAVE_IGNORE);
+	Cvar_SetDescription ("quake_maingame", "Name override of Quake1 id1 folder.  Allows mounting content for other Quake1 engine games such as Hexen2.");
+	// Additional gamedirs for mounting the Quake mission packs and mods' .pak files
+	fs_quakegamedir1 = Cvar_Get("quake_game1", "", CVAR_LATCH|CVAR_SAVE_IGNORE);	
+	Cvar_SetDescription ("quake_game1", "First additional gamedir under Quake1 install path for content mounting.  Use for Hipnotic/Rogue mission packs or other mods.");
+	fs_quakegamedir2 = Cvar_Get("quake_game2", "", CVAR_LATCH|CVAR_SAVE_IGNORE);	
+	Cvar_SetDescription ("quake_game2", "Second additional gamedir under Quake1 install path for content mounting.  Use for Hipnotic/Rogue mission packs or other mods.");
+	fs_quakegamedir3 = Cvar_Get("quake_game3", "", CVAR_LATCH|CVAR_SAVE_IGNORE);	
+	Cvar_SetDescription ("quake_game3", "Third additional gamedir under Quake1 install path for content mounting.  Use for Hipnotic/Rogue mission packs or other mods.");
+	fs_quakegamedir4 = Cvar_Get("quake_game4", "", CVAR_LATCH|CVAR_SAVE_IGNORE);	
+	Cvar_SetDescription ("quake_game4", "Fourth additional gamedir under Quake1 install path for content mounting.  Use for Hipnotic/Rogue mission packs or other mods.");
+
+#ifdef USE_Q2RR_IMPORT_PATH
+	// Whether to auto-detect Quake2RR Steam install path
+	fs_quake2rrimportpath_auto = Cvar_Get("quake2rr_importpath_auto", "0", CVAR_LATCH|CVAR_SAVE_IGNORE);
+	Cvar_SetDescription ("quake2rr_importpath_auto", "Whether to auto-detect Steam install path of Quake2 re-release for content mounting.");
+	// Install path of Quake2RR for content mounting, baseq2 folder paks are automatically added
+	fs_quake2rrimportpath = Cvar_Get("quake2rr_importpath", "", CVAR_LATCH|CVAR_SAVE_IGNORE);
+	Cvar_SetDescription ("quake2rr_importpath", "Install path of Quake2 re-release for content mounting (e.g. X:/Quake2RR).  Baseq2 folder is automatically added.");
+	// Name override of Quake2RR baseq2 folder, to allow mounting content for other Quake2 engine games
+	fs_quake2rrmaingame = Cvar_Get("quake2rr_maingame", BASEDIRNAME, CVAR_LATCH|CVAR_SAVE_IGNORE);
+	Cvar_SetDescription ("quake2rr_maingame", "Name override of Quake2 re-release baseq2 folder.  Allows mounting content for other Quake2 engine games.");
+	// Additional gamedirs for mounting Quake2RR mods' .pak files
+	fs_quake2rrgamedir1 = Cvar_Get("quake2rr_game1", "", CVAR_LATCH|CVAR_SAVE_IGNORE);
+	Cvar_SetDescription ("quake2rr_game1", "First additional gamedir under Quake2 re-release install path for content mounting.  Use for Q2RR mods.");
+	fs_quake2rrgamedir2 = Cvar_Get("quake2rr_game2", "", CVAR_LATCH|CVAR_SAVE_IGNORE);
+	Cvar_SetDescription ("quake2rr_game2", "Second additional gamedir under Quake2 re-release install path for content mounting.  Use for Q2RR mods.");
+	fs_quake2rrgamedir3 = Cvar_Get("quake2rr_game3", "", CVAR_LATCH|CVAR_SAVE_IGNORE);
+	Cvar_SetDescription ("quake2rr_game3", "Third additional gamedir under Quake2 re-release install path for content mounting.  Use for Q2RR mods.");
+	fs_quake2rrgamedir4 = Cvar_Get("quake2rr_game4", "", CVAR_LATCH|CVAR_SAVE_IGNORE);
+	Cvar_SetDescription ("quake2rr_game4", "Fourth additional gamedir under Quake2 re-release install path for content mounting.  Use for Q2RR mods.");
+#endif	// USE_Q2RR_IMPORT_PATH
+
+	// Set up pref dir under Win32 here
 #ifdef _WIN32
 #ifdef NOTTHIRTYFLIGHTS
 	// whether to use user profile dir for savegames, configs, screenshots, etc
@@ -2587,28 +3139,26 @@ void FS_InitFilesystem (void)
 	Sys_InitPrefDir ();	// set up pref dir now instead of calling a function every time it's needed
 #endif
 
-	// set our savegame/download dirs with Sys_PrefDir() and baseq2
+	// Set our savegame/download dirs with Sys_PrefDir() and baseq2
 #ifdef USE_SAVEGAMEDIR
-	FS_AddDownloadDirectory (BASEDIRNAME);
-	FS_AddSaveGameDirectory (BASEDIRNAME);
-//	Com_sprintf (fs_savegamedir, sizeof(fs_savegamedir), "%s/%s", Sys_PrefDir(), BASEDIRNAME);
-//	Com_sprintf (fs_downloaddir, sizeof(fs_downloaddir), "%s/%s", Sys_DownloadDir(), BASEDIRNAME);
+	FS_AddDownloadDirectory (va("%s/%s", Sys_DownloadDir(), BASEDIRNAME));
+	FS_AddSaveGameDirectory (va("%s/%s", Sys_PrefDir(), BASEDIRNAME));
 #else
 	Q_strncpyz(fs_savegamedir, sizeof(fs_savegamedir), fs_gamedir);
 	Q_strncpyz(fs_downloaddir, sizeof(fs_downloaddir), fs_gamedir);
 #endif	// USE_SAVEGAMEDIR
 
-	// check and load game directory
+	// Check for game override
+	// Check and load game directory (also sets config/savegame dirs)
 	if (fs_gamedirvar->string[0])
 		FS_SetGamedir (fs_gamedirvar->string);
 
-#ifdef USE_SAVEGAMEDIR
-	// copy over configs from gamedir to savegamedir if it's empty
+	// Copy over configs from gamedir to savegamedir if it's empty
 	FS_CopyConfigsToSavegameDir ();
-#endif	// USE_SAVEGAMEDIR
 
-	FS_Path_f(); // output path data
+	FS_Path_f (); // output path data
 }
+
 
 /*
 =================
@@ -2622,20 +3172,20 @@ void FS_Shutdown (void)
 	fsPack_t		*pack;
 	int				i;
 
-	Cmd_RemoveCommand("dir");
-	//Cmd_RemoveCommand("fdir");
-	Cmd_RemoveCommand("link");
-	Cmd_RemoveCommand("path");
+	Cmd_RemoveCommand ("dir");
+//	Cmd_RemoveCommand ("fdir");
+	Cmd_RemoveCommand ("link");
+	Cmd_RemoveCommand ("path");
 
 	// Close all files
 	for (i = 0, handle = fs_handles; i < MAX_HANDLES; i++, handle++)
 	{
 		if (handle->file)
-			fclose(handle->file);
+			fclose (handle->file);
 		if (handle->zip)
 		{
-			unzCloseCurrentFile(handle->zip);
-			unzClose(handle->zip);
+			unzCloseCurrentFile (handle->zip);
+			unzClose (handle->zip);
 		}
 	}
 
@@ -2647,17 +3197,393 @@ void FS_Shutdown (void)
 			pack = fs_searchPaths->pack;
 
 			if (pack->pak)
-				fclose(pack->pak);
+				fclose (pack->pak);
 			if (pack->pk3)
-				unzClose(pack->pk3);
+				unzClose (pack->pk3);
 
-			Z_Free(pack->files);
-			Z_Free(pack);
+			Z_Free (pack->files);
+			Z_Free (pack);
 		}
 		next = fs_searchPaths->next;
-		Z_Free(fs_searchPaths);
+		Z_Free (fs_searchPaths);
 		fs_searchPaths = next;
 	}
+}
+
+
+/*
+================
+FS_CheckBaseGameVars
+
+Cvar checks moved from FS_SetGamedir().
+================
+*/
+void FS_CheckBaseGameVars (const char *dir)
+{
+	// check basegame var
+	if ( fs_basegamedir1->string[0] )
+	{
+		if (strstr(fs_basegamedir1->string, "..") || strstr(fs_basegamedir1->string, "/")
+			|| strstr(fs_basegamedir1->string, "\\") || strstr(fs_basegamedir1->string, ":"))
+		{
+			Cvar_Set ("basegame", "");
+			Com_Printf ("Basegame should be a single filename, not a path.\n");
+		}
+		if ( !Q_stricmp(fs_basegamedir1->string, BASEDIRNAME) || !Q_stricmp(fs_basegamedir1->string, (char *)dir) )
+		{
+			Cvar_Set ("basegame", "");
+			Com_Printf ("Basegame should not be the same as "BASEDIRNAME" or gamedir.\n");
+		}
+	}
+
+	// check basegame2 var
+	if ( fs_basegamedir2->string[0] )
+	{
+		if (strstr(fs_basegamedir2->string, "..") || strstr(fs_basegamedir2->string, "/")
+			|| strstr(fs_basegamedir2->string, "\\") || strstr(fs_basegamedir2->string, ":") )
+		{
+			Cvar_Set ("basegame2", "");
+			Com_Printf ("Basegame2 should be a single filename, not a path.\n");
+		}
+		if ( !Q_stricmp(fs_basegamedir2->string, BASEDIRNAME) || !Q_stricmp(fs_basegamedir2->string, (char *)dir)
+			|| !Q_stricmp(fs_basegamedir2->string, fs_basegamedir1->string) )
+		{
+			Cvar_Set ("basegame2", "");
+			Com_Printf ("Basegame2 should not be the same as "BASEDIRNAME", gamedir, or basegame.\n");
+		}
+	}
+
+	// check basegame3 var
+	if ( fs_basegamedir3->string[0] )
+	{
+		if ( strstr(fs_basegamedir3->string, "..") || strstr(fs_basegamedir3->string, "/")
+			|| strstr(fs_basegamedir3->string, "\\") || strstr(fs_basegamedir3->string, ":") )
+		{
+			Cvar_Set ("basegame3", "");
+			Com_Printf ("Basegame3 should be a single filename, not a path.\n");
+		}
+		if ( !Q_stricmp(fs_basegamedir3->string, BASEDIRNAME) || !Q_stricmp(fs_basegamedir3->string, (char *)dir)
+			|| !Q_stricmp(fs_basegamedir3->string, fs_basegamedir1->string) || !Q_stricmp(fs_basegamedir3->string, fs_basegamedir2->string) )
+		{
+			Cvar_Set ("basegame3", "");
+			Com_Printf ("Basegame3 should not be the same as "BASEDIRNAME", gamedir, basegame, or basegame2.\n");
+		}
+	}
+}
+
+
+/*
+================
+FS_CheckImportGameVars
+
+Cvar checks moved from FS_SetGamedir().
+================
+*/
+void FS_CheckImportGameVars (const char *dir)
+{
+	// check quakeimportpath var
+	if ( fs_quakeimportpath->string[0] )
+	{
+		if (fs_quakeimportpath->string[0] == '.') 
+		{
+			Cvar_Set ("quake_importpath", "");
+			Com_Printf ("Quake_importpath should be an absolute path, not a relative one.\n");
+		}
+	}
+
+	// check quakemaingame var
+	if ( fs_quakemaingame->string[0] == 0 ) {
+		Cvar_Set ("quake_maingame", "id1");	// must not be 0-length string
+	}
+	else if ( fs_quakemaingame->string[0] )
+	{
+		if ( strstr(fs_quakemaingame->string, "..") || strstr(fs_quakemaingame->string, "/")
+			|| strstr(fs_quakemaingame->string, "\\") || strstr(fs_quakemaingame->string, ":") )
+		{
+			Cvar_Set ("quake_maingame", "id1");
+			Com_Printf ("Quake_maingame should be a single filename, not a path.\n");
+		}
+		if ( !Q_stricmp(fs_quakemaingame->string, fs_quakegamedir1->string) || !Q_stricmp(fs_quakemaingame->string, fs_quakegamedir2->string)
+			|| !Q_stricmp(fs_quakemaingame->string, fs_quakegamedir3->string) || !Q_stricmp(fs_quakemaingame->string, fs_quakegamedir4->string) )
+		{
+			Cvar_Set ("quake_maingame", "id1");
+			Com_Printf ("Quake_maingame should not be the same as quake_game1, quake_game2, quake_game3, or quake_game4.\n");
+		}
+	}
+
+	// check quakegamedir1 var
+	if ( fs_quakegamedir1->string[0] )
+	{
+		if ( strstr(fs_quakegamedir1->string, "..") || strstr(fs_quakegamedir1->string, "/")
+			|| strstr(fs_quakegamedir1->string, "\\") || strstr(fs_quakegamedir1->string, ":") )
+		{
+			Cvar_Set ("quake_game1", "");
+			Com_Printf ("Quake_game1 should be a single filename, not a path.\n");
+		}
+		if ( !Q_stricmp(fs_quakegamedir1->string, fs_quakemaingame->string) || !Q_stricmp(fs_quakegamedir1->string, fs_quakegamedir2->string)
+			|| !Q_stricmp(fs_quakegamedir1->string, fs_quakegamedir3->string) || !Q_stricmp(fs_quakegamedir1->string, fs_quakegamedir4->string) )
+		{
+			Cvar_Set ("quake_game1", "");
+			Com_Printf ("Quake_game1 should not be the same as quake_maingame, quake_game2, quake_game3, or quake_game4.\n");
+		}
+	}
+
+	// check quakegamedir2 var
+	if ( fs_quakegamedir2->string[0] )
+	{
+		if ( strstr(fs_quakegamedir2->string, "..") || strstr(fs_quakegamedir2->string, "/")
+			|| strstr(fs_quakegamedir2->string, "\\") || strstr(fs_quakegamedir2->string, ":") )
+		{
+			Cvar_Set ("quake_game2", "");
+			Com_Printf ("Quake_game2 should be a single filename, not a path.\n");
+		}
+		if ( !Q_stricmp(fs_quakegamedir2->string, fs_quakemaingame->string) || !Q_stricmp(fs_quakegamedir2->string, fs_quakegamedir1->string)
+			|| !Q_stricmp(fs_quakegamedir2->string, fs_quakegamedir3->string) || !Q_stricmp(fs_quakegamedir2->string, fs_quakegamedir4->string) )
+		{
+			Cvar_Set ("quake_game2", "");
+			Com_Printf ("Quake_game2 should not be the same as quake_maingame, quake_game1, quake_game3, or quake_game4.\n");
+		}
+	}
+
+	// check quakegamedir3 var
+	if ( fs_quakegamedir3->string[0] )
+	{
+		if ( strstr(fs_quakegamedir3->string, "..") || strstr(fs_quakegamedir3->string, "/")
+			|| strstr(fs_quakegamedir3->string, "\\") || strstr(fs_quakegamedir3->string, ":") )
+		{
+			Cvar_Set ("quake_game3", "");
+			Com_Printf ("Quake_game3 should be a single filename, not a path.\n");
+		}
+		if ( !Q_stricmp(fs_quakegamedir3->string, fs_quakemaingame->string) || !Q_stricmp(fs_quakegamedir3->string, fs_quakegamedir1->string)
+			|| !Q_stricmp(fs_quakegamedir3->string, fs_quakegamedir2->string) || !Q_stricmp(fs_quakegamedir3->string, fs_quakegamedir4->string) )
+		{
+			Cvar_Set ("quake_game3", "");
+			Com_Printf ("Quake_game3 should not be the same as quake_maingame, quake_game1, quake_game2, or quake_game4.\n");
+		}
+	}
+
+	// check quakegamedir4 var
+	if ( fs_quakegamedir4->string[0] )
+	{
+		if ( strstr(fs_quakegamedir4->string, "..") || strstr(fs_quakegamedir4->string, "/")
+			|| strstr(fs_quakegamedir4->string, "\\") || strstr(fs_quakegamedir4->string, ":") )
+		{
+			Cvar_Set ("quake_game4", "");
+			Com_Printf ("Quake_game4 should be a single filename, not a path.\n");
+		}
+		if ( !Q_stricmp(fs_quakegamedir4->string, fs_quakemaingame->string) || !Q_stricmp(fs_quakegamedir4->string, fs_quakegamedir1->string)
+			|| !Q_stricmp(fs_quakegamedir4->string, fs_quakegamedir2->string) || !Q_stricmp(fs_quakegamedir4->string, fs_quakegamedir3->string) )
+		{
+			Cvar_Set ("quake_game4", "");
+			Com_Printf ("Quake_game4 should not be the same as quake_maingame, quake_game1, quake_game2, or quake_game3.\n");
+		}
+	}
+
+#ifdef USE_Q2RR_IMPORT_PATH
+	// check quake2rrimportpath var
+	if ( fs_quake2rrimportpath->string[0] )
+	{
+		if (fs_quake2rrimportpath->string[0] == '.') 
+		{
+			Cvar_Set ("quake2rr_importpath", "");
+			Com_Printf ("Quake2rr_importpath should be an absolute path, not a relative one.\n");
+		}
+	}
+
+	// check quake2rrmaingame var
+	if ( fs_quake2rrmaingame->string[0] == 0 ) {
+		Cvar_Set ("quake2rr_maingame", BASEDIRNAME);	// must not be 0-length string
+	}
+	else if ( fs_quake2rrmaingame->string[0] )
+	{
+		if ( strstr(fs_quake2rrmaingame->string, "..") || strstr(fs_quake2rrmaingame->string, "/")
+			|| strstr(fs_quake2rrmaingame->string, "\\") || strstr(fs_quake2rrmaingame->string, ":") )
+		{
+			Cvar_Set ("quake2rr_maingame", BASEDIRNAME);
+			Com_Printf ("Quake2rr_maingame should be a single filename, not a path.\n");
+		}
+		if ( !Q_stricmp(fs_quake2rrmaingame->string, fs_quake2rrgamedir1->string) || !Q_stricmp(fs_quake2rrmaingame->string, fs_quake2rrgamedir2->string)
+			|| !Q_stricmp(fs_quake2rrmaingame->string, fs_quake2rrgamedir3->string) || !Q_stricmp(fs_quake2rrmaingame->string, fs_quake2rrgamedir4->string) )
+		{
+			Cvar_Set ("quake2rr_maingame", BASEDIRNAME);
+			Com_Printf ("Quake2rr_maingame should not be the same as quake2rr_game1, quake2rr_game2, quake2rr_game3, or quake2rr_game4.\n");
+		}
+	}
+
+	// check quake2rrgamedir1 var
+	if ( fs_quake2rrgamedir1->string[0] )
+	{
+		if ( strstr(fs_quake2rrgamedir1->string, "..") || strstr(fs_quake2rrgamedir1->string, "/")
+			|| strstr(fs_quake2rrgamedir1->string, "\\") || strstr(fs_quake2rrgamedir1->string, ":") )
+		{
+			Cvar_Set ("quake2rr_game1", "");
+			Com_Printf ("Quake2rr_game1 should be a single filename, not a path.\n");
+		}
+		if ( !Q_stricmp(fs_quake2rrgamedir1->string, fs_quake2rrmaingame->string) || !Q_stricmp(fs_quake2rrgamedir1->string, fs_quake2rrgamedir2->string)
+			|| !Q_stricmp(fs_quake2rrgamedir1->string, fs_quake2rrgamedir3->string) || !Q_stricmp(fs_quake2rrgamedir1->string, fs_quake2rrgamedir4->string) )
+		{
+			Cvar_Set ("quake2rr_game1", "");
+			Com_Printf ("Quake2rr_game1 should not be the same as quake2rr_maingame, quake2rr_game2, quake2rr_game3, or quake2rr_game4.\n");
+		}
+	}
+
+	// check quake2rrgamedir2 var
+	if ( fs_quake2rrgamedir2->string[0] )
+	{
+		if ( strstr(fs_quake2rrgamedir2->string, "..") || strstr(fs_quake2rrgamedir2->string, "/")
+			|| strstr(fs_quake2rrgamedir2->string, "\\") || strstr(fs_quake2rrgamedir2->string, ":") )
+		{
+			Cvar_Set ("quake2rr_game2", "");
+			Com_Printf ("Quake2rr_game2 should be a single filename, not a path.\n");
+		}
+		if ( !Q_stricmp(fs_quake2rrgamedir2->string, fs_quake2rrmaingame->string) || !Q_stricmp(fs_quake2rrgamedir2->string, fs_quake2rrgamedir1->string)
+			|| !Q_stricmp(fs_quake2rrgamedir2->string, fs_quake2rrgamedir3->string) || !Q_stricmp(fs_quake2rrgamedir2->string, fs_quake2rrgamedir4->string) )
+		{
+			Cvar_Set ("quake2rr_game2", "");
+			Com_Printf ("Quake2rr_game2 should not be the same as quake2rr_maingame, quake2rr_game1, quake2rr_game3, or quake2rr_game4.\n");
+		}
+	}
+
+	// check quake2rrgamedir3 var
+	if ( fs_quake2rrgamedir3->string[0] )
+	{
+		if ( strstr(fs_quake2rrgamedir3->string, "..") || strstr(fs_quake2rrgamedir3->string, "/")
+			|| strstr(fs_quake2rrgamedir3->string, "\\") || strstr(fs_quake2rrgamedir3->string, ":") )
+		{
+			Cvar_Set ("quake2rr_game3", "");
+			Com_Printf ("Quake2rr_game3 should be a single filename, not a path.\n");
+		}
+		if ( !Q_stricmp(fs_quake2rrgamedir3->string, fs_quake2rrmaingame->string) || !Q_stricmp(fs_quake2rrgamedir3->string, fs_quake2rrgamedir1->string)
+			|| !Q_stricmp(fs_quake2rrgamedir3->string, fs_quake2rrgamedir2->string) || !Q_stricmp(fs_quake2rrgamedir3->string, fs_quake2rrgamedir4->string) )
+		{
+			Cvar_Set ("quake2rr_game3", "");
+			Com_Printf ("Quake2rr_game3 should not be the same as quake2rr_maingame, quake2rr_game1, quake2rr_game2, or quake2rr_game4.\n");
+		}
+	}
+
+	// check quake2rrgamedir4 var
+	if ( fs_quake2rrgamedir4->string[0] )
+	{
+		if ( strstr(fs_quake2rrgamedir4->string, "..") || strstr(fs_quake2rrgamedir4->string, "/")
+			|| strstr(fs_quake2rrgamedir4->string, "\\") || strstr(fs_quake2rrgamedir4->string, ":") )
+		{
+			Cvar_Set ("quake2rr_game4", "");
+			Com_Printf ("Quake2rr_game4 should be a single filename, not a path.\n");
+		}
+		if ( !Q_stricmp(fs_quake2rrgamedir4->string, fs_quake2rrmaingame->string) || !Q_stricmp(fs_quake2rrgamedir4->string, fs_quake2rrgamedir1->string)
+			|| !Q_stricmp(fs_quake2rrgamedir4->string, fs_quake2rrgamedir2->string) || !Q_stricmp(fs_quake2rrgamedir4->string, fs_quake2rrgamedir3->string) )
+		{
+			Cvar_Set ("quake2rr_game4", "");
+			Com_Printf ("Quake2rr_game4 should not be the same as quake2rr_maingame, quake2rr_game1, quake2rr_game2, or quake2rr_game3.\n");
+		}
+	}
+#endif	// USE_Q2RR_IMPORT_PATH
+}
+
+
+/*
+================
+FS_AddQuakeImportGame
+
+Adds the quakeImportPath / quake2RRImportPath paks
+================
+*/
+void FS_AddQuakeImportGame (const char *dir)
+{
+	char		tempPath[MAX_OSPATH];
+	qboolean	quakegame1_loaded = false, quakegame2_loaded = false, quakegame3_loaded = false;
+	qboolean	quakeimportpath_autoset = false;
+	qboolean	quake2rrgame1_loaded = false, quake2rrgame2_loaded = false, quake2rrgame3_loaded = false;
+
+	// set QuakeImportPath if quakeimportpath_auto or quakerrimportpath_auto is enabled
+#if defined (_WIN32) || (__linux__)
+	if (fs_quakerrimportpath_auto->integer) {
+		Sys_InitQ1RRSteamInstallDir ();	// auto-detect Q1 Steam install dir
+		Q_strncpyz (tempPath, sizeof(tempPath), Sys_Q1RRSteamInstallDir());
+		if (tempPath[0] != 0) {
+			Cvar_ForceSet ("quake_importpath", tempPath);
+			quakeimportpath_autoset = true;
+		}
+	}
+	if ( !quakeimportpath_autoset && fs_quakeimportpath_auto->integer ) {
+		Sys_InitQ1SteamInstallDir ();	// auto-detect Q1RR Steam install dir
+		Q_strncpyz (tempPath, sizeof(tempPath), Sys_Q1SteamInstallDir());
+		if (tempPath[0] != 0)
+			Cvar_ForceSet ("quake_importpath", tempPath);
+	}
+#endif
+	// check and load QuakeImportPath/id1 and quakegame dirs
+	if ( fs_quakeimportpath->string[0] )
+	{
+		// Load pak remap script for fs_quakemaingame
+		FS_LoadPakRemapScript (dir, fs_quakemaingame->string);
+		FS_AddQuakeImportGameDirectory (va("%s/%s", fs_quakeimportpath->string, fs_quakemaingame->string));
+
+		if ( fs_quakegamedir1->string[0] ) {
+			FS_LoadPakRemapScript (dir, fs_quakegamedir1->string);
+			FS_AddQuakeImportGameDirectory (va("%s/%s", fs_quakeimportpath->string, fs_quakegamedir1->string));
+			quakegame1_loaded = true;
+		}
+		if ( quakegame1_loaded && fs_quakegamedir2->string[0] ) {
+			FS_LoadPakRemapScript (dir, fs_quakegamedir2->string);
+			FS_AddQuakeImportGameDirectory (va("%s/%s", fs_quakeimportpath->string, fs_quakegamedir2->string));
+			quakegame2_loaded = true;
+		}
+		if ( quakegame2_loaded && fs_quakegamedir3->string[0] ) {
+			FS_LoadPakRemapScript (dir, fs_quakegamedir3->string);
+			FS_AddQuakeImportGameDirectory (va("%s/%s", fs_quakeimportpath->string, fs_quakegamedir3->string));
+			quakegame3_loaded = true;
+		}
+		if ( quakegame3_loaded && fs_quakegamedir4->string[0] ) {
+			FS_LoadPakRemapScript (dir, fs_quakegamedir4->string);
+			FS_AddQuakeImportGameDirectory (va("%s/%s", fs_quakeimportpath->string, fs_quakegamedir4->string));
+		}
+
+		// Free pak remap script, as we're done with it
+		FS_FreePakRemapScript ();
+	}
+
+#ifdef USE_Q2RR_IMPORT_PATH
+	// set Quake2RRImportPath if quake2rrimportpath_auto is enabled
+#if defined (_WIN32) || (__linux__)
+	if (fs_quake2rrimportpath_auto->integer) {
+		Sys_InitQ2RRSteamInstallDir ();	// auto-detect Q1 Steam install dir
+		Q_strncpyz (tempPath, sizeof(tempPath), Sys_Q2RRSteamInstallDir());
+		if (tempPath[0] != 0)
+			Cvar_ForceSet ("quake2rr_importpath", tempPath);
+	}
+#endif
+	// check and load Quake2RRImportPath/id1 and quake2rrgame dirs
+	if ( fs_quake2rrimportpath->string[0] )
+	{
+		// TODO: load pak remap script for quakebasedirname here
+		FS_LoadPakRemapScript (dir, fs_quake2rrmaingame->string);
+		FS_AddQuakeImportGameDirectory (va("%s/%s", fs_quake2rrimportpath->string, fs_quake2rrmaingame->string));
+
+		if ( fs_quake2rrgamedir1->string[0] ) {
+			FS_LoadPakRemapScript (dir, fs_quake2rrgamedir1->string);
+			FS_AddQuakeImportGameDirectory (va("%s/%s", fs_quake2rrimportpath->string, fs_quake2rrgamedir1->string));
+			quake2rrgame1_loaded = true;
+		}
+		if ( quake2rrgame1_loaded && fs_quake2rrgamedir2->string[0] ) {
+			FS_LoadPakRemapScript (dir, fs_quake2rrgamedir2->string);
+			FS_AddQuakeImportGameDirectory (va("%s/%s", fs_quake2rrimportpath->string, fs_quake2rrgamedir2->string));
+			quake2rrgame2_loaded = true;
+		}
+		if ( quake2rrgame2_loaded && fs_quake2rrgamedir3->string[0] ) {
+			FS_LoadPakRemapScript (dir, fs_quake2rrgamedir3->string);
+			FS_AddQuakeImportGameDirectory (va("%s/%s", fs_quake2rrimportpath->string, fs_quake2rrgamedir3->string));
+			quake2rrgame3_loaded = true;
+		}
+		if ( quake2rrgame3_loaded && fs_quake2rrgamedir4->string[0] ) {
+			FS_LoadPakRemapScript (dir, fs_quake2rrgamedir4->string);
+			FS_AddQuakeImportGameDirectory (va("%s/%s", fs_quake2rrimportpath->string, fs_quake2rrgamedir4->string));
+		}
+
+		// Free pak remap script, as we're done with it
+		FS_FreePakRemapScript ();
+	}
+#endif	// USE_Q2RR_IMPORT_PATH
 }
 
 
@@ -2673,62 +3599,18 @@ void FS_SetGamedir (const char *dir)
 	fsSearchPath_t	*next;
 	qboolean		basegame1_loaded = false, basegame2_loaded = false;
 
-	if (strstr(dir, "..") || strstr(dir, "/")
+	if ( strstr(dir, "..") || strstr(dir, "/")
 		|| strstr(dir, "\\") || strstr(dir, ":") )
 	{
 		Com_Printf ("Gamedir should be a single filename, not a path\n");
 		return;
 	}
 
-	// Knightmare- check basegame var
-	if ( fs_basegamedir->string[0] )
-	{
-		if (strstr(fs_basegamedir->string, "..") || strstr(fs_basegamedir->string, "/")
-			|| strstr(fs_basegamedir->string, "\\") || strstr(fs_basegamedir->string, ":"))
-		{
-			Cvar_Set ("basegame", "");
-			Com_Printf ("Basegame should be a single filename, not a path\n");
-		}
-		if ( !Q_stricmp(fs_basegamedir->string, BASEDIRNAME) || !Q_stricmp(fs_basegamedir->string, (char *)dir) )
-		{
-			Cvar_Set ("basegame", "");
-			Com_Printf ("Basegame should not be the same as "BASEDIRNAME" or gamedir.\n");
-		}
-	}
-
-	// Knightmare- check basegame2 var
-	if ( fs_basegamedir2->string[0] )
-	{
-		if (strstr(fs_basegamedir2->string, "..") || strstr(fs_basegamedir2->string, "/")
-			|| strstr(fs_basegamedir2->string, "\\") || strstr(fs_basegamedir2->string, ":") )
-		{
-			Cvar_Set ("basegame2", "");
-			Com_Printf ("Basegame2 should be a single filename, not a path\n");
-		}
-		if ( !Q_stricmp(fs_basegamedir2->string, BASEDIRNAME) || !Q_stricmp(fs_basegamedir2->string, (char *)dir)
-			|| !Q_stricmp(fs_basegamedir2->string, fs_basegamedir->string) )
-		{
-			Cvar_Set ("basegame2", "");
-			Com_Printf ("Basegame2 should not be the same as "BASEDIRNAME", gamedir, or basegame.\n");
-		}
-	}
-
-	// Knightmare- check basegame3 var
-	if ( fs_basegamedir3->string[0] )
-	{
-		if (strstr(fs_basegamedir3->string, "..") || strstr(fs_basegamedir3->string, "/")
-			|| strstr(fs_basegamedir3->string, "\\") || strstr(fs_basegamedir3->string, ":") )
-		{
-			Cvar_Set ("basegame3", "");
-			Com_Printf ("Basegame3 should be a single filename, not a path.\n");
-		}
-		if ( !Q_stricmp(fs_basegamedir3->string, BASEDIRNAME) || !Q_stricmp(fs_basegamedir3->string, (char *)dir)
-			|| !Q_stricmp(fs_basegamedir3->string, fs_basegamedir->string) || !Q_stricmp(fs_basegamedir3->string, fs_basegamedir2->string) )
-		{
-			Cvar_Set ("basegame3", "");
-			Com_Printf ("Basegame3 should not be the same as "BASEDIRNAME", gamedir, basegame, or basegame2.\n");
-		}
-	}
+	//
+	// check our basegame/quakegame cvars
+	//
+	FS_CheckBaseGameVars (dir);
+	FS_CheckImportGameVars (dir);
 
 	//
 	// free up any current game dir info
@@ -2738,9 +3620,9 @@ void FS_SetGamedir (const char *dir)
 		if (fs_searchPaths->pack)
 		{
 			if (fs_searchPaths->pack->pak)
-				fclose(fs_searchPaths->pack->pak);
+				fclose (fs_searchPaths->pack->pak);
 			if (fs_searchPaths->pack->pk3)
-				unzClose(fs_searchPaths->pack->pk3);
+				unzClose (fs_searchPaths->pack->pk3);
 			Z_Free (fs_searchPaths->pack->files);
 			Z_Free (fs_searchPaths->pack);
 		}
@@ -2764,12 +3646,11 @@ void FS_SetGamedir (const char *dir)
 	{
 		Cvar_FullSet ("gamedir", "", CVAR_SERVERINFO|CVAR_NOSET|CVAR_SAVE_IGNORE);
 		Cvar_FullSet ("game", "", CVAR_LATCH|CVAR_SERVERINFO|CVAR_SAVE_IGNORE);
+
 		// set our savegame/download dirs with Sys_PrefDir() and baseq2
 #ifdef USE_SAVEGAMEDIR
-		FS_AddDownloadDirectory (BASEDIRNAME);
-		FS_AddSaveGameDirectory (BASEDIRNAME);
-	//	Com_sprintf (fs_savegamedir, sizeof(fs_savegamedir), "%s/%s", Sys_PrefDir(), BASEDIRNAME);
-	//	Com_sprintf (fs_downloaddir, sizeof(fs_downloaddir), "%s/%s", Sys_DownloadDir(), BASEDIRNAME);
+		FS_AddDownloadDirectory (va("%s/%s", Sys_DownloadDir(), BASEDIRNAME));
+		FS_AddSaveGameDirectory (va("%s/%s", Sys_PrefDir(), BASEDIRNAME));
 #else
 		Q_strncpyz(fs_savegamedir, sizeof(fs_savegamedir), fs_gamedir);
 		Q_strncpyz(fs_downloaddir, sizeof(fs_downloaddir), fs_gamedir);
@@ -2778,12 +3659,12 @@ void FS_SetGamedir (const char *dir)
 	else
 	{
 		// check and load base game directory (so mods can be based upon other mods)
-		if ( fs_basegamedir->string[0] )
+		if ( fs_basegamedir1->string[0] )
 		{
-		//	Com_Printf("Adding basegame path %s/%s\n", fs_basedir->string, fs_basegamedir->string);
+		//	Com_Printf("Adding basegame path %s/%s\n", fs_basedir->string, fs_basegamedir1->string);
 			if (fs_cddir->string[0])
-				FS_AddGameDirectory (va("%s/%s", fs_cddir->string, fs_basegamedir->string) );
-			FS_AddGameDirectory (va("%s/%s", fs_basedir->string, fs_basegamedir->string) );
+				FS_AddGameDirectory (va("%s/%s", fs_cddir->string, fs_basegamedir1->string) );
+			FS_AddGameDirectory (va("%s/%s", fs_basedir->string, fs_basegamedir1->string) );
 			basegame1_loaded = true;
 		}
 
@@ -2806,17 +3687,19 @@ void FS_SetGamedir (const char *dir)
 			FS_AddGameDirectory (va("%s/%s", fs_basedir->string, fs_basegamedir3->string) );
 		}
 
+		// load the gamedir
 		Cvar_FullSet ("gamedir", (char *)dir, CVAR_SERVERINFO|CVAR_NOSET|CVAR_SAVE_IGNORE);
 		if (fs_cddir->string[0])
 			FS_AddGameDirectory (va("%s/%s", fs_cddir->string, dir) );
 		FS_AddGameDirectory (va("%s/%s", fs_basedir->string, dir) );
 
+		// load the Quake import paks
+		FS_AddQuakeImportGame (dir);
+
 		// set our savegame/download dirs with Sys_PrefDir() and baseq2
 #ifdef USE_SAVEGAMEDIR
-		FS_AddDownloadDirectory (dir);
-		FS_AddSaveGameDirectory (dir);
-	//	Com_sprintf (fs_savegamedir, sizeof(fs_savegamedir), "%s/%s", Sys_PrefDir(), dir);
-	//	Com_sprintf (fs_downloaddir, sizeof(fs_downloaddir), "%s/%s", Sys_DownloadDir(), dir);
+		FS_AddDownloadDirectory (va("%s/%s", Sys_DownloadDir(), dir));
+		FS_AddSaveGameDirectory (va("%s/%s", Sys_PrefDir(), dir));
 #else
 		Q_strncpyz(fs_savegamedir, sizeof(fs_savegamedir), fs_gamedir);
 		Q_strncpyz(fs_downloaddir, sizeof(fs_downloaddir), fs_gamedir);
@@ -2927,6 +3810,7 @@ void FS_ExecAutoexec (void)
 	Sys_FindClose ();
 }
 
+
 /*
 ================
 FS_ListFiles
@@ -2955,8 +3839,8 @@ char **FS_ListFiles (const char *findname, int *numfiles, unsigned musthave, uns
 	nfiles++; // add space for a guard
 	*numfiles = nfiles;
 
-	list = malloc( sizeof( char * ) * nfiles );
-	memset( list, 0, sizeof( char * ) * nfiles );
+	list = malloc(sizeof(char *) * nfiles);
+	memset(list, 0, sizeof(char *) * nfiles);
 
 	s = Sys_FindFirst( (char *)findname, musthave, canthave );
 	nfiles = 0;
@@ -2974,8 +3858,12 @@ char **FS_ListFiles (const char *findname, int *numfiles, unsigned musthave, uns
 	}
 	Sys_FindClose ();
 
+	// sort the list
+	qsort(list, nfiles, sizeof(char *), Q_SortStrcmp);
+
 	return list;
 }
+
 
 /*
 =================
@@ -2996,6 +3884,7 @@ void FS_FreeFileList (char **list, int n)
 	}
 	free(list);
 }
+
 
 /*
 =================
@@ -3018,30 +3907,6 @@ qboolean FS_ItemInList (const char *check, int num, const char **list)
 	return false;
 }
 
-/*
-=================
-FS_InsertInList
-=================
-*/
-void FS_InsertInList (char **list, const char *insert, int len, int start)
-{
-	int		i;
-
-	if (!list || !insert) return;
-	if (len < 1 || start < 0) return;
-//	if (start >= len) return;
-	if (start > len) return;
-
-	for (i=start; i<len; i++)
-	{
-		if (!list[i])
-		{
-			list[i] = strdup(insert);
-			return;
-		}
-	}
-	list[len] = strdup(insert);
-}
 
 /*
 ================

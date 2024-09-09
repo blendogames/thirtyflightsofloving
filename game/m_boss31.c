@@ -32,7 +32,8 @@ jorg
 #include "g_local.h"
 #include "m_boss31.h"
 
-extern SP_monster_makron (edict_t *self);
+void MakronPrecache (edict_t *self);
+extern void SP_monster_makron (edict_t *self);
 qboolean visible (edict_t *self, edict_t *other);
 
 static int	sound_pain1;
@@ -142,7 +143,7 @@ mmove_t	jorg_move_stand = {FRAME_stand01, FRAME_stand51, jorg_frames_stand, NULL
 
 void jorg_idle (edict_t *self)
 {
-	if (!(self->spawnflags & SF_MONSTER_AMBUSH))
+	if ( !(self->spawnflags & SF_MONSTER_AMBUSH) )
 		gi.sound (self, CHAN_VOICE, sound_idle, 1, ATTN_NORM,0);
 }
 
@@ -581,8 +582,8 @@ void jorg_attack(edict_t *self)
 	{
 		gi.sound (self, CHAN_VOICE, sound_attack1, 1, ATTN_NORM,0);
 		self->s.sound = gi.soundindex ("boss3/w_loop.wav");
-	#ifdef LOOP_SOUND_ATTENUATION
-		self->s.attenuation = ATTN_IDLE;
+	#ifdef KMQUAKE2_ENGINE_MOD
+		self->s.loop_attenuation = ATTN_IDLE;
 	#endif
 		self->monsterinfo.currentmove = &jorg_move_start_attack1;
 	}
@@ -742,18 +743,9 @@ qboolean Jorg_CheckAttack (edict_t *self)
 }
 
 
-void MakronPrecache (void);
-
-/*QUAKED monster_jorg (1 .5 0) (-80 -80 0) (90 90 140) Ambush Trigger_Spawn Sight
-*/
-void SP_monster_jorg (edict_t *self)
+// Knightmare- added soundcache function
+void monster_jorg_soundcache (edict_t *self)
 {
-	if (deathmatch->value)
-	{
-		G_FreeEdict (self);
-		return;
-	}
-
 	sound_pain1 = gi.soundindex ("boss3/bs3pain1.wav");
 	sound_pain2 = gi.soundindex ("boss3/bs3pain2.wav");
 	sound_pain3 = gi.soundindex ("boss3/bs3pain3.wav");
@@ -768,8 +760,23 @@ void SP_monster_jorg (edict_t *self)
 	sound_step_right = gi.soundindex ("boss3/step2.wav");
 	sound_firegun = gi.soundindex ("boss3/xfire.wav");
 	sound_death_hit = gi.soundindex ("boss3/d_hit.wav");
+}
 
-	MakronPrecache ();
+
+/*QUAKED monster_jorg (1 .5 0) (-80 -80 0) (90 90 140) Ambush Trigger_Spawn Sight
+*/
+void SP_monster_jorg (edict_t *self)
+{
+	if (deathmatch->value)
+	{
+		G_FreeEdict (self);
+		return;
+	}
+
+	// Knightmare- use soundcache function
+	monster_jorg_soundcache (self);
+
+	MakronPrecache (self);
 
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;

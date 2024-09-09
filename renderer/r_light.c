@@ -29,7 +29,7 @@ int	r_dlightframecount;
 gllightmapstate_t gl_lms;
 
 static void		LM_InitBlock (void);
-static void		LM_UploadBlock (qboolean dynamic);
+static void		LM_UploadBlock (void);
 static qboolean	LM_AllocBlock (int w, int h, int *x, int *y);
 
 //#define	DLIGHT_CUTOFF	64	// Knightmare- no longer hard-coded
@@ -290,6 +290,10 @@ int RecursiveLightPoint (mnode_t *node, vec3_t start, vec3_t end)
 			continue;	// no lightmaps
 		if ( (surf->texinfo->flags & SURF_SKY) || ((surf->texinfo->flags & SURF_WARP) && !surf->isLightmapped) )
 			continue;	// no lightmaps
+		if ( (node->contents & MASK_WATER) && ((surf->flags & SURF_DRAWTURB) || (surf->texinfo->flags & SURF_WARP))  )
+			continue;	// skip inside-liquid warp surfaces, as they will have darker lightmaps
+	//	if ((surf->flags & SURF_DRAWTURB) || (surf->texinfo->flags & SURF_WARP))
+	//		continue;	// skip warp surfaces if warp lightmap loading is enabled, as water lightmaps may screw up model lighting
 #else	// WARP_LIGHTMAPS
 		if (surf->flags & (SURF_DRAWTURB|SURF_DRAWSKY)) 
 			continue;	// no lightmaps
@@ -326,11 +330,11 @@ int RecursiveLightPoint (mnode_t *node, vec3_t start, vec3_t end)
 
 			lightmap += 3*(dt * ((surf->extents[0]>>4)+1) + ds);
 
-			for (maps=0; maps < MAXLIGHTMAPS && surf->styles[maps]!=255; maps++)
+			for (maps = 0; maps < MAXLIGHTMAPS && surf->styles[maps] != 255; maps++)
 			{
-				if (!r_newrefdef.lightstyles || !surf->styles)
+				if ( !r_newrefdef.lightstyles || !surf->styles )
 					break;
-				for (i=0; i<3; i++)
+				for (i = 0; i < 3; i++)
 					scale[i] = r_modulate->value*r_newrefdef.lightstyles[surf->styles[maps]].rgb[i];
 
 				pointcolor[0] += lightmap[0] * scale[0] * (1.0/255);
@@ -550,11 +554,10 @@ void R_LightPointDynamics (vec3_t p, vec3_t color, m_dlight_t *list, int *amount
 R_SurfLightPoint
 ===============
 */
-void R_SurfLightPoint (msurface_t *surf, vec3_t p, vec3_t color, qboolean baselight)
+void R_SurfLightPoint (msurface_t *surf, vec3_t p, vec3_t color, qboolean vertexLightBase)
 {
 	vec3_t		start, end, dist, bestColor;
 	vec3_t		dlorigin, temp, forward, right, up;
-//	vec3_t		startOffset[4] = { {0,0,0}, {-1,0,0}, {0,-1,0}, {-1,-1,0} };
 	vec3_t		startOffset[9] = { {0,0,0}, {-1,0,0}, {-1,-1,0}, {0,-1,0}, {1,-1,0}, {1,0,0}, {1,1,0}, {0,1,0}, {-1,1,0} };
 	float		r, light, add;
 	int			lnum, i;
@@ -578,7 +581,7 @@ void R_SurfLightPoint (msurface_t *surf, vec3_t p, vec3_t color, qboolean baseli
 		AngleVectors (hostent->angles, forward, right, up);
 	}
 
-	if (baselight)
+	if (vertexLightBase)
 	{
 		VectorCopy (vec3_origin, bestColor);
 		for (i=0; i<9; i++) // test multiple offset points to avoid dark corners, select brightest
@@ -702,7 +705,7 @@ void R_ShadowLight (vec3_t pos, vec3_t lightAdd)
 	if (shadowdist<=0) return;
 
 	// now rotate according to model yaw
-	vectoangles (lightAdd, angle);
+	vectoangles2 (lightAdd, angle);
 	angle[YAW] = -(currententity->angles[YAW]-angle[YAW]);
 	AngleVectors (angle, dist, NULL, NULL);
 	VectorScale (dist, shadowdist, lightAdd); 
@@ -724,7 +727,7 @@ void R_ShadowLight (vec3_t pos, vec3_t lightAdd)
 	}
 	else // shadow from dynamic lights
 	{
-		vectoangles (lightAdd, angle);
+		vectoangles2 (lightAdd, angle);
 		angle[YAW] -= currententity->angles[YAW];
 		AngleVectors (angle, dist, NULL, NULL);
 	}
@@ -874,7 +877,7 @@ static void LM_InitBlock (void)
 
 #ifdef BATCH_LM_UPDATES
 	// alloc lightmap update buffer if needed
-	if (!gl_lms.lightmap_update[gl_lms.current_lightmap_texture]) {
+	if ( !gl_lms.lightmap_update[gl_lms.current_lightmap_texture] ) {
 		gl_lms.lightmap_update[gl_lms.current_lightmap_texture] = Z_Malloc (LM_BLOCK_WIDTH*LM_BLOCK_HEIGHT*LIGHTMAP_BYTES);
 	}
 #endif	// BATCH_LM_UPDATES
@@ -886,63 +889,25 @@ static void LM_InitBlock (void)
 LM_UploadBlock
 ================
 */
-static void LM_UploadBlock (qboolean dynamic)
+static void LM_UploadBlock (void)
 {
-	int texture;
-	int height = 0;
-
-	if ( dynamic )
-	{
-		texture = 0;
-	}
-	else
-	{
-		texture = gl_lms.current_lightmap_texture;
-	}
-
-	GL_Bind( glState.lightmap_textures + texture );
+	GL_Bind (glState.lightmap_textures + gl_lms.current_lightmap_texture);
 	qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	if ( dynamic )
-	{
-		int i;
-
-		for ( i = 0; i < LM_BLOCK_WIDTH; i++ )
-		{
-			if ( gl_lms.allocated[i] > height )
-				height = gl_lms.allocated[i];
-		}
-
-		qglTexSubImage2D( GL_TEXTURE_2D, 
-						  0,
-						  0, 0,
-						  LM_BLOCK_WIDTH, height,
-						  gl_lms.format,
-						  gl_lms.type,
-	//					  GL_LIGHTMAP_FORMAT,
-	//					  GL_UNSIGNED_BYTE,
-						  gl_lms.lightmap_buffer );
-	}
-	else
-	{
-		qglTexImage2D( GL_TEXTURE_2D, 
-					   0, 
-					   gl_lms.internal_format,
-					   LM_BLOCK_WIDTH, LM_BLOCK_HEIGHT, 
-					   0, 
-					   gl_lms.format,
-					   gl_lms.type,
-	//				   GL_LIGHTMAP_FORMAT, 
-	//				   GL_UNSIGNED_BYTE, 
+	qglTexImage2D( GL_TEXTURE_2D, 0, 
+				   gl_lms.internal_format,
+				   LM_BLOCK_WIDTH, LM_BLOCK_HEIGHT, 
+				   0, 
+	//			   GL_LIGHTMAP_FORMAT, GL_LIGHTMAP_TYPE, 
+					   gl_lms.format, gl_lms.type,
 #ifdef BATCH_LM_UPDATES
-					   gl_lms.lightmap_update[gl_lms.current_lightmap_texture] );
+				   gl_lms.lightmap_update[gl_lms.current_lightmap_texture] );
 #else
-					   gl_lms.lightmap_buffer );
+				   gl_lms.lightmap_buffer );
 #endif	// BATCH_LM_UPDATES
-		if ( ++gl_lms.current_lightmap_texture == MAX_LIGHTMAPS )
-			VID_Error( ERR_DROP, "LM_UploadBlock() - MAX_LIGHTMAPS exceeded\n" );
-	}
+	if ( ++gl_lms.current_lightmap_texture == MAX_LIGHTMAPS )
+		VID_Error( ERR_DROP, "LM_UploadBlock() - MAX_LIGHTMAPS exceeded\n" );
 }
 
 
@@ -996,8 +961,7 @@ void R_SetCacheState (msurface_t *surf)
 {
 	int maps;
 
-	for (maps = 0 ; maps < MAXLIGHTMAPS && surf->styles[maps] != 255 ;
-		 maps++)
+	for (maps = 0; maps < MAXLIGHTMAPS && surf->styles[maps] != 255; maps++)
 	{
 		surf->cached_light[maps] = r_newrefdef.lightstyles[surf->styles[maps]].white;
 	}
@@ -1058,8 +1022,7 @@ void R_BuildLightMap (msurface_t *surf, byte *dest, int stride)
 	}
 
 	// count the # of maps
-	for ( nummaps = 0 ; nummaps < MAXLIGHTMAPS && surf->styles[nummaps] != 255 ;
-		 nummaps++)
+	for ( nummaps = 0; nummaps < MAXLIGHTMAPS && surf->styles[nummaps] != 255; nummaps++)
 		;
 
 	lightmap = surf->samples;
@@ -1069,19 +1032,18 @@ void R_BuildLightMap (msurface_t *surf, byte *dest, int stride)
 	{
 		int maps;
 
-		for (maps = 0 ; maps < MAXLIGHTMAPS && surf->styles[maps] != 255 ;
-			 maps++)
+		for (maps = 0; maps < MAXLIGHTMAPS && surf->styles[maps] != 255; maps++)
 		{
 			bl = s_blocklights;
 
-			for (i=0 ; i<3 ; i++)
+			for (i = 0; i < 3; i++)
 				scale[i] = r_modulate->value*r_newrefdef.lightstyles[surf->styles[maps]].rgb[i];
 
 			if ( scale[0] == 1.0F &&
 				 scale[1] == 1.0F &&
 				 scale[2] == 1.0F )
 			{
-				for (i=0 ; i<size ; i++, bl+=3)
+				for (i = 0; i < size; i++, bl+=3)
 				{
 					bl[0] = lightmap[i*3+0];
 					bl[1] = lightmap[i*3+1];
@@ -1090,7 +1052,7 @@ void R_BuildLightMap (msurface_t *surf, byte *dest, int stride)
 			}
 			else
 			{
-				for (i=0 ; i<size ; i++, bl+=3)
+				for (i = 0; i < size; i++, bl+=3)
 				{
 					bl[0] = lightmap[i*3+0] * scale[0];
 					bl[1] = lightmap[i*3+1] * scale[1];
@@ -1106,19 +1068,18 @@ void R_BuildLightMap (msurface_t *surf, byte *dest, int stride)
 
 		memset( s_blocklights, 0, sizeof( s_blocklights[0] ) * size * 3 );
 
-		for (maps = 0 ; maps < MAXLIGHTMAPS && surf->styles[maps] != 255 ;
-			 maps++)
+		for (maps = 0; maps < MAXLIGHTMAPS && surf->styles[maps] != 255; maps++)
 		{
 			bl = s_blocklights;
 
-			for (i=0 ; i<3 ; i++)
+			for (i = 0; i < 3; i++)
 				scale[i] = r_modulate->value*r_newrefdef.lightstyles[surf->styles[maps]].rgb[i];
 
 			if ( scale[0] == 1.0F &&
 				 scale[1] == 1.0F &&
 				 scale[2] == 1.0F )
 			{
-				for (i=0 ; i<size ; i++, bl+=3 )
+				for (i = 0; i < size; i++, bl+=3 )
 				{
 					bl[0] += lightmap[i*3+0];
 					bl[1] += lightmap[i*3+1];
@@ -1127,7 +1088,7 @@ void R_BuildLightMap (msurface_t *surf, byte *dest, int stride)
 			}
 			else
 			{
-				for (i=0 ; i<size ; i++, bl+=3)
+				for (i = 0; i < size; i++, bl+=3)
 				{
 					bl[0] += lightmap[i*3+0] * scale[0];
 					bl[1] += lightmap[i*3+1] * scale[1];
@@ -1151,9 +1112,9 @@ store:
 
 	if ( monolightmap == '0' )
 	{
-		for (i=0 ; i<tmax ; i++, dest += stride)
+		for (i = 0; i < tmax; i++, dest += stride)
 		{
-			for (j=0 ; j<smax ; j++)
+			for (j = 0; j < smax; j++)
 			{
 				
 				r = Q_ftol( bl[0] );
@@ -1222,9 +1183,9 @@ store:
 	}
 	else
 	{
-		for (i=0 ; i<tmax ; i++, dest += stride)
+		for (i = 0; i < tmax; i++, dest += stride)
 		{
-			for (j=0 ; j<smax ; j++)
+			for (j = 0; j < smax; j++)
 			{
 				
 				r = Q_ftol( bl[0] );
@@ -1353,7 +1314,7 @@ void R_CreateSurfaceLightmap (msurface_t *surf)
 
 	if ( !LM_AllocBlock (smax, tmax, &surf->light_s, &surf->light_t) )
 	{
-		LM_UploadBlock (false);
+		LM_UploadBlock ();
 		LM_InitBlock();
 		if ( !LM_AllocBlock (smax, tmax, &surf->light_s, &surf->light_t) )
 		{
@@ -1393,14 +1354,14 @@ void R_BeginBuildingLightmaps (model_t *m)
 	int				i;
 	unsigned		dummy[LM_BLOCK_WIDTH*LM_BLOCK_HEIGHT];	// 128*128
 
-	memset( gl_lms.allocated, 0, sizeof(gl_lms.allocated) );
+	memset (gl_lms.allocated, 0, sizeof(gl_lms.allocated));
 
 #ifdef BATCH_LM_UPDATES
 	// free lightmap update buffers
-	for (i=0; i<MAX_LIGHTMAPS; i++)
+	for (i = 0; i < MAX_LIGHTMAPS; i++)
 	{
 		if (gl_lms.lightmap_update[i])
-			Z_Free(gl_lms.lightmap_update[i]);
+			Z_Free (gl_lms.lightmap_update[i]);
 		gl_lms.lightmap_update[i] = NULL;
 		gl_lms.modified[i] = false;
 		gl_lms.lightrect[i].left = LM_BLOCK_WIDTH;
@@ -1413,11 +1374,11 @@ void R_BeginBuildingLightmaps (model_t *m)
 	r_framecount = 1;		// no dlightcache
 
 	GL_EnableMultitexture (true);
-	GL_SelectTexture(1);
+	GL_SelectTexture (1);
 
 	// setup the base lightstyles so the lightmaps won't have to be regenerated
 	// the first time they're seen
-	for (i=0 ; i<MAX_LIGHTSTYLES ; i++)
+	for (i = 0; i < MAX_LIGHTSTYLES; i++)
 	{
 		lightstyles[i].rgb[0] = 1;
 		lightstyles[i].rgb[1] = 1;
@@ -1426,7 +1387,7 @@ void R_BeginBuildingLightmaps (model_t *m)
 	}
 	r_newrefdef.lightstyles = lightstyles;
 
-	if (!glState.lightmap_textures)
+	if ( !glState.lightmap_textures )
 	{
 		glState.lightmap_textures	= TEXNUM_LIGHTMAPS;
 	//	glState.lightmap_textures	= glState.texture_extension_number;
@@ -1437,7 +1398,7 @@ void R_BeginBuildingLightmaps (model_t *m)
 
 #ifdef BATCH_LM_UPDATES
 	// alloc lightmap update buffer if needed
-	if (!gl_lms.lightmap_update[gl_lms.current_lightmap_texture]) {
+	if ( !gl_lms.lightmap_update[gl_lms.current_lightmap_texture] ) {
 		gl_lms.lightmap_update[gl_lms.current_lightmap_texture] = Z_Malloc (LM_BLOCK_WIDTH*LM_BLOCK_HEIGHT*LIGHTMAP_BYTES);
 	}
 #endif	// BATCH_LM_UPDATES
@@ -1522,6 +1483,6 @@ R_EndBuildingLightmaps
 */
 void R_EndBuildingLightmaps (void)
 {
-	LM_UploadBlock (false);
+	LM_UploadBlock ();
 	GL_EnableMultitexture (false);
 }

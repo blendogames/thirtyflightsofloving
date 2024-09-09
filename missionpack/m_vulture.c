@@ -601,17 +601,9 @@ void vulture_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dama
 		self->monsterinfo.currentmove = &vulture_move_death;
 }
 
-
-/*QUAKED monster_vulture (1 .5 0) (-8 -8 -8) (8 8 8) Ambush Trigger_Spawn Sight InAir GoodGuy NoGib
-*/
-void SP_monster_vulture (edict_t *self)
+// Knightmare- added soundcache function
+void monster_vulture_soundcache (edict_t *self)
 {
-	if (deathmatch->value)
-	{
-		G_FreeEdict (self);
-		return;
-	}
-
 //	sound_sight =		gi.soundindex ("vulture/sight1.wav");
 	sound_perch_idle1 =	gi.soundindex ("vulture/perch_idle1.wav");
 	sound_perch_idle2 =	gi.soundindex ("vulture/perch_idle2.wav");
@@ -628,6 +620,20 @@ void SP_monster_vulture (edict_t *self)
 	sound_pain1 =	gi.soundindex ("vulture/pain1.wav");
 	sound_pain2 =	gi.soundindex ("vulture/pain2.wav");
 	sound_death =	gi.soundindex ("vulture/death1.wav");
+}
+
+/*QUAKED monster_vulture (1 .5 0) (-8 -8 -8) (8 8 8) Ambush Trigger_Spawn Sight InAir GoodGuy NoGib
+*/
+void SP_monster_vulture (edict_t *self)
+{
+	if (deathmatch->value)
+	{
+		G_FreeEdict (self);
+		return;
+	}
+
+	// Knightmare- use soundcache function
+	monster_vulture_soundcache (self);
 
 	// precache feather gibs
 	gi.modelindex ("models/monsters/vulture/feather1.md2");

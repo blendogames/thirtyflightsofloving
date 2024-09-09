@@ -25,9 +25,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "r_local.h"
 
-#define random()	((rand () & 0x7fff) / ((float)0x7fff))
-#define crandom()	(2.0 * (random() - 0.5))
-
 //#define BINARY_PART_SORT
 
 #ifdef BINARY_PART_SORT
@@ -433,9 +430,9 @@ int TexParticle (int type)
 	type =  max( type, 0 );
 	type =  min( type, PARTICLE_TYPES-1 );
 	// check for bad particle image num
-	if (!glMedia.particletextures[type])
-		glMedia.particletextures[type] = glMedia.notexture;
-	return glMedia.particletextures[type]->texnum;
+	if (!glMedia.particleTextures[type])
+		glMedia.particleTextures[type] = glMedia.noTexture;
+	return glMedia.particleTextures[type]->texnum;
 }
 
 
@@ -533,7 +530,7 @@ R_RenderParticle
 */
 void R_RenderParticle (particle_t *p)
 {
-	float		size, len, lighting = r_particle_lighting->value;
+	float		size = 0.0f, len = 0.0f, lighting = r_particle_lighting->value;
 	int			oldrender=0, rendertype=0, numVerts, numIndex;
 	
 	vec3_t		shadelight, move;

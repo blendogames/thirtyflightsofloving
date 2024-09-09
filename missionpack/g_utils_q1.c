@@ -12,6 +12,19 @@ float PointDist (vec3_t x, vec3_t y)
 	return dist;
 }
 
+
+qboolean IsQ1Chthon (edict_t *self)
+{
+	if ( !self || !self->classname || (self->classname[0] == 0) )
+		return false;
+
+	if ( (strcmp(self->classname, "q1_monster_chton") == 0) || (strcmp(self->classname, "monster_q1_chthon") == 0) )
+		return true;
+
+	return false;
+}
+
+
 void Q1TeleportSounds (edict_t *ent)
 {
 	float sound = random();
@@ -27,4 +40,3 @@ void Q1TeleportSounds (edict_t *ent)
 	else
 		gi.sound (ent, CHAN_NO_PHS_ADD+CHAN_VOICE, gi.soundindex("q1world/teleport/r_tele5.wav"), 1, ATTN_NORM, 0);
 }
-

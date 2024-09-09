@@ -400,20 +400,20 @@ struct altsel_s
 	char *weapon[MAX_ALT];
 } alternates[] = 
 {
-	{0}, // filler
-	{2,"Blaster", "Flare Gun"},
-	{1,"Shotgun"},
-	{1,"Super Shotgun"},
-	{1,"Machinegun"},
-	{1,"Chaingun"},
-	{1,"Grenade Launcher"},
-	{1,"Rocket Launcher"},
-	{1,"HyperBlaster"},
-	{2,"Railgun", "Sniper Rifle"},
-	{2,"BFG10K", "Sonic Cannon"}
+	{0, }, // filler
+	{2, "Blaster", "Flare Gun"},
+	{1, "Shotgun"},
+	{1, "Super Shotgun"},
+	{1, "Machinegun"},
+	{1, "Chaingun"},
+	{1, "Grenade Launcher"},
+	{1, "Rocket Launcher"},
+	{1, "HyperBlaster"},
+	{2, "Railgun", "Sniper Rifle"},
+	{2, "BFG10K", "Sonic Cannon"}
 };
 
-qboolean tryUse(edict_t *ent, char *s)
+qboolean tryUse (edict_t *ent, char *s)
 {
 	int index = 0;
 	gitem_t *it = FindItem(s);
@@ -437,7 +437,7 @@ qboolean tryUse(edict_t *ent, char *s)
 	return true;
 }
 
-void findNext(edict_t *ent, struct altsel_s *ptr, int offset)
+void findNext (edict_t *ent, struct altsel_s *ptr, int offset)
 {
 	int start = offset;
 
@@ -456,9 +456,9 @@ void findNext(edict_t *ent, struct altsel_s *ptr, int offset)
 	}
 }
 
-void altSelect(edict_t *ent, int num)
+void altSelect (edict_t *ent, int num)
 {
-	int index = 0;
+//	int index = 0;
 	int offset = -1;
 	int i = 0;
 	struct altsel_s *ptr = NULL;
@@ -990,6 +990,240 @@ void Cmd_Say_f (edict_t *ent, qboolean team, qboolean arg0)
 	}
 }
 
+// From Yamagi Q2
+static int get_ammo_usage(gitem_t *weap)
+{
+	if (!weap) {
+		return 0;
+	}
+
+	// handles grenades and tesla which only use 1 ammo per shot
+	// have to check this because they don't store their ammo usage in weap->quantity
+	if (weap->flags & IT_AMMO) {
+		return 1;
+	}
+
+	// weapons store their ammo usage in the quantity field
+	return weap->quantity;
+}
+
+static gitem_t *cycle_weapon (edict_t *ent)
+{
+	gclient_t	*cl = NULL;
+	gitem_t		*noammo_fallback = NULL;
+	gitem_t		*noweap_fallback = NULL;
+	gitem_t		*weap = NULL;
+	gitem_t		*ammo = NULL;
+	int			i;
+	int			start;
+	int			num_weaps;
+	const char	*weapname = NULL;
+
+	if (!ent) {
+		return NULL;
+	}
+
+	cl = ent->client;
+
+	if (!cl) {
+		return NULL;
+	}
+
+	num_weaps = gi.argc();
+
+	// find where we want to start the search for the next eligible weapon
+	if (cl->newweapon) {
+		weapname = cl->newweapon->classname;
+	}
+	else if (cl->pers.weapon) {
+		weapname = cl->pers.weapon->classname;
+	}
+
+	if (weapname)
+	{
+		for (i = 1; i < num_weaps; i++) {
+			if (Q_stricmp(weapname, gi.argv(i)) == 0) {
+				break;
+			}
+		}
+		i++;
+
+		if (i >= num_weaps) {
+			i = 1;
+		}
+	}
+	else {
+		i = 1;
+	}
+
+	start = i;
+	noammo_fallback = NULL;
+	noweap_fallback = NULL;
+
+	// find the first eligible weapon in the list we can switch to
+	do
+	{
+		weap = FindItemByClassname(gi.argv(i));
+
+		if (weap && weap != cl->pers.weapon && (weap->flags & IT_WEAPON) && weap->use)
+		{
+			if (cl->pers.inventory[ITEM_INDEX(weap)] > 0)
+			{
+				if (weap->ammo)
+				{
+					ammo = FindItem(weap->ammo);
+					if (ammo)
+					{
+						if (cl->pers.inventory[ITEM_INDEX(ammo)] >= get_ammo_usage(weap)) {
+							return weap;
+						}
+						if (!noammo_fallback) {
+							noammo_fallback = weap;
+						}
+					}
+				}
+				else {
+					return weap;
+				}
+			}
+			else if (!noweap_fallback) {
+				noweap_fallback = weap;
+			}
+		}
+
+		i++;
+
+		if (i >= num_weaps) {
+			i = 1;
+		}
+	}
+	while (i != start);
+
+	// if no weapon was found, the fallbacks will be used for
+	// printing the appropriate error message to the console
+	if (noammo_fallback) {
+		return noammo_fallback;
+	}
+
+	return noweap_fallback;
+}
+
+void Cmd_CycleWeap_f (edict_t *ent)
+{
+	gitem_t		*weap = NULL;
+
+	if (!ent) {
+		return;
+	}
+
+	if (gi.argc() <= 1) {
+		gi.cprintf(ent, PRINT_HIGH, "Usage: cycleweap classname1 classname2 .. classnameN\n");
+		return;
+	}
+
+	weap = cycle_weapon(ent);
+	if (weap)
+	{
+		if (ent->client->pers.inventory[ITEM_INDEX(weap)] <= 0) {
+			gi.cprintf(ent, PRINT_HIGH, "Out of item: %s\n", weap->pickup_name);
+		}
+		else {
+			weap->use(ent, weap);
+		}
+	}
+}
+
+static gitem_t *preferred_weapon (edict_t *ent)
+{
+	gclient_t	*cl = NULL;
+	gitem_t		*noammo_fallback = NULL;
+	gitem_t		*noweap_fallback = NULL;
+	gitem_t		*weap = NULL;
+	gitem_t		*ammo = NULL;
+	int			i;
+	int			num_weaps;
+
+	if (!ent) {
+		return NULL;
+	}
+
+	cl = ent->client;
+
+	if (!cl) {
+		return NULL;
+	}
+
+	num_weaps = gi.argc();
+
+	// find the first eligible weapon in the list we can switch to
+	for (i = 1; i < num_weaps; i++)
+	{
+		weap = FindItemByClassname(gi.argv(i));
+
+		if (weap && (weap->flags & IT_WEAPON) && weap->use)
+		{
+			if (cl->pers.inventory[ITEM_INDEX(weap)] > 0)
+			{
+				if (weap->ammo)
+				{
+					ammo = FindItem(weap->ammo);
+					if (ammo)
+					{
+						if (cl->pers.inventory[ITEM_INDEX(ammo)] >= get_ammo_usage(weap)) {
+							return weap;
+						}
+
+						if (!noammo_fallback) {
+							noammo_fallback = weap;
+						}
+					}
+				}
+				else {
+					return weap;
+				}
+			}
+			else if (!noweap_fallback) {
+				noweap_fallback = weap;
+			}
+		}
+	}
+
+	// If no weapon was found, the fallbacks will be used for
+	// printing the appropriate error message to the console
+	if (noammo_fallback) {
+		return noammo_fallback;
+	}
+
+	return noweap_fallback;
+}
+
+
+void Cmd_PrefWeap_f (edict_t *ent)
+{
+	gitem_t *weap;
+
+	if (!ent) {
+		return;
+	}
+
+	if (gi.argc() <= 1) {
+		gi.cprintf(ent, PRINT_HIGH, "Usage: prefweap classname1 classname2 .. classnameN\n");
+		return;
+	}
+
+	weap = preferred_weapon (ent);
+	if (weap)
+	{
+		if (ent->client->pers.inventory[ITEM_INDEX(weap)] <= 0) {
+			gi.cprintf(ent, PRINT_HIGH, "Out of item: %s\n", weap->pickup_name);
+		}
+		else {
+			weap->use(ent, weap);
+		}
+	}
+}
+// end from Yamagi Q2
+
 /*
 =================
 ClientCommand
@@ -1128,6 +1362,16 @@ void ClientCommand (edict_t *ent)
    else if(Q_stricmp (cmd, "anim") == 0)
       anim_player_cmd(ent);
 #endif
+	// from Yamagi Q2
+	else if (!Q_stricmp(cmd, "cycleweap"))
+	{
+		Cmd_CycleWeap_f (ent);
+	}
+	else if (!Q_stricmp(cmd, "prefweap"))
+	{
+		Cmd_PrefWeap_f (ent);
+	}
+	// end from Yamagi Q2
 	else	// anything that doesn't match a command will be a chat
 		Cmd_Say_f (ent, false, true);
 }

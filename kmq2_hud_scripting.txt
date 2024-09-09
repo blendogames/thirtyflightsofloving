@@ -1,0 +1,217 @@
+KMQuake2 0.20u8 supports the scripting of HUD layouts.
+
+The script file has a .hud extension, and goes under scripts/huds.
+
+Single-line (//) and block comments (/* */) are supported.  The included hud scripts have a block comment at the beginning that lists the stat numbers used in the default game DLL.  It's a good idea to copy this to each new script file for quick reference.
+
+Inside the script file, there are two types of top-level items that can be decared, hudDefs and renameSetDefs.  There can only be one hudDef, but up to eight renameSetDefs.
+
+
+Rename sets are used to rename images from the default status bar for HUD items that specify a particular rename set.  This is useful if you want a hud item that uses a special set of images, such as larger image of the current weapon.
+
+The word "renameSetDef" is followed by curly braces that enclose the set's name and items.  Each item is specified by the word "renameItemDef", followed by curly braces that enclose the item's oldName and newName attributes.  Here's an example of a rename set:
+
+renameSetDef
+{
+	name	renameset1
+	renameItemDef
+	{
+		oldName		w_blaster
+		newName		newhud_blaster
+	}
+	renameItemDef
+	{
+		oldName		w_shotgun
+		newName		newhud_shotgun
+	}
+}
+
+This rename set is named "renameset1" and has two rename items, which will rename the images w_blaster and w_shotgun to newhud_blaster and newhud_shotgun, respectively.  Wildcards can also be used instead of specifying each image when a consistent naming scheme is used:
+
+renameSetDef
+{
+	name	renameset1
+	renameItemDef
+	{
+		oldName		w_*
+		newName		newhud_*
+	}
+}
+
+Note that wildcards can result in missing image errors if they are used to rename to an image that doesn't exist. I.e. if you rename an image called w_sidewinder to newhud_sidewinder and don't yet have an image named newhud_sidewinder.
+
+
+The hudDef is the structure that contains all item groups of the HUD itself.  It's declared with the word "hudDef" followed by curly braces that enclose the item groups and overridePath (if used).
+
+The overridePath is used to specify where images that use a rename set and those with the overridepic/overidepath flag will be loaded from, instead of the default of gfx/huds/<hudname>.  This is useful for HUDs that use a set of replacement graphics without replacing the graphics used by the default Quake2 HUD.  If an overridePath of "newhud" is specified, such rename and overridepic/overidepath images will be looked for under gfx/huds/newhud.
+
+Item groups are specified with the word "itemGroup" followed by curly braces that enclose the group's attributes and items.
+
+Items are specified with the word "drawItem" or "itemDef" followed by curly braces that enclose the item's attributes.  Each item's type is specified with the attribute "type" followed by either pic, string, number, or bar.
+
+Here's a simple example of a hudDef:
+
+hudDef
+{
+	overridePath	quake4
+	
+	// Health Bar
+	itemGroup
+	{
+		name healthbar
+		skipIfStat 0 == 0
+		
+		// Background
+		drawItem
+		{
+			name	healthbar_background
+			type	pic
+			rect	40 420 125 59
+			offset	7 0
+			scralign	bottom
+			color	0 0 0 0.5
+			shader	gfx/huds/quake4/huditem_back
+		}
+		// Icon
+		drawItem
+		{
+			name	healthbar_icon
+			type	pic
+			rect	140 458 16 16
+			scralign	bottom
+			color	1 1 1 0.8
+			shader	fromStat 0 usingRenameSet status_icons
+		}
+		// Number
+		drawItem
+		{
+			name	healthbar_number
+			type	number
+			rect	88 433 72 22
+			scralign	bottom
+			size	18 22
+			offset	2.6 0
+			color	1 1 1 1
+			number	fromStat 1
+			shader	gfx/huds/quake4/numbers
+			shaderMinus	gfx/huds/quake4/num_minus
+		}
+	}
+}
+
+This hudDef uses an overridePath of quake4, so renamed/override images will be loaded from gfx/huds/quake4.  It has a single item group named "healtbar".
+
+This lone item group has the skipIfStat attribute set so that if stat 0 (the health icon) has a value of 0, it won't be drawn.  It has three items, two of them of the pic type, and one number.
+
+The first pic item is draw at the 640x480 virtual coordinates of 40, 420 and is 125x59 pixels, anamorphically aligned to the bottom of the screen.  It is skewed at the top horizontally by 7 pixels. It uses the image gfx/huds/quake4/huditem_back, and is colored black (0,0,0) with 50% opacity.
+
+The second pic item is located at 140, 458 and is sized 16x16 pixels, also with a bottom anamorphic alignment.  It uses the image's color unchanged (1,1,1 is white, or the identity color) at 80% opacity.  It draws the image specified by stat value 0 (the health icon) using a renameSet called "status_icons".  If the image specified by the stat value is found in the rename set, the new image name will be loaded from gfx/huds/quake4.
+
+The number item is named healthbar_number, and is located ath 88, 433 and is 72x2 pixels, bottom aligned.  Each digit is sized 18x22 pixels.  It is skewed to the right by 2.6 pixels and draws each digit image at identity color with 100% opacity.  The image gfx/huds/quake4/numbers is used for the digits, and gfx/huds/quake4/num_minus is used for the minus if the number is negative.  It displays the number in stat 1 (the healh number).
+
+Here's a list of attributes and their parameters for item groups and items.
+
+ITEMGROUP attributes
+
+onlyMultiplayer					- Makes this itemGroup only appear in multiplayer games.
+name <groupname>				- The itemGroup's name.
+variant <variantname>			- Adds a variant name to this itemGroup (max 16).
+								  The itemGroup is skipped if it has at least 1 variant name and none of them match the value of
+								  the CS_HUDVARIANT configstring or the cl_hud_variant cvar.
+								  Useful for having multiple game mode variants in one hud script, such as for DM and CTF.
+								  
+skipIfStat <stat> <op> <value>	- Makes this itemGroup not be drawn if the operation with the numbered stat and value is true.
+								  An itemGroup can have up to 8 skipIfStat attributes.
+								  Here are the valid operations:
+								  > greater than
+								  < less than
+								  >= greater than or equal
+								  <= less than or equal
+								  == equal to
+								  != not equal to
+								  & has bit(s) set
+								  !& does not have bit(s) set
+
+							
+skipIfStat <stat1> <op1> <val1> && <stat2> <op2> <val2>	- A second stat and value operation can be added with a "&&" symbol.
+														  The itemGroup is only skipped if both operations are true.
+DRAWITEM attributes
+
+name <itemname>					- The item's name.
+type <itemtype>					- The item's type (pic, string, number, or bar).
+skipIfStat <stat1> <op1> <val1> [&& <stat2> <op2> <val2>]	- Same as for itemGroups.  An item can have up to two skipIfStat attributes.
+rect <x> <y> <w> <h>			- The item's x/y coordinates and size.
+size <w> <h>					- The size of each digit or character (only used for types number and string).
+offset <x> <y>					- The amount in pixels to skew horizontally and vertically.
+skew <x> <y>					- The ratio to height or width to skew horizontally and vertically.  Rect must already be specified for this to work.
+scroll <x> <y>					- The texture scrolls by these values on the x and y axis.  NOTE: values are based on ST-coords of image (0-1),
+									not size in pixels.
+scralign <align>				- The item's anamorpic screen alignment.  Used to properly scale from virtual 640x480 to widescreen resolutions.
+								  Valid alignment types:
+								  center
+								  top
+								  bottom
+								  right
+								  left
+								  topRight
+								  topLeft
+								  bottomRight
+								  bottomLeft
+								  stretch
+								  topStretch
+								  bottomStretch
+flags							- Several formatting attributes for text and images can be set with this.  Valid parameters:
+								  left:		Text is aligned to the left
+								  center:	Text is centered
+								  right:	Text is aligned to the right
+								  lower:	Text is made lowercase
+								  upper:	Test is made uppercase
+								  shadow:	Text is shadowed
+								  flipx:	Image is flipped on the x axis
+								  flipy:	Image is flipped on the y axis
+								  overridepic: Image is loaded from the HUD's overridePath instead of from pics/
+								  overridepath: Same as overridepic
+								  maskedpic: Image is masked with an image specified by shaderMinus
+								  additiveBlend:	Image is drawn with additive blending
+								  
+								  
+filldir <dir>					- Sets the fill direction for a bar (leftToRight, rightToLeft, bottomToTop, or topToBottom).
+padding <pad>					- Sets the size of the base area for a bar, which is always filled.
+range <range>					- Sets the minimum and maximum values for a bar.
+minRange <min>					- Sets just the minimum value for a bar.
+maxRange <min>					- Sets just the maximum value for a bar.
+minRange fromStat <stat> [statClamp <lower> <upper> statMult <mult>]	- Sets the minimum value for a bar from a stat value.
+																	Falls back to that set by range if the stat is 0.
+																	statClamp specifies lower and upper limits for the minRange,
+																	to normalize the bar's appearance in case its range is controlled
+																	by a cvar, which may be set to an extreme value.
+																	statMult specifies a multiplier for the stat value.
+maxRange fromStat <stat> [statClamp <lower> <upper> statMult <mult>]	- Sets the maximum value for a bar from a stat value.
+																	Falls back to that set by range if the stat is 0.
+																	statClamp specifies lower and upper limits for the maxRange,
+																	to normalize the bar's appearance in case its range is controlled
+																	by a cvar, which may be set to an extreme value.
+																	statMult specifies a multiplier for the stat value.
+color <rgba> [blink <rgba>]		- The color of the item, using a red-green-blue-alpha tuple that is normalized between 0 and 1.  A second
+								 blink tuple can be added to make the item flash.
+
+colorRangeStat <stat> [maxStat <stat>]	- Sets the stat to be used by the item's colorRange values.  maxStat specifies a stat containing
+										  a max value used for relative colorRanges.
+addColorRange <min> <max> <rgba> [blink <rgba>]		- Sets the item's color to this if its specified colorRangeStat is between the min and max values.
+													  An item can have up to 8 colorRanges.
+addColorRangeRel <min> <max> <rgba> [blink <rgba>]	- Same as the above, but the min and max values are normalized relative to the max stat specified
+													  in colorRangeStat.
+statFlash <stat> <bit> <rgba>	- Sets the item's color to this if the stat has the bit set.  Used for the HUD damage flashes (stat 15).
+string <string>					- Sets a string item's string.
+string fromPlayerName			- Same as above, but uses the player's name.
+string fromStat <stat>			- Same as above, but use a HUD stat value.
+number <num>					- Sets a number item's number.
+number fromStat <stat>			- Same as above, but uses a HUD stat value.
+value <num>						- Sets a bar item's numeric value.
+value fromStat <num>			- Same as above, but use a HUD stat value.
+shader <picname>				- Sets the image used by a pic, bar, or number.
+shader fromStat <stat>	[usingRenameSet <renameset>]		- Same as above, but use a HUD stat value.
+															  RenameSet is optional, makes image load from overridePath.
+shader fromWeaponModel	[usingRenameSet <renameset>]		- Same as above, but uses the current vwep model.
+															  RenameSet is optional, makes image load from overridePath.
+shaderMinus <picname>			- Sets the image used for the minus in a number.

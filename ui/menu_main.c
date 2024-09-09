@@ -243,7 +243,7 @@ void Menu_Main_Draw (void)
 		ds.h = viddef.height;
 		Vector2Copy(vec2_origin, ds.offset);
 		Vector4Copy(vec4_identity, ds.color);
-		R_DrawPic(ds);
+		R_DrawPic(&ds);
 		/*R_DrawStretchPic (
 			margin,
 			0,
@@ -271,7 +271,7 @@ void Menu_Main_Draw (void)
 		ds.h = boxsize;
 		Vector2Copy(vec2_origin, ds.offset);
 		Vector4Copy(vec4_identity, ds.color);
-		R_DrawPic(ds);
+		R_DrawPic(&ds);
 		/*R_DrawStretchPic (
 			//adjustedWidth * 0.65,
 			(viddef.width /2) + (adjustedWidth * 0.1),
@@ -392,7 +392,7 @@ void UI_CheckMainMenuMouse (void)
 	int totalheight;
 	int i, oldhover;
 	char *sound = NULL;
-	mainmenuobject_t buttons[MAIN_ITEMS];
+	buttonmenuobject_t buttons[MAIN_ITEMS];
 
 	oldhover = MainMenuMouseHover;
 	MainMenuMouseHover = 0;
@@ -562,7 +562,7 @@ void Menu_Main_f (void)
 #endif
 
 	UI_CheckQuadModel ();
-	UI_PushMenu (Menu_Main_Draw, Menu_Main_Key);
+	//UI_PushMenu (Menu_Main_Draw, Menu_Main_Key); - I don't fully know how to fix this one here - Brad
 
 #ifndef NOTTHIRTYFLIGHTS
 	if (cls.state == ca_disconnected)

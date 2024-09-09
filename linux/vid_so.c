@@ -164,6 +164,25 @@ qboolean VID_GetModeInfo( int *width, int *height, int mode )
 }
 
 /*
+==============
+VID_ModeList_f
+==============
+*/
+void VID_ModeList_f (void)
+{
+	int		i;
+
+	VID_Printf (PRINT_ALL, "\n");
+	for (i = 0; i < VID_NUM_MODES; i++) {
+		if ( (vid_modes[i].width < 640) || (vid_modes[i].height < 480) )
+			VID_Printf (PRINT_ALL, "%s (hidden)\n", vid_modes[i].description );
+		else
+			VID_Printf (PRINT_ALL, "%s\n", vid_modes[i].description );
+	}
+	VID_Printf (PRINT_ALL, "\n");
+}
+
+/*
 ** VID_NewWindow
 */
 void VID_NewWindow ( int width, int height)
@@ -288,7 +307,7 @@ qboolean VID_LoadRefresh( char *name )
 	ri.Vid_GetModeInfo = VID_GetModeInfo;
 	ri.Vid_MenuInit = VID_MenuInit;
 	ri.Vid_NewWindow = VID_NewWindow;
-	ri.TextColor = CL_TextColor; // Knightmare added
+	ri.SetParticlePics = CL_RegisterParticleImages; // Knightmare added
 
 	if ( ( GetRefAPI = (void *) dlsym( reflib_library, "GetRefAPI" ) ) == 0 )
 		Com_Error( ERR_FATAL, "dlsym failed on %s", name );
@@ -450,6 +469,7 @@ void VID_Init (void)
 
 	/* Add some console commands that we want to handle */
 	Cmd_AddCommand ("vid_restart", VID_Restart_f);
+	Cmd_AddCommand ("vid_modelist", VID_ModeList_f);
 
 	/* Disable the 3Dfx splash screen */
 	putenv("FX_GLIDE_NO_SPLASH=0");

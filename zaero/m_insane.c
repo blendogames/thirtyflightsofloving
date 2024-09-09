@@ -597,7 +597,8 @@ void insane_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 }
 
 
-void SP_misc_insane_precache(void)
+// Knightmare- added soundcache function
+void misc_insane_soundcache (edict_t *self)
 {
 	sound_fist = gi.soundindex ("insane/insane11.wav");
 	sound_shake = gi.soundindex ("insane/insane5.wav");
@@ -610,6 +611,12 @@ void SP_misc_insane_precache(void)
 	sound_scream[5] = gi.soundindex ("insane/insane8.wav");
 	sound_scream[6] = gi.soundindex ("insane/insane9.wav");
 	sound_scream[7] = gi.soundindex ("insane/insane10.wav");
+}
+
+void SP_misc_insane_precache (edict_t *self)
+{
+	// Knightmare- use soundcache function
+	misc_insane_soundcache (self);
 }
 
 
@@ -625,7 +632,7 @@ void SP_misc_insane (edict_t *self)
 		return;
 	}
 
-  SP_misc_insane_precache();
+	SP_misc_insane_precache (self);
 
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;

@@ -148,17 +148,17 @@ extern	cvar_t	*sk_pack_slugs;
 extern	cvar_t	*sk_pack_fuel;
 
 // pickup values
-extern	cvar_t	*sk_box_shells; //value of shells
-extern	cvar_t	*sk_box_bullets; //value of bullets
-extern	cvar_t	*sk_box_grenades; //value of grenade pack
-extern	cvar_t	*sk_box_rockets; //value of rocket pack
-extern	cvar_t	*sk_box_cells; //value of cell pack
-extern	cvar_t	*sk_box_slugs; //value of slug box
-extern	cvar_t	*sk_box_fuel; //value of fuel
+extern	cvar_t	*sk_box_shells;		// value of shells
+extern	cvar_t	*sk_box_bullets;	// value of bullets
+extern	cvar_t	*sk_box_grenades;	// value of grenade pack
+extern	cvar_t	*sk_box_rockets;	// value of rocket pack
+extern	cvar_t	*sk_box_cells;		// value of cell pack
+extern	cvar_t	*sk_box_slugs;		// value of slug box
+extern	cvar_t	*sk_box_fuel;		// value of fuel
 
 // items/powerups
-extern cvar_t	*sk_armor_bonus_value; //value of armor shards
-extern cvar_t	*sk_health_bonus_value; //value of stimpacks
+extern cvar_t	*sk_armor_bonus_value;	// value of armor shards
+extern cvar_t	*sk_health_bonus_value;	// value of stimpacks
 extern cvar_t	*sk_powerup_max;
 extern cvar_t	*sk_quad_time;
 extern cvar_t	*sk_inv_time;

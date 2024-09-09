@@ -46,7 +46,7 @@ static int	sound_cock;
 
 void soldier_idle (edict_t *self)
 {
-	if (!(self->spawnflags & SF_MONSTER_AMBUSH))
+	if ( !(self->spawnflags & SF_MONSTER_AMBUSH) )
 	{
 		if (random() > 0.8)
 			gi.sound (self, CHAN_VOICE, sound_idle, 1, ATTN_IDLE, 0);
@@ -1251,6 +1251,31 @@ void soldier_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dama
 }
 
 
+// Knightmare- added soundcache function
+void monster_soldier_x_soundcache (edict_t *self)
+{
+	if (strcmp(self->classname, "monster_soldier_light") == 0)
+	{
+		sound_pain_light = gi.soundindex ("soldier/solpain2.wav");
+		sound_death_light =	gi.soundindex ("soldier/soldeth2.wav");
+	}
+	else if (strcmp(self->classname, "monster_soldier") == 0)
+	{
+		sound_pain = gi.soundindex ("soldier/solpain1.wav");
+		sound_death = gi.soundindex ("soldier/soldeth1.wav");
+	}
+	else if (strcmp(self->classname, "monster_soldier_ss") == 0)
+	{
+		sound_pain_ss = gi.soundindex ("soldier/solpain3.wav");
+		sound_death_ss = gi.soundindex ("soldier/soldeth3.wav");
+	}
+
+	sound_idle =	gi.soundindex ("soldier/solidle1.wav");
+	sound_sight1 =	gi.soundindex ("soldier/solsght1.wav");
+	sound_sight2 =	gi.soundindex ("soldier/solsrch1.wav");
+	sound_cock =	gi.soundindex ("infantry/infatck3.wav");
+}
+
 //
 // SPAWN
 //
@@ -1268,10 +1293,8 @@ void SP_monster_soldier_x (edict_t *self)
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;
 
-	sound_idle =	gi.soundindex ("soldier/solidle1.wav");
-	sound_sight1 =	gi.soundindex ("soldier/solsght1.wav");
-	sound_sight2 =	gi.soundindex ("soldier/solsrch1.wav");
-	sound_cock =	gi.soundindex ("infantry/infatck3.wav");
+	// Knightmare- use soundcache function
+	monster_soldier_x_soundcache (self);
 
 	if (!self->mass)
 		self->mass = 100;
@@ -1335,8 +1358,7 @@ void SP_monster_soldier_light (edict_t *self)
 		return;
 	}
 
-	sound_pain_light = gi.soundindex ("soldier/solpain2.wav");
-	sound_death_light =	gi.soundindex ("soldier/soldeth2.wav");
+	// precache
 	gi.modelindex ("models/objects/laser/tris.md2");
 	gi.soundindex ("misc/lasfly.wav");
 	gi.soundindex ("soldier/solatck2.wav");
@@ -1366,8 +1388,7 @@ void SP_monster_soldier (edict_t *self)
 		return;
 	}
 
-	sound_pain = gi.soundindex ("soldier/solpain1.wav");
-	sound_death = gi.soundindex ("soldier/soldeth1.wav");
+	// precache
 	gi.soundindex ("soldier/solatck1.wav");
 
 	self->common_name = "Shotgun Guard";
@@ -1395,8 +1416,7 @@ void SP_monster_soldier_ss (edict_t *self)
 		return;
 	}
 
-	sound_pain_ss = gi.soundindex ("soldier/solpain3.wav");
-	sound_death_ss = gi.soundindex ("soldier/soldeth3.wav");
+	// precache
 	gi.soundindex ("soldier/solatck3.wav");
 
 	self->common_name = "Machinegun Guard";

@@ -724,12 +724,14 @@ void flyer_pain (edict_t *self, edict_t *other, float kick, int damage)
 
 void flyer_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
+#ifdef KMQUAKE2_ENGINE_MOD
 	int n;
 
 	for (n = 0; n < 4; n++)
 		ThrowGib (self, "models/objects/gibs/sm_metal/tris.md2", 0, 0, damage, GIB_METALLIC);
 	for (n = 0; n < 2; n++)
 		ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", 0, 0, damage, GIB_ORGANIC);
+#endif	// KMQUAKE2_ENGINE_MOD
 	gi.sound (self, CHAN_VOICE, sound_die, 1, ATTN_NORM, 0);
 	BecomeExplosion1 (self);
 }
@@ -772,6 +774,18 @@ qboolean flyer_blocked (edict_t *self, float dist)
 	return false;
 }
 
+// Knightmare- added soundcache function
+void monster_flyer_soundcache (edict_t *self)
+{
+	sound_sight = gi.soundindex ("flyer/flysght1.wav");
+	sound_idle = gi.soundindex ("flyer/flysrch1.wav");
+	sound_pain1 = gi.soundindex ("flyer/flypain1.wav");
+	sound_pain2 = gi.soundindex ("flyer/flypain2.wav");
+	sound_slash = gi.soundindex ("flyer/flyatck2.wav");
+	sound_sproing = gi.soundindex ("flyer/flyatck1.wav");
+	sound_die = gi.soundindex ("flyer/flydeth1.wav");
+}
+
 /*QUAKED monster_flyer (1 .5 0) (-16 -16 -24) (16 16 16) Ambush Trigger_Spawn Sight GoodGuy
 */
 void SP_monster_flyer (edict_t *self)
@@ -802,13 +816,8 @@ void SP_monster_flyer (edict_t *self)
 
 	}
 
-	sound_sight = gi.soundindex ("flyer/flysght1.wav");
-	sound_idle = gi.soundindex ("flyer/flysrch1.wav");
-	sound_pain1 = gi.soundindex ("flyer/flypain1.wav");
-	sound_pain2 = gi.soundindex ("flyer/flypain2.wav");
-	sound_slash = gi.soundindex ("flyer/flyatck2.wav");
-	sound_sproing = gi.soundindex ("flyer/flyatck1.wav");
-	sound_die = gi.soundindex ("flyer/flydeth1.wav");
+	// Knightmare- use soundcache function
+	monster_flyer_soundcache (self);
 
 	gi.soundindex ("flyer/flyatck3.wav");
 
@@ -877,13 +886,8 @@ void SP_monster_kamikaze (edict_t *self)
 		return;
 	}
 
-	sound_sight = gi.soundindex ("flyer/flysght1.wav");
-	sound_idle = gi.soundindex ("flyer/flysrch1.wav");
-	sound_pain1 = gi.soundindex ("flyer/flypain1.wav");
-	sound_pain2 = gi.soundindex ("flyer/flypain2.wav");
-	sound_slash = gi.soundindex ("flyer/flyatck2.wav");
-	sound_sproing = gi.soundindex ("flyer/flyatck1.wav");
-	sound_die = gi.soundindex ("flyer/flydeth1.wav");
+	// Knightmare- use soundcache function
+	monster_flyer_soundcache (self);
 
 	gi.soundindex ("flyer/flyatck3.wav");
 

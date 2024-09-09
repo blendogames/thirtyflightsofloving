@@ -308,8 +308,8 @@ void vehicle_think (edict_t *self)
 			self->s.sound = self->noise_index;
 		else
 			self->s.sound = self->noise_index2;
-#ifdef LOOP_SOUND_ATTENUATION
-		self->s.attenuation = self->attenuation;
+#ifdef KMQUAKE2_ENGINE_MOD
+		self->s.loop_attenuation = self->attenuation;
 #endif
 
 		gi.linkentity(self);
@@ -402,8 +402,8 @@ void vehicle_think (edict_t *self)
 				gi.linkentity(ent);
 				// vehicle idle noise
 				self->s.sound  = self->noise_index2;
-		#ifdef LOOP_SOUND_ATTENUATION
-				self->s.attenuation = self->attenuation;
+		#ifdef KMQUAKE2_ENGINE_MOD
+				self->s.loop_attenuation = self->attenuation;
 		#endif
 				// reset wait time so we can start accelerating
 				self->moveinfo.wait = 0;
@@ -460,7 +460,7 @@ void SP_func_vehicle (edict_t *self)
 	self->noise_index  = gi.soundindex("engine/engine.wav");
 	self->noise_index2 = gi.soundindex("engine/idle.wav");
 
-#ifdef LOOP_SOUND_ATTENUATION
+#ifdef KMQUAKE2_ENGINE_MOD
 	if (self->attenuation <= 0)
 		self->attenuation = ATTN_IDLE;
 #endif

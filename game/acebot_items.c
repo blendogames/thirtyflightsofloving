@@ -87,7 +87,7 @@ edict_t *players[MAX_CLIENTS];		// pointers to all players in the game
 ///////////////////////////////////////////////////////////////////////
 // Add the player to our list
 ///////////////////////////////////////////////////////////////////////
-void ACEIT_PlayerAdded(edict_t *ent)
+void ACEIT_PlayerAdded (edict_t *ent)
 {
 	players[num_players++] = ent;
 }
@@ -95,29 +95,28 @@ void ACEIT_PlayerAdded(edict_t *ent)
 ///////////////////////////////////////////////////////////////////////
 // Remove player from list
 ///////////////////////////////////////////////////////////////////////
-void ACEIT_PlayerRemoved(edict_t *ent)
+void ACEIT_PlayerRemoved (edict_t *ent)
 {
-	int i;
-	int pos;
+	int i = 0, pos = 0;
 
 	// watch for 0 players
-	if(num_players == 0)
+	if (num_players == 0)
 		return;
 
 	// special cas for only one player
-	if(num_players == 1)
+	if (num_players == 1)
 	{	
 		num_players = 0;
 		return;
 	}
 
 	// Find the player
-	for(i=0;i<num_players;i++)
-		if(ent == players[i])
+	for (i=0; i<num_players; i++)
+		if (ent == players[i])
 			pos = i;
 
 	// decrement
-	for(i=pos;i<num_players-1;i++)
+	for (i=pos; i<num_players-1; i++)
 		players[i] = players[i+1];
 
 	num_players--;
@@ -126,7 +125,7 @@ void ACEIT_PlayerRemoved(edict_t *ent)
 ///////////////////////////////////////////////////////////////////////
 // Can we get there?
 ///////////////////////////////////////////////////////////////////////
-qboolean ACEIT_IsReachable(edict_t *self, vec3_t goal)
+qboolean ACEIT_IsReachable (edict_t *self, vec3_t goal)
 {
 	trace_t trace;
 	vec3_t v;
@@ -147,7 +146,7 @@ qboolean ACEIT_IsReachable(edict_t *self, vec3_t goal)
 ///////////////////////////////////////////////////////////////////////
 // Visiblilty check 
 ///////////////////////////////////////////////////////////////////////
-qboolean ACEIT_IsVisible(edict_t *self, vec3_t goal)
+qboolean ACEIT_IsVisible (edict_t *self, vec3_t goal)
 {
 	trace_t trace;
 	
@@ -174,7 +173,7 @@ qboolean ACEIT_ChangeWeapon (edict_t *ent, gitem_t *item)
 		return true; 
 
 	// Has not picked up weapon yet
-	if(!ent->client->pers.inventory[ITEM_INDEX(item)])
+	if (!ent->client->pers.inventory[ITEM_INDEX(item)])
 		return false;
 
 	// Do we have ammo for it?
@@ -253,11 +252,11 @@ qboolean ACEIT_CanUseArmor (gitem_t *item, edict_t *other)
 // Any other logic that needs to be added for custom decision making
 // can be added here. For now it is very simple.
 ///////////////////////////////////////////////////////////////////////
-float ACEIT_ItemNeed(edict_t *self, int item)
+float ACEIT_ItemNeed (edict_t *self, int item)
 {
 	
 	// Make sure item is at least close to being valid
-	if(item < 0 || item > 100)
+	if (item < 0 || item > 100)
 		return 0.0;
 
 	switch(item)
@@ -267,7 +266,7 @@ float ACEIT_ItemNeed(edict_t *self, int item)
 		case ITEMLIST_HEALTH_MEDIUM:
 		case ITEMLIST_HEALTH_LARGE:	
 		case ITEMLIST_HEALTH_MEGA:	
-			if(self->health < 100)
+			if (self->health < 100)
 				return 1.0 - (float)self->health/100.0f; // worse off, higher priority
 			else
 				return 0.0;
@@ -295,58 +294,58 @@ float ACEIT_ItemNeed(edict_t *self, int item)
 		case ITEMLIST_BFG10K:
 		case ITEMLIST_GRENADELAUNCHER:
 		case ITEMLIST_HYPERBLASTER:
-			if(!self->client->pers.inventory[item])
+			if (!self->client->pers.inventory[item])
 				return 0.7;
 			else
 				return 0.0;
 
 		// Ammo
 		case ITEMLIST_SLUGS:			
-			if(self->client->pers.inventory[ITEMLIST_SLUGS] < self->client->pers.max_slugs)
+			if (self->client->pers.inventory[ITEMLIST_SLUGS] < self->client->pers.max_slugs)
 				return 0.4;  
 			else
 				return 0.0;
 	
 		case ITEMLIST_BULLETS:
-			if(self->client->pers.inventory[ITEMLIST_BULLETS] < self->client->pers.max_bullets)
+			if (self->client->pers.inventory[ITEMLIST_BULLETS] < self->client->pers.max_bullets)
 				return 0.3;  
 			else
 				return 0.0;
 	
 		case ITEMLIST_SHELLS:
-		   if(self->client->pers.inventory[ITEMLIST_SHELLS] < self->client->pers.max_shells)
+		   if (self->client->pers.inventory[ITEMLIST_SHELLS] < self->client->pers.max_shells)
 				return 0.3;  
 			else
 				return 0.0;
 	
 		case ITEMLIST_CELLS:
-			if(self->client->pers.inventory[ITEMLIST_CELLS] <	self->client->pers.max_cells)
+			if (self->client->pers.inventory[ITEMLIST_CELLS] <	self->client->pers.max_cells)
 				return 0.3;  
 			else
 				return 0.0;
 	
 		case ITEMLIST_ROCKETS:
-			if(self->client->pers.inventory[ITEMLIST_ROCKETS] < self->client->pers.max_rockets)
+			if (self->client->pers.inventory[ITEMLIST_ROCKETS] < self->client->pers.max_rockets)
 				return 1.5;  
 			else
 				return 0.0;
 
 		// Knightmare added
 		case ITEMLIST_HOMINGROCKETS:
-			if(self->client->pers.inventory[ITEMLIST_HOMINGROCKETS] < self->client->pers.max_homing_rockets)
+			if (self->client->pers.inventory[ITEMLIST_HOMINGROCKETS] < self->client->pers.max_homing_rockets)
 				return 1.5;  
 			else
 				return 0.0;
 
 		case ITEMLIST_GRENADES:
-			if(self->client->pers.inventory[ITEMLIST_GRENADES] < self->client->pers.max_grenades)
+			if (self->client->pers.inventory[ITEMLIST_GRENADES] < self->client->pers.max_grenades)
 				return 0.3;  
 			else
 				return 0.0;
 
 		// Knightmare added
 		case ITEMLIST_FUEL:
-			if(self->client->pers.inventory[ITEMLIST_FUEL] < self->client->pers.max_fuel)
+			if (self->client->pers.inventory[ITEMLIST_FUEL] < self->client->pers.max_fuel)
 				return 0.3;  
 			else
 				return 0.0;
@@ -356,19 +355,19 @@ float ACEIT_ItemNeed(edict_t *self, int item)
 			return 0.5;
 	
 		case ITEMLIST_BODYARMOR:
-			if(ACEIT_CanUseArmor (FindItem("Body Armor"), self))
+			if (ACEIT_CanUseArmor (FindItem("Body Armor"), self))
 				return 0.6;  
 			else
 				return 0.0;
 	
 		case ITEMLIST_COMBATARMOR:
-			if(ACEIT_CanUseArmor (FindItem("Combat Armor"), self))
+			if (ACEIT_CanUseArmor (FindItem("Combat Armor"), self))
 				return 0.6;  
 			else
 				return 0.0;
 	
 		case ITEMLIST_JACKETARMOR:
-			if(ACEIT_CanUseArmor (FindItem("Jacket Armor"), self))
+			if (ACEIT_CanUseArmor (FindItem("Jacket Armor"), self))
 				return 0.6;  
 			else
 				return 0.0;
@@ -379,21 +378,21 @@ float ACEIT_ItemNeed(edict_t *self, int item)
 
 		case ITEMLIST_FLAG1:
 			// If I am on team one or three, I want team two's flag
-			if(!self->client->pers.inventory[item]
+			if (!self->client->pers.inventory[item]
 				&& self->client->resp.ctf_team == CTF_TEAM2 || self->client->resp.ctf_team == CTF_TEAM3)
 				return 10.0;  
 			else 
 				return 0.0;
 
 		case ITEMLIST_FLAG2:
-			if(!self->client->pers.inventory[item]
+			if (!self->client->pers.inventory[item]
 				&& self->client->resp.ctf_team == CTF_TEAM1 || self->client->resp.ctf_team == CTF_TEAM3)
 				return 10.0;  
 			else
 				return 0.0;
 
 		case ITEMLIST_FLAG3:
-			if(!self->client->pers.inventory[item]
+			if (!self->client->pers.inventory[item]
 				&& self->client->resp.ctf_team == CTF_TEAM1 || self->client->resp.ctf_team == CTF_TEAM2)
 				return 10.0;  
 			else
@@ -407,7 +406,7 @@ float ACEIT_ItemNeed(edict_t *self, int item)
 		case ITEMLIST_VAMPIRETECH: // Knightmare added
 		case ITEMLIST_AMMOGENTECH: // Knightamre added
 			// Check for other tech
-			if(!self->client->pers.inventory[ITEMLIST_RESISTANCETECH] &&
+			if (!self->client->pers.inventory[ITEMLIST_RESISTANCETECH] &&
 			   !self->client->pers.inventory[ITEMLIST_STRENGTHTECH] &&
 			   !self->client->pers.inventory[ITEMLIST_HASTETECH] &&
 			   !self->client->pers.inventory[ITEMLIST_VAMPIRETECH] &&
@@ -431,202 +430,202 @@ float ACEIT_ItemNeed(edict_t *self, int item)
 // can lead to some slowdowns I guess, but makes the rest of the code
 // easier to deal with.
 ///////////////////////////////////////////////////////////////////////
-int ACEIT_ClassnameToIndex(char *classname)
+int ACEIT_ClassnameToIndex (char *classname)
 {
-	if(strcmp(classname,"item_armor_body")==0) 
+	if (strcmp(classname,"item_armor_body")==0) 
 		return ITEMLIST_BODYARMOR;
 	
-	if(strcmp(classname,"item_armor_combat")==0)
+	if (strcmp(classname,"item_armor_combat")==0)
 		return ITEMLIST_COMBATARMOR;
 
-	if(strcmp(classname,"item_armor_jacket")==0)
+	if (strcmp(classname,"item_armor_jacket")==0)
 		return ITEMLIST_JACKETARMOR;
 	
-	if(strcmp(classname,"item_armor_shard")==0)
+	if (strcmp(classname,"item_armor_shard")==0)
 		return ITEMLIST_ARMORSHARD;
 
 	// Knightmare added
-	if(strcmp(classname,"item_armor_shard_flat")==0)
+	if (strcmp(classname,"item_armor_shard_flat")==0)
 		return ITEMLIST_ARMORSHARD_FLAT;
 
-	if(strcmp(classname,"item_power_screen")==0)
+	if (strcmp(classname,"item_power_screen")==0)
 		return ITEMLIST_POWERSCREEN;
 
-	if(strcmp(classname,"item_power_shield")==0)
+	if (strcmp(classname,"item_power_shield")==0)
 		return ITEMLIST_POWERSHIELD;
 
-	if(strcmp(classname,"weapon_grapple")==0)
+	if (strcmp(classname,"weapon_grapple")==0)
 		return ITEMLIST_GRAPPLE;
 
-	if(strcmp(classname,"weapon_blaster")==0)
+	if (strcmp(classname,"weapon_blaster")==0)
 		return ITEMLIST_BLASTER;
 
-	if(strcmp(classname,"weapon_shotgun")==0)
+	if (strcmp(classname,"weapon_shotgun")==0)
 		return ITEMLIST_SHOTGUN;
 	
-	if(strcmp(classname,"weapon_supershotgun")==0)
+	if (strcmp(classname,"weapon_supershotgun")==0)
 		return ITEMLIST_SUPERSHOTGUN;
 	
-	if(strcmp(classname,"weapon_machinegun")==0)
+	if (strcmp(classname,"weapon_machinegun")==0)
 		return ITEMLIST_MACHINEGUN;
 	
-	if(strcmp(classname,"weapon_chaingun")==0)
+	if (strcmp(classname,"weapon_chaingun")==0)
 		return ITEMLIST_CHAINGUN;
 	
-	if(strcmp(classname,"ammo_grenades")==0)
+	if (strcmp(classname,"ammo_grenades")==0)
 		return ITEMLIST_GRENADES;
 
-	if(strcmp(classname,"weapon_grenadelauncher")==0)
+	if (strcmp(classname,"weapon_grenadelauncher")==0)
 		return ITEMLIST_GRENADELAUNCHER;
 
-	if(strcmp(classname,"weapon_rocketlauncher")==0)
+	if (strcmp(classname,"weapon_rocketlauncher")==0)
 		return ITEMLIST_ROCKETLAUNCHER;
 
-	if(strcmp(classname,"weapon_hyperblaster")==0)
+	if (strcmp(classname,"weapon_hyperblaster")==0)
 		return ITEMLIST_HYPERBLASTER;
 
-	if(strcmp(classname,"weapon_railgun")==0)
+	if (strcmp(classname,"weapon_railgun")==0)
 		return ITEMLIST_RAILGUN;
 
-	if(strcmp(classname,"weapon_bfg10k")==0)
+	if (strcmp(classname,"weapon_bfg10k")==0)
 		return ITEMLIST_BFG10K;
 
-	//if(strcmp(classname,"weapon_hml")==0)
+	//if (strcmp(classname,"weapon_hml")==0)
 	//	return ITEMLIST_HML;
 
-	if(strcmp(classname,"ammo_shells")==0)
+	if (strcmp(classname,"ammo_shells")==0)
 		return ITEMLIST_SHELLS;
 	
-	if(strcmp(classname,"ammo_bullets")==0)
+	if (strcmp(classname,"ammo_bullets")==0)
 		return ITEMLIST_BULLETS;
 
-	if(strcmp(classname,"ammo_cells")==0)
+	if (strcmp(classname,"ammo_cells")==0)
 		return ITEMLIST_CELLS;
 
-	if(strcmp(classname,"ammo_rockets")==0)
+	if (strcmp(classname,"ammo_rockets")==0)
 		return ITEMLIST_ROCKETS;
 
 	// Knightmare added
-	if(strcmp(classname,"ammo_homing_missiles")==0)
+	if (strcmp(classname,"ammo_homing_missiles")==0)
 		return ITEMLIST_HOMINGROCKETS;
 
-	if(strcmp(classname,"ammo_slugs")==0)
+	if (strcmp(classname,"ammo_slugs")==0)
 		return ITEMLIST_SLUGS;
 	
 	// Knightmare added
-	if(strcmp(classname,"ammo_fuel")==0)
+	if (strcmp(classname,"ammo_fuel")==0)
 		return ITEMLIST_FUEL;
 
-	if(strcmp(classname,"item_quad")==0)
+	if (strcmp(classname,"item_quad")==0)
 		return ITEMLIST_QUADDAMAGE;
 
-	if(strcmp(classname,"item_invunerability")==0)
+	if (strcmp(classname,"item_invunerability")==0)
 		return ITEMLIST_INVULNERABILITY;
 
-	if(strcmp(classname,"item_silencer")==0)
+	if (strcmp(classname,"item_silencer")==0)
 		return ITEMLIST_SILENCER;
 
-	if(strcmp(classname,"item_rebreather")==0)
+	if (strcmp(classname,"item_rebreather")==0)
 		return ITEMLIST_REBREATHER;
 
-	if(strcmp(classname,"item_enviornmentsuit")==0)
+	if (strcmp(classname,"item_enviornmentsuit")==0)
 		return ITEMLIST_ENVIRONMENTSUIT;
 
-	if(strcmp(classname,"item_ancienthead")==0)
+	if (strcmp(classname,"item_ancienthead")==0)
 		return ITEMLIST_ANCIENTHEAD;
 
-	if(strcmp(classname,"item_adrenaline")==0)
+	if (strcmp(classname,"item_adrenaline")==0)
 		return ITEMLIST_ADRENALINE;
 
-	if(strcmp(classname,"item_bandolier")==0)
+	if (strcmp(classname,"item_bandolier")==0)
 		return ITEMLIST_BANDOLIER;
 
-	if(strcmp(classname,"item_pack")==0)
+	if (strcmp(classname,"item_pack")==0)
 		return ITEMLIST_AMMOPACK;
 
 	// Knightmare added
-	if(strcmp(classname,"item_flashlight")==0)
+	if (strcmp(classname,"item_flashlight")==0)
 		return ITEMLIST_FLASHLIGHT;
 
-	if(strcmp(classname,"item_jetpack")==0)
+	if (strcmp(classname,"item_jetpack")==0)
 		return ITEMLIST_JETPACK;
 
-	if(strcmp(classname,"item_freeze")==0)
+	if (strcmp(classname,"item_freeze")==0)
 		return ITEMLIST_STASIS;
 	//end Knightmare
 
-	if(strcmp(classname,"item_datacd")==0)
+	if (strcmp(classname,"item_datacd")==0)
 		return ITEMLIST_DATACD;
 
-	if(strcmp(classname,"item_powercube")==0)
+	if (strcmp(classname,"item_powercube")==0)
 		return ITEMLIST_POWERCUBE;
 
-	if(strcmp(classname,"item_pyramidkey")==0)
+	if (strcmp(classname,"item_pyramidkey")==0)
 		return ITEMLIST_PYRAMIDKEY;
 
-	if(strcmp(classname,"item_dataspinner")==0)
+	if (strcmp(classname,"item_dataspinner")==0)
 		return ITEMLIST_DATASPINNER;
 
-	if(strcmp(classname,"item_securitypass")==0)
+	if (strcmp(classname,"item_securitypass")==0)
 		return ITEMLIST_SECURITYPASS;
 
-	if(strcmp(classname,"item_bluekey")==0)
+	if (strcmp(classname,"item_bluekey")==0)
 		return ITEMLIST_BLUEKEY;
 
-	if(strcmp(classname,"item_redkey")==0)
+	if (strcmp(classname,"item_redkey")==0)
 		return ITEMLIST_REDKEY;
 
-	if(strcmp(classname,"item_commandershead")==0)
+	if (strcmp(classname,"item_commandershead")==0)
 		return ITEMLIST_COMMANDERSHEAD;
 
-	if(strcmp(classname,"item_airstrikemarker")==0)
+	if (strcmp(classname,"item_airstrikemarker")==0)
 		return ITEMLIST_AIRSTRIKEMARKER;
 
-	//if(strcmp(classname,"item_health")==0) // ??
+	//if (strcmp(classname,"item_health")==0) // ??
 	//	return ITEMLIST_HEALTH;
 
-	if(strcmp(classname,"item_health_small")==0)
+	if (strcmp(classname,"item_health_small")==0)
 		return ITEMLIST_HEALTH_SMALL;
 
-	if(strcmp(classname,"item_health")==0)
+	if (strcmp(classname,"item_health")==0)
 		return ITEMLIST_HEALTH_MEDIUM;
 
-	if(strcmp(classname,"item_health_large")==0)
+	if (strcmp(classname,"item_health_large")==0)
 		return ITEMLIST_HEALTH_LARGE;
 	
-	if(strcmp(classname,"item_health_mega")==0)
+	if (strcmp(classname,"item_health_mega")==0)
 		return ITEMLIST_HEALTH_MEGA;
 
-	if(strcmp(classname,"item_flag_team1")==0)
+	if (strcmp(classname,"item_flag_team1")==0)
 		return ITEMLIST_FLAG1;
 
-	if(strcmp(classname,"item_flag_team2")==0)
+	if (strcmp(classname,"item_flag_team2")==0)
 		return ITEMLIST_FLAG2;
 
 	// Knightmare added
-	if(strcmp(classname,"item_flag_team3")==0)
+	if (strcmp(classname,"item_flag_team3")==0)
 		return ITEMLIST_FLAG3;
 
-	if(strcmp(classname,"item_tech1")==0)
+	if (strcmp(classname,"item_tech1")==0)
 		return ITEMLIST_RESISTANCETECH;
 
-	if(strcmp(classname,"item_tech2")==0)
+	if (strcmp(classname,"item_tech2")==0)
 		return ITEMLIST_STRENGTHTECH;
 
-	if(strcmp(classname,"item_tech3")==0)
+	if (strcmp(classname,"item_tech3")==0)
 		return ITEMLIST_HASTETECH;
 
-	if(strcmp(classname,"item_tech4")==0)
+	if (strcmp(classname,"item_tech4")==0)
 		return ITEMLIST_REGENERATIONTECH;
 
 	// Knightmare added
-	if(strcmp(classname,"item_tech5")==0)
+	if (strcmp(classname,"item_tech5")==0)
 		return ITEMLIST_VAMPIRETECH;
 
-	if(strcmp(classname,"item_tech6")==0)
+	if (strcmp(classname,"item_tech6")==0)
 		return ITEMLIST_AMMOGENTECH;
 
-	if(strcmp(classname,"item_ammogen_pack")==0)
+	if (strcmp(classname,"item_ammogen_pack")==0)
 		return ITEMLIST_AMMOGENPACK;
 	// end Knightmare
 
@@ -645,14 +644,19 @@ int ACEIT_ClassnameToIndex(char *classname)
 ///////////////////////////////////////////////////////////////////////
 void ACEIT_BuildItemNodeTable (qboolean rebuild)
 {
-	edict_t *items;
-	int i,item_index;
-	vec3_t v,v1,v2;
-	int j;
+	edict_t	*items;
+	int		i, j, item_index;
+	vec3_t	v,v1,v2;
 
 #ifdef DEBUG
-	FILE *pOut; // for testing
-	if((pOut = fopen("items.txt","wt"))==NULL)
+	char	filename[MAX_OSPATH] = "";
+	FILE	*pOut; // for testing
+//	if ((pOut = fopen("items.txt", "wt")) == NULL)
+	// Knightmare- use SavegameDir()
+	Com_sprintf (filename, sizeof(filename), "%s/items.txt", SavegameDir());
+	pOut = fopen("items.txt", "wt");
+	if (pOut == NULL)
+	// end Knightmare
 		return;
 #endif
 	
@@ -681,23 +685,23 @@ void ACEIT_BuildItemNodeTable (qboolean rebuild)
 		// SPECIAL NAV NODE DROPPING CODE
 		////////////////////////////////////////////////////////////////
 		// Special node dropping for platforms
-		if(strcmp(items->classname,"func_plat")==0)
+		if (strcmp(items->classname,"func_plat")==0)
 		{
-			if(!rebuild)
+			if (!rebuild)
 				ACEND_AddNode(items,NODE_PLATFORM);
 			item_index = 99; // to allow to pass the item index test
 		}
 		
 		// Special node dropping for teleporters
-		if(strcmp(items->classname,"misc_teleporter_dest")==0 || strcmp(items->classname,"misc_teleporter")==0)
+		if (strcmp(items->classname,"misc_teleporter_dest")==0 || strcmp(items->classname,"misc_teleporter")==0)
 		{
-			if(!rebuild)
+			if (!rebuild)
 				ACEND_AddNode(items,NODE_TELEPORTER);
 			item_index = 99;
 		}
 		
 		#ifdef DEBUG
-		if(item_index == INVALID)
+		if (item_index == INVALID)
 			fprintf(pOut,"Rejected item: %s node: %d pos: %f %f %f\n",items->classname,item_table[num_items].node,items->s.origin[0],items->s.origin[1],items->s.origin[2]);
 		else
 			fprintf(pOut,"item: %s node: %d pos: %f %f %f\n",items->classname,item_table[num_items].node,items->s.origin[0],items->s.origin[1],items->s.origin[2]);
@@ -711,7 +715,7 @@ void ACEIT_BuildItemNodeTable (qboolean rebuild)
 		item_table[num_items].item = item_index;
 	
 		// If new, add nodes for items
-		if(!rebuild)
+		if (!rebuild)
 		{
 			// Add a new node at the item's location.
 			item_table[num_items].node = ACEND_AddNode(items,NODE_ITEM);
@@ -720,23 +724,23 @@ void ACEIT_BuildItemNodeTable (qboolean rebuild)
 		else // Now if rebuilding, just relink ent structures 
 		{
 			// Find stored location
-			for(i=0;i<numnodes;i++)
+			for (i=0;i<numnodes;i++)
 			{
-				if(nodes[i].type == NODE_ITEM ||
+				if (nodes[i].type == NODE_ITEM ||
 				   nodes[i].type == NODE_PLATFORM ||
 				   nodes[i].type == NODE_TELEPORTER) // valid types
 				{
 					VectorCopy(items->s.origin,v);
 					
 					// Add 16 to item type nodes
-					if(nodes[i].type == NODE_ITEM)
+					if (nodes[i].type == NODE_ITEM)
 						v[2] += 16;
 					
 					// Add 32 to teleporter
-					if(nodes[i].type == NODE_TELEPORTER)
+					if (nodes[i].type == NODE_TELEPORTER)
 						v[2] += 32;
 					
-					if(nodes[i].type == NODE_PLATFORM)
+					if (nodes[i].type == NODE_PLATFORM)
 					{
 						VectorCopy(items->maxs,v1);
 						VectorCopy(items->mins,v2);
@@ -747,7 +751,7 @@ void ACEIT_BuildItemNodeTable (qboolean rebuild)
 						v[2] = items->mins[2]+64;
 					}
 
-					if(v[0] == nodes[i].origin[0] &&
+					if (v[0] == nodes[i].origin[0] &&
  					   v[1] == nodes[i].origin[1] &&
 					   v[2] == nodes[i].origin[2])
 					{

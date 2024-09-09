@@ -514,13 +514,13 @@ void CarrierSpawn (edict_t *self)
 		gi.sound (self, CHAN_BODY, sound_spawn, 1, ATTN_NONE, 0);
 
 		self->monsterinfo.monster_slots--;
-//		if ((g_showlogic) && (g_showlogic->value))
-//			gi.dprintf ("carrier: post-spawn : %d slots left\n", self->monsterinfo.monster_slots);
+	//	if ((g_showlogic) && (g_showlogic->value))
+	//		gi.dprintf ("carrier: post-spawn : %d slots left\n", self->monsterinfo.monster_slots);
 
 		ent->nextthink = level.time;
 		ent->think (ent);
 		
-		//ent->monsterinfo.aiflags |= AI_SPAWNED_CARRIER|AI_DO_NOT_COUNT|AI_IGNORE_SHOTS;
+	//	ent->monsterinfo.aiflags |= AI_SPAWNED_CARRIER|AI_DO_NOT_COUNT|AI_IGNORE_SHOTS;
 		ent->monsterinfo.aiflags |= AI_IGNORE_SHOTS;
 		ent->monsterinfo.monsterflags |= MFL_SPAWNED_CARRIER|MFL_DO_NOT_COUNT;
 
@@ -550,8 +550,8 @@ void CarrierSpawn (edict_t *self)
 				ent->monsterinfo.attack_state = AS_SLIDING;
 				ent->monsterinfo.currentmove = &flyer_move_attack3;
 			}
-//			else if ((g_showlogic) && (g_showlogic->value))
-//				gi.dprintf ("carrier:  unexpected time %d!\n", mytime);
+		//	else if ((g_showlogic) && (g_showlogic->value))
+		//		gi.dprintf ("carrier:  unexpected time %d!\n", mytime);
 		}
 	}
 }
@@ -568,8 +568,8 @@ void carrier_prep_spawn (edict_t *self)
 void carrier_spawn_check (edict_t *self)
 {
 //	gi.dprintf ("times - %2.2f %2.2f\n", level.time, self->timestamp);
-	CarrierCoopCheck(self);
-	CarrierMachineGun(self);
+	CarrierCoopCheck (self);
+	CarrierMachineGun (self);
 	CarrierSpawn (self);
 
 	if (level.time > (self->timestamp + 1.1))  // 0.5 seconds per flyer.  this gets three
@@ -1194,10 +1194,10 @@ void carrier_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dama
 
 qboolean Carrier_CheckAttack (edict_t *self)
 {
-	vec3_t	spot1, spot2;
-	vec3_t	temp;
-	float	chance;
-	trace_t	tr;
+	vec3_t		spot1, spot2;
+	vec3_t		temp;
+	float		chance = 0.0f;
+	trace_t		tr;
 	qboolean	enemy_infront, enemy_inback, enemy_below;
 	int			enemy_range;
 	float		enemy_yaw;
@@ -1304,7 +1304,21 @@ qboolean Carrier_CheckAttack (edict_t *self)
 	return false;
 }
 
-void CarrierPrecache ()
+
+// Knightmare- added soundcache function
+void monster_carrier_soundcache (edict_t *self)
+{
+	sound_pain1 = gi.soundindex ("carrier/pain_md.wav");
+	sound_pain2 = gi.soundindex ("carrier/pain_lg.wav");
+	sound_pain3 = gi.soundindex ("carrier/pain_sm.wav");
+	sound_death = gi.soundindex ("carrier/death.wav");
+//	sound_search1 = gi.soundindex ("bosshovr/bhvunqv1.wav");
+	sound_rail = gi.soundindex ("gladiator/railgun.wav");
+	sound_sight = gi.soundindex ("carrier/sight.wav");
+	sound_spawn = gi.soundindex ("medic_commander/monsterspawn1.wav");
+}
+
+void CarrierPrecache (void)
 {
 	gi.soundindex ("flyer/flysght1.wav");
 	gi.soundindex ("flyer/flysrch1.wav");
@@ -1342,14 +1356,8 @@ void SP_monster_carrier (edict_t *self)
 		return;
 	}
 
-	sound_pain1 = gi.soundindex ("carrier/pain_md.wav");
-	sound_pain2 = gi.soundindex ("carrier/pain_lg.wav");
-	sound_pain3 = gi.soundindex ("carrier/pain_sm.wav");
-	sound_death = gi.soundindex ("carrier/death.wav");
-//	sound_search1 = gi.soundindex ("bosshovr/bhvunqv1.wav");
-	sound_rail = gi.soundindex ("gladiator/railgun.wav");
-	sound_sight = gi.soundindex ("carrier/sight.wav");
-	sound_spawn = gi.soundindex ("medic_commander/monsterspawn1.wav");
+	// Knightmare- use soundcache function
+	monster_carrier_soundcache (self);
 
 	self->s.sound = gi.soundindex ("bosshovr/bhvengn1.wav");
 
@@ -1426,7 +1434,7 @@ void SP_monster_carrier (edict_t *self)
 	}
 	self->monsterinfo.scale = MODEL_SCALE;
 
-	CarrierPrecache();
+	CarrierPrecache ();
 
 	flymonster_start (self);
 

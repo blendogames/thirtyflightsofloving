@@ -139,7 +139,7 @@ mmove_t infantry_move_fidget = {FRAME_stand01, FRAME_stand49, infantry_frames_fi
 void infantry_fidget (edict_t *self)
 {
 	self->monsterinfo.currentmove = &infantry_move_fidget;
-	if (!(self->spawnflags & SF_MONSTER_AMBUSH))
+	if ( !(self->spawnflags & SF_MONSTER_AMBUSH) )
 		gi.sound (self, CHAN_VOICE, sound_idle, 1, ATTN_IDLE, 0);
 }
 
@@ -503,19 +503,32 @@ void infantry_dodge (edict_t *self, edict_t *attacker, float eta)
 	self->monsterinfo.currentmove = &infantry_move_duck;
 }
 
-
-void infantry_cock_gun (edict_t *self)
+// Knightmare- from Xatrix
+void infantry_set_firetime (edict_t *self)
 {
 	int		n;
 
-	gi.sound (self, CHAN_WEAPON, sound_weapon_cock, 1, ATTN_NORM, 0);
-	n = (rand() & 15) + 3 + 7;
+	// Xatrix: n = (rand() & 15) + 5;
+	// Rogue: n = (rand() & 15) + 4;
+	n = (rand() & 15) + 10;
 	self->monsterinfo.pausetime = level.time + n * FRAMETIME;
+}
+
+void infantry_cock_gun (edict_t *self)
+{
+	// Knightmare- moved code from here to infantry_set_firetime()
+	gi.sound (self, CHAN_WEAPON, sound_weapon_cock, 1, ATTN_NORM, 0);
+
+	// set cocked gun state, from Q2 re-release
+	self->count = 1;
 }
 
 void infantry_fire (edict_t *self)
 {
 	InfantryMachineGun (self);
+
+	// clear cocked gun state, from Q2 re-release
+	self->count = 0;
 
 	if (level.time >= self->monsterinfo.pausetime)
 		self->monsterinfo.aiflags &= ~AI_HOLD_FRAME;
@@ -534,16 +547,55 @@ mframe_t infantry_frames_attack1 [] =
 	ai_charge, 1,  NULL,
 	ai_charge, 2,  NULL,
 	ai_charge, -2, NULL,
-	ai_charge, -3, NULL,
+	ai_charge, -3, infantry_set_firetime,	// Knightmare added, was NULL
 	ai_charge, 1,  infantry_fire,
 	ai_charge, 5,  NULL,
 	ai_charge, -1, NULL,
 	ai_charge, -2, NULL,
 	ai_charge, -3, NULL
 };
-
 mmove_t infantry_move_attack1 = {FRAME_attak101, FRAME_attak115, infantry_frames_attack1, infantry_run};
 
+/* Xatrix version
+mframe_t infantry_frames_attack1 [] =
+{
+	ai_charge, 10, infantry_set_firetime,
+	ai_charge,  6, NULL,
+	ai_charge,  0, infantry_fire,
+	ai_charge,  0, NULL,
+	ai_charge,  1, NULL,
+	ai_charge, -7, NULL,
+	ai_charge, -6, NULL,
+	ai_charge, -1, NULL,
+	ai_charge,  0, infantry_cock_gun,
+	ai_charge,  0, NULL,
+	ai_charge,  0, NULL,
+	ai_charge,  0, NULL,
+	ai_charge,  0, NULL,
+	ai_charge, -1, NULL,
+	ai_charge, -1, NULL
+};
+*/
+/* Rogue version
+mframe_t infantry_frames_attack1 [] =
+{
+	ai_charge, -3, NULL,
+	ai_charge, -2, NULL,
+	ai_charge, -1, infantry_fire_prep,
+	ai_charge, 5,  infantry_fire,
+	ai_charge, 1,  NULL,
+	ai_charge, -3, NULL,
+	ai_charge, -2, NULL,
+	ai_charge, 2,  infantry_cock_gun,
+	ai_charge, 1,  NULL,
+	ai_charge, 1,  NULL,
+	ai_charge, -1, NULL,
+	ai_charge, 0,  NULL,
+	ai_charge, -1, NULL,
+	ai_charge, -1, NULL,
+	ai_charge, 4,  NULL
+};
+*/
 
 void infantry_swing (edict_t *self)
 {
@@ -576,8 +628,10 @@ void infantry_attack(edict_t *self)
 {
 	if (range (self, self->enemy) == RANGE_MELEE)
 		self->monsterinfo.currentmove = &infantry_move_attack2;
-	else
+	else {
+		// TODO: check self->count to see if we should do new cock-less anim or old cock + shoot anim
 		self->monsterinfo.currentmove = &infantry_move_attack1;
+	}
 }
 
 //Jump
@@ -599,6 +653,26 @@ void infantry_jump (edict_t *self)
 	self->monsterinfo.currentmove = &infantry_move_jump;
 }
 
+
+// Knightmare- added soundcache function
+void monster_infantry_soundcache (edict_t *self)
+{
+	sound_pain1 = gi.soundindex ("infantry/infpain1.wav");
+	sound_pain2 = gi.soundindex ("infantry/infpain2.wav");
+	sound_die1 = gi.soundindex ("infantry/infdeth1.wav");
+	sound_die2 = gi.soundindex ("infantry/infdeth2.wav");
+
+	sound_gunshot = gi.soundindex ("infantry/infatck1.wav");
+	sound_weapon_cock = gi.soundindex ("infantry/infatck3.wav");
+	sound_punch_swing = gi.soundindex ("infantry/infatck2.wav");
+	sound_punch_hit = gi.soundindex ("infantry/melee2.wav");
+
+	sound_sight = gi.soundindex ("infantry/infsght1.wav");
+	sound_search = gi.soundindex ("infantry/infsrch1.wav");
+	sound_idle = gi.soundindex ("infantry/infidle1.wav");
+}
+
+
 /*QUAKED monster_infantry (1 .5 0) (-16 -16 -24) (16 16 32) Ambush Trigger_Spawn Sight
 */
 void SP_monster_infantry (edict_t *self)
@@ -609,19 +683,8 @@ void SP_monster_infantry (edict_t *self)
 		return;
 	}
 
-	sound_pain1 = gi.soundindex ("infantry/infpain1.wav");
-	sound_pain2 = gi.soundindex ("infantry/infpain2.wav");
-	sound_die1 = gi.soundindex ("infantry/infdeth1.wav");
-	sound_die2 = gi.soundindex ("infantry/infdeth2.wav");
-
-	sound_gunshot = gi.soundindex ("infantry/infatck1.wav");
-	sound_weapon_cock = gi.soundindex ("infantry/infatck3.wav");
-	sound_punch_swing = gi.soundindex ("infantry/infatck2.wav");
-	sound_punch_hit = gi.soundindex ("infantry/melee2.wav");
-	
-	sound_sight = gi.soundindex ("infantry/infsght1.wav");
-	sound_search = gi.soundindex ("infantry/infsrch1.wav");
-	sound_idle = gi.soundindex ("infantry/infidle1.wav");
+	// Knightmare- use soundcache function
+	monster_infantry_soundcache (self);
 
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;

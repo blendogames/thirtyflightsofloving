@@ -949,7 +949,7 @@ CIN_ReadAudioFrame
 static void CIN_ReadAudioFrame (cinematic_t *cin)
 {
 	byte	data[0x40000];
-	int		samples;
+	int		samples = 0;
 
 	if (!cin->isRoQ)
 	{
@@ -1502,7 +1502,7 @@ void CIN_DrawCinematic (cinHandle_t handle){
 		Vector2Copy (vec2_origin, ds.offset);
 		Vector4Copy (vec4_identity, ds.color);
 
-		R_DrawPic (ds);
+		R_DrawPic (&ds);
 	//	R_DrawStretchPic (x, y, w, h, picname, 1.0);
 		return;
 	} // end JPG hack

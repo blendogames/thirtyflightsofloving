@@ -271,7 +271,7 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer)
 			if (stringlength + j > 1024)
 				break;
 		//	strncpy (string + stringlength, entry);
-			Q_strncpyz (string + stringlength, sizeof(string)-stringlength, entry);
+			Q_strncpyz (string + stringlength, sizeof(string) - stringlength, entry);
 			stringlength += j;
 		}
 
@@ -485,11 +485,6 @@ void WhatIsIt (edict_t *ent)
 	}
 }
 
-static char *tnames[] = {
-	"item_tech1", "item_tech2", "item_tech3", "item_tech4", "item_tech5", "item_tech6",
-	NULL
-};
-
 /*
 ===============
 G_SetStats
@@ -500,9 +495,9 @@ G_SetStats
 extern void WhatsIt(edict_t *ent);
 void G_SetStats (edict_t *ent)
 {
-	gitem_t		*item;
-	int			index, cells;
-	int			power_armor_type;
+	gitem_t		*item = NULL;
+	int			index = 0, cells = 0;
+	int			power_armor_type = 0;
 
 	//
 	// health
@@ -510,8 +505,8 @@ void G_SetStats (edict_t *ent)
 	ent->client->ps.stats[STAT_HEALTH_ICON] = level.pic_health;
 	ent->client->ps.stats[STAT_HEALTH] = ent->health;
 #ifdef KMQUAKE2_ENGINE_MOD	// for enhanced HUD
-//	ent->client->ps.stats[STAT_MAXHEALTH] = min(max(ent->client->pers.max_health, 0), 10000);
-	ent->client->ps.stats[STAT_MAXHEALTH] = min(max(ent->max_health, 0), 10000);
+//	ent->client->ps.stats[STAT_MAXHEALTH] = min(max(ent->client->pers.max_health, 0), SHRT_MAX);
+	ent->client->ps.stats[STAT_MAXHEALTH] = min(max(ent->max_health, 0), SHRT_MAX);
 #endif
 
 	//
@@ -531,7 +526,7 @@ void G_SetStats (edict_t *ent)
 		ent->client->ps.stats[STAT_AMMO_ICON] = gi.imageindex (item->icon);
 		ent->client->ps.stats[STAT_AMMO] = ent->client->pers.inventory[ent->client->ammo_index];
 #ifdef KMQUAKE2_ENGINE_MOD	// for enhanced HUD
-		ent->client->ps.stats[STAT_MAXAMMO] = min(max(GetMaxAmmoByIndex(ent->client, ent->client->ammo_index), 0), 10000);
+		ent->client->ps.stats[STAT_MAXAMMO] = min(max(GetMaxAmmoByIndex(ent->client, ent->client->ammo_index), 0), SHRT_MAX);
 #endif
 	}
 	
@@ -559,7 +554,7 @@ void G_SetStats (edict_t *ent)
 			ent->client->ps.stats[STAT_ARMOR_ICON] = gi.imageindex ("i_powerscreen");
 		ent->client->ps.stats[STAT_ARMOR] = cells;
 #ifdef KMQUAKE2_ENGINE_MOD	// for enhanced HUD
-		ent->client->ps.stats[STAT_MAXARMOR] = min(max(ent->client->pers.max_cells, 0), 10000);
+		ent->client->ps.stats[STAT_MAXARMOR] = min(max(ent->client->pers.max_cells, 0), SHRT_MAX);
 #endif
 	}
 	else if (index)
@@ -568,7 +563,7 @@ void G_SetStats (edict_t *ent)
 		ent->client->ps.stats[STAT_ARMOR_ICON] = gi.imageindex (item->icon);
 		ent->client->ps.stats[STAT_ARMOR] = ent->client->pers.inventory[index];
 #ifdef KMQUAKE2_ENGINE_MOD	// for enhanced HUD
-		ent->client->ps.stats[STAT_MAXARMOR] = min(max(GetMaxArmorByIndex(index), 0), 10000);
+		ent->client->ps.stats[STAT_MAXARMOR] = min(max(GetMaxArmorByIndex(index), 0), SHRT_MAX);
 #endif
 	}
 	else
@@ -597,7 +592,7 @@ void G_SetStats (edict_t *ent)
 		ent->client->ps.stats[STAT_TIMER_ICON] = gi.imageindex ("p_quad");
 		ent->client->ps.stats[STAT_TIMER] = (ent->client->quad_framenum - level.framenum)/10;
 #ifdef KMQUAKE2_ENGINE_MOD	// for enhanced HUD
-		ent->client->ps.stats[STAT_TIMER_RANGE] = min(max((int)sk_quad_time->value, 0), 10000);
+		ent->client->ps.stats[STAT_TIMER_RANGE] = min(max((int)sk_quad_time->value, 0), SHRT_MAX);
 #endif
 	}
 	else if (ent->client->invincible_framenum > level.framenum)
@@ -605,7 +600,7 @@ void G_SetStats (edict_t *ent)
 		ent->client->ps.stats[STAT_TIMER_ICON] = gi.imageindex ("p_invulnerability");
 		ent->client->ps.stats[STAT_TIMER] = (ent->client->invincible_framenum - level.framenum)/10;
 #ifdef KMQUAKE2_ENGINE_MOD	// for enhanced HUD
-		ent->client->ps.stats[STAT_TIMER_RANGE] = min(max((int)sk_inv_time->value, 0), 10000);
+		ent->client->ps.stats[STAT_TIMER_RANGE] = min(max((int)sk_inv_time->value, 0), SHRT_MAX);
 #endif
 	}
 	else if (ent->client->enviro_framenum > level.framenum)
@@ -613,7 +608,7 @@ void G_SetStats (edict_t *ent)
 		ent->client->ps.stats[STAT_TIMER_ICON] = gi.imageindex ("p_envirosuit");
 		ent->client->ps.stats[STAT_TIMER] = (ent->client->enviro_framenum - level.framenum)/10;
 #ifdef KMQUAKE2_ENGINE_MOD	// for enhanced HUD
-		ent->client->ps.stats[STAT_TIMER_RANGE] = min(max((int)sk_enviro_time->value, 0), 10000);
+		ent->client->ps.stats[STAT_TIMER_RANGE] = min(max((int)sk_enviro_time->value, 0), SHRT_MAX);
 #endif
 	}
 	else if (ent->client->breather_framenum > level.framenum)
@@ -621,7 +616,7 @@ void G_SetStats (edict_t *ent)
 		ent->client->ps.stats[STAT_TIMER_ICON] = gi.imageindex ("p_rebreather");
 		ent->client->ps.stats[STAT_TIMER] = (ent->client->breather_framenum - level.framenum)/10;
 #ifdef KMQUAKE2_ENGINE_MOD	// for enhanced HUD
-		ent->client->ps.stats[STAT_TIMER_RANGE] = min(max((int)sk_breather_time->value, 0), 10000);
+		ent->client->ps.stats[STAT_TIMER_RANGE] = min(max((int)sk_breather_time->value, 0), SHRT_MAX);
 #endif
 	}
 #ifdef JETPACK_MOD
@@ -633,7 +628,7 @@ void G_SetStats (edict_t *ent)
 		ent->client->ps.stats[STAT_TIMER_ICON] = gi.imageindex("p_jet");
 		ent->client->ps.stats[STAT_TIMER] = ent->client->pers.inventory[fuel_index];
 #ifdef KMQUAKE2_ENGINE_MOD	// for enhanced HUD
-		ent->client->ps.stats[STAT_TIMER_RANGE] = min(max(ent->client->pers.max_fuel, 0), 10000);
+		ent->client->ps.stats[STAT_TIMER_RANGE] = min(max(ent->client->pers.max_fuel, 0), SHRT_MAX);
 #endif
 	}
 #endif
@@ -642,7 +637,7 @@ void G_SetStats (edict_t *ent)
 		ent->client->ps.stats[STAT_TIMER_ICON] = gi.imageindex ("p_freeze");
 		ent->client->ps.stats[STAT_TIMER] = sk_stasis_time->value - level.freezeframes/10;
 #ifdef KMQUAKE2_ENGINE_MOD	// for enhanced HUD
-		ent->client->ps.stats[STAT_TIMER_RANGE] = min(max((int)sk_stasis_time->value, 0), 10000);
+		ent->client->ps.stats[STAT_TIMER_RANGE] = min(max((int)sk_stasis_time->value, 0), SHRT_MAX);
 #endif
 	}
 	else
@@ -752,7 +747,7 @@ void G_SetStats (edict_t *ent)
 	//
 	// help icon / current weapon if not shown
 	//
-	if (ent->client->pers.helpchanged && (level.framenum&8) )
+	if (ent->client->pers.helpchanged && (level.framenum & 8) )
 		ent->client->ps.stats[STAT_HELPICON] = gi.imageindex ("i_help");
 	else if ( (ent->client->pers.hand == CENTER_HANDED || ent->client->ps.fov > 91)
 		&& ent->client->pers.weapon)
@@ -779,18 +774,18 @@ void G_SetStats (edict_t *ent)
 		ent->client->ps.stats[STAT_ZOOM] = 0;
 
 //ZOID
-	SetCTFStats(ent);
+	SetCTFStats (ent);
 //ZOID
 
 	// Knightmare- show tech icon if in DM
-	if (deathmatch->value && !ctf->value)
+	if ( deathmatch->value && !(int)ctf->value )
 	{
 		int i = 0;
 		gitem_t *tech;
 
 		ent->client->ps.stats[STAT_CTF_TECH] = 0;
-		while (tnames[i]) {
-			if ((tech = FindItemByClassname(tnames[i])) != NULL &&
+		while (ctf_tnames[i]) {
+			if ((tech = FindItemByClassname(ctf_tnames[i])) != NULL &&
 				ent->client->pers.inventory[ITEM_INDEX(tech)])
 			{
 				ent->client->ps.stats[STAT_CTF_TECH] = gi.imageindex(tech->icon);

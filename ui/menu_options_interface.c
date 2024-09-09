@@ -37,22 +37,22 @@ INTERFACE MENU
 =======================================================================
 */
 
-static menuframework_s	s_options_interface_menu;
-static menuseparator_s	s_options_interface_header;
-static menuslider_s		s_options_interface_conalpha_slider;
-//static menuslider_s		s_options_interface_conheight_slider;
-static menuslider_s		s_options_interface_menumouse_slider;
-static menuslider_s		s_options_interface_menualpha_slider;
-static menulist_s		s_options_interface_confont_box;
-static menuslider_s		s_options_interface_fontsize_slider;
-static menulist_s		s_options_interface_uifont_box;
-static menulist_s		s_options_interface_scrfont_box;
-static menulist_s		s_options_interface_alt_text_color_box;
-static menulist_s		s_options_interface_simple_loadscreen_box;
-static menulist_s		s_options_interface_newconback_box;
-static menulist_s		s_options_interface_noalttab_box;
-static menuaction_s		s_options_interface_defaults_action;
-static menuaction_s		s_options_interface_back_action;
+static menuFramework_s	s_options_interface_menu;
+static menuSeparator_s	s_options_interface_header;
+static menuSlider_s		s_options_interface_conalpha_slider;
+//static menuSlider_s		s_options_interface_conheight_slider;
+static menuSlider_s		s_options_interface_menumouse_slider;
+static menuSlider_s		s_options_interface_menualpha_slider;
+static menuPicker_s		s_options_interface_confont_box;
+static menuSlider_s		s_options_interface_fontsize_slider;
+static menuPicker_s		s_options_interface_uifont_box;
+static menuPicker_s		s_options_interface_scrfont_box;
+static menuPicker_s		s_options_interface_alt_text_color_box;
+static menuPicker_s		s_options_interface_simple_loadscreen_box;
+static menuPicker_s		s_options_interface_newconback_box;
+static menuPicker_s		s_options_interface_noalttab_box;
+static menuAction_s		s_options_interface_defaults_action;
+static menuAction_s		s_options_interface_back_action;
 
 //=======================================================================
 
@@ -375,5 +375,5 @@ const char *Menu_Options_Interface_Key (int key)
 void Menu_Options_Interface_f (void)
 {
 	Options_Interface_MenuInit ();
-	UI_PushMenu (Menu_Options_Interface_Draw, Menu_Options_Interface_Key);
+	UI_PushMenu (&s_options_interface_menu);
 }

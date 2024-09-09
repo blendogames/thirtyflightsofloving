@@ -37,16 +37,16 @@ SOUND MENU
 =======================================================================
 */
 
-static menuframework_s	s_options_sound_menu;
-static menuseparator_s	s_options_sound_header;
-static menuslider_s		s_options_sound_sfxvolume_slider;
-static menuslider_s		s_options_sound_musicvolume_slider;
-static menulist_s		s_options_sound_oggmusic_box;
-static menulist_s		s_options_sound_cdvolume_box;
-static menulist_s		s_options_sound_quality_list;
-static menulist_s		s_options_sound_compatibility_list;
-static menuaction_s		s_options_sound_defaults_action;
-static menuaction_s		s_options_sound_back_action;
+static menuFramework_s	s_options_sound_menu;
+static menuSeparator_s	s_options_sound_header;
+static menuSlider_s		s_options_sound_sfxvolume_slider;
+static menuSlider_s		s_options_sound_musicvolume_slider;
+static menuPicker_s		s_options_sound_oggmusic_box;
+static menuPicker_s		s_options_sound_cdvolume_box;
+static menuPicker_s		s_options_sound_quality_list;
+static menuPicker_s		s_options_sound_compatibility_list;
+static menuAction_s		s_options_sound_defaults_action;
+static menuAction_s		s_options_sound_back_action;
 
 //=======================================================================
 
@@ -299,5 +299,5 @@ const char *Menu_Options_Sound_Key (int key)
 void Menu_Options_Sound_f (void)
 {
 	Menu_Options_Sound_Init ();
-	UI_PushMenu (Menu_Options_Sound_Draw, Menu_Options_Sound_Key);
+	UI_PushMenu (&s_options_sound_menu);
 }

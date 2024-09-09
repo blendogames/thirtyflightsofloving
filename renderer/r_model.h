@@ -72,8 +72,8 @@ typedef struct
 #define SURF_UNDERSLIME		0x200
 #define SURF_UNDERLAVA		0x400
 #define SURF_MASK_CAUSTIC	(SURF_UNDERWATER|SURF_UNDERSLIME|SURF_UNDERLAVA)
-// Psychospaz's envmapping
-#define SURF_ENVMAP			0x800
+#define SURF_ENVMAP			0x800	// Psychospaz's envmapping
+#define	SURF_DRAWFOG		0x1000
 
 // !!! if this is changed, it must be changed in asm_draw.h too !!!
 typedef struct
@@ -85,13 +85,15 @@ typedef struct
 typedef struct mtexinfo_s
 {
 	float		vecs[2][4];
-	int			texWidth;	// added Q2E hack
-	int			texHeight;	// added Q2E hack
+	int			texWidth;		// added Q2E hack
+	int			texHeight;		// added Q2E hack
 	int			flags;
+	int			value;			// added for light emission, fog distance, etc
 	int			numframes;
-	struct mtexinfo_s	*next;		// animation chain
+	struct mtexinfo_s	*next;	// animation chain
 	image_t		*image;
-	image_t		*glow;		// glow overlay
+	image_t		*glow;			// glow overlay
+	byte		color[4];		// added for surface colors
 } mtexinfo_t;
 
 typedef struct
@@ -139,7 +141,7 @@ typedef struct msurface_s
 
 	mtexinfo_t	*texinfo;
 	
-// lighting info
+	// lighting info
 	int			dlightframe;
 	int			dlightbits[(MAX_DLIGHTS+31)>>5];	// derived from MAX_DLIGHTS
 	qboolean	cached_dlight;
@@ -289,9 +291,11 @@ typedef struct model_s
 	size_t		extradatasize;
 	void		*extradata;
 
-	qboolean	hasAlpha;		// if model has scripted transparency
-	int			bspVersion;		// For checking BSP version for compatibility
-	int			bspFeatures;	// flags for BSP features
+	qboolean	usingModChunk;			// if model is using ModChunk allocation instead of Hunk system
+	qboolean	hasAlpha;				// if model has scripted transparency
+	int			bspVersion;				// for checking BSP version for compatibility
+	int			bspFeatures;			// flags for BSP features
+	qboolean	warpLightmapOverride;	// if warp lightmaps are force-loaded on format 38 BSPs
 
 #ifdef PROJECTION_SHADOWS // projection shadows from BeefQuake R6
 	//signed int	edge_tri[MD2_MAX_TRIANGLES][3]; // make this dynamically allocated?
@@ -303,6 +307,14 @@ typedef struct model_s
 #define	BSPF_WARPLIGHTMAPS		0x00000001
 
 //============================================================================
+
+void	R_BeginRegistration (char *map);
+void	R_EndRegistration (void);
+struct model_s *R_RegisterModel (char *name);
+struct image_s *R_RegisterSkin (char *name);
+struct image_s *R_DrawFindPic (char *name);
+qboolean R_RegistrationIsActive (void);
+qboolean R_ModelIsValid (struct model_s *model);
 
 void	Mod_Init (void);
 void	Mod_ClearAll (void);

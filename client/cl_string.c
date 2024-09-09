@@ -33,6 +33,8 @@ CL_StringSetParams
 */
 qboolean CL_StringSetParams (char modifier, int *red, int *green, int *blue, int *bold, int *shadow, int *italic, int *reset)
 {
+    char    colorBuf[4] = {0};
+
 	// sanity check
 	if (!red || !green || !blue || !bold || !shadow || !italic || !reset)
 		return false;
@@ -77,11 +79,11 @@ qboolean CL_StringSetParams (char modifier, int *red, int *green, int *blue, int
 		case COLOR_BLACK:
 		case COLOR_ORANGE:
 		case COLOR_GRAY:
-			CL_TextColor (atoi(&modifier), red, green, blue);
+			colorBuf[0] = modifier;
+			CL_TextColor (atoi(&colorBuf[0]), red, green, blue);
 			return true;
 		case 'A':	// alt text color
 		case 'a':
-		//	CL_TextColor ((int)alt_text_color->value, red, green, blue);
 			CL_TextColor (alt_text_color->integer, red, green, blue);
 			return true;
 	}
@@ -207,12 +209,12 @@ CL_DrawStringFromCharsPic
 void CL_DrawStringFromCharsPic (float x, float y, float w, float h, vec2_t offset, float width, char *string, color_t color, char *pic, int flags)
 {
 	vec4_t			modulate, shadowModulate, texCorners;
-	char			line[1024], *l;
-	int				len, ch;
-	float			xx, yy, ofsX, ofsY, col, row;
-	char			modifier;
-	int				red, green, blue, italic, shadow, bold, reset;
-	qboolean		modified;
+	char			line[1024], *l = NULL;
+	int				len = 0, ch = 0;
+	float			xx = 0.0f, yy = 0.0f, ofsX = 0.0f, ofsY = 0.0f, col = 0.0f, row = 0.0f;
+	char			modifier = 0;
+	int				red = 0, green = 0, blue = 0, italic = 0, shadow = 0, bold = 0, reset = 0;
+	qboolean		modified = false;
 	drawStruct_t	ds = { 0 };
 
 	Vector4Set (modulate, (float)color[0] * DIV255, (float)color[1] * DIV255, (float)color[2] * DIV255, (float)color[3] * DIV255);
@@ -306,14 +308,12 @@ void CL_DrawStringFromCharsPic (float x, float y, float w, float h, vec2_t offse
 				{
 					ds.x = xx + ofsX;	ds.y = yy + ofsY;
 					Vector4Copy (shadowModulate, ds.color);
-					R_DrawPic (ds);
-				//	R_DrawPic (xx + ofsX, yy + ofsY, w, h, offset, texCorners, shadowModulate, pic);
+					R_DrawPic (&ds);
 				}
 
 				ds.x = xx;	ds.y = yy;
 				Vector4Copy (modulate, ds.color);
-				R_DrawPic (ds);
-			//	R_DrawPic (xx, yy, w, h, offset, texCorners, modulate, pic);
+				R_DrawPic (&ds);
 			}
 			xx += w;
 		}

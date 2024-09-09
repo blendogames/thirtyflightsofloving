@@ -24,8 +24,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "client.h"
 
-
-
 /*
 =========================================================================
 
@@ -197,9 +195,9 @@ Returns the entity number and the header bits
 =================
 */
 int	bitcounts[32];	/// just for protocol profiling
-int CL_ParseEntityBits (unsigned *bits)
+int CL_ParseEntityBits (unsigned *bits, unsigned *bits2)
 {
-	unsigned	b, total;
+	unsigned	b, total, total2 = 0;
 	int			i;
 	int			number;
 
@@ -220,6 +218,27 @@ int CL_ParseEntityBits (unsigned *bits)
 		total |= b<<24;
 	}
 
+	// Knightmare- read 2nd dword of bits
+	if ( !LegacyProtocol() && (total & U_MOREBITS4) )
+	{
+		total2 = MSG_ReadByte (&net_message);
+		if (total2 & U2_MOREBITS5)
+		{
+			b = MSG_ReadByte (&net_message);
+			total2 |= b<<8;
+		}
+		if (total2 & U2_MOREBITS6)
+		{
+			b = MSG_ReadByte (&net_message);
+			total2 |= b<<16;
+		}
+		if (total2 & U2_MOREBITS7)
+		{
+			b = MSG_ReadByte (&net_message);
+			total2 |= b<<24;
+		}
+	}
+
 	// count the bits for net profiling
 	for (i=0 ; i<32 ; i++)
 		if (total&(1<<i))
@@ -231,6 +250,7 @@ int CL_ParseEntityBits (unsigned *bits)
 		number = MSG_ReadByte (&net_message);
 
 	*bits = total;
+	*bits2 = total2;
 
 	return number;
 }
@@ -242,7 +262,7 @@ CL_ParseDelta
 Can go from either a baseline or a previous packet_entity
 ==================
 */
-void CL_ParseDelta (entity_state_t *from, entity_state_t *to, int number, int bits)
+void CL_ParseDelta (centity_state_t *from, centity_state_t *to, int number, int bits, int bits2)
 {
 	// set everything to the state we are delta'ing from
 	*to = *from;
@@ -269,25 +289,25 @@ void CL_ParseDelta (entity_state_t *from, entity_state_t *to, int number, int bi
 			to->frame = MSG_ReadShort (&net_message);
 
 		if ((bits & U_SKIN8) && (bits & U_SKIN16))		//used for laser colors
-			to->skinnum = MSG_ReadLong(&net_message);
+			to->skinnum = MSG_ReadLong (&net_message);
 		else if (bits & U_SKIN8)
-			to->skinnum = MSG_ReadByte(&net_message);
+			to->skinnum = MSG_ReadByte (&net_message);
 		else if (bits & U_SKIN16)
-			to->skinnum = MSG_ReadShort(&net_message);
+			to->skinnum = MSG_ReadShort (&net_message);
 
 		if ( (bits & (U_EFFECTS8|U_EFFECTS16)) == (U_EFFECTS8|U_EFFECTS16) )
-			to->effects = MSG_ReadLong(&net_message);
+			to->effects = MSG_ReadLong (&net_message);
 		else if (bits & U_EFFECTS8)
-			to->effects = MSG_ReadByte(&net_message);
+			to->effects = MSG_ReadByte (&net_message);
 		else if (bits & U_EFFECTS16)
-			to->effects = MSG_ReadShort(&net_message);
+			to->effects = MSG_ReadShort (&net_message);
 
 		if ( (bits & (U_RENDERFX8|U_RENDERFX16)) == (U_RENDERFX8|U_RENDERFX16) )
-			to->renderfx = MSG_ReadLong(&net_message);
+			to->renderfx = MSG_ReadLong (&net_message);
 		else if (bits & U_RENDERFX8)
-			to->renderfx = MSG_ReadByte(&net_message);
+			to->renderfx = MSG_ReadByte (&net_message);
 		else if (bits & U_RENDERFX16)
-			to->renderfx = MSG_ReadShort(&net_message);
+			to->renderfx = MSG_ReadShort (&net_message);
 
 		if (bits & U_ORIGIN1)
 			to->origin[0] = MSG_ReadCoord (&net_message);
@@ -297,11 +317,11 @@ void CL_ParseDelta (entity_state_t *from, entity_state_t *to, int number, int bi
 			to->origin[2] = MSG_ReadCoord (&net_message);
 			
 		if (bits & U_ANGLE1)
-			to->angles[0] = MSG_ReadAngle(&net_message);
+			to->angles[0] = MSG_ReadAngle8 (&net_message);
 		if (bits & U_ANGLE2)
-			to->angles[1] = MSG_ReadAngle(&net_message);
+			to->angles[1] = MSG_ReadAngle8 (&net_message);
 		if (bits & U_ANGLE3)
-			to->angles[2] = MSG_ReadAngle(&net_message);
+			to->angles[2] = MSG_ReadAngle8 (&net_message);
 
 		if (bits & U_OLDORIGIN)
 			MSG_ReadPos (&net_message, to->old_origin);
@@ -315,15 +335,25 @@ void CL_ParseDelta (entity_state_t *from, entity_state_t *to, int number, int bi
 			to->event = 0;
 
 		if (bits & U_SOLID)
+		{
 			to->solid = MSG_ReadShort (&net_message);
+			// unpack solid to mins/maxs
+			if ( (to->solid != 0) && (to->solid != 31) ) {
+				MSG_UnpackSolid16 (to->solid, to->mins, to->maxs);
+			}
+			else {
+				VectorClear (to->mins);
+				VectorClear (to->maxs);
+			}
+		}
 		// end old CL_ParseDelta code
 	}	
-	else //new CL_ParseDelta code
+	else	// new CL_ParseDelta code
 	{
 	#ifndef NEW_ENTITY_STATE_MEMBERS
 		int ignore;	// holder for messages to be ignored
 	#endif
-		// Knightmare- 12/23/2001- read model indices as shorts 
+		// Knightmare- read model indices as shorts 
 		if (bits & U_MODEL)
 			to->modelindex = MSG_ReadShort (&net_message);
 		if (bits & U_MODEL2)
@@ -333,16 +363,16 @@ void CL_ParseDelta (entity_state_t *from, entity_state_t *to, int number, int bi
 		if (bits & U_MODEL4)
 			to->modelindex4 = MSG_ReadShort (&net_message);
 
-	// 1/18/2002- extra model indices
+	// Knightmare- extra model indices
 	#ifdef NEW_ENTITY_STATE_MEMBERS
-		if (bits & U_MODEL5)
+		if (bits2 & U2_MODEL5)
 			to->modelindex5 = MSG_ReadShort (&net_message);
-		if (bits & U_MODEL6)
+		if (bits2 & U2_MODEL6)
 			to->modelindex6 = MSG_ReadShort (&net_message);
-	#else // we need to read and ignore this for eraser client compatibility
-		if (bits & U_MODEL5)
+	#else // we need to read and ignore this for client compatibility with precompiled game code
+		if (bits2 & U2_MODEL5)
 			ignore = MSG_ReadShort (&net_message);
-		if (bits & U_MODEL6)
+		if (bits2 & U2_MODEL6)
 			ignore = MSG_ReadShort (&net_message);
 	#endif // NEW_ENTITY_STATE_MEMBERS
 		if (bits & U_FRAME8)
@@ -351,25 +381,33 @@ void CL_ParseDelta (entity_state_t *from, entity_state_t *to, int number, int bi
 			to->frame = MSG_ReadShort (&net_message);
 
 		if ((bits & U_SKIN8) && (bits & U_SKIN16))		//used for laser colors
-			to->skinnum = MSG_ReadLong(&net_message);
+			to->skinnum = MSG_ReadLong (&net_message);
 		else if (bits & U_SKIN8)
-			to->skinnum = MSG_ReadByte(&net_message);
+			to->skinnum = MSG_ReadByte (&net_message);
 		else if (bits & U_SKIN16)
-			to->skinnum = MSG_ReadShort(&net_message);
+			to->skinnum = MSG_ReadShort (&net_message);
 
 		if ( (bits & (U_EFFECTS8|U_EFFECTS16)) == (U_EFFECTS8|U_EFFECTS16) )
-			to->effects = MSG_ReadLong(&net_message);
+			to->effects = MSG_ReadLong (&net_message);
 		else if (bits & U_EFFECTS8)
-			to->effects = MSG_ReadByte(&net_message);
+			to->effects = MSG_ReadByte (&net_message);
 		else if (bits & U_EFFECTS16)
-			to->effects = MSG_ReadShort(&net_message);
+			to->effects = MSG_ReadShort (&net_message);
 
 		if ( (bits & (U_RENDERFX8|U_RENDERFX16)) == (U_RENDERFX8|U_RENDERFX16) )
-			to->renderfx = MSG_ReadLong(&net_message);
+			to->renderfx = MSG_ReadLong (&net_message);
 		else if (bits & U_RENDERFX8)
-			to->renderfx = MSG_ReadByte(&net_message);
+			to->renderfx = MSG_ReadByte (&net_message);
 		else if (bits & U_RENDERFX16)
-			to->renderfx = MSG_ReadShort(&net_message);
+			to->renderfx = MSG_ReadShort (&net_message);
+
+		// Knightmare- added alpha
+		if (bits & U_ALPHA)
+	#ifdef NEW_ENTITY_STATE_MEMBERS
+			to->alpha = (float)(MSG_ReadByte (&net_message) / 255.0);
+	#else // we need to read and ignore this for client compatibility with precompiled game code
+			ignore = (float)(MSG_ReadByte (&net_message) / 255.0);
+	#endif
 
 		if (bits & U_ORIGIN1)
 			to->origin[0] = MSG_ReadCoord (&net_message);
@@ -378,35 +416,28 @@ void CL_ParseDelta (entity_state_t *from, entity_state_t *to, int number, int bi
 		if (bits & U_ORIGIN3)
 			to->origin[2] = MSG_ReadCoord (&net_message);
 			
+		// Knightmare- switched to 16-bit angles
 		if (bits & U_ANGLE1)
-			to->angles[0] = MSG_ReadAngle(&net_message);
+			to->angles[0] = MSG_ReadAngle16 (&net_message);
 		if (bits & U_ANGLE2)
-			to->angles[1] = MSG_ReadAngle(&net_message);
+			to->angles[1] = MSG_ReadAngle16 (&net_message);
 		if (bits & U_ANGLE3)
-			to->angles[2] = MSG_ReadAngle(&net_message);
+			to->angles[2] = MSG_ReadAngle16 (&net_message);
 
 		if (bits & U_OLDORIGIN)
 			MSG_ReadPos (&net_message, to->old_origin);
 
-		// 5/11/2002- added alpha
-		if (bits & U_ALPHA)
-	#ifdef NEW_ENTITY_STATE_MEMBERS
-			to->alpha = (float)(MSG_ReadByte (&net_message) / 255.0);
-	#else // we need to read and ignore this for eraser client compatibility
-			ignore = (float)(MSG_ReadByte (&net_message) / 255.0);
-	#endif
+		// alpha was here
 
-		// 12/23/2001- read sound indices as shorts
+		// Knightmare- read sound indices as shorts
 		if (bits & U_SOUND)
 			to->sound = MSG_ReadShort (&net_message);
 		
-	#ifdef LOOP_SOUND_ATTENUATION
 		if (bits & U_ATTENUAT)
 	#ifdef NEW_ENTITY_STATE_MEMBERS
-			to->attenuation = MSG_ReadByte (&net_message) / 64.0;
-	#else // we need to read and ignore this for eraser client compatibility
+			to->loop_attenuation = MSG_ReadByte (&net_message) / 64.0;
+	#else // we need to read and ignore this for client compatibility with precompiled game code
 			ignore = MSG_ReadByte (&net_message) / 64.0;
-	#endif
 	#endif
 
 		if (bits & U_EVENT)
@@ -415,9 +446,33 @@ void CL_ParseDelta (entity_state_t *from, entity_state_t *to, int number, int bi
 			to->event = 0;
 
 		if (bits & U_SOLID)
+		{
 			to->solid = MSG_ReadShort (&net_message);
+			// unpack solid to mins/maxs
+			if ( (to->solid != 0) && (to->solid != 31) ) {
+				MSG_UnpackSolid16 (to->solid, to->mins, to->maxs);
+			}
+			else {
+				VectorClear (to->mins);
+				VectorClear (to->maxs);
+			}
+		}
 
-	}	//end new CL_ParseDelta code
+		if ( (bits & (U_MINSMAXS_8|U_MINSMAXS_16)) == (U_MINSMAXS_8|U_MINSMAXS_16) ) {
+			MSG_ReadPos (&net_message, to->mins);
+			MSG_ReadPos (&net_message, to->maxs);
+			to->iflags |= IF_REAL_BBOX;
+		}
+		else if (bits & U_MINSMAXS_8) {
+			MSG_ReadBBox8 (&net_message, to->mins, to->maxs);
+			to->iflags |= IF_REAL_BBOX;
+		}
+		else if (bits & U_MINSMAXS_16) {
+			MSG_ReadBBox16 (&net_message, to->mins, to->maxs);
+			to->iflags |= IF_REAL_BBOX;
+		}
+
+	}	// end new CL_ParseDelta code
 }
 
 /*
@@ -428,10 +483,10 @@ Parses deltas from the given base and adds the resulting entity
 to the current frame
 ==================
 */
-void CL_DeltaEntity (frame_t *frame, int newnum, entity_state_t *old, int bits)
+void CL_DeltaEntity (frame_t *frame, int newnum, centity_state_t *old, int bits, int bits2)
 {
 	centity_t	*ent;
-	entity_state_t	*state;
+	centity_state_t	*state;
 
 	ent = &cl_entities[newnum];
 
@@ -439,7 +494,7 @@ void CL_DeltaEntity (frame_t *frame, int newnum, entity_state_t *old, int bits)
 	cl.parse_entities++;
 	frame->num_entities++;
 
-	CL_ParseDelta (old, state, newnum, bits);
+	CL_ParseDelta (old, state, newnum, bits, bits2);
 
 	// some data changes will force no lerping
 	if (state->modelindex != ent->current.modelindex
@@ -447,7 +502,7 @@ void CL_DeltaEntity (frame_t *frame, int newnum, entity_state_t *old, int bits)
 		|| state->modelindex3 != ent->current.modelindex3
 		|| state->modelindex4 != ent->current.modelindex4
 #ifdef NEW_ENTITY_STATE_MEMBERS
-		// 1/18/2002- extra model indices
+		// Knightmare- extra model indices
 		|| state->modelindex5 != ent->current.modelindex5
 		|| state->modelindex6 != ent->current.modelindex6
 #endif
@@ -456,6 +511,7 @@ void CL_DeltaEntity (frame_t *frame, int newnum, entity_state_t *old, int bits)
 		|| abs(state->origin[2] - ent->current.origin[2]) > 512
 		|| state->event == EV_PLAYER_TELEPORT
 		|| state->event == EV_OTHER_TELEPORT
+		|| state->event == EV_PLAYER_TELEPORT2	// Knightmare added
 		)
 	{
 		ent->serverframe = -99;
@@ -496,10 +552,10 @@ rest of the data stream.
 */
 void CL_ParsePacketEntities (frame_t *oldframe, frame_t *newframe)
 {
-	int			newnum;
-	int			bits;
-	entity_state_t	*oldstate;
-	int			oldindex, oldnum;
+	int				newnum;
+	int				bits, bits2;
+	centity_state_t	*oldstate = NULL;
+	int				oldindex, oldnum;
 
 	newframe->parse_entities = cl.parse_entities;
 	newframe->num_entities = 0;
@@ -521,7 +577,7 @@ void CL_ParsePacketEntities (frame_t *oldframe, frame_t *newframe)
 
 	while (1)
 	{
-		newnum = CL_ParseEntityBits (&bits);
+		newnum = CL_ParseEntityBits (&bits, &bits2);
 		if (newnum >= MAX_EDICTS)
 			Com_Error (ERR_DROP,"CL_ParsePacketEntities: bad number:%i", newnum);
 
@@ -536,7 +592,7 @@ void CL_ParsePacketEntities (frame_t *oldframe, frame_t *newframe)
 		//	if (cl_shownet->value == 3)
 			if (cl_shownet->integer == 3)
 				Com_Printf ("   unchanged: %i\n", oldnum);
-			CL_DeltaEntity (newframe, oldnum, oldstate, 0);
+			CL_DeltaEntity (newframe, oldnum, oldstate, 0, 0);
 			
 			oldindex++;
 
@@ -574,7 +630,7 @@ void CL_ParsePacketEntities (frame_t *oldframe, frame_t *newframe)
 		//	if (cl_shownet->value == 3)
 			if (cl_shownet->integer == 3)
 				Com_Printf ("   delta: %i\n", newnum);
-			CL_DeltaEntity (newframe, newnum, oldstate, bits);
+			CL_DeltaEntity (newframe, newnum, oldstate, bits, bits2);
 
 			oldindex++;
 
@@ -593,7 +649,7 @@ void CL_ParsePacketEntities (frame_t *oldframe, frame_t *newframe)
 		//	if (cl_shownet->value == 3)
 			if (cl_shownet->integer == 3)
 				Com_Printf ("   baseline: %i\n", newnum);
-			CL_DeltaEntity (newframe, newnum, &cl_entities[newnum].baseline, bits);
+			CL_DeltaEntity (newframe, newnum, &cl_entities[newnum].baseline, bits, bits2);
 			continue;
 		}
 
@@ -605,7 +661,7 @@ void CL_ParsePacketEntities (frame_t *oldframe, frame_t *newframe)
 	//	if (cl_shownet->value == 3)
 		if (cl_shownet->integer == 3)
 			Com_Printf ("   unchanged: %i\n", oldnum);
-		CL_DeltaEntity (newframe, oldnum, oldstate, 0);
+		CL_DeltaEntity (newframe, oldnum, oldstate, 0, 0);
 		
 		oldindex++;
 
@@ -655,7 +711,7 @@ void CL_ParsePlayerstate (frame_t *oldframe, frame_t *newframe)
 		if (flags & PS_M_TYPE)
 			state->pmove.pm_type = MSG_ReadByte (&net_message);
 
-		if (flags & PS_M_ORIGIN) // FIXME- map size
+		if (flags & PS_M_ORIGIN)
 		{
 			state->pmove.origin[0] = MSG_ReadShort (&net_message);
 			state->pmove.origin[1] = MSG_ReadShort (&net_message);
@@ -746,11 +802,11 @@ void CL_ParsePlayerstate (frame_t *oldframe, frame_t *newframe)
 		statbits = MSG_ReadLong (&net_message);
 		for (i = 0; i < OLD_MAX_STATS; i++) // Knightmare- use old max_stats
 			if (statbits & (1<<i) )
-				state->stats[i] = MSG_ReadShort(&net_message);
+				state->stats[i] = MSG_ReadShort (&net_message);
 	}	// end old CL_ParsePlayerstate code
 	else // new CL_ParsePlayerstate code
 	{
-		// Knightmare 4/5/2002- read as long
+		// Knightmare- read as long
 		flags = MSG_ReadLong (&net_message);
 
 		//
@@ -761,15 +817,9 @@ void CL_ParsePlayerstate (frame_t *oldframe, frame_t *newframe)
 
 		if (flags & PS_M_ORIGIN)
 		{
-#ifdef LARGE_MAP_SIZE
-			state->pmove.origin[0] = MSG_ReadPMCoordNew (&net_message);
-			state->pmove.origin[1] = MSG_ReadPMCoordNew (&net_message);
-			state->pmove.origin[2] = MSG_ReadPMCoordNew (&net_message);
-#else
-			state->pmove.origin[0] = MSG_ReadShort (&net_message);
-			state->pmove.origin[1] = MSG_ReadShort (&net_message);
-			state->pmove.origin[2] = MSG_ReadShort (&net_message);
-#endif
+			state->pmove.origin[0] = MSG_ReadPMCoord (&net_message);
+			state->pmove.origin[1] = MSG_ReadPMCoord (&net_message);
+			state->pmove.origin[2] = MSG_ReadPMCoord (&net_message);
 		}
 
 		if (flags & PS_M_VELOCITY)
@@ -822,7 +872,7 @@ void CL_ParsePlayerstate (frame_t *oldframe, frame_t *newframe)
 			state->kick_angles[2] = MSG_ReadChar (&net_message) * 0.25;
 		}
 
-		// Knightmare 4/5/2002- read as short
+		// Knightmare- read as short
 		if (flags & PS_WEAPONINDEX)
 			state->gunindex = MSG_ReadShort (&net_message);
 
@@ -901,13 +951,13 @@ void CL_ParsePlayerstate (frame_t *oldframe, frame_t *newframe)
 	/*	statbits = MSG_ReadLong (&net_message);
 		for (i = 0; i < MAX_STATS; i++)
 			if (statbits & (1<<i) )
-				state->stats[i] = MSG_ReadShort(&net_message);
+				state->stats[i] = MSG_ReadShort (&net_message);
 	*/
 		for (j = 0; j < (MAX_STATS+31)>>5; j++)
 			statbitarray[j] = MSG_ReadLong (&net_message);
 		for (i = 0; i < MAX_STATS; i++)
 			if ( statbitarray[i>>5] & (1<<(i&31)) )
-				state->stats[i] = MSG_ReadShort(&net_message);
+				state->stats[i] = MSG_ReadShort (&net_message);
 	} // end new CL_ParsePlayerstate code
 }
 
@@ -920,7 +970,7 @@ CL_FireEntityEvents
 */
 void CL_FireEntityEvents (frame_t *frame)
 {
-	entity_state_t		*s1;
+	centity_state_t		*s1;
 	int					pnum, num;
 
 	for (pnum = 0 ; pnum<frame->num_entities ; pnum++)
@@ -1066,7 +1116,7 @@ INTERPOLATE BETWEEN FRAMES TO GET RENDERING PARMS
 ==========================================================================
 */
 
-struct model_s *S_RegisterSexedModel (entity_state_t *ent, char *base)
+struct model_s *S_RegisterSexedModel (centity_state_t *ent, char *base)
 {
 	int				n;
 	char			*p;
@@ -1077,7 +1127,7 @@ struct model_s *S_RegisterSexedModel (entity_state_t *ent, char *base)
 	// determine what model the client is using
 	model[0] = 0;
 
-	// Knightmare- BIG UGLY HACK for old connected to server using old protocol
+	// Knightmare- hack for old connected to server using old protocol
 	// Changed config strings require different parsing
 	if ( LegacyProtocol() )
 		n = OLD_CS_PLAYERSKINS + ent->number - 1;
@@ -1133,12 +1183,10 @@ CL_AddPacketEntities
 
 ===============
 */
-// FIXME TFOL -flibit
-void CL_FreonEffect (vec3_t start, vec3_t end, vec3_t angle, int red, int green, int blue, int reddelta, int greendelta, int bluedelta, float len, float size);
 void CL_AddPacketEntities (frame_t *frame)
 {
 	entity_t			ent;
-	entity_state_t		*s1;
+	centity_state_t		*s1;
 	float				autorotate;
 	int					i, pnum, autoanim;
 	int					max_models;
@@ -1185,6 +1233,8 @@ void CL_AddPacketEntities (frame_t *frame)
 		ent.alpha = 1.0F;
 		// reset this
 		ent.renderfx = 0;
+		// needed for flare occlusion queries
+		ent.edict_num = s1->number;
 
 		// set frame
 		if (effects & EF_ANIM01)
@@ -1260,12 +1310,54 @@ void CL_AddPacketEntities (frame_t *frame)
 			ent.skinnum = (s1->skinnum >> ((rand() % 4)*8)) & 0xff;
 			ent.model = NULL;
 		}
+		// Knightmare- added for Kex flares
+		else if (renderfx & RF_FLARE)
+		{
+			ent.model = NULL;
+			ent.skin = NULL;
+			ent.skinnum = 0;
+			ent.fade_start_dist = 96;
+			ent.fade_end_dist = 384;
+			ent.sprite_radius = 50.0f;
+			ent.scale = 1.0f;
+			VectorSet (ent.color[0], 1.0f, 1.0f, 1.0f);
+
+			if ( (renderfx & RF_CUSTOMSKIN) && (s1->frame > 0) && (s1->frame < MAX_IMAGES) )
+				ent.skin = R_RegisterSkin (cl.configstrings[CS_IMAGES + s1->frame]);
+			if (s1->modelindex2)
+				ent.fade_start_dist = s1->modelindex2;
+			if (s1->modelindex3)
+				ent.fade_end_dist = s1->modelindex3;
+			// next game API version will use s1->scale * 50.0f for sprite_radius
+			if (s1->modelindex4) {
+				ent.sprite_radius = (float)s1->modelindex4;
+				ent.scale = ent.sprite_radius * 0.02f;
+			}
+			// color is embedded in 32 bits of skinnum
+			VectorSet (ent.color[0],
+				(float)(s1->skinnum & 255) * DIV255,
+				(float)((s1->skinnum >> 8) & 255) * DIV255,
+				(float)((s1->skinnum >> 16) & 255) * DIV255);
+
+			if (renderfx & (RF_SHELL_RED|RF_SHELL_GREEN|RF_SHELL_BLUE))
+			{
+				VectorCopy (ent.color[1], vec3_origin);
+				if (renderfx & RF_SHELL_RED)
+					ent.color[1][0] = (float)((s1->skinnum >> 24) & 255) * DIV255;
+				else if (renderfx & RF_SHELL_GREEN)
+					ent.color[1][1] = (float)((s1->skinnum >> 24) & 255) * DIV255;
+				else if (renderfx & RF_SHELL_BLUE)
+					ent.color[1][2] = (float)((s1->skinnum >> 24) & 255) * DIV255;
+			}
+			else
+				VectorCopy (ent.color[0], ent.color[1]);
+
+		//	Com_Printf ("CL_AddPacketEntities: adding flare with radius %f color0 (%f %f %f) color1 (%f %f %f)\n",
+		//		ent.sprite_radius, ent.color[0][0], ent.color[0][1], ent.color[0][2], ent.color[1][0], ent.color[1][1], ent.color[1][2]);
+		}
 		else
 		{
 			// set skin
-		/*	if ( s1->modelindex == MAX_MODELS-1 //was 255
-				//Knightmare- GROSS HACK for old demos, use modelindex 255
-				|| ( LegacyProtocol() && s1->modelindex == OLD_MAX_MODELS-1 ) ) */
 			if ( s1->modelindex == (max_models-1)) // was 255
 
 			{	// use custom player skin
@@ -1310,6 +1402,10 @@ void CL_AddPacketEntities (frame_t *frame)
 				ent.skin = NULL;
 				ent.model = cl.model_draw[s1->modelindex];
 			}
+
+			// Knightmare- copy bbox to ent
+			VectorCopy (s1->mins, ent.mins);
+			VectorCopy (s1->maxs, ent.maxs);
 		}
 		
 		//**** MODEL / EFFECT SWAPPING ETC *** - per gametype...
@@ -1322,7 +1418,7 @@ void CL_AddPacketEntities (frame_t *frame)
 					255, 150, 50, 0, -90, -30, 10, 3);
 				drawEnt = false;
 			}
-			if (!Q_strcasecmp((char *)ent.model, "sprites/freonparticle.sp2")) // TFOL
+            if (!Q_strcasecmp((char *)ent.model, "sprites/freonparticle.sp2")) // TFOL
 			{	//freon particle.
 				CL_FreonEffect (cent->lerp_origin, ent.origin, s1->angles,
 					255, 150, 50, 0, -90, -30, 10, 2);
@@ -1415,9 +1511,12 @@ void CL_AddPacketEntities (frame_t *frame)
 			isclientviewer = true;
 
 			// EF_FLAG1|EF_FLAG2 is a special case for EF_FLAG3...  plus de fromage!
+			// EF_FLAG1|EF_GREENGIB is a special case for EF_FLAG4
 			if (effects & EF_FLAG1) {
 				if (effects & EF_FLAG2)
 					V_AddLight (ent.origin, 255, 0.1, 1.0, 0.1);
+				else if (effects & EF_GREENGIB)
+					V_AddLight (ent.origin, 255, 1.0, 1.0, 0.1);
 				else
 					V_AddLight (ent.origin, 225, 1.0, 0.1, 0.1);
 			}
@@ -1429,9 +1528,7 @@ void CL_AddPacketEntities (frame_t *frame)
 				V_AddLight (ent.origin, 225, -1.0, -1.0, -1.0);	//PGM
 
 			// Knightmare- save off current player weapon model for player config menu
-		/*	if (s1->modelindex2 == MAX_MODELS-1
-				|| ( LegacyProtocol() && s1->modelindex2 == OLD_MAX_MODELS-1 ) ) */
-			if (s1->modelindex2 == max_models-1)
+			if (s1->modelindex2 == (max_models - 1) )
 			{
 				ci = &cl.clientinfo[s1->skinnum & 0xff];
 				i = (s1->skinnum >> 8); // 0 is default weapon model
@@ -1477,9 +1574,9 @@ void CL_AddPacketEntities (frame_t *frame)
 
 // Knightmare- read server-assigned alpha, overriding effects flags
 #ifdef NEW_ENTITY_STATE_MEMBERS
-		if (s1->alpha > 0.0F && s1->alpha < 1.0F)
+		if ( (s1->alpha > 0.0f) && (s1->alpha < 1.0f) )
 		{
-			//ent.alpha = s1->alpha;
+		//	ent.alpha = s1->alpha;
 			// lerp alpha :p
 			ent.alpha = cent->prev.alpha + cl.lerpfrac * (cent->current.alpha - cent->prev.alpha);
 			ent.flags |= RF_TRANSLUCENT;
@@ -1504,8 +1601,8 @@ void CL_AddPacketEntities (frame_t *frame)
 			// PMM - at this point, all of the shells have been handled
 			// if we're in the rogue pack, set up the custom mixing, otherwise just
 			// keep going
-			// Knightmare 6/06/2002
-			if (FS_RoguePath())
+			// Knightmare added
+			if ( FS_RoguePath() )
 			{
 				// all of the solo colors are fine.  we need to catch any of the combinations that look bad
 				// (double & half) and turn them into the appropriate color, and make double/quad something special
@@ -1545,12 +1642,10 @@ void CL_AddPacketEntities (frame_t *frame)
 		ent.alpha = 1.0F;
 
 		// duplicate for linked models
-		if (s1->modelindex2)
+	//	if (s1->modelindex2)
+		if ( s1->modelindex2 && !(renderfx & RF_FLARE) )	// RF_FLARE overloads modelindex2
 		{
-		/*	if (s1->modelindex2 == MAX_MODELS-1
-				//Knightmare- GROSS HACK for old demos, use modelindex 255
-				|| ( LegacyProtocol() && s1->modelindex2 == OLD_MAX_MODELS-1 ) ) */
-			if (s1->modelindex2 == (max_models-1))
+			if (s1->modelindex2 == (max_models - 1))
 			{	// custom weapon
 				ci = &cl.clientinfo[s1->skinnum & 0xff];
 				i = (s1->skinnum >> 8); // 0 is default weapon model
@@ -1593,7 +1688,8 @@ void CL_AddPacketEntities (frame_t *frame)
 			//PGM
 		}
 
-		if (s1->modelindex3)
+	//	if (s1->modelindex3)
+		if ( s1->modelindex3 && !(renderfx & RF_FLARE) )	// RF_FLARE overloads modelindex3
 		{
 			// Knightmare added for Psychospaz's chasecam
 			if (isclientviewer)
@@ -1606,7 +1702,8 @@ void CL_AddPacketEntities (frame_t *frame)
 			ent.model = cl.model_draw[s1->modelindex3];
 			V_AddEntity (&ent);
 		}
-		if (s1->modelindex4)
+	//	if (s1->modelindex4)
+		if ( s1->modelindex4 && !(renderfx & RF_FLARE) )	// RF_FLARE overloads modelindex4
 		{
 			// Knightmare added for Psychospaz's chasecam
 			if (isclientviewer)
@@ -1620,7 +1717,7 @@ void CL_AddPacketEntities (frame_t *frame)
 			V_AddEntity (&ent);
 		}
 #ifdef NEW_ENTITY_STATE_MEMBERS
-		// 1/18/2002- extra model indices
+		// Knightmare- extra model indices
 		if (s1->modelindex5)
 		{
 			// Knightmare added for Psychospaz's chasecam
@@ -1751,24 +1848,47 @@ void CL_AddPacketEntities (frame_t *frame)
 				i = (rand()%100) + 100;
 				V_AddLight (ent.origin, i, 1, 0.8, 0.1);
 			}
+			// Knightmare added
+			else if ( (effects & (EF_GREENGIB|EF_TRACKER)) == (EF_GREENGIB|EF_TRACKER) )	// scrag acid bolt tracer
+			{
+				CL_TracerTrail_Q1 (cent->lerp_origin, ent.origin, cent, 1);
+				V_AddLight (ent.origin, 75, 1, 0.893, 0.08);	// 187, 167, 15
+			}
+			else if ( (effects & (EF_IONRIPPER|EF_TRACKER)) == (EF_IONRIPPER|EF_TRACKER) )	// hell knight flame tracer
+			{
+				CL_TracerTrail_Q1 (cent->lerp_origin, ent.origin, cent, 2);
+				V_AddLight (ent.origin, 75, 1, 0.093, 0);	// 75, 7, 0
+			}
+			else if ( (effects & (EF_FLAG1|EF_BLUEHYPERBLASTER)) == (EF_FLAG1|EF_BLUEHYPERBLASTER) )	// vore firepod tracer
+			{
+				CL_TracerTrail_Q1 (cent->lerp_origin, ent.origin, cent, 3);
+				V_AddLight (ent.origin, 100, 1, 0.537, 0.663);	// 95, 51, 63
+			}
+			// end Knightmare
 			else if (effects & EF_FLAG1)
-			{	// Knightmare 1/3/2002
+			{	// Knightmare added
 				// EF_FLAG1|EF_FLAG2 is a special case for EF_FLAG3...  More cheese!
 				if (effects & EF_FLAG2)
 				{	//Knightmare- Psychospaz's enhanced particle code
-					CL_FlagTrail (cent->lerp_origin, ent.origin, false, true);
+					CL_FlagTrail (cent->lerp_origin, ent.origin, 0, 255, 0);
 					V_AddLight (ent.origin, 255, 0.1, 1, 0.1);
+				}
+				// EF_FLAG1|EF_GREENGIB is a special case for EF_FLAG4
+				else if (effects & EF_GREENGIB)
+				{
+					CL_FlagTrail (cent->lerp_origin, ent.origin, 255, 255, 0);
+					V_AddLight (ent.origin, 255, 1, 1, 0.1);
 				}
 				else
 				{	// Knightmare- Psychospaz's enhanced particle code
-					CL_FlagTrail (cent->lerp_origin, ent.origin, true, false);
+					CL_FlagTrail (cent->lerp_origin, ent.origin, 255, 0, 0);
 					V_AddLight (ent.origin, 225, 1, 0.1, 0.1);
 				}
 				// end Knightmare
 			}
 			else if (effects & EF_FLAG2)
 			{	// Knightmare- Psychospaz's enhanced particle code
-				CL_FlagTrail (cent->lerp_origin, ent.origin, false, false);
+				CL_FlagTrail (cent->lerp_origin, ent.origin, 0, 0, 255);
 				V_AddLight (ent.origin, 225, 0.1, 0.1, 1);
 			}
 //======
@@ -1890,6 +2010,7 @@ void CL_AddPlayerAttachment ( player_state_t *ps, player_state_t *ops, int model
 	}
 }
 
+
 /*
 ==============
 CL_AddViewWeapon
@@ -1911,7 +2032,7 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 		return;
 
 	// don't draw gun if in wide angle view
-	if (ps->fov > 180) //Knightmare 1/4/2002 - was 90
+	if (ps->fov > 180)	// Knightmare - was 90
 		return;
 
 	memset (&gun, 0, sizeof(gun));
@@ -1973,7 +2094,7 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 		if (cl_weapon_shells->integer)
 		{
 			int oldeffects = gun.flags, pnum;
-			entity_state_t	*s1;
+			centity_state_t	*s1;
 
 			for (pnum = 0 ; pnum<cl.frame.num_entities ; pnum++)
 				if ((s1=&cl_parse_entities[(cl.frame.parse_entities+pnum)&(MAX_PARSE_ENTITIES-1)])->number == cl.playernum+1)
@@ -2059,7 +2180,7 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 		if (cl_weapon_shells->integer)
 		{
 			int oldeffects = gun2.flags, pnum;
-			entity_state_t	*s1;
+			centity_state_t	*s1;
 
 			for (pnum = 0 ; pnum<cl.frame.num_entities ; pnum++)
 				if ((s1=&cl_parse_entities[(cl.frame.parse_entities+pnum)&(MAX_PARSE_ENTITIES-1)])->number == cl.playernum+1)
@@ -2167,7 +2288,7 @@ void SetUpCamera (void)
 		vectoangles2 (cl.v_forward, temp);
 		temp[PITCH] = 0;
 		temp[ROLL] = 0;
-		AngleVectors (temp, temp2, tempright, NULL);
+		AngleVectors (temp, temp2, NULL, NULL);
 		VectorMA (end, -(dist_back/1.8f), temp2, end);
 
 		// TFOL
@@ -2313,7 +2434,6 @@ void CL_DrawGunArms( player_state_t *ps, player_state_t *ops, int modelIndex, fl
 	}
 	}
 }
-
 /*
 ===============
 CL_CalcViewValues
@@ -2412,6 +2532,7 @@ void CL_CalcViewValues (void)
 	// add the weapon
 	CL_AddViewWeapon (ps, ops);
 
+    
 	// TFOL BEGIN
 
 	if (cl.frame.playerstate.stats[STAT_ATTACHMENT1] > 0)

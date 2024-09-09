@@ -353,11 +353,10 @@ void ThrowClientHead (edict_t *self, int damage)
 	VectorSet (self->maxs, 4, 4, 4);
 
 	self->takedamage = DAMAGE_NO;
-	self->solid = SOLID_TRIGGER;	// Knightmare- was SOLID_NOT
+	self->solid = SOLID_NOT;	// Knightmare- don't use SOLID_TRIGGER, as SVF_GIB can't force removal from the body queue
 	self->s.effects = EF_GIB;
 	self->s.sound = 0;
 	self->flags |= FL_NO_KNOCKBACK;
-	self->svflags |= SVF_GIB; // Knightmare- added gib flag
 
 	self->movetype = MOVETYPE_BOUNCE;
 	VelocityForDamage (damage, vd);
@@ -458,7 +457,7 @@ void BecomeExplosion1 (edict_t *self)
 	if (strcmp(self->classname, "item_flag_team2") == 0) {
 		CTFResetFlag(CTF_TEAM2); // this will free self!
 		gi.bprintf(PRINT_HIGH, "The %s flag has returned!\n",
-			CTFTeamName(CTF_TEAM1));
+			CTFTeamName(CTF_TEAM2));
 		return;
 	}
 	// techs are important too

@@ -344,7 +344,7 @@ void DeleteReflection (edict_t *ent, int index)
 void AddReflection (edict_t *ent)
 {
 	gclient_t	*cl;
-	edict_t		*mirror;
+	edict_t		*mirror = NULL;
 	float		roll;
 	int			i, m;
 	qboolean	is_reflected;
@@ -405,9 +405,9 @@ void AddReflection (edict_t *ent)
 			}
 			if (ent->client && ent->reflection[i]->client)
 			{
-//				Lazarus: Hmm.. this crashes when loading saved game.
-//				         Not sure what use pers is anyhow?
-//				ent->reflection[i]->client->pers = ent->client->pers;
+			//	Lazarus: Hmm.. this crashes when loading saved game.
+			//	         Not sure what use pers is anyhow?
+			//	ent->reflection[i]->client->pers = ent->client->pers;
 				ent->reflection[i]->s = ent->s;
 			}
 			ent->reflection[i]->s.number     = ent->reflection[i] - g_edicts;
@@ -435,24 +435,24 @@ void AddReflection (edict_t *ent)
 			{
 			case 0:
 			case 1:
-				ent->reflection[i]->s.angles[0]+=180;
-				ent->reflection[i]->s.angles[1]+=180;
-				ent->reflection[i]->s.angles[2]=360-ent->reflection[i]->s.angles[2];
+				ent->reflection[i]->s.angles[0] += 180;
+				ent->reflection[i]->s.angles[1] += 180;
+				ent->reflection[i]->s.angles[2] = 360 - ent->reflection[i]->s.angles[2];
 				break;
 			case 2:
 			case 3:
-				AngleVectors(ent->reflection[i]->s.angles,forward,NULL,NULL);
+				AngleVectors (ent->reflection[i]->s.angles, forward, NULL, NULL);
 				roll = ent->reflection[i]->s.angles[2];
 				forward[0] = -forward[0];
-				vectoangles(forward,ent->reflection[i]->s.angles);
+				vectoangles (forward, ent->reflection[i]->s.angles);
 				ent->reflection[i]->s.angles[2] = 360-roll;
 				break;
 			case 4:
 			case 5:
-				AngleVectors(ent->reflection[i]->s.angles,forward,NULL,NULL);
+				AngleVectors (ent->reflection[i]->s.angles, forward, NULL, NULL);
 				roll = ent->reflection[i]->s.angles[2];
 				forward[1] = -forward[1];
-				vectoangles(forward,ent->reflection[i]->s.angles);
+				vectoangles (forward, ent->reflection[i]->s.angles);
 				ent->reflection[i]->s.angles[2] = 360-roll;
 			}
 
@@ -461,16 +461,16 @@ void AddReflection (edict_t *ent)
 			{
 				vec3_t	delta;
 
-				VectorSubtract(ent->reflection[i]->s.origin,ent->s.origin,delta);
-				VectorAdd(ent->s.old_origin,delta,ent->reflection[i]->s.old_origin);
+				VectorSubtract (ent->reflection[i]->s.origin,ent->s.origin,delta);
+				VectorAdd (ent->s.old_origin,delta,ent->reflection[i]->s.old_origin);
 			}
 			else
-				VectorCopy(ent->reflection[i]->s.origin, ent->reflection[i]->s.old_origin);
+				VectorCopy (ent->reflection[i]->s.origin, ent->reflection[i]->s.old_origin);
 			gi.linkentity (ent->reflection[i]);
 		}
 		else if (ent->reflection[i])
 		{
-			DeleteReflection(ent,i);
+			DeleteReflection (ent, i);
 		}
 	}
 }

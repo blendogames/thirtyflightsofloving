@@ -26,7 +26,7 @@ void SP_func_door (edict_t *ent);
 void SP_func_door_secret (edict_t *ent);
 void SP_func_door_rotating (edict_t *ent);
 void SP_func_water (edict_t *ent);
-void SP_func_bobbingwater(edict_t *self); //Knightmare added
+void SP_func_bobbingwater (edict_t *self); // Knightmare added
 void SP_func_train (edict_t *ent);
 void SP_func_conveyor (edict_t *self);
 void SP_func_wall (edict_t *self);
@@ -74,7 +74,7 @@ void SP_target_lightramp (edict_t *self);
 void SP_target_earthquake (edict_t *ent);
 void SP_target_character (edict_t *ent);
 void SP_target_string (edict_t *ent);
-//Knightmare
+// Knightmare
 void SP_target_monitor (edict_t *ent);
 void SP_target_monsterbattle (edict_t *self);
 void SP_target_movewith (edict_t *self);
@@ -120,17 +120,20 @@ void SP_misc_blackhole (edict_t *self);
 void SP_misc_eastertank (edict_t *self);
 void SP_misc_easterchick (edict_t *self);
 void SP_misc_easterchick2 (edict_t *self);
-//Knightmare- patient for the infirmary
+// Knightmare- patient for the infirmary
 void SP_misc_sick_guard (edict_t *self);
-//Knightmare- experiment gekk
+// Knightmare- experiment gekk
 void SP_misc_gekk_writhe (edict_t *self);
 
-//Knightmare- Coconut Monkey 3 Flame entities
+// Knightmare- Kex flares
+void SP_misc_flare (edict_t *self);
+
+// Knightmare- Coconut Monkey 3 Flame entities
 void SP_light_flame1 (edict_t *self);
 void SP_light_flame1s (edict_t *self);
 void SP_light_flame2 (edict_t *self);
 void SP_light_flame2s (edict_t *self);
-//Knightmare- Coconut Monkey
+// Knightmare- Coconut Monkey
 void SP_monster_coco_monkey (edict_t *self);
 
 void SP_monster_berserk (edict_t *self);
@@ -148,14 +151,13 @@ void SP_monster_parasite (edict_t *self);
 void SP_monster_flyer (edict_t *self);
 void SP_monster_gekk (edict_t *self);
 void SP_monster_brain (edict_t *self);
-void SP_monster_brain_beta (edict_t *self);
 void SP_monster_floater (edict_t *self);
 void SP_monster_hover (edict_t *self);
 void SP_monster_mutant (edict_t *self);
 void SP_monster_supertank (edict_t *self);
 void SP_monster_boss2 (edict_t *self);
 void SP_monster_jorg (edict_t *self);
-//Knightmare- added spawn function for monster_makron
+// Knightmare- added spawn function for monster_makron
 void SP_monster_makron (edict_t *self);
 void SP_monster_boss3_stand (edict_t *self);
 
@@ -171,13 +173,10 @@ void SP_monster_soldier_lasergun (edict_t *self);
 void SP_monster_soldier_ripper (edict_t *self);
 void SP_monster_fixbot (edict_t *self);
 void SP_monster_gekk (edict_t *self);
+void SP_monster_brain_beta (edict_t *self);
 void SP_monster_chick_heat (edict_t *self);
 void SP_monster_gladb (edict_t *self);
 void SP_monster_boss5 (edict_t *self);
-
-// Knightmare- LM Escape soldiers
-void SP_monster_soldier_plasma_re (edict_t *self);
-void SP_monster_soldier_plasma_sp (edict_t *self);
 
 // Zaero
 void SP_monster_autocannon (edict_t *self);
@@ -196,6 +195,13 @@ void SP_misc_crate_medium (edict_t *self);
 void SP_misc_crate_small (edict_t *self);
 void SP_misc_seat (edict_t *self);
 // end Zaero
+
+// Knightmare- LM Escape soldiers
+void SP_monster_soldier_plasma_re (edict_t *self);
+void SP_monster_soldier_plasma_sp (edict_t *self);
+
+// Q25
+void SP_monster_soldier_dist (edict_t *self);
 
 // Knightmare- the dog from Coconut Monkey 3
 void SP_monster_dog (edict_t *self);
@@ -218,7 +224,7 @@ void SP_func_plat2 (edict_t *ent);
 void SP_func_door_secret2(edict_t *ent);
 void SP_func_force_wall(edict_t *ent);
 
-//Knightmare
+// Knightmare
 void SP_func_breakaway (edict_t *self);
 void SP_func_monitor (edict_t *self);
 void SP_func_pendulum (edict_t *self);
@@ -320,7 +326,7 @@ void SP_misc_crashviper_origin (edict_t *ent);
 void SP_misc_strogg_ship_origin (edict_t *ent);
 void SP_misc_transport_origin (edict_t *ent);
 
-// Knightmare- Q1 monsters/entities
+// Knightmare- Quake1 monsters/entities
 void SP_monster_q1_chthon (edict_t *self);
 void SP_monster_q1_dog (edict_t *self);
 void SP_monster_q1_enforcer (edict_t *self);
@@ -333,6 +339,7 @@ void SP_monster_q1_rotfish (edict_t *self);
 void SP_monster_q1_scrag (edict_t *self); 
 void SP_monster_q1_shalrath (edict_t *self);
 void SP_monster_q1_shambler (edict_t *self);
+//void SP_monster_q1_shub (edict_t *self);
 void SP_monster_q1_tarbaby (edict_t *self);
 void SP_monster_q1_zombie (edict_t *self);
 void SP_monster_q1_freddie (edict_t *self);
@@ -343,6 +350,7 @@ void SP_misc_q1_large_flame(edict_t *self);
 void SP_misc_q1_small_flame (edict_t *self);
 void SP_misc_q1_torch(edict_t *self);
 void SP_target_q1_trap(edict_t *self);
+void SP_target_q1_bolt (edict_t *self);
 void SP_misc_q1_explobox(edict_t *self);  
 void SP_misc_q1_fireball(edict_t *self);
 void SP_misc_q1_globe(edict_t *self);
@@ -368,8 +376,19 @@ void SP_trap (edict_t *self);
 void SP_rocket (edict_t *self);
 void SP_missile (edict_t *self);
 void SP_plasmaball (edict_t *self);	// SKWiD MOD
+// Quake1 projectiles
+void SP_q1_nail (edict_t *nail);
+void SP_q1_laser (edict_t *laser);
+void SP_q1_flame (edict_t *bolt);
+void SP_q1_grenade (edict_t *grenade);
+void SP_q1_rocket (edict_t *rocket);
+void SP_q1_firepod (edict_t *pod);
+void SP_q1_lavaball (edict_t *lavaball);
+void SP_q1_acidspit (edict_t *acidbolt);
+void SP_q1_zombiegib (edict_t *gib);
 //
 // end Lazarus
+
 
 
 spawn_t	spawns[] = {
@@ -442,7 +461,7 @@ spawn_t	spawns[] = {
 	{"target_earthquake", SP_target_earthquake},
 	{"target_character", SP_target_character},
 	{"target_string", SP_target_string},
-	//Knightmare
+	// Knightmare
 	{"target_monitor", SP_target_monitor},
 	{"target_monsterbattle", SP_target_monsterbattle},
 	{"target_movewith", SP_target_movewith},
@@ -498,12 +517,15 @@ spawn_t	spawns[] = {
 // Knightmare- experiment gekks
 	{"misc_gekk_writhe", SP_misc_gekk_writhe},
 
+	// Knightmare- Kex flares
+	{"misc_flare", SP_misc_flare},
+
 	// Knightmare- Coconut Monkey 3 Flame entities
 	{"light_flame1", SP_light_flame1}, 
 	{"light_flame1s", SP_light_flame1s}, 
 	{"light_flame2", SP_light_flame2}, 
 	{"light_flame2s", SP_light_flame2s},
-	//Knightmare- Coconut Monkey
+	// Knightmare- Coconut Monkey
 	{"monster_coco_monkey", SP_monster_coco_monkey}, 
 
 	// RAFAEL
@@ -531,7 +553,6 @@ spawn_t	spawns[] = {
 	{"monster_parasite", SP_monster_parasite},
 	{"monster_flyer", SP_monster_flyer},
 	{"monster_brain", SP_monster_brain},
-	{"monster_brain_beta", SP_monster_brain_beta},
 	{"monster_floater", SP_monster_floater},
 	{"monster_hover", SP_monster_hover},
 	{"monster_mutant", SP_monster_mutant},
@@ -539,7 +560,7 @@ spawn_t	spawns[] = {
 	{"monster_boss2", SP_monster_boss2},
 	{"monster_boss3_stand", SP_monster_boss3_stand},
 	{"monster_jorg", SP_monster_jorg},
-	//Knightmare- added spawn function for monster_makron
+	// Knightmare- added spawn function for monster_makron
 	{"monster_makron", SP_monster_makron},
 
 	{"monster_commander_body", SP_monster_commander_body},
@@ -550,6 +571,7 @@ spawn_t	spawns[] = {
 	{"monster_soldier_ripper",	SP_monster_soldier_ripper},
 	{"monster_fixbot", SP_monster_fixbot},
 	{"monster_gekk", SP_monster_gekk},
+	{"monster_brain_beta", SP_monster_brain_beta},
 	{"monster_chick_heat", SP_monster_chick_heat},
 	{"monster_gladb", SP_monster_gladb},
 	{"monster_boss5", SP_monster_boss5},
@@ -565,10 +587,6 @@ spawn_t	spawns[] = {
 	{"monster_kamikaze", SP_monster_kamikaze},
 	{"monster_widow", SP_monster_widow},
 	{"monster_widow2", SP_monster_widow2},
-
-	// Knightmare- LM Escape soldiers
-	{"monster_soldier_plasma_re", SP_monster_soldier_plasma_re},
-	{"monster_soldier_plasma_sp", SP_monster_soldier_plasma_sp},
 
 	// Zaero
 	{"monster_autocannon", SP_monster_autocannon},
@@ -588,8 +606,16 @@ spawn_t	spawns[] = {
 	{"misc_seat", SP_misc_seat},
 	// end Zaero
 
+	// Knightmare- LM Escape soldiers
+	{"monster_soldier_plasma_re", SP_monster_soldier_plasma_re},
+	{"monster_soldier_plasma_sp", SP_monster_soldier_plasma_sp},
+
 	// Knightmare- added Tactician Gunner
 	{"monster_gunner_tactician", SP_monster_gunner},
+
+	// Q25
+	{"monster_soldier_dist", SP_monster_soldier_dist},
+	{"monster_bfgladiator", SP_monster_gladiator},
 
 	// Knightmare- the dog from Coconut Monkey 3
 	{"monster_dog", SP_monster_dog},
@@ -620,14 +646,14 @@ spawn_t	spawns[] = {
 	{"info_train_start", SP_info_train_start},
 	{"func_trainbutton", SP_func_trainbutton},
 	{"func_vehicle", SP_func_vehicle},
-	//Knightmare
+	// Knightmare
 	{"func_breakaway", SP_func_breakaway},
 	// Lazarus
 	{"crane_beam",   SP_crane_beam},
 	{"crane_hoist",  SP_crane_hoist},
 	{"crane_hook",   SP_crane_hook},
-	{"crane_control",SP_crane_control},
-	{"crane_reset",SP_crane_reset},
+	{"crane_control", SP_crane_control},
+	{"crane_reset", SP_crane_reset},
 	{"trigger_teleport", SP_trigger_teleport},
 	{"trigger_teleporter", SP_trigger_teleporter},
 	{"trigger_teleporter_bbox", SP_trigger_teleporter_bbox},
@@ -700,9 +726,9 @@ spawn_t	spawns[] = {
 	{"misc_strogg_ship_origin", SP_misc_strogg_ship_origin},
 	{"misc_transport_origin", SP_misc_transport_origin},
 
-// Knightmare- Q1 monsters/entities
+	// Knightmare- Quake1 monsters/entities
 	// Generations spawn names
-//	{"q1_monster_chton", SP_monster_q1_chthon},	
+	{"q1_monster_chton", SP_monster_q1_chthon},	
 	{"q1_monster_dog", SP_monster_q1_dog},
 	{"q1_monster_enforcer", SP_monster_q1_enforcer},
 	{"q1_monster_fiend", SP_monster_q1_fiend},
@@ -712,14 +738,15 @@ spawn_t	spawns[] = {
 	{"q1_monster_ogre", SP_monster_q1_ogre},
 	{"q1_monster_fish", SP_monster_q1_rotfish},
 	{"q1_monster_scrag", SP_monster_q1_scrag},
-	{"q1_monster_shambler", SP_monster_q1_shambler},
 	{"q1_monster_shalrath", SP_monster_q1_shalrath},
+	{"q1_monster_shambler", SP_monster_q1_shambler},
+//	{"q1_monster_shub", SP_monster_q1_shub},
 	{"q1_monster_tarbaby", SP_monster_q1_tarbaby},
 	{"q1_monster_zombie", SP_monster_q1_zombie},
 	{"q1_monster_freddie", SP_monster_q1_freddie},
 
 	// Q2Infighter spawn names
-//	{"monster_q1_chthon", SP_monster_q1_chthon},	
+	{"monster_q1_chthon", SP_monster_q1_chthon},	
 	{"monster_q1_dog", SP_monster_q1_dog},
 	{"monster_q1_enforcer", SP_monster_q1_enforcer},
 	{"monster_q1_demon", SP_monster_q1_fiend},
@@ -729,19 +756,21 @@ spawn_t	spawns[] = {
 	{"monster_q1_ogre", SP_monster_q1_ogre},
 	{"monster_q1_fish", SP_monster_q1_rotfish},
 	{"monster_q1_wizard", SP_monster_q1_scrag},
-	{"monster_q1_shambler", SP_monster_q1_shambler},
 	{"monster_q1_shalrath", SP_monster_q1_shalrath},
+	{"monster_q1_shambler", SP_monster_q1_shambler},
+//	{"monster_q1_shub", SP_monster_q1_shub},
 	{"monster_q1_tarbaby", SP_monster_q1_tarbaby},
 	{"monster_q1_zombie", SP_monster_q1_zombie},
 	{"monster_q1_freddie", SP_monster_q1_freddie},
 
-	// misc Q1 entities
+	// misc Quake1 entities
 	{"misc_q1_zombie_crucified", SP_misc_q1_zombie_crucified},
 	{"misc_q1_air_bubbles", SP_misc_q1_air_bubbles},
 	{"misc_q1_large_flame", SP_misc_q1_large_flame},
 	{"misc_q1_small_flame", SP_misc_q1_small_flame},
 	{"misc_q1_torch", SP_misc_q1_torch},
 	{"target_q1_trap", SP_target_q1_trap},
+	{"target_q1_bolt", SP_target_q1_bolt},
 	{"misc_q1_light_globe", SP_misc_q1_globe},
 	{"misc_q1_explobox", SP_misc_q1_explobox},
 	{"misc_q1_fireball",SP_misc_q1_fireball},
@@ -769,10 +798,186 @@ spawn_t	spawns[] = {
 	{"missile", SP_missile},
 	{"homing rocket", SP_missile},
 	{"plasmaball", SP_plasmaball},	// SKWiD MOD
+	// Quake1 projectiles
+	{"q1_nail", SP_q1_nail},
+	{"q1_laser", SP_q1_laser},
+	{"q1_flame", SP_q1_flame},
+	{"q1_grenade", SP_q1_grenade},
+	{"q1_rocket", SP_q1_rocket},
+	{"q1_firepod", SP_q1_firepod},
+	{"chthon_lavaball", SP_q1_lavaball},
+	{"q1_acidbolt", SP_q1_acidspit},
+	{"q1_zombiegib", SP_q1_zombiegib},
 // end Lazarus
 
 	{NULL, NULL}
 };
+
+
+// Knightmare- sound precache functions
+void monster_berserk_soundcache (edict_t *self);
+void monster_boss2_soundcache (edict_t *self);
+void monster_jorg_soundcache (edict_t *self);
+void monster_makron_soundcache (edict_t *self);
+void monster_boss5_soundcache (edict_t *self);
+void monster_brain_soundcache (edict_t *self);
+void monster_brain_beta_soundcache (edict_t *self);
+void monster_carrier_soundcache (edict_t *self);
+void monster_chick_soundcache (edict_t *self);
+void monster_dog_soundcache (edict_t *self);
+void monster_fixbot_soundcache (edict_t *self);
+void monster_flipper_soundcache (edict_t *self);
+void monster_floater_soundcache (edict_t *self);
+void monster_flyer_soundcache (edict_t *self);
+void monster_gekk_soundcache (edict_t *self);
+void monster_gladb_soundcache (edict_t *self);
+void monster_gladiator_soundcache (edict_t *self);
+void monster_gunner_soundcache (edict_t *self);
+void monster_hover_soundcache (edict_t *self);
+void monster_infantry_soundcache (edict_t *self);
+void misc_insane_soundcache (edict_t *self);
+void monster_medic_soundcache (edict_t *self);
+void monster_mutant_soundcache (edict_t *self);
+void monster_parasite_soundcache (edict_t *self);
+void monster_soldier_x_soundcache (edict_t *self);
+void monster_soldier_h_soundcache (edict_t *self);
+void monster_soldier_q25_soundcache (edict_t *self);
+void monster_stalker_soundcache (edict_t *self);
+void monster_supertank_soundcache (edict_t *self);
+void monster_tank_soundcache (edict_t *self);
+void monster_vulture_soundcache (edict_t *self);
+void monster_widow_soundcache (edict_t *self);
+void monster_widow2_soundcache (edict_t *self);
+
+// Zaero
+void monster_handler_soundcache (edict_t *self);
+void monster_hound_soundcache (edict_t *self);
+void monster_sentien_soundcache (edict_t *self);
+void monster_zboss_soundcache (edict_t *self);
+
+// Q1
+void monster_q1_chthon_soundcache (edict_t *self);
+void monster_q1_dog_soundcache (edict_t *self);
+void monster_q1_enforcer_soundcache (edict_t *self);
+void monster_q1_fiend_soundcache (edict_t *self);
+void monster_q1_grunt_soundcache (edict_t *self);
+void monster_q1_hknight_soundcache (edict_t *self);
+void monster_q1_knight_soundcache (edict_t *self);
+void monster_q1_ogre_soundcache (edict_t *self);
+void monster_q1_rotfish_soundcache (edict_t *self);
+void monster_q1_scrag_soundcache (edict_t *self);
+void monster_q1_shalrath_soundcache (edict_t *self);
+void monster_q1_shambler_soundcache (edict_t *self);
+void monster_q1_tarbaby_soundcache (edict_t *self);
+void monster_q1_zombie_soundcache (edict_t *self);
+void monster_q1_freddie_soundcache (edict_t *self);
+
+// Knightmare- sound precache table
+soundcache_t	soundcaches[] = {
+	{"monster_berserk", monster_berserk_soundcache},
+	{"monster_boss2", monster_boss2_soundcache},
+	{"monster_jorg", monster_jorg_soundcache},
+	{"monster_makron", monster_makron_soundcache},
+	{"monster_brain", monster_brain_soundcache},
+	{"monster_chick", monster_chick_soundcache},
+	{"monster_flipper", monster_flipper_soundcache},
+	{"monster_floater", monster_floater_soundcache},
+	{"monster_flyer", monster_flyer_soundcache},
+	{"monster_gladiator", monster_gladiator_soundcache},
+	{"monster_gunner", monster_gunner_soundcache},
+	{"monster_hover", monster_hover_soundcache},
+	{"monster_infantry", monster_infantry_soundcache},
+	{"misc_insane", misc_insane_soundcache},
+	{"monster_medic", monster_medic_soundcache},
+	{"monster_mutant", monster_mutant_soundcache},
+	{"monster_parasite", monster_parasite_soundcache},
+	{"monster_soldier_light", monster_soldier_x_soundcache},
+	{"monster_soldier", monster_soldier_x_soundcache},
+	{"monster_soldier_ss", monster_soldier_x_soundcache},
+	{"monster_supertank",  monster_supertank_soundcache},
+	{"monster_tank", monster_tank_soundcache},
+	{"monster_tank_commander", monster_tank_soundcache},
+
+	// Xatrix
+	{"monster_soldier_hypergun", monster_soldier_h_soundcache},
+	{"monster_soldier_lasergun", monster_soldier_h_soundcache},
+	{"monster_soldier_ripper", monster_soldier_h_soundcache},
+	{"monster_fixbot", monster_fixbot_soundcache},
+	{"monster_gekk", monster_gekk_soundcache},
+	{"monster_brain_beta", monster_brain_beta_soundcache},
+	{"monster_chick_heat", monster_chick_soundcache},
+	{"monster_gladb", monster_gladb_soundcache},
+	{"monster_boss5", monster_boss5_soundcache},
+	
+	// Rogue
+	{"monster_daedalus", monster_hover_soundcache},
+	{"monster_medic_commander",  monster_medic_soundcache},
+	{"monster_stalker", monster_stalker_soundcache},
+	{"monster_carrier", monster_carrier_soundcache},
+	{"monster_kamikaze", monster_flyer_soundcache},
+	{"monster_widow", monster_widow_soundcache},
+	{"monster_widow2", monster_widow2_soundcache},
+
+	// Zaero
+	{"monster_hound", monster_hound_soundcache},
+	{"monster_handler", monster_handler_soundcache},
+	{"monster_sentien", monster_sentien_soundcache},
+	{"monster_zboss", monster_zboss_soundcache},
+
+	// LM Escape soldiers
+	{"monster_soldier_plasma_re", monster_soldier_x_soundcache},
+	{"monster_soldier_plasma_sp", monster_soldier_x_soundcache},
+
+	// Tactician Gunner
+	{"monster_gunner_tactician", monster_gunner_soundcache},
+
+	// Q25
+	{"monster_soldier_dist", monster_soldier_q25_soundcache},
+	{"monster_bfgladiator", monster_gladiator_soundcache},
+
+	// Coconut Monkey 1/2/3
+	{"monster_dog", monster_dog_soundcache},
+	{"monster_vulture", monster_vulture_soundcache},
+
+	// Quake1
+	// Generations spawn names
+	{"q1_monster_chton", monster_q1_chthon_soundcache},	
+	{"q1_monster_dog", monster_q1_dog_soundcache},
+	{"q1_monster_enforcer", monster_q1_enforcer_soundcache},
+	{"q1_monster_fiend", monster_q1_fiend_soundcache},
+	{"q1_monster_soldier", monster_q1_grunt_soundcache},
+	{"q1_monster_hknight", monster_q1_hknight_soundcache},
+	{"q1_monster_knight", monster_q1_knight_soundcache},
+	{"q1_monster_ogre", monster_q1_ogre_soundcache},
+	{"q1_monster_fish", monster_q1_rotfish_soundcache},
+	{"q1_monster_scrag", monster_q1_scrag_soundcache},
+	{"q1_monster_shalrath", monster_q1_shalrath_soundcache},
+	{"q1_monster_shambler", monster_q1_shambler_soundcache},
+	{"q1_monster_tarbaby", monster_q1_tarbaby_soundcache},
+	{"q1_monster_zombie", monster_q1_zombie_soundcache},
+	{"q1_monster_freddie", monster_q1_freddie_soundcache},
+
+	// Q2Infighter spawn names
+	{"monster_q1_chthon", monster_q1_chthon_soundcache},	
+	{"monster_q1_dog", monster_q1_dog_soundcache},
+	{"monster_q1_enforcer", monster_q1_enforcer_soundcache},
+	{"monster_q1_demon", monster_q1_fiend_soundcache},
+	{"monster_q1_army", monster_q1_grunt_soundcache},
+	{"monster_q1_hknight", monster_q1_hknight_soundcache},
+	{"monster_q1_knight", monster_q1_knight_soundcache},
+	{"monster_q1_ogre", monster_q1_ogre_soundcache},
+	{"monster_q1_fish", monster_q1_rotfish_soundcache},
+	{"monster_q1_wizard", monster_q1_scrag_soundcache},
+	{"monster_q1_shalrath", monster_q1_shalrath_soundcache},
+	{"monster_q1_shambler", monster_q1_shambler_soundcache},
+	{"monster_q1_tarbaby", monster_q1_tarbaby_soundcache},
+	{"monster_q1_zombie", monster_q1_zombie_soundcache},
+	{"monster_q1_freddie", monster_q1_freddie_soundcache},
+
+	{NULL, NULL}
+};
+// end Knightmare
+
 
 // Knightmare- global pointer for the entity alias script
 // The file should be loaded into memory, because we can't
@@ -811,85 +1016,102 @@ void ED_CallSpawn (edict_t *ent)
 //PGM
 
 	// FIXME - PMM classnames hack
-	if (!strcmp(ent->classname, "weapon_nailgun"))
+	if ( !strcmp(ent->classname, "weapon_nailgun") )
 		ent->classname = (FindItem("ETF Rifle"))->classname;
-	if (!strcmp(ent->classname, "ammo_nails"))
+	if ( !strcmp(ent->classname, "ammo_nails") )
 		ent->classname = (FindItem("Flechettes"))->classname;
-	if (!strcmp(ent->classname, "weapon_heatbeam"))
+	if ( !strcmp(ent->classname, "weapon_heatbeam") )
 		ent->classname = (FindItem("Plasma Beam"))->classname;
 	// PMM
 
 	// replace brains in Reckoning
 	gamedir = gi.cvar("game", "", 0);
-	if (gamedir->string && !Q_stricmp(gamedir->string, "xatrix")
-		&& (level.maptype == MAPTYPE_XATRIX) && !strcmp(ent->classname, "monster_brain"))
+	if ( gamedir->string && !Q_stricmp(gamedir->string, "xatrix")
+		&& (level.maptype == MAPTYPE_XATRIX) && !strcmp(ent->classname, "monster_brain") )
 		ent->classname = "monster_brain_beta";
 
-	// Knightmare- mission pack monster replacement
-	if (mp_monster_replace->value)
-	{	// gladiator
-		if (!strcmp(ent->classname, "monster_gladiator"))
+	// Knightmare- mission pack monster replacement by cvar
+	if ( (int)mp_monster_replace->value > 0 )
+	{	// gladiator (replacing all of them in a map makes it too hard, so vary based on skill level)
+		if ( !strcmp(ent->classname, "monster_gladiator") && (random() < ((skill->value + 1.0f) * 0.15f)) )
 		{
 			ent->classname = "monster_gladb";
-			if (st.item && mp_monster_ammo_replace->value)
-				if (!strcmp(st.item, "ammo_slugs")) //replace ammo
-				{
-					ent->item = FindItemByClassname ("ammo_magslug");
-					st.item = NULL;
+			if ( st.item && mp_monster_ammo_replace->value ) {
+				if ( !strcmp(st.item, "ammo_slugs") ) {
+					st.item = "ammo_magslug";
 				}
+			}
 		}
 		// brain
 		if (!strcmp(ent->classname, "monster_brain"))
 			ent->classname = "monster_brain_beta";
 		// soldiers
-		if (!strcmp(ent->classname, "monster_soldier_light"))
+		if ( !strcmp(ent->classname, "monster_soldier_light") )
 		{
 			ent->classname = "monster_soldier_ripper";
-			if (st.item && mp_monster_ammo_replace->value)
-				if ( !strcmp(st.item, "ammo_shells") || !strcmp(st.item, "ammo_bullets"))
-				{
-					ent->item = FindItemByClassname ("ammo_cells");
-					st.item = NULL;
+			if ( st.item && mp_monster_ammo_replace->value ) {
+				if ( !strcmp(st.item, "ammo_shells") || !strcmp(st.item, "ammo_bullets") ) {
+					st.item = "ammo_cells";
 				}
+			}
 		}
-		if (!strcmp(ent->classname, "monster_soldier"))
+		if ( !strcmp(ent->classname, "monster_soldier") )
 		{
 			ent->classname = "monster_soldier_hypergun";
-			if (st.item && mp_monster_ammo_replace->value)
-				if ( !strcmp(st.item, "ammo_shells") || !strcmp(st.item, "ammo_bullets"))
-				{
-					ent->item = FindItemByClassname ("ammo_cells");
-					st.item = NULL;
+			if ( st.item && mp_monster_ammo_replace->value ) {
+				if ( !strcmp(st.item, "ammo_shells") || !strcmp(st.item, "ammo_bullets") ) {
+					st.item = "ammo_cells";
 				}
+			}
 		}
-		if (!strcmp(ent->classname, "monster_soldier_ss"))
+		if ( !strcmp(ent->classname, "monster_soldier_ss") )
 		{
 			ent->classname = "monster_soldier_lasergun";
-			if (st.item && mp_monster_ammo_replace->value)
-				if ( !strcmp(st.item, "ammo_shells") || !strcmp(st.item, "ammo_bullets"))
-				{
-					ent->item = FindItemByClassname ("ammo_cells");
-					st.item = NULL;
+			if ( st.item && mp_monster_ammo_replace->value ) {
+				if ( !strcmp(st.item, "ammo_shells") || !strcmp(st.item, "ammo_bullets") ) {
+					st.item = "ammo_cells";
 				}
+			}
 		}
 		// icarus
-		if (!strcmp(ent->classname, "monster_hover"))
+		if ( !strcmp(ent->classname, "monster_hover") ) {
 			ent->classname = "monster_daedalus";
+		}
 		// supertank
-		if (!strcmp(ent->classname, "monster_supertank"))
+		if ( !strcmp(ent->classname, "monster_supertank") ) {
 			ent->classname = "monster_boss5";
+		}
 		// chick
-		if (!strcmp(ent->classname, "monster_chick"))
+		if ( !strcmp(ent->classname, "monster_chick") )
+		{
 			ent->classname = "monster_chick_heat";
+			if ( st.item && mp_monster_ammo_replace->value ) {
+				if ( !strcmp(st.item, "ammo_rockets") ) {
+					st.item = "ammo_homing_missiles";
+				}
+			}
+		}
 		// medic
-		if (!strcmp(ent->classname, "monster_medic")
+		if ( !strcmp(ent->classname, "monster_medic")
 			// don't spawn another medic commander from medic commander
-			&& !(ent->monsterinfo.monsterflags & MFL_DO_NOT_COUNT))
+			&& !(ent->monsterinfo.monsterflags & MFL_DO_NOT_COUNT) ) {
 			ent->classname = "monster_medic_commander";
+		}
 		// gunner
-		if ( !strcmp(ent->classname, "monster_gunner") ) {
+		if ( !strcmp(ent->classname, "monster_gunner") )
+		{
 			if (random() < ((skill->value + 1.0f) * 0.15f))
+			{
 				ent->classname = "monster_gunner_tactician";
+				if ( st.item && mp_monster_ammo_replace->value ) {
+					if ( !strcmp(st.item, "ammo_bullets") ) {
+						st.item = "ammo_cells";
+					}
+					else if ( !strcmp(st.item, "ammo_grenades") ) {
+						st.item = "ammo_prox";
+					}
+				}
+			}
 			else
 				ent->spawnflags |= SF_MONSTER_SPECIAL;
 		}
@@ -972,7 +1194,7 @@ ED_NewString
 char *ED_NewString (char *string)
 {
 	char	*newb, *new_p;
-	int		i,l;
+	int		i, l;
 	
 	l = (int)strlen(string) + 1;
 
@@ -980,9 +1202,9 @@ char *ED_NewString (char *string)
 
 	new_p = newb;
 
-	for (i=0 ; i< l ; i++)
+	for (i = 0; i < l; i++)
 	{
-		if (string[i] == '\\' && i < l-1)
+		if ( (string[i] == '\\') && (i < l-1) )
 		{
 			i++;
 			if (string[i] == 'n')
@@ -996,8 +1218,6 @@ char *ED_NewString (char *string)
 	
 	return newb;
 }
-
-
 
 
 /*
@@ -1017,7 +1237,7 @@ void ED_ParseField (char *key, char *value, edict_t *ent)
 
 	for (f=fields ; f->name ; f++)
 	{
-		if (!(f->flags & FFL_NOSPAWN) && !Q_stricmp(f->name, key))
+		if ( !(f->flags & FFL_NOSPAWN) && !Q_stricmp(f->name, key) )
 		{	// found it
 			if (f->flags & FFL_SPAWNTEMP)
 				b = (byte *)&st;
@@ -1058,6 +1278,45 @@ void ED_ParseField (char *key, char *value, edict_t *ent)
 	}
 	gi.dprintf ("%s is not a field\n", key);
 }
+
+
+// Knightmare added
+/*
+===============
+ED_SetDefaultFields
+
+Sets the default binary values in an edict
+===============
+*/
+void ED_SetDefaultFields (edict_t *ent)
+{
+	field_t	*f;
+	byte	*b;
+	
+	for (f=fields ; f->name ; f++)
+	{
+		if (f->flags & FFL_DEFAULT_NEG)
+		{
+			if (f->flags & FFL_SPAWNTEMP)
+				b = (byte *)&st;
+			else
+				b = (byte *)ent;
+				
+			if (f->type == F_LSTRING)
+				*(char **)(b+f->ofs) = ED_NewString ("-1");
+			else if ( (f->type == F_VECTOR) || (f->type == F_ANGLEHACK) ) {
+				((float *)(b+f->ofs))[0] = -1.0f;
+				((float *)(b+f->ofs))[1] = -1.0f;
+				((float *)(b+f->ofs))[2] = -1.0f;
+			}
+			else if (f->type == F_INT)
+				*(int *)(b+f->ofs) = -1;
+			else if (f->type == F_FLOAT)
+				*(float *)(b+f->ofs) = -1.0f;
+		}
+	}
+}
+// end Knightmare
 
 /*
 ==============================================================================
@@ -1258,7 +1517,7 @@ qboolean ED_ParseEntityAlias (char *data, edict_t *ent)
 	search_data = data;  // copy entity data postion
 	// go through all the dictionary pairs looking for the classname
 	while (1)
-	{	//parse keyname
+	{	// parse keyname
 		search_token = COM_Parse (&search_data);
 		if (!search_data)
 			gi.error ("ED_ParseEntityAlias: end of entity data without closing brace");
@@ -1299,7 +1558,7 @@ qboolean ED_ParseEntityAlias (char *data, edict_t *ent)
 			}
 			// matching classname must be outside braces
 			if (!strcmp(search_token, entclassname) && (braceLevel == 0)) {
-				//gi.dprintf ("Alias for %s found in alias script file.\n", search_token);
+			//	gi.dprintf ("Alias for %s found in alias script file.\n", search_token);
 				alias_found = true;
 				break;
 			}
@@ -1372,6 +1631,9 @@ char *ED_ParseEdict (char *data, edict_t *ent)
 	init = false;
 	memset (&st, 0, sizeof(st));
 
+	// Knightmare- set field defaults
+	ED_SetDefaultFields (ent);
+
 	// Knightmare- look for and load an alias for this ent
 	alias_loaded = ED_ParseEntityAlias (data, ent);
 
@@ -1417,13 +1679,46 @@ char *ED_ParseEdict (char *data, edict_t *ent)
 
 
 /*
+===========
+G_PrecachePlayerInventories
+
+Precaches inventory for all players transitioning
+across maps in SP and coop.
+============
+*/
+void G_PrecachePlayerInventories (void)
+{
+	int			i, j;
+	gclient_t	*client = NULL;
+	gitem_t		*item = NULL;
+
+	if (deathmatch->value)	// not needed in DM/CTF
+		return;
+
+	for (i = 0; i < game.maxclients; i++)
+	{
+		if (&game.clients[i] != NULL)
+		{
+		//	gi.dprintf ("PrecachePlayerInventories(): precaching for client %i\n", i);
+			client = &game.clients[i];
+			for (j = 0; j < game.num_items; j++)
+			{
+				if (client->pers.inventory[j] > 0) {
+					item = &itemlist[j];
+					if (item != NULL) {
+					//	gi.dprintf ("PrecachePlayerInventories(): precaching item %i: %s\n", j, item->classname);
+						PrecacheItem (item);
+					}
+				}
+			}
+		}
+	}
+}
+
+
+/*
 ================
-G_FindTeams
-
-Chain together all entities with a matching team field.
-
-All but the first will have the FL_TEAMSLAVE flag set.
-All but the last will have the teamchain field set to the next one
+G_FixTeams
 ================
 */
 void G_FixTeams (void)
@@ -1440,8 +1735,8 @@ void G_FixTeams (void)
 			continue;
 		if (!e->team)
 			continue;
-		//Lazarus- ignore bmodel spawner (its team isn't used)
-		if (e->classname && !Q_stricmp(e->classname,"target_bmodel_spawner"))
+		// Lazarus- ignore bmodel spawner (its team isn't used)
+		if (e->classname && !Q_stricmp(e->classname, "target_bmodel_spawner"))
 			continue; 
 		if (!strcmp(e->classname, "func_train"))
 		{
@@ -1479,6 +1774,16 @@ void G_FixTeams (void)
 	gi.dprintf ("%i teams repaired\n", c);
 }
 
+/*
+================
+G_FindTeams
+
+Chain together all entities with a matching team field.
+
+All but the first will have the FL_TEAMSLAVE flag set.
+All but the last will have the teamchain field set to the next one
+================
+*/
 void G_FindTeams (void)
 {
 	edict_t	*e, *e2, *chain;
@@ -1494,6 +1799,13 @@ void G_FindTeams (void)
 		if (!e->team)
 			continue;
 		if (e->flags & FL_TEAMSLAVE)
+			continue;
+		// Lazarus: some entities may have psuedo-teams that shouldn't be handled here
+		if (e->classname && !Q_stricmp(e->classname, "target_change"))
+			continue;
+		if (e->classname && !Q_stricmp(e->classname, "target_bmodel_spawner"))
+			continue;
+		if (e->classname && !Q_stricmp(e->classname, "target_clone"))
 			continue;
 		chain = e;
 		e->teammaster = e;
@@ -1518,7 +1830,7 @@ void G_FindTeams (void)
 		}
 	}
 
-	G_FixTeams();
+	G_FixTeams ();
 
 	gi.dprintf ("%i teams with %i entities\n", c, c2);
 }
@@ -1599,13 +1911,14 @@ void LoadTransitionEnts (void)
 					}
 					ent->owner_id = 0;
 				}
-			//Knightmare- is this necessary?  Entity state flags should be saved.
+			// Knightmare- is this necessary?  Entity state flags should be saved.
 			//	ent->s.renderfx |= RF_IR_VISIBLE;
 			}
 			fclose(f);
 		}
 	}
 }
+
 /*
 ==============
 SpawnEntities
@@ -1689,7 +2002,7 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 	LoadAliasData();
 //	gi.dprintf ("Size of alias data: %i\n", alias_data_size);
 
-// parse ents
+	// parse ents
 	while (1)
 	{
 		// parse the opening brace	
@@ -1707,16 +2020,16 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 		entities = ED_ParseEdict (entities, ent);
 
 		// yet another map hack
-		if (!Q_stricmp(level.mapname, "command") && !Q_stricmp(ent->classname, "trigger_once") && !Q_stricmp(ent->model, "*27"))
+		if ( !Q_stricmp(level.mapname, "command") && !Q_stricmp(ent->classname, "trigger_once") && !Q_stricmp(ent->model, "*27") )
 			ent->spawnflags &= ~SPAWNFLAG_NOT_HARD;
 		
 		// ROGUE
-		//ahh, the joys of map hacks .. 
-		if (!Q_stricmp(level.mapname, "rhangar2") && !Q_stricmp(ent->classname, "func_door_rotating") && ent->targetname && !Q_stricmp(ent->targetname, "t265"))
+		// ahh, the joys of map hacks .. 
+		if ( !Q_stricmp(level.mapname, "rhangar2") && !Q_stricmp(ent->classname, "func_door_rotating") && ent->targetname && !Q_stricmp(ent->targetname, "t265") )
 			ent->spawnflags &= ~SPAWNFLAG_NOT_COOP;
-		if (!Q_stricmp(level.mapname, "rhangar2") && !Q_stricmp(ent->classname, "trigger_always") && ent->target && !Q_stricmp(ent->target, "t265"))
+		if ( !Q_stricmp(level.mapname, "rhangar2") && !Q_stricmp(ent->classname, "trigger_always") && ent->target && !Q_stricmp(ent->target, "t265") )
 			ent->spawnflags |= SPAWNFLAG_NOT_COOP;
-		if (!Q_stricmp(level.mapname, "rhangar2") && !Q_stricmp(ent->classname, "func_wall") && !Q_stricmp(ent->model, "*15"))
+		if ( !Q_stricmp(level.mapname, "rhangar2") && !Q_stricmp(ent->classname, "func_wall") && !Q_stricmp(ent->model, "*15") )
 			ent->spawnflags |= SPAWNFLAG_NOT_COOP;
 		// rogue
 		
@@ -1804,15 +2117,15 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 //PGM
 		ED_CallSpawn (ent);
 
-		//Knightmare- remove IR visible attrib from mine lights and banners
+		// Knightmare- remove IR visible attrib from mine lights and banners
 		if ( !strcmp(ent->classname, "light_mine1") || !strcmp(ent->classname, "light_mine2")
 			|| !strcmp(ent->classname, "misc_banner") )
 			ent->s.renderfx &= ~RF_IR_VISIBLE;
 
 		// David Hyde's code for the origin offset
-		VectorAdd(ent->absmin, ent->absmax, ent->origin_offset);
-		VectorScale(ent->origin_offset, 0.5, ent->origin_offset);
-		VectorSubtract(ent->origin_offset, ent->s.origin, ent->origin_offset);
+		VectorAdd (ent->absmin, ent->absmax, ent->origin_offset);
+		VectorScale (ent->origin_offset, 0.5, ent->origin_offset);
+		VectorSubtract (ent->origin_offset, ent->s.origin, ent->origin_offset);
 	}	
 
 	// Knightmare- unload the alias script file
@@ -1843,11 +2156,11 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 	G_FindTeams ();
 
 	// DWH
-	G_FindCraneParts();
+	G_FindCraneParts ();
 
 	PlayerTrail_Init ();
 
-// ROGUE
+	// ROGUE
 	if (deathmatch->value)
 	{
 		if (randomrespawn && randomrespawn->value)
@@ -1855,17 +2168,17 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 	}
 	else
 	{
-		InitHintPaths();	// if there aren't hintpaths on this map, enable quick aborts
+		InitHintPaths ();	// if there aren't hintpaths on this map, enable quick aborts
 	}
-// ROGUE
+	// ROGUE
 
-// ROGUE	-- allow dm games to do init stuff right before game starts.
+	// ROGUE	-- allow dm games to do init stuff right before game starts.
 	if (deathmatch->value && gamerules && gamerules->value)
 	{
 		if (DMGame.PostInitSetup)
 			DMGame.PostInitSetup ();
 	}
-// ROGUE
+	// ROGUE
 
 	// Lazarus movewith init
 /*	for (i=1, ent=g_edicts+i; i < globals.num_edicts; i++, ent++)
@@ -1897,8 +2210,8 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 			 ent->movewith_ent = G_Find (ent->movewith_ent, FOFS(targetname), ent->movewith);
 		if (ent->movewith_ent)
 			movewith_init (ent->movewith_ent);
-	}
-*/
+	} */
+
 /*	for(i=1, ent=g_edicts+i; i < globals.num_edicts; i++, ent++)
 	{
 		gi.dprintf("%s:%s - movewith=%s, movewith_ent=%s:%s, movewith_next=%s:%s\n====================\n",
@@ -1914,12 +2227,52 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 	// Knightmare added
 	if (game.transition_ents)
 	{
-		LoadTransitionEnts();
+		LoadTransitionEnts ();
 	}
 
 	actor_files ();
+
+	// Knightmare- precache transitioning player inventories here
+	// Fixes lag when changing weapons after level transition
+	G_PrecachePlayerInventories ();
 }
 
+//===================================================================
+
+// Knightmare added
+/*
+==============
+G_SoundcacheEntities
+
+Reloads static cached sounds for entities using spawns table
+==============
+*/
+void G_SoundcacheEntities (void)
+{
+	int		i;
+	edict_t	*ent = NULL;
+	soundcache_t	*s = NULL;
+
+	ent = &g_edicts[0];
+	for (i = 0; i < globals.num_edicts; i++, ent++)
+	{
+		if (!ent->inuse)
+			continue;
+
+		// check normal spawn functions
+		for (s=soundcaches; s->name; s++)
+		{
+			if ( !strcmp(s->name, ent->classname) )
+			{	// found it
+				if (s->soundcache != NULL) {
+					s->soundcache (ent);
+				}
+				break;
+			}
+		}
+	}
+}
+// end Knightmare
 
 //===================================================================
 
@@ -1991,7 +2344,7 @@ char *single_statusbar =
 
 // timer
 "if 9 "
-"	xv	230 " //was xv 262
+"	xv	230 " // was xv 262
 "	num	4	10 "
 "	xv	296 "
 "	pic	9 "
@@ -2063,7 +2416,7 @@ char *dm_statusbar =
 
 // timer
 "if 9 "
-"	xv	230 " //was 246
+"	xv	230 " // was 246
 "	num	4	10 "
 "	xv	296 "
 "	pic	9 "
@@ -2153,6 +2506,27 @@ void SP_worldspawn (edict_t *ent)
 
 	gi.configstring (CS_SKYAXIS, va("%f %f %f",
 		st.skyaxis[0], st.skyaxis[1], st.skyaxis[2]) );
+
+	// Knightmare- configstrings added for DK-style clouds support
+#ifdef KMQUAKE2_ENGINE_MOD
+	gi.configstring (CS_SKYDISTANCE, va("%f", st.skydistance) );
+
+	if (st.cloudname && st.cloudname[0])
+		gi.configstring (CS_CLOUDNAME, st.cloudname);
+	else
+		gi.configstring (CS_CLOUDNAME, "");
+
+	gi.configstring (CS_CLOUDLIGHTFREQ, va("%f", st.lightningfreq) );
+
+	gi.configstring (CS_CLOUDDIR, va("%f %f", st.cloudxdir, st.cloudydir) );
+
+	gi.configstring (CS_CLOUDTILE, va("%f %f %f", st.cloud1tile, st.cloud2tile, st.cloud3tile) );
+
+	gi.configstring (CS_CLOUDSPEED, va("%f %f %f", st.cloud1speed, st.cloud2speed, st.cloud3speed) );
+
+	gi.configstring (CS_CLOUDALPHA, va("%f %f %f", st.cloud1alpha, st.cloud2alpha, st.cloud3alpha) );
+#endif	// KMQUAKE2_ENGINE_MOD
+	// end DK-style clouds support
 
 	// Knightmare- if a named soundtrack is specified, play it instead of from CD
 	if (ent->musictrack && strlen(ent->musictrack))
@@ -2305,9 +2679,9 @@ void SP_worldspawn (edict_t *ent)
 	if (ent->fogclip)
 	{
 		if ( gl_driver && !Q_stricmp(gl_driver->string, "3dfxgl") )
-			gi.cvar_forceset("gl_clear", "0");
+			gi.cvar_forceset (GL_CLEAR_CVAR, "0");
 		else
-			gi.cvar_forceset("gl_clear", "1");
+			gi.cvar_forceset (GL_CLEAR_CVAR, "1");
 	}
 
 	// FMOD 3D sound attenuation:
@@ -2332,7 +2706,7 @@ void SP_worldspawn (edict_t *ent)
 	if (footstep_sounds->value)
 		world->effects |= FX_WORLDSPAWN_STEPSOUNDS;
 
-//Knightmare- this is now handled client-side
+// Knightmare- this is now handled client-side
 #ifdef FMOD_FOOTSTEPS
 
 	if (deathmatch->value || coop->value)
@@ -2416,20 +2790,20 @@ void SP_worldspawn (edict_t *ent)
 //
 // CreateMonster
 //
-edict_t *CreateMonster(vec3_t origin, vec3_t angles, char *classname)
+edict_t *CreateMonster (vec3_t origin, vec3_t angles, char *classname)
 {
 	edict_t		*newEnt;
 
 	newEnt = G_Spawn();
 
-	VectorCopy(origin, newEnt->s.origin);
-	VectorCopy(angles, newEnt->s.angles);
+	VectorCopy (origin, newEnt->s.origin);
+	VectorCopy (angles, newEnt->s.angles);
 	newEnt->classname = ED_NewString (classname);
-	//newEnt->monsterinfo.aiflags |= AI_DO_NOT_COUNT;
+//	newEnt->monsterinfo.aiflags |= AI_DO_NOT_COUNT;
 	newEnt->monsterinfo.monsterflags |= MFL_DO_NOT_COUNT;
 
-	VectorSet(newEnt->gravityVector, 0, 0, -1);
-	ED_CallSpawn(newEnt);
+	VectorSet (newEnt->gravityVector, 0, 0, -1);
+	ED_CallSpawn (newEnt);
 	newEnt->s.renderfx |= RF_IR_VISIBLE;
 
 	return newEnt;
@@ -2593,7 +2967,7 @@ qboolean CheckGroundSpawnPoint (vec3_t origin, vec3_t entMins, vec3_t entMaxs, f
 {
 	trace_t		tr;
 	vec3_t		start, stop;
-	int			failure = 0;
+//	int			failure = 0;
 	vec3_t		mins, maxs;
 	int			x, y;	
 	float		mid, bottom;
@@ -2763,13 +3137,13 @@ void DetermineBBox (char *classname, vec3_t mins, vec3_t maxs)
 
 	newEnt = G_Spawn();
 
-	VectorCopy(vec3_origin, newEnt->s.origin);
-	VectorCopy(vec3_origin, newEnt->s.angles);
+	VectorCopy (vec3_origin, newEnt->s.origin);
+	VectorCopy (vec3_origin, newEnt->s.angles);
 	newEnt->classname = ED_NewString (classname);
-	//newEnt->monsterinfo.aiflags |= AI_DO_NOT_COUNT;
+//	newEnt->monsterinfo.aiflags |= AI_DO_NOT_COUNT;
 	newEnt->monsterinfo.monsterflags |= MFL_DO_NOT_COUNT;
 
-	ED_CallSpawn(newEnt);
+	ED_CallSpawn (newEnt);
 	
 	VectorCopy (newEnt->mins, mins);
 	VectorCopy (newEnt->maxs, maxs);
@@ -2999,7 +3373,7 @@ void Cmd_ToggleHud (void)
 	if (deathmatch->value)
 		return;
   if (nohud)
-		Hud_On();
+		Hud_On ();
 	else
-		Hud_Off();
+		Hud_Off ();
 }

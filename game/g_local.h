@@ -51,7 +51,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define	svc_layout			4
 #define	svc_inventory		5
 #define	svc_stufftext		11
-#define	svc_fog				21
+#define	svc_lazarus_fog		21
 
 //==================================================================
 
@@ -506,6 +506,32 @@ typedef struct
 	float		phase;
 
 	float		shift;
+
+	// Knightmare- added for sky distance
+	float		skydistance;
+	// Knightmare- added for DK-style clouds
+	char		*cloudname;
+	float		lightningfreq;
+	float		cloudxdir;
+	float		cloudydir;
+	float		cloud1tile;
+	float		cloud1speed;
+	float		cloud1alpha;
+	float		cloud2tile;
+	float		cloud2speed;
+	float		cloud2alpha;
+	float		cloud3tile;
+	float		cloud3speed;
+	float		cloud3alpha;
+
+	// Knightmare- added for misc_flare
+	int			fade_start_dist;
+	int			fade_end_dist;
+	char		*image;
+	char		*rgba;
+
+	// Knightmare- added for angled sprites
+	int			spritetype;
 } spawn_temp_t;
 
 
@@ -804,7 +830,7 @@ extern	cvar_t	*jump_kick;
 extern	cvar_t	*lazarus_cd_loop;
 extern	cvar_t	*lazarus_cl_gun;
 extern	cvar_t	*lazarus_crosshair;
-extern	cvar_t	*lazarus_gl_clear;
+extern	cvar_t	*lazarus_r_clear;
 extern	cvar_t	*lazarus_joyp;
 extern	cvar_t	*lazarus_joyy;
 extern	cvar_t	*lazarus_pitch;
@@ -827,7 +853,12 @@ extern	cvar_t	*vid_ref;
 extern	cvar_t	*zoomrate;
 extern	cvar_t	*zoomsnap;
 
-extern	cvar_t	*g_showlogic; // Knightmare added
+extern	cvar_t	*g_aimfix;				// Knightmare- from Yamagi Q2
+extern	cvar_t	*g_aimfix_min_dist;		// Knightmare- minimum range for aimfix
+extern	cvar_t	*g_aimfix_taper_dist;	// Knightmare- transition range for aimfix
+extern	cvar_t	*g_nm_maphacks;			// Knightmare- enables hacks for Neil Manke's Q2 maps
+
+extern	cvar_t	*g_showlogic;			// Knightmare added
 
 extern	int		max_modelindex;
 extern	int		max_soundindex;
@@ -850,6 +881,7 @@ extern	int		max_soundindex;
 //
 #define FFL_SPAWNTEMP		1
 #define FFL_NOSPAWN			2
+#define FFL_DEFAULT_NEG		4	// Knightmare- spawntemp that defaults to -1
 
 typedef enum {
 	F_INT, 
@@ -879,6 +911,13 @@ typedef struct
 	char	*name;
 	void	(*spawn)(edict_t *ent);
 } spawn_t;
+
+// Knightmare- added soundcache struct
+typedef struct
+{
+	char	*name;
+	void	(*soundcache)(edict_t *ent);	
+} soundcache_t;
 
 // Lazarus: worldspawn effects
 #define FX_WORLDSPAWN_NOHELP       1
@@ -1156,10 +1195,12 @@ void ReflectTrail (int type, vec3_t start, vec3_t end, int red, int green, int b
 //
 void ED_CallSpawn (edict_t *ent);
 void ReInitialize_Entity (edict_t *ent);
-void G_FindTeams();
-void Cmd_ToggleHud ();
-void Hud_On();
-void Hud_Off();
+void G_PrecachePlayerInventories (void);	// Knightmare added
+void G_SoundcacheEntities (void);			// Knightmare added
+void G_FindTeams (void);
+void Cmd_ToggleHud (void);
+void Hud_On (void);
+void Hud_Off (void);
 
 //
 // g_svcmds.c
@@ -1185,7 +1226,7 @@ void tracktrain_disengage (edict_t *train);
 //
 // g_turret.c
 //
-void turret_breach_fire(edict_t *ent);
+void turret_breach_fire (edict_t *ent);
 void turret_disengage (edict_t *ent);
 
 //
@@ -1208,6 +1249,7 @@ edict_t *findradius (edict_t *from, vec3_t org, float rad);
 edict_t *G_PickTarget (char *targetname);
 void	G_UseTargets (edict_t *ent, edict_t *activator);
 void	G_SetMovedir (vec3_t angles, vec3_t movedir);
+void	G_SetMovedir2 (vec3_t angles, vec3_t movedir);	// Knightmare added
 mmove_t	*G_NewCustomAnim (void);	// Knightmare- util func for custom anims
 void	G_InitEdict (edict_t *e);
 edict_t	*G_Spawn (void);
@@ -1219,27 +1261,34 @@ void	stuffcmd(edict_t *ent,char *command);
 float	*tv (float x, float y, float z);
 char	*vtos (vec3_t v);
 float vectoyaw (vec3_t vec);
-void vectoangles (vec3_t vec, vec3_t angles);
 qboolean point_infront (edict_t *self, vec3_t point);
 void AnglesNormalize(vec3_t vec);
 float SnapToEights(float x);
+
 // Lazarus
 float AtLeast (float x, float dx);
 edict_t	*LookingAt (edict_t *ent, int filter, vec3_t endpos, float *range);
+
+char *GameDir (void);
+char *SavegameDir (void);
 void GameDirRelativePath (const char *filename, char *output, size_t outputSize);
 void SavegameDirRelativePath (const char *filename, char *output, size_t outputSize);
 void CreatePath (const char *path);
+qboolean LocalFileExists (const char *path);
+qboolean AnyPlayerSpawned (void);	// Knightmare added
+qboolean AllPlayersSpawned (void);	// Knightmare added
+qboolean AllPlayersLinkcountCmp (int cmp_linkcount);	// Knightmare added
+
 void G_UseTarget (edict_t *ent, edict_t *activator, edict_t *target);
-qboolean IsIdMap (void); // Knightmare added
-qboolean IsXatrixMap (void); // Knightmare added
-qboolean IsRogueMap (void); // Knightmare added
-qboolean IsZaeroMap (void); // Knightmare added
+qboolean IsIdMap (void);		// Knightmare added
+qboolean IsXatrixMap (void);	// Knightmare added
+qboolean IsRogueMap (void);		// Knightmare added
+qboolean IsZaeroMap (void);		// Knightmare added
 void my_bprintf (int printlevel, char *fmt, ...);
 qboolean UseRegularGoodGuyFlag (edict_t *monster); // Knightmare added
 
 void	G_ProjectSource2 (vec3_t point, vec3_t distance, vec3_t forward, vec3_t right, vec3_t up, vec3_t result);
 float	vectoyaw2 (vec3_t vec);
-void	vectoangles2 (vec3_t vec, vec3_t angles);
 edict_t *findradius2 (edict_t *from, vec3_t org, float rad);
 
 //
@@ -1292,7 +1341,7 @@ extern mmove_t	actor_move_walk_back;
 #define MEDIC_MAX_HEAL_DISTANCE	400
 #define	MEDIC_TRY_TIME		10.0
 
-void abortHeal (edict_t *ent,qboolean mark);
+void abortHeal (edict_t *self, qboolean change_frame, qboolean gib, qboolean mark);
 void medic_NextPatrolPoint(edict_t *ent,edict_t *hintpath);
 edict_t *medic_FindDeadMonster (edict_t *ent);
 void medic_StopPatrolling(edict_t *ent);
@@ -1365,7 +1414,7 @@ void ClientEndServerFrame (edict_t *ent);
 // p_weapon.c
 //
 void PlayerNoise(edict_t *who, vec3_t where, int type);
-void P_ProjectSource (gclient_t *client, vec3_t point, vec3_t distance, vec3_t forward, vec3_t right, vec3_t result);
+void P_ProjectSource (edict_t *client_ent, vec3_t point, vec3_t distance, vec3_t forward, vec3_t right, vec3_t result);	// Knightmare- changed parms for aimfix
 void Weapon_Generic (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST, int FRAME_IDLE_LAST, int FRAME_DEACTIVATE_LAST, int *pause_frames, int *fire_frames, void (*fire)(edict_t *ent, qboolean altfire));
 void kick_attack (edict_t *ent);
 
@@ -1778,7 +1827,7 @@ struct edict_s
 	float		damage_debounce_time;
 	float		gravity_debounce_time;		// used by item_ movement commands to prevent
 											// monsters from dropping to floor
-	float		fly_sound_debounce_time;	//move to clientinfo
+	float		fly_sound_debounce_time;	// move to clientinfo
 	float		last_move_time;
 
 	int			health;
@@ -1857,7 +1906,7 @@ struct edict_s
 	vec_t		base_radius;	// Lazarus: used to project "viewpoint" of TRACK turret
 								// out past base
 
-	//ed - for the sprite/model spawner
+	// Mappack - for the sprite/model spawner
 	char		*usermodel;
 	int			startframe;
 	int			framenumbers;

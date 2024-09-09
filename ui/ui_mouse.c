@@ -22,9 +22,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 // ui_mouse.c -- mouse support code
 
-#include <string.h>
-#include <ctype.h>
-
 #include "../client/client.h"
 #include "ui_local.h"
 
@@ -33,6 +30,7 @@ cursor_t ui_mousecursor;
 #ifndef NOTTHIRTYFLIGHTS
 qboolean hasitem;
 char *menu_click		= "misc/click.wav";
+static char *creditsBuffer; // doesn't exist in newer engine releases - Brad
 #endif
 
 /*
@@ -46,7 +44,6 @@ Menu Mouse Cursor - psychospaz
 /*
 =================
 UI_RefreshCursorButtons
-From Q2max
 =================
 */
 void UI_RefreshCursorButtons (void)
@@ -84,10 +81,100 @@ void UI_RefreshCursorLink (void)
 
 /*
 =================
+UI_Mouseover_CheckItem
+=================
+*/
+qboolean UI_Mouseover_CheckItem (menuFramework_s *menu, int i, menuCommon_s	*lastitem)
+{
+	int				itemType, min[2], max[2];
+	float			x1, y1, x2, y2;
+	menuCommon_s	*item;
+
+	item = ((menuCommon_s * )menu->items[i]);
+
+	if ( !UI_ItemHasMouseBounds(item) )
+		return false;
+	if ( item->isHidden )
+		return false;
+
+	x1 = item->topLeft[0];
+	y1 = item->topLeft[1];
+	x2 = item->botRight[0];
+	y2 = item->botRight[1];
+
+	// add length and height of current item
+	UI_SetMenuItemDynamicSize (menu->items[i]);
+	x2 += item->dynamicWidth;
+	y2 += item->dynamicHeight;
+
+	SCR_ScaleCoords (&x1, &y1, NULL, NULL, item->scrAlign);
+	SCR_ScaleCoords (&x2, &y2, NULL, NULL, item->scrAlign);
+	min[0] = x1;	max[0] = x2;
+	min[1] = y1;	max[1] = y2;
+
+	itemType = UI_GetItemMouseoverType(item);
+	if (itemType == MENUITEM_NONE)
+		return false;
+
+	if ( (ui_mousecursor.x >= min[0]) &&  (ui_mousecursor.x <= max[0])
+		&& (ui_mousecursor.y >= min[1]) && (ui_mousecursor.y <= max[1]) )
+	{	// new item
+		if (lastitem != item)
+		{
+			int j;
+			for (j=0; j<MENU_CURSOR_BUTTON_MAX; j++) {
+				ui_mousecursor.buttonclicks[j] = 0;
+				ui_mousecursor.buttontime[j] = 0;
+			}
+		}
+		ui_mousecursor.menuitem = item;
+		ui_mousecursor.menuitemtype = itemType;
+		// don't set menu cursor for mouse-only items
+		if (!(item->flags & QMF_MOUSEONLY))
+			menu->cursor = i;
+		return true;
+	}
+	return false;
+}
+
+
+/*
+=================
+UI_Mouseover_Check
+=================
+*/
+void UI_Mouseover_Check (menuFramework_s *menu)
+{
+	int				i;
+	menuCommon_s	*lastitem;
+
+	ui_mousecursor.menu = menu;
+
+	// don't allow change in item focus if waiting to grab a key
+	if ( UI_HasValidGrabBindItem(menu) ) 
+		return;
+
+	if (ui_mousecursor.mouseaction)
+	{
+		lastitem = ui_mousecursor.menuitem;
+		UI_RefreshCursorLink ();
+
+		for (i=0; i<=menu->nitems; i++)
+		{
+			if ( UI_Mouseover_CheckItem (menu, i, lastitem) )
+				break;
+		}
+	}
+	ui_mousecursor.mouseaction = false;
+}
+
+// This whole section was forward ported from the older code; expect possible bugs - Brad
+/*
+=================
 UI_Slider_CursorPositionX
 =================
 */
-int UI_Slider_CursorPositionX (menuslider_s *s)
+int UI_Slider_CursorPositionX (menuSlider_s *s)
 {
 	float range;
 
@@ -111,7 +198,7 @@ int UI_Slider_CursorPositionX (menuslider_s *s)
 UI_SliderValueForX
 =================
 */
-int UI_SliderValueForX (menuslider_s *s, int x)
+int UI_SliderValueForX (menuSlider_s *s, int x)
 {
 	float	newValue, sliderbase;
 	int		newValueInt;
@@ -140,7 +227,7 @@ int UI_SliderValueForX (menuslider_s *s, int x)
 UI_Slider_CheckSlide
 =================
 */
-void UI_Slider_CheckSlide (menuslider_s *s)
+void UI_Slider_CheckSlide (menuSlider_s *s)
 {
 	if (!s)
 		return;
@@ -151,20 +238,19 @@ void UI_Slider_CheckSlide (menuslider_s *s)
 		s->generic.callback (s);
 }
 
-
 /*
 =================
 UI_DragSlideItem
 =================
 */
-void UI_DragSlideItem (menuframework_s *menu, void *menuitem)
+void UI_DragSlideItem (menuFramework_s *menu, void *menuitem)
 {
-	menuslider_s *slider;
+	menuSlider_s *slider;
 
 	if (!menu || !menuitem)
 		return;
 
-	slider = (menuslider_s *) menuitem;
+	slider = (menuSlider_s *) menuitem;
 
 	slider->curPos = UI_SliderValueForX(slider, ui_mousecursor.x);
 	UI_Slider_CheckSlide (slider);
@@ -176,16 +262,16 @@ void UI_DragSlideItem (menuframework_s *menu, void *menuitem)
 UI_ClickSlideItem
 =================
 */
-void UI_ClickSlideItem (menuframework_s *menu, void *menuitem)
+void UI_ClickSlideItem (menuFramework_s *menu, void *menuitem)
 {
 	int				min, max;
 	float			x, w;
-	menuslider_s	*slider;
+	menuSlider_s	*slider;
 	
 	if (!menu || !menuitem)
 		return;
 
-	slider = (menuslider_s *)menuitem;
+	slider = (menuSlider_s *)menuitem;
 
 //	x = menu->x + item->x + UI_Slider_CursorPositionX(slider) - 4;
 //	w = 8;
@@ -206,16 +292,16 @@ void UI_ClickSlideItem (menuframework_s *menu, void *menuitem)
 UI_CheckSlider_Mouseover
 =================
 */
-qboolean UI_CheckSlider_Mouseover (menuframework_s *menu, void *menuitem)
+qboolean UI_CheckSlider_Mouseover (menuFramework_s *menu, void *menuitem)
 {
 	int				min[2], max[2];
 	float			x1, y1, x2, y2;
-	menuslider_s	*s;
+	menuSlider_s	*s;
 
 	if (!menu || !menuitem)
 		return false;
 
-	s = (menuslider_s *)menuitem;
+	s = (menuSlider_s *)menuitem;
 
 	x1 = s->generic.x + s->generic.parent->x + RCOLUMN_OFFSET;
 	y1 = s->generic.y + s->generic.parent->y;
@@ -234,199 +320,6 @@ qboolean UI_CheckSlider_Mouseover (menuframework_s *menu, void *menuitem)
 		return false;
 }
 
-
-/*
-=================
-UI_Mouseover_Check
-=================
-*/
-void UI_Mouseover_Check (menuframework_s *menu)
-{
-	int				i;
-	menucommon_s	*item, *lastitem;
-
-	ui_mousecursor.menu = menu;
-
-	// don't allow change in item focus if waiting to grab a key
-	if (UI_HasValidGrabBindItem(menu)) 
-		return;
-
-	if (ui_mousecursor.mouseaction)
-	{
-		lastitem = ui_mousecursor.menuitem;
-		UI_RefreshCursorLink();
-
-		for (i = menu->nitems; i >= 0 ; i--)
-		{
-			int		type, len;
-			int		min[2], max[2];
-			float	x1, y1, w1, h1;
-
-			item = ((menucommon_s * )menu->items[i]);
-
-			if (!item || item->type == MTYPE_SEPARATOR)
-				continue;
-
-			x1 = menu->x + item->x + RCOLUMN_OFFSET; // + 2 chars for space + cursor
-			y1 = menu->y + item->y;
-			w1 = 0;			h1 = item->textSize;	// MENU_FONT_SIZE
-			SCR_ScaleCoords (&x1, &y1, &w1, &h1, ALIGN_CENTER);
-			min[0] = x1;	max[0] = x1 + w1;
-			min[1] = y1;	max[1] = y1 + h1;
-		//	max[0] = min[0] = SCR_ScaledScreen(menu->x + item->x + RCOLUMN_OFFSET); //+ 2 chars for space + cursor
-		//	max[1] = min[1] = SCR_ScaledScreen(menu->y + item->y);
-		//	max[1] += SCR_ScaledScreen(MENU_FONT_SIZE);
-
-			switch (item->type)
-			{
-				case MTYPE_ACTION:
-					{
-						len = (int)strlen(item->name);
-						
-						if (item->flags & QMF_LEFT_JUSTIFY) {
-							min[0] += SCR_ScaledScreen(LCOLUMN_OFFSET*2);
-							max[0] = min[0] + SCR_ScaledScreen(len*item->textSize);
-						}
-						else
-							min[0] -= SCR_ScaledScreen(len*item->textSize + item->textSize*4);
-
-						type = MENUITEM_ACTION;
-					}
-					break;
-				case MTYPE_SLIDER:
-					{
-						if (item->name) {
-							len = (int)strlen(item->name);
-							min[0] -= SCR_ScaledScreen(len*item->textSize - LCOLUMN_OFFSET*2);
-						}
-						else
-							min[0] -= SCR_ScaledScreen(16);
-						max[0] += SCR_ScaledScreen((SLIDER_RANGE + 4) * item->textSize);
-						type = MENUITEM_SLIDER;
-					}
-					break;
-				case MTYPE_LIST:
-				case MTYPE_SPINCONTROL:
-					{
-						int len;
-						menulist_s *spin = menu->items[i];
-
-						if (item->name) {
-							len = (int)strlen(item->name);
-							min[0] -= SCR_ScaledScreen(len*item->textSize - LCOLUMN_OFFSET*2);
-						}
-
-						len = (int)strlen(spin->itemNames[spin->curValue]);
-						max[0] += SCR_ScaledScreen(len*item->textSize);
-
-						type = MENUITEM_ROTATE;
-					}
-					break;
-				case MTYPE_CHECKBOX:
-					{
-						int len;
-						menulist_s *spin = menu->items[i];
-
-
-						//mouseover detection.
-						if (item->flags & QMF_LEFT_JUSTIFY)
-						{
-							min[0] += SCR_ScaledScreen(LCOLUMN_OFFSET*2);
-
-							if (item->name)
-							{
-								len = strlen(item->name);
-								max[0] += SCR_ScaledScreen(len*MENU_FONT_SIZE);
-							}
-						}
-						else
-						{
-							if (item->name)
-							{
-								len = strlen(item->name);
-								min[0] -= SCR_ScaledScreen(len*MENU_FONT_SIZE - LCOLUMN_OFFSET*2);
-							}
-
-							len = strlen(spin->itemNames[spin->curValue]);
-							max[0] += SCR_ScaledScreen(len*MENU_FONT_SIZE);
-						}
-
-						type = MENUITEM_ROTATE;
-					}
-					break;
-				case MTYPE_FIELD:
-					{
-						menufield_s *text = menu->items[i];
-
-						len = text->visible_length + 2;
-
-						max[0] += SCR_ScaledScreen(len*item->textSize);
-						type = MENUITEM_TEXT;
-					}
-					break;
-				case MTYPE_KEYBIND:
-					{
-						menukeybind_s *k = menu->items[i];
-						len = (int)strlen(item->name);
-						
-						if (item->flags & QMF_LEFT_JUSTIFY) {
-							min[0] += SCR_ScaledScreen(LCOLUMN_OFFSET*2);
-						}
-						else {
-							min[0] -= SCR_ScaledScreen(len*item->textSize + item->textSize*4);
-						}
-						max[0] = min[0] + SCR_ScaledScreen(len*item->textSize);
-
-						if (k->commandName)
-						{
-							UI_FindKeysForCommand (k->commandName, k->keys);
-							max[0] += SCR_ScaledScreen(MENU_FONT_SIZE*4);
-							if (k->keys[0] == -1)
-								max[0] += SCR_ScaledScreen(MENU_FONT_SIZE*3); // "???"
-							else {
-								max[0] += SCR_ScaledScreen( item->textSize*(int)strlen(Key_KeynumToString(k->keys[0])) ); // key 1
-								if (k->keys[1] != -1) // " or " + key2
-									max[0] += SCR_ScaledScreen( MENU_FONT_SIZE*4 + item->textSize*(int)strlen(Key_KeynumToString(k->keys[1])) );
-							}
-						}
-						type = MENUITEM_KEYBIND;
-					}
-					break;
-				default:
-					continue;
-			}
-
-			if (ui_mousecursor.x >= min[0] && 
-				ui_mousecursor.x <= max[0] &&
-				ui_mousecursor.y >= min[1] && 
-				ui_mousecursor.y <= max[1])
-			{
-				// new item
-				if (lastitem!=item)
-				{
-					int j;
-
-					for (j=0; j<MENU_CURSOR_BUTTON_MAX; j++)
-					{
-						ui_mousecursor.buttonclicks[j] = 0;
-						ui_mousecursor.buttontime[j] = 0;
-					}
-				}
-
-				ui_mousecursor.menuitem = item;
-				ui_mousecursor.menuitemtype = type;
-				
-				menu->cursor = i;
-
-				break;
-			}
-		}
-	}
-
-	ui_mousecursor.mouseaction = false;
-}
-
-
 /*
 =================
 UI_MouseCursor_Think
@@ -435,14 +328,15 @@ UI_MouseCursor_Think
 void UI_MouseCursor_Think (void)
 {
 	char * sound = NULL;
-	menuframework_s *m = (menuframework_s *)ui_mousecursor.menu;
+	menuFramework_s *m = (menuFramework_s *)ui_mousecursor.menuitem;
+    void *m_drawfunc = m->drawFunc;
 
-	if (m_drawfunc == Menu_Main_Draw) // have to hack for main menu :p
+	if (m_drawfunc == Menu_Main_f) // have to hack for main menu :p
 	{
 		UI_CheckMainMenuMouse ();
 		return;
 	}
-	if (m_drawfunc == Menu_Credits_Draw) // have to hack for credits :p
+	if (m_drawfunc == Menu_Credits_f) // have to hack for credits :p
 	{
 #ifdef NOTTHIRTYFLIGHTS
 		if (ui_mousecursor.buttonclicks[MOUSEBUTTON2])
@@ -462,7 +356,7 @@ void UI_MouseCursor_Think (void)
 		}
 	}
 #ifndef NOTTHIRTYFLIGHTS
-	else if (m_drawfunc == Menu_Quit_Draw) //hack for quit menu
+	else if (m_drawfunc == Menu_Quit_f) //hack for quit menu
 	{
 		if (ui_mousecursor.buttonclicks[MOUSEBUTTON2])
 		{
@@ -483,10 +377,10 @@ void UI_MouseCursor_Think (void)
 #endif
 
 /*	// clicking on the player model menu...
-	if (m_drawfunc == Menu_PlayerConfig_Draw)
+	if (m_drawfunc == Menu_PlayerConfig_f)
 		Menu_PlayerConfig_MouseClick ();
 	// clicking on the screen menu
-	if (m_drawfunc == Menu_Options_Screen_Draw)
+	if (m_drawfunc == Menu_Options_Screen_f)
 		Menu_Options_Screen_Crosshair_MouseClick ();
 */
 	if (!m)
@@ -575,7 +469,7 @@ void UI_MouseCursor_Think (void)
 		&& ui_mousecursor.buttondown[MOUSEBUTTON2])
 	{
 		// We need to manually save changes for playerconfig menu here
-		if (m_drawfunc == Menu_PlayerConfig_Draw)
+		if (m_drawfunc == Menu_PlayerConfig_f)
 			Menu_PConfigSaveChanges ();
 
 		UI_PopMenu ();
@@ -595,10 +489,13 @@ void UI_MouseCursor_Think (void)
 #endif
 
 	// clicking on the player model menu...
-	if (m_drawfunc == Menu_PlayerConfig_Draw)
+// Is this needed? - Brad
+#ifdef NOTTHIRTYFLIGHTS
+	if (m_drawfunc == Menu_PlayerConfig_f)
 		Menu_PlayerConfig_MouseClick ();
+#endif
 	// clicking on the screen menu
-	if (m_drawfunc == Menu_Options_Screen_Draw)
+	if (m_drawfunc == Menu_Options_Screen_f)
 		Menu_Options_Screen_Crosshair_MouseClick ();
 
 	if ( sound )

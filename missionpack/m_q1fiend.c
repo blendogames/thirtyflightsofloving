@@ -435,6 +435,19 @@ void fiend_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 }
 
 
+// Knightmare- added soundcache function
+void monster_q1_fiend_soundcache (edict_t *self)
+{
+	sound_hit =		gi.soundindex ("q1fiend/dhit2.wav");
+	sound_jump =	gi.soundindex ("q1fiend/djump.wav");
+	sound_death =	gi.soundindex ("q1fiend/ddeath.wav");
+	sound_gib =		gi.soundindex ("q1player/udeath.wav");
+	sound_idle =	gi.soundindex ("q1fiend/idle1.wav");
+	sound_pain =	gi.soundindex ("q1fiend/dpain1.wav");
+	sound_sight =	gi.soundindex ("q1fiend/sight2.wav");
+	sound_land =	gi.soundindex ("q1fiend/dland2.wav");
+}
+
 //
 // SPAWN
 //
@@ -450,14 +463,8 @@ void SP_monster_q1_fiend (edict_t *self)
 		return;
 	}
 
-	sound_hit =		gi.soundindex ("q1fiend/dhit2.wav");
-	sound_jump =	gi.soundindex ("q1fiend/djump.wav");
-	sound_death =	gi.soundindex ("q1fiend/ddeath.wav");
-	sound_gib =		gi.soundindex ("q1player/udeath.wav");
-	sound_idle =	gi.soundindex ("q1fiend/idle1.wav");
-	sound_pain =	gi.soundindex ("q1fiend/dpain1.wav");
-	sound_sight =	gi.soundindex ("q1fiend/sight2.wav");
-	sound_land =	gi.soundindex ("q1fiend/dland2.wav");
+	// Knightmare- use soundcache function
+	monster_q1_fiend_soundcache (self);
 
 	// precache gibs
 	gi.modelindex ("models/monsters/q1fiend/head/tris.md2");
