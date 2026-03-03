@@ -21,7 +21,7 @@
   <PropertyGroup Label="Globals">
     <ProjectName>kmquake2</ProjectName>
     <ProjectGuid>{10E97B41-1A5F-4BFC-B922-3321F99FAEB5}</ProjectGuid>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -68,9 +68,10 @@
     <_ProjectFileVersion>15.0.28307.799</_ProjectFileVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>.\debug\</OutDir>
-    <IntDir>.\debug\</IntDir>
+    <OutDir>..\..\</OutDir>
+    <IntDir>.\debug_kmquake2\</IntDir>
     <LinkIncremental>false</LinkIncremental>
+    <TargetName>tfol</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>.\x64\debug\</OutDir>
@@ -78,9 +79,10 @@
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>.\</OutDir>
-    <IntDir>.\release\</IntDir>
+    <OutDir>..\..\</OutDir>
+    <IntDir>.\release_kmquake2\</IntDir>
     <LinkIncremental>false</LinkIncremental>
+    <TargetName>tfol</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>.\x64\release\</OutDir>
@@ -117,7 +119,8 @@
     </ResourceCompile>
     <Link>
       <AdditionalDependencies>wsock32.lib;winmm.lib;glu32.lib;libjpeg_2015_d.lib;zlib_d.lib;libogg_d.lib;libvorbisfile_d.lib;libpng_2015_d.lib;libcurl_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>..\..\tfol.exe</OutputFile>
+      <OutputFile>
+      </OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>..\win32\lib\;..\win32\lib\VS2015\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>MSVCRT;LIBCMT;LIBCD;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
@@ -217,7 +220,8 @@
     </ResourceCompile>
     <Link>
       <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;winmm.lib;wsock32.lib;glu32.lib;libjpeg_2015_r.lib;zlib_r.lib;libogg_r.lib;libvorbisfile_r.lib;libpng_2015_r.lib;libcurl_r.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>..\..\tfol.exe</OutputFile>
+      <OutputFile>
+      </OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>..\win32\lib\;..\win32\lib\VS2015\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>MSVCRT;LIBC;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
