@@ -33,7 +33,7 @@ jobs:
 
   macos:
     name: macOS
-    runs-on: macos-latest
+    runs-on: macos-15-intel
     steps:
     - uses: actions/checkout@v4
       with:
