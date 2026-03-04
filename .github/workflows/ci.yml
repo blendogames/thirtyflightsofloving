@@ -29,7 +29,9 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: tfol-linux
-        path: tfol baseq2/kmquake2x64.so
+        path: |
+          tfol
+          baseq2/kmq2gamex64.so
 
   macos:
     name: macOS
@@ -56,4 +58,6 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: tfol-osx
-        path: tfol baseq2/kmquake2x64.dylib
+        path: |
+          tfol
+          baseq2/kmq2gamex64.dylib
