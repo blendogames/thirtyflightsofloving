@@ -121,8 +121,7 @@
     </ResourceCompile>
     <Link>
       <AdditionalDependencies>wsock32.lib;winmm.lib;glu32.lib;libjpeg_2015_d.lib;zlib_d.lib;libogg_d.lib;libvorbisfile_d.lib;libpng_2015_d.lib;libcurl_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>
-      </OutputFile>
+      <OutputFile>../../tfol.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>..\win32\lib\;..\win32\lib\VS2015\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>MSVCRT;LIBCMT;LIBCD;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
@@ -222,8 +221,7 @@
     </ResourceCompile>
     <Link>
       <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;winmm.lib;wsock32.lib;glu32.lib;libjpeg_2015_r.lib;zlib_r.lib;libogg_r.lib;libvorbisfile_r.lib;libpng_2015_r.lib;libcurl_r.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>
-      </OutputFile>
+      <OutputFile>../../tfol.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>..\win32\lib\;..\win32\lib\VS2015\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>MSVCRT;LIBC;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
