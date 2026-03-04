@@ -22,3 +22,7 @@ kmq2gamex86.dll
 kmquake2.exe
 *.vc.db
 *.vc.opendb
+/tfol/debug_kmq2gamex86
+/tfol/release_kmq2gamex86
+/tfol/debug_kmquake2
+/tfol/release_kmquake2
