@@ -98,8 +98,8 @@ TFOL_SRC = \
 
 all:
 	mkdir -p baseq2
-	$(CC) -o baseq2/kmq2gamex64.$(SUFFIX) -g -w $(LDFLAGS) -fpic -fPIC -shared $(TFOL_SRC) -lSDL2 -lm
+	$(CC) -o baseq2/kmq2gamex64.$(SUFFIX) -O2 -w $(LDFLAGS) -fpic -fPIC -shared $(TFOL_SRC) -lSDL2 -lm
 	cp ../quake2/kmquake2 .
 
 clean:
-	rm -f baseq2/kmq2gamex86_64.so
+	rm -f baseq2/kmq2gamex86_64.$(SUFFIX)
