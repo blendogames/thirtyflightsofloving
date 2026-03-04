@@ -529,7 +529,7 @@ void CL_ExecuteLayoutString (char *s, qboolean isStatusBar)
 			{
 				if (i==selected)
 				{
-					selected_num = num;
+					selected_num = i;
 					alpha=1.0;
 					boxalpha=1.0;
 					alph=255;
