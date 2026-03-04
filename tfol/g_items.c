@@ -2479,7 +2479,7 @@ gives +1 to maximum health
 		0,
 		NULL, //ammo type
 		IT_WEAPON|IT_STAY_COOP,
-		NULL,
+		0,
 		NULL,
 		0,
 /* precache */ "sprites/s_bfg1.sp2 sprites/s_bfg2.sp2 sprites/s_bfg3.sp2 weapons/bfg__f1y.wav weapons/bfg__l1a.wav weapons/bfg__x1b.wav weapons/bfg_hum.wav"
@@ -4331,7 +4331,7 @@ void suitcase_action(edict_t *self, edict_t *other)
 		}
 		else
 		{
-			self->s.sound = NULL;
+			self->s.sound = 0;
 			G_UseTargets (self, NULL);
 
 			//is open, or is opening.

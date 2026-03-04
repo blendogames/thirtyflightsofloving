@@ -26,7 +26,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "../win32/winquake.h"
 #endif
 
-#if defined(__APPLE__) || (MACOSX)
+#if defined(__APPLE__) || (MACOSX) || defined(__clang__)
 #include <ctype.h>
 #endif // __APPLE__ || MACOSX
 

@@ -3,6 +3,7 @@
 
 ifeq ($(shell uname), Darwin)
 	SUFFIX = dylib
+	CFLAGS := -Wno-implicit-function-declaration -Wno-incompatible-function-pointer-types
 else
 	SUFFIX = so
 	LDFLAGS := -Wl,--no-undefined
@@ -98,7 +99,7 @@ TFOL_SRC = \
 
 all:
 	mkdir -p baseq2
-	$(CC) -o baseq2/kmq2gamex64.$(SUFFIX) -O2 -w $(LDFLAGS) -fpic -fPIC -shared $(TFOL_SRC) -lSDL2 -lm
+	$(CC) -o baseq2/kmq2gamex64.$(SUFFIX) -O2 -w $(CFLAGS) $(LDFLAGS) -fpic -fPIC -shared $(TFOL_SRC) -lSDL2 -lm
 	cp ../quake2/kmquake2 .
 
 clean:

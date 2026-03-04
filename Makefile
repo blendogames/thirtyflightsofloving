@@ -49,7 +49,7 @@ BINDIR=quake2
 ifeq ($(OSTYPE),Linux)
   LDFLAGS+='-Wl,-rpath,$$ORIGIN/lib64'
 else ifeq ($(OSTYPE),Darwin)
-  BASE_CFLAGS:=-mmacosx-version-min=10.9
+  BASE_CFLAGS:=-mmacosx-version-min=10.9 -Wno-implicit-function-declaration -Wno-incompatible-function-pointer-types
   LDFLAGS+='-Wl,-rpath,@executable_path/osx'
 endif
 

@@ -1460,7 +1460,7 @@ void reynard_thinkforward(edict_t *self)
 	else if (self->s.frame==46)
 		self->s.skinnum=0;
 	else if (self->s.frame==47)
-		self->s.modelindex2 = NULL;
+		self->s.modelindex2 = 0;
 	else if (self->s.frame==49)
 	{
 		vec3_t forward,right,org;

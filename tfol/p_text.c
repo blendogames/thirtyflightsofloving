@@ -703,7 +703,7 @@ done_linebreaks:
 					while(*p2 != 0)
 						p2++;
 					p2++;
-					memcpy(p1,p2,hnd->buffer+hnd->size-(size_t)p2+1);
+					memcpy(p1,p2,(size_t)hnd->buffer+hnd->size-(size_t)p2+1);
 					hnd->nlines--;
 					// Found one (only one is allowed)
 					gi.sound (activator, CHAN_AUTO, gi.soundindex (sound), 1, ATTN_NORM, 0);
