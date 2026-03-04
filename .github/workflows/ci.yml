@@ -39,6 +39,9 @@ jobs:
       with:
         submodules: true
 
+    - name: Install dependencies
+      run: brew install sdl2 jpeg libpng libvorbis
+
     - name: Build Engine
       run: |
         make release -j$(nproc)
@@ -47,9 +50,7 @@ jobs:
       run: |
         cd tfol
         make
-        strip -S kmquake2
-        strip -S baseq2/kmq2gamex64.dylib
-        mv kmquake2 tfol
+        ../fixupMac.sh
 
     - name: Archive build result
       uses: actions/upload-artifact@v4
