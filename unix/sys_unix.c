@@ -329,7 +329,7 @@ void Sys_SendKeyEvents (void)
 
 qboolean Sys_IsSteamDeck(void)
 {
-	return SDL_GetHintBoolean("SteamDeck", SDL_TRUE);
+	return SDL_GetHintBoolean("SteamDeck", SDL_FALSE);
 }
 
 /*****************************************************************************/
