@@ -1063,6 +1063,8 @@ const char *Sys_PrefDir (void);
 //		(maps, textures, sounds, skies, models, etc) should be written to
 const char *Sys_DownloadDir (void);
 
+qboolean Sys_IsSteamDeck(void);
+
 /*
 ==============================================================
 

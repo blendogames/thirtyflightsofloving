@@ -327,6 +327,13 @@ void Sys_SendKeyEvents (void)
 
 /*****************************************************************************/
 
+qboolean Sys_IsSteamDeck(void)
+{
+	return SDL_GetHintBoolean("SteamDeck", SDL_TRUE);
+}
+
+/*****************************************************************************/
+
 // Knightmare- adapted from DK 1.3 Linux port
 const char* Sys_ExeDir(void)
 {
