@@ -116,7 +116,7 @@ static qboolean DS_CreateBuffers( void )
     format.cbSize = 0;
     format.nAvgBytesPerSec = format.nSamplesPerSec*format.nBlockAlign; 
 
-	Com_Printf( "Creating DS buffers\n" );
+	Com_DPrintf( "Creating DS buffers\n" ); //BC 3-5-2026 changed this to be dprint
 
 	Com_DPrintf("...setting EXCLUSIVE coop level: " );
 	if ( DS_OK != pDS->lpVtbl->SetCooperativeLevel( pDS, cl_hwnd, DSSCL_EXCLUSIVE ) )

@@ -1793,6 +1793,26 @@ char *SCR_FindKey (char *key)
 }
 
 
+//BC 3-5-2026 Get icon glyph via gamepad bind.
+//This is very caveman but should work ok...
+char *GetGamepadGlyph(char *bindName)
+{
+    if (!strcmp(bindName, "^2[A]"))
+        return "steamdeck_button_a";
+    else if (!strcmp(bindName, "^1[B]"))
+        return "steamdeck_button_b";
+    else if (!strcmp(bindName, "^4[X]"))
+        return "steamdeck_button_x";
+    else if (!strcmp(bindName, "^3[Y]"))
+        return "steamdeck_button_y";
+
+    //TODO: fill this out further.
+
+    //No match.
+    return "";
+}
+
+
 /*
 =================
 SCR_DrawCrosshair
@@ -1881,6 +1901,7 @@ void SCR_DrawCrosshair (void)
 	
 	if (cl.frame.playerstate.stats[STAT_USEABLE] < 1)
 	{
+        //Draw crosshair (no finger).
 		SCR_DrawLegacyPic (scr_vrect.x + ((scr_vrect.width - scale*crosshair_width)/2), // width
 			scr_vrect.y + ((scr_vrect.height - scale*crosshair_height)/2),	// height
 			scale,	// scale
@@ -1891,6 +1912,7 @@ void SCR_DrawCrosshair (void)
 	}
 	else
 	{
+        //Draw finger (no crosshair).
 		int x,y;
 		const char *keymsg;
 		drawStruct_t ds;
@@ -1927,45 +1949,71 @@ void SCR_DrawCrosshair (void)
 
 		//Com_Printf ("%s\n",keymsg);				
 
+        qboolean drawMissingBind = false;
 		if (keymsg)				
 		{
-			/*
-			if (!strcmp(keymsg, "MOUSE2"))
-			{
-				x = scr_vrect.width * 0.03f;
+            if (ShowGamepadIcons()) //BC 3-5-2026 show gamepad icons.
+            {
+                //Note: uses 640x480 virtual canvas
+                int ICONSIZE = 26;
+                const char* iconName = GetGamepadGlyph(keymsg);
+                if (iconName[0] != '\0')
+                {
+                    //Draw gamepad glyph.
+                    SCR_DrawPic(320 - 10, 258, ICONSIZE, ICONSIZE, ALIGN_CENTER, false, iconName, 1.0f);
+                }
+                else
+                {
+                    drawMissingBind = true;
+                }                
+            }
+            else
+            {
+                if (!strcmp(keymsg, "e"))
+                {
+                    //Hack to make a capital E
+                    Com_sprintf(keymsg, sizeof(keymsg), "E");
 
-				R_DrawStretchPic (
-					scr_vrect.width * 0.49f,
-					scr_vrect.height * 0.535f,
-					x, x,
-					"/pics/letter_mouse2.tga", 1.0);
-			}
-			else*/ if (!strcmp(keymsg, "e"))
-			{
-				Com_sprintf (keymsg, sizeof(keymsg), "E");
-
-				SCR_DrawString(
-					318,
-					258, //BC 2021: moved keyprompt down a little to accommodate for better-aspect-ratio'd finger cursor.
-					MENU_FONT_SIZE,
-					ALIGN_CENTER,
-					keymsg,
-					FONT_SCREEN,
-					255);
-			}
-			else
-			{
-				SCR_DrawString(
-					318,
-					257,
-					MENU_FONT_SIZE,
-					ALIGN_CENTER,
-					keymsg,
-					FONT_SCREEN,
-					255);
-			}
+                    SCR_DrawString(
+                        318,
+                        258, //BC 2021: moved keyprompt down a little to accommodate for better-aspect-ratio'd finger cursor.
+                        MENU_FONT_SIZE,
+                        ALIGN_CENTER,
+                        keymsg,
+                        FONT_SCREEN,
+                        255);
+                }
+                else
+                {
+                    SCR_DrawString(
+                        318,
+                        257,
+                        MENU_FONT_SIZE,
+                        ALIGN_CENTER,
+                        keymsg,
+                        FONT_SCREEN,
+                        255);
+                }
+            }
 
 		}
+        else
+        {
+            drawMissingBind = true;
+        }
+
+        if (drawMissingBind)
+        {
+            //BC 3-5-2026 if no bind is found, draw question marks.
+            SCR_DrawString(
+                311,
+                263,
+                MENU_FONT_SIZE,
+                ALIGN_CENTER,
+                "???",
+                FONT_SCREEN,
+                255);
+        }
 	}
 #endif
 }

@@ -1476,6 +1476,7 @@ static char *SDL_getenv_unsafe(const char *name)
     }
     return string;
 }
+
 qboolean Sys_IsSteamDeck (void)
 {
 	qboolean result = false;
@@ -1486,6 +1487,12 @@ qboolean Sys_IsSteamDeck (void)
 		free(env);
 	}
 	return result;
+}
+
+qboolean ShowGamepadIcons(void)
+{
+    //return true;
+    return Sys_IsSteamDeck();
 }
 
 /*

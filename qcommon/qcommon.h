@@ -1065,6 +1065,8 @@ const char *Sys_DownloadDir (void);
 
 qboolean Sys_IsSteamDeck(void);
 
+qboolean ShowGamepadIcons(void); //BC 3-5-2026
+
 /*
 ==============================================================
 
