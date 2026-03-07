@@ -332,6 +332,12 @@ qboolean Sys_IsSteamDeck(void)
 	return SDL_GetHintBoolean("SteamDeck", SDL_FALSE);
 }
 
+qboolean ShowGamepadIcons(void)
+{
+	//return true;
+	return Sys_IsSteamDeck();
+}
+
 /*****************************************************************************/
 
 // Knightmare- adapted from DK 1.3 Linux port
