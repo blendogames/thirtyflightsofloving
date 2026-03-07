@@ -264,7 +264,7 @@ void Menu_Main_Draw (void)
 		int boxsize = viddef.height * 0.35;
 
 		memset(&ds, 0, sizeof(drawStruct_t));
-		ds.pic = "m_main_minibox";
+		ds.pic = ShowGamepadIcons() ? "m_main_minibox_deck" : "m_main_minibox"; //BC 3-5-2026 gamepad glyphs
 		ds.x = (viddef.width /2) + (adjustedWidth * 0.1);
 		ds.y = posy;
 		ds.w = boxsize;
@@ -272,13 +272,7 @@ void Menu_Main_Draw (void)
 		Vector2Copy(vec2_origin, ds.offset);
 		Vector4Copy(vec4_identity, ds.color);
 		R_DrawPic(ds);
-		/*R_DrawStretchPic (
-			//adjustedWidth * 0.65,
-			(viddef.width /2) + (adjustedWidth * 0.1),
-			posy,
-			boxsize,
-			boxsize,
-			"m_main_minibox", 1.0);*/
+
 	}
 #endif
 

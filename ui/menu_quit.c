@@ -150,7 +150,9 @@ void Menu_Quit_Draw (void)
 	SCR_DrawPic (
 		SCREEN_WIDTH/2-w/2   + (9*sin(anglemod(cl.time*0.0025))),
 		SCREEN_HEIGHT/2-h/2 + 20  +  (6*sin(anglemod(cl.time*0.005))),
-		w, h, ALIGN_CENTER, false, "quit2", 1.0);
+		w, h, ALIGN_CENTER, false,
+        ShowGamepadIcons() ? "quit2_deck" : "quit2", //BC 3-5-2026 gamepad glyphs
+        1.0);
 #endif
 #endif // QUITMENU_NOKEY
 }
