@@ -175,10 +175,14 @@ int UI_MouseOverAlpha (menucommon_s *m)
 	{
 		int alpha;
 
+#ifdef NOTTHIRTYFLIGHTS
 		alpha = 125 + 25 * cos(anglemod(cl.time*0.005));
 
 		if (alpha>255) alpha = 255;
 		if (alpha<0) alpha = 0;
+#else
+		alpha = 255;
+#endif
 
 		return alpha;
 	}
@@ -320,6 +324,8 @@ void UIStartSPGame (void)
 	UI_ForceMenuOff ();
 	Cvar_SetValue( "deathmatch", 0 );
 	Cvar_SetValue( "coop", 0 );
+	Cvar_SetValue( "ctf", 0 );
+	Cvar_SetValue( "ttctf", 0 );
 	Cvar_SetValue( "gamerules", 0 );		//PGM
 
 	if (cls.state != ca_disconnected) // don't force loadscreen if disconnected
@@ -1243,7 +1249,11 @@ void UI_Load_Savestrings (qboolean update)
 	for (i=0; i<UI_MAX_SAVEGAMES; i++)
 	{
 	//	Com_sprintf (name, sizeof(name), "%s/save/kmq2save%03i/server.ssv", FS_Savegamedir(), i);	// was FS_Gamedir()
+#ifdef NOTTHIRTYFLIGHTS
 		Com_sprintf (name, sizeof(name), "%s/"SAVEDIRNAME"/kmq2save%03i/server.ssv", FS_Savegamedir(), i);	// was FS_Gamedir()
+#else
+		Com_sprintf (name, sizeof(name), "%s/"SAVEDIRNAME"/save%i/server.ssv", FS_Savegamedir(), i);	// was FS_Gamedir()
+#endif
 
 		old_timestamp = ui_savetimestamps[i];
 		stat(name, &st);
@@ -1266,7 +1276,11 @@ void UI_Load_Savestrings (qboolean update)
 		{
 			fclose (fp);
 		//	Com_sprintf (name, sizeof(name), "save/kmq2save%03i/server.ssv", i);
+#ifdef NOTTHIRTYFLIGHTS
 			Com_sprintf (name, sizeof(name), SAVEDIRNAME"/kmq2save%03i/server.ssv", i);
+#else
+			Com_sprintf (name, sizeof(name), SAVEDIRNAME"/save%i/server.ssv", i);
+#endif
 			FS_FOpenFile (name, &f, FS_READ);
 			if (!f)
 			{
@@ -1318,10 +1332,18 @@ void UI_ValidateSaveshots (void)
 			else
 			{	// free previously loaded shots
 			//	Com_sprintf(shotname, sizeof(shotname), "save/kmq2save%03i/shot.jpg", i);
+#ifdef NOTTHIRTYFLIGHTS
 				Com_sprintf(shotname, sizeof(shotname), SAVEDIRNAME"/kmq2save%03i/shot.jpg", i);
+#else
+				Com_sprintf(shotname, sizeof(shotname), SAVEDIRNAME"/save%i/shot.jpg", i);
+#endif
 				R_FreePic (shotname);
 			//	Com_sprintf(shotname, sizeof(shotname), "/save/kmq2save%03i/shot.jpg", i);
+#ifdef NOTTHIRTYFLIGHTS
 				Com_sprintf(shotname, sizeof(shotname), "/"SAVEDIRNAME"/kmq2save%03i/shot.jpg", i);
+#else
+				Com_sprintf(shotname, sizeof(shotname), "/"SAVEDIRNAME"/save%i/shot.jpg", i);
+#endif
 			}
 			if (R_DrawFindPic(shotname))
 				ui_saveshotvalid[i] = true;
@@ -1350,7 +1372,11 @@ char *UI_UpdateSaveshot (int index)
 			Com_sprintf(ui_saveload_shotname, sizeof(ui_saveload_shotname), "/levelshots/%s.pcx", ui_mapname);
 		else
 		//	Com_sprintf(ui_saveload_shotname, sizeof(ui_saveload_shotname), "/save/kmq2save%03i/shot.jpg", index);
+#ifdef NOTTHIRTYFLIGHTS
 			Com_sprintf(ui_saveload_shotname, sizeof(ui_saveload_shotname), "/"SAVEDIRNAME"/kmq2save%03i/shot.jpg", index);
+#else
+			Com_sprintf(ui_saveload_shotname, sizeof(ui_saveload_shotname), "/"SAVEDIRNAME"/save%i/shot.jpg", index);
+#endif
 	}
 	else if ( ui_saveshotvalid[UI_MAX_SAVEGAMES] )
 		Com_sprintf(ui_saveload_shotname, sizeof(ui_saveload_shotname), UI_NOSCREEN_NAME);

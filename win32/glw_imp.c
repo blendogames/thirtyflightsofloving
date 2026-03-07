@@ -306,7 +306,7 @@ qboolean VID_CreateWindow (int width, int height, dispType_t fullscreen)
 	glw_state.hWnd = CreateWindowEx (
 		 exstyle, 
 		 WINDOW_CLASS_NAME,
-		 "KMQuake2",		//Knightmare changed
+		 "TFOL",		//Knightmare changed //BC 3-5-2026 window name change
 		 stylebits,
 		 x, y, w, h,
 		 NULL,

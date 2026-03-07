@@ -1144,6 +1144,9 @@ void SV_Init (void)
 	Cvar_SetDescription ("rcon_password", "Sets password for rcon commands.");
 	Cvar_Get ("skill", "1", 0);
 	Cvar_SetDescription ("skill", "Sets skill level. 0 = Easy, 1 = Medium, 2 = Hard, 3 = Nightmare.");
+#ifndef NOTTHIRTYFLIGHTS
+	Cvar_Get ("commentary", "0", 0);
+#endif
 	Cvar_Get ("deathmatch", "0", CVAR_LATCH);
 	Cvar_SetDescription ("deathmatch", "Enables non-coop multiplayer.  This is enabled for both Deathmatch and CTF.");
 	Cvar_Get ("coop", "0", CVAR_LATCH);

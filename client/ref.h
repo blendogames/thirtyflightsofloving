@@ -262,6 +262,12 @@ typedef struct
 	int			num_decals;
 	particle_t	*decals;
 
+#ifndef NOTTHIRTYFLIGHTS
+	float bloomintensity;
+	float bloomalpha;
+	int bloomdarken;
+#endif
+
 	foginfo_t	foginfo;			// Knightmare added
 } refdef_t;
 

@@ -2209,12 +2209,14 @@ void Com_sprintf (char *dest, size_t size, char *fmt, ...)
 	va_start (argptr, fmt);
 	len = Q_vsnprintf (bigbuffer, sizeof(bigbuffer), fmt, argptr);
 	va_end (argptr);
+#ifdef NOTTHIRTYFLIGHTS // FIXME: Can we print this when cl_enableconsole? -flibit
 //	if (len >= size)
 //		Com_Printf ("Com_sprintf: overflow of %i in %i\n", len, size);
 	if (len < 0)
 		Com_Printf ("Com_sprintf: overflow in temp buffer of size %i\n", sizeof(bigbuffer));
 	else if (len >= size)
 		Com_Printf ("Com_sprintf: overflow of %i in dest buffer of size %i\n", len, size);
+#endif
 	strncpy (dest, bigbuffer, size-1);
 	dest[size-1] = 0;
 }

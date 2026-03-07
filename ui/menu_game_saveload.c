@@ -105,7 +105,11 @@ void UI_DrawMenuSaveshot (qboolean loadmenu)
 	else if ( ui_savevalid[i] && ui_saveshotvalid[i] )
 	{
 	//	Com_sprintf(shotname, sizeof(shotname), "/save/kmq2save%03i/shot.jpg", i);
+#ifdef NOTTHIRTYFLIGHTS
 		Com_sprintf(shotname, sizeof(shotname), "/"SAVEDIRNAME"/kmq2save%03i/shot.jpg", i);
+#else
+		Com_sprintf(shotname, sizeof(shotname), "/"SAVEDIRNAME"/save%i/shot.jpg", i);
+#endif
 
 		UI_DrawPic (SCREEN_WIDTH/2+46, SCREEN_HEIGHT/2-68, 240, 180, ALIGN_CENTER, false, shotname, 1.0);
 	}
@@ -135,14 +139,22 @@ void LoadGameCallback (void *self)
 	if ( ui_saveshotvalid[ a->generic.localdata[0] ] && (a->generic.localdata[0] != 0) )	// autosave has no saveshot, but uses levelshot instead
 	{
 	//	Com_sprintf(loadshotname, sizeof(loadshotname), "/save/kmq2save%03i/shot.jpg", a->generic.localdata[0]);
+#ifdef NOTTHIRTYFLIGHTS
 		Com_sprintf(loadshotname, sizeof(loadshotname), "/"SAVEDIRNAME"/kmq2save%03i/shot.jpg", a->generic.localdata[0]);
+#else
+		Com_sprintf(loadshotname, sizeof(loadshotname), "/"SAVEDIRNAME"/save%i/shot.jpg", a->generic.localdata[0]);
+#endif
 		load_saveshot = loadshotname; }
 	else {
 		load_saveshot = NULL;
 	}
 
 	if ( ui_savevalid[ a->generic.localdata[0] ] ) {
+#ifdef NOTTHIRTYFLIGHTS
 		Cbuf_AddText (va("load kmq2save%03i\n",  a->generic.localdata[0] ) );
+#else
+		Cbuf_AddText (va("load save%i\n",  a->generic.localdata[0] ) );
+#endif
 		UI_ForceMenuOff ();
 	}
 }
@@ -170,7 +182,11 @@ void Menu_LoadGame_Init (void)
 
 		s_loadgame_actions[i].generic.x = 0;
 		s_loadgame_actions[i].generic.y = (i) * MENU_LINE_SIZE;
+#ifdef NOTTHIRTYFLIGHTS
 		if (i>0)	// separate from autosave
+#else
+		if (i>1)	// separate from autosave
+#endif
 			s_loadgame_actions[i].generic.y += 10;
 
 		s_loadgame_actions[i].generic.type = MTYPE_ACTION;
@@ -184,7 +200,11 @@ void Menu_LoadGame_Init (void)
 	s_loadgame_back_action.generic.flags	= QMF_LEFT_JUSTIFY;
 	s_loadgame_back_action.generic.x		= 0;
 	s_loadgame_back_action.generic.y		= (UI_MAX_SAVEGAMES+3)*MENU_LINE_SIZE;
+#ifdef NOTTHIRTYFLIGHTS
 	s_loadgame_back_action.generic.name		= "Back";
+#else
+	s_loadgame_back_action.generic.name		= "CANCEL";
+#endif
 	s_loadgame_back_action.generic.callback = UI_BackMenu;
 
 	UI_AddMenuItem (&s_loadgame_menu, &s_loadgame_back_action);
@@ -230,7 +250,11 @@ void SaveGameCallback (void *self)
 {
 	menuaction_s *a = (menuaction_s *) self;
 
+#ifdef NOTTHIRTYFLIGHTS
 	Cbuf_AddText (va("save kmq2save%03i\n", a->generic.localdata[0] ));
+#else
+	Cbuf_AddText (va("save save%i\n", a->generic.localdata[0] ));
+#endif
 	UI_ForceMenuOff ();
 }
 
@@ -249,10 +273,19 @@ void Menu_SaveGame_Init (void)
 //	Load_Savestrings ();
 
 	// don't include the autosave slot
+#ifdef NOTTHIRTYFLIGHTS
 	for ( i = 0; i < UI_MAX_SAVEGAMES-1; i++ )
+#else
+	for ( i = 0; i < UI_MAX_SAVEGAMES-2; i++ )
+#endif
 	{
+#ifdef NOTTHIRTYFLIGHTS
 		s_savegame_actions[i].generic.name = ui_savestrings[i+1];
 		s_savegame_actions[i].generic.localdata[0] = i+1;
+#else
+		s_savegame_actions[i].generic.name = ui_savestrings[i+2];
+		s_savegame_actions[i].generic.localdata[0] = i+2;
+#endif
 		s_savegame_actions[i].generic.flags = QMF_LEFT_JUSTIFY;
 		s_savegame_actions[i].generic.callback = SaveGameCallback;
 
@@ -268,8 +301,13 @@ void Menu_SaveGame_Init (void)
 	s_savegame_back_action.generic.textSize	= MENU_FONT_SIZE;
 	s_savegame_back_action.generic.flags  = QMF_LEFT_JUSTIFY;
 	s_savegame_back_action.generic.x		= 0;
+#ifdef NOTTHIRTYFLIGHTS
 	s_savegame_back_action.generic.y		= (UI_MAX_SAVEGAMES+1)*MENU_LINE_SIZE;
 	s_savegame_back_action.generic.name		= "Back";
+#else
+	s_savegame_back_action.generic.y		= (UI_MAX_SAVEGAMES+2)*MENU_LINE_SIZE;
+	s_savegame_back_action.generic.name		= "CANCEL";
+#endif
 	s_savegame_back_action.generic.callback = UI_BackMenu;
 
 	UI_AddMenuItem (&s_savegame_menu, &s_savegame_back_action);

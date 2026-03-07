@@ -151,6 +151,10 @@ typedef enum {
 
 	K_MWHEELDOWN,
 	K_MWHEELUP,
+
+	K_JOY_UP,	//BC 1/30/2024 Joystick menu selection
+	K_JOY_DOWN,	//BC 1/30/2024 Joystick menu selection
+
 } keynum_t;
 
 /*

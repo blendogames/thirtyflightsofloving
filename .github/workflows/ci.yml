@@ -1,0 +1,63 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  linux:
+    name: Steam Linux Runtime
+    runs-on: ubuntu-latest
+    container:
+      image: registry.gitlab.steamos.cloud/steamrt/sniper/sdk:latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+
+    - name: Build Engine
+      run: |
+        make release -j$(nproc)
+
+    - name: Build Game
+      run: |
+        cd tfol
+        make
+        strip -S kmquake2
+        strip -S baseq2/kmq2gamex64.so
+        mv kmquake2 tfol
+
+    - name: Archive build result
+      uses: actions/upload-artifact@v4
+      with:
+        name: tfol-linux
+        path: |
+          tfol/tfol
+          tfol/baseq2/kmq2gamex64.so
+
+  macos:
+    name: macOS
+    runs-on: macos-15-intel
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+
+    - name: Install dependencies
+      run: brew install sdl2 jpeg libpng libvorbis
+
+    - name: Build Engine
+      run: |
+        make release -j$(nproc)
+
+    - name: Build Game
+      run: |
+        cd tfol
+        make
+        ../fixupMac.sh
+
+    - name: Archive build result
+      uses: actions/upload-artifact@v4
+      with:
+        name: tfol-osx
+        path: |
+          tfol/tfol
+          tfol/baseq2/kmq2gamex64.dylib

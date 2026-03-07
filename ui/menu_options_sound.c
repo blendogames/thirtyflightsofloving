@@ -161,7 +161,11 @@ void Menu_Options_Sound_Init (void)
 
 	s_options_sound_header.generic.type		= MTYPE_SEPARATOR;
 	s_options_sound_header.generic.textSize	= MENU_HEADER_FONT_SIZE;
+#ifdef NOTTHIRTYFLIGHTS
 	s_options_sound_header.generic.name		= "Sound";
+#else
+	s_options_sound_header.generic.name		= "SOUND";
+#endif
 	s_options_sound_header.generic.x		= MENU_HEADER_FONT_SIZE/2 * (int)strlen(s_options_sound_header.generic.name);
 	s_options_sound_header.generic.y		= -2*MENU_LINE_SIZE;	// 0
 
@@ -169,7 +173,11 @@ void Menu_Options_Sound_Init (void)
 	s_options_sound_sfxvolume_slider.generic.textSize	= MENU_FONT_SIZE;
 	s_options_sound_sfxvolume_slider.generic.x			= 0;
 	s_options_sound_sfxvolume_slider.generic.y			= y;
+#ifdef NOTTHIRTYFLIGHTS
 	s_options_sound_sfxvolume_slider.generic.name		= "effects volume";
+#else
+	s_options_sound_sfxvolume_slider.generic.name		= "Effects Volume";
+#endif
 	s_options_sound_sfxvolume_slider.generic.callback	= VolumeFunc;
 	s_options_sound_sfxvolume_slider.maxPos				= 20;
 	s_options_sound_sfxvolume_slider.baseValue			= 0.0f;
@@ -182,7 +190,11 @@ void Menu_Options_Sound_Init (void)
 	s_options_sound_musicvolume_slider.generic.textSize		= MENU_FONT_SIZE;
 	s_options_sound_musicvolume_slider.generic.x			= 0;
 	s_options_sound_musicvolume_slider.generic.y			= y+=MENU_LINE_SIZE;
+#ifdef NOTTHIRTYFLIGHTS
 	s_options_sound_musicvolume_slider.generic.name			= "music volume";
+#else
+	s_options_sound_musicvolume_slider.generic.name			= "Music Volume";
+#endif
 	s_options_sound_musicvolume_slider.generic.callback		= MusicVolumeFunc;
 	s_options_sound_musicvolume_slider.maxPos				= 20;
 	s_options_sound_musicvolume_slider.baseValue			= 0.0f;
@@ -237,7 +249,11 @@ void Menu_Options_Sound_Init (void)
 	s_options_sound_defaults_action.generic.textSize	= MENU_FONT_SIZE;
 	s_options_sound_defaults_action.generic.x			= MENU_FONT_SIZE;
 	s_options_sound_defaults_action.generic.y			= 18*MENU_LINE_SIZE;
+#ifdef NOTTHIRTYFLIGHTS
 	s_options_sound_defaults_action.generic.name		= "Reset to Defaults";
+#else
+	s_options_sound_defaults_action.generic.name		= "Reset Defaults";
+#endif
 	s_options_sound_defaults_action.generic.callback	= M_SoundResetDefaultsFunc;
 	s_options_sound_defaults_action.generic.statusbar	= "resets all sound settings to internal defaults";
 
@@ -245,16 +261,22 @@ void Menu_Options_Sound_Init (void)
 	s_options_sound_back_action.generic.textSize		= MENU_FONT_SIZE;
 	s_options_sound_back_action.generic.x				= MENU_FONT_SIZE;
 	s_options_sound_back_action.generic.y				= 20*MENU_LINE_SIZE;
+#ifdef NOTTHIRTYFLIGHTS
 	s_options_sound_back_action.generic.name			= "Back to Options";
+#else
+	s_options_sound_back_action.generic.name			= "Done";
+#endif
 	s_options_sound_back_action.generic.callback		= UI_BackMenu;
 
 	UI_AddMenuItem (&s_options_sound_menu, (void *) &s_options_sound_header);
 	UI_AddMenuItem (&s_options_sound_menu, (void *) &s_options_sound_sfxvolume_slider);
 	UI_AddMenuItem (&s_options_sound_menu, (void *) &s_options_sound_musicvolume_slider);
+#ifdef NOTTHIRTYFLIGHTS
 	UI_AddMenuItem (&s_options_sound_menu, (void *) &s_options_sound_oggmusic_box);
 	UI_AddMenuItem (&s_options_sound_menu, (void *) &s_options_sound_cdvolume_box);
 	UI_AddMenuItem (&s_options_sound_menu, (void *) &s_options_sound_quality_list);
 	UI_AddMenuItem (&s_options_sound_menu, (void *) &s_options_sound_compatibility_list);
+#endif
 	UI_AddMenuItem (&s_options_sound_menu, (void *) &s_options_sound_defaults_action);
 	UI_AddMenuItem (&s_options_sound_menu, (void *) &s_options_sound_back_action);
 

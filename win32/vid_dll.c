@@ -764,7 +764,11 @@ void VID_Init (void)
 	Cvar_SetDescription ("vid_xpos", "Sets horizontal desktop position of window in windowed mode.");
 	vid_ypos = Cvar_Get ("vid_ypos", "22", CVAR_ARCHIVE);
 	Cvar_SetDescription ("vid_ypos", "Sets vertical desktop position of window in windowed mode.");
+#ifdef NOTTHIRTYFLIGHTS
 	vid_fullscreen = Cvar_Get ("vid_fullscreen", "1", CVAR_ARCHIVE);
+#else
+	vid_fullscreen = Cvar_Get ("vid_fullscreen", "2", CVAR_ARCHIVE);
+#endif
 //	Cvar_SetDescription ("vid_fullscreen", "Enables fullscreen video mode.");
 	Cvar_SetDescription ("vid_fullscreen", "Sets fullscreen or borderless video mode.  0 = windowed, 1 = fullscreen, 2 = borderless");	// borderless support
 	vid_gamma = Cvar_Get( "vid_gamma", "0.8", CVAR_ARCHIVE ); // was 1.0
@@ -777,7 +781,11 @@ void VID_Init (void)
 	Cvar_SetDescription ("r_customwidth", "Sets resolution width when using custom video mode (-1).");
 	r_customheight = Cvar_Get ("r_customheight", "1024", CVAR_ARCHIVE);
 	Cvar_SetDescription ("r_customheight", "Sets resolution height when using custom video mode (-1).");
+#ifdef NOTTHIRTYFLIGHTS
 	r_mode_desktop = Cvar_Get ("r_mode_desktop", "0", CVAR_ARCHIVE);	// desktop-resolution display mode
+#else
+	r_mode_desktop = Cvar_Get ("r_mode_desktop", "1", CVAR_ARCHIVE);	// desktop-resolution display mode
+#endif
 
 	// Knightmare- just here to enable command line option without error
 	scanforcd = Cvar_Get ("scanforcd", "0", 0);

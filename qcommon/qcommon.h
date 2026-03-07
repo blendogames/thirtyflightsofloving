@@ -101,7 +101,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 // KMQ2 MacOSX port uses the Fruitz of Dojo plug system.
 // Comment this out if you want to use dylibs.
+#ifdef NOTTHIRTYFLIGHTS
 #define USE_Q2PLUG
+#endif
 
 #if defined (_M_X64) || defined (_M_AMD64) || defined (__x86_64__)
 
@@ -1060,6 +1062,10 @@ const char *Sys_PrefDir (void);
 // Knightmare- returns the directory where autodownload content
 //		(maps, textures, sounds, skies, models, etc) should be written to
 const char *Sys_DownloadDir (void);
+
+qboolean Sys_IsSteamDeck(void);
+
+qboolean ShowGamepadIcons(void); //BC 3-5-2026
 
 /*
 ==============================================================

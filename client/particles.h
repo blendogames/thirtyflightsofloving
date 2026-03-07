@@ -38,9 +38,11 @@ typedef enum
 	particle_beam,
 	particle_beam2,
 	particle_lightning,
-//	particle_lensflare,
-//	particle_lightflare,
-//	particle_shield,
+#ifndef NOTTHIRTYFLIGHTS
+	particle_lensflare,
+	particle_lightflare,
+	particle_shield,
+#endif
 	particle_rflash,
 	particle_rexplosion1,
 	particle_rexplosion2,
@@ -49,9 +51,11 @@ typedef enum
 	particle_rexplosion5,
 	particle_rexplosion6,
 	particle_rexplosion7,
-//	particle_dexplosion1,
-//	particle_dexplosion2,
-//	particle_dexplosion3,
+#ifndef NOTTHIRTYFLIGHTS
+	particle_dexplosion1,
+	particle_dexplosion2,
+	particle_dexplosion3,
+#endif
 	particle_bfgmark,
 	particle_burnmark,
 	particle_blooddecal1,
@@ -62,7 +66,19 @@ typedef enum
 	particle_shadow,
 	particle_bulletmark,
 	particle_trackermark,
-//	particle_footprint,
+#ifndef NOTTHIRTYFLIGHTS
+	particle_footprint,
+	particle_freongeneric,
+	particle_glass,
+	particle_glass2,
+	particle_music1,
+	particle_music2,
+	particle_music3,
+	particle_heart,
+	particle_shred0,
+	particle_shred1,
+	particle_shred2
+#endif
 } particle_type;
 
 #define  GL_ZERO						0x0

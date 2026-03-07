@@ -185,7 +185,9 @@ static void M_ApplyVideoChanges (void *unused)
 	}
 
 	UI_MenuSpinControl_SaveValue (&s_fs_box, "vid_fullscreen");
+#ifdef _WIN32 /* FIXME: Unix vid_gamma -flibit */
 	UI_MenuSlider_SaveValue (&s_brightness_slider, "vid_gamma");
+#endif
 	UI_MenuSpinControl_SaveValue (&s_texfilter_box, "r_texturemode");
 	UI_MenuSpinControl_SaveValue (&s_aniso_box, "r_anisotropic");
 	UI_MenuSpinControl_SaveValue (&s_texqual_box, "r_picmip");
@@ -200,6 +202,16 @@ static void M_ApplyVideoChanges (void *unused)
 	M_PrepareVideoRefresh ();
 
 //	UI_ForceMenuOff();
+#ifndef NOTTHIRTYFLIGHTS
+	if (!cls.consoleActive && Cvar_VariableValue ("maxclients") <= 1 && !Com_ServerState())
+	{
+		//if NOT in-game.
+		UI_ForceMenuOff();
+
+		//kick player out of limbo state.
+		Con_ToggleConsole_f();
+	}
+#endif
 }
 
 //=======================================================================
@@ -214,9 +226,15 @@ void Menu_Video_Init (void)
 	};
 	static const char *fullscreen_names[] =
 	{
+#ifdef NOTTHIRTYFLIGHTS
 		"windowed",
 		"fullscreen",
 		"borderless",
+#else
+		"Windowed",
+		"Fullscreen",
+		"Borderless",
+#endif
 		0
 	};
 	static const char *refreshrate_names[] = 
@@ -259,8 +277,13 @@ void Menu_Video_Init (void)
 	};
 	static const char *texfilter_names[] =
 	{
+#ifdef NOTTHIRTYFLIGHTS
 		"bilinear",
 		"trilinear",
+#else
+		"Bilinear",
+		"Trilinear",
+#endif
 		0
 	};
 	static const char *texfilter_values[] =
@@ -271,11 +294,19 @@ void Menu_Video_Init (void)
 	};
 	static const char *lmh_names[] =
 	{
+#ifdef NOTTHIRTYFLIGHTS
 		"lowest",
 		"low",
 		"medium",
 		"high",
 		"highest",
+#else
+		"Lowest",
+		"Low",
+		"Medium",
+		"High",
+		"Highest",
+#endif
 		0
 	};
 	static const char *lmh_values[] =
@@ -300,7 +331,11 @@ void Menu_Video_Init (void)
 
 	s_mode_list.generic.type		= MTYPE_SPINCONTROL;
 	s_mode_list.generic.textSize	= MENU_FONT_SIZE;
+#ifdef NOTTHIRTYFLIGHTS
 	s_mode_list.generic.name		= "video mode";
+#else
+	s_mode_list.generic.name		= "Screen Resolution";
+#endif
 	s_mode_list.generic.x			= 0;
 	s_mode_list.generic.y			= y;
 	s_mode_list.itemNames			= ui_resolution_names;
@@ -353,17 +388,26 @@ void Menu_Video_Init (void)
 	s_fs_box.generic.textSize		= MENU_FONT_SIZE;
 	s_fs_box.generic.x				= 0;
 	s_fs_box.generic.y				= y += 3.5*MENU_LINE_SIZE;
+#ifdef NOTTHIRTYFLIGHTS
 	s_fs_box.generic.name			= "display type";	// "fullscreen"
+#else
+	s_fs_box.generic.name			= "Display Type";	// "fullscreen"
+#endif
 	s_fs_box.itemNames				= fullscreen_names;
 //	s_fs_box.generic.statusbar		= "changes bettween fullscreen and windowed display";
 	s_fs_box.generic.statusbar		= "changes bettween fullscreen, borderless window, and windowed display";
 	UI_MenuSpinControl_SetValue (&s_fs_box, "vid_fullscreen", 0, 2, true);
 
+#ifdef _WIN32 /* FIXME: Unix vid_gamma -flibit */
 	s_brightness_slider.generic.type		= MTYPE_SLIDER;
 	s_brightness_slider.generic.textSize	= MENU_FONT_SIZE;
 	s_brightness_slider.generic.x			= 0;
 	s_brightness_slider.generic.y			= y += MENU_LINE_SIZE;
+#ifdef NOTTHIRTYFLIGHTS
 	s_brightness_slider.generic.name		= "brightness";
+#else
+	s_brightness_slider.generic.name		= "Brightness";
+#endif
 	s_brightness_slider.generic.callback	= BrightnessCallback;
 	s_brightness_slider.maxPos				= 20;
 	s_brightness_slider.baseValue			= 1.3f;
@@ -371,12 +415,17 @@ void Menu_Video_Init (void)
 	s_brightness_slider.displayAsPercent	= false;
 	s_brightness_slider.generic.statusbar	= "changes display brightness";
 	UI_MenuSlider_SetValue (&s_brightness_slider, "vid_gamma", 0.3f, 1.3f, true);
+#endif /* _WIN32 */
 
 	s_texfilter_box.generic.type		= MTYPE_SPINCONTROL;
 	s_texfilter_box.generic.textSize	= MENU_FONT_SIZE;
 	s_texfilter_box.generic.x			= 0;
 	s_texfilter_box.generic.y			= y += 2*MENU_LINE_SIZE;
+#ifdef NOTTHIRTYFLIGHTS
 	s_texfilter_box.generic.name		= "texture filter";
+#else
+	s_texfilter_box.generic.name		= "Texture Filter";
+#endif
 	s_texfilter_box.itemNames			= texfilter_names;
 	s_texfilter_box.itemValues			= texfilter_values;
 	s_texfilter_box.generic.statusbar	= "changes texture filtering mode";
@@ -386,7 +435,11 @@ void Menu_Video_Init (void)
 	s_aniso_box.generic.textSize	= MENU_FONT_SIZE;
 	s_aniso_box.generic.x			= 0;
 	s_aniso_box.generic.y			= y += MENU_LINE_SIZE;
+#ifdef NOTTHIRTYFLIGHTS
 	s_aniso_box.generic.name		= "anisotropic filter";
+#else
+	s_aniso_box.generic.name		= "Anisotropic Filter";
+#endif
 	s_aniso_box.itemNames			= ui_aniso_names;
 	s_aniso_box.itemValues			= ui_aniso_values;
 	s_aniso_box.generic.callback	= AnisoCallback;
@@ -397,12 +450,17 @@ void Menu_Video_Init (void)
 	s_texqual_box.generic.textSize	= MENU_FONT_SIZE;
 	s_texqual_box.generic.x			= 0;
 	s_texqual_box.generic.y			= y += MENU_LINE_SIZE;
+#ifdef NOTTHIRTYFLIGHTS
 	s_texqual_box.generic.name		= "texture quality";
+#else
+	s_texqual_box.generic.name		= "Texture Quality";
+#endif
 	s_texqual_box.itemNames			= lmh_names;
 	s_texqual_box.itemValues		= lmh_values;
 	s_texqual_box.generic.statusbar	= "changes maximum texture size (highest = no limit)";
 	UI_MenuSpinControl_SetValue (&s_texqual_box, "r_picmip", 0, 0, false);
 
+#ifdef NOTTHIRTYFLIGHTS
 	s_npot_mipmap_box.generic.type		= MTYPE_SPINCONTROL;
 	s_npot_mipmap_box.generic.textSize	= MENU_FONT_SIZE;
 	s_npot_mipmap_box.generic.x			= 0;
@@ -420,6 +478,7 @@ void Menu_Video_Init (void)
 	s_sgis_mipmap_box.itemNames			= yesno_names;
 	s_sgis_mipmap_box.generic.statusbar	= "enables driver-based mipmap generation";
 	UI_MenuSpinControl_SetValue (&s_sgis_mipmap_box, "r_sgis_generatemipmap", 0, 1, true);
+#endif
 /*
 	s_texcompress_box.generic.type		= MTYPE_SPINCONTROL;
 	s_texcompress_box.generic.textSize	= MENU_FONT_SIZE;
@@ -430,11 +489,19 @@ void Menu_Video_Init (void)
 	s_texcompress_box.generic.statusbar	= "reduces quality, increases performance (leave off unless needed)";
 	UI_MenuSpinControl_SetValue (&s_texcompress_box, "r_ext_texture_compression", 0, 1, true);
 */
+#ifdef NOTTHIRTYFLIGHTS
 	s_vsync_box.generic.type			= MTYPE_SPINCONTROL;
+#else
+	s_vsync_box.generic.type			= MTYPE_CHECKBOX;
+#endif
 	s_vsync_box.generic.textSize		= MENU_FONT_SIZE;
 	s_vsync_box.generic.x				= 0;
 	s_vsync_box.generic.y				= y += 2*MENU_LINE_SIZE;
+#ifdef NOTTHIRTYFLIGHTS
 	s_vsync_box.generic.name			= "video sync";
+#else
+	s_vsync_box.generic.name			= "Video Sync";
+#endif
 	s_vsync_box.generic.callback		= VsyncCallback;
 	s_vsync_box.itemNames				= yesno_names;
 	s_vsync_box.generic.statusbar		= "sync framerate with monitor refresh";
@@ -480,7 +547,11 @@ void Menu_Video_Init (void)
 
 	s_defaults_action.generic.type		= MTYPE_ACTION;
 	s_defaults_action.generic.textSize	= MENU_FONT_SIZE;
+#ifdef NOTTHIRTYFLIGHTS
 	s_defaults_action.generic.name		= "Reset to Defaults";
+#else
+	s_defaults_action.generic.name		= "Reset Defaults";
+#endif
 	s_defaults_action.generic.x			= 0;
 	s_defaults_action.generic.y			= y += 3*MENU_LINE_SIZE;
 	s_defaults_action.generic.callback	= M_ResetVideoDefaults;
@@ -489,14 +560,22 @@ void Menu_Video_Init (void)
 	// changed cancel to apply changes, thanx to MrG
 	s_apply_action.generic.type			= MTYPE_ACTION;
 	s_apply_action.generic.textSize		= MENU_FONT_SIZE;
+#ifdef NOTTHIRTYFLIGHTS
 	s_apply_action.generic.name			= "Apply Changes";
+#else
+	s_apply_action.generic.name			= "APPLY CHANGES";
+#endif
 	s_apply_action.generic.x			= 0;
 	s_apply_action.generic.y			= y += 2*MENU_LINE_SIZE;
 	s_apply_action.generic.callback		= M_ApplyVideoChanges;
 
 	s_backmain_action.generic.type		= MTYPE_ACTION;
 	s_backmain_action.generic.textSize	= MENU_FONT_SIZE;
+#ifdef NOTTHIRTYFLIGHTS
 	s_backmain_action.generic.name		= "Back to Main";
+#else
+	s_backmain_action.generic.name		= "Done";
+#endif
 	s_backmain_action.generic.x			= 0;
 	s_backmain_action.generic.y			= y += 2*MENU_LINE_SIZE;
 	s_backmain_action.generic.callback	= UI_BackMenu;
@@ -509,17 +588,23 @@ void Menu_Video_Init (void)
 	UI_AddMenuItem (&s_video_menu, (void *) &s_customheight_field);
 
 	UI_AddMenuItem (&s_video_menu, (void *) &s_fs_box);
+#ifdef _WIN32 /* FIXME: Unix vid_gamma -flibit */
 	UI_AddMenuItem (&s_video_menu, (void *) &s_brightness_slider);
+#endif /* _WIN32 */
 	UI_AddMenuItem (&s_video_menu, (void *) &s_texfilter_box);
 	UI_AddMenuItem (&s_video_menu, (void *) &s_aniso_box);
 	UI_AddMenuItem (&s_video_menu, (void *) &s_texqual_box);
+#ifdef NOTTHIRTYFLIGHTS
 	UI_AddMenuItem (&s_video_menu, (void *) &s_npot_mipmap_box);
 	UI_AddMenuItem (&s_video_menu, (void *) &s_sgis_mipmap_box);
+#endif
 //	UI_AddMenuItem (&s_video_menu, (void *) &s_texcompress_box);
 	UI_AddMenuItem (&s_video_menu, (void *) &s_vsync_box);
+#ifdef NOTTHIRTYFLIGHTS
 	UI_AddMenuItem (&s_video_menu, (void *) &s_refresh_box);
 	UI_AddMenuItem (&s_video_menu, (void *) &s_adjust_fov_box);
 	UI_AddMenuItem (&s_video_menu, (void *) &s_async_box);
+#endif
 
 	UI_AddMenuItem (&s_video_menu, (void *) &s_advanced_action);
 	UI_AddMenuItem (&s_video_menu, (void *) &s_defaults_action);
