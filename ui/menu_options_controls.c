@@ -364,11 +364,7 @@ void Menu_Options_Controls_Init (void)
 	s_options_controls_customize_keys_action.generic.textSize	= MENU_FONT_SIZE;
 	s_options_controls_customize_keys_action.generic.x			= MENU_FONT_SIZE;
 	s_options_controls_customize_keys_action.generic.y			= y += 2*MENU_LINE_SIZE;
-#ifdef NOTTHIRTYFLIGHTS
 	s_options_controls_customize_keys_action.generic.name		= "Customize Controls";
-#else
-	s_options_controls_customize_keys_action.generic.name		= "Customize Keys";
-#endif
 	s_options_controls_customize_keys_action.generic.callback	= CustomizeControlsFunc;
 
 	s_options_controls_defaults_action.generic.type			= MTYPE_ACTION;

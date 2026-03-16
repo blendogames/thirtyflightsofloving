@@ -1771,6 +1771,13 @@ void Qcommon_Init (int argc, char **argv)
 		SCR_EndLoadingPlaque ();
 	}
 
+    //BC 3-16-2026 default to joystick for deck
+    if (ShowGamepadIcons())
+    {
+        Cvar_Set("in_joystick", "1");
+    }
+
+
 	Com_Printf ("====== " WINDOWNAME " Initialized ======\n\n");
 	
 	// testing crap
