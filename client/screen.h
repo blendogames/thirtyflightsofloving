@@ -86,6 +86,8 @@ typedef struct
 #define MENU_FONT_SIZE	8
 #define MENU_LINE_SIZE	10
 
+#define MENU_KEYBIND_LINESIZE	17
+
 #define HUD_FONT_SIZE	8.0
 
 

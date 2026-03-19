@@ -184,17 +184,17 @@ static void M_KeyCursorDrawFunc (menuframework_s *menu)
 	else
 		cursor = ((int)(Sys_Milliseconds()/250)&1) ? UI_ITEMCURSOR_DEFAULT_PIC : UI_ITEMCURSOR_BLINK_PIC;
 
-	UI_DrawPic (menu->x, menu->y + menu->cursor * MENU_LINE_SIZE, MENU_FONT_SIZE, MENU_FONT_SIZE, ALIGN_CENTER, false, cursor, 255);
+	UI_DrawPic (menu->x, menu->y + menu->cursor * MENU_KEYBIND_LINESIZE, MENU_FONT_SIZE, MENU_FONT_SIZE, ALIGN_CENTER, false, cursor, 255);
 /*	if (bind_grab)
-		UI_DrawChar (menu->x, menu->y + menu->cursor * MENU_LINE_SIZE, MENU_FONT_SIZE, ALIGN_CENTER,
+		UI_DrawChar (menu->x, menu->y + menu->cursor * MENU_KEYBIND_LINESIZE, MENU_FONT_SIZE, ALIGN_CENTER,
 						'=', 255, 255, 255, 255, false, true);
 	else
-		UI_DrawChar (menu->x, menu->y + menu->cursor * MENU_LINE_SIZE, MENU_FONT_SIZE, ALIGN_CENTER,
+		UI_DrawChar (menu->x, menu->y + menu->cursor * MENU_KEYBIND_LINESIZE, MENU_FONT_SIZE, ALIGN_CENTER,
 						12+((int)(Sys_Milliseconds()/250)&1), 255, 255, 255, 255, false, true);
 */
 #else
 		SCR_DrawChar (menu->x+ (5*sin(anglemod(cl.time*0.01))),
-			menu->y + menu->cursor * MENU_LINE_SIZE,
+			menu->y + menu->cursor * MENU_KEYBIND_LINESIZE,
 			MENU_FONT_SIZE,
 			ALIGN_CENTER,
 			13,
@@ -277,7 +277,7 @@ void M_AddBindOption (int i, char *list[][2])
 	s_keys_binds[i].generic.textSize = MENU_FONT_SIZE;
 	s_keys_binds[i].generic.flags  = QMF_GRAYED;
 	s_keys_binds[i].generic.x		= 0;
-	s_keys_binds[i].generic.y		= i*MENU_LINE_SIZE;
+	s_keys_binds[i].generic.y		= i*MENU_KEYBIND_LINESIZE;
 	s_keys_binds[i].generic.ownerdraw = M_DrawKeyBindingFunc;
 	s_keys_binds[i].generic.localdata[0] = i;
 	s_keys_binds[i].generic.name	= list[s_keys_binds[i].generic.localdata[0]][1];
@@ -310,7 +310,7 @@ static void Menu_Keys_Init (void)
 		s_keys_binds[i].generic.type			= MTYPE_KEYBIND;
 		s_keys_binds[i].generic.flags			= QMF_ALTCOLOR;
 		s_keys_binds[i].generic.x				= x;
-		s_keys_binds[i].generic.y				= y + i*MENU_LINE_SIZE;
+		s_keys_binds[i].generic.y				= y + i*MENU_KEYBIND_LINESIZE;
 		s_keys_binds[i].generic.name			= bindnames[i][1];
 		s_keys_binds[i].generic.statusbar		= "enter or mouse1 to change, backspace or del to clear";
 		s_keys_binds[i].commandName				= bindnames[i][0];
@@ -324,7 +324,7 @@ static void Menu_Keys_Init (void)
 	s_keys_back_action.generic.textSize	= MENU_FONT_SIZE;
 	s_keys_back_action.generic.flags	= QMF_LEFT_JUSTIFY;
 	s_keys_back_action.generic.x		= x;
-	s_keys_back_action.generic.y		= y + (BINDS_MAX+2)*MENU_LINE_SIZE;
+	s_keys_back_action.generic.y		= y + (BINDS_MAX+2)*MENU_KEYBIND_LINESIZE;
 #ifdef NOTTHIRTYFLIGHTS
 	s_keys_back_action.generic.name		= "Back";
 #else
