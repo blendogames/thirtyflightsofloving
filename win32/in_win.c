@@ -1032,21 +1032,30 @@ void IN_JoyMove (usercmd_t *cmd)
 				// user wants turn control to be turn control
 				if (fabs(fAxisValue) > joy_yawthreshold->value)
 				{
+
+
+                    float cursorSpeedModifier = 1.0f; //BC 3-19-2026 if on frobbable/useable thing, then slow down cursor speed
+                    if (cl.frame.playerstate.stats[STAT_USEABLE] > 0) //BC 3-19-2026 if on frobbable/useable thing, then slow down cursor speed
+                    {
+                        cursorSpeedModifier *= 0.5f;
+                    }
+
+
 					if(dwControlMap[i] == JOY_ABSOLUTE_AXIS)
 					{
 					//	if (in_autosensitivity->value && cl.base_fov < 90) // Knightmare added
 						if (in_autosensitivity->integer && cl.base_fov < 90) // Knightmare added
-							cl.viewangles[YAW] += (fAxisValue * joy_yawsensitivity->value * (cl.base_fov/90.0)) * aspeed * cl_yawspeed->value;
+							cl.viewangles[YAW] += (fAxisValue * joy_yawsensitivity->value * (cl.base_fov/90.0)) * aspeed * cl_yawspeed->value * cursorSpeedModifier;
 						else
-							cl.viewangles[YAW] += (fAxisValue * joy_yawsensitivity->value) * aspeed * cl_yawspeed->value;
+							cl.viewangles[YAW] += (fAxisValue * joy_yawsensitivity->value) * aspeed * cl_yawspeed->value * cursorSpeedModifier;
 					}
 					else
 					{
 					//	if (in_autosensitivity->value && cl.base_fov < 90) // Knightmare added
 						if (in_autosensitivity->integer && cl.base_fov < 90) // Knightmare added
-							cl.viewangles[YAW] += (fAxisValue * joy_yawsensitivity->value * (cl.base_fov/90.0)) * speed * 180.0;
+							cl.viewangles[YAW] += (fAxisValue * joy_yawsensitivity->value * (cl.base_fov/90.0)) * speed * 180.0 * cursorSpeedModifier;
 						else
-							cl.viewangles[YAW] += (fAxisValue * joy_yawsensitivity->value) * speed * 180.0;
+							cl.viewangles[YAW] += (fAxisValue * joy_yawsensitivity->value) * speed * 180.0 * cursorSpeedModifier;
 					}
 
 				}
@@ -1059,6 +1068,13 @@ void IN_JoyMove (usercmd_t *cmd)
 				if (fabs(fAxisValue) > joy_pitchthreshold->value)
 				{
                     float invertModifier = m_pitch->value > 0 ? 1.0f : -1.0f; //BC 3-19-2026 allow mouse invert to adjust the joystick pitch
+
+
+                    if (cl.frame.playerstate.stats[STAT_USEABLE] > 0) //BC 3-19-2026 if on frobbable/useable thing, then slow down cursor speed
+                    {
+                        invertModifier *= 0.5f;
+                    }
+
 
 					// pitch movement detected and pitch movement desired by user
 					if(dwControlMap[i] == JOY_ABSOLUTE_AXIS)
