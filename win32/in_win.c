@@ -1054,26 +1054,28 @@ void IN_JoyMove (usercmd_t *cmd)
 			break;
 
 		case AxisLook:
-			if (mlooking)
+			//if (mlooking) //BC 3-19-2026 commenting this out to allow for gamepad stick to adjust viewpitch
 			{
 				if (fabs(fAxisValue) > joy_pitchthreshold->value)
 				{
+                    float invertModifier = m_pitch->value > 0 ? 1.0f : -1.0f; //BC 3-19-2026 allow mouse invert to adjust the joystick pitch
+
 					// pitch movement detected and pitch movement desired by user
 					if(dwControlMap[i] == JOY_ABSOLUTE_AXIS)
 					{
 					//	if (in_autosensitivity->value && cl.base_fov < 90) // Knightmare added
 						if (in_autosensitivity->integer && cl.base_fov < 90) // Knightmare added
-							cl.viewangles[PITCH] += (fAxisValue * joy_pitchsensitivity->value * (cl.base_fov/90.0)) * aspeed * cl_pitchspeed->value;
+							cl.viewangles[PITCH] += (fAxisValue * joy_pitchsensitivity->value * (cl.base_fov/90.0)) * aspeed * cl_pitchspeed->value * invertModifier;
 						else
-							cl.viewangles[PITCH] += (fAxisValue * joy_pitchsensitivity->value) * aspeed * cl_pitchspeed->value;
+							cl.viewangles[PITCH] += (fAxisValue * joy_pitchsensitivity->value) * aspeed * cl_pitchspeed->value * invertModifier;
 					}
 					else
 					{
 					//	if (in_autosensitivity->value && cl.base_fov < 90) // Knightmare added
 						if (in_autosensitivity->integer && cl.base_fov < 90) // Knightmare added
-							cl.viewangles[PITCH] += (fAxisValue * joy_pitchsensitivity->value * (cl.base_fov/90.0)) * speed * 180.0;
+							cl.viewangles[PITCH] += (fAxisValue * joy_pitchsensitivity->value * (cl.base_fov/90.0)) * speed * 180.0 * invertModifier;
 						else
-							cl.viewangles[PITCH] += (fAxisValue * joy_pitchsensitivity->value) * speed * 180.0;
+							cl.viewangles[PITCH] += (fAxisValue * joy_pitchsensitivity->value) * speed * 180.0 * invertModifier;
 					}
 				}
 			}

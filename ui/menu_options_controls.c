@@ -236,7 +236,7 @@ void Menu_Options_Controls_Init (void)
 #ifdef NOTTHIRTYFLIGHTS
 	s_options_controls_invertmouse_box.generic.name			= "invert mouse";
 #else
-	s_options_controls_invertmouse_box.generic.name			= "Invert Mouse";
+	s_options_controls_invertmouse_box.generic.name			= "Invert Camera";
 #endif
 	s_options_controls_invertmouse_box.generic.callback		= InvertMouseFunc;
 	s_options_controls_invertmouse_box.itemNames			= yesno_names;
