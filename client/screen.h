@@ -177,3 +177,5 @@ qboolean SCR_DrawCinematic (void);
 void	SCR_RunCinematic (void);
 void	SCR_StopCinematic (void);
 void	SCR_FinishCinematic (void);
+
+char *GetGamepadGlyph(char *bindName); //BC 3-23-2026

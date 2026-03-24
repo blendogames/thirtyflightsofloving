@@ -1805,8 +1805,31 @@ char *GetGamepadGlyph(char *bindName)
         return "steamdeck_button_x";
     else if (!strcmp(bindName, "^3[Y]"))
         return "steamdeck_button_y";
+    else if (!strcmp(bindName, "[LEFT BUMPER]"))
+        return "steamdeck_button_l1";
+    else if (!strcmp(bindName, "[RIGHT BUMPER]"))
+        return "steamdeck_button_r1";
+    else if (!strcmp(bindName, "[BACK]"))
+        return "steamdeck_button_view";
+    else if (!strcmp(bindName, "[START]"))
+        return "steamdeck_button_options";
+    else if (!strcmp(bindName, "[LEFT TRIGGER]"))
+        return "steamdeck_button_l2";
+    else if (!strcmp(bindName, "[RIGHT TRIGGER]"))
+        return "steamdeck_button_r2";
+    else if (!strcmp(bindName, "[D-PAD UP]"))
+        return "steamdeck_dpad_up";
+    else if (!strcmp(bindName, "[D-PAD RIGHT]"))
+        return "steamdeck_dpad_right";
+    else if (!strcmp(bindName, "[D-PAD DOWN]"))
+        return "steamdeck_dpad_down";
+    else if (!strcmp(bindName, "[D-PAD LEFT]"))
+        return "steamdeck_dpad_left";
+    else if (!strcmp(bindName, "[L3]"))
+        return "steamdeck_stick_l_press";
+    else if (!strcmp(bindName, "[R3]"))
+        return "steamdeck_stick_r_press";
 
-    //TODO: fill this out further.
 
     //No match.
     return "";

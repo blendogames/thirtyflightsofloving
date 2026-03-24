@@ -235,20 +235,56 @@ static void M_DrawKeyBindingFunc (void *self)
 			alpha=160;
 #endif
 
-		name = Key_KeynumToString (keys[0]);
 
-		UI_DrawString (a->generic.x + a->generic.parent->x + 16,
-						a->generic.y + a->generic.parent->y, a->generic.textSize, ALIGN_CENTER, name, FONT_UI, alpha);
+        if (ShowGamepadIcons())
+        {
+            //BC 3-23-2026 draw glyphs in gamepad bind screen.
 
-		x = (int)strlen(name) * MENU_FONT_SIZE;
+            
 
-		if (keys[1] != -1)
-		{
-			UI_DrawString (a->generic.x + a->generic.parent->x + MENU_FONT_SIZE*3 + x,
-							a->generic.y + a->generic.parent->y, a->generic.textSize, ALIGN_CENTER, "or", FONT_UI, alpha);
-			UI_DrawString (a->generic.x + a->generic.parent->x + MENU_FONT_SIZE*6 + x,
-							a->generic.y + a->generic.parent->y, a->generic.textSize, ALIGN_CENTER, Key_KeynumToString(keys[1]), FONT_UI, alpha);
-		}
+            //sprintf(name, "%d", keys[0]);
+
+            int drawPosXOffset = 0;
+            for (int i = 0; i < 2; i++)
+            {
+                if (keys[i] < 205 || keys[i] > 240)
+                    continue;
+
+                const char* bindname = Key_KeynumToString(keys[i]);
+                const char* iconName = GetGamepadGlyph(bindname);
+                int ICONSIZE = 20;
+                if (iconName[0] != '\0')
+                {
+                    //Draw gamepad glyph.
+                    SCR_DrawPic(a->generic.x + a->generic.parent->x + 14 + drawPosXOffset, a->generic.y + a->generic.parent->y - 7, ICONSIZE, ICONSIZE, ALIGN_CENTER, false, iconName, 1.0f);
+                }
+
+                drawPosXOffset += ICONSIZE + 5;
+            }
+
+
+
+
+        }
+        else
+        {
+            //BC 3-23-2026 default keyboard controls bind display. This section of code hasn't been changed from the original.
+
+            name = Key_KeynumToString(keys[0]);
+
+            UI_DrawString(a->generic.x + a->generic.parent->x + 16,
+                a->generic.y + a->generic.parent->y, a->generic.textSize, ALIGN_CENTER, name, FONT_UI, alpha);
+
+            x = (int)strlen(name) * MENU_FONT_SIZE;
+
+            if (keys[1] != -1)
+            {
+                UI_DrawString(a->generic.x + a->generic.parent->x + MENU_FONT_SIZE * 3 + x,
+                    a->generic.y + a->generic.parent->y, a->generic.textSize, ALIGN_CENTER, "or", FONT_UI, alpha);
+                UI_DrawString(a->generic.x + a->generic.parent->x + MENU_FONT_SIZE * 6 + x,
+                    a->generic.y + a->generic.parent->y, a->generic.textSize, ALIGN_CENTER, Key_KeynumToString(keys[1]), FONT_UI, alpha);
+            }
+        }
 	}
 }
 
