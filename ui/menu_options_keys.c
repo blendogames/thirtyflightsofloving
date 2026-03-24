@@ -247,9 +247,6 @@ static void M_DrawKeyBindingFunc (void *self)
             int drawPosXOffset = 0;
             for (int i = 0; i < 2; i++)
             {
-                if (keys[i] < 205 || keys[i] > 240)
-                    continue;
-
                 const char* bindname = Key_KeynumToString(keys[i]);
                 const char* iconName = GetGamepadGlyph(bindname);
                 int ICONSIZE = 20;
@@ -257,9 +254,10 @@ static void M_DrawKeyBindingFunc (void *self)
                 {
                     //Draw gamepad glyph.
                     SCR_DrawPic(a->generic.x + a->generic.parent->x + 14 + drawPosXOffset, a->generic.y + a->generic.parent->y - 7, ICONSIZE, ICONSIZE, ALIGN_CENTER, false, iconName, 1.0f);
+                    drawPosXOffset += ICONSIZE + 5;
                 }
 
-                drawPosXOffset += ICONSIZE + 5;
+                
             }
 
 

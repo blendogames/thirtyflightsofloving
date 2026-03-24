@@ -796,6 +796,8 @@ extern	cvar_t	*zoomsnap;
 
 extern	cvar_t	*blaster_color; // Knightmare added
 
+extern cvar_t   *joy_frobfriction; //BC 3-23-2026 frob friction
+
 extern	int		max_modelindex;
 extern	int		max_soundindex;
 
@@ -1582,6 +1584,9 @@ struct gclient_s
 	float		menutime;			// time to update menu
 	qboolean	menudirty;
 //ZOID
+
+
+    float		joy_frobfriction; //BC 3-23-2026 gamepad frob friction
 };
 
 #define NUM_ACTOR_SOUNDS   13

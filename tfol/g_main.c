@@ -136,6 +136,8 @@ cvar_t	*zoomsnap;
 
 cvar_t	*blaster_color; // Knightmare added
 
+cvar_t	*joy_frobfriction; //BC 3-23-2026 frob friction
+
 void SpawnEntities (char *mapname, char *entities, char *spawnpoint);
 void ClientThink (edict_t *ent, usercmd_t *cmd);
 qboolean ClientConnect (edict_t *ent, char *userinfo);

@@ -86,6 +86,8 @@ cvar_t	*joy_yawsensitivity;
 cvar_t	*joy_upthreshold;
 cvar_t	*joy_upsensitivity;
 
+cvar_t	*joy_frobfriction; //BC 3-23-2026
+
 qboolean	joy_avail, joy_advancedinit, joy_haspov;
 DWORD		joy_oldbuttonstate, joy_oldpovstate;
 
@@ -498,6 +500,9 @@ void IN_Init (void)
 	Cvar_SetDescription ("joy_pitchsensitivity", "Controls the speed that you look up and down.");
 	joy_yawsensitivity		= Cvar_Get ("joy_yawsensitivity",		"-1",		0);
 	Cvar_SetDescription ("joy_yawsensitivity", "Controls the speed that you look left to right.");
+
+    joy_frobfriction = Cvar_Get("joy_frobfriction", "0.5", 0);
+    Cvar_SetDescription("joy_frobfriction", "Adds look friction when crosshair is above a frobbable.");
 
 	// centering
 	v_centermove			= Cvar_Get ("v_centermove",				"0.15",		0);
@@ -1037,7 +1042,7 @@ void IN_JoyMove (usercmd_t *cmd)
                     float cursorSpeedModifier = 1.0f; //BC 3-19-2026 if on frobbable/useable thing, then slow down cursor speed
                     if (cl.frame.playerstate.stats[STAT_USEABLE] > 0) //BC 3-19-2026 if on frobbable/useable thing, then slow down cursor speed
                     {
-                        cursorSpeedModifier *= 0.5f;
+                        cursorSpeedModifier *= joy_frobfriction->value;
                     }
 
 
@@ -1072,7 +1077,7 @@ void IN_JoyMove (usercmd_t *cmd)
 
                     if (cl.frame.playerstate.stats[STAT_USEABLE] > 0) //BC 3-19-2026 if on frobbable/useable thing, then slow down cursor speed
                     {
-                        invertModifier *= 0.5f;
+                        invertModifier *= joy_frobfriction->value;
                     }
 
 
