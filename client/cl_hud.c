@@ -450,7 +450,7 @@ void CL_ExecuteLayoutString (char *s, qboolean isStatusBar)
 			viddef.width - SCR_ScaledHud(128),
 			viddef.height - SCR_ScaledHud(128),
 			SCR_GetHudScale() * 0.8,
-			"drunk",
+            ShowGamepadIcons() ? "drunk_deck" : "drunk",
 			1.0);
 	}
 
