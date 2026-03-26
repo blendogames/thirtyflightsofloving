@@ -216,14 +216,14 @@ void Menu_Options_Controls_Init (void)
 #ifdef NOTTHIRTYFLIGHTS
 	s_options_controls_sensitivity_slider.generic.name		= "mouse speed";
 #else
-	s_options_controls_sensitivity_slider.generic.name		= "Mouse Sensitivity";
+	s_options_controls_sensitivity_slider.generic.name		= "Look Sensitivity";
 #endif
 	s_options_controls_sensitivity_slider.generic.callback	= MouseSpeedFunc;
 	s_options_controls_sensitivity_slider.maxPos			= 20;
 	s_options_controls_sensitivity_slider.baseValue			= 1.0f;
 	s_options_controls_sensitivity_slider.increment			= 0.5f;
 	s_options_controls_sensitivity_slider.displayAsPercent	= false;
-	s_options_controls_sensitivity_slider.generic.statusbar	= "changes sensitivity of mouse for head movement";
+	s_options_controls_sensitivity_slider.generic.statusbar	= "changes sensitivity of head movement";
 
 #ifdef NOTTHIRTYFLIGHTS
 	s_options_controls_invertmouse_box.generic.type			= MTYPE_SPINCONTROL;
@@ -241,7 +241,7 @@ void Menu_Options_Controls_Init (void)
 	s_options_controls_invertmouse_box.generic.callback		= InvertMouseFunc;
 	s_options_controls_invertmouse_box.itemNames			= yesno_names;
 	s_options_controls_invertmouse_box.invertValue			= true;
-	s_options_controls_invertmouse_box.generic.statusbar	= "inverts mouse y-axis movement";
+	s_options_controls_invertmouse_box.generic.statusbar	= "inverts camera y-axis movement";
 
 #ifdef NOTTHIRTYFLIGHTS
 	s_options_controls_autosensitivity_box.generic.type			= MTYPE_SPINCONTROL;

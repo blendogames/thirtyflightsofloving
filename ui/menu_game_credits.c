@@ -149,7 +149,7 @@ void Menu_Credits_Draw (void)
 	//SCR_DrawFill( 25, 60, 550, 4, ALIGN_STRETCH, 255,128,0, 254 );
 
 	Menu_DrawString(leftMargin, 40, "^7CREATED BY", 128);
-	Menu_DrawString(leftIndent, 50, " ^7Brendon Chung", 255);	Menu_DrawString(210, 50, "^7blendogames.com", 128);
+	Menu_DrawString(leftIndent, 50, "^7Brendon Chung", 255);	Menu_DrawString(210, 50, "^7blendogames.com", 128);
 
 
 	//SCR_DrawFill2( 25, 110, 540, 2, ALIGN_STRETCH, 255,128,0, 160 );
