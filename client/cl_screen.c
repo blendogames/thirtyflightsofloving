@@ -1835,6 +1835,19 @@ char *GetGamepadGlyph(char *bindName)
     return "";
 }
 
+//BC 3-26-2026 generic button prompt render
+void DrawGamepadPrompt(float x, float y, char *buttonIcon, char *text)
+{
+    int ICONSIZE = 25;
+    const char* iconName = GetGamepadGlyph(buttonIcon);
+    if (iconName[0] != '\0')
+    {
+        SCR_DrawPic(x, y, ICONSIZE, ICONSIZE, ALIGN_LEFT, false, iconName, 1.0f);
+    }
+
+    SCR_DrawString(x + 25, y + 8, MENU_HEADER_FONT_SIZE, ALIGN_LEFT, text, FONT_SCREEN, 255);
+}
+
 
 /*
 =================

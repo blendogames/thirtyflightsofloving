@@ -179,3 +179,4 @@ void	SCR_StopCinematic (void);
 void	SCR_FinishCinematic (void);
 
 char *GetGamepadGlyph(char *bindName); //BC 3-23-2026
+void DrawGamepadPrompt(float x, float y, char *buttonIcon, char *text); //BC 3-26-2026

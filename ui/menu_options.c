@@ -196,6 +196,13 @@ void Menu_Options_Draw (void)
 		icondraw( name );
 	}
 #endif
+
+    //BC 3-26-2026 gamepad prompts
+    if (ShowGamepadIcons())
+    {
+        DrawGamepadPrompt(20, 435, "^1[B]", "Back");
+        DrawGamepadPrompt(125, 435, "^2[A]", "Select");
+    }
 }
 
 const char *Menu_Options_Key (int key)
