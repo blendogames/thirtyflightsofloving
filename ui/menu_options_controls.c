@@ -174,9 +174,23 @@ static void M_ControlsResetDefaultsFunc (void *unused)
 //	Cvar_SetToDefault ("lookspring");
 //	Cvar_SetToDefault ("lookstrafe");
 //	Cvar_SetToDefault ("freelook");
-	Cvar_SetToDefault ("in_joystick");
+	
 
-	Cbuf_AddText ("exec defaultbinds.cfg\n"); // reset default binds
+    //BC 3-26-2026 on steam deck, default to joystick on.
+    if (ShowGamepadIcons())
+    {
+        Cvar_Set("in_joystick", "1");
+        Cbuf_AddText("exec defaultgamepad.cfg\n"); // reset default binds
+    }
+    else
+    {
+        //Default keyboard/mouse.
+        Cvar_SetToDefault("in_joystick");
+        Cbuf_AddText("exec defaultbinds.cfg\n"); // reset default binds
+    }
+
+	
+
 	Cbuf_Execute();
 
 	M_ControlsSetMenuItemValues ();
@@ -349,7 +363,7 @@ void Menu_Options_Controls_Init (void)
 #endif
 	s_options_controls_joystick_box.generic.callback	= JoystickFunc;
 	s_options_controls_joystick_box.itemNames			= yesno_names;
-	s_options_controls_joystick_box.generic.statusbar	= "enables use of joystick";
+	s_options_controls_joystick_box.generic.statusbar	= "enables use of gamepad";
 
 #ifndef NOTTHIRTYFLIGHTS
 	s_options_controls_console_box.generic.type = MTYPE_CHECKBOX;
