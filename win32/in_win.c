@@ -146,6 +146,11 @@ RECT		window_rect;
 
 qboolean	joystickVerticalMoved;
 
+
+qboolean    joystickLeftTriggerMoved;
+qboolean    joystickRightTriggerMoved;
+
+
 /*
 ===========
 IN_ActivateMouse
@@ -517,6 +522,9 @@ void IN_Init (void)
 	IN_StartupJoystick ();
 
 	joystickVerticalMoved = false;
+
+    joystickLeftTriggerMoved = false;
+    joystickRightTriggerMoved = false;
 }
 
 /*
@@ -831,6 +839,9 @@ void IN_Commands (void)
 	}
 	joy_oldbuttonstate = buttonstate;
 
+
+
+
 	if (joy_haspov)
 	{
 		// convert POV information into 4 bits of state information
@@ -942,6 +953,34 @@ void IN_JoyMove (usercmd_t *cmd)
 
 		// convert range from -32768..32767 to -1..1 
 		fAxisValue /= 32768.0;
+
+
+        //BC 3-31-2026 allow gamepad triggers to call key event. This is a bit of a kludge....
+        if (i == JOY_AXIS_Z)
+        {
+            if (fAxisValue > 0.2f)
+            {
+                Key_Event(K_AUX27, true, sys_msg_time); //left trigger
+                joystickLeftTriggerMoved = true;
+            }
+            else if (joystickLeftTriggerMoved)
+            {
+                Key_Event(K_AUX27, false, 0);
+            }
+
+            if (fAxisValue < -0.2f)
+            {
+                Key_Event(K_AUX28, true, sys_msg_time); //right trigger
+                joystickRightTriggerMoved = true;
+            }
+            else if (joystickRightTriggerMoved)
+            {
+                Key_Event(K_AUX28, false, 0);
+            }
+
+            
+        }
+
 
 		switch (dwAxisMap[i])
 		{
