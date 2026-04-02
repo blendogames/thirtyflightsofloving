@@ -437,7 +437,8 @@ static const char *Menu_Keys_Key (int key)
 			UI_BackMenu(item); return NULL; }
 		M_KeyBindingFunc (item);
 		return ui_menu_in_sound;
-	case K_BACKSPACE:		// delete bindings
+    case K_JOY4:            //BC 4-2-2026 Y button will unbind a keybind.
+    case K_BACKSPACE:		// delete bindings
 	case K_DEL:				// delete bindings
 	case K_KP_DEL:
 		M_UnbindCommand (bindnames[item->generic.localdata[0]][0]);

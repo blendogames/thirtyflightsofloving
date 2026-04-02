@@ -665,8 +665,25 @@ const char *UI_DefaultMenuKey (menuframework_s *m, int key)
 			}
 			else 
 			{
-				
-				UI_SelectMenuItem( m );
+                //BC 4-2-2026 only allow gamepad button A to select menu items.
+                qboolean shouldSelect = true;
+                if (ShowGamepadIcons())
+                {
+                    if (key == K_JOY1)
+                    {
+                        shouldSelect = true;
+                    }
+                    else
+                    {
+                        shouldSelect = false;
+                    }
+                }
+                    
+
+                if (shouldSelect)
+                {
+                    UI_SelectMenuItem(m);
+                }
 
 				if ( item->type == MTYPE_ACTION )
 					sound = ui_menu_move_sound;

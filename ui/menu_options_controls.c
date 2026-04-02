@@ -372,6 +372,7 @@ void Menu_Options_Controls_Init (void)
 	s_options_controls_console_box.generic.name	= "Enable Console";
 	s_options_controls_console_box.generic.callback = ConsoleFunc;
 	s_options_controls_console_box.itemNames = yesno_names;
+    s_options_controls_console_box.generic.statusbar = "enable developer console";
 #endif
 
 	s_options_controls_customize_keys_action.generic.type		= MTYPE_ACTION;
