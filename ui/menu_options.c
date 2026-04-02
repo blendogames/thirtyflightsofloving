@@ -106,7 +106,7 @@ void Menu_Options_Init (void)
 	s_options_controls_section.generic.x			= x;
 	s_options_controls_section.generic.y			= y += 2*MENU_LINE_SIZE;	// MENU_FONT_SIZE * 4
 	s_options_controls_section.generic.callback		= M_MenuControlsFunc;
-	s_options_controls_section.generic.statusbar	= "change control settings and bind keys";
+	s_options_controls_section.generic.statusbar	= "change control settings";
 
 #ifndef NOTTHIRTYFLIGHTS
 	s_options_video_section.generic.type		= MTYPE_ACTION;
@@ -116,6 +116,7 @@ void Menu_Options_Init (void)
 	s_options_video_section.generic.x		= QMF_LEFT_JUSTIFY;
 	s_options_video_section.generic.y		= y += 2*MENU_LINE_SIZE;
 	s_options_video_section.generic.callback	= Menu_Video_f;
+    s_options_video_section.generic.statusbar = "change video settings";
 #else
 	s_options_screen_section.generic.type		= MTYPE_ACTION;
 	s_options_screen_section.generic.textSize	= MENU_HEADER_FONT_SIZE;
@@ -151,7 +152,7 @@ void Menu_Options_Init (void)
 #ifdef NOTTHIRTYFLIGHTS
 	s_options_back_action.generic.name		= "Back to Main";
 #else
-	s_options_back_action.generic.name		= "Cancel";
+	s_options_back_action.generic.name		= "Done";
 #endif
 	s_options_back_action.generic.x			= x;
 	s_options_back_action.generic.y			= y += 3*MENU_HEADER_LINE_SIZE;	// MENU_FONT_SIZE * 13

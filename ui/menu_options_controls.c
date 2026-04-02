@@ -250,12 +250,12 @@ void Menu_Options_Controls_Init (void)
 #ifdef NOTTHIRTYFLIGHTS
 	s_options_controls_invertmouse_box.generic.name			= "invert mouse";
 #else
-	s_options_controls_invertmouse_box.generic.name			= "Invert Camera";
+	s_options_controls_invertmouse_box.generic.name			= "Invert Look";
 #endif
 	s_options_controls_invertmouse_box.generic.callback		= InvertMouseFunc;
 	s_options_controls_invertmouse_box.itemNames			= yesno_names;
 	s_options_controls_invertmouse_box.invertValue			= true;
-	s_options_controls_invertmouse_box.generic.statusbar	= "inverts camera y-axis movement";
+	s_options_controls_invertmouse_box.generic.statusbar	= "inverts vertical look movement";
 
 #ifdef NOTTHIRTYFLIGHTS
 	s_options_controls_autosensitivity_box.generic.type			= MTYPE_SPINCONTROL;
