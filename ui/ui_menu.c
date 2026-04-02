@@ -669,7 +669,7 @@ const char *UI_DefaultMenuKey (menuframework_s *m, int key)
                 qboolean shouldSelect = true;
                 if (ShowGamepadIcons())
                 {
-                    if (key == K_JOY1)
+                    if (key == K_JOY1 || key == K_KP_ENTER || key == K_ENTER)
                     {
                         shouldSelect = true;
                     }
