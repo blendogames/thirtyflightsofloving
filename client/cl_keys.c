@@ -1111,7 +1111,8 @@ void Key_Event (int key, qboolean down, unsigned time)
 		key = K_ESCAPE;*/
 
 	// menu key is hardcoded, so the user can never unbind it
-	if (key == K_ESCAPE)
+	if (key == K_ESCAPE 
+        || key == K_AUX8) //BC 4-2-2026 hardcode the Start button to make pausemenu appear
 	{
 		if (!down)
 			return;
