@@ -515,6 +515,33 @@ void UI_DrawMenu (menuframework_s *menu)
 	}
 	else
 		UI_DrawMenuStatusBar (menu->statusbar);
+
+
+    //BC 4-2-2026 button glyph prompts
+    if (ShowGamepadIcons())
+    {
+        //BC this is a hack to not draw prompts for the keybind menu, since the keybind menu has some
+        //additional logic (handled in menu_options_keys.c). QMF_GRAYED just happens to only be used
+        //on the keybind menu options, so we're piggybacking on that here.
+        if (item->flags & QMF_GRAYED) 
+            return;
+
+        DrawGamepadPrompt(20, 435, "^1[B]", "Back");
+
+        if (item->type == MTYPE_ACTION || item->type == MTYPE_CHECKBOX)
+        {            
+            //Draw 'A button' glyph.
+            DrawGamepadPrompt(125, 435, "^2[A]", "Select");
+        }
+        else if (item->type == MTYPE_SLIDER || item->type == MTYPE_LIST || item->type == MTYPE_SPINCONTROL)
+        {
+            //Draw dpad glyphs.
+            DrawGamepadPrompt(125, 435, "[D-PAD LEFT]", "");
+            DrawGamepadPrompt(150, 435, "[D-PAD RIGHT]", "Select");
+        }
+        
+
+    }
 }
 
 

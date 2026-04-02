@@ -301,7 +301,7 @@ static void M_KeyBindingFunc (void *self)
 #ifdef NOTTHIRTYFLIGHTS
 	UI_SetMenuStatusBar (&s_keys_menu, "press a key or button for this action");
 #else
-	UI_SetMenuStatusBar (&s_keys_menu, "Press a key or button.");
+	UI_SetMenuStatusBar (&s_keys_menu, ShowGamepadIcons() ? "Press a button..." : "Press a key or button.");
 #endif
 }
 
@@ -377,7 +377,7 @@ static void Menu_Keys_Init (void)
 #ifdef NOTTHIRTYFLIGHTS
 	UI_SetMenuStatusBar (&s_keys_menu, "enter or mouse1 to change, backspace to clear");
 #else
-	UI_SetMenuStatusBar (&s_keys_menu, "Press ENTER or LEFT CLICK to change the key. Press BACKSPACE to clear.");
+	UI_SetMenuStatusBar (&s_keys_menu, ShowGamepadIcons() ? "" : "Press ENTER or LEFT CLICK to change the key. Press BACKSPACE to clear.");
 #endif
 #endif
 	// Don't center it- it's too large
@@ -394,6 +394,28 @@ static void Menu_Keys_Draw (void)
 
 	UI_AdjustMenuCursor (&s_keys_menu, 1);
 	UI_DrawMenu (&s_keys_menu);
+
+
+    //BC 4-2-2026
+    if (ShowGamepadIcons())
+    {
+        if (bind_grab)
+        {
+        }
+        else
+        {
+            menucommon_s *item;
+
+            DrawGamepadPrompt(20, 435, "^1[B]", "Back");
+            DrawGamepadPrompt(125, 435, "^2[A]", "Select");
+            
+            item = UI_ItemAtMenuCursor(&s_keys_menu);
+            if (item->flags & QMF_GRAYED)
+            {
+                DrawGamepadPrompt(640, 435, "^3[Y]", "Unbind");
+            }
+        }
+    }
 }
 
 static const char *Menu_Keys_Key (int key)
@@ -423,7 +445,7 @@ static const char *Menu_Keys_Key (int key)
 #ifdef NOTTHIRTYFLIGHTS
 		UI_SetMenuStatusBar (&s_keys_menu, "enter to change, backspace to clear");
 #else
-		UI_SetMenuStatusBar (&s_keys_menu, "Press ENTER or LEFT CLICK to change the key. Press BACKSPACE to clear.");
+		UI_SetMenuStatusBar (&s_keys_menu, ShowGamepadIcons() ? "" : "Press ENTER or LEFT CLICK to change the key. Press BACKSPACE to clear.");
 #endif
 		bind_grab = false;
 		return ui_menu_out_sound;
