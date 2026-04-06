@@ -1021,6 +1021,74 @@ void Cmd_List_f (void)
 	Com_Printf ("%i commands\n", i);
 }
 
+//BC 4-6-2026 emulate functionality of Find command from Halflife2. Do substring filter search on all commands+cvars.
+void Cmd_Find_f(void)
+{
+	#define	MAXCOMMANDS		1024
+
+	int		c;
+
+	cmd_function_t	*cmd;
+	int				i, counter;
+
+	cvar_t	*var;
+
+	char	*tmpList[MAXCOMMANDS];
+
+	char	*filter;
+
+	c = Cmd_Argc();
+	if (c <= 1)
+	{
+		Com_Printf("usage: find <substring>\n");
+		return;
+	}
+
+	Com_Printf("\n");
+
+	filter = Cmd_Argv(1);
+
+	//Clear the array
+	i = 0;
+	for (i = 0; i < MAXCOMMANDS; i++)
+	{
+		tmpList[i] = strdup("");
+	}
+
+	//Find command matches.
+	counter = 0;
+	for (cmd = cmd_functions; cmd; cmd = cmd->next)
+	{
+		if (strstr(cmd->name, filter))
+		{
+			//Com_Printf("%s\n", cmd->name);
+			tmpList[counter] = cmd->name;
+			counter++;
+		}
+	}
+
+	//Find cvar matches.
+	for (var = cvar_vars; var; var = var->next, i++)
+	{
+		if (strstr(var->name, filter))
+		{
+			//Com_Printf("%s\n", var->name);
+			tmpList[counter] = var->name;
+			counter++;
+		}
+	}
+
+	//Sort alphabetically.
+	qsort(tmpList, counter, sizeof(char *), Q_SortStrcmp);
+	i = 0;
+	for (i = 0; i < counter; i++)
+	{
+		Com_Printf("%s\n", tmpList[i]); //Print to console.
+	}
+
+	Com_Printf("\nFound %d matches.\n", i);
+}
+
 /*
 ============
 Cmd_Init
@@ -1036,5 +1104,7 @@ void Cmd_Init (void)
 	Cmd_AddCommand ("echo",Cmd_Echo_f);
 	Cmd_AddCommand ("alias",Cmd_Alias_f);
 	Cmd_AddCommand ("wait", Cmd_Wait_f);
+
+	Cmd_AddCommand("find", Cmd_Find_f); //BC 4-6-2026 find command
 }
 
