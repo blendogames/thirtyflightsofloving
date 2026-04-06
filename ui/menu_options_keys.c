@@ -401,6 +401,7 @@ static void Menu_Keys_Draw (void)
     {
         if (bind_grab)
         {
+			DrawGamepadPrompt(640, 435, "[START]", "Cancel");
         }
         else
         {
@@ -428,7 +429,8 @@ static const char *Menu_Keys_Key (int key)
 	// pressing mouse1 to pick a new bind wont force bind/unbind itself - spaz
 	if ( bind_grab && !(ui_mousecursor.buttonused[MOUSEBUTTON1]&&key==K_MOUSE1))
 	{	
-		if ( key != K_ESCAPE && key != '`' )
+		if ( key != K_ESCAPE && key != '`'
+			&& key != K_AUX8) //BC 4-6-2026 dont allow binding to Start button
 		{
 			char cmd[1024];
 
