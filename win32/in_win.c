@@ -1015,7 +1015,9 @@ void IN_JoyMove (usercmd_t *cmd)
 				if (fabs(fAxisValue) > joy_forwardthreshold->value && cl.frame.playerstate.stats[STAT_FREEZE] <= 0 /*BC 1/30/2024 don't allow joystick movement during stat_freeze*/ )
 				{
 					if (cl.frame.playerstate.stats[STAT_MOVESLOW]) //BC 1/30/2024 slow down movement during stat_moveslow
+					{
 						speed *= .5f;
+					}
 
 					cmd->forwardmove += (fAxisValue * joy_forwardsensitivity->value) * speed * cl_forwardspeed->value;
 				}
@@ -1049,8 +1051,14 @@ void IN_JoyMove (usercmd_t *cmd)
 			break;
 
 		case AxisSide:
-			if (fabs(fAxisValue) > joy_sidethreshold->value)
+			if (fabs(fAxisValue) > joy_sidethreshold->value
+				&& cl.frame.playerstate.stats[STAT_FREEZE] <= 0) //BC 4-7-2026 disable gamepad movement during stat_freeze
 			{
+				if (cl.frame.playerstate.stats[STAT_MOVESLOW]) //BC 1/30/2024 slow down movement during stat_moveslow
+				{
+					speed *= .5f;
+				}
+
 				cmd->sidemove += (fAxisValue * joy_sidesensitivity->value) * speed * cl_sidespeed->value;
 			}
 			break;
