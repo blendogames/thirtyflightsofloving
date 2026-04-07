@@ -2304,8 +2304,15 @@ void SCR_DrawLoading (void)
 				ALIGN_STRETCH,
 				"/gfx/loadscreen.pcx", 1.0);			*/
 
+			qboolean isGravityBone = false;
+			//BC 4-7-2026 hack to shove in the gravitybone load screen.
+			if (strcmp(mapfile, "hof1") == 0 || strcmp(mapfile, "parlo1") == 0)
+			{
+				isGravityBone = true;
+			}
+
 			memset(&ds, 0, sizeof(drawStruct_t));
-			ds.pic = "/gfx/loadscreen.pcx";
+			ds.pic = isGravityBone ? "/gfx/loadscreen_gb.pcx" : "/gfx/loadscreen.pcx";
 			ds.x = (viddef.width / 2) - (viddef.height/2);
 			ds.y = 0;
 			ds.w = viddef.height;
