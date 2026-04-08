@@ -1156,6 +1156,7 @@ void PNGAPI R_ReadPNGData (png_structp png, png_bytep data, png_size_t length)
 		data[i] = r_png_handle->tmpBuf[r_png_handle->tmpi++];    // give pnglib a some more bytes  
 }
 
+//BC 4-8-2026 swap some signage textures when using gamepad. This is a caveman implementation but it works ok
 char *GetDeckTexture(char *textureName)
 {
 	if (!strcmp(textureName, "textures/signs/mouse.png"))
@@ -1181,6 +1182,10 @@ char *GetDeckTexture(char *textureName)
 	else if (!strcmp(textureName, "textures/signs/sf_mouse1.png"))
 	{
 		return "textures/signs/sf_mouse1_deck.png";
+	}
+	else if (!strcmp(textureName, "textures/signs/sf_wasd.png"))
+	{
+		return "textures/signs/sf_wasd_deck.png";
 	}
 
 	return textureName;
