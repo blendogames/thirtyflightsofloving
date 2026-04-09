@@ -203,8 +203,11 @@ void Menu_Credits_Draw (void)
 	Menu_DrawString(leftMargin, 410, "^7LINUX, SDL2 PORT", 128);
 	Menu_DrawString(leftIndent, 420, "^7Ethan Lee", 255);
 
-	Menu_DrawString(leftMargin , 435, "^7MAC PORT", 128);
-	Menu_DrawString(leftIndent , 445, "^7Corwin Light-Williams", 255);
+	Menu_DrawString(leftMargin + 300, 410, "^7GAMEPAD ICONS", 128);
+	Menu_DrawString(leftIndent + 300, 420, "^7Kenney Input Prompts", 255);
+
+	Menu_DrawString(leftMargin, 440, "^7MAC PORT", 128);
+	Menu_DrawString(leftIndent, 450, "^7Corwin Light-Williams", 255);
 
 	
 	#undef Menu_DrawString
