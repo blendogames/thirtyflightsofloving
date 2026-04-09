@@ -133,6 +133,15 @@ static void JoystickFunc (void *unused)
 #ifdef NOTTHIRTYFLIGHTS
 	UI_MenuSpinControl_SaveValue (&s_options_controls_joystick_box, "in_joystick");
 #else
+
+	//BC 4-8-2026 if steam deck, force gamepad on
+	if (Sys_IsSteamDeck())
+	{
+		Cvar_SetValue("in_joystick", 1);
+		s_options_controls_joystick_box.curValue = 1;
+		return;
+	}
+
 	Cvar_SetValue( "in_joystick", s_options_controls_joystick_box.curValue );
 #endif
 }
@@ -161,6 +170,7 @@ static void M_ControlsSetMenuItemValues (void)
 	UI_MenuSpinControl_SetValue (&s_options_controls_freelook_box, "freelook", 0, 1, true);
 	UI_MenuSpinControl_SetValue (&s_options_controls_joystick_box, "in_joystick", 0, 1, true);
 
+	//BC 4-8-2026
 	UI_MenuSpinControl_SetValue(&s_glyphs_box, "joy_glyphs", 0, 1, true);
 }
 
@@ -181,7 +191,7 @@ static void M_ControlsResetDefaultsFunc (void *unused)
 	
 
     //BC 3-26-2026 on steam deck, default to joystick on.
-    if (ShowGamepadIcons())
+    if (Sys_IsSteamDeck())
     {
 		Cvar_Set("joy_glyphs", "1");
         Cvar_Set("in_joystick", "1");

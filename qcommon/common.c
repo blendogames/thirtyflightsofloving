@@ -1772,9 +1772,10 @@ void Qcommon_Init (int argc, char **argv)
 	}
 
     //BC 3-16-2026 default to joystick for deck
-    if (ShowGamepadIcons())
+    if (Sys_IsSteamDeck())
     {
         Cvar_Set("in_joystick", "1");
+		Cvar_Set("joy_glyphs", "1");
     }
 
 
