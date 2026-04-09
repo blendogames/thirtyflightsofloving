@@ -1190,6 +1190,10 @@ char *GetDeckTexture(char *textureName)
 	{
 		return "textures/signs/sf_wasd_deck.png";
 	}
+	else if (!strcmp(textureName, "pics/victory.png"))
+	{
+		return "pics/victory_deck.png";
+	}
 
 	return textureName;
 }

@@ -218,7 +218,7 @@ static void M_ControlsResetDefaultsFunc (void *unused)
 static const char *glyph_names[] =
 {
 	"keyboard/mouse",
-	"xbox/steamdeck",
+	"steamdeck/xbox",
 	0
 };
 
