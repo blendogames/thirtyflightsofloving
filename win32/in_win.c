@@ -87,6 +87,7 @@ cvar_t	*joy_upthreshold;
 cvar_t	*joy_upsensitivity;
 
 cvar_t	*joy_frobfriction; //BC 3-23-2026
+cvar_t	*joy_glyphs; //BC 4-8-2026 What control glyphs to show.
 
 qboolean	joy_avail, joy_advancedinit, joy_haspov;
 DWORD		joy_oldbuttonstate, joy_oldpovstate;
@@ -471,6 +472,10 @@ void IN_Init (void)
 	Cvar_SetDescription ("joy_name", "Sets name of the joystick.");
 	joy_advanced			= Cvar_Get ("joy_advanced",				"1",		0);
 	Cvar_SetDescription ("joy_advanced", "Enables the advanced axis (\"joy_advaxis*\") cvars.  Use the \"joy_advancedupdate\" command after setting this and the \"joy_advaxis*\" cvars.");
+
+	//BC 4-8-2026
+	joy_glyphs = Cvar_Get("joy_glyphs", "0", CVAR_ARCHIVE);
+	Cvar_SetDescription("joy_glyphs", "What control prompts to display. 0 = keyboard/mouse. 1 = xbox.");
 
 	joy_advaxisx			= Cvar_Get ("joy_advaxisx",				"3",		0);
 	Cvar_SetDescription ("joy_advaxisx", "Controls mapping of DirectInput axis X (typically joystick left and right).");

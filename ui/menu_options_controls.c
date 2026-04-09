@@ -55,6 +55,8 @@ static menuaction_s		s_options_controls_customize_keys_action;
 static menuaction_s		s_options_controls_defaults_action;
 static menuaction_s		s_options_controls_back_action;
 
+static menulist_s		s_glyphs_box; //BC 4-8-2026
+
 #ifndef NOTTHIRTYFLIGHTS
 static menulist_s		s_options_controls_console_box;
 static void ConsoleFunc( void *unused )
@@ -158,6 +160,8 @@ static void M_ControlsSetMenuItemValues (void)
 	UI_MenuSpinControl_SetValue (&s_options_controls_lookstrafe_box, "lookstrafe", 0, 1, true);
 	UI_MenuSpinControl_SetValue (&s_options_controls_freelook_box, "freelook", 0, 1, true);
 	UI_MenuSpinControl_SetValue (&s_options_controls_joystick_box, "in_joystick", 0, 1, true);
+
+	UI_MenuSpinControl_SetValue(&s_glyphs_box, "joy_glyphs", 0, 1, true);
 }
 
 static void M_ControlsResetDefaultsFunc (void *unused)
@@ -179,12 +183,14 @@ static void M_ControlsResetDefaultsFunc (void *unused)
     //BC 3-26-2026 on steam deck, default to joystick on.
     if (ShowGamepadIcons())
     {
+		Cvar_Set("joy_glyphs", "1");
         Cvar_Set("in_joystick", "1");
         Cbuf_AddText("exec defaultgamepad.cfg\n"); // reset default binds
     }
     else
     {
         //Default keyboard/mouse.
+		Cvar_Set("joy_glyphs", "0");
         Cvar_SetToDefault("in_joystick");
         Cbuf_AddText("exec defaultbinds.cfg\n"); // reset default binds
     }
@@ -197,6 +203,20 @@ static void M_ControlsResetDefaultsFunc (void *unused)
 }
 
 //=======================================================================
+
+//BC 4-8-2026
+static const char *glyph_names[] =
+{
+	"keyboard/mouse",
+	"xbox/steamdeck",
+	0
+};
+
+//BC 4-8-2026
+static void GlyphCallback(void *unused)
+{
+	UI_MenuSpinControl_SaveValue(&s_glyphs_box, "joy_glyphs");
+}
 
 void Menu_Options_Controls_Init (void)
 {
@@ -365,6 +385,23 @@ void Menu_Options_Controls_Init (void)
 	s_options_controls_joystick_box.itemNames			= yesno_names;
 	s_options_controls_joystick_box.generic.statusbar	= "enables use of gamepad";
 
+
+
+
+	//BC 4-8-2026
+	s_glyphs_box.generic.type = MTYPE_SPINCONTROL;
+	s_glyphs_box.generic.textSize = MENU_FONT_SIZE;
+	s_glyphs_box.generic.x = 0;
+	s_glyphs_box.generic.y = y += 2 * MENU_LINE_SIZE;
+	s_glyphs_box.generic.name = "Button prompts";
+	s_glyphs_box.generic.callback = GlyphCallback;
+	s_glyphs_box.itemNames = glyph_names;
+	s_glyphs_box.generic.statusbar = "what button prompts to display";
+
+
+
+
+
 #ifndef NOTTHIRTYFLIGHTS
 	s_options_controls_console_box.generic.type = MTYPE_CHECKBOX;
 	s_options_controls_console_box.generic.x	= 0;
@@ -420,6 +457,10 @@ void Menu_Options_Controls_Init (void)
 	UI_AddMenuItem (&s_options_controls_menu, (void *) &s_options_controls_freelook_box);
 #endif
 	UI_AddMenuItem (&s_options_controls_menu, (void *) &s_options_controls_joystick_box);
+
+	UI_AddMenuItem(&s_options_controls_menu, (void *)&s_glyphs_box);
+
+
 #ifndef NOTTHIRTYFLIGHTS
 	UI_AddMenuItem (&s_options_controls_menu, (void *) &s_options_controls_console_box);
 #endif

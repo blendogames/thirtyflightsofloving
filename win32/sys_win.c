@@ -1491,8 +1491,10 @@ qboolean Sys_IsSteamDeck (void)
 
 qboolean ShowGamepadIcons(void)
 {
-    //return true;
-    return Sys_IsSteamDeck();
+	cvar_t		*joy_glyphs;
+	joy_glyphs = Cvar_Get("joy_glyphs", "0", CVAR_ARCHIVE);
+
+	return (joy_glyphs->integer > 0 || Sys_IsSteamDeck());
 }
 
 /*
