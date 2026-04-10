@@ -53,6 +53,7 @@ static menuaction_s		s_game_back_action;
 #ifndef NOTTHIRTYFLIGHTS
 static menuaction_s		s_gravitybone;
 static menuaction_s		s_commentarymode;
+static menuaction_s		s_commentarymodeGB;
 #ifdef IDLETHUMBS
 static menuaction_s		s_idlemode;
 #endif
@@ -110,6 +111,13 @@ static void GravityboneFunc( void *data )
 
 	Cbuf_AddText ("gravitybonegame\n");
 	cls.key_dest = key_game;
+}
+
+static void GravityboneCommentaryFunc(void *data)
+{
+	GravityboneFunc(NULL);
+	Cvar_ForceSet("skill", "1");
+	Cvar_ForceSet("commentary", "1");
 }
 
 static void CommentaryFunc( void *data )
@@ -243,6 +251,17 @@ void Menu_Game_Init (void)
 	s_gravitybone.generic.iconname	= "gravitybone";
 	s_gravitybone.generic.callback = GravityboneFunc;
 
+	//BC 4-10-2026 commentary for GB
+	s_commentarymodeGB.generic.type = MTYPE_ACTION;
+	s_commentarymodeGB.generic.textSize = MENU_HEADER_FONT_SIZE;
+	s_commentarymodeGB.generic.flags = QMF_LEFT_JUSTIFY;
+	s_commentarymodeGB.generic.x = 10;
+	s_commentarymodeGB.generic.y = y += (MENU_LINE_SIZE * 1.5f);
+	s_commentarymodeGB.generic.name = "A. Developer Commentary";
+	s_commentarymodeGB.generic.iconname = "devcommentary";
+	s_commentarymodeGB.generic.callback = GravityboneCommentaryFunc;
+
+
 	y += MENU_LINE_SIZE;
 #endif
 
@@ -307,6 +326,7 @@ void Menu_Game_Init (void)
 	UI_AddMenuItem (&s_game_menu, ( void * ) &s_idlemode);
 #endif
 	UI_AddMenuItem (&s_game_menu, (void *) &s_gravitybone);
+	UI_AddMenuItem(&s_game_menu, (void *) &s_commentarymodeGB);//BC 4-10-2026 GB commentary mode
 #endif
 
 	UI_AddMenuItem (&s_game_menu, (void *) &s_blankline);

@@ -837,9 +837,31 @@ V_Viewpos_f
 */
 void V_Viewpos_f (void)
 {
+	if (Cmd_Argc() >= 2)
+	{
+		//BC 4-10-2026 if an arg is included, then snap to nearest multiple value.
+		//This functionality is being added in order to make it easier to append
+		//commentary nodes in-game, since we don't want to recompile maps.
+		int value = atoi(Cmd_Argv(1));
+
+		int x = (int)cl.refdef.vieworg[0];
+		x = x - x % value;
+
+		int y = (int)cl.refdef.vieworg[1];
+		y = y - y % value;
+
+		int z = (int)cl.refdef.vieworg[2];
+		z = z - z % value;
+
+		Com_Printf("%i %i %i\n", x, y, z);		
+		return;
+	}
+
 	Com_Printf ("(%i %i %i) : %i\n", (int)cl.refdef.vieworg[0],
 		(int)cl.refdef.vieworg[1], (int)cl.refdef.vieworg[2], 
 		(int)cl.refdef.viewangles[YAW]);
+
+
 }
 
 // Knightmare- diagnostic commands from Lazarus
