@@ -61,7 +61,7 @@ void Text_BuildDisplay(texthnd_t *hnd)
 
 	if(!(hnd->flags & 2))
 	{
-		text[hnd->page_length+1].text =   "Press E";
+		text[hnd->page_length+1].text =   "Press [USE]";
 		if(hnd->nlines > hnd->page_length)
 			text[hnd->page_length].text = "Scroll Mousewheel for next page";
 	}
