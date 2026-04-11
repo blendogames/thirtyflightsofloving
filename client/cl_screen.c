@@ -1797,39 +1797,116 @@ char *SCR_FindKey (char *key)
 //This is very caveman but should work ok...
 char *GetGamepadGlyph(char *bindName)
 {
-    if (!strcmp(bindName, "^2[A]"))
-        return "steamdeck_button_a";
-    else if (!strcmp(bindName, "^1[B]"))
-        return "steamdeck_button_b";
-    else if (!strcmp(bindName, "^4[X]"))
-        return "steamdeck_button_x";
-    else if (!strcmp(bindName, "^3[Y]"))
-        return "steamdeck_button_y";
-    else if (!strcmp(bindName, "[LEFT BUMPER]"))
-        return "steamdeck_button_l1";
-    else if (!strcmp(bindName, "[RIGHT BUMPER]"))
-        return "steamdeck_button_r1";
-    else if (!strcmp(bindName, "[BACK]"))
-        return "steamdeck_button_view";
-    else if (!strcmp(bindName, "[START]"))
-        return "steamdeck_button_options";
-    else if (!strcmp(bindName, "[LEFT TRIGGER]"))
-        return "steamdeck_button_l2";
-    else if (!strcmp(bindName, "[RIGHT TRIGGER]"))
-        return "steamdeck_button_r2";
-    else if (!strcmp(bindName, "[D-PAD UP]"))
-        return "steamdeck_dpad_up";
-    else if (!strcmp(bindName, "[D-PAD RIGHT]"))
-        return "steamdeck_dpad_right";
-    else if (!strcmp(bindName, "[D-PAD DOWN]"))
-        return "steamdeck_dpad_down";
-    else if (!strcmp(bindName, "[D-PAD LEFT]"))
-        return "steamdeck_dpad_left";
-    else if (!strcmp(bindName, "[L3]"))
-        return "steamdeck_stick_l_press";
-    else if (!strcmp(bindName, "[R3]"))
-        return "steamdeck_stick_r_press";
-
+	cvar_t *glyph = Cvar_Get("joy_glyphs", Sys_IsSteamDeck() ? "1" : "0", CVAR_ARCHIVE);
+	
+	if (glyph->integer == 2)
+	{
+		//Xbox.
+		if (!strcmp(bindName, "^2[A]"))
+			return "xbox_button_a";
+		else if (!strcmp(bindName, "^1[B]"))
+			return "xbox_button_b";
+		else if (!strcmp(bindName, "^4[X]"))
+			return "xbox_button_x";
+		else if (!strcmp(bindName, "^3[Y]"))
+			return "xbox_button_y";
+		else if (!strcmp(bindName, "[LEFT BUMPER]"))
+			return "steamdeck_button_l1";
+		else if (!strcmp(bindName, "[RIGHT BUMPER]"))
+			return "steamdeck_button_r1";
+		else if (!strcmp(bindName, "[BACK]"))
+			return "xbox_button_view";
+		else if (!strcmp(bindName, "[START]"))
+			return "xbox_button_menu";
+		else if (!strcmp(bindName, "[LEFT TRIGGER]"))
+			return "steamdeck_button_l2";
+		else if (!strcmp(bindName, "[RIGHT TRIGGER]"))
+			return "steamdeck_button_r2";
+		else if (!strcmp(bindName, "[D-PAD UP]"))
+			return "steamdeck_dpad_up";
+		else if (!strcmp(bindName, "[D-PAD RIGHT]"))
+			return "steamdeck_dpad_right";
+		else if (!strcmp(bindName, "[D-PAD DOWN]"))
+			return "steamdeck_dpad_down";
+		else if (!strcmp(bindName, "[D-PAD LEFT]"))
+			return "steamdeck_dpad_left";
+		else if (!strcmp(bindName, "[L3]"))
+			return "steamdeck_stick_l_press";
+		else if (!strcmp(bindName, "[R3]"))
+			return "steamdeck_stick_r_press";
+	}
+	else if (glyph->integer == 3)
+	{
+		//Playstation.
+		if (!strcmp(bindName, "^2[A]"))
+			return "playstation_button_cross";
+		else if (!strcmp(bindName, "^1[B]"))
+			return "playstation_button_circle";
+		else if (!strcmp(bindName, "^4[X]"))
+			return "playstation_button_square";
+		else if (!strcmp(bindName, "^3[Y]"))
+			return "playstation_button_triangle";
+		else if (!strcmp(bindName, "[LEFT BUMPER]"))
+			return "steamdeck_button_l1";
+		else if (!strcmp(bindName, "[RIGHT BUMPER]"))
+			return "steamdeck_button_r1";
+		else if (!strcmp(bindName, "[BACK]"))
+			return "playstation5_button_create";
+		else if (!strcmp(bindName, "[START]"))
+			return "playstation5_button_options";
+		else if (!strcmp(bindName, "[LEFT TRIGGER]"))
+			return "steamdeck_button_l2";
+		else if (!strcmp(bindName, "[RIGHT TRIGGER]"))
+			return "steamdeck_button_r2";
+		else if (!strcmp(bindName, "[D-PAD UP]"))
+			return "playstation_dpad_up";
+		else if (!strcmp(bindName, "[D-PAD RIGHT]"))
+			return "playstation_dpad_right";
+		else if (!strcmp(bindName, "[D-PAD DOWN]"))
+			return "playstation_dpad_down";
+		else if (!strcmp(bindName, "[D-PAD LEFT]"))
+			return "playstation_dpad_left";
+		else if (!strcmp(bindName, "[L3]"))
+			return "steamdeck_stick_l_press";
+		else if (!strcmp(bindName, "[R3]"))
+			return "steamdeck_stick_r_press";
+	}
+	else
+	{
+		//Steamdeck.
+		if (!strcmp(bindName, "^2[A]"))
+			return "steamdeck_button_a";
+		else if (!strcmp(bindName, "^1[B]"))
+			return "steamdeck_button_b";
+		else if (!strcmp(bindName, "^4[X]"))
+			return "steamdeck_button_x";
+		else if (!strcmp(bindName, "^3[Y]"))
+			return "steamdeck_button_y";
+		else if (!strcmp(bindName, "[LEFT BUMPER]"))
+			return "steamdeck_button_l1";
+		else if (!strcmp(bindName, "[RIGHT BUMPER]"))
+			return "steamdeck_button_r1";
+		else if (!strcmp(bindName, "[BACK]"))
+			return "steamdeck_button_view";
+		else if (!strcmp(bindName, "[START]"))
+			return "steamdeck_button_options";
+		else if (!strcmp(bindName, "[LEFT TRIGGER]"))
+			return "steamdeck_button_l2";
+		else if (!strcmp(bindName, "[RIGHT TRIGGER]"))
+			return "steamdeck_button_r2";
+		else if (!strcmp(bindName, "[D-PAD UP]"))
+			return "steamdeck_dpad_up";
+		else if (!strcmp(bindName, "[D-PAD RIGHT]"))
+			return "steamdeck_dpad_right";
+		else if (!strcmp(bindName, "[D-PAD DOWN]"))
+			return "steamdeck_dpad_down";
+		else if (!strcmp(bindName, "[D-PAD LEFT]"))
+			return "steamdeck_dpad_left";
+		else if (!strcmp(bindName, "[L3]"))
+			return "steamdeck_stick_l_press";
+		else if (!strcmp(bindName, "[R3]"))
+			return "steamdeck_stick_r_press";
+	}
 
     //No match.
     return "";

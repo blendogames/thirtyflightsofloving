@@ -171,7 +171,7 @@ static void M_ControlsSetMenuItemValues (void)
 	UI_MenuSpinControl_SetValue (&s_options_controls_joystick_box, "in_joystick", 0, 1, true);
 
 	//BC 4-8-2026
-	UI_MenuSpinControl_SetValue(&s_glyphs_box, "joy_glyphs", 0, 1, true);
+	UI_MenuSpinControl_SetValue(&s_glyphs_box, "joy_glyphs", 0, 3, true);
 }
 
 static void M_ControlsResetDefaultsFunc (void *unused)
@@ -218,7 +218,9 @@ static void M_ControlsResetDefaultsFunc (void *unused)
 static const char *glyph_names[] =
 {
 	"keyboard/mouse",
-	"steamdeck/xbox",
+	"Steam Deck",
+	"Xbox",
+	"Playstation",
 	0
 };
 

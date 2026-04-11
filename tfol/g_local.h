@@ -798,6 +798,8 @@ extern	cvar_t	*blaster_color; // Knightmare added
 
 extern cvar_t   *joy_frobfriction; //BC 3-23-2026 frob friction
 
+extern cvar_t	*joy_glyphs; //BC 4-11-2026
+
 extern	int		max_modelindex;
 extern	int		max_soundindex;
 

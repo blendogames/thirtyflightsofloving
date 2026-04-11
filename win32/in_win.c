@@ -475,7 +475,7 @@ void IN_Init (void)
 
 	//BC 4-8-2026
 	joy_glyphs = Cvar_Get("joy_glyphs", "0", CVAR_ARCHIVE);
-	Cvar_SetDescription("joy_glyphs", "What control prompts to display. 0 = keyboard/mouse. 1 = xbox.");
+	Cvar_SetDescription("joy_glyphs", "What control prompts to display. 0=keyboard/mouse. 1=steamdeck. 2=xbox. 3=playstation.");
 
 	joy_advaxisx			= Cvar_Get ("joy_advaxisx",				"3",		0);
 	Cvar_SetDescription ("joy_advaxisx", "Controls mapping of DirectInput axis X (typically joystick left and right).");
