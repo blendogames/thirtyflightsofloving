@@ -1783,25 +1783,25 @@ char *GetGamepadGlyph(char *bindName)
 			return "xbox_button_x";
 		else if (!strcmp(bindName, "^3[Y]"))
 			return "xbox_button_y";
-		else if (!strcmp(bindName, "[LEFT BUMPER]"))
+		else if (!strcmp(bindName, "[LEFT_BUMPER]"))
 			return "steamdeck_button_l1";
-		else if (!strcmp(bindName, "[RIGHT BUMPER]"))
+		else if (!strcmp(bindName, "[RIGHT_BUMPER]"))
 			return "steamdeck_button_r1";
 		else if (!strcmp(bindName, "[BACK]"))
 			return "xbox_button_view";
 		else if (!strcmp(bindName, "[START]"))
 			return "xbox_button_menu";
-		else if (!strcmp(bindName, "[LEFT TRIGGER]"))
+		else if (!strcmp(bindName, "[LEFT_TRIGGER]"))
 			return "steamdeck_button_l2";
-		else if (!strcmp(bindName, "[RIGHT TRIGGER]"))
+		else if (!strcmp(bindName, "[RIGHT_TRIGGER]"))
 			return "steamdeck_button_r2";
-		else if (!strcmp(bindName, "[D-PAD UP]"))
+		else if (!strcmp(bindName, "[D-PAD_UP]"))
 			return "steamdeck_dpad_up";
-		else if (!strcmp(bindName, "[D-PAD RIGHT]"))
+		else if (!strcmp(bindName, "[D-PAD_RIGHT]"))
 			return "steamdeck_dpad_right";
-		else if (!strcmp(bindName, "[D-PAD DOWN]"))
+		else if (!strcmp(bindName, "[D-PAD_DOWN]"))
 			return "steamdeck_dpad_down";
-		else if (!strcmp(bindName, "[D-PAD LEFT]"))
+		else if (!strcmp(bindName, "[D-PAD_LEFT]"))
 			return "steamdeck_dpad_left";
 		else if (!strcmp(bindName, "[L3]"))
 			return "steamdeck_stick_l_press";
@@ -1819,25 +1819,25 @@ char *GetGamepadGlyph(char *bindName)
 			return "playstation_button_square";
 		else if (!strcmp(bindName, "^3[Y]"))
 			return "playstation_button_triangle";
-		else if (!strcmp(bindName, "[LEFT BUMPER]"))
+		else if (!strcmp(bindName, "[LEFT_BUMPER]"))
 			return "steamdeck_button_l1";
-		else if (!strcmp(bindName, "[RIGHT BUMPER]"))
+		else if (!strcmp(bindName, "[RIGHT_BUMPER]"))
 			return "steamdeck_button_r1";
 		else if (!strcmp(bindName, "[BACK]"))
 			return "playstation5_button_create";
 		else if (!strcmp(bindName, "[START]"))
 			return "playstation5_button_options";
-		else if (!strcmp(bindName, "[LEFT TRIGGER]"))
+		else if (!strcmp(bindName, "[LEFT_TRIGGER]"))
 			return "steamdeck_button_l2";
-		else if (!strcmp(bindName, "[RIGHT TRIGGER]"))
+		else if (!strcmp(bindName, "[RIGHT_TRIGGER]"))
 			return "steamdeck_button_r2";
-		else if (!strcmp(bindName, "[D-PAD UP]"))
+		else if (!strcmp(bindName, "[D-PAD_UP]"))
 			return "playstation_dpad_up";
-		else if (!strcmp(bindName, "[D-PAD RIGHT]"))
+		else if (!strcmp(bindName, "[D-PAD_RIGHT]"))
 			return "playstation_dpad_right";
-		else if (!strcmp(bindName, "[D-PAD DOWN]"))
+		else if (!strcmp(bindName, "[D-PAD_DOWN]"))
 			return "playstation_dpad_down";
-		else if (!strcmp(bindName, "[D-PAD LEFT]"))
+		else if (!strcmp(bindName, "[D-PAD_LEFT]"))
 			return "playstation_dpad_left";
 		else if (!strcmp(bindName, "[L3]"))
 			return "steamdeck_stick_l_press";
@@ -1855,25 +1855,25 @@ char *GetGamepadGlyph(char *bindName)
 			return "steamdeck_button_x";
 		else if (!strcmp(bindName, "^3[Y]"))
 			return "steamdeck_button_y";
-		else if (!strcmp(bindName, "[LEFT BUMPER]"))
+		else if (!strcmp(bindName, "[LEFT_BUMPER]"))
 			return "steamdeck_button_l1";
-		else if (!strcmp(bindName, "[RIGHT BUMPER]"))
+		else if (!strcmp(bindName, "[RIGHT_BUMPER]"))
 			return "steamdeck_button_r1";
 		else if (!strcmp(bindName, "[BACK]"))
 			return "steamdeck_button_view";
 		else if (!strcmp(bindName, "[START]"))
 			return "steamdeck_button_options";
-		else if (!strcmp(bindName, "[LEFT TRIGGER]"))
+		else if (!strcmp(bindName, "[LEFT_TRIGGER]"))
 			return "steamdeck_button_l2";
-		else if (!strcmp(bindName, "[RIGHT TRIGGER]"))
+		else if (!strcmp(bindName, "[RIGHT_TRIGGER]"))
 			return "steamdeck_button_r2";
-		else if (!strcmp(bindName, "[D-PAD UP]"))
+		else if (!strcmp(bindName, "[D-PAD_UP]"))
 			return "steamdeck_dpad_up";
-		else if (!strcmp(bindName, "[D-PAD RIGHT]"))
+		else if (!strcmp(bindName, "[D-PAD_RIGHT]"))
 			return "steamdeck_dpad_right";
-		else if (!strcmp(bindName, "[D-PAD DOWN]"))
+		else if (!strcmp(bindName, "[D-PAD_DOWN]"))
 			return "steamdeck_dpad_down";
-		else if (!strcmp(bindName, "[D-PAD LEFT]"))
+		else if (!strcmp(bindName, "[D-PAD_LEFT]"))
 			return "steamdeck_dpad_left";
 		else if (!strcmp(bindName, "[L3]"))
 			return "steamdeck_stick_l_press";

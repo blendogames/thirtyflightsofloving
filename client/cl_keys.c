@@ -143,8 +143,8 @@ keyname_t keynames[] =
 	{"AUX9", K_AUX9},
 	{"AUX10", K_AUX10},
 #else
-	{"[LEFT BUMPER]", K_AUX5},
-	{"[RIGHT BUMPER]", K_AUX6},
+	{"[LEFT_BUMPER]", K_AUX5},
+	{"[RIGHT_BUMPER]", K_AUX6},
 	{"[BACK]", K_AUX7},
 	{"[START]", K_AUX8},
 	{"[L3]", K_AUX9},
@@ -174,12 +174,12 @@ keyname_t keynames[] =
 	{"AUX31", K_AUX31},
 	{"AUX32", K_AUX32},
 #else
-	{"[LEFT TRIGGER]", K_AUX27},
-	{"[RIGHT TRIGGER]", K_AUX28},
-	{"[D-PAD UP]", K_AUX29},
-	{"[D-PAD RIGHT]", K_AUX30},
-	{"[D-PAD DOWN]", K_AUX31},
-	{"[D-PAD LEFT]", K_AUX32},
+	{"[LEFT_TRIGGER]", K_AUX27},
+	{"[RIGHT_TRIGGER]", K_AUX28},
+	{"[D-PAD_UP]", K_AUX29},
+	{"[D-PAD_RIGHT]", K_AUX30},
+	{"[D-PAD_DOWN]", K_AUX31},
+	{"[D-PAD_LEFT]", K_AUX32},
 #endif
 
 #if defined(__APPLE__) || (MACOSX)

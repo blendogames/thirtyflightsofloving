@@ -536,8 +536,8 @@ void UI_DrawMenu (menuframework_s *menu)
         else if (item->type == MTYPE_SLIDER || item->type == MTYPE_LIST || item->type == MTYPE_SPINCONTROL)
         {
             //Draw dpad glyphs.
-            DrawGamepadPrompt(125, 435, "[D-PAD LEFT]", "");
-            DrawGamepadPrompt(150, 435, "[D-PAD RIGHT]", "Select");
+            DrawGamepadPrompt(125, 435, "[D-PAD_LEFT]", "");
+            DrawGamepadPrompt(150, 435, "[D-PAD_RIGHT]", "Select");
         }
         
 
