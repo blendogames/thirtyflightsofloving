@@ -120,7 +120,7 @@ void IN_Commands (void)
 //BC
 void IN_JoyMove(usercmd_t *cmd)
 {
-	//menu navigation with gamepad.
+	//BC menu navigation with gamepad.
 	if (fabs(controller_lefty) > 0.3f)
 	{
 		if (!joystickVerticalMoved)
@@ -224,10 +224,19 @@ void IN_Move (usercmd_t *cmd)
 	else
 		speed = 1;
 
+	//Player movement.
 	aspeed = speed * cls.netFrameTime;
 	cmd->sidemove += controller_leftx * speed * cl_sidespeed->value;
 	cmd->forwardmove -= controller_lefty * speed * cl_forwardspeed->value;
 
+
+	//BC cursor friction on frobbables
+	if (cl.frame.playerstate.stats[STAT_USEABLE] > 0)
+	{
+		aspeed *= joy_frobfriction->value;
+	}
+
+	//Viewangle logic
 	if (in_autosensitivity->integer && cl.base_fov < 90)
 	{
 		cl.viewangles[YAW] -= controller_rightx * aspeed * cl_pitchspeed->value * (cl.refdef.fov_x/90.0);
