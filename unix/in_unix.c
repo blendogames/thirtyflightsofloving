@@ -228,8 +228,19 @@ void IN_Move (usercmd_t *cmd)
 
 	//Player movement.
 	aspeed = speed * cls.netFrameTime;
-	cmd->sidemove += controller_leftx * speed * cl_sidespeed->value;
-	cmd->forwardmove -= controller_lefty * speed * cl_forwardspeed->value;
+
+	if (cl.frame.playerstate.stats[STAT_FREEZE] <= 0) //BC dont allow movement during stat_freeze
+	{
+		//BC stat_moveslow logic
+		float slowModifier = 1.0f;
+		if (cl.frame.playerstate.stats[STAT_MOVESLOW])
+		{
+			slowModifier = 0.5f;
+		}
+
+		cmd->sidemove += controller_leftx * speed * cl_sidespeed->value * slowModifier;
+		cmd->forwardmove -= controller_lefty * speed * cl_forwardspeed->value * slowModifier;
+	}
 
 
 	//BC cursor friction on frobbables
