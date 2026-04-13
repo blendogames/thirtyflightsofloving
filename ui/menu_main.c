@@ -236,7 +236,7 @@ void Menu_Main_Draw (void)
 		//BC MAIN MENU FULLSCREEN
 
 		memset(&ds, 0, sizeof(drawStruct_t));
-		ds.pic = "m_main_bg";
+		ds.pic = ShowGamepadIcons() ? "m_main_bg_deck" : "m_main_bg";
 		ds.x = margin;
 		ds.y = 0;
 		ds.w = bgWidth;
