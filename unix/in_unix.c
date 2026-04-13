@@ -44,7 +44,8 @@ void UI_RefreshCursorMenu (void);
 void UI_RefreshCursorLink (void);
 
 //BC
-void IN_JoyMove(usercmd_t *cmd);
+void		IN_JoyMove(usercmd_t *cmd);
+qboolean	joystickVerticalMoved;
 
 void IN_MLookDown (void) { 
 	mlooking = true; 
@@ -93,6 +94,9 @@ void IN_Init (void)
 	// Knightmare- added Psychospaz's menu mouse support
 	UI_RefreshCursorMenu();
 	UI_RefreshCursorLink();
+
+	//BC
+	joystickVerticalMoved = false;
 }
 
 void IN_Shutdown (void)
@@ -116,7 +120,31 @@ void IN_Commands (void)
 //BC
 void IN_JoyMove(usercmd_t *cmd)
 {
-	Com_Printf("leftx %f %f\n", controller_leftx, controller_lefty);
+	//menu navigation with gamepad.
+	if (fabs(controller_lefty) > 0.3f)
+	{
+		if (!joystickVerticalMoved)
+		{
+			if (controller_lefty < 0)
+			{
+				//joystick up.
+				Key_Event(K_JOY_UP, true, sys_msg_time);
+			}
+			else
+			{
+				//joystick down.
+				Key_Event(K_JOY_DOWN, true, sys_msg_time);
+			}
+		}
+
+		joystickVerticalMoved = true;
+	}
+	else if (joystickVerticalMoved == true)
+	{
+		joystickVerticalMoved = false;
+		Key_Event(K_JOY_UP, false, 0);
+		Key_Event(K_JOY_DOWN, false, 0);
+	}
 }
 
 void IN_Move (usercmd_t *cmd)
