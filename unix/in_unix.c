@@ -128,12 +128,12 @@ void IN_JoyMove(usercmd_t *cmd)
 			if (controller_lefty < 0)
 			{
 				//joystick up.
-				Key_Event(K_JOY_UP, true, sys_msg_time);
+				Key_Event(K_JOY_UP, true, 0);
 			}
 			else
 			{
 				//joystick down.
-				Key_Event(K_JOY_DOWN, true, sys_msg_time);
+				Key_Event(K_JOY_DOWN, true, 0);
 			}
 		}
 
