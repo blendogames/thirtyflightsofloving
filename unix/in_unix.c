@@ -111,10 +111,6 @@ void IN_Shutdown (void)
 
 void IN_Commands (void)
 {
-	if (!joy_avail || !in_joystick->integer)
-	{
-		return;
-	}
 }
 
 //BC
