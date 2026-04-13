@@ -1032,16 +1032,19 @@ void IN_JoyMove (usercmd_t *cmd)
 			//BC 1/30/2024 allow joystick menu selection.
 			if (fabs(fAxisValue) > joy_forwardthreshold->value)
 			{
-				if (fAxisValue < 0)
+				if (!joystickVerticalMoved)
 				{
-					//joystick up.
-					//Com_Printf("joystick up\n");
-					Key_Event(K_JOY_UP, true, sys_msg_time);
-				}
-				else
-				{
-					//joystick down.
-					Key_Event(K_JOY_DOWN, true, sys_msg_time);
+					if (fAxisValue < 0)
+					{
+						//joystick up.
+						//Com_Printf("joystick up\n");
+						Key_Event(K_JOY_UP, true, sys_msg_time);
+					}
+					else
+					{
+						//joystick down.
+						Key_Event(K_JOY_DOWN, true, sys_msg_time);
+					}
 				}
 
 				joystickVerticalMoved = true;

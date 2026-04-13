@@ -43,6 +43,9 @@ extern cursor_t ui_mousecursor;
 void UI_RefreshCursorMenu (void);
 void UI_RefreshCursorLink (void);
 
+//BC
+void IN_JoyMove(usercmd_t *cmd);
+
 void IN_MLookDown (void) { 
 	mlooking = true; 
 }
@@ -108,6 +111,16 @@ void IN_Shutdown (void)
 
 void IN_Commands (void)
 {
+	if (!joy_avail || !in_joystick->integer)
+	{
+		return;
+	}
+}
+
+//BC
+void IN_JoyMove(usercmd_t *cmd)
+{
+	Com_Printf("leftx %f %f\n", controller_leftx, controller_lefty);
 }
 
 void IN_Move (usercmd_t *cmd)
@@ -202,6 +215,11 @@ void IN_Move (usercmd_t *cmd)
 		cl.viewangles[PITCH] += controller_righty * aspeed * cl_pitchspeed->value;
 	}
 	// end flibitijibibo
+
+
+	//BC
+	IN_JoyMove(cmd);
+
 }
 
 void IN_Frame (void)

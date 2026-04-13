@@ -194,6 +194,13 @@ void Menu_Options_Draw (void)
 	{
 		char	name[16];
 		Com_sprintf (name, sizeof(name), "c_%s", citem->name);
+
+		//BC 4-12-2026 dont draw icon for Done menu item
+		if (strcmp(name, "c_Done") == 0)
+		{
+			return;
+		}
+
 		icondraw( name );
 	}
 #endif
