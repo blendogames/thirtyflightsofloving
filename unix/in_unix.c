@@ -46,6 +46,7 @@ void UI_RefreshCursorLink (void);
 //BC
 void		IN_JoyMove(usercmd_t *cmd);
 qboolean	joystickVerticalMoved;
+cvar_t		*joy_frobfriction;
 
 void IN_MLookDown (void) { 
 	mlooking = true; 
@@ -97,6 +98,7 @@ void IN_Init (void)
 
 	//BC
 	joystickVerticalMoved = false;
+	joy_frobfriction = Cvar_Get("joy_frobfriction", "0.5", 0);
 }
 
 void IN_Shutdown (void)
