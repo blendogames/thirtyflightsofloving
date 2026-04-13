@@ -466,7 +466,7 @@ void IN_Init (void)
 	Cvar_SetDescription ("in_mouse", "Enables mouse input.");
 
 	// joystick variables
-	in_joystick				= Cvar_Get ("in_joystick",	Sys_IsSteamDeck() ?  "1" :	"0",		CVAR_ARCHIVE);
+	in_joystick				= Cvar_Get ("in_joystick",	  "1",		CVAR_ARCHIVE); //BC 4-13-2026 default to gamepad on.
 	Cvar_SetDescription ("in_joystick", "Enables joystick input.");
 	joy_name				= Cvar_Get ("joy_name",					"joystick",	0);
 	Cvar_SetDescription ("joy_name", "Sets name of the joystick.");

@@ -86,15 +86,105 @@ static void NitemareGameFunc (void *data)
 	UIStartSPGame ();
 }
 #else
+
+//BC 4-13-2026 When game starts, check if gamepad has required binds.
+//This is largely to handle the situation where an old config file
+//from years ago will not have the default gamepad binds. So, we now
+//do a check whenever a new game is started.
+static void GamepadBindCheck(void)
+{
+	if (Sys_IsSteamDeck()) //always do gamepad bind check on steam deck.
+	{
+	}
+	else
+	{
+		cvar_t *joy;
+		cvar_t *glyphs;
+
+		joy = Cvar_Get("in_joystick", "1", CVAR_ARCHIVE);
+		if (joy->integer <= 0)
+			return; //not using gamepad, so exit early.
+
+		glyphs = Cvar_Get("joy_glyphs", "0", CVAR_ARCHIVE);
+		if (glyphs->integer <= 0)
+			return; //showing keyboard icons, so exit early
+	}
+		
+
+	int i;
+
+	static const char *bindchecks[] =
+	{
+		"+use",
+		"+moveup",
+		"+attack",
+		"weapprev",
+		"weapnext",
+		0
+	};
+
+
+	for (i = 0; i < 5; i++)
+	{
+		if (!SCR_FindKeyGamepad(bindchecks[i]))
+		{
+			//Missing bind.
+			//Run the gamepad binds reset.
+			Com_Printf("Gamepad bind check: missing bind - %s\n", bindchecks[i]);
+			Com_Printf("    Running: defaultgamepad.cfg\n");
+			Cbuf_AddText("exec defaultgamepad.cfg\n"); // reset default binds
+			return;
+		}
+	}
+}
+
+//Starting TFOL (normal)
 static void MediumGameFunc( void *data )
 {
+	GamepadBindCheck();
+
 	Cvar_ForceSet( "commentary", "0" );
 	Cvar_ForceSet( "skill", "1" );
 	UIStartSPGame();
 }
 
+//Starting TFOL (commentary)
+static void CommentaryFunc(void *data)
+{
+	GamepadBindCheck();
+
+	Cvar_ForceSet("skill", "1");
+	Cvar_ForceSet("commentary", "1");
+	UIStartSPGame();
+}
+
+//Starting TFOL (puffin)
+static void IdleGameFunc(void *data)
+{
+	GamepadBindCheck();
+
+	Cvar_ForceSet("skill", "2");
+	Cvar_ForceSet("commentary", "0");
+
+	// disable updates and start the cinematic going
+	cl.servercount = -1;
+	UI_ForceMenuOff();
+	Cvar_SetValue("deathmatch", 0);
+	Cvar_SetValue("coop", 0);
+	Cvar_SetValue("gamerules", 0);		//PGM
+
+										//	Cbuf_AddText ("loading ; killserver ; wait ; newgame\n");
+	if (cls.state != ca_disconnected) // don't force loadscreen if disconnected
+		Cbuf_AddText("loading ; killserver ; wait\n");
+	Cbuf_AddText("idlegame\n");
+	cls.key_dest = key_game;
+}
+
+//Starting GB (normal)
 static void GravityboneFunc( void *data )
 {
+	GamepadBindCheck();
+
 	Cvar_ForceSet( "commentary", "0" );
 	Cvar_ForceSet( "skill", "1" );
 
@@ -113,6 +203,7 @@ static void GravityboneFunc( void *data )
 	cls.key_dest = key_game;
 }
 
+//Starting GB (commentary)
 static void GravityboneCommentaryFunc(void *data)
 {
 	GravityboneFunc(NULL);
@@ -120,31 +211,6 @@ static void GravityboneCommentaryFunc(void *data)
 	Cvar_ForceSet("commentary", "1");
 }
 
-static void CommentaryFunc( void *data )
-{
-	Cvar_ForceSet( "skill", "1" );
-	Cvar_ForceSet( "commentary", "1" );
-	UIStartSPGame();
-}
-
-static void IdleGameFunc( void *data )
-{
-	Cvar_ForceSet( "skill", "2" );
-	Cvar_ForceSet( "commentary", "0" );
-
-	// disable updates and start the cinematic going
-	cl.servercount = -1;
-	UI_ForceMenuOff ();
-	Cvar_SetValue( "deathmatch", 0 );
-	Cvar_SetValue( "coop", 0 );
-	Cvar_SetValue( "gamerules", 0 );		//PGM
-
-	//	Cbuf_AddText ("loading ; killserver ; wait ; newgame\n");
-	if (cls.state != ca_disconnected) // don't force loadscreen if disconnected
-		Cbuf_AddText ("loading ; killserver ; wait\n");
-	Cbuf_AddText ("idlegame\n");
-	cls.key_dest = key_game;	
-}
 #endif
 
 static void LoadGameFunc (void *unused)

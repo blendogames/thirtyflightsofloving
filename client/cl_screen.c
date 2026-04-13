@@ -1761,36 +1761,9 @@ void SCR_Shutdown (void)
 }
 
 
-char *SCR_FindKey (char *key)
-{
-	static char	mapmsg[16];
-	int			k;
-	qboolean	found_bind=false;
 
-	for (k=0 ; k<256 ; k++)
-	{
-		if (keybindings[k] && keybindings[k][0])
-		{						
-			if (!Q_stricmp(keybindings[k], key))
-			{							
-				Com_sprintf (mapmsg, sizeof(mapmsg), "%s", Key_KeynumToString(k));
-				found_bind = true;
-			}
-		}
-	}
 
-	if (!found_bind)
-	{
-		//no key bound to action. Give you question marks!
-		Com_sprintf (mapmsg, sizeof(mapmsg), "^1?");
-	}
 
-	if (mapmsg)
-	{
-		//return the final result:					
-		return mapmsg;		
-	}
-}
 
 
 //BC 3-5-2026 Get icon glyph via gamepad bind.
@@ -1923,6 +1896,64 @@ void DrawGamepadPrompt(float x, float y, char *buttonIcon, char *text)
     }
 
     SCR_DrawString(x + 25, y + 8, MENU_HEADER_FONT_SIZE, ALIGN_LEFT, text, FONT_SCREEN, 255);
+}
+
+
+char *SCR_FindKey(char *key)
+{
+	static char	mapmsg[16];
+	int			k;
+	qboolean	found_bind = false;
+
+	for (k = 0; k<256; k++)
+	{
+		if (keybindings[k] && keybindings[k][0])
+		{
+			if (!Q_stricmp(keybindings[k], key))
+			{
+				Com_sprintf(mapmsg, sizeof(mapmsg), "%s", Key_KeynumToString(k));
+				found_bind = true;
+			}
+		}
+	}
+
+	if (!found_bind)
+	{
+		//no key bound to action. Give you question marks!
+		Com_sprintf(mapmsg, sizeof(mapmsg), "^1?");
+	}
+
+	if (mapmsg)
+	{
+		//return the final result:					
+		return mapmsg;
+	}
+}
+
+//BC check if a gamepad bind exists for a given bind action
+qboolean SCR_FindKeyGamepad(char *key)
+{
+	static char	mapmsg[16];
+	int			k;
+
+	for (k = 0; k<256; k++)
+	{
+		if (keybindings[k] && keybindings[k][0])
+		{
+			if (!Q_stricmp(keybindings[k], key))
+			{
+				Com_sprintf(mapmsg, sizeof(mapmsg), "%s", Key_KeynumToString(k));
+
+				const char* iconName = GetGamepadGlyph(mapmsg);
+				if (iconName[0] != '\0')
+				{
+					return true;
+				}
+			}
+		}
+	}
+
+	return false;
 }
 
 

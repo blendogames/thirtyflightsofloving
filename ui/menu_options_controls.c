@@ -193,16 +193,16 @@ static void M_ControlsResetDefaultsFunc (void *unused)
     //BC 3-26-2026 on steam deck, default to joystick on.
     if (Sys_IsSteamDeck())
     {
+		//If steam deck build, default to steam deck button glyphs.
 		Cvar_Set("joy_glyphs", "1");
-        Cvar_Set("in_joystick", "1");
     }
     else
     {
         //Default keyboard/mouse.
 		Cvar_Set("joy_glyphs", "0");
-        Cvar_SetToDefault("in_joystick");        
     }
 
+	Cvar_SetToDefault("in_joystick");
 	Cbuf_AddText("exec defaultbinds.cfg\n"); // reset default binds
 
 	
@@ -404,7 +404,7 @@ void Menu_Options_Controls_Init (void)
 	s_glyphs_box.generic.type = MTYPE_SPINCONTROL;
 	s_glyphs_box.generic.textSize = MENU_FONT_SIZE;
 	s_glyphs_box.generic.x = 0;
-	s_glyphs_box.generic.y = y += 2 * MENU_LINE_SIZE;
+	s_glyphs_box.generic.y = y += 1.2f * MENU_LINE_SIZE;
 	s_glyphs_box.generic.name = "Button prompts";
 	s_glyphs_box.generic.callback = GlyphCallback;
 	s_glyphs_box.itemNames = glyph_names;
