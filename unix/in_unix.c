@@ -249,16 +249,23 @@ void IN_Move (usercmd_t *cmd)
 		aspeed *= joy_frobfriction->value;
 	}
 
+	//BC camera invert logic.
+	float invertModifier = 1.0f;
+	if (m_pitch->value < 0.0)
+	{
+		invertModifier = -1.0f;
+	}
+
 	//Viewangle logic
 	if (in_autosensitivity->integer && cl.base_fov < 90)
 	{
 		cl.viewangles[YAW] -= controller_rightx * aspeed * cl_pitchspeed->value * (cl.refdef.fov_x/90.0);
-		cl.viewangles[PITCH] += controller_righty * aspeed * cl_pitchspeed->value * (cl.refdef.fov_x/90.0);
+		cl.viewangles[PITCH] += controller_righty * aspeed * cl_pitchspeed->value * (cl.refdef.fov_x/90.0) * invertModifier;
 	}
 	else
 	{
 		cl.viewangles[YAW] -= controller_rightx * aspeed * cl_pitchspeed->value;
-		cl.viewangles[PITCH] += controller_righty * aspeed * cl_pitchspeed->value;
+		cl.viewangles[PITCH] += controller_righty * aspeed * cl_pitchspeed->value * invertModifier;
 	}
 	// end flibitijibibo
 
