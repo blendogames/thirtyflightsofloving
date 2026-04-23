@@ -67,12 +67,13 @@ void UI_DrawMenuSaveshot (qboolean loadmenu)
 	}
 	shotname = UI_UpdateSaveshot (i);
 
-	UI_DrawFill (SCREEN_WIDTH/2+44, SCREEN_HEIGHT/2-70, 244, 184, ALIGN_CENTER, false, 60,60,60,255);
+	//BC 4-23-2026 increase display width of saveload screenshot to roughly 16x9 (was 3x4)
+	UI_DrawFill (SCREEN_WIDTH/2+44, SCREEN_HEIGHT/2-70, 294, 184, ALIGN_CENTER, false, 60,60,60,255);
 
 	if (shotname)
-		UI_DrawPic (SCREEN_WIDTH/2+46, SCREEN_HEIGHT/2-68, 240, 180, ALIGN_CENTER, false, shotname, 1.0);
+		UI_DrawPic (SCREEN_WIDTH/2+46, SCREEN_HEIGHT/2-68, 290, 180, ALIGN_CENTER, false, shotname, 1.0);
 	else
-		UI_DrawFill (SCREEN_WIDTH/2+46, SCREEN_HEIGHT/2-68, 240, 180, ALIGN_CENTER, false, 0,0,0,255);
+		UI_DrawFill (SCREEN_WIDTH/2+46, SCREEN_HEIGHT/2-68, 290, 180, ALIGN_CENTER, false, 0,0,0,255);
 }
 #else
 void UI_DrawMenuSaveshot (qboolean loadmenu)
@@ -168,7 +169,7 @@ void Menu_LoadGame_Init (void)
 	UI_UpdateSavegameData ();
 
 	s_loadgame_menu.x = SCREEN_WIDTH*0.5 - 240;
-	s_loadgame_menu.y = SCREEN_HEIGHT*0.5 - 68;
+	s_loadgame_menu.y = SCREEN_HEIGHT*0.5 - 110; //BC 4-23-2026 offset so that the gamepad UI doesnt overlap with saveload UI
 	s_loadgame_menu.nitems = 0;
 
 //	Load_Savestrings ();
@@ -267,7 +268,7 @@ void Menu_SaveGame_Init (void)
 	UI_UpdateSavegameData ();
 
 	s_savegame_menu.x = SCREEN_WIDTH*0.5 - 240;
-	s_savegame_menu.y = SCREEN_HEIGHT*0.5 - 68;
+	s_savegame_menu.y = SCREEN_HEIGHT*0.5 - 110; //BC 4-23-2026 offset so that the gamepad UI doesnt overlap with saveload UI
 	s_savegame_menu.nitems = 0;
 
 //	Load_Savestrings ();
