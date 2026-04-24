@@ -202,7 +202,10 @@ static void M_ControlsResetDefaultsFunc (void *unused)
 		Cvar_Set("joy_glyphs", "0");
     }
 
-	Cvar_SetToDefault("in_joystick");
+	
+	//Cvar_SetToDefault("in_joystick");
+	Cvar_Set("in_joystick", "1");
+
 	Cbuf_AddText("exec defaultbinds.cfg\n"); // reset default binds
 
 	
