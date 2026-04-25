@@ -24,6 +24,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #define Function(f) {#f, f}
 
+#include "g_functable.h"
+
 mmove_t mmove_reloc;
 
 field_t fields[] = {
@@ -550,9 +552,16 @@ void WriteField1 (FILE *f, field_t *field, byte *base)
 	//relative to code segment
 	case F_FUNCTION:
 		if (*(byte **)p == NULL)
-			index = 0;
-		else
-			index = *(byte **)p - ((byte *)InitGame);
+		{
+			index = -1;
+		}
+		else for (index = 0; index < g_gamefunctiontablesize; index += 1)
+		{
+		    if (*(byte **)p == g_gamefunctions[index])
+		    {
+		        break;
+		    }
+		}
 		*(int *)p = index;
 		break;
 
@@ -646,10 +655,10 @@ void ReadField (FILE *f, field_t *field, byte *base)
 	//relative to code segment
 	case F_FUNCTION:
 		index = *(int *)p;
-		if ( index == 0 )
+		if ( index == -1 )
 			*(byte **)p = NULL;
 		else
-			*(byte **)p = ((byte *)InitGame) + index;
+			*(byte **)p = ((byte *) g_gamefunctions[index]);
 		break;
 
 	//relative to data segment

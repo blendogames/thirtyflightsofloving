@@ -89,6 +89,7 @@ TFOL_SRC = \
 	p_view.c \
 	p_weapon.c \
 	q_shared.c \
+	g_functable.c \
 	acesrc/acebot_ai.c \
 	acesrc/acebot_cmds.c \
 	acesrc/acebot_compress.c \
