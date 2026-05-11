@@ -942,7 +942,10 @@ void WriteLevel (char *filename)
 	fwrite (&i, sizeof(i), 1, f);
 
 	// write out a function pointer for checking
-	base = (void *)InitGame;
+	
+	//base = (void *)InitGame;
+	base = (void *)g_gamefunctions;
+
 	fwrite (&base, sizeof(base), 1, f);
 
 	// write out level_locals_t
