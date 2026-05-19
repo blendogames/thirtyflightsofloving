@@ -47,7 +47,7 @@ BUILD_RELEASE_DIR=build_release
 BINDIR=quake2
 
 ifeq ($(OSTYPE),Linux)
-  LDFLAGS+='-Wl,-rpath,$$ORIGIN/lib64'
+  LDFLAGS+='-Wl,-rpath,$$ORIGIN/lib64,--disable-new-dtags'
 else ifeq ($(OSTYPE),Darwin)
   BASE_CFLAGS:=-mmacosx-version-min=10.9 -Wno-implicit-function-declaration -Wno-incompatible-function-pointer-types
   LDFLAGS+='-Wl,-rpath,@executable_path/osx'
