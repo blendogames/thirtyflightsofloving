@@ -18,7 +18,7 @@ void* g_getgamefunction(int index)
 	return g_gamefunctions[index];
 }
 
-extern int g_getgamefunctionindex(void* ptr)
+int g_getgamefunctionindex(void* ptr)
 {
 	int index;
 	for (index = 0; index < g_gamefunctiontablesize; index += 1)
@@ -31,4 +31,18 @@ extern int g_getgamefunctionindex(void* ptr)
 	return -1;
 }
 
+const char* g_getgamefunctionname(int index)
+{
+	static const char* g_functionnames[] =
+	{
+		#define FUNTAB(name) #name,
+		#include "functions.inl"
+		#undef FUNTAB(name)
+	};
 
+	if (index == -1)
+	{
+		return "NONE";
+	}
+	return g_functionnames[index];
+}

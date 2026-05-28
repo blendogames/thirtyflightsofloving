@@ -25,6 +25,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define Function(f) {#f, f}
 
 #include "g_functable.h"
+//#define DEBUG_FUNCTABLE
 
 mmove_t mmove_reloc;
 
@@ -86,6 +87,7 @@ field_t fields[] = {
 	{"use", FOFS(use), F_FUNCTION, FFL_NOSPAWN},
 	{"pain", FOFS(pain), F_FUNCTION, FFL_NOSPAWN},
 	{"die", FOFS(die), F_FUNCTION, FFL_NOSPAWN},
+	{"play", FOFS(play), F_FUNCTION, FFL_NOSPAWN}, // Someone added, flibit found it was missing in 2026!!!
 
 	{"stand", FOFS(monsterinfo.stand), F_FUNCTION, FFL_NOSPAWN},
 	{"idle", FOFS(monsterinfo.idle), F_FUNCTION, FFL_NOSPAWN},
@@ -555,6 +557,9 @@ void WriteField1 (FILE *f, field_t *field, byte *base)
 			index = -1;
 		else
 			index = g_getgamefunctionindex(*(byte **)p);
+#ifdef DEBUG_FUNCTABLE
+		gi.dprintf("%i is %s\n", index, g_getgamefunctionname(index));
+#endif
 		*(int *)p = index;
 		break;
 
@@ -652,6 +657,9 @@ void ReadField (FILE *f, field_t *field, byte *base)
 			*(byte **)p = NULL;
 		else
 			*(byte **)p = (byte *)g_getgamefunction(index);
+#ifdef DEBUG_FUNCTABLE
+		gi.dprintf("%i is %s\n", index, g_getgamefunctionname(index));
+#endif
 		break;
 
 	//relative to data segment
@@ -951,6 +959,9 @@ void WriteLevel (char *filename)
 		if (ent->flags & FL_REFLECT)
 			continue;
 		fwrite (&i, sizeof(i), 1, f);
+#ifdef DEBUG_FUNCTABLE
+		gi.dprintf("EDICT %d\n", i);
+#endif
 		WriteEdict (f, ent);
 	}
 	i = -1;
@@ -1044,6 +1055,9 @@ void ReadLevel (char *filename)
 			globals.num_edicts = entnum+1;
 
 		ent = &g_edicts[entnum];
+#ifdef DEBUG_FUNCTABLE
+		gi.dprintf("EDICT %d\n", entnum);
+#endif
 		ReadEdict (f, ent);
 
 		// let the server rebuild world links for this ent
