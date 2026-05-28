@@ -5,11 +5,30 @@
 #include "functions.inl"
 #undef FUNTAB(name)
 
-void* g_gamefunctions[] =
+static const void* g_gamefunctions[] =
 {
 	#define FUNTAB(name) name,
 	#include "functions.inl"
 	#undef FUNTAB(name)
 };
+static const int g_gamefunctiontablesize = sizeof(g_gamefunctions) / sizeof(g_gamefunctions[0]);
 
-int g_gamefunctiontablesize = sizeof(g_gamefunctions) / sizeof(g_gamefunctions[0]);
+void* g_getgamefunction(int index)
+{
+	return g_gamefunctions[index];
+}
+
+extern int g_getgamefunctionindex(void* ptr)
+{
+	int index;
+	for (index = 0; index < g_gamefunctiontablesize; index += 1)
+	{
+		if (ptr == g_gamefunctions[index])
+		{
+			return index;
+		}
+	}
+	return -1;
+}
+
+

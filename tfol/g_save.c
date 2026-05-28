@@ -552,16 +552,9 @@ void WriteField1 (FILE *f, field_t *field, byte *base)
 	//relative to code segment
 	case F_FUNCTION:
 		if (*(byte **)p == NULL)
-		{
 			index = -1;
-		}
-		else for (index = 0; index < g_gamefunctiontablesize; index += 1)
-		{
-		    if (*(byte **)p == g_gamefunctions[index])
-		    {
-		        break;
-		    }
-		}
+		else
+			index = g_getgamefunctionindex(*(byte **)p);
 		*(int *)p = index;
 		break;
 
@@ -658,7 +651,7 @@ void ReadField (FILE *f, field_t *field, byte *base)
 		if ( index == -1 )
 			*(byte **)p = NULL;
 		else
-			*(byte **)p = ((byte *) g_gamefunctions[index]);
+			*(byte **)p = (byte *)g_getgamefunction(index);
 		break;
 
 	//relative to data segment
