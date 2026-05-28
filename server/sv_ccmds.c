@@ -950,7 +950,7 @@ void SV_Savegame_f (void)
 	}
 
 #ifndef NOTTHIRTYFLIGHTS
-	if (!strstr(dir, "save1"))
+	if (strcmp(dir, "save1") != 0)
 #endif
 	Com_Printf (S_COLOR_CYAN"Saving game \"%s\"...\n", dir);
 
@@ -963,10 +963,15 @@ void SV_Savegame_f (void)
 #ifdef NOTTHIRTYFLIGHTS
 	SV_WriteServerFile (false, quicksave);
 #else
-	if (strstr (dir, "save1"))
-		SV_WriteServerFile (false,true);
+	if (strcmp(dir, "save1") == 0)
+	{
+		//"save1" is a special slot that is for autosave.
+		SV_WriteServerFile(false, true);
+	}
 	else
-		SV_WriteServerFile (false,false);
+	{
+		SV_WriteServerFile(false, false);
+	}
 #endif
 
 	// take screenshot
@@ -976,9 +981,9 @@ void SV_Savegame_f (void)
 	SV_CopySaveGame ("current", dir);
 
 #ifndef NOTTHIRTYFLIGHTS
-	if (!strstr(dir, "save1"))
+	if (strcmp(dir, "save1") != 0)
 #endif
-	Com_Printf (S_COLOR_CYAN"Done.\n");
+	Com_Printf (S_COLOR_CYAN"Save done.\n");
 }
 
 //===============================================================
