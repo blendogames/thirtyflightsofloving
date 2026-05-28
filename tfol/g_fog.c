@@ -201,7 +201,7 @@ void Fog_Off()
 	if (gl_driver && vid_ref)
 	{
 		//Knightmare- also ref_kmgl.dll
-		if (!strcmp(vid_ref->string,"gl") || !strcmp(vid_ref->string,"kmgl"))
+		if (!strcmp(vid_ref->string,"gl") || !strcmp(vid_ref->string,"glx") || !strcmp(vid_ref->string,"kmgl"))
 		{
 			if (hOpenGL) GL_glDisable (GL_FOG);
 		}
@@ -596,7 +596,7 @@ void Fog (edict_t *ent) //vec3_t viewpoint)
 	viewpoint[2] += ent->viewheight;
 
 	//Knightmare- also ref_kmgl.dll
-	if(stricmp(vid_ref->string,"gl") && stricmp(vid_ref->string,"kmgl"))
+	if(stricmp(vid_ref->string,"gl") && stricmp(vid_ref->string,"glx") && stricmp(vid_ref->string,"kmgl"))
 	{
 		last_software_frame = level.framenum;
 		level.active_fog = 0;
