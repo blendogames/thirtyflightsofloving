@@ -1441,7 +1441,7 @@ void Sys_AppActivate (void)
 
 /*
 =================
-Sys_IsSteamDeck
+Sys_IsGameConsole
 =================
 */
 static char *SDL_getenv_unsafe(const char *name)
@@ -1477,7 +1477,7 @@ static char *SDL_getenv_unsafe(const char *name)
     return string;
 }
 
-qboolean Sys_IsSteamDeck (void)
+qboolean Sys_IsGameConsole (void)
 {
 	qboolean result = false;
 	char *env = SDL_getenv_unsafe("SteamDeck");
@@ -1492,7 +1492,7 @@ qboolean Sys_IsSteamDeck (void)
 qboolean ShowGamepadIcons(void)
 {
 	cvar_t		*joy_glyphs;
-	joy_glyphs = Cvar_Get("joy_glyphs", Sys_IsSteamDeck() ? "1" : "0", CVAR_ARCHIVE);
+	joy_glyphs = Cvar_Get("joy_glyphs", Sys_IsGameConsole() ? "1" : "0", CVAR_ARCHIVE);
 	return (joy_glyphs->integer > 0);
 }
 

@@ -135,7 +135,7 @@ static void JoystickFunc (void *unused)
 #else
 
 	//BC 4-8-2026 if steam deck, force gamepad on
-	if (Sys_IsSteamDeck())
+	if (Sys_IsGameConsole())
 	{
 		Cvar_SetValue("in_joystick", 1);
 		s_options_controls_joystick_box.curValue = 1;
@@ -191,7 +191,7 @@ static void M_ControlsResetDefaultsFunc (void *unused)
 	
 
     //BC 3-26-2026 on steam deck, default to joystick on.
-    if (Sys_IsSteamDeck())
+    if (Sys_IsGameConsole())
     {
 		//If steam deck build, default to steam deck button glyphs.
 		Cvar_Set("joy_glyphs", "1");

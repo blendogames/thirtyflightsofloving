@@ -1063,7 +1063,7 @@ const char *Sys_PrefDir (void);
 //		(maps, textures, sounds, skies, models, etc) should be written to
 const char *Sys_DownloadDir (void);
 
-qboolean Sys_IsSteamDeck(void);
+qboolean Sys_IsGameConsole(void);
 
 qboolean ShowGamepadIcons(void); //BC 3-5-2026
 

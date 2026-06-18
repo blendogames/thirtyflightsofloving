@@ -93,7 +93,7 @@ static void NitemareGameFunc (void *data)
 //do a check whenever a new game is started.
 static void GamepadBindCheck(void)
 {
-	if (Sys_IsSteamDeck()) //always do gamepad bind check on steam deck.
+	if (Sys_IsGameConsole()) //always do gamepad bind check on steam deck.
 	{
 	}
 	else

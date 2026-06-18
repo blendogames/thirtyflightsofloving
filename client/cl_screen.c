@@ -1770,7 +1770,7 @@ void SCR_Shutdown (void)
 //This is very caveman but should work ok...
 char *GetGamepadGlyph(char *bindName)
 {
-	cvar_t *glyph = Cvar_Get("joy_glyphs", Sys_IsSteamDeck() ? "1" : "0", CVAR_ARCHIVE);
+	cvar_t *glyph = Cvar_Get("joy_glyphs", Sys_IsGameConsole() ? "1" : "0", CVAR_ARCHIVE);
 	
 	if (glyph->integer == 2)
 	{
