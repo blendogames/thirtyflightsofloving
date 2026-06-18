@@ -62,15 +62,21 @@ typedef struct sfx_s
 typedef struct {
 	char				introName[MAX_QPATH];
 	char				loopName[MAX_QPATH];
+#ifdef NOTTHIRTYFLIGHTS
 	char				ambientName[MAX_QPATH];
+#endif
 	qboolean			looping;
+#ifdef NOTTHIRTYFLIGHTS
 	qboolean			ambient_looping;
+#endif
 #ifdef OGG_DIRECT_FILE
 	FILE				*file;
 #else
 	fileHandle_t		file;
 #endif
+#ifdef NOTTHIRTYFLIGHTS // flibit removed this, null.ogg exposes an infinite loop
 	int					start;
+#endif
 	int					rate;
 	int					width;
 	int					channels;

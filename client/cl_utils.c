@@ -64,6 +64,7 @@ void CL_TextColor (int colornum, int *red, int *green, int *blue)
 
 	switch (colornum)
 	{
+#ifdef NOTTHIRTYFLIGHTS
 		case 1:		// red
 			*red =	255;
 			*green=	0;
@@ -84,6 +85,28 @@ void CL_TextColor (int colornum, int *red, int *green, int *blue)
 			*green=	0;
 			*blue =	255;
 			break;
+#else
+		case 1:		// red
+			*red =	212;
+			*green=	25;
+			*blue =	25;
+			break;
+		case 2:		// green
+			*red =	100;
+			*green=	220;
+			*blue =	100;
+			break;
+		case 3:		// yellow
+			*red =	240;
+			*green=	235;
+			*blue =	90;
+			break;
+		case 4:		// blue
+			*red =	130;
+			*green=	180;
+			*blue =	250;
+			break;
+#endif
 		case 5:		// cyan
 			*red =	0;
 			*green=	255;

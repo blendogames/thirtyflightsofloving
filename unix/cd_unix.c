@@ -529,7 +529,11 @@ int CDAudio_Init(void)
 	cvar_t			*cv;
 	extern uid_t saved_euid;
 
+#ifdef NOTTHIRTYFLIGHTS
 	cv = Cvar_Get ("nocdaudio", "0", CVAR_NOSET);
+#else
+	cv = Cvar_Get ("nocdaudio", "1", CVAR_NOSET);
+#endif
 	if (cv->value)
 		return -1;
 

@@ -76,6 +76,22 @@ void CL_SetParticleImages (void)
 	R_SetParticlePicture(particle_bulletmark,	"gfx/decals/bulletmark.tga");
 	R_SetParticlePicture(particle_trackermark,	"gfx/decals/trackermark.tga");
 //	R_SetParticlePicture(particle_footprint,	"gfx/decals/footprint.tga");
+
+	// BEGIN TFOL
+	R_SetParticlePicture(particle_freongeneric,	"gfx/particles/freonbasic.tga");
+	R_SetParticlePicture(particle_glass,		"gfx/particles/glass.tga");
+	R_SetParticlePicture(particle_glass2,		"gfx/particles/glass2.tga");
+
+	R_SetParticlePicture(particle_music1,		"gfx/particles/music1.tga");
+	R_SetParticlePicture(particle_music2,		"gfx/particles/music2.tga");
+	R_SetParticlePicture(particle_music3,		"gfx/particles/music3.tga");
+
+	R_SetParticlePicture(particle_heart,		"gfx/particles/heart.tga");
+
+	R_SetParticlePicture(particle_shred0,		"models/monsters/drone/shred0.png");
+	R_SetParticlePicture(particle_shred1,		"models/monsters/drone/shred1.png");
+	R_SetParticlePicture(particle_shred2,		"models/monsters/drone/shred2.png");
+	// END TFOL
 }
 
 

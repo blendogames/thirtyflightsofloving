@@ -807,6 +807,19 @@ void V_RenderView (float stereo_separation)
         qsort( cl.refdef.entities, cl.refdef.num_entities, sizeof( cl.refdef.entities[0] ), (int (*)(const void *, const void *))CL_EntityCmpFnc );
 	}
 
+#ifndef NOTTHIRTYFLIGHTS
+	//bc uggghh hack
+	cl.refdef.bloomintensity = cl.frame.playerstate.stats[STAT_BLOOMINTENSITY] / 100.0;
+
+	cl.refdef.bloomalpha = cl.frame.playerstate.stats[STAT_BLOOMALPHA] / 1000.0;
+	cl.refdef.bloomdarken = cl.frame.playerstate.stats[STAT_BLOOMDARKEN];
+	
+
+	//Com_Printf("redner %f   Stat:  %f\n",cl.refdef.bloomintensity ,  cl.frame.playerstate.stats[STAT_BLOOMINTENSITY]);
+
+	//Com_Printf("redner %f   Stat:  %f\n", cl.refdef.bloomdarken ,  cl.frame.playerstate.stats[STAT_BLOOMDARKEN]);
+#endif
+
 	R_RenderFrame (&cl.refdef);
 //	if (cl_stats->value)
 	if (cl_stats->integer)
@@ -824,9 +837,31 @@ V_Viewpos_f
 */
 void V_Viewpos_f (void)
 {
+	if (Cmd_Argc() >= 2)
+	{
+		//BC 4-10-2026 if an arg is included, then snap to nearest multiple value.
+		//This functionality is being added in order to make it easier to append
+		//commentary nodes in-game, since we don't want to recompile maps.
+		int value = atoi(Cmd_Argv(1));
+
+		int x = (int)cl.refdef.vieworg[0];
+		x = x - x % value;
+
+		int y = (int)cl.refdef.vieworg[1];
+		y = y - y % value;
+
+		int z = (int)cl.refdef.vieworg[2];
+		z = z - z % value;
+
+		Com_Printf("%i %i %i\n", x, y, z);		
+		return;
+	}
+
 	Com_Printf ("(%i %i %i) : %i\n", (int)cl.refdef.vieworg[0],
 		(int)cl.refdef.vieworg[1], (int)cl.refdef.vieworg[2], 
 		(int)cl.refdef.viewangles[YAW]);
+
+
 }
 
 // Knightmare- diagnostic commands from Lazarus

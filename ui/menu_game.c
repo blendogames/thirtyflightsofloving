@@ -50,8 +50,18 @@ static menuaction_s		s_credits_action;
 static menuseparator_s	s_blankline;
 static menuaction_s		s_game_back_action;
 
+#ifndef NOTTHIRTYFLIGHTS
+static menuaction_s		s_gravitybone;
+static menuaction_s		s_commentarymode;
+static menuaction_s		s_commentarymodeGB;
+#ifdef IDLETHUMBS
+static menuaction_s		s_idlemode;
+#endif
+#endif
+
 //=======================================================================
 
+#ifdef NOTTHIRTYFLIGHTS
 static void EasyGameFunc (void *data)
 {
 	Cvar_ForceSet ("skill", "0");
@@ -75,6 +85,133 @@ static void NitemareGameFunc (void *data)
 	Cvar_ForceSet ("skill", "3");
 	UIStartSPGame ();
 }
+#else
+
+//BC 4-13-2026 When game starts, check if gamepad has required binds.
+//This is largely to handle the situation where an old config file
+//from years ago will not have the default gamepad binds. So, we now
+//do a check whenever a new game is started.
+static void GamepadBindCheck(void)
+{
+	if (Sys_IsGameConsole()) //always do gamepad bind check on steam deck.
+	{
+	}
+	else
+	{
+		cvar_t *joy;
+		cvar_t *glyphs;
+
+		joy = Cvar_Get("in_joystick", "1", CVAR_ARCHIVE);
+		if (joy->integer <= 0)
+			return; //not using gamepad, so exit early.
+
+		glyphs = Cvar_Get("joy_glyphs", "0", CVAR_ARCHIVE);
+		if (glyphs->integer <= 0)
+			return; //showing keyboard icons, so exit early
+	}
+		
+
+	int i;
+
+	static const char *bindchecks[] =
+	{
+		"+use",
+		"+moveup",
+		"+attack",
+		"weapprev",
+		"weapnext",
+		0
+	};
+
+
+	for (i = 0; i < 5; i++)
+	{
+		if (!SCR_FindKeyGamepad(bindchecks[i]))
+		{
+			//Missing bind.
+			//Run the gamepad binds reset.
+			Com_Printf("Gamepad bind check: missing bind - %s\n", bindchecks[i]);
+			Com_Printf("    Running: defaultgamepad.cfg\n");
+			Cbuf_AddText("exec defaultgamepad.cfg\n"); // reset default binds
+			return;
+		}
+	}
+}
+
+//Starting TFOL (normal)
+static void MediumGameFunc( void *data )
+{
+	GamepadBindCheck();
+
+	Cvar_ForceSet( "commentary", "0" );
+	Cvar_ForceSet( "skill", "1" );
+	UIStartSPGame();
+}
+
+//Starting TFOL (commentary)
+static void CommentaryFunc(void *data)
+{
+	GamepadBindCheck();
+
+	Cvar_ForceSet("skill", "1");
+	Cvar_ForceSet("commentary", "1");
+	UIStartSPGame();
+}
+
+//Starting TFOL (puffin)
+static void IdleGameFunc(void *data)
+{
+	GamepadBindCheck();
+
+	Cvar_ForceSet("skill", "2");
+	Cvar_ForceSet("commentary", "0");
+
+	// disable updates and start the cinematic going
+	cl.servercount = -1;
+	UI_ForceMenuOff();
+	Cvar_SetValue("deathmatch", 0);
+	Cvar_SetValue("coop", 0);
+	Cvar_SetValue("gamerules", 0);		//PGM
+
+										//	Cbuf_AddText ("loading ; killserver ; wait ; newgame\n");
+	if (cls.state != ca_disconnected) // don't force loadscreen if disconnected
+		Cbuf_AddText("loading ; killserver ; wait\n");
+	Cbuf_AddText("idlegame\n");
+	cls.key_dest = key_game;
+}
+
+//Starting GB (normal)
+static void GravityboneFunc( void *data )
+{
+	GamepadBindCheck();
+
+	Cvar_ForceSet( "commentary", "0" );
+	Cvar_ForceSet( "skill", "1" );
+
+	// disable updates and start the cinematic going
+	cl.servercount = -1;
+	UI_ForceMenuOff ();
+	Cvar_SetValue( "deathmatch", 0 );
+	Cvar_SetValue( "coop", 0 );
+	Cvar_SetValue( "gamerules", 0 );		//PGM
+
+	//	Cbuf_AddText ("loading ; killserver ; wait ; newgame\n");
+	if (cls.state != ca_disconnected) // don't force loadscreen if disconnected
+		Cbuf_AddText ("loading ; killserver ; wait\n");
+
+	Cbuf_AddText ("gravitybonegame\n");
+	cls.key_dest = key_game;
+}
+
+//Starting GB (commentary)
+static void GravityboneCommentaryFunc(void *data)
+{
+	GravityboneFunc(NULL);
+	Cvar_ForceSet("skill", "1");
+	Cvar_ForceSet("commentary", "1");
+}
+
+#endif
 
 static void LoadGameFunc (void *unused)
 {
@@ -96,11 +233,18 @@ static void CreditsFunc (void *unused)
 void Menu_Game_Init (void)
 {
 	int x = 0, y = 0;
+#ifndef NOTTHIRTYFLIGHTS
+	static const char *yesno_names[] =
+	{
+		"no", "yes", 0
+	};
+#endif
 
 	s_game_menu.x = SCREEN_WIDTH*0.5 - 3*MENU_LINE_SIZE;
 	s_game_menu.y = SCREEN_HEIGHT*0.5 - 5*MENU_LINE_SIZE;	// 0
 	s_game_menu.nitems = 0;
 
+#ifdef NOTTHIRTYFLIGHTS
 	s_easy_game_action.generic.type			= MTYPE_ACTION;
 	s_easy_game_action.generic.textSize		= MENU_HEADER_FONT_SIZE;
 	s_easy_game_action.generic.flags		= QMF_LEFT_JUSTIFY;
@@ -132,6 +276,60 @@ void Menu_Game_Init (void)
 	s_nitemare_game_action.generic.y			= y += 1.5*MENU_LINE_SIZE;
 	s_nitemare_game_action.generic.name			= "Nightmare";
 	s_nitemare_game_action.generic.callback		= NitemareGameFunc;
+#else
+	s_medium_game_action.generic.type	= MTYPE_ACTION;
+	s_medium_game_action.generic.textSize		= MENU_HEADER_FONT_SIZE;
+	s_medium_game_action.generic.flags  = QMF_LEFT_JUSTIFY;
+	s_medium_game_action.generic.x		= 0;
+	s_medium_game_action.generic.y		= y += MENU_LINE_SIZE;
+	s_medium_game_action.generic.name	= "1. Thirty Flights of Loving";
+	s_medium_game_action.generic.iconname	= "start";
+	s_medium_game_action.generic.callback = MediumGameFunc;
+
+	s_commentarymode.generic.type	= MTYPE_ACTION;
+	s_commentarymode.generic.textSize		= MENU_HEADER_FONT_SIZE;
+	s_commentarymode.generic.flags  = QMF_LEFT_JUSTIFY;
+	s_commentarymode.generic.x		= 10;
+	s_commentarymode.generic.y		= y += (MENU_LINE_SIZE * 1.5f);
+	s_commentarymode.generic.name		= "A. Developer Commentary";
+	s_commentarymode.generic.iconname = "devcommentary";
+	s_commentarymode.generic.callback = CommentaryFunc;
+
+	/* idle thumbs mode */
+#ifdef IDLETHUMBS
+	s_idlemode.generic.type	= MTYPE_ACTION;
+	s_idlemode.generic.textSize		= MENU_HEADER_FONT_SIZE;
+	s_idlemode.generic.flags  = QMF_LEFT_JUSTIFY;
+	s_idlemode.generic.x		= 10;
+	s_idlemode.generic.y		= y += (MENU_LINE_SIZE * 1.5f);
+	s_idlemode.generic.name		= "B. Puffin Mode";
+	s_idlemode.generic.iconname = "puffinmode";
+	s_idlemode.generic.callback = IdleGameFunc;
+#endif
+
+	y += MENU_LINE_SIZE;
+	s_gravitybone.generic.type	= MTYPE_ACTION;
+	s_gravitybone.generic.textSize		= MENU_HEADER_FONT_SIZE;
+	s_gravitybone.generic.flags  = QMF_LEFT_JUSTIFY;
+	s_gravitybone.generic.x		= 0;
+	s_gravitybone.generic.y		= y += MENU_LINE_SIZE;
+	s_gravitybone.generic.name	= "2. Gravity Bone";
+	s_gravitybone.generic.iconname	= "gravitybone";
+	s_gravitybone.generic.callback = GravityboneFunc;
+
+	//BC 4-10-2026 commentary for GB
+	s_commentarymodeGB.generic.type = MTYPE_ACTION;
+	s_commentarymodeGB.generic.textSize = MENU_HEADER_FONT_SIZE;
+	s_commentarymodeGB.generic.flags = QMF_LEFT_JUSTIFY;
+	s_commentarymodeGB.generic.x = 10;
+	s_commentarymodeGB.generic.y = y += (MENU_LINE_SIZE * 1.5f);
+	s_commentarymodeGB.generic.name = "A. Developer Commentary";
+	s_commentarymodeGB.generic.iconname = "devcommentary";
+	s_commentarymodeGB.generic.callback = GravityboneCommentaryFunc;
+
+
+	y += MENU_LINE_SIZE;
+#endif
 
 	s_blankline.generic.type = MTYPE_SEPARATOR;
 	s_blankline.generic.textSize = MENU_FONT_SIZE;
@@ -142,6 +340,9 @@ void Menu_Game_Init (void)
 	s_load_game_action.generic.x			= x;
 	s_load_game_action.generic.y			= y += 2*MENU_HEADER_LINE_SIZE;	// 2*MENU_LINE_SIZE
 	s_load_game_action.generic.name			= "Load Game";
+#ifndef NOTTHIRTYFLIGHTS
+	s_load_game_action.generic.iconname		= "load";
+#endif
 	s_load_game_action.generic.callback		= LoadGameFunc;
 
 	s_save_game_action.generic.type			= MTYPE_ACTION;
@@ -150,6 +351,9 @@ void Menu_Game_Init (void)
 	s_save_game_action.generic.x			= x;
 	s_save_game_action.generic.y			= y += 1.5*MENU_LINE_SIZE;
 	s_save_game_action.generic.name			= "Save Game";
+#ifndef NOTTHIRTYFLIGHTS
+	s_save_game_action.generic.iconname		= "save";
+#endif
 	s_save_game_action.generic.callback		= SaveGameFunc;
 
 	s_credits_action.generic.type			= MTYPE_ACTION;
@@ -158,6 +362,9 @@ void Menu_Game_Init (void)
 	s_credits_action.generic.x				= x;
 	s_credits_action.generic.y				= y += 2*MENU_HEADER_LINE_SIZE;	// 1.5*MENU_LINE_SIZE
 	s_credits_action.generic.name			= "Credits";
+#ifndef NOTTHIRTYFLIGHTS
+	s_credits_action.generic.iconname		= "credits";
+#endif
 	s_credits_action.generic.callback		= CreditsFunc;
 
 	s_game_back_action.generic.type			= MTYPE_ACTION;
@@ -165,13 +372,28 @@ void Menu_Game_Init (void)
 	s_game_back_action.generic.flags		= QMF_LEFT_JUSTIFY;
 	s_game_back_action.generic.x			= x;
 	s_game_back_action.generic.y			= y += 3*MENU_HEADER_LINE_SIZE;	// 2*MENU_LINE_SIZE
+#ifdef NOTTHIRTYFLIGHTS
 	s_game_back_action.generic.name			= "Back to Main";
+#else
+	s_game_back_action.generic.name			= "Cancel";
+	s_game_back_action.generic.iconname		= "cancel";
+#endif
 	s_game_back_action.generic.callback		= UI_BackMenu;
 
+#ifdef NOTTHIRTYFLIGHTS
 	UI_AddMenuItem (&s_game_menu, (void *) &s_easy_game_action);
 	UI_AddMenuItem (&s_game_menu, (void *) &s_medium_game_action);
 	UI_AddMenuItem (&s_game_menu, (void *) &s_hard_game_action);
 	UI_AddMenuItem (&s_game_menu, (void *) &s_nitemare_game_action);
+#else
+	UI_AddMenuItem (&s_game_menu, (void *) &s_medium_game_action);
+	UI_AddMenuItem (&s_game_menu, (void *) &s_commentarymode);
+#ifdef IDLETHUMBS
+	UI_AddMenuItem (&s_game_menu, ( void * ) &s_idlemode);
+#endif
+	UI_AddMenuItem (&s_game_menu, (void *) &s_gravitybone);
+	UI_AddMenuItem(&s_game_menu, (void *) &s_commentarymodeGB);//BC 4-10-2026 GB commentary mode
+#endif
 
 	UI_AddMenuItem (&s_game_menu, (void *) &s_blankline);
 
@@ -186,11 +408,48 @@ void Menu_Game_Init (void)
 //	UI_CenterMenu (&s_game_menu);
 }
 
+void icondraw (char *name)
+{
+	int w, h;
+	R_DrawGetPicSize (&w, &h, name );
+	w *= 0.5;
+	h *= 0.5;
+	SCR_DrawPic (SCREEN_WIDTH/2 - 200 + (6*sin(anglemod(cl.time*0.0025))),
+		SCREEN_HEIGHT/2 - 60 + (3*sin(anglemod(cl.time*0.005))),
+		w, h, ALIGN_CENTER, false, name, 1);
+}
+
 void Menu_Game_Draw (void)
 {
+#ifndef NOTTHIRTYFLIGHTS
+	menucommon_s *citem;
+#endif
 	UI_DrawBanner ("m_banner_game");
 	UI_AdjustMenuCursor (&s_game_menu, 1);
 	UI_DrawMenu (&s_game_menu);
+#ifndef NOTTHIRTYFLIGHTS
+	if (s_game_menu.cursor < 0 || s_game_menu.cursor >= s_game_menu.nitems)
+	{
+		citem = NULL;
+	}
+	else
+	{
+		citem = s_game_menu.items[s_game_menu.cursor];
+	}
+	if ( citem )
+	{
+		char	name[16];
+
+		if (citem->iconname)
+		{
+			Com_sprintf (name, sizeof(name), "c_%s", citem->iconname);
+
+			if (name)
+				icondraw( name );
+		}
+	}
+#endif
+
 }
 
 const char *Menu_Game_Key (int key)

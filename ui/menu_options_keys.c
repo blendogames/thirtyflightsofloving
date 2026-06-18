@@ -29,7 +29,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "../client/client.h"
 #include "ui_local.h"
 
+#ifdef NOTTHIRTYFLIGHTS
 #define USE_KEYBIND_CONTROL
+#endif
 
 /*
 =======================================================================
@@ -41,6 +43,7 @@ KEYS MENU
 
 char *bindnames[][2] =
 {
+#ifdef NOTTHIRTYFLIGHTS
 {"+attack", 		"attack"},
 {"+attack2", 		"alternate attack"},
 {"+use", 			"activate"},
@@ -67,6 +70,21 @@ char *bindnames[][2] =
 {"invprev",			"prev item"},
 {"invnext",			"next item"},
 {"cmd help", 		"help computer" }, 
+#else
+{"+forward", 		"Move Forward"},
+{"+back", 			"Move Backward"},
+{"+moveleft", 		"Move Left"},
+{"+moveright", 		"Move Right"},
+{"+moveup",			"Jump"},
+{"+movedown",		"Crouch"},
+{"+attack", 		"Use Item"},
+{"weapprev", 		"Select Previous Item"},
+{"weapnext", 		"Select Next Item"},
+{"+use", 			"Action"},
+{"centerview", 		"Center View"},
+{"save quick",		"Quick Save"},
+{"load quick",		"Quick Load"},
+#endif
 { 0, 0 }
 };
 
@@ -136,6 +154,7 @@ static void M_FindKeysForCommand (char *command, int *twokeys)
 
 static void M_KeysBackCursorDrawFunc (menuaction_s *self) // back action
 {
+#ifdef NOTTHIRTYFLIGHTS
 	char	*cursor;
 
 	cursor = ((int)(Sys_Milliseconds()/250)&1) ? UI_ITEMCURSOR_DEFAULT_PIC : UI_ITEMCURSOR_BLINK_PIC;
@@ -144,10 +163,20 @@ static void M_KeysBackCursorDrawFunc (menuaction_s *self) // back action
 /*	UI_DrawChar (SCREEN_WIDTH*0.5 - 24, s_keys_menu.y + self->generic.y, MENU_FONT_SIZE, ALIGN_CENTER,
 					12+((int)(Sys_Milliseconds()/250)&1), 255, 255, 255, 255, false, true);
 */
+#else
+	SCR_DrawChar (SCREEN_WIDTH*0.5 - 24+ (5*sin(anglemod(cl.time*0.01))),
+		s_keys_menu.y + self->generic.y,
+		MENU_FONT_SIZE,
+		ALIGN_CENTER,
+		13,
+		FONT_UI,
+		255,255,255,255, false, true);
+#endif
 }
 
 static void M_KeyCursorDrawFunc (menuframework_s *menu)
 {
+#ifdef NOTTHIRTYFLIGHTS
 	char	*cursor;
 
 	if (bind_grab)
@@ -155,14 +184,24 @@ static void M_KeyCursorDrawFunc (menuframework_s *menu)
 	else
 		cursor = ((int)(Sys_Milliseconds()/250)&1) ? UI_ITEMCURSOR_DEFAULT_PIC : UI_ITEMCURSOR_BLINK_PIC;
 
-	UI_DrawPic (menu->x, menu->y + menu->cursor * MENU_LINE_SIZE, MENU_FONT_SIZE, MENU_FONT_SIZE, ALIGN_CENTER, false, cursor, 255);
+	UI_DrawPic (menu->x, menu->y + menu->cursor * MENU_KEYBIND_LINESIZE, MENU_FONT_SIZE, MENU_FONT_SIZE, ALIGN_CENTER, false, cursor, 255);
 /*	if (bind_grab)
-		UI_DrawChar (menu->x, menu->y + menu->cursor * MENU_LINE_SIZE, MENU_FONT_SIZE, ALIGN_CENTER,
+		UI_DrawChar (menu->x, menu->y + menu->cursor * MENU_KEYBIND_LINESIZE, MENU_FONT_SIZE, ALIGN_CENTER,
 						'=', 255, 255, 255, 255, false, true);
 	else
-		UI_DrawChar (menu->x, menu->y + menu->cursor * MENU_LINE_SIZE, MENU_FONT_SIZE, ALIGN_CENTER,
+		UI_DrawChar (menu->x, menu->y + menu->cursor * MENU_KEYBIND_LINESIZE, MENU_FONT_SIZE, ALIGN_CENTER,
 						12+((int)(Sys_Milliseconds()/250)&1), 255, 255, 255, 255, false, true);
 */
+#else
+		SCR_DrawChar (menu->x+ (5*sin(anglemod(cl.time*0.01))),
+			menu->y + menu->cursor * MENU_KEYBIND_LINESIZE,
+			MENU_FONT_SIZE,
+			ALIGN_CENTER,
+			13,
+			FONT_UI,
+			255,255,255,
+			255, false, true);
+#endif
 }
 
 static void M_DrawKeyBindingFunc (void *self)
@@ -174,28 +213,76 @@ static void M_DrawKeyBindingFunc (void *self)
 		
 	if (keys[0] == -1)
 	{
+#ifdef NOTTHIRTYFLIGHTS
 		UI_DrawString (a->generic.x + a->generic.parent->x + 16,
-						a->generic.y + a->generic.parent->y, a->generic.textSize, "???", 255);
+						a->generic.y + a->generic.parent->y, a->generic.textSize, ALIGN_CENTER, "???", FONT_UI, 255);
+#else
+		UI_DrawString (a->generic.x + a->generic.parent->x + 16,
+						a->generic.y + a->generic.parent->y, a->generic.textSize, ALIGN_CENTER, "^1<NONE>", FONT_UI, 255);
+#endif
 	}
 	else
 	{
 		int x;
 		const char *name;
+		int alpha;
+#ifdef NOTTHIRTYFLIGHTS
+		alpha=255;
+#else
+		if (ui_mousecursor.menuitem == a)
+			alpha=255;
+		else
+			alpha=160;
+#endif
 
-		name = Key_KeynumToString (keys[0]);
 
-		UI_DrawString (a->generic.x + a->generic.parent->x + 16,
-						a->generic.y + a->generic.parent->y, a->generic.textSize, name , 255);
+        if (ShowGamepadIcons())
+        {
+            //BC 3-23-2026 draw glyphs in gamepad bind screen.
 
-		x = (int)strlen(name) * MENU_FONT_SIZE;
+            
 
-		if (keys[1] != -1)
-		{
-			UI_DrawString (a->generic.x + a->generic.parent->x + MENU_FONT_SIZE*3 + x,
-							a->generic.y + a->generic.parent->y, a->generic.textSize, "or", 255);
-			UI_DrawString (a->generic.x + a->generic.parent->x + MENU_FONT_SIZE*6 + x,
-							a->generic.y + a->generic.parent->y, a->generic.textSize, Key_KeynumToString(keys[1]), 255);
-		}
+            //sprintf(name, "%d", keys[0]);
+
+            int drawPosXOffset = 0;
+            for (int i = 0; i < 2; i++)
+            {
+                const char* bindname = Key_KeynumToString(keys[i]);
+                const char* iconName = GetGamepadGlyph(bindname);
+                int ICONSIZE = 20;
+                if (iconName[0] != '\0')
+                {
+                    //Draw gamepad glyph.
+                    SCR_DrawPic(a->generic.x + a->generic.parent->x + 14 + drawPosXOffset, a->generic.y + a->generic.parent->y - 7, ICONSIZE, ICONSIZE, ALIGN_CENTER, false, iconName, 1.0f);
+                    drawPosXOffset += ICONSIZE + 5;
+                }
+
+                
+            }
+
+
+
+
+        }
+        else
+        {
+            //BC 3-23-2026 default keyboard controls bind display. This section of code hasn't been changed from the original.
+
+            name = Key_KeynumToString(keys[0]);
+
+            UI_DrawString(a->generic.x + a->generic.parent->x + 16,
+                a->generic.y + a->generic.parent->y, a->generic.textSize, ALIGN_CENTER, name, FONT_UI, alpha);
+
+            x = (int)strlen(name) * MENU_FONT_SIZE;
+
+            if (keys[1] != -1)
+            {
+                UI_DrawString(a->generic.x + a->generic.parent->x + MENU_FONT_SIZE * 3 + x,
+                    a->generic.y + a->generic.parent->y, a->generic.textSize, ALIGN_CENTER, "or", FONT_UI, alpha);
+                UI_DrawString(a->generic.x + a->generic.parent->x + MENU_FONT_SIZE * 6 + x,
+                    a->generic.y + a->generic.parent->y, a->generic.textSize, ALIGN_CENTER, Key_KeynumToString(keys[1]), FONT_UI, alpha);
+            }
+        }
 	}
 }
 
@@ -211,7 +298,11 @@ static void M_KeyBindingFunc (void *self)
 
 	bind_grab = true;
 
+#ifdef NOTTHIRTYFLIGHTS
 	UI_SetMenuStatusBar (&s_keys_menu, "press a key or button for this action");
+#else
+	UI_SetMenuStatusBar (&s_keys_menu, ShowGamepadIcons() ? "Press a button..." : "Press a key or button.");
+#endif
 }
 
 void M_AddBindOption (int i, char *list[][2])
@@ -220,7 +311,7 @@ void M_AddBindOption (int i, char *list[][2])
 	s_keys_binds[i].generic.textSize = MENU_FONT_SIZE;
 	s_keys_binds[i].generic.flags  = QMF_GRAYED;
 	s_keys_binds[i].generic.x		= 0;
-	s_keys_binds[i].generic.y		= i*MENU_LINE_SIZE;
+	s_keys_binds[i].generic.y		= i*MENU_KEYBIND_LINESIZE;
 	s_keys_binds[i].generic.ownerdraw = M_DrawKeyBindingFunc;
 	s_keys_binds[i].generic.localdata[0] = i;
 	s_keys_binds[i].generic.name	= list[s_keys_binds[i].generic.localdata[0]][1];
@@ -253,7 +344,7 @@ static void Menu_Keys_Init (void)
 		s_keys_binds[i].generic.type			= MTYPE_KEYBIND;
 		s_keys_binds[i].generic.flags			= QMF_ALTCOLOR;
 		s_keys_binds[i].generic.x				= x;
-		s_keys_binds[i].generic.y				= y + i*MENU_LINE_SIZE;
+		s_keys_binds[i].generic.y				= y + i*MENU_KEYBIND_LINESIZE;
 		s_keys_binds[i].generic.name			= bindnames[i][1];
 		s_keys_binds[i].generic.statusbar		= "enter or mouse1 to change, backspace or del to clear";
 		s_keys_binds[i].commandName				= bindnames[i][0];
@@ -267,8 +358,12 @@ static void Menu_Keys_Init (void)
 	s_keys_back_action.generic.textSize	= MENU_FONT_SIZE;
 	s_keys_back_action.generic.flags	= QMF_LEFT_JUSTIFY;
 	s_keys_back_action.generic.x		= x;
-	s_keys_back_action.generic.y		= y + (BINDS_MAX+2)*MENU_LINE_SIZE;
+	s_keys_back_action.generic.y		= y + (BINDS_MAX+2)*MENU_KEYBIND_LINESIZE;
+#ifdef NOTTHIRTYFLIGHTS
 	s_keys_back_action.generic.name		= "Back";
+#else
+	s_keys_back_action.generic.name		= "Done";
+#endif
 	s_keys_back_action.generic.callback	= UI_BackMenu;
 #ifndef USE_KEYBIND_CONTROL
 	s_keys_back_action.generic.cursordraw = M_KeysBackCursorDrawFunc;
@@ -279,7 +374,11 @@ static void Menu_Keys_Init (void)
 	UI_AddMenuItem (&s_keys_menu, (void *) &s_keys_back_action);
 
 #ifndef USE_KEYBIND_CONTROL
+#ifdef NOTTHIRTYFLIGHTS
 	UI_SetMenuStatusBar (&s_keys_menu, "enter or mouse1 to change, backspace to clear");
+#else
+	UI_SetMenuStatusBar (&s_keys_menu, ShowGamepadIcons() ? "" : "Press ENTER or LEFT CLICK to change the key. Press BACKSPACE to clear.");
+#endif
 #endif
 	// Don't center it- it's too large
 //	UI_CenterMenu (&s_keys_menu);
@@ -287,10 +386,37 @@ static void Menu_Keys_Init (void)
 
 static void Menu_Keys_Draw (void)
 {
+#ifdef NOTTHIRTYFLIGHTS
 	UI_DrawBanner ("m_banner_customize"); // Knightmare added
+#else
+	UI_DrawBanner ("m_banner_options");
+#endif
 
 	UI_AdjustMenuCursor (&s_keys_menu, 1);
 	UI_DrawMenu (&s_keys_menu);
+
+
+    //BC 4-2-2026
+    if (ShowGamepadIcons())
+    {
+        if (bind_grab)
+        {
+			DrawGamepadPrompt(640, 435, "[START]", "Cancel");
+        }
+        else
+        {
+            menucommon_s *item;
+
+            DrawGamepadPrompt(20, 435, "^1[B]", "Back");
+            DrawGamepadPrompt(125, 435, "^2[A]", "Select");
+            
+            item = UI_ItemAtMenuCursor(&s_keys_menu);
+            if (item->flags & QMF_GRAYED)
+            {
+                DrawGamepadPrompt(640, 435, "^3[Y]", "Unbind");
+            }
+        }
+    }
 }
 
 static const char *Menu_Keys_Key (int key)
@@ -303,7 +429,8 @@ static const char *Menu_Keys_Key (int key)
 	// pressing mouse1 to pick a new bind wont force bind/unbind itself - spaz
 	if ( bind_grab && !(ui_mousecursor.buttonused[MOUSEBUTTON1]&&key==K_MOUSE1))
 	{	
-		if ( key != K_ESCAPE && key != '`' )
+		if ( key != K_ESCAPE && key != '`'
+			&& key != K_AUX8) //BC 4-6-2026 dont allow binding to Start button
 		{
 			char cmd[1024];
 
@@ -317,7 +444,11 @@ static const char *Menu_Keys_Key (int key)
 		if (key == K_MOUSE1)
 			ui_mousecursor.buttonclicks[MOUSEBUTTON1] = -1;
 
+#ifdef NOTTHIRTYFLIGHTS
 		UI_SetMenuStatusBar (&s_keys_menu, "enter to change, backspace to clear");
+#else
+		UI_SetMenuStatusBar (&s_keys_menu, ShowGamepadIcons() ? "" : "Press ENTER or LEFT CLICK to change the key. Press BACKSPACE to clear.");
+#endif
 		bind_grab = false;
 		return ui_menu_out_sound;
 	}
@@ -330,7 +461,8 @@ static const char *Menu_Keys_Key (int key)
 			UI_BackMenu(item); return NULL; }
 		M_KeyBindingFunc (item);
 		return ui_menu_in_sound;
-	case K_BACKSPACE:		// delete bindings
+    case K_JOY4:            //BC 4-2-2026 Y button will unbind a keybind.
+    case K_BACKSPACE:		// delete bindings
 	case K_DEL:				// delete bindings
 	case K_KP_DEL:
 		M_UnbindCommand (bindnames[item->generic.localdata[0]][0]);

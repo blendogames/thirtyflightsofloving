@@ -437,6 +437,11 @@ extern	cvar_t	*cg_thirdperson_indemo;
 extern	cvar_t	*cg_thirdperson_overhead;
 extern	cvar_t	*cg_thirdperson_overhead_dist;
 
+#ifndef NOTTHIRTYFLIGHTS
+extern	cvar_t	*cl_3dcam_yaw;
+extern	cvar_t	*cl_enableconsole;
+#endif
+
 extern	cvar_t	*cl_blood;
 extern	cvar_t	*cl_old_explosions;	// Option for old explosions
 extern	cvar_t	*cl_plasma_explo_sound;	// Option for unique plasma explosion sound
@@ -603,6 +608,7 @@ typedef struct cl_sustain
 	int			thinkinterval;
 	vec3_t		org;
 	vec3_t		dir;
+	vec3_t		playerDir;
 	int			color;
 	int			count;
 	int			magnitude;
@@ -950,7 +956,11 @@ typedef struct {
 	struct sfx_s	*sfx_lightning;
 	struct sfx_s	*sfx_disrexp;
 	struct sfx_s	*sfx_shockhit;
+#ifdef NOTTHIRTYFLIGHTS
 	struct sfx_s	*sfx_footsteps[4];
+#else
+	struct sfx_s	*sfx_footsteps[3];
+#endif
 	struct sfx_s	*sfx_metal_footsteps[4];
 	struct sfx_s	*sfx_dirt_footsteps[4];
 	struct sfx_s	*sfx_vent_footsteps[4];

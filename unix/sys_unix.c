@@ -327,6 +327,31 @@ void Sys_SendKeyEvents (void)
 
 /*****************************************************************************/
 
+qboolean Sys_IsGameConsole(void)
+{
+	qboolean has_gamepad = false;
+	int joysticks = SDL_NumJoysticks();
+	int i;
+	for (i = 0; i < joysticks; i += 1)
+	{
+		if (SDL_IsGameController(i))
+		{
+			has_gamepad = true;
+			break;
+		}
+	}
+	return SDL_GetHintBoolean("SteamDeck", SDL_FALSE) || (SDL_GetHintBoolean("SteamTenfoot", SDL_FALSE) && has_gamepad);
+}
+
+qboolean ShowGamepadIcons(void)
+{
+	cvar_t		*joy_glyphs;
+	joy_glyphs = Cvar_Get("joy_glyphs", Sys_IsGameConsole() ? "1" : "0", CVAR_ARCHIVE);
+	return (joy_glyphs->integer > 0);
+}
+
+/*****************************************************************************/
+
 // Knightmare- adapted from DK 1.3 Linux port
 const char* Sys_ExeDir(void)
 {

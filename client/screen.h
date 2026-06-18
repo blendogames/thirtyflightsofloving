@@ -86,6 +86,8 @@ typedef struct
 #define MENU_FONT_SIZE	8
 #define MENU_LINE_SIZE	10
 
+#define MENU_KEYBIND_LINESIZE	17
+
 #define HUD_FONT_SIZE	8.0
 
 
@@ -175,3 +177,6 @@ qboolean SCR_DrawCinematic (void);
 void	SCR_RunCinematic (void);
 void	SCR_StopCinematic (void);
 void	SCR_FinishCinematic (void);
+
+char *GetGamepadGlyph(char *bindName); //BC 3-23-2026
+void DrawGamepadPrompt(float x, float y, char *buttonIcon, char *text); //BC 3-26-2026

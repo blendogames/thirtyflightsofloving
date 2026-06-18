@@ -32,6 +32,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define MTYPE_SEPARATOR  	4
 #define MTYPE_FIELD			5
 #define MTYPE_KEYBIND		6
+#define MTYPE_CHECKBOX		7
 
 #define	K_TAB			9
 #define	K_ENTER			13
@@ -79,6 +80,9 @@ typedef struct _tag_menuframework
 	void *items[64];
 
 	const char	*statusbar;
+#ifndef NOTTHIRTYFLIGHTS
+	const char	*iconname;
+#endif
 	int			grabBindCursor;
 
 	void (*cursordraw)( struct _tag_menuframework *m );
@@ -97,6 +101,9 @@ typedef struct
 	unsigned flags;
 
 	const char *statusbar;
+#ifndef NOTTHIRTYFLIGHTS
+	const char	*iconname;
+#endif
 
 	void (*callback)( void *self );
 	void (*statusbarfunc)( void *self );
@@ -145,6 +152,9 @@ typedef struct
 typedef struct
 {
 	menucommon_s generic;
+#ifndef NOTTHIRTYFLIGHTS
+	const char	*iconname;
+#endif
 } menuaction_s;
 
 typedef struct
@@ -267,7 +277,11 @@ extern int	ui_numcrosshairs;
 //=======================================================
 
 #define	UI_MAX_SAVEGAMES	25 // was 15, 21
+#ifdef NOTTHIRTYFLIGHTS
 #define	EMPTY_GAME_STRING	"<EMPTY>"
+#else
+#define	EMPTY_GAME_STRING	"- EMPTY -"
+#endif
 
 extern char		ui_savestrings[UI_MAX_SAVEGAMES][32];
 extern qboolean	ui_savevalid[UI_MAX_SAVEGAMES+1];
@@ -601,6 +615,8 @@ static char *creditsBuffer;
 // ui_credits.c
 //
 void Menu_Credits_Draw (void);
+
+void Menu_Quit_Draw (void);
 
 //
 // ui_options_screen.c

@@ -86,6 +86,9 @@ cvar_t	*joy_yawsensitivity;
 cvar_t	*joy_upthreshold;
 cvar_t	*joy_upsensitivity;
 
+cvar_t	*joy_frobfriction; //BC 3-23-2026
+cvar_t	*joy_glyphs; //BC 4-8-2026 What control glyphs to show.
+
 qboolean	joy_avail, joy_advancedinit, joy_haspov;
 DWORD		joy_oldbuttonstate, joy_oldpovstate;
 
@@ -141,6 +144,12 @@ qboolean	mouseparmsvalid;
 
 int			window_center_x, window_center_y;
 RECT		window_rect;
+
+qboolean	joystickVerticalMoved;
+
+
+qboolean    joystickLeftTriggerMoved;
+qboolean    joystickRightTriggerMoved;
 
 
 /*
@@ -457,22 +466,26 @@ void IN_Init (void)
 	Cvar_SetDescription ("in_mouse", "Enables mouse input.");
 
 	// joystick variables
-	in_joystick				= Cvar_Get ("in_joystick",				"0",		CVAR_ARCHIVE);
+	in_joystick				= Cvar_Get ("in_joystick",	  "1",		CVAR_ARCHIVE); //BC 4-13-2026 default to gamepad on.
 	Cvar_SetDescription ("in_joystick", "Enables joystick input.");
 	joy_name				= Cvar_Get ("joy_name",					"joystick",	0);
 	Cvar_SetDescription ("joy_name", "Sets name of the joystick.");
-	joy_advanced			= Cvar_Get ("joy_advanced",				"0",		0);
+	joy_advanced			= Cvar_Get ("joy_advanced",				"1",		0);
 	Cvar_SetDescription ("joy_advanced", "Enables the advanced axis (\"joy_advaxis*\") cvars.  Use the \"joy_advancedupdate\" command after setting this and the \"joy_advaxis*\" cvars.");
 
-	joy_advaxisx			= Cvar_Get ("joy_advaxisx",				"0",		0);
+	//BC 4-8-2026
+	joy_glyphs = Cvar_Get("joy_glyphs", "0", CVAR_ARCHIVE);
+	Cvar_SetDescription("joy_glyphs", "What control prompts to display. 0=keyboard/mouse. 1=steamdeck. 2=xbox. 3=playstation.");
+
+	joy_advaxisx			= Cvar_Get ("joy_advaxisx",				"3",		0);
 	Cvar_SetDescription ("joy_advaxisx", "Controls mapping of DirectInput axis X (typically joystick left and right).");
-	joy_advaxisy			= Cvar_Get ("joy_advaxisy",				"0",		0);
+	joy_advaxisy			= Cvar_Get ("joy_advaxisy",				"1",		0);
 	Cvar_SetDescription ("joy_advaxisy", "Controls mapping of DirectInput axis Y (typically joystick forward and backward).");
 	joy_advaxisz			= Cvar_Get ("joy_advaxisz",				"0",		0);
 	Cvar_SetDescription ("joy_advaxisz", "Controls mapping of DirectInput axis Z (typically joystick throttle).");
-	joy_advaxisr			= Cvar_Get ("joy_advaxisr",				"0",		0);
+	joy_advaxisr			= Cvar_Get ("joy_advaxisr",				"2",		0);
 	Cvar_SetDescription ("joy_advaxisr", "Controls mapping of DirectInput axis R (typically joystick rudder).");
-	joy_advaxisu			= Cvar_Get ("joy_advaxisu",				"0",		0);
+	joy_advaxisu			= Cvar_Get ("joy_advaxisu",				"4",		0);
 	Cvar_SetDescription ("joy_advaxisu", "Controls mapping of DirectInput axis U (custom axis - Assassin 3D trackball left and right and SpaceOrb roll).");
 	joy_advaxisv			= Cvar_Get ("joy_advaxisv",				"0",		0);
 	Cvar_SetDescription ("joy_advaxisv", "Controls mapping of DirectInput axis V (custom axis - Assassin 3D trackball forward and backward and SpaceOrb yaw).");
@@ -489,7 +502,7 @@ void IN_Init (void)
 	Cvar_SetDescription ("joy_yawthreshold", "Controls the dead-zone for looking left and right.");
 	joy_forwardsensitivity	= Cvar_Get ("joy_forwardsensitivity",	"-1",		0);
 	Cvar_SetDescription ("joy_forwardsensitivity", "Controls the ramp-up speed for moving forward and backward.");
-	joy_sidesensitivity		= Cvar_Get ("joy_sidesensitivity",		"-1",		0);
+	joy_sidesensitivity		= Cvar_Get ("joy_sidesensitivity",		"1",		0);
 	Cvar_SetDescription ("joy_sidesensitivity", "Controls the ramp-up speed for moving side to side.");
 	joy_upsensitivity		= Cvar_Get ("joy_upsensitivity",		"-1",		0);
 	Cvar_SetDescription ("joy_upsensitivity", "Controls the ramp-up speed for moving up and down.");
@@ -497,6 +510,9 @@ void IN_Init (void)
 	Cvar_SetDescription ("joy_pitchsensitivity", "Controls the speed that you look up and down.");
 	joy_yawsensitivity		= Cvar_Get ("joy_yawsensitivity",		"-1",		0);
 	Cvar_SetDescription ("joy_yawsensitivity", "Controls the speed that you look left to right.");
+
+    joy_frobfriction = Cvar_Get("joy_frobfriction", "0.5", 0);
+    Cvar_SetDescription("joy_frobfriction", "Adds look friction when crosshair is above a frobbable.");
 
 	// centering
 	v_centermove			= Cvar_Get ("v_centermove",				"0.15",		0);
@@ -509,6 +525,11 @@ void IN_Init (void)
 
 	IN_StartupMouse ();
 	IN_StartupJoystick ();
+
+	joystickVerticalMoved = false;
+
+    joystickLeftTriggerMoved = false;
+    joystickRightTriggerMoved = false;
 }
 
 /*
@@ -823,6 +844,9 @@ void IN_Commands (void)
 	}
 	joy_oldbuttonstate = buttonstate;
 
+
+
+
 	if (joy_haspov)
 	{
 		// convert POV information into 4 bits of state information
@@ -935,6 +959,34 @@ void IN_JoyMove (usercmd_t *cmd)
 		// convert range from -32768..32767 to -1..1 
 		fAxisValue /= 32768.0;
 
+
+        //BC 3-31-2026 allow gamepad triggers to call key event. This is a bit of a kludge....
+        if (i == JOY_AXIS_Z)
+        {
+            if (fAxisValue > 0.2f)
+            {
+                Key_Event(K_AUX27, true, sys_msg_time); //left trigger
+                joystickLeftTriggerMoved = true;
+            }
+            else if (joystickLeftTriggerMoved)
+            {
+                Key_Event(K_AUX27, false, 0);
+            }
+
+            if (fAxisValue < -0.2f)
+            {
+                Key_Event(K_AUX28, true, sys_msg_time); //right trigger
+                joystickRightTriggerMoved = true;
+            }
+            else if (joystickRightTriggerMoved)
+            {
+                Key_Event(K_AUX28, false, 0);
+            }
+
+            
+        }
+
+
 		switch (dwAxisMap[i])
 		{
 		case AxisForward:
@@ -965,16 +1017,56 @@ void IN_JoyMove (usercmd_t *cmd)
 			else
 			{
 				// user wants forward control to be forward control
-				if (fabs(fAxisValue) > joy_forwardthreshold->value)
+				if (fabs(fAxisValue) > joy_forwardthreshold->value && cl.frame.playerstate.stats[STAT_FREEZE] <= 0 /*BC 1/30/2024 don't allow joystick movement during stat_freeze*/ )
 				{
+					if (cl.frame.playerstate.stats[STAT_MOVESLOW]) //BC 1/30/2024 slow down movement during stat_moveslow
+					{
+						speed *= .5f;
+					}
+
 					cmd->forwardmove += (fAxisValue * joy_forwardsensitivity->value) * speed * cl_forwardspeed->value;
 				}
 			}
+
+
+			//BC 1/30/2024 allow joystick menu selection.
+			if (fabs(fAxisValue) > joy_forwardthreshold->value)
+			{
+				if (!joystickVerticalMoved)
+				{
+					if (fAxisValue < 0)
+					{
+						//joystick up.
+						//Com_Printf("joystick up\n");
+						Key_Event(K_JOY_UP, true, sys_msg_time);
+					}
+					else
+					{
+						//joystick down.
+						Key_Event(K_JOY_DOWN, true, sys_msg_time);
+					}
+				}
+
+				joystickVerticalMoved = true;
+			}
+			else if (joystickVerticalMoved == true)
+			{
+				joystickVerticalMoved = false;
+				Key_Event(K_JOY_UP, false, 0);
+				Key_Event(K_JOY_DOWN, false, 0);
+			}
+
 			break;
 
 		case AxisSide:
-			if (fabs(fAxisValue) > joy_sidethreshold->value)
+			if (fabs(fAxisValue) > joy_sidethreshold->value
+				&& cl.frame.playerstate.stats[STAT_FREEZE] <= 0) //BC 4-7-2026 disable gamepad movement during stat_freeze
 			{
+				if (cl.frame.playerstate.stats[STAT_MOVESLOW]) //BC 1/30/2024 slow down movement during stat_moveslow
+				{
+					speed *= .5f;
+				}
+
 				cmd->sidemove += (fAxisValue * joy_sidesensitivity->value) * speed * cl_sidespeed->value;
 			}
 			break;
@@ -1000,21 +1092,30 @@ void IN_JoyMove (usercmd_t *cmd)
 				// user wants turn control to be turn control
 				if (fabs(fAxisValue) > joy_yawthreshold->value)
 				{
+
+
+                    float cursorSpeedModifier = 1.0f; //BC 3-19-2026 if on frobbable/useable thing, then slow down cursor speed
+                    if (cl.frame.playerstate.stats[STAT_USEABLE] > 0) //BC 3-19-2026 if on frobbable/useable thing, then slow down cursor speed
+                    {
+                        cursorSpeedModifier *= joy_frobfriction->value;
+                    }
+
+
 					if(dwControlMap[i] == JOY_ABSOLUTE_AXIS)
 					{
 					//	if (in_autosensitivity->value && cl.base_fov < 90) // Knightmare added
 						if (in_autosensitivity->integer && cl.base_fov < 90) // Knightmare added
-							cl.viewangles[YAW] += (fAxisValue * joy_yawsensitivity->value * (cl.base_fov/90.0)) * aspeed * cl_yawspeed->value;
+							cl.viewangles[YAW] += (fAxisValue * joy_yawsensitivity->value * (cl.base_fov/90.0)) * aspeed * cl_yawspeed->value * cursorSpeedModifier;
 						else
-							cl.viewangles[YAW] += (fAxisValue * joy_yawsensitivity->value) * aspeed * cl_yawspeed->value;
+							cl.viewangles[YAW] += (fAxisValue * joy_yawsensitivity->value) * aspeed * cl_yawspeed->value * cursorSpeedModifier;
 					}
 					else
 					{
 					//	if (in_autosensitivity->value && cl.base_fov < 90) // Knightmare added
 						if (in_autosensitivity->integer && cl.base_fov < 90) // Knightmare added
-							cl.viewangles[YAW] += (fAxisValue * joy_yawsensitivity->value * (cl.base_fov/90.0)) * speed * 180.0;
+							cl.viewangles[YAW] += (fAxisValue * joy_yawsensitivity->value * (cl.base_fov/90.0)) * speed * 180.0 * cursorSpeedModifier;
 						else
-							cl.viewangles[YAW] += (fAxisValue * joy_yawsensitivity->value) * speed * 180.0;
+							cl.viewangles[YAW] += (fAxisValue * joy_yawsensitivity->value) * speed * 180.0 * cursorSpeedModifier;
 					}
 
 				}
@@ -1022,26 +1123,35 @@ void IN_JoyMove (usercmd_t *cmd)
 			break;
 
 		case AxisLook:
-			if (mlooking)
+			//if (mlooking) //BC 3-19-2026 commenting this out to allow for gamepad stick to adjust viewpitch
 			{
 				if (fabs(fAxisValue) > joy_pitchthreshold->value)
 				{
+                    float invertModifier = m_pitch->value > 0 ? 1.0f : -1.0f; //BC 3-19-2026 allow mouse invert to adjust the joystick pitch
+
+
+                    if (cl.frame.playerstate.stats[STAT_USEABLE] > 0) //BC 3-19-2026 if on frobbable/useable thing, then slow down cursor speed
+                    {
+                        invertModifier *= joy_frobfriction->value;
+                    }
+
+
 					// pitch movement detected and pitch movement desired by user
 					if(dwControlMap[i] == JOY_ABSOLUTE_AXIS)
 					{
 					//	if (in_autosensitivity->value && cl.base_fov < 90) // Knightmare added
 						if (in_autosensitivity->integer && cl.base_fov < 90) // Knightmare added
-							cl.viewangles[PITCH] += (fAxisValue * joy_pitchsensitivity->value * (cl.base_fov/90.0)) * aspeed * cl_pitchspeed->value;
+							cl.viewangles[PITCH] += (fAxisValue * joy_pitchsensitivity->value * (cl.base_fov/90.0)) * aspeed * cl_pitchspeed->value * invertModifier;
 						else
-							cl.viewangles[PITCH] += (fAxisValue * joy_pitchsensitivity->value) * aspeed * cl_pitchspeed->value;
+							cl.viewangles[PITCH] += (fAxisValue * joy_pitchsensitivity->value) * aspeed * cl_pitchspeed->value * invertModifier;
 					}
 					else
 					{
 					//	if (in_autosensitivity->value && cl.base_fov < 90) // Knightmare added
 						if (in_autosensitivity->integer && cl.base_fov < 90) // Knightmare added
-							cl.viewangles[PITCH] += (fAxisValue * joy_pitchsensitivity->value * (cl.base_fov/90.0)) * speed * 180.0;
+							cl.viewangles[PITCH] += (fAxisValue * joy_pitchsensitivity->value * (cl.base_fov/90.0)) * speed * 180.0 * invertModifier;
 						else
-							cl.viewangles[PITCH] += (fAxisValue * joy_pitchsensitivity->value) * speed * 180.0;
+							cl.viewangles[PITCH] += (fAxisValue * joy_pitchsensitivity->value) * speed * 180.0 * invertModifier;
 					}
 				}
 			}

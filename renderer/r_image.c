@@ -1156,6 +1156,47 @@ void PNGAPI R_ReadPNGData (png_structp png, png_bytep data, png_size_t length)
 		data[i] = r_png_handle->tmpBuf[r_png_handle->tmpi++];    // give pnglib a some more bytes  
 }
 
+//BC 4-8-2026 swap some signage textures when using gamepad. This is a caveman implementation but it works ok
+char *GetDeckTexture(char *textureName)
+{
+	if (!ShowGamepadIcons())
+		return textureName;
+
+	if (!strcmp(textureName, "textures/signs/mouse.png"))
+	{
+		return "textures/signs/mouse_deck.png";
+	}
+	else if (!strcmp(textureName, "textures/signs/wasd.png"))
+	{
+		return "textures/signs/wasd_deck.png";
+	}
+	else if (!strcmp(textureName, "textures/signs/sf_usebutt.png"))
+	{
+		return "textures/signs/sf_usebutt_deck.png";
+	}
+	else if (!strcmp(textureName, "textures/signs/sf_jump2.png"))
+	{
+		return "textures/signs/sf_jump2_deck.png";
+	}
+	else if (!strcmp(textureName, "textures/signs/sf_mousewheel.png"))
+	{
+		return "textures/signs/sf_mousewheel_deck.png";
+	}
+	else if (!strcmp(textureName, "textures/signs/sf_mouse1.png"))
+	{
+		return "textures/signs/sf_mouse1_deck.png";
+	}
+	else if (!strcmp(textureName, "textures/signs/sf_wasd.png"))
+	{
+		return "textures/signs/sf_wasd_deck.png";
+	}
+	else if (!strcmp(textureName, "pics/victory.png"))
+	{
+		return "pics/victory_deck.png";
+	}
+
+	return textureName;
+}
 
 /*
 ==============
@@ -1171,6 +1212,8 @@ void R_LoadPNG (char *filename, byte **pic, int *width, int *height)
 	byte		*raw;
 
 	*pic = NULL;
+
+	filename = GetDeckTexture(filename);
 
 	len = FS_LoadFile (filename, (void **)&raw);
 

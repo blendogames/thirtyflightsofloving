@@ -55,6 +55,16 @@ static menuaction_s		s_options_controls_customize_keys_action;
 static menuaction_s		s_options_controls_defaults_action;
 static menuaction_s		s_options_controls_back_action;
 
+static menulist_s		s_glyphs_box; //BC 4-8-2026
+
+#ifndef NOTTHIRTYFLIGHTS
+static menulist_s		s_options_controls_console_box;
+static void ConsoleFunc( void *unused )
+{
+	Cvar_SetValue( "cl_enableconsole", s_options_controls_console_box.curValue );
+}
+#endif
+
 //=======================================================================
 
 static void MouseSpeedFunc (void *unused)
@@ -95,7 +105,12 @@ static void FreeLookFunc (void *unused)
 
 static void InvertMouseFunc (void *unused)
 {
+#ifdef NOTTHIRTYFLIGHTS
 	UI_MenuSpinControl_SaveValue (&s_options_controls_invertmouse_box, "m_pitch");
+#else
+	//Cvar_SetValue( "m_pitch", s_options_controls_invertmouse_box.curValue );
+	Cvar_SetValue("m_pitch", -m_pitch->value);
+#endif
 }
 
 static void AutosensitivityFunc (void *unused)
@@ -115,7 +130,20 @@ static void LookstrafeFunc (void *unused)
 
 static void JoystickFunc (void *unused)
 {
+#ifdef NOTTHIRTYFLIGHTS
 	UI_MenuSpinControl_SaveValue (&s_options_controls_joystick_box, "in_joystick");
+#else
+
+	//BC 4-8-2026 if steam deck, force gamepad on
+	if (Sys_IsGameConsole())
+	{
+		Cvar_SetValue("in_joystick", 1);
+		s_options_controls_joystick_box.curValue = 1;
+		return;
+	}
+
+	Cvar_SetValue( "in_joystick", s_options_controls_joystick_box.curValue );
+#endif
 }
 
 static void CustomizeControlsFunc(void *unused)
@@ -141,6 +169,9 @@ static void M_ControlsSetMenuItemValues (void)
 	UI_MenuSpinControl_SetValue (&s_options_controls_lookstrafe_box, "lookstrafe", 0, 1, true);
 	UI_MenuSpinControl_SetValue (&s_options_controls_freelook_box, "freelook", 0, 1, true);
 	UI_MenuSpinControl_SetValue (&s_options_controls_joystick_box, "in_joystick", 0, 1, true);
+
+	//BC 4-8-2026
+	UI_MenuSpinControl_SetValue(&s_glyphs_box, "joy_glyphs", 0, 3, true);
 }
 
 static void M_ControlsResetDefaultsFunc (void *unused)
@@ -157,15 +188,50 @@ static void M_ControlsResetDefaultsFunc (void *unused)
 //	Cvar_SetToDefault ("lookspring");
 //	Cvar_SetToDefault ("lookstrafe");
 //	Cvar_SetToDefault ("freelook");
-	Cvar_SetToDefault ("in_joystick");
+	
 
-	Cbuf_AddText ("exec defaultbinds.cfg\n"); // reset default binds
+    //BC 3-26-2026 on steam deck, default to joystick on.
+    if (Sys_IsGameConsole())
+    {
+		//If steam deck build, default to steam deck button glyphs.
+		Cvar_Set("joy_glyphs", "1");
+    }
+    else
+    {
+        //Default keyboard/mouse.
+		Cvar_Set("joy_glyphs", "0");
+    }
+
+	
+	//Cvar_SetToDefault("in_joystick");
+	Cvar_Set("in_joystick", "1");
+
+	Cbuf_AddText("exec defaultbinds.cfg\n"); // reset default binds
+
+	
+
 	Cbuf_Execute();
 
 	M_ControlsSetMenuItemValues ();
 }
 
 //=======================================================================
+
+//BC 4-8-2026
+static const char *glyph_names[] =
+{
+	"keyboard/mouse",
+	"Steam Deck",
+	"Xbox",
+	"Playstation",
+	0
+};
+
+//BC 4-8-2026
+static void GlyphCallback(void *unused)
+{
+	UI_MenuSpinControl_SaveValue(&s_glyphs_box, "joy_glyphs");
+}
 
 void Menu_Options_Controls_Init (void)
 {
@@ -184,7 +250,11 @@ void Menu_Options_Controls_Init (void)
 
 	s_options_controls_header.generic.type		= MTYPE_SEPARATOR;
 	s_options_controls_header.generic.textSize	= MENU_HEADER_FONT_SIZE;
+#ifdef NOTTHIRTYFLIGHTS
 	s_options_controls_header.generic.name		= "Controls";
+#else
+	s_options_controls_header.generic.name		= "CONTROLS";
+#endif
 	s_options_controls_header.generic.x			= MENU_HEADER_FONT_SIZE/2 * (int)strlen(s_options_controls_header.generic.name);
 	s_options_controls_header.generic.y			= -2*MENU_LINE_SIZE;	// 0
 
@@ -192,24 +262,37 @@ void Menu_Options_Controls_Init (void)
 	s_options_controls_sensitivity_slider.generic.textSize	= MENU_FONT_SIZE;
 	s_options_controls_sensitivity_slider.generic.x			= 0;
 	s_options_controls_sensitivity_slider.generic.y			= y;
+#ifdef NOTTHIRTYFLIGHTS
 	s_options_controls_sensitivity_slider.generic.name		= "mouse speed";
+#else
+	s_options_controls_sensitivity_slider.generic.name		= "Look Sensitivity";
+#endif
 	s_options_controls_sensitivity_slider.generic.callback	= MouseSpeedFunc;
 	s_options_controls_sensitivity_slider.maxPos			= 20;
 	s_options_controls_sensitivity_slider.baseValue			= 1.0f;
 	s_options_controls_sensitivity_slider.increment			= 0.5f;
 	s_options_controls_sensitivity_slider.displayAsPercent	= false;
-	s_options_controls_sensitivity_slider.generic.statusbar	= "changes sensitivity of mouse for head movement";
+	s_options_controls_sensitivity_slider.generic.statusbar	= "changes sensitivity of head movement";
 
+#ifdef NOTTHIRTYFLIGHTS
 	s_options_controls_invertmouse_box.generic.type			= MTYPE_SPINCONTROL;
+#else
+	s_options_controls_invertmouse_box.generic.type			= MTYPE_CHECKBOX;
+#endif
 	s_options_controls_invertmouse_box.generic.textSize		= MENU_FONT_SIZE;
 	s_options_controls_invertmouse_box.generic.x			= 0;
 	s_options_controls_invertmouse_box.generic.y			= y+=MENU_LINE_SIZE;
+#ifdef NOTTHIRTYFLIGHTS
 	s_options_controls_invertmouse_box.generic.name			= "invert mouse";
+#else
+	s_options_controls_invertmouse_box.generic.name			= "Invert Look";
+#endif
 	s_options_controls_invertmouse_box.generic.callback		= InvertMouseFunc;
 	s_options_controls_invertmouse_box.itemNames			= yesno_names;
 	s_options_controls_invertmouse_box.invertValue			= true;
-	s_options_controls_invertmouse_box.generic.statusbar	= "inverts mouse y-axis movement";
+	s_options_controls_invertmouse_box.generic.statusbar	= "inverts vertical look movement";
 
+#ifdef NOTTHIRTYFLIGHTS
 	s_options_controls_autosensitivity_box.generic.type			= MTYPE_SPINCONTROL;
 	s_options_controls_autosensitivity_box.generic.textSize		= MENU_FONT_SIZE;
 	s_options_controls_autosensitivity_box.generic.x			= 0;
@@ -297,15 +380,52 @@ void Menu_Options_Controls_Init (void)
 	s_options_controls_freelook_box.generic.callback	= FreeLookFunc;
 	s_options_controls_freelook_box.itemNames			= yesno_names;
 	s_options_controls_freelook_box.generic.statusbar	= "enables free head movement with mouse";
+#endif
 
+#ifdef NOTTHIRTYFLIGHTS
 	s_options_controls_joystick_box.generic.type		= MTYPE_SPINCONTROL;
+#else
+	s_options_controls_joystick_box.generic.type		= MTYPE_CHECKBOX;
+#endif
 	s_options_controls_joystick_box.generic.textSize	= MENU_FONT_SIZE;
 	s_options_controls_joystick_box.generic.x			= 0;
+#ifdef NOTTHIRTYFLIGHTS
 	s_options_controls_joystick_box.generic.y			= y += MENU_LINE_SIZE;
 	s_options_controls_joystick_box.generic.name		= "use joystick";
+#else
+	s_options_controls_joystick_box.generic.y			= y += MENU_LINE_SIZE*2;
+	s_options_controls_joystick_box.generic.name		= "Use Gamepad";
+#endif
 	s_options_controls_joystick_box.generic.callback	= JoystickFunc;
 	s_options_controls_joystick_box.itemNames			= yesno_names;
-	s_options_controls_joystick_box.generic.statusbar	= "enables use of joystick";
+	s_options_controls_joystick_box.generic.statusbar	= "enables use of gamepad";
+
+
+
+
+	//BC 4-8-2026
+	s_glyphs_box.generic.type = MTYPE_SPINCONTROL;
+	s_glyphs_box.generic.textSize = MENU_FONT_SIZE;
+	s_glyphs_box.generic.x = 0;
+	s_glyphs_box.generic.y = y += 1.2f * MENU_LINE_SIZE;
+	s_glyphs_box.generic.name = "Button prompts";
+	s_glyphs_box.generic.callback = GlyphCallback;
+	s_glyphs_box.itemNames = glyph_names;
+	s_glyphs_box.generic.statusbar = "what button prompts to display";
+
+
+
+
+
+#ifndef NOTTHIRTYFLIGHTS
+	s_options_controls_console_box.generic.type = MTYPE_CHECKBOX;
+	s_options_controls_console_box.generic.x	= 0;
+	s_options_controls_console_box.generic.y	= y+=MENU_LINE_SIZE*2;
+	s_options_controls_console_box.generic.name	= "Enable Console";
+	s_options_controls_console_box.generic.callback = ConsoleFunc;
+	s_options_controls_console_box.itemNames = yesno_names;
+    s_options_controls_console_box.generic.statusbar = "enable developer console";
+#endif
 
 	s_options_controls_customize_keys_action.generic.type		= MTYPE_ACTION;
 	s_options_controls_customize_keys_action.generic.textSize	= MENU_FONT_SIZE;
@@ -318,7 +438,11 @@ void Menu_Options_Controls_Init (void)
 	s_options_controls_defaults_action.generic.textSize		= MENU_FONT_SIZE;
 	s_options_controls_defaults_action.generic.x			= MENU_FONT_SIZE;
 	s_options_controls_defaults_action.generic.y			= 20*MENU_LINE_SIZE;
+#ifdef NOTTHIRTYFLIGHTS
 	s_options_controls_defaults_action.generic.name			= "Reset to Defaults";
+#else
+	s_options_controls_defaults_action.generic.name			= "Reset Defaults";
+#endif
 	s_options_controls_defaults_action.generic.callback		= M_ControlsResetDefaultsFunc;
 	s_options_controls_defaults_action.generic.statusbar	= "resets all control settings to internal defaults";
 
@@ -326,12 +450,17 @@ void Menu_Options_Controls_Init (void)
 	s_options_controls_back_action.generic.textSize		= MENU_FONT_SIZE;
 	s_options_controls_back_action.generic.x			= MENU_FONT_SIZE;
 	s_options_controls_back_action.generic.y			= 22*MENU_LINE_SIZE;
+#ifdef NOTTHIRTYFLIGHTS
 	s_options_controls_back_action.generic.name			= "Back to Options";
+#else
+	s_options_controls_back_action.generic.name			= "Done";
+#endif
 	s_options_controls_back_action.generic.callback		= UI_BackMenu;
 
 	UI_AddMenuItem (&s_options_controls_menu, (void *) &s_options_controls_header);
 	UI_AddMenuItem (&s_options_controls_menu, (void *) &s_options_controls_sensitivity_slider);
 	UI_AddMenuItem (&s_options_controls_menu, (void *) &s_options_controls_invertmouse_box);
+#ifdef NOTTHIRTYFLIGHTS
 	UI_AddMenuItem (&s_options_controls_menu, (void *) &s_options_controls_autosensitivity_box);
 	UI_AddMenuItem (&s_options_controls_menu, (void *) &s_options_controls_thirdperson_box);
 	UI_AddMenuItem (&s_options_controls_menu, (void *) &s_options_controls_thirdperson_distance_slider);
@@ -341,7 +470,15 @@ void Menu_Options_Controls_Init (void)
 	UI_AddMenuItem (&s_options_controls_menu, (void *) &s_options_controls_lookspring_box);
 	UI_AddMenuItem (&s_options_controls_menu, (void *) &s_options_controls_lookstrafe_box);
 	UI_AddMenuItem (&s_options_controls_menu, (void *) &s_options_controls_freelook_box);
+#endif
 	UI_AddMenuItem (&s_options_controls_menu, (void *) &s_options_controls_joystick_box);
+
+	UI_AddMenuItem(&s_options_controls_menu, (void *)&s_glyphs_box);
+
+
+#ifndef NOTTHIRTYFLIGHTS
+	UI_AddMenuItem (&s_options_controls_menu, (void *) &s_options_controls_console_box);
+#endif
 	UI_AddMenuItem (&s_options_controls_menu, (void *) &s_options_controls_customize_keys_action);
 	UI_AddMenuItem (&s_options_controls_menu, (void *) &s_options_controls_defaults_action);
 	UI_AddMenuItem (&s_options_controls_menu, (void *) &s_options_controls_back_action);

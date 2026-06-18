@@ -1133,6 +1133,8 @@ CL_AddPacketEntities
 
 ===============
 */
+// FIXME TFOL -flibit
+void CL_FreonEffect (vec3_t start, vec3_t end, vec3_t angle, int red, int green, int blue, int reddelta, int greendelta, int bluedelta, float len, float size);
 void CL_AddPacketEntities (frame_t *frame)
 {
 	entity_t			ent;
@@ -1318,6 +1320,12 @@ void CL_AddPacketEntities (frame_t *frame)
 			{	// replace the bolt with a particle glow
 				CL_HyperBlasterEffect (cent->lerp_origin, ent.origin, s1->angles,
 					255, 150, 50, 0, -90, -30, 10, 3);
+				drawEnt = false;
+			}
+			if (!Q_strcasecmp((char *)ent.model, "sprites/freonparticle.sp2")) // TFOL
+			{	//freon particle.
+				CL_FreonEffect (cent->lerp_origin, ent.origin, s1->angles,
+					255, 150, 50, 0, -90, -30, 10, 2);
 				drawEnt = false;
 			}
 			if ( (!Q_strcasecmp((char *)ent.model, "models/proj/laser2/tris.md2")
@@ -1823,6 +1831,64 @@ void CL_AddPacketEntities (frame_t *frame)
 	} //end for
 }
 
+// TFOL: 23 = weap_borges
+
+void CL_AddPlayerAttachment ( player_state_t *ps, player_state_t *ops, int modelIndex, int skin , int frame, int offset_y)
+{
+	entity_t	gun;		// view model
+	int			i;
+
+	//dont draw if outside body...
+	//if (cl_3dcam->value && !(cl.attractloop && !(cl.cinematictime > 0 && cls.realtime - cl.cinematictime > 1000)))
+	//	return;
+
+
+	// allow the gun to be completely removed
+	if (!cl_gun->value)
+		return;
+
+	// don't draw gun if in wide angle view
+	if (ps->fov > 180) //Knightmare 1/4/2002 - was 90
+		return;
+
+	memset (&gun, 0, sizeof(gun));
+
+
+	gun.model = cl.model_draw[modelIndex];
+
+	if (!gun.model)
+		return;
+
+	if (gun.model)
+	{
+		// set up gun position
+		for (i=0 ; i<3 ; i++)
+		{
+			gun.origin[i] = cl.refdef.vieworg[i] + ops->gunoffset[i] + cl.lerpfrac * (ps->gunoffset[i] - ops->gunoffset[i]);
+
+			//do not pitch.
+			if (i == 0)
+				continue;
+
+			gun.angles[i] = cl.refdef.viewangles[i] + LerpAngle (ops->gunangles[i], ps->gunangles[i], cl.lerpfrac);
+		}
+
+		gun.origin[2] += offset_y;
+
+		gun.frame = frame;	// development tool
+		gun.oldframe = frame;	// development tool
+
+		//Knightmare- added changeable skin
+		gun.skinnum = skin;
+
+		//gun.flags = RF_MINLIGHT | RF_DEPTHHACK | RF_WEAPONMODEL;
+		gun.flags = RF_MINLIGHT | RF_DEPTHHACK ;
+
+		gun.backlerp = 1.0 - cl.lerpfrac;
+		VectorCopy (gun.origin, gun.oldorigin);	// don't lerp at all
+		V_AddEntity (&gun);
+	}
+}
 
 /*
 ==============
@@ -2091,7 +2157,7 @@ void SetUpCamera (void)
 	}
 	else if (cg_thirdperson_chase->integer)
 	{
-		vec3_t temp, temp2;
+		vec3_t temp, temp2, tempright;
 
 		VectorMA(cl.refdef.vieworg, -dist_back, cl.v_forward, end);
 		VectorMA(end, dist_up, cl.v_up, end);
@@ -2101,8 +2167,14 @@ void SetUpCamera (void)
 		vectoangles2 (cl.v_forward, temp);
 		temp[PITCH] = 0;
 		temp[ROLL] = 0;
-		AngleVectors (temp, temp2, NULL, NULL);
+		AngleVectors (temp, temp2, tempright, NULL);
 		VectorMA (end, -(dist_back/1.8f), temp2, end);
+
+		// TFOL
+		if (cl_3dcam_yaw->value != 0)
+		{
+			VectorMA(end, cl_3dcam_yaw->value, tempright, end);
+		}
 
 		V_ClipCam (cl.refdef.vieworg, end, camPosition);
 	}
@@ -2168,6 +2240,77 @@ void SetUpCamera (void)
 
 		VectorAdd (camForward, cl.refdef.vieworg, newPos);
 		V_ClipCam (cl.refdef.vieworg, newPos, cl.refdef.vieworg);
+	}
+}
+
+// TFOL
+void CL_DrawGunArms( player_state_t *ps, player_state_t *ops, int modelIndex, float yaw, float pitch)
+{
+	int k;
+	for (k=0; k<2; k++)
+	{
+
+	entity_t	gun;		// view model
+	int			i;
+
+	// allow the gun to be completely removed
+	if (!cl_gun->value)
+		return;
+
+	// don't draw gun if in wide angle view
+	if (ps->fov > 180) //Knightmare 1/4/2002 - was 90
+		return;
+
+	memset (&gun, 0, sizeof(gun));
+
+	gun.model = cl.model_draw[modelIndex];
+
+	if (!gun.model)
+		return;
+
+	if (gun.model)
+	{
+		vec3_t forward, right, viewang;
+		vec3_t start;
+
+		vec3_t muzzleang, muzzlepos, muzzleforward, gunpos;
+
+		vec3_t color = { 200, 100, 10 };
+
+		// set up gun position
+		for (i=0 ; i<3 ; i++)
+		{
+			gun.origin[i] = cl.refdef.vieworg[i] + ops->gunoffset[i] + cl.lerpfrac * (ps->gunoffset[i] - ops->gunoffset[i]);
+
+			//do not pitch.
+			if (i == 0)
+				continue;
+
+			gun.angles[i] = cl.refdef.viewangles[i] + LerpAngle (ops->gunangles[i], ps->gunangles[i], cl.lerpfrac);
+		}
+
+		gun.angles[YAW] += yaw;
+		gun.angles[PITCH] += pitch;
+
+		VectorCopy (cl.refdef.viewangles, viewang);
+		viewang[PITCH] = 0;
+		AngleVectors (viewang, forward, right, NULL);
+
+		if (k <= 0)
+			VectorMA (gun.origin, 4.6, right, gun.origin);
+		else
+			VectorMA (gun.origin, -9.2, right, gun.origin);
+
+		VectorMA (gun.origin, 23, forward, gun.origin);
+		gun.origin[2] -= 20;
+
+
+		//gun.flags = RF_MINLIGHT | RF_DEPTHHACK | RF_WEAPONMODEL;
+		//gun.flags = RF_MINLIGHT | RF_DEPTHHACK ;
+		gun.backlerp = 1.0 - cl.lerpfrac;
+		VectorCopy (gun.origin, gun.oldorigin);	// don't lerp at all
+		V_AddEntity (&gun);
+	}
 	}
 }
 
@@ -2268,6 +2411,34 @@ void CL_CalcViewValues (void)
 
 	// add the weapon
 	CL_AddViewWeapon (ps, ops);
+
+	// TFOL BEGIN
+
+	if (cl.frame.playerstate.stats[STAT_ATTACHMENT1] > 0)
+	{
+		CL_AddPlayerAttachment( ps, ops, cl.frame.playerstate.stats[STAT_ATTACHMENT1],
+			cl.frame.playerstate.stats[STAT_ATTACHMENT1SKIN],
+			cl.frame.playerstate.stats[STAT_ATTACHMENT1FRAME],
+			cl.frame.playerstate.stats[STAT_ATTACHMENT1HEIGHT]);
+	}
+
+	if (cl.frame.playerstate.stats[STAT_ATTACHMENT2] > 0)
+	{
+		CL_AddPlayerAttachment( ps, ops, cl.frame.playerstate.stats[STAT_ATTACHMENT2],
+			cl.frame.playerstate.stats[STAT_ATTACHMENT2SKIN],
+			cl.frame.playerstate.stats[STAT_ATTACHMENT2FRAME],
+			cl.frame.playerstate.stats[STAT_ATTACHMENT2HEIGHT]);
+	}
+
+
+	if (cl.frame.playerstate.stats[STAT_GUNARMS] > 0)
+	{
+		CL_DrawGunArms(ps, ops, cl.frame.playerstate.stats[STAT_GUNARMS],
+			cl.frame.playerstate.stats[STAT_GUNARM_YAW],
+			cl.frame.playerstate.stats[STAT_GUNARM_PITCH]);
+	}
+
+	// TFOL END
 
 	// set up chase cam
 	SetUpCamera();

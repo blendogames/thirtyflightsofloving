@@ -396,8 +396,10 @@ void CL_PlayBackgroundTrack (void)
 	char	name[MAX_QPATH];
 	int		track;
 
+#ifdef NOTTHIRTYFLIGHTS //BC investigate whether these lines are needed!!
 	if (!cl.refresh_prepped)
 		return;
+#endif
 
 	// using a named audio track intead of numbered
 	if (strlen(cl.configstrings[CS_CDTRACK]) > 2)
@@ -405,8 +407,20 @@ void CL_PlayBackgroundTrack (void)
 		Com_sprintf (name, sizeof(name), "music/%s.ogg", cl.configstrings[CS_CDTRACK]);
 		if (FS_LoadFile(name, NULL) != -1)
 		{
+#ifndef NOTTHIRTYFLIGHTS
+			//BC add looping track.
+			//check if the intro name exists. If not, then just use the looping track.
+			char	introname[MAX_QPATH];
+			sprintf(introname, va("music/%s_intro.ogg", cl.configstrings[CS_CDTRACK]) );
+			if (FS_LoadFile(introname, NULL) <= -1)
+				strcpy (introname, name);
+#endif
 			CDAudio_Stop();
+#ifdef NOTTHIRTYFLIGHTS
 			S_StartBackgroundTrack(name, name);
+#else
+			S_StartBackgroundTrack(introname, name);
+#endif
 			return;
 		}
 	}

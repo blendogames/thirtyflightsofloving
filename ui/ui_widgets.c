@@ -40,6 +40,12 @@ static	void	MenuSpinControl_DoEnter (menulist_s *s);
 static	void	MenuSpinControl_Draw (menulist_s *s);
 static	void	MenuSpinControl_DoSlide (menulist_s *s, int dir);
 
+#ifndef NOTTHIRTYFLIGHTS
+static void	checkbox_DoEnter( menulist_s *s );
+static void	checkbox_Draw( menulist_s *s );
+static void	checkbox_DoSlide( menulist_s *s, int dir );
+#endif
+
 #define RCOLUMN_OFFSET  MENU_FONT_SIZE*2	// was 16
 #define LCOLUMN_OFFSET -MENU_FONT_SIZE*2	// was -16
 
@@ -463,31 +469,43 @@ void MenuSlider_Draw (menuslider_s *s)
 	y = s->generic.y + s->generic.parent->y;
 
 	// draw left
+#ifdef NOTTHIRTYFLIGHTS
 	UI_DrawPicST (x, y, SLIDER_ENDCAP_WIDTH, SLIDER_HEIGHT,
 						stCoord_slider_left, ALIGN_CENTER, true, color_identity, UI_SLIDER_PIC);
-//	UI_DrawChar (s->generic.x + s->generic.parent->x + RCOLUMN_OFFSET,
-//				s->generic.y + s->generic.parent->y, s->generic.textSize, ALIGN_CENTER, 128, 255,255,255,255, false, false);
+#else
+	SCR_DrawChar (s->generic.x + s->generic.parent->x + RCOLUMN_OFFSET,
+				s->generic.y + s->generic.parent->y, s->generic.textSize, ALIGN_CENTER, 128, FONT_UI, 255,255,255,255, false, false);
+#endif
 
 	// draw center
 	x += SLIDER_ENDCAP_WIDTH;
 	for (i = 0; i < SLIDER_RANGE; i++) {
+#ifdef NOTTHIRTYFLIGHTS
 		UI_DrawPicST (x + i*SLIDER_SECTION_WIDTH, y, SLIDER_SECTION_WIDTH, SLIDER_HEIGHT,
 							stCoord_slider_center, ALIGN_CENTER, true, color_identity, UI_SLIDER_PIC);
-	//	UI_DrawChar (s->generic.x + s->generic.parent->x + (i+1)*s->generic.textSize + RCOLUMN_OFFSET,
-	//				s->generic.y + s->generic.parent->y, s->generic.textSize, ALIGN_CENTER, 129, 255,255,255,255, false, false);
+#else
+		SCR_DrawChar (s->generic.x + s->generic.parent->x + (i+1)*s->generic.textSize + RCOLUMN_OFFSET,
+					s->generic.y + s->generic.parent->y, s->generic.textSize, ALIGN_CENTER, 129, FONT_UI, 255,255,255,255, false, false);
+#endif
 	}
 
 	// draw right
+#ifdef NOTTHIRTYFLIGHTS
 	UI_DrawPicST (x + i*SLIDER_SECTION_WIDTH, y, SLIDER_ENDCAP_WIDTH, SLIDER_HEIGHT,
 						stCoord_slider_right, ALIGN_CENTER, true, color_identity, UI_SLIDER_PIC);
-//	UI_DrawChar (s->generic.x + s->generic.parent->x + (i+1)*s->generic.textSize + RCOLUMN_OFFSET,
-//				s->generic.y + s->generic.parent->y, s->generic.textSize, ALIGN_CENTER, 130, 255,255,255,255, false, false);
+#else
+	SCR_DrawChar (s->generic.x + s->generic.parent->x + (i+1)*s->generic.textSize + RCOLUMN_OFFSET,
+				s->generic.y + s->generic.parent->y, s->generic.textSize, ALIGN_CENTER, 130, FONT_UI, 255,255,255,255, false, false);
+#endif
 
 	// draw knob
+#ifdef NOTTHIRTYFLIGHTS
 	UI_DrawPicST (x + SLIDER_RANGE*SLIDER_SECTION_WIDTH*s->range - (SLIDER_KNOB_WIDTH/2), y, SLIDER_KNOB_WIDTH, SLIDER_HEIGHT,
 						stCoord_slider_knob, ALIGN_CENTER, true, color_identity, UI_SLIDER_PIC);
-//	UI_DrawChar (s->generic.x + s->generic.parent->x + s->generic.textSize*((SLIDER_RANGE-1)*s->range+1) + RCOLUMN_OFFSET,
-//				s->generic.y + s->generic.parent->y, s->generic.textSize, ALIGN_CENTER, 131, 255,255,255,255, false, true);
+#else
+	SCR_DrawChar (s->generic.x + s->generic.parent->x + s->generic.textSize*((SLIDER_RANGE-1)*s->range+1) + RCOLUMN_OFFSET,
+				s->generic.y + s->generic.parent->y, s->generic.textSize, ALIGN_CENTER, 131, FONT_UI, 255,255,255,255, false, true);
+#endif
 
 	// draw value
 	tmpValue = s->curPos * s->increment + s->baseValue;
@@ -640,7 +658,11 @@ void MenuSpinControl_Draw (menulist_s *s)
 	}
 	if (!strchr(s->itemNames[s->curValue], '\n'))
 	{
+#ifdef NOTTHIRTYFLIGHTS
 		UI_DrawString (s->generic.x + s->generic.parent->x + RCOLUMN_OFFSET,
+#else
+		UI_DrawString (s->generic.x + s->generic.parent->x + RCOLUMN_OFFSET + (6),
+#endif
 						s->generic.y + s->generic.parent->y, s->generic.textSize, ALIGN_CENTER, s->itemNames[s->curValue], FONT_UI, alpha);
 	}
 	else
@@ -768,6 +790,113 @@ const char *UI_MenuKeyBind_Key (menukeybind_s *k, int key)
 	}
 }
 
+void checkbox_DoEnter( menulist_s *s )
+{
+	s->curValue++;
+	if ( s->itemNames[s->curValue] == 0 )
+		s->curValue = 0;
+
+	if ( s->generic.callback )
+		s->generic.callback( s );
+}
+
+void checkbox_DoSlide( menulist_s *s, int dir )
+{
+	s->curValue += dir;
+
+	/*if ( s->curValue < 0 )
+		s->curValue = 0;
+	else if ( s->itemnames[s->curValue] == 0 )
+		s->curValue--;*/
+
+
+	if ( s->curValue > 1 )
+		s->curValue = 0;
+	else if ( s->curValue < 0 )
+		s->curValue = 1;
+
+
+	if ( s->generic.callback )
+		s->generic.callback( s );
+}
+
+void checkbox_Draw( menulist_s *s  )
+{
+	int alpha = UI_MouseOverAlpha(&s->generic);	
+	char buffer[100];
+
+	if ( s->generic.name )
+	{
+
+		if (s->generic.flags & QMF_LEFT_JUSTIFY)
+		{
+			UI_DrawString (s->generic.x + s->generic.parent->x + LCOLUMN_OFFSET + 13,
+							s->generic.y + s->generic.parent->y,
+							s->generic.textSize,
+							ALIGN_CENTER,
+							s->generic.name, FONT_UI, alpha);
+		}
+		else
+		{
+			UI_DrawStringR2LDark (s->generic.x + s->generic.parent->x + LCOLUMN_OFFSET,
+				s->generic.y + s->generic.parent->y,
+				s->generic.textSize,
+				ALIGN_CENTER,
+				s->generic.name,
+				FONT_UI,
+				alpha);
+		}
+	}
+
+	if ( s->curValue > 0 )
+	{
+		strcpy(buffer, "m_checkbox_on");
+	}
+	else
+		strcpy(buffer, "m_checkbox_off");
+
+	if (buffer)
+	{
+		int yoffset=0;
+		drawStruct_t ds;
+
+		if (viddef.height==1024)
+		{
+			yoffset = MENU_FONT_SIZE*2;
+		}
+
+		memset(&ds, 0, sizeof(drawStruct_t));
+		ds.pic = buffer;
+		if (s->generic.flags & QMF_LEFT_JUSTIFY)
+		{
+			ds.x = (viddef.width / 2) + SCR_ScaledScreen(-38);
+			/*R_DrawStretchPic (
+				(viddef.width / 2) + SCR_ScaledScreen(-38),
+				SCR_ScaledScreen(s->generic.y + s->generic.parent->y+yoffset),
+				SCR_ScaledScreen(MENU_FONT_SIZE), SCR_ScaledScreen(MENU_FONT_SIZE), buffer,
+				alpha / 255.0);*/
+		}
+		else
+		{
+			ds.x = (viddef.width / 2) + SCR_ScaledScreen(24);
+			/*R_DrawStretchPic (
+				(viddef.width / 2) + SCR_ScaledScreen(24),
+				SCR_ScaledScreen(s->generic.y + s->generic.parent->y+yoffset),
+				SCR_ScaledScreen(MENU_FONT_SIZE), SCR_ScaledScreen(MENU_FONT_SIZE), buffer,
+				alpha / 255.0);*/
+		}
+		ds.y = SCR_ScaledScreen(s->generic.y + s->generic.parent->y+yoffset);
+		ds.w = SCR_ScaledScreen(MENU_FONT_SIZE);
+		ds.h = SCR_ScaledScreen(MENU_FONT_SIZE);
+		Vector2Copy(vec2_origin, ds.offset);
+		Vector4Copy(vec4_identity, ds.color);
+		ds.color[3] = alpha / 255.0;
+		R_DrawPic(ds);
+	}
+
+
+}
+
 //=========================================================
 
 /*
@@ -807,6 +936,9 @@ void UI_DrawMenuItem (void *item)
 	case MTYPE_KEYBIND:
 		MenuKeyBind_Draw ((menukeybind_s *)item);
 		break;
+	case MTYPE_CHECKBOX:
+		checkbox_Draw((menulist_s *)item);
+		break;
 	default:
 		break;
 	}
@@ -844,6 +976,8 @@ qboolean UI_SelectMenuItem (menuframework_s *s)
 		case MTYPE_KEYBIND:
 			MenuKeyBind_DoEnter ( (menukeybind_s *)item );
 			return true;
+		case MTYPE_CHECKBOX:
+			return false;
 		default:
 			break;
 		}
@@ -906,6 +1040,9 @@ void UI_SlideMenuItem (menuframework_s *s, int dir)
 			break;
 		case MTYPE_SPINCONTROL:
 			MenuSpinControl_DoSlide ((menulist_s *) item, dir);
+			break;
+		case MTYPE_CHECKBOX:
+			checkbox_DoSlide( ( menulist_s * ) item, dir );
 			break;
 		default:
 			break;

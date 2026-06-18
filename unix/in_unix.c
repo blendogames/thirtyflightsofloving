@@ -43,6 +43,11 @@ extern cursor_t ui_mousecursor;
 void UI_RefreshCursorMenu (void);
 void UI_RefreshCursorLink (void);
 
+//BC
+void		IN_JoyMove(usercmd_t *cmd);
+qboolean	joystickVerticalMoved;
+cvar_t		*joy_frobfriction;
+
 void IN_MLookDown (void) { 
 	mlooking = true; 
 }
@@ -90,6 +95,10 @@ void IN_Init (void)
 	// Knightmare- added Psychospaz's menu mouse support
 	UI_RefreshCursorMenu();
 	UI_RefreshCursorLink();
+
+	//BC
+	joystickVerticalMoved = false;
+	joy_frobfriction = Cvar_Get("joy_frobfriction", "0.5", 0);
 }
 
 void IN_Shutdown (void)
@@ -108,6 +117,36 @@ void IN_Shutdown (void)
 
 void IN_Commands (void)
 {
+}
+
+//BC
+void IN_JoyMove(usercmd_t *cmd)
+{
+	//BC menu navigation with gamepad.
+	if (fabs(controller_lefty) > 0.3f)
+	{
+		if (!joystickVerticalMoved)
+		{
+			if (controller_lefty < 0)
+			{
+				//joystick up.
+				Key_Event(K_JOY_UP, true, 0);
+			}
+			else
+			{
+				//joystick down.
+				Key_Event(K_JOY_DOWN, true, 0);
+			}
+		}
+
+		joystickVerticalMoved = true;
+	}
+	else if (joystickVerticalMoved == true)
+	{
+		joystickVerticalMoved = false;
+		Key_Event(K_JOY_UP, false, 0);
+		Key_Event(K_JOY_DOWN, false, 0);
+	}
 }
 
 void IN_Move (usercmd_t *cmd)
@@ -187,21 +226,53 @@ void IN_Move (usercmd_t *cmd)
 	else
 		speed = 1;
 
+	//Player movement.
 	aspeed = speed * cls.netFrameTime;
-	cmd->sidemove += controller_leftx * speed * cl_sidespeed->value;
-	cmd->forwardmove -= controller_lefty * speed * cl_forwardspeed->value;
 
+	if (cl.frame.playerstate.stats[STAT_FREEZE] <= 0) //BC dont allow movement during stat_freeze
+	{
+		//BC stat_moveslow logic
+		float slowModifier = 1.0f;
+		if (cl.frame.playerstate.stats[STAT_MOVESLOW])
+		{
+			slowModifier = 0.5f;
+		}
+
+		cmd->sidemove += controller_leftx * speed * cl_sidespeed->value * slowModifier;
+		cmd->forwardmove -= controller_lefty * speed * cl_forwardspeed->value * slowModifier;
+	}
+
+
+	//BC cursor friction on frobbables
+	if (cl.frame.playerstate.stats[STAT_USEABLE] > 0)
+	{
+		aspeed *= joy_frobfriction->value;
+	}
+
+	//BC camera invert logic.
+	float invertModifier = 1.0f;
+	if (m_pitch->value < 0.0)
+	{
+		invertModifier = -1.0f;
+	}
+
+	//Viewangle logic
 	if (in_autosensitivity->integer && cl.base_fov < 90)
 	{
 		cl.viewangles[YAW] -= controller_rightx * aspeed * cl_pitchspeed->value * (cl.refdef.fov_x/90.0);
-		cl.viewangles[PITCH] += controller_righty * aspeed * cl_pitchspeed->value * (cl.refdef.fov_x/90.0);
+		cl.viewangles[PITCH] += controller_righty * aspeed * cl_pitchspeed->value * (cl.refdef.fov_x/90.0) * invertModifier;
 	}
 	else
 	{
 		cl.viewangles[YAW] -= controller_rightx * aspeed * cl_pitchspeed->value;
-		cl.viewangles[PITCH] += controller_righty * aspeed * cl_pitchspeed->value;
+		cl.viewangles[PITCH] += controller_righty * aspeed * cl_pitchspeed->value * invertModifier;
 	}
 	// end flibitijibibo
+
+
+	//BC
+	IN_JoyMove(cmd);
+
 }
 
 void IN_Frame (void)

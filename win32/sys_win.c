@@ -1440,6 +1440,63 @@ void Sys_AppActivate (void)
 }
 
 /*
+=================
+Sys_IsGameConsole
+=================
+*/
+static char *SDL_getenv_unsafe(const char *name)
+{
+    DWORD length, maxlen = 0;
+    char *string = NULL;
+    const char *result = NULL;
+
+    // Input validation
+    if (!name || *name == '\0') {
+        return NULL;
+    }
+
+    for ( ; ; ) {
+        SetLastError(ERROR_SUCCESS);
+        length = GetEnvironmentVariableA(name, string, maxlen);
+
+        if (length > maxlen) {
+            char *temp = (char *)realloc(string, length);
+            if (!temp)  {
+                return NULL;
+            }
+            string = temp;
+            maxlen = length;
+        } else {
+            if (GetLastError() != ERROR_SUCCESS) {
+                free(string);
+                return NULL;
+            }
+            break;
+        }
+    }
+    return string;
+}
+
+qboolean Sys_IsGameConsole (void)
+{
+	qboolean result = false;
+	char *env = SDL_getenv_unsafe("SteamDeck");
+	if (env != NULL)
+	{
+		result = env[0] == '1';
+		free(env);
+	}
+	return result;
+}
+
+qboolean ShowGamepadIcons(void)
+{
+	cvar_t		*joy_glyphs;
+	joy_glyphs = Cvar_Get("joy_glyphs", Sys_IsGameConsole() ? "1" : "0", CVAR_ARCHIVE);
+	return (joy_glyphs->integer > 0);
+}
+
+/*
 ========================================================================
 
 GAME DLL
